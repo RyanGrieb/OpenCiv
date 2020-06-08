@@ -2,6 +2,7 @@ package me.rhin.openciv.ui.screen;
 
 import me.rhin.openciv.ui.screen.type.InGameScreen;
 import me.rhin.openciv.ui.screen.type.LoadingScreen;
+import me.rhin.openciv.ui.screen.type.ServerLobbyScreen;
 import me.rhin.openciv.ui.screen.type.ServerSelectScreen;
 import me.rhin.openciv.ui.screen.type.TitleScreen;
 
@@ -19,6 +20,11 @@ public enum ScreenEnum {
 	SERVER_SELECT {
 		public AbstractScreen getScreen() {
 			return new ServerSelectScreen();
+		}
+	},
+	SERVER_LOBBY {
+		public AbstractScreen getScreen() {
+			return new ServerLobbyScreen();
 		}
 	},
 	IN_GAME {

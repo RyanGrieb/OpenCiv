@@ -8,16 +8,19 @@ import com.badlogic.gdx.scenes.scene2d.ui.TextField.TextFieldListener;
 import com.badlogic.gdx.utils.Align;
 
 import me.rhin.openciv.Civilization;
+import me.rhin.openciv.game.player.Player;
 import me.rhin.openciv.listener.LeftClickListener.LeftClickEvent;
 import me.rhin.openciv.listener.MouseMoveListener.MouseMoveEvent;
+import me.rhin.openciv.listener.ServerConnectListener;
 import me.rhin.openciv.shared.listener.EventManager;
 import me.rhin.openciv.ui.button.ButtonManager;
 import me.rhin.openciv.ui.button.type.BackTitleScreenButton;
 import me.rhin.openciv.ui.button.type.ConnectServerButton;
 import me.rhin.openciv.ui.label.CustomLabel;
 import me.rhin.openciv.ui.screen.AbstractScreen;
+import me.rhin.openciv.ui.screen.ScreenEnum;
 
-public class ServerSelectScreen extends AbstractScreen {
+public class ServerSelectScreen extends AbstractScreen implements ServerConnectListener {
 
 	private EventManager eventManager;
 	private ButtonManager buttonManager;
@@ -28,6 +31,7 @@ public class ServerSelectScreen extends AbstractScreen {
 	public ServerSelectScreen() {
 		this.eventManager = Civilization.getInstance().getEventManager();
 		eventManager.clearEvents();
+		eventManager.addListener(ServerConnectListener.class, this);
 
 		this.buttonManager = new ButtonManager(this);
 
@@ -62,6 +66,7 @@ public class ServerSelectScreen extends AbstractScreen {
 	@Override
 	public void show() {
 		super.show();
+
 	}
 
 	@Override
@@ -82,5 +87,17 @@ public class ServerSelectScreen extends AbstractScreen {
 
 	public TextField getIPTextField() {
 		return ipTextField;
+	}
+
+	@Override
+	public void onServerConnect() {
+		// NOTE: This method runs on a separate thread (shared library from gradle), we
+		// need to get the libgdx thread first.
+		Gdx.app.postRunnable(new Runnable() {
+			public void run() {
+				Civilization.getInstance().getScreenManager().setScreen(ScreenEnum.SERVER_LOBBY);
+			}
+		});
+
 	}
 }

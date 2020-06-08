@@ -25,7 +25,6 @@ public class EventManager {
 
 	public <L extends Listener, E extends Event<L>> void fireEvent(E event) {
 		Class<L> listenerType = event.getListenerType();
-
 		@SuppressWarnings("unchecked")
 		ArrayList<L> listeners = (ArrayList<L>) listenerMap.get(listenerType);
 

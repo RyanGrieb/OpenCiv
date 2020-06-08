@@ -9,6 +9,8 @@ import org.java_websocket.server.WebSocketServer;
 import me.rhin.openciv.server.game.Game;
 import me.rhin.openciv.server.listener.ConnectionListener;
 import me.rhin.openciv.server.listener.ConnectionListener.ConnectionEvent;
+import me.rhin.openciv.server.listener.DisconnectListener;
+import me.rhin.openciv.server.listener.DisconnectListener.DisconnectEvent;
 import me.rhin.openciv.shared.listener.EventManager;
 
 public class Server extends WebSocketServer {
@@ -24,7 +26,7 @@ public class Server extends WebSocketServer {
 		// TODO: Implement proper logging.
 		System.out.println("Starting Server...");
 		server = new Server(new InetSocketAddress(HOST, PORT));
-		// server.setConnectionLostTimeout(0); // Removes websocket timeout.
+		//server.setConnectionLostTimeout(0); // Removes websocket timeout.
 		server.run();
 	}
 
@@ -38,6 +40,7 @@ public class Server extends WebSocketServer {
 		this.eventManager = new EventManager();
 		this.game = new Game();
 		eventManager.addListener(ConnectionListener.class, game);
+		eventManager.addListener(DisconnectListener.class, game);
 	}
 
 	@Override
@@ -48,6 +51,7 @@ public class Server extends WebSocketServer {
 
 	@Override
 	public void onClose(WebSocket conn, int code, String reason, boolean remote) {
+		eventManager.fireEvent(new DisconnectEvent(conn));
 	}
 
 	@Override

@@ -16,6 +16,7 @@ import me.rhin.openciv.Civilization;
 import me.rhin.openciv.game.Game;
 import me.rhin.openciv.listener.LeftClickListener;
 import me.rhin.openciv.listener.MouseMoveListener;
+import me.rhin.openciv.listener.PlayerConnectListener;
 import me.rhin.openciv.listener.RightClickListener;
 import me.rhin.openciv.listener.LeftClickListener.LeftClickEvent;
 import me.rhin.openciv.listener.MouseMoveListener.MouseMoveEvent;
@@ -48,6 +49,7 @@ public class InGameScreen extends AbstractScreen {
 		eventManager.addListener(MouseMoveListener.class, game);
 		eventManager.addListener(LeftClickListener.class, game);
 		eventManager.addListener(RightClickListener.class, game);
+		eventManager.addListener(PlayerConnectListener.class, game);
 
 		this.shapeRenderer = new ShapeRenderer();
 		ShapeRenderEvent.setShapeRenderer(shapeRenderer);

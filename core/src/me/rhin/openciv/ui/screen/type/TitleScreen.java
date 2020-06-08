@@ -56,12 +56,7 @@ public class TitleScreen extends AbstractScreen {
 
 		Civilization.getInstance().getEventManager().fireEvent(MouseMoveEvent.INSTANCE);
 	}
-
-	@Override
-	public void hide() {
-		Gdx.input.setInputProcessor(null);
-	}
-
+	
 	@Override
 	public boolean touchUp(int screenX, int screenY, int pointer, int button) {
 		if (button == Input.Buttons.LEFT)

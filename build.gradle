@@ -80,6 +80,7 @@ project(":shared") {
 
     dependencies {
         api "com.github.czyzby:gdx-websocket:$libVersion"
+        api "com.badlogicgames.gdx:gdx:$gdxVersion"
     }
 }
 
@@ -89,6 +90,7 @@ project(":server") {
     dependencies {
         implementation project(":shared")
         api "org.java-websocket:Java-WebSocket:1.5.1"
+        api "com.badlogicgames.gdx:gdx:$gdxVersion"
     }
 }
 
@@ -102,6 +104,5 @@ project(":core") {
         api "com.badlogicgames.gdx:gdx-ai:$aiVersion"
         api "com.github.czyzby:gdx-websocket:$libVersion"
         api "com.badlogicgames.gdx:gdx-freetype:$gdxVersion"
-        
     }
 }
