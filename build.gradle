@@ -1,0 +1,107 @@
+buildscript {
+    
+
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        maven { url "https://plugins.gradle.org/m2/" }
+        maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
+        jcenter()
+        google()
+    }
+    dependencies {
+        classpath 'org.wisepersist:gwt-gradle-plugin:1.0.9'
+        
+
+    }
+}
+
+allprojects {
+    apply plugin: "eclipse"
+
+    version = '1.0'
+    ext {
+        appName = "OpenCiv"
+        gdxVersion = '1.9.10'
+        roboVMVersion = '2.3.8'
+        box2DLightsVersion = '1.4'
+        ashleyVersion = '1.7.0'
+        aiVersion = '1.8.0'
+        libVersion = '1.9.1.9.10-SNAPSHOT'
+        fontVersion = '1.9.11-SNAPSHOT'
+    }
+
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        jcenter()
+        google()
+        maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
+        maven { url "https://oss.sonatype.org/content/repositories/releases/" }
+    }
+}
+
+project(":desktop") {
+    apply plugin: "java-library"
+
+
+    dependencies {
+        implementation project(":core")
+        api "com.badlogicgames.gdx:gdx-backend-lwjgl:$gdxVersion"
+        api "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop"
+        api "com.badlogicgames.gdx:gdx-tools:$gdxVersion"
+        api "com.github.czyzby:gdx-websocket-common:$libVersion"
+        api "com.badlogicgames.gdx:gdx-freetype-platform:$gdxVersion:natives-desktop"
+    }
+}
+
+project(":html") {
+    apply plugin: "java-library"
+    apply plugin: "gwt"
+    apply plugin: "war"
+
+
+    dependencies {
+        implementation project(":core")
+        api "com.badlogicgames.gdx:gdx-backend-gwt:$gdxVersion"
+        api "com.badlogicgames.gdx:gdx:$gdxVersion:sources"
+        api "com.badlogicgames.gdx:gdx-backend-gwt:$gdxVersion:sources"
+        api "com.badlogicgames.gdx:gdx-ai:$aiVersion:sources"
+        api "com.github.czyzby:gdx-websocket:$libVersion:sources"
+        api "com.github.czyzby:gdx-websocket-gwt:$libVersion"
+        api "com.github.czyzby:gdx-websocket-gwt:$libVersion:sources"
+        api "com.github.intrigus.gdx-freetype-gwt:gdx-freetype-gwt:$fontVersion"
+        api "com.github.intrigus.gdx-freetype-gwt:gdx-freetype-gwt:$fontVersion:sources"
+    }
+}
+
+project(":shared") {
+    apply plugin: "java-library"
+
+    dependencies {
+        api "com.github.czyzby:gdx-websocket:$libVersion"
+    }
+}
+
+project(":server") {
+    apply plugin: "java-library"
+    
+    dependencies {
+        implementation project(":shared")
+        api "org.java-websocket:Java-WebSocket:1.5.1"
+    }
+}
+
+project(":core") {
+    apply plugin: "java-library"
+
+
+    dependencies {
+        implementation project(":shared")
+        api "com.badlogicgames.gdx:gdx:$gdxVersion"
+        api "com.badlogicgames.gdx:gdx-ai:$aiVersion"
+        api "com.github.czyzby:gdx-websocket:$libVersion"
+        api "com.badlogicgames.gdx:gdx-freetype:$gdxVersion"
+        
+    }
+}

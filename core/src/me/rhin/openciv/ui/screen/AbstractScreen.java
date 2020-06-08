@@ -1,0 +1,160 @@
+package me.rhin.openciv.ui.screen;
+
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.InputMultiplexer;
+import com.badlogic.gdx.InputProcessor;
+import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.utils.viewport.ExtendViewport;
+import com.badlogic.gdx.utils.viewport.Viewport;
+
+import me.rhin.openciv.Civilization;
+
+public abstract class AbstractScreen implements Screen, InputProcessor {
+
+	protected OrthographicCamera camera;
+	private float camX, camY;
+	// TODO: Make a overlayViewport.
+	protected Viewport viewport;
+	protected Stage stage;
+
+	protected AbstractScreen() {
+		camera = new OrthographicCamera();
+		// FIXME: Set a global var for width & height for game.
+		this.camX = 800 / 2;
+		this.camY = 600 / 2;
+		viewport = new ExtendViewport(800, 600, camera);
+		stage = new Stage(viewport);
+		viewport.apply();
+	}
+
+	@Override
+	public void show() {
+		Gdx.input.setInputProcessor(this);
+
+		// Input processor for MY stuff
+		InputProcessor screenInputProcessor = this;
+		// Input processor for libgdx stuff
+		InputProcessor stageInputProcessor = stage;
+		InputMultiplexer inputMultiplexer = new InputMultiplexer();
+		inputMultiplexer.addProcessor(stageInputProcessor);
+		inputMultiplexer.addProcessor(screenInputProcessor);
+		Gdx.input.setInputProcessor(inputMultiplexer);
+	}
+
+	@Override
+	public void render(float delta) {
+		Gdx.gl.glClearColor(0, 0, 0, 1);
+		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+
+		camera.position.x = camX;
+		camera.position.y = camY;
+		camera.update();
+
+		stage.act();
+		stage.draw();
+
+		if (Civilization.DEBUG_GL) {
+			System.out.println("  Drawcalls: " + Civilization.GL_PROFILER.getDrawCalls() + ", Calls: "
+					+ Civilization.GL_PROFILER.getCalls() + ", TextureBindings: "
+					+ Civilization.GL_PROFILER.getTextureBindings() + ", ShaderSwitches: "
+					+ Civilization.GL_PROFILER.getShaderSwitches() + ", VertexCount: "
+					+ Civilization.GL_PROFILER.getVertexCount().value);
+			Civilization.GL_PROFILER.reset();
+		}
+	}
+
+	@Override
+	public void resize(int width, int height) {
+		viewport.setScreenSize(width, height);
+		viewport.update(width, height, true);
+		viewport.setScreenSize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+		stage.getCamera().viewportWidth = Gdx.graphics.getWidth();
+		stage.getCamera().viewportHeight = Gdx.graphics.getHeight();
+		stage.getCamera().position.set(stage.getCamera().viewportWidth / 2, stage.getCamera().viewportHeight / 2, 0);
+	}
+
+	@Override
+	public void dispose() {
+		stage.dispose();
+	}
+
+	@Override
+	public void hide() {
+
+	}
+
+	@Override
+	public void pause() {
+
+	}
+
+	@Override
+	public void resume() {
+
+	}
+
+	@Override
+	public boolean keyDown(int keycode) {
+		return true;
+	}
+
+	@Override
+	public boolean keyUp(int keycode) {
+		return true;
+	}
+
+	@Override
+	public boolean keyTyped(char character) {
+		return true;
+	}
+
+	@Override
+	public boolean touchDown(int screenX, int screenY, int pointer, int button) {
+		return true;
+	}
+
+	@Override
+	public boolean touchUp(int screenX, int screenY, int pointer, int button) {
+		return true;
+	}
+
+	@Override
+	public boolean touchDragged(int screenX, int screenY, int pointer) {
+		return true;
+	}
+
+	@Override
+	public boolean mouseMoved(int screenX, int screenY) {
+		return true;
+	}
+
+	@Override
+	public boolean scrolled(int amount) {
+		return true;
+	}
+
+	public void setCameraPosition(float camX, float camY) {
+		this.camX = camX;
+		this.camY = camY;
+	}
+
+	public void tanslateCamera(int x, int y, int z) {
+		camX += x;
+		camY += y;
+	}
+
+	public Viewport getViewport() {
+		return viewport;
+	}
+
+	public Stage getStage() {
+		return stage;
+	}
+
+	public OrthographicCamera getCamera() {
+		return camera;
+	}
+}
