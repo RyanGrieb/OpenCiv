@@ -1,5 +1,6 @@
 package me.rhin.openciv.ui.screen;
 
+import me.rhin.openciv.ui.screen.type.CreditsScreen;
 import me.rhin.openciv.ui.screen.type.InGameScreen;
 import me.rhin.openciv.ui.screen.type.LoadingScreen;
 import me.rhin.openciv.ui.screen.type.ServerLobbyScreen;
@@ -15,6 +16,11 @@ public enum ScreenEnum {
 	TITLE {
 		public AbstractScreen getScreen() {
 			return new TitleScreen();
+		}
+	},
+	CREDITS {
+		public AbstractScreen getScreen() {
+			return new CreditsScreen();
 		}
 	},
 	SERVER_SELECT {

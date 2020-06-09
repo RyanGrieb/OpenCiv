@@ -73,7 +73,7 @@ public class ServerSelectScreen extends AbstractScreen implements ServerConnectL
 	public void render(float delta) {
 		super.render(delta);
 
-		Civilization.getInstance().getEventManager().fireEvent(MouseMoveEvent.INSTANCE);
+		eventManager.fireEvent(MouseMoveEvent.INSTANCE);
 	}
 
 	@Override

@@ -5,12 +5,12 @@ import com.badlogic.gdx.utils.JsonValue;
 
 import me.rhin.openciv.shared.packet.Packet;
 
-public class PlayerConnectPacket extends Packet {
+public class PlayerDisconnectPacket extends Packet {
 
 	private String playerName;
 
-	public PlayerConnectPacket() {
-		super(PlayerConnectPacket.class.getName());
+	public PlayerDisconnectPacket() {
+		super(PlayerDisconnectPacket.class.getName());
 	}
 
 	public void setPlayerName(String playerName) {
@@ -29,7 +29,8 @@ public class PlayerConnectPacket extends Packet {
 
 	@Override
 	public void read(Json json, JsonValue jsonData) {
-		super.read(json, jsonData);
+		super.write(json);
 		this.playerName = jsonData.getString("playerName");
 	}
+
 }

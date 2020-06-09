@@ -53,7 +53,7 @@ public class ServerLobbyScreen extends AbstractScreen implements PlayerConnectLi
 	public void render(float delta) {
 		super.render(delta);
 
-		Civilization.getInstance().getEventManager().fireEvent(MouseMoveEvent.INSTANCE);
+		eventManager.fireEvent(MouseMoveEvent.INSTANCE);
 	}
 
 	@Override

@@ -30,6 +30,16 @@ public abstract class Packet implements Json.Serializable {
 	 * public void setValue(String key, String value) { values.put(key, value); }
 	 */
 
+	@Override
+	public void write(Json json) {
+		json.writeValue("packetName", packetName);
+	}
+
+	@Override
+	public void read(Json json, JsonValue jsonData) {
+		this.packetName = jsonData.getString("packetName");
+	}
+
 	public String getPacketName() {
 		return packetName;
 	}

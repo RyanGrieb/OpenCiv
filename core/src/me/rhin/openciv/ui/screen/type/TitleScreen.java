@@ -1,6 +1,5 @@
 package me.rhin.openciv.ui.screen.type;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.utils.Align;
 
@@ -9,6 +8,7 @@ import me.rhin.openciv.listener.LeftClickListener.LeftClickEvent;
 import me.rhin.openciv.listener.MouseMoveListener.MouseMoveEvent;
 import me.rhin.openciv.shared.listener.EventManager;
 import me.rhin.openciv.ui.button.ButtonManager;
+import me.rhin.openciv.ui.button.type.AknowledgementsButton;
 import me.rhin.openciv.ui.button.type.GithubButton;
 import me.rhin.openciv.ui.button.type.MultiplayerButton;
 import me.rhin.openciv.ui.button.type.PlayButton;
@@ -33,13 +33,14 @@ public class TitleScreen extends AbstractScreen {
 		buttonManager.addButton(new MultiplayerButton(viewport.getWorldWidth() / 2 - 150 / 2,
 				viewport.getWorldHeight() - 260, 150, 45));
 
-		this.titleLabel = new CustomLabel("Kingomraiders: Civilization", 0, viewport.getWorldHeight() / 1.1F,
-				viewport.getWorldWidth(), 20);
-		titleLabel.setAlignment(Align.center);
+		buttonManager.addButton(new AknowledgementsButton(viewport.getWorldWidth() / 2 - 150 / 2,
+				viewport.getWorldHeight() - 320, 150, 45));
+
+		this.titleLabel = new CustomLabel("Kingomraiders: Civilization", Align.center, 0,
+				viewport.getWorldHeight() / 1.1F, viewport.getWorldWidth(), 20);
 		stage.addActor(titleLabel);
 
-		this.subTitleLabel = new CustomLabel("OpenCiv", 4, 0, viewport.getWorldWidth(), 20);
-		subTitleLabel.setAlignment(Align.bottomLeft);
+		this.subTitleLabel = new CustomLabel("OpenCiv", Align.bottomLeft, 4, 0, viewport.getWorldWidth(), 20);
 		stage.addActor(subTitleLabel);
 	}
 
@@ -52,7 +53,7 @@ public class TitleScreen extends AbstractScreen {
 	public void render(float delta) {
 		super.render(delta);
 
-		Civilization.getInstance().getEventManager().fireEvent(MouseMoveEvent.INSTANCE);
+		eventManager.fireEvent(MouseMoveEvent.INSTANCE);
 	}
 
 	@Override
