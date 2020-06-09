@@ -33,13 +33,10 @@ public class InGameScreen extends AbstractScreen {
 
 	private Stage overlayStage;
 	private Viewport overlayViewport;
-	private GameOverlay gameOveraly;
+	private GameOverlay gameOverlay;
 	private EventManager eventManager;
 	private Game game;
 	private ShapeRenderer shapeRenderer;
-
-	private SpriteBatch fpsBatch;
-	private Label fpsLabel;
 
 	long lastTimeCounted;
 	private float frameRate;
@@ -48,8 +45,8 @@ public class InGameScreen extends AbstractScreen {
 		overlayViewport = new StretchViewport(800, 600);
 		overlayStage = new Stage(overlayViewport);
 		overlayViewport.apply();
-		this.gameOveraly = new GameOverlay(overlayViewport);
-		overlayStage.addActor(gameOveraly);
+		this.gameOverlay = new GameOverlay(overlayViewport);
+		overlayStage.addActor(gameOverlay);
 
 		this.eventManager = Civilization.getInstance().getEventManager();
 		eventManager.clearEvents();
@@ -66,11 +63,6 @@ public class InGameScreen extends AbstractScreen {
 		Label.LabelStyle label1Style = new Label.LabelStyle();
 		label1Style.font = Civilization.getInstance().getFont();
 		label1Style.fontColor = Color.WHITE;
-
-		this.fpsBatch = new SpriteBatch();
-		this.fpsLabel = new Label("FPS: 0", label1Style);
-		fpsLabel.setSize(Gdx.graphics.getWidth(), 20);
-		fpsLabel.setPosition(4, 4);
 
 		lastTimeCounted = TimeUtils.millis();
 		frameRate = Gdx.graphics.getFramesPerSecond();
@@ -103,10 +95,7 @@ public class InGameScreen extends AbstractScreen {
 			frameRate = Gdx.graphics.getFramesPerSecond();
 		}
 
-		fpsLabel.setText("FPS: " + frameRate);
-		fpsBatch.begin();
-		fpsLabel.draw(fpsBatch, 1);
-		fpsBatch.end();
+		gameOverlay.getFPSLabel().setText("FPS: " + frameRate);
 
 		overlayStage.act();
 		overlayStage.draw();
