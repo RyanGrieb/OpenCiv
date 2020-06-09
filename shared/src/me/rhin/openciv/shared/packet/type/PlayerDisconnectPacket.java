@@ -29,7 +29,7 @@ public class PlayerDisconnectPacket extends Packet {
 
 	@Override
 	public void read(Json json, JsonValue jsonData) {
-		super.write(json);
+		super.read(json, jsonData);
 		this.playerName = jsonData.getString("playerName");
 	}
 

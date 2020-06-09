@@ -71,12 +71,13 @@ public class Server extends WebSocketServer {
 
 	@Override
 	public void onClose(WebSocket conn, int code, String reason, boolean remote) {
+		System.out.println("Disconnect event firing..");
 		eventManager.fireEvent(new DisconnectEvent(conn));
 	}
 
 	@Override
 	public void onMessage(WebSocket conn, String message) {
-		System.out.println("[SERVER] Received Message: "+message);
+		System.out.println("[SERVER] Received Message: " + message);
 		fireAssociatedPacketEvents(conn, message);
 	}
 

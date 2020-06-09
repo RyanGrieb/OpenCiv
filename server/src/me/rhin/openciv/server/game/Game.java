@@ -10,6 +10,7 @@ import me.rhin.openciv.server.listener.ConnectionListener;
 import me.rhin.openciv.server.listener.DisconnectListener;
 import me.rhin.openciv.server.listener.PlayerListRequestListener;
 import me.rhin.openciv.shared.packet.type.PlayerConnectPacket;
+import me.rhin.openciv.shared.packet.type.PlayerDisconnectPacket;
 import me.rhin.openciv.shared.packet.type.PlayerListRequestPacket;
 
 public class Game implements ConnectionListener, DisconnectListener, PlayerListRequestListener {
@@ -42,10 +43,31 @@ public class Game implements ConnectionListener, DisconnectListener, PlayerListR
 
 	@Override
 	public void onDisconnect(WebSocket conn) {
+		Player removedPlayer = getPlayerByConn(conn);
+
+		if (removedPlayer == null)
+			return;
+
+		players.remove(removedPlayer);
+
 		for (Player player : players) {
-			if (player.getConn().equals(conn))
-				players.remove(player);
+			WebSocket playerConn = player.getConn();
+
+			PlayerDisconnectPacket packet = new PlayerDisconnectPacket();
+			packet.setPlayerName(removedPlayer.getName());
+			Json json = new Json();
+			playerConn.send(json.toJson(packet));
 		}
+	}
+
+	private Player getPlayerByConn(WebSocket conn) {
+
+		for (Player player : players)
+			if (player.getConn().equals(conn))
+				return player;
+
+		return null;
+
 	}
 
 	@Override

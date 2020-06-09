@@ -14,12 +14,14 @@ import com.github.czyzby.websocket.data.WebSocketCloseCode;
 
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.listener.PlayerConnectListener.PlayerConnectEvent;
+import me.rhin.openciv.listener.PlayerDisconnectListener.PlayerDisconnectEvent;
 import me.rhin.openciv.listener.PlayerListRequestListener.PlayerListRequestEvent;
 import me.rhin.openciv.listener.ServerConnectListener.ServerConnectEvent;
 import me.rhin.openciv.shared.listener.Event;
 import me.rhin.openciv.shared.listener.Listener;
 import me.rhin.openciv.shared.packet.Packet;
 import me.rhin.openciv.shared.packet.type.PlayerConnectPacket;
+import me.rhin.openciv.shared.packet.type.PlayerDisconnectPacket;
 import me.rhin.openciv.shared.packet.type.PlayerListRequestPacket;
 
 public class NetworkManager {
@@ -31,6 +33,7 @@ public class NetworkManager {
 		networkEvents = new HashMap<>();
 
 		networkEvents.put(PlayerConnectPacket.class, PlayerConnectEvent.class);
+		networkEvents.put(PlayerDisconnectPacket.class, PlayerDisconnectEvent.class);
 		networkEvents.put(PlayerListRequestPacket.class, PlayerListRequestEvent.class);
 	}
 
