@@ -11,6 +11,8 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.utils.TimeUtils;
+import com.badlogic.gdx.utils.viewport.StretchViewport;
+import com.badlogic.gdx.utils.viewport.Viewport;
 
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.game.Game;
@@ -23,12 +25,15 @@ import me.rhin.openciv.listener.MouseMoveListener.MouseMoveEvent;
 import me.rhin.openciv.listener.RightClickListener.RightClickEvent;
 import me.rhin.openciv.listener.ShapeRenderListener.ShapeRenderEvent;
 import me.rhin.openciv.shared.listener.EventManager;
+import me.rhin.openciv.ui.overlay.GameOverlay;
 import me.rhin.openciv.ui.screen.AbstractScreen;
 import me.rhin.openciv.util.ClickType;
 
 public class InGameScreen extends AbstractScreen {
 
 	private Stage overlayStage;
+	private Viewport overlayViewport;
+	private GameOverlay gameOveraly;
 	private EventManager eventManager;
 	private Game game;
 	private ShapeRenderer shapeRenderer;
@@ -40,7 +45,11 @@ public class InGameScreen extends AbstractScreen {
 	private float frameRate;
 
 	public InGameScreen() {
-		overlayStage = new Stage();
+		overlayViewport = new StretchViewport(800, 600);
+		overlayStage = new Stage(overlayViewport);
+		overlayViewport.apply();
+		this.gameOveraly = new GameOverlay(overlayViewport);
+		overlayStage.addActor(gameOveraly);
 
 		this.eventManager = Civilization.getInstance().getEventManager();
 		eventManager.clearEvents();
@@ -101,6 +110,13 @@ public class InGameScreen extends AbstractScreen {
 
 		overlayStage.act();
 		overlayStage.draw();
+	}
+
+	@Override
+	public void resize(int width, int height) {
+		overlayViewport.setScreenSize(width, height);
+		overlayViewport.update(width, height, true);
+		overlayViewport.setScreenSize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 	}
 
 	@Override

@@ -22,7 +22,6 @@ public class Game implements MouseMoveListener, LeftClickListener, RightClickLis
 
 	private InGameScreen screen;
 	private GameMap map;
-	private GameOverlay gameOveraly;
 
 	private Tile hoveredTile;
 	private Unit selectedUnit;
@@ -31,9 +30,6 @@ public class Game implements MouseMoveListener, LeftClickListener, RightClickLis
 	public Game(InGameScreen screen) {
 		this.screen = screen;
 		this.map = new GameMap(this);
-		this.gameOveraly = new GameOverlay();
-		this.screen.getOverlayStage().addActor(gameOveraly);
-
 		placePlayers();
 	}
 

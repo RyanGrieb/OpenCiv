@@ -87,6 +87,7 @@ public class NetworkManager {
 	}
 
 	public void disconnect() {
-		socket.close();
+		if (socket != null)
+			socket.close();
 	}
 }

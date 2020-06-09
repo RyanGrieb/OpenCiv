@@ -1,5 +1,8 @@
 package me.rhin.openciv;
 
+import java.awt.Dimension;
+import java.awt.Toolkit;
+
 import com.badlogic.gdx.Application;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
@@ -20,6 +23,8 @@ public class Civilization extends Game {
 	public static final String LOG_TAG = "OpenCiv-INFO";
 	public static final String WS_LOG_TAG = "OpenCiv-WebSocket";
 	public static GLProfiler GL_PROFILER;
+	public static float DESKTOP_WIDTH;
+	public static float DESKTOP_HEIGHT;
 
 	public static Civilization instance;
 
@@ -35,6 +40,11 @@ public class Civilization extends Game {
 		Gdx.app.log(LOG_TAG, "Starting Game...");
 		GL_PROFILER = new GLProfiler(Gdx.graphics);
 		GL_PROFILER.enable();
+
+		Dimension dimension = Toolkit.getDefaultToolkit().getScreenSize();
+		DESKTOP_WIDTH = (float) dimension.getWidth();
+		DESKTOP_HEIGHT = (float) dimension.getHeight();
+
 		assetHandler = new AssetHandler();
 		eventManager = new EventManager();
 		screenManager = new ScreenManager();

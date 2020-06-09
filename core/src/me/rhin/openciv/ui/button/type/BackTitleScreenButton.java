@@ -6,7 +6,7 @@ import me.rhin.openciv.ui.screen.ScreenEnum;
 
 public class BackTitleScreenButton extends Button {
 
-	public BackTitleScreenButton(int x, int y, int width, int height) {
+	public BackTitleScreenButton(float x, float y, float width, float height) {
 		super("Back", x, y, width, height);
 	}
 

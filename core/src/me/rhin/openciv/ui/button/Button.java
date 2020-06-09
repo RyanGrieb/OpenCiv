@@ -19,11 +19,11 @@ public abstract class Button extends Actor {
 	private CustomLabel btnLabel;
 	private boolean hovered;
 
-	public Button(String text, int x, int y, int width, int height) {
+	public Button(String text, float x, float y, float width, float height) {
 		this(TextureEnum.UI_BUTTON, text, x, y, width, height);
 	}
 
-	public Button(TextureEnum textureEnum, String text, int x, int y, int width, int height) {
+	public Button(TextureEnum textureEnum, String text, float x, float y, float width, float height) {
 		this.textureEnum = textureEnum;
 		this.setPosition(x, y);
 		this.setSize(width, height);

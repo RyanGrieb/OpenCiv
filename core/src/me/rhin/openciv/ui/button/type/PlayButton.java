@@ -6,7 +6,7 @@ import me.rhin.openciv.ui.screen.ScreenEnum;
 
 public class PlayButton extends Button {
 
-	public PlayButton(int x, int y, int width, int height) {
+	public PlayButton(float x, float y, float width, float height) {
 		super("Play", x, y, width, height);
 	}
 

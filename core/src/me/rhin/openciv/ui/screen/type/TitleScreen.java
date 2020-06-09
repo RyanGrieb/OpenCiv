@@ -27,22 +27,20 @@ public class TitleScreen extends AbstractScreen {
 		eventManager.clearEvents();
 
 		this.buttonManager = new ButtonManager(this);
-
 		buttonManager.addButton(
-				new PlayButton(Gdx.graphics.getWidth() / 2 - 150 / 2, Gdx.graphics.getHeight() - 200, 150, 45));
+				new PlayButton(viewport.getWorldWidth() / 2 - 150 / 2, viewport.getWorldHeight() - 200, 150, 45));
 		buttonManager.addButton(new GithubButton(74, 4, 32, 32));
-		buttonManager.addButton(
-				new MultiplayerButton(Gdx.graphics.getWidth() / 2 - 150 / 2, Gdx.graphics.getHeight() - 260, 150, 45));
+		buttonManager.addButton(new MultiplayerButton(viewport.getWorldWidth() / 2 - 150 / 2,
+				viewport.getWorldHeight() - 260, 150, 45));
 
-		this.titleLabel = new CustomLabel("Kingomraiders: Civilization", 0, Gdx.graphics.getHeight() / 1.1F,
-				Gdx.graphics.getWidth(), 20);
+		this.titleLabel = new CustomLabel("Kingomraiders: Civilization", 0, viewport.getWorldHeight() / 1.1F,
+				viewport.getWorldWidth(), 20);
 		titleLabel.setAlignment(Align.center);
 		stage.addActor(titleLabel);
 
-		this.subTitleLabel = new CustomLabel("OpenCiv", 4, 0, Gdx.graphics.getWidth(), 20);
+		this.subTitleLabel = new CustomLabel("OpenCiv", 4, 0, viewport.getWorldWidth(), 20);
 		subTitleLabel.setAlignment(Align.bottomLeft);
 		stage.addActor(subTitleLabel);
-
 	}
 
 	@Override
@@ -56,7 +54,7 @@ public class TitleScreen extends AbstractScreen {
 
 		Civilization.getInstance().getEventManager().fireEvent(MouseMoveEvent.INSTANCE);
 	}
-	
+
 	@Override
 	public boolean touchUp(int screenX, int screenY, int pointer, int button) {
 		if (button == Input.Buttons.LEFT)

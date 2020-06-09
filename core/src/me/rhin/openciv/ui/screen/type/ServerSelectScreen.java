@@ -35,21 +35,21 @@ public class ServerSelectScreen extends AbstractScreen implements ServerConnectL
 
 		this.buttonManager = new ButtonManager(this);
 
-		buttonManager.addButton(new ConnectServerButton(this, Gdx.graphics.getWidth() / 2 - 150 / 2,
-				Gdx.graphics.getHeight() - 200, 150, 45));
+		buttonManager.addButton(new ConnectServerButton(this, viewport.getWorldWidth() / 2 - 150 / 2,
+				viewport.getWorldHeight() - 200, 150, 45));
 
-		buttonManager.addButton(new BackTitleScreenButton(Gdx.graphics.getWidth() / 2 - 150 / 2,
-				Gdx.graphics.getHeight() - 260, 150, 45));
+		buttonManager.addButton(new BackTitleScreenButton(viewport.getWorldWidth() / 2 - 150 / 2,
+				viewport.getWorldHeight() - 260, 150, 45));
 
-		this.serverIPLabel = new CustomLabel("Enter server IP address:", 0, Gdx.graphics.getHeight() / 1.1F,
-				Gdx.graphics.getWidth(), 20);
+		this.serverIPLabel = new CustomLabel("Enter server IP address:", 0, viewport.getWorldHeight() / 1.1F,
+				viewport.getWorldWidth(), 20);
 		serverIPLabel.setAlignment(Align.center);
 		stage.addActor(serverIPLabel);
 
 		this.ipTextField = new TextField("",
 				Civilization.getInstance().getAssetHandler().get("skin/uiskin.json", Skin.class));
 		ipTextField.setSize(200, 24);
-		ipTextField.setPosition(Gdx.graphics.getWidth() / 2 - 200 / 2, Gdx.graphics.getHeight() - 100);
+		ipTextField.setPosition(viewport.getWorldWidth() / 2 - 200 / 2, viewport.getWorldHeight() - 100);
 		stage.setKeyboardFocus(ipTextField);
 		stage.addActor(ipTextField);
 

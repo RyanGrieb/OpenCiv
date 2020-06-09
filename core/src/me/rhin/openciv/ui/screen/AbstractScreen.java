@@ -7,7 +7,7 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.utils.viewport.ExtendViewport;
+import com.badlogic.gdx.utils.viewport.StretchViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
 import me.rhin.openciv.Civilization;
@@ -25,7 +25,7 @@ public abstract class AbstractScreen implements Screen, InputProcessor {
 		// FIXME: Set a global var for width & height for game.
 		this.camX = 800 / 2;
 		this.camY = 600 / 2;
-		viewport = new ExtendViewport(800, 600, camera);
+		viewport = new StretchViewport(800, 600, camera);
 		stage = new Stage(viewport);
 		viewport.apply();
 	}
@@ -46,7 +46,7 @@ public abstract class AbstractScreen implements Screen, InputProcessor {
 
 	@Override
 	public void render(float delta) {
-		Gdx.gl.glClearColor(0, 0, 0, 1);
+		Gdx.gl.glClearColor(0, 0.253F, 0.304F, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
 		camera.position.x = camX;
@@ -71,8 +71,8 @@ public abstract class AbstractScreen implements Screen, InputProcessor {
 		viewport.setScreenSize(width, height);
 		viewport.update(width, height, true);
 		viewport.setScreenSize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-		stage.getCamera().viewportWidth = Gdx.graphics.getWidth();
-		stage.getCamera().viewportHeight = Gdx.graphics.getHeight();
+		//stage.getCamera().viewportWidth = Gdx.graphics.getWidth();
+		//stage.getCamera().viewportHeight = Gdx.graphics.getHeight();
 		stage.getCamera().position.set(stage.getCamera().viewportWidth / 2, stage.getCamera().viewportHeight / 2, 0);
 	}
 

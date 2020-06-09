@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.utils.Align;
+import com.badlogic.gdx.utils.viewport.Viewport;
 
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.ui.label.CustomLabel;
@@ -14,8 +15,8 @@ public class GameOverlay extends Overlay {
 	private Sprite scienceIcon;
 	private CustomLabel scienceLabel;
 
-	public GameOverlay() {
-		super(0, Gdx.graphics.getHeight() - 20, Gdx.graphics.getWidth(), 20);
+	public GameOverlay(Viewport viewport) {
+		super(0, viewport.getWorldHeight() - 20, viewport.getWorldWidth(), 20);
 
 		this.topBar = TextureEnum.UI_BLACK.sprite();
 		topBar.setPosition(x, y);

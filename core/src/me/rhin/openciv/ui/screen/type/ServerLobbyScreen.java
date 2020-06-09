@@ -33,8 +33,8 @@ public class ServerLobbyScreen extends AbstractScreen implements PlayerConnectLi
 
 		connectedPlayersLabels = new ArrayList<>();
 
-		connectedPlayersTitleLabel = new CustomLabel("Connected Players: ", 0, Gdx.graphics.getHeight() / 1.1F,
-				Gdx.graphics.getWidth(), 20);
+		connectedPlayersTitleLabel = new CustomLabel("Connected Players: ", 0, viewport.getWorldHeight() / 1.1F,
+				viewport.getWorldWidth(), 20);
 		connectedPlayersTitleLabel.setAlignment(Align.center);
 		stage.addActor(connectedPlayersTitleLabel);
 
@@ -67,7 +67,7 @@ public class ServerLobbyScreen extends AbstractScreen implements PlayerConnectLi
 		Gdx.app.log(Civilization.LOG_TAG, packet.getPlayerName() + " has connected to the lobby");
 
 		CustomLabel playerLabel = new CustomLabel("Player", 0,
-				Gdx.graphics.getHeight() - 100 - (connectedPlayersLabels.size() * 40), Gdx.graphics.getWidth(), 20);
+				viewport.getWorldHeight() - 100 - (connectedPlayersLabels.size() * 40), viewport.getWorldWidth(), 20);
 		playerLabel.setAlignment(Align.center);
 		stage.addActor(playerLabel);
 		connectedPlayersLabels.add(playerLabel);
@@ -75,7 +75,7 @@ public class ServerLobbyScreen extends AbstractScreen implements PlayerConnectLi
 
 	private void requestPlayerList() {
 		// TODO: Request list of players from the server.
-		//Match our connection /w the other list of players to find ourselfs.
+		// Match our connection /w the other list of players to find ourselfs.
 	}
 
 }

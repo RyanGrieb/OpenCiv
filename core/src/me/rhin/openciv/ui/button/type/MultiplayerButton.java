@@ -5,7 +5,7 @@ import me.rhin.openciv.ui.button.Button;
 import me.rhin.openciv.ui.screen.ScreenEnum;
 
 public class MultiplayerButton extends Button {
-	public MultiplayerButton(int x, int y, int width, int height) {
+	public MultiplayerButton(float x, float y, float width, float height) {
 		super("Multiplayer", x, y, width, height);
 	}
 

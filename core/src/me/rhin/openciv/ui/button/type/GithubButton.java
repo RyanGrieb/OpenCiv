@@ -5,7 +5,7 @@ import me.rhin.openciv.ui.button.Button;
 
 public class GithubButton extends Button {
 
-	public GithubButton(int x, int y, int width, int height) {
+	public GithubButton(float x, float y, float width, float height) {
 		super(TextureEnum.UI_GITHUB, "", x, y, width, height);
 	}
 

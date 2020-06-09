@@ -8,7 +8,7 @@ public class ConnectServerButton extends Button {
 
 	private ServerSelectScreen screen;
 
-	public ConnectServerButton(ServerSelectScreen screen, int x, int y, int width, int height) {
+	public ConnectServerButton(ServerSelectScreen screen, float x, float y, float width, float height) {
 		super("Connect", x, y, width, height);
 		this.screen = screen;
 	}
