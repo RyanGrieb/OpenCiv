@@ -12,9 +12,7 @@ import me.rhin.openciv.listener.LeftClickListener;
 import me.rhin.openciv.listener.MouseMoveListener;
 import me.rhin.openciv.listener.PlayerConnectListener;
 import me.rhin.openciv.listener.RightClickListener;
-import me.rhin.openciv.networking.PacketParameter;
 import me.rhin.openciv.shared.packet.type.PlayerConnectPacket;
-import me.rhin.openciv.ui.overlay.GameOverlay;
 import me.rhin.openciv.ui.screen.type.InGameScreen;
 import me.rhin.openciv.util.ClickType;
 

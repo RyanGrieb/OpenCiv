@@ -4,6 +4,7 @@ import java.lang.reflect.Constructor;
 import java.util.HashMap;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.JsonReader;
 import com.badlogic.gdx.utils.JsonValue;
 import com.github.czyzby.websocket.WebSocket;
@@ -13,11 +14,13 @@ import com.github.czyzby.websocket.data.WebSocketCloseCode;
 
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.listener.PlayerConnectListener.PlayerConnectEvent;
+import me.rhin.openciv.listener.PlayerListRequestListener.PlayerListRequestEvent;
 import me.rhin.openciv.listener.ServerConnectListener.ServerConnectEvent;
 import me.rhin.openciv.shared.listener.Event;
 import me.rhin.openciv.shared.listener.Listener;
 import me.rhin.openciv.shared.packet.Packet;
 import me.rhin.openciv.shared.packet.type.PlayerConnectPacket;
+import me.rhin.openciv.shared.packet.type.PlayerListRequestPacket;
 
 public class NetworkManager {
 
@@ -28,6 +31,7 @@ public class NetworkManager {
 		networkEvents = new HashMap<>();
 
 		networkEvents.put(PlayerConnectPacket.class, PlayerConnectEvent.class);
+		networkEvents.put(PlayerListRequestPacket.class, PlayerListRequestEvent.class);
 	}
 
 	public void connect(String ip) {
@@ -40,6 +44,16 @@ public class NetworkManager {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+
+	public void disconnect() {
+		if (socket != null)
+			socket.close();
+	}
+
+	public void sendPacket(Packet packet) {
+		Json json = new Json();
+		socket.send(json.toJson(packet));
 	}
 
 	private void fireAssociatedPacketEvents(WebSocket webSocket, String packet) {
@@ -84,10 +98,5 @@ public class NetworkManager {
 				return true;
 			}
 		};
-	}
-
-	public void disconnect() {
-		if (socket != null)
-			socket.close();
 	}
 }

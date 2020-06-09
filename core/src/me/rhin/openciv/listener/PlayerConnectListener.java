@@ -19,9 +19,7 @@ public interface PlayerConnectListener extends Listener {
 
 		public PlayerConnectEvent(PacketParameter packetParamter) {
 			Json json = new Json();
-			//PlayerConnectPacket extends Packet
 			this.packet = json.fromJson(PlayerConnectPacket.class, packetParamter.getPacket());
-			//json.fromJson(type, elementType, json)
 		}
 
 		@Override

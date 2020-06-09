@@ -8,10 +8,11 @@ import com.badlogic.gdx.utils.Json;
 
 import me.rhin.openciv.server.listener.ConnectionListener;
 import me.rhin.openciv.server.listener.DisconnectListener;
+import me.rhin.openciv.server.listener.PlayerListRequestListener;
 import me.rhin.openciv.shared.packet.type.PlayerConnectPacket;
 import me.rhin.openciv.shared.packet.type.PlayerListRequestPacket;
 
-public class Game implements ConnectionListener, DisconnectListener {
+public class Game implements ConnectionListener, DisconnectListener, PlayerListRequestListener {
 
 	private ArrayList<Player> players;
 	private boolean started;
@@ -25,16 +26,18 @@ public class Game implements ConnectionListener, DisconnectListener {
 	public void onConnection(WebSocket conn) {
 		// FIXME: Check for multiple connections
 
+		Player newPlayer = new Player(conn);
+
 		for (Player player : players) {
 			WebSocket playerConn = player.getConn();
 
 			PlayerConnectPacket packet = new PlayerConnectPacket();
-			packet.setPlayerName(player.getName());
+			packet.setPlayerName(newPlayer.getName());
 			Json json = new Json();
 			playerConn.send(json.toJson(packet));
 		}
 
-		players.add(new Player(conn));
+		players.add(newPlayer);
 	}
 
 	@Override
@@ -45,17 +48,14 @@ public class Game implements ConnectionListener, DisconnectListener {
 		}
 	}
 
-	public void onPlayerListRequest() {
-		ArrayList<String> playerNames = new ArrayList<>();
-
+	@Override
+	public void onPlayerListRequested(WebSocket conn, PlayerListRequestPacket packet) {
+		System.out.println("[SERVER] Player list requested");
 		for (Player player : players) {
-			playerNames.add(player.getName());
+			packet.addPlayer(player.getName());
 		}
-
-		PlayerListRequestPacket packet = new PlayerListRequestPacket();
-		packet.setPlayerList(playerNames);
-
-		// TODO: Send to conn.
+		Json json = new Json();
+		conn.send(json.toJson(packet));
 	}
 
 }

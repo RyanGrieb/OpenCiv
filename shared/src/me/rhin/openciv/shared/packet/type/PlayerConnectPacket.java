@@ -21,10 +21,6 @@ public class PlayerConnectPacket extends Packet {
 		return playerName;
 	}
 
-	public String getPacketName() {
-		return packetName;
-	}
-
 	@Override
 	public void write(Json json) {
 		json.writeValue("packetName", packetName);

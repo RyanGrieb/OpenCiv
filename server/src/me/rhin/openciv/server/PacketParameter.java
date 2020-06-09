@@ -1,6 +1,6 @@
-package me.rhin.openciv.networking;
+package me.rhin.openciv.server;
 
-import com.github.czyzby.websocket.WebSocket;
+import org.java_websocket.WebSocket;
 
 public class PacketParameter {
 

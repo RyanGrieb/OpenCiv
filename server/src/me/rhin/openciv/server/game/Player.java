@@ -4,6 +4,8 @@ import java.sql.Connection;
 
 import org.java_websocket.WebSocket;
 
+import me.rhin.openciv.server.Server;
+
 public class Player {
 
 	private WebSocket conn;
@@ -11,7 +13,7 @@ public class Player {
 
 	public Player(WebSocket conn) {
 		this.conn = conn;
-		this.name = "Player";
+		this.name = "Player" + Server.getInstance().getPlayerIndex();
 	}
 
 	public WebSocket getConn() {
