@@ -16,7 +16,7 @@ import me.rhin.openciv.shared.packet.type.PlayerConnectPacket;
 import me.rhin.openciv.ui.screen.type.InGameScreen;
 import me.rhin.openciv.util.ClickType;
 
-public class Game implements MouseMoveListener, LeftClickListener, RightClickListener, PlayerConnectListener {
+public class CivGame implements MouseMoveListener, LeftClickListener, RightClickListener, PlayerConnectListener {
 
 	private InGameScreen screen;
 	private GameMap map;
@@ -25,15 +25,14 @@ public class Game implements MouseMoveListener, LeftClickListener, RightClickLis
 	private Unit selectedUnit;
 	private boolean rightMouseHeld;
 
-	public Game(InGameScreen screen) {
-		this.screen = screen;
+	public CivGame() {
+		// this.screen = screen;
 		this.map = new GameMap(this);
-		placePlayers();
+		// placePlayers();
 	}
 
 	@Override
 	public void onMouseMove(float x, float y) {
-
 		Tile currentHoveredTile = map.getTileFromLocation(x, y);
 
 		if (currentHoveredTile == null)
@@ -116,11 +115,7 @@ public class Game implements MouseMoveListener, LeftClickListener, RightClickLis
 	public GameMap getGameMap() {
 		return map;
 	}
-
-	public InGameScreen getScreen() {
-		return screen;
-	}
-
+	
 	@Override
 	public void onPlayerConnect(PlayerConnectPacket packet) {
 		//

@@ -30,6 +30,10 @@ public enum TileType {
 		this.movementCost = movementCost;
 	}
 
+	public static TileType fromId(int i) {
+		return values()[i];
+	}
+
 	public Sprite sprite() {
 		return assetEnum.sprite();
 	}

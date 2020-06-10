@@ -1,100 +1,36 @@
-package me.rhin.openciv.game.map;
+package me.rhin.openciv.server.game.map.tile;
 
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Random;
 
-import com.badlogic.gdx.math.Vector2;
+import me.rhin.openciv.server.game.Game;
+import me.rhin.openciv.server.game.map.Tile;
 
-import me.rhin.openciv.game.CivGame;
-import me.rhin.openciv.game.map.tile.Tile;
-import me.rhin.openciv.game.map.tile.TileType;
-import me.rhin.openciv.listener.ReceiveMapChunkListener;
-import me.rhin.openciv.shared.packet.type.MapChunkPacket;
-import me.rhin.openciv.util.MathHelper;
-
-public class GameMap implements ReceiveMapChunkListener {
-
+public class GameMap {
 	public static final int WIDTH = 80; // Default: 104
 	public static final int HEIGHT = 52; // Default: 64
 	public static final int MAX_NODES = WIDTH * HEIGHT;
 	private static final int CONTINENT_AMOUNT = 780; // Default: 780
 
-	private CivGame game;
+	private Game game;
 	private Tile[][] tiles;
 
 	private int[][] oddEdgeAxis = { { 0, -1 }, { 1, -1 }, { 1, 0 }, { 1, 1 }, { 0, 1 }, { -1, 0 } };
 	private int[][] evenEdgeAxis = { { -1, -1 }, { 0, -1 }, { 1, 0 }, { 0, 1 }, { -1, 1 }, { -1, 0 } };
 
-	public GameMap(CivGame game) {
+	public GameMap(Game game) {
 		this.game = game;
 
 		tiles = new Tile[WIDTH][HEIGHT];
 		for (int x = 0; x < WIDTH; x++) {
 			for (int y = 0; y < HEIGHT; y++) {
 				Tile tile = new Tile(this, TileType.OCEAN, x, y);
-				// game.getScreen().getStage().addActor(tile);
 				tiles[x][y] = tile;
 			}
 		}
 
 		initializeEdges();
-		// TODO: Check if game is singleplayer or multiplayer. e.g.
-		// if(game.isSingleplayer()).
-		// generateTerrain();
-	}
-
-	@Override
-	public void onReciveMapChunk(MapChunkPacket packet) {
-		// Start from 0 and go up the Y axis.
-		for (int i = 0; i < MapChunkPacket.CHUNK_SIZE; i++) {
-			for (int j = 0; j < MapChunkPacket.CHUNK_SIZE; j++) {
-				tiles[packet.getChunkX() + i][packet.getChunkY() + j]
-						.setTileType(TileType.fromId(packet.getTileChunk()[i][j]));
-			}
-		}
-	}
-
-	public Tile getTileFromLocation(float x, float y) {
-		float width = tiles[0][0].getWidth();
-		float height = tiles[0][0].getHeight();
-
-		int gridY = (int) (y / height);
-		int gridX;
-
-		if (gridY % 2 == 0) {
-			gridX = (int) (x / width);
-		} else
-			gridX = (int) ((x - (width / 2)) / width);
-
-		if (gridX < 0 || gridX > WIDTH - 1 || gridY < 0 || gridY > HEIGHT - 1)
-			return null;
-
-		Tile nearTile = tiles[gridX][gridY];
-		Tile[] tiles = nearTile.getAdjTiles();
-
-		// Check if the mouse is inside the surrounding tiles.
-		Vector2 mouseVector = new Vector2(x, y);
-		Vector2 mouseExtremeVector = new Vector2(x + 1000, y);
-
-		// FIXME: I kind of want to add the near tile to the adjTile Array. This is
-		// redundant.
-
-		Tile locatedTile = null;
-
-		if (MathHelper.isInsidePolygon(nearTile.getVectors(), mouseVector, mouseExtremeVector)) {
-			locatedTile = nearTile;
-		} else
-			for (Tile tile : tiles) {
-				if (tile == null)
-					continue;
-				if (MathHelper.isInsidePolygon(tile.getVectors(), mouseVector, mouseExtremeVector)) {
-					locatedTile = tile;
-					break;
-				}
-			}
-
-		return locatedTile;
 	}
 
 	public void resetTerrain() {
@@ -214,7 +150,7 @@ public class GameMap implements ReceiveMapChunkListener {
 		return tiles;
 	}
 
-	public CivGame getGame() {
+	public Game getGame() {
 		return game;
 	}
 
@@ -247,7 +183,6 @@ public class GameMap implements ReceiveMapChunkListener {
 		}
 	}
 
-	// TODO: Do this step by step, wanna figure this out.
 	private void growTile(Tile tile, int amount) {
 		Random rnd = new Random();
 

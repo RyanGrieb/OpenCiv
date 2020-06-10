@@ -20,18 +20,19 @@ public class PlayerListRequestPacket extends Packet {
 
 	@Override
 	public void write(Json json) {
-		json.writeValue("packetName", packetName);
+		super.write(json);
 		json.writeValue("playerNames", playerList);
 	}
 
 	@Override
 	public void read(Json json, JsonValue jsonData) {
-		this.packetName = jsonData.getString("packetName");
+		super.read(json, jsonData);
 		this.playerList = new String[MAX_PLAYERS];
 
 		if (!jsonData.hasChild("playerNames"))
 			return;
 
+		// FIXME: Just the the playerList to the String array?
 		for (int i = 0; i < jsonData.get("playerNames").asStringArray().length; i++) {
 			playerList[i] = jsonData.get("playerNames").asStringArray()[i];
 		}

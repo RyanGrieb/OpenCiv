@@ -5,7 +5,6 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.scenes.scene2d.Stage;
@@ -15,13 +14,16 @@ import com.badlogic.gdx.utils.viewport.StretchViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
 import me.rhin.openciv.Civilization;
-import me.rhin.openciv.game.Game;
+import me.rhin.openciv.game.CivGame;
+import me.rhin.openciv.game.map.GameMap;
+import me.rhin.openciv.game.map.tile.Tile;
 import me.rhin.openciv.listener.LeftClickListener;
-import me.rhin.openciv.listener.MouseMoveListener;
-import me.rhin.openciv.listener.PlayerConnectListener;
-import me.rhin.openciv.listener.RightClickListener;
 import me.rhin.openciv.listener.LeftClickListener.LeftClickEvent;
+import me.rhin.openciv.listener.MouseMoveListener;
 import me.rhin.openciv.listener.MouseMoveListener.MouseMoveEvent;
+import me.rhin.openciv.listener.PlayerConnectListener;
+import me.rhin.openciv.listener.ReceiveMapChunkListener;
+import me.rhin.openciv.listener.RightClickListener;
 import me.rhin.openciv.listener.RightClickListener.RightClickEvent;
 import me.rhin.openciv.listener.ShapeRenderListener.ShapeRenderEvent;
 import me.rhin.openciv.shared.listener.EventManager;
@@ -35,7 +37,7 @@ public class InGameScreen extends AbstractScreen {
 	private Viewport overlayViewport;
 	private GameOverlay gameOverlay;
 	private EventManager eventManager;
-	private Game game;
+	private CivGame game;
 	private ShapeRenderer shapeRenderer;
 
 	long lastTimeCounted;
@@ -51,12 +53,12 @@ public class InGameScreen extends AbstractScreen {
 		this.eventManager = Civilization.getInstance().getEventManager();
 		eventManager.clearEvents();
 
-		this.game = new Game(this);
+		this.game = Civilization.getInstance().getGame();
 		eventManager.addListener(MouseMoveListener.class, game);
 		eventManager.addListener(LeftClickListener.class, game);
 		eventManager.addListener(RightClickListener.class, game);
 		eventManager.addListener(PlayerConnectListener.class, game);
-
+		addTileActors();
 		this.shapeRenderer = new ShapeRenderer();
 		ShapeRenderEvent.setShapeRenderer(shapeRenderer);
 
@@ -129,10 +131,19 @@ public class InGameScreen extends AbstractScreen {
 	@Override
 	public boolean keyUp(int keycode) {
 		if (keycode == Input.Keys.G) {
-			game.getGameMap().resetTerrain();
-			game.getGameMap().generateTerrain();
+			// game.getGameMap().resetTerrain();
+			// game.getGameMap().generateTerrain();
 		}
 		return true;
+	}
+
+	private void addTileActors() {
+		for (int x = 0; x < GameMap.WIDTH; x++) {
+			for (int y = 0; y < GameMap.HEIGHT; y++) {
+				Tile tile = game.getGameMap().getTiles()[x][y];
+				getStage().addActor(tile);
+			}
+		}
 	}
 
 	private void handleInput() {

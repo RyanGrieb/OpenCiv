@@ -3,6 +3,7 @@ package me.rhin.openciv.server;
 import java.lang.reflect.Constructor;
 import java.net.InetSocketAddress;
 import java.util.HashMap;
+import java.util.Scanner;
 
 import org.java_websocket.WebSocket;
 import org.java_websocket.handshake.ClientHandshake;
@@ -11,6 +12,7 @@ import org.java_websocket.server.WebSocketServer;
 import com.badlogic.gdx.utils.JsonReader;
 import com.badlogic.gdx.utils.JsonValue;
 
+import me.rhin.openciv.server.command.CmdProcessor;
 import me.rhin.openciv.server.game.Game;
 import me.rhin.openciv.server.listener.ConnectionListener;
 import me.rhin.openciv.server.listener.ConnectionListener.ConnectionEvent;
@@ -26,14 +28,15 @@ import me.rhin.openciv.shared.packet.type.PlayerListRequestPacket;
 
 public class Server extends WebSocketServer {
 
-	private static final String HOST = "localhost";
-	private static final int PORT = 8000;
+	private static final String HOST = "192.168.1.77";
+	private static final int PORT = 5000;
 	private static Server server;
 
 	private Game game;
 	private EventManager eventManager;
 	private int playerIndex;
 	private HashMap<Class<? extends Packet>, Class<? extends Event<? extends Listener>>> networkEvents;
+	private CmdProcessor commandProcessor;
 
 	public static void main(String[] args) {
 		// TODO: Implement proper logging.
@@ -60,6 +63,24 @@ public class Server extends WebSocketServer {
 		networkEvents.put(PlayerListRequestPacket.class, PlayerListRequestEvent.class);
 
 		this.playerIndex = 0;
+		this.commandProcessor = new CmdProcessor();
+
+		//FIXME: Move this to a more suitable location
+		Thread t1 = new Thread(new Runnable() {
+			Scanner scanner = new Scanner(System.in);
+
+			@Override
+			public void run() {
+				while (scanner.hasNext()) {
+					String input = scanner.nextLine();
+					Server.getInstance().getCommandProcessor().proccessCommand(input);
+				}
+
+				scanner.close();
+
+			}
+		});
+		t1.start();
 	}
 
 	@Override
@@ -93,6 +114,15 @@ public class Server extends WebSocketServer {
 		return playerIndex;
 	}
 
+	public Game getGame() {
+		return game;
+	}
+
+	public CmdProcessor getCommandProcessor() {
+		return commandProcessor;
+	}
+
+	@SuppressWarnings("unchecked")
 	private void fireAssociatedPacketEvents(WebSocket conn, String packet) {
 		try {
 			JsonValue jsonValue = new JsonReader().parse(packet);

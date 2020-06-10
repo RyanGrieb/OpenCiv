@@ -9,11 +9,13 @@ import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.utils.Align;
 
 import me.rhin.openciv.Civilization;
+import me.rhin.openciv.listener.GameStartListener;
 import me.rhin.openciv.listener.LeftClickListener.LeftClickEvent;
 import me.rhin.openciv.listener.MouseMoveListener.MouseMoveEvent;
 import me.rhin.openciv.listener.PlayerConnectListener;
 import me.rhin.openciv.listener.PlayerDisconnectListener;
 import me.rhin.openciv.listener.PlayerListRequestListener;
+import me.rhin.openciv.listener.ReceiveMapChunkListener;
 import me.rhin.openciv.shared.listener.EventManager;
 import me.rhin.openciv.shared.packet.type.PlayerConnectPacket;
 import me.rhin.openciv.shared.packet.type.PlayerDisconnectPacket;
@@ -21,9 +23,10 @@ import me.rhin.openciv.shared.packet.type.PlayerListRequestPacket;
 import me.rhin.openciv.ui.button.ButtonManager;
 import me.rhin.openciv.ui.label.CustomLabel;
 import me.rhin.openciv.ui.screen.AbstractScreen;
+import me.rhin.openciv.ui.screen.ScreenEnum;
 
 public class ServerLobbyScreen extends AbstractScreen
-		implements PlayerConnectListener, PlayerDisconnectListener, PlayerListRequestListener {
+		implements PlayerConnectListener, PlayerDisconnectListener, PlayerListRequestListener, GameStartListener {
 
 	private EventManager eventManager;
 	private ButtonManager buttonManager;
@@ -37,6 +40,8 @@ public class ServerLobbyScreen extends AbstractScreen
 		eventManager.addListener(PlayerConnectListener.class, this);
 		eventManager.addListener(PlayerDisconnectListener.class, this);
 		eventManager.addListener(PlayerListRequestListener.class, this);
+		eventManager.addListener(GameStartListener.class, this);
+		eventManager.addListener(ReceiveMapChunkListener.class, Civilization.getInstance().getGame().getGameMap());
 
 		this.buttonManager = new ButtonManager(this);
 
@@ -118,6 +123,15 @@ public class ServerLobbyScreen extends AbstractScreen
 		}
 
 		connectedPlayersLabels.remove(packet.getPlayerName());
+	}
+
+	@Override
+	public void onGameStart() {
+		Gdx.app.postRunnable(new Runnable() {
+			public void run() {
+				Civilization.getInstance().getScreenManager().setScreen(ScreenEnum.IN_GAME);
+			}
+		});
 	}
 
 }

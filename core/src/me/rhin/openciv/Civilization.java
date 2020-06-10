@@ -11,6 +11,7 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.profiling.GLProfiler;
 
 import me.rhin.openciv.asset.AssetHandler;
+import me.rhin.openciv.game.CivGame;
 import me.rhin.openciv.networking.NetworkManager;
 import me.rhin.openciv.shared.listener.EventManager;
 import me.rhin.openciv.ui.font.CustomFont;
@@ -33,6 +34,7 @@ public class Civilization extends Game {
 	private ScreenManager screenManager;
 	private CustomFont customFont;
 	private NetworkManager networkManager;
+	private CivGame game;
 
 	@Override
 	public void create() {
@@ -62,6 +64,10 @@ public class Civilization extends Game {
 		networkManager.disconnect();
 	}
 
+	public void setGame(CivGame game) {
+		this.game = game;
+	}
+
 	public AssetHandler getAssetHandler() {
 		return assetHandler;
 	}
@@ -80,6 +86,10 @@ public class Civilization extends Game {
 
 	public NetworkManager getNetworkManager() {
 		return networkManager;
+	}
+
+	public CivGame getGame() {
+		return game;
 	}
 
 	public OrthographicCamera getCamera() {

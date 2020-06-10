@@ -13,13 +13,17 @@ import com.github.czyzby.websocket.WebSockets;
 import com.github.czyzby.websocket.data.WebSocketCloseCode;
 
 import me.rhin.openciv.Civilization;
+import me.rhin.openciv.listener.GameStartListener.GameStartEvent;
 import me.rhin.openciv.listener.PlayerConnectListener.PlayerConnectEvent;
 import me.rhin.openciv.listener.PlayerDisconnectListener.PlayerDisconnectEvent;
 import me.rhin.openciv.listener.PlayerListRequestListener.PlayerListRequestEvent;
+import me.rhin.openciv.listener.ReceiveMapChunkListener.ReciveMapChunkEvent;
 import me.rhin.openciv.listener.ServerConnectListener.ServerConnectEvent;
 import me.rhin.openciv.shared.listener.Event;
 import me.rhin.openciv.shared.listener.Listener;
 import me.rhin.openciv.shared.packet.Packet;
+import me.rhin.openciv.shared.packet.type.GameStartPacket;
+import me.rhin.openciv.shared.packet.type.MapChunkPacket;
 import me.rhin.openciv.shared.packet.type.PlayerConnectPacket;
 import me.rhin.openciv.shared.packet.type.PlayerDisconnectPacket;
 import me.rhin.openciv.shared.packet.type.PlayerListRequestPacket;
@@ -35,10 +39,12 @@ public class NetworkManager {
 		networkEvents.put(PlayerConnectPacket.class, PlayerConnectEvent.class);
 		networkEvents.put(PlayerDisconnectPacket.class, PlayerDisconnectEvent.class);
 		networkEvents.put(PlayerListRequestPacket.class, PlayerListRequestEvent.class);
+		networkEvents.put(MapChunkPacket.class, ReciveMapChunkEvent.class);
+		networkEvents.put(GameStartPacket.class, GameStartEvent.class);
 	}
 
 	public void connect(String ip) {
-		String socketAddress = "ws://" + ip + ":8000";
+		String socketAddress = "ws://" + ip + ":5000";
 		Gdx.app.log(Civilization.LOG_TAG, "Attempting to connect to: " + socketAddress);
 		try {
 			this.socket = WebSockets.newSocket(socketAddress);
@@ -59,6 +65,7 @@ public class NetworkManager {
 		socket.send(json.toJson(packet));
 	}
 
+	@SuppressWarnings("unchecked")
 	private void fireAssociatedPacketEvents(WebSocket webSocket, String packet) {
 		JsonValue jsonValue = new JsonReader().parse(packet);
 		String packetName = jsonValue.getString("packetName");
