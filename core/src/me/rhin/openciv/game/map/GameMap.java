@@ -6,9 +6,11 @@ import java.util.Random;
 
 import com.badlogic.gdx.math.Vector2;
 
+import me.rhin.openciv.Civilization;
 import me.rhin.openciv.game.CivGame;
 import me.rhin.openciv.game.map.tile.Tile;
 import me.rhin.openciv.game.map.tile.TileType;
+import me.rhin.openciv.listener.AddUnitListener;
 import me.rhin.openciv.listener.ReceiveMapChunkListener;
 import me.rhin.openciv.shared.packet.type.MapChunkPacket;
 import me.rhin.openciv.util.MathHelper;
@@ -33,7 +35,6 @@ public class GameMap implements ReceiveMapChunkListener {
 		for (int x = 0; x < WIDTH; x++) {
 			for (int y = 0; y < HEIGHT; y++) {
 				Tile tile = new Tile(this, TileType.OCEAN, x, y);
-				// game.getScreen().getStage().addActor(tile);
 				tiles[x][y] = tile;
 			}
 		}
@@ -42,6 +43,8 @@ public class GameMap implements ReceiveMapChunkListener {
 		// TODO: Check if game is singleplayer or multiplayer. e.g.
 		// if(game.isSingleplayer()).
 		// generateTerrain();
+
+		Civilization.getInstance().getEventManager().addListener(ReceiveMapChunkListener.class, this);
 	}
 
 	@Override
@@ -49,8 +52,9 @@ public class GameMap implements ReceiveMapChunkListener {
 		// Start from 0 and go up the Y axis.
 		for (int i = 0; i < MapChunkPacket.CHUNK_SIZE; i++) {
 			for (int j = 0; j < MapChunkPacket.CHUNK_SIZE; j++) {
-				tiles[packet.getChunkX() + i][packet.getChunkY() + j]
-						.setTileType(TileType.fromId(packet.getTileChunk()[i][j]));
+				Tile tile = tiles[packet.getChunkX() + i][packet.getChunkY() + j];
+				tile.setTileType(TileType.fromId(packet.getTileChunk()[i][j]));
+				Civilization.getInstance().getScreenManager().getCurrentScreen().getStage().addActor(tile);
 			}
 		}
 	}
@@ -218,9 +222,7 @@ public class GameMap implements ReceiveMapChunkListener {
 		return game;
 	}
 
-	// FIXME: Rename to adjecent Tiles?
 	private void initializeEdges() {
-		// n^2 * 6
 		for (int x = 0; x < WIDTH; x++) {
 			for (int y = 0; y < HEIGHT; y++) {
 				// Set the 6 edges of the hexagon.

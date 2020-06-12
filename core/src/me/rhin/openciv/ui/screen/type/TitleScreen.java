@@ -43,10 +43,6 @@ public class TitleScreen extends AbstractScreen {
 
 		this.subTitleLabel = new CustomLabel("OpenCiv", Align.bottomLeft, 4, 0, viewport.getWorldWidth(), 20);
 		stage.addActor(subTitleLabel);
-
-		// FIXME: Should this be put somewhere else?
-		// Maybe an event or method that we call inside the civilization class?
-		Civilization.getInstance().setGame(new CivGame());
 	}
 
 	@Override

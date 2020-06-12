@@ -1,12 +1,13 @@
-package me.rhin.openciv.game.unit;
+package me.rhin.openciv.game.unit.type;
 
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.map.tile.Tile;
+import me.rhin.openciv.game.unit.Unit;
 
-public class Settler extends Unit {
+public class Warrior extends Unit {
 
-	public Settler(Tile standingTile) {
-		super(standingTile, TextureEnum.UNIT_SETTLER);
+	public Warrior(Tile standingTile) {
+		super(standingTile, TextureEnum.UNIT_WARRIOR);
 	}
 
 	@Override
@@ -16,4 +17,6 @@ public class Settler extends Unit {
 		else
 			return tile.getTileType().getMovementCost();
 	}
+
+	//TODO: method that returns it's UI or buttons?
 }

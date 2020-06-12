@@ -1,12 +1,12 @@
-package me.rhin.openciv.game.unit;
+package me.rhin.openciv.server.game.unit;
 
-import me.rhin.openciv.asset.TextureEnum;
-import me.rhin.openciv.game.map.tile.Tile;
+import me.rhin.openciv.server.game.Player;
+import me.rhin.openciv.server.game.map.Tile;
 
 public class Warrior extends Unit {
 
-	public Warrior(Tile standingTile) {
-		super(standingTile, TextureEnum.UNIT_WARRIOR);
+	public Warrior(Player player, Tile standingTile) {
+		super(player, standingTile);
 	}
 
 	@Override

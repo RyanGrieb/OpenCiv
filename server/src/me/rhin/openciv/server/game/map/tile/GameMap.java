@@ -1,13 +1,26 @@
 package me.rhin.openciv.server.game.map.tile;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Random;
 
-import me.rhin.openciv.server.game.Game;
-import me.rhin.openciv.server.game.map.Tile;
+import org.java_websocket.WebSocket;
 
-public class GameMap {
+import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.utils.Json;
+
+import me.rhin.openciv.server.Server;
+import me.rhin.openciv.server.game.Game;
+import me.rhin.openciv.server.game.Player;
+import me.rhin.openciv.server.game.map.Tile;
+import me.rhin.openciv.server.game.unit.Unit;
+import me.rhin.openciv.server.listener.MapRequestListener;
+import me.rhin.openciv.shared.packet.type.AddUnitPacket;
+import me.rhin.openciv.shared.packet.type.MapChunkPacket;
+import me.rhin.openciv.shared.util.MathHelper;
+
+public class GameMap implements MapRequestListener {
 	public static final int WIDTH = 80; // Default: 104
 	public static final int HEIGHT = 52; // Default: 64
 	public static final int MAX_NODES = WIDTH * HEIGHT;
@@ -31,6 +44,51 @@ public class GameMap {
 		}
 
 		initializeEdges();
+
+		System.out.println(Server.getInstance());
+		Server.getInstance().getEventManager().addListener(MapRequestListener.class, this);
+	}
+
+	@Override
+	public void onMapRequest(WebSocket conn) {
+		Json json = new Json();
+
+		ArrayList<AddUnitPacket> addUnitPackets = new ArrayList<>();
+
+		for (int x = 0; x < GameMap.WIDTH; x++) {
+			for (int y = 0; y < GameMap.HEIGHT; y++) {
+				if (x % 4 == 0 && y % 4 == 0) {
+					MapChunkPacket mapChunkPacket = new MapChunkPacket();
+					AddUnitPacket addUnitPacket = new AddUnitPacket();
+
+					int[][] tileChunk = new int[MapChunkPacket.CHUNK_SIZE][MapChunkPacket.CHUNK_SIZE];
+					for (int i = 0; i < MapChunkPacket.CHUNK_SIZE; i++) {
+						for (int j = 0; j < MapChunkPacket.CHUNK_SIZE; j++) {
+							int tileX = x + i;
+							int tileY = y + j;
+							tileChunk[i][j] = tiles[tileX][tileY].getTileType().getID();
+
+							for (Unit unit : tiles[tileX][tileY].getUnits()) {
+								addUnitPacket.setUnit(unit.getClass().getSimpleName(), tileX, tileY);
+								addUnitPackets.add(addUnitPacket);
+							}
+
+						}
+					}
+					mapChunkPacket.setTileCunk(tileChunk);
+					mapChunkPacket.setChunkLocation(x, y);
+
+					for (Player player : game.getPlayers()) {
+						player.getConn().send(json.toJson(mapChunkPacket));
+					}
+				}
+			}
+		}
+
+		for (Player player : game.getPlayers()) {
+			for (AddUnitPacket packet : addUnitPackets)
+				player.getConn().send(json.toJson(packet));
+		}
 	}
 
 	public void resetTerrain() {
@@ -144,6 +202,48 @@ public class GameMap {
 			}
 		}
 
+	}
+
+	public Tile getTileFromLocation(float x, float y) {
+		float width = tiles[0][0].getWidth();
+		float height = tiles[0][0].getHeight();
+
+		int gridY = (int) (y / height);
+		int gridX;
+
+		if (gridY % 2 == 0) {
+			gridX = (int) (x / width);
+		} else
+			gridX = (int) ((x - (width / 2)) / width);
+
+		if (gridX < 0 || gridX > WIDTH - 1 || gridY < 0 || gridY > HEIGHT - 1)
+			return null;
+
+		Tile nearTile = tiles[gridX][gridY];
+		Tile[] tiles = nearTile.getAdjTiles();
+
+		// Check if the mouse is inside the surrounding tiles.
+		Vector2 mouseVector = new Vector2(x, y);
+		Vector2 mouseExtremeVector = new Vector2(x + 1000, y);
+
+		// FIXME: I kind of want to add the near tile to the adjTile Array. This is
+		// redundant.
+
+		Tile locatedTile = null;
+
+		if (MathHelper.isInsidePolygon(nearTile.getVectors(), mouseVector, mouseExtremeVector)) {
+			locatedTile = nearTile;
+		} else
+			for (Tile tile : tiles) {
+				if (tile == null)
+					continue;
+				if (MathHelper.isInsidePolygon(tile.getVectors(), mouseVector, mouseExtremeVector)) {
+					locatedTile = tile;
+					break;
+				}
+			}
+
+		return locatedTile;
 	}
 
 	public Tile[][] getTiles() {

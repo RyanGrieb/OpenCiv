@@ -5,10 +5,13 @@ import java.util.ArrayList;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.utils.Json;
 
-import me.rhin.openciv.server.game.Unit;
 import me.rhin.openciv.server.game.map.tile.GameMap;
 import me.rhin.openciv.server.game.map.tile.TileType;
+import me.rhin.openciv.server.game.unit.Unit;
+import me.rhin.openciv.shared.packet.type.AddUnitPacket;
+import me.rhin.openciv.shared.packet.type.PlayerDisconnectPacket;
 
 public class Tile {
 
@@ -17,7 +20,7 @@ public class Tile {
 	private GameMap map;
 	private TileType tileType;
 	private float x, y, width, height;
-	private float gridX, gridY;
+	private int gridX, gridY;
 	private Tile[] adjTiles;
 	private Vector2[] vectors;
 	private ArrayList<Unit> units;
@@ -27,8 +30,8 @@ public class Tile {
 		this.tileType = tileType;
 		this.x = x;
 		this.y = y;
-		this.gridX = x;
-		this.gridY = y;
+		this.gridX = (int) x;
+		this.gridY = (int) y;
 		initializeVectors();
 		this.adjTiles = new Tile[6];
 		this.units = new ArrayList<>();
@@ -50,11 +53,11 @@ public class Tile {
 		return y;
 	}
 
-	public float getGridX() {
+	public int getGridX() {
 		return gridX;
 	}
 
-	public float getGridY() {
+	public int getGridY() {
 		return gridY;
 	}
 

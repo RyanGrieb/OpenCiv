@@ -1,24 +1,13 @@
-package me.rhin.openciv.util;
+package me.rhin.openciv.shared.util;
 
 import com.badlogic.gdx.math.Vector2;
 
-import me.rhin.openciv.game.map.GameMap;
-
 public class MathHelper {
 
-	// FIXME: Move minDistance to shared class.
-
-	public static int minDistance(int dist[], boolean sptSet[]) {
-		// Initialize min value
-		int min = GameMap.WIDTH * GameMap.HEIGHT, min_index = 0;
-
-		for (int v = 0; v < GameMap.WIDTH * GameMap.HEIGHT; v++)
-			if (sptSet[v] == false && dist[v] <= min) {
-				min = dist[v];
-				min_index = v;
-			}
-
-		return min_index;
+	public static float distance(int v1x, int v1y, int v2x, int v2y) {
+		int x_d = v1x - v2x;
+		int y_d = v1y - v2y;
+		return (float) Math.sqrt(x_d * x_d + y_d * y_d);
 	}
 
 	public static boolean isInsidePolygon(Vector2[] vectors, Vector2 mouseVector, Vector2 mouseExtremeVector) {

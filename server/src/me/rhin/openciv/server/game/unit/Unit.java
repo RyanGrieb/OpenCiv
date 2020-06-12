@@ -1,42 +1,29 @@
-package me.rhin.openciv.game.unit;
+package me.rhin.openciv.server.game.unit;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Stack;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.scenes.scene2d.Actor;
 
-import me.rhin.openciv.Civilization;
-import me.rhin.openciv.asset.TextureEnum;
-import me.rhin.openciv.game.map.GameMap;
-import me.rhin.openciv.game.map.tile.Tile;
-import me.rhin.openciv.game.map.tile.TileNode;
-import me.rhin.openciv.listener.ShapeRenderListener;
+import me.rhin.openciv.server.game.Player;
+import me.rhin.openciv.server.game.map.Tile;
+import me.rhin.openciv.server.game.map.tile.GameMap;
 
-public abstract class Unit extends Actor implements ShapeRenderListener {
+public abstract class Unit {
 
 	private ArrayList<Vector2[]> pathVectors = new ArrayList<>();
+	private Player player;
+	private float x, y;
+	private float width, height;
 	private Tile standingTile, targetTile;
-	private Sprite sprite, selectionSprite, targetSelectionSprite;
 	private boolean selected;
 	private int movement;
 	private float health;
 
-	public Unit(Tile standingTile, TextureEnum assetEnum) {
-		Civilization.getInstance().getEventManager().addListener(ShapeRenderListener.class, this);
-
+	public Unit(Player player, Tile standingTile) {
+		this.player = player;
 		this.standingTile = standingTile;
-		this.sprite = assetEnum.sprite();
-		this.selectionSprite = TextureEnum.UI_SELECTION.sprite();
-		// TODO: Change this sprite to a different texture
-		this.targetSelectionSprite = TextureEnum.UI_SELECTION.sprite();
-
 		setPosition(standingTile.getVectors()[0].x - standingTile.getWidth() / 2, standingTile.getVectors()[0].y + 4);
 		setSize(standingTile.getWidth(), standingTile.getHeight());
 
@@ -44,25 +31,6 @@ public abstract class Unit extends Actor implements ShapeRenderListener {
 	}
 
 	public abstract int getMovementCost(Tile tile);
-
-	@Override
-	public void act(float delta) {
-		super.act(delta);
-	}
-
-	@Override
-	public void draw(Batch batch, float parentAlpha) {
-		if (selected)
-			selectionSprite.draw(batch);
-
-		// Draw shortest path to target tile
-		if (targetTile != null) {
-			targetSelectionSprite.draw(batch);
-		}
-
-		sprite.draw(batch);
-
-	}
 
 	public void setTargetTile(Tile targetTile) {
 		if (targetTile == null) {
@@ -77,9 +45,10 @@ public abstract class Unit extends Actor implements ShapeRenderListener {
 
 		// TODO: Determine if the unit can walk on the tile.
 
-		targetSelectionSprite.setPosition(targetTile.getVectors()[0].x - targetTile.getWidth() / 2,
-				targetTile.getVectors()[0].y + 4);
-		targetSelectionSprite.setSize(targetTile.getWidth(), targetTile.getHeight());
+		// targetSelectionSprite.setPosition(targetTile.getVectors()[0].x -
+		// targetTile.getWidth() / 2,
+		// targetTile.getVectors()[0].y + 4);
+		// targetSelectionSprite.setSize(targetTile.getWidth(), targetTile.getHeight());
 
 		GameMap map = targetTile.getMap();
 
@@ -183,7 +152,6 @@ public abstract class Unit extends Actor implements ShapeRenderListener {
 				break;
 
 			if (iterations >= GameMap.MAX_NODES) {
-				Gdx.app.log(Civilization.LOG_TAG, "ERROR: Pathing iteration error");
 				break;
 			}
 
@@ -192,12 +160,14 @@ public abstract class Unit extends Actor implements ShapeRenderListener {
 		}
 	}
 
-	@Override
-	public void onShapeRender(ShapeRenderer shapeRenderer) {
-		shapeRenderer.setColor(Color.YELLOW);
-		for (Vector2[] vectors : pathVectors) {
-			shapeRenderer.line(vectors[0], vectors[1]);
+	private boolean fastContains(ArrayList<Tile> tileList, Tile seachedTile) {
+		for (Tile tile : tileList) {
+			if (tile.equals(seachedTile)) {
+				return true;
+			}
 		}
+
+		return false;
 	}
 
 	private Tile removeSmallest(ArrayList<Tile> queue, int fScore[][]) {
@@ -212,6 +182,10 @@ public abstract class Unit extends Actor implements ShapeRenderListener {
 
 		queue.remove(smallestTile);
 		return smallestTile;
+	}
+
+	private int tileDistance(Tile tile, int dist[][]) {
+		return dist[tile.getGridX()][tile.getGridY()];
 	}
 
 	public void moveToTargetTile() {
@@ -232,21 +206,17 @@ public abstract class Unit extends Actor implements ShapeRenderListener {
 	}
 
 	public void setPosition(float x, float y) {
-		sprite.setPosition(x, y);
-		selectionSprite.setPosition(x, y);
+		this.x = x;
+		this.y = y;
 	}
 
 	public void setSize(float width, float height) {
-		sprite.setSize(width, height);
-		selectionSprite.setSize(width, height);
+		this.width = width;
+		this.height = height;
 	}
 
 	public void setSelected(boolean selected) {
 		this.selected = selected;
-	}
-
-	public Sprite getSprite() {
-		return sprite;
 	}
 
 	public boolean isSelected() {
@@ -259,6 +229,10 @@ public abstract class Unit extends Actor implements ShapeRenderListener {
 
 	public int getMovement() {
 		return movement;
+	}
+
+	public Player getPlayer() {
+		return player;
 	}
 
 	public void setMovement(int movement) {

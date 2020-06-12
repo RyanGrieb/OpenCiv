@@ -11,13 +11,14 @@ public class ScreenManager {
 
 	public void setScreen(ScreenEnum screenEnum) {
 		AbstractScreen newScreen = screenEnum.getScreen();
-		Civilization.getInstance().setScreen(newScreen);
 
 		if (currentScreen != null) {
 			currentScreen.dispose();
 		}
 
 		currentScreen = newScreen;
+		
+		Civilization.getInstance().setScreen(newScreen);
 	}
 
 	public AbstractScreen getCurrentScreen() {

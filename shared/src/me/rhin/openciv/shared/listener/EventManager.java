@@ -28,8 +28,9 @@ public class EventManager {
 		@SuppressWarnings("unchecked")
 		ArrayList<L> listeners = (ArrayList<L>) listenerMap.get(listenerType);
 
-		if (listeners == null || listeners.isEmpty())
+		if (listeners == null || listeners.isEmpty()) {
 			return;
+		}
 
 		// Create copy to avoid concurrent modification
 		ArrayList<L> listenersCopy = new ArrayList<>(listeners);

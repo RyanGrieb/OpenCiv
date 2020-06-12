@@ -1,34 +1,39 @@
 package me.rhin.openciv.game;
 
-import java.util.Random;
+import java.lang.reflect.Constructor;
+import java.util.ArrayList;
 
+import me.rhin.openciv.Civilization;
 import me.rhin.openciv.game.map.GameMap;
 import me.rhin.openciv.game.map.tile.Tile;
-import me.rhin.openciv.game.map.tile.TileType;
-import me.rhin.openciv.game.unit.Settler;
 import me.rhin.openciv.game.unit.Unit;
-import me.rhin.openciv.game.unit.Warrior;
+import me.rhin.openciv.listener.AddUnitListener;
+import me.rhin.openciv.listener.GameStartListener;
 import me.rhin.openciv.listener.LeftClickListener;
 import me.rhin.openciv.listener.MouseMoveListener;
 import me.rhin.openciv.listener.PlayerConnectListener;
 import me.rhin.openciv.listener.RightClickListener;
+import me.rhin.openciv.shared.packet.type.AddUnitPacket;
 import me.rhin.openciv.shared.packet.type.PlayerConnectPacket;
 import me.rhin.openciv.ui.screen.type.InGameScreen;
 import me.rhin.openciv.util.ClickType;
 
-public class CivGame implements MouseMoveListener, LeftClickListener, RightClickListener, PlayerConnectListener {
+public class CivGame
+		implements MouseMoveListener, LeftClickListener, RightClickListener, PlayerConnectListener, AddUnitListener {
 
-	private InGameScreen screen;
 	private GameMap map;
-
 	private Tile hoveredTile;
 	private Unit selectedUnit;
 	private boolean rightMouseHeld;
 
 	public CivGame() {
-		// this.screen = screen;
 		this.map = new GameMap(this);
-		// placePlayers();
+
+		Civilization.getInstance().getEventManager().addListener(MouseMoveListener.class, this);
+		Civilization.getInstance().getEventManager().addListener(LeftClickListener.class, this);
+		Civilization.getInstance().getEventManager().addListener(RightClickListener.class, this);
+		Civilization.getInstance().getEventManager().addListener(PlayerConnectListener.class, this);
+		Civilization.getInstance().getEventManager().addListener(AddUnitListener.class, this);
 	}
 
 	@Override
@@ -83,42 +88,27 @@ public class CivGame implements MouseMoveListener, LeftClickListener, RightClick
 		}
 	}
 
-	private void placePlayers() {
-		Random rnd = new Random();
-
-		Tile tile = null;
-
-		while (tile == null || !tile.getTileType().equals(TileType.GRASS)) {
-			tile = map.getTiles()[rnd.nextInt(GameMap.WIDTH - 1)][rnd.nextInt(GameMap.HEIGHT - 1)];
-		}
-
-		Unit unit = new Settler(tile);
-		tile.addUnit(unit);
-		// FIXME: Instead of the game adding the actor, we should create an event such
-		// as onActorCreation so that the InGameScreen can listen to & add it to the
-		// stage
-		// itself.
-		screen.getStage().addActor(unit);
-
-		screen.setCameraPosition(tile.getX(), tile.getY());
-
-		for (Tile adjTile : tile.getAdjTiles()) {
-			if (adjTile.getTileType().equals(TileType.GRASS)) {
-				Unit warrior = new Warrior(adjTile);
-				adjTile.addUnit(warrior);
-				screen.getStage().addActor(warrior);
-				break;
-			}
-		}
-	}
-
-	public GameMap getGameMap() {
-		return map;
-	}
-	
 	@Override
 	public void onPlayerConnect(PlayerConnectPacket packet) {
 		//
 	}
 
+	@Override
+	public void onUnitAdd(AddUnitPacket packet) {
+		try {
+			Tile tile = map.getTiles()[packet.getTileGridX()][packet.getTileGridY()];
+			Class<? extends Unit> unitClass = (Class<? extends Unit>) Class
+					.forName("me.rhin.openciv.game.unit.type." + packet.getUnitName());
+			Constructor<?> ctor = unitClass.getConstructor(Tile.class);
+			Unit unit = (Unit) ctor.newInstance(new Object[] { tile });
+			tile.addUnit(unit);
+			Civilization.getInstance().getScreenManager().getCurrentScreen().getStage().addActor(unit);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	public GameMap getMap() {
+		return map;
+	}
 }

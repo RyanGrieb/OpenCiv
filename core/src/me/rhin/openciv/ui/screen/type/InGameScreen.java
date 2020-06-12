@@ -15,14 +15,12 @@ import com.badlogic.gdx.utils.viewport.Viewport;
 
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.game.CivGame;
-import me.rhin.openciv.game.map.GameMap;
-import me.rhin.openciv.game.map.tile.Tile;
+import me.rhin.openciv.listener.AddUnitListener;
 import me.rhin.openciv.listener.LeftClickListener;
 import me.rhin.openciv.listener.LeftClickListener.LeftClickEvent;
 import me.rhin.openciv.listener.MouseMoveListener;
 import me.rhin.openciv.listener.MouseMoveListener.MouseMoveEvent;
 import me.rhin.openciv.listener.PlayerConnectListener;
-import me.rhin.openciv.listener.ReceiveMapChunkListener;
 import me.rhin.openciv.listener.RightClickListener;
 import me.rhin.openciv.listener.RightClickListener.RightClickEvent;
 import me.rhin.openciv.listener.ShapeRenderListener.ShapeRenderEvent;
@@ -53,19 +51,6 @@ public class InGameScreen extends AbstractScreen {
 		this.eventManager = Civilization.getInstance().getEventManager();
 		eventManager.clearEvents();
 
-		this.game = Civilization.getInstance().getGame();
-		eventManager.addListener(MouseMoveListener.class, game);
-		eventManager.addListener(LeftClickListener.class, game);
-		eventManager.addListener(RightClickListener.class, game);
-		eventManager.addListener(PlayerConnectListener.class, game);
-		addTileActors();
-		this.shapeRenderer = new ShapeRenderer();
-		ShapeRenderEvent.setShapeRenderer(shapeRenderer);
-
-		Label.LabelStyle label1Style = new Label.LabelStyle();
-		label1Style.font = Civilization.getInstance().getFont();
-		label1Style.fontColor = Color.WHITE;
-
 		lastTimeCounted = TimeUtils.millis();
 		frameRate = Gdx.graphics.getFramesPerSecond();
 	}
@@ -73,6 +58,14 @@ public class InGameScreen extends AbstractScreen {
 	@Override
 	public void show() {
 		super.show();
+
+		this.game = new CivGame();
+		this.shapeRenderer = new ShapeRenderer();
+		ShapeRenderEvent.setShapeRenderer(shapeRenderer);
+
+		Label.LabelStyle label1Style = new Label.LabelStyle();
+		label1Style.font = Civilization.getInstance().getFont();
+		label1Style.fontColor = Color.WHITE;
 
 		getCamera().zoom = 0.8F;
 	}
@@ -135,15 +128,6 @@ public class InGameScreen extends AbstractScreen {
 			// game.getGameMap().generateTerrain();
 		}
 		return true;
-	}
-
-	private void addTileActors() {
-		for (int x = 0; x < GameMap.WIDTH; x++) {
-			for (int y = 0; y < GameMap.HEIGHT; y++) {
-				Tile tile = game.getGameMap().getTiles()[x][y];
-				getStage().addActor(tile);
-			}
-		}
 	}
 
 	private void handleInput() {

@@ -13,6 +13,7 @@ import com.github.czyzby.websocket.WebSockets;
 import com.github.czyzby.websocket.data.WebSocketCloseCode;
 
 import me.rhin.openciv.Civilization;
+import me.rhin.openciv.listener.AddUnitListener.AddUnitEvent;
 import me.rhin.openciv.listener.GameStartListener.GameStartEvent;
 import me.rhin.openciv.listener.PlayerConnectListener.PlayerConnectEvent;
 import me.rhin.openciv.listener.PlayerDisconnectListener.PlayerDisconnectEvent;
@@ -22,6 +23,7 @@ import me.rhin.openciv.listener.ServerConnectListener.ServerConnectEvent;
 import me.rhin.openciv.shared.listener.Event;
 import me.rhin.openciv.shared.listener.Listener;
 import me.rhin.openciv.shared.packet.Packet;
+import me.rhin.openciv.shared.packet.type.AddUnitPacket;
 import me.rhin.openciv.shared.packet.type.GameStartPacket;
 import me.rhin.openciv.shared.packet.type.MapChunkPacket;
 import me.rhin.openciv.shared.packet.type.PlayerConnectPacket;
@@ -41,6 +43,7 @@ public class NetworkManager {
 		networkEvents.put(PlayerListRequestPacket.class, PlayerListRequestEvent.class);
 		networkEvents.put(MapChunkPacket.class, ReciveMapChunkEvent.class);
 		networkEvents.put(GameStartPacket.class, GameStartEvent.class);
+		networkEvents.put(AddUnitPacket.class, AddUnitEvent.class);
 	}
 
 	public void connect(String ip) {

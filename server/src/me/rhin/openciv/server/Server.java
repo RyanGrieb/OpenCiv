@@ -18,17 +18,20 @@ import me.rhin.openciv.server.listener.ConnectionListener;
 import me.rhin.openciv.server.listener.ConnectionListener.ConnectionEvent;
 import me.rhin.openciv.server.listener.DisconnectListener;
 import me.rhin.openciv.server.listener.DisconnectListener.DisconnectEvent;
+import me.rhin.openciv.server.listener.MapRequestListener.MapRequestEvent;
 import me.rhin.openciv.server.listener.PlayerListRequestListener;
 import me.rhin.openciv.server.listener.PlayerListRequestListener.PlayerListRequestEvent;
 import me.rhin.openciv.shared.listener.Event;
 import me.rhin.openciv.shared.listener.EventManager;
 import me.rhin.openciv.shared.listener.Listener;
 import me.rhin.openciv.shared.packet.Packet;
+import me.rhin.openciv.shared.packet.type.MapRequestPacket;
 import me.rhin.openciv.shared.packet.type.PlayerListRequestPacket;
 
 public class Server extends WebSocketServer {
 
-	private static final String HOST = "192.168.1.77";
+	// private static final String HOST = "192.168.1.77";
+	private static final String HOST = "localhost";
 	private static final int PORT = 5000;
 	private static Server server;
 
@@ -41,7 +44,7 @@ public class Server extends WebSocketServer {
 	public static void main(String[] args) {
 		// TODO: Implement proper logging.
 		System.out.println("Starting Server...");
-		server = new Server(new InetSocketAddress(HOST, PORT));
+		Server server = new Server(new InetSocketAddress(HOST, PORT));
 		// server.setConnectionLostTimeout(0); // Removes websocket timeout.
 		server.run();
 	}
@@ -52,20 +55,19 @@ public class Server extends WebSocketServer {
 
 	public Server(InetSocketAddress address) {
 		super(address);
+		server = this;
 
 		this.eventManager = new EventManager();
 		this.game = new Game();
-		eventManager.addListener(ConnectionListener.class, game);
-		eventManager.addListener(DisconnectListener.class, game);
-		eventManager.addListener(PlayerListRequestListener.class, game);
 
 		networkEvents = new HashMap<>();
 		networkEvents.put(PlayerListRequestPacket.class, PlayerListRequestEvent.class);
+		networkEvents.put(MapRequestPacket.class, MapRequestEvent.class);
 
 		this.playerIndex = 0;
 		this.commandProcessor = new CmdProcessor();
 
-		//FIXME: Move this to a more suitable location
+		// FIXME: Move this to a more suitable location
 		Thread t1 = new Thread(new Runnable() {
 			Scanner scanner = new Scanner(System.in);
 
@@ -122,6 +124,10 @@ public class Server extends WebSocketServer {
 		return commandProcessor;
 	}
 
+	public EventManager getEventManager() {
+		return eventManager;
+	}
+
 	@SuppressWarnings("unchecked")
 	private void fireAssociatedPacketEvents(WebSocket conn, String packet) {
 		try {
@@ -139,4 +145,5 @@ public class Server extends WebSocketServer {
 		}
 
 	}
+
 }

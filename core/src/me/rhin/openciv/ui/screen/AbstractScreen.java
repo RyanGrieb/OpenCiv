@@ -32,8 +32,6 @@ public abstract class AbstractScreen implements Screen, InputProcessor {
 
 	@Override
 	public void show() {
-		Gdx.input.setInputProcessor(this);
-
 		// Input processor for MY stuff
 		InputProcessor screenInputProcessor = this;
 		// Input processor for libgdx stuff
@@ -71,8 +69,8 @@ public abstract class AbstractScreen implements Screen, InputProcessor {
 		viewport.setScreenSize(width, height);
 		viewport.update(width, height, true);
 		viewport.setScreenSize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-		//stage.getCamera().viewportWidth = Gdx.graphics.getWidth();
-		//stage.getCamera().viewportHeight = Gdx.graphics.getHeight();
+		// stage.getCamera().viewportWidth = Gdx.graphics.getWidth();
+		// stage.getCamera().viewportHeight = Gdx.graphics.getHeight();
 		stage.getCamera().position.set(stage.getCamera().viewportWidth / 2, stage.getCamera().viewportHeight / 2, 0);
 	}
 
