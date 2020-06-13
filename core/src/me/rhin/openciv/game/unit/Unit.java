@@ -79,12 +79,13 @@ public abstract class Unit extends Actor implements ShapeRenderListener {
 
 	}
 
-	public void setTargetTile(Tile targetTile) {
+	public boolean setTargetTile(Tile targetTile) {
+		this.targetTile = null;
 		if (targetTile == null)
-			return;
+			return false;
 
 		if (targetTile.equals(this.targetTile))
-			return;
+			return false;
 
 		pathVectors.clear();
 
@@ -172,7 +173,7 @@ public abstract class Unit extends Actor implements ShapeRenderListener {
 
 		// If it's moving to itself.
 		if (parentTile == null)
-			return;
+			return false;
 
 		int iterations = 0;
 		while (parentTile != null) {
@@ -204,9 +205,11 @@ public abstract class Unit extends Actor implements ShapeRenderListener {
 
 		if (movement < iterations) {
 			this.targetTile = null;
-			return;
+			return false;
 		}
 		this.targetTile = targetTile;
+
+		return true;
 	}
 
 	@Override
