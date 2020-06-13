@@ -16,6 +16,7 @@ import me.rhin.openciv.Civilization;
 import me.rhin.openciv.listener.AddUnitListener.AddUnitEvent;
 import me.rhin.openciv.listener.FetchPlayerListener.FetchPlayerEvent;
 import me.rhin.openciv.listener.GameStartListener.GameStartEvent;
+import me.rhin.openciv.listener.MoveUnitListener.MoveUnitEvent;
 import me.rhin.openciv.listener.PlayerConnectListener.PlayerConnectEvent;
 import me.rhin.openciv.listener.PlayerDisconnectListener.PlayerDisconnectEvent;
 import me.rhin.openciv.listener.PlayerListRequestListener.PlayerListRequestEvent;
@@ -29,6 +30,7 @@ import me.rhin.openciv.shared.packet.type.AddUnitPacket;
 import me.rhin.openciv.shared.packet.type.FetchPlayerPacket;
 import me.rhin.openciv.shared.packet.type.GameStartPacket;
 import me.rhin.openciv.shared.packet.type.MapChunkPacket;
+import me.rhin.openciv.shared.packet.type.MoveUnitPacket;
 import me.rhin.openciv.shared.packet.type.PlayerConnectPacket;
 import me.rhin.openciv.shared.packet.type.PlayerDisconnectPacket;
 import me.rhin.openciv.shared.packet.type.PlayerListRequestPacket;
@@ -50,6 +52,7 @@ public class NetworkManager {
 		networkEvents.put(AddUnitPacket.class, AddUnitEvent.class);
 		networkEvents.put(FetchPlayerPacket.class, FetchPlayerEvent.class);
 		networkEvents.put(SelectUnitPacket.class, SelectUnitEvent.class);
+		networkEvents.put(MoveUnitPacket.class, MoveUnitEvent.class);
 	}
 
 	public void connect(String ip) {

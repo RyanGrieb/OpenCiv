@@ -45,6 +45,7 @@ public class Tile extends Actor implements ShapeRenderListener {
 		selectionSprite.setAlpha(0.2f);
 
 		this.drawSelection = false;
+		// FIXME: Remove our own x,y,and size variables, and use the actors instead.
 		this.x = x;
 		this.y = y;
 		this.gridX = (int) x;

@@ -18,8 +18,10 @@ import me.rhin.openciv.server.listener.DisconnectListener;
 import me.rhin.openciv.server.listener.FetchPlayerListener;
 import me.rhin.openciv.server.listener.PlayerListRequestListener;
 import me.rhin.openciv.server.listener.SelectUnitListener;
+import me.rhin.openciv.server.listener.UnitMoveListener;
 import me.rhin.openciv.shared.packet.type.FetchPlayerPacket;
 import me.rhin.openciv.shared.packet.type.GameStartPacket;
+import me.rhin.openciv.shared.packet.type.MoveUnitPacket;
 import me.rhin.openciv.shared.packet.type.PlayerConnectPacket;
 import me.rhin.openciv.shared.packet.type.PlayerDisconnectPacket;
 import me.rhin.openciv.shared.packet.type.PlayerListRequestPacket;
@@ -27,7 +29,7 @@ import me.rhin.openciv.shared.packet.type.SelectUnitPacket;
 import me.rhin.openciv.shared.util.MathHelper;
 
 public class Game implements ConnectionListener, DisconnectListener, PlayerListRequestListener, FetchPlayerListener,
-		SelectUnitListener {
+		SelectUnitListener, UnitMoveListener {
 
 	private GameMap map;
 	private ArrayList<Player> players;
@@ -43,6 +45,7 @@ public class Game implements ConnectionListener, DisconnectListener, PlayerListR
 		Server.getInstance().getEventManager().addListener(PlayerListRequestListener.class, this);
 		Server.getInstance().getEventManager().addListener(FetchPlayerListener.class, this);
 		Server.getInstance().getEventManager().addListener(SelectUnitListener.class, this);
+		Server.getInstance().getEventManager().addListener(UnitMoveListener.class, this);
 	}
 
 	@Override
@@ -110,9 +113,41 @@ public class Game implements ConnectionListener, DisconnectListener, PlayerListR
 			return;
 
 		player.setSelectedUnit(unit);
+		unit.setSelected(true);
 
 		Json json = new Json();
 		conn.send(json.toJson(packet));
+	}
+
+	@Override
+	public void onUnitMove(WebSocket conn, MoveUnitPacket packet) {
+
+		Tile prevTile = map.getTiles()[packet.getPrevGridX()][packet.getPrevGridY()];
+
+		Unit unit = prevTile.getSelectedUnit();
+
+		if (unit == null) {
+			System.out.println("Error: Unit is NULL");
+			return;
+		}
+
+		Tile targetTile = map.getTiles()[packet.getTargetGridX()][packet.getTargetGridY()];
+
+		unit.setTargetTile(targetTile);
+		int moveAmount = unit.getPathVectors().size();
+
+		// The player is hacking here or i'm a poop coder
+		if (unit.getMaxMovement() < moveAmount)
+			return;
+
+		unit.moveToTargetTile();
+
+		unit.getPlayerOwner().setSelectedUnit(null);
+
+		Json json = new Json();
+		for (Player player : players) {
+			player.getConn().send(json.toJson(packet));
+		}
 	}
 
 	public void start() {
@@ -184,4 +219,5 @@ public class Game implements ConnectionListener, DisconnectListener, PlayerListR
 
 		return null;
 	}
+
 }

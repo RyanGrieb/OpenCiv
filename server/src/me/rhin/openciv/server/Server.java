@@ -20,12 +20,14 @@ import me.rhin.openciv.server.listener.FetchPlayerListener.FetchPlayerEvent;
 import me.rhin.openciv.server.listener.MapRequestListener.MapRequestEvent;
 import me.rhin.openciv.server.listener.PlayerListRequestListener.PlayerListRequestEvent;
 import me.rhin.openciv.server.listener.SelectUnitListener.SelectUnitEvent;
+import me.rhin.openciv.server.listener.UnitMoveListener.UnitMoveEvent;
 import me.rhin.openciv.shared.listener.Event;
 import me.rhin.openciv.shared.listener.EventManager;
 import me.rhin.openciv.shared.listener.Listener;
 import me.rhin.openciv.shared.packet.Packet;
 import me.rhin.openciv.shared.packet.type.FetchPlayerPacket;
 import me.rhin.openciv.shared.packet.type.MapRequestPacket;
+import me.rhin.openciv.shared.packet.type.MoveUnitPacket;
 import me.rhin.openciv.shared.packet.type.PlayerListRequestPacket;
 import me.rhin.openciv.shared.packet.type.SelectUnitPacket;
 
@@ -66,6 +68,7 @@ public class Server extends WebSocketServer {
 		networkEvents.put(MapRequestPacket.class, MapRequestEvent.class);
 		networkEvents.put(FetchPlayerPacket.class, FetchPlayerEvent.class);
 		networkEvents.put(SelectUnitPacket.class, SelectUnitEvent.class);
+		networkEvents.put(MoveUnitPacket.class, UnitMoveEvent.class);
 
 		this.playerIndex = 0;
 		this.commandProcessor = new CmdProcessor();

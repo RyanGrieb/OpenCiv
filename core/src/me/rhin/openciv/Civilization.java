@@ -36,6 +36,10 @@ public class Civilization extends Game {
 	private CustomFont customFont;
 	private NetworkManager networkManager;
 
+	public static Civilization getInstance() {
+		return instance;
+	}
+
 	@Override
 	public void create() {
 		Gdx.app.setLogLevel(Application.LOG_INFO);
@@ -86,10 +90,6 @@ public class Civilization extends Game {
 
 	public OrthographicCamera getCamera() {
 		return screenManager.getCurrentScreen().getCamera();
-	}
-
-	public static Civilization getInstance() {
-		return instance;
 	}
 
 	public CivGame getGame() {

@@ -118,11 +118,6 @@ public class Tile {
 		return adjTiles;
 	}
 
-	public int[][] getTrueAdjList() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
 	private void initializeVectors() {
 		this.vectors = new Vector2[6];
 

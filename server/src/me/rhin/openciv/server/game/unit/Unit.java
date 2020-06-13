@@ -18,6 +18,7 @@ public abstract class Unit {
 	private float width, height;
 	private Tile standingTile, targetTile;
 	private boolean selected;
+	private int maxMovement;
 	private int movement;
 	private float health;
 
@@ -28,6 +29,7 @@ public abstract class Unit {
 		setSize(standingTile.getWidth(), standingTile.getHeight());
 
 		this.movement = 3;
+		this.maxMovement = 3;
 	}
 
 	public abstract int getMovementCost(Tile tile);
@@ -203,6 +205,7 @@ public abstract class Unit {
 		// TODO: Determine if we still have no movement left.
 
 		targetTile = null;
+		selected = false;
 	}
 
 	public void setPosition(float x, float y) {
@@ -217,6 +220,10 @@ public abstract class Unit {
 
 	public void setSelected(boolean selected) {
 		this.selected = selected;
+	}
+
+	public void setMovement(int movement) {
+		this.movement = movement;
 	}
 
 	public boolean isSelected() {
@@ -235,7 +242,12 @@ public abstract class Unit {
 		return playerOwner;
 	}
 
-	public void setMovement(int movement) {
-		this.movement = movement;
+	public ArrayList<Vector2[]> getPathVectors() {
+		return pathVectors;
 	}
+
+	public int getMaxMovement() {
+		return maxMovement;
+	}
+
 }

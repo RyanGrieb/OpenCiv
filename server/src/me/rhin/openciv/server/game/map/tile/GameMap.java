@@ -78,17 +78,14 @@ public class GameMap implements MapRequestListener {
 					mapChunkPacket.setTileCunk(tileChunk);
 					mapChunkPacket.setChunkLocation(x, y);
 
-					for (Player player : game.getPlayers()) {
-						player.getConn().send(json.toJson(mapChunkPacket));
-					}
+					conn.send(json.toJson(mapChunkPacket));
 				}
 			}
 		}
 
-		for (Player player : game.getPlayers()) {
-			for (AddUnitPacket packet : addUnitPackets)
-				player.getConn().send(json.toJson(packet));
-		}
+		for (AddUnitPacket packet : addUnitPackets)
+			conn.send(json.toJson(packet));
+
 	}
 
 	public void resetTerrain() {

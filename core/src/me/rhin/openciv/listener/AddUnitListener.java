@@ -37,6 +37,5 @@ public interface AddUnitListener extends Listener {
 		public Class<AddUnitListener> getListenerType() {
 			return AddUnitListener.class;
 		}
-
 	}
 }

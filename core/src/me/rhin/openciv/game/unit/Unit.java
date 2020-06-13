@@ -17,6 +17,7 @@ import me.rhin.openciv.game.map.GameMap;
 import me.rhin.openciv.game.map.tile.Tile;
 import me.rhin.openciv.game.player.Player;
 import me.rhin.openciv.listener.ShapeRenderListener;
+import me.rhin.openciv.shared.packet.type.MoveUnitPacket;
 
 public abstract class Unit extends Actor implements ShapeRenderListener {
 
@@ -74,8 +75,7 @@ public abstract class Unit extends Actor implements ShapeRenderListener {
 		if (selected)
 			selectionSprite.draw(batch);
 
-		// Draw shortest path to target tile
-		if (targetTile != null) {
+		if (targetTile != null && pathVectors.size() <= movement) {
 			targetSelectionSprite.draw(batch);
 		}
 
@@ -84,14 +84,12 @@ public abstract class Unit extends Actor implements ShapeRenderListener {
 	}
 
 	public void setTargetTile(Tile targetTile) {
-		if (targetTile == null) {
+		if (targetTile == null)
 			return;
-		}
 
 		if (targetTile.equals(this.targetTile))
 			return;
 
-		this.targetTile = targetTile;
 		pathVectors.clear();
 
 		// TODO: Determine if the unit can walk on the tile.
@@ -156,8 +154,6 @@ public abstract class Unit extends Actor implements ShapeRenderListener {
 
 				// We can either use adjTile or current tile movement cost here, doesn't really
 				// matter.
-				// System.out.println(adjTile.getTileType().getMovementCost() + "," +
-				// getMovementCost(adjTile));
 
 				int tenativeGScore = gScores[current.getGridX()][current.getGridY()] + getMovementCost(adjTile);
 
@@ -209,13 +205,23 @@ public abstract class Unit extends Actor implements ShapeRenderListener {
 			parentTile = nextTile;
 			iterations++;
 		}
+
+		if (movement < iterations) {
+			this.targetTile = null;
+			return;
+		}
+		this.targetTile = targetTile;
 	}
 
 	@Override
 	public void onShapeRender(ShapeRenderer shapeRenderer) {
 		shapeRenderer.setColor(Color.YELLOW);
+		int index = pathVectors.size() - 1;
 		for (Vector2[] vectors : pathVectors) {
+			if (movement <= index)
+				break;
 			shapeRenderer.line(vectors[0], vectors[1]);
+			index--;
 		}
 	}
 
@@ -245,14 +251,23 @@ public abstract class Unit extends Actor implements ShapeRenderListener {
 		setPosition(targetTile.getVectors()[0].x - targetTile.getWidth() / 2, targetTile.getVectors()[0].y + 4);
 		standingTile = targetTile;
 
-		// TODO: Determine if we still have no movement left.
-
 		targetTile = null;
+	}
+
+	public void sendMovementPacket() {
+		if (targetTile == null)
+			return;
+
+		MoveUnitPacket packet = new MoveUnitPacket();
+		packet.setUnit(playerOwner.getName(), getClass().getSimpleName(), standingTile.getGridX(),
+				standingTile.getGridY(), targetTile.getGridX(), targetTile.getGridY());
+		Civilization.getInstance().getNetworkManager().sendPacket(packet);
 	}
 
 	public void setPosition(float x, float y) {
 		sprite.setPosition(x, y);
 		selectionSprite.setPosition(x, y);
+		super.setPosition(x, y);
 	}
 
 	public void setSize(float width, float height) {
@@ -262,6 +277,13 @@ public abstract class Unit extends Actor implements ShapeRenderListener {
 
 	public void setSelected(boolean selected) {
 		this.selected = selected;
+
+		// Sometimes, due to lag the unit is unselected before it moves, we remove the
+		// path vectors to account for that
+		if (!selected) {
+			pathVectors.clear();
+			targetTile = null;
+		}
 	}
 
 	public Sprite getSprite() {

@@ -31,12 +31,8 @@ public class Player implements MouseMoveListener, LeftClickListener, RightClickL
 			return;
 
 		if (rightMouseHeld) {
-			if (!selectedUnit.getTargetTile().equals(hoveredTile))
-				selectedUnit.setTargetTile(hoveredTile);
+			selectedUnit.setTargetTile(currentHoveredTile);
 		}
-
-		if (currentHoveredTile.equals(hoveredTile))
-			return;
 
 		if (hoveredTile != null)
 			hoveredTile.onMouseUnhover();
@@ -58,6 +54,9 @@ public class Player implements MouseMoveListener, LeftClickListener, RightClickL
 		if (!unit.getPlayerOwner().equals(this))
 			return;
 
+		if (unit.isSelected())
+			return;
+
 		SelectUnitPacket packet = new SelectUnitPacket();
 		packet.setUnitName(unit.getClass().getName());
 		packet.setLocation(hoveredTile.getGridX(), hoveredTile.getGridY());
@@ -74,7 +73,7 @@ public class Player implements MouseMoveListener, LeftClickListener, RightClickL
 			selectedUnit.setTargetTile(hoveredTile);
 			rightMouseHeld = true;
 		} else {
-			selectedUnit.moveToTargetTile();
+			selectedUnit.sendMovementPacket();
 			selectedUnit.setSelected(false);
 			selectedUnit = null;
 			rightMouseHeld = false;
