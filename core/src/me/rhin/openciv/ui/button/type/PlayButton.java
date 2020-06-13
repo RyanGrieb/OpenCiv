@@ -14,7 +14,7 @@ public class PlayButton extends Button {
 	public void onClick() {
 		// FIXME: We should clear the EventManger when we change screens, but doesn't
 		// matter right now.
-		Civilization.getInstance().getScreenManager().setScreen(ScreenEnum.IN_GAME);
+		Civilization.getInstance().getScreenManager().setScreen(ScreenEnum.GAME_SETTINGS);
 	}
 
 }
