@@ -14,7 +14,7 @@ public interface MapRequestListener extends Listener {
 
 	public static class MapRequestEvent extends Event<MapRequestListener> {
 
-		WebSocket conn;
+		private WebSocket conn;
 
 		public MapRequestEvent(PacketParameter packetParameter) {
 			this.conn = packetParameter.getConn();

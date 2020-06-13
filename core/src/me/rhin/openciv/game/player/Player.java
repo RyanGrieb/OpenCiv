@@ -74,8 +74,7 @@ public class Player implements MouseMoveListener, LeftClickListener, RightClickL
 			rightMouseHeld = true;
 		} else {
 			selectedUnit.sendMovementPacket();
-			selectedUnit.setSelected(false);
-			selectedUnit = null;
+			unselectUnit();
 			rightMouseHeld = false;
 		}
 	}
@@ -90,6 +89,14 @@ public class Player implements MouseMoveListener, LeftClickListener, RightClickL
 
 	public String getName() {
 		return name;
+	}
+
+	public void unselectUnit() {
+		if (selectedUnit == null)
+			return;
+
+		selectedUnit.setSelected(false);
+		this.selectedUnit = null;
 	}
 
 }

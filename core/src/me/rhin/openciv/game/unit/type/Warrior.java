@@ -4,11 +4,13 @@ import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.map.tile.Tile;
 import me.rhin.openciv.game.player.Player;
 import me.rhin.openciv.game.unit.Unit;
+import me.rhin.openciv.game.unit.UnitParameter;
+import me.rhin.openciv.ui.overlay.Overlay;
 
 public class Warrior extends Unit {
 
-	public Warrior(Player playerOwner, Tile standingTile) {
-		super(playerOwner, standingTile, TextureEnum.UNIT_WARRIOR);
+	public Warrior(UnitParameter unitParameter) {
+		super(unitParameter, TextureEnum.UNIT_WARRIOR);
 	}
 
 	@Override
@@ -18,6 +20,4 @@ public class Warrior extends Unit {
 		else
 			return tile.getTileType().getMovementCost();
 	}
-
-	//TODO: method that returns it's UI or buttons?
 }

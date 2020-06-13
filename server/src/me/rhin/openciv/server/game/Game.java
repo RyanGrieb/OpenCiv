@@ -18,6 +18,7 @@ import me.rhin.openciv.server.listener.DisconnectListener;
 import me.rhin.openciv.server.listener.FetchPlayerListener;
 import me.rhin.openciv.server.listener.PlayerListRequestListener;
 import me.rhin.openciv.server.listener.SelectUnitListener;
+import me.rhin.openciv.server.listener.StartGameRequestListener;
 import me.rhin.openciv.server.listener.UnitMoveListener;
 import me.rhin.openciv.shared.packet.type.FetchPlayerPacket;
 import me.rhin.openciv.shared.packet.type.GameStartPacket;
@@ -28,8 +29,8 @@ import me.rhin.openciv.shared.packet.type.PlayerListRequestPacket;
 import me.rhin.openciv.shared.packet.type.SelectUnitPacket;
 import me.rhin.openciv.shared.util.MathHelper;
 
-public class Game implements ConnectionListener, DisconnectListener, PlayerListRequestListener, FetchPlayerListener,
-		SelectUnitListener, UnitMoveListener {
+public class Game implements StartGameRequestListener, ConnectionListener, DisconnectListener,
+		PlayerListRequestListener, FetchPlayerListener, SelectUnitListener, UnitMoveListener {
 
 	private GameMap map;
 	private ArrayList<Player> players;
@@ -40,12 +41,20 @@ public class Game implements ConnectionListener, DisconnectListener, PlayerListR
 		this.players = new ArrayList<>();
 		this.started = false;
 
+		Server.getInstance().getEventManager().addListener(StartGameRequestListener.class, this);
 		Server.getInstance().getEventManager().addListener(ConnectionListener.class, this);
 		Server.getInstance().getEventManager().addListener(DisconnectListener.class, this);
 		Server.getInstance().getEventManager().addListener(PlayerListRequestListener.class, this);
 		Server.getInstance().getEventManager().addListener(FetchPlayerListener.class, this);
 		Server.getInstance().getEventManager().addListener(SelectUnitListener.class, this);
 		Server.getInstance().getEventManager().addListener(UnitMoveListener.class, this);
+	}
+
+	@Override
+	public void onStartGameRequest(WebSocket conn) {
+		if (conn != null && !getPlayerByConn(conn).equals(players.get(0)))
+			return;
+		start();
 	}
 
 	@Override
@@ -219,5 +228,4 @@ public class Game implements ConnectionListener, DisconnectListener, PlayerListR
 
 		return null;
 	}
-
 }

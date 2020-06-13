@@ -24,7 +24,7 @@ public class CreditsScreen extends AbstractScreen {
 		this.eventManager = Civilization.getInstance().getEventManager();
 		eventManager.clearEvents();
 
-		this.buttonManager = new ButtonManager(this);
+		this.buttonManager = new ButtonManager(getStage());
 
 		creditLabelList = new ArrayList<>();
 		creditLabelList.add(new CustomLabel(
@@ -60,7 +60,7 @@ public class CreditsScreen extends AbstractScreen {
 		if (button == Input.Buttons.LEFT) {
 			Civilization.getInstance().getEventManager().fireEvent(new LeftClickEvent(screenX, screenY));
 		}
-		return true;
+		return false;
 
 	}
 }

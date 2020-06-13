@@ -19,6 +19,7 @@ public abstract class AbstractScreen implements Screen, InputProcessor {
 	// TODO: Make a overlayViewport.
 	protected Viewport viewport;
 	protected Stage stage;
+	private InputMultiplexer inputMultiplexer;
 
 	protected AbstractScreen() {
 		camera = new OrthographicCamera();
@@ -36,7 +37,7 @@ public abstract class AbstractScreen implements Screen, InputProcessor {
 		InputProcessor screenInputProcessor = this;
 		// Input processor for libgdx stuff
 		InputProcessor stageInputProcessor = stage;
-		InputMultiplexer inputMultiplexer = new InputMultiplexer();
+		inputMultiplexer = new InputMultiplexer();
 		inputMultiplexer.addProcessor(stageInputProcessor);
 		inputMultiplexer.addProcessor(screenInputProcessor);
 		Gdx.input.setInputProcessor(inputMultiplexer);
@@ -96,42 +97,42 @@ public abstract class AbstractScreen implements Screen, InputProcessor {
 
 	@Override
 	public boolean keyDown(int keycode) {
-		return true;
+		return false;
 	}
 
 	@Override
 	public boolean keyUp(int keycode) {
-		return true;
+		return false;
 	}
 
 	@Override
 	public boolean keyTyped(char character) {
-		return true;
+		return false;
 	}
 
 	@Override
 	public boolean touchDown(int screenX, int screenY, int pointer, int button) {
-		return true;
+		return false;
 	}
 
 	@Override
 	public boolean touchUp(int screenX, int screenY, int pointer, int button) {
-		return true;
+		return false;
 	}
 
 	@Override
 	public boolean touchDragged(int screenX, int screenY, int pointer) {
-		return true;
+		return false;
 	}
 
 	@Override
 	public boolean mouseMoved(int screenX, int screenY) {
-		return true;
+		return false;
 	}
 
 	@Override
 	public boolean scrolled(int amount) {
-		return true;
+		return false;
 	}
 
 	public void setCameraPosition(float camX, float camY) {
@@ -154,5 +155,9 @@ public abstract class AbstractScreen implements Screen, InputProcessor {
 
 	public OrthographicCamera getCamera() {
 		return camera;
+	}
+
+	public InputMultiplexer getInputMultiplexer() {
+		return inputMultiplexer;
 	}
 }

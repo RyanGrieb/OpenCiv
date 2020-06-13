@@ -15,6 +15,7 @@ import me.rhin.openciv.game.CivGame;
 import me.rhin.openciv.networking.NetworkManager;
 import me.rhin.openciv.shared.listener.EventManager;
 import me.rhin.openciv.ui.font.CustomFont;
+import me.rhin.openciv.ui.screen.AbstractScreen;
 import me.rhin.openciv.ui.screen.ScreenEnum;
 import me.rhin.openciv.ui.screen.ScreenManager;
 import me.rhin.openciv.ui.screen.type.InGameScreen;
@@ -86,6 +87,10 @@ public class Civilization extends Game {
 
 	public NetworkManager getNetworkManager() {
 		return networkManager;
+	}
+
+	public AbstractScreen getCurrentScreen() {
+		return screenManager.getCurrentScreen();
 	}
 
 	public OrthographicCamera getCamera() {

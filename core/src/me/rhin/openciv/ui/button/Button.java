@@ -1,10 +1,10 @@
 package me.rhin.openciv.ui.button;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.utils.Align;
 
 import me.rhin.openciv.asset.TextureEnum;
@@ -24,6 +24,7 @@ public abstract class Button extends Actor {
 	}
 
 	public Button(TextureEnum textureEnum, String text, float x, float y, float width, float height) {
+		this.setTouchable(Touchable.enabled);
 		this.textureEnum = textureEnum;
 		this.setPosition(x, y);
 		this.setSize(width, height);

@@ -23,7 +23,7 @@ public class GameSettingsScreen extends AbstractScreen {
 		this.eventManager = Civilization.getInstance().getEventManager();
 		eventManager.clearEvents();
 
-		this.buttonManager = new ButtonManager(this);
+		this.buttonManager = new ButtonManager(getStage());
 
 		CustomLabel todoLabel = new CustomLabel(
 				"TODO: Multiplayer is only supported.\nOnce a proper AI is coded i'll start working on SP again.",
@@ -46,7 +46,6 @@ public class GameSettingsScreen extends AbstractScreen {
 		if (button == Input.Buttons.LEFT) {
 			Civilization.getInstance().getEventManager().fireEvent(new LeftClickEvent(screenX, screenY));
 		}
-		return true;
-
+		return false;
 	}
 }

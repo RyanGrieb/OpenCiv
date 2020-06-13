@@ -7,7 +7,9 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
+import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.utils.TimeUtils;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
@@ -15,25 +17,21 @@ import com.badlogic.gdx.utils.viewport.Viewport;
 
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.game.CivGame;
-import me.rhin.openciv.listener.AddUnitListener;
-import me.rhin.openciv.listener.LeftClickListener;
 import me.rhin.openciv.listener.LeftClickListener.LeftClickEvent;
-import me.rhin.openciv.listener.MouseMoveListener;
 import me.rhin.openciv.listener.MouseMoveListener.MouseMoveEvent;
-import me.rhin.openciv.listener.PlayerConnectListener;
-import me.rhin.openciv.listener.RightClickListener;
 import me.rhin.openciv.listener.RightClickListener.RightClickEvent;
 import me.rhin.openciv.listener.ShapeRenderListener.ShapeRenderEvent;
 import me.rhin.openciv.shared.listener.EventManager;
 import me.rhin.openciv.ui.overlay.GameOverlay;
+import me.rhin.openciv.ui.overlay.UnitOverlay;
 import me.rhin.openciv.ui.screen.AbstractScreen;
 import me.rhin.openciv.util.ClickType;
 
 public class InGameScreen extends AbstractScreen {
 
-	private Stage overlayStage;
 	private Viewport overlayViewport;
 	private GameOverlay gameOverlay;
+	private UnitOverlay unitOverlay;
 	private EventManager eventManager;
 	private CivGame game;
 	private ShapeRenderer shapeRenderer;
@@ -42,11 +40,7 @@ public class InGameScreen extends AbstractScreen {
 	private float frameRate;
 
 	public InGameScreen() {
-		overlayViewport = new StretchViewport(800, 600);
-		overlayStage = new Stage(overlayViewport);
-		overlayViewport.apply();
-		this.gameOverlay = new GameOverlay(overlayViewport);
-		overlayStage.addActor(gameOverlay);
+		this.gameOverlay = new GameOverlay();
 
 		this.eventManager = Civilization.getInstance().getEventManager();
 		eventManager.clearEvents();
@@ -92,15 +86,20 @@ public class InGameScreen extends AbstractScreen {
 
 		gameOverlay.getFPSLabel().setText("FPS: " + frameRate);
 
-		overlayStage.act();
-		overlayStage.draw();
+		gameOverlay.act();
+		gameOverlay.draw();
+		if (unitOverlay != null) {
+			unitOverlay.act();
+			unitOverlay.draw();
+		}
 	}
 
 	@Override
 	public void resize(int width, int height) {
-		overlayViewport.setScreenSize(width, height);
-		overlayViewport.update(width, height, true);
-		overlayViewport.setScreenSize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+		// overlayViewport.setScreenSize(width, height);
+		// overlayViewport.update(width, height, true);
+		// overlayViewport.setScreenSize(Gdx.graphics.getWidth(),
+		// Gdx.graphics.getHeight());
 	}
 
 	@Override
@@ -110,7 +109,7 @@ public class InGameScreen extends AbstractScreen {
 
 		if (button == Input.Buttons.RIGHT)
 			Civilization.getInstance().getEventManager().fireEvent(new RightClickEvent(ClickType.UP, x, y));
-		return true;
+		return false;
 	}
 
 	@Override
@@ -118,7 +117,7 @@ public class InGameScreen extends AbstractScreen {
 		if (button == Input.Buttons.RIGHT)
 			Civilization.getInstance().getEventManager().fireEvent(new RightClickEvent(ClickType.DOWN, x, y));
 
-		return true;
+		return false;
 	}
 
 	@Override
@@ -127,7 +126,7 @@ public class InGameScreen extends AbstractScreen {
 			// game.getGameMap().resetTerrain();
 			// game.getGameMap().generateTerrain();
 		}
-		return true;
+		return false;
 	}
 
 	private void handleInput() {
@@ -154,11 +153,11 @@ public class InGameScreen extends AbstractScreen {
 
 	}
 
-	public Stage getOverlayStage() {
-		return overlayStage;
-	}
-
 	public CivGame getGame() {
 		return game;
+	}
+
+	public void setUnitOverlay(UnitOverlay unitOverlay) {
+		this.unitOverlay = unitOverlay;
 	}
 }

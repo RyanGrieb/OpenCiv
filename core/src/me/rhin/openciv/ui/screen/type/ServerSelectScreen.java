@@ -33,7 +33,7 @@ public class ServerSelectScreen extends AbstractScreen implements ServerConnectL
 		eventManager.clearEvents();
 		eventManager.addListener(ServerConnectListener.class, this);
 
-		this.buttonManager = new ButtonManager(this);
+		this.buttonManager = new ButtonManager(getStage());
 
 		buttonManager.addButton(new ConnectServerButton(this, viewport.getWorldWidth() / 2 - 150 / 2,
 				viewport.getWorldHeight() - 200, 150, 45));
@@ -84,7 +84,7 @@ public class ServerSelectScreen extends AbstractScreen implements ServerConnectL
 		if (button == Input.Buttons.LEFT) {
 			eventManager.fireEvent(new LeftClickEvent(screenX, screenY));
 		}
-		return true;
+		return false;
 
 	}
 

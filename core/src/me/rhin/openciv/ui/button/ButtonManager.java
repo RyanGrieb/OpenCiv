@@ -2,38 +2,48 @@ package me.rhin.openciv.ui.button;
 
 import java.util.ArrayList;
 
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.listener.LeftClickListener;
 import me.rhin.openciv.listener.MouseMoveListener;
-import me.rhin.openciv.ui.screen.AbstractScreen;
 
-public class ButtonManager implements LeftClickListener, MouseMoveListener {
+public class ButtonManager implements MouseMoveListener {
 
 	private ArrayList<Button> buttons;
-	private AbstractScreen screen;
+	private Stage stage;
 
-	public ButtonManager(AbstractScreen screen) {
+	public ButtonManager(Stage stage) {
 		this.buttons = new ArrayList<>();
-		this.screen = screen;
-		Civilization.getInstance().getEventManager().addListener(LeftClickListener.class, this);
+		this.stage = stage;
 		Civilization.getInstance().getEventManager().addListener(MouseMoveListener.class, this);
 	}
 
 	public void addButton(Button button) {
 		// Civilization.getInstance().getEventManager().addListener(RenderListener.class,
 		// button);
-		screen.getStage().addActor(button);
+
+		button.addListener(new ClickListener() {
+			@Override
+			public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
+				Button buttonActor = (Button) event.getListenerActor();
+				buttonActor.onClick();
+				event.handle();
+			}
+		});
+
+		stage.addActor(button);
 		buttons.add(button);
 	}
 
-	@Override
-	public void onLeftClick(float x, float y) {
-		for (Button button : buttons) {
-			if (x >= button.getX() && x < button.getX() + button.getWidth())
-				if (y >= button.getY() && y <= button.getY() + button.getHeight())
-					button.onClick();
-		}
-	}
+	/*
+	 * @Override public void onLeftClick(float x, float y) { for (Button button :
+	 * buttons) { if (x >= button.getX() && x < button.getX() + button.getWidth())
+	 * if (y >= button.getY() && y <= button.getY() + button.getHeight())
+	 * button.onClick(); } }
+	 */
 
 	@Override
 	public void onMouseMove(float x, float y) {
@@ -43,8 +53,8 @@ public class ButtonManager implements LeftClickListener, MouseMoveListener {
 					button.setHovered(true);
 					continue;
 				}
-			
-			if(button.isHovered())
+
+			if (button.isHovered())
 				button.setHovered(false);
 		}
 	}

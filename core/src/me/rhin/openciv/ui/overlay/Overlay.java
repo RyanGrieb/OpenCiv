@@ -1,19 +1,23 @@
 package me.rhin.openciv.ui.overlay;
 
-import com.badlogic.gdx.graphics.g2d.Batch;
-import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.InputMultiplexer;
+import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.utils.viewport.StretchViewport;
+import com.badlogic.gdx.utils.viewport.Viewport;
 
-public abstract class Overlay extends Actor {
+import me.rhin.openciv.Civilization;
 
-	protected float x, y, width, height;
+public abstract class Overlay extends Stage {
 
-	public Overlay(float x, float y, float width, float height) {
-		this.x = x;
-		this.y = y;
-		this.width = width;
-		this.height = height;
+	protected Viewport viewport;
+
+	public Overlay() {
+		super(new StretchViewport(800, 600));
+		// overlayViewport.apply();
+		this.viewport = getViewport();
+		InputMultiplexer inputMultiplexer = Civilization.getInstance().getCurrentScreen().getInputMultiplexer();
+		inputMultiplexer.addProcessor(this);
+		Gdx.input.setInputProcessor(inputMultiplexer);
 	}
-	
-	
-	public abstract void draw(Batch batch, float parentAlpha);
 }

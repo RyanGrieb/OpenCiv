@@ -4,11 +4,12 @@ import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.map.tile.Tile;
 import me.rhin.openciv.game.player.Player;
 import me.rhin.openciv.game.unit.Unit;
+import me.rhin.openciv.game.unit.UnitParameter;
 
 public class Galley extends Unit {
 
-	public Galley(Player playerOwner, Tile standingTile) {
-		super(playerOwner, standingTile, TextureEnum.UNIT_SETTLER);
+	public Galley(UnitParameter unitParameter) {
+		super(unitParameter, TextureEnum.UNIT_SETTLER);
 	}
 
 	@Override

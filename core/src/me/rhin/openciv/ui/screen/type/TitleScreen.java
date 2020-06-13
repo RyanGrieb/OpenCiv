@@ -4,7 +4,6 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.utils.Align;
 
 import me.rhin.openciv.Civilization;
-import me.rhin.openciv.game.CivGame;
 import me.rhin.openciv.listener.LeftClickListener.LeftClickEvent;
 import me.rhin.openciv.listener.MouseMoveListener.MouseMoveEvent;
 import me.rhin.openciv.shared.listener.EventManager;
@@ -27,7 +26,7 @@ public class TitleScreen extends AbstractScreen {
 		this.eventManager = Civilization.getInstance().getEventManager();
 		eventManager.clearEvents();
 
-		this.buttonManager = new ButtonManager(this);
+		this.buttonManager = new ButtonManager(getStage());
 		buttonManager.addButton(
 				new PlayButton(viewport.getWorldWidth() / 2 - 150 / 2, viewport.getWorldHeight() - 200, 150, 45));
 		buttonManager.addButton(new GithubButton(74, 4, 32, 32));
@@ -61,7 +60,7 @@ public class TitleScreen extends AbstractScreen {
 	public boolean touchUp(int screenX, int screenY, int pointer, int button) {
 		if (button == Input.Buttons.LEFT)
 			eventManager.fireEvent(new LeftClickEvent(screenX, screenY));
-		return true;
+		return false;
 
 	}
 }
