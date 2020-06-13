@@ -13,7 +13,7 @@ import me.rhin.openciv.server.game.map.tile.GameMap;
 public abstract class Unit {
 
 	private ArrayList<Vector2[]> pathVectors = new ArrayList<>();
-	private Player player;
+	private Player playerOwner;
 	private float x, y;
 	private float width, height;
 	private Tile standingTile, targetTile;
@@ -21,8 +21,8 @@ public abstract class Unit {
 	private int movement;
 	private float health;
 
-	public Unit(Player player, Tile standingTile) {
-		this.player = player;
+	public Unit(Player playerOwner, Tile standingTile) {
+		this.playerOwner = playerOwner;
 		this.standingTile = standingTile;
 		setPosition(standingTile.getVectors()[0].x - standingTile.getWidth() / 2, standingTile.getVectors()[0].y + 4);
 		setSize(standingTile.getWidth(), standingTile.getHeight());
@@ -231,8 +231,8 @@ public abstract class Unit {
 		return movement;
 	}
 
-	public Player getPlayer() {
-		return player;
+	public Player getPlayerOwner() {
+		return playerOwner;
 	}
 
 	public void setMovement(int movement) {

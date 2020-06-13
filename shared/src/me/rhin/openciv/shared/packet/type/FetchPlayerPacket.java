@@ -5,12 +5,12 @@ import com.badlogic.gdx.utils.JsonValue;
 
 import me.rhin.openciv.shared.packet.Packet;
 
-public class PlayerDisconnectPacket extends Packet {
+public class FetchPlayerPacket extends Packet {
 
 	private String playerName;
 
-	public PlayerDisconnectPacket() {
-		super(PlayerDisconnectPacket.class.getName());
+	public FetchPlayerPacket() {
+		super(FetchPlayerPacket.class.getName());
 	}
 
 	@Override

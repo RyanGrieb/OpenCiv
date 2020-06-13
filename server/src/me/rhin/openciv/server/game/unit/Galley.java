@@ -5,8 +5,8 @@ import me.rhin.openciv.server.game.map.Tile;
 
 public class Galley extends Unit {
 
-	public Galley(Player player, Tile standingTile) {
-		super(player, standingTile);
+	public Galley(Player playerOwner, Tile standingTile) {
+		super(playerOwner, standingTile);
 	}
 
 	@Override

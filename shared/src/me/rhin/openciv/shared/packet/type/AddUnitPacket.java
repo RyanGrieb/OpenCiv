@@ -8,7 +8,8 @@ import me.rhin.openciv.shared.packet.Packet;
 public class AddUnitPacket extends Packet {
 
 	int tileGridX, tileGridY;
-	String unitName;
+	private String unitName;
+	private String playerOwner;
 
 	public AddUnitPacket() {
 		super(AddUnitPacket.class.getName());
@@ -20,6 +21,7 @@ public class AddUnitPacket extends Packet {
 		json.writeValue("tileGridX", tileGridX);
 		json.writeValue("tileGridY", tileGridY);
 		json.writeValue("unitName", unitName);
+		json.writeValue("playerOwner", playerOwner);
 	}
 
 	@Override
@@ -28,12 +30,14 @@ public class AddUnitPacket extends Packet {
 		this.tileGridX = jsonData.getInt("tileGridX");
 		this.tileGridY = jsonData.getInt("tileGridY");
 		this.unitName = jsonData.getString("unitName");
+		this.playerOwner = jsonData.getString("playerOwner");
 	}
 
-	public void setUnit(String unitName, int tileGridX, int tileGridY) {
+	public void setUnit(String playerOwner, String unitName, int tileGridX, int tileGridY) {
 		this.tileGridX = tileGridX;
 		this.tileGridY = tileGridY;
 		this.unitName = unitName;
+		this.playerOwner = playerOwner;
 	}
 
 	public int getTileGridX() {
@@ -48,4 +52,7 @@ public class AddUnitPacket extends Packet {
 		return unitName;
 	}
 
+	public String getPlayerOwner() {
+		return playerOwner;
+	}
 }

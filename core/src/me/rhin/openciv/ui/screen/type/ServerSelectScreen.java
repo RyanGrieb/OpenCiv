@@ -61,6 +61,9 @@ public class ServerSelectScreen extends AbstractScreen implements ServerConnectL
 					Civilization.getInstance().getNetworkManager().connect(ipTextField.getText());
 			}
 		});
+
+		// DEBUG
+		ipTextField.setText("localhost");
 	}
 
 	@Override

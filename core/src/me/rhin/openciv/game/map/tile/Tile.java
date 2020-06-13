@@ -124,11 +124,6 @@ public class Tile extends Actor implements ShapeRenderListener {
 		return map;
 	}
 
-	public void onLeftClick() {
-		for (Unit unit : units)
-			unit.setSelected(true);
-	}
-
 	public void onMouseHover() {
 		drawSelection = true;
 	}

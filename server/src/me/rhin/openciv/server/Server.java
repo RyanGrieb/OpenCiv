@@ -14,19 +14,20 @@ import com.badlogic.gdx.utils.JsonValue;
 
 import me.rhin.openciv.server.command.CmdProcessor;
 import me.rhin.openciv.server.game.Game;
-import me.rhin.openciv.server.listener.ConnectionListener;
 import me.rhin.openciv.server.listener.ConnectionListener.ConnectionEvent;
-import me.rhin.openciv.server.listener.DisconnectListener;
 import me.rhin.openciv.server.listener.DisconnectListener.DisconnectEvent;
+import me.rhin.openciv.server.listener.FetchPlayerListener.FetchPlayerEvent;
 import me.rhin.openciv.server.listener.MapRequestListener.MapRequestEvent;
-import me.rhin.openciv.server.listener.PlayerListRequestListener;
 import me.rhin.openciv.server.listener.PlayerListRequestListener.PlayerListRequestEvent;
+import me.rhin.openciv.server.listener.SelectUnitListener.SelectUnitEvent;
 import me.rhin.openciv.shared.listener.Event;
 import me.rhin.openciv.shared.listener.EventManager;
 import me.rhin.openciv.shared.listener.Listener;
 import me.rhin.openciv.shared.packet.Packet;
+import me.rhin.openciv.shared.packet.type.FetchPlayerPacket;
 import me.rhin.openciv.shared.packet.type.MapRequestPacket;
 import me.rhin.openciv.shared.packet.type.PlayerListRequestPacket;
+import me.rhin.openciv.shared.packet.type.SelectUnitPacket;
 
 public class Server extends WebSocketServer {
 
@@ -63,6 +64,8 @@ public class Server extends WebSocketServer {
 		networkEvents = new HashMap<>();
 		networkEvents.put(PlayerListRequestPacket.class, PlayerListRequestEvent.class);
 		networkEvents.put(MapRequestPacket.class, MapRequestEvent.class);
+		networkEvents.put(FetchPlayerPacket.class, FetchPlayerEvent.class);
+		networkEvents.put(SelectUnitPacket.class, SelectUnitEvent.class);
 
 		this.playerIndex = 0;
 		this.commandProcessor = new CmdProcessor();

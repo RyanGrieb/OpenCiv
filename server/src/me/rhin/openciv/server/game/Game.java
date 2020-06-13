@@ -12,16 +12,22 @@ import me.rhin.openciv.server.game.map.Tile;
 import me.rhin.openciv.server.game.map.tile.GameMap;
 import me.rhin.openciv.server.game.map.tile.TileType;
 import me.rhin.openciv.server.game.unit.Settler;
+import me.rhin.openciv.server.game.unit.Unit;
 import me.rhin.openciv.server.listener.ConnectionListener;
 import me.rhin.openciv.server.listener.DisconnectListener;
+import me.rhin.openciv.server.listener.FetchPlayerListener;
 import me.rhin.openciv.server.listener.PlayerListRequestListener;
+import me.rhin.openciv.server.listener.SelectUnitListener;
+import me.rhin.openciv.shared.packet.type.FetchPlayerPacket;
 import me.rhin.openciv.shared.packet.type.GameStartPacket;
 import me.rhin.openciv.shared.packet.type.PlayerConnectPacket;
 import me.rhin.openciv.shared.packet.type.PlayerDisconnectPacket;
 import me.rhin.openciv.shared.packet.type.PlayerListRequestPacket;
+import me.rhin.openciv.shared.packet.type.SelectUnitPacket;
 import me.rhin.openciv.shared.util.MathHelper;
 
-public class Game implements ConnectionListener, DisconnectListener, PlayerListRequestListener {
+public class Game implements ConnectionListener, DisconnectListener, PlayerListRequestListener, FetchPlayerListener,
+		SelectUnitListener {
 
 	private GameMap map;
 	private ArrayList<Player> players;
@@ -35,6 +41,8 @@ public class Game implements ConnectionListener, DisconnectListener, PlayerListR
 		Server.getInstance().getEventManager().addListener(ConnectionListener.class, this);
 		Server.getInstance().getEventManager().addListener(DisconnectListener.class, this);
 		Server.getInstance().getEventManager().addListener(PlayerListRequestListener.class, this);
+		Server.getInstance().getEventManager().addListener(FetchPlayerListener.class, this);
+		Server.getInstance().getEventManager().addListener(SelectUnitListener.class, this);
 	}
 
 	@Override
@@ -74,22 +82,35 @@ public class Game implements ConnectionListener, DisconnectListener, PlayerListR
 		}
 	}
 
-	private Player getPlayerByConn(WebSocket conn) {
-
-		for (Player player : players)
-			if (player.getConn().equals(conn))
-				return player;
-
-		return null;
-
-	}
-
 	@Override
 	public void onPlayerListRequested(WebSocket conn, PlayerListRequestPacket packet) {
 		System.out.println("[SERVER] Player list requested");
 		for (Player player : players) {
 			packet.addPlayer(player.getName());
 		}
+		Json json = new Json();
+		conn.send(json.toJson(packet));
+	}
+
+	@Override
+	public void onPlayerFetch(WebSocket conn, FetchPlayerPacket packet) {
+		System.out.println("[SERVER] Fetching player...");
+		Player player = getPlayerByConn(conn);
+		packet.setPlayerName(player.getName());
+		Json json = new Json();
+		conn.send(json.toJson(packet));
+	}
+
+	@Override
+	public void onUnitSelect(WebSocket conn, SelectUnitPacket packet) {
+		// FIXME: Use a hashmap to get by unit name?
+		Unit unit = map.getTiles()[packet.getGridX()][packet.getGridY()].getUnits().get(0);
+		Player player = getPlayerByConn(conn);
+		if (!unit.getPlayerOwner().equals(player))
+			return;
+
+		player.setSelectedUnit(unit);
+
 		Json json = new Json();
 		conn.send(json.toJson(packet));
 	}
@@ -153,5 +174,14 @@ public class Game implements ConnectionListener, DisconnectListener, PlayerListR
 
 	public ArrayList<Player> getPlayers() {
 		return players;
+	}
+
+	private Player getPlayerByConn(WebSocket conn) {
+
+		for (Player player : players)
+			if (player.getConn().equals(conn))
+				return player;
+
+		return null;
 	}
 }

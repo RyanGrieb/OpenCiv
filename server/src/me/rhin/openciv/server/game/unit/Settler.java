@@ -5,8 +5,8 @@ import me.rhin.openciv.server.game.map.Tile;
 
 public class Settler extends Unit {
 
-	public Settler(Player player, Tile standingTile) {
-		super(player, standingTile);
+	public Settler(Player playerOwner, Tile standingTile) {
+		super(playerOwner, standingTile);
 	}
 
 	@Override

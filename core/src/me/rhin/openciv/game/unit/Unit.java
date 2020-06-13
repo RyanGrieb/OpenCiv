@@ -2,7 +2,6 @@ package me.rhin.openciv.game.unit;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Stack;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
@@ -16,22 +15,42 @@ import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.map.GameMap;
 import me.rhin.openciv.game.map.tile.Tile;
-import me.rhin.openciv.game.map.tile.TileNode;
+import me.rhin.openciv.game.player.Player;
 import me.rhin.openciv.listener.ShapeRenderListener;
 
 public abstract class Unit extends Actor implements ShapeRenderListener {
 
-	private ArrayList<Vector2[]> pathVectors = new ArrayList<>();
+	private Player playerOwner;
+	private ArrayList<Vector2[]> pathVectors;
 	private Tile standingTile, targetTile;
 	private Sprite sprite, selectionSprite, targetSelectionSprite;
 	private boolean selected;
 	private int movement;
 	private float health;
 
-	public Unit(Tile standingTile, TextureEnum assetEnum) {
+	public Unit(Player playerOwner, Tile standingTile, TextureEnum assetEnum) {
 		Civilization.getInstance().getEventManager().addListener(ShapeRenderListener.class, this);
 
+		this.playerOwner = playerOwner;
+		this.pathVectors = new ArrayList<>();
 		this.standingTile = standingTile;
+		this.sprite = assetEnum.sprite();
+		this.selectionSprite = TextureEnum.UI_SELECTION.sprite();
+		// TODO: Change this sprite to a different texture
+		this.targetSelectionSprite = TextureEnum.UI_SELECTION.sprite();
+
+		setPosition(standingTile.getVectors()[0].x - standingTile.getWidth() / 2, standingTile.getVectors()[0].y + 4);
+		setSize(standingTile.getWidth(), standingTile.getHeight());
+
+		this.movement = 3;
+	}
+
+	public Unit(UnitParameter unitParameter, TextureEnum assetEnum) {
+		Civilization.getInstance().getEventManager().addListener(ShapeRenderListener.class, this);
+
+		this.playerOwner = unitParameter.getPlayerOwner();
+		this.pathVectors = new ArrayList<>();
+		this.standingTile = unitParameter.getStandingTile();
 		this.sprite = assetEnum.sprite();
 		this.selectionSprite = TextureEnum.UI_SELECTION.sprite();
 		// TODO: Change this sprite to a different texture
@@ -259,6 +278,10 @@ public abstract class Unit extends Actor implements ShapeRenderListener {
 
 	public int getMovement() {
 		return movement;
+	}
+
+	public Player getPlayerOwner() {
+		return playerOwner;
 	}
 
 	public void setMovement(int movement) {

@@ -3,11 +3,12 @@ package me.rhin.openciv.game.unit.type;
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.map.tile.Tile;
 import me.rhin.openciv.game.unit.Unit;
+import me.rhin.openciv.game.unit.UnitParameter;
 
 public class Settler extends Unit {
 
-	public Settler(Tile standingTile) {
-		super(standingTile, TextureEnum.UNIT_SETTLER);
+	public Settler(UnitParameter unitParameter) {
+		super(unitParameter, TextureEnum.UNIT_SETTLER);
 	}
 
 	@Override

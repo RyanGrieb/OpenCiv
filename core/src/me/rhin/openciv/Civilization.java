@@ -17,6 +17,7 @@ import me.rhin.openciv.shared.listener.EventManager;
 import me.rhin.openciv.ui.font.CustomFont;
 import me.rhin.openciv.ui.screen.ScreenEnum;
 import me.rhin.openciv.ui.screen.ScreenManager;
+import me.rhin.openciv.ui.screen.type.InGameScreen;
 
 public class Civilization extends Game {
 
@@ -89,6 +90,10 @@ public class Civilization extends Game {
 
 	public static Civilization getInstance() {
 		return instance;
+	}
+
+	public CivGame getGame() {
+		return ((InGameScreen) screenManager.getCurrentScreen()).getGame();
 	}
 
 }

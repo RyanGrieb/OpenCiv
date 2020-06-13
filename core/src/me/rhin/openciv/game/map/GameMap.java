@@ -22,14 +22,12 @@ public class GameMap implements ReceiveMapChunkListener {
 	public static final int MAX_NODES = WIDTH * HEIGHT;
 	private static final int CONTINENT_AMOUNT = 780; // Default: 780
 
-	private CivGame game;
 	private Tile[][] tiles;
 
 	private int[][] oddEdgeAxis = { { 0, -1 }, { 1, -1 }, { 1, 0 }, { 1, 1 }, { 0, 1 }, { -1, 0 } };
 	private int[][] evenEdgeAxis = { { -1, -1 }, { 0, -1 }, { 1, 0 }, { 0, 1 }, { -1, 1 }, { -1, 0 } };
 
-	public GameMap(CivGame game) {
-		this.game = game;
+	public GameMap() {
 
 		tiles = new Tile[WIDTH][HEIGHT];
 		for (int x = 0; x < WIDTH; x++) {
@@ -216,10 +214,6 @@ public class GameMap implements ReceiveMapChunkListener {
 
 	public Tile[][] getTiles() {
 		return tiles;
-	}
-
-	public CivGame getGame() {
-		return game;
 	}
 
 	private void initializeEdges() {

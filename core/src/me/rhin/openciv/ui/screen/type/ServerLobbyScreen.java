@@ -88,7 +88,6 @@ public class ServerLobbyScreen extends AbstractScreen
 
 	@Override
 	public void onPlayerListRequested(PlayerListRequestPacket packet) {
-		System.out.println("Got player list.");
 		for (String playerName : packet.getPlayerList()) {
 			if (playerName == null)
 				continue;

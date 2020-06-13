@@ -1,91 +1,44 @@
 package me.rhin.openciv.game;
 
 import java.lang.reflect.Constructor;
-import java.util.ArrayList;
+import java.util.HashMap;
 
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.game.map.GameMap;
 import me.rhin.openciv.game.map.tile.Tile;
+import me.rhin.openciv.game.player.Player;
 import me.rhin.openciv.game.unit.Unit;
+import me.rhin.openciv.game.unit.UnitParameter;
 import me.rhin.openciv.listener.AddUnitListener;
-import me.rhin.openciv.listener.GameStartListener;
+import me.rhin.openciv.listener.FetchPlayerListener;
 import me.rhin.openciv.listener.LeftClickListener;
 import me.rhin.openciv.listener.MouseMoveListener;
 import me.rhin.openciv.listener.PlayerConnectListener;
+import me.rhin.openciv.listener.PlayerListRequestListener;
 import me.rhin.openciv.listener.RightClickListener;
+import me.rhin.openciv.listener.SelectUnitListener;
 import me.rhin.openciv.shared.packet.type.AddUnitPacket;
+import me.rhin.openciv.shared.packet.type.FetchPlayerPacket;
 import me.rhin.openciv.shared.packet.type.PlayerConnectPacket;
-import me.rhin.openciv.ui.screen.type.InGameScreen;
-import me.rhin.openciv.util.ClickType;
+import me.rhin.openciv.shared.packet.type.PlayerListRequestPacket;
 
-public class CivGame
-		implements MouseMoveListener, LeftClickListener, RightClickListener, PlayerConnectListener, AddUnitListener {
+public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerListRequestListener, FetchPlayerListener {
 
 	private GameMap map;
-	private Tile hoveredTile;
-	private Unit selectedUnit;
-	private boolean rightMouseHeld;
+	private Player player;
+	private HashMap<String, Player> players;
 
 	public CivGame() {
-		this.map = new GameMap(this);
+		this.map = new GameMap();
+		this.players = new HashMap<>();
 
-		Civilization.getInstance().getEventManager().addListener(MouseMoveListener.class, this);
-		Civilization.getInstance().getEventManager().addListener(LeftClickListener.class, this);
-		Civilization.getInstance().getEventManager().addListener(RightClickListener.class, this);
 		Civilization.getInstance().getEventManager().addListener(PlayerConnectListener.class, this);
 		Civilization.getInstance().getEventManager().addListener(AddUnitListener.class, this);
-	}
+		Civilization.getInstance().getEventManager().addListener(PlayerListRequestListener.class, this);
+		Civilization.getInstance().getEventManager().addListener(FetchPlayerListener.class, this);
 
-	@Override
-	public void onMouseMove(float x, float y) {
-		Tile currentHoveredTile = map.getTileFromLocation(x, y);
-
-		if (currentHoveredTile == null)
-			return;
-
-		if (rightMouseHeld) {
-			if (!selectedUnit.getTargetTile().equals(hoveredTile))
-				selectedUnit.setTargetTile(hoveredTile);
-		}
-
-		if (currentHoveredTile.equals(hoveredTile))
-			return;
-
-		if (hoveredTile != null)
-			hoveredTile.onMouseUnhover();
-
-		hoveredTile = currentHoveredTile;
-		hoveredTile.onMouseHover();
-	}
-
-	@Override
-	public void onLeftClick(float x, float y) {
-		if (hoveredTile == null)
-			return;
-
-		// TODO: Account for clicking on cities in the future.
-		if (hoveredTile.getUnits().size() < 1)
-			return;
-
-		hoveredTile.onLeftClick();
-		selectedUnit = hoveredTile.getUnits().get(0);
-	}
-
-	@Override
-	public void onRightClick(ClickType clickType, int x, int y) {
-		if (selectedUnit == null)
-			return;
-
-		if (clickType == ClickType.DOWN) {
-			// TODO: Check if the tile is passble for the unit.
-			selectedUnit.setTargetTile(hoveredTile);
-			rightMouseHeld = true;
-		} else {
-			selectedUnit.moveToTargetTile();
-			selectedUnit.setSelected(false);
-			selectedUnit = null;
-			rightMouseHeld = false;
-		}
+		Civilization.getInstance().getNetworkManager().sendPacket(new FetchPlayerPacket());
+		Civilization.getInstance().getNetworkManager().sendPacket(new PlayerListRequestPacket());
 	}
 
 	@Override
@@ -95,17 +48,42 @@ public class CivGame
 
 	@Override
 	public void onUnitAdd(AddUnitPacket packet) {
+
 		try {
+			Player playerOwner = players.get(packet.getPlayerOwner());
 			Tile tile = map.getTiles()[packet.getTileGridX()][packet.getTileGridY()];
+			UnitParameter unitParameter = new UnitParameter(playerOwner, tile);
 			Class<? extends Unit> unitClass = (Class<? extends Unit>) Class
 					.forName("me.rhin.openciv.game.unit.type." + packet.getUnitName());
-			Constructor<?> ctor = unitClass.getConstructor(Tile.class);
-			Unit unit = (Unit) ctor.newInstance(new Object[] { tile });
+			Constructor<?> ctor = unitClass.getConstructor(UnitParameter.class);
+			Unit unit = (Unit) ctor.newInstance(new Object[] { unitParameter });
 			tile.addUnit(unit);
 			Civilization.getInstance().getScreenManager().getCurrentScreen().getStage().addActor(unit);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+
+	@Override
+	public void onPlayerListRequested(PlayerListRequestPacket packet) {
+		for (String playerName : packet.getPlayerList()) {
+			if (playerName == null)
+				continue;
+
+			if (playerName.equals(player.getName()))
+				players.put(playerName, player);
+			else
+				players.put(playerName, new Player(playerName));
+		}
+	}
+
+	@Override
+	public void onFetchPlayer(FetchPlayerPacket packet) {
+		this.player = new Player(packet.getPlayerName());
+		Civilization.getInstance().getEventManager().addListener(MouseMoveListener.class, player);
+		Civilization.getInstance().getEventManager().addListener(LeftClickListener.class, player);
+		Civilization.getInstance().getEventManager().addListener(RightClickListener.class, player);
+		Civilization.getInstance().getEventManager().addListener(SelectUnitListener.class, player);
 	}
 
 	public GameMap getMap() {

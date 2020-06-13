@@ -5,8 +5,8 @@ import me.rhin.openciv.server.game.map.Tile;
 
 public class Warrior extends Unit {
 
-	public Warrior(Player player, Tile standingTile) {
-		super(player, standingTile);
+	public Warrior(Player playerOwner, Tile standingTile) {
+		super(playerOwner, standingTile);
 	}
 
 	@Override
@@ -16,6 +16,4 @@ public class Warrior extends Unit {
 		else
 			return tile.getTileType().getMovementCost();
 	}
-
-	//TODO: method that returns it's UI or buttons?
 }

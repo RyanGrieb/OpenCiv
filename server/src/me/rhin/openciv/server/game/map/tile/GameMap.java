@@ -45,7 +45,6 @@ public class GameMap implements MapRequestListener {
 
 		initializeEdges();
 
-		System.out.println(Server.getInstance());
 		Server.getInstance().getEventManager().addListener(MapRequestListener.class, this);
 	}
 
@@ -69,7 +68,8 @@ public class GameMap implements MapRequestListener {
 							tileChunk[i][j] = tiles[tileX][tileY].getTileType().getID();
 
 							for (Unit unit : tiles[tileX][tileY].getUnits()) {
-								addUnitPacket.setUnit(unit.getClass().getSimpleName(), tileX, tileY);
+								addUnitPacket.setUnit(unit.getPlayerOwner().getName(), unit.getClass().getSimpleName(),
+										tileX, tileY);
 								addUnitPackets.add(addUnitPacket);
 							}
 

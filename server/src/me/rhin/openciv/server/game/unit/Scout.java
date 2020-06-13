@@ -5,8 +5,8 @@ import me.rhin.openciv.server.game.map.Tile;
 
 public class Scout extends Unit {
 
-	public Scout(Player player, Tile standingTile) {
-		super(player, standingTile);
+	public Scout(Player playerOwner, Tile standingTile) {
+		super(playerOwner, standingTile);
 	}
 
 	@Override

@@ -157,4 +157,8 @@ public class InGameScreen extends AbstractScreen {
 	public Stage getOverlayStage() {
 		return overlayStage;
 	}
+
+	public CivGame getGame() {
+		return game;
+	}
 }
