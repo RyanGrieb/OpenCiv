@@ -3,7 +3,6 @@ package me.rhin.openciv.server.game.unit;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.math.Vector2;
 
 import me.rhin.openciv.server.game.Player;
@@ -19,7 +18,7 @@ public abstract class Unit {
 	private Tile standingTile, targetTile;
 	private boolean selected;
 	private int maxMovement;
-	private int movement;
+	private int pathMovement;
 	private float health;
 
 	public Unit(Player playerOwner, Tile standingTile) {
@@ -28,31 +27,19 @@ public abstract class Unit {
 		setPosition(standingTile.getVectors()[0].x - standingTile.getWidth() / 2, standingTile.getVectors()[0].y + 4);
 		setSize(standingTile.getWidth(), standingTile.getHeight());
 
-		this.movement = 3;
 		this.maxMovement = 3;
 	}
 
 	public abstract int getMovementCost(Tile tile);
 
-	public void setTargetTile(Tile targetTile) {
-		if (targetTile == null) {
-			return;
-		}
+	public boolean setTargetTile(Tile targetTile) {
+		if (targetTile == null)
+			return false;
 
 		if (targetTile.equals(this.targetTile))
-			return;
+			return false;
 
-		this.targetTile = targetTile;
 		pathVectors.clear();
-
-		// TODO: Determine if the unit can walk on the tile.
-
-		// targetSelectionSprite.setPosition(targetTile.getVectors()[0].x -
-		// targetTile.getWidth() / 2,
-		// targetTile.getVectors()[0].y + 4);
-		// targetSelectionSprite.setSize(targetTile.getWidth(), targetTile.getHeight());
-
-		GameMap map = targetTile.getMap();
 
 		// Find the shortest path to the target tile.
 		// Remember:
@@ -66,7 +53,6 @@ public abstract class Unit {
 		// https://en.wikipedia.org/wiki/A*_search_algorithm
 		// https://www.youtube.com/watch?v=6TsL96NAZCo
 
-		// FIXME: This should only be the size of our targetTileGrid X & Y.
 		// Remember, stack is LIFO.
 
 		// int aScore = costOfPath + hurestic of the target point.
@@ -75,7 +61,7 @@ public abstract class Unit {
 
 		// FIXME: This shouldn't be a static number. (E.g. account for hills, ect.)
 		// SHOULD NEVERRRR OVERESTIMATE tough
-		int h = 1; // Lowest possible cost to reach nearest tile. (Do we want to
+		int h = 0; // Lowest possible cost to reach nearest tile. (Do we want to
 					// overestimate
 		// this?).
 		ArrayList<Tile> openSet = new ArrayList<>();
@@ -106,11 +92,6 @@ public abstract class Unit {
 				if (adjTile == null)
 					continue;
 
-				// We can either use adjTile or current tile movement cost here, doesn't really
-				// matter.
-				// System.out.println(adjTile.getTileType().getMovementCost() + "," +
-				// getMovementCost(adjTile));
-
 				int tenativeGScore = gScores[current.getGridX()][current.getGridY()] + getMovementCost(adjTile);
 
 				if (tenativeGScore < gScores[adjTile.getGridX()][adjTile.getGridY()]) {
@@ -120,8 +101,9 @@ public abstract class Unit {
 
 					int adjFScore = gScores[adjTile.getGridX()][adjTile.getGridY()] + h;
 					fScores[adjTile.getGridX()][adjTile.getGridY()] = adjFScore;
-					if (!openSet.contains(adjTile))
+					if (!openSet.contains(adjTile)) {
 						openSet.add(adjTile);
+					}
 				}
 			}
 		}
@@ -130,11 +112,14 @@ public abstract class Unit {
 
 		Tile parentTile = cameFrom[targetTile.getGridX()][targetTile.getGridY()];
 
-		// If it's moving to itself.
-		if (parentTile == null)
-			return;
+		// If it's moving to itself or there isn't a valid path
+		if (parentTile == null) {
+			pathMovement = 0;
+			return false;
+		}
 
 		int iterations = 0;
+		int pathMovement = 0;
 		while (parentTile != null) {
 			Tile nextTile = cameFrom[parentTile.getGridX()][parentTile.getGridY()];
 
@@ -150,8 +135,13 @@ public abstract class Unit {
 			if (nextTile == null)
 				nextTile = targetTile;
 
-			if (parentTile.equals(targetTile))
+			if (!parentTile.equals(standingTile)) {
+				pathMovement += parentTile.getTileType().getMovementCost();
+			}
+
+			if (parentTile.equals(targetTile)) {
 				break;
+			}
 
 			if (iterations >= GameMap.MAX_NODES) {
 				break;
@@ -160,16 +150,11 @@ public abstract class Unit {
 			parentTile = nextTile;
 			iterations++;
 		}
-	}
 
-	private boolean fastContains(ArrayList<Tile> tileList, Tile seachedTile) {
-		for (Tile tile : tileList) {
-			if (tile.equals(seachedTile)) {
-				return true;
-			}
-		}
+		this.targetTile = targetTile;
+		this.pathMovement = pathMovement;
 
-		return false;
+		return true;
 	}
 
 	private Tile removeSmallest(ArrayList<Tile> queue, int fScore[][]) {
@@ -184,10 +169,6 @@ public abstract class Unit {
 
 		queue.remove(smallestTile);
 		return smallestTile;
-	}
-
-	private int tileDistance(Tile tile, int dist[][]) {
-		return dist[tile.getGridX()][tile.getGridY()];
 	}
 
 	public void moveToTargetTile() {
@@ -222,10 +203,6 @@ public abstract class Unit {
 		this.selected = selected;
 	}
 
-	public void setMovement(int movement) {
-		this.movement = movement;
-	}
-
 	public boolean isSelected() {
 		return selected;
 	}
@@ -234,8 +211,8 @@ public abstract class Unit {
 		return targetTile;
 	}
 
-	public int getMovement() {
-		return movement;
+	public int getMaxMovement() {
+		return maxMovement;
 	}
 
 	public Player getPlayerOwner() {
@@ -246,8 +223,8 @@ public abstract class Unit {
 		return pathVectors;
 	}
 
-	public int getMaxMovement() {
-		return maxMovement;
+	public int getPathMovement() {
+		return pathMovement;
 	}
 
 }

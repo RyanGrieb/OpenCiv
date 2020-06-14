@@ -16,12 +16,11 @@ import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.map.GameMap;
 import me.rhin.openciv.game.map.tile.Tile;
+import me.rhin.openciv.game.map.tile.TileType;
 import me.rhin.openciv.game.player.Player;
 import me.rhin.openciv.listener.ShapeRenderListener;
-import me.rhin.openciv.shared.packet.type.MapRequestPacket;
 import me.rhin.openciv.shared.packet.type.MoveUnitPacket;
 import me.rhin.openciv.ui.overlay.UnitOverlay;
-import me.rhin.openciv.ui.screen.ScreenEnum;
 import me.rhin.openciv.ui.screen.type.InGameScreen;
 
 public abstract class Unit extends Actor implements ShapeRenderListener {
@@ -30,10 +29,11 @@ public abstract class Unit extends Actor implements ShapeRenderListener {
 	protected ArrayList<Action> customActions;
 	private Player playerOwner;
 	private ArrayList<Vector2[]> pathVectors;
+	private int pathMovement;
 	private Tile standingTile, targetTile;
 	private Sprite sprite, selectionSprite, targetSelectionSprite;
 	private boolean selected;
-	private int movement;
+	private int maxMovement;
 	private float health;
 
 	public Unit(String unitName, Player playerOwner, Tile standingTile, TextureEnum assetEnum) {
@@ -52,14 +52,14 @@ public abstract class Unit extends Actor implements ShapeRenderListener {
 		setPosition(standingTile.getVectors()[0].x - standingTile.getWidth() / 2, standingTile.getVectors()[0].y + 4);
 		setSize(standingTile.getWidth(), standingTile.getHeight());
 
-		this.movement = 3;
+		this.maxMovement = 3;
 	}
 
 	public Unit(UnitParameter unitParameter, TextureEnum assetEnum) {
 		this(unitParameter.getUnitName(), unitParameter.getPlayerOwner(), unitParameter.getStandingTile(), assetEnum);
 	}
 
-	public abstract int getMovementCost(Tile tile);
+	public abstract int getMovementCost(Tile adjTile);
 
 	@Override
 	public void act(float delta) {
@@ -71,7 +71,7 @@ public abstract class Unit extends Actor implements ShapeRenderListener {
 		if (selected)
 			selectionSprite.draw(batch);
 
-		if (targetTile != null && pathVectors.size() <= movement) {
+		if (targetTile != null && pathMovement <= maxMovement && pathMovement != 0) {
 			targetSelectionSprite.draw(batch);
 		}
 
@@ -80,7 +80,6 @@ public abstract class Unit extends Actor implements ShapeRenderListener {
 	}
 
 	public boolean setTargetTile(Tile targetTile) {
-		this.targetTile = null;
 		if (targetTile == null)
 			return false;
 
@@ -89,13 +88,9 @@ public abstract class Unit extends Actor implements ShapeRenderListener {
 
 		pathVectors.clear();
 
-		// TODO: Determine if the unit can walk on the tile.
-
 		targetSelectionSprite.setPosition(targetTile.getVectors()[0].x - targetTile.getWidth() / 2,
 				targetTile.getVectors()[0].y + 4);
 		targetSelectionSprite.setSize(targetTile.getWidth(), targetTile.getHeight());
-
-		GameMap map = targetTile.getMap();
 
 		// Find the shortest path to the target tile.
 		// Remember:
@@ -109,7 +104,6 @@ public abstract class Unit extends Actor implements ShapeRenderListener {
 		// https://en.wikipedia.org/wiki/A*_search_algorithm
 		// https://www.youtube.com/watch?v=6TsL96NAZCo
 
-		// FIXME: This should only be the size of our targetTileGrid X & Y.
 		// Remember, stack is LIFO.
 
 		// int aScore = costOfPath + hurestic of the target point.
@@ -118,7 +112,7 @@ public abstract class Unit extends Actor implements ShapeRenderListener {
 
 		// FIXME: This shouldn't be a static number. (E.g. account for hills, ect.)
 		// SHOULD NEVERRRR OVERESTIMATE tough
-		int h = 1; // Lowest possible cost to reach nearest tile. (Do we want to
+		int h = 0; // Lowest possible cost to reach nearest tile. (Do we want to
 					// overestimate
 		// this?).
 		ArrayList<Tile> openSet = new ArrayList<>();
@@ -149,9 +143,6 @@ public abstract class Unit extends Actor implements ShapeRenderListener {
 				if (adjTile == null)
 					continue;
 
-				// We can either use adjTile or current tile movement cost here, doesn't really
-				// matter.
-
 				int tenativeGScore = gScores[current.getGridX()][current.getGridY()] + getMovementCost(adjTile);
 
 				if (tenativeGScore < gScores[adjTile.getGridX()][adjTile.getGridY()]) {
@@ -161,8 +152,9 @@ public abstract class Unit extends Actor implements ShapeRenderListener {
 
 					int adjFScore = gScores[adjTile.getGridX()][adjTile.getGridY()] + h;
 					fScores[adjTile.getGridX()][adjTile.getGridY()] = adjFScore;
-					if (!openSet.contains(adjTile))
+					if (!openSet.contains(adjTile)) {
 						openSet.add(adjTile);
+					}
 				}
 			}
 		}
@@ -171,11 +163,15 @@ public abstract class Unit extends Actor implements ShapeRenderListener {
 
 		Tile parentTile = cameFrom[targetTile.getGridX()][targetTile.getGridY()];
 
-		// If it's moving to itself.
-		if (parentTile == null)
+		// If it's moving to itself or there isn't a valid path
+		if (parentTile == null) {
+			pathMovement = 0;
+			this.targetTile = null;
 			return false;
-
+		}
+		
 		int iterations = 0;
+		int pathMovement = 0;
 		while (parentTile != null) {
 			Tile nextTile = cameFrom[parentTile.getGridX()][parentTile.getGridY()];
 
@@ -191,8 +187,13 @@ public abstract class Unit extends Actor implements ShapeRenderListener {
 			if (nextTile == null)
 				nextTile = targetTile;
 
-			if (parentTile.equals(targetTile))
+			if (!parentTile.equals(standingTile)) {
+				pathMovement += parentTile.getTileType().getMovementCost();
+			}
+
+			if (parentTile.equals(targetTile)) {
 				break;
+			}
 
 			if (iterations >= GameMap.MAX_NODES) {
 				Gdx.app.log(Civilization.LOG_TAG, "ERROR: Pathing iteration error");
@@ -203,11 +204,8 @@ public abstract class Unit extends Actor implements ShapeRenderListener {
 			iterations++;
 		}
 
-		if (movement < iterations) {
-			this.targetTile = null;
-			return false;
-		}
 		this.targetTile = targetTile;
+		this.pathMovement = pathMovement;
 
 		return true;
 	}
@@ -215,12 +213,12 @@ public abstract class Unit extends Actor implements ShapeRenderListener {
 	@Override
 	public void onShapeRender(ShapeRenderer shapeRenderer) {
 		shapeRenderer.setColor(Color.YELLOW);
-		int index = pathVectors.size() - 1;
 		for (Vector2[] vectors : pathVectors) {
-			if (movement <= index)
+			// System.out.println(maxMovement + "," + pathMovement);
+			if (maxMovement < pathMovement)
 				break;
 			shapeRenderer.line(vectors[0], vectors[1]);
-			index--;
+
 		}
 	}
 
@@ -307,8 +305,8 @@ public abstract class Unit extends Actor implements ShapeRenderListener {
 		return targetTile;
 	}
 
-	public int getMovement() {
-		return movement;
+	public int getMaxMovement() {
+		return maxMovement;
 	}
 
 	public Player getPlayerOwner() {
@@ -319,7 +317,7 @@ public abstract class Unit extends Actor implements ShapeRenderListener {
 		return customActions;
 	}
 
-	public void setMovement(int movement) {
-		this.movement = movement;
+	public void setMaxMovement(int movement) {
+		this.maxMovement = movement;
 	}
 }

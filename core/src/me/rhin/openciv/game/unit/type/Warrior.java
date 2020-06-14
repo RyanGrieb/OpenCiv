@@ -15,6 +15,7 @@ public class Warrior extends Unit {
 
 	@Override
 	public int getMovementCost(Tile tile) {
+
 		if (tile.getTileType().isWater())
 			return 1000000;
 		else

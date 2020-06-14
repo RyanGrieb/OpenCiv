@@ -143,10 +143,9 @@ public class Game implements StartGameRequestListener, ConnectionListener, Disco
 		Tile targetTile = map.getTiles()[packet.getTargetGridX()][packet.getTargetGridY()];
 
 		unit.setTargetTile(targetTile);
-		int moveAmount = unit.getPathVectors().size();
 
 		// The player is hacking here or i'm a poop coder
-		if (unit.getMaxMovement() < moveAmount)
+		if (unit.getMaxMovement() < unit.getPathMovement())
 			return;
 
 		unit.moveToTargetTile();
