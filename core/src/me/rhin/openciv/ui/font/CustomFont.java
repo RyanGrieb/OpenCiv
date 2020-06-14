@@ -16,8 +16,8 @@ public class CustomFont {
 		generator.dispose(); // don't forget to dispose to avoid memory leaks!
 	}
 
+	
 	public BitmapFont getFont() {
 		return font;
 	}
-
 }
