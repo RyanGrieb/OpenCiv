@@ -38,8 +38,12 @@ public class CreditsScreen extends AbstractScreen {
 				viewport.getWorldWidth(), 20));
 
 		creditLabelList
-				.add(new CustomLabel("Icons: \n Roguelike/RPG Icons by Joe Williamson \n@JoeCreates", Align.center, 0,
+				.add(new CustomLabel("Icons: \n Roguelike/RPG Icons by Joe Williamson \n@JoeCreates\n", Align.center, 0,
 						viewport.getWorldHeight() - 100 - (creditLabelList.size() * 40), viewport.getWorldWidth(), 20));
+		
+		creditLabelList
+		.add(new CustomLabel("\nUI: \n[LPC] Pennomi's UI Elements by pennomi, Buch, and cemkalyoncu \nhttps://opengameart.org/content/lpc-pennomis-ui-elements", Align.center, 0,
+				viewport.getWorldHeight() - 100 - (creditLabelList.size() * 40), viewport.getWorldWidth(), 20));
 
 		for (CustomLabel label : creditLabelList)
 			stage.addActor(label);

@@ -7,7 +7,7 @@ import me.rhin.openciv.ui.screen.ScreenEnum;
 public class AknowledgementsButton extends Button {
 
 	public AknowledgementsButton(float x, float y, float width, float height) {
-		super("Aknowledgements", x, y, width, height);
+		super("Credits", x, y, width, height);
 	}
 
 	@Override
