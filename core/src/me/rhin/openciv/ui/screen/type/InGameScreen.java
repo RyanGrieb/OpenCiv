@@ -61,7 +61,7 @@ public class InGameScreen extends AbstractScreen {
 		label1Style.font = Civilization.getInstance().getFont();
 		label1Style.fontColor = Color.WHITE;
 
-		getCamera().zoom = 0.8F;
+		getCamera().zoom = 0.6F; // 0.8 Default
 	}
 
 	@Override

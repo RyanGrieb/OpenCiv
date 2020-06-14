@@ -34,22 +34,22 @@ ui_button_hovered
   index: -1
 ui_github
   rotate: false
-  xy: 2, 2
+  xy: 804, 604
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 ui_gray
   rotate: false
-  xy: 804, 635
+  xy: 146, 63
   size: 1, 1
   orig: 1, 1
   offset: 0, 0
   index: -1
 ui_selection
   rotate: false
-  xy: 146, 48
-  size: 16, 16
-  orig: 16, 16
+  xy: 2, 2
+  size: 32, 32
+  orig: 32, 32
   offset: 0, 0
   index: -1
