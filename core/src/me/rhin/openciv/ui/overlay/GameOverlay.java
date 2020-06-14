@@ -1,9 +1,5 @@
 package me.rhin.openciv.ui.overlay;
 
-import com.badlogic.gdx.graphics.g2d.Sprite;
-import com.badlogic.gdx.utils.Align;
-
-import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.ui.game.StatusBar;
 import me.rhin.openciv.ui.label.CustomLabel;
 

@@ -15,11 +15,13 @@ import me.rhin.openciv.Civilization;
 public abstract class AbstractScreen implements Screen, InputProcessor {
 
 	protected OrthographicCamera camera;
-	private float camX, camY;
+	protected float camX;
+	protected float camY;
 	// TODO: Make a overlayViewport.
 	protected Viewport viewport;
 	protected Stage stage;
 	private InputMultiplexer inputMultiplexer;
+	private boolean glClear;
 
 	protected AbstractScreen() {
 		camera = new OrthographicCamera();
@@ -29,6 +31,8 @@ public abstract class AbstractScreen implements Screen, InputProcessor {
 		viewport = new StretchViewport(800, 600, camera);
 		stage = new Stage(viewport);
 		viewport.apply();
+
+		this.glClear = true;
 	}
 
 	@Override
@@ -45,8 +49,10 @@ public abstract class AbstractScreen implements Screen, InputProcessor {
 
 	@Override
 	public void render(float delta) {
-		Gdx.gl.glClearColor(0, 0.253F, 0.304F, 1);
-		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+		if (glClear) {
+			Gdx.gl.glClearColor(0, 0.253F, 0.304F, 1);
+			Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+		}
 
 		camera.position.x = camX;
 		camera.position.y = camY;
@@ -133,6 +139,10 @@ public abstract class AbstractScreen implements Screen, InputProcessor {
 	@Override
 	public boolean scrolled(int amount) {
 		return false;
+	}
+
+	public void overrideGlClear() {
+		glClear = false;
 	}
 
 	public void setCameraPosition(float camX, float camY) {

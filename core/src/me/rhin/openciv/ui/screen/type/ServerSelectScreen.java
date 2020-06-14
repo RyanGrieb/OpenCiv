@@ -2,13 +2,13 @@ package me.rhin.openciv.ui.screen.type;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.TextField;
 import com.badlogic.gdx.scenes.scene2d.ui.TextField.TextFieldListener;
 import com.badlogic.gdx.utils.Align;
 
 import me.rhin.openciv.Civilization;
-import me.rhin.openciv.game.player.Player;
 import me.rhin.openciv.listener.LeftClickListener.LeftClickEvent;
 import me.rhin.openciv.listener.MouseMoveListener.MouseMoveEvent;
 import me.rhin.openciv.listener.ServerConnectListener;
@@ -17,12 +17,14 @@ import me.rhin.openciv.ui.button.ButtonManager;
 import me.rhin.openciv.ui.button.type.BackTitleScreenButton;
 import me.rhin.openciv.ui.button.type.ConnectServerButton;
 import me.rhin.openciv.ui.label.CustomLabel;
+import me.rhin.openciv.ui.overlay.TitleOverlay;
 import me.rhin.openciv.ui.screen.AbstractScreen;
 import me.rhin.openciv.ui.screen.ScreenEnum;
 
 public class ServerSelectScreen extends AbstractScreen implements ServerConnectListener {
 
 	private EventManager eventManager;
+	private TitleOverlay titleOverlay;
 	private ButtonManager buttonManager;
 	private CustomLabel serverIPLabel;
 	private CustomLabel connectLabel;
@@ -32,6 +34,8 @@ public class ServerSelectScreen extends AbstractScreen implements ServerConnectL
 		this.eventManager = Civilization.getInstance().getEventManager();
 		eventManager.clearEvents();
 		eventManager.addListener(ServerConnectListener.class, this);
+
+		this.titleOverlay = new TitleOverlay();
 
 		this.buttonManager = new ButtonManager(getStage());
 
@@ -64,6 +68,8 @@ public class ServerSelectScreen extends AbstractScreen implements ServerConnectL
 
 		// DEBUG
 		ipTextField.setText("localhost");
+
+		overrideGlClear();
 	}
 
 	@Override
@@ -74,6 +80,10 @@ public class ServerSelectScreen extends AbstractScreen implements ServerConnectL
 
 	@Override
 	public void render(float delta) {
+		Gdx.gl.glClearColor(0, 0.253F, 0.304F, 1);
+		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+		titleOverlay.act();
+		titleOverlay.draw();
 		super.render(delta);
 
 		eventManager.fireEvent(MouseMoveEvent.INSTANCE);

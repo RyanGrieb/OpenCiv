@@ -27,7 +27,8 @@ public enum TextureEnum {
 	UI_BUTTON_HOVERED,
 	UI_BLACK,
 	UI_GRAY,
-	UI_GITHUB;
+	UI_GITHUB,
+	UI_BACKGROUND;
 
 	private TextureAtlas textureAtlas;
 

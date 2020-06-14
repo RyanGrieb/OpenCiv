@@ -16,6 +16,7 @@ public abstract class Overlay extends Stage {
 		super(new StretchViewport(800, 600));
 		// overlayViewport.apply();
 		this.viewport = getViewport();
+		
 		InputMultiplexer inputMultiplexer = Civilization.getInstance().getCurrentScreen().getInputMultiplexer();
 		inputMultiplexer.addProcessor(this);
 		Gdx.input.setInputProcessor(inputMultiplexer);

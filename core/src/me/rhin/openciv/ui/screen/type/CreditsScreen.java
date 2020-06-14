@@ -2,7 +2,9 @@ package me.rhin.openciv.ui.screen.type;
 
 import java.util.ArrayList;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.utils.Align;
 
 import me.rhin.openciv.Civilization;
@@ -12,18 +14,22 @@ import me.rhin.openciv.shared.listener.EventManager;
 import me.rhin.openciv.ui.button.ButtonManager;
 import me.rhin.openciv.ui.button.type.BackTitleScreenButton;
 import me.rhin.openciv.ui.label.CustomLabel;
+import me.rhin.openciv.ui.overlay.TitleOverlay;
 import me.rhin.openciv.ui.screen.AbstractScreen;
 
 public class CreditsScreen extends AbstractScreen {
 
 	private EventManager eventManager;
+	private TitleOverlay titleOverlay;
 	private ButtonManager buttonManager;
 	private ArrayList<CustomLabel> creditLabelList;
 
 	public CreditsScreen() {
 		this.eventManager = Civilization.getInstance().getEventManager();
 		eventManager.clearEvents();
-
+		
+		this.titleOverlay = new TitleOverlay();
+		
 		this.buttonManager = new ButtonManager(getStage());
 
 		creditLabelList = new ArrayList<>();
@@ -50,10 +56,15 @@ public class CreditsScreen extends AbstractScreen {
 
 		buttonManager.addButton(new BackTitleScreenButton(viewport.getWorldWidth() / 2 - 150 / 2, 50, 150, 45));
 
+		overrideGlClear();
 	}
 
 	@Override
 	public void render(float delta) {
+		Gdx.gl.glClearColor(0, 0.253F, 0.304F, 1);
+		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+		titleOverlay.act();
+		titleOverlay.draw();
 		super.render(delta);
 
 		Civilization.getInstance().getEventManager().fireEvent(MouseMoveEvent.INSTANCE);

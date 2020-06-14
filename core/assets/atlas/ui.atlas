@@ -1,47 +1,54 @@
 
 ui.png
-size: 256,64
+size: 1024,1024
 format: RGBA8888
 filter: Nearest,Nearest
 repeat: none
+ui_background
+  rotate: false
+  xy: 2, 66
+  size: 800, 600
+  orig: 800, 600
+  offset: 0, 0
+  index: -1
 ui_black
   rotate: false
-  xy: 146, 7
+  xy: 948, 665
   size: 1, 1
   orig: 1, 1
   offset: 0, 0
   index: -1
 ui_button
   rotate: false
-  xy: 2, 2
+  xy: 804, 638
   size: 142, 28
   orig: 142, 28
   offset: 0, 0
   index: -1
 ui_button_hovered
   rotate: false
-  xy: 2, 32
+  xy: 2, 36
   size: 142, 28
   orig: 142, 28
   offset: 0, 0
   index: -1
 ui_github
   rotate: false
-  xy: 146, 28
+  xy: 2, 2
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 ui_gray
   rotate: false
-  xy: 180, 59
+  xy: 804, 635
   size: 1, 1
   orig: 1, 1
   offset: 0, 0
   index: -1
 ui_selection
   rotate: false
-  xy: 146, 10
+  xy: 146, 48
   size: 16, 16
   orig: 16, 16
   offset: 0, 0

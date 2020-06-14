@@ -1,6 +1,8 @@
 package me.rhin.openciv.ui.screen.type;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.utils.Align;
 
 import me.rhin.openciv.Civilization;
@@ -13,11 +15,13 @@ import me.rhin.openciv.ui.button.type.GithubButton;
 import me.rhin.openciv.ui.button.type.MultiplayerButton;
 import me.rhin.openciv.ui.button.type.PlayButton;
 import me.rhin.openciv.ui.label.CustomLabel;
+import me.rhin.openciv.ui.overlay.TitleOverlay;
 import me.rhin.openciv.ui.screen.AbstractScreen;
 
 public class TitleScreen extends AbstractScreen {
 
 	private EventManager eventManager;
+	private TitleOverlay titleOverlay;
 	private ButtonManager buttonManager;
 	private CustomLabel titleLabel;
 	private CustomLabel subTitleLabel;
@@ -25,6 +29,8 @@ public class TitleScreen extends AbstractScreen {
 	public TitleScreen() {
 		this.eventManager = Civilization.getInstance().getEventManager();
 		eventManager.clearEvents();
+
+		this.titleOverlay = new TitleOverlay();
 
 		this.buttonManager = new ButtonManager(getStage());
 		buttonManager.addButton(
@@ -42,6 +48,8 @@ public class TitleScreen extends AbstractScreen {
 
 		this.subTitleLabel = new CustomLabel("OpenCiv", Align.bottomLeft, 4, 0, viewport.getWorldWidth(), 20);
 		stage.addActor(subTitleLabel);
+
+		overrideGlClear();
 	}
 
 	@Override
@@ -51,8 +59,11 @@ public class TitleScreen extends AbstractScreen {
 
 	@Override
 	public void render(float delta) {
+		Gdx.gl.glClearColor(0, 0.253F, 0.304F, 1);
+		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+		titleOverlay.act();
+		titleOverlay.draw();
 		super.render(delta);
-
 		eventManager.fireEvent(MouseMoveEvent.INSTANCE);
 	}
 
