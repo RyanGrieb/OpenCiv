@@ -17,9 +17,7 @@ public class CustomLabel extends Label {
 
 	public CustomLabel(CharSequence text) {
 		super(text, getDefaultStyle());
-
-		GlyphLayout layout = new GlyphLayout(getDefaultStyle().font, text);
-		this.setSize(layout.width, layout.height);
+		updateSize();
 	}
 
 	public CustomLabel(CharSequence text, float x, float y, float width, float height) {
@@ -31,5 +29,23 @@ public class CustomLabel extends Label {
 	public CustomLabel(CharSequence text, int textAlignment, float x, float y, float width, float height) {
 		this(text, x, y, width, height);
 		setAlignment(textAlignment);
+	}
+
+	@Override
+	public boolean setText(int value) {
+		boolean returnValue = super.setText(value);
+		updateSize();
+		return returnValue;
+	}
+
+	@Override
+	public void setText(CharSequence newText) {
+		super.setText(newText);
+		updateSize();
+	}
+
+	private void updateSize() {
+		GlyphLayout layout = new GlyphLayout(getDefaultStyle().font, getText());
+		this.setSize(layout.width, layout.height);
 	}
 }

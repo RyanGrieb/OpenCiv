@@ -16,11 +16,10 @@ public class LoadingScreen extends AbstractScreen {
 
 	public LoadingScreen() {
 		this.assetHandler = Civilization.getInstance().getAssetHandler();
-		
+
 		this.loadingLabel = new CustomLabel("Loading: 0%");
-		loadingLabel.setSize(Gdx.graphics.getWidth(), 20);
 		loadingLabel.setPosition(Gdx.graphics.getWidth() / 2 - loadingLabel.getWidth() / 2,
-				Gdx.graphics.getHeight() - 40);
+				viewport.getWorldHeight() / 1.1F);
 		loadingLabel.setAlignment(Align.center);
 		stage.addActor(loadingLabel);
 	}
@@ -38,7 +37,7 @@ public class LoadingScreen extends AbstractScreen {
 			Civilization.getInstance().getScreenManager().setScreen(ScreenEnum.TITLE);
 		} else {
 			float progress = assetHandler.getProgress();
-			loadingLabel.setText(("Loading: " + (int) (progress*100) + "%"));
+			loadingLabel.setText(("Loading: " + (int) (progress * 100) + "%"));
 		}
 	}
 }

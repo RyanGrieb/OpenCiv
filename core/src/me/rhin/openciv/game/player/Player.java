@@ -8,6 +8,7 @@ import me.rhin.openciv.listener.MouseMoveListener;
 import me.rhin.openciv.listener.RightClickListener;
 import me.rhin.openciv.listener.SelectUnitListener;
 import me.rhin.openciv.shared.packet.type.SelectUnitPacket;
+import me.rhin.openciv.ui.screen.type.InGameScreen;
 import me.rhin.openciv.util.ClickType;
 
 public class Player implements MouseMoveListener, LeftClickListener, RightClickListener, SelectUnitListener {
