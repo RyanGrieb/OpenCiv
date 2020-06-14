@@ -32,7 +32,7 @@ limitMemory=true
 useIndexes=true
 
 scaleFactors=[{suffix:"",factor:1,resampling:bicubic}]
-inputFiles=[{path:../icon_faith.png,type:Input,regionName:null},{path:../icon_gold.png,type:Input,regionName:null},{path:../icon_heritage.png,type:Input,regionName:null},{path:../icon_research.png,type:Input,regionName:null}]
+inputFiles=[{path:../icon_faith.png,type:Input,regionName:null},{path:../icon_gold.png,type:Input,regionName:null},{path:../icon_research.png,type:Input,regionName:null},{path:../icon_heritage.png,type:Input,regionName:null}]
 
 
 -PROJ-

@@ -25,17 +25,17 @@ public class StatusBar extends Actor {
 
 		this.scienceDescLabel = new CustomLabel("Science:");
 		this.scienceIcon = TextureEnum.ICON_RESEARCH.sprite();
-		scienceIcon.setSize(12, 12);
+		scienceIcon.setSize(16, 16);
 		this.scienceLabel = new CustomLabel("0");
 
 		this.hertiageDescLabel = new CustomLabel("Hertiage:");
 		this.heritageIcon = TextureEnum.ICON_HERITAGE.sprite();
-		heritageIcon.setSize(12, 12);
+		heritageIcon.setSize(16, 16);
 		this.hertiageLabel = new CustomLabel("0");
 
 		this.goldDescLabel = new CustomLabel("Gold:");
 		this.goldIcon = TextureEnum.ICON_GOLD.sprite();
-		goldIcon.setSize(12, 12);
+		goldIcon.setSize(16, 16);
 		this.goldLabel = new CustomLabel("0");
 
 		updatePositions();
@@ -71,7 +71,7 @@ public class StatusBar extends Actor {
 		scienceDescLabel.setPosition(originX, y + scienceDescLabel.getHeight() / 2);
 
 		originX += scienceDescLabel.getWidth() + 5;
-		scienceIcon.setPosition(originX, y + 4);
+		scienceIcon.setPosition(originX, y + 1);
 
 		originX += scienceIcon.getWidth() + 5;
 		scienceLabel.setPosition(originX, y + scienceLabel.getHeight() / 2);
@@ -80,7 +80,7 @@ public class StatusBar extends Actor {
 		hertiageDescLabel.setPosition(originX, y + hertiageDescLabel.getHeight() / 2);
 
 		originX += hertiageDescLabel.getWidth() + 5;
-		heritageIcon.setPosition(originX, y + 4);
+		heritageIcon.setPosition(originX, y + 1);
 
 		originX += heritageIcon.getWidth() + 5;
 		hertiageLabel.setPosition(originX, y + hertiageLabel.getHeight() / 2);
@@ -89,7 +89,7 @@ public class StatusBar extends Actor {
 		goldDescLabel.setPosition(originX, y + goldDescLabel.getHeight() / 2);
 
 		originX += goldDescLabel.getWidth() + 5;
-		goldIcon.setPosition(originX, y + 4);
+		goldIcon.setPosition(originX, y + 2);
 
 		originX += goldIcon.getWidth() + 5;
 		goldLabel.setPosition(originX, y + goldLabel.getHeight() / 2);
