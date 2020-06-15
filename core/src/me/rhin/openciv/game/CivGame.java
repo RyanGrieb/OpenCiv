@@ -3,6 +3,9 @@ package me.rhin.openciv.game;
 import java.lang.reflect.Constructor;
 import java.util.HashMap;
 
+import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.actions.Actions;
+
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.game.map.GameMap;
 import me.rhin.openciv.game.map.tile.Tile;
@@ -11,6 +14,7 @@ import me.rhin.openciv.game.unit.Unit;
 import me.rhin.openciv.game.unit.UnitParameter;
 import me.rhin.openciv.game.unit.type.Settler;
 import me.rhin.openciv.listener.AddUnitListener;
+import me.rhin.openciv.listener.DeleteUnitListener;
 import me.rhin.openciv.listener.FetchPlayerListener;
 import me.rhin.openciv.listener.LeftClickListener;
 import me.rhin.openciv.listener.MouseMoveListener;
@@ -20,13 +24,14 @@ import me.rhin.openciv.listener.PlayerListRequestListener;
 import me.rhin.openciv.listener.RightClickListener;
 import me.rhin.openciv.listener.SelectUnitListener;
 import me.rhin.openciv.shared.packet.type.AddUnitPacket;
+import me.rhin.openciv.shared.packet.type.DeleteUnitPacket;
 import me.rhin.openciv.shared.packet.type.FetchPlayerPacket;
 import me.rhin.openciv.shared.packet.type.MoveUnitPacket;
 import me.rhin.openciv.shared.packet.type.PlayerConnectPacket;
 import me.rhin.openciv.shared.packet.type.PlayerListRequestPacket;
 
 public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerListRequestListener, FetchPlayerListener,
-		MoveUnitListener {
+		MoveUnitListener, DeleteUnitListener {
 
 	private GameMap map;
 	private Player player;
@@ -41,6 +46,7 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 		Civilization.getInstance().getEventManager().addListener(PlayerListRequestListener.class, this);
 		Civilization.getInstance().getEventManager().addListener(FetchPlayerListener.class, this);
 		Civilization.getInstance().getEventManager().addListener(MoveUnitListener.class, this);
+		Civilization.getInstance().getEventManager().addListener(DeleteUnitListener.class, this);
 
 		Civilization.getInstance().getNetworkManager().sendPacket(new FetchPlayerPacket());
 		Civilization.getInstance().getNetworkManager().sendPacket(new PlayerListRequestPacket());
@@ -53,7 +59,7 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 
 	@Override
 	public void onUnitAdd(AddUnitPacket packet) {
-		
+
 		try {
 			Player playerOwner = players.get(packet.getPlayerOwner());
 			Tile tile = map.getTiles()[packet.getTileGridX()][packet.getTileGridY()];
@@ -106,10 +112,21 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 
 		unit.setTargetTile(targetTile);
 		unit.moveToTargetTile();
-		
-		//If we own this unit, add the movement cooldown.
-		if(unit.getPlayerOwner().equals(player)) {
+
+		// If we own this unit, add the movement cooldown.
+		if (unit.getPlayerOwner().equals(player)) {
 			unit.reduceMovement(packet.getMovementCost());
+		}
+	}
+
+	@Override
+	public void onUnitDelete(DeleteUnitPacket packet) {
+		Tile tile = map.getTiles()[packet.getTileGridX()][packet.getTileGridY()];
+		Unit unit = tile.getUnits().get(0);
+		tile.removeUnit(unit);
+		for (Actor actor : Civilization.getInstance().getScreenManager().getCurrentScreen().getStage().getActors()) {
+			if (actor.equals(unit))
+				actor.addAction(Actions.removeActor());
 		}
 	}
 

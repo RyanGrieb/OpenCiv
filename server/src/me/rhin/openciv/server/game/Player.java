@@ -1,10 +1,11 @@
 package me.rhin.openciv.server.game;
 
+import java.util.ArrayList;
+
 import org.java_websocket.WebSocket;
 
-import com.badlogic.gdx.math.Vector2;
-
 import me.rhin.openciv.server.Server;
+import me.rhin.openciv.server.game.city.City;
 import me.rhin.openciv.server.game.unit.Unit;
 
 public class Player {
@@ -13,6 +14,7 @@ public class Player {
 	private String name;
 	private int spawnX;
 	private int spawnY;
+	private ArrayList<City> ownedCities;
 	private Unit selectedUnit;
 
 	public Player(WebSocket conn) {
@@ -21,6 +23,7 @@ public class Player {
 
 		this.spawnX = -1;
 		this.spawnY = -1;
+		this.ownedCities = new ArrayList<>();
 	}
 
 	public void setSpawnPos(int spawnX, int spawnY) {
@@ -52,4 +55,11 @@ public class Player {
 		return spawnX == -1 || spawnY == -1;
 	}
 
+	public ArrayList<City> getOwnedCities() {
+		return ownedCities;
+	}
+
+	public void addCity(City city) {
+		ownedCities.add(city);
+	}
 }

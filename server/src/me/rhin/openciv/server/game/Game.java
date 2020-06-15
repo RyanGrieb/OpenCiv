@@ -8,6 +8,7 @@ import org.java_websocket.WebSocket;
 import com.badlogic.gdx.utils.Json;
 
 import me.rhin.openciv.server.Server;
+import me.rhin.openciv.server.game.city.City;
 import me.rhin.openciv.server.game.map.Tile;
 import me.rhin.openciv.server.game.map.tile.GameMap;
 import me.rhin.openciv.server.game.map.tile.TileType;
@@ -18,8 +19,10 @@ import me.rhin.openciv.server.listener.DisconnectListener;
 import me.rhin.openciv.server.listener.FetchPlayerListener;
 import me.rhin.openciv.server.listener.PlayerListRequestListener;
 import me.rhin.openciv.server.listener.SelectUnitListener;
+import me.rhin.openciv.server.listener.SettleCityListener;
 import me.rhin.openciv.server.listener.StartGameRequestListener;
 import me.rhin.openciv.server.listener.UnitMoveListener;
+import me.rhin.openciv.shared.packet.type.DeleteUnitPacket;
 import me.rhin.openciv.shared.packet.type.FetchPlayerPacket;
 import me.rhin.openciv.shared.packet.type.GameStartPacket;
 import me.rhin.openciv.shared.packet.type.MoveUnitPacket;
@@ -27,10 +30,11 @@ import me.rhin.openciv.shared.packet.type.PlayerConnectPacket;
 import me.rhin.openciv.shared.packet.type.PlayerDisconnectPacket;
 import me.rhin.openciv.shared.packet.type.PlayerListRequestPacket;
 import me.rhin.openciv.shared.packet.type.SelectUnitPacket;
+import me.rhin.openciv.shared.packet.type.SettleCityPacket;
 import me.rhin.openciv.shared.util.MathHelper;
 
 public class Game implements StartGameRequestListener, ConnectionListener, DisconnectListener,
-		PlayerListRequestListener, FetchPlayerListener, SelectUnitListener, UnitMoveListener {
+		PlayerListRequestListener, FetchPlayerListener, SelectUnitListener, UnitMoveListener, SettleCityListener {
 
 	private GameMap map;
 	private ArrayList<Player> players;
@@ -48,6 +52,7 @@ public class Game implements StartGameRequestListener, ConnectionListener, Disco
 		Server.getInstance().getEventManager().addListener(FetchPlayerListener.class, this);
 		Server.getInstance().getEventManager().addListener(SelectUnitListener.class, this);
 		Server.getInstance().getEventManager().addListener(UnitMoveListener.class, this);
+		Server.getInstance().getEventManager().addListener(SettleCityListener.class, this);
 	}
 
 	@Override
@@ -157,6 +162,26 @@ public class Game implements StartGameRequestListener, ConnectionListener, Disco
 		Json json = new Json();
 		for (Player player : players) {
 			player.getConn().send(json.toJson(packet));
+		}
+	}
+
+	@Override
+	public void onSettleCity(WebSocket conn, SettleCityPacket packet) {
+		Player cityPlayer = getPlayerByConn(conn);
+		City city = new City(cityPlayer);
+		Tile tile = map.getTiles()[packet.getGridX()][packet.getGridY()];
+		tile.setCity(city);
+		cityPlayer.addCity(city);
+
+		cityPlayer.setSelectedUnit(null);
+		Unit unit = tile.getUnits().remove(0);
+
+		DeleteUnitPacket deleteUnitPacket = new DeleteUnitPacket();
+		deleteUnitPacket.setUnit(cityPlayer.getName(), unit.getClass().getSimpleName(), packet.getGridX(),
+				packet.getGridY());
+		Json json = new Json();
+		for (Player player : players) {
+			player.getConn().send(json.toJson(deleteUnitPacket));
 		}
 	}
 

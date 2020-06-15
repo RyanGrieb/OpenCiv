@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Json;
 
+import me.rhin.openciv.server.game.city.City;
 import me.rhin.openciv.server.game.map.tile.GameMap;
 import me.rhin.openciv.server.game.map.tile.TileType;
 import me.rhin.openciv.server.game.unit.Unit;
@@ -23,6 +24,7 @@ public class Tile {
 	private int gridX, gridY;
 	private Tile[] adjTiles;
 	private Vector2[] vectors;
+	private City city;
 	private ArrayList<Unit> units;
 
 	public Tile(GameMap map, TileType tileType, float x, float y) {
@@ -162,5 +164,9 @@ public class Tile {
 		// Reset the y postion to the actual non-grid position.
 		this.x = vectors[0].x - width / 2;
 		this.y = vectors[0].y;
+	}
+
+	public void setCity(City city) {
+		this.city = city;
 	}
 }

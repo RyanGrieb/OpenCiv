@@ -345,4 +345,8 @@ public abstract class Unit extends Actor implements ShapeRenderListener {
 	public void setMaxMovement(int movement) {
 		this.maxMovement = movement;
 	}
+
+	public Tile getStandingTile() {
+		return standingTile;
+	}
 }
