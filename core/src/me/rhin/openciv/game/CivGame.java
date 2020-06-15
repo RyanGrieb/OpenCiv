@@ -18,10 +18,10 @@ import me.rhin.openciv.listener.AddUnitListener;
 import me.rhin.openciv.listener.DeleteUnitListener;
 import me.rhin.openciv.listener.FetchPlayerListener;
 import me.rhin.openciv.listener.LeftClickListener;
-import me.rhin.openciv.listener.MouseMoveListener;
 import me.rhin.openciv.listener.MoveUnitListener;
 import me.rhin.openciv.listener.PlayerConnectListener;
 import me.rhin.openciv.listener.PlayerListRequestListener;
+import me.rhin.openciv.listener.RelativeMouseMoveListener;
 import me.rhin.openciv.listener.RightClickListener;
 import me.rhin.openciv.listener.SelectUnitListener;
 import me.rhin.openciv.listener.SettleCityListener;
@@ -100,7 +100,7 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 	@Override
 	public void onFetchPlayer(FetchPlayerPacket packet) {
 		this.player = new Player(packet.getPlayerName());
-		Civilization.getInstance().getEventManager().addListener(MouseMoveListener.class, player);
+		Civilization.getInstance().getEventManager().addListener(RelativeMouseMoveListener.class, player);
 		Civilization.getInstance().getEventManager().addListener(LeftClickListener.class, player);
 		Civilization.getInstance().getEventManager().addListener(RightClickListener.class, player);
 		Civilization.getInstance().getEventManager().addListener(SelectUnitListener.class, player);

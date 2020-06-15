@@ -24,7 +24,7 @@ public class ButtonManager implements MouseMoveListener {
 	public void addButton(Button button) {
 		button.addListener(new ClickListener() {
 			@Override
-			public void clicked (InputEvent event, float x, float y) {
+			public void clicked(InputEvent event, float x, float y) {
 				Button buttonActor = (Button) event.getListenerActor();
 				buttonActor.onClick();
 				event.handle();

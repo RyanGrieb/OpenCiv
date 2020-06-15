@@ -2,8 +2,10 @@ package me.rhin.openciv.ui.overlay;
 
 import com.badlogic.gdx.utils.Align;
 
+import me.rhin.openciv.Civilization;
 import me.rhin.openciv.game.AbstractAction;
 import me.rhin.openciv.game.unit.Unit;
+import me.rhin.openciv.listener.MouseMoveListener.MouseMoveEvent;
 import me.rhin.openciv.ui.background.BlankBackground;
 import me.rhin.openciv.ui.button.ButtonManager;
 import me.rhin.openciv.ui.button.type.UnitActionButton;
@@ -48,5 +50,6 @@ public class UnitOverlay extends Overlay {
 		// FIXME: Just create an event that the unit calls when it update's it's
 		// currentMovement
 		movementLabel.setText("Movement: " + (int) unit.getCurrentMovement() + "/" + unit.getMaxMovement());
+		Civilization.getInstance().getEventManager().fireEvent(MouseMoveEvent.INSTANCE);
 	}
 }

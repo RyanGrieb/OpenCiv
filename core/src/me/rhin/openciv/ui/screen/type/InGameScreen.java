@@ -7,18 +7,15 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
-import com.badlogic.gdx.scenes.scene2d.Actor;
-import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.utils.TimeUtils;
-import com.badlogic.gdx.utils.viewport.StretchViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.game.CivGame;
 import me.rhin.openciv.listener.LeftClickListener.LeftClickEvent;
 import me.rhin.openciv.listener.MouseMoveListener.MouseMoveEvent;
+import me.rhin.openciv.listener.RelativeMouseMoveListener.RelativeMouseMoveEvent;
 import me.rhin.openciv.listener.RightClickListener.RightClickEvent;
 import me.rhin.openciv.listener.ShapeRenderListener.ShapeRenderEvent;
 import me.rhin.openciv.shared.listener.EventManager;
@@ -78,6 +75,7 @@ public class InGameScreen extends AbstractScreen {
 		Gdx.gl.glDisable(GL20.GL_BLEND);
 
 		Civilization.getInstance().getEventManager().fireEvent(MouseMoveEvent.INSTANCE);
+		Civilization.getInstance().getEventManager().fireEvent(RelativeMouseMoveEvent.INSTANCE);
 
 		long timeSince = TimeUtils.timeSinceMillis(lastTimeCounted);
 		if (timeSince >= 500) {

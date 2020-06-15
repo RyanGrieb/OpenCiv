@@ -7,13 +7,13 @@ import me.rhin.openciv.game.city.City;
 import me.rhin.openciv.game.map.tile.Tile;
 import me.rhin.openciv.game.unit.Unit;
 import me.rhin.openciv.listener.LeftClickListener;
-import me.rhin.openciv.listener.MouseMoveListener;
+import me.rhin.openciv.listener.RelativeMouseMoveListener;
 import me.rhin.openciv.listener.RightClickListener;
 import me.rhin.openciv.listener.SelectUnitListener;
 import me.rhin.openciv.shared.packet.type.SelectUnitPacket;
 import me.rhin.openciv.util.ClickType;
 
-public class Player implements MouseMoveListener, LeftClickListener, RightClickListener, SelectUnitListener {
+public class Player implements RelativeMouseMoveListener, LeftClickListener, RightClickListener, SelectUnitListener {
 
 	// NOTE: This class can be the controlled by the player or the MPPlayer. The
 	// distinction is in the listeners firing.
@@ -29,7 +29,7 @@ public class Player implements MouseMoveListener, LeftClickListener, RightClickL
 	}
 
 	@Override
-	public void onMouseMove(float x, float y) {
+	public void onRelativeMouseMove(float x, float y) {
 		Tile currentHoveredTile = Civilization.getInstance().getGame().getMap().getTileFromLocation(x, y);
 
 		if (currentHoveredTile == null)

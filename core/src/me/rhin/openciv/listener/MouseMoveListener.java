@@ -22,11 +22,10 @@ public interface MouseMoveListener extends Listener {
 
 		public boolean hasMouseMoved() {
 			worldCoordinates.set(Gdx.input.getX(), Gdx.input.getY(), 0);
-			Vector3 gamePosition = Civilization.getInstance().getCamera().unproject(worldCoordinates);
 
-			if (gamePosition.x != x || gamePosition.y != y) {
-				x = gamePosition.x;
-				y = gamePosition.y;
+			if (Gdx.input.getX() != x || Gdx.graphics.getHeight() - Gdx.input.getY() != y) {
+				x = Gdx.input.getX();
+				y = Gdx.graphics.getHeight() - Gdx.input.getY();
 				return true;
 			}
 
