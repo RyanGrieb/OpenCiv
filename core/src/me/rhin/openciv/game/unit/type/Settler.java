@@ -27,6 +27,7 @@ public class Settler extends Unit {
 	public static class SettleAction extends Action {
 		@Override
 		public boolean act(float delta) {
+			// FIXME: Cancel the act if the unit's movement < 1
 			Unit unit = (Unit) actor;
 			unit.getPlayerOwner().unselectUnit();
 			SettleCityPacket packet = new SettleCityPacket();

@@ -7,6 +7,7 @@ import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 
 import me.rhin.openciv.Civilization;
+import me.rhin.openciv.game.city.City;
 import me.rhin.openciv.game.map.GameMap;
 import me.rhin.openciv.game.map.tile.Tile;
 import me.rhin.openciv.game.player.Player;
@@ -23,15 +24,17 @@ import me.rhin.openciv.listener.PlayerConnectListener;
 import me.rhin.openciv.listener.PlayerListRequestListener;
 import me.rhin.openciv.listener.RightClickListener;
 import me.rhin.openciv.listener.SelectUnitListener;
+import me.rhin.openciv.listener.SettleCityListener;
 import me.rhin.openciv.shared.packet.type.AddUnitPacket;
 import me.rhin.openciv.shared.packet.type.DeleteUnitPacket;
 import me.rhin.openciv.shared.packet.type.FetchPlayerPacket;
 import me.rhin.openciv.shared.packet.type.MoveUnitPacket;
 import me.rhin.openciv.shared.packet.type.PlayerConnectPacket;
 import me.rhin.openciv.shared.packet.type.PlayerListRequestPacket;
+import me.rhin.openciv.shared.packet.type.SettleCityPacket;
 
 public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerListRequestListener, FetchPlayerListener,
-		MoveUnitListener, DeleteUnitListener {
+		MoveUnitListener, DeleteUnitListener, SettleCityListener {
 
 	private GameMap map;
 	private Player player;
@@ -47,6 +50,7 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 		Civilization.getInstance().getEventManager().addListener(FetchPlayerListener.class, this);
 		Civilization.getInstance().getEventManager().addListener(MoveUnitListener.class, this);
 		Civilization.getInstance().getEventManager().addListener(DeleteUnitListener.class, this);
+		Civilization.getInstance().getEventManager().addListener(SettleCityListener.class, this);
 
 		Civilization.getInstance().getNetworkManager().sendPacket(new FetchPlayerPacket());
 		Civilization.getInstance().getNetworkManager().sendPacket(new PlayerListRequestPacket());
@@ -102,10 +106,9 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 		Civilization.getInstance().getEventManager().addListener(SelectUnitListener.class, player);
 	}
 
-	// FIXME: Move this method? not sure.
+	// FIXME: Move these 2 tile methods to map class?
 	@Override
 	public void onUnitMove(MoveUnitPacket packet) {
-		System.out.println("Moving unit....");
 		Tile prevTile = map.getTiles()[packet.getPrevGridX()][packet.getPrevGridY()];
 		Tile targetTile = map.getTiles()[packet.getTargetGridX()][packet.getTargetGridY()];
 		Unit unit = prevTile.getUnits().get(0);
@@ -128,6 +131,16 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 			if (actor.equals(unit))
 				actor.addAction(Actions.removeActor());
 		}
+	}
+
+	@Override
+	public void onSettleCity(SettleCityPacket packet) {
+		Player playerOwner = players.get(packet.getPlayerOwner());
+		City city = new City(playerOwner);
+		playerOwner.addCity(city);
+
+		Tile tile = map.getTiles()[packet.getGridX()][packet.getGridY()];
+		tile.setCity(city);
 	}
 
 	public GameMap getMap() {

@@ -33,6 +33,5 @@ public interface PlayerConnectListener extends Listener {
 		public Class<PlayerConnectListener> getListenerType() {
 			return PlayerConnectListener.class;
 		}
-
 	}
 }

@@ -31,6 +31,5 @@ public interface ShapeRenderListener extends Listener {
 		public Class<ShapeRenderListener> getListenerType() {
 			return ShapeRenderListener.class;
 		}
-
 	}
 }

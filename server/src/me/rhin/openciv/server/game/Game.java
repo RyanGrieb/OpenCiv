@@ -168,6 +168,8 @@ public class Game implements StartGameRequestListener, ConnectionListener, Disco
 	@Override
 	public void onSettleCity(WebSocket conn, SettleCityPacket packet) {
 		Player cityPlayer = getPlayerByConn(conn);
+		packet.setOwner(cityPlayer.getName());
+
 		City city = new City(cityPlayer);
 		Tile tile = map.getTiles()[packet.getGridX()][packet.getGridY()];
 		tile.setCity(city);
@@ -182,6 +184,7 @@ public class Game implements StartGameRequestListener, ConnectionListener, Disco
 		Json json = new Json();
 		for (Player player : players) {
 			player.getConn().send(json.toJson(deleteUnitPacket));
+			player.getConn().send(json.toJson(packet));
 		}
 	}
 

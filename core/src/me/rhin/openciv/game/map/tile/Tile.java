@@ -10,6 +10,7 @@ import com.badlogic.gdx.scenes.scene2d.Actor;
 
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.TextureEnum;
+import me.rhin.openciv.game.city.City;
 import me.rhin.openciv.game.map.GameMap;
 import me.rhin.openciv.game.unit.Unit;
 import me.rhin.openciv.listener.ShapeRenderListener;
@@ -25,7 +26,7 @@ public class Tile extends Actor implements ShapeRenderListener {
 	private GameMap map;
 	private TileType tileType;
 	private Sprite sprite;
-	public Sprite bottomSprite;
+	public Sprite topSprite;
 	private Sprite selectionSprite;
 	private boolean drawSelection;
 	private CustomLabel posLabel;
@@ -33,6 +34,7 @@ public class Tile extends Actor implements ShapeRenderListener {
 	private int gridX, gridY;
 	private Vector2[] vectors;
 	private Tile[] adjTiles;
+	private City city;
 	private ArrayList<Unit> units;
 
 	public Tile(GameMap map, TileType tileType, float x, float y) {
@@ -40,7 +42,6 @@ public class Tile extends Actor implements ShapeRenderListener {
 		this.map = map;
 		this.tileType = tileType;
 		this.sprite = tileType.sprite();
-		this.bottomSprite = tileType.sprite();
 		this.selectionSprite = new Sprite(TextureEnum.TILE_SELECT.sprite());
 		selectionSprite.setAlpha(0.2f);
 
@@ -95,6 +96,9 @@ public class Tile extends Actor implements ShapeRenderListener {
 		// bottomSprite.draw(batch);
 
 		sprite.draw(batch);
+
+		if (topSprite != null)
+			topSprite.draw(batch);
 
 		if (drawSelection)
 			selectionSprite.draw(batch);
@@ -250,8 +254,8 @@ public class Tile extends Actor implements ShapeRenderListener {
 
 		sprite.setSize(28, 32);
 		sprite.setPosition(x, y);
-		bottomSprite.setSize(28, 32);
-		bottomSprite.setPosition(x, y);
+		// bottomSprite.setSize(28, 32);
+		// bottomSprite.setPosition(x, y);
 		selectionSprite.setSize(28, 32);
 		selectionSprite.setPosition(x, y);
 	}
@@ -259,5 +263,17 @@ public class Tile extends Actor implements ShapeRenderListener {
 	public Sprite getSprite() {
 		return sprite;
 
+	}
+
+	public void setTopSprite(Sprite topSprite) {
+		this.topSprite = topSprite;
+	}
+
+	public void setCity(City city) {
+		this.city = city;
+		Sprite citySprite = TileType.CITY.sprite();
+		citySprite.setSize(28, 32);
+		citySprite.setPosition(x, y);
+		setTopSprite(citySprite);
 	}
 }

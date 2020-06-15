@@ -1,6 +1,9 @@
 package me.rhin.openciv.game.player;
 
+import java.util.ArrayList;
+
 import me.rhin.openciv.Civilization;
+import me.rhin.openciv.game.city.City;
 import me.rhin.openciv.game.map.tile.Tile;
 import me.rhin.openciv.game.unit.Unit;
 import me.rhin.openciv.listener.LeftClickListener;
@@ -8,7 +11,6 @@ import me.rhin.openciv.listener.MouseMoveListener;
 import me.rhin.openciv.listener.RightClickListener;
 import me.rhin.openciv.listener.SelectUnitListener;
 import me.rhin.openciv.shared.packet.type.SelectUnitPacket;
-import me.rhin.openciv.ui.screen.type.InGameScreen;
 import me.rhin.openciv.util.ClickType;
 
 public class Player implements MouseMoveListener, LeftClickListener, RightClickListener, SelectUnitListener {
@@ -18,10 +20,12 @@ public class Player implements MouseMoveListener, LeftClickListener, RightClickL
 	private String name;
 	private Tile hoveredTile;
 	private Unit selectedUnit;
+	private ArrayList<City> ownedCities;
 	private boolean rightMouseHeld;
 
 	public Player(String name) {
 		this.name = name;
+		this.ownedCities = new ArrayList<>();
 	}
 
 	@Override
@@ -98,6 +102,10 @@ public class Player implements MouseMoveListener, LeftClickListener, RightClickL
 
 		selectedUnit.setSelected(false);
 		this.selectedUnit = null;
+	}
+
+	public void addCity(City city) {
+		ownedCities.add(city);
 	}
 
 }
