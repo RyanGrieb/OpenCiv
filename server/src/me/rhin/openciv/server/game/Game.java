@@ -145,12 +145,14 @@ public class Game implements StartGameRequestListener, ConnectionListener, Disco
 		unit.setTargetTile(targetTile);
 
 		// The player is hacking here or i'm a poop coder
-		if (unit.getMaxMovement() < unit.getPathMovement())
+		if (unit.getCurrentMovement() < unit.getPathMovement())
 			return;
 
 		unit.moveToTargetTile();
-
 		unit.getPlayerOwner().setSelectedUnit(null);
+		unit.reduceMovement(packet.getMovementCost());
+
+		packet.setMovementCost(unit.getPathMovement());
 
 		Json json = new Json();
 		for (Player player : players) {

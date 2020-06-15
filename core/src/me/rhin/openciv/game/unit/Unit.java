@@ -16,7 +16,6 @@ import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.map.GameMap;
 import me.rhin.openciv.game.map.tile.Tile;
-import me.rhin.openciv.game.map.tile.TileType;
 import me.rhin.openciv.game.player.Player;
 import me.rhin.openciv.listener.ShapeRenderListener;
 import me.rhin.openciv.shared.packet.type.MoveUnitPacket;
@@ -34,6 +33,8 @@ public abstract class Unit extends Actor implements ShapeRenderListener {
 	private Sprite sprite, selectionSprite, targetSelectionSprite;
 	private boolean selected;
 	private int maxMovement;
+	private float currentMovementOffset;
+	private long lastMoveTime;
 	private float health;
 
 	public Unit(String unitName, Player playerOwner, Tile standingTile, TextureEnum assetEnum) {
@@ -53,6 +54,8 @@ public abstract class Unit extends Actor implements ShapeRenderListener {
 		setSize(standingTile.getWidth(), standingTile.getHeight());
 
 		this.maxMovement = 3;
+		this.currentMovementOffset = maxMovement;
+		this.lastMoveTime = -1;
 	}
 
 	public Unit(UnitParameter unitParameter, TextureEnum assetEnum) {
@@ -71,7 +74,7 @@ public abstract class Unit extends Actor implements ShapeRenderListener {
 		if (selected)
 			selectionSprite.draw(batch);
 
-		if (targetTile != null && pathMovement <= maxMovement && pathMovement != 0) {
+		if (targetTile != null && pathMovement <= getCurrentMovement() && pathMovement != 0) {
 			targetSelectionSprite.draw(batch);
 		}
 
@@ -169,7 +172,7 @@ public abstract class Unit extends Actor implements ShapeRenderListener {
 			this.targetTile = null;
 			return false;
 		}
-		
+
 		int iterations = 0;
 		int pathMovement = 0;
 		while (parentTile != null) {
@@ -215,7 +218,7 @@ public abstract class Unit extends Actor implements ShapeRenderListener {
 		shapeRenderer.setColor(Color.YELLOW);
 		for (Vector2[] vectors : pathVectors) {
 			// System.out.println(maxMovement + "," + pathMovement);
-			if (maxMovement < pathMovement)
+			if (getCurrentMovement() < pathMovement)
 				break;
 			shapeRenderer.line(vectors[0], vectors[1]);
 
@@ -291,6 +294,28 @@ public abstract class Unit extends Actor implements ShapeRenderListener {
 			}
 		});
 
+	}
+
+	public void reduceMovement(int movementCost) {
+		long currentTime = System.currentTimeMillis() / 1000;
+		currentMovementOffset = getCurrentMovement();
+		currentMovementOffset -= movementCost;
+		lastMoveTime = currentTime;
+	}
+
+	public float getCurrentMovement() {
+		// Return a movement value between 0 - 3.
+		// NOTE: 1 movement = 3 seconds.
+		long turnsPassed = ((System.currentTimeMillis() / 1000) - lastMoveTime) / 3;
+
+		if (currentMovementOffset + turnsPassed > maxMovement)
+			return maxMovement;
+
+		return currentMovementOffset + turnsPassed;
+	}
+
+	public int getPathMovement() {
+		return pathMovement;
 	}
 
 	public Sprite getSprite() {

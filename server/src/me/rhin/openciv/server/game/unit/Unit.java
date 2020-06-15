@@ -19,6 +19,8 @@ public abstract class Unit {
 	private boolean selected;
 	private int maxMovement;
 	private int pathMovement;
+	private float currentMovementOffset;
+	private long lastMoveTime;
 	private float health;
 
 	public Unit(Player playerOwner, Tile standingTile) {
@@ -189,6 +191,24 @@ public abstract class Unit {
 		selected = false;
 	}
 
+	public void reduceMovement(int movementCost) {
+		long currentTime = System.currentTimeMillis() / 1000;
+		currentMovementOffset = getCurrentMovement();
+		currentMovementOffset -= movementCost;
+		lastMoveTime = currentTime;
+	}
+
+	public float getCurrentMovement() {
+		// Return a movement value between 0 - 3.
+		// NOTE: 1 movement = 3 seconds.
+		long turnsPassed = ((System.currentTimeMillis() / 1000) - lastMoveTime) / 3;
+
+		if (currentMovementOffset + turnsPassed > maxMovement)
+			return maxMovement;
+
+		return currentMovementOffset + turnsPassed;
+	}
+
 	public void setPosition(float x, float y) {
 		this.x = x;
 		this.y = y;
@@ -226,5 +246,4 @@ public abstract class Unit {
 	public int getPathMovement() {
 		return pathMovement;
 	}
-
 }

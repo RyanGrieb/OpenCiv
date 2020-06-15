@@ -70,11 +70,11 @@ public class Player implements MouseMoveListener, LeftClickListener, RightClickL
 			return;
 
 		if (clickType == ClickType.DOWN) {
-			// TODO: Check if the tile is passble for the unit.
 			selectedUnit.setTargetTile(hoveredTile);
 			rightMouseHeld = true;
 		} else {
-			selectedUnit.sendMovementPacket();
+			if (selectedUnit.getCurrentMovement() >= selectedUnit.getPathMovement())
+				selectedUnit.sendMovementPacket();
 			unselectUnit();
 			rightMouseHeld = false;
 		}

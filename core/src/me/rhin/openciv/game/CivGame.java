@@ -106,6 +106,11 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 
 		unit.setTargetTile(targetTile);
 		unit.moveToTargetTile();
+		
+		//If we own this unit, add the movement cooldown.
+		if(unit.getPlayerOwner().equals(player)) {
+			unit.reduceMovement(packet.getMovementCost());
+		}
 	}
 
 	public GameMap getMap() {
