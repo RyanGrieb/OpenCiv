@@ -1,9 +1,10 @@
 package me.rhin.openciv.game.unit.type;
 
-import com.badlogic.gdx.scenes.scene2d.Action;
+import com.badlogic.gdx.scenes.scene2d.Actor;
 
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.TextureEnum;
+import me.rhin.openciv.game.AbstractAction;
 import me.rhin.openciv.game.map.tile.Tile;
 import me.rhin.openciv.game.unit.Unit;
 import me.rhin.openciv.game.unit.UnitParameter;
@@ -13,7 +14,7 @@ public class Settler extends Unit {
 
 	public Settler(UnitParameter unitParameter) {
 		super(unitParameter, TextureEnum.UNIT_SETTLER);
-		customActions.add(new SettleAction());
+		customActions.add(new SettleAction(this));
 	}
 
 	@Override
@@ -24,7 +25,12 @@ public class Settler extends Unit {
 			return tile.getTileType().getMovementCost();
 	}
 
-	public static class SettleAction extends Action {
+	public static class SettleAction extends AbstractAction {
+
+		public SettleAction(Actor actor) {
+			super(actor);
+		}
+
 		@Override
 		public boolean act(float delta) {
 			// FIXME: Cancel the act if the unit's movement < 1
@@ -33,6 +39,16 @@ public class Settler extends Unit {
 			SettleCityPacket packet = new SettleCityPacket();
 			packet.setLocation(unit.getStandingTile().getGridX(), unit.getStandingTile().getGridY());
 			Civilization.getInstance().getNetworkManager().sendPacket(packet);
+			return true;
+		}
+
+		@Override
+		public boolean canAct() {
+			Unit unit = (Unit) actor;
+			if (unit.getCurrentMovement() < 1) {
+				unit.removeAction(this);
+				return false;
+			}
 			return true;
 		}
 	}

@@ -22,12 +22,9 @@ public class ButtonManager implements MouseMoveListener {
 	}
 
 	public void addButton(Button button) {
-		// Civilization.getInstance().getEventManager().addListener(RenderListener.class,
-		// button);
-
 		button.addListener(new ClickListener() {
 			@Override
-			public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
+			public void clicked (InputEvent event, float x, float y) {
 				Button buttonActor = (Button) event.getListenerActor();
 				buttonActor.onClick();
 				event.handle();

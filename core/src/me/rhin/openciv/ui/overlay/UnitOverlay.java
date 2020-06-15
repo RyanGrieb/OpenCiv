@@ -1,10 +1,8 @@
 package me.rhin.openciv.ui.overlay;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.scenes.scene2d.Action;
 import com.badlogic.gdx.utils.Align;
 
-import me.rhin.openciv.asset.TextureEnum;
+import me.rhin.openciv.game.AbstractAction;
 import me.rhin.openciv.game.unit.Unit;
 import me.rhin.openciv.ui.background.BlankBackground;
 import me.rhin.openciv.ui.button.ButtonManager;
@@ -39,7 +37,7 @@ public class UnitOverlay extends Overlay {
 		movementLabel.setPosition((viewport.getWorldWidth() - (200 / 2)) - movementLabel.getWidth() / 2, 5);
 		addActor(movementLabel);
 
-		for (Action action : unit.getCustomActions()) {
+		for (AbstractAction action : unit.getCustomActions()) {
 			buttonManager.addButton(new UnitActionButton(unit, action, viewport.getWorldWidth() - 200 + 3, 50, 70, 30));
 		}
 	}

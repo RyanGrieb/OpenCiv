@@ -9,11 +9,11 @@ import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.scenes.scene2d.Action;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.TextureEnum;
+import me.rhin.openciv.game.AbstractAction;
 import me.rhin.openciv.game.map.GameMap;
 import me.rhin.openciv.game.map.tile.Tile;
 import me.rhin.openciv.game.player.Player;
@@ -24,8 +24,7 @@ import me.rhin.openciv.ui.screen.type.InGameScreen;
 
 public abstract class Unit extends Actor implements ShapeRenderListener {
 
-	// FIXME: This should be an arraylist of libGDX actions not buttons.
-	protected ArrayList<Action> customActions;
+	protected ArrayList<AbstractAction> customActions;
 	private Player playerOwner;
 	private ArrayList<Vector2[]> pathVectors;
 	private int pathMovement;
@@ -338,7 +337,7 @@ public abstract class Unit extends Actor implements ShapeRenderListener {
 		return playerOwner;
 	}
 
-	public ArrayList<Action> getCustomActions() {
+	public ArrayList<AbstractAction> getCustomActions() {
 		return customActions;
 	}
 
