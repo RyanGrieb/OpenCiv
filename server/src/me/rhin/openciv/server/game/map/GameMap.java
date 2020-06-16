@@ -12,7 +12,6 @@ import com.badlogic.gdx.utils.Json;
 
 import me.rhin.openciv.server.Server;
 import me.rhin.openciv.server.game.Game;
-import me.rhin.openciv.server.game.Player;
 import me.rhin.openciv.server.game.map.tile.Tile;
 import me.rhin.openciv.server.game.map.tile.TileType;
 import me.rhin.openciv.server.game.unit.Unit;
@@ -115,17 +114,20 @@ public class GameMap implements MapRequestListener {
 				if (!tile.getTileType().equals(TileType.OCEAN))
 					continue;
 
+				Tile targetTile = null;
 				boolean adjOceanTile = false;
 				for (Tile adjTile : tile.getAdjTiles()) {
 					if (adjTile == null)
 						continue;
+
+					targetTile = adjTile;
 
 					if (adjTile.getTileType().equals(TileType.OCEAN))
 						adjOceanTile = true;
 				}
 
 				if (!adjOceanTile) {
-					tile.setTileType(TileType.GRASS);
+					tile.setTileType(targetTile.getTileType());
 					continue;
 				}
 
@@ -138,7 +140,7 @@ public class GameMap implements MapRequestListener {
 
 		for (int i = 0; i < 25; i++) {
 			Tile tile = tiles[rnd.nextInt(WIDTH - 1)][rnd.nextInt(HEIGHT - 1)];
-			if (tile.getTileType().equals(TileType.GRASS)) {
+			if (isFlatTile(tile)) {
 				tile.setTileType(TileType.MOUNTAIN);
 				mountainTiles.add(tile);
 			} else
@@ -148,7 +150,7 @@ public class GameMap implements MapRequestListener {
 		while (!mountainTiles.isEmpty()) {
 			Tile tile = mountainTiles.remove();
 			for (Tile adjTile : tile.getAdjTiles()) {
-				if (rnd.nextInt(6) > 3 && adjTile.getTileType().equals(TileType.GRASS)) {
+				if (rnd.nextInt(6) > 3 && isFlatTile(adjTile)) {
 					tile.setTileType(TileType.MOUNTAIN);
 					mountainTiles.add(adjTile);
 					break;
@@ -161,7 +163,7 @@ public class GameMap implements MapRequestListener {
 
 		for (int i = 0; i < 70; i++) {
 			Tile tile = tiles[rnd.nextInt(WIDTH - 1)][rnd.nextInt(HEIGHT - 1)];
-			if (tile.getTileType().equals(TileType.GRASS)) {
+			if (isFlatTile(tile)) {
 				tile.setTileType(TileType.FOREST);
 				forestTiles.add(tile);
 			} else
@@ -171,7 +173,7 @@ public class GameMap implements MapRequestListener {
 		while (!forestTiles.isEmpty()) {
 			Tile tile = forestTiles.remove();
 			for (Tile adjTile : tile.getAdjTiles()) {
-				if (rnd.nextInt(20) > 15 && adjTile.getTileType().equals(TileType.GRASS)) {
+				if (rnd.nextInt(20) > 15 && isFlatTile(adjTile)) {
 					tile.setTileType(TileType.FOREST);
 					forestTiles.add(adjTile);
 				}
@@ -183,8 +185,11 @@ public class GameMap implements MapRequestListener {
 
 		for (int i = 0; i < 120; i++) {
 			Tile tile = tiles[rnd.nextInt(WIDTH - 1)][rnd.nextInt(HEIGHT - 1)];
-			if (tile.getTileType().equals(TileType.GRASS)) {
-				tile.setTileType(TileType.GRASS_HILL);
+			if (isFlatTile(tile)) {
+				if (tile.getTileType() == TileType.GRASS)
+					tile.setTileType(TileType.GRASS_HILL);
+				else
+					tile.setTileType(TileType.PLAINS_HILL);
 				hillTiles.add(tile);
 			} else
 				i--;
@@ -193,8 +198,11 @@ public class GameMap implements MapRequestListener {
 		while (!hillTiles.isEmpty()) {
 			Tile tile = hillTiles.remove();
 			for (Tile adjTile : tile.getAdjTiles()) {
-				if (rnd.nextInt(20) > 17 && adjTile.getTileType().equals(TileType.GRASS)) {
-					tile.setTileType(TileType.GRASS_HILL);
+				if (rnd.nextInt(20) > 17 && isFlatTile(adjTile)) {
+					if (tile.getTileType() == TileType.GRASS)
+						tile.setTileType(TileType.GRASS_HILL);
+					else if (tile.getTileType() == TileType.PLAINS)
+						tile.setTileType(TileType.PLAINS_HILL);
 					hillTiles.add(adjTile);
 				}
 			}
@@ -284,13 +292,23 @@ public class GameMap implements MapRequestListener {
 	private void growTile(Tile tile, int amount) {
 		Random rnd = new Random();
 
+		TileType tileType = null;
+
+		if (tile.getTileType().equals(TileType.OCEAN)) {
+			if (rnd.nextInt(10) > 1)
+				tileType = TileType.GRASS;
+			else
+				tileType = TileType.PLAINS;
+		} else
+			tileType = tile.getTileType();
+
 		// #1
 		// Set the initial tile the grass
 		if (HEIGHT - tile.getGridY() < 10 || tile.getGridY() < 10 || WIDTH - tile.getGridX() < 10
 				|| tile.getGridX() < 10)
 			return;
 
-		tile.setTileType(TileType.GRASS);
+		tile.setTileType(tileType);
 		amount--;
 
 		// #2
@@ -304,7 +322,7 @@ public class GameMap implements MapRequestListener {
 				// Also, this chance increase the closer the x & y is to the center. (Should be
 				// 100% of grass in the center of the map).
 				if (rnd.nextInt(8) > 2)
-					currentTile.setTileType(TileType.GRASS);
+					currentTile.setTileType(tileType);
 
 				// Fill in the gap created
 				if (amount > 1) {
@@ -312,7 +330,7 @@ public class GameMap implements MapRequestListener {
 					Tile currentFillTile = currentTile;
 					for (int j = 0; j < fillAmount; j++) {
 						if (rnd.nextInt(8) > 2)
-							currentFillTile.getAdjTiles()[edgeFillIndex].setTileType(TileType.GRASS);
+							currentFillTile.getAdjTiles()[edgeFillIndex].setTileType(tileType);
 						currentFillTile = currentFillTile.getAdjTiles()[edgeFillIndex];
 					}
 				}
@@ -324,5 +342,9 @@ public class GameMap implements MapRequestListener {
 			if (edgeFillIndex > 5)
 				edgeFillIndex = 0;
 		}
+	}
+
+	private boolean isFlatTile(Tile tile) {
+		return tile.getTileType() == TileType.GRASS || tile.getTileType() == TileType.PLAINS;
 	}
 }

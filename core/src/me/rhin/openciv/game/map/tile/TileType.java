@@ -6,7 +6,8 @@ import com.badlogic.gdx.graphics.g2d.Sprite;
 import me.rhin.openciv.asset.TextureEnum;
 
 public enum TileType {
-	GRASS(TextureEnum.TILE_GRASS), GRASS_HILL(TextureEnum.TILE_GRASS_HILL, 2), OCEAN(TextureEnum.TILE_OCEAN, true),
+	GRASS(TextureEnum.TILE_GRASS), GRASS_HILL(TextureEnum.TILE_GRASS_HILL, 2), PLAINS(TextureEnum.TILE_PLAINS),
+	PLAINS_HILL(TextureEnum.TILE_PLAINS_HILL, 2), OCEAN(TextureEnum.TILE_OCEAN, true),
 	SHALLOW_OCEAN(TextureEnum.TILE_SHALLOW_OCEAN, true), MOUNTAIN(TextureEnum.TILE_MOUNTIAN, 1000000),
 	FOREST(TextureEnum.TILE_FOREST, 2), CITY(TextureEnum.TILE_CITY);
 
