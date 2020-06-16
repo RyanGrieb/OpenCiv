@@ -63,7 +63,7 @@ public class Player implements RelativeMouseMoveListener, LeftClickListener, Rig
 			return;
 
 		SelectUnitPacket packet = new SelectUnitPacket();
-		packet.setUnitName(unit.getClass().getName());
+		packet.setUnitID(unit.getID());
 		packet.setLocation(hoveredTile.getGridX(), hoveredTile.getGridY());
 		Civilization.getInstance().getNetworkManager().sendPacket(packet);
 	}
@@ -90,7 +90,7 @@ public class Player implements RelativeMouseMoveListener, LeftClickListener, Rig
 			selectedUnit.setSelected(false);
 
 		Unit unit = Civilization.getInstance().getGame().getMap().getTiles()[packet.getGridX()][packet.getGridY()]
-				.getUnits().get(0);
+				.getUnitFromID(packet.getUnitID());
 		unit.setSelected(true);
 		selectedUnit = unit;
 	}

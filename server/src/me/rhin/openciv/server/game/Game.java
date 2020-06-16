@@ -122,11 +122,11 @@ public class Game implements StartGameRequestListener, ConnectionListener, Disco
 	@Override
 	public void onUnitSelect(WebSocket conn, SelectUnitPacket packet) {
 		// FIXME: Use a hashmap to get by unit name?
-		Unit unit = map.getTiles()[packet.getGridX()][packet.getGridY()].getUnits().get(0);
+		Unit unit = map.getTiles()[packet.getGridX()][packet.getGridY()].getUnitFromID(packet.getUnitID());
 		Player player = getPlayerByConn(conn);
 		if (!unit.getPlayerOwner().equals(player))
 			return;
-
+		
 		player.setSelectedUnit(unit);
 		unit.setSelected(true);
 

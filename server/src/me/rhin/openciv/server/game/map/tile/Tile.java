@@ -66,11 +66,6 @@ public class Tile {
 		return map;
 	}
 
-	public void onLeftClick() {
-		for (Unit unit : units)
-			unit.setSelected(true);
-	}
-
 	public void setTileType(TileType tileType) {
 		this.tileType = tileType;
 	}

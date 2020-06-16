@@ -7,7 +7,7 @@ import me.rhin.openciv.shared.packet.Packet;
 
 public class SelectUnitPacket extends Packet {
 
-	private String unitName;
+	private int unitID;
 	private int gridX, gridY;
 
 	public SelectUnitPacket() {
@@ -17,7 +17,7 @@ public class SelectUnitPacket extends Packet {
 	@Override
 	public void write(Json json) {
 		super.write(json);
-		json.writeValue("unitName", unitName);
+		json.writeValue("unitID", unitID);
 		json.writeValue("gridX", gridX);
 		json.writeValue("gridY", gridY);
 	}
@@ -25,13 +25,13 @@ public class SelectUnitPacket extends Packet {
 	@Override
 	public void read(Json json, JsonValue jsonData) {
 		super.read(json, jsonData);
-		this.unitName = jsonData.getString("unitName");
+		this.unitID = jsonData.getInt("unitID");
 		this.gridX = jsonData.getInt("gridX");
 		this.gridY = jsonData.getInt("gridY");
 	}
 
-	public void setUnitName(String unitName) {
-		this.unitName = unitName;
+	public void setUnitID(int unitID) {
+		this.unitID = unitID;
 	}
 
 	public void setLocation(int gridX, int gridY) {
@@ -47,7 +47,7 @@ public class SelectUnitPacket extends Packet {
 		return gridY;
 	}
 
-	public String getUnitName() {
-		return unitName;
+	public int getUnitID() {
+		return unitID;
 	}
 }

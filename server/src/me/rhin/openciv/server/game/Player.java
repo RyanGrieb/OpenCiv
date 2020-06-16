@@ -32,6 +32,8 @@ public class Player {
 	}
 
 	public void setSelectedUnit(Unit selectedUnit) {
+		if (this.selectedUnit != null)
+			this.selectedUnit.setSelected(false);
 		this.selectedUnit = selectedUnit;
 	}
 
