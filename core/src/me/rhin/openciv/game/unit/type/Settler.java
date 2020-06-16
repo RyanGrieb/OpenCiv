@@ -15,6 +15,7 @@ public class Settler extends Unit {
 	public Settler(UnitParameter unitParameter) {
 		super(unitParameter, TextureEnum.UNIT_SETTLER);
 		customActions.add(new SettleAction(this));
+		this.canAttack = false;
 	}
 
 	@Override

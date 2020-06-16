@@ -10,6 +10,7 @@ public class Scout extends Unit {
 
 	public Scout(UnitParameter unitParameter) {
 		super(unitParameter, TextureEnum.UNIT_SCOUT);
+		this.canAttack = true;
 	}
 
 	@Override

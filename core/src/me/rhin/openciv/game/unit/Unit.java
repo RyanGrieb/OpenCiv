@@ -24,6 +24,7 @@ import me.rhin.openciv.ui.screen.type.InGameScreen;
 
 public abstract class Unit extends Actor implements ShapeRenderListener {
 
+	protected boolean canAttack;
 	protected ArrayList<AbstractAction> customActions;
 	private int id;
 	private Player playerOwner;
@@ -354,5 +355,9 @@ public abstract class Unit extends Actor implements ShapeRenderListener {
 
 	public int getID() {
 		return id;
+	}
+
+	public boolean canAttack() {
+		return canAttack;
 	}
 }

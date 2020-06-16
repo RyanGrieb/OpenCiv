@@ -10,6 +10,7 @@ public class Galley extends Unit {
 
 	public Galley(UnitParameter unitParameter) {
 		super(unitParameter, TextureEnum.UNIT_SETTLER);
+		this.canAttack = true;
 	}
 
 	@Override

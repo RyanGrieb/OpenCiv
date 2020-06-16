@@ -126,7 +126,7 @@ public class Game implements StartGameRequestListener, ConnectionListener, Disco
 		Player player = getPlayerByConn(conn);
 		if (!unit.getPlayerOwner().equals(player))
 			return;
-		
+
 		player.setSelectedUnit(unit);
 		unit.setSelected(true);
 
@@ -186,13 +186,23 @@ public class Game implements StartGameRequestListener, ConnectionListener, Disco
 		}
 		packet.setCityName(cityName);
 
-		City city = new City(cityPlayer, cityName);
 		Tile tile = map.getTiles()[packet.getGridX()][packet.getGridY()];
+		Unit unit = null;
+
+		for (Unit currentUnit : tile.getUnits())
+			if (currentUnit instanceof Settler)
+				unit = currentUnit;
+
+		// The player is actually trying to hack if this is triggered
+		if (unit == null)
+			return;
+
+		City city = new City(cityPlayer, cityName);
+
 		tile.setCity(city);
 		cityPlayer.addCity(city);
 
 		cityPlayer.setSelectedUnit(null);
-		Unit unit = tile.getUnits().remove(0);
 
 		DeleteUnitPacket deleteUnitPacket = new DeleteUnitPacket();
 		deleteUnitPacket.setUnit(cityPlayer.getName(), unit.getID(), packet.getGridX(), packet.getGridY());

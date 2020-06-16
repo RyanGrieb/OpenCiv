@@ -11,6 +11,7 @@ public class Warrior extends Unit {
 
 	public Warrior(UnitParameter unitParameter) {
 		super(unitParameter, TextureEnum.UNIT_WARRIOR);
+		this.canAttack = true;
 	}
 
 	@Override

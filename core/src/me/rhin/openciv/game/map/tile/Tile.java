@@ -153,7 +153,10 @@ public class Tile extends Actor implements ShapeRenderListener {
 	}
 
 	public void addUnit(Unit unit) {
-		units.add(unit);
+		if (unit.canAttack())
+			units.add(0, unit);
+		else
+			units.add(unit);
 	}
 
 	public void setEdge(int index, Tile tile) {
@@ -285,5 +288,15 @@ public class Tile extends Actor implements ShapeRenderListener {
 				return unit;
 
 		return null;
+	}
+
+	// Return the next unit from the already selectedOne
+	public Unit getNextUnit() {
+		for (int i = 0; i < units.size(); i++) {
+			Unit unit = units.get(i);
+			if (unit.isSelected() && (i + 1) < units.size())
+				return units.get(i + 1);
+		}
+		return units.get(0);
 	}
 }

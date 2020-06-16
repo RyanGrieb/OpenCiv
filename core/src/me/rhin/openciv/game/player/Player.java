@@ -55,7 +55,7 @@ public class Player implements RelativeMouseMoveListener, LeftClickListener, Rig
 		if (hoveredTile.getUnits().size() < 1)
 			return;
 
-		Unit unit = hoveredTile.getUnits().get(0);
+		Unit unit = hoveredTile.getNextUnit();
 		if (!unit.getPlayerOwner().equals(this))
 			return;
 
