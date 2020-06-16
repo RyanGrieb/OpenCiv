@@ -9,11 +9,12 @@ import com.badlogic.gdx.utils.Json;
 
 import me.rhin.openciv.server.Server;
 import me.rhin.openciv.server.game.city.City;
-import me.rhin.openciv.server.game.map.Tile;
-import me.rhin.openciv.server.game.map.tile.GameMap;
+import me.rhin.openciv.server.game.map.GameMap;
+import me.rhin.openciv.server.game.map.tile.Tile;
 import me.rhin.openciv.server.game.map.tile.TileType;
 import me.rhin.openciv.server.game.unit.Settler;
 import me.rhin.openciv.server.game.unit.Unit;
+import me.rhin.openciv.server.game.unit.Warrior;
 import me.rhin.openciv.server.listener.ConnectionListener;
 import me.rhin.openciv.server.listener.DisconnectListener;
 import me.rhin.openciv.server.listener.FetchPlayerListener;
@@ -224,7 +225,13 @@ public class Game implements StartGameRequestListener, ConnectionListener, Disco
 						maxDistance = distance;
 				}
 
-				if (maxDistance > 20 || maxDistance == -1) {
+				// Check if there is room for 2 units.
+				boolean hasSafeTile = false;
+				for (Tile adjTile : tile.getAdjTiles())
+					if (adjTile.getTileType() != TileType.OCEAN)
+						hasSafeTile = true;
+
+				if (maxDistance > 20 || maxDistance == -1 && hasSafeTile) {
 					player.setSpawnPos(rndX, rndY);
 					break;
 				}
@@ -235,6 +242,13 @@ public class Game implements StartGameRequestListener, ConnectionListener, Disco
 		for (Player player : players) {
 			Tile tile = map.getTiles()[player.getSpawnX()][player.getSpawnY()];
 			tile.addUnit(new Settler(player, tile));
+
+			for (Tile adjTile : tile.getAdjTiles()) {
+				if (adjTile.getTileType() != TileType.OCEAN) {
+					adjTile.addUnit(new Warrior(player, adjTile));
+					break;
+				}
+			}
 		}
 
 		started = true;

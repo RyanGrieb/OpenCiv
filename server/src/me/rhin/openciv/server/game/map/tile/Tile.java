@@ -1,4 +1,4 @@
-package me.rhin.openciv.server.game.map;
+package me.rhin.openciv.server.game.map.tile;
 
 import java.util.ArrayList;
 
@@ -8,8 +8,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Json;
 
 import me.rhin.openciv.server.game.city.City;
-import me.rhin.openciv.server.game.map.tile.GameMap;
-import me.rhin.openciv.server.game.map.tile.TileType;
+import me.rhin.openciv.server.game.map.GameMap;
 import me.rhin.openciv.server.game.unit.Unit;
 import me.rhin.openciv.shared.packet.type.AddUnitPacket;
 import me.rhin.openciv.shared.packet.type.PlayerDisconnectPacket;

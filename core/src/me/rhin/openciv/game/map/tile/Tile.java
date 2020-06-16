@@ -11,6 +11,7 @@ import com.badlogic.gdx.scenes.scene2d.Actor;
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.city.City;
+import me.rhin.openciv.game.city.CityTerritory;
 import me.rhin.openciv.game.map.GameMap;
 import me.rhin.openciv.game.unit.Unit;
 import me.rhin.openciv.listener.ShapeRenderListener;
@@ -35,6 +36,7 @@ public class Tile extends Actor implements ShapeRenderListener {
 	private Vector2[] vectors;
 	private Tile[] adjTiles;
 	private City city;
+	private CityTerritory cityTerritory;
 	private ArrayList<Unit> units;
 
 	public Tile(GameMap map, TileType tileType, float x, float y) {

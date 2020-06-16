@@ -1,7 +1,7 @@
 package me.rhin.openciv.server.game.unit;
 
 import me.rhin.openciv.server.game.Player;
-import me.rhin.openciv.server.game.map.Tile;
+import me.rhin.openciv.server.game.map.tile.Tile;
 
 public class Galley extends Unit {
 

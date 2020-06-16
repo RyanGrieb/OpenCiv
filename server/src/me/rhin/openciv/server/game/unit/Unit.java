@@ -6,8 +6,8 @@ import java.util.Arrays;
 import com.badlogic.gdx.math.Vector2;
 
 import me.rhin.openciv.server.game.Player;
-import me.rhin.openciv.server.game.map.Tile;
-import me.rhin.openciv.server.game.map.tile.GameMap;
+import me.rhin.openciv.server.game.map.GameMap;
+import me.rhin.openciv.server.game.map.tile.Tile;
 
 public abstract class Unit {
 

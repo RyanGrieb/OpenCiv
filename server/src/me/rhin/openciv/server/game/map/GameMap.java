@@ -1,4 +1,4 @@
-package me.rhin.openciv.server.game.map.tile;
+package me.rhin.openciv.server.game.map;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -13,7 +13,8 @@ import com.badlogic.gdx.utils.Json;
 import me.rhin.openciv.server.Server;
 import me.rhin.openciv.server.game.Game;
 import me.rhin.openciv.server.game.Player;
-import me.rhin.openciv.server.game.map.Tile;
+import me.rhin.openciv.server.game.map.tile.Tile;
+import me.rhin.openciv.server.game.map.tile.TileType;
 import me.rhin.openciv.server.game.unit.Unit;
 import me.rhin.openciv.server.listener.MapRequestListener;
 import me.rhin.openciv.shared.packet.type.AddUnitPacket;
@@ -58,7 +59,6 @@ public class GameMap implements MapRequestListener {
 			for (int y = 0; y < GameMap.HEIGHT; y++) {
 				if (x % 4 == 0 && y % 4 == 0) {
 					MapChunkPacket mapChunkPacket = new MapChunkPacket();
-					AddUnitPacket addUnitPacket = new AddUnitPacket();
 
 					int[][] tileChunk = new int[MapChunkPacket.CHUNK_SIZE][MapChunkPacket.CHUNK_SIZE];
 					for (int i = 0; i < MapChunkPacket.CHUNK_SIZE; i++) {
@@ -68,6 +68,7 @@ public class GameMap implements MapRequestListener {
 							tileChunk[i][j] = tiles[tileX][tileY].getTileType().getID();
 
 							for (Unit unit : tiles[tileX][tileY].getUnits()) {
+								AddUnitPacket addUnitPacket = new AddUnitPacket();
 								addUnitPacket.setUnit(unit.getPlayerOwner().getName(), unit.getClass().getSimpleName(),
 										tileX, tileY);
 								addUnitPackets.add(addUnitPacket);
