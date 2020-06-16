@@ -70,7 +70,7 @@ public class GameMap implements MapRequestListener {
 							for (Unit unit : tiles[tileX][tileY].getUnits()) {
 								AddUnitPacket addUnitPacket = new AddUnitPacket();
 								addUnitPacket.setUnit(unit.getPlayerOwner().getName(), unit.getClass().getSimpleName(),
-										tileX, tileY);
+										unit.getID(), tileX, tileY);
 								addUnitPackets.add(addUnitPacket);
 							}
 

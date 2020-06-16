@@ -67,7 +67,8 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 		try {
 			Player playerOwner = players.get(packet.getPlayerOwner());
 			Tile tile = map.getTiles()[packet.getTileGridX()][packet.getTileGridY()];
-			UnitParameter unitParameter = new UnitParameter(packet.getUnitName(), playerOwner, tile);
+			UnitParameter unitParameter = new UnitParameter(packet.getUnitID(), packet.getUnitName(), playerOwner,
+					tile);
 			Class<? extends Unit> unitClass = (Class<? extends Unit>) Class
 					.forName("me.rhin.openciv.game.unit.type." + packet.getUnitName());
 			Constructor<?> ctor = unitClass.getConstructor(UnitParameter.class);
@@ -125,7 +126,7 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 	@Override
 	public void onUnitDelete(DeleteUnitPacket packet) {
 		Tile tile = map.getTiles()[packet.getTileGridX()][packet.getTileGridY()];
-		Unit unit = tile.getUnits().get(0);
+		Unit unit = tile.getUnitFromID(packet.getUnitID());
 		tile.removeUnit(unit);
 		for (Actor actor : Civilization.getInstance().getScreenManager().getCurrentScreen().getStage().getActors()) {
 			if (actor.equals(unit))

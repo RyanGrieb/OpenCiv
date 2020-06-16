@@ -278,4 +278,12 @@ public class Tile extends Actor implements ShapeRenderListener {
 		citySprite.setPosition(x, y);
 		setTopSprite(citySprite);
 	}
+
+	public Unit getUnitFromID(int unitID) {
+		for (Unit unit : units)
+			if (unit.getID() == unitID)
+				return unit;
+
+		return null;
+	}
 }

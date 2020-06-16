@@ -11,6 +11,9 @@ import me.rhin.openciv.server.game.map.tile.Tile;
 
 public abstract class Unit {
 
+	private static int unitID = 0;
+
+	private int id;
 	private ArrayList<Vector2[]> pathVectors = new ArrayList<>();
 	private Player playerOwner;
 	private float x, y;
@@ -24,6 +27,7 @@ public abstract class Unit {
 	private float health;
 
 	public Unit(Player playerOwner, Tile standingTile) {
+		this.id = unitID++;
 		this.playerOwner = playerOwner;
 		this.standingTile = standingTile;
 		setPosition(standingTile.getVectors()[0].x - standingTile.getWidth() / 2, standingTile.getVectors()[0].y + 4);
@@ -245,5 +249,9 @@ public abstract class Unit {
 
 	public int getPathMovement() {
 		return pathMovement;
+	}
+
+	public int getID() {
+		return id;
 	}
 }

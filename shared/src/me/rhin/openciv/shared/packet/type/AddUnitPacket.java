@@ -9,6 +9,7 @@ public class AddUnitPacket extends Packet {
 
 	int tileGridX, tileGridY;
 	private String unitName;
+	private int unitID;
 	private String playerOwner;
 
 	public AddUnitPacket() {
@@ -21,6 +22,7 @@ public class AddUnitPacket extends Packet {
 		json.writeValue("tileGridX", tileGridX);
 		json.writeValue("tileGridY", tileGridY);
 		json.writeValue("unitName", unitName);
+		json.writeValue("unitID", unitID);
 		json.writeValue("playerOwner", playerOwner);
 	}
 
@@ -30,13 +32,15 @@ public class AddUnitPacket extends Packet {
 		this.tileGridX = jsonData.getInt("tileGridX");
 		this.tileGridY = jsonData.getInt("tileGridY");
 		this.unitName = jsonData.getString("unitName");
+		this.unitID = jsonData.getInt("unitID");
 		this.playerOwner = jsonData.getString("playerOwner");
 	}
 
-	public void setUnit(String playerOwner, String unitName, int tileGridX, int tileGridY) {
+	public void setUnit(String playerOwner, String unitName, int unitID, int tileGridX, int tileGridY) {
 		this.tileGridX = tileGridX;
 		this.tileGridY = tileGridY;
 		this.unitName = unitName;
+		this.unitID = unitID;
 		this.playerOwner = playerOwner;
 	}
 
@@ -50,6 +54,10 @@ public class AddUnitPacket extends Packet {
 
 	public String getUnitName() {
 		return unitName;
+	}
+
+	public int getUnitID() {
+		return unitID;
 	}
 
 	public String getPlayerOwner() {

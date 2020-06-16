@@ -139,7 +139,7 @@ public class Game implements StartGameRequestListener, ConnectionListener, Disco
 
 		Tile prevTile = map.getTiles()[packet.getPrevGridX()][packet.getPrevGridY()];
 
-		Unit unit = prevTile.getSelectedUnit();
+		Unit unit = prevTile.getUnitFromID(packet.getUnitID());
 
 		if (unit == null) {
 			System.out.println("Error: Unit is NULL");
@@ -195,8 +195,7 @@ public class Game implements StartGameRequestListener, ConnectionListener, Disco
 		Unit unit = tile.getUnits().remove(0);
 
 		DeleteUnitPacket deleteUnitPacket = new DeleteUnitPacket();
-		deleteUnitPacket.setUnit(cityPlayer.getName(), unit.getClass().getSimpleName(), packet.getGridX(),
-				packet.getGridY());
+		deleteUnitPacket.setUnit(cityPlayer.getName(), unit.getID(), packet.getGridX(), packet.getGridY());
 		Json json = new Json();
 		for (Player player : players) {
 			player.getConn().send(json.toJson(deleteUnitPacket));

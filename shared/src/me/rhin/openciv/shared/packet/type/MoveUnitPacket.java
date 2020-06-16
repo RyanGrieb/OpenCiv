@@ -10,7 +10,7 @@ public class MoveUnitPacket extends Packet {
 	private int movementCost;
 	private int prevGridX, prevGridY;
 	private int targetGridX, targetGridY;
-	private String unitName;
+	private int unitID;
 	private String playerOwner;
 
 	public MoveUnitPacket() {
@@ -25,7 +25,7 @@ public class MoveUnitPacket extends Packet {
 		json.writeValue("prevGridY", prevGridY);
 		json.writeValue("targetGridX", targetGridX);
 		json.writeValue("targetGridY", targetGridY);
-		json.writeValue("unitName", unitName);
+		json.writeValue("unitID", unitID);
 		json.writeValue("playerOwner", playerOwner);
 	}
 
@@ -37,17 +37,17 @@ public class MoveUnitPacket extends Packet {
 		this.prevGridY = jsonData.getInt("prevGridY");
 		this.targetGridX = jsonData.getInt("targetGridX");
 		this.targetGridY = jsonData.getInt("targetGridY");
-		this.unitName = jsonData.getString("unitName");
+		this.unitID = jsonData.getInt("unitID");
 		this.playerOwner = jsonData.getString("playerOwner");
 	}
 
-	public void setUnit(String playerOwner, String unitName, int prevGridX, int prevGridY, int targetGridX,
+	public void setUnit(String playerOwner, int unitID, int prevGridX, int prevGridY, int targetGridX,
 			int targetGridY) {
 		this.prevGridX = prevGridX;
 		this.prevGridY = prevGridY;
 		this.targetGridX = targetGridX;
 		this.targetGridY = targetGridY;
-		this.unitName = unitName;
+		this.unitID = unitID;
 		this.playerOwner = playerOwner;
 	}
 
@@ -75,8 +75,8 @@ public class MoveUnitPacket extends Packet {
 		return prevGridY;
 	}
 
-	public String getUnitName() {
-		return unitName;
+	public int getUnitID() {
+		return unitID;
 	}
 
 	public String getPlayerOwner() {

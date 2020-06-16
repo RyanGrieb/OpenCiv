@@ -25,6 +25,7 @@ import me.rhin.openciv.ui.screen.type.InGameScreen;
 public abstract class Unit extends Actor implements ShapeRenderListener {
 
 	protected ArrayList<AbstractAction> customActions;
+	private int id;
 	private Player playerOwner;
 	private ArrayList<Vector2[]> pathVectors;
 	private int pathMovement;
@@ -36,9 +37,10 @@ public abstract class Unit extends Actor implements ShapeRenderListener {
 	private long lastMoveTime;
 	private float health;
 
-	public Unit(String unitName, Player playerOwner, Tile standingTile, TextureEnum assetEnum) {
+	public Unit(int id, String unitName, Player playerOwner, Tile standingTile, TextureEnum assetEnum) {
 		Civilization.getInstance().getEventManager().addListener(ShapeRenderListener.class, this);
 
+		this.id = id;
 		setName(unitName);
 		this.playerOwner = playerOwner;
 		this.customActions = new ArrayList<>();
@@ -58,7 +60,8 @@ public abstract class Unit extends Actor implements ShapeRenderListener {
 	}
 
 	public Unit(UnitParameter unitParameter, TextureEnum assetEnum) {
-		this(unitParameter.getUnitName(), unitParameter.getPlayerOwner(), unitParameter.getStandingTile(), assetEnum);
+		this(unitParameter.getID(), unitParameter.getUnitName(), unitParameter.getPlayerOwner(),
+				unitParameter.getStandingTile(), assetEnum);
 	}
 
 	public abstract int getMovementCost(Tile adjTile);
@@ -258,8 +261,8 @@ public abstract class Unit extends Actor implements ShapeRenderListener {
 			return;
 
 		MoveUnitPacket packet = new MoveUnitPacket();
-		packet.setUnit(playerOwner.getName(), getClass().getSimpleName(), standingTile.getGridX(),
-				standingTile.getGridY(), targetTile.getGridX(), targetTile.getGridY());
+		packet.setUnit(playerOwner.getName(), id, standingTile.getGridX(), standingTile.getGridY(),
+				targetTile.getGridX(), targetTile.getGridY());
 		Civilization.getInstance().getNetworkManager().sendPacket(packet);
 	}
 
@@ -347,5 +350,9 @@ public abstract class Unit extends Actor implements ShapeRenderListener {
 
 	public Tile getStandingTile() {
 		return standingTile;
+	}
+
+	public int getID() {
+		return id;
 	}
 }

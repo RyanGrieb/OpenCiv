@@ -5,14 +5,20 @@ import me.rhin.openciv.game.player.Player;
 
 public class UnitParameter {
 
+	private int id;
 	private String unitName;
 	private Tile standingTile;
 	private Player playerOwner;
 
-	public UnitParameter(String unitName, Player playerOwner, Tile standingTile) {
+	public UnitParameter(int id, String unitName, Player playerOwner, Tile standingTile) {
+		this.id = id;
 		this.unitName = unitName;
 		this.playerOwner = playerOwner;
 		this.standingTile = standingTile;
+	}
+
+	public int getID() {
+		return id;
 	}
 
 	public String getUnitName() {

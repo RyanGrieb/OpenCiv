@@ -168,4 +168,12 @@ public class Tile {
 	public void setCity(City city) {
 		this.city = city;
 	}
+
+	public Unit getUnitFromID(int unitID) {
+		for (Unit unit : units)
+			if (unit.getID() == unitID)
+				return unit;
+
+		return null;
+	}
 }
