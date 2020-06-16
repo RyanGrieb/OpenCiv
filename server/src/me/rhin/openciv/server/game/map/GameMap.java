@@ -24,7 +24,7 @@ public class GameMap implements MapRequestListener {
 	public static final int WIDTH = 80; // Default: 104
 	public static final int HEIGHT = 52; // Default: 64
 	public static final int MAX_NODES = WIDTH * HEIGHT;
-	private static final int CONTINENT_AMOUNT = 780; // Default: 780
+	private static final int CONTINENT_AMOUNT = 550; // Default: 780
 
 	private Game game;
 	private Tile[][] tiles;
@@ -161,7 +161,7 @@ public class GameMap implements MapRequestListener {
 		// Generate forests
 		Queue<Tile> forestTiles = new LinkedList<>();
 
-		for (int i = 0; i < 70; i++) {
+		for (int i = 0; i < 100; i++) {
 			Tile tile = tiles[rnd.nextInt(WIDTH - 1)][rnd.nextInt(HEIGHT - 1)];
 			if (isFlatTile(tile)) {
 				tile.setTileType(TileType.FOREST);
@@ -183,7 +183,7 @@ public class GameMap implements MapRequestListener {
 		// Generate hills
 		Queue<Tile> hillTiles = new LinkedList<>();
 
-		for (int i = 0; i < 120; i++) {
+		for (int i = 0; i < 250; i++) {
 			Tile tile = tiles[rnd.nextInt(WIDTH - 1)][rnd.nextInt(HEIGHT - 1)];
 			if (isFlatTile(tile)) {
 				if (tile.getTileType() == TileType.GRASS)
