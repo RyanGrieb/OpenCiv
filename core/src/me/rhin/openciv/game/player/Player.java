@@ -86,6 +86,9 @@ public class Player implements RelativeMouseMoveListener, LeftClickListener, Rig
 
 	@Override
 	public void onSelectUnit(SelectUnitPacket packet) {
+		if (selectedUnit != null)
+			selectedUnit.setSelected(false);
+
 		Unit unit = Civilization.getInstance().getGame().getMap().getTiles()[packet.getGridX()][packet.getGridY()]
 				.getUnits().get(0);
 		unit.setSelected(true);
