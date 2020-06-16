@@ -9,6 +9,7 @@ public class SettleCityPacket extends Packet {
 
 	private int gridX, gridY;
 	private String playerOwner;
+	private String cityName;
 
 	public SettleCityPacket() {
 		super(SettleCityPacket.class.getName());
@@ -18,6 +19,7 @@ public class SettleCityPacket extends Packet {
 	public void write(Json json) {
 		super.write(json);
 		json.writeValue("playerOwner", playerOwner);
+		json.writeValue("cityName", cityName);
 		json.writeValue("gridX", gridX);
 		json.writeValue("gridY", gridY);
 	}
@@ -26,6 +28,7 @@ public class SettleCityPacket extends Packet {
 	public void read(Json json, JsonValue jsonData) {
 		super.read(json, jsonData);
 		this.playerOwner = jsonData.getString("playerOwner");
+		this.cityName = jsonData.getString("cityName");
 		this.gridX = jsonData.getInt("gridX");
 		this.gridY = jsonData.getInt("gridY");
 	}
@@ -39,8 +42,16 @@ public class SettleCityPacket extends Packet {
 		this.playerOwner = playerOwner;
 	}
 
+	public void setCityName(String cityName) {
+		this.cityName = cityName;
+	}
+
 	public String getPlayerOwner() {
 		return playerOwner;
+	}
+
+	public String getCityName() {
+		return cityName;
 	}
 
 	public int getGridX() {

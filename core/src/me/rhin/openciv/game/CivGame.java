@@ -136,10 +136,10 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 	@Override
 	public void onSettleCity(SettleCityPacket packet) {
 		Player playerOwner = players.get(packet.getPlayerOwner());
-		City city = new City(playerOwner);
-		playerOwner.addCity(city);
 
 		Tile tile = map.getTiles()[packet.getGridX()][packet.getGridY()];
+		City city = new City(tile, playerOwner, packet.getCityName());
+		playerOwner.addCity(city);
 		tile.setCity(city);
 	}
 

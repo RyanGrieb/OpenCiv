@@ -171,7 +171,22 @@ public class Game implements StartGameRequestListener, ConnectionListener, Disco
 		Player cityPlayer = getPlayerByConn(conn);
 		packet.setOwner(cityPlayer.getName());
 
-		City city = new City(cityPlayer);
+		String cityName = "Unknown";
+		boolean identicalName = true;
+
+		while (identicalName) {
+			identicalName = false;
+			cityName = City.getRandomCityName();
+			for (Player player : players) {
+				for (City city : player.getOwnedCities()) {
+					if (city.getName().equals(cityName))
+						identicalName = true;
+				}
+			}
+		}
+		packet.setCityName(cityName);
+
+		City city = new City(cityPlayer, cityName);
 		Tile tile = map.getTiles()[packet.getGridX()][packet.getGridY()];
 		tile.setCity(city);
 		cityPlayer.addCity(city);

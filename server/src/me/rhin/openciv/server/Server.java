@@ -14,6 +14,7 @@ import com.badlogic.gdx.utils.JsonValue;
 
 import me.rhin.openciv.server.command.CmdProcessor;
 import me.rhin.openciv.server.game.Game;
+import me.rhin.openciv.server.game.city.City;
 import me.rhin.openciv.server.listener.ConnectionListener.ConnectionEvent;
 import me.rhin.openciv.server.listener.DisconnectListener.DisconnectEvent;
 import me.rhin.openciv.server.listener.FetchPlayerListener.FetchPlayerEvent;
