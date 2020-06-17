@@ -11,9 +11,11 @@ import com.badlogic.gdx.utils.viewport.StretchViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
 import me.rhin.openciv.Civilization;
+import me.rhin.openciv.ui.window.WindowManager;
 
 public abstract class AbstractScreen implements Screen, InputProcessor {
 
+	protected WindowManager windowManager;
 	protected OrthographicCamera camera;
 	protected float camX;
 	protected float camY;
@@ -24,6 +26,7 @@ public abstract class AbstractScreen implements Screen, InputProcessor {
 	private boolean glClear;
 
 	protected AbstractScreen() {
+		this.windowManager = new WindowManager();
 		camera = new OrthographicCamera();
 		// FIXME: Set a global var for width & height for game.
 		this.camX = 800 / 2;
@@ -169,5 +172,9 @@ public abstract class AbstractScreen implements Screen, InputProcessor {
 
 	public InputMultiplexer getInputMultiplexer() {
 		return inputMultiplexer;
+	}
+
+	public WindowManager getWindowManager() {
+		return windowManager;
 	}
 }

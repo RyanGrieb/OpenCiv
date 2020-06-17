@@ -98,16 +98,12 @@ public class Civilization extends Game {
 		return screenManager.getCurrentScreen().getCamera();
 	}
 
-	// FIXME: We really shouldn't be casting a specific screen here for these 2
-	// methods
+	public WindowManager getWindowManager() {
+		return screenManager.getCurrentScreen().getWindowManager();
+	}
+
+	// FIXME: We really shouldn't be casting a specific screen here
 	public CivGame getGame() {
 		return ((InGameScreen) screenManager.getCurrentScreen()).getGame();
 	}
-
-	public WindowManager getWindowManager() {
-		if (!(screenManager.getCurrentScreen() instanceof InGameScreen))
-			return null;
-		return ((InGameScreen) screenManager.getCurrentScreen()).getWindowManager();
-	}
-
 }

@@ -11,9 +11,15 @@ public class WindowManager {
 	}
 
 	public void onRender() {
+		boolean inputAllowed = allowsInput();
 		for (AbstractWindow window : windows.values()) {
-			window.act();
-			window.draw();
+			if (!inputAllowed && window.disablesInput()) {
+				window.act();
+				window.draw();
+			} else if (inputAllowed) {
+				window.act();
+				window.draw();
+			}
 		}
 	}
 
@@ -32,6 +38,15 @@ public class WindowManager {
 
 	public void closeWindow(Class<? extends AbstractWindow> windowClass) {
 		windows.remove(windowClass);
+	}
+
+	public boolean allowsInput() {
+		for (AbstractWindow window : windows.values()) {
+			if (window.disablesInput())
+				return false;
+		}
+
+		return true;
 	}
 
 }

@@ -24,9 +24,12 @@ public class ButtonManager {
 		button.addListener(new ClickListener() {
 			@Override
 			public void clicked(InputEvent event, float x, float y) {
+				if (!Civilization.getInstance().getWindowManager().allowsInput()) {
+					return;
+				}
+
 				Button buttonActor = (Button) event.getListenerActor();
 				buttonActor.onClick();
-				event.handle();
 			}
 
 			@Override

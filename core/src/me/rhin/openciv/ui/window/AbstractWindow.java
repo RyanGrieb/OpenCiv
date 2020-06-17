@@ -21,9 +21,12 @@ public abstract class AbstractWindow extends Stage {
 		Gdx.input.setInputProcessor(inputMultiplexer);
 	}
 
+	protected abstract boolean disablesInput();
+
 	@Override
 	public void dispose() {
 		super.dispose();
-		//FIXME: Should we remove ourselves from the input processor here?
+		// FIXME: Should we remove ourselves from the input processor here?
 	}
+
 }

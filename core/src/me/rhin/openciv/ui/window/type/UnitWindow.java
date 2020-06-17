@@ -51,4 +51,9 @@ public class UnitWindow extends AbstractWindow {
 		movementLabel.setText("Movement: " + (int) unit.getCurrentMovement() + "/" + unit.getMaxMovement());
 		Civilization.getInstance().getEventManager().fireEvent(MouseMoveEvent.INSTANCE);
 	}
+
+	@Override
+	protected boolean disablesInput() {
+		return false;
+	}
 }

@@ -26,7 +26,6 @@ import me.rhin.openciv.util.ClickType;
 
 public class InGameScreen extends AbstractScreen {
 
-	private WindowManager windowManager;
 	private GameOverlay gameOverlay;
 	private EventManager eventManager;
 	private CivGame game;
@@ -36,7 +35,6 @@ public class InGameScreen extends AbstractScreen {
 	private float frameRate;
 
 	public InGameScreen() {
-		this.windowManager = new WindowManager();
 		this.gameOverlay = new GameOverlay();
 
 		this.eventManager = Civilization.getInstance().getEventManager();
@@ -106,6 +104,9 @@ public class InGameScreen extends AbstractScreen {
 
 	@Override
 	public boolean touchUp(int x, int y, int pointer, int button) {
+		if (!windowManager.allowsInput())
+			return false;
+
 		if (button == Input.Buttons.LEFT)
 			Civilization.getInstance().getEventManager().fireEvent(new LeftClickEvent(x, y));
 
@@ -116,6 +117,9 @@ public class InGameScreen extends AbstractScreen {
 
 	@Override
 	public boolean touchDown(int x, int y, int pointer, int button) {
+		if (!windowManager.allowsInput())
+			return false;
+
 		if (button == Input.Buttons.RIGHT)
 			Civilization.getInstance().getEventManager().fireEvent(new RightClickEvent(ClickType.DOWN, x, y));
 
@@ -137,6 +141,9 @@ public class InGameScreen extends AbstractScreen {
 	}
 
 	private void handleInput() {
+		if (!windowManager.allowsInput())
+			return;
+
 		OrthographicCamera cam = getCamera();
 		if (Gdx.input.isKeyPressed(Input.Keys.EQUALS)) {
 			cam.zoom += 0.04;
@@ -162,9 +169,5 @@ public class InGameScreen extends AbstractScreen {
 
 	public CivGame getGame() {
 		return game;
-	}
-
-	public WindowManager getWindowManager() {
-		return windowManager;
 	}
 }

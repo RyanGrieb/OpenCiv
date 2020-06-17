@@ -23,5 +23,9 @@ public class EscWindow extends AbstractWindow {
 				blankBackground.getY() + blankBackground.getHeight() - 110, 150, 45));
 
 	}
-
+	
+	@Override
+	protected boolean disablesInput() {
+		return true;
+	}
 }
