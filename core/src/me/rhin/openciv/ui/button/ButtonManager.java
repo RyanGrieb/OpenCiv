@@ -2,15 +2,15 @@ package me.rhin.openciv.ui.button;
 
 import java.util.ArrayList;
 
+import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 
 import me.rhin.openciv.Civilization;
-import me.rhin.openciv.listener.LeftClickListener;
 import me.rhin.openciv.listener.MouseMoveListener;
 
-public class ButtonManager implements MouseMoveListener {
+public class ButtonManager {
 
 	private ArrayList<Button> buttons;
 	private Stage stage;
@@ -18,7 +18,6 @@ public class ButtonManager implements MouseMoveListener {
 	public ButtonManager(Stage stage) {
 		this.buttons = new ArrayList<>();
 		this.stage = stage;
-		Civilization.getInstance().getEventManager().addListener(MouseMoveListener.class, this);
 	}
 
 	public void addButton(Button button) {
@@ -29,31 +28,21 @@ public class ButtonManager implements MouseMoveListener {
 				buttonActor.onClick();
 				event.handle();
 			}
+
+			@Override
+			public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
+				Button buttonActor = (Button) event.getListenerActor();
+				buttonActor.setHovered(true);
+			}
+
+			@Override
+			public void exit(InputEvent event, float x, float y, int pointer, Actor fromActor) {
+				Button buttonActor = (Button) event.getListenerActor();
+				buttonActor.setHovered(false);
+			}
 		});
 
 		stage.addActor(button);
 		buttons.add(button);
 	}
-
-	/*
-	 * @Override public void onLeftClick(float x, float y) { for (Button button :
-	 * buttons) { if (x >= button.getX() && x < button.getX() + button.getWidth())
-	 * if (y >= button.getY() && y <= button.getY() + button.getHeight())
-	 * button.onClick(); } }
-	 */
-
-	@Override
-	public void onMouseMove(float x, float y) {
-		for (Button button : buttons) {
-			if (x >= button.getX() && x < button.getX() + button.getWidth())
-				if (y >= button.getY() && y <= button.getY() + button.getHeight()) {
-					button.setHovered(true);
-					continue;
-				}
-
-			if (button.isHovered())
-				button.setHovered(false);
-		}
-	}
-
 }
