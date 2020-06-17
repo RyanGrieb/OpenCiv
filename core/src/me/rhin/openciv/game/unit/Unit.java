@@ -19,8 +19,7 @@ import me.rhin.openciv.game.map.tile.Tile;
 import me.rhin.openciv.game.player.Player;
 import me.rhin.openciv.listener.ShapeRenderListener;
 import me.rhin.openciv.shared.packet.type.MoveUnitPacket;
-import me.rhin.openciv.ui.overlay.UnitOverlay;
-import me.rhin.openciv.ui.screen.type.InGameScreen;
+import me.rhin.openciv.ui.window.type.UnitWindow;
 
 public abstract class Unit extends Actor implements ShapeRenderListener {
 
@@ -289,10 +288,9 @@ public abstract class Unit extends Actor implements ShapeRenderListener {
 				if (!selected) {
 					pathVectors.clear();
 					targetTile = null;
-					((InGameScreen) Civilization.getInstance().getCurrentScreen()).setUnitOverlay(null);
+					Civilization.getInstance().getWindowManager().closeWindow(UnitWindow.class);
 				} else {
-					((InGameScreen) Civilization.getInstance().getCurrentScreen())
-							.setUnitOverlay(new UnitOverlay(thisUnit));
+					Civilization.getInstance().getWindowManager().addWindow(new UnitWindow(thisUnit));
 				}
 			}
 		});

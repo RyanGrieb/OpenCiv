@@ -1,4 +1,4 @@
-package me.rhin.openciv.ui.overlay;
+package me.rhin.openciv.ui.window.type;
 
 import com.badlogic.gdx.utils.Align;
 
@@ -10,10 +10,9 @@ import me.rhin.openciv.ui.background.BlankBackground;
 import me.rhin.openciv.ui.button.ButtonManager;
 import me.rhin.openciv.ui.button.type.UnitActionButton;
 import me.rhin.openciv.ui.label.CustomLabel;
+import me.rhin.openciv.ui.window.AbstractWindow;
 
-//TODO: This should implement listener for unit health, and movement cooldown.
-public class UnitOverlay extends Overlay {
-
+public class UnitWindow extends AbstractWindow {
 	private ButtonManager buttonManager;
 	private CustomLabel unitNameLabel;
 	private CustomLabel movementLabel;
@@ -22,7 +21,7 @@ public class UnitOverlay extends Overlay {
 
 	private Unit unit;
 
-	public UnitOverlay(Unit unit) {
+	public UnitWindow(Unit unit) {
 		this.unit = unit;
 		this.buttonManager = new ButtonManager(this);
 		// viewport().getWorldWidth() - 200, 0, 200, 100;

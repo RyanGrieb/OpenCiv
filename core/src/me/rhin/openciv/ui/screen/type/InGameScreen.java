@@ -9,7 +9,6 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.utils.TimeUtils;
-import com.badlogic.gdx.utils.viewport.Viewport;
 
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.game.CivGame;
@@ -20,15 +19,15 @@ import me.rhin.openciv.listener.RightClickListener.RightClickEvent;
 import me.rhin.openciv.listener.ShapeRenderListener.ShapeRenderEvent;
 import me.rhin.openciv.shared.listener.EventManager;
 import me.rhin.openciv.ui.overlay.GameOverlay;
-import me.rhin.openciv.ui.overlay.UnitOverlay;
 import me.rhin.openciv.ui.screen.AbstractScreen;
+import me.rhin.openciv.ui.window.WindowManager;
+import me.rhin.openciv.ui.window.type.EscWindow;
 import me.rhin.openciv.util.ClickType;
 
 public class InGameScreen extends AbstractScreen {
 
-	private Viewport overlayViewport;
+	private WindowManager windowManager;
 	private GameOverlay gameOverlay;
-	private UnitOverlay unitOverlay;
 	private EventManager eventManager;
 	private CivGame game;
 	private ShapeRenderer shapeRenderer;
@@ -37,6 +36,7 @@ public class InGameScreen extends AbstractScreen {
 	private float frameRate;
 
 	public InGameScreen() {
+		this.windowManager = new WindowManager();
 		this.gameOverlay = new GameOverlay();
 
 		this.eventManager = Civilization.getInstance().getEventManager();
@@ -84,12 +84,16 @@ public class InGameScreen extends AbstractScreen {
 
 		gameOverlay.getFPSLabel().setText("FPS: " + frameRate);
 
+		windowManager.onRender();
+
 		gameOverlay.act();
 		gameOverlay.draw();
-		if (unitOverlay != null) {
-			unitOverlay.act();
-			unitOverlay.draw();
-		}
+	}
+
+	@Override
+	public void dispose() {
+		super.dispose();
+		Civilization.getInstance().getNetworkManager().disconnect();
 	}
 
 	@Override
@@ -124,6 +128,11 @@ public class InGameScreen extends AbstractScreen {
 			// game.getGameMap().resetTerrain();
 			// game.getGameMap().generateTerrain();
 		}
+
+		if (keycode == Input.Keys.ESCAPE) {
+			windowManager.toggleWindow(new EscWindow());
+		}
+
 		return false;
 	}
 
@@ -155,7 +164,7 @@ public class InGameScreen extends AbstractScreen {
 		return game;
 	}
 
-	public void setUnitOverlay(UnitOverlay unitOverlay) {
-		this.unitOverlay = unitOverlay;
+	public WindowManager getWindowManager() {
+		return windowManager;
 	}
 }

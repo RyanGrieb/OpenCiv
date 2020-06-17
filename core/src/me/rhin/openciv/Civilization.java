@@ -19,6 +19,7 @@ import me.rhin.openciv.ui.screen.AbstractScreen;
 import me.rhin.openciv.ui.screen.ScreenEnum;
 import me.rhin.openciv.ui.screen.ScreenManager;
 import me.rhin.openciv.ui.screen.type.InGameScreen;
+import me.rhin.openciv.ui.window.WindowManager;
 
 public class Civilization extends Game {
 
@@ -97,8 +98,14 @@ public class Civilization extends Game {
 		return screenManager.getCurrentScreen().getCamera();
 	}
 
+	// FIXME: We really shouldn't be casting a specific screen here for these 2
+	// methods
 	public CivGame getGame() {
 		return ((InGameScreen) screenManager.getCurrentScreen()).getGame();
+	}
+
+	public WindowManager getWindowManager() {
+		return ((InGameScreen) screenManager.getCurrentScreen()).getWindowManager();
 	}
 
 }
