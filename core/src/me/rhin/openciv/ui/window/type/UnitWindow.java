@@ -53,7 +53,12 @@ public class UnitWindow extends AbstractWindow {
 	}
 
 	@Override
-	protected boolean disablesInput() {
+	public boolean disablesInput() {
 		return false;
+	}
+
+	@Override
+	public boolean closesOtherWindows() {
+		return true;
 	}
 }

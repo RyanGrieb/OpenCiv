@@ -25,7 +25,8 @@ public class ButtonManager {
 			@Override
 			public void clicked(InputEvent event, float x, float y) {
 				if (!Civilization.getInstance().getWindowManager().allowsInput()) {
-					return;
+					if (!Civilization.getInstance().getWindowManager().isDisabledWindow(stage))
+						return;
 				}
 
 				Button buttonActor = (Button) event.getListenerActor();

@@ -25,7 +25,12 @@ public class EscWindow extends AbstractWindow {
 	}
 	
 	@Override
-	protected boolean disablesInput() {
+	public boolean disablesInput() {
 		return true;
+	}
+
+	@Override
+	public boolean closesOtherWindows() {
+		return false;
 	}
 }

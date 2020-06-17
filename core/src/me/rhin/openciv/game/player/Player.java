@@ -51,7 +51,6 @@ public class Player implements RelativeMouseMoveListener, LeftClickListener, Rig
 		if (hoveredTile == null)
 			return;
 
-		// TODO: Account for clicking on cities in the future.
 		if (hoveredTile.getUnits().size() < 1)
 			return;
 

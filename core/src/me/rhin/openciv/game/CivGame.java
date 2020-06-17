@@ -147,4 +147,8 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 	public GameMap getMap() {
 		return map;
 	}
+
+	public Player getPlayer() {
+		return player;
+	}
 }
