@@ -105,6 +105,8 @@ public class Civilization extends Game {
 	}
 
 	public WindowManager getWindowManager() {
+		if (!(screenManager.getCurrentScreen() instanceof InGameScreen))
+			return null;
 		return ((InGameScreen) screenManager.getCurrentScreen()).getWindowManager();
 	}
 

@@ -14,7 +14,7 @@ public class BlankBackground extends Actor {
 		this.sprite = TextureEnum.UI_BLACK.sprite();
 		sprite.setPosition(x, y);
 		sprite.setSize(width, height);
-		
+
 		this.setPosition(x, y);
 		this.setSize(width, height);
 	}
