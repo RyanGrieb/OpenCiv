@@ -236,7 +236,7 @@ public class Game implements StartGameRequestListener, ConnectionListener, Disco
 				rndY = rnd.nextInt(GameMap.HEIGHT);
 				Tile tile = map.getTiles()[rndX][rndY];
 
-				if (tile.getTileType().equals(TileType.OCEAN) || tile.getTileType().equals(TileType.MOUNTAIN))
+				if (tile.getTileType() == TileType.OCEAN || tile.getTileType() == TileType.MOUNTAIN)
 					continue;
 
 				float maxDistance = -1; // Closest distance to another player;
@@ -252,7 +252,7 @@ public class Game implements StartGameRequestListener, ConnectionListener, Disco
 				// Check if there is room for 2 units.
 				boolean hasSafeTile = false;
 				for (Tile adjTile : tile.getAdjTiles())
-					if (adjTile.getTileType() != TileType.OCEAN)
+					if (adjTile.getTileType() != TileType.OCEAN && adjTile.getTileType() != TileType.MOUNTAIN)
 						hasSafeTile = true;
 
 				if (maxDistance > 20 || maxDistance == -1 && hasSafeTile) {
@@ -268,7 +268,7 @@ public class Game implements StartGameRequestListener, ConnectionListener, Disco
 			tile.addUnit(new Settler(player, tile));
 
 			for (Tile adjTile : tile.getAdjTiles()) {
-				if (adjTile.getTileType() != TileType.OCEAN) {
+				if (adjTile.getTileType() != TileType.OCEAN && adjTile.getTileType() != TileType.MOUNTAIN) {
 					adjTile.addUnit(new Warrior(player, adjTile));
 					break;
 				}
