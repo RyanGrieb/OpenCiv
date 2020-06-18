@@ -15,7 +15,9 @@ public class Player {
 	private int spawnX;
 	private int spawnY;
 	private ArrayList<City> ownedCities;
+	private ArrayList<Unit> ownedUnits;
 	private Unit selectedUnit;
+	private boolean loaded;
 
 	public Player(WebSocket conn) {
 		this.conn = conn;
@@ -24,6 +26,8 @@ public class Player {
 		this.spawnX = -1;
 		this.spawnY = -1;
 		this.ownedCities = new ArrayList<>();
+		this.ownedUnits = new ArrayList<>();
+		this.loaded = false;
 	}
 
 	public void setSpawnPos(int spawnX, int spawnY) {
@@ -63,5 +67,21 @@ public class Player {
 
 	public void addCity(City city) {
 		ownedCities.add(city);
+	}
+
+	public void addOwnedUnit(Unit unit) {
+		ownedUnits.add(unit);
+	}
+
+	public ArrayList<Unit> getOwnedUnits() {
+		return ownedUnits;
+	}
+
+	public void finishLoading() {
+		this.loaded = true;
+	}
+
+	public boolean isLoaded() {
+		return loaded;
 	}
 }

@@ -17,6 +17,7 @@ import me.rhin.openciv.server.game.map.tile.TileType;
 import me.rhin.openciv.server.game.unit.Unit;
 import me.rhin.openciv.server.listener.MapRequestListener;
 import me.rhin.openciv.shared.packet.type.AddUnitPacket;
+import me.rhin.openciv.shared.packet.type.FinishLoadingPacket;
 import me.rhin.openciv.shared.packet.type.MapChunkPacket;
 import me.rhin.openciv.shared.util.MathHelper;
 
@@ -86,6 +87,9 @@ public class GameMap implements MapRequestListener {
 		for (AddUnitPacket packet : addUnitPackets)
 			conn.send(json.toJson(packet));
 
+		// NOTE: The packet sent below assumes that no other loading packets have been
+		// sent
+		conn.send(json.toJson(new FinishLoadingPacket()));
 	}
 
 	public void resetTerrain() {

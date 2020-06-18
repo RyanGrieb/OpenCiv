@@ -3,6 +3,7 @@ package me.rhin.openciv.game;
 import java.lang.reflect.Constructor;
 import java.util.HashMap;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 
@@ -17,6 +18,7 @@ import me.rhin.openciv.game.unit.type.Settler;
 import me.rhin.openciv.listener.AddUnitListener;
 import me.rhin.openciv.listener.DeleteUnitListener;
 import me.rhin.openciv.listener.FetchPlayerListener;
+import me.rhin.openciv.listener.FinishLoadingRequestListener;
 import me.rhin.openciv.listener.LeftClickListener;
 import me.rhin.openciv.listener.MoveUnitListener;
 import me.rhin.openciv.listener.PlayerConnectListener;
@@ -25,24 +27,31 @@ import me.rhin.openciv.listener.RelativeMouseMoveListener;
 import me.rhin.openciv.listener.RightClickListener;
 import me.rhin.openciv.listener.SelectUnitListener;
 import me.rhin.openciv.listener.SettleCityListener;
+import me.rhin.openciv.listener.TurnTimeUpdateListener;
 import me.rhin.openciv.shared.packet.type.AddUnitPacket;
 import me.rhin.openciv.shared.packet.type.DeleteUnitPacket;
 import me.rhin.openciv.shared.packet.type.FetchPlayerPacket;
+import me.rhin.openciv.shared.packet.type.FinishLoadingPacket;
 import me.rhin.openciv.shared.packet.type.MoveUnitPacket;
 import me.rhin.openciv.shared.packet.type.PlayerConnectPacket;
 import me.rhin.openciv.shared.packet.type.PlayerListRequestPacket;
 import me.rhin.openciv.shared.packet.type.SettleCityPacket;
+import me.rhin.openciv.shared.packet.type.TurnTimeUpdatePacket;
 
 public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerListRequestListener, FetchPlayerListener,
-		MoveUnitListener, DeleteUnitListener, SettleCityListener {
+		MoveUnitListener, DeleteUnitListener, SettleCityListener, TurnTimeUpdateListener, FinishLoadingRequestListener {
+
+	private static final int BASE_TURN_TIME = 9;
 
 	private GameMap map;
 	private Player player;
 	private HashMap<String, Player> players;
+	private int turnTime;
 
 	public CivGame() {
 		this.map = new GameMap();
 		this.players = new HashMap<>();
+		this.turnTime = BASE_TURN_TIME;
 
 		Civilization.getInstance().getEventManager().addListener(PlayerConnectListener.class, this);
 		Civilization.getInstance().getEventManager().addListener(AddUnitListener.class, this);
@@ -51,6 +60,8 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 		Civilization.getInstance().getEventManager().addListener(MoveUnitListener.class, this);
 		Civilization.getInstance().getEventManager().addListener(DeleteUnitListener.class, this);
 		Civilization.getInstance().getEventManager().addListener(SettleCityListener.class, this);
+		Civilization.getInstance().getEventManager().addListener(TurnTimeUpdateListener.class, this);
+		Civilization.getInstance().getEventManager().addListener(FinishLoadingRequestListener.class, this);
 
 		Civilization.getInstance().getNetworkManager().sendPacket(new FetchPlayerPacket());
 		Civilization.getInstance().getNetworkManager().sendPacket(new PlayerListRequestPacket());
@@ -144,11 +155,31 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 		tile.setCity(city);
 	}
 
+	@Override
+	public void onTurnTimeUpdate(TurnTimeUpdatePacket packet) {
+		if (turnTime != packet.getTurnTime()) {
+			Gdx.app.log(Civilization.LOG_TAG, "Updating turn time to: " + packet.getTurnTime());
+			turnTime = packet.getTurnTime();
+		}
+
+		// Update the city informatioin
+	}
+
+	@Override
+	public void onFinishLoadingRequest(FinishLoadingPacket packet) {
+		// FIXME: Actually check were done loading.
+		Civilization.getInstance().getNetworkManager().sendPacket(packet);
+	}
+
 	public GameMap getMap() {
 		return map;
 	}
 
 	public Player getPlayer() {
 		return player;
+	}
+
+	public int getTurnTime() {
+		return turnTime;
 	}
 }

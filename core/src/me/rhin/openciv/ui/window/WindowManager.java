@@ -48,7 +48,6 @@ public class WindowManager {
 	}
 
 	public void closeWindow(Class<? extends AbstractWindow> windowClass) {
-		System.out.println("Close window?");
 		windows.remove(windowClass);
 	}
 

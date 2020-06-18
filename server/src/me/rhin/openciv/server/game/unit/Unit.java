@@ -5,6 +5,7 @@ import java.util.Arrays;
 
 import com.badlogic.gdx.math.Vector2;
 
+import me.rhin.openciv.server.Server;
 import me.rhin.openciv.server.game.Player;
 import me.rhin.openciv.server.game.map.GameMap;
 import me.rhin.openciv.server.game.map.tile.Tile;
@@ -34,6 +35,7 @@ public abstract class Unit {
 		setSize(standingTile.getWidth(), standingTile.getHeight());
 
 		this.maxMovement = 3;
+		playerOwner.addOwnedUnit(this);
 	}
 
 	public abstract int getMovementCost(Tile tile);
@@ -205,8 +207,8 @@ public abstract class Unit {
 	public float getCurrentMovement() {
 		// Return a movement value between 0 - 3.
 		// NOTE: 1 movement = 3 seconds.
-		long turnsPassed = ((System.currentTimeMillis() / 1000) - lastMoveTime) / 3;
-
+		long turnsPassed = ((System.currentTimeMillis() / 1000) - lastMoveTime)
+				/ (Server.getInstance().getGame().getTurnTime() / this.maxMovement);
 		if (currentMovementOffset + turnsPassed > maxMovement)
 			return maxMovement;
 

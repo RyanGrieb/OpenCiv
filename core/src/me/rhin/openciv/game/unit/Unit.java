@@ -307,7 +307,8 @@ public abstract class Unit extends Actor implements ShapeRenderListener {
 	public float getCurrentMovement() {
 		// Return a movement value between 0 - 3.
 		// NOTE: 1 movement = 3 seconds.
-		long turnsPassed = ((System.currentTimeMillis() / 1000) - lastMoveTime) / 3;
+		long turnsPassed = ((System.currentTimeMillis() / 1000) - lastMoveTime)
+				/ (Civilization.getInstance().getGame().getTurnTime() / this.maxMovement);
 
 		if (currentMovementOffset + turnsPassed > maxMovement)
 			return maxMovement;

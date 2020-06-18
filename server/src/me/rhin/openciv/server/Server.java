@@ -14,11 +14,11 @@ import com.badlogic.gdx.utils.JsonValue;
 
 import me.rhin.openciv.server.command.CmdProcessor;
 import me.rhin.openciv.server.game.Game;
-import me.rhin.openciv.server.game.city.City;
 import me.rhin.openciv.server.listener.ConnectionListener.ConnectionEvent;
 import me.rhin.openciv.server.listener.DisconnectListener.DisconnectEvent;
 import me.rhin.openciv.server.listener.FetchPlayerListener.FetchPlayerEvent;
 import me.rhin.openciv.server.listener.MapRequestListener.MapRequestEvent;
+import me.rhin.openciv.server.listener.PlayerFinishLoadingListener.PlayerFinishLoadingEvent;
 import me.rhin.openciv.server.listener.PlayerListRequestListener.PlayerListRequestEvent;
 import me.rhin.openciv.server.listener.SelectUnitListener.SelectUnitEvent;
 import me.rhin.openciv.server.listener.SettleCityListener.SettleCityEvent;
@@ -29,6 +29,7 @@ import me.rhin.openciv.shared.listener.EventManager;
 import me.rhin.openciv.shared.listener.Listener;
 import me.rhin.openciv.shared.packet.Packet;
 import me.rhin.openciv.shared.packet.type.FetchPlayerPacket;
+import me.rhin.openciv.shared.packet.type.FinishLoadingPacket;
 import me.rhin.openciv.shared.packet.type.MapRequestPacket;
 import me.rhin.openciv.shared.packet.type.MoveUnitPacket;
 import me.rhin.openciv.shared.packet.type.PlayerListRequestPacket;
@@ -38,8 +39,8 @@ import me.rhin.openciv.shared.packet.type.StartGameRequestPacket;
 
 public class Server extends WebSocketServer {
 
-	// private static final String HOST = "192.168.1.77";
-	private static final String HOST = "localhost";
+	 private static final String HOST = "192.168.1.77";
+	//private static final String HOST = "localhost";
 	private static final int PORT = 5000;
 	private static Server server;
 
@@ -76,6 +77,7 @@ public class Server extends WebSocketServer {
 		networkEvents.put(MoveUnitPacket.class, UnitMoveEvent.class);
 		networkEvents.put(StartGameRequestPacket.class, StartGameRequestEvent.class);
 		networkEvents.put(SettleCityPacket.class, SettleCityEvent.class);
+		networkEvents.put(FinishLoadingPacket.class, PlayerFinishLoadingEvent.class);
 
 		this.playerIndex = 0;
 		this.commandProcessor = new CmdProcessor();

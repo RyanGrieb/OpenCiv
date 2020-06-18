@@ -2,6 +2,9 @@ package me.rhin.openciv.server.game;
 
 import java.util.ArrayList;
 import java.util.Random;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import org.java_websocket.WebSocket;
 
@@ -9,6 +12,7 @@ import com.badlogic.gdx.utils.Json;
 
 import me.rhin.openciv.server.Server;
 import me.rhin.openciv.server.game.city.City;
+import me.rhin.openciv.server.game.city.building.type.Palace;
 import me.rhin.openciv.server.game.map.GameMap;
 import me.rhin.openciv.server.game.map.tile.Tile;
 import me.rhin.openciv.server.game.map.tile.TileType;
@@ -18,6 +22,7 @@ import me.rhin.openciv.server.game.unit.Warrior;
 import me.rhin.openciv.server.listener.ConnectionListener;
 import me.rhin.openciv.server.listener.DisconnectListener;
 import me.rhin.openciv.server.listener.FetchPlayerListener;
+import me.rhin.openciv.server.listener.PlayerFinishLoadingListener;
 import me.rhin.openciv.server.listener.PlayerListRequestListener;
 import me.rhin.openciv.server.listener.SelectUnitListener;
 import me.rhin.openciv.server.listener.SettleCityListener;
@@ -32,19 +37,51 @@ import me.rhin.openciv.shared.packet.type.PlayerDisconnectPacket;
 import me.rhin.openciv.shared.packet.type.PlayerListRequestPacket;
 import me.rhin.openciv.shared.packet.type.SelectUnitPacket;
 import me.rhin.openciv.shared.packet.type.SettleCityPacket;
+import me.rhin.openciv.shared.packet.type.TurnTimeUpdatePacket;
 import me.rhin.openciv.shared.util.MathHelper;
 
-public class Game implements StartGameRequestListener, ConnectionListener, DisconnectListener,
-		PlayerListRequestListener, FetchPlayerListener, SelectUnitListener, UnitMoveListener, SettleCityListener {
+public class Game
+		implements StartGameRequestListener, ConnectionListener, DisconnectListener, PlayerListRequestListener,
+		FetchPlayerListener, SelectUnitListener, UnitMoveListener, SettleCityListener, PlayerFinishLoadingListener {
+
+	private static final int BASE_TURN_TIME = 9;
 
 	private GameMap map;
 	private ArrayList<Player> players;
 	private boolean started;
+	private int turnTime;
+	private long lastTurnClock;
+	private ScheduledExecutorService executor;
+	private Runnable turnTimeRunnable;
 
 	public Game() {
 		this.map = new GameMap(this);
 		this.players = new ArrayList<>();
 		this.started = false;
+		this.turnTime = BASE_TURN_TIME;
+
+		this.executor = Executors.newScheduledThreadPool(1);
+
+		this.turnTimeRunnable = new Runnable() {
+			public void run() {
+				if (!playersLoaded() || !started)
+					return;
+
+				if ((System.currentTimeMillis() - lastTurnClock) / 1000 < turnTime)
+					return;
+
+				turnTime = getUpdatedTurnTime();
+
+				Json json = new Json();
+				TurnTimeUpdatePacket turnTimeUpdatePacket = new TurnTimeUpdatePacket();
+				turnTimeUpdatePacket.setTurnTime(turnTime);
+				for (Player player : players) {
+					player.getConn().send(json.toJson(turnTimeUpdatePacket));
+				}
+				lastTurnClock = System.currentTimeMillis();
+			}
+		};
+		executor.scheduleAtFixedRate(turnTimeRunnable, 0, 1, TimeUnit.MILLISECONDS);
 
 		Server.getInstance().getEventManager().addListener(StartGameRequestListener.class, this);
 		Server.getInstance().getEventManager().addListener(ConnectionListener.class, this);
@@ -54,6 +91,7 @@ public class Game implements StartGameRequestListener, ConnectionListener, Disco
 		Server.getInstance().getEventManager().addListener(SelectUnitListener.class, this);
 		Server.getInstance().getEventManager().addListener(UnitMoveListener.class, this);
 		Server.getInstance().getEventManager().addListener(SettleCityListener.class, this);
+		Server.getInstance().getEventManager().addListener(PlayerFinishLoadingListener.class, this);
 	}
 
 	@Override
@@ -123,6 +161,8 @@ public class Game implements StartGameRequestListener, ConnectionListener, Disco
 	public void onUnitSelect(WebSocket conn, SelectUnitPacket packet) {
 		// FIXME: Use a hashmap to get by unit name?
 		Unit unit = map.getTiles()[packet.getGridX()][packet.getGridY()].getUnitFromID(packet.getUnitID());
+		if (unit == null)
+			return;
 		Player player = getPlayerByConn(conn);
 		if (!unit.getPlayerOwner().equals(player))
 			return;
@@ -167,9 +207,9 @@ public class Game implements StartGameRequestListener, ConnectionListener, Disco
 	}
 
 	@Override
-	public void onSettleCity(WebSocket conn, SettleCityPacket packet) {
+	public void onSettleCity(WebSocket conn, SettleCityPacket settleCityPacket) {
 		Player cityPlayer = getPlayerByConn(conn);
-		packet.setOwner(cityPlayer.getName());
+		settleCityPacket.setOwner(cityPlayer.getName());
 
 		String cityName = "Unknown";
 		boolean identicalName = true;
@@ -184,9 +224,9 @@ public class Game implements StartGameRequestListener, ConnectionListener, Disco
 				}
 			}
 		}
-		packet.setCityName(cityName);
+		settleCityPacket.setCityName(cityName);
 
-		Tile tile = map.getTiles()[packet.getGridX()][packet.getGridY()];
+		Tile tile = map.getTiles()[settleCityPacket.getGridX()][settleCityPacket.getGridY()];
 		Unit unit = null;
 
 		for (Unit currentUnit : tile.getUnits())
@@ -205,12 +245,21 @@ public class Game implements StartGameRequestListener, ConnectionListener, Disco
 		cityPlayer.setSelectedUnit(null);
 
 		DeleteUnitPacket deleteUnitPacket = new DeleteUnitPacket();
-		deleteUnitPacket.setUnit(cityPlayer.getName(), unit.getID(), packet.getGridX(), packet.getGridY());
+		deleteUnitPacket.setUnit(cityPlayer.getName(), unit.getID(), settleCityPacket.getGridX(),
+				settleCityPacket.getGridY());
+
 		Json json = new Json();
 		for (Player player : players) {
 			player.getConn().send(json.toJson(deleteUnitPacket));
-			player.getConn().send(json.toJson(packet));
+			player.getConn().send(json.toJson(settleCityPacket));
 		}
+
+		city.addBuilding(new Palace(city));
+	}
+
+	@Override
+	public void onPlayerFinishLoading(WebSocket conn) {
+		getPlayerByConn(conn).finishLoading();
 	}
 
 	public void start() {
@@ -218,14 +267,13 @@ public class Game implements StartGameRequestListener, ConnectionListener, Disco
 		map.generateTerrain();
 
 		// Start the game
+		Json json = new Json();
+		GameStartPacket gameStartPacket = new GameStartPacket();
 		for (Player player : players) {
-			Json json = new Json();
-			GameStartPacket packet = new GameStartPacket();
-			player.getConn().send(json.toJson(packet));
+			player.getConn().send(json.toJson(gameStartPacket));
 		}
 
 		// Spawn in the players at fair locations
-
 		Random rnd = new Random();
 
 		for (Player player : players) {
@@ -287,12 +335,46 @@ public class Game implements StartGameRequestListener, ConnectionListener, Disco
 		return players;
 	}
 
-	private Player getPlayerByConn(WebSocket conn) {
+	public int getTurnTime() {
+		return turnTime;
+	}
 
+	private Player getPlayerByConn(WebSocket conn) {
 		for (Player player : players)
 			if (player.getConn().equals(conn))
 				return player;
 
 		return null;
 	}
+
+	private int getUpdatedTurnTime() {
+		int cityMultiplier = 1;
+		int unitMultiplier = 1;
+		return BASE_TURN_TIME + getMaxPlayerCities() * cityMultiplier + getMaxPlayerUnits() * unitMultiplier;
+	}
+
+	private int getMaxPlayerCities() {
+		int maxCities = 0;
+		for (Player player : players)
+			if (player.getOwnedCities().size() > maxCities)
+				maxCities = player.getOwnedCities().size();
+		return maxCities;
+	}
+
+	private int getMaxPlayerUnits() {
+		int maxUnits = 0;
+		for (Player player : players)
+			if (player.getOwnedUnits().size() > maxUnits)
+				maxUnits = player.getOwnedUnits().size();
+		return maxUnits;
+	}
+
+	private boolean playersLoaded() {
+		for (Player player : players)
+			if (!player.isLoaded())
+				return false;
+
+		return true;
+	}
+
 }

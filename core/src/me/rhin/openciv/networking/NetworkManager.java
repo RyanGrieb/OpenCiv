@@ -14,8 +14,10 @@ import com.github.czyzby.websocket.data.WebSocketCloseCode;
 
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.listener.AddUnitListener.AddUnitEvent;
+import me.rhin.openciv.listener.BuildingConstructedListener.BuildingConstructedEvent;
 import me.rhin.openciv.listener.DeleteUnitListener.DeleteUnitEvent;
 import me.rhin.openciv.listener.FetchPlayerListener.FetchPlayerEvent;
+import me.rhin.openciv.listener.FinishLoadingRequestListener.FinishLoadingRequestEvent;
 import me.rhin.openciv.listener.GameStartListener.GameStartEvent;
 import me.rhin.openciv.listener.MoveUnitListener.MoveUnitEvent;
 import me.rhin.openciv.listener.PlayerConnectListener.PlayerConnectEvent;
@@ -25,12 +27,15 @@ import me.rhin.openciv.listener.ReceiveMapChunkListener.ReciveMapChunkEvent;
 import me.rhin.openciv.listener.SelectUnitListener.SelectUnitEvent;
 import me.rhin.openciv.listener.ServerConnectListener.ServerConnectEvent;
 import me.rhin.openciv.listener.SettleCityListener.SettleCityEvent;
+import me.rhin.openciv.listener.TurnTimeUpdateListener.TurnTimeUpdateEvent;
 import me.rhin.openciv.shared.listener.Event;
 import me.rhin.openciv.shared.listener.Listener;
 import me.rhin.openciv.shared.packet.Packet;
 import me.rhin.openciv.shared.packet.type.AddUnitPacket;
+import me.rhin.openciv.shared.packet.type.BuildingConstructedPacket;
 import me.rhin.openciv.shared.packet.type.DeleteUnitPacket;
 import me.rhin.openciv.shared.packet.type.FetchPlayerPacket;
+import me.rhin.openciv.shared.packet.type.FinishLoadingPacket;
 import me.rhin.openciv.shared.packet.type.GameStartPacket;
 import me.rhin.openciv.shared.packet.type.MapChunkPacket;
 import me.rhin.openciv.shared.packet.type.MoveUnitPacket;
@@ -39,6 +44,7 @@ import me.rhin.openciv.shared.packet.type.PlayerDisconnectPacket;
 import me.rhin.openciv.shared.packet.type.PlayerListRequestPacket;
 import me.rhin.openciv.shared.packet.type.SelectUnitPacket;
 import me.rhin.openciv.shared.packet.type.SettleCityPacket;
+import me.rhin.openciv.shared.packet.type.TurnTimeUpdatePacket;
 
 public class NetworkManager {
 
@@ -59,6 +65,9 @@ public class NetworkManager {
 		networkEvents.put(MoveUnitPacket.class, MoveUnitEvent.class);
 		networkEvents.put(DeleteUnitPacket.class, DeleteUnitEvent.class);
 		networkEvents.put(SettleCityPacket.class, SettleCityEvent.class);
+		networkEvents.put(BuildingConstructedPacket.class, BuildingConstructedEvent.class);
+		networkEvents.put(TurnTimeUpdatePacket.class, TurnTimeUpdateEvent.class);
+		networkEvents.put(FinishLoadingPacket.class, FinishLoadingRequestEvent.class);
 	}
 
 	public void connect(String ip) {
