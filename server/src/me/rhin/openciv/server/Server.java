@@ -39,8 +39,8 @@ import me.rhin.openciv.shared.packet.type.StartGameRequestPacket;
 
 public class Server extends WebSocketServer {
 
-	 private static final String HOST = "192.168.1.77";
-	//private static final String HOST = "localhost";
+	// private static final String HOST = "192.168.1.77";
+	private static final String HOST = "localhost";
 	private static final int PORT = 5000;
 	private static Server server;
 

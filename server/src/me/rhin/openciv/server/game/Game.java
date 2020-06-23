@@ -27,6 +27,7 @@ import me.rhin.openciv.server.listener.PlayerListRequestListener;
 import me.rhin.openciv.server.listener.SelectUnitListener;
 import me.rhin.openciv.server.listener.SettleCityListener;
 import me.rhin.openciv.server.listener.StartGameRequestListener;
+import me.rhin.openciv.server.listener.TurnTimeUpdateListener;
 import me.rhin.openciv.server.listener.UnitMoveListener;
 import me.rhin.openciv.shared.packet.type.DeleteUnitPacket;
 import me.rhin.openciv.shared.packet.type.FetchPlayerPacket;
@@ -40,9 +41,9 @@ import me.rhin.openciv.shared.packet.type.SettleCityPacket;
 import me.rhin.openciv.shared.packet.type.TurnTimeUpdatePacket;
 import me.rhin.openciv.shared.util.MathHelper;
 
-public class Game
-		implements StartGameRequestListener, ConnectionListener, DisconnectListener, PlayerListRequestListener,
-		FetchPlayerListener, SelectUnitListener, UnitMoveListener, SettleCityListener, PlayerFinishLoadingListener {
+public class Game implements StartGameRequestListener, ConnectionListener, DisconnectListener,
+		PlayerListRequestListener, FetchPlayerListener, SelectUnitListener, UnitMoveListener, SettleCityListener,
+		PlayerFinishLoadingListener, TurnTimeUpdateListener {
 
 	private static final int BASE_TURN_TIME = 9;
 
@@ -71,13 +72,7 @@ public class Game
 					return;
 
 				turnTime = getUpdatedTurnTime();
-
-				Json json = new Json();
-				TurnTimeUpdatePacket turnTimeUpdatePacket = new TurnTimeUpdatePacket();
-				turnTimeUpdatePacket.setTurnTime(turnTime);
-				for (Player player : players) {
-					player.getConn().send(json.toJson(turnTimeUpdatePacket));
-				}
+				Server.getInstance().getEventManager().fireEvent(new TurnTimeUpdateEvent(turnTime));
 				lastTurnClock = System.currentTimeMillis();
 			}
 		};
@@ -92,6 +87,7 @@ public class Game
 		Server.getInstance().getEventManager().addListener(UnitMoveListener.class, this);
 		Server.getInstance().getEventManager().addListener(SettleCityListener.class, this);
 		Server.getInstance().getEventManager().addListener(PlayerFinishLoadingListener.class, this);
+		Server.getInstance().getEventManager().addListener(TurnTimeUpdateListener.class, this);
 	}
 
 	@Override
@@ -262,6 +258,16 @@ public class Game
 		getPlayerByConn(conn).finishLoading();
 	}
 
+	@Override
+	public void onTurnTimeUpdate(int turnTime) {
+		Json json = new Json();
+		TurnTimeUpdatePacket turnTimeUpdatePacket = new TurnTimeUpdatePacket();
+		turnTimeUpdatePacket.setTurnTime(turnTime);
+		for (Player player : players) {
+			player.getConn().send(json.toJson(turnTimeUpdatePacket));
+		}
+	}
+
 	public void start() {
 		System.out.println("[SERVER] Starting game...");
 		map.generateTerrain();
@@ -376,5 +382,4 @@ public class Game
 
 		return true;
 	}
-
 }
