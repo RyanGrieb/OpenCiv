@@ -95,14 +95,6 @@ public class InGameScreen extends AbstractScreen {
 	}
 
 	@Override
-	public void resize(int width, int height) {
-		// overlayViewport.setScreenSize(width, height);
-		// overlayViewport.update(width, height, true);
-		// overlayViewport.setScreenSize(Gdx.graphics.getWidth(),
-		// Gdx.graphics.getHeight());
-	}
-
-	@Override
 	public boolean touchUp(int x, int y, int pointer, int button) {
 		if (!windowManager.allowsInput())
 			return false;

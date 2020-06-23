@@ -22,12 +22,18 @@ public abstract class AbstractWindow extends Stage {
 	}
 
 	public abstract boolean disablesInput();
-	
+
 	public abstract boolean closesOtherWindows();
-	
+
 	@Override
 	public void dispose() {
 		super.dispose();
 		// FIXME: Should we remove ourselves from the input processor here?
+	}
+
+	public void onResize(int width, int height) {
+		viewport.setScreenSize(width, height);
+		viewport.update(width, height, true);
+		viewport.setScreenSize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 	}
 }

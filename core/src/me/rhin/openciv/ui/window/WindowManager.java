@@ -67,4 +67,10 @@ public class WindowManager {
 		}
 		return false;
 	}
+
+	public void onResize(int width, int height) {
+		for (AbstractWindow window : windows.values()) {
+			window.onResize(width, height);
+		}
+	}
 }
