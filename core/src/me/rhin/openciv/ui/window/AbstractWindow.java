@@ -28,7 +28,7 @@ public abstract class AbstractWindow extends Stage {
 	@Override
 	public void dispose() {
 		super.dispose();
-		// FIXME: Should we remove ourselves from the input processor here?
+		Civilization.getInstance().getCurrentScreen().getInputMultiplexer().removeProcessor(this);
 	}
 
 	public void onResize(int width, int height) {

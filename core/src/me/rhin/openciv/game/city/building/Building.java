@@ -9,4 +9,6 @@ public abstract class Building {
 	public Building(City city) {
 		this.city = city;
 	}
+
+	public abstract String getName();
 }

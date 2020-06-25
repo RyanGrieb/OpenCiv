@@ -9,4 +9,9 @@ public class Palace extends Building {
 		super(city);
 	}
 
+	@Override
+	public String getName() {
+		return "Palace";
+	}
+
 }

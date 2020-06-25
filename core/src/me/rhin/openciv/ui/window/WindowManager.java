@@ -35,7 +35,7 @@ public class WindowManager {
 
 	public void toggleWindow(AbstractWindow abstractWindow) {
 		if (windows.containsKey(abstractWindow.getClass())) {
-			windows.remove(abstractWindow.getClass());
+			closeWindow(abstractWindow.getClass());
 			return;
 		}
 
@@ -48,6 +48,9 @@ public class WindowManager {
 	}
 
 	public void closeWindow(Class<? extends AbstractWindow> windowClass) {
+		if (!windows.containsKey(windowClass))
+			return;
+		windows.get(windowClass).dispose();
 		windows.remove(windowClass);
 	}
 

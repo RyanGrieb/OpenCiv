@@ -5,10 +5,13 @@ import com.badlogic.gdx.graphics.g2d.Sprite;
 
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.city.City;
+import me.rhin.openciv.game.city.building.Building;
 import me.rhin.openciv.ui.background.BlankBackground;
 import me.rhin.openciv.ui.button.ButtonManager;
 import me.rhin.openciv.ui.button.type.CityInfoCloseButton;
 import me.rhin.openciv.ui.label.CustomLabel;
+import me.rhin.openciv.ui.list.ItemList;
+import me.rhin.openciv.ui.list.type.ListBuilding;
 import me.rhin.openciv.ui.overlay.GameOverlay;
 import me.rhin.openciv.ui.window.AbstractWindow;
 
@@ -22,14 +25,14 @@ public class CityInfoWindow extends AbstractWindow {
 	private Sprite foodIcon, productionIcon, goldIcon, scienceIcon, heritageIcon;
 	private CustomLabel foodDescLabel, productionDescLabel, goldDescLabel, scienceDescLabel, heritageDescLabel;
 	private CustomLabel foodLabel, productionLabel, goldLabel, scienceLabel, heritageLabel;
+	private ItemList itemList;
 
 	public CityInfoWindow(City city) {
 		this.buttonManager = new ButtonManager(this);
 		this.city = city;
-		
-		buttonManager.addButton(new CityInfoCloseButton(viewport.getWorldWidth() / 2 - 150 / 2,
-				50, 150, 45));
-		
+
+		buttonManager.addButton(new CityInfoCloseButton(viewport.getWorldWidth() / 2 - 150 / 2, 50, 150, 45));
+
 		BlankBackground blankBackground = new BlankBackground(2,
 				viewport.getWorldHeight() - (300 + GameOverlay.HEIGHT + 2), WIDTH, HEIGHT);
 		addActor(blankBackground);
@@ -114,6 +117,15 @@ public class CityInfoWindow extends AbstractWindow {
 		this.heritageLabel = new CustomLabel("+0");
 		heritageLabel.setPosition(WIDTH - (goldLabel.getWidth() + 2), originY + foodDescLabel.getHeight() / 2);
 		addActor(heritageLabel);
+
+		this.itemList = new ItemList(viewport.getWorldWidth() - 100, 200, 100, 200);
+
+		for (Building building : city.getBuildings()) {
+			itemList.addItem(new ListBuilding(building, 100, 45));
+		}
+		addActor(itemList);
+
+		this.setScrollFocus(itemList);
 	}
 
 	@Override
@@ -138,5 +150,4 @@ public class CityInfoWindow extends AbstractWindow {
 	public boolean closesOtherWindows() {
 		return true;
 	}
-
 }

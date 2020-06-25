@@ -7,7 +7,6 @@ import com.badlogic.gdx.utils.Json;
 import me.rhin.openciv.networking.PacketParameter;
 import me.rhin.openciv.shared.listener.Event;
 import me.rhin.openciv.shared.listener.Listener;
-import me.rhin.openciv.shared.packet.type.AddUnitPacket;
 import me.rhin.openciv.shared.packet.type.MoveUnitPacket;
 
 public interface MoveUnitListener extends Listener {

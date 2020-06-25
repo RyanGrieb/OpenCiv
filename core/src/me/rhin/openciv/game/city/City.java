@@ -87,4 +87,8 @@ public class City extends Actor implements BuildingConstructedListener {
 
 		Gdx.app.log(Civilization.LOG_TAG, "Adding building " + packet.getBuildingName() + " to city " + getName());
 	}
+
+	public ArrayList<Building> getBuildings() {
+		return buildings;
+	}
 }
