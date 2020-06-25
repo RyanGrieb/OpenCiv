@@ -19,7 +19,7 @@ import me.rhin.openciv.ui.label.CustomLabel;
 
 // We can extend the actor class for other sprites (e.g. terrain) here, but when we draw lines we need to use the RendererListener.
 public class Tile extends Actor implements ShapeRenderListener {
-
+	
 	private static final int SIZE = 16;
 	private static final int SPRITE_WIDTH = 28;
 	private static final int SPRITE_HEIGHT = 32;

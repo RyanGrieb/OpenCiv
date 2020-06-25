@@ -3,7 +3,7 @@ package me.rhin.openciv.server.game.map.tile;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 
 public enum TileType {
-	GRASS(), GRASS_HILL(2), PLAINS(), PLAINS_HILL(), OCEAN(true), SHALLOW_OCEAN(true), MOUNTAIN(1000000), FOREST(2);
+	GRASS(), GRASS_HILL(2), PLAINS(), PLAINS_HILL(2), OCEAN(true), SHALLOW_OCEAN(true), MOUNTAIN(1000000), FOREST(2);
 
 	private boolean isWater;
 	private int movementCost;
