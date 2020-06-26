@@ -6,8 +6,8 @@ import com.badlogic.gdx.graphics.g2d.Sprite;
 public abstract class ListItem {
 
 	private int yOffset;
-	private float x, y;
-	private float width, height;
+	protected float x, y;
+	protected float width, height;
 	private Sprite backgroundSprite;
 
 	public ListItem(float width, float height) {

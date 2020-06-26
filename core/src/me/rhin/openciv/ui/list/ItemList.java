@@ -1,6 +1,7 @@
 package me.rhin.openciv.ui.list;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
@@ -14,12 +15,12 @@ import me.rhin.openciv.asset.TextureEnum;
 public class ItemList extends Actor {
 
 	private int yOffset;
-	private ArrayList<ListItem> listItems;
+	private HashMap<Class<?>, ListContainer> listContainers;
 	private Sprite backgroundSprite;
 
 	public ItemList(float x, float y, float width, float height) {
 		this.yOffset = 0;
-		this.listItems = new ArrayList<>();
+		this.listContainers = new HashMap<>();
 		this.setBounds(x, y, width, height);
 		this.addListener(new DragListener() {
 
@@ -53,23 +54,27 @@ public class ItemList extends Actor {
 	@Override
 	public void draw(Batch batch, float parentAlpha) {
 		backgroundSprite.draw(batch);
-		for (ListItem item : listItems) {
-			if (item.getY() > getY())
-				item.draw(batch, parentAlpha);
+		for (ListContainer container : listContainers.values()) {
+			if (container.getY() > getY())
+				container.draw(batch, parentAlpha);
 		}
 	}
 
 	public void scroll(int amount) {
-		//TODO: Display certain items depending on the yOffset.
+		// TODO: Display certain items depending on the yOffset.
 		yOffset += amount;
-		for (ListItem item : listItems) {
-			item.setYOffset(yOffset);
+		for (ListContainer container : listContainers.values()) {
+			container.setYOffset(yOffset);
 		}
 	}
 
-	public void addItem(ListItem listItem) {
-		listItems.add(listItem);
-		listItem.setPosition(getX(),
-				(getY() + getHeight() - listItem.getHeight()) - (listItems.size() - 1) * listItem.getHeight());
+	public void addItem(Class<?> classType, ListItem listItem) {
+		if (!listContainers.containsKey(classType)) {
+			listContainers.put(classType, new ListContainer(classType.getSimpleName() + "s", getWidth(), 15));
+			ListContainer container = listContainers.get(classType);
+			container.setPosition(getX(), (getY() + getHeight() - container.getHeight())
+					- (listContainers.size() - 1) * container.getHeight());
+		}
+		listContainers.get(classType).addItem(listItem);
 	}
 }

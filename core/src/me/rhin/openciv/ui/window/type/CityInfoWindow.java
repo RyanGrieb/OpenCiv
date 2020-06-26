@@ -17,8 +17,9 @@ import me.rhin.openciv.ui.window.AbstractWindow;
 
 public class CityInfoWindow extends AbstractWindow {
 
+	// FIXME: These variables only apply to the city stat window.
 	public static final int WIDTH = 175;
-	public static final int HEIGHT = 300;
+	public static final int HEIGHT = 175;
 
 	private ButtonManager buttonManager;
 	private City city;
@@ -34,7 +35,7 @@ public class CityInfoWindow extends AbstractWindow {
 		buttonManager.addButton(new CityInfoCloseButton(viewport.getWorldWidth() / 2 - 150 / 2, 50, 150, 45));
 
 		BlankBackground blankBackground = new BlankBackground(2,
-				viewport.getWorldHeight() - (300 + GameOverlay.HEIGHT + 2), WIDTH, HEIGHT);
+				viewport.getWorldHeight() - (HEIGHT + GameOverlay.HEIGHT + 2), WIDTH, HEIGHT);
 		addActor(blankBackground);
 
 		float originX = 5;
@@ -118,10 +119,10 @@ public class CityInfoWindow extends AbstractWindow {
 		heritageLabel.setPosition(WIDTH - (goldLabel.getWidth() + 2), originY + foodDescLabel.getHeight() / 2);
 		addActor(heritageLabel);
 
-		this.itemList = new ItemList(viewport.getWorldWidth() - 100, 200, 100, 200);
+		this.itemList = new ItemList(viewport.getWorldWidth() - 150, 200, 150, 200);
 
 		for (Building building : city.getBuildings()) {
-			itemList.addItem(new ListBuilding(building, 100, 45));
+			itemList.addItem(Building.class, new ListBuilding(building, 150, 45));
 		}
 		addActor(itemList);
 
