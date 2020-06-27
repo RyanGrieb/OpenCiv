@@ -4,6 +4,7 @@ import java.lang.reflect.Constructor;
 import java.util.HashMap;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 
@@ -27,6 +28,7 @@ import me.rhin.openciv.listener.RelativeMouseMoveListener;
 import me.rhin.openciv.listener.RightClickListener;
 import me.rhin.openciv.listener.SelectUnitListener;
 import me.rhin.openciv.listener.SettleCityListener;
+import me.rhin.openciv.listener.TerritoryGrowListener;
 import me.rhin.openciv.listener.TurnTimeUpdateListener;
 import me.rhin.openciv.shared.packet.type.AddUnitPacket;
 import me.rhin.openciv.shared.packet.type.DeleteUnitPacket;
@@ -36,10 +38,12 @@ import me.rhin.openciv.shared.packet.type.MoveUnitPacket;
 import me.rhin.openciv.shared.packet.type.PlayerConnectPacket;
 import me.rhin.openciv.shared.packet.type.PlayerListRequestPacket;
 import me.rhin.openciv.shared.packet.type.SettleCityPacket;
+import me.rhin.openciv.shared.packet.type.TerritoryGrowPacket;
 import me.rhin.openciv.shared.packet.type.TurnTimeUpdatePacket;
 
 public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerListRequestListener, FetchPlayerListener,
-		MoveUnitListener, DeleteUnitListener, SettleCityListener, TurnTimeUpdateListener, FinishLoadingRequestListener {
+		MoveUnitListener, DeleteUnitListener, SettleCityListener, TurnTimeUpdateListener, FinishLoadingRequestListener,
+		TerritoryGrowListener {
 
 	private static final int BASE_TURN_TIME = 9;
 
@@ -62,6 +66,7 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 		Civilization.getInstance().getEventManager().addListener(SettleCityListener.class, this);
 		Civilization.getInstance().getEventManager().addListener(TurnTimeUpdateListener.class, this);
 		Civilization.getInstance().getEventManager().addListener(FinishLoadingRequestListener.class, this);
+		Civilization.getInstance().getEventManager().addListener(TerritoryGrowListener.class, this);
 
 		Civilization.getInstance().getNetworkManager().sendPacket(new FetchPlayerPacket());
 		Civilization.getInstance().getNetworkManager().sendPacket(new PlayerListRequestPacket());
@@ -98,7 +103,8 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 
 	@Override
 	public void onPlayerListRequested(PlayerListRequestPacket packet) {
-		for (String playerName : packet.getPlayerList()) {
+		for (int i = 0; i < packet.getPlayerList().length; i++) {
+			String playerName = packet.getPlayerList()[i];
 			if (playerName == null)
 				continue;
 
@@ -106,6 +112,8 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 				players.put(playerName, player);
 			else
 				players.put(playerName, new Player(playerName));
+
+			players.get(playerName).setColor(Color.valueOf(packet.getColorList()[i]));
 		}
 	}
 
@@ -169,6 +177,14 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 	public void onFinishLoadingRequest(FinishLoadingPacket packet) {
 		// FIXME: Actually check were done loading.
 		Civilization.getInstance().getNetworkManager().sendPacket(packet);
+	}
+
+	@Override
+	public void onTerritoryGrow(TerritoryGrowPacket packet) {
+		Player player = players.get(packet.getPlayerOwner());
+		City city = player.getCityFromName(packet.getCityName());
+		Tile tile = map.getTiles()[packet.getGridX()][packet.getGridY()];
+		city.growTerritory(tile);
 	}
 
 	public GameMap getMap() {

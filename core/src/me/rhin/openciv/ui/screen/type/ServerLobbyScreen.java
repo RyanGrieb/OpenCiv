@@ -4,6 +4,7 @@ import java.util.HashMap;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
@@ -96,13 +97,15 @@ public class ServerLobbyScreen extends AbstractScreen
 		CustomLabel playerLabel = new CustomLabel(packet.getPlayerName(), 0,
 				viewport.getWorldHeight() - 100 - (connectedPlayersLabels.size() * 40), viewport.getWorldWidth(), 20);
 		playerLabel.setAlignment(Align.center);
+		playerLabel.setColor(Color.valueOf(packet.getColorHex()));
 		stage.addActor(playerLabel);
 		connectedPlayersLabels.put(packet.getPlayerName(), playerLabel);
 	}
 
 	@Override
 	public void onPlayerListRequested(PlayerListRequestPacket packet) {
-		for (String playerName : packet.getPlayerList()) {
+		for (int i = 0; i < packet.getPlayerList().length; i++) {
+			String playerName = packet.getPlayerList()[i];
 			if (playerName == null)
 				continue;
 
@@ -110,6 +113,7 @@ public class ServerLobbyScreen extends AbstractScreen
 					viewport.getWorldHeight() - 100 - (connectedPlayersLabels.size() * 40), viewport.getWorldWidth(),
 					20);
 			playerLabel.setAlignment(Align.center);
+			playerLabel.setColor(Color.valueOf(packet.getColorList()[i]));
 			stage.addActor(playerLabel);
 			connectedPlayersLabels.put(playerName, playerLabel);
 		}

@@ -11,18 +11,31 @@ import com.badlogic.gdx.utils.Json;
 import me.rhin.openciv.server.Server;
 import me.rhin.openciv.server.game.Player;
 import me.rhin.openciv.server.game.city.building.Building;
+import me.rhin.openciv.server.game.map.tile.Tile;
 import me.rhin.openciv.shared.packet.type.BuildingConstructedPacket;
 
 public class City {
 
 	private Player playerOwner;
 	private String name;
+	private Tile originTile;
+	private ArrayList<Tile> territory;
 	private ArrayList<Building> buildings;
 
-	public City(Player playerOwner, String name) {
+	public City(Player playerOwner, String name, Tile originTile) {
 		this.playerOwner = playerOwner;
 		this.name = name;
-		buildings = new ArrayList<>();
+		this.originTile = originTile;
+		this.territory = new ArrayList<>();
+		this.buildings = new ArrayList<>();
+
+		for (Tile adjTile : originTile.getAdjTiles()) {
+			territory.add(adjTile);
+		}
+
+		territory.add(originTile);
+
+		originTile.setCity(this);
 	}
 
 	public static String getRandomCityName() {
@@ -63,5 +76,13 @@ public class City {
 		for (Player player : Server.getInstance().getGame().getPlayers()) {
 			player.getConn().send(json.toJson(buildingConstructedPacket));
 		}
+	}
+
+	public Tile getOriginTile() {
+		return originTile;
+	}
+
+	public ArrayList<Tile> getTerritory() {
+		return territory;
 	}
 }

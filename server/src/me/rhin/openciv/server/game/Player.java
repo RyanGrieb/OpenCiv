@@ -4,6 +4,8 @@ import java.util.ArrayList;
 
 import org.java_websocket.WebSocket;
 
+import com.badlogic.gdx.graphics.Color;
+
 import me.rhin.openciv.server.Server;
 import me.rhin.openciv.server.game.city.City;
 import me.rhin.openciv.server.game.unit.Unit;
@@ -18,6 +20,7 @@ public class Player {
 	private ArrayList<Unit> ownedUnits;
 	private Unit selectedUnit;
 	private boolean loaded;
+	private Color color;
 
 	public Player(WebSocket conn) {
 		this.conn = conn;
@@ -28,6 +31,8 @@ public class Player {
 		this.ownedCities = new ArrayList<>();
 		this.ownedUnits = new ArrayList<>();
 		this.loaded = false;
+
+		this.color = Server.getInstance().getGame().getColorHelper().getRandomColor();
 	}
 
 	public void setSpawnPos(int spawnX, int spawnY) {
@@ -83,5 +88,9 @@ public class Player {
 
 	public boolean isLoaded() {
 		return loaded;
+	}
+
+	public Color getColor() {
+		return color;
 	}
 }

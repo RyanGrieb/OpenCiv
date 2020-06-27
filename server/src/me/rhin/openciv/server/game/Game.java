@@ -38,7 +38,9 @@ import me.rhin.openciv.shared.packet.type.PlayerDisconnectPacket;
 import me.rhin.openciv.shared.packet.type.PlayerListRequestPacket;
 import me.rhin.openciv.shared.packet.type.SelectUnitPacket;
 import me.rhin.openciv.shared.packet.type.SettleCityPacket;
+import me.rhin.openciv.shared.packet.type.TerritoryGrowPacket;
 import me.rhin.openciv.shared.packet.type.TurnTimeUpdatePacket;
+import me.rhin.openciv.shared.util.ColorHelper;
 import me.rhin.openciv.shared.util.MathHelper;
 
 public class Game implements StartGameRequestListener, ConnectionListener, DisconnectListener,
@@ -49,6 +51,7 @@ public class Game implements StartGameRequestListener, ConnectionListener, Disco
 
 	private GameMap map;
 	private ArrayList<Player> players;
+	private ColorHelper colorHelper;
 	private boolean started;
 	private int turnTime;
 	private long lastTurnClock;
@@ -58,6 +61,7 @@ public class Game implements StartGameRequestListener, ConnectionListener, Disco
 	public Game() {
 		this.map = new GameMap(this);
 		this.players = new ArrayList<>();
+		this.colorHelper = new ColorHelper();
 		this.started = false;
 		this.turnTime = BASE_TURN_TIME;
 
@@ -108,6 +112,7 @@ public class Game implements StartGameRequestListener, ConnectionListener, Disco
 
 			PlayerConnectPacket packet = new PlayerConnectPacket();
 			packet.setPlayerName(newPlayer.getName());
+			packet.setColor(newPlayer.getColor().toString());
 			Json json = new Json();
 			playerConn.send(json.toJson(packet));
 		}
@@ -138,7 +143,7 @@ public class Game implements StartGameRequestListener, ConnectionListener, Disco
 	public void onPlayerListRequested(WebSocket conn, PlayerListRequestPacket packet) {
 		System.out.println("[SERVER] Player list requested");
 		for (Player player : players) {
-			packet.addPlayer(player.getName());
+			packet.addPlayer(player.getName(), player.getColor().toString());
 		}
 		Json json = new Json();
 		conn.send(json.toJson(packet));
@@ -233,11 +238,8 @@ public class Game implements StartGameRequestListener, ConnectionListener, Disco
 		if (unit == null)
 			return;
 
-		City city = new City(cityPlayer, cityName);
-
-		tile.setCity(city);
+		City city = new City(cityPlayer, cityName, tile);
 		cityPlayer.addCity(city);
-
 		cityPlayer.setSelectedUnit(null);
 
 		DeleteUnitPacket deleteUnitPacket = new DeleteUnitPacket();
@@ -248,6 +250,14 @@ public class Game implements StartGameRequestListener, ConnectionListener, Disco
 		for (Player player : players) {
 			player.getConn().send(json.toJson(deleteUnitPacket));
 			player.getConn().send(json.toJson(settleCityPacket));
+
+			for (Tile territoryTile : city.getTerritory()) {
+				TerritoryGrowPacket territoryGrowPacket = new TerritoryGrowPacket();
+				territoryGrowPacket.setCityName(city.getName());
+				territoryGrowPacket.setLocation(territoryTile.getGridX(), territoryTile.getGridY());
+				territoryGrowPacket.setOwner(city.getPlayerOwner().getName());
+				player.getConn().send(json.toJson(territoryGrowPacket));
+			}
 		}
 
 		city.addBuilding(new Palace(city));
@@ -381,5 +391,9 @@ public class Game implements StartGameRequestListener, ConnectionListener, Disco
 				return false;
 
 		return true;
+	}
+
+	public ColorHelper getColorHelper() {
+		return colorHelper;
 	}
 }

@@ -27,6 +27,7 @@ import me.rhin.openciv.listener.ReceiveMapChunkListener.ReciveMapChunkEvent;
 import me.rhin.openciv.listener.SelectUnitListener.SelectUnitEvent;
 import me.rhin.openciv.listener.ServerConnectListener.ServerConnectEvent;
 import me.rhin.openciv.listener.SettleCityListener.SettleCityEvent;
+import me.rhin.openciv.listener.TerritoryGrowListener.TerritoryGrowEvent;
 import me.rhin.openciv.listener.TurnTimeUpdateListener.TurnTimeUpdateEvent;
 import me.rhin.openciv.shared.listener.Event;
 import me.rhin.openciv.shared.listener.Listener;
@@ -44,6 +45,7 @@ import me.rhin.openciv.shared.packet.type.PlayerDisconnectPacket;
 import me.rhin.openciv.shared.packet.type.PlayerListRequestPacket;
 import me.rhin.openciv.shared.packet.type.SelectUnitPacket;
 import me.rhin.openciv.shared.packet.type.SettleCityPacket;
+import me.rhin.openciv.shared.packet.type.TerritoryGrowPacket;
 import me.rhin.openciv.shared.packet.type.TurnTimeUpdatePacket;
 
 public class NetworkManager {
@@ -68,6 +70,7 @@ public class NetworkManager {
 		networkEvents.put(BuildingConstructedPacket.class, BuildingConstructedEvent.class);
 		networkEvents.put(TurnTimeUpdatePacket.class, TurnTimeUpdateEvent.class);
 		networkEvents.put(FinishLoadingPacket.class, FinishLoadingRequestEvent.class);
+		networkEvents.put(TerritoryGrowPacket.class, TerritoryGrowEvent.class);
 	}
 
 	public void connect(String ip) {

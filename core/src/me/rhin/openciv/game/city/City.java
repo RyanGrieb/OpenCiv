@@ -22,11 +22,13 @@ public class City extends Actor implements BuildingConstructedListener {
 
 	private Tile tile;
 	private Player playerOwner;
+	private ArrayList<Tile> territory;
 	private ArrayList<Building> buildings;
 	private CustomLabel nameLabel;
 
 	public City(Tile tile, Player playerOwner, String name) {
 		this.playerOwner = playerOwner;
+		this.territory = new ArrayList<>();
 		this.buildings = new ArrayList<>();
 		setName(name);
 		this.nameLabel = new CustomLabel(name);
@@ -38,7 +40,6 @@ public class City extends Actor implements BuildingConstructedListener {
 		this.setSize(nameLabel.getWidth(), nameLabel.getHeight());
 
 		Civilization.getInstance().getScreenManager().getCurrentScreen().getStage().addActor(this);
-
 		addListener(new ClickListener() {
 			@Override
 			public void clicked(InputEvent event, float x, float y) {
@@ -90,5 +91,24 @@ public class City extends Actor implements BuildingConstructedListener {
 
 	public ArrayList<Building> getBuildings() {
 		return buildings;
+	}
+
+	public void growTerritory(Tile tile) {
+		for (Tile adjTile : territory)
+			adjTile.clearBorders();
+
+		tile.setTerritory(this);
+		territory.add(tile);
+
+		for (Tile adjTile : territory)
+			adjTile.defineBorders();
+	}
+
+	public ArrayList<Tile> getTerritory() {
+		return territory;
+	}
+
+	public Player getPlayerOwner() {
+		return playerOwner;
 	}
 }

@@ -2,6 +2,7 @@ package me.rhin.openciv.game.map.tile;
 
 import java.util.ArrayList;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
@@ -29,6 +30,8 @@ public class Tile extends Actor implements ShapeRenderListener {
 	private Sprite sprite;
 	public Sprite topSprite;
 	private Sprite selectionSprite;
+	private Sprite territorySprite;
+	private boolean[] territoryBorders;
 	private boolean drawSelection;
 	private CustomLabel posLabel;
 	private float x, y, width, height;
@@ -36,7 +39,7 @@ public class Tile extends Actor implements ShapeRenderListener {
 	private Vector2[] vectors;
 	private Tile[] adjTiles;
 	private City city;
-	private CityTerritory cityTerritory;
+	private City territory;
 	private ArrayList<Unit> units;
 
 	public Tile(GameMap map, TileType tileType, float x, float y) {
@@ -46,7 +49,8 @@ public class Tile extends Actor implements ShapeRenderListener {
 		this.sprite = tileType.sprite();
 		this.selectionSprite = new Sprite(TextureEnum.TILE_SELECT.sprite());
 		selectionSprite.setAlpha(0.2f);
-
+		this.territorySprite = new Sprite(TextureEnum.TILE_SELECT.sprite());
+		this.territoryBorders = new boolean[6];
 		this.drawSelection = false;
 		// FIXME: Remove our own x,y,and size variables, and use the actors instead.
 		this.x = x;
@@ -64,12 +68,32 @@ public class Tile extends Actor implements ShapeRenderListener {
 
 	@Override
 	public void onShapeRender(ShapeRenderer shapeRenderer) {
+		if (territory == null)
+			return;
+
+		shapeRenderer.setColor(territory.getPlayerOwner().getColor());
+
 		// Draw the hexagon outline
 
 		// FIXME: Don't render lines if they're off the screen. This isn't part of the
 		// actor class so we need to manually put that in.
+		for (int i = 0; i < territoryBorders.length; i++) {
+			boolean renderLine = territoryBorders[i];
+			if (!renderLine)
+				continue;
 
-		// shapeRenderer.setColor(0F, 0F, 0F, 0.3F);
+			// 0 = 5 0
+			// 1 = 0 1
+			// 2 = 1 2
+			int v1 = i - 1;
+			int v2 = i;
+			if (v1 == -1) {
+				v1 = 5;
+				v2 = 0;
+			}
+			shapeRenderer.line(vectors[v1], vectors[v2]);
+		}
+
 		// shapeRenderer.line(vectors[0], vectors[1]);
 		// shapeRenderer.line(vectors[1], vectors[2]);
 		// shapeRenderer.line(vectors[2], vectors[3]);
@@ -104,6 +128,10 @@ public class Tile extends Actor implements ShapeRenderListener {
 
 		if (drawSelection)
 			selectionSprite.draw(batch);
+
+		if (territory != null)
+			territorySprite.draw(batch);
+
 		// posLabel.draw(batch, 1);
 	}
 
@@ -263,6 +291,9 @@ public class Tile extends Actor implements ShapeRenderListener {
 		// bottomSprite.setPosition(x, y);
 		selectionSprite.setSize(28, 32);
 		selectionSprite.setPosition(x, y);
+
+		territorySprite.setSize(28, 32);
+		territorySprite.setPosition(x, y);
 	}
 
 	public Sprite getSprite() {
@@ -282,6 +313,28 @@ public class Tile extends Actor implements ShapeRenderListener {
 		setTopSprite(citySprite);
 	}
 
+	public void setTerritory(City city) {
+		this.territory = city;
+		territorySprite.setColor(city.getPlayerOwner().getColor().r, city.getPlayerOwner().getColor().g,
+				city.getPlayerOwner().getColor().b, 0.15f);
+	}
+
+	public void defineBorders() {
+		int index = 0;
+		for (Tile adjTile : getAdjTiles()) {
+			if (adjTile.getTerritory() == null) {
+				// Draw a line at the index here.
+				territoryBorders[index] = true;
+			}
+			index++;
+		}
+	}
+
+	public void clearBorders() {
+		for (int i = 0; i < territoryBorders.length; i++)
+			territoryBorders[i] = false;
+	}
+
 	public Unit getUnitFromID(int unitID) {
 		for (Unit unit : units)
 			if (unit.getID() == unitID)
@@ -298,5 +351,9 @@ public class Tile extends Actor implements ShapeRenderListener {
 				return units.get(i + 1);
 		}
 		return units.get(0);
+	}
+
+	public City getTerritory() {
+		return territory;
 	}
 }

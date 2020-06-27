@@ -2,6 +2,8 @@ package me.rhin.openciv.game.player;
 
 import java.util.ArrayList;
 
+import com.badlogic.gdx.graphics.Color;
+
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.game.city.City;
 import me.rhin.openciv.game.map.tile.Tile;
@@ -18,6 +20,7 @@ public class Player implements RelativeMouseMoveListener, LeftClickListener, Rig
 	// NOTE: This class can be the controlled by the player or the MPPlayer. The
 	// distinction is in the listeners firing.
 	private String name;
+	private Color color;
 	private Tile hoveredTile;
 	private Unit selectedUnit;
 	private ArrayList<City> ownedCities;
@@ -110,4 +113,20 @@ public class Player implements RelativeMouseMoveListener, LeftClickListener, Rig
 		ownedCities.add(city);
 	}
 
+	public City getCityFromName(String name) {
+		for (City city : ownedCities)
+			if (city.getName().equals(name))
+				return city;
+
+		return null;
+	}
+
+	// FIXME: The color should really be defined in the constructor
+	public void setColor(Color color) {
+		this.color = color;
+	}
+
+	public Color getColor() {
+		return color;
+	}
 }

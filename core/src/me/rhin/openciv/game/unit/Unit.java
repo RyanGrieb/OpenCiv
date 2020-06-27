@@ -217,6 +217,7 @@ public abstract class Unit extends Actor implements ShapeRenderListener {
 
 	@Override
 	public void onShapeRender(ShapeRenderer shapeRenderer) {
+		// FIXME: We get a concurrency error here at some point
 		shapeRenderer.setColor(Color.YELLOW);
 		for (Vector2[] vectors : pathVectors) {
 			// System.out.println(maxMovement + "," + pathMovement);
