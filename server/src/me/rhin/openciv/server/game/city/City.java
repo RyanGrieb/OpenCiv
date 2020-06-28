@@ -13,6 +13,9 @@ import me.rhin.openciv.server.game.Player;
 import me.rhin.openciv.server.game.city.building.Building;
 import me.rhin.openciv.server.game.map.tile.Tile;
 import me.rhin.openciv.shared.packet.type.BuildingConstructedPacket;
+import me.rhin.openciv.shared.packet.type.CityStatUpdatePacket;
+import me.rhin.openciv.shared.stat.Stat;
+import me.rhin.openciv.shared.stat.StatLine;
 
 public class City {
 
@@ -21,6 +24,7 @@ public class City {
 	private Tile originTile;
 	private ArrayList<Tile> territory;
 	private ArrayList<Building> buildings;
+	private StatLine statLine;
 
 	public City(Player playerOwner, String name, Tile originTile) {
 		this.playerOwner = playerOwner;
@@ -28,13 +32,12 @@ public class City {
 		this.originTile = originTile;
 		this.territory = new ArrayList<>();
 		this.buildings = new ArrayList<>();
+		this.statLine = new StatLine();
 
 		for (Tile adjTile : originTile.getAdjTiles()) {
 			territory.add(adjTile);
 		}
-
 		territory.add(originTile);
-
 		originTile.setCity(this);
 	}
 
@@ -76,6 +79,16 @@ public class City {
 		for (Player player : Server.getInstance().getGame().getPlayers()) {
 			player.getConn().send(json.toJson(buildingConstructedPacket));
 		}
+
+		statLine.mergeStatLine(building.getStatLine());
+
+		CityStatUpdatePacket packet = new CityStatUpdatePacket();
+		for (Stat stat : this.statLine.getStatValues().keySet()) {
+			packet.addStat(name, stat.name(), this.statLine.getStatValues().get(stat));
+		}
+		playerOwner.getConn().send(json.toJson(packet));
+
+		playerOwner.mergeStatLine(statLine);
 	}
 
 	public Tile getOriginTile() {
@@ -84,5 +97,9 @@ public class City {
 
 	public ArrayList<Tile> getTerritory() {
 		return territory;
+	}
+
+	public StatLine getStatLine() {
+		return statLine;
 	}
 }

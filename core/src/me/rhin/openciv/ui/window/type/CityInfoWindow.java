@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.g2d.Sprite;
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.city.City;
 import me.rhin.openciv.game.city.building.Building;
+import me.rhin.openciv.shared.stat.Stat;
 import me.rhin.openciv.ui.background.BlankBackground;
 import me.rhin.openciv.ui.button.ButtonManager;
 import me.rhin.openciv.ui.button.type.CityInfoCloseButton;
@@ -51,7 +52,6 @@ public class CityInfoWindow extends AbstractWindow {
 		addActor(foodDescLabel);
 
 		this.foodLabel = new CustomLabel("+0");
-		foodLabel.setPosition(WIDTH - (foodLabel.getWidth() + 2), originY + foodDescLabel.getHeight() / 2);
 		addActor(foodLabel);
 
 		originX = 5;
@@ -68,7 +68,6 @@ public class CityInfoWindow extends AbstractWindow {
 
 		this.productionLabel = new CustomLabel("+0");
 		originX += productionIcon.getWidth() + 2;
-		productionLabel.setPosition(WIDTH - (productionLabel.getWidth() + 2), originY + foodDescLabel.getHeight() / 2);
 		addActor(productionLabel);
 
 		originX = 5;
@@ -84,7 +83,6 @@ public class CityInfoWindow extends AbstractWindow {
 		addActor(goldDescLabel);
 
 		this.goldLabel = new CustomLabel("+0");
-		goldLabel.setPosition(WIDTH - (goldLabel.getWidth() + 2), originY + foodDescLabel.getHeight() / 2);
 		addActor(goldLabel);
 
 		originX = 5;
@@ -94,13 +92,12 @@ public class CityInfoWindow extends AbstractWindow {
 		scienceIcon.setSize(16, 16);
 		scienceIcon.setPosition(originX, originY);
 
-		this.scienceDescLabel = new CustomLabel("Gold:");
+		this.scienceDescLabel = new CustomLabel("Science:");
 		originX += scienceIcon.getWidth() + 5;
 		scienceDescLabel.setPosition(originX, originY + scienceDescLabel.getHeight() / 2);
 		addActor(scienceDescLabel);
 
 		this.scienceLabel = new CustomLabel("+0");
-		scienceLabel.setPosition(WIDTH - (goldLabel.getWidth() + 2), originY + foodDescLabel.getHeight() / 2);
 		addActor(scienceLabel);
 
 		originX = 5;
@@ -116,17 +113,18 @@ public class CityInfoWindow extends AbstractWindow {
 		addActor(heritageDescLabel);
 
 		this.heritageLabel = new CustomLabel("+0");
-		heritageLabel.setPosition(WIDTH - (goldLabel.getWidth() + 2), originY + foodDescLabel.getHeight() / 2);
 		addActor(heritageLabel);
 
-		this.itemList = new ItemList(viewport.getWorldWidth() - 150, 200, 150, 200);
+		this.itemList = new ItemList(viewport.getWorldWidth() - 200, 200, 200, 200);
 
 		for (Building building : city.getBuildings()) {
-			itemList.addItem(Building.class, new ListBuilding(building, 150, 45));
+			itemList.addItem(Building.class, new ListBuilding(building, 200, 45));
 		}
 		addActor(itemList);
 
 		this.setScrollFocus(itemList);
+
+		updateStatValues();
 	}
 
 	@Override
@@ -150,5 +148,29 @@ public class CityInfoWindow extends AbstractWindow {
 	@Override
 	public boolean closesOtherWindows() {
 		return true;
+	}
+
+	private void updateStatValues() {
+		int gainedFood = (int) city.getStatLine().getStatValue(Stat.FOOD_GAIN);
+		foodLabel.setText((gainedFood < 0 ? "-" : "+") + gainedFood);
+		productionLabel.setText("+" + (int) city.getStatLine().getStatValue(Stat.PRODUCTION_GAIN));
+		goldLabel.setText("+" + (int) city.getStatLine().getStatValue(Stat.GOLD_GAIN));
+		scienceLabel.setText("+" + (int) city.getStatLine().getStatValue(Stat.RESEARCH_GAIN));
+		heritageLabel.setText("+" + (int) city.getStatLine().getStatValue(Stat.HERITAGE_GAIN));
+
+		updatePositions();
+	}
+
+	private void updatePositions() {
+		float originY = viewport.getWorldHeight() - (GameOverlay.HEIGHT * 2 + 2);
+		foodLabel.setPosition(WIDTH - (foodLabel.getWidth() + 2), originY + foodDescLabel.getHeight() / 2);
+		originY -= foodIcon.getHeight();
+		productionLabel.setPosition(WIDTH - (productionLabel.getWidth() + 2), originY + foodDescLabel.getHeight() / 2);
+		originY -= productionIcon.getHeight();
+		goldLabel.setPosition(WIDTH - (goldLabel.getWidth() + 2), originY + foodDescLabel.getHeight() / 2);
+		originY -= goldIcon.getHeight();
+		scienceLabel.setPosition(WIDTH - (goldLabel.getWidth() + 2), originY + foodDescLabel.getHeight() / 2);
+		originY -= scienceIcon.getHeight();
+		heritageLabel.setPosition(WIDTH - (goldLabel.getWidth() + 2), originY + foodDescLabel.getHeight() / 2);
 	}
 }

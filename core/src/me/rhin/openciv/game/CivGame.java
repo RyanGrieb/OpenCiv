@@ -120,10 +120,6 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 	@Override
 	public void onFetchPlayer(FetchPlayerPacket packet) {
 		this.player = new Player(packet.getPlayerName());
-		Civilization.getInstance().getEventManager().addListener(RelativeMouseMoveListener.class, player);
-		Civilization.getInstance().getEventManager().addListener(LeftClickListener.class, player);
-		Civilization.getInstance().getEventManager().addListener(RightClickListener.class, player);
-		Civilization.getInstance().getEventManager().addListener(SelectUnitListener.class, player);
 	}
 
 	// FIXME: Move these 2 tile methods to map class?
@@ -169,8 +165,6 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 			Gdx.app.log(Civilization.LOG_TAG, "Updating turn time to: " + packet.getTurnTime());
 			turnTime = packet.getTurnTime();
 		}
-
-		// Update the city informatioin
 	}
 
 	@Override

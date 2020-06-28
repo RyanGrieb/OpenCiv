@@ -35,11 +35,11 @@ public class InGameScreen extends AbstractScreen {
 	private float frameRate;
 
 	public InGameScreen() {
-		this.gameOverlay = new GameOverlay();
-
 		this.eventManager = Civilization.getInstance().getEventManager();
 		eventManager.clearEvents();
-
+		
+		this.gameOverlay = new GameOverlay();
+		
 		lastTimeCounted = TimeUtils.millis();
 		frameRate = Gdx.graphics.getFramesPerSecond();
 	}

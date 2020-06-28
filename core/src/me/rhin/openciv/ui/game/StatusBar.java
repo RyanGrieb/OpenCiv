@@ -3,12 +3,16 @@ package me.rhin.openciv.ui.game;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.scenes.scene2d.Actor;
-import com.badlogic.gdx.utils.Align;
 
+import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.TextureEnum;
+import me.rhin.openciv.listener.PlayerStatUpdateListener;
+import me.rhin.openciv.shared.packet.type.PlayerStatUpdatePacket;
+import me.rhin.openciv.shared.stat.Stat;
+import me.rhin.openciv.shared.stat.StatLine;
 import me.rhin.openciv.ui.label.CustomLabel;
 
-public class StatusBar extends Actor {
+public class StatusBar extends Actor implements PlayerStatUpdateListener {
 
 	private Sprite sprite;
 
@@ -39,6 +43,8 @@ public class StatusBar extends Actor {
 		this.goldLabel = new CustomLabel("0");
 
 		updatePositions();
+
+		Civilization.getInstance().getEventManager().addListener(PlayerStatUpdateListener.class, this);
 	}
 
 	@Override
@@ -61,6 +67,22 @@ public class StatusBar extends Actor {
 		scienceLabel.draw(batch, parentAlpha);
 		hertiageLabel.draw(batch, parentAlpha);
 		goldLabel.draw(batch, parentAlpha);
+	}
+
+	@Override
+	public void onPlayerStatUpdate(PlayerStatUpdatePacket packet) {
+		StatLine statLine = StatLine.fromPacket(packet);
+
+		scienceLabel.setText("+" + (int) statLine.getStatValue(Stat.RESEARCH_GAIN));
+
+		int currentGold = (int) statLine.getStatValue(Stat.GOLD);
+		int gainedGold = (int) statLine.getStatValue(Stat.GOLD_GAIN);
+		goldLabel.setText("" + currentGold + "(" + (gainedGold < 0 ? "-" : "+") + gainedGold + ")");
+
+		hertiageLabel.setText((int) statLine.getStatValue(Stat.HERITAGE) + "/???" + "(+"
+				+ (int) statLine.getStatValue(Stat.HERITAGE_GAIN) + ")");
+
+		this.updatePositions();
 	}
 
 	private void updatePositions() {

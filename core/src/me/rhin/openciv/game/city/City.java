@@ -15,6 +15,7 @@ import me.rhin.openciv.game.map.tile.Tile;
 import me.rhin.openciv.game.player.Player;
 import me.rhin.openciv.listener.BuildingConstructedListener;
 import me.rhin.openciv.shared.packet.type.BuildingConstructedPacket;
+import me.rhin.openciv.shared.stat.StatLine;
 import me.rhin.openciv.ui.label.CustomLabel;
 import me.rhin.openciv.ui.window.type.CityInfoWindow;
 
@@ -24,17 +25,18 @@ public class City extends Actor implements BuildingConstructedListener {
 	private Player playerOwner;
 	private ArrayList<Tile> territory;
 	private ArrayList<Building> buildings;
+	private StatLine statLine;
 	private CustomLabel nameLabel;
 
 	public City(Tile tile, Player playerOwner, String name) {
 		this.playerOwner = playerOwner;
 		this.territory = new ArrayList<>();
 		this.buildings = new ArrayList<>();
+		this.statLine = new StatLine();
 		setName(name);
 		this.nameLabel = new CustomLabel(name);
 		nameLabel.setPosition(tile.getX() + tile.getWidth() / 2 - nameLabel.getWidth() / 2,
 				tile.getY() + tile.getHeight() + 5);
-		// Civilization.getInstance().getScreenManager().getCurrentScreen().getStage().addActor(nameLabel);
 
 		this.setPosition(nameLabel.getX(), nameLabel.getY());
 		this.setSize(nameLabel.getWidth(), nameLabel.getHeight());
@@ -87,6 +89,14 @@ public class City extends Actor implements BuildingConstructedListener {
 		}
 
 		Gdx.app.log(Civilization.LOG_TAG, "Adding building " + packet.getBuildingName() + " to city " + getName());
+	}
+
+	public void setStatLine(StatLine statLine) {
+		this.statLine = statLine;
+	}
+
+	public StatLine getStatLine() {
+		return statLine;
 	}
 
 	public ArrayList<Building> getBuildings() {

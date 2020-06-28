@@ -5,12 +5,17 @@ import java.util.ArrayList;
 import org.java_websocket.WebSocket;
 
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.utils.Json;
 
 import me.rhin.openciv.server.Server;
 import me.rhin.openciv.server.game.city.City;
 import me.rhin.openciv.server.game.unit.Unit;
+import me.rhin.openciv.server.listener.TurnTimeUpdateListener;
+import me.rhin.openciv.shared.packet.type.PlayerStatUpdatePacket;
+import me.rhin.openciv.shared.stat.Stat;
+import me.rhin.openciv.shared.stat.StatLine;
 
-public class Player {
+public class Player implements TurnTimeUpdateListener {
 
 	private WebSocket conn;
 	private String name;
@@ -21,6 +26,7 @@ public class Player {
 	private Unit selectedUnit;
 	private boolean loaded;
 	private Color color;
+	private StatLine statLine;
 
 	public Player(WebSocket conn) {
 		this.conn = conn;
@@ -31,8 +37,43 @@ public class Player {
 		this.ownedCities = new ArrayList<>();
 		this.ownedUnits = new ArrayList<>();
 		this.loaded = false;
-
 		this.color = Server.getInstance().getGame().getColorHelper().getRandomColor();
+		this.statLine = new StatLine();
+
+		Server.getInstance().getEventManager().addListener(TurnTimeUpdateListener.class, this);
+	}
+
+	@Override
+	public void onTurnTimeUpdate(int turnTime) {
+		if (ownedCities.size() < 1)
+			return;
+
+		try {
+			statLine.updateStatLine();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		// FIXME: We should have a universal method for this, dunno where to put it.
+		PlayerStatUpdatePacket packet = new PlayerStatUpdatePacket();
+		for (Stat stat : this.statLine.getStatValues().keySet()) {
+			packet.addStat(stat.name(), this.statLine.getStatValues().get(stat));
+		}
+		Json json = new Json();
+		conn.send(json.toJson(packet));
+	}
+
+	// FIXME: Find a better name that isn't the same as the statline class method.
+	public void mergeStatLine(StatLine statLine) {
+		this.statLine.mergeStatLine(statLine);
+
+		// FIXME: We should have a universal method for this, dunno where to put it.
+		PlayerStatUpdatePacket packet = new PlayerStatUpdatePacket();
+		for (Stat stat : this.statLine.getStatValues().keySet()) {
+			packet.addStat(stat.name(), this.statLine.getStatValues().get(stat));
+		}
+		Json json = new Json();
+		conn.send(json.toJson(packet));
 	}
 
 	public void setSpawnPos(int spawnX, int spawnY) {
@@ -92,5 +133,9 @@ public class Player {
 
 	public Color getColor() {
 		return color;
+	}
+
+	public StatLine getStatLine() {
+		return statLine;
 	}
 }
