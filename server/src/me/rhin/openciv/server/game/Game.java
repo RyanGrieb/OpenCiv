@@ -74,7 +74,7 @@ public class Game implements StartGameRequestListener, ConnectionListener, Disco
 
 				if ((System.currentTimeMillis() - lastTurnClock) / 1000 < turnTime)
 					return;
-				
+
 				turnTime = getUpdatedTurnTime();
 				Server.getInstance().getEventManager().fireEvent(new TurnTimeUpdateEvent(turnTime));
 				lastTurnClock = System.currentTimeMillis();
