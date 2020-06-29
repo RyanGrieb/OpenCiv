@@ -11,15 +11,21 @@ import me.rhin.openciv.ui.label.CustomLabel;
 
 public class ListContainer extends ListItem {
 
+	public enum ListContainerType {
+		CATEGORY, DEFAULT
+	}
+
 	private ArrayList<ListItem> listItems;
 	private ArrayList<Sprite> seperatorSprites;
+	private ListContainerType containerType;
 	private Sprite backgroundSprite;
 	private CustomLabel containerNameLabel;
 
-	public ListContainer(String name, float width, float height) {
-		super(width, height);
+	public ListContainer(ListContainerType containerType, String name, float width) {
+		super(width, (containerType == ListContainerType.CATEGORY ? 15 : 0));
 		this.listItems = new ArrayList<>();
 		this.seperatorSprites = new ArrayList<>();
+		this.containerType = containerType;
 
 		this.backgroundSprite = TextureEnum.UI_GRAY.sprite();
 		backgroundSprite.setSize(width, height);
@@ -34,8 +40,10 @@ public class ListContainer extends ListItem {
 
 	@Override
 	public void draw(Batch batch, float parentAlpha) {
-		backgroundSprite.draw(batch);
-		containerNameLabel.draw(batch, parentAlpha);
+		if (containerType == ListContainerType.CATEGORY) {
+			backgroundSprite.draw(batch);
+			containerNameLabel.draw(batch, parentAlpha);
+		}
 
 		for (ListItem item : listItems) {
 			item.draw(batch, parentAlpha);

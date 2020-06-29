@@ -11,7 +11,8 @@ import me.rhin.openciv.ui.background.BlankBackground;
 import me.rhin.openciv.ui.button.ButtonManager;
 import me.rhin.openciv.ui.button.type.CityInfoCloseButton;
 import me.rhin.openciv.ui.label.CustomLabel;
-import me.rhin.openciv.ui.list.ItemList;
+import me.rhin.openciv.ui.list.ContainerList;
+import me.rhin.openciv.ui.list.ListContainer.ListContainerType;
 import me.rhin.openciv.ui.list.type.ListBuilding;
 import me.rhin.openciv.ui.overlay.GameOverlay;
 import me.rhin.openciv.ui.window.AbstractWindow;
@@ -27,7 +28,7 @@ public class CityInfoWindow extends AbstractWindow {
 	private Sprite foodIcon, productionIcon, goldIcon, scienceIcon, heritageIcon;
 	private CustomLabel foodDescLabel, productionDescLabel, goldDescLabel, scienceDescLabel, heritageDescLabel;
 	private CustomLabel foodLabel, productionLabel, goldLabel, scienceLabel, heritageLabel;
-	private ItemList itemList;
+	private ContainerList containerList;
 
 	public CityInfoWindow(City city) {
 		this.buttonManager = new ButtonManager(this);
@@ -115,14 +116,14 @@ public class CityInfoWindow extends AbstractWindow {
 		this.heritageLabel = new CustomLabel("+0");
 		addActor(heritageLabel);
 
-		this.itemList = new ItemList(viewport.getWorldWidth() - 200, 200, 200, 200);
+		this.containerList = new ContainerList(viewport.getWorldWidth() - 200, 200, 200, 200);
 
 		for (Building building : city.getBuildings()) {
-			itemList.addItem(Building.class, new ListBuilding(building, 200, 45));
+			containerList.addItem(ListContainerType.CATEGORY, Building.class, new ListBuilding(building, 200, 45));
 		}
-		addActor(itemList);
+		addActor(containerList);
 
-		this.setScrollFocus(itemList);
+		this.setScrollFocus(containerList);
 
 		updateStatValues();
 	}
