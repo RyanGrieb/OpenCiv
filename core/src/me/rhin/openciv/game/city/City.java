@@ -8,13 +8,15 @@ import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.utils.reflect.ClassReflection;
 
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.game.city.building.Building;
 import me.rhin.openciv.game.map.tile.Tile;
 import me.rhin.openciv.game.player.Player;
 import me.rhin.openciv.game.production.ProducibleItemManager;
-import me.rhin.openciv.game.production.ProductionItem;
+import me.rhin.openciv.game.unit.Unit;
+import me.rhin.openciv.game.unit.UnitParameter;
 import me.rhin.openciv.listener.BuildingConstructedListener;
 import me.rhin.openciv.shared.packet.type.BuildingConstructedPacket;
 import me.rhin.openciv.shared.stat.StatLine;
@@ -79,16 +81,17 @@ public class City extends Actor implements BuildingConstructedListener {
 		if (!this.getName().equals(packet.getCityName()))
 			return;
 
-		// FIXME: The reflection done here makes GWT incompatible.
 		String buildingClassName = "me.rhin.openciv.game.city.building.type." + packet.getBuildingName();
 		try {
-			Class<? extends Building> buildingClass = (Class<? extends Building>) Class.forName(buildingClassName);
+			Class<? extends Building> buildingClass = (Class<? extends Building>) ClassReflection
+					.forName(buildingClassName);
 
-			Constructor<?> ctor = buildingClass.getConstructor(City.class);
-			Building building = (Building) ctor.newInstance(new Object[] { this });
-
+			// Constructor<?> ctor = buildingClass.getConstructor(City.class);
+			// Building building = (Building) ctor.newInstance(new Object[] { this });
+			Building building = (Building) ClassReflection.getConstructor(buildingClass, City.class).newInstance(this);
 			buildings.add(building);
 		} catch (Exception e) {
+			Gdx.app.log(Civilization.WS_LOG_TAG, e.getMessage());
 			e.printStackTrace();
 		}
 

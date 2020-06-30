@@ -1,12 +1,12 @@
 package me.rhin.openciv.game;
 
-import java.lang.reflect.Constructor;
 import java.util.HashMap;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
+import com.badlogic.gdx.utils.reflect.ClassReflection;
 
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.game.city.City;
@@ -82,10 +82,12 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 			Tile tile = map.getTiles()[packet.getTileGridX()][packet.getTileGridY()];
 			UnitParameter unitParameter = new UnitParameter(packet.getUnitID(), packet.getUnitName(), playerOwner,
 					tile);
-			Class<? extends Unit> unitClass = (Class<? extends Unit>) Class.forName(
+
+			Class<? extends Unit> unitClass = (Class<? extends Unit>) ClassReflection.forName(
 					"me.rhin.openciv.game.unit.type." + packet.getUnitName() + "$" + packet.getUnitName() + "Unit");
-			Constructor<?> ctor = unitClass.getConstructor(UnitParameter.class);
-			Unit unit = (Unit) ctor.newInstance(new Object[] { unitParameter });
+
+			Unit unit = (Unit) ClassReflection.getConstructor(unitClass, UnitParameter.class)
+					.newInstance(unitParameter);
 			tile.addUnit(unit);
 			Civilization.getInstance().getScreenManager().getCurrentScreen().getStage().addActor(unit);
 			if (unit instanceof SettlerUnit && unit.getPlayerOwner().equals(player)) {
@@ -94,6 +96,7 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 						unit.getY());
 			}
 		} catch (Exception e) {
+			Gdx.app.log(Civilization.WS_LOG_TAG, e.getMessage());
 			e.printStackTrace();
 		}
 	}

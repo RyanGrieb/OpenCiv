@@ -7,12 +7,15 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.JsonReader;
 import com.badlogic.gdx.utils.JsonValue;
+import com.badlogic.gdx.utils.reflect.ClassReflection;
 import com.github.czyzby.websocket.WebSocket;
 import com.github.czyzby.websocket.WebSocketAdapter;
 import com.github.czyzby.websocket.WebSockets;
 import com.github.czyzby.websocket.data.WebSocketCloseCode;
 
 import me.rhin.openciv.Civilization;
+import me.rhin.openciv.game.city.City;
+import me.rhin.openciv.game.city.building.Building;
 import me.rhin.openciv.listener.AddUnitListener.AddUnitEvent;
 import me.rhin.openciv.listener.BuildingConstructedListener.BuildingConstructedEvent;
 import me.rhin.openciv.listener.CityStatUpdateListener.CityStatUpdateEvent;
@@ -51,6 +54,7 @@ import me.rhin.openciv.shared.packet.type.SelectUnitPacket;
 import me.rhin.openciv.shared.packet.type.SettleCityPacket;
 import me.rhin.openciv.shared.packet.type.TerritoryGrowPacket;
 import me.rhin.openciv.shared.packet.type.TurnTimeUpdatePacket;
+import me.rhin.openciv.shared.util.MathHelper;
 
 public class NetworkManager {
 
@@ -106,15 +110,17 @@ public class NetworkManager {
 		JsonValue jsonValue = new JsonReader().parse(packet);
 		String packetName = jsonValue.getString("packetName");
 
-		// FIXME: The reflection done here makes GWT incompatible.
 		try {
-			Class<? extends Event<? extends Listener>> eventClass = networkEvents.get(Class.forName(packetName));
+			Class<? extends Event<? extends Listener>> eventClass = networkEvents
+					.get(ClassReflection.forName(packetName));
 
-			Constructor<?> ctor = eventClass.getConstructor(PacketParameter.class);
-			Event<? extends Listener> object = (Event<? extends Listener>) ctor
-					.newInstance(new Object[] { new PacketParameter(webSocket, packet) });
-			Civilization.getInstance().getEventManager().fireEvent(object);
+			Event<? extends Listener> eventObj = (Event<? extends Listener>) ClassReflection
+					.getConstructor(eventClass, PacketParameter.class)
+					.newInstance(new PacketParameter(webSocket, packet));
+
+			Civilization.getInstance().getEventManager().fireEvent(eventObj);
 		} catch (Exception e) {
+			Gdx.app.log(Civilization.WS_LOG_TAG, e.getMessage());
 			e.printStackTrace();
 		}
 

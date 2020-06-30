@@ -37,7 +37,7 @@ public abstract class Unit extends Actor implements ShapeRenderListener {
 	private float currentMovementOffset;
 	private long lastMoveTime;
 	private float health;
-
+	
 	public Unit(int id, String unitName, Player playerOwner, Tile standingTile, TextureEnum assetEnum) {
 		Civilization.getInstance().getEventManager().addListener(ShapeRenderListener.class, this);
 
