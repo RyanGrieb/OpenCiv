@@ -2,24 +2,40 @@ package me.rhin.openciv.game.unit.type;
 
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.map.tile.Tile;
-import me.rhin.openciv.game.player.Player;
+import me.rhin.openciv.game.production.ProductionItem;
 import me.rhin.openciv.game.unit.Unit;
 import me.rhin.openciv.game.unit.UnitParameter;
-import me.rhin.openciv.ui.overlay.Overlay;
 
-public class Warrior extends Unit {
+public class Warrior implements ProductionItem {
 
-	public Warrior(UnitParameter unitParameter) {
-		super(unitParameter, TextureEnum.UNIT_WARRIOR);
-		this.canAttack = true;
+	public static class WarriorUnit extends Unit {
+		public WarriorUnit(UnitParameter unitParameter) {
+			super(unitParameter, TextureEnum.UNIT_WARRIOR);
+			this.canAttack = true;
+		}
+
+		@Override
+		public int getMovementCost(Tile tile) {
+
+			if (tile.getTileType().isWater())
+				return 1000000;
+			else
+				return tile.getTileType().getMovementCost();
+		}
 	}
 
 	@Override
-	public int getMovementCost(Tile tile) {
+	public int getProductionCost() {
+		return 0;
+	}
 
-		if (tile.getTileType().isWater())
-			return 1000000;
-		else
-			return tile.getTileType().getMovementCost();
+	@Override
+	public boolean meetsProductionRequirements() {
+		return true;
+	}
+
+	@Override
+	public String getName() {
+		return "Warrior";
 	}
 }

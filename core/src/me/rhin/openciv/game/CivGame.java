@@ -15,18 +15,14 @@ import me.rhin.openciv.game.map.tile.Tile;
 import me.rhin.openciv.game.player.Player;
 import me.rhin.openciv.game.unit.Unit;
 import me.rhin.openciv.game.unit.UnitParameter;
-import me.rhin.openciv.game.unit.type.Settler;
+import me.rhin.openciv.game.unit.type.Settler.SettlerUnit;
 import me.rhin.openciv.listener.AddUnitListener;
 import me.rhin.openciv.listener.DeleteUnitListener;
 import me.rhin.openciv.listener.FetchPlayerListener;
 import me.rhin.openciv.listener.FinishLoadingRequestListener;
-import me.rhin.openciv.listener.LeftClickListener;
 import me.rhin.openciv.listener.MoveUnitListener;
 import me.rhin.openciv.listener.PlayerConnectListener;
 import me.rhin.openciv.listener.PlayerListRequestListener;
-import me.rhin.openciv.listener.RelativeMouseMoveListener;
-import me.rhin.openciv.listener.RightClickListener;
-import me.rhin.openciv.listener.SelectUnitListener;
 import me.rhin.openciv.listener.SettleCityListener;
 import me.rhin.openciv.listener.TerritoryGrowListener;
 import me.rhin.openciv.listener.TurnTimeUpdateListener;
@@ -80,18 +76,19 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 	@Override
 	public void onUnitAdd(AddUnitPacket packet) {
 
+		// Find unit class using reflection & create an instance of it.
 		try {
 			Player playerOwner = players.get(packet.getPlayerOwner());
 			Tile tile = map.getTiles()[packet.getTileGridX()][packet.getTileGridY()];
 			UnitParameter unitParameter = new UnitParameter(packet.getUnitID(), packet.getUnitName(), playerOwner,
 					tile);
-			Class<? extends Unit> unitClass = (Class<? extends Unit>) Class
-					.forName("me.rhin.openciv.game.unit.type." + packet.getUnitName());
+			Class<? extends Unit> unitClass = (Class<? extends Unit>) Class.forName(
+					"me.rhin.openciv.game.unit.type." + packet.getUnitName() + "$" + packet.getUnitName() + "Unit");
 			Constructor<?> ctor = unitClass.getConstructor(UnitParameter.class);
 			Unit unit = (Unit) ctor.newInstance(new Object[] { unitParameter });
 			tile.addUnit(unit);
 			Civilization.getInstance().getScreenManager().getCurrentScreen().getStage().addActor(unit);
-			if (unit instanceof Settler && unit.getPlayerOwner().equals(player)) {
+			if (unit instanceof SettlerUnit && unit.getPlayerOwner().equals(player)) {
 				// Focus camera on unit.
 				Civilization.getInstance().getScreenManager().getCurrentScreen().setCameraPosition(unit.getX(),
 						unit.getY());

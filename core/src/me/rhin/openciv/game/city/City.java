@@ -13,6 +13,8 @@ import me.rhin.openciv.Civilization;
 import me.rhin.openciv.game.city.building.Building;
 import me.rhin.openciv.game.map.tile.Tile;
 import me.rhin.openciv.game.player.Player;
+import me.rhin.openciv.game.production.ProducibleItemManager;
+import me.rhin.openciv.game.production.ProductionItem;
 import me.rhin.openciv.listener.BuildingConstructedListener;
 import me.rhin.openciv.shared.packet.type.BuildingConstructedPacket;
 import me.rhin.openciv.shared.stat.StatLine;
@@ -25,6 +27,7 @@ public class City extends Actor implements BuildingConstructedListener {
 	private Player playerOwner;
 	private ArrayList<Tile> territory;
 	private ArrayList<Building> buildings;
+	private ProducibleItemManager producibleItemManager;
 	private StatLine statLine;
 	private CustomLabel nameLabel;
 
@@ -32,6 +35,7 @@ public class City extends Actor implements BuildingConstructedListener {
 		this.playerOwner = playerOwner;
 		this.territory = new ArrayList<>();
 		this.buildings = new ArrayList<>();
+		this.producibleItemManager = new ProducibleItemManager(this);
 		this.statLine = new StatLine();
 		setName(name);
 		this.nameLabel = new CustomLabel(name);
@@ -120,5 +124,9 @@ public class City extends Actor implements BuildingConstructedListener {
 
 	public Player getPlayerOwner() {
 		return playerOwner;
+	}
+
+	public ProducibleItemManager getProducibleItemManager() {
+		return producibleItemManager;
 	}
 }

@@ -7,10 +7,11 @@ import com.badlogic.gdx.math.Vector2;
 
 import me.rhin.openciv.server.Server;
 import me.rhin.openciv.server.game.Player;
+import me.rhin.openciv.server.game.city.ProductionItem;
 import me.rhin.openciv.server.game.map.GameMap;
 import me.rhin.openciv.server.game.map.tile.Tile;
 
-public abstract class Unit {
+public abstract class Unit implements ProductionItem {
 
 	private static int unitID = 0;
 
@@ -39,7 +40,7 @@ public abstract class Unit {
 	}
 
 	public abstract int getMovementCost(Tile tile);
-
+	
 	public boolean setTargetTile(Tile targetTile) {
 		if (targetTile == null)
 			return false;

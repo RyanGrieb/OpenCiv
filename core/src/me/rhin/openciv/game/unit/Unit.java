@@ -17,6 +17,7 @@ import me.rhin.openciv.game.AbstractAction;
 import me.rhin.openciv.game.map.GameMap;
 import me.rhin.openciv.game.map.tile.Tile;
 import me.rhin.openciv.game.player.Player;
+import me.rhin.openciv.game.production.ProductionItem;
 import me.rhin.openciv.listener.ShapeRenderListener;
 import me.rhin.openciv.shared.packet.type.MoveUnitPacket;
 import me.rhin.openciv.ui.window.type.UnitWindow;

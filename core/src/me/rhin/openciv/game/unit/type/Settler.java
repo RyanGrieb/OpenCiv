@@ -6,24 +6,27 @@ import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.AbstractAction;
 import me.rhin.openciv.game.map.tile.Tile;
+import me.rhin.openciv.game.production.ProductionItem;
 import me.rhin.openciv.game.unit.Unit;
 import me.rhin.openciv.game.unit.UnitParameter;
 import me.rhin.openciv.shared.packet.type.SettleCityPacket;
 
-public class Settler extends Unit {
+public class Settler implements ProductionItem {
 
-	public Settler(UnitParameter unitParameter) {
-		super(unitParameter, TextureEnum.UNIT_SETTLER);
-		customActions.add(new SettleAction(this));
-		this.canAttack = false;
-	}
+	public static class SettlerUnit extends Unit {
+		public SettlerUnit(UnitParameter unitParameter) {
+			super(unitParameter, TextureEnum.UNIT_SETTLER);
+			customActions.add(new SettleAction(this));
+			this.canAttack = false;
+		}
 
-	@Override
-	public int getMovementCost(Tile tile) {
-		if (tile.getTileType().isWater())
-			return 1000000;
-		else
-			return tile.getTileType().getMovementCost();
+		@Override
+		public int getMovementCost(Tile tile) {
+			if (tile.getTileType().isWater())
+				return 1000000;
+			else
+				return tile.getTileType().getMovementCost();
+		}
 	}
 
 	public static class SettleAction extends AbstractAction {
@@ -52,5 +55,20 @@ public class Settler extends Unit {
 			}
 			return true;
 		}
+	}
+
+	@Override
+	public int getProductionCost() {
+		return 0;
+	}
+
+	@Override
+	public boolean meetsProductionRequirements() {
+		return true;
+	}
+
+	@Override
+	public String getName() {
+		return "Settler";
 	}
 }

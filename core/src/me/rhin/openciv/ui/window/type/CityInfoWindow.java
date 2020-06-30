@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.g2d.Sprite;
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.city.City;
 import me.rhin.openciv.game.city.building.Building;
+import me.rhin.openciv.game.production.ProductionItem;
 import me.rhin.openciv.shared.stat.Stat;
 import me.rhin.openciv.ui.background.BlankBackground;
 import me.rhin.openciv.ui.button.ButtonManager;
@@ -14,6 +15,7 @@ import me.rhin.openciv.ui.label.CustomLabel;
 import me.rhin.openciv.ui.list.ContainerList;
 import me.rhin.openciv.ui.list.ListContainer.ListContainerType;
 import me.rhin.openciv.ui.list.type.ListBuilding;
+import me.rhin.openciv.ui.list.type.ListProductionItem;
 import me.rhin.openciv.ui.overlay.GameOverlay;
 import me.rhin.openciv.ui.window.AbstractWindow;
 
@@ -28,7 +30,8 @@ public class CityInfoWindow extends AbstractWindow {
 	private Sprite foodIcon, productionIcon, goldIcon, scienceIcon, heritageIcon;
 	private CustomLabel foodDescLabel, productionDescLabel, goldDescLabel, scienceDescLabel, heritageDescLabel;
 	private CustomLabel foodLabel, productionLabel, goldLabel, scienceLabel, heritageLabel;
-	private ContainerList containerList;
+	private ContainerList buildingContainerList;
+	private ContainerList productionContainerList;
 
 	public CityInfoWindow(City city) {
 		this.buttonManager = new ButtonManager(this);
@@ -116,15 +119,24 @@ public class CityInfoWindow extends AbstractWindow {
 		this.heritageLabel = new CustomLabel("+0");
 		addActor(heritageLabel);
 
-		this.containerList = new ContainerList(viewport.getWorldWidth() - 200, 200, 200, 200);
+		this.buildingContainerList = new ContainerList(viewport.getWorldWidth() - 200, 200, 200, 200);
 
 		for (Building building : city.getBuildings()) {
-			containerList.addItem(ListContainerType.CATEGORY, Building.class, new ListBuilding(building, 200, 45));
+			buildingContainerList.addItem(ListContainerType.CATEGORY, Building.class,
+					new ListBuilding(building, 200, 45));
 		}
-		addActor(containerList);
+		addActor(buildingContainerList);
 
-		this.setScrollFocus(containerList);
+		// FIXME: We need to set our scroll focus automatically when the user moves
+		// their mouse inside
+		this.setScrollFocus(buildingContainerList);
 
+		this.productionContainerList = new ContainerList(0, 0, 200, 200);
+		for (ProductionItem productionItem : city.getProducibleItemManager().getProducibleItems()) {
+			productionContainerList.addItem(ListContainerType.CATEGORY, ProductionItem.class,
+					new ListProductionItem(productionItem, 200, 45));
+		}
+		addActor(productionContainerList);
 		updateStatValues();
 	}
 

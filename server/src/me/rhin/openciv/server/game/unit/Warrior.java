@@ -16,4 +16,14 @@ public class Warrior extends Unit {
 		else
 			return tile.getTileType().getMovementCost();
 	}
+
+	@Override
+	public String getName() {
+		return "Warrior";
+	}
+
+	@Override
+	public int getProductionCost() {
+		return 0;
+	}
 }

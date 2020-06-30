@@ -16,4 +16,14 @@ public class Settler extends Unit {
 		else
 			return tile.getTileType().getMovementCost();
 	}
+
+	@Override
+	public String getName() {
+		return "Settler";
+	}
+
+	@Override
+	public int getProductionCost() {
+		return 0;
+	}
 }

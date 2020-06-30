@@ -16,4 +16,14 @@ public class Scout extends Unit {
 		else
 			return tile.getTileType().getMovementCost();
 	}
+
+	@Override
+	public String getName() {
+		return "Scout";
+	}
+
+	@Override
+	public int getProductionCost() {
+		return 0;
+	}
 }

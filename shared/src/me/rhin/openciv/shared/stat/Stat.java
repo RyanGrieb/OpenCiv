@@ -3,6 +3,7 @@ package me.rhin.openciv.shared.stat;
 public enum Stat {
 	GOLD, 
 	GOLD_GAIN(GOLD),
+	MAINTENANCE(GOLD),
 	HERITAGE,
 	HERITAGE_GAIN(HERITAGE),
 	RESEARCH_GAIN,
@@ -12,12 +13,14 @@ public enum Stat {
 	private Stat addedStat;
 
 	private Stat() {
-		//An empty enum means the stat is APPLIED to whatever is applicable to the resource.
+		// An empty enum means the stat is APPLIED to whatever is applicable to the
+		// resource.
 	}
 
 	private Stat(Stat addedStat) {
 		this.addedStat = addedStat;
-		//A non-empty enum means the stat is ACCUMULATED to whatever is applicable to the resource.
+		// A non-empty enum means the stat is ACCUMULATED to whatever is applicable to
+		// the resource.
 	}
 
 	public boolean isGained() {

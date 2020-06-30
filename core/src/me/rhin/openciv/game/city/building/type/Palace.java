@@ -20,4 +20,14 @@ public class Palace extends Building {
 		return "Palace";
 	}
 
+	@Override
+	public int getProductionCost() {
+		return -1;
+	}
+
+	@Override
+	public boolean meetsProductionRequirements() {
+		return false;
+	}
+
 }

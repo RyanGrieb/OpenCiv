@@ -16,4 +16,14 @@ public class Galley extends Unit {
 		else
 			return tile.getTileType().getMovementCost();
 	}
+
+	@Override
+	public String getName() {
+		return "Galley";
+	}
+
+	@Override
+	public int getProductionCost() {
+		return 0;
+	}
 }

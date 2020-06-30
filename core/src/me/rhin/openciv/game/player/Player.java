@@ -7,6 +7,8 @@ import com.badlogic.gdx.graphics.Color;
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.game.city.City;
 import me.rhin.openciv.game.map.tile.Tile;
+import me.rhin.openciv.game.production.ProducibleItemManager;
+import me.rhin.openciv.game.research.ResearchTree;
 import me.rhin.openciv.game.unit.Unit;
 import me.rhin.openciv.listener.CityStatUpdateListener;
 import me.rhin.openciv.listener.LeftClickListener;
@@ -31,12 +33,14 @@ public class Player implements RelativeMouseMoveListener, LeftClickListener, Rig
 	private Unit selectedUnit;
 	private ArrayList<City> ownedCities;
 	private StatLine statLine;
+	private ResearchTree researchTree;
 	private boolean rightMouseHeld;
 
 	public Player(String name) {
 		this.name = name;
 		this.ownedCities = new ArrayList<>();
 		this.statLine = new StatLine();
+		this.researchTree = new ResearchTree();
 
 		Civilization.getInstance().getEventManager().addListener(RelativeMouseMoveListener.class, this);
 		Civilization.getInstance().getEventManager().addListener(LeftClickListener.class, this);
@@ -122,7 +126,7 @@ public class Player implements RelativeMouseMoveListener, LeftClickListener, Rig
 		City city = getCityFromName(packet.getCityName());
 		city.setStatLine(StatLine.fromPacket(packet));
 	}
-
+	
 	public String getName() {
 		return name;
 	}
@@ -146,7 +150,7 @@ public class Player implements RelativeMouseMoveListener, LeftClickListener, Rig
 
 		return null;
 	}
-
+	
 	// FIXME: The color should really be defined in the constructor
 	public void setColor(Color color) {
 		this.color = color;
@@ -154,5 +158,9 @@ public class Player implements RelativeMouseMoveListener, LeftClickListener, Rig
 
 	public Color getColor() {
 		return color;
+	}
+
+	public ResearchTree getResearchTree() {
+		return researchTree;
 	}
 }
