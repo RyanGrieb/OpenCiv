@@ -4,14 +4,13 @@ import com.badlogic.gdx.Application;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.profiling.GLProfiler;
 
 import me.rhin.openciv.asset.AssetHandler;
 import me.rhin.openciv.game.CivGame;
 import me.rhin.openciv.networking.NetworkManager;
 import me.rhin.openciv.shared.listener.EventManager;
-import me.rhin.openciv.ui.font.CustomFont;
+import me.rhin.openciv.ui.font.FontHandler;
 import me.rhin.openciv.ui.screen.AbstractScreen;
 import me.rhin.openciv.ui.screen.ScreenEnum;
 import me.rhin.openciv.ui.screen.ScreenManager;
@@ -30,8 +29,8 @@ public class Civilization extends Game {
 	private AssetHandler assetHandler;
 	private EventManager eventManager;
 	private ScreenManager screenManager;
-	private CustomFont customFont;
 	private NetworkManager networkManager;
+	private FontHandler fontHandler;
 
 	public static Civilization getInstance() {
 		return instance;
@@ -47,8 +46,8 @@ public class Civilization extends Game {
 		assetHandler = new AssetHandler();
 		eventManager = new EventManager();
 		screenManager = new ScreenManager();
-		customFont = new CustomFont();
 		networkManager = new NetworkManager();
+		fontHandler = new FontHandler();
 		instance = this;
 
 		screenManager.setScreen(ScreenEnum.LOADING);
@@ -73,10 +72,6 @@ public class Civilization extends Game {
 		return screenManager;
 	}
 
-	public BitmapFont getFont() {
-		return customFont.getFont();
-	}
-
 	public NetworkManager getNetworkManager() {
 		return networkManager;
 	}
@@ -96,5 +91,9 @@ public class Civilization extends Game {
 	// FIXME: We really shouldn't be casting a specific screen here
 	public CivGame getGame() {
 		return ((InGameScreen) screenManager.getCurrentScreen()).getGame();
+	}
+
+	public FontHandler getFontHandler() {
+		return fontHandler;
 	}
 }

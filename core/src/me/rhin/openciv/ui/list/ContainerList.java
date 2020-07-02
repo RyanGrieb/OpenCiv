@@ -29,9 +29,8 @@ public class ContainerList extends Actor {
 				// FIXME: We shouldn't use a low level listener for this. We shouldn't have to
 				// check for the bounds here.
 
-				if (!Civilization.getInstance().getWindowManager().allowsInput()) {
-					if (!Civilization.getInstance().getWindowManager().isDisabledWindow(getStage()))
-						return false;
+				if (!Civilization.getInstance().getWindowManager().allowsInput(event.getListenerActor())) {
+					return false;
 				}
 
 				if (event.getStageX() >= getX() && event.getStageY() >= getY())

@@ -1,6 +1,6 @@
 package me.rhin.openciv.listener;
 
-import java.util.ArrayList;
+import java.util.Queue;
 
 import me.rhin.openciv.shared.listener.Event;
 import me.rhin.openciv.shared.listener.Listener;
@@ -14,7 +14,7 @@ public interface ServerConnectListener extends Listener {
 		}
 
 		@Override
-		public void fire(ArrayList<ServerConnectListener> listeners) {
+		public void fire(Queue<ServerConnectListener> listeners) {
 			for (ServerConnectListener listener : listeners) {
 				listener.onServerConnect();
 			}

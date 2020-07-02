@@ -1,39 +1,23 @@
 package me.rhin.openciv.ui.window;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.InputMultiplexer;
+import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.utils.viewport.StretchViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
 import me.rhin.openciv.Civilization;
 
-public abstract class AbstractWindow extends Stage {
+public abstract class AbstractWindow extends Group {
 
+	protected Stage stage;
 	protected Viewport viewport;
 
 	public AbstractWindow() {
-		super(new StretchViewport(800, 600));
-		this.viewport = getViewport();
-
-		InputMultiplexer inputMultiplexer = Civilization.getInstance().getCurrentScreen().getInputMultiplexer();
-		inputMultiplexer.addProcessor(this);
-		Gdx.input.setInputProcessor(inputMultiplexer);
+		this.stage = Civilization.getInstance().getScreenManager().getCurrentScreen().getOverlayStage();
+		this.viewport = Civilization.getInstance().getScreenManager().getCurrentScreen().getViewport();
 	}
 
 	public abstract boolean disablesInput();
 
 	public abstract boolean closesOtherWindows();
-
-	@Override
-	public void dispose() {
-		super.dispose();
-		Civilization.getInstance().getCurrentScreen().getInputMultiplexer().removeProcessor(this);
-	}
-
-	public void onResize(int width, int height) {
-		viewport.setScreenSize(width, height);
-		viewport.update(width, height, true);
-		viewport.setScreenSize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-	}
 }

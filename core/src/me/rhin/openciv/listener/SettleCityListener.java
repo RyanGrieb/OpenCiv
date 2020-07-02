@@ -1,13 +1,12 @@
 package me.rhin.openciv.listener;
 
-import java.util.ArrayList;
+import java.util.Queue;
 
 import com.badlogic.gdx.utils.Json;
 
 import me.rhin.openciv.networking.PacketParameter;
 import me.rhin.openciv.shared.listener.Event;
 import me.rhin.openciv.shared.listener.Listener;
-import me.rhin.openciv.shared.packet.type.PlayerConnectPacket;
 import me.rhin.openciv.shared.packet.type.SettleCityPacket;
 
 public interface SettleCityListener extends Listener {
@@ -24,7 +23,7 @@ public interface SettleCityListener extends Listener {
 		}
 
 		@Override
-		public void fire(ArrayList<SettleCityListener> listeners) {
+		public void fire(Queue<SettleCityListener> listeners) {
 			for (SettleCityListener listener : listeners) {
 				listener.onSettleCity(packet);
 			}

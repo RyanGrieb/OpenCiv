@@ -1,6 +1,6 @@
 package me.rhin.openciv.server.listener;
 
-import java.util.ArrayList;
+import java.util.Queue;
 
 import org.java_websocket.WebSocket;
 
@@ -21,7 +21,7 @@ public interface MapRequestListener extends Listener {
 		}
 
 		@Override
-		public void fire(ArrayList<MapRequestListener> listeners) {
+		public void fire(Queue<MapRequestListener> listeners) {
 			for (MapRequestListener listener : listeners) {
 				listener.onMapRequest(conn);
 			}

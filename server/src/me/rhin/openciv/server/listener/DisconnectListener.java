@@ -1,6 +1,6 @@
 package me.rhin.openciv.server.listener;
 
-import java.util.ArrayList;
+import java.util.Queue;
 
 import org.java_websocket.WebSocket;
 
@@ -20,7 +20,7 @@ public interface DisconnectListener extends Listener {
 		}
 
 		@Override
-		public void fire(ArrayList<DisconnectListener> listeners) {
+		public void fire(Queue<DisconnectListener> listeners) {
 			for (DisconnectListener listener : listeners) {
 				listener.onDisconnect(conn);
 			}

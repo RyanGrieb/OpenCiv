@@ -17,9 +17,9 @@ import me.rhin.openciv.ui.button.ButtonManager;
 import me.rhin.openciv.ui.button.type.BackTitleScreenButton;
 import me.rhin.openciv.ui.button.type.ConnectServerButton;
 import me.rhin.openciv.ui.label.CustomLabel;
-import me.rhin.openciv.ui.overlay.TitleOverlay;
 import me.rhin.openciv.ui.screen.AbstractScreen;
 import me.rhin.openciv.ui.screen.ScreenEnum;
+import me.rhin.openciv.ui.window.type.TitleOverlay;
 
 public class ServerSelectScreen extends AbstractScreen implements ServerConnectListener {
 
@@ -36,7 +36,8 @@ public class ServerSelectScreen extends AbstractScreen implements ServerConnectL
 		eventManager.addListener(ServerConnectListener.class, this);
 
 		this.titleOverlay = new TitleOverlay();
-
+		stage.addActor(titleOverlay);
+		
 		this.buttonManager = new ButtonManager(getStage());
 
 		buttonManager.addButton(new ConnectServerButton(this, viewport.getWorldWidth() / 2 - 150 / 2,
@@ -68,8 +69,6 @@ public class ServerSelectScreen extends AbstractScreen implements ServerConnectL
 
 		// DEBUG
 		ipTextField.setText("localhost");
-
-		overrideGlClear();
 	}
 
 	@Override
@@ -80,10 +79,6 @@ public class ServerSelectScreen extends AbstractScreen implements ServerConnectL
 
 	@Override
 	public void render(float delta) {
-		Gdx.gl.glClearColor(0, 0.253F, 0.304F, 1);
-		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-		titleOverlay.act();
-		titleOverlay.draw();
 		super.render(delta);
 
 		eventManager.fireEvent(MouseMoveEvent.INSTANCE);

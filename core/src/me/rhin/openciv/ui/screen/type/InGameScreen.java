@@ -2,12 +2,7 @@ package me.rhin.openciv.ui.screen.type;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
-import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.utils.TimeUtils;
 
 import me.rhin.openciv.Civilization;
@@ -16,12 +11,10 @@ import me.rhin.openciv.listener.LeftClickListener.LeftClickEvent;
 import me.rhin.openciv.listener.MouseMoveListener.MouseMoveEvent;
 import me.rhin.openciv.listener.RelativeMouseMoveListener.RelativeMouseMoveEvent;
 import me.rhin.openciv.listener.RightClickListener.RightClickEvent;
-import me.rhin.openciv.listener.ShapeRenderListener.ShapeRenderEvent;
 import me.rhin.openciv.shared.listener.EventManager;
-import me.rhin.openciv.ui.overlay.GameOverlay;
 import me.rhin.openciv.ui.screen.AbstractScreen;
-import me.rhin.openciv.ui.window.WindowManager;
 import me.rhin.openciv.ui.window.type.EscWindow;
+import me.rhin.openciv.ui.window.type.GameOverlay;
 import me.rhin.openciv.util.ClickType;
 
 public class InGameScreen extends AbstractScreen {
@@ -29,7 +22,6 @@ public class InGameScreen extends AbstractScreen {
 	private GameOverlay gameOverlay;
 	private EventManager eventManager;
 	private CivGame game;
-	private ShapeRenderer shapeRenderer;
 
 	long lastTimeCounted;
 	private float frameRate;
@@ -37,9 +29,10 @@ public class InGameScreen extends AbstractScreen {
 	public InGameScreen() {
 		this.eventManager = Civilization.getInstance().getEventManager();
 		eventManager.clearEvents();
-		
+
 		this.gameOverlay = new GameOverlay();
-		
+		overlayStage.addActor(gameOverlay);
+
 		lastTimeCounted = TimeUtils.millis();
 		frameRate = Gdx.graphics.getFramesPerSecond();
 	}
@@ -47,15 +40,7 @@ public class InGameScreen extends AbstractScreen {
 	@Override
 	public void show() {
 		super.show();
-
 		this.game = new CivGame();
-		this.shapeRenderer = new ShapeRenderer();
-		ShapeRenderEvent.setShapeRenderer(shapeRenderer);
-
-		Label.LabelStyle label1Style = new Label.LabelStyle();
-		label1Style.font = Civilization.getInstance().getFont();
-		label1Style.fontColor = Color.WHITE;
-
 		getCamera().zoom = 0.6F; // 0.8 Default
 	}
 
@@ -64,28 +49,14 @@ public class InGameScreen extends AbstractScreen {
 		super.render(delta);
 		handleInput();
 
-		Gdx.gl.glEnable(GL20.GL_BLEND);
-		Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
-		shapeRenderer.setProjectionMatrix(camera.combined);
-		shapeRenderer.begin(ShapeType.Line);
-		Civilization.getInstance().getEventManager().fireEvent(ShapeRenderEvent.INSTANCE);
-		shapeRenderer.end();
-		Gdx.gl.glDisable(GL20.GL_BLEND);
-
 		Civilization.getInstance().getEventManager().fireEvent(MouseMoveEvent.INSTANCE);
 		Civilization.getInstance().getEventManager().fireEvent(RelativeMouseMoveEvent.INSTANCE);
 
 		long timeSince = TimeUtils.timeSinceMillis(lastTimeCounted);
 		if (timeSince >= 500) {
 			frameRate = Gdx.graphics.getFramesPerSecond();
+			gameOverlay.getFPSLabel().setText("FPS: " + frameRate);
 		}
-
-		gameOverlay.getFPSLabel().setText("FPS: " + frameRate);
-
-		windowManager.onRender();
-
-		gameOverlay.act();
-		gameOverlay.draw();
 	}
 
 	@Override

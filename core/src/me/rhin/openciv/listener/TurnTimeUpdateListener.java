@@ -1,6 +1,6 @@
 package me.rhin.openciv.listener;
 
-import java.util.ArrayList;
+import java.util.Queue;
 
 import com.badlogic.gdx.utils.Json;
 
@@ -23,7 +23,7 @@ public interface TurnTimeUpdateListener extends Listener {
 		}
 
 		@Override
-		public void fire(ArrayList<TurnTimeUpdateListener> listeners) {
+		public void fire(Queue<TurnTimeUpdateListener> listeners) {
 			for (TurnTimeUpdateListener listener : listeners) {
 				listener.onTurnTimeUpdate(packet);
 			}

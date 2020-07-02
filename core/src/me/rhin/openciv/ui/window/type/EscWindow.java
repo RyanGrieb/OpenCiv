@@ -12,7 +12,7 @@ public class EscWindow extends AbstractWindow {
 
 	public EscWindow() {
 		this.buttonManager = new ButtonManager(this);
-		
+
 		BlankBackground blankBackground = new BlankBackground(viewport.getWorldWidth() / 2 - 200 / 2,
 				viewport.getWorldHeight() / 2 - 400 / 2, 200, 400);
 		addActor(blankBackground);
@@ -23,7 +23,7 @@ public class EscWindow extends AbstractWindow {
 				blankBackground.getY() + blankBackground.getHeight() - 110, 150, 45));
 
 	}
-	
+
 	@Override
 	public boolean disablesInput() {
 		return true;

@@ -6,11 +6,14 @@ import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
 import me.rhin.openciv.Civilization;
+import me.rhin.openciv.listener.ShapeRenderListener.ShapeRenderEvent;
 import me.rhin.openciv.ui.window.WindowManager;
 
 public abstract class AbstractScreen implements Screen, InputProcessor {
@@ -21,48 +24,64 @@ public abstract class AbstractScreen implements Screen, InputProcessor {
 	protected float camY;
 	// TODO: Make a overlayViewport.
 	protected Viewport viewport;
+	private Viewport overlayViewport;
 	protected Stage stage;
+	protected Stage overlayStage;
 	private InputMultiplexer inputMultiplexer;
-	private boolean glClear;
+	private ShapeRenderer shapeRenderer;
 
 	protected AbstractScreen() {
 		this.windowManager = new WindowManager();
-		camera = new OrthographicCamera();
+		this.camera = new OrthographicCamera();
 		// FIXME: Set a global var for width & height for game.
 		this.camX = 800 / 2;
 		this.camY = 600 / 2;
-		viewport = new StretchViewport(800, 600, camera);
-		stage = new Stage(viewport);
-		viewport.apply();
+		this.viewport = new StretchViewport(800, 600, camera);
+		this.overlayViewport = new StretchViewport(800, 600);
 
-		this.glClear = true;
+		this.stage = new Stage(viewport);
+		this.overlayStage = new Stage(overlayViewport);
+
+		this.shapeRenderer = new ShapeRenderer();
+		ShapeRenderEvent.setShapeRenderer(shapeRenderer);
 	}
 
 	@Override
 	public void show() {
-		// Input processor for MY stuff
-		InputProcessor screenInputProcessor = this;
-		// Input processor for libgdx stuff
-		InputProcessor stageInputProcessor = stage;
 		inputMultiplexer = new InputMultiplexer();
-		inputMultiplexer.addProcessor(stageInputProcessor);
-		inputMultiplexer.addProcessor(screenInputProcessor);
+		inputMultiplexer.addProcessor(stage);
+		inputMultiplexer.addProcessor(overlayStage);
+		inputMultiplexer.addProcessor(this);
 		Gdx.input.setInputProcessor(inputMultiplexer);
 	}
 
 	@Override
 	public void render(float delta) {
-		if (glClear) {
-			Gdx.gl.glClearColor(0, 0.253F, 0.304F, 1);
-			Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-		}
+		Gdx.gl.glClearColor(0, 0.253F, 0.304F, 1);
+		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
 		camera.position.x = camX;
 		camera.position.y = camY;
 		camera.update();
 
+		// Bottom stage
 		stage.act();
 		stage.draw();
+
+		Gdx.gl.glEnable(GL20.GL_BLEND);
+		Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
+		shapeRenderer.setProjectionMatrix(camera.combined);
+		shapeRenderer.begin(ShapeType.Line);
+		Civilization.getInstance().getEventManager().fireEvent(ShapeRenderEvent.INSTANCE);
+		shapeRenderer.end();
+		Gdx.gl.glDisable(GL20.GL_BLEND);
+
+		// Middle Stage
+
+		// Top Stage
+
+		overlayStage.act();
+		overlayStage.draw();
 
 		if (Civilization.DEBUG_GL) {
 			System.out.println("  Drawcalls: " + Civilization.GL_PROFILER.getDrawCalls() + ", Calls: "
@@ -76,18 +95,21 @@ public abstract class AbstractScreen implements Screen, InputProcessor {
 
 	@Override
 	public void resize(int width, int height) {
-		windowManager.onResize(width, height);
 		viewport.setScreenSize(width, height);
 		viewport.update(width, height, true);
 		viewport.setScreenSize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-		// stage.getCamera().viewportWidth = Gdx.graphics.getWidth();
-		// stage.getCamera().viewportHeight = Gdx.graphics.getHeight();
+
+		overlayViewport.setScreenSize(width, height);
+		overlayViewport.update(width, height, true);
+		overlayViewport.setScreenSize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+
 		stage.getCamera().position.set(stage.getCamera().viewportWidth / 2, stage.getCamera().viewportHeight / 2, 0);
 	}
 
 	@Override
 	public void dispose() {
 		stage.dispose();
+		overlayStage.dispose();
 	}
 
 	@Override
@@ -145,10 +167,6 @@ public abstract class AbstractScreen implements Screen, InputProcessor {
 		return false;
 	}
 
-	public void overrideGlClear() {
-		glClear = false;
-	}
-
 	public void setCameraPosition(float camX, float camY) {
 		this.camX = camX;
 		this.camY = camY;
@@ -165,6 +183,10 @@ public abstract class AbstractScreen implements Screen, InputProcessor {
 
 	public Stage getStage() {
 		return stage;
+	}
+
+	public Stage getOverlayStage() {
+		return overlayStage;
 	}
 
 	public OrthographicCamera getCamera() {

@@ -1,6 +1,6 @@
 package me.rhin.openciv.listener;
 
-import java.util.ArrayList;
+import java.util.Queue;
 
 import com.badlogic.gdx.utils.Json;
 
@@ -23,7 +23,7 @@ public interface PlayerDisconnectListener extends Listener {
 		}
 
 		@Override
-		public void fire(ArrayList<PlayerDisconnectListener> listeners) {
+		public void fire(Queue<PlayerDisconnectListener> listeners) {
 			for (PlayerDisconnectListener listener : listeners) {
 				listener.onPlayerDisconnect(packet);
 			}

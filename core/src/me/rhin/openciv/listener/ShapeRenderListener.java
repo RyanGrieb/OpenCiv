@@ -1,6 +1,6 @@
 package me.rhin.openciv.listener;
 
-import java.util.ArrayList;
+import java.util.Queue;
 
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 
@@ -21,7 +21,7 @@ public interface ShapeRenderListener extends Listener {
 		}
 
 		@Override
-		public void fire(ArrayList<ShapeRenderListener> listeners) {
+		public void fire(Queue<ShapeRenderListener> listeners) {
 			for (ShapeRenderListener listener : listeners) {
 				listener.onShapeRender(shapeRenderer);
 			}

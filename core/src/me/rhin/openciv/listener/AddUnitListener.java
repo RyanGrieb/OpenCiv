@@ -1,6 +1,6 @@
 package me.rhin.openciv.listener;
 
-import java.util.ArrayList;
+import java.util.Queue;
 
 import com.badlogic.gdx.utils.Json;
 
@@ -27,7 +27,7 @@ public interface AddUnitListener extends Listener {
 		}
 
 		@Override
-		public void fire(ArrayList<AddUnitListener> listeners) {
+		public void fire(Queue<AddUnitListener> listeners) {
 			for (AddUnitListener listener : listeners) {
 				listener.onUnitAdd(packet);
 			}

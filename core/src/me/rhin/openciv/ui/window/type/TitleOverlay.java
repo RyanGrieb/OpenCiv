@@ -1,12 +1,13 @@
-package me.rhin.openciv.ui.overlay;
+package me.rhin.openciv.ui.window.type;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
+import com.badlogic.gdx.scenes.scene2d.Actor;
 
 import me.rhin.openciv.asset.TextureEnum;
-import me.rhin.openciv.game.unit.Unit;
 
-public class TitleOverlay extends Overlay {
+public class TitleOverlay extends Actor {
 
 	private Sprite backgroundSprite;
 	
@@ -17,9 +18,7 @@ public class TitleOverlay extends Overlay {
 	}
 
 	@Override
-	public void draw() {
-		getBatch().begin();
-		backgroundSprite.draw(getBatch());
-		getBatch().end();
+	public void draw (Batch batch, float parentAlpha) {
+		backgroundSprite.draw(batch);
 	}
 }

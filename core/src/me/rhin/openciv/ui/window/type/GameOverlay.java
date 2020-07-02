@@ -1,9 +1,10 @@
-package me.rhin.openciv.ui.overlay;
+package me.rhin.openciv.ui.window.type;
 
 import me.rhin.openciv.ui.game.StatusBar;
 import me.rhin.openciv.ui.label.CustomLabel;
+import me.rhin.openciv.ui.window.AbstractWindow;
 
-public class GameOverlay extends Overlay {
+public class GameOverlay extends AbstractWindow {
 
 	public static final int HEIGHT = 20;
 
@@ -22,6 +23,16 @@ public class GameOverlay extends Overlay {
 
 	public CustomLabel getFPSLabel() {
 		return fpsLabel;
+	}
+
+	@Override
+	public boolean disablesInput() {
+		return false;
+	}
+
+	@Override
+	public boolean closesOtherWindows() {
+		return false;
 	}
 
 }

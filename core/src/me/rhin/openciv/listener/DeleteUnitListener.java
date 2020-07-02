@@ -1,6 +1,6 @@
 package me.rhin.openciv.listener;
 
-import java.util.ArrayList;
+import java.util.Queue;
 
 import com.badlogic.gdx.utils.Json;
 
@@ -27,7 +27,7 @@ public interface DeleteUnitListener extends Listener {
 		}
 
 		@Override
-		public void fire(ArrayList<DeleteUnitListener> listeners) {
+		public void fire(Queue<DeleteUnitListener> listeners) {
 			for (DeleteUnitListener listener : listeners) {
 				listener.onUnitDelete(packet);
 			}

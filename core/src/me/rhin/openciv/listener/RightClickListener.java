@@ -1,6 +1,6 @@
 package me.rhin.openciv.listener;
 
-import java.util.ArrayList;
+import java.util.Queue;
 
 import me.rhin.openciv.shared.listener.Event;
 import me.rhin.openciv.shared.listener.Listener;
@@ -21,7 +21,7 @@ public interface RightClickListener extends Listener {
 		}
 
 		@Override
-		public void fire(ArrayList<RightClickListener> listeners) {
+		public void fire(Queue<RightClickListener> listeners) {
 			for (RightClickListener listener : listeners) {
 				listener.onRightClick(clickType, x, y);
 			}

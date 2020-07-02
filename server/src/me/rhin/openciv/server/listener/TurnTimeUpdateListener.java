@@ -1,6 +1,6 @@
 package me.rhin.openciv.server.listener;
 
-import java.util.ArrayList;
+import java.util.Queue;
 
 import me.rhin.openciv.shared.listener.Event;
 import me.rhin.openciv.shared.listener.Listener;
@@ -18,7 +18,7 @@ public interface TurnTimeUpdateListener extends Listener {
 		}
 
 		@Override
-		public void fire(ArrayList<TurnTimeUpdateListener> listeners) {
+		public void fire(Queue<TurnTimeUpdateListener> listeners) {
 			for (TurnTimeUpdateListener listener : listeners) {
 				listener.onTurnTimeUpdate(turnTime);
 			}

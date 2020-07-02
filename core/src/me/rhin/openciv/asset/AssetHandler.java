@@ -2,6 +2,7 @@ package me.rhin.openciv.asset;
 
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.assets.loaders.SkinLoader;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 
@@ -15,6 +16,8 @@ public class AssetHandler extends AssetManager {
 		load("atlas/icon.atlas", TextureAtlas.class);
 		load("skin/uiskin.atlas", TextureAtlas.class);
 		load("skin/uiskin.json", Skin.class, new SkinLoader.SkinParameter("skin/uiskin.atlas"));
+		load("fonts/font.fnt", BitmapFont.class);
+
 	}
 
 	@Override

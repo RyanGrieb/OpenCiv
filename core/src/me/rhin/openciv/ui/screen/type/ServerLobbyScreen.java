@@ -25,9 +25,9 @@ import me.rhin.openciv.shared.packet.type.PlayerListRequestPacket;
 import me.rhin.openciv.ui.button.ButtonManager;
 import me.rhin.openciv.ui.button.type.MPStartButton;
 import me.rhin.openciv.ui.label.CustomLabel;
-import me.rhin.openciv.ui.overlay.TitleOverlay;
 import me.rhin.openciv.ui.screen.AbstractScreen;
 import me.rhin.openciv.ui.screen.ScreenEnum;
+import me.rhin.openciv.ui.window.type.TitleOverlay;
 
 public class ServerLobbyScreen extends AbstractScreen
 		implements PlayerConnectListener, PlayerDisconnectListener, PlayerListRequestListener, GameStartListener {
@@ -44,7 +44,8 @@ public class ServerLobbyScreen extends AbstractScreen
 		eventManager.clearEvents();
 
 		this.titleOverlay = new TitleOverlay();
-
+		stage.addActor(titleOverlay);
+		
 		eventManager.addListener(PlayerConnectListener.class, this);
 		eventManager.addListener(PlayerDisconnectListener.class, this);
 		eventManager.addListener(PlayerListRequestListener.class, this);
@@ -63,8 +64,6 @@ public class ServerLobbyScreen extends AbstractScreen
 		buttonManager.addButton(new MPStartButton(viewport.getWorldWidth() / 2 - 150 / 2, 50, 150, 45));
 
 		requestPlayerList();
-
-		overrideGlClear();
 	}
 
 	@Override
@@ -74,10 +73,6 @@ public class ServerLobbyScreen extends AbstractScreen
 
 	@Override
 	public void render(float delta) {
-		Gdx.gl.glClearColor(0, 0.253F, 0.304F, 1);
-		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-		titleOverlay.act();
-		titleOverlay.draw();
 		super.render(delta);
 		eventManager.fireEvent(MouseMoveEvent.INSTANCE);
 	}

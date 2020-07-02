@@ -1,7 +1,7 @@
 package me.rhin.openciv.ui.window.type;
 
-import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
+import com.badlogic.gdx.scenes.scene2d.Actor;
 
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.city.City;
@@ -16,7 +16,6 @@ import me.rhin.openciv.ui.list.ContainerList;
 import me.rhin.openciv.ui.list.ListContainer.ListContainerType;
 import me.rhin.openciv.ui.list.type.ListBuilding;
 import me.rhin.openciv.ui.list.type.ListProductionItem;
-import me.rhin.openciv.ui.overlay.GameOverlay;
 import me.rhin.openciv.ui.window.AbstractWindow;
 
 public class CityInfoWindow extends AbstractWindow {
@@ -36,7 +35,6 @@ public class CityInfoWindow extends AbstractWindow {
 	public CityInfoWindow(City city) {
 		this.buttonManager = new ButtonManager(this);
 		this.city = city;
-
 		buttonManager.addButton(new CityInfoCloseButton(viewport.getWorldWidth() / 2 - 150 / 2, 50, 150, 45));
 
 		BlankBackground blankBackground = new BlankBackground(2,
@@ -129,7 +127,7 @@ public class CityInfoWindow extends AbstractWindow {
 
 		// FIXME: We need to set our scroll focus automatically when the user moves
 		// their mouse inside
-		this.setScrollFocus(buildingContainerList);
+		stage.setScrollFocus(buildingContainerList);
 
 		this.productionContainerList = new ContainerList(0, 0, 200, 200);
 		for (ProductionItem productionItem : city.getProducibleItemManager().getProducibleItems()) {
@@ -140,18 +138,12 @@ public class CityInfoWindow extends AbstractWindow {
 		updateStatValues();
 	}
 
-	@Override
-	public void draw() {
-		super.draw();
-		Batch batch = getBatch();
-		batch.begin();
-		foodIcon.draw(batch);
-		productionIcon.draw(batch);
-		goldIcon.draw(batch);
-		scienceIcon.draw(batch);
-		heritageIcon.draw(batch);
-		batch.end();
-	}
+	/*
+	 * @Override public void draw() { super.draw(); Batch batch = getBatch();
+	 * batch.begin(); foodIcon.draw(batch); productionIcon.draw(batch);
+	 * goldIcon.draw(batch); scienceIcon.draw(batch); heritageIcon.draw(batch);
+	 * batch.end(); }
+	 */
 
 	@Override
 	public boolean disablesInput() {

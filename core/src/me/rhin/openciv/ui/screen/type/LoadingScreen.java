@@ -12,16 +12,16 @@ import me.rhin.openciv.ui.screen.ScreenEnum;
 public class LoadingScreen extends AbstractScreen {
 
 	private AssetHandler assetHandler;
-	private CustomLabel loadingLabel;
+	//private CustomLabel loadingLabel;
 
 	public LoadingScreen() {
 		this.assetHandler = Civilization.getInstance().getAssetHandler();
 
-		this.loadingLabel = new CustomLabel("Loading: 0%");
-		loadingLabel.setPosition(Gdx.graphics.getWidth() / 2 - loadingLabel.getWidth() / 2,
-				viewport.getWorldHeight() / 1.1F);
-		loadingLabel.setAlignment(Align.center);
-		stage.addActor(loadingLabel);
+		//this.loadingLabel = new CustomLabel("Loading: 0%");
+		//loadingLabel.setPosition(Gdx.graphics.getWidth() / 2 - loadingLabel.getWidth() / 2,
+		//		viewport.getWorldHeight() / 1.1F);
+		//loadingLabel.setAlignment(Align.center);
+		//stage.addActor(loadingLabel);
 	}
 
 	@Override
@@ -34,10 +34,11 @@ public class LoadingScreen extends AbstractScreen {
 		super.render(delta);
 
 		if (assetHandler.update()) {
+			Civilization.getInstance().getFontHandler().loadStyles();
 			Civilization.getInstance().getScreenManager().setScreen(ScreenEnum.TITLE);
 		} else {
 			float progress = assetHandler.getProgress();
-			loadingLabel.setText(("Loading: " + (int) (progress * 100) + "%"));
+			//loadingLabel.setText(("Loading: " + (int) (progress * 100) + "%"));
 		}
 	}
 }

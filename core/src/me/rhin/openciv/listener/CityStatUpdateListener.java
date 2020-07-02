@@ -1,6 +1,6 @@
 package me.rhin.openciv.listener;
 
-import java.util.ArrayList;
+import java.util.Queue;
 
 import com.badlogic.gdx.utils.Json;
 
@@ -23,7 +23,7 @@ public interface CityStatUpdateListener extends Listener {
 		}
 
 		@Override
-		public void fire(ArrayList<CityStatUpdateListener> listeners) {
+		public void fire(Queue<CityStatUpdateListener> listeners) {
 			for (CityStatUpdateListener listener : listeners) {
 				listener.onCityStatUpdate(packet);
 			}

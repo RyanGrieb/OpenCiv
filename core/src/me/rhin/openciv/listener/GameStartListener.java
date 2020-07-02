@@ -1,6 +1,6 @@
 package me.rhin.openciv.listener;
 
-import java.util.ArrayList;
+import java.util.Queue;
 
 import me.rhin.openciv.networking.PacketParameter;
 import me.rhin.openciv.shared.listener.Event;
@@ -16,7 +16,7 @@ public interface GameStartListener extends Listener {
 		}
 
 		@Override
-		public void fire(ArrayList<GameStartListener> listeners) {
+		public void fire(Queue<GameStartListener> listeners) {
 			for (GameStartListener listener : listeners)
 				listener.onGameStart();
 		}

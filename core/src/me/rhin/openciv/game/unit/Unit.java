@@ -82,7 +82,6 @@ public abstract class Unit extends Actor implements ShapeRenderListener {
 		}
 
 		sprite.draw(batch);
-
 	}
 
 	public boolean setTargetTile(Tile targetTile) {

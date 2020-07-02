@@ -1,6 +1,6 @@
 package me.rhin.openciv.server.listener;
 
-import java.util.ArrayList;
+import java.util.Queue;
 
 import org.java_websocket.WebSocket;
 
@@ -10,7 +10,6 @@ import me.rhin.openciv.server.PacketParameter;
 import me.rhin.openciv.shared.listener.Event;
 import me.rhin.openciv.shared.listener.Listener;
 import me.rhin.openciv.shared.packet.type.MoveUnitPacket;
-import me.rhin.openciv.shared.packet.type.SelectUnitPacket;
 
 public interface UnitMoveListener extends Listener {
 
@@ -32,7 +31,7 @@ public interface UnitMoveListener extends Listener {
 		}
 
 		@Override
-		public void fire(ArrayList<UnitMoveListener> listeners) {
+		public void fire(Queue<UnitMoveListener> listeners) {
 			for (UnitMoveListener listener : listeners) {
 				listener.onUnitMove(conn, packet);
 			}
