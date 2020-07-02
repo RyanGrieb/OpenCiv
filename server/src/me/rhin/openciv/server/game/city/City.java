@@ -48,15 +48,15 @@ public class City {
 			reader = new BufferedReader(new FileReader("data/cityNames.txt"));
 			String line = reader.readLine();
 			while (line != null) {
-				line = reader.readLine();
 				names.add(line);
+				line = reader.readLine();
 			}
 			reader.close();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		Random rnd = new Random();
 
+		Random rnd = new Random();
 		return names.get(rnd.nextInt(names.size()));
 	}
 
