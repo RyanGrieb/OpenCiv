@@ -51,7 +51,8 @@ public class GameMap implements ReceiveMapChunkListener {
 		for (int i = 0; i < MapChunkPacket.CHUNK_SIZE; i++) {
 			for (int j = 0; j < MapChunkPacket.CHUNK_SIZE; j++) {
 				Tile tile = tiles[packet.getChunkX() + i][packet.getChunkY() + j];
-				tile.setTileType(TileType.fromId(packet.getTileChunk()[i][j]));
+				tile.setTileType(TileType.fromId(packet.getBottomTileChunk()[i][j]));
+				tile.setTileType(TileType.fromId(packet.getTopTileChunk()[i][j]));
 				Civilization.getInstance().getScreenManager().getCurrentScreen().getStage().addActor(tile);
 			}
 		}

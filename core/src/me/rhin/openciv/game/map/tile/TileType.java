@@ -5,18 +5,24 @@ import com.badlogic.gdx.graphics.g2d.Sprite;
 import me.rhin.openciv.asset.TextureEnum;
 
 public enum TileType {
+	AIR(TextureEnum.TILE_AIR),
 	GRASS(TextureEnum.TILE_GRASS), 
 	GRASS_HILL(TextureEnum.TILE_GRASS_HILL, 2), 
 	PLAINS(TextureEnum.TILE_PLAINS),
 	PLAINS_HILL(TextureEnum.TILE_PLAINS_HILL, 2),
-	OCEAN(TextureEnum.TILE_OCEAN, true),
-	SHALLOW_OCEAN(TextureEnum.TILE_SHALLOW_OCEAN, true), 
-	MOUNTAIN(TextureEnum.TILE_MOUNTIAN, 1000000),
-	FOREST(TextureEnum.TILE_FOREST, 2), 
-	CITY(TextureEnum.TILE_CITY);
-
+	OCEAN(TextureEnum.TILE_OCEAN, TileProperty.WATER),
+	SHALLOW_OCEAN(TextureEnum.TILE_SHALLOW_OCEAN, TileProperty.WATER), 
+	MOUNTAIN(TextureEnum.TILE_MOUNTIAN, 1000000, TileProperty.TOP_LAYER),
+	FOREST(TextureEnum.TILE_FOREST, 2, TileProperty.TOP_LAYER), 
+	JUNGLE(TextureEnum.TILE_JUNGLE, 2, TileProperty.TOP_LAYER),
+	CITY(TextureEnum.TILE_CITY, TileProperty.TOP_LAYER);
+	
+	public enum TileProperty {
+		WATER, TOP_LAYER;
+	}
+	
 	private TextureEnum assetEnum;
-	private boolean isWater;
+	private TileProperty[] tileProperties;
 	private int movementCost;
 
 	TileType(TextureEnum assetEnum) {
@@ -24,15 +30,16 @@ public enum TileType {
 		this.movementCost = 1;
 	}
 
-	TileType(TextureEnum assetEnum, boolean isWater) {
+	TileType(TextureEnum assetEnum, TileProperty... tileProperties) {
 		this.assetEnum = assetEnum;
 		this.movementCost = 1;
-		this.isWater = isWater;
+		this.tileProperties = tileProperties;
 	}
 
-	TileType(TextureEnum assetEnum, int movementCost) {
+	TileType(TextureEnum assetEnum, int movementCost, TileProperty... tileProperties) {
 		this.assetEnum = assetEnum;
 		this.movementCost = movementCost;
+		this.tileProperties = tileProperties;
 	}
 
 	public static TileType fromId(int i) {
@@ -44,11 +51,17 @@ public enum TileType {
 	}
 
 	public int getMovementCost() {
-		// TODO: Could we accept a unit parameter and change it based on the type?
 		return movementCost;
 	}
+	
+	public boolean hasProperty(TileProperty targetProperty) {
+		if (tileProperties == null)
+			return false;
+		
+		for (TileProperty tileProperty : tileProperties)
+			if (tileProperty == targetProperty)
+				return true;
 
-	public boolean isWater() {
-		return isWater;
+		return false;
 	}
 }

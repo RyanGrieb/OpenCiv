@@ -9,6 +9,7 @@ import com.badlogic.gdx.utils.Json;
 
 import me.rhin.openciv.server.game.city.City;
 import me.rhin.openciv.server.game.map.GameMap;
+import me.rhin.openciv.server.game.map.tile.TileType.TileProperty;
 import me.rhin.openciv.server.game.unit.Unit;
 import me.rhin.openciv.shared.packet.type.AddUnitPacket;
 import me.rhin.openciv.shared.packet.type.PlayerDisconnectPacket;
@@ -18,7 +19,8 @@ public class Tile {
 	private static final int SIZE = 16;
 
 	private GameMap map;
-	private TileType tileType;
+	private TileType topTileType;
+	private TileType bottomTileType;
 	private float x, y, width, height;
 	private int gridX, gridY;
 	private Tile[] adjTiles;
@@ -28,7 +30,8 @@ public class Tile {
 
 	public Tile(GameMap map, TileType tileType, float x, float y) {
 		this.map = map;
-		this.tileType = tileType;
+		this.bottomTileType = tileType;
+		this.topTileType = TileType.AIR;
 		this.x = x;
 		this.y = y;
 		this.gridX = (int) x;
@@ -67,7 +70,12 @@ public class Tile {
 	}
 
 	public void setTileType(TileType tileType) {
-		this.tileType = tileType;
+		if (tileType.hasProperty(TileProperty.TOP_LAYER)) {
+			this.topTileType = tileType;
+		} else {
+			//this.topTileType = TileType.AIR;
+			bottomTileType = tileType;
+		}
 	}
 
 	public void addUnit(Unit unit) {
@@ -103,7 +111,10 @@ public class Tile {
 	}
 
 	public TileType getTileType() {
-		return tileType;
+		if (topTileType == TileType.AIR)
+			return bottomTileType;
+		else
+			return topTileType;
 	}
 
 	public Vector2[] getVectors() {
@@ -170,5 +181,13 @@ public class Tile {
 				return unit;
 
 		return null;
+	}
+
+	public TileType getBottomTileType() {
+		return bottomTileType;
+	}
+
+	public TileType getTopTileType() {
+		return topTileType;
 	}
 }

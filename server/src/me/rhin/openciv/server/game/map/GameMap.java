@@ -60,12 +60,14 @@ public class GameMap implements MapRequestListener {
 				if (x % 4 == 0 && y % 4 == 0) {
 					MapChunkPacket mapChunkPacket = new MapChunkPacket();
 
-					int[][] tileChunk = new int[MapChunkPacket.CHUNK_SIZE][MapChunkPacket.CHUNK_SIZE];
+					int[][] bottomTileChunk = new int[MapChunkPacket.CHUNK_SIZE][MapChunkPacket.CHUNK_SIZE];
+					int[][] topTileChunk = new int[MapChunkPacket.CHUNK_SIZE][MapChunkPacket.CHUNK_SIZE];
 					for (int i = 0; i < MapChunkPacket.CHUNK_SIZE; i++) {
 						for (int j = 0; j < MapChunkPacket.CHUNK_SIZE; j++) {
 							int tileX = x + i;
 							int tileY = y + j;
-							tileChunk[i][j] = tiles[tileX][tileY].getTileType().getID();
+							bottomTileChunk[i][j] = tiles[tileX][tileY].getBottomTileType().getID();
+							topTileChunk[i][j] = tiles[tileX][tileY].getTopTileType().getID();
 
 							for (Unit unit : tiles[tileX][tileY].getUnits()) {
 								AddUnitPacket addUnitPacket = new AddUnitPacket();
@@ -76,7 +78,7 @@ public class GameMap implements MapRequestListener {
 
 						}
 					}
-					mapChunkPacket.setTileCunk(tileChunk);
+					mapChunkPacket.setTileCunk(topTileChunk, bottomTileChunk);
 					mapChunkPacket.setChunkLocation(x, y);
 
 					conn.send(json.toJson(mapChunkPacket));

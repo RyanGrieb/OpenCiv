@@ -9,7 +9,8 @@ public class MapChunkPacket extends Packet {
 
 	public static final int CHUNK_SIZE = 4;
 
-	private int[][] tileChunk;
+	private int[][] topTileChunk;
+	private int[][] bottomTileChunk;
 	private int chunkX, chunkY;
 
 	public MapChunkPacket() {
@@ -20,9 +21,10 @@ public class MapChunkPacket extends Packet {
 	public void write(Json json) {
 		super.write(json);
 		// TODO: Find a better way to store a 2D array /w libgdx json limiting me.
-		for (int i = 0; i < CHUNK_SIZE; i++)
-			json.writeValue("t" + i, tileChunk[i]);
-
+		for (int i = 0; i < CHUNK_SIZE; i++) {
+			json.writeValue("t" + i, topTileChunk[i]);
+			json.writeValue("b" + i, bottomTileChunk[i]);
+		}
 		json.writeValue("chunkX", chunkX);
 		json.writeValue("chunkY", chunkY);
 	}
@@ -30,22 +32,29 @@ public class MapChunkPacket extends Packet {
 	@Override
 	public void read(Json json, JsonValue jsonData) {
 		super.read(json, jsonData);
-		this.tileChunk = new int[CHUNK_SIZE][CHUNK_SIZE];
+		this.topTileChunk = new int[CHUNK_SIZE][CHUNK_SIZE];
+		this.bottomTileChunk = new int[CHUNK_SIZE][CHUNK_SIZE];
 
 		for (int i = 0; i < CHUNK_SIZE; i++) {
-			tileChunk[i] = jsonData.get("t" + i).asIntArray();
+			topTileChunk[i] = jsonData.get("t" + i).asIntArray();
+			bottomTileChunk[i] = jsonData.get("b" + i).asIntArray();
 		}
 
 		this.chunkX = jsonData.getInt("chunkX");
 		this.chunkY = jsonData.getInt("chunkY");
 	}
 
-	public void setTileCunk(int[][] tileChunk) {
-		this.tileChunk = tileChunk;
+	public void setTileCunk(int[][] topTileChunk, int[][] bottomTileChunk) {
+		this.topTileChunk = topTileChunk;
+		this.bottomTileChunk = bottomTileChunk;
 	}
 
-	public int[][] getTileChunk() {
-		return tileChunk;
+	public int[][] getTopTileChunk() {
+		return topTileChunk;
+	}
+
+	public int[][] getBottomTileChunk() {
+		return bottomTileChunk;
 	}
 
 	public int getChunkX() {

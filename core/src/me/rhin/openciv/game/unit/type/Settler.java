@@ -6,6 +6,7 @@ import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.AbstractAction;
 import me.rhin.openciv.game.map.tile.Tile;
+import me.rhin.openciv.game.map.tile.TileType.TileProperty;
 import me.rhin.openciv.game.production.ProductionItem;
 import me.rhin.openciv.game.unit.Unit;
 import me.rhin.openciv.game.unit.UnitParameter;
@@ -22,7 +23,7 @@ public class Settler implements ProductionItem {
 
 		@Override
 		public int getMovementCost(Tile tile) {
-			if (tile.getTileType().isWater())
+			if (tile.getTileType().hasProperty(TileProperty.WATER))
 				return 1000000;
 			else
 				return tile.getTileType().getMovementCost();

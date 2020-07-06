@@ -1,6 +1,5 @@
 package me.rhin.openciv.asset;
 
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 
@@ -9,13 +8,15 @@ import me.rhin.openciv.shared.stat.Stat;
 
 public enum TextureEnum {
 
+	TILE_AIR,
 	TILE_GRASS,
 	TILE_GRASS_HILL,
 	TILE_PLAINS,
 	TILE_PLAINS_HILL,
 	TILE_OCEAN,
 	TILE_SHALLOW_OCEAN, 
-	TILE_FOREST, 
+	TILE_FOREST,
+	TILE_JUNGLE,
 	TILE_MOUNTIAN,
 	TILE_CITY,
 	TILE_SELECT,

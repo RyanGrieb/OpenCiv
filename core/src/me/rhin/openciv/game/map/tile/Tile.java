@@ -2,7 +2,7 @@ package me.rhin.openciv.game.map.tile;
 
 import java.util.ArrayList;
 
-import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
@@ -12,8 +12,8 @@ import com.badlogic.gdx.scenes.scene2d.Actor;
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.city.City;
-import me.rhin.openciv.game.city.CityTerritory;
 import me.rhin.openciv.game.map.GameMap;
+import me.rhin.openciv.game.map.tile.TileType.TileProperty;
 import me.rhin.openciv.game.unit.Unit;
 import me.rhin.openciv.listener.ShapeRenderListener;
 import me.rhin.openciv.ui.label.CustomLabel;
@@ -26,8 +26,9 @@ public class Tile extends Actor implements ShapeRenderListener {
 	private static final int SPRITE_HEIGHT = 32;
 
 	private GameMap map;
-	private TileType tileType;
-	private Sprite sprite;
+	private TileType topTileType;
+	private TileType bottomTileType;
+	private Sprite bottomSprite;
 	public Sprite topSprite;
 	private Sprite selectionSprite;
 	private Sprite territorySprite;
@@ -45,8 +46,14 @@ public class Tile extends Actor implements ShapeRenderListener {
 	public Tile(GameMap map, TileType tileType, float x, float y) {
 		Civilization.getInstance().getEventManager().addListener(ShapeRenderListener.class, this);
 		this.map = map;
-		this.tileType = tileType;
-		this.sprite = tileType.sprite();
+		if (tileType.hasProperty(TileProperty.TOP_LAYER)) {
+			Gdx.app.log(Civilization.LOG_TAG,
+					"WARNING: TileType " + tileType.name() + " top layer applied to constructor");
+		}
+		this.bottomTileType = tileType;
+		this.topTileType = TileType.AIR;
+		this.bottomSprite = tileType.sprite();
+		this.topSprite = TileType.AIR.sprite();
 		this.selectionSprite = new Sprite(TextureEnum.TILE_SELECT.sprite());
 		selectionSprite.setAlpha(0.2f);
 		this.territorySprite = new Sprite(TextureEnum.TILE_SELECT.sprite());
@@ -121,9 +128,9 @@ public class Tile extends Actor implements ShapeRenderListener {
 		// if (!tileType.equals(TileType.OCEAN))
 		// bottomSprite.draw(batch);
 
-		sprite.draw(batch);
+		bottomSprite.draw(batch);
 
-		if (topSprite != null)
+		if (topTileType != TileType.AIR)
 			topSprite.draw(batch);
 
 		if (drawSelection)
@@ -168,16 +175,25 @@ public class Tile extends Actor implements ShapeRenderListener {
 	}
 
 	public void setTileType(TileType tileType) {
-		this.tileType = tileType;
-		// Update the texture, this seems redundant???
-		// if (tileType != this.tileType)
-		// bottomSprite.setTexture(sprite.getTexture());
-		// System.out.println(sprite.getTexture()+","+tileType.sprite().getTexture());
-		float x = sprite.getX();
-		float y = sprite.getY();
-		this.sprite = tileType.sprite();
-		sprite.setPosition(x, y);
-		sprite.setSize(SPRITE_WIDTH, SPRITE_HEIGHT);
+		if (tileType.hasProperty(TileProperty.TOP_LAYER)) {
+			this.topTileType = tileType;
+
+			float x = topSprite.getX();
+			float y = topSprite.getY();
+			this.topSprite = tileType.sprite();
+			topSprite.setPosition(x, y);
+			topSprite.setSize(SPRITE_WIDTH, SPRITE_HEIGHT);
+		} else {
+			if (tileType == TileType.AIR)
+				return;
+			bottomTileType = tileType;
+
+			float x = bottomSprite.getX();
+			float y = bottomSprite.getY();
+			this.bottomSprite = tileType.sprite();
+			bottomSprite.setPosition(x, y);
+			bottomSprite.setSize(SPRITE_WIDTH, SPRITE_HEIGHT);
+		}
 	}
 
 	public void addUnit(Unit unit) {
@@ -216,7 +232,11 @@ public class Tile extends Actor implements ShapeRenderListener {
 	}
 
 	public TileType getTileType() {
-		return tileType;
+		if (topTileType == TileType.AIR)
+			return bottomTileType;
+		else {
+			return topTileType;
+		}
 	}
 
 	public int getGridX() {
@@ -285,10 +305,12 @@ public class Tile extends Actor implements ShapeRenderListener {
 		this.x = vectors[0].x - width / 2;
 		this.y = vectors[0].y;
 
-		sprite.setSize(28, 32);
-		sprite.setPosition(x, y);
-		// bottomSprite.setSize(28, 32);
-		// bottomSprite.setPosition(x, y);
+		bottomSprite.setSize(28, 32);
+		bottomSprite.setPosition(x, y);
+
+		topSprite.setSize(28, 32);
+		topSprite.setPosition(x, y);
+
 		selectionSprite.setSize(28, 32);
 		selectionSprite.setPosition(x, y);
 
@@ -296,21 +318,14 @@ public class Tile extends Actor implements ShapeRenderListener {
 		territorySprite.setPosition(x, y);
 	}
 
-	public Sprite getSprite() {
-		return sprite;
+	public Sprite getBottomSpriteSprite() {
+		return bottomSprite;
 
-	}
-
-	public void setTopSprite(Sprite topSprite) {
-		this.topSprite = topSprite;
 	}
 
 	public void setCity(City city) {
 		this.city = city;
-		Sprite citySprite = TileType.CITY.sprite();
-		citySprite.setSize(28, 32);
-		citySprite.setPosition(x, y);
-		setTopSprite(citySprite);
+		setTileType(TileType.CITY);
 	}
 
 	public void setTerritory(City city) {
