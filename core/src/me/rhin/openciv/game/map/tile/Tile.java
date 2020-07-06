@@ -116,18 +116,6 @@ public class Tile extends Actor implements ShapeRenderListener {
 
 	@Override
 	public void draw(Batch batch, float parentAlpha) {
-		// FIXME: Instead of drawing all the individual sprites, have the game map
-		// create a single mesh merging of our created sprites.
-		// We did it before
-
-		// FIXME: This is inefficient. Water tiles replaced as grass still get drawn
-		// under the grass
-		// Have mountians and trees have their own special labels for the bottom Sprite
-		// to be rendered.
-		// if (!sprite.getTexture().equals(bottomSprite.getTexture()))
-		// if (!tileType.equals(TileType.OCEAN))
-		// bottomSprite.draw(batch);
-
 		bottomSprite.draw(batch);
 
 		if (topTileType != TileType.AIR)
