@@ -1,6 +1,6 @@
 package me.rhin.openciv.listener;
 
-import java.util.Queue;
+import java.util.ArrayList;
 
 import com.badlogic.gdx.utils.Json;
 
@@ -27,7 +27,7 @@ public interface FinishLoadingRequestListener extends Listener {
 		}
 
 		@Override
-		public void fire(Queue<FinishLoadingRequestListener> listeners) {
+		public void fire(ArrayList<FinishLoadingRequestListener> listeners) {
 			for (FinishLoadingRequestListener listener : listeners) {
 				listener.onFinishLoadingRequest(packet);
 			}

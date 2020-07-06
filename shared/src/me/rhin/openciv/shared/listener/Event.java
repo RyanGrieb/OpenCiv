@@ -1,12 +1,12 @@
 package me.rhin.openciv.shared.listener;
 
-import java.util.Queue;
+import java.util.ArrayList;
 
 public abstract class Event<T extends Listener> {
 
 	private boolean cancelled;
 
-	public abstract void fire(Queue<T> listeners);
+	public abstract void fire(ArrayList<T> listeners);
 
 	public abstract Class<T> getListenerType();
 

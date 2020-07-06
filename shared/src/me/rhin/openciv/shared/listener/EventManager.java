@@ -1,21 +1,20 @@
 package me.rhin.openciv.shared.listener;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Queue;
 
 public class EventManager {
-	private final HashMap<Class<? extends Listener>, LinkedList<? extends Listener>> listenerMap = new HashMap<>();
+	private final HashMap<Class<? extends Listener>, ArrayList<? extends Listener>> listenerMap = new HashMap<>();
 
 	// TODO: Support multiple listenerType's as input. E.g. Class<L>... listenerType
 	public <L extends Listener> void addListener(Class<L> listenerType, L listener) {
 
 		@SuppressWarnings("unchecked")
-		LinkedList<L> listeners = (LinkedList<L>) listenerMap.get(listenerType);
+		ArrayList<L> listeners = (ArrayList<L>) listenerMap.get(listenerType);
 
 		if (listeners == null) {
-			listeners = new LinkedList<>(Arrays.asList(listener));
+			listeners = new ArrayList<>(Arrays.asList(listener));
 			listenerMap.put(listenerType, listeners);
 			return;
 		}
@@ -26,22 +25,22 @@ public class EventManager {
 
 	public <L extends Listener, E extends Event<L>> void fireEvent(E event) {
 		Class<L> listenerType = event.getListenerType();
+
 		@SuppressWarnings("unchecked")
-		Queue<L> listeners = (LinkedList<L>) listenerMap.get(listenerType);
+		ArrayList<L> listeners = (ArrayList<L>) listenerMap.get(listenerType);
 
-		if (listeners == null || listeners.isEmpty()) {
+		if (listeners == null || listeners.isEmpty())
 			return;
-		}
 
-		// Create copy to avoid concurrent modification
-		//ArrayList<L> listenersCopy = new ArrayList<>(listeners);
+		// FIXME: This is inefficient
+		ArrayList<L> listenersCopy = new ArrayList<>(listeners);
 
-		event.fire(listeners);
+		event.fire(listenersCopy);
 	}
 
 	public <L extends Listener> void removeListener(Class<L> listenerType, L listener) {
 		@SuppressWarnings("unchecked")
-		LinkedList<L> listeners = (LinkedList<L>) listenerMap.get(listenerType);
+		ArrayList<L> listeners = (ArrayList<L>) listenerMap.get(listenerType);
 
 		if (listeners != null)
 			listeners.remove(listener);
@@ -51,5 +50,4 @@ public class EventManager {
 	public void clearEvents() {
 		listenerMap.clear();
 	}
-
 }

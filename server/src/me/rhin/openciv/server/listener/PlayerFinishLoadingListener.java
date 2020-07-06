@@ -1,6 +1,6 @@
 package me.rhin.openciv.server.listener;
 
-import java.util.Queue;
+import java.util.ArrayList;
 
 import org.java_websocket.WebSocket;
 
@@ -21,7 +21,7 @@ public interface PlayerFinishLoadingListener extends Listener {
 		}
 
 		@Override
-		public void fire(Queue<PlayerFinishLoadingListener> listeners) {
+		public void fire(ArrayList<PlayerFinishLoadingListener> listeners) {
 			for (PlayerFinishLoadingListener listener : listeners) {
 				listener.onPlayerFinishLoading(conn);
 			}

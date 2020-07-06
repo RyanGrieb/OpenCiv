@@ -1,6 +1,6 @@
 package me.rhin.openciv.server.listener;
 
-import java.util.Queue;
+import java.util.ArrayList;
 
 import org.java_websocket.WebSocket;
 
@@ -19,7 +19,7 @@ public interface ConnectionListener extends Listener {
 		}
 
 		@Override
-		public void fire(Queue<ConnectionListener> listeners) {
+		public void fire(ArrayList<ConnectionListener> listeners) {
 			for (ConnectionListener listener : listeners) {
 				listener.onConnection(conn);
 			}

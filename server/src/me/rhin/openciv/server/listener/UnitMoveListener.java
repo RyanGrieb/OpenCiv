@@ -1,6 +1,6 @@
 package me.rhin.openciv.server.listener;
 
-import java.util.Queue;
+import java.util.ArrayList;
 
 import org.java_websocket.WebSocket;
 
@@ -31,7 +31,7 @@ public interface UnitMoveListener extends Listener {
 		}
 
 		@Override
-		public void fire(Queue<UnitMoveListener> listeners) {
+		public void fire(ArrayList<UnitMoveListener> listeners) {
 			for (UnitMoveListener listener : listeners) {
 				listener.onUnitMove(conn, packet);
 			}

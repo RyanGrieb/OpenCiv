@@ -1,6 +1,6 @@
 package me.rhin.openciv.server.listener;
 
-import java.util.Queue;
+import java.util.ArrayList;
 
 import org.java_websocket.WebSocket;
 
@@ -31,7 +31,7 @@ public interface SettleCityListener extends Listener {
 		}
 
 		@Override
-		public void fire(Queue<SettleCityListener> listeners) {
+		public void fire(ArrayList<SettleCityListener> listeners) {
 			for (SettleCityListener listener : listeners) {
 				listener.onSettleCity(conn, packet);
 			}

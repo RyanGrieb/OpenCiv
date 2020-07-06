@@ -1,6 +1,6 @@
 package me.rhin.openciv.listener;
 
-import java.util.Queue;
+import java.util.ArrayList;
 
 import me.rhin.openciv.shared.listener.Event;
 import me.rhin.openciv.shared.listener.Listener;
@@ -18,7 +18,7 @@ public interface RightMouseHeldListener extends Listener {
 		}
 
 		@Override
-		public void fire(Queue<RightMouseHeldListener> listeners) {
+		public void fire(ArrayList<RightMouseHeldListener> listeners) {
 			for (RightMouseHeldListener listener : listeners) {
 				listener.onRightMouseHeld(x, y);
 			}

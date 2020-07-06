@@ -1,6 +1,6 @@
 package me.rhin.openciv.listener;
 
-import java.util.Queue;
+import java.util.ArrayList;
 
 import me.rhin.openciv.shared.listener.Event;
 import me.rhin.openciv.shared.listener.Listener;
@@ -13,7 +13,7 @@ public interface RenderListener extends Listener {
 		public static final RenderEvent INSTANCE = new RenderEvent();
 
 		@Override
-		public void fire(Queue<RenderListener> listeners) {
+		public void fire(ArrayList<RenderListener> listeners) {
 			for (RenderListener listener : listeners) {
 				listener.onRender();
 			}

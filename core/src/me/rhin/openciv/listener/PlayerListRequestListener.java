@@ -1,6 +1,6 @@
 package me.rhin.openciv.listener;
 
-import java.util.Queue;
+import java.util.ArrayList;
 
 import com.badlogic.gdx.utils.Json;
 
@@ -27,7 +27,7 @@ public interface PlayerListRequestListener extends Listener {
 		}
 
 		@Override
-		public void fire(Queue<PlayerListRequestListener> listeners) {
+		public void fire(ArrayList<PlayerListRequestListener> listeners) {
 			for (PlayerListRequestListener listener : listeners) {
 				listener.onPlayerListRequested(packet);
 			}

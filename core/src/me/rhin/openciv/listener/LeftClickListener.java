@@ -1,6 +1,6 @@
 package me.rhin.openciv.listener;
 
-import java.util.Queue;
+import java.util.ArrayList;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.Vector3;
@@ -25,7 +25,7 @@ public interface LeftClickListener extends Listener {
 		}
 
 		@Override
-		public void fire(Queue<LeftClickListener> listeners) {
+		public void fire(ArrayList<LeftClickListener> listeners) {
 			for (LeftClickListener listener : listeners) {
 				listener.onLeftClick(x, y);
 			}

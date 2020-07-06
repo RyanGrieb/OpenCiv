@@ -1,6 +1,6 @@
 package me.rhin.openciv.server.listener;
 
-import java.util.Queue;
+import java.util.ArrayList;
 
 import org.java_websocket.WebSocket;
 
@@ -25,7 +25,7 @@ public interface StartGameRequestListener extends Listener {
 		}
 
 		@Override
-		public void fire(Queue<StartGameRequestListener> listeners) {
+		public void fire(ArrayList<StartGameRequestListener> listeners) {
 			for (StartGameRequestListener listener : listeners) {
 				listener.onStartGameRequest(conn);
 			}

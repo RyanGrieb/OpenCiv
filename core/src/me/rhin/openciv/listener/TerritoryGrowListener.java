@@ -1,6 +1,6 @@
 package me.rhin.openciv.listener;
 
-import java.util.Queue;
+import java.util.ArrayList;
 
 import com.badlogic.gdx.utils.Json;
 
@@ -23,7 +23,7 @@ public interface TerritoryGrowListener extends Listener {
 		}
 
 		@Override
-		public void fire(Queue<TerritoryGrowListener> listeners) {
+		public void fire(ArrayList<TerritoryGrowListener> listeners) {
 			for (TerritoryGrowListener listener : listeners) {
 				listener.onTerritoryGrow(packet);
 			}

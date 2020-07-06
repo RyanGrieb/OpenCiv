@@ -1,6 +1,6 @@
 package me.rhin.openciv.listener;
 
-import java.util.Queue;
+import java.util.ArrayList;
 
 import com.badlogic.gdx.utils.Json;
 
@@ -27,7 +27,7 @@ public interface ReceiveMapChunkListener extends Listener {
 		}
 
 		@Override
-		public void fire(Queue<ReceiveMapChunkListener> listeners) {
+		public void fire(ArrayList<ReceiveMapChunkListener> listeners) {
 			for (ReceiveMapChunkListener listener : listeners)
 				listener.onReciveMapChunk(packet);
 		}

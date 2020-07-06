@@ -1,6 +1,6 @@
 package me.rhin.openciv.listener;
 
-import java.util.Queue;
+import java.util.ArrayList;
 
 import com.badlogic.gdx.utils.Json;
 
@@ -23,7 +23,7 @@ public interface ResearchFinishListener extends Listener {
 		}
 
 		@Override
-		public void fire(Queue<ResearchFinishListener> listeners) {
+		public void fire(ArrayList<ResearchFinishListener> listeners) {
 			for (ResearchFinishListener listener : listeners) {
 				listener.onResearchFinished(packet);
 			}

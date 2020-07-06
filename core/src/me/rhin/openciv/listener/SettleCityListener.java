@@ -1,6 +1,6 @@
 package me.rhin.openciv.listener;
 
-import java.util.Queue;
+import java.util.ArrayList;
 
 import com.badlogic.gdx.utils.Json;
 
@@ -23,7 +23,7 @@ public interface SettleCityListener extends Listener {
 		}
 
 		@Override
-		public void fire(Queue<SettleCityListener> listeners) {
+		public void fire(ArrayList<SettleCityListener> listeners) {
 			for (SettleCityListener listener : listeners) {
 				listener.onSettleCity(packet);
 			}

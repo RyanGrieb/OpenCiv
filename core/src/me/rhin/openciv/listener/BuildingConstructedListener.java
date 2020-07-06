@@ -1,6 +1,6 @@
 package me.rhin.openciv.listener;
 
-import java.util.Queue;
+import java.util.ArrayList;
 
 import com.badlogic.gdx.utils.Json;
 
@@ -27,7 +27,7 @@ public interface BuildingConstructedListener extends Listener {
 		}
 
 		@Override
-		public void fire(Queue<BuildingConstructedListener> listeners) {
+		public void fire(ArrayList<BuildingConstructedListener> listeners) {
 			for (BuildingConstructedListener listener : listeners) {
 				listener.onBuildingConstructed(packet);
 			}

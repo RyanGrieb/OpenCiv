@@ -1,6 +1,6 @@
 package me.rhin.openciv.listener;
 
-import java.util.Queue;
+import java.util.ArrayList;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.Vector3;
@@ -32,7 +32,7 @@ public interface MouseMoveListener extends Listener {
 		}
 
 		@Override
-		public void fire(Queue<MouseMoveListener> listeners) {
+		public void fire(ArrayList<MouseMoveListener> listeners) {
 			if (!hasMouseMoved())
 				return;
 
