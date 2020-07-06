@@ -1,5 +1,6 @@
 package me.rhin.openciv.ui.window.type;
 
+import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 
@@ -138,12 +139,15 @@ public class CityInfoWindow extends AbstractWindow {
 		updateStatValues();
 	}
 
-	/*
-	 * @Override public void draw() { super.draw(); Batch batch = getBatch();
-	 * batch.begin(); foodIcon.draw(batch); productionIcon.draw(batch);
-	 * goldIcon.draw(batch); scienceIcon.draw(batch); heritageIcon.draw(batch);
-	 * batch.end(); }
-	 */
+	@Override
+	public void draw(Batch batch, float parentAlpha) {
+		super.draw(batch, parentAlpha);
+		foodIcon.draw(batch);
+		productionIcon.draw(batch);
+		goldIcon.draw(batch);
+		scienceIcon.draw(batch);
+		heritageIcon.draw(batch);
+	}
 
 	@Override
 	public boolean disablesInput() {
