@@ -54,7 +54,6 @@ public class ContainerList extends Actor {
 	public void draw(Batch batch, float parentAlpha) {
 		backgroundSprite.draw(batch);
 		for (ListItem container : listContainers.values()) {
-			if (container.getY() > getY())
 				container.draw(batch, parentAlpha);
 		}
 	}
@@ -69,19 +68,20 @@ public class ContainerList extends Actor {
 
 	public void addItem(ListContainerType containerType, String categoryType, ListItem listItem) {
 		if (!listContainers.containsKey(categoryType)) {
-
-			float nextHeight = 0;
-
-			for (ListContainer container : listContainers.values()) {
-				nextHeight += container.getHeight();
-			}
-
-			listContainers.put(categoryType, new ListContainer(containerType, categoryType, getWidth()));
-			ListContainer container = (ListContainer) listContainers.get(categoryType);
-
-			// Bump down our next container from the height of all the previous contains
-			container.setPosition(getX(), (getY() + getHeight() - container.getHeight()) - nextHeight);
+			listContainers.put(categoryType, new ListContainer(this, containerType, categoryType, getWidth()));
 		}
+
 		listContainers.get(categoryType).addItem(listItem);
+		updatePositions();
+	}
+
+	private void updatePositions() {
+		float nextHeight = 0;
+
+		// Problem:
+		for (ListContainer container : listContainers.values()) {
+			container.setPosition(getX(), (getY() + getHeight()) - container.getHeight() - nextHeight);
+			nextHeight += container.getHeight();
+		}
 	}
 }

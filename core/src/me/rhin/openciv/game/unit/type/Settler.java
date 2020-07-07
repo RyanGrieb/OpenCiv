@@ -60,7 +60,7 @@ public class Settler extends UnitItem {
 
 	@Override
 	public int getProductionCost() {
-		return 0;
+		return 106;
 	}
 
 	@Override

@@ -118,7 +118,7 @@ public class CityInfoWindow extends AbstractWindow {
 		this.heritageLabel = new CustomLabel("+0");
 		addActor(heritageLabel);
 
-		this.buildingContainerList = new ContainerList(viewport.getWorldWidth() - 200, 200, 200, 200);
+		this.buildingContainerList = new ContainerList(viewport.getWorldWidth() - 200, 200, 200, 195);
 
 		for (Building building : city.getBuildings()) {
 			buildingContainerList.addItem(ListContainerType.CATEGORY, "Buildings", new ListBuilding(building, 200, 45));
@@ -129,7 +129,7 @@ public class CityInfoWindow extends AbstractWindow {
 		// their mouse inside
 		stage.setScrollFocus(buildingContainerList);
 
-		this.productionContainerList = new ContainerList(0, 0, 200, 200);
+		this.productionContainerList = new ContainerList(0, 0, 200, 210);
 		for (ProductionItem productionItem : city.getProducibleItemManager().getProducibleItems()) {
 			productionContainerList.addItem(ListContainerType.CATEGORY, productionItem.getCategory(),
 					new ListProductionItem(city, productionItem, 200, 45));

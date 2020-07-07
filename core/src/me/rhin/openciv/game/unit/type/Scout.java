@@ -27,7 +27,7 @@ public class Scout extends UnitItem {
 
 	@Override
 	public int getProductionCost() {
-		return 0;
+		return 25;
 	}
 
 	@Override

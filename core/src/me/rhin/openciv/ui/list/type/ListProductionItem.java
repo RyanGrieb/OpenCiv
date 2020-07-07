@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.utils.Align;
 
+import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.city.City;
 import me.rhin.openciv.game.production.ProductionItem;
 import me.rhin.openciv.shared.stat.Stat;
@@ -21,6 +22,8 @@ public class ListProductionItem extends ListItem {
 	public ListProductionItem(City city, ProductionItem productionItem, float width, float height) {
 		super(width, height);
 		this.productionItem = productionItem;
+		this.backgroundSprite = TextureEnum.UI_GRAY.sprite();
+		this.backgroundSprite.setSize(width, height);
 		this.itemNameLabel = new CustomLabel(productionItem.getName());
 		itemNameLabel.setSize(width, height);
 		itemNameLabel.setAlignment(Align.topLeft);
@@ -36,6 +39,7 @@ public class ListProductionItem extends ListItem {
 
 	@Override
 	public void draw(Batch batch, float parentAlpha) {
+		backgroundSprite.draw(batch);
 		itemNameLabel.draw(batch, parentAlpha);
 		itemTurnCostLabel.draw(batch, parentAlpha);
 	}
@@ -43,6 +47,7 @@ public class ListProductionItem extends ListItem {
 	@Override
 	public void setPosition(float x, float y) {
 		super.setPosition(x, y);
+		backgroundSprite.setPosition(x, y);
 		itemNameLabel.setPosition(x, y);
 		itemTurnCostLabel.setPosition(x, y);
 	}

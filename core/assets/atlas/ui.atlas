@@ -53,6 +53,13 @@ ui_gray
   orig: 1, 1
   offset: 0, 0
   index: -1
+ui_light_gray
+  rotate: false
+  xy: 146, 32
+  size: 1, 1
+  orig: 1, 1
+  offset: 0, 0
+  index: -1
 ui_selection
   rotate: false
   xy: 644, 99

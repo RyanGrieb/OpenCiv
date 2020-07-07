@@ -32,7 +32,7 @@ limitMemory=true
 useIndexes=true
 
 scaleFactors=[{suffix:"",factor:1,resampling:bicubic}]
-inputFiles=[{path:../ui_black.png,type:Input,regionName:null},{path:../ui_github.png,type:Input,regionName:null},{path:../ui_gray.png,type:Input,regionName:null},{path:../ui_button.png,type:Input,regionName:null},{path:../ui_button_hovered.png,type:Input,regionName:null},{path:../ui_background.png,type:Input,regionName:null},{path:../ui_selection.png,type:Input,regionName:null},{path:../ui_container_box.png,type:Input,regionName:null}]
+inputFiles=[{path:../ui_black.png,type:Input,regionName:null},{path:../ui_github.png,type:Input,regionName:null},{path:../ui_gray.png,type:Input,regionName:null},{path:../ui_button.png,type:Input,regionName:null},{path:../ui_button_hovered.png,type:Input,regionName:null},{path:../ui_background.png,type:Input,regionName:null},{path:../ui_selection.png,type:Input,regionName:null},{path:../ui_container_box.png,type:Input,regionName:null},{path:../ui_light_gray.png,type:Input,regionName:null}]
 
 
 -PROJ-
