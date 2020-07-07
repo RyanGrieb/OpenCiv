@@ -38,4 +38,9 @@ public class Galley extends UnitItem {
 	public String getName() {
 		return "Galley";
 	}
+
+	@Override
+	public TextureEnum getTexture() {
+		return TextureEnum.UNIT_SETTLER;
+	}
 }

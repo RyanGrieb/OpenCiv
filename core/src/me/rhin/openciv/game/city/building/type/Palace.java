@@ -1,5 +1,6 @@
 package me.rhin.openciv.game.city.building.type;
 
+import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.city.City;
 import me.rhin.openciv.game.city.building.Building;
 import me.rhin.openciv.shared.stat.Stat;
@@ -28,5 +29,10 @@ public class Palace extends Building {
 	@Override
 	public boolean meetsProductionRequirements() {
 		return false;
+	}
+
+	@Override
+	public TextureEnum getTexture() {
+		return TextureEnum.UI_ERROR;
 	}
 }

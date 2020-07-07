@@ -72,4 +72,9 @@ public class Settler extends UnitItem {
 	public String getName() {
 		return "Settler";
 	}
+
+	@Override
+	public TextureEnum getTexture() {
+		return TextureEnum.UNIT_SETTLER;
+	}
 }

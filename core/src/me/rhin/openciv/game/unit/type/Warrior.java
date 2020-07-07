@@ -1,5 +1,7 @@
 package me.rhin.openciv.game.unit.type;
 
+import com.badlogic.gdx.graphics.Texture;
+
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.map.tile.Tile;
 import me.rhin.openciv.game.map.tile.TileType.TileProperty;
@@ -38,5 +40,10 @@ public class Warrior extends UnitItem {
 	@Override
 	public String getName() {
 		return "Warrior";
+	}
+
+	@Override
+	public TextureEnum getTexture() {
+		return TextureEnum.UNIT_WARRIOR;
 	}
 }

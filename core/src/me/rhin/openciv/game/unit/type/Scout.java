@@ -39,4 +39,9 @@ public class Scout extends UnitItem {
 	public String getName() {
 		return "Scout";
 	}
+
+	@Override
+	public TextureEnum getTexture() {
+		return TextureEnum.UNIT_SCOUT;
+	}
 }

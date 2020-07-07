@@ -1,6 +1,7 @@
 package me.rhin.openciv.game.city.building.type;
 
 import me.rhin.openciv.Civilization;
+import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.city.City;
 import me.rhin.openciv.game.city.building.Building;
 import me.rhin.openciv.shared.stat.Stat;
@@ -26,7 +27,12 @@ public class Granary extends Building {
 
 	@Override
 	public boolean meetsProductionRequirements() {
-		//TODO: Check if pottery is researched
+		// TODO: Check if pottery is researched
 		return Civilization.getInstance().getGame().getPlayer().getResearchTree().hasResearched(Granary.class);
+	}
+
+	@Override
+	public TextureEnum getTexture() {
+		return TextureEnum.UI_ERROR;
 	}
 }

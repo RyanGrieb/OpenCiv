@@ -13,7 +13,7 @@ ui_background
   index: -1
 ui_black
   rotate: false
-  xy: 2, 2
+  xy: 146, 32
   size: 1, 1
   orig: 1, 1
   offset: 0, 0
@@ -39,6 +39,13 @@ ui_container_box
   orig: 640, 96
   offset: 0, 0
   index: -1
+ui_error
+  rotate: false
+  xy: 948, 717
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
 ui_github
   rotate: false
   xy: 804, 671
@@ -48,14 +55,14 @@ ui_github
   index: -1
 ui_gray
   rotate: false
-  xy: 948, 732
+  xy: 2, 2
   size: 1, 1
   orig: 1, 1
   offset: 0, 0
   index: -1
 ui_light_gray
   rotate: false
-  xy: 146, 32
+  xy: 644, 96
   size: 1, 1
   orig: 1, 1
   offset: 0, 0

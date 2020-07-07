@@ -1,5 +1,6 @@
 package me.rhin.openciv.game.city.building.type;
 
+import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.city.City;
 import me.rhin.openciv.game.city.building.Building;
 import me.rhin.openciv.shared.stat.Stat;
@@ -26,5 +27,10 @@ public class Monument extends Building {
 	@Override
 	public boolean meetsProductionRequirements() {
 		return true;
+	}
+
+	@Override
+	public TextureEnum getTexture() {
+		return TextureEnum.UI_ERROR;
 	}
 }

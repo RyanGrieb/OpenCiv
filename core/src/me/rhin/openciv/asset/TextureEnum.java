@@ -37,7 +37,8 @@ public enum TextureEnum {
 	UI_LIGHT_GRAY,
 	UI_GITHUB,
 	UI_BACKGROUND,
-	UI_CONTAINER_BOX;
+	UI_CONTAINER_BOX,
+	UI_ERROR;
 
 	private TextureAtlas textureAtlas;
 
