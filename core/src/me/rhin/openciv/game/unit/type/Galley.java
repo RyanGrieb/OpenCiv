@@ -3,11 +3,11 @@ package me.rhin.openciv.game.unit.type;
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.map.tile.Tile;
 import me.rhin.openciv.game.map.tile.TileType.TileProperty;
-import me.rhin.openciv.game.production.ProductionItem;
 import me.rhin.openciv.game.unit.Unit;
+import me.rhin.openciv.game.unit.UnitItem;
 import me.rhin.openciv.game.unit.UnitParameter;
 
-public class Galley implements ProductionItem {
+public class Galley extends UnitItem {
 
 	public static class GalleyUnit extends Unit {
 		public GalleyUnit(UnitParameter unitParameter) {

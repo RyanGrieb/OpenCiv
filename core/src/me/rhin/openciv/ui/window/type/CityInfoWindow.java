@@ -121,8 +121,7 @@ public class CityInfoWindow extends AbstractWindow {
 		this.buildingContainerList = new ContainerList(viewport.getWorldWidth() - 200, 200, 200, 200);
 
 		for (Building building : city.getBuildings()) {
-			buildingContainerList.addItem(ListContainerType.CATEGORY, Building.class,
-					new ListBuilding(building, 200, 45));
+			buildingContainerList.addItem(ListContainerType.CATEGORY, "Buildings", new ListBuilding(building, 200, 45));
 		}
 		addActor(buildingContainerList);
 
@@ -132,8 +131,8 @@ public class CityInfoWindow extends AbstractWindow {
 
 		this.productionContainerList = new ContainerList(0, 0, 200, 200);
 		for (ProductionItem productionItem : city.getProducibleItemManager().getProducibleItems()) {
-			productionContainerList.addItem(ListContainerType.CATEGORY, ProductionItem.class,
-					new ListProductionItem(productionItem, 200, 45));
+			productionContainerList.addItem(ListContainerType.CATEGORY, productionItem.getCategory(),
+					new ListProductionItem(city, productionItem, 200, 45));
 		}
 		addActor(productionContainerList);
 		updateStatValues();

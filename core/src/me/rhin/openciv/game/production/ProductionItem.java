@@ -7,4 +7,6 @@ public interface ProductionItem {
 	public int getProductionCost();
 
 	public boolean meetsProductionRequirements();
+
+	public String getCategory();
 }

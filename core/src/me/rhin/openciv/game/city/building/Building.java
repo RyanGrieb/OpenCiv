@@ -8,13 +8,18 @@ public abstract class Building implements ProductionItem {
 
 	private City city;
 	protected StatLine statLine;
-	
+
 	public Building(City city) {
 		this.city = city;
 		this.statLine = new StatLine();
 	}
 
 	public abstract String getName();
+
+	@Override
+	public String getCategory() {
+		return "Buildings";
+	}
 
 	public StatLine getStatLine() {
 		return statLine;

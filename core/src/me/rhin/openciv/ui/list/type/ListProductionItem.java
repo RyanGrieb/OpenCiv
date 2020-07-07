@@ -4,7 +4,9 @@ import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.utils.Align;
 
+import me.rhin.openciv.game.city.City;
 import me.rhin.openciv.game.production.ProductionItem;
+import me.rhin.openciv.shared.stat.Stat;
 import me.rhin.openciv.ui.label.CustomLabel;
 import me.rhin.openciv.ui.list.ListItem;
 
@@ -12,25 +14,36 @@ public class ListProductionItem extends ListItem {
 
 	private ProductionItem productionItem;
 	private CustomLabel itemNameLabel;
+	private CustomLabel itemTurnCostLabel;
 	private Sprite itemIconSprite;
 	private Sprite backgroundSprite;
 
-	public ListProductionItem(ProductionItem productionItem, float width, float height) {
+	public ListProductionItem(City city, ProductionItem productionItem, float width, float height) {
 		super(width, height);
 		this.productionItem = productionItem;
 		this.itemNameLabel = new CustomLabel(productionItem.getName());
 		itemNameLabel.setSize(width, height);
 		itemNameLabel.setAlignment(Align.topLeft);
+
+		// FIXME: In the future, we need to divide by the already applied production to
+		// the item.
+		this.itemTurnCostLabel = new CustomLabel(
+				(int) (productionItem.getProductionCost() / city.getStatLine().getStatValue(Stat.PRODUCTION_GAIN))
+						+ " Turns");
+		itemTurnCostLabel.setSize(width, height);
+		itemTurnCostLabel.setAlignment(Align.bottomLeft);
 	}
 
 	@Override
 	public void draw(Batch batch, float parentAlpha) {
 		itemNameLabel.draw(batch, parentAlpha);
+		itemTurnCostLabel.draw(batch, parentAlpha);
 	}
 
 	@Override
 	public void setPosition(float x, float y) {
 		super.setPosition(x, y);
 		itemNameLabel.setPosition(x, y);
+		itemTurnCostLabel.setPosition(x, y);
 	}
 }

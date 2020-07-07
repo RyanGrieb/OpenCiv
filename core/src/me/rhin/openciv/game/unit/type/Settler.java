@@ -7,12 +7,12 @@ import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.AbstractAction;
 import me.rhin.openciv.game.map.tile.Tile;
 import me.rhin.openciv.game.map.tile.TileType.TileProperty;
-import me.rhin.openciv.game.production.ProductionItem;
 import me.rhin.openciv.game.unit.Unit;
+import me.rhin.openciv.game.unit.UnitItem;
 import me.rhin.openciv.game.unit.UnitParameter;
 import me.rhin.openciv.shared.packet.type.SettleCityPacket;
 
-public class Settler implements ProductionItem {
+public class Settler extends UnitItem {
 
 	public static class SettlerUnit extends Unit {
 		public SettlerUnit(UnitParameter unitParameter) {

@@ -3,13 +3,14 @@ package me.rhin.openciv.game.unit.type;
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.map.tile.Tile;
 import me.rhin.openciv.game.map.tile.TileType.TileProperty;
-import me.rhin.openciv.game.production.ProductionItem;
 import me.rhin.openciv.game.unit.Unit;
+import me.rhin.openciv.game.unit.UnitItem;
 import me.rhin.openciv.game.unit.UnitParameter;
 
-public class Warrior implements ProductionItem {
+public class Warrior extends UnitItem {
 
 	public static class WarriorUnit extends Unit {
+
 		public WarriorUnit(UnitParameter unitParameter) {
 			super(unitParameter, TextureEnum.UNIT_WARRIOR);
 			this.canAttack = true;
@@ -26,7 +27,7 @@ public class Warrior implements ProductionItem {
 
 	@Override
 	public int getProductionCost() {
-		return 0;
+		return 40;
 	}
 
 	@Override

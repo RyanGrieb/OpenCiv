@@ -15,7 +15,7 @@ import me.rhin.openciv.ui.list.ListContainer.ListContainerType;
 public class ContainerList extends Actor {
 
 	private int yOffset;
-	private HashMap<Class<?>, ListContainer> listContainers;
+	private HashMap<String, ListContainer> listContainers;
 	private Sprite backgroundSprite;
 
 	public ContainerList(float x, float y, float width, float height) {
@@ -67,14 +67,21 @@ public class ContainerList extends Actor {
 		}
 	}
 
-	public void addItem(ListContainerType containerType, Class<?> classType, ListItem listItem) {
-		if (!listContainers.containsKey(classType)) {
-			listContainers.put(classType,
-					new ListContainer(containerType, classType.getSimpleName() + "s", getWidth()));
-			ListContainer container = (ListContainer) listContainers.get(classType);
-			container.setPosition(getX(), (getY() + getHeight() - container.getHeight())
-					- (listContainers.size() - 1) * container.getHeight());
+	public void addItem(ListContainerType containerType, String categoryType, ListItem listItem) {
+		if (!listContainers.containsKey(categoryType)) {
+
+			float nextHeight = 0;
+
+			for (ListContainer container : listContainers.values()) {
+				nextHeight += container.getHeight();
+			}
+
+			listContainers.put(categoryType, new ListContainer(containerType, categoryType, getWidth()));
+			ListContainer container = (ListContainer) listContainers.get(categoryType);
+
+			// Bump down our next container from the height of all the previous contains
+			container.setPosition(getX(), (getY() + getHeight() - container.getHeight()) - nextHeight);
 		}
-		listContainers.get(classType).addItem(listItem);
+		listContainers.get(categoryType).addItem(listItem);
 	}
 }

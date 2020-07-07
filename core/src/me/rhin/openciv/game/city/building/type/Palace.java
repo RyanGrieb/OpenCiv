@@ -29,5 +29,4 @@ public class Palace extends Building {
 	public boolean meetsProductionRequirements() {
 		return false;
 	}
-
 }
