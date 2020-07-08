@@ -2,11 +2,11 @@
 
 An open source Civ'ish game made in LibGDX
 
-![alt text](https://github.com/rhin123/OpenCiv/blob/master/meta/city_menu.png?raw=true?raw=true)
+![alt text](https://github.com/rhin123/OpenCiv/blob/master/meta/screenshots/city_menu.png?raw=true?raw=true)
 
-![alt text](https://github.com/rhin123/OpenCiv/blob/master/meta/title_screen.png?raw=true)
+![alt text](https://github.com/rhin123/OpenCiv/blob/master/meta/screenshots/title_screen.png?raw=true)
 
-![alt text](https://github.com/rhin123/OpenCiv/blob/master/meta/wold_map.png?raw=true)
+![alt text](https://github.com/rhin123/OpenCiv/blob/master/meta/screenshots/wold_map.png?raw=true)
 ## Planned Features:
 - [X] Random map generation
 - [X] Unit pathfinding
