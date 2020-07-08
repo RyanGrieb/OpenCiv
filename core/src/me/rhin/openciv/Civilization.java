@@ -41,8 +41,9 @@ public class Civilization extends Game {
 		Gdx.app.setLogLevel(Application.LOG_INFO);
 		Gdx.app.log(LOG_TAG, "Starting Game...");
 		GL_PROFILER = new GLProfiler(Gdx.graphics);
-		GL_PROFILER.enable();
-
+		if (DEBUG_GL) {
+			GL_PROFILER.enable();
+		}
 		assetHandler = new AssetHandler();
 		eventManager = new EventManager();
 		screenManager = new ScreenManager();
