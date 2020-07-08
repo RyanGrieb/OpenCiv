@@ -52,7 +52,7 @@ public class ListProductionItem extends ListItem {
 	public void setPosition(float x, float y) {
 		super.setPosition(x, y);
 		backgroundSprite.setPosition(x, y);
-		itemIconSprite.setPosition(x + width - itemIconSprite.getWidth(), y);
+		itemIconSprite.setPosition(x + getWidth() - itemIconSprite.getWidth(), y);
 		itemNameLabel.setPosition(x, y);
 		itemTurnCostLabel.setPosition(x, y);
 	}

@@ -26,12 +26,12 @@ public class Galley extends UnitItem {
 
 	@Override
 	public int getProductionCost() {
-		return 0;
+		return 45;
 	}
 
 	@Override
 	public boolean meetsProductionRequirements() {
-		return false;
+		return true;
 	}
 
 	@Override
@@ -41,6 +41,6 @@ public class Galley extends UnitItem {
 
 	@Override
 	public TextureEnum getTexture() {
-		return TextureEnum.UNIT_SETTLER;
+		return TextureEnum.UNIT_GALLEY;
 	}
 }

@@ -4,15 +4,19 @@ import java.util.HashMap;
 
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.DragListener;
 
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.TextureEnum;
+import me.rhin.openciv.ui.button.Button;
 import me.rhin.openciv.ui.list.ListContainer.ListContainerType;
 
-public class ContainerList extends Actor {
+public class ContainerList extends Group {
 
 	private int yOffset;
 	private HashMap<String, ListContainer> listContainers;
@@ -22,8 +26,13 @@ public class ContainerList extends Actor {
 		this.yOffset = 0;
 		this.listContainers = new HashMap<>();
 		this.setBounds(x, y, width, height);
-		this.addListener(new DragListener() {
 
+		backgroundSprite = TextureEnum.UI_BLACK.sprite();
+		backgroundSprite.setPosition(x, y);
+		backgroundSprite.setSize(width, height);
+		// this.setCullingArea(new Rectangle(x, y, width, height));
+
+		this.addListener(new DragListener() {
 			@Override
 			public boolean scrolled(InputEvent event, float x, float y, int amount) {
 				// FIXME: We shouldn't use a low level listener for this. We shouldn't have to
@@ -40,30 +49,52 @@ public class ContainerList extends Actor {
 				return false;
 			}
 		});
-		backgroundSprite = TextureEnum.UI_BLACK.sprite();
-		backgroundSprite.setPosition(x, y);
-		backgroundSprite.setSize(width, height);
-	}
 
-	@Override
-	public void act(float delta) {
-		super.act(delta);
+		// FIXME: This doesn't seem correct.
+		final ContainerList thisContainer = this;
+
+		this.addListener(new ClickListener() {
+			@Override
+			public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
+				thisContainer.getStage().setScrollFocus(thisContainer);
+			}
+
+			@Override
+			public void exit(InputEvent event, float x, float y, int pointer, Actor fromActor) {
+				thisContainer.getStage().setScrollFocus(null);
+			}
+		});
 	}
 
 	@Override
 	public void draw(Batch batch, float parentAlpha) {
 		backgroundSprite.draw(batch);
-		for (ListItem container : listContainers.values()) {
-				container.draw(batch, parentAlpha);
+
+		batch.flush();
+		if (clipBegin(getX(), getY(), getWidth(), getHeight())) {
+			drawChildren(batch, parentAlpha);
+			batch.flush();
+			clipEnd();
 		}
 	}
 
 	public void scroll(int amount) {
-		// TODO: Display certain items depending on the yOffset.
-		yOffset += amount;
-		for (ListItem container : listContainers.values()) {
-			container.setYOffset(yOffset);
+		int yAmount = yOffset + (amount * 12);
+		if (yAmount < 0)
+			yAmount = 0;
+
+		// FIXME: Redundant code, same as line 112
+		float maxHeight = 0;
+		for (ListContainer container : listContainers.values()) {
+			maxHeight += container.getHeight();
 		}
+
+		if (yAmount > (maxHeight - getHeight())) {
+			yAmount = (int) (maxHeight - getHeight());
+		}
+
+		yOffset = yAmount;
+		updatePositions();
 	}
 
 	public void addItem(ListContainerType containerType, String categoryType, ListItem listItem) {
@@ -73,6 +104,8 @@ public class ContainerList extends Actor {
 
 		listContainers.get(categoryType).addItem(listItem);
 		updatePositions();
+
+		addActor(listContainers.get(categoryType));
 	}
 
 	private void updatePositions() {
@@ -80,7 +113,7 @@ public class ContainerList extends Actor {
 
 		// Problem:
 		for (ListContainer container : listContainers.values()) {
-			container.setPosition(getX(), (getY() + getHeight()) - container.getHeight() - nextHeight);
+			container.setPosition(getX(), yOffset + (getY() + getHeight()) - container.getHeight() - nextHeight);
 			nextHeight += container.getHeight();
 		}
 	}

@@ -7,6 +7,7 @@ import java.util.HashMap;
 import me.rhin.openciv.game.city.City;
 import me.rhin.openciv.game.city.building.type.Granary;
 import me.rhin.openciv.game.city.building.type.Monument;
+import me.rhin.openciv.game.unit.type.Galley;
 import me.rhin.openciv.game.unit.type.Scout;
 import me.rhin.openciv.game.unit.type.Settler;
 import me.rhin.openciv.game.unit.type.Warrior;
@@ -35,6 +36,7 @@ public class ProducibleItemManager {
 		possibleItems.put(Warrior.class, new Warrior());
 		possibleItems.put(Settler.class, new Settler());
 		possibleItems.put(Scout.class, new Scout());
+		possibleItems.put(Galley.class, new Galley());
 	}
 
 	public Collection<ProductionItem> getItems() {

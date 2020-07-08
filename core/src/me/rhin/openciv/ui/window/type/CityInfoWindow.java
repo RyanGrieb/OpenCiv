@@ -125,10 +125,6 @@ public class CityInfoWindow extends AbstractWindow {
 		}
 		addActor(buildingContainerList);
 
-		// FIXME: We need to set our scroll focus automatically when the user moves
-		// their mouse inside
-		stage.setScrollFocus(buildingContainerList);
-
 		this.productionContainerList = new ContainerList(0, 0, 200, 210);
 		for (ProductionItem productionItem : city.getProducibleItemManager().getProducibleItems()) {
 			productionContainerList.addItem(ListContainerType.CATEGORY, productionItem.getCategory(),

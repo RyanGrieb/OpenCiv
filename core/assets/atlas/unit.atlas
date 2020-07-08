@@ -1,9 +1,16 @@
 
 unit.png
-size: 64,32
+size: 128,32
 format: RGBA8888
 filter: Nearest,Nearest
 repeat: none
+unit_galley
+  rotate: false
+  xy: 56, 2
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
 unit_scout
   rotate: false
   xy: 2, 2
