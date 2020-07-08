@@ -48,11 +48,6 @@ public class StatusBar extends Actor implements PlayerStatUpdateListener {
 	}
 
 	@Override
-	public void act(float delta) {
-		super.act(delta);
-	}
-
-	@Override
 	public void draw(Batch batch, float parentAlpha) {
 		sprite.draw(batch);
 

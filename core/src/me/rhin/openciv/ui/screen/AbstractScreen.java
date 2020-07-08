@@ -22,7 +22,6 @@ public abstract class AbstractScreen implements Screen, InputProcessor {
 	protected OrthographicCamera camera;
 	protected float camX;
 	protected float camY;
-	// TODO: Make a overlayViewport.
 	protected Viewport viewport;
 	private Viewport overlayViewport;
 	protected Stage stage;
