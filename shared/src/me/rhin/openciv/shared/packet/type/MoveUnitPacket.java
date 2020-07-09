@@ -13,10 +13,6 @@ public class MoveUnitPacket extends Packet {
 	private int unitID;
 	private String playerOwner;
 
-	public MoveUnitPacket() {
-		super(MoveUnitPacket.class.getName());
-	}
-
 	@Override
 	public void write(Json json) {
 		super.write(json);

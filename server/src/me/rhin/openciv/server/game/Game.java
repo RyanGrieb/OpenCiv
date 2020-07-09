@@ -277,7 +277,9 @@ public class Game implements StartGameRequestListener, ConnectionListener, Disco
 			player.getConn().send(json.toJson(turnTimeUpdatePacket));
 		}
 	}
-
+	
+	
+	
 	public void start() {
 		System.out.println("[SERVER] Starting game...");
 		map.generateTerrain();

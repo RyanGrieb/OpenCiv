@@ -11,10 +11,6 @@ public class SettleCityPacket extends Packet {
 	private String playerOwner;
 	private String cityName;
 
-	public SettleCityPacket() {
-		super(SettleCityPacket.class.getName());
-	}
-
 	@Override
 	public void write(Json json) {
 		super.write(json);

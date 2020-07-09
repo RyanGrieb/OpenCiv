@@ -9,10 +9,6 @@ public class FetchPlayerPacket extends Packet {
 
 	private String playerName;
 
-	public FetchPlayerPacket() {
-		super(FetchPlayerPacket.class.getName());
-	}
-
 	@Override
 	public void write(Json json) {
 		super.write(json);

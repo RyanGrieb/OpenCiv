@@ -6,14 +6,10 @@ import com.badlogic.gdx.utils.JsonValue;
 import me.rhin.openciv.shared.packet.Packet;
 
 public class TerritoryGrowPacket extends Packet {
-	
+
 	private int gridX, gridY;
 	private String playerOwner;
 	private String cityName;
-
-	public TerritoryGrowPacket() {
-		super(TerritoryGrowPacket.class.getName());
-	}
 
 	@Override
 	public void write(Json json) {

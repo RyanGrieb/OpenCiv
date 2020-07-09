@@ -10,10 +10,6 @@ public class PlayerConnectPacket extends Packet {
 	private String playerName;
 	private String color;
 
-	public PlayerConnectPacket() {
-		super(PlayerConnectPacket.class.getName());
-	}
-
 	public void setPlayerName(String playerName) {
 		this.playerName = playerName;
 	}

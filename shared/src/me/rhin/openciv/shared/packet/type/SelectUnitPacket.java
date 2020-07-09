@@ -10,10 +10,6 @@ public class SelectUnitPacket extends Packet {
 	private int unitID;
 	private int gridX, gridY;
 
-	public SelectUnitPacket() {
-		super(SelectUnitPacket.class.getName());
-	}
-
 	@Override
 	public void write(Json json) {
 		super.write(json);

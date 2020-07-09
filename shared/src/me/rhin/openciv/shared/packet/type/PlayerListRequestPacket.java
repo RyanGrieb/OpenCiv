@@ -15,10 +15,6 @@ public class PlayerListRequestPacket extends Packet {
 	private String[] playerList;
 	private String[] colorList;
 
-	public PlayerListRequestPacket() {
-		super(PlayerListRequestPacket.class.getName());
-	}
-
 	@Override
 	public void write(Json json) {
 		super.write(json);

@@ -9,10 +9,6 @@ public class PlayerDisconnectPacket extends Packet {
 
 	private String playerName;
 
-	public PlayerDisconnectPacket() {
-		super(PlayerDisconnectPacket.class.getName());
-	}
-
 	@Override
 	public void write(Json json) {
 		super.write(json);

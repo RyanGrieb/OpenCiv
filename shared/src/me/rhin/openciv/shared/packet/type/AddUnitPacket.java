@@ -12,10 +12,6 @@ public class AddUnitPacket extends Packet {
 	private int unitID;
 	private String playerOwner;
 
-	public AddUnitPacket() {
-		super(AddUnitPacket.class.getName());
-	}
-
 	@Override
 	public void write(Json json) {
 		super.write(json);

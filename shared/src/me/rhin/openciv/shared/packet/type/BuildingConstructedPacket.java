@@ -10,10 +10,6 @@ public class BuildingConstructedPacket extends Packet {
 	private String cityName;
 	private String buildingName;
 
-	public BuildingConstructedPacket() {
-		super(BuildingConstructedPacket.class.getName());
-	}
-
 	@Override
 	public void write(Json json) {
 		super.write(json);

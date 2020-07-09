@@ -9,10 +9,6 @@ public class TurnTimeUpdatePacket extends Packet {
 
 	private int turnTime;
 
-	public TurnTimeUpdatePacket() {
-		super(TurnTimeUpdatePacket.class.getName());
-	}
-
 	@Override
 	public void write(Json json) {
 		super.write(json);

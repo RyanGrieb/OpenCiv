@@ -13,10 +13,6 @@ public class MapChunkPacket extends Packet {
 	private int[][] bottomTileChunk;
 	private int chunkX, chunkY;
 
-	public MapChunkPacket() {
-		super(MapChunkPacket.class.getName());
-	}
-
 	@Override
 	public void write(Json json) {
 		super.write(json);

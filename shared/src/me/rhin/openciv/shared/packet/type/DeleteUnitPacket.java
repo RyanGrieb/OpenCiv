@@ -11,10 +11,6 @@ public class DeleteUnitPacket extends Packet {
 	private int unitID;
 	private String playerOwner;
 
-	public DeleteUnitPacket() {
-		super(DeleteUnitPacket.class.getName());
-	}
-
 	@Override
 	public void write(Json json) {
 		super.write(json);

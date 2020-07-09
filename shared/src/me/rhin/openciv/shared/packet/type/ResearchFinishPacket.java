@@ -9,10 +9,6 @@ public class ResearchFinishPacket extends Packet {
 
 	private int techID;
 
-	public ResearchFinishPacket() {
-		super(ResearchFinishPacket.class.getName());
-	}
-
 	@Override
 	public void write(Json json) {
 		super.write(json);

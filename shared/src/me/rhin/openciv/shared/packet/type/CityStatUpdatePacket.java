@@ -13,8 +13,6 @@ public class CityStatUpdatePacket extends Packet {
 	private float[] statValues;
 
 	public CityStatUpdatePacket() {
-		super(CityStatUpdatePacket.class.getName());
-
 		this.statNames = new String[MAX_STATS];
 		this.statValues = new float[MAX_STATS];
 	}
