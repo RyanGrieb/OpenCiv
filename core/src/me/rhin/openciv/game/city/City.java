@@ -1,6 +1,5 @@
 package me.rhin.openciv.game.city;
 
-import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 
 import com.badlogic.gdx.Gdx;
@@ -15,8 +14,6 @@ import me.rhin.openciv.game.city.building.Building;
 import me.rhin.openciv.game.map.tile.Tile;
 import me.rhin.openciv.game.player.Player;
 import me.rhin.openciv.game.production.ProducibleItemManager;
-import me.rhin.openciv.game.unit.Unit;
-import me.rhin.openciv.game.unit.UnitParameter;
 import me.rhin.openciv.listener.BuildingConstructedListener;
 import me.rhin.openciv.shared.packet.type.BuildingConstructedPacket;
 import me.rhin.openciv.shared.stat.StatLine;
@@ -34,6 +31,7 @@ public class City extends Actor implements BuildingConstructedListener {
 	private CustomLabel nameLabel;
 
 	public City(Tile tile, Player playerOwner, String name) {
+		this.tile = tile;
 		this.playerOwner = playerOwner;
 		this.territory = new ArrayList<>();
 		this.buildings = new ArrayList<>();
@@ -44,6 +42,7 @@ public class City extends Actor implements BuildingConstructedListener {
 		nameLabel.setPosition(tile.getX() + tile.getWidth() / 2 - nameLabel.getWidth() / 2,
 				tile.getY() + tile.getHeight() + 5);
 
+		// FIXME: The actor size & position really shouldn't be confined to the label.
 		this.setPosition(nameLabel.getX(), nameLabel.getY());
 		this.setSize(nameLabel.getWidth(), nameLabel.getHeight());
 
@@ -71,7 +70,10 @@ public class City extends Actor implements BuildingConstructedListener {
 	public void onClick() {
 		if (!playerOwner.equals(Civilization.getInstance().getGame().getPlayer()))
 			return;
-		// TODO: Unselect selected unit
+
+		Civilization.getInstance().getScreenManager().getCurrentScreen()
+				.setCameraPosition(tile.getX() + tile.getWidth() / 2, tile.getY() + tile.getHeight() / 2);
+
 		Civilization.getInstance().getGame().getPlayer().unselectUnit();
 		Civilization.getInstance().getWindowManager().toggleWindow(new CityInfoWindow(this));
 	}

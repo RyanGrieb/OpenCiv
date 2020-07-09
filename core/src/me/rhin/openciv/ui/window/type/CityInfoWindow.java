@@ -57,7 +57,7 @@ public class CityInfoWindow extends AbstractWindow {
 
 	@Override
 	public boolean disablesInput() {
-		return false;
+		return true;
 	}
 
 	@Override
