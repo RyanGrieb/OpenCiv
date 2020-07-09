@@ -4,15 +4,15 @@ import java.util.ArrayList;
 
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
+import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.utils.Align;
 
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.city.building.Building;
 import me.rhin.openciv.shared.stat.Stat;
 import me.rhin.openciv.ui.label.CustomLabel;
-import me.rhin.openciv.ui.list.ListItem;
 
-public class ListBuilding extends ListItem {
+public class ListBuilding extends Actor {
 
 	private Building building;
 	private Sprite backgroundSprite;
@@ -21,7 +21,7 @@ public class ListBuilding extends ListItem {
 	private ArrayList<CustomLabel> statLabels;
 
 	public ListBuilding(Building building, float width, float height) {
-		super(width, height);
+		this.setSize(width, height);
 		this.building = building;
 		backgroundSprite = TextureEnum.UI_GRAY.sprite();
 		backgroundSprite.setSize(width, height);

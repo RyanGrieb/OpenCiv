@@ -1,7 +1,9 @@
 package me.rhin.openciv.asset;
 
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
+import com.badlogic.gdx.graphics.g2d.TextureAtlas.AtlasRegion;
 
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.shared.stat.Stat;
@@ -36,6 +38,7 @@ public enum TextureEnum {
 	UI_BLACK,
 	UI_GRAY,
 	UI_LIGHT_GRAY,
+	UI_DARK_GRAY,
 	UI_GITHUB,
 	UI_BACKGROUND,
 	UI_CONTAINER_BOX,
@@ -43,8 +46,7 @@ public enum TextureEnum {
 
 	private TextureAtlas textureAtlas;
 
-	TextureEnum() {
-
+	private TextureEnum() {
 		String assetType = this.name().toLowerCase().substring(0, this.name().toLowerCase().indexOf('_'));
 		this.textureAtlas = Civilization.getInstance().getAssetHandler().get("atlas/" + assetType + ".atlas",
 				TextureAtlas.class);

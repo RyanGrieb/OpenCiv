@@ -4,20 +4,21 @@ import java.util.ArrayList;
 
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
-import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.utils.Align;
 
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.ui.label.CustomLabel;
 
-public class ListContainer extends ListItem {
+public class ListContainer extends Group {
 
 	public enum ListContainerType {
 		CATEGORY, DEFAULT
 	}
 
 	private ContainerList containerList;
-	private ArrayList<ListItem> listItems;
+	private ArrayList<Actor> listItemActors;
 	private ArrayList<Sprite> seperatorSprites;
 	private ListContainerType containerType;
 	private Sprite categoryBackgroundSprite;
@@ -25,9 +26,9 @@ public class ListContainer extends ListItem {
 	private CustomLabel containerNameLabel;
 
 	public ListContainer(ContainerList containerList, ListContainerType containerType, String name, float width) {
-		super(width, (containerType == ListContainerType.CATEGORY ? 15 : 0));
+		this.setSize(width, (containerType == ListContainerType.CATEGORY ? 15 : 0));
 		this.containerList = containerList;
-		this.listItems = new ArrayList<>();
+		this.listItemActors = new ArrayList<>();
 		this.seperatorSprites = new ArrayList<>();
 		this.containerType = containerType;
 
@@ -55,9 +56,9 @@ public class ListContainer extends ListItem {
 			containerNameLabel.draw(batch, parentAlpha);
 		}
 
-		for (ListItem item : listItems) {
+		for (Actor itemActor : listItemActors) {
 			// if (item.getY() >= containerList.getY())
-			item.draw(batch, parentAlpha);
+			// itemActor.draw(batch, parentAlpha);
 		}
 
 		for (int i = 0; i < seperatorSprites.size(); i++) {
@@ -76,44 +77,41 @@ public class ListContainer extends ListItem {
 		backgroundSprite.setPosition(x, y);
 		containerNameLabel.setPosition(x, y + getHeight() - containerNameLabel.getHeight());
 
-		for (int i = 0; i < listItems.size(); i++) {
-			ListItem listItem = listItems.get(i);
+		for (int i = 0; i < listItemActors.size(); i++) {
+			Actor itemActor = listItemActors.get(i);
 			// NOTE: This assumes that all listItems are the same size.
-			listItem.setPosition(x, y + (getHeight() - categoryBackgroundSprite.getHeight() - listItem.getHeight())
-					- (i * listItem.getHeight()));
+			itemActor.setPosition(0, (getHeight() - categoryBackgroundSprite.getHeight() - itemActor.getHeight())
+					- (i * itemActor.getHeight()));
 		}
 
-		// TODO: Set proper locations for seperatorSprites & listItems on setposition.
 		float initY = y;
 		int index = -1;
 		for (Sprite sprite : seperatorSprites) {
 			if (index < 0)
 				sprite.setPosition(x, y);
 			else {
-				initY += listItems.get(index).getHeight();
+				initY += listItemActors.get(index).getHeight();
 				sprite.setPosition(x, initY);
 			}
 			index++;
 		}
 	}
 
-	public void addItem(ListItem listItem) {
-		// listItem.setPosition(x, y - (listItems.size() * listItem.height) -
-		// listItem.height);
-		listItems.add(listItem);
+	public void addItem(Actor itemActor) {
+		listItemActors.add(itemActor);
+		addActor(itemActor);
 
 		Sprite seperatorSprite = TextureEnum.UI_BLACK.sprite();
 		seperatorSprite.setSize(getWidth(), 1);
 		seperatorSprites.add(seperatorSprite);
 
 		// Update the height.
-		// FIXME: If the listItem exceeds the listContainer's height, we really
+		// FIXME: If the itemActor exceeds the listContainer's height, we really
 		// shouldn't increase the size further.
-		setHeight(getHeight() + listItem.getHeight());
+		setHeight(getHeight() + itemActor.getHeight());
 		updateHeight();
 	}
 
-	// TODO: We might make this a required method for all ListItem's.
 	private void updateHeight() {
 		backgroundSprite.setSize(getWidth(), getHeight());
 	}

@@ -25,7 +25,7 @@ public class ContainerList extends Group {
 		this.listContainers = new HashMap<>();
 		this.setBounds(x, y, width, height);
 
-		backgroundSprite = TextureEnum.UI_BLACK.sprite();
+		backgroundSprite = TextureEnum.UI_LIGHT_GRAY.sprite();
 		backgroundSprite.setPosition(x, y);
 		backgroundSprite.setSize(width, height);
 		// this.setCullingArea(new Rectangle(x, y, width, height));
@@ -87,7 +87,7 @@ public class ContainerList extends Group {
 			maxHeight += container.getHeight();
 		}
 
-		if (yAmount > maxHeight - getHeight() && maxHeight - getHeight() > 0) {
+		if (yAmount > maxHeight - getHeight() && maxHeight - getHeight() >= 0) {
 			yAmount = (int) (maxHeight - getHeight());
 		} else if (maxHeight - getHeight() < 0) {
 			yAmount = 0;
@@ -97,12 +97,12 @@ public class ContainerList extends Group {
 		updatePositions();
 	}
 
-	public void addItem(ListContainerType containerType, String categoryType, ListItem listItem) {
+	public void addItem(ListContainerType containerType, String categoryType, Actor itemActor) {
 		if (!listContainers.containsKey(categoryType)) {
 			listContainers.put(categoryType, new ListContainer(this, containerType, categoryType, getWidth()));
 		}
 
-		listContainers.get(categoryType).addItem(listItem);
+		listContainers.get(categoryType).addItem(itemActor);
 		updatePositions();
 
 		addActor(listContainers.get(categoryType));

@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 
+import com.badlogic.gdx.Gdx;
+
+import me.rhin.openciv.Civilization;
 import me.rhin.openciv.game.city.City;
 import me.rhin.openciv.game.city.building.type.Granary;
 import me.rhin.openciv.game.city.building.type.Monument;
@@ -22,9 +25,12 @@ import me.rhin.openciv.game.unit.type.Warrior;
  */
 public class ProducibleItemManager {
 
+	private City city;
 	private HashMap<Class<? extends ProductionItem>, ProductionItem> possibleItems;
+	private ProductionItem currentProductionItem;
 
 	public ProducibleItemManager(City city) {
+		this.city = city;
 		this.possibleItems = new HashMap<>();
 		// At the start of the game, define
 
@@ -52,5 +58,15 @@ public class ProducibleItemManager {
 		}
 
 		return producibleItems;
+	}
+
+	public void setCurrentProductionItem(ProductionItem currentProductionItem) {
+		Gdx.app.log(Civilization.LOG_TAG,
+				"Requesting to build: " + currentProductionItem.getName() + " in city: " + city.getName());
+		// TODO: Send packet.
+	}
+
+	public ProductionItem getCurrentProductionItem() {
+		return currentProductionItem;
 	}
 }

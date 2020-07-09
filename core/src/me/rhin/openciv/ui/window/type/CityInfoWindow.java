@@ -8,7 +8,8 @@ import me.rhin.openciv.game.city.building.Building;
 import me.rhin.openciv.game.production.ProductionItem;
 import me.rhin.openciv.ui.button.ButtonManager;
 import me.rhin.openciv.ui.button.type.CityInfoCloseButton;
-import me.rhin.openciv.ui.game.CityStats;
+import me.rhin.openciv.ui.game.CityProductionInfo;
+import me.rhin.openciv.ui.game.CityStatsInfo;
 import me.rhin.openciv.ui.list.ContainerList;
 import me.rhin.openciv.ui.list.ListContainer.ListContainerType;
 import me.rhin.openciv.ui.list.type.ListBuilding;
@@ -19,7 +20,8 @@ public class CityInfoWindow extends AbstractWindow {
 
 	private ButtonManager buttonManager;
 	private City city;
-	private CityStats cityStats;
+	private CityStatsInfo cityStatsInfo;
+	private CityProductionInfo cityProductionInfo;
 	private ContainerList buildingContainerList;
 	private ContainerList productionContainerList;
 
@@ -28,12 +30,15 @@ public class CityInfoWindow extends AbstractWindow {
 		this.city = city;
 		buttonManager.addButton(new CityInfoCloseButton(viewport.getWorldWidth() / 2 - 150 / 2, 50, 150, 45));
 
-		this.cityStats = new CityStats(city, 2,
+		this.cityStatsInfo = new CityStatsInfo(city, 2,
 				Civilization.getInstance().getScreenManager().getCurrentScreen().getViewport().getWorldHeight()
 						- (175 + GameOverlay.HEIGHT + 2),
-				175, 175);
+				200, 175);
 
-		addActor(cityStats);
+		addActor(cityStatsInfo);
+
+		cityProductionInfo = new CityProductionInfo(city, 2, cityStatsInfo.getY() - 105, 200, 100);
+		addActor(cityProductionInfo);
 
 		this.buildingContainerList = new ContainerList(viewport.getWorldWidth() - 200, 200, 200, 195);
 
@@ -42,7 +47,7 @@ public class CityInfoWindow extends AbstractWindow {
 		}
 		addActor(buildingContainerList);
 
-		this.productionContainerList = new ContainerList(0, 0, 200, 210);
+		this.productionContainerList = new ContainerList(0, 0, 200, 255);
 		for (ProductionItem productionItem : city.getProducibleItemManager().getProducibleItems()) {
 			productionContainerList.addItem(ListContainerType.CATEGORY, productionItem.getCategory(),
 					new ListProductionItem(city, productionItem, 200, 45));

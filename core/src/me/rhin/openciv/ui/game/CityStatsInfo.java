@@ -11,7 +11,7 @@ import me.rhin.openciv.shared.stat.Stat;
 import me.rhin.openciv.ui.label.CustomLabel;
 import me.rhin.openciv.ui.window.type.GameOverlay;
 
-public class CityStats extends Actor {
+public class CityStatsInfo extends Actor {
 
 	private City city;
 
@@ -20,7 +20,7 @@ public class CityStats extends Actor {
 	private CustomLabel foodDescLabel, productionDescLabel, goldDescLabel, scienceDescLabel, heritageDescLabel;
 	private CustomLabel foodLabel, productionLabel, goldLabel, scienceLabel, heritageLabel;
 
-	public CityStats(City city, float x, float y, float width, float height) {
+	public CityStatsInfo(City city, float x, float y, float width, float height) {
 		this.city = city;
 		this.setBounds(x, y, width, height);
 
