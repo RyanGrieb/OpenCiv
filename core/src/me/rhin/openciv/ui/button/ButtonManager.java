@@ -35,7 +35,6 @@ public class ButtonManager {
 				if (!Civilization.getInstance().getWindowManager().allowsInput(event.getListenerActor())) {
 					return;
 				}
-
 				Button buttonActor = (Button) event.getListenerActor();
 				buttonActor.onClick();
 			}

@@ -26,16 +26,13 @@ public abstract class Button extends Actor {
 	public Button(TextureEnum textureEnum, String text, float x, float y, float width, float height) {
 		this.setTouchable(Touchable.enabled);
 		this.textureEnum = textureEnum;
-		this.setPosition(x, y);
-		this.setSize(width, height);
+		this.setBounds(x, y, width, height);
 		this.sprite = textureEnum.sprite();
-		sprite.setSize(getWidth(), getHeight());
-		sprite.setPosition(getX(), getY());
+		sprite.setBounds(x, y, width, height);
 
 		// FIXME: This should be specified in the constructor above
 		this.hoveredSprite = TextureEnum.UI_BUTTON_HOVERED.sprite();
-		hoveredSprite.setSize(getWidth(), getHeight());
-		hoveredSprite.setPosition(getX(), getY());
+		hoveredSprite.setBounds(x, y, width, height);
 
 		this.btnLabel = new CustomLabel(text);
 		btnLabel.setSize(Gdx.graphics.getWidth(), 20);
@@ -46,11 +43,6 @@ public abstract class Button extends Actor {
 	}
 
 	public abstract void onClick();
-
-	@Override
-	public void act(float delta) {
-		super.act(delta);
-	}
 
 	@Override
 	public void draw(Batch batch, float parentAlpha) {
