@@ -4,7 +4,6 @@ import java.util.HashMap;
 
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
-import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
@@ -13,7 +12,6 @@ import com.badlogic.gdx.scenes.scene2d.utils.DragListener;
 
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.TextureEnum;
-import me.rhin.openciv.ui.button.Button;
 import me.rhin.openciv.ui.list.ListContainer.ListContainerType;
 
 public class ContainerList extends Group {
@@ -89,8 +87,10 @@ public class ContainerList extends Group {
 			maxHeight += container.getHeight();
 		}
 
-		if (yAmount > (maxHeight - getHeight())) {
+		if (yAmount > maxHeight - getHeight() && maxHeight - getHeight() > 0) {
 			yAmount = (int) (maxHeight - getHeight());
+		} else if (maxHeight - getHeight() < 0) {
+			yAmount = 0;
 		}
 
 		yOffset = yAmount;
