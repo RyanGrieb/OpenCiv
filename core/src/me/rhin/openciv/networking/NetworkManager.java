@@ -1,6 +1,5 @@
 package me.rhin.openciv.networking;
 
-import java.lang.reflect.Constructor;
 import java.util.HashMap;
 
 import com.badlogic.gdx.Gdx;
@@ -14,8 +13,6 @@ import com.github.czyzby.websocket.WebSockets;
 import com.github.czyzby.websocket.data.WebSocketCloseCode;
 
 import me.rhin.openciv.Civilization;
-import me.rhin.openciv.game.city.City;
-import me.rhin.openciv.game.city.building.Building;
 import me.rhin.openciv.listener.AddUnitListener.AddUnitEvent;
 import me.rhin.openciv.listener.BuildingConstructedListener.BuildingConstructedEvent;
 import me.rhin.openciv.listener.CityStatUpdateListener.CityStatUpdateEvent;
@@ -31,6 +28,7 @@ import me.rhin.openciv.listener.PlayerStatUpdateListener.PlayerStatUpdateEvent;
 import me.rhin.openciv.listener.ReceiveMapChunkListener.ReciveMapChunkEvent;
 import me.rhin.openciv.listener.SelectUnitListener.SelectUnitEvent;
 import me.rhin.openciv.listener.ServerConnectListener.ServerConnectEvent;
+import me.rhin.openciv.listener.SetProductionItemListener.SetProductionItemEvent;
 import me.rhin.openciv.listener.SettleCityListener.SettleCityEvent;
 import me.rhin.openciv.listener.TerritoryGrowListener.TerritoryGrowEvent;
 import me.rhin.openciv.listener.TurnTimeUpdateListener.TurnTimeUpdateEvent;
@@ -51,10 +49,10 @@ import me.rhin.openciv.shared.packet.type.PlayerDisconnectPacket;
 import me.rhin.openciv.shared.packet.type.PlayerListRequestPacket;
 import me.rhin.openciv.shared.packet.type.PlayerStatUpdatePacket;
 import me.rhin.openciv.shared.packet.type.SelectUnitPacket;
+import me.rhin.openciv.shared.packet.type.SetProductionItemPacket;
 import me.rhin.openciv.shared.packet.type.SettleCityPacket;
 import me.rhin.openciv.shared.packet.type.TerritoryGrowPacket;
 import me.rhin.openciv.shared.packet.type.TurnTimeUpdatePacket;
-import me.rhin.openciv.shared.util.MathHelper;
 
 public class NetworkManager {
 
@@ -81,6 +79,7 @@ public class NetworkManager {
 		networkEvents.put(TerritoryGrowPacket.class, TerritoryGrowEvent.class);
 		networkEvents.put(PlayerStatUpdatePacket.class, PlayerStatUpdateEvent.class);
 		networkEvents.put(CityStatUpdatePacket.class, CityStatUpdateEvent.class);
+		networkEvents.put(SetProductionItemPacket.class, SetProductionItemEvent.class);
 	}
 
 	public void connect(String ip) {

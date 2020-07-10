@@ -1,7 +1,7 @@
 package me.rhin.openciv.server.game.city.building;
 
 import me.rhin.openciv.server.game.city.City;
-import me.rhin.openciv.server.game.city.ProductionItem;
+import me.rhin.openciv.server.game.production.ProductionItem;
 import me.rhin.openciv.shared.stat.StatLine;
 
 public abstract class Building implements ProductionItem {

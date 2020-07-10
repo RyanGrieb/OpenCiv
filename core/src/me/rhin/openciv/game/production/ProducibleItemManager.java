@@ -3,6 +3,8 @@ package me.rhin.openciv.game.production;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.Queue;
 
 import com.badlogic.gdx.Gdx;
 
@@ -14,6 +16,7 @@ import me.rhin.openciv.game.unit.type.Galley;
 import me.rhin.openciv.game.unit.type.Scout;
 import me.rhin.openciv.game.unit.type.Settler;
 import me.rhin.openciv.game.unit.type.Warrior;
+import me.rhin.openciv.shared.packet.type.SetProductionItemPacket;
 
 /**
  * Manager that handles the available items to be produced by cities. Producible
@@ -26,27 +29,26 @@ import me.rhin.openciv.game.unit.type.Warrior;
 public class ProducibleItemManager {
 
 	private City city;
-	private HashMap<Class<? extends ProductionItem>, ProductionItem> possibleItems;
-	private ProductionItem currentProductionItem;
+	private HashMap<String, ProductionItem> possibleItems;
+	private Queue<ProducingItem> itemQueue;
+	private boolean queueEnabled;
 
 	public ProducibleItemManager(City city) {
 		this.city = city;
 		this.possibleItems = new HashMap<>();
-		// At the start of the game, define
+		this.itemQueue = new LinkedList<>();
+		this.queueEnabled = false;
 
-		// FIXME: Maybe move this into the city class itself, I feel like it this class
-		// shouldn't handle this. If not, we need to rename this class to represent a
-		// relationship /w the city.
-		possibleItems.put(Granary.class, new Granary(city));
-		possibleItems.put(Monument.class, new Monument(city));
-		possibleItems.put(Warrior.class, new Warrior());
-		possibleItems.put(Settler.class, new Settler());
-		possibleItems.put(Scout.class, new Scout());
-		possibleItems.put(Galley.class, new Galley());
+		possibleItems.put("Granary", new Granary(city));
+		possibleItems.put("Monument", new Monument(city));
+		possibleItems.put("Warrior", new Warrior());
+		possibleItems.put("Settler", new Settler());
+		possibleItems.put("Scout", new Scout());
+		possibleItems.put("Galley", new Galley());
 	}
 
-	public Collection<ProductionItem> getItems() {
-		return possibleItems.values();
+	public HashMap<String, ProductionItem> getPossibleItems() {
+		return possibleItems;
 	}
 
 	public ArrayList<ProductionItem> getProducibleItems() {
@@ -60,13 +62,26 @@ public class ProducibleItemManager {
 		return producibleItems;
 	}
 
-	public void setCurrentProductionItem(ProductionItem currentProductionItem) {
+	public void requestSetProductionItem(ProductionItem currentProductionItem) {
 		Gdx.app.log(Civilization.LOG_TAG,
 				"Requesting to build: " + currentProductionItem.getName() + " in city: " + city.getName());
-		// TODO: Send packet.
+
+		SetProductionItemPacket packet = new SetProductionItemPacket();
+		packet.setProductionItem(city.getName(), currentProductionItem.getName());
+
+		Civilization.getInstance().getNetworkManager().sendPacket(packet);
 	}
 
-	public ProductionItem getCurrentProductionItem() {
-		return currentProductionItem;
+	public void setCurrentProductionItem(String itemName) {
+		if (queueEnabled)
+			itemQueue.add(new ProducingItem(possibleItems.get(itemName)));
+		else {
+			itemQueue.clear();
+			itemQueue.add(new ProducingItem(possibleItems.get(itemName)));
+		}
+	}
+
+	public ProducingItem getCurrentProducingItem() {
+		return itemQueue.peek();
 	}
 }

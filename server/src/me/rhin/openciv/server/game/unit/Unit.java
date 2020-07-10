@@ -7,14 +7,15 @@ import com.badlogic.gdx.math.Vector2;
 
 import me.rhin.openciv.server.Server;
 import me.rhin.openciv.server.game.Player;
-import me.rhin.openciv.server.game.city.ProductionItem;
 import me.rhin.openciv.server.game.map.GameMap;
 import me.rhin.openciv.server.game.map.tile.Tile;
+import me.rhin.openciv.server.game.production.ProductionItem;
 
-public abstract class Unit implements ProductionItem {
+public abstract class Unit {
 
 	private static int unitID = 0;
 
+	private String name;
 	private int id;
 	private ArrayList<Vector2[]> pathVectors = new ArrayList<>();
 	private Player playerOwner;
@@ -29,6 +30,7 @@ public abstract class Unit implements ProductionItem {
 	private float health;
 
 	public Unit(Player playerOwner, Tile standingTile) {
+		this.name = getClass().getSimpleName().substring(0, getClass().getSimpleName().indexOf("Unit"));
 		this.id = unitID++;
 		this.playerOwner = playerOwner;
 		this.standingTile = standingTile;
@@ -40,7 +42,7 @@ public abstract class Unit implements ProductionItem {
 	}
 
 	public abstract int getMovementCost(Tile tile);
-	
+
 	public boolean setTargetTile(Tile targetTile) {
 		if (targetTile == null)
 			return false;
@@ -256,5 +258,9 @@ public abstract class Unit implements ProductionItem {
 
 	public int getID() {
 		return id;
+	}
+
+	public String getName() {
+		return name;
 	}
 }

@@ -55,7 +55,7 @@ public class ListProductionItem extends Actor {
 		this.addListener(new ClickListener() {
 			@Override
 			public void clicked(InputEvent event, float x, float y) {
-				city.getProducibleItemManager().setCurrentProductionItem(productionItem);
+				city.getProducibleItemManager().requestSetProductionItem(productionItem);
 			}
 
 			@Override

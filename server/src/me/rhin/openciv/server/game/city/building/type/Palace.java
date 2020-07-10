@@ -25,4 +25,8 @@ public class Palace extends Building {
 		return -1;
 	}
 
+	@Override
+	public boolean meetsProductionRequirements() {
+		return false;
+	}
 }

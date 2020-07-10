@@ -4,12 +4,12 @@ import me.rhin.openciv.server.game.city.City;
 import me.rhin.openciv.server.game.city.building.Building;
 import me.rhin.openciv.shared.stat.Stat;
 
-public class Monument extends Building {
+public class Granary extends Building {
 
-	public Monument(City city) {
+	public Granary(City city) {
 		super(city);
 
-		this.statLine.addValue(Stat.HERITAGE_GAIN, 2);
+		this.statLine.addValue(Stat.FOOD_GAIN, 2);
 		this.statLine.addValue(Stat.MAINTENANCE, -1);
 	}
 
@@ -25,6 +25,6 @@ public class Monument extends Building {
 
 	@Override
 	public boolean meetsProductionRequirements() {
-		return true;
+		return false;
 	}
 }

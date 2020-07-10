@@ -16,15 +16,18 @@ import me.rhin.openciv.server.game.city.building.type.Palace;
 import me.rhin.openciv.server.game.map.GameMap;
 import me.rhin.openciv.server.game.map.tile.Tile;
 import me.rhin.openciv.server.game.map.tile.TileType;
-import me.rhin.openciv.server.game.unit.Settler;
+import me.rhin.openciv.server.game.production.ProductionItem;
 import me.rhin.openciv.server.game.unit.Unit;
-import me.rhin.openciv.server.game.unit.Warrior;
+import me.rhin.openciv.server.game.unit.type.Settler;
+import me.rhin.openciv.server.game.unit.type.Settler.SettlerUnit;
+import me.rhin.openciv.server.game.unit.type.Warrior.WarriorUnit;
 import me.rhin.openciv.server.listener.ConnectionListener;
 import me.rhin.openciv.server.listener.DisconnectListener;
 import me.rhin.openciv.server.listener.FetchPlayerListener;
 import me.rhin.openciv.server.listener.PlayerFinishLoadingListener;
 import me.rhin.openciv.server.listener.PlayerListRequestListener;
 import me.rhin.openciv.server.listener.SelectUnitListener;
+import me.rhin.openciv.server.listener.SetProductionItemListener;
 import me.rhin.openciv.server.listener.SettleCityListener;
 import me.rhin.openciv.server.listener.StartGameRequestListener;
 import me.rhin.openciv.server.listener.TurnTimeUpdateListener;
@@ -37,6 +40,7 @@ import me.rhin.openciv.shared.packet.type.PlayerConnectPacket;
 import me.rhin.openciv.shared.packet.type.PlayerDisconnectPacket;
 import me.rhin.openciv.shared.packet.type.PlayerListRequestPacket;
 import me.rhin.openciv.shared.packet.type.SelectUnitPacket;
+import me.rhin.openciv.shared.packet.type.SetProductionItemPacket;
 import me.rhin.openciv.shared.packet.type.SettleCityPacket;
 import me.rhin.openciv.shared.packet.type.TerritoryGrowPacket;
 import me.rhin.openciv.shared.packet.type.TurnTimeUpdatePacket;
@@ -45,7 +49,7 @@ import me.rhin.openciv.shared.util.MathHelper;
 
 public class Game implements StartGameRequestListener, ConnectionListener, DisconnectListener,
 		PlayerListRequestListener, FetchPlayerListener, SelectUnitListener, UnitMoveListener, SettleCityListener,
-		PlayerFinishLoadingListener, TurnTimeUpdateListener {
+		PlayerFinishLoadingListener, TurnTimeUpdateListener, SetProductionItemListener {
 
 	private static final int BASE_TURN_TIME = 9;
 
@@ -92,6 +96,7 @@ public class Game implements StartGameRequestListener, ConnectionListener, Disco
 		Server.getInstance().getEventManager().addListener(SettleCityListener.class, this);
 		Server.getInstance().getEventManager().addListener(PlayerFinishLoadingListener.class, this);
 		Server.getInstance().getEventManager().addListener(TurnTimeUpdateListener.class, this);
+		Server.getInstance().getEventManager().addListener(SetProductionItemListener.class, this);
 	}
 
 	@Override
@@ -231,7 +236,7 @@ public class Game implements StartGameRequestListener, ConnectionListener, Disco
 		Unit unit = null;
 
 		for (Unit currentUnit : tile.getUnits())
-			if (currentUnit instanceof Settler)
+			if (currentUnit instanceof SettlerUnit)
 				unit = currentUnit;
 
 		// The player is actually trying to hack if this is triggered
@@ -277,9 +282,28 @@ public class Game implements StartGameRequestListener, ConnectionListener, Disco
 			player.getConn().send(json.toJson(turnTimeUpdatePacket));
 		}
 	}
-	
-	
-	
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public void onSetProductionItem(WebSocket conn, SetProductionItemPacket packet) {
+		// Verify if the player owns that city.
+		Player player = getPlayerByConn(conn);
+		City targetCity = null;
+		for (City city : player.getOwnedCities())
+			if (city.getName().equals(packet.getCityName()))
+				targetCity = city;
+
+		// TODO: Verify if the item can be produced.
+
+		if (targetCity == null)
+			return;
+
+		targetCity.getProducibleItemManager().setProducingItem(packet.getItemName());
+
+		Json json = new Json();
+		conn.send(json.toJson(packet));
+	}
+
 	public void start() {
 		System.out.println("[SERVER] Starting game...");
 		map.generateTerrain();
@@ -331,11 +355,11 @@ public class Game implements StartGameRequestListener, ConnectionListener, Disco
 
 		for (Player player : players) {
 			Tile tile = map.getTiles()[player.getSpawnX()][player.getSpawnY()];
-			tile.addUnit(new Settler(player, tile));
+			tile.addUnit(new SettlerUnit(player, tile));
 
 			for (Tile adjTile : tile.getAdjTiles()) {
 				if (adjTile.getTileType() != TileType.OCEAN && adjTile.getTileType() != TileType.MOUNTAIN) {
-					adjTile.addUnit(new Warrior(player, adjTile));
+					adjTile.addUnit(new WarriorUnit(player, adjTile));
 					break;
 				}
 			}

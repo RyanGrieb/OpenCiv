@@ -12,6 +12,7 @@ import me.rhin.openciv.server.Server;
 import me.rhin.openciv.server.game.Player;
 import me.rhin.openciv.server.game.city.building.Building;
 import me.rhin.openciv.server.game.map.tile.Tile;
+import me.rhin.openciv.server.game.production.ProducibleItemManager;
 import me.rhin.openciv.shared.packet.type.BuildingConstructedPacket;
 import me.rhin.openciv.shared.packet.type.CityStatUpdatePacket;
 import me.rhin.openciv.shared.stat.Stat;
@@ -24,6 +25,7 @@ public class City {
 	private Tile originTile;
 	private ArrayList<Tile> territory;
 	private ArrayList<Building> buildings;
+	private ProducibleItemManager producibleItemManager;
 	private StatLine statLine;
 
 	public City(Player playerOwner, String name, Tile originTile) {
@@ -32,6 +34,7 @@ public class City {
 		this.originTile = originTile;
 		this.territory = new ArrayList<>();
 		this.buildings = new ArrayList<>();
+		this.producibleItemManager = new ProducibleItemManager(this);
 		this.statLine = new StatLine();
 
 		for (Tile adjTile : originTile.getAdjTiles()) {
@@ -101,5 +104,9 @@ public class City {
 
 	public StatLine getStatLine() {
 		return statLine;
+	}
+
+	public ProducibleItemManager getProducibleItemManager() {
+		return producibleItemManager;
 	}
 }
