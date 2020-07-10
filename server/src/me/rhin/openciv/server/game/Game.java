@@ -283,7 +283,6 @@ public class Game implements StartGameRequestListener, ConnectionListener, Disco
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public void onSetProductionItem(WebSocket conn, SetProductionItemPacket packet) {
 		// Verify if the player owns that city.
