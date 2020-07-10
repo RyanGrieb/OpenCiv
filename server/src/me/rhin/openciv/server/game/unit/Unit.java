@@ -15,7 +15,6 @@ public abstract class Unit {
 
 	private static int unitID = 0;
 
-	private String name;
 	private int id;
 	private ArrayList<Vector2[]> pathVectors = new ArrayList<>();
 	private Player playerOwner;
@@ -30,7 +29,6 @@ public abstract class Unit {
 	private float health;
 
 	public Unit(Player playerOwner, Tile standingTile) {
-		this.name = getClass().getSimpleName().substring(0, getClass().getSimpleName().indexOf("Unit"));
 		this.id = unitID++;
 		this.playerOwner = playerOwner;
 		this.standingTile = standingTile;
@@ -258,9 +256,5 @@ public abstract class Unit {
 
 	public int getID() {
 		return id;
-	}
-
-	public String getName() {
-		return name;
 	}
 }
