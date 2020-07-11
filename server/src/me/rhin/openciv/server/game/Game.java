@@ -8,6 +8,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.java_websocket.WebSocket;
 
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Json;
 
 import me.rhin.openciv.server.Server;
@@ -16,9 +17,7 @@ import me.rhin.openciv.server.game.city.building.type.Palace;
 import me.rhin.openciv.server.game.map.GameMap;
 import me.rhin.openciv.server.game.map.tile.Tile;
 import me.rhin.openciv.server.game.map.tile.TileType;
-import me.rhin.openciv.server.game.production.ProductionItem;
 import me.rhin.openciv.server.game.unit.Unit;
-import me.rhin.openciv.server.game.unit.type.Settler;
 import me.rhin.openciv.server.game.unit.type.Settler.SettlerUnit;
 import me.rhin.openciv.server.game.unit.type.Warrior.WarriorUnit;
 import me.rhin.openciv.server.listener.ConnectionListener;
@@ -318,29 +317,26 @@ public class Game implements StartGameRequestListener, ConnectionListener, Disco
 			player.getConn().send(json.toJson(gameStartPacket));
 		}
 
-		// Spawn in the players at fair locations
 		Random rnd = new Random();
 
-		for (Player player : players) {
+		for (int i = 0; i < players.size(); i++) {
+			Player player = players.get(i);
+			Rectangle rect = map.getMapPartition().get(i);
+
 			int rndX = -1;
 			int rndY = -1;
 			while (true) {
-				rndX = rnd.nextInt(GameMap.WIDTH);
-				rndY = rnd.nextInt(GameMap.HEIGHT);
+				float padding = 0.25F;
+				int minX = (int) (rect.getX() + (rect.getWidth() * padding));
+				int minY = (int) (rect.getY() + (rect.getHeight() * padding));
+				int maxX = (int) (rect.getX() + rect.getWidth() - (rect.getWidth() * padding));
+				int maxY = (int) (rect.getY() + rect.getHeight() - (rect.getWidth() * padding));
+				rndX = rnd.nextInt(maxX - minX + 1) + minX;
+				rndY = rnd.nextInt(maxY - minY + 1) + minY;
 				Tile tile = map.getTiles()[rndX][rndY];
 
 				if (tile.getTileType() == TileType.OCEAN || tile.getTileType() == TileType.MOUNTAIN)
 					continue;
-
-				float maxDistance = -1; // Closest distance to another player;
-				for (Player otherPlayer : players) {
-					if (player.equals(otherPlayer) || !player.hasSpawnSet())
-						continue;
-
-					float distance = MathHelper.distance(rndX, rndY, otherPlayer.getSpawnX(), otherPlayer.getSpawnY());
-					if (distance > maxDistance)
-						maxDistance = distance;
-				}
 
 				// Check if there is room for 2 units.
 				boolean hasSafeTile = false;
@@ -348,13 +344,14 @@ public class Game implements StartGameRequestListener, ConnectionListener, Disco
 					if (adjTile.getTileType() != TileType.OCEAN && adjTile.getTileType() != TileType.MOUNTAIN)
 						hasSafeTile = true;
 
-				if (maxDistance > 20 || maxDistance == -1 && hasSafeTile) {
+				if (hasSafeTile) {
 					player.setSpawnPos(rndX, rndY);
 					break;
 				}
 			}
-
 		}
+
+		// Spawn in the players at fair locations
 
 		for (Player player : players) {
 			Tile tile = map.getTiles()[player.getSpawnX()][player.getSpawnY()];

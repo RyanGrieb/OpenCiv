@@ -7,6 +7,7 @@ import java.util.Random;
 
 import org.java_websocket.WebSocket;
 
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Json;
 
@@ -29,6 +30,7 @@ public class GameMap implements MapRequestListener {
 
 	private Game game;
 	private Tile[][] tiles;
+	private ArrayList<Rectangle> mapPartition;
 
 	private int[][] oddEdgeAxis = { { 0, -1 }, { 1, -1 }, { 1, 0 }, { 1, 1 }, { 0, 1 }, { -1, 0 } };
 	private int[][] evenEdgeAxis = { { -1, -1 }, { 0, -1 }, { 1, 0 }, { 0, 1 }, { -1, 1 }, { -1, 0 } };
@@ -43,6 +45,8 @@ public class GameMap implements MapRequestListener {
 				tiles[x][y] = tile;
 			}
 		}
+
+		this.mapPartition = new ArrayList<>();
 
 		initializeEdges();
 
@@ -107,6 +111,8 @@ public class GameMap implements MapRequestListener {
 	public void generateTerrain() {
 		Random rnd = new Random();
 
+		splitMapPartition();
+
 		for (int i = 0; i < CONTINENT_AMOUNT; i++) {
 			int randomX = rnd.nextInt(WIDTH - 1);
 			int randomY = rnd.nextInt(HEIGHT - 1);
@@ -165,6 +171,11 @@ public class GameMap implements MapRequestListener {
 				}
 			}
 		}
+
+		ArrayList<TileType> targetGenerationTileTypes = new ArrayList<>();
+		targetGenerationTileTypes.add(TileType.FOREST);
+		targetGenerationTileTypes.add(TileType.GRASS_HILL);
+		targetGenerationTileTypes.add(TileType.PLAINS_HILL);
 
 		// Generate forests
 		Queue<Tile> forestTiles = new LinkedList<>();
@@ -266,6 +277,30 @@ public class GameMap implements MapRequestListener {
 
 	public Game getGame() {
 		return game;
+	}
+
+	public ArrayList<Rectangle> getMapPartition() {
+		return mapPartition;
+	}
+
+	private void splitMapPartition() {
+		int playerSize = game.getPlayers().size();
+		if (playerSize < 2) {
+			mapPartition.add(new Rectangle(0, 0, WIDTH, HEIGHT));
+			return;
+		}
+
+		int numRects = (playerSize % 2 == 0) ? playerSize : playerSize + 1;
+
+		int columns = (int) Math.ceil(Math.sqrt(numRects));
+		int fullRows = numRects / columns;
+
+		int width = WIDTH / columns;
+		int height = HEIGHT / fullRows;
+
+		for (int y = 0; y < fullRows; ++y)
+			for (int x = 0; x < columns; ++x)
+				mapPartition.add(new Rectangle(x * width, y * height, width, height));
 	}
 
 	// FIXME: Rename to adjecent Tiles?
