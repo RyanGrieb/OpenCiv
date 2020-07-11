@@ -44,9 +44,9 @@ public class ListProductionItem extends Actor {
 		itemNameLabel.setAlignment(Align.topLeft);
 		// FIXME: In the future, we need to divide by the already applied production to
 		// the item.
-		this.itemTurnCostLabel = new CustomLabel(
-				(int) (productionItem.getProductionCost() / city.getStatLine().getStatValue(Stat.PRODUCTION_GAIN))
-						+ " Turns");
+		this.itemTurnCostLabel = new CustomLabel((int) Math
+				.ceil((productionItem.getProductionCost() / city.getStatLine().getStatValue(Stat.PRODUCTION_GAIN)))
+				+ " Turns");
 		itemTurnCostLabel.setSize(width, height);
 		itemTurnCostLabel.setAlignment(Align.bottomLeft);
 

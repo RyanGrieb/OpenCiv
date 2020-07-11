@@ -3,10 +3,10 @@ package me.rhin.openciv.server.game.unit.type;
 import me.rhin.openciv.server.game.Player;
 import me.rhin.openciv.server.game.map.tile.Tile;
 import me.rhin.openciv.server.game.map.tile.TileType.TileProperty;
-import me.rhin.openciv.server.game.production.ProductionItem;
 import me.rhin.openciv.server.game.unit.Unit;
+import me.rhin.openciv.server.game.unit.UnitItem;
 
-public class Warrior implements ProductionItem {
+public class Warrior extends UnitItem {
 
 	public static class WarriorUnit extends Unit {
 
@@ -24,13 +24,8 @@ public class Warrior implements ProductionItem {
 	}
 
 	@Override
-	public String getName() {
-		return "Warrior";
-	}
-
-	@Override
 	public int getProductionCost() {
-		return 0;
+		return 40;
 	}
 
 	@Override

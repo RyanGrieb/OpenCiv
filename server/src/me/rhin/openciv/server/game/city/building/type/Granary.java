@@ -19,11 +19,6 @@ public class Granary extends Building {
 	}
 
 	@Override
-	public String getName() {
-		return "Monument";
-	}
-
-	@Override
 	public boolean meetsProductionRequirements() {
 		return false;
 	}

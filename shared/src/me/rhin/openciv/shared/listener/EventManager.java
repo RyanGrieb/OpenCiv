@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 
 public class EventManager {
+	
 	private final HashMap<Class<? extends Listener>, ArrayList<? extends Listener>> listenerMap = new HashMap<>();
 
 	// TODO: Support multiple listenerType's as input. E.g. Class<L>... listenerType

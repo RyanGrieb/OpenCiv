@@ -117,4 +117,12 @@ public class ContainerList extends Group {
 			nextHeight += container.getHeight();
 		}
 	}
+
+	public void clearList() {
+		for (ListContainer container : listContainers.values()) {
+			removeActor(container);
+		}
+
+		listContainers.clear();
+	}
 }

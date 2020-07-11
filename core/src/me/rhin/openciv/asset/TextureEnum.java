@@ -60,17 +60,4 @@ public enum TextureEnum {
 		Sprite sprite = textureAtlas.createSprite(this.name().toLowerCase());
 		return sprite;
 	}
-
-	public static TextureEnum fromStat(Stat stat) {
-		// FIXME: This seems hackish, and the stat class should really handle this.
-		// But I want to keep the stat class shared b/w the client & server.
-		String name = null;
-		if (stat.name().contains("_")) {
-			name = stat.name().substring(0, stat.name().indexOf('_')).toUpperCase();
-		} else {
-			name = stat.name().toUpperCase();
-		}
-		return TextureEnum.valueOf("ICON_" + name);
-	}
-
 }

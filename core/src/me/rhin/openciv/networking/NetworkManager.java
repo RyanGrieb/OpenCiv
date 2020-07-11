@@ -14,11 +14,13 @@ import com.github.czyzby.websocket.data.WebSocketCloseCode;
 
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.listener.AddUnitListener.AddUnitEvent;
+import me.rhin.openciv.listener.ApplyProductionToItemListener.ApplyProductionToItemEvent;
 import me.rhin.openciv.listener.BuildingConstructedListener.BuildingConstructedEvent;
 import me.rhin.openciv.listener.CityStatUpdateListener.CityStatUpdateEvent;
 import me.rhin.openciv.listener.DeleteUnitListener.DeleteUnitEvent;
 import me.rhin.openciv.listener.FetchPlayerListener.FetchPlayerEvent;
 import me.rhin.openciv.listener.FinishLoadingRequestListener.FinishLoadingRequestEvent;
+import me.rhin.openciv.listener.FinishProductionItemListener.FinishProductionItemEvent;
 import me.rhin.openciv.listener.GameStartListener.GameStartEvent;
 import me.rhin.openciv.listener.MoveUnitListener.MoveUnitEvent;
 import me.rhin.openciv.listener.PlayerConnectListener.PlayerConnectEvent;
@@ -36,11 +38,13 @@ import me.rhin.openciv.shared.listener.Event;
 import me.rhin.openciv.shared.listener.Listener;
 import me.rhin.openciv.shared.packet.Packet;
 import me.rhin.openciv.shared.packet.type.AddUnitPacket;
+import me.rhin.openciv.shared.packet.type.ApplyProductionToItemPacket;
 import me.rhin.openciv.shared.packet.type.BuildingConstructedPacket;
 import me.rhin.openciv.shared.packet.type.CityStatUpdatePacket;
 import me.rhin.openciv.shared.packet.type.DeleteUnitPacket;
 import me.rhin.openciv.shared.packet.type.FetchPlayerPacket;
 import me.rhin.openciv.shared.packet.type.FinishLoadingPacket;
+import me.rhin.openciv.shared.packet.type.FinishProductionItemPacket;
 import me.rhin.openciv.shared.packet.type.GameStartPacket;
 import me.rhin.openciv.shared.packet.type.MapChunkPacket;
 import me.rhin.openciv.shared.packet.type.MoveUnitPacket;
@@ -80,6 +84,8 @@ public class NetworkManager {
 		networkEvents.put(PlayerStatUpdatePacket.class, PlayerStatUpdateEvent.class);
 		networkEvents.put(CityStatUpdatePacket.class, CityStatUpdateEvent.class);
 		networkEvents.put(SetProductionItemPacket.class, SetProductionItemEvent.class);
+		networkEvents.put(ApplyProductionToItemPacket.class, ApplyProductionToItemEvent.class);
+		networkEvents.put(FinishProductionItemPacket.class, FinishProductionItemEvent.class);
 	}
 
 	public void connect(String ip) {

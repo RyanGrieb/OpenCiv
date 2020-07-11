@@ -9,14 +9,18 @@ import me.rhin.openciv.game.city.City;
 import me.rhin.openciv.game.map.tile.Tile;
 import me.rhin.openciv.game.research.ResearchTree;
 import me.rhin.openciv.game.unit.Unit;
+import me.rhin.openciv.listener.ApplyProductionToItemListener;
 import me.rhin.openciv.listener.CityStatUpdateListener;
+import me.rhin.openciv.listener.FinishProductionItemListener;
 import me.rhin.openciv.listener.LeftClickListener;
 import me.rhin.openciv.listener.PlayerStatUpdateListener;
 import me.rhin.openciv.listener.RelativeMouseMoveListener;
 import me.rhin.openciv.listener.RightClickListener;
 import me.rhin.openciv.listener.SelectUnitListener;
 import me.rhin.openciv.listener.SetProductionItemListener;
+import me.rhin.openciv.shared.packet.type.ApplyProductionToItemPacket;
 import me.rhin.openciv.shared.packet.type.CityStatUpdatePacket;
+import me.rhin.openciv.shared.packet.type.FinishProductionItemPacket;
 import me.rhin.openciv.shared.packet.type.PlayerStatUpdatePacket;
 import me.rhin.openciv.shared.packet.type.SelectUnitPacket;
 import me.rhin.openciv.shared.packet.type.SetProductionItemPacket;
@@ -24,7 +28,7 @@ import me.rhin.openciv.shared.stat.StatLine;
 import me.rhin.openciv.util.ClickType;
 
 public class Player implements RelativeMouseMoveListener, LeftClickListener, RightClickListener, SelectUnitListener,
-		PlayerStatUpdateListener, CityStatUpdateListener, SetProductionItemListener {
+		PlayerStatUpdateListener {
 
 	// NOTE: This class can be the controlled by the player or the MPPlayer. The
 	// distinction is in the listeners firing.
@@ -48,8 +52,6 @@ public class Player implements RelativeMouseMoveListener, LeftClickListener, Rig
 		Civilization.getInstance().getEventManager().addListener(RightClickListener.class, this);
 		Civilization.getInstance().getEventManager().addListener(SelectUnitListener.class, this);
 		Civilization.getInstance().getEventManager().addListener(PlayerStatUpdateListener.class, this);
-		Civilization.getInstance().getEventManager().addListener(CityStatUpdateListener.class, this);
-		Civilization.getInstance().getEventManager().addListener(SetProductionItemListener.class, this);
 	}
 
 	@Override
@@ -121,18 +123,6 @@ public class Player implements RelativeMouseMoveListener, LeftClickListener, Rig
 	@Override
 	public void onPlayerStatUpdate(PlayerStatUpdatePacket packet) {
 		this.statLine = StatLine.fromPacket(packet);
-	}
-
-	@Override
-	public void onCityStatUpdate(CityStatUpdatePacket packet) {
-		City city = getCityFromName(packet.getCityName());
-		city.setStatLine(StatLine.fromPacket(packet));
-	}
-
-	@Override
-	public void onSetProductionItem(SetProductionItemPacket packet) {
-		City city = getCityFromName(packet.getCityName());
-		city.getProducibleItemManager().setCurrentProductionItem(packet.getItemName());
 	}
 
 	public String getName() {

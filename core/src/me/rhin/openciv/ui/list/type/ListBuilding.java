@@ -33,7 +33,17 @@ public class ListBuilding extends Actor {
 		this.statLabels = new ArrayList<>();
 
 		for (Stat stat : building.getStatLine().getStatValues().keySet()) {
-			Sprite sprite = TextureEnum.fromStat(stat).sprite();
+			if (stat == Stat.MAINTENANCE)
+				continue;
+
+			String name = null;
+			if (stat.name().contains("_")) {
+				name = stat.name().substring(0, stat.name().indexOf('_')).toUpperCase();
+			} else {
+				name = stat.name().toUpperCase();
+			}
+
+			Sprite sprite = TextureEnum.valueOf("ICON_" + name).sprite();
 			sprite.setSize(16, 16);
 			statIcons.add(sprite);
 

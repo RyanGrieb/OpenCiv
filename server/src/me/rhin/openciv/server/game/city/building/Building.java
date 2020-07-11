@@ -14,7 +14,16 @@ public abstract class Building implements ProductionItem {
 		this.statLine = new StatLine();
 	}
 
-	public abstract String getName();
+	@Override
+	public String getName() {
+		return getClass().getSimpleName();
+	}
+
+	@Override
+	public void create(City city) {
+		city.addBuilding(this);
+		city.getProducibleItemManager().getPossibleItems().remove(getName());
+	}
 
 	public StatLine getStatLine() {
 		return statLine;

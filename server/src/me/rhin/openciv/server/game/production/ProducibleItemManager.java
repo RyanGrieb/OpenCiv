@@ -1,10 +1,11 @@
 package me.rhin.openciv.server.game.production;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Queue;
+
+import com.badlogic.gdx.utils.Json;
 
 import me.rhin.openciv.server.Server;
 import me.rhin.openciv.server.game.city.City;
@@ -16,6 +17,8 @@ import me.rhin.openciv.server.game.unit.type.Scout;
 import me.rhin.openciv.server.game.unit.type.Settler;
 import me.rhin.openciv.server.game.unit.type.Warrior;
 import me.rhin.openciv.server.listener.TurnTimeUpdateListener;
+import me.rhin.openciv.shared.packet.type.ApplyProductionToItemPacket;
+import me.rhin.openciv.shared.packet.type.FinishProductionItemPacket;
 import me.rhin.openciv.shared.stat.Stat;
 
 /**
@@ -55,8 +58,8 @@ public class ProducibleItemManager implements TurnTimeUpdateListener {
 		Server.getInstance().getEventManager().addListener(TurnTimeUpdateListener.class, this);
 	}
 
-	public Collection<ProductionItem> getItems() {
-		return possibleItems.values();
+	public HashMap<String, ProductionItem> getPossibleItems() {
+		return possibleItems;
 	}
 
 	public ArrayList<ProductionItem> getProducibleItems() {
@@ -74,7 +77,7 @@ public class ProducibleItemManager implements TurnTimeUpdateListener {
 		if (possibleItems.get(itemName) == null)
 			return;
 
-		// Prevent buildings being added twice.
+		// Prevent buildings being added twice in the queue
 		if (possibleItems.get(itemName) instanceof Building) {
 			for (ProducingItem producingItem : itemQueue) {
 				if (producingItem.getProductionItem().getName().equals(itemName))
@@ -82,27 +85,46 @@ public class ProducibleItemManager implements TurnTimeUpdateListener {
 			}
 		}
 
-		System.out.println("Adding production item to queue: " + possibleItems.get(itemName).getName() + " in city: "
-				+ city.getName());
-
-		if (queueEnabled)
-			itemQueue.add(new ProducingItem(possibleItems.get(itemName)));
-		else {
-
+		if (!queueEnabled) {
+			// TODO: Implement appliedProductionItems here to save applied production.
+			itemQueue.clear();
 		}
+
+		itemQueue.add(new ProducingItem(possibleItems.get(itemName)));
 	}
 
 	@Override
 	public void onTurnTimeUpdate(int turnTime) {
 		ProducingItem producingItem = itemQueue.peek();
+
+		if (producingItem == null)
+			return;
+
 		producingItem.applyProduction(city.getStatLine().getStatValue(Stat.PRODUCTION_GAIN));
+
+		Json json = new Json();
 
 		if (producingItem.getAppliedProduction() > producingItem.getProductionItem().getProductionCost()) {
 			itemQueue.remove();
-			itemQueue.peek().applyProduction(
-					itemQueue.peek().getAppliedProduction() - producingItem.getProductionItem().getProductionCost());
 
-			// TODO: Send FinishProductionItemPacket
+			// FIXME: Not only should this apply to the queue. We should save the leftover
+			// production if the queue is not enabled.
+			if (itemQueue.peek() != null) {
+				itemQueue.peek().applyProduction(itemQueue.peek().getAppliedProduction()
+						- producingItem.getProductionItem().getProductionCost());
+			}
+
+			producingItem.getProductionItem().create(city);
+
+			FinishProductionItemPacket packet = new FinishProductionItemPacket();
+			packet.setProductionItem(city.getName(), producingItem.getProductionItem().getName());
+			city.getPlayerOwner().getConn().send(json.toJson(packet));
+			return;
 		}
+
+		ApplyProductionToItemPacket packet = new ApplyProductionToItemPacket();
+		packet.setProductionItem(city.getName(), producingItem.getProductionItem().getName(),
+				city.getStatLine().getStatValue(Stat.PRODUCTION_GAIN));
+		city.getPlayerOwner().getConn().send(json.toJson(packet));
 	}
 }

@@ -91,7 +91,7 @@ public class City {
 		}
 		playerOwner.getConn().send(json.toJson(packet));
 
-		playerOwner.mergeStatLine(statLine);
+		playerOwner.mergeStatLine(building.getStatLine());
 	}
 
 	public Tile getOriginTile() {

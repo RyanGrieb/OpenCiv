@@ -16,11 +16,6 @@ public class Palace extends Building {
 	}
 
 	@Override
-	public String getName() {
-		return "Palace";
-	}
-
-	@Override
 	public int getProductionCost() {
 		return -1;
 	}

@@ -15,13 +15,22 @@ import me.rhin.openciv.game.map.tile.Tile;
 import me.rhin.openciv.game.player.Player;
 import me.rhin.openciv.game.production.ProducibleItemManager;
 import me.rhin.openciv.game.production.ProductionItem;
+import me.rhin.openciv.listener.ApplyProductionToItemListener;
 import me.rhin.openciv.listener.BuildingConstructedListener;
+import me.rhin.openciv.listener.CityStatUpdateListener;
+import me.rhin.openciv.listener.FinishProductionItemListener;
+import me.rhin.openciv.listener.SetProductionItemListener;
+import me.rhin.openciv.shared.packet.type.ApplyProductionToItemPacket;
 import me.rhin.openciv.shared.packet.type.BuildingConstructedPacket;
+import me.rhin.openciv.shared.packet.type.CityStatUpdatePacket;
+import me.rhin.openciv.shared.packet.type.FinishProductionItemPacket;
+import me.rhin.openciv.shared.packet.type.SetProductionItemPacket;
 import me.rhin.openciv.shared.stat.StatLine;
 import me.rhin.openciv.ui.label.CustomLabel;
 import me.rhin.openciv.ui.window.type.CityInfoWindow;
 
-public class City extends Actor implements BuildingConstructedListener {
+public class City extends Actor implements BuildingConstructedListener, CityStatUpdateListener,
+		SetProductionItemListener, ApplyProductionToItemListener, FinishProductionItemListener {
 
 	private Tile tile;
 	private Player playerOwner;
@@ -61,6 +70,10 @@ public class City extends Actor implements BuildingConstructedListener {
 		});
 
 		Civilization.getInstance().getEventManager().addListener(BuildingConstructedListener.class, this);
+		Civilization.getInstance().getEventManager().addListener(CityStatUpdateListener.class, this);
+		Civilization.getInstance().getEventManager().addListener(SetProductionItemListener.class, this);
+		Civilization.getInstance().getEventManager().addListener(ApplyProductionToItemListener.class, this);
+		Civilization.getInstance().getEventManager().addListener(FinishProductionItemListener.class, this);
 	}
 
 	@Override
@@ -81,7 +94,7 @@ public class City extends Actor implements BuildingConstructedListener {
 
 	@Override
 	public void onBuildingConstructed(BuildingConstructedPacket packet) {
-		if (!this.getName().equals(packet.getCityName()))
+		if (!getName().equals(packet.getCityName()))
 			return;
 
 		String buildingClassName = "me.rhin.openciv.game.city.building.type." + packet.getBuildingName();
@@ -98,7 +111,41 @@ public class City extends Actor implements BuildingConstructedListener {
 			e.printStackTrace();
 		}
 
+		producibleItemManager.getPossibleItems().remove(packet.getBuildingName());
+
 		Gdx.app.log(Civilization.LOG_TAG, "Adding building " + packet.getBuildingName() + " to city " + getName());
+	}
+
+	@Override
+	public void onCityStatUpdate(CityStatUpdatePacket packet) {
+		if (!getName().equals(packet.getCityName()))
+			return;
+
+		setStatLine(StatLine.fromPacket(packet));
+	}
+
+	@Override
+	public void onSetProductionItem(SetProductionItemPacket packet) {
+		if (!getName().equals(packet.getCityName()))
+			return;
+
+		getProducibleItemManager().setCurrentProductionItem(packet.getItemName());
+	}
+
+	@Override
+	public void onApplyProductionToItem(ApplyProductionToItemPacket packet) {
+		if (!getName().equals(packet.getCityName()))
+			return;
+
+		getProducibleItemManager().applyProduction(packet.getProductionAmount());
+	}
+
+	@Override
+	public void onFinishProductionItem(FinishProductionItemPacket packet) {
+		if (!getName().equals(packet.getCityName()))
+			return;
+
+		getProducibleItemManager().getItemQueue().clear();
 	}
 
 	public void setStatLine(StatLine statLine) {

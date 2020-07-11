@@ -5,7 +5,7 @@ import com.badlogic.gdx.utils.JsonValue;
 
 import me.rhin.openciv.shared.packet.Packet;
 
-public class SetProductionItemPacket extends Packet {
+public class FinishProductionItemPacket extends Packet {
 
 	private String cityName;
 	private String itemName;

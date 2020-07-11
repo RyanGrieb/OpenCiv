@@ -73,15 +73,19 @@ public class Game implements StartGameRequestListener, ConnectionListener, Disco
 
 		this.turnTimeRunnable = new Runnable() {
 			public void run() {
-				if (!playersLoaded() || !started)
-					return;
+				try {
+					if (!playersLoaded() || !started)
+						return;
 
-				if ((System.currentTimeMillis() - lastTurnClock) / 1000 < turnTime)
-					return;
+					if ((System.currentTimeMillis() - lastTurnClock) / 1000 < turnTime)
+						return;
 
-				turnTime = getUpdatedTurnTime();
-				Server.getInstance().getEventManager().fireEvent(new TurnTimeUpdateEvent(turnTime));
-				lastTurnClock = System.currentTimeMillis();
+					turnTime = getUpdatedTurnTime();
+					Server.getInstance().getEventManager().fireEvent(new TurnTimeUpdateEvent(turnTime));
+					lastTurnClock = System.currentTimeMillis();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
 			}
 		};
 		executor.scheduleAtFixedRate(turnTimeRunnable, 0, 1, TimeUnit.MILLISECONDS);

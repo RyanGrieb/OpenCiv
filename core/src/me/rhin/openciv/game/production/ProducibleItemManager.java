@@ -72,6 +72,10 @@ public class ProducibleItemManager {
 		Civilization.getInstance().getNetworkManager().sendPacket(packet);
 	}
 
+	public void applyProduction(float productionAmount) {
+		itemQueue.peek().applyProduction(productionAmount);
+	}
+
 	public void setCurrentProductionItem(String itemName) {
 		if (queueEnabled)
 			itemQueue.add(new ProducingItem(possibleItems.get(itemName)));
@@ -79,6 +83,10 @@ public class ProducibleItemManager {
 			itemQueue.clear();
 			itemQueue.add(new ProducingItem(possibleItems.get(itemName)));
 		}
+	}
+
+	public Queue<ProducingItem> getItemQueue() {
+		return itemQueue;
 	}
 
 	public ProducingItem getCurrentProducingItem() {

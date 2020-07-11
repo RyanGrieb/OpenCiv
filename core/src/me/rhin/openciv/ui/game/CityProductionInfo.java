@@ -8,13 +8,17 @@ import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.city.City;
 import me.rhin.openciv.game.production.ProducingItem;
-import me.rhin.openciv.game.production.ProductionItem;
+import me.rhin.openciv.listener.ApplyProductionToItemListener;
+import me.rhin.openciv.listener.FinishProductionItemListener;
 import me.rhin.openciv.listener.SetProductionItemListener;
+import me.rhin.openciv.shared.packet.type.ApplyProductionToItemPacket;
+import me.rhin.openciv.shared.packet.type.FinishProductionItemPacket;
 import me.rhin.openciv.shared.packet.type.SetProductionItemPacket;
 import me.rhin.openciv.shared.stat.Stat;
 import me.rhin.openciv.ui.label.CustomLabel;
 
-public class CityProductionInfo extends Actor implements SetProductionItemListener {
+public class CityProductionInfo extends Actor
+		implements SetProductionItemListener, ApplyProductionToItemListener, FinishProductionItemListener {
 
 	private City city;
 	private Sprite backgroundSprite;
@@ -51,8 +55,8 @@ public class CityProductionInfo extends Actor implements SetProductionItemListen
 			int appliedTurns = (int) (producingItem.getAppliedProduction()
 					/ city.getStatLine().getStatValue(Stat.PRODUCTION_GAIN));
 
-			int totalTurns = (int) (producingItem.getProductionItem().getProductionCost()
-					/ city.getStatLine().getStatValue(Stat.PRODUCTION_GAIN));
+			int totalTurns = (int) Math.ceil((producingItem.getProductionItem().getProductionCost()
+					/ city.getStatLine().getStatValue(Stat.PRODUCTION_GAIN)));
 
 			this.turnsLeftLabel = new CustomLabel(appliedTurns + "/" + totalTurns + " Turns");
 		} else {
@@ -63,6 +67,8 @@ public class CityProductionInfo extends Actor implements SetProductionItemListen
 				y + productionItemSprite.getHeight() / 2 - turnsLeftLabel.getHeight() / 2);
 
 		Civilization.getInstance().getEventManager().addListener(SetProductionItemListener.class, this);
+		Civilization.getInstance().getEventManager().addListener(ApplyProductionToItemListener.class, this);
+		Civilization.getInstance().getEventManager().addListener(FinishProductionItemListener.class, this);
 	}
 
 	@Override
@@ -90,9 +96,35 @@ public class CityProductionInfo extends Actor implements SetProductionItemListen
 		int appliedTurns = (int) (producingItem.getAppliedProduction()
 				/ city.getStatLine().getStatValue(Stat.PRODUCTION_GAIN));
 
-		int totalTurns = (int) (producingItem.getProductionItem().getProductionCost()
-				/ city.getStatLine().getStatValue(Stat.PRODUCTION_GAIN));
+		int totalTurns = (int) Math.ceil((producingItem.getProductionItem().getProductionCost()
+				/ city.getStatLine().getStatValue(Stat.PRODUCTION_GAIN)));
 
 		turnsLeftLabel.setText(appliedTurns + "/" + totalTurns + " Turns");
+	}
+
+	@Override
+	public void onApplyProductionToItem(ApplyProductionToItemPacket packet) {
+		ProducingItem producingItem = Civilization.getInstance().getGame().getPlayer()
+				.getCityFromName(packet.getCityName()).getProducibleItemManager().getCurrentProducingItem();
+
+		int appliedTurns = (int) (producingItem.getAppliedProduction()
+				/ city.getStatLine().getStatValue(Stat.PRODUCTION_GAIN));
+
+		int totalTurns = (int) Math.ceil((producingItem.getProductionItem().getProductionCost()
+				/ city.getStatLine().getStatValue(Stat.PRODUCTION_GAIN)));
+
+		turnsLeftLabel.setText(appliedTurns + "/" + totalTurns + " Turns");
+	}
+
+	@Override
+	public void onFinishProductionItem(FinishProductionItemPacket packet) {
+		productionItemNameLabel.setText("Nothing");
+		turnsLeftLabel.setText("???/??? Turns");
+
+		Sprite sprite = TextureEnum.UI_ERROR.sprite();
+		sprite.setBounds(productionItemSprite.getX(), productionItemSprite.getY(), productionItemSprite.getWidth(),
+				productionItemSprite.getHeight());
+
+		productionItemSprite = sprite;
 	}
 }

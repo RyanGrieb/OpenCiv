@@ -1,12 +1,13 @@
 package me.rhin.openciv.server.game.unit.type;
 
 import me.rhin.openciv.server.game.Player;
+import me.rhin.openciv.server.game.city.City;
 import me.rhin.openciv.server.game.map.tile.Tile;
 import me.rhin.openciv.server.game.map.tile.TileType.TileProperty;
-import me.rhin.openciv.server.game.production.ProductionItem;
 import me.rhin.openciv.server.game.unit.Unit;
+import me.rhin.openciv.server.game.unit.UnitItem;
 
-public class Galley implements ProductionItem {
+public class Galley extends UnitItem {
 
 	public static class GalleyUnit extends Unit {
 
@@ -24,13 +25,8 @@ public class Galley implements ProductionItem {
 	}
 
 	@Override
-	public String getName() {
-		return "Galley";
-	}
-
-	@Override
 	public int getProductionCost() {
-		return 0;
+		return 45;
 	}
 
 	@Override

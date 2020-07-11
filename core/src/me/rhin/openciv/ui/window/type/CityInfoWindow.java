@@ -6,6 +6,8 @@ import me.rhin.openciv.Civilization;
 import me.rhin.openciv.game.city.City;
 import me.rhin.openciv.game.city.building.Building;
 import me.rhin.openciv.game.production.ProductionItem;
+import me.rhin.openciv.listener.BuildingConstructedListener;
+import me.rhin.openciv.shared.packet.type.BuildingConstructedPacket;
 import me.rhin.openciv.ui.button.ButtonManager;
 import me.rhin.openciv.ui.button.type.CityInfoCloseButton;
 import me.rhin.openciv.ui.game.CityProductionInfo;
@@ -16,7 +18,7 @@ import me.rhin.openciv.ui.list.type.ListBuilding;
 import me.rhin.openciv.ui.list.type.ListProductionItem;
 import me.rhin.openciv.ui.window.AbstractWindow;
 
-public class CityInfoWindow extends AbstractWindow {
+public class CityInfoWindow extends AbstractWindow implements BuildingConstructedListener {
 
 	private ButtonManager buttonManager;
 	private City city;
@@ -53,6 +55,8 @@ public class CityInfoWindow extends AbstractWindow {
 					new ListProductionItem(city, productionItem, 200, 45));
 		}
 		addActor(productionContainerList);
+
+		Civilization.getInstance().getEventManager().addListener(BuildingConstructedListener.class, this);
 	}
 
 	@Override
@@ -68,5 +72,20 @@ public class CityInfoWindow extends AbstractWindow {
 	@Override
 	public boolean closesOtherWindows() {
 		return true;
+	}
+
+	@Override
+	public void onBuildingConstructed(BuildingConstructedPacket packet) {
+		buildingContainerList.clearList();
+
+		for (Building building : city.getBuildings()) {
+			buildingContainerList.addItem(ListContainerType.CATEGORY, "Buildings", new ListBuilding(building, 200, 45));
+		}
+
+		productionContainerList.clearList();
+		for (ProductionItem productionItem : city.getProducibleItemManager().getProducibleItems()) {
+			productionContainerList.addItem(ListContainerType.CATEGORY, productionItem.getCategory(),
+					new ListProductionItem(city, productionItem, 200, 45));
+		}
 	}
 }
