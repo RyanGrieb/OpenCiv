@@ -135,6 +135,7 @@ public class Game implements StartGameRequestListener, ConnectionListener, Disco
 		if (removedPlayer == null)
 			return;
 
+		Server.getInstance().getEventManager().removeListener(TurnTimeUpdateListener.class, removedPlayer);
 		players.remove(removedPlayer);
 
 		for (Player player : players) {

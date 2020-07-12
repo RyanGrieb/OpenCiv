@@ -70,10 +70,10 @@ public class Tile {
 	}
 
 	public void setTileType(TileType tileType) {
-		if (tileType.hasProperty(TileProperty.TOP_LAYER)) {
+		if (tileType.hasProperty(TileProperty.TOP_LAYER) || tileType.hasProperty(TileProperty.RESOURCE)) {
 			this.topTileType = tileType;
 		} else {
-			//this.topTileType = TileType.AIR;
+			// this.topTileType = TileType.AIR;
 			bottomTileType = tileType;
 		}
 	}

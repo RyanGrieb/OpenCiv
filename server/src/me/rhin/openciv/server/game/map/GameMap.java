@@ -1,6 +1,7 @@
 package me.rhin.openciv.server.game.map;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Random;
@@ -172,11 +173,7 @@ public class GameMap implements MapRequestListener {
 			}
 		}
 
-		ArrayList<TileType> targetGenerationTileTypes = new ArrayList<>();
-		targetGenerationTileTypes.add(TileType.FOREST);
-		targetGenerationTileTypes.add(TileType.GRASS_HILL);
-		targetGenerationTileTypes.add(TileType.PLAINS_HILL);
-
+		// FIXME: These loops below are redundant
 		// Generate forests
 		Queue<Tile> forestTiles = new LinkedList<>();
 
@@ -195,6 +192,28 @@ public class GameMap implements MapRequestListener {
 				if (rnd.nextInt(20) > 15 && isFlatTile(adjTile)) {
 					tile.setTileType(TileType.FOREST);
 					forestTiles.add(adjTile);
+				}
+			}
+		}
+
+		// Generate jungle
+		Queue<Tile> jungleTiles = new LinkedList<>();
+
+		for (int i = 0; i < 100; i++) {
+			Tile tile = tiles[rnd.nextInt(WIDTH - 1)][rnd.nextInt(HEIGHT - 1)];
+			if (isFlatTile(tile)) {
+				tile.setTileType(TileType.JUNGLE);
+				jungleTiles.add(tile);
+			} else
+				i--;
+		}
+
+		while (!jungleTiles.isEmpty()) {
+			Tile tile = jungleTiles.remove();
+			for (Tile adjTile : tile.getAdjTiles()) {
+				if (rnd.nextInt(20) > 15 && isFlatTile(adjTile)) {
+					tile.setTileType(TileType.JUNGLE);
+					jungleTiles.add(adjTile);
 				}
 			}
 		}
@@ -227,6 +246,36 @@ public class GameMap implements MapRequestListener {
 			}
 		}
 
+		generateResource(TileType.HORSES, game.getPlayers().size() * 4, TileType.GRASS, TileType.PLAINS);
+		generateResource(TileType.IRON, game.getPlayers().size() * 4, TileType.GRASS, TileType.PLAINS,
+				TileType.PLAINS_HILL, TileType.GRASS_HILL);
+		generateResource(TileType.COPPER, game.getPlayers().size(), TileType.GRASS, TileType.PLAINS,
+				TileType.PLAINS_HILL, TileType.GRASS_HILL);
+		generateResource(TileType.COTTON, game.getPlayers().size(), TileType.GRASS, TileType.PLAINS);
+		generateResource(TileType.GEMS, game.getPlayers().size(), TileType.GRASS, TileType.PLAINS);
+
+	}
+
+	private void generateResource(TileType tileType, int amount, TileType... exclusiveTiles) {
+		Random rnd = new Random();
+		while (amount > 0) {
+			for (Rectangle rect : mapPartition) {
+				while (true) {
+					int rndX = rnd.nextInt((int) (rect.getX() + rect.getWidth() - 1) - (int) rect.getX() + 1)
+							+ (int) rect.getX();
+
+					int rndY = rnd.nextInt((int) (rect.getY() + rect.getHeight() - 1) - (int) rect.getY() + 1)
+							+ (int) rect.getY();
+					Tile tile = tiles[rndX][rndY];
+
+					if ((exclusiveTiles.length < 1 || Arrays.asList(exclusiveTiles).contains(tile.getTileType()))) {
+						tile.setTileType(tileType);
+						amount--;
+						break;
+					}
+				}
+			}
+		}
 	}
 
 	public Tile getTileFromLocation(float x, float y) {

@@ -4,10 +4,11 @@ public enum TileType {
 
 	AIR(), GRASS(), GRASS_HILL(2), PLAINS(), PLAINS_HILL(2), OCEAN(TileProperty.WATER),
 	SHALLOW_OCEAN(TileProperty.WATER), MOUNTAIN(1000000, TileProperty.TOP_LAYER), FOREST(2, TileProperty.TOP_LAYER),
-	JUNGLE(2, TileProperty.TOP_LAYER);
+	JUNGLE(2, TileProperty.TOP_LAYER), HORSES(TileProperty.RESOURCE), IRON(TileProperty.RESOURCE),
+	COPPER(TileProperty.RESOURCE), COTTON(TileProperty.RESOURCE), GEMS(TileProperty.RESOURCE);
 
 	public enum TileProperty {
-		WATER, TOP_LAYER;
+		WATER, RESOURCE, TOP_LAYER;
 	}
 
 	private int movementCost;
@@ -18,6 +19,7 @@ public enum TileType {
 	}
 
 	TileType(TileProperty... tileProperties) {
+		this.movementCost = 1;
 		this.tileProperties = tileProperties;
 	}
 

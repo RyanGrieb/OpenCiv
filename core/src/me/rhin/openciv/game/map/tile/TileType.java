@@ -15,10 +15,15 @@ public enum TileType {
 	MOUNTAIN(TextureEnum.TILE_MOUNTIAN, 1000000, TileProperty.TOP_LAYER),
 	FOREST(TextureEnum.TILE_FOREST, 2, TileProperty.TOP_LAYER), 
 	JUNGLE(TextureEnum.TILE_JUNGLE, 2, TileProperty.TOP_LAYER),
+	HORSES(TextureEnum.TILE_HORSES, TileProperty.RESOURCE),
+	IRON(TextureEnum.TILE_IRON, TileProperty.RESOURCE),
+	COPPER(TextureEnum.TILE_COPPER, TileProperty.RESOURCE),
+	COTTON(TextureEnum.TILE_COTTON, TileProperty.RESOURCE),
+	GEMS(TextureEnum.TILE_GEMS, TileProperty.RESOURCE),
 	CITY(TextureEnum.TILE_CITY, TileProperty.TOP_LAYER);
 	
 	public enum TileProperty {
-		WATER, TOP_LAYER;
+		WATER, RESOURCE, TOP_LAYER;
 	}
 	
 	private TextureEnum assetEnum;

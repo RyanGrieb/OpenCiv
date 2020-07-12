@@ -163,7 +163,7 @@ public class Tile extends Actor implements ShapeRenderListener {
 	}
 
 	public void setTileType(TileType tileType) {
-		if (tileType.hasProperty(TileProperty.TOP_LAYER)) {
+		if (tileType.hasProperty(TileProperty.TOP_LAYER) || tileType.hasProperty(TileProperty.RESOURCE)) {
 			this.topTileType = tileType;
 
 			float x = topSprite.getX();

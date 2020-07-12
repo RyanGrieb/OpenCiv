@@ -1,6 +1,6 @@
 
 tile.png
-size: 128,128
+size: 512,64
 format: RGBA8888
 filter: Nearest,Nearest
 repeat: none
@@ -13,70 +13,105 @@ tile_air
   index: -1
 tile_city
   rotate: false
-  xy: 36, 57
+  xy: 172, 23
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
-tile_forest
-  rotate: false
-  xy: 36, 91
-  size: 32, 32
-  orig: 32, 32
-  offset: 0, 0
-  index: -1
-tile_grass
-  rotate: false
-  xy: 70, 91
-  size: 32, 32
-  orig: 32, 32
-  offset: 0, 0
-  index: -1
-tile_grass_hill
+tile_copper
   rotate: false
   xy: 36, 23
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
+tile_cotton
+  rotate: false
+  xy: 410, 23
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+tile_forest
+  rotate: false
+  xy: 104, 23
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+tile_gems
+  rotate: false
+  xy: 376, 23
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+tile_grass
+  rotate: false
+  xy: 206, 23
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+tile_grass_hill
+  rotate: false
+  xy: 240, 23
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+tile_horses
+  rotate: false
+  xy: 274, 23
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+tile_iron
+  rotate: false
+  xy: 444, 23
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
 tile_jungle
   rotate: false
-  xy: 70, 23
+  xy: 342, 23
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 tile_mountian
   rotate: false
-  xy: 2, 57
+  xy: 70, 23
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 tile_ocean
   rotate: false
-  xy: 70, 57
+  xy: 308, 23
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 tile_plains
   rotate: false
-  xy: 2, 23
+  xy: 138, 23
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 tile_plains_hill
   rotate: false
-  xy: 2, 91
+  xy: 2, 23
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 tile_select
   rotate: false
-  xy: 104, 107
+  xy: 478, 39
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
