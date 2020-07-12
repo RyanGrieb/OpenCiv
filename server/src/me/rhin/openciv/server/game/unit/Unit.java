@@ -22,7 +22,6 @@ public abstract class Unit {
 	private float width, height;
 	private Tile standingTile, targetTile;
 	private boolean selected;
-	private int maxMovement;
 	private int pathMovement;
 	private float currentMovementOffset;
 	private long lastMoveTime;
@@ -35,7 +34,6 @@ public abstract class Unit {
 		setPosition(standingTile.getVectors()[0].x - standingTile.getWidth() / 2, standingTile.getVectors()[0].y + 4);
 		setSize(standingTile.getWidth(), standingTile.getHeight());
 
-		this.maxMovement = 3;
 		playerOwner.addOwnedUnit(this);
 	}
 
@@ -145,7 +143,7 @@ public abstract class Unit {
 				nextTile = targetTile;
 
 			if (!parentTile.equals(standingTile)) {
-				pathMovement += parentTile.getTileType().getMovementCost();
+				pathMovement += getMovementCost(parentTile);
 			}
 
 			if (parentTile.equals(targetTile)) {
@@ -209,9 +207,9 @@ public abstract class Unit {
 		// Return a movement value between 0 - 3.
 		// NOTE: 1 movement = 3 seconds.
 		long turnsPassed = ((System.currentTimeMillis() / 1000) - lastMoveTime)
-				/ (Server.getInstance().getGame().getTurnTime() / this.maxMovement);
-		if (currentMovementOffset + turnsPassed > maxMovement)
-			return maxMovement;
+				/ (Server.getInstance().getGame().getTurnTime() / getMaxMovement());
+		if (currentMovementOffset + turnsPassed > getMaxMovement())
+			return getMaxMovement();
 
 		return currentMovementOffset + turnsPassed;
 	}
@@ -230,16 +228,16 @@ public abstract class Unit {
 		this.selected = selected;
 	}
 
+	public int getMaxMovement() {
+		return 3;
+	}
+
 	public boolean isSelected() {
 		return selected;
 	}
 
 	public Tile getTargetTile() {
 		return targetTile;
-	}
-
-	public int getMaxMovement() {
-		return maxMovement;
 	}
 
 	public Player getPlayerOwner() {

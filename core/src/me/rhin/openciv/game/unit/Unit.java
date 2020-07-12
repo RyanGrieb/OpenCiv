@@ -33,7 +33,6 @@ public abstract class Unit extends Actor implements ShapeRenderListener {
 	private Tile standingTile, targetTile;
 	private Sprite sprite, selectionSprite, targetSelectionSprite;
 	private boolean selected;
-	private int maxMovement;
 	private float currentMovementOffset;
 	private long lastMoveTime;
 	private float health;
@@ -55,8 +54,7 @@ public abstract class Unit extends Actor implements ShapeRenderListener {
 		setPosition(standingTile.getVectors()[0].x - standingTile.getWidth() / 2, standingTile.getVectors()[0].y + 4);
 		setSize(standingTile.getWidth(), standingTile.getHeight());
 
-		this.maxMovement = 3;
-		this.currentMovementOffset = maxMovement;
+		this.currentMovementOffset = getMaxMovement();
 		this.lastMoveTime = -1;
 	}
 
@@ -193,7 +191,7 @@ public abstract class Unit extends Actor implements ShapeRenderListener {
 				nextTile = targetTile;
 
 			if (!parentTile.equals(standingTile)) {
-				pathMovement += parentTile.getTileType().getMovementCost();
+				pathMovement += getMovementCost(parentTile);
 			}
 
 			if (parentTile.equals(targetTile)) {
@@ -309,12 +307,16 @@ public abstract class Unit extends Actor implements ShapeRenderListener {
 		// Return a movement value between 0 - 3.
 		// NOTE: 1 movement = 3 seconds.
 		long turnsPassed = ((System.currentTimeMillis() / 1000) - lastMoveTime)
-				/ (Civilization.getInstance().getGame().getTurnTime() / this.maxMovement);
+				/ (Civilization.getInstance().getGame().getTurnTime() / getMaxMovement());
 
-		if (currentMovementOffset + turnsPassed > maxMovement)
-			return maxMovement;
+		if (currentMovementOffset + turnsPassed > getMaxMovement())
+			return getMaxMovement();
 
 		return currentMovementOffset + turnsPassed;
+	}
+
+	public int getMaxMovement() {
+		return 3;
 	}
 
 	public int getPathMovement() {
@@ -333,20 +335,12 @@ public abstract class Unit extends Actor implements ShapeRenderListener {
 		return targetTile;
 	}
 
-	public int getMaxMovement() {
-		return maxMovement;
-	}
-
 	public Player getPlayerOwner() {
 		return playerOwner;
 	}
 
 	public ArrayList<AbstractAction> getCustomActions() {
 		return customActions;
-	}
-
-	public void setMaxMovement(int movement) {
-		this.maxMovement = movement;
 	}
 
 	public Tile getStandingTile() {

@@ -2,6 +2,7 @@ package me.rhin.openciv.game.unit.type;
 
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.map.tile.Tile;
+import me.rhin.openciv.game.map.tile.TileType;
 import me.rhin.openciv.game.map.tile.TileType.TileProperty;
 import me.rhin.openciv.game.unit.Unit;
 import me.rhin.openciv.game.unit.UnitItem;
@@ -19,8 +20,15 @@ public class Scout extends UnitItem {
 		public int getMovementCost(Tile tile) {
 			if (tile.getTileType().hasProperty(TileProperty.WATER))
 				return 1000000;
+			else if (tile.getTileType().getMovementCost() > 1 && tile.getTileType().getMovementCost() < 3)
+				return 1;
 			else
 				return tile.getTileType().getMovementCost();
+		}
+
+		@Override
+		public int getMaxMovement() {
+			return 4;
 		}
 
 	}

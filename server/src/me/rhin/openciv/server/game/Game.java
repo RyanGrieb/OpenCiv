@@ -44,7 +44,6 @@ import me.rhin.openciv.shared.packet.type.SettleCityPacket;
 import me.rhin.openciv.shared.packet.type.TerritoryGrowPacket;
 import me.rhin.openciv.shared.packet.type.TurnTimeUpdatePacket;
 import me.rhin.openciv.shared.util.ColorHelper;
-import me.rhin.openciv.shared.util.MathHelper;
 
 public class Game implements StartGameRequestListener, ConnectionListener, DisconnectListener,
 		PlayerListRequestListener, FetchPlayerListener, SelectUnitListener, UnitMoveListener, SettleCityListener,
