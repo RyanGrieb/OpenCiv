@@ -2,16 +2,13 @@ package me.rhin.openciv.ui.screen.type;
 
 import java.util.ArrayList;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
-import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.utils.Align;
 
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.listener.LeftClickListener.LeftClickEvent;
 import me.rhin.openciv.listener.MouseMoveListener.MouseMoveEvent;
 import me.rhin.openciv.shared.listener.EventManager;
-import me.rhin.openciv.ui.button.ButtonManager;
 import me.rhin.openciv.ui.button.type.BackTitleScreenButton;
 import me.rhin.openciv.ui.label.CustomLabel;
 import me.rhin.openciv.ui.screen.AbstractScreen;
@@ -21,7 +18,6 @@ public class CreditsScreen extends AbstractScreen {
 
 	private EventManager eventManager;
 	private TitleOverlay titleOverlay;
-	private ButtonManager buttonManager;
 	private ArrayList<CustomLabel> creditLabelList;
 
 	public CreditsScreen() {
@@ -30,8 +26,6 @@ public class CreditsScreen extends AbstractScreen {
 
 		this.titleOverlay = new TitleOverlay();
 		stage.addActor(titleOverlay);
-
-		this.buttonManager = new ButtonManager(getStage());
 
 		creditLabelList = new ArrayList<>();
 		creditLabelList.add(new CustomLabel(
@@ -56,7 +50,7 @@ public class CreditsScreen extends AbstractScreen {
 		for (CustomLabel label : creditLabelList)
 			stage.addActor(label);
 
-		buttonManager.addButton(new BackTitleScreenButton(viewport.getWorldWidth() / 2 - 150 / 2, 50, 150, 45));
+		stage.addActor(new BackTitleScreenButton(viewport.getWorldWidth() / 2 - 150 / 2, 50, 150, 45));
 
 	}
 

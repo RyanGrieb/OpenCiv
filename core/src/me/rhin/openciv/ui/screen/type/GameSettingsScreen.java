@@ -1,7 +1,5 @@
 package me.rhin.openciv.ui.screen.type;
 
-import java.util.ArrayList;
-
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.utils.Align;
 
@@ -9,7 +7,6 @@ import me.rhin.openciv.Civilization;
 import me.rhin.openciv.listener.LeftClickListener.LeftClickEvent;
 import me.rhin.openciv.listener.MouseMoveListener.MouseMoveEvent;
 import me.rhin.openciv.shared.listener.EventManager;
-import me.rhin.openciv.ui.button.ButtonManager;
 import me.rhin.openciv.ui.button.type.BackTitleScreenButton;
 import me.rhin.openciv.ui.label.CustomLabel;
 import me.rhin.openciv.ui.screen.AbstractScreen;
@@ -17,19 +14,16 @@ import me.rhin.openciv.ui.screen.AbstractScreen;
 public class GameSettingsScreen extends AbstractScreen {
 
 	private EventManager eventManager;
-	private ButtonManager buttonManager;
 
 	public GameSettingsScreen() {
 		this.eventManager = Civilization.getInstance().getEventManager();
 		eventManager.clearEvents();
 
-		this.buttonManager = new ButtonManager(getStage());
-
 		CustomLabel todoLabel = new CustomLabel(
 				"TODO: Multiplayer is only supported.\nOnce a proper AI is coded i'll start working on SP again.",
 				Align.center, 0, viewport.getWorldHeight() - 100, viewport.getWorldWidth(), 20);
 
-		buttonManager.addButton(new BackTitleScreenButton(viewport.getWorldWidth() / 2 - 150 / 2, 50, 150, 45));
+		stage.addActor(new BackTitleScreenButton(viewport.getWorldWidth() / 2 - 150 / 2, 50, 150, 45));
 
 		stage.addActor(todoLabel);
 	}

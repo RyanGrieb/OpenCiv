@@ -8,8 +8,8 @@ import me.rhin.openciv.game.city.building.Building;
 import me.rhin.openciv.game.production.ProductionItem;
 import me.rhin.openciv.listener.BuildingConstructedListener;
 import me.rhin.openciv.shared.packet.type.BuildingConstructedPacket;
-import me.rhin.openciv.ui.button.ButtonManager;
 import me.rhin.openciv.ui.button.type.CityInfoCloseButton;
+import me.rhin.openciv.ui.game.CitizenManagementInfo;
 import me.rhin.openciv.ui.game.CityProductionInfo;
 import me.rhin.openciv.ui.game.CityStatsInfo;
 import me.rhin.openciv.ui.list.ContainerList;
@@ -20,17 +20,17 @@ import me.rhin.openciv.ui.window.AbstractWindow;
 
 public class CityInfoWindow extends AbstractWindow implements BuildingConstructedListener {
 
-	private ButtonManager buttonManager;
 	private City city;
 	private CityStatsInfo cityStatsInfo;
 	private CityProductionInfo cityProductionInfo;
+	private CitizenManagementInfo citizenManagementInfo;
+	// TODO: buildingContainerList should contain citizen focuses soon
 	private ContainerList buildingContainerList;
 	private ContainerList productionContainerList;
 
 	public CityInfoWindow(City city) {
-		this.buttonManager = new ButtonManager(this);
 		this.city = city;
-		buttonManager.addButton(new CityInfoCloseButton(viewport.getWorldWidth() / 2 - 150 / 2, 50, 150, 45));
+		addActor(new CityInfoCloseButton(viewport.getWorldWidth() / 2 - 150 / 2, 50, 150, 45));
 
 		this.cityStatsInfo = new CityStatsInfo(city, 2,
 				Civilization.getInstance().getScreenManager().getCurrentScreen().getViewport().getWorldHeight()
@@ -39,8 +39,11 @@ public class CityInfoWindow extends AbstractWindow implements BuildingConstructe
 
 		addActor(cityStatsInfo);
 
-		cityProductionInfo = new CityProductionInfo(city, 2, cityStatsInfo.getY() - 105, 200, 100);
+		this.cityProductionInfo = new CityProductionInfo(city, 2, cityStatsInfo.getY() - 105, 200, 100);
 		addActor(cityProductionInfo);
+
+		citizenManagementInfo = new CitizenManagementInfo(city);
+		addActor(citizenManagementInfo);
 
 		this.buildingContainerList = new ContainerList(viewport.getWorldWidth() - 200, 200, 200, 195);
 

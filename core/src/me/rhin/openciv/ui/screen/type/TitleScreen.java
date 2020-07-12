@@ -1,15 +1,12 @@
 package me.rhin.openciv.ui.screen.type;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
-import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.utils.Align;
 
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.listener.LeftClickListener.LeftClickEvent;
 import me.rhin.openciv.listener.MouseMoveListener.MouseMoveEvent;
 import me.rhin.openciv.shared.listener.EventManager;
-import me.rhin.openciv.ui.button.ButtonManager;
 import me.rhin.openciv.ui.button.type.AknowledgementsButton;
 import me.rhin.openciv.ui.button.type.GithubButton;
 import me.rhin.openciv.ui.button.type.MultiplayerButton;
@@ -22,7 +19,6 @@ public class TitleScreen extends AbstractScreen {
 
 	private EventManager eventManager;
 	private TitleOverlay titleOverlay;
-	private ButtonManager buttonManager;
 	private CustomLabel titleLabel;
 	private CustomLabel subTitleLabel;
 
@@ -32,15 +28,14 @@ public class TitleScreen extends AbstractScreen {
 
 		this.titleOverlay = new TitleOverlay();
 		stage.addActor(titleOverlay);
-		
-		this.buttonManager = new ButtonManager(getStage());
-		buttonManager.addButton(
-				new PlayButton(viewport.getWorldWidth() / 2 - 150 / 2, viewport.getWorldHeight() - 200, 150, 45));
-		buttonManager.addButton(new GithubButton(74, 4, 32, 32));
-		buttonManager.addButton(new MultiplayerButton(viewport.getWorldWidth() / 2 - 150 / 2,
-				viewport.getWorldHeight() - 260, 150, 45));
 
-		buttonManager.addButton(new AknowledgementsButton(viewport.getWorldWidth() / 2 - 150 / 2,
+		stage.addActor(
+				new PlayButton(viewport.getWorldWidth() / 2 - 150 / 2, viewport.getWorldHeight() - 200, 150, 45));
+		stage.addActor(new GithubButton(74, 4, 32, 32));
+		stage.addActor(new MultiplayerButton(viewport.getWorldWidth() / 2 - 150 / 2, viewport.getWorldHeight() - 260,
+				150, 45));
+
+		stage.addActor(new AknowledgementsButton(viewport.getWorldWidth() / 2 - 150 / 2,
 				viewport.getWorldHeight() - 320, 150, 45));
 
 		this.titleLabel = new CustomLabel("Kingomraiders: Civilization", Align.center, 0,

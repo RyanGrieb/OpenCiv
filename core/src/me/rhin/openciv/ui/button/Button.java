@@ -4,9 +4,12 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Align;
 
+import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.ui.label.CustomLabel;
 
@@ -38,6 +41,26 @@ public abstract class Button extends Actor {
 		btnLabel.setSize(Gdx.graphics.getWidth(), 20);
 		btnLabel.setPosition(x + width / 2 - btnLabel.getWidth() / 2, (y + height / 2) - btnLabel.getHeight() / 2);
 		btnLabel.setAlignment(Align.center);
+
+		this.addListener(new ClickListener() {
+			@Override
+			public void clicked(InputEvent event, float x, float y) {
+				if (!Civilization.getInstance().getWindowManager().allowsInput(event.getListenerActor())) {
+					return;
+				}
+				onClick();
+			}
+
+			@Override
+			public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
+				setHovered(true);
+			}
+
+			@Override
+			public void exit(InputEvent event, float x, float y, int pointer, Actor fromActor) {
+				setHovered(false);
+			}
+		});
 
 		this.hovered = false;
 	}

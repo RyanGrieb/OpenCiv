@@ -5,7 +5,6 @@ import java.util.HashMap;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.utils.Align;
@@ -22,7 +21,6 @@ import me.rhin.openciv.shared.packet.type.MapRequestPacket;
 import me.rhin.openciv.shared.packet.type.PlayerConnectPacket;
 import me.rhin.openciv.shared.packet.type.PlayerDisconnectPacket;
 import me.rhin.openciv.shared.packet.type.PlayerListRequestPacket;
-import me.rhin.openciv.ui.button.ButtonManager;
 import me.rhin.openciv.ui.button.type.MPStartButton;
 import me.rhin.openciv.ui.label.CustomLabel;
 import me.rhin.openciv.ui.screen.AbstractScreen;
@@ -34,7 +32,6 @@ public class ServerLobbyScreen extends AbstractScreen
 
 	private EventManager eventManager;
 	private TitleOverlay titleOverlay;
-	private ButtonManager buttonManager;
 
 	private CustomLabel connectedPlayersTitleLabel;
 	private HashMap<String, CustomLabel> connectedPlayersLabels;
@@ -51,7 +48,6 @@ public class ServerLobbyScreen extends AbstractScreen
 		eventManager.addListener(PlayerListRequestListener.class, this);
 		eventManager.addListener(GameStartListener.class, this);
 
-		this.buttonManager = new ButtonManager(getStage());
 
 		connectedPlayersLabels = new HashMap<>();
 
@@ -61,7 +57,7 @@ public class ServerLobbyScreen extends AbstractScreen
 		stage.addActor(connectedPlayersTitleLabel);
 
 		// FIXME: Only show this button to the first player in the player list.
-		buttonManager.addButton(new MPStartButton(viewport.getWorldWidth() / 2 - 150 / 2, 50, 150, 45));
+		stage.addActor(new MPStartButton(viewport.getWorldWidth() / 2 - 150 / 2, 50, 150, 45));
 
 		requestPlayerList();
 	}

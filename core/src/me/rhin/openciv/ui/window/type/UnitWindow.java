@@ -5,16 +5,12 @@ import com.badlogic.gdx.utils.Align;
 
 import me.rhin.openciv.game.AbstractAction;
 import me.rhin.openciv.game.unit.Unit;
-import me.rhin.openciv.listener.TurnTimeUpdateListener;
-import me.rhin.openciv.shared.packet.type.TurnTimeUpdatePacket;
 import me.rhin.openciv.ui.background.BlankBackground;
-import me.rhin.openciv.ui.button.ButtonManager;
 import me.rhin.openciv.ui.button.type.UnitActionButton;
 import me.rhin.openciv.ui.label.CustomLabel;
 import me.rhin.openciv.ui.window.AbstractWindow;
 
 public class UnitWindow extends AbstractWindow {
-	private ButtonManager buttonManager;
 	private CustomLabel unitNameLabel;
 	private CustomLabel movementLabel;
 	private BlankBackground blankBackground;
@@ -24,7 +20,6 @@ public class UnitWindow extends AbstractWindow {
 
 	public UnitWindow(Unit unit) {
 		this.unit = unit;
-		this.buttonManager = new ButtonManager(this);
 		// viewport().getWorldWidth() - 200, 0, 200, 100;
 
 		this.blankBackground = new BlankBackground(viewport.getWorldWidth() - 200, 0, 200, 100);
@@ -40,7 +35,7 @@ public class UnitWindow extends AbstractWindow {
 		addActor(movementLabel);
 
 		for (AbstractAction action : unit.getCustomActions()) {
-			buttonManager.addButton(new UnitActionButton(unit, action, viewport.getWorldWidth() - 200 + 3, 50, 70, 30));
+			addActor(new UnitActionButton(unit, action, viewport.getWorldWidth() - 200 + 3, 50, 70, 30));
 		}
 	}
 

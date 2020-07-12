@@ -2,7 +2,6 @@ package me.rhin.openciv.ui.screen.type;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
-import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.TextField;
 import com.badlogic.gdx.scenes.scene2d.ui.TextField.TextFieldListener;
@@ -13,7 +12,6 @@ import me.rhin.openciv.listener.LeftClickListener.LeftClickEvent;
 import me.rhin.openciv.listener.MouseMoveListener.MouseMoveEvent;
 import me.rhin.openciv.listener.ServerConnectListener;
 import me.rhin.openciv.shared.listener.EventManager;
-import me.rhin.openciv.ui.button.ButtonManager;
 import me.rhin.openciv.ui.button.type.BackTitleScreenButton;
 import me.rhin.openciv.ui.button.type.ConnectServerButton;
 import me.rhin.openciv.ui.label.CustomLabel;
@@ -25,7 +23,6 @@ public class ServerSelectScreen extends AbstractScreen implements ServerConnectL
 
 	private EventManager eventManager;
 	private TitleOverlay titleOverlay;
-	private ButtonManager buttonManager;
 	private CustomLabel serverIPLabel;
 	private CustomLabel connectLabel;
 	private TextField ipTextField;
@@ -37,13 +34,11 @@ public class ServerSelectScreen extends AbstractScreen implements ServerConnectL
 
 		this.titleOverlay = new TitleOverlay();
 		stage.addActor(titleOverlay);
-		
-		this.buttonManager = new ButtonManager(getStage());
 
-		buttonManager.addButton(new ConnectServerButton(this, viewport.getWorldWidth() / 2 - 150 / 2,
+		stage.addActor(new ConnectServerButton(this, viewport.getWorldWidth() / 2 - 150 / 2,
 				viewport.getWorldHeight() - 200, 150, 45));
 
-		buttonManager.addButton(new BackTitleScreenButton(viewport.getWorldWidth() / 2 - 150 / 2,
+		stage.addActor(new BackTitleScreenButton(viewport.getWorldWidth() / 2 - 150 / 2,
 				viewport.getWorldHeight() - 260, 150, 45));
 
 		this.serverIPLabel = new CustomLabel("Enter server IP address:", 0, viewport.getWorldHeight() / 1.1F,
