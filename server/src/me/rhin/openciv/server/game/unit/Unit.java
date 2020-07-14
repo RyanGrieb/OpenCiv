@@ -7,9 +7,9 @@ import com.badlogic.gdx.math.Vector2;
 
 import me.rhin.openciv.server.Server;
 import me.rhin.openciv.server.game.Player;
-import me.rhin.openciv.server.game.city.City;
 import me.rhin.openciv.server.game.map.GameMap;
 import me.rhin.openciv.server.game.map.tile.Tile;
+import me.rhin.openciv.server.game.map.tile.Tile.TileTypeWrapper;
 
 public abstract class Unit {
 

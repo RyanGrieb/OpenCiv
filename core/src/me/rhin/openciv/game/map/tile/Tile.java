@@ -22,7 +22,7 @@ import me.rhin.openciv.ui.label.CustomLabel;
 
 public class Tile extends Actor implements ShapeRenderListener {
 
-	private class TileTypeWrapper extends Sprite implements Comparable<TileTypeWrapper> {
+	public class TileTypeWrapper extends Sprite implements Comparable<TileTypeWrapper> {
 
 		private TileType tileType;
 
@@ -377,10 +377,19 @@ public class Tile extends Actor implements ShapeRenderListener {
 	}
 
 	public int getMovementCost() {
-		return ((TileTypeWrapper) tileWrappers.toArray()[tileWrappers.size() - 1]).getTileType().getMovementCost();
+		TileTypeWrapper topWrapper = ((TileTypeWrapper) tileWrappers.toArray()[tileWrappers.size() - 1]);
+		if (topWrapper.getTileType().hasProperty(TileProperty.RESOURCE)) {
+
+			return ((TileTypeWrapper) tileWrappers.toArray()[tileWrappers.size() - 2]).getTileType().getMovementCost();
+		} else
+			return topWrapper.getTileType().getMovementCost();
 	}
 
 	public City getTerritory() {
 		return territory;
+	}
+
+	public PriorityQueue<TileTypeWrapper> getTileTypeWrappers() {
+		return tileWrappers;
 	}
 }

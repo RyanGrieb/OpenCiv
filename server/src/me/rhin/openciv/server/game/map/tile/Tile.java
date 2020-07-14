@@ -269,6 +269,10 @@ public class Tile {
 	}
 
 	public int getMovementCost() {
-		return ((TileTypeWrapper) tileWrappers.toArray()[tileWrappers.size() - 1]).getTileType().getMovementCost();
+		TileTypeWrapper topWrapper = ((TileTypeWrapper) tileWrappers.toArray()[tileWrappers.size() - 1]);
+		if (topWrapper.getTileType().hasProperty(TileProperty.RESOURCE)) {
+			return ((TileTypeWrapper) tileWrappers.toArray()[tileWrappers.size() - 2]).getTileType().getMovementCost();
+		} else
+			return topWrapper.getTileType().getMovementCost();
 	}
 }
