@@ -293,6 +293,9 @@ public class GameMap implements MapRequestListener {
 								isExclusiveTile = tile.onlyHasTileType(exclusiveType);
 							} else if (exclusiveType.getTileLayer().ordinal() > 0)
 								isExclusiveTile = tile.containsTileType(exclusiveType);
+
+							if (isExclusiveTile)
+								break;
 						}
 					}
 
