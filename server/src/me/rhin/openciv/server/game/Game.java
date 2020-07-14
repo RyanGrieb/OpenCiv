@@ -260,6 +260,8 @@ public class Game implements StartGameRequestListener, ConnectionListener, Disco
 			player.getConn().send(json.toJson(settleCityPacket));
 
 			for (Tile territoryTile : city.getTerritory()) {
+				if (territoryTile == null)
+					continue;
 				TerritoryGrowPacket territoryGrowPacket = new TerritoryGrowPacket();
 				territoryGrowPacket.setCityName(city.getName());
 				territoryGrowPacket.setLocation(territoryTile.getGridX(), territoryTile.getGridY());
@@ -269,6 +271,7 @@ public class Game implements StartGameRequestListener, ConnectionListener, Disco
 		}
 
 		city.addBuilding(new Palace(city));
+		city.updateWorkedTiles();
 	}
 
 	@Override
@@ -326,6 +329,7 @@ public class Game implements StartGameRequestListener, ConnectionListener, Disco
 			int rndX = -1;
 			int rndY = -1;
 			while (true) {
+
 				float padding = 0.25F;
 				int minX = (int) (rect.getX() + (rect.getWidth() * padding));
 				int minY = (int) (rect.getY() + (rect.getHeight() * padding));
@@ -335,13 +339,13 @@ public class Game implements StartGameRequestListener, ConnectionListener, Disco
 				rndY = rnd.nextInt(maxY - minY + 1) + minY;
 				Tile tile = map.getTiles()[rndX][rndY];
 
-				if (tile.getTileType() == TileType.OCEAN || tile.getTileType() == TileType.MOUNTAIN)
+				if (tile.containsTileType(TileType.OCEAN) || tile.containsTileType(TileType.MOUNTAIN))
 					continue;
 
 				// Check if there is room for 2 units.
 				boolean hasSafeTile = false;
 				for (Tile adjTile : tile.getAdjTiles())
-					if (adjTile.getTileType() != TileType.OCEAN && adjTile.getTileType() != TileType.MOUNTAIN)
+					if (!adjTile.containsTileType(TileType.OCEAN) && !adjTile.containsTileType(TileType.MOUNTAIN))
 						hasSafeTile = true;
 
 				if (hasSafeTile) {
@@ -358,7 +362,7 @@ public class Game implements StartGameRequestListener, ConnectionListener, Disco
 			tile.addUnit(new SettlerUnit(player, tile));
 
 			for (Tile adjTile : tile.getAdjTiles()) {
-				if (adjTile.getTileType() != TileType.OCEAN && adjTile.getTileType() != TileType.MOUNTAIN) {
+				if (!adjTile.containsTileType(TileType.OCEAN) && !adjTile.containsTileType(TileType.MOUNTAIN)) {
 					adjTile.addUnit(new WarriorUnit(player, adjTile));
 					break;
 				}

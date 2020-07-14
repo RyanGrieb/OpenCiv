@@ -1,26 +1,47 @@
 
 icon.png
-size: 128,32
+size: 256,32
 format: RGBA8888
 filter: Nearest,Nearest
 repeat: none
-icon_faith
+icon_citizen
   rotate: false
   xy: 74, 2
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-icon_food
+icon_citizen_locked
   rotate: false
   xy: 38, 2
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
+icon_citizen_unworked
+  rotate: false
+  xy: 20, 2
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+icon_faith
+  rotate: false
+  xy: 128, 2
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+icon_food
+  rotate: false
+  xy: 92, 2
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
 icon_gold
   rotate: false
-  xy: 56, 2
+  xy: 110, 2
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
@@ -34,14 +55,14 @@ icon_heritage
   index: -1
 icon_production
   rotate: false
-  xy: 92, 2
+  xy: 146, 2
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 icon_research
   rotate: false
-  xy: 20, 2
+  xy: 56, 2
   size: 16, 16
   orig: 16, 16
   offset: 0, 0

@@ -77,6 +77,13 @@ public abstract class Button extends Actor {
 		btnLabel.draw(batch, 1);
 	}
 
+	public void setTexture(TextureEnum textureEnum) {
+		this.textureEnum = textureEnum;
+		Sprite sprite = textureEnum.sprite();
+		sprite.setBounds(this.sprite.getX(), this.sprite.getY(), this.sprite.getWidth(), this.sprite.getHeight());
+		this.sprite = sprite;
+	}
+
 	public void setHovered(boolean hovered) {
 		this.hovered = hovered;
 	}

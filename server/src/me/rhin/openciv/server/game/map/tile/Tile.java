@@ -1,26 +1,43 @@
 package me.rhin.openciv.server.game.map.tile;
 
 import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.PriorityQueue;
 
-import com.badlogic.gdx.graphics.g2d.Batch;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.utils.Json;
 
 import me.rhin.openciv.server.game.city.City;
 import me.rhin.openciv.server.game.map.GameMap;
+import me.rhin.openciv.server.game.map.tile.TileType.TileLayer;
 import me.rhin.openciv.server.game.map.tile.TileType.TileProperty;
 import me.rhin.openciv.server.game.unit.Unit;
-import me.rhin.openciv.shared.packet.type.AddUnitPacket;
-import me.rhin.openciv.shared.packet.type.PlayerDisconnectPacket;
+import me.rhin.openciv.shared.stat.StatLine;
 
 public class Tile {
+
+	public class TileTypeWrapper implements Comparable<TileTypeWrapper> {
+
+		private TileType tileType;
+
+		public TileTypeWrapper(TileType tileType) {
+			this.tileType = tileType;
+		}
+
+		@Override
+		public int compareTo(TileTypeWrapper type) {
+			return tileType.getTileLayer().ordinal() - type.getTileType().getTileLayer().ordinal();
+		}
+
+		public TileType getTileType() {
+			return tileType;
+		}
+	}
 
 	private static final int SIZE = 16;
 
 	private GameMap map;
-	private TileType topTileType;
-	private TileType bottomTileType;
+	private PriorityQueue<TileTypeWrapper> tileWrappers;
+	private StatLine statLine;
 	private float x, y, width, height;
 	private int gridX, gridY;
 	private Tile[] adjTiles;
@@ -30,8 +47,9 @@ public class Tile {
 
 	public Tile(GameMap map, TileType tileType, float x, float y) {
 		this.map = map;
-		this.bottomTileType = tileType;
-		this.topTileType = TileType.AIR;
+		this.tileWrappers = new PriorityQueue<>();
+		tileWrappers.add(new TileTypeWrapper(tileType));
+		this.statLine = getStatLine();
 		this.x = x;
 		this.y = y;
 		this.gridX = (int) x;
@@ -70,12 +88,19 @@ public class Tile {
 	}
 
 	public void setTileType(TileType tileType) {
-		if (tileType.hasProperty(TileProperty.TOP_LAYER) || tileType.hasProperty(TileProperty.RESOURCE)) {
-			this.topTileType = tileType;
-		} else {
-			// this.topTileType = TileType.AIR;
-			bottomTileType = tileType;
+		if (tileType == null)
+			return;
+
+		if (containsTileLayer(tileType.getTileLayer())) {
+			for (TileTypeWrapper tileWrapper : tileWrappers) {
+				// Find the tileType /w the exact layer and replace it.
+				if (tileWrapper.getTileType().getTileLayer() == tileType.getTileLayer())
+					tileWrappers.remove(tileWrapper);
+			}
 		}
+		// Add the tileType to the Array in an ordered manner. note: this will never be
+		// a baseTile
+		tileWrappers.add(new TileTypeWrapper(tileType));
 	}
 
 	public void addUnit(Unit unit) {
@@ -110,11 +135,20 @@ public class Tile {
 		return units;
 	}
 
-	public TileType getTileType() {
-		if (topTileType == TileType.AIR)
-			return bottomTileType;
-		else
-			return topTileType;
+	public TileType getBaseTileType() {
+		return ((TileTypeWrapper) tileWrappers.toArray()[tileWrappers.size() - 1]).getTileType();
+	}
+
+	public PriorityQueue<TileTypeWrapper> getTileTypeWrappers() {
+		return tileWrappers;
+	}
+
+	public boolean containsTileType(TileType tileType) {
+		for (TileTypeWrapper tileWrapper : tileWrappers)
+			if (tileWrapper.getTileType() == tileType)
+				return true;
+
+		return false;
 	}
 
 	public Vector2[] getVectors() {
@@ -173,6 +207,7 @@ public class Tile {
 
 	public void setCity(City city) {
 		this.city = city;
+		setTileType(TileType.CITY);
 	}
 
 	public Unit getUnitFromID(int unitID) {
@@ -183,11 +218,57 @@ public class Tile {
 		return null;
 	}
 
-	public TileType getBottomTileType() {
-		return bottomTileType;
+	public StatLine getStatLine() {
+		StatLine statLine = new StatLine();
+
+		Iterator<TileTypeWrapper> iterator = tileWrappers.iterator();
+
+		while (iterator.hasNext()) {
+			TileType tileType = iterator.next().getTileType();
+
+			// Skip over the base layer, since the layered tile overrides the base layer.
+			if (containsTileLayer(TileLayer.MIDDLE) && !containsTileType(TileType.CITY)
+					&& tileType.getTileLayer() == TileLayer.BASE) {
+				tileType = iterator.next().getTileType();
+			}
+
+			statLine.mergeStatLine(tileType.getStatLine());
+		}
+
+		return statLine;
 	}
 
-	public TileType getTopTileType() {
-		return topTileType;
+	public boolean onlyHasTileType(TileType tileType) {
+		boolean containsTileType = false;
+
+		for (TileTypeWrapper tileWrapper : tileWrappers) {
+			if (tileWrapper.getTileType() == tileType)
+				containsTileType = true;
+		}
+
+		return containsTileType && tileWrappers.size() < 2;
+	}
+
+	public boolean containsTileProperty(TileProperty... tileProperties) {
+		for (TileTypeWrapper tileWrapper : tileWrappers) {
+			for (TileProperty tileProperty : tileProperties)
+				if (tileWrapper.getTileType().hasProperty(tileProperty))
+					return true;
+		}
+
+		return false;
+	}
+
+	public boolean containsTileLayer(TileLayer tileLayer) {
+		for (TileTypeWrapper tileWrapper : tileWrappers) {
+			if (tileWrapper.getTileType().getTileLayer() == tileLayer)
+				return true;
+		}
+
+		return false;
+	}
+
+	public int getMovementCost() {
+		return ((TileTypeWrapper) tileWrappers.toArray()[tileWrappers.size() - 1]).getTileType().getMovementCost();
 	}
 }

@@ -48,6 +48,7 @@ public class WindowManager {
 				.getActors()) {
 			if (actor.equals(windows.get(windowClass))) {
 				actor.addAction(Actions.removeActor());
+				windows.get(windowClass).onClose();
 				break;
 			}
 		}

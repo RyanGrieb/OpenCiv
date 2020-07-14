@@ -9,8 +9,9 @@ public class MapChunkPacket extends Packet {
 
 	public static final int CHUNK_SIZE = 4;
 
-	private int[][] topTileChunk;
-	private int[][] bottomTileChunk;
+	private int[][] luxuryTileChunk;
+	private int[][] layeredTileChunk;
+	private int[][] baseTileChunk;
 	private int chunkX, chunkY;
 
 	@Override
@@ -18,8 +19,9 @@ public class MapChunkPacket extends Packet {
 		super.write(json);
 		// TODO: Find a better way to store a 2D array /w libgdx json limiting me.
 		for (int i = 0; i < CHUNK_SIZE; i++) {
-			json.writeValue("t" + i, topTileChunk[i]);
-			json.writeValue("b" + i, bottomTileChunk[i]);
+			json.writeValue("l3" + i, luxuryTileChunk[i]);
+			json.writeValue("l2" + i, layeredTileChunk[i]);
+			json.writeValue("l1" + i, baseTileChunk[i]);
 		}
 		json.writeValue("chunkX", chunkX);
 		json.writeValue("chunkY", chunkY);
@@ -28,29 +30,36 @@ public class MapChunkPacket extends Packet {
 	@Override
 	public void read(Json json, JsonValue jsonData) {
 		super.read(json, jsonData);
-		this.topTileChunk = new int[CHUNK_SIZE][CHUNK_SIZE];
-		this.bottomTileChunk = new int[CHUNK_SIZE][CHUNK_SIZE];
+		this.luxuryTileChunk = new int[CHUNK_SIZE][CHUNK_SIZE];
+		this.layeredTileChunk = new int[CHUNK_SIZE][CHUNK_SIZE];
+		this.baseTileChunk = new int[CHUNK_SIZE][CHUNK_SIZE];
 
 		for (int i = 0; i < CHUNK_SIZE; i++) {
-			topTileChunk[i] = jsonData.get("t" + i).asIntArray();
-			bottomTileChunk[i] = jsonData.get("b" + i).asIntArray();
+			luxuryTileChunk[i] = jsonData.get("l3" + i).asIntArray();
+			layeredTileChunk[i] = jsonData.get("l2" + i).asIntArray();
+			baseTileChunk[i] = jsonData.get("l1" + i).asIntArray();
 		}
 
 		this.chunkX = jsonData.getInt("chunkX");
 		this.chunkY = jsonData.getInt("chunkY");
 	}
 
-	public void setTileCunk(int[][] topTileChunk, int[][] bottomTileChunk) {
-		this.topTileChunk = topTileChunk;
-		this.bottomTileChunk = bottomTileChunk;
+	public void setTileCunk(int[][] luxuryTileChunk, int[][] layeredTileChunk, int[][] baseTileChunk) {
+		this.luxuryTileChunk = luxuryTileChunk;
+		this.layeredTileChunk = layeredTileChunk;
+		this.baseTileChunk = baseTileChunk;
 	}
 
-	public int[][] getTopTileChunk() {
-		return topTileChunk;
+	public int[][] getLuxuryTileChunk() {
+		return luxuryTileChunk;
 	}
 
-	public int[][] getBottomTileChunk() {
-		return bottomTileChunk;
+	public int[][] getLayeredTileChunk() {
+		return layeredTileChunk;
+	}
+
+	public int[][] getBaseTileChunk() {
+		return baseTileChunk;
 	}
 
 	public int getChunkX() {

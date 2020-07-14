@@ -81,7 +81,7 @@ public class Server extends WebSocketServer {
 		networkEvents.put(SettleCityPacket.class, SettleCityEvent.class);
 		networkEvents.put(FinishLoadingPacket.class, PlayerFinishLoadingEvent.class);
 		networkEvents.put(SetProductionItemPacket.class, SetProductionItemEvent.class);
-		
+
 		this.playerIndex = 0;
 		this.commandProcessor = new CmdProcessor();
 

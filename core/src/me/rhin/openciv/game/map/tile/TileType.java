@@ -1,53 +1,63 @@
 package me.rhin.openciv.game.map.tile;
 
 import com.badlogic.gdx.graphics.g2d.Sprite;
+import com.badlogic.gdx.graphics.g2d.TextureAtlas.AtlasRegion;
 
 import me.rhin.openciv.asset.TextureEnum;
 
 public enum TileType {
-	AIR(TextureEnum.TILE_AIR),
-	GRASS(TextureEnum.TILE_GRASS), 
-	GRASS_HILL(TextureEnum.TILE_GRASS_HILL, 2), 
-	PLAINS(TextureEnum.TILE_PLAINS),
-	PLAINS_HILL(TextureEnum.TILE_PLAINS_HILL, 2),
-	OCEAN(TextureEnum.TILE_OCEAN, TileProperty.WATER),
-	SHALLOW_OCEAN(TextureEnum.TILE_SHALLOW_OCEAN, TileProperty.WATER), 
-	MOUNTAIN(TextureEnum.TILE_MOUNTIAN, 1000000, TileProperty.TOP_LAYER),
-	FOREST(TextureEnum.TILE_FOREST, 2, TileProperty.TOP_LAYER), 
-	JUNGLE(TextureEnum.TILE_JUNGLE, 2, TileProperty.TOP_LAYER),
-	HORSES(TextureEnum.TILE_HORSES, TileProperty.RESOURCE),
-	IRON(TextureEnum.TILE_IRON, TileProperty.RESOURCE),
-	COPPER(TextureEnum.TILE_COPPER, TileProperty.RESOURCE),
-	COTTON(TextureEnum.TILE_COTTON, TileProperty.RESOURCE),
-	GEMS(TextureEnum.TILE_GEMS, TileProperty.RESOURCE),
-	CITY(TextureEnum.TILE_CITY, TileProperty.TOP_LAYER);
-	
-	public enum TileProperty {
-		WATER, RESOURCE, TOP_LAYER;
+	CITY(TextureEnum.TILE_CITY, TileLayer.TOP),
+	GRASS(TextureEnum.TILE_GRASS, TileLayer.BASE),
+	GRASS_HILL(TextureEnum.TILE_GRASS_HILL, 2, TileLayer.BASE),
+	PLAINS(TextureEnum.TILE_PLAINS, TileLayer.BASE),
+	PLAINS_HILL(TextureEnum.TILE_PLAINS_HILL, 2, TileLayer.BASE),
+	OCEAN(TextureEnum.TILE_OCEAN, TileLayer.BASE, TileProperty.WATER),
+	SHALLOW_OCEAN(TextureEnum.TILE_SHALLOW_OCEAN, TileLayer.BASE, TileProperty.WATER),
+	MOUNTAIN(TextureEnum.TILE_MOUNTIAN, 1000000, TileLayer.MIDDLE),
+	FOREST(TextureEnum.TILE_FOREST, 2, TileLayer.MIDDLE),
+	JUNGLE(TextureEnum.TILE_JUNGLE, 2, TileLayer.MIDDLE),
+	HORSES(TextureEnum.TILE_HORSES, TileLayer.HIGH, TileProperty.RESOURCE),
+	IRON(TextureEnum.TILE_IRON, TileLayer.HIGH, TileProperty.RESOURCE),
+	COPPER(TextureEnum.TILE_COPPER, TileLayer.HIGH, TileProperty.RESOURCE),
+	COTTON(TextureEnum.TILE_COTTON, TileLayer.HIGH, TileProperty.RESOURCE),
+	GEMS(TextureEnum.TILE_GEMS, TileLayer.HIGH, TileProperty.RESOURCE);
+
+	public enum TileLayer {
+		BASE, MIDDLE, HIGH, TOP;
 	}
-	
+
+	public enum TileProperty {
+		WATER, RESOURCE;
+	}
+
 	private TextureEnum assetEnum;
 	private TileProperty[] tileProperties;
+	private TileLayer tileLayer;
 	private int movementCost;
 
-	TileType(TextureEnum assetEnum) {
+	TileType(TextureEnum assetEnum, TileLayer tileLayer) {
 		this.assetEnum = assetEnum;
+		this.tileLayer = tileLayer;
 		this.movementCost = 1;
 	}
 
-	TileType(TextureEnum assetEnum, TileProperty... tileProperties) {
+	TileType(TextureEnum assetEnum, TileLayer tileLayer, TileProperty... tileProperties) {
 		this.assetEnum = assetEnum;
+		this.tileLayer = tileLayer;
 		this.movementCost = 1;
 		this.tileProperties = tileProperties;
 	}
 
-	TileType(TextureEnum assetEnum, int movementCost, TileProperty... tileProperties) {
+	TileType(TextureEnum assetEnum, int movementCost, TileLayer tileLayer, TileProperty... tileProperties) {
 		this.assetEnum = assetEnum;
 		this.movementCost = movementCost;
+		this.tileLayer = tileLayer;
 		this.tileProperties = tileProperties;
 	}
 
 	public static TileType fromId(int i) {
+		if (i < 0)
+			return null;
 		return values()[i];
 	}
 
@@ -55,18 +65,30 @@ public enum TileType {
 		return assetEnum.sprite();
 	}
 
+	public AtlasRegion texture() {
+		return assetEnum.texture();
+	}
+
 	public int getMovementCost() {
 		return movementCost;
 	}
-	
+
 	public boolean hasProperty(TileProperty targetProperty) {
 		if (tileProperties == null)
 			return false;
-		
+
 		for (TileProperty tileProperty : tileProperties)
 			if (tileProperty == targetProperty)
 				return true;
 
 		return false;
+	}
+
+	public TileProperty[] getProperties() {
+		return tileProperties;
+	}
+
+	public TileLayer getTileLayer() {
+		return tileLayer;
 	}
 }

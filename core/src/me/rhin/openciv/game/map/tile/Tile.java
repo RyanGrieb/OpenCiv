@@ -1,6 +1,7 @@
 package me.rhin.openciv.game.map.tile;
 
 import java.util.ArrayList;
+import java.util.PriorityQueue;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.Batch;
@@ -13,23 +14,44 @@ import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.city.City;
 import me.rhin.openciv.game.map.GameMap;
+import me.rhin.openciv.game.map.tile.TileType.TileLayer;
 import me.rhin.openciv.game.map.tile.TileType.TileProperty;
 import me.rhin.openciv.game.unit.Unit;
 import me.rhin.openciv.listener.ShapeRenderListener;
 import me.rhin.openciv.ui.label.CustomLabel;
 
-// We can extend the actor class for other sprites (e.g. terrain) here, but when we draw lines we need to use the RendererListener.
 public class Tile extends Actor implements ShapeRenderListener {
+
+	private class TileTypeWrapper extends Sprite implements Comparable<TileTypeWrapper> {
+
+		private TileType tileType;
+
+		public TileTypeWrapper(TileType tileType) {
+			super(tileType.texture());
+			this.tileType = tileType;
+		}
+
+		public TileTypeWrapper(TileType tileType, float x, float y, float width, float height) {
+			this(tileType);
+			this.setBounds(x, y, width, height);
+		}
+
+		@Override
+		public int compareTo(TileTypeWrapper tileTypeWrapper) {
+			return tileType.getTileLayer().ordinal() - tileTypeWrapper.getTileType().getTileLayer().ordinal();
+		}
+
+		public TileType getTileType() {
+			return tileType;
+		}
+	}
 
 	private static final int SIZE = 16;
 	private static final int SPRITE_WIDTH = 28;
 	private static final int SPRITE_HEIGHT = 32;
 
 	private GameMap map;
-	private TileType topTileType;
-	private TileType bottomTileType;
-	private Sprite bottomSprite;
-	public Sprite topSprite;
+	private PriorityQueue<TileTypeWrapper> tileWrappers;
 	private Sprite selectionSprite;
 	private Sprite territorySprite;
 	private boolean[] territoryBorders;
@@ -46,14 +68,13 @@ public class Tile extends Actor implements ShapeRenderListener {
 	public Tile(GameMap map, TileType tileType, float x, float y) {
 		Civilization.getInstance().getEventManager().addListener(ShapeRenderListener.class, this);
 		this.map = map;
-		if (tileType.hasProperty(TileProperty.TOP_LAYER)) {
+		if (tileType.getTileLayer() != TileLayer.BASE) {
 			Gdx.app.log(Civilization.LOG_TAG,
 					"WARNING: TileType " + tileType.name() + " top layer applied to constructor");
 		}
-		this.bottomTileType = tileType;
-		this.topTileType = TileType.AIR;
-		this.bottomSprite = tileType.sprite();
-		this.topSprite = TileType.AIR.sprite();
+		this.tileWrappers = new PriorityQueue<>();
+		tileWrappers.add(new TileTypeWrapper(tileType));
+
 		this.selectionSprite = new Sprite(TextureEnum.TILE_SELECT.sprite());
 		selectionSprite.setAlpha(0.2f);
 		this.territorySprite = new Sprite(TextureEnum.TILE_SELECT.sprite());
@@ -116,13 +137,14 @@ public class Tile extends Actor implements ShapeRenderListener {
 
 	@Override
 	public void draw(Batch batch, float parentAlpha) {
-		bottomSprite.draw(batch);
 
-		if (topTileType != TileType.AIR)
-			topSprite.draw(batch);
+		for (TileTypeWrapper sprite : tileWrappers) {
+			sprite.draw(batch);
+		}
 
-		if (drawSelection)
+		if (drawSelection) {
 			selectionSprite.draw(batch);
+		}
 
 		if (territory != null)
 			territorySprite.draw(batch);
@@ -163,25 +185,19 @@ public class Tile extends Actor implements ShapeRenderListener {
 	}
 
 	public void setTileType(TileType tileType) {
-		if (tileType.hasProperty(TileProperty.TOP_LAYER) || tileType.hasProperty(TileProperty.RESOURCE)) {
-			this.topTileType = tileType;
+		if (tileType == null)
+			return;
 
-			float x = topSprite.getX();
-			float y = topSprite.getY();
-			this.topSprite = tileType.sprite();
-			topSprite.setPosition(x, y);
-			topSprite.setSize(SPRITE_WIDTH, SPRITE_HEIGHT);
-		} else {
-			if (tileType == TileType.AIR)
-				return;
-			bottomTileType = tileType;
-
-			float x = bottomSprite.getX();
-			float y = bottomSprite.getY();
-			this.bottomSprite = tileType.sprite();
-			bottomSprite.setPosition(x, y);
-			bottomSprite.setSize(SPRITE_WIDTH, SPRITE_HEIGHT);
+		if (containsTileLayer(tileType.getTileLayer())) {
+			for (TileTypeWrapper tileWrapper : tileWrappers) {
+				// Find the tileType /w the exact layer and replace it.
+				if (tileWrapper.getTileType().getTileLayer() == tileType.getTileLayer())
+					tileWrappers.remove(tileWrapper);
+			}
 		}
+		// Add the tileType to the Array in an ordered manner. note: this will never be
+		// a baseTile
+		tileWrappers.add(new TileTypeWrapper(tileType, x, y, 28, 32));
 	}
 
 	public void addUnit(Unit unit) {
@@ -217,14 +233,6 @@ public class Tile extends Actor implements ShapeRenderListener {
 
 	public ArrayList<Unit> getUnits() {
 		return units;
-	}
-
-	public TileType getTileType() {
-		if (topTileType == TileType.AIR)
-			return bottomTileType;
-		else {
-			return topTileType;
-		}
 	}
 
 	public int getGridX() {
@@ -293,22 +301,15 @@ public class Tile extends Actor implements ShapeRenderListener {
 		this.x = vectors[0].x - width / 2;
 		this.y = vectors[0].y;
 
-		bottomSprite.setSize(28, 32);
-		bottomSprite.setPosition(x, y);
-
-		topSprite.setSize(28, 32);
-		topSprite.setPosition(x, y);
+		for (Sprite sprite : tileWrappers) {
+			sprite.setBounds(x, y, 28, 32);
+		}
 
 		selectionSprite.setSize(28, 32);
 		selectionSprite.setPosition(x, y);
 
 		territorySprite.setSize(28, 32);
 		territorySprite.setPosition(x, y);
-	}
-
-	public Sprite getBottomSpriteSprite() {
-		return bottomSprite;
-
 	}
 
 	public void setCity(City city) {
@@ -354,6 +355,29 @@ public class Tile extends Actor implements ShapeRenderListener {
 				return units.get(i + 1);
 		}
 		return units.get(0);
+	}
+
+	public boolean containsTileLayer(TileLayer tileLayer) {
+		for (TileTypeWrapper tileWrapper : tileWrappers) {
+			if (tileWrapper.getTileType().getTileLayer() == tileLayer)
+				return true;
+		}
+
+		return false;
+	}
+
+	public boolean containsTileProperty(TileProperty... tileProperties) {
+		for (TileTypeWrapper tileWrapper : tileWrappers) {
+			for (TileProperty tileProperty : tileProperties)
+				if (tileWrapper.getTileType().hasProperty(tileProperty))
+					return true;
+		}
+
+		return false;
+	}
+
+	public int getMovementCost() {
+		return ((TileTypeWrapper) tileWrappers.toArray()[tileWrappers.size() - 1]).getTileType().getMovementCost();
 	}
 
 	public City getTerritory() {

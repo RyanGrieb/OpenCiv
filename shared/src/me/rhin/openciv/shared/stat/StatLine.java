@@ -23,8 +23,9 @@ public class StatLine {
 		}
 		return statLine;
 	}
-	
-	//FIXME: This should really be only one method. City & Player Stat update should extend form an Abstract StatPacket.
+
+	// FIXME: This should really be only one method. City & Player Stat update
+	// should extend form an Abstract StatPacket.
 	public static StatLine fromPacket(CityStatUpdatePacket packet) {
 		StatLine statLine = new StatLine();
 		for (int i = 0; i < packet.getStatNames().length; i++) {
@@ -64,6 +65,12 @@ public class StatLine {
 		}
 	}
 
+	public void reduceStatLine(StatLine statLine) {
+		for (Stat stat : statLine.getStatValues().keySet()) {
+			addValue(stat, -statLine.getStatValues().get(stat));
+		}
+	}
+
 	public HashMap<Stat, Float> getStatValues() {
 		return statValues;
 	}
@@ -75,6 +82,13 @@ public class StatLine {
 			statValues.replace(stat, statValues.get(stat) + value);
 	}
 
+	public void setValue(Stat stat, float value) {
+		if (!statValues.containsKey(stat))
+			statValues.put(stat, value);
+		else
+			statValues.replace(stat, value);
+	}
+
 	public boolean isEmpty() {
 		return statValues.size() < 1;
 	}
@@ -84,5 +98,9 @@ public class StatLine {
 			return 0;
 
 		return statValues.get(stat);
+	}
+
+	public void clear() {
+		statValues.clear();
 	}
 }

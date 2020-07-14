@@ -1,35 +1,174 @@
 package me.rhin.openciv.server.game.map.tile;
 
-public enum TileType {
+import me.rhin.openciv.shared.stat.Stat;
+import me.rhin.openciv.shared.stat.StatLine;
 
-	AIR(), GRASS(), GRASS_HILL(2), PLAINS(), PLAINS_HILL(2), OCEAN(TileProperty.WATER),
-	SHALLOW_OCEAN(TileProperty.WATER), MOUNTAIN(1000000, TileProperty.TOP_LAYER), FOREST(2, TileProperty.TOP_LAYER),
-	JUNGLE(2, TileProperty.TOP_LAYER), HORSES(TileProperty.RESOURCE), IRON(TileProperty.RESOURCE),
-	COPPER(TileProperty.RESOURCE), COTTON(TileProperty.RESOURCE), GEMS(TileProperty.RESOURCE);
+public enum TileType implements Comparable<TileType> {
+
+	CITY(TileLayer.TOP) {
+		public StatLine getStatLine() {
+			StatLine statLine = new StatLine();
+			return statLine;
+		}
+	},
+	GRASS(TileLayer.BASE) {
+		public StatLine getStatLine() {
+			StatLine statLine = new StatLine();
+			statLine.setValue(Stat.FOOD_GAIN, 2);
+			return statLine;
+		}
+	},
+	GRASS_HILL(TileLayer.BASE) {
+		@Override
+		public StatLine getStatLine() {
+			StatLine statLine = new StatLine();
+			statLine.setValue(Stat.PRODUCTION_GAIN, 2);
+			return statLine;
+		}
+
+		@Override
+		public int getMovementCost() {
+			return 2;
+		}
+	},
+	PLAINS(TileLayer.BASE) {
+		@Override
+		public StatLine getStatLine() {
+			StatLine statLine = new StatLine();
+			statLine.setValue(Stat.FOOD_GAIN, 1);
+			statLine.setValue(Stat.PRODUCTION_GAIN, 1);
+			return statLine;
+		}
+	},
+	PLAINS_HILL(TileLayer.BASE) {
+		@Override
+		public StatLine getStatLine() {
+			StatLine statLine = new StatLine();
+			statLine.setValue(Stat.PRODUCTION_GAIN, 2);
+			return statLine;
+		}
+
+		@Override
+		public int getMovementCost() {
+			return 2;
+		}
+	},
+	OCEAN(TileLayer.BASE, TileProperty.WATER) {
+		@Override
+		public StatLine getStatLine() {
+			StatLine statLine = new StatLine();
+			statLine.setValue(Stat.FOOD_GAIN, 1);
+			return statLine;
+		}
+	},
+	SHALLOW_OCEAN(TileLayer.BASE, TileProperty.WATER) {
+		@Override
+		public StatLine getStatLine() {
+			StatLine statLine = new StatLine();
+			statLine.setValue(Stat.FOOD_GAIN, 2);
+			return statLine;
+		}
+	},
+	MOUNTAIN(TileLayer.MIDDLE) {
+		@Override
+		public StatLine getStatLine() {
+			StatLine statLine = new StatLine();
+			return statLine;
+		}
+
+		@Override
+		public int getMovementCost() {
+			return 1000000;
+		}
+	},
+	FOREST(TileLayer.MIDDLE) {
+		@Override
+		public StatLine getStatLine() {
+			StatLine statLine = new StatLine();
+			statLine.setValue(Stat.FOOD_GAIN, 1);
+			statLine.setValue(Stat.PRODUCTION_GAIN, 1);
+			return statLine;
+		}
+
+		@Override
+		public int getMovementCost() {
+			return 2;
+		}
+	},
+	JUNGLE(TileLayer.MIDDLE) {
+		@Override
+		public StatLine getStatLine() {
+			StatLine statLine = new StatLine();
+			statLine.setValue(Stat.FOOD_GAIN, 2);
+			return statLine;
+		}
+
+		@Override
+		public int getMovementCost() {
+			return 2;
+		}
+	},
+	HORSES(TileLayer.HIGH) {
+		@Override
+		public StatLine getStatLine() {
+			StatLine statLine = new StatLine();
+			statLine.setValue(Stat.PRODUCTION_GAIN, 1);
+			return statLine;
+		}
+	},
+	IRON(TileLayer.HIGH) {
+		@Override
+		public StatLine getStatLine() {
+			StatLine statLine = new StatLine();
+			statLine.setValue(Stat.PRODUCTION_GAIN, 1);
+			return statLine;
+		}
+	},
+	COPPER(TileLayer.HIGH) {
+		@Override
+		public StatLine getStatLine() {
+			StatLine statLine = new StatLine();
+			statLine.setValue(Stat.GOLD_GAIN, 2);
+			return statLine;
+		}
+	},
+	COTTON(TileLayer.HIGH) {
+		@Override
+		public StatLine getStatLine() {
+			StatLine statLine = new StatLine();
+			statLine.setValue(Stat.GOLD_GAIN, 2);
+			return statLine;
+		}
+	},
+	GEMS(TileLayer.HIGH) {
+		@Override
+		public StatLine getStatLine() {
+			StatLine statLine = new StatLine();
+			statLine.setValue(Stat.GOLD_GAIN, 3);
+			return statLine;
+		}
+	};
+
+	public enum TileLayer {
+		BASE, MIDDLE, HIGH, TOP;
+	}
 
 	public enum TileProperty {
-		WATER, RESOURCE, TOP_LAYER;
+		WATER, RESOURCE;
 	}
 
-	private int movementCost;
+	private TileLayer tileLayer;
 	private TileProperty[] tileProperties;
 
-	TileType() {
-		this.movementCost = 1;
-	}
-
-	TileType(TileProperty... tileProperties) {
-		this.movementCost = 1;
+	TileType(TileLayer tileLayer, TileProperty... tileProperties) {
+		this.tileLayer = tileLayer;
 		this.tileProperties = tileProperties;
 	}
 
-	TileType(int movementCost) {
-		this.movementCost = movementCost;
-	}
+	public abstract StatLine getStatLine();
 
-	TileType(int movementCost, TileProperty... tileProperties) {
-		this.movementCost = movementCost;
-		this.tileProperties = tileProperties;
+	public int getMovementCost() {
+		return 1;
 	}
 
 	public int getID() {
@@ -41,8 +180,12 @@ public enum TileType {
 		return -1;
 	}
 
-	public int getMovementCost() {
-		return movementCost;
+	public TileLayer getTileLayer() {
+		return tileLayer;
+	}
+	
+	public TileProperty[] getProperties() {
+		return tileProperties;
 	}
 
 	public boolean hasProperty(TileProperty targetProperty) {

@@ -1,7 +1,6 @@
 package me.rhin.openciv.server.game.map;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Random;
@@ -15,7 +14,10 @@ import com.badlogic.gdx.utils.Json;
 import me.rhin.openciv.server.Server;
 import me.rhin.openciv.server.game.Game;
 import me.rhin.openciv.server.game.map.tile.Tile;
+import me.rhin.openciv.server.game.map.tile.Tile.TileTypeWrapper;
 import me.rhin.openciv.server.game.map.tile.TileType;
+import me.rhin.openciv.server.game.map.tile.TileType.TileLayer;
+import me.rhin.openciv.server.game.map.tile.TileType.TileProperty;
 import me.rhin.openciv.server.game.unit.Unit;
 import me.rhin.openciv.server.listener.MapRequestListener;
 import me.rhin.openciv.shared.packet.type.AddUnitPacket;
@@ -65,16 +67,24 @@ public class GameMap implements MapRequestListener {
 				if (x % 4 == 0 && y % 4 == 0) {
 					MapChunkPacket mapChunkPacket = new MapChunkPacket();
 
-					int[][] bottomTileChunk = new int[MapChunkPacket.CHUNK_SIZE][MapChunkPacket.CHUNK_SIZE];
-					int[][] topTileChunk = new int[MapChunkPacket.CHUNK_SIZE][MapChunkPacket.CHUNK_SIZE];
+					ArrayList<int[][]> chunkLayers = new ArrayList<>();
+					for (int i = 0; i < 3; i++) {
+						int[][] chunkLayer = new int[MapChunkPacket.CHUNK_SIZE][MapChunkPacket.CHUNK_SIZE];
+						for (int a = 0; a < chunkLayer.length; a++)
+							for (int b = 0; b < chunkLayer[a].length; b++)
+								chunkLayer[a][b] = -1;
+						chunkLayers.add(chunkLayer);
+					}
 					for (int i = 0; i < MapChunkPacket.CHUNK_SIZE; i++) {
 						for (int j = 0; j < MapChunkPacket.CHUNK_SIZE; j++) {
 							int tileX = x + i;
 							int tileY = y + j;
-							bottomTileChunk[i][j] = tiles[tileX][tileY].getBottomTileType().getID();
-							topTileChunk[i][j] = tiles[tileX][tileY].getTopTileType().getID();
+							Tile tile = tiles[tileX][tileY];
+							for (int k = 0; k < tile.getTileTypeWrappers().size(); k++)
+								chunkLayers.get(k)[i][j] = ((TileTypeWrapper) tile.getTileTypeWrappers().toArray()[k])
+										.getTileType().getID();
 
-							for (Unit unit : tiles[tileX][tileY].getUnits()) {
+							for (Unit unit : tile.getUnits()) {
 								AddUnitPacket addUnitPacket = new AddUnitPacket();
 								String unitName = unit.getClass().getSimpleName().substring(0,
 										unit.getClass().getSimpleName().indexOf("Unit"));
@@ -85,7 +95,7 @@ public class GameMap implements MapRequestListener {
 
 						}
 					}
-					mapChunkPacket.setTileCunk(topTileChunk, bottomTileChunk);
+					mapChunkPacket.setTileCunk(chunkLayers.get(0), chunkLayers.get(1), chunkLayers.get(2));
 					mapChunkPacket.setChunkLocation(x, y);
 
 					conn.send(json.toJson(mapChunkPacket));
@@ -126,7 +136,7 @@ public class GameMap implements MapRequestListener {
 		for (int x = 0; x < WIDTH; x++) {
 			for (int y = 0; y < HEIGHT; y++) {
 				Tile tile = tiles[x][y];
-				if (!tile.getTileType().equals(TileType.OCEAN))
+				if (!tile.containsTileType(TileType.OCEAN))
 					continue;
 
 				Tile targetTile = null;
@@ -137,12 +147,12 @@ public class GameMap implements MapRequestListener {
 
 					targetTile = adjTile;
 
-					if (adjTile.getTileType().equals(TileType.OCEAN))
+					if (adjTile.containsTileType(TileType.OCEAN))
 						adjOceanTile = true;
 				}
 
 				if (!adjOceanTile) {
-					tile.setTileType(targetTile.getTileType());
+					tile.setTileType(targetTile.getBaseTileType());
 					continue;
 				}
 
@@ -155,6 +165,7 @@ public class GameMap implements MapRequestListener {
 
 		for (int i = 0; i < 25; i++) {
 			Tile tile = tiles[rnd.nextInt(WIDTH - 1)][rnd.nextInt(HEIGHT - 1)];
+			System.out.println(isFlatTile(tile));
 			if (isFlatTile(tile)) {
 				tile.setTileType(TileType.MOUNTAIN);
 				mountainTiles.add(tile);
@@ -224,7 +235,7 @@ public class GameMap implements MapRequestListener {
 		for (int i = 0; i < 250; i++) {
 			Tile tile = tiles[rnd.nextInt(WIDTH - 1)][rnd.nextInt(HEIGHT - 1)];
 			if (isFlatTile(tile)) {
-				if (tile.getTileType() == TileType.GRASS)
+				if (tile.containsTileType(TileType.GRASS))
 					tile.setTileType(TileType.GRASS_HILL);
 				else
 					tile.setTileType(TileType.PLAINS_HILL);
@@ -237,9 +248,9 @@ public class GameMap implements MapRequestListener {
 			Tile tile = hillTiles.remove();
 			for (Tile adjTile : tile.getAdjTiles()) {
 				if (rnd.nextInt(20) > 17 && isFlatTile(adjTile)) {
-					if (tile.getTileType() == TileType.GRASS)
+					if (tile.containsTileType(TileType.GRASS))
 						tile.setTileType(TileType.GRASS_HILL);
-					else if (tile.getTileType() == TileType.PLAINS)
+					else if (tile.containsTileType(TileType.PLAINS))
 						tile.setTileType(TileType.PLAINS_HILL);
 					hillTiles.add(adjTile);
 				}
@@ -247,7 +258,7 @@ public class GameMap implements MapRequestListener {
 		}
 
 		generateResource(TileType.HORSES, game.getPlayers().size() * 4, TileType.GRASS, TileType.PLAINS);
-		generateResource(TileType.IRON, game.getPlayers().size() * 4, TileType.GRASS, TileType.PLAINS,
+		generateResource(TileType.IRON, game.getPlayers().size() * 60, TileType.GRASS, TileType.PLAINS,
 				TileType.PLAINS_HILL, TileType.GRASS_HILL);
 		generateResource(TileType.COPPER, game.getPlayers().size(), TileType.GRASS, TileType.PLAINS,
 				TileType.PLAINS_HILL, TileType.GRASS_HILL);
@@ -268,7 +279,24 @@ public class GameMap implements MapRequestListener {
 							+ (int) rect.getY();
 					Tile tile = tiles[rndX][rndY];
 
-					if ((exclusiveTiles.length < 1 || Arrays.asList(exclusiveTiles).contains(tile.getTileType()))) {
+					boolean isExclusiveTile = false;
+					boolean containsResource = false;
+					for (TileTypeWrapper tileWrapper : tile.getTileTypeWrappers())
+						if (tileWrapper.getTileType().hasProperty(TileProperty.RESOURCE)) {
+							containsResource = true;
+						}
+
+					if (!containsResource) {
+						for (TileType exclusiveType : exclusiveTiles) {
+							if (exclusiveType.getTileLayer() == TileLayer.BASE) {
+								// If the exclusiveType is a base layer, make sure no other layers are there.
+								isExclusiveTile = tile.onlyHasTileType(exclusiveType);
+							} else if (exclusiveType.getTileLayer().ordinal() > 0)
+								isExclusiveTile = tile.containsTileType(exclusiveType);
+						}
+					}
+
+					if (exclusiveTiles.length < 1 || isExclusiveTile) {
 						tile.setTileType(tileType);
 						amount--;
 						break;
@@ -386,13 +414,13 @@ public class GameMap implements MapRequestListener {
 
 		TileType tileType = null;
 
-		if (tile.getTileType().equals(TileType.OCEAN)) {
+		if (tile.containsTileType(TileType.OCEAN)) {
 			if (rnd.nextInt(10) > 1)
 				tileType = TileType.GRASS;
 			else
 				tileType = TileType.PLAINS;
 		} else
-			tileType = tile.getTileType();
+			tileType = tile.getBaseTileType();
 
 		// #1
 		// Set the initial tile the grass
@@ -437,6 +465,6 @@ public class GameMap implements MapRequestListener {
 	}
 
 	private boolean isFlatTile(Tile tile) {
-		return tile.getTileType() == TileType.GRASS || tile.getTileType() == TileType.PLAINS;
+		return tile.onlyHasTileType(TileType.GRASS) || tile.onlyHasTileType(TileType.PLAINS);
 	}
 }

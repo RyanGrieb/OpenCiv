@@ -2,6 +2,7 @@ package me.rhin.openciv.asset;
 
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
+import com.badlogic.gdx.graphics.g2d.TextureAtlas.AtlasRegion;
 
 import me.rhin.openciv.Civilization;
 
@@ -13,7 +14,7 @@ public enum TextureEnum {
 	TILE_PLAINS,
 	TILE_PLAINS_HILL,
 	TILE_OCEAN,
-	TILE_SHALLOW_OCEAN, 
+	TILE_SHALLOW_OCEAN,
 	TILE_FOREST,
 	TILE_JUNGLE,
 	TILE_MOUNTIAN,
@@ -24,7 +25,7 @@ public enum TextureEnum {
 	TILE_GEMS,
 	TILE_CITY,
 	TILE_SELECT,
-	UNIT_SETTLER, 
+	UNIT_SETTLER,
 	UNIT_WARRIOR,
 	UNIT_SCOUT,
 	UNIT_GALLEY,
@@ -34,11 +35,15 @@ public enum TextureEnum {
 	ICON_FATIH,
 	ICON_FOOD,
 	ICON_PRODUCTION,
-	UI_SELECTION, 
+	ICON_CITIZEN,
+	ICON_CITIZEN_LOCK,
+	ICON_CITIZEN_UNWORKED,
+	UI_SELECTION,
 	UI_BUTTON,
 	UI_BUTTON_HOVERED,
 	UI_BLACK,
 	UI_GRAY,
+	UI_GREEN,
 	UI_LIGHT_GRAY,
 	UI_DARK_GRAY,
 	UI_GITHUB,
@@ -61,5 +66,10 @@ public enum TextureEnum {
 	public Sprite sprite() {
 		Sprite sprite = textureAtlas.createSprite(this.name().toLowerCase());
 		return sprite;
+	}
+
+	public AtlasRegion texture() {
+		AtlasRegion texture = textureAtlas.findRegion(this.name().toLowerCase());
+		return texture;
 	}
 }

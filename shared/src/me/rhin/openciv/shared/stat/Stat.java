@@ -8,7 +8,8 @@ public enum Stat {
 	HERITAGE_GAIN(HERITAGE),
 	RESEARCH_GAIN,
 	PRODUCTION_GAIN,
-	FOOD_GAIN;
+	FOOD_GAIN,
+	POPULATION;
 
 	private Stat addedStat;
 

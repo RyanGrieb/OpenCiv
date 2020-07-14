@@ -74,9 +74,16 @@ ui_gray
   orig: 1, 1
   offset: 0, 0
   index: -1
-ui_light_gray
+ui_green
   rotate: false
   xy: 2, 2
+  size: 1, 1
+  orig: 1, 1
+  offset: 0, 0
+  index: -1
+ui_light_gray
+  rotate: false
+  xy: 36, 36
   size: 1, 1
   orig: 1, 1
   offset: 0, 0

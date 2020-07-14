@@ -18,12 +18,12 @@ public class Scout extends UnitItem {
 
 		@Override
 		public int getMovementCost(Tile tile) {
-			if (tile.getTileType().hasProperty(TileProperty.WATER))
+			if (tile.containsTileProperty(TileProperty.WATER))
 				return 1000000;
-			else if (tile.getTileType().getMovementCost() > 1 && tile.getTileType().getMovementCost() < 3)
+			else if (tile.getMovementCost() > 1 && tile.getMovementCost() < 3)
 				return 1;
 			else
-				return tile.getTileType().getMovementCost();
+				return tile.getMovementCost();
 		}
 
 		@Override

@@ -20,4 +20,8 @@ public abstract class AbstractWindow extends Group {
 	public abstract boolean disablesInput();
 
 	public abstract boolean closesOtherWindows();
+	
+	public void onClose() {
+		
+	}
 }
