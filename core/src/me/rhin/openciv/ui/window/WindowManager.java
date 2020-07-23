@@ -7,6 +7,7 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 
 import me.rhin.openciv.Civilization;
+import me.rhin.openciv.ui.window.type.CityInfoWindow;
 
 public class WindowManager {
 
@@ -89,5 +90,9 @@ public class WindowManager {
 				return true;
 		}
 		return false;
+	}
+
+	public boolean isOpenWindow(Class<CityInfoWindow> windowClass) {
+		return windows.containsKey(windowClass);
 	}
 }

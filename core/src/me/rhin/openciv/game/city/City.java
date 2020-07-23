@@ -84,11 +84,13 @@ public class City extends Actor implements BuildingConstructedListener, CityStat
 
 	@Override
 	public void draw(Batch batch, float parentAlpha) {
-		nameLabel.draw(batch, parentAlpha);
+		if (!Civilization.getInstance().getWindowManager().isOpenWindow(CityInfoWindow.class))
+			nameLabel.draw(batch, parentAlpha);
 	}
 
 	public void onClick() {
-		if (!playerOwner.equals(Civilization.getInstance().getGame().getPlayer()))
+		if (!playerOwner.equals(Civilization.getInstance().getGame().getPlayer())
+				|| Civilization.getInstance().getWindowManager().isOpenWindow(CityInfoWindow.class))
 			return;
 
 		Civilization.getInstance().getScreenManager().getCurrentScreen().setCameraPosition(
