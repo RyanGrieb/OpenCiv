@@ -1,8 +1,6 @@
 package me.rhin.openciv.desktop;
 
-import java.awt.Dimension;
-import java.awt.Toolkit;
-
+import com.badlogic.gdx.Files.FileType;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
 import com.github.czyzby.websocket.CommonWebSockets;
@@ -16,6 +14,7 @@ public class DesktopLauncher {
 		config.width = 800;
 		config.height = 600;
 		config.title = "OpenCiv";
+		config.addIcon("tile_city.png", FileType.Internal);
 		new LwjglApplication(new Civilization(), config);
 	}
 }
