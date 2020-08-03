@@ -20,6 +20,7 @@ import me.rhin.openciv.server.game.map.tile.TileType;
 import me.rhin.openciv.server.game.unit.Unit;
 import me.rhin.openciv.server.game.unit.type.Settler.SettlerUnit;
 import me.rhin.openciv.server.game.unit.type.Warrior.WarriorUnit;
+import me.rhin.openciv.server.listener.ClickWorkedTileListener;
 import me.rhin.openciv.server.listener.ConnectionListener;
 import me.rhin.openciv.server.listener.DisconnectListener;
 import me.rhin.openciv.server.listener.FetchPlayerListener;
@@ -31,6 +32,7 @@ import me.rhin.openciv.server.listener.SettleCityListener;
 import me.rhin.openciv.server.listener.StartGameRequestListener;
 import me.rhin.openciv.server.listener.TurnTimeUpdateListener;
 import me.rhin.openciv.server.listener.UnitMoveListener;
+import me.rhin.openciv.shared.packet.type.ClickWorkedTilePacket;
 import me.rhin.openciv.shared.packet.type.DeleteUnitPacket;
 import me.rhin.openciv.shared.packet.type.FetchPlayerPacket;
 import me.rhin.openciv.shared.packet.type.GameStartPacket;
@@ -47,7 +49,7 @@ import me.rhin.openciv.shared.util.ColorHelper;
 
 public class Game implements StartGameRequestListener, ConnectionListener, DisconnectListener,
 		PlayerListRequestListener, FetchPlayerListener, SelectUnitListener, UnitMoveListener, SettleCityListener,
-		PlayerFinishLoadingListener, TurnTimeUpdateListener, SetProductionItemListener {
+		PlayerFinishLoadingListener, TurnTimeUpdateListener, SetProductionItemListener, ClickWorkedTileListener {
 
 	private static final int BASE_TURN_TIME = 9;
 
@@ -99,6 +101,7 @@ public class Game implements StartGameRequestListener, ConnectionListener, Disco
 		Server.getInstance().getEventManager().addListener(PlayerFinishLoadingListener.class, this);
 		Server.getInstance().getEventManager().addListener(TurnTimeUpdateListener.class, this);
 		Server.getInstance().getEventManager().addListener(SetProductionItemListener.class, this);
+		Server.getInstance().getEventManager().addListener(ClickWorkedTileListener.class, this);
 	}
 
 	@Override
@@ -307,6 +310,20 @@ public class Game implements StartGameRequestListener, ConnectionListener, Disco
 
 		Json json = new Json();
 		conn.send(json.toJson(packet));
+	}
+
+	@Override
+	public void onClickWorkedTile(WebSocket conn, ClickWorkedTilePacket packet) {
+		Player player = getPlayerByConn(conn);
+		City targetCity = null;
+		for (City city : player.getOwnedCities())
+			if (city.getName().equals(packet.getCityName()))
+				targetCity = city;
+
+		if (targetCity == null)
+			return;
+
+		targetCity.clickWorkedTile(map.getTiles()[packet.getGridX()][packet.getGridY()]);
 	}
 
 	public void start() {

@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Random;
 
 import com.badlogic.gdx.utils.Json;
@@ -11,14 +12,17 @@ import com.badlogic.gdx.utils.Json;
 import me.rhin.openciv.server.Server;
 import me.rhin.openciv.server.game.Player;
 import me.rhin.openciv.server.game.city.building.Building;
+import me.rhin.openciv.server.game.city.citizen.AssignedCitizenWorker;
+import me.rhin.openciv.server.game.city.citizen.CitizenWorker;
+import me.rhin.openciv.server.game.city.citizen.CityCenterCitizenWorker;
+import me.rhin.openciv.server.game.city.citizen.EmptyCitizenWorker;
+import me.rhin.openciv.server.game.city.citizen.UnemployedCitizenWorker;
 import me.rhin.openciv.server.game.map.tile.Tile;
 import me.rhin.openciv.server.game.map.tile.Tile.TileTypeWrapper;
-import me.rhin.openciv.server.game.map.tile.TileType;
 import me.rhin.openciv.server.game.production.ProducibleItemManager;
 import me.rhin.openciv.shared.packet.type.BuildingConstructedPacket;
 import me.rhin.openciv.shared.packet.type.CityStatUpdatePacket;
-import me.rhin.openciv.shared.packet.type.RemoveWorkedTilePacket;
-import me.rhin.openciv.shared.packet.type.SetWorkedTilePacket;
+import me.rhin.openciv.shared.packet.type.SetCitizenTileWorkerPacket;
 import me.rhin.openciv.shared.stat.Stat;
 import me.rhin.openciv.shared.stat.StatLine;
 
@@ -29,7 +33,8 @@ public class City {
 	private Tile originTile;
 	private ArrayList<Tile> territory;
 	private ArrayList<Building> buildings;
-	private ArrayList<Tile> workedTiles;
+	private HashMap<Tile, CitizenWorker> citizenWorkers;
+	private ArrayList<UnemployedCitizenWorker> unemployedWorkers;
 	private ProducibleItemManager producibleItemManager;
 	private StatLine statLine;
 
@@ -39,7 +44,8 @@ public class City {
 		this.originTile = originTile;
 		this.territory = new ArrayList<>();
 		this.buildings = new ArrayList<>();
-		this.workedTiles = new ArrayList<>();
+		this.citizenWorkers = new HashMap<>();
+		this.unemployedWorkers = new ArrayList<>();
 		this.producibleItemManager = new ProducibleItemManager(this);
 		this.statLine = new StatLine();
 
@@ -91,20 +97,64 @@ public class City {
 			}
 		}
 
-		for (Tile tile : new ArrayList<>(workedTiles)) {
-			removeWorkedTile(tile);
+		unemployedWorkers.clear();
+		citizenWorkers.clear();
+
+		for (Tile tile : territory) {
+			// TODO: Ensure the tile is within 3 tiles of the city
+			setCitizenTileWorker(new EmptyCitizenWorker(this, tile));
 		}
 
-		setWorkedTile(null, originTile);
+		setCitizenTileWorker(new CityCenterCitizenWorker(this, originTile));
 
 		for (int i = 0; i < statLine.getStatValue(Stat.POPULATION); i++) {
 			Tile tile = topTiles.get(i);
-			setWorkedTile(null, tile);
+			setCitizenTileWorker(new AssignedCitizenWorker(this, tile));
 		}
+	}
+
+	public void setCitizenTileWorker(CitizenWorker citizenWorker) {
+		if (citizenWorker instanceof UnemployedCitizenWorker) {
+			throw new RuntimeException();
+		}
+
+		citizenWorkers.put(citizenWorker.getTile(), citizenWorker);
+
+		// TODO: Send associated packet.
+
+		SetCitizenTileWorkerPacket packet = new SetCitizenTileWorkerPacket();
+		packet.setWorker(citizenWorker.getWorkerType(), name, citizenWorker.getTile().getGridX(),
+				citizenWorker.getTile().getGridY());
+
+		Json json = new Json();
+		playerOwner.getConn().send(json.toJson(packet));
+	}
+
+	public void removeCitizenWorkerFromTile(Tile tile) {
+		citizenWorkers.put(tile, new EmptyCitizenWorker(this, tile));
+
+		// TODO: Send associated packet.
+
+		addUnemployedCitizen();
+	}
+
+	public void addUnemployedCitizen() {
+		unemployedWorkers.add(new UnemployedCitizenWorker(this));
+
+		// TODO: Send associated packet.
+
 	}
 
 	public Player getPlayerOwner() {
 		return playerOwner;
+	}
+
+	public HashMap<Tile, CitizenWorker> getCitizenWorkers() {
+		return citizenWorkers;
+	}
+
+	public ArrayList<UnemployedCitizenWorker> getUnemployedWorkers() {
+		return unemployedWorkers;
 	}
 
 	public String getName() {
@@ -150,32 +200,8 @@ public class City {
 		return producibleItemManager;
 	}
 
-	private void setWorkedTile(Tile prevTile, Tile workedTile) {
-		if (prevTile != null) {
-			removeWorkedTile(prevTile);
-		}
-
-		workedTiles.add(workedTile);
-		statLine.mergeStatLine(getTileStatLine(workedTile));
-
-		SetWorkedTilePacket workedTilePacket = new SetWorkedTilePacket();
-		workedTilePacket.setTile(getName(), workedTile.getGridX(), workedTile.getGridY());
-		Json json = new Json();
-		playerOwner.getConn().send(json.toJson(workedTilePacket));
-
-		CityStatUpdatePacket statUpdatePacket = new CityStatUpdatePacket();
-		for (Stat stat : this.statLine.getStatValues().keySet()) {
-			statUpdatePacket.addStat(name, stat.name(), this.statLine.getStatValues().get(stat));
-		}
-		playerOwner.getConn().send(json.toJson(statUpdatePacket));
-	}
-
-	private void removeWorkedTile(Tile tile) {
-		workedTiles.remove(tile);
-		RemoveWorkedTilePacket packet = new RemoveWorkedTilePacket();
-		packet.setTile(getName(), tile.getGridX(), tile.getGridY());
-		Json json = new Json();
-		playerOwner.getConn().send(json.toJson(packet));
+	public void clickWorkedTile(Tile tile) {
+		citizenWorkers.get(tile).onClick();
 	}
 
 	private StatLine getTileStatLine(Tile tile) {

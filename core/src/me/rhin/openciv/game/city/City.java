@@ -1,6 +1,7 @@
 package me.rhin.openciv.game.city;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.Batch;
@@ -18,28 +19,29 @@ import me.rhin.openciv.listener.ApplyProductionToItemListener;
 import me.rhin.openciv.listener.BuildingConstructedListener;
 import me.rhin.openciv.listener.CityStatUpdateListener;
 import me.rhin.openciv.listener.FinishProductionItemListener;
+import me.rhin.openciv.listener.SetCitizenTileWorkerListener;
 import me.rhin.openciv.listener.SetProductionItemListener;
-import me.rhin.openciv.listener.SetWorkedTileListener;
 import me.rhin.openciv.shared.packet.type.ApplyProductionToItemPacket;
 import me.rhin.openciv.shared.packet.type.BuildingConstructedPacket;
 import me.rhin.openciv.shared.packet.type.CityStatUpdatePacket;
 import me.rhin.openciv.shared.packet.type.FinishProductionItemPacket;
-import me.rhin.openciv.shared.packet.type.RemoveWorkedTilePacket;
+import me.rhin.openciv.shared.packet.type.SetCitizenTileWorkerPacket;
+import me.rhin.openciv.shared.packet.type.SetCitizenTileWorkerPacket.WorkerType;
 import me.rhin.openciv.shared.packet.type.SetProductionItemPacket;
-import me.rhin.openciv.shared.packet.type.SetWorkedTilePacket;
-import me.rhin.openciv.shared.stat.Stat;
 import me.rhin.openciv.shared.stat.StatLine;
 import me.rhin.openciv.ui.label.CustomLabel;
 import me.rhin.openciv.ui.window.type.CityInfoWindow;
 
-public class City extends Actor implements BuildingConstructedListener, CityStatUpdateListener,
-		SetProductionItemListener, ApplyProductionToItemListener, FinishProductionItemListener, SetWorkedTileListener {
+public class City extends Actor
+		implements BuildingConstructedListener, CityStatUpdateListener, SetProductionItemListener,
+		ApplyProductionToItemListener, FinishProductionItemListener, SetCitizenTileWorkerListener {
 
 	private Tile originTile;
 	private Player playerOwner;
 	private ArrayList<Tile> territory;
 	private ArrayList<Building> buildings;
-	private ArrayList<Tile> workedTiles;
+	private HashMap<Tile, WorkerType> citizenWorkers;
+	// private ArrayList<UnemployedCitizenWorker> unemployedWorkers;
 	private ProducibleItemManager producibleItemManager;
 	private StatLine statLine;
 	private CustomLabel nameLabel;
@@ -49,7 +51,8 @@ public class City extends Actor implements BuildingConstructedListener, CityStat
 		this.playerOwner = playerOwner;
 		this.territory = new ArrayList<>();
 		this.buildings = new ArrayList<>();
-		this.workedTiles = new ArrayList<>();
+		this.citizenWorkers = new HashMap<>();
+		// this.unemployedWorkers = new ArrayList<>();
 		this.producibleItemManager = new ProducibleItemManager(this);
 		this.statLine = new StatLine();
 		setName(name);
@@ -79,7 +82,7 @@ public class City extends Actor implements BuildingConstructedListener, CityStat
 		Civilization.getInstance().getEventManager().addListener(SetProductionItemListener.class, this);
 		Civilization.getInstance().getEventManager().addListener(ApplyProductionToItemListener.class, this);
 		Civilization.getInstance().getEventManager().addListener(FinishProductionItemListener.class, this);
-		Civilization.getInstance().getEventManager().addListener(SetWorkedTileListener.class, this);
+		Civilization.getInstance().getEventManager().addListener(SetCitizenTileWorkerListener.class, this);
 	}
 
 	@Override
@@ -157,22 +160,13 @@ public class City extends Actor implements BuildingConstructedListener, CityStat
 	}
 
 	@Override
-	public void onSetWorkedTile(SetWorkedTilePacket packet) {
+	public void onSetCitizenTileWorker(SetCitizenTileWorkerPacket packet) {
 		if (!getName().equals(packet.getCityName()))
 			return;
 
-		workedTiles.add(Civilization.getInstance().getGame().getMap().getTiles()[packet.getGridX()][packet.getGridY()]);
-	}
+		Tile tile = Civilization.getInstance().getGame().getMap().getTiles()[packet.getGridX()][packet.getGridY()];
 
-	public void onRemoveWorkedTile(RemoveWorkedTilePacket packet) {
-		if (!getName().equals(packet.getCityName()))
-			return;
-
-		for (Tile workedTile : workedTiles) {
-			if (workedTile.equals(
-					Civilization.getInstance().getGame().getMap().getTiles()[packet.getGridX()][packet.getGridY()]))
-				workedTiles.remove(workedTile);
-		}
+		citizenWorkers.put(tile, packet.getWorkerType());
 	}
 
 	public void setStatLine(StatLine statLine) {
@@ -210,8 +204,8 @@ public class City extends Actor implements BuildingConstructedListener, CityStat
 		return producibleItemManager;
 	}
 
-	public ArrayList<Tile> getWorkedTiles() {
-		return workedTiles;
+	public HashMap<Tile, WorkerType> getCitizenWorkers() {
+		return citizenWorkers;
 	}
 
 	public Tile getOriginTile() {

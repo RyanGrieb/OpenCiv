@@ -6,7 +6,14 @@ filter: Nearest,Nearest
 repeat: none
 icon_citizen
   rotate: false
-  xy: 74, 2
+  xy: 92, 2
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+icon_citizen_city_center
+  rotate: false
+  xy: 56, 2
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
@@ -27,21 +34,21 @@ icon_citizen_unworked
   index: -1
 icon_faith
   rotate: false
-  xy: 128, 2
+  xy: 146, 2
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 icon_food
   rotate: false
-  xy: 92, 2
+  xy: 110, 2
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 icon_gold
   rotate: false
-  xy: 110, 2
+  xy: 128, 2
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
@@ -55,14 +62,14 @@ icon_heritage
   index: -1
 icon_production
   rotate: false
-  xy: 146, 2
+  xy: 164, 2
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 icon_research
   rotate: false
-  xy: 56, 2
+  xy: 74, 2
   size: 16, 16
   orig: 16, 16
   offset: 0, 0

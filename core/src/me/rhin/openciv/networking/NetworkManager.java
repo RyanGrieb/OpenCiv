@@ -28,11 +28,10 @@ import me.rhin.openciv.listener.PlayerDisconnectListener.PlayerDisconnectEvent;
 import me.rhin.openciv.listener.PlayerListRequestListener.PlayerListRequestEvent;
 import me.rhin.openciv.listener.PlayerStatUpdateListener.PlayerStatUpdateEvent;
 import me.rhin.openciv.listener.ReceiveMapChunkListener.ReciveMapChunkEvent;
-import me.rhin.openciv.listener.RemoveWorkedTileListener.RemoveWorkedTileEvent;
 import me.rhin.openciv.listener.SelectUnitListener.SelectUnitEvent;
 import me.rhin.openciv.listener.ServerConnectListener.ServerConnectEvent;
+import me.rhin.openciv.listener.SetCitizenTileWorkerListener.SetCitizenTileWorkerEvent;
 import me.rhin.openciv.listener.SetProductionItemListener.SetProductionItemEvent;
-import me.rhin.openciv.listener.SetWorkedTileListener.SetWorkedTileEvent;
 import me.rhin.openciv.listener.SettleCityListener.SettleCityEvent;
 import me.rhin.openciv.listener.TerritoryGrowListener.TerritoryGrowEvent;
 import me.rhin.openciv.listener.TurnTimeUpdateListener.TurnTimeUpdateEvent;
@@ -54,10 +53,9 @@ import me.rhin.openciv.shared.packet.type.PlayerConnectPacket;
 import me.rhin.openciv.shared.packet.type.PlayerDisconnectPacket;
 import me.rhin.openciv.shared.packet.type.PlayerListRequestPacket;
 import me.rhin.openciv.shared.packet.type.PlayerStatUpdatePacket;
-import me.rhin.openciv.shared.packet.type.RemoveWorkedTilePacket;
 import me.rhin.openciv.shared.packet.type.SelectUnitPacket;
+import me.rhin.openciv.shared.packet.type.SetCitizenTileWorkerPacket;
 import me.rhin.openciv.shared.packet.type.SetProductionItemPacket;
-import me.rhin.openciv.shared.packet.type.SetWorkedTilePacket;
 import me.rhin.openciv.shared.packet.type.SettleCityPacket;
 import me.rhin.openciv.shared.packet.type.TerritoryGrowPacket;
 import me.rhin.openciv.shared.packet.type.TurnTimeUpdatePacket;
@@ -90,8 +88,7 @@ public class NetworkManager {
 		networkEvents.put(SetProductionItemPacket.class, SetProductionItemEvent.class);
 		networkEvents.put(ApplyProductionToItemPacket.class, ApplyProductionToItemEvent.class);
 		networkEvents.put(FinishProductionItemPacket.class, FinishProductionItemEvent.class);
-		networkEvents.put(SetWorkedTilePacket.class, SetWorkedTileEvent.class);
-		networkEvents.put(RemoveWorkedTilePacket.class, RemoveWorkedTileEvent.class);
+		networkEvents.put(SetCitizenTileWorkerPacket.class, SetCitizenTileWorkerEvent.class);
 	}
 
 	public void connect(String ip) {

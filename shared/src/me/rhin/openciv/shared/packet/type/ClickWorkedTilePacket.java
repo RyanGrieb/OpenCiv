@@ -5,7 +5,7 @@ import com.badlogic.gdx.utils.JsonValue;
 
 import me.rhin.openciv.shared.packet.Packet;
 
-public class SetWorkedTilePacket extends Packet {
+public class ClickWorkedTilePacket extends Packet {
 
 	private String cityName;
 	private int gridX, gridY;
