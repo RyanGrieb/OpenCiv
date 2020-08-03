@@ -19,7 +19,8 @@ public abstract class CitizenWorker {
 	}
 
 	public abstract void onClick();
-
+	public abstract boolean isValidTileWorker();
+	
 	public abstract WorkerType getWorkerType();
 
 	public Tile getTile() {

@@ -111,6 +111,20 @@ public class City {
 			Tile tile = topTiles.get(i);
 			setCitizenTileWorker(new AssignedCitizenWorker(this, tile));
 		}
+
+		for (CitizenWorker citizenWorker : citizenWorkers.values()) {
+			if (citizenWorker.isValidTileWorker()) {
+				statLine.mergeStatLine(getTileStatLine(citizenWorker.getTile()));
+			}
+		}
+
+		Json json = new Json();
+
+		CityStatUpdatePacket statUpdatePacket = new CityStatUpdatePacket();
+		for (Stat stat : this.statLine.getStatValues().keySet()) {
+			statUpdatePacket.addStat(name, stat.name(), this.statLine.getStatValues().get(stat));
+		}
+		playerOwner.getConn().send(json.toJson(statUpdatePacket));
 	}
 
 	public void setCitizenTileWorker(CitizenWorker citizenWorker) {
@@ -119,8 +133,6 @@ public class City {
 		}
 
 		citizenWorkers.put(citizenWorker.getTile(), citizenWorker);
-
-		// TODO: Send associated packet.
 
 		SetCitizenTileWorkerPacket packet = new SetCitizenTileWorkerPacket();
 		packet.setWorker(citizenWorker.getWorkerType(), name, citizenWorker.getTile().getGridX(),

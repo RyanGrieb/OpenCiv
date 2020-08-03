@@ -16,6 +16,11 @@ public class AssignedCitizenWorker extends CitizenWorker {
 	}
 
 	@Override
+	public boolean isValidTileWorker() {
+		return true;
+	}
+
+	@Override
 	public WorkerType getWorkerType() {
 		return WorkerType.ASSIGNED;
 	}

@@ -16,6 +16,11 @@ public class CityCenterCitizenWorker extends CitizenWorker {
 	}
 
 	@Override
+	public boolean isValidTileWorker() {
+		return true;
+	}
+
+	@Override
 	public WorkerType getWorkerType() {
 		return WorkerType.CITY_CENTER;
 	}

@@ -13,6 +13,11 @@ public class UnemployedCitizenWorker extends CitizenWorker {
 	public void onClick() {
 
 	}
+	
+	@Override
+	public boolean isValidTileWorker() {
+		return false;
+	}
 
 	@Override
 	public WorkerType getWorkerType() {
