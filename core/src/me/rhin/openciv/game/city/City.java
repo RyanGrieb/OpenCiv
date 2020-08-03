@@ -15,12 +15,14 @@ import me.rhin.openciv.game.city.building.Building;
 import me.rhin.openciv.game.map.tile.Tile;
 import me.rhin.openciv.game.player.Player;
 import me.rhin.openciv.game.production.ProducibleItemManager;
+import me.rhin.openciv.listener.AddUnemployedCitizenListener;
 import me.rhin.openciv.listener.ApplyProductionToItemListener;
 import me.rhin.openciv.listener.BuildingConstructedListener;
 import me.rhin.openciv.listener.CityStatUpdateListener;
 import me.rhin.openciv.listener.FinishProductionItemListener;
 import me.rhin.openciv.listener.SetCitizenTileWorkerListener;
 import me.rhin.openciv.listener.SetProductionItemListener;
+import me.rhin.openciv.shared.packet.type.AddUnemployedCitizenPacket;
 import me.rhin.openciv.shared.packet.type.ApplyProductionToItemPacket;
 import me.rhin.openciv.shared.packet.type.BuildingConstructedPacket;
 import me.rhin.openciv.shared.packet.type.CityStatUpdatePacket;
@@ -32,16 +34,16 @@ import me.rhin.openciv.shared.stat.StatLine;
 import me.rhin.openciv.ui.label.CustomLabel;
 import me.rhin.openciv.ui.window.type.CityInfoWindow;
 
-public class City extends Actor
-		implements BuildingConstructedListener, CityStatUpdateListener, SetProductionItemListener,
-		ApplyProductionToItemListener, FinishProductionItemListener, SetCitizenTileWorkerListener {
+public class City extends Actor implements BuildingConstructedListener, CityStatUpdateListener,
+		SetProductionItemListener, ApplyProductionToItemListener, FinishProductionItemListener,
+		SetCitizenTileWorkerListener, AddUnemployedCitizenListener {
 
 	private Tile originTile;
 	private Player playerOwner;
 	private ArrayList<Tile> territory;
 	private ArrayList<Building> buildings;
 	private HashMap<Tile, WorkerType> citizenWorkers;
-	// private ArrayList<UnemployedCitizenWorker> unemployedWorkers;
+	private int unemployedWorkerAmount;
 	private ProducibleItemManager producibleItemManager;
 	private StatLine statLine;
 	private CustomLabel nameLabel;
@@ -52,7 +54,7 @@ public class City extends Actor
 		this.territory = new ArrayList<>();
 		this.buildings = new ArrayList<>();
 		this.citizenWorkers = new HashMap<>();
-		// this.unemployedWorkers = new ArrayList<>();
+		this.unemployedWorkerAmount = 0;
 		this.producibleItemManager = new ProducibleItemManager(this);
 		this.statLine = new StatLine();
 		setName(name);
@@ -83,6 +85,7 @@ public class City extends Actor
 		Civilization.getInstance().getEventManager().addListener(ApplyProductionToItemListener.class, this);
 		Civilization.getInstance().getEventManager().addListener(FinishProductionItemListener.class, this);
 		Civilization.getInstance().getEventManager().addListener(SetCitizenTileWorkerListener.class, this);
+		Civilization.getInstance().getEventManager().addListener(AddUnemployedCitizenListener.class, this);
 	}
 
 	@Override
@@ -169,6 +172,11 @@ public class City extends Actor
 		citizenWorkers.put(tile, packet.getWorkerType());
 	}
 
+	@Override
+	public void onAddUnemployedCitizen(AddUnemployedCitizenPacket packet) {
+		unemployedWorkerAmount += packet.getAmount();
+	}
+
 	public void setStatLine(StatLine statLine) {
 		this.statLine = statLine;
 	}
@@ -210,5 +218,9 @@ public class City extends Actor
 
 	public Tile getOriginTile() {
 		return originTile;
+	}
+
+	public int getUnemployedWorkerAmount() {
+		return unemployedWorkerAmount;
 	}
 }

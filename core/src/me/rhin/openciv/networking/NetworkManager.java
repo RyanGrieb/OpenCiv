@@ -13,6 +13,7 @@ import com.github.czyzby.websocket.WebSockets;
 import com.github.czyzby.websocket.data.WebSocketCloseCode;
 
 import me.rhin.openciv.Civilization;
+import me.rhin.openciv.listener.AddUnemployedCitizenListener.AddUnemployedCitizenEvent;
 import me.rhin.openciv.listener.AddUnitListener.AddUnitEvent;
 import me.rhin.openciv.listener.ApplyProductionToItemListener.ApplyProductionToItemEvent;
 import me.rhin.openciv.listener.BuildingConstructedListener.BuildingConstructedEvent;
@@ -38,6 +39,7 @@ import me.rhin.openciv.listener.TurnTimeUpdateListener.TurnTimeUpdateEvent;
 import me.rhin.openciv.shared.listener.Event;
 import me.rhin.openciv.shared.listener.Listener;
 import me.rhin.openciv.shared.packet.Packet;
+import me.rhin.openciv.shared.packet.type.AddUnemployedCitizenPacket;
 import me.rhin.openciv.shared.packet.type.AddUnitPacket;
 import me.rhin.openciv.shared.packet.type.ApplyProductionToItemPacket;
 import me.rhin.openciv.shared.packet.type.BuildingConstructedPacket;
@@ -89,6 +91,7 @@ public class NetworkManager {
 		networkEvents.put(ApplyProductionToItemPacket.class, ApplyProductionToItemEvent.class);
 		networkEvents.put(FinishProductionItemPacket.class, FinishProductionItemEvent.class);
 		networkEvents.put(SetCitizenTileWorkerPacket.class, SetCitizenTileWorkerEvent.class);
+		networkEvents.put(AddUnemployedCitizenPacket.class, AddUnemployedCitizenEvent.class);
 	}
 
 	public void connect(String ip) {

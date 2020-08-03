@@ -34,5 +34,8 @@ public class GameOverlay extends AbstractWindow {
 	public boolean closesOtherWindows() {
 		return false;
 	}
-
+	
+	public float getTopbarHeight() {
+		return statusBar.getHeight();
+	}
 }

@@ -133,4 +133,8 @@ public class InGameScreen extends AbstractScreen {
 	public CivGame getGame() {
 		return game;
 	}
+	
+	public GameOverlay getGameOverlay() {
+		return gameOverlay;
+	}
 }

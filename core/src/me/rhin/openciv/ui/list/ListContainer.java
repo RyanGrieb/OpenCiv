@@ -115,4 +115,8 @@ public class ListContainer extends Group {
 	private void updateHeight() {
 		backgroundSprite.setSize(getWidth(), getHeight());
 	}
+	
+	public ArrayList<Actor> getListItemActors(){
+		return listItemActors;
+	}
 }

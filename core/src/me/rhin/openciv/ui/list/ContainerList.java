@@ -125,4 +125,8 @@ public class ContainerList extends Group {
 
 		listContainers.clear();
 	}
+	
+	public HashMap<String, ListContainer> getListContainers(){
+		return listContainers;
+	}
 }

@@ -15,23 +15,22 @@ public class WorkedTileButton extends Button {
 		super(TextureEnum.ICON_CITIZEN_UNWORKED, "", x, y, width, height);
 		this.tile = tile;
 
+		this.setTexture(getTextureFromWorkerType(workerType));
+	}
+
+	public static TextureEnum getTextureFromWorkerType(WorkerType workerType) {
 		switch (workerType) {
 		case ASSIGNED:
-			this.setTexture(TextureEnum.ICON_CITIZEN);
-			break;
+			return TextureEnum.ICON_CITIZEN;
 		case CITY_CENTER:
-			this.setTexture(TextureEnum.ICON_CITIZEN_CITY_CENTER);
-			break;
+			return TextureEnum.ICON_CITIZEN_CITY_CENTER;
 		case EMPTY:
-			this.setTexture(TextureEnum.ICON_CITIZEN_UNWORKED);
-			break;
+			return TextureEnum.ICON_CITIZEN_UNWORKED;
 		case LOCKED:
-			this.setTexture(TextureEnum.ICON_CITIZEN_LOCK);
-			break;
+			return TextureEnum.ICON_CITIZEN_LOCKED;
 		case UNEMPLOYED:
-			break;
 		default:
-			break;
+			return null;
 		}
 	}
 
@@ -41,5 +40,4 @@ public class WorkedTileButton extends Button {
 		packet.setTile(tile.getTerritory().getName(), tile.getGridX(), tile.getGridY());
 		Civilization.getInstance().getNetworkManager().sendPacket(packet);
 	}
-
 }

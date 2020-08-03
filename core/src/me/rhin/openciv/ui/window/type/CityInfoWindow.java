@@ -1,41 +1,44 @@
 package me.rhin.openciv.ui.window.type;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 
 import me.rhin.openciv.Civilization;
-import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.city.City;
 import me.rhin.openciv.game.city.building.Building;
 import me.rhin.openciv.game.map.tile.Tile;
 import me.rhin.openciv.game.production.ProductionItem;
+import me.rhin.openciv.listener.AddUnemployedCitizenListener;
 import me.rhin.openciv.listener.BuildingConstructedListener;
 import me.rhin.openciv.listener.SetCitizenTileWorkerListener;
+import me.rhin.openciv.shared.packet.type.AddUnemployedCitizenPacket;
 import me.rhin.openciv.shared.packet.type.BuildingConstructedPacket;
 import me.rhin.openciv.shared.packet.type.SetCitizenTileWorkerPacket;
-import me.rhin.openciv.shared.packet.type.SetCitizenTileWorkerPacket.WorkerType;
 import me.rhin.openciv.ui.button.type.CityInfoCloseButton;
 import me.rhin.openciv.ui.button.type.WorkedTileButton;
 import me.rhin.openciv.ui.game.CityProductionInfo;
 import me.rhin.openciv.ui.game.CityStatsInfo;
 import me.rhin.openciv.ui.list.ContainerList;
+import me.rhin.openciv.ui.list.ListContainer;
 import me.rhin.openciv.ui.list.ListContainer.ListContainerType;
 import me.rhin.openciv.ui.list.type.ListBuilding;
 import me.rhin.openciv.ui.list.type.ListProductionItem;
+import me.rhin.openciv.ui.list.type.ListUnemployedCitizens;
+import me.rhin.openciv.ui.screen.type.InGameScreen;
 import me.rhin.openciv.ui.window.AbstractWindow;
 
 public class CityInfoWindow extends AbstractWindow
-		implements BuildingConstructedListener, SetCitizenTileWorkerListener {
+		implements BuildingConstructedListener, SetCitizenTileWorkerListener, AddUnemployedCitizenListener {
 
 	private City city;
 	private CityStatsInfo cityStatsInfo;
 	private CityProductionInfo cityProductionInfo;
 	// TODO: buildingContainerList should contain citizen focuses soon
-	private ContainerList buildingContainerList;
+	private ContainerList topRightContainerList;
 	private ContainerList productionContainerList;
-	private ArrayList<WorkedTileButton> citizenButtons;
+	private HashMap<Tile, WorkedTileButton> citizenButtons;
 
 	public CityInfoWindow(City city) {
 		this.city = city;
@@ -51,12 +54,16 @@ public class CityInfoWindow extends AbstractWindow
 		this.cityProductionInfo = new CityProductionInfo(city, 2, cityStatsInfo.getY() - 105, 200, 100);
 		addActor(cityProductionInfo);
 
-		this.buildingContainerList = new ContainerList(viewport.getWorldWidth() - 200, 200, 200, 195);
+		float topbarHeight = ((InGameScreen) Civilization.getInstance().getCurrentScreen()).getGameOverlay()
+				.getTopbarHeight();
+
+		this.topRightContainerList = new ContainerList(viewport.getWorldWidth() - 200,
+				viewport.getWorldHeight() - 195 - topbarHeight, 200, 195);
 
 		for (Building building : city.getBuildings()) {
-			buildingContainerList.addItem(ListContainerType.CATEGORY, "Buildings", new ListBuilding(building, 200, 45));
+			topRightContainerList.addItem(ListContainerType.CATEGORY, "Buildings", new ListBuilding(building, 200, 45));
 		}
-		addActor(buildingContainerList);
+		addActor(topRightContainerList);
 
 		this.productionContainerList = new ContainerList(0, 0, 200, 255);
 		for (ProductionItem productionItem : city.getProducibleItemManager().getProducibleItems()) {
@@ -65,19 +72,23 @@ public class CityInfoWindow extends AbstractWindow
 		}
 		addActor(productionContainerList);
 
-		Civilization.getInstance().getEventManager().addListener(BuildingConstructedListener.class, this);
-
-		// FIXME: I'm unsure where to put this
-		this.citizenButtons = new ArrayList<>();
+		this.citizenButtons = new HashMap<>();
 		for (Tile tile : city.getCitizenWorkers().keySet()) {
-			WorkedTileButton button = new WorkedTileButton(city.getCitizenWorkers().get(tile), tile, tile.getX() + tile.getWidth() / 2 - 16 / 2,
-					tile.getY() + tile.getHeight() - 16 / 1.5F, 16, 16);
+			WorkedTileButton button = new WorkedTileButton(city.getCitizenWorkers().get(tile), tile,
+					tile.getX() + tile.getWidth() / 2 - 16 / 2, tile.getY() + tile.getHeight() - 16 / 1.5F, 16, 16);
 
-			citizenButtons.add(button);
+			citizenButtons.put(tile, button);
 			Civilization.getInstance().getScreenManager().getCurrentScreen().getStage().addActor(button);
 		}
 
+		if (city.getUnemployedWorkerAmount() > 0) {
+			topRightContainerList.addItem(ListContainerType.CATEGORY, "Unemployed Citizens",
+					new ListUnemployedCitizens(city.getUnemployedWorkerAmount(), 200, 45));
+		}
+
+		Civilization.getInstance().getEventManager().addListener(BuildingConstructedListener.class, this);
 		Civilization.getInstance().getEventManager().addListener(SetCitizenTileWorkerListener.class, this);
+		Civilization.getInstance().getEventManager().addListener(AddUnemployedCitizenListener.class, this);
 	}
 
 	@Override
@@ -97,10 +108,10 @@ public class CityInfoWindow extends AbstractWindow
 
 	@Override
 	public void onBuildingConstructed(BuildingConstructedPacket packet) {
-		buildingContainerList.clearList();
+		topRightContainerList.clearList();
 
 		for (Building building : city.getBuildings()) {
-			buildingContainerList.addItem(ListContainerType.CATEGORY, "Buildings", new ListBuilding(building, 200, 45));
+			topRightContainerList.addItem(ListContainerType.CATEGORY, "Buildings", new ListBuilding(building, 200, 45));
 		}
 
 		productionContainerList.clearList();
@@ -112,13 +123,29 @@ public class CityInfoWindow extends AbstractWindow
 
 	@Override
 	public void onClose() {
-		for (WorkedTileButton button : citizenButtons) {
+		for (WorkedTileButton button : citizenButtons.values()) {
 			button.addAction(Actions.removeActor());
 		}
 	}
 
 	@Override
 	public void onSetCitizenTileWorker(SetCitizenTileWorkerPacket packet) {
-		System.out.println("YO!!!!!");
+		Tile tile = Civilization.getInstance().getGame().getMap().getTiles()[packet.getGridX()][packet.getGridY()];
+
+		citizenButtons.get(tile).setTexture(WorkedTileButton.getTextureFromWorkerType(packet.getWorkerType()));
 	}
+
+	@Override
+	public void onAddUnemployedCitizen(AddUnemployedCitizenPacket packet) {
+		// NOTE: We manually select the listContianer, since were adding to a horizontal
+		// list.
+		if (topRightContainerList.getListContainers().get("Unemployed Citizens") == null) {
+			topRightContainerList.addItem(ListContainerType.CATEGORY, "Unemployed Citizens",
+					new ListUnemployedCitizens(200, 45));
+		}
+
+		ListContainer listContainer = topRightContainerList.getListContainers().get("Unemployed Citizens");
+		((ListUnemployedCitizens) listContainer.getListItemActors().get(0)).setCitizens(city.getUnemployedWorkerAmount());
+	}
+
 }

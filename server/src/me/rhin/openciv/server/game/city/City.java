@@ -20,6 +20,7 @@ import me.rhin.openciv.server.game.city.citizen.UnemployedCitizenWorker;
 import me.rhin.openciv.server.game.map.tile.Tile;
 import me.rhin.openciv.server.game.map.tile.Tile.TileTypeWrapper;
 import me.rhin.openciv.server.game.production.ProducibleItemManager;
+import me.rhin.openciv.shared.packet.type.AddUnemployedCitizenPacket;
 import me.rhin.openciv.shared.packet.type.BuildingConstructedPacket;
 import me.rhin.openciv.shared.packet.type.CityStatUpdatePacket;
 import me.rhin.openciv.shared.packet.type.SetCitizenTileWorkerPacket;
@@ -143,9 +144,15 @@ public class City {
 	}
 
 	public void removeCitizenWorkerFromTile(Tile tile) {
-		citizenWorkers.put(tile, new EmptyCitizenWorker(this, tile));
+		CitizenWorker citizenWorker = new EmptyCitizenWorker(this, tile);
+		citizenWorkers.put(tile, citizenWorker);
 
-		// TODO: Send associated packet.
+		SetCitizenTileWorkerPacket packet = new SetCitizenTileWorkerPacket();
+		packet.setWorker(citizenWorker.getWorkerType(), name, citizenWorker.getTile().getGridX(),
+				citizenWorker.getTile().getGridY());
+
+		Json json = new Json();
+		playerOwner.getConn().send(json.toJson(packet));
 
 		addUnemployedCitizen();
 	}
@@ -153,8 +160,11 @@ public class City {
 	public void addUnemployedCitizen() {
 		unemployedWorkers.add(new UnemployedCitizenWorker(this));
 
-		// TODO: Send associated packet.
+		AddUnemployedCitizenPacket packet = new AddUnemployedCitizenPacket();
+		packet.setAmount(1);
 
+		Json json = new Json();
+		playerOwner.getConn().send(json.toJson(packet));
 	}
 
 	public Player getPlayerOwner() {
