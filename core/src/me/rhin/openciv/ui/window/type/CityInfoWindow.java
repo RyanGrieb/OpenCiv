@@ -54,6 +54,13 @@ public class CityInfoWindow extends AbstractWindow
 		this.cityProductionInfo = new CityProductionInfo(city, 2, cityStatsInfo.getY() - 105, 200, 100);
 		addActor(cityProductionInfo);
 
+		this.productionContainerList = new ContainerList(0, 0, 200, 255);
+		for (ProductionItem productionItem : city.getProducibleItemManager().getProducibleItems()) {
+			productionContainerList.addItem(ListContainerType.CATEGORY, productionItem.getCategory(),
+					new ListProductionItem(city, productionItem, 200, 45));
+		}
+		addActor(productionContainerList);
+
 		float topbarHeight = ((InGameScreen) Civilization.getInstance().getCurrentScreen()).getGameOverlay()
 				.getTopbarHeight();
 
@@ -63,14 +70,6 @@ public class CityInfoWindow extends AbstractWindow
 		for (Building building : city.getBuildings()) {
 			topRightContainerList.addItem(ListContainerType.CATEGORY, "Buildings", new ListBuilding(building, 200, 45));
 		}
-		addActor(topRightContainerList);
-
-		this.productionContainerList = new ContainerList(0, 0, 200, 255);
-		for (ProductionItem productionItem : city.getProducibleItemManager().getProducibleItems()) {
-			productionContainerList.addItem(ListContainerType.CATEGORY, productionItem.getCategory(),
-					new ListProductionItem(city, productionItem, 200, 45));
-		}
-		addActor(productionContainerList);
 
 		this.citizenButtons = new HashMap<>();
 		for (Tile tile : city.getCitizenWorkers().keySet()) {
@@ -85,6 +84,8 @@ public class CityInfoWindow extends AbstractWindow
 			topRightContainerList.addItem(ListContainerType.CATEGORY, "Unemployed Citizens",
 					new ListUnemployedCitizens(city.getUnemployedWorkerAmount(), 200, 45));
 		}
+
+		addActor(topRightContainerList);
 
 		Civilization.getInstance().getEventManager().addListener(BuildingConstructedListener.class, this);
 		Civilization.getInstance().getEventManager().addListener(SetCitizenTileWorkerListener.class, this);
@@ -145,7 +146,8 @@ public class CityInfoWindow extends AbstractWindow
 		}
 
 		ListContainer listContainer = topRightContainerList.getListContainers().get("Unemployed Citizens");
-		((ListUnemployedCitizens) listContainer.getListItemActors().get(0)).setCitizens(city.getUnemployedWorkerAmount());
+		((ListUnemployedCitizens) listContainer.getListItemActors().get(0))
+				.setCitizens(city.getUnemployedWorkerAmount());
 	}
 
 }

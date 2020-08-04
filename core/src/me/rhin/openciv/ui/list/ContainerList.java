@@ -70,7 +70,11 @@ public class ContainerList extends Group {
 
 		batch.flush();
 		if (clipBegin(getX(), getY(), getWidth(), getHeight())) {
+			if (isTransform())
+				applyTransform(batch, computeTransform());
 			drawChildren(batch, parentAlpha);
+			if (isTransform())
+				resetTransform(batch);
 			batch.flush();
 			clipEnd();
 		}
@@ -97,12 +101,12 @@ public class ContainerList extends Group {
 		updatePositions();
 	}
 
-	public void addItem(ListContainerType containerType, String categoryType, Actor itemActor) {
+	public void addItem(ListContainerType containerType, String categoryType, Group itemGroup) {
 		if (!listContainers.containsKey(categoryType)) {
-			listContainers.put(categoryType, new ListContainer(this, containerType, categoryType, getWidth()));
+			listContainers.put(categoryType, new ListContainer(this, containerType, categoryType));
 		}
 
-		listContainers.get(categoryType).addItem(itemActor);
+		listContainers.get(categoryType).addItem(itemGroup);
 		updatePositions();
 
 		addActor(listContainers.get(categoryType));
@@ -113,7 +117,7 @@ public class ContainerList extends Group {
 
 		// Problem:
 		for (ListContainer container : listContainers.values()) {
-			container.setPosition(getX(), yOffset + (getY() + getHeight()) - container.getHeight() - nextHeight);
+			container.setPosition(0, yOffset + (0 + getHeight()) - container.getHeight() - nextHeight);
 			nextHeight += container.getHeight();
 		}
 	}
@@ -125,8 +129,8 @@ public class ContainerList extends Group {
 
 		listContainers.clear();
 	}
-	
-	public HashMap<String, ListContainer> getListContainers(){
+
+	public HashMap<String, ListContainer> getListContainers() {
 		return listContainers;
 	}
 }

@@ -6,6 +6,8 @@ import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Group;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Align;
 
 import me.rhin.openciv.asset.TextureEnum;
@@ -18,31 +20,31 @@ public class ListContainer extends Group {
 	}
 
 	private ContainerList containerList;
-	private ArrayList<Actor> listItemActors;
+	private ArrayList<Group> listItemActors;
 	private ArrayList<Sprite> seperatorSprites;
 	private ListContainerType containerType;
 	private Sprite categoryBackgroundSprite;
 	private Sprite backgroundSprite;
 	private CustomLabel containerNameLabel;
 
-	public ListContainer(ContainerList containerList, ListContainerType containerType, String name, float width) {
-		this.setSize(width, (containerType == ListContainerType.CATEGORY ? 15 : 0));
+	public ListContainer(ContainerList containerList, ListContainerType containerType, String name) {
+		this.setSize(containerList.getWidth(), (containerType == ListContainerType.CATEGORY ? 15 : 0));
 		this.containerList = containerList;
 		this.listItemActors = new ArrayList<>();
 		this.seperatorSprites = new ArrayList<>();
 		this.containerType = containerType;
 
 		this.categoryBackgroundSprite = TextureEnum.UI_LIGHT_GRAY.sprite();
-		categoryBackgroundSprite.setSize(width, getHeight());
+		categoryBackgroundSprite.setSize(getWidth(), getHeight());
 		this.backgroundSprite = TextureEnum.UI_GRAY.sprite();
-		backgroundSprite.setSize(width, getHeight());
+		backgroundSprite.setSize(getWidth(), getHeight());
 
 		this.containerNameLabel = new CustomLabel(name);
-		containerNameLabel.setSize(width, getHeight());
+		containerNameLabel.setSize(getWidth(), getHeight());
 		containerNameLabel.setAlignment(Align.center);
 
 		Sprite topSeperator = TextureEnum.UI_BLACK.sprite();
-		topSeperator.setSize(width, 1);
+		topSeperator.setSize(getWidth(), 1);
 		seperatorSprites.add(topSeperator);
 	}
 
@@ -73,6 +75,7 @@ public class ListContainer extends Group {
 	@Override
 	public void setPosition(float x, float y) {
 		super.setPosition(x, y);
+		
 		categoryBackgroundSprite.setPosition(x, y + getHeight() - categoryBackgroundSprite.getHeight());
 		backgroundSprite.setPosition(x, y);
 		containerNameLabel.setPosition(x, y + getHeight() - containerNameLabel.getHeight());
@@ -97,9 +100,9 @@ public class ListContainer extends Group {
 		}
 	}
 
-	public void addItem(Actor itemActor) {
-		listItemActors.add(itemActor);
-		addActor(itemActor);
+	public void addItem(Group itemGroup) {
+		listItemActors.add(itemGroup);
+		addActor(itemGroup);
 
 		Sprite seperatorSprite = TextureEnum.UI_BLACK.sprite();
 		seperatorSprite.setSize(getWidth(), 1);
@@ -108,15 +111,15 @@ public class ListContainer extends Group {
 		// Update the height.
 		// FIXME: If the itemActor exceeds the listContainer's height, we really
 		// shouldn't increase the size further.
-		setHeight(getHeight() + itemActor.getHeight());
+		setHeight(getHeight() + itemGroup.getHeight());
 		updateHeight();
 	}
 
 	private void updateHeight() {
 		backgroundSprite.setSize(getWidth(), getHeight());
 	}
-	
-	public ArrayList<Actor> getListItemActors(){
+
+	public ArrayList<Group> getListItemActors() {
 		return listItemActors;
 	}
 }

@@ -4,7 +4,9 @@ import java.util.ArrayList;
 
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
-import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.Group;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Align;
 
 import me.rhin.openciv.asset.TextureEnum;
@@ -12,7 +14,7 @@ import me.rhin.openciv.game.city.building.Building;
 import me.rhin.openciv.shared.stat.Stat;
 import me.rhin.openciv.ui.label.CustomLabel;
 
-public class ListBuilding extends Actor {
+public class ListBuilding extends Group {
 
 	private Building building;
 	private Sprite backgroundSprite;

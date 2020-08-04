@@ -5,14 +5,19 @@ import java.util.ArrayList;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.Group;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 
 import me.rhin.openciv.asset.TextureEnum;
+import me.rhin.openciv.ui.button.Button;
+import me.rhin.openciv.ui.button.type.UnemployedCitizenButton;
 
-public class ListUnemployedCitizens extends Actor {
+public class ListUnemployedCitizens extends Group {
 	// TODO: There really should be a Horizontal List class
 
 	private Sprite backgroundSprite;
-	private ArrayList<Sprite> citizenIcons;
+	private ArrayList<Button> citizenButtons;
 
 	public ListUnemployedCitizens(int width, int height) {
 		this.setSize(width, height);
@@ -20,7 +25,7 @@ public class ListUnemployedCitizens extends Actor {
 		this.backgroundSprite = TextureEnum.UI_GRAY.sprite();
 		this.backgroundSprite.setSize(width, height);
 
-		this.citizenIcons = new ArrayList<>();
+		this.citizenButtons = new ArrayList<>();
 	}
 
 	public ListUnemployedCitizens(int amount, int width, int height) {
@@ -31,9 +36,7 @@ public class ListUnemployedCitizens extends Actor {
 	@Override
 	public void draw(Batch batch, float parentAlpha) {
 		backgroundSprite.draw(batch);
-
-		for (Sprite sprite : citizenIcons)
-			sprite.draw(batch);
+		super.draw(batch, parentAlpha);
 	}
 
 	@Override
@@ -42,21 +45,20 @@ public class ListUnemployedCitizens extends Actor {
 		backgroundSprite.setPosition(x, y);
 
 		// TODO: Compress unemployed citizens positions if we can't fit
-		for (int i = 0; i < citizenIcons.size(); i++) {
-			float xPos = x + ((i == 0) ? 0 : citizenIcons.get(i).getWidth() * i);
-			citizenIcons.get(i).setPosition(xPos, y);
+		for (int i = 0; i < citizenButtons.size(); i++) {
+			float xPos = x + ((i == 0) ? 0 : citizenButtons.get(i).getWidth() * i);
+			citizenButtons.get(i).setPosition(xPos, y);
 		}
 	}
 
 	public void setCitizens(int amount) {
-		citizenIcons.clear();
+		citizenButtons.clear();
 
 		for (int i = 0; i < amount; i++) {
-			Sprite sprite = TextureEnum.ICON_CITIZEN_LOCKED.sprite();
-			sprite.setSize(32, 32);
-			float xPos = getX() + ((i == 0) ? 0 : sprite.getWidth() * i);
-			sprite.setPosition(xPos, getY());
-			citizenIcons.add(sprite);
+			float xPos = 0 + ((i == 0) ? 0 : 32 * i);
+			UnemployedCitizenButton button = new UnemployedCitizenButton(xPos, 0, 32, 32);
+			addActor(button);
+			citizenButtons.add(button);
 		}
 	}
 }

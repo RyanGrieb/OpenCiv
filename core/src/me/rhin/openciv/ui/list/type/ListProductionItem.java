@@ -3,19 +3,18 @@ package me.rhin.openciv.ui.list.type;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Align;
 
-import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.city.City;
 import me.rhin.openciv.game.production.ProductionItem;
 import me.rhin.openciv.shared.stat.Stat;
-import me.rhin.openciv.ui.button.Button;
 import me.rhin.openciv.ui.label.CustomLabel;
 
-public class ListProductionItem extends Actor {
+public class ListProductionItem extends Group {
 
 	private City city;
 	private ProductionItem productionItem;
