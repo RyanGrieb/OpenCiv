@@ -28,7 +28,7 @@ public class ListContainer extends Group {
 	private CustomLabel containerNameLabel;
 
 	public ListContainer(ContainerList containerList, ListContainerType containerType, String name) {
-		this.setSize(containerList.getWidth(), (containerType == ListContainerType.CATEGORY ? 15 : 0));
+		this.setSize(containerList.getWidth(), (containerType == ListContainerType.CATEGORY ? 18 : 0));
 		this.containerList = containerList;
 		this.listItemActors = new ArrayList<>();
 		this.seperatorSprites = new ArrayList<>();
