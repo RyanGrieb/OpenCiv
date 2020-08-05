@@ -12,21 +12,25 @@ import com.badlogic.gdx.utils.reflect.ClassReflection;
 
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.game.city.building.Building;
+import me.rhin.openciv.game.city.specialist.SpecialistContainer;
 import me.rhin.openciv.game.map.tile.Tile;
 import me.rhin.openciv.game.player.Player;
 import me.rhin.openciv.game.production.ProducibleItemManager;
-import me.rhin.openciv.listener.AddUnemployedCitizenListener;
+import me.rhin.openciv.listener.AddSpecialistToContainerListener;
 import me.rhin.openciv.listener.ApplyProductionToItemListener;
 import me.rhin.openciv.listener.BuildingConstructedListener;
 import me.rhin.openciv.listener.CityStatUpdateListener;
 import me.rhin.openciv.listener.FinishProductionItemListener;
+import me.rhin.openciv.listener.RemoveSpecialistFromContainerListener;
 import me.rhin.openciv.listener.SetCitizenTileWorkerListener;
 import me.rhin.openciv.listener.SetProductionItemListener;
-import me.rhin.openciv.shared.packet.type.AddUnemployedCitizenPacket;
+import me.rhin.openciv.shared.city.SpecialistType;
+import me.rhin.openciv.shared.packet.type.AddSpecialistToContainerPacket;
 import me.rhin.openciv.shared.packet.type.ApplyProductionToItemPacket;
 import me.rhin.openciv.shared.packet.type.BuildingConstructedPacket;
 import me.rhin.openciv.shared.packet.type.CityStatUpdatePacket;
 import me.rhin.openciv.shared.packet.type.FinishProductionItemPacket;
+import me.rhin.openciv.shared.packet.type.RemoveSpecialistFromContainerPacket;
 import me.rhin.openciv.shared.packet.type.SetCitizenTileWorkerPacket;
 import me.rhin.openciv.shared.packet.type.SetCitizenTileWorkerPacket.WorkerType;
 import me.rhin.openciv.shared.packet.type.SetProductionItemPacket;
@@ -34,9 +38,10 @@ import me.rhin.openciv.shared.stat.StatLine;
 import me.rhin.openciv.ui.label.CustomLabel;
 import me.rhin.openciv.ui.window.type.CityInfoWindow;
 
-public class City extends Actor implements BuildingConstructedListener, CityStatUpdateListener,
+//FIXME: We should have a interface for these networking interface.
+public class City extends Actor implements SpecialistContainer, BuildingConstructedListener, CityStatUpdateListener,
 		SetProductionItemListener, ApplyProductionToItemListener, FinishProductionItemListener,
-		SetCitizenTileWorkerListener, AddUnemployedCitizenListener {
+		SetCitizenTileWorkerListener, AddSpecialistToContainerListener, RemoveSpecialistFromContainerListener {
 
 	private Tile originTile;
 	private Player playerOwner;
@@ -85,25 +90,14 @@ public class City extends Actor implements BuildingConstructedListener, CityStat
 		Civilization.getInstance().getEventManager().addListener(ApplyProductionToItemListener.class, this);
 		Civilization.getInstance().getEventManager().addListener(FinishProductionItemListener.class, this);
 		Civilization.getInstance().getEventManager().addListener(SetCitizenTileWorkerListener.class, this);
-		Civilization.getInstance().getEventManager().addListener(AddUnemployedCitizenListener.class, this);
+		Civilization.getInstance().getEventManager().addListener(AddSpecialistToContainerListener.class, this);
+		Civilization.getInstance().getEventManager().addListener(RemoveSpecialistFromContainerListener.class, this);
 	}
 
 	@Override
 	public void draw(Batch batch, float parentAlpha) {
 		if (!Civilization.getInstance().getWindowManager().isOpenWindow(CityInfoWindow.class))
 			nameLabel.draw(batch, parentAlpha);
-	}
-
-	public void onClick() {
-		if (!playerOwner.equals(Civilization.getInstance().getGame().getPlayer())
-				|| Civilization.getInstance().getWindowManager().isOpenWindow(CityInfoWindow.class))
-			return;
-
-		Civilization.getInstance().getScreenManager().getCurrentScreen().setCameraPosition(
-				originTile.getX() + originTile.getWidth() / 2, originTile.getY() + originTile.getHeight() / 2);
-
-		Civilization.getInstance().getGame().getPlayer().unselectUnit();
-		Civilization.getInstance().getWindowManager().toggleWindow(new CityInfoWindow(this));
 	}
 
 	@Override
@@ -173,8 +167,71 @@ public class City extends Actor implements BuildingConstructedListener, CityStat
 	}
 
 	@Override
-	public void onAddUnemployedCitizen(AddUnemployedCitizenPacket packet) {
-		unemployedWorkerAmount += packet.getAmount();
+	public void onAddSpecialistToContainer(AddSpecialistToContainerPacket packet) {
+		if (!getName().equals(packet.getCityName()))
+			return;
+
+		ArrayList<SpecialistContainer> specialistContainers = new ArrayList<>();
+
+		specialistContainers.add(this);
+
+		for (Building building : buildings)
+			if (building instanceof SpecialistContainer)
+				specialistContainers.add((SpecialistContainer) building);
+
+		for (SpecialistContainer contianer : specialistContainers)
+			if (contianer.getName().equals(packet.getContainerName()))
+				contianer.addSpecialist();
+	}
+
+	@Override
+	public void onRemoveSpecialistFromContainer(RemoveSpecialistFromContainerPacket packet) {
+		if (!getName().equals(packet.getCityName()))
+			return;
+
+		ArrayList<SpecialistContainer> specialistContainers = new ArrayList<>();
+
+		specialistContainers.add(this);
+
+		for (Building building : buildings)
+			if (building instanceof SpecialistContainer)
+				specialistContainers.add((SpecialistContainer) building);
+
+		for (SpecialistContainer contianer : specialistContainers)
+			if (contianer.getName().equals(packet.getContainerName()))
+				contianer.removeSpecialist();
+	}
+
+	@Override
+	public void addSpecialist() {
+		unemployedWorkerAmount++;
+	}
+
+	@Override
+	public void removeSpecialist() {
+		unemployedWorkerAmount--;
+	}
+
+	@Override
+	public int getSpecialistSlots() {
+		return Integer.MAX_VALUE;
+	}
+
+	@Override
+	public SpecialistType getSpecialistType() {
+		return SpecialistType.UNEMPLOYED;
+	}
+
+	public void onClick() {
+		if (!playerOwner.equals(Civilization.getInstance().getGame().getPlayer())
+				|| Civilization.getInstance().getWindowManager().isOpenWindow(CityInfoWindow.class))
+			return;
+
+		Civilization.getInstance().getScreenManager().getCurrentScreen().setCameraPosition(
+				originTile.getX() + originTile.getWidth() / 2, originTile.getY() + originTile.getHeight() / 2);
+
+		Civilization.getInstance().getGame().getPlayer().unselectUnit();
+		Civilization.getInstance().getWindowManager().toggleWindow(new CityInfoWindow(this));
 	}
 
 	public void setStatLine(StatLine statLine) {

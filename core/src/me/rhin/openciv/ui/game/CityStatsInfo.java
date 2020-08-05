@@ -7,11 +7,14 @@ import com.badlogic.gdx.scenes.scene2d.Actor;
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.city.City;
+import me.rhin.openciv.listener.CityStatUpdateListener;
+import me.rhin.openciv.listener.PlayerStatUpdateListener;
+import me.rhin.openciv.shared.packet.type.CityStatUpdatePacket;
 import me.rhin.openciv.shared.stat.Stat;
 import me.rhin.openciv.ui.label.CustomLabel;
 import me.rhin.openciv.ui.window.type.GameOverlay;
 
-public class CityStatsInfo extends Actor {
+public class CityStatsInfo extends Actor implements CityStatUpdateListener {
 
 	private City city;
 
@@ -95,6 +98,8 @@ public class CityStatsInfo extends Actor {
 		this.heritageLabel = new CustomLabel("+0");
 
 		updateStatValues();
+		
+		Civilization.getInstance().getEventManager().addListener(CityStatUpdateListener.class, this);
 	}
 
 	@Override
@@ -119,7 +124,16 @@ public class CityStatsInfo extends Actor {
 		scienceLabel.draw(batch, parentAlpha);
 		heritageLabel.draw(batch, parentAlpha);
 	}
-
+	
+	
+	@Override
+	public void onCityStatUpdate(CityStatUpdatePacket packet) {
+		if(!city.getName().equals(packet.getCityName()))
+			return;
+		
+		updateStatValues();
+	}
+	
 	private void updateStatValues() {
 		int gainedFood = (int) city.getStatLine().getStatValue(Stat.FOOD_GAIN);
 		foodLabel.setText((gainedFood < 0 ? "-" : "+") + gainedFood);

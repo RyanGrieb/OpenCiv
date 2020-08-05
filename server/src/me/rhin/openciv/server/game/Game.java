@@ -13,13 +13,16 @@ import com.badlogic.gdx.utils.Json;
 
 import me.rhin.openciv.server.Server;
 import me.rhin.openciv.server.game.city.City;
+import me.rhin.openciv.server.game.city.building.Building;
 import me.rhin.openciv.server.game.city.building.type.Palace;
+import me.rhin.openciv.server.game.city.specialist.SpecialistContainer;
 import me.rhin.openciv.server.game.map.GameMap;
 import me.rhin.openciv.server.game.map.tile.Tile;
 import me.rhin.openciv.server.game.map.tile.TileType;
 import me.rhin.openciv.server.game.unit.Unit;
 import me.rhin.openciv.server.game.unit.type.Settler.SettlerUnit;
 import me.rhin.openciv.server.game.unit.type.Warrior.WarriorUnit;
+import me.rhin.openciv.server.listener.ClickSpecialistListener;
 import me.rhin.openciv.server.listener.ClickWorkedTileListener;
 import me.rhin.openciv.server.listener.ConnectionListener;
 import me.rhin.openciv.server.listener.DisconnectListener;
@@ -32,6 +35,7 @@ import me.rhin.openciv.server.listener.SettleCityListener;
 import me.rhin.openciv.server.listener.StartGameRequestListener;
 import me.rhin.openciv.server.listener.TurnTimeUpdateListener;
 import me.rhin.openciv.server.listener.UnitMoveListener;
+import me.rhin.openciv.shared.packet.type.ClickSpecialistPacket;
 import me.rhin.openciv.shared.packet.type.ClickWorkedTilePacket;
 import me.rhin.openciv.shared.packet.type.DeleteUnitPacket;
 import me.rhin.openciv.shared.packet.type.FetchPlayerPacket;
@@ -47,9 +51,10 @@ import me.rhin.openciv.shared.packet.type.TerritoryGrowPacket;
 import me.rhin.openciv.shared.packet.type.TurnTimeUpdatePacket;
 import me.rhin.openciv.shared.util.ColorHelper;
 
-public class Game implements StartGameRequestListener, ConnectionListener, DisconnectListener,
-		PlayerListRequestListener, FetchPlayerListener, SelectUnitListener, UnitMoveListener, SettleCityListener,
-		PlayerFinishLoadingListener, TurnTimeUpdateListener, SetProductionItemListener, ClickWorkedTileListener {
+public class Game
+		implements StartGameRequestListener, ConnectionListener, DisconnectListener, PlayerListRequestListener,
+		FetchPlayerListener, SelectUnitListener, UnitMoveListener, SettleCityListener, PlayerFinishLoadingListener,
+		TurnTimeUpdateListener, SetProductionItemListener, ClickWorkedTileListener, ClickSpecialistListener {
 
 	private static final int BASE_TURN_TIME = 9;
 
@@ -102,6 +107,7 @@ public class Game implements StartGameRequestListener, ConnectionListener, Disco
 		Server.getInstance().getEventManager().addListener(TurnTimeUpdateListener.class, this);
 		Server.getInstance().getEventManager().addListener(SetProductionItemListener.class, this);
 		Server.getInstance().getEventManager().addListener(ClickWorkedTileListener.class, this);
+		Server.getInstance().getEventManager().addListener(ClickSpecialistListener.class, this);
 	}
 
 	@Override
@@ -324,6 +330,33 @@ public class Game implements StartGameRequestListener, ConnectionListener, Disco
 			return;
 
 		targetCity.clickWorkedTile(map.getTiles()[packet.getGridX()][packet.getGridY()]);
+	}
+
+	@Override
+	public void onClickSpecialist(WebSocket conn, ClickSpecialistPacket packet) {
+		// FIXME: This target city stuff is starting to seem redundant, lets fix that
+		// soon.
+		Player player = getPlayerByConn(conn);
+		City targetCity = null;
+		for (City city : player.getOwnedCities())
+			if (city.getName().equals(packet.getCityName()))
+				targetCity = city;
+
+		if (targetCity == null)
+			return;
+
+		// FIXME: Should this be here or in the city class
+
+		ArrayList<SpecialistContainer> specialistContainers = new ArrayList<>();
+		specialistContainers.add(targetCity);
+
+		for (Building building : targetCity.getBuildings())
+			if (building instanceof SpecialistContainer)
+				specialistContainers.add((SpecialistContainer) building);
+
+		for (SpecialistContainer container : specialistContainers)
+			if (container.getName().equals(packet.getContainerName()))
+				targetCity.removeSpecialistFromContainer(container);
 	}
 
 	public void start() {

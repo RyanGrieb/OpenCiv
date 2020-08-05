@@ -16,18 +16,21 @@ import me.rhin.openciv.server.game.city.citizen.AssignedCitizenWorker;
 import me.rhin.openciv.server.game.city.citizen.CitizenWorker;
 import me.rhin.openciv.server.game.city.citizen.CityCenterCitizenWorker;
 import me.rhin.openciv.server.game.city.citizen.EmptyCitizenWorker;
-import me.rhin.openciv.server.game.city.citizen.UnemployedCitizenWorker;
+import me.rhin.openciv.server.game.city.specialist.Specialist;
+import me.rhin.openciv.server.game.city.specialist.SpecialistContainer;
+import me.rhin.openciv.server.game.city.specialist.UnemployedSpecialist;
 import me.rhin.openciv.server.game.map.tile.Tile;
 import me.rhin.openciv.server.game.map.tile.Tile.TileTypeWrapper;
 import me.rhin.openciv.server.game.production.ProducibleItemManager;
-import me.rhin.openciv.shared.packet.type.AddUnemployedCitizenPacket;
+import me.rhin.openciv.shared.packet.type.AddSpecialistToContainerPacket;
 import me.rhin.openciv.shared.packet.type.BuildingConstructedPacket;
 import me.rhin.openciv.shared.packet.type.CityStatUpdatePacket;
+import me.rhin.openciv.shared.packet.type.RemoveSpecialistFromContainerPacket;
 import me.rhin.openciv.shared.packet.type.SetCitizenTileWorkerPacket;
 import me.rhin.openciv.shared.stat.Stat;
 import me.rhin.openciv.shared.stat.StatLine;
 
-public class City {
+public class City implements SpecialistContainer {
 
 	private Player playerOwner;
 	private String name;
@@ -35,7 +38,9 @@ public class City {
 	private ArrayList<Tile> territory;
 	private ArrayList<Building> buildings;
 	private HashMap<Tile, CitizenWorker> citizenWorkers;
-	private ArrayList<UnemployedCitizenWorker> unemployedWorkers;
+	// FIXME: I don't believe we need an array here, we might be able to use just an
+	// int.
+	private ArrayList<Specialist> unemployedSpecialists;
 	private ProducibleItemManager producibleItemManager;
 	private StatLine statLine;
 
@@ -46,7 +51,7 @@ public class City {
 		this.territory = new ArrayList<>();
 		this.buildings = new ArrayList<>();
 		this.citizenWorkers = new HashMap<>();
-		this.unemployedWorkers = new ArrayList<>();
+		this.unemployedSpecialists = new ArrayList<>();
 		this.producibleItemManager = new ProducibleItemManager(this);
 		this.statLine = new StatLine();
 
@@ -80,25 +85,32 @@ public class City {
 		return names.get(rnd.nextInt(names.size()));
 	}
 
-	public void updateWorkedTiles() {
-		ArrayList<Tile> topTiles = new ArrayList<>();
+	@Override
+	public void addSpecialist() {
+		unemployedSpecialists.add(new UnemployedSpecialist(this));
+	}
 
-		float maxValue = -1;
+	@Override
+	public void removeSpecialist() {
+		unemployedSpecialists.remove(0);
 
-		for (Tile tile : territory) {
-			if (tile.equals(originTile))
-				continue;
-			float value = getTileStatLine(tile).getStatValue(Stat.FOOD_GAIN) * 3
-					+ getTileStatLine(tile).getStatValue(Stat.GOLD_GAIN) * 2
-					+ getTileStatLine(tile).getStatValue(Stat.PRODUCTION_GAIN) * 1;
+		ArrayList<Tile> topTiles = getTopWorkableTiles();
+		setCitizenTileWorker(new AssignedCitizenWorker(this, topTiles.get(0)));
 
-			if (value > maxValue) {
-				topTiles.add(0, tile);
-				maxValue = value;
-			}
+		statLine.mergeStatLine(topTiles.get(0).getStatLine());
+
+		Json json = new Json();
+
+		CityStatUpdatePacket statUpdatePacket = new CityStatUpdatePacket();
+		for (Stat stat : this.statLine.getStatValues().keySet()) {
+			statUpdatePacket.addStat(name, stat.name(), this.statLine.getStatValues().get(stat));
 		}
+		playerOwner.getConn().send(json.toJson(statUpdatePacket));
+	}
 
-		unemployedWorkers.clear();
+	public void updateWorkedTiles() {
+		ArrayList<Tile> topTiles = getTopWorkableTiles();
+		unemployedSpecialists.clear();
 		citizenWorkers.clear();
 
 		for (Tile tile : territory) {
@@ -129,10 +141,6 @@ public class City {
 	}
 
 	public void setCitizenTileWorker(CitizenWorker citizenWorker) {
-		if (citizenWorker instanceof UnemployedCitizenWorker) {
-			throw new RuntimeException();
-		}
-
 		citizenWorkers.put(citizenWorker.getTile(), citizenWorker);
 
 		SetCitizenTileWorkerPacket packet = new SetCitizenTileWorkerPacket();
@@ -144,24 +152,42 @@ public class City {
 	}
 
 	public void removeCitizenWorkerFromTile(Tile tile) {
-		CitizenWorker citizenWorker = new EmptyCitizenWorker(this, tile);
-		citizenWorkers.put(tile, citizenWorker);
+		CitizenWorker emptyCitizenWorker = new EmptyCitizenWorker(this, tile);
+		citizenWorkers.put(tile, emptyCitizenWorker);
 
-		SetCitizenTileWorkerPacket packet = new SetCitizenTileWorkerPacket();
-		packet.setWorker(citizenWorker.getWorkerType(), name, citizenWorker.getTile().getGridX(),
-				citizenWorker.getTile().getGridY());
+		statLine.reduceStatLine(tile.getStatLine());
+
+		CityStatUpdatePacket statUpdatePacket = new CityStatUpdatePacket();
+		for (Stat stat : this.statLine.getStatValues().keySet()) {
+			statUpdatePacket.addStat(name, stat.name(), this.statLine.getStatValues().get(stat));
+		}
+
+		SetCitizenTileWorkerPacket tileWorkerPacket = new SetCitizenTileWorkerPacket();
+		tileWorkerPacket.setWorker(emptyCitizenWorker.getWorkerType(), name, emptyCitizenWorker.getTile().getGridX(),
+				emptyCitizenWorker.getTile().getGridY());
+
+		Json json = new Json();
+		playerOwner.getConn().send(json.toJson(tileWorkerPacket));
+		playerOwner.getConn().send(json.toJson(statUpdatePacket));
+
+		addSpecialistToContainer(this);
+	}
+
+	public void addSpecialistToContainer(SpecialistContainer specialistContainer) {
+		specialistContainer.addSpecialist();
+
+		AddSpecialistToContainerPacket packet = new AddSpecialistToContainerPacket();
+		packet.setContainer(name, specialistContainer.getName());
 
 		Json json = new Json();
 		playerOwner.getConn().send(json.toJson(packet));
-
-		addUnemployedCitizen();
 	}
 
-	public void addUnemployedCitizen() {
-		unemployedWorkers.add(new UnemployedCitizenWorker(this));
+	public void removeSpecialistFromContainer(SpecialistContainer specialistContainer) {
+		specialistContainer.removeSpecialist();
 
-		AddUnemployedCitizenPacket packet = new AddUnemployedCitizenPacket();
-		packet.setAmount(1);
+		RemoveSpecialistFromContainerPacket packet = new RemoveSpecialistFromContainerPacket();
+		packet.setContainer(name, specialistContainer.getName());
 
 		Json json = new Json();
 		playerOwner.getConn().send(json.toJson(packet));
@@ -175,8 +201,8 @@ public class City {
 		return citizenWorkers;
 	}
 
-	public ArrayList<UnemployedCitizenWorker> getUnemployedWorkers() {
-		return unemployedWorkers;
+	public ArrayList<Specialist> getUnemployedSpecialists() {
+		return unemployedSpecialists;
 	}
 
 	public String getName() {
@@ -226,6 +252,10 @@ public class City {
 		citizenWorkers.get(tile).onClick();
 	}
 
+	public ArrayList<Building> getBuildings() {
+		return buildings;
+	}
+
 	private StatLine getTileStatLine(Tile tile) {
 		// TODO: Research, religion can effect the output of tiles.
 
@@ -247,5 +277,27 @@ public class City {
 			return statLine;
 		}
 		return tile.getStatLine();
+	}
+
+	private ArrayList<Tile> getTopWorkableTiles() {
+		ArrayList<Tile> topTiles = new ArrayList<>();
+
+		float maxValue = -1;
+
+		for (Tile tile : territory) {
+			if (tile.equals(originTile)
+					|| (citizenWorkers.containsKey(tile) && citizenWorkers.get(tile).isValidTileWorker()))
+				continue;
+			float value = getTileStatLine(tile).getStatValue(Stat.FOOD_GAIN) * 3
+					+ getTileStatLine(tile).getStatValue(Stat.GOLD_GAIN) * 2
+					+ getTileStatLine(tile).getStatValue(Stat.PRODUCTION_GAIN) * 1;
+
+			if (value > maxValue) {
+				topTiles.add(0, tile);
+				maxValue = value;
+			}
+		}
+
+		return topTiles;
 	}
 }

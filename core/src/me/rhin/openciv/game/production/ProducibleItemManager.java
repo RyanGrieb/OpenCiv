@@ -1,7 +1,6 @@
 package me.rhin.openciv.game.production;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Queue;
@@ -11,6 +10,7 @@ import com.badlogic.gdx.Gdx;
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.game.city.City;
 import me.rhin.openciv.game.city.building.type.Granary;
+import me.rhin.openciv.game.city.building.type.Market;
 import me.rhin.openciv.game.city.building.type.Monument;
 import me.rhin.openciv.game.unit.type.Galley;
 import me.rhin.openciv.game.unit.type.Scout;
@@ -41,6 +41,7 @@ public class ProducibleItemManager {
 
 		possibleItems.put("Granary", new Granary(city));
 		possibleItems.put("Monument", new Monument(city));
+		possibleItems.put("Market", new Market(city));
 		possibleItems.put("Warrior", new Warrior());
 		possibleItems.put("Settler", new Settler());
 		possibleItems.put("Scout", new Scout());

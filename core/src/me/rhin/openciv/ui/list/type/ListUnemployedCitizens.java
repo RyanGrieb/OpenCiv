@@ -4,32 +4,33 @@ import java.util.ArrayList;
 
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
-import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Group;
-import com.badlogic.gdx.scenes.scene2d.InputEvent;
-import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 
 import me.rhin.openciv.asset.TextureEnum;
+import me.rhin.openciv.game.city.City;
 import me.rhin.openciv.ui.button.Button;
-import me.rhin.openciv.ui.button.type.UnemployedCitizenButton;
+import me.rhin.openciv.ui.button.type.SpecialistCitizenButton;
 
 public class ListUnemployedCitizens extends Group {
 	// TODO: There really should be a Horizontal List class
 
+	private City city;
 	private Sprite backgroundSprite;
 	private ArrayList<Button> citizenButtons;
 
-	public ListUnemployedCitizens(int width, int height) {
+	public ListUnemployedCitizens(City city, int width, int height) {
 		this.setSize(width, height);
 
+		this.city = city;
 		this.backgroundSprite = TextureEnum.UI_GRAY.sprite();
 		this.backgroundSprite.setSize(width, height);
 
 		this.citizenButtons = new ArrayList<>();
 	}
 
-	public ListUnemployedCitizens(int amount, int width, int height) {
-		this(width, height);
+	public ListUnemployedCitizens(City city, int amount, int width, int height) {
+		this(city, width, height);
 		setCitizens(amount);
 	}
 
@@ -52,11 +53,13 @@ public class ListUnemployedCitizens extends Group {
 	}
 
 	public void setCitizens(int amount) {
+		for (Button button : citizenButtons) {
+			button.addAction(Actions.removeActor());
+		}
 		citizenButtons.clear();
-
 		for (int i = 0; i < amount; i++) {
-			float xPos = 0 + ((i == 0) ? 0 : 32 * i);
-			UnemployedCitizenButton button = new UnemployedCitizenButton(xPos, 0, 32, 32);
+			float xPos = 0 + ((i == 0) ? 4 : 21 * i);
+			SpecialistCitizenButton button = new SpecialistCitizenButton(city, city, xPos, 21 / 2, 21, 21);
 			addActor(button);
 			citizenButtons.add(button);
 		}

@@ -21,7 +21,12 @@ public abstract class Building implements ProductionItem {
 		return "Buildings";
 	}
 
+
 	public StatLine getStatLine() {
 		return statLine;
+	}
+
+	public City getCity() {
+		return city;
 	}
 }

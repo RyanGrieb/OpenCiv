@@ -14,6 +14,7 @@ import com.badlogic.gdx.utils.JsonValue;
 
 import me.rhin.openciv.server.command.CmdProcessor;
 import me.rhin.openciv.server.game.Game;
+import me.rhin.openciv.server.listener.ClickSpecialistListener.ClickSpecialistEvent;
 import me.rhin.openciv.server.listener.ClickWorkedTileListener.ClickWorkedTileEvent;
 import me.rhin.openciv.server.listener.ConnectionListener.ConnectionEvent;
 import me.rhin.openciv.server.listener.DisconnectListener.DisconnectEvent;
@@ -30,6 +31,7 @@ import me.rhin.openciv.shared.listener.Event;
 import me.rhin.openciv.shared.listener.EventManager;
 import me.rhin.openciv.shared.listener.Listener;
 import me.rhin.openciv.shared.packet.Packet;
+import me.rhin.openciv.shared.packet.type.ClickSpecialistPacket;
 import me.rhin.openciv.shared.packet.type.ClickWorkedTilePacket;
 import me.rhin.openciv.shared.packet.type.FetchPlayerPacket;
 import me.rhin.openciv.shared.packet.type.FinishLoadingPacket;
@@ -84,6 +86,7 @@ public class Server extends WebSocketServer {
 		networkEvents.put(FinishLoadingPacket.class, PlayerFinishLoadingEvent.class);
 		networkEvents.put(SetProductionItemPacket.class, SetProductionItemEvent.class);
 		networkEvents.put(ClickWorkedTilePacket.class, ClickWorkedTileEvent.class);
+		networkEvents.put(ClickSpecialistPacket.class, ClickSpecialistEvent.class);	
 		
 		this.playerIndex = 0;
 		this.commandProcessor = new CmdProcessor();

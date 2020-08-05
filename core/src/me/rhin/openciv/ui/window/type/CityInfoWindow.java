@@ -10,11 +10,13 @@ import me.rhin.openciv.game.city.City;
 import me.rhin.openciv.game.city.building.Building;
 import me.rhin.openciv.game.map.tile.Tile;
 import me.rhin.openciv.game.production.ProductionItem;
-import me.rhin.openciv.listener.AddUnemployedCitizenListener;
+import me.rhin.openciv.listener.AddSpecialistToContainerListener;
 import me.rhin.openciv.listener.BuildingConstructedListener;
+import me.rhin.openciv.listener.RemoveSpecialistFromContainerListener;
 import me.rhin.openciv.listener.SetCitizenTileWorkerListener;
-import me.rhin.openciv.shared.packet.type.AddUnemployedCitizenPacket;
+import me.rhin.openciv.shared.packet.type.AddSpecialistToContainerPacket;
 import me.rhin.openciv.shared.packet.type.BuildingConstructedPacket;
+import me.rhin.openciv.shared.packet.type.RemoveSpecialistFromContainerPacket;
 import me.rhin.openciv.shared.packet.type.SetCitizenTileWorkerPacket;
 import me.rhin.openciv.ui.button.type.CityInfoCloseButton;
 import me.rhin.openciv.ui.button.type.WorkedTileButton;
@@ -29,8 +31,8 @@ import me.rhin.openciv.ui.list.type.ListUnemployedCitizens;
 import me.rhin.openciv.ui.screen.type.InGameScreen;
 import me.rhin.openciv.ui.window.AbstractWindow;
 
-public class CityInfoWindow extends AbstractWindow
-		implements BuildingConstructedListener, SetCitizenTileWorkerListener, AddUnemployedCitizenListener {
+public class CityInfoWindow extends AbstractWindow implements BuildingConstructedListener, SetCitizenTileWorkerListener,
+		AddSpecialistToContainerListener, RemoveSpecialistFromContainerListener {
 
 	private City city;
 	private CityStatsInfo cityStatsInfo;
@@ -82,14 +84,15 @@ public class CityInfoWindow extends AbstractWindow
 
 		if (city.getUnemployedWorkerAmount() > 0) {
 			topRightContainerList.addItem(ListContainerType.CATEGORY, "Unemployed Citizens",
-					new ListUnemployedCitizens(city.getUnemployedWorkerAmount(), 200, 45));
+					new ListUnemployedCitizens(city, city.getUnemployedWorkerAmount(), 200, 45));
 		}
 
 		addActor(topRightContainerList);
 
 		Civilization.getInstance().getEventManager().addListener(BuildingConstructedListener.class, this);
 		Civilization.getInstance().getEventManager().addListener(SetCitizenTileWorkerListener.class, this);
-		Civilization.getInstance().getEventManager().addListener(AddUnemployedCitizenListener.class, this);
+		Civilization.getInstance().getEventManager().addListener(AddSpecialistToContainerListener.class, this);
+		Civilization.getInstance().getEventManager().addListener(RemoveSpecialistFromContainerListener.class, this);
 	}
 
 	@Override
@@ -108,7 +111,17 @@ public class CityInfoWindow extends AbstractWindow
 	}
 
 	@Override
+	public void onClose() {
+		for (WorkedTileButton button : citizenButtons.values()) {
+			button.addAction(Actions.removeActor());
+		}
+	}
+
+	@Override
 	public void onBuildingConstructed(BuildingConstructedPacket packet) {
+		if (!city.getName().equals(packet.getCityName()))
+			return;
+
 		topRightContainerList.clearList();
 
 		for (Building building : city.getBuildings()) {
@@ -123,31 +136,55 @@ public class CityInfoWindow extends AbstractWindow
 	}
 
 	@Override
-	public void onClose() {
-		for (WorkedTileButton button : citizenButtons.values()) {
-			button.addAction(Actions.removeActor());
-		}
-	}
-
-	@Override
 	public void onSetCitizenTileWorker(SetCitizenTileWorkerPacket packet) {
+		if (!city.getName().equals(packet.getCityName()))
+			return;
+
 		Tile tile = Civilization.getInstance().getGame().getMap().getTiles()[packet.getGridX()][packet.getGridY()];
 
 		citizenButtons.get(tile).setTexture(WorkedTileButton.getTextureFromWorkerType(packet.getWorkerType()));
 	}
 
 	@Override
-	public void onAddUnemployedCitizen(AddUnemployedCitizenPacket packet) {
-		// NOTE: We manually select the listContianer, since were adding to a horizontal
-		// list.
-		if (topRightContainerList.getListContainers().get("Unemployed Citizens") == null) {
-			topRightContainerList.addItem(ListContainerType.CATEGORY, "Unemployed Citizens",
-					new ListUnemployedCitizens(200, 45));
-		}
+	public void onAddSpecialistToContainer(AddSpecialistToContainerPacket packet) {
+		if (!city.getName().equals(packet.getCityName()))
+			return;
 
-		ListContainer listContainer = topRightContainerList.getListContainers().get("Unemployed Citizens");
-		((ListUnemployedCitizens) listContainer.getListItemActors().get(0))
-				.setCitizens(city.getUnemployedWorkerAmount());
+		updateSpecialistContainers(packet.getCityName(), packet.getContainerName());
+	}
+
+	@Override
+	public void onRemoveSpecialistFromContainer(RemoveSpecialistFromContainerPacket packet) {
+		if (!city.getName().equals(packet.getCityName()))
+			return;
+
+		updateSpecialistContainers(packet.getCityName(), packet.getContainerName());
+	}
+
+	public void updateSpecialistContainers(String cityName, String containerName) {
+		if (!city.getName().equals(cityName))
+			return;
+
+		if (containerName.equals(city.getName())) {
+
+			if (city.getUnemployedWorkerAmount() < 1) {
+				ListContainer listContainer = topRightContainerList.getListContainers().remove("Unemployed Citizens");
+				listContainer.addAction(Actions.removeActor());
+				return;
+			}
+
+			// NOTE: We manually select the listContianer, since were adding to a
+			if (topRightContainerList.getListContainers().get("Unemployed Citizens") == null) {
+				topRightContainerList.addItem(ListContainerType.CATEGORY, "Unemployed Citizens",
+						new ListUnemployedCitizens(city, 200, 45));
+			}
+
+			ListContainer listContainer = topRightContainerList.getListContainers().get("Unemployed Citizens");
+			((ListUnemployedCitizens) listContainer.getListItemActors().get(0))
+					.setCitizens(city.getUnemployedWorkerAmount());
+		} else {
+			// TODO: Update the ListBuilding specialist slot.
+		}
 	}
 
 }

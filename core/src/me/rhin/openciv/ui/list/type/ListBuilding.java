@@ -5,13 +5,14 @@ import java.util.ArrayList;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.scenes.scene2d.Group;
-import com.badlogic.gdx.scenes.scene2d.InputEvent;
-import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Align;
 
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.city.building.Building;
+import me.rhin.openciv.game.city.specialist.SpecialistContainer;
 import me.rhin.openciv.shared.stat.Stat;
+import me.rhin.openciv.ui.button.Button;
+import me.rhin.openciv.ui.button.type.SpecialistCitizenButton;
 import me.rhin.openciv.ui.label.CustomLabel;
 
 public class ListBuilding extends Group {
@@ -21,6 +22,7 @@ public class ListBuilding extends Group {
 	private CustomLabel buildingNameLabel;
 	private ArrayList<Sprite> statIcons;
 	private ArrayList<CustomLabel> statLabels;
+	private ArrayList<Button> specialistButtons;
 
 	public ListBuilding(Building building, float width, float height) {
 		this.setSize(width, height);
@@ -33,6 +35,7 @@ public class ListBuilding extends Group {
 
 		this.statIcons = new ArrayList<>();
 		this.statLabels = new ArrayList<>();
+		this.specialistButtons = new ArrayList<>();
 
 		for (Stat stat : building.getStatLine().getStatValues().keySet()) {
 			if (stat == Stat.MAINTENANCE)
@@ -51,6 +54,15 @@ public class ListBuilding extends Group {
 
 			CustomLabel label = new CustomLabel("+" + (int) building.getStatLine().getStatValue(stat));
 			statLabels.add(label);
+		}
+
+		if (building instanceof SpecialistContainer) {
+			SpecialistContainer specialistContinaer = (SpecialistContainer) building;
+			for (int i = 0; i < specialistContinaer.getSpecialistSlots(); i++) {
+				specialistContinaer.getSpecialistType();
+				specialistButtons
+						.add(new SpecialistCitizenButton(building.getCity(), specialistContinaer, 0, 0, 32, 32));
+			}
 		}
 	}
 
