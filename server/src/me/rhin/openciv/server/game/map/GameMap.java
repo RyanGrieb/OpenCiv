@@ -1,8 +1,6 @@
 package me.rhin.openciv.server.game.map;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.Queue;
 import java.util.Random;
 
 import org.java_websocket.WebSocket;
@@ -26,13 +24,19 @@ import me.rhin.openciv.shared.packet.type.MapChunkPacket;
 import me.rhin.openciv.shared.util.MathHelper;
 
 public class GameMap implements MapRequestListener {
-	public static final int WIDTH = 80; // Default: 104
-	public static final int HEIGHT = 52; // Default: 64
+
+	public static final int WIDTH = 80;
+	public static final int HEIGHT = 52;
 	public static final int MAX_NODES = WIDTH * HEIGHT;
-	private static final int CONTINENT_AMOUNT = 550; // Default: 780
+
+	private static final int LAND_MASS_PARAM = 5;
+	private static final int TEMPATURE_PARAM = 1;
+	private static final int CLIMATE_PARAM = 2;
 
 	private Game game;
 	private Tile[][] tiles;
+	private GenerationValue[][] stencilMap;
+	private GenerationValue[][] geographyMap;
 	private ArrayList<Rectangle> mapPartition;
 
 	private int[][] oddEdgeAxis = { { 0, -1 }, { 1, -1 }, { 1, 0 }, { 1, 1 }, { 0, 1 }, { -1, 0 } };
@@ -41,11 +45,16 @@ public class GameMap implements MapRequestListener {
 	public GameMap(Game game) {
 		this.game = game;
 
-		tiles = new Tile[WIDTH][HEIGHT];
+		this.tiles = new Tile[WIDTH][HEIGHT];
+		this.stencilMap = new GenerationValue[WIDTH][HEIGHT];
+		this.geographyMap = new GenerationValue[WIDTH][HEIGHT];
+
 		for (int x = 0; x < WIDTH; x++) {
 			for (int y = 0; y < HEIGHT; y++) {
 				Tile tile = new Tile(this, TileType.OCEAN, x, y);
 				tiles[x][y] = tile;
+				stencilMap[x][y] = new GenerationValue(0, x, y);
+				geographyMap[x][y] = new GenerationValue(0, x, y);
 			}
 		}
 
@@ -120,151 +129,302 @@ public class GameMap implements MapRequestListener {
 	}
 
 	public void generateTerrain() {
-		Random rnd = new Random();
+		int landMassSize = (int) ((WIDTH * HEIGHT) / 12.5) * (LAND_MASS_PARAM + 2);
 
-		splitMapPartition();
+		// Apply stencil's to geography map
+		while (getTotalGeographyLandMass() < landMassSize) {
+			ArrayList<GenerationValue> chunk = generateRandomStencilChunk();
+			for (GenerationValue chunkValue : chunk) {
+				GenerationValue geographyMapValue = geographyMap[chunkValue.getGridX()][chunkValue.getGridY()];
 
-		for (int i = 0; i < CONTINENT_AMOUNT; i++) {
-			int randomX = rnd.nextInt(WIDTH - 1);
-			int randomY = rnd.nextInt(HEIGHT - 1);
-
-			Tile tile = tiles[randomX][randomY];
-			growTile(tile, rnd.nextInt(rnd.nextInt(5 - 3 + 1) + 5));
+				if (geographyMapValue.getValue() == 0)
+					geographyMapValue.setValue(1);
+				else
+					geographyMapValue.setValue(geographyMapValue.getValue() + 1);
+			}
 		}
 
-		// Remove 1 tile ponds
+		int maxHeight = 0;
+
+		// Latitude adjustments
+		Random rnd = new Random();
 		for (int x = 0; x < WIDTH; x++) {
 			for (int y = 0; y < HEIGHT; y++) {
-				Tile tile = tiles[x][y];
-				if (!tile.containsTileType(TileType.OCEAN))
-					continue;
+				int latitude = y - 29; // FIXME: This should be the center of the map
+				latitude += rnd.nextInt(7);
+				latitude = Math.abs(latitude);
+				latitude += (1 - TEMPATURE_PARAM);
+				latitude = latitude / 6 + 1;
 
-				Tile targetTile = null;
-				boolean adjOceanTile = false;
-				for (Tile adjTile : tile.getAdjTiles()) {
-					if (adjTile == null)
-						continue;
+				if (geographyMap[x][y].getValue() > maxHeight)
+					maxHeight = geographyMap[x][y].getValue();
 
-					targetTile = adjTile;
-
-					if (adjTile.containsTileType(TileType.OCEAN))
-						adjOceanTile = true;
-				}
-
-				if (!adjOceanTile) {
-					tile.setTileType(targetTile.getBaseTileType());
-					continue;
-				}
-
-				// TODO: Add shallow sea tiles
-			}
-		}
-
-		// Generate mountain chains
-		Queue<Tile> mountainTiles = new LinkedList<>();
-
-		for (int i = 0; i < 25; i++) {
-			Tile tile = tiles[rnd.nextInt(WIDTH - 1)][rnd.nextInt(HEIGHT - 1)];
-			System.out.println(isFlatTile(tile));
-			if (isFlatTile(tile)) {
-				tile.setTileType(TileType.MOUNTAIN);
-				mountainTiles.add(tile);
-			} else
-				i--;
-		}
-
-		while (!mountainTiles.isEmpty()) {
-			Tile tile = mountainTiles.remove();
-			for (Tile adjTile : tile.getAdjTiles()) {
-				if (rnd.nextInt(6) > 3 && isFlatTile(adjTile)) {
-					tile.setTileType(TileType.MOUNTAIN);
-					mountainTiles.add(adjTile);
-					break;
+				if (geographyMap[x][y].getValue() > 0) {
+					if (latitude < 2)
+						tiles[x][y].setTileType(TileType.DESERT);
+					else if (latitude < 4)
+						tiles[x][y].setTileType(TileType.PLAINS);
+					else
+						tiles[x][y].setTileType(TileType.TUNDRA);
 				}
 			}
 		}
 
-		// FIXME: These loops below are redundant
-		// Generate forests
-		Queue<Tile> forestTiles = new LinkedList<>();
+		float mountainTopHeightPrecent = 0.50F;
+		float mountainSpawnChancePrecent = 0.90F;
+		float hillTopHeightPrecent = 0.85F;
+		float hillSpawnChancePrecent = 0.65F;
 
-		for (int i = 0; i < 100; i++) {
-			Tile tile = tiles[rnd.nextInt(WIDTH - 1)][rnd.nextInt(HEIGHT - 1)];
-			if (isFlatTile(tile)) {
-				tile.setTileType(TileType.FOREST);
-				forestTiles.add(tile);
-			} else
-				i--;
-		}
+		for (int x = 0; x < WIDTH; x++) {
+			for (int y = 0; y < HEIGHT; y++) {
 
-		while (!forestTiles.isEmpty()) {
-			Tile tile = forestTiles.remove();
-			for (Tile adjTile : tile.getAdjTiles()) {
-				if (rnd.nextInt(20) > 15 && isFlatTile(adjTile)) {
-					tile.setTileType(TileType.FOREST);
-					forestTiles.add(adjTile);
+				if (geographyMap[x][y].getValue() > 0) {
+
+					float topHeightPrecent = 1 - ((float) geographyMap[x][y].getValue() / maxHeight);
+
+					// Spawn mountains
+					if (mountainTopHeightPrecent > topHeightPrecent
+							&& rnd.nextInt(100) >= (100 - (mountainSpawnChancePrecent * 100)))
+						tiles[x][y].setTileType(TileType.MOUNTAIN);
+
+					if (hillTopHeightPrecent > topHeightPrecent
+							&& rnd.nextInt(100) >= (100 - (hillSpawnChancePrecent * 100))) {
+						switch (tiles[x][y].getBaseTileType()) {
+						case PLAINS:
+							tiles[x][y].setTileType(TileType.PLAINS_HILL);
+							break;
+						case DESERT:
+							tiles[x][y].setTileType(TileType.DESERT_HILL);
+							break;
+						case TUNDRA:
+							tiles[x][y].setTileType(TileType.TUNDRA_HILL);
+							break;
+						default:
+							break;
+						}
+					}
 				}
+
 			}
 		}
 
-		// Generate jungle
-		Queue<Tile> jungleTiles = new LinkedList<>();
+		// Geography adjustments
+		for (int x = 0; x < WIDTH; x++) {
+			for (int y = 0; y < HEIGHT; y++) {
 
-		for (int i = 0; i < 100; i++) {
-			Tile tile = tiles[rnd.nextInt(WIDTH - 1)][rnd.nextInt(HEIGHT - 1)];
-			if (isFlatTile(tile)) {
-				tile.setTileType(TileType.JUNGLE);
-				jungleTiles.add(tile);
-			} else
-				i--;
-		}
-
-		while (!jungleTiles.isEmpty()) {
-			Tile tile = jungleTiles.remove();
-			for (Tile adjTile : tile.getAdjTiles()) {
-				if (rnd.nextInt(20) > 15 && isFlatTile(adjTile)) {
-					tile.setTileType(TileType.JUNGLE);
-					jungleTiles.add(adjTile);
-				}
 			}
 		}
 
-		// Generate hills
-		Queue<Tile> hillTiles = new LinkedList<>();
+		// Climate adjustments
+		for (int x = 0; x < WIDTH; x++) {
+			int wetness = 0;
+			for (int y = 0; y < HEIGHT; y++) {
+				int latitude = Math.abs(25 - y);
 
-		for (int i = 0; i < 250; i++) {
-			Tile tile = tiles[rnd.nextInt(WIDTH - 1)][rnd.nextInt(HEIGHT - 1)];
-			if (isFlatTile(tile)) {
-				if (tile.containsTileType(TileType.GRASS))
-					tile.setTileType(TileType.GRASS_HILL);
-				else
-					tile.setTileType(TileType.PLAINS_HILL);
-				hillTiles.add(tile);
-			} else
-				i--;
-		}
+				if (tiles[x][y].getBaseTileType() == TileType.OCEAN) {
+					int wetnessYeild = Math.abs(latitude - 12) + (CLIMATE_PARAM * 4);
 
-		while (!hillTiles.isEmpty()) {
-			Tile tile = hillTiles.remove();
-			for (Tile adjTile : tile.getAdjTiles()) {
-				if (rnd.nextInt(20) > 17 && isFlatTile(adjTile)) {
-					if (tile.containsTileType(TileType.GRASS))
-						tile.setTileType(TileType.GRASS_HILL);
-					else if (tile.containsTileType(TileType.PLAINS))
-						tile.setTileType(TileType.PLAINS_HILL);
-					hillTiles.add(adjTile);
+					if (wetnessYeild > wetness)
+						wetness += 2;
+
+				} else if (wetness > 0) {
+					int rainfall = 1;
+
+					wetness -= rainfall;
+
+					switch (tiles[x][y].getBaseTileType()) {
+					case PLAINS:
+						tiles[x][y].setTileType(TileType.GRASS);
+						break;
+					case PLAINS_HILL:
+						tiles[x][y].setTileType(TileType.GRASS_HILL);
+						break;
+					case TUNDRA:
+						break;
+					case DESERT:
+						tiles[x][y].setTileType(TileType.PLAINS);
+						break;
+					case DESERT_HILL:
+						tiles[x][y].setTileType(TileType.PLAINS_HILL);
+						break;
+					case MOUNTAIN:
+						// wetness -= 2;
+						break;
+					default:
+						break;
+					}
+
+					// FIXME: This is a slight workaround, but for now it works
+					if (tiles[x][y].getMovementCost() == 2) {
+						if (tiles[x][y].getBaseTileType() != TileType.DESERT_HILL
+								&& tiles[x][y].getBaseTileType() != TileType.TUNDRA_HILL) {
+
+							if (rnd.nextInt(100) >= 50) {
+								if (rnd.nextInt(100) >= 75) {
+									if (tiles[x][y].getBaseTileType() == TileType.PLAINS_HILL)
+										tiles[x][y].setTileType(TileType.PLAINS);
+
+									if (tiles[x][y].getBaseTileType() == TileType.GRASS_HILL)
+										tiles[x][y].setTileType(TileType.GRASS);
+								}
+
+								tiles[x][y].setTileType(TileType.FOREST);
+							}
+
+						}
+					}
 				}
 			}
+
+			wetness = 0;
+
+			for (int y = HEIGHT - 1; y >= 0; y--) {
+				int latitude = Math.abs(25 - y);
+
+				if (tiles[x][y].getBaseTileType() == TileType.OCEAN) {
+					int wetnessYeild = latitude / 2 + CLIMATE_PARAM;
+
+					if (wetnessYeild > wetness)
+						wetness += 2;
+
+				} else if (wetness > 0) {
+					int rainfall = 1;
+
+					wetness -= rainfall;
+
+					switch (tiles[x][y].getBaseTileType()) {
+					case PLAINS:
+						tiles[x][y].setTileType(TileType.GRASS);
+						break;
+					case PLAINS_HILL:
+						tiles[x][y].setTileType(TileType.GRASS_HILL);
+						break;
+					case GRASS:
+						if (latitude > 10) {
+							tiles[x][y].setTileType(TileType.JUNGLE);
+							wetness--;
+						}
+						break;
+					case DESERT:
+						tiles[x][y].setTileType(TileType.PLAINS);
+						break;
+					case DESERT_HILL:
+						tiles[x][y].setTileType(TileType.PLAINS_HILL);
+						break;
+					default:
+						break;
+					}
+
+					// FIXME: This is a slight workaround, but for now it works
+					if (tiles[x][y].getMovementCost() == 2) {
+						if (tiles[x][y].getBaseTileType() != TileType.DESERT_HILL
+								&& tiles[x][y].getBaseTileType() != TileType.TUNDRA_HILL) {
+
+							if (rnd.nextInt(100) >= 50) {
+								if (rnd.nextInt(100) >= 75) {
+									if (tiles[x][y].getBaseTileType() == TileType.PLAINS_HILL)
+										tiles[x][y].setTileType(TileType.PLAINS);
+
+									if (tiles[x][y].getBaseTileType() == TileType.GRASS_HILL)
+										tiles[x][y].setTileType(TileType.GRASS);
+								}
+
+								tiles[x][y].setTileType(TileType.FOREST);
+							}
+
+						}
+					}
+
+				}
+			}
+
 		}
+
+		// Split the map to make resource generation & player spawnpoints balanced
+		splitMapPartition();
 
 		generateResource(TileType.HORSES, game.getPlayers().size() * 4, TileType.GRASS, TileType.PLAINS);
 		generateResource(TileType.IRON, game.getPlayers().size() * 60, TileType.GRASS, TileType.PLAINS,
-				TileType.PLAINS_HILL, TileType.GRASS_HILL);
+				TileType.PLAINS_HILL, TileType.GRASS_HILL, TileType.DESERT, TileType.DESERT_HILL);
 		generateResource(TileType.COPPER, game.getPlayers().size(), TileType.GRASS, TileType.PLAINS,
-				TileType.PLAINS_HILL, TileType.GRASS_HILL);
+				TileType.PLAINS_HILL, TileType.GRASS_HILL, TileType.DESERT, TileType.DESERT_HILL);
 		generateResource(TileType.COTTON, game.getPlayers().size(), TileType.GRASS, TileType.PLAINS);
-		generateResource(TileType.GEMS, game.getPlayers().size(), TileType.GRASS, TileType.PLAINS);
+		generateResource(TileType.GEMS, game.getPlayers().size(), TileType.GRASS, TileType.PLAINS, TileType.DESERT,
+				TileType.DESERT_HILL);
 
+	}
+
+	private ArrayList<GenerationValue> generateRandomStencilChunk() {
+		clearMap();
+
+		ArrayList<GenerationValue> chunk = new ArrayList<>();
+		Random rnd = new Random();
+
+		// FIXME: These values need to chagne depedning on the map size.
+		int xPadding = 4;
+		int yPadding = 8;
+		int minX = xPadding;
+		int minY = yPadding;
+		int maxX = GameMap.WIDTH - xPadding;
+		int maxY = GameMap.HEIGHT - yPadding;
+		int maxPathLength = 64;
+
+		int rndX = rnd.nextInt(maxX - minX + 1) + minX;
+		int rndY = rnd.nextInt(maxY - minY + 1) + minY;
+
+		int pathLength = rnd.nextInt(maxPathLength - 1 + 1) + 1;
+
+		for (int i = 0; i < pathLength; i++) {
+
+			GenerationValue[] adjGenerationValues = stencilMap[rndX][rndY].getAdjGenerationValues();
+
+			for (int j = 0; j < 5; j++) {
+				// Set adj tiles execpt the last? to 1
+				if (adjGenerationValues[j] == null)
+					break;
+				adjGenerationValues[j].setValue(1);
+				chunk.add(adjGenerationValues[j]);
+			}
+
+			int nextAdjValueIndex = rnd.nextInt(6);
+
+			if (adjGenerationValues[nextAdjValueIndex] == null)
+				return chunk;
+
+			rndX = adjGenerationValues[nextAdjValueIndex].getGridX();
+			rndY = adjGenerationValues[nextAdjValueIndex].getGridY();
+
+			// FIXME: I want these values to change depending on the map size
+			if (outsidePaddingArea(rndX, rndY))
+				return chunk;
+
+		}
+
+		return chunk;
+	}
+
+	private boolean outsidePaddingArea(int x, int y) {
+		return (x < 3 || y < 3 || x > WIDTH - 4 || y > HEIGHT - 5);
+	}
+
+	private int getTotalGeographyLandMass() {
+		int total = 0;
+		for (int x = 0; x < GameMap.WIDTH; x++) {
+			for (int y = 0; y < GameMap.HEIGHT; y++) {
+				if (geographyMap[x][y].getValue() != 0)
+					total++;
+			}
+		}
+
+		return total;
+	}
+
+	private void clearMap() {
+		for (int x = 0; x < GameMap.WIDTH; x++) {
+			for (int y = 0; y < GameMap.HEIGHT; y++) {
+				stencilMap[x][y].setValue(0);
+			}
+		}
 	}
 
 	private void generateResource(TileType tileType, int amount, TileType... exclusiveTiles) {
@@ -407,67 +567,10 @@ public class GameMap implements MapRequestListener {
 					}
 
 					tiles[x][y].setEdge(i, tiles[x + edgeAxis[i][0]][y + edgeAxis[i][1]]);
+					stencilMap[x][y].setEdge(i, stencilMap[x + edgeAxis[i][0]][y + edgeAxis[i][1]]);
+					geographyMap[x][y].setEdge(i, geographyMap[x + edgeAxis[i][0]][y + edgeAxis[i][1]]);
 				}
 			}
 		}
-	}
-
-	private void growTile(Tile tile, int amount) {
-		Random rnd = new Random();
-
-		TileType tileType = null;
-
-		if (tile.containsTileType(TileType.OCEAN)) {
-			if (rnd.nextInt(10) > 1)
-				tileType = TileType.GRASS;
-			else
-				tileType = TileType.PLAINS;
-		} else
-			tileType = tile.getBaseTileType();
-
-		// #1
-		// Set the initial tile the grass
-		if (HEIGHT - tile.getGridY() < 10 || tile.getGridY() < 10 || WIDTH - tile.getGridX() < 10
-				|| tile.getGridX() < 10)
-			return;
-
-		tile.setTileType(tileType);
-		amount--;
-
-		// #2
-
-		int edgeFillIndex = 2;
-		for (int edgeIndex = 0; edgeIndex < tile.getAdjTiles().length; edgeIndex++) {
-			Tile currentTile = tile.getAdjTiles()[edgeIndex];
-			for (int i = 0; i < amount; i++) {
-
-				// FIXME: The chance of this happening should decrease as our growth increases.
-				// Also, this chance increase the closer the x & y is to the center. (Should be
-				// 100% of grass in the center of the map).
-				if (rnd.nextInt(8) > 2)
-					currentTile.setTileType(tileType);
-
-				// Fill in the gap created
-				if (amount > 1) {
-					int fillAmount = amount - 1;
-					Tile currentFillTile = currentTile;
-					for (int j = 0; j < fillAmount; j++) {
-						if (rnd.nextInt(8) > 2)
-							currentFillTile.getAdjTiles()[edgeFillIndex].setTileType(tileType);
-						currentFillTile = currentFillTile.getAdjTiles()[edgeFillIndex];
-					}
-				}
-
-				currentTile = currentTile.getAdjTiles()[edgeIndex];
-			}
-			edgeFillIndex++;
-
-			if (edgeFillIndex > 5)
-				edgeFillIndex = 0;
-		}
-	}
-
-	private boolean isFlatTile(Tile tile) {
-		return tile.onlyHasTileType(TileType.GRASS) || tile.onlyHasTileType(TileType.PLAINS);
 	}
 }

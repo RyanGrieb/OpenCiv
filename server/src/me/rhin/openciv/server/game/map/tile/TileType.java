@@ -53,6 +53,46 @@ public enum TileType implements Comparable<TileType> {
 			return 2;
 		}
 	},
+	DESERT(TileLayer.BASE) {
+		@Override
+		public StatLine getStatLine() {
+			StatLine statLine = new StatLine();
+			return statLine;
+		}
+	},
+	DESERT_HILL(TileLayer.BASE) {
+		@Override
+		public StatLine getStatLine() {
+			StatLine statLine = new StatLine();
+			statLine.setValue(Stat.PRODUCTION_GAIN, 2);
+			return statLine;
+		}
+
+		@Override
+		public int getMovementCost() {
+			return 2;
+		}
+	},
+	TUNDRA(TileLayer.BASE) {
+		@Override
+		public StatLine getStatLine() {
+			StatLine statLine = new StatLine();
+			return statLine;
+		}
+	},
+	TUNDRA_HILL(TileLayer.BASE) {
+		@Override
+		public StatLine getStatLine() {
+			StatLine statLine = new StatLine();
+			statLine.setValue(Stat.PRODUCTION_GAIN, 2);
+			return statLine;
+		}
+
+		@Override
+		public int getMovementCost() {
+			return 2;
+		}
+	},
 	OCEAN(TileLayer.BASE, TileProperty.WATER) {
 		@Override
 		public StatLine getStatLine() {
