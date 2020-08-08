@@ -208,13 +208,6 @@ public class GameMap implements MapRequestListener {
 			}
 		}
 
-		// Geography adjustments
-		for (int x = 0; x < WIDTH; x++) {
-			for (int y = 0; y < HEIGHT; y++) {
-
-			}
-		}
-
 		// Climate adjustments
 		for (int x = 0; x < WIDTH; x++) {
 			int wetness = 0;
