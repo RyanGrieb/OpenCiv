@@ -18,12 +18,21 @@ import me.rhin.openciv.server.game.map.tile.TileType.TileLayer;
 import me.rhin.openciv.server.game.map.tile.TileType.TileProperty;
 import me.rhin.openciv.server.game.unit.Unit;
 import me.rhin.openciv.server.listener.MapRequestListener;
+import me.rhin.openciv.shared.packet.ChunkTile;
 import me.rhin.openciv.shared.packet.type.AddUnitPacket;
 import me.rhin.openciv.shared.packet.type.FinishLoadingPacket;
 import me.rhin.openciv.shared.packet.type.MapChunkPacket;
 import me.rhin.openciv.shared.util.MathHelper;
 
 public class GameMap implements MapRequestListener {
+
+	private class VectorNode {
+		Vector2 vector;
+
+		public VectorNode(Vector2 vector) {
+			this.vector = vector;
+		}
+	}
 
 	public static final int WIDTH = 80;
 	public static final int HEIGHT = 52;
@@ -74,6 +83,7 @@ public class GameMap implements MapRequestListener {
 		for (int x = 0; x < GameMap.WIDTH; x++) {
 			for (int y = 0; y < GameMap.HEIGHT; y++) {
 				if (x % 4 == 0 && y % 4 == 0) {
+
 					MapChunkPacket mapChunkPacket = new MapChunkPacket();
 
 					ArrayList<int[][]> chunkLayers = new ArrayList<>();
@@ -84,6 +94,9 @@ public class GameMap implements MapRequestListener {
 								chunkLayer[a][b] = -1;
 						chunkLayers.add(chunkLayer);
 					}
+
+					ArrayList<ChunkTile> chunkTiles = new ArrayList<ChunkTile>();
+
 					for (int i = 0; i < MapChunkPacket.CHUNK_SIZE; i++) {
 						for (int j = 0; j < MapChunkPacket.CHUNK_SIZE; j++) {
 							int tileX = x + i;
@@ -92,6 +105,23 @@ public class GameMap implements MapRequestListener {
 							for (int k = 0; k < tile.getTileTypeWrappers().size(); k++)
 								chunkLayers.get(k)[i][j] = ((TileTypeWrapper) tile.getTileTypeWrappers().toArray()[k])
 										.getTileType().getID();
+
+							int[] tileLayers = new int[tile.getTileTypeWrappers().size()];
+
+							for (int k = 0; k < tile.getTileTypeWrappers().size(); k++) {
+								tileLayers[k] = ((TileTypeWrapper) tile.getTileTypeWrappers().toArray()[k])
+										.getTileType().getID();
+							}
+
+							int[] riverSides = new int[6];
+
+							for (int k = 0; k < 6; k++) {
+								riverSides[k] = tile.getRiverSides()[k] ? 1 : 0;
+							}
+
+							ChunkTile chunkTile = new ChunkTile();
+							chunkTile.setTile(riverSides, tileLayers);
+							chunkTiles.add(chunkTile);
 
 							for (Unit unit : tile.getUnits()) {
 								AddUnitPacket addUnitPacket = new AddUnitPacket();
@@ -104,7 +134,10 @@ public class GameMap implements MapRequestListener {
 
 						}
 					}
-					mapChunkPacket.setTileCunk(chunkLayers.get(0), chunkLayers.get(1), chunkLayers.get(2));
+
+					// chunkJson.setElementType(type, fieldName, int);
+
+					mapChunkPacket.setChunkTiles(chunkTiles);
 					mapChunkPacket.setChunkLocation(x, y);
 
 					conn.send(json.toJson(mapChunkPacket));
@@ -331,6 +364,152 @@ public class GameMap implements MapRequestListener {
 				}
 			}
 
+		}
+
+		// Generate rivers
+		int riverAmount = 50;
+		int minRiverSize = 4;
+		while (riverAmount > 0) {
+
+			ArrayList<Tile> river = new ArrayList<>();
+
+			// Attempt to create a river
+			Tile currentTile = null;
+			while (currentTile == null) {
+				Tile rndTile = tiles[rnd.nextInt(WIDTH)][rnd.nextInt(HEIGHT)];
+				if (isHill(rndTile) && !rndTile.hasRivers()) {
+					currentTile = rndTile;
+				}
+			}
+
+			// FIXME: Ensure our river is not on the same side adj to the target tile.
+
+			Tile lowestElvTile = null;
+
+			while (true) {
+				river.add(currentTile);
+
+				if (currentTile.getBaseTileType() == TileType.OCEAN)
+					break;
+
+				lowestElvTile = currentTile;
+				for (Tile adjTile : currentTile.getAdjTiles()) {
+					if (geographyMap[adjTile.getGridX()][adjTile.getGridY()]
+							.getValue() < geographyMap[lowestElvTile.getGridX()][lowestElvTile.getGridY()].getValue())
+						lowestElvTile = adjTile;
+				}
+
+				// If we hit the lowest elevation possible w/ out reaching ocean
+				if (currentTile.equals(lowestElvTile) || river.contains(lowestElvTile) || lowestElvTile.hasRivers()) {
+					// FIXME: Or if the lowestElvTile is already a river.
+					break;
+				}
+
+				currentTile = lowestElvTile;
+			}
+
+			if (river.size() < minRiverSize)
+				continue;
+
+			// Apply the river sides
+			ArrayList<Vector2> traversedVectors = new ArrayList<>();
+
+			System.out.println("Generating river sides w/ river size of: " + river.size());
+			for (int i = 0; i < river.size(); i++) {
+				if (i + 1 >= river.size())
+					break;
+
+				Tile tile = river.get(i);
+				Tile nextTile = river.get(i + 1);
+
+				if (tile.hasRivers())
+					break;
+
+				Vector2 currentVector = null;
+
+				if (i == 0) {
+					// Assign a random starting vector not adj to the next tile
+					while (currentVector == null || containsVector(nextTile, currentVector)) {
+						currentVector = tile.getVectors()[rnd.nextInt(6)];
+					}
+				} else {
+					// Assign the current vector to the previous traversed vector
+					currentVector = traversedVectors.get(traversedVectors.size() - 1);
+				}
+
+				// System.out.println("Current river vector at: " + currentVector);
+
+				while (!containsVector(nextTile, currentVector)) {
+					Vector2 nextVector = null;
+
+					int currentVectorIndex = -1;
+					for (int j = 0; j < tile.getVectors().length; j++) {
+						// FIXME: I shouldn't have to round my vectors
+						if (roundedEquals(currentVector, tile.getVectors()[j]))
+							currentVectorIndex = j;
+					}
+
+					// System.out.println("Current vector index: " + currentVectorIndex);
+
+					Vector2 leftVector = tile.getVectors()[currentVectorIndex + 1 > 5 ? 0 : currentVectorIndex + 1];
+					Vector2 rightVector = tile.getVectors()[currentVectorIndex - 1 < 0 ? 5 : currentVectorIndex - 1];
+
+					// Determine which vector to take based on the distance to the next tile
+					Vector2 nextTileCenterVector = new Vector2(
+							((nextTile.getVectors()[1].x - nextTile.getVectors()[5].x) / 2)
+									+ nextTile.getVectors()[5].x,
+							((nextTile.getVectors()[4].y - nextTile.getVectors()[5].y) / 2)
+									+ nextTile.getVectors()[5].y);
+
+					if (leftVector.dst(nextTileCenterVector) < rightVector.dst(nextTileCenterVector))
+						nextVector = leftVector;
+					else
+						nextVector = rightVector;
+
+					// Determine which vector to take based on the distance to the next tile
+					Vector2 currentTileCenterVector = new Vector2(
+							((tile.getVectors()[1].x - tile.getVectors()[5].x) / 2) + tile.getVectors()[5].x,
+							((tile.getVectors()[4].y - tile.getVectors()[5].y) / 2) + tile.getVectors()[5].y);
+
+					// System.out.println("Current tile center vector: " + currentTileCenterVector);
+					// System.out.println("Next tile center vector: " + nextTileCenterVector);
+
+					// System.out.println("Next vector found at: " + nextVector);
+
+					int nextVectorIndex = -1;
+					for (int j = 0; j < tile.getVectors().length; j++)
+						if (roundedEquals(nextVector, tile.getVectors()[j]))
+							nextVectorIndex = j;
+
+					// System.out.println("Next vector index: " + nextVectorIndex);
+
+					// Determine the side from the current & next vector
+
+					// 5 & 0, 0 & 5 == side 0
+					int tileSide = -1;
+
+					for (int j = 0; j < tile.getAdjTiles().length; j++) {
+						Vector2 firstVector = tile.getVectors()[j - 1 < 0 ? 5 : j - 1];
+						Vector2 lastVector = tile.getVectors()[j];
+
+						// System.out.println("====== Side " + j + " ======");
+						// System.out.println(firstVector + "," + lastVector);
+
+						// FIXME: Not the prettiest approach
+
+						if ((roundedEquals(firstVector, currentVector) && roundedEquals(lastVector, nextVector))
+								|| roundedEquals(firstVector, nextVector) && roundedEquals(lastVector, currentVector)) {
+							tileSide = j;
+						}
+					}
+					System.out.println("Adding river to side: " + tileSide);
+					tile.addRiverToSide(tileSide);
+					traversedVectors.add(nextVector);
+					currentVector = nextVector;
+				}
+			}
+
+			riverAmount--;
 		}
 
 		// Split the map to make resource generation & player spawnpoints balanced
@@ -565,5 +744,42 @@ public class GameMap implements MapRequestListener {
 				}
 			}
 		}
+	}
+
+	private boolean isHill(Tile tile) {
+		// FIXME: Not ideal code
+		return tile.getBaseTileType() == TileType.GRASS_HILL || tile.getBaseTileType() == TileType.PLAINS_HILL
+				|| tile.getBaseTileType() == TileType.DESERT_HILL || tile.getBaseTileType() == TileType.TUNDRA_HILL;
+	}
+
+	private boolean containsVector(Tile tile, Vector2 vector) {
+		for (Vector2 v : tile.getVectors()) {
+			// FIXME: We shouldn't have to round out our vectors here
+			if (roundedEquals(v, vector))
+				return true;
+		}
+		return false;
+	}
+
+	private ArrayList<Vector2> getSharedVectors(Tile tile, int side, Tile otherTile) {
+		// TODO: Verify this works.
+		ArrayList<Vector2> sharedVectors = new ArrayList<>();
+
+		// Get the 2 vectors from the side.
+		Vector2 firstVector = tile.getVectors()[side - 1 < 0 ? 5 : side - 1];
+		Vector2 lastVector = tile.getVectors()[side];
+
+		for (Vector2 vector : otherTile.getVectors())
+			if (firstVector.equals(vector) || lastVector.equals(vector))
+				sharedVectors.add(vector);
+
+		return sharedVectors;
+	}
+
+	private boolean roundedEquals(Vector2 v1, Vector2 v2) {
+		if ((int) v1.x == (int) v2.x && (int) v1.y == (int) v2.y)
+			return true;
+
+		return false;
 	}
 }

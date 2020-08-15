@@ -190,7 +190,7 @@ public enum TileType implements Comparable<TileType> {
 	};
 
 	public enum TileLayer {
-		BASE, MIDDLE, HIGH, TOP;
+		BASE, MIDDLE, HIGH, TOP, RIVER;
 	}
 
 	public enum TileProperty {

@@ -6,7 +6,7 @@ filter: Nearest,Nearest
 repeat: none
 tile_air
   rotate: false
-  xy: 206, 85
+  xy: 240, 119
   size: 1, 1
   orig: 1, 1
   offset: 0, 0
@@ -121,6 +121,13 @@ tile_plains_hill
   xy: 2, 88
   size: 32, 32
   orig: 32, 32
+  offset: 0, 0
+  index: -1
+tile_river
+  rotate: false
+  xy: 206, 83
+  size: 17, 3
+  orig: 17, 3
   offset: 0, 0
   index: -1
 tile_select

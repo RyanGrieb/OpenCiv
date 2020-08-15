@@ -1,7 +1,5 @@
 package me.rhin.openciv.shared.packet;
 
-import java.util.HashMap;
-
 import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.JsonValue;
 

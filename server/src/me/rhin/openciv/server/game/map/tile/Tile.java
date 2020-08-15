@@ -41,6 +41,7 @@ public class Tile {
 	private float x, y, width, height;
 	private int gridX, gridY;
 	private Tile[] adjTiles;
+	private boolean[] riverSides;
 	private Vector2[] vectors;
 	private City city;
 	private ArrayList<Unit> units;
@@ -56,6 +57,7 @@ public class Tile {
 		this.gridY = (int) y;
 		initializeVectors();
 		this.adjTiles = new Tile[6];
+		this.riverSides = new boolean[6];
 		this.units = new ArrayList<>();
 	}
 
@@ -274,5 +276,21 @@ public class Tile {
 			return ((TileTypeWrapper) tileWrappers.toArray()[tileWrappers.size() - 2]).getTileType().getMovementCost();
 		} else
 			return topWrapper.getTileType().getMovementCost();
+	}
+
+	public void addRiverToSide(int side) {
+		this.riverSides[side] = true;
+	}
+
+	public boolean[] getRiverSides() {
+		return riverSides;
+	}
+
+	public boolean hasRivers() {
+		for (boolean riverSide : riverSides)
+			if (riverSide)
+				return true;
+
+		return false;
 	}
 }

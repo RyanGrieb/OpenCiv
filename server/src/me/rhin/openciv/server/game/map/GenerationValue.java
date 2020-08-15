@@ -1,7 +1,5 @@
 package me.rhin.openciv.server.game.map;
 
-import me.rhin.openciv.server.game.map.tile.Tile;
-
 public class GenerationValue {
 
 	private GenerationValue[] adjGenerationValues;

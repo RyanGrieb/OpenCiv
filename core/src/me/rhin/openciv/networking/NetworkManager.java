@@ -127,15 +127,15 @@ public class NetworkManager {
 		try {
 			Class<? extends Event<? extends Listener>> eventClass = networkEvents
 					.get(ClassReflection.forName(packetName));
-
+			
 			Event<? extends Listener> eventObj = (Event<? extends Listener>) ClassReflection
 					.getConstructor(eventClass, PacketParameter.class)
 					.newInstance(new PacketParameter(webSocket, packet));
 
 			Civilization.getInstance().getEventManager().fireEvent(eventObj);
 		} catch (Exception e) {
-			Gdx.app.log(Civilization.WS_LOG_TAG, e.getMessage());
-			e.printStackTrace();
+			//Gdx.app.log(Civilization.WS_LOG_TAG, e.getMessage());
+			//e.printStackTrace();
 		}
 
 	}

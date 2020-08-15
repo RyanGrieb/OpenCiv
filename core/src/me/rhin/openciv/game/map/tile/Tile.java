@@ -14,6 +14,7 @@ import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.city.City;
 import me.rhin.openciv.game.map.GameMap;
+import me.rhin.openciv.game.map.RiverPart;
 import me.rhin.openciv.game.map.tile.TileType.TileLayer;
 import me.rhin.openciv.game.map.tile.TileType.TileProperty;
 import me.rhin.openciv.game.unit.Unit;
@@ -61,6 +62,7 @@ public class Tile extends Actor implements ShapeRenderListener {
 	private int gridX, gridY;
 	private Vector2[] vectors;
 	private Tile[] adjTiles;
+	private RiverPart[] riverSides;
 	private City city;
 	private City territory;
 	private ArrayList<Unit> units;
@@ -87,6 +89,7 @@ public class Tile extends Actor implements ShapeRenderListener {
 		this.gridY = (int) y;
 		initializeVectors();
 		this.adjTiles = new Tile[6];
+		this.riverSides = new RiverPart[6];
 		this.units = new ArrayList<>();
 
 		this.posLabel = new CustomLabel(gridX + "," + gridY);
@@ -170,6 +173,17 @@ public class Tile extends Actor implements ShapeRenderListener {
 	@Override
 	public float getY() {
 		return y;
+	}
+
+	public void addRiver(RiverPart river, int side) {
+		// FIXME: The way our adjTiles are set up, all our possible river sides are:
+		// 5,0,1,2. In the future, we want our adjTiles index to align /w the river.
+		// So the possible river sides = 0,1,2,3
+		riverSides[side] = river;
+	}
+
+	public RiverPart[] getRiverSides() {
+		return riverSides;
 	}
 
 	public GameMap getMap() {

@@ -3,6 +3,7 @@ package me.rhin.openciv.ui.screen.type;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.utils.TimeUtils;
 
 import me.rhin.openciv.Civilization;
@@ -22,6 +23,8 @@ public class InGameScreen extends AbstractScreen {
 	private GameOverlay gameOverlay;
 	private EventManager eventManager;
 	private CivGame game;
+	private Group tileGroup;
+	private Group riverGroup;
 
 	long lastTimeCounted;
 	private float frameRate;
@@ -35,6 +38,12 @@ public class InGameScreen extends AbstractScreen {
 
 		lastTimeCounted = TimeUtils.millis();
 		frameRate = Gdx.graphics.getFramesPerSecond();
+
+		this.tileGroup = new Group();
+		this.riverGroup = new Group();
+
+		stage.addActor(tileGroup);
+		stage.addActor(riverGroup);
 	}
 
 	@Override
@@ -133,8 +142,16 @@ public class InGameScreen extends AbstractScreen {
 	public CivGame getGame() {
 		return game;
 	}
-	
+
 	public GameOverlay getGameOverlay() {
 		return gameOverlay;
+	}
+
+	public Group getTileGroup() {
+		return tileGroup;
+	}
+
+	public Group getRiverGroup() {
+		return riverGroup;
 	}
 }

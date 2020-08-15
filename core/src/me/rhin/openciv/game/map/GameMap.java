@@ -1,18 +1,14 @@
 package me.rhin.openciv.game.map;
 
-import java.util.LinkedList;
-import java.util.Queue;
-import java.util.Random;
-
 import com.badlogic.gdx.math.Vector2;
 
 import me.rhin.openciv.Civilization;
-import me.rhin.openciv.game.CivGame;
 import me.rhin.openciv.game.map.tile.Tile;
 import me.rhin.openciv.game.map.tile.TileType;
-import me.rhin.openciv.listener.AddUnitListener;
 import me.rhin.openciv.listener.ReceiveMapChunkListener;
+import me.rhin.openciv.shared.packet.ChunkTile;
 import me.rhin.openciv.shared.packet.type.MapChunkPacket;
+import me.rhin.openciv.ui.screen.type.InGameScreen;
 import me.rhin.openciv.util.MathHelper;
 
 public class GameMap implements ReceiveMapChunkListener {
@@ -48,14 +44,30 @@ public class GameMap implements ReceiveMapChunkListener {
 	@Override
 	public void onReciveMapChunk(MapChunkPacket packet) {
 		// Start from 0 and go up the Y axis.
+		int chunkTileIndex = 0;
 		for (int i = 0; i < MapChunkPacket.CHUNK_SIZE; i++) {
 			for (int j = 0; j < MapChunkPacket.CHUNK_SIZE; j++) {
 				Tile tile = tiles[packet.getChunkX() + i][packet.getChunkY() + j];
-				
-				tile.setTileType(TileType.fromId(packet.getBaseTileChunk()[i][j]));
-				tile.setTileType(TileType.fromId(packet.getLayeredTileChunk()[i][j]));
-				tile.setTileType(TileType.fromId(packet.getLuxuryTileChunk()[i][j]));
-				Civilization.getInstance().getScreenManager().getCurrentScreen().getStage().addActor(tile);
+
+				ChunkTile chunkTile = packet.getChunkTiles().get(chunkTileIndex);
+
+				for (int tileLayer : chunkTile.getTileLayers()) {
+					tile.setTileType(TileType.fromId(tileLayer));
+				}
+
+				for (int k = 0; k < chunkTile.getRiverSides().length; k++) {
+					if (chunkTile.getRiverSides()[k] == 1) {
+						RiverPart river = new RiverPart(tile, k);
+						tile.getRiverSides()[k] = river;
+						((InGameScreen) Civilization.getInstance().getScreenManager().getCurrentScreen())
+								.getRiverGroup().addActor(river);
+					}
+				}
+
+				((InGameScreen) Civilization.getInstance().getScreenManager().getCurrentScreen()).getTileGroup()
+						.addActor(tile);
+
+				chunkTileIndex++;
 			}
 		}
 	}
