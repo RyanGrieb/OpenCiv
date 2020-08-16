@@ -502,8 +502,10 @@ public class GameMap implements MapRequestListener {
 							tileSide = j;
 						}
 					}
-					//System.out.println("Adding river to side: " + tileSide);
-					tile.addRiverToSide(tileSide);
+					// System.out.println("Adding river to side: " + tileSide);
+					if (tile.getAdjTiles()[tileSide].getBaseTileType() != TileType.OCEAN)
+						tile.addRiverToSide(tileSide);
+
 					traversedVectors.add(nextVector);
 					currentVector = nextVector;
 				}
