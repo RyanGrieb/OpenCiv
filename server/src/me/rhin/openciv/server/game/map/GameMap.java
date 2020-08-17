@@ -26,14 +26,6 @@ import me.rhin.openciv.shared.util.MathHelper;
 
 public class GameMap implements MapRequestListener {
 
-	private class VectorNode {
-		Vector2 vector;
-
-		public VectorNode(Vector2 vector) {
-			this.vector = vector;
-		}
-	}
-
 	public static final int WIDTH = 80;
 	public static final int HEIGHT = 52;
 	public static final int MAX_NODES = WIDTH * HEIGHT;
