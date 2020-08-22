@@ -389,7 +389,8 @@ public class Game
 				rndY = rnd.nextInt(maxY - minY + 1) + minY;
 				Tile tile = map.getTiles()[rndX][rndY];
 
-				if (tile.containsTileType(TileType.OCEAN) || tile.containsTileType(TileType.MOUNTAIN))
+				if (tile.containsTileType(TileType.OCEAN) || tile.containsTileType(TileType.MOUNTAIN)
+						|| tile.containsTileType(TileType.TUNDRA) || !tile.hasRivers())
 					continue;
 
 				// Check if there is room for 2 units.
