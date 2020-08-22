@@ -316,7 +316,7 @@ public abstract class Unit extends Actor implements ShapeRenderListener {
 	}
 
 	public int getMaxMovement() {
-		return 3;
+		return 2;
 	}
 
 	public int getPathMovement() {

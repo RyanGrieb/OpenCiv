@@ -229,7 +229,7 @@ public abstract class Unit {
 	}
 
 	public int getMaxMovement() {
-		return 3;
+		return 2;
 	}
 
 	public boolean isSelected() {
