@@ -197,8 +197,8 @@ public class GameMap implements MapRequestListener {
 
 		float mountainTopHeightPrecent = 0.50F;
 		float mountainSpawnChancePrecent = 0.90F;
-		float hillTopHeightPrecent = 0.85F;
-		float hillSpawnChancePrecent = 0.65F;
+		float hillTopHeightPrecent = 0.90F;
+		float hillSpawnChancePrecent = 0.50F;
 
 		for (int x = 0; x < WIDTH; x++) {
 			for (int y = 0; y < HEIGHT; y++) {

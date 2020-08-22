@@ -372,13 +372,16 @@ public class Game
 
 		Random rnd = new Random();
 
+		int iterations = 0;
 		for (int i = 0; i < players.size(); i++) {
 			Player player = players.get(i);
 			Rectangle rect = map.getMapPartition().get(i);
 
 			int rndX = -1;
 			int rndY = -1;
+
 			while (true) {
+				iterations++;
 
 				float padding = 0.25F;
 				int minX = (int) (rect.getX() + (rect.getWidth() * padding));
@@ -403,6 +406,7 @@ public class Game
 					player.setSpawnPos(rndX, rndY);
 					break;
 				}
+
 			}
 		}
 
