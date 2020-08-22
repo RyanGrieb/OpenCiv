@@ -1,7 +1,7 @@
 package me.rhin.openciv.game.map.tile;
 
 import java.util.ArrayList;
-import java.util.PriorityQueue;
+import java.util.TreeSet;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.Batch;
@@ -52,7 +52,7 @@ public class Tile extends Actor implements ShapeRenderListener {
 	private static final int SPRITE_HEIGHT = 32;
 
 	private GameMap map;
-	private PriorityQueue<TileTypeWrapper> tileWrappers;
+	private TreeSet<TileTypeWrapper> tileWrappers;
 	private Sprite selectionSprite;
 	private Sprite territorySprite;
 	private boolean[] territoryBorders;
@@ -74,7 +74,7 @@ public class Tile extends Actor implements ShapeRenderListener {
 			Gdx.app.log(Civilization.LOG_TAG,
 					"WARNING: TileType " + tileType.name() + " top layer applied to constructor");
 		}
-		this.tileWrappers = new PriorityQueue<>();
+		this.tileWrappers = new TreeSet<>();
 		tileWrappers.add(new TileTypeWrapper(tileType));
 
 		this.selectionSprite = new Sprite(TextureEnum.TILE_SELECT.sprite());
@@ -403,7 +403,7 @@ public class Tile extends Actor implements ShapeRenderListener {
 		return territory;
 	}
 
-	public PriorityQueue<TileTypeWrapper> getTileTypeWrappers() {
+	public TreeSet<TileTypeWrapper> getTileTypeWrappers() {
 		return tileWrappers;
 	}
 }

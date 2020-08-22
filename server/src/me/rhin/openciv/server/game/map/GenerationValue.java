@@ -1,6 +1,8 @@
 package me.rhin.openciv.server.game.map;
 
-public class GenerationValue {
+import me.rhin.openciv.server.game.map.tile.Tile.TileTypeWrapper;
+
+public class GenerationValue implements Comparable<GenerationValue> {
 
 	private GenerationValue[] adjGenerationValues;
 	private int value;
@@ -12,6 +14,11 @@ public class GenerationValue {
 		this.value = value;
 		this.gridX = x;
 		this.gridY = y;
+	}
+
+	@Override
+	public int compareTo(GenerationValue type) {
+		return value - type.getValue();
 	}
 
 	public void setEdge(int index, GenerationValue adjGenerationValue) {

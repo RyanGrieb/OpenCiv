@@ -2,7 +2,7 @@ package me.rhin.openciv.server.game.map.tile;
 
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.PriorityQueue;
+import java.util.TreeSet;
 
 import com.badlogic.gdx.math.Vector2;
 
@@ -36,7 +36,7 @@ public class Tile {
 	private static final int SIZE = 16;
 
 	private GameMap map;
-	private PriorityQueue<TileTypeWrapper> tileWrappers;
+	private TreeSet<TileTypeWrapper> tileWrappers;
 	private StatLine statLine;
 	private float x, y, width, height;
 	private int gridX, gridY;
@@ -48,7 +48,7 @@ public class Tile {
 
 	public Tile(GameMap map, TileType tileType, float x, float y) {
 		this.map = map;
-		this.tileWrappers = new PriorityQueue<>();
+		this.tileWrappers = new TreeSet<>();
 		tileWrappers.add(new TileTypeWrapper(tileType));
 		this.statLine = getStatLine();
 		this.x = x;
@@ -141,7 +141,7 @@ public class Tile {
 		return ((TileTypeWrapper) tileWrappers.toArray()[tileWrappers.size() - 1]).getTileType();
 	}
 
-	public PriorityQueue<TileTypeWrapper> getTileTypeWrappers() {
+	public TreeSet<TileTypeWrapper> getTileTypeWrappers() {
 		return tileWrappers;
 	}
 
