@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.TreeSet;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
@@ -99,15 +100,12 @@ public class Tile extends Actor implements ShapeRenderListener {
 
 	@Override
 	public void onShapeRender(ShapeRenderer shapeRenderer) {
-		if (territory == null)
-			return;
-
-		shapeRenderer.setColor(territory.getPlayerOwner().getColor());
 
 		// Draw the hexagon outline
 
 		// FIXME: Don't render lines if they're off the screen. This isn't part of the
 		// actor class so we need to manually put that in.
+
 		for (int i = 0; i < territoryBorders.length; i++) {
 			boolean renderLine = territoryBorders[i];
 			if (!renderLine)
@@ -122,15 +120,26 @@ public class Tile extends Actor implements ShapeRenderListener {
 				v1 = 5;
 				v2 = 0;
 			}
+
+			shapeRenderer.setColor(territory.getPlayerOwner().getColor());
 			shapeRenderer.line(vectors[v1], vectors[v2]);
 		}
 
-		// shapeRenderer.line(vectors[0], vectors[1]);
-		// shapeRenderer.line(vectors[1], vectors[2]);
-		// shapeRenderer.line(vectors[2], vectors[3]);
-		// shapeRenderer.line(vectors[3], vectors[4]);
-		// shapeRenderer.line(vectors[4], vectors[5]);
-		// shapeRenderer.line(vectors[5], vectors[0]);
+		shapeRenderer.setColor(0, 0, 0, 0.3F);
+		for (int i = 0; i < adjTiles.length; i++) {
+			Tile adjTile = adjTiles[i];
+
+			int v1 = i - 1;
+			int v2 = i;
+			if (v1 == -1) {
+				v1 = 5;
+				v2 = 0;
+			}
+
+			if ((adjTile == null || adjTile.getTerritory() == null) && territory == null) {
+				shapeRenderer.line(vectors[v1], vectors[v2]);
+			}
+		}
 	}
 
 	@Override
