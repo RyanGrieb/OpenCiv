@@ -509,13 +509,17 @@ public class GameMap implements MapRequestListener {
 		// Split the map to make resource generation & player spawnpoints balanced
 		splitMapPartition();
 
-		generateResource(TileType.HORSES, game.getPlayers().size() * 4, TileType.GRASS, TileType.PLAINS);
-		generateResource(TileType.IRON, game.getPlayers().size() * 60, TileType.GRASS, TileType.PLAINS,
+		generateResource(TileType.HORSES, game.getPlayers().size() * 6, TileType.GRASS, TileType.PLAINS);
+
+		generateResource(TileType.IRON, game.getPlayers().size() * 6, TileType.GRASS, TileType.PLAINS,
 				TileType.PLAINS_HILL, TileType.GRASS_HILL, TileType.DESERT, TileType.DESERT_HILL);
-		generateResource(TileType.COPPER, game.getPlayers().size(), TileType.GRASS, TileType.PLAINS,
+
+		generateResource(TileType.COPPER, game.getPlayers().size() * 4, TileType.GRASS, TileType.PLAINS,
 				TileType.PLAINS_HILL, TileType.GRASS_HILL, TileType.DESERT, TileType.DESERT_HILL);
-		generateResource(TileType.COTTON, game.getPlayers().size(), TileType.GRASS, TileType.PLAINS);
-		generateResource(TileType.GEMS, game.getPlayers().size(), TileType.GRASS, TileType.PLAINS, TileType.DESERT,
+
+		generateResource(TileType.COTTON, game.getPlayers().size() * 4, TileType.GRASS, TileType.PLAINS);
+
+		generateResource(TileType.GEMS, game.getPlayers().size() * 4, TileType.GRASS, TileType.PLAINS, TileType.DESERT,
 				TileType.DESERT_HILL);
 
 	}
