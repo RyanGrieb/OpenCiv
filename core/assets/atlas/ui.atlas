@@ -14,8 +14,8 @@ font
 ui_background
   rotate: false
   xy: 2, 171
-  size: 800, 600
-  orig: 800, 600
+  size: 800, 580
+  orig: 800, 580
   offset: 0, 0
   index: -1
 ui_black
@@ -34,7 +34,7 @@ ui_button
   index: -1
 ui_button_hovered
   rotate: false
-  xy: 804, 743
+  xy: 804, 723
   size: 142, 28
   orig: 142, 28
   offset: 0, 0
@@ -48,14 +48,14 @@ ui_container_box
   index: -1
 ui_dark_gray
   rotate: false
-  xy: 948, 770
+  xy: 948, 750
   size: 1, 1
   orig: 1, 1
   offset: 0, 0
   index: -1
 ui_error
   rotate: false
-  xy: 804, 725
+  xy: 804, 705
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
