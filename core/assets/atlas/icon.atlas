@@ -34,7 +34,7 @@ icon_citizen_unworked
   index: -1
 icon_faith
   rotate: false
-  xy: 146, 2
+  xy: 164, 2
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
@@ -62,7 +62,7 @@ icon_heritage
   index: -1
 icon_production
   rotate: false
-  xy: 164, 2
+  xy: 182, 2
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
@@ -70,6 +70,13 @@ icon_production
 icon_research
   rotate: false
   xy: 74, 2
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+icon_unemployed_citizen
+  rotate: false
+  xy: 146, 2
   size: 16, 16
   orig: 16, 16
   offset: 0, 0

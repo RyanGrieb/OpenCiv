@@ -15,6 +15,7 @@ public class AssetHandler extends AssetManager {
 		load("atlas/ui.atlas", TextureAtlas.class);
 		load("atlas/unit.atlas", TextureAtlas.class);
 		load("atlas/icon.atlas", TextureAtlas.class);
+		load("atlas/building.atlas", TextureAtlas.class);
 		load("skin/uiskin.atlas", TextureAtlas.class);
 		load("skin/uiskin.json", Skin.class, new SkinLoader.SkinParameter("skin/uiskin.atlas"));
 

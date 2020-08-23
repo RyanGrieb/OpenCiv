@@ -31,6 +31,6 @@ public class Monument extends Building {
 
 	@Override
 	public TextureEnum getTexture() {
-		return TextureEnum.UI_ERROR;
+		return TextureEnum.BUILDING_MONUMENT;
 	}
 }

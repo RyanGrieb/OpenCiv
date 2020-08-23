@@ -17,7 +17,7 @@ public class GameOverlay extends AbstractWindow {
 
 		this.fpsLabel = new CustomLabel("FPS: 60.0");
 		fpsLabel.setPosition(viewport.getWorldWidth() - fpsLabel.getWidth() - 4,
-				viewport.getWorldHeight() - fpsLabel.getHeight() - 5);
+				viewport.getWorldHeight() - fpsLabel.getHeight() - statusBar.getHeight() - 5);
 		this.addActor(fpsLabel);
 	}
 
@@ -34,7 +34,7 @@ public class GameOverlay extends AbstractWindow {
 	public boolean closesOtherWindows() {
 		return false;
 	}
-	
+
 	public float getTopbarHeight() {
 		return statusBar.getHeight();
 	}

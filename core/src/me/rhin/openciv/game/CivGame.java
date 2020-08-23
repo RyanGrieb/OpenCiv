@@ -47,11 +47,13 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 	private Player player;
 	private HashMap<String, Player> players;
 	private int turnTime;
+	private int turns;
 
 	public CivGame() {
 		this.map = new GameMap();
 		this.players = new HashMap<>();
 		this.turnTime = BASE_TURN_TIME;
+		this.turns = 0;
 
 		Civilization.getInstance().getEventManager().addListener(PlayerConnectListener.class, this);
 		Civilization.getInstance().getEventManager().addListener(AddUnitListener.class, this);
@@ -165,6 +167,8 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 			Gdx.app.log(Civilization.LOG_TAG, "Updating turn time to: " + packet.getTurnTime());
 			turnTime = packet.getTurnTime();
 		}
+
+		turns++;
 	}
 
 	@Override
@@ -191,5 +195,9 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 
 	public int getTurnTime() {
 		return turnTime;
+	}
+
+	public int getTurn() {
+		return turns;
 	}
 }

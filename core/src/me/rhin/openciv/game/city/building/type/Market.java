@@ -28,7 +28,7 @@ public class Market extends Building implements SpecialistContainer {
 
 	@Override
 	public TextureEnum getTexture() {
-		return TextureEnum.UI_ERROR;
+		return TextureEnum.BUILDING_MARKET;
 	}
 
 	@Override
@@ -48,11 +48,11 @@ public class Market extends Building implements SpecialistContainer {
 
 	@Override
 	public void addSpecialist() {
-		
+
 	}
 
 	@Override
 	public void removeSpecialist() {
-		
+
 	}
 }

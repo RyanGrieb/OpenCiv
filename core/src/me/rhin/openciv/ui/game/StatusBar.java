@@ -7,18 +7,22 @@ import com.badlogic.gdx.scenes.scene2d.Actor;
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.listener.PlayerStatUpdateListener;
+import me.rhin.openciv.listener.TurnTimeUpdateListener;
 import me.rhin.openciv.shared.packet.type.PlayerStatUpdatePacket;
+import me.rhin.openciv.shared.packet.type.TurnTimeUpdatePacket;
 import me.rhin.openciv.shared.stat.Stat;
 import me.rhin.openciv.shared.stat.StatLine;
 import me.rhin.openciv.ui.label.CustomLabel;
 
-public class StatusBar extends Actor implements PlayerStatUpdateListener {
+public class StatusBar extends Actor implements PlayerStatUpdateListener, TurnTimeUpdateListener {
 
 	private Sprite sprite;
 
 	private CustomLabel scienceDescLabel, heritageDescLabel, goldDescLabel;
 	private Sprite scienceIcon, heritageIcon, goldIcon;
 	private CustomLabel scienceLabel, hertiageLabel, goldLabel;
+
+	private CustomLabel turnsLabel;
 
 	public StatusBar(float x, float y, float width, float height) {
 		this.setPosition(x, y);
@@ -42,9 +46,12 @@ public class StatusBar extends Actor implements PlayerStatUpdateListener {
 		goldIcon.setSize(16, 16);
 		this.goldLabel = new CustomLabel("0");
 
+		this.turnsLabel = new CustomLabel("Turns: 0");
+
 		updatePositions();
 
 		Civilization.getInstance().getEventManager().addListener(PlayerStatUpdateListener.class, this);
+		Civilization.getInstance().getEventManager().addListener(TurnTimeUpdateListener.class, this);
 	}
 
 	@Override
@@ -62,6 +69,8 @@ public class StatusBar extends Actor implements PlayerStatUpdateListener {
 		scienceLabel.draw(batch, parentAlpha);
 		hertiageLabel.draw(batch, parentAlpha);
 		goldLabel.draw(batch, parentAlpha);
+
+		turnsLabel.draw(batch, parentAlpha);
 	}
 
 	@Override
@@ -77,7 +86,13 @@ public class StatusBar extends Actor implements PlayerStatUpdateListener {
 		hertiageLabel.setText((int) statLine.getStatValue(Stat.HERITAGE) + "/???" + "(+"
 				+ (int) statLine.getStatValue(Stat.HERITAGE_GAIN) + ")");
 
-		this.updatePositions();
+		updatePositions();
+	}
+
+	@Override
+	public void onTurnTimeUpdate(TurnTimeUpdatePacket packet) {
+		turnsLabel.setText("Turns: " + Civilization.getInstance().getGame().getTurn());
+		updatePositions();
 	}
 
 	private void updatePositions() {
@@ -110,5 +125,7 @@ public class StatusBar extends Actor implements PlayerStatUpdateListener {
 
 		originX += goldIcon.getWidth() + 5;
 		goldLabel.setPosition(originX, y + goldLabel.getHeight() / 2);
+
+		turnsLabel.setPosition(getWidth() - turnsLabel.getWidth() - 2, y + 5);
 	}
 }

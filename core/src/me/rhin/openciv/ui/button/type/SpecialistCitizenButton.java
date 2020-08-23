@@ -14,7 +14,7 @@ public class SpecialistCitizenButton extends Button {
 
 	public SpecialistCitizenButton(City city, SpecialistContainer specialistContainer, float x, float y, float width,
 			float height) {
-		super(TextureEnum.UI_ERROR, "", x, y, width, height);
+		super(TextureEnum.ICON_UNEMPLOYED_CITIZEN, "", x, y, width, height);
 
 		this.city = city;
 		this.specialistContainer = specialistContainer;
@@ -24,7 +24,7 @@ public class SpecialistCitizenButton extends Button {
 	public void onClick() {
 		ClickSpecialistPacket packet = new ClickSpecialistPacket();
 		packet.setContainer(city.getName(), specialistContainer.getName());
-		
+
 		Civilization.getInstance().getNetworkManager().sendPacket(packet);
 	}
 
