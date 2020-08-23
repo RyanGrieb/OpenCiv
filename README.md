@@ -1,6 +1,6 @@
 # OpenCiv
 
-An open source Civ'ish game made in LibGDX
+An open source civilization inspired game
 
 ![alt text](https://github.com/rhin123/OpenCiv/blob/master/meta/screenshots/title_screen.png?raw=true)
 
