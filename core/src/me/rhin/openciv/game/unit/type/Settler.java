@@ -22,11 +22,11 @@ public class Settler extends UnitItem {
 		}
 
 		@Override
-		public int getMovementCost(Tile tile) {
+		public int getMovementCost(Tile prevTile, Tile tile) {
 			if (tile.containsTileProperty(TileProperty.WATER))
 				return 1000000;
 			else
-				return tile.getMovementCost();
+				return tile.getMovementCost(prevTile);
 		}
 	}
 

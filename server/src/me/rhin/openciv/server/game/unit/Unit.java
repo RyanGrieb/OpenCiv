@@ -37,7 +37,7 @@ public abstract class Unit {
 		playerOwner.addOwnedUnit(this);
 	}
 
-	public abstract int getMovementCost(Tile tile);
+	public abstract int getMovementCost(Tile prevTile, Tile adjTile);
 
 	public boolean setTargetTile(Tile targetTile) {
 		if (targetTile == null)
@@ -99,7 +99,8 @@ public abstract class Unit {
 				if (adjTile == null)
 					continue;
 
-				int tenativeGScore = gScores[current.getGridX()][current.getGridY()] + getMovementCost(adjTile);
+				int tenativeGScore = gScores[current.getGridX()][current.getGridY()]
+						+ getMovementCost(current, adjTile);
 
 				if (tenativeGScore < gScores[adjTile.getGridX()][adjTile.getGridY()]) {
 
@@ -143,7 +144,7 @@ public abstract class Unit {
 				nextTile = targetTile;
 
 			if (!parentTile.equals(standingTile)) {
-				pathMovement += getMovementCost(parentTile);
+				pathMovement += getMovementCost(parentTile, nextTile);
 			}
 
 			if (parentTile.equals(targetTile)) {

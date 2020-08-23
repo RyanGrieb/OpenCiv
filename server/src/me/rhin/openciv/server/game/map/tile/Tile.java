@@ -278,6 +278,35 @@ public class Tile {
 			return topWrapper.getTileType().getMovementCost();
 	}
 
+	public int getMovementCost(Tile prevTile) {
+
+		// Check if the tile were moving to
+		int currentSideCheck = -1;
+		for (int i = 0; i < adjTiles.length; i++) {
+			if (prevTile.equals(adjTiles[i])) {
+				currentSideCheck = i;
+			}
+		}
+
+		if (riverSides[currentSideCheck]) {
+			return 2;
+		}
+
+		// Check if the tile were moving from has a river
+		int prevSideCheck = -1;
+		for (int i = 0; i < prevTile.adjTiles.length; i++) {
+			if (this.equals(prevTile.adjTiles[i])) {
+				prevSideCheck = i;
+			}
+		}
+
+		if (prevTile.getRiverSides()[prevSideCheck]) {
+			return 2;
+		}
+
+		return getMovementCost();
+	}
+
 	public void addRiverToSide(int side) {
 		this.riverSides[side] = true;
 	}

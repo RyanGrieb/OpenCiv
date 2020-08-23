@@ -63,7 +63,7 @@ public abstract class Unit extends Actor implements ShapeRenderListener {
 				unitParameter.getStandingTile(), assetEnum);
 	}
 
-	public abstract int getMovementCost(Tile adjTile);
+	public abstract int getMovementCost(Tile prevTile, Tile adjTile);
 
 	@Override
 	public void act(float delta) {
@@ -146,7 +146,8 @@ public abstract class Unit extends Actor implements ShapeRenderListener {
 				if (adjTile == null)
 					continue;
 
-				int tenativeGScore = gScores[current.getGridX()][current.getGridY()] + getMovementCost(adjTile);
+				int tenativeGScore = gScores[current.getGridX()][current.getGridY()]
+						+ getMovementCost(current, adjTile);
 
 				if (tenativeGScore < gScores[adjTile.getGridX()][adjTile.getGridY()]) {
 
@@ -191,7 +192,7 @@ public abstract class Unit extends Actor implements ShapeRenderListener {
 				nextTile = targetTile;
 
 			if (!parentTile.equals(standingTile)) {
-				pathMovement += getMovementCost(parentTile);
+				pathMovement += getMovementCost(parentTile, nextTile);
 			}
 
 			if (parentTile.equals(targetTile)) {
