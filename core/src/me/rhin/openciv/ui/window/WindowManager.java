@@ -83,6 +83,15 @@ public class WindowManager {
 
 		return true;
 	}
+	
+	public boolean allowsCameraMovement() {
+		for (AbstractWindow window : windows.values()) {
+			if (window.disablesCameraMovement())
+				return false;
+		}
+
+		return true;
+	}
 
 	public boolean isDisabledWindow(AbstractWindow targetWindow) {
 		for (AbstractWindow window : windows.values()) {

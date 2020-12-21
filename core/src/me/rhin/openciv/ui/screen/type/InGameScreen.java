@@ -115,7 +115,11 @@ public class InGameScreen extends AbstractScreen {
 	private void handleInput() {
 		if (!windowManager.allowsInput())
 			return;
-
+		
+		if(!windowManager.allowsCameraMovement()) {
+			return;
+		}
+		
 		OrthographicCamera cam = getCamera();
 		if (Gdx.input.isKeyPressed(Input.Keys.EQUALS)) {
 			cam.zoom += 0.04;

@@ -62,6 +62,8 @@ public class ContainerList extends Group {
 				thisContainer.getStage().setScrollFocus(null);
 			}
 		});
+		
+		
 	}
 
 	@Override

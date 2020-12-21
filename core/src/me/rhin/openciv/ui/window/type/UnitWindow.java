@@ -50,6 +50,11 @@ public class UnitWindow extends AbstractWindow {
 	public boolean disablesInput() {
 		return false;
 	}
+	
+	@Override
+	public boolean disablesCameraMovement() {
+		return false;
+	}
 
 	@Override
 	public boolean closesOtherWindows() {

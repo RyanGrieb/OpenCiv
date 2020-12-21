@@ -104,7 +104,12 @@ public class CityInfoWindow extends AbstractWindow implements BuildingConstructe
 	public boolean disablesInput() {
 		return false;
 	}
-
+	
+	@Override
+	public boolean disablesCameraMovement() {
+		return true;
+	}
+	
 	@Override
 	public boolean closesOtherWindows() {
 		return true;
