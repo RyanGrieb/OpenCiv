@@ -154,6 +154,10 @@ public class Game
 			Json json = new Json();
 			playerConn.send(json.toJson(packet));
 		}
+
+		if (players.size() < 1) {
+			System.exit(0);
+		}
 	}
 
 	@Override
