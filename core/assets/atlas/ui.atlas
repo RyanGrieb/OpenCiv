@@ -20,7 +20,7 @@ ui_background
   index: -1
 ui_black
   rotate: false
-  xy: 788, 168
+  xy: 36, 36
   size: 1, 1
   orig: 1, 1
   offset: 0, 0
@@ -48,7 +48,7 @@ ui_container_box
   index: -1
 ui_dark_gray
   rotate: false
-  xy: 948, 750
+  xy: 788, 168
   size: 1, 1
   orig: 1, 1
   offset: 0, 0
@@ -69,7 +69,7 @@ ui_github
   index: -1
 ui_gray
   rotate: false
-  xy: 644, 138
+  xy: 550, 70
   size: 1, 1
   orig: 1, 1
   offset: 0, 0
@@ -83,7 +83,14 @@ ui_green
   index: -1
 ui_light_gray
   rotate: false
-  xy: 36, 36
+  xy: 948, 750
+  size: 1, 1
+  orig: 1, 1
+  offset: 0, 0
+  index: -1
+ui_lighter_gray
+  rotate: false
+  xy: 644, 138
   size: 1, 1
   orig: 1, 1
   offset: 0, 0

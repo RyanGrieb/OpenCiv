@@ -24,7 +24,7 @@ public class ContainerScrollbar extends Actor {
 
 		this.containerList = containerList;
 
-		backgroundSprite = TextureEnum.UI_LIGHT_GRAY.sprite();
+		backgroundSprite = TextureEnum.UI_LIGHTER_GRAY.sprite();
 		backgroundSprite.setBounds(x, y, width, height);
 
 		scrubber = TextureEnum.UI_BLACK.sprite();
