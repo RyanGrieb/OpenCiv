@@ -14,6 +14,7 @@ import me.rhin.openciv.listener.RelativeMouseMoveListener.RelativeMouseMoveEvent
 import me.rhin.openciv.listener.RightClickListener.RightClickEvent;
 import me.rhin.openciv.shared.listener.EventManager;
 import me.rhin.openciv.ui.screen.AbstractScreen;
+import me.rhin.openciv.ui.screen.ScreenEnum;
 import me.rhin.openciv.ui.window.type.EscWindow;
 import me.rhin.openciv.ui.window.type.GameOverlay;
 import me.rhin.openciv.util.ClickType;
@@ -157,5 +158,10 @@ public class InGameScreen extends AbstractScreen {
 
 	public Group getRiverGroup() {
 		return riverGroup;
+	}
+	
+	@Override
+	public ScreenEnum getType() {
+		return ScreenEnum.IN_GAME;
 	}
 }

@@ -14,6 +14,7 @@ import me.rhin.openciv.ui.button.type.PlayButton;
 import me.rhin.openciv.ui.button.type.QuitGameButton;
 import me.rhin.openciv.ui.label.CustomLabel;
 import me.rhin.openciv.ui.screen.AbstractScreen;
+import me.rhin.openciv.ui.screen.ScreenEnum;
 import me.rhin.openciv.ui.window.type.TitleOverlay;
 
 public class TitleScreen extends AbstractScreen {
@@ -37,8 +38,8 @@ public class TitleScreen extends AbstractScreen {
 				150, 45));
 		stage.addActor(new AknowledgementsButton(viewport.getWorldWidth() / 2 - 150 / 2,
 				viewport.getWorldHeight() - 320, 150, 45));
-		stage.addActor(new QuitGameButton(viewport.getWorldWidth() / 2 - 150 / 2, viewport.getWorldHeight() - 380,
-				150, 45));
+		stage.addActor(
+				new QuitGameButton(viewport.getWorldWidth() / 2 - 150 / 2, viewport.getWorldHeight() - 380, 150, 45));
 		this.titleLabel = new CustomLabel("Kingomraiders: Civilization", Align.center, 0,
 				viewport.getWorldHeight() / 1.1F, viewport.getWorldWidth(), 20);
 		stage.addActor(titleLabel);
@@ -64,5 +65,10 @@ public class TitleScreen extends AbstractScreen {
 			eventManager.fireEvent(new LeftClickEvent(screenX, screenY));
 		return false;
 
+	}
+
+	@Override
+	public ScreenEnum getType() {
+		return ScreenEnum.TITLE;
 	}
 }

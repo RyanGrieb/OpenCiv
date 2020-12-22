@@ -41,4 +41,9 @@ public class LoadingScreen extends AbstractScreen {
 			//loadingLabel.setText(("Loading: " + (int) (progress * 100) + "%"));
 		}
 	}
+	
+	@Override
+	public ScreenEnum getType() {
+		return ScreenEnum.LOADING;
+	}
 }

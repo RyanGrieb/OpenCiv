@@ -45,6 +45,8 @@ public abstract class AbstractScreen implements Screen, InputProcessor {
 		ShapeRenderEvent.setShapeRenderer(shapeRenderer);
 	}
 
+	public abstract ScreenEnum getType();
+
 	@Override
 	public void show() {
 		inputMultiplexer = new InputMultiplexer();
