@@ -13,17 +13,25 @@ import com.badlogic.gdx.scenes.scene2d.utils.DragListener;
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.ui.list.ListContainer.ListContainerType;
+import me.rhin.openciv.ui.window.AbstractWindow;
+
+//FIXME: The naming of ContainerList and ListContainer is bad.
 
 public class ContainerList extends Group {
 
-	private int yOffset;
+	private float yOffset;
 	private HashMap<String, ListContainer> listContainers;
+	private ContainerScrollbar containerScrollbar;
 	private Sprite backgroundSprite;
 
-	public ContainerList(float x, float y, float width, float height) {
+	public ContainerList(AbstractWindow window, float x, float y, float width, float height) {
 		this.yOffset = 0;
 		this.listContainers = new HashMap<>();
+
 		this.setBounds(x, y, width, height);
+
+		this.containerScrollbar = new ContainerScrollbar(this, x + width, y, 20, height);
+		window.addActor(containerScrollbar);
 
 		backgroundSprite = TextureEnum.UI_LIGHT_GRAY.sprite();
 		backgroundSprite.setPosition(x, y);
@@ -33,18 +41,7 @@ public class ContainerList extends Group {
 		this.addListener(new DragListener() {
 			@Override
 			public boolean scrolled(InputEvent event, float x, float y, int amount) {
-				// FIXME: We shouldn't use a low level listener for this. We shouldn't have to
-				// check for the bounds here.
-
-				if (!Civilization.getInstance().getWindowManager().allowsInput(event.getListenerActor())) {
-					return false;
-				}
-
-				if (event.getStageX() >= getX() && event.getStageY() >= getY())
-					if (event.getStageX() <= getX() + getWidth() && event.getStageY() <= getY() + getHeight()) {
-						scroll(amount);
-					}
-				return false;
+				return onScrolled(event, x, y, amount);
 			}
 		});
 
@@ -62,13 +59,16 @@ public class ContainerList extends Group {
 				thisContainer.getStage().setScrollFocus(null);
 			}
 		});
-		
-		
+
 	}
 
 	@Override
 	public void draw(Batch batch, float parentAlpha) {
 		backgroundSprite.draw(batch);
+
+		// Note: We do this instead of adding to the group is to override the trimming
+		// of the children below.
+		// containerScrollbar.draw(batch, parentAlpha);
 
 		batch.flush();
 		if (clipBegin(getX(), getY(), getWidth(), getHeight())) {
@@ -82,8 +82,24 @@ public class ContainerList extends Group {
 		}
 	}
 
-	public void scroll(int amount) {
-		int yAmount = yOffset + (amount * 12);
+	public boolean onScrolled(InputEvent event, float x, float y, int amount) {
+		// FIXME: We shouldn't use a low level listener for this. We shouldn't have to
+		// check for the bounds here.
+		if (!Civilization.getInstance().getWindowManager().allowsInput(event.getListenerActor())) {
+			return false;
+		}
+
+		// FIXME: I would be weary of commenting out the bounding check here.
+		// if (event.getStageX() >= getX() && event.getStageY() >= getY())
+		// if (event.getStageX() <= getX() + getWidth() && event.getStageY() <= getY() +
+		// getHeight()) {
+		scroll(amount);
+		// }
+		return false;
+	}
+
+	public void scroll(float amount) {
+		float yAmount = yOffset + (amount * 12);
 		if (yAmount < 0)
 			yAmount = 0;
 
@@ -114,7 +130,7 @@ public class ContainerList extends Group {
 		addActor(listContainers.get(categoryType));
 	}
 
-	private void updatePositions() {
+	public void updatePositions() {
 		float nextHeight = 0;
 
 		// Problem:
@@ -122,6 +138,8 @@ public class ContainerList extends Group {
 			container.setPosition(0, yOffset + (0 + getHeight()) - container.getHeight() - nextHeight);
 			nextHeight += container.getHeight();
 		}
+
+		containerScrollbar.setNextHeight(nextHeight);
 	}
 
 	public void clearList() {
@@ -134,5 +152,13 @@ public class ContainerList extends Group {
 
 	public HashMap<String, ListContainer> getListContainers() {
 		return listContainers;
+	}
+
+	public void setYOffset(float yOffset) {
+		this.yOffset = yOffset;
+	}
+
+	public float getYOffset() {
+		return yOffset;
 	}
 }

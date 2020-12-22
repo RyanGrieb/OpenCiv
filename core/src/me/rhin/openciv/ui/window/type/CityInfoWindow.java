@@ -56,7 +56,7 @@ public class CityInfoWindow extends AbstractWindow implements BuildingConstructe
 		this.cityProductionInfo = new CityProductionInfo(city, 2, cityStatsInfo.getY() - 105, 200, 100);
 		addActor(cityProductionInfo);
 
-		this.productionContainerList = new ContainerList(0, 0, 200, 255);
+		this.productionContainerList = new ContainerList(this, 0, 0, 200, 255);
 		for (ProductionItem productionItem : city.getProducibleItemManager().getProducibleItems()) {
 			productionContainerList.addItem(ListContainerType.CATEGORY, productionItem.getCategory(),
 					new ListProductionItem(city, productionItem, 200, 45));
@@ -66,7 +66,7 @@ public class CityInfoWindow extends AbstractWindow implements BuildingConstructe
 		float topbarHeight = ((InGameScreen) Civilization.getInstance().getCurrentScreen()).getGameOverlay()
 				.getTopbarHeight();
 
-		this.topRightContainerList = new ContainerList(viewport.getWorldWidth() - 200,
+		this.topRightContainerList = new ContainerList(this, viewport.getWorldWidth() - 220,
 				viewport.getWorldHeight() - 195 - topbarHeight, 200, 195);
 
 		for (Building building : city.getBuildings()) {
@@ -104,12 +104,12 @@ public class CityInfoWindow extends AbstractWindow implements BuildingConstructe
 	public boolean disablesInput() {
 		return false;
 	}
-	
+
 	@Override
 	public boolean disablesCameraMovement() {
 		return true;
 	}
-	
+
 	@Override
 	public boolean closesOtherWindows() {
 		return true;
