@@ -1,6 +1,7 @@
 package me.rhin.openciv.ui.screen.type;
 
-import java.util.HashMap;
+import java.util.NavigableMap;
+import java.util.TreeMap;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
@@ -35,7 +36,8 @@ public class ServerLobbyScreen extends AbstractScreen
 	private TitleOverlay titleOverlay;
 
 	private CustomLabel connectedPlayersTitleLabel;
-	private HashMap<String, CustomLabel> connectedPlayersLabels;
+	private NavigableMap<String, CustomLabel> connectedPlayersLabels;
+	private String playerName;
 
 	public ServerLobbyScreen() {
 		this.eventManager = Civilization.getInstance().getEventManager();
@@ -49,7 +51,7 @@ public class ServerLobbyScreen extends AbstractScreen
 		eventManager.addListener(PlayerListRequestListener.class, this);
 		eventManager.addListener(GameStartListener.class, this);
 
-		connectedPlayersLabels = new HashMap<>();
+		connectedPlayersLabels = new TreeMap<>();
 
 		connectedPlayersTitleLabel = new CustomLabel("Connected Players: ", 0, viewport.getWorldHeight() / 1.1F,
 				viewport.getWorldWidth(), 20);
@@ -57,7 +59,6 @@ public class ServerLobbyScreen extends AbstractScreen
 		stage.addActor(connectedPlayersTitleLabel);
 
 		// FIXME: Only show this button to the first player in the player list.
-		stage.addActor(new MPStartButton(viewport.getWorldWidth() / 2 - 150 / 2, 60, 150, 45));
 		stage.addActor(new ServerLobbyBackButton(viewport.getWorldWidth() / 2 - 150 / 2, 20, 150, 45));
 
 		requestPlayerList();
@@ -109,6 +110,12 @@ public class ServerLobbyScreen extends AbstractScreen
 			stage.addActor(playerLabel);
 			connectedPlayersLabels.put(playerName, playerLabel);
 		}
+
+		this.playerName = connectedPlayersLabels.lastKey();
+
+		if (connectedPlayersLabels.size() < 2) {
+			assignToLobbyLeader();
+		}
 	}
 
 	@Override
@@ -126,6 +133,10 @@ public class ServerLobbyScreen extends AbstractScreen
 			CustomLabel label = (CustomLabel) connectedPlayersLabels.values().toArray()[i];
 
 			label.setPosition(0, viewport.getWorldHeight() - 100 - (i * 40));
+		}
+
+		if (connectedPlayersLabels.lastKey().equals(playerName)) {
+			assignToLobbyLeader();
 		}
 	}
 
@@ -146,5 +157,9 @@ public class ServerLobbyScreen extends AbstractScreen
 
 	private void requestPlayerList() {
 		Civilization.getInstance().getNetworkManager().sendPacket(new PlayerListRequestPacket());
+	}
+
+	private void assignToLobbyLeader() {
+		stage.addActor(new MPStartButton(viewport.getWorldWidth() / 2 - 150 / 2, 60, 150, 45));
 	}
 }
