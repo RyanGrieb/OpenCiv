@@ -119,14 +119,14 @@ public class ServerLobbyScreen extends AbstractScreen
 				actor.addAction(Actions.removeActor());
 		}
 
+		connectedPlayersLabels.remove(packet.getPlayerName());
+
 		// Repositon our labels
 		for (int i = 0; i < connectedPlayersLabels.size(); i++) {
 			CustomLabel label = (CustomLabel) connectedPlayersLabels.values().toArray()[i];
 
 			label.setPosition(0, viewport.getWorldHeight() - 100 - (i * 40));
 		}
-
-		connectedPlayersLabels.remove(packet.getPlayerName());
 	}
 
 	@Override
