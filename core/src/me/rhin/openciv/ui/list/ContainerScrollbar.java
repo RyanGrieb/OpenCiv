@@ -68,16 +68,14 @@ public class ContainerScrollbar extends Actor {
 						float scrubAmount = (event.getStageY() - prevMouseY);
 
 						// Keep dragging in bounds
+
 						if (scrubber.getY() + scrubAmount < containerList.getY()) {
-							scrubber.setPosition(scrubber.getX(), containerList.getY());
 							prevMouseY = -1;
 							return;
 						}
 
 						if (scrubber.getY() + scrubber.getHeight() + scrubAmount > containerList.getY()
 								+ containerList.getHeight()) {
-							scrubber.setPosition(scrubber.getX(),
-									(containerList.getY() + containerList.getHeight() - scrubber.getHeight()));
 							prevMouseY = -1;
 							return;
 						}
