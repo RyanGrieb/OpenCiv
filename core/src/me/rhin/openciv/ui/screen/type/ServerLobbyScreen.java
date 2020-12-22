@@ -22,7 +22,7 @@ import me.rhin.openciv.shared.packet.type.PlayerConnectPacket;
 import me.rhin.openciv.shared.packet.type.PlayerDisconnectPacket;
 import me.rhin.openciv.shared.packet.type.PlayerListRequestPacket;
 import me.rhin.openciv.ui.button.type.MPStartButton;
-import me.rhin.openciv.ui.button.type.PreviousScreenButton;
+import me.rhin.openciv.ui.button.type.ServerLobbyBackButton;
 import me.rhin.openciv.ui.label.CustomLabel;
 import me.rhin.openciv.ui.screen.AbstractScreen;
 import me.rhin.openciv.ui.screen.ScreenEnum;
@@ -58,7 +58,7 @@ public class ServerLobbyScreen extends AbstractScreen
 
 		// FIXME: Only show this button to the first player in the player list.
 		stage.addActor(new MPStartButton(viewport.getWorldWidth() / 2 - 150 / 2, 60, 150, 45));
-		stage.addActor(new PreviousScreenButton(viewport.getWorldWidth() / 2 - 150 / 2, 20, 150, 45));
+		stage.addActor(new ServerLobbyBackButton(viewport.getWorldWidth() / 2 - 150 / 2, 20, 150, 45));
 
 		requestPlayerList();
 	}
@@ -111,10 +111,6 @@ public class ServerLobbyScreen extends AbstractScreen
 		}
 	}
 
-	private void requestPlayerList() {
-		Civilization.getInstance().getNetworkManager().sendPacket(new PlayerListRequestPacket());
-	}
-
 	@Override
 	public void onPlayerDisconnect(PlayerDisconnectPacket packet) {
 		CustomLabel removedLabel = connectedPlayersLabels.get(packet.getPlayerName());
@@ -146,5 +142,9 @@ public class ServerLobbyScreen extends AbstractScreen
 	@Override
 	public ScreenEnum getType() {
 		return ScreenEnum.SERVER_LOBBY;
+	}
+
+	private void requestPlayerList() {
+		Civilization.getInstance().getNetworkManager().sendPacket(new PlayerListRequestPacket());
 	}
 }
