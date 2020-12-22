@@ -155,7 +155,7 @@ public class Game
 			playerConn.send(json.toJson(packet));
 		}
 
-		if (players.size() < 1) {
+		if (players.size() < 1 && started) {
 			System.exit(0);
 		}
 	}
