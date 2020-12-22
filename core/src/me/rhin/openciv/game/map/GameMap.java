@@ -1,5 +1,6 @@
 package me.rhin.openciv.game.map;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.Vector2;
 
 import me.rhin.openciv.Civilization;
@@ -8,6 +9,8 @@ import me.rhin.openciv.game.map.tile.TileType;
 import me.rhin.openciv.listener.ReceiveMapChunkListener;
 import me.rhin.openciv.shared.packet.ChunkTile;
 import me.rhin.openciv.shared.packet.type.MapChunkPacket;
+import me.rhin.openciv.shared.packet.type.MapRequestPacket;
+import me.rhin.openciv.ui.screen.ScreenEnum;
 import me.rhin.openciv.ui.screen.type.InGameScreen;
 import me.rhin.openciv.util.MathHelper;
 
@@ -47,7 +50,7 @@ public class GameMap implements ReceiveMapChunkListener {
 		int chunkTileIndex = 0;
 		for (int i = 0; i < MapChunkPacket.CHUNK_SIZE; i++) {
 			for (int j = 0; j < MapChunkPacket.CHUNK_SIZE; j++) {
-				Tile tile = tiles[packet.getChunkX() + i][packet.getChunkY() + j];
+				final Tile tile = tiles[packet.getChunkX() + i][packet.getChunkY() + j];
 
 				ChunkTile chunkTile = packet.getChunkTiles().get(chunkTileIndex);
 
@@ -64,8 +67,12 @@ public class GameMap implements ReceiveMapChunkListener {
 					}
 				}
 
-				((InGameScreen) Civilization.getInstance().getScreenManager().getCurrentScreen()).getTileGroup()
-						.addActor(tile);
+				Gdx.app.postRunnable(new Runnable() {
+					public void run() {
+						((InGameScreen) Civilization.getInstance().getScreenManager().getCurrentScreen()).getTileGroup()
+								.addActor(tile);
+					}
+				});
 
 				chunkTileIndex++;
 			}
