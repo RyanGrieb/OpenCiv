@@ -3,7 +3,6 @@ package me.rhin.openciv.ui.list.type;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.scenes.scene2d.Actor;
-import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Align;
@@ -13,8 +12,9 @@ import me.rhin.openciv.game.city.City;
 import me.rhin.openciv.game.production.ProductionItem;
 import me.rhin.openciv.shared.stat.Stat;
 import me.rhin.openciv.ui.label.CustomLabel;
+import me.rhin.openciv.ui.list.ListObject;
 
-public class ListProductionItem extends Group {
+public class ListProductionItem extends ListObject {
 
 	private City city;
 	private ProductionItem productionItem;
@@ -26,7 +26,8 @@ public class ListProductionItem extends Group {
 	private boolean hovered;
 
 	public ListProductionItem(final City city, final ProductionItem productionItem, float width, float height) {
-		this.setSize(width, height);
+		super(width, height, "ProductionItem");
+
 		this.city = city;
 		this.productionItem = productionItem;
 		this.backgroundSprite = TextureEnum.UI_GRAY.sprite();
@@ -78,6 +79,8 @@ public class ListProductionItem extends Group {
 		itemIconSprite.draw(batch);
 		itemNameLabel.draw(batch, parentAlpha);
 		itemTurnCostLabel.draw(batch, parentAlpha);
+		
+		super.draw(batch, parentAlpha);
 	}
 
 	@Override

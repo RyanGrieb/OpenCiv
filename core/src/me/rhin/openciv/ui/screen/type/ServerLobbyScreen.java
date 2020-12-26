@@ -1,7 +1,6 @@
 package me.rhin.openciv.ui.screen.type;
 
-import java.util.NavigableMap;
-import java.util.TreeMap;
+import java.util.ArrayList;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
@@ -25,6 +24,10 @@ import me.rhin.openciv.shared.packet.type.PlayerListRequestPacket;
 import me.rhin.openciv.ui.button.type.MPStartButton;
 import me.rhin.openciv.ui.button.type.ServerLobbyBackButton;
 import me.rhin.openciv.ui.label.CustomLabel;
+import me.rhin.openciv.ui.list.ContainerList;
+import me.rhin.openciv.ui.list.ListContainer.ListContainerType;
+import me.rhin.openciv.ui.list.ListObject;
+import me.rhin.openciv.ui.list.type.ListLobbyPlayer;
 import me.rhin.openciv.ui.screen.AbstractScreen;
 import me.rhin.openciv.ui.screen.ScreenEnum;
 import me.rhin.openciv.ui.window.type.TitleOverlay;
@@ -36,8 +39,8 @@ public class ServerLobbyScreen extends AbstractScreen
 	private TitleOverlay titleOverlay;
 
 	private CustomLabel connectedPlayersTitleLabel;
-	private NavigableMap<String, CustomLabel> connectedPlayersLabels;
 	private String playerName;
+	private ContainerList playerContainerList;
 
 	public ServerLobbyScreen() {
 		this.eventManager = Civilization.getInstance().getEventManager();
@@ -46,19 +49,20 @@ public class ServerLobbyScreen extends AbstractScreen
 		this.titleOverlay = new TitleOverlay();
 		stage.addActor(titleOverlay);
 
+		this.playerContainerList = new ContainerList(stage, viewport.getWorldWidth() / 2 - 220 / 2,
+				viewport.getWorldHeight() - 360, 200, 300);
+
+		stage.addActor(playerContainerList);
+
 		eventManager.addListener(PlayerConnectListener.class, this);
 		eventManager.addListener(PlayerDisconnectListener.class, this);
 		eventManager.addListener(PlayerListRequestListener.class, this);
 		eventManager.addListener(GameStartListener.class, this);
 
-		connectedPlayersLabels = new TreeMap<>();
-
-		connectedPlayersTitleLabel = new CustomLabel("Connected Players: ", 0, viewport.getWorldHeight() / 1.1F,
+		connectedPlayersTitleLabel = new CustomLabel("Players: ", 0, viewport.getWorldHeight() / 1.1F,
 				viewport.getWorldWidth(), 20);
 		connectedPlayersTitleLabel.setAlignment(Align.center);
-		stage.addActor(connectedPlayersTitleLabel);
 
-		// FIXME: Only show this button to the first player in the player list.
 		stage.addActor(new ServerLobbyBackButton(viewport.getWorldWidth() / 2 - 150 / 2, 20, 150, 45));
 
 		requestPlayerList();
@@ -87,12 +91,8 @@ public class ServerLobbyScreen extends AbstractScreen
 	public void onPlayerConnect(PlayerConnectPacket packet) {
 		Gdx.app.log(Civilization.LOG_TAG, packet.getPlayerName() + " has connected to the lobby");
 
-		CustomLabel playerLabel = new CustomLabel(packet.getPlayerName(), 0,
-				viewport.getWorldHeight() - 100 - (connectedPlayersLabels.size() * 40), viewport.getWorldWidth(), 20);
-		playerLabel.setAlignment(Align.center);
-		playerLabel.setColor(Color.valueOf(packet.getColorHex()));
-		stage.addActor(playerLabel);
-		connectedPlayersLabels.put(packet.getPlayerName(), playerLabel);
+		playerContainerList.addItem(ListContainerType.CATEGORY, "Players",
+				new ListLobbyPlayer(packet.getPlayerName(), 200, 40));
 	}
 
 	@Override
@@ -102,40 +102,27 @@ public class ServerLobbyScreen extends AbstractScreen
 			if (playerName == null)
 				continue;
 
-			CustomLabel playerLabel = new CustomLabel(playerName, 0,
-					viewport.getWorldHeight() - 100 - (connectedPlayersLabels.size() * 40), viewport.getWorldWidth(),
-					20);
-			playerLabel.setAlignment(Align.center);
-			playerLabel.setColor(Color.valueOf(packet.getColorList()[i]));
-			stage.addActor(playerLabel);
-			connectedPlayersLabels.put(playerName, playerLabel);
+			playerContainerList.addItem(ListContainerType.CATEGORY, "Players",
+					new ListLobbyPlayer(playerName, 200, 40));
 		}
 
-		this.playerName = connectedPlayersLabels.lastKey();
+		ArrayList<ListObject> listItemActors = playerContainerList.getListContainers().get("Players")
+				.getListItemActors();
+		this.playerName = listItemActors.get(listItemActors.size() - 1).getKey();
 
-		if (connectedPlayersLabels.size() < 2) {
+		if (listItemActors.size() < 2) {
 			assignToLobbyLeader();
 		}
 	}
 
 	@Override
 	public void onPlayerDisconnect(PlayerDisconnectPacket packet) {
-		CustomLabel removedLabel = connectedPlayersLabels.get(packet.getPlayerName());
-		for (Actor actor : stage.getActors()) {
-			if (removedLabel.equals(actor))
-				actor.addAction(Actions.removeActor());
-		}
+		playerContainerList.removeItem("Players", packet.getPlayerName());
 
-		connectedPlayersLabels.remove(packet.getPlayerName());
+		ArrayList<ListObject> listItemActors = playerContainerList.getListContainers().get("Players")
+				.getListItemActors();
 
-		// Repositon our labels
-		for (int i = 0; i < connectedPlayersLabels.size(); i++) {
-			CustomLabel label = (CustomLabel) connectedPlayersLabels.values().toArray()[i];
-
-			label.setPosition(0, viewport.getWorldHeight() - 100 - (i * 40));
-		}
-
-		if (connectedPlayersLabels.lastKey().equals(playerName)) {
+		if (listItemActors.get(0).getKey().equals(playerName)) {
 			assignToLobbyLeader();
 		}
 	}

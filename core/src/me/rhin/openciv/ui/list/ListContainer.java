@@ -6,8 +6,7 @@ import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Group;
-import com.badlogic.gdx.scenes.scene2d.InputEvent;
-import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.utils.Align;
 
 import me.rhin.openciv.asset.TextureEnum;
@@ -20,8 +19,8 @@ public class ListContainer extends Group {
 	}
 
 	private ContainerList containerList;
-	private ArrayList<Group> listItemActors;
-	private ArrayList<Sprite> seperatorSprites;
+	private ArrayList<ListObject> itemListObjects;
+	private Sprite topSeperatorSprite;
 	private ListContainerType containerType;
 	private Sprite categoryBackgroundSprite;
 	private Sprite backgroundSprite;
@@ -30,8 +29,7 @@ public class ListContainer extends Group {
 	public ListContainer(ContainerList containerList, ListContainerType containerType, String name) {
 		this.setSize(containerList.getWidth(), (containerType == ListContainerType.CATEGORY ? 18 : 0));
 		this.containerList = containerList;
-		this.listItemActors = new ArrayList<>();
-		this.seperatorSprites = new ArrayList<>();
+		this.itemListObjects = new ArrayList<>();
 		this.containerType = containerType;
 
 		this.categoryBackgroundSprite = TextureEnum.UI_LIGHT_GRAY.sprite();
@@ -43,83 +41,70 @@ public class ListContainer extends Group {
 		containerNameLabel.setSize(getWidth(), getHeight());
 		containerNameLabel.setAlignment(Align.center);
 
-		Sprite topSeperator = TextureEnum.UI_BLACK.sprite();
-		topSeperator.setSize(getWidth(), 1);
-		seperatorSprites.add(topSeperator);
+		this.topSeperatorSprite = TextureEnum.UI_BLACK.sprite();
+		topSeperatorSprite.setSize(getWidth(), 1);
 	}
 
 	@Override
 	public void draw(Batch batch, float parentAlpha) {
 		super.draw(batch, parentAlpha);
-		// backgroundSprite.draw(batch);
 
 		if (containerType == ListContainerType.CATEGORY) {
 			categoryBackgroundSprite.draw(batch);
 			containerNameLabel.draw(batch, parentAlpha);
 		}
 
-		for (Actor itemActor : listItemActors) {
-			// if (item.getY() >= containerList.getY())
-			// itemActor.draw(batch, parentAlpha);
-		}
-
-		for (int i = 0; i < seperatorSprites.size(); i++) {
-			Sprite sprite = seperatorSprites.get(i);
-
-			// FIXME: The i > 0 doesn't account for non-rendered seperatorSprites.
-			// if (sprite.getY() >= containerList.getY() && i > 0)
-			sprite.draw(batch);
-		}
+		topSeperatorSprite.draw(batch);
 	}
 
 	@Override
 	public void setPosition(float x, float y) {
 		super.setPosition(x, y);
-		
+
 		categoryBackgroundSprite.setPosition(x, y + getHeight() - categoryBackgroundSprite.getHeight());
 		backgroundSprite.setPosition(x, y);
 		containerNameLabel.setPosition(x, y + getHeight() - containerNameLabel.getHeight());
+		topSeperatorSprite.setPosition(x, y + getHeight() - (containerType == ListContainerType.CATEGORY ? 18 : 0));
 
-		for (int i = 0; i < listItemActors.size(); i++) {
-			Actor itemActor = listItemActors.get(i);
+		for (int i = 0; i < itemListObjects.size(); i++) {
+			Actor itemActor = itemListObjects.get(i);
 			// NOTE: This assumes that all listItems are the same size.
 			itemActor.setPosition(0, (getHeight() - categoryBackgroundSprite.getHeight() - itemActor.getHeight())
 					- (i * itemActor.getHeight()));
 		}
-
-		float initY = y;
-		int index = -1;
-		for (Sprite sprite : seperatorSprites) {
-			if (index < 0)
-				sprite.setPosition(x, y);
-			else {
-				initY += listItemActors.get(index).getHeight();
-				sprite.setPosition(x, initY);
-			}
-			index++;
-		}
 	}
 
-	public void addItem(Group itemGroup) {
-		listItemActors.add(itemGroup);
-		addActor(itemGroup);
-
-		Sprite seperatorSprite = TextureEnum.UI_BLACK.sprite();
-		seperatorSprite.setSize(getWidth(), 1);
-		seperatorSprites.add(seperatorSprite);
+	public void addItem(ListObject listObject) {
+		itemListObjects.add(listObject);
+		addActor(listObject);
 
 		// Update the height.
 		// FIXME: If the itemActor exceeds the listContainer's height, we really
 		// shouldn't increase the size further.
-		setHeight(getHeight() + itemGroup.getHeight());
+		setHeight(getHeight() + listObject.getHeight());
 		updateHeight();
+	}
+
+	public void removeItem(String itemKey) {
+		for (ListObject listObject : itemListObjects) {
+
+			if (listObject.getKey().equals(itemKey)) {
+				listObject.addAction(Actions.removeActor());
+				itemListObjects.remove(listObject);
+
+				setHeight(getHeight() - listObject.getHeight());
+				updateHeight();
+
+				break;
+			}
+		}
 	}
 
 	private void updateHeight() {
 		backgroundSprite.setSize(getWidth(), getHeight());
 	}
 
-	public ArrayList<Group> getListItemActors() {
-		return listItemActors;
+	public ArrayList<ListObject> getListItemActors() {
+		return itemListObjects;
 	}
 }

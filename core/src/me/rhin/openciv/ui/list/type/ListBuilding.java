@@ -4,7 +4,6 @@ import java.util.ArrayList;
 
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
-import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.utils.Align;
 
 import me.rhin.openciv.asset.TextureEnum;
@@ -14,8 +13,9 @@ import me.rhin.openciv.shared.stat.Stat;
 import me.rhin.openciv.ui.button.Button;
 import me.rhin.openciv.ui.button.type.SpecialistCitizenButton;
 import me.rhin.openciv.ui.label.CustomLabel;
+import me.rhin.openciv.ui.list.ListObject;
 
-public class ListBuilding extends Group {
+public class ListBuilding extends ListObject {
 
 	private Building building;
 	private Sprite backgroundSprite;
@@ -25,7 +25,8 @@ public class ListBuilding extends Group {
 	private ArrayList<Button> specialistButtons;
 
 	public ListBuilding(Building building, float width, float height) {
-		this.setSize(width, height);
+		super(width, height, "Building");
+
 		this.building = building;
 		backgroundSprite = TextureEnum.UI_GRAY.sprite();
 		backgroundSprite.setSize(width, height);
@@ -76,6 +77,8 @@ public class ListBuilding extends Group {
 
 		for (CustomLabel label : statLabels)
 			label.draw(batch, parentAlpha);
+		
+		super.draw(batch, parentAlpha);
 	}
 
 	@Override

@@ -4,15 +4,15 @@ import java.util.ArrayList;
 
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
-import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.city.City;
 import me.rhin.openciv.ui.button.Button;
 import me.rhin.openciv.ui.button.type.SpecialistCitizenButton;
+import me.rhin.openciv.ui.list.ListObject;
 
-public class ListUnemployedCitizens extends Group {
+public class ListUnemployedCitizens extends ListObject {
 	// TODO: There really should be a Horizontal List class
 
 	private City city;
@@ -20,7 +20,7 @@ public class ListUnemployedCitizens extends Group {
 	private ArrayList<Button> citizenButtons;
 
 	public ListUnemployedCitizens(City city, int width, int height) {
-		this.setSize(width, height);
+		super(width, height, "UnemployedCitizens");
 
 		this.city = city;
 		this.backgroundSprite = TextureEnum.UI_GRAY.sprite();

@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.DragListener;
 
@@ -25,13 +26,22 @@ public class ContainerList extends Group {
 	private Sprite backgroundSprite;
 
 	public ContainerList(AbstractWindow window, float x, float y, float width, float height) {
+		this(x, y, width, height);
+		window.addActor(containerScrollbar);
+	}
+
+	public ContainerList(Stage stage, float x, float y, float width, float height) {
+		this(x, y, width, height);
+		stage.addActor(containerScrollbar);
+	}
+
+	public ContainerList(float x, float y, float width, float height) {
 		this.yOffset = 0;
 		this.listContainers = new HashMap<>();
 
 		this.setBounds(x, y, width, height);
 
 		this.containerScrollbar = new ContainerScrollbar(this, x + width, y, 20, height);
-		window.addActor(containerScrollbar);
 
 		backgroundSprite = TextureEnum.UI_LIGHT_GRAY.sprite();
 		backgroundSprite.setPosition(x, y);
@@ -59,7 +69,6 @@ public class ContainerList extends Group {
 				thisContainer.getStage().setScrollFocus(null);
 			}
 		});
-
 	}
 
 	@Override
@@ -119,7 +128,7 @@ public class ContainerList extends Group {
 		updatePositions();
 	}
 
-	public void addItem(ListContainerType containerType, String categoryType, Group itemGroup) {
+	public void addItem(ListContainerType containerType, String categoryType, ListObject itemGroup) {
 		if (!listContainers.containsKey(categoryType)) {
 			listContainers.put(categoryType, new ListContainer(this, containerType, categoryType));
 		}
@@ -128,6 +137,11 @@ public class ContainerList extends Group {
 		updatePositions();
 
 		addActor(listContainers.get(categoryType));
+	}
+
+	public void removeItem(String listContainerName, String itemKey) {
+		listContainers.get(listContainerName).removeItem(itemKey);
+		updatePositions();
 	}
 
 	public void updatePositions() {
