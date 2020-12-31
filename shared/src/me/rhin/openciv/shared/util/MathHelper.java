@@ -2,7 +2,17 @@ package me.rhin.openciv.shared.util;
 
 import com.badlogic.gdx.math.Vector2;
 
+//FIXME: Remove the other MathHelper class and merge it into this
 public class MathHelper {
+
+	public static float clamp(float num, float min, float max) {
+		if (num < min)
+			return min;
+		else if (num > max)
+			return max;
+
+		return num;
+	}
 
 	public static float distance(int v1x, int v1y, int v2x, int v2y) {
 		int x_d = v1x - v2x;

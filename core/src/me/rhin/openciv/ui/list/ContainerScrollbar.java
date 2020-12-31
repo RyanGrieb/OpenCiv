@@ -8,6 +8,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.DragListener;
 
 import me.rhin.openciv.asset.TextureEnum;
+import me.rhin.openciv.shared.util.MathHelper;
 
 public class ContainerScrollbar extends Actor {
 
@@ -67,20 +68,23 @@ public class ContainerScrollbar extends Actor {
 
 						float scrubAmount = (event.getStageY() - prevMouseY);
 
-						// Keep dragging in bounds
-
-						if (scrubber.getY() + scrubAmount < containerList.getY()) {
+						// Contain the scrubber within the bounds
+						if (scrubAmount < 0 && scrubber.getY() < containerList.getY()) {
 							prevMouseY = -1;
 							return;
 						}
 
-						if (scrubber.getY() + scrubber.getHeight() + scrubAmount > containerList.getY()
+						if (scrubAmount > 0 && scrubber.getY() + scrubber.getHeight() > containerList.getY()
 								+ containerList.getHeight()) {
 							prevMouseY = -1;
 							return;
 						}
 
-						containerList.setYOffset(containerList.getYOffset() - scrubAmount);
+						// If our scrub amount exceeds our container, clamp the offset to our bounds.
+						float offset = MathHelper.clamp(containerList.getYOffset() - scrubAmount, containerList.getY(),
+								containerList.getY() + (containerList.getHeight() - scrubber.getHeight()));
+
+						containerList.setYOffset(offset);
 						containerList.updatePositions();
 						prevMouseY = event.getStageY();
 					}
