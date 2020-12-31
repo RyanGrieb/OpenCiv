@@ -12,7 +12,7 @@ public class Market extends Building {
 
 	@Override
 	public int getProductionCost() {
-		return 10;
+		return 100;
 	}
 
 	@Override

@@ -8,7 +8,6 @@ import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.city.City;
 import me.rhin.openciv.listener.CityStatUpdateListener;
-import me.rhin.openciv.listener.PlayerStatUpdateListener;
 import me.rhin.openciv.shared.packet.type.CityStatUpdatePacket;
 import me.rhin.openciv.shared.stat.Stat;
 import me.rhin.openciv.ui.label.CustomLabel;
@@ -19,9 +18,10 @@ public class CityStatsInfo extends Actor implements CityStatUpdateListener {
 	private City city;
 
 	private Sprite backgroundSprite;
-	private Sprite foodIcon, productionIcon, goldIcon, scienceIcon, heritageIcon;
-	private CustomLabel foodDescLabel, productionDescLabel, goldDescLabel, scienceDescLabel, heritageDescLabel;
-	private CustomLabel foodLabel, productionLabel, goldLabel, scienceLabel, heritageLabel;
+	private Sprite populationIcon, foodIcon, productionIcon, goldIcon, scienceIcon, heritageIcon;
+	private CustomLabel populationDescLabel, foodDescLabel, productionDescLabel, goldDescLabel, scienceDescLabel,
+			heritageDescLabel;
+	private CustomLabel populationLabel, foodLabel, productionLabel, goldLabel, scienceLabel, heritageLabel;
 
 	public CityStatsInfo(City city, float x, float y, float width, float height) {
 		this.city = city;
@@ -30,11 +30,24 @@ public class CityStatsInfo extends Actor implements CityStatUpdateListener {
 		this.backgroundSprite = TextureEnum.UI_BLACK.sprite();
 		backgroundSprite.setBounds(x, y, width, height);
 
-		float originX = x;
+		float originX = 5;
 		float originY = Civilization.getInstance().getScreenManager().getCurrentScreen().getViewport().getWorldHeight()
 				- (GameOverlay.HEIGHT * 2 + 2);
 
+		this.populationIcon = TextureEnum.ICON_CITIZEN.sprite();
+		populationIcon.setSize(16, 16);
+		populationIcon.setPosition(originX, originY);
+
+		this.populationDescLabel = new CustomLabel("Citizens:");
+		originX += populationIcon.getWidth() + 5;
+		populationDescLabel.setPosition(originX, originY + populationDescLabel.getHeight() / 2);
+
+		this.populationLabel = new CustomLabel("0");
+
+		originX = 5;
+
 		this.foodIcon = TextureEnum.ICON_FOOD.sprite();
+		originY -= populationIcon.getHeight();
 		foodIcon.setSize(16, 16);
 		foodIcon.setPosition(originX, originY);
 
@@ -98,7 +111,7 @@ public class CityStatsInfo extends Actor implements CityStatUpdateListener {
 		this.heritageLabel = new CustomLabel("+0");
 
 		updateStatValues();
-		
+
 		Civilization.getInstance().getEventManager().addListener(CityStatUpdateListener.class, this);
 	}
 
@@ -106,36 +119,39 @@ public class CityStatsInfo extends Actor implements CityStatUpdateListener {
 	public void draw(Batch batch, float parentAlpha) {
 		backgroundSprite.draw(batch);
 
+		populationIcon.draw(batch);
 		foodIcon.draw(batch);
 		productionIcon.draw(batch);
 		goldIcon.draw(batch);
 		scienceIcon.draw(batch);
 		heritageIcon.draw(batch);
 
+		populationDescLabel.draw(batch, parentAlpha);
 		foodDescLabel.draw(batch, parentAlpha);
 		productionDescLabel.draw(batch, parentAlpha);
 		goldDescLabel.draw(batch, parentAlpha);
 		scienceDescLabel.draw(batch, parentAlpha);
 		heritageDescLabel.draw(batch, parentAlpha);
 
+		populationLabel.draw(batch, parentAlpha);
 		foodLabel.draw(batch, parentAlpha);
 		productionLabel.draw(batch, parentAlpha);
 		goldLabel.draw(batch, parentAlpha);
 		scienceLabel.draw(batch, parentAlpha);
 		heritageLabel.draw(batch, parentAlpha);
 	}
-	
-	
+
 	@Override
 	public void onCityStatUpdate(CityStatUpdatePacket packet) {
-		if(!city.getName().equals(packet.getCityName()))
+		if (!city.getName().equals(packet.getCityName()))
 			return;
-		
+
 		updateStatValues();
 	}
-	
+
 	private void updateStatValues() {
 		int gainedFood = (int) city.getStatLine().getStatValue(Stat.FOOD_GAIN);
+		populationLabel.setText((int) city.getStatLine().getStatValue(Stat.POPULATION));
 		foodLabel.setText((gainedFood < 0 ? "-" : "+") + gainedFood);
 		productionLabel.setText("+" + (int) city.getStatLine().getStatValue(Stat.PRODUCTION_GAIN));
 		goldLabel.setText("+" + (int) city.getStatLine().getStatValue(Stat.GOLD_GAIN));
@@ -148,6 +164,9 @@ public class CityStatsInfo extends Actor implements CityStatUpdateListener {
 	private void updatePositions() {
 		float originY = Civilization.getInstance().getScreenManager().getCurrentScreen().getViewport().getWorldHeight()
 				- (GameOverlay.HEIGHT * 2 + 2);
+		populationLabel.setPosition(getWidth() - (populationLabel.getWidth() + 2),
+				originY + populationDescLabel.getHeight() / 2);
+		originY -= populationIcon.getHeight();
 		foodLabel.setPosition(getWidth() - (foodLabel.getWidth() + 2), originY + foodDescLabel.getHeight() / 2);
 		originY -= foodIcon.getHeight();
 		productionLabel.setPosition(getWidth() - (productionLabel.getWidth() + 2),
