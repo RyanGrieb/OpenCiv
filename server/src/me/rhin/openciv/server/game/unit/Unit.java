@@ -144,7 +144,7 @@ public abstract class Unit {
 				nextTile = targetTile;
 
 			if (!parentTile.equals(standingTile)) {
-				pathMovement += getMovementCost(parentTile, nextTile);
+				pathMovement += getMovementCost(nextTile, parentTile);
 			}
 
 			if (parentTile.equals(targetTile)) {

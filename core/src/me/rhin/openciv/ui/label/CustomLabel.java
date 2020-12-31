@@ -11,6 +11,7 @@ public class CustomLabel extends Label {
 
 	public CustomLabel(CharSequence text) {
 		super(text, Civilization.getInstance().getFontHandler().getDefaultStyle());
+		this.setScale(10);
 		updateSize();
 	}
 

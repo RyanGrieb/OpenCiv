@@ -61,7 +61,7 @@ public class City implements SpecialistContainer {
 		territory.add(originTile);
 		originTile.setCity(this);
 
-		statLine.setValue(Stat.POPULATION, 1);
+		setPopulation(1);
 		// NOTE: We don't need to send a stat update packet here. So we dont.
 		playerOwner.getStatLine().mergeStatLine(statLine);
 	}
@@ -299,5 +299,11 @@ public class City implements SpecialistContainer {
 		}
 
 		return topTiles;
+	}
+
+	private void setPopulation(int amount) {
+		statLine.setValue(Stat.POPULATION, amount);
+		statLine.setValue(Stat.FOOD_GAIN,
+				statLine.getStatValue(Stat.FOOD_GAIN) - statLine.getStatValue(Stat.POPULATION) * 2);
 	}
 }

@@ -6,28 +6,28 @@ filter: Nearest,Nearest
 repeat: none
 unit_galley
   rotate: false
-  xy: 56, 2
+  xy: 2, 2
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 unit_scout
   rotate: false
-  xy: 2, 2
+  xy: 38, 2
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 unit_settler
   rotate: false
-  xy: 38, 2
+  xy: 20, 2
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 unit_warrior
   rotate: false
-  xy: 20, 2
+  xy: 56, 2
   size: 16, 16
   orig: 16, 16
   offset: 0, 0

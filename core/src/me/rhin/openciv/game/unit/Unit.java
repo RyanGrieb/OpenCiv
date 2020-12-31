@@ -192,7 +192,7 @@ public abstract class Unit extends Actor implements ShapeRenderListener {
 				nextTile = targetTile;
 
 			if (!parentTile.equals(standingTile)) {
-				pathMovement += getMovementCost(parentTile, nextTile);
+				pathMovement += getMovementCost(nextTile, parentTile);
 			}
 
 			if (parentTile.equals(targetTile)) {
