@@ -92,11 +92,13 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 					.newInstance(unitParameter);
 			tile.addUnit(unit);
 			Civilization.getInstance().getScreenManager().getCurrentScreen().getStage().addActor(unit);
+
 			if (unit instanceof SettlerUnit && unit.getPlayerOwner().equals(player)) {
 				// Focus camera on unit.
 				Civilization.getInstance().getScreenManager().getCurrentScreen().setCameraPosition(unit.getX(),
 						unit.getY());
 			}
+
 		} catch (Exception e) {
 			Gdx.app.log(Civilization.WS_LOG_TAG, e.getMessage());
 			e.printStackTrace();
@@ -144,6 +146,7 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 	public void onUnitDelete(DeleteUnitPacket packet) {
 		Tile tile = map.getTiles()[packet.getTileGridX()][packet.getTileGridY()];
 		Unit unit = tile.getUnitFromID(packet.getUnitID());
+		unit.getPlayerOwner().removeUnit(unit);
 		tile.removeUnit(unit);
 		for (Actor actor : Civilization.getInstance().getScreenManager().getCurrentScreen().getStage().getActors()) {
 			if (actor.equals(unit))

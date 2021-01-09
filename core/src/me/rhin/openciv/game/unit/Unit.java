@@ -56,6 +56,7 @@ public abstract class Unit extends Actor implements ShapeRenderListener {
 
 		this.currentMovementOffset = getMaxMovement();
 		this.lastMoveTime = -1;
+		playerOwner.addUnit(this);
 	}
 
 	public Unit(UnitParameter unitParameter, TextureEnum assetEnum) {

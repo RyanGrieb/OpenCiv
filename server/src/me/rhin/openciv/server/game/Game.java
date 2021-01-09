@@ -48,6 +48,7 @@ import me.rhin.openciv.shared.packet.type.SelectUnitPacket;
 import me.rhin.openciv.shared.packet.type.SetProductionItemPacket;
 import me.rhin.openciv.shared.packet.type.SettleCityPacket;
 import me.rhin.openciv.shared.packet.type.TerritoryGrowPacket;
+import me.rhin.openciv.shared.packet.type.TurnTickPacket;
 import me.rhin.openciv.shared.packet.type.TurnTimeUpdatePacket;
 import me.rhin.openciv.shared.util.ColorHelper;
 
@@ -82,12 +83,28 @@ public class Game
 					if (!playersLoaded() || !started)
 						return;
 
-					if ((System.currentTimeMillis() - lastTurnClock) / 1000 < turnTime)
-						return;
+					long timeDiff = System.currentTimeMillis() - lastTurnClock;
 
-					turnTime = getUpdatedTurnTime();
-					Server.getInstance().getEventManager().fireEvent(new TurnTimeUpdateEvent(turnTime));
-					lastTurnClock = System.currentTimeMillis();
+					if (timeDiff / 1000 >= turnTime) {
+
+						turnTime = getUpdatedTurnTime();
+						Server.getInstance().getEventManager().fireEvent(new TurnTimeUpdateEvent(turnTime));
+						lastTurnClock = System.currentTimeMillis();
+						System.out.println("Sending...");
+					}
+
+					// Update the timeDiff if we went into the next turn
+					timeDiff = System.currentTimeMillis() - lastTurnClock;
+
+					if (timeDiff % 1000 == 0) {
+						TurnTickPacket turnTickPacket = new TurnTickPacket();
+						turnTickPacket.setTime((int) (turnTime - (timeDiff / 1000)));
+
+						Json json = new Json();
+						for (Player player : players)
+							player.getConn().send(json.toJson(turnTickPacket));
+					}
+
 				} catch (Exception e) {
 					e.printStackTrace();
 				}

@@ -36,6 +36,7 @@ import me.rhin.openciv.listener.SetCitizenTileWorkerListener.SetCitizenTileWorke
 import me.rhin.openciv.listener.SetProductionItemListener.SetProductionItemEvent;
 import me.rhin.openciv.listener.SettleCityListener.SettleCityEvent;
 import me.rhin.openciv.listener.TerritoryGrowListener.TerritoryGrowEvent;
+import me.rhin.openciv.listener.TurnTickListener.TurnTickEvent;
 import me.rhin.openciv.listener.TurnTimeUpdateListener.TurnTimeUpdateEvent;
 import me.rhin.openciv.shared.listener.Event;
 import me.rhin.openciv.shared.listener.Listener;
@@ -62,6 +63,7 @@ import me.rhin.openciv.shared.packet.type.SetCitizenTileWorkerPacket;
 import me.rhin.openciv.shared.packet.type.SetProductionItemPacket;
 import me.rhin.openciv.shared.packet.type.SettleCityPacket;
 import me.rhin.openciv.shared.packet.type.TerritoryGrowPacket;
+import me.rhin.openciv.shared.packet.type.TurnTickPacket;
 import me.rhin.openciv.shared.packet.type.TurnTimeUpdatePacket;
 
 public class NetworkManager {
@@ -95,6 +97,7 @@ public class NetworkManager {
 		networkEvents.put(SetCitizenTileWorkerPacket.class, SetCitizenTileWorkerEvent.class);
 		networkEvents.put(AddSpecialistToContainerPacket.class, AddSpecialistToContainerEvent.class);
 		networkEvents.put(RemoveSpecialistFromContainerPacket.class, RemoveSpecialistFromContainerEvent.class);
+		networkEvents.put(TurnTickPacket.class, TurnTickEvent.class);
 	}
 
 	public void connect(String ip) {
@@ -127,15 +130,15 @@ public class NetworkManager {
 		try {
 			Class<? extends Event<? extends Listener>> eventClass = networkEvents
 					.get(ClassReflection.forName(packetName));
-			
+
 			Event<? extends Listener> eventObj = (Event<? extends Listener>) ClassReflection
 					.getConstructor(eventClass, PacketParameter.class)
 					.newInstance(new PacketParameter(webSocket, packet));
 
 			Civilization.getInstance().getEventManager().fireEvent(eventObj);
 		} catch (Exception e) {
-			//Gdx.app.log(Civilization.WS_LOG_TAG, e.getMessage());
-			//e.printStackTrace();
+			// Gdx.app.log(Civilization.WS_LOG_TAG, e.getMessage());
+			e.printStackTrace();
 		}
 
 	}

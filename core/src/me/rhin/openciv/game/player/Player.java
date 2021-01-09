@@ -1,6 +1,7 @@
 package me.rhin.openciv.game.player;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import com.badlogic.gdx.graphics.Color;
 
@@ -37,6 +38,7 @@ public class Player implements RelativeMouseMoveListener, LeftClickListener, Rig
 	private Tile hoveredTile;
 	private Unit selectedUnit;
 	private ArrayList<City> ownedCities;
+	private ArrayList<Unit> ownedUnits;
 	private StatLine statLine;
 	private ResearchTree researchTree;
 	private boolean rightMouseHeld;
@@ -44,6 +46,7 @@ public class Player implements RelativeMouseMoveListener, LeftClickListener, Rig
 	public Player(String name) {
 		this.name = name;
 		this.ownedCities = new ArrayList<>();
+		this.ownedUnits = new ArrayList<>();
 		this.statLine = new StatLine();
 		this.researchTree = new ResearchTree();
 
@@ -160,5 +163,21 @@ public class Player implements RelativeMouseMoveListener, LeftClickListener, Rig
 
 	public ResearchTree getResearchTree() {
 		return researchTree;
+	}
+
+	public ArrayList<City> getOwnedCities() {
+		return ownedCities;
+	}
+
+	public ArrayList<Unit> getOwnedUnits() {
+		return ownedUnits;
+	}
+
+	public void addUnit(Unit unit) {
+		ownedUnits.add(unit);
+	}
+
+	public void removeUnit(Unit unit) {
+		ownedUnits.remove(unit);
 	}
 }

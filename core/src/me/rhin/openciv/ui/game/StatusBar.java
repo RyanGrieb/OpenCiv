@@ -7,14 +7,16 @@ import com.badlogic.gdx.scenes.scene2d.Actor;
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.listener.PlayerStatUpdateListener;
+import me.rhin.openciv.listener.TurnTickListener;
 import me.rhin.openciv.listener.TurnTimeUpdateListener;
 import me.rhin.openciv.shared.packet.type.PlayerStatUpdatePacket;
+import me.rhin.openciv.shared.packet.type.TurnTickPacket;
 import me.rhin.openciv.shared.packet.type.TurnTimeUpdatePacket;
 import me.rhin.openciv.shared.stat.Stat;
 import me.rhin.openciv.shared.stat.StatLine;
 import me.rhin.openciv.ui.label.CustomLabel;
 
-public class StatusBar extends Actor implements PlayerStatUpdateListener, TurnTimeUpdateListener {
+public class StatusBar extends Actor implements PlayerStatUpdateListener, TurnTimeUpdateListener, TurnTickListener {
 
 	private Sprite sprite;
 
@@ -46,12 +48,13 @@ public class StatusBar extends Actor implements PlayerStatUpdateListener, TurnTi
 		goldIcon.setSize(16, 16);
 		this.goldLabel = new CustomLabel("0");
 
-		this.turnsLabel = new CustomLabel("Turns: 0");
+		this.turnsLabel = new CustomLabel("Turns: 0 (0s)");
 
 		updatePositions();
 
 		Civilization.getInstance().getEventManager().addListener(PlayerStatUpdateListener.class, this);
 		Civilization.getInstance().getEventManager().addListener(TurnTimeUpdateListener.class, this);
+		Civilization.getInstance().getEventManager().addListener(TurnTickListener.class, this);
 	}
 
 	@Override
@@ -91,7 +94,14 @@ public class StatusBar extends Actor implements PlayerStatUpdateListener, TurnTi
 
 	@Override
 	public void onTurnTimeUpdate(TurnTimeUpdatePacket packet) {
-		turnsLabel.setText("Turns: " + Civilization.getInstance().getGame().getTurn());
+		turnsLabel.setText("Turns: " + Civilization.getInstance().getGame().getTurn() + "("
+				+ Civilization.getInstance().getGame().getTurnTime() + "s)");
+		updatePositions();
+	}
+
+	@Override
+	public void onTurnTick(TurnTickPacket packet) {
+		turnsLabel.setText("Turns: " + Civilization.getInstance().getGame().getTurn() + "(" + packet.getTime() + "s)");
 		updatePositions();
 	}
 
