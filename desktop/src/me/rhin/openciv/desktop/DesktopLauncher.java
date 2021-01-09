@@ -11,6 +11,7 @@ public class DesktopLauncher {
 	public static void main(String[] arg) {
 		CommonWebSockets.initiate();
 		LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
+		config.vSyncEnabled = true;
 		config.width = 800;
 		config.height = 600;
 		config.title = "OpenCiv";
