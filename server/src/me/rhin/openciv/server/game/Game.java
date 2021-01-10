@@ -173,7 +173,7 @@ public class Game
 		}
 
 		if (players.size() < 1 && started) {
-			System.exit(0);
+			Server.getInstance().stop();
 		}
 	}
 

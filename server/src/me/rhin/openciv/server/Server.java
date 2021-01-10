@@ -11,6 +11,8 @@ import org.java_websocket.server.WebSocketServer;
 
 import com.badlogic.gdx.utils.JsonReader;
 import com.badlogic.gdx.utils.JsonValue;
+import com.github.czyzby.websocket.CommonWebSockets;
+import com.github.czyzby.websocket.WebSocketAdapter;
 
 import me.rhin.openciv.server.command.CmdProcessor;
 import me.rhin.openciv.server.game.Game;
@@ -59,6 +61,13 @@ public class Server extends WebSocketServer {
 	public static void main(String[] args) {
 		// TODO: Implement proper logging.
 		System.out.println("Starting Server...");
+
+		// Check for servers already running
+		checkExistingServers();
+
+		// FIXME: The server should only be initialized when we are 100% sure there are
+		// no other existing servers
+
 		Server server = new Server(new InetSocketAddress(HOST, PORT));
 		// server.setConnectionLostTimeout(0); // Removes websocket timeout.
 		server.run();
@@ -86,8 +95,8 @@ public class Server extends WebSocketServer {
 		networkEvents.put(FinishLoadingPacket.class, PlayerFinishLoadingEvent.class);
 		networkEvents.put(SetProductionItemPacket.class, SetProductionItemEvent.class);
 		networkEvents.put(ClickWorkedTilePacket.class, ClickWorkedTileEvent.class);
-		networkEvents.put(ClickSpecialistPacket.class, ClickSpecialistEvent.class);	
-		
+		networkEvents.put(ClickSpecialistPacket.class, ClickSpecialistEvent.class);
+
 		this.playerIndex = 0;
 		this.commandProcessor = new CmdProcessor();
 
@@ -136,6 +145,22 @@ public class Server extends WebSocketServer {
 	public void onStart() {
 	}
 
+	@Override
+	public void stop() {
+		try {
+			super.stop();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		/*
+		 * Note: It's a known bug on linux that java programs hang when we exit out of
+		 * them. Just wait a few seconds
+		 * https://bugs.java.com/bugdatabase/view_bug.do?bug_id=4656697
+		 */
+		System.exit(0);
+	}
+
 	public int getPlayerIndex() {
 		return playerIndex;
 	}
@@ -170,4 +195,31 @@ public class Server extends WebSocketServer {
 
 	}
 
+	private static void checkExistingServers() {
+		CommonWebSockets.initiate();
+		String socketAddress = "ws://" + HOST + ":" + PORT;
+		try {
+			com.github.czyzby.websocket.WebSocket socket = com.github.czyzby.websocket.WebSockets
+					.newSocket(socketAddress);
+			socket.addListener(existingServerListener());
+			socket.connect();
+		} catch (Exception e) {
+			// e.printStackTrace();
+		}
+	}
+
+	private static WebSocketAdapter existingServerListener() {
+		return new WebSocketAdapter() {
+			@Override
+			public boolean onOpen(final com.github.czyzby.websocket.WebSocket webSocket) {
+				try {
+					System.out.println("[SERVER] Another server already running, exiting...");
+					System.exit(0);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+				return true;
+			}
+		};
+	}
 }
