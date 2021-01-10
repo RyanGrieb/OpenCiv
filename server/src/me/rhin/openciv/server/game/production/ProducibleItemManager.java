@@ -13,6 +13,7 @@ import me.rhin.openciv.server.game.city.building.Building;
 import me.rhin.openciv.server.game.city.building.type.Granary;
 import me.rhin.openciv.server.game.city.building.type.Market;
 import me.rhin.openciv.server.game.city.building.type.Monument;
+import me.rhin.openciv.server.game.unit.type.Builder;
 import me.rhin.openciv.server.game.unit.type.Galley;
 import me.rhin.openciv.server.game.unit.type.Scout;
 import me.rhin.openciv.server.game.unit.type.Settler;
@@ -56,6 +57,7 @@ public class ProducibleItemManager implements TurnTimeUpdateListener {
 		possibleItems.put("Settler", new Settler());
 		possibleItems.put("Scout", new Scout());
 		possibleItems.put("Galley", new Galley());
+		possibleItems.put("Builder", new Builder());
 
 		Server.getInstance().getEventManager().addListener(TurnTimeUpdateListener.class, this);
 	}

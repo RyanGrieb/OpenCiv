@@ -38,6 +38,7 @@ public class Civilization extends Game {
 
 	@Override
 	public void create() {
+		Gdx.graphics.setVSync(true);
 		Gdx.app.setLogLevel(Application.LOG_INFO);
 		Gdx.app.log(LOG_TAG, "Starting Game...");
 		GL_PROFILER = new GLProfiler(Gdx.graphics);
