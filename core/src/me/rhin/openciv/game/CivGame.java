@@ -36,6 +36,7 @@ import me.rhin.openciv.shared.packet.type.PlayerListRequestPacket;
 import me.rhin.openciv.shared.packet.type.SettleCityPacket;
 import me.rhin.openciv.shared.packet.type.TerritoryGrowPacket;
 import me.rhin.openciv.shared.packet.type.TurnTimeUpdatePacket;
+import me.rhin.openciv.ui.screen.type.InGameScreen;
 
 public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerListRequestListener, FetchPlayerListener,
 		MoveUnitListener, DeleteUnitListener, SettleCityListener, TurnTimeUpdateListener, FinishLoadingRequestListener,
@@ -91,9 +92,11 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 			Unit unit = (Unit) ClassReflection.getConstructor(unitClass, UnitParameter.class)
 					.newInstance(unitParameter);
 			tile.addUnit(unit);
-			Civilization.getInstance().getScreenManager().getCurrentScreen().getStage().addActor(unit);
 
-			if (unit instanceof SettlerUnit && unit.getPlayerOwner().equals(player)) {
+			((InGameScreen) Civilization.getInstance().getScreenManager().getCurrentScreen()).getUnitGroup()
+					.addActor(unit);
+
+			if (unit instanceof SettlerUnit && unit.getPlayerOwner().equals(player) && turns < 1) {
 				// Focus camera on unit.
 				Civilization.getInstance().getScreenManager().getCurrentScreen().setCameraPosition(unit.getX(),
 						unit.getY());
@@ -148,7 +151,8 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 		Unit unit = tile.getUnitFromID(packet.getUnitID());
 		unit.getPlayerOwner().removeUnit(unit);
 		tile.removeUnit(unit);
-		for (Actor actor : Civilization.getInstance().getScreenManager().getCurrentScreen().getStage().getActors()) {
+		for (Actor actor : ((InGameScreen) Civilization.getInstance().getScreenManager().getCurrentScreen())
+				.getUnitGroup().getChildren()) {
 			if (actor.equals(unit))
 				actor.addAction(Actions.removeActor());
 		}

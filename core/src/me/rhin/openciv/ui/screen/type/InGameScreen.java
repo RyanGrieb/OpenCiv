@@ -26,6 +26,7 @@ public class InGameScreen extends AbstractScreen {
 	private CivGame game;
 	private Group tileGroup;
 	private Group riverGroup;
+	private Group unitGroup;
 
 	long lastTimeCounted;
 	private float frameRate;
@@ -42,9 +43,11 @@ public class InGameScreen extends AbstractScreen {
 
 		this.tileGroup = new Group();
 		this.riverGroup = new Group();
+		this.unitGroup = new Group();
 
 		stage.addActor(tileGroup);
 		stage.addActor(riverGroup);
+		stage.addActor(unitGroup);
 	}
 
 	@Override
@@ -116,11 +119,11 @@ public class InGameScreen extends AbstractScreen {
 	private void handleInput() {
 		if (!windowManager.allowsInput())
 			return;
-		
-		if(!windowManager.allowsCameraMovement()) {
+
+		if (!windowManager.allowsCameraMovement()) {
 			return;
 		}
-		
+
 		OrthographicCamera cam = getCamera();
 		if (Gdx.input.isKeyPressed(Input.Keys.EQUALS)) {
 			cam.zoom += 0.04;
@@ -159,7 +162,11 @@ public class InGameScreen extends AbstractScreen {
 	public Group getRiverGroup() {
 		return riverGroup;
 	}
-	
+
+	public Group getUnitGroup() {
+		return riverGroup;
+	}
+
 	@Override
 	public ScreenEnum getType() {
 		return ScreenEnum.IN_GAME;
