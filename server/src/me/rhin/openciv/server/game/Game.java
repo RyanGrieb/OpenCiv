@@ -90,7 +90,6 @@ public class Game
 						turnTime = getUpdatedTurnTime();
 						Server.getInstance().getEventManager().fireEvent(new TurnTimeUpdateEvent(turnTime));
 						lastTurnClock = System.currentTimeMillis();
-						System.out.println("Sending...");
 					}
 
 					// Update the timeDiff if we went into the next turn

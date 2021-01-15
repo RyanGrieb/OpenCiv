@@ -91,6 +91,7 @@ project(":server") {
         implementation project(":shared")
         api "org.java-websocket:Java-WebSocket:1.5.1"
         api "com.badlogicgames.gdx:gdx:$gdxVersion"
+        api "com.github.czyzby:gdx-websocket-common:$libVersion"
     }
 }
 
@@ -102,7 +103,6 @@ project(":core") {
         implementation project(":shared")
         api "com.badlogicgames.gdx:gdx:$gdxVersion"
         api "com.badlogicgames.gdx:gdx-ai:$aiVersion"
-        api "com.github.czyzby:gdx-websocket:$libVersion"
         api "com.badlogicgames.gdx:gdx-freetype:$gdxVersion"
     }
 }

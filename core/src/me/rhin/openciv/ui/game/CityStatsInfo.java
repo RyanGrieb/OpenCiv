@@ -19,9 +19,10 @@ public class CityStatsInfo extends Actor implements CityStatUpdateListener {
 
 	private Sprite backgroundSprite;
 	private Sprite populationIcon, foodIcon, productionIcon, goldIcon, scienceIcon, heritageIcon;
-	private CustomLabel populationDescLabel, foodDescLabel, productionDescLabel, goldDescLabel, scienceDescLabel,
-			heritageDescLabel;
-	private CustomLabel populationLabel, foodLabel, productionLabel, goldLabel, scienceLabel, heritageLabel;
+	private CustomLabel populationDescLabel, populationGrowthDescLabel, foodDescLabel, productionDescLabel,
+			goldDescLabel, scienceDescLabel, heritageDescLabel;
+	private CustomLabel populationLabel, populationGrowthLabel, foodLabel, productionLabel, goldLabel, scienceLabel,
+			heritageLabel;
 
 	public CityStatsInfo(City city, float x, float y, float width, float height) {
 		this.city = city;
@@ -43,6 +44,14 @@ public class CityStatsInfo extends Actor implements CityStatUpdateListener {
 		populationDescLabel.setPosition(originX, originY + populationDescLabel.getHeight() / 2);
 
 		this.populationLabel = new CustomLabel("0");
+
+		originX = 5;
+		originY -= populationIcon.getHeight() + 3;
+
+		this.populationGrowthDescLabel = new CustomLabel("Growth In:");
+		populationGrowthDescLabel.setPosition(originX, originY + populationGrowthDescLabel.getHeight() / 2);
+
+		this.populationGrowthLabel = new CustomLabel("0 Turns");
 
 		originX = 5;
 
@@ -127,6 +136,7 @@ public class CityStatsInfo extends Actor implements CityStatUpdateListener {
 		heritageIcon.draw(batch);
 
 		populationDescLabel.draw(batch, parentAlpha);
+		populationGrowthDescLabel.draw(batch, parentAlpha);
 		foodDescLabel.draw(batch, parentAlpha);
 		productionDescLabel.draw(batch, parentAlpha);
 		goldDescLabel.draw(batch, parentAlpha);
@@ -134,6 +144,7 @@ public class CityStatsInfo extends Actor implements CityStatUpdateListener {
 		heritageDescLabel.draw(batch, parentAlpha);
 
 		populationLabel.draw(batch, parentAlpha);
+		populationGrowthLabel.draw(batch, parentAlpha);
 		foodLabel.draw(batch, parentAlpha);
 		productionLabel.draw(batch, parentAlpha);
 		goldLabel.draw(batch, parentAlpha);
@@ -166,6 +177,9 @@ public class CityStatsInfo extends Actor implements CityStatUpdateListener {
 				- (GameOverlay.HEIGHT * 2 + 2);
 		populationLabel.setPosition(getWidth() - (populationLabel.getWidth() + 2),
 				originY + populationDescLabel.getHeight() / 2);
+		originY -= populationIcon.getHeight() + 3;
+		populationGrowthLabel.setPosition(getWidth() - (populationGrowthLabel.getWidth() + 2),
+				originY + populationGrowthDescLabel.getHeight() / 2);
 		originY -= populationIcon.getHeight();
 		foodLabel.setPosition(getWidth() - (foodLabel.getWidth() + 2), originY + foodDescLabel.getHeight() / 2);
 		originY -= foodIcon.getHeight();

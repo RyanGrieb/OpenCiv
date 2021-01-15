@@ -359,7 +359,7 @@ public class GameMap implements MapRequestListener {
 		}
 
 		// Generate rivers
-		int riverAmount = 50;
+		int riverAmount = 75;
 		int minRiverSize = 4;
 		while (riverAmount > 0) {
 
