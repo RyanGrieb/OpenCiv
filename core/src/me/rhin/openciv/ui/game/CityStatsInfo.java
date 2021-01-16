@@ -10,6 +10,7 @@ import me.rhin.openciv.game.city.City;
 import me.rhin.openciv.listener.CityStatUpdateListener;
 import me.rhin.openciv.shared.packet.type.CityStatUpdatePacket;
 import me.rhin.openciv.shared.stat.Stat;
+import me.rhin.openciv.shared.util.MathHelper;
 import me.rhin.openciv.ui.label.CustomLabel;
 import me.rhin.openciv.ui.window.type.GameOverlay;
 
@@ -163,6 +164,21 @@ public class CityStatsInfo extends Actor implements CityStatUpdateListener {
 	private void updateStatValues() {
 		int gainedFood = (int) city.getStatLine().getStatValue(Stat.FOOD_GAIN);
 		populationLabel.setText((int) city.getStatLine().getStatValue(Stat.POPULATION));
+
+		int surplusFood = (int) city.getStatLine().getStatValue(Stat.FOOD_SURPLUS);
+		int population = (int) city.getStatLine().getStatValue(Stat.POPULATION);
+		int foodRequired = (int) (15 + 8 * (population - 1) + Math.pow(population - 1, 1.5));
+
+		int growthTurns = (foodRequired - surplusFood) / MathHelper.nonZero(gainedFood);
+
+		if (gainedFood < 0) {
+			System.out.println(growthTurns + "!!");
+			populationGrowthLabel.setText("Starving in " + growthTurns);
+		} else if (gainedFood == 0) {
+			populationGrowthLabel.setText("Stagnated");
+		} else
+			populationGrowthLabel.setText(growthTurns + " Turns");
+
 		foodLabel.setText((gainedFood < 0 ? "-" : "+") + gainedFood);
 		productionLabel.setText("+" + (int) city.getStatLine().getStatValue(Stat.PRODUCTION_GAIN));
 		goldLabel.setText("+" + (int) city.getStatLine().getStatValue(Stat.GOLD_GAIN));

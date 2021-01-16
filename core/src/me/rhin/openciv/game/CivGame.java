@@ -28,6 +28,7 @@ import me.rhin.openciv.listener.TerritoryGrowListener;
 import me.rhin.openciv.listener.TurnTimeUpdateListener;
 import me.rhin.openciv.shared.packet.type.AddUnitPacket;
 import me.rhin.openciv.shared.packet.type.DeleteUnitPacket;
+import me.rhin.openciv.shared.packet.type.EndTurnPacket;
 import me.rhin.openciv.shared.packet.type.FetchPlayerPacket;
 import me.rhin.openciv.shared.packet.type.FinishLoadingPacket;
 import me.rhin.openciv.shared.packet.type.MoveUnitPacket;
@@ -190,6 +191,11 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 		City city = player.getCityFromName(packet.getCityName());
 		Tile tile = map.getTiles()[packet.getGridX()][packet.getGridY()];
 		city.growTerritory(tile);
+	}
+
+	public void endTurn() {
+		EndTurnPacket packet = new EndTurnPacket();
+		Civilization.getInstance().getNetworkManager().sendPacket(packet);
 	}
 
 	public GameMap getMap() {

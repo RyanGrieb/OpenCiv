@@ -22,6 +22,8 @@ import me.rhin.openciv.server.game.city.specialist.UnemployedSpecialist;
 import me.rhin.openciv.server.game.map.tile.Tile;
 import me.rhin.openciv.server.game.map.tile.Tile.TileTypeWrapper;
 import me.rhin.openciv.server.game.production.ProducibleItemManager;
+import me.rhin.openciv.server.listener.ClickSpecialistListener;
+import me.rhin.openciv.server.listener.TurnTimeUpdateListener;
 import me.rhin.openciv.shared.packet.type.AddSpecialistToContainerPacket;
 import me.rhin.openciv.shared.packet.type.BuildingConstructedPacket;
 import me.rhin.openciv.shared.packet.type.CityStatUpdatePacket;
@@ -29,8 +31,9 @@ import me.rhin.openciv.shared.packet.type.RemoveSpecialistFromContainerPacket;
 import me.rhin.openciv.shared.packet.type.SetCitizenTileWorkerPacket;
 import me.rhin.openciv.shared.stat.Stat;
 import me.rhin.openciv.shared.stat.StatLine;
+import me.rhin.openciv.shared.util.MathHelper;
 
-public class City implements SpecialistContainer {
+public class City implements SpecialistContainer, TurnTimeUpdateListener {
 
 	private Player playerOwner;
 	private String name;
@@ -64,6 +67,8 @@ public class City implements SpecialistContainer {
 		setPopulation(1);
 		// NOTE: We don't need to send a stat update packet here. So we dont.
 		playerOwner.getStatLine().mergeStatLine(statLine);
+
+		Server.getInstance().getEventManager().addListener(TurnTimeUpdateListener.class, this);
 	}
 
 	public static String getRandomCityName() {
@@ -95,9 +100,19 @@ public class City implements SpecialistContainer {
 		unemployedSpecialists.remove(0);
 
 		ArrayList<Tile> topTiles = getTopWorkableTiles();
-		setCitizenTileWorker(new AssignedCitizenWorker(this, topTiles.get(0)));
 
-		statLine.mergeStatLine(topTiles.get(0).getStatLine());
+		Tile topTile = null;
+
+		for (Tile tile : topTiles) {
+			if (citizenWorkers.containsKey(tile) && !citizenWorkers.get(tile).isValidTileWorker()) {
+				topTile = tile;
+				break;
+			}
+		}
+
+		setCitizenTileWorker(new AssignedCitizenWorker(this, topTile));
+
+		statLine.mergeStatLine(topTile.getStatLine());
 
 		Json json = new Json();
 
@@ -105,6 +120,34 @@ public class City implements SpecialistContainer {
 		for (Stat stat : this.statLine.getStatValues().keySet()) {
 			statUpdatePacket.addStat(name, stat.name(), this.statLine.getStatValues().get(stat));
 		}
+		playerOwner.getConn().send(json.toJson(statUpdatePacket));
+	}
+
+	@Override
+	public void onTurnTimeUpdate(int turnTime) {
+		if (playerOwner.getConn().isClosed())
+			return;
+
+		statLine.addValue(Stat.FOOD_SURPLUS, statLine.getStatValue(Stat.FOOD_GAIN));
+
+		int gainedFood = (int) statLine.getStatValue(Stat.FOOD_GAIN);
+		int surplusFood = (int) statLine.getStatValue(Stat.FOOD_SURPLUS);
+		int population = (int) statLine.getStatValue(Stat.POPULATION);
+		int foodRequired = (int) (15 + 8 * (population - 1) + Math.pow(population - 1, 1.5));
+
+		int growthTurns = (foodRequired - surplusFood) / MathHelper.nonZero(gainedFood);
+
+		if (growthTurns < 1 && gainedFood > 0) {
+			setPopulation((int) statLine.getStatValue(Stat.POPULATION) + 1);
+			updateWorkedTiles();
+		}
+
+		Json json = new Json();
+		CityStatUpdatePacket statUpdatePacket = new CityStatUpdatePacket();
+		for (Stat stat : this.statLine.getStatValues().keySet()) {
+			statUpdatePacket.addStat(name, stat.name(), this.statLine.getStatValues().get(stat));
+		}
+
 		playerOwner.getConn().send(json.toJson(statUpdatePacket));
 	}
 
@@ -122,6 +165,8 @@ public class City implements SpecialistContainer {
 
 		for (int i = 0; i < statLine.getStatValue(Stat.POPULATION); i++) {
 			Tile tile = topTiles.get(i);
+			if (citizenWorkers.containsKey(tile) && citizenWorkers.get(tile).isValidTileWorker())
+				continue;
 			setCitizenTileWorker(new AssignedCitizenWorker(this, tile));
 		}
 
@@ -271,8 +316,8 @@ public class City implements SpecialistContainer {
 				statLine.setValue(stat, tile.getStatLine().getStatValue(stat));
 			}
 
-			if (statLine.getStatValue(Stat.PRODUCTION_GAIN) < 1)
-				statLine.setValue(Stat.PRODUCTION_GAIN, 1);
+			//if (statLine.getStatValue(Stat.PRODUCTION_GAIN) < 1)
+			//	statLine.setValue(Stat.PRODUCTION_GAIN, 1);
 
 			return statLine;
 		}
@@ -282,20 +327,32 @@ public class City implements SpecialistContainer {
 	private ArrayList<Tile> getTopWorkableTiles() {
 		ArrayList<Tile> topTiles = new ArrayList<>();
 
-		float maxValue = -1;
-
 		for (Tile tile : territory) {
-			if (tile.equals(originTile)
-					|| (citizenWorkers.containsKey(tile) && citizenWorkers.get(tile).isValidTileWorker()))
+			if (tile.equals(originTile))
 				continue;
+
+			topTiles.add(tile);
+		}
+
+		// Sort the topTiles based on the tile's value
+		for (int i = 1; i < topTiles.size(); i++) {
+
+			int j = i - 1;
+
+			Tile tile = topTiles.get(i);
+
 			float value = getTileStatLine(tile).getStatValue(Stat.FOOD_GAIN) * 3
 					+ getTileStatLine(tile).getStatValue(Stat.GOLD_GAIN) * 2
 					+ getTileStatLine(tile).getStatValue(Stat.PRODUCTION_GAIN) * 1;
 
-			if (value > maxValue) {
-				topTiles.add(0, tile);
-				maxValue = value;
+			while (j >= 0 && getTileStatLine(topTiles.get(j)).getStatValue(Stat.FOOD_GAIN) * 3
+					+ getTileStatLine(topTiles.get(j)).getStatValue(Stat.GOLD_GAIN) * 2
+					+ getTileStatLine(topTiles.get(j)).getStatValue(Stat.PRODUCTION_GAIN) * 1 < value) {
+				topTiles.set(j + 1, topTiles.get(j));
+				j--;
 			}
+
+			topTiles.set(j + 1, tile);
 		}
 
 		return topTiles;
@@ -305,5 +362,6 @@ public class City implements SpecialistContainer {
 		statLine.setValue(Stat.POPULATION, amount);
 		statLine.setValue(Stat.FOOD_GAIN,
 				statLine.getStatValue(Stat.FOOD_GAIN) - statLine.getStatValue(Stat.POPULATION) * 2);
+		statLine.setValue(Stat.FOOD_SURPLUS, 0);
 	}
 }

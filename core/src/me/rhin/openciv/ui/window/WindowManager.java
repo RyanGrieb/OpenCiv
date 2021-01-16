@@ -3,7 +3,6 @@ package me.rhin.openciv.ui.window;
 import java.util.HashMap;
 
 import com.badlogic.gdx.scenes.scene2d.Actor;
-import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 
 import me.rhin.openciv.Civilization;

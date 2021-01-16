@@ -5,6 +5,13 @@ import com.badlogic.gdx.math.Vector2;
 //FIXME: Remove the other MathHelper class and merge it into this
 public class MathHelper {
 
+	public static int nonZero(int num) {
+		if (num == 0)
+			return 1;
+
+		return num;
+	}
+
 	public static float clamp(float num, float min, float max) {
 		if (num < min)
 			return min;

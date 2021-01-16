@@ -26,6 +26,7 @@ import me.rhin.openciv.server.listener.ClickSpecialistListener;
 import me.rhin.openciv.server.listener.ClickWorkedTileListener;
 import me.rhin.openciv.server.listener.ConnectionListener;
 import me.rhin.openciv.server.listener.DisconnectListener;
+import me.rhin.openciv.server.listener.EndTurnListener;
 import me.rhin.openciv.server.listener.FetchPlayerListener;
 import me.rhin.openciv.server.listener.PlayerFinishLoadingListener;
 import me.rhin.openciv.server.listener.PlayerListRequestListener;
@@ -38,6 +39,7 @@ import me.rhin.openciv.server.listener.UnitMoveListener;
 import me.rhin.openciv.shared.packet.type.ClickSpecialistPacket;
 import me.rhin.openciv.shared.packet.type.ClickWorkedTilePacket;
 import me.rhin.openciv.shared.packet.type.DeleteUnitPacket;
+import me.rhin.openciv.shared.packet.type.EndTurnPacket;
 import me.rhin.openciv.shared.packet.type.FetchPlayerPacket;
 import me.rhin.openciv.shared.packet.type.GameStartPacket;
 import me.rhin.openciv.shared.packet.type.MoveUnitPacket;
@@ -52,10 +54,10 @@ import me.rhin.openciv.shared.packet.type.TurnTickPacket;
 import me.rhin.openciv.shared.packet.type.TurnTimeUpdatePacket;
 import me.rhin.openciv.shared.util.ColorHelper;
 
-public class Game
-		implements StartGameRequestListener, ConnectionListener, DisconnectListener, PlayerListRequestListener,
-		FetchPlayerListener, SelectUnitListener, UnitMoveListener, SettleCityListener, PlayerFinishLoadingListener,
-		TurnTimeUpdateListener, SetProductionItemListener, ClickWorkedTileListener, ClickSpecialistListener {
+public class Game implements StartGameRequestListener, ConnectionListener, DisconnectListener,
+		PlayerListRequestListener, FetchPlayerListener, SelectUnitListener, UnitMoveListener, SettleCityListener,
+		PlayerFinishLoadingListener, TurnTimeUpdateListener, SetProductionItemListener, ClickWorkedTileListener,
+		ClickSpecialistListener, EndTurnListener {
 
 	private static final int BASE_TURN_TIME = 9;
 
@@ -124,6 +126,7 @@ public class Game
 		Server.getInstance().getEventManager().addListener(SetProductionItemListener.class, this);
 		Server.getInstance().getEventManager().addListener(ClickWorkedTileListener.class, this);
 		Server.getInstance().getEventManager().addListener(ClickSpecialistListener.class, this);
+		Server.getInstance().getEventManager().addListener(EndTurnListener.class, this);
 	}
 
 	@Override
@@ -377,6 +380,11 @@ public class Game
 		for (SpecialistContainer container : specialistContainers)
 			if (container.getName().equals(packet.getContainerName()))
 				targetCity.removeSpecialistFromContainer(container);
+	}
+
+	@Override
+	public void onEndTurn(WebSocket conn, EndTurnPacket packet) {
+		turnTime = 0;
 	}
 
 	public void start() {

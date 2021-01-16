@@ -20,6 +20,7 @@ import me.rhin.openciv.server.listener.ClickSpecialistListener.ClickSpecialistEv
 import me.rhin.openciv.server.listener.ClickWorkedTileListener.ClickWorkedTileEvent;
 import me.rhin.openciv.server.listener.ConnectionListener.ConnectionEvent;
 import me.rhin.openciv.server.listener.DisconnectListener.DisconnectEvent;
+import me.rhin.openciv.server.listener.EndTurnListener.EndTurnEvent;
 import me.rhin.openciv.server.listener.FetchPlayerListener.FetchPlayerEvent;
 import me.rhin.openciv.server.listener.MapRequestListener.MapRequestEvent;
 import me.rhin.openciv.server.listener.PlayerFinishLoadingListener.PlayerFinishLoadingEvent;
@@ -35,6 +36,7 @@ import me.rhin.openciv.shared.listener.Listener;
 import me.rhin.openciv.shared.packet.Packet;
 import me.rhin.openciv.shared.packet.type.ClickSpecialistPacket;
 import me.rhin.openciv.shared.packet.type.ClickWorkedTilePacket;
+import me.rhin.openciv.shared.packet.type.EndTurnPacket;
 import me.rhin.openciv.shared.packet.type.FetchPlayerPacket;
 import me.rhin.openciv.shared.packet.type.FinishLoadingPacket;
 import me.rhin.openciv.shared.packet.type.MapRequestPacket;
@@ -96,6 +98,7 @@ public class Server extends WebSocketServer {
 		networkEvents.put(SetProductionItemPacket.class, SetProductionItemEvent.class);
 		networkEvents.put(ClickWorkedTilePacket.class, ClickWorkedTileEvent.class);
 		networkEvents.put(ClickSpecialistPacket.class, ClickSpecialistEvent.class);
+		networkEvents.put(EndTurnPacket.class, EndTurnEvent.class);
 
 		this.playerIndex = 0;
 		this.commandProcessor = new CmdProcessor();
