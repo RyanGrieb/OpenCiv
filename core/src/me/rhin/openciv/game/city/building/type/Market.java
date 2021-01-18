@@ -47,12 +47,14 @@ public class Market extends Building implements SpecialistContainer {
 	}
 
 	@Override
-	public void addSpecialist() {
+	public void addSpecialist(int amount) {
+		// TODO Auto-generated method stub
 
 	}
 
 	@Override
-	public void removeSpecialist() {
+	public void removeSpecialist(int amount) {
+		// TODO Auto-generated method stub
 
 	}
 }

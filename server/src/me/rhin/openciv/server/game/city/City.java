@@ -211,14 +211,11 @@ public class City implements SpecialistContainer, NextTurnListener {
 			// FIXME: This is a workaround to avoid send an unnecessary packet from
 			// removeSpecialistFromContainer()
 
-			// FIXME: Make a bulk packet to remove specialists
-			for (int i = 0; i < unemployedSpecialists.size(); i++) {
-				RemoveSpecialistFromContainerPacket packet = new RemoveSpecialistFromContainerPacket();
-				packet.setContainer(name, name);
+			RemoveSpecialistFromContainerPacket packet = new RemoveSpecialistFromContainerPacket();
+			packet.setContainer(name, name, -1);
 
-				Json json = new Json();
-				playerOwner.getConn().send(json.toJson(packet));
-			}
+			Json json = new Json();
+			playerOwner.getConn().send(json.toJson(packet));
 		}
 
 		unemployedSpecialists.clear();
@@ -276,7 +273,7 @@ public class City implements SpecialistContainer, NextTurnListener {
 		specialistContainer.addSpecialist();
 
 		AddSpecialistToContainerPacket packet = new AddSpecialistToContainerPacket();
-		packet.setContainer(name, specialistContainer.getName());
+		packet.setContainer(name, specialistContainer.getName(), 1);
 
 		Json json = new Json();
 		playerOwner.getConn().send(json.toJson(packet));
@@ -286,7 +283,7 @@ public class City implements SpecialistContainer, NextTurnListener {
 		specialistContainer.removeSpecialist();
 
 		RemoveSpecialistFromContainerPacket packet = new RemoveSpecialistFromContainerPacket();
-		packet.setContainer(name, specialistContainer.getName());
+		packet.setContainer(name, specialistContainer.getName(), 1);
 
 		Json json = new Json();
 		playerOwner.getConn().send(json.toJson(packet));

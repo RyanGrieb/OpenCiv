@@ -181,7 +181,7 @@ public class City extends Actor implements SpecialistContainer, BuildingConstruc
 
 		for (SpecialistContainer contianer : specialistContainers)
 			if (contianer.getName().equals(packet.getContainerName()))
-				contianer.addSpecialist();
+				contianer.addSpecialist(packet.getAmount());
 	}
 
 	@Override
@@ -199,17 +199,23 @@ public class City extends Actor implements SpecialistContainer, BuildingConstruc
 
 		for (SpecialistContainer contianer : specialistContainers)
 			if (contianer.getName().equals(packet.getContainerName()))
-				contianer.removeSpecialist();
+				contianer.removeSpecialist(packet.getAmount());
 	}
 
 	@Override
-	public void addSpecialist() {
-		unemployedWorkerAmount++;
+	public void addSpecialist(int amount) {
+		if (amount == -1) {
+			unemployedWorkerAmount = 0;
+		} else
+			unemployedWorkerAmount += amount;
 	}
 
 	@Override
-	public void removeSpecialist() {
-		unemployedWorkerAmount--;
+	public void removeSpecialist(int amount) {
+		if (amount == -1)
+			unemployedWorkerAmount = 0;
+		else
+			unemployedWorkerAmount -= amount;
 	}
 
 	@Override
