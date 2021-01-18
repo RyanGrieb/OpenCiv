@@ -12,6 +12,7 @@ import com.badlogic.gdx.utils.Json;
 import me.rhin.openciv.server.Server;
 import me.rhin.openciv.server.game.Player;
 import me.rhin.openciv.server.game.city.building.Building;
+import me.rhin.openciv.server.game.city.building.type.Palace;
 import me.rhin.openciv.server.game.city.citizen.AssignedCitizenWorker;
 import me.rhin.openciv.server.game.city.citizen.CitizenWorker;
 import me.rhin.openciv.server.game.city.citizen.CityCenterCitizenWorker;
@@ -22,7 +23,6 @@ import me.rhin.openciv.server.game.city.specialist.UnemployedSpecialist;
 import me.rhin.openciv.server.game.map.tile.Tile;
 import me.rhin.openciv.server.game.map.tile.Tile.TileTypeWrapper;
 import me.rhin.openciv.server.game.production.ProducibleItemManager;
-import me.rhin.openciv.server.listener.ClickSpecialistListener;
 import me.rhin.openciv.server.listener.NextTurnListener;
 import me.rhin.openciv.shared.packet.type.AddSpecialistToContainerPacket;
 import me.rhin.openciv.shared.packet.type.BuildingConstructedPacket;
@@ -64,9 +64,18 @@ public class City implements SpecialistContainer, NextTurnListener {
 		territory.add(originTile);
 		originTile.setCity(this);
 
+		for (Tile tile : territory) {
+			citizenWorkers.put(tile, new EmptyCitizenWorker(this, tile));
+		}
+
 		setPopulation(1);
-		// NOTE: We don't need to send a stat update packet here. So we dont.
-		playerOwner.getStatLine().mergeStatLine(statLine);
+
+		// Add our two specialists, one from pop, one city center
+		addSpecialist();
+		addSpecialist();
+
+		// Necessary?
+		// playerOwner.getStatLine().mergeStatLine(statLine);
 
 		Server.getInstance().getEventManager().addListener(NextTurnListener.class, this);
 	}
@@ -129,7 +138,6 @@ public class City implements SpecialistContainer, NextTurnListener {
 			return;
 
 		int gainedFood = (int) (statLine.getStatValue(Stat.FOOD_GAIN) - (statLine.getStatValue(Stat.POPULATION) * 2));
-
 		statLine.addValue(Stat.FOOD_SURPLUS, gainedFood);
 
 		int surplusFood = (int) statLine.getStatValue(Stat.FOOD_SURPLUS);
@@ -139,7 +147,10 @@ public class City implements SpecialistContainer, NextTurnListener {
 		int growthTurns = (foodRequired - surplusFood) / MathHelper.nonZero(gainedFood);
 
 		if (growthTurns < 1 && gainedFood >= 0) {
+
 			setPopulation((int) statLine.getStatValue(Stat.POPULATION) + 1);
+
+			addSpecialist();
 			updateWorkedTiles();
 		} else if (gainedFood < 0) {
 			int starvingTurns = (surplusFood / Math.abs(gainedFood));
@@ -160,34 +171,59 @@ public class City implements SpecialistContainer, NextTurnListener {
 	}
 
 	public void updateWorkedTiles() {
-		ArrayList<Tile> topTiles = getTopWorkableTiles();
 
-		// Unset all statLine values added by the workers
-		for (CitizenWorker citizenWorker : citizenWorkers.values()) {
-			if (citizenWorker.isValidTileWorker()) {
-				statLine.reduceStatLine(citizenWorker.getTile().getStatLine());
-			}
-		}
-
-		// TODO: Reset all building & unemployed citizen specialists statLine
-
-		unemployedSpecialists.clear();
-		citizenWorkers.clear();
-
+		// Make all citizens unemployed
 		for (Tile tile : territory) {
-			// TODO: Ensure the tile is within 3 tiles of the city
-			setCitizenTileWorker(new EmptyCitizenWorker(this, tile));
+			CitizenWorker citizenWorker = citizenWorkers.get(tile);
+			if (citizenWorker.isValidTileWorker()) {
+				statLine.reduceStatLine(getTileStatLine(citizenWorker.getTile()));
+				addSpecialist();
+			}
+
+			setCitizenTileWorker(new EmptyCitizenWorker(this, citizenWorker.getTile()));
 		}
 
-		setCitizenTileWorker(new CityCenterCitizenWorker(this, originTile));
+		// TODO: Remove all specialists from buildings
+
+		// Go through the city population, and assign a worker from our unemployed
+		// specialist
+
+		ArrayList<Tile> topTiles = getTopWorkableTiles();
 
 		for (int i = 0; i < statLine.getStatValue(Stat.POPULATION); i++) {
 			Tile tile = topTiles.get(i);
 			if (citizenWorkers.containsKey(tile) && citizenWorkers.get(tile).isValidTileWorker())
 				continue;
+
+			// FIXME: This is slow, have bulk packets in the future
 			setCitizenTileWorker(new AssignedCitizenWorker(this, tile));
+			unemployedSpecialists.remove(0);
 		}
 
+		setCitizenTileWorker(new CityCenterCitizenWorker(this, originTile));
+		unemployedSpecialists.remove(0);
+
+		// Clear the assigned unemployed specialists.
+
+		// Assume we lost a citizen, and remove a specialist here.
+		if (unemployedSpecialists.size() > 0) {
+
+			// FIXME: This is a workaround to avoid send an unnecessary packet from
+			// removeSpecialistFromContainer()
+
+			// FIXME: Make a bulk packet to remove specialists
+			for (int i = 0; i < unemployedSpecialists.size(); i++) {
+				RemoveSpecialistFromContainerPacket packet = new RemoveSpecialistFromContainerPacket();
+				packet.setContainer(name, name);
+
+				Json json = new Json();
+				playerOwner.getConn().send(json.toJson(packet));
+			}
+		}
+
+		unemployedSpecialists.clear();
+
+		// Apply the new stat values for our worked tiles
 		for (CitizenWorker citizenWorker : citizenWorkers.values()) {
 			if (citizenWorker.isValidTileWorker()) {
 				statLine.mergeStatLine(getTileStatLine(citizenWorker.getTile()));
@@ -323,9 +359,7 @@ public class City implements SpecialistContainer, NextTurnListener {
 		// TODO: Research, religion can effect the output of tiles.
 
 		if (tile.equals(originTile)) {
-			for (TileTypeWrapper type : originTile.getTileTypeWrappers()) {
-				System.out.println(type);
-			}
+
 			StatLine statLine = new StatLine();
 			statLine.setValue(Stat.FOOD_GAIN, 2);
 			for (Stat stat : tile.getStatLine().getStatValues().keySet()) {
@@ -334,8 +368,8 @@ public class City implements SpecialistContainer, NextTurnListener {
 				statLine.setValue(stat, tile.getStatLine().getStatValue(stat));
 			}
 
-			// if (statLine.getStatValue(Stat.PRODUCTION_GAIN) < 1)
-			// statLine.setValue(Stat.PRODUCTION_GAIN, 1);
+			if (statLine.getStatValue(Stat.PRODUCTION_GAIN) < 1)
+				statLine.setValue(Stat.PRODUCTION_GAIN, 1);
 
 			return statLine;
 		}
