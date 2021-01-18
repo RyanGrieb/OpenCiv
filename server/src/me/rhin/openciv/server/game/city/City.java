@@ -125,7 +125,7 @@ public class City implements SpecialistContainer, NextTurnListener {
 
 	@Override
 	public void onNextTurn() {
-		if (playerOwner.getConn().isClosed())
+		if (playerOwner.getConn().isClosed() || playerOwner.getConn().isClosing())
 			return;
 
 		int gainedFood = (int) (statLine.getStatValue(Stat.FOOD_GAIN) - (statLine.getStatValue(Stat.POPULATION) * 2));
