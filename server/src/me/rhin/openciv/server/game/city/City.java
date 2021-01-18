@@ -128,9 +128,10 @@ public class City implements SpecialistContainer, TurnTimeUpdateListener {
 		if (playerOwner.getConn().isClosed())
 			return;
 
-		statLine.addValue(Stat.FOOD_SURPLUS, statLine.getStatValue(Stat.FOOD_GAIN));
+		int gainedFood = (int) (statLine.getStatValue(Stat.FOOD_GAIN) - (statLine.getStatValue(Stat.POPULATION) * 2));
 
-		int gainedFood = (int) statLine.getStatValue(Stat.FOOD_GAIN);
+		statLine.addValue(Stat.FOOD_SURPLUS, gainedFood);
+
 		int surplusFood = (int) statLine.getStatValue(Stat.FOOD_SURPLUS);
 		int population = (int) statLine.getStatValue(Stat.POPULATION);
 		int foodRequired = (int) (15 + 8 * (population - 1) + Math.pow(population - 1, 1.5));
@@ -153,6 +154,16 @@ public class City implements SpecialistContainer, TurnTimeUpdateListener {
 
 	public void updateWorkedTiles() {
 		ArrayList<Tile> topTiles = getTopWorkableTiles();
+
+		// Unset all statLine values added by the workers
+		for (CitizenWorker citizenWorker : citizenWorkers.values()) {
+			if (citizenWorker.isValidTileWorker()) {
+				statLine.reduceStatLine(citizenWorker.getTile().getStatLine());
+			}
+		}
+
+		// TODO: Reset all building & unemployed citizen specialists statLine
+
 		unemployedSpecialists.clear();
 		citizenWorkers.clear();
 
@@ -316,8 +327,8 @@ public class City implements SpecialistContainer, TurnTimeUpdateListener {
 				statLine.setValue(stat, tile.getStatLine().getStatValue(stat));
 			}
 
-			//if (statLine.getStatValue(Stat.PRODUCTION_GAIN) < 1)
-			//	statLine.setValue(Stat.PRODUCTION_GAIN, 1);
+			// if (statLine.getStatValue(Stat.PRODUCTION_GAIN) < 1)
+			// statLine.setValue(Stat.PRODUCTION_GAIN, 1);
 
 			return statLine;
 		}
@@ -360,8 +371,6 @@ public class City implements SpecialistContainer, TurnTimeUpdateListener {
 
 	private void setPopulation(int amount) {
 		statLine.setValue(Stat.POPULATION, amount);
-		statLine.setValue(Stat.FOOD_GAIN,
-				statLine.getStatValue(Stat.FOOD_GAIN) - statLine.getStatValue(Stat.POPULATION) * 2);
 		statLine.setValue(Stat.FOOD_SURPLUS, 0);
 	}
 }

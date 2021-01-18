@@ -3,6 +3,7 @@ package me.rhin.openciv.server.game.city.citizen;
 import me.rhin.openciv.server.game.city.City;
 import me.rhin.openciv.server.game.map.tile.Tile;
 import me.rhin.openciv.shared.packet.type.SetCitizenTileWorkerPacket.WorkerType;
+import me.rhin.openciv.shared.stat.StatLine;
 
 public abstract class CitizenWorker {
 
@@ -19,8 +20,9 @@ public abstract class CitizenWorker {
 	}
 
 	public abstract void onClick();
+
 	public abstract boolean isValidTileWorker();
-	
+
 	public abstract WorkerType getWorkerType();
 
 	public Tile getTile() {

@@ -162,7 +162,8 @@ public class CityStatsInfo extends Actor implements CityStatUpdateListener {
 	}
 
 	private void updateStatValues() {
-		int gainedFood = (int) city.getStatLine().getStatValue(Stat.FOOD_GAIN);
+		int gainedFood = (int) (city.getStatLine().getStatValue(Stat.FOOD_GAIN)
+				- (city.getStatLine().getStatValue(Stat.POPULATION) * 2));
 		populationLabel.setText((int) city.getStatLine().getStatValue(Stat.POPULATION));
 
 		int surplusFood = (int) city.getStatLine().getStatValue(Stat.FOOD_SURPLUS);
