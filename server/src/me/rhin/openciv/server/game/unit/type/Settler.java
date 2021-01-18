@@ -27,7 +27,7 @@ public class Settler extends UnitItem {
 
 	@Override
 	public int getProductionCost() {
-		return 106;
+		return 80;
 	}
 
 	@Override
