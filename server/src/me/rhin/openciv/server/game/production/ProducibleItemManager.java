@@ -18,7 +18,7 @@ import me.rhin.openciv.server.game.unit.type.Galley;
 import me.rhin.openciv.server.game.unit.type.Scout;
 import me.rhin.openciv.server.game.unit.type.Settler;
 import me.rhin.openciv.server.game.unit.type.Warrior;
-import me.rhin.openciv.server.listener.TurnTimeUpdateListener;
+import me.rhin.openciv.server.listener.NextTurnListener;
 import me.rhin.openciv.shared.packet.type.ApplyProductionToItemPacket;
 import me.rhin.openciv.shared.packet.type.FinishProductionItemPacket;
 import me.rhin.openciv.shared.stat.Stat;
@@ -31,7 +31,7 @@ import me.rhin.openciv.shared.stat.Stat;
  * @author Ryan
  *
  */
-public class ProducibleItemManager implements TurnTimeUpdateListener {
+public class ProducibleItemManager implements NextTurnListener {
 
 	private City city;
 	private HashMap<String, ProductionItem> possibleItems;
@@ -59,7 +59,7 @@ public class ProducibleItemManager implements TurnTimeUpdateListener {
 		possibleItems.put("Galley", new Galley());
 		possibleItems.put("Builder", new Builder());
 
-		Server.getInstance().getEventManager().addListener(TurnTimeUpdateListener.class, this);
+		Server.getInstance().getEventManager().addListener(NextTurnListener.class, this);
 	}
 
 	public HashMap<String, ProductionItem> getPossibleItems() {
@@ -98,7 +98,7 @@ public class ProducibleItemManager implements TurnTimeUpdateListener {
 	}
 
 	@Override
-	public void onTurnTimeUpdate(int turnTime) {
+	public void onNextTurn() {
 		ProducingItem producingItem = itemQueue.peek();
 
 		if (producingItem == null)

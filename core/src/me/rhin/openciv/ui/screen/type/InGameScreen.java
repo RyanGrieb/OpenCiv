@@ -35,9 +35,6 @@ public class InGameScreen extends AbstractScreen {
 		this.eventManager = Civilization.getInstance().getEventManager();
 		eventManager.clearEvents();
 
-		this.gameOverlay = new GameOverlay();
-		overlayStage.addActor(gameOverlay);
-
 		lastTimeCounted = TimeUtils.millis();
 		frameRate = Gdx.graphics.getFramesPerSecond();
 
@@ -54,6 +51,10 @@ public class InGameScreen extends AbstractScreen {
 	public void show() {
 		super.show();
 		this.game = new CivGame();
+
+		this.gameOverlay = new GameOverlay();
+		overlayStage.addActor(gameOverlay);
+
 		getCamera().zoom = 0.6F; // 0.8 Default
 	}
 

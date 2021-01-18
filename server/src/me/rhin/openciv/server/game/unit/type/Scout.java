@@ -27,7 +27,7 @@ public class Scout extends UnitItem {
 
 		@Override
 		public int getMaxMovement() {
-			return 4;
+			return 3;
 		}
 	}
 

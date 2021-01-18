@@ -16,13 +16,14 @@ import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.AbstractAction;
 import me.rhin.openciv.game.map.GameMap;
 import me.rhin.openciv.game.map.tile.Tile;
-import me.rhin.openciv.game.map.tile.Tile.TileTypeWrapper;
 import me.rhin.openciv.game.player.Player;
+import me.rhin.openciv.listener.NextTurnListener;
 import me.rhin.openciv.listener.ShapeRenderListener;
 import me.rhin.openciv.shared.packet.type.MoveUnitPacket;
+import me.rhin.openciv.shared.packet.type.NextTurnPacket;
 import me.rhin.openciv.ui.window.type.UnitWindow;
 
-public abstract class Unit extends Actor implements ShapeRenderListener {
+public abstract class Unit extends Actor implements ShapeRenderListener, NextTurnListener {
 
 	protected boolean canAttack;
 	protected ArrayList<AbstractAction> customActions;
@@ -33,8 +34,7 @@ public abstract class Unit extends Actor implements ShapeRenderListener {
 	private Tile standingTile, targetTile;
 	private Sprite sprite, selectionSprite, targetSelectionSprite;
 	private boolean selected;
-	private float currentMovementOffset;
-	private long lastMoveTime;
+	private float movement;
 	private float health;
 
 	public Unit(int id, String unitName, Player playerOwner, Tile standingTile, TextureEnum assetEnum) {
@@ -54,9 +54,10 @@ public abstract class Unit extends Actor implements ShapeRenderListener {
 		setPosition(standingTile.getVectors()[0].x - standingTile.getWidth() / 2, standingTile.getVectors()[0].y + 4);
 		setSize(standingTile.getWidth(), standingTile.getHeight());
 
-		this.currentMovementOffset = getMaxMovement();
-		this.lastMoveTime = -1;
+		this.movement = getMaxMovement();
 		playerOwner.addUnit(this);
+		
+		Civilization.getInstance().getEventManager().addListener(NextTurnListener.class, this);
 	}
 
 	public Unit(UnitParameter unitParameter, TextureEnum assetEnum) {
@@ -81,6 +82,11 @@ public abstract class Unit extends Actor implements ShapeRenderListener {
 		}
 
 		sprite.draw(batch);
+	}
+
+	@Override
+	public void onNextTurn(NextTurnPacket packet) {
+		this.movement = getMaxMovement();
 	}
 
 	public boolean setTargetTile(Tile targetTile) {
@@ -299,22 +305,11 @@ public abstract class Unit extends Actor implements ShapeRenderListener {
 	}
 
 	public void reduceMovement(int movementCost) {
-		long currentTime = System.currentTimeMillis() / 1000;
-		currentMovementOffset = getCurrentMovement();
-		currentMovementOffset -= movementCost;
-		lastMoveTime = currentTime;
+		movement -= movementCost;
 	}
 
 	public float getCurrentMovement() {
-		// Return a movement value between 0 - 3.
-		// NOTE: 1 movement = 3 seconds.
-		long turnsPassed = ((System.currentTimeMillis() / 1000) - lastMoveTime)
-				/ (Civilization.getInstance().getGame().getTurnTime() / getMaxMovement());
-
-		if (currentMovementOffset + turnsPassed > getMaxMovement())
-			return getMaxMovement();
-
-		return currentMovementOffset + turnsPassed;
+		return movement;
 	}
 
 	public int getMaxMovement() {

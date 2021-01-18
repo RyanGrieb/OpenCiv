@@ -10,12 +10,12 @@ import com.badlogic.gdx.utils.Json;
 import me.rhin.openciv.server.Server;
 import me.rhin.openciv.server.game.city.City;
 import me.rhin.openciv.server.game.unit.Unit;
-import me.rhin.openciv.server.listener.TurnTimeUpdateListener;
+import me.rhin.openciv.server.listener.NextTurnListener;
 import me.rhin.openciv.shared.packet.type.PlayerStatUpdatePacket;
 import me.rhin.openciv.shared.stat.Stat;
 import me.rhin.openciv.shared.stat.StatLine;
 
-public class Player implements TurnTimeUpdateListener {
+public class Player implements NextTurnListener {
 
 	private WebSocket conn;
 	private String name;
@@ -40,11 +40,11 @@ public class Player implements TurnTimeUpdateListener {
 		this.color = Server.getInstance().getGame().getColorHelper().getRandomColor();
 		this.statLine = new StatLine();
 
-		Server.getInstance().getEventManager().addListener(TurnTimeUpdateListener.class, this);
+		Server.getInstance().getEventManager().addListener(NextTurnListener.class, this);
 	}
 
 	@Override
-	public void onTurnTimeUpdate(int turnTime) {
+	public void onNextTurn() {
 		if (ownedCities.size() < 1)
 			return;
 

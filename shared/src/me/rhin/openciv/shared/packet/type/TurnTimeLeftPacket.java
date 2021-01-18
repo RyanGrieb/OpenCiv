@@ -5,28 +5,28 @@ import com.badlogic.gdx.utils.JsonValue;
 
 import me.rhin.openciv.shared.packet.Packet;
 
-public class TurnTickPacket extends Packet {
+public class TurnTimeLeftPacket extends Packet {
 
-	private int tickTime;
+	private int time;
 
 	@Override
 	public void write(Json json) {
 		super.write(json);
-		json.writeValue("tickTime", tickTime);
+		json.writeValue("time", time);
 	}
 
 	@Override
 	public void read(Json json, JsonValue jsonData) {
 		super.read(json, jsonData);
-		this.tickTime = jsonData.getInt("tickTime");
+		this.time = jsonData.getInt("time");
 	}
 
 	public void setTime(int time) {
-		this.tickTime = time;
+		this.time = time;
 	}
 
 	public int getTime() {
-		return tickTime;
+		return time;
 	}
 
 }

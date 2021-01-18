@@ -5,7 +5,7 @@ import com.badlogic.gdx.utils.JsonValue;
 
 import me.rhin.openciv.shared.packet.Packet;
 
-public class TurnTimeUpdatePacket extends Packet {
+public class NextTurnPacket extends Packet {
 
 	private int turnTime;
 

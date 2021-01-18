@@ -24,6 +24,7 @@ import me.rhin.openciv.listener.FinishLoadingRequestListener.FinishLoadingReques
 import me.rhin.openciv.listener.FinishProductionItemListener.FinishProductionItemEvent;
 import me.rhin.openciv.listener.GameStartListener.GameStartEvent;
 import me.rhin.openciv.listener.MoveUnitListener.MoveUnitEvent;
+import me.rhin.openciv.listener.NextTurnListener.NextTurnEvent;
 import me.rhin.openciv.listener.PlayerConnectListener.PlayerConnectEvent;
 import me.rhin.openciv.listener.PlayerDisconnectListener.PlayerDisconnectEvent;
 import me.rhin.openciv.listener.PlayerListRequestListener.PlayerListRequestEvent;
@@ -36,8 +37,7 @@ import me.rhin.openciv.listener.SetCitizenTileWorkerListener.SetCitizenTileWorke
 import me.rhin.openciv.listener.SetProductionItemListener.SetProductionItemEvent;
 import me.rhin.openciv.listener.SettleCityListener.SettleCityEvent;
 import me.rhin.openciv.listener.TerritoryGrowListener.TerritoryGrowEvent;
-import me.rhin.openciv.listener.TurnTickListener.TurnTickEvent;
-import me.rhin.openciv.listener.TurnTimeUpdateListener.TurnTimeUpdateEvent;
+import me.rhin.openciv.listener.TurnTimeLeftListener.TurnTimeLeftEvent;
 import me.rhin.openciv.shared.listener.Event;
 import me.rhin.openciv.shared.listener.Listener;
 import me.rhin.openciv.shared.packet.Packet;
@@ -53,6 +53,7 @@ import me.rhin.openciv.shared.packet.type.FinishProductionItemPacket;
 import me.rhin.openciv.shared.packet.type.GameStartPacket;
 import me.rhin.openciv.shared.packet.type.MapChunkPacket;
 import me.rhin.openciv.shared.packet.type.MoveUnitPacket;
+import me.rhin.openciv.shared.packet.type.NextTurnPacket;
 import me.rhin.openciv.shared.packet.type.PlayerConnectPacket;
 import me.rhin.openciv.shared.packet.type.PlayerDisconnectPacket;
 import me.rhin.openciv.shared.packet.type.PlayerListRequestPacket;
@@ -63,8 +64,7 @@ import me.rhin.openciv.shared.packet.type.SetCitizenTileWorkerPacket;
 import me.rhin.openciv.shared.packet.type.SetProductionItemPacket;
 import me.rhin.openciv.shared.packet.type.SettleCityPacket;
 import me.rhin.openciv.shared.packet.type.TerritoryGrowPacket;
-import me.rhin.openciv.shared.packet.type.TurnTickPacket;
-import me.rhin.openciv.shared.packet.type.TurnTimeUpdatePacket;
+import me.rhin.openciv.shared.packet.type.TurnTimeLeftPacket;
 
 public class NetworkManager {
 
@@ -86,7 +86,7 @@ public class NetworkManager {
 		networkEvents.put(DeleteUnitPacket.class, DeleteUnitEvent.class);
 		networkEvents.put(SettleCityPacket.class, SettleCityEvent.class);
 		networkEvents.put(BuildingConstructedPacket.class, BuildingConstructedEvent.class);
-		networkEvents.put(TurnTimeUpdatePacket.class, TurnTimeUpdateEvent.class);
+		networkEvents.put(NextTurnPacket.class, NextTurnEvent.class);
 		networkEvents.put(FinishLoadingPacket.class, FinishLoadingRequestEvent.class);
 		networkEvents.put(TerritoryGrowPacket.class, TerritoryGrowEvent.class);
 		networkEvents.put(PlayerStatUpdatePacket.class, PlayerStatUpdateEvent.class);
@@ -97,7 +97,7 @@ public class NetworkManager {
 		networkEvents.put(SetCitizenTileWorkerPacket.class, SetCitizenTileWorkerEvent.class);
 		networkEvents.put(AddSpecialistToContainerPacket.class, AddSpecialistToContainerEvent.class);
 		networkEvents.put(RemoveSpecialistFromContainerPacket.class, RemoveSpecialistFromContainerEvent.class);
-		networkEvents.put(TurnTickPacket.class, TurnTickEvent.class);
+		networkEvents.put(TurnTimeLeftPacket.class, TurnTimeLeftEvent.class);
 	}
 
 	public void connect(String ip) {
@@ -162,7 +162,7 @@ public class NetworkManager {
 
 			@Override
 			public boolean onMessage(final WebSocket webSocket, final String packet) {
-				// Gdx.app.log(Civilization.WS_LOG_TAG, "Got message: " + packet);
+				 Gdx.app.log(Civilization.WS_LOG_TAG, "Got message: " + packet);
 				fireAssociatedPacketEvents(webSocket, packet);
 				return true;
 			}

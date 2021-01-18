@@ -23,7 +23,7 @@ import me.rhin.openciv.server.game.map.tile.Tile;
 import me.rhin.openciv.server.game.map.tile.Tile.TileTypeWrapper;
 import me.rhin.openciv.server.game.production.ProducibleItemManager;
 import me.rhin.openciv.server.listener.ClickSpecialistListener;
-import me.rhin.openciv.server.listener.TurnTimeUpdateListener;
+import me.rhin.openciv.server.listener.NextTurnListener;
 import me.rhin.openciv.shared.packet.type.AddSpecialistToContainerPacket;
 import me.rhin.openciv.shared.packet.type.BuildingConstructedPacket;
 import me.rhin.openciv.shared.packet.type.CityStatUpdatePacket;
@@ -33,7 +33,7 @@ import me.rhin.openciv.shared.stat.Stat;
 import me.rhin.openciv.shared.stat.StatLine;
 import me.rhin.openciv.shared.util.MathHelper;
 
-public class City implements SpecialistContainer, TurnTimeUpdateListener {
+public class City implements SpecialistContainer, NextTurnListener {
 
 	private Player playerOwner;
 	private String name;
@@ -68,7 +68,7 @@ public class City implements SpecialistContainer, TurnTimeUpdateListener {
 		// NOTE: We don't need to send a stat update packet here. So we dont.
 		playerOwner.getStatLine().mergeStatLine(statLine);
 
-		Server.getInstance().getEventManager().addListener(TurnTimeUpdateListener.class, this);
+		Server.getInstance().getEventManager().addListener(NextTurnListener.class, this);
 	}
 
 	public static String getRandomCityName() {
@@ -124,7 +124,7 @@ public class City implements SpecialistContainer, TurnTimeUpdateListener {
 	}
 
 	@Override
-	public void onTurnTimeUpdate(int turnTime) {
+	public void onNextTurn() {
 		if (playerOwner.getConn().isClosed())
 			return;
 
@@ -138,9 +138,16 @@ public class City implements SpecialistContainer, TurnTimeUpdateListener {
 
 		int growthTurns = (foodRequired - surplusFood) / MathHelper.nonZero(gainedFood);
 
-		if (growthTurns < 1 && gainedFood > 0) {
+		if (growthTurns < 1 && gainedFood >= 0) {
 			setPopulation((int) statLine.getStatValue(Stat.POPULATION) + 1);
 			updateWorkedTiles();
+		} else if (gainedFood < 0) {
+			int starvingTurns = (surplusFood / Math.abs(gainedFood));
+
+			if (starvingTurns <= 0) {
+				setPopulation((int) statLine.getStatValue(Stat.POPULATION) - 1);
+				updateWorkedTiles();
+			}
 		}
 
 		Json json = new Json();

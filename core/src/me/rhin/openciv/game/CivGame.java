@@ -25,7 +25,7 @@ import me.rhin.openciv.listener.PlayerConnectListener;
 import me.rhin.openciv.listener.PlayerListRequestListener;
 import me.rhin.openciv.listener.SettleCityListener;
 import me.rhin.openciv.listener.TerritoryGrowListener;
-import me.rhin.openciv.listener.TurnTimeUpdateListener;
+import me.rhin.openciv.listener.NextTurnListener;
 import me.rhin.openciv.shared.packet.type.AddUnitPacket;
 import me.rhin.openciv.shared.packet.type.DeleteUnitPacket;
 import me.rhin.openciv.shared.packet.type.EndTurnPacket;
@@ -36,11 +36,11 @@ import me.rhin.openciv.shared.packet.type.PlayerConnectPacket;
 import me.rhin.openciv.shared.packet.type.PlayerListRequestPacket;
 import me.rhin.openciv.shared.packet.type.SettleCityPacket;
 import me.rhin.openciv.shared.packet.type.TerritoryGrowPacket;
-import me.rhin.openciv.shared.packet.type.TurnTimeUpdatePacket;
+import me.rhin.openciv.shared.packet.type.NextTurnPacket;
 import me.rhin.openciv.ui.screen.type.InGameScreen;
 
 public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerListRequestListener, FetchPlayerListener,
-		MoveUnitListener, DeleteUnitListener, SettleCityListener, TurnTimeUpdateListener, FinishLoadingRequestListener,
+		MoveUnitListener, DeleteUnitListener, SettleCityListener, NextTurnListener, FinishLoadingRequestListener,
 		TerritoryGrowListener {
 
 	private static final int BASE_TURN_TIME = 9;
@@ -64,7 +64,7 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 		Civilization.getInstance().getEventManager().addListener(MoveUnitListener.class, this);
 		Civilization.getInstance().getEventManager().addListener(DeleteUnitListener.class, this);
 		Civilization.getInstance().getEventManager().addListener(SettleCityListener.class, this);
-		Civilization.getInstance().getEventManager().addListener(TurnTimeUpdateListener.class, this);
+		Civilization.getInstance().getEventManager().addListener(NextTurnListener.class, this);
 		Civilization.getInstance().getEventManager().addListener(FinishLoadingRequestListener.class, this);
 		Civilization.getInstance().getEventManager().addListener(TerritoryGrowListener.class, this);
 
@@ -170,7 +170,7 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 	}
 
 	@Override
-	public void onTurnTimeUpdate(TurnTimeUpdatePacket packet) {
+	public void onNextTurn(NextTurnPacket packet) {
 		if (turnTime != packet.getTurnTime()) {
 			Gdx.app.log(Civilization.LOG_TAG, "Updating turn time to: " + packet.getTurnTime());
 			turnTime = packet.getTurnTime();

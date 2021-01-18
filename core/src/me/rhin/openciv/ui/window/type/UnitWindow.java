@@ -5,6 +5,8 @@ import com.badlogic.gdx.utils.Align;
 
 import me.rhin.openciv.game.AbstractAction;
 import me.rhin.openciv.game.unit.Unit;
+import me.rhin.openciv.listener.NextTurnListener;
+import me.rhin.openciv.shared.packet.type.NextTurnPacket;
 import me.rhin.openciv.ui.background.BlankBackground;
 import me.rhin.openciv.ui.button.type.UnitActionButton;
 import me.rhin.openciv.ui.label.CustomLabel;
@@ -50,7 +52,7 @@ public class UnitWindow extends AbstractWindow {
 	public boolean disablesInput() {
 		return false;
 	}
-	
+
 	@Override
 	public boolean disablesCameraMovement() {
 		return false;

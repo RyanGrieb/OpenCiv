@@ -28,13 +28,13 @@ import me.rhin.openciv.server.listener.ConnectionListener;
 import me.rhin.openciv.server.listener.DisconnectListener;
 import me.rhin.openciv.server.listener.EndTurnListener;
 import me.rhin.openciv.server.listener.FetchPlayerListener;
+import me.rhin.openciv.server.listener.NextTurnListener;
 import me.rhin.openciv.server.listener.PlayerFinishLoadingListener;
 import me.rhin.openciv.server.listener.PlayerListRequestListener;
 import me.rhin.openciv.server.listener.SelectUnitListener;
 import me.rhin.openciv.server.listener.SetProductionItemListener;
 import me.rhin.openciv.server.listener.SettleCityListener;
 import me.rhin.openciv.server.listener.StartGameRequestListener;
-import me.rhin.openciv.server.listener.TurnTimeUpdateListener;
 import me.rhin.openciv.server.listener.UnitMoveListener;
 import me.rhin.openciv.shared.packet.type.ClickSpecialistPacket;
 import me.rhin.openciv.shared.packet.type.ClickWorkedTilePacket;
@@ -43,6 +43,7 @@ import me.rhin.openciv.shared.packet.type.EndTurnPacket;
 import me.rhin.openciv.shared.packet.type.FetchPlayerPacket;
 import me.rhin.openciv.shared.packet.type.GameStartPacket;
 import me.rhin.openciv.shared.packet.type.MoveUnitPacket;
+import me.rhin.openciv.shared.packet.type.NextTurnPacket;
 import me.rhin.openciv.shared.packet.type.PlayerConnectPacket;
 import me.rhin.openciv.shared.packet.type.PlayerDisconnectPacket;
 import me.rhin.openciv.shared.packet.type.PlayerListRequestPacket;
@@ -50,14 +51,13 @@ import me.rhin.openciv.shared.packet.type.SelectUnitPacket;
 import me.rhin.openciv.shared.packet.type.SetProductionItemPacket;
 import me.rhin.openciv.shared.packet.type.SettleCityPacket;
 import me.rhin.openciv.shared.packet.type.TerritoryGrowPacket;
-import me.rhin.openciv.shared.packet.type.TurnTickPacket;
-import me.rhin.openciv.shared.packet.type.TurnTimeUpdatePacket;
+import me.rhin.openciv.shared.packet.type.TurnTimeLeftPacket;
 import me.rhin.openciv.shared.util.ColorHelper;
 
-public class Game implements StartGameRequestListener, ConnectionListener, DisconnectListener,
-		PlayerListRequestListener, FetchPlayerListener, SelectUnitListener, UnitMoveListener, SettleCityListener,
-		PlayerFinishLoadingListener, TurnTimeUpdateListener, SetProductionItemListener, ClickWorkedTileListener,
-		ClickSpecialistListener, EndTurnListener {
+public class Game
+		implements StartGameRequestListener, ConnectionListener, DisconnectListener, PlayerListRequestListener,
+		FetchPlayerListener, SelectUnitListener, UnitMoveListener, SettleCityListener, PlayerFinishLoadingListener,
+		NextTurnListener, SetProductionItemListener, ClickWorkedTileListener, ClickSpecialistListener, EndTurnListener {
 
 	private static final int BASE_TURN_TIME = 9;
 
@@ -65,8 +65,8 @@ public class Game implements StartGameRequestListener, ConnectionListener, Disco
 	private ArrayList<Player> players;
 	private ColorHelper colorHelper;
 	private boolean started;
-	private int turnTime;
-	private long lastTurnClock;
+	private int currentTurn;
+	private int turnTimeLeft;
 	private ScheduledExecutorService executor;
 	private Runnable turnTimeRunnable;
 
@@ -75,7 +75,8 @@ public class Game implements StartGameRequestListener, ConnectionListener, Disco
 		this.players = new ArrayList<>();
 		this.colorHelper = new ColorHelper();
 		this.started = false;
-		this.turnTime = BASE_TURN_TIME;
+		this.currentTurn = 0;
+		this.turnTimeLeft = 0;
 
 		this.executor = Executors.newScheduledThreadPool(1);
 
@@ -85,33 +86,27 @@ public class Game implements StartGameRequestListener, ConnectionListener, Disco
 					if (!playersLoaded() || !started)
 						return;
 
-					long timeDiff = System.currentTimeMillis() - lastTurnClock;
-
-					if (timeDiff / 1000 >= turnTime) {
-
-						turnTime = getUpdatedTurnTime();
-						Server.getInstance().getEventManager().fireEvent(new TurnTimeUpdateEvent(turnTime));
-						lastTurnClock = System.currentTimeMillis();
+					if (turnTimeLeft <= 0) {
+						Server.getInstance().getEventManager().fireEvent(new NextTurnEvent());
+						currentTurn++;
+						turnTimeLeft = getUpdatedTurnTime();
 					}
 
-					// Update the timeDiff if we went into the next turn
-					timeDiff = System.currentTimeMillis() - lastTurnClock;
+					TurnTimeLeftPacket turnTimeLeftPacket = new TurnTimeLeftPacket();
+					turnTimeLeftPacket.setTime(turnTimeLeft);
 
-					if (timeDiff % 1000 == 0) {
-						TurnTickPacket turnTickPacket = new TurnTickPacket();
-						turnTickPacket.setTime((int) (turnTime - (timeDiff / 1000)));
+					Json json = new Json();
+					for (Player player : players)
+						player.getConn().send(json.toJson(turnTimeLeftPacket));
 
-						Json json = new Json();
-						for (Player player : players)
-							player.getConn().send(json.toJson(turnTickPacket));
-					}
+					turnTimeLeft--;
 
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
 			}
 		};
-		executor.scheduleAtFixedRate(turnTimeRunnable, 0, 1, TimeUnit.MILLISECONDS);
+		executor.scheduleAtFixedRate(turnTimeRunnable, 0, 1, TimeUnit.SECONDS);
 
 		Server.getInstance().getEventManager().addListener(StartGameRequestListener.class, this);
 		Server.getInstance().getEventManager().addListener(ConnectionListener.class, this);
@@ -122,7 +117,7 @@ public class Game implements StartGameRequestListener, ConnectionListener, Disco
 		Server.getInstance().getEventManager().addListener(UnitMoveListener.class, this);
 		Server.getInstance().getEventManager().addListener(SettleCityListener.class, this);
 		Server.getInstance().getEventManager().addListener(PlayerFinishLoadingListener.class, this);
-		Server.getInstance().getEventManager().addListener(TurnTimeUpdateListener.class, this);
+		Server.getInstance().getEventManager().addListener(NextTurnListener.class, this);
 		Server.getInstance().getEventManager().addListener(SetProductionItemListener.class, this);
 		Server.getInstance().getEventManager().addListener(ClickWorkedTileListener.class, this);
 		Server.getInstance().getEventManager().addListener(ClickSpecialistListener.class, this);
@@ -162,7 +157,7 @@ public class Game implements StartGameRequestListener, ConnectionListener, Disco
 		if (removedPlayer == null)
 			return;
 
-		Server.getInstance().getEventManager().removeListener(TurnTimeUpdateListener.class, removedPlayer);
+		Server.getInstance().getEventManager().removeListener(NextTurnListener.class, removedPlayer);
 		players.remove(removedPlayer);
 
 		for (Player player : players) {
@@ -232,7 +227,7 @@ public class Game implements StartGameRequestListener, ConnectionListener, Disco
 		unit.setTargetTile(targetTile);
 
 		// The player is hacking here or i'm a poop coder
-		if (unit.getCurrentMovement() < unit.getPathMovement())
+		if (unit.getMovement() < unit.getPathMovement())
 			return;
 
 		unit.moveToTargetTile();
@@ -312,10 +307,10 @@ public class Game implements StartGameRequestListener, ConnectionListener, Disco
 	}
 
 	@Override
-	public void onTurnTimeUpdate(int turnTime) {
+	public void onNextTurn() {
 		Json json = new Json();
-		TurnTimeUpdatePacket turnTimeUpdatePacket = new TurnTimeUpdatePacket();
-		turnTimeUpdatePacket.setTurnTime(turnTime);
+		NextTurnPacket turnTimeUpdatePacket = new NextTurnPacket();
+		turnTimeUpdatePacket.setTurnTime(getUpdatedTurnTime());
 		for (Player player : players) {
 			player.getConn().send(json.toJson(turnTimeUpdatePacket));
 		}
@@ -384,7 +379,7 @@ public class Game implements StartGameRequestListener, ConnectionListener, Disco
 
 	@Override
 	public void onEndTurn(WebSocket conn, EndTurnPacket packet) {
-		turnTime = 0;
+		turnTimeLeft = 0;
 	}
 
 	public void start() {
@@ -464,8 +459,8 @@ public class Game implements StartGameRequestListener, ConnectionListener, Disco
 		return players;
 	}
 
-	public int getTurnTime() {
-		return turnTime;
+	public int getTurnTimeLeft() {
+		return turnTimeLeft;
 	}
 
 	private Player getPlayerByConn(WebSocket conn) {

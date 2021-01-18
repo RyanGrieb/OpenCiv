@@ -9,9 +9,10 @@ import me.rhin.openciv.server.Server;
 import me.rhin.openciv.server.game.Player;
 import me.rhin.openciv.server.game.map.GameMap;
 import me.rhin.openciv.server.game.map.tile.Tile;
-import me.rhin.openciv.server.game.map.tile.Tile.TileTypeWrapper;
+import me.rhin.openciv.server.listener.NextTurnListener;
+import me.rhin.openciv.shared.packet.type.NextTurnPacket;
 
-public abstract class Unit {
+public abstract class Unit implements NextTurnListener {
 
 	private static int unitID = 0;
 
@@ -23,18 +24,25 @@ public abstract class Unit {
 	private Tile standingTile, targetTile;
 	private boolean selected;
 	private int pathMovement;
-	private float currentMovementOffset;
-	private long lastMoveTime;
+	private int movement;
 	private float health;
 
 	public Unit(Player playerOwner, Tile standingTile) {
 		this.id = unitID++;
 		this.playerOwner = playerOwner;
 		this.standingTile = standingTile;
+		this.movement = getMaxMovement();
 		setPosition(standingTile.getVectors()[0].x - standingTile.getWidth() / 2, standingTile.getVectors()[0].y + 4);
 		setSize(standingTile.getWidth(), standingTile.getHeight());
 
 		playerOwner.addOwnedUnit(this);
+
+		Server.getInstance().getEventManager().addListener(NextTurnListener.class, this);
+	}
+
+	@Override
+	public void onNextTurn() {
+		this.movement = getMaxMovement();
 	}
 
 	public abstract int getMovementCost(Tile prevTile, Tile adjTile);
@@ -198,21 +206,11 @@ public abstract class Unit {
 	}
 
 	public void reduceMovement(int movementCost) {
-		long currentTime = System.currentTimeMillis() / 1000;
-		currentMovementOffset = getCurrentMovement();
-		currentMovementOffset -= movementCost;
-		lastMoveTime = currentTime;
+		movement -= movementCost;
 	}
 
-	public float getCurrentMovement() {
-		// Return a movement value between 0 - 3.
-		// NOTE: 1 movement = 3 seconds.
-		long turnsPassed = ((System.currentTimeMillis() / 1000) - lastMoveTime)
-				/ (Server.getInstance().getGame().getTurnTime() / getMaxMovement());
-		if (currentMovementOffset + turnsPassed > getMaxMovement())
-			return getMaxMovement();
-
-		return currentMovementOffset + turnsPassed;
+	public float getMovement() {
+		return movement;
 	}
 
 	public void setPosition(float x, float y) {
