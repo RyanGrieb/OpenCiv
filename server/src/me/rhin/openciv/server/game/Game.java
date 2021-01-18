@@ -379,7 +379,16 @@ public class Game
 
 	@Override
 	public void onEndTurn(WebSocket conn, EndTurnPacket packet) {
-		turnTimeLeft = 0;
+		Server.getInstance().getEventManager().fireEvent(new NextTurnEvent());
+		currentTurn++;
+		turnTimeLeft = getUpdatedTurnTime();
+
+		TurnTimeLeftPacket turnTimeLeftPacket = new TurnTimeLeftPacket();
+		turnTimeLeftPacket.setTime(turnTimeLeft);
+
+		Json json = new Json();
+		for (Player player : players)
+			player.getConn().send(json.toJson(turnTimeLeftPacket));
 	}
 
 	public void start() {
