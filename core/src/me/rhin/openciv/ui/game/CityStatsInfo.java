@@ -174,12 +174,16 @@ public class CityStatsInfo extends Actor implements CityStatUpdateListener {
 
 		if (gainedFood < 0) {
 			int starvingTurns = (surplusFood / Math.abs(gainedFood)) + 1;
-			populationGrowthLabel.setText("Starve in" + starvingTurns);
+			populationGrowthLabel.setText(starvingTurns + (starvingTurns > 1 ? " Turns" : " Turn"));
+			populationGrowthDescLabel.setText("Starve In: ");
 
 		} else if (gainedFood == 0) {
 			populationGrowthLabel.setText("Stagnated");
-		} else
-			populationGrowthLabel.setText(growthTurns + " Turns");
+			populationGrowthDescLabel.setText("Growth: ");
+		} else {
+			populationGrowthLabel.setText(growthTurns + (growthTurns > 1 ? " Turns" : " Turn"));
+			populationGrowthDescLabel.setText("Growth In: ");
+		}
 
 		foodLabel.setText((gainedFood < 0 ? "" : "+") + gainedFood);
 		productionLabel.setText("+" + (int) city.getStatLine().getStatValue(Stat.PRODUCTION_GAIN));

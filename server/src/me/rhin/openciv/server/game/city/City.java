@@ -153,7 +153,7 @@ public class City implements SpecialistContainer, NextTurnListener {
 			addSpecialist();
 			updateWorkedTiles();
 		} else if (gainedFood < 0) {
-			int starvingTurns = (surplusFood / Math.abs(gainedFood));
+			int starvingTurns = (surplusFood / Math.abs(gainedFood)) + 1;
 
 			if (starvingTurns <= 0) {
 				setPopulation((int) statLine.getStatValue(Stat.POPULATION) - 1);
