@@ -419,11 +419,11 @@ public class City implements SpecialistContainer, NextTurnListener {
 
 			Tile tile = topTiles.get(i);
 
-			float value = getTileStatLine(tile).getStatValue(Stat.FOOD_GAIN) * 3
+			float value = getTileStatLine(tile).getStatValue(Stat.FOOD_GAIN) * 4
 					+ getTileStatLine(tile).getStatValue(Stat.GOLD_GAIN) * 2
 					+ getTileStatLine(tile).getStatValue(Stat.PRODUCTION_GAIN) * 1;
 
-			while (j >= 0 && getTileStatLine(topTiles.get(j)).getStatValue(Stat.FOOD_GAIN) * 3
+			while (j >= 0 && getTileStatLine(topTiles.get(j)).getStatValue(Stat.FOOD_GAIN) * 4
 					+ getTileStatLine(topTiles.get(j)).getStatValue(Stat.GOLD_GAIN) * 2
 					+ getTileStatLine(topTiles.get(j)).getStatValue(Stat.PRODUCTION_GAIN) * 1 < value) {
 				topTiles.set(j + 1, topTiles.get(j));
@@ -456,13 +456,13 @@ public class City implements SpecialistContainer, NextTurnListener {
 			Tile tile = topTiles.get(i);
 
 			// TODO: Include the distance from the city center towards the value.
-			float value = getTileStatLine(tile).getStatValue(Stat.FOOD_GAIN) * 2
-					+ getTileStatLine(tile).getStatValue(Stat.GOLD_GAIN) * 3
-					+ getTileStatLine(tile).getStatValue(Stat.PRODUCTION_GAIN) * 2;
+			float value = getTileStatLine(tile).getStatValue(Stat.FOOD_GAIN) * 4
+					+ getTileStatLine(tile).getStatValue(Stat.GOLD_GAIN) * 1
+					+ getTileStatLine(tile).getStatValue(Stat.PRODUCTION_GAIN) * 4;
 
-			while (j >= 0 && getTileStatLine(topTiles.get(j)).getStatValue(Stat.FOOD_GAIN) * 2
-					+ getTileStatLine(topTiles.get(j)).getStatValue(Stat.GOLD_GAIN) * 3
-					+ getTileStatLine(topTiles.get(j)).getStatValue(Stat.PRODUCTION_GAIN) * 2 < value) {
+			while (j >= 0 && getTileStatLine(topTiles.get(j)).getStatValue(Stat.FOOD_GAIN) * 4
+					+ getTileStatLine(topTiles.get(j)).getStatValue(Stat.GOLD_GAIN) * 1
+					+ getTileStatLine(topTiles.get(j)).getStatValue(Stat.PRODUCTION_GAIN) * 4 < value) {
 				topTiles.set(j + 1, topTiles.get(j));
 				j--;
 			}

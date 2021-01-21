@@ -462,13 +462,15 @@ public class Game
 		for (Player player : players) {
 			int assignedLuxTiles = 0;
 			int assignedResourceTiles = 0;
-			while (assignedLuxTiles < 3 || assignedResourceTiles < 2) {
+			int loopLimit = 500;
+			while ((assignedLuxTiles < 3 || assignedResourceTiles < 2) && loopLimit > 0) {
 
 				int randX = rnd.nextInt(7) - 3;
 				int randY = rnd.nextInt(7) - 3;
 				Tile tile = map.getTiles()[player.getSpawnX() + randX][player.getSpawnY() + randY];
 
-				if (tile.getBaseTileType().hasProperty(TileProperty.WATER)
+				if (tile.getBaseTileType().hasProperty(TileProperty.WATER) || tile.getBaseTileType() == TileType.DESERT
+						|| tile.getBaseTileType() == TileType.DESERT_HILL
 						|| tile.getBaseTileType() == TileType.MOUNTAIN) {
 					continue;
 				}
@@ -485,6 +487,8 @@ public class Game
 					tile.setTileType(TileType.getRandomResourceTile());
 					assignedResourceTiles++;
 				}
+
+				loopLimit--;
 			}
 		}
 
