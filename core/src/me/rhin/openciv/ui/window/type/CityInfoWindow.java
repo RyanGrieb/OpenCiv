@@ -120,6 +120,11 @@ public class CityInfoWindow extends AbstractWindow implements BuildingConstructe
 		for (WorkedTileButton button : citizenButtons.values()) {
 			button.addAction(Actions.removeActor());
 		}
+
+		Civilization.getInstance().getEventManager().removeListener(BuildingConstructedListener.class, this);
+		Civilization.getInstance().getEventManager().removeListener(SetCitizenTileWorkerListener.class, this);
+		Civilization.getInstance().getEventManager().removeListener(AddSpecialistToContainerListener.class, this);
+		Civilization.getInstance().getEventManager().removeListener(RemoveSpecialistFromContainerListener.class, this);
 	}
 
 	@Override
