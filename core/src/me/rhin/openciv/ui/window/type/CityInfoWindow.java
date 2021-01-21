@@ -147,6 +147,17 @@ public class CityInfoWindow extends AbstractWindow implements BuildingConstructe
 
 		Tile tile = Civilization.getInstance().getGame().getMap().getTiles()[packet.getGridX()][packet.getGridY()];
 
+		if (!citizenButtons.containsKey(tile)) {
+
+			WorkedTileButton button = new WorkedTileButton(city.getCitizenWorkers().get(tile), tile,
+					tile.getX() + tile.getWidth() / 2 - 16 / 2, tile.getY() + tile.getHeight() - 16 / 1.5F, 16, 16);
+
+			citizenButtons.put(tile, button);
+
+			if (this.isOpen())
+				Civilization.getInstance().getScreenManager().getCurrentScreen().getStage().addActor(button);
+		}
+
 		citizenButtons.get(tile).setTexture(WorkedTileButton.getTextureFromWorkerType(packet.getWorkerType()));
 	}
 

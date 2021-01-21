@@ -11,19 +11,26 @@ public abstract class AbstractWindow extends Group {
 
 	protected Stage stage;
 	protected Viewport viewport;
+	private boolean open;
 
 	public AbstractWindow() {
 		this.stage = Civilization.getInstance().getScreenManager().getCurrentScreen().getOverlayStage();
 		this.viewport = Civilization.getInstance().getScreenManager().getCurrentScreen().getViewport();
+
+		open = true;
 	}
 
 	public abstract boolean disablesInput();
-	
+
 	public abstract boolean disablesCameraMovement();
-	
+
 	public abstract boolean closesOtherWindows();
-	
+
+	public boolean isOpen() {
+		return open;
+	}
+
 	public void onClose() {
-		
+		open = false;
 	}
 }

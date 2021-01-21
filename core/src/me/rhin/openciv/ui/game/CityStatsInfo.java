@@ -21,9 +21,9 @@ public class CityStatsInfo extends Actor implements CityStatUpdateListener {
 	private Sprite backgroundSprite;
 	private Sprite populationIcon, foodIcon, productionIcon, goldIcon, scienceIcon, heritageIcon;
 	private CustomLabel populationDescLabel, populationGrowthDescLabel, foodDescLabel, productionDescLabel,
-			goldDescLabel, scienceDescLabel, heritageDescLabel;
+			goldDescLabel, scienceDescLabel, heritageDescLabel, borderGrowthDescLabel;
 	private CustomLabel populationLabel, populationGrowthLabel, foodLabel, productionLabel, goldLabel, scienceLabel,
-			heritageLabel;
+			heritageLabel, borderGrowthLabel;
 
 	public CityStatsInfo(City city, float x, float y, float width, float height) {
 		this.city = city;
@@ -84,7 +84,7 @@ public class CityStatsInfo extends Actor implements CityStatUpdateListener {
 		originX = 5;
 
 		this.goldIcon = TextureEnum.ICON_GOLD.sprite();
-		originY -= foodIcon.getHeight();
+		originY -= productionIcon.getHeight();
 		goldIcon.setSize(16, 16);
 		goldIcon.setPosition(originX, originY);
 
@@ -97,7 +97,7 @@ public class CityStatsInfo extends Actor implements CityStatUpdateListener {
 		originX = 5;
 
 		this.scienceIcon = TextureEnum.ICON_RESEARCH.sprite();
-		originY -= foodIcon.getHeight();
+		originY -= goldIcon.getHeight();
 		scienceIcon.setSize(16, 16);
 		scienceIcon.setPosition(originX, originY);
 
@@ -110,7 +110,7 @@ public class CityStatsInfo extends Actor implements CityStatUpdateListener {
 		originX = 5;
 
 		this.heritageIcon = TextureEnum.ICON_HERITAGE.sprite();
-		originY -= foodIcon.getHeight();
+		originY -= scienceIcon.getHeight();
 		heritageIcon.setSize(16, 16);
 		heritageIcon.setPosition(originX, originY);
 
@@ -119,6 +119,14 @@ public class CityStatsInfo extends Actor implements CityStatUpdateListener {
 		heritageDescLabel.setPosition(originX, originY + heritageDescLabel.getHeight() / 2);
 
 		this.heritageLabel = new CustomLabel("+0");
+
+		originX = 5;
+
+		originY -= heritageIcon.getHeight() + 3;
+		this.borderGrowthDescLabel = new CustomLabel("Expansion In:");
+		borderGrowthDescLabel.setPosition(originX, originY + borderGrowthDescLabel.getHeight() / 2);
+
+		this.borderGrowthLabel = new CustomLabel("0 Turns");
 
 		updateStatValues();
 
@@ -143,6 +151,7 @@ public class CityStatsInfo extends Actor implements CityStatUpdateListener {
 		goldDescLabel.draw(batch, parentAlpha);
 		scienceDescLabel.draw(batch, parentAlpha);
 		heritageDescLabel.draw(batch, parentAlpha);
+		borderGrowthDescLabel.draw(batch, parentAlpha);
 
 		populationLabel.draw(batch, parentAlpha);
 		populationGrowthLabel.draw(batch, parentAlpha);
@@ -151,6 +160,7 @@ public class CityStatsInfo extends Actor implements CityStatUpdateListener {
 		goldLabel.draw(batch, parentAlpha);
 		scienceLabel.draw(batch, parentAlpha);
 		heritageLabel.draw(batch, parentAlpha);
+		borderGrowthLabel.draw(batch, parentAlpha);
 	}
 
 	@Override
@@ -191,6 +201,11 @@ public class CityStatsInfo extends Actor implements CityStatUpdateListener {
 		scienceLabel.setText("+" + (int) city.getStatLine().getStatValue(Stat.RESEARCH_GAIN));
 		heritageLabel.setText("+" + (int) city.getStatLine().getStatValue(Stat.HERITAGE_GAIN));
 
+		int expansionTurns = (int) (city.getStatLine().getStatValue(Stat.EXPANSION_REQUIREMENT)
+				- city.getStatLine().getStatValue(Stat.HERITAGE) / city.getStatLine().getStatValue(Stat.HERITAGE_GAIN));
+
+		borderGrowthLabel.setText(expansionTurns + (expansionTurns > 1 ? " Turns" : " Turn"));
+
 		updatePositions();
 	}
 
@@ -206,12 +221,17 @@ public class CityStatsInfo extends Actor implements CityStatUpdateListener {
 		foodLabel.setPosition(getWidth() - (foodLabel.getWidth() + 2), originY + foodDescLabel.getHeight() / 2);
 		originY -= foodIcon.getHeight();
 		productionLabel.setPosition(getWidth() - (productionLabel.getWidth() + 2),
-				originY + foodDescLabel.getHeight() / 2);
+				originY + productionDescLabel.getHeight() / 2);
 		originY -= productionIcon.getHeight();
-		goldLabel.setPosition(getWidth() - (goldLabel.getWidth() + 2), originY + foodDescLabel.getHeight() / 2);
+		goldLabel.setPosition(getWidth() - (goldLabel.getWidth() + 2), originY + goldDescLabel.getHeight() / 2);
 		originY -= goldIcon.getHeight();
-		scienceLabel.setPosition(getWidth() - (goldLabel.getWidth() + 2), originY + foodDescLabel.getHeight() / 2);
+		scienceLabel.setPosition(getWidth() - (scienceLabel.getWidth() + 2),
+				originY + scienceDescLabel.getHeight() / 2);
 		originY -= scienceIcon.getHeight();
-		heritageLabel.setPosition(getWidth() - (goldLabel.getWidth() + 2), originY + foodDescLabel.getHeight() / 2);
+		heritageLabel.setPosition(getWidth() - (heritageLabel.getWidth() + 2),
+				originY + heritageDescLabel.getHeight() / 2);
+		originY -= heritageIcon.getHeight() + 3;
+		borderGrowthLabel.setPosition(getWidth() - (borderGrowthLabel.getWidth() + 2),
+				originY + foodDescLabel.getHeight() / 2);
 	}
 }

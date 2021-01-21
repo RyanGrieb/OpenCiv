@@ -12,16 +12,15 @@ public class ColorHelper {
 	public ColorHelper() {
 		this.availableColors = new ArrayList<>();
 
-		availableColors.add(Color.BLACK);
-		availableColors.add(Color.BROWN);
 		availableColors.add(Color.RED);
-		availableColors.add(Color.ORANGE);
-		availableColors.add(Color.YELLOW);
 		availableColors.add(Color.GREEN);
 		availableColors.add(Color.BLUE);
 		availableColors.add(Color.VIOLET);
-		availableColors.add(Color.GRAY);
 		availableColors.add(Color.WHITE);
+		availableColors.add(Color.MAGENTA);
+		availableColors.add(Color.CYAN);
+		availableColors.add(Color.LIME);
+		availableColors.add(Color.SCARLET);
 	}
 
 	public Color getRandomColor() {

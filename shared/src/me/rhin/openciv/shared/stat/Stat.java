@@ -10,7 +10,8 @@ public enum Stat {
 	PRODUCTION_GAIN,
 	FOOD_SURPLUS,
 	FOOD_GAIN,
-	POPULATION;
+	POPULATION,
+	EXPANSION_REQUIREMENT;
 
 	private Stat addedStat;
 

@@ -29,6 +29,7 @@ import me.rhin.openciv.shared.packet.type.BuildingConstructedPacket;
 import me.rhin.openciv.shared.packet.type.CityStatUpdatePacket;
 import me.rhin.openciv.shared.packet.type.RemoveSpecialistFromContainerPacket;
 import me.rhin.openciv.shared.packet.type.SetCitizenTileWorkerPacket;
+import me.rhin.openciv.shared.packet.type.TerritoryGrowPacket;
 import me.rhin.openciv.shared.stat.Stat;
 import me.rhin.openciv.shared.stat.StatLine;
 import me.rhin.openciv.shared.util.MathHelper;
@@ -61,6 +62,7 @@ public class City implements SpecialistContainer, NextTurnListener {
 		for (Tile adjTile : originTile.getAdjTiles()) {
 			territory.add(adjTile);
 		}
+
 		territory.add(originTile);
 		originTile.setCity(this);
 
@@ -69,13 +71,11 @@ public class City implements SpecialistContainer, NextTurnListener {
 		}
 
 		setPopulation(1);
-
+		statLine.setValue(Stat.EXPANSION_REQUIREMENT, 10 + 10 * (float) Math.pow(territory.size() - 6, 1.3));
+		System.out.println(statLine.getStatValue(Stat.EXPANSION_REQUIREMENT) + "!");
 		// Add our two specialists, one from pop, one city center
 		addSpecialist();
 		addSpecialist();
-
-		// Necessary?
-		// playerOwner.getStatLine().mergeStatLine(statLine);
 
 		Server.getInstance().getEventManager().addListener(NextTurnListener.class, this);
 	}
@@ -159,6 +159,36 @@ public class City implements SpecialistContainer, NextTurnListener {
 				setPopulation((int) statLine.getStatValue(Stat.POPULATION) - 1);
 				updateWorkedTiles();
 			}
+		}
+
+		statLine.addValue(Stat.HERITAGE, statLine.getStatValue(Stat.HERITAGE_GAIN));
+
+		if (statLine.getStatValue(Stat.HERITAGE) >= statLine.getStatValue(Stat.EXPANSION_REQUIREMENT)) {
+
+			Tile expansionTile = getTopExpansionTile();
+
+			territory.add(expansionTile);
+			EmptyCitizenWorker citizenWorker = new EmptyCitizenWorker(this, expansionTile);
+			citizenWorkers.put(expansionTile, citizenWorker);
+
+			Json json = new Json();
+			TerritoryGrowPacket territoryGrowPacket = new TerritoryGrowPacket();
+			territoryGrowPacket.setCityName(name);
+			territoryGrowPacket.setLocation(expansionTile.getGridX(), expansionTile.getGridY());
+			territoryGrowPacket.setOwner(playerOwner.getName());
+			playerOwner.getConn().send(json.toJson(territoryGrowPacket));
+
+			// FIXME: Have the client automatically add an empty citizen...
+			SetCitizenTileWorkerPacket setTileWorkerPacket = new SetCitizenTileWorkerPacket();
+			setTileWorkerPacket.setWorker(citizenWorker.getWorkerType(), name, citizenWorker.getTile().getGridX(),
+					citizenWorker.getTile().getGridY());
+
+			playerOwner.getConn().send(json.toJson(setTileWorkerPacket));
+
+			int tiles = territory.size() - 6;
+			statLine.setValue(Stat.EXPANSION_REQUIREMENT, 10 + 10 * (float) Math.pow(tiles, 1.3));
+
+			updateWorkedTiles();
 		}
 
 		Json json = new Json();
@@ -405,6 +435,43 @@ public class City implements SpecialistContainer, NextTurnListener {
 		}
 
 		return topTiles;
+	}
+
+	private Tile getTopExpansionTile() {
+		ArrayList<Tile> topTiles = new ArrayList<>();
+
+		for (Tile tile : territory) {
+			for (Tile adjTile : tile.getAdjTiles()) {
+				if (territory.contains(adjTile))
+					continue;
+
+				topTiles.add(adjTile);
+			}
+		}
+
+		// Sort the topTiles based on the tile's value
+		for (int i = 1; i < topTiles.size(); i++) {
+
+			int j = i - 1;
+
+			Tile tile = topTiles.get(i);
+
+			// TODO: Include the distance from the city center towards the value.
+			float value = getTileStatLine(tile).getStatValue(Stat.FOOD_GAIN) * 3
+					+ getTileStatLine(tile).getStatValue(Stat.GOLD_GAIN) * 2
+					+ getTileStatLine(tile).getStatValue(Stat.PRODUCTION_GAIN) * 1;
+
+			while (j >= 0 && getTileStatLine(topTiles.get(j)).getStatValue(Stat.FOOD_GAIN) * 3
+					+ getTileStatLine(topTiles.get(j)).getStatValue(Stat.GOLD_GAIN) * 2
+					+ getTileStatLine(topTiles.get(j)).getStatValue(Stat.PRODUCTION_GAIN) * 1 < value) {
+				topTiles.set(j + 1, topTiles.get(j));
+				j--;
+			}
+
+			topTiles.set(j + 1, tile);
+		}
+
+		return topTiles.get(0);
 	}
 
 	private void setPopulation(int amount) {
