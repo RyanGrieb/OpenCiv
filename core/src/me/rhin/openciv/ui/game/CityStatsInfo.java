@@ -201,8 +201,9 @@ public class CityStatsInfo extends Actor implements CityStatUpdateListener {
 		scienceLabel.setText("+" + (int) city.getStatLine().getStatValue(Stat.RESEARCH_GAIN));
 		heritageLabel.setText("+" + (int) city.getStatLine().getStatValue(Stat.HERITAGE_GAIN));
 
-		int expansionTurns = (int) (city.getStatLine().getStatValue(Stat.EXPANSION_REQUIREMENT)
-				- city.getStatLine().getStatValue(Stat.HERITAGE) / city.getStatLine().getStatValue(Stat.HERITAGE_GAIN));
+		int expansionTurns = (int) Math.ceil(((city.getStatLine().getStatValue(Stat.EXPANSION_REQUIREMENT)
+				- city.getStatLine().getStatValue(Stat.HERITAGE))
+				/ city.getStatLine().getStatValue(Stat.HERITAGE_GAIN)));
 
 		borderGrowthLabel.setText(expansionTurns + (expansionTurns > 1 ? " Turns" : " Turn"));
 

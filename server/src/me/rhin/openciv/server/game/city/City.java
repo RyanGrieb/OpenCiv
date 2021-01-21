@@ -72,7 +72,6 @@ public class City implements SpecialistContainer, NextTurnListener {
 
 		setPopulation(1);
 		statLine.setValue(Stat.EXPANSION_REQUIREMENT, 10 + 10 * (float) Math.pow(territory.size() - 6, 1.3));
-		System.out.println(statLine.getStatValue(Stat.EXPANSION_REQUIREMENT) + "!");
 		// Add our two specialists, one from pop, one city center
 		addSpecialist();
 		addSpecialist();
