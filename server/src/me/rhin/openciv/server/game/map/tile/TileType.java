@@ -1,5 +1,8 @@
 package me.rhin.openciv.server.game.map.tile;
 
+import java.util.ArrayList;
+import java.util.Random;
+
 import me.rhin.openciv.shared.stat.Stat;
 import me.rhin.openciv.shared.stat.StatLine;
 
@@ -164,7 +167,7 @@ public enum TileType implements Comparable<TileType> {
 			return statLine;
 		}
 	},
-	COPPER(TileLayer.HIGH, TileProperty.RESOURCE) {
+	COPPER(TileLayer.HIGH, TileProperty.LUXURY) {
 		@Override
 		public StatLine getStatLine() {
 			StatLine statLine = new StatLine();
@@ -172,7 +175,7 @@ public enum TileType implements Comparable<TileType> {
 			return statLine;
 		}
 	},
-	COTTON(TileLayer.HIGH, TileProperty.RESOURCE) {
+	COTTON(TileLayer.HIGH, TileProperty.LUXURY) {
 		@Override
 		public StatLine getStatLine() {
 			StatLine statLine = new StatLine();
@@ -180,7 +183,7 @@ public enum TileType implements Comparable<TileType> {
 			return statLine;
 		}
 	},
-	GEMS(TileLayer.HIGH, TileProperty.RESOURCE) {
+	GEMS(TileLayer.HIGH, TileProperty.LUXURY) {
 		@Override
 		public StatLine getStatLine() {
 			StatLine statLine = new StatLine();
@@ -194,7 +197,7 @@ public enum TileType implements Comparable<TileType> {
 	}
 
 	public enum TileProperty {
-		WATER, RESOURCE;
+		WATER, LUXURY, RESOURCE;
 	}
 
 	private TileLayer tileLayer;
@@ -237,5 +240,29 @@ public enum TileType implements Comparable<TileType> {
 				return true;
 
 		return false;
+	}
+
+	public static TileType getRandomLandLuxuryTile() {
+		ArrayList<TileType> luxuryTypes = new ArrayList<>();
+		for (TileType type : values()) {
+			if (type.hasProperty(TileProperty.LUXURY))
+				luxuryTypes.add(type);
+		}
+
+		Random rnd = new Random();
+
+		return luxuryTypes.get(rnd.nextInt(luxuryTypes.size()));
+	}
+
+	public static TileType getRandomResourceTile() {
+		ArrayList<TileType> resourceTypes = new ArrayList<>();
+		for (TileType type : values()) {
+			if (type.hasProperty(TileProperty.RESOURCE))
+				resourceTypes.add(type);
+		}
+
+		Random rnd = new Random();
+
+		return resourceTypes.get(rnd.nextInt(resourceTypes.size()));
 	}
 }

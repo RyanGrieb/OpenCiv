@@ -190,6 +190,10 @@ public class CityInfoWindow extends AbstractWindow implements BuildingConstructe
 
 			if (city.getUnemployedWorkerAmount() < 1) {
 				ListContainer listContainer = topRightContainerList.getListContainers().remove("Unemployed Citizens");
+
+				if (listContainer == null)
+					return;
+
 				listContainer.addAction(Actions.removeActor());
 				return;
 			}

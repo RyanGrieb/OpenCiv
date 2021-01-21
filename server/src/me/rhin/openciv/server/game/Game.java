@@ -19,6 +19,8 @@ import me.rhin.openciv.server.game.city.specialist.SpecialistContainer;
 import me.rhin.openciv.server.game.map.GameMap;
 import me.rhin.openciv.server.game.map.tile.Tile;
 import me.rhin.openciv.server.game.map.tile.TileType;
+import me.rhin.openciv.server.game.map.tile.Tile.TileTypeWrapper;
+import me.rhin.openciv.server.game.map.tile.TileType.TileProperty;
 import me.rhin.openciv.server.game.unit.Unit;
 import me.rhin.openciv.server.game.unit.type.Settler.SettlerUnit;
 import me.rhin.openciv.server.game.unit.type.Warrior.WarriorUnit;
@@ -452,6 +454,36 @@ public class Game
 				if (!adjTile.containsTileType(TileType.OCEAN) && !adjTile.containsTileType(TileType.MOUNTAIN)) {
 					adjTile.addUnit(new WarriorUnit(player, adjTile));
 					break;
+				}
+			}
+		}
+
+		// Add two luxuries around the player
+		for (Player player : players) {
+			int assignedLuxTiles = 0;
+			int assignedResourceTiles = 0;
+			while (assignedLuxTiles < 3 || assignedResourceTiles < 2) {
+
+				int randX = rnd.nextInt(7) - 3;
+				int randY = rnd.nextInt(7) - 3;
+				Tile tile = map.getTiles()[player.getSpawnX() + randX][player.getSpawnY() + randY];
+
+				if (tile.getBaseTileType().hasProperty(TileProperty.WATER)
+						|| tile.getBaseTileType() == TileType.MOUNTAIN) {
+					continue;
+				}
+
+				if (assignedLuxTiles < 3) {
+					tile.setTileType(TileType.getRandomLandLuxuryTile());
+					assignedLuxTiles++;
+				} else {
+
+					for (TileTypeWrapper tileWrapper : tile.getTileTypeWrappers())
+						if (tileWrapper.getTileType().hasProperty(TileProperty.LUXURY))
+							continue;
+
+					tile.setTileType(TileType.getRandomResourceTile());
+					assignedResourceTiles++;
 				}
 			}
 		}
