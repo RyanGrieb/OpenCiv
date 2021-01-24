@@ -13,112 +13,112 @@ tile_air
   index: -1
 tile_city
   rotate: false
-  xy: 70, 54
+  xy: 104, 20
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 tile_copper
   rotate: false
-  xy: 2, 54
+  xy: 206, 88
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 tile_cotton
   rotate: false
-  xy: 172, 54
+  xy: 36, 54
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 tile_desert
   rotate: false
-  xy: 138, 20
+  xy: 70, 88
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 tile_desert_hill
   rotate: false
-  xy: 36, 88
+  xy: 36, 20
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 tile_forest
   rotate: false
-  xy: 36, 54
+  xy: 36, 88
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 tile_gems
   rotate: false
-  xy: 172, 88
+  xy: 104, 88
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 tile_grass
   rotate: false
-  xy: 104, 88
+  xy: 172, 88
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 tile_grass_hill
   rotate: false
-  xy: 70, 20
+  xy: 2, 20
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 tile_horses
   rotate: false
-  xy: 104, 54
+  xy: 2, 88
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 tile_iron
   rotate: false
-  xy: 206, 88
+  xy: 70, 20
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 tile_jungle
   rotate: false
-  xy: 138, 54
+  xy: 138, 20
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 tile_mountian
   rotate: false
-  xy: 2, 20
+  xy: 2, 54
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 tile_ocean
   rotate: false
-  xy: 104, 20
+  xy: 138, 88
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 tile_plains
   rotate: false
-  xy: 36, 20
+  xy: 138, 54
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 tile_plains_hill
   rotate: false
-  xy: 2, 88
+  xy: 104, 54
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
@@ -146,14 +146,14 @@ tile_shallow_ocean
   index: -1
 tile_tundra
   rotate: false
-  xy: 70, 88
+  xy: 70, 54
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 tile_tundra_hill
   rotate: false
-  xy: 138, 88
+  xy: 172, 54
   size: 32, 32
   orig: 32, 32
   offset: 0, 0

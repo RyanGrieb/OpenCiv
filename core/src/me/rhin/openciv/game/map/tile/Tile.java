@@ -137,7 +137,7 @@ public class Tile extends Actor implements ShapeRenderListener {
 			}
 
 			if ((adjTile == null || adjTile.getTerritory() == null) && territory == null) {
-				shapeRenderer.line(vectors[v1], vectors[v2]);
+				//shapeRenderer.line(vectors[v1], vectors[v2]);
 			}
 		}
 	}

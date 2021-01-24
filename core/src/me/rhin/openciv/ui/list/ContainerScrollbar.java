@@ -36,7 +36,6 @@ public class ContainerScrollbar extends Actor {
 		this.addListener(new DragListener() {
 			@Override
 			public boolean scrolled(InputEvent event, float x, float y, int amount) {
-
 				return containerList.onScrolled(event, x, y, amount);
 			}
 		});

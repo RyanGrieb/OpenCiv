@@ -10,7 +10,8 @@ buildscript {
         google()
     }
     dependencies {
-        classpath 'org.wisepersist:gwt-gradle-plugin:1.0.9'
+        classpath 'org.wisepersist:gwt-gradle-plugin:1.0.13'
+        classpath 'org.gretty:gretty:3.0.2'
         
 
     }
@@ -23,11 +24,11 @@ allprojects {
     ext {
         appName = "OpenCiv"
         gdxVersion = '1.9.10'
-        roboVMVersion = '2.3.8'
-        box2DLightsVersion = '1.4'
-        ashleyVersion = '1.7.0'
-        aiVersion = '1.8.0'
-        libVersion = '1.9.1.9.10-SNAPSHOT'
+        roboVMVersion = '2.3.12'
+        box2DLightsVersion = '1.5'
+        ashleyVersion = '1.7.3'
+        aiVersion = '1.8.2'
+        czyzbyVersion = '1.9.1.9.10-SNAPSHOT'
         fontVersion = '1.9.11-SNAPSHOT'
     }
 
@@ -49,9 +50,9 @@ project(":desktop") {
         implementation project(":core")
         api "com.badlogicgames.gdx:gdx-backend-lwjgl:$gdxVersion"
         api "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop"
+        api "com.badlogicgames.gdx:gdx-box2d-platform:$gdxVersion:natives-desktop"
         api "com.badlogicgames.gdx:gdx-tools:$gdxVersion"
-        api "com.github.czyzby:gdx-websocket-common:$libVersion"
-        api "com.badlogicgames.gdx:gdx-freetype-platform:$gdxVersion:natives-desktop"
+        
     }
 }
 
@@ -59,28 +60,45 @@ project(":html") {
     apply plugin: "java-library"
     apply plugin: "gwt"
     apply plugin: "war"
+    apply plugin: "org.gretty"
 
 
     dependencies {
         implementation project(":core")
+        implementation project(":shared")
         api "com.badlogicgames.gdx:gdx-backend-gwt:$gdxVersion"
         api "com.badlogicgames.gdx:gdx:$gdxVersion:sources"
         api "com.badlogicgames.gdx:gdx-backend-gwt:$gdxVersion:sources"
+        api "com.badlogicgames.gdx:gdx-box2d:$gdxVersion:sources"
+        api "com.badlogicgames.gdx:gdx-box2d-gwt:$gdxVersion:sources"
         api "com.badlogicgames.gdx:gdx-ai:$aiVersion:sources"
-        api "com.github.czyzby:gdx-websocket:$libVersion:sources"
-        api "com.github.czyzby:gdx-websocket-gwt:$libVersion"
-        api "com.github.czyzby:gdx-websocket-gwt:$libVersion:sources"
+        api "com.github.czyzby:gdx-websocket:$czyzbyVersion:sources"
+        api "com.github.czyzby:gdx-websocket-gwt:$czyzbyVersion"
+        api "com.github.czyzby:gdx-websocket-gwt:$czyzbyVersion:sources"
         api "com.github.intrigus.gdx-freetype-gwt:gdx-freetype-gwt:$fontVersion"
         api "com.github.intrigus.gdx-freetype-gwt:gdx-freetype-gwt:$fontVersion:sources"
     }
 }
 
+project(":core") {
+    apply plugin: "java-library"
+
+
+    dependencies {
+    	implementation project(":shared")
+        api "com.badlogicgames.gdx:gdx:$gdxVersion"
+        api "com.badlogicgames.gdx:gdx-box2d:$gdxVersion"
+        api "com.badlogicgames.gdx:gdx-ai:$aiVersion"
+        
+    }
+    
 project(":shared") {
     apply plugin: "java-library"
 
     dependencies {
-        api "com.github.czyzby:gdx-websocket:$libVersion"
+        api "com.github.czyzby:gdx-websocket:$czyzbyVersion"
         api "com.badlogicgames.gdx:gdx:$gdxVersion"
+        api "com.github.czyzby:gdx-websocket-common:$czyzbyVersion"
     }
 }
 
@@ -90,19 +108,7 @@ project(":server") {
     dependencies {
         implementation project(":shared")
         api "org.java-websocket:Java-WebSocket:1.5.1"
-        api "com.badlogicgames.gdx:gdx:$gdxVersion"
-        api "com.github.czyzby:gdx-websocket-common:$libVersion"
+        
     }
 }
-
-project(":core") {
-    apply plugin: "java-library"
-
-
-    dependencies {
-        implementation project(":shared")
-        api "com.badlogicgames.gdx:gdx:$gdxVersion"
-        api "com.badlogicgames.gdx:gdx-ai:$aiVersion"
-        api "com.badlogicgames.gdx:gdx-freetype:$gdxVersion"
-    }
 }
