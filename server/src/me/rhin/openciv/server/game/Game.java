@@ -427,7 +427,8 @@ public class Game
 				Tile tile = map.getTiles()[rndX][rndY];
 
 				if (tile.containsTileType(TileType.OCEAN) || tile.containsTileType(TileType.MOUNTAIN)
-						|| tile.containsTileType(TileType.TUNDRA) || !tile.hasRivers())
+						|| tile.containsTileType(TileType.TUNDRA) || !tile.hasRivers()
+						|| tile.containsTileType(TileType.DESERT_HILL) || tile.containsTileType(TileType.DESERT))
 					continue;
 
 				// Check if there is room for 2 units.
