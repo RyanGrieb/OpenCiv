@@ -9,6 +9,8 @@ public class GithubButton extends Button {
 
 	public GithubButton(float x, float y, float width, float height) {
 		super(TextureEnum.UI_GITHUB, "", x, y, width, height);
+
+		this.hoveredSprite = null;
 	}
 
 	@Override

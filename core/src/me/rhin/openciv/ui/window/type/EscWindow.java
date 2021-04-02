@@ -29,9 +29,20 @@ public class EscWindow extends AbstractWindow {
 	public boolean disablesCameraMovement() {
 		return false;
 	}
-	
+
 	@Override
 	public boolean closesOtherWindows() {
+		return true;
+	}
+
+	@Override
+	public boolean isGameDisplayWindow() {
 		return false;
 	}
+
+	@Override
+	public boolean closesGameDisplayWindows() {
+		return false;
+	}
+
 }

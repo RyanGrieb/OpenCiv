@@ -9,6 +9,7 @@ import com.badlogic.gdx.utils.Json;
 
 import me.rhin.openciv.server.Server;
 import me.rhin.openciv.server.game.city.City;
+import me.rhin.openciv.server.game.policy.PolicyManager;
 import me.rhin.openciv.server.game.unit.Unit;
 import me.rhin.openciv.server.listener.NextTurnListener;
 import me.rhin.openciv.shared.packet.type.PlayerStatUpdatePacket;
@@ -27,6 +28,7 @@ public class Player implements NextTurnListener {
 	private boolean loaded;
 	private Color color;
 	private StatLine statLine;
+	private PolicyManager policyManager;
 
 	public Player(WebSocket conn) {
 		this.conn = conn;
@@ -39,6 +41,8 @@ public class Player implements NextTurnListener {
 		this.loaded = false;
 		this.color = Server.getInstance().getGame().getColorHelper().getRandomColor();
 		this.statLine = new StatLine();
+
+		policyManager = new PolicyManager(this);
 
 		Server.getInstance().getEventManager().addListener(NextTurnListener.class, this);
 	}

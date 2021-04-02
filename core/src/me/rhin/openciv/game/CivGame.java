@@ -21,23 +21,24 @@ import me.rhin.openciv.listener.DeleteUnitListener;
 import me.rhin.openciv.listener.FetchPlayerListener;
 import me.rhin.openciv.listener.FinishLoadingRequestListener;
 import me.rhin.openciv.listener.MoveUnitListener;
+import me.rhin.openciv.listener.NextTurnListener;
 import me.rhin.openciv.listener.PlayerConnectListener;
 import me.rhin.openciv.listener.PlayerListRequestListener;
 import me.rhin.openciv.listener.SettleCityListener;
 import me.rhin.openciv.listener.TerritoryGrowListener;
-import me.rhin.openciv.listener.NextTurnListener;
 import me.rhin.openciv.shared.packet.type.AddUnitPacket;
 import me.rhin.openciv.shared.packet.type.DeleteUnitPacket;
 import me.rhin.openciv.shared.packet.type.EndTurnPacket;
 import me.rhin.openciv.shared.packet.type.FetchPlayerPacket;
 import me.rhin.openciv.shared.packet.type.FinishLoadingPacket;
 import me.rhin.openciv.shared.packet.type.MoveUnitPacket;
+import me.rhin.openciv.shared.packet.type.NextTurnPacket;
 import me.rhin.openciv.shared.packet.type.PlayerConnectPacket;
 import me.rhin.openciv.shared.packet.type.PlayerListRequestPacket;
 import me.rhin.openciv.shared.packet.type.SettleCityPacket;
 import me.rhin.openciv.shared.packet.type.TerritoryGrowPacket;
-import me.rhin.openciv.shared.packet.type.NextTurnPacket;
 import me.rhin.openciv.ui.screen.type.InGameScreen;
+import me.rhin.openciv.ui.window.type.CurrentResearchWindow;
 
 public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerListRequestListener, FetchPlayerListener,
 		MoveUnitListener, DeleteUnitListener, SettleCityListener, NextTurnListener, FinishLoadingRequestListener,
@@ -128,6 +129,8 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 	@Override
 	public void onFetchPlayer(FetchPlayerPacket packet) {
 		this.player = new Player(packet.getPlayerName());
+
+		Civilization.getInstance().getWindowManager().toggleWindow(new CurrentResearchWindow());
 	}
 
 	// FIXME: Move these 2 tile methods to map class?

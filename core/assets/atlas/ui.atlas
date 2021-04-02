@@ -6,98 +6,112 @@ filter: Nearest,Nearest
 repeat: none
 font
   rotate: false
-  xy: 2, 39
+  xy: 2, 35
   size: 512, 32
   orig: 512, 32
   offset: 0, 0
   index: -1
 ui_background
   rotate: false
-  xy: 2, 171
+  xy: 2, 167
   size: 800, 580
   orig: 800, 580
   offset: 0, 0
   index: -1
 ui_black
   rotate: false
-  xy: 36, 36
+  xy: 589, 66
   size: 1, 1
   orig: 1, 1
   offset: 0, 0
   index: -1
 ui_button
   rotate: false
-  xy: 644, 141
+  xy: 644, 137
   size: 142, 28
   orig: 142, 28
   offset: 0, 0
   index: -1
 ui_button_hovered
   rotate: false
-  xy: 804, 723
+  xy: 804, 719
   size: 142, 28
   orig: 142, 28
   offset: 0, 0
   index: -1
+ui_button_small
+  rotate: false
+  xy: 516, 39
+  size: 71, 28
+  orig: 71, 28
+  offset: 0, 0
+  index: -1
+ui_button_small_hovered
+  rotate: false
+  xy: 2, 5
+  size: 71, 28
+  orig: 71, 28
+  offset: 0, 0
+  index: -1
 ui_container_box
   rotate: false
-  xy: 2, 73
+  xy: 2, 69
   size: 640, 96
   orig: 640, 96
   offset: 0, 0
   index: -1
 ui_dark_gray
   rotate: false
-  xy: 788, 168
+  xy: 75, 32
   size: 1, 1
   orig: 1, 1
   offset: 0, 0
   index: -1
 ui_error
   rotate: false
-  xy: 804, 705
+  xy: 948, 731
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 ui_github
   rotate: false
-  xy: 516, 39
+  xy: 644, 103
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 ui_gray
   rotate: false
-  xy: 550, 70
+  xy: 804, 682
   size: 1, 1
   orig: 1, 1
   offset: 0, 0
   index: -1
 ui_green
   rotate: false
-  xy: 2, 2
+  xy: 516, 36
   size: 1, 1
   orig: 1, 1
   offset: 0, 0
   index: -1
 ui_light_gray
   rotate: false
-  xy: 948, 750
+  xy: 788, 164
   size: 1, 1
   orig: 1, 1
   offset: 0, 0
   index: -1
 ui_lighter_gray
   rotate: false
-  xy: 644, 138
+  xy: 2, 2
   size: 1, 1
   orig: 1, 1
   offset: 0, 0
   index: -1
 ui_selection
   rotate: false
-  xy: 2, 5
+  xy: 804, 685
   size: 32, 32
   orig: 32, 32
   offset: 0, 0

@@ -44,7 +44,9 @@ public class TitleScreen extends AbstractScreen {
 				viewport.getWorldHeight() / 1.1F, viewport.getWorldWidth(), 20);
 		stage.addActor(titleLabel);
 
-		this.subTitleLabel = new CustomLabel("OpenCiv", Align.bottomLeft, 4, 0, viewport.getWorldWidth(), 20);
+		this.subTitleLabel = new CustomLabel("OpenCiv");
+		subTitleLabel.setPosition(3, 3);
+		subTitleLabel.setWidth(0);
 		stage.addActor(subTitleLabel);
 	}
 

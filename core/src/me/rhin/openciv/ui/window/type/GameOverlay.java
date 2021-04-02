@@ -34,9 +34,19 @@ public class GameOverlay extends AbstractWindow {
 	public boolean disablesCameraMovement() {
 		return false;
 	}
-	
+
 	@Override
 	public boolean closesOtherWindows() {
+		return false;
+	}
+
+	@Override
+	public boolean isGameDisplayWindow() {
+		return false;
+	}
+	
+	@Override
+	public boolean closesGameDisplayWindows() {
 		return false;
 	}
 

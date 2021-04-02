@@ -116,6 +116,16 @@ public class CityInfoWindow extends AbstractWindow implements BuildingConstructe
 	}
 
 	@Override
+	public boolean closesGameDisplayWindows() {
+		return true;
+	}
+
+	@Override
+	public boolean isGameDisplayWindow() {
+		return false;
+	}
+
+	@Override
 	public void onClose() {
 		for (WorkedTileButton button : citizenButtons.values()) {
 			button.addAction(Actions.removeActor());

@@ -15,10 +15,11 @@ import me.rhin.openciv.ui.label.CustomLabel;
 
 public abstract class Button extends Actor {
 
+	protected Sprite hoveredSprite;
+
 	private String text;
 	private TextureEnum textureEnum;
 	private Sprite sprite;
-	private Sprite hoveredSprite;
 	private CustomLabel btnLabel;
 	private boolean hovered;
 
@@ -42,7 +43,8 @@ public abstract class Button extends Actor {
 		btnLabel.setPosition(x + width / 2 - btnLabel.getWidth() / 2, (y + height / 2) - btnLabel.getHeight() / 2);
 		btnLabel.setAlignment(Align.center);
 
-		this.addListener(new ClickListener() {
+		addListener(new ClickListener() {
+
 			@Override
 			public void clicked(InputEvent event, float x, float y) {
 				if (!Civilization.getInstance().getWindowManager().allowsInput(event.getListenerActor())) {
@@ -70,7 +72,7 @@ public abstract class Button extends Actor {
 	@Override
 	public void draw(Batch batch, float parentAlpha) {
 		// FIXME: We shouldn't be checking for a default textureEnum.
-		if (textureEnum == TextureEnum.UI_BUTTON && hovered)
+		if (hovered && hoveredSprite != null)
 			hoveredSprite.draw(batch);
 		else
 			sprite.draw(batch);

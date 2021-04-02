@@ -14,6 +14,7 @@ public class WorkedTileButton extends Button {
 	public WorkedTileButton(WorkerType workerType, Tile tile, float x, float y, float width, float height) {
 		super(TextureEnum.ICON_CITIZEN_UNWORKED, "", x, y, width, height);
 		this.tile = tile;
+		this.hoveredSprite = null;
 
 		this.setTexture(getTextureFromWorkerType(workerType));
 	}

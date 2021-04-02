@@ -99,11 +99,9 @@ public abstract class AbstractScreen implements Screen, InputProcessor {
 	public void resize(int width, int height) {
 		viewport.setScreenSize(width, height);
 		viewport.update(width, height, true);
-		viewport.setScreenSize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 
 		overlayViewport.setScreenSize(width, height);
 		overlayViewport.update(width, height, true);
-		overlayViewport.setScreenSize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 
 		stage.getCamera().position.set(stage.getCamera().viewportWidth / 2, stage.getCamera().viewportHeight / 2, 0);
 	}

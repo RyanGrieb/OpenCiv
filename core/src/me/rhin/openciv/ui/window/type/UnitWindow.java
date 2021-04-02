@@ -13,6 +13,7 @@ import me.rhin.openciv.ui.label.CustomLabel;
 import me.rhin.openciv.ui.window.AbstractWindow;
 
 public class UnitWindow extends AbstractWindow {
+
 	private CustomLabel unitNameLabel;
 	private CustomLabel movementLabel;
 	private BlankBackground blankBackground;
@@ -61,5 +62,15 @@ public class UnitWindow extends AbstractWindow {
 	@Override
 	public boolean closesOtherWindows() {
 		return true;
+	}
+
+	@Override
+	public boolean isGameDisplayWindow() {
+		return true;
+	}
+
+	@Override
+	public boolean closesGameDisplayWindows() {
+		return false;
 	}
 }
