@@ -12,6 +12,7 @@ public enum TileType {
 	PLAINS(TextureEnum.TILE_PLAINS, TileLayer.BASE),
 	PLAINS_HILL(TextureEnum.TILE_PLAINS_HILL, 2, TileLayer.BASE),
 	DESERT(TextureEnum.TILE_DESERT, TileLayer.BASE),
+	FLOODPLAINS(TextureEnum.TILE_FLOODPLAINS, TileLayer.BASE),
 	DESERT_HILL(TextureEnum.TILE_DESERT_HILL, 2, TileLayer.BASE),
 	TUNDRA(TextureEnum.TILE_TUNDRA, TileLayer.BASE),
 	TUNDRA_HILL(TextureEnum.TILE_TUNDRA_HILL,TileLayer.BASE),

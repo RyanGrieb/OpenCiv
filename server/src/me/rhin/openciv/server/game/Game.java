@@ -414,6 +414,7 @@ public class Game
 			int rndX = -1;
 			int rndY = -1;
 
+			// FIXME: Use the tile indexer to locate habitable tiles
 			while (true) {
 				iterations++;
 
@@ -452,7 +453,8 @@ public class Game
 			tile.addUnit(new SettlerUnit(player, tile));
 
 			for (Tile adjTile : tile.getAdjTiles()) {
-				if (!adjTile.containsTileType(TileType.OCEAN) && !adjTile.containsTileType(TileType.MOUNTAIN)) {
+				if (!adjTile.getBaseTileType().hasProperty(TileProperty.WATER)
+						&& !adjTile.containsTileType(TileType.MOUNTAIN)) {
 					adjTile.addUnit(new WarriorUnit(player, adjTile));
 					break;
 				}
@@ -549,5 +551,9 @@ public class Game
 
 	public ColorHelper getColorHelper() {
 		return colorHelper;
+	}
+
+	public GameMap getMap() {
+		return map;
 	}
 }

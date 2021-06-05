@@ -13,6 +13,7 @@ import me.rhin.openciv.server.Server;
 import me.rhin.openciv.server.game.Game;
 import me.rhin.openciv.server.game.map.tile.Tile;
 import me.rhin.openciv.server.game.map.tile.Tile.TileTypeWrapper;
+import me.rhin.openciv.server.game.map.tile.TileIndexer;
 import me.rhin.openciv.server.game.map.tile.TileType;
 import me.rhin.openciv.server.game.map.tile.TileType.TileLayer;
 import me.rhin.openciv.server.game.map.tile.TileType.TileProperty;
@@ -39,6 +40,7 @@ public class GameMap implements MapRequestListener {
 	private GenerationValue[][] stencilMap;
 	private GenerationValue[][] geographyMap;
 	private ArrayList<Rectangle> mapPartition;
+	private TileIndexer tileIndexer;
 
 	private int[][] oddEdgeAxis = { { 0, -1 }, { 1, -1 }, { 1, 0 }, { 1, 1 }, { 0, 1 }, { -1, 0 } };
 	private int[][] evenEdgeAxis = { { -1, -1 }, { 0, -1 }, { 1, 0 }, { 0, 1 }, { -1, 1 }, { -1, 0 } };
@@ -60,6 +62,7 @@ public class GameMap implements MapRequestListener {
 		}
 
 		this.mapPartition = new ArrayList<>();
+		this.tileIndexer = new TileIndexer(this);
 
 		initializeEdges();
 
@@ -495,8 +498,44 @@ public class GameMap implements MapRequestListener {
 						}
 					}
 					// System.out.println("Adding river to side: " + tileSide);
-					if (tile.getAdjTiles()[tileSide].getBaseTileType() != TileType.OCEAN)
+					if (tile.getAdjTiles()[tileSide].getBaseTileType() != TileType.OCEAN) {
 						tile.addRiverToSide(tileSide);
+
+						// 5 = left &
+						// 0 = bottom right
+						// 1 = bottom left
+						// 2 = right &
+						// 3 = top right
+						// 4 = top left
+
+						// 2 & 5
+						// 0 & 3
+						// 4 & 1
+						int otherSidedIndex = -1;
+						switch (tileSide) {
+						case 0:
+							otherSidedIndex = 3;
+							break;
+						case 1:
+							otherSidedIndex = 4;
+							break;
+						case 2:
+							otherSidedIndex = 5;
+							break;
+						case 3:
+							otherSidedIndex = 0;
+							break;
+						case 4:
+							otherSidedIndex = 1;
+							break;
+						case 5:
+							otherSidedIndex = 2;
+							break;
+						}
+
+						// Add river side to opposite angle of side.
+						tile.getAdjTiles()[tileSide].addRiverToSide(otherSidedIndex);
+					}
 
 					traversedVectors.add(nextVector);
 					currentVector = nextVector;
@@ -522,6 +561,23 @@ public class GameMap implements MapRequestListener {
 		generateResource(TileType.GEMS, game.getPlayers().size() * 4, TileType.GRASS, TileType.PLAINS, TileType.DESERT,
 				TileType.DESERT_HILL);
 
+		ArrayList<Tile> adjGroundTiles = new ArrayList<>();
+		adjGroundTiles.addAll(tileIndexer.getAdjacentTilesTo(TileType.GRASS));
+		adjGroundTiles.addAll(tileIndexer.getAdjacentTilesTo(TileType.PLAINS));
+		adjGroundTiles.addAll(tileIndexer.getAdjacentTilesTo(TileType.TUNDRA));
+
+		for (Tile tile : adjGroundTiles)
+			if (tile.getBaseTileType().hasProperty(TileProperty.WATER))
+				tile.setTileType(TileType.SHALLOW_OCEAN);
+
+		for (Tile tile : tileIndexer.getAdjacentTilesTo(TileType.SHALLOW_OCEAN))
+			if (tile.getBaseTileType() == TileType.OCEAN && rnd.nextInt(8) == 0)
+				tile.setTileType(TileType.SHALLOW_OCEAN);
+
+		for (Tile tile : tileIndexer.getAdjacentRiverTiles()) {
+			if (tile.getBaseTileType() == TileType.DESERT)
+				tile.setTileType(TileType.FLOODPLAINS);
+		}
 	}
 
 	private ArrayList<GenerationValue> generateRandomStencilChunk() {
@@ -779,5 +835,9 @@ public class GameMap implements MapRequestListener {
 			return true;
 
 		return false;
+	}
+
+	public TileIndexer getTileIndexer() {
+		return tileIndexer;
 	}
 }

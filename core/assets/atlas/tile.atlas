@@ -1,8 +1,8 @@
 
 tile.png
-size: 256,128
+size: 256, 128
 format: RGBA8888
-filter: Nearest,Nearest
+filter: Nearest, Nearest
 repeat: none
 tile_air
   rotate: false
@@ -13,35 +13,42 @@ tile_air
   index: -1
 tile_city
   rotate: false
-  xy: 104, 20
+  xy: 172, 88
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 tile_copper
   rotate: false
-  xy: 206, 88
+  xy: 206, 54
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 tile_cotton
   rotate: false
-  xy: 36, 54
+  xy: 70, 88
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 tile_desert
   rotate: false
-  xy: 70, 88
+  xy: 70, 54
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 tile_desert_hill
   rotate: false
-  xy: 36, 20
+  xy: 104, 88
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+tile_floodplains
+  rotate: false
+  xy: 36, 54
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
@@ -55,14 +62,14 @@ tile_forest
   index: -1
 tile_gems
   rotate: false
-  xy: 104, 88
+  xy: 104, 54
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 tile_grass
   rotate: false
-  xy: 172, 88
+  xy: 172, 54
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
@@ -83,14 +90,14 @@ tile_horses
   index: -1
 tile_iron
   rotate: false
-  xy: 70, 20
+  xy: 138, 88
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 tile_jungle
   rotate: false
-  xy: 138, 20
+  xy: 206, 88
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
@@ -104,56 +111,56 @@ tile_mountian
   index: -1
 tile_ocean
   rotate: false
-  xy: 138, 88
+  xy: 138, 54
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 tile_plains
   rotate: false
-  xy: 138, 54
+  xy: 138, 20
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 tile_plains_hill
   rotate: false
-  xy: 104, 54
+  xy: 104, 20
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 tile_river
   rotate: false
-  xy: 206, 83
+  xy: 206, 49
   size: 17, 3
   orig: 17, 3
   offset: 0, 0
   index: -1
 tile_select
   rotate: false
-  xy: 172, 36
+  xy: 2, 2
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 tile_shallow_ocean
   rotate: false
-  xy: 2, 2
-  size: 16, 16
-  orig: 16, 16
+  xy: 36, 20
+  size: 32, 32
+  orig: 32, 32
   offset: 0, 0
   index: -1
 tile_tundra
   rotate: false
-  xy: 70, 54
+  xy: 70, 20
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 tile_tundra_hill
   rotate: false
-  xy: 172, 54
+  xy: 172, 20
   size: 32, 32
   orig: 32, 32
   offset: 0, 0

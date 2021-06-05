@@ -63,6 +63,14 @@ public enum TileType implements Comparable<TileType> {
 			return statLine;
 		}
 	},
+	FLOODPLAINS(TileLayer.BASE) {
+		@Override
+		public StatLine getStatLine() {
+			StatLine statLine = new StatLine();
+			statLine.setValue(Stat.FOOD_GAIN, 2);
+			return statLine;
+		}
+	},
 	DESERT_HILL(TileLayer.BASE) {
 		@Override
 		public StatLine getStatLine() {

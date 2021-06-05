@@ -1,11 +1,14 @@
 package me.rhin.openciv.server.game.map.tile;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
+import java.util.Set;
 import java.util.TreeSet;
 
 import com.badlogic.gdx.math.Vector2;
 
+import me.rhin.openciv.server.Server;
 import me.rhin.openciv.server.game.city.City;
 import me.rhin.openciv.server.game.map.GameMap;
 import me.rhin.openciv.server.game.map.tile.TileType.TileLayer;
@@ -36,7 +39,7 @@ public class Tile {
 	private static final int SIZE = 16;
 
 	private GameMap map;
-	private TreeSet<TileTypeWrapper> tileWrappers;
+	private Set<TileTypeWrapper> tileWrappers;
 	private StatLine statLine;
 	private float x, y, width, height;
 	private int gridX, gridY;
@@ -48,7 +51,7 @@ public class Tile {
 
 	public Tile(GameMap map, TileType tileType, float x, float y) {
 		this.map = map;
-		this.tileWrappers = new TreeSet<>();
+		this.tileWrappers = Collections.synchronizedSet(new TreeSet<TileTypeWrapper>());
 		tileWrappers.add(new TileTypeWrapper(tileType));
 		this.statLine = getStatLine();
 		this.x = x;
@@ -94,14 +97,49 @@ public class Tile {
 			return;
 
 		if (containsTileLayer(tileType.getTileLayer())) {
-			for (TileTypeWrapper tileWrapper : tileWrappers) {
+			Iterator<TileTypeWrapper> iterator = tileWrappers.iterator();
+
+			while (iterator.hasNext()) {
+				TileTypeWrapper tileWrapper = iterator.next();
+
 				// Find the tileType /w the exact layer and replace it.
+
 				if (tileWrapper.getTileType().getTileLayer() == tileType.getTileLayer())
-					tileWrappers.remove(tileWrapper);
+					iterator.remove();
+
+				for (Tile adjTile : getAdjTiles()) {
+					if (adjTile == null)
+						continue;
+
+					TileType adjTileType = tileWrapper.getTileType(); // One we remove.
+
+					// Check if we are still adjacent to that tile type
+					boolean removeAdjTile = true;
+					for (Tile exteriorTile : adjTile.getAdjTiles()) {
+
+						if (exteriorTile == null)
+							continue;
+
+						if (exteriorTile.containsTileType(adjTileType))
+							removeAdjTile = false;
+					}
+
+					if (removeAdjTile)
+						Server.getInstance().getGame().getMap().getTileIndexer().removeAdjacentTileType(adjTile,
+								tileWrapper.getTileType());
+				}
 			}
+
 		}
 		// Add the tileType to the Array in an ordered manner. note: this will never be
 		// a baseTile
+
+		for (Tile adjTile : getAdjTiles()) {
+			if (adjTile == null)
+				continue;
+			Server.getInstance().getGame().getMap().getTileIndexer().setAdjacentTileType(adjTile, tileType);
+		}
+
 		tileWrappers.add(new TileTypeWrapper(tileType));
 	}
 
@@ -141,7 +179,7 @@ public class Tile {
 		return ((TileTypeWrapper) tileWrappers.toArray()[tileWrappers.size() - 1]).getTileType();
 	}
 
-	public TreeSet<TileTypeWrapper> getTileTypeWrappers() {
+	public Set<TileTypeWrapper> getTileTypeWrappers() {
 		return tileWrappers;
 	}
 
@@ -309,6 +347,7 @@ public class Tile {
 
 	public void addRiverToSide(int side) {
 		this.riverSides[side] = true;
+		Server.getInstance().getGame().getMap().getTileIndexer().setAdjacentRiverTile(this);
 	}
 
 	public boolean[] getRiverSides() {
