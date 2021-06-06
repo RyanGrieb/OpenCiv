@@ -8,12 +8,12 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
-import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
 import me.rhin.openciv.Civilization;
+import me.rhin.openciv.listener.ResizeListener.ResizeEvent;
 import me.rhin.openciv.listener.ShapeRenderListener.ShapeRenderEvent;
 import me.rhin.openciv.ui.window.WindowManager;
 
@@ -21,10 +21,11 @@ public abstract class AbstractScreen implements Screen, InputProcessor {
 
 	protected WindowManager windowManager;
 	protected OrthographicCamera camera;
+	protected OrthographicCamera overlayCamera;
 	protected float camX;
 	protected float camY;
-	protected Viewport viewport;
-	private Viewport overlayViewport;
+	protected StretchViewport viewport;
+	private StretchViewport overlayViewport;
 	protected Stage stage;
 	protected Stage overlayStage;
 	private InputMultiplexer inputMultiplexer;
@@ -33,11 +34,12 @@ public abstract class AbstractScreen implements Screen, InputProcessor {
 	protected AbstractScreen() {
 		this.windowManager = new WindowManager();
 		this.camera = new OrthographicCamera();
+		this.overlayCamera = new OrthographicCamera();
 		// FIXME: Set a global var for width & height for game.
-		this.camX = 800 / 2;
-		this.camY = 600 / 2;
-		this.viewport = new StretchViewport(800, 600, camera);
-		this.overlayViewport = new StretchViewport(800, 600);
+		this.camX = Gdx.graphics.getWidth() / 2;
+		this.camY = Gdx.graphics.getHeight() / 2;
+		this.viewport = new StretchViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), camera);
+		this.overlayViewport = new StretchViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), overlayCamera);
 
 		this.stage = new Stage(viewport);
 		this.overlayStage = new Stage(overlayViewport);
@@ -62,9 +64,11 @@ public abstract class AbstractScreen implements Screen, InputProcessor {
 		Gdx.gl.glClearColor(0, 0.253F, 0.304F, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-		camera.position.x = camX;
-		camera.position.y = camY;
-		camera.update();
+		//camera.position.x = camX;
+		//camera.position.y = camY;
+		//camera.update();
+
+		overlayCamera.update();
 
 		// Bottom stage
 		stage.act();
@@ -97,13 +101,16 @@ public abstract class AbstractScreen implements Screen, InputProcessor {
 
 	@Override
 	public void resize(int width, int height) {
-		viewport.setScreenSize(width, height);
+		Civilization.getInstance().getEventManager().fireEvent(new ResizeEvent(width, height));
+		
+		viewport.setWorldSize(width, height);
 		viewport.update(width, height, true);
 
-		overlayViewport.setScreenSize(width, height);
+		overlayViewport.setWorldSize(width, height);
 		overlayViewport.update(width, height, true);
 
-		stage.getCamera().position.set(stage.getCamera().viewportWidth / 2, stage.getCamera().viewportHeight / 2, 0);
+		camera.update();
+		overlayCamera.update();
 	}
 
 	@Override

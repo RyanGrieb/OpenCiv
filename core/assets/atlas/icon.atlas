@@ -1,63 +1,84 @@
 
 icon.png
-size: 256,32
+size: 256, 64
 format: RGBA8888
-filter: Nearest,Nearest
+filter: Nearest, Nearest
 repeat: none
+icon_america
+  rotate: false
+  xy: 36, 20
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
 icon_citizen
   rotate: false
-  xy: 92, 2
+  xy: 208, 36
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 icon_citizen_city_center
   rotate: false
-  xy: 164, 2
+  xy: 92, 2
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 icon_citizen_locked
   rotate: false
-  xy: 20, 2
+  xy: 172, 36
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 icon_citizen_unworked
   rotate: false
-  xy: 110, 2
+  xy: 56, 2
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
+icon_england
+  rotate: false
+  xy: 138, 20
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
 icon_faith
   rotate: false
-  xy: 128, 2
+  xy: 226, 36
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 icon_food
   rotate: false
-  xy: 146, 2
+  xy: 74, 2
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 icon_gold
   rotate: false
-  xy: 38, 2
+  xy: 20, 2
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 icon_heritage
   rotate: false
-  xy: 56, 2
+  xy: 190, 36
   size: 16, 16
   orig: 16, 16
+  offset: 0, 0
+  index: -1
+icon_nazi
+  rotate: false
+  xy: 104, 20
+  size: 32, 32
+  orig: 32, 32
   offset: 0, 0
   index: -1
 icon_production
@@ -69,15 +90,29 @@ icon_production
   index: -1
 icon_research
   rotate: false
-  xy: 182, 2
+  xy: 110, 2
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
+icon_rome
+  rotate: false
+  xy: 70, 20
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
 icon_unemployed_citizen
   rotate: false
-  xy: 74, 2
+  xy: 38, 2
   size: 16, 16
   orig: 16, 16
+  offset: 0, 0
+  index: -1
+icon_unknown
+  rotate: false
+  xy: 2, 20
+  size: 32, 32
+  orig: 32, 32
   offset: 0, 0
   index: -1

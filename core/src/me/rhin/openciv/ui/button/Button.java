@@ -79,6 +79,20 @@ public abstract class Button extends Actor {
 		btnLabel.draw(batch, 1);
 	}
 
+	@Override
+	public void setPosition(float x, float y) {
+		super.setPosition(x, y);
+
+		if (sprite != null)
+			sprite.setPosition(x, y);
+
+		if (hoveredSprite != null)
+			hoveredSprite.setPosition(x, y);
+
+		btnLabel.setPosition(x + sprite.getWidth() / 2 - btnLabel.getWidth() / 2,
+				(y + sprite.getHeight() / 2) - btnLabel.getHeight() / 2);
+	}
+
 	public void setTexture(TextureEnum textureEnum) {
 		this.textureEnum = textureEnum;
 		Sprite sprite = textureEnum.sprite();

@@ -33,8 +33,7 @@ public class CityStatsInfo extends Actor implements CityStatUpdateListener {
 		backgroundSprite.setBounds(x, y, width, height);
 
 		float originX = 5;
-		float originY = Civilization.getInstance().getScreenManager().getCurrentScreen().getViewport().getWorldHeight()
-				- (GameOverlay.HEIGHT * 2 + 2);
+		float originY = backgroundSprite.getY() + backgroundSprite.getHeight() - 20;
 
 		this.populationIcon = TextureEnum.ICON_CITIZEN.sprite();
 		populationIcon.setSize(16, 16);
@@ -164,6 +163,13 @@ public class CityStatsInfo extends Actor implements CityStatUpdateListener {
 	}
 
 	@Override
+	public void setPosition(float x, float y) {
+		super.setPosition(x, y);
+		backgroundSprite.setPosition(x, y);
+		updatePositions();
+	}
+
+	@Override
 	public void onCityStatUpdate(CityStatUpdatePacket packet) {
 		if (!city.getName().equals(packet.getCityName()))
 			return;
@@ -211,27 +217,71 @@ public class CityStatsInfo extends Actor implements CityStatUpdateListener {
 	}
 
 	private void updatePositions() {
-		float originY = Civilization.getInstance().getScreenManager().getCurrentScreen().getViewport().getWorldHeight()
-				- (GameOverlay.HEIGHT * 2 + 2);
+		float originX = 5;
+		float originY = backgroundSprite.getY() + backgroundSprite.getHeight() - 20;
+
+		//Population information
+		populationIcon.setPosition(originX, originY);
+		this.populationDescLabel = new CustomLabel("Citizens:");
+		originX += populationIcon.getWidth() + 5;
+		populationDescLabel.setPosition(originX, originY + populationDescLabel.getHeight() / 2);
+		originX = 5;
 		populationLabel.setPosition(getWidth() - (populationLabel.getWidth() + 2),
 				originY + populationDescLabel.getHeight() / 2);
 		originY -= populationIcon.getHeight() + 3;
+
+		//Population growth information
+		populationGrowthDescLabel.setPosition(originX, originY + populationGrowthDescLabel.getHeight() / 2);
+		originX = 5;
 		populationGrowthLabel.setPosition(getWidth() - (populationGrowthLabel.getWidth() + 2),
 				originY + populationGrowthDescLabel.getHeight() / 2);
 		originY -= populationIcon.getHeight();
+		
+		//Food information
+		foodIcon.setPosition(originX, originY);
+		originX += foodIcon.getWidth() + 5;
+		foodDescLabel.setPosition(originX, originY + foodDescLabel.getHeight() / 2);
+		originX = 5;
 		foodLabel.setPosition(getWidth() - (foodLabel.getWidth() + 2), originY + foodDescLabel.getHeight() / 2);
 		originY -= foodIcon.getHeight();
+		
+		//Production information
+		productionIcon.setPosition(originX, originY);
+		originX += productionIcon.getWidth() + 5;
+		productionDescLabel.setPosition(originX, originY + productionDescLabel.getHeight() / 2);
+		originX = 5;
 		productionLabel.setPosition(getWidth() - (productionLabel.getWidth() + 2),
 				originY + productionDescLabel.getHeight() / 2);
 		originY -= productionIcon.getHeight();
+		
+		//Gold information
+		goldIcon.setPosition(originX, originY);
+		originX += productionIcon.getWidth() + 5;
+		goldDescLabel.setPosition(originX, originY + goldDescLabel.getHeight() / 2);
+		originX = 5;
 		goldLabel.setPosition(getWidth() - (goldLabel.getWidth() + 2), originY + goldDescLabel.getHeight() / 2);
 		originY -= goldIcon.getHeight();
+		
+		//Science information
+		scienceIcon.setPosition(originX, originY);
+		originX += scienceIcon.getWidth() + 5;
+		scienceDescLabel.setPosition(originX, originY + scienceDescLabel.getHeight() / 2);
+		originX = 5;
 		scienceLabel.setPosition(getWidth() - (scienceLabel.getWidth() + 2),
 				originY + scienceDescLabel.getHeight() / 2);
 		originY -= scienceIcon.getHeight();
+		
+		//Heritage information
+		heritageIcon.setPosition(originX, originY);
+		originX += heritageIcon.getWidth() + 5;
+		heritageDescLabel.setPosition(originX, originY + heritageDescLabel.getHeight() / 2);
+		originX = 5;
 		heritageLabel.setPosition(getWidth() - (heritageLabel.getWidth() + 2),
 				originY + heritageDescLabel.getHeight() / 2);
 		originY -= heritageIcon.getHeight() + 3;
+			
+		//Border growth information
+		borderGrowthDescLabel.setPosition(originX, originY + borderGrowthDescLabel.getHeight() / 2);
 		borderGrowthLabel.setPosition(getWidth() - (borderGrowthLabel.getWidth() + 2),
 				originY + foodDescLabel.getHeight() / 2);
 	}

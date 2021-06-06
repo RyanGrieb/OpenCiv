@@ -81,6 +81,16 @@ public class CityProductionInfo extends Actor
 	}
 
 	@Override
+	public void setPosition(float x, float y) {
+		backgroundSprite.setPosition(x, y);
+		productionItemSprite.setPosition(x + getWidth() - 34, y + 2);
+		productionDescLabel.setPosition(x, y + getHeight() - productionDescLabel.getHeight());
+		productionItemNameLabel.setPosition(x, y + getHeight() - productionItemNameLabel.getHeight() - 15);
+		turnsLeftLabel.setPosition(x + productionItemSprite.getX() - turnsLeftLabel.getWidth() - 5,
+				y + productionItemSprite.getHeight() / 2 - turnsLeftLabel.getHeight() / 2);
+	}
+
+	@Override
 	public void onSetProductionItem(SetProductionItemPacket packet) {
 		ProducingItem producingItem = Civilization.getInstance().getGame().getPlayer()
 				.getCityFromName(packet.getCityName()).getProducibleItemManager().getCurrentProducingItem();

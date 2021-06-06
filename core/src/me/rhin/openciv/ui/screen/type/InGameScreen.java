@@ -61,6 +61,11 @@ public class InGameScreen extends AbstractScreen {
 	@Override
 	public void render(float delta) {
 		super.render(delta);
+		
+		camera.position.x = camX;
+		camera.position.y = camY;
+		camera.update();
+		
 		handleInput();
 
 		Civilization.getInstance().getEventManager().fireEvent(MouseMoveEvent.INSTANCE);

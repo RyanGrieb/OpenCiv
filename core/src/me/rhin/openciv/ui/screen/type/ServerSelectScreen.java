@@ -10,19 +10,22 @@ import com.badlogic.gdx.utils.Align;
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.listener.LeftClickListener.LeftClickEvent;
 import me.rhin.openciv.listener.MouseMoveListener.MouseMoveEvent;
+import me.rhin.openciv.listener.ResizeListener;
 import me.rhin.openciv.listener.ServerConnectListener;
 import me.rhin.openciv.shared.listener.EventManager;
-import me.rhin.openciv.ui.button.type.PreviousScreenButton;
 import me.rhin.openciv.ui.button.type.ConnectServerButton;
+import me.rhin.openciv.ui.button.type.PreviousScreenButton;
 import me.rhin.openciv.ui.label.CustomLabel;
 import me.rhin.openciv.ui.screen.AbstractScreen;
 import me.rhin.openciv.ui.screen.ScreenEnum;
 import me.rhin.openciv.ui.window.type.TitleOverlay;
 
-public class ServerSelectScreen extends AbstractScreen implements ServerConnectListener {
+public class ServerSelectScreen extends AbstractScreen implements ServerConnectListener, ResizeListener {
 
 	private EventManager eventManager;
 	private TitleOverlay titleOverlay;
+	private ConnectServerButton connectServerButton;
+	private PreviousScreenButton previousScreenButton;
 	private CustomLabel serverIPLabel;
 	private CustomLabel connectLabel;
 	private TextField ipTextField;
@@ -35,13 +38,15 @@ public class ServerSelectScreen extends AbstractScreen implements ServerConnectL
 		this.titleOverlay = new TitleOverlay();
 		stage.addActor(titleOverlay);
 
-		stage.addActor(new ConnectServerButton(this, viewport.getWorldWidth() / 2 - 150 / 2,
-				viewport.getWorldHeight() - 200, 150, 45));
+		connectServerButton = new ConnectServerButton(this, viewport.getWorldWidth() / 2 - 150 / 2,
+				viewport.getWorldHeight() - 200, 150, 45);
+		stage.addActor(connectServerButton);
 
-		stage.addActor(new PreviousScreenButton(viewport.getWorldWidth() / 2 - 150 / 2,
-				viewport.getWorldHeight() - 260, 150, 45));
+		previousScreenButton = new PreviousScreenButton(viewport.getWorldWidth() / 2 - 150 / 2,
+				viewport.getWorldHeight() - 260, 150, 45);
+		stage.addActor(previousScreenButton);
 
-		this.serverIPLabel = new CustomLabel("Enter server IP address:", 0, viewport.getWorldHeight() / 1.1F,
+		this.serverIPLabel = new CustomLabel("Enter server IP address:", 0, viewport.getWorldHeight() - 70,
 				viewport.getWorldWidth(), 20);
 		serverIPLabel.setAlignment(Align.center);
 		stage.addActor(serverIPLabel);
@@ -64,6 +69,8 @@ public class ServerSelectScreen extends AbstractScreen implements ServerConnectL
 
 		// DEBUG
 		ipTextField.setText("localhost");
+
+		Civilization.getInstance().getEventManager().addListener(ResizeListener.class, this);
 	}
 
 	@Override
@@ -73,10 +80,25 @@ public class ServerSelectScreen extends AbstractScreen implements ServerConnectL
 	}
 
 	@Override
+	public void onResize(int width, int height) {
+		// TODO Auto-generated method stub
+		titleOverlay.setSize(width, height);
+		serverIPLabel.setBounds(0, height - 70, width, 20);
+		ipTextField.setPosition(width / 2 - 200 / 2, height - 100);
+		connectServerButton.setPosition(width / 2 - 150 / 2, height - 200);
+		previousScreenButton.setPosition(width / 2 - 150 / 2, height - 260);
+	}
+
+	@Override
 	public void render(float delta) {
 		super.render(delta);
 
 		eventManager.fireEvent(MouseMoveEvent.INSTANCE);
+	}
+
+	@Override
+	public void dispose() {
+
 	}
 
 	@Override
@@ -103,7 +125,7 @@ public class ServerSelectScreen extends AbstractScreen implements ServerConnectL
 		});
 
 	}
-	
+
 	@Override
 	public ScreenEnum getType() {
 		return ScreenEnum.SERVER_SELECT;

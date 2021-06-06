@@ -17,6 +17,12 @@ public class BlankBackground extends Actor {
 	}
 
 	@Override
+	public void setPosition(float x, float y) {
+		super.setPosition(x, y);
+		sprite.setPosition(x, y);
+	}
+
+	@Override
 	public void draw(Batch batch, float parentAlpha) {
 		sprite.draw(batch);
 	}

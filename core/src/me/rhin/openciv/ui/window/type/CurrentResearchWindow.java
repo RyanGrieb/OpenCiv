@@ -1,19 +1,18 @@
 package me.rhin.openciv.ui.window.type;
 
-import com.badlogic.gdx.graphics.g2d.Batch;
-import com.badlogic.gdx.graphics.g2d.Sprite;
-
-import me.rhin.openciv.asset.TextureEnum;
+import me.rhin.openciv.Civilization;
+import me.rhin.openciv.listener.ResizeListener;
 import me.rhin.openciv.ui.background.BlankBackground;
 import me.rhin.openciv.ui.button.type.OpenResearchButton;
 import me.rhin.openciv.ui.label.CustomLabel;
 import me.rhin.openciv.ui.window.AbstractWindow;
 
-public class CurrentResearchWindow extends AbstractWindow {
+public class CurrentResearchWindow extends AbstractWindow implements ResizeListener {
 
 	private BlankBackground blankBackground;
 	private CustomLabel researchNameDesc;
 	private CustomLabel researchName;
+	private OpenResearchButton researchButton;
 
 	public CurrentResearchWindow() {
 
@@ -29,8 +28,21 @@ public class CurrentResearchWindow extends AbstractWindow {
 		researchName.setPosition(blankBackground.getX() + 3, blankBackground.getY() + researchName.getHeight() - 3);
 		addActor(researchName);
 
-		addActor(new OpenResearchButton(blankBackground.getX() + blankBackground.getWidth() - 52,
-				blankBackground.getY(), 48, 32));
+		researchButton = new OpenResearchButton(blankBackground.getX() + blankBackground.getWidth() - 52,
+				blankBackground.getY(), 48, 32);
+		addActor(researchButton);
+
+		Civilization.getInstance().getEventManager().addListener(ResizeListener.class, this);
+	}
+
+	@Override
+	public void onResize(int width, int height) {
+		blankBackground.setPosition(5, height - 75);
+
+		researchNameDesc.setPosition(5 + 3,
+				blankBackground.getY() + blankBackground.getHeight() - researchNameDesc.getHeight() - 3);
+		researchName.setPosition(blankBackground.getX() + 3, blankBackground.getY() + researchName.getHeight() - 3);
+		researchButton.setPosition(blankBackground.getX() + blankBackground.getWidth() - 52, blankBackground.getY());
 	}
 
 	@Override
@@ -47,12 +59,12 @@ public class CurrentResearchWindow extends AbstractWindow {
 	public boolean closesOtherWindows() {
 		return false;
 	}
-	
+
 	@Override
 	public boolean isGameDisplayWindow() {
 		return true;
 	}
-	
+
 	@Override
 	public boolean closesGameDisplayWindows() {
 		return false;

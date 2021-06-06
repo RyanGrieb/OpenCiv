@@ -106,6 +106,12 @@ public class ContainerScrollbar extends Actor {
 			scrubber.draw(batch);
 	}
 
+	@Override
+	public void setPosition(float x, float y) {
+		backgroundSprite.setPosition(x, y);
+		scrubber.setPosition(x, y);
+	}
+	
 	public void setNextHeight(float nextHeight) {
 		this.nextHeight = nextHeight;
 

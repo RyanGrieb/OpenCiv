@@ -91,6 +91,13 @@ public class ContainerList extends Group {
 		}
 	}
 
+	@Override
+	public void setPosition(float x, float y) {
+		super.setPosition(x, y);
+		backgroundSprite.setPosition(x, y);
+		containerScrollbar.setPosition(x + getWidth(), y);
+	}
+
 	public boolean onScrolled(InputEvent event, float x, float y, int amount) {
 		// FIXME: We shouldn't use a low level listener for this. We shouldn't have to
 		// check for the bounds here.

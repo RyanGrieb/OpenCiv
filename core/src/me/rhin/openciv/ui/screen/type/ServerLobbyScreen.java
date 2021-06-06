@@ -14,6 +14,7 @@ import me.rhin.openciv.listener.MouseMoveListener.MouseMoveEvent;
 import me.rhin.openciv.listener.PlayerConnectListener;
 import me.rhin.openciv.listener.PlayerDisconnectListener;
 import me.rhin.openciv.listener.PlayerListRequestListener;
+import me.rhin.openciv.listener.ResizeListener;
 import me.rhin.openciv.shared.listener.EventManager;
 import me.rhin.openciv.shared.packet.type.GetHostPacket;
 import me.rhin.openciv.shared.packet.type.MapRequestPacket;
@@ -31,16 +32,17 @@ import me.rhin.openciv.ui.screen.AbstractScreen;
 import me.rhin.openciv.ui.screen.ScreenEnum;
 import me.rhin.openciv.ui.window.type.TitleOverlay;
 
-public class ServerLobbyScreen extends AbstractScreen implements PlayerConnectListener, PlayerDisconnectListener,
-		PlayerListRequestListener, GameStartListener, GetHostListener {
+public class ServerLobbyScreen extends AbstractScreen implements ResizeListener, PlayerConnectListener,
+		PlayerDisconnectListener, PlayerListRequestListener, GameStartListener, GetHostListener {
 
 	private EventManager eventManager;
 	private TitleOverlay titleOverlay;
 
-	private CustomLabel connectedPlayersTitleLabel;
 	private String playerName;
 	private String hostPlayerName;
 	private ContainerList playerContainerList;
+	private MPStartButton multiplayerStartButton;
+	private ServerLobbyBackButton backButton;
 
 	public ServerLobbyScreen() {
 		this.eventManager = Civilization.getInstance().getEventManager();
@@ -54,17 +56,17 @@ public class ServerLobbyScreen extends AbstractScreen implements PlayerConnectLi
 
 		stage.addActor(playerContainerList);
 
+		eventManager.addListener(ResizeListener.class, this);
 		eventManager.addListener(PlayerConnectListener.class, this);
 		eventManager.addListener(PlayerDisconnectListener.class, this);
 		eventManager.addListener(PlayerListRequestListener.class, this);
 		eventManager.addListener(GameStartListener.class, this);
 		eventManager.addListener(GetHostListener.class, this);
 
-		connectedPlayersTitleLabel = new CustomLabel("Players: ", 0, viewport.getWorldHeight() / 1.1F,
-				viewport.getWorldWidth(), 20);
-		connectedPlayersTitleLabel.setAlignment(Align.center);
+		multiplayerStartButton = new MPStartButton(viewport.getWorldWidth() / 2 - 150 / 2, 60, 150, 45);
 
-		stage.addActor(new ServerLobbyBackButton(viewport.getWorldWidth() / 2 - 150 / 2, 20, 150, 45));
+		backButton = new ServerLobbyBackButton(viewport.getWorldWidth() / 2 - 150 / 2, 20, 150, 45);
+		stage.addActor(backButton);
 
 		requestPlayerList();
 	}
@@ -72,6 +74,14 @@ public class ServerLobbyScreen extends AbstractScreen implements PlayerConnectLi
 	@Override
 	public void show() {
 		super.show();
+	}
+
+	@Override
+	public void onResize(int width, int height) {
+		titleOverlay.setSize(width, height);
+		playerContainerList.setPosition(width / 2 - 220 / 2, height - 360);
+		multiplayerStartButton.setPosition(width / 2 - 150 / 2, 60);
+		backButton.setPosition(width / 2 - 150 / 2, 20);
 	}
 
 	@Override
@@ -141,7 +151,6 @@ public class ServerLobbyScreen extends AbstractScreen implements PlayerConnectLi
 				.getListItemActors();
 		for (ListObject listObj : listItemActors) {
 			ListLobbyPlayer listPlayer = (ListLobbyPlayer) listObj;
-			System.out.println(listPlayer.getPlayerName() + "," + hostPlayerName);
 			if (listPlayer.getPlayerName().equals(hostPlayerName)) {
 				listPlayer.setHost();
 			}
@@ -159,6 +168,6 @@ public class ServerLobbyScreen extends AbstractScreen implements PlayerConnectLi
 	}
 
 	private void assignToLobbyLeader() {
-		stage.addActor(new MPStartButton(viewport.getWorldWidth() / 2 - 150 / 2, 60, 150, 45));
+		stage.addActor(multiplayerStartButton);
 	}
 }

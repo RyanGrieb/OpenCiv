@@ -31,4 +31,12 @@ public class OpenResearchButton extends Button {
 		researchIconSprite.draw(batch);
 	}
 
+	// FIXME: This isn't ideal updating the icon in a custom button. Make the button
+	// class do that.
+	@Override
+	public void setPosition(float x, float y) {
+		super.setPosition(x, y);
+		researchIconSprite.setPosition(x + (getWidth() / 2) - (16 / 2), y + (getHeight() / 2) - (16 / 2));
+	}
+
 }

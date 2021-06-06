@@ -30,8 +30,6 @@ public class StatusBar extends Actor implements PlayerStatUpdateListener, NextTu
 		this.setPosition(x, y);
 		this.setSize(width, height);
 		this.sprite = TextureEnum.UI_BLACK.sprite();
-		sprite.setPosition(x, y);
-		sprite.setSize(width, height);
 
 		this.scienceDescLabel = new CustomLabel("Science:");
 		this.scienceIcon = TextureEnum.ICON_RESEARCH.sprite();
@@ -55,6 +53,24 @@ public class StatusBar extends Actor implements PlayerStatUpdateListener, NextTu
 		Civilization.getInstance().getEventManager().addListener(PlayerStatUpdateListener.class, this);
 		Civilization.getInstance().getEventManager().addListener(NextTurnListener.class, this);
 		Civilization.getInstance().getEventManager().addListener(TurnTimeLeftListener.class, this);
+	}
+
+	@Override
+	public void setSize(float width, float height) {
+		super.setSize(width, height);
+		if (sprite != null) {
+			sprite.setSize(width, height);
+			updatePositions();
+		}
+	}
+
+	@Override
+	public void setPosition(float x, float y) {
+		super.setPosition(x, y);
+		if (sprite != null) {
+			sprite.setPosition(x, y);
+			updatePositions();
+		}
 	}
 
 	@Override

@@ -13,6 +13,7 @@ import me.rhin.openciv.game.production.ProductionItem;
 import me.rhin.openciv.listener.AddSpecialistToContainerListener;
 import me.rhin.openciv.listener.BuildingConstructedListener;
 import me.rhin.openciv.listener.RemoveSpecialistFromContainerListener;
+import me.rhin.openciv.listener.ResizeListener;
 import me.rhin.openciv.listener.SetCitizenTileWorkerListener;
 import me.rhin.openciv.shared.packet.type.AddSpecialistToContainerPacket;
 import me.rhin.openciv.shared.packet.type.BuildingConstructedPacket;
@@ -31,10 +32,11 @@ import me.rhin.openciv.ui.list.type.ListUnemployedCitizens;
 import me.rhin.openciv.ui.screen.type.InGameScreen;
 import me.rhin.openciv.ui.window.AbstractWindow;
 
-public class CityInfoWindow extends AbstractWindow implements BuildingConstructedListener, SetCitizenTileWorkerListener,
-		AddSpecialistToContainerListener, RemoveSpecialistFromContainerListener {
+public class CityInfoWindow extends AbstractWindow implements ResizeListener, BuildingConstructedListener,
+		SetCitizenTileWorkerListener, AddSpecialistToContainerListener, RemoveSpecialistFromContainerListener {
 
 	private City city;
+	private CityInfoCloseButton cityCloseButton;
 	private CityStatsInfo cityStatsInfo;
 	private CityProductionInfo cityProductionInfo;
 	// TODO: buildingContainerList should contain citizen focuses soon
@@ -44,12 +46,11 @@ public class CityInfoWindow extends AbstractWindow implements BuildingConstructe
 
 	public CityInfoWindow(City city) {
 		this.city = city;
-		addActor(new CityInfoCloseButton(viewport.getWorldWidth() / 2 - 150 / 2, 50, 150, 45));
+		cityCloseButton = new CityInfoCloseButton(viewport.getWorldWidth() / 2 - 150 / 2, 50, 150, 45);
+		addActor(cityCloseButton);
 
-		this.cityStatsInfo = new CityStatsInfo(city, 2,
-				Civilization.getInstance().getScreenManager().getCurrentScreen().getViewport().getWorldHeight()
-						- (175 + GameOverlay.HEIGHT + 2),
-				200, 175);
+		this.cityStatsInfo = new CityStatsInfo(city, 2, viewport.getWorldHeight() - (175 + GameOverlay.HEIGHT + 2), 200,
+				175);
 
 		addActor(cityStatsInfo);
 
@@ -89,6 +90,7 @@ public class CityInfoWindow extends AbstractWindow implements BuildingConstructe
 
 		addActor(topRightContainerList);
 
+		Civilization.getInstance().getEventManager().addListener(ResizeListener.class, this);
 		Civilization.getInstance().getEventManager().addListener(BuildingConstructedListener.class, this);
 		Civilization.getInstance().getEventManager().addListener(SetCitizenTileWorkerListener.class, this);
 		Civilization.getInstance().getEventManager().addListener(AddSpecialistToContainerListener.class, this);
@@ -98,6 +100,17 @@ public class CityInfoWindow extends AbstractWindow implements BuildingConstructe
 	@Override
 	public void draw(Batch batch, float parentAlpha) {
 		super.draw(batch, parentAlpha);
+	}
+
+	@Override
+	public void onResize(int width, int height) {
+		cityCloseButton.setPosition(width / 2 - 150 / 2, 50);
+		cityStatsInfo.setPosition(2, height - (175 + GameOverlay.HEIGHT + 2));
+		cityProductionInfo.setPosition(2, cityStatsInfo.getY() - 105);
+
+		float topbarHeight = ((InGameScreen) Civilization.getInstance().getCurrentScreen()).getGameOverlay()
+				.getTopbarHeight();
+		topRightContainerList.setPosition(width - 220, height - 195 - topbarHeight);
 	}
 
 	@Override
@@ -131,6 +144,7 @@ public class CityInfoWindow extends AbstractWindow implements BuildingConstructe
 			button.addAction(Actions.removeActor());
 		}
 
+		Civilization.getInstance().getEventManager().removeListener(ResizeListener.class, this);
 		Civilization.getInstance().getEventManager().removeListener(BuildingConstructedListener.class, this);
 		Civilization.getInstance().getEventManager().removeListener(SetCitizenTileWorkerListener.class, this);
 		Civilization.getInstance().getEventManager().removeListener(AddSpecialistToContainerListener.class, this);
@@ -221,5 +235,4 @@ public class CityInfoWindow extends AbstractWindow implements BuildingConstructe
 			// TODO: Update the ListBuilding specialist slot.
 		}
 	}
-
 }

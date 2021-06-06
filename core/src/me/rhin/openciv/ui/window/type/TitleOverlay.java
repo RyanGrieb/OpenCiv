@@ -10,7 +10,7 @@ import me.rhin.openciv.asset.TextureEnum;
 public class TitleOverlay extends Actor {
 
 	private Sprite backgroundSprite;
-	
+
 	public TitleOverlay() {
 		this.backgroundSprite = TextureEnum.UI_BACKGROUND.sprite();
 		backgroundSprite.setSize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
@@ -18,7 +18,13 @@ public class TitleOverlay extends Actor {
 	}
 
 	@Override
-	public void draw (Batch batch, float parentAlpha) {
+	public void draw(Batch batch, float parentAlpha) {
 		backgroundSprite.draw(batch);
+	}
+
+	@Override
+	public void setSize(float width, float height) {
+		super.setSize(width, height);
+		backgroundSprite.setSize(width, height);
 	}
 }
