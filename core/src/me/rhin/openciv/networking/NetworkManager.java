@@ -120,6 +120,7 @@ public class NetworkManager {
 	public void sendPacket(Packet packet) {
 		Json json = new Json();
 		socket.send(json.toJson(packet));
+		//Gdx.app.log(Civilization.WS_LOG_TAG, "Sending message: " + packet.toString());
 	}
 
 	@SuppressWarnings("unchecked")

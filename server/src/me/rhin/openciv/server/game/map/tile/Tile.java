@@ -125,7 +125,7 @@ public class Tile {
 					}
 
 					if (removeAdjTile)
-						Server.getInstance().getGame().getMap().getTileIndexer().removeAdjacentTileType(adjTile,
+						Server.getInstance().getMap().getTileIndexer().removeAdjacentTileType(adjTile,
 								tileWrapper.getTileType());
 				}
 			}
@@ -137,7 +137,7 @@ public class Tile {
 		for (Tile adjTile : getAdjTiles()) {
 			if (adjTile == null)
 				continue;
-			Server.getInstance().getGame().getMap().getTileIndexer().setAdjacentTileType(adjTile, tileType);
+			Server.getInstance().getMap().getTileIndexer().setAdjacentTileType(adjTile, tileType);
 		}
 
 		tileWrappers.add(new TileTypeWrapper(tileType));
@@ -347,7 +347,7 @@ public class Tile {
 
 	public void addRiverToSide(int side) {
 		this.riverSides[side] = true;
-		Server.getInstance().getGame().getMap().getTileIndexer().setAdjacentRiverTile(this);
+		Server.getInstance().getMap().getTileIndexer().setAdjacentRiverTile(this);
 	}
 
 	public boolean[] getRiverSides() {

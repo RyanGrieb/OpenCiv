@@ -342,7 +342,7 @@ public class City implements SpecialistContainer, NextTurnListener {
 		buildingConstructedPacket.setCityName(name);
 
 		Json json = new Json();
-		for (Player player : Server.getInstance().getGame().getPlayers()) {
+		for (Player player : Server.getInstance().getPlayers()) {
 			player.getConn().send(json.toJson(buildingConstructedPacket));
 		}
 

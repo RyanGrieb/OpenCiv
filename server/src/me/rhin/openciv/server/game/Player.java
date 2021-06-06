@@ -39,7 +39,7 @@ public class Player implements NextTurnListener {
 		this.ownedCities = new ArrayList<>();
 		this.ownedUnits = new ArrayList<>();
 		this.loaded = false;
-		this.color = Server.getInstance().getGame().getColorHelper().getRandomColor();
+		this.color = Server.getInstance().getColorHelper().getRandomColor();
 		this.statLine = new StatLine();
 
 		policyManager = new PolicyManager(this);

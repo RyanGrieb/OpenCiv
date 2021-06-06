@@ -2,6 +2,7 @@ package me.rhin.openciv.server;
 
 import java.lang.reflect.Constructor;
 import java.net.InetSocketAddress;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Scanner;
 
@@ -16,6 +17,10 @@ import com.github.czyzby.websocket.WebSocketAdapter;
 
 import me.rhin.openciv.server.command.CmdProcessor;
 import me.rhin.openciv.server.game.Game;
+import me.rhin.openciv.server.game.Player;
+import me.rhin.openciv.server.game.map.GameMap;
+import me.rhin.openciv.server.game.state.InGameState;
+import me.rhin.openciv.server.game.state.InLobbyState;
 import me.rhin.openciv.server.listener.ClickSpecialistListener.ClickSpecialistEvent;
 import me.rhin.openciv.server.listener.ClickWorkedTileListener.ClickWorkedTileEvent;
 import me.rhin.openciv.server.listener.ConnectionListener.ConnectionEvent;
@@ -46,6 +51,7 @@ import me.rhin.openciv.shared.packet.type.SelectUnitPacket;
 import me.rhin.openciv.shared.packet.type.SetProductionItemPacket;
 import me.rhin.openciv.shared.packet.type.SettleCityPacket;
 import me.rhin.openciv.shared.packet.type.StartGameRequestPacket;
+import me.rhin.openciv.shared.util.ColorHelper;
 
 public class Server extends WebSocketServer {
 
@@ -59,6 +65,9 @@ public class Server extends WebSocketServer {
 	private int playerIndex;
 	private HashMap<Class<? extends Packet>, Class<? extends Event<? extends Listener>>> networkEvents;
 	private CmdProcessor commandProcessor;
+	private GameMap map;
+	private ArrayList<Player> players;
+	private ColorHelper colorHelper;
 
 	public static void main(String[] args) {
 		// TODO: Implement proper logging.
@@ -84,7 +93,12 @@ public class Server extends WebSocketServer {
 		server = this;
 
 		this.eventManager = new EventManager();
-		this.game = new Game();
+
+		this.map = new GameMap();
+		this.players = new ArrayList<>();
+		this.colorHelper = new ColorHelper();
+
+		this.game = new InLobbyState();
 
 		networkEvents = new HashMap<>();
 		networkEvents.put(PlayerListRequestPacket.class, PlayerListRequestEvent.class);
@@ -136,7 +150,7 @@ public class Server extends WebSocketServer {
 
 	@Override
 	public void onMessage(WebSocket conn, String message) {
-		System.out.println("[SERVER] Received Message: " + message);
+		System.out.println("[SERVER : " + game.toString() + "] Received Message: " + message);
 		fireAssociatedPacketEvents(conn, message);
 	}
 
@@ -164,6 +178,26 @@ public class Server extends WebSocketServer {
 		System.exit(0);
 	}
 
+	public Player getPlayerByConn(WebSocket conn) {
+		for (Player player : players)
+			if (player.getConn().equals(conn))
+				return player;
+
+		return null;
+	}
+
+	public ArrayList<Player> getPlayers() {
+		return players;
+	}
+
+	public ColorHelper getColorHelper() {
+		return colorHelper;
+	}
+
+	public GameMap getMap() {
+		return map;
+	}
+
 	public int getPlayerIndex() {
 		return playerIndex;
 	}
@@ -178,6 +212,11 @@ public class Server extends WebSocketServer {
 
 	public EventManager getEventManager() {
 		return eventManager;
+	}
+
+	public void setGameState(Game game) {
+		this.game.onStateEnd();
+		this.game = game;
 	}
 
 	@SuppressWarnings("unchecked")

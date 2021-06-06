@@ -35,7 +35,6 @@ public class GameMap implements MapRequestListener {
 	private static final int TEMPATURE_PARAM = 1;
 	private static final int CLIMATE_PARAM = 2;
 
-	private Game game;
 	private Tile[][] tiles;
 	private GenerationValue[][] stencilMap;
 	private GenerationValue[][] geographyMap;
@@ -45,8 +44,7 @@ public class GameMap implements MapRequestListener {
 	private int[][] oddEdgeAxis = { { 0, -1 }, { 1, -1 }, { 1, 0 }, { 1, 1 }, { 0, 1 }, { -1, 0 } };
 	private int[][] evenEdgeAxis = { { -1, -1 }, { 0, -1 }, { 1, 0 }, { 0, 1 }, { -1, 1 }, { -1, 0 } };
 
-	public GameMap(Game game) {
-		this.game = game;
+	public GameMap() {
 
 		this.tiles = new Tile[WIDTH][HEIGHT];
 		this.stencilMap = new GenerationValue[WIDTH][HEIGHT];
@@ -548,20 +546,23 @@ public class GameMap implements MapRequestListener {
 		// Split the map to make resource generation & player spawnpoints balanced
 		splitMapPartition();
 
-		generateResource(TileType.HORSES, game.getPlayers().size() * 6, TileType.GRASS, TileType.PLAINS);
+		generateResource(TileType.HORSES, Server.getInstance().getPlayers().size() * 6, TileType.GRASS,
+				TileType.PLAINS);
 
-		generateResource(TileType.IRON, game.getPlayers().size() * 6, TileType.GRASS, TileType.PLAINS,
+		generateResource(TileType.IRON, Server.getInstance().getPlayers().size() * 6, TileType.GRASS, TileType.PLAINS,
 				TileType.PLAINS_HILL, TileType.GRASS_HILL, TileType.DESERT, TileType.DESERT_HILL);
 
-		generateResource(TileType.COPPER, game.getPlayers().size() * 4, TileType.GRASS, TileType.PLAINS,
+		generateResource(TileType.COPPER, Server.getInstance().getPlayers().size() * 4, TileType.GRASS, TileType.PLAINS,
 				TileType.PLAINS_HILL, TileType.GRASS_HILL, TileType.DESERT, TileType.DESERT_HILL);
 
-		generateResource(TileType.COTTON, game.getPlayers().size() * 4, TileType.GRASS, TileType.PLAINS);
+		generateResource(TileType.COTTON, Server.getInstance().getPlayers().size() * 4, TileType.GRASS,
+				TileType.PLAINS);
 
-		generateResource(TileType.GEMS, game.getPlayers().size() * 4, TileType.GRASS, TileType.PLAINS, TileType.DESERT,
-				TileType.DESERT_HILL);
+		generateResource(TileType.GEMS, Server.getInstance().getPlayers().size() * 4, TileType.GRASS, TileType.PLAINS,
+				TileType.DESERT, TileType.DESERT_HILL);
 
 		ArrayList<Tile> adjGroundTiles = new ArrayList<>();
+		System.out.println(tileIndexer.getAdjacentTilesTo(TileType.GRASS).toString());
 		adjGroundTiles.addAll(tileIndexer.getAdjacentTilesTo(TileType.GRASS));
 		adjGroundTiles.addAll(tileIndexer.getAdjacentTilesTo(TileType.PLAINS));
 		adjGroundTiles.addAll(tileIndexer.getAdjacentTilesTo(TileType.TUNDRA));
@@ -578,6 +579,7 @@ public class GameMap implements MapRequestListener {
 			if (tile.getBaseTileType() == TileType.DESERT)
 				tile.setTileType(TileType.FLOODPLAINS);
 		}
+
 	}
 
 	private ArrayList<GenerationValue> generateRandomStencilChunk() {
@@ -741,16 +743,12 @@ public class GameMap implements MapRequestListener {
 		return tiles;
 	}
 
-	public Game getGame() {
-		return game;
-	}
-
 	public ArrayList<Rectangle> getMapPartition() {
 		return mapPartition;
 	}
 
 	private void splitMapPartition() {
-		int playerSize = game.getPlayers().size();
+		int playerSize = Server.getInstance().getPlayers().size();
 		if (playerSize < 2) {
 			mapPartition.add(new Rectangle(0, 0, WIDTH, HEIGHT));
 			return;

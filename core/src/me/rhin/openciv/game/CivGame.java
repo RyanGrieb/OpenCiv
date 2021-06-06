@@ -84,6 +84,7 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 		// Find unit class using reflection & create an instance of it.
 		try {
 			Player playerOwner = players.get(packet.getPlayerOwner());
+
 			Tile tile = map.getTiles()[packet.getTileGridX()][packet.getTileGridY()];
 			UnitParameter unitParameter = new UnitParameter(packet.getUnitID(), packet.getUnitName(), playerOwner,
 					tile);

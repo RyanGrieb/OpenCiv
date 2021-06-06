@@ -41,7 +41,7 @@ public abstract class UnitItem implements ProductionItem {
 				tile.getGridY());
 
 		Json json = new Json();
-		for (Player player : Server.getInstance().getGame().getPlayers())
+		for (Player player : Server.getInstance().getPlayers())
 			player.getConn().send(json.toJson(addUnitPacket));
 	}
 
