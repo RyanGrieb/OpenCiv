@@ -23,6 +23,7 @@ import me.rhin.openciv.listener.FetchPlayerListener.FetchPlayerEvent;
 import me.rhin.openciv.listener.FinishLoadingRequestListener.FinishLoadingRequestEvent;
 import me.rhin.openciv.listener.FinishProductionItemListener.FinishProductionItemEvent;
 import me.rhin.openciv.listener.GameStartListener.GameStartEvent;
+import me.rhin.openciv.listener.GetHostListener.GetHostEvent;
 import me.rhin.openciv.listener.MoveUnitListener.MoveUnitEvent;
 import me.rhin.openciv.listener.NextTurnListener.NextTurnEvent;
 import me.rhin.openciv.listener.PlayerConnectListener.PlayerConnectEvent;
@@ -51,6 +52,7 @@ import me.rhin.openciv.shared.packet.type.FetchPlayerPacket;
 import me.rhin.openciv.shared.packet.type.FinishLoadingPacket;
 import me.rhin.openciv.shared.packet.type.FinishProductionItemPacket;
 import me.rhin.openciv.shared.packet.type.GameStartPacket;
+import me.rhin.openciv.shared.packet.type.GetHostPacket;
 import me.rhin.openciv.shared.packet.type.MapChunkPacket;
 import me.rhin.openciv.shared.packet.type.MoveUnitPacket;
 import me.rhin.openciv.shared.packet.type.NextTurnPacket;
@@ -98,6 +100,7 @@ public class NetworkManager {
 		networkEvents.put(AddSpecialistToContainerPacket.class, AddSpecialistToContainerEvent.class);
 		networkEvents.put(RemoveSpecialistFromContainerPacket.class, RemoveSpecialistFromContainerEvent.class);
 		networkEvents.put(TurnTimeLeftPacket.class, TurnTimeLeftEvent.class);
+		networkEvents.put(GetHostPacket.class, GetHostEvent.class);
 	}
 
 	public void connect(String ip) {
@@ -120,7 +123,8 @@ public class NetworkManager {
 	public void sendPacket(Packet packet) {
 		Json json = new Json();
 		socket.send(json.toJson(packet));
-		//Gdx.app.log(Civilization.WS_LOG_TAG, "Sending message: " + packet.toString());
+		// Gdx.app.log(Civilization.WS_LOG_TAG, "Sending message: " +
+		// packet.toString());
 	}
 
 	@SuppressWarnings("unchecked")

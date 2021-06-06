@@ -125,6 +125,9 @@ public class InGameState extends Game
 		// Revert back to lobby state.
 	}
 
+	// TODO: On player connection, don't allow him to join yet. Since we haven't
+	// implemented hot joining.
+
 	@Override
 	public void onDisconnect(WebSocket conn) {
 		Player removedPlayer = getPlayerByConn(conn);

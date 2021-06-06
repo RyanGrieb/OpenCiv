@@ -63,6 +63,7 @@ public enum TextureEnum {
 	UI_GITHUB,
 	UI_BACKGROUND,
 	UI_CONTAINER_BOX,
+	UI_STAR,
 	UI_ERROR;
 
 	private TextureAtlas textureAtlas;

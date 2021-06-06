@@ -4,19 +4,18 @@ import java.util.ArrayList;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.scenes.scene2d.Actor;
-import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.utils.Align;
 
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.listener.GameStartListener;
+import me.rhin.openciv.listener.GetHostListener;
 import me.rhin.openciv.listener.LeftClickListener.LeftClickEvent;
 import me.rhin.openciv.listener.MouseMoveListener.MouseMoveEvent;
 import me.rhin.openciv.listener.PlayerConnectListener;
 import me.rhin.openciv.listener.PlayerDisconnectListener;
 import me.rhin.openciv.listener.PlayerListRequestListener;
 import me.rhin.openciv.shared.listener.EventManager;
+import me.rhin.openciv.shared.packet.type.GetHostPacket;
 import me.rhin.openciv.shared.packet.type.MapRequestPacket;
 import me.rhin.openciv.shared.packet.type.PlayerConnectPacket;
 import me.rhin.openciv.shared.packet.type.PlayerDisconnectPacket;
@@ -32,14 +31,15 @@ import me.rhin.openciv.ui.screen.AbstractScreen;
 import me.rhin.openciv.ui.screen.ScreenEnum;
 import me.rhin.openciv.ui.window.type.TitleOverlay;
 
-public class ServerLobbyScreen extends AbstractScreen
-		implements PlayerConnectListener, PlayerDisconnectListener, PlayerListRequestListener, GameStartListener {
+public class ServerLobbyScreen extends AbstractScreen implements PlayerConnectListener, PlayerDisconnectListener,
+		PlayerListRequestListener, GameStartListener, GetHostListener {
 
 	private EventManager eventManager;
 	private TitleOverlay titleOverlay;
 
 	private CustomLabel connectedPlayersTitleLabel;
 	private String playerName;
+	private String hostPlayerName;
 	private ContainerList playerContainerList;
 
 	public ServerLobbyScreen() {
@@ -58,6 +58,7 @@ public class ServerLobbyScreen extends AbstractScreen
 		eventManager.addListener(PlayerDisconnectListener.class, this);
 		eventManager.addListener(PlayerListRequestListener.class, this);
 		eventManager.addListener(GameStartListener.class, this);
+		eventManager.addListener(GetHostListener.class, this);
 
 		connectedPlayersTitleLabel = new CustomLabel("Players: ", 0, viewport.getWorldHeight() / 1.1F,
 				viewport.getWorldWidth(), 20);
@@ -108,23 +109,16 @@ public class ServerLobbyScreen extends AbstractScreen
 
 		ArrayList<ListObject> listItemActors = playerContainerList.getListContainers().get("Players")
 				.getListItemActors();
-		this.playerName = listItemActors.get(listItemActors.size() - 1).getKey();
 
-		if (listItemActors.size() < 2) {
-			assignToLobbyLeader();
-		}
+		// FIXME: This is fucking stupid. Send a packet to the player telling them who
+		// they are?
+		this.playerName = listItemActors.get(listItemActors.size() - 1).getKey();
 	}
 
 	@Override
 	public void onPlayerDisconnect(PlayerDisconnectPacket packet) {
 		playerContainerList.removeItem("Players", packet.getPlayerName());
 
-		ArrayList<ListObject> listItemActors = playerContainerList.getListContainers().get("Players")
-				.getListItemActors();
-
-		if (listItemActors.get(0).getKey().equals(playerName)) {
-			assignToLobbyLeader();
-		}
 	}
 
 	@Override
@@ -138,12 +132,30 @@ public class ServerLobbyScreen extends AbstractScreen
 	}
 
 	@Override
+	public void onGetHost(GetHostPacket packet) {
+		hostPlayerName = packet.getPlayer();
+		if (playerName.equals(packet.getPlayer()))
+			assignToLobbyLeader();
+
+		ArrayList<ListObject> listItemActors = playerContainerList.getListContainers().get("Players")
+				.getListItemActors();
+		for (ListObject listObj : listItemActors) {
+			ListLobbyPlayer listPlayer = (ListLobbyPlayer) listObj;
+			System.out.println(listPlayer.getPlayerName() + "," + hostPlayerName);
+			if (listPlayer.getPlayerName().equals(hostPlayerName)) {
+				listPlayer.setHost();
+			}
+		}
+	}
+
+	@Override
 	public ScreenEnum getType() {
 		return ScreenEnum.SERVER_LOBBY;
 	}
 
 	private void requestPlayerList() {
 		Civilization.getInstance().getNetworkManager().sendPacket(new PlayerListRequestPacket());
+		Civilization.getInstance().getNetworkManager().sendPacket(new GetHostPacket());
 	}
 
 	private void assignToLobbyLeader() {

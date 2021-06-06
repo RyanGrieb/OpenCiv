@@ -12,6 +12,7 @@ import me.rhin.openciv.server.game.city.City;
 import me.rhin.openciv.server.game.policy.PolicyManager;
 import me.rhin.openciv.server.game.unit.Unit;
 import me.rhin.openciv.server.listener.NextTurnListener;
+import me.rhin.openciv.shared.packet.type.GetHostPacket;
 import me.rhin.openciv.shared.packet.type.PlayerStatUpdatePacket;
 import me.rhin.openciv.shared.stat.Stat;
 import me.rhin.openciv.shared.stat.StatLine;
@@ -29,6 +30,7 @@ public class Player implements NextTurnListener {
 	private Color color;
 	private StatLine statLine;
 	private PolicyManager policyManager;
+	private boolean host;
 
 	public Player(WebSocket conn) {
 		this.conn = conn;
@@ -43,6 +45,7 @@ public class Player implements NextTurnListener {
 		this.statLine = new StatLine();
 
 		policyManager = new PolicyManager(this);
+		this.host = false;
 
 		Server.getInstance().getEventManager().addListener(NextTurnListener.class, this);
 	}
@@ -141,5 +144,13 @@ public class Player implements NextTurnListener {
 
 	public StatLine getStatLine() {
 		return statLine;
+	}
+
+	public void setHost() {
+		this.host = true;
+	}
+
+	public boolean isHost() {
+		return host;
 	}
 }

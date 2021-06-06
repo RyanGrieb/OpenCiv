@@ -19,7 +19,6 @@ import me.rhin.openciv.server.command.CmdProcessor;
 import me.rhin.openciv.server.game.Game;
 import me.rhin.openciv.server.game.Player;
 import me.rhin.openciv.server.game.map.GameMap;
-import me.rhin.openciv.server.game.state.InGameState;
 import me.rhin.openciv.server.game.state.InLobbyState;
 import me.rhin.openciv.server.listener.ClickSpecialistListener.ClickSpecialistEvent;
 import me.rhin.openciv.server.listener.ClickWorkedTileListener.ClickWorkedTileEvent;
@@ -27,6 +26,7 @@ import me.rhin.openciv.server.listener.ConnectionListener.ConnectionEvent;
 import me.rhin.openciv.server.listener.DisconnectListener.DisconnectEvent;
 import me.rhin.openciv.server.listener.EndTurnListener.EndTurnEvent;
 import me.rhin.openciv.server.listener.FetchPlayerListener.FetchPlayerEvent;
+import me.rhin.openciv.server.listener.GetHostListener.GetHostEvent;
 import me.rhin.openciv.server.listener.MapRequestListener.MapRequestEvent;
 import me.rhin.openciv.server.listener.PlayerFinishLoadingListener.PlayerFinishLoadingEvent;
 import me.rhin.openciv.server.listener.PlayerListRequestListener.PlayerListRequestEvent;
@@ -44,6 +44,7 @@ import me.rhin.openciv.shared.packet.type.ClickWorkedTilePacket;
 import me.rhin.openciv.shared.packet.type.EndTurnPacket;
 import me.rhin.openciv.shared.packet.type.FetchPlayerPacket;
 import me.rhin.openciv.shared.packet.type.FinishLoadingPacket;
+import me.rhin.openciv.shared.packet.type.GetHostPacket;
 import me.rhin.openciv.shared.packet.type.MapRequestPacket;
 import me.rhin.openciv.shared.packet.type.MoveUnitPacket;
 import me.rhin.openciv.shared.packet.type.PlayerListRequestPacket;
@@ -113,7 +114,8 @@ public class Server extends WebSocketServer {
 		networkEvents.put(ClickWorkedTilePacket.class, ClickWorkedTileEvent.class);
 		networkEvents.put(ClickSpecialistPacket.class, ClickSpecialistEvent.class);
 		networkEvents.put(EndTurnPacket.class, EndTurnEvent.class);
-
+		networkEvents.put(GetHostPacket.class, GetHostEvent.class);
+		
 		this.playerIndex = 0;
 		this.commandProcessor = new CmdProcessor();
 
