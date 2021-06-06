@@ -7,7 +7,7 @@ import me.rhin.openciv.ui.button.Button;
 public class MPStartButton extends Button {
 
 	public MPStartButton(float x, float y, float width, float height) {
-		super("Start", x, y, width, height);
+		super("Start Game", x, y, width, height);
 	}
 
 	@Override

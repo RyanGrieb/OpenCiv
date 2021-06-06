@@ -115,7 +115,7 @@ public class Server extends WebSocketServer {
 		networkEvents.put(ClickSpecialistPacket.class, ClickSpecialistEvent.class);
 		networkEvents.put(EndTurnPacket.class, EndTurnEvent.class);
 		networkEvents.put(GetHostPacket.class, GetHostEvent.class);
-		
+
 		this.playerIndex = 0;
 		this.commandProcessor = new CmdProcessor();
 
@@ -166,12 +166,6 @@ public class Server extends WebSocketServer {
 
 	@Override
 	public void stop() {
-		try {
-			super.stop();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
 		/*
 		 * Note: It's a known bug on linux that java programs hang when we exit out of
 		 * them. Just wait a few seconds
