@@ -92,8 +92,12 @@ public class CityProductionInfo extends Actor
 
 	@Override
 	public void onSetProductionItem(SetProductionItemPacket packet) {
-		ProducingItem producingItem = Civilization.getInstance().getGame().getPlayer()
-				.getCityFromName(packet.getCityName()).getProducibleItemManager().getCurrentProducingItem();
+		if (!city.getName().equals(packet.getCityName()))
+			return;
+
+		ProducingItem producingItem = city.getProducibleItemManager().getCurrentProducingItem();
+
+		// FIXME: The packet should set the producing item. not the client.
 
 		productionItemNameLabel.setText(producingItem.getProductionItem().getName());
 
@@ -114,8 +118,11 @@ public class CityProductionInfo extends Actor
 
 	@Override
 	public void onApplyProductionToItem(ApplyProductionToItemPacket packet) {
-		ProducingItem producingItem = Civilization.getInstance().getGame().getPlayer()
-				.getCityFromName(packet.getCityName()).getProducibleItemManager().getCurrentProducingItem();
+		if (!city.getName().equals(packet.getCityName()))
+			return;
+
+		// FIXME: The packet should be checking if this is correct
+		ProducingItem producingItem = city.getProducibleItemManager().getCurrentProducingItem();
 
 		int appliedTurns = (int) (producingItem.getAppliedProduction()
 				/ city.getStatLine().getStatValue(Stat.PRODUCTION_GAIN));
