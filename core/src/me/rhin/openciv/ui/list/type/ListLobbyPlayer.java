@@ -7,9 +7,13 @@ import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Align;
 
+import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.TextureEnum;
+import me.rhin.openciv.game.civilization.CivType;
 import me.rhin.openciv.ui.label.CustomLabel;
 import me.rhin.openciv.ui.list.ListObject;
+import me.rhin.openciv.ui.screen.type.ServerLobbyScreen;
+import me.rhin.openciv.ui.window.type.ChooseCivWindow;
 
 public class ListLobbyPlayer extends ListObject {
 
@@ -22,7 +26,7 @@ public class ListLobbyPlayer extends ListObject {
 	private Sprite chosenCivSprite;
 	private boolean hovered;
 
-	public ListLobbyPlayer(final String playerName, float width, float height) {
+	public ListLobbyPlayer(final String playerName, CivType civType, float width, float height) {
 		super(width, height, playerName);
 		this.playerName = playerName;
 
@@ -36,7 +40,7 @@ public class ListLobbyPlayer extends ListObject {
 		playerNameLabel.setSize(width, height);
 		playerNameLabel.setAlignment(Align.center);
 
-		chosenCivSprite = TextureEnum.ICON_UNKNOWN.sprite();
+		chosenCivSprite = civType.getIcon().sprite();
 		chosenCivSprite.setSize(32, 32);
 
 		hostSprite = TextureEnum.UI_STAR.sprite();
@@ -47,17 +51,24 @@ public class ListLobbyPlayer extends ListObject {
 		this.addListener(new ClickListener() {
 			@Override
 			public void clicked(InputEvent event, float x, float y) {
-				System.out.println(playerName + "!!");
+				if (!Civilization.getInstance().getWindowManager().allowsInput(event.getListenerActor())
+						|| !isPlayer()) {
+					return;
+				}
+
+				Civilization.getInstance().getWindowManager().toggleWindow(new ChooseCivWindow());
 			}
 
 			@Override
 			public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
-				hovered = true;
+				if (isPlayer())
+					hovered = true;
 			}
 
 			@Override
 			public void exit(InputEvent event, float x, float y, int pointer, Actor fromActor) {
-				hovered = false;
+				if (isPlayer())
+					hovered = false;
 			}
 		});
 
@@ -96,5 +107,15 @@ public class ListLobbyPlayer extends ListObject {
 
 	public void setHost() {
 		this.isHost = true;
+	}
+
+	public void setCivilization(CivType civType) {
+		// FIXME: There has to be a better way to change the sprite
+		chosenCivSprite = civType.getIcon().sprite();
+		chosenCivSprite.setPosition(getX() + getWidth() - 36, getY() + getHeight() / 2 - 32 / 2);
+	}
+
+	private boolean isPlayer() {
+		return playerName.equals(((ServerLobbyScreen) Civilization.getInstance().getCurrentScreen()).getPlayerName());
 	}
 }

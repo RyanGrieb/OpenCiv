@@ -9,10 +9,10 @@ import com.badlogic.gdx.utils.Json;
 
 import me.rhin.openciv.server.Server;
 import me.rhin.openciv.server.game.city.City;
+import me.rhin.openciv.server.game.civilization.CivType;
 import me.rhin.openciv.server.game.policy.PolicyManager;
 import me.rhin.openciv.server.game.unit.Unit;
 import me.rhin.openciv.server.listener.NextTurnListener;
-import me.rhin.openciv.shared.packet.type.GetHostPacket;
 import me.rhin.openciv.shared.packet.type.PlayerStatUpdatePacket;
 import me.rhin.openciv.shared.stat.Stat;
 import me.rhin.openciv.shared.stat.StatLine;
@@ -27,21 +27,21 @@ public class Player implements NextTurnListener {
 	private ArrayList<Unit> ownedUnits;
 	private Unit selectedUnit;
 	private boolean loaded;
-	private Color color;
 	private StatLine statLine;
 	private PolicyManager policyManager;
+	private CivType civType;
 	private boolean host;
 
 	public Player(WebSocket conn) {
 		this.conn = conn;
 		this.name = "Player" + Server.getInstance().getPlayerIndex();
+		this.civType = CivType.RANDOM;
 
 		this.spawnX = -1;
 		this.spawnY = -1;
 		this.ownedCities = new ArrayList<>();
 		this.ownedUnits = new ArrayList<>();
 		this.loaded = false;
-		this.color = Server.getInstance().getColorHelper().getRandomColor();
 		this.statLine = new StatLine();
 
 		policyManager = new PolicyManager(this);
@@ -126,6 +126,10 @@ public class Player implements NextTurnListener {
 		ownedUnits.add(unit);
 	}
 
+	public void setCivilization(CivType civType) {
+		this.civType = civType;
+	}
+
 	public ArrayList<Unit> getOwnedUnits() {
 		return ownedUnits;
 	}
@@ -138,10 +142,6 @@ public class Player implements NextTurnListener {
 		return loaded;
 	}
 
-	public Color getColor() {
-		return color;
-	}
-
 	public StatLine getStatLine() {
 		return statLine;
 	}
@@ -152,5 +152,9 @@ public class Player implements NextTurnListener {
 
 	public boolean isHost() {
 		return host;
+	}
+
+	public CivType getCivType() {
+		return civType;
 	}
 }

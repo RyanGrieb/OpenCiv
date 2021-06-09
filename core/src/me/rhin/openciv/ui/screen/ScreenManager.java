@@ -1,6 +1,5 @@
 package me.rhin.openciv.ui.screen;
 
-import java.util.ArrayList;
 import java.util.Stack;
 
 import me.rhin.openciv.Civilization;

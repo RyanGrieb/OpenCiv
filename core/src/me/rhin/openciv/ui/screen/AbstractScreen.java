@@ -136,42 +136,42 @@ public abstract class AbstractScreen implements Screen, InputProcessor {
 
 	@Override
 	public boolean keyDown(int keycode) {
-		return false;
+		return true;
 	}
 
 	@Override
 	public boolean keyUp(int keycode) {
-		return false;
+		return true;
 	}
 
 	@Override
 	public boolean keyTyped(char character) {
-		return false;
+		return true;
 	}
 
 	@Override
 	public boolean touchDown(int screenX, int screenY, int pointer, int button) {
-		return false;
+		return true;
 	}
 
 	@Override
 	public boolean touchUp(int screenX, int screenY, int pointer, int button) {
-		return false;
+		return true;
 	}
 
 	@Override
 	public boolean touchDragged(int screenX, int screenY, int pointer) {
-		return false;
+		return true;
 	}
 
 	@Override
 	public boolean mouseMoved(int screenX, int screenY) {
-		return false;
+		return true;
 	}
 
 	@Override
 	public boolean scrolled(int amount) {
-		return false;
+		return true;
 	}
 
 	public void setCameraPosition(float camX, float camY) {

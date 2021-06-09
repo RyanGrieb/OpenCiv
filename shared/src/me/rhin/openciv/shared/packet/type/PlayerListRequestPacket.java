@@ -13,20 +13,20 @@ public class PlayerListRequestPacket extends Packet {
 	private static final int MAX_PLAYERS = 12;
 
 	private String[] playerList;
-	private String[] colorList;
+	private String[] civList;
 
 	@Override
 	public void write(Json json) {
 		super.write(json);
 		json.writeValue("playerNames", playerList);
-		json.writeValue("colorList", colorList);
+		json.writeValue("civList", civList);
 	}
 
 	@Override
 	public void read(Json json, JsonValue jsonData) {
 		super.read(json, jsonData);
 		this.playerList = new String[MAX_PLAYERS];
-		this.colorList = new String[MAX_PLAYERS];
+		this.civList = new String[MAX_PLAYERS];
 
 		if (!jsonData.hasChild("playerNames"))
 			return;
@@ -37,14 +37,14 @@ public class PlayerListRequestPacket extends Packet {
 		// playerList[i] = jsonData.get("playerNames").asStringArray()[i];
 		// }
 		playerList = jsonData.get("playerNames").asStringArray();
-		colorList = jsonData.get("colorList").asStringArray();
+		civList = jsonData.get("civList").asStringArray();
 	}
 
-	public void addPlayer(String name, String color) {
+	public void addPlayer(String name, String civName) {
 		for (int i = 0; i < MAX_PLAYERS; i++) {
 			if (playerList[i] == null) {
 				playerList[i] = name;
-				colorList[i] = color;
+				civList[i] = civName;
 				break;
 			}
 		}
@@ -54,7 +54,7 @@ public class PlayerListRequestPacket extends Packet {
 		return playerList;
 	}
 
-	public String[] getColorList() {
-		return colorList;
+	public String[] getCivList() {
+		return civList;
 	}
 }

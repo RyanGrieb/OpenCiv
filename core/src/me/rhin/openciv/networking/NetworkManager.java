@@ -17,6 +17,7 @@ import me.rhin.openciv.listener.AddSpecialistToContainerListener.AddSpecialistTo
 import me.rhin.openciv.listener.AddUnitListener.AddUnitEvent;
 import me.rhin.openciv.listener.ApplyProductionToItemListener.ApplyProductionToItemEvent;
 import me.rhin.openciv.listener.BuildingConstructedListener.BuildingConstructedEvent;
+import me.rhin.openciv.listener.ChooseCivListener.ChooseCivEvent;
 import me.rhin.openciv.listener.CityStatUpdateListener.CityStatUpdateEvent;
 import me.rhin.openciv.listener.DeleteUnitListener.DeleteUnitEvent;
 import me.rhin.openciv.listener.FetchPlayerListener.FetchPlayerEvent;
@@ -46,6 +47,7 @@ import me.rhin.openciv.shared.packet.type.AddSpecialistToContainerPacket;
 import me.rhin.openciv.shared.packet.type.AddUnitPacket;
 import me.rhin.openciv.shared.packet.type.ApplyProductionToItemPacket;
 import me.rhin.openciv.shared.packet.type.BuildingConstructedPacket;
+import me.rhin.openciv.shared.packet.type.ChooseCivPacket;
 import me.rhin.openciv.shared.packet.type.CityStatUpdatePacket;
 import me.rhin.openciv.shared.packet.type.DeleteUnitPacket;
 import me.rhin.openciv.shared.packet.type.FetchPlayerPacket;
@@ -101,6 +103,7 @@ public class NetworkManager {
 		networkEvents.put(RemoveSpecialistFromContainerPacket.class, RemoveSpecialistFromContainerEvent.class);
 		networkEvents.put(TurnTimeLeftPacket.class, TurnTimeLeftEvent.class);
 		networkEvents.put(GetHostPacket.class, GetHostEvent.class);
+		networkEvents.put(ChooseCivPacket.class, ChooseCivEvent.class);
 	}
 
 	public void connect(String ip) {
@@ -167,7 +170,7 @@ public class NetworkManager {
 
 			@Override
 			public boolean onMessage(final WebSocket webSocket, final String packet) {
-				// Gdx.app.log(Civilization.WS_LOG_TAG, "Got message: " + packet);
+				 Gdx.app.log(Civilization.WS_LOG_TAG, "Got message: " + packet);
 				fireAssociatedPacketEvents(webSocket, packet);
 				return true;
 			}

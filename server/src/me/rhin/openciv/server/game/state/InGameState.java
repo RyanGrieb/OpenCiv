@@ -117,7 +117,7 @@ public class InGameState extends Game
 
 	@Override
 	public void onStateEnd() {
-		// FIXME: Single method clearing all listeners from this object.
+		Server.getInstance().getEventManager().clearListenersFromObject(this);
 	}
 
 	@Override
@@ -355,7 +355,7 @@ public class InGameState extends Game
 	public void onPlayerListRequested(WebSocket conn, PlayerListRequestPacket packet) {
 		System.out.println("[SERVER] Player list requested");
 		for (Player player : players) {
-			packet.addPlayer(player.getName(), player.getColor().toString());
+			packet.addPlayer(player.getName(), player.getCivType().name());
 		}
 		Json json = new Json();
 		conn.send(json.toJson(packet));

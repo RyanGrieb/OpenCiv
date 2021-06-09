@@ -5,7 +5,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 
 public class EventManager {
-	
+
 	private final HashMap<Class<? extends Listener>, ArrayList<? extends Listener>> listenerMap = new HashMap<>();
 
 	// TODO: Support multiple listenerType's as input. E.g. Class<L>... listenerType
@@ -50,5 +50,17 @@ public class EventManager {
 
 	public void clearEvents() {
 		listenerMap.clear();
+	}
+
+	public <L extends Listener> void clearListenersFromObject(L listener) {
+		// Go through all the listeners
+		for (Class<? extends Listener> listenerType : listenerMap.keySet()) {
+			@SuppressWarnings("unchecked")
+			ArrayList<L> listeners = (ArrayList<L>) listenerMap.get(listenerType);
+
+			// Remove object attached all listeners
+			if (listeners != null)
+				listeners.remove(listener);
+		}
 	}
 }

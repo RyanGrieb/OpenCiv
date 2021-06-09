@@ -28,8 +28,6 @@ public class UnitWindow extends AbstractWindow implements ResizeListener {
 		this.unit = unit;
 		this.unitActionButtons = new ArrayList<>();
 
-		// viewport().getWorldWidth() - 200, 0, 200, 100;
-
 		this.blankBackground = new BlankBackground(viewport.getWorldWidth() - 200, 0, 200, 100);
 		addActor(blankBackground);
 

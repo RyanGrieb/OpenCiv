@@ -7,6 +7,8 @@ import com.badlogic.gdx.utils.Json;
 import me.rhin.openciv.server.Server;
 import me.rhin.openciv.server.game.Game;
 import me.rhin.openciv.server.game.Player;
+import me.rhin.openciv.server.game.civilization.CivType;
+import me.rhin.openciv.server.listener.ChooseCivListener;
 import me.rhin.openciv.server.listener.ConnectionListener;
 import me.rhin.openciv.server.listener.DisconnectListener;
 import me.rhin.openciv.server.listener.FetchPlayerListener;
@@ -14,6 +16,7 @@ import me.rhin.openciv.server.listener.GetHostListener;
 import me.rhin.openciv.server.listener.NextTurnListener;
 import me.rhin.openciv.server.listener.PlayerListRequestListener;
 import me.rhin.openciv.server.listener.StartGameRequestListener;
+import me.rhin.openciv.shared.packet.type.ChooseCivPacket;
 import me.rhin.openciv.shared.packet.type.FetchPlayerPacket;
 import me.rhin.openciv.shared.packet.type.GetHostPacket;
 import me.rhin.openciv.shared.packet.type.PlayerConnectPacket;
@@ -21,7 +24,7 @@ import me.rhin.openciv.shared.packet.type.PlayerDisconnectPacket;
 import me.rhin.openciv.shared.packet.type.PlayerListRequestPacket;
 
 public class InLobbyState extends Game implements StartGameRequestListener, ConnectionListener, DisconnectListener,
-		PlayerListRequestListener, FetchPlayerListener, GetHostListener {
+		PlayerListRequestListener, FetchPlayerListener, GetHostListener, ChooseCivListener {
 
 	public InLobbyState() {
 		Server.getInstance().getEventManager().addListener(StartGameRequestListener.class, this);
@@ -30,17 +33,12 @@ public class InLobbyState extends Game implements StartGameRequestListener, Conn
 		Server.getInstance().getEventManager().addListener(PlayerListRequestListener.class, this);
 		Server.getInstance().getEventManager().addListener(FetchPlayerListener.class, this);
 		Server.getInstance().getEventManager().addListener(GetHostListener.class, this);
+		Server.getInstance().getEventManager().addListener(ChooseCivListener.class, this);
 	}
 
 	@Override
 	public void onStateEnd() {
-		// FIXME: Single method clearing all listeners from this object.
-		Server.getInstance().getEventManager().removeListener(StartGameRequestListener.class, this);
-		Server.getInstance().getEventManager().removeListener(ConnectionListener.class, this);
-		Server.getInstance().getEventManager().removeListener(DisconnectListener.class, this);
-		Server.getInstance().getEventManager().removeListener(PlayerListRequestListener.class, this);
-		Server.getInstance().getEventManager().removeListener(FetchPlayerListener.class, this);
-		Server.getInstance().getEventManager().addListener(GetHostListener.class, this);
+		Server.getInstance().getEventManager().clearListenersFromObject(this);
 	}
 
 	@Override
@@ -66,7 +64,6 @@ public class InLobbyState extends Game implements StartGameRequestListener, Conn
 
 			PlayerConnectPacket packet = new PlayerConnectPacket();
 			packet.setPlayerName(newPlayer.getName());
-			packet.setColor(newPlayer.getColor().toString());
 			Json json = new Json();
 			playerConn.send(json.toJson(packet));
 		}
@@ -119,7 +116,7 @@ public class InLobbyState extends Game implements StartGameRequestListener, Conn
 	public void onPlayerListRequested(WebSocket conn, PlayerListRequestPacket packet) {
 		System.out.println("[SERVER] Player list requested");
 		for (Player player : players) {
-			packet.addPlayer(player.getName(), player.getColor().toString());
+			packet.addPlayer(player.getName(), player.getCivType().name());
 		}
 		Json json = new Json();
 		conn.send(json.toJson(packet));
@@ -142,6 +139,18 @@ public class InLobbyState extends Game implements StartGameRequestListener, Conn
 				Json json = new Json();
 				conn.send(json.toJson(packet));
 			}
+	}
+
+	@Override
+	public void onChooseCiv(WebSocket conn, ChooseCivPacket packet) {
+
+		Player packetPlayer = getPlayerByConn(conn);
+		packetPlayer.setCivilization(CivType.valueOf(packet.getCivName()));
+
+		Json json = new Json();
+		for (Player player : Server.getInstance().getPlayers())
+			player.getConn().send(json.toJson(packet));
+
 	}
 
 	@Override

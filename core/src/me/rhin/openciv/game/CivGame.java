@@ -10,6 +10,7 @@ import com.badlogic.gdx.utils.reflect.ClassReflection;
 
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.game.city.City;
+import me.rhin.openciv.game.civilization.CivType;
 import me.rhin.openciv.game.map.GameMap;
 import me.rhin.openciv.game.map.tile.Tile;
 import me.rhin.openciv.game.player.Player;
@@ -123,7 +124,7 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 			else
 				players.put(playerName, new Player(playerName));
 
-			players.get(playerName).setColor(Color.valueOf(packet.getColorList()[i]));
+			players.get(playerName).setColor(CivType.valueOf(packet.getCivList()[i]).getColor());
 		}
 	}
 
