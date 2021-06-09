@@ -5,6 +5,7 @@ import java.util.HashMap;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
@@ -52,6 +53,7 @@ public class City extends Actor implements SpecialistContainer, BuildingConstruc
 	private ProducibleItemManager producibleItemManager;
 	private StatLine statLine;
 	private CustomLabel nameLabel;
+	private Sprite nameIcon;
 
 	public City(Tile originTile, Player playerOwner, String name) {
 		this.originTile = originTile;
@@ -67,9 +69,12 @@ public class City extends Actor implements SpecialistContainer, BuildingConstruc
 		nameLabel.setPosition(originTile.getX() + originTile.getWidth() / 2 - nameLabel.getWidth() / 2,
 				originTile.getY() + originTile.getHeight() + 5);
 
+		this.nameIcon = playerOwner.getCivType().getIcon().sprite();
+		nameIcon.setBounds(nameLabel.getX() - 20, nameLabel.getY() - 4, 16, 16);
+
 		// FIXME: The actor size & position really shouldn't be confined to the label.
-		this.setPosition(nameLabel.getX(), nameLabel.getY());
-		this.setSize(nameLabel.getWidth(), nameLabel.getHeight());
+		this.setPosition(nameLabel.getX() - 20, nameLabel.getY() - 4);
+		this.setSize(nameLabel.getWidth() + 20, nameLabel.getHeight());
 
 		Civilization.getInstance().getScreenManager().getCurrentScreen().getStage().addActor(this);
 		addListener(new ClickListener() {
@@ -96,8 +101,10 @@ public class City extends Actor implements SpecialistContainer, BuildingConstruc
 
 	@Override
 	public void draw(Batch batch, float parentAlpha) {
-		if (!Civilization.getInstance().getWindowManager().isOpenWindow(CityInfoWindow.class))
+		if (!Civilization.getInstance().getWindowManager().isOpenWindow(CityInfoWindow.class)) {
 			nameLabel.draw(batch, parentAlpha);
+			nameIcon.draw(batch);
+		}
 	}
 
 	@Override

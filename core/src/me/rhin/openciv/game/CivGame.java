@@ -125,7 +125,7 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 			else
 				players.put(playerName, new Player(playerName));
 
-			players.get(playerName).setColor(CivType.valueOf(packet.getCivList()[i]).getColor());
+			players.get(playerName).setCivType(CivType.valueOf(packet.getCivList()[i]));
 		}
 	}
 

@@ -1,30 +1,22 @@
 package me.rhin.openciv.game.player;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 import com.badlogic.gdx.graphics.Color;
 
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.game.city.City;
+import me.rhin.openciv.game.civilization.CivType;
 import me.rhin.openciv.game.map.tile.Tile;
 import me.rhin.openciv.game.research.ResearchTree;
 import me.rhin.openciv.game.unit.Unit;
-import me.rhin.openciv.listener.ApplyProductionToItemListener;
-import me.rhin.openciv.listener.CityStatUpdateListener;
-import me.rhin.openciv.listener.FinishProductionItemListener;
 import me.rhin.openciv.listener.LeftClickListener;
 import me.rhin.openciv.listener.PlayerStatUpdateListener;
 import me.rhin.openciv.listener.RelativeMouseMoveListener;
 import me.rhin.openciv.listener.RightClickListener;
 import me.rhin.openciv.listener.SelectUnitListener;
-import me.rhin.openciv.listener.SetProductionItemListener;
-import me.rhin.openciv.shared.packet.type.ApplyProductionToItemPacket;
-import me.rhin.openciv.shared.packet.type.CityStatUpdatePacket;
-import me.rhin.openciv.shared.packet.type.FinishProductionItemPacket;
 import me.rhin.openciv.shared.packet.type.PlayerStatUpdatePacket;
 import me.rhin.openciv.shared.packet.type.SelectUnitPacket;
-import me.rhin.openciv.shared.packet.type.SetProductionItemPacket;
 import me.rhin.openciv.shared.stat.StatLine;
 import me.rhin.openciv.util.ClickType;
 
@@ -34,7 +26,6 @@ public class Player implements RelativeMouseMoveListener, LeftClickListener, Rig
 	// NOTE: This class can be the controlled by the player or the MPPlayer. The
 	// distinction is in the listeners firing.
 	private String name;
-	private Color color;
 	private Tile hoveredTile;
 	private Unit selectedUnit;
 	private ArrayList<City> ownedCities;
@@ -42,6 +33,7 @@ public class Player implements RelativeMouseMoveListener, LeftClickListener, Rig
 	private StatLine statLine;
 	private ResearchTree researchTree;
 	private boolean rightMouseHeld;
+	private CivType civType;
 
 	public Player(String name) {
 		this.name = name;
@@ -151,16 +143,7 @@ public class Player implements RelativeMouseMoveListener, LeftClickListener, Rig
 
 		return null;
 	}
-
-	// FIXME: The color should really be defined in the constructor
-	public void setColor(Color color) {
-		this.color = color;
-	}
-
-	public Color getColor() {
-		return color;
-	}
-
+	
 	public ResearchTree getResearchTree() {
 		return researchTree;
 	}
@@ -182,5 +165,13 @@ public class Player implements RelativeMouseMoveListener, LeftClickListener, Rig
 
 		if (selectedUnit != null && selectedUnit.equals(unit))
 			unselectUnit();
+	}
+
+	public CivType getCivType() {
+		return civType;
+	}
+
+	public void setCivType(CivType civType) {
+		this.civType = civType;
 	}
 }

@@ -121,7 +121,7 @@ public class Tile extends Actor implements ShapeRenderListener {
 				v2 = 0;
 			}
 
-			shapeRenderer.setColor(territory.getPlayerOwner().getColor());
+			shapeRenderer.setColor(territory.getPlayerOwner().getCivType().getColor());
 			shapeRenderer.line(vectors[v1], vectors[v2]);
 		}
 
@@ -137,7 +137,7 @@ public class Tile extends Actor implements ShapeRenderListener {
 			}
 
 			if ((adjTile == null || adjTile.getTerritory() == null) && territory == null) {
-				//shapeRenderer.line(vectors[v1], vectors[v2]);
+				// shapeRenderer.line(vectors[v1], vectors[v2]);
 			}
 		}
 	}
@@ -342,8 +342,8 @@ public class Tile extends Actor implements ShapeRenderListener {
 
 	public void setTerritory(City city) {
 		this.territory = city;
-		territorySprite.setColor(city.getPlayerOwner().getColor().r, city.getPlayerOwner().getColor().g,
-				city.getPlayerOwner().getColor().b, 0.15f);
+		Color color = city.getPlayerOwner().getCivType().getColor();
+		territorySprite.setColor(color.r, color.g, color.b, 0.25f);
 	}
 
 	public void defineBorders() {
@@ -400,7 +400,7 @@ public class Tile extends Actor implements ShapeRenderListener {
 	}
 
 	public int getMovementCost(Tile prevTile) {
-		// Check if the tile were moving to 
+		// Check if the tile were moving to
 		int currentSideCheck = -1;
 		for (int i = 0; i < adjTiles.length; i++) {
 			if (prevTile.equals(adjTiles[i])) {
