@@ -10,7 +10,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Json;
 
 import me.rhin.openciv.server.Server;
-import me.rhin.openciv.server.game.Game;
+import me.rhin.openciv.server.game.GameState;
 import me.rhin.openciv.server.game.map.tile.Tile;
 import me.rhin.openciv.server.game.map.tile.Tile.TileTypeWrapper;
 import me.rhin.openciv.server.game.map.tile.TileIndexer;

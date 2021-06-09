@@ -5,7 +5,7 @@ import org.java_websocket.WebSocket;
 import com.badlogic.gdx.utils.Json;
 
 import me.rhin.openciv.server.Server;
-import me.rhin.openciv.server.game.Game;
+import me.rhin.openciv.server.game.GameState;
 import me.rhin.openciv.server.game.Player;
 import me.rhin.openciv.server.game.civilization.CivType;
 import me.rhin.openciv.server.listener.ChooseCivListener;
@@ -23,7 +23,7 @@ import me.rhin.openciv.shared.packet.type.PlayerConnectPacket;
 import me.rhin.openciv.shared.packet.type.PlayerDisconnectPacket;
 import me.rhin.openciv.shared.packet.type.PlayerListRequestPacket;
 
-public class InLobbyState extends Game implements StartGameRequestListener, ConnectionListener, DisconnectListener,
+public class InLobbyState extends GameState implements StartGameRequestListener, ConnectionListener, DisconnectListener,
 		PlayerListRequestListener, FetchPlayerListener, GetHostListener, ChooseCivListener {
 
 	public InLobbyState() {
@@ -50,6 +50,23 @@ public class InLobbyState extends Game implements StartGameRequestListener, Conn
 	public void onStartGameRequest(WebSocket conn) {
 		if (conn != null && !getPlayerByConn(conn).isHost())
 			return;
+
+		// Assign players with a random civ a civilization
+		for (Player rndPlayer : Server.getInstance().getPlayers()) {
+			if (rndPlayer.getCivType() == CivType.RANDOM) {
+				// TODO: Set to a random civ not already being played.
+				rndPlayer.setCivilization(CivType.randomCiv());
+
+				ChooseCivPacket packet = new ChooseCivPacket();
+				packet.setPlayerName(rndPlayer.getName());
+				packet.setCivName(rndPlayer.getCivType().name());
+
+				Json json = new Json();
+				for (Player player : Server.getInstance().getPlayers())
+					player.getConn().send(json.toJson(packet));
+			}
+		}
+
 		Server.getInstance().setGameState(new InGameState());
 	}
 
@@ -143,7 +160,7 @@ public class InLobbyState extends Game implements StartGameRequestListener, Conn
 
 	@Override
 	public void onChooseCiv(WebSocket conn, ChooseCivPacket packet) {
-		
+
 		Player packetPlayer = getPlayerByConn(conn);
 		packet.setPlayerName(packetPlayer.getName());
 		packetPlayer.setCivilization(CivType.valueOf(packet.getCivName()));

@@ -7,12 +7,12 @@ import org.java_websocket.WebSocket;
 import me.rhin.openciv.server.Server;
 import me.rhin.openciv.server.game.map.GameMap;
 
-public abstract class Game {
+public abstract class GameState {
 
 	protected ArrayList<Player> players;
 	protected GameMap map;
 
-	public Game() {
+	public GameState() {
 		players = Server.getInstance().getPlayers();
 		map = Server.getInstance().getMap();
 	}

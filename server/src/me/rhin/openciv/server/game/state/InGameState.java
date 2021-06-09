@@ -12,7 +12,7 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Json;
 
 import me.rhin.openciv.server.Server;
-import me.rhin.openciv.server.game.Game;
+import me.rhin.openciv.server.game.GameState;
 import me.rhin.openciv.server.game.Player;
 import me.rhin.openciv.server.game.city.City;
 import me.rhin.openciv.server.game.city.building.Building;
@@ -53,7 +53,7 @@ import me.rhin.openciv.shared.packet.type.SettleCityPacket;
 import me.rhin.openciv.shared.packet.type.TerritoryGrowPacket;
 import me.rhin.openciv.shared.packet.type.TurnTimeLeftPacket;
 
-public class InGameState extends Game
+public class InGameState extends GameState
 		implements DisconnectListener, SelectUnitListener, UnitMoveListener, SettleCityListener,
 		PlayerFinishLoadingListener, NextTurnListener, SetProductionItemListener, ClickWorkedTileListener,
 		ClickSpecialistListener, EndTurnListener, PlayerListRequestListener, FetchPlayerListener {

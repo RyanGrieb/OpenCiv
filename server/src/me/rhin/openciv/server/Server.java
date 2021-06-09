@@ -16,7 +16,7 @@ import com.github.czyzby.websocket.CommonWebSockets;
 import com.github.czyzby.websocket.WebSocketAdapter;
 
 import me.rhin.openciv.server.command.CmdProcessor;
-import me.rhin.openciv.server.game.Game;
+import me.rhin.openciv.server.game.GameState;
 import me.rhin.openciv.server.game.Player;
 import me.rhin.openciv.server.game.map.GameMap;
 import me.rhin.openciv.server.game.state.InLobbyState;
@@ -63,7 +63,7 @@ public class Server extends WebSocketServer {
 	private static final int PORT = 5000;
 	private static Server server;
 
-	private Game game;
+	private GameState game;
 	private EventManager eventManager;
 	private int playerIndex;
 	private HashMap<Class<? extends Packet>, Class<? extends Event<? extends Listener>>> networkEvents;
@@ -201,7 +201,7 @@ public class Server extends WebSocketServer {
 		return playerIndex;
 	}
 
-	public Game getGame() {
+	public GameState getGame() {
 		return game;
 	}
 
@@ -213,7 +213,7 @@ public class Server extends WebSocketServer {
 		return eventManager;
 	}
 
-	public void setGameState(Game game) {
+	public void setGameState(GameState game) {
 		this.game.onStateEnd();
 		this.game = game;
 	}

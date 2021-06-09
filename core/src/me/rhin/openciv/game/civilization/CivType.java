@@ -25,7 +25,7 @@ public enum CivType {
 
 		@Override
 		public Color getColor() {
-			return Color.BLUE;
+			return Color.WHITE;
 		}
 	},
 	AMERICA(TextureEnum.ICON_AMERICA) {
