@@ -2,10 +2,10 @@ package me.rhin.openciv.ui.window;
 
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.Map.Entry;
 
 import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 
 import me.rhin.openciv.Civilization;
@@ -71,6 +71,8 @@ public class WindowManager {
 		}
 
 		if (windows.get(windowClass).isGameDisplayWindow()) {
+			// FIXME: I don't believe we properly hide game display windows. Use
+			// setVisible() instead of removing shit.
 			hiddenGameDisplayWindows.put(windowClass, windows.get(windowClass));
 		}
 

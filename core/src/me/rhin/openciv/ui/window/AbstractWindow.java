@@ -20,7 +20,7 @@ public abstract class AbstractWindow extends Group {
 
 		open = true;
 	}
-
+	
 	public abstract boolean disablesInput();
 
 	public abstract boolean disablesCameraMovement();

@@ -27,6 +27,8 @@ public class EscWindow extends AbstractWindow implements ResizeListener {
 				blankBackground.getY() + blankBackground.getHeight() - 110, 150, 45);
 		addActor(mainMenuButton);
 
+		Civilization.getInstance().getGame().getPlayer().unselectUnit();
+
 		Civilization.getInstance().getEventManager().addListener(ResizeListener.class, this);
 	}
 

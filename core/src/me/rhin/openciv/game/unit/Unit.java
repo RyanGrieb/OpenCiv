@@ -56,7 +56,7 @@ public abstract class Unit extends Actor implements ShapeRenderListener, NextTur
 
 		this.movement = getMaxMovement();
 		playerOwner.addUnit(this);
-		
+
 		Civilization.getInstance().getEventManager().addListener(NextTurnListener.class, this);
 	}
 

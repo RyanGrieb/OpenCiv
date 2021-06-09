@@ -179,5 +179,8 @@ public class Player implements RelativeMouseMoveListener, LeftClickListener, Rig
 
 	public void removeUnit(Unit unit) {
 		ownedUnits.remove(unit);
+
+		if (selectedUnit != null && selectedUnit.equals(unit))
+			unselectUnit();
 	}
 }

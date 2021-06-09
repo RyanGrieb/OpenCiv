@@ -175,7 +175,7 @@ public class InGameScreen extends AbstractScreen {
 	}
 
 	public Group getUnitGroup() {
-		return riverGroup;
+		return unitGroup;
 	}
 
 	@Override

@@ -90,7 +90,7 @@ public class UnitWindow extends AbstractWindow implements ResizeListener {
 
 	@Override
 	public boolean isGameDisplayWindow() {
-		return true;
+		return false;
 	}
 
 	@Override
@@ -98,4 +98,14 @@ public class UnitWindow extends AbstractWindow implements ResizeListener {
 		return false;
 	}
 
+	@Override
+	public void onClose() {
+		super.onClose();
+
+		Civilization.getInstance().getEventManager().removeListener(ResizeListener.class, this);
+	}
+
+	public Unit getUnit() {
+		return unit;
+	}
 }
