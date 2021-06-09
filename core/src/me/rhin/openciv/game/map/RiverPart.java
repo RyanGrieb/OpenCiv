@@ -67,6 +67,7 @@ public class RiverPart extends Actor {
 	@Override
 	public void draw(Batch batch, float parentAlpha) {
 		// FIXME: Don't draw on top of one another if there are two tile sides.
+		if(tile.isDiscovered())
 		sprite.draw(batch);
 	}
 }

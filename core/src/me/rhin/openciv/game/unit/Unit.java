@@ -81,7 +81,8 @@ public abstract class Unit extends Actor implements ShapeRenderListener, NextTur
 			targetSelectionSprite.draw(batch);
 		}
 
-		sprite.draw(batch);
+		if (standingTile.hasVision())
+			sprite.draw(batch);
 	}
 
 	@Override

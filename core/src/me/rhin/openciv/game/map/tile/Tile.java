@@ -56,6 +56,8 @@ public class Tile extends Actor implements ShapeRenderListener {
 	private TreeSet<TileTypeWrapper> tileWrappers;
 	private Sprite selectionSprite;
 	private Sprite territorySprite;
+	private Sprite fogSprite;
+	private Sprite nonVisibleSprite;
 	private boolean[] territoryBorders;
 	private boolean drawSelection;
 	private CustomLabel posLabel;
@@ -67,6 +69,8 @@ public class Tile extends Actor implements ShapeRenderListener {
 	private City city;
 	private City territory;
 	private ArrayList<Unit> units;
+	private boolean discovered;
+	private boolean hasVision;
 
 	public Tile(GameMap map, TileType tileType, float x, float y) {
 		Civilization.getInstance().getEventManager().addListener(ShapeRenderListener.class, this);
@@ -82,6 +86,11 @@ public class Tile extends Actor implements ShapeRenderListener {
 		selectionSprite.setAlpha(0.2f);
 		this.territorySprite = new Sprite(TextureEnum.TILE_SELECT.sprite());
 		this.territoryBorders = new boolean[6];
+
+		this.fogSprite = new Sprite(TextureEnum.TILE_UNDISCOVERED.sprite());
+		this.nonVisibleSprite = new Sprite(TextureEnum.TILE_NON_VISIBLE.sprite());
+		nonVisibleSprite.setAlpha(0.5f);
+
 		this.drawSelection = false;
 		// FIXME: Remove our own x,y,and size variables, and use the actors instead.
 		this.x = x;
@@ -100,7 +109,9 @@ public class Tile extends Actor implements ShapeRenderListener {
 
 	@Override
 	public void onShapeRender(ShapeRenderer shapeRenderer) {
-
+		if(!hasVision)
+			return;
+		
 		// Draw the hexagon outline
 
 		// FIXME: Don't render lines if they're off the screen. This isn't part of the
@@ -150,15 +161,24 @@ public class Tile extends Actor implements ShapeRenderListener {
 	@Override
 	public void draw(Batch batch, float parentAlpha) {
 
-		for (TileTypeWrapper sprite : tileWrappers) {
-			sprite.draw(batch);
+		if (discovered)
+			for (TileTypeWrapper sprite : tileWrappers) {
+				sprite.draw(batch);
+			}
+
+		if (!discovered) {
+			fogSprite.draw(batch);
+		}
+
+		if (!hasVision) {
+			nonVisibleSprite.draw(batch);
 		}
 
 		if (drawSelection) {
 			selectionSprite.draw(batch);
 		}
 
-		if (territory != null)
+		if (territory != null && hasVision)
 			territorySprite.draw(batch);
 
 		// posLabel.draw(batch, 1);
@@ -189,6 +209,10 @@ public class Tile extends Actor implements ShapeRenderListener {
 		// 5,0,1,2. In the future, we want our adjTiles index to align /w the river.
 		// So the possible river sides = 0,1,2,3
 		riverSides[side] = river;
+	}
+
+	public TileType getBaseTileType() {
+		return ((TileTypeWrapper) tileWrappers.toArray()[tileWrappers.size() - 1]).getTileType();
 	}
 
 	public RiverPart[] getRiverSides() {
@@ -228,6 +252,36 @@ public class Tile extends Actor implements ShapeRenderListener {
 			units.add(0, unit);
 		else
 			units.add(unit);
+
+		// FIXME: Make all this server side
+		if (!unit.getPlayerOwner().equals(Civilization.getInstance().getGame().getPlayer()))
+			return;
+
+		// Is hill
+		boolean isHill = getBaseTileType() == TileType.GRASS_HILL || getBaseTileType() == TileType.DESERT_HILL
+				|| getBaseTileType() == TileType.PLAINS_HILL;
+		// Update visibility
+
+		for (Tile tile : getAdjTiles()) {
+
+			boolean denyVisibility = false;
+			for (TileTypeWrapper wrapper : tile.getTileTypeWrappers())
+				if (wrapper.getTileType().getMovementCost() > 1) {
+					denyVisibility = true;
+				}
+
+			if (denyVisibility && !isHill) {
+				tile.setDiscovered(true);
+				tile.setHasVision(true);
+				continue;
+			}
+			for (Tile adjTile : tile.getAdjTiles()) {
+
+				adjTile.setDiscovered(true);
+				adjTile.setHasVision(true);
+			}
+
+		}
 	}
 
 	public void setEdge(int index, Tile tile) {
@@ -236,6 +290,8 @@ public class Tile extends Actor implements ShapeRenderListener {
 
 	public void removeUnit(Unit unit) {
 		units.remove(unit);
+
+		// TODO: Get all adj tiles, if there is a unit nearby. don't set it non visible
 	}
 
 	public boolean hasUnitSelected() {
@@ -333,6 +389,12 @@ public class Tile extends Actor implements ShapeRenderListener {
 
 		territorySprite.setSize(28, 32);
 		territorySprite.setPosition(x, y);
+
+		fogSprite.setSize(28, 32);
+		fogSprite.setPosition(x, y);
+
+		nonVisibleSprite.setSize(28, 32);
+		nonVisibleSprite.setPosition(x, y);
 	}
 
 	public void setCity(City city) {
@@ -438,5 +500,21 @@ public class Tile extends Actor implements ShapeRenderListener {
 
 	public TreeSet<TileTypeWrapper> getTileTypeWrappers() {
 		return tileWrappers;
+	}
+
+	private void setDiscovered(boolean discovered) {
+		this.discovered = discovered;
+	}
+
+	private void setHasVision(boolean hasVision) {
+		this.hasVision = hasVision;
+	}
+
+	public boolean isDiscovered() {
+		return discovered;
+	}
+	
+	public boolean hasVision() {
+		return hasVision;
 	}
 }

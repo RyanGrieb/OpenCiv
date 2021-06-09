@@ -15,7 +15,7 @@ public enum TileType {
 	FLOODPLAINS(TextureEnum.TILE_FLOODPLAINS, TileLayer.BASE),
 	DESERT_HILL(TextureEnum.TILE_DESERT_HILL, 2, TileLayer.BASE),
 	TUNDRA(TextureEnum.TILE_TUNDRA, TileLayer.BASE),
-	TUNDRA_HILL(TextureEnum.TILE_TUNDRA_HILL,TileLayer.BASE),
+	TUNDRA_HILL(TextureEnum.TILE_TUNDRA_HILL, 2, TileLayer.BASE),
 	OCEAN(TextureEnum.TILE_OCEAN, TileLayer.BASE, TileProperty.WATER),
 	SHALLOW_OCEAN(TextureEnum.TILE_SHALLOW_OCEAN, TileLayer.BASE, TileProperty.WATER),
 	MOUNTAIN(TextureEnum.TILE_MOUNTIAN, 1000000, TileLayer.MIDDLE),
@@ -28,11 +28,15 @@ public enum TileType {
 	GEMS(TextureEnum.TILE_GEMS, TileLayer.HIGH, TileProperty.RESOURCE);
 
 	public enum TileLayer {
-		BASE, MIDDLE, HIGH, TOP;
+		BASE,
+		MIDDLE,
+		HIGH,
+		TOP;
 	}
 
 	public enum TileProperty {
-		WATER, RESOURCE;
+		WATER,
+		RESOURCE;
 	}
 
 	private TextureEnum assetEnum;

@@ -101,7 +101,7 @@ public class City extends Actor implements SpecialistContainer, BuildingConstruc
 
 	@Override
 	public void draw(Batch batch, float parentAlpha) {
-		if (!Civilization.getInstance().getWindowManager().isOpenWindow(CityInfoWindow.class)) {
+		if (!Civilization.getInstance().getWindowManager().isOpenWindow(CityInfoWindow.class) && originTile.hasVision()) {
 			nameLabel.draw(batch, parentAlpha);
 			nameIcon.draw(batch);
 		}
