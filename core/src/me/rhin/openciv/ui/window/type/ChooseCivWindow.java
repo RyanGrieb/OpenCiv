@@ -25,7 +25,7 @@ public class ChooseCivWindow extends AbstractWindow implements ResizeListener {
 		civContianerList.addItem(ListContainerType.CATEGORY, "Civilizations",
 				new ListCivilization(CivType.AMERICA, 200, 40));
 		civContianerList.addItem(ListContainerType.CATEGORY, "Civilizations",
-				new ListCivilization(CivType.NAZI_GERMANY, 200, 40));
+				new ListCivilization(CivType.GERMANY, 200, 40));
 		civContianerList.addItem(ListContainerType.CATEGORY, "Civilizations",
 				new ListCivilization(CivType.ENGLAND, 200, 40));
 		civContianerList.addItem(ListContainerType.CATEGORY, "Civilizations",

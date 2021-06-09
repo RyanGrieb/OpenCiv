@@ -97,8 +97,6 @@ public class CityProductionInfo extends Actor
 
 		ProducingItem producingItem = city.getProducibleItemManager().getCurrentProducingItem();
 
-		// FIXME: The packet should set the producing item. not the client.
-
 		productionItemNameLabel.setText(producingItem.getProductionItem().getName());
 
 		Sprite sprite = producingItem.getProductionItem().getTexture().sprite();
@@ -121,7 +119,6 @@ public class CityProductionInfo extends Actor
 		if (!city.getName().equals(packet.getCityName()))
 			return;
 
-		// FIXME: The packet should be checking if this is correct
 		ProducingItem producingItem = city.getProducibleItemManager().getCurrentProducingItem();
 
 		int appliedTurns = (int) (producingItem.getAppliedProduction()

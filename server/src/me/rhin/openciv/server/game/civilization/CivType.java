@@ -7,7 +7,7 @@ public enum CivType {
 	RANDOM,
 	AMERICA,
 	ENGLAND,
-	NAZI_GERMANY,
+	GERMANY,
 	ROME;
 
 	public static CivType randomCiv() {

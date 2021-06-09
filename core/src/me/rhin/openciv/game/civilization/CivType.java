@@ -60,7 +60,7 @@ public enum CivType {
 			return Color.FIREBRICK;
 		}
 	},
-	NAZI_GERMANY(TextureEnum.ICON_NAZI) {
+	GERMANY(TextureEnum.ICON_GERMANY) {
 		@Override
 		public Civ getCiv() {
 			return new NaziGermany();
