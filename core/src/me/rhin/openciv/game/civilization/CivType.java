@@ -73,7 +73,7 @@ public enum CivType {
 
 		@Override
 		public Color getColor() {
-			return Color.RED;
+			return Color.GRAY;
 		}
 	},
 	ROME(TextureEnum.ICON_ROME) {
