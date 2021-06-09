@@ -42,8 +42,6 @@ public class ListCivilization extends ListObject {
 			@Override
 			public void clicked(InputEvent event, float x, float y) {
 				ChooseCivPacket chooseCivPacket = new ChooseCivPacket();
-				chooseCivPacket.setPlayerName(
-						((ServerLobbyScreen) Civilization.getInstance().getCurrentScreen()).getPlayerName());
 				chooseCivPacket.setCivName(civType.name());
 				Civilization.getInstance().getNetworkManager().sendPacket(chooseCivPacket);
 			}

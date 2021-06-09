@@ -143,8 +143,9 @@ public class InLobbyState extends Game implements StartGameRequestListener, Conn
 
 	@Override
 	public void onChooseCiv(WebSocket conn, ChooseCivPacket packet) {
-
+		
 		Player packetPlayer = getPlayerByConn(conn);
+		packet.setPlayerName(packetPlayer.getName());
 		packetPlayer.setCivilization(CivType.valueOf(packet.getCivName()));
 
 		Json json = new Json();
