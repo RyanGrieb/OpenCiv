@@ -41,12 +41,6 @@ public class Player implements RelativeMouseMoveListener, LeftClickListener, Rig
 		this.ownedUnits = new ArrayList<>();
 		this.statLine = new StatLine();
 		this.researchTree = new ResearchTree();
-
-		Civilization.getInstance().getEventManager().addListener(RelativeMouseMoveListener.class, this);
-		Civilization.getInstance().getEventManager().addListener(LeftClickListener.class, this);
-		Civilization.getInstance().getEventManager().addListener(RightClickListener.class, this);
-		Civilization.getInstance().getEventManager().addListener(SelectUnitListener.class, this);
-		Civilization.getInstance().getEventManager().addListener(PlayerStatUpdateListener.class, this);
 	}
 
 	@Override
@@ -97,8 +91,9 @@ public class Player implements RelativeMouseMoveListener, LeftClickListener, Rig
 			selectedUnit.setTargetTile(hoveredTile);
 			rightMouseHeld = true;
 		} else {
-			if (selectedUnit.getCurrentMovement() >= selectedUnit.getPathMovement())
+			if (selectedUnit.getCurrentMovement() >= selectedUnit.getPathMovement()) {
 				selectedUnit.sendMovementPacket();
+			}
 			unselectUnit();
 			rightMouseHeld = false;
 		}
@@ -143,7 +138,7 @@ public class Player implements RelativeMouseMoveListener, LeftClickListener, Rig
 
 		return null;
 	}
-	
+
 	public ResearchTree getResearchTree() {
 		return researchTree;
 	}

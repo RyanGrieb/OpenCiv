@@ -170,6 +170,7 @@ public class NetworkManager {
 
 			@Override
 			public boolean onMessage(final WebSocket webSocket, final String packet) {
+				// if (!packet.contains("MapChunkPacket"))
 				// Gdx.app.log(Civilization.WS_LOG_TAG, "Got message: " + packet);
 				fireAssociatedPacketEvents(webSocket, packet);
 				return true;

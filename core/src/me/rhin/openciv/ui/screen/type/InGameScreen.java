@@ -15,6 +15,7 @@ import me.rhin.openciv.listener.RightClickListener.RightClickEvent;
 import me.rhin.openciv.shared.listener.EventManager;
 import me.rhin.openciv.ui.screen.AbstractScreen;
 import me.rhin.openciv.ui.screen.ScreenEnum;
+import me.rhin.openciv.ui.window.type.CurrentResearchWindow;
 import me.rhin.openciv.ui.window.type.EscWindow;
 import me.rhin.openciv.ui.window.type.GameOverlay;
 import me.rhin.openciv.util.ClickType;
@@ -61,11 +62,11 @@ public class InGameScreen extends AbstractScreen {
 	@Override
 	public void render(float delta) {
 		super.render(delta);
-		
+
 		camera.position.x = camX;
 		camera.position.y = camY;
 		camera.update();
-		
+
 		handleInput();
 
 		Civilization.getInstance().getEventManager().fireEvent(MouseMoveEvent.INSTANCE);
