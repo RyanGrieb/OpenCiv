@@ -279,8 +279,6 @@ public class Tile extends Actor implements ShapeRenderListener {
 			tile.setDiscovered(true);
 			tile.getObservingUnits().add(unit);
 			if (denyVisibility && !isHill) {
-				tile.setDiscovered(true);
-				tile.getObservingUnits().add(unit);
 				continue;
 			}
 			for (Tile adjTile : tile.getAdjTiles()) {
@@ -311,6 +309,8 @@ public class Tile extends Actor implements ShapeRenderListener {
 			adjTiles.add(tile);
 
 		for (Tile tile : adjTiles) {
+
+			tile.getObservingUnits().remove(unit);
 			for (Tile adjTile : tile.getAdjTiles()) {
 				adjTile.getObservingUnits().remove(unit);
 			}
