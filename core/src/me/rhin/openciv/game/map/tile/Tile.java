@@ -70,7 +70,7 @@ public class Tile extends Actor implements ShapeRenderListener {
 	private City territory;
 	private ArrayList<Unit> units;
 	private boolean discovered;
-	private boolean hasVision;
+	private ArrayList<Unit> observingUnits;
 
 	public Tile(GameMap map, TileType tileType, float x, float y) {
 		Civilization.getInstance().getEventManager().addListener(ShapeRenderListener.class, this);
@@ -89,7 +89,7 @@ public class Tile extends Actor implements ShapeRenderListener {
 
 		this.fogSprite = new Sprite(TextureEnum.TILE_UNDISCOVERED.sprite());
 		this.nonVisibleSprite = new Sprite(TextureEnum.TILE_NON_VISIBLE.sprite());
-		nonVisibleSprite.setAlpha(0.5f);
+		nonVisibleSprite.setAlpha(0.7f);
 
 		this.drawSelection = false;
 		// FIXME: Remove our own x,y,and size variables, and use the actors instead.
@@ -101,6 +101,7 @@ public class Tile extends Actor implements ShapeRenderListener {
 		this.adjTiles = new Tile[6];
 		this.riverSides = new RiverPart[6];
 		this.units = new ArrayList<>();
+		this.observingUnits = new ArrayList<>();
 
 		this.posLabel = new CustomLabel(gridX + "," + gridY);
 		posLabel.setSize(width, 20);
@@ -109,9 +110,9 @@ public class Tile extends Actor implements ShapeRenderListener {
 
 	@Override
 	public void onShapeRender(ShapeRenderer shapeRenderer) {
-		if(!hasVision)
+		if (observingUnits.size() < 1)
 			return;
-		
+
 		// Draw the hexagon outline
 
 		// FIXME: Don't render lines if they're off the screen. This isn't part of the
@@ -170,7 +171,7 @@ public class Tile extends Actor implements ShapeRenderListener {
 			fogSprite.draw(batch);
 		}
 
-		if (!hasVision) {
+		if (observingUnits.size() < 1) {
 			nonVisibleSprite.draw(batch);
 		}
 
@@ -178,7 +179,7 @@ public class Tile extends Actor implements ShapeRenderListener {
 			selectionSprite.draw(batch);
 		}
 
-		if (territory != null && hasVision)
+		if (territory != null && observingUnits.size() > 1)
 			territorySprite.draw(batch);
 
 		// posLabel.draw(batch, 1);
@@ -262,23 +263,30 @@ public class Tile extends Actor implements ShapeRenderListener {
 				|| getBaseTileType() == TileType.PLAINS_HILL;
 		// Update visibility
 
-		for (Tile tile : getAdjTiles()) {
+		ArrayList<Tile> adjTiles = new ArrayList<>();
+		adjTiles.add(this);
+		for (Tile tile : getAdjTiles())
+			adjTiles.add(tile);
+
+		for (Tile tile : adjTiles) {
 
 			boolean denyVisibility = false;
 			for (TileTypeWrapper wrapper : tile.getTileTypeWrappers())
-				if (wrapper.getTileType().getMovementCost() > 1) {
+				if (wrapper.getTileType().getMovementCost() > 1 && !tile.equals(this)) {
 					denyVisibility = true;
 				}
 
+			tile.setDiscovered(true);
+			tile.getObservingUnits().add(unit);
 			if (denyVisibility && !isHill) {
 				tile.setDiscovered(true);
-				tile.setHasVision(true);
+				tile.getObservingUnits().add(unit);
 				continue;
 			}
 			for (Tile adjTile : tile.getAdjTiles()) {
 
 				adjTile.setDiscovered(true);
-				adjTile.setHasVision(true);
+				adjTile.getObservingUnits().add(unit);
 			}
 
 		}
@@ -291,7 +299,23 @@ public class Tile extends Actor implements ShapeRenderListener {
 	public void removeUnit(Unit unit) {
 		units.remove(unit);
 
-		// TODO: Get all adj tiles, if there is a unit nearby. don't set it non visible
+		// FIXME: Make all this server side
+		if (!unit.getPlayerOwner().equals(Civilization.getInstance().getGame().getPlayer()))
+			return;
+
+		// Update visibility
+
+		ArrayList<Tile> adjTiles = new ArrayList<>();
+		adjTiles.add(this);
+		for (Tile tile : getAdjTiles())
+			adjTiles.add(tile);
+
+		for (Tile tile : adjTiles) {
+			for (Tile adjTile : tile.getAdjTiles()) {
+				adjTile.getObservingUnits().remove(unit);
+			}
+
+		}
 	}
 
 	public boolean hasUnitSelected() {
@@ -333,6 +357,10 @@ public class Tile extends Actor implements ShapeRenderListener {
 	public int[][] getTrueAdjList() {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	public ArrayList<Unit> getObservingUnits() {
+		return observingUnits;
 	}
 
 	private void initializeVectors() {
@@ -506,15 +534,7 @@ public class Tile extends Actor implements ShapeRenderListener {
 		this.discovered = discovered;
 	}
 
-	private void setHasVision(boolean hasVision) {
-		this.hasVision = hasVision;
-	}
-
 	public boolean isDiscovered() {
 		return discovered;
-	}
-	
-	public boolean hasVision() {
-		return hasVision;
 	}
 }
