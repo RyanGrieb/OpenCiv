@@ -22,7 +22,7 @@ import me.rhin.openciv.game.unit.Unit;
 import me.rhin.openciv.listener.ShapeRenderListener;
 import me.rhin.openciv.ui.label.CustomLabel;
 
-public class Tile extends Actor implements ShapeRenderListener {
+public class Tile extends Actor implements ShapeRenderListener, TileObserver {
 
 	public class TileTypeWrapper extends Sprite implements Comparable<TileTypeWrapper> {
 
@@ -331,6 +331,8 @@ public class Tile extends Actor implements ShapeRenderListener {
 		this.territory = city;
 		Color color = city.getPlayerOwner().getCivType().getColor();
 		territorySprite.setColor(color.r, color.g, color.b, 0.25f);
+		
+		addTileObserver(this);
 	}
 
 	public void defineBorders() {
