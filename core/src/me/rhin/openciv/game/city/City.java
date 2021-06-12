@@ -15,6 +15,7 @@ import me.rhin.openciv.Civilization;
 import me.rhin.openciv.game.city.building.Building;
 import me.rhin.openciv.game.city.specialist.SpecialistContainer;
 import me.rhin.openciv.game.map.tile.Tile;
+import me.rhin.openciv.game.map.tile.TileObserver;
 import me.rhin.openciv.game.player.Player;
 import me.rhin.openciv.game.production.ProducibleItemManager;
 import me.rhin.openciv.listener.AddSpecialistToContainerListener;
@@ -40,7 +41,7 @@ import me.rhin.openciv.ui.label.CustomLabel;
 import me.rhin.openciv.ui.window.type.CityInfoWindow;
 
 //FIXME: We should have a interface for these networking interface.
-public class City extends Actor implements SpecialistContainer, BuildingConstructedListener, CityStatUpdateListener,
+public class City extends Actor implements TileObserver, SpecialistContainer, BuildingConstructedListener, CityStatUpdateListener,
 		SetProductionItemListener, ApplyProductionToItemListener, FinishProductionItemListener,
 		SetCitizenTileWorkerListener, AddSpecialistToContainerListener, RemoveSpecialistFromContainerListener {
 
@@ -102,7 +103,7 @@ public class City extends Actor implements SpecialistContainer, BuildingConstruc
 	@Override
 	public void draw(Batch batch, float parentAlpha) {
 		if (!Civilization.getInstance().getWindowManager().isOpenWindow(CityInfoWindow.class)
-				&& originTile.getObservingUnits().size() > 1) {
+				&& originTile.getTileObservers().size() > 1) {
 			nameLabel.draw(batch, parentAlpha);
 			nameIcon.draw(batch);
 		}

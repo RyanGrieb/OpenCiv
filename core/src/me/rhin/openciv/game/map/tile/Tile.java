@@ -70,7 +70,7 @@ public class Tile extends Actor implements ShapeRenderListener {
 	private City territory;
 	private ArrayList<Unit> units;
 	private boolean discovered;
-	private ArrayList<Unit> observingUnits;
+	private ArrayList<TileObserver> tileObservers;
 
 	public Tile(GameMap map, TileType tileType, float x, float y) {
 		Civilization.getInstance().getEventManager().addListener(ShapeRenderListener.class, this);
@@ -101,7 +101,7 @@ public class Tile extends Actor implements ShapeRenderListener {
 		this.adjTiles = new Tile[6];
 		this.riverSides = new RiverPart[6];
 		this.units = new ArrayList<>();
-		this.observingUnits = new ArrayList<>();
+		this.tileObservers = new ArrayList<>();
 
 		this.posLabel = new CustomLabel(gridX + "," + gridY);
 		posLabel.setSize(width, 20);
@@ -110,7 +110,7 @@ public class Tile extends Actor implements ShapeRenderListener {
 
 	@Override
 	public void onShapeRender(ShapeRenderer shapeRenderer) {
-		if (observingUnits.size() < 1)
+		if (tileObservers.size() < 1)
 			return;
 
 		// Draw the hexagon outline
@@ -171,7 +171,7 @@ public class Tile extends Actor implements ShapeRenderListener {
 			fogSprite.draw(batch);
 		}
 
-		if (observingUnits.size() < 1) {
+		if (tileObservers.size() < 1) {
 			nonVisibleSprite.draw(batch);
 		}
 
@@ -179,7 +179,7 @@ public class Tile extends Actor implements ShapeRenderListener {
 			selectionSprite.draw(batch);
 		}
 
-		if (territory != null && observingUnits.size() > 1)
+		if (territory != null && tileObservers.size() > 1)
 			territorySprite.draw(batch);
 
 		// posLabel.draw(batch, 1);
@@ -258,36 +258,7 @@ public class Tile extends Actor implements ShapeRenderListener {
 		if (!unit.getPlayerOwner().equals(Civilization.getInstance().getGame().getPlayer()))
 			return;
 
-		// Is hill
-		boolean isHill = getBaseTileType() == TileType.GRASS_HILL || getBaseTileType() == TileType.DESERT_HILL
-				|| getBaseTileType() == TileType.PLAINS_HILL;
-		// Update visibility
-
-		ArrayList<Tile> adjTiles = new ArrayList<>();
-		adjTiles.add(this);
-		for (Tile tile : getAdjTiles())
-			adjTiles.add(tile);
-
-		for (Tile tile : adjTiles) {
-
-			boolean denyVisibility = false;
-			for (TileTypeWrapper wrapper : tile.getTileTypeWrappers())
-				if (wrapper.getTileType().getMovementCost() > 1 && !tile.equals(this)) {
-					denyVisibility = true;
-				}
-
-			tile.setDiscovered(true);
-			tile.getObservingUnits().add(unit);
-			if (denyVisibility && !isHill) {
-				continue;
-			}
-			for (Tile adjTile : tile.getAdjTiles()) {
-
-				adjTile.setDiscovered(true);
-				adjTile.getObservingUnits().add(unit);
-			}
-
-		}
+		addTileObserver(unit);
 	}
 
 	public void setEdge(int index, Tile tile) {
@@ -301,21 +272,7 @@ public class Tile extends Actor implements ShapeRenderListener {
 		if (!unit.getPlayerOwner().equals(Civilization.getInstance().getGame().getPlayer()))
 			return;
 
-		// Update visibility
-
-		ArrayList<Tile> adjTiles = new ArrayList<>();
-		adjTiles.add(this);
-		for (Tile tile : getAdjTiles())
-			adjTiles.add(tile);
-
-		for (Tile tile : adjTiles) {
-
-			tile.getObservingUnits().remove(unit);
-			for (Tile adjTile : tile.getAdjTiles()) {
-				adjTile.getObservingUnits().remove(unit);
-			}
-
-		}
+		removeTileObserver(unit);
 	}
 
 	public boolean hasUnitSelected() {
@@ -359,75 +316,15 @@ public class Tile extends Actor implements ShapeRenderListener {
 		return null;
 	}
 
-	public ArrayList<Unit> getObservingUnits() {
-		return observingUnits;
-	}
-
-	private void initializeVectors() {
-		this.vectors = new Vector2[6];
-
-		float xOrigin = 0;
-		float yOrigin = 0;
-
-		float vX0 = xOrigin + SIZE; // True starting point, at the bottom of the hex.
-
-		vectors[0] = new Vector2(vX0, yOrigin);
-
-		float vX1 = vX0 + (float) (Math.cos(Math.toRadians(30)) * SIZE);
-		float vY1 = yOrigin + (float) (Math.sin(Math.toRadians(30)) * SIZE);
-		vectors[1] = new Vector2(vX1, vY1);
-
-		vectors[2] = new Vector2(vX1, vY1 + SIZE);
-
-		float vX3 = vectors[2].x + (float) (Math.cos(Math.toRadians(150)) * SIZE);
-		float vY3 = vectors[2].y + (float) (Math.sin(Math.toRadians(150)) * SIZE);
-
-		vectors[3] = new Vector2(vX3, vY3);
-
-		float vX4 = vectors[3].x + (float) (Math.cos(Math.toRadians(210)) * SIZE);
-		float vY4 = vectors[3].y + (float) (Math.sin(Math.toRadians(210)) * SIZE);
-
-		vectors[4] = new Vector2(vX4, vY4);
-
-		vectors[5] = new Vector2(vX4, vY4 - SIZE);
-
-		this.width = vectors[1].x - vectors[5].x;
-		this.height = vectors[1].y + SIZE;
-
-		for (Vector2 vector : vectors) {
-			if (this.y % 2 == 0) {
-				vector.x += (this.x * width);
-				vector.y += (this.y * height); // wrong
-			} else {
-				vector.x += ((this.x + 0.5) * width);
-				vector.y += ((this.y) * height);
-			}
-		}
-
-		// Reset the y postion to the actual non-grid position.
-		this.x = vectors[0].x - width / 2;
-		this.y = vectors[0].y;
-
-		for (Sprite sprite : tileWrappers) {
-			sprite.setBounds(x, y, 28, 32);
-		}
-
-		selectionSprite.setSize(28, 32);
-		selectionSprite.setPosition(x, y);
-
-		territorySprite.setSize(28, 32);
-		territorySprite.setPosition(x, y);
-
-		fogSprite.setSize(28, 32);
-		fogSprite.setPosition(x, y);
-
-		nonVisibleSprite.setSize(28, 32);
-		nonVisibleSprite.setPosition(x, y);
+	public ArrayList<TileObserver> getTileObservers() {
+		return tileObservers;
 	}
 
 	public void setCity(City city) {
 		this.city = city;
 		setTileType(TileType.CITY);
+
+		addTileObserver(city);
 	}
 
 	public void setTerritory(City city) {
@@ -536,5 +433,118 @@ public class Tile extends Actor implements ShapeRenderListener {
 
 	public boolean isDiscovered() {
 		return discovered;
+	}
+
+	private void addTileObserver(TileObserver tileObserver) {
+		// Is hill
+		boolean isHill = getBaseTileType() == TileType.GRASS_HILL || getBaseTileType() == TileType.DESERT_HILL
+				|| getBaseTileType() == TileType.PLAINS_HILL;
+		// Update visibility
+
+		ArrayList<Tile> adjTiles = new ArrayList<>();
+		adjTiles.add(this);
+		for (Tile tile : getAdjTiles())
+			adjTiles.add(tile);
+
+		for (Tile tile : adjTiles) {
+
+			boolean denyVisibility = false;
+			for (TileTypeWrapper wrapper : tile.getTileTypeWrappers())
+				if (wrapper.getTileType().getMovementCost() > 1 && !tile.equals(this)) {
+					denyVisibility = true;
+				}
+
+			tile.setDiscovered(true);
+			tile.getTileObservers().add(tileObserver);
+			if (denyVisibility && !isHill) {
+				continue;
+			}
+			for (Tile adjTile : tile.getAdjTiles()) {
+
+				adjTile.setDiscovered(true);
+				adjTile.getTileObservers().add(tileObserver);
+			}
+
+		}
+	}
+
+	private void removeTileObserver(TileObserver tileObserver) {
+		// Update visibility
+
+		ArrayList<Tile> adjTiles = new ArrayList<>();
+		adjTiles.add(this);
+		for (Tile tile : getAdjTiles())
+			adjTiles.add(tile);
+
+		for (Tile tile : adjTiles) {
+
+			tile.getTileObservers().remove(tileObserver);
+			for (Tile adjTile : tile.getAdjTiles()) {
+				adjTile.getTileObservers().remove(tileObserver);
+			}
+
+		}
+	}
+
+	private void initializeVectors() {
+		this.vectors = new Vector2[6];
+
+		float xOrigin = 0;
+		float yOrigin = 0;
+
+		float vX0 = xOrigin + SIZE; // True starting point, at the bottom of the hex.
+
+		vectors[0] = new Vector2(vX0, yOrigin);
+
+		float vX1 = vX0 + (float) (Math.cos(Math.toRadians(30)) * SIZE);
+		float vY1 = yOrigin + (float) (Math.sin(Math.toRadians(30)) * SIZE);
+		vectors[1] = new Vector2(vX1, vY1);
+
+		vectors[2] = new Vector2(vX1, vY1 + SIZE);
+
+		float vX3 = vectors[2].x + (float) (Math.cos(Math.toRadians(150)) * SIZE);
+		float vY3 = vectors[2].y + (float) (Math.sin(Math.toRadians(150)) * SIZE);
+
+		vectors[3] = new Vector2(vX3, vY3);
+
+		float vX4 = vectors[3].x + (float) (Math.cos(Math.toRadians(210)) * SIZE);
+		float vY4 = vectors[3].y + (float) (Math.sin(Math.toRadians(210)) * SIZE);
+
+		vectors[4] = new Vector2(vX4, vY4);
+
+		vectors[5] = new Vector2(vX4, vY4 - SIZE);
+
+		this.width = vectors[1].x - vectors[5].x;
+		this.height = vectors[1].y + SIZE;
+
+		for (Vector2 vector : vectors) {
+			if (this.y % 2 == 0) {
+				vector.x += (this.x * width);
+				vector.y += (this.y * height); // wrong
+			} else {
+				vector.x += ((this.x + 0.5) * width);
+				vector.y += ((this.y) * height);
+			}
+		}
+
+		// Reset the y postion to the actual non-grid position.
+		this.x = vectors[0].x - width / 2;
+		this.y = vectors[0].y;
+
+		for (Sprite sprite : tileWrappers) {
+			sprite.setBounds(x, y, 28, 32);
+		}
+
+		selectionSprite.setSize(28, 32);
+		selectionSprite.setPosition(x, y);
+
+		territorySprite.setSize(28, 32);
+		territorySprite.setPosition(x, y);
+
+		fogSprite.setSize(28, 32);
+		fogSprite.setPosition(x, y);
+
+		nonVisibleSprite.setSize(28, 32);
+		nonVisibleSprite.setPosition(x, y);
 	}
 }

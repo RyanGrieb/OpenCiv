@@ -16,6 +16,7 @@ import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.AbstractAction;
 import me.rhin.openciv.game.map.GameMap;
 import me.rhin.openciv.game.map.tile.Tile;
+import me.rhin.openciv.game.map.tile.TileObserver;
 import me.rhin.openciv.game.player.Player;
 import me.rhin.openciv.listener.NextTurnListener;
 import me.rhin.openciv.listener.ShapeRenderListener;
@@ -23,7 +24,7 @@ import me.rhin.openciv.shared.packet.type.MoveUnitPacket;
 import me.rhin.openciv.shared.packet.type.NextTurnPacket;
 import me.rhin.openciv.ui.window.type.UnitWindow;
 
-public abstract class Unit extends Actor implements ShapeRenderListener, NextTurnListener {
+public abstract class Unit extends Actor implements TileObserver, ShapeRenderListener, NextTurnListener {
 
 	protected boolean canAttack;
 	protected ArrayList<AbstractAction> customActions;
@@ -81,7 +82,7 @@ public abstract class Unit extends Actor implements ShapeRenderListener, NextTur
 			targetSelectionSprite.draw(batch);
 		}
 
-		if (standingTile.getObservingUnits().size() > 0)
+		if (standingTile.getTileObservers().size() > 0)
 			sprite.draw(batch);
 	}
 
