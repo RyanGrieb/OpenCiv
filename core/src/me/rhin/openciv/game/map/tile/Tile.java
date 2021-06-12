@@ -21,6 +21,7 @@ import me.rhin.openciv.game.map.tile.TileType.TileProperty;
 import me.rhin.openciv.game.unit.Unit;
 import me.rhin.openciv.listener.ShapeRenderListener;
 import me.rhin.openciv.ui.label.CustomLabel;
+import me.rhin.openciv.ui.screen.type.InGameScreen;
 
 public class Tile extends Actor implements ShapeRenderListener, TileObserver {
 
@@ -226,6 +227,8 @@ public class Tile extends Actor implements ShapeRenderListener, TileObserver {
 
 	public void onMouseHover() {
 		drawSelection = true;
+
+		((InGameScreen) Civilization.getInstance().getCurrentScreen()).getGameOverlay().setHoveredTile(this);
 	}
 
 	public void onMouseUnhover() {
@@ -331,7 +334,7 @@ public class Tile extends Actor implements ShapeRenderListener, TileObserver {
 		this.territory = city;
 		Color color = city.getPlayerOwner().getCivType().getColor();
 		territorySprite.setColor(color.r, color.g, color.b, 0.25f);
-		
+
 		addTileObserver(this);
 	}
 

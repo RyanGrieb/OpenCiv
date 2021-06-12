@@ -1,6 +1,8 @@
 package me.rhin.openciv.ui.window.type;
 
 import me.rhin.openciv.Civilization;
+import me.rhin.openciv.game.map.tile.Tile;
+import me.rhin.openciv.game.map.tile.Tile.TileTypeWrapper;
 import me.rhin.openciv.listener.ResizeListener;
 import me.rhin.openciv.ui.game.StatusBar;
 import me.rhin.openciv.ui.label.CustomLabel;
@@ -11,6 +13,7 @@ public class GameOverlay extends AbstractWindow implements ResizeListener {
 	public static final int HEIGHT = 20;
 
 	private CustomLabel fpsLabel;
+	private CustomLabel tileNameLabel;
 	private StatusBar statusBar;
 
 	public GameOverlay() {
@@ -21,6 +24,10 @@ public class GameOverlay extends AbstractWindow implements ResizeListener {
 		fpsLabel.setPosition(viewport.getWorldWidth() - fpsLabel.getWidth() - 4,
 				viewport.getWorldHeight() - fpsLabel.getHeight() - statusBar.getHeight() - 5);
 		this.addActor(fpsLabel);
+
+		this.tileNameLabel = new CustomLabel("Grass");
+		tileNameLabel.setPosition(2, 2);
+		this.addActor(tileNameLabel);
 
 		Civilization.getInstance().getEventManager().addListener(ResizeListener.class, this);
 	}
@@ -65,5 +72,27 @@ public class GameOverlay extends AbstractWindow implements ResizeListener {
 
 	public float getTopbarHeight() {
 		return statusBar.getHeight();
+	}
+
+	public void setHoveredTile(Tile tile) {
+		if (!tile.isDiscovered()) {
+			tileNameLabel.setText("Undiscovered");
+			return;
+		}
+		
+		// [grass,copper]
+		String tileName = "";
+		int index = 0;
+		for (TileTypeWrapper typeWrapper : tile.getTileTypeWrappers()) {
+
+			tileName += typeWrapper.getTileType().getName();
+
+			if (index < tile.getTileTypeWrappers().size() - 1) {
+				tileName += ", ";
+			}
+			index++;
+		}
+
+		tileNameLabel.setText(tileName);
 	}
 }

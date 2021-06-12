@@ -100,4 +100,20 @@ public enum TileType {
 	public TileLayer getTileLayer() {
 		return tileLayer;
 	}
+
+	public String getName() {
+		String name = name().toLowerCase();
+		name = name.replaceAll("_", " ");
+		char[] chars = name.toCharArray();
+		for (int i = 0; i < chars.length; i++) {
+			if (i == 0) {
+				chars[i] = Character.toUpperCase(chars[i]);
+			}
+
+			if (chars[i] == ' ' && i + 1 < chars.length)
+				chars[i + 1] = Character.toUpperCase(chars[i + 1]);
+		}
+
+		return String.valueOf(chars);
+	}
 }
