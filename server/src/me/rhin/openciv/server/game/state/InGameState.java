@@ -422,48 +422,80 @@ public class InGameState extends GameState
 
 		Random rnd = new Random();
 
-		int iterations = 0;
 		for (int i = 0; i < players.size(); i++) {
 			Player player = players.get(i);
 			Rectangle rect = map.getMapPartition().get(i);
 
-			int rndX = -1;
-			int rndY = -1;
+			// TODO: Be able to get river tiles AND tiles of a specific type
+			ArrayList<Tile> riverTiles = new ArrayList<>(map.getTileIndexer().getAdjacentRiverTiles());
 
-			// FIXME: Use the tile indexer to locate habitable tiles
+			// Check if the tile is within our bounds.
+			float padding = 0.25F;
+			int minX = (int) (rect.getX() + (rect.getWidth() * padding));
+			int minY = (int) (rect.getY() + (rect.getHeight() * padding));
+			int maxX = (int) (rect.getX() + rect.getWidth() - (rect.getWidth() * padding));
+			int maxY = (int) (rect.getY() + rect.getHeight() - (rect.getWidth() * padding));
+
+			int iterations = 0;
 			while (true) {
-				iterations++;
+				for (Tile tile : riverTiles) {
 
-				float padding = 0.25F;
-				int minX = (int) (rect.getX() + (rect.getWidth() * padding));
-				int minY = (int) (rect.getY() + (rect.getHeight() * padding));
-				int maxX = (int) (rect.getX() + rect.getWidth() - (rect.getWidth() * padding));
-				int maxY = (int) (rect.getY() + rect.getHeight() - (rect.getWidth() * padding));
-				rndX = rnd.nextInt(maxX - minX + 1) + minX;
-				rndY = rnd.nextInt(maxY - minY + 1) + minY;
-				Tile tile = map.getTiles()[rndX][rndY];
+					System.out.println(tile.getGridX() + "," + minX);
+					if (tile.getGridX() > minX && tile.getGridX() < maxX && tile.getGridY() > minY
+							&& tile.getGridY() < maxY) {
 
-				if (tile.containsTileProperty(TileProperty.WATER) || tile.containsTileType(TileType.MOUNTAIN)
-						|| tile.containsTileType(TileType.TUNDRA) || tile.containsTileType(TileType.DESERT_HILL)
-						|| tile.containsTileType(TileType.DESERT))
-					continue;
+						boolean adjToBias = false;
 
-				// Check if there is room for 2 units.
-				boolean hasSafeTile = false;
-				for (Tile adjTile : tile.getAdjTiles())
-					if (!adjTile.containsTileProperty(TileProperty.WATER)
-							&& !adjTile.containsTileType(TileType.MOUNTAIN))
-						hasSafeTile = true;
+						if (player.getCivType().getBiasTileType() != null) {
+							for (Tile adjTile : tile.getAdjTiles())
+								if (adjTile.getBaseTileType() == player.getCivType().getBiasTileType())
+									adjToBias = true;
+						} else
+							adjToBias = true; // If we don't have a bias, just set we are adj no matter what.
 
-				if (hasSafeTile) {
-					player.setSpawnPos(rndX, rndY);
-					break;
+						boolean adjToTundra = tile.getBaseTileType() == TileType.TUNDRA
+								|| tile.getBaseTileType() == TileType.TUNDRA_HILL; // Can still be false.
+						for (Tile adjTile : tile.getAdjTiles()) {
+							if (adjTile.getBaseTileType() == TileType.TUNDRA
+									|| adjTile.getBaseTileType() == TileType.TUNDRA_HILL)
+								adjToTundra = true;
+						}
+						// Problem, how do we favor adjToBais over not adj to tundra.
+						// adjToBais ignore if iterations > 0
+						// adjToTundra ignore if iterations > 0
+						// iterations
+
+						if ((adjToBias && !adjToTundra) || iterations > 0) {
+
+							if (hasSafeTile(tile)) {
+								player.setSpawnPos(tile.getGridX(), tile.getGridY());
+								break;
+							}
+
+						}
+					}
 				}
 
+				if (player.hasSpawnPos())
+					break;
+
+				iterations++;
+			}
+
+			if (!player.hasSpawnPos()) {
+				while (true) {
+					// Just pick a random tile on the map
+
+					int rndX = rnd.nextInt(maxX - minX + 1) + minX;
+					int rndY = rnd.nextInt(maxY - minY + 1) + minY;
+					Tile tile = map.getTiles()[rndX][rndY];
+					if (hasSafeTile(tile)) {
+						player.setSpawnPos(tile.getGridX(), tile.getGridY());
+						break;
+					}
+				}
 			}
 		}
-
-		// Spawn in the players at fair locations
 
 		for (Player player : players) {
 			Tile tile = map.getTiles()[player.getSpawnX()][player.getSpawnY()];
@@ -478,8 +510,8 @@ public class InGameState extends GameState
 			}
 		}
 
-		// Add two luxuries around the player
 		for (Player player : players) {
+			// Add two luxuries around the player
 			int assignedLuxTiles = 0;
 			int assignedResourceTiles = 0;
 			int loopLimit = 500;
@@ -489,6 +521,7 @@ public class InGameState extends GameState
 				int randY = rnd.nextInt(7) - 3;
 				Tile tile = map.getTiles()[player.getSpawnX() + randX][player.getSpawnY() + randY];
 
+				// FIXME: Some special resources can be on desert & desert hills.
 				if (tile.getBaseTileType().hasProperty(TileProperty.WATER) || tile.getBaseTileType() == TileType.DESERT
 						|| tile.getBaseTileType() == TileType.DESERT_HILL
 						|| tile.getBaseTileType() == TileType.MOUNTAIN) {
@@ -511,5 +544,18 @@ public class InGameState extends GameState
 				loopLimit--;
 			}
 		}
+	}
+
+	private boolean hasSafeTile(Tile tile) {
+		// If the tile itself isn't safe, return false.
+		if (tile.containsTileProperty(TileProperty.WATER) || tile.containsTileType(TileType.MOUNTAIN))
+			return false;
+
+		boolean hasSafeTile = false;
+		for (Tile adjTile : tile.getAdjTiles())
+			if (!adjTile.containsTileProperty(TileProperty.WATER) && !adjTile.containsTileType(TileType.MOUNTAIN))
+				hasSafeTile = true;
+
+		return hasSafeTile;
 	}
 }

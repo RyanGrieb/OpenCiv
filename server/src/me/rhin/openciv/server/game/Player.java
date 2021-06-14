@@ -88,6 +88,10 @@ public class Player implements NextTurnListener {
 		this.spawnY = spawnY;
 	}
 
+	public boolean hasSpawnPos() {
+		return spawnX != -1 && spawnY != -1;
+	}
+
 	public void setSelectedUnit(Unit selectedUnit) {
 		if (this.selectedUnit != null)
 			this.selectedUnit.setSelected(false);
