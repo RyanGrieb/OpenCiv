@@ -455,7 +455,6 @@ public class City implements SpecialistContainer, NextTurnListener {
 
 			Tile tile = topTiles.get(i);
 
-			System.out.println(tile.getDistanceFrom(originTile));
 			// TODO: Include the distance from the city center towards the value.
 			float value = (getTileStatLine(tile).getStatValue(Stat.FOOD_GAIN) * 4
 					+ getTileStatLine(tile).getStatValue(Stat.GOLD_GAIN) * 1

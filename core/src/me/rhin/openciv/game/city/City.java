@@ -103,7 +103,7 @@ public class City extends Actor implements TileObserver, SpecialistContainer, Bu
 	@Override
 	public void draw(Batch batch, float parentAlpha) {
 		if (!Civilization.getInstance().getWindowManager().isOpenWindow(CityInfoWindow.class)
-				&& originTile.getTileObservers().size() > 1) {
+				&& originTile.getTileObservers().size() > 0) {
 			nameLabel.draw(batch, parentAlpha);
 			nameIcon.draw(batch);
 		}

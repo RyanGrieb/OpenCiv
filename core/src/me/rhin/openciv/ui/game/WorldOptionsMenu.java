@@ -62,7 +62,13 @@ public class WorldOptionsMenu extends Group implements SetWorldSizeListener {
 
 	@Override
 	public void setPosition(float x, float y) {
-
+		super.setPosition(x, y);
+		blankBackground.setPosition(0, 0);
+		worldOptionsLabel.setPosition(0, getHeight() - 17);
+		worldSizeDescLabel.setPosition(0, getHeight() - 40);
+		worldSizeLabel.setPosition(0, getHeight() - 55);
+		increaseWorldSizeButton.setPosition(getWidth() - 52, getHeight() - 72);
+		reduceWorldSizeButton.setPosition(20, getHeight() - 72);
 	}
 
 	@Override

@@ -90,6 +90,7 @@ public class ServerLobbyScreen extends AbstractScreen implements ResizeListener,
 		multiplayerStartButton.setPosition(width / 2 - 150 / 2, 60);
 		worldOptionsMenu.setPosition(width / 2 + 120, height - 360);
 		backButton.setPosition(width / 2 - 150 / 2, 20);
+		worldOptionsMenu.setPosition(width / 2 + 120, height - 360);
 	}
 
 	@Override

@@ -22,7 +22,7 @@ public class OpenResearchButton extends Button {
 
 	@Override
 	public void onClick() {
-
+		
 	}
 
 	@Override

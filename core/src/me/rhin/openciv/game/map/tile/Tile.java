@@ -328,7 +328,8 @@ public class Tile extends Actor implements ShapeRenderListener, TileObserver {
 		this.city = city;
 		setTileType(TileType.CITY);
 
-		addTileObserver(city);
+		if (city.getPlayerOwner().equals(Civilization.getInstance().getGame().getPlayer()))
+			addTileObserver(city);
 	}
 
 	public void setTerritory(City city) {
@@ -336,7 +337,8 @@ public class Tile extends Actor implements ShapeRenderListener, TileObserver {
 		Color color = city.getPlayerOwner().getCivType().getColor();
 		territorySprite.setColor(color.r, color.g, color.b, 0.25f);
 
-		addTileObserver(this);
+		if (city.getPlayerOwner().equals(Civilization.getInstance().getGame().getPlayer()))
+			addTileObserver(this);
 	}
 
 	public void defineBorders() {
@@ -468,14 +470,16 @@ public class Tile extends Actor implements ShapeRenderListener, TileObserver {
 				}
 
 			tile.setDiscovered(true);
-			tile.getTileObservers().add(tileObserver);
+			if (!tile.getTileObservers().contains(tileObserver))
+				tile.getTileObservers().add(tileObserver);
 			if (denyVisibility && !isHill) {
 				continue;
 			}
 			for (Tile adjTile : tile.getAdjTiles()) {
 
 				adjTile.setDiscovered(true);
-				adjTile.getTileObservers().add(tileObserver);
+				if (!adjTile.getTileObservers().contains(tileObserver))
+					adjTile.getTileObservers().add(tileObserver);
 			}
 
 		}
