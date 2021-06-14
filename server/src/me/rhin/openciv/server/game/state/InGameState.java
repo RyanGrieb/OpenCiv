@@ -430,17 +430,14 @@ public class InGameState extends GameState
 			ArrayList<Tile> riverTiles = new ArrayList<>(map.getTileIndexer().getAdjacentRiverTiles());
 
 			// Check if the tile is within our bounds.
-			float padding = 0.25F;
-			int minX = (int) (rect.getX() + (rect.getWidth() * padding));
-			int minY = (int) (rect.getY() + (rect.getHeight() * padding));
-			int maxX = (int) (rect.getX() + rect.getWidth() - (rect.getWidth() * padding));
-			int maxY = (int) (rect.getY() + rect.getHeight() - (rect.getWidth() * padding));
+			int minX = (int) (rect.getX());
+			int minY = (int) (rect.getY());
+			int maxX = (int) (rect.getX() + rect.getWidth());
+			int maxY = (int) (rect.getY() + rect.getHeight());
 
 			int iterations = 0;
 			while (true) {
 				for (Tile tile : riverTiles) {
-
-					System.out.println(tile.getGridX() + "," + minX);
 					if (tile.getGridX() > minX && tile.getGridX() < maxX && tile.getGridY() > minY
 							&& tile.getGridY() < maxY) {
 
@@ -448,7 +445,7 @@ public class InGameState extends GameState
 
 						if (player.getCivType().getBiasTileType() != null) {
 							for (Tile adjTile : tile.getAdjTiles())
-								if (adjTile.getBaseTileType() == player.getCivType().getBiasTileType())
+								if (adjTile.containsTileType(player.getCivType().getBiasTileType()))
 									adjToBias = true;
 						} else
 							adjToBias = true; // If we don't have a bias, just set we are adj no matter what.
@@ -465,24 +462,27 @@ public class InGameState extends GameState
 						// adjToTundra ignore if iterations > 0
 						// iterations
 
-						if ((adjToBias && !adjToTundra) || iterations > 0) {
-
-							if (hasSafeTile(tile)) {
+						System.out.println(adjToBias + "," + adjToTundra);
+						if (adjToBias && !adjToTundra) {
+							System.out.println(iterations);
+							if (!tile.containsTileProperty(TileProperty.WATER)
+									&& !tile.containsTileType(TileType.MOUNTAIN))
 								player.setSpawnPos(tile.getGridX(), tile.getGridY());
-								break;
-							}
+							break;
 
 						}
 					}
 				}
 
-				if (player.hasSpawnPos())
+				if (player.hasSpawnPos() || iterations == 0)
 					break;
 
 				iterations++;
 			}
 
+			//FIXME: We might not be able to spawn the player within the bounds.
 			if (!player.hasSpawnPos()) {
+				System.out.println("No suitable spawn pos for: " + player.getName());
 				while (true) {
 					// Just pick a random tile on the map
 
