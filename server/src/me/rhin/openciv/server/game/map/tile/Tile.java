@@ -369,4 +369,15 @@ public class Tile {
 
 		return false;
 	}
+
+	public float getDistanceFrom(Tile originTile) {
+
+		float x1 = getX() + (getWidth() / 2);
+		float x2 = originTile.getX() + (originTile.getWidth() / 2);
+		float y1 = getY() + (getHeight() / 2);
+		float y2 = originTile.getY() + (originTile.getHeight() / 2);
+
+		return (float) Math.sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
+
+	}
 }
