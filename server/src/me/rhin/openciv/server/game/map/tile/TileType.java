@@ -21,7 +21,7 @@ public enum TileType implements Comparable<TileType> {
 			return statLine;
 		}
 	},
-	GRASS_HILL(TileLayer.BASE) {
+	GRASS_HILL(TileLayer.BASE, TileProperty.HILL) {
 		@Override
 		public StatLine getStatLine() {
 			StatLine statLine = new StatLine();
@@ -43,7 +43,7 @@ public enum TileType implements Comparable<TileType> {
 			return statLine;
 		}
 	},
-	PLAINS_HILL(TileLayer.BASE) {
+	PLAINS_HILL(TileLayer.BASE, TileProperty.HILL) {
 		@Override
 		public StatLine getStatLine() {
 			StatLine statLine = new StatLine();
@@ -71,7 +71,7 @@ public enum TileType implements Comparable<TileType> {
 			return statLine;
 		}
 	},
-	DESERT_HILL(TileLayer.BASE) {
+	DESERT_HILL(TileLayer.BASE, TileProperty.HILL) {
 		@Override
 		public StatLine getStatLine() {
 			StatLine statLine = new StatLine();
@@ -91,7 +91,7 @@ public enum TileType implements Comparable<TileType> {
 			return statLine;
 		}
 	},
-	TUNDRA_HILL(TileLayer.BASE) {
+	TUNDRA_HILL(TileLayer.BASE, TileProperty.HILL) {
 		@Override
 		public StatLine getStatLine() {
 			StatLine statLine = new StatLine();
@@ -205,7 +205,7 @@ public enum TileType implements Comparable<TileType> {
 	}
 
 	public enum TileProperty {
-		WATER, LUXURY, RESOURCE;
+		WATER, LUXURY, RESOURCE, HILL;
 	}
 
 	private TileLayer tileLayer;

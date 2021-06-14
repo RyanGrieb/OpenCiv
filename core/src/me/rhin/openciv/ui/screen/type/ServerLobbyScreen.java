@@ -25,6 +25,7 @@ import me.rhin.openciv.shared.packet.type.PlayerDisconnectPacket;
 import me.rhin.openciv.shared.packet.type.PlayerListRequestPacket;
 import me.rhin.openciv.ui.button.type.MPStartButton;
 import me.rhin.openciv.ui.button.type.ServerLobbyBackButton;
+import me.rhin.openciv.ui.game.WorldOptionsMenu;
 import me.rhin.openciv.ui.list.ContainerList;
 import me.rhin.openciv.ui.list.ListContainer.ListContainerType;
 import me.rhin.openciv.ui.list.ListObject;
@@ -42,6 +43,7 @@ public class ServerLobbyScreen extends AbstractScreen implements ResizeListener,
 	private String playerName;
 	private String hostPlayerName;
 	private ContainerList playerContainerList;
+	private WorldOptionsMenu worldOptionsMenu;
 	private MPStartButton multiplayerStartButton;
 	private ServerLobbyBackButton backButton;
 
@@ -67,6 +69,10 @@ public class ServerLobbyScreen extends AbstractScreen implements ResizeListener,
 
 		multiplayerStartButton = new MPStartButton(viewport.getWorldWidth() / 2 - 150 / 2, 60, 150, 45);
 
+		worldOptionsMenu = new WorldOptionsMenu(viewport.getWorldWidth() / 2 + 120, viewport.getWorldHeight() - 360,
+				200, 300);
+		stage.addActor(worldOptionsMenu);
+
 		backButton = new ServerLobbyBackButton(viewport.getWorldWidth() / 2 - 150 / 2, 20, 150, 45);
 		stage.addActor(backButton);
 
@@ -83,6 +89,7 @@ public class ServerLobbyScreen extends AbstractScreen implements ResizeListener,
 		titleOverlay.setSize(width, height);
 		playerContainerList.setPosition(width / 2 - 220 / 2, height - 360);
 		multiplayerStartButton.setPosition(width / 2 - 150 / 2, 60);
+		worldOptionsMenu.setPosition(width / 2 + 120, height - 360);
 		backButton.setPosition(width / 2 - 150 / 2, 20);
 	}
 
@@ -187,5 +194,6 @@ public class ServerLobbyScreen extends AbstractScreen implements ResizeListener,
 
 	private void assignToLobbyLeader() {
 		stage.addActor(multiplayerStartButton);
+		stage.addActor(worldOptionsMenu);
 	}
 }

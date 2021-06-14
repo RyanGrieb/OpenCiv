@@ -444,14 +444,15 @@ public class InGameState extends GameState
 				Tile tile = map.getTiles()[rndX][rndY];
 
 				if (tile.containsTileType(TileType.OCEAN) || tile.containsTileType(TileType.MOUNTAIN)
-						|| tile.containsTileType(TileType.TUNDRA) || !tile.hasRivers()
-						|| tile.containsTileType(TileType.DESERT_HILL) || tile.containsTileType(TileType.DESERT))
+						|| tile.containsTileType(TileType.TUNDRA) || tile.containsTileType(TileType.DESERT_HILL)
+						|| tile.containsTileType(TileType.DESERT))
 					continue;
 
 				// Check if there is room for 2 units.
 				boolean hasSafeTile = false;
 				for (Tile adjTile : tile.getAdjTiles())
-					if (!adjTile.containsTileType(TileType.OCEAN) && !adjTile.containsTileType(TileType.MOUNTAIN))
+					if (!adjTile.containsTileProperty(TileProperty.WATER)
+							&& !adjTile.containsTileType(TileType.MOUNTAIN))
 						hasSafeTile = true;
 
 				if (hasSafeTile) {

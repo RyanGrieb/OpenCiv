@@ -163,21 +163,21 @@ public class Tile extends Actor implements ShapeRenderListener, TileObserver {
 	@Override
 	public void draw(Batch batch, float parentAlpha) {
 
-		if (discovered)
-			for (TileTypeWrapper sprite : tileWrappers) {
-				sprite.draw(batch);
-			}
-
-		if (!discovered) {
-			fogSprite.draw(batch);
+		 if (discovered)
+		for (TileTypeWrapper sprite : tileWrappers) {
+			sprite.draw(batch);
 		}
 
-		if (tileObservers.size() < 1) {
-			nonVisibleSprite.draw(batch);
-		}
+		 if (!discovered) {
+		 fogSprite.draw(batch);
+		 }
 
-		if (drawSelection) {
-			selectionSprite.draw(batch);
+		 if (tileObservers.size() < 1) {
+		 nonVisibleSprite.draw(batch);
+		 }
+
+			if (drawSelection) {
+				selectionSprite.draw(batch);
 		}
 
 		if (territory != null && tileObservers.size() > 1)

@@ -139,6 +139,8 @@ public class Tile {
 				continue;
 			Server.getInstance().getMap().getTileIndexer().setAdjacentTileType(adjTile, tileType);
 		}
+		
+		Server.getInstance().getMap().getTileIndexer().setTilePropertfyOf(this, tileType.getProperties());
 
 		tileWrappers.add(new TileTypeWrapper(tileType));
 	}

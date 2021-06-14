@@ -1,45 +1,69 @@
 package me.rhin.openciv.server.game.map.tile;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import me.rhin.openciv.server.Server;
 import me.rhin.openciv.server.game.map.GameMap;
+import me.rhin.openciv.server.game.map.tile.TileType.TileProperty;
 
 public class TileIndexer {
 
 	// All tiles adjacent to ocean
 
-	private HashMap<TileType, ConcurrentLinkedQueue<Tile>> tileTypeList;
+	private HashMap<TileType, ConcurrentLinkedQueue<Tile>> adjTileTypeList;
 	private ConcurrentLinkedQueue<Tile> adjRiverTiles;
+	private HashMap<TileType, Tile> tileTypeOf;
+	private HashMap<TileProperty, ArrayList<Tile>> tilePropertyOf;
 
 	public TileIndexer(GameMap gameMap) {
-		this.tileTypeList = new HashMap<>();
+		this.adjTileTypeList = new HashMap<>();
 		this.adjRiverTiles = new ConcurrentLinkedQueue<>();
+		this.tilePropertyOf = new HashMap<>();
 
-		tileTypeList.put(TileType.OCEAN, new ConcurrentLinkedQueue<Tile>());
-		for (int x = 0; x < GameMap.WIDTH; x++) {
-			for (int y = 0; y < GameMap.HEIGHT; y++) {
-				tileTypeList.get(TileType.OCEAN).add(gameMap.getTiles()[x][y]);
+		adjTileTypeList.put(TileType.OCEAN, new ConcurrentLinkedQueue<Tile>());
+
+		int width = Server.getInstance().getMap().getWidth();
+		int height = Server.getInstance().getMap().getHeight();
+
+		for (int x = 0; x < width; x++) {
+			for (int y = 0; y < height; y++) {
+				adjTileTypeList.get(TileType.OCEAN).add(gameMap.getTiles()[x][y]);
 			}
 		}
 	}
 
 	public ConcurrentLinkedQueue<Tile> getAdjacentTilesTo(TileType tileType) {
-		return tileTypeList.get(tileType);
+		return adjTileTypeList.get(tileType);
 	}
 
 	public void setAdjacentTileType(Tile adjTile, TileType tileType) {
 		// The tileType is from the original tile, and the adjTile is the adjacent tile.
-		if (tileTypeList.get(tileType) == null)
-			tileTypeList.put(tileType, new ConcurrentLinkedQueue<Tile>());
-		tileTypeList.get(tileType).add(adjTile);
+		if (adjTileTypeList.get(tileType) == null)
+			adjTileTypeList.put(tileType, new ConcurrentLinkedQueue<Tile>());
+		adjTileTypeList.get(tileType).add(adjTile);
 	}
 
 	public void removeAdjacentTileType(Tile adjTile, TileType tileType) {
-		if (tileTypeList.get(tileType) == null)
+		if (adjTileTypeList.get(tileType) == null)
 			return;
 
-		tileTypeList.get(tileType).remove(adjTile);
+		adjTileTypeList.get(tileType).remove(adjTile);
+	}
+
+	public void setTilePropertfyOf(Tile tile, TileProperty[] tileProperties) {
+		for (TileProperty tileProperty : tileProperties) {
+
+			if (tilePropertyOf.get(tileProperty) == null)
+				tilePropertyOf.put(tileProperty, new ArrayList<Tile>());
+
+			tilePropertyOf.get(tileProperty).add(tile);
+		}
+	}
+
+	public void removeTilePropertyOf(Tile tile, TileProperty[] tileProperties) {
+
 	}
 
 	public ConcurrentLinkedQueue<Tile> getAdjacentRiverTiles() {
@@ -48,5 +72,9 @@ public class TileIndexer {
 
 	public void setAdjacentRiverTile(Tile tile) {
 		adjRiverTiles.add(tile);
+	}
+
+	public ArrayList<Tile> getTilesOf(TileProperty tileProperty) {
+		return tilePropertyOf.get(tileProperty);
 	}
 }

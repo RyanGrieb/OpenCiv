@@ -33,6 +33,7 @@ import me.rhin.openciv.server.listener.PlayerFinishLoadingListener.PlayerFinishL
 import me.rhin.openciv.server.listener.PlayerListRequestListener.PlayerListRequestEvent;
 import me.rhin.openciv.server.listener.SelectUnitListener.SelectUnitEvent;
 import me.rhin.openciv.server.listener.SetProductionItemListener.SetProductionItemEvent;
+import me.rhin.openciv.server.listener.SetWorldSizeListener.SetWorldSizeEvent;
 import me.rhin.openciv.server.listener.SettleCityListener.SettleCityEvent;
 import me.rhin.openciv.server.listener.StartGameRequestListener.StartGameRequestEvent;
 import me.rhin.openciv.server.listener.UnitMoveListener.UnitMoveEvent;
@@ -52,6 +53,7 @@ import me.rhin.openciv.shared.packet.type.MoveUnitPacket;
 import me.rhin.openciv.shared.packet.type.PlayerListRequestPacket;
 import me.rhin.openciv.shared.packet.type.SelectUnitPacket;
 import me.rhin.openciv.shared.packet.type.SetProductionItemPacket;
+import me.rhin.openciv.shared.packet.type.SetWorldSizePacket;
 import me.rhin.openciv.shared.packet.type.SettleCityPacket;
 import me.rhin.openciv.shared.packet.type.StartGameRequestPacket;
 import me.rhin.openciv.shared.util.ColorHelper;
@@ -118,6 +120,7 @@ public class Server extends WebSocketServer {
 		networkEvents.put(EndTurnPacket.class, EndTurnEvent.class);
 		networkEvents.put(GetHostPacket.class, GetHostEvent.class);
 		networkEvents.put(ChooseCivPacket.class, ChooseCivEvent.class);
+		networkEvents.put(SetWorldSizePacket.class, SetWorldSizeEvent.class);
 
 		this.playerIndex = 0;
 		this.commandProcessor = new CmdProcessor();

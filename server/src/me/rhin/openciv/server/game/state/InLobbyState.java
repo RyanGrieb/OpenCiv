@@ -15,16 +15,19 @@ import me.rhin.openciv.server.listener.FetchPlayerListener;
 import me.rhin.openciv.server.listener.GetHostListener;
 import me.rhin.openciv.server.listener.NextTurnListener;
 import me.rhin.openciv.server.listener.PlayerListRequestListener;
+import me.rhin.openciv.server.listener.SetWorldSizeListener;
 import me.rhin.openciv.server.listener.StartGameRequestListener;
+import me.rhin.openciv.shared.map.MapSize;
 import me.rhin.openciv.shared.packet.type.ChooseCivPacket;
 import me.rhin.openciv.shared.packet.type.FetchPlayerPacket;
 import me.rhin.openciv.shared.packet.type.GetHostPacket;
 import me.rhin.openciv.shared.packet.type.PlayerConnectPacket;
 import me.rhin.openciv.shared.packet.type.PlayerDisconnectPacket;
 import me.rhin.openciv.shared.packet.type.PlayerListRequestPacket;
+import me.rhin.openciv.shared.packet.type.SetWorldSizePacket;
 
 public class InLobbyState extends GameState implements StartGameRequestListener, ConnectionListener, DisconnectListener,
-		PlayerListRequestListener, FetchPlayerListener, GetHostListener, ChooseCivListener {
+		PlayerListRequestListener, FetchPlayerListener, GetHostListener, ChooseCivListener, SetWorldSizeListener {
 
 	public InLobbyState() {
 		Server.getInstance().getEventManager().addListener(StartGameRequestListener.class, this);
@@ -34,6 +37,7 @@ public class InLobbyState extends GameState implements StartGameRequestListener,
 		Server.getInstance().getEventManager().addListener(FetchPlayerListener.class, this);
 		Server.getInstance().getEventManager().addListener(GetHostListener.class, this);
 		Server.getInstance().getEventManager().addListener(ChooseCivListener.class, this);
+		Server.getInstance().getEventManager().addListener(SetWorldSizeListener.class, this);
 	}
 
 	@Override
@@ -169,6 +173,23 @@ public class InLobbyState extends GameState implements StartGameRequestListener,
 		for (Player player : Server.getInstance().getPlayers())
 			player.getConn().send(json.toJson(packet));
 
+	}
+
+	@Override
+	public void onSetWorldSize(WebSocket conn, SetWorldSizePacket packet) {
+		int mapSize = packet.getWorldSize();
+
+		if (mapSize < 0)
+			mapSize = 0;
+		if (mapSize > MapSize.values().length - 1)
+			mapSize = MapSize.values().length - 1;
+
+		Server.getInstance().getMap().setSize(mapSize);
+		packet.setWorldSize(mapSize);
+
+		Json json = new Json();
+		for (Player player : Server.getInstance().getPlayers())
+			player.getConn().send(json.toJson(packet));
 	}
 
 	@Override

@@ -1,7 +1,9 @@
 package me.rhin.openciv.server.game.map;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Random;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.java_websocket.WebSocket;
 
@@ -10,7 +12,6 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Json;
 
 import me.rhin.openciv.server.Server;
-import me.rhin.openciv.server.game.GameState;
 import me.rhin.openciv.server.game.map.tile.Tile;
 import me.rhin.openciv.server.game.map.tile.Tile.TileTypeWrapper;
 import me.rhin.openciv.server.game.map.tile.TileIndexer;
@@ -19,6 +20,7 @@ import me.rhin.openciv.server.game.map.tile.TileType.TileLayer;
 import me.rhin.openciv.server.game.map.tile.TileType.TileProperty;
 import me.rhin.openciv.server.game.unit.Unit;
 import me.rhin.openciv.server.listener.MapRequestListener;
+import me.rhin.openciv.shared.map.MapSize;
 import me.rhin.openciv.shared.packet.ChunkTile;
 import me.rhin.openciv.shared.packet.type.AddUnitPacket;
 import me.rhin.openciv.shared.packet.type.FinishLoadingPacket;
@@ -27,10 +29,7 @@ import me.rhin.openciv.shared.util.MathHelper;
 
 public class GameMap implements MapRequestListener {
 
-	public static final int WIDTH = 80;
-	public static final int HEIGHT = 52;
-	public static final int MAX_NODES = WIDTH * HEIGHT;
-
+	// Modify these too.
 	private static final int LAND_MASS_PARAM = 5;
 	private static final int TEMPATURE_PARAM = 1;
 	private static final int CLIMATE_PARAM = 2;
@@ -40,29 +39,15 @@ public class GameMap implements MapRequestListener {
 	private GenerationValue[][] geographyMap;
 	private ArrayList<Rectangle> mapPartition;
 	private TileIndexer tileIndexer;
+	private int mapSize;
 
 	private int[][] oddEdgeAxis = { { 0, -1 }, { 1, -1 }, { 1, 0 }, { 1, 1 }, { 0, 1 }, { -1, 0 } };
 	private int[][] evenEdgeAxis = { { -1, -1 }, { 0, -1 }, { 1, 0 }, { 0, 1 }, { -1, 1 }, { -1, 0 } };
 
 	public GameMap() {
 
-		this.tiles = new Tile[WIDTH][HEIGHT];
-		this.stencilMap = new GenerationValue[WIDTH][HEIGHT];
-		this.geographyMap = new GenerationValue[WIDTH][HEIGHT];
-
-		for (int x = 0; x < WIDTH; x++) {
-			for (int y = 0; y < HEIGHT; y++) {
-				Tile tile = new Tile(this, TileType.OCEAN, x, y);
-				tiles[x][y] = tile;
-				stencilMap[x][y] = new GenerationValue(0, x, y);
-				geographyMap[x][y] = new GenerationValue(0, x, y);
-			}
-		}
-
+		this.mapSize = 3;
 		this.mapPartition = new ArrayList<>();
-		this.tileIndexer = new TileIndexer(this);
-
-		initializeEdges();
 
 		Server.getInstance().getEventManager().addListener(MapRequestListener.class, this);
 	}
@@ -73,8 +58,8 @@ public class GameMap implements MapRequestListener {
 
 		ArrayList<AddUnitPacket> addUnitPackets = new ArrayList<>();
 
-		for (int x = 0; x < GameMap.WIDTH; x++) {
-			for (int y = 0; y < GameMap.HEIGHT; y++) {
+		for (int x = 0; x < getWidth(); x++) {
+			for (int y = 0; y < getHeight(); y++) {
 				if (x % 4 == 0 && y % 4 == 0) {
 
 					MapChunkPacket mapChunkPacket = new MapChunkPacket();
@@ -147,15 +132,32 @@ public class GameMap implements MapRequestListener {
 	}
 
 	public void resetTerrain() {
-		for (int x = 0; x < WIDTH; x++) {
-			for (int y = 0; y < HEIGHT; y++) {
+		for (int x = 0; x < getWidth(); x++) {
+			for (int y = 0; y < getHeight(); y++) {
 				tiles[x][y].setTileType(TileType.OCEAN);
 			}
 		}
 	}
 
 	public void generateTerrain() {
-		int landMassSize = (int) ((WIDTH * HEIGHT) / 12.5) * (LAND_MASS_PARAM + 2);
+
+		this.tiles = new Tile[getWidth()][getHeight()];
+		this.stencilMap = new GenerationValue[getWidth()][getHeight()];
+		this.geographyMap = new GenerationValue[getWidth()][getHeight()];
+
+		for (int x = 0; x < getWidth(); x++) {
+			for (int y = 0; y < getHeight(); y++) {
+				Tile tile = new Tile(this, TileType.OCEAN, x, y);
+				tiles[x][y] = tile;
+				stencilMap[x][y] = new GenerationValue(0, x, y);
+				geographyMap[x][y] = new GenerationValue(0, x, y);
+			}
+		}
+
+		initializeEdges();
+		this.tileIndexer = new TileIndexer(this);
+
+		int landMassSize = (int) ((getWidth() * getHeight()) / 12.5) * (LAND_MASS_PARAM + 2);
 
 		// Apply stencil's to geography map
 		while (getTotalGeographyLandMass() < landMassSize) {
@@ -174,8 +176,8 @@ public class GameMap implements MapRequestListener {
 
 		// Latitude adjustments
 		Random rnd = new Random();
-		for (int x = 0; x < WIDTH; x++) {
-			for (int y = 0; y < HEIGHT; y++) {
+		for (int x = 0; x < getWidth(); x++) {
+			for (int y = 0; y < getHeight(); y++) {
 				int latitude = y - 29; // FIXME: This should be the center of the map
 				latitude += rnd.nextInt(7);
 				latitude = Math.abs(latitude);
@@ -201,8 +203,8 @@ public class GameMap implements MapRequestListener {
 		float hillTopHeightPrecent = 0.90F;
 		float hillSpawnChancePrecent = 0.50F;
 
-		for (int x = 0; x < WIDTH; x++) {
-			for (int y = 0; y < HEIGHT; y++) {
+		for (int x = 0; x < getWidth(); x++) {
+			for (int y = 0; y < getHeight(); y++) {
 
 				if (geographyMap[x][y].getValue() > 0) {
 
@@ -235,9 +237,9 @@ public class GameMap implements MapRequestListener {
 		}
 
 		// Climate adjustments
-		for (int x = 0; x < WIDTH; x++) {
+		for (int x = 0; x < getWidth(); x++) {
 			int wetness = 0;
-			for (int y = 0; y < HEIGHT; y++) {
+			for (int y = 0; y < getHeight(); y++) {
 				int latitude = Math.abs(25 - y);
 
 				if (tiles[x][y].getBaseTileType() == TileType.OCEAN) {
@@ -297,7 +299,7 @@ public class GameMap implements MapRequestListener {
 
 			wetness = 0;
 
-			for (int y = HEIGHT - 1; y >= 0; y--) {
+			for (int y = getHeight() - 1; y >= 0; y--) {
 				int latitude = Math.abs(25 - y);
 
 				if (tiles[x][y].getBaseTileType() == TileType.OCEAN) {
@@ -360,49 +362,45 @@ public class GameMap implements MapRequestListener {
 		}
 
 		// Generate rivers
-		int riverAmount = 75;
+		int riverAmount = 20 * (mapSize + 1);
+		int iterations = 0;
 		int minRiverSize = 4;
 		while (riverAmount > 0) {
 
 			ArrayList<Tile> river = new ArrayList<>();
+			Tile originTile = tileIndexer.getTilesOf(TileProperty.HILL)
+					.get(rnd.nextInt(tileIndexer.getTilesOf(TileProperty.HILL).size()));
 
-			// Attempt to create a river
-			Tile currentTile = null;
-			while (currentTile == null) {
-				Tile rndTile = tiles[rnd.nextInt(WIDTH)][rnd.nextInt(HEIGHT)];
-				if (isHill(rndTile) && !rndTile.hasRivers()) {
-					currentTile = rndTile;
+			river.add(originTile);
+
+			Tile currentTile = river.get(river.size() - 1);
+			int directionIndex = 0;
+			int currentDirection = -1;
+			for (Tile tile : currentTile.getAdjTiles()) {
+				if (geographyMap[tile.getGridX()][tile.getGridY()]
+						.getValue() <= geographyMap[currentTile.getGridX()][currentTile.getGridY()].getValue()) {
+					currentDirection = directionIndex;
 				}
+				directionIndex++;
 			}
 
-			// FIXME: Ensure our river is not on the same side adj to the target tile.
+			while (river.get(river.size() - 1).getBaseTileType() != TileType.OCEAN) {
+				int direction = MathHelper.clamp(currentDirection + rnd.nextInt(3) - 1, 0, 5);
 
-			Tile lowestElvTile = null;
-
-			while (true) {
-				river.add(currentTile);
-
-				if (currentTile.getBaseTileType() == TileType.OCEAN)
-					break;
-
-				lowestElvTile = currentTile;
-				for (Tile adjTile : currentTile.getAdjTiles()) {
-					if (geographyMap[adjTile.getGridX()][adjTile.getGridY()]
-							.getValue() < geographyMap[lowestElvTile.getGridX()][lowestElvTile.getGridY()].getValue())
-						lowestElvTile = adjTile;
-				}
-
-				// If we hit the lowest elevation possible w/ out reaching ocean
-				if (currentTile.equals(lowestElvTile) || river.contains(lowestElvTile) || lowestElvTile.hasRivers()) {
-					// FIXME: Or if the lowestElvTile is already a river.
+				// If the nextTile is behind the river, then we just need to keep going forward
+				if (river.contains(river.get(river.size() - 1).getAdjTiles()[direction])
+						|| river.get(river.size() - 1).getAdjTiles()[direction].hasRivers()) {
 					break;
 				}
 
-				currentTile = lowestElvTile;
+				river.add(river.get(river.size() - 1).getAdjTiles()[direction]);
 			}
 
 			if (river.size() < minRiverSize)
 				continue;
+
+			riverAmount--;
+			iterations++;
 
 			// Apply the river sides
 			ArrayList<Vector2> traversedVectors = new ArrayList<>();
@@ -539,8 +537,6 @@ public class GameMap implements MapRequestListener {
 					currentVector = nextVector;
 				}
 			}
-
-			riverAmount--;
 		}
 
 		// Split the map to make resource generation & player spawnpoints balanced
@@ -593,8 +589,8 @@ public class GameMap implements MapRequestListener {
 		int yPadding = 8;
 		int minX = xPadding;
 		int minY = yPadding;
-		int maxX = GameMap.WIDTH - xPadding;
-		int maxY = GameMap.HEIGHT - yPadding;
+		int maxX = getWidth() - xPadding;
+		int maxY = getHeight() - yPadding;
 		int maxPathLength = 64;
 
 		int rndX = rnd.nextInt(maxX - minX + 1) + minX;
@@ -632,13 +628,13 @@ public class GameMap implements MapRequestListener {
 	}
 
 	private boolean outsidePaddingArea(int x, int y) {
-		return (x < 3 || y < 3 || x > WIDTH - 4 || y > HEIGHT - 5);
+		return (x < 3 || y < 3 || x > getWidth() - 4 || y > getHeight() - 5);
 	}
 
 	private int getTotalGeographyLandMass() {
 		int total = 0;
-		for (int x = 0; x < GameMap.WIDTH; x++) {
-			for (int y = 0; y < GameMap.HEIGHT; y++) {
+		for (int x = 0; x < getWidth(); x++) {
+			for (int y = 0; y < getHeight(); y++) {
 				if (geographyMap[x][y].getValue() != 0)
 					total++;
 			}
@@ -648,8 +644,8 @@ public class GameMap implements MapRequestListener {
 	}
 
 	private void clearMap() {
-		for (int x = 0; x < GameMap.WIDTH; x++) {
-			for (int y = 0; y < GameMap.HEIGHT; y++) {
+		for (int x = 0; x < getWidth(); x++) {
+			for (int y = 0; y < getHeight(); y++) {
 				stencilMap[x][y].setValue(0);
 			}
 		}
@@ -709,7 +705,7 @@ public class GameMap implements MapRequestListener {
 		} else
 			gridX = (int) ((x - (width / 2)) / width);
 
-		if (gridX < 0 || gridX > WIDTH - 1 || gridY < 0 || gridY > HEIGHT - 1)
+		if (gridX < 0 || gridX > getWidth() - 1 || gridY < 0 || gridY > getHeight() - 1)
 			return null;
 
 		Tile nearTile = tiles[gridX][gridY];
@@ -747,10 +743,30 @@ public class GameMap implements MapRequestListener {
 		return mapPartition;
 	}
 
+	public TileIndexer getTileIndexer() {
+		return tileIndexer;
+	}
+
+	public void setSize(int mapSize) {
+		this.mapSize = mapSize;
+	}
+
+	public int getWidth() {
+		return MapSize.values()[mapSize].getWidth();
+	}
+
+	public int getHeight() {
+		return MapSize.values()[mapSize].getHeight();
+	}
+
+	public int getMaxNodes() {
+		return getWidth() * getHeight();
+	}
+
 	private void splitMapPartition() {
 		int playerSize = Server.getInstance().getPlayers().size();
 		if (playerSize < 2) {
-			mapPartition.add(new Rectangle(0, 0, WIDTH, HEIGHT));
+			mapPartition.add(new Rectangle(0, 0, getWidth(), getHeight()));
 			return;
 		}
 
@@ -759,8 +775,8 @@ public class GameMap implements MapRequestListener {
 		int columns = (int) Math.ceil(Math.sqrt(numRects));
 		int fullRows = numRects / columns;
 
-		int width = WIDTH / columns;
-		int height = HEIGHT / fullRows;
+		int width = getWidth() / columns;
+		int height = getHeight() / fullRows;
 
 		for (int y = 0; y < fullRows; ++y)
 			for (int x = 0; x < columns; ++x)
@@ -770,8 +786,8 @@ public class GameMap implements MapRequestListener {
 	// FIXME: Rename to adjecent Tiles?
 	private void initializeEdges() {
 		// n^2 * 6
-		for (int x = 0; x < WIDTH; x++) {
-			for (int y = 0; y < HEIGHT; y++) {
+		for (int x = 0; x < getWidth(); x++) {
+			for (int y = 0; y < getHeight(); y++) {
 				// Set the 6 edges of the hexagon.
 
 				int[][] edgeAxis;
@@ -785,7 +801,7 @@ public class GameMap implements MapRequestListener {
 					int edgeX = x + edgeAxis[i][0];
 					int edgeY = y + edgeAxis[i][1];
 
-					if (edgeX == -1 || edgeY == -1 || edgeX > WIDTH - 1 || edgeY > HEIGHT - 1) {
+					if (edgeX == -1 || edgeY == -1 || edgeX > getWidth() - 1 || edgeY > getHeight() - 1) {
 						tiles[x][y].setEdge(i, null);
 						continue;
 					}
@@ -835,7 +851,17 @@ public class GameMap implements MapRequestListener {
 		return false;
 	}
 
-	public TileIndexer getTileIndexer() {
-		return tileIndexer;
+	private Tile removeSmallest(ArrayList<Tile> queue, int fScore[][]) {
+		int smallest = Integer.MAX_VALUE;
+		Tile smallestTile = null;
+		for (Tile tile : queue) {
+			if (fScore[tile.getGridX()][tile.getGridY()] < smallest) {
+				smallest = fScore[tile.getGridX()][tile.getGridY()];
+				smallestTile = tile;
+			}
+		}
+
+		queue.remove(smallestTile);
+		return smallestTile;
 	}
 }

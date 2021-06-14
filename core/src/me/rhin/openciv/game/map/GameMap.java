@@ -16,10 +16,9 @@ import me.rhin.openciv.util.MathHelper;
 
 public class GameMap implements ReceiveMapChunkListener {
 
-	public static final int WIDTH = 80; // Default: 104
-	public static final int HEIGHT = 52; // Default: 64
+	public static final int WIDTH = 128;
+	public static final int HEIGHT = 80;
 	public static final int MAX_NODES = WIDTH * HEIGHT;
-	private static final int CONTINENT_AMOUNT = 780; // Default: 780
 
 	private Tile[][] tiles;
 

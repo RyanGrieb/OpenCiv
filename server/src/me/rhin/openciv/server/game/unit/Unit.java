@@ -79,15 +79,20 @@ public abstract class Unit implements NextTurnListener {
 		int h = 0; // Lowest possible cost to reach nearest tile. (Do we want to
 					// overestimate
 		// this?).
+
+		int width = Server.getInstance().getMap().getWidth();
+		int height = Server.getInstance().getMap().getHeight();
+		int maxNodes = Server.getInstance().getMap().getMaxNodes();
+
 		ArrayList<Tile> openSet = new ArrayList<>();
-		Tile[][] cameFrom = new Tile[GameMap.WIDTH][GameMap.HEIGHT];
-		int[][] gScores = new int[GameMap.WIDTH][GameMap.HEIGHT];
-		int[][] fScores = new int[GameMap.WIDTH][GameMap.HEIGHT];
+		Tile[][] cameFrom = new Tile[width][height];
+		int[][] gScores = new int[width][height];
+		int[][] fScores = new int[width][height];
 
 		for (int[] gScore : gScores)
-			Arrays.fill(gScore, GameMap.MAX_NODES);
+			Arrays.fill(gScore, maxNodes);
 		for (int[] fScore : fScores)
-			Arrays.fill(fScore, GameMap.MAX_NODES);
+			Arrays.fill(fScore, maxNodes);
 
 		gScores[standingTile.getGridX()][standingTile.getGridY()] = 0;
 		fScores[standingTile.getGridX()][standingTile.getGridY()] = h;
@@ -159,7 +164,7 @@ public abstract class Unit implements NextTurnListener {
 				break;
 			}
 
-			if (iterations >= GameMap.MAX_NODES) {
+			if (iterations >= maxNodes) {
 				break;
 			}
 

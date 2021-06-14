@@ -21,6 +21,15 @@ public class MathHelper {
 		return num;
 	}
 
+	public static int clamp(int num, int min, int max) {
+		if (num < min)
+			return min;
+		else if (num > max)
+			return max;
+
+		return num;
+	}
+
 	public static float distance(int v1x, int v1y, int v2x, int v2y) {
 		int x_d = v1x - v2x;
 		int y_d = v1y - v2y;
