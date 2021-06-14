@@ -34,6 +34,7 @@ public abstract class Unit extends Actor implements TileObserver, ShapeRenderLis
 	private int pathMovement;
 	private Tile standingTile, targetTile;
 	private Sprite sprite, selectionSprite, targetSelectionSprite;
+	private Sprite civIconSprite;
 	private boolean selected;
 	private float movement;
 	private float health;
@@ -51,6 +52,9 @@ public abstract class Unit extends Actor implements TileObserver, ShapeRenderLis
 		this.selectionSprite = TextureEnum.UI_SELECTION.sprite();
 		// TODO: Change this sprite to a different texture
 		this.targetSelectionSprite = TextureEnum.UI_SELECTION.sprite();
+		this.civIconSprite = playerOwner.getCivType().getIcon().sprite();
+		civIconSprite.setSize(8, 8);
+		civIconSprite.setAlpha(0.8F);
 
 		setPosition(standingTile.getVectors()[0].x - standingTile.getWidth() / 2, standingTile.getVectors()[0].y + 4);
 		setSize(standingTile.getWidth(), standingTile.getHeight());
@@ -82,8 +86,10 @@ public abstract class Unit extends Actor implements TileObserver, ShapeRenderLis
 			targetSelectionSprite.draw(batch);
 		}
 
-		if (standingTile.getTileObservers().size() > 0)
+		if (standingTile.getTileObservers().size() > 0) {
 			sprite.draw(batch);
+			civIconSprite.draw(batch);
+		}
 	}
 
 	@Override
@@ -278,6 +284,7 @@ public abstract class Unit extends Actor implements TileObserver, ShapeRenderLis
 	public void setPosition(float x, float y) {
 		sprite.setPosition(x, y);
 		selectionSprite.setPosition(x, y);
+		civIconSprite.setPosition(x + 10, y + 20);
 		super.setPosition(x, y);
 	}
 

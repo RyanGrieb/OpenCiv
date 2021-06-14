@@ -43,7 +43,7 @@ public class UnitWindow extends AbstractWindow implements ResizeListener {
 		int index = 0;
 		for (AbstractAction action : unit.getCustomActions()) {
 			UnitActionButton actionButton = new UnitActionButton(unit, action, blankBackground.getX() + (75 * index),
-					blankBackground.getY() + blankBackground.getHeight() / 2 - 20 / 2, 70, 30);
+					blankBackground.getY() + blankBackground.getHeight() / 2 - 40 / 2, 70, 30);
 			unitActionButtons.add(actionButton);
 			addActor(actionButton);
 			index++;
