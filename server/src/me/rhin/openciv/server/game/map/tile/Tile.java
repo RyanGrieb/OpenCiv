@@ -139,7 +139,7 @@ public class Tile {
 				continue;
 			Server.getInstance().getMap().getTileIndexer().setAdjacentTileType(adjTile, tileType);
 		}
-		
+
 		Server.getInstance().getMap().getTileIndexer().setTilePropertfyOf(this, tileType.getProperties());
 
 		tileWrappers.add(new TileTypeWrapper(tileType));
@@ -320,6 +320,8 @@ public class Tile {
 
 	public int getMovementCost(Tile prevTile) {
 
+		int movementCost = 0;
+
 		// Check if the tile were moving to
 		int currentSideCheck = -1;
 		for (int i = 0; i < adjTiles.length; i++) {
@@ -329,7 +331,7 @@ public class Tile {
 		}
 
 		if (riverSides[currentSideCheck]) {
-			return 2;
+			movementCost = 2;
 		}
 
 		// Check if the tile were moving from has a river
@@ -341,10 +343,14 @@ public class Tile {
 		}
 
 		if (prevTile.getRiverSides()[prevSideCheck]) {
-			return 2;
+			movementCost = 2;
 		}
 
-		return getMovementCost();
+		if (getMovementCost() > movementCost)
+			movementCost = getMovementCost();
+
+		return movementCost;
+
 	}
 
 	public void addRiverToSide(int side) {

@@ -8,6 +8,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 
@@ -163,21 +164,21 @@ public class Tile extends Actor implements ShapeRenderListener, TileObserver {
 	@Override
 	public void draw(Batch batch, float parentAlpha) {
 
-		 if (discovered)
-		for (TileTypeWrapper sprite : tileWrappers) {
-			sprite.draw(batch);
+		if (discovered)
+			for (TileTypeWrapper sprite : tileWrappers) {
+				sprite.draw(batch);
+			}
+
+		if (!discovered) {
+			fogSprite.draw(batch);
 		}
 
-		 if (!discovered) {
-		 fogSprite.draw(batch);
-		 }
+		if (tileObservers.size() < 1) {
+			nonVisibleSprite.draw(batch);
+		}
 
-		 if (tileObservers.size() < 1) {
-		 nonVisibleSprite.draw(batch);
-		 }
-
-			if (drawSelection) {
-				selectionSprite.draw(batch);
+		if (drawSelection) {
+			selectionSprite.draw(batch);
 		}
 
 		if (territory != null && tileObservers.size() > 1)
@@ -392,6 +393,7 @@ public class Tile extends Actor implements ShapeRenderListener, TileObserver {
 	}
 
 	public int getMovementCost(Tile prevTile) {
+		int movementCost = 0;
 		// Check if the tile were moving to
 		int currentSideCheck = -1;
 		for (int i = 0; i < adjTiles.length; i++) {
@@ -401,7 +403,7 @@ public class Tile extends Actor implements ShapeRenderListener, TileObserver {
 		}
 
 		if (riverSides[currentSideCheck] != null) {
-			return 2;
+			movementCost = 2;
 		}
 
 		// Check if the tile were moving from has a river
@@ -413,15 +415,21 @@ public class Tile extends Actor implements ShapeRenderListener, TileObserver {
 		}
 
 		if (prevTile.getRiverSides()[prevSideCheck] != null) {
-			return 2;
+			movementCost = 2;
 		}
 
 		TileTypeWrapper topWrapper = ((TileTypeWrapper) tileWrappers.toArray()[tileWrappers.size() - 1]);
 		if (topWrapper.getTileType().hasProperty(TileProperty.RESOURCE)) {
+			int tileMovementCost = ((TileTypeWrapper) tileWrappers.toArray()[tileWrappers.size() - 2]).getTileType()
+					.getMovementCost();
+			if (tileMovementCost > movementCost) {
+				movementCost = tileMovementCost;
+			}
 
-			return ((TileTypeWrapper) tileWrappers.toArray()[tileWrappers.size() - 2]).getTileType().getMovementCost();
-		} else
-			return topWrapper.getTileType().getMovementCost();
+		} else if (topWrapper.getTileType().getMovementCost() > movementCost)
+			movementCost = topWrapper.getTileType().getMovementCost();
+
+		return movementCost;
 	}
 
 	public City getTerritory() {
