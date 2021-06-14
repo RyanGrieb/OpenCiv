@@ -71,7 +71,6 @@ public class ServerLobbyScreen extends AbstractScreen implements ResizeListener,
 
 		worldOptionsMenu = new WorldOptionsMenu(viewport.getWorldWidth() / 2 + 120, viewport.getWorldHeight() - 360,
 				200, 300);
-		stage.addActor(worldOptionsMenu);
 
 		backButton = new ServerLobbyBackButton(viewport.getWorldWidth() / 2 - 150 / 2, 20, 150, 45);
 		stage.addActor(backButton);
