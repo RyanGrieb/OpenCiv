@@ -443,7 +443,7 @@ public class InGameState extends GameState
 				rndY = rnd.nextInt(maxY - minY + 1) + minY;
 				Tile tile = map.getTiles()[rndX][rndY];
 
-				if (tile.containsTileType(TileType.OCEAN) || tile.containsTileType(TileType.MOUNTAIN)
+				if (tile.containsTileProperty(TileProperty.WATER) || tile.containsTileType(TileType.MOUNTAIN)
 						|| tile.containsTileType(TileType.TUNDRA) || tile.containsTileType(TileType.DESERT_HILL)
 						|| tile.containsTileType(TileType.DESERT))
 					continue;
