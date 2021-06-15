@@ -201,6 +201,7 @@ public class InGameState extends GameState implements DisconnectListener, Select
 				// TODO: Delete unit and allow the unit move to continue if the targetUnit gets
 				// destroyed.
 
+				boolean doUnitMove = true;
 				float unitDamage = unit.getDamageTaken(targetUnit);
 				float targetDamage = targetUnit.getDamageTaken(unit);
 
@@ -220,7 +221,7 @@ public class InGameState extends GameState implements DisconnectListener, Select
 						player.getConn().send(json.toJson(attackPacket));
 					}
 
-					return;
+					doUnitMove = false;
 				}
 
 				// Delete units below 1 hp
@@ -236,6 +237,7 @@ public class InGameState extends GameState implements DisconnectListener, Select
 					for (Player player : players) {
 						player.getConn().send(json.toJson(removeUnitPacket));
 					}
+					doUnitMove = true;
 				}
 
 				if (unit.getHealth() <= 0) {
@@ -249,8 +251,11 @@ public class InGameState extends GameState implements DisconnectListener, Select
 						player.getConn().send(json.toJson(removeUnitPacket));
 					}
 
-					return;
+					doUnitMove = false;
 				}
+
+				if (!doUnitMove)
+					return;
 
 			}
 		unit.setTargetTile(targetTile);

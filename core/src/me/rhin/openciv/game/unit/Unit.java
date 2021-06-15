@@ -236,9 +236,8 @@ public abstract class Unit extends Actor implements TileObserver, ShapeRenderLis
 		this.pathMovement = pathMovement;
 
 		targetingUnit = null;
-		for (Unit unit : targetTile.getUnits())
-			if (!unit.getPlayerOwner().equals(playerOwner))
-				targetingUnit = unit;
+		if (targetTile.getTopUnit() != null && !targetTile.getTopUnit().getPlayerOwner().equals(playerOwner))
+			targetingUnit = targetTile.getTopUnit();
 
 		// Open combat preview window once.
 		if (targetingUnit != null) {
