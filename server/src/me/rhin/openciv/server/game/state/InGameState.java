@@ -27,6 +27,7 @@ import me.rhin.openciv.server.game.unit.type.Settler.SettlerUnit;
 import me.rhin.openciv.server.game.unit.type.Warrior.WarriorUnit;
 import me.rhin.openciv.server.listener.ClickSpecialistListener;
 import me.rhin.openciv.server.listener.ClickWorkedTileListener;
+import me.rhin.openciv.server.listener.CombatPreviewListener;
 import me.rhin.openciv.server.listener.DisconnectListener;
 import me.rhin.openciv.server.listener.EndTurnListener;
 import me.rhin.openciv.server.listener.FetchPlayerListener;
@@ -39,6 +40,7 @@ import me.rhin.openciv.server.listener.SettleCityListener;
 import me.rhin.openciv.server.listener.UnitMoveListener;
 import me.rhin.openciv.shared.packet.type.ClickSpecialistPacket;
 import me.rhin.openciv.shared.packet.type.ClickWorkedTilePacket;
+import me.rhin.openciv.shared.packet.type.CombatPreviewPacket;
 import me.rhin.openciv.shared.packet.type.DeleteUnitPacket;
 import me.rhin.openciv.shared.packet.type.EndTurnPacket;
 import me.rhin.openciv.shared.packet.type.FetchPlayerPacket;
@@ -52,11 +54,13 @@ import me.rhin.openciv.shared.packet.type.SetProductionItemPacket;
 import me.rhin.openciv.shared.packet.type.SettleCityPacket;
 import me.rhin.openciv.shared.packet.type.TerritoryGrowPacket;
 import me.rhin.openciv.shared.packet.type.TurnTimeLeftPacket;
+import me.rhin.openciv.shared.packet.type.UnitAttackPacket;
 
-public class InGameState extends GameState
-		implements DisconnectListener, SelectUnitListener, UnitMoveListener, SettleCityListener,
-		PlayerFinishLoadingListener, NextTurnListener, SetProductionItemListener, ClickWorkedTileListener,
-		ClickSpecialistListener, EndTurnListener, PlayerListRequestListener, FetchPlayerListener {
+//FIXME: Instead of the civ game listening for everything. Just split them off into the respective classes. (EX: CombatPreviewListener in the Unit class)
+public class InGameState extends GameState implements DisconnectListener, SelectUnitListener, UnitMoveListener,
+		SettleCityListener, PlayerFinishLoadingListener, NextTurnListener, SetProductionItemListener,
+		ClickWorkedTileListener, ClickSpecialistListener, EndTurnListener, PlayerListRequestListener,
+		FetchPlayerListener, CombatPreviewListener {
 
 	private static final int BASE_TURN_TIME = 9;
 
@@ -66,6 +70,24 @@ public class InGameState extends GameState
 	private Runnable turnTimeRunnable;
 
 	public InGameState() {
+
+		Server.getInstance().getEventManager().addListener(DisconnectListener.class, this);
+		Server.getInstance().getEventManager().addListener(SelectUnitListener.class, this);
+		Server.getInstance().getEventManager().addListener(UnitMoveListener.class, this);
+		Server.getInstance().getEventManager().addListener(SettleCityListener.class, this);
+		Server.getInstance().getEventManager().addListener(PlayerFinishLoadingListener.class, this);
+		Server.getInstance().getEventManager().addListener(NextTurnListener.class, this);
+		Server.getInstance().getEventManager().addListener(SetProductionItemListener.class, this);
+		Server.getInstance().getEventManager().addListener(ClickWorkedTileListener.class, this);
+		Server.getInstance().getEventManager().addListener(ClickSpecialistListener.class, this);
+		Server.getInstance().getEventManager().addListener(EndTurnListener.class, this);
+		Server.getInstance().getEventManager().addListener(PlayerListRequestListener.class, this);
+		Server.getInstance().getEventManager().addListener(FetchPlayerListener.class, this);
+		Server.getInstance().getEventManager().addListener(CombatPreviewListener.class, this);
+	}
+
+	@Override
+	public void onStateBegin() {
 		this.currentTurn = 0;
 		this.turnTimeLeft = 0;
 
@@ -99,20 +121,6 @@ public class InGameState extends GameState
 		executor.scheduleAtFixedRate(turnTimeRunnable, 0, 1, TimeUnit.SECONDS);
 
 		loadGame();
-
-		Server.getInstance().getEventManager().addListener(DisconnectListener.class, this);
-		Server.getInstance().getEventManager().addListener(SelectUnitListener.class, this);
-		Server.getInstance().getEventManager().addListener(UnitMoveListener.class, this);
-		Server.getInstance().getEventManager().addListener(SettleCityListener.class, this);
-		Server.getInstance().getEventManager().addListener(PlayerFinishLoadingListener.class, this);
-		Server.getInstance().getEventManager().addListener(NextTurnListener.class, this);
-		Server.getInstance().getEventManager().addListener(SetProductionItemListener.class, this);
-		Server.getInstance().getEventManager().addListener(ClickWorkedTileListener.class, this);
-		Server.getInstance().getEventManager().addListener(ClickSpecialistListener.class, this);
-		Server.getInstance().getEventManager().addListener(EndTurnListener.class, this);
-		Server.getInstance().getEventManager().addListener(PlayerListRequestListener.class, this);
-		Server.getInstance().getEventManager().addListener(FetchPlayerListener.class, this);
-
 	}
 
 	@Override
@@ -183,7 +191,68 @@ public class InGameState extends GameState
 		}
 
 		Tile targetTile = map.getTiles()[packet.getTargetGridX()][packet.getTargetGridY()];
+		Json json = new Json();
 
+		if (targetTile.getTopUnit() != null)
+			if (!targetTile.getTopUnit().getPlayerOwner().equals(unit.getPlayerOwner())) {
+				// We are about to attack this unit on the tile
+				Unit targetUnit = targetTile.getTopUnit();
+
+				// TODO: Delete unit and allow the unit move to continue if the targetUnit gets
+				// destroyed.
+
+				float unitDamage = unit.getDamageTaken(targetUnit);
+				float targetDamage = targetUnit.getDamageTaken(unit);
+
+				unit.setHealth(unit.getHealth() - unitDamage);
+				targetUnit.setHealth(targetUnit.getHealth() - targetDamage);
+
+				if (targetUnit.getHealth() > 0) {
+					UnitAttackPacket attackPacket = new UnitAttackPacket();
+					attackPacket.setUnitLocations(unit.getStandingTile().getGridX(), unit.getStandingTile().getGridY(),
+							targetUnit.getStandingTile().getGridX(), targetUnit.getStandingTile().getGridY());
+					attackPacket.setUnitDamage(unitDamage);
+					attackPacket.setTargetDamage(targetDamage);
+
+					unit.reduceMovement(2);
+
+					for (Player player : players) {
+						player.getConn().send(json.toJson(attackPacket));
+					}
+
+					return;
+				}
+
+				// Delete units below 1 hp
+
+				if (targetUnit.getHealth() <= 0) {
+					targetUnit.getStandingTile().removeUnit(unit);
+
+					// FIXME: Redundant code.
+					DeleteUnitPacket removeUnitPacket = new DeleteUnitPacket();
+					removeUnitPacket.setUnit(targetUnit.getID(), targetUnit.getStandingTile().getGridX(),
+							targetUnit.getStandingTile().getGridY());
+
+					for (Player player : players) {
+						player.getConn().send(json.toJson(removeUnitPacket));
+					}
+				}
+
+				if (unit.getHealth() <= 0) {
+					unit.getStandingTile().removeUnit(unit);
+
+					DeleteUnitPacket removeUnitPacket = new DeleteUnitPacket();
+					removeUnitPacket.setUnit(unit.getID(), unit.getStandingTile().getGridX(),
+							unit.getStandingTile().getGridY());
+
+					for (Player player : players) {
+						player.getConn().send(json.toJson(removeUnitPacket));
+					}
+
+					return;
+				}
+
+			}
 		unit.setTargetTile(targetTile);
 
 		// The player is hacking here or i'm a poop coder
@@ -196,7 +265,6 @@ public class InGameState extends GameState
 
 		packet.setMovementCost(unit.getPathMovement());
 
-		Json json = new Json();
 		for (Player player : players) {
 			player.getConn().send(json.toJson(packet));
 		}
@@ -238,8 +306,7 @@ public class InGameState extends GameState
 		cityPlayer.setSelectedUnit(null);
 
 		DeleteUnitPacket deleteUnitPacket = new DeleteUnitPacket();
-		deleteUnitPacket.setUnit(cityPlayer.getName(), unit.getID(), settleCityPacket.getGridX(),
-				settleCityPacket.getGridY());
+		deleteUnitPacket.setUnit(unit.getID(), settleCityPacket.getGridX(), settleCityPacket.getGridY());
 
 		Json json = new Json();
 		for (Player player : players) {
@@ -371,6 +438,20 @@ public class InGameState extends GameState
 	}
 
 	@Override
+	public void onCombatPreview(WebSocket conn, CombatPreviewPacket packet) {
+		Unit unit = map.getTiles()[packet.getUnitGridX()][packet.getUnitGridY()].getTopUnit();
+		Unit targetUnit = map.getTiles()[packet.getTargetGridX()][packet.getTargetGridY()].getTopUnit();
+		// TODO: We need to include city combat as well.
+		// TODO: Implement unit xp
+
+		packet.setUnitDamage(unit.getDamageTaken(targetUnit));
+		packet.setTargetDamage(targetUnit.getDamageTaken(unit));
+		// NOTE: Cities have initial health of 200.
+		Json json = new Json();
+		conn.send(json.toJson(packet));
+	}
+
+	@Override
 	public String toString() {
 		return "InGame";
 	}
@@ -457,14 +538,8 @@ public class InGameState extends GameState
 									|| adjTile.getBaseTileType() == TileType.TUNDRA_HILL)
 								adjToTundra = true;
 						}
-						// Problem, how do we favor adjToBais over not adj to tundra.
-						// adjToBais ignore if iterations > 0
-						// adjToTundra ignore if iterations > 0
-						// iterations
 
-						System.out.println(adjToBias + "," + adjToTundra);
 						if (adjToBias && !adjToTundra) {
-							System.out.println(iterations);
 							if (!tile.containsTileProperty(TileProperty.WATER)
 									&& !tile.containsTileType(TileType.MOUNTAIN))
 								player.setSpawnPos(tile.getGridX(), tile.getGridY());
@@ -480,7 +555,7 @@ public class InGameState extends GameState
 				iterations++;
 			}
 
-			//FIXME: We might not be able to spawn the player within the bounds.
+			// FIXME: We might not be able to spawn the player within the bounds.
 			if (!player.hasSpawnPos()) {
 				System.out.println("No suitable spawn pos for: " + player.getName());
 				while (true) {
@@ -495,6 +570,10 @@ public class InGameState extends GameState
 					}
 				}
 			}
+		}
+
+		if (players.size() > 1) {
+			players.get(0).setSpawnPos(players.get(1).getSpawnX() + 1, players.get(1).getSpawnY() + 1);
 		}
 
 		for (Player player : players) {

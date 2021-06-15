@@ -442,12 +442,22 @@ public class Tile extends Actor implements ShapeRenderListener, TileObserver {
 		return tileWrappers;
 	}
 
-	private void setDiscovered(boolean discovered) {
-		this.discovered = discovered;
-	}
-
 	public boolean isDiscovered() {
 		return discovered;
+	}
+
+	public Unit getTopUnit() {
+		Unit topUnit = null;
+		for (Unit unit : units) {
+			if (topUnit == null || topUnit.getCombatStrength() < unit.getCombatStrength())
+				topUnit = unit;
+		}
+
+		return topUnit;
+	}
+
+	private void setDiscovered(boolean discovered) {
+		this.discovered = discovered;
 	}
 
 	private void addTileObserver(TileObserver tileObserver) {

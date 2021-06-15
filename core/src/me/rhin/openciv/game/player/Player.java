@@ -51,7 +51,8 @@ public class Player implements RelativeMouseMoveListener, LeftClickListener, Rig
 			return;
 
 		if (rightMouseHeld) {
-			selectedUnit.setTargetTile(currentHoveredTile);
+			if (selectedUnit != null)
+				selectedUnit.setTargetTile(currentHoveredTile);
 		}
 
 		if (hoveredTile != null)

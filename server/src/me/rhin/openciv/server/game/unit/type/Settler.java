@@ -23,6 +23,11 @@ public class Settler extends UnitItem {
 			else
 				return tile.getMovementCost(prevTile);
 		}
+
+		@Override
+		public int getCombatStrength() {
+			return 0;
+		}
 	}
 
 	@Override

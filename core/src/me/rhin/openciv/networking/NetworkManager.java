@@ -19,6 +19,7 @@ import me.rhin.openciv.listener.ApplyProductionToItemListener.ApplyProductionToI
 import me.rhin.openciv.listener.BuildingConstructedListener.BuildingConstructedEvent;
 import me.rhin.openciv.listener.ChooseCivListener.ChooseCivEvent;
 import me.rhin.openciv.listener.CityStatUpdateListener.CityStatUpdateEvent;
+import me.rhin.openciv.listener.CombatPreviewListener.CombatPreviewEvent;
 import me.rhin.openciv.listener.DeleteUnitListener.DeleteUnitEvent;
 import me.rhin.openciv.listener.FetchPlayerListener.FetchPlayerEvent;
 import me.rhin.openciv.listener.FinishLoadingRequestListener.FinishLoadingRequestEvent;
@@ -41,6 +42,7 @@ import me.rhin.openciv.listener.SetWorldSizeListener.SetWorldSizeEvent;
 import me.rhin.openciv.listener.SettleCityListener.SettleCityEvent;
 import me.rhin.openciv.listener.TerritoryGrowListener.TerritoryGrowEvent;
 import me.rhin.openciv.listener.TurnTimeLeftListener.TurnTimeLeftEvent;
+import me.rhin.openciv.listener.UnitAttackListener.UnitAttackEvent;
 import me.rhin.openciv.shared.listener.Event;
 import me.rhin.openciv.shared.listener.Listener;
 import me.rhin.openciv.shared.packet.Packet;
@@ -50,6 +52,7 @@ import me.rhin.openciv.shared.packet.type.ApplyProductionToItemPacket;
 import me.rhin.openciv.shared.packet.type.BuildingConstructedPacket;
 import me.rhin.openciv.shared.packet.type.ChooseCivPacket;
 import me.rhin.openciv.shared.packet.type.CityStatUpdatePacket;
+import me.rhin.openciv.shared.packet.type.CombatPreviewPacket;
 import me.rhin.openciv.shared.packet.type.DeleteUnitPacket;
 import me.rhin.openciv.shared.packet.type.FetchPlayerPacket;
 import me.rhin.openciv.shared.packet.type.FinishLoadingPacket;
@@ -71,6 +74,7 @@ import me.rhin.openciv.shared.packet.type.SetWorldSizePacket;
 import me.rhin.openciv.shared.packet.type.SettleCityPacket;
 import me.rhin.openciv.shared.packet.type.TerritoryGrowPacket;
 import me.rhin.openciv.shared.packet.type.TurnTimeLeftPacket;
+import me.rhin.openciv.shared.packet.type.UnitAttackPacket;
 
 public class NetworkManager {
 
@@ -107,6 +111,8 @@ public class NetworkManager {
 		networkEvents.put(GetHostPacket.class, GetHostEvent.class);
 		networkEvents.put(ChooseCivPacket.class, ChooseCivEvent.class);
 		networkEvents.put(SetWorldSizePacket.class, SetWorldSizeEvent.class);
+		networkEvents.put(CombatPreviewPacket.class, CombatPreviewEvent.class);
+		networkEvents.put(UnitAttackPacket.class, UnitAttackEvent.class);
 	}
 
 	public void connect(String ip) {

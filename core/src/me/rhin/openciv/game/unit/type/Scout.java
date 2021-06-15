@@ -31,6 +31,10 @@ public class Scout extends UnitItem {
 			return 3;
 		}
 
+		@Override
+		public int getCombatStrength() {
+			return 10;
+		}
 	}
 
 	@Override

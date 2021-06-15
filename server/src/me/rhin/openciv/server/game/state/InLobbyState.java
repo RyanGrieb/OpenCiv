@@ -41,6 +41,11 @@ public class InLobbyState extends GameState implements StartGameRequestListener,
 	}
 
 	@Override
+	public void onStateBegin() {
+
+	}
+
+	@Override
 	public void onStateEnd() {
 		Server.getInstance().getEventManager().clearListenersFromObject(this);
 	}

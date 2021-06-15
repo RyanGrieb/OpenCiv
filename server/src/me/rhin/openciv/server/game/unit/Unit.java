@@ -32,6 +32,7 @@ public abstract class Unit implements NextTurnListener {
 		this.playerOwner = playerOwner;
 		this.standingTile = standingTile;
 		this.movement = getMaxMovement();
+		this.health = 100;
 		setPosition(standingTile.getVectors()[0].x - standingTile.getWidth() / 2, standingTile.getVectors()[0].y + 4);
 		setSize(standingTile.getWidth(), standingTile.getHeight());
 
@@ -46,6 +47,8 @@ public abstract class Unit implements NextTurnListener {
 	}
 
 	public abstract int getMovementCost(Tile prevTile, Tile adjTile);
+
+	public abstract int getCombatStrength();
 
 	public boolean setTargetTile(Tile targetTile) {
 		if (targetTile == null)
@@ -240,6 +243,10 @@ public abstract class Unit implements NextTurnListener {
 		return selected;
 	}
 
+	public Tile getStandingTile() {
+		return standingTile;
+	}
+
 	public Tile getTargetTile() {
 		return targetTile;
 	}
@@ -258,5 +265,18 @@ public abstract class Unit implements NextTurnListener {
 
 	public int getID() {
 		return id;
+	}
+
+	public float getDamageTaken(Unit otherUnit) {
+		// y=30*1.041^(x), x= combat diff
+		return (float) (30 * (Math.pow(1.041, otherUnit.getCombatStrength() - getCombatStrength())));
+	}
+
+	public void setHealth(float health) {
+		this.health = health;
+	}
+
+	public float getHealth() {
+		return health;
 	}
 }

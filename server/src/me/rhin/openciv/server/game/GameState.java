@@ -21,9 +21,11 @@ public abstract class GameState {
 		return Server.getInstance().getPlayerByConn(conn);
 	}
 
+	public abstract void onStateBegin();
+	
 	public abstract void onStateEnd();
 
 	public abstract void stop();
-	
+
 	public abstract String toString();
 }

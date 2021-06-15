@@ -25,6 +25,11 @@ public class Warrior extends UnitItem {
 			else
 				return tile.getMovementCost(prevTile);
 		}
+
+		@Override
+		public int getCombatStrength() {
+			return 20;
+		}
 	}
 
 	@Override

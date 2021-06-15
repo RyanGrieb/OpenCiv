@@ -2,6 +2,8 @@ package me.rhin.openciv.game.unit;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
@@ -22,6 +24,7 @@ import me.rhin.openciv.listener.NextTurnListener;
 import me.rhin.openciv.listener.ShapeRenderListener;
 import me.rhin.openciv.shared.packet.type.MoveUnitPacket;
 import me.rhin.openciv.shared.packet.type.NextTurnPacket;
+import me.rhin.openciv.ui.window.type.UnitCombatWindow;
 import me.rhin.openciv.ui.window.type.UnitWindow;
 
 public abstract class Unit extends Actor implements TileObserver, ShapeRenderListener, NextTurnListener {
@@ -38,6 +41,7 @@ public abstract class Unit extends Actor implements TileObserver, ShapeRenderLis
 	private boolean selected;
 	private float movement;
 	private float health;
+	private Unit targetingUnit;
 
 	public Unit(int id, String unitName, Player playerOwner, Tile standingTile, TextureEnum assetEnum) {
 		Civilization.getInstance().getEventManager().addListener(ShapeRenderListener.class, this);
@@ -60,6 +64,8 @@ public abstract class Unit extends Actor implements TileObserver, ShapeRenderLis
 		setSize(standingTile.getWidth(), standingTile.getHeight());
 
 		this.movement = getMaxMovement();
+		this.health = 100;
+
 		playerOwner.addUnit(this);
 
 		Civilization.getInstance().getEventManager().addListener(NextTurnListener.class, this);
@@ -71,6 +77,8 @@ public abstract class Unit extends Actor implements TileObserver, ShapeRenderLis
 	}
 
 	public abstract int getMovementCost(Tile prevTile, Tile adjTile);
+
+	public abstract int getCombatStrength();
 
 	@Override
 	public void act(float delta) {
@@ -186,6 +194,7 @@ public abstract class Unit extends Actor implements TileObserver, ShapeRenderLis
 		if (parentTile == null) {
 			pathMovement = 0;
 			this.targetTile = null;
+			Civilization.getInstance().getWindowManager().closeWindow(UnitCombatWindow.class);
 			return false;
 		}
 
@@ -226,13 +235,35 @@ public abstract class Unit extends Actor implements TileObserver, ShapeRenderLis
 		this.targetTile = targetTile;
 		this.pathMovement = pathMovement;
 
+		targetingUnit = null;
+		for (Unit unit : targetTile.getUnits())
+			if (!unit.getPlayerOwner().equals(playerOwner))
+				targetingUnit = unit;
+
+		// Open combat preview window once.
+		if (targetingUnit != null) {
+			// Close previous combat windows.
+			Civilization.getInstance().getWindowManager().closeWindow(UnitCombatWindow.class);
+			Civilization.getInstance().getWindowManager().addWindow(new UnitCombatWindow(this, targetingUnit));
+		} else {
+			Civilization.getInstance().getWindowManager().closeWindow(UnitCombatWindow.class);
+		}
+
+		if (targetingUnit != null)
+			targetSelectionSprite.setColor(Color.RED);
+		else
+			targetSelectionSprite.setColor(Color.YELLOW);
+
 		return true;
 	}
 
 	@Override
 	public void onShapeRender(ShapeRenderer shapeRenderer) {
 		// FIXME: We get a concurrency error here at some point
-		shapeRenderer.setColor(Color.YELLOW);
+		if (targetingUnit != null)
+			shapeRenderer.setColor(Color.RED);
+		else
+			shapeRenderer.setColor(Color.YELLOW);
 		for (Vector2[] vectors : pathVectors) {
 			// System.out.println(maxMovement + "," + pathMovement);
 			if (getCurrentMovement() < pathMovement)
@@ -305,11 +336,25 @@ public abstract class Unit extends Actor implements TileObserver, ShapeRenderLis
 					pathVectors.clear();
 					targetTile = null;
 					Civilization.getInstance().getWindowManager().closeWindow(UnitWindow.class);
+					Civilization.getInstance().getWindowManager().closeWindow(UnitCombatWindow.class);
 				} else {
 					Civilization.getInstance().getWindowManager().addWindow(new UnitWindow(thisUnit));
 				}
 			}
 		});
+
+	}
+
+	public void flashColor(Color red) {
+		sprite.setColor(red.r / 2, red.g / 2, red.b / 2, 1);
+
+		final ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(2);
+		executor.schedule(new Runnable() {
+			@Override
+			public void run() {
+				sprite.setColor(Color.WHITE);
+			}
+		}, 250, TimeUnit.MILLISECONDS);
 
 	}
 
@@ -359,5 +404,13 @@ public abstract class Unit extends Actor implements TileObserver, ShapeRenderLis
 
 	public boolean canAttack() {
 		return canAttack;
+	}
+
+	public float getHealth() {
+		return health;
+	}
+
+	public void setHealth(float health) {
+		this.health = health;
 	}
 }

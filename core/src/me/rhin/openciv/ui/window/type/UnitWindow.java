@@ -9,35 +9,42 @@ import me.rhin.openciv.Civilization;
 import me.rhin.openciv.game.AbstractAction;
 import me.rhin.openciv.game.unit.Unit;
 import me.rhin.openciv.listener.ResizeListener;
+import me.rhin.openciv.listener.UnitAttackListener;
+import me.rhin.openciv.shared.packet.type.UnitAttackPacket;
 import me.rhin.openciv.ui.background.BlankBackground;
-import me.rhin.openciv.ui.button.Button;
 import me.rhin.openciv.ui.button.type.UnitActionButton;
+import me.rhin.openciv.ui.game.Healthbar;
 import me.rhin.openciv.ui.label.CustomLabel;
 import me.rhin.openciv.ui.window.AbstractWindow;
 
-public class UnitWindow extends AbstractWindow implements ResizeListener {
+public class UnitWindow extends AbstractWindow implements ResizeListener, UnitAttackListener {
 
 	private CustomLabel unitNameLabel;
 	private CustomLabel movementLabel;
 	private BlankBackground blankBackground;
+	private Healthbar healthbar;
 
 	private Unit unit;
 	private ArrayList<UnitActionButton> unitActionButtons;
 
 	public UnitWindow(Unit unit) {
+		super.setBounds(viewport.getWorldWidth() - 200, 0, 200, 100);
 		this.unit = unit;
 		this.unitActionButtons = new ArrayList<>();
 
-		this.blankBackground = new BlankBackground(viewport.getWorldWidth() - 200, 0, 200, 100);
+		this.blankBackground = new BlankBackground(0, 0, 200, 100);
 		addActor(blankBackground);
 
-		this.unitNameLabel = new CustomLabel(unit.getName(), Align.center, viewport.getWorldWidth() - 200, 100 - 20,
-				200, 20);
+		this.healthbar = new Healthbar(getWidth() - 200, getHeight() - 35, 200, 15);
+		healthbar.setHealth(unit.getHealth());
+		addActor(healthbar);
+
+		this.unitNameLabel = new CustomLabel(unit.getName(), Align.center, getWidth() - 200, 100 - 20, 200, 20);
 		addActor(unitNameLabel);
 
 		this.movementLabel = new CustomLabel(
 				"Movement: " + (int) unit.getCurrentMovement() + "/" + unit.getMaxMovement());
-		movementLabel.setPosition((viewport.getWorldWidth() - (200 / 2)) - movementLabel.getWidth() / 2, 5);
+		movementLabel.setPosition((getWidth() - (200 / 2)) - movementLabel.getWidth() / 2, 5);
 		addActor(movementLabel);
 
 		int index = 0;
@@ -50,6 +57,20 @@ public class UnitWindow extends AbstractWindow implements ResizeListener {
 		}
 
 		Civilization.getInstance().getEventManager().addListener(ResizeListener.class, this);
+		Civilization.getInstance().getEventManager().addListener(UnitAttackListener.class, this);
+	}
+
+	@Override
+	public void onUnitAttack(UnitAttackPacket packet) {
+		// FIXME: Is this the best way to do this? How about onUnitSetHealth event?
+		Unit attackingUnit = Civilization.getInstance().getGame().getMap().getTiles()[packet.getUnitGridX()][packet
+				.getUnitGridY()].getTopUnit();
+		Unit targetUnit = Civilization.getInstance().getGame().getMap().getTiles()[packet.getTargetGridX()][packet
+				.getTargetGridY()].getTopUnit();
+
+		if (unit.equals(attackingUnit) || unit.equals(targetUnit)) {
+			healthbar.setHealth(unit.getHealth());
+		}
 	}
 
 	@Override
@@ -61,14 +82,15 @@ public class UnitWindow extends AbstractWindow implements ResizeListener {
 
 	@Override
 	public void onResize(int width, int height) {
-		blankBackground.setPosition(width - 200, 0);
-		unitNameLabel.setPosition(width - 200, 100 - 20);
-		movementLabel.setPosition((width - (200 / 2)) - movementLabel.getWidth() / 2, 5);
+		super.setPosition(width - 200, 0);
+		blankBackground.setPosition(0, 0);
+		unitNameLabel.setPosition(getWidth() - 200, 100 - 20);
+		movementLabel.setPosition((getWidth() - (200 / 2)) - movementLabel.getWidth() / 2, 5);
 
 		int index = 0;
 		for (UnitActionButton actionButton : unitActionButtons) {
 			actionButton.setPosition(blankBackground.getX() + (75 * index),
-					blankBackground.getY() + blankBackground.getHeight() / 2 - 20 / 2);
+					blankBackground.getY() + blankBackground.getHeight() / 2 - 40 / 2);
 			index++;
 		}
 	}

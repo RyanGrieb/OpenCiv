@@ -32,6 +32,7 @@ import me.rhin.openciv.listener.RightClickListener;
 import me.rhin.openciv.listener.SelectUnitListener;
 import me.rhin.openciv.listener.SettleCityListener;
 import me.rhin.openciv.listener.TerritoryGrowListener;
+import me.rhin.openciv.listener.UnitAttackListener;
 import me.rhin.openciv.shared.packet.type.AddUnitPacket;
 import me.rhin.openciv.shared.packet.type.DeleteUnitPacket;
 import me.rhin.openciv.shared.packet.type.EndTurnPacket;
@@ -43,13 +44,14 @@ import me.rhin.openciv.shared.packet.type.PlayerConnectPacket;
 import me.rhin.openciv.shared.packet.type.PlayerListRequestPacket;
 import me.rhin.openciv.shared.packet.type.SettleCityPacket;
 import me.rhin.openciv.shared.packet.type.TerritoryGrowPacket;
+import me.rhin.openciv.shared.packet.type.UnitAttackPacket;
 import me.rhin.openciv.ui.screen.type.InGameScreen;
 import me.rhin.openciv.ui.window.type.CurrentResearchWindow;
-import me.rhin.openciv.ui.window.type.UnitWindow;
 
-public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerListRequestListener, FetchPlayerListener,
-		MoveUnitListener, DeleteUnitListener, SettleCityListener, NextTurnListener, FinishLoadingRequestListener,
-		TerritoryGrowListener {
+//FIXME: Instead of the civ game listening for everything. Just split them off into the respective classes. (EX: UnitAttackListener in the Unit class)
+public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerListRequestListener,
+		FetchPlayerListener, MoveUnitListener, DeleteUnitListener, SettleCityListener, NextTurnListener,
+		FinishLoadingRequestListener, TerritoryGrowListener, UnitAttackListener {
 
 	private static final int BASE_TURN_TIME = 9;
 
@@ -77,6 +79,7 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 		Civilization.getInstance().getEventManager().addListener(NextTurnListener.class, this);
 		Civilization.getInstance().getEventManager().addListener(FinishLoadingRequestListener.class, this);
 		Civilization.getInstance().getEventManager().addListener(TerritoryGrowListener.class, this);
+		Civilization.getInstance().getEventManager().addListener(UnitAttackListener.class, this);
 
 		Civilization.getInstance().getNetworkManager().sendPacket(new FetchPlayerPacket());
 		Civilization.getInstance().getNetworkManager().sendPacket(new PlayerListRequestPacket());
@@ -207,6 +210,18 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 		City city = player.getCityFromName(packet.getCityName());
 		Tile tile = map.getTiles()[packet.getGridX()][packet.getGridY()];
 		city.growTerritory(tile);
+	}
+
+	@Override
+	public void onUnitAttack(UnitAttackPacket packet) {
+		Unit unit = map.getTiles()[packet.getUnitGridX()][packet.getUnitGridY()].getTopUnit();
+		Unit targetUnit = map.getTiles()[packet.getTargetGridX()][packet.getTargetGridY()].getTopUnit();
+		targetUnit.flashColor(Color.RED);
+
+		unit.setHealth(unit.getHealth() - packet.getUnitDamage());
+		targetUnit.setHealth(targetUnit.getHealth() - packet.getTargetUnitDamage());
+
+		unit.reduceMovement(2);
 	}
 
 	public void endTurn() {

@@ -9,7 +9,8 @@ public class ColoredBackground extends Actor {
 	private Sprite sprite;
 
 	public ColoredBackground(Sprite sprite, float x, float y, float width, float height) {
-		this.setBounds(x, y, width, height);
+		super.setBounds(x, y, width, height);
+
 		this.sprite = sprite;
 		sprite.setBounds(x, y, width, height);
 	}
@@ -23,6 +24,12 @@ public class ColoredBackground extends Actor {
 	@Override
 	public void draw(Batch batch, float parentAlpha) {
 		sprite.draw(batch);
+	}
+
+	@Override
+	public void setWidth(float width) {
+		super.setWidth(width);
+		sprite.setSize(width, sprite.getHeight());
 	}
 
 }

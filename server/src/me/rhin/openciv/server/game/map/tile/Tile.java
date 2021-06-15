@@ -380,4 +380,14 @@ public class Tile {
 		return (float) Math.sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
 
 	}
+
+	public Unit getTopUnit() {
+		Unit topUnit = null;
+		for (Unit unit : units) {
+			if (topUnit == null || topUnit.getCombatStrength() < unit.getCombatStrength())
+				topUnit = unit;
+		}
+
+		return topUnit;
+	}
 }

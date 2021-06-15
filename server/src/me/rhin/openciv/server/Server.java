@@ -19,10 +19,12 @@ import me.rhin.openciv.server.command.CmdProcessor;
 import me.rhin.openciv.server.game.GameState;
 import me.rhin.openciv.server.game.Player;
 import me.rhin.openciv.server.game.map.GameMap;
+import me.rhin.openciv.server.game.state.InGameState;
 import me.rhin.openciv.server.game.state.InLobbyState;
 import me.rhin.openciv.server.listener.ChooseCivListener.ChooseCivEvent;
 import me.rhin.openciv.server.listener.ClickSpecialistListener.ClickSpecialistEvent;
 import me.rhin.openciv.server.listener.ClickWorkedTileListener.ClickWorkedTileEvent;
+import me.rhin.openciv.server.listener.CombatPreviewListener.CombatPreviewEvent;
 import me.rhin.openciv.server.listener.ConnectionListener.ConnectionEvent;
 import me.rhin.openciv.server.listener.DisconnectListener.DisconnectEvent;
 import me.rhin.openciv.server.listener.EndTurnListener.EndTurnEvent;
@@ -44,6 +46,7 @@ import me.rhin.openciv.shared.packet.Packet;
 import me.rhin.openciv.shared.packet.type.ChooseCivPacket;
 import me.rhin.openciv.shared.packet.type.ClickSpecialistPacket;
 import me.rhin.openciv.shared.packet.type.ClickWorkedTilePacket;
+import me.rhin.openciv.shared.packet.type.CombatPreviewPacket;
 import me.rhin.openciv.shared.packet.type.EndTurnPacket;
 import me.rhin.openciv.shared.packet.type.FetchPlayerPacket;
 import me.rhin.openciv.shared.packet.type.FinishLoadingPacket;
@@ -121,6 +124,7 @@ public class Server extends WebSocketServer {
 		networkEvents.put(GetHostPacket.class, GetHostEvent.class);
 		networkEvents.put(ChooseCivPacket.class, ChooseCivEvent.class);
 		networkEvents.put(SetWorldSizePacket.class, SetWorldSizeEvent.class);
+		networkEvents.put(CombatPreviewPacket.class, CombatPreviewEvent.class);
 
 		this.playerIndex = 0;
 		this.commandProcessor = new CmdProcessor();
@@ -220,6 +224,7 @@ public class Server extends WebSocketServer {
 	public void setGameState(GameState game) {
 		this.game.onStateEnd();
 		this.game = game;
+		this.game.onStateBegin();
 	}
 
 	@SuppressWarnings("unchecked")

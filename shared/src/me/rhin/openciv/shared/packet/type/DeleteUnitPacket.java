@@ -9,7 +9,6 @@ public class DeleteUnitPacket extends Packet {
 
 	int tileGridX, tileGridY;
 	private int unitID;
-	private String playerOwner;
 
 	@Override
 	public void write(Json json) {
@@ -17,7 +16,6 @@ public class DeleteUnitPacket extends Packet {
 		json.writeValue("tileGridX", tileGridX);
 		json.writeValue("tileGridY", tileGridY);
 		json.writeValue("unitID", unitID);
-		json.writeValue("playerOwner", playerOwner);
 	}
 
 	@Override
@@ -26,14 +24,12 @@ public class DeleteUnitPacket extends Packet {
 		this.tileGridX = jsonData.getInt("tileGridX");
 		this.tileGridY = jsonData.getInt("tileGridY");
 		this.unitID = jsonData.getInt("unitID");
-		this.playerOwner = jsonData.getString("playerOwner");
 	}
 
-	public void setUnit(String playerOwner, int unitID, int tileGridX, int tileGridY) {
+	public void setUnit(int unitID, int tileGridX, int tileGridY) {
 		this.tileGridX = tileGridX;
 		this.tileGridY = tileGridY;
 		this.unitID = unitID;
-		this.playerOwner = playerOwner;
 	}
 
 	public int getTileGridX() {
@@ -46,9 +42,5 @@ public class DeleteUnitPacket extends Packet {
 
 	public int getUnitID() {
 		return unitID;
-	}
-
-	public String getPlayerOwner() {
-		return playerOwner;
 	}
 }
