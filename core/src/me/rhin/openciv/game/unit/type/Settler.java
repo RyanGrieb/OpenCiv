@@ -34,6 +34,11 @@ public class Settler extends UnitItem {
 		public int getCombatStrength() {
 			return 0;
 		}
+		
+		@Override
+		public boolean isCapturable() {
+			return true;	
+		}
 	}
 
 	public static class SettleAction extends AbstractAction {

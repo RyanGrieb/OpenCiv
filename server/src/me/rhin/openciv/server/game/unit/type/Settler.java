@@ -28,6 +28,11 @@ public class Settler extends UnitItem {
 		public int getCombatStrength() {
 			return 0;
 		}
+
+		@Override
+		public boolean isCapturable() {
+			return true;
+		}
 	}
 
 	@Override

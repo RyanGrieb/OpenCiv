@@ -51,6 +51,7 @@ import me.rhin.openciv.shared.packet.type.PlayerDisconnectPacket;
 import me.rhin.openciv.shared.packet.type.PlayerListRequestPacket;
 import me.rhin.openciv.shared.packet.type.SelectUnitPacket;
 import me.rhin.openciv.shared.packet.type.SetProductionItemPacket;
+import me.rhin.openciv.shared.packet.type.SetUnitOwnerPacket;
 import me.rhin.openciv.shared.packet.type.SettleCityPacket;
 import me.rhin.openciv.shared.packet.type.TerritoryGrowPacket;
 import me.rhin.openciv.shared.packet.type.TurnTimeLeftPacket;
@@ -160,6 +161,7 @@ public class InGameState extends GameState implements DisconnectListener, Select
 		}
 	}
 
+	// TODO: Move to map class
 	@Override
 	public void onUnitSelect(WebSocket conn, SelectUnitPacket packet) {
 
@@ -178,6 +180,7 @@ public class InGameState extends GameState implements DisconnectListener, Select
 		conn.send(json.toJson(packet));
 	}
 
+	// TODO: Move to map class
 	@Override
 	public void onUnitMove(WebSocket conn, MoveUnitPacket packet) {
 
@@ -197,61 +200,74 @@ public class InGameState extends GameState implements DisconnectListener, Select
 			if (!targetTile.getTopUnit().getPlayerOwner().equals(unit.getPlayerOwner())) {
 				// We are about to attack this unit on the tile
 				Unit targetUnit = targetTile.getTopUnit();
-
-				// TODO: Delete unit and allow the unit move to continue if the targetUnit gets
-				// destroyed.
-
 				boolean doUnitMove = true;
-				float unitDamage = unit.getDamageTaken(targetUnit);
-				float targetDamage = targetUnit.getDamageTaken(unit);
 
-				unit.setHealth(unit.getHealth() - unitDamage);
-				targetUnit.setHealth(targetUnit.getHealth() - targetDamage);
+				if (unit.isCapturable())
+					return;
 
-				if (targetUnit.getHealth() > 0) {
-					UnitAttackPacket attackPacket = new UnitAttackPacket();
-					attackPacket.setUnitLocations(unit.getStandingTile().getGridX(), unit.getStandingTile().getGridY(),
+				if (targetUnit.isCapturable()) {
+					targetUnit.setPlayerOwner(unit.getPlayerOwner());
+					SetUnitOwnerPacket setOwnerPacket = new SetUnitOwnerPacket();
+					setOwnerPacket.setUnit(targetUnit.getPlayerOwner().getName(), targetUnit.getID(),
 							targetUnit.getStandingTile().getGridX(), targetUnit.getStandingTile().getGridY());
-					attackPacket.setUnitDamage(unitDamage);
-					attackPacket.setTargetDamage(targetDamage);
-
-					unit.reduceMovement(2);
 
 					for (Player player : players) {
-						player.getConn().send(json.toJson(attackPacket));
+						player.getConn().send(json.toJson(setOwnerPacket));
+					}
+				} else {
+
+					float unitDamage = unit.getDamageTaken(targetUnit);
+					float targetDamage = targetUnit.getDamageTaken(unit);
+
+					unit.setHealth(unit.getHealth() - unitDamage);
+					targetUnit.setHealth(targetUnit.getHealth() - targetDamage);
+
+					if (targetUnit.getHealth() > 0) {
+						UnitAttackPacket attackPacket = new UnitAttackPacket();
+						attackPacket.setUnitLocations(unit.getStandingTile().getGridX(),
+								unit.getStandingTile().getGridY(), targetUnit.getStandingTile().getGridX(),
+								targetUnit.getStandingTile().getGridY());
+						attackPacket.setUnitDamage(unitDamage);
+						attackPacket.setTargetDamage(targetDamage);
+
+						unit.reduceMovement(2);
+
+						for (Player player : players) {
+							player.getConn().send(json.toJson(attackPacket));
+						}
+
+						doUnitMove = false;
 					}
 
-					doUnitMove = false;
-				}
+					// Delete units below 1 hp
 
-				// Delete units below 1 hp
+					if (targetUnit.getHealth() <= 0) {
+						targetUnit.getStandingTile().removeUnit(unit);
 
-				if (targetUnit.getHealth() <= 0) {
-					targetUnit.getStandingTile().removeUnit(unit);
+						// FIXME: Redundant code.
+						DeleteUnitPacket removeUnitPacket = new DeleteUnitPacket();
+						removeUnitPacket.setUnit(targetUnit.getID(), targetUnit.getStandingTile().getGridX(),
+								targetUnit.getStandingTile().getGridY());
 
-					// FIXME: Redundant code.
-					DeleteUnitPacket removeUnitPacket = new DeleteUnitPacket();
-					removeUnitPacket.setUnit(targetUnit.getID(), targetUnit.getStandingTile().getGridX(),
-							targetUnit.getStandingTile().getGridY());
-
-					for (Player player : players) {
-						player.getConn().send(json.toJson(removeUnitPacket));
-					}
-					doUnitMove = true;
-				}
-
-				if (unit.getHealth() <= 0) {
-					unit.getStandingTile().removeUnit(unit);
-
-					DeleteUnitPacket removeUnitPacket = new DeleteUnitPacket();
-					removeUnitPacket.setUnit(unit.getID(), unit.getStandingTile().getGridX(),
-							unit.getStandingTile().getGridY());
-
-					for (Player player : players) {
-						player.getConn().send(json.toJson(removeUnitPacket));
+						for (Player player : players) {
+							player.getConn().send(json.toJson(removeUnitPacket));
+						}
+						doUnitMove = true;
 					}
 
-					doUnitMove = false;
+					if (unit.getHealth() <= 0) {
+						unit.getStandingTile().removeUnit(unit);
+
+						DeleteUnitPacket removeUnitPacket = new DeleteUnitPacket();
+						removeUnitPacket.setUnit(unit.getID(), unit.getStandingTile().getGridX(),
+								unit.getStandingTile().getGridY());
+
+						for (Player player : players) {
+							player.getConn().send(json.toJson(removeUnitPacket));
+						}
+
+						doUnitMove = false;
+					}
 				}
 
 				if (!doUnitMove)
@@ -275,6 +291,7 @@ public class InGameState extends GameState implements DisconnectListener, Select
 		}
 	}
 
+	// TODO: Move to game map class?
 	@Override
 	public void onSettleCity(WebSocket conn, SettleCityPacket settleCityPacket) {
 		Player cityPlayer = getPlayerByConn(conn);
@@ -348,6 +365,7 @@ public class InGameState extends GameState implements DisconnectListener, Select
 		}
 	}
 
+	// TODO: Move to city class
 	@Override
 	public void onSetProductionItem(WebSocket conn, SetProductionItemPacket packet) {
 		// Verify if the player owns that city.
@@ -368,6 +386,7 @@ public class InGameState extends GameState implements DisconnectListener, Select
 		conn.send(json.toJson(packet));
 	}
 
+	// TODO: Move to city class
 	@Override
 	public void onClickWorkedTile(WebSocket conn, ClickWorkedTilePacket packet) {
 		Player player = getPlayerByConn(conn);
@@ -382,6 +401,7 @@ public class InGameState extends GameState implements DisconnectListener, Select
 		targetCity.clickWorkedTile(map.getTiles()[packet.getGridX()][packet.getGridY()]);
 	}
 
+	// TODO: Move to city class
 	@Override
 	public void onClickSpecialist(WebSocket conn, ClickSpecialistPacket packet) {
 		// FIXME: This target city stuff is starting to seem redundant, lets fix that
@@ -442,6 +462,7 @@ public class InGameState extends GameState implements DisconnectListener, Select
 		conn.send(json.toJson(packet));
 	}
 
+	// TODO: Split this up into the Unit class
 	@Override
 	public void onCombatPreview(WebSocket conn, CombatPreviewPacket packet) {
 		Unit unit = map.getTiles()[packet.getUnitGridX()][packet.getUnitGridY()].getTopUnit();

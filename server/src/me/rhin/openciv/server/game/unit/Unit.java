@@ -50,6 +50,10 @@ public abstract class Unit implements NextTurnListener {
 
 	public abstract int getCombatStrength();
 
+	public boolean isCapturable() {
+		return false;
+	}
+
 	public boolean setTargetTile(Tile targetTile) {
 		if (targetTile == null)
 			return false;
@@ -268,6 +272,12 @@ public abstract class Unit implements NextTurnListener {
 	}
 
 	public float getDamageTaken(Unit otherUnit) {
+		if (isCapturable())
+			return 100;
+
+		if (otherUnit.isCapturable())
+			return 0;
+
 		// y=30*1.041^(x), x= combat diff
 		return (float) (30 * (Math.pow(1.041, otherUnit.getCombatStrength() - getCombatStrength())));
 	}
@@ -278,5 +288,9 @@ public abstract class Unit implements NextTurnListener {
 
 	public float getHealth() {
 		return health;
+	}
+
+	public void setPlayerOwner(Player playerOwner) {
+		this.playerOwner = playerOwner;
 	}
 }

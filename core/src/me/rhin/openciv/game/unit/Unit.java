@@ -240,7 +240,7 @@ public abstract class Unit extends Actor implements TileObserver, ShapeRenderLis
 			targetingUnit = targetTile.getTopUnit();
 
 		// Open combat preview window once.
-		if (targetingUnit != null) {
+		if (targetingUnit != null && !isCapturable()) {
 			// Close previous combat windows.
 			Civilization.getInstance().getWindowManager().closeWindow(UnitCombatWindow.class);
 			Civilization.getInstance().getWindowManager().addWindow(new UnitCombatWindow(this, targetingUnit));
@@ -248,9 +248,15 @@ public abstract class Unit extends Actor implements TileObserver, ShapeRenderLis
 			Civilization.getInstance().getWindowManager().closeWindow(UnitCombatWindow.class);
 		}
 
-		if (targetingUnit != null)
-			targetSelectionSprite.setColor(Color.RED);
-		else
+		if (targetingUnit != null) {
+
+			if (isCapturable()) {
+				pathVectors.clear();
+				pathMovement = 0;
+				this.targetTile = null;
+			} else
+				targetSelectionSprite.setColor(Color.RED);
+		} else
 			targetSelectionSprite.setColor(Color.YELLOW);
 
 		return true;
@@ -272,18 +278,8 @@ public abstract class Unit extends Actor implements TileObserver, ShapeRenderLis
 		}
 	}
 
-	private Tile removeSmallest(ArrayList<Tile> queue, int fScore[][]) {
-		int smallest = Integer.MAX_VALUE;
-		Tile smallestTile = null;
-		for (Tile tile : queue) {
-			if (fScore[tile.getGridX()][tile.getGridY()] < smallest) {
-				smallest = fScore[tile.getGridX()][tile.getGridY()];
-				smallestTile = tile;
-			}
-		}
-
-		queue.remove(smallestTile);
-		return smallestTile;
+	public boolean isCapturable() {
+		return false;
 	}
 
 	public void moveToTargetTile() {
@@ -357,6 +353,13 @@ public abstract class Unit extends Actor implements TileObserver, ShapeRenderLis
 
 	}
 
+	public void setPlayerOwner(Player playerOwner) {
+		this.playerOwner = playerOwner;
+		this.civIconSprite = playerOwner.getCivType().getIcon().sprite();
+		civIconSprite.setSize(8, 8);
+		civIconSprite.setAlpha(0.8F);
+	}
+
 	public void reduceMovement(int movementCost) {
 		movement -= movementCost;
 	}
@@ -411,5 +414,19 @@ public abstract class Unit extends Actor implements TileObserver, ShapeRenderLis
 
 	public void setHealth(float health) {
 		this.health = health;
+	}
+
+	private Tile removeSmallest(ArrayList<Tile> queue, int fScore[][]) {
+		int smallest = Integer.MAX_VALUE;
+		Tile smallestTile = null;
+		for (Tile tile : queue) {
+			if (fScore[tile.getGridX()][tile.getGridY()] < smallest) {
+				smallest = fScore[tile.getGridX()][tile.getGridY()];
+				smallestTile = tile;
+			}
+		}
+
+		queue.remove(smallestTile);
+		return smallestTile;
 	}
 }
