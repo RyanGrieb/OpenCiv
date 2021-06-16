@@ -12,7 +12,6 @@ import com.badlogic.gdx.utils.Json;
 import me.rhin.openciv.server.Server;
 import me.rhin.openciv.server.game.Player;
 import me.rhin.openciv.server.game.city.building.Building;
-import me.rhin.openciv.server.game.city.building.type.Palace;
 import me.rhin.openciv.server.game.city.citizen.AssignedCitizenWorker;
 import me.rhin.openciv.server.game.city.citizen.CitizenWorker;
 import me.rhin.openciv.server.game.city.citizen.CityCenterCitizenWorker;
@@ -21,8 +20,8 @@ import me.rhin.openciv.server.game.city.specialist.Specialist;
 import me.rhin.openciv.server.game.city.specialist.SpecialistContainer;
 import me.rhin.openciv.server.game.city.specialist.UnemployedSpecialist;
 import me.rhin.openciv.server.game.map.tile.Tile;
-import me.rhin.openciv.server.game.map.tile.Tile.TileTypeWrapper;
 import me.rhin.openciv.server.game.production.ProducibleItemManager;
+import me.rhin.openciv.server.game.unit.AttackableEntity;
 import me.rhin.openciv.server.listener.NextTurnListener;
 import me.rhin.openciv.shared.packet.type.AddSpecialistToContainerPacket;
 import me.rhin.openciv.shared.packet.type.BuildingConstructedPacket;
@@ -34,7 +33,7 @@ import me.rhin.openciv.shared.stat.Stat;
 import me.rhin.openciv.shared.stat.StatLine;
 import me.rhin.openciv.shared.util.MathHelper;
 
-public class City implements SpecialistContainer, NextTurnListener {
+public class City implements AttackableEntity, SpecialistContainer, NextTurnListener {
 
 	private Player playerOwner;
 	private String name;
@@ -477,5 +476,30 @@ public class City implements SpecialistContainer, NextTurnListener {
 	private void setPopulation(int amount) {
 		statLine.setValue(Stat.POPULATION, amount);
 		statLine.setValue(Stat.FOOD_SURPLUS, 0);
+	}
+
+	@Override
+	public int getCombatStrength() {
+		return 20;
+	}
+
+	@Override
+	public boolean isUnitCapturable() {
+		return false;
+	}
+
+	@Override
+	public float getHealth() {
+		return 200;
+	}
+
+	@Override
+	public Tile getTile() {
+		return originTile;
+	}
+
+	@Override
+	public float getDamageTaken(AttackableEntity otherEntity) {
+		return (float) (30 * (Math.pow(1.041, otherEntity.getCombatStrength() - getCombatStrength())));
 	}
 }

@@ -30,7 +30,7 @@ public class Settler extends UnitItem {
 		}
 
 		@Override
-		public boolean isCapturable() {
+		public boolean isUnitCapturable() {
 			return true;
 		}
 	}

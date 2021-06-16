@@ -52,7 +52,7 @@ public class Player implements RelativeMouseMoveListener, LeftClickListener, Rig
 
 		if (rightMouseHeld) {
 			if (selectedUnit != null)
-				selectedUnit.setTargetTile(currentHoveredTile);
+				selectedUnit.setTargetTile(currentHoveredTile, true);
 		}
 
 		if (hoveredTile != null)
@@ -89,7 +89,7 @@ public class Player implements RelativeMouseMoveListener, LeftClickListener, Rig
 			return;
 
 		if (clickType == ClickType.DOWN) {
-			selectedUnit.setTargetTile(hoveredTile);
+			selectedUnit.setTargetTile(hoveredTile, true);
 			rightMouseHeld = true;
 		} else {
 			if (selectedUnit.getCurrentMovement() >= selectedUnit.getPathMovement()) {

@@ -13,6 +13,7 @@ import me.rhin.openciv.server.game.city.City;
 import me.rhin.openciv.server.game.map.GameMap;
 import me.rhin.openciv.server.game.map.tile.TileType.TileLayer;
 import me.rhin.openciv.server.game.map.tile.TileType.TileProperty;
+import me.rhin.openciv.server.game.unit.AttackableEntity;
 import me.rhin.openciv.server.game.unit.Unit;
 import me.rhin.openciv.shared.stat.StatLine;
 
@@ -389,5 +390,31 @@ public class Tile {
 		}
 
 		return topUnit;
+	}
+
+	public AttackableEntity getAttackableEntity() {
+
+		Unit unit = getTopUnit();
+		if (unit != null)
+			return unit;
+
+		if (city != null)
+			return city;
+
+		return null;
+	}
+
+	public City getCity() {
+		return city;
+	}
+
+	public Unit getCaptureableUnit() {
+		Unit capturableUnit = null;
+		for (Unit unit : units) {
+			if (unit.isUnitCapturable())
+				capturableUnit = unit;
+		}
+
+		return capturableUnit;
 	}
 }

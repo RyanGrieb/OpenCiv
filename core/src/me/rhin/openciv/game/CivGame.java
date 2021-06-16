@@ -83,7 +83,7 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 		Civilization.getInstance().getEventManager().addListener(TerritoryGrowListener.class, this);
 		Civilization.getInstance().getEventManager().addListener(UnitAttackListener.class, this);
 		Civilization.getInstance().getEventManager().addListener(SetUnitOwnerListener.class, this);
-		
+
 		Civilization.getInstance().getNetworkManager().sendPacket(new FetchPlayerPacket());
 		Civilization.getInstance().getNetworkManager().sendPacket(new PlayerListRequestPacket());
 	}
@@ -159,7 +159,7 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 		Tile targetTile = map.getTiles()[packet.getTargetGridX()][packet.getTargetGridY()];
 		Unit unit = prevTile.getUnitFromID(packet.getUnitID());
 
-		unit.setTargetTile(targetTile);
+		unit.setTargetTile(targetTile, false);
 		unit.moveToTargetTile();
 
 		// If we own this unit, add the movement cooldown.
@@ -222,9 +222,8 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 		targetUnit.flashColor(Color.RED);
 
 		unit.setHealth(unit.getHealth() - packet.getUnitDamage());
-		targetUnit.setHealth(targetUnit.getHealth() - packet.getTargetUnitDamage());
-
 		unit.reduceMovement(2);
+		targetUnit.setHealth(targetUnit.getHealth() - packet.getTargetUnitDamage());
 	}
 
 	@Override

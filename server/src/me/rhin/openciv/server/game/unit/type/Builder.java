@@ -28,7 +28,7 @@ public class Builder extends UnitItem {
 		}
 
 		@Override
-		public boolean isCapturable() {
+		public boolean isUnitCapturable() {
 			return true;
 		}
 	}

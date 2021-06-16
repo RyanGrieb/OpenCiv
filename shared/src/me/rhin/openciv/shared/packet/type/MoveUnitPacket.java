@@ -78,4 +78,9 @@ public class MoveUnitPacket extends Packet {
 	public String getPlayerOwner() {
 		return playerOwner;
 	}
+
+	public void setLocation(int gridX, int gridY) {
+		this.targetGridX = gridX;
+		this.targetGridY = gridY;
+	}
 }

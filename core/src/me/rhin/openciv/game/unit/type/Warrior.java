@@ -1,7 +1,5 @@
 package me.rhin.openciv.game.unit.type;
 
-import com.badlogic.gdx.graphics.Texture;
-
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.map.tile.Tile;
 import me.rhin.openciv.game.map.tile.TileType.TileProperty;

@@ -36,7 +36,7 @@ public class UnitWindow extends AbstractWindow implements ResizeListener, UnitAt
 		addActor(blankBackground);
 
 		this.healthbar = new Healthbar(getWidth() - 200, getHeight() - 35, 200, 15);
-		healthbar.setHealth(unit.getHealth());
+		healthbar.setHealth(unit.getMaxHealth(), unit.getHealth());
 		addActor(healthbar);
 
 		this.unitNameLabel = new CustomLabel(unit.getName(), Align.center, getWidth() - 200, 100 - 20, 200, 20);
@@ -69,7 +69,7 @@ public class UnitWindow extends AbstractWindow implements ResizeListener, UnitAt
 				.getTargetGridY()].getTopUnit();
 
 		if (unit.equals(attackingUnit) || unit.equals(targetUnit)) {
-			healthbar.setHealth(unit.getHealth());
+			healthbar.setHealth(unit.getMaxHealth(), unit.getHealth());
 		}
 	}
 

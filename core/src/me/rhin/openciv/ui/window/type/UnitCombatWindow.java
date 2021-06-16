@@ -4,6 +4,7 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.Align;
 
 import me.rhin.openciv.Civilization;
+import me.rhin.openciv.game.unit.AttackableEntity;
 import me.rhin.openciv.game.unit.Unit;
 import me.rhin.openciv.listener.CombatPreviewListener;
 import me.rhin.openciv.listener.ResizeListener;
@@ -17,18 +18,24 @@ import me.rhin.openciv.ui.window.AbstractWindow;
 public class UnitCombatWindow extends AbstractWindow implements ResizeListener, CombatPreviewListener {
 
 	// Show preview of health amounts of the unit, and the unit being attacked.
-	private BlankBackground blankBackground;
-	private ColoredBackground unitIcon;
-	private ColoredBackground targetUnitIcon;
-	private CustomLabel combatPreviewLabel;
-	private CustomLabel unitLabel;
-	private CustomLabel targetUnitLabel;
-	private CustomLabel versusLabel;
-	private Healthbar unitHealthbar;
-	private Healthbar targetUnitHealthbar;
+	private AttackableEntity attackingEntity;
+	private AttackableEntity targetEntity;
 
-	public UnitCombatWindow(Unit unit, Unit targetUnit) {
+	private BlankBackground blankBackground;
+	private ColoredBackground attackerIcon;
+	private ColoredBackground targetIcon;
+	private CustomLabel combatPreviewLabel;
+	private CustomLabel attackerLabel;
+	private CustomLabel targetLabel;
+	private CustomLabel versusLabel;
+	private Healthbar attackerHealthbar;
+	private Healthbar targetHealthbar;
+
+	public UnitCombatWindow(AttackableEntity attackingEntity, AttackableEntity targetEntity) {
 		super.setBounds(viewport.getWorldWidth() - 200, 105, 200, 75);
+
+		this.attackingEntity = attackingEntity;
+		this.targetEntity = targetEntity;
 
 		this.blankBackground = new BlankBackground(0, 0, 200, 75);
 		addActor(blankBackground);
@@ -38,38 +45,38 @@ public class UnitCombatWindow extends AbstractWindow implements ResizeListener, 
 		addActor(combatPreviewLabel);
 
 		// FIXME: The naming scheme of coloredbackground is weird.
-		this.unitIcon = new ColoredBackground(unit.getPlayerOwner().getCivType().getIcon().sprite(), 2,
+		this.attackerIcon = new ColoredBackground(attackingEntity.getPlayerOwner().getCivType().getIcon().sprite(), 2,
 				getHeight() - 35, 16, 16);
-		addActor(unitIcon);
+		addActor(attackerIcon);
 
-		this.unitLabel = new CustomLabel(unit.getName());
-		unitLabel.setPosition(20, getHeight() - 35);
-		addActor(unitLabel);
+		this.attackerLabel = new CustomLabel(attackingEntity.getName());
+		attackerLabel.setPosition(20, getHeight() - 35);
+		addActor(attackerLabel);
 
-		this.unitHealthbar = new Healthbar(getWidth() - 77, unitLabel.getY(), 75, 15);
-		unitHealthbar.setHealth(unit.getHealth());
-		addActor(unitHealthbar);
+		this.attackerHealthbar = new Healthbar(getWidth() - 77, attackerLabel.getY(), 75, 15);
+		attackerHealthbar.setHealth(attackingEntity.getMaxHealth(), attackingEntity.getHealth());
+		addActor(attackerHealthbar);
 
 		this.versusLabel = new CustomLabel("Vs.");
 		versusLabel.setPosition(35, getHeight() - 50);
 		addActor(versusLabel);
 
-		this.targetUnitIcon = new ColoredBackground(targetUnit.getPlayerOwner().getCivType().getIcon().sprite(), 2,
+		this.targetIcon = new ColoredBackground(targetEntity.getPlayerOwner().getCivType().getIcon().sprite(), 2,
 				getHeight() - 65, 16, 16);
-		addActor(targetUnitIcon);
+		addActor(targetIcon);
 
-		this.targetUnitLabel = new CustomLabel(targetUnit.getName());
-		targetUnitLabel.setPosition(20, getHeight() - 65);
-		addActor(targetUnitLabel);
+		this.targetLabel = new CustomLabel(targetEntity.getName());
+		targetLabel.setPosition(20, getHeight() - 65);
+		addActor(targetLabel);
 
-		this.targetUnitHealthbar = new Healthbar(getWidth() - 77, targetUnitLabel.getY(), 75, 15);
-		targetUnitHealthbar.setHealth(targetUnit.getHealth());
-		addActor(targetUnitHealthbar);
+		this.targetHealthbar = new Healthbar(getWidth() - 77, targetLabel.getY(), 75, 15);
+		targetHealthbar.setHealth(attackingEntity.getMaxHealth(), targetEntity.getHealth());
+		addActor(targetHealthbar);
 
 		// Attempt to get combat preview values from the server.
 		CombatPreviewPacket packet = new CombatPreviewPacket();
-		packet.setUnitLocations(unit.getStandingTile().getGridX(), unit.getStandingTile().getGridY(),
-				targetUnit.getStandingTile().getGridX(), targetUnit.getStandingTile().getGridY());
+		packet.setUnitLocations(attackingEntity.getTile().getGridX(), attackingEntity.getTile().getGridY(),
+				targetEntity.getTile().getGridX(), targetEntity.getTile().getGridY());
 		Civilization.getInstance().getNetworkManager().sendPacket(packet);
 
 		Civilization.getInstance().getEventManager().addListener(CombatPreviewListener.class, this);
@@ -79,9 +86,15 @@ public class UnitCombatWindow extends AbstractWindow implements ResizeListener, 
 	public void onCombatPreview(CombatPreviewPacket packet) {
 		float unitDamage = packet.getUnitDamage();
 		float targetUnitDamage = packet.getTargetUnitDamage();
+		attackerHealthbar.setHealth(attackingEntity.getMaxHealth(),
+				MathUtils.clamp(attackerHealthbar.getHealth() - unitDamage, 0, 200));
+		targetHealthbar.setHealth(targetEntity.getMaxHealth(),
+				MathUtils.clamp(targetHealthbar.getHealth() - targetUnitDamage, 0, 200));
+	}
 
-		unitHealthbar.setHealth(MathUtils.clamp(unitHealthbar.getHealth() - unitDamage, 0, 100));
-		targetUnitHealthbar.setHealth(MathUtils.clamp(targetUnitHealthbar.getHealth() - targetUnitDamage, 0, 100));
+	@Override
+	public void onClose() {
+		Civilization.getInstance().getEventManager().removeListener(CombatPreviewListener.class, this);
 	}
 
 	@Override

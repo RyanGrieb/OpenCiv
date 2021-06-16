@@ -7,16 +7,15 @@ import com.badlogic.gdx.math.Vector2;
 
 import me.rhin.openciv.server.Server;
 import me.rhin.openciv.server.game.Player;
-import me.rhin.openciv.server.game.map.GameMap;
 import me.rhin.openciv.server.game.map.tile.Tile;
 import me.rhin.openciv.server.listener.NextTurnListener;
-import me.rhin.openciv.shared.packet.type.NextTurnPacket;
 
-public abstract class Unit implements NextTurnListener {
+public abstract class Unit implements AttackableEntity, NextTurnListener {
 
 	private static int unitID = 0;
 
 	private int id;
+	private Tile[][] cameFrom;
 	private ArrayList<Vector2[]> pathVectors = new ArrayList<>();
 	private Player playerOwner;
 	private float x, y;
@@ -46,13 +45,20 @@ public abstract class Unit implements NextTurnListener {
 		this.movement = getMaxMovement();
 	}
 
+	@Override
+	public boolean isUnitCapturable() {
+		return false;
+	}
+
+	// FIXME: Replace getStandingTile method
+	@Override
+	public Tile getTile() {
+		return standingTile;
+	}
+
 	public abstract int getMovementCost(Tile prevTile, Tile adjTile);
 
 	public abstract int getCombatStrength();
-
-	public boolean isCapturable() {
-		return false;
-	}
 
 	public boolean setTargetTile(Tile targetTile) {
 		if (targetTile == null)
@@ -92,7 +98,7 @@ public abstract class Unit implements NextTurnListener {
 		int maxNodes = Server.getInstance().getMap().getMaxNodes();
 
 		ArrayList<Tile> openSet = new ArrayList<>();
-		Tile[][] cameFrom = new Tile[width][height];
+		cameFrom = new Tile[width][height];
 		int[][] gScores = new int[width][height];
 		int[][] fScores = new int[width][height];
 
@@ -219,6 +225,9 @@ public abstract class Unit implements NextTurnListener {
 
 	public void reduceMovement(int movementCost) {
 		movement -= movementCost;
+
+		if (movement < 0)
+			movement = 0;
 	}
 
 	public float getMovement() {
@@ -271,15 +280,15 @@ public abstract class Unit implements NextTurnListener {
 		return id;
 	}
 
-	public float getDamageTaken(Unit otherUnit) {
-		if (isCapturable())
+	public float getDamageTaken(AttackableEntity otherEntity) {
+		if (isUnitCapturable())
 			return 100;
 
-		if (otherUnit.isCapturable())
+		if (otherEntity.isUnitCapturable())
 			return 0;
 
 		// y=30*1.041^(x), x= combat diff
-		return (float) (30 * (Math.pow(1.041, otherUnit.getCombatStrength() - getCombatStrength())));
+		return (float) (30 * (Math.pow(1.041, otherEntity.getCombatStrength() - getCombatStrength())));
 	}
 
 	public void setHealth(float health) {
@@ -292,5 +301,9 @@ public abstract class Unit implements NextTurnListener {
 
 	public void setPlayerOwner(Player playerOwner) {
 		this.playerOwner = playerOwner;
+	}
+
+	public Tile[][] getCameFromTiles() {
+		return cameFrom;
 	}
 }

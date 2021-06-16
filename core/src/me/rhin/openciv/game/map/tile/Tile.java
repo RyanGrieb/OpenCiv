@@ -456,11 +456,33 @@ public class Tile extends Actor implements ShapeRenderListener, TileObserver {
 		return topUnit;
 	}
 
+	public City getCity() {
+		return city;
+	}
+
+	public void removeTileObserver(TileObserver tileObserver) {
+		// Update visibility
+
+		ArrayList<Tile> adjTiles = new ArrayList<>();
+		adjTiles.add(this);
+		for (Tile tile : getAdjTiles())
+			adjTiles.add(tile);
+
+		for (Tile tile : adjTiles) {
+
+			tile.getTileObservers().remove(tileObserver);
+			for (Tile adjTile : tile.getAdjTiles()) {
+				adjTile.getTileObservers().remove(tileObserver);
+			}
+
+		}
+	}
+
 	private void setDiscovered(boolean discovered) {
 		this.discovered = discovered;
 	}
 
-	private void addTileObserver(TileObserver tileObserver) {
+	public void addTileObserver(TileObserver tileObserver) {
 		// Is hill
 		boolean isHill = getBaseTileType() == TileType.GRASS_HILL || getBaseTileType() == TileType.DESERT_HILL
 				|| getBaseTileType() == TileType.PLAINS_HILL;
@@ -490,24 +512,6 @@ public class Tile extends Actor implements ShapeRenderListener, TileObserver {
 				adjTile.setDiscovered(true);
 				if (!adjTile.getTileObservers().contains(tileObserver))
 					adjTile.getTileObservers().add(tileObserver);
-			}
-
-		}
-	}
-
-	private void removeTileObserver(TileObserver tileObserver) {
-		// Update visibility
-
-		ArrayList<Tile> adjTiles = new ArrayList<>();
-		adjTiles.add(this);
-		for (Tile tile : getAdjTiles())
-			adjTiles.add(tile);
-
-		for (Tile tile : adjTiles) {
-
-			tile.getTileObservers().remove(tileObserver);
-			for (Tile adjTile : tile.getAdjTiles()) {
-				adjTile.getTileObservers().remove(tileObserver);
 			}
 
 		}

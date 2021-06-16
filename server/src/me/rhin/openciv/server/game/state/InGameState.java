@@ -22,6 +22,7 @@ import me.rhin.openciv.server.game.map.tile.Tile;
 import me.rhin.openciv.server.game.map.tile.Tile.TileTypeWrapper;
 import me.rhin.openciv.server.game.map.tile.TileType;
 import me.rhin.openciv.server.game.map.tile.TileType.TileProperty;
+import me.rhin.openciv.server.game.unit.AttackableEntity;
 import me.rhin.openciv.server.game.unit.Unit;
 import me.rhin.openciv.server.game.unit.type.Settler.SettlerUnit;
 import me.rhin.openciv.server.game.unit.type.Warrior.WarriorUnit;
@@ -194,101 +195,106 @@ public class InGameState extends GameState implements DisconnectListener, Select
 		}
 
 		Tile targetTile = map.getTiles()[packet.getTargetGridX()][packet.getTargetGridY()];
+		Tile originalTargetTile = map.getTiles()[packet.getTargetGridX()][packet.getTargetGridY()];
 		Json json = new Json();
 
-		if (targetTile.getTopUnit() != null)
-			if (!targetTile.getTopUnit().getPlayerOwner().equals(unit.getPlayerOwner())) {
+		unit.setTargetTile(targetTile);
+
+		// If were moving onto a unit or city. Stop the unit just outside the target
+		// unit.
+		if (targetTile.getAttackableEntity() != null)
+			if (!targetTile.getAttackableEntity().getPlayerOwner().equals(unit.getPlayerOwner())
+					&& !targetTile.getAttackableEntity().isUnitCapturable()) {
+				targetTile = unit.getCameFromTiles()[targetTile.getGridX()][targetTile.getGridY()];
+				if (targetTile != null) {
+					unit.setTargetTile(targetTile);
+				} else // If the came from tile is null, assume it's where we are standing
+					targetTile = unit.getStandingTile();
+			}
+
+		if (unit.getMovement() >= unit.getPathMovement() && !unit.getStandingTile().equals(targetTile)) {
+
+			unit.moveToTargetTile();
+			unit.getPlayerOwner().setSelectedUnit(null);
+			unit.reduceMovement(unit.getPathMovement());
+
+			packet.setMovementCost(unit.getPathMovement());
+			packet.setLocation(unit.getStandingTile().getGridX(), unit.getStandingTile().getGridY());
+
+			for (Player player : players) {
+				player.getConn().send(json.toJson(packet));
+			}
+		}
+
+		// If the tile we are moving on has a capturable unit.
+		if (targetTile.getCaptureableUnit() != null) {
+			Unit targetUnit = targetTile.getCaptureableUnit();
+
+			// Problem: Wrong id being set in the packet?
+			targetUnit.setPlayerOwner(unit.getPlayerOwner());
+			SetUnitOwnerPacket setOwnerPacket = new SetUnitOwnerPacket();
+			setOwnerPacket.setUnit(targetUnit.getPlayerOwner().getName(), targetUnit.getID(),
+					targetUnit.getStandingTile().getGridX(), targetUnit.getStandingTile().getGridY());
+
+			for (Player player : players) {
+				player.getConn().send(json.toJson(setOwnerPacket));
+			}
+		}
+
+		// Handle the targetTile being a enemy unit.
+		if (originalTargetTile.getTopUnit() != null)
+			if (!originalTargetTile.getTopUnit().getPlayerOwner().equals(unit.getPlayerOwner())) {
 				// We are about to attack this unit on the tile
-				Unit targetUnit = targetTile.getTopUnit();
-				boolean doUnitMove = true;
+				Unit targetUnit = originalTargetTile.getTopUnit();
 
-				if (unit.isCapturable())
-					return;
+				float unitDamage = unit.getDamageTaken(targetUnit);
+				float targetDamage = targetUnit.getDamageTaken(unit);
 
-				if (targetUnit.isCapturable()) {
-					targetUnit.setPlayerOwner(unit.getPlayerOwner());
-					SetUnitOwnerPacket setOwnerPacket = new SetUnitOwnerPacket();
-					setOwnerPacket.setUnit(targetUnit.getPlayerOwner().getName(), targetUnit.getID(),
+				unit.setHealth(unit.getHealth() - unitDamage);
+				targetUnit.setHealth(targetUnit.getHealth() - targetDamage);
+
+				if (targetUnit.getHealth() > 0) {
+					UnitAttackPacket attackPacket = new UnitAttackPacket();
+					attackPacket.setUnitLocations(unit.getStandingTile().getGridX(), unit.getStandingTile().getGridY(),
 							targetUnit.getStandingTile().getGridX(), targetUnit.getStandingTile().getGridY());
+					attackPacket.setUnitDamage(unitDamage);
+					attackPacket.setTargetDamage(targetDamage);
 
 					for (Player player : players) {
-						player.getConn().send(json.toJson(setOwnerPacket));
-					}
-				} else {
-
-					float unitDamage = unit.getDamageTaken(targetUnit);
-					float targetDamage = targetUnit.getDamageTaken(unit);
-
-					unit.setHealth(unit.getHealth() - unitDamage);
-					targetUnit.setHealth(targetUnit.getHealth() - targetDamage);
-
-					if (targetUnit.getHealth() > 0) {
-						UnitAttackPacket attackPacket = new UnitAttackPacket();
-						attackPacket.setUnitLocations(unit.getStandingTile().getGridX(),
-								unit.getStandingTile().getGridY(), targetUnit.getStandingTile().getGridX(),
-								targetUnit.getStandingTile().getGridY());
-						attackPacket.setUnitDamage(unitDamage);
-						attackPacket.setTargetDamage(targetDamage);
-
-						unit.reduceMovement(2);
-
-						for (Player player : players) {
-							player.getConn().send(json.toJson(attackPacket));
-						}
-
-						doUnitMove = false;
-					}
-
-					// Delete units below 1 hp
-
-					if (targetUnit.getHealth() <= 0) {
-						targetUnit.getStandingTile().removeUnit(unit);
-
-						// FIXME: Redundant code.
-						DeleteUnitPacket removeUnitPacket = new DeleteUnitPacket();
-						removeUnitPacket.setUnit(targetUnit.getID(), targetUnit.getStandingTile().getGridX(),
-								targetUnit.getStandingTile().getGridY());
-
-						for (Player player : players) {
-							player.getConn().send(json.toJson(removeUnitPacket));
-						}
-						doUnitMove = true;
-					}
-
-					if (unit.getHealth() <= 0) {
-						unit.getStandingTile().removeUnit(unit);
-
-						DeleteUnitPacket removeUnitPacket = new DeleteUnitPacket();
-						removeUnitPacket.setUnit(unit.getID(), unit.getStandingTile().getGridX(),
-								unit.getStandingTile().getGridY());
-
-						for (Player player : players) {
-							player.getConn().send(json.toJson(removeUnitPacket));
-						}
-
-						doUnitMove = false;
+						player.getConn().send(json.toJson(attackPacket));
 					}
 				}
 
-				if (!doUnitMove)
-					return;
+				// Delete units below 1 hp
+
+				//If target is unit, use this method. if city, implement that other one
+				if (targetUnit.getHealth() <= 0) {
+					targetUnit.getStandingTile().removeUnit(unit);
+
+					// FIXME: Redundant code.
+					DeleteUnitPacket removeUnitPacket = new DeleteUnitPacket();
+					removeUnitPacket.setUnit(targetUnit.getID(), targetUnit.getStandingTile().getGridX(),
+							targetUnit.getStandingTile().getGridY());
+
+					for (Player player : players) {
+						player.getConn().send(json.toJson(removeUnitPacket));
+					}
+				}
+
+				if (unit.getHealth() <= 0) {
+					unit.getStandingTile().removeUnit(unit);
+
+					DeleteUnitPacket removeUnitPacket = new DeleteUnitPacket();
+					removeUnitPacket.setUnit(unit.getID(), unit.getStandingTile().getGridX(),
+							unit.getStandingTile().getGridY());
+
+					for (Player player : players) {
+						player.getConn().send(json.toJson(removeUnitPacket));
+					}
+				}
 
 			}
-		unit.setTargetTile(targetTile);
 
-		// The player is hacking here or i'm a poop coder
-		if (unit.getMovement() < unit.getPathMovement())
-			return;
-
-		unit.moveToTargetTile();
-		unit.getPlayerOwner().setSelectedUnit(null);
-		unit.reduceMovement(packet.getMovementCost());
-
-		packet.setMovementCost(unit.getPathMovement());
-
-		for (Player player : players) {
-			player.getConn().send(json.toJson(packet));
-		}
 	}
 
 	// TODO: Move to game map class?
@@ -326,6 +332,8 @@ public class InGameState extends GameState implements DisconnectListener, Select
 		City city = new City(cityPlayer, cityName, tile);
 		cityPlayer.addCity(city);
 		cityPlayer.setSelectedUnit(null);
+
+		tile.removeUnit(unit);
 
 		DeleteUnitPacket deleteUnitPacket = new DeleteUnitPacket();
 		deleteUnitPacket.setUnit(unit.getID(), settleCityPacket.getGridX(), settleCityPacket.getGridY());
@@ -465,13 +473,13 @@ public class InGameState extends GameState implements DisconnectListener, Select
 	// TODO: Split this up into the Unit class
 	@Override
 	public void onCombatPreview(WebSocket conn, CombatPreviewPacket packet) {
-		Unit unit = map.getTiles()[packet.getUnitGridX()][packet.getUnitGridY()].getTopUnit();
-		Unit targetUnit = map.getTiles()[packet.getTargetGridX()][packet.getTargetGridY()].getTopUnit();
-		// TODO: We need to include city combat as well.
-		// TODO: Implement unit xp
+		AttackableEntity attackingEntity = map.getTiles()[packet.getUnitGridX()][packet.getUnitGridY()]
+				.getAttackableEntity();
+		AttackableEntity targetEntity = map.getTiles()[packet.getTargetGridX()][packet.getTargetGridY()]
+				.getAttackableEntity();
 
-		packet.setUnitDamage(unit.getDamageTaken(targetUnit));
-		packet.setTargetDamage(targetUnit.getDamageTaken(unit));
+		packet.setUnitDamage(attackingEntity.getDamageTaken(targetEntity));
+		packet.setTargetDamage(targetEntity.getDamageTaken(attackingEntity));
 		// NOTE: Cities have initial health of 200.
 		Json json = new Json();
 		conn.send(json.toJson(packet));

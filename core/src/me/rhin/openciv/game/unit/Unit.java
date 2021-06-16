@@ -27,7 +27,8 @@ import me.rhin.openciv.shared.packet.type.NextTurnPacket;
 import me.rhin.openciv.ui.window.type.UnitCombatWindow;
 import me.rhin.openciv.ui.window.type.UnitWindow;
 
-public abstract class Unit extends Actor implements TileObserver, ShapeRenderListener, NextTurnListener {
+public abstract class Unit extends Actor
+		implements AttackableEntity, TileObserver, ShapeRenderListener, NextTurnListener {
 
 	protected boolean canAttack;
 	protected ArrayList<AbstractAction> customActions;
@@ -41,7 +42,7 @@ public abstract class Unit extends Actor implements TileObserver, ShapeRenderLis
 	private boolean selected;
 	private float movement;
 	private float health;
-	private Unit targetingUnit;
+	private AttackableEntity targetEntity;
 
 	public Unit(int id, String unitName, Player playerOwner, Tile standingTile, TextureEnum assetEnum) {
 		Civilization.getInstance().getEventManager().addListener(ShapeRenderListener.class, this);
@@ -64,7 +65,7 @@ public abstract class Unit extends Actor implements TileObserver, ShapeRenderLis
 		setSize(standingTile.getWidth(), standingTile.getHeight());
 
 		this.movement = getMaxMovement();
-		this.health = 100;
+		this.health = getMaxHealth();
 
 		playerOwner.addUnit(this);
 
@@ -77,8 +78,6 @@ public abstract class Unit extends Actor implements TileObserver, ShapeRenderLis
 	}
 
 	public abstract int getMovementCost(Tile prevTile, Tile adjTile);
-
-	public abstract int getCombatStrength();
 
 	@Override
 	public void act(float delta) {
@@ -105,7 +104,12 @@ public abstract class Unit extends Actor implements TileObserver, ShapeRenderLis
 		this.movement = getMaxMovement();
 	}
 
-	public boolean setTargetTile(Tile targetTile) {
+	@Override
+	public float getMaxHealth() {
+		return 100;
+	}
+
+	public boolean setTargetTile(Tile targetTile, boolean wasMouseClick) {
 		if (targetTile == null)
 			return false;
 
@@ -235,22 +239,27 @@ public abstract class Unit extends Actor implements TileObserver, ShapeRenderLis
 		this.targetTile = targetTile;
 		this.pathMovement = pathMovement;
 
-		targetingUnit = null;
+		// TODO: How would we implement cities able to be attacked?
+
+		targetEntity = null;
 		if (targetTile.getTopUnit() != null && !targetTile.getTopUnit().getPlayerOwner().equals(playerOwner))
-			targetingUnit = targetTile.getTopUnit();
+			targetEntity = targetTile.getTopUnit();
+		if (targetTile.getCity() != null && !targetTile.getCity().getPlayerOwner().equals(playerOwner)) {
+			targetEntity = targetTile.getCity();
+		}
 
 		// Open combat preview window once.
-		if (targetingUnit != null && !isCapturable()) {
+		if (targetEntity != null && !isUnitCapturable() && wasMouseClick) {
 			// Close previous combat windows.
 			Civilization.getInstance().getWindowManager().closeWindow(UnitCombatWindow.class);
-			Civilization.getInstance().getWindowManager().addWindow(new UnitCombatWindow(this, targetingUnit));
+			Civilization.getInstance().getWindowManager().addWindow(new UnitCombatWindow(this, targetEntity));
 		} else {
 			Civilization.getInstance().getWindowManager().closeWindow(UnitCombatWindow.class);
 		}
 
-		if (targetingUnit != null) {
+		if (targetEntity != null) {
 
-			if (isCapturable()) {
+			if (isUnitCapturable()) {
 				pathVectors.clear();
 				pathMovement = 0;
 				this.targetTile = null;
@@ -265,7 +274,7 @@ public abstract class Unit extends Actor implements TileObserver, ShapeRenderLis
 	@Override
 	public void onShapeRender(ShapeRenderer shapeRenderer) {
 		// FIXME: We get a concurrency error here at some point
-		if (targetingUnit != null)
+		if (targetEntity != null)
 			shapeRenderer.setColor(Color.RED);
 		else
 			shapeRenderer.setColor(Color.YELLOW);
@@ -278,8 +287,15 @@ public abstract class Unit extends Actor implements TileObserver, ShapeRenderLis
 		}
 	}
 
-	public boolean isCapturable() {
+	@Override
+	public boolean isUnitCapturable() {
 		return false;
+	}
+
+	// FIXME: Have this method replace getStandingTile()
+	@Override
+	public Tile getTile() {
+		return standingTile;
 	}
 
 	public void moveToTargetTile() {
@@ -356,12 +372,19 @@ public abstract class Unit extends Actor implements TileObserver, ShapeRenderLis
 	public void setPlayerOwner(Player playerOwner) {
 		this.playerOwner = playerOwner;
 		this.civIconSprite = playerOwner.getCivType().getIcon().sprite();
-		civIconSprite.setSize(8, 8);
-		civIconSprite.setAlpha(0.8F);
+		civIconSprite.setBounds(getX() + 10, getY() + 20, 8, 8);
+
+		if (!playerOwner.equals(Civilization.getInstance().getGame().getPlayer()))
+			standingTile.removeTileObserver(this);
+		else
+			standingTile.addTileObserver(this);
 	}
 
 	public void reduceMovement(int movementCost) {
 		movement -= movementCost;
+
+		if (movement < 0)
+			movement = 0;
 	}
 
 	public float getCurrentMovement() {

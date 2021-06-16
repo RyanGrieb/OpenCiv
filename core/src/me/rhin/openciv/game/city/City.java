@@ -18,6 +18,7 @@ import me.rhin.openciv.game.map.tile.Tile;
 import me.rhin.openciv.game.map.tile.TileObserver;
 import me.rhin.openciv.game.player.Player;
 import me.rhin.openciv.game.production.ProducibleItemManager;
+import me.rhin.openciv.game.unit.AttackableEntity;
 import me.rhin.openciv.listener.AddSpecialistToContainerListener;
 import me.rhin.openciv.listener.ApplyProductionToItemListener;
 import me.rhin.openciv.listener.BuildingConstructedListener;
@@ -41,8 +42,9 @@ import me.rhin.openciv.ui.label.CustomLabel;
 import me.rhin.openciv.ui.window.type.CityInfoWindow;
 
 //FIXME: We should have a interface for these networking interface.
-public class City extends Actor implements TileObserver, SpecialistContainer, BuildingConstructedListener, CityStatUpdateListener,
-		SetProductionItemListener, ApplyProductionToItemListener, FinishProductionItemListener,
+public class City extends Actor
+		implements AttackableEntity, TileObserver, SpecialistContainer, BuildingConstructedListener,
+		CityStatUpdateListener, SetProductionItemListener, ApplyProductionToItemListener, FinishProductionItemListener,
 		SetCitizenTileWorkerListener, AddSpecialistToContainerListener, RemoveSpecialistFromContainerListener {
 
 	private Tile originTile;
@@ -55,6 +57,7 @@ public class City extends Actor implements TileObserver, SpecialistContainer, Bu
 	private StatLine statLine;
 	private CustomLabel nameLabel;
 	private Sprite nameIcon;
+	private float health;
 
 	public City(Tile originTile, Player playerOwner, String name) {
 		this.originTile = originTile;
@@ -72,6 +75,8 @@ public class City extends Actor implements TileObserver, SpecialistContainer, Bu
 
 		this.nameIcon = playerOwner.getCivType().getIcon().sprite();
 		nameIcon.setBounds(nameLabel.getX() - 20, nameLabel.getY() - 4, 16, 16);
+
+		this.health = getMaxHealth();
 
 		// FIXME: The actor size & position really shouldn't be confined to the label.
 		this.setPosition(nameLabel.getX() - 20, nameLabel.getY() - 4);
@@ -237,6 +242,31 @@ public class City extends Actor implements TileObserver, SpecialistContainer, Bu
 		return SpecialistType.UNEMPLOYED;
 	}
 
+	@Override
+	public int getCombatStrength() {
+		return 20;
+	}
+
+	@Override
+	public boolean isUnitCapturable() {
+		return false;
+	}
+
+	@Override
+	public float getHealth() {
+		return health;
+	}
+
+	@Override
+	public float getMaxHealth() {
+		return 200;
+	}
+
+	@Override
+	public Tile getTile() {
+		return originTile;
+	}
+
 	public void onClick() {
 		if (!playerOwner.equals(Civilization.getInstance().getGame().getPlayer())
 				|| Civilization.getInstance().getWindowManager().isOpenWindow(CityInfoWindow.class))
@@ -288,6 +318,7 @@ public class City extends Actor implements TileObserver, SpecialistContainer, Bu
 		return citizenWorkers;
 	}
 
+	// FIXME: Have getTile() replace this redundant method.
 	public Tile getOriginTile() {
 		return originTile;
 	}

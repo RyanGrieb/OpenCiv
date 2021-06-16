@@ -45,13 +45,12 @@ public class Healthbar extends Group {
 		return health;
 	}
 
-	public void setHealth(float amount) {
+	public void setHealth(float maxHealth, float amount) {
 		// FIXME: Account for setting health back to a greater value
-		healthLabel.setText((int) amount + "%");
+		healthLabel.setText((int) ((amount / maxHealth) * 100) + "%");
 		healthLabel.setBounds(0, 0, getWidth(), getHeight());
 		healthLabel.setAlignment(Align.center);
 
-		float maxHealth = 100;
 		this.health = amount;
 		float newWidth = (originalWidth * (amount / maxHealth));
 		healthBarActor.setWidth(newWidth);
