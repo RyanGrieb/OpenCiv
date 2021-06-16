@@ -14,6 +14,7 @@ import me.rhin.openciv.game.civilization.CivType;
 import me.rhin.openciv.game.map.GameMap;
 import me.rhin.openciv.game.map.tile.Tile;
 import me.rhin.openciv.game.player.Player;
+import me.rhin.openciv.game.unit.AttackableEntity;
 import me.rhin.openciv.game.unit.Unit;
 import me.rhin.openciv.game.unit.UnitParameter;
 import me.rhin.openciv.game.unit.type.Settler.SettlerUnit;
@@ -30,6 +31,8 @@ import me.rhin.openciv.listener.PlayerStatUpdateListener;
 import me.rhin.openciv.listener.RelativeMouseMoveListener;
 import me.rhin.openciv.listener.RightClickListener;
 import me.rhin.openciv.listener.SelectUnitListener;
+import me.rhin.openciv.listener.SetCityHealthListener;
+import me.rhin.openciv.listener.SetCityOwnerListener;
 import me.rhin.openciv.listener.SetUnitOwnerListener;
 import me.rhin.openciv.listener.SettleCityListener;
 import me.rhin.openciv.listener.TerritoryGrowListener;
@@ -43,6 +46,8 @@ import me.rhin.openciv.shared.packet.type.MoveUnitPacket;
 import me.rhin.openciv.shared.packet.type.NextTurnPacket;
 import me.rhin.openciv.shared.packet.type.PlayerConnectPacket;
 import me.rhin.openciv.shared.packet.type.PlayerListRequestPacket;
+import me.rhin.openciv.shared.packet.type.SetCityHealthPacket;
+import me.rhin.openciv.shared.packet.type.SetCityOwnerPacket;
 import me.rhin.openciv.shared.packet.type.SetUnitOwnerPacket;
 import me.rhin.openciv.shared.packet.type.SettleCityPacket;
 import me.rhin.openciv.shared.packet.type.TerritoryGrowPacket;
@@ -53,7 +58,7 @@ import me.rhin.openciv.ui.window.type.CurrentResearchWindow;
 //FIXME: Instead of the civ game listening for everything. Just split them off into the respective classes. (EX: UnitAttackListener in the Unit class)
 public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerListRequestListener, FetchPlayerListener,
 		MoveUnitListener, DeleteUnitListener, SettleCityListener, NextTurnListener, FinishLoadingRequestListener,
-		TerritoryGrowListener, UnitAttackListener, SetUnitOwnerListener {
+		TerritoryGrowListener, UnitAttackListener, SetUnitOwnerListener, SetCityOwnerListener, SetCityHealthListener {
 
 	private static final int BASE_TURN_TIME = 9;
 
@@ -83,6 +88,8 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 		Civilization.getInstance().getEventManager().addListener(TerritoryGrowListener.class, this);
 		Civilization.getInstance().getEventManager().addListener(UnitAttackListener.class, this);
 		Civilization.getInstance().getEventManager().addListener(SetUnitOwnerListener.class, this);
+		Civilization.getInstance().getEventManager().addListener(SetCityOwnerListener.class, this);
+		Civilization.getInstance().getEventManager().addListener(SetCityHealthListener.class, this);
 
 		Civilization.getInstance().getNetworkManager().sendPacket(new FetchPlayerPacket());
 		Civilization.getInstance().getNetworkManager().sendPacket(new PlayerListRequestPacket());
@@ -218,18 +225,44 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 	@Override
 	public void onUnitAttack(UnitAttackPacket packet) {
 		Unit unit = map.getTiles()[packet.getUnitGridX()][packet.getUnitGridY()].getTopUnit();
-		Unit targetUnit = map.getTiles()[packet.getTargetGridX()][packet.getTargetGridY()].getTopUnit();
-		targetUnit.flashColor(Color.RED);
+		// FIXME: Not having a unit ID here is problematic.
+		AttackableEntity targetEntity = map.getTiles()[packet.getTargetGridX()][packet.getTargetGridY()]
+				.getAttackableEntity();
+		targetEntity.flashColor(Color.RED);
 
 		unit.setHealth(unit.getHealth() - packet.getUnitDamage());
 		unit.reduceMovement(2);
-		targetUnit.setHealth(targetUnit.getHealth() - packet.getTargetUnitDamage());
+		targetEntity.setHealth(targetEntity.getHealth() - packet.getTargetUnitDamage());
 	}
 
 	@Override
 	public void onSetUnitOwner(SetUnitOwnerPacket packet) {
 		Unit unit = map.getTiles()[packet.getTileGridX()][packet.getTileGridY()].getUnitFromID(packet.getUnitID());
 		unit.setPlayerOwner(players.get(packet.getPlayerOwner()));
+	}
+
+	@Override
+	public void onSetCityHealth(SetCityHealthPacket packet) {
+		// FIXME: Iterating through players to find the city seems silly
+		for (Player player : players.values()) {
+			City city = player.getCityFromName(packet.getCityName());
+			if (city != null) {
+				city.setHealth(packet.getHealth());
+			}
+		}
+	}
+
+	@Override
+	public void onSetCityOwner(SetCityOwnerPacket packet) {
+		// FIXME: Iterating through players to find the city seems silly
+		for (Player player : players.values()) {
+			City city = player.getCityFromName(packet.getCityName());
+			if (city != null) {
+				city.setOwner(players.get(packet.getPlayerName()));
+				player.removeCity(city);
+				players.get(packet.getPlayerName()).addCity(city);
+			}
+		}
 	}
 
 	public void endTurn() {

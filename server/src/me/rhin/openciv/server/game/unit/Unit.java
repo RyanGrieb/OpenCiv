@@ -56,6 +56,33 @@ public abstract class Unit implements AttackableEntity, NextTurnListener {
 		return standingTile;
 	}
 
+	@Override
+	public float getDamageTaken(AttackableEntity otherEntity) {
+		if (isUnitCapturable())
+			return 100;
+
+		if (otherEntity.isUnitCapturable())
+			return 0;
+
+		// y=30*1.041^(x), x= combat diff
+		return (float) (30 * (Math.pow(1.041, otherEntity.getCombatStrength() - getCombatStrength())));
+	}
+
+	@Override
+	public boolean surviveAttack(AttackableEntity otherEntity) {
+		return health - getDamageTaken(otherEntity) > 0;
+	}
+
+	@Override
+	public void setHealth(float health) {
+		this.health = health;
+	}
+
+	@Override
+	public float getHealth() {
+		return health;
+	}
+
 	public abstract int getMovementCost(Tile prevTile, Tile adjTile);
 
 	public abstract int getCombatStrength();
@@ -278,25 +305,6 @@ public abstract class Unit implements AttackableEntity, NextTurnListener {
 
 	public int getID() {
 		return id;
-	}
-
-	public float getDamageTaken(AttackableEntity otherEntity) {
-		if (isUnitCapturable())
-			return 100;
-
-		if (otherEntity.isUnitCapturable())
-			return 0;
-
-		// y=30*1.041^(x), x= combat diff
-		return (float) (30 * (Math.pow(1.041, otherEntity.getCombatStrength() - getCombatStrength())));
-	}
-
-	public void setHealth(float health) {
-		this.health = health;
-	}
-
-	public float getHealth() {
-		return health;
 	}
 
 	public void setPlayerOwner(Player playerOwner) {

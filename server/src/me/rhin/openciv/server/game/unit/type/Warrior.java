@@ -27,7 +27,6 @@ public class Warrior extends UnitItem {
 		public int getCombatStrength() {
 			return 20;
 		}
-
 	}
 
 	@Override

@@ -170,4 +170,8 @@ public class Player implements RelativeMouseMoveListener, LeftClickListener, Rig
 	public void setCivType(CivType civType) {
 		this.civType = civType;
 	}
+
+	public void removeCity(City city) {
+		ownedCities.remove(city);
+	}
 }

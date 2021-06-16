@@ -16,4 +16,9 @@ public interface AttackableEntity {
 	public Tile getTile();
 
 	public float getDamageTaken(AttackableEntity otherEntity);
+
+	public boolean surviveAttack(AttackableEntity otherEntity);
+
+	public void setHealth(float health);
+
 }

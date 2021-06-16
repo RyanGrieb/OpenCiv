@@ -14,6 +14,7 @@ public class Healthbar extends Group {
 	private CustomLabel healthLabel;
 	private float health;
 	private float originalWidth;
+	private boolean showLabel;
 
 	public Healthbar(float x, float y, float width, float height) {
 		super.setBounds(x, y, width, height);
@@ -28,9 +29,15 @@ public class Healthbar extends Group {
 		this.healthLabel = new CustomLabel("100%");
 		healthLabel.setBounds(0, 0, width, height);
 		healthLabel.setAlignment(Align.center);
-		addActor(healthLabel);
+		if (showLabel)
+			addActor(healthLabel);
 
 		this.health = 100;
+	}
+
+	public Healthbar(float x, float y, float width, float height, boolean showLabel) {
+		this(x, y, width, height);
+		this.showLabel = showLabel;
 	}
 
 	@Override

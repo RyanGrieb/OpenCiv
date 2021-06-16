@@ -2,11 +2,14 @@ package me.rhin.openciv.game.city;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
-import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.reflect.ClassReflection;
@@ -38,11 +41,12 @@ import me.rhin.openciv.shared.packet.type.SetCitizenTileWorkerPacket;
 import me.rhin.openciv.shared.packet.type.SetCitizenTileWorkerPacket.WorkerType;
 import me.rhin.openciv.shared.packet.type.SetProductionItemPacket;
 import me.rhin.openciv.shared.stat.StatLine;
+import me.rhin.openciv.ui.game.Healthbar;
 import me.rhin.openciv.ui.label.CustomLabel;
 import me.rhin.openciv.ui.window.type.CityInfoWindow;
 
 //FIXME: We should have a interface for these networking interface.
-public class City extends Actor
+public class City extends Group
 		implements AttackableEntity, TileObserver, SpecialistContainer, BuildingConstructedListener,
 		CityStatUpdateListener, SetProductionItemListener, ApplyProductionToItemListener, FinishProductionItemListener,
 		SetCitizenTileWorkerListener, AddSpecialistToContainerListener, RemoveSpecialistFromContainerListener {
@@ -57,6 +61,7 @@ public class City extends Actor
 	private StatLine statLine;
 	private CustomLabel nameLabel;
 	private Sprite nameIcon;
+	private Healthbar healthbar;
 	private float health;
 
 	public City(Tile originTile, Player playerOwner, String name) {
@@ -76,6 +81,9 @@ public class City extends Actor
 		this.nameIcon = playerOwner.getCivType().getIcon().sprite();
 		nameIcon.setBounds(nameLabel.getX() - 20, nameLabel.getY() - 4, 16, 16);
 
+		// FIXME: We really should have the city behave as a group, rather than an
+		// actor...
+		this.healthbar = new Healthbar(nameLabel.getX(), nameIcon.getY() + 15, nameLabel.getWidth(), 4, false);
 		this.health = getMaxHealth();
 
 		// FIXME: The actor size & position really shouldn't be confined to the label.
@@ -109,8 +117,10 @@ public class City extends Actor
 	public void draw(Batch batch, float parentAlpha) {
 		if (!Civilization.getInstance().getWindowManager().isOpenWindow(CityInfoWindow.class)
 				&& originTile.getTileObservers().size() > 0) {
+			// FIXME: Since we are a group now, we don't need to override draw.
 			nameLabel.draw(batch, parentAlpha);
 			nameIcon.draw(batch);
+			healthbar.draw(batch, parentAlpha);
 		}
 	}
 
@@ -243,13 +253,33 @@ public class City extends Actor
 	}
 
 	@Override
+	public void flashColor(Color red) {
+		originTile.setColor(red.r / 2, red.g / 2, red.b / 2, 1);
+
+		final ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(2);
+		executor.schedule(new Runnable() {
+			@Override
+			public void run() {
+				originTile.setColor(Color.WHITE);
+			}
+		}, 250, TimeUnit.MILLISECONDS);
+
+	}
+
+	@Override
 	public int getCombatStrength() {
-		return 20;
+		return 5;
 	}
 
 	@Override
 	public boolean isUnitCapturable() {
 		return false;
+	}
+
+	@Override
+	public void setHealth(float health) {
+		this.health = health;
+		this.healthbar.setHealth(getMaxHealth(), health);
 	}
 
 	@Override
@@ -265,6 +295,17 @@ public class City extends Actor
 	@Override
 	public Tile getTile() {
 		return originTile;
+	}
+
+	public void setOwner(Player playerOwner) {
+		this.playerOwner = playerOwner;
+
+		this.nameIcon = playerOwner.getCivType().getIcon().sprite();
+		nameIcon.setBounds(nameLabel.getX() - 20, nameLabel.getY() - 4, 16, 16);
+		
+		for(Tile tile : territory) {
+			tile.setTerritory(this);
+		}
 	}
 
 	public void onClick() {

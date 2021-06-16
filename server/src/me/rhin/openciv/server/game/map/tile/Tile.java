@@ -394,12 +394,14 @@ public class Tile {
 
 	public AttackableEntity getAttackableEntity() {
 
+		// Problem: This can AND WILL pick up friendly units. Fixed by having to return
+		// enemy cities first.
+		if (city != null)
+			return city;
+
 		Unit unit = getTopUnit();
 		if (unit != null)
 			return unit;
-
-		if (city != null)
-			return city;
 
 		return null;
 	}

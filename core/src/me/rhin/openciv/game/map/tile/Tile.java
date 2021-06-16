@@ -8,7 +8,6 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 
@@ -19,6 +18,7 @@ import me.rhin.openciv.game.map.GameMap;
 import me.rhin.openciv.game.map.RiverPart;
 import me.rhin.openciv.game.map.tile.TileType.TileLayer;
 import me.rhin.openciv.game.map.tile.TileType.TileProperty;
+import me.rhin.openciv.game.unit.AttackableEntity;
 import me.rhin.openciv.game.unit.Unit;
 import me.rhin.openciv.listener.ShapeRenderListener;
 import me.rhin.openciv.ui.label.CustomLabel;
@@ -458,6 +458,18 @@ public class Tile extends Actor implements ShapeRenderListener, TileObserver {
 
 	public City getCity() {
 		return city;
+	}
+
+	public AttackableEntity getAttackableEntity() {
+
+		if (city != null)
+			return city;
+
+		Unit unit = getTopUnit();
+		if (unit != null)
+			return unit;
+
+		return null;
 	}
 
 	public void removeTileObserver(TileObserver tileObserver) {

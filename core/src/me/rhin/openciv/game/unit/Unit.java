@@ -109,6 +109,20 @@ public abstract class Unit extends Actor
 		return 100;
 	}
 
+	@Override
+	public void flashColor(Color red) {
+		sprite.setColor(red.r / 2, red.g / 2, red.b / 2, 1);
+
+		final ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(2);
+		executor.schedule(new Runnable() {
+			@Override
+			public void run() {
+				sprite.setColor(Color.WHITE);
+			}
+		}, 250, TimeUnit.MILLISECONDS);
+
+	}
+
 	public boolean setTargetTile(Tile targetTile, boolean wasMouseClick) {
 		if (targetTile == null)
 			return false;
@@ -353,19 +367,6 @@ public abstract class Unit extends Actor
 				}
 			}
 		});
-
-	}
-
-	public void flashColor(Color red) {
-		sprite.setColor(red.r / 2, red.g / 2, red.b / 2, 1);
-
-		final ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(2);
-		executor.schedule(new Runnable() {
-			@Override
-			public void run() {
-				sprite.setColor(Color.WHITE);
-			}
-		}, 250, TimeUnit.MILLISECONDS);
 
 	}
 

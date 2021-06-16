@@ -46,6 +46,7 @@ public class City implements AttackableEntity, SpecialistContainer, NextTurnList
 	private ArrayList<Specialist> unemployedSpecialists;
 	private ProducibleItemManager producibleItemManager;
 	private StatLine statLine;
+	private float health;
 
 	public City(Player playerOwner, String name, Tile originTile) {
 		this.playerOwner = playerOwner;
@@ -57,6 +58,7 @@ public class City implements AttackableEntity, SpecialistContainer, NextTurnList
 		this.unemployedSpecialists = new ArrayList<>();
 		this.producibleItemManager = new ProducibleItemManager(this);
 		this.statLine = new StatLine();
+		this.health = 200;
 
 		for (Tile adjTile : originTile.getAdjTiles()) {
 			territory.add(adjTile);
@@ -196,6 +198,45 @@ public class City implements AttackableEntity, SpecialistContainer, NextTurnList
 		}
 
 		playerOwner.getConn().send(json.toJson(statUpdatePacket));
+	}
+
+	@Override
+	public int getCombatStrength() {
+		return 5;
+	}
+
+	@Override
+	public boolean isUnitCapturable() {
+		return false;
+	}
+
+	@Override
+	public void setHealth(float health) {
+		this.health = health;
+	}
+
+	@Override
+	public float getHealth() {
+		return health;
+	}
+
+	@Override
+	public Tile getTile() {
+		return originTile;
+	}
+
+	@Override
+	public float getDamageTaken(AttackableEntity otherEntity) {
+		return (float) (30 * (Math.pow(1.041, otherEntity.getCombatStrength() - getCombatStrength())));
+	}
+
+	@Override
+	public boolean surviveAttack(AttackableEntity otherEntity) {
+		return health - getDamageTaken(otherEntity) > 0;
+	}
+
+	public int getMaxHealth() {
+		return 200;
 	}
 
 	public void updateWorkedTiles() {
@@ -380,6 +421,10 @@ public class City implements AttackableEntity, SpecialistContainer, NextTurnList
 		return buildings;
 	}
 
+	public void setOwner(Player playerOwner) {
+		this.playerOwner = playerOwner;
+	}
+
 	private StatLine getTileStatLine(Tile tile) {
 		// TODO: Research, religion can effect the output of tiles.
 
@@ -476,30 +521,5 @@ public class City implements AttackableEntity, SpecialistContainer, NextTurnList
 	private void setPopulation(int amount) {
 		statLine.setValue(Stat.POPULATION, amount);
 		statLine.setValue(Stat.FOOD_SURPLUS, 0);
-	}
-
-	@Override
-	public int getCombatStrength() {
-		return 20;
-	}
-
-	@Override
-	public boolean isUnitCapturable() {
-		return false;
-	}
-
-	@Override
-	public float getHealth() {
-		return 200;
-	}
-
-	@Override
-	public Tile getTile() {
-		return originTile;
-	}
-
-	@Override
-	public float getDamageTaken(AttackableEntity otherEntity) {
-		return (float) (30 * (Math.pow(1.041, otherEntity.getCombatStrength() - getCombatStrength())));
 	}
 }

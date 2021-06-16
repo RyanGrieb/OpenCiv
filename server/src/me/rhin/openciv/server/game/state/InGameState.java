@@ -51,6 +51,8 @@ import me.rhin.openciv.shared.packet.type.NextTurnPacket;
 import me.rhin.openciv.shared.packet.type.PlayerDisconnectPacket;
 import me.rhin.openciv.shared.packet.type.PlayerListRequestPacket;
 import me.rhin.openciv.shared.packet.type.SelectUnitPacket;
+import me.rhin.openciv.shared.packet.type.SetCityHealthPacket;
+import me.rhin.openciv.shared.packet.type.SetCityOwnerPacket;
 import me.rhin.openciv.shared.packet.type.SetProductionItemPacket;
 import me.rhin.openciv.shared.packet.type.SetUnitOwnerPacket;
 import me.rhin.openciv.shared.packet.type.SettleCityPacket;
@@ -204,7 +206,8 @@ public class InGameState extends GameState implements DisconnectListener, Select
 		// unit.
 		if (targetTile.getAttackableEntity() != null)
 			if (!targetTile.getAttackableEntity().getPlayerOwner().equals(unit.getPlayerOwner())
-					&& !targetTile.getAttackableEntity().isUnitCapturable()) {
+					&& (!targetTile.getAttackableEntity().isUnitCapturable()
+							&& targetTile.getAttackableEntity().surviveAttack(unit))) {
 				targetTile = unit.getCameFromTiles()[targetTile.getGridX()][targetTile.getGridY()];
 				if (targetTile != null) {
 					unit.setTargetTile(targetTile);
@@ -242,21 +245,21 @@ public class InGameState extends GameState implements DisconnectListener, Select
 		}
 
 		// Handle the targetTile being a enemy unit.
-		if (originalTargetTile.getTopUnit() != null)
-			if (!originalTargetTile.getTopUnit().getPlayerOwner().equals(unit.getPlayerOwner())) {
+		if (originalTargetTile.getAttackableEntity() != null)
+			if (!originalTargetTile.getAttackableEntity().getPlayerOwner().equals(unit.getPlayerOwner())) {
 				// We are about to attack this unit on the tile
-				Unit targetUnit = originalTargetTile.getTopUnit();
+				AttackableEntity targetEntity = originalTargetTile.getAttackableEntity();
 
-				float unitDamage = unit.getDamageTaken(targetUnit);
-				float targetDamage = targetUnit.getDamageTaken(unit);
+				float unitDamage = unit.getDamageTaken(targetEntity);
+				float targetDamage = targetEntity.getDamageTaken(unit);
 
 				unit.setHealth(unit.getHealth() - unitDamage);
-				targetUnit.setHealth(targetUnit.getHealth() - targetDamage);
+				targetEntity.setHealth(targetEntity.getHealth() - targetDamage);
 
-				if (targetUnit.getHealth() > 0) {
+				if (targetEntity.getHealth() > 0) {
 					UnitAttackPacket attackPacket = new UnitAttackPacket();
 					attackPacket.setUnitLocations(unit.getStandingTile().getGridX(), unit.getStandingTile().getGridY(),
-							targetUnit.getStandingTile().getGridX(), targetUnit.getStandingTile().getGridY());
+							targetEntity.getTile().getGridX(), targetEntity.getTile().getGridY());
 					attackPacket.setUnitDamage(unitDamage);
 					attackPacket.setTargetDamage(targetDamage);
 
@@ -267,17 +270,63 @@ public class InGameState extends GameState implements DisconnectListener, Select
 
 				// Delete units below 1 hp
 
-				//If target is unit, use this method. if city, implement that other one
-				if (targetUnit.getHealth() <= 0) {
-					targetUnit.getStandingTile().removeUnit(unit);
+				// If target is unit, use this method. if city, implement that other one
 
-					// FIXME: Redundant code.
-					DeleteUnitPacket removeUnitPacket = new DeleteUnitPacket();
-					removeUnitPacket.setUnit(targetUnit.getID(), targetUnit.getStandingTile().getGridX(),
-							targetUnit.getStandingTile().getGridY());
+				// Doesn't get called?
+				System.out.println(targetEntity.getHealth());
 
-					for (Player player : players) {
-						player.getConn().send(json.toJson(removeUnitPacket));
+				if (targetEntity.getHealth() <= 0) {
+					if (targetEntity instanceof Unit && targetEntity.getTile().getCity() == null) {
+
+						Unit targetUnit = (Unit) targetEntity;
+						targetUnit.getStandingTile().removeUnit(targetUnit);
+
+						// FIXME: Redundant code.
+						DeleteUnitPacket removeUnitPacket = new DeleteUnitPacket();
+						removeUnitPacket.setUnit(targetUnit.getID(), targetUnit.getStandingTile().getGridX(),
+								targetUnit.getStandingTile().getGridY());
+
+						for (Player player : players) {
+							player.getConn().send(json.toJson(removeUnitPacket));
+						}
+					}
+
+					// When we capture a city
+					if (targetEntity instanceof City) {
+						City city = (City) targetEntity;
+						city.setHealth(city.getMaxHealth() / 2);
+						city.setOwner(unit.getPlayerOwner());
+
+						SetCityOwnerPacket cityOwnerPacket = new SetCityOwnerPacket();
+						cityOwnerPacket.setCity(city.getName(), unit.getPlayerOwner().getName());
+
+						for (Player player : players) {
+							player.getConn().send(json.toJson(cityOwnerPacket));
+						}
+
+						SetCityHealthPacket cityHealthPacket = new SetCityHealthPacket();
+						cityHealthPacket.setCity(city.getName(), city.getMaxHealth() / 2);
+
+						for (Player player : players) {
+							player.getConn().send(json.toJson(cityHealthPacket));
+						}
+
+						// Kill all enemy units inside the city
+						for (Unit cityUnit : city.getTile().getUnits()) {
+							if (!cityUnit.getPlayerOwner().equals(unit.getPlayerOwner())) {
+
+								city.getTile().removeUnit(cityUnit);
+
+								DeleteUnitPacket removeUnitPacket = new DeleteUnitPacket();
+								removeUnitPacket.setUnit(cityUnit.getID(), cityUnit.getStandingTile().getGridX(),
+										cityUnit.getStandingTile().getGridY());
+
+								for (Player player : players) {
+									player.getConn().send(json.toJson(removeUnitPacket));
+								}
+
+							}
+						}
 					}
 				}
 
@@ -606,8 +655,10 @@ public class InGameState extends GameState implements DisconnectListener, Select
 			}
 		}
 
+		// Debug code
 		if (players.size() > 1) {
-			players.get(0).setSpawnPos(players.get(1).getSpawnX() + 1, players.get(1).getSpawnY() + 1);
+			// players.get(0).setSpawnPos(players.get(1).getSpawnX() + 1,
+			// players.get(1).getSpawnY() + 1);
 		}
 
 		for (Player player : players) {

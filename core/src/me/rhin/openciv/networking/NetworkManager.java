@@ -37,6 +37,8 @@ import me.rhin.openciv.listener.RemoveSpecialistFromContainerListener.RemoveSpec
 import me.rhin.openciv.listener.SelectUnitListener.SelectUnitEvent;
 import me.rhin.openciv.listener.ServerConnectListener.ServerConnectEvent;
 import me.rhin.openciv.listener.SetCitizenTileWorkerListener.SetCitizenTileWorkerEvent;
+import me.rhin.openciv.listener.SetCityHealthListener.SetCityHealthEvent;
+import me.rhin.openciv.listener.SetCityOwnerListener.SetCityOwnerEvent;
 import me.rhin.openciv.listener.SetProductionItemListener.SetProductionItemEvent;
 import me.rhin.openciv.listener.SetUnitOwnerListener.SetUnitOwnerEvent;
 import me.rhin.openciv.listener.SetWorldSizeListener.SetWorldSizeEvent;
@@ -70,6 +72,8 @@ import me.rhin.openciv.shared.packet.type.PlayerStatUpdatePacket;
 import me.rhin.openciv.shared.packet.type.RemoveSpecialistFromContainerPacket;
 import me.rhin.openciv.shared.packet.type.SelectUnitPacket;
 import me.rhin.openciv.shared.packet.type.SetCitizenTileWorkerPacket;
+import me.rhin.openciv.shared.packet.type.SetCityHealthPacket;
+import me.rhin.openciv.shared.packet.type.SetCityOwnerPacket;
 import me.rhin.openciv.shared.packet.type.SetProductionItemPacket;
 import me.rhin.openciv.shared.packet.type.SetUnitOwnerPacket;
 import me.rhin.openciv.shared.packet.type.SetWorldSizePacket;
@@ -116,6 +120,8 @@ public class NetworkManager {
 		networkEvents.put(CombatPreviewPacket.class, CombatPreviewEvent.class);
 		networkEvents.put(UnitAttackPacket.class, UnitAttackEvent.class);
 		networkEvents.put(SetUnitOwnerPacket.class, SetUnitOwnerEvent.class);
+		networkEvents.put(SetCityOwnerPacket.class, SetCityOwnerEvent.class);
+		networkEvents.put(SetCityHealthPacket.class, SetCityHealthEvent.class);
 	}
 
 	public void connect(String ip) {
@@ -182,7 +188,7 @@ public class NetworkManager {
 
 			@Override
 			public boolean onMessage(final WebSocket webSocket, final String packet) {
-				if (!packet.contains("MapChunkPacket"))
+				if (!packet.contains("MapChunkPacket") && !packet.contains("TurnTimeLeftPacket"))
 					Gdx.app.log(Civilization.WS_LOG_TAG, "Got message: " + packet);
 				fireAssociatedPacketEvents(webSocket, packet);
 				return true;
