@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Random;
 
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.Json;
 
 import me.rhin.openciv.server.Server;
@@ -198,6 +199,10 @@ public class City implements AttackableEntity, SpecialistContainer, NextTurnList
 		}
 
 		playerOwner.getConn().send(json.toJson(statUpdatePacket));
+
+		if (health < getMaxHealth()) {
+			health = MathUtils.clamp(health + 5, 0, getMaxHealth());
+		}
 	}
 
 	@Override

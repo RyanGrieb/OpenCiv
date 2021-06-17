@@ -9,6 +9,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
@@ -27,6 +28,7 @@ import me.rhin.openciv.listener.ApplyProductionToItemListener;
 import me.rhin.openciv.listener.BuildingConstructedListener;
 import me.rhin.openciv.listener.CityStatUpdateListener;
 import me.rhin.openciv.listener.FinishProductionItemListener;
+import me.rhin.openciv.listener.NextTurnListener;
 import me.rhin.openciv.listener.RemoveSpecialistFromContainerListener;
 import me.rhin.openciv.listener.SetCitizenTileWorkerListener;
 import me.rhin.openciv.listener.SetProductionItemListener;
@@ -36,6 +38,7 @@ import me.rhin.openciv.shared.packet.type.ApplyProductionToItemPacket;
 import me.rhin.openciv.shared.packet.type.BuildingConstructedPacket;
 import me.rhin.openciv.shared.packet.type.CityStatUpdatePacket;
 import me.rhin.openciv.shared.packet.type.FinishProductionItemPacket;
+import me.rhin.openciv.shared.packet.type.NextTurnPacket;
 import me.rhin.openciv.shared.packet.type.RemoveSpecialistFromContainerPacket;
 import me.rhin.openciv.shared.packet.type.SetCitizenTileWorkerPacket;
 import me.rhin.openciv.shared.packet.type.SetCitizenTileWorkerPacket.WorkerType;
@@ -46,10 +49,10 @@ import me.rhin.openciv.ui.label.CustomLabel;
 import me.rhin.openciv.ui.window.type.CityInfoWindow;
 
 //FIXME: We should have a interface for these networking interface.
-public class City extends Group
-		implements AttackableEntity, TileObserver, SpecialistContainer, BuildingConstructedListener,
-		CityStatUpdateListener, SetProductionItemListener, ApplyProductionToItemListener, FinishProductionItemListener,
-		SetCitizenTileWorkerListener, AddSpecialistToContainerListener, RemoveSpecialistFromContainerListener {
+public class City extends Group implements AttackableEntity, TileObserver, SpecialistContainer,
+		BuildingConstructedListener, CityStatUpdateListener, SetProductionItemListener, ApplyProductionToItemListener,
+		FinishProductionItemListener, SetCitizenTileWorkerListener, AddSpecialistToContainerListener,
+		RemoveSpecialistFromContainerListener, NextTurnListener {
 
 	private Tile originTile;
 	private Player playerOwner;
@@ -83,7 +86,8 @@ public class City extends Group
 
 		// FIXME: We really should have the city behave as a group, rather than an
 		// actor...
-		this.healthbar = new Healthbar(nameLabel.getX(), nameIcon.getY() + 15, nameLabel.getWidth(), 4, false);
+		this.healthbar = new Healthbar(nameLabel.getX() + nameLabel.getWidth() / 2 - 50 / 2, nameIcon.getY() + 15, 50,
+				4, false);
 		this.health = getMaxHealth();
 
 		// FIXME: The actor size & position really shouldn't be confined to the label.
@@ -111,6 +115,7 @@ public class City extends Group
 		Civilization.getInstance().getEventManager().addListener(SetCitizenTileWorkerListener.class, this);
 		Civilization.getInstance().getEventManager().addListener(AddSpecialistToContainerListener.class, this);
 		Civilization.getInstance().getEventManager().addListener(RemoveSpecialistFromContainerListener.class, this);
+		Civilization.getInstance().getEventManager().addListener(NextTurnListener.class, this);
 	}
 
 	@Override
@@ -121,6 +126,13 @@ public class City extends Group
 			nameLabel.draw(batch, parentAlpha);
 			nameIcon.draw(batch);
 			healthbar.draw(batch, parentAlpha);
+		}
+	}
+
+	@Override
+	public void onNextTurn(NextTurnPacket packet) {
+		if (health < getMaxHealth()) {
+			setHealth(MathUtils.clamp(health + 5, 0, getMaxHealth()));
 		}
 	}
 
@@ -302,8 +314,8 @@ public class City extends Group
 
 		this.nameIcon = playerOwner.getCivType().getIcon().sprite();
 		nameIcon.setBounds(nameLabel.getX() - 20, nameLabel.getY() - 4, 16, 16);
-		
-		for(Tile tile : territory) {
+
+		for (Tile tile : territory) {
 			tile.setTerritory(this);
 		}
 	}

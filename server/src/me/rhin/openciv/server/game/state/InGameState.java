@@ -657,8 +657,7 @@ public class InGameState extends GameState implements DisconnectListener, Select
 
 		// Debug code
 		if (players.size() > 1) {
-			// players.get(0).setSpawnPos(players.get(1).getSpawnX() + 1,
-			// players.get(1).getSpawnY() + 1);
+			players.get(0).setSpawnPos(players.get(1).getSpawnX() + 1, players.get(1).getSpawnY() + 1);
 		}
 
 		for (Player player : players) {
