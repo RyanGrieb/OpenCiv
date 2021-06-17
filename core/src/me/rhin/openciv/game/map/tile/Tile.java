@@ -24,7 +24,7 @@ import me.rhin.openciv.listener.ShapeRenderListener;
 import me.rhin.openciv.ui.label.CustomLabel;
 import me.rhin.openciv.ui.screen.type.InGameScreen;
 
-public class Tile extends Actor implements ShapeRenderListener, TileObserver {
+public class Tile extends Actor implements ShapeRenderListener {
 
 	public class TileTypeWrapper extends Sprite implements Comparable<TileTypeWrapper> {
 
@@ -181,7 +181,7 @@ public class Tile extends Actor implements ShapeRenderListener, TileObserver {
 			selectionSprite.draw(batch);
 		}
 
-		if (territory != null && tileObservers.size() > 1)
+		if (territory != null && tileObservers.size() > 0)
 			territorySprite.draw(batch);
 
 		// posLabel.draw(batch, 1);
@@ -338,7 +338,7 @@ public class Tile extends Actor implements ShapeRenderListener, TileObserver {
 		territorySprite.setColor(color.r, color.g, color.b, 0.25f);
 
 		if (city.getPlayerOwner().equals(Civilization.getInstance().getGame().getPlayer()))
-			addTileObserver(this);
+			addTileObserver(city);
 	}
 
 	public void defineBorders() {

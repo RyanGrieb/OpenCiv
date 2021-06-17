@@ -315,6 +315,12 @@ public class City extends Group implements AttackableEntity, TileObserver, Speci
 		this.nameIcon = playerOwner.getCivType().getIcon().sprite();
 		nameIcon.setBounds(nameLabel.getX() - 20, nameLabel.getY() - 4, 16, 16);
 
+		if (!playerOwner.equals(Civilization.getInstance().getGame().getPlayer())) {
+			for (Tile tile : territory)
+				tile.removeTileObserver(this);
+			originTile.removeTileObserver(this);
+		}
+
 		for (Tile tile : territory) {
 			tile.setTerritory(this);
 		}
