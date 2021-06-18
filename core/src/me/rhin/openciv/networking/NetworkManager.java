@@ -46,6 +46,7 @@ import me.rhin.openciv.listener.SettleCityListener.SettleCityEvent;
 import me.rhin.openciv.listener.TerritoryGrowListener.TerritoryGrowEvent;
 import me.rhin.openciv.listener.TurnTimeLeftListener.TurnTimeLeftEvent;
 import me.rhin.openciv.listener.UnitAttackListener.UnitAttackEvent;
+import me.rhin.openciv.listener.WorkTileListener.WorkTileEvent;
 import me.rhin.openciv.shared.listener.Event;
 import me.rhin.openciv.shared.listener.Listener;
 import me.rhin.openciv.shared.packet.Packet;
@@ -81,6 +82,7 @@ import me.rhin.openciv.shared.packet.type.SettleCityPacket;
 import me.rhin.openciv.shared.packet.type.TerritoryGrowPacket;
 import me.rhin.openciv.shared.packet.type.TurnTimeLeftPacket;
 import me.rhin.openciv.shared.packet.type.UnitAttackPacket;
+import me.rhin.openciv.shared.packet.type.WorkTilePacket;
 
 public class NetworkManager {
 
@@ -122,6 +124,7 @@ public class NetworkManager {
 		networkEvents.put(SetUnitOwnerPacket.class, SetUnitOwnerEvent.class);
 		networkEvents.put(SetCityOwnerPacket.class, SetCityOwnerEvent.class);
 		networkEvents.put(SetCityHealthPacket.class, SetCityHealthEvent.class);
+		networkEvents.put(WorkTilePacket.class, WorkTileEvent.class);
 	}
 
 	public void connect(String ip) {

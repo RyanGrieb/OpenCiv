@@ -1,19 +1,43 @@
 package me.rhin.openciv.game.unit.type;
 
+import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.TextureEnum;
+import me.rhin.openciv.game.AbstractAction;
+import me.rhin.openciv.game.map.tile.ImprovementType;
 import me.rhin.openciv.game.map.tile.Tile;
 import me.rhin.openciv.game.map.tile.TileType.TileProperty;
 import me.rhin.openciv.game.unit.Unit;
 import me.rhin.openciv.game.unit.UnitItem;
 import me.rhin.openciv.game.unit.UnitParameter;
+import me.rhin.openciv.listener.UnitActListener.UnitActEvent;
+import me.rhin.openciv.listener.WorkTileListener;
+import me.rhin.openciv.shared.packet.type.WorkTilePacket;
 
 public class Builder extends UnitItem {
 
-	public static class BuilderUnit extends Unit {
+	public static class BuilderUnit extends Unit implements WorkTileListener {
+
+		private ImprovementType improvementType;
+		private boolean building;
+		private int appliedTurns;
+
 		public BuilderUnit(UnitParameter unitParameter) {
 			super(unitParameter, TextureEnum.UNIT_BUILDER);
-
+			customActions.add(new FarmAction(this));
 			this.canAttack = false;
+			this.building = false;
+			this.appliedTurns = 0;
+
+			// FIXME: REALLY should remove this listener when this unit gets destroyed
+			Civilization.getInstance().getEventManager().addListener(WorkTileListener.class, this);
+		}
+
+		@Override
+		public void onWorkTile(WorkTilePacket packet) {
+			if (packet.getUnitID() != getID())
+				return;
+			
+			this.appliedTurns = packet.getAppliedTurns();
 		}
 
 		@Override
@@ -33,7 +57,79 @@ public class Builder extends UnitItem {
 		public boolean isUnitCapturable() {
 			return true;
 		}
+
+		public void setBuilding(boolean building) {
+			this.building = building;
+		}
+
+		public boolean isBuilding() {
+			return building;
+		}
+
+		public void setImprovementType(ImprovementType improvementType) {
+			this.improvementType = improvementType;
+		}
+
+		public String getImprovementName() {
+			return improvementType.getName();
+		}
+
+		public int getAppliedTurns() {
+			return appliedTurns;
+		}
+
+		public int getMaxTurns() {
+			return improvementType.getMaxTurns();
+		}
 	}
+
+	public static class FarmAction extends AbstractAction {
+
+		public FarmAction(Unit unit) {
+			super(unit);
+		}
+
+		@Override
+		public boolean act(float delta) {
+			// unit.getPlayerOwner().unselectUnit();
+			unit.reduceMovement(2);
+			WorkTilePacket packet = new WorkTilePacket();
+			packet.setTile("farm", unit.getStandingTile().getGridX(), unit.getStandingTile().getGridY());
+			Civilization.getInstance().getNetworkManager().sendPacket(packet);
+			// unit.removeAction(this);
+
+			BuilderUnit builderUnit = (BuilderUnit) unit;
+			builderUnit.setBuilding(true);
+			builderUnit.setImprovementType(ImprovementType.FARM);
+
+			Civilization.getInstance().getEventManager().fireEvent(new UnitActEvent(unit));
+
+			unit.removeAction(this);
+			return true;
+		}
+
+		@Override
+		public boolean canAct() {
+			Tile tile = unit.getStandingTile();
+			boolean farmableTile = !tile.isImproved() && tile.getBaseTileType().hasProperty(TileProperty.FARMABLE)
+					&& tile.getTerritory() != null
+					&& tile.getTerritory().getPlayerOwner().equals(unit.getPlayerOwner());
+
+			BuilderUnit builderUnit = (BuilderUnit) unit;
+			if (unit.getCurrentMovement() < 1 || !farmableTile || builderUnit.isBuilding()) {
+				return false;
+			}
+
+			return true;
+		}
+
+		@Override
+		public String getName() {
+			return "Farm";
+		}
+	}
+
+//TODO: Mine action, plantation action
 
 	@Override
 	public int getProductionCost() {

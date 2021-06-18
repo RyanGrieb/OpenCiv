@@ -20,8 +20,10 @@ public abstract class Button extends Actor {
 	private String text;
 	private TextureEnum textureEnum;
 	private Sprite sprite;
+	private Sprite disabledSprite;
 	private CustomLabel btnLabel;
 	private boolean hovered;
+	private boolean enabled;
 
 	public Button(String text, float x, float y, float width, float height) {
 		this(TextureEnum.UI_BUTTON, text, x, y, width, height);
@@ -38,6 +40,9 @@ public abstract class Button extends Actor {
 		this.hoveredSprite = TextureEnum.UI_BUTTON_HOVERED.sprite();
 		hoveredSprite.setBounds(x, y, width, height);
 
+		this.disabledSprite = TextureEnum.UI_BUTTON_DISABLED.sprite();
+		disabledSprite.setBounds(x, y, width, height);
+
 		this.btnLabel = new CustomLabel(text);
 		btnLabel.setSize(Gdx.graphics.getWidth(), 20);
 		btnLabel.setPosition(x + width / 2 - btnLabel.getWidth() / 2, (y + height / 2) - btnLabel.getHeight() / 2);
@@ -47,7 +52,7 @@ public abstract class Button extends Actor {
 
 			@Override
 			public void clicked(InputEvent event, float x, float y) {
-				if (!Civilization.getInstance().getWindowManager().allowsInput(event.getListenerActor())) {
+				if (!Civilization.getInstance().getWindowManager().allowsInput(event.getListenerActor()) || !enabled) {
 					return;
 				}
 				onClick();
@@ -65,17 +70,23 @@ public abstract class Button extends Actor {
 		});
 
 		this.hovered = false;
+		this.enabled = true;
 	}
 
 	public abstract void onClick();
 
 	@Override
 	public void draw(Batch batch, float parentAlpha) {
-		// FIXME: We shouldn't be checking for a default textureEnum.
-		if (hovered && hoveredSprite != null)
-			hoveredSprite.draw(batch);
-		else
-			sprite.draw(batch);
+		if (!enabled) {
+			disabledSprite.draw(batch);
+		} else {
+			// FIXME: We shouldn't be checking for a default textureEnum.
+			if (hovered && hoveredSprite != null)
+				hoveredSprite.draw(batch);
+			else
+				sprite.draw(batch);
+		}
+
 		btnLabel.draw(batch, 1);
 	}
 
@@ -98,6 +109,10 @@ public abstract class Button extends Actor {
 		Sprite sprite = textureEnum.sprite();
 		sprite.setBounds(this.sprite.getX(), this.sprite.getY(), this.sprite.getWidth(), this.sprite.getHeight());
 		this.sprite = sprite;
+	}
+
+	public void setEnabled(boolean enabled) {
+		this.enabled = enabled;
 	}
 
 	public void setHovered(boolean hovered) {

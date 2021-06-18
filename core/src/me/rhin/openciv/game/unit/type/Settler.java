@@ -10,6 +10,7 @@ import me.rhin.openciv.game.map.tile.TileType.TileProperty;
 import me.rhin.openciv.game.unit.Unit;
 import me.rhin.openciv.game.unit.UnitItem;
 import me.rhin.openciv.game.unit.UnitParameter;
+import me.rhin.openciv.listener.UnitActListener.UnitActEvent;
 import me.rhin.openciv.shared.packet.type.NextTurnPacket;
 import me.rhin.openciv.shared.packet.type.SettleCityPacket;
 
@@ -34,38 +35,45 @@ public class Settler extends UnitItem {
 		public int getCombatStrength() {
 			return 0;
 		}
-		
+
 		@Override
 		public boolean isUnitCapturable() {
-			return true;	
+			return true;
 		}
 	}
 
 	public static class SettleAction extends AbstractAction {
 
-		public SettleAction(Actor actor) {
-			super(actor);
+		public SettleAction(Unit unit) {
+			super(unit);
 		}
 
 		@Override
 		public boolean act(float delta) {
-			// FIXME: Cancel the act if the unit's movement < 1
-			Unit unit = (Unit) actor;
 			unit.getPlayerOwner().unselectUnit();
 			SettleCityPacket packet = new SettleCityPacket();
 			packet.setLocation(unit.getStandingTile().getGridX(), unit.getStandingTile().getGridY());
 			Civilization.getInstance().getNetworkManager().sendPacket(packet);
+			// unit.removeAction(this);
+
+			Civilization.getInstance().getEventManager().fireEvent(new UnitActEvent(unit));
+
+			unit.removeAction(this);
+			return true;
+		}
+
+		// Problem: We need to find a way to update this.
+		@Override
+		public boolean canAct() {
+			if (unit.getCurrentMovement() < 1) {
+				return false;
+			}
 			return true;
 		}
 
 		@Override
-		public boolean canAct() {
-			Unit unit = (Unit) actor;
-			if (unit.getCurrentMovement() < 1) {
-				unit.removeAction(this);
-				return false;
-			}
-			return true;
+		public String getName() {
+			return "Settle";
 		}
 	}
 

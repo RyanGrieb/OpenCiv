@@ -10,8 +10,7 @@ public class UnitActionButton extends Button {
 	private AbstractAction action;
 
 	public UnitActionButton(Unit unit, AbstractAction action, float x, float y, float width, float height) {
-		super(action.getClass().getSimpleName().substring(0,
-				action.getClass().getSimpleName().length() - "action".length()), x, y, width, height);
+		super(action.getName(), x, y, width, height);
 		this.unit = unit;
 		this.action = action;
 	}
@@ -22,4 +21,7 @@ public class UnitActionButton extends Button {
 			unit.addAction(action);
 	}
 
+	public AbstractAction getAction() {
+		return action;
+	}
 }

@@ -24,6 +24,7 @@ import me.rhin.openciv.server.game.map.tile.TileType;
 import me.rhin.openciv.server.game.map.tile.TileType.TileProperty;
 import me.rhin.openciv.server.game.unit.AttackableEntity;
 import me.rhin.openciv.server.game.unit.Unit;
+import me.rhin.openciv.server.game.unit.type.Builder.BuilderUnit;
 import me.rhin.openciv.server.game.unit.type.Settler.SettlerUnit;
 import me.rhin.openciv.server.game.unit.type.Warrior.WarriorUnit;
 import me.rhin.openciv.server.listener.ClickSpecialistListener;
@@ -39,6 +40,7 @@ import me.rhin.openciv.server.listener.SelectUnitListener;
 import me.rhin.openciv.server.listener.SetProductionItemListener;
 import me.rhin.openciv.server.listener.SettleCityListener;
 import me.rhin.openciv.server.listener.UnitMoveListener;
+import me.rhin.openciv.server.listener.WorkTileListener;
 import me.rhin.openciv.shared.packet.type.ClickSpecialistPacket;
 import me.rhin.openciv.shared.packet.type.ClickWorkedTilePacket;
 import me.rhin.openciv.shared.packet.type.CombatPreviewPacket;
@@ -59,12 +61,13 @@ import me.rhin.openciv.shared.packet.type.SettleCityPacket;
 import me.rhin.openciv.shared.packet.type.TerritoryGrowPacket;
 import me.rhin.openciv.shared.packet.type.TurnTimeLeftPacket;
 import me.rhin.openciv.shared.packet.type.UnitAttackPacket;
+import me.rhin.openciv.shared.packet.type.WorkTilePacket;
 
 //FIXME: Instead of the civ game listening for everything. Just split them off into the respective classes. (EX: CombatPreviewListener in the Unit class)
 public class InGameState extends GameState implements DisconnectListener, SelectUnitListener, UnitMoveListener,
 		SettleCityListener, PlayerFinishLoadingListener, NextTurnListener, SetProductionItemListener,
 		ClickWorkedTileListener, ClickSpecialistListener, EndTurnListener, PlayerListRequestListener,
-		FetchPlayerListener, CombatPreviewListener {
+		FetchPlayerListener, CombatPreviewListener, WorkTileListener {
 
 	private static final int BASE_TURN_TIME = 9;
 
@@ -88,6 +91,7 @@ public class InGameState extends GameState implements DisconnectListener, Select
 		Server.getInstance().getEventManager().addListener(PlayerListRequestListener.class, this);
 		Server.getInstance().getEventManager().addListener(FetchPlayerListener.class, this);
 		Server.getInstance().getEventManager().addListener(CombatPreviewListener.class, this);
+		Server.getInstance().getEventManager().addListener(WorkTileListener.class, this);
 	}
 
 	@Override
@@ -273,7 +277,6 @@ public class InGameState extends GameState implements DisconnectListener, Select
 				// If target is unit, use this method. if city, implement that other one
 
 				// Doesn't get called?
-				System.out.println(targetEntity.getHealth());
 
 				if (targetEntity.getHealth() <= 0) {
 					if (targetEntity instanceof Unit && targetEntity.getTile().getCity() == null) {
@@ -529,9 +532,25 @@ public class InGameState extends GameState implements DisconnectListener, Select
 
 		packet.setUnitDamage(attackingEntity.getDamageTaken(targetEntity));
 		packet.setTargetDamage(targetEntity.getDamageTaken(attackingEntity));
-		// NOTE: Cities have initial health of 200.
+
 		Json json = new Json();
 		conn.send(json.toJson(packet));
+	}
+
+	@Override
+	public void onWorkTile(WebSocket conn, WorkTilePacket packet) {
+
+		// TODO: !! We need to do territory & ownership checks like in clientside.
+
+		Tile tile = map.getTiles()[packet.getGridX()][packet.getGridY()];
+		for (Unit unit : tile.getUnits()) {
+			if (unit instanceof BuilderUnit) {
+				BuilderUnit builder = (BuilderUnit) unit;
+				builder.setBuilding(true);
+				builder.setImprovement(packet.getImprovementType());
+				builder.reduceMovement(2);
+			}
+		}
 	}
 
 	@Override
@@ -657,7 +676,8 @@ public class InGameState extends GameState implements DisconnectListener, Select
 
 		// Debug code
 		if (players.size() > 1) {
-			players.get(0).setSpawnPos(players.get(1).getSpawnX() + 1, players.get(1).getSpawnY() + 1);
+			// players.get(0).setSpawnPos(players.get(1).getSpawnX() + 1,
+			// players.get(1).getSpawnY() + 1);
 		}
 
 		for (Player player : players) {
@@ -721,4 +741,5 @@ public class InGameState extends GameState implements DisconnectListener, Select
 
 		return hasSafeTile;
 	}
+
 }

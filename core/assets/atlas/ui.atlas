@@ -20,35 +20,42 @@ ui_background
   index: -1
 ui_black
   rotate: false
-  xy: 838, 747
+  xy: 644, 131
   size: 1, 1
   orig: 1, 1
   offset: 0, 0
   index: -1
 ui_button
   rotate: false
-  xy: 644, 168
+  xy: 2, 36
   size: 142, 28
   orig: 142, 28
   offset: 0, 0
   index: -1
-ui_button_hovered
+ui_button_disabled
   rotate: false
   xy: 804, 750
   size: 142, 28
   orig: 142, 28
   offset: 0, 0
   index: -1
+ui_button_hovered
+  rotate: false
+  xy: 644, 168
+  size: 142, 28
+  orig: 142, 28
+  offset: 0, 0
+  index: -1
 ui_button_small
   rotate: false
-  xy: 516, 70
+  xy: 804, 720
   size: 71, 28
   orig: 71, 28
   offset: 0, 0
   index: -1
 ui_button_small_hovered
   rotate: false
-  xy: 2, 36
+  xy: 516, 70
   size: 71, 28
   orig: 71, 28
   offset: 0, 0
@@ -76,28 +83,28 @@ ui_error
   index: -1
 ui_github
   rotate: false
-  xy: 2, 2
+  xy: 804, 686
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 ui_gray
   rotate: false
-  xy: 644, 131
+  xy: 678, 165
   size: 1, 1
   orig: 1, 1
   offset: 0, 0
   index: -1
 ui_green
   rotate: false
-  xy: 804, 713
+  xy: 877, 747
   size: 1, 1
   orig: 1, 1
   offset: 0, 0
   index: -1
 ui_light_gray
   rotate: false
-  xy: 75, 63
+  xy: 146, 63
   size: 1, 1
   orig: 1, 1
   offset: 0, 0
@@ -118,14 +125,14 @@ ui_red
   index: -1
 ui_selection
   rotate: false
-  xy: 804, 716
+  xy: 644, 134
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 ui_star
   rotate: false
-  xy: 644, 134
+  xy: 2, 2
   size: 32, 32
   orig: 32, 32
   offset: 0, 0

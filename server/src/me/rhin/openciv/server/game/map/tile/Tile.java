@@ -7,14 +7,17 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.utils.Json;
 
 import me.rhin.openciv.server.Server;
+import me.rhin.openciv.server.game.Player;
 import me.rhin.openciv.server.game.city.City;
 import me.rhin.openciv.server.game.map.GameMap;
 import me.rhin.openciv.server.game.map.tile.TileType.TileLayer;
 import me.rhin.openciv.server.game.map.tile.TileType.TileProperty;
 import me.rhin.openciv.server.game.unit.AttackableEntity;
 import me.rhin.openciv.server.game.unit.Unit;
+import me.rhin.openciv.shared.packet.type.WorkTilePacket;
 import me.rhin.openciv.shared.stat.StatLine;
 
 public class Tile {
@@ -41,7 +44,6 @@ public class Tile {
 
 	private GameMap map;
 	private Set<TileTypeWrapper> tileWrappers;
-	private StatLine statLine;
 	private float x, y, width, height;
 	private int gridX, gridY;
 	private Tile[] adjTiles;
@@ -49,12 +51,12 @@ public class Tile {
 	private Vector2[] vectors;
 	private City city;
 	private ArrayList<Unit> units;
+	private TileImprovement tileImprovement;
 
 	public Tile(GameMap map, TileType tileType, float x, float y) {
 		this.map = map;
 		this.tileWrappers = Collections.synchronizedSet(new TreeSet<TileTypeWrapper>());
 		tileWrappers.add(new TileTypeWrapper(tileType));
-		this.statLine = getStatLine();
 		this.x = x;
 		this.y = y;
 		this.gridX = (int) x;
@@ -418,5 +420,42 @@ public class Tile {
 		}
 
 		return capturableUnit;
+	}
+
+	public void workTile(Unit unit, String improvementName) {
+		if (tileImprovement == null) {
+			tileImprovement = getBaseTileType().getImprovement(improvementName);
+		}
+
+		if (tileImprovement == null) {
+			System.out.println("Tile: Error, no tile improvement found for " + getBaseTileType().name());
+			return;
+		}
+
+		tileImprovement.addTurnsWorked();
+
+		// add
+		if (tileImprovement.getTurnsWorked() >= tileImprovement.getMaxTurns()) {
+			// TODO: Do we properly change the tiletype?
+			setTileType(tileImprovement.getTileType());
+
+			// TODO: Send set tileType packet?
+
+			tileImprovement.setFinished(true);
+		} else {
+			// Send work tile packet
+			WorkTilePacket workTilePacket = new WorkTilePacket();
+			workTilePacket.setTile(tileImprovement.getName().toLowerCase(), gridX, gridY,
+					tileImprovement.getTurnsWorked(), unit.getID());
+
+			Json json = new Json();
+			for (Player player : Server.getInstance().getPlayers())
+				player.getConn().send(json.toJson(workTilePacket));
+
+		}
+	}
+
+	public TileImprovement getTileImprovement() {
+		return tileImprovement;
 	}
 }

@@ -1,6 +1,8 @@
 package me.rhin.openciv.server.game.map.tile;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Random;
 
 import me.rhin.openciv.shared.stat.Stat;
@@ -20,6 +22,11 @@ public enum TileType implements Comparable<TileType> {
 			statLine.setValue(Stat.FOOD_GAIN, 2);
 			return statLine;
 		}
+
+		@Override
+		public List<TileImprovement> getImprovements() {
+			return Arrays.asList(new TileImprovement(TileType.FARM, 5));
+		}
 	},
 	GRASS_HILL(TileLayer.BASE, TileProperty.HILL) {
 		@Override
@@ -33,6 +40,11 @@ public enum TileType implements Comparable<TileType> {
 		public int getMovementCost() {
 			return 2;
 		}
+
+		@Override
+		public List<TileImprovement> getImprovements() {
+			return Arrays.asList(new TileImprovement(TileType.FARM, 5));
+		}
 	},
 	PLAINS(TileLayer.BASE) {
 		@Override
@@ -41,6 +53,11 @@ public enum TileType implements Comparable<TileType> {
 			statLine.setValue(Stat.FOOD_GAIN, 1);
 			statLine.setValue(Stat.PRODUCTION_GAIN, 1);
 			return statLine;
+		}
+
+		@Override
+		public List<TileImprovement> getImprovements() {
+			return Arrays.asList(new TileImprovement(TileType.FARM, 5));
 		}
 	},
 	PLAINS_HILL(TileLayer.BASE, TileProperty.HILL) {
@@ -54,6 +71,11 @@ public enum TileType implements Comparable<TileType> {
 		@Override
 		public int getMovementCost() {
 			return 2;
+		}
+
+		@Override
+		public List<TileImprovement> getImprovements() {
+			return Arrays.asList(new TileImprovement(TileType.FARM, 5));
 		}
 	},
 	DESERT(TileLayer.BASE) {
@@ -69,6 +91,11 @@ public enum TileType implements Comparable<TileType> {
 			StatLine statLine = new StatLine();
 			statLine.setValue(Stat.FOOD_GAIN, 2);
 			return statLine;
+		}
+
+		@Override
+		public List<TileImprovement> getImprovements() {
+			return Arrays.asList(new TileImprovement(TileType.FARM, 5));
 		}
 	},
 	DESERT_HILL(TileLayer.BASE, TileProperty.HILL) {
@@ -198,14 +225,44 @@ public enum TileType implements Comparable<TileType> {
 			statLine.setValue(Stat.GOLD_GAIN, 3);
 			return statLine;
 		}
+
+		@Override
+		public List<TileImprovement> getImprovements() {
+			return Arrays.asList(new TileImprovement(TileType.GEMS_IMPROVED, 5));
+		}
+	},
+	FARM(TileLayer.HIGH, TileProperty.IMPROVEMENT) {
+		@Override
+		public StatLine getStatLine() {
+			StatLine statLine = new StatLine();
+			statLine.addValue(Stat.FOOD_GAIN, 1);
+			return statLine;
+		}
+	},
+	GEMS_IMPROVED(TileLayer.HIGH, TileProperty.IMPROVEMENT) {
+		@Override
+		public StatLine getStatLine() {
+			StatLine statLine = new StatLine();
+			statLine.addValue(Stat.GOLD_GAIN, 3);
+			statLine.addValue(Stat.PRODUCTION_GAIN, 3);
+			return statLine;
+		}
 	};
 
 	public enum TileLayer {
-		BASE, MIDDLE, HIGH, TOP, RIVER;
+		BASE,
+		MIDDLE,
+		HIGH,
+		TOP,
+		RIVER;
 	}
 
 	public enum TileProperty {
-		WATER, LUXURY, RESOURCE, HILL;
+		WATER,
+		LUXURY,
+		RESOURCE,
+		IMPROVEMENT,
+		HILL;
 	}
 
 	private TileLayer tileLayer;
@@ -217,6 +274,10 @@ public enum TileType implements Comparable<TileType> {
 	}
 
 	public abstract StatLine getStatLine();
+
+	public List<TileImprovement> getImprovements() {
+		return null;
+	}
 
 	public int getMovementCost() {
 		return 1;
@@ -272,5 +333,14 @@ public enum TileType implements Comparable<TileType> {
 		Random rnd = new Random();
 
 		return resourceTypes.get(rnd.nextInt(resourceTypes.size()));
+	}
+
+	TileImprovement getImprovement(String improvementName) {
+		for (TileImprovement tileImprovement : getImprovements()) {
+			if (tileImprovement.getName().equals(improvementName))
+				return tileImprovement;
+		}
+
+		return null;
 	}
 }

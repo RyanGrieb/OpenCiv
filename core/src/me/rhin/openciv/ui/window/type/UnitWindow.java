@@ -7,22 +7,32 @@ import com.badlogic.gdx.utils.Align;
 
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.game.AbstractAction;
+import me.rhin.openciv.game.map.tile.Tile;
 import me.rhin.openciv.game.unit.Unit;
+import me.rhin.openciv.game.unit.type.Builder.BuilderUnit;
+import me.rhin.openciv.listener.NextTurnListener;
 import me.rhin.openciv.listener.ResizeListener;
+import me.rhin.openciv.listener.UnitActListener;
 import me.rhin.openciv.listener.UnitAttackListener;
+import me.rhin.openciv.listener.WorkTileListener;
+import me.rhin.openciv.shared.packet.type.NextTurnPacket;
 import me.rhin.openciv.shared.packet.type.UnitAttackPacket;
+import me.rhin.openciv.shared.packet.type.WorkTilePacket;
+import me.rhin.openciv.shared.util.StrUtil;
 import me.rhin.openciv.ui.background.BlankBackground;
 import me.rhin.openciv.ui.button.type.UnitActionButton;
 import me.rhin.openciv.ui.game.Healthbar;
 import me.rhin.openciv.ui.label.CustomLabel;
 import me.rhin.openciv.ui.window.AbstractWindow;
 
-public class UnitWindow extends AbstractWindow implements ResizeListener, UnitAttackListener {
+public class UnitWindow extends AbstractWindow
+		implements ResizeListener, UnitAttackListener, NextTurnListener, UnitActListener, WorkTileListener {
 
 	private CustomLabel unitNameLabel;
 	private CustomLabel movementLabel;
 	private BlankBackground blankBackground;
 	private Healthbar healthbar;
+	private CustomLabel buildDescLabel;
 
 	private Unit unit;
 	private ArrayList<UnitActionButton> unitActionButtons;
@@ -47,17 +57,81 @@ public class UnitWindow extends AbstractWindow implements ResizeListener, UnitAt
 		movementLabel.setPosition((getWidth() - (200 / 2)) - movementLabel.getWidth() / 2, 5);
 		addActor(movementLabel);
 
+		this.buildDescLabel = new CustomLabel("??? - (0/0)", 4, 100 - 55, 200, 20);
+
+		if (unit instanceof BuilderUnit) {
+			BuilderUnit builderUnit = (BuilderUnit) unit;
+
+			if (builderUnit.isBuilding()) {
+				this.buildDescLabel.setText("Building " + StrUtil.capitalize((builderUnit.getImprovementName()) + " ("
+						+ builderUnit.getAppliedTurns() + "/" + builderUnit.getMaxTurns() + ")"));
+				addActor(buildDescLabel);
+			}
+		}
+
 		int index = 0;
 		for (AbstractAction action : unit.getCustomActions()) {
 			UnitActionButton actionButton = new UnitActionButton(unit, action, blankBackground.getX() + (75 * index),
 					blankBackground.getY() + blankBackground.getHeight() / 2 - 40 / 2, 70, 30);
 			unitActionButtons.add(actionButton);
-			addActor(actionButton);
+			if (action.canAct())
+				addActor(actionButton);
 			index++;
 		}
 
 		Civilization.getInstance().getEventManager().addListener(ResizeListener.class, this);
 		Civilization.getInstance().getEventManager().addListener(UnitAttackListener.class, this);
+		Civilization.getInstance().getEventManager().addListener(NextTurnListener.class, this);
+		Civilization.getInstance().getEventManager().addListener(UnitActListener.class, this);
+		Civilization.getInstance().getEventManager().addListener(WorkTileListener.class, this);
+	}
+
+	@Override
+	public void onClose() {
+		super.onClose();
+
+		Civilization.getInstance().getEventManager().clearListenersFromObject(this);
+	}
+
+	@Override
+	public void onNextTurn(NextTurnPacket packet) {
+		for (UnitActionButton button : unitActionButtons) {
+			if (button.getStage() == null) {
+				if (button.getAction().canAct())
+					addActor(button);
+			}
+		}
+	}
+
+	@Override
+	public void onUnitAct(Unit unit) {
+		for (AbstractAction action : unit.getCustomActions()) {
+			for (UnitActionButton button : unitActionButtons) {
+
+				if (action.equals(button.getAction())) {
+
+					if (action.canAct() && button.getStage() == null)
+						addActor(button);
+
+					if (!action.canAct() && button.getStage() != null) {
+						removeActor(button);
+
+						// FIXME: This is pretty much hard coded into the UI
+						if (unit instanceof BuilderUnit) {
+							BuilderUnit builderUnit = (BuilderUnit) unit;
+							if (builderUnit.isBuilding()) {
+
+								buildDescLabel.setText("Building " + StrUtil.capitalize(
+										(builderUnit.getImprovementName()) + " (" + builderUnit.getAppliedTurns() + "/"
+												+ builderUnit.getMaxTurns() + ")"));
+								addActor(buildDescLabel);
+							}
+						}
+					}
+
+				}
+			}
+		}
 	}
 
 	@Override
@@ -71,6 +145,17 @@ public class UnitWindow extends AbstractWindow implements ResizeListener, UnitAt
 		if (unit.equals(attackingUnit) || unit.equals(targetUnit)) {
 			healthbar.setHealth(unit.getMaxHealth(), unit.getHealth());
 		}
+	}
+
+	@Override
+	public void onWorkTile(WorkTilePacket packet) {
+		if (unit.getID() != packet.getUnitID())
+			return;
+
+		BuilderUnit builderUnit = (BuilderUnit) unit;
+
+		this.buildDescLabel.setText("Building " + StrUtil.capitalize((builderUnit.getImprovementName()) + " ("
+				+ builderUnit.getAppliedTurns() + "/" + builderUnit.getMaxTurns() + ")"));
 	}
 
 	@Override
@@ -118,13 +203,6 @@ public class UnitWindow extends AbstractWindow implements ResizeListener, UnitAt
 	@Override
 	public boolean closesGameDisplayWindows() {
 		return false;
-	}
-
-	@Override
-	public void onClose() {
-		super.onClose();
-
-		Civilization.getInstance().getEventManager().removeListener(ResizeListener.class, this);
 	}
 
 	public Unit getUnit() {

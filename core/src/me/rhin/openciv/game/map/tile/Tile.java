@@ -73,6 +73,7 @@ public class Tile extends Actor implements ShapeRenderListener {
 	private ArrayList<Unit> units;
 	private boolean discovered;
 	private ArrayList<TileObserver> tileObservers;
+	private boolean improved;
 
 	public Tile(GameMap map, TileType tileType, float x, float y) {
 		Civilization.getInstance().getEventManager().addListener(ShapeRenderListener.class, this);
@@ -94,6 +95,8 @@ public class Tile extends Actor implements ShapeRenderListener {
 		nonVisibleSprite.setAlpha(0.7f);
 
 		this.drawSelection = false;
+		this.improved = false;
+
 		// FIXME: Remove our own x,y,and size variables, and use the actors instead.
 		this.x = x;
 		this.y = y;
@@ -458,6 +461,10 @@ public class Tile extends Actor implements ShapeRenderListener {
 
 	public City getCity() {
 		return city;
+	}
+
+	public boolean isImproved() {
+		return improved;
 	}
 
 	public AttackableEntity getAttackableEntity() {

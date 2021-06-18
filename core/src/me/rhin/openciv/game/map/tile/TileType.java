@@ -7,12 +7,12 @@ import me.rhin.openciv.asset.TextureEnum;
 
 public enum TileType {
 	CITY(TextureEnum.TILE_CITY, TileLayer.TOP),
-	GRASS(TextureEnum.TILE_GRASS, TileLayer.BASE),
-	GRASS_HILL(TextureEnum.TILE_GRASS_HILL, 2, TileLayer.BASE),
-	PLAINS(TextureEnum.TILE_PLAINS, TileLayer.BASE),
-	PLAINS_HILL(TextureEnum.TILE_PLAINS_HILL, 2, TileLayer.BASE),
+	GRASS(TextureEnum.TILE_GRASS, TileLayer.BASE, TileProperty.FARMABLE),
+	GRASS_HILL(TextureEnum.TILE_GRASS_HILL, 2, TileLayer.BASE, TileProperty.FARMABLE),
+	PLAINS(TextureEnum.TILE_PLAINS, TileLayer.BASE, TileProperty.FARMABLE),
+	PLAINS_HILL(TextureEnum.TILE_PLAINS_HILL, 2, TileLayer.BASE, TileProperty.FARMABLE),
 	DESERT(TextureEnum.TILE_DESERT, TileLayer.BASE),
-	FLOODPLAINS(TextureEnum.TILE_FLOODPLAINS, TileLayer.BASE),
+	FLOODPLAINS(TextureEnum.TILE_FLOODPLAINS, TileLayer.BASE, TileProperty.FARMABLE),
 	DESERT_HILL(TextureEnum.TILE_DESERT_HILL, 2, TileLayer.BASE),
 	TUNDRA(TextureEnum.TILE_TUNDRA, TileLayer.BASE),
 	TUNDRA_HILL(TextureEnum.TILE_TUNDRA_HILL, 2, TileLayer.BASE),
@@ -36,7 +36,8 @@ public enum TileType {
 
 	public enum TileProperty {
 		WATER,
-		RESOURCE;
+		RESOURCE,
+		FARMABLE;
 	}
 
 	private TextureEnum assetEnum;
