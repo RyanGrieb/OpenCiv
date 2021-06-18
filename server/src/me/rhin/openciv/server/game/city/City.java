@@ -173,11 +173,13 @@ public class City implements AttackableEntity, SpecialistContainer, NextTurnList
 			citizenWorkers.put(expansionTile, citizenWorker);
 
 			Json json = new Json();
-			TerritoryGrowPacket territoryGrowPacket = new TerritoryGrowPacket();
-			territoryGrowPacket.setCityName(name);
-			territoryGrowPacket.setLocation(expansionTile.getGridX(), expansionTile.getGridY());
-			territoryGrowPacket.setOwner(playerOwner.getName());
-			playerOwner.getConn().send(json.toJson(territoryGrowPacket));
+			for (Player player : Server.getInstance().getPlayers()) {
+				TerritoryGrowPacket territoryGrowPacket = new TerritoryGrowPacket();
+				territoryGrowPacket.setCityName(name);
+				territoryGrowPacket.setLocation(expansionTile.getGridX(), expansionTile.getGridY());
+				territoryGrowPacket.setOwner(playerOwner.getName());
+				player.getConn().send(json.toJson(territoryGrowPacket));
+			}
 
 			// FIXME: Have the client automatically add an empty citizen...
 			SetCitizenTileWorkerPacket setTileWorkerPacket = new SetCitizenTileWorkerPacket();
