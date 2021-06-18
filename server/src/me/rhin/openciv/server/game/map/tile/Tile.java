@@ -17,6 +17,7 @@ import me.rhin.openciv.server.game.map.tile.TileType.TileLayer;
 import me.rhin.openciv.server.game.map.tile.TileType.TileProperty;
 import me.rhin.openciv.server.game.unit.AttackableEntity;
 import me.rhin.openciv.server.game.unit.Unit;
+import me.rhin.openciv.shared.packet.type.SetTileTypePacket;
 import me.rhin.openciv.shared.packet.type.WorkTilePacket;
 import me.rhin.openciv.shared.stat.StatLine;
 
@@ -434,21 +435,27 @@ public class Tile {
 
 		tileImprovement.addTurnsWorked();
 
+		Json json = new Json();
+
 		// add
 		if (tileImprovement.getTurnsWorked() >= tileImprovement.getMaxTurns()) {
-			// TODO: Do we properly change the tiletype?
+
+			// FIXME: Do we properly change the tiletype?
 			setTileType(tileImprovement.getTileType());
-
-			// TODO: Send set tileType packet?
-
 			tileImprovement.setFinished(true);
+
+			SetTileTypePacket setTileTypePacket = new SetTileTypePacket();
+			setTileTypePacket.setTile(tileImprovement.getTileType().name(), gridX, gridY);
+
+			for (Player player : Server.getInstance().getPlayers())
+				player.getConn().send(json.toJson(setTileTypePacket));
+
 		} else {
 			// Send work tile packet
 			WorkTilePacket workTilePacket = new WorkTilePacket();
 			workTilePacket.setTile(tileImprovement.getName().toLowerCase(), gridX, gridY,
 					tileImprovement.getTurnsWorked(), unit.getID());
 
-			Json json = new Json();
 			for (Player player : Server.getInstance().getPlayers())
 				player.getConn().send(json.toJson(workTilePacket));
 

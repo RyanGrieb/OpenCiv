@@ -25,7 +25,8 @@ public enum TileType {
 	IRON(TextureEnum.TILE_IRON, TileLayer.HIGH, TileProperty.RESOURCE),
 	COPPER(TextureEnum.TILE_COPPER, TileLayer.HIGH, TileProperty.RESOURCE),
 	COTTON(TextureEnum.TILE_COTTON, TileLayer.HIGH, TileProperty.RESOURCE),
-	GEMS(TextureEnum.TILE_GEMS, TileLayer.HIGH, TileProperty.RESOURCE);
+	GEMS(TextureEnum.TILE_GEMS, TileLayer.HIGH, TileProperty.RESOURCE),
+	FARM(TextureEnum.TILE_FARM, TileLayer.HIGH, TileProperty.IMPROVEMENT);
 
 	public enum TileLayer {
 		BASE,
@@ -37,6 +38,7 @@ public enum TileType {
 	public enum TileProperty {
 		WATER,
 		RESOURCE,
+		IMPROVEMENT,
 		FARMABLE;
 	}
 

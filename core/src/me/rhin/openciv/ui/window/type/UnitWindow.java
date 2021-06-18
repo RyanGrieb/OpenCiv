@@ -7,15 +7,16 @@ import com.badlogic.gdx.utils.Align;
 
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.game.AbstractAction;
-import me.rhin.openciv.game.map.tile.Tile;
 import me.rhin.openciv.game.unit.Unit;
 import me.rhin.openciv.game.unit.type.Builder.BuilderUnit;
 import me.rhin.openciv.listener.NextTurnListener;
 import me.rhin.openciv.listener.ResizeListener;
+import me.rhin.openciv.listener.SetTileTypeListener;
 import me.rhin.openciv.listener.UnitActListener;
 import me.rhin.openciv.listener.UnitAttackListener;
 import me.rhin.openciv.listener.WorkTileListener;
 import me.rhin.openciv.shared.packet.type.NextTurnPacket;
+import me.rhin.openciv.shared.packet.type.SetTileTypePacket;
 import me.rhin.openciv.shared.packet.type.UnitAttackPacket;
 import me.rhin.openciv.shared.packet.type.WorkTilePacket;
 import me.rhin.openciv.shared.util.StrUtil;
@@ -25,8 +26,8 @@ import me.rhin.openciv.ui.game.Healthbar;
 import me.rhin.openciv.ui.label.CustomLabel;
 import me.rhin.openciv.ui.window.AbstractWindow;
 
-public class UnitWindow extends AbstractWindow
-		implements ResizeListener, UnitAttackListener, NextTurnListener, UnitActListener, WorkTileListener {
+public class UnitWindow extends AbstractWindow implements ResizeListener, UnitAttackListener, NextTurnListener,
+		UnitActListener, WorkTileListener, SetTileTypeListener {
 
 	private CustomLabel unitNameLabel;
 	private CustomLabel movementLabel;
@@ -64,7 +65,8 @@ public class UnitWindow extends AbstractWindow
 
 			if (builderUnit.isBuilding()) {
 				this.buildDescLabel.setText("Building " + StrUtil.capitalize((builderUnit.getImprovementName()) + " ("
-						+ builderUnit.getAppliedTurns() + "/" + builderUnit.getMaxTurns() + ")"));
+						+ builderUnit.getStandingTile().getAppliedImprovementTurns() + "/" + builderUnit.getMaxTurns()
+						+ ")"));
 				addActor(buildDescLabel);
 			}
 		}
@@ -84,6 +86,7 @@ public class UnitWindow extends AbstractWindow
 		Civilization.getInstance().getEventManager().addListener(NextTurnListener.class, this);
 		Civilization.getInstance().getEventManager().addListener(UnitActListener.class, this);
 		Civilization.getInstance().getEventManager().addListener(WorkTileListener.class, this);
+		Civilization.getInstance().getEventManager().addListener(SetTileTypeListener.class, this);
 	}
 
 	@Override
@@ -116,14 +119,16 @@ public class UnitWindow extends AbstractWindow
 					if (!action.canAct() && button.getStage() != null) {
 						removeActor(button);
 
-						// FIXME: This is pretty much hard coded into the UI
+						// FIXME: This is pretty much hard coded into the UI. Maybe each required unit
+						// could build it's own unitWindow UI. that extends this.
 						if (unit instanceof BuilderUnit) {
 							BuilderUnit builderUnit = (BuilderUnit) unit;
 							if (builderUnit.isBuilding()) {
 
-								buildDescLabel.setText("Building " + StrUtil.capitalize(
-										(builderUnit.getImprovementName()) + " (" + builderUnit.getAppliedTurns() + "/"
-												+ builderUnit.getMaxTurns() + ")"));
+								buildDescLabel
+										.setText("Building " + StrUtil.capitalize((builderUnit.getImprovementName())
+												+ " (" + builderUnit.getStandingTile().getAppliedImprovementTurns()
+												+ "/" + builderUnit.getMaxTurns() + ")"));
 								addActor(buildDescLabel);
 							}
 						}
@@ -155,7 +160,22 @@ public class UnitWindow extends AbstractWindow
 		BuilderUnit builderUnit = (BuilderUnit) unit;
 
 		this.buildDescLabel.setText("Building " + StrUtil.capitalize((builderUnit.getImprovementName()) + " ("
-				+ builderUnit.getAppliedTurns() + "/" + builderUnit.getMaxTurns() + ")"));
+				+ builderUnit.getStandingTile().getAppliedImprovementTurns() + "/" + builderUnit.getMaxTurns() + ")"));
+	}
+
+	@Override
+	public void onSetTileType(SetTileTypePacket packet) {
+		if (!(unit instanceof BuilderUnit))
+			return;
+
+		BuilderUnit builderUnit = (BuilderUnit) unit;
+
+		if (builderUnit.getStandingTile().getGridX() == packet.getGridX()
+				&& builderUnit.getStandingTile().getGridY() == packet.getGridY()) {
+
+			// Assume the builder is done building
+			removeActor(buildDescLabel);
+		}
 	}
 
 	@Override

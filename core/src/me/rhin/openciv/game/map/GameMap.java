@@ -7,14 +7,14 @@ import me.rhin.openciv.Civilization;
 import me.rhin.openciv.game.map.tile.Tile;
 import me.rhin.openciv.game.map.tile.TileType;
 import me.rhin.openciv.listener.ReceiveMapChunkListener;
+import me.rhin.openciv.listener.SetTileTypeListener;
 import me.rhin.openciv.shared.packet.ChunkTile;
 import me.rhin.openciv.shared.packet.type.MapChunkPacket;
-import me.rhin.openciv.shared.packet.type.MapRequestPacket;
-import me.rhin.openciv.ui.screen.ScreenEnum;
+import me.rhin.openciv.shared.packet.type.SetTileTypePacket;
 import me.rhin.openciv.ui.screen.type.InGameScreen;
 import me.rhin.openciv.util.MathHelper;
 
-public class GameMap implements ReceiveMapChunkListener {
+public class GameMap implements ReceiveMapChunkListener, SetTileTypeListener {
 
 	public static final int WIDTH = 128;
 	public static final int HEIGHT = 80;
@@ -40,7 +40,9 @@ public class GameMap implements ReceiveMapChunkListener {
 		// if(game.isSingleplayer()).
 		// generateTerrain();
 
+		// FIXME: I don't believe we clear these
 		Civilization.getInstance().getEventManager().addListener(ReceiveMapChunkListener.class, this);
+		Civilization.getInstance().getEventManager().addListener(SetTileTypeListener.class, this);
 	}
 
 	@Override
@@ -76,6 +78,13 @@ public class GameMap implements ReceiveMapChunkListener {
 				chunkTileIndex++;
 			}
 		}
+	}
+
+	@Override
+	public void onSetTileType(SetTileTypePacket packet) {
+		Tile tile = tiles[packet.getGridX()][packet.getGridY()];
+		// FIXME: Should be using tile Ids?
+		tile.setTileType(TileType.valueOf(packet.getTileTypeName()));
 	}
 
 	public Tile getTileFromLocation(float x, float y) {

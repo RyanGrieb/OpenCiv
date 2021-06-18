@@ -74,6 +74,7 @@ public class Tile extends Actor implements ShapeRenderListener {
 	private boolean discovered;
 	private ArrayList<TileObserver> tileObservers;
 	private boolean improved;
+	private int appliedImprovementTurns;
 
 	public Tile(GameMap map, TileType tileType, float x, float y) {
 		Civilization.getInstance().getEventManager().addListener(ShapeRenderListener.class, this);
@@ -107,6 +108,8 @@ public class Tile extends Actor implements ShapeRenderListener {
 		this.riverSides = new RiverPart[6];
 		this.units = new ArrayList<>();
 		this.tileObservers = new ArrayList<>();
+		this.improved = false;
+		this.appliedImprovementTurns = 0;
 
 		this.posLabel = new CustomLabel(gridX + "," + gridY);
 		posLabel.setSize(width, 20);
@@ -497,8 +500,12 @@ public class Tile extends Actor implements ShapeRenderListener {
 		}
 	}
 
-	private void setDiscovered(boolean discovered) {
-		this.discovered = discovered;
+	public void setAppliedTurns(int appliedTurns) {
+		this.appliedImprovementTurns = appliedTurns;
+	}
+
+	public int getAppliedImprovementTurns() {
+		return appliedImprovementTurns;
 	}
 
 	public void addTileObserver(TileObserver tileObserver) {
@@ -534,6 +541,10 @@ public class Tile extends Actor implements ShapeRenderListener {
 			}
 
 		}
+	}
+
+	private void setDiscovered(boolean discovered) {
+		this.discovered = discovered;
 	}
 
 	private void initializeVectors() {

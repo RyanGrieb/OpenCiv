@@ -1,14 +1,10 @@
 package me.rhin.openciv.server.game.unit.type;
 
-import me.rhin.openciv.server.Server;
 import me.rhin.openciv.server.game.Player;
 import me.rhin.openciv.server.game.map.tile.Tile;
 import me.rhin.openciv.server.game.map.tile.TileType.TileProperty;
 import me.rhin.openciv.server.game.unit.Unit;
 import me.rhin.openciv.server.game.unit.UnitItem;
-import me.rhin.openciv.server.game.unit.type.Builder.BuilderUnit;
-import me.rhin.openciv.server.listener.NextTurnListener;
-import me.rhin.openciv.shared.packet.type.NextTurnPacket;
 
 public class Builder extends UnitItem {
 
@@ -34,6 +30,13 @@ public class Builder extends UnitItem {
 				}
 			}
 
+		}
+
+		@Override
+		public void moveToTargetTile() {
+			super.moveToTargetTile();
+			building = false;
+			improvement = null;
 		}
 
 		@Override

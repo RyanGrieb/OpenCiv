@@ -9,24 +9,24 @@ import me.rhin.openciv.game.map.tile.TileType.TileProperty;
 import me.rhin.openciv.game.unit.Unit;
 import me.rhin.openciv.game.unit.UnitItem;
 import me.rhin.openciv.game.unit.UnitParameter;
+import me.rhin.openciv.listener.SetTileTypeListener;
 import me.rhin.openciv.listener.UnitActListener.UnitActEvent;
 import me.rhin.openciv.listener.WorkTileListener;
+import me.rhin.openciv.shared.packet.type.SetTileTypePacket;
 import me.rhin.openciv.shared.packet.type.WorkTilePacket;
 
 public class Builder extends UnitItem {
 
-	public static class BuilderUnit extends Unit implements WorkTileListener {
+	public static class BuilderUnit extends Unit implements WorkTileListener, SetTileTypeListener {
 
 		private ImprovementType improvementType;
 		private boolean building;
-		private int appliedTurns;
 
 		public BuilderUnit(UnitParameter unitParameter) {
 			super(unitParameter, TextureEnum.UNIT_BUILDER);
 			customActions.add(new FarmAction(this));
 			this.canAttack = false;
 			this.building = false;
-			this.appliedTurns = 0;
 
 			// FIXME: REALLY should remove this listener when this unit gets destroyed
 			Civilization.getInstance().getEventManager().addListener(WorkTileListener.class, this);
@@ -36,8 +36,25 @@ public class Builder extends UnitItem {
 		public void onWorkTile(WorkTilePacket packet) {
 			if (packet.getUnitID() != getID())
 				return;
-			
-			this.appliedTurns = packet.getAppliedTurns();
+
+			getStandingTile().setAppliedTurns(packet.getAppliedTurns());
+		}
+
+		@Override
+		public void onSetTileType(SetTileTypePacket packet) {
+			if (building) {
+				// Assume we finish building
+				building = false;
+				improvementType = null;
+			}
+
+		}
+
+		@Override
+		public void moveToTargetTile() {
+			super.moveToTargetTile();
+
+			building = false;
 		}
 
 		@Override
@@ -72,10 +89,6 @@ public class Builder extends UnitItem {
 
 		public String getImprovementName() {
 			return improvementType.getName();
-		}
-
-		public int getAppliedTurns() {
-			return appliedTurns;
 		}
 
 		public int getMaxTurns() {

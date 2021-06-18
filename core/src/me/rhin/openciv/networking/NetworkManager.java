@@ -40,6 +40,7 @@ import me.rhin.openciv.listener.SetCitizenTileWorkerListener.SetCitizenTileWorke
 import me.rhin.openciv.listener.SetCityHealthListener.SetCityHealthEvent;
 import me.rhin.openciv.listener.SetCityOwnerListener.SetCityOwnerEvent;
 import me.rhin.openciv.listener.SetProductionItemListener.SetProductionItemEvent;
+import me.rhin.openciv.listener.SetTileTypeListener.SetTileTypeEvent;
 import me.rhin.openciv.listener.SetUnitOwnerListener.SetUnitOwnerEvent;
 import me.rhin.openciv.listener.SetWorldSizeListener.SetWorldSizeEvent;
 import me.rhin.openciv.listener.SettleCityListener.SettleCityEvent;
@@ -76,6 +77,7 @@ import me.rhin.openciv.shared.packet.type.SetCitizenTileWorkerPacket;
 import me.rhin.openciv.shared.packet.type.SetCityHealthPacket;
 import me.rhin.openciv.shared.packet.type.SetCityOwnerPacket;
 import me.rhin.openciv.shared.packet.type.SetProductionItemPacket;
+import me.rhin.openciv.shared.packet.type.SetTileTypePacket;
 import me.rhin.openciv.shared.packet.type.SetUnitOwnerPacket;
 import me.rhin.openciv.shared.packet.type.SetWorldSizePacket;
 import me.rhin.openciv.shared.packet.type.SettleCityPacket;
@@ -125,6 +127,7 @@ public class NetworkManager {
 		networkEvents.put(SetCityOwnerPacket.class, SetCityOwnerEvent.class);
 		networkEvents.put(SetCityHealthPacket.class, SetCityHealthEvent.class);
 		networkEvents.put(WorkTilePacket.class, WorkTileEvent.class);
+		networkEvents.put(SetTileTypePacket.class, SetTileTypeEvent.class);
 	}
 
 	public void connect(String ip) {

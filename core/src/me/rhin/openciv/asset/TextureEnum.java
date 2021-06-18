@@ -28,6 +28,7 @@ public enum TextureEnum {
 	TILE_COPPER,
 	TILE_COTTON,
 	TILE_GEMS,
+	TILE_FARM,
 	TILE_CITY,
 	TILE_RIVER,
 	TILE_SELECT,
