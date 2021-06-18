@@ -16,6 +16,9 @@ public class SpecialistCitizenButton extends Button {
 			float height) {
 		super(TextureEnum.ICON_UNEMPLOYED_CITIZEN, "", x, y, width, height);
 
+		this.hoveredSprite = TextureEnum.ICON_UNEMPLOYED_CITIZEN.sprite();
+		hoveredSprite.setBounds(x, y, width, height);
+
 		this.city = city;
 		this.specialistContainer = specialistContainer;
 	}

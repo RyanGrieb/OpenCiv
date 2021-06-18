@@ -443,12 +443,14 @@ public class Tile {
 			// FIXME: Do we properly change the tiletype?
 			setTileType(tileImprovement.getTileType());
 			tileImprovement.setFinished(true);
-
+			System.out.println(getStatLine());
 			SetTileTypePacket setTileTypePacket = new SetTileTypePacket();
 			setTileTypePacket.setTile(tileImprovement.getTileType().name(), gridX, gridY);
 
 			for (Player player : Server.getInstance().getPlayers())
 				player.getConn().send(json.toJson(setTileTypePacket));
+
+			// FIXME: We need to update the city worked tiles
 
 		} else {
 			// Send work tile packet
