@@ -19,13 +19,13 @@ public enum TileType {
 	OCEAN(TextureEnum.TILE_OCEAN, TileLayer.BASE, TileProperty.WATER),
 	SHALLOW_OCEAN(TextureEnum.TILE_SHALLOW_OCEAN, TileLayer.BASE, TileProperty.WATER),
 	MOUNTAIN(TextureEnum.TILE_MOUNTIAN, 1000000, TileLayer.MIDDLE),
-	FOREST(TextureEnum.TILE_FOREST, 2, TileLayer.MIDDLE),
-	JUNGLE(TextureEnum.TILE_JUNGLE, 2, TileLayer.MIDDLE),
-	HORSES(TextureEnum.TILE_HORSES, TileLayer.HIGH, TileProperty.RESOURCE),
-	IRON(TextureEnum.TILE_IRON, TileLayer.HIGH, TileProperty.RESOURCE),
-	COPPER(TextureEnum.TILE_COPPER, TileLayer.HIGH, TileProperty.RESOURCE),
-	COTTON(TextureEnum.TILE_COTTON, TileLayer.HIGH, TileProperty.RESOURCE),
-	GEMS(TextureEnum.TILE_GEMS, TileLayer.HIGH, TileProperty.RESOURCE),
+	FOREST(TextureEnum.TILE_FOREST, 2, TileLayer.HIGH),
+	JUNGLE(TextureEnum.TILE_JUNGLE, 2, TileLayer.HIGH),
+	HORSES(TextureEnum.TILE_HORSES, TileLayer.MIDDLE, TileProperty.RESOURCE),
+	IRON(TextureEnum.TILE_IRON, TileLayer.MIDDLE, TileProperty.RESOURCE),
+	COPPER(TextureEnum.TILE_COPPER, TileLayer.MIDDLE, TileProperty.RESOURCE),
+	COTTON(TextureEnum.TILE_COTTON, TileLayer.MIDDLE, TileProperty.RESOURCE),
+	GEMS(TextureEnum.TILE_GEMS, TileLayer.MIDDLE, TileProperty.RESOURCE),
 	FARM(TextureEnum.TILE_FARM, TileLayer.HIGH, TileProperty.IMPROVEMENT);
 
 	public enum TileLayer {
