@@ -8,24 +8,24 @@ import me.rhin.openciv.asset.TextureEnum;
 public enum TileType {
 	CITY(TextureEnum.TILE_CITY, TileLayer.TOP),
 	GRASS(TextureEnum.TILE_GRASS, TileLayer.BASE, TileProperty.FARMABLE),
-	GRASS_HILL(TextureEnum.TILE_GRASS_HILL, 2, TileLayer.BASE, TileProperty.FARMABLE),
+	GRASS_HILL(TextureEnum.TILE_GRASS_HILL, 2, TileLayer.BASE, TileProperty.FARMABLE, TileProperty.MINEABLE),
 	PLAINS(TextureEnum.TILE_PLAINS, TileLayer.BASE, TileProperty.FARMABLE),
-	PLAINS_HILL(TextureEnum.TILE_PLAINS_HILL, 2, TileLayer.BASE, TileProperty.FARMABLE),
+	PLAINS_HILL(TextureEnum.TILE_PLAINS_HILL, 2, TileLayer.BASE, TileProperty.FARMABLE, TileProperty.MINEABLE),
 	DESERT(TextureEnum.TILE_DESERT, TileLayer.BASE),
 	FLOODPLAINS(TextureEnum.TILE_FLOODPLAINS, TileLayer.BASE, TileProperty.FARMABLE),
-	DESERT_HILL(TextureEnum.TILE_DESERT_HILL, 2, TileLayer.BASE),
+	DESERT_HILL(TextureEnum.TILE_DESERT_HILL, 2, TileLayer.BASE, TileProperty.MINEABLE),
 	TUNDRA(TextureEnum.TILE_TUNDRA, TileLayer.BASE),
-	TUNDRA_HILL(TextureEnum.TILE_TUNDRA_HILL, 2, TileLayer.BASE),
+	TUNDRA_HILL(TextureEnum.TILE_TUNDRA_HILL, 2, TileLayer.BASE, TileProperty.MINEABLE),
 	OCEAN(TextureEnum.TILE_OCEAN, TileLayer.BASE, TileProperty.WATER),
 	SHALLOW_OCEAN(TextureEnum.TILE_SHALLOW_OCEAN, TileLayer.BASE, TileProperty.WATER),
 	MOUNTAIN(TextureEnum.TILE_MOUNTIAN, 1000000, TileLayer.MIDDLE),
 	FOREST(TextureEnum.TILE_FOREST, 2, TileLayer.HIGH),
 	JUNGLE(TextureEnum.TILE_JUNGLE, 2, TileLayer.HIGH),
 	HORSES(TextureEnum.TILE_HORSES, TileLayer.MIDDLE, TileProperty.RESOURCE),
-	IRON(TextureEnum.TILE_IRON, TileLayer.MIDDLE, TileProperty.RESOURCE),
-	COPPER(TextureEnum.TILE_COPPER, TileLayer.MIDDLE, TileProperty.RESOURCE),
+	IRON(TextureEnum.TILE_IRON, TileLayer.MIDDLE, TileProperty.RESOURCE, TileProperty.MINEABLE),
+	COPPER(TextureEnum.TILE_COPPER, TileLayer.MIDDLE, TileProperty.RESOURCE, TileProperty.MINEABLE),
 	COTTON(TextureEnum.TILE_COTTON, TileLayer.MIDDLE, TileProperty.RESOURCE),
-	GEMS(TextureEnum.TILE_GEMS, TileLayer.MIDDLE, TileProperty.RESOURCE),
+	GEMS(TextureEnum.TILE_GEMS, TileLayer.MIDDLE, TileProperty.RESOURCE, TileProperty.MINEABLE),
 	FARM(TextureEnum.TILE_FARM, TileLayer.HIGH, TileProperty.IMPROVEMENT);
 
 	public enum TileLayer {
@@ -39,6 +39,7 @@ public enum TileType {
 		WATER,
 		RESOURCE,
 		IMPROVEMENT,
+		MINEABLE,
 		FARMABLE;
 	}
 

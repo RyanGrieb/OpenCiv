@@ -11,15 +11,26 @@ public class BlankBackground extends Actor {
 	private Sprite sprite;
 
 	public BlankBackground(float x, float y, float width, float height) {
-		this.setBounds(x, y, width, height);
 		this.sprite = TextureEnum.UI_BLACK.sprite();
-		sprite.setBounds(x, y, width, height);
+		setBounds(x, y, width, height);
 	}
 
 	@Override
 	public void setPosition(float x, float y) {
 		super.setPosition(x, y);
 		sprite.setPosition(x, y);
+	}
+
+	@Override
+	public void setSize(float width, float height) {
+		super.setSize(width, height);
+		sprite.setSize(width, height);
+	}
+
+	@Override
+	public void setBounds(float x, float y, float width, float height) {
+		super.setBounds(x, y, width, height);
+		sprite.setBounds(x, y, width, height);
 	}
 
 	@Override

@@ -2,8 +2,11 @@ package me.rhin.openciv.game.research;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
-import me.rhin.openciv.game.city.building.type.Granary;
+import me.rhin.openciv.game.research.type.MiningTech;
+import me.rhin.openciv.game.research.type.PotteryTech;
+import me.rhin.openciv.game.research.type.SailingTech;
 
 public class ResearchTree {
 
@@ -11,14 +14,24 @@ public class ResearchTree {
 
 	public ResearchTree() {
 		this.technologies = new HashMap<>();
+
+		// FIXME: This is going to be a crappton of techs
+		technologies.put(MiningTech.class, new MiningTech());
+		technologies.put(SailingTech.class, new SailingTech());
+		technologies.put(PotteryTech.class, new PotteryTech());
 	}
 
-	public ArrayList<Technology> getTechnologies() {
-		return (ArrayList<Technology>) technologies.values();
+	public List<Technology> getTechnologies() {
+		// FIXME: This seems dumb
+		return new ArrayList<>(technologies.values());
 	}
 
-	public boolean hasResearched(Class<Granary> technologyClass) {
-		return false;
+	public <T extends Technology> boolean hasResearched(Class<T> technologyClass) {
+		return technologies.get(technologyClass).isResearched();
+	}
+
+	public Technology getTechnology(Class<? extends Technology> clazz) {
+		return technologies.get(clazz);
 	}
 
 }

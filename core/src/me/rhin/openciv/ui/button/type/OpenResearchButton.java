@@ -3,8 +3,10 @@ package me.rhin.openciv.ui.button.type;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 
+import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.ui.button.Button;
+import me.rhin.openciv.ui.window.type.ResearchWindow;
 
 public class OpenResearchButton extends Button {
 
@@ -22,7 +24,7 @@ public class OpenResearchButton extends Button {
 
 	@Override
 	public void onClick() {
-		
+		Civilization.getInstance().getWindowManager().toggleWindow(new ResearchWindow());
 	}
 
 	@Override

@@ -443,7 +443,6 @@ public class Tile {
 			// FIXME: Do we properly change the tiletype?
 			setTileType(tileImprovement.getTileType());
 			tileImprovement.setFinished(true);
-			System.out.println(getStatLine());
 			SetTileTypePacket setTileTypePacket = new SetTileTypePacket();
 			setTileTypePacket.setTile(tileImprovement.getTileType().name(), gridX, gridY);
 
