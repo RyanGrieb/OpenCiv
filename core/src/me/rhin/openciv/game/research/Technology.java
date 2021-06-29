@@ -30,4 +30,16 @@ public abstract class Technology {
 	public ArrayList<Class<? extends Technology>> getRequiredTechs() {
 		return requiredTechs;
 	}
+
+	public boolean hasResearchedRequiredTechs() {
+		for (Class<? extends Technology> techClazz : requiredTechs) {
+			Technology tech = Civilization.getInstance().getGame().getPlayer().getResearchTree()
+					.getTechnology(techClazz);
+
+			if (!tech.isResearched())
+				return false;
+		}
+
+		return true;
+	}
 }

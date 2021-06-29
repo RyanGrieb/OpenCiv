@@ -77,6 +77,7 @@ public enum TextureEnum {
 	UI_GRAY,
 	UI_GREEN,
 	UI_RED,
+	UI_YELLOW,
 	UI_LIGHT_GRAY,
 	UI_LIGHTER_GRAY,
 	UI_DARK_GRAY,

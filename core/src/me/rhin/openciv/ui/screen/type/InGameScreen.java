@@ -95,6 +95,7 @@ public class InGameScreen extends AbstractScreen {
 
 		if (button == Input.Buttons.RIGHT)
 			Civilization.getInstance().getEventManager().fireEvent(new RightClickEvent(ClickType.UP, x, y));
+
 		return false;
 	}
 

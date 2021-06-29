@@ -6,134 +6,141 @@ filter: Nearest, Nearest
 repeat: none
 font
   rotate: false
-  xy: 2, 66
+  xy: 2, 69
   size: 512, 32
   orig: 512, 32
   offset: 0, 0
   index: -1
 ui_background
   rotate: false
-  xy: 2, 198
+  xy: 2, 201
   size: 800, 580
   orig: 800, 580
   offset: 0, 0
   index: -1
 ui_black
   rotate: false
-  xy: 644, 131
+  xy: 678, 168
   size: 1, 1
   orig: 1, 1
   offset: 0, 0
   index: -1
 ui_button
   rotate: false
-  xy: 2, 36
+  xy: 2, 39
   size: 142, 28
   orig: 142, 28
   offset: 0, 0
   index: -1
 ui_button_disabled
   rotate: false
-  xy: 804, 750
+  xy: 804, 753
   size: 142, 28
   orig: 142, 28
   offset: 0, 0
   index: -1
 ui_button_hovered
   rotate: false
-  xy: 644, 168
+  xy: 644, 171
   size: 142, 28
   orig: 142, 28
   offset: 0, 0
   index: -1
 ui_button_small
   rotate: false
-  xy: 804, 720
+  xy: 804, 723
   size: 71, 28
   orig: 71, 28
   offset: 0, 0
   index: -1
 ui_button_small_hovered
   rotate: false
-  xy: 516, 70
+  xy: 516, 73
   size: 71, 28
   orig: 71, 28
   offset: 0, 0
   index: -1
 ui_container_box
   rotate: false
-  xy: 2, 100
+  xy: 2, 103
   size: 640, 96
   orig: 640, 96
   offset: 0, 0
   index: -1
 ui_dark_gray
   rotate: false
-  xy: 589, 97
+  xy: 877, 750
   size: 1, 1
   orig: 1, 1
   offset: 0, 0
   index: -1
 ui_error
   rotate: false
-  xy: 948, 762
+  xy: 948, 765
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 ui_github
   rotate: false
-  xy: 804, 686
+  xy: 804, 689
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 ui_gray
   rotate: false
-  xy: 678, 165
+  xy: 2, 2
   size: 1, 1
   orig: 1, 1
   offset: 0, 0
   index: -1
 ui_green
   rotate: false
-  xy: 877, 747
+  xy: 644, 134
   size: 1, 1
   orig: 1, 1
   offset: 0, 0
   index: -1
 ui_light_gray
   rotate: false
-  xy: 146, 63
+  xy: 146, 66
   size: 1, 1
   orig: 1, 1
   offset: 0, 0
   index: -1
 ui_lighter_gray
   rotate: false
-  xy: 516, 67
+  xy: 589, 100
   size: 1, 1
   orig: 1, 1
   offset: 0, 0
   index: -1
 ui_red
   rotate: false
-  xy: 788, 195
+  xy: 788, 198
   size: 1, 1
   orig: 1, 1
   offset: 0, 0
   index: -1
 ui_selection
   rotate: false
-  xy: 644, 134
+  xy: 644, 137
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 ui_star
   rotate: false
-  xy: 2, 2
+  xy: 2, 5
   size: 32, 32
   orig: 32, 32
+  offset: 0, 0
+  index: -1
+ui_yellow
+  rotate: false
+  xy: 516, 70
+  size: 1, 1
+  orig: 1, 1
   offset: 0, 0
   index: -1

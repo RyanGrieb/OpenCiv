@@ -3,10 +3,10 @@ package me.rhin.openciv.ui.window.type;
 import com.badlogic.gdx.utils.Align;
 
 import me.rhin.openciv.Civilization;
-import me.rhin.openciv.game.research.ResearchTree;
 import me.rhin.openciv.game.research.Technology;
 import me.rhin.openciv.listener.ResizeListener;
 import me.rhin.openciv.ui.background.BlankBackground;
+import me.rhin.openciv.ui.button.type.CloseResearchButton;
 import me.rhin.openciv.ui.game.TechnologyList;
 import me.rhin.openciv.ui.label.CustomLabel;
 import me.rhin.openciv.ui.window.AbstractWindow;
@@ -16,6 +16,7 @@ public class ResearchWindow extends AbstractWindow implements ResizeListener {
 	private BlankBackground blankBackground;
 	private CustomLabel researchDescLabel;
 	private TechnologyList technologyList;
+	private CloseResearchButton closeResearchButton;
 
 	public ResearchWindow() {
 		super.setBounds(0, 0, viewport.getWorldWidth(), viewport.getWorldHeight());
@@ -35,8 +36,11 @@ public class ResearchWindow extends AbstractWindow implements ResizeListener {
 		for (Technology tech : Civilization.getInstance().getGame().getPlayer().getResearchTree().getTechnologies()) {
 			technologyList.addTech(tech);
 		}
-		
+
 		addActor(technologyList);
+
+		this.closeResearchButton = new CloseResearchButton(viewport.getWorldWidth() / 2 - 150 / 2, 35, 150, 45);
+		addActor(closeResearchButton);
 	}
 
 	@Override
