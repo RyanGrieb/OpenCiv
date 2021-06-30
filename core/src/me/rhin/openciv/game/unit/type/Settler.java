@@ -1,20 +1,22 @@
 package me.rhin.openciv.game.unit.type;
 
-import com.badlogic.gdx.scenes.scene2d.Actor;
-
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.AbstractAction;
+import me.rhin.openciv.game.city.City;
 import me.rhin.openciv.game.map.tile.Tile;
 import me.rhin.openciv.game.map.tile.TileType.TileProperty;
 import me.rhin.openciv.game.unit.Unit;
 import me.rhin.openciv.game.unit.UnitItem;
 import me.rhin.openciv.game.unit.UnitParameter;
 import me.rhin.openciv.listener.UnitActListener.UnitActEvent;
-import me.rhin.openciv.shared.packet.type.NextTurnPacket;
 import me.rhin.openciv.shared.packet.type.SettleCityPacket;
 
 public class Settler extends UnitItem {
+
+	public Settler(City city) {
+		super(city);
+	}
 
 	public static class SettlerUnit extends Unit {
 		public SettlerUnit(UnitParameter unitParameter) {

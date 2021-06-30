@@ -27,7 +27,7 @@ icon_citizen_city_center
   index: -1
 icon_citizen_locked
   rotate: false
-  xy: 20, 2
+  xy: 2, 2
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
@@ -69,14 +69,14 @@ icon_germany
   index: -1
 icon_gold
   rotate: false
-  xy: 38, 2
+  xy: 20, 2
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 icon_heritage
   rotate: false
-  xy: 56, 2
+  xy: 38, 2
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
@@ -97,13 +97,6 @@ icon_nazi
   index: -1
 icon_production
   rotate: false
-  xy: 2, 2
-  size: 16, 16
-  orig: 16, 16
-  offset: 0, 0
-  index: -1
-icon_research
-  rotate: false
   xy: 182, 2
   size: 16, 16
   orig: 16, 16
@@ -114,6 +107,13 @@ icon_rome
   xy: 104, 20
   size: 32, 32
   orig: 32, 32
+  offset: 0, 0
+  index: -1
+icon_science
+  rotate: false
+  xy: 56, 2
+  size: 16, 16
+  orig: 16, 16
   offset: 0, 0
   index: -1
 icon_unemployed_citizen

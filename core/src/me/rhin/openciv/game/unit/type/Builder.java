@@ -3,6 +3,7 @@ package me.rhin.openciv.game.unit.type;
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.AbstractAction;
+import me.rhin.openciv.game.city.City;
 import me.rhin.openciv.game.map.tile.ImprovementType;
 import me.rhin.openciv.game.map.tile.Tile;
 import me.rhin.openciv.game.map.tile.TileType.TileProperty;
@@ -17,6 +18,10 @@ import me.rhin.openciv.shared.packet.type.SetTileTypePacket;
 import me.rhin.openciv.shared.packet.type.WorkTilePacket;
 
 public class Builder extends UnitItem {
+
+	public Builder(City city) {
+		super(city);
+	}
 
 	public static class BuilderUnit extends Unit implements WorkTileListener, SetTileTypeListener {
 

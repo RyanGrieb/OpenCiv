@@ -4,6 +4,8 @@ import com.badlogic.gdx.graphics.g2d.Sprite;
 
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.research.Technology;
+import me.rhin.openciv.shared.packet.type.CompleteResearchPacket;
+import me.rhin.openciv.shared.packet.type.NextTurnPacket;
 
 public class SailingTech extends Technology {
 
@@ -28,7 +30,6 @@ public class SailingTech extends Technology {
 
 	@Override
 	public String getDesc() {
-		return "";
+		return "- Unlocks work boat\n" + "- Unlocks galley\n" + "- Unlocks cargo ship";
 	}
-
 }

@@ -2,8 +2,6 @@ package me.rhin.openciv.game.player;
 
 import java.util.ArrayList;
 
-import com.badlogic.gdx.graphics.Color;
-
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.game.city.City;
 import me.rhin.openciv.game.civilization.CivType;
@@ -173,5 +171,9 @@ public class Player implements RelativeMouseMoveListener, LeftClickListener, Rig
 
 	public void removeCity(City city) {
 		ownedCities.remove(city);
+	}
+	
+	public StatLine getStatLine() {
+		return statLine;
 	}
 }

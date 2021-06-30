@@ -92,4 +92,8 @@ public class ListProductionItem extends ListObject {
 		itemNameLabel.setPosition(x, y);
 		itemTurnCostLabel.setPosition(x, y);
 	}
+	
+	public ProductionItem getProductionItem() {
+		return productionItem;
+	}
 }

@@ -20,6 +20,7 @@ import me.rhin.openciv.game.city.building.Building;
 import me.rhin.openciv.game.city.specialist.SpecialistContainer;
 import me.rhin.openciv.game.map.tile.Tile;
 import me.rhin.openciv.game.map.tile.TileObserver;
+import me.rhin.openciv.game.map.tile.TileType.TileProperty;
 import me.rhin.openciv.game.player.Player;
 import me.rhin.openciv.game.production.ProducibleItemManager;
 import me.rhin.openciv.game.unit.AttackableEntity;
@@ -384,5 +385,13 @@ public class City extends Group implements AttackableEntity, TileObserver, Speci
 
 	public int getUnemployedWorkerAmount() {
 		return unemployedWorkerAmount;
+	}
+
+	public boolean isCoastal() {
+		for (Tile tile : originTile.getAdjTiles())
+			if (tile.containsTileProperty(TileProperty.WATER))
+				return true;
+		
+		return false;
 	}
 }

@@ -21,6 +21,7 @@ import me.rhin.openciv.server.game.Player;
 import me.rhin.openciv.server.game.map.GameMap;
 import me.rhin.openciv.server.game.state.InLobbyState;
 import me.rhin.openciv.server.listener.ChooseCivListener.ChooseCivEvent;
+import me.rhin.openciv.server.listener.ChooseTechListener.ChooseTechEvent;
 import me.rhin.openciv.server.listener.ClickSpecialistListener.ClickSpecialistEvent;
 import me.rhin.openciv.server.listener.ClickWorkedTileListener.ClickWorkedTileEvent;
 import me.rhin.openciv.server.listener.CombatPreviewListener.CombatPreviewEvent;
@@ -44,6 +45,7 @@ import me.rhin.openciv.shared.listener.EventManager;
 import me.rhin.openciv.shared.listener.Listener;
 import me.rhin.openciv.shared.packet.Packet;
 import me.rhin.openciv.shared.packet.type.ChooseCivPacket;
+import me.rhin.openciv.shared.packet.type.ChooseTechPacket;
 import me.rhin.openciv.shared.packet.type.ClickSpecialistPacket;
 import me.rhin.openciv.shared.packet.type.ClickWorkedTilePacket;
 import me.rhin.openciv.shared.packet.type.CombatPreviewPacket;
@@ -127,7 +129,8 @@ public class Server extends WebSocketServer {
 		networkEvents.put(SetWorldSizePacket.class, SetWorldSizeEvent.class);
 		networkEvents.put(CombatPreviewPacket.class, CombatPreviewEvent.class);
 		networkEvents.put(WorkTilePacket.class, WorkTileEvent.class);
-		
+		networkEvents.put(ChooseTechPacket.class, ChooseTechEvent.class);
+
 		this.playerIndex = 0;
 		this.commandProcessor = new CmdProcessor();
 

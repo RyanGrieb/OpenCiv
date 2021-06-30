@@ -32,7 +32,7 @@ public class StatusBar extends Actor implements PlayerStatUpdateListener, NextTu
 		this.sprite = TextureEnum.UI_BLACK.sprite();
 
 		this.scienceDescLabel = new CustomLabel("Science:");
-		this.scienceIcon = TextureEnum.ICON_RESEARCH.sprite();
+		this.scienceIcon = TextureEnum.ICON_SCIENCE.sprite();
 		scienceIcon.setSize(16, 16);
 		this.scienceLabel = new CustomLabel("0");
 
@@ -96,7 +96,7 @@ public class StatusBar extends Actor implements PlayerStatUpdateListener, NextTu
 	public void onPlayerStatUpdate(PlayerStatUpdatePacket packet) {
 		StatLine statLine = StatLine.fromPacket(packet);
 
-		scienceLabel.setText("+" + (int) statLine.getStatValue(Stat.RESEARCH_GAIN));
+		scienceLabel.setText("+" + (int) statLine.getStatValue(Stat.SCIENCE_GAIN));
 
 		int currentGold = (int) statLine.getStatValue(Stat.GOLD);
 		int gainedGold = (int) statLine.getStatValue(Stat.GOLD_GAIN);

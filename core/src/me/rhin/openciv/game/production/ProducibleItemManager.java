@@ -43,11 +43,11 @@ public class ProducibleItemManager {
 		possibleItems.put("Granary", new Granary(city));
 		possibleItems.put("Monument", new Monument(city));
 		possibleItems.put("Market", new Market(city));
-		possibleItems.put("Warrior", new Warrior());
-		possibleItems.put("Settler", new Settler());
-		possibleItems.put("Scout", new Scout());
-		possibleItems.put("Galley", new Galley());
-		possibleItems.put("Builder", new Builder());
+		possibleItems.put("Warrior", new Warrior(city));
+		possibleItems.put("Settler", new Settler(city));
+		possibleItems.put("Scout", new Scout(city));
+		possibleItems.put("Galley", new Galley(city));
+		possibleItems.put("Builder", new Builder(city));
 	}
 
 	public HashMap<String, ProductionItem> getPossibleItems() {

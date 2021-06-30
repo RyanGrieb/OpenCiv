@@ -12,11 +12,13 @@ import me.rhin.openciv.game.map.tile.Tile;
 import me.rhin.openciv.game.production.ProductionItem;
 import me.rhin.openciv.listener.AddSpecialistToContainerListener;
 import me.rhin.openciv.listener.BuildingConstructedListener;
+import me.rhin.openciv.listener.CompleteResearchListener;
 import me.rhin.openciv.listener.RemoveSpecialistFromContainerListener;
 import me.rhin.openciv.listener.ResizeListener;
 import me.rhin.openciv.listener.SetCitizenTileWorkerListener;
 import me.rhin.openciv.shared.packet.type.AddSpecialistToContainerPacket;
 import me.rhin.openciv.shared.packet.type.BuildingConstructedPacket;
+import me.rhin.openciv.shared.packet.type.CompleteResearchPacket;
 import me.rhin.openciv.shared.packet.type.RemoveSpecialistFromContainerPacket;
 import me.rhin.openciv.shared.packet.type.SetCitizenTileWorkerPacket;
 import me.rhin.openciv.ui.button.type.CityInfoCloseButton;
@@ -26,14 +28,16 @@ import me.rhin.openciv.ui.game.CityStatsInfo;
 import me.rhin.openciv.ui.list.ContainerList;
 import me.rhin.openciv.ui.list.ListContainer;
 import me.rhin.openciv.ui.list.ListContainer.ListContainerType;
+import me.rhin.openciv.ui.list.ListObject;
 import me.rhin.openciv.ui.list.type.ListBuilding;
 import me.rhin.openciv.ui.list.type.ListProductionItem;
 import me.rhin.openciv.ui.list.type.ListUnemployedCitizens;
 import me.rhin.openciv.ui.screen.type.InGameScreen;
 import me.rhin.openciv.ui.window.AbstractWindow;
 
-public class CityInfoWindow extends AbstractWindow implements ResizeListener, BuildingConstructedListener,
-		SetCitizenTileWorkerListener, AddSpecialistToContainerListener, RemoveSpecialistFromContainerListener {
+public class CityInfoWindow extends AbstractWindow
+		implements ResizeListener, BuildingConstructedListener, SetCitizenTileWorkerListener,
+		AddSpecialistToContainerListener, RemoveSpecialistFromContainerListener, CompleteResearchListener {
 
 	private City city;
 	private CityInfoCloseButton cityCloseButton;
@@ -95,6 +99,7 @@ public class CityInfoWindow extends AbstractWindow implements ResizeListener, Bu
 		Civilization.getInstance().getEventManager().addListener(SetCitizenTileWorkerListener.class, this);
 		Civilization.getInstance().getEventManager().addListener(AddSpecialistToContainerListener.class, this);
 		Civilization.getInstance().getEventManager().addListener(RemoveSpecialistFromContainerListener.class, this);
+		Civilization.getInstance().getEventManager().addListener(CompleteResearchListener.class, this);
 	}
 
 	@Override
@@ -204,6 +209,28 @@ public class CityInfoWindow extends AbstractWindow implements ResizeListener, Bu
 			return;
 
 		updateSpecialistContainers(packet.getCityName(), packet.getContainerName());
+	}
+
+	@Override
+	public void onCompleteResearch(CompleteResearchPacket packet) {
+		outerloop: for (ProductionItem productionItem : city.getProducibleItemManager().getProducibleItems()) {
+
+			for (ListContainer listContainer : productionContainerList.getListContainers().values()) {
+				for (ListObject listObj : listContainer.getListItemActors()) {
+					if (listObj instanceof ListProductionItem) {
+						ListProductionItem listProductionItem = (ListProductionItem) listObj;
+
+						if (listProductionItem.getProductionItem().equals(productionItem)) {
+							System.out.println("Will this break all our for loops");
+							continue outerloop;
+						}
+					}
+				}
+			}
+
+			productionContainerList.addItem(ListContainerType.CATEGORY, productionItem.getCategory(),
+					new ListProductionItem(city, productionItem, 200, 45));
+		}
 	}
 
 	public void updateSpecialistContainers(String cityName, String containerName) {

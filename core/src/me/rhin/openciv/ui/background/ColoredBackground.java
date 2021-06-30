@@ -22,6 +22,12 @@ public class ColoredBackground extends Actor {
 	}
 
 	@Override
+	public void setBounds(float x, float y, float width, float height) {
+		super.setBounds(x, y, width, height);
+		sprite.setBounds(x, y, width, height);
+	}
+
+	@Override
 	public void draw(Batch batch, float parentAlpha) {
 		sprite.draw(batch);
 	}
@@ -32,4 +38,7 @@ public class ColoredBackground extends Actor {
 		sprite.setSize(width, sprite.getHeight());
 	}
 
+	public void setSprite(Sprite sprite) {
+		this.sprite = sprite;
+	}
 }

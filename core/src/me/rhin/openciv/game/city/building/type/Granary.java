@@ -23,17 +23,16 @@ public class Granary extends Building {
 
 	@Override
 	public String getName() {
-		return "Monument";
+		return "Granary";
 	}
 
 	@Override
 	public boolean meetsProductionRequirements() {
-		// TODO: Check if pottery is researched
 		return Civilization.getInstance().getGame().getPlayer().getResearchTree().hasResearched(PotteryTech.class);
 	}
 
 	@Override
 	public TextureEnum getTexture() {
-		return TextureEnum.UI_ERROR;
+		return TextureEnum.BUILDING_GRANARY;
 	}
 }

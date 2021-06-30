@@ -12,15 +12,18 @@ import com.badlogic.gdx.utils.Align;
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.research.Technology;
+import me.rhin.openciv.listener.CompleteResearchListener;
+import me.rhin.openciv.shared.packet.type.CompleteResearchPacket;
 import me.rhin.openciv.ui.background.ColoredBackground;
 import me.rhin.openciv.ui.label.CustomLabel;
 import me.rhin.openciv.ui.window.type.PickResearchWindow;
 
-public class TechnologyLeaf extends Group {
+public class TechnologyLeaf extends Group implements CompleteResearchListener {
 
 	private Technology tech;
 	private ColoredBackground background;
 	private ColoredBackground icon;
+	private ColoredBackground researchIcon;
 	private CustomLabel techNameLabel;
 	private Vector2 backVector;
 	private Vector2 frontVector;
@@ -45,8 +48,14 @@ public class TechnologyLeaf extends Group {
 		this.icon = new ColoredBackground(tech.getIcon(), width / 2 - 32 / 2, 4, 32, 32);
 		addActor(icon);
 
+		this.researchIcon = new ColoredBackground(TextureEnum.ICON_SCIENCE.sprite(), width / 2 - 16 / 2, height - 18,
+				16, 16);
+
+		if (tech.isResearching())
+			addActor(researchIcon);
+
 		// FIXME: Setting the label to a height > 0 causes click input isses.
-		this.techNameLabel = new CustomLabel(tech.getName(), Align.center, 0, height - 20, width, 0);
+		this.techNameLabel = new CustomLabel(tech.getName(), Align.center, 0, height - 25, width, 0);
 		addActor(techNameLabel);
 
 		this.backVector = new Vector2(x, y + height / 2);
@@ -57,7 +66,7 @@ public class TechnologyLeaf extends Group {
 			@Override
 			public void clicked(InputEvent event, float x, float y) {
 				if (!Civilization.getInstance().getWindowManager().allowsInput(event.getListenerActor())
-						|| !tech.hasResearchedRequiredTechs()) {
+						|| !tech.hasResearchedRequiredTechs() || tech.isResearched()) {
 					return;
 				}
 
@@ -72,6 +81,29 @@ public class TechnologyLeaf extends Group {
 			public void exit(InputEvent event, float x, float y, int pointer, Actor fromActor) {
 			}
 		});
+
+		Civilization.getInstance().getEventManager().addListener(CompleteResearchListener.class, this);
+	}
+
+	@Override
+	public void onCompleteResearch(CompleteResearchPacket packet) {
+		if (packet.getTechID() != tech.getID()) {
+			Technology completedTech = Technology.fromID(packet.getTechID());
+			for (Class<? extends Technology> requiredTechClazz : tech.getRequiredTechs()) {
+				Technology requiredTech = Civilization.getInstance().getGame().getPlayer().getResearchTree()
+						.getTechnology(requiredTechClazz);
+
+				if (requiredTech.equals(completedTech) && tech.hasResearchedRequiredTechs()) {
+					background.setSprite(TextureEnum.UI_YELLOW.sprite());
+					background.setBounds(0, 0, getWidth(), getHeight());
+				}
+
+			}
+			return;
+		}
+		background.setSprite(TextureEnum.UI_GREEN.sprite());
+		background.setBounds(0, 0, getWidth(), getHeight());
+		removeActor(researchIcon);
 	}
 
 	@Override
@@ -99,4 +131,10 @@ public class TechnologyLeaf extends Group {
 		return frontVector;
 	}
 
+	public void setResearching(boolean researching) {
+		if (researching)
+			addActor(researchIcon);
+		else
+			removeActor(researchIcon);
+	}
 }

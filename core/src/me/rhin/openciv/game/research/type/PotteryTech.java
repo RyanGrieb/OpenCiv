@@ -24,6 +24,6 @@ public class PotteryTech extends Technology {
 
 	@Override
 	public String getDesc() {
-		return "- Enables granary building \n" + "- Enables shrine building";
+		return "- Unlocks granary building \n" + "- Unlocks shrine building";
 	}
 }

@@ -7,7 +7,7 @@ import me.rhin.openciv.shared.stat.StatLine;
 
 public abstract class Building implements ProductionItem {
 
-	private City city;
+	protected City city;
 	protected StatLine statLine;
 
 	public Building(City city) {

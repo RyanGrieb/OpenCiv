@@ -95,7 +95,7 @@ public class CityStatsInfo extends Actor implements CityStatUpdateListener {
 
 		originX = 5;
 
-		this.scienceIcon = TextureEnum.ICON_RESEARCH.sprite();
+		this.scienceIcon = TextureEnum.ICON_SCIENCE.sprite();
 		originY -= goldIcon.getHeight();
 		scienceIcon.setSize(16, 16);
 		scienceIcon.setPosition(originX, originY);
@@ -204,7 +204,7 @@ public class CityStatsInfo extends Actor implements CityStatUpdateListener {
 		foodLabel.setText((gainedFood < 0 ? "" : "+") + gainedFood);
 		productionLabel.setText("+" + (int) city.getStatLine().getStatValue(Stat.PRODUCTION_GAIN));
 		goldLabel.setText("+" + (int) city.getStatLine().getStatValue(Stat.GOLD_GAIN));
-		scienceLabel.setText("+" + (int) city.getStatLine().getStatValue(Stat.RESEARCH_GAIN));
+		scienceLabel.setText("+" + (int) city.getStatLine().getStatValue(Stat.SCIENCE_GAIN));
 		heritageLabel.setText("+" + (int) city.getStatLine().getStatValue(Stat.HERITAGE_GAIN));
 
 		int expansionTurns = (int) Math.ceil(((city.getStatLine().getStatValue(Stat.EXPANSION_REQUIREMENT)

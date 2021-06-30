@@ -2,8 +2,10 @@ package me.rhin.openciv.ui.window.type;
 
 import com.badlogic.gdx.utils.Align;
 
+import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.research.Technology;
+import me.rhin.openciv.shared.stat.Stat;
 import me.rhin.openciv.ui.background.ColoredBackground;
 import me.rhin.openciv.ui.button.type.ClosePickResearchButton;
 import me.rhin.openciv.ui.button.type.PickResearchButton;
@@ -36,10 +38,13 @@ public class PickResearchWindow extends AbstractWindow {
 		this.icon = new ColoredBackground(tech.getIcon(), getWidth() / 2 - 32 / 2, getHeight() - 55, 32, 32);
 		addActor(icon);
 
-		this.descLabel = new CustomLabel(tech.getDesc(), Align.left, 5, getHeight() - 80, getWidth(), 15);
+		this.descLabel = new CustomLabel(tech.getDesc(), Align.left, 5, getHeight() - 87, getWidth(), 15);
 		addActor(descLabel);
 
-		this.turnsLabel = new CustomLabel("??? Turns", Align.center, 0, 50, getWidth(), 15);
+		int turns = (int) Math.ceil(tech.getScienceCost()
+				/ Civilization.getInstance().getGame().getPlayer().getStatLine().getStatValue(Stat.SCIENCE_GAIN));
+
+		this.turnsLabel = new CustomLabel(turns + " Turns", Align.center, 0, 50, getWidth(), 15);
 		addActor(turnsLabel);
 
 		this.pickResearchButton = new PickResearchButton(tech, 0, 5, 100, 35);
