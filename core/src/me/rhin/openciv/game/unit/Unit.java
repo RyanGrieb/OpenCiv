@@ -21,14 +21,14 @@ import me.rhin.openciv.game.map.tile.Tile;
 import me.rhin.openciv.game.map.tile.TileObserver;
 import me.rhin.openciv.game.player.Player;
 import me.rhin.openciv.listener.NextTurnListener;
-import me.rhin.openciv.listener.ShapeRenderListener;
+import me.rhin.openciv.listener.BottomShapeRenderListener;
 import me.rhin.openciv.shared.packet.type.MoveUnitPacket;
 import me.rhin.openciv.shared.packet.type.NextTurnPacket;
 import me.rhin.openciv.ui.window.type.UnitCombatWindow;
 import me.rhin.openciv.ui.window.type.UnitWindow;
 
 public abstract class Unit extends Actor
-		implements AttackableEntity, TileObserver, ShapeRenderListener, NextTurnListener {
+		implements AttackableEntity, TileObserver, BottomShapeRenderListener, NextTurnListener {
 
 	protected boolean canAttack;
 	protected ArrayList<AbstractAction> customActions;
@@ -45,7 +45,7 @@ public abstract class Unit extends Actor
 	private AttackableEntity targetEntity;
 
 	public Unit(int id, String unitName, Player playerOwner, Tile standingTile, TextureEnum assetEnum) {
-		Civilization.getInstance().getEventManager().addListener(ShapeRenderListener.class, this);
+		Civilization.getInstance().getEventManager().addListener(BottomShapeRenderListener.class, this);
 
 		this.id = id;
 		setName(unitName);
@@ -286,7 +286,7 @@ public abstract class Unit extends Actor
 	}
 
 	@Override
-	public void onShapeRender(ShapeRenderer shapeRenderer) {
+	public void onBottomShapeRender(ShapeRenderer shapeRenderer) {
 		// FIXME: We get a concurrency error here at some point
 		if (targetEntity != null)
 			shapeRenderer.setColor(Color.RED);

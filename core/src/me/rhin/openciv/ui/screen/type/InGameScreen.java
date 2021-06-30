@@ -2,7 +2,10 @@ package me.rhin.openciv.ui.screen.type;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.utils.TimeUtils;
 
@@ -12,6 +15,7 @@ import me.rhin.openciv.listener.LeftClickListener.LeftClickEvent;
 import me.rhin.openciv.listener.MouseMoveListener.MouseMoveEvent;
 import me.rhin.openciv.listener.RelativeMouseMoveListener.RelativeMouseMoveEvent;
 import me.rhin.openciv.listener.RightClickListener.RightClickEvent;
+import me.rhin.openciv.listener.TopShapeRenderListener.TopShapeRenderEvent;
 import me.rhin.openciv.shared.listener.EventManager;
 import me.rhin.openciv.ui.screen.AbstractScreen;
 import me.rhin.openciv.ui.screen.ScreenEnum;

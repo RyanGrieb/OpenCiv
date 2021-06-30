@@ -37,7 +37,7 @@ inputFiles=[{path:../unit_scout.png,type:Input,regionName:null},{path:../unit_wa
 
 -PROJ-
 
-version=4.9.0
+version=4.10.0
 fileTypeType=png
 fileTypeData={encoding:RGBA8888}
 previewBackgroundColor=ffffffff

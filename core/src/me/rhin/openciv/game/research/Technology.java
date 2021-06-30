@@ -2,6 +2,8 @@ package me.rhin.openciv.game.research;
 
 import java.util.ArrayList;
 
+import com.badlogic.gdx.graphics.g2d.Sprite;
+
 import me.rhin.openciv.Civilization;
 
 public abstract class Technology {
@@ -22,6 +24,10 @@ public abstract class Technology {
 	public abstract int getScienceCost();
 
 	public abstract String getName();
+
+	public abstract Sprite getIcon();
+	
+	public abstract String getDesc();
 
 	public boolean isResearched() {
 		return researched;

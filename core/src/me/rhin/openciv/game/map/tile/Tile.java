@@ -20,11 +20,11 @@ import me.rhin.openciv.game.map.tile.TileType.TileLayer;
 import me.rhin.openciv.game.map.tile.TileType.TileProperty;
 import me.rhin.openciv.game.unit.AttackableEntity;
 import me.rhin.openciv.game.unit.Unit;
-import me.rhin.openciv.listener.ShapeRenderListener;
+import me.rhin.openciv.listener.BottomShapeRenderListener;
 import me.rhin.openciv.ui.label.CustomLabel;
 import me.rhin.openciv.ui.screen.type.InGameScreen;
 
-public class Tile extends Actor implements ShapeRenderListener {
+public class Tile extends Actor implements BottomShapeRenderListener {
 
 	public class TileTypeWrapper extends Sprite implements Comparable<TileTypeWrapper> {
 
@@ -77,7 +77,7 @@ public class Tile extends Actor implements ShapeRenderListener {
 	private int appliedImprovementTurns;
 
 	public Tile(GameMap map, TileType tileType, float x, float y) {
-		Civilization.getInstance().getEventManager().addListener(ShapeRenderListener.class, this);
+		Civilization.getInstance().getEventManager().addListener(BottomShapeRenderListener.class, this);
 		this.map = map;
 		if (tileType.getTileLayer() != TileLayer.BASE) {
 			Gdx.app.log(Civilization.LOG_TAG,
@@ -117,7 +117,7 @@ public class Tile extends Actor implements ShapeRenderListener {
 	}
 
 	@Override
-	public void onShapeRender(ShapeRenderer shapeRenderer) {
+	public void onBottomShapeRender(ShapeRenderer shapeRenderer) {
 		if (tileObservers.size() < 1)
 			return;
 

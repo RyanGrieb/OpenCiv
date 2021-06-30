@@ -13,49 +13,49 @@ icon_america
   index: -1
 icon_citizen
   rotate: false
-  xy: 56, 2
+  xy: 92, 2
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 icon_citizen_city_center
   rotate: false
-  xy: 128, 2
+  xy: 164, 2
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 icon_citizen_locked
   rotate: false
-  xy: 206, 36
+  xy: 20, 2
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 icon_citizen_unworked
   rotate: false
-  xy: 74, 2
+  xy: 110, 2
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 icon_england
   rotate: false
-  xy: 172, 20
+  xy: 206, 20
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 icon_faith
   rotate: false
-  xy: 92, 2
+  xy: 128, 2
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 icon_food
   rotate: false
-  xy: 110, 2
+  xy: 146, 2
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
@@ -69,21 +69,28 @@ icon_germany
   index: -1
 icon_gold
   rotate: false
-  xy: 20, 2
+  xy: 38, 2
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 icon_heritage
   rotate: false
-  xy: 224, 36
+  xy: 56, 2
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-icon_nazi
+icon_mining
   rotate: false
   xy: 138, 20
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+icon_nazi
+  rotate: false
+  xy: 172, 20
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
@@ -97,7 +104,7 @@ icon_production
   index: -1
 icon_research
   rotate: false
-  xy: 146, 2
+  xy: 182, 2
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
@@ -111,7 +118,7 @@ icon_rome
   index: -1
 icon_unemployed_citizen
   rotate: false
-  xy: 38, 2
+  xy: 74, 2
   size: 16, 16
   orig: 16, 16
   offset: 0, 0

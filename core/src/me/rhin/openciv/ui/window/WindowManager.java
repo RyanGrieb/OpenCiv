@@ -2,10 +2,10 @@ package me.rhin.openciv.ui.window;
 
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.Map.Entry;
 
 import com.badlogic.gdx.scenes.scene2d.Actor;
-import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 
 import me.rhin.openciv.Civilization;
@@ -13,11 +13,11 @@ import me.rhin.openciv.ui.window.type.CityInfoWindow;
 
 public class WindowManager {
 
-	private HashMap<Class<? extends AbstractWindow>, AbstractWindow> windows;
+	private LinkedHashMap<Class<? extends AbstractWindow>, AbstractWindow> windows;
 	private HashMap<Class<? extends AbstractWindow>, AbstractWindow> hiddenGameDisplayWindows;
 
 	public WindowManager() {
-		this.windows = new HashMap<>();
+		this.windows = new LinkedHashMap<>();
 		this.hiddenGameDisplayWindows = new HashMap<>();
 	}
 
@@ -98,19 +98,13 @@ public class WindowManager {
 	}
 
 	public boolean allowsInput(Actor actor) {
-		if (allowsInput())
+		AbstractWindow topWindow = getLastElement(windows.values());
+
+		if (allowsInput() || topWindow == null)
 			return true;
 
-		for (AbstractWindow window : windows.values()) {
-			if (window.disablesInput())
-				for (Actor windowActor : window.getChildren()) {
-					if (actor.equals(windowActor)) {
-						return true;
-					}
-				}
-			// if (window.disablesInput())
-			// return false;
-		}
+		if (topWindow.disablesInput() && actor.getParent().equals(topWindow))
+			return true;
 
 		return false;
 	}
@@ -143,5 +137,16 @@ public class WindowManager {
 
 	public boolean isOpenWindow(Class<CityInfoWindow> windowClass) {
 		return windows.containsKey(windowClass);
+	}
+
+	// FIXME: Move to util class?
+	private <T> T getLastElement(final Iterable<T> elements) {
+		T lastElement = null;
+
+		for (T element : elements) {
+			lastElement = element;
+		}
+
+		return lastElement;
 	}
 }

@@ -2,6 +2,7 @@ package me.rhin.openciv.game.research;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 import me.rhin.openciv.game.research.type.MiningTech;
@@ -10,15 +11,15 @@ import me.rhin.openciv.game.research.type.SailingTech;
 
 public class ResearchTree {
 
-	private HashMap<Class<? extends Technology>, Technology> technologies;
+	private LinkedHashMap<Class<? extends Technology>, Technology> technologies;
 
 	public ResearchTree() {
-		this.technologies = new HashMap<>();
+		this.technologies = new LinkedHashMap<>();
 
 		// FIXME: This is going to be a crappton of techs
+		technologies.put(PotteryTech.class, new PotteryTech());
 		technologies.put(MiningTech.class, new MiningTech());
 		technologies.put(SailingTech.class, new SailingTech());
-		technologies.put(PotteryTech.class, new PotteryTech());
 	}
 
 	public List<Technology> getTechnologies() {

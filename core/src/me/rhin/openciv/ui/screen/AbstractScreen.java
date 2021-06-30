@@ -8,13 +8,15 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
 import me.rhin.openciv.Civilization;
+import me.rhin.openciv.listener.BottomShapeRenderListener.BottomShapeRenderEvent;
 import me.rhin.openciv.listener.ResizeListener.ResizeEvent;
-import me.rhin.openciv.listener.ShapeRenderListener.ShapeRenderEvent;
+import me.rhin.openciv.listener.TopShapeRenderListener.TopShapeRenderEvent;
 import me.rhin.openciv.ui.window.WindowManager;
 
 public abstract class AbstractScreen implements Screen, InputProcessor {
@@ -29,7 +31,8 @@ public abstract class AbstractScreen implements Screen, InputProcessor {
 	protected Stage stage;
 	protected Stage overlayStage;
 	private InputMultiplexer inputMultiplexer;
-	private ShapeRenderer shapeRenderer;
+	private ShapeRenderer bottomShapeRenderer;
+	protected ShapeRenderer topShapeRenderer;
 
 	protected AbstractScreen() {
 		this.windowManager = new WindowManager();
@@ -44,8 +47,11 @@ public abstract class AbstractScreen implements Screen, InputProcessor {
 		this.stage = new Stage(viewport);
 		this.overlayStage = new Stage(overlayViewport);
 
-		this.shapeRenderer = new ShapeRenderer();
-		ShapeRenderEvent.setShapeRenderer(shapeRenderer);
+		this.bottomShapeRenderer = new ShapeRenderer();
+		BottomShapeRenderEvent.setShapeRenderer(bottomShapeRenderer);
+
+		this.topShapeRenderer = new ShapeRenderer();
+		TopShapeRenderEvent.setShapeRenderer(topShapeRenderer);
 	}
 
 	public abstract ScreenEnum getType();
@@ -64,9 +70,9 @@ public abstract class AbstractScreen implements Screen, InputProcessor {
 		Gdx.gl.glClearColor(0, 0.253F, 0.304F, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-		//camera.position.x = camX;
-		//camera.position.y = camY;
-		//camera.update();
+		// camera.position.x = camX;
+		// camera.position.y = camY;
+		// camera.update();
 
 		overlayCamera.update();
 
@@ -76,10 +82,10 @@ public abstract class AbstractScreen implements Screen, InputProcessor {
 
 		Gdx.gl.glEnable(GL20.GL_BLEND);
 		Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
-		shapeRenderer.setProjectionMatrix(camera.combined);
-		shapeRenderer.begin(ShapeType.Line);
-		Civilization.getInstance().getEventManager().fireEvent(ShapeRenderEvent.INSTANCE);
-		shapeRenderer.end();
+		bottomShapeRenderer.setProjectionMatrix(camera.combined);
+		bottomShapeRenderer.begin(ShapeType.Line);
+		Civilization.getInstance().getEventManager().fireEvent(BottomShapeRenderEvent.INSTANCE);
+		bottomShapeRenderer.end();
 		Gdx.gl.glDisable(GL20.GL_BLEND);
 
 		// Middle Stage
@@ -88,6 +94,14 @@ public abstract class AbstractScreen implements Screen, InputProcessor {
 
 		overlayStage.act();
 		overlayStage.draw();
+
+		Gdx.gl.glEnable(GL20.GL_BLEND);
+		Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
+		topShapeRenderer.setProjectionMatrix(overlayCamera.combined);
+		topShapeRenderer.begin(ShapeType.Line);
+		Civilization.getInstance().getEventManager().fireEvent(TopShapeRenderEvent.INSTANCE);
+		topShapeRenderer.end();
+		Gdx.gl.glDisable(GL20.GL_BLEND);
 
 		if (Civilization.DEBUG_GL) {
 			System.out.println("  Drawcalls: " + Civilization.GL_PROFILER.getDrawCalls() + ", Calls: "
@@ -102,7 +116,7 @@ public abstract class AbstractScreen implements Screen, InputProcessor {
 	@Override
 	public void resize(int width, int height) {
 		Civilization.getInstance().getEventManager().fireEvent(new ResizeEvent(width, height));
-		
+
 		viewport.setWorldSize(width, height);
 		viewport.update(width, height, true);
 
