@@ -27,6 +27,7 @@ import me.rhin.openciv.server.game.unit.Unit;
 import me.rhin.openciv.server.game.unit.type.Builder.BuilderUnit;
 import me.rhin.openciv.server.game.unit.type.Settler.SettlerUnit;
 import me.rhin.openciv.server.game.unit.type.Warrior.WarriorUnit;
+import me.rhin.openciv.server.game.unit.type.WorkBoat.WorkBoatUnit;
 import me.rhin.openciv.server.listener.ClickSpecialistListener;
 import me.rhin.openciv.server.listener.ClickWorkedTileListener;
 import me.rhin.openciv.server.listener.CombatPreviewListener;
@@ -549,6 +550,13 @@ public class InGameState extends GameState implements DisconnectListener, Select
 				builder.setBuilding(true);
 				builder.setImprovement(packet.getImprovementType());
 				builder.reduceMovement(2);
+			}
+			
+			if(unit instanceof WorkBoatUnit) {
+				WorkBoatUnit workBoat = (WorkBoatUnit) unit;
+				//workBoat.setBuilding(true);
+				//workBoat.setImprovement(packet.getImprovementType());
+				workBoat.reduceMovement(2);
 			}
 		}
 	}

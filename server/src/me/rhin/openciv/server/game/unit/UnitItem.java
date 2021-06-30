@@ -1,7 +1,6 @@
 package me.rhin.openciv.server.game.unit;
 
 import com.badlogic.gdx.utils.Json;
-import com.badlogic.gdx.utils.reflect.ClassReflection;
 
 import me.rhin.openciv.server.Server;
 import me.rhin.openciv.server.game.Player;
@@ -12,9 +11,10 @@ import me.rhin.openciv.shared.packet.type.AddUnitPacket;
 
 public abstract class UnitItem implements ProductionItem {
 
-	@Override
-	public String getName() {
-		return getClass().getSimpleName();
+	protected City city;
+
+	public UnitItem(City city) {
+		this.city = city;
 	}
 
 	@SuppressWarnings("unchecked")

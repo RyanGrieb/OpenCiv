@@ -1,19 +1,20 @@
 package me.rhin.openciv.game.map.tile;
 
-import me.rhin.openciv.shared.util.StrUtil;
-
 public enum ImprovementType {
-	FARM(5),
-	MINE(5);
+	FARM("Building Farm", 5),
+	MINE("Building Mine", 5),
+	CHOP("Clearing Forest", 3);
 
+	private String improvementDesc;
 	private int maxTurns;
 
-	ImprovementType(int turns) {
+	ImprovementType(String desc, int turns) {
+		improvementDesc = desc;
 		maxTurns = turns;
 	}
 
-	public String getName() {
-		return StrUtil.capitalize(name().toLowerCase());
+	public String getImprovementDesc() {
+		return improvementDesc;
 	}
 
 	public int getMaxTurns() {

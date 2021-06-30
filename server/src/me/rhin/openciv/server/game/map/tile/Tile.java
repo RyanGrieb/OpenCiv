@@ -15,6 +15,7 @@ import me.rhin.openciv.server.game.city.City;
 import me.rhin.openciv.server.game.map.GameMap;
 import me.rhin.openciv.server.game.map.tile.TileType.TileLayer;
 import me.rhin.openciv.server.game.map.tile.TileType.TileProperty;
+import me.rhin.openciv.server.game.map.tile.improvement.TileImprovement;
 import me.rhin.openciv.server.game.unit.AttackableEntity;
 import me.rhin.openciv.server.game.unit.Unit;
 import me.rhin.openciv.shared.packet.type.SetTileTypePacket;
@@ -147,6 +148,45 @@ public class Tile {
 		Server.getInstance().getMap().getTileIndexer().setTilePropertfyOf(this, tileType.getProperties());
 
 		tileWrappers.add(new TileTypeWrapper(tileType));
+	}
+
+	public void removeTileType(TileType tileType) {
+
+		if (tileType == null || !containsTileType(tileType))
+			return;
+
+		for (Tile adjTile : getAdjTiles()) {
+			if (adjTile == null)
+				continue;
+
+			TileType adjTileType = tileType; // TileType we are removing
+
+			// Check if we are still adjacent to that tile type
+			boolean removeAdjTile = true;
+			for (Tile exteriorTile : adjTile.getAdjTiles()) {
+
+				if (exteriorTile == null)
+					continue;
+
+				if (exteriorTile.containsTileType(adjTileType))
+					removeAdjTile = false;
+			}
+
+			if (removeAdjTile)
+				Server.getInstance().getMap().getTileIndexer().removeAdjacentTileType(adjTile, tileType);
+		}
+
+		Server.getInstance().getMap().getTileIndexer().removeTilePropertyOf(this, tileType.getProperties());
+
+		// FIXME: Remove from set.
+		Iterator<TileTypeWrapper> iterator = tileWrappers.iterator();
+
+		while (iterator.hasNext()) {
+			TileTypeWrapper tileWrapper = iterator.next();
+
+			if (tileWrapper.getTileType().getTileLayer() == tileType.getTileLayer())
+				iterator.remove();
+		}
 	}
 
 	public void addUnit(Unit unit) {
@@ -426,6 +466,7 @@ public class Tile {
 	public void workTile(Unit unit, String improvementName) {
 		if (tileImprovement == null) {
 			tileImprovement = getBaseTileType().getImprovement(improvementName);
+			tileImprovement.setTile(this);
 		}
 
 		if (tileImprovement == null) {
@@ -435,24 +476,17 @@ public class Tile {
 
 		tileImprovement.addTurnsWorked();
 
-		Json json = new Json();
-
-		// add
 		if (tileImprovement.getTurnsWorked() >= tileImprovement.getMaxTurns()) {
 
-			// FIXME: Do we properly change the tiletype?
-			setTileType(tileImprovement.getTileType());
-			tileImprovement.setFinished(true);
-			SetTileTypePacket setTileTypePacket = new SetTileTypePacket();
-			setTileTypePacket.setTile(tileImprovement.getTileType().name(), gridX, gridY);
-
-			for (Player player : Server.getInstance().getPlayers())
-				player.getConn().send(json.toJson(setTileTypePacket));
+			// Modify the tile here
+			tileImprovement.improveTile();
 
 			// FIXME: We need to update the city worked tiles
 
 		} else {
-			// Send work tile packet
+			// Continue to work the tile
+			Json json = new Json();
+
 			WorkTilePacket workTilePacket = new WorkTilePacket();
 			workTilePacket.setTile(tileImprovement.getName().toLowerCase(), gridX, gridY,
 					tileImprovement.getTurnsWorked(), unit.getID());

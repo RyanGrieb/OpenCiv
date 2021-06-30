@@ -32,7 +32,7 @@ limitMemory=true
 useIndexes=true
 
 scaleFactors=[{suffix:"",factor:1,resampling:bicubic}]
-inputFiles=[{path:../unit_scout.png,type:Input,regionName:null},{path:../unit_warrior.png,type:Input,regionName:null},{path:../unit_galley.png,type:Input,regionName:null},{path:../unit_builder.png,type:Input,regionName:null},{path:../unit_settler.png,type:Input,regionName:null}]
+inputFiles=[{path:../unit_scout.png,type:Input,regionName:null},{path:../unit_warrior.png,type:Input,regionName:null},{path:../unit_galley.png,type:Input,regionName:null},{path:../unit_builder.png,type:Input,regionName:null},{path:../unit_settler.png,type:Input,regionName:null},{path:../unit_work_boat.png,type:Input,regionName:null}]
 
 
 -PROJ-

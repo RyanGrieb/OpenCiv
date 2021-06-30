@@ -111,8 +111,9 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 			UnitParameter unitParameter = new UnitParameter(packet.getUnitID(), packet.getUnitName(), playerOwner,
 					tile);
 
-			Class<? extends Unit> unitClass = (Class<? extends Unit>) ClassReflection.forName(
-					"me.rhin.openciv.game.unit.type." + packet.getUnitName() + "$" + packet.getUnitName() + "Unit");
+			Class<? extends Unit> unitClass = (Class<? extends Unit>) ClassReflection
+					.forName("me.rhin.openciv.game.unit.type." + packet.getUnitName().replaceAll("\\s", "") + "$"
+							+ packet.getUnitName().replaceAll("\\s", "") + "Unit");
 
 			Unit unit = (Unit) ClassReflection.getConstructor(unitClass, UnitParameter.class)
 					.newInstance(unitParameter);

@@ -258,6 +258,17 @@ public class Tile extends Actor implements BottomShapeRenderListener {
 		tileWrappers.add(new TileTypeWrapper(tileType, x, y, 28, 32));
 	}
 
+	public void removeTileType(TileType tileType) {
+
+		if (tileType == null)
+			return;
+
+		for (TileTypeWrapper tileWrapper : tileWrappers) {
+			if (tileWrapper.getTileType() == tileType)
+				tileWrappers.remove(tileWrapper);
+		}
+	}
+
 	public void addUnit(Unit unit) {
 		if (unit.canAttack())
 			units.add(0, unit);
@@ -400,6 +411,15 @@ public class Tile extends Actor implements BottomShapeRenderListener {
 		return false;
 	}
 
+	public boolean containsTileType(TileType tileType) {
+		for (TileTypeWrapper tileWrapper : tileWrappers) {
+			if (tileWrapper.getTileType() == tileType)
+				return true;
+		}
+
+		return false;
+	}
+
 	public int getMovementCost(Tile prevTile) {
 		int movementCost = 0;
 		// Check if the tile were moving to
@@ -534,7 +554,8 @@ public class Tile extends Actor implements BottomShapeRenderListener {
 				continue;
 			}
 			for (Tile adjTile : tile.getAdjTiles()) {
-
+				if (adjTile == null)
+					continue;
 				adjTile.setDiscovered(true);
 				if (!adjTile.getTileObservers().contains(tileObserver))
 					adjTile.getTileObservers().add(tileObserver);

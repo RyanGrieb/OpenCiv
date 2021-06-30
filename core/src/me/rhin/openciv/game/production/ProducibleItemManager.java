@@ -17,6 +17,7 @@ import me.rhin.openciv.game.unit.type.Galley;
 import me.rhin.openciv.game.unit.type.Scout;
 import me.rhin.openciv.game.unit.type.Settler;
 import me.rhin.openciv.game.unit.type.Warrior;
+import me.rhin.openciv.game.unit.type.WorkBoat;
 import me.rhin.openciv.shared.packet.type.SetProductionItemPacket;
 
 /**
@@ -48,6 +49,7 @@ public class ProducibleItemManager {
 		possibleItems.put("Scout", new Scout(city));
 		possibleItems.put("Galley", new Galley(city));
 		possibleItems.put("Builder", new Builder(city));
+		possibleItems.put("Work Boat", new WorkBoat(city));
 	}
 
 	public HashMap<String, ProductionItem> getPossibleItems() {

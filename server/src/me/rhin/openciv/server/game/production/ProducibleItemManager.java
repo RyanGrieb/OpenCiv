@@ -18,6 +18,7 @@ import me.rhin.openciv.server.game.unit.type.Galley;
 import me.rhin.openciv.server.game.unit.type.Scout;
 import me.rhin.openciv.server.game.unit.type.Settler;
 import me.rhin.openciv.server.game.unit.type.Warrior;
+import me.rhin.openciv.server.game.unit.type.WorkBoat;
 import me.rhin.openciv.server.listener.NextTurnListener;
 import me.rhin.openciv.shared.packet.type.ApplyProductionToItemPacket;
 import me.rhin.openciv.shared.packet.type.FinishProductionItemPacket;
@@ -53,11 +54,12 @@ public class ProducibleItemManager implements NextTurnListener {
 		possibleItems.put("Granary", new Granary(city));
 		possibleItems.put("Monument", new Monument(city));
 		possibleItems.put("Market", new Market(city));
-		possibleItems.put("Warrior", new Warrior());
-		possibleItems.put("Settler", new Settler());
-		possibleItems.put("Scout", new Scout());
-		possibleItems.put("Galley", new Galley());
-		possibleItems.put("Builder", new Builder());
+		possibleItems.put("Warrior", new Warrior(city));
+		possibleItems.put("Settler", new Settler(city));
+		possibleItems.put("Scout", new Scout(city));
+		possibleItems.put("Galley", new Galley(city));
+		possibleItems.put("Builder", new Builder(city));
+		possibleItems.put("Work Boat", new WorkBoat(city));
 
 		Server.getInstance().getEventManager().addListener(NextTurnListener.class, this);
 	}

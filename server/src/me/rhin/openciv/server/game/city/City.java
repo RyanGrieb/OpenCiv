@@ -21,6 +21,7 @@ import me.rhin.openciv.server.game.city.specialist.Specialist;
 import me.rhin.openciv.server.game.city.specialist.SpecialistContainer;
 import me.rhin.openciv.server.game.city.specialist.UnemployedSpecialist;
 import me.rhin.openciv.server.game.map.tile.Tile;
+import me.rhin.openciv.server.game.map.tile.TileType.TileProperty;
 import me.rhin.openciv.server.game.production.ProducibleItemManager;
 import me.rhin.openciv.server.game.unit.AttackableEntity;
 import me.rhin.openciv.server.listener.NextTurnListener;
@@ -528,5 +529,13 @@ public class City implements AttackableEntity, SpecialistContainer, NextTurnList
 	private void setPopulation(int amount) {
 		statLine.setValue(Stat.POPULATION, amount);
 		statLine.setValue(Stat.FOOD_SURPLUS, 0);
+	}
+
+	public boolean isCoastal() {
+		for (Tile tile : originTile.getAdjTiles())
+			if (tile.containsTileProperty(TileProperty.WATER))
+				return true;
+
+		return false;
 	}
 }

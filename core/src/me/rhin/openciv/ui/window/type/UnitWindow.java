@@ -64,20 +64,21 @@ public class UnitWindow extends AbstractWindow implements ResizeListener, UnitAt
 			BuilderUnit builderUnit = (BuilderUnit) unit;
 
 			if (builderUnit.isBuilding()) {
-				this.buildDescLabel.setText("Building " + StrUtil.capitalize((builderUnit.getImprovementName()) + " ("
+				this.buildDescLabel.setText(builderUnit.getImprovementDesc() + " ("
 						+ builderUnit.getStandingTile().getAppliedImprovementTurns() + "/" + builderUnit.getMaxTurns()
-						+ ")"));
+						+ ")");
 				addActor(buildDescLabel);
 			}
 		}
 
 		int index = 0;
 		for (AbstractAction action : unit.getCustomActions()) {
+			if (!action.canAct())
+				continue;
 			UnitActionButton actionButton = new UnitActionButton(unit, action, blankBackground.getX() + (75 * index),
 					blankBackground.getY() + blankBackground.getHeight() / 2 - 40 / 2, 70, 30);
 			unitActionButtons.add(actionButton);
-			if (action.canAct())
-				addActor(actionButton);
+			addActor(actionButton);
 			index++;
 		}
 
@@ -125,10 +126,9 @@ public class UnitWindow extends AbstractWindow implements ResizeListener, UnitAt
 							BuilderUnit builderUnit = (BuilderUnit) unit;
 							if (builderUnit.isBuilding()) {
 
-								buildDescLabel
-										.setText("Building " + StrUtil.capitalize((builderUnit.getImprovementName())
-												+ " (" + builderUnit.getStandingTile().getAppliedImprovementTurns()
-												+ "/" + builderUnit.getMaxTurns() + ")"));
+								buildDescLabel.setText(builderUnit.getImprovementDesc() + " ("
+										+ builderUnit.getStandingTile().getAppliedImprovementTurns() + "/"
+										+ builderUnit.getMaxTurns() + ")");
 								addActor(buildDescLabel);
 							}
 						}
@@ -159,8 +159,8 @@ public class UnitWindow extends AbstractWindow implements ResizeListener, UnitAt
 
 		BuilderUnit builderUnit = (BuilderUnit) unit;
 
-		this.buildDescLabel.setText("Building " + StrUtil.capitalize((builderUnit.getImprovementName()) + " ("
-				+ builderUnit.getStandingTile().getAppliedImprovementTurns() + "/" + builderUnit.getMaxTurns() + ")"));
+		this.buildDescLabel.setText(builderUnit.getImprovementDesc() + " ("
+				+ builderUnit.getStandingTile().getAppliedImprovementTurns() + "/" + builderUnit.getMaxTurns() + ")");
 	}
 
 	@Override

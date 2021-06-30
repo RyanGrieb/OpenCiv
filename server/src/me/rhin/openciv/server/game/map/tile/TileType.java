@@ -5,6 +5,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
+import me.rhin.openciv.server.game.map.tile.improvement.ChopImprovement;
+import me.rhin.openciv.server.game.map.tile.improvement.TileImprovement;
 import me.rhin.openciv.shared.stat.Stat;
 import me.rhin.openciv.shared.stat.StatLine;
 
@@ -171,6 +173,13 @@ public enum TileType implements Comparable<TileType> {
 		@Override
 		public int getMovementCost() {
 			return 2;
+		}
+
+		@Override
+		public List<TileImprovement> getImprovements() {
+			ArrayList<TileImprovement> improvements = new ArrayList<>();
+			improvements.add(new ChopImprovement(3));
+			return improvements;
 		}
 	},
 	JUNGLE(TileLayer.MIDDLE) {

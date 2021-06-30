@@ -39,3 +39,10 @@ unit_warrior
   orig: 32, 32
   offset: 0, 0
   index: -1
+unit_work_boat
+  rotate: false
+  xy: 172, 2
+  size: 27, 32
+  orig: 27, 32
+  offset: 0, 0
+  index: -1
