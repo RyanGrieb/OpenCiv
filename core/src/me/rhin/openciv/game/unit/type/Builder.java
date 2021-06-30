@@ -234,8 +234,6 @@ public class Builder extends UnitItem {
 			if (!unit.getPlayerOwner().getResearchTree().hasResearched(MiningTech.class)) {
 				return false;
 			}
-
-			System.out.println(tile.containsTileType(TileType.FOREST)+"!");
 			
 			boolean farmableTile = !tile.isImproved() && tile.containsTileType(TileType.FOREST)
 					&& tile.getTerritory() != null

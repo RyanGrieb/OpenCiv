@@ -10,16 +10,17 @@ import me.rhin.openciv.game.AbstractAction;
 import me.rhin.openciv.game.unit.Unit;
 import me.rhin.openciv.game.unit.type.Builder.BuilderUnit;
 import me.rhin.openciv.listener.NextTurnListener;
+import me.rhin.openciv.listener.RemoveTileTypeListener;
 import me.rhin.openciv.listener.ResizeListener;
 import me.rhin.openciv.listener.SetTileTypeListener;
 import me.rhin.openciv.listener.UnitActListener;
 import me.rhin.openciv.listener.UnitAttackListener;
 import me.rhin.openciv.listener.WorkTileListener;
 import me.rhin.openciv.shared.packet.type.NextTurnPacket;
+import me.rhin.openciv.shared.packet.type.RemoveTileTypePacket;
 import me.rhin.openciv.shared.packet.type.SetTileTypePacket;
 import me.rhin.openciv.shared.packet.type.UnitAttackPacket;
 import me.rhin.openciv.shared.packet.type.WorkTilePacket;
-import me.rhin.openciv.shared.util.StrUtil;
 import me.rhin.openciv.ui.background.BlankBackground;
 import me.rhin.openciv.ui.button.type.UnitActionButton;
 import me.rhin.openciv.ui.game.Healthbar;
@@ -27,7 +28,7 @@ import me.rhin.openciv.ui.label.CustomLabel;
 import me.rhin.openciv.ui.window.AbstractWindow;
 
 public class UnitWindow extends AbstractWindow implements ResizeListener, UnitAttackListener, NextTurnListener,
-		UnitActListener, WorkTileListener, SetTileTypeListener {
+		UnitActListener, WorkTileListener, SetTileTypeListener, RemoveTileTypeListener {
 
 	private CustomLabel unitNameLabel;
 	private CustomLabel movementLabel;
@@ -88,6 +89,7 @@ public class UnitWindow extends AbstractWindow implements ResizeListener, UnitAt
 		Civilization.getInstance().getEventManager().addListener(UnitActListener.class, this);
 		Civilization.getInstance().getEventManager().addListener(WorkTileListener.class, this);
 		Civilization.getInstance().getEventManager().addListener(SetTileTypeListener.class, this);
+		Civilization.getInstance().getEventManager().addListener(RemoveTileTypeListener.class, this);
 	}
 
 	@Override
@@ -99,12 +101,7 @@ public class UnitWindow extends AbstractWindow implements ResizeListener, UnitAt
 
 	@Override
 	public void onNextTurn(NextTurnPacket packet) {
-		for (UnitActionButton button : unitActionButtons) {
-			if (button.getStage() == null) {
-				if (button.getAction().canAct())
-					addActor(button);
-			}
-		}
+		updateActionButtons();
 	}
 
 	@Override
@@ -176,6 +173,25 @@ public class UnitWindow extends AbstractWindow implements ResizeListener, UnitAt
 			// Assume the builder is done building
 			removeActor(buildDescLabel);
 		}
+
+		updateActionButtons();
+	}
+
+	@Override
+	public void onRemoveTileType(RemoveTileTypePacket packet) {
+		if (!(unit instanceof BuilderUnit))
+			return;
+
+		BuilderUnit builderUnit = (BuilderUnit) unit;
+
+		if (builderUnit.getStandingTile().getGridX() == packet.getGridX()
+				&& builderUnit.getStandingTile().getGridY() == packet.getGridY()) {
+
+			// Assume the builder is done building
+			removeActor(buildDescLabel);
+		}
+
+		updateActionButtons();
 	}
 
 	@Override
@@ -227,5 +243,23 @@ public class UnitWindow extends AbstractWindow implements ResizeListener, UnitAt
 
 	public Unit getUnit() {
 		return unit;
+	}
+
+	private void updateActionButtons() {
+
+		for (UnitActionButton button : unitActionButtons) {
+			removeActor(button);
+		}
+
+		int index = 0;
+		for (AbstractAction action : unit.getCustomActions()) {
+			if (!action.canAct())
+				continue;
+			UnitActionButton actionButton = new UnitActionButton(unit, action, blankBackground.getX() + (75 * index),
+					blankBackground.getY() + blankBackground.getHeight() / 2 - 40 / 2, 70, 30);
+			unitActionButtons.add(actionButton);
+			addActor(actionButton);
+			index++;
+		}
 	}
 }
