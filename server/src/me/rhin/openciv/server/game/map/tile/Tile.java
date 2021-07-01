@@ -329,7 +329,7 @@ public class Tile {
 		while (iterator.hasNext()) {
 			TileType tileType = iterator.next().getTileType();
 
-			// Skip over the base & middle layer, since the layered tile overrides the base
+			// Skip over the high layer, since the layered tile overrides the base
 			// layer.
 			if (containsTileLayer(TileLayer.HIGH) && !containsTileType(TileType.CITY)
 					&& tileType.getTileLayer() == TileLayer.BASE) {

@@ -513,6 +513,9 @@ public class City implements AttackableEntity, SpecialistContainer, NextTurnList
 					+ getTileStatLine(tile).getStatValue(Stat.PRODUCTION_GAIN) * 4)
 					- tile.getDistanceFrom(originTile) / 32;
 
+			if (tile.containsTileProperty(TileProperty.LUXURY, TileProperty.RESOURCE))
+				value += 4;
+
 			while (j >= 0 && getTileStatLine(topTiles.get(j)).getStatValue(Stat.FOOD_GAIN) * 4
 					+ getTileStatLine(topTiles.get(j)).getStatValue(Stat.GOLD_GAIN) * 1
 					+ getTileStatLine(topTiles.get(j)).getStatValue(Stat.PRODUCTION_GAIN) * 4 < value) {
