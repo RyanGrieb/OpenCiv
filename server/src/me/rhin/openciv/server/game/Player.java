@@ -178,4 +178,8 @@ public class Player implements NextTurnListener, ChooseTechListener {
 	public ResearchTree getResearchTree() {
 		return researchTree;
 	}
+
+	public void removeCity(City city) {
+		ownedCities.remove(city);
+	}
 }

@@ -305,7 +305,10 @@ public class InGameState extends GameState implements DisconnectListener, Select
 					if (targetEntity instanceof City) {
 						City city = (City) targetEntity;
 						city.setHealth(city.getMaxHealth() / 2);
+
+						city.getPlayerOwner().removeCity(city);
 						city.setOwner(unit.getPlayerOwner());
+						unit.getPlayerOwner().addCity(city);
 
 						SetCityOwnerPacket cityOwnerPacket = new SetCityOwnerPacket();
 						cityOwnerPacket.setCity(city.getName(), unit.getPlayerOwner().getName());
@@ -438,9 +441,10 @@ public class InGameState extends GameState implements DisconnectListener, Select
 		// Verify if the player owns that city.
 		Player player = getPlayerByConn(conn);
 		City targetCity = null;
-		for (City city : player.getOwnedCities())
+		for (City city : player.getOwnedCities()) {
 			if (city.getName().equals(packet.getCityName()))
 				targetCity = city;
+		}
 
 		// TODO: Verify if the item can be produced.
 

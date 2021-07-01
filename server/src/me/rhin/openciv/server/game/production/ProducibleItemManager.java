@@ -98,6 +98,7 @@ public class ProducibleItemManager implements NextTurnListener {
 			itemQueue.clear();
 		}
 
+		System.out.println("Adding to queue");
 		itemQueue.add(new ProducingItem(possibleItems.get(itemName)));
 	}
 
