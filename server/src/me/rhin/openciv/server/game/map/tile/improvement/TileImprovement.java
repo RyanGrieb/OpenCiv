@@ -16,6 +16,7 @@ public class TileImprovement {
 	private int maxTurns;
 	private int workedTurns;
 
+	// FIXME: Just make this an interface or abstact class.
 	public TileImprovement(TileType tileType, int maxTurns) {
 		this.tileType = tileType;
 		this.maxTurns = maxTurns;

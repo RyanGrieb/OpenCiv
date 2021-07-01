@@ -26,7 +26,12 @@ public enum TileType {
 	COPPER(TextureEnum.TILE_COPPER, TileLayer.MIDDLE, TileProperty.RESOURCE, TileProperty.MINEABLE),
 	COTTON(TextureEnum.TILE_COTTON, TileLayer.MIDDLE, TileProperty.RESOURCE),
 	GEMS(TextureEnum.TILE_GEMS, TileLayer.MIDDLE, TileProperty.RESOURCE, TileProperty.MINEABLE),
-	FARM(TextureEnum.TILE_FARM, TileLayer.HIGH, TileProperty.IMPROVEMENT);
+	FARM(TextureEnum.TILE_FARM, TileLayer.HIGH, TileProperty.IMPROVEMENT),
+	GEMS_IMPROVED(TextureEnum.TILE_GEMS_IMPROVED, TileLayer.MIDDLE, TileProperty.RESOURCE),
+	COTTON_IMPROVED(TextureEnum.TILE_COTTON_IMPROVED, TileLayer.MIDDLE, TileProperty.RESOURCE),
+	IRON_IMPROVED(TextureEnum.TILE_IRON_IMPROVED, TileLayer.MIDDLE, TileProperty.RESOURCE),
+	COPPER_IMPROVED(TextureEnum.TILE_COPPER_IMPROVED, TileLayer.MIDDLE, TileProperty.RESOURCE),
+	;
 
 	public enum TileLayer {
 		BASE,

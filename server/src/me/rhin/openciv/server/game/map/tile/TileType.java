@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Random;
 
 import me.rhin.openciv.server.game.map.tile.improvement.ChopImprovement;
+import me.rhin.openciv.server.game.map.tile.improvement.MineImprovement;
 import me.rhin.openciv.server.game.map.tile.improvement.TileImprovement;
 import me.rhin.openciv.shared.stat.Stat;
 import me.rhin.openciv.shared.stat.StatLine;
@@ -210,6 +211,13 @@ public enum TileType implements Comparable<TileType> {
 			statLine.setValue(Stat.PRODUCTION_GAIN, 1);
 			return statLine;
 		}
+
+		@Override
+		public List<TileImprovement> getImprovements() {
+			ArrayList<TileImprovement> improvements = new ArrayList<>();
+			improvements.add(new MineImprovement(TileType.IRON_IMPROVED, 5));
+			return improvements;
+		}
 	},
 	COPPER(TileLayer.MIDDLE, TileProperty.LUXURY) {
 		@Override
@@ -218,6 +226,13 @@ public enum TileType implements Comparable<TileType> {
 			statLine.setValue(Stat.GOLD_GAIN, 2);
 			return statLine;
 		}
+
+		@Override
+		public List<TileImprovement> getImprovements() {
+			ArrayList<TileImprovement> improvements = new ArrayList<>();
+			improvements.add(new MineImprovement(TileType.COPPER_IMPROVED, 5));
+			return improvements;
+		}
 	},
 	COTTON(TileLayer.MIDDLE, TileProperty.LUXURY) {
 		@Override
@@ -225,6 +240,13 @@ public enum TileType implements Comparable<TileType> {
 			StatLine statLine = new StatLine();
 			statLine.setValue(Stat.GOLD_GAIN, 2);
 			return statLine;
+		}
+
+		@Override
+		public List<TileImprovement> getImprovements() {
+			ArrayList<TileImprovement> improvements = new ArrayList<>();
+			improvements.add(new MineImprovement(TileType.COTTON_IMPROVED, 5));
+			return improvements;
 		}
 	},
 	GEMS(TileLayer.MIDDLE, TileProperty.LUXURY) {
@@ -237,10 +259,12 @@ public enum TileType implements Comparable<TileType> {
 
 		@Override
 		public List<TileImprovement> getImprovements() {
-			return Arrays.asList(new TileImprovement(TileType.GEMS_IMPROVED, 5));
+			ArrayList<TileImprovement> improvements = new ArrayList<>();
+			improvements.add(new MineImprovement(TileType.GEMS_IMPROVED, 5));
+			return improvements;
 		}
 	},
-	FARM(TileLayer.HIGH, TileProperty.IMPROVEMENT) {
+	FARM(TileLayer.MIDDLE, TileProperty.IMPROVEMENT) {
 		@Override
 		public StatLine getStatLine() {
 			StatLine statLine = new StatLine();
@@ -248,15 +272,39 @@ public enum TileType implements Comparable<TileType> {
 			return statLine;
 		}
 	},
-	GEMS_IMPROVED(TileLayer.HIGH, TileProperty.IMPROVEMENT) {
+	GEMS_IMPROVED(TileLayer.MIDDLE, TileProperty.IMPROVEMENT) {
 		@Override
 		public StatLine getStatLine() {
 			StatLine statLine = new StatLine();
 			statLine.addValue(Stat.GOLD_GAIN, 3);
-			statLine.addValue(Stat.PRODUCTION_GAIN, 3);
+			statLine.addValue(Stat.PRODUCTION_GAIN, 1);
 			return statLine;
 		}
-	};
+	},
+	COTTON_IMPROVED(TileLayer.MIDDLE, TileProperty.IMPROVEMENT) {
+		@Override
+		public StatLine getStatLine() {
+			StatLine statLine = new StatLine();
+			statLine.addValue(Stat.GOLD_GAIN, 3);
+			return statLine;
+		}
+	},
+	IRON_IMPROVED(TileLayer.MIDDLE, TileProperty.IMPROVEMENT) {
+		@Override
+		public StatLine getStatLine() {
+			StatLine statLine = new StatLine();
+			statLine.addValue(Stat.PRODUCTION_GAIN, 1);
+			return statLine;
+		}
+	},
+	COPPER_IMPROVED(TileLayer.MIDDLE, TileProperty.IMPROVEMENT) {
+		@Override
+		public StatLine getStatLine() {
+			StatLine statLine = new StatLine();
+			statLine.addValue(Stat.PRODUCTION_GAIN, 1);
+			return statLine;
+		}
+	},;
 
 	public enum TileLayer {
 		BASE,

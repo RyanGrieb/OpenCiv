@@ -485,6 +485,7 @@ public class Tile {
 
 	public void workTile(Unit unit, String improvementName) {
 		if (tileImprovement == null) {
+			System.out.println(getBaseTileType());
 			tileImprovement = getBaseTileType().getImprovement(improvementName);
 			tileImprovement.setTile(this);
 		}
