@@ -4,6 +4,13 @@ size: 256, 64
 format: RGBA8888
 filter: Nearest, Nearest
 repeat: none
+unit_archer
+  rotate: false
+  xy: 104, 2
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
 unit_builder
   rotate: false
   xy: 36, 2
@@ -20,7 +27,7 @@ unit_galley
   index: -1
 unit_scout
   rotate: false
-  xy: 104, 2
+  xy: 138, 2
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
@@ -34,14 +41,14 @@ unit_settler
   index: -1
 unit_warrior
   rotate: false
-  xy: 138, 2
+  xy: 172, 2
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 unit_work_boat
   rotate: false
-  xy: 172, 2
+  xy: 206, 2
   size: 27, 32
   orig: 27, 32
   offset: 0, 0

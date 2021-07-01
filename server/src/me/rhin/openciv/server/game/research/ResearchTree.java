@@ -8,6 +8,8 @@ import com.badlogic.gdx.utils.Json;
 
 import me.rhin.openciv.server.Server;
 import me.rhin.openciv.server.game.Player;
+import me.rhin.openciv.server.game.research.type.AnimalHusbandryTech;
+import me.rhin.openciv.server.game.research.type.ArcheryTech;
 import me.rhin.openciv.server.game.research.type.MiningTech;
 import me.rhin.openciv.server.game.research.type.PotteryTech;
 import me.rhin.openciv.server.game.research.type.SailingTech;
@@ -29,6 +31,8 @@ public class ResearchTree implements NextTurnListener {
 
 		// FIXME: This is going to be a crappton of techs
 		technologies.put(PotteryTech.class, new PotteryTech(this));
+		technologies.put(AnimalHusbandryTech.class, new AnimalHusbandryTech(this));
+		technologies.put(ArcheryTech.class, new ArcheryTech(this));
 		technologies.put(MiningTech.class, new MiningTech(this));
 		technologies.put(SailingTech.class, new SailingTech(this));
 

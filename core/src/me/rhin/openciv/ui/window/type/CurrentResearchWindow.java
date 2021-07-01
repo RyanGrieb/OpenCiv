@@ -93,7 +93,6 @@ public class CurrentResearchWindow extends AbstractWindow
 
 	@Override
 	public void onCompleteResearch(CompleteResearchPacket packet) {
-		System.out.println("hi" + packet.getTechID() + "," + tech.getID());
 		if (tech.getID() != packet.getTechID())
 			return;
 

@@ -73,7 +73,7 @@ public class ResearchWindow extends AbstractWindow
 				requiredTechs++;
 			}
 
-			x += requiredTechs * 150;
+			x += requiredTechs * 170;
 
 			int sameXAxisLeafs = 0;
 			for (TechnologyLeaf otherLeaf : technologyLeafs) {
@@ -156,7 +156,7 @@ public class ResearchWindow extends AbstractWindow
 
 	private void addTech(Technology tech) {
 
-		float width = 125;
+		float width = 145;
 		float height = 75;
 
 		float x = 25;
@@ -171,7 +171,7 @@ public class ResearchWindow extends AbstractWindow
 			requiredTechs++;
 		}
 
-		x += requiredTechs * 150;
+		x += requiredTechs * 170;
 
 		ArrayList<TechnologyLeaf> rowLeafs = new ArrayList<>();
 		for (TechnologyLeaf leaf : technologyLeafs)

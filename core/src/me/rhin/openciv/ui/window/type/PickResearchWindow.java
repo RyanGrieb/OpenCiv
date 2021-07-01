@@ -25,7 +25,7 @@ public class PickResearchWindow extends AbstractWindow implements ResizeListener
 	private ClosePickResearchButton closePickResearchButton;
 
 	public PickResearchWindow(Technology tech) {
-		super.setBounds(viewport.getWorldWidth() / 2 - 250 / 2, viewport.getWorldHeight() / 2 - 300 / 2, 250, 300);
+		super.setBounds(viewport.getWorldWidth() / 2 - 270 / 2, viewport.getWorldHeight() / 2 - 300 / 2, 270, 300);
 		this.tech = tech;
 
 		this.coloredBackground = new ColoredBackground(TextureEnum.UI_LIGHT_GRAY.sprite(), 0, 0, getWidth(),
@@ -59,7 +59,7 @@ public class PickResearchWindow extends AbstractWindow implements ResizeListener
 
 	@Override
 	public void onResize(int width, int height) {
-		super.setPosition(width / 2 - 250 / 2, height / 2 - 300 / 2);
+		super.setPosition(width / 2 - 270 / 2, height / 2 - 300 / 2);
 	}
 
 	@Override

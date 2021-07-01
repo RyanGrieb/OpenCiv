@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 
+import me.rhin.openciv.game.research.type.AnimalHusbandryTech;
+import me.rhin.openciv.game.research.type.ArcheryTech;
 import me.rhin.openciv.game.research.type.MiningTech;
 import me.rhin.openciv.game.research.type.PotteryTech;
 import me.rhin.openciv.game.research.type.SailingTech;
@@ -17,6 +19,8 @@ public class ResearchTree {
 
 		// FIXME: This is going to be a crappton of techs
 		technologies.put(PotteryTech.class, new PotteryTech());
+		technologies.put(AnimalHusbandryTech.class, new AnimalHusbandryTech());
+		technologies.put(ArcheryTech.class, new ArcheryTech());
 		technologies.put(MiningTech.class, new MiningTech());
 		technologies.put(SailingTech.class, new SailingTech());
 	}
