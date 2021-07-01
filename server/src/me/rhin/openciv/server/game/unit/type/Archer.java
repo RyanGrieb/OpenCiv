@@ -4,6 +4,7 @@ import me.rhin.openciv.server.game.Player;
 import me.rhin.openciv.server.game.city.City;
 import me.rhin.openciv.server.game.map.tile.Tile;
 import me.rhin.openciv.server.game.map.tile.TileType.TileProperty;
+import me.rhin.openciv.server.game.research.type.ArcheryTech;
 import me.rhin.openciv.server.game.unit.RangedUnit;
 import me.rhin.openciv.server.game.unit.Unit;
 import me.rhin.openciv.server.game.unit.UnitItem;
@@ -46,7 +47,7 @@ public class Archer extends UnitItem {
 
 	@Override
 	public boolean meetsProductionRequirements() {
-		return true;
+		return city.getPlayerOwner().getResearchTree().hasResearched(ArcheryTech.class);
 	}
 
 	@Override

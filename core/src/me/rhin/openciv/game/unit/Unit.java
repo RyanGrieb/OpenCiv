@@ -20,8 +20,8 @@ import me.rhin.openciv.game.map.GameMap;
 import me.rhin.openciv.game.map.tile.Tile;
 import me.rhin.openciv.game.map.tile.TileObserver;
 import me.rhin.openciv.game.player.Player;
-import me.rhin.openciv.listener.NextTurnListener;
 import me.rhin.openciv.listener.BottomShapeRenderListener;
+import me.rhin.openciv.listener.NextTurnListener;
 import me.rhin.openciv.shared.packet.type.MoveUnitPacket;
 import me.rhin.openciv.shared.packet.type.NextTurnPacket;
 import me.rhin.openciv.ui.window.type.UnitCombatWindow;
@@ -33,12 +33,13 @@ public abstract class Unit extends Actor
 	protected boolean canAttack;
 	protected ArrayList<AbstractAction> customActions;
 	protected Tile standingTile;
+	protected Sprite targetSelectionSprite;
 	private int id;
 	private Player playerOwner;
 	private ArrayList<Vector2[]> pathVectors;
 	private int pathMovement;
 	private Tile targetTile;
-	private Sprite sprite, selectionSprite, targetSelectionSprite;
+	private Sprite sprite, selectionSprite;
 	private Sprite civIconSprite;
 	private boolean selected;
 	private float movement;
@@ -91,7 +92,7 @@ public abstract class Unit extends Actor
 			selectionSprite.draw(batch);
 
 		if ((targetTile != null && pathMovement <= getCurrentMovement() && pathMovement != 0) || hasRangedTarget()) {
-			getTargetSelectionSprite().draw(batch);
+			targetSelectionSprite.draw(batch);
 		}
 
 		if (standingTile.getTileObservers().size() > 0) {
@@ -133,9 +134,9 @@ public abstract class Unit extends Actor
 
 		pathVectors.clear();
 
-		getTargetSelectionSprite().setPosition(targetTile.getVectors()[0].x - targetTile.getWidth() / 2,
+		targetSelectionSprite.setPosition(targetTile.getVectors()[0].x - targetTile.getWidth() / 2,
 				targetTile.getVectors()[0].y + 4);
-		getTargetSelectionSprite().setSize(targetTile.getWidth(), targetTile.getHeight());
+		targetSelectionSprite.setSize(targetTile.getWidth(), targetTile.getHeight());
 
 		// Find the shortest path to the target tile.
 		// Remember:
@@ -280,9 +281,9 @@ public abstract class Unit extends Actor
 				pathMovement = 0;
 				this.targetTile = null;
 			} else
-				getTargetSelectionSprite().setColor(Color.RED);
+				targetSelectionSprite.setColor(Color.RED);
 		} else
-			getTargetSelectionSprite().setColor(Color.YELLOW);
+			targetSelectionSprite.setColor(Color.YELLOW);
 
 		return true;
 	}
@@ -447,7 +448,7 @@ public abstract class Unit extends Actor
 	}
 
 	public boolean isRangedUnit() {
-		return false;
+		return this instanceof RangedUnit;
 	}
 
 	public boolean hasRangedTarget() {
@@ -466,9 +467,5 @@ public abstract class Unit extends Actor
 
 		queue.remove(smallestTile);
 		return smallestTile;
-	}
-
-	public Sprite getTargetSelectionSprite() {
-		return targetSelectionSprite;
 	}
 }
