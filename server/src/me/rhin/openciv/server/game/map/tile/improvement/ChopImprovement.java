@@ -20,6 +20,9 @@ public class ChopImprovement extends TileImprovement {
 
 		finished = true;
 
+		// Set improvement to null, since this isn't an improvement.
+		tile.setTileImprovement(null);
+
 		// TODO: Remove tileType?
 		RemoveTileTypePacket removeTileTypePacket = new RemoveTileTypePacket();
 		removeTileTypePacket.setTile(tileType.name(), tile.getGridX(), tile.getGridY());

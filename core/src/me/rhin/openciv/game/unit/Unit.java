@@ -32,11 +32,12 @@ public abstract class Unit extends Actor
 
 	protected boolean canAttack;
 	protected ArrayList<AbstractAction> customActions;
+	protected Tile standingTile;
 	private int id;
 	private Player playerOwner;
 	private ArrayList<Vector2[]> pathVectors;
 	private int pathMovement;
-	private Tile standingTile, targetTile;
+	private Tile targetTile;
 	private Sprite sprite, selectionSprite, targetSelectionSprite;
 	private Sprite civIconSprite;
 	private boolean selected;

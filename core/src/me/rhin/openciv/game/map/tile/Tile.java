@@ -108,7 +108,6 @@ public class Tile extends Actor implements BottomShapeRenderListener {
 		this.riverSides = new RiverPart[6];
 		this.units = new ArrayList<>();
 		this.tileObservers = new ArrayList<>();
-		this.improved = false;
 		this.appliedImprovementTurns = 0;
 
 		this.posLabel = new CustomLabel(gridX + "," + gridY);
@@ -561,6 +560,10 @@ public class Tile extends Actor implements BottomShapeRenderListener {
 			}
 
 		}
+	}
+
+	public void setImproved(boolean improved) {
+		this.improved = improved;
 	}
 
 	private void setDiscovered(boolean discovered) {

@@ -28,7 +28,8 @@ public class Builder extends UnitItem {
 			// Update all the worked tiles
 			if (building) {
 				getStandingTile().workTile(this, improvement);
-				if (getStandingTile().getTileImprovement().isFinished()) {
+				if (getStandingTile().getTileImprovement() == null
+						|| getStandingTile().getTileImprovement().isFinished()) {
 					building = false;
 					improvement = null;
 				}

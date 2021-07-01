@@ -12,9 +12,11 @@ import me.rhin.openciv.game.research.type.MiningTech;
 import me.rhin.openciv.game.unit.Unit;
 import me.rhin.openciv.game.unit.UnitItem;
 import me.rhin.openciv.game.unit.UnitParameter;
+import me.rhin.openciv.listener.RemoveTileTypeListener;
 import me.rhin.openciv.listener.SetTileTypeListener;
 import me.rhin.openciv.listener.UnitActListener.UnitActEvent;
 import me.rhin.openciv.listener.WorkTileListener;
+import me.rhin.openciv.shared.packet.type.RemoveTileTypePacket;
 import me.rhin.openciv.shared.packet.type.SetTileTypePacket;
 import me.rhin.openciv.shared.packet.type.WorkTilePacket;
 
@@ -24,7 +26,8 @@ public class Builder extends UnitItem {
 		super(city);
 	}
 
-	public static class BuilderUnit extends Unit implements WorkTileListener, SetTileTypeListener {
+	public static class BuilderUnit extends Unit
+			implements WorkTileListener, SetTileTypeListener, RemoveTileTypeListener {
 
 		private ImprovementType improvementType;
 		private boolean building;
@@ -37,8 +40,10 @@ public class Builder extends UnitItem {
 			this.canAttack = false;
 			this.building = false;
 
-			// FIXME: REALLY should remove this listener when this unit gets destroyed
+			// FIXME: REALLY should remove these listeners when this unit gets destroyed
 			Civilization.getInstance().getEventManager().addListener(WorkTileListener.class, this);
+			Civilization.getInstance().getEventManager().addListener(SetTileTypeListener.class, this);
+			Civilization.getInstance().getEventManager().addListener(RemoveTileTypeListener.class, this);
 		}
 
 		@Override
@@ -55,8 +60,19 @@ public class Builder extends UnitItem {
 				// Assume we finish building
 				building = false;
 				improvementType = null;
+				standingTile.setAppliedTurns(0);
+				standingTile.setImproved(true);
 			}
+		}
 
+		@Override
+		public void onRemoveTileType(RemoveTileTypePacket packet) {
+			if (building) {
+				// Assume we finish building
+				building = false;
+				improvementType = null;
+				standingTile.setAppliedTurns(0);
+			}
 		}
 
 		@Override

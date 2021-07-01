@@ -521,4 +521,8 @@ public class Tile {
 	public TileImprovement getTileImprovement() {
 		return tileImprovement;
 	}
+
+	public void setTileImprovement(TileImprovement tileImprovement) {
+		this.tileImprovement = tileImprovement;
+	}
 }
