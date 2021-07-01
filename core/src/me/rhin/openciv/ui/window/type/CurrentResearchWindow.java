@@ -62,7 +62,7 @@ public class CurrentResearchWindow extends AbstractWindow
 
 	@Override
 	public void onResize(int width, int height) {
-
+		super.setPosition(5, height - 75);
 	}
 
 	@Override
