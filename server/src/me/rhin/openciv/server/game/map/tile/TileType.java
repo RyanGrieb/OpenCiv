@@ -161,7 +161,7 @@ public enum TileType implements Comparable<TileType> {
 			return 1000000;
 		}
 	},
-	FOREST(TileLayer.MIDDLE) {
+	FOREST(TileLayer.HIGH) {
 		@Override
 		public StatLine getStatLine() {
 			StatLine statLine = new StatLine();
@@ -182,7 +182,7 @@ public enum TileType implements Comparable<TileType> {
 			return improvements;
 		}
 	},
-	JUNGLE(TileLayer.MIDDLE) {
+	JUNGLE(TileLayer.HIGH) {
 		@Override
 		public StatLine getStatLine() {
 			StatLine statLine = new StatLine();
@@ -195,7 +195,7 @@ public enum TileType implements Comparable<TileType> {
 			return 2;
 		}
 	},
-	HORSES(TileLayer.HIGH, TileProperty.RESOURCE) {
+	HORSES(TileLayer.MIDDLE, TileProperty.RESOURCE) {
 		@Override
 		public StatLine getStatLine() {
 			StatLine statLine = new StatLine();
@@ -203,7 +203,7 @@ public enum TileType implements Comparable<TileType> {
 			return statLine;
 		}
 	},
-	IRON(TileLayer.HIGH, TileProperty.RESOURCE) {
+	IRON(TileLayer.MIDDLE, TileProperty.RESOURCE) {
 		@Override
 		public StatLine getStatLine() {
 			StatLine statLine = new StatLine();
@@ -211,7 +211,7 @@ public enum TileType implements Comparable<TileType> {
 			return statLine;
 		}
 	},
-	COPPER(TileLayer.HIGH, TileProperty.LUXURY) {
+	COPPER(TileLayer.MIDDLE, TileProperty.LUXURY) {
 		@Override
 		public StatLine getStatLine() {
 			StatLine statLine = new StatLine();
@@ -219,7 +219,7 @@ public enum TileType implements Comparable<TileType> {
 			return statLine;
 		}
 	},
-	COTTON(TileLayer.HIGH, TileProperty.LUXURY) {
+	COTTON(TileLayer.MIDDLE, TileProperty.LUXURY) {
 		@Override
 		public StatLine getStatLine() {
 			StatLine statLine = new StatLine();
@@ -227,7 +227,7 @@ public enum TileType implements Comparable<TileType> {
 			return statLine;
 		}
 	},
-	GEMS(TileLayer.HIGH, TileProperty.LUXURY) {
+	GEMS(TileLayer.MIDDLE, TileProperty.LUXURY) {
 		@Override
 		public StatLine getStatLine() {
 			StatLine statLine = new StatLine();

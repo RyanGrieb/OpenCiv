@@ -234,11 +234,11 @@ public class Builder extends UnitItem {
 			if (!unit.getPlayerOwner().getResearchTree().hasResearched(MiningTech.class)) {
 				return false;
 			}
-			
+
 			boolean farmableTile = !tile.isImproved() && tile.containsTileType(TileType.FOREST)
 					&& tile.getTerritory() != null
 					&& tile.getTerritory().getPlayerOwner().equals(unit.getPlayerOwner());
-			System.out.println(farmableTile);
+
 			BuilderUnit builderUnit = (BuilderUnit) unit;
 			if (unit.getCurrentMovement() < 1 || !farmableTile || builderUnit.isBuilding()) {
 				return false;

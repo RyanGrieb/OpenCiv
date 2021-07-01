@@ -3,6 +3,7 @@ package me.rhin.openciv.server.game.map.tile;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -18,7 +19,6 @@ import me.rhin.openciv.server.game.map.tile.TileType.TileProperty;
 import me.rhin.openciv.server.game.map.tile.improvement.TileImprovement;
 import me.rhin.openciv.server.game.unit.AttackableEntity;
 import me.rhin.openciv.server.game.unit.Unit;
-import me.rhin.openciv.shared.packet.type.SetTileTypePacket;
 import me.rhin.openciv.shared.packet.type.WorkTilePacket;
 import me.rhin.openciv.shared.stat.StatLine;
 
@@ -33,8 +33,24 @@ public class Tile {
 		}
 
 		@Override
+		public boolean equals(Object o) {
+			if (this == o)
+				return true;
+			if (o == null || getClass() != o.getClass())
+				return false;
+			TileTypeWrapper wrapper = (TileTypeWrapper) o;
+
+			return tileType == wrapper.getTileType();
+		}
+
+		@Override
 		public int compareTo(TileTypeWrapper type) {
 			return tileType.getTileLayer().ordinal() - type.getTileType().getTileLayer().ordinal();
+		}
+
+		@Override
+		public int hashCode() {
+			return Objects.hash(tileType.getTileLayer().ordinal());
 		}
 
 		public TileType getTileType() {
@@ -355,6 +371,7 @@ public class Tile {
 	}
 
 	public int getMovementCost() {
+		//FIXME: This is wrong. We need to add up all the tileTypes accordingly.
 		TileTypeWrapper topWrapper = ((TileTypeWrapper) tileWrappers.toArray()[tileWrappers.size() - 1]);
 		if (topWrapper.getTileType().hasProperty(TileProperty.RESOURCE)) {
 			return ((TileTypeWrapper) tileWrappers.toArray()[tileWrappers.size() - 2]).getTileType().getMovementCost();
