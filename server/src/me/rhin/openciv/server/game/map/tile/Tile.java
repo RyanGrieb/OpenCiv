@@ -3,6 +3,7 @@ package me.rhin.openciv.server.game.map.tile;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.ListIterator;
 import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
@@ -328,8 +329,9 @@ public class Tile {
 		while (iterator.hasNext()) {
 			TileType tileType = iterator.next().getTileType();
 
-			// Skip over the base layer, since the layered tile overrides the base layer.
-			if (containsTileLayer(TileLayer.MIDDLE) && !containsTileType(TileType.CITY)
+			// Skip over the base & middle layer, since the layered tile overrides the base
+			// layer.
+			if (containsTileLayer(TileLayer.HIGH) && !containsTileType(TileType.CITY)
 					&& tileType.getTileLayer() == TileLayer.BASE) {
 				tileType = iterator.next().getTileType();
 			}
