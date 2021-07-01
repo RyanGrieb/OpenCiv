@@ -1,7 +1,6 @@
 package me.rhin.openciv.game.unit.type;
 
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.utils.Json;
 
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.TextureEnum;
@@ -11,6 +10,7 @@ import me.rhin.openciv.game.map.tile.Tile;
 import me.rhin.openciv.game.map.tile.Tile.TileTypeWrapper;
 import me.rhin.openciv.game.map.tile.TileType;
 import me.rhin.openciv.game.map.tile.TileType.TileProperty;
+import me.rhin.openciv.game.unit.AttackableEntity;
 import me.rhin.openciv.game.unit.RangedUnit;
 import me.rhin.openciv.game.unit.Unit;
 import me.rhin.openciv.game.unit.UnitItem;
@@ -36,7 +36,7 @@ public class Archer extends UnitItem {
 
 		private UntargetAction untargetAction;
 		private boolean targeting;
-		private Unit rangedTarget;
+		private AttackableEntity rangedTarget;
 
 		public ArcherUnit(UnitParameter unitParameter) {
 			super(unitParameter, TextureEnum.UNIT_ARCHER);
@@ -86,6 +86,9 @@ public class Archer extends UnitItem {
 		@Override
 		public void onLeftClick(float x, float y) {
 
+			if (getPlayerOwner().getSelectedUnit() == null || !getPlayerOwner().getSelectedUnit().equals(this))
+				return;
+
 			if (rangedTarget == null || getCurrentMovement() < 1)
 				return;
 
@@ -94,8 +97,7 @@ public class Archer extends UnitItem {
 
 			RangedAttackPacket packet = new RangedAttackPacket();
 			packet.setUnit(getID(), standingTile.getGridX(), standingTile.getGridY());
-			packet.setTargetUnit(rangedTarget.getID(), rangedTarget.getStandingTile().getGridX(),
-					rangedTarget.getStandingTile().getGridY());
+			packet.setTargetEntity(rangedTarget.getTile().getGridX(), rangedTarget.getTile().getGridY());
 
 			Civilization.getInstance().getNetworkManager().sendPacket(packet);
 
@@ -104,30 +106,42 @@ public class Archer extends UnitItem {
 
 		@Override
 		public void onRightClick(ClickType clickType, int x, int y) {
+
+			if (getPlayerOwner().getSelectedUnit() == null || !getPlayerOwner().getSelectedUnit().equals(this))
+				return;
+
 			if (untargetAction.canAct())
 				addAction(untargetAction);
 		}
 
 		@Override
 		public void onSelectUnit(SelectUnitPacket packet) {
+
+			if (getPlayerOwner().getSelectedUnit() == null || !getPlayerOwner().getSelectedUnit().equals(this))
+				return;
+
 			if (untargetAction.canAct())
 				addAction(untargetAction);
 		}
 
 		@Override
 		public void onRelativeMouseMove(float x, float y) {
+
+			if (getPlayerOwner().getSelectedUnit() == null || !getPlayerOwner().getSelectedUnit().equals(this))
+				return;
+
 			Tile tile = Civilization.getInstance().getGame().getPlayer().getHoveredTile();
 
-			if (!targeting || tile == null || tile.getUnits().size() < 1 || !tile.hasRangedTarget()) {
+			if (!targeting || tile == null || tile.getAttackableEntity() == null || !tile.hasRangedTarget()) {
 				rangedTarget = null;
 				getTargetSelectionSprite().setColor(Color.YELLOW);
 				Civilization.getInstance().getWindowManager().closeWindow(UnitCombatWindow.class);
 				return;
 			}
 
-			if (!tile.getNextUnit().getPlayerOwner().equals(getPlayerOwner())
-					&& (rangedTarget == null || !rangedTarget.equals(tile.getNextUnit()))) {
-				rangedTarget = tile.getNextUnit();
+			if (!tile.getAttackableEntity().getPlayerOwner().equals(getPlayerOwner())
+					&& (rangedTarget == null || !rangedTarget.equals(tile.getAttackableEntity()))) {
+				rangedTarget = tile.getAttackableEntity();
 
 				getTargetSelectionSprite().setPosition(tile.getVectors()[0].x - tile.getWidth() / 2,
 						tile.getVectors()[0].y + 4);

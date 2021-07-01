@@ -39,8 +39,7 @@ public class RangedAttackPacket extends Packet {
 		this.unitGridY = unitGridY;
 	}
 
-	public void setTargetUnit(int targetID, int targetGridX, int targetGridY) {
-		this.targetID = targetID;
+	public void setTargetEntity(int targetGridX, int targetGridY) {
 		this.targetGridX = targetGridX;
 		this.targetGridY = targetGridY;
 	}

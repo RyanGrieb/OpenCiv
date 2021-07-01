@@ -184,4 +184,8 @@ public class Player implements RelativeMouseMoveListener, LeftClickListener, Rig
 	public Tile getHoveredTile() {
 		return hoveredTile;
 	}
+
+	public Unit getSelectedUnit() {
+		return selectedUnit;
+	}
 }

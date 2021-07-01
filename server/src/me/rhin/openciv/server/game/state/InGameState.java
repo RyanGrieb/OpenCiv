@@ -560,9 +560,6 @@ public class InGameState extends GameState implements DisconnectListener, Select
 			((Unit) attackingEntity).reduceMovement(2);
 		}
 
-		System.out.println(attackingEntity);
-		System.out.println(targetEntity);
-
 		// FIXME: Slight redundant code w/ mele attack.
 		if (!attackingEntity.getPlayerOwner().equals(targetEntity.getPlayerOwner())) {
 			// We are about to attack this unit on the tile
@@ -573,6 +570,12 @@ public class InGameState extends GameState implements DisconnectListener, Select
 
 			attackingEntity.setHealth(attackingEntity.getHealth() - unitDamage);
 			targetEntity.setHealth(targetEntity.getHealth() - targetDamage);
+
+			// If our ranged unit reduces the city below health, just set it to the min
+			// amount.
+			if (targetEntity instanceof City && targetEntity.getHealth() < 0) {
+				targetEntity.setHealth(1);
+			}
 
 			if (targetEntity.getHealth() > 0) {
 				UnitAttackPacket attackPacket = new UnitAttackPacket();

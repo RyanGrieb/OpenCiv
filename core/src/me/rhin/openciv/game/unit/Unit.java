@@ -439,6 +439,10 @@ public abstract class Unit extends Actor
 	}
 
 	public void setHealth(float health) {
+
+		if (health <= 0)
+			health = 1;
+
 		this.health = health;
 	}
 

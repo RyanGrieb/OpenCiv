@@ -291,6 +291,10 @@ public class City extends Group implements AttackableEntity, TileObserver, Speci
 
 	@Override
 	public void setHealth(float health) {
+
+		if (health <= 0)
+			health = 1;
+
 		this.health = health;
 		this.healthbar.setHealth(getMaxHealth(), health);
 	}
@@ -391,7 +395,7 @@ public class City extends Group implements AttackableEntity, TileObserver, Speci
 		for (Tile tile : originTile.getAdjTiles())
 			if (tile.containsTileProperty(TileProperty.WATER))
 				return true;
-		
+
 		return false;
 	}
 }
