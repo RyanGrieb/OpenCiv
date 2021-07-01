@@ -61,12 +61,14 @@ public class ContainerList extends Group {
 		this.addListener(new ClickListener() {
 			@Override
 			public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
-				thisContainer.getStage().setScrollFocus(thisContainer);
+				if (thisContainer != null)
+					thisContainer.getStage().setScrollFocus(thisContainer);
 			}
 
 			@Override
 			public void exit(InputEvent event, float x, float y, int pointer, Actor fromActor) {
-				thisContainer.getStage().setScrollFocus(null);
+				if (thisContainer != null)
+					thisContainer.getStage().setScrollFocus(null);
 			}
 		});
 	}

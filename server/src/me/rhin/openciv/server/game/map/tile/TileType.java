@@ -46,7 +46,10 @@ public enum TileType implements Comparable<TileType> {
 
 		@Override
 		public List<TileImprovement> getImprovements() {
-			return Arrays.asList(new TileImprovement(TileType.FARM, 5));
+			ArrayList<TileImprovement> improvements = new ArrayList<>();
+			improvements.add(new MineImprovement(TileType.GRASS_HILL_MINE, 5));
+			improvements.add(new TileImprovement(TileType.FARM, 5));
+			return improvements;
 		}
 	},
 	PLAINS(TileLayer.BASE) {
@@ -78,7 +81,10 @@ public enum TileType implements Comparable<TileType> {
 
 		@Override
 		public List<TileImprovement> getImprovements() {
-			return Arrays.asList(new TileImprovement(TileType.FARM, 5));
+			ArrayList<TileImprovement> improvements = new ArrayList<>();
+			improvements.add(new MineImprovement(TileType.PLAINS_HILL_MINE, 5));
+			improvements.add(new TileImprovement(TileType.FARM, 5));
+			return improvements;
 		}
 	},
 	DESERT(TileLayer.BASE) {
@@ -113,6 +119,13 @@ public enum TileType implements Comparable<TileType> {
 		public int getMovementCost() {
 			return 2;
 		}
+		
+		@Override
+		public List<TileImprovement> getImprovements() {
+			ArrayList<TileImprovement> improvements = new ArrayList<>();
+			improvements.add(new MineImprovement(TileType.DESERT_HILL_MINE, 5));
+			return improvements;
+		}
 	},
 	TUNDRA(TileLayer.BASE) {
 		@Override
@@ -132,6 +145,13 @@ public enum TileType implements Comparable<TileType> {
 		@Override
 		public int getMovementCost() {
 			return 2;
+		}
+		
+		@Override
+		public List<TileImprovement> getImprovements() {
+			ArrayList<TileImprovement> improvements = new ArrayList<>();
+			improvements.add(new MineImprovement(TileType.TUNDRA_HILL_MINE, 5));
+			return improvements;
 		}
 	},
 	OCEAN(TileLayer.BASE, TileProperty.WATER) {
@@ -304,7 +324,40 @@ public enum TileType implements Comparable<TileType> {
 			statLine.addValue(Stat.PRODUCTION_GAIN, 1);
 			return statLine;
 		}
-	},;
+	},
+	GRASS_HILL_MINE(TileLayer.BASE, TileProperty.IMPROVEMENT) {
+		@Override
+		public StatLine getStatLine() {
+			StatLine statLine = new StatLine();
+			statLine.addValue(Stat.PRODUCTION_GAIN, 3);
+			return statLine;
+		}
+	},
+	PLAINS_HILL_MINE(TileLayer.BASE, TileProperty.IMPROVEMENT) {
+		@Override
+		public StatLine getStatLine() {
+			StatLine statLine = new StatLine();
+			statLine.addValue(Stat.PRODUCTION_GAIN, 3);
+			return statLine;
+		}
+	},
+	TUNDRA_HILL_MINE(TileLayer.BASE, TileProperty.IMPROVEMENT) {
+		@Override
+		public StatLine getStatLine() {
+			StatLine statLine = new StatLine();
+			statLine.addValue(Stat.PRODUCTION_GAIN, 3);
+			return statLine;
+		}
+	},
+	DESERT_HILL_MINE(TileLayer.BASE, TileProperty.IMPROVEMENT) {
+		@Override
+		public StatLine getStatLine() {
+			StatLine statLine = new StatLine();
+			statLine.addValue(Stat.PRODUCTION_GAIN, 3);
+			return statLine;
+		}
+	},
+	;
 
 	public enum TileLayer {
 		BASE,
