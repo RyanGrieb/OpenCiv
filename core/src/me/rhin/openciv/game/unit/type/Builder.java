@@ -34,6 +34,7 @@ public class Builder extends UnitItem {
 
 		public BuilderUnit(UnitParameter unitParameter) {
 			super(unitParameter, TextureEnum.UNIT_BUILDER);
+			//FIXME: Move these classes into a separate package 
 			customActions.add(new FarmAction(this));
 			customActions.add(new MineAction(this));
 			customActions.add(new ChopAction(this));

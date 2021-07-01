@@ -90,8 +90,8 @@ public abstract class Unit extends Actor
 		if (selected)
 			selectionSprite.draw(batch);
 
-		if (targetTile != null && pathMovement <= getCurrentMovement() && pathMovement != 0) {
-			targetSelectionSprite.draw(batch);
+		if ((targetTile != null && pathMovement <= getCurrentMovement() && pathMovement != 0) || hasRangedTarget()) {
+			getTargetSelectionSprite().draw(batch);
 		}
 
 		if (standingTile.getTileObservers().size() > 0) {
@@ -133,9 +133,9 @@ public abstract class Unit extends Actor
 
 		pathVectors.clear();
 
-		targetSelectionSprite.setPosition(targetTile.getVectors()[0].x - targetTile.getWidth() / 2,
+		getTargetSelectionSprite().setPosition(targetTile.getVectors()[0].x - targetTile.getWidth() / 2,
 				targetTile.getVectors()[0].y + 4);
-		targetSelectionSprite.setSize(targetTile.getWidth(), targetTile.getHeight());
+		getTargetSelectionSprite().setSize(targetTile.getWidth(), targetTile.getHeight());
 
 		// Find the shortest path to the target tile.
 		// Remember:
@@ -264,7 +264,7 @@ public abstract class Unit extends Actor
 		}
 
 		// Open combat preview window once.
-		if (targetEntity != null && !isUnitCapturable() && wasMouseClick) {
+		if (targetEntity != null && !isUnitCapturable() && wasMouseClick && !isRangedUnit()) {
 			// Close previous combat windows.
 			Civilization.getInstance().getWindowManager().closeWindow(UnitCombatWindow.class);
 			Civilization.getInstance().getWindowManager().addWindow(new UnitCombatWindow(this, targetEntity));
@@ -274,14 +274,15 @@ public abstract class Unit extends Actor
 
 		if (targetEntity != null) {
 
-			if (isUnitCapturable()) {
+			// FIXME: Range units should be able to move onto capturable units.
+			if (isUnitCapturable() || isRangedUnit()) {
 				pathVectors.clear();
 				pathMovement = 0;
 				this.targetTile = null;
 			} else
-				targetSelectionSprite.setColor(Color.RED);
+				getTargetSelectionSprite().setColor(Color.RED);
 		} else
-			targetSelectionSprite.setColor(Color.YELLOW);
+			getTargetSelectionSprite().setColor(Color.YELLOW);
 
 		return true;
 	}
@@ -441,6 +442,14 @@ public abstract class Unit extends Actor
 		this.health = health;
 	}
 
+	public boolean isRangedUnit() {
+		return false;
+	}
+
+	public boolean hasRangedTarget() {
+		return false;
+	}
+
 	private Tile removeSmallest(ArrayList<Tile> queue, int fScore[][]) {
 		int smallest = Integer.MAX_VALUE;
 		Tile smallestTile = null;
@@ -453,5 +462,9 @@ public abstract class Unit extends Actor
 
 		queue.remove(smallestTile);
 		return smallestTile;
+	}
+
+	public Sprite getTargetSelectionSprite() {
+		return targetSelectionSprite;
 	}
 }

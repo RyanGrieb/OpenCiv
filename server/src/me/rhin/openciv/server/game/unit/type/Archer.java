@@ -4,6 +4,7 @@ import me.rhin.openciv.server.game.Player;
 import me.rhin.openciv.server.game.city.City;
 import me.rhin.openciv.server.game.map.tile.Tile;
 import me.rhin.openciv.server.game.map.tile.TileType.TileProperty;
+import me.rhin.openciv.server.game.unit.RangedUnit;
 import me.rhin.openciv.server.game.unit.Unit;
 import me.rhin.openciv.server.game.unit.UnitItem;
 
@@ -13,7 +14,7 @@ public class Archer extends UnitItem {
 		super(city);
 	}
 
-	public static class ArcherUnit extends Unit {
+	public static class ArcherUnit extends Unit implements RangedUnit {
 
 		public ArcherUnit(Player playerOwner, Tile standingTile) {
 			super(playerOwner, standingTile);
@@ -30,6 +31,11 @@ public class Archer extends UnitItem {
 		@Override
 		public int getCombatStrength() {
 			return 14;
+		}
+
+		@Override
+		public int getRangedCombatStrength() {
+			return 7;
 		}
 	}
 

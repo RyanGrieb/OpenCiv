@@ -106,34 +106,21 @@ public class UnitWindow extends AbstractWindow implements ResizeListener, UnitAt
 
 	@Override
 	public void onUnitAct(Unit unit) {
-		for (AbstractAction action : unit.getCustomActions()) {
-			for (UnitActionButton button : unitActionButtons) {
 
-				if (action.equals(button.getAction())) {
+		// FIXME: This is pretty much hard coded into the UI. Maybe each required unit
+		// could build it's own unitWindow UI. that extends this.
+		if (unit instanceof BuilderUnit) {
+			BuilderUnit builderUnit = (BuilderUnit) unit;
+			if (builderUnit.isBuilding()) {
 
-					if (action.canAct() && button.getStage() == null)
-						addActor(button);
-
-					if (!action.canAct() && button.getStage() != null) {
-						removeActor(button);
-
-						// FIXME: This is pretty much hard coded into the UI. Maybe each required unit
-						// could build it's own unitWindow UI. that extends this.
-						if (unit instanceof BuilderUnit) {
-							BuilderUnit builderUnit = (BuilderUnit) unit;
-							if (builderUnit.isBuilding()) {
-
-								buildDescLabel.setText(builderUnit.getImprovementDesc() + " ("
-										+ builderUnit.getStandingTile().getAppliedImprovementTurns() + "/"
-										+ builderUnit.getMaxTurns() + ")");
-								addActor(buildDescLabel);
-							}
-						}
-					}
-
-				}
+				buildDescLabel.setText(builderUnit.getImprovementDesc() + " ("
+						+ builderUnit.getStandingTile().getAppliedImprovementTurns() + "/" + builderUnit.getMaxTurns()
+						+ ")");
+				addActor(buildDescLabel);
 			}
 		}
+
+		updateActionButtons();
 	}
 
 	@Override

@@ -56,10 +56,11 @@ public class Tile extends Actor implements BottomShapeRenderListener {
 
 	private GameMap map;
 	private TreeSet<TileTypeWrapper> tileWrappers;
-	private Sprite selectionSprite;
 	private Sprite territorySprite;
+	private Sprite selectionSprite;
 	private Sprite fogSprite;
 	private Sprite nonVisibleSprite;
+	private Sprite rangedTargetSprite;
 	private boolean[] territoryBorders;
 	private boolean drawSelection;
 	private CustomLabel posLabel;
@@ -75,6 +76,7 @@ public class Tile extends Actor implements BottomShapeRenderListener {
 	private ArrayList<TileObserver> tileObservers;
 	private boolean improved;
 	private int appliedImprovementTurns;
+	private boolean rangedTarget;
 
 	public Tile(GameMap map, TileType tileType, float x, float y) {
 		Civilization.getInstance().getEventManager().addListener(BottomShapeRenderListener.class, this);
@@ -91,12 +93,17 @@ public class Tile extends Actor implements BottomShapeRenderListener {
 		this.territorySprite = new Sprite(TextureEnum.TILE_SELECT.sprite());
 		this.territoryBorders = new boolean[6];
 
+		this.rangedTargetSprite = new Sprite(TextureEnum.TILE_SELECT.sprite());
+		rangedTargetSprite.setColor(Color.RED);
+		rangedTargetSprite.setAlpha(0.25f);
+
 		this.fogSprite = new Sprite(TextureEnum.TILE_UNDISCOVERED.sprite());
 		this.nonVisibleSprite = new Sprite(TextureEnum.TILE_NON_VISIBLE.sprite());
 		nonVisibleSprite.setAlpha(0.7f);
 
 		this.drawSelection = false;
 		this.improved = false;
+		this.rangedTarget = false;
 
 		// FIXME: Remove our own x,y,and size variables, and use the actors instead.
 		this.x = x;
@@ -186,8 +193,12 @@ public class Tile extends Actor implements BottomShapeRenderListener {
 			selectionSprite.draw(batch);
 		}
 
-		if (territory != null && tileObservers.size() > 0)
+		if (territory != null && tileObservers.size() > 0 && !rangedTarget)
 			territorySprite.draw(batch);
+
+		if (rangedTarget) {
+			rangedTargetSprite.draw(batch);
+		}
 
 		// posLabel.draw(batch, 1);
 	}
@@ -570,6 +581,14 @@ public class Tile extends Actor implements BottomShapeRenderListener {
 		this.discovered = discovered;
 	}
 
+	public void setRangedTarget(boolean rangedTarget) {
+		this.rangedTarget = rangedTarget;
+	}
+
+	public boolean hasRangedTarget() {
+		return rangedTarget;
+	}
+
 	private void initializeVectors() {
 		this.vectors = new Vector2[6];
 
@@ -630,5 +649,8 @@ public class Tile extends Actor implements BottomShapeRenderListener {
 
 		nonVisibleSprite.setSize(28, 32);
 		nonVisibleSprite.setPosition(x, y);
+
+		rangedTargetSprite.setSize(28, 32);
+		rangedTargetSprite.setPosition(x, y);
 	}
 }

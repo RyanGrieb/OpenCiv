@@ -61,11 +61,17 @@ public abstract class Unit implements AttackableEntity, NextTurnListener {
 		if (isUnitCapturable())
 			return 100;
 
-		if (otherEntity.isUnitCapturable())
+		if (otherEntity.isUnitCapturable() || this instanceof RangedUnit)
 			return 0;
 
 		// y=30*1.041^(x), x= combat diff
-		return (float) (30 * (Math.pow(1.041, otherEntity.getCombatStrength() - getCombatStrength())));
+
+		// FIXME: This code is not ideal, have separate mele & ranged classes for this
+		float otherEntityCombatStrength = otherEntity.getCombatStrength();
+		if (otherEntity instanceof RangedUnit)
+			otherEntityCombatStrength = ((RangedUnit) otherEntity).getRangedCombatStrength();
+
+		return (float) (30 * (Math.pow(1.041, otherEntityCombatStrength - getCombatStrength())));
 	}
 
 	@Override
