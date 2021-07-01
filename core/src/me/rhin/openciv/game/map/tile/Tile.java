@@ -447,9 +447,8 @@ public class Tile extends Actor implements BottomShapeRenderListener {
 		}
 
 		TileTypeWrapper topWrapper = ((TileTypeWrapper) tileWrappers.toArray()[tileWrappers.size() - 1]);
-		if (topWrapper.getTileType().hasProperty(TileProperty.RESOURCE)) {
-			int tileMovementCost = ((TileTypeWrapper) tileWrappers.toArray()[tileWrappers.size() - 2]).getTileType()
-					.getMovementCost();
+		if (topWrapper.getTileType().hasProperty(TileProperty.RESOURCE, TileProperty.IMPROVEMENT)) {
+			int tileMovementCost = ((TileTypeWrapper) tileWrappers.toArray()[0]).getTileType().getMovementCost();
 			if (tileMovementCost > movementCost) {
 				movementCost = tileMovementCost;
 			}

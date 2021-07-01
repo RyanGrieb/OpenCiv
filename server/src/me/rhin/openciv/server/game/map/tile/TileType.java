@@ -309,14 +309,15 @@ public enum TileType implements Comparable<TileType> {
 		return tileProperties;
 	}
 
-	public boolean hasProperty(TileProperty targetProperty) {
+	public boolean hasProperty(TileProperty... targetProperties) {
 		if (tileProperties == null)
 			return false;
 
-		for (TileProperty tileProperty : tileProperties)
-			if (tileProperty == targetProperty)
-				return true;
-
+		for (TileProperty tileProperty : tileProperties) {
+			for (TileProperty targetProperty : targetProperties)
+				if (tileProperty == targetProperty)
+					return true;
+		}
 		return false;
 	}
 

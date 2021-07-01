@@ -371,10 +371,11 @@ public class Tile {
 	}
 
 	public int getMovementCost() {
-		//FIXME: This is wrong. We need to add up all the tileTypes accordingly.
+		// FIXME: This is wrong. We need to add up all the tileTypes accordingly.
 		TileTypeWrapper topWrapper = ((TileTypeWrapper) tileWrappers.toArray()[tileWrappers.size() - 1]);
-		if (topWrapper.getTileType().hasProperty(TileProperty.RESOURCE)) {
-			return ((TileTypeWrapper) tileWrappers.toArray()[tileWrappers.size() - 2]).getTileType().getMovementCost();
+		if (topWrapper.getTileType().hasProperty(TileProperty.RESOURCE, TileProperty.IMPROVEMENT,
+				TileProperty.LUXURY)) {
+			return ((TileTypeWrapper) tileWrappers.toArray()[0]).getTileType().getMovementCost();
 		} else
 			return topWrapper.getTileType().getMovementCost();
 	}
