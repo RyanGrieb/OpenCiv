@@ -133,6 +133,8 @@ public class City implements AttackableEntity, SpecialistContainer, NextTurnList
 			statUpdatePacket.addStat(name, stat.name(), this.statLine.getStatValues().get(stat));
 		}
 		playerOwner.getConn().send(json.toJson(statUpdatePacket));
+		
+		//!!! Update player 
 	}
 
 	@Override
@@ -164,9 +166,9 @@ public class City implements AttackableEntity, SpecialistContainer, NextTurnList
 			}
 		}
 
-		statLine.addValue(Stat.HERITAGE, statLine.getStatValue(Stat.HERITAGE_GAIN));
+		statLine.addValue(Stat.EXPANSION_PROGRESS, statLine.getStatValue(Stat.HERITAGE_GAIN));
 
-		if (statLine.getStatValue(Stat.HERITAGE) >= statLine.getStatValue(Stat.EXPANSION_REQUIREMENT)) {
+		if (statLine.getStatValue(Stat.EXPANSION_PROGRESS) >= statLine.getStatValue(Stat.EXPANSION_REQUIREMENT)) {
 
 			Tile expansionTile = getTopExpansionTile();
 
@@ -250,9 +252,6 @@ public class City implements AttackableEntity, SpecialistContainer, NextTurnList
 
 	public void updateWorkedTiles() {
 
-		// Reduce the players statline that we get from the city
-		playerOwner.getStatLine().reduceStatLine(statLine);
-
 		// Make all citizens unemployed
 		for (Tile tile : territory) {
 			CitizenWorker citizenWorker = citizenWorkers.get(tile);
@@ -308,8 +307,6 @@ public class City implements AttackableEntity, SpecialistContainer, NextTurnList
 			}
 		}
 
-		playerOwner.getStatLine().mergeStatLine(statLine);
-
 		Json json = new Json();
 
 		// Update city statline
@@ -318,13 +315,6 @@ public class City implements AttackableEntity, SpecialistContainer, NextTurnList
 			statUpdatePacket.addStat(name, stat.name(), this.statLine.getStatValues().get(stat));
 		}
 		playerOwner.getConn().send(json.toJson(statUpdatePacket));
-
-		// Update the players statline
-		PlayerStatUpdatePacket playerStatPacket = new PlayerStatUpdatePacket();
-		for (Stat stat : this.statLine.getStatValues().keySet()) {
-			playerStatPacket.addStat(stat.name(), this.statLine.getStatValues().get(stat));
-		}
-		playerOwner.getConn().send(json.toJson(playerStatPacket));
 	}
 
 	public void setCitizenTileWorker(CitizenWorker citizenWorker) {
@@ -342,9 +332,7 @@ public class City implements AttackableEntity, SpecialistContainer, NextTurnList
 		CitizenWorker emptyCitizenWorker = new EmptyCitizenWorker(this, tile);
 		citizenWorkers.put(tile, emptyCitizenWorker);
 
-		playerOwner.getStatLine().reduceStatLine(statLine);
 		statLine.reduceStatLine(tile.getStatLine());
-		playerOwner.mergeStatLine(statLine);
 
 		CityStatUpdatePacket cityStatUpdatePacket = new CityStatUpdatePacket();
 		for (Stat stat : this.statLine.getStatValues().keySet()) {
@@ -417,8 +405,6 @@ public class City implements AttackableEntity, SpecialistContainer, NextTurnList
 			packet.addStat(name, stat.name(), this.statLine.getStatValues().get(stat));
 		}
 		playerOwner.getConn().send(json.toJson(packet));
-
-		playerOwner.mergeStatLine(building.getStatLine());
 	}
 
 	public Tile getOriginTile() {
@@ -488,11 +474,11 @@ public class City implements AttackableEntity, SpecialistContainer, NextTurnList
 			Tile tile = topTiles.get(i);
 
 			float value = getTileStatLine(tile).getStatValue(Stat.FOOD_GAIN) * 4
-					+ getTileStatLine(tile).getStatValue(Stat.GOLD_GAIN) * 2
+					+ getTileStatLine(tile).getStatValue(Stat.GOLD_GAIN) * 1
 					+ getTileStatLine(tile).getStatValue(Stat.PRODUCTION_GAIN) * 1;
 
 			while (j >= 0 && getTileStatLine(topTiles.get(j)).getStatValue(Stat.FOOD_GAIN) * 4
-					+ getTileStatLine(topTiles.get(j)).getStatValue(Stat.GOLD_GAIN) * 2
+					+ getTileStatLine(topTiles.get(j)).getStatValue(Stat.GOLD_GAIN) * 1
 					+ getTileStatLine(topTiles.get(j)).getStatValue(Stat.PRODUCTION_GAIN) * 1 < value) {
 				topTiles.set(j + 1, topTiles.get(j));
 				j--;
@@ -548,6 +534,11 @@ public class City implements AttackableEntity, SpecialistContainer, NextTurnList
 	private void setPopulation(int amount) {
 		statLine.setValue(Stat.POPULATION, amount);
 		statLine.setValue(Stat.FOOD_SURPLUS, 0);
+
+		if (amount > 0)
+			statLine.addValue(Stat.SCIENCE_GAIN, 0.5F);
+		else
+			statLine.subValue(Stat.SCIENCE_GAIN, 0.5F);
 	}
 
 	public boolean isCoastal() {

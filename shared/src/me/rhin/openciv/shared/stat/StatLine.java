@@ -1,6 +1,8 @@
 package me.rhin.openciv.shared.stat;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 
 import me.rhin.openciv.shared.packet.type.CityStatUpdatePacket;
 import me.rhin.openciv.shared.packet.type.PlayerStatUpdatePacket;
@@ -19,7 +21,7 @@ public class StatLine {
 			if (packet.getStatNames()[i] == null)
 				break;
 
-			statLine.addValue(Stat.valueOf(packet.getStatNames()[i]), packet.getStatValues()[i]);
+			statLine.setValue(Stat.valueOf(packet.getStatNames()[i]), packet.getStatValues()[i]);
 		}
 		return statLine;
 	}
@@ -32,7 +34,7 @@ public class StatLine {
 			if (packet.getStatNames()[i] == null)
 				break;
 
-			statLine.addValue(Stat.valueOf(packet.getStatNames()[i]), packet.getStatValues()[i]);
+			statLine.setValue(Stat.valueOf(packet.getStatNames()[i]), packet.getStatValues()[i]);
 		}
 		return statLine;
 	}
@@ -55,11 +57,19 @@ public class StatLine {
 		}
 	}
 
+	public void mergeStatLineExcluding(StatLine statLine, StatType statType) {
+		for (Stat stat : statLine.getStatValues().keySet()) {
+			if (stat.getStatType() == statType)
+				continue;
+			addValue(stat, statLine.getStatValues().get(stat));
+		}
+	}
+
 	public void updateStatLine() {
-		// Clone the statValues to avoid concurrent modification
 		HashMap<Stat, Float> statValuesCopy = (HashMap<Stat, Float>) statValues.clone();
 		for (Stat stat : statValuesCopy.keySet()) {
 			if (stat.isGained()) {
+				// FIXME: Implement maintenance cost
 				addValue(stat.getAddedStat(), statValues.get(stat));
 			}
 		}
@@ -82,6 +92,13 @@ public class StatLine {
 			statValues.replace(stat, statValues.get(stat) + value);
 	}
 
+	public void subValue(Stat stat, float value) {
+		if (!statValues.containsKey(stat))
+			statValues.put(stat, value);
+		else
+			statValues.replace(stat, statValues.get(stat) - value);
+	}
+
 	public void setValue(Stat stat, float value) {
 		if (!statValues.containsKey(stat))
 			statValues.put(stat, value);
@@ -102,5 +119,20 @@ public class StatLine {
 
 	public void clear() {
 		statValues.clear();
+	}
+
+	public void clearNonAccumulative() {
+		ArrayList<Stat> accumulativeStats = new ArrayList<>();
+		for (Stat stat : statValues.keySet())
+			if (stat.isGained())
+				accumulativeStats.add(stat.getAddedStat());
+
+		Iterator<Stat> iterator = statValues.keySet().iterator();
+		while (iterator.hasNext()) {
+			Stat stat = iterator.next();
+
+			if (!accumulativeStats.contains(stat))
+				iterator.remove();
+		}
 	}
 }

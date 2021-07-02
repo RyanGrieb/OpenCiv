@@ -18,6 +18,7 @@ import me.rhin.openciv.shared.packet.type.ChooseTechPacket;
 import me.rhin.openciv.shared.packet.type.PlayerStatUpdatePacket;
 import me.rhin.openciv.shared.stat.Stat;
 import me.rhin.openciv.shared.stat.StatLine;
+import me.rhin.openciv.shared.stat.StatType;
 
 public class Player implements NextTurnListener, ChooseTechListener {
 
@@ -60,16 +61,17 @@ public class Player implements NextTurnListener, ChooseTechListener {
 		if (ownedCities.size() < 1)
 			return;
 
-		try {
-			statLine.updateStatLine();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+		statLine.updateStatLine();
 
-		// FIXME: We should have a universal method for this, dunno where to put it.
+		statLine.clearNonAccumulative();
+
+		for (City city : ownedCities)
+			statLine.mergeStatLineExcluding(city.getStatLine(), StatType.CITY_EXCLUSIVE);
+
 		PlayerStatUpdatePacket packet = new PlayerStatUpdatePacket();
-		for (Stat stat : this.statLine.getStatValues().keySet()) {
-			packet.addStat(stat.name(), this.statLine.getStatValues().get(stat));
+		for (Stat stat : statLine.getStatValues().keySet()) {
+			if (stat.getStatType() != StatType.CITY_EXCLUSIVE)
+				packet.addStat(stat.name(), this.statLine.getStatValues().get(stat));
 		}
 		Json json = new Json();
 		conn.send(json.toJson(packet));
@@ -83,10 +85,8 @@ public class Player implements NextTurnListener, ChooseTechListener {
 		researchTree.chooseTech(packet.getTechID());
 	}
 
-	// FIXME: Find a better name that isn't the same as the statline class method.
 	public void mergeStatLine(StatLine statLine) {
 		this.statLine.mergeStatLine(statLine);
-		// FIXME: We should have a universal method for this, dunno where to put it.
 		PlayerStatUpdatePacket packet = new PlayerStatUpdatePacket();
 		for (Stat stat : this.statLine.getStatValues().keySet()) {
 			packet.addStat(stat.name(), this.statLine.getStatValues().get(stat));
@@ -94,10 +94,9 @@ public class Player implements NextTurnListener, ChooseTechListener {
 		Json json = new Json();
 		conn.send(json.toJson(packet));
 	}
-	
+
 	public void reduceStatLine(StatLine statLine) {
 		this.statLine.reduceStatLine(statLine);
-		// FIXME: We should have a universal method for this, dunno where to put it.
 		PlayerStatUpdatePacket packet = new PlayerStatUpdatePacket();
 		for (Stat stat : this.statLine.getStatValues().keySet()) {
 			packet.addStat(stat.name(), this.statLine.getStatValues().get(stat));

@@ -1,30 +1,38 @@
 package me.rhin.openciv.shared.stat;
 
 public enum Stat {
-	GOLD, 
+
+	GOLD(),
 	GOLD_GAIN(GOLD),
-	MAINTENANCE(GOLD),
+	MAINTENANCE(StatType.CITY_EXCLUSIVE, GOLD),
 	HERITAGE,
 	HERITAGE_GAIN(HERITAGE),
 	SCIENCE_GAIN,
-	PRODUCTION_GAIN,
-	FOOD_SURPLUS,
-	FOOD_GAIN,
-	POPULATION,
-	EXPANSION_REQUIREMENT,
-	POLICY_COST;
+	PRODUCTION_GAIN(StatType.CITY_EXCLUSIVE),
+	FOOD_SURPLUS(StatType.CITY_EXCLUSIVE),
+	FOOD_GAIN(StatType.CITY_EXCLUSIVE),
+	POPULATION(StatType.CITY_EXCLUSIVE),
+	EXPANSION_REQUIREMENT(StatType.CITY_EXCLUSIVE),
+	EXPANSION_PROGRESS(StatType.CITY_EXCLUSIVE),
+	POLICY_COST(StatType.POLICY_EXCLUSIVE);
 
 	private Stat addedStat;
+	private StatType statType;
 
 	private Stat() {
-		// An empty enum means the stat is APPLIED to whatever is applicable to the
-		// resource.
 	}
 
 	private Stat(Stat addedStat) {
 		this.addedStat = addedStat;
-		// A non-empty enum means the stat is ACCUMULATED to whatever is applicable to
-		// the resource.
+	}
+
+	private Stat(StatType statType) {
+		this.statType = statType;
+	}
+
+	private Stat(StatType statType, Stat addedStat) {
+		this.addedStat = addedStat;
+		this.statType = statType;
 	}
 
 	public boolean isGained() {
@@ -33,5 +41,9 @@ public enum Stat {
 
 	public Stat getAddedStat() {
 		return addedStat;
+	}
+
+	public StatType getStatType() {
+		return statType;
 	}
 }
