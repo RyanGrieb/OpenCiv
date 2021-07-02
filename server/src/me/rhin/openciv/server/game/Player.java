@@ -86,7 +86,17 @@ public class Player implements NextTurnListener, ChooseTechListener {
 	// FIXME: Find a better name that isn't the same as the statline class method.
 	public void mergeStatLine(StatLine statLine) {
 		this.statLine.mergeStatLine(statLine);
-
+		// FIXME: We should have a universal method for this, dunno where to put it.
+		PlayerStatUpdatePacket packet = new PlayerStatUpdatePacket();
+		for (Stat stat : this.statLine.getStatValues().keySet()) {
+			packet.addStat(stat.name(), this.statLine.getStatValues().get(stat));
+		}
+		Json json = new Json();
+		conn.send(json.toJson(packet));
+	}
+	
+	public void reduceStatLine(StatLine statLine) {
+		this.statLine.reduceStatLine(statLine);
 		// FIXME: We should have a universal method for this, dunno where to put it.
 		PlayerStatUpdatePacket packet = new PlayerStatUpdatePacket();
 		for (Stat stat : this.statLine.getStatValues().keySet()) {

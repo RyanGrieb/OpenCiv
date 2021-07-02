@@ -55,6 +55,7 @@ import me.rhin.openciv.shared.packet.type.MoveUnitPacket;
 import me.rhin.openciv.shared.packet.type.NextTurnPacket;
 import me.rhin.openciv.shared.packet.type.PlayerDisconnectPacket;
 import me.rhin.openciv.shared.packet.type.PlayerListRequestPacket;
+import me.rhin.openciv.shared.packet.type.PlayerStatUpdatePacket;
 import me.rhin.openciv.shared.packet.type.RangedAttackPacket;
 import me.rhin.openciv.shared.packet.type.SelectUnitPacket;
 import me.rhin.openciv.shared.packet.type.SetCityHealthPacket;
@@ -66,6 +67,7 @@ import me.rhin.openciv.shared.packet.type.TerritoryGrowPacket;
 import me.rhin.openciv.shared.packet.type.TurnTimeLeftPacket;
 import me.rhin.openciv.shared.packet.type.UnitAttackPacket;
 import me.rhin.openciv.shared.packet.type.WorkTilePacket;
+import me.rhin.openciv.shared.stat.Stat;
 
 //FIXME: Instead of the civ game listening for everything. Just split them off into the respective classes. (EX: CombatPreviewListener in the Unit class)
 //Or just use reflection so we don't have to implement 20+ classes.
@@ -303,8 +305,12 @@ public class InGameState extends GameState implements DisconnectListener, Select
 
 					// When we capture a city
 					if (targetEntity instanceof City) {
+						
 						City city = (City) targetEntity;
 						city.setHealth(city.getMaxHealth() / 2);
+
+						//Reduce statline of the original owner
+						city.getPlayerOwner().reduceStatLine(city.getStatLine());
 
 						city.getPlayerOwner().removeCity(city);
 						city.setOwner(unit.getPlayerOwner());
@@ -323,6 +329,8 @@ public class InGameState extends GameState implements DisconnectListener, Select
 						for (Player player : players) {
 							player.getConn().send(json.toJson(cityHealthPacket));
 						}
+
+						city.getPlayerOwner().mergeStatLine(city.getStatLine());
 
 						// Kill all enemy units inside the city
 						for (Unit cityUnit : city.getTile().getUnits()) {

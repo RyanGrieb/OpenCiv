@@ -28,6 +28,7 @@ import me.rhin.openciv.server.listener.NextTurnListener;
 import me.rhin.openciv.shared.packet.type.AddSpecialistToContainerPacket;
 import me.rhin.openciv.shared.packet.type.BuildingConstructedPacket;
 import me.rhin.openciv.shared.packet.type.CityStatUpdatePacket;
+import me.rhin.openciv.shared.packet.type.PlayerStatUpdatePacket;
 import me.rhin.openciv.shared.packet.type.RemoveSpecialistFromContainerPacket;
 import me.rhin.openciv.shared.packet.type.SetCitizenTileWorkerPacket;
 import me.rhin.openciv.shared.packet.type.TerritoryGrowPacket;
@@ -249,6 +250,9 @@ public class City implements AttackableEntity, SpecialistContainer, NextTurnList
 
 	public void updateWorkedTiles() {
 
+		// Reduce the players statline that we get from the city
+		playerOwner.getStatLine().reduceStatLine(statLine);
+
 		// Make all citizens unemployed
 		for (Tile tile : territory) {
 			CitizenWorker citizenWorker = citizenWorkers.get(tile);
@@ -282,7 +286,7 @@ public class City implements AttackableEntity, SpecialistContainer, NextTurnList
 
 		// Clear the assigned unemployed specialists.
 
-		// Assume we lost a citizen, and remove a specialist here.
+		// Assume we lost a citizen, and remove a specialist here. (For starving cities)
 		if (unemployedSpecialists.size() > 0) {
 
 			// FIXME: This is a workaround to avoid send an unnecessary packet from
@@ -304,13 +308,23 @@ public class City implements AttackableEntity, SpecialistContainer, NextTurnList
 			}
 		}
 
+		playerOwner.getStatLine().mergeStatLine(statLine);
+
 		Json json = new Json();
 
+		// Update city statline
 		CityStatUpdatePacket statUpdatePacket = new CityStatUpdatePacket();
 		for (Stat stat : this.statLine.getStatValues().keySet()) {
 			statUpdatePacket.addStat(name, stat.name(), this.statLine.getStatValues().get(stat));
 		}
 		playerOwner.getConn().send(json.toJson(statUpdatePacket));
+
+		// Update the players statline
+		PlayerStatUpdatePacket playerStatPacket = new PlayerStatUpdatePacket();
+		for (Stat stat : this.statLine.getStatValues().keySet()) {
+			playerStatPacket.addStat(stat.name(), this.statLine.getStatValues().get(stat));
+		}
+		playerOwner.getConn().send(json.toJson(playerStatPacket));
 	}
 
 	public void setCitizenTileWorker(CitizenWorker citizenWorker) {
@@ -328,11 +342,13 @@ public class City implements AttackableEntity, SpecialistContainer, NextTurnList
 		CitizenWorker emptyCitizenWorker = new EmptyCitizenWorker(this, tile);
 		citizenWorkers.put(tile, emptyCitizenWorker);
 
+		playerOwner.getStatLine().reduceStatLine(statLine);
 		statLine.reduceStatLine(tile.getStatLine());
+		playerOwner.mergeStatLine(statLine);
 
-		CityStatUpdatePacket statUpdatePacket = new CityStatUpdatePacket();
+		CityStatUpdatePacket cityStatUpdatePacket = new CityStatUpdatePacket();
 		for (Stat stat : this.statLine.getStatValues().keySet()) {
-			statUpdatePacket.addStat(name, stat.name(), this.statLine.getStatValues().get(stat));
+			cityStatUpdatePacket.addStat(name, stat.name(), this.statLine.getStatValues().get(stat));
 		}
 
 		SetCitizenTileWorkerPacket tileWorkerPacket = new SetCitizenTileWorkerPacket();
@@ -341,7 +357,7 @@ public class City implements AttackableEntity, SpecialistContainer, NextTurnList
 
 		Json json = new Json();
 		playerOwner.getConn().send(json.toJson(tileWorkerPacket));
-		playerOwner.getConn().send(json.toJson(statUpdatePacket));
+		playerOwner.getConn().send(json.toJson(cityStatUpdatePacket));
 
 		addSpecialistToContainer(this);
 	}
