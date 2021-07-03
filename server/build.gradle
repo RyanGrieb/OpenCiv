@@ -1,0 +1,32 @@
+apply plugin: 'application'
+
+sourceCompatibility = 8.0
+mainClassName = 'me.rhin.openciv.server.Server'
+eclipse.project.name = appName + '-server'
+
+dependencies {
+	implementation project(':shared')
+	
+	api "org.java-websocket:Java-WebSocket:1.5.1"
+}
+
+jar {
+	archiveBaseName.set(appName)
+// the duplicatesStrategy matters starting in Gradle 7.0; this setting works.
+	duplicatesStrategy(DuplicatesStrategy.EXCLUDE)
+	dependsOn configurations.runtimeClasspath
+	from { configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) } }
+// these "exclude" lines remove some unnecessary duplicate files in the output JAR.
+	exclude('META-INF/INDEX.LIST', 'META-INF/*.SF', 'META-INF/*.DSA', 'META-INF/*.RSA')
+	dependencies {
+		exclude('META-INF/INDEX.LIST', 'META-INF/maven/**')
+	}
+// setting the manifest makes the JAR runnable.
+	manifest {
+		attributes 'Main-Class': project.mainClassName
+	}
+// this last step may help on some OSes that need extra instruction to make runnable JARs.
+	doLast {
+		file(archiveFile).setExecutable(true, false)
+	}
+}

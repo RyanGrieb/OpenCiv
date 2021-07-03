@@ -1,0 +1,11 @@
+[compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
+eclipse.project.name = appName + '-core'
+
+dependencies {
+	api "com.badlogicgames.gdx:gdx:$gdxVersion"
+	api "com.badlogicgames.gdx:gdx-ai:$aiVersion"
+	api "com.github.czyzby:gdx-websocket:$czyzbyVersion"
+    api "com.badlogicgames.gdx:gdx:$gdxVersion"
+    api "com.github.czyzby:gdx-websocket-common:$czyzbyVersion"
+	api project(':shared')
+}
