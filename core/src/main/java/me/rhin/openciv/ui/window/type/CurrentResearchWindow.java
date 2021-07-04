@@ -1,5 +1,7 @@
 package me.rhin.openciv.ui.window.type;
 
+import com.badlogic.gdx.math.MathUtils;
+
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.research.Technology;
@@ -88,10 +90,13 @@ public class CurrentResearchWindow extends AbstractWindow
 		// we are at turn 0 when reseaching something, but when our science increases +
 		// 10 when we have 1 turn left, we go over the totalTurns
 
-		int totalTurns = (int) Math.ceil(tech.getScienceCost()
-				/ Civilization.getInstance().getGame().getPlayer().getStatLine().getStatValue(Stat.SCIENCE_GAIN));
+		float techAppliedScience = tech.getAppliedScience() + Civilization.getInstance().getGame().getPlayer().getStatLine().getStatValue(Stat.SCIENCE_GAIN);
+		
+		int turnsLeft = MathUtils.ceil((tech.getScienceCost() - techAppliedScience) / Civilization.getInstance().getGame().getPlayer().getStatLine().getStatValue(Stat.SCIENCE_GAIN));
 
 		int currentTurns = (int) tech.getAppliedTurns() + 1; // +1 since this listener before
+
+		int totalTurns = currentTurns + turnsLeft;
 
 		researchTurnsLabel.setText(currentTurns + "/" + totalTurns + " Turns");
 	}
