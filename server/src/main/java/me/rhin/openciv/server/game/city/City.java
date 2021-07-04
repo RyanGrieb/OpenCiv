@@ -133,8 +133,8 @@ public class City implements AttackableEntity, SpecialistContainer, NextTurnList
 			statUpdatePacket.addStat(name, stat.name(), this.statLine.getStatValues().get(stat));
 		}
 		playerOwner.getConn().send(json.toJson(statUpdatePacket));
-		
-		//!!! Update player 
+
+		// !!! Update player
 	}
 
 	@Override
@@ -196,6 +196,8 @@ public class City implements AttackableEntity, SpecialistContainer, NextTurnList
 			statLine.setValue(Stat.EXPANSION_REQUIREMENT, 10 + 10 * (float) Math.pow(tiles, 1.3));
 
 			updateWorkedTiles();
+			//Update the player's statline just in case we start working a non-city value yielded tile.
+			playerOwner.updateOwnedStatlines(false);
 		}
 
 		Json json = new Json();
@@ -347,7 +349,7 @@ public class City implements AttackableEntity, SpecialistContainer, NextTurnList
 		playerOwner.getConn().send(json.toJson(tileWorkerPacket));
 		playerOwner.getConn().send(json.toJson(cityStatUpdatePacket));
 		playerOwner.updateOwnedStatlines(false);
-		
+
 		addSpecialistToContainer(this);
 	}
 
@@ -369,7 +371,7 @@ public class City implements AttackableEntity, SpecialistContainer, NextTurnList
 
 		Json json = new Json();
 		playerOwner.getConn().send(json.toJson(packet));
-		
+
 		playerOwner.updateOwnedStatlines(false);
 	}
 

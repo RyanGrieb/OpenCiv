@@ -128,6 +128,9 @@ public class ProducibleItemManager implements NextTurnListener {
 			FinishProductionItemPacket packet = new FinishProductionItemPacket();
 			packet.setProductionItem(city.getName(), producingItem.getProductionItem().getName());
 			city.getPlayerOwner().getConn().send(json.toJson(packet));
+			
+			
+			city.getPlayerOwner().updateOwnedStatlines(false);
 			return;
 		}
 
