@@ -196,7 +196,8 @@ public class City implements AttackableEntity, SpecialistContainer, NextTurnList
 			statLine.setValue(Stat.EXPANSION_REQUIREMENT, 10 + 10 * (float) Math.pow(tiles, 1.3));
 
 			updateWorkedTiles();
-			//Update the player's statline just in case we start working a non-city value yielded tile.
+			// Update the player's statline just in case we start working a non-city value
+			// yielded tile.
 			playerOwner.updateOwnedStatlines(false);
 		}
 
@@ -280,10 +281,13 @@ public class City implements AttackableEntity, SpecialistContainer, NextTurnList
 			// FIXME: This is slow, have bulk packets in the future
 			setCitizenTileWorker(new AssignedCitizenWorker(this, tile));
 			unemployedSpecialists.remove(0);
+
+			statLine.mergeStatLine(getTileStatLine(tile));
 		}
 
 		setCitizenTileWorker(new CityCenterCitizenWorker(this, originTile));
 		unemployedSpecialists.remove(0);
+		statLine.mergeStatLine(getTileStatLine(originTile));
 
 		// Clear the assigned unemployed specialists.
 
@@ -303,11 +307,11 @@ public class City implements AttackableEntity, SpecialistContainer, NextTurnList
 		unemployedSpecialists.clear();
 
 		// Apply the new stat values for our worked tiles
-		for (CitizenWorker citizenWorker : citizenWorkers.values()) {
-			if (citizenWorker.isValidTileWorker()) {
-				statLine.mergeStatLine(getTileStatLine(citizenWorker.getTile()));
-			}
-		}
+		// for (CitizenWorker citizenWorker : citizenWorkers.values()) {
+		// if (citizenWorker.isValidTileWorker()) {
+		// statLine.mergeStatLine(getTileStatLine(citizenWorker.getTile()));
+		// }
+		// }
 
 		Json json = new Json();
 
@@ -317,6 +321,8 @@ public class City implements AttackableEntity, SpecialistContainer, NextTurnList
 			statUpdatePacket.addStat(name, stat.name(), this.statLine.getStatValues().get(stat));
 		}
 		playerOwner.getConn().send(json.toJson(statUpdatePacket));
+		
+		System.out.println(statLine);
 	}
 
 	public void setCitizenTileWorker(CitizenWorker citizenWorker) {
@@ -478,13 +484,16 @@ public class City implements AttackableEntity, SpecialistContainer, NextTurnList
 
 			Tile tile = topTiles.get(i);
 
-			float value = getTileStatLine(tile).getStatValue(Stat.FOOD_GAIN) * 4
-					+ getTileStatLine(tile).getStatValue(Stat.GOLD_GAIN) * 1
-					+ getTileStatLine(tile).getStatValue(Stat.PRODUCTION_GAIN) * 1;
+			int eatenFood = (int) (statLine.getStatValue(Stat.POPULATION) * 2);
+			int foodValue = (statLine.getStatValue(Stat.FOOD_GAIN) - eatenFood > 2) ? 1 : 4;
 
-			while (j >= 0 && getTileStatLine(topTiles.get(j)).getStatValue(Stat.FOOD_GAIN) * 4
+			float value = getTileStatLine(tile).getStatValue(Stat.FOOD_GAIN) * foodValue
+					+ getTileStatLine(tile).getStatValue(Stat.GOLD_GAIN) * 1
+					+ getTileStatLine(tile).getStatValue(Stat.PRODUCTION_GAIN) * 2;
+
+			while (j >= 0 && getTileStatLine(topTiles.get(j)).getStatValue(Stat.FOOD_GAIN) * foodValue
 					+ getTileStatLine(topTiles.get(j)).getStatValue(Stat.GOLD_GAIN) * 1
-					+ getTileStatLine(topTiles.get(j)).getStatValue(Stat.PRODUCTION_GAIN) * 1 < value) {
+					+ getTileStatLine(topTiles.get(j)).getStatValue(Stat.PRODUCTION_GAIN) * 2 < value) {
 				topTiles.set(j + 1, topTiles.get(j));
 				j--;
 			}
