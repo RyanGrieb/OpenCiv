@@ -83,6 +83,11 @@ public class CurrentResearchWindow extends AbstractWindow
 	public void onNextTurn(NextTurnPacket packet) {
 		if (tech == null)
 			return;
+
+		// FIXME: This returns incorrect values when our science increases. It assumes
+		// we are at turn 0 when reseaching something, but when our science increases +
+		// 10 when we have 1 turn left, we go over the totalTurns
+
 		int totalTurns = (int) Math.ceil(tech.getScienceCost()
 				/ Civilization.getInstance().getGame().getPlayer().getStatLine().getStatValue(Stat.SCIENCE_GAIN));
 
