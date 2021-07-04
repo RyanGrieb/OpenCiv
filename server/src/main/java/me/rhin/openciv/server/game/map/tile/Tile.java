@@ -503,6 +503,8 @@ public class Tile {
 			tileImprovement.improveTile();
 
 			// FIXME: We need to update the city worked tiles
+			if (city != null)
+				city.updateWorkedTiles();
 
 		} else {
 			// Continue to work the tile
