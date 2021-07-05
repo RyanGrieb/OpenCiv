@@ -68,6 +68,7 @@ public class Tile {
 	private boolean[] riverSides;
 	private Vector2[] vectors;
 	private City city;
+	private City territory;
 	private ArrayList<Unit> units;
 	private TileImprovement tileImprovement;
 
@@ -312,6 +313,14 @@ public class Tile {
 		setTileType(TileType.CITY);
 	}
 
+	public void setTerritory(City territory) {
+		this.territory = territory;
+	}
+	
+	public City getTerritory() {
+		return territory;
+	}
+	
 	public Unit getUnitFromID(int unitID) {
 		for (Unit unit : units)
 			if (unit.getID() == unitID)
@@ -510,7 +519,6 @@ public class Tile {
 
 	public void workTile(Unit unit, String improvementName) {
 		if (tileImprovement == null) {
-			System.out.println(getBaseTileType());
 			tileImprovement = getBaseTileType().getImprovement(improvementName);
 			tileImprovement.setTile(this);
 		}
@@ -527,9 +535,8 @@ public class Tile {
 			// Modify the tile here
 			tileImprovement.improveTile();
 
-			// FIXME: We need to update the city worked tiles
-			if (city != null)
-				city.updateWorkedTiles();
+			if (territory != null)
+				territory.updateWorkedTiles();
 
 		} else {
 			// Continue to work the tile

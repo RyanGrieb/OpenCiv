@@ -21,6 +21,7 @@ import me.rhin.openciv.server.game.city.specialist.Specialist;
 import me.rhin.openciv.server.game.city.specialist.SpecialistContainer;
 import me.rhin.openciv.server.game.city.specialist.UnemployedSpecialist;
 import me.rhin.openciv.server.game.map.tile.Tile;
+import me.rhin.openciv.server.game.map.tile.Tile.TileTypeWrapper;
 import me.rhin.openciv.server.game.map.tile.TileType.TileProperty;
 import me.rhin.openciv.server.game.production.ProducibleItemManager;
 import me.rhin.openciv.server.game.unit.AttackableEntity;
@@ -28,7 +29,6 @@ import me.rhin.openciv.server.listener.NextTurnListener;
 import me.rhin.openciv.shared.packet.type.AddSpecialistToContainerPacket;
 import me.rhin.openciv.shared.packet.type.BuildingConstructedPacket;
 import me.rhin.openciv.shared.packet.type.CityStatUpdatePacket;
-import me.rhin.openciv.shared.packet.type.PlayerStatUpdatePacket;
 import me.rhin.openciv.shared.packet.type.RemoveSpecialistFromContainerPacket;
 import me.rhin.openciv.shared.packet.type.SetCitizenTileWorkerPacket;
 import me.rhin.openciv.shared.packet.type.TerritoryGrowPacket;
@@ -65,11 +65,13 @@ public class City implements AttackableEntity, SpecialistContainer, NextTurnList
 
 		for (Tile adjTile : originTile.getAdjTiles()) {
 			territory.add(adjTile);
+			adjTile.setTerritory(this);
 		}
 
 		territory.add(originTile);
 		originTile.setCity(this);
-
+		originTile.setTerritory(this);
+		
 		for (Tile tile : territory) {
 			citizenWorkers.put(tile, new EmptyCitizenWorker(this, tile));
 		}
@@ -173,6 +175,7 @@ public class City implements AttackableEntity, SpecialistContainer, NextTurnList
 			Tile expansionTile = getTopExpansionTile();
 
 			territory.add(expansionTile);
+			expansionTile.setTerritory(this);
 			EmptyCitizenWorker citizenWorker = new EmptyCitizenWorker(this, expansionTile);
 			citizenWorkers.put(expansionTile, citizenWorker);
 
@@ -254,7 +257,6 @@ public class City implements AttackableEntity, SpecialistContainer, NextTurnList
 	}
 
 	public void updateWorkedTiles() {
-
 		// Make all citizens unemployed
 		for (Tile tile : territory) {
 			CitizenWorker citizenWorker = citizenWorkers.get(tile);
@@ -485,9 +487,10 @@ public class City implements AttackableEntity, SpecialistContainer, NextTurnList
 
 			int eatenFood = (int) (statLine.getStatValue(Stat.POPULATION) * 2);
 			int foodValue = (statLine.getStatValue(Stat.FOOD_GAIN) - eatenFood > 2) ? 1 : 6;
-			
-			//System.out.println(statLine.getStatValue(Stat.FOOD_GAIN) + "," + eatenFood+"="+foodValue);
-			
+
+			// System.out.println(statLine.getStatValue(Stat.FOOD_GAIN) + "," +
+			// eatenFood+"="+foodValue);
+
 			float value = getTileStatLine(tile).getStatValue(Stat.FOOD_GAIN) * foodValue
 					+ getTileStatLine(tile).getStatValue(Stat.GOLD_GAIN) * 1
 					+ getTileStatLine(tile).getStatValue(Stat.PRODUCTION_GAIN) * 2;
