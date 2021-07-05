@@ -61,7 +61,7 @@ public abstract class Unit implements AttackableEntity, NextTurnListener {
 		if (isUnitCapturable())
 			return 100;
 
-		if (otherEntity.isUnitCapturable() || this instanceof RangedUnit)
+		if (otherEntity.isUnitCapturable())
 			return 0;
 
 		// y=30*1.041^(x), x= combat diff

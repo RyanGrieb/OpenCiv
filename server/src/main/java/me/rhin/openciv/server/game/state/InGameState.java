@@ -202,7 +202,8 @@ public class InGameState extends GameState implements DisconnectListener, Select
 		Tile prevTile = map.getTiles()[packet.getPrevGridX()][packet.getPrevGridY()];
 
 		Unit unit = prevTile.getUnitFromID(packet.getUnitID());
-
+		Player playerOwner = unit.getPlayerOwner();
+		
 		if (unit == null) {
 			System.out.println("Error: Unit is NULL");
 			return;
@@ -214,18 +215,21 @@ public class InGameState extends GameState implements DisconnectListener, Select
 
 		unit.setTargetTile(targetTile);
 
+		
+
 		// If were moving onto a unit or city. Stop the unit just outside the target
 		// unit.
-		if (targetTile.getAttackableEntity() != null)
-			if (!targetTile.getAttackableEntity().getPlayerOwner().equals(unit.getPlayerOwner())
-					&& (!targetTile.getAttackableEntity().isUnitCapturable()
-							&& targetTile.getAttackableEntity().surviveAttack(unit))) {
+		if (targetTile.getEnemyAttackableEntity(playerOwner) != null)
+			if (!targetTile.getEnemyAttackableEntity(playerOwner).getPlayerOwner().equals(unit.getPlayerOwner())
+					&& (!targetTile.getEnemyAttackableEntity(playerOwner).isUnitCapturable()
+							&& targetTile.getEnemyAttackableEntity(playerOwner).surviveAttack(unit))) {
 				targetTile = unit.getCameFromTiles()[targetTile.getGridX()][targetTile.getGridY()];
 				if (targetTile != null) {
 					unit.setTargetTile(targetTile);
 				} else // If the came from tile is null, assume it's where we are standing
 					targetTile = unit.getStandingTile();
 			}
+
 
 		// Move to target tile
 		if (unit.getMovement() >= unit.getPathMovement() && !unit.getStandingTile().equals(targetTile)) {
@@ -257,11 +261,12 @@ public class InGameState extends GameState implements DisconnectListener, Select
 			}
 		}
 
+
 		// Handle the targetTile being a enemy unit.
-		if (originalTargetTile.getAttackableEntity() != null)
-			if (!originalTargetTile.getAttackableEntity().getPlayerOwner().equals(unit.getPlayerOwner())) {
+		if (originalTargetTile.getEnemyAttackableEntity(playerOwner) != null)
+			if (!originalTargetTile.getEnemyAttackableEntity(playerOwner).getPlayerOwner().equals(unit.getPlayerOwner())) {
 				// We are about to attack this unit on the tile
-				AttackableEntity targetEntity = originalTargetTile.getAttackableEntity();
+				AttackableEntity targetEntity = originalTargetTile.getEnemyAttackableEntity(playerOwner);
 
 				float unitDamage = unit.getDamageTaken(targetEntity);
 				float targetDamage = targetEntity.getDamageTaken(unit);
@@ -546,10 +551,11 @@ public class InGameState extends GameState implements DisconnectListener, Select
 	// TODO: Split this up into the Unit class
 	@Override
 	public void onCombatPreview(WebSocket conn, CombatPreviewPacket packet) {
+		Player playerOwner = Server.getInstance().getPlayerByConn(conn);
 		AttackableEntity attackingEntity = map.getTiles()[packet.getUnitGridX()][packet.getUnitGridY()]
 				.getAttackableEntity();
 		AttackableEntity targetEntity = map.getTiles()[packet.getTargetGridX()][packet.getTargetGridY()]
-				.getAttackableEntity();
+				.getEnemyAttackableEntity(playerOwner);
 
 		if (attackingEntity instanceof RangedUnit) {
 			packet.setUnitDamage(0);
@@ -579,7 +585,7 @@ public class InGameState extends GameState implements DisconnectListener, Select
 			// We are about to attack this unit on the tile
 
 			Json json = new Json();
-			float unitDamage = attackingEntity.getDamageTaken(targetEntity);
+			float unitDamage = 0; //A shooting unit takes no damage
 			float targetDamage = targetEntity.getDamageTaken(attackingEntity);
 
 			attackingEntity.setHealth(attackingEntity.getHealth() - unitDamage);

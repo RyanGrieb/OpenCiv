@@ -3,7 +3,6 @@ package me.rhin.openciv.server.game.map.tile;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
-import java.util.ListIterator;
 import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
@@ -454,7 +453,33 @@ public class Tile {
 
 		return topUnit;
 	}
+	
+	public Unit getTopEnemyUnit(Player player) {
+		Unit topUnit = null;
+		for (Unit unit : units) {
+			if(unit.getPlayerOwner().equals(player))
+				continue;
+			if (topUnit == null || topUnit.getCombatStrength() < unit.getCombatStrength())
+				topUnit = unit;
+		}
 
+		return topUnit;
+	}
+
+	public AttackableEntity getEnemyAttackableEntity(Player player) {
+
+		// Problem: This can AND WILL pick up friendly units. Fixed by having to return
+		// enemy cities first.
+		if (city != null)
+			return city;
+
+		Unit unit = getTopEnemyUnit(player);
+		if (unit != null)
+			return unit;
+
+		return null;
+	}
+	
 	public AttackableEntity getAttackableEntity() {
 
 		// Problem: This can AND WILL pick up friendly units. Fixed by having to return
