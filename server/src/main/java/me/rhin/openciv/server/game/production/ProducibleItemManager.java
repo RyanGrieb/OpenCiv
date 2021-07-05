@@ -113,7 +113,7 @@ public class ProducibleItemManager implements NextTurnListener {
 
 		Json json = new Json();
 
-		if (producingItem.getAppliedProduction() > producingItem.getProductionItem().getProductionCost()) {
+		if (producingItem.getAppliedProduction() >= producingItem.getProductionItem().getProductionCost()) {
 			itemQueue.remove();
 
 			// FIXME: Not only should this apply to the queue. We should save the leftover

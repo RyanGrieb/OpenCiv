@@ -2,6 +2,7 @@ package me.rhin.openciv.ui.game;
 
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 
 import me.rhin.openciv.Civilization;
@@ -105,13 +106,16 @@ public class CityProductionInfo extends Actor
 
 		productionItemSprite = sprite;
 
-		int appliedTurns = (int) (producingItem.getAppliedProduction()
+		float appliedProduction = producingItem.getAppliedProduction();
+
+		int turnsLeft = MathUtils.ceil((producingItem.getProductionItem().getProductionCost() - appliedProduction)
 				/ city.getStatLine().getStatValue(Stat.PRODUCTION_GAIN));
 
-		int totalTurns = (int) Math.ceil((producingItem.getProductionItem().getProductionCost()
-				/ city.getStatLine().getStatValue(Stat.PRODUCTION_GAIN)));
+		int currentTurns = producingItem.getAppiedTurns();
 
-		turnsLeftLabel.setText(appliedTurns + "/" + totalTurns + " Turns");
+		int totalTurns = currentTurns + turnsLeft;
+
+		turnsLeftLabel.setText(currentTurns + "/" + totalTurns + " Turns");
 	}
 
 	@Override
