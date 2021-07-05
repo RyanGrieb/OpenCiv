@@ -24,6 +24,10 @@ public class OpenResearchButton extends Button {
 
 	@Override
 	public void onClick() {
+		//TODO: Prompt the player that they need to settle a city.
+		if (Civilization.getInstance().getGame().getPlayer().getOwnedCities().size() < 1)
+			return;
+		
 		Civilization.getInstance().getWindowManager().toggleWindow(new ResearchWindow());
 	}
 
