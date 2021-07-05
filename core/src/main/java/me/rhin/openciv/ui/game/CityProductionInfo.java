@@ -10,16 +10,18 @@ import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.city.City;
 import me.rhin.openciv.game.production.ProducingItem;
 import me.rhin.openciv.listener.ApplyProductionToItemListener;
+import me.rhin.openciv.listener.CityStatUpdateListener;
 import me.rhin.openciv.listener.FinishProductionItemListener;
 import me.rhin.openciv.listener.SetProductionItemListener;
 import me.rhin.openciv.shared.packet.type.ApplyProductionToItemPacket;
+import me.rhin.openciv.shared.packet.type.CityStatUpdatePacket;
 import me.rhin.openciv.shared.packet.type.FinishProductionItemPacket;
 import me.rhin.openciv.shared.packet.type.SetProductionItemPacket;
 import me.rhin.openciv.shared.stat.Stat;
 import me.rhin.openciv.ui.label.CustomLabel;
 
-public class CityProductionInfo extends Actor
-		implements SetProductionItemListener, ApplyProductionToItemListener, FinishProductionItemListener {
+public class CityProductionInfo extends Actor implements SetProductionItemListener, ApplyProductionToItemListener,
+		FinishProductionItemListener, CityStatUpdateListener {
 
 	private City city;
 	private Sprite backgroundSprite;
@@ -64,12 +66,13 @@ public class CityProductionInfo extends Actor
 			this.turnsLeftLabel = new CustomLabel("???/??? Turns");
 		}
 
-		turnsLeftLabel.setPosition(x + productionItemSprite.getX() - turnsLeftLabel.getWidth() - 5,
+		turnsLeftLabel.setPosition(x + 5,
 				y + productionItemSprite.getHeight() / 2 - turnsLeftLabel.getHeight() / 2);
 
 		Civilization.getInstance().getEventManager().addListener(SetProductionItemListener.class, this);
 		Civilization.getInstance().getEventManager().addListener(ApplyProductionToItemListener.class, this);
 		Civilization.getInstance().getEventManager().addListener(FinishProductionItemListener.class, this);
+		Civilization.getInstance().getEventManager().addListener(CityStatUpdateListener.class, this);
 	}
 
 	@Override
@@ -87,7 +90,7 @@ public class CityProductionInfo extends Actor
 		productionItemSprite.setPosition(x + getWidth() - 34, y + 2);
 		productionDescLabel.setPosition(x, y + getHeight() - productionDescLabel.getHeight());
 		productionItemNameLabel.setPosition(x, y + getHeight() - productionItemNameLabel.getHeight() - 15);
-		turnsLeftLabel.setPosition(x + productionItemSprite.getX() - turnsLeftLabel.getWidth() - 5,
+		turnsLeftLabel.setPosition(x + 5,
 				y + productionItemSprite.getHeight() / 2 - turnsLeftLabel.getHeight() / 2);
 	}
 
@@ -106,9 +109,7 @@ public class CityProductionInfo extends Actor
 
 		productionItemSprite = sprite;
 
-		float appliedProduction = producingItem.getAppliedProduction();
-
-		int turnsLeft = MathUtils.ceil((producingItem.getProductionItem().getProductionCost() - appliedProduction)
+		int turnsLeft = MathUtils.ceil((producingItem.getProductionItem().getProductionCost() - producingItem.getAppliedProduction())
 				/ city.getStatLine().getStatValue(Stat.PRODUCTION_GAIN));
 
 		int currentTurns = producingItem.getAppiedTurns();
@@ -125,13 +126,14 @@ public class CityProductionInfo extends Actor
 
 		ProducingItem producingItem = city.getProducibleItemManager().getCurrentProducingItem();
 
-		int appliedTurns = (int) (producingItem.getAppliedProduction()
+		int turnsLeft = MathUtils.ceil((producingItem.getProductionItem().getProductionCost() - producingItem.getAppliedProduction())
 				/ city.getStatLine().getStatValue(Stat.PRODUCTION_GAIN));
 
-		int totalTurns = (int) Math.ceil((producingItem.getProductionItem().getProductionCost()
-				/ city.getStatLine().getStatValue(Stat.PRODUCTION_GAIN)));
+		int currentTurns = producingItem.getAppiedTurns();
 
-		turnsLeftLabel.setText(appliedTurns + "/" + totalTurns + " Turns");
+		int totalTurns = currentTurns + turnsLeft;
+
+		turnsLeftLabel.setText(currentTurns + "/" + totalTurns + " Turns");
 	}
 
 	@Override
@@ -144,5 +146,26 @@ public class CityProductionInfo extends Actor
 				productionItemSprite.getHeight());
 
 		productionItemSprite = sprite;
+	}
+	
+	@Override
+	public void onCityStatUpdate(CityStatUpdatePacket packet) {
+		if (!city.getName().equals(packet.getCityName()))
+			return;
+
+		ProducingItem producingItem = city.getProducibleItemManager().getCurrentProducingItem();
+
+		if(producingItem == null)
+			return;
+		
+		int turnsLeft = MathUtils.ceil((producingItem.getProductionItem().getProductionCost() - producingItem.getAppliedProduction())
+				/ city.getStatLine().getStatValue(Stat.PRODUCTION_GAIN));
+
+		int currentTurns = producingItem.getAppiedTurns();
+
+		int totalTurns = currentTurns + turnsLeft;
+
+
+		turnsLeftLabel.setText(currentTurns + "/" + totalTurns + " Turns");
 	}
 }

@@ -149,6 +149,7 @@ public class ContainerList extends Group {
 	}
 
 	public void removeItem(String listContainerName, String itemKey) {
+		listContainers.get(listContainerName).clearListeners();
 		listContainers.get(listContainerName).removeItem(itemKey);
 		updatePositions();
 	}

@@ -7,14 +7,17 @@ import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Align;
 
+import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.city.City;
 import me.rhin.openciv.game.production.ProductionItem;
+import me.rhin.openciv.listener.CityStatUpdateListener;
+import me.rhin.openciv.shared.packet.type.CityStatUpdatePacket;
 import me.rhin.openciv.shared.stat.Stat;
 import me.rhin.openciv.ui.label.CustomLabel;
 import me.rhin.openciv.ui.list.ListObject;
 
-public class ListProductionItem extends ListObject {
+public class ListProductionItem extends ListObject implements CityStatUpdateListener {
 
 	private City city;
 	private ProductionItem productionItem;
@@ -42,8 +45,7 @@ public class ListProductionItem extends ListObject {
 		this.itemNameLabel = new CustomLabel(productionItem.getName());
 		itemNameLabel.setSize(width, height);
 		itemNameLabel.setAlignment(Align.topLeft);
-		// FIXME: In the future, we need to divide by the already applied production to
-		// the item.
+
 		this.itemTurnCostLabel = new CustomLabel((int) Math
 				.ceil((productionItem.getProductionCost() / city.getStatLine().getStatValue(Stat.PRODUCTION_GAIN)))
 				+ " Turns");
@@ -68,6 +70,21 @@ public class ListProductionItem extends ListObject {
 				hovered = false;
 			}
 		});
+		
+		Civilization.getInstance().getEventManager().addListener(CityStatUpdateListener.class, this);
+	}
+	
+	@Override
+	public void onCityStatUpdate(CityStatUpdatePacket packet) {
+		itemTurnCostLabel.setText((int) Math
+				.ceil((productionItem.getProductionCost() / city.getStatLine().getStatValue(Stat.PRODUCTION_GAIN)))
+				+ " Turns");
+	}
+	
+	@Override
+	public void clearListeners() {
+		super.clearListeners();
+		Civilization.getInstance().getEventManager().clearListenersFromObject(this);
 	}
 
 	@Override
