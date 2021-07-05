@@ -166,6 +166,11 @@ public class CityInfoWindow extends AbstractWindow
 		for (Building building : city.getBuildings()) {
 			topRightContainerList.addItem(ListContainerType.CATEGORY, "Buildings", new ListBuilding(building, 200, 45));
 		}
+		
+		if(city.getUnemployedWorkerAmount() > 0) {
+			//FIXME: These params are dumb
+			updateSpecialistContainers(city.getName(), city.getName());
+		}
 
 		productionContainerList.clearList();
 		for (ProductionItem productionItem : city.getProducibleItemManager().getProducibleItems()) {
