@@ -493,11 +493,11 @@ public class City implements AttackableEntity, SpecialistContainer, NextTurnList
 
 			float value = getTileStatLine(tile).getStatValue(Stat.FOOD_GAIN) * foodValue
 					+ getTileStatLine(tile).getStatValue(Stat.GOLD_GAIN) * 1
-					+ getTileStatLine(tile).getStatValue(Stat.PRODUCTION_GAIN) * 2;
+					+ getTileStatLine(tile).getStatValue(Stat.PRODUCTION_GAIN) * 3;
 
 			while (j >= 0 && getTileStatLine(topTiles.get(j)).getStatValue(Stat.FOOD_GAIN) * foodValue
 					+ getTileStatLine(topTiles.get(j)).getStatValue(Stat.GOLD_GAIN) * 1
-					+ getTileStatLine(topTiles.get(j)).getStatValue(Stat.PRODUCTION_GAIN) * 2 < value) {
+					+ getTileStatLine(topTiles.get(j)).getStatValue(Stat.PRODUCTION_GAIN) * 3 < value) {
 				topTiles.set(j + 1, topTiles.get(j));
 				j--;
 			}

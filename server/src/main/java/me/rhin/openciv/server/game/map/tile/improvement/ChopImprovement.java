@@ -5,6 +5,8 @@ import com.badlogic.gdx.utils.Json;
 import me.rhin.openciv.server.Server;
 import me.rhin.openciv.server.game.Player;
 import me.rhin.openciv.server.game.map.tile.TileType;
+import me.rhin.openciv.server.game.research.Technology;
+import me.rhin.openciv.server.game.research.type.MiningTech;
 import me.rhin.openciv.shared.packet.type.RemoveTileTypePacket;
 
 public class ChopImprovement extends TileImprovement {
@@ -32,6 +34,11 @@ public class ChopImprovement extends TileImprovement {
 			player.getConn().send(json.toJson(removeTileTypePacket));
 	}
 
+	@Override
+	public Class<? extends Technology> getRequiredTech() {
+		return MiningTech.class;
+	}
+	
 	@Override
 	public String getName() {
 		return "chop";

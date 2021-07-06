@@ -2,10 +2,7 @@ package me.rhin.openciv.ui.screen.type;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
-import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
-import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.utils.TimeUtils;
 
@@ -15,11 +12,9 @@ import me.rhin.openciv.listener.LeftClickListener.LeftClickEvent;
 import me.rhin.openciv.listener.MouseMoveListener.MouseMoveEvent;
 import me.rhin.openciv.listener.RelativeMouseMoveListener.RelativeMouseMoveEvent;
 import me.rhin.openciv.listener.RightClickListener.RightClickEvent;
-import me.rhin.openciv.listener.TopShapeRenderListener.TopShapeRenderEvent;
 import me.rhin.openciv.shared.listener.EventManager;
 import me.rhin.openciv.ui.screen.AbstractScreen;
 import me.rhin.openciv.ui.screen.ScreenEnum;
-import me.rhin.openciv.ui.window.type.CurrentResearchWindow;
 import me.rhin.openciv.ui.window.type.EscWindow;
 import me.rhin.openciv.ui.window.type.GameOverlay;
 import me.rhin.openciv.util.ClickType;
@@ -116,6 +111,7 @@ public class InGameScreen extends AbstractScreen {
 
 	@Override
 	public boolean keyUp(int keycode) {
+
 		if (keycode == Input.Keys.G) {
 			// game.getGameMap().resetTerrain();
 			// game.getGameMap().generateTerrain();
@@ -140,13 +136,13 @@ public class InGameScreen extends AbstractScreen {
 		if (!windowManager.allowsCameraMovement()) {
 			return;
 		}
-
+		
 		OrthographicCamera cam = getCamera();
-		if (Gdx.input.isKeyPressed(Input.Keys.EQUALS)) {
+		if (Gdx.input.isKeyPressed(Input.Keys.EQUALS) || Gdx.input.isKeyPressed(Input.Keys.P)) {
 			cam.zoom += 0.04;
 		}
 
-		if (Gdx.input.isKeyPressed(Input.Keys.MINUS)) {
+		if (Gdx.input.isKeyPressed(Input.Keys.MINUS) || Gdx.input.isKeyPressed(Input.Keys.O)) {
 			cam.zoom -= 0.04;
 		}
 		if (Gdx.input.isKeyPressed(Input.Keys.A)) {

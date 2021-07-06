@@ -2,21 +2,21 @@ package me.rhin.openciv.server.game.map.tile.improvement;
 
 import me.rhin.openciv.server.game.map.tile.TileType;
 import me.rhin.openciv.server.game.research.Technology;
-import me.rhin.openciv.server.game.research.type.MiningTech;
+import me.rhin.openciv.server.game.research.type.AnimalHusbandryTech;
 
-public class MineImprovement extends TileImprovement {
+public class PastureImprovement extends TileImprovement {
 
-	public MineImprovement(TileType tileType, int turns) {
-		super(tileType, turns);
+	public PastureImprovement(TileType tileType, int maxTurns) {
+		super(tileType, maxTurns);
 	}
-
+	
 	@Override
 	public Class<? extends Technology> getRequiredTech() {
-		return MiningTech.class;
+		return AnimalHusbandryTech.class;
 	}
 	
 	@Override
 	public String getName() {
-		return "mine";
+		return "pasture";
 	}
 }

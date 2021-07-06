@@ -7,6 +7,7 @@ import java.util.Random;
 
 import me.rhin.openciv.server.game.map.tile.improvement.ChopImprovement;
 import me.rhin.openciv.server.game.map.tile.improvement.MineImprovement;
+import me.rhin.openciv.server.game.map.tile.improvement.PastureImprovement;
 import me.rhin.openciv.server.game.map.tile.improvement.TileImprovement;
 import me.rhin.openciv.shared.stat.Stat;
 import me.rhin.openciv.shared.stat.StatLine;
@@ -119,7 +120,7 @@ public enum TileType implements Comparable<TileType> {
 		public int getMovementCost() {
 			return 2;
 		}
-		
+
 		@Override
 		public List<TileImprovement> getImprovements() {
 			ArrayList<TileImprovement> improvements = new ArrayList<>();
@@ -146,7 +147,7 @@ public enum TileType implements Comparable<TileType> {
 		public int getMovementCost() {
 			return 2;
 		}
-		
+
 		@Override
 		public List<TileImprovement> getImprovements() {
 			ArrayList<TileImprovement> improvements = new ArrayList<>();
@@ -222,6 +223,13 @@ public enum TileType implements Comparable<TileType> {
 			StatLine statLine = new StatLine();
 			statLine.setValue(Stat.PRODUCTION_GAIN, 1);
 			return statLine;
+		}
+
+		@Override
+		public List<TileImprovement> getImprovements() {
+			ArrayList<TileImprovement> improvements = new ArrayList<>();
+			improvements.add(new PastureImprovement(TileType.HORSES_IMPROVED, 5));
+			return improvements;
 		}
 	},
 	IRON(TileLayer.MIDDLE, TileProperty.RESOURCE) {
@@ -354,6 +362,15 @@ public enum TileType implements Comparable<TileType> {
 		public StatLine getStatLine() {
 			StatLine statLine = new StatLine();
 			statLine.addValue(Stat.PRODUCTION_GAIN, 3);
+			return statLine;
+		}
+	},
+	HORSES_IMPROVED(TileLayer.MIDDLE, TileProperty.IMPROVEMENT) {
+		@Override
+		public StatLine getStatLine() {
+			StatLine statLine = new StatLine();
+			statLine.addValue(Stat.PRODUCTION_GAIN, 1);
+			statLine.addValue(Stat.FOOD_GAIN, 2);
 			return statLine;
 		}
 	},

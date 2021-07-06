@@ -21,7 +21,7 @@ public enum TileType {
 	MOUNTAIN(TextureEnum.TILE_MOUNTIAN, 1000000, TileLayer.MIDDLE),
 	FOREST(TextureEnum.TILE_FOREST, 2, TileLayer.HIGH),
 	JUNGLE(TextureEnum.TILE_JUNGLE, 2, TileLayer.HIGH),
-	HORSES(TextureEnum.TILE_HORSES, TileLayer.MIDDLE, TileProperty.RESOURCE),
+	HORSES(TextureEnum.TILE_HORSES, TileLayer.MIDDLE, TileProperty.RESOURCE, TileProperty.ANIMAL),
 	IRON(TextureEnum.TILE_IRON, TileLayer.MIDDLE, TileProperty.RESOURCE, TileProperty.MINEABLE),
 	COPPER(TextureEnum.TILE_COPPER, TileLayer.MIDDLE, TileProperty.RESOURCE, TileProperty.MINEABLE),
 	COTTON(TextureEnum.TILE_COTTON, TileLayer.MIDDLE, TileProperty.RESOURCE),
@@ -35,6 +35,7 @@ public enum TileType {
 	PLAINS_HILL_MINE(TextureEnum.TILE_PLAINS_HILL_MINE, TileLayer.BASE, TileProperty.RESOURCE),
 	DESERT_HILL_MINE(TextureEnum.TILE_DESERT_HILL_MINE, TileLayer.BASE, TileProperty.RESOURCE),
 	TUNDRA_HILL_MINE(TextureEnum.TILE_TUNDRA_HILL_MINE, TileLayer.BASE, TileProperty.RESOURCE),
+	HORSES_IMPROVED(TextureEnum.TILE_HORSES_IMPROVED, TileLayer.MIDDLE, TileProperty.IMPROVEMENT),
 	;
 
 	public enum TileLayer {
@@ -49,6 +50,7 @@ public enum TileType {
 		RESOURCE,
 		IMPROVEMENT,
 		MINEABLE,
+		ANIMAL,
 		FARMABLE;
 	}
 

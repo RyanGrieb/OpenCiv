@@ -527,6 +527,10 @@ public class Tile {
 			System.out.println("Tile: Error, no tile improvement found for " + getBaseTileType().name());
 			return;
 		}
+		
+		//FIXME: This should be called before the builder has a chance to work the tile
+		if(tileImprovement.getRequiredTech() != null && !unit.getPlayerOwner().getResearchTree().hasResearched(tileImprovement.getRequiredTech()))
+			return;
 
 		tileImprovement.addTurnsWorked();
 
