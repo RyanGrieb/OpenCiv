@@ -796,7 +796,7 @@ public class InGameState extends GameState implements DisconnectListener, Select
 			int assignedLuxTiles = 0;
 			int assignedResourceTiles = 0;
 			int loopLimit = 500;
-			while ((assignedLuxTiles < 3 || assignedResourceTiles < 2) && loopLimit > 0) {
+			while ((assignedLuxTiles < 3 || assignedResourceTiles < 4) && loopLimit > 0) {
 
 				int randX = rnd.nextInt(7) - 3;
 				int randY = rnd.nextInt(7) - 3;

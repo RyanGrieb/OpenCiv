@@ -490,8 +490,7 @@ public class City implements AttackableEntity, SpecialistContainer, NextTurnList
 			int eatenFood = (int) (statLine.getStatValue(Stat.POPULATION) * 2);
 			int foodValue = ((statLine.getStatValue(Stat.FOOD_GAIN) - eatenFood) > 1) ? 1 : 6;
 			
-			// Problem, food gain value wiped out
-			//System.out.println((statLine.getStatValue(Stat.FOOD_GAIN) - eatenFood) + "=" + foodValue);
+			//System.out.println((statLine.getStatValue(Stat.FOOD_GAIN)) + "=" + foodValue);
 
 			float value = getTileStatLine(tile).getStatValue(Stat.FOOD_GAIN) * foodValue
 					+ getTileStatLine(tile).getStatValue(Stat.GOLD_GAIN) * 1

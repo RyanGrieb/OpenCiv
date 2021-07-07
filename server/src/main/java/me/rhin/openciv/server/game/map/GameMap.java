@@ -542,9 +542,12 @@ public class GameMap implements MapRequestListener {
 		// Split the map to make resource generation & player spawnpoints balanced
 		splitMapPartition();
 
-		generateResource(TileType.HORSES, Server.getInstance().getPlayers().size() * 6, TileType.GRASS,
+		generateResource(TileType.HORSES, Server.getInstance().getPlayers().size() * 8, TileType.GRASS,
 				TileType.PLAINS);
 
+		generateResource(TileType.CATTLE, Server.getInstance().getPlayers().size() * 8, TileType.GRASS,
+				TileType.PLAINS);
+		
 		generateResource(TileType.IRON, Server.getInstance().getPlayers().size() * 6, TileType.GRASS, TileType.PLAINS,
 				TileType.PLAINS_HILL, TileType.GRASS_HILL, TileType.DESERT, TileType.DESERT_HILL);
 
