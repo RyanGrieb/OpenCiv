@@ -71,7 +71,7 @@ public class City implements AttackableEntity, SpecialistContainer, NextTurnList
 		territory.add(originTile);
 		originTile.setCity(this);
 		originTile.setTerritory(this);
-		
+
 		for (Tile tile : territory) {
 			citizenWorkers.put(tile, new EmptyCitizenWorker(this, tile));
 		}
@@ -257,6 +257,7 @@ public class City implements AttackableEntity, SpecialistContainer, NextTurnList
 	}
 
 	public void updateWorkedTiles() {
+
 		// Make all citizens unemployed
 		for (Tile tile : territory) {
 			CitizenWorker citizenWorker = citizenWorkers.get(tile);
@@ -273,10 +274,14 @@ public class City implements AttackableEntity, SpecialistContainer, NextTurnList
 		// Go through the city population, and assign a worker from our unemployed
 		// specialist
 
-		ArrayList<Tile> topTiles = getTopWorkableTiles();
+		// ArrayList<Tile> topTiles = getTopWorkableTiles(statLine);
 
+		setCitizenTileWorker(new CityCenterCitizenWorker(this, originTile));
+		unemployedSpecialists.remove(0);
+		statLine.mergeStatLine(getTileStatLine(originTile));
+		
 		for (int i = 0; i < statLine.getStatValue(Stat.POPULATION); i++) {
-			Tile tile = topTiles.get(i);
+			Tile tile = getTopWorkableTiles().get(0); // FIXME: Make a method that gets single top tile
 			if (citizenWorkers.containsKey(tile) && citizenWorkers.get(tile).isValidTileWorker())
 				continue;
 
@@ -286,10 +291,6 @@ public class City implements AttackableEntity, SpecialistContainer, NextTurnList
 
 			statLine.mergeStatLine(getTileStatLine(tile));
 		}
-
-		setCitizenTileWorker(new CityCenterCitizenWorker(this, originTile));
-		unemployedSpecialists.remove(0);
-		statLine.mergeStatLine(getTileStatLine(originTile));
 
 		// Clear the assigned unemployed specialists.
 
@@ -472,7 +473,8 @@ public class City implements AttackableEntity, SpecialistContainer, NextTurnList
 		ArrayList<Tile> topTiles = new ArrayList<>();
 
 		for (Tile tile : territory) {
-			if (tile.equals(originTile))
+			if (tile.equals(originTile)
+					|| citizenWorkers.containsKey(tile) && citizenWorkers.get(tile).isValidTileWorker())
 				continue;
 
 			topTiles.add(tile);
@@ -486,10 +488,10 @@ public class City implements AttackableEntity, SpecialistContainer, NextTurnList
 			Tile tile = topTiles.get(i);
 
 			int eatenFood = (int) (statLine.getStatValue(Stat.POPULATION) * 2);
-			int foodValue = (statLine.getStatValue(Stat.FOOD_GAIN) - eatenFood > 2) ? 1 : 6;
-
-			// System.out.println(statLine.getStatValue(Stat.FOOD_GAIN) + "," +
-			// eatenFood+"="+foodValue);
+			int foodValue = ((statLine.getStatValue(Stat.FOOD_GAIN) - eatenFood) > 1) ? 1 : 6;
+			
+			// Problem, food gain value wiped out
+			//System.out.println((statLine.getStatValue(Stat.FOOD_GAIN) - eatenFood) + "=" + foodValue);
 
 			float value = getTileStatLine(tile).getStatValue(Stat.FOOD_GAIN) * foodValue
 					+ getTileStatLine(tile).getStatValue(Stat.GOLD_GAIN) * 1

@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Random;
 
 import me.rhin.openciv.server.game.map.tile.improvement.ChopImprovement;
+import me.rhin.openciv.server.game.map.tile.improvement.FarmImprovement;
 import me.rhin.openciv.server.game.map.tile.improvement.MineImprovement;
 import me.rhin.openciv.server.game.map.tile.improvement.PastureImprovement;
 import me.rhin.openciv.server.game.map.tile.improvement.TileImprovement;
@@ -29,7 +30,7 @@ public enum TileType implements Comparable<TileType> {
 
 		@Override
 		public List<TileImprovement> getImprovements() {
-			return Arrays.asList(new TileImprovement(TileType.FARM, 5));
+			return Arrays.asList(new FarmImprovement());
 		}
 	},
 	GRASS_HILL(TileLayer.BASE, TileProperty.HILL) {
@@ -49,7 +50,7 @@ public enum TileType implements Comparable<TileType> {
 		public List<TileImprovement> getImprovements() {
 			ArrayList<TileImprovement> improvements = new ArrayList<>();
 			improvements.add(new MineImprovement(TileType.GRASS_HILL_MINE, 5));
-			improvements.add(new TileImprovement(TileType.FARM, 5));
+			improvements.add(new FarmImprovement());
 			return improvements;
 		}
 	},
@@ -64,7 +65,7 @@ public enum TileType implements Comparable<TileType> {
 
 		@Override
 		public List<TileImprovement> getImprovements() {
-			return Arrays.asList(new TileImprovement(TileType.FARM, 5));
+			return Arrays.asList(new FarmImprovement());
 		}
 	},
 	PLAINS_HILL(TileLayer.BASE, TileProperty.HILL) {
@@ -84,7 +85,7 @@ public enum TileType implements Comparable<TileType> {
 		public List<TileImprovement> getImprovements() {
 			ArrayList<TileImprovement> improvements = new ArrayList<>();
 			improvements.add(new MineImprovement(TileType.PLAINS_HILL_MINE, 5));
-			improvements.add(new TileImprovement(TileType.FARM, 5));
+			improvements.add(new FarmImprovement());
 			return improvements;
 		}
 	},
@@ -105,7 +106,7 @@ public enum TileType implements Comparable<TileType> {
 
 		@Override
 		public List<TileImprovement> getImprovements() {
-			return Arrays.asList(new TileImprovement(TileType.FARM, 5));
+			return Arrays.asList(new FarmImprovement());
 		}
 	},
 	DESERT_HILL(TileLayer.BASE, TileProperty.HILL) {

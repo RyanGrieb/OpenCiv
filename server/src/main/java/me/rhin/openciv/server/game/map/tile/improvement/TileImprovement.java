@@ -9,7 +9,7 @@ import me.rhin.openciv.server.game.map.tile.TileType;
 import me.rhin.openciv.server.game.research.Technology;
 import me.rhin.openciv.shared.packet.type.SetTileTypePacket;
 
-public class TileImprovement {
+public abstract class TileImprovement {
 
 	protected Tile tile;
 	protected TileType tileType;
@@ -17,7 +17,6 @@ public class TileImprovement {
 	private int maxTurns;
 	private int workedTurns;
 
-	// FIXME: Just make this an interface or abstact class.
 	public TileImprovement(TileType tileType, int maxTurns) {
 		this.tileType = tileType;
 		this.maxTurns = maxTurns;
