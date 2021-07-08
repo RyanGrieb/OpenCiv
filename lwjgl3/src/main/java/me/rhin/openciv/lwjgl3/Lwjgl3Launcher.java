@@ -12,9 +12,9 @@ import me.rhin.openciv.Civilization;
 /** Launches the desktop (LWJGL3) application. */
 public class Lwjgl3Launcher {
 	public static void main(String[] args) {
-		
+
 		CommonWebSockets.initiate();
-		
+
 		createApplication();
 		LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
 
@@ -28,7 +28,7 @@ public class Lwjgl3Launcher {
 	private static Lwjgl3ApplicationConfiguration getDefaultConfiguration() {
 		Lwjgl3ApplicationConfiguration config = new Lwjgl3ApplicationConfiguration();
 		config.useVsync(true);
-		config.setWindowSizeLimits(800,600, -1, -1);
+		config.setWindowSizeLimits(800, 700, -1, -1);
 		config.setTitle("OpenCiv");
 		config.setWindowIcon(FileType.Internal, "tile_city.png");
 		return config;
