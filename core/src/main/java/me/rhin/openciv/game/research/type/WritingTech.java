@@ -28,6 +28,6 @@ public class WritingTech extends Technology {
 
 	@Override
 	public String getDesc() {
-		return "";
+		return "- Unlocks great library\n" + "- Unlocks library\n" + "- Unlocks embassies";
 	}
 }
