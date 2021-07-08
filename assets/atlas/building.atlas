@@ -4,9 +4,16 @@ size: 256, 64
 format: RGBA8888
 filter: Nearest, Nearest
 repeat: none
-building_granary
+building_circus
   rotate: false
   xy: 104, 2
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+building_granary
+  rotate: false
+  xy: 138, 2
   size: 32, 32
   orig: 32, 32
   offset: 0, 0

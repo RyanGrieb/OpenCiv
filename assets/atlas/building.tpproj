@@ -32,7 +32,7 @@ limitMemory=true
 useIndexes=true
 
 scaleFactors=[{suffix:"",factor:1,resampling:bicubic}]
-inputFiles=[{path:../building_monument.png,type:Input,regionName:null},{path:../building_market.png,type:Input,regionName:null},{path:../building_granary.png,type:Input,regionName:null},{path:../building_library.png,type:Input,regionName:null}]
+inputFiles=[{path:../building_monument.png,type:Input,regionName:null},{path:../building_market.png,type:Input,regionName:null},{path:../building_granary.png,type:Input,regionName:null},{path:../building_library.png,type:Input,regionName:null},{path:../building_circus.png,type:Input,regionName:null}]
 
 
 -PROJ-

@@ -23,7 +23,7 @@ public class TrappingTech extends Technology {
 
 	@Override
 	public Sprite getIcon() {
-		return TextureEnum.UI_ERROR.sprite();
+		return TextureEnum.BUILDING_CIRCUS.sprite();
 	}
 
 	@Override

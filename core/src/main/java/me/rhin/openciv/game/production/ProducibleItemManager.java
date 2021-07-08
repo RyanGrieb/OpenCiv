@@ -10,6 +10,7 @@ import com.badlogic.gdx.Gdx;
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.game.city.City;
 import me.rhin.openciv.game.city.building.type.Granary;
+import me.rhin.openciv.game.city.building.type.Library;
 import me.rhin.openciv.game.city.building.type.Market;
 import me.rhin.openciv.game.city.building.type.Monument;
 import me.rhin.openciv.game.unit.type.Archer;
@@ -52,6 +53,7 @@ public class ProducibleItemManager {
 		possibleItems.put("Builder", new Builder(city));
 		possibleItems.put("Work Boat", new WorkBoat(city));
 		possibleItems.put("Archer", new Archer(city));
+		possibleItems.put("Library", new Library(city));
 	}
 
 	public HashMap<String, ProductionItem> getPossibleItems() {

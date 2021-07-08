@@ -11,6 +11,7 @@ import me.rhin.openciv.server.Server;
 import me.rhin.openciv.server.game.city.City;
 import me.rhin.openciv.server.game.city.building.Building;
 import me.rhin.openciv.server.game.city.building.type.Granary;
+import me.rhin.openciv.server.game.city.building.type.Library;
 import me.rhin.openciv.server.game.city.building.type.Market;
 import me.rhin.openciv.server.game.city.building.type.Monument;
 import me.rhin.openciv.server.game.unit.type.Archer;
@@ -62,7 +63,8 @@ public class ProducibleItemManager implements NextTurnListener {
 		possibleItems.put("Builder", new Builder(city));
 		possibleItems.put("Work Boat", new WorkBoat(city));
 		possibleItems.put("Archer", new Archer(city));
-
+		possibleItems.put("Library", new Library(city));
+		
 		Server.getInstance().getEventManager().addListener(NextTurnListener.class, this);
 	}
 
