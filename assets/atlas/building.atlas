@@ -1,26 +1,33 @@
 
 building.png
-size: 128, 64
+size: 256, 64
 format: RGBA8888
 filter: Nearest, Nearest
 repeat: none
 building_granary
   rotate: false
-  xy: 36, 20
+  xy: 104, 2
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+building_library
+  rotate: false
+  xy: 70, 2
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 building_market
   rotate: false
-  xy: 2, 2
-  size: 16, 16
-  orig: 16, 16
+  xy: 36, 2
+  size: 32, 32
+  orig: 32, 32
   offset: 0, 0
   index: -1
 building_monument
   rotate: false
-  xy: 2, 20
+  xy: 2, 2
   size: 32, 32
   orig: 32, 32
   offset: 0, 0

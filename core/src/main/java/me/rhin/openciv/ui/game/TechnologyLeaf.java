@@ -27,7 +27,8 @@ public class TechnologyLeaf extends Group implements CompleteResearchListener {
 	private CustomLabel techNameLabel;
 	private Vector2 backVector;
 	private Vector2 frontVector;
-
+	private boolean positionUpdated;
+	
 	public TechnologyLeaf(final Technology tech, float x, float y, float width, float height) {
 		this.tech = tech;
 		this.setTouchable(Touchable.enabled);
@@ -45,7 +46,7 @@ public class TechnologyLeaf extends Group implements CompleteResearchListener {
 		this.background = new ColoredBackground(sprite, 0, 0, width, height);
 		addActor(background);
 
-		this.icon = new ColoredBackground(tech.getIcon(), width / 2 - 32 / 2, 4, 32, 32);
+		this.icon = new ColoredBackground(tech.getIcon(), 2, 6, 32, 32);
 		addActor(icon);
 
 		this.researchIcon = new ColoredBackground(TextureEnum.ICON_SCIENCE.sprite(), width / 2 - 16 / 2, height - 18,
@@ -55,7 +56,7 @@ public class TechnologyLeaf extends Group implements CompleteResearchListener {
 			addActor(researchIcon);
 
 		// FIXME: Setting the label to a height > 0 causes click input isses.
-		this.techNameLabel = new CustomLabel(tech.getName(), Align.center, 0, height - 25, width, 0);
+		this.techNameLabel = new CustomLabel(tech.getName(), icon.getX() + icon.getWidth() + 3, height - 25, width, 0);
 		addActor(techNameLabel);
 
 		this.backVector = new Vector2(x, y + height / 2);
@@ -112,12 +113,21 @@ public class TechnologyLeaf extends Group implements CompleteResearchListener {
 
 		backVector.set(x, y + getHeight() / 2);
 		frontVector.set(x + getWidth(), y + getHeight() / 2);
+		positionUpdated = true;
 	}
 
 	public Technology getTech() {
 		return tech;
 	}
+	
+	public void setPositionUpdated(boolean positionUpdated) {
+		this.positionUpdated = positionUpdated;
+	}
 
+	public boolean isPositionUpdated() {
+		return positionUpdated;
+	}
+	
 	public void onClicked() {
 		// Start researching the tech, ect.
 		System.out.println("Research: " + tech.getName());

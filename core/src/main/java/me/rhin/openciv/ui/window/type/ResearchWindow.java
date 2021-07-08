@@ -60,9 +60,19 @@ public class ResearchWindow extends AbstractWindow
 		closeResearchButton.setPosition(width / 2 - 150 / 2, 35);
 
 		for (TechnologyLeaf leaf : technologyLeafs) {
+			leaf.setPositionUpdated(false);
+		}
+
+		for (TechnologyLeaf leaf : technologyLeafs) {
 
 			float x = 25;
-			float y = height - 75 - 50;
+
+			float y = height - 45 - 50;
+
+			for (TechnologyLeaf otherLeaf : technologyLeafs)
+				if (leaf.getTech().getRequiredTechs().contains(otherLeaf.getTech().getClass())) {
+					y = otherLeaf.getY();
+				}
 
 			int requiredTechs = 0;
 			Technology currentTech = leaf.getTech();
@@ -73,7 +83,7 @@ public class ResearchWindow extends AbstractWindow
 				requiredTechs++;
 			}
 
-			x += requiredTechs * 170;
+			x += requiredTechs * 205;
 
 			int sameXAxisLeafs = 0;
 			for (TechnologyLeaf otherLeaf : technologyLeafs) {
@@ -83,7 +93,40 @@ public class ResearchWindow extends AbstractWindow
 					sameXAxisLeafs++;
 			}
 
-			y -= sameXAxisLeafs * 95;
+			float yPadding = (requiredTechs == 0) ? 45 * 3 + 25 : 0;
+			y -= sameXAxisLeafs * (yPadding);
+
+			// Determine if there are any other leafs that required our required tech
+			if (leaf.getTech().getRequiredTechs().size() > 0) {
+
+				Class<? extends Technology> requiredTechClass = leaf.getTech().getRequiredTechs().get(0); // FIXME:
+																											// Support >
+																											// 1
+
+				boolean singleTech = true;
+
+				for (Technology otherTech : Civilization.getInstance().getGame().getPlayer().getResearchTree()
+						.getTechnologies()) {
+					if (otherTech.equals(leaf.getTech()))
+						continue;
+					if (otherTech.getRequiredTechs().contains(requiredTechClass))
+						singleTech = false;
+				}
+
+				// Problem, we already added the other leafs.
+				for (TechnologyLeaf otherLeaf : technologyLeafs)
+					if (otherLeaf.getTech().getRequiredTechs().contains(requiredTechClass)
+							&& otherLeaf.isPositionUpdated()) {
+						y -= 45 + 3;
+					}
+
+				if (!singleTech)
+					y += 45 + 3;
+			}
+
+			if (requiredTechs == 0) {
+				y -= 45 + 3;
+			}
 
 			leaf.setPosition(x, y);
 		}
@@ -156,11 +199,16 @@ public class ResearchWindow extends AbstractWindow
 
 	private void addTech(Technology tech) {
 
-		float width = 145;
-		float height = 75;
+		float width = 185;
+		float height = 45;
 
 		float x = 25;
+
 		float y = getHeight() - height - 50;
+
+		for (TechnologyLeaf leaf : technologyLeafs)
+			if (tech.getRequiredTechs().contains(leaf.getTech().getClass()))
+				y = leaf.getY();
 
 		int requiredTechs = 0;
 		Technology currentTech = tech;
@@ -171,7 +219,7 @@ public class ResearchWindow extends AbstractWindow
 			requiredTechs++;
 		}
 
-		x += requiredTechs * 170;
+		x += requiredTechs * 205;
 
 		ArrayList<TechnologyLeaf> rowLeafs = new ArrayList<>();
 		for (TechnologyLeaf leaf : technologyLeafs)
@@ -187,7 +235,35 @@ public class ResearchWindow extends AbstractWindow
 				sameXAxisLeafs++;
 		}
 
-		y -= sameXAxisLeafs * 95;
+		float yPadding = (requiredTechs == 0) ? height * 3 + 25 : 0;
+		y -= sameXAxisLeafs * (yPadding);
+
+		// Determine if there are any other leafs that required our required tech
+		if (tech.getRequiredTechs().size() > 0) {
+
+			Class<? extends Technology> requiredTechClass = tech.getRequiredTechs().get(0); // FIXME: Support > 1
+
+			boolean singleTech = true;
+
+			for (Technology otherTech : Civilization.getInstance().getGame().getPlayer().getResearchTree()
+					.getTechnologies()) {
+				if (otherTech.equals(tech))
+					continue;
+				if (otherTech.getRequiredTechs().contains(requiredTechClass))
+					singleTech = false;
+			}
+
+			for (TechnologyLeaf leaf : technologyLeafs)
+				if (leaf.getTech().getRequiredTechs().contains(requiredTechClass))
+					y -= height + 3;
+
+			if (!singleTech)
+				y += height + 3;
+		}
+
+		if (requiredTechs == 0) {
+			y -= height + 3;
+		}
 
 		TechnologyLeaf leaf = new TechnologyLeaf(tech, x, y, width, height);
 		technologyLeafs.add(leaf);
