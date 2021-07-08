@@ -21,10 +21,11 @@ import me.rhin.openciv.server.game.city.specialist.Specialist;
 import me.rhin.openciv.server.game.city.specialist.SpecialistContainer;
 import me.rhin.openciv.server.game.city.specialist.UnemployedSpecialist;
 import me.rhin.openciv.server.game.map.tile.Tile;
-import me.rhin.openciv.server.game.map.tile.Tile.TileTypeWrapper;
 import me.rhin.openciv.server.game.map.tile.TileType.TileProperty;
 import me.rhin.openciv.server.game.production.ProducibleItemManager;
 import me.rhin.openciv.server.game.unit.AttackableEntity;
+import me.rhin.openciv.server.listener.CityGrowthListener.CityGrowthEvent;
+import me.rhin.openciv.server.listener.CityStarveListener.CityStarveEvent;
 import me.rhin.openciv.server.listener.NextTurnListener;
 import me.rhin.openciv.shared.packet.type.AddSpecialistToContainerPacket;
 import me.rhin.openciv.shared.packet.type.BuildingConstructedPacket;
@@ -401,7 +402,7 @@ public class City implements AttackableEntity, SpecialistContainer, NextTurnList
 
 	public void addBuilding(Building building) {
 		buildings.add(building);
-
+		
 		BuildingConstructedPacket buildingConstructedPacket = new BuildingConstructedPacket();
 		buildingConstructedPacket.setBuildingName(building.getName());
 		buildingConstructedPacket.setCityName(name);
@@ -556,10 +557,16 @@ public class City implements AttackableEntity, SpecialistContainer, NextTurnList
 		statLine.setValue(Stat.POPULATION, amount);
 		statLine.setValue(Stat.FOOD_SURPLUS, 0);
 
-		if (amount > 0)
+		if (amount > 0) {
+			Server.getInstance().getEventManager().fireEvent(new CityGrowthEvent(this));
 			statLine.addValue(Stat.SCIENCE_GAIN, 0.5F);
-		else
+		}
+		else {
+			Server.getInstance().getEventManager().fireEvent(new CityStarveEvent(this));
 			statLine.subValue(Stat.SCIENCE_GAIN, 0.5F);
+		}
+		
+		playerOwner.updateOwnedStatlines(false);
 	}
 
 	public boolean isCoastal() {

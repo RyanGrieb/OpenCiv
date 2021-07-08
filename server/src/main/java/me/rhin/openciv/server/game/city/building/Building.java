@@ -21,7 +21,7 @@ public abstract class Building implements ProductionItem {
 	}
 
 	@Override
-	public void create(City city) {
+	public void create() {
 		city.addBuilding(this);
 		city.getProducibleItemManager().getPossibleItems().remove(getName());
 	}

@@ -125,7 +125,7 @@ public class ProducibleItemManager implements NextTurnListener {
 						- producingItem.getProductionItem().getProductionCost());
 			}
 
-			producingItem.getProductionItem().create(city);
+			producingItem.getProductionItem().create();
 
 			FinishProductionItemPacket packet = new FinishProductionItemPacket();
 			packet.setProductionItem(city.getName(), producingItem.getProductionItem().getName());

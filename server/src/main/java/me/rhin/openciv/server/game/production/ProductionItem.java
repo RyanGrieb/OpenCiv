@@ -9,5 +9,5 @@ public interface ProductionItem {
 
 	public boolean meetsProductionRequirements();
 
-	public void create(City city);
+	public void create();
 }

@@ -19,7 +19,7 @@ public abstract class UnitItem implements ProductionItem {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public void create(City city) {
+	public void create() {
 		Tile tile = city.getOriginTile();
 
 		Unit unit = null;
