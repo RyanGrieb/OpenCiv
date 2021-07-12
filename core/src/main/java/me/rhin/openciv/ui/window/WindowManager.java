@@ -29,7 +29,7 @@ public class WindowManager {
 				if (!abstractWindow.closesGameDisplayWindows() && window.isGameDisplayWindow())
 					continue;
 
-				closeWindow(window.getClass());
+				closeWindow(abstractWindow.getClass(), window.getClass());
 			}
 		}
 
@@ -49,7 +49,7 @@ public class WindowManager {
 				if (!abstractWindow.closesGameDisplayWindows() && window.isGameDisplayWindow())
 					continue;
 
-				closeWindow(window.getClass());
+				closeWindow(abstractWindow.getClass(), window.getClass());
 			}
 		}
 
@@ -57,7 +57,8 @@ public class WindowManager {
 		windows.put(abstractWindow.getClass(), abstractWindow);
 	}
 
-	public void closeWindow(Class<? extends AbstractWindow> windowClass) {
+	public void closeWindow(Class<? extends AbstractWindow> closedByWindow,
+			Class<? extends AbstractWindow> windowClass) {
 		if (!windows.containsKey(windowClass))
 			return;
 
@@ -70,10 +71,12 @@ public class WindowManager {
 			}
 		}
 
+
 		if (windows.get(windowClass).isGameDisplayWindow()) {
-			// FIXME: I don't believe we properly hide game display windows. Use
-			// setVisible() instead of removing shit.
 			hiddenGameDisplayWindows.put(windowClass, windows.get(windowClass));
+
+			if (closedByWindow != null)
+				windows.get(windowClass).setClosedBy(closedByWindow);
 		}
 
 		if (windows.get(windowClass).closesOtherWindows()) {
@@ -86,6 +89,11 @@ public class WindowManager {
 				Entry<Class<? extends AbstractWindow>, AbstractWindow> hiddenGameWindow = hiddenGameDisplayWindowsIter
 						.next();
 
+				// If this window wasn't closed by windowClass, skip.
+				if (hiddenGameWindow.getValue().getClosedByWindow() != null
+						&& !hiddenGameWindow.getValue().getClosedByWindow().equals(windowClass))
+					continue;
+
 				Civilization.getInstance().getScreenManager().getCurrentScreen().getOverlayStage()
 						.addActor(hiddenGameWindow.getValue());
 
@@ -95,6 +103,10 @@ public class WindowManager {
 		}
 
 		windows.remove(windowClass);
+	}
+
+	public void closeWindow(Class<? extends AbstractWindow> windowClass) {
+		closeWindow(null, windowClass);
 	}
 
 	public boolean allowsInput(Actor actor) {

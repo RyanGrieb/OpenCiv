@@ -13,6 +13,7 @@ public abstract class AbstractWindow extends Group {
 	protected Stage stage;
 	protected Viewport viewport;
 	private boolean open;
+	private Class<? extends AbstractWindow> closedByWindow;
 
 	public AbstractWindow() {
 		this.stage = Civilization.getInstance().getScreenManager().getCurrentScreen().getOverlayStage();
@@ -37,5 +38,13 @@ public abstract class AbstractWindow extends Group {
 
 	public void onClose() {
 		open = false;
+	}
+
+	public void setClosedBy(Class<? extends AbstractWindow> closedByWindow) {
+		this.closedByWindow = closedByWindow;
+	}
+	
+	public Class<? extends AbstractWindow> getClosedByWindow(){
+		return closedByWindow;
 	}
 }
