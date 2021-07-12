@@ -111,7 +111,7 @@ public class InGameScreen extends AbstractScreen {
 
 	@Override
 	public boolean keyUp(int keycode) {
-
+		
 		if (keycode == Input.Keys.G) {
 			// game.getGameMap().resetTerrain();
 			// game.getGameMap().generateTerrain();

@@ -25,7 +25,7 @@ configure(subprojects) {
 	}
 	ext {
         appName = "OpenCiv"
-        gdxVersion = '1.9.10'
+        gdxVersion = '1.9.11'
         roboVMVersion = '2.3.12'
         box2DLightsVersion = '1.5'
         ashleyVersion = '1.7.3'

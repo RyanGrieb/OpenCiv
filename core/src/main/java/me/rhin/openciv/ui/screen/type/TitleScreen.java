@@ -103,5 +103,4 @@ public class TitleScreen extends AbstractScreen implements ResizeListener {
 	public ScreenEnum getType() {
 		return ScreenEnum.TITLE;
 	}
-
 }
