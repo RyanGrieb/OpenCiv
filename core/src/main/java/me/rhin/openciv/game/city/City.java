@@ -2,8 +2,6 @@ package me.rhin.openciv.game.city;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
@@ -13,6 +11,8 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.utils.Timer;
+import com.badlogic.gdx.utils.Timer.Task;
 import com.badlogic.gdx.utils.reflect.ClassReflection;
 
 import me.rhin.openciv.Civilization;
@@ -266,17 +266,17 @@ public class City extends Group implements AttackableEntity, TileObserver, Speci
 	}
 
 	@Override
-	public void flashColor(Color red) {
-		originTile.setColor(red.r / 2, red.g / 2, red.b / 2, 1);
+	public void flashColor(Color color) {
+		originTile.setColor(color.r / 2, color.g / 2, color.b / 2, 1);
 
-		final ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(2);
-		executor.schedule(new Runnable() {
+		float delay = 0.25F; // seconds
+
+		Timer.schedule(new Task() {
 			@Override
 			public void run() {
 				originTile.setColor(Color.WHITE);
 			}
-		}, 250, TimeUnit.MILLISECONDS);
-
+		}, delay);
 	}
 
 	@Override

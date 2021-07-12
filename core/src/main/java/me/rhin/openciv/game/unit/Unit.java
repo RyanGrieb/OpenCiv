@@ -12,6 +12,8 @@ import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.utils.Timer;
+import com.badlogic.gdx.utils.Timer.Task;
 
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.TextureEnum;
@@ -112,17 +114,17 @@ public abstract class Unit extends Actor
 	}
 
 	@Override
-	public void flashColor(Color red) {
-		sprite.setColor(red.r / 2, red.g / 2, red.b / 2, 1);
+	public void flashColor(Color color) {
+		sprite.setColor(color.r / 2, color.g / 2, color.b / 2, 1);
 
-		final ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(2);
-		executor.schedule(new Runnable() {
+		float delay = 0.25F; // seconds
+
+		Timer.schedule(new Task() {
 			@Override
 			public void run() {
 				sprite.setColor(Color.WHITE);
 			}
-		}, 250, TimeUnit.MILLISECONDS);
-
+		}, delay);
 	}
 
 	public boolean setTargetTile(Tile targetTile, boolean wasMouseClick) {
