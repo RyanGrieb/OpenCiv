@@ -1,16 +1,18 @@
 package me.rhin.openciv.ui.list;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
-import com.badlogic.gdx.scenes.scene2d.utils.DragListener;
 
+import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.TextureEnum;
+import me.rhin.openciv.listener.ScrollListener;
 import me.rhin.openciv.shared.util.MathHelper;
 
-public class ContainerScrollbar extends Actor {
+public class ContainerScrollbar extends Actor implements ScrollListener {
 
 	private ContainerList containerList;
 	private Sprite backgroundSprite;
@@ -33,12 +35,12 @@ public class ContainerScrollbar extends Actor {
 		this.originY = y;
 		this.prevMouseY = -1;
 
-		this.addListener(new DragListener() {
-			@Override
-			public boolean scrolled(InputEvent event, float x, float y, int amount) {
-				return containerList.onScrolled(event, x, y, amount);
-			}
-		});
+		/*
+		 * this.addListener(new DragScrollListener(null) {
+		 * 
+		 * @Override public boolean scrolled(InputEvent event, float x, float y, int
+		 * amount) { return containerList.onScrolled(event, x, y, amount); } });
+		 */
 
 		// FIXME: This doesn't seem correct.
 		final ContainerScrollbar thisContainer = this;
@@ -46,12 +48,12 @@ public class ContainerScrollbar extends Actor {
 		this.addListener(new ClickListener() {
 			@Override
 			public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
-				thisContainer.getStage().setScrollFocus(thisContainer);
+				//thisContainer.getStage().setScrollFocus(thisContainer);
 			}
 
 			@Override
 			public void exit(InputEvent event, float x, float y, int pointer, Actor fromActor) {
-				thisContainer.getStage().setScrollFocus(null);
+				//thisContainer.getStage().setScrollFocus(null);
 			}
 
 			@Override
@@ -96,6 +98,8 @@ public class ContainerScrollbar extends Actor {
 			}
 
 		});
+
+		Civilization.getInstance().getEventManager().addListener(ScrollListener.class, this);
 	}
 
 	@Override
@@ -111,7 +115,25 @@ public class ContainerScrollbar extends Actor {
 		backgroundSprite.setPosition(x, y);
 		scrubber.setPosition(x, y);
 	}
-	
+
+	@Override
+	public void onScroll(float amountX, float amountY) {
+		if (!Civilization.getInstance().getWindowManager().allowsInput(this)) {
+			return;
+		}
+
+		float y = Civilization.getInstance().getCurrentScreen().getViewport().getWorldHeight() - Gdx.input.getY();
+
+		if (Gdx.input.getX() >= getX() && y >= getY())
+			if (Gdx.input.getX() <= getX() + getWidth() && y <= getY() + getHeight()) {
+				containerList.scroll(amountY);
+			}
+	}
+
+	public void onClose() {
+		Civilization.getInstance().getEventManager().clearListenersFromObject(this);
+	}
+
 	public void setNextHeight(float nextHeight) {
 		this.nextHeight = nextHeight;
 
@@ -121,5 +143,4 @@ public class ContainerScrollbar extends Actor {
 					containerList.getHeight() - heightDiff);
 		}
 	}
-
 }

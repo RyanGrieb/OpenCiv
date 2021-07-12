@@ -149,11 +149,10 @@ public class CityInfoWindow extends AbstractWindow
 			button.addAction(Actions.removeActor());
 		}
 
-		Civilization.getInstance().getEventManager().removeListener(ResizeListener.class, this);
-		Civilization.getInstance().getEventManager().removeListener(BuildingConstructedListener.class, this);
-		Civilization.getInstance().getEventManager().removeListener(SetCitizenTileWorkerListener.class, this);
-		Civilization.getInstance().getEventManager().removeListener(AddSpecialistToContainerListener.class, this);
-		Civilization.getInstance().getEventManager().removeListener(RemoveSpecialistFromContainerListener.class, this);
+		topRightContainerList.onClose();
+		productionContainerList.onClose();
+
+		Civilization.getInstance().getEventManager().clearListenersFromObject(this);
 	}
 
 	@Override
@@ -166,9 +165,9 @@ public class CityInfoWindow extends AbstractWindow
 		for (Building building : city.getBuildings()) {
 			topRightContainerList.addItem(ListContainerType.CATEGORY, "Buildings", new ListBuilding(building, 200, 45));
 		}
-		
-		if(city.getUnemployedWorkerAmount() > 0) {
-			//FIXME: These params are dumb
+
+		if (city.getUnemployedWorkerAmount() > 0) {
+			// FIXME: These params are dumb
 			updateSpecialistContainers(city.getName(), city.getName());
 		}
 

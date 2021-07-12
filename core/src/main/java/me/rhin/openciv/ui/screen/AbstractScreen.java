@@ -8,7 +8,6 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
-import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
@@ -16,6 +15,7 @@ import com.badlogic.gdx.utils.viewport.Viewport;
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.listener.BottomShapeRenderListener.BottomShapeRenderEvent;
 import me.rhin.openciv.listener.ResizeListener.ResizeEvent;
+import me.rhin.openciv.listener.ScrollListener.ScollEvent;
 import me.rhin.openciv.listener.TopShapeRenderListener.TopShapeRenderEvent;
 import me.rhin.openciv.ui.window.WindowManager;
 
@@ -183,8 +183,10 @@ public abstract class AbstractScreen implements Screen, InputProcessor {
 		return true;
 	}
 
+
 	@Override
-	public boolean scrolled(int amount) {
+	public boolean scrolled(float amountX, float amountY) {
+		Civilization.getInstance().getEventManager().fireEvent(new ScollEvent(amountX, amountY));
 		return true;
 	}
 

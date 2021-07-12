@@ -42,6 +42,13 @@ public class ChooseCivWindow extends AbstractWindow implements ResizeListener {
 		civContianerList.setPosition(width / 2 - 340, height - 360);
 
 	}
+	
+	@Override
+	public void onClose() {
+		super.onClose();
+		
+		civContianerList.onClose();
+	}
 
 	@Override
 	public boolean disablesInput() {

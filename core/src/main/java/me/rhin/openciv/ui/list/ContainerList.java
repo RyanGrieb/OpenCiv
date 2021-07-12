@@ -2,6 +2,7 @@ package me.rhin.openciv.ui.list;
 
 import java.util.HashMap;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.scenes.scene2d.Actor;
@@ -9,16 +10,16 @@ import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
-import com.badlogic.gdx.scenes.scene2d.utils.DragListener;
 
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.TextureEnum;
+import me.rhin.openciv.listener.ScrollListener;
 import me.rhin.openciv.ui.list.ListContainer.ListContainerType;
 import me.rhin.openciv.ui.window.AbstractWindow;
 
 //FIXME: The naming of ContainerList and ListContainer is bad.
 
-public class ContainerList extends Group {
+public class ContainerList extends Group implements ScrollListener {
 
 	private float yOffset;
 	private HashMap<String, ListContainer> listContainers;
@@ -48,12 +49,12 @@ public class ContainerList extends Group {
 		backgroundSprite.setSize(width, height);
 		// this.setCullingArea(new Rectangle(x, y, width, height));
 
-		this.addListener(new DragListener() {
-			@Override
-			public boolean scrolled(InputEvent event, float x, float y, int amount) {
-				return onScrolled(event, x, y, amount);
-			}
-		});
+		/*
+		 * this.addListener(new DragScrollListener(null) {
+		 * 
+		 * @Override public void drag(InputEvent event, float x, float y, int amount) {
+		 * return onScrolled(event, x, y, amount); } });
+		 */
 
 		// FIXME: This doesn't seem correct.
 		final ContainerList thisContainer = this;
@@ -61,16 +62,18 @@ public class ContainerList extends Group {
 		this.addListener(new ClickListener() {
 			@Override
 			public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
-				if (thisContainer != null)
-					thisContainer.getStage().setScrollFocus(thisContainer);
+				//if (thisContainer != null)
+				//	thisContainer.getStage().setScrollFocus(thisContainer);
 			}
 
 			@Override
 			public void exit(InputEvent event, float x, float y, int pointer, Actor fromActor) {
-				if (thisContainer != null)
-					thisContainer.getStage().setScrollFocus(null);
+				//if (thisContainer != null)
+				//	thisContainer.getStage().setScrollFocus(null);
 			}
 		});
+
+		Civilization.getInstance().getEventManager().addListener(ScrollListener.class, this);
 	}
 
 	@Override
@@ -100,6 +103,21 @@ public class ContainerList extends Group {
 		containerScrollbar.setPosition(x + getWidth(), y);
 	}
 
+	@Override
+	public void onScroll(float amountX, float amountY) {
+		if (!Civilization.getInstance().getWindowManager().allowsInput(this)) {
+			return;
+		}
+
+		float y = Civilization.getInstance().getCurrentScreen().getViewport().getWorldHeight() - Gdx.input.getY();
+
+		if (Gdx.input.getX() >= getX() && y >= getY())
+			if (Gdx.input.getX() <= getX() + getWidth() && y <= getY() + getHeight()) {
+				scroll(amountY);
+			}
+	}
+
+	@Deprecated
 	public boolean onScrolled(InputEvent event, float x, float y, int amount) {
 		// FIXME: We shouldn't use a low level listener for this. We shouldn't have to
 		// check for the bounds here.
@@ -114,6 +132,12 @@ public class ContainerList extends Group {
 		scroll(amount);
 		// }
 		return false;
+	}
+
+	public void onClose() {
+		containerScrollbar.onClose();
+
+		Civilization.getInstance().getEventManager().clearListenersFromObject(this);
 	}
 
 	public void scroll(float amount) {

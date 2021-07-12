@@ -100,6 +100,13 @@ public class ServerLobbyScreen extends AbstractScreen implements ResizeListener,
 	}
 
 	@Override
+	public void dispose() {
+		super.dispose();
+		
+		playerContainerList.onClose();
+	}
+	
+	@Override
 	public boolean touchUp(int screenX, int screenY, int pointer, int button) {
 		if (button == Input.Buttons.LEFT) {
 			eventManager.fireEvent(new LeftClickEvent(screenX, screenY));
