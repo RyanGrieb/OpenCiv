@@ -248,6 +248,21 @@ public enum TileType implements Comparable<TileType> {
 			return improvements;
 		}
 	},
+	SHEEP(TileLayer.MIDDLE, TileProperty.RESOURCE) {
+		@Override
+		public StatLine getStatLine() {
+			StatLine statLine = new StatLine();
+			statLine.setValue(Stat.FOOD_GAIN, 1);
+			return statLine;
+		}
+
+		@Override
+		public List<TileImprovement> getImprovements() {
+			ArrayList<TileImprovement> improvements = new ArrayList<>();
+			improvements.add(new PastureImprovement(TileType.SHEEP_IMPROVED, 5));
+			return improvements;
+		}
+	},
 	IRON(TileLayer.MIDDLE, TileProperty.RESOURCE) {
 		@Override
 		public StatLine getStatLine() {
@@ -394,12 +409,18 @@ public enum TileType implements Comparable<TileType> {
 		@Override
 		public StatLine getStatLine() {
 			StatLine statLine = new StatLine();
-			statLine.addValue(Stat.PRODUCTION_GAIN, 1);
 			statLine.addValue(Stat.FOOD_GAIN, 2);
 			return statLine;
 		}
 	},
-	;
+	SHEEP_IMPROVED(TileLayer.MIDDLE, TileProperty.IMPROVEMENT) {
+		@Override
+		public StatLine getStatLine() {
+			StatLine statLine = new StatLine();
+			statLine.addValue(Stat.FOOD_GAIN, 2);
+			return statLine;
+		}
+	},;
 
 	public enum TileLayer {
 		BASE,
