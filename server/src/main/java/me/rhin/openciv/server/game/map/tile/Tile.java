@@ -316,11 +316,11 @@ public class Tile {
 	public void setTerritory(City territory) {
 		this.territory = territory;
 	}
-	
+
 	public City getTerritory() {
 		return territory;
 	}
-	
+
 	public Unit getUnitFromID(int unitID) {
 		for (Unit unit : units)
 			if (unit.getID() == unitID)
@@ -462,11 +462,11 @@ public class Tile {
 
 		return topUnit;
 	}
-	
+
 	public Unit getTopEnemyUnit(Player player) {
 		Unit topUnit = null;
 		for (Unit unit : units) {
-			if(unit.getPlayerOwner().equals(player))
+			if (unit.getPlayerOwner().equals(player))
 				continue;
 			if (topUnit == null || topUnit.getCombatStrength() < unit.getCombatStrength())
 				topUnit = unit;
@@ -488,7 +488,7 @@ public class Tile {
 
 		return null;
 	}
-	
+
 	public AttackableEntity getAttackableEntity() {
 
 		// Problem: This can AND WILL pick up friendly units. Fixed by having to return
@@ -527,9 +527,10 @@ public class Tile {
 			System.out.println("Tile: Error, no tile improvement found for " + getBaseTileType().name());
 			return;
 		}
-		
-		//FIXME: This should be called before the builder has a chance to work the tile
-		if(tileImprovement.getRequiredTech() != null && !unit.getPlayerOwner().getResearchTree().hasResearched(tileImprovement.getRequiredTech()))
+
+		// FIXME: This should be called before the builder has a chance to work the tile
+		if (tileImprovement.getRequiredTech() != null
+				&& !unit.getPlayerOwner().getResearchTree().hasResearched(tileImprovement.getRequiredTech()))
 			return;
 
 		tileImprovement.addTurnsWorked();
@@ -562,5 +563,16 @@ public class Tile {
 
 	public void setTileImprovement(TileImprovement tileImprovement) {
 		this.tileImprovement = tileImprovement;
+	}
+
+	public float getCombatModifier() {
+		float combatModifier = 1;
+		if (containsTileProperty(TileProperty.HILL))
+			combatModifier -= 0.15;
+
+		if (containsTileType(TileType.FOREST) || containsTileType(TileType.JUNGLE))
+			combatModifier -= 0.10;
+
+		return combatModifier;
 	}
 }

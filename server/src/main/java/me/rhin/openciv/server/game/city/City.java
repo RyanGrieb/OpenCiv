@@ -220,7 +220,7 @@ public class City implements AttackableEntity, SpecialistContainer, NextTurnList
 
 	@Override
 	public int getCombatStrength() {
-		return 5;
+		return 8;
 	}
 
 	@Override
@@ -244,21 +244,21 @@ public class City implements AttackableEntity, SpecialistContainer, NextTurnList
 	}
 
 	@Override
-	public float getDamageTaken(AttackableEntity otherEntity) {
+	public float getDamageTaken(AttackableEntity otherEntity, boolean entityDefending) {
+		// Note: we don't apply terrain modifiers for cities, yet?
 		return (float) (30 * (Math.pow(1.041, otherEntity.getCombatStrength() - getCombatStrength())));
 	}
 
 	@Override
 	public boolean surviveAttack(AttackableEntity otherEntity) {
-		return health - getDamageTaken(otherEntity) > 0;
+		return health - getDamageTaken(otherEntity, true) > 0;
 	}
-
 
 	@Override
 	public void onCombat() {
-		//TODO: Maybe increase health regen when out of combat?
+		// TODO: Maybe increase health regen when out of combat?
 	}
-	
+
 	public int getMaxHealth() {
 		return 200;
 	}
@@ -408,7 +408,7 @@ public class City implements AttackableEntity, SpecialistContainer, NextTurnList
 
 	public void addBuilding(Building building) {
 		buildings.add(building);
-		
+
 		BuildingConstructedPacket buildingConstructedPacket = new BuildingConstructedPacket();
 		buildingConstructedPacket.setBuildingName(building.getName());
 		buildingConstructedPacket.setCityName(name);
@@ -417,7 +417,6 @@ public class City implements AttackableEntity, SpecialistContainer, NextTurnList
 		for (Player player : Server.getInstance().getPlayers()) {
 			player.getConn().send(json.toJson(buildingConstructedPacket));
 		}
-
 
 		statLine.mergeStatLine(building.getStatLine());
 
@@ -454,7 +453,7 @@ public class City implements AttackableEntity, SpecialistContainer, NextTurnList
 
 	public void setOwner(Player playerOwner) {
 		this.playerOwner = playerOwner;
-		
+
 		producibleItemManager.clearProducingItem();
 	}
 
@@ -568,12 +567,11 @@ public class City implements AttackableEntity, SpecialistContainer, NextTurnList
 		if (amount > 0) {
 			Server.getInstance().getEventManager().fireEvent(new CityGrowthEvent(this));
 			statLine.addValue(Stat.SCIENCE_GAIN, 0.5F);
-		}
-		else {
+		} else {
 			Server.getInstance().getEventManager().fireEvent(new CityStarveEvent(this));
 			statLine.subValue(Stat.SCIENCE_GAIN, 0.5F);
 		}
-		
+
 		playerOwner.updateOwnedStatlines(false);
 	}
 

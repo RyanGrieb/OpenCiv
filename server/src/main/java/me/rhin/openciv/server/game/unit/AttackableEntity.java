@@ -15,7 +15,7 @@ public interface AttackableEntity {
 
 	public Tile getTile();
 
-	public float getDamageTaken(AttackableEntity otherEntity);
+	public float getDamageTaken(AttackableEntity otherEntity, boolean entityDefending);
 
 	public boolean surviveAttack(AttackableEntity otherEntity);
 

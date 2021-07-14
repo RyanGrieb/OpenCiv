@@ -204,7 +204,7 @@ public class InGameState extends GameState implements DisconnectListener, Select
 
 		Unit unit = prevTile.getUnitFromID(packet.getUnitID());
 		Player playerOwner = unit.getPlayerOwner();
-		
+
 		if (unit == null) {
 			System.out.println("Error: Unit is NULL");
 			return;
@@ -215,8 +215,6 @@ public class InGameState extends GameState implements DisconnectListener, Select
 		Json json = new Json();
 
 		unit.setTargetTile(targetTile);
-
-		
 
 		// If were moving onto a unit or city. Stop the unit just outside the target
 		// unit.
@@ -230,7 +228,6 @@ public class InGameState extends GameState implements DisconnectListener, Select
 				} else // If the came from tile is null, assume it's where we are standing
 					targetTile = unit.getStandingTile();
 			}
-
 
 		// Move to target tile
 		if (unit.getMovement() >= unit.getPathMovement() && !unit.getStandingTile().equals(targetTile)) {
@@ -262,19 +259,19 @@ public class InGameState extends GameState implements DisconnectListener, Select
 			}
 		}
 
-
 		// Handle the targetTile being a enemy unit.
 		if (originalTargetTile.getEnemyAttackableEntity(playerOwner) != null)
-			if (!originalTargetTile.getEnemyAttackableEntity(playerOwner).getPlayerOwner().equals(unit.getPlayerOwner())) {
+			if (!originalTargetTile.getEnemyAttackableEntity(playerOwner).getPlayerOwner()
+					.equals(unit.getPlayerOwner())) {
 				// We are about to attack this unit on the tile
 				AttackableEntity targetEntity = originalTargetTile.getEnemyAttackableEntity(playerOwner);
 
-				float unitDamage = unit.getDamageTaken(targetEntity);
-				float targetDamage = targetEntity.getDamageTaken(unit);
-				
+				float unitDamage = unit.getDamageTaken(targetEntity, false);
+				float targetDamage = targetEntity.getDamageTaken(unit, true);
+
 				unit.onCombat();
 				targetEntity.onCombat();
-				
+
 				unit.setHealth(unit.getHealth() - unitDamage);
 				targetEntity.setHealth(targetEntity.getHealth() - targetDamage);
 
@@ -314,11 +311,11 @@ public class InGameState extends GameState implements DisconnectListener, Select
 
 					// When we capture a city
 					if (targetEntity instanceof City) {
-						
+
 						City city = (City) targetEntity;
 						city.setHealth(city.getMaxHealth() / 2);
 
-						//Reduce statline of the original owner
+						// Reduce statline of the original owner
 						city.getPlayerOwner().reduceStatLine(city.getStatLine());
 
 						city.getPlayerOwner().removeCity(city);
@@ -382,9 +379,10 @@ public class InGameState extends GameState implements DisconnectListener, Select
 	public void onSettleCity(WebSocket conn, SettleCityPacket settleCityPacket) {
 		Player cityPlayer = getPlayerByConn(conn);
 		settleCityPacket.setOwner(cityPlayer.getName());
-		
-		//FIXME: The server needs to check if the unit has movement & is too close to other cities.
-		
+
+		// FIXME: The server needs to check if the unit has movement & is too close to
+		// other cities.
+
 		String cityName = "Unknown";
 		boolean identicalName = true;
 
@@ -438,7 +436,7 @@ public class InGameState extends GameState implements DisconnectListener, Select
 
 		city.addBuilding(new Palace(city));
 		city.updateWorkedTiles();
-		
+
 		city.getPlayerOwner().updateOwnedStatlines(false);
 	}
 
@@ -478,8 +476,8 @@ public class InGameState extends GameState implements DisconnectListener, Select
 		Json json = new Json();
 		conn.send(json.toJson(packet));
 	}
-	
-	//TODO: Move to producibleItemManager
+
+	// TODO: Move to producibleItemManager
 	@Override
 	public void onBuyProductionItem(WebSocket conn, BuyProductionItemPacket packet) {
 		// Verify if the player owns that city.
@@ -497,8 +495,8 @@ public class InGameState extends GameState implements DisconnectListener, Select
 
 		targetCity.getProducibleItemManager().buyProducingItem(packet.getItemName());
 
-		//Json json = new Json();
-		//conn.send(json.toJson(packet));
+		// Json json = new Json();
+		// conn.send(json.toJson(packet));
 	}
 
 	// TODO: Move to city class
@@ -589,9 +587,9 @@ public class InGameState extends GameState implements DisconnectListener, Select
 		if (attackingEntity instanceof RangedUnit) {
 			packet.setUnitDamage(0);
 		} else
-			packet.setUnitDamage(attackingEntity.getDamageTaken(targetEntity));
+			packet.setUnitDamage(attackingEntity.getDamageTaken(targetEntity, false));
 
-		packet.setTargetDamage(targetEntity.getDamageTaken(attackingEntity));
+		packet.setTargetDamage(targetEntity.getDamageTaken(attackingEntity, true));
 
 		Json json = new Json();
 		conn.send(json.toJson(packet));
@@ -614,8 +612,8 @@ public class InGameState extends GameState implements DisconnectListener, Select
 			// We are about to attack this unit on the tile
 
 			Json json = new Json();
-			float unitDamage = 0; //A shooting unit takes no damage
-			float targetDamage = targetEntity.getDamageTaken(attackingEntity);
+			float unitDamage = 0; // A shooting unit takes no damage
+			float targetDamage = targetEntity.getDamageTaken(attackingEntity, true);
 
 			attackingEntity.setHealth(attackingEntity.getHealth() - unitDamage);
 			targetEntity.setHealth(targetEntity.getHealth() - targetDamage);

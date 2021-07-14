@@ -53,7 +53,7 @@ public abstract class Unit implements AttackableEntity, NextTurnListener {
 			turnsSinceCombat++;
 			return;
 		}
-		
+
 		if (standingTile.getTerritory() != null && standingTile.getTerritory().getPlayerOwner().equals(playerOwner)) {
 			// Set health.
 			this.health += 15;
@@ -86,7 +86,7 @@ public abstract class Unit implements AttackableEntity, NextTurnListener {
 	}
 
 	@Override
-	public float getDamageTaken(AttackableEntity otherEntity) {
+	public float getDamageTaken(AttackableEntity otherEntity, boolean entityDefending) {
 		if (isUnitCapturable())
 			return 100;
 
@@ -100,12 +100,24 @@ public abstract class Unit implements AttackableEntity, NextTurnListener {
 		if (otherEntity instanceof RangedUnit)
 			otherEntityCombatStrength = ((RangedUnit) otherEntity).getRangedCombatStrength();
 
-		return (float) (30 * (Math.pow(1.041, otherEntityCombatStrength - getCombatStrength())));
+		float tileCombatModifier = entityDefending ? standingTile.getCombatModifier() : 1;
+
+		// System.out.println(entityDefending + "," + playerOwner.getCivType().name());
+
+		// FIXME: This doesn't account for units that have > 2 movement
+		if (entityDefending && !(otherEntity instanceof RangedUnit)) {
+			for (int i = 0; i < standingTile.getRiverSides().length; i++)
+				if (standingTile.getRiverSides()[i] && standingTile.getAdjTiles()[i].equals(otherEntity.getTile())) {
+					tileCombatModifier -= 0.15F;
+				}
+		}
+
+		return (float) (30 * (Math.pow(1.041, otherEntityCombatStrength - getCombatStrength()))) * tileCombatModifier;
 	}
 
 	@Override
 	public boolean surviveAttack(AttackableEntity otherEntity) {
-		return health - getDamageTaken(otherEntity) > 0;
+		return health - getDamageTaken(otherEntity, true) > 0;
 	}
 
 	@Override
