@@ -79,6 +79,14 @@ public abstract class RangedUnit extends Unit
 	}
 
 	@Override
+	public void setSelected(final boolean selected) {
+		super.setSelected(selected);
+
+		if (!selected)
+			addAction(untargetAction);
+	}
+
+	@Override
 	public void onSelectUnit(SelectUnitPacket packet) {
 
 		if (getPlayerOwner().getSelectedUnit() == null || !getPlayerOwner().getSelectedUnit().equals(this))
@@ -96,7 +104,8 @@ public abstract class RangedUnit extends Unit
 
 		Tile tile = Civilization.getInstance().getGame().getPlayer().getHoveredTile();
 
-		if (!targeting || tile == null || tile.getEnemyAttackableEntity(getPlayerOwner()) == null || !tile.hasRangedTarget()) {
+		if (!targeting || tile == null || tile.getEnemyAttackableEntity(getPlayerOwner()) == null
+				|| !tile.hasRangedTarget()) {
 			rangedTarget = null;
 			targetSelectionSprite.setColor(Color.YELLOW);
 			Civilization.getInstance().getWindowManager().closeWindow(UnitCombatWindow.class);
