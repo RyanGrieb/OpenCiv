@@ -141,4 +141,8 @@ public class ProducibleItemManager implements NextTurnListener {
 				city.getStatLine().getStatValue(Stat.PRODUCTION_GAIN));
 		city.getPlayerOwner().getConn().send(json.toJson(packet));
 	}
+
+	public void clearProducingItem() {
+		itemQueue.clear();
+	}
 }

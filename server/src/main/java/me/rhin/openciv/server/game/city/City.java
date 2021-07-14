@@ -448,6 +448,8 @@ public class City implements AttackableEntity, SpecialistContainer, NextTurnList
 
 	public void setOwner(Player playerOwner) {
 		this.playerOwner = playerOwner;
+		
+		producibleItemManager.clearProducingItem();
 	}
 
 	private StatLine getTileStatLine(Tile tile) {

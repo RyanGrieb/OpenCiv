@@ -141,7 +141,7 @@ public class NetworkManager {
 		Gdx.app.log(Civilization.LOG_TAG, "Attempting to connect to: " + socketAddress);
 		try {
 			this.socket = WebSockets.newSocket(socketAddress);
-			socket.setSendGracefully(true);
+			//socket.setSendGracefully(true);
 			socket.addListener(getListener());
 			socket.connect();
 		} catch (Exception e) {

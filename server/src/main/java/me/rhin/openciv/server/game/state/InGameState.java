@@ -335,7 +335,8 @@ public class InGameState extends GameState implements DisconnectListener, Select
 							player.getConn().send(json.toJson(cityHealthPacket));
 						}
 
-						city.getPlayerOwner().mergeStatLine(city.getStatLine());
+						city.updateWorkedTiles();
+						city.getPlayerOwner().updateOwnedStatlines(false);
 
 						// Kill all enemy units inside the city
 						for (Unit cityUnit : city.getTile().getUnits()) {
