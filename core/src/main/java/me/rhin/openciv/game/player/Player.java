@@ -97,8 +97,7 @@ public class Player implements RelativeMouseMoveListener, LeftClickListener, Rig
 				selectedUnit.sendMovementPacket();
 			}
 
-			if (selectedUnit.getCurrentMovement() - selectedUnit.getPathMovement() <= 0)
-				unselectUnit();
+			unselectUnit();
 			rightMouseHeld = false;
 		}
 	}

@@ -216,6 +216,7 @@ public class Tile {
 
 	public void removeUnit(Unit unit) {
 		units.remove(unit);
+		unit.clearListeners();
 	}
 
 	public boolean hasUnitSelected() {

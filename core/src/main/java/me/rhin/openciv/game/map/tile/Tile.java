@@ -516,7 +516,7 @@ public class Tile extends Actor implements BottomShapeRenderListener {
 
 		// Problem: This can AND WILL pick up friendly units. Fixed by having to return
 		// enemy cities first.
-		if (city != null)
+		if (city != null && !city.getPlayerOwner().equals(player))
 			return city;
 
 		Unit unit = getTopEnemyUnit(player);
