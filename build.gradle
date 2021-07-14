@@ -5,6 +5,7 @@ buildscript {
 		google()
 		gradlePluginPortal()
 		maven { url 'https://oss.sonatype.org/content/repositories/snapshots/' }
+		maven { url "https://jitpack.io" }
 	}
 	dependencies {
 		classpath "com.mobidevelop.robovm:robovm-gradle-plugin:$robovmVersion"
@@ -31,6 +32,7 @@ configure(subprojects) {
         ashleyVersion = '1.7.3'
         aiVersion = '1.8.2'
         czyzbyVersion = '1.9.1.9.10-SNAPSHOT'
+        wsVersion = '1.9.10.3'
         fontVersion = '1.9.11-SNAPSHOT'
     }
 }

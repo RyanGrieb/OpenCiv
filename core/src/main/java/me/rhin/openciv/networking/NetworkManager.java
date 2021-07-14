@@ -137,10 +137,11 @@ public class NetworkManager {
 	}
 
 	public void connect(String ip) {
-		String socketAddress = "ws://" + ip + ":5000";
+		String socketAddress = "ws://" + ip + ":5222";
 		Gdx.app.log(Civilization.LOG_TAG, "Attempting to connect to: " + socketAddress);
 		try {
 			this.socket = WebSockets.newSocket(socketAddress);
+			socket.setSendGracefully(true);
 			socket.addListener(getListener());
 			socket.connect();
 		} catch (Exception e) {
@@ -193,8 +194,8 @@ public class NetworkManager {
 			}
 
 			@Override
-			public boolean onClose(final WebSocket webSocket, final WebSocketCloseCode code, final String reason) {
-				Gdx.app.log(Civilization.WS_LOG_TAG, "Disconnected - status: " + code + ", reason: " + reason);
+			public boolean onClose(final WebSocket webSocket, final int closeCode, final String reason) {
+				Gdx.app.log(Civilization.WS_LOG_TAG, "Disconnected - status: " + closeCode + ", reason: " + reason);
 				return true;
 			}
 

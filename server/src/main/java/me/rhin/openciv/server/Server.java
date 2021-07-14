@@ -66,9 +66,9 @@ import me.rhin.openciv.shared.util.ColorHelper;
 
 public class Server extends WebSocketServer {
 
-	// private static final String HOST = "192.168.1.77";
+	//private static final String HOST = "207.246.89.13";
 	private static final String HOST = "localhost";
-	private static final int PORT = 5000;
+	private static final int PORT = 5222;
 	private static Server server;
 
 	private GameState game;
@@ -187,7 +187,7 @@ public class Server extends WebSocketServer {
 		 * them. Just wait a few seconds
 		 * https://bugs.java.com/bugdatabase/view_bug.do?bug_id=4656697
 		 */
-		System.exit(0);
+		// System.exit(0);
 	}
 
 	public Player getPlayerByConn(WebSocket conn) {

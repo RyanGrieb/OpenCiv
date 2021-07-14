@@ -127,7 +127,7 @@ public class InGameScreen extends AbstractScreen {
 	private void handleInput() {
 
 		if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
-			game.endTurn();
+			//game.endTurn();
 		}
 
 		if (!windowManager.allowsInput())

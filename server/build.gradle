@@ -3,6 +3,7 @@ apply plugin: 'application'
 sourceCompatibility = 8.0
 mainClassName = 'me.rhin.openciv.server.Server'
 eclipse.project.name = appName + '-server'
+sourceSets.main.resources.srcDirs += [ rootProject.file('server/data').path ]
 
 dependencies {
 	implementation project(':shared')
@@ -10,8 +11,14 @@ dependencies {
 	api "org.java-websocket:Java-WebSocket:1.5.1"
 }
 
+run {
+	workingDir = rootProject.file('server/data').path
+	setIgnoreExitValue(true)
+}
+
 jar {
 	archiveBaseName.set(appName)
+	
 // the duplicatesStrategy matters starting in Gradle 7.0; this setting works.
 	duplicatesStrategy(DuplicatesStrategy.EXCLUDE)
 	dependsOn configurations.runtimeClasspath

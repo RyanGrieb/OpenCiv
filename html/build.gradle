@@ -36,9 +36,14 @@ dependencies {
 	implementation "com.badlogicgames.gdx:gdx-backend-gwt:$gdxVersion:sources"
 	implementation "com.badlogicgames.gdx:gdx-ai:$aiVersion:sources"
 	
-    api "com.github.czyzby:gdx-websocket:$czyzbyVersion:sources"
-    api "com.github.czyzby:gdx-websocket-gwt:$czyzbyVersion"
-    api "com.github.czyzby:gdx-websocket-gwt:$czyzbyVersion:sources"
+	api "com.github.MrStahlfelge.gdx-websockets:core:$wsVersion:sources"
+    api "com.github.MrStahlfelge.gdx-websockets:html:$wsVersion"
+    api "com.github.MrStahlfelge.gdx-websockets:html:$wsVersion:sources"
+        
+    //api "com.github.czyzby:gdx-websocket:$czyzbyVersion:sources"
+    //api "com.github.czyzby:gdx-websocket-gwt:$czyzbyVersion"
+    //api "com.github.czyzby:gdx-websocket-gwt:$czyzbyVersion:sources"
+    
     api "com.github.intrigus.gdx-freetype-gwt:gdx-freetype-gwt:$fontVersion"
     api "com.github.intrigus.gdx-freetype-gwt:gdx-freetype-gwt:$fontVersion:sources"
 

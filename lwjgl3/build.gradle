@@ -9,9 +9,11 @@ dependencies {
 	implementation project(':core')
 	implementation "com.badlogicgames.gdx:gdx-backend-lwjgl3:$gdxVersion"
 	implementation "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop"
-	api "com.github.czyzby:gdx-websocket:$czyzbyVersion"
-    api "com.badlogicgames.gdx:gdx:$gdxVersion"
-    api "com.github.czyzby:gdx-websocket-common:$czyzbyVersion"
+	
+	api "com.github.MrStahlfelge.gdx-websockets:common:$wsVersion"
+	//api "com.github.czyzby:gdx-websocket:$czyzbyVersion"
+    //api "com.badlogicgames.gdx:gdx:$gdxVersion"
+    //api "com.github.czyzby:gdx-websocket-common:$czyzbyVersion"
 }
 
 import org.gradle.internal.os.OperatingSystem
