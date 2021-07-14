@@ -40,6 +40,11 @@ public class WorkBoat extends UnitItem {
 	public int getProductionCost() {
 		return 30;
 	}
+	
+	@Override
+	public float getGoldCost() {
+		return 150;
+	}
 
 	@Override
 	public boolean meetsProductionRequirements() {

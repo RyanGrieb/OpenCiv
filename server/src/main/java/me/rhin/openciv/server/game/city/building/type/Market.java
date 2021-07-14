@@ -16,6 +16,11 @@ public class Market extends Building {
 	}
 
 	@Override
+	public float getGoldCost() {
+		return 200;
+	}
+
+	@Override
 	public boolean meetsProductionRequirements() {
 		return true;
 	}

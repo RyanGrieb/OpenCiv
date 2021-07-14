@@ -18,6 +18,7 @@ import me.rhin.openciv.server.game.GameState;
 import me.rhin.openciv.server.game.Player;
 import me.rhin.openciv.server.game.map.GameMap;
 import me.rhin.openciv.server.game.state.InLobbyState;
+import me.rhin.openciv.server.listener.BuyProductionItemListener.BuyProductionItemEvent;
 import me.rhin.openciv.server.listener.ChooseCivListener.ChooseCivEvent;
 import me.rhin.openciv.server.listener.ChooseTechListener.ChooseTechEvent;
 import me.rhin.openciv.server.listener.ClickSpecialistListener.ClickSpecialistEvent;
@@ -43,6 +44,7 @@ import me.rhin.openciv.shared.listener.Event;
 import me.rhin.openciv.shared.listener.EventManager;
 import me.rhin.openciv.shared.listener.Listener;
 import me.rhin.openciv.shared.packet.Packet;
+import me.rhin.openciv.shared.packet.type.BuyProductionItemPacket;
 import me.rhin.openciv.shared.packet.type.ChooseCivPacket;
 import me.rhin.openciv.shared.packet.type.ChooseTechPacket;
 import me.rhin.openciv.shared.packet.type.ClickSpecialistPacket;
@@ -130,6 +132,7 @@ public class Server extends WebSocketServer {
 		networkEvents.put(WorkTilePacket.class, WorkTileEvent.class);
 		networkEvents.put(ChooseTechPacket.class, ChooseTechEvent.class);
 		networkEvents.put(RangedAttackPacket.class, RangedAttackEvent.class);
+		networkEvents.put(BuyProductionItemPacket.class, BuyProductionItemEvent.class);
 
 		this.playerIndex = 0;
 		this.commandProcessor = new CmdProcessor();

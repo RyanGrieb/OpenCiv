@@ -29,6 +29,7 @@ import me.rhin.openciv.server.game.unit.type.Builder.BuilderUnit;
 import me.rhin.openciv.server.game.unit.type.Settler.SettlerUnit;
 import me.rhin.openciv.server.game.unit.type.Warrior.WarriorUnit;
 import me.rhin.openciv.server.game.unit.type.WorkBoat.WorkBoatUnit;
+import me.rhin.openciv.server.listener.BuyProductionItemListener;
 import me.rhin.openciv.server.listener.ClickSpecialistListener;
 import me.rhin.openciv.server.listener.ClickWorkedTileListener;
 import me.rhin.openciv.server.listener.CombatPreviewListener;
@@ -44,6 +45,7 @@ import me.rhin.openciv.server.listener.SetProductionItemListener;
 import me.rhin.openciv.server.listener.SettleCityListener;
 import me.rhin.openciv.server.listener.UnitMoveListener;
 import me.rhin.openciv.server.listener.WorkTileListener;
+import me.rhin.openciv.shared.packet.type.BuyProductionItemPacket;
 import me.rhin.openciv.shared.packet.type.ClickSpecialistPacket;
 import me.rhin.openciv.shared.packet.type.ClickWorkedTilePacket;
 import me.rhin.openciv.shared.packet.type.CombatPreviewPacket;
@@ -55,7 +57,6 @@ import me.rhin.openciv.shared.packet.type.MoveUnitPacket;
 import me.rhin.openciv.shared.packet.type.NextTurnPacket;
 import me.rhin.openciv.shared.packet.type.PlayerDisconnectPacket;
 import me.rhin.openciv.shared.packet.type.PlayerListRequestPacket;
-import me.rhin.openciv.shared.packet.type.PlayerStatUpdatePacket;
 import me.rhin.openciv.shared.packet.type.RangedAttackPacket;
 import me.rhin.openciv.shared.packet.type.SelectUnitPacket;
 import me.rhin.openciv.shared.packet.type.SetCityHealthPacket;
@@ -67,14 +68,13 @@ import me.rhin.openciv.shared.packet.type.TerritoryGrowPacket;
 import me.rhin.openciv.shared.packet.type.TurnTimeLeftPacket;
 import me.rhin.openciv.shared.packet.type.UnitAttackPacket;
 import me.rhin.openciv.shared.packet.type.WorkTilePacket;
-import me.rhin.openciv.shared.stat.Stat;
 
 //FIXME: Instead of the civ game listening for everything. Just split them off into the respective classes. (EX: CombatPreviewListener in the Unit class)
 //Or just use reflection so we don't have to implement 20+ classes.
 public class InGameState extends GameState implements DisconnectListener, SelectUnitListener, UnitMoveListener,
 		SettleCityListener, PlayerFinishLoadingListener, NextTurnListener, SetProductionItemListener,
 		ClickWorkedTileListener, ClickSpecialistListener, EndTurnListener, PlayerListRequestListener,
-		FetchPlayerListener, CombatPreviewListener, WorkTileListener, RangedAttackListener {
+		FetchPlayerListener, CombatPreviewListener, WorkTileListener, RangedAttackListener, BuyProductionItemListener {
 
 	private static final int BASE_TURN_TIME = 9;
 
@@ -100,6 +100,7 @@ public class InGameState extends GameState implements DisconnectListener, Select
 		Server.getInstance().getEventManager().addListener(CombatPreviewListener.class, this);
 		Server.getInstance().getEventManager().addListener(WorkTileListener.class, this);
 		Server.getInstance().getEventManager().addListener(RangedAttackListener.class, this);
+		Server.getInstance().getEventManager().addListener(BuyProductionItemListener.class, this);
 	}
 
 	@Override
@@ -456,7 +457,7 @@ public class InGameState extends GameState implements DisconnectListener, Select
 		}
 	}
 
-	// TODO: Move to city class
+	// TODO: Move to producibleItemManager
 	@Override
 	public void onSetProductionItem(WebSocket conn, SetProductionItemPacket packet) {
 		// Verify if the player owns that city.
@@ -476,6 +477,28 @@ public class InGameState extends GameState implements DisconnectListener, Select
 
 		Json json = new Json();
 		conn.send(json.toJson(packet));
+	}
+	
+	//TODO: Move to producibleItemManager
+	@Override
+	public void onBuyProductionItem(WebSocket conn, BuyProductionItemPacket packet) {
+		// Verify if the player owns that city.
+		Player player = getPlayerByConn(conn);
+		City targetCity = null;
+		for (City city : player.getOwnedCities()) {
+			if (city.getName().equals(packet.getCityName()))
+				targetCity = city;
+		}
+
+		// TODO: Verify if the item can be produced.
+
+		if (targetCity == null)
+			return;
+
+		targetCity.getProducibleItemManager().buyProducingItem(packet.getItemName());
+
+		//Json json = new Json();
+		//conn.send(json.toJson(packet));
 	}
 
 	// TODO: Move to city class

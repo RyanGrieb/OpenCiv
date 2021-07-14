@@ -20,6 +20,11 @@ public class Market extends Building implements SpecialistContainer {
 	public int getProductionCost() {
 		return 100;
 	}
+	
+	@Override
+	public float getGoldCost() {
+		return 200;
+	}
 
 	@Override
 	public boolean meetsProductionRequirements() {

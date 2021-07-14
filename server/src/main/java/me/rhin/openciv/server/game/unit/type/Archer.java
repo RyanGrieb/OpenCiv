@@ -44,6 +44,11 @@ public class Archer extends UnitItem {
 	public int getProductionCost() {
 		return 40;
 	}
+	
+	@Override
+	public float getGoldCost() {
+		return 100;
+	}
 
 	@Override
 	public boolean meetsProductionRequirements() {

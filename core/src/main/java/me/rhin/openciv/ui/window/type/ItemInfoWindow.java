@@ -6,6 +6,7 @@ import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.city.City;
 import me.rhin.openciv.game.production.ProductionItem;
 import me.rhin.openciv.listener.ResizeListener;
+import me.rhin.openciv.shared.stat.Stat;
 import me.rhin.openciv.ui.background.ColoredBackground;
 import me.rhin.openciv.ui.button.type.BuyItemButton;
 import me.rhin.openciv.ui.button.type.CancelItemButton;
@@ -45,7 +46,7 @@ public class ItemInfoWindow extends AbstractWindow implements ResizeListener {
 		this.itemIcon = new ColoredBackground(productionItem.getTexture().sprite(), getWidth() / 2 - 32 / 2,
 				getHeight() - 48, 32, 32);
 		addActor(itemIcon);
-		
+
 		this.itemDescLabel = new CustomLabel(productionItem.getDesc());
 		itemDescLabel.setPosition(4, itemIcon.getY() - itemIcon.getHeight() - itemDescLabel.getHeight());
 		addActor(itemDescLabel);
@@ -68,6 +69,18 @@ public class ItemInfoWindow extends AbstractWindow implements ResizeListener {
 				buyItemButton.getX() + buyItemButton.getWidth() / 2 - 16 / 2,
 				buyItemButton.getY() + buyItemButton.getHeight(), 16, 16);
 		addActor(buyIcon);
+
+		this.productionCostLabel = new CustomLabel(
+				(int) Math.ceil(
+						(productionItem.getProductionCost() / city.getStatLine().getStatValue(Stat.PRODUCTION_GAIN)))
+						+ " Turns",
+				Align.center, produceIcon.getX(), produceIcon.getY() + produceIcon.getHeight() + 2,
+				produceIcon.getWidth(), 12);
+		addActor(productionCostLabel);
+
+		this.goldCostLabel = new CustomLabel((int) productionItem.getGoldCost() + " Gold", Align.center, buyIcon.getX(),
+				buyIcon.getY() + buyIcon.getHeight() + 2, buyIcon.getWidth(), 12);
+		addActor(goldCostLabel);
 	}
 
 	@Override

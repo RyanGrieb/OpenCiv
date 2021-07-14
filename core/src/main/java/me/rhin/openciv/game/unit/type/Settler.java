@@ -100,6 +100,11 @@ public class Settler extends UnitItem {
 	}
 
 	@Override
+	public float getGoldCost() {
+		return 250;
+	}
+
+	@Override
 	public boolean meetsProductionRequirements() {
 		return true;
 	}
@@ -113,7 +118,7 @@ public class Settler extends UnitItem {
 	public TextureEnum getTexture() {
 		return TextureEnum.UNIT_SETTLER;
 	}
-	
+
 	@Override
 	public String getDesc() {
 		return "Can settle new cities.";

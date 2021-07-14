@@ -19,6 +19,11 @@ public class Monument extends Building {
 	}
 
 	@Override
+	public float getGoldCost() {
+		return 100;
+	}
+
+	@Override
 	public boolean meetsProductionRequirements() {
 		return true;
 	}

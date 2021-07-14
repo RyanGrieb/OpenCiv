@@ -64,7 +64,7 @@ public class ProducibleItemManager implements NextTurnListener {
 		possibleItems.put("Work Boat", new WorkBoat(city));
 		possibleItems.put("Archer", new Archer(city));
 		possibleItems.put("Library", new Library(city));
-		
+
 		Server.getInstance().getEventManager().addListener(NextTurnListener.class, this);
 	}
 
@@ -104,6 +104,27 @@ public class ProducibleItemManager implements NextTurnListener {
 		itemQueue.add(new ProducingItem(possibleItems.get(itemName)));
 	}
 
+	public void buyProducingItem(String itemName) {
+		if (possibleItems.get(itemName) == null)
+			return;
+
+		ProducingItem item = new ProducingItem(possibleItems.get(itemName));
+		
+		if(city.getPlayerOwner().getStatLine().getStatValue(Stat.GOLD) < item.getProductionItem().getGoldCost())
+			return;
+		
+		city.getPlayerOwner().getStatLine().subValue(Stat.GOLD, item.getProductionItem().getGoldCost());
+		item.getProductionItem().create();
+
+		Json json = new Json();
+		
+		FinishProductionItemPacket packet = new FinishProductionItemPacket();
+		packet.setProductionItem(city.getName(), item.getProductionItem().getName());
+		city.getPlayerOwner().getConn().send(json.toJson(packet));
+
+		city.getPlayerOwner().updateOwnedStatlines(false);
+	}
+
 	@Override
 	public void onNextTurn() {
 		ProducingItem producingItem = itemQueue.peek();
@@ -130,8 +151,7 @@ public class ProducibleItemManager implements NextTurnListener {
 			FinishProductionItemPacket packet = new FinishProductionItemPacket();
 			packet.setProductionItem(city.getName(), producingItem.getProductionItem().getName());
 			city.getPlayerOwner().getConn().send(json.toJson(packet));
-			
-			
+
 			city.getPlayerOwner().updateOwnedStatlines(false);
 			return;
 		}

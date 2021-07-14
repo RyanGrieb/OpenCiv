@@ -21,6 +21,11 @@ public class Palace extends Building {
 	}
 
 	@Override
+	public float getGoldCost() {
+		return 0;
+	}
+	
+	@Override
 	public boolean meetsProductionRequirements() {
 		return false;
 	}

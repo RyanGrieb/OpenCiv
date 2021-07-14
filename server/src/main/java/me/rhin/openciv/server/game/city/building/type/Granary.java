@@ -20,6 +20,11 @@ public class Granary extends Building {
 	}
 
 	@Override
+	public float getGoldCost() {
+		return 150;
+	}
+
+	@Override
 	public boolean meetsProductionRequirements() {
 		return city.getPlayerOwner().getResearchTree().hasResearched(PotteryTech.class);
 	}

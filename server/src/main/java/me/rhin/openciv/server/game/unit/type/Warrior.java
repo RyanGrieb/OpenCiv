@@ -40,6 +40,11 @@ public class Warrior extends UnitItem {
 	}
 
 	@Override
+	public float getGoldCost() {
+		return 100;
+	}
+	
+	@Override
 	public boolean meetsProductionRequirements() {
 		return true;
 	}

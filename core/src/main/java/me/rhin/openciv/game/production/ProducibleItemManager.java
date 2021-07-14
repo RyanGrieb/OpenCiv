@@ -20,6 +20,7 @@ import me.rhin.openciv.game.unit.type.Scout;
 import me.rhin.openciv.game.unit.type.Settler;
 import me.rhin.openciv.game.unit.type.Warrior;
 import me.rhin.openciv.game.unit.type.WorkBoat;
+import me.rhin.openciv.shared.packet.type.BuyProductionItemPacket;
 import me.rhin.openciv.shared.packet.type.SetProductionItemPacket;
 
 /**
@@ -77,6 +78,16 @@ public class ProducibleItemManager {
 
 		SetProductionItemPacket packet = new SetProductionItemPacket();
 		packet.setProductionItem(city.getName(), currentProductionItem.getName());
+
+		Civilization.getInstance().getNetworkManager().sendPacket(packet);
+	}
+
+	public void requestBuyProductionItem(ProductionItem productionItem) {
+		Gdx.app.log(Civilization.LOG_TAG,
+				"Requesting to buy: " + productionItem.getName() + " in city: " + city.getName());
+
+		BuyProductionItemPacket packet = new BuyProductionItemPacket();
+		packet.setProductionItem(city.getName(), productionItem.getName());
 
 		Civilization.getInstance().getNetworkManager().sendPacket(packet);
 	}

@@ -41,6 +41,11 @@ public class Galley extends UnitItem {
 	}
 
 	@Override
+	public float getGoldCost() {
+		return 150;
+	}
+
+	@Override
 	public boolean meetsProductionRequirements() {
 		return city.isCoastal() && city.getPlayerOwner().getResearchTree().hasResearched(SailingTech.class);
 	}
@@ -54,7 +59,7 @@ public class Galley extends UnitItem {
 	public TextureEnum getTexture() {
 		return TextureEnum.UNIT_GALLEY;
 	}
-	
+
 	@Override
 	public String getDesc() {
 		return "An ancient naval unit.";

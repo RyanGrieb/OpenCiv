@@ -21,6 +21,11 @@ public class Library extends Building implements SpecialistContainer {
 	public int getProductionCost() {
 		return 75;
 	}
+	
+	@Override
+	public float getGoldCost() {
+		return 175;
+	}
 
 	@Override
 	public boolean meetsProductionRequirements() {

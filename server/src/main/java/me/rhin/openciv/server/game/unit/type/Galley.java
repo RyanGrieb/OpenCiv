@@ -40,6 +40,11 @@ public class Galley extends UnitItem {
 	}
 
 	@Override
+	public float getGoldCost() {
+		return 150;
+	}
+	
+	@Override
 	public boolean meetsProductionRequirements() {
 		return city.isCoastal() && city.getPlayerOwner().getResearchTree().hasResearched(SailingTech.class);
 	}

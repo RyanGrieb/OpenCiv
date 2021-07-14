@@ -85,6 +85,11 @@ public class Builder extends UnitItem {
 	}
 
 	@Override
+	public float getGoldCost() {
+		return 175;
+	}
+	
+	@Override
 	public boolean meetsProductionRequirements() {
 		return true;
 	}

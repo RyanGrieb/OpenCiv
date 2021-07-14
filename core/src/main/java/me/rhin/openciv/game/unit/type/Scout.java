@@ -45,6 +45,11 @@ public class Scout extends UnitItem {
 	public int getProductionCost() {
 		return 25;
 	}
+	
+	@Override
+	public float getGoldCost() {
+		return 100;
+	}
 
 	@Override
 	public boolean meetsProductionRequirements() {

@@ -15,4 +15,6 @@ public interface ProductionItem {
 	public String getCategory();
 
 	public String getDesc();
+
+	public float getGoldCost();
 }

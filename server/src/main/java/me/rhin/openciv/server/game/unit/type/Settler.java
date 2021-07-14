@@ -42,6 +42,11 @@ public class Settler extends UnitItem {
 	public int getProductionCost() {
 		return 80;
 	}
+	
+	@Override
+	public float getGoldCost() {
+		return 250;
+	}
 
 	@Override
 	public boolean meetsProductionRequirements() {
