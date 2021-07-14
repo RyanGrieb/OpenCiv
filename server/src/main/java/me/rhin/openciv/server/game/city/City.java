@@ -253,6 +253,12 @@ public class City implements AttackableEntity, SpecialistContainer, NextTurnList
 		return health - getDamageTaken(otherEntity) > 0;
 	}
 
+
+	@Override
+	public void onCombat() {
+		//TODO: Maybe increase health regen when out of combat?
+	}
+	
 	public int getMaxHealth() {
 		return 200;
 	}

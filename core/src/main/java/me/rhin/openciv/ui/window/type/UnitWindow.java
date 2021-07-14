@@ -13,12 +13,14 @@ import me.rhin.openciv.listener.NextTurnListener;
 import me.rhin.openciv.listener.RemoveTileTypeListener;
 import me.rhin.openciv.listener.ResizeListener;
 import me.rhin.openciv.listener.SetTileTypeListener;
+import me.rhin.openciv.listener.SetUnitHealthListener;
 import me.rhin.openciv.listener.UnitActListener;
 import me.rhin.openciv.listener.UnitAttackListener;
 import me.rhin.openciv.listener.WorkTileListener;
 import me.rhin.openciv.shared.packet.type.NextTurnPacket;
 import me.rhin.openciv.shared.packet.type.RemoveTileTypePacket;
 import me.rhin.openciv.shared.packet.type.SetTileTypePacket;
+import me.rhin.openciv.shared.packet.type.SetUnitHealthPacket;
 import me.rhin.openciv.shared.packet.type.UnitAttackPacket;
 import me.rhin.openciv.shared.packet.type.WorkTilePacket;
 import me.rhin.openciv.ui.background.BlankBackground;
@@ -28,7 +30,7 @@ import me.rhin.openciv.ui.label.CustomLabel;
 import me.rhin.openciv.ui.window.AbstractWindow;
 
 public class UnitWindow extends AbstractWindow implements ResizeListener, UnitAttackListener, NextTurnListener,
-		UnitActListener, WorkTileListener, SetTileTypeListener, RemoveTileTypeListener {
+		UnitActListener, WorkTileListener, SetTileTypeListener, RemoveTileTypeListener, SetUnitHealthListener {
 
 	private CustomLabel unitNameLabel;
 	private CustomLabel movementLabel;
@@ -90,6 +92,7 @@ public class UnitWindow extends AbstractWindow implements ResizeListener, UnitAt
 		Civilization.getInstance().getEventManager().addListener(WorkTileListener.class, this);
 		Civilization.getInstance().getEventManager().addListener(SetTileTypeListener.class, this);
 		Civilization.getInstance().getEventManager().addListener(RemoveTileTypeListener.class, this);
+		Civilization.getInstance().getEventManager().addListener(SetUnitHealthListener.class, this);
 	}
 
 	@Override
@@ -132,6 +135,16 @@ public class UnitWindow extends AbstractWindow implements ResizeListener, UnitAt
 				.getTargetGridY()].getTopUnit();
 
 		if (unit.equals(attackingUnit) || unit.equals(targetUnit)) {
+			healthbar.setHealth(unit.getMaxHealth(), unit.getHealth());
+		}
+	}
+
+	@Override
+	public void onSetUnitHealth(SetUnitHealthPacket packet) {
+		Unit unit = Civilization.getInstance().getGame().getMap().getTiles()[packet.getTileGridX()][packet
+				.getTileGridY()].getUnitFromID(packet.getUnitID());
+
+		if (unit.equals(this.unit)) {
 			healthbar.setHealth(unit.getMaxHealth(), unit.getHealth());
 		}
 	}

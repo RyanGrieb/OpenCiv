@@ -10,7 +10,6 @@ import com.badlogic.gdx.utils.reflect.ClassReflection;
 import com.github.czyzby.websocket.WebSocket;
 import com.github.czyzby.websocket.WebSocketAdapter;
 import com.github.czyzby.websocket.WebSockets;
-import com.github.czyzby.websocket.data.WebSocketCloseCode;
 
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.listener.AddSpecialistToContainerListener.AddSpecialistToContainerEvent;
@@ -43,6 +42,7 @@ import me.rhin.openciv.listener.SetCityHealthListener.SetCityHealthEvent;
 import me.rhin.openciv.listener.SetCityOwnerListener.SetCityOwnerEvent;
 import me.rhin.openciv.listener.SetProductionItemListener.SetProductionItemEvent;
 import me.rhin.openciv.listener.SetTileTypeListener.SetTileTypeEvent;
+import me.rhin.openciv.listener.SetUnitHealthListener.SetUnitHealthEvent;
 import me.rhin.openciv.listener.SetUnitOwnerListener.SetUnitOwnerEvent;
 import me.rhin.openciv.listener.SetWorldSizeListener.SetWorldSizeEvent;
 import me.rhin.openciv.listener.SettleCityListener.SettleCityEvent;
@@ -82,6 +82,7 @@ import me.rhin.openciv.shared.packet.type.SetCityHealthPacket;
 import me.rhin.openciv.shared.packet.type.SetCityOwnerPacket;
 import me.rhin.openciv.shared.packet.type.SetProductionItemPacket;
 import me.rhin.openciv.shared.packet.type.SetTileTypePacket;
+import me.rhin.openciv.shared.packet.type.SetUnitHealthPacket;
 import me.rhin.openciv.shared.packet.type.SetUnitOwnerPacket;
 import me.rhin.openciv.shared.packet.type.SetWorldSizePacket;
 import me.rhin.openciv.shared.packet.type.SettleCityPacket;
@@ -134,6 +135,7 @@ public class NetworkManager {
 		networkEvents.put(SetTileTypePacket.class, SetTileTypeEvent.class);
 		networkEvents.put(CompleteResearchPacket.class, CompleteResearchEvent.class);
 		networkEvents.put(RemoveTileTypePacket.class, RemoveTileTypeEvent.class);
+		networkEvents.put(SetUnitHealthPacket.class, SetUnitHealthEvent.class);
 	}
 
 	public void connect(String ip) {

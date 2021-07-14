@@ -52,10 +52,10 @@ public class EventManager {
 		listenerMap.clear();
 	}
 
+	@SuppressWarnings("unchecked")
 	public <L extends Listener> void clearListenersFromObject(L listener) {
 		// Go through all the listeners
-		for (Class<? extends Listener> listenerType : listenerMap.keySet()) {
-			@SuppressWarnings("unchecked")
+		for (Class<? extends Listener> listenerType : ((HashMap<Class<? extends Listener>, ArrayList<? extends Listener>>) listenerMap.clone()).keySet()) {
 			ArrayList<L> listeners = (ArrayList<L>) listenerMap.get(listenerType);
 
 			// Remove object attached all listeners

@@ -20,5 +20,7 @@ public interface AttackableEntity {
 	public boolean surviveAttack(AttackableEntity otherEntity);
 
 	public void setHealth(float health);
+	
+	public void onCombat();
 
 }

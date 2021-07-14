@@ -4,11 +4,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.utils.Json;
 
 import me.rhin.openciv.server.Server;
 import me.rhin.openciv.server.game.Player;
 import me.rhin.openciv.server.game.map.tile.Tile;
 import me.rhin.openciv.server.listener.NextTurnListener;
+import me.rhin.openciv.shared.packet.type.SetUnitHealthPacket;
 
 public abstract class Unit implements AttackableEntity, NextTurnListener {
 
@@ -25,6 +27,7 @@ public abstract class Unit implements AttackableEntity, NextTurnListener {
 	private int pathMovement;
 	private int movement;
 	private float health;
+	private int turnsSinceCombat;
 
 	public Unit(Player playerOwner, Tile standingTile) {
 		this.id = unitID++;
@@ -32,6 +35,7 @@ public abstract class Unit implements AttackableEntity, NextTurnListener {
 		this.standingTile = standingTile;
 		this.movement = getMaxMovement();
 		this.health = 100;
+		this.turnsSinceCombat = 0;
 		setPosition(standingTile.getVectors()[0].x - standingTile.getWidth() / 2, standingTile.getVectors()[0].y + 4);
 		setSize(standingTile.getWidth(), standingTile.getHeight());
 
@@ -43,6 +47,31 @@ public abstract class Unit implements AttackableEntity, NextTurnListener {
 	@Override
 	public void onNextTurn() {
 		this.movement = getMaxMovement();
+
+		if (turnsSinceCombat < 2 || health >= 100) {
+
+			turnsSinceCombat++;
+			return;
+		}
+		
+		if (standingTile.getTerritory() != null && standingTile.getTerritory().getPlayerOwner().equals(playerOwner)) {
+			// Set health.
+			this.health += 15;
+		} else
+			this.health += 10;
+
+		if (health > 100)
+			health = 100;
+
+		Json json = new Json();
+
+		SetUnitHealthPacket packet = new SetUnitHealthPacket();
+		packet.setUnit(playerOwner.getName(), id, standingTile.getGridX(), standingTile.getGridY(), health);
+
+		for (Player player : Server.getInstance().getPlayers())
+			player.getConn().send(json.toJson(packet));
+
+		turnsSinceCombat++;
 	}
 
 	@Override
@@ -82,6 +111,11 @@ public abstract class Unit implements AttackableEntity, NextTurnListener {
 	@Override
 	public void setHealth(float health) {
 		this.health = health;
+	}
+
+	@Override
+	public void onCombat() {
+		turnsSinceCombat = 0;
 	}
 
 	@Override

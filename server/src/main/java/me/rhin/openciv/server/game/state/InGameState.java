@@ -270,7 +270,10 @@ public class InGameState extends GameState implements DisconnectListener, Select
 
 				float unitDamage = unit.getDamageTaken(targetEntity);
 				float targetDamage = targetEntity.getDamageTaken(unit);
-
+				
+				unit.onCombat();
+				targetEntity.onCombat();
+				
 				unit.setHealth(unit.getHealth() - unitDamage);
 				targetEntity.setHealth(targetEntity.getHealth() - targetDamage);
 
