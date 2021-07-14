@@ -381,7 +381,9 @@ public class InGameState extends GameState implements DisconnectListener, Select
 	public void onSettleCity(WebSocket conn, SettleCityPacket settleCityPacket) {
 		Player cityPlayer = getPlayerByConn(conn);
 		settleCityPacket.setOwner(cityPlayer.getName());
-
+		
+		//FIXME: The server needs to check if the unit has movement & is too close to other cities.
+		
 		String cityName = "Unknown";
 		boolean identicalName = true;
 

@@ -70,6 +70,21 @@ public class Settler extends UnitItem {
 			if (unit.getCurrentMovement() < 1) {
 				return false;
 			}
+
+			for (City city : Civilization.getInstance().getGame().getCities()) {
+				float distX = Math.abs(unit.getTile().getGridX() - city.getOriginTile().getGridX());
+				float distY = Math.abs(unit.getTile().getGridY() - city.getOriginTile().getGridY());
+
+				System.out.println(distX + distY);
+				if (distX + distY < 4)
+					return false;
+			}
+
+			for (Tile tile : unit.getStandingTile().getAdjTiles())
+				for (Tile adjTile : tile.getAdjTiles())
+					if (adjTile.getTerritory() != null)
+						return false;
+
 			return true;
 		}
 

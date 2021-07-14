@@ -1,5 +1,6 @@
 package me.rhin.openciv.game;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import com.badlogic.gdx.Gdx;
@@ -296,6 +297,14 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 
 	public int getTurn() {
 		return turns;
+	}
+
+	public ArrayList<City> getCities() {
+		ArrayList<City> cities = new ArrayList<>();
+		for (Player player : players.values())
+			cities.addAll(player.getOwnedCities());
+
+		return cities;
 	}
 
 }
