@@ -18,6 +18,7 @@ import me.rhin.openciv.game.map.GameMap;
 import me.rhin.openciv.game.map.RiverPart;
 import me.rhin.openciv.game.map.tile.TileType.TileLayer;
 import me.rhin.openciv.game.map.tile.TileType.TileProperty;
+import me.rhin.openciv.game.player.Player;
 import me.rhin.openciv.game.unit.AttackableEntity;
 import me.rhin.openciv.game.unit.Unit;
 import me.rhin.openciv.listener.BottomShapeRenderListener;
@@ -491,6 +492,18 @@ public class Tile extends Actor implements BottomShapeRenderListener {
 		return topUnit;
 	}
 
+	public Unit getTopEnemyUnit(Player player) {
+		Unit topUnit = null;
+		for (Unit unit : units) {
+			if (unit.getPlayerOwner().equals(player))
+				continue;
+			if (topUnit == null || topUnit.getCombatStrength() < unit.getCombatStrength())
+				topUnit = unit;
+		}
+
+		return topUnit;
+	}
+
 	public City getCity() {
 		return city;
 	}
@@ -499,8 +512,25 @@ public class Tile extends Actor implements BottomShapeRenderListener {
 		return improved;
 	}
 
+	public AttackableEntity getEnemyAttackableEntity(Player player) {
+
+		// Problem: This can AND WILL pick up friendly units. Fixed by having to return
+		// enemy cities first.
+		if (city != null)
+			return city;
+
+		Unit unit = getTopEnemyUnit(player);
+		if (unit != null)
+			return unit;
+
+		return null;
+	}
+
+	@Deprecated
 	public AttackableEntity getAttackableEntity() {
 
+		// Problem: This can AND WILL pick up friendly units. Fixed by having to return
+		// enemy cities first.
 		if (city != null)
 			return city;
 

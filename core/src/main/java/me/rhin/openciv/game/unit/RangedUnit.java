@@ -96,17 +96,16 @@ public abstract class RangedUnit extends Unit
 
 		Tile tile = Civilization.getInstance().getGame().getPlayer().getHoveredTile();
 
-		if (!targeting || tile == null || tile.getAttackableEntity() == null || !tile.hasRangedTarget()) {
+		if (!targeting || tile == null || tile.getEnemyAttackableEntity(getPlayerOwner()) == null || !tile.hasRangedTarget()) {
 			rangedTarget = null;
 			targetSelectionSprite.setColor(Color.YELLOW);
 			Civilization.getInstance().getWindowManager().closeWindow(UnitCombatWindow.class);
 			return;
 		}
 
-		if (!tile.getAttackableEntity().getPlayerOwner().equals(getPlayerOwner())
-				&& (rangedTarget == null || !rangedTarget.equals(tile.getAttackableEntity()))) {
-			rangedTarget = tile.getAttackableEntity();
-			System.out.println("hi3");
+		if (rangedTarget == null || !rangedTarget.equals(tile.getEnemyAttackableEntity(getPlayerOwner()))) {
+			rangedTarget = tile.getEnemyAttackableEntity(getPlayerOwner());
+
 			targetSelectionSprite.setPosition(tile.getVectors()[0].x - tile.getWidth() / 2, tile.getVectors()[0].y + 4);
 			targetSelectionSprite.setSize(tile.getWidth(), tile.getHeight());
 			targetSelectionSprite.setColor(Color.RED);
