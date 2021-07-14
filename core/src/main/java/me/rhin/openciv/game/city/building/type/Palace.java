@@ -35,4 +35,9 @@ public class Palace extends Building {
 	public TextureEnum getTexture() {
 		return TextureEnum.UI_ERROR;
 	}
+
+	@Override
+	public String getDesc() {
+		return "???";
+	}
 }

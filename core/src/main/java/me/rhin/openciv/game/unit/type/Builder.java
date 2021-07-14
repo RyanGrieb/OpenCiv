@@ -35,7 +35,7 @@ public class Builder extends UnitItem {
 
 		public BuilderUnit(UnitParameter unitParameter) {
 			super(unitParameter, TextureEnum.UNIT_BUILDER);
-			//FIXME: Move these classes into a separate package 
+			// FIXME: Move these classes into a separate package
 			customActions.add(new FarmAction(this));
 			customActions.add(new MineAction(this));
 			customActions.add(new ChopAction(this));
@@ -323,7 +323,6 @@ public class Builder extends UnitItem {
 		}
 	}
 
-	
 	@Override
 	public int getProductionCost() {
 		return 50;
@@ -342,5 +341,10 @@ public class Builder extends UnitItem {
 	@Override
 	public TextureEnum getTexture() {
 		return TextureEnum.UNIT_BUILDER;
+	}
+
+	@Override
+	public String getDesc() {
+		return "Can improve tiles on the map. \nCertain tiles require a specific \nresearch.";
 	}
 }

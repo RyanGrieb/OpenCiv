@@ -113,4 +113,9 @@ public class Settler extends UnitItem {
 	public TextureEnum getTexture() {
 		return TextureEnum.UNIT_SETTLER;
 	}
+	
+	@Override
+	public String getDesc() {
+		return "Can settle new cities.";
+	}
 }

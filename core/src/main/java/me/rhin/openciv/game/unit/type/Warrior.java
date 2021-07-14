@@ -54,4 +54,9 @@ public class Warrior extends UnitItem {
 	public TextureEnum getTexture() {
 		return TextureEnum.UNIT_WARRIOR;
 	}
+	
+	@Override
+	public String getDesc() {
+		return "An ancient melee unit.";
+	}
 }

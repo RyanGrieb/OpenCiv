@@ -35,4 +35,9 @@ public class Granary extends Building {
 	public TextureEnum getTexture() {
 		return TextureEnum.BUILDING_GRANARY;
 	}
+
+	@Override
+	public String getDesc() {
+		return "Provides an additional food source.\n+2 Food\n+1 Maintenance";
+	}
 }

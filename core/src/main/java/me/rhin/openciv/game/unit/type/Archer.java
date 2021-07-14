@@ -59,4 +59,9 @@ public class Archer extends UnitItem {
 	public TextureEnum getTexture() {
 		return TextureEnum.UNIT_ARCHER;
 	}
+
+	@Override
+	public String getDesc() {
+		return "A ancient ranged unit.";
+	}
 }

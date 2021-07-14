@@ -33,4 +33,9 @@ public class Monument extends Building {
 	public TextureEnum getTexture() {
 		return TextureEnum.BUILDING_MONUMENT;
 	}
+
+	@Override
+	public String getDesc() {
+		return "Provides an additonal source of \nheritage to further increase \nborder growth.\n+2 Heritage\n+1 Maintenance";
+	}
 }

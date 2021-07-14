@@ -16,6 +16,7 @@ import me.rhin.openciv.shared.packet.type.CityStatUpdatePacket;
 import me.rhin.openciv.shared.stat.Stat;
 import me.rhin.openciv.ui.label.CustomLabel;
 import me.rhin.openciv.ui.list.ListObject;
+import me.rhin.openciv.ui.window.type.ItemInfoWindow;
 
 public class ListProductionItem extends ListObject implements CityStatUpdateListener {
 
@@ -57,7 +58,11 @@ public class ListProductionItem extends ListObject implements CityStatUpdateList
 		this.addListener(new ClickListener() {
 			@Override
 			public void clicked(InputEvent event, float x, float y) {
-				city.getProducibleItemManager().requestSetProductionItem(productionItem);
+				// city.getProducibleItemManager().requestSetProductionItem(productionItem);
+				if (!Civilization.getInstance().getWindowManager().allowsInput())
+					return;
+
+				Civilization.getInstance().getWindowManager().addWindow(new ItemInfoWindow(city, productionItem));
 			}
 
 			@Override
@@ -70,17 +75,17 @@ public class ListProductionItem extends ListObject implements CityStatUpdateList
 				hovered = false;
 			}
 		});
-		
+
 		Civilization.getInstance().getEventManager().addListener(CityStatUpdateListener.class, this);
 	}
-	
+
 	@Override
 	public void onCityStatUpdate(CityStatUpdatePacket packet) {
 		itemTurnCostLabel.setText((int) Math
 				.ceil((productionItem.getProductionCost() / city.getStatLine().getStatValue(Stat.PRODUCTION_GAIN)))
 				+ " Turns");
 	}
-	
+
 	@Override
 	public void clearListeners() {
 		super.clearListeners();
@@ -96,7 +101,7 @@ public class ListProductionItem extends ListObject implements CityStatUpdateList
 		itemIconSprite.draw(batch);
 		itemNameLabel.draw(batch, parentAlpha);
 		itemTurnCostLabel.draw(batch, parentAlpha);
-		
+
 		super.draw(batch, parentAlpha);
 	}
 
@@ -109,7 +114,7 @@ public class ListProductionItem extends ListObject implements CityStatUpdateList
 		itemNameLabel.setPosition(x, y);
 		itemTurnCostLabel.setPosition(x, y);
 	}
-	
+
 	public ProductionItem getProductionItem() {
 		return productionItem;
 	}

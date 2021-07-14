@@ -57,4 +57,9 @@ public class Market extends Building implements SpecialistContainer {
 		// TODO Auto-generated method stub
 
 	}
+
+	@Override
+	public String getDesc() {
+		return "Provides an additional source of \ngold.\n+2 Gold";
+	}
 }

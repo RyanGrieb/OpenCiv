@@ -60,4 +60,9 @@ public class Scout extends UnitItem {
 	public TextureEnum getTexture() {
 		return TextureEnum.UNIT_SCOUT;
 	}
+
+	@Override
+	public String getDesc() {
+		return "Ignores movement cost of tiles.";
+	}
 }

@@ -54,4 +54,9 @@ public class Galley extends UnitItem {
 	public TextureEnum getTexture() {
 		return TextureEnum.UNIT_GALLEY;
 	}
+	
+	@Override
+	public String getDesc() {
+		return "An ancient naval unit.";
+	}
 }

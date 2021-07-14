@@ -55,4 +55,9 @@ public class WorkBoat extends UnitItem {
 	public TextureEnum getTexture() {
 		return TextureEnum.UNIT_WORK_BOAT;
 	}
+
+	@Override
+	public String getDesc() {
+		return "A naval builder. Can improve ocean tiles.";
+	}
 }

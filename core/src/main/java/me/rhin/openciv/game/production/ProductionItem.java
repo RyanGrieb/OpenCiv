@@ -13,4 +13,6 @@ public interface ProductionItem {
 	public boolean meetsProductionRequirements();
 
 	public String getCategory();
+
+	public String getDesc();
 }
