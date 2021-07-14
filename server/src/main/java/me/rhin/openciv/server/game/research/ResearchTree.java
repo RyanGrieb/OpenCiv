@@ -38,7 +38,7 @@ public class ResearchTree implements NextTurnListener {
 		technologies.put(ArcheryTech.class, new ArcheryTech(this));
 		technologies.put(MiningTech.class, new MiningTech(this));
 		technologies.put(SailingTech.class, new SailingTech(this));
-		technologies.put(CalendarTech.class, new CalendarTech(this));		
+		technologies.put(CalendarTech.class, new CalendarTech(this));
 		technologies.put(WritingTech.class, new WritingTech(this));
 		technologies.put(TrappingTech.class, new TrappingTech(this));
 
@@ -47,7 +47,7 @@ public class ResearchTree implements NextTurnListener {
 
 	@Override
 	public void onNextTurn() {
-		if (techResearching == null)
+		if (techResearching == null || player.getConn().isClosed())
 			return;
 
 		techResearching.applyScience(player.getStatLine().getStatValue(Stat.SCIENCE_GAIN));
