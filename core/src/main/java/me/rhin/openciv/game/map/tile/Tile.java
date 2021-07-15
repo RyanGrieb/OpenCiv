@@ -372,7 +372,7 @@ public class Tile extends Actor implements BottomShapeRenderListener {
 	public void defineBorders() {
 		int index = 0;
 		for (Tile adjTile : getAdjTiles()) {
-			if (adjTile.getTerritory() == null) {
+			if (adjTile.getTerritory() == null || !adjTile.getTerritory().equals(territory)) {
 				// Draw a line at the index here.
 				territoryBorders[index] = true;
 			}
