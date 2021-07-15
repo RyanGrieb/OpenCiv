@@ -134,7 +134,7 @@ public abstract class Unit implements AttackableEntity, NextTurnListener {
 	public float getHealth() {
 		return health;
 	}
-	
+
 	public void clearListeners() {
 		Server.getInstance().getEventManager().clearListenersFromObject(this);
 	}
@@ -369,5 +369,9 @@ public abstract class Unit implements AttackableEntity, NextTurnListener {
 
 	public Tile[][] getCameFromTiles() {
 		return cameFrom;
+	}
+
+	public void kill() {
+		clearListeners();
 	}
 }

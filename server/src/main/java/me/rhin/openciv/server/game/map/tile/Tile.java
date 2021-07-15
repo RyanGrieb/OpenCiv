@@ -216,7 +216,6 @@ public class Tile {
 
 	public void removeUnit(Unit unit) {
 		units.remove(unit);
-		unit.clearListeners();
 	}
 
 	public boolean hasUnitSelected() {
@@ -322,6 +321,7 @@ public class Tile {
 		return territory;
 	}
 
+	
 	public Unit getUnitFromID(int unitID) {
 		for (Unit unit : units)
 			if (unit.getID() == unitID)

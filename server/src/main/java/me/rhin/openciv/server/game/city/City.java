@@ -524,7 +524,7 @@ public class City implements AttackableEntity, SpecialistContainer, NextTurnList
 
 		for (Tile tile : territory) {
 			for (Tile adjTile : tile.getAdjTiles()) {
-				if (territory.contains(adjTile))
+				if (territory.contains(adjTile) || adjTile.getTerritory() != null)
 					continue;
 
 				topTiles.add(adjTile);

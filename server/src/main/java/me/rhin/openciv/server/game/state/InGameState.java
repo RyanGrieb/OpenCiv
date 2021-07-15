@@ -299,6 +299,8 @@ public class InGameState extends GameState implements DisconnectListener, Select
 						Unit targetUnit = (Unit) targetEntity;
 						targetUnit.getStandingTile().removeUnit(targetUnit);
 
+						targetUnit.kill();
+
 						// FIXME: Redundant code.
 						DeleteUnitPacket removeUnitPacket = new DeleteUnitPacket();
 						removeUnitPacket.setUnit(targetUnit.getID(), targetUnit.getStandingTile().getGridX(),
@@ -345,6 +347,8 @@ public class InGameState extends GameState implements DisconnectListener, Select
 
 								city.getTile().removeUnit(cityUnit);
 
+								cityUnit.kill();
+
 								DeleteUnitPacket removeUnitPacket = new DeleteUnitPacket();
 								removeUnitPacket.setUnit(cityUnit.getID(), cityUnit.getStandingTile().getGridX(),
 										cityUnit.getStandingTile().getGridY());
@@ -361,6 +365,8 @@ public class InGameState extends GameState implements DisconnectListener, Select
 				if (unit.getHealth() <= 0) {
 					unit.getStandingTile().removeUnit(unit);
 
+					unit.kill();
+
 					DeleteUnitPacket removeUnitPacket = new DeleteUnitPacket();
 					removeUnitPacket.setUnit(unit.getID(), unit.getStandingTile().getGridX(),
 							unit.getStandingTile().getGridY());
@@ -368,6 +374,7 @@ public class InGameState extends GameState implements DisconnectListener, Select
 					for (Player player : players) {
 						player.getConn().send(json.toJson(removeUnitPacket));
 					}
+
 				}
 
 			}
@@ -414,6 +421,8 @@ public class InGameState extends GameState implements DisconnectListener, Select
 		cityPlayer.setSelectedUnit(null);
 
 		tile.removeUnit(unit);
+
+		unit.kill();
 
 		DeleteUnitPacket deleteUnitPacket = new DeleteUnitPacket();
 		deleteUnitPacket.setUnit(unit.getID(), settleCityPacket.getGridX(), settleCityPacket.getGridY());
@@ -642,6 +651,8 @@ public class InGameState extends GameState implements DisconnectListener, Select
 
 					Unit targetUnit = (Unit) targetEntity;
 					targetUnit.getStandingTile().removeUnit(targetUnit);
+
+					targetUnit.kill();
 
 					// FIXME: Redundant code.
 					DeleteUnitPacket removeUnitPacket = new DeleteUnitPacket();
