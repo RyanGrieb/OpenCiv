@@ -69,20 +69,20 @@ public class Player implements NextTurnListener, ChooseTechListener {
 		if (!conn.equals(this.conn))
 			return;
 
+		// FIXME: Check if the player is able to research that tech. (Prevent cheating).
 		researchTree.chooseTech(packet.getTechID());
 	}
-	
+
 	public void updateOwnedStatlines(boolean increaseValues) {
 
 		statLine.clearNonAccumulative();
 
-		//Problem, don't update our accumulated values 
 		for (City city : ownedCities)
 			statLine.mergeStatLineExcluding(city.getStatLine(), StatType.CITY_EXCLUSIVE);
 
-		if(increaseValues)
-		statLine.updateStatLine();
-		
+		if (increaseValues)
+			statLine.updateStatLine();
+
 		PlayerStatUpdatePacket packet = new PlayerStatUpdatePacket();
 		for (Stat stat : statLine.getStatValues().keySet()) {
 			if (stat.getStatType() != StatType.CITY_EXCLUSIVE)
@@ -91,7 +91,6 @@ public class Player implements NextTurnListener, ChooseTechListener {
 		Json json = new Json();
 		conn.send(json.toJson(packet));
 	}
-
 
 	public void mergeStatLine(StatLine statLine) {
 		this.statLine.mergeStatLine(statLine);

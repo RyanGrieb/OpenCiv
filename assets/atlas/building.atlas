@@ -13,7 +13,7 @@ building_circus
   index: -1
 building_granary
   rotate: false
-  xy: 138, 2
+  xy: 172, 2
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
@@ -35,6 +35,13 @@ building_market
 building_monument
   rotate: false
   xy: 2, 2
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+building_watermill
+  rotate: false
+  xy: 138, 2
   size: 32, 32
   orig: 32, 32
   offset: 0, 0

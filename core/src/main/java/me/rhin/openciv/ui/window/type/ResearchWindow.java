@@ -8,11 +8,9 @@ import com.badlogic.gdx.utils.Align;
 
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.game.research.Technology;
-import me.rhin.openciv.listener.CompleteResearchListener;
 import me.rhin.openciv.listener.PickResearchListener;
 import me.rhin.openciv.listener.ResizeListener;
 import me.rhin.openciv.listener.TopShapeRenderListener;
-import me.rhin.openciv.shared.packet.type.CompleteResearchPacket;
 import me.rhin.openciv.ui.background.BlankBackground;
 import me.rhin.openciv.ui.button.type.CloseResearchButton;
 import me.rhin.openciv.ui.game.TechnologyLeaf;
@@ -134,6 +132,10 @@ public class ResearchWindow extends AbstractWindow
 
 	@Override
 	public void onTopShapeRender(ShapeRenderer shapeRenderer) {
+		// FIXME: More elegant solution
+		if (Civilization.getInstance().getWindowManager().isOpenWindow(PickResearchWindow.class))
+			return;
+
 		for (TechnologyLeaf leaf : technologyLeafs) {
 			if (leaf.getTech().getRequiredTechs().size() > 0) {
 
@@ -242,25 +244,28 @@ public class ResearchWindow extends AbstractWindow
 		if (tech.getRequiredTechs().size() > 0) {
 
 			Class<? extends Technology> requiredTechClass = tech.getRequiredTechs().get(0); // FIXME: Support > 1
-
+			System.out.println(requiredTechClass);
 			boolean singleTech = true;
 
 			for (Technology otherTech : Civilization.getInstance().getGame().getPlayer().getResearchTree()
 					.getTechnologies()) {
-				if (otherTech.equals(tech))
+				if (otherTech.equals(tech) || otherTech.getClass() == requiredTechClass)
 					continue;
 				if (otherTech.getRequiredTechs().contains(requiredTechClass))
 					singleTech = false;
 			}
 
+			//Subtract our y to be below our similar leafs that branch out
 			for (TechnologyLeaf leaf : technologyLeafs)
 				if (leaf.getTech().getRequiredTechs().contains(requiredTechClass))
 					y -= height + 3;
 
+			// If were not a single tech, increase our height to be above the center
 			if (!singleTech)
 				y += height + 3;
 		}
 
+		//If were the first techs, decrease our high to allow branching off.
 		if (requiredTechs == 0) {
 			y -= height + 3;
 		}

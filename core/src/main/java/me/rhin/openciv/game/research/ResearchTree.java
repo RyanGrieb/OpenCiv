@@ -7,10 +7,12 @@ import java.util.List;
 import me.rhin.openciv.game.research.type.AnimalHusbandryTech;
 import me.rhin.openciv.game.research.type.ArcheryTech;
 import me.rhin.openciv.game.research.type.CalendarTech;
+import me.rhin.openciv.game.research.type.MathematicsTech;
 import me.rhin.openciv.game.research.type.MiningTech;
 import me.rhin.openciv.game.research.type.PotteryTech;
 import me.rhin.openciv.game.research.type.SailingTech;
 import me.rhin.openciv.game.research.type.TrappingTech;
+import me.rhin.openciv.game.research.type.WheelTech;
 import me.rhin.openciv.game.research.type.WritingTech;
 
 public class ResearchTree {
@@ -29,6 +31,8 @@ public class ResearchTree {
 		technologies.put(CalendarTech.class, new CalendarTech());
 		technologies.put(WritingTech.class, new WritingTech());
 		technologies.put(TrappingTech.class, new TrappingTech());
+		technologies.put(WheelTech.class, new WheelTech());
+		technologies.put(MathematicsTech.class, new MathematicsTech());
 	}
 
 	public List<Technology> getTechnologies() {

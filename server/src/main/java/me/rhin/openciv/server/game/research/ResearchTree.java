@@ -11,10 +11,12 @@ import me.rhin.openciv.server.game.Player;
 import me.rhin.openciv.server.game.research.type.AnimalHusbandryTech;
 import me.rhin.openciv.server.game.research.type.ArcheryTech;
 import me.rhin.openciv.server.game.research.type.CalendarTech;
+import me.rhin.openciv.server.game.research.type.MathematicsTech;
 import me.rhin.openciv.server.game.research.type.MiningTech;
 import me.rhin.openciv.server.game.research.type.PotteryTech;
 import me.rhin.openciv.server.game.research.type.SailingTech;
 import me.rhin.openciv.server.game.research.type.TrappingTech;
+import me.rhin.openciv.server.game.research.type.WheelTech;
 import me.rhin.openciv.server.game.research.type.WritingTech;
 import me.rhin.openciv.server.listener.NextTurnListener;
 import me.rhin.openciv.shared.packet.type.CompleteResearchPacket;
@@ -41,6 +43,8 @@ public class ResearchTree implements NextTurnListener {
 		technologies.put(CalendarTech.class, new CalendarTech(this));
 		technologies.put(WritingTech.class, new WritingTech(this));
 		technologies.put(TrappingTech.class, new TrappingTech(this));
+		technologies.put(WheelTech.class, new WheelTech(this));
+		technologies.put(MathematicsTech.class, new MathematicsTech(this));
 
 		Server.getInstance().getEventManager().addListener(NextTurnListener.class, this);
 	}
