@@ -27,4 +27,9 @@ public class Monument extends Building {
 	public boolean meetsProductionRequirements() {
 		return true;
 	}
+	
+	@Override
+	public String getName() {
+		return "Monument";
+	}
 }

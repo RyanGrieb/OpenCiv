@@ -321,7 +321,6 @@ public class Tile {
 		return territory;
 	}
 
-	
 	public Unit getUnitFromID(int unitID) {
 		for (Unit unit : units)
 			if (unit.getID() == unitID)
@@ -575,5 +574,14 @@ public class Tile {
 			combatModifier -= 0.10;
 
 		return combatModifier;
+	}
+
+	public boolean isAdjToRiver() {
+		for (boolean part : riverSides) {
+			if (part)
+				return true;
+		}
+
+		return false;
 	}
 }

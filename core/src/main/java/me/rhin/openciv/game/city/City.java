@@ -142,7 +142,9 @@ public class City extends Group implements AttackableEntity, TileObserver, Speci
 		if (!getName().equals(packet.getCityName()))
 			return;
 
-		String buildingClassName = "me.rhin.openciv.game.city.building.type." + packet.getBuildingName();
+		String buildingClassName = "me.rhin.openciv.game.city.building.type."
+				+ packet.getBuildingName().replaceAll(" ", "");
+
 		try {
 			Class<? extends Building> buildingClass = (Class<? extends Building>) ClassReflection
 					.forName(buildingClassName);

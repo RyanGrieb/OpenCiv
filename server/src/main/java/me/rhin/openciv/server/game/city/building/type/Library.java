@@ -70,4 +70,9 @@ public class Library extends Building implements CityGrowthListener, CityStarveL
 	public SpecialistType getSpecialistType() {
 		return SpecialistType.SCIENTIST;
 	}
+
+	@Override
+	public String getName() {
+		return "Library";
+	}
 }

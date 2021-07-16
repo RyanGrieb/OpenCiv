@@ -34,4 +34,9 @@ public class Market extends Building {
 	public SpecialistType getSpecialistType() {
 		return SpecialistType.MERCHANT;
 	}
+	
+	@Override
+	public String getName() {
+		return "Market";
+	}
 }

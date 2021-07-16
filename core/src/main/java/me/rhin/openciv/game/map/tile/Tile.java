@@ -619,6 +619,15 @@ public class Tile extends Actor implements BottomShapeRenderListener {
 		return rangedTarget;
 	}
 
+	public boolean isAdjToRiver() {
+		for (RiverPart part : riverSides) {
+			if (part != null)
+				return true;
+		}
+
+		return false;
+	}
+
 	private void initializeVectors() {
 		this.vectors = new Vector2[6];
 

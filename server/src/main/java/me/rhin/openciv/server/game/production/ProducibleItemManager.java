@@ -14,6 +14,7 @@ import me.rhin.openciv.server.game.city.building.type.Granary;
 import me.rhin.openciv.server.game.city.building.type.Library;
 import me.rhin.openciv.server.game.city.building.type.Market;
 import me.rhin.openciv.server.game.city.building.type.Monument;
+import me.rhin.openciv.server.game.city.building.type.WaterMill;
 import me.rhin.openciv.server.game.unit.type.Archer;
 import me.rhin.openciv.server.game.unit.type.Builder;
 import me.rhin.openciv.server.game.unit.type.Galley;
@@ -64,6 +65,7 @@ public class ProducibleItemManager implements NextTurnListener {
 		possibleItems.put("Work Boat", new WorkBoat(city));
 		possibleItems.put("Archer", new Archer(city));
 		possibleItems.put("Library", new Library(city));
+		possibleItems.put("Water Mill", new WaterMill(city));
 
 		Server.getInstance().getEventManager().addListener(NextTurnListener.class, this);
 	}
@@ -75,6 +77,7 @@ public class ProducibleItemManager implements NextTurnListener {
 	public ArrayList<ProductionItem> getProducibleItems() {
 		ArrayList<ProductionItem> producibleItems = new ArrayList<>();
 
+		// FIXME: I believe this returns items that DONT meet production requirements
 		for (ProductionItem item : possibleItems.values()) {
 			if (item.meetsProductionRequirements())
 				producibleItems.add(item);
@@ -109,15 +112,15 @@ public class ProducibleItemManager implements NextTurnListener {
 			return;
 
 		ProducingItem item = new ProducingItem(possibleItems.get(itemName));
-		
-		if(city.getPlayerOwner().getStatLine().getStatValue(Stat.GOLD) < item.getProductionItem().getGoldCost())
+
+		if (city.getPlayerOwner().getStatLine().getStatValue(Stat.GOLD) < item.getProductionItem().getGoldCost())
 			return;
-		
+
 		city.getPlayerOwner().getStatLine().subValue(Stat.GOLD, item.getProductionItem().getGoldCost());
 		item.getProductionItem().create();
 
 		Json json = new Json();
-		
+
 		FinishProductionItemPacket packet = new FinishProductionItemPacket();
 		packet.setProductionItem(city.getName(), item.getProductionItem().getName());
 		city.getPlayerOwner().getConn().send(json.toJson(packet));

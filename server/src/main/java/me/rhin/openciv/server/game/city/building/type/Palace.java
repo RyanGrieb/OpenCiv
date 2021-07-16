@@ -29,4 +29,9 @@ public class Palace extends Building {
 	public boolean meetsProductionRequirements() {
 		return false;
 	}
+	
+	@Override
+	public String getName() {
+		return "Palace";
+	}
 }
