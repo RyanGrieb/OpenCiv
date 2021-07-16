@@ -813,7 +813,8 @@ public class InGameState extends GameState implements DisconnectListener, Select
 
 		// Debug code
 		if (players.size() > 1) {
-			players.get(0).setSpawnPos(players.get(1).getSpawnX() + 1, players.get(1).getSpawnY() + 1);
+			// players.get(0).setSpawnPos(players.get(1).getSpawnX() + 1,
+			// players.get(1).getSpawnY() + 1);
 		}
 
 		for (Player player : players) {
@@ -836,8 +837,8 @@ public class InGameState extends GameState implements DisconnectListener, Select
 			int loopLimit = 500;
 			while ((assignedLuxTiles < 3 || assignedResourceTiles < 4) && loopLimit > 0) {
 
-				int randX = rnd.nextInt(7) - 3;
-				int randY = rnd.nextInt(7) - 3;
+				int randX = rnd.nextInt(5) - 3;
+				int randY = rnd.nextInt(5) - 3;
 				Tile tile = map.getTiles()[player.getSpawnX() + randX][player.getSpawnY() + randY];
 
 				// FIXME: Some special resources can be on desert & desert hills.
@@ -847,15 +848,15 @@ public class InGameState extends GameState implements DisconnectListener, Select
 					continue;
 				}
 
+				for (TileTypeWrapper tileWrapper : tile.getTileTypeWrappers())
+					if (tileWrapper.getTileType().hasProperty(TileProperty.LUXURY)
+							|| tileWrapper.getTileType().hasProperty(TileProperty.RESOURCE))
+						continue;
+
 				if (assignedLuxTiles < 3) {
 					tile.setTileType(TileType.getRandomLandLuxuryTile());
 					assignedLuxTiles++;
 				} else {
-
-					for (TileTypeWrapper tileWrapper : tile.getTileTypeWrappers())
-						if (tileWrapper.getTileType().hasProperty(TileProperty.LUXURY))
-							continue;
-
 					tile.setTileType(TileType.getRandomResourceTile());
 					assignedResourceTiles++;
 				}
