@@ -43,7 +43,7 @@ public abstract class RangedUnit extends Unit
 		Civilization.getInstance().getEventManager().addListener(RelativeMouseMoveListener.class, this);
 	}
 
-	public abstract int getMovementCost(Tile prevTile, Tile adjTile);
+	public abstract float getMovementCost(Tile prevTile, Tile adjTile);
 
 	public abstract int getRangedCombatStrength();
 

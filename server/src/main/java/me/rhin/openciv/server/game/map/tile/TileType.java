@@ -9,6 +9,7 @@ import me.rhin.openciv.server.game.map.tile.improvement.ChopImprovement;
 import me.rhin.openciv.server.game.map.tile.improvement.FarmImprovement;
 import me.rhin.openciv.server.game.map.tile.improvement.MineImprovement;
 import me.rhin.openciv.server.game.map.tile.improvement.PastureImprovement;
+import me.rhin.openciv.server.game.map.tile.improvement.RoadImprovement;
 import me.rhin.openciv.server.game.map.tile.improvement.TileImprovement;
 import me.rhin.openciv.shared.stat.Stat;
 import me.rhin.openciv.shared.stat.StatLine;
@@ -42,7 +43,7 @@ public enum TileType implements Comparable<TileType> {
 		}
 
 		@Override
-		public int getMovementCost() {
+		public float getMovementCost() {
 			return 2;
 		}
 
@@ -77,7 +78,7 @@ public enum TileType implements Comparable<TileType> {
 		}
 
 		@Override
-		public int getMovementCost() {
+		public float getMovementCost() {
 			return 2;
 		}
 
@@ -118,7 +119,7 @@ public enum TileType implements Comparable<TileType> {
 		}
 
 		@Override
-		public int getMovementCost() {
+		public float getMovementCost() {
 			return 2;
 		}
 
@@ -145,7 +146,7 @@ public enum TileType implements Comparable<TileType> {
 		}
 
 		@Override
-		public int getMovementCost() {
+		public float getMovementCost() {
 			return 2;
 		}
 
@@ -180,7 +181,7 @@ public enum TileType implements Comparable<TileType> {
 		}
 
 		@Override
-		public int getMovementCost() {
+		public float getMovementCost() {
 			return 1000000;
 		}
 	},
@@ -194,7 +195,7 @@ public enum TileType implements Comparable<TileType> {
 		}
 
 		@Override
-		public int getMovementCost() {
+		public float getMovementCost() {
 			return 2;
 		}
 
@@ -214,7 +215,7 @@ public enum TileType implements Comparable<TileType> {
 		}
 
 		@Override
-		public int getMovementCost() {
+		public float getMovementCost() {
 			return 2;
 		}
 	},
@@ -420,10 +421,22 @@ public enum TileType implements Comparable<TileType> {
 			statLine.addValue(Stat.FOOD_GAIN, 2);
 			return statLine;
 		}
-	},;
+	},
+	ROAD(TileLayer.LOW) {
+		@Override
+		public StatLine getStatLine() {
+			return new StatLine();
+		}
+
+		@Override
+		public float getMovementCost() {
+			return 0.5f;
+		}
+	};
 
 	public enum TileLayer {
 		BASE,
+		LOW,
 		MIDDLE,
 		HIGH,
 		TOP,
@@ -452,7 +465,7 @@ public enum TileType implements Comparable<TileType> {
 		return null;
 	}
 
-	public int getMovementCost() {
+	public float getMovementCost() {
 		return 1;
 	}
 
@@ -510,6 +523,9 @@ public enum TileType implements Comparable<TileType> {
 	}
 
 	TileImprovement getImprovement(String improvementName) {
+		if (improvementName.equals("road"))
+			return new RoadImprovement();
+
 		for (TileImprovement tileImprovement : getImprovements()) {
 			if (tileImprovement.getName().equals(improvementName))
 				return tileImprovement;

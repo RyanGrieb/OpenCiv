@@ -10,6 +10,7 @@ import me.rhin.openciv.game.map.tile.TileType;
 import me.rhin.openciv.game.map.tile.TileType.TileProperty;
 import me.rhin.openciv.game.research.type.AnimalHusbandryTech;
 import me.rhin.openciv.game.research.type.MiningTech;
+import me.rhin.openciv.game.research.type.WheelTech;
 import me.rhin.openciv.game.unit.Unit;
 import me.rhin.openciv.game.unit.UnitItem;
 import me.rhin.openciv.game.unit.UnitParameter;
@@ -40,6 +41,7 @@ public class Builder extends UnitItem {
 			customActions.add(new MineAction(this));
 			customActions.add(new ChopAction(this));
 			customActions.add(new PastureAction(this));
+			customActions.add(new RoadAction(this));
 			this.canAttack = false;
 			this.building = false;
 
@@ -86,7 +88,7 @@ public class Builder extends UnitItem {
 		}
 
 		@Override
-		public int getMovementCost(Tile prevTile, Tile tile) {
+		public float getMovementCost(Tile prevTile, Tile tile) {
 			if (tile.containsTileProperty(TileProperty.WATER))
 				return 1000000;
 			else
@@ -323,6 +325,57 @@ public class Builder extends UnitItem {
 		}
 	}
 
+	public static class RoadAction extends AbstractAction {
+
+		public RoadAction(Unit unit) {
+			super(unit);
+		}
+
+		@Override
+		public boolean act(float delta) {
+			// unit.getPlayerOwner().unselectUnit();
+			unit.reduceMovement(2);
+			WorkTilePacket packet = new WorkTilePacket();
+			packet.setTile("road", unit.getStandingTile().getGridX(), unit.getStandingTile().getGridY());
+			Civilization.getInstance().getNetworkManager().sendPacket(packet);
+			// unit.removeAction(this);
+
+			BuilderUnit builderUnit = (BuilderUnit) unit;
+			builderUnit.setBuilding(true);
+			builderUnit.setImprovementType(ImprovementType.ROAD);
+
+			Civilization.getInstance().getEventManager().fireEvent(new UnitActEvent(unit));
+
+			unit.removeAction(this);
+			return true;
+		}
+
+		@Override
+		public boolean canAct() {
+			Tile tile = unit.getStandingTile();
+
+			// if (!unit.getPlayerOwner().getResearchTree().hasResearched(WheelTech.class))
+			// {
+			// return false;
+			// }
+
+			BuilderUnit builderUnit = (BuilderUnit) unit;
+			if (unit.getCurrentMovement() < 1 || builderUnit.isBuilding()) {
+				return false;
+			}
+
+			if (tile.containsTileType(TileType.ROAD))
+				return false;
+
+			return true;
+		}
+
+		@Override
+		public String getName() {
+			return "Road";
+		}
+	}
+
 	@Override
 	public int getProductionCost() {
 		return 50;
@@ -332,7 +385,7 @@ public class Builder extends UnitItem {
 	public float getGoldCost() {
 		return 175;
 	}
-	
+
 	@Override
 	public boolean meetsProductionRequirements() {
 		return true;

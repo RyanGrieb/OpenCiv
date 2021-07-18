@@ -198,7 +198,7 @@ public class UnitWindow extends AbstractWindow implements ResizeListener, UnitAt
 	public void draw(Batch batch, float parentAlpha) {
 		super.draw(batch, parentAlpha);
 		// FIXME: This is not ideal
-		movementLabel.setText("Movement: " + (int) unit.getCurrentMovement() + "/" + unit.getMaxMovement());
+		movementLabel.setText("Movement: " + unit.getCurrentMovement() + "/" + unit.getMaxMovement());
 	}
 
 	@Override

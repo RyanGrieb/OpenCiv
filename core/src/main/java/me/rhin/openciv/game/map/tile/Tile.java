@@ -1,6 +1,7 @@
 package me.rhin.openciv.game.map.tile;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.TreeSet;
 
 import com.badlogic.gdx.Gdx;
@@ -16,6 +17,7 @@ import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.city.City;
 import me.rhin.openciv.game.map.GameMap;
 import me.rhin.openciv.game.map.RiverPart;
+import me.rhin.openciv.game.map.road.Road;
 import me.rhin.openciv.game.map.tile.TileType.TileLayer;
 import me.rhin.openciv.game.map.tile.TileType.TileProperty;
 import me.rhin.openciv.game.player.Player;
@@ -41,6 +43,10 @@ public class Tile extends Actor implements BottomShapeRenderListener {
 			this.setBounds(x, y, width, height);
 		}
 
+		public TileTypeWrapper(float x, float y, float width, float height) {
+			this.setBounds(x, y, width, height);
+		}
+
 		@Override
 		public int compareTo(TileTypeWrapper tileTypeWrapper) {
 			return tileType.getTileLayer().ordinal() - tileTypeWrapper.getTileType().getTileLayer().ordinal();
@@ -48,6 +54,14 @@ public class Tile extends Actor implements BottomShapeRenderListener {
 
 		public TileType getTileType() {
 			return tileType;
+		}
+
+		public void setTileType(TileType tileType) {
+			this.tileType = tileType;
+		}
+
+		public void setSprite(TextureEnum textureEnum) {
+			this.setRegion(textureEnum.texture());
 		}
 	}
 
@@ -78,6 +92,7 @@ public class Tile extends Actor implements BottomShapeRenderListener {
 	private boolean improved;
 	private int appliedImprovementTurns;
 	private boolean rangedTarget;
+	private Road road;
 
 	public Tile(GameMap map, TileType tileType, float x, float y) {
 		Civilization.getInstance().getEventManager().addListener(BottomShapeRenderListener.class, this);
@@ -257,6 +272,11 @@ public class Tile extends Actor implements BottomShapeRenderListener {
 		if (tileType == null)
 			return;
 
+		if (tileType == TileType.ROAD) {
+			setRoad();
+			return;
+		}
+
 		if (containsTileLayer(tileType.getTileLayer())) {
 			for (TileTypeWrapper tileWrapper : tileWrappers) {
 				// Find the tileType /w the exact layer and replace it.
@@ -431,8 +451,9 @@ public class Tile extends Actor implements BottomShapeRenderListener {
 		return false;
 	}
 
-	public int getMovementCost(Tile prevTile) {
-		int movementCost = 0;
+	public float getMovementCost(Tile prevTile) {
+
+		float movementCost = 0;
 		// Check if the tile were moving to
 		int currentSideCheck = -1;
 		for (int i = 0; i < adjTiles.length; i++) {
@@ -459,7 +480,7 @@ public class Tile extends Actor implements BottomShapeRenderListener {
 
 		TileTypeWrapper topWrapper = ((TileTypeWrapper) tileWrappers.toArray()[tileWrappers.size() - 1]);
 		if (topWrapper.getTileType().hasProperty(TileProperty.RESOURCE, TileProperty.IMPROVEMENT)) {
-			int tileMovementCost = ((TileTypeWrapper) tileWrappers.toArray()[0]).getTileType().getMovementCost();
+			float tileMovementCost = ((TileTypeWrapper) tileWrappers.toArray()[0]).getTileType().getMovementCost();
 			if (tileMovementCost > movementCost) {
 				movementCost = tileMovementCost;
 			}
@@ -628,6 +649,10 @@ public class Tile extends Actor implements BottomShapeRenderListener {
 		return false;
 	}
 
+	public Road getRoad() {
+		return road;
+	}
+
 	private void initializeVectors() {
 		this.vectors = new Vector2[6];
 
@@ -691,5 +716,74 @@ public class Tile extends Actor implements BottomShapeRenderListener {
 
 		rangedTargetSprite.setSize(28, 32);
 		rangedTargetSprite.setPosition(x, y);
+	}
+
+	private void setRoad() {
+		this.road = new Road(this);
+
+		System.out.println("Setting road!");
+
+		// FIXME: Account for if the road is being set not by anything.
+
+		ArrayList<Road> openAdjRoads = new ArrayList<>();
+		Tile adjCityTile = null;
+		Tile prevTile = null;
+		Tile targetTile = null;
+
+		// 1. Prioritize open roads
+		// 2. Prioritize cities
+		// 3. Prioritize other roads
+		// 4. Set horizontal road
+
+		for (Tile adjTile : adjTiles) {
+			// FIXME: Prioritize the road without the targetTile
+			if (adjTile.getRoad() != null && adjTile.getRoad().getTargetTile() == null) {
+				openAdjRoads.add(adjTile.getRoad());
+			}
+
+			if (adjTile.getCity() != null)
+				adjCityTile = adjTile;
+		}
+
+		if (openAdjRoads.size() > 0) {
+			// FIXME: Account for multiple roads
+			prevTile = openAdjRoads.get(0).getOriginTile();
+		} else if (adjCityTile != null) {
+			prevTile = adjCityTile;
+		}
+
+		// TODO: Set target tile if were nearby a road with a null target or city
+
+		this.setRoadDirection(prevTile, null);
+
+		// Change the previous roads direction towards us.
+		for (Road openAdjRoad : openAdjRoads) {
+			System.out.println("Updating previous road direction");
+			openAdjRoad.getOriginTile().setRoadDirection(openAdjRoad.getPrevTile(), this);
+		}
+
+		System.out.println("adding road wrapper");
+	}
+
+	private void setRoadDirection(Tile prevTile, Tile targetTile) {
+
+		// Remove the previous road wrapper
+		Iterator<TileTypeWrapper> iterator = tileWrappers.iterator();
+
+		while (iterator.hasNext()) {
+			TileTypeWrapper wrapper = iterator.next();
+			if (wrapper.getTileType() == TileType.ROAD)
+				iterator.remove();
+		}
+
+		road.setDirection(prevTile, targetTile);
+
+		TileTypeWrapper roadWrapper = new TileTypeWrapper(x, y, 28, 32);
+		TextureEnum roadEnum = road.getRoadPart().getTexture();
+
+		road.setDirection(prevTile, targetTile);
+		roadWrapper.setTileType(TileType.ROAD);
+		roadWrapper.setSprite(roadEnum);
+		tileWrappers.add(roadWrapper);
 	}
 }

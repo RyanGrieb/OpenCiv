@@ -21,7 +21,7 @@ public class Warrior extends UnitItem {
 		}
 
 		@Override
-		public int getMovementCost(Tile prevTile, Tile tile) {
+		public float getMovementCost(Tile prevTile, Tile tile) {
 			if (tile.containsTileProperty(TileProperty.WATER))
 				return 1000000;
 			else

@@ -39,7 +39,7 @@ public abstract class Unit extends Actor
 	private int id;
 	private Player playerOwner;
 	private ArrayList<Vector2[]> pathVectors;
-	private int pathMovement;
+	private float pathMovement;
 	private Tile targetTile;
 	private Sprite sprite, selectionSprite;
 	private Sprite civIconSprite;
@@ -81,7 +81,7 @@ public abstract class Unit extends Actor
 				unitParameter.getStandingTile(), assetEnum);
 	}
 
-	public abstract int getMovementCost(Tile prevTile, Tile adjTile);
+	public abstract float getMovementCost(Tile prevTile, Tile adjTile);
 
 	@Override
 	public void act(float delta) {
@@ -93,7 +93,7 @@ public abstract class Unit extends Actor
 		if (selected)
 			selectionSprite.draw(batch);
 
-		if ((targetTile != null && pathMovement <= getCurrentMovement() && pathMovement != 0) || hasRangedTarget()) {
+		if ((targetTile != null && pathMovement <= getCurrentMovement() && pathMovement > 0) || hasRangedTarget()) {
 			targetSelectionSprite.draw(batch);
 		}
 
@@ -165,12 +165,12 @@ public abstract class Unit extends Actor
 		// this?).
 		ArrayList<Tile> openSet = new ArrayList<>();
 		Tile[][] cameFrom = new Tile[GameMap.WIDTH][GameMap.HEIGHT];
-		int[][] gScores = new int[GameMap.WIDTH][GameMap.HEIGHT];
-		int[][] fScores = new int[GameMap.WIDTH][GameMap.HEIGHT];
+		float[][] gScores = new float[GameMap.WIDTH][GameMap.HEIGHT];
+		float[][] fScores = new float[GameMap.WIDTH][GameMap.HEIGHT];
 
-		for (int[] gScore : gScores)
+		for (float[] gScore : gScores)
 			Arrays.fill(gScore, GameMap.MAX_NODES);
-		for (int[] fScore : fScores)
+		for (float[] fScore : fScores)
 			Arrays.fill(fScore, GameMap.MAX_NODES);
 
 		gScores[standingTile.getGridX()][standingTile.getGridY()] = 0;
@@ -191,7 +191,7 @@ public abstract class Unit extends Actor
 				if (adjTile == null)
 					continue;
 
-				int tenativeGScore = gScores[current.getGridX()][current.getGridY()]
+				float tenativeGScore = gScores[current.getGridX()][current.getGridY()]
 						+ getMovementCost(current, adjTile);
 
 				if (tenativeGScore < gScores[adjTile.getGridX()][adjTile.getGridY()]) {
@@ -199,7 +199,7 @@ public abstract class Unit extends Actor
 					cameFrom[adjTile.getGridX()][adjTile.getGridY()] = current;
 					gScores[adjTile.getGridX()][adjTile.getGridY()] = tenativeGScore;
 
-					int adjFScore = gScores[adjTile.getGridX()][adjTile.getGridY()] + h;
+					float adjFScore = gScores[adjTile.getGridX()][adjTile.getGridY()] + h;
 					fScores[adjTile.getGridX()][adjTile.getGridY()] = adjFScore;
 					if (!openSet.contains(adjTile)) {
 						openSet.add(adjTile);
@@ -221,7 +221,7 @@ public abstract class Unit extends Actor
 		}
 
 		int iterations = 0;
-		int pathMovement = 0;
+		float pathMovement = 0;
 		while (parentTile != null) {
 			Tile nextTile = cameFrom[parentTile.getGridX()][parentTile.getGridY()];
 
@@ -256,8 +256,6 @@ public abstract class Unit extends Actor
 
 		this.targetTile = targetTile;
 		this.pathMovement = pathMovement;
-
-		// TODO: How would we implement cities able to be attacked?
 
 		targetEntity = null;
 		if (targetTile.getTopUnit() != null && !targetTile.getTopUnit().getPlayerOwner().equals(playerOwner))
@@ -386,7 +384,7 @@ public abstract class Unit extends Actor
 			standingTile.addTileObserver(this);
 	}
 
-	public void reduceMovement(int movementCost) {
+	public void reduceMovement(float movementCost) {
 		movement -= movementCost;
 
 		if (movement < 0)
@@ -397,11 +395,11 @@ public abstract class Unit extends Actor
 		return movement;
 	}
 
-	public int getMaxMovement() {
+	public float getMaxMovement() {
 		return 2;
 	}
 
-	public int getPathMovement() {
+	public float getPathMovement() {
 		return pathMovement;
 	}
 
@@ -457,8 +455,8 @@ public abstract class Unit extends Actor
 		return false;
 	}
 
-	private Tile removeSmallest(ArrayList<Tile> queue, int fScore[][]) {
-		int smallest = Integer.MAX_VALUE;
+	private Tile removeSmallest(ArrayList<Tile> queue, float fScore[][]) {
+		float smallest = Integer.MAX_VALUE;
 		Tile smallestTile = null;
 		for (Tile tile : queue) {
 			if (fScore[tile.getGridX()][tile.getGridY()] < smallest) {

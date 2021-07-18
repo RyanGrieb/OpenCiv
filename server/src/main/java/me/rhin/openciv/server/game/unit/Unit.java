@@ -24,8 +24,8 @@ public abstract class Unit implements AttackableEntity, NextTurnListener {
 	private float width, height;
 	private Tile standingTile, targetTile;
 	private boolean selected;
-	private int pathMovement;
-	private int movement;
+	private float pathMovement;
+	private float movement;
 	private float health;
 	private int turnsSinceCombat;
 
@@ -139,7 +139,7 @@ public abstract class Unit implements AttackableEntity, NextTurnListener {
 		Server.getInstance().getEventManager().clearListenersFromObject(this);
 	}
 
-	public abstract int getMovementCost(Tile prevTile, Tile adjTile);
+	public abstract float getMovementCost(Tile prevTile, Tile adjTile);
 
 	public abstract int getCombatStrength();
 
@@ -182,12 +182,12 @@ public abstract class Unit implements AttackableEntity, NextTurnListener {
 
 		ArrayList<Tile> openSet = new ArrayList<>();
 		cameFrom = new Tile[width][height];
-		int[][] gScores = new int[width][height];
-		int[][] fScores = new int[width][height];
+		float[][] gScores = new float[width][height];
+		float[][] fScores = new float[width][height];
 
-		for (int[] gScore : gScores)
+		for (float[] gScore : gScores)
 			Arrays.fill(gScore, maxNodes);
-		for (int[] fScore : fScores)
+		for (float[] fScore : fScores)
 			Arrays.fill(fScore, maxNodes);
 
 		gScores[standingTile.getGridX()][standingTile.getGridY()] = 0;
@@ -208,7 +208,7 @@ public abstract class Unit implements AttackableEntity, NextTurnListener {
 				if (adjTile == null)
 					continue;
 
-				int tenativeGScore = gScores[current.getGridX()][current.getGridY()]
+				float tenativeGScore = gScores[current.getGridX()][current.getGridY()]
 						+ getMovementCost(current, adjTile);
 
 				if (tenativeGScore < gScores[adjTile.getGridX()][adjTile.getGridY()]) {
@@ -216,7 +216,7 @@ public abstract class Unit implements AttackableEntity, NextTurnListener {
 					cameFrom[adjTile.getGridX()][adjTile.getGridY()] = current;
 					gScores[adjTile.getGridX()][adjTile.getGridY()] = tenativeGScore;
 
-					int adjFScore = gScores[adjTile.getGridX()][adjTile.getGridY()] + h;
+					float adjFScore = gScores[adjTile.getGridX()][adjTile.getGridY()] + h;
 					fScores[adjTile.getGridX()][adjTile.getGridY()] = adjFScore;
 					if (!openSet.contains(adjTile)) {
 						openSet.add(adjTile);
@@ -236,7 +236,7 @@ public abstract class Unit implements AttackableEntity, NextTurnListener {
 		}
 
 		int iterations = 0;
-		int pathMovement = 0;
+		float pathMovement = 0;
 		while (parentTile != null) {
 			Tile nextTile = cameFrom[parentTile.getGridX()][parentTile.getGridY()];
 
@@ -274,8 +274,8 @@ public abstract class Unit implements AttackableEntity, NextTurnListener {
 		return true;
 	}
 
-	private Tile removeSmallest(ArrayList<Tile> queue, int fScore[][]) {
-		int smallest = Integer.MAX_VALUE;
+	private Tile removeSmallest(ArrayList<Tile> queue, float fScore[][]) {
+		float smallest = Integer.MAX_VALUE;
 		Tile smallestTile = null;
 		for (Tile tile : queue) {
 			if (fScore[tile.getGridX()][tile.getGridY()] < smallest) {
@@ -306,7 +306,7 @@ public abstract class Unit implements AttackableEntity, NextTurnListener {
 		selected = false;
 	}
 
-	public void reduceMovement(int movementCost) {
+	public void reduceMovement(float movementCost) {
 		movement -= movementCost;
 
 		if (movement < 0)
@@ -331,7 +331,7 @@ public abstract class Unit implements AttackableEntity, NextTurnListener {
 		this.selected = selected;
 	}
 
-	public int getMaxMovement() {
+	public float getMaxMovement() {
 		return 2;
 	}
 
@@ -355,7 +355,7 @@ public abstract class Unit implements AttackableEntity, NextTurnListener {
 		return pathVectors;
 	}
 
-	public int getPathMovement() {
+	public float getPathMovement() {
 		return pathMovement;
 	}
 

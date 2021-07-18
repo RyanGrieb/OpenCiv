@@ -4,7 +4,8 @@ public enum ImprovementType {
 	FARM("Building Farm", 5),
 	MINE("Building Mine", 5),
 	PASTURE("Building Pasture",5),
-	CHOP("Clearing Forest", 3);
+	CHOP("Clearing Forest", 3),
+	ROAD("Building Road", 3);
 
 	private String improvementDesc;
 	private int maxTurns;

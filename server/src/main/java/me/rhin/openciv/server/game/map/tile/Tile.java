@@ -380,7 +380,7 @@ public class Tile {
 		return false;
 	}
 
-	public int getMovementCost() {
+	public float getMovementCost() {
 		// FIXME: This is wrong. We need to add up all the tileTypes accordingly.
 		TileTypeWrapper topWrapper = ((TileTypeWrapper) tileWrappers.toArray()[tileWrappers.size() - 1]);
 		if (topWrapper.getTileType().hasProperty(TileProperty.RESOURCE, TileProperty.IMPROVEMENT,
@@ -390,9 +390,9 @@ public class Tile {
 			return topWrapper.getTileType().getMovementCost();
 	}
 
-	public int getMovementCost(Tile prevTile) {
+	public float getMovementCost(Tile prevTile) {
 
-		int movementCost = 0;
+		float movementCost = 0;
 
 		// Check if the tile were moving to
 		int currentSideCheck = -1;
@@ -420,7 +420,12 @@ public class Tile {
 
 		if (getMovementCost() > movementCost)
 			movementCost = getMovementCost();
-
+		
+		
+		//FIXME: Implement this. This is the civ 5 movement pattern.
+		//if(movementCost > 1 && unit.getMovement() < 2)
+		//	movementCost = unit.getMovement();
+		
 		return movementCost;
 
 	}

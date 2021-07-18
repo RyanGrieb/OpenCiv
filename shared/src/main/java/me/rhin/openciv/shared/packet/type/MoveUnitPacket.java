@@ -7,7 +7,7 @@ import me.rhin.openciv.shared.packet.Packet;
 
 public class MoveUnitPacket extends Packet {
 
-	private int movementCost;
+	private float movementCost;
 	private int prevGridX, prevGridY;
 	private int targetGridX, targetGridY;
 	private int unitID;
@@ -28,7 +28,7 @@ public class MoveUnitPacket extends Packet {
 	@Override
 	public void read(Json json, JsonValue jsonData) {
 		super.read(json, jsonData);
-		this.movementCost = jsonData.getInt("movementCost");
+		this.movementCost = jsonData.getFloat("movementCost");
 		this.prevGridX = jsonData.getInt("prevGridX");
 		this.prevGridY = jsonData.getInt("prevGridY");
 		this.targetGridX = jsonData.getInt("targetGridX");
@@ -47,11 +47,11 @@ public class MoveUnitPacket extends Packet {
 		this.playerOwner = playerOwner;
 	}
 
-	public void setMovementCost(int movementCost) {
+	public void setMovementCost(float movementCost) {
 		this.movementCost = movementCost;
 	}
 
-	public int getMovementCost() {
+	public float getMovementCost() {
 		return movementCost;
 	}
 

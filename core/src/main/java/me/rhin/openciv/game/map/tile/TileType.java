@@ -40,10 +40,11 @@ public enum TileType {
 	HORSES_IMPROVED(TextureEnum.TILE_HORSES_IMPROVED, TileLayer.MIDDLE, TileProperty.IMPROVEMENT),
 	CATTLE_IMPROVED(TextureEnum.TILE_CATTLE_IMPROVED, TileLayer.MIDDLE, TileProperty.IMPROVEMENT),
 	SHEEP_IMPROVED(TextureEnum.TILE_SHEEP_IMPROVED, TileLayer.MIDDLE, TileProperty.IMPROVEMENT),
-	;
+	ROAD(0.5F, TileProperty.ROAD);
 
 	public enum TileLayer {
 		BASE,
+		LOW,
 		MIDDLE,
 		HIGH,
 		TOP;
@@ -55,13 +56,21 @@ public enum TileType {
 		IMPROVEMENT,
 		MINEABLE,
 		ANIMAL,
-		FARMABLE;
+		FARMABLE,
+		ROAD;
 	}
 
 	private TextureEnum assetEnum;
 	private TileProperty[] tileProperties;
 	private TileLayer tileLayer;
-	private int movementCost;
+	private float movementCost;
+
+	TileType(float movementCost, TileProperty... targetProperties) {
+		this.assetEnum = null;
+		this.movementCost = movementCost;
+		this.tileProperties = targetProperties;
+		this.tileLayer = TileLayer.LOW;
+	}
 
 	TileType(TextureEnum assetEnum, TileLayer tileLayer) {
 		this.assetEnum = assetEnum;
@@ -97,7 +106,7 @@ public enum TileType {
 		return assetEnum.texture();
 	}
 
-	public int getMovementCost() {
+	public float getMovementCost() {
 		return movementCost;
 	}
 
