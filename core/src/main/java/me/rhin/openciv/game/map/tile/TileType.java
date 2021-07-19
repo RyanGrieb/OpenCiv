@@ -28,7 +28,7 @@ public enum TileType {
 	COPPER(TextureEnum.TILE_COPPER, TileLayer.MIDDLE, TileProperty.RESOURCE, TileProperty.MINEABLE),
 	COTTON(TextureEnum.TILE_COTTON, TileLayer.MIDDLE, TileProperty.RESOURCE),
 	GEMS(TextureEnum.TILE_GEMS, TileLayer.MIDDLE, TileProperty.RESOURCE, TileProperty.MINEABLE),
-	FARM(TextureEnum.TILE_FARM, TileLayer.HIGH, TileProperty.IMPROVEMENT),
+	FARM(TextureEnum.TILE_FARM, TileLayer.LOW, TileProperty.IMPROVEMENT),
 	GEMS_IMPROVED(TextureEnum.TILE_GEMS_IMPROVED, TileLayer.MIDDLE, TileProperty.IMPROVEMENT),
 	COTTON_IMPROVED(TextureEnum.TILE_COTTON_IMPROVED, TileLayer.MIDDLE, TileProperty.IMPROVEMENT),
 	IRON_IMPROVED(TextureEnum.TILE_IRON_IMPROVED, TileLayer.MIDDLE, TileProperty.IMPROVEMENT),
@@ -45,6 +45,7 @@ public enum TileType {
 	public enum TileLayer {
 		BASE,
 		LOW,
+		LOW_MIDDLE,
 		MIDDLE,
 		HIGH,
 		TOP;
@@ -69,7 +70,7 @@ public enum TileType {
 		this.assetEnum = null;
 		this.movementCost = movementCost;
 		this.tileProperties = targetProperties;
-		this.tileLayer = TileLayer.LOW;
+		this.tileLayer = TileLayer.LOW_MIDDLE;
 	}
 
 	TileType(TextureEnum assetEnum, TileLayer tileLayer) {

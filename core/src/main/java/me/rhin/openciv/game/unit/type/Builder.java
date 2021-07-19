@@ -66,7 +66,11 @@ public class Builder extends UnitItem {
 				building = false;
 				improvementType = null;
 				standingTile.setAppliedTurns(0);
-				standingTile.setImproved(true);
+
+				// FIXME: This is a workaround for non improvement builds
+				System.out.println(TileType.valueOf(packet.getTileTypeName()));
+				if (TileType.valueOf(packet.getTileTypeName()) != TileType.ROAD)
+					standingTile.setImproved(true);
 			}
 		}
 
@@ -159,6 +163,7 @@ public class Builder extends UnitItem {
 					&& tile.getTerritory().getPlayerOwner().equals(unit.getPlayerOwner());
 
 			BuilderUnit builderUnit = (BuilderUnit) unit;
+			System.out.println(tile.isImproved() + "," + tile.getBaseTileType().hasProperty(TileProperty.FARMABLE));
 			if (unit.getCurrentMovement() < 1 || !farmableTile || builderUnit.isBuilding()) {
 				return false;
 			}

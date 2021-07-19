@@ -239,7 +239,15 @@ public class Tile {
 	}
 
 	public TileType getBaseTileType() {
-		return ((TileTypeWrapper) tileWrappers.toArray()[tileWrappers.size() - 1]).getTileType();
+		for (int i = tileWrappers.size() - 1; i >= 0; i--) {
+			if (((TileTypeWrapper) tileWrappers.toArray()[i]).getTileType() == TileType.ROAD)
+				continue;
+			return ((TileTypeWrapper) tileWrappers.toArray()[i]).getTileType();
+		}
+
+		return null;
+		// return ((TileTypeWrapper) tileWrappers.toArray()[tileWrappers.size() -
+		// 1]).getTileType();
 	}
 
 	public Set<TileTypeWrapper> getTileTypeWrappers() {

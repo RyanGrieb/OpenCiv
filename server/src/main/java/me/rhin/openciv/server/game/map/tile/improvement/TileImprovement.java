@@ -55,9 +55,12 @@ public abstract class TileImprovement {
 	}
 
 	public void improveTile() {
-		// FIXME: Do we properly change the tiletype?
 		tile.setTileType(tileType);
 		finished = true;
+		// Note: We reset the tile improvement here since other improvements can be
+		// built.
+		tile.setTileImprovement(null);
+
 		SetTileTypePacket setTileTypePacket = new SetTileTypePacket();
 		setTileTypePacket.setTile(tileType.name(), tile.getGridX(), tile.getGridY());
 
