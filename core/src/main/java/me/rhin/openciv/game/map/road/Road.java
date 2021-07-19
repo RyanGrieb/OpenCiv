@@ -1,8 +1,14 @@
 package me.rhin.openciv.game.map.road;
 
-import me.rhin.openciv.game.map.tile.Tile;
+import java.util.ArrayList;
 
-public class Road {
+import com.badlogic.gdx.Gdx;
+
+import me.rhin.openciv.Civilization;
+import me.rhin.openciv.game.map.tile.Tile;
+import me.rhin.openciv.listener.RoadConstructedListener;
+
+public class Road implements RoadConstructedListener {
 
 	private Tile originTile;
 	private Tile targetTile;
@@ -11,19 +17,87 @@ public class Road {
 
 	public Road(Tile originTile) {
 		this.originTile = originTile;
-	}
 
-	public void setDirection(Tile prevTile, Tile targetTile) {
+		Civilization.getInstance().getEventManager().addListener(RoadConstructedListener.class, this);
 
-		if (prevTile == null && targetTile != null) {
-			prevTile = targetTile;
-			targetTile = null;
+		// Now figure out what direction were going in.
+
+		//System.out.println("Setting road!");
+
+		// FIXME: Account for if the road is being set not by anything.
+
+		ArrayList<Road> openAdjRoads = new ArrayList<>();
+		Tile adjCityTile = null;
+		Tile prevTile = null;
+		Tile targetTile = null;
+
+		// 1. Prioritize open roads
+		// 2. Prioritize cities
+		// 3. Prioritize other roads
+		// 4. Set horizontal road
+
+		for (Tile adjTile : originTile.getAdjTiles()) {
+			if (adjTile.getRoad() != null && adjTile.getRoad().isOpen()) {
+				openAdjRoads.add(adjTile.getRoad());
+			}
+
+			if (adjTile.getCity() != null)
+				adjCityTile = adjTile;
 		}
 
-		this.targetTile = targetTile;
+		if (openAdjRoads.size() > 0) {
+			// FIXME: Account for multiple roads
+			prevTile = openAdjRoads.get(0).getOriginTile();
+		} else if (adjCityTile != null) {
+			prevTile = adjCityTile;
+		}
+
+		// TODO: Set target tile if were nearby a road with a null target or city
+		for (Tile adjTile : originTile.getAdjTiles()) {
+			if (adjTile.equals(prevTile))
+				continue;
+			if (adjTile.getRoad() != null && adjTile.getRoad().isOpen() || adjTile.getCity() != null)
+				targetTile = adjTile;
+		}
+
 		this.prevTile = prevTile;
+		this.targetTile = targetTile;
+		//System.out.println("We initalizing ourselfs: [" + originTile.getGridX() + "," + originTile.getGridY() + "]");
+
+		//System.out.println(prevTile + "," + targetTile);
+		//System.out.println("--------------------------");
+		defineRoadEnum();
+
+		Civilization.getInstance().getEventManager().fireEvent(new RoadConstructedEvent(this));
+	}
+
+	@Override
+	public void onRoadConstructed(Road road) {
+		if (road.getOriginTile().equals(originTile))
+			return;
+
+		// Reset our direction based on what we got going on
+		boolean adjRoad = false;
+		for (Tile adjTile : road.getOriginTile().getAdjTiles())
+			if (originTile.equals(adjTile))
+				adjRoad = true;
+
+		if (!adjRoad || (prevTile != null && targetTile != null))
+			return;
+
+		//System.out.println("Called");
+		//System.out.println("We are: [" + originTile.getGridX() + "," + originTile.getGridY() + "]");
+
+		if (targetTile == null)
+			targetTile = road.getOriginTile();
+		else if (prevTile == null)
+			prevTile = road.getOriginTile();
+
+		//System.out.println(prevTile + "," + targetTile);
+		//System.out.println("=======================");
 
 		defineRoadEnum();
+		originTile.applyRoad();
 	}
 
 	public Tile getTargetTile() {
@@ -40,6 +114,10 @@ public class Road {
 
 	public Tile getOriginTile() {
 		return originTile;
+	}
+
+	public boolean isOpen() {
+		return prevTile == null || targetTile == null;
 	}
 
 	private void defineRoadEnum() {
@@ -85,5 +163,16 @@ public class Road {
 		}
 
 		this.roadPart = RoadPart.fetchRoadPart(prevTileIndex, targetTileIndex);
+		//System.out.println(prevTile + "," + targetTile);
+
+		//if (prevTile != null)
+		//	System.out.println("prev:" + prevTile.getGridX() + "," + prevTile.getGridY());
+		//if (targetTile != null)
+		//	System.out.println("target:" + targetTile.getGridX() + "," + targetTile.getGridY());
+
+		//System.out.println(prevTileIndex + "," + targetTileIndex);
+		//System.out.println("Setting ourselfs +[" + originTile.getGridX() + "," + originTile.getGridY() + "]" + " TO: "
+		//		+ roadPart.name());
+		//System.out.println("***************");
 	}
 }

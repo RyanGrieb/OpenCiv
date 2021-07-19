@@ -76,12 +76,12 @@ public class GameOverlay extends AbstractWindow implements ResizeListener {
 
 	public void setHoveredTile(Tile tile) {
 		if (!tile.isDiscovered()) {
-			tileNameLabel.setText("Undiscovered");
+			tileNameLabel.setText("[" + tile.getGridX() + "," + tile.getGridY() + "] Undiscovered");
 			return;
 		}
-		
+
 		// [grass,copper]
-		String tileName = "";
+		String tileName = "[" + tile.getGridX() + "," + tile.getGridY() + "] ";
 		int index = 0;
 		for (TileTypeWrapper typeWrapper : tile.getTileTypeWrappers()) {
 

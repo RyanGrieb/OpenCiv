@@ -724,52 +724,10 @@ public class Tile extends Actor implements BottomShapeRenderListener {
 
 	private void setRoad() {
 		this.road = new Road(this);
-
-		System.out.println("Setting road!");
-
-		// FIXME: Account for if the road is being set not by anything.
-
-		ArrayList<Road> openAdjRoads = new ArrayList<>();
-		Tile adjCityTile = null;
-		Tile prevTile = null;
-		Tile targetTile = null;
-
-		// 1. Prioritize open roads
-		// 2. Prioritize cities
-		// 3. Prioritize other roads
-		// 4. Set horizontal road
-
-		for (Tile adjTile : adjTiles) {
-			// FIXME: Prioritize the road without the targetTile
-			if (adjTile.getRoad() != null && adjTile.getRoad().getTargetTile() == null) {
-				openAdjRoads.add(adjTile.getRoad());
-			}
-
-			if (adjTile.getCity() != null)
-				adjCityTile = adjTile;
-		}
-
-		if (openAdjRoads.size() > 0) {
-			// FIXME: Account for multiple roads
-			prevTile = openAdjRoads.get(0).getOriginTile();
-		} else if (adjCityTile != null) {
-			prevTile = adjCityTile;
-		}
-
-		// TODO: Set target tile if were nearby a road with a null target or city
-
-		this.setRoadDirection(prevTile, null);
-
-		// Change the previous roads direction towards us.
-		for (Road openAdjRoad : openAdjRoads) {
-			System.out.println("Updating previous road direction");
-			openAdjRoad.getOriginTile().setRoadDirection(openAdjRoad.getPrevTile(), this);
-		}
-
-		System.out.println("adding road wrapper");
+		applyRoad();
 	}
 
-	private void setRoadDirection(Tile prevTile, Tile targetTile) {
+	public void applyRoad() {
 
 		// Remove the previous road wrapper
 		Iterator<TileTypeWrapper> iterator = tileWrappers.iterator();
@@ -779,8 +737,6 @@ public class Tile extends Actor implements BottomShapeRenderListener {
 			if (wrapper.getTileType() == TileType.ROAD)
 				iterator.remove();
 		}
-
-		road.setDirection(prevTile, targetTile);
 
 		TileTypeWrapper roadWrapper = new TileTypeWrapper(x, y, 28, 32);
 		TextureEnum roadEnum = road.getRoadPart().getTexture();

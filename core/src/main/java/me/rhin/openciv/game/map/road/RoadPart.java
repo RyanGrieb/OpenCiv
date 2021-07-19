@@ -16,7 +16,7 @@ public enum RoadPart {
 	HORIZONTAL_TOPLEFT(TextureEnum.ROAD_HORIZONTAL_TOPLEFT, new int[] { 2, 4 }, new int[] { 4, 2 }),
 	HORIZONTAL_TOPRIGHT(TextureEnum.ROAD_HORIZONTAL_TOPRIGHT, new int[] { 3, 5 }, new int[] { 5, 3 }),
 	HORIZONTAL_CORNERBOTTOMLEFT(TextureEnum.ROAD_HORIZONTAL_CORNERBOTTOMLEFT, new int[] { 0, 5 }, new int[] { 5, 0 }),
-	HORIZONTAL_CORNERBOTTOMRIGHT(TextureEnum.ROAD_HORIZONTAL_BOTTOMRIGHT, new int[] { 1, 2 }, new int[] { 2, 1 }),
+	HORIZONTAL_CORNERBOTTOMRIGHT(TextureEnum.ROAD_HORIZONTAL_CORNERBOTTOMRIGHT, new int[] { 1, 2 }, new int[] { 2, 1 }),
 	HORIZONTAL_CORNERTOPLEFT(TextureEnum.ROAD_HORIZONTAL_CORNERTOPLEFT, new int[] { 4, 5 }, new int[] { 5, 4 }),
 	HORIZONTAL_CORNERTOPRIGHT(TextureEnum.ROAD_HORIZONTAL_CORNERTOPRIGHT, new int[] { 2, 3 }, new int[] { 3, 2 });
 

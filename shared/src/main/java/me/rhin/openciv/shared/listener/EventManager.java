@@ -54,13 +54,18 @@ public class EventManager {
 
 	@SuppressWarnings("unchecked")
 	public <L extends Listener> void clearListenersFromObject(L listener) {
-		// Go through all the listeners
-		for (Class<? extends Listener> listenerType : ((HashMap<Class<? extends Listener>, ArrayList<? extends Listener>>) listenerMap.clone()).keySet()) {
-			ArrayList<L> listeners = (ArrayList<L>) listenerMap.get(listenerType);
+		try {
+			// Go through all the listeners
+			for (Class<? extends Listener> listenerType : ((HashMap<Class<? extends Listener>, ArrayList<? extends Listener>>) listenerMap
+					.clone()).keySet()) {
+				ArrayList<L> listeners = (ArrayList<L>) listenerMap.get(listenerType);
 
-			// Remove object attached all listeners
-			if (listeners != null)
-				listeners.remove(listener);
+				// Remove object attached all listeners
+				if (listeners != null)
+					listeners.remove(listener);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 	}
 }
