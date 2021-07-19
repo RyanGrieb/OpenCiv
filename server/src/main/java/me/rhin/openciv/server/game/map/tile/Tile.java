@@ -381,6 +381,10 @@ public class Tile {
 	}
 
 	public float getMovementCost() {
+
+		if (containsTileType(TileType.ROAD))
+			return 0.5F;
+
 		// FIXME: This is wrong. We need to add up all the tileTypes accordingly.
 		TileTypeWrapper topWrapper = ((TileTypeWrapper) tileWrappers.toArray()[tileWrappers.size() - 1]);
 		if (topWrapper.getTileType().hasProperty(TileProperty.RESOURCE, TileProperty.IMPROVEMENT,
@@ -418,14 +422,16 @@ public class Tile {
 			movementCost = 2;
 		}
 
+		if (containsTileType(TileType.ROAD))
+			movementCost = 0.5F;
+
 		if (getMovementCost() > movementCost)
 			movementCost = getMovementCost();
-		
-		
-		//FIXME: Implement this. This is the civ 5 movement pattern.
-		//if(movementCost > 1 && unit.getMovement() < 2)
-		//	movementCost = unit.getMovement();
-		
+
+		// FIXME: Implement this. This is the civ 5 movement pattern.
+		// if(movementCost > 1 && unit.getMovement() < 2)
+		// movementCost = unit.getMovement();
+
 		return movementCost;
 
 	}

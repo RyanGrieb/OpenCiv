@@ -478,6 +478,10 @@ public class Tile extends Actor implements BottomShapeRenderListener {
 			movementCost = 2;
 		}
 
+		// TODO: Later on in the tech tree roads should go across rivers (bridges!)
+		if (containsTileType(TileType.ROAD))
+			return 0.5F;
+
 		TileTypeWrapper topWrapper = ((TileTypeWrapper) tileWrappers.toArray()[tileWrappers.size() - 1]);
 		if (topWrapper.getTileType().hasProperty(TileProperty.RESOURCE, TileProperty.IMPROVEMENT)) {
 			float tileMovementCost = ((TileTypeWrapper) tileWrappers.toArray()[0]).getTileType().getMovementCost();
@@ -781,7 +785,6 @@ public class Tile extends Actor implements BottomShapeRenderListener {
 		TileTypeWrapper roadWrapper = new TileTypeWrapper(x, y, 28, 32);
 		TextureEnum roadEnum = road.getRoadPart().getTexture();
 
-		road.setDirection(prevTile, targetTile);
 		roadWrapper.setTileType(TileType.ROAD);
 		roadWrapper.setSprite(roadEnum);
 		tileWrappers.add(roadWrapper);
