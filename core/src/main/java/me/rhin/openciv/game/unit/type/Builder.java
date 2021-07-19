@@ -414,6 +414,6 @@ public class Builder extends UnitItem {
 
 	@Override
 	public String getDesc() {
-		return "Can improve tiles on the map. \nCertain tiles require a specific \nresearch.";
+		return "Can improve tiles on the map. \nCertain tiles require a specific \nresearch.\nCan be captured by enemy units.";
 	}
 }

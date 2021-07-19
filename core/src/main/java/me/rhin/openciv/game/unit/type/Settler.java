@@ -121,6 +121,6 @@ public class Settler extends UnitItem {
 
 	@Override
 	public String getDesc() {
-		return "Can settle new cities.";
+		return "Can settle new cities.\nCan be captured by enemy units.";
 	}
 }

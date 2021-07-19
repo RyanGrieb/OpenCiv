@@ -63,6 +63,6 @@ public class WorkBoat extends UnitItem {
 
 	@Override
 	public String getDesc() {
-		return "A naval builder. Can improve ocean tiles.";
+		return "A naval builder. Can improve\nocean tiles.\nCan be captured by enemy units.";
 	}
 }
