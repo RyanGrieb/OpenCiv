@@ -92,6 +92,11 @@ public class Settler extends UnitItem {
 		public String getName() {
 			return "Settle";
 		}
+
+		@Override
+		public TextureEnum getSprite() {
+			return TextureEnum.ICON_SETTLE;
+		}
 	}
 
 	@Override

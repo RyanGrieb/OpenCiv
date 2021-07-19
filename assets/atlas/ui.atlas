@@ -20,7 +20,7 @@ ui_background
   index: -1
 ui_black
   rotate: false
-  xy: 678, 168
+  xy: 36, 36
   size: 1, 1
   orig: 1, 1
   offset: 0, 0
@@ -44,6 +44,20 @@ ui_button_hovered
   xy: 644, 171
   size: 142, 28
   orig: 142, 28
+  offset: 0, 0
+  index: -1
+ui_button_icon
+  rotate: false
+  xy: 804, 689
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+ui_button_icon_hovered
+  rotate: false
+  xy: 644, 103
+  size: 32, 32
+  orig: 32, 32
   offset: 0, 0
   index: -1
 ui_button_small
@@ -83,21 +97,21 @@ ui_error
   index: -1
 ui_github
   rotate: false
-  xy: 804, 689
+  xy: 678, 137
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 ui_gray
   rotate: false
-  xy: 2, 2
+  xy: 804, 686
   size: 1, 1
   orig: 1, 1
   offset: 0, 0
   index: -1
 ui_green
   rotate: false
-  xy: 644, 134
+  xy: 2, 2
   size: 1, 1
   orig: 1, 1
   offset: 0, 0

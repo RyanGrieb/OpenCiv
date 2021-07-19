@@ -68,7 +68,6 @@ public class Builder extends UnitItem {
 				standingTile.setAppliedTurns(0);
 
 				// FIXME: This is a workaround for non improvement builds
-				System.out.println(TileType.valueOf(packet.getTileTypeName()));
 				if (TileType.valueOf(packet.getTileTypeName()) != TileType.ROAD)
 					standingTile.setImproved(true);
 			}
@@ -163,7 +162,6 @@ public class Builder extends UnitItem {
 					&& tile.getTerritory().getPlayerOwner().equals(unit.getPlayerOwner());
 
 			BuilderUnit builderUnit = (BuilderUnit) unit;
-			System.out.println(tile.isImproved() + "," + tile.getBaseTileType().hasProperty(TileProperty.FARMABLE));
 			if (unit.getCurrentMovement() < 1 || !farmableTile || builderUnit.isBuilding()) {
 				return false;
 			}
@@ -174,6 +172,11 @@ public class Builder extends UnitItem {
 		@Override
 		public String getName() {
 			return "Farm";
+		}
+
+		@Override
+		public TextureEnum getSprite() {
+			return TextureEnum.ICON_FARM;
 		}
 	}
 
@@ -225,6 +228,11 @@ public class Builder extends UnitItem {
 		@Override
 		public String getName() {
 			return "Mine";
+		}
+
+		@Override
+		public TextureEnum getSprite() {
+			return TextureEnum.ICON_MINING;
 		}
 	}
 
@@ -280,6 +288,12 @@ public class Builder extends UnitItem {
 		public String getName() {
 			return "Chop";
 		}
+
+		@Override
+		public TextureEnum getSprite() {
+			// TODO Auto-generated method stub
+			return TextureEnum.ICON_CHOP;
+		}
 	}
 
 	public static class PastureAction extends AbstractAction {
@@ -334,6 +348,12 @@ public class Builder extends UnitItem {
 		public String getName() {
 			return "Pasture";
 		}
+
+		@Override
+		public TextureEnum getSprite() {
+			// TODO Auto-generated method stub
+			return TextureEnum.ICON_PASTURE;
+		}
 	}
 
 	public static class RoadAction extends AbstractAction {
@@ -384,6 +404,12 @@ public class Builder extends UnitItem {
 		@Override
 		public String getName() {
 			return "Road";
+		}
+
+		@Override
+		public TextureEnum getSprite() {
+			// TODO Auto-generated method stub
+			return TextureEnum.ROAD_HORIZONTAL;
 		}
 	}
 

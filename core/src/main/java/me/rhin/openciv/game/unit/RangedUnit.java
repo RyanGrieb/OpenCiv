@@ -190,6 +190,11 @@ public abstract class RangedUnit extends Unit
 		public String getName() {
 			return "Target";
 		}
+
+		@Override
+		public TextureEnum getSprite() {
+			return TextureEnum.ICON_TARGET;
+		}
 	}
 
 	public static class UntargetAction extends AbstractAction {
@@ -233,6 +238,12 @@ public abstract class RangedUnit extends Unit
 		@Override
 		public String getName() {
 			return "Untarget";
+		}
+
+		@Override
+		public TextureEnum getSprite() {
+			// TODO Auto-generated method stub
+			return null;
 		}
 	}
 

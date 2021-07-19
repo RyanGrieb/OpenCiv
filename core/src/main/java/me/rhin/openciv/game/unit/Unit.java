@@ -2,8 +2,6 @@ package me.rhin.openciv.game.unit;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
@@ -24,6 +22,7 @@ import me.rhin.openciv.game.map.tile.TileObserver;
 import me.rhin.openciv.game.player.Player;
 import me.rhin.openciv.listener.BottomShapeRenderListener;
 import me.rhin.openciv.listener.NextTurnListener;
+import me.rhin.openciv.listener.UnitActListener.UnitActEvent;
 import me.rhin.openciv.shared.packet.type.MoveUnitPacket;
 import me.rhin.openciv.shared.packet.type.NextTurnPacket;
 import me.rhin.openciv.ui.window.type.UnitCombatWindow;
@@ -49,8 +48,6 @@ public abstract class Unit extends Actor
 	private AttackableEntity targetEntity;
 
 	public Unit(int id, String unitName, Player playerOwner, Tile standingTile, TextureEnum assetEnum) {
-		Civilization.getInstance().getEventManager().addListener(BottomShapeRenderListener.class, this);
-
 		this.id = id;
 		setName(unitName);
 		this.playerOwner = playerOwner;
@@ -73,12 +70,53 @@ public abstract class Unit extends Actor
 
 		playerOwner.addUnit(this);
 
+		customActions.add(new MoveAction(this));
+
 		Civilization.getInstance().getEventManager().addListener(NextTurnListener.class, this);
+		Civilization.getInstance().getEventManager().addListener(BottomShapeRenderListener.class, this);
 	}
 
 	public Unit(UnitParameter unitParameter, TextureEnum assetEnum) {
 		this(unitParameter.getID(), unitParameter.getUnitName(), unitParameter.getPlayerOwner(),
 				unitParameter.getStandingTile(), assetEnum);
+	}
+
+	public static class MoveAction extends AbstractAction {
+
+		public MoveAction(Unit unit) {
+			super(unit);
+		}
+
+		@Override
+		public boolean act(float delta) {
+
+			Player player = unit.getPlayerOwner();
+			unit.setTargetTile(player.getHoveredTile(), true);
+			player.setRightMouseHeld(true);
+
+			Civilization.getInstance().getEventManager().fireEvent(new UnitActEvent(unit));
+
+			unit.removeAction(this);
+			return true;
+		}
+
+		@Override
+		public boolean canAct() {
+			if (unit.getPlayerOwner().isRightMouseHeld())
+				return false;
+
+			return unit.getCurrentMovement() > 0;
+		}
+
+		@Override
+		public String getName() {
+			return "Move";
+		}
+
+		@Override
+		public TextureEnum getSprite() {
+			return TextureEnum.ICON_MOVE;
+		}
 	}
 
 	public abstract float getMovementCost(Tile prevTile, Tile adjTile);

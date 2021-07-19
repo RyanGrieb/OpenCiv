@@ -105,7 +105,7 @@ public class Player implements RelativeMouseMoveListener, LeftClickListener, Rig
 	@Override
 	public void onSelectUnit(SelectUnitPacket packet) {
 		if (selectedUnit != null)
-			selectedUnit.setSelected(false);
+			unselectUnit();
 
 		Unit unit = Civilization.getInstance().getGame().getMap().getTiles()[packet.getGridX()][packet.getGridY()]
 				.getUnitFromID(packet.getUnitID());
@@ -116,6 +116,10 @@ public class Player implements RelativeMouseMoveListener, LeftClickListener, Rig
 	@Override
 	public void onPlayerStatUpdate(PlayerStatUpdatePacket packet) {
 		this.statLine = StatLine.fromPacket(packet);
+	}
+
+	public void setRightMouseHeld(boolean rightMouseHeld) {
+		this.rightMouseHeld = rightMouseHeld;
 	}
 
 	public String getName() {
@@ -129,6 +133,7 @@ public class Player implements RelativeMouseMoveListener, LeftClickListener, Rig
 
 		selectedUnit.setSelected(false);
 		this.selectedUnit = null;
+		rightMouseHeld = false;
 	}
 
 	public void addCity(City city) {
@@ -188,5 +193,9 @@ public class Player implements RelativeMouseMoveListener, LeftClickListener, Rig
 
 	public Unit getSelectedUnit() {
 		return selectedUnit;
+	}
+
+	public boolean isRightMouseHeld() {
+		return rightMouseHeld;
 	}
 }

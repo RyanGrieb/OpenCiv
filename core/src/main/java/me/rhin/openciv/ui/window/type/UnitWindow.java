@@ -37,23 +37,24 @@ public class UnitWindow extends AbstractWindow implements ResizeListener, UnitAt
 	private BlankBackground blankBackground;
 	private Healthbar healthbar;
 	private CustomLabel buildDescLabel;
+	private CustomLabel actionDescLabel;
 
 	private Unit unit;
 	private ArrayList<UnitActionButton> unitActionButtons;
 
 	public UnitWindow(Unit unit) {
-		super.setBounds(viewport.getWorldWidth() - 200, 0, 200, 100);
+		super.setBounds(viewport.getWorldWidth() - 200, 0, 200, 125);
 		this.unit = unit;
 		this.unitActionButtons = new ArrayList<>();
 
-		this.blankBackground = new BlankBackground(0, 0, 200, 100);
+		this.blankBackground = new BlankBackground(0, 0, 200, 125);
 		addActor(blankBackground);
 
 		this.healthbar = new Healthbar(getWidth() - 200, getHeight() - 35, 200, 15);
 		healthbar.setHealth(unit.getMaxHealth(), unit.getHealth());
 		addActor(healthbar);
 
-		this.unitNameLabel = new CustomLabel(unit.getName(), Align.center, getWidth() - 200, 100 - 20, 200, 20);
+		this.unitNameLabel = new CustomLabel(unit.getName(), Align.center, getWidth() - 200, 125 - 20, 200, 20);
 		addActor(unitNameLabel);
 
 		this.movementLabel = new CustomLabel(
@@ -61,7 +62,9 @@ public class UnitWindow extends AbstractWindow implements ResizeListener, UnitAt
 		movementLabel.setPosition((getWidth() - (200 / 2)) - movementLabel.getWidth() / 2, 5);
 		addActor(movementLabel);
 
-		this.buildDescLabel = new CustomLabel("??? - (0/0)", 4, 100 - 55, 200, 20);
+		this.buildDescLabel = new CustomLabel("??? - (0/0)", 4, 125 - 52, 200, 20);
+
+		this.actionDescLabel = new CustomLabel("???", 4, 125 - 52, 200, 20);
 
 		if (unit instanceof BuilderUnit) {
 			BuilderUnit builderUnit = (BuilderUnit) unit;
@@ -78,8 +81,7 @@ public class UnitWindow extends AbstractWindow implements ResizeListener, UnitAt
 		for (AbstractAction action : unit.getCustomActions()) {
 			if (!action.canAct())
 				continue;
-			UnitActionButton actionButton = new UnitActionButton(unit, action, blankBackground.getX() + (75 * index),
-					blankBackground.getY() + blankBackground.getHeight() / 2 - 40 / 2, 70, 30);
+			UnitActionButton actionButton = new UnitActionButton(unit, action, this, 4 + (52 * index), 17, 48, 48);
 			unitActionButtons.add(actionButton);
 			addActor(actionButton);
 			index++;
@@ -205,15 +207,13 @@ public class UnitWindow extends AbstractWindow implements ResizeListener, UnitAt
 	public void onResize(int width, int height) {
 		super.setPosition(width - 200, 0);
 		blankBackground.setPosition(0, 0);
-		unitNameLabel.setPosition(getWidth() - 200, 100 - 20);
+		unitNameLabel.setPosition(getWidth() - 200, 125 - 20);
 		movementLabel.setPosition((getWidth() - (200 / 2)) - movementLabel.getWidth() / 2, 5);
 
-		int index = 0;
-		for (UnitActionButton actionButton : unitActionButtons) {
-			actionButton.setPosition(blankBackground.getX() + (75 * index),
-					blankBackground.getY() + blankBackground.getHeight() / 2 - 40 / 2);
-			index++;
-		}
+		/*
+		 * int index = 0; for (UnitActionButton actionButton : unitActionButtons) {
+		 * actionButton.setPosition((52 * index), 17); index++; }
+		 */
 	}
 
 	@Override
@@ -255,11 +255,23 @@ public class UnitWindow extends AbstractWindow implements ResizeListener, UnitAt
 		for (AbstractAction action : unit.getCustomActions()) {
 			if (!action.canAct())
 				continue;
-			UnitActionButton actionButton = new UnitActionButton(unit, action, blankBackground.getX() + (75 * index),
-					blankBackground.getY() + blankBackground.getHeight() / 2 - 40 / 2, 70, 30);
+			UnitActionButton actionButton = new UnitActionButton(unit, action, this, 4 + (52 * index), 17, 48, 48);
 			unitActionButtons.add(actionButton);
 			addActor(actionButton);
 			index++;
 		}
+	}
+
+	public void setHoveredAction(AbstractAction action) {
+		if (buildDescLabel.getStage() != null)
+			return;
+
+		actionDescLabel.setText(action.getName());
+		addActor(actionDescLabel);
+	}
+
+	public void unsetHoveredAction() {
+		actionDescLabel.setText("");
+		removeActor(actionDescLabel);
 	}
 }
