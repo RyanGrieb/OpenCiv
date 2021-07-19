@@ -257,6 +257,9 @@ public class Builder extends UnitItem {
 		public boolean canAct() {
 			Tile tile = unit.getStandingTile();
 
+			if (tile.getCity() != null)
+				return false;
+
 			if (!unit.getPlayerOwner().getResearchTree().hasResearched(MiningTech.class)) {
 				return false;
 			}
@@ -307,6 +310,9 @@ public class Builder extends UnitItem {
 		@Override
 		public boolean canAct() {
 			Tile tile = unit.getStandingTile();
+
+			if (tile.getCity() != null)
+				return false;
 
 			if (!unit.getPlayerOwner().getResearchTree().hasResearched(AnimalHusbandryTech.class)) {
 				return false;
