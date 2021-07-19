@@ -242,8 +242,7 @@ public abstract class RangedUnit extends Unit
 
 		@Override
 		public TextureEnum getSprite() {
-			// TODO Auto-generated method stub
-			return null;
+			return TextureEnum.ICON_UNTARGET;
 		}
 	}
 

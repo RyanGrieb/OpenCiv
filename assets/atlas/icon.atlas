@@ -6,28 +6,28 @@ filter: Nearest, Nearest
 repeat: none
 icon_america
   rotate: false
-  xy: 138, 20
+  xy: 172, 20
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 icon_chop
   rotate: false
-  xy: 172, 20
+  xy: 206, 20
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 icon_citizen
   rotate: false
-  xy: 480, 36
+  xy: 74, 2
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 icon_citizen_city_center
   rotate: false
-  xy: 110, 2
+  xy: 146, 2
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
@@ -41,21 +41,21 @@ icon_citizen_locked
   index: -1
 icon_citizen_unworked
   rotate: false
-  xy: 56, 2
+  xy: 92, 2
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 icon_england
   rotate: false
-  xy: 410, 20
+  xy: 444, 20
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 icon_faith
   rotate: false
-  xy: 74, 2
+  xy: 110, 2
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
@@ -69,21 +69,21 @@ icon_farm
   index: -1
 icon_food
   rotate: false
-  xy: 92, 2
+  xy: 128, 2
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 icon_germany
   rotate: false
-  xy: 206, 20
+  xy: 240, 20
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 icon_gold
   rotate: false
-  xy: 444, 36
+  xy: 478, 36
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
@@ -97,21 +97,21 @@ icon_heritage
   index: -1
 icon_mining
   rotate: false
-  xy: 308, 20
+  xy: 342, 20
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 icon_move
   rotate: false
-  xy: 376, 20
+  xy: 410, 20
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 icon_nazi
   rotate: false
-  xy: 342, 20
+  xy: 376, 20
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
@@ -125,21 +125,21 @@ icon_pasture
   index: -1
 icon_production
   rotate: false
-  xy: 128, 2
+  xy: 164, 2
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 icon_rome
   rotate: false
-  xy: 240, 20
+  xy: 274, 20
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 icon_science
   rotate: false
-  xy: 462, 36
+  xy: 38, 2
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
@@ -153,14 +153,14 @@ icon_settle
   index: -1
 icon_target
   rotate: false
-  xy: 274, 20
+  xy: 308, 20
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 icon_unemployed_citizen
   rotate: false
-  xy: 38, 2
+  xy: 56, 2
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
@@ -168,6 +168,13 @@ icon_unemployed_citizen
 icon_unknown
   rotate: false
   xy: 104, 20
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+icon_untarget
+  rotate: false
+  xy: 138, 20
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
