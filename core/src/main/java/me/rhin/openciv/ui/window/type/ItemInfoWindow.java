@@ -2,6 +2,7 @@ package me.rhin.openciv.ui.window.type;
 
 import com.badlogic.gdx.utils.Align;
 
+import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.city.City;
 import me.rhin.openciv.game.production.ProductionItem;
@@ -81,11 +82,31 @@ public class ItemInfoWindow extends AbstractWindow implements ResizeListener {
 		this.goldCostLabel = new CustomLabel((int) productionItem.getGoldCost() + " Gold", Align.center, buyIcon.getX(),
 				buyIcon.getY() + buyIcon.getHeight() + 2, buyIcon.getWidth(), 12);
 		addActor(goldCostLabel);
+
+		Civilization.getInstance().getEventManager().addListener(ResizeListener.class, this);
 	}
 
 	@Override
 	public void onResize(int width, int height) {
-		// TODO: Handle resize.
+		this.setBounds(width / 2 - 300 / 2, height / 2 - 300 / 2, 300, 300);
+
+		background.setPosition(0, 0);
+		itemNameLabel.setPosition(0, getHeight() - 14);
+		itemIcon.setPosition(getWidth() / 2 - 32 / 2, getHeight() - 48);
+		itemDescLabel.setPosition(4, itemIcon.getY() - itemIcon.getHeight() - itemDescLabel.getHeight());
+		produceItemButton.setPosition(4, 4);
+		buyItemButton.setPosition(getWidth() / 2 - 82 / 2, 4);
+		cancelItemButton.setPosition(getWidth() - 86, 4);
+
+		produceIcon.setPosition(produceItemButton.getX() + produceItemButton.getWidth() / 2 - 16 / 2,
+				produceItemButton.getY() + produceItemButton.getHeight());
+
+		buyIcon.setPosition(buyItemButton.getX() + buyItemButton.getWidth() / 2 - 16 / 2,
+				buyItemButton.getY() + buyItemButton.getHeight());
+
+		productionCostLabel.setPosition(produceIcon.getX(), produceIcon.getY() + produceIcon.getHeight() + 2);
+		goldCostLabel.setPosition(buyIcon.getX(), buyIcon.getY() + buyIcon.getHeight() + 2);
+
 	}
 
 	@Override
