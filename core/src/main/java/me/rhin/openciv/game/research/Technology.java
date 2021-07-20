@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 
 import me.rhin.openciv.Civilization;
+import me.rhin.openciv.game.notification.type.NotResearchingNotification;
 import me.rhin.openciv.listener.CompleteResearchListener;
 import me.rhin.openciv.listener.NextTurnListener;
 import me.rhin.openciv.shared.packet.type.CompleteResearchPacket;

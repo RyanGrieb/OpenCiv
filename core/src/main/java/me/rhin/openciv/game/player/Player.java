@@ -1,6 +1,7 @@
 package me.rhin.openciv.game.player;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.game.city.City;
@@ -8,19 +9,21 @@ import me.rhin.openciv.game.civilization.CivType;
 import me.rhin.openciv.game.map.tile.Tile;
 import me.rhin.openciv.game.research.ResearchTree;
 import me.rhin.openciv.game.unit.Unit;
+import me.rhin.openciv.listener.DeleteUnitListener;
 import me.rhin.openciv.listener.LeftClickEnemyUnitListener.LeftClickEnemyUnitEvent;
 import me.rhin.openciv.listener.LeftClickListener;
 import me.rhin.openciv.listener.PlayerStatUpdateListener;
 import me.rhin.openciv.listener.RelativeMouseMoveListener;
 import me.rhin.openciv.listener.RightClickListener;
 import me.rhin.openciv.listener.SelectUnitListener;
+import me.rhin.openciv.shared.packet.type.DeleteUnitPacket;
 import me.rhin.openciv.shared.packet.type.PlayerStatUpdatePacket;
 import me.rhin.openciv.shared.packet.type.SelectUnitPacket;
 import me.rhin.openciv.shared.stat.StatLine;
 import me.rhin.openciv.util.ClickType;
 
 public class Player implements RelativeMouseMoveListener, LeftClickListener, RightClickListener, SelectUnitListener,
-		PlayerStatUpdateListener {
+		PlayerStatUpdateListener, DeleteUnitListener {
 
 	// NOTE: This class can be the controlled by the player or the MPPlayer. The
 	// distinction is in the listeners firing.
@@ -116,6 +119,21 @@ public class Player implements RelativeMouseMoveListener, LeftClickListener, Rig
 	@Override
 	public void onPlayerStatUpdate(PlayerStatUpdatePacket packet) {
 		this.statLine = StatLine.fromPacket(packet);
+	}
+
+	@Override
+	public void onUnitDelete(DeleteUnitPacket packet) {
+		int unitID = packet.getUnitID();
+
+		Iterator<Unit> iterator = ownedUnits.iterator();
+
+		while (iterator.hasNext()) {
+			Unit unit = iterator.next();
+
+			if (unit.getID() == unitID) {
+				iterator.remove();
+			}
+		}
 	}
 
 	public void setRightMouseHeld(boolean rightMouseHeld) {

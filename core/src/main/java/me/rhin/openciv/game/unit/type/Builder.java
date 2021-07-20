@@ -2,7 +2,6 @@ package me.rhin.openciv.game.unit.type;
 
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.TextureEnum;
-import me.rhin.openciv.game.AbstractAction;
 import me.rhin.openciv.game.city.City;
 import me.rhin.openciv.game.map.tile.ImprovementType;
 import me.rhin.openciv.game.map.tile.Tile;
@@ -11,6 +10,7 @@ import me.rhin.openciv.game.map.tile.TileType.TileProperty;
 import me.rhin.openciv.game.research.type.AnimalHusbandryTech;
 import me.rhin.openciv.game.research.type.MiningTech;
 import me.rhin.openciv.game.research.type.WheelTech;
+import me.rhin.openciv.game.unit.AbstractAction;
 import me.rhin.openciv.game.unit.Unit;
 import me.rhin.openciv.game.unit.UnitItem;
 import me.rhin.openciv.game.unit.UnitParameter;

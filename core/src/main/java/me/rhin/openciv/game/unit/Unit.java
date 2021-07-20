@@ -15,10 +15,10 @@ import com.badlogic.gdx.utils.Timer.Task;
 
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.TextureEnum;
-import me.rhin.openciv.game.AbstractAction;
 import me.rhin.openciv.game.map.GameMap;
 import me.rhin.openciv.game.map.tile.Tile;
 import me.rhin.openciv.game.map.tile.TileObserver;
+import me.rhin.openciv.game.notification.type.AvailableMovementNotification;
 import me.rhin.openciv.game.player.Player;
 import me.rhin.openciv.listener.BottomShapeRenderListener;
 import me.rhin.openciv.listener.NextTurnListener;
@@ -144,6 +144,10 @@ public abstract class Unit extends Actor
 	@Override
 	public void onNextTurn(NextTurnPacket packet) {
 		this.movement = getMaxMovement();
+
+		Civilization.getInstance().getGame().getNotificationHanlder()
+				.fireNotification(new AvailableMovementNotification(this));
+	
 	}
 
 	@Override

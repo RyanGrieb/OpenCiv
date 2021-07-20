@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 
+import me.rhin.openciv.Civilization;
+import me.rhin.openciv.game.notification.type.NotResearchingNotification;
 import me.rhin.openciv.game.research.type.AnimalHusbandryTech;
 import me.rhin.openciv.game.research.type.ArcheryTech;
 import me.rhin.openciv.game.research.type.CalendarTech;
@@ -33,6 +35,9 @@ public class ResearchTree {
 		technologies.put(TrappingTech.class, new TrappingTech());
 		technologies.put(WheelTech.class, new WheelTech());
 		technologies.put(MathematicsTech.class, new MathematicsTech());
+
+		Civilization.getInstance().getGame().getNotificationHanlder()
+				.fireNotification(new NotResearchingNotification());
 	}
 
 	public List<Technology> getTechnologies() {

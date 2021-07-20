@@ -4,6 +4,7 @@ import com.badlogic.gdx.math.MathUtils;
 
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.TextureEnum;
+import me.rhin.openciv.game.notification.type.NotResearchingNotification;
 import me.rhin.openciv.game.research.Technology;
 import me.rhin.openciv.listener.CompleteResearchListener;
 import me.rhin.openciv.listener.NextTurnListener;
@@ -90,9 +91,11 @@ public class CurrentResearchWindow extends AbstractWindow
 		// we are at turn 0 when reseaching something, but when our science increases +
 		// 10 when we have 1 turn left, we go over the totalTurns
 
-		float techAppliedScience = tech.getAppliedScience() + Civilization.getInstance().getGame().getPlayer().getStatLine().getStatValue(Stat.SCIENCE_GAIN);
-		
-		int turnsLeft = MathUtils.ceil((tech.getScienceCost() - techAppliedScience) / Civilization.getInstance().getGame().getPlayer().getStatLine().getStatValue(Stat.SCIENCE_GAIN));
+		float techAppliedScience = tech.getAppliedScience()
+				+ Civilization.getInstance().getGame().getPlayer().getStatLine().getStatValue(Stat.SCIENCE_GAIN);
+
+		int turnsLeft = MathUtils.ceil((tech.getScienceCost() - techAppliedScience)
+				/ Civilization.getInstance().getGame().getPlayer().getStatLine().getStatValue(Stat.SCIENCE_GAIN));
 
 		int currentTurns = (int) tech.getAppliedTurns() + 1; // +1 since this listener before
 
@@ -111,6 +114,9 @@ public class CurrentResearchWindow extends AbstractWindow
 		researchTurnsLabel.setText("??/?? Turns");
 
 		tech = null;
+
+		Civilization.getInstance().getGame().getNotificationHanlder()
+				.fireNotification(new NotResearchingNotification());
 	}
 
 	@Override

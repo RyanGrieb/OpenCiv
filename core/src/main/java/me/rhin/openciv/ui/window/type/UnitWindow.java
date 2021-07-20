@@ -6,7 +6,7 @@ import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.utils.Align;
 
 import me.rhin.openciv.Civilization;
-import me.rhin.openciv.game.AbstractAction;
+import me.rhin.openciv.game.unit.AbstractAction;
 import me.rhin.openciv.game.unit.Unit;
 import me.rhin.openciv.game.unit.type.Builder.BuilderUnit;
 import me.rhin.openciv.listener.NextTurnListener;

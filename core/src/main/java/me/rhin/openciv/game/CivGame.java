@@ -14,6 +14,7 @@ import me.rhin.openciv.game.city.City;
 import me.rhin.openciv.game.civilization.CivType;
 import me.rhin.openciv.game.map.GameMap;
 import me.rhin.openciv.game.map.tile.Tile;
+import me.rhin.openciv.game.notification.NotificationHandler;
 import me.rhin.openciv.game.player.Player;
 import me.rhin.openciv.game.unit.AttackableEntity;
 import me.rhin.openciv.game.unit.Unit;
@@ -57,6 +58,7 @@ import me.rhin.openciv.shared.packet.type.TerritoryGrowPacket;
 import me.rhin.openciv.shared.packet.type.UnitAttackPacket;
 import me.rhin.openciv.ui.screen.type.InGameScreen;
 import me.rhin.openciv.ui.window.type.CurrentResearchWindow;
+import me.rhin.openciv.ui.window.type.NotificationWindow;
 
 //FIXME: Instead of the civ game listening for everything. Just split them off into the respective classes. (EX: UnitAttackListener in the Unit class)
 public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerListRequestListener, FetchPlayerListener,
@@ -69,6 +71,7 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 	private GameMap map;
 	private Player player;
 	private HashMap<String, Player> players;
+	private NotificationHandler notificationHandler;
 	private int turnTime;
 	private int turns;
 
@@ -79,6 +82,10 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 		this.turns = 0;
 
 		Civilization.getInstance().getWindowManager().toggleWindow(new CurrentResearchWindow());
+
+		NotificationWindow notificationWindow = new NotificationWindow();
+		Civilization.getInstance().getWindowManager().toggleWindow(notificationWindow);
+		this.notificationHandler = new NotificationHandler(notificationWindow);
 
 		Civilization.getInstance().getEventManager().addListener(PlayerConnectListener.class, this);
 		Civilization.getInstance().getEventManager().addListener(AddUnitListener.class, this);
@@ -163,6 +170,8 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 		Civilization.getInstance().getEventManager().addListener(RightClickListener.class, player);
 		Civilization.getInstance().getEventManager().addListener(SelectUnitListener.class, player);
 		Civilization.getInstance().getEventManager().addListener(PlayerStatUpdateListener.class, player);
+		Civilization.getInstance().getEventManager().addListener(DeleteUnitListener.class, player);
+
 	}
 
 	// FIXME: Move these 2 tile methods to map class?
@@ -192,6 +201,8 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 			if (actor.equals(unit))
 				actor.addAction(Actions.removeActor());
 		}
+
+		Civilization.getInstance().getEventManager().clearListenersFromObject(unit);
 	}
 
 	@Override
@@ -305,6 +316,10 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 			cities.addAll(player.getOwnedCities());
 
 		return cities;
+	}
+
+	public NotificationHandler getNotificationHanlder() {
+		return notificationHandler;
 	}
 
 }
