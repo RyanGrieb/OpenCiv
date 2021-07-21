@@ -120,12 +120,13 @@ public class Player implements RelativeMouseMoveListener, LeftClickListener, Rig
 		} else {
 			if (selectedUnit.getCurrentMovement() >= selectedUnit.getPathMovement()) {
 				selectedUnit.sendMovementPacket();
+			} else {
+				Civilization.getInstance().getGame().getNotificationHanlder()
+						.fireNotification(new MovementRangeHelpNotification());
 			}
 
 			unselectUnit();
 			rightMouseHeld = false;
-			
-			Civilization.getInstance().getGame().getNotificationHanlder().fireNotification(new MovementRangeHelpNotification());
 		}
 	}
 
