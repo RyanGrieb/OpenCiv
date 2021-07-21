@@ -48,6 +48,6 @@ public class NotResearchingNotification extends AbstractNotification implements 
 
 	@Override
 	public NotificationPriority getPriorityLevel() {
-		return NotificationPriority.MEDIUM;
+		return NotificationPriority.HIGH;
 	}
 }

@@ -1,8 +1,10 @@
 package me.rhin.openciv.ui.window.type;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
-import java.util.PriorityQueue;
 
+import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.notification.AbstractNotification;
 import me.rhin.openciv.listener.ResizeListener;
@@ -12,7 +14,7 @@ import me.rhin.openciv.ui.window.AbstractWindow;
 
 public class NotificationWindow extends AbstractWindow implements ResizeListener {
 
-	private PriorityQueue<GameNotificationBox> gameNotifications;
+	private ArrayList<GameNotificationBox> gameNotifications;
 	private ColoredBackground backgroundSprite;
 
 	public NotificationWindow() {
@@ -21,12 +23,14 @@ public class NotificationWindow extends AbstractWindow implements ResizeListener
 		this.backgroundSprite = new ColoredBackground(TextureEnum.UI_BLACK.sprite(), 0, 0, 242, 400);
 		// addActor(backgroundSprite);
 
-		this.gameNotifications = new PriorityQueue<>();
+		this.gameNotifications = new ArrayList<>();
+
+		Civilization.getInstance().getEventManager().addListener(ResizeListener.class, this);
 	}
 
 	@Override
 	public void onResize(int width, int height) {
-
+		this.setPosition(width - 244, height - 450);
 	}
 
 	@Override
@@ -56,12 +60,13 @@ public class NotificationWindow extends AbstractWindow implements ResizeListener
 
 	public void addNotification(AbstractNotification notification) {
 
-		float y = gameNotifications.size() < 1 ? getHeight() : gameNotifications.peek().getY();
+		float y = gameNotifications.size() < 1 ? getHeight()
+				: gameNotifications.get(gameNotifications.size() - 1).getY();
 		y -= 80;
 		GameNotificationBox notificationBox = new GameNotificationBox(notification, 0, y);
 		gameNotifications.add(notificationBox);
 		addActor(notificationBox);
-		
+
 		updatePositions();
 	}
 
@@ -82,10 +87,16 @@ public class NotificationWindow extends AbstractWindow implements ResizeListener
 	}
 
 	public void updatePositions() {
+		Collections.sort(gameNotifications);
 		// Reset the positions of the notifications.
 		float y = getHeight();
 
-		for (GameNotificationBox gameNotification : gameNotifications) {
+		Iterator<GameNotificationBox> iterator = gameNotifications.iterator();
+
+		// Displaying the values after iterating through the queue
+		while (iterator.hasNext()) {
+			GameNotificationBox gameNotification = iterator.next();
+
 			y -= 80;
 			gameNotification.setPosition(gameNotification.getX(), y);
 		}

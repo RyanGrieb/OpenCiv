@@ -8,6 +8,7 @@ import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.city.City;
 import me.rhin.openciv.game.notification.AbstractNotification;
+import me.rhin.openciv.game.notification.NotificationPriority;
 import me.rhin.openciv.listener.SetProductionItemListener;
 import me.rhin.openciv.shared.packet.type.SetProductionItemPacket;
 import me.rhin.openciv.ui.window.type.CityInfoWindow;
@@ -49,7 +50,8 @@ public class AvailableProductionManager extends AbstractNotification implements 
 		if (!cities.contains(city))
 			return;
 
-		//ProducingItem producingItem = city.getProducibleItemManager().getCurrentProducingItem();
+		// ProducingItem producingItem =
+		// city.getProducibleItemManager().getCurrentProducingItem();
 
 		cities.remove(city);
 
@@ -81,6 +83,11 @@ public class AvailableProductionManager extends AbstractNotification implements 
 	@Override
 	public String getText() {
 		return "A city is able to\nproduce items.";
+	}
+
+	@Override
+	public NotificationPriority getPriorityLevel() {
+		return NotificationPriority.MEDIUM;
 	}
 
 	public ArrayList<City> getCities() {

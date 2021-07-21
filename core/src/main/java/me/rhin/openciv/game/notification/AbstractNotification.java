@@ -27,7 +27,7 @@ public abstract class AbstractNotification implements Listener, Comparable<Abstr
 
 	@Override
 	public int compareTo(AbstractNotification notification) {
-		return notification.getPriorityLevel().ordinal() - getPriorityLevel().ordinal() ;
+		return Integer.valueOf(notification.getPriorityLevel().ordinal()).compareTo(getPriorityLevel().ordinal());
 	}
 
 }
