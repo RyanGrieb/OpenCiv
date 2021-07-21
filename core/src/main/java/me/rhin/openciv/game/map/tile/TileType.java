@@ -26,7 +26,7 @@ public enum TileType {
 	SHEEP(TextureEnum.TILE_SHEEP, TileLayer.MIDDLE, TileProperty.RESOURCE, TileProperty.ANIMAL),
 	IRON(TextureEnum.TILE_IRON, TileLayer.MIDDLE, TileProperty.RESOURCE, TileProperty.MINEABLE),
 	COPPER(TextureEnum.TILE_COPPER, TileLayer.MIDDLE, TileProperty.RESOURCE, TileProperty.MINEABLE),
-	COTTON(TextureEnum.TILE_COTTON, TileLayer.MIDDLE, TileProperty.RESOURCE),
+	COTTON(TextureEnum.TILE_COTTON, TileLayer.MIDDLE, TileProperty.RESOURCE, TileProperty.HARVESTABLE),
 	GEMS(TextureEnum.TILE_GEMS, TileLayer.MIDDLE, TileProperty.RESOURCE, TileProperty.MINEABLE),
 	FARM(TextureEnum.TILE_FARM, TileLayer.LOW, TileProperty.IMPROVEMENT),
 	GEMS_IMPROVED(TextureEnum.TILE_GEMS_IMPROVED, TileLayer.MIDDLE, TileProperty.IMPROVEMENT),
@@ -58,6 +58,7 @@ public enum TileType {
 		MINEABLE,
 		ANIMAL,
 		FARMABLE,
+		HARVESTABLE,
 		ROAD;
 	}
 
@@ -105,6 +106,10 @@ public enum TileType {
 
 	public AtlasRegion texture() {
 		return assetEnum.texture();
+	}
+	
+	public TextureEnum getTextureEnum() {
+		return assetEnum;
 	}
 
 	public float getMovementCost() {

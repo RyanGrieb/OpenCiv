@@ -9,6 +9,7 @@ import me.rhin.openciv.server.game.map.tile.improvement.ChopImprovement;
 import me.rhin.openciv.server.game.map.tile.improvement.FarmImprovement;
 import me.rhin.openciv.server.game.map.tile.improvement.MineImprovement;
 import me.rhin.openciv.server.game.map.tile.improvement.PastureImprovement;
+import me.rhin.openciv.server.game.map.tile.improvement.PlantationImprovement;
 import me.rhin.openciv.server.game.map.tile.improvement.RoadImprovement;
 import me.rhin.openciv.server.game.map.tile.improvement.TileImprovement;
 import me.rhin.openciv.shared.stat.Stat;
@@ -305,7 +306,7 @@ public enum TileType implements Comparable<TileType> {
 		@Override
 		public List<TileImprovement> getImprovements() {
 			ArrayList<TileImprovement> improvements = new ArrayList<>();
-			improvements.add(new MineImprovement(TileType.COTTON_IMPROVED, 5));
+			improvements.add(new PlantationImprovement(TileType.COTTON_IMPROVED, 5));
 			return improvements;
 		}
 	},

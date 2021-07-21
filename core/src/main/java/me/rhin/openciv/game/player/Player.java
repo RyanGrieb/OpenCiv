@@ -85,7 +85,8 @@ public class Player implements RelativeMouseMoveListener, LeftClickListener, Rig
 		if (hoveredTile == null)
 			return;
 
-		if (selectedUnit != null && clicksPerSecond > 0 && !(selectedUnit instanceof RangedUnit)) {
+		if (selectedUnit != null && clicksPerSecond > 0 && !(selectedUnit instanceof RangedUnit)
+				&& Civilization.getInstance().getGame().getTurn() < 2) {
 			Civilization.getInstance().getGame().getNotificationHanlder()
 					.fireNotification(new MoveUnitHelpNotification());
 		}
@@ -121,8 +122,9 @@ public class Player implements RelativeMouseMoveListener, LeftClickListener, Rig
 			if (selectedUnit.getCurrentMovement() >= selectedUnit.getPathMovement()) {
 				selectedUnit.sendMovementPacket();
 			} else {
-				Civilization.getInstance().getGame().getNotificationHanlder()
-						.fireNotification(new MovementRangeHelpNotification());
+				if (Civilization.getInstance().getGame().getTurn() < 2)
+					Civilization.getInstance().getGame().getNotificationHanlder()
+							.fireNotification(new MovementRangeHelpNotification());
 			}
 
 			unselectUnit();
