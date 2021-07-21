@@ -75,7 +75,7 @@ public class Settler extends UnitItem {
 				float distX = Math.abs(unit.getTile().getGridX() - city.getOriginTile().getGridX());
 				float distY = Math.abs(unit.getTile().getGridY() - city.getOriginTile().getGridY());
 
-				System.out.println(distX + distY);
+
 				if (distX + distY < 4)
 					return false;
 			}

@@ -12,6 +12,10 @@ import me.rhin.openciv.ui.window.type.ResearchWindow;
 
 public class NotResearchingNotification extends AbstractNotification implements PickResearchListener {
 
+	public NotResearchingNotification() {
+		Civilization.getInstance().getEventManager().addListener(PickResearchListener.class, this);
+	}
+
 	@Override
 	public void act() {
 		// TODO: Prompt the player that they need to settle a city.
@@ -19,12 +23,11 @@ public class NotResearchingNotification extends AbstractNotification implements 
 			return;
 
 		Civilization.getInstance().getWindowManager().toggleWindow(new ResearchWindow());
-
-		Civilization.getInstance().getEventManager().addListener(PickResearchListener.class, this);
 	}
 
 	@Override
 	public void onPickResearch(Technology tech) {
+		System.out.println("Hello>!");
 		Civilization.getInstance().getGame().getNotificationHanlder().removeNotification(this);
 	}
 

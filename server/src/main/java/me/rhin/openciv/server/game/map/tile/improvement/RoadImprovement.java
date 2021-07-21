@@ -23,7 +23,7 @@ public class RoadImprovement extends TileImprovement {
 		// Note: We reset the tile improvement here since other improvements can be
 		// built.
 		tile.setTileImprovement(null);
-		System.out.println("what teh fuck.");
+
 		SetTileTypePacket setTileTypePacket = new SetTileTypePacket();
 		setTileTypePacket.setTile(tileType.name(), tile.getGridX(), tile.getGridY());
 

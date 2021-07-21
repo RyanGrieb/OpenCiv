@@ -116,6 +116,8 @@ public class CityInfoWindow extends AbstractWindow
 		float topbarHeight = ((InGameScreen) Civilization.getInstance().getCurrentScreen()).getGameOverlay()
 				.getTopbarHeight();
 		topRightContainerList.setPosition(width - 220, height - 195 - topbarHeight);
+
+		System.out.println("Resize in city info windw");
 	}
 
 	@Override

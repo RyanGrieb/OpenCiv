@@ -2,11 +2,12 @@ package me.rhin.openciv.shared.listener;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
+import java.util.Iterator;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class EventManager {
 
-	private final HashMap<Class<? extends Listener>, ArrayList<? extends Listener>> listenerMap = new HashMap<>();
+	private final ConcurrentHashMap<Class<? extends Listener>, ArrayList<? extends Listener>> listenerMap = new ConcurrentHashMap<>();
 
 	// TODO: Support multiple listenerType's as input. E.g. Class<L>... listenerType
 	public <L extends Listener> void addListener(Class<L> listenerType, L listener) {
@@ -55,9 +56,23 @@ public class EventManager {
 	@SuppressWarnings("unchecked")
 	public <L extends Listener> void clearListenersFromObject(L listener) {
 		try {
+
+			/*
+			 * Iterator<Class<? extends Listener>> iterator =
+			 * listenerMap.keySet().iterator();
+			 * 
+			 * while (iterator.hasNext()) { ArrayList<L> listeners = (ArrayList<L>)
+			 * listenerMap.get(iterator.next());
+			 * 
+			 * if (listeners != null) { Iterator<L> listenersIterator =
+			 * listeners.iterator();
+			 * 
+			 * while (listenersIterator.hasNext()) { if
+			 * (listenersIterator.next().equals(listener)) listenersIterator.remove(); } } }
+			 */
+
 			// Go through all the listeners
-			for (Class<? extends Listener> listenerType : ((HashMap<Class<? extends Listener>, ArrayList<? extends Listener>>) listenerMap
-					.clone()).keySet()) {
+			for (Class<? extends Listener> listenerType : listenerMap.keySet()) {
 				ArrayList<L> listeners = (ArrayList<L>) listenerMap.get(listenerType);
 
 				// Remove object attached all listeners

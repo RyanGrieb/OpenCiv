@@ -22,7 +22,6 @@ public class AvailableMovementNotification extends AbstractNotification
 	private ArrayList<Unit> availableUnits;
 	private int index;
 
-
 	public AvailableMovementNotification(Unit unit) {
 		this.availableUnits = new ArrayList<>();
 		this.index = 0;
@@ -35,12 +34,13 @@ public class AvailableMovementNotification extends AbstractNotification
 
 	@Override
 	public void onUnitMove(MoveUnitPacket packet) {
-		
+
 		Tile targetTile = Civilization.getInstance().getGame().getMap().getTiles()[packet.getTargetGridX()][packet
 				.getTargetGridY()];
 		Unit unit = targetTile.getUnitFromID(packet.getUnitID());
 
-		if (unit.getCurrentMovement() > 0)
+		if (unit.getCurrentMovement() > 0
+				|| !unit.getPlayerOwner().equals(Civilization.getInstance().getGame().getPlayer()))
 			return;
 
 		availableUnits.remove(unit);
@@ -65,7 +65,7 @@ public class AvailableMovementNotification extends AbstractNotification
 				iterator.remove();
 			}
 		}
-		
+
 		if (availableUnits.size() < 1) {
 			Civilization.getInstance().getGame().getNotificationHanlder().removeNotification(this);
 		}
@@ -74,7 +74,7 @@ public class AvailableMovementNotification extends AbstractNotification
 	@Override
 	public void merge(AbstractNotification notification) {
 		super.merge(notification);
-		
+
 		AvailableMovementNotification movementNotification = (AvailableMovementNotification) notification;
 
 		// Add units that are not already in this notification.

@@ -21,6 +21,7 @@ import me.rhin.openciv.game.city.specialist.SpecialistContainer;
 import me.rhin.openciv.game.map.tile.Tile;
 import me.rhin.openciv.game.map.tile.TileObserver;
 import me.rhin.openciv.game.map.tile.TileType.TileProperty;
+import me.rhin.openciv.game.notification.type.AvailableProductionManager;
 import me.rhin.openciv.game.player.Player;
 import me.rhin.openciv.game.production.ProducibleItemManager;
 import me.rhin.openciv.game.unit.AttackableEntity;
@@ -193,6 +194,10 @@ public class City extends Group implements AttackableEntity, TileObserver, Speci
 			return;
 
 		getProducibleItemManager().getItemQueue().clear();
+
+		if (playerOwner.equals(Civilization.getInstance().getGame().getPlayer()))
+			Civilization.getInstance().getGame().getNotificationHanlder()
+					.fireNotification(new AvailableProductionManager(this));
 	}
 
 	@Override

@@ -95,9 +95,9 @@ public class CurrentResearchWindow extends AbstractWindow
 				+ Civilization.getInstance().getGame().getPlayer().getStatLine().getStatValue(Stat.SCIENCE_GAIN);
 
 		int turnsLeft = MathUtils.ceil((tech.getScienceCost() - techAppliedScience)
-				/ Civilization.getInstance().getGame().getPlayer().getStatLine().getStatValue(Stat.SCIENCE_GAIN));
+				/ Civilization.getInstance().getGame().getPlayer().getStatLine().getStatValue(Stat.SCIENCE_GAIN)) + 1;
 
-		int currentTurns = (int) tech.getAppliedTurns() + 1; // +1 since this listener before
+		int currentTurns = (int) tech.getAppliedTurns(); // +1 since this listener before
 
 		int totalTurns = currentTurns + turnsLeft;
 
@@ -115,6 +115,7 @@ public class CurrentResearchWindow extends AbstractWindow
 
 		tech = null;
 
+		// FIXME: Move somewhere else?
 		Civilization.getInstance().getGame().getNotificationHanlder()
 				.fireNotification(new NotResearchingNotification());
 	}

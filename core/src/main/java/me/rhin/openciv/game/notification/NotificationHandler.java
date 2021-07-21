@@ -31,7 +31,8 @@ public class NotificationHandler {
 	}
 
 	public void removeNotification(AbstractNotification notification) {
-		System.out.println("remove: " + notification.getName());
+		//System.out.println("remove: " + notification.getName());
+		
 		window.removeNotification(notification);
 		activeNotifications.remove(notification);
 		Civilization.getInstance().getEventManager().clearListenersFromObject(notification);

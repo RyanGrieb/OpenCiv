@@ -244,7 +244,7 @@ public class ResearchWindow extends AbstractWindow
 		if (tech.getRequiredTechs().size() > 0) {
 
 			Class<? extends Technology> requiredTechClass = tech.getRequiredTechs().get(0); // FIXME: Support > 1
-			System.out.println(requiredTechClass);
+
 			boolean singleTech = true;
 
 			for (Technology otherTech : Civilization.getInstance().getGame().getPlayer().getResearchTree()

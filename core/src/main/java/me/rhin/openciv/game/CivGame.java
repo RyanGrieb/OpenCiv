@@ -15,6 +15,7 @@ import me.rhin.openciv.game.civilization.CivType;
 import me.rhin.openciv.game.map.GameMap;
 import me.rhin.openciv.game.map.tile.Tile;
 import me.rhin.openciv.game.notification.NotificationHandler;
+import me.rhin.openciv.game.notification.type.NotResearchingNotification;
 import me.rhin.openciv.game.player.Player;
 import me.rhin.openciv.game.unit.AttackableEntity;
 import me.rhin.openciv.game.unit.Unit;
@@ -80,8 +81,6 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 		this.players = new HashMap<>();
 		this.turnTime = BASE_TURN_TIME;
 		this.turns = 0;
-
-		Civilization.getInstance().getWindowManager().toggleWindow(new CurrentResearchWindow());
 
 		NotificationWindow notificationWindow = new NotificationWindow();
 		Civilization.getInstance().getWindowManager().toggleWindow(notificationWindow);
@@ -213,6 +212,14 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 		City city = new City(tile, playerOwner, packet.getCityName());
 		playerOwner.addCity(city);
 		tile.setCity(city);
+
+		if (playerOwner.equals(player) && playerOwner.getOwnedCities().size() <= 1) {
+
+			Civilization.getInstance().getWindowManager().toggleWindow(new CurrentResearchWindow());
+
+			Civilization.getInstance().getGame().getNotificationHanlder()
+					.fireNotification(new NotResearchingNotification());
+		}
 	}
 
 	@Override

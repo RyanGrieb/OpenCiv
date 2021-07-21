@@ -35,9 +35,6 @@ public class ResearchTree {
 		technologies.put(TrappingTech.class, new TrappingTech());
 		technologies.put(WheelTech.class, new WheelTech());
 		technologies.put(MathematicsTech.class, new MathematicsTech());
-
-		Civilization.getInstance().getGame().getNotificationHanlder()
-				.fireNotification(new NotResearchingNotification());
 	}
 
 	public List<Technology> getTechnologies() {
