@@ -27,7 +27,6 @@ public class NotResearchingNotification extends AbstractNotification implements 
 
 	@Override
 	public void onPickResearch(Technology tech) {
-		System.out.println("Hello>!");
 		Civilization.getInstance().getGame().getNotificationHanlder().removeNotification(this);
 	}
 

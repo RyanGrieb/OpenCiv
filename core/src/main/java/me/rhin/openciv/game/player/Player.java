@@ -3,11 +3,17 @@ package me.rhin.openciv.game.player;
 import java.util.ArrayList;
 import java.util.Iterator;
 
+import com.badlogic.gdx.utils.Timer;
+import com.badlogic.gdx.utils.Timer.Task;
+
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.game.city.City;
 import me.rhin.openciv.game.civilization.CivType;
 import me.rhin.openciv.game.map.tile.Tile;
+import me.rhin.openciv.game.notification.type.MoveUnitHelpNotification;
+import me.rhin.openciv.game.notification.type.MovementRangeHelpNotification;
 import me.rhin.openciv.game.research.ResearchTree;
+import me.rhin.openciv.game.unit.RangedUnit;
 import me.rhin.openciv.game.unit.Unit;
 import me.rhin.openciv.listener.DeleteUnitListener;
 import me.rhin.openciv.listener.LeftClickEnemyUnitListener.LeftClickEnemyUnitEvent;
@@ -36,6 +42,7 @@ public class Player implements RelativeMouseMoveListener, LeftClickListener, Rig
 	private ResearchTree researchTree;
 	private boolean rightMouseHeld;
 	private CivType civType;
+	private int clicksPerSecond;
 
 	public Player(String name) {
 		this.name = name;
@@ -43,6 +50,13 @@ public class Player implements RelativeMouseMoveListener, LeftClickListener, Rig
 		this.ownedUnits = new ArrayList<>();
 		this.statLine = new StatLine();
 		this.researchTree = new ResearchTree();
+
+		Timer.schedule(new Task() {
+			@Override
+			public void run() {
+				clicksPerSecond = 0;
+			}
+		}, 0, 1);
 	}
 
 	@Override
@@ -66,8 +80,15 @@ public class Player implements RelativeMouseMoveListener, LeftClickListener, Rig
 
 	@Override
 	public void onLeftClick(float x, float y) {
+		clicksPerSecond++;
+
 		if (hoveredTile == null)
 			return;
+
+		if (selectedUnit != null && clicksPerSecond > 0 && !(selectedUnit instanceof RangedUnit)) {
+			Civilization.getInstance().getGame().getNotificationHanlder()
+					.fireNotification(new MoveUnitHelpNotification());
+		}
 
 		if (hoveredTile.getUnits().size() < 1)
 			return;
@@ -78,8 +99,9 @@ public class Player implements RelativeMouseMoveListener, LeftClickListener, Rig
 			Civilization.getInstance().getEventManager().fireEvent(new LeftClickEnemyUnitEvent(unit));
 			return;
 		}
-		if (unit.isSelected())
+		if (unit.isSelected()) {
 			return;
+		}
 
 		SelectUnitPacket packet = new SelectUnitPacket();
 		packet.setUnitID(unit.getID());
@@ -102,6 +124,8 @@ public class Player implements RelativeMouseMoveListener, LeftClickListener, Rig
 
 			unselectUnit();
 			rightMouseHeld = false;
+			
+			Civilization.getInstance().getGame().getNotificationHanlder().fireNotification(new MovementRangeHelpNotification());
 		}
 	}
 

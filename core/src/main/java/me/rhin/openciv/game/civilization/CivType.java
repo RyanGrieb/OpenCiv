@@ -7,7 +7,7 @@ import com.badlogic.gdx.graphics.Color;
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.civilization.type.America;
 import me.rhin.openciv.game.civilization.type.England;
-import me.rhin.openciv.game.civilization.type.NaziGermany;
+import me.rhin.openciv.game.civilization.type.Germany;
 import me.rhin.openciv.game.civilization.type.Rome;
 
 public enum CivType {
@@ -63,7 +63,7 @@ public enum CivType {
 	GERMANY(TextureEnum.ICON_GERMANY) {
 		@Override
 		public Civ getCiv() {
-			return new NaziGermany();
+			return new Germany();
 		}
 
 		@Override
