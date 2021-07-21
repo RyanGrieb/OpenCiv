@@ -59,6 +59,7 @@ import me.rhin.openciv.shared.packet.type.TerritoryGrowPacket;
 import me.rhin.openciv.shared.packet.type.UnitAttackPacket;
 import me.rhin.openciv.ui.screen.type.InGameScreen;
 import me.rhin.openciv.ui.window.type.CurrentResearchWindow;
+import me.rhin.openciv.ui.window.type.NextTurnWindow;
 import me.rhin.openciv.ui.window.type.NotificationWindow;
 
 //FIXME: Instead of the civ game listening for everything. Just split them off into the respective classes. (EX: UnitAttackListener in the Unit class)
@@ -85,6 +86,8 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 		NotificationWindow notificationWindow = new NotificationWindow();
 		Civilization.getInstance().getWindowManager().toggleWindow(notificationWindow);
 		this.notificationHandler = new NotificationHandler(notificationWindow);
+
+		Civilization.getInstance().getWindowManager().toggleWindow(new NextTurnWindow());
 
 		Civilization.getInstance().getEventManager().addListener(PlayerConnectListener.class, this);
 		Civilization.getInstance().getEventManager().addListener(AddUnitListener.class, this);
@@ -301,6 +304,10 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 		Civilization.getInstance().getNetworkManager().sendPacket(packet);
 	}
 
+	public void cancelEndTurn() {
+		
+	}
+
 	public GameMap getMap() {
 		return map;
 	}
@@ -328,5 +335,4 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 	public NotificationHandler getNotificationHanlder() {
 		return notificationHandler;
 	}
-
 }
