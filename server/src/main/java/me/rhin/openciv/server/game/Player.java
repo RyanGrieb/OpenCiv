@@ -35,6 +35,7 @@ public class Player implements NextTurnListener, ChooseTechListener {
 	private CivType civType;
 	private boolean host;
 	private ResearchTree researchTree;
+	private boolean turnDone;
 
 	public Player(WebSocket conn) {
 		this.conn = conn;
@@ -197,5 +198,13 @@ public class Player implements NextTurnListener, ChooseTechListener {
 
 	public void removeCity(City city) {
 		ownedCities.remove(city);
+	}
+
+	public void setTurnDone(boolean turnDone) {
+		this.turnDone = turnDone;
+	}
+
+	public boolean isTurnDone() {
+		return turnDone;
 	}
 }

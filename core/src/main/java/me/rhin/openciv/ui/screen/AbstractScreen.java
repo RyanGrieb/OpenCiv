@@ -74,7 +74,7 @@ public abstract class AbstractScreen implements Screen, InputProcessor {
 		// camera.position.y = camY;
 		// camera.update();
 
-		overlayCamera.update();
+		//overlayCamera.update();
 
 		// Bottom stage
 		stage.act();

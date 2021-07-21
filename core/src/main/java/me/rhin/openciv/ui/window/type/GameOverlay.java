@@ -26,7 +26,7 @@ public class GameOverlay extends AbstractWindow implements ResizeListener {
 		this.addActor(fpsLabel);
 
 		this.tileNameLabel = new CustomLabel("Grass");
-		tileNameLabel.setPosition(2, 2);
+		tileNameLabel.setBounds(2, 2, 0, 15); // FIXME: Setting the width to 0 is a workaround
 		this.addActor(tileNameLabel);
 
 		Civilization.getInstance().getEventManager().addListener(ResizeListener.class, this);
@@ -77,6 +77,7 @@ public class GameOverlay extends AbstractWindow implements ResizeListener {
 	public void setHoveredTile(Tile tile) {
 		if (!tile.isDiscovered()) {
 			tileNameLabel.setText("[" + tile.getGridX() + "," + tile.getGridY() + "] Undiscovered");
+			tileNameLabel.setSize(0, 15);
 			return;
 		}
 
@@ -94,5 +95,6 @@ public class GameOverlay extends AbstractWindow implements ResizeListener {
 		}
 
 		tileNameLabel.setText(tileName);
+		tileNameLabel.setSize(0, 15);
 	}
 }

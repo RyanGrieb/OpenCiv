@@ -11,6 +11,6 @@ public class NextTurnButton extends Button {
 
 	@Override
 	public void onClick() {
-		Civilization.getInstance().getGame().endTurn();
+		Civilization.getInstance().getGame().requestEndTurn();
 	}
 }

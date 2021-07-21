@@ -13,6 +13,7 @@ import me.rhin.openciv.listener.MouseMoveListener.MouseMoveEvent;
 import me.rhin.openciv.listener.RelativeMouseMoveListener.RelativeMouseMoveEvent;
 import me.rhin.openciv.listener.RightClickListener.RightClickEvent;
 import me.rhin.openciv.shared.listener.EventManager;
+import me.rhin.openciv.ui.button.type.NextTurnButton;
 import me.rhin.openciv.ui.screen.AbstractScreen;
 import me.rhin.openciv.ui.screen.ScreenEnum;
 import me.rhin.openciv.ui.window.type.EscWindow;
@@ -111,7 +112,7 @@ public class InGameScreen extends AbstractScreen {
 
 	@Override
 	public boolean keyUp(int keycode) {
-		
+
 		if (keycode == Input.Keys.G) {
 			// game.getGameMap().resetTerrain();
 			// game.getGameMap().generateTerrain();
@@ -136,7 +137,7 @@ public class InGameScreen extends AbstractScreen {
 		if (!windowManager.allowsCameraMovement()) {
 			return;
 		}
-		
+
 		OrthographicCamera cam = getCamera();
 		if (Gdx.input.isKeyPressed(Input.Keys.EQUALS) || Gdx.input.isKeyPressed(Input.Keys.P)) {
 			cam.zoom += 0.04;

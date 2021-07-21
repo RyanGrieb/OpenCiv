@@ -40,6 +40,7 @@ import me.rhin.openciv.server.listener.NextTurnListener;
 import me.rhin.openciv.server.listener.PlayerFinishLoadingListener;
 import me.rhin.openciv.server.listener.PlayerListRequestListener;
 import me.rhin.openciv.server.listener.RangedAttackListener;
+import me.rhin.openciv.server.listener.RequestEndTurnListener;
 import me.rhin.openciv.server.listener.SelectUnitListener;
 import me.rhin.openciv.server.listener.SetProductionItemListener;
 import me.rhin.openciv.server.listener.SettleCityListener;
@@ -58,6 +59,7 @@ import me.rhin.openciv.shared.packet.type.NextTurnPacket;
 import me.rhin.openciv.shared.packet.type.PlayerDisconnectPacket;
 import me.rhin.openciv.shared.packet.type.PlayerListRequestPacket;
 import me.rhin.openciv.shared.packet.type.RangedAttackPacket;
+import me.rhin.openciv.shared.packet.type.RequestEndTurnPacket;
 import me.rhin.openciv.shared.packet.type.SelectUnitPacket;
 import me.rhin.openciv.shared.packet.type.SetCityHealthPacket;
 import me.rhin.openciv.shared.packet.type.SetCityOwnerPacket;
@@ -71,10 +73,11 @@ import me.rhin.openciv.shared.packet.type.WorkTilePacket;
 
 //FIXME: Instead of the civ game listening for everything. Just split them off into the respective classes. (EX: CombatPreviewListener in the Unit class)
 //Or just use reflection so we don't have to implement 20+ classes.
-public class InGameState extends GameState implements DisconnectListener, SelectUnitListener, UnitMoveListener,
-		SettleCityListener, PlayerFinishLoadingListener, NextTurnListener, SetProductionItemListener,
-		ClickWorkedTileListener, ClickSpecialistListener, EndTurnListener, PlayerListRequestListener,
-		FetchPlayerListener, CombatPreviewListener, WorkTileListener, RangedAttackListener, BuyProductionItemListener {
+public class InGameState extends GameState
+		implements DisconnectListener, SelectUnitListener, UnitMoveListener, SettleCityListener,
+		PlayerFinishLoadingListener, NextTurnListener, SetProductionItemListener, ClickWorkedTileListener,
+		ClickSpecialistListener, EndTurnListener, PlayerListRequestListener, FetchPlayerListener, CombatPreviewListener,
+		WorkTileListener, RangedAttackListener, BuyProductionItemListener, RequestEndTurnListener {
 
 	private static final int BASE_TURN_TIME = 9;
 
@@ -101,6 +104,7 @@ public class InGameState extends GameState implements DisconnectListener, Select
 		Server.getInstance().getEventManager().addListener(WorkTileListener.class, this);
 		Server.getInstance().getEventManager().addListener(RangedAttackListener.class, this);
 		Server.getInstance().getEventManager().addListener(BuyProductionItemListener.class, this);
+		Server.getInstance().getEventManager().addListener(RequestEndTurnListener.class, this);
 	}
 
 	@Override
@@ -117,8 +121,6 @@ public class InGameState extends GameState implements DisconnectListener, Select
 						return;
 					if (turnTimeLeft <= 0) {
 						Server.getInstance().getEventManager().fireEvent(new NextTurnEvent());
-						currentTurn++;
-						turnTimeLeft = getUpdatedTurnTime();
 					}
 
 					TurnTimeLeftPacket turnTimeLeftPacket = new TurnTimeLeftPacket();
@@ -456,12 +458,26 @@ public class InGameState extends GameState implements DisconnectListener, Select
 
 	@Override
 	public void onNextTurn() {
+
 		Json json = new Json();
+
+		currentTurn++;
+		turnTimeLeft = getUpdatedTurnTime();
+
 		NextTurnPacket turnTimeUpdatePacket = new NextTurnPacket();
-		turnTimeUpdatePacket.setTurnTime(getUpdatedTurnTime());
+		turnTimeUpdatePacket.setTurnTime(turnTimeLeft);
 		for (Player player : players) {
 			player.getConn().send(json.toJson(turnTimeUpdatePacket));
 		}
+
+		TurnTimeLeftPacket turnTimeLeftPacket = new TurnTimeLeftPacket();
+		turnTimeLeftPacket.setTime(turnTimeLeft);
+
+		for (Player player : players)
+			player.getConn().send(json.toJson(turnTimeLeftPacket));
+
+		for (Player player : players)
+			player.setTurnDone(false);
 	}
 
 	// TODO: Move to producibleItemManager
@@ -554,15 +570,26 @@ public class InGameState extends GameState implements DisconnectListener, Select
 	@Override
 	public void onEndTurn(WebSocket conn, EndTurnPacket packet) {
 		Server.getInstance().getEventManager().fireEvent(new NextTurnEvent());
-		currentTurn++;
-		turnTimeLeft = getUpdatedTurnTime();
+	}
 
-		TurnTimeLeftPacket turnTimeLeftPacket = new TurnTimeLeftPacket();
-		turnTimeLeftPacket.setTime(turnTimeLeft);
+	@Override
+	public void onRequestEndTurn(WebSocket conn, RequestEndTurnPacket packet) {
+		Player player = Server.getInstance().getPlayerByConn(conn);
+		player.setTurnDone(true);
+
+		packet.setPlayerName(player.getName());
 
 		Json json = new Json();
-		for (Player player : players)
-			player.getConn().send(json.toJson(turnTimeLeftPacket));
+		for (Player otherPlayer : players)
+			otherPlayer.getConn().send(json.toJson(packet));
+
+		boolean playersTurnsDone = true;
+		for (Player otherPlayer : players)
+			if (!otherPlayer.isTurnDone())
+				playersTurnsDone = false;
+
+		if (playersTurnsDone)
+			Server.getInstance().getEventManager().fireEvent(new NextTurnEvent());
 	}
 
 	@Override

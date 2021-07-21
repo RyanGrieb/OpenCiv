@@ -35,6 +35,7 @@ import me.rhin.openciv.listener.PlayerStatUpdateListener.PlayerStatUpdateEvent;
 import me.rhin.openciv.listener.ReceiveMapChunkListener.ReciveMapChunkEvent;
 import me.rhin.openciv.listener.RemoveSpecialistFromContainerListener.RemoveSpecialistFromContainerEvent;
 import me.rhin.openciv.listener.RemoveTileTypeListener.RemoveTileTypeEvent;
+import me.rhin.openciv.listener.RequestEndTurnListener.RequestEndTurnEvent;
 import me.rhin.openciv.listener.SelectUnitListener.SelectUnitEvent;
 import me.rhin.openciv.listener.ServerConnectListener.ServerConnectEvent;
 import me.rhin.openciv.listener.SetCitizenTileWorkerListener.SetCitizenTileWorkerEvent;
@@ -76,6 +77,7 @@ import me.rhin.openciv.shared.packet.type.PlayerListRequestPacket;
 import me.rhin.openciv.shared.packet.type.PlayerStatUpdatePacket;
 import me.rhin.openciv.shared.packet.type.RemoveSpecialistFromContainerPacket;
 import me.rhin.openciv.shared.packet.type.RemoveTileTypePacket;
+import me.rhin.openciv.shared.packet.type.RequestEndTurnPacket;
 import me.rhin.openciv.shared.packet.type.SelectUnitPacket;
 import me.rhin.openciv.shared.packet.type.SetCitizenTileWorkerPacket;
 import me.rhin.openciv.shared.packet.type.SetCityHealthPacket;
@@ -136,6 +138,7 @@ public class NetworkManager {
 		networkEvents.put(CompleteResearchPacket.class, CompleteResearchEvent.class);
 		networkEvents.put(RemoveTileTypePacket.class, RemoveTileTypeEvent.class);
 		networkEvents.put(SetUnitHealthPacket.class, SetUnitHealthEvent.class);
+		networkEvents.put(RequestEndTurnPacket.class, RequestEndTurnEvent.class);
 	}
 
 	public void connect(String ip) {
@@ -143,7 +146,7 @@ public class NetworkManager {
 		Gdx.app.log(Civilization.LOG_TAG, "Attempting to connect to: " + socketAddress);
 		try {
 			this.socket = WebSockets.newSocket(socketAddress);
-			//socket.setSendGracefully(true);
+			// socket.setSendGracefully(true);
 			socket.addListener(getListener());
 			socket.connect();
 		} catch (Exception e) {

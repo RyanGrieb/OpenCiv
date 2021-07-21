@@ -33,6 +33,7 @@ import me.rhin.openciv.server.listener.MapRequestListener.MapRequestEvent;
 import me.rhin.openciv.server.listener.PlayerFinishLoadingListener.PlayerFinishLoadingEvent;
 import me.rhin.openciv.server.listener.PlayerListRequestListener.PlayerListRequestEvent;
 import me.rhin.openciv.server.listener.RangedAttackListener.RangedAttackEvent;
+import me.rhin.openciv.server.listener.RequestEndTurnListener.RequestEndTurnEvent;
 import me.rhin.openciv.server.listener.SelectUnitListener.SelectUnitEvent;
 import me.rhin.openciv.server.listener.SetProductionItemListener.SetProductionItemEvent;
 import me.rhin.openciv.server.listener.SetWorldSizeListener.SetWorldSizeEvent;
@@ -58,6 +59,7 @@ import me.rhin.openciv.shared.packet.type.MapRequestPacket;
 import me.rhin.openciv.shared.packet.type.MoveUnitPacket;
 import me.rhin.openciv.shared.packet.type.PlayerListRequestPacket;
 import me.rhin.openciv.shared.packet.type.RangedAttackPacket;
+import me.rhin.openciv.shared.packet.type.RequestEndTurnPacket;
 import me.rhin.openciv.shared.packet.type.SelectUnitPacket;
 import me.rhin.openciv.shared.packet.type.SetProductionItemPacket;
 import me.rhin.openciv.shared.packet.type.SetWorldSizePacket;
@@ -68,7 +70,7 @@ import me.rhin.openciv.shared.util.ColorHelper;
 
 public class Server extends WebSocketServer {
 
-	//private static final String HOST = "207.246.89.13";
+	// private static final String HOST = "207.246.89.13";
 	private static final String HOST = "localhost";
 	private static final int PORT = 5222;
 	private static Server server;
@@ -133,6 +135,7 @@ public class Server extends WebSocketServer {
 		networkEvents.put(ChooseTechPacket.class, ChooseTechEvent.class);
 		networkEvents.put(RangedAttackPacket.class, RangedAttackEvent.class);
 		networkEvents.put(BuyProductionItemPacket.class, BuyProductionItemEvent.class);
+		networkEvents.put(RequestEndTurnPacket.class, RequestEndTurnEvent.class);
 
 		this.playerIndex = 0;
 		this.commandProcessor = new CmdProcessor();

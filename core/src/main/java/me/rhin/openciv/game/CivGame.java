@@ -50,6 +50,7 @@ import me.rhin.openciv.shared.packet.type.MoveUnitPacket;
 import me.rhin.openciv.shared.packet.type.NextTurnPacket;
 import me.rhin.openciv.shared.packet.type.PlayerConnectPacket;
 import me.rhin.openciv.shared.packet.type.PlayerListRequestPacket;
+import me.rhin.openciv.shared.packet.type.RequestEndTurnPacket;
 import me.rhin.openciv.shared.packet.type.SetCityHealthPacket;
 import me.rhin.openciv.shared.packet.type.SetCityOwnerPacket;
 import me.rhin.openciv.shared.packet.type.SetUnitHealthPacket;
@@ -304,8 +305,13 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 		Civilization.getInstance().getNetworkManager().sendPacket(packet);
 	}
 
+	public void requestEndTurn() {
+		RequestEndTurnPacket packet = new RequestEndTurnPacket();
+		Civilization.getInstance().getNetworkManager().sendPacket(packet);
+	}
+
 	public void cancelEndTurn() {
-		
+
 	}
 
 	public GameMap getMap() {
@@ -334,5 +340,9 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 
 	public NotificationHandler getNotificationHanlder() {
 		return notificationHandler;
+	}
+
+	public HashMap<String, Player> getPlayers() {
+		return players;
 	}
 }
