@@ -28,7 +28,7 @@ public class CalendarTech extends Technology {
 
 	@Override
 	public String getDesc() {
-		return "- Unlocks stone works\n" + "- Unlocks stonegenge\n" + "- Build plantations";
+		return "- Unlocks stone works\n" + "- Unlocks stonehenge\n" + "- Build plantations";
 	}
 
 }

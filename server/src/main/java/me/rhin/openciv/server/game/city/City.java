@@ -13,6 +13,7 @@ import com.badlogic.gdx.utils.Json;
 import me.rhin.openciv.server.Server;
 import me.rhin.openciv.server.game.Player;
 import me.rhin.openciv.server.game.city.building.Building;
+import me.rhin.openciv.server.game.city.building.IncreaseTileStatlineBuilding;
 import me.rhin.openciv.server.game.city.citizen.AssignedCitizenWorker;
 import me.rhin.openciv.server.game.city.citizen.CitizenWorker;
 import me.rhin.openciv.server.game.city.citizen.CityCenterCitizenWorker;
@@ -127,7 +128,7 @@ public class City implements AttackableEntity, SpecialistContainer, NextTurnList
 
 		setCitizenTileWorker(new AssignedCitizenWorker(this, topTile));
 
-		statLine.mergeStatLine(topTile.getStatLine());
+		statLine.mergeStatLine(getTileStatLine(topTile));
 
 		Json json = new Json();
 
@@ -349,7 +350,7 @@ public class City implements AttackableEntity, SpecialistContainer, NextTurnList
 		CitizenWorker emptyCitizenWorker = new EmptyCitizenWorker(this, tile);
 		citizenWorkers.put(tile, emptyCitizenWorker);
 
-		statLine.reduceStatLine(tile.getStatLine());
+		statLine.reduceStatLine(getTileStatLine(tile));
 
 		CityStatUpdatePacket cityStatUpdatePacket = new CityStatUpdatePacket();
 		for (Stat stat : this.statLine.getStatValues().keySet()) {
@@ -475,7 +476,18 @@ public class City implements AttackableEntity, SpecialistContainer, NextTurnList
 
 			return statLine;
 		}
-		return tile.getStatLine();
+
+		StatLine buildingStatline = new StatLine();
+		for(Building building : buildings) {
+			if(building instanceof IncreaseTileStatlineBuilding) {
+				IncreaseTileStatlineBuilding statlineBuilding = (IncreaseTileStatlineBuilding) building;
+				
+				buildingStatline.mergeStatLine(statlineBuilding.getTileStatline(tile));
+			}
+		}
+		
+		buildingStatline.mergeStatLine(tile.getStatLine());
+		return buildingStatline;
 	}
 
 	private ArrayList<Tile> getTopWorkableTiles() {
