@@ -10,7 +10,7 @@ import me.rhin.openciv.listener.ResizeListener;
 import me.rhin.openciv.shared.stat.Stat;
 import me.rhin.openciv.ui.background.ColoredBackground;
 import me.rhin.openciv.ui.button.type.BuyItemButton;
-import me.rhin.openciv.ui.button.type.CancelItemButton;
+import me.rhin.openciv.ui.button.type.CloseWindowButton;
 import me.rhin.openciv.ui.button.type.ProduceItemButton;
 import me.rhin.openciv.ui.label.CustomLabel;
 import me.rhin.openciv.ui.window.AbstractWindow;
@@ -28,7 +28,7 @@ public class ItemInfoWindow extends AbstractWindow implements ResizeListener {
 	private ColoredBackground itemIcon;
 	private ProduceItemButton produceItemButton;
 	private BuyItemButton buyItemButton;
-	private CancelItemButton cancelItemButton;
+	private CloseWindowButton closeWindowButton;
 	private ColoredBackground produceIcon;
 	private ColoredBackground buyIcon;
 
@@ -58,8 +58,8 @@ public class ItemInfoWindow extends AbstractWindow implements ResizeListener {
 		this.buyItemButton = new BuyItemButton(city, productionItem, getWidth() / 2 - 82 / 2, 4, 82, 28);
 		addActor(buyItemButton);
 
-		this.cancelItemButton = new CancelItemButton(getWidth() - 86, 4, 82, 28);
-		addActor(cancelItemButton);
+		this.closeWindowButton = new CloseWindowButton(this.getClass(), "Cancel", getWidth() - 86, 4, 82, 28);
+		addActor(closeWindowButton);
 
 		this.produceIcon = new ColoredBackground(TextureEnum.ICON_PRODUCTION.sprite(),
 				produceItemButton.getX() + produceItemButton.getWidth() / 2 - 16 / 2,
@@ -96,7 +96,7 @@ public class ItemInfoWindow extends AbstractWindow implements ResizeListener {
 		itemDescLabel.setPosition(4, itemIcon.getY() - itemIcon.getHeight() - itemDescLabel.getHeight());
 		produceItemButton.setPosition(4, 4);
 		buyItemButton.setPosition(getWidth() / 2 - 82 / 2, 4);
-		cancelItemButton.setPosition(getWidth() - 86, 4);
+		closeWindowButton.setPosition(getWidth() - 86, 4);
 
 		produceIcon.setPosition(produceItemButton.getX() + produceItemButton.getWidth() / 2 - 16 / 2,
 				produceItemButton.getY() + produceItemButton.getHeight());

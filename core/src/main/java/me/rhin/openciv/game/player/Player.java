@@ -8,7 +8,9 @@ import com.badlogic.gdx.utils.Timer.Task;
 
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.game.city.City;
+import me.rhin.openciv.game.civilization.Civ;
 import me.rhin.openciv.game.civilization.CivType;
+import me.rhin.openciv.game.heritage.HeritageTree;
 import me.rhin.openciv.game.map.tile.Tile;
 import me.rhin.openciv.game.notification.type.MoveUnitHelpNotification;
 import me.rhin.openciv.game.notification.type.MovementRangeHelpNotification;
@@ -40,8 +42,9 @@ public class Player implements RelativeMouseMoveListener, LeftClickListener, Rig
 	private ArrayList<Unit> ownedUnits;
 	private StatLine statLine;
 	private ResearchTree researchTree;
+	private HeritageTree heritageTree;
 	private boolean rightMouseHeld;
-	private CivType civType;
+	private Civ civilization;
 	private int clicksPerSecond;
 
 	public Player(String name) {
@@ -50,6 +53,7 @@ public class Player implements RelativeMouseMoveListener, LeftClickListener, Rig
 		this.ownedUnits = new ArrayList<>();
 		this.statLine = new StatLine();
 		this.researchTree = new ResearchTree();
+		this.heritageTree = new HeritageTree();
 
 		Timer.schedule(new Task() {
 			@Override
@@ -197,6 +201,10 @@ public class Player implements RelativeMouseMoveListener, LeftClickListener, Rig
 		return researchTree;
 	}
 
+	public HeritageTree getHeritageTree() {
+		return heritageTree;
+	}
+
 	public ArrayList<City> getOwnedCities() {
 		return ownedCities;
 	}
@@ -216,12 +224,12 @@ public class Player implements RelativeMouseMoveListener, LeftClickListener, Rig
 			unselectUnit();
 	}
 
-	public CivType getCivType() {
-		return civType;
+	public Civ getCivilization() {
+		return civilization;
 	}
 
-	public void setCivType(CivType civType) {
-		this.civType = civType;
+	public void setCivilization(Civ civilization) {
+		this.civilization = civilization;
 	}
 
 	public void removeCity(City city) {

@@ -21,7 +21,7 @@ import me.rhin.openciv.shared.packet.type.BuildingConstructedPacket;
 import me.rhin.openciv.shared.packet.type.CompleteResearchPacket;
 import me.rhin.openciv.shared.packet.type.RemoveSpecialistFromContainerPacket;
 import me.rhin.openciv.shared.packet.type.SetCitizenTileWorkerPacket;
-import me.rhin.openciv.ui.button.type.CityInfoCloseButton;
+import me.rhin.openciv.ui.button.type.CloseWindowButton;
 import me.rhin.openciv.ui.button.type.WorkedTileButton;
 import me.rhin.openciv.ui.game.CityProductionInfo;
 import me.rhin.openciv.ui.game.CityStatsInfo;
@@ -40,7 +40,7 @@ public class CityInfoWindow extends AbstractWindow
 		AddSpecialistToContainerListener, RemoveSpecialistFromContainerListener, CompleteResearchListener {
 
 	private City city;
-	private CityInfoCloseButton cityCloseButton;
+	private CloseWindowButton closeWindowButton;
 	private CityStatsInfo cityStatsInfo;
 	private CityProductionInfo cityProductionInfo;
 	// TODO: buildingContainerList should contain citizen focuses soon
@@ -50,8 +50,9 @@ public class CityInfoWindow extends AbstractWindow
 
 	public CityInfoWindow(City city) {
 		this.city = city;
-		cityCloseButton = new CityInfoCloseButton(viewport.getWorldWidth() / 2 - 150 / 2, 50, 150, 45);
-		addActor(cityCloseButton);
+		closeWindowButton = new CloseWindowButton(this.getClass(), "Close", viewport.getWorldWidth() / 2 - 150 / 2, 50,
+				150, 45);
+		addActor(closeWindowButton);
 
 		this.cityStatsInfo = new CityStatsInfo(city, 2, viewport.getWorldHeight() - (175 + GameOverlay.HEIGHT + 2), 200,
 				175);
@@ -109,7 +110,7 @@ public class CityInfoWindow extends AbstractWindow
 
 	@Override
 	public void onResize(int width, int height) {
-		cityCloseButton.setPosition(width / 2 - 150 / 2, 50);
+		closeWindowButton.setPosition(width / 2 - 150 / 2, 50);
 		cityStatsInfo.setPosition(2, height - (175 + GameOverlay.HEIGHT + 2));
 		cityProductionInfo.setPosition(2, cityStatsInfo.getY() - 105);
 

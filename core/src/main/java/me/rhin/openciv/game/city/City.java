@@ -83,7 +83,7 @@ public class City extends Group implements AttackableEntity, TileObserver, Speci
 		nameLabel.setPosition(originTile.getX() + originTile.getWidth() / 2 - nameLabel.getWidth() / 2,
 				originTile.getY() + originTile.getHeight() + 5);
 
-		this.nameIcon = playerOwner.getCivType().getIcon().sprite();
+		this.nameIcon = playerOwner.getCivilization().getIcon().sprite();
 		nameIcon.setBounds(nameLabel.getX() - 20, nameLabel.getY() - 4, 16, 16);
 
 		// FIXME: We really should have the city behave as a group, rather than an
@@ -324,7 +324,7 @@ public class City extends Group implements AttackableEntity, TileObserver, Speci
 	public void setOwner(Player playerOwner) {
 		this.playerOwner = playerOwner;
 
-		this.nameIcon = playerOwner.getCivType().getIcon().sprite();
+		this.nameIcon = playerOwner.getCivilization().getIcon().sprite();
 		nameIcon.setBounds(nameLabel.getX() - 20, nameLabel.getY() - 4, 16, 16);
 
 		if (!playerOwner.equals(Civilization.getInstance().getGame().getPlayer())) {

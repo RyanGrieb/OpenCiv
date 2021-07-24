@@ -58,7 +58,7 @@ public abstract class Unit extends Actor
 		this.selectionSprite = TextureEnum.UI_SELECTION.sprite();
 		// TODO: Change this sprite to a different texture
 		this.targetSelectionSprite = TextureEnum.UI_SELECTION.sprite();
-		this.civIconSprite = playerOwner.getCivType().getIcon().sprite();
+		this.civIconSprite = playerOwner.getCivilization().getIcon().sprite();
 		civIconSprite.setSize(8, 8);
 		civIconSprite.setAlpha(0.8F);
 
@@ -417,7 +417,7 @@ public abstract class Unit extends Actor
 
 	public void setPlayerOwner(Player playerOwner) {
 		this.playerOwner = playerOwner;
-		this.civIconSprite = playerOwner.getCivType().getIcon().sprite();
+		this.civIconSprite = playerOwner.getCivilization().getIcon().sprite();
 		civIconSprite.setBounds(getX() + 10, getY() + 20, 8, 8);
 
 		if (!playerOwner.equals(Civilization.getInstance().getGame().getPlayer()))

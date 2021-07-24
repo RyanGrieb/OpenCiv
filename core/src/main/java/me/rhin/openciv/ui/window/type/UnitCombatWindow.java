@@ -45,7 +45,7 @@ public class UnitCombatWindow extends AbstractWindow implements ResizeListener, 
 		addActor(combatPreviewLabel);
 
 		// FIXME: The naming scheme of coloredbackground is weird.
-		this.attackerIcon = new ColoredBackground(attackingEntity.getPlayerOwner().getCivType().getIcon().sprite(), 2,
+		this.attackerIcon = new ColoredBackground(attackingEntity.getPlayerOwner().getCivilization().getIcon().sprite(), 2,
 				getHeight() - 35, 16, 16);
 		addActor(attackerIcon);
 
@@ -61,7 +61,7 @@ public class UnitCombatWindow extends AbstractWindow implements ResizeListener, 
 		versusLabel.setPosition(35, getHeight() - 50);
 		addActor(versusLabel);
 
-		this.targetIcon = new ColoredBackground(targetEntity.getPlayerOwner().getCivType().getIcon().sprite(), 2,
+		this.targetIcon = new ColoredBackground(targetEntity.getPlayerOwner().getCivilization().getIcon().sprite(), 2,
 				getHeight() - 65, 16, 16);
 		addActor(targetIcon);
 

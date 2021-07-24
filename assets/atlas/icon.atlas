@@ -97,7 +97,7 @@ icon_gold
   index: -1
 icon_goto
   rotate: false
-  xy: 104, 88
+  xy: 70, 20
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
@@ -111,7 +111,7 @@ icon_heritage
   index: -1
 icon_mining
   rotate: false
-  xy: 138, 88
+  xy: 104, 20
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
@@ -125,7 +125,7 @@ icon_move
   index: -1
 icon_nazi
   rotate: false
-  xy: 104, 20
+  xy: 138, 54
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
@@ -144,16 +144,9 @@ icon_production
   orig: 16, 16
   offset: 0, 0
   index: -1
-icon_question
-  rotate: false
-  xy: 138, 54
-  size: 32, 32
-  orig: 32, 32
-  offset: 0, 0
-  index: -1
 icon_rome
   rotate: false
-  xy: 70, 20
+  xy: 104, 54
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
@@ -172,9 +165,16 @@ icon_settle
   orig: 32, 32
   offset: 0, 0
   index: -1
+icon_shield
+  rotate: false
+  xy: 104, 88
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
 icon_target
   rotate: false
-  xy: 104, 54
+  xy: 138, 88
   size: 32, 32
   orig: 32, 32
   offset: 0, 0

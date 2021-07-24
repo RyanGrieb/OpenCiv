@@ -163,7 +163,7 @@ public class Tile extends Actor implements BottomShapeRenderListener {
 				v2 = 0;
 			}
 
-			shapeRenderer.setColor(territory.getPlayerOwner().getCivType().getColor());
+			shapeRenderer.setColor(territory.getPlayerOwner().getCivilization().getColor());
 			shapeRenderer.line(vectors[v1], vectors[v2]);
 		}
 
@@ -392,7 +392,7 @@ public class Tile extends Actor implements BottomShapeRenderListener {
 
 	public void setTerritory(City city) {
 		this.territory = city;
-		Color color = city.getPlayerOwner().getCivType().getColor();
+		Color color = city.getPlayerOwner().getCivilization().getColor();
 		territorySprite.setColor(color.r, color.g, color.b, 0.25f);
 
 		if (city.getPlayerOwner().equals(Civilization.getInstance().getGame().getPlayer()))

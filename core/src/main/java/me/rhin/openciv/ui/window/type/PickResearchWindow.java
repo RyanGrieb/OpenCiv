@@ -8,7 +8,7 @@ import me.rhin.openciv.game.research.Technology;
 import me.rhin.openciv.listener.ResizeListener;
 import me.rhin.openciv.shared.stat.Stat;
 import me.rhin.openciv.ui.background.ColoredBackground;
-import me.rhin.openciv.ui.button.type.ClosePickResearchButton;
+import me.rhin.openciv.ui.button.type.CloseWindowButton;
 import me.rhin.openciv.ui.button.type.PickResearchButton;
 import me.rhin.openciv.ui.label.CustomLabel;
 import me.rhin.openciv.ui.window.AbstractWindow;
@@ -22,7 +22,7 @@ public class PickResearchWindow extends AbstractWindow implements ResizeListener
 	private CustomLabel descLabel;
 	private CustomLabel turnsLabel;
 	private PickResearchButton pickResearchButton;
-	private ClosePickResearchButton closePickResearchButton;
+	private CloseWindowButton closeWindowButton;
 
 	public PickResearchWindow(Technology tech) {
 		super.setBounds(viewport.getWorldWidth() / 2 - 270 / 2, viewport.getWorldHeight() / 2 - 300 / 2, 270, 300);
@@ -51,8 +51,8 @@ public class PickResearchWindow extends AbstractWindow implements ResizeListener
 		this.pickResearchButton = new PickResearchButton(tech, 0, 5, 100, 35);
 		addActor(pickResearchButton);
 
-		this.closePickResearchButton = new ClosePickResearchButton(getWidth() - 100, 5, 100, 35);
-		addActor(closePickResearchButton);
+		this.closeWindowButton = new CloseWindowButton(this.getClass(), "Cancel", getWidth() - 100, 5, 100, 35);
+		addActor(closeWindowButton);
 
 		Civilization.getInstance().getEventManager().addListener(ResizeListener.class, this);
 	}

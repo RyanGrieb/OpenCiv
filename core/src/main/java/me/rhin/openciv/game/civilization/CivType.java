@@ -10,6 +10,7 @@ import me.rhin.openciv.game.civilization.type.England;
 import me.rhin.openciv.game.civilization.type.Germany;
 import me.rhin.openciv.game.civilization.type.Rome;
 
+@Deprecated
 public enum CivType {
 
 	RANDOM(TextureEnum.ICON_UNKNOWN) {

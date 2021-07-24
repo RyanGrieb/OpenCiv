@@ -3,14 +3,14 @@ package me.rhin.openciv.ui.window.type;
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.listener.ResizeListener;
 import me.rhin.openciv.ui.background.BlankBackground;
-import me.rhin.openciv.ui.button.type.EscBackButton;
+import me.rhin.openciv.ui.button.type.CloseWindowButton;
 import me.rhin.openciv.ui.button.type.MainMenuButton;
 import me.rhin.openciv.ui.window.AbstractWindow;
 
 public class EscWindow extends AbstractWindow implements ResizeListener {
 
 	private BlankBackground blankBackground;
-	private EscBackButton escBackButton;
+	private CloseWindowButton closeWindowButton;
 	private MainMenuButton mainMenuButton;
 
 	public EscWindow() {
@@ -19,9 +19,9 @@ public class EscWindow extends AbstractWindow implements ResizeListener {
 				viewport.getWorldHeight() / 2 - 400 / 2, 200, 400);
 		addActor(blankBackground);
 
-		escBackButton = new EscBackButton(viewport.getWorldWidth() / 2 - 150 / 2,
+		closeWindowButton = new CloseWindowButton(this.getClass(), "Back", viewport.getWorldWidth() / 2 - 150 / 2,
 				blankBackground.getY() + blankBackground.getHeight() - 55, 150, 45);
-		addActor(escBackButton);
+		addActor(closeWindowButton);
 
 		mainMenuButton = new MainMenuButton(viewport.getWorldWidth() / 2 - 150 / 2,
 				blankBackground.getY() + blankBackground.getHeight() - 110, 150, 45);
@@ -35,7 +35,7 @@ public class EscWindow extends AbstractWindow implements ResizeListener {
 	@Override
 	public void onResize(int width, int height) {
 		blankBackground.setPosition(width / 2 - 200 / 2, height / 2 - 400 / 2);
-		escBackButton.setPosition(width / 2 - 150 / 2, blankBackground.getY() + blankBackground.getHeight() - 55);
+		closeWindowButton.setPosition(width / 2 - 150 / 2, blankBackground.getY() + blankBackground.getHeight() - 55);
 		mainMenuButton.setPosition(width / 2 - 150 / 2, blankBackground.getY() + blankBackground.getHeight() - 110);
 	}
 

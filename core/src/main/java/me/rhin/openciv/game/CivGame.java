@@ -59,6 +59,7 @@ import me.rhin.openciv.shared.packet.type.SettleCityPacket;
 import me.rhin.openciv.shared.packet.type.TerritoryGrowPacket;
 import me.rhin.openciv.shared.packet.type.UnitAttackPacket;
 import me.rhin.openciv.ui.screen.type.InGameScreen;
+import me.rhin.openciv.ui.window.type.CurrentHeritageWindow;
 import me.rhin.openciv.ui.window.type.CurrentResearchWindow;
 import me.rhin.openciv.ui.window.type.NextTurnWindow;
 import me.rhin.openciv.ui.window.type.NotificationWindow;
@@ -161,7 +162,8 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 			else
 				players.put(playerName, new Player(playerName));
 
-			players.get(playerName).setCivType(CivType.valueOf(packet.getCivList()[i]));
+			// TODO: Use reflection & remove our deprecated enum
+			players.get(playerName).setCivilization(CivType.valueOf(packet.getCivList()[i]).getCiv());
 		}
 	}
 
@@ -220,6 +222,7 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 		if (playerOwner.equals(player) && playerOwner.getOwnedCities().size() <= 1) {
 
 			Civilization.getInstance().getWindowManager().toggleWindow(new CurrentResearchWindow());
+			Civilization.getInstance().getWindowManager().toggleWindow(new CurrentHeritageWindow());
 
 			Civilization.getInstance().getGame().getNotificationHanlder()
 					.fireNotification(new NotResearchingNotification());

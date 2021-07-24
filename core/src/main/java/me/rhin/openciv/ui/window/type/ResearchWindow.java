@@ -12,7 +12,7 @@ import me.rhin.openciv.listener.PickResearchListener;
 import me.rhin.openciv.listener.ResizeListener;
 import me.rhin.openciv.listener.TopShapeRenderListener;
 import me.rhin.openciv.ui.background.BlankBackground;
-import me.rhin.openciv.ui.button.type.CloseResearchButton;
+import me.rhin.openciv.ui.button.type.CloseWindowButton;
 import me.rhin.openciv.ui.game.TechnologyLeaf;
 import me.rhin.openciv.ui.label.CustomLabel;
 import me.rhin.openciv.ui.window.AbstractWindow;
@@ -23,7 +23,7 @@ public class ResearchWindow extends AbstractWindow
 	private ArrayList<TechnologyLeaf> technologyLeafs;
 	private BlankBackground blankBackground;
 	private CustomLabel researchDescLabel;
-	private CloseResearchButton closeResearchButton;
+	private CloseWindowButton closeWindowButton;
 
 	public ResearchWindow() {
 		super.setBounds(0, 0, viewport.getWorldWidth(), viewport.getWorldHeight());
@@ -42,8 +42,9 @@ public class ResearchWindow extends AbstractWindow
 			addTech(tech);
 		}
 
-		this.closeResearchButton = new CloseResearchButton(viewport.getWorldWidth() / 2 - 150 / 2, 35, 150, 45);
-		addActor(closeResearchButton);
+		this.closeWindowButton = new CloseWindowButton(this.getClass(), "Close", viewport.getWorldWidth() / 2 - 150 / 2,
+				35, 150, 45);
+		addActor(closeWindowButton);
 
 		Civilization.getInstance().getEventManager().addListener(ResizeListener.class, this);
 		Civilization.getInstance().getEventManager().addListener(TopShapeRenderListener.class, this);
@@ -55,7 +56,7 @@ public class ResearchWindow extends AbstractWindow
 		super.setSize(width, height);
 		blankBackground.setSize(width, height);
 		researchDescLabel.setBounds(0, height - 25, width, 15);
-		closeResearchButton.setPosition(width / 2 - 150 / 2, 35);
+		closeWindowButton.setPosition(width / 2 - 150 / 2, 35);
 
 		for (TechnologyLeaf leaf : technologyLeafs) {
 			leaf.setPositionUpdated(false);
@@ -255,7 +256,7 @@ public class ResearchWindow extends AbstractWindow
 					singleTech = false;
 			}
 
-			//Subtract our y to be below our similar leafs that branch out
+			// Subtract our y to be below our similar leafs that branch out
 			for (TechnologyLeaf leaf : technologyLeafs)
 				if (leaf.getTech().getRequiredTechs().contains(requiredTechClass))
 					y -= height + 3;
@@ -265,7 +266,7 @@ public class ResearchWindow extends AbstractWindow
 				y += height + 3;
 		}
 
-		//If were the first techs, decrease our high to allow branching off.
+		// If were the first techs, decrease our high to allow branching off.
 		if (requiredTechs == 0) {
 			y -= height + 3;
 		}
