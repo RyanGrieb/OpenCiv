@@ -8,19 +8,23 @@ import com.badlogic.gdx.utils.Json;
 
 import me.rhin.openciv.server.Server;
 import me.rhin.openciv.server.game.city.City;
+import me.rhin.openciv.server.game.civilization.Civ;
 import me.rhin.openciv.server.game.civilization.CivType;
-import me.rhin.openciv.server.game.policy.PolicyManager;
+import me.rhin.openciv.server.game.civilization.type.RandomCivilization;
+import me.rhin.openciv.server.game.heritage.HeritageTree;
 import me.rhin.openciv.server.game.research.ResearchTree;
 import me.rhin.openciv.server.game.unit.Unit;
+import me.rhin.openciv.server.listener.ChooseHeritageListener;
 import me.rhin.openciv.server.listener.ChooseTechListener;
 import me.rhin.openciv.server.listener.NextTurnListener;
+import me.rhin.openciv.shared.packet.type.ChooseHeritagePacket;
 import me.rhin.openciv.shared.packet.type.ChooseTechPacket;
 import me.rhin.openciv.shared.packet.type.PlayerStatUpdatePacket;
 import me.rhin.openciv.shared.stat.Stat;
 import me.rhin.openciv.shared.stat.StatLine;
 import me.rhin.openciv.shared.stat.StatType;
 
-public class Player implements NextTurnListener, ChooseTechListener {
+public class Player implements NextTurnListener, ChooseTechListener, ChooseHeritageListener {
 
 	private WebSocket conn;
 	private String name;
@@ -31,16 +35,16 @@ public class Player implements NextTurnListener, ChooseTechListener {
 	private Unit selectedUnit;
 	private boolean loaded;
 	private StatLine statLine;
-	private PolicyManager policyManager;
-	private CivType civType;
+	private Civ civilization;
 	private boolean host;
 	private ResearchTree researchTree;
+	private HeritageTree heritageTree;
 	private boolean turnDone;
 
 	public Player(WebSocket conn) {
 		this.conn = conn;
 		this.name = "Player" + Server.getInstance().getPlayerIndex();
-		this.civType = CivType.RANDOM;
+		this.civilization = new RandomCivilization(this);
 
 		this.spawnX = -1;
 		this.spawnY = -1;
@@ -49,12 +53,13 @@ public class Player implements NextTurnListener, ChooseTechListener {
 		this.loaded = false;
 		this.statLine = new StatLine();
 
-		policyManager = new PolicyManager(this);
 		this.host = false;
 		this.researchTree = new ResearchTree(this);
+		this.heritageTree = new HeritageTree(this);
 
 		Server.getInstance().getEventManager().addListener(NextTurnListener.class, this);
 		Server.getInstance().getEventManager().addListener(ChooseTechListener.class, this);
+		Server.getInstance().getEventManager().addListener(ChooseHeritageListener.class, this);
 	}
 
 	@Override
@@ -65,6 +70,7 @@ public class Player implements NextTurnListener, ChooseTechListener {
 		updateOwnedStatlines(true);
 	}
 
+	// FIXME: Move to researchTree
 	@Override
 	public void onChooseTech(WebSocket conn, ChooseTechPacket packet) {
 		if (!conn.equals(this.conn))
@@ -72,6 +78,14 @@ public class Player implements NextTurnListener, ChooseTechListener {
 
 		// FIXME: Check if the player is able to research that tech. (Prevent cheating).
 		researchTree.chooseTech(packet.getTechID());
+	}
+
+	@Override
+	public void onChooseHeritage(WebSocket conn, ChooseHeritagePacket packet) {
+		if (!conn.equals(this.conn))
+			return;
+
+		heritageTree.studyHeritage(packet.getName());
 	}
 
 	public void updateOwnedStatlines(boolean increaseValues) {
@@ -87,7 +101,7 @@ public class Player implements NextTurnListener, ChooseTechListener {
 		PlayerStatUpdatePacket packet = new PlayerStatUpdatePacket();
 		for (Stat stat : statLine.getStatValues().keySet()) {
 			if (stat.getStatType() != StatType.CITY_EXCLUSIVE)
-				packet.addStat(stat.name(), this.statLine.getStatValues().get(stat));
+				packet.addStat(stat.name(), this.statLine.getStatValues().get(stat).getValue());
 		}
 		Json json = new Json();
 		conn.send(json.toJson(packet));
@@ -97,7 +111,7 @@ public class Player implements NextTurnListener, ChooseTechListener {
 		this.statLine.mergeStatLine(statLine);
 		PlayerStatUpdatePacket packet = new PlayerStatUpdatePacket();
 		for (Stat stat : this.statLine.getStatValues().keySet()) {
-			packet.addStat(stat.name(), this.statLine.getStatValues().get(stat));
+			packet.addStat(stat.name(), this.statLine.getStatValues().get(stat).getValue());
 		}
 		Json json = new Json();
 		conn.send(json.toJson(packet));
@@ -107,7 +121,7 @@ public class Player implements NextTurnListener, ChooseTechListener {
 		this.statLine.reduceStatLine(statLine);
 		PlayerStatUpdatePacket packet = new PlayerStatUpdatePacket();
 		for (Stat stat : this.statLine.getStatValues().keySet()) {
-			packet.addStat(stat.name(), this.statLine.getStatValues().get(stat));
+			packet.addStat(stat.name(), this.statLine.getStatValues().get(stat).getValue());
 		}
 		Json json = new Json();
 		conn.send(json.toJson(packet));
@@ -161,7 +175,7 @@ public class Player implements NextTurnListener, ChooseTechListener {
 	}
 
 	public void setCivilization(CivType civType) {
-		this.civType = civType;
+		this.civilization = civType.getCiv(this);
 	}
 
 	public ArrayList<Unit> getOwnedUnits() {
@@ -188,8 +202,8 @@ public class Player implements NextTurnListener, ChooseTechListener {
 		return host;
 	}
 
-	public CivType getCivType() {
-		return civType;
+	public Civ getCiv() {
+		return civilization;
 	}
 
 	public ResearchTree getResearchTree() {
@@ -207,4 +221,9 @@ public class Player implements NextTurnListener, ChooseTechListener {
 	public boolean isTurnDone() {
 		return turnDone;
 	}
+
+	public HeritageTree getHeritageTree() {
+		return heritageTree;
+	}
+
 }

@@ -596,7 +596,7 @@ public class InGameState extends GameState
 	public void onPlayerListRequested(WebSocket conn, PlayerListRequestPacket packet) {
 		System.out.println("[SERVER] Player list requested");
 		for (Player player : players) {
-			packet.addPlayer(player.getName(), player.getCivType().name());
+			packet.addPlayer(player.getName(), player.getCiv().getName().toUpperCase());
 		}
 		Json json = new Json();
 		conn.send(json.toJson(packet));
@@ -790,9 +790,9 @@ public class InGameState extends GameState
 
 						boolean adjToBias = false;
 
-						if (player.getCivType().getBiasTileType() != null) {
+						if (player.getCiv().getBiasTileType() != null) {
 							for (Tile adjTile : tile.getAdjTiles())
-								if (adjTile.containsTileType(player.getCivType().getBiasTileType()))
+								if (adjTile.containsTileType(player.getCiv().getBiasTileType()))
 									adjToBias = true;
 						} else
 							adjToBias = true; // If we don't have a bias, just set we are adj no matter what.

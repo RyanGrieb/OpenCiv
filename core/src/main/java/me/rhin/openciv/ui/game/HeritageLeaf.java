@@ -11,10 +11,13 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.heritage.Heritage;
+import me.rhin.openciv.listener.CompleteHeritageListener;
+import me.rhin.openciv.shared.packet.type.CompleteHeritagePacket;
 import me.rhin.openciv.ui.background.ColoredBackground;
 import me.rhin.openciv.ui.label.CustomLabel;
+import me.rhin.openciv.ui.window.type.PickHeritageWindow;
 
-public class HeritageLeaf extends Group implements Comparable<HeritageLeaf>{
+public class HeritageLeaf extends Group implements Comparable<HeritageLeaf>, CompleteHeritageListener {
 
 	private Heritage heritage;
 	private ColoredBackground background;
@@ -68,8 +71,7 @@ public class HeritageLeaf extends Group implements Comparable<HeritageLeaf>{
 					return;
 				}
 
-				// Civilization.getInstance().getWindowManager().addWindow(new
-				// PickResearchWindow(tech));
+				Civilization.getInstance().getWindowManager().addWindow(new PickHeritageWindow(heritage));
 			}
 
 			@Override
@@ -81,14 +83,39 @@ public class HeritageLeaf extends Group implements Comparable<HeritageLeaf>{
 			}
 		});
 
-		// Civilization.getInstance().getEventManager().addListener(CompleteResearchListener.class,
-		// this);
+		Civilization.getInstance().getEventManager().addListener(CompleteHeritageListener.class, this);
 	}
 
+	@Override
+	public void onCompleteHeritage(CompleteHeritagePacket packet) {
+
+		if (!Civilization.getInstance().getGame().getPlayer().getHeritageTree()
+				.getHeritageFromClassName(packet.getHeritageName()).equals(heritage)) {
+			// Determine if others can be studied.
+
+			if (heritage.ableToStudy() && !heritage.isStudied()) {
+				background.setSprite(TextureEnum.UI_YELLOW.sprite());
+				background.setBounds(0, 0, getWidth(), getHeight());
+			}
+
+			return;
+		}
+
+		background.setSprite(TextureEnum.UI_GREEN.sprite());
+		background.setBounds(0, 0, getWidth(), getHeight());
+		removeActor(heritageIcon);
+	}
 
 	@Override
 	public int compareTo(HeritageLeaf otherLeaf) {
 		return heritage.getLevel() - otherLeaf.getHeritage().getLevel();
+	}
+
+	public void setStudying(boolean studying) {
+		if (studying)
+			addActor(heritageIcon);
+		else
+			removeActor(heritageIcon);
 	}
 
 	public Heritage getHeritage() {

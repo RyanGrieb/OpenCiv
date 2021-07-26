@@ -36,7 +36,7 @@ public class Warrior extends UnitItem {
 	}
 
 	@Override
-	public int getProductionCost() {
+	protected float getUnitProductionCost() {
 		return 40;
 	}
 
@@ -63,5 +63,10 @@ public class Warrior extends UnitItem {
 	@Override
 	public String getDesc() {
 		return "An ancient melee unit.";
+	}
+
+	@Override
+	public UnitItemType getUnitItemType() {
+		return UnitItemType.MELEE;
 	}
 }

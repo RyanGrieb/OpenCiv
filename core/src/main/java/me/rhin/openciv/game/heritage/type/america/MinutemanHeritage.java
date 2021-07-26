@@ -22,4 +22,17 @@ public class MinutemanHeritage extends Heritage {
 		return TextureEnum.UI_ERROR.sprite();
 	}
 
+	@Override
+	public float getCost() {
+		return 60;
+	}
+
+	@Override
+	public String getDesc() {
+		return "Unique mele unit.\nReplaces the musketman.";
+	}
+
+	@Override
+	protected void onStudied() {
+	}
 }

@@ -41,7 +41,7 @@ public class Archer extends UnitItem {
 	}
 
 	@Override
-	public int getProductionCost() {
+	protected float getUnitProductionCost() {
 		return 40;
 	}
 
@@ -68,5 +68,10 @@ public class Archer extends UnitItem {
 	@Override
 	public String getDesc() {
 		return "A ancient ranged unit.";
+	}
+
+	@Override
+	public UnitItemType getUnitItemType() {
+		return UnitItemType.RANGED;
 	}
 }

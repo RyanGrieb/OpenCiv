@@ -22,4 +22,17 @@ public class CapitalIconHeritage extends Heritage {
 		return TextureEnum.ICON_PRODUCTION.sprite();
 	}
 
+	@Override
+	public float getCost() {
+		return 40;
+	}
+
+	@Override
+	public String getDesc() {
+		return "30% Production bonus for buildings\nalready built in the\ncapital.";
+	}
+
+	@Override
+	protected void onStudied() {
+	}
 }

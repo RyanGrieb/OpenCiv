@@ -22,4 +22,18 @@ public class StateWorshipHeritage extends Heritage {
 		return TextureEnum.BUILDING_MONUMENT.sprite();
 	}
 
+	@Override
+	public float getCost() {
+		return 20;
+	}
+
+	@Override
+	public String getDesc() {
+		return "Gain a free monument in all\ncities.";
+	}
+
+
+	@Override
+	protected void onStudied() {
+	}
 }

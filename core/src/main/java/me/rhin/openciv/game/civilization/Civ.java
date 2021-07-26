@@ -5,7 +5,6 @@ import com.badlogic.gdx.graphics.Color;
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.heritage.Heritage;
-import me.rhin.openciv.game.heritage.type.rome.LegionHeritage;
 
 public abstract class Civ {
 

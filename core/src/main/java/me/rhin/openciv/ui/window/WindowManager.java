@@ -1,5 +1,6 @@
 package me.rhin.openciv.ui.window;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -159,5 +160,9 @@ public class WindowManager {
 		}
 
 		return lastElement;
+	}
+
+	public Collection<AbstractWindow> getWindows() {
+		return windows.values();
 	}
 }

@@ -12,11 +12,11 @@ public class WaterMill extends Building {
 
 		this.statLine.addValue(Stat.FOOD_GAIN, 2);
 		this.statLine.addValue(Stat.PRODUCTION_GAIN, 1);
-		//TODO: Implement maintenance
+		// TODO: Implement maintenance
 	}
 
 	@Override
-	public int getProductionCost() {
+	public float getProductionCost() {
 		return 75;
 	}
 
@@ -24,13 +24,13 @@ public class WaterMill extends Building {
 	public float getGoldCost() {
 		return 250;
 	}
-	
+
 	@Override
 	public boolean meetsProductionRequirements() {
 		return city.getOriginTile().isAdjToRiver()
 				&& city.getPlayerOwner().getResearchTree().hasResearched(WheelTech.class);
 	}
-	
+
 	@Override
 	public String getName() {
 		return "Water Mill";

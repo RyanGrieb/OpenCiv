@@ -35,6 +35,9 @@ import me.rhin.openciv.shared.stat.Stat;
  * @author Ryan
  *
  */
+
+//FIXME: Remove modifiers if this city is captured.
+
 public class ProducibleItemManager implements NextTurnListener {
 
 	private City city;

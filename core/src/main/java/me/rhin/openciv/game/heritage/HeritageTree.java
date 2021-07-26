@@ -9,6 +9,7 @@ import me.rhin.openciv.game.heritage.type.all.StateWorshipHeritage;
 import me.rhin.openciv.game.heritage.type.all.TaxesHeritage;
 
 public class HeritageTree {
+
 	private LinkedHashMap<Class<? extends Heritage>, Heritage> values;
 
 	public HeritageTree() {
@@ -37,4 +38,13 @@ public class HeritageTree {
 		return values.get(clazz);
 	}
 
+	public Heritage getHeritageFromClassName(String className) {
+		try {
+			return values.get(Class.forName("me.rhin.openciv.game.heritage.type." + className));
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		}
+
+		return null;
+	}
 }

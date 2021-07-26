@@ -22,4 +22,17 @@ public class ExpandedVisionHeritage extends Heritage {
 		return TextureEnum.UNIT_SCOUT.sprite();
 	}
 
+	@Override
+	public float getCost() {
+		return 40;
+	}
+
+	@Override
+	public String getDesc() {
+		return "All units gain +1 vision.";
+	}
+
+	@Override
+	protected void onStudied() {
+	}
 }

@@ -22,4 +22,17 @@ public class SailingHeritage extends Heritage {
 		return TextureEnum.UNIT_GALLEY.sprite();
 	}
 
+	@Override
+	public float getCost() {
+		return 20;
+	}
+
+	@Override
+	public String getDesc() {
+		return "20% Production bonus to naval\nunits.";
+	}
+
+	@Override
+	protected void onStudied() {
+	}
 }

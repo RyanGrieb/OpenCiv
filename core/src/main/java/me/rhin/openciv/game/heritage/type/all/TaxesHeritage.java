@@ -22,4 +22,17 @@ public class TaxesHeritage extends Heritage {
 		return TextureEnum.ICON_GOLD.sprite();
 	}
 
+	@Override
+	public float getCost() {
+		return 60;
+	}
+
+	@Override
+	public String getDesc() {
+		return "+1 Gold for every\n2 citizens in cities.";
+	}
+
+	@Override
+	protected void onStudied() {
+	}
 }

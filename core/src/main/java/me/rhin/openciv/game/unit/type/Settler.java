@@ -75,7 +75,6 @@ public class Settler extends UnitItem {
 				float distX = Math.abs(unit.getTile().getGridX() - city.getOriginTile().getGridX());
 				float distY = Math.abs(unit.getTile().getGridY() - city.getOriginTile().getGridY());
 
-
 				if (distX + distY < 4)
 					return false;
 			}
@@ -100,7 +99,7 @@ public class Settler extends UnitItem {
 	}
 
 	@Override
-	public int getProductionCost() {
+	protected float getUnitProductionCost() {
 		return 80;
 	}
 
@@ -127,5 +126,10 @@ public class Settler extends UnitItem {
 	@Override
 	public String getDesc() {
 		return "Can settle new cities.\nCan be captured by enemy units.";
+	}
+
+	@Override
+	public UnitItemType getUnitItemType() {
+		return UnitItemType.SUPPORT;
 	}
 }

@@ -8,7 +8,7 @@ public interface ProductionItem {
 
 	public TextureEnum getTexture();
 
-	public int getProductionCost();
+	public float getProductionCost();
 
 	public boolean meetsProductionRequirements();
 
@@ -17,4 +17,6 @@ public interface ProductionItem {
 	public String getDesc();
 
 	public float getGoldCost();
+
+	public void setProductionModifier(float modifier);
 }

@@ -17,7 +17,7 @@ public class Market extends Building implements SpecialistContainer {
 	}
 
 	@Override
-	public int getProductionCost() {
+	public float getProductionCost() {
 		return 100;
 	}
 	

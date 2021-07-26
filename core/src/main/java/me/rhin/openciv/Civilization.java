@@ -20,6 +20,7 @@ import me.rhin.openciv.ui.window.WindowManager;
 public class Civilization extends Game {
 
 	public static final boolean DEBUG_GL = false;
+	public static final boolean DEBUG_BOUNDING_BOXES = false; // NOTE: Overlay only.
 	public static final String LOG_TAG = "OpenCiv-INFO";
 	public static final String WS_LOG_TAG = "OpenCiv-WebSocket";
 	public static GLProfiler GL_PROFILER;

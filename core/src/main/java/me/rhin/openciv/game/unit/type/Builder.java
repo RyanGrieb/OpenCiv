@@ -474,7 +474,7 @@ public class Builder extends UnitItem {
 	}
 
 	@Override
-	public int getProductionCost() {
+	protected float getUnitProductionCost() {
 		return 50;
 	}
 
@@ -501,5 +501,10 @@ public class Builder extends UnitItem {
 	@Override
 	public String getDesc() {
 		return "Can improve tiles on the map. \nCertain tiles require a specific \nresearch.\nCan be captured by enemy units.";
+	}
+
+	@Override
+	public UnitItemType getUnitItemType() {
+		return UnitItemType.SUPPORT;
 	}
 }

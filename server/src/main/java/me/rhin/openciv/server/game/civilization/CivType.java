@@ -2,38 +2,47 @@ package me.rhin.openciv.server.game.civilization;
 
 import java.util.Random;
 
-import me.rhin.openciv.server.game.map.tile.TileType;
+import me.rhin.openciv.server.game.Player;
+import me.rhin.openciv.server.game.civilization.type.America;
+import me.rhin.openciv.server.game.civilization.type.England;
+import me.rhin.openciv.server.game.civilization.type.Germany;
+import me.rhin.openciv.server.game.civilization.type.Rome;
 
 public enum CivType {
 
 	RANDOM {
+
 		@Override
-		public TileType getBiasTileType() {
-			return null;
+		public Civ getCiv(Player player) {
+			Random rnd = new Random();
+			return CivType.values()[rnd.nextInt(CivType.values().length)].getCiv(player);
 		}
 	},
 	AMERICA {
 		@Override
-		public TileType getBiasTileType() {
-			return null;
+		public Civ getCiv(Player player) {
+			return new America(player);
 		}
 	},
 	ENGLAND {
+
 		@Override
-		public TileType getBiasTileType() {
-			return TileType.SHALLOW_OCEAN;
+		public Civ getCiv(Player player) {
+			return new England(player);
 		}
 	},
 	GERMANY {
+
 		@Override
-		public TileType getBiasTileType() {
-			return null;
+		public Civ getCiv(Player player) {
+			return new Germany(player);
 		}
 	},
 	ROME {
+
 		@Override
-		public TileType getBiasTileType() {
-			return null;
+		public Civ getCiv(Player player) {
+			return new Rome(player);
 		}
 	};
 
@@ -46,6 +55,6 @@ public enum CivType {
 		return civType;
 	}
 
-	public abstract TileType getBiasTileType();
+	public abstract Civ getCiv(Player player);
 
 }

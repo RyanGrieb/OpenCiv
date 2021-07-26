@@ -9,7 +9,6 @@ import com.badlogic.gdx.utils.Timer.Task;
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.game.city.City;
 import me.rhin.openciv.game.civilization.Civ;
-import me.rhin.openciv.game.civilization.CivType;
 import me.rhin.openciv.game.heritage.HeritageTree;
 import me.rhin.openciv.game.map.tile.Tile;
 import me.rhin.openciv.game.notification.type.MoveUnitHelpNotification;
@@ -52,6 +51,8 @@ public class Player implements RelativeMouseMoveListener, LeftClickListener, Rig
 		this.ownedCities = new ArrayList<>();
 		this.ownedUnits = new ArrayList<>();
 		this.statLine = new StatLine();
+		
+		
 		this.researchTree = new ResearchTree();
 		this.heritageTree = new HeritageTree();
 

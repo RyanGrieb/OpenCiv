@@ -7,6 +7,7 @@ import me.rhin.openciv.server.game.map.tile.TileType.TileProperty;
 import me.rhin.openciv.server.game.research.type.SailingTech;
 import me.rhin.openciv.server.game.unit.Unit;
 import me.rhin.openciv.server.game.unit.UnitItem;
+import me.rhin.openciv.server.game.unit.UnitItem.UnitItemType;
 
 public class WorkBoat extends UnitItem {
 
@@ -35,7 +36,7 @@ public class WorkBoat extends UnitItem {
 	}
 
 	@Override
-	public int getProductionCost() {
+	public float getUnitProductionCost() {
 		return 30;
 	}
 
@@ -52,5 +53,10 @@ public class WorkBoat extends UnitItem {
 	@Override
 	public String getName() {
 		return "Work Boat";
+	}
+
+	@Override
+	protected UnitItemType getUnitItemType() {
+		return UnitItemType.SUPPORT;
 	}
 }

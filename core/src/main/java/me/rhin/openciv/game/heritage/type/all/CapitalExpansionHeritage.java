@@ -22,4 +22,18 @@ public class CapitalExpansionHeritage extends Heritage {
 		return TextureEnum.ICON_FOOD.sprite();
 	}
 
+	@Override
+	public float getCost() {
+		return 40;
+	}
+
+	@Override
+	public String getDesc() {
+		return "%15 Growth bonus in the \ncapital.";
+	}
+
+	@Override
+	protected void onStudied() {
+	}
+
 }

@@ -42,10 +42,10 @@ public class Scout extends UnitItem {
 	}
 
 	@Override
-	public int getProductionCost() {
+	protected float getUnitProductionCost() {
 		return 25;
 	}
-	
+
 	@Override
 	public float getGoldCost() {
 		return 100;
@@ -69,5 +69,10 @@ public class Scout extends UnitItem {
 	@Override
 	public String getDesc() {
 		return "Ignores movement cost of tiles.";
+	}
+
+	@Override
+	public UnitItemType getUnitItemType() {
+		return UnitItemType.MELEE;
 	}
 }

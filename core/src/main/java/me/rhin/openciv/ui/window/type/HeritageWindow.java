@@ -5,19 +5,20 @@ import java.util.Collections;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.scenes.scene2d.Action;
 import com.badlogic.gdx.utils.Align;
 
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.game.heritage.Heritage;
+import me.rhin.openciv.listener.PickHeritageListener;
 import me.rhin.openciv.listener.TopShapeRenderListener;
 import me.rhin.openciv.ui.background.BlankBackground;
 import me.rhin.openciv.ui.button.type.CloseWindowButton;
 import me.rhin.openciv.ui.game.HeritageLeaf;
+import me.rhin.openciv.ui.game.TechnologyLeaf;
 import me.rhin.openciv.ui.label.CustomLabel;
 import me.rhin.openciv.ui.window.AbstractWindow;
 
-public class HeritageWindow extends AbstractWindow implements TopShapeRenderListener {
+public class HeritageWindow extends AbstractWindow implements TopShapeRenderListener, PickHeritageListener {
 
 	// TODO: Sort by level
 	private ArrayList<HeritageLeaf> heritageLeafs;
@@ -41,7 +42,6 @@ public class HeritageWindow extends AbstractWindow implements TopShapeRenderList
 		Civilization.getInstance().getGame().getPlayer().unselectUnit();
 
 		for (Heritage heritage : Civilization.getInstance().getGame().getPlayer().getHeritageTree().getAllHeritage()) {
-			System.out.println("Called?");
 			addHeritage(heritage);
 		}
 
@@ -50,14 +50,13 @@ public class HeritageWindow extends AbstractWindow implements TopShapeRenderList
 		addActor(closeWindowButton);
 
 		Civilization.getInstance().getEventManager().addListener(TopShapeRenderListener.class, this);
-
+		Civilization.getInstance().getEventManager().addListener(PickHeritageListener.class, this);
 	}
 
 	@Override
 	public void onTopShapeRender(ShapeRenderer shapeRenderer) {
-		// if
-		// (Civilization.getInstance().getWindowManager().isOpenWindow(PickResearchWindow.class))
-		// return;
+		if (Civilization.getInstance().getWindowManager().isOpenWindow(PickHeritageWindow.class))
+			return;
 
 		// Get max level and draw lines on the way down
 		int maxLevel = 0;
@@ -70,6 +69,16 @@ public class HeritageWindow extends AbstractWindow implements TopShapeRenderList
 			shapeRenderer.setColor(Color.WHITE);
 			shapeRenderer.line(0, viewport.getWorldHeight() - 125 * (i + 1), viewport.getWorldWidth(),
 					viewport.getWorldHeight() - 125 * (i + 1));
+		}
+	}
+
+	@Override
+	public void onPickHeritage(Heritage heritage) {
+		for (HeritageLeaf leaf : heritageLeafs) {
+			if (leaf.getHeritage().equals(heritage))
+				leaf.setStudying(true);
+			else
+				leaf.setStudying(false);
 		}
 	}
 
@@ -142,5 +151,4 @@ public class HeritageWindow extends AbstractWindow implements TopShapeRenderList
 			addActor(leaf);
 		}
 	}
-
 }

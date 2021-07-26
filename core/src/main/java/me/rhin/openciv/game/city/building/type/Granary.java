@@ -17,7 +17,7 @@ public class Granary extends Building {
 	}
 
 	@Override
-	public int getProductionCost() {
+	public float getProductionCost() {
 		return 40;
 	}
 
@@ -25,7 +25,7 @@ public class Granary extends Building {
 	public float getGoldCost() {
 		return 150;
 	}
-	
+
 	@Override
 	public String getName() {
 		return "Granary";

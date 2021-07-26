@@ -19,6 +19,7 @@ import me.rhin.openciv.listener.BuildingConstructedListener.BuildingConstructedE
 import me.rhin.openciv.listener.ChooseCivListener.ChooseCivEvent;
 import me.rhin.openciv.listener.CityStatUpdateListener.CityStatUpdateEvent;
 import me.rhin.openciv.listener.CombatPreviewListener.CombatPreviewEvent;
+import me.rhin.openciv.listener.CompleteHeritageListener.CompleteHeritageEvent;
 import me.rhin.openciv.listener.CompleteResearchListener.CompleteResearchEvent;
 import me.rhin.openciv.listener.DeleteUnitListener.DeleteUnitEvent;
 import me.rhin.openciv.listener.FetchPlayerListener.FetchPlayerEvent;
@@ -61,6 +62,7 @@ import me.rhin.openciv.shared.packet.type.BuildingConstructedPacket;
 import me.rhin.openciv.shared.packet.type.ChooseCivPacket;
 import me.rhin.openciv.shared.packet.type.CityStatUpdatePacket;
 import me.rhin.openciv.shared.packet.type.CombatPreviewPacket;
+import me.rhin.openciv.shared.packet.type.CompleteHeritagePacket;
 import me.rhin.openciv.shared.packet.type.CompleteResearchPacket;
 import me.rhin.openciv.shared.packet.type.DeleteUnitPacket;
 import me.rhin.openciv.shared.packet.type.FetchPlayerPacket;
@@ -139,6 +141,7 @@ public class NetworkManager {
 		networkEvents.put(RemoveTileTypePacket.class, RemoveTileTypeEvent.class);
 		networkEvents.put(SetUnitHealthPacket.class, SetUnitHealthEvent.class);
 		networkEvents.put(RequestEndTurnPacket.class, RequestEndTurnEvent.class);
+		networkEvents.put(CompleteHeritagePacket.class, CompleteHeritageEvent.class);
 	}
 
 	public void connect(String ip) {

@@ -22,4 +22,17 @@ public class DefensiveLogisticsHeritage extends Heritage {
 		return TextureEnum.ICON_SHIELD.sprite();
 	}
 
+	@Override
+	public float getCost() {
+		return 60;
+	}
+
+	@Override
+	public String getDesc() {
+		return "Builders can build forts.";
+	}
+
+	@Override
+	protected void onStudied() {
+	}
 }

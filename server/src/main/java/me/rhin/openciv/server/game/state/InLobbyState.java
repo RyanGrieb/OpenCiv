@@ -8,6 +8,7 @@ import me.rhin.openciv.server.Server;
 import me.rhin.openciv.server.game.GameState;
 import me.rhin.openciv.server.game.Player;
 import me.rhin.openciv.server.game.civilization.CivType;
+import me.rhin.openciv.server.game.civilization.type.RandomCivilization;
 import me.rhin.openciv.server.listener.ChooseCivListener;
 import me.rhin.openciv.server.listener.ConnectionListener;
 import me.rhin.openciv.server.listener.DisconnectListener;
@@ -62,13 +63,13 @@ public class InLobbyState extends GameState implements StartGameRequestListener,
 
 		// Assign players with a random civ a civilization
 		for (Player rndPlayer : Server.getInstance().getPlayers()) {
-			if (rndPlayer.getCivType() == CivType.RANDOM) {
+			if (rndPlayer.getCiv() instanceof RandomCivilization) {
 				// TODO: Set to a random civ not already being played.
 				rndPlayer.setCivilization(CivType.randomCiv());
 
 				ChooseCivPacket packet = new ChooseCivPacket();
 				packet.setPlayerName(rndPlayer.getName());
-				packet.setCivName(rndPlayer.getCivType().name());
+				packet.setCivName(rndPlayer.getCiv().getName().toUpperCase());
 
 				Json json = new Json();
 				for (Player player : Server.getInstance().getPlayers())
@@ -142,7 +143,7 @@ public class InLobbyState extends GameState implements StartGameRequestListener,
 	public void onPlayerListRequested(WebSocket conn, PlayerListRequestPacket packet) {
 		System.out.println("[SERVER] Player list requested");
 		for (Player player : players) {
-			packet.addPlayer(player.getName(), player.getCivType().name());
+			packet.addPlayer(player.getName(), player.getCiv().getName().toUpperCase());
 		}
 		Json json = new Json();
 		conn.send(json.toJson(packet));

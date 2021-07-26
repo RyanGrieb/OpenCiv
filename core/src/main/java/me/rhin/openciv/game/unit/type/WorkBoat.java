@@ -37,10 +37,10 @@ public class WorkBoat extends UnitItem {
 	}
 
 	@Override
-	public int getProductionCost() {
+	protected float getUnitProductionCost() {
 		return 30;
 	}
-	
+
 	@Override
 	public float getGoldCost() {
 		return 150;
@@ -64,5 +64,10 @@ public class WorkBoat extends UnitItem {
 	@Override
 	public String getDesc() {
 		return "A naval builder. Can improve\nocean tiles.\nCan be captured by enemy units.";
+	}
+
+	@Override
+	public UnitItemType getUnitItemType() {
+		return UnitItemType.SUPPORT;
 	}
 }

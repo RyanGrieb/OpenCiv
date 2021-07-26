@@ -7,6 +7,7 @@ import me.rhin.openciv.server.game.map.tile.TileType;
 import me.rhin.openciv.server.game.map.tile.TileType.TileProperty;
 import me.rhin.openciv.server.game.unit.Unit;
 import me.rhin.openciv.server.game.unit.UnitItem;
+import me.rhin.openciv.server.game.unit.UnitItem.UnitItemType;
 
 public class Scout extends UnitItem {
 
@@ -42,7 +43,7 @@ public class Scout extends UnitItem {
 	}
 
 	@Override
-	public int getProductionCost() {
+	public float getUnitProductionCost() {
 		return 25;
 	}
 	
@@ -59,5 +60,10 @@ public class Scout extends UnitItem {
 	@Override
 	public String getName() {
 		return "Scout";
+	}
+	
+	@Override
+	protected UnitItemType getUnitItemType() {
+		return UnitItemType.MELEE;
 	}
 }

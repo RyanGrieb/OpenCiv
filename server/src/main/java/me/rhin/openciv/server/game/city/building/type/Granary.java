@@ -15,7 +15,7 @@ public class Granary extends Building {
 	}
 
 	@Override
-	public int getProductionCost() {
+	public float getProductionCost() {
 		return 40;
 	}
 

@@ -22,4 +22,17 @@ public class LineShipHeritage extends Heritage {
 		return TextureEnum.UNIT_WORK_BOAT.sprite();
 	}
 
+	@Override
+	public float getCost() {
+		return 40;
+	}
+
+	@Override
+	public String getDesc() {
+		return "A unique naval unit.\nReplaces caravel.";
+	}
+
+	@Override
+	protected void onStudied() {
+	}
 }

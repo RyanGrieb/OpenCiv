@@ -8,6 +8,7 @@ import me.rhin.openciv.game.research.type.SailingTech;
 import me.rhin.openciv.game.unit.Unit;
 import me.rhin.openciv.game.unit.UnitItem;
 import me.rhin.openciv.game.unit.UnitParameter;
+import me.rhin.openciv.game.unit.UnitItem.UnitItemType;
 
 public class Galley extends UnitItem {
 
@@ -36,7 +37,7 @@ public class Galley extends UnitItem {
 	}
 
 	@Override
-	public int getProductionCost() {
+	protected float getUnitProductionCost() {
 		return 45;
 	}
 
@@ -63,5 +64,10 @@ public class Galley extends UnitItem {
 	@Override
 	public String getDesc() {
 		return "An ancient naval unit.";
+	}
+
+	@Override
+	public UnitItemType getUnitItemType() {
+		return UnitItemType.NAVAL;
 	}
 }

@@ -17,10 +17,13 @@ public abstract class Building implements ProductionItem {
 	public abstract String getName();
 
 	@Override
+	public void setProductionModifier(float modifier) {
+	}
+
+	@Override
 	public String getCategory() {
 		return "Buildings";
 	}
-
 
 	public StatLine getStatLine() {
 		return statLine;

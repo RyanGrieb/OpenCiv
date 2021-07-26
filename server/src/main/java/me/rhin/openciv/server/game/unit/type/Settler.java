@@ -6,6 +6,7 @@ import me.rhin.openciv.server.game.map.tile.Tile;
 import me.rhin.openciv.server.game.map.tile.TileType.TileProperty;
 import me.rhin.openciv.server.game.unit.Unit;
 import me.rhin.openciv.server.game.unit.UnitItem;
+import me.rhin.openciv.server.game.unit.UnitItem.UnitItemType;
 
 public class Settler extends UnitItem {
 
@@ -39,7 +40,7 @@ public class Settler extends UnitItem {
 	}
 
 	@Override
-	public int getProductionCost() {
+	public float getUnitProductionCost() {
 		return 80;
 	}
 	
@@ -56,5 +57,10 @@ public class Settler extends UnitItem {
 	@Override
 	public String getName() {
 		return "Settler";
+	}
+
+	@Override
+	protected UnitItemType getUnitItemType() {
+		return UnitItemType.SUPPORT;
 	}
 }

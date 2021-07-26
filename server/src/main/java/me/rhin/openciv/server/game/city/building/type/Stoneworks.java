@@ -17,7 +17,7 @@ public class Stoneworks extends Building implements IncreaseTileStatlineBuilding
 	}
 
 	@Override
-	public int getProductionCost() {
+	public float getProductionCost() {
 		return 75;
 	}
 

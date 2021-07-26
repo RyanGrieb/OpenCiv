@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.g2d.Sprite;
 
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.heritage.Heritage;
+import me.rhin.openciv.shared.packet.type.CompleteHeritagePacket;
 
 public class LegionHeritage extends Heritage {
 
@@ -22,4 +23,17 @@ public class LegionHeritage extends Heritage {
 		return TextureEnum.ICON_ROME.sprite();
 	}
 
+	@Override
+	public float getCost() {
+		return 20;
+	}
+
+	@Override
+	public String getDesc() {
+		return "The largest military unit of \nthe roman army.\nAn enhanced version of swordsman.";
+	}
+
+	@Override
+	protected void onStudied() {
+	}
 }

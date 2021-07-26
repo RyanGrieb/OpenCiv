@@ -3,6 +3,7 @@ package me.rhin.openciv.ui.window.type;
 import java.util.ArrayList;
 
 import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.utils.Align;
 
 import me.rhin.openciv.Civilization;

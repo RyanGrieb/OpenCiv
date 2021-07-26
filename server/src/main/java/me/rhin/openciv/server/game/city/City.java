@@ -134,7 +134,7 @@ public class City implements AttackableEntity, SpecialistContainer, NextTurnList
 
 		CityStatUpdatePacket statUpdatePacket = new CityStatUpdatePacket();
 		for (Stat stat : this.statLine.getStatValues().keySet()) {
-			statUpdatePacket.addStat(name, stat.name(), this.statLine.getStatValues().get(stat));
+			statUpdatePacket.addStat(name, stat.name(), this.statLine.getStatValues().get(stat).getValue());
 		}
 		playerOwner.getConn().send(json.toJson(statUpdatePacket));
 
@@ -209,7 +209,7 @@ public class City implements AttackableEntity, SpecialistContainer, NextTurnList
 		Json json = new Json();
 		CityStatUpdatePacket statUpdatePacket = new CityStatUpdatePacket();
 		for (Stat stat : this.statLine.getStatValues().keySet()) {
-			statUpdatePacket.addStat(name, stat.name(), this.statLine.getStatValues().get(stat));
+			statUpdatePacket.addStat(name, stat.name(), this.statLine.getStatValues().get(stat).getValue());
 		}
 
 		playerOwner.getConn().send(json.toJson(statUpdatePacket));
@@ -329,7 +329,7 @@ public class City implements AttackableEntity, SpecialistContainer, NextTurnList
 		// Update city statline
 		CityStatUpdatePacket statUpdatePacket = new CityStatUpdatePacket();
 		for (Stat stat : this.statLine.getStatValues().keySet()) {
-			statUpdatePacket.addStat(name, stat.name(), this.statLine.getStatValues().get(stat));
+			statUpdatePacket.addStat(name, stat.name(), this.statLine.getStatValues().get(stat).getValue());
 		}
 		playerOwner.getConn().send(json.toJson(statUpdatePacket));
 
@@ -354,7 +354,7 @@ public class City implements AttackableEntity, SpecialistContainer, NextTurnList
 
 		CityStatUpdatePacket cityStatUpdatePacket = new CityStatUpdatePacket();
 		for (Stat stat : this.statLine.getStatValues().keySet()) {
-			cityStatUpdatePacket.addStat(name, stat.name(), this.statLine.getStatValues().get(stat));
+			cityStatUpdatePacket.addStat(name, stat.name(), this.statLine.getStatValues().get(stat).getValue());
 		}
 
 		SetCitizenTileWorkerPacket tileWorkerPacket = new SetCitizenTileWorkerPacket();
@@ -423,7 +423,7 @@ public class City implements AttackableEntity, SpecialistContainer, NextTurnList
 
 		CityStatUpdatePacket packet = new CityStatUpdatePacket();
 		for (Stat stat : this.statLine.getStatValues().keySet()) {
-			packet.addStat(name, stat.name(), this.statLine.getStatValues().get(stat));
+			packet.addStat(name, stat.name(), this.statLine.getStatValues().get(stat).getValue());
 		}
 		playerOwner.getConn().send(json.toJson(packet));
 	}
@@ -478,14 +478,14 @@ public class City implements AttackableEntity, SpecialistContainer, NextTurnList
 		}
 
 		StatLine buildingStatline = new StatLine();
-		for(Building building : buildings) {
-			if(building instanceof IncreaseTileStatlineBuilding) {
+		for (Building building : buildings) {
+			if (building instanceof IncreaseTileStatlineBuilding) {
 				IncreaseTileStatlineBuilding statlineBuilding = (IncreaseTileStatlineBuilding) building;
-				
+
 				buildingStatline.mergeStatLine(statlineBuilding.getTileStatline(tile));
 			}
 		}
-		
+
 		buildingStatline.mergeStatLine(tile.getStatLine());
 		return buildingStatline;
 	}

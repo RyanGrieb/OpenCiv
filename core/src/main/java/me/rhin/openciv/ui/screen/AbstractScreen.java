@@ -4,10 +4,12 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
+import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
@@ -17,6 +19,7 @@ import me.rhin.openciv.listener.BottomShapeRenderListener.BottomShapeRenderEvent
 import me.rhin.openciv.listener.ResizeListener.ResizeEvent;
 import me.rhin.openciv.listener.ScrollListener.ScollEvent;
 import me.rhin.openciv.listener.TopShapeRenderListener.TopShapeRenderEvent;
+import me.rhin.openciv.ui.window.AbstractWindow;
 import me.rhin.openciv.ui.window.WindowManager;
 
 public abstract class AbstractScreen implements Screen, InputProcessor {
@@ -74,7 +77,7 @@ public abstract class AbstractScreen implements Screen, InputProcessor {
 		// camera.position.y = camY;
 		// camera.update();
 
-		//overlayCamera.update();
+		// overlayCamera.update();
 
 		// Bottom stage
 		stage.act();
@@ -100,6 +103,29 @@ public abstract class AbstractScreen implements Screen, InputProcessor {
 		topShapeRenderer.setProjectionMatrix(overlayCamera.combined);
 		topShapeRenderer.begin(ShapeType.Line);
 		Civilization.getInstance().getEventManager().fireEvent(TopShapeRenderEvent.INSTANCE);
+
+		if (Civilization.DEBUG_BOUNDING_BOXES) {
+			for (Actor actor : overlayStage.getActors()) {
+
+				topShapeRenderer.setColor(Color.RED);
+
+				// Bottom square
+				topShapeRenderer.line(actor.getX(), actor.getY() + 1, actor.getX() + actor.getWidth(),
+						actor.getY() + 1);
+				// Top square
+				topShapeRenderer.line(actor.getX(), actor.getY() + actor.getHeight(), actor.getX() + actor.getWidth(),
+						actor.getY() + actor.getHeight());
+
+				// Left square
+				topShapeRenderer.line(actor.getX() + 1, actor.getY(), actor.getX() + 1,
+						actor.getY() + actor.getHeight());
+				// Right square
+				topShapeRenderer.line(actor.getX() + actor.getWidth(), actor.getY(), actor.getX() + actor.getWidth(),
+						actor.getY() + actor.getHeight());
+			}
+		}
+		topShapeRenderer.setColor(Color.WHITE);
+
 		topShapeRenderer.end();
 		Gdx.gl.glDisable(GL20.GL_BLEND);
 
@@ -182,7 +208,6 @@ public abstract class AbstractScreen implements Screen, InputProcessor {
 	public boolean mouseMoved(int screenX, int screenY) {
 		return true;
 	}
-
 
 	@Override
 	public boolean scrolled(float amountX, float amountY) {

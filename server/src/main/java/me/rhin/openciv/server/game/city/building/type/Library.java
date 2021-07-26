@@ -47,7 +47,7 @@ public class Library extends Building implements CityGrowthListener, CityStarveL
 	}
 
 	@Override
-	public int getProductionCost() {
+	public float getProductionCost() {
 		return 75;
 	}
 	

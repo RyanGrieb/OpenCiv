@@ -1,7 +1,9 @@
 package me.rhin.openciv.ui.label;
 
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
+import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.utils.Null;
 
 import me.rhin.openciv.Civilization;
 
@@ -35,6 +37,15 @@ public class CustomLabel extends Label {
 	public void setText(CharSequence newText) {
 		super.setText(newText);
 		updateSize();
+	}
+
+	// FIXME: I have no idea why, even with the bouding boxes in the correct
+	// positions.
+	// Does the libgdx click event detect labels overriding random actors such as
+	// buttons & groups.
+	@Override
+	public @Null Actor hit(float x, float y, boolean touchable) {
+		return null;
 	}
 
 	private void updateSize() {

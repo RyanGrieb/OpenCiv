@@ -8,14 +8,28 @@ import me.rhin.openciv.server.game.city.City;
 import me.rhin.openciv.server.game.map.tile.Tile;
 import me.rhin.openciv.server.game.production.ProductionItem;
 import me.rhin.openciv.shared.packet.type.AddUnitPacket;
+import me.rhin.openciv.shared.stat.StatValue;
 
 public abstract class UnitItem implements ProductionItem {
 
+	public static enum UnitItemType {
+		MELEE,
+		RANGED,
+		SUPPORT,
+		NAVAL;
+	}
+
 	protected City city;
+	protected float productionModifier;
 
 	public UnitItem(City city) {
 		this.city = city;
+		this.productionModifier = 0;
 	}
+
+	public abstract float getUnitProductionCost();
+
+	protected abstract UnitItemType getUnitItemType();
 
 	@SuppressWarnings("unchecked")
 	@Override
@@ -45,4 +59,19 @@ public abstract class UnitItem implements ProductionItem {
 			player.getConn().send(json.toJson(addUnitPacket));
 	}
 
+	@Override
+	public float getProductionCost() {
+		StatValue prodModifier = new StatValue(getUnitProductionCost(), productionModifier);
+
+		return prodModifier.getValue();
+	}
+
+	@Override
+	public void setProductionModifier(float modifier) {
+		this.productionModifier = modifier;
+	}
+
+	public float getProductionModifier() {
+		return productionModifier;
+	}
 }

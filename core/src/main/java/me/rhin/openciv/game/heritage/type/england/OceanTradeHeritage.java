@@ -22,4 +22,17 @@ public class OceanTradeHeritage extends Heritage {
 		return TextureEnum.ICON_GOLD.sprite();
 	}
 
+	@Override
+	public float getCost() {
+		return 40;
+	}
+
+	@Override
+	public String getDesc() {
+		return "+1 Trade route for\neach coastal city.";
+	}
+
+	@Override
+	protected void onStudied() {
+	}
 }

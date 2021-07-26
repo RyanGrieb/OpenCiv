@@ -9,7 +9,7 @@ import me.rhin.openciv.shared.packet.type.PlayerStatUpdatePacket;
 
 public class StatLine {
 
-	private HashMap<Stat, Float> statValues;
+	private HashMap<Stat, StatValue> statValues;
 
 	public StatLine() {
 		this.statValues = new HashMap<>();
@@ -44,7 +44,8 @@ public class StatLine {
 		StringBuilder stringBuilder = new StringBuilder();
 		stringBuilder.append("STATS:\n");
 		for (Stat stat : statValues.keySet()) {
-			stringBuilder.append(stat.name().toUpperCase() + ":" + statValues.get(stat));
+			stringBuilder.append(stat.name().toUpperCase() + ":" + statValues.get(stat).getValue() + " - "
+					+ 100 * statValues.get(stat).getModifier()+"%");
 			stringBuilder.append("\n");
 		}
 
@@ -53,7 +54,7 @@ public class StatLine {
 
 	public void mergeStatLine(StatLine statLine) {
 		for (Stat stat : statLine.getStatValues().keySet()) {
-			addValue(stat, statLine.getStatValues().get(stat));
+			mergeValue(stat, statLine.getStatValues().get(stat));
 		}
 	}
 
@@ -61,49 +62,61 @@ public class StatLine {
 		for (Stat stat : statLine.getStatValues().keySet()) {
 			if (stat.getStatType() == statType)
 				continue;
-			addValue(stat, statLine.getStatValues().get(stat));
+			mergeValue(stat, statLine.getStatValues().get(stat));
 		}
 	}
 
 	public void updateStatLine() {
-		HashMap<Stat, Float> statValuesCopy = (HashMap<Stat, Float>) statValues.clone();
+		HashMap<Stat, StatValue> statValuesCopy = (HashMap<Stat, StatValue>) statValues.clone();
 		for (Stat stat : statValuesCopy.keySet()) {
 			if (stat.isGained()) {
 				// FIXME: Implement maintenance cost
-				addValue(stat.getAddedStat(), statValues.get(stat));
+				addValue(stat.getAddedStat(), statValues.get(stat).getValue());
 			}
 		}
 	}
 
 	public void reduceStatLine(StatLine statLine) {
 		for (Stat stat : statLine.getStatValues().keySet()) {
-			addValue(stat, -statLine.getStatValues().get(stat));
+			unmergeValue(stat, statLine.getStatValues().get(stat));
 		}
 	}
 
-	public HashMap<Stat, Float> getStatValues() {
+	public HashMap<Stat, StatValue> getStatValues() {
 		return statValues;
 	}
 
 	public void addValue(Stat stat, float value) {
 		if (!statValues.containsKey(stat))
-			statValues.put(stat, value);
+			statValues.put(stat, new StatValue(value));
 		else
-			statValues.replace(stat, statValues.get(stat) + value);
+			statValues.get(stat).addValue(value);
 	}
 
 	public void subValue(Stat stat, float value) {
 		if (!statValues.containsKey(stat))
-			statValues.put(stat, value);
+			statValues.put(stat, new StatValue(value));
 		else
-			statValues.replace(stat, statValues.get(stat) - value);
+			statValues.get(stat).subValue(value);
 	}
 
 	public void setValue(Stat stat, float value) {
 		if (!statValues.containsKey(stat))
-			statValues.put(stat, value);
+			statValues.put(stat, new StatValue(value));
 		else
-			statValues.replace(stat, value);
+			statValues.get(stat).setValue(value);
+	}
+
+	public void mergeValue(Stat stat, StatValue statValue) {
+		if (!statValues.containsKey(stat))
+			statValues.put(stat, statValue);
+		else
+			statValues.get(stat).merge(statValue);
+	}
+
+	private void unmergeValue(Stat stat, StatValue statValue) {
+		if (statValues.containsKey(stat))
+			statValues.get(stat).unmerge(statValue);
 	}
 
 	public boolean isEmpty() {
@@ -114,7 +127,7 @@ public class StatLine {
 		if (!statValues.containsKey(stat))
 			return 0;
 
-		return statValues.get(stat);
+		return statValues.get(stat).getValue();
 	}
 
 	public void clear() {
@@ -134,5 +147,12 @@ public class StatLine {
 			if (!accumulativeStats.contains(stat))
 				iterator.remove();
 		}
+	}
+
+	public void addModifier(Stat stat, float modifier) {
+		if (!statValues.containsKey(stat))
+			statValues.put(stat, new StatValue(0));
+
+		statValues.get(stat).addModifier(modifier);
 	}
 }
