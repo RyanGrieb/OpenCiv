@@ -38,7 +38,7 @@ public abstract class Heritage implements NextTurnListener, CompleteHeritageList
 
 		studied = true;
 		studying = false;
-		
+
 		onStudied();
 	}
 
@@ -52,8 +52,9 @@ public abstract class Heritage implements NextTurnListener, CompleteHeritageList
 
 	public abstract String getDesc();
 
+	// Client side call
 	protected abstract void onStudied();
-	
+
 	public boolean ableToStudy() {
 		// Return based on how many heritage's we study of the same level.
 		// e.g. two LOW level heritage's.

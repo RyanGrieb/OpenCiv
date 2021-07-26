@@ -2,6 +2,9 @@ package me.rhin.openciv.server.game.civilization.type;
 
 import me.rhin.openciv.server.game.Player;
 import me.rhin.openciv.server.game.civilization.Civ;
+import me.rhin.openciv.server.game.heritage.type.america.ExpandedVisionHeritage;
+import me.rhin.openciv.server.game.heritage.type.america.ManifestDestinyHeritage;
+import me.rhin.openciv.server.game.heritage.type.america.MinutemanHeritage;
 import me.rhin.openciv.server.game.heritage.type.england.LineShipHeritage;
 import me.rhin.openciv.server.game.heritage.type.england.OceanTradeHeritage;
 import me.rhin.openciv.server.game.heritage.type.england.SailingHeritage;
@@ -16,10 +19,6 @@ public class England extends Civ {
 
 	public England(Player player) {
 		super(player);
-
-		addHeritage(new LineShipHeritage(player));
-		addHeritage(new OceanTradeHeritage(player));
-		addHeritage(new SailingHeritage(player));
 	}
 
 	@Override
@@ -30,6 +29,13 @@ public class England extends Civ {
 	@Override
 	public TileType getBiasTileType() {
 		return TileType.SHALLOW_OCEAN;
+	}
+
+	@Override
+	public void initHeritage() {
+		addHeritage(new LineShipHeritage(player));
+		addHeritage(new OceanTradeHeritage(player));
+		addHeritage(new SailingHeritage(player));
 	}
 
 }

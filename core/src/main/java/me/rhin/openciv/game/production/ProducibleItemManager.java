@@ -14,7 +14,7 @@ import me.rhin.openciv.game.city.building.type.Library;
 import me.rhin.openciv.game.city.building.type.Market;
 import me.rhin.openciv.game.city.building.type.Monument;
 import me.rhin.openciv.game.city.building.type.WaterMill;
-import me.rhin.openciv.game.notification.type.AvailableProductionManager;
+import me.rhin.openciv.game.notification.type.AvailableProductionNotification;
 import me.rhin.openciv.game.unit.type.Archer;
 import me.rhin.openciv.game.unit.type.Builder;
 import me.rhin.openciv.game.unit.type.Galley;
@@ -63,7 +63,7 @@ public class ProducibleItemManager {
 		// player matches
 		if (city.getPlayerOwner().equals(Civilization.getInstance().getGame().getPlayer()))
 			Civilization.getInstance().getGame().getNotificationHanlder()
-					.fireNotification(new AvailableProductionManager(city));
+					.fireNotification(new AvailableProductionNotification(city));
 	}
 
 	public HashMap<String, ProductionItem> getPossibleItems() {

@@ -2,6 +2,9 @@ package me.rhin.openciv.server.game.civilization.type;
 
 import me.rhin.openciv.server.game.Player;
 import me.rhin.openciv.server.game.civilization.Civ;
+import me.rhin.openciv.server.game.heritage.type.england.LineShipHeritage;
+import me.rhin.openciv.server.game.heritage.type.england.OceanTradeHeritage;
+import me.rhin.openciv.server.game.heritage.type.england.SailingHeritage;
 import me.rhin.openciv.server.game.heritage.type.germany.BarbarianHeritage;
 import me.rhin.openciv.server.game.heritage.type.germany.BlitzkriegHeritage;
 import me.rhin.openciv.server.game.heritage.type.germany.DisciplineHeritage;
@@ -14,14 +17,17 @@ public class Germany extends Civ {
 	 */
 	public Germany(Player player) {
 		super(player);
-
-		addHeritage(new BarbarianHeritage(player));
-		addHeritage(new BlitzkriegHeritage(player));
-		addHeritage(new DisciplineHeritage(player));
 	}
 
 	@Override
 	public String getName() {
 		return "Germany";
+	}
+
+	@Override
+	public void initHeritage() {
+		addHeritage(new BarbarianHeritage(player));
+		addHeritage(new BlitzkriegHeritage(player));
+		addHeritage(new DisciplineHeritage(player));
 	}
 }

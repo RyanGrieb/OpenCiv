@@ -29,7 +29,7 @@ public class StateWorshipHeritage extends Heritage {
 
 	@Override
 	public String getDesc() {
-		return "Gain a free monument in all\ncities.";
+		return "Gain a free monument in all \nfuture and current cities.";
 	}
 
 

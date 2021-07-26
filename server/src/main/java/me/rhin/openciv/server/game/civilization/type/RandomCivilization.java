@@ -14,4 +14,8 @@ public class RandomCivilization extends Civ {
 		return "Random";
 	}
 
+	@Override
+	public void initHeritage() {
+	}
+
 }

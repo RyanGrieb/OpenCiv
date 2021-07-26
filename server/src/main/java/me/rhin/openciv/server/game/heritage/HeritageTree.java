@@ -26,11 +26,6 @@ public class HeritageTree implements NextTurnListener {
 		this.player = player;
 		this.values = new LinkedHashMap<>();
 
-		// Our default heritage values
-		addHeritage(new CapitalExpansionHeritage(player));
-		addHeritage(new StateWorshipHeritage(player));
-		addHeritage(new TaxesHeritage(player));
-
 		Server.getInstance().getEventManager().addListener(NextTurnListener.class, this);
 	}
 
@@ -53,6 +48,13 @@ public class HeritageTree implements NextTurnListener {
 
 			heritageStudying = null;
 		}
+	}
+
+	public void initHeritage() {
+		// Our default heritage values
+		addHeritage(new CapitalExpansionHeritage(player));
+		addHeritage(new StateWorshipHeritage(player));
+		addHeritage(new TaxesHeritage(player));
 	}
 
 	public void addHeritage(Heritage heritage) {

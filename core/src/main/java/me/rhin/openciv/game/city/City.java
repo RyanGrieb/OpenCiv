@@ -21,7 +21,7 @@ import me.rhin.openciv.game.city.specialist.SpecialistContainer;
 import me.rhin.openciv.game.map.tile.Tile;
 import me.rhin.openciv.game.map.tile.TileObserver;
 import me.rhin.openciv.game.map.tile.TileType.TileProperty;
-import me.rhin.openciv.game.notification.type.AvailableProductionManager;
+import me.rhin.openciv.game.notification.type.AvailableProductionNotification;
 import me.rhin.openciv.game.player.Player;
 import me.rhin.openciv.game.production.ProducibleItemManager;
 import me.rhin.openciv.game.unit.AttackableEntity;
@@ -70,6 +70,7 @@ public class City extends Group implements AttackableEntity, TileObserver, Speci
 	private float health;
 
 	public City(Tile originTile, Player playerOwner, String name) {
+		setName(name);
 		this.originTile = originTile;
 		this.playerOwner = playerOwner;
 		this.territory = new ArrayList<>();
@@ -78,7 +79,6 @@ public class City extends Group implements AttackableEntity, TileObserver, Speci
 		this.unemployedWorkerAmount = 0;
 		this.producibleItemManager = new ProducibleItemManager(this);
 		this.statLine = new StatLine();
-		setName(name);
 		this.nameLabel = new CustomLabel(name);
 		nameLabel.setPosition(originTile.getX() + originTile.getWidth() / 2 - nameLabel.getWidth() / 2,
 				originTile.getY() + originTile.getHeight() + 5);
@@ -197,7 +197,7 @@ public class City extends Group implements AttackableEntity, TileObserver, Speci
 
 		if (playerOwner.equals(Civilization.getInstance().getGame().getPlayer()))
 			Civilization.getInstance().getGame().getNotificationHanlder()
-					.fireNotification(new AvailableProductionManager(this));
+					.fireNotification(new AvailableProductionNotification(this));
 	}
 
 	@Override

@@ -6,13 +6,15 @@ import me.rhin.openciv.server.game.map.tile.TileType;
 
 public abstract class Civ {
 
-	private Player player;
+	protected Player player;
 
 	public Civ(Player player) {
 		this.player = player;
 	}
 
 	public abstract String getName();
+	
+	public abstract void initHeritage();
 
 	public TileType getBiasTileType() {
 		return null;

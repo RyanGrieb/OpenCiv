@@ -13,12 +13,12 @@ import me.rhin.openciv.listener.SetProductionItemListener;
 import me.rhin.openciv.shared.packet.type.SetProductionItemPacket;
 import me.rhin.openciv.ui.window.type.CityInfoWindow;
 
-public class AvailableProductionManager extends AbstractNotification implements SetProductionItemListener {
+public class AvailableProductionNotification extends AbstractNotification implements SetProductionItemListener {
 
 	private ArrayList<City> cities;
 	private int index;
 
-	public AvailableProductionManager(City city) {
+	public AvailableProductionNotification(City city) {
 		this.cities = new ArrayList<>();
 		cities.add(city);
 
@@ -28,7 +28,7 @@ public class AvailableProductionManager extends AbstractNotification implements 
 	public void merge(AbstractNotification notification) {
 		super.merge(notification);
 
-		AvailableProductionManager productionNotification = (AvailableProductionManager) notification;
+		AvailableProductionNotification productionNotification = (AvailableProductionNotification) notification;
 
 		// Add cities that are not already in this notification.
 		for (City city : productionNotification.getCities()) {

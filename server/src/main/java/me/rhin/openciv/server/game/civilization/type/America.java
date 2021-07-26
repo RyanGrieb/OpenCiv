@@ -13,14 +13,17 @@ public class America extends Civ {
 	 */
 	public America(Player player) {
 		super(player);
-
-		addHeritage(new ExpandedVisionHeritage(player));
-		addHeritage(new ManifestDestinyHeritage(player));
-		addHeritage(new MinutemanHeritage(player));
 	}
 
 	@Override
 	public String getName() {
 		return "America";
+	}
+
+	@Override
+	public void initHeritage() {
+		addHeritage(new ExpandedVisionHeritage(player));
+		addHeritage(new ManifestDestinyHeritage(player));
+		addHeritage(new MinutemanHeritage(player));
 	}
 }

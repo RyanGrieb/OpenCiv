@@ -2,14 +2,12 @@ package me.rhin.openciv.shared.listener;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class EventManager {
 
 	private final ConcurrentHashMap<Class<? extends Listener>, ArrayList<? extends Listener>> listenerMap = new ConcurrentHashMap<>();
 
-	// TODO: Support multiple listenerType's as input. E.g. Class<L>... listenerType
 	public <L extends Listener> void addListener(Class<L> listenerType, L listener) {
 
 		@SuppressWarnings("unchecked")

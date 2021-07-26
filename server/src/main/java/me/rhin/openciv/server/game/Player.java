@@ -184,6 +184,9 @@ public class Player implements NextTurnListener, ChooseTechListener, ChooseHerit
 
 	public void finishLoading() {
 		this.loaded = true;
+
+		heritageTree.initHeritage();
+		civilization.initHeritage();
 	}
 
 	public boolean isLoaded() {
