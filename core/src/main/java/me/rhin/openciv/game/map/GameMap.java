@@ -1,5 +1,5 @@
-package me.rhin.openciv.game.map;
 
+package me.rhin.openciv.game.map;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.Vector2;
 

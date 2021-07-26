@@ -321,6 +321,16 @@ public class City extends Group implements AttackableEntity, TileObserver, Speci
 		return originTile;
 	}
 
+	@Override
+	public boolean ignoresTileObstructions() {
+		return false;
+	}
+
+	@Override
+	public void seTignoresTileObstructions(boolean ignoresTileObstructions) {
+
+	}
+
 	public void setOwner(Player playerOwner) {
 		this.playerOwner = playerOwner;
 

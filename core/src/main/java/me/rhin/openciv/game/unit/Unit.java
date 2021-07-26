@@ -45,6 +45,7 @@ public abstract class Unit extends Actor
 	private boolean selected;
 	private float movement;
 	private float health;
+	private boolean ignoresTileObstructions;
 	private AttackableEntity targetEntity;
 
 	public Unit(int id, String unitName, Player playerOwner, Tile standingTile, TextureEnum assetEnum) {
@@ -355,6 +356,18 @@ public abstract class Unit extends Actor
 	@Override
 	public Tile getTile() {
 		return standingTile;
+	}
+
+	@Override
+	public boolean ignoresTileObstructions() {
+		return ignoresTileObstructions;
+	}
+
+	public void seTignoresTileObstructions(boolean ignoresTileObstructions) {
+		this.ignoresTileObstructions = ignoresTileObstructions;
+
+		standingTile.removeTileObserver(this);
+		standingTile.addTileObserver(this);
 	}
 
 	public void moveToTargetTile() {

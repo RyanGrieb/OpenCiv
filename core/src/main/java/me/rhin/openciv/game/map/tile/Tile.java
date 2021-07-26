@@ -617,7 +617,8 @@ public class Tile extends Actor implements BottomShapeRenderListener {
 
 			boolean denyVisibility = false;
 			for (TileTypeWrapper wrapper : tile.getTileTypeWrappers())
-				if (wrapper.getTileType().getMovementCost() > 1 && !tile.equals(this)) {
+				if (wrapper.getTileType().getMovementCost() > 1 && !tile.equals(this)
+						&& !tileObserver.ignoresTileObstructions()) {
 					denyVisibility = true;
 				}
 
