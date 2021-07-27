@@ -14,6 +14,7 @@ import me.rhin.openciv.server.Server;
 import me.rhin.openciv.server.game.Player;
 import me.rhin.openciv.server.game.city.building.Building;
 import me.rhin.openciv.server.game.city.building.IncreaseTileStatlineBuilding;
+import me.rhin.openciv.server.game.city.building.type.Monument;
 import me.rhin.openciv.server.game.city.citizen.AssignedCitizenWorker;
 import me.rhin.openciv.server.game.city.citizen.CitizenWorker;
 import me.rhin.openciv.server.game.city.citizen.CityCenterCitizenWorker;
@@ -590,6 +591,14 @@ public class City implements AttackableEntity, SpecialistContainer, NextTurnList
 	public boolean isCoastal() {
 		for (Tile tile : originTile.getAdjTiles())
 			if (tile.containsTileProperty(TileProperty.WATER))
+				return true;
+
+		return false;
+	}
+
+	public <T extends Building> boolean containsBuilding(Class<T> buildingClass) {
+		for (Building building : buildings)
+			if (building.getClass() == buildingClass)
 				return true;
 
 		return false;

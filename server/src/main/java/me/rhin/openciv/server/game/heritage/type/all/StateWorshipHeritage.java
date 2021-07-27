@@ -38,7 +38,8 @@ public class StateWorshipHeritage extends Heritage implements SettleCityListener
 	protected void onStudied() {
 		// Add monument to all cities & future cities
 		for (City city : player.getOwnedCities())
-			city.addBuilding(new Monument(city));
+			if (!city.containsBuilding(Monument.class))
+				city.addBuilding(new Monument(city));
 	}
 
 	@Override
