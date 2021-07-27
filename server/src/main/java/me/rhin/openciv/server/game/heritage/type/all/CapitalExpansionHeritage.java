@@ -2,6 +2,7 @@ package me.rhin.openciv.server.game.heritage.type.all;
 
 import me.rhin.openciv.server.game.Player;
 import me.rhin.openciv.server.game.heritage.Heritage;
+import me.rhin.openciv.shared.stat.Stat;
 
 public class CapitalExpansionHeritage extends Heritage {
 
@@ -26,6 +27,7 @@ public class CapitalExpansionHeritage extends Heritage {
 
 	@Override
 	protected void onStudied() {
-		//Set capital city stat value
+		// Set capital city stat value
+		player.getOwnedCities().get(0).getStatLine().addModifier(Stat.FOOD_GAIN, 0.15F);
 	}
 }
