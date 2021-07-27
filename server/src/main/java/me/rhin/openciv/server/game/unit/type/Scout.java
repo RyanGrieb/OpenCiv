@@ -63,7 +63,7 @@ public class Scout extends UnitItem {
 	}
 	
 	@Override
-	protected UnitItemType getUnitItemType() {
+	public UnitItemType getUnitItemType() {
 		return UnitItemType.MELEE;
 	}
 }

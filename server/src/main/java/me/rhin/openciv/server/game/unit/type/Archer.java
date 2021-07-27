@@ -44,7 +44,7 @@ public class Archer extends UnitItem {
 	public float getUnitProductionCost() {
 		return 40;
 	}
-	
+
 	@Override
 	public float getGoldCost() {
 		return 100;
@@ -61,7 +61,7 @@ public class Archer extends UnitItem {
 	}
 
 	@Override
-	protected UnitItemType getUnitItemType() {
+	public UnitItemType getUnitItemType() {
 		return UnitItemType.RANGED;
 	}
 }

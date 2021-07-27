@@ -29,7 +29,7 @@ public abstract class UnitItem implements ProductionItem {
 
 	public abstract float getUnitProductionCost();
 
-	protected abstract UnitItemType getUnitItemType();
+	public abstract UnitItemType getUnitItemType();
 
 	@SuppressWarnings("unchecked")
 	@Override

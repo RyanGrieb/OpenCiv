@@ -56,7 +56,7 @@ public class Galley extends UnitItem {
 	}
 	
 	@Override
-	protected UnitItemType getUnitItemType() {
+	public UnitItemType getUnitItemType() {
 		return UnitItemType.NAVAL;
 	}
 }
