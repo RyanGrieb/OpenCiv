@@ -697,7 +697,7 @@ public class InGameState extends GameState
 	@Override
 	public void onWorkTile(WebSocket conn, WorkTilePacket packet) {
 
-		// TODO: !! We need to do territory & ownership checks like in clientside.
+		// TODO: !! We need to do territory & ownership &research checks like in clientside.
 
 		Tile tile = map.getTiles()[packet.getGridX()][packet.getGridY()];
 		for (Unit unit : tile.getUnits()) {

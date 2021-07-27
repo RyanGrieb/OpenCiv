@@ -10,6 +10,7 @@ import me.rhin.openciv.game.map.tile.TileType.TileProperty;
 import me.rhin.openciv.game.research.type.AnimalHusbandryTech;
 import me.rhin.openciv.game.research.type.CalendarTech;
 import me.rhin.openciv.game.research.type.MiningTech;
+import me.rhin.openciv.game.research.type.WheelTech;
 import me.rhin.openciv.game.unit.AbstractAction;
 import me.rhin.openciv.game.unit.Unit;
 import me.rhin.openciv.game.unit.UnitItem;
@@ -445,10 +446,9 @@ public class Builder extends UnitItem {
 		public boolean canAct() {
 			Tile tile = unit.getStandingTile();
 
-			// if (!unit.getPlayerOwner().getResearchTree().hasResearched(WheelTech.class))
-			// {
-			// return false;
-			// }
+			if (!unit.getPlayerOwner().getResearchTree().hasResearched(WheelTech.class)) {
+				return false;
+			}
 
 			BuilderUnit builderUnit = (BuilderUnit) unit;
 			if (unit.getCurrentMovement() < 1 || builderUnit.isBuilding()) {

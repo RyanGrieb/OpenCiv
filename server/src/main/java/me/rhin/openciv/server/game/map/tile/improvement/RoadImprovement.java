@@ -5,6 +5,8 @@ import com.badlogic.gdx.utils.Json;
 import me.rhin.openciv.server.Server;
 import me.rhin.openciv.server.game.Player;
 import me.rhin.openciv.server.game.map.tile.TileType;
+import me.rhin.openciv.server.game.research.Technology;
+import me.rhin.openciv.server.game.research.type.WheelTech;
 import me.rhin.openciv.shared.packet.type.SetTileTypePacket;
 
 public class RoadImprovement extends TileImprovement {
@@ -31,4 +33,10 @@ public class RoadImprovement extends TileImprovement {
 		for (Player player : Server.getInstance().getPlayers())
 			player.getConn().send(json.toJson(setTileTypePacket));
 	}
+
+	@Override
+	public Class<? extends Technology> getRequiredTech() {
+		return WheelTech.class;
+	}
+
 }
