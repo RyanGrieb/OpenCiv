@@ -16,6 +16,7 @@ import me.rhin.openciv.game.map.GameMap;
 import me.rhin.openciv.game.map.tile.Tile;
 import me.rhin.openciv.game.notification.NotificationHandler;
 import me.rhin.openciv.game.notification.type.NotResearchingNotification;
+import me.rhin.openciv.game.notification.type.NotStudyingNotification;
 import me.rhin.openciv.game.player.Player;
 import me.rhin.openciv.game.unit.AttackableEntity;
 import me.rhin.openciv.game.unit.Unit;
@@ -226,6 +227,9 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 
 			Civilization.getInstance().getGame().getNotificationHanlder()
 					.fireNotification(new NotResearchingNotification());
+			
+			Civilization.getInstance().getGame().getNotificationHanlder()
+			.fireNotification(new NotStudyingNotification());
 		}
 	}
 

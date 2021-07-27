@@ -5,7 +5,7 @@ import com.badlogic.gdx.math.MathUtils;
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.heritage.Heritage;
-import me.rhin.openciv.game.notification.type.NotResearchingNotification;
+import me.rhin.openciv.game.notification.type.NotStudyingNotification;
 import me.rhin.openciv.listener.CompleteHeritageListener;
 import me.rhin.openciv.listener.NextTurnListener;
 import me.rhin.openciv.listener.PickHeritageListener;
@@ -55,7 +55,7 @@ public class CurrentHeritageWindow extends AbstractWindow
 				blankBackground.getY(), 48, 32);
 		addActor(openHeritageButton);
 
-		this.heritageIcon = new ColoredBackground(TextureEnum.UI_ERROR.sprite(), 2, 2, 32, 32);
+		this.heritageIcon = new ColoredBackground(TextureEnum.UI_BLACK.sprite(), 2, 2, 32, 32);
 		addActor(heritageIcon);
 
 		Civilization.getInstance().getEventManager().addListener(ResizeListener.class, this);
@@ -124,8 +124,8 @@ public class CurrentHeritageWindow extends AbstractWindow
 		heritage = null;
 
 		// FIXME: Move somewhere else?
-		// Civilization.getInstance().getGame().getNotificationHanlder()
-		// .fireNotification(new NotResearchingNotification());
+		Civilization.getInstance().getGame().getNotificationHanlder()
+				.fireNotification(new NotStudyingNotification());
 	}
 
 	@Override
