@@ -204,7 +204,7 @@ public class CityStatsInfo extends Actor implements CityStatUpdateListener {
 		foodLabel.setText((gainedFood < 0 ? "" : "+") + gainedFood);
 		productionLabel.setText("+" + (int) city.getStatLine().getStatValue(Stat.PRODUCTION_GAIN));
 		goldLabel.setText("+" + (int) city.getStatLine().getStatValue(Stat.GOLD_GAIN));
-		scienceLabel.setText("+" + (int) city.getStatLine().getStatValue(Stat.SCIENCE_GAIN));
+		scienceLabel.setText("+" + city.getStatLine().getStatValue(Stat.SCIENCE_GAIN));
 		heritageLabel.setText("+" + (int) city.getStatLine().getStatValue(Stat.HERITAGE_GAIN));
 
 		int expansionTurns = (int) Math.ceil(((city.getStatLine().getStatValue(Stat.EXPANSION_REQUIREMENT)
@@ -220,7 +220,7 @@ public class CityStatsInfo extends Actor implements CityStatUpdateListener {
 		float originX = 5;
 		float originY = backgroundSprite.getY() + backgroundSprite.getHeight() - 20;
 
-		//Population information
+		// Population information
 		populationIcon.setPosition(originX, originY);
 		this.populationDescLabel = new CustomLabel("Citizens:");
 		originX += populationIcon.getWidth() + 5;
@@ -230,22 +230,22 @@ public class CityStatsInfo extends Actor implements CityStatUpdateListener {
 				originY + populationDescLabel.getHeight() / 2);
 		originY -= populationIcon.getHeight() + 3;
 
-		//Population growth information
+		// Population growth information
 		populationGrowthDescLabel.setPosition(originX, originY + populationGrowthDescLabel.getHeight() / 2);
 		originX = 5;
 		populationGrowthLabel.setPosition(getWidth() - (populationGrowthLabel.getWidth() + 2),
 				originY + populationGrowthDescLabel.getHeight() / 2);
 		originY -= populationIcon.getHeight();
-		
-		//Food information
+
+		// Food information
 		foodIcon.setPosition(originX, originY);
 		originX += foodIcon.getWidth() + 5;
 		foodDescLabel.setPosition(originX, originY + foodDescLabel.getHeight() / 2);
 		originX = 5;
 		foodLabel.setPosition(getWidth() - (foodLabel.getWidth() + 2), originY + foodDescLabel.getHeight() / 2);
 		originY -= foodIcon.getHeight();
-		
-		//Production information
+
+		// Production information
 		productionIcon.setPosition(originX, originY);
 		originX += productionIcon.getWidth() + 5;
 		productionDescLabel.setPosition(originX, originY + productionDescLabel.getHeight() / 2);
@@ -253,16 +253,16 @@ public class CityStatsInfo extends Actor implements CityStatUpdateListener {
 		productionLabel.setPosition(getWidth() - (productionLabel.getWidth() + 2),
 				originY + productionDescLabel.getHeight() / 2);
 		originY -= productionIcon.getHeight();
-		
-		//Gold information
+
+		// Gold information
 		goldIcon.setPosition(originX, originY);
 		originX += productionIcon.getWidth() + 5;
 		goldDescLabel.setPosition(originX, originY + goldDescLabel.getHeight() / 2);
 		originX = 5;
 		goldLabel.setPosition(getWidth() - (goldLabel.getWidth() + 2), originY + goldDescLabel.getHeight() / 2);
 		originY -= goldIcon.getHeight();
-		
-		//Science information
+
+		// Science information
 		scienceIcon.setPosition(originX, originY);
 		originX += scienceIcon.getWidth() + 5;
 		scienceDescLabel.setPosition(originX, originY + scienceDescLabel.getHeight() / 2);
@@ -270,8 +270,8 @@ public class CityStatsInfo extends Actor implements CityStatUpdateListener {
 		scienceLabel.setPosition(getWidth() - (scienceLabel.getWidth() + 2),
 				originY + scienceDescLabel.getHeight() / 2);
 		originY -= scienceIcon.getHeight();
-		
-		//Heritage information
+
+		// Heritage information
 		heritageIcon.setPosition(originX, originY);
 		originX += heritageIcon.getWidth() + 5;
 		heritageDescLabel.setPosition(originX, originY + heritageDescLabel.getHeight() / 2);
@@ -279,8 +279,8 @@ public class CityStatsInfo extends Actor implements CityStatUpdateListener {
 		heritageLabel.setPosition(getWidth() - (heritageLabel.getWidth() + 2),
 				originY + heritageDescLabel.getHeight() / 2);
 		originY -= heritageIcon.getHeight() + 3;
-			
-		//Border growth information
+
+		// Border growth information
 		borderGrowthDescLabel.setPosition(originX, originY + borderGrowthDescLabel.getHeight() / 2);
 		borderGrowthLabel.setPosition(getWidth() - (borderGrowthLabel.getWidth() + 2),
 				originY + foodDescLabel.getHeight() / 2);

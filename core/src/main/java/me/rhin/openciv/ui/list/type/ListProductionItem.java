@@ -1,5 +1,6 @@
 package me.rhin.openciv.ui.list.type;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.scenes.scene2d.Actor;
@@ -24,6 +25,7 @@ public class ListProductionItem extends ListObject implements CityStatUpdateList
 	private ProductionItem productionItem;
 	private CustomLabel itemNameLabel;
 	private CustomLabel itemTurnCostLabel;
+	private CustomLabel productionModifierLabel;
 	private Sprite itemIconSprite;
 	private Sprite backgroundSprite;
 	private Sprite hoveredBackgroundSprite;
@@ -50,8 +52,15 @@ public class ListProductionItem extends ListObject implements CityStatUpdateList
 		this.itemTurnCostLabel = new CustomLabel((int) Math
 				.ceil((productionItem.getProductionCost() / city.getStatLine().getStatValue(Stat.PRODUCTION_GAIN)))
 				+ " Turns");
+
 		itemTurnCostLabel.setSize(width, height);
 		itemTurnCostLabel.setAlignment(Align.bottomLeft);
+
+		this.productionModifierLabel = new CustomLabel(
+				"(+" + 100 * Math.abs(productionItem.getProductionModifier()) + "%)");
+		productionModifierLabel.setColor(Color.GREEN);
+		productionModifierLabel.setSize(width, height);
+		productionModifierLabel.setAlignment(Align.center);
 
 		this.hovered = false;
 
@@ -84,6 +93,10 @@ public class ListProductionItem extends ListObject implements CityStatUpdateList
 		itemTurnCostLabel.setText((int) Math
 				.ceil((productionItem.getProductionCost() / city.getStatLine().getStatValue(Stat.PRODUCTION_GAIN)))
 				+ " Turns");
+
+		this.productionModifierLabel.setText("(+" + 100 * Math.abs(productionItem.getProductionModifier()) + "%)");
+		productionModifierLabel.setSize(getWidth(), getHeight());
+		productionModifierLabel.setAlignment(Align.center);
 	}
 
 	@Override
@@ -101,6 +114,8 @@ public class ListProductionItem extends ListObject implements CityStatUpdateList
 		itemIconSprite.draw(batch);
 		itemNameLabel.draw(batch, parentAlpha);
 		itemTurnCostLabel.draw(batch, parentAlpha);
+		if (Math.abs(productionItem.getProductionModifier()) > 0)
+			productionModifierLabel.draw(batch, parentAlpha);
 
 		super.draw(batch, parentAlpha);
 	}
@@ -113,6 +128,7 @@ public class ListProductionItem extends ListObject implements CityStatUpdateList
 		itemIconSprite.setPosition(x + getWidth() - itemIconSprite.getWidth(), y);
 		itemNameLabel.setPosition(x, y);
 		itemTurnCostLabel.setPosition(x, y);
+		productionModifierLabel.setPosition(x, y);
 	}
 
 	public ProductionItem getProductionItem() {

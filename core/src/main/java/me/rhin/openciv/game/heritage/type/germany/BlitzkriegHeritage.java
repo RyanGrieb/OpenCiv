@@ -29,7 +29,7 @@ public class BlitzkriegHeritage extends Heritage {
 
 	@Override
 	public String getDesc() {
-		return "All units get +1 movement.";
+		return "All mounted units get +1 movement.";
 	}
 
 	@Override

@@ -3,6 +3,7 @@ package me.rhin.openciv.shared.stat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Random;
 
 import me.rhin.openciv.shared.packet.type.CityStatUpdatePacket;
 import me.rhin.openciv.shared.packet.type.PlayerStatUpdatePacket;
@@ -44,8 +45,8 @@ public class StatLine {
 		StringBuilder stringBuilder = new StringBuilder();
 		stringBuilder.append("STATS:\n");
 		for (Stat stat : statValues.keySet()) {
-			stringBuilder.append(stat.name().toUpperCase() + ":" + statValues.get(stat).getValue() + " - "
-					+ 100 * statValues.get(stat).getModifier()+"%");
+			stringBuilder.append(stat.name().toUpperCase() + ": " + statValues.get(stat).getValue() + " - "
+					+ 100 * statValues.get(stat).getModifier() + "%");
 			stringBuilder.append("\n");
 		}
 
@@ -54,7 +55,7 @@ public class StatLine {
 
 	public void mergeStatLine(StatLine statLine) {
 		for (Stat stat : statLine.getStatValues().keySet()) {
-			mergeValue(stat, statLine.getStatValues().get(stat));
+			mergeValue(stat, statLine.getStatValues().get(stat).cloneValue());
 		}
 	}
 
@@ -62,7 +63,7 @@ public class StatLine {
 		for (Stat stat : statLine.getStatValues().keySet()) {
 			if (stat.getStatType() == statType)
 				continue;
-			mergeValue(stat, statLine.getStatValues().get(stat));
+			mergeValue(stat, statLine.getStatValues().get(stat).cloneValue());
 		}
 	}
 
@@ -78,7 +79,7 @@ public class StatLine {
 
 	public void reduceStatLine(StatLine statLine) {
 		for (Stat stat : statLine.getStatValues().keySet()) {
-			unmergeValue(stat, statLine.getStatValues().get(stat));
+			unmergeValue(stat, statLine.getStatValues().get(stat).cloneValue());
 		}
 	}
 
@@ -87,6 +88,7 @@ public class StatLine {
 	}
 
 	public void addValue(Stat stat, float value) {
+
 		if (!statValues.containsKey(stat))
 			statValues.put(stat, new StatValue(value));
 		else

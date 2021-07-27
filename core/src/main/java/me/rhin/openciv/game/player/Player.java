@@ -252,4 +252,8 @@ public class Player implements RelativeMouseMoveListener, LeftClickListener, Rig
 	public boolean isRightMouseHeld() {
 		return rightMouseHeld;
 	}
+
+	public City getCapitalCity() {
+		return ownedCities.get(0);
+	}
 }

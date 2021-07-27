@@ -43,6 +43,7 @@ public abstract class UnitItem implements ProductionItem {
 		this.productionModifier = modifier;
 	}
 
+	@Override
 	public float getProductionModifier() {
 		return productionModifier;
 	}

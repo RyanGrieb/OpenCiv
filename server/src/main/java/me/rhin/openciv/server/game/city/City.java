@@ -14,7 +14,6 @@ import me.rhin.openciv.server.Server;
 import me.rhin.openciv.server.game.Player;
 import me.rhin.openciv.server.game.city.building.Building;
 import me.rhin.openciv.server.game.city.building.IncreaseTileStatlineBuilding;
-import me.rhin.openciv.server.game.city.building.type.Monument;
 import me.rhin.openciv.server.game.city.citizen.AssignedCitizenWorker;
 import me.rhin.openciv.server.game.city.citizen.CitizenWorker;
 import me.rhin.openciv.server.game.city.citizen.CityCenterCitizenWorker;
@@ -138,8 +137,6 @@ public class City implements AttackableEntity, SpecialistContainer, NextTurnList
 			statUpdatePacket.addStat(name, stat.name(), this.statLine.getStatValues().get(stat).getValue());
 		}
 		playerOwner.getConn().send(json.toJson(statUpdatePacket));
-
-		// !!! Update player
 	}
 
 	@Override
@@ -271,6 +268,7 @@ public class City implements AttackableEntity, SpecialistContainer, NextTurnList
 		for (Tile tile : territory) {
 			CitizenWorker citizenWorker = citizenWorkers.get(tile);
 			if (citizenWorker.isValidTileWorker()) {
+
 				statLine.reduceStatLine(getTileStatLine(citizenWorker.getTile()));
 				addSpecialist();
 			}
@@ -287,6 +285,7 @@ public class City implements AttackableEntity, SpecialistContainer, NextTurnList
 
 		setCitizenTileWorker(new CityCenterCitizenWorker(this, originTile));
 		unemployedSpecialists.remove(0);
+
 		statLine.mergeStatLine(getTileStatLine(originTile));
 
 		for (int i = 0; i < statLine.getStatValue(Stat.POPULATION); i++) {
@@ -457,6 +456,8 @@ public class City implements AttackableEntity, SpecialistContainer, NextTurnList
 		this.playerOwner = playerOwner;
 
 		producibleItemManager.clearProducingItem();
+
+		// Note: This assumes were being captured.
 	}
 
 	private StatLine getTileStatLine(Tile tile) {
@@ -478,17 +479,17 @@ public class City implements AttackableEntity, SpecialistContainer, NextTurnList
 			return statLine;
 		}
 
-		StatLine buildingStatline = new StatLine();
+		StatLine tileStatLine = new StatLine();
+		tileStatLine.mergeStatLine(tile.getStatLine());
 		for (Building building : buildings) {
 			if (building instanceof IncreaseTileStatlineBuilding) {
 				IncreaseTileStatlineBuilding statlineBuilding = (IncreaseTileStatlineBuilding) building;
 
-				buildingStatline.mergeStatLine(statlineBuilding.getTileStatline(tile));
+				tileStatLine.mergeStatLine(statlineBuilding.getTileStatline(tile));
 			}
 		}
 
-		buildingStatline.mergeStatLine(tile.getStatLine());
-		return buildingStatline;
+		return tileStatLine;
 	}
 
 	private ArrayList<Tile> getTopWorkableTiles() {

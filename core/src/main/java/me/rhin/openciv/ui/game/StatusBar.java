@@ -96,7 +96,7 @@ public class StatusBar extends Actor implements PlayerStatUpdateListener, NextTu
 	public void onPlayerStatUpdate(PlayerStatUpdatePacket packet) {
 		StatLine statLine = StatLine.fromPacket(packet);
 
-		scienceLabel.setText("+" + (int) statLine.getStatValue(Stat.SCIENCE_GAIN));
+		scienceLabel.setText("+" + statLine.getStatValue(Stat.SCIENCE_GAIN));
 
 		int currentGold = (int) statLine.getStatValue(Stat.GOLD);
 		int gainedGold = (int) statLine.getStatValue(Stat.GOLD_GAIN);

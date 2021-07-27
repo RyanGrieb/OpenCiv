@@ -89,11 +89,12 @@ public class Player implements NextTurnListener, ChooseTechListener, ChooseHerit
 	}
 
 	public void updateOwnedStatlines(boolean increaseValues) {
-
+		
 		statLine.clearNonAccumulative();
 
-		for (City city : ownedCities)
+		for (City city : ownedCities) {
 			statLine.mergeStatLineExcluding(city.getStatLine(), StatType.CITY_EXCLUSIVE);
+		}
 
 		if (increaseValues)
 			statLine.updateStatLine();
@@ -227,6 +228,10 @@ public class Player implements NextTurnListener, ChooseTechListener, ChooseHerit
 
 	public HeritageTree getHeritageTree() {
 		return heritageTree;
+	}
+
+	public City getCapitalCity() {
+		return ownedCities.get(0);
 	}
 
 }

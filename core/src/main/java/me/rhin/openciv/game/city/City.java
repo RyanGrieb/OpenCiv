@@ -415,4 +415,11 @@ public class City extends Group implements AttackableEntity, TileObserver, Speci
 
 		return false;
 	}
+
+	public boolean containsBuilding(Class<? extends Building> clazz) {
+		for (Building building : buildings)
+			if (building.getClass() == clazz)
+				return true;
+		return false;
+	}
 }

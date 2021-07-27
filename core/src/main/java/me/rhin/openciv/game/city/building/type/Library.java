@@ -18,7 +18,7 @@ public class Library extends Building implements SpecialistContainer {
 	}
 
 	@Override
-	public float getProductionCost() {
+	public float getBuildingProductionCost() {
 		return 75;
 	}
 	

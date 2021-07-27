@@ -22,7 +22,7 @@ public class Palace extends Building {
 	}
 
 	@Override
-	public float getProductionCost() {
+	public float getBuildingProductionCost() {
 		return -1;
 	}
 	

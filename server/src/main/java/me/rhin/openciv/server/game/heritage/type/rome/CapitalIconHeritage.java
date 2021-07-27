@@ -1,9 +1,19 @@
 package me.rhin.openciv.server.game.heritage.type.rome;
 
-import me.rhin.openciv.server.game.Player;
-import me.rhin.openciv.server.game.heritage.Heritage;
+import org.java_websocket.WebSocket;
 
-public class CapitalIconHeritage extends Heritage {
+import me.rhin.openciv.server.Server;
+import me.rhin.openciv.server.game.Player;
+import me.rhin.openciv.server.game.city.City;
+import me.rhin.openciv.server.game.city.building.Building;
+import me.rhin.openciv.server.game.heritage.Heritage;
+import me.rhin.openciv.server.game.map.tile.Tile;
+import me.rhin.openciv.server.game.production.ProductionItem;
+import me.rhin.openciv.server.listener.BuildingConstructedListener;
+import me.rhin.openciv.server.listener.SettleCityListener;
+import me.rhin.openciv.shared.packet.type.SettleCityPacket;
+
+public class CapitalIconHeritage extends Heritage implements SettleCityListener, BuildingConstructedListener {
 
 	public CapitalIconHeritage(Player player) {
 		super(player);
@@ -26,7 +36,66 @@ public class CapitalIconHeritage extends Heritage {
 
 	@Override
 	protected void onStudied() {
-		// Modify production manager in other cities than the captial to refrence the
-		// captials built buildings
+		int index = 0;
+		for (City city : player.getOwnedCities()) {
+			if (index == 0) {
+				index++;
+				continue;
+			}
+			for (ProductionItem item : city.getProducibleItemManager().getPossibleItems().values()) {
+				if (item instanceof Building) {
+					Building building = (Building) item;
+					if (player.getCapitalCity().containsBuilding(building.getClass()))
+						building.setProductionModifier(-0.25F);
+				}
+			}
+
+			index++;
+		}
+	}
+
+	@Override
+	public void onSettleCity(WebSocket conn, SettleCityPacket packet) {
+		if (!studied)
+			return;
+
+		Tile tile = Server.getInstance().getMap().getTiles()[packet.getGridX()][packet.getGridY()];
+		City city = tile.getCity(); // Assume this is called after others (TODO: WE NEED EVENT PRIORITY!!)
+
+		if (!city.getPlayerOwner().equals(player))
+			return;
+
+		for (ProductionItem item : city.getProducibleItemManager().getPossibleItems().values()) {
+			if (item instanceof Building) {
+				Building building = (Building) item;
+				if (player.getCapitalCity().containsBuilding(building.getClass()))
+					building.setProductionModifier(-0.25F);
+			}
+		}
+	}
+
+	@Override
+	public void onBuildingConstructed(City city, Building building) {
+		if (!studied || !city.getPlayerOwner().getCapitalCity().equals(city))
+			return;
+
+		if (!city.getPlayerOwner().equals(player))
+			return;
+
+		int index = 0;
+		for (City otherCity : player.getOwnedCities()) {
+			if (index == 0) {
+				index++;
+				continue;
+			}
+			for (ProductionItem item : otherCity.getProducibleItemManager().getPossibleItems().values()) {
+				if (item.getClass() == building.getClass()) {
+					Building otherBuilding = (Building) item;
+					otherBuilding.setProductionModifier(-0.25F);
+				}
+			}
+
+			index++;
+		}
 	}
 }

@@ -15,7 +15,7 @@ public class Monument extends Building {
 	}
 
 	@Override
-	public float getProductionCost() {
+	public float getBuildingProductionCost() {
 		return 40;
 	}
 
