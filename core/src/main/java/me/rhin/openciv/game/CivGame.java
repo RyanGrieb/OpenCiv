@@ -293,8 +293,6 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 				}
 
 				city.setHealth(packet.getHealth());
-
-				System.out.println(packet.getHealth() + "," + city.getHealth());
 			}
 		}
 	}
