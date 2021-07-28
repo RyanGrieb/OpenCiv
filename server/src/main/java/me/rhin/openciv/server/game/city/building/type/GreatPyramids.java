@@ -24,7 +24,7 @@ public class GreatPyramids extends Building implements Wonder {
 	@Override
 	public void create() {
 		super.create();
-		// TODO: Spawn 2 builders.
+
 		Server.getInstance().getGame().getWonders().setBuilt(getClass());
 
 		for (int i = 0; i < 2; i++) {

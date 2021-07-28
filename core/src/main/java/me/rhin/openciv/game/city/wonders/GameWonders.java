@@ -2,8 +2,8 @@ package me.rhin.openciv.game.city.wonders;
 
 import java.util.HashMap;
 
+import me.rhin.openciv.game.city.building.type.GreatLibrary;
 import me.rhin.openciv.game.city.building.type.GreatPyramids;
-import me.rhin.openciv.listener.FinishProductionItemListener;
 
 public class GameWonders {
 
@@ -13,6 +13,7 @@ public class GameWonders {
 		this.availableWonders = new HashMap<>();
 
 		addWonder(GreatPyramids.class);
+		addWonder(GreatLibrary.class);
 	}
 
 	private void addWonder(Class<? extends Wonder> clazz) {

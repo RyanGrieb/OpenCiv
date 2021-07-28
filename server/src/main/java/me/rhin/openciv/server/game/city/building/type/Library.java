@@ -36,8 +36,8 @@ public class Library extends Building implements CityGrowthListener, CityStarveL
 			return;
 
 		city.getStatLine().subValue(Stat.SCIENCE_GAIN, 0.5F);
+		
 	}
-
 	@Override
 	public void onCityGrowth(City city) {
 		if (!city.getBuildings().contains(this))

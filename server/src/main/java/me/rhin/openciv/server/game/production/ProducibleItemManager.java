@@ -11,6 +11,7 @@ import me.rhin.openciv.server.Server;
 import me.rhin.openciv.server.game.city.City;
 import me.rhin.openciv.server.game.city.building.Building;
 import me.rhin.openciv.server.game.city.building.type.Granary;
+import me.rhin.openciv.server.game.city.building.type.GreatLibrary;
 import me.rhin.openciv.server.game.city.building.type.GreatPyramids;
 import me.rhin.openciv.server.game.city.building.type.Library;
 import me.rhin.openciv.server.game.city.building.type.Market;
@@ -26,7 +27,6 @@ import me.rhin.openciv.server.game.unit.type.WorkBoat;
 import me.rhin.openciv.server.listener.NextTurnListener;
 import me.rhin.openciv.shared.packet.type.ApplyProductionToItemPacket;
 import me.rhin.openciv.shared.packet.type.FinishProductionItemPacket;
-import me.rhin.openciv.shared.packet.type.RemoveProductionItemPacket;
 import me.rhin.openciv.shared.stat.Stat;
 
 /**
@@ -72,6 +72,7 @@ public class ProducibleItemManager implements NextTurnListener {
 		possibleItems.put("Library", new Library(city));
 		possibleItems.put("Water Mill", new WaterMill(city));
 		possibleItems.put("Great Pyramids", new GreatPyramids(city));
+		possibleItems.put("Great Library", new GreatLibrary(city));
 
 		Server.getInstance().getEventManager().addListener(NextTurnListener.class, this);
 	}

@@ -33,7 +33,6 @@ public class GreatPyramids extends Building implements Wonder {
 
 	@Override
 	public void onBuilt() {
-		System.out.println("Called");
 		Civilization.getInstance().getGame().getWonders().setBuilt(getClass());
 	}
 
@@ -50,6 +49,6 @@ public class GreatPyramids extends Building implements Wonder {
 
 	@Override
 	public String getDesc() {
-		return "A great ancient wonder. \nOnce built, recieve 2 builders.";
+		return "A great ancient wonder. \nOnce built, recieve 2 builders.\n+1 Heritage";
 	}
 }

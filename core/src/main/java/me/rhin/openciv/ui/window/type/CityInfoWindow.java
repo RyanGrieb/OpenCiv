@@ -117,8 +117,6 @@ public class CityInfoWindow extends AbstractWindow
 		float topbarHeight = ((InGameScreen) Civilization.getInstance().getCurrentScreen()).getGameOverlay()
 				.getTopbarHeight();
 		topRightContainerList.setPosition(width - 220, height - 195 - topbarHeight);
-
-		System.out.println("Resize in city info windw");
 	}
 
 	@Override
@@ -162,7 +160,7 @@ public class CityInfoWindow extends AbstractWindow
 	public void onBuildingConstructed(BuildingConstructedPacket packet) {
 
 		// Account for wonders being built.
-		for (ListContainer listContainer : productionContainerList.getListContainers().values()) {
+		outerloop: for (ListContainer listContainer : productionContainerList.getListContainers().values()) {
 			for (ListObject listObject : listContainer.getListItemActors()) {
 				{
 					if (listObject instanceof ListProductionItem) {
@@ -174,7 +172,7 @@ public class CityInfoWindow extends AbstractWindow
 										productionItem.getCategory(),
 										new ListProductionItem(city, productionItem, 200, 45));
 							}
-							return;
+							break outerloop;
 						}
 					}
 				}
@@ -251,7 +249,6 @@ public class CityInfoWindow extends AbstractWindow
 						ListProductionItem listProductionItem = (ListProductionItem) listObj;
 
 						if (listProductionItem.getProductionItem().equals(productionItem)) {
-							System.out.println("Will this break all our for loops");
 							continue outerloop;
 						}
 					}
