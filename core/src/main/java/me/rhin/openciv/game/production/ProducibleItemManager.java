@@ -15,6 +15,7 @@ import me.rhin.openciv.game.city.building.type.GreatPyramids;
 import me.rhin.openciv.game.city.building.type.Library;
 import me.rhin.openciv.game.city.building.type.Market;
 import me.rhin.openciv.game.city.building.type.Monument;
+import me.rhin.openciv.game.city.building.type.Walls;
 import me.rhin.openciv.game.city.building.type.WaterMill;
 import me.rhin.openciv.game.notification.type.AvailableProductionNotification;
 import me.rhin.openciv.game.unit.type.Archer;
@@ -48,6 +49,7 @@ public class ProducibleItemManager {
 		this.itemQueue = new LinkedList<>();
 		this.queueEnabled = false;
 
+		// Buildings
 		possibleItems.put("Granary", new Granary(city));
 		possibleItems.put("Monument", new Monument(city));
 		possibleItems.put("Market", new Market(city));
@@ -60,9 +62,12 @@ public class ProducibleItemManager {
 		possibleItems.put("Archer", new Archer(city));
 		possibleItems.put("Library", new Library(city));
 		possibleItems.put("Water Mill", new WaterMill(city));
+		possibleItems.put("Walls", new Walls(city));
+
+		// Wonders
 		possibleItems.put("Great Pyramids", new GreatPyramids(city));
 		possibleItems.put("Great Library", new GreatLibrary(city));
-		
+
 		// FIXME: There should be a better way to do this than just checking if the
 		// player matches
 		if (city.getPlayerOwner().equals(Civilization.getInstance().getGame().getPlayer()))

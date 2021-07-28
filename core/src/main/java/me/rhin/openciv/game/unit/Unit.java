@@ -490,8 +490,18 @@ public abstract class Unit extends Actor
 		return canAttack;
 	}
 
+	@Override
 	public float getHealth() {
 		return health;
+	}
+
+	// TODO: Implement these
+	@Override
+	public void setMaxHealth(float health) {
+	}
+
+	@Override
+	public void setCombatStrength(int combatStrength) {
 	}
 
 	public void setHealth(float health) {

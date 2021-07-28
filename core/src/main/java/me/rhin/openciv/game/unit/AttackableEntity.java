@@ -13,6 +13,10 @@ public interface AttackableEntity {
 
 	public void setHealth(float health);
 
+	public void setMaxHealth(float health);
+
+	public void setCombatStrength(int combatStrength);
+
 	public float getHealth();
 
 	public float getMaxHealth();

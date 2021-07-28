@@ -87,11 +87,11 @@ public class InGameState extends GameState
 	private ScheduledExecutorService executor;
 	private Runnable turnTimeRunnable;
 	private GameWonders gameWonders;
-	
+
 	public InGameState() {
-		
+
 		this.gameWonders = new GameWonders();
-		
+
 		Server.getInstance().getEventManager().addListener(DisconnectListener.class, this);
 		Server.getInstance().getEventManager().addListener(SelectUnitListener.class, this);
 		Server.getInstance().getEventManager().addListener(UnitMoveListener.class, this);
@@ -701,7 +701,8 @@ public class InGameState extends GameState
 	@Override
 	public void onWorkTile(WebSocket conn, WorkTilePacket packet) {
 
-		// TODO: !! We need to do territory & ownership &research checks like in clientside.
+		// TODO: !! We need to do territory & ownership &research checks like in
+		// clientside.
 
 		Tile tile = map.getTiles()[packet.getGridX()][packet.getGridY()];
 		for (Unit unit : tile.getUnits()) {
@@ -725,7 +726,6 @@ public class InGameState extends GameState
 	public String toString() {
 		return "InGame";
 	}
-	
 
 	@Override
 	public GameWonders getWonders() {
@@ -850,8 +850,7 @@ public class InGameState extends GameState
 
 		// Debug code
 		if (players.size() > 1) {
-			// players.get(0).setSpawnPos(players.get(1).getSpawnX() + 1,
-			// players.get(1).getSpawnY() + 1);
+			players.get(0).setSpawnPos(players.get(1).getSpawnX() + 2, players.get(1).getSpawnY() + 2);
 		}
 
 		for (Player player : players) {

@@ -31,7 +31,6 @@ import me.rhin.openciv.listener.BuildingConstructedListener;
 import me.rhin.openciv.listener.CityStatUpdateListener;
 import me.rhin.openciv.listener.FinishProductionItemListener;
 import me.rhin.openciv.listener.NextTurnListener;
-import me.rhin.openciv.listener.RemoveProductionItemListener;
 import me.rhin.openciv.listener.RemoveSpecialistFromContainerListener;
 import me.rhin.openciv.listener.SetCitizenTileWorkerListener;
 import me.rhin.openciv.listener.SetProductionItemListener;
@@ -42,7 +41,6 @@ import me.rhin.openciv.shared.packet.type.BuildingConstructedPacket;
 import me.rhin.openciv.shared.packet.type.CityStatUpdatePacket;
 import me.rhin.openciv.shared.packet.type.FinishProductionItemPacket;
 import me.rhin.openciv.shared.packet.type.NextTurnPacket;
-import me.rhin.openciv.shared.packet.type.RemoveProductionItemPacket;
 import me.rhin.openciv.shared.packet.type.RemoveSpecialistFromContainerPacket;
 import me.rhin.openciv.shared.packet.type.SetCitizenTileWorkerPacket;
 import me.rhin.openciv.shared.packet.type.SetCitizenTileWorkerPacket.WorkerType;
@@ -70,6 +68,8 @@ public class City extends Group implements AttackableEntity, TileObserver, Speci
 	private Sprite nameIcon;
 	private Healthbar healthbar;
 	private float health;
+	private float maxHealth;
+	private int combatStrength;
 
 	public City(Tile originTile, Player playerOwner, String name) {
 		setName(name);
@@ -92,6 +92,9 @@ public class City extends Group implements AttackableEntity, TileObserver, Speci
 		// actor...
 		this.healthbar = new Healthbar(nameLabel.getX() + nameLabel.getWidth() / 2 - 50 / 2, nameIcon.getY() + 15, 50,
 				4, false);
+
+		this.maxHealth = 200; // Default
+		this.combatStrength = 5; // Default
 		this.health = getMaxHealth();
 
 		// FIXME: The actor size & position really shouldn't be confined to the label.
@@ -291,7 +294,7 @@ public class City extends Group implements AttackableEntity, TileObserver, Speci
 
 	@Override
 	public int getCombatStrength() {
-		return 5;
+		return combatStrength; // 5
 	}
 
 	@Override
@@ -310,13 +313,25 @@ public class City extends Group implements AttackableEntity, TileObserver, Speci
 	}
 
 	@Override
+	public void setMaxHealth(float maxHealth) {
+		this.maxHealth = maxHealth;
+
+		this.healthbar.setHealth(getMaxHealth(), health);
+	}
+
+	@Override
+	public void setCombatStrength(int combatStrength) {
+		this.combatStrength = combatStrength;
+	}
+
+	@Override
 	public float getHealth() {
 		return health;
 	}
 
 	@Override
 	public float getMaxHealth() {
-		return 200;
+		return maxHealth; // 200
 	}
 
 	@Override

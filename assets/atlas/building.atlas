@@ -6,14 +6,14 @@ filter: Nearest, Nearest
 repeat: none
 building_circus
   rotate: false
-  xy: 166, 164
+  xy: 200, 198
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 building_granary
   rotate: false
-  xy: 166, 130
+  xy: 200, 164
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
@@ -27,21 +27,21 @@ building_great_library
   index: -1
 building_great_lighthouse
   rotate: false
-  xy: 132, 164
+  xy: 166, 198
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 building_library
   rotate: false
-  xy: 132, 130
+  xy: 166, 164
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 building_lighthouse
   rotate: false
-  xy: 166, 198
+  xy: 132, 130
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
@@ -69,6 +69,13 @@ building_palace
   index: -1
 building_pyramids
   rotate: false
+  xy: 132, 164
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+building_wall
+  rotate: false
   xy: 68, 68
   size: 32, 32
   orig: 32, 32
@@ -76,7 +83,7 @@ building_pyramids
   index: -1
 building_watermill
   rotate: false
-  xy: 200, 198
+  xy: 166, 130
   size: 32, 32
   orig: 32, 32
   offset: 0, 0

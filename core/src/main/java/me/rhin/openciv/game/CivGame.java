@@ -285,7 +285,16 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 		for (Player player : players.values()) {
 			City city = player.getCityFromName(packet.getCityName());
 			if (city != null) {
+
+				// FIXME: Should be a better way to implement this
+				if (packet.getMaxHealth() != -1 && packet.getCombatStrength() != -1) {
+					city.setCombatStrength(packet.getCombatStrength());
+					city.setMaxHealth(packet.getMaxHealth());
+				}
+
 				city.setHealth(packet.getHealth());
+
+				System.out.println(packet.getHealth() + "," + city.getHealth());
 			}
 		}
 	}
