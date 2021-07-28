@@ -160,6 +160,28 @@ public class CityInfoWindow extends AbstractWindow
 
 	@Override
 	public void onBuildingConstructed(BuildingConstructedPacket packet) {
+
+		// Account for wonders being built.
+		for (ListContainer listContainer : productionContainerList.getListContainers().values()) {
+			for (ListObject listObject : listContainer.getListItemActors()) {
+				{
+					if (listObject instanceof ListProductionItem) {
+						ListProductionItem listProdItem = (ListProductionItem) listObject;
+						if (!listProdItem.getProductionItem().meetsProductionRequirements()) {
+							productionContainerList.clearList();
+							for (ProductionItem productionItem : city.getProducibleItemManager().getProducibleItems()) {
+								productionContainerList.addItem(ListContainerType.CATEGORY,
+										productionItem.getCategory(),
+										new ListProductionItem(city, productionItem, 200, 45));
+							}
+							return;
+						}
+					}
+				}
+
+			}
+		}
+
 		if (!city.getName().equals(packet.getCityName()))
 			return;
 
@@ -179,6 +201,7 @@ public class CityInfoWindow extends AbstractWindow
 			productionContainerList.addItem(ListContainerType.CATEGORY, productionItem.getCategory(),
 					new ListProductionItem(city, productionItem, 200, 45));
 		}
+
 	}
 
 	@Override

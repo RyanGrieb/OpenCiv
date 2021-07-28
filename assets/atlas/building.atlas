@@ -1,47 +1,82 @@
 
 building.png
-size: 256, 64
+size: 256, 256
 format: RGBA8888
 filter: Nearest, Nearest
 repeat: none
 building_circus
   rotate: false
-  xy: 104, 2
+  xy: 166, 164
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 building_granary
   rotate: false
-  xy: 172, 2
+  xy: 166, 130
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+building_great_library
+  rotate: false
+  xy: 2, 102
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: -1
+building_great_lighthouse
+  rotate: false
+  xy: 132, 164
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 building_library
   rotate: false
-  xy: 70, 2
+  xy: 132, 130
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+building_lighthouse
+  rotate: false
+  xy: 166, 198
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 building_market
   rotate: false
-  xy: 36, 2
+  xy: 2, 2
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 building_monument
   rotate: false
-  xy: 2, 2
+  xy: 132, 198
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+building_palace
+  rotate: false
+  xy: 2, 36
+  size: 64, 64
+  orig: 64, 64
+  offset: 0, 0
+  index: -1
+building_pyramids
+  rotate: false
+  xy: 68, 68
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 building_watermill
   rotate: false
-  xy: 138, 2
+  xy: 200, 198
   size: 32, 32
   orig: 32, 32
   offset: 0, 0

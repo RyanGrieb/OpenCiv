@@ -5,12 +5,12 @@ import com.badlogic.gdx.graphics.g2d.Sprite;
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.research.Technology;
 
-public class CalendarTech extends Technology {
+public class MasonryTech extends Technology {
 
-	public CalendarTech() {
-		requiredTechs.add(PotteryTech.class);
+	public MasonryTech() {
+		requiredTechs.add(MiningTech.class);
 	}
-	
+
 	@Override
 	public int getScienceCost() {
 		return 55;
@@ -18,17 +18,17 @@ public class CalendarTech extends Technology {
 
 	@Override
 	public String getName() {
-		return "Calendar";
+		return "Masonry";
 	}
 
 	@Override
 	public Sprite getIcon() {
-		return TextureEnum.ICON_CALENDAR.sprite();
+		return TextureEnum.BUILDING_PYRAMIDS.sprite();
 	}
 
 	@Override
 	public String getDesc() {
-		return "- Unlocks stone works\n" + "- Unlocks stonehenge\n" + "- Build plantations";
+		return "- Unlocks great pyramids\n- Build quarrys\n- Unlocks walls";
 	}
 
 }

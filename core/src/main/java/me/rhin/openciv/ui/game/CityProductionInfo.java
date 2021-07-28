@@ -40,7 +40,7 @@ public class CityProductionInfo extends Actor implements SetProductionItemListen
 		ProducingItem producingItem = city.getProducibleItemManager().getCurrentProducingItem();
 
 		if (producingItem == null)
-			productionItemSprite = TextureEnum.UI_ERROR.sprite();
+			productionItemSprite = TextureEnum.UI_BLACK.sprite();
 		else
 			productionItemSprite = producingItem.getProductionItem().getTexture().sprite();
 
@@ -141,7 +141,7 @@ public class CityProductionInfo extends Actor implements SetProductionItemListen
 		productionItemNameLabel.setText("Nothing");
 		turnsLeftLabel.setText("???/??? Turns");
 
-		Sprite sprite = TextureEnum.UI_ERROR.sprite();
+		Sprite sprite = TextureEnum.UI_BLACK.sprite();
 		sprite.setBounds(productionItemSprite.getX(), productionItemSprite.getY(), productionItemSprite.getWidth(),
 				productionItemSprite.getHeight());
 

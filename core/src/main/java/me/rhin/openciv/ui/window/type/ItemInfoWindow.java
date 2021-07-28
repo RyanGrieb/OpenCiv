@@ -56,7 +56,9 @@ public class ItemInfoWindow extends AbstractWindow implements ResizeListener {
 		addActor(produceItemButton);
 
 		this.buyItemButton = new BuyItemButton(city, productionItem, getWidth() / 2 - 82 / 2, 4, 82, 28);
-		addActor(buyItemButton);
+
+		if (productionItem.getGoldCost() > 0)
+			addActor(buyItemButton);
 
 		this.closeWindowButton = new CloseWindowButton(this.getClass(), "Cancel", getWidth() - 86, 4, 82, 28);
 		addActor(closeWindowButton);
@@ -69,7 +71,9 @@ public class ItemInfoWindow extends AbstractWindow implements ResizeListener {
 		this.buyIcon = new ColoredBackground(TextureEnum.ICON_GOLD.sprite(),
 				buyItemButton.getX() + buyItemButton.getWidth() / 2 - 16 / 2,
 				buyItemButton.getY() + buyItemButton.getHeight(), 16, 16);
-		addActor(buyIcon);
+
+		if (productionItem.getGoldCost() > 0)
+			addActor(buyIcon);
 
 		this.productionCostLabel = new CustomLabel(
 				(int) Math.ceil(
@@ -81,7 +85,9 @@ public class ItemInfoWindow extends AbstractWindow implements ResizeListener {
 
 		this.goldCostLabel = new CustomLabel((int) productionItem.getGoldCost() + " Gold", Align.center, buyIcon.getX(),
 				buyIcon.getY() + buyIcon.getHeight() + 2, buyIcon.getWidth(), 12);
-		addActor(goldCostLabel);
+
+		if (productionItem.getGoldCost() > 0)
+			addActor(goldCostLabel);
 
 		Civilization.getInstance().getEventManager().addListener(ResizeListener.class, this);
 	}

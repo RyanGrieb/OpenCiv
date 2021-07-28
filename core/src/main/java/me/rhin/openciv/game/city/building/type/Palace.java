@@ -38,7 +38,7 @@ public class Palace extends Building {
 
 	@Override
 	public TextureEnum getTexture() {
-		return TextureEnum.UI_ERROR;
+		return TextureEnum.BUILDING_PALACE;
 	}
 
 	@Override

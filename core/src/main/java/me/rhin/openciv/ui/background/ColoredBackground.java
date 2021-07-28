@@ -8,6 +8,7 @@ public class ColoredBackground extends Actor {
 
 	private Sprite sprite;
 
+	//TODO: Rename this to a better name.
 	public ColoredBackground(Sprite sprite, float x, float y, float width, float height) {
 		super.setBounds(x, y, width, height);
 

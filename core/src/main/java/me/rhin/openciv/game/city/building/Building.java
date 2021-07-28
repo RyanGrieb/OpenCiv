@@ -49,4 +49,7 @@ public abstract class Building implements ProductionItem {
 	public City getCity() {
 		return city;
 	}
+
+	public void onBuilt() {
+	}
 }

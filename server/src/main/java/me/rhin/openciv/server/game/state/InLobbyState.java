@@ -7,6 +7,7 @@ import com.badlogic.gdx.utils.Json;
 import me.rhin.openciv.server.Server;
 import me.rhin.openciv.server.game.GameState;
 import me.rhin.openciv.server.game.Player;
+import me.rhin.openciv.server.game.city.wonders.GameWonders;
 import me.rhin.openciv.server.game.civilization.CivType;
 import me.rhin.openciv.server.game.civilization.type.RandomCivilization;
 import me.rhin.openciv.server.listener.ChooseCivListener;
@@ -201,5 +202,10 @@ public class InLobbyState extends GameState implements StartGameRequestListener,
 	@Override
 	public String toString() {
 		return "InLobby";
+	}
+	
+	@Override
+	public GameWonders getWonders() {
+		return null;
 	}
 }

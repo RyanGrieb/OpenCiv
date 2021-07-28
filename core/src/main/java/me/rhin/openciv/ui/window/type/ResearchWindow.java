@@ -43,7 +43,7 @@ public class ResearchWindow extends AbstractWindow
 		}
 
 		this.closeWindowButton = new CloseWindowButton(this.getClass(), "Close", viewport.getWorldWidth() / 2 - 150 / 2,
-				35, 150, 45);
+				25, 150, 45);
 		addActor(closeWindowButton);
 
 		Civilization.getInstance().getEventManager().addListener(ResizeListener.class, this);
@@ -56,7 +56,7 @@ public class ResearchWindow extends AbstractWindow
 		super.setSize(width, height);
 		blankBackground.setSize(width, height);
 		researchDescLabel.setBounds(0, height - 25, width, 15);
-		closeWindowButton.setPosition(width / 2 - 150 / 2, 35);
+		closeWindowButton.setPosition(width / 2 - 150 / 2, 25);
 
 		for (TechnologyLeaf leaf : technologyLeafs) {
 			leaf.setPositionUpdated(false);

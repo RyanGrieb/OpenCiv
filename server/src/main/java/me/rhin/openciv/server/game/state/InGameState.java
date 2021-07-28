@@ -18,6 +18,7 @@ import me.rhin.openciv.server.game.city.City;
 import me.rhin.openciv.server.game.city.building.Building;
 import me.rhin.openciv.server.game.city.building.type.Palace;
 import me.rhin.openciv.server.game.city.specialist.SpecialistContainer;
+import me.rhin.openciv.server.game.city.wonders.GameWonders;
 import me.rhin.openciv.server.game.map.tile.Tile;
 import me.rhin.openciv.server.game.map.tile.Tile.TileTypeWrapper;
 import me.rhin.openciv.server.game.map.tile.TileType;
@@ -85,9 +86,12 @@ public class InGameState extends GameState
 	private int turnTimeLeft;
 	private ScheduledExecutorService executor;
 	private Runnable turnTimeRunnable;
-
+	private GameWonders gameWonders;
+	
 	public InGameState() {
-
+		
+		this.gameWonders = new GameWonders();
+		
 		Server.getInstance().getEventManager().addListener(DisconnectListener.class, this);
 		Server.getInstance().getEventManager().addListener(SelectUnitListener.class, this);
 		Server.getInstance().getEventManager().addListener(UnitMoveListener.class, this);
@@ -720,6 +724,12 @@ public class InGameState extends GameState
 	@Override
 	public String toString() {
 		return "InGame";
+	}
+	
+
+	@Override
+	public GameWonders getWonders() {
+		return gameWonders;
 	}
 
 	private boolean playersLoaded() {

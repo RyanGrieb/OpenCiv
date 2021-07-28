@@ -46,5 +46,4 @@ public class WaterMill extends Building {
 	public String getName() {
 		return "Water Mill";
 	}
-
 }

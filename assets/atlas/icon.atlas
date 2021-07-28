@@ -6,35 +6,42 @@ filter: Nearest, Nearest
 repeat: none
 icon_america
   rotate: false
-  xy: 70, 88
+  xy: 36, 20
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+icon_calendar
+  rotate: false
+  xy: 36, 88
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 icon_cancel
   rotate: false
-  xy: 172, 54
+  xy: 206, 88
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 icon_chop
   rotate: false
-  xy: 36, 20
+  xy: 70, 54
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 icon_citizen
   rotate: false
-  xy: 56, 2
+  xy: 206, 34
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 icon_citizen_city_center
   rotate: false
-  xy: 128, 2
+  xy: 110, 2
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
@@ -48,21 +55,21 @@ icon_citizen_locked
   index: -1
 icon_citizen_unworked
   rotate: false
-  xy: 74, 2
+  xy: 56, 2
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 icon_england
   rotate: false
-  xy: 206, 88
+  xy: 172, 20
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 icon_faith
   rotate: false
-  xy: 92, 2
+  xy: 74, 2
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
@@ -76,56 +83,56 @@ icon_farm
   index: -1
 icon_food
   rotate: false
-  xy: 110, 2
+  xy: 92, 2
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 icon_germany
   rotate: false
-  xy: 70, 54
+  xy: 104, 88
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 icon_gold
   rotate: false
-  xy: 172, 36
+  xy: 206, 70
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 icon_goto
   rotate: false
-  xy: 70, 20
+  xy: 104, 54
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 icon_heritage
   rotate: false
-  xy: 206, 70
+  xy: 20, 2
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 icon_mining
   rotate: false
-  xy: 104, 20
+  xy: 138, 54
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 icon_move
   rotate: false
-  xy: 138, 20
+  xy: 172, 54
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 icon_nazi
   rotate: false
-  xy: 138, 54
+  xy: 172, 88
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
@@ -139,49 +146,49 @@ icon_pasture
   index: -1
 icon_production
   rotate: false
-  xy: 146, 2
+  xy: 128, 2
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 icon_question
   rotate: false
-  xy: 172, 88
+  xy: 138, 20
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 icon_rome
   rotate: false
-  xy: 104, 54
+  xy: 138, 88
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 icon_science
   rotate: false
-  xy: 20, 2
+  xy: 206, 52
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 icon_settle
   rotate: false
-  xy: 36, 88
+  xy: 2, 20
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 icon_shield
   rotate: false
-  xy: 104, 88
+  xy: 70, 20
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 icon_target
   rotate: false
-  xy: 138, 88
+  xy: 104, 20
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
@@ -195,14 +202,14 @@ icon_unemployed_citizen
   index: -1
 icon_unknown
   rotate: false
-  xy: 2, 20
+  xy: 36, 54
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 icon_untarget
   rotate: false
-  xy: 36, 54
+  xy: 70, 88
   size: 32, 32
   orig: 32, 32
   offset: 0, 0

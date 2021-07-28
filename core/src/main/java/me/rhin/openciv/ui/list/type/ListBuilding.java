@@ -10,6 +10,7 @@ import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.city.building.Building;
 import me.rhin.openciv.game.city.specialist.SpecialistContainer;
 import me.rhin.openciv.shared.stat.Stat;
+import me.rhin.openciv.ui.background.ColoredBackground;
 import me.rhin.openciv.ui.button.Button;
 import me.rhin.openciv.ui.button.type.SpecialistCitizenButton;
 import me.rhin.openciv.ui.label.CustomLabel;
@@ -19,6 +20,7 @@ public class ListBuilding extends ListObject {
 
 	private Building building;
 	private Sprite backgroundSprite;
+	private ColoredBackground buildingSprite;
 	private CustomLabel buildingNameLabel;
 	private ArrayList<Sprite> statIcons;
 	private ArrayList<CustomLabel> statLabels;
@@ -33,6 +35,11 @@ public class ListBuilding extends ListObject {
 		buildingNameLabel = new CustomLabel(building.getName());
 		buildingNameLabel.setSize(width, height);
 		buildingNameLabel.setAlignment(Align.topLeft);
+
+		// FIXME: We need to convert our sprites to actors like this
+		buildingSprite = new ColoredBackground(building.getTexture().sprite(), getWidth() - 34,
+				getHeight() / 2 - 32 / 2, 32, 32);
+		addActor(buildingSprite);
 
 		this.statIcons = new ArrayList<>();
 		this.statLabels = new ArrayList<>();
@@ -77,7 +84,7 @@ public class ListBuilding extends ListObject {
 
 		for (CustomLabel label : statLabels)
 			label.draw(batch, parentAlpha);
-		
+
 		super.draw(batch, parentAlpha);
 	}
 
@@ -86,6 +93,7 @@ public class ListBuilding extends ListObject {
 		super.setPosition(x, y);
 		backgroundSprite.setPosition(x, y);
 		buildingNameLabel.setPosition(x, y);
+		buildingSprite.setPosition(getWidth() - 34, getHeight() / 2 - 32 / 2);
 
 		float originX = x;
 		for (int i = 0; i < statIcons.size(); i++) {

@@ -31,6 +31,7 @@ import me.rhin.openciv.listener.BuildingConstructedListener;
 import me.rhin.openciv.listener.CityStatUpdateListener;
 import me.rhin.openciv.listener.FinishProductionItemListener;
 import me.rhin.openciv.listener.NextTurnListener;
+import me.rhin.openciv.listener.RemoveProductionItemListener;
 import me.rhin.openciv.listener.RemoveSpecialistFromContainerListener;
 import me.rhin.openciv.listener.SetCitizenTileWorkerListener;
 import me.rhin.openciv.listener.SetProductionItemListener;
@@ -41,6 +42,7 @@ import me.rhin.openciv.shared.packet.type.BuildingConstructedPacket;
 import me.rhin.openciv.shared.packet.type.CityStatUpdatePacket;
 import me.rhin.openciv.shared.packet.type.FinishProductionItemPacket;
 import me.rhin.openciv.shared.packet.type.NextTurnPacket;
+import me.rhin.openciv.shared.packet.type.RemoveProductionItemPacket;
 import me.rhin.openciv.shared.packet.type.RemoveSpecialistFromContainerPacket;
 import me.rhin.openciv.shared.packet.type.SetCitizenTileWorkerPacket;
 import me.rhin.openciv.shared.packet.type.SetCitizenTileWorkerPacket.WorkerType;
@@ -153,6 +155,7 @@ public class City extends Group implements AttackableEntity, TileObserver, Speci
 			// Constructor<?> ctor = buildingClass.getConstructor(City.class);
 			// Building building = (Building) ctor.newInstance(new Object[] { this });
 			Building building = (Building) ClassReflection.getConstructor(buildingClass, City.class).newInstance(this);
+			building.onBuilt();
 			buildings.add(building);
 		} catch (Exception e) {
 			Gdx.app.log(Civilization.WS_LOG_TAG, e.getMessage());

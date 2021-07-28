@@ -11,6 +11,7 @@ import com.badlogic.gdx.utils.reflect.ClassReflection;
 
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.game.city.City;
+import me.rhin.openciv.game.city.wonders.GameWonders;
 import me.rhin.openciv.game.civilization.CivType;
 import me.rhin.openciv.game.map.GameMap;
 import me.rhin.openciv.game.map.tile.Tile;
@@ -77,12 +78,14 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 	private Player player;
 	private HashMap<String, Player> players;
 	private NotificationHandler notificationHandler;
+	private GameWonders gameWonders;
 	private int turnTime;
 	private int turns;
 
 	public CivGame() {
 		this.map = new GameMap();
 		this.players = new HashMap<>();
+		this.gameWonders = new GameWonders();
 		this.turnTime = BASE_TURN_TIME;
 		this.turns = 0;
 
@@ -227,9 +230,9 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 
 			Civilization.getInstance().getGame().getNotificationHanlder()
 					.fireNotification(new NotResearchingNotification());
-			
+
 			Civilization.getInstance().getGame().getNotificationHanlder()
-			.fireNotification(new NotStudyingNotification());
+					.fireNotification(new NotStudyingNotification());
 		}
 	}
 
@@ -351,5 +354,9 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 
 	public HashMap<String, Player> getPlayers() {
 		return players;
+	}
+
+	public GameWonders getWonders() {
+		return gameWonders;
 	}
 }

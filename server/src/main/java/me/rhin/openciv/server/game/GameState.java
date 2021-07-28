@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import org.java_websocket.WebSocket;
 
 import me.rhin.openciv.server.Server;
+import me.rhin.openciv.server.game.city.wonders.GameWonders;
 import me.rhin.openciv.server.game.map.GameMap;
 
 public abstract class GameState {
@@ -28,4 +29,7 @@ public abstract class GameState {
 	public abstract void stop();
 
 	public abstract String toString();
+
+	//FIXME: InGame only method
+	public abstract GameWonders getWonders();
 }
