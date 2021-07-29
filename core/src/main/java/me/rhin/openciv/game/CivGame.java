@@ -167,7 +167,8 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 				players.put(playerName, new Player(playerName));
 
 			// TODO: Use reflection & remove our deprecated enum
-			players.get(playerName).setCivilization(CivType.valueOf(packet.getCivList()[i]).getCiv());
+			players.get(playerName)
+					.setCivilization(CivType.valueOf(packet.getCivList()[i]).getCiv(players.get(playerName)));
 		}
 	}
 

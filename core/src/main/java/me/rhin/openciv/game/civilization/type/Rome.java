@@ -2,12 +2,12 @@ package me.rhin.openciv.game.civilization.type;
 
 import com.badlogic.gdx.graphics.Color;
 
-import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.civilization.Civ;
 import me.rhin.openciv.game.heritage.type.rome.CapitalIconHeritage;
 import me.rhin.openciv.game.heritage.type.rome.DefensiveLogisticsHeritage;
 import me.rhin.openciv.game.heritage.type.rome.LegionHeritage;
+import me.rhin.openciv.game.player.Player;
 
 public class Rome extends Civ {
 
@@ -16,7 +16,9 @@ public class Rome extends Civ {
 	 * produce forts immediately, Legion Unit
 	 */
 
-	public Rome() {
+	public Rome(Player player) {
+		super(player);
+
 		addHeritage(new LegionHeritage());
 		addHeritage(new CapitalIconHeritage());
 		addHeritage(new DefensiveLogisticsHeritage());

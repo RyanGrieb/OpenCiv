@@ -9,14 +9,15 @@ import me.rhin.openciv.game.civilization.type.America;
 import me.rhin.openciv.game.civilization.type.England;
 import me.rhin.openciv.game.civilization.type.Germany;
 import me.rhin.openciv.game.civilization.type.Rome;
+import me.rhin.openciv.game.player.Player;
 
 @Deprecated
 public enum CivType {
 
 	RANDOM(TextureEnum.ICON_UNKNOWN) {
-		public Civ getCiv() {
+		public Civ getCiv(Player player) {
 			Random rnd = new Random();
-			return CivType.values()[rnd.nextInt(CivType.values().length)].getCiv();
+			return CivType.values()[rnd.nextInt(CivType.values().length)].getCiv(player);
 		}
 
 		@Override
@@ -31,8 +32,8 @@ public enum CivType {
 	},
 	AMERICA(TextureEnum.ICON_AMERICA) {
 		@Override
-		public Civ getCiv() {
-			return new America();
+		public Civ getCiv(Player player) {
+			return new America(player);
 		}
 
 		@Override
@@ -47,8 +48,8 @@ public enum CivType {
 	},
 	ENGLAND(TextureEnum.ICON_ENGLAND) {
 		@Override
-		public Civ getCiv() {
-			return new England();
+		public Civ getCiv(Player player) {
+			return new England(player);
 		}
 
 		@Override
@@ -63,8 +64,8 @@ public enum CivType {
 	},
 	GERMANY(TextureEnum.ICON_GERMANY) {
 		@Override
-		public Civ getCiv() {
-			return new Germany();
+		public Civ getCiv(Player player) {
+			return new Germany(player);
 		}
 
 		@Override
@@ -79,8 +80,8 @@ public enum CivType {
 	},
 	ROME(TextureEnum.ICON_ROME) {
 		@Override
-		public Civ getCiv() {
-			return new Rome();
+		public Civ getCiv(Player player) {
+			return new Rome(player);
 		}
 
 		@Override
@@ -100,7 +101,7 @@ public enum CivType {
 		icon = civIcon;
 	}
 
-	public abstract Civ getCiv();
+	public abstract Civ getCiv(Player player);
 
 	public TextureEnum getIcon() {
 		return icon;
