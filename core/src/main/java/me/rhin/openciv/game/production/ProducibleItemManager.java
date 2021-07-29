@@ -12,6 +12,7 @@ import me.rhin.openciv.game.city.City;
 import me.rhin.openciv.game.city.building.type.Granary;
 import me.rhin.openciv.game.city.building.type.GreatLibrary;
 import me.rhin.openciv.game.city.building.type.GreatPyramids;
+import me.rhin.openciv.game.city.building.type.HangingGardens;
 import me.rhin.openciv.game.city.building.type.Library;
 import me.rhin.openciv.game.city.building.type.Market;
 import me.rhin.openciv.game.city.building.type.Monument;
@@ -71,6 +72,7 @@ public class ProducibleItemManager {
 		// Wonders
 		possibleItems.put("Great Pyramids", new GreatPyramids(city));
 		possibleItems.put("Great Library", new GreatLibrary(city));
+		possibleItems.put("Hanging Gardens", new HangingGardens(city));
 
 		// FIXME: There should be a better way to do this than just checking if the
 		// player matches
