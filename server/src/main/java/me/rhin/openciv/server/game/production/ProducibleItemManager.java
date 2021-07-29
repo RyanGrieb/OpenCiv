@@ -20,6 +20,7 @@ import me.rhin.openciv.server.game.city.building.type.Walls;
 import me.rhin.openciv.server.game.city.building.type.WaterMill;
 import me.rhin.openciv.server.game.unit.type.Archer;
 import me.rhin.openciv.server.game.unit.type.Builder;
+import me.rhin.openciv.server.game.unit.type.ChariotArcher;
 import me.rhin.openciv.server.game.unit.type.Galley;
 import me.rhin.openciv.server.game.unit.type.Scout;
 import me.rhin.openciv.server.game.unit.type.Settler;
@@ -60,9 +61,7 @@ public class ProducibleItemManager implements NextTurnListener {
 		this.itemQueue = new LinkedList<>();
 		this.queueEnabled = false;
 
-		possibleItems.put("Granary", new Granary(city));
-		possibleItems.put("Monument", new Monument(city));
-		possibleItems.put("Market", new Market(city));
+		// Units
 		possibleItems.put("Warrior", new Warrior(city));
 		possibleItems.put("Settler", new Settler(city));
 		possibleItems.put("Scout", new Scout(city));
@@ -70,10 +69,17 @@ public class ProducibleItemManager implements NextTurnListener {
 		possibleItems.put("Builder", new Builder(city));
 		possibleItems.put("Work Boat", new WorkBoat(city));
 		possibleItems.put("Archer", new Archer(city));
+		possibleItems.put("Chariot Archer", new ChariotArcher(city));
+
+		// Buildings
+		possibleItems.put("Granary", new Granary(city));
+		possibleItems.put("Monument", new Monument(city));
+		possibleItems.put("Market", new Market(city));
 		possibleItems.put("Library", new Library(city));
 		possibleItems.put("Water Mill", new WaterMill(city));
 		possibleItems.put("Walls", new Walls(city));
-		
+
+		// Wonders
 		possibleItems.put("Great Pyramids", new GreatPyramids(city));
 		possibleItems.put("Great Library", new GreatLibrary(city));
 

@@ -20,6 +20,7 @@ import me.rhin.openciv.game.city.building.type.WaterMill;
 import me.rhin.openciv.game.notification.type.AvailableProductionNotification;
 import me.rhin.openciv.game.unit.type.Archer;
 import me.rhin.openciv.game.unit.type.Builder;
+import me.rhin.openciv.game.unit.type.ChariotArcher;
 import me.rhin.openciv.game.unit.type.Galley;
 import me.rhin.openciv.game.unit.type.Scout;
 import me.rhin.openciv.game.unit.type.Settler;
@@ -49,10 +50,7 @@ public class ProducibleItemManager {
 		this.itemQueue = new LinkedList<>();
 		this.queueEnabled = false;
 
-		// Buildings
-		possibleItems.put("Granary", new Granary(city));
-		possibleItems.put("Monument", new Monument(city));
-		possibleItems.put("Market", new Market(city));
+		// Units
 		possibleItems.put("Warrior", new Warrior(city));
 		possibleItems.put("Settler", new Settler(city));
 		possibleItems.put("Scout", new Scout(city));
@@ -60,6 +58,12 @@ public class ProducibleItemManager {
 		possibleItems.put("Builder", new Builder(city));
 		possibleItems.put("Work Boat", new WorkBoat(city));
 		possibleItems.put("Archer", new Archer(city));
+		possibleItems.put("Chariot Archer", new ChariotArcher(city));
+
+		// Buildings
+		possibleItems.put("Granary", new Granary(city));
+		possibleItems.put("Monument", new Monument(city));
+		possibleItems.put("Market", new Market(city));
 		possibleItems.put("Library", new Library(city));
 		possibleItems.put("Water Mill", new WaterMill(city));
 		possibleItems.put("Walls", new Walls(city));

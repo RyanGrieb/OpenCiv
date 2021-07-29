@@ -7,7 +7,6 @@ import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.map.tile.Tile;
 import me.rhin.openciv.game.map.tile.Tile.TileTypeWrapper;
 import me.rhin.openciv.game.map.tile.TileType;
-import me.rhin.openciv.game.unit.type.Archer.ArcherUnit;
 import me.rhin.openciv.listener.LeftClickListener;
 import me.rhin.openciv.listener.RelativeMouseMoveListener;
 import me.rhin.openciv.listener.RightClickListener;
@@ -139,7 +138,7 @@ public abstract class RangedUnit extends Unit
 		@Override
 		public boolean act(float delta) {
 
-			((ArcherUnit) unit).setTargeting(true);
+			((RangedUnit) unit).setTargeting(true);
 
 			boolean isHill = unit.getStandingTile().getBaseTileType() == TileType.GRASS_HILL
 					|| unit.getStandingTile().getBaseTileType() == TileType.DESERT_HILL
@@ -176,9 +175,9 @@ public abstract class RangedUnit extends Unit
 		@Override
 		public boolean canAct() {
 
-			ArcherUnit archerUnit = (ArcherUnit) unit;
+			RangedUnit rangedUnit = (RangedUnit) unit;
 
-			if (archerUnit.getCurrentMovement() < 1 || archerUnit.isTargeting()) {
+			if (rangedUnit.getCurrentMovement() < 1 || rangedUnit.isTargeting()) {
 				return false;
 			}
 
@@ -205,10 +204,10 @@ public abstract class RangedUnit extends Unit
 		@Override
 		public boolean act(float delta) {
 
-			ArcherUnit archerUnit = (ArcherUnit) unit;
+			RangedUnit rangedUnit = (RangedUnit) unit;
 
-			archerUnit.setTargeting(false);
-			archerUnit.setRangedTarget(null);
+			rangedUnit.setTargeting(false);
+			rangedUnit.setRangedTarget(null);
 
 			for (Tile tile : unit.getStandingTile().getAdjTiles()) {
 
@@ -231,7 +230,7 @@ public abstract class RangedUnit extends Unit
 
 		@Override
 		public boolean canAct() {
-			return ((ArcherUnit) unit).isTargeting();
+			return ((RangedUnit) unit).isTargeting();
 		}
 
 		@Override
