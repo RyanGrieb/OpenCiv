@@ -9,8 +9,7 @@ import me.rhin.openciv.server.game.heritage.Heritage;
 import me.rhin.openciv.server.game.map.tile.Tile;
 import me.rhin.openciv.server.game.production.ProductionItem;
 import me.rhin.openciv.server.game.unit.UnitItem;
-import me.rhin.openciv.server.game.unit.UnitItem.UnitItemType;
-import me.rhin.openciv.server.game.unit.type.Settler;
+import me.rhin.openciv.server.game.unit.UnitItem.UnitType;
 import me.rhin.openciv.server.listener.SettleCityListener;
 import me.rhin.openciv.shared.packet.type.SettleCityPacket;
 
@@ -43,7 +42,7 @@ public class SailingHeritage extends Heritage implements SettleCityListener {
 			for (ProductionItem item : city.getProducibleItemManager().getPossibleItems().values()) {
 				if (item instanceof UnitItem) {
 					UnitItem unitItem = (UnitItem) item;
-					if (unitItem.getUnitItemType() == UnitItemType.NAVAL) {
+					if (unitItem.getUnitItemType() == UnitType.NAVAL) {
 						item.setProductionModifier(-0.25F);
 					}
 				}
@@ -65,7 +64,7 @@ public class SailingHeritage extends Heritage implements SettleCityListener {
 		for (ProductionItem item : city.getProducibleItemManager().getPossibleItems().values()) {
 			if (item instanceof UnitItem) {
 				UnitItem unitItem = (UnitItem) item;
-				if (unitItem.getUnitItemType() == UnitItemType.NAVAL) {
+				if (unitItem.getUnitItemType() == UnitType.NAVAL) {
 					item.setProductionModifier(-0.25F);
 				}
 			}

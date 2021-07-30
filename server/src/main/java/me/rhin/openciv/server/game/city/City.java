@@ -219,7 +219,7 @@ public class City implements AttackableEntity, SpecialistContainer, NextTurnList
 	}
 
 	@Override
-	public int getCombatStrength() {
+	public int getCombatStrength(AttackableEntity targetEntity) {
 		return 8;
 	}
 
@@ -247,13 +247,13 @@ public class City implements AttackableEntity, SpecialistContainer, NextTurnList
 	public float getDamageTaken(AttackableEntity otherEntity, boolean entityDefending) {
 		// Note: we don't apply terrain modifiers for cities, yet?
 
-		float otherEntityCombatStrength = otherEntity.getCombatStrength();
+		float otherEntityCombatStrength = otherEntity.getCombatStrength(this);
 
 		if (otherEntity instanceof RangedUnit) {
 			otherEntityCombatStrength = ((RangedUnit) otherEntity).getRangedCombatStrength(this);
 		}
 
-		return (float) (30 * (Math.pow(1.041, otherEntityCombatStrength - getCombatStrength())));
+		return (float) (30 * (Math.pow(1.041, otherEntityCombatStrength - getCombatStrength(otherEntity))));
 	}
 
 	@Override
@@ -266,6 +266,10 @@ public class City implements AttackableEntity, SpecialistContainer, NextTurnList
 		// TODO: Maybe increase health regen when out of combat?
 	}
 
+	public int getBaseCombatStrength() {
+		return getCombatStrength(null);
+	}
+	
 	public int getMaxHealth() {
 		return 200;
 	}

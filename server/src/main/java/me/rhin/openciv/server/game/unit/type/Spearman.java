@@ -4,22 +4,20 @@ import me.rhin.openciv.server.game.Player;
 import me.rhin.openciv.server.game.city.City;
 import me.rhin.openciv.server.game.map.tile.Tile;
 import me.rhin.openciv.server.game.map.tile.TileType.TileProperty;
-import me.rhin.openciv.server.game.research.type.MathematicsTech;
 import me.rhin.openciv.server.game.unit.AttackableEntity;
-import me.rhin.openciv.server.game.unit.RangedUnit;
 import me.rhin.openciv.server.game.unit.Unit;
 import me.rhin.openciv.server.game.unit.UnitItem;
 import me.rhin.openciv.server.game.unit.UnitItem.UnitType;
 
-public class Catapult extends UnitItem {
+public class Spearman extends UnitItem {
 
-	public Catapult(City city) {
+	public Spearman(City city) {
 		super(city);
 	}
 
-	public static class CatapultUnit extends Unit implements RangedUnit {
+	public static class SpearmanUnit extends Unit {
 
-		public CatapultUnit(Player playerOwner, Tile standingTile) {
+		public SpearmanUnit(Player playerOwner, Tile standingTile) {
 			super(playerOwner, standingTile);
 		}
 
@@ -33,45 +31,44 @@ public class Catapult extends UnitItem {
 
 		@Override
 		public int getCombatStrength(AttackableEntity target) {
-			return 7;
+			if (target instanceof Unit) {
+				Unit targetUnit = (Unit) target;
+
+				if (targetUnit.getUnitType() == UnitType.MOUNTED) {
+					return (int) (22 * 1.5);
+				}
+			}
+			return 22;
 		}
 
 		@Override
-		public int getRangedCombatStrength(AttackableEntity target) {
-			if (target instanceof City) {
-				// FIXME: Support floats.
-				return (int) (7 * 1.75);
-			}
-			return 7;
-		}
-		@Override
 		public UnitType getUnitType() {
-			return UnitType.RANGED;
+			return UnitType.MELEE;
 		}
 	}
 
 	@Override
 	public float getUnitProductionCost() {
-		return 75;
+		return 56;
 	}
 
 	@Override
 	public float getGoldCost() {
-		return 200;
+		return 175;
 	}
 
 	@Override
 	public boolean meetsProductionRequirements() {
-		return city.getPlayerOwner().getResearchTree().hasResearched(MathematicsTech.class);
+		return true;
 	}
 
 	@Override
 	public String getName() {
-		return "Catapult";
+		return "Spearman";
 	}
 
 	@Override
 	public UnitType getUnitItemType() {
-		return UnitType.RANGED;
+		return UnitType.MELEE;
 	}
 }

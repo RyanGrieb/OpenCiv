@@ -12,6 +12,7 @@ import me.rhin.openciv.game.research.type.CalendarTech;
 import me.rhin.openciv.game.research.type.MiningTech;
 import me.rhin.openciv.game.research.type.WheelTech;
 import me.rhin.openciv.game.unit.AbstractAction;
+import me.rhin.openciv.game.unit.AttackableEntity;
 import me.rhin.openciv.game.unit.Unit;
 import me.rhin.openciv.game.unit.UnitItem;
 import me.rhin.openciv.game.unit.UnitParameter;
@@ -101,7 +102,7 @@ public class Builder extends UnitItem {
 		}
 
 		@Override
-		public int getCombatStrength() {
+		public int getCombatStrength(AttackableEntity targetEntity) {
 			return 0;
 		}
 

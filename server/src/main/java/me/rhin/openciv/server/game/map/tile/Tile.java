@@ -475,7 +475,7 @@ public class Tile {
 	public Unit getTopUnit() {
 		Unit topUnit = null;
 		for (Unit unit : units) {
-			if (topUnit == null || topUnit.getCombatStrength() < unit.getCombatStrength())
+			if (topUnit == null || topUnit.getBaseCombatStrength() < unit.getBaseCombatStrength())
 				topUnit = unit;
 		}
 
@@ -487,7 +487,7 @@ public class Tile {
 		for (Unit unit : units) {
 			if (unit.getPlayerOwner().equals(player))
 				continue;
-			if (topUnit == null || topUnit.getCombatStrength() < unit.getCombatStrength())
+			if (topUnit == null || topUnit.getBaseCombatStrength() < unit.getBaseCombatStrength())
 				topUnit = unit;
 		}
 

@@ -293,7 +293,7 @@ public class City extends Group implements AttackableEntity, TileObserver, Speci
 	}
 
 	@Override
-	public int getCombatStrength() {
+	public int getCombatStrength(AttackableEntity targetEntity) {
 		return combatStrength; // 5
 	}
 

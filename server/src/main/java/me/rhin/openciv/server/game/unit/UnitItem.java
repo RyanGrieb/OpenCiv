@@ -12,10 +12,11 @@ import me.rhin.openciv.shared.stat.StatValue;
 
 public abstract class UnitItem implements ProductionItem {
 
-	public static enum UnitItemType {
+	public static enum UnitType {
 		MELEE,
 		RANGED,
 		SUPPORT,
+		MOUNTED,
 		NAVAL;
 	}
 
@@ -29,7 +30,7 @@ public abstract class UnitItem implements ProductionItem {
 
 	public abstract float getUnitProductionCost();
 
-	public abstract UnitItemType getUnitItemType();
+	public abstract UnitType getUnitItemType();
 
 	@SuppressWarnings("unchecked")
 	@Override

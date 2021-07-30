@@ -31,7 +31,7 @@ public class Archer extends UnitItem {
 		}
 
 		@Override
-		public int getCombatStrength() {
+		public int getCombatStrength(AttackableEntity targetEntity) {
 			return 14;
 		}
 

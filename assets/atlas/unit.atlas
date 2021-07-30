@@ -41,7 +41,7 @@ unit_galley
   index: -1
 unit_scout
   rotate: false
-  xy: 206, 2
+  xy: 240, 2
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
@@ -53,16 +53,23 @@ unit_settler
   orig: 32, 32
   offset: 0, 0
   index: -1
+unit_spearman
+  rotate: false
+  xy: 206, 2
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
 unit_warrior
   rotate: false
-  xy: 240, 2
+  xy: 274, 2
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 unit_work_boat
   rotate: false
-  xy: 274, 2
+  xy: 308, 2
   size: 27, 32
   orig: 27, 32
   offset: 0, 0

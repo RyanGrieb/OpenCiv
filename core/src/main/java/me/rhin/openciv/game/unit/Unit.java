@@ -520,6 +520,10 @@ public abstract class Unit extends Actor
 		return false;
 	}
 
+	public int getCombatStrength() {
+		return getCombatStrength(null);
+	}
+
 	private Tile removeSmallest(ArrayList<Tile> queue, float fScore[][]) {
 		float smallest = Integer.MAX_VALUE;
 		Tile smallestTile = null;

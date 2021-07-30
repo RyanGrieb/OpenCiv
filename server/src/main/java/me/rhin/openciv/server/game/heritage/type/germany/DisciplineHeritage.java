@@ -9,7 +9,7 @@ import me.rhin.openciv.server.game.heritage.Heritage;
 import me.rhin.openciv.server.game.map.tile.Tile;
 import me.rhin.openciv.server.game.production.ProductionItem;
 import me.rhin.openciv.server.game.unit.UnitItem;
-import me.rhin.openciv.server.game.unit.UnitItem.UnitItemType;
+import me.rhin.openciv.server.game.unit.UnitItem.UnitType;
 import me.rhin.openciv.server.listener.SettleCityListener;
 import me.rhin.openciv.shared.packet.type.SettleCityPacket;
 
@@ -40,8 +40,8 @@ public class DisciplineHeritage extends Heritage implements SettleCityListener {
 			for (ProductionItem item : city.getProducibleItemManager().getPossibleItems().values()) {
 				if (item instanceof UnitItem) {
 					UnitItem unitItem = (UnitItem) item;
-					if (unitItem.getUnitItemType() == UnitItemType.MELEE
-							|| unitItem.getUnitItemType() == UnitItemType.RANGED) {
+					if (unitItem.getUnitItemType() == UnitType.MELEE
+							|| unitItem.getUnitItemType() == UnitType.RANGED) {
 						item.setProductionModifier(-0.1F);
 					}
 				}
@@ -63,8 +63,8 @@ public class DisciplineHeritage extends Heritage implements SettleCityListener {
 		for (ProductionItem item : city.getProducibleItemManager().getPossibleItems().values()) {
 			if (item instanceof UnitItem) {
 				UnitItem unitItem = (UnitItem) item;
-				if (unitItem.getUnitItemType() == UnitItemType.MELEE
-						|| unitItem.getUnitItemType() == UnitItemType.RANGED) {
+				if (unitItem.getUnitItemType() == UnitType.MELEE
+						|| unitItem.getUnitItemType() == UnitType.RANGED) {
 					item.setProductionModifier(-0.1F);
 				}
 			}

@@ -9,16 +9,16 @@ import me.rhin.openciv.game.unit.Unit;
 import me.rhin.openciv.game.unit.UnitItem;
 import me.rhin.openciv.game.unit.UnitParameter;
 
-public class Warrior extends UnitItem {
+public class Spearman extends UnitItem {
 
-	public Warrior(City city) {
+	public Spearman(City city) {
 		super(city);
 	}
 
-	public static class WarriorUnit extends Unit {
+	public static class SpearmanUnit extends Unit {
 
-		public WarriorUnit(UnitParameter unitParameter) {
-			super(unitParameter, TextureEnum.UNIT_WARRIOR);
+		public SpearmanUnit(UnitParameter unitParameter) {
+			super(unitParameter, TextureEnum.UNIT_SPEARMAN);
 			this.canAttack = true;
 		}
 
@@ -32,20 +32,21 @@ public class Warrior extends UnitItem {
 
 		@Override
 		public int getCombatStrength(AttackableEntity targetEntity) {
-			return 20;
+			// NOTE: We don't realllyy use combat strength here.
+			return 22;
 		}
 	}
 
 	@Override
 	protected float getUnitProductionCost() {
-		return 40;
+		return 56;
 	}
 
 	@Override
 	public float getGoldCost() {
-		return 100;
+		return 175;
 	}
-	
+
 	@Override
 	public boolean meetsProductionRequirements() {
 		return true;
@@ -53,17 +54,17 @@ public class Warrior extends UnitItem {
 
 	@Override
 	public String getName() {
-		return "Warrior";
+		return "Spearman";
 	}
 
 	@Override
 	public TextureEnum getTexture() {
-		return TextureEnum.UNIT_WARRIOR;
+		return TextureEnum.UNIT_SPEARMAN;
 	}
-	
+
 	@Override
 	public String getDesc() {
-		return "An ancient melee unit.";
+		return "An ancient disciplined melee unit. \n50% bonus towards mounted units.";
 	}
 
 	@Override

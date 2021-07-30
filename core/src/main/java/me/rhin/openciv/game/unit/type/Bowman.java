@@ -22,7 +22,7 @@ public class Bowman extends RangedUnit {
 	}
 
 	@Override
-	public int getCombatStrength() {
+	public int getCombatStrength(AttackableEntity targetEntity) {
 		return 14;
 	}
 

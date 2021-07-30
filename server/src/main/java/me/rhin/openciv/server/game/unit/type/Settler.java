@@ -4,9 +4,10 @@ import me.rhin.openciv.server.game.Player;
 import me.rhin.openciv.server.game.city.City;
 import me.rhin.openciv.server.game.map.tile.Tile;
 import me.rhin.openciv.server.game.map.tile.TileType.TileProperty;
+import me.rhin.openciv.server.game.unit.AttackableEntity;
 import me.rhin.openciv.server.game.unit.Unit;
 import me.rhin.openciv.server.game.unit.UnitItem;
-import me.rhin.openciv.server.game.unit.UnitItem.UnitItemType;
+import me.rhin.openciv.server.game.unit.UnitItem.UnitType;
 
 public class Settler extends UnitItem {
 
@@ -29,13 +30,18 @@ public class Settler extends UnitItem {
 		}
 
 		@Override
-		public int getCombatStrength() {
+		public int getCombatStrength(AttackableEntity target) {
 			return 0;
 		}
 
 		@Override
 		public boolean isUnitCapturable() {
 			return true;
+		}
+		
+		@Override
+		public UnitType getUnitType() {
+			return UnitType.SUPPORT;
 		}
 	}
 
@@ -60,7 +66,7 @@ public class Settler extends UnitItem {
 	}
 
 	@Override
-	public UnitItemType getUnitItemType() {
-		return UnitItemType.SUPPORT;
+	public UnitType getUnitItemType() {
+		return UnitType.SUPPORT;
 	}
 }

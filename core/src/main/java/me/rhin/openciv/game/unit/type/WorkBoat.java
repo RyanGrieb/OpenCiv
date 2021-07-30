@@ -5,6 +5,7 @@ import me.rhin.openciv.game.city.City;
 import me.rhin.openciv.game.map.tile.Tile;
 import me.rhin.openciv.game.map.tile.TileType.TileProperty;
 import me.rhin.openciv.game.research.type.SailingTech;
+import me.rhin.openciv.game.unit.AttackableEntity;
 import me.rhin.openciv.game.unit.Unit;
 import me.rhin.openciv.game.unit.UnitItem;
 import me.rhin.openciv.game.unit.UnitParameter;
@@ -31,7 +32,7 @@ public class WorkBoat extends UnitItem {
 		}
 
 		@Override
-		public int getCombatStrength() {
+		public int getCombatStrength(AttackableEntity targetEntity) {
 			return 0;
 		}
 	}

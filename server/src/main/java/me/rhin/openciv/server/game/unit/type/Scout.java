@@ -3,11 +3,11 @@ package me.rhin.openciv.server.game.unit.type;
 import me.rhin.openciv.server.game.Player;
 import me.rhin.openciv.server.game.city.City;
 import me.rhin.openciv.server.game.map.tile.Tile;
-import me.rhin.openciv.server.game.map.tile.TileType;
 import me.rhin.openciv.server.game.map.tile.TileType.TileProperty;
+import me.rhin.openciv.server.game.unit.AttackableEntity;
 import me.rhin.openciv.server.game.unit.Unit;
 import me.rhin.openciv.server.game.unit.UnitItem;
-import me.rhin.openciv.server.game.unit.UnitItem.UnitItemType;
+import me.rhin.openciv.server.game.unit.UnitItem.UnitType;
 
 public class Scout extends UnitItem {
 
@@ -37,8 +37,13 @@ public class Scout extends UnitItem {
 		}
 
 		@Override
-		public int getCombatStrength() {
+		public int getCombatStrength(AttackableEntity target) {
 			return 10;
+		}
+		
+		@Override
+		public UnitType getUnitType() {
+			return UnitType.MELEE;
 		}
 	}
 
@@ -46,7 +51,7 @@ public class Scout extends UnitItem {
 	public float getUnitProductionCost() {
 		return 25;
 	}
-	
+
 	@Override
 	public float getGoldCost() {
 		return 100;
@@ -56,14 +61,14 @@ public class Scout extends UnitItem {
 	public boolean meetsProductionRequirements() {
 		return true;
 	}
-	
+
 	@Override
 	public String getName() {
 		return "Scout";
 	}
-	
+
 	@Override
-	public UnitItemType getUnitItemType() {
-		return UnitItemType.MELEE;
+	public UnitType getUnitItemType() {
+		return UnitType.MELEE;
 	}
 }

@@ -7,7 +7,7 @@ import me.rhin.openciv.game.player.Player;
 
 public interface AttackableEntity {
 
-	public int getCombatStrength();
+	public int getCombatStrength(AttackableEntity targetEntity);
 
 	public boolean isUnitCapturable();
 

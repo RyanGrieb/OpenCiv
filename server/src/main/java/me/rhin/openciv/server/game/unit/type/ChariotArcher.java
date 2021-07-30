@@ -9,6 +9,7 @@ import me.rhin.openciv.server.game.unit.AttackableEntity;
 import me.rhin.openciv.server.game.unit.RangedUnit;
 import me.rhin.openciv.server.game.unit.Unit;
 import me.rhin.openciv.server.game.unit.UnitItem;
+import me.rhin.openciv.server.game.unit.UnitItem.UnitType;
 
 public class ChariotArcher extends UnitItem {
 
@@ -31,13 +32,18 @@ public class ChariotArcher extends UnitItem {
 		}
 
 		@Override
-		public int getCombatStrength() {
+		public int getCombatStrength(AttackableEntity target) {
 			return 17;
 		}
 
 		@Override
 		public int getRangedCombatStrength(AttackableEntity target) {
 			return 10;
+		}
+		
+		@Override
+		public UnitType getUnitType() {
+			return UnitType.MOUNTED; //FIXME: Allow multiple unit types?
 		}
 	}
 
@@ -62,7 +68,7 @@ public class ChariotArcher extends UnitItem {
 	}
 
 	@Override
-	public UnitItemType getUnitItemType() {
-		return UnitItemType.RANGED;
+	public UnitType getUnitItemType() {
+		return UnitType.RANGED;
 	}
 }

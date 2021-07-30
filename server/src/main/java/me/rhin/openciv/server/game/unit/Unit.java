@@ -9,6 +9,7 @@ import com.badlogic.gdx.utils.Json;
 import me.rhin.openciv.server.Server;
 import me.rhin.openciv.server.game.Player;
 import me.rhin.openciv.server.game.map.tile.Tile;
+import me.rhin.openciv.server.game.unit.UnitItem.UnitType;
 import me.rhin.openciv.server.listener.NextTurnListener;
 import me.rhin.openciv.shared.packet.type.SetUnitHealthPacket;
 
@@ -96,7 +97,7 @@ public abstract class Unit implements AttackableEntity, NextTurnListener {
 		// y=30*1.041^(x), x= combat diff
 
 		// FIXME: This code is not ideal, have separate mele & ranged classes for this
-		float otherEntityCombatStrength = otherEntity.getCombatStrength();
+		float otherEntityCombatStrength = otherEntity.getCombatStrength(this);
 		if (otherEntity instanceof RangedUnit)
 			otherEntityCombatStrength = ((RangedUnit) otherEntity).getRangedCombatStrength(this);
 
@@ -112,7 +113,8 @@ public abstract class Unit implements AttackableEntity, NextTurnListener {
 				}
 		}
 
-		return (float) (30 * (Math.pow(1.041, otherEntityCombatStrength - getCombatStrength()))) * tileCombatModifier;
+		return (float) (30 * (Math.pow(1.041, otherEntityCombatStrength - getCombatStrength(otherEntity))))
+				* tileCombatModifier;
 	}
 
 	@Override
@@ -135,13 +137,17 @@ public abstract class Unit implements AttackableEntity, NextTurnListener {
 		return health;
 	}
 
-	public void clearListeners() {
-		Server.getInstance().getEventManager().clearListenersFromObject(this);
+	public int getBaseCombatStrength() {
+		return getCombatStrength(null);
 	}
 
 	public abstract float getMovementCost(Tile prevTile, Tile adjTile);
 
-	public abstract int getCombatStrength();
+	public abstract UnitType getUnitType();
+
+	public void clearListeners() {
+		Server.getInstance().getEventManager().clearListenersFromObject(this);
+	}
 
 	public boolean setTargetTile(Tile targetTile) {
 		if (targetTile == null)

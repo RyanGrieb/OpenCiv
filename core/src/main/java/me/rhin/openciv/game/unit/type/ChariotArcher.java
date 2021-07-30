@@ -32,7 +32,7 @@ public class ChariotArcher extends UnitItem {
 		}
 
 		@Override
-		public int getCombatStrength() {
+		public int getCombatStrength(AttackableEntity targetEntity) {
 			return 17;
 		}
 

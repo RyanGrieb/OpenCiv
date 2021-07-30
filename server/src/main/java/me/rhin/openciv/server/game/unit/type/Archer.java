@@ -31,13 +31,18 @@ public class Archer extends UnitItem {
 		}
 
 		@Override
-		public int getCombatStrength() {
+		public int getCombatStrength(AttackableEntity target) {
 			return 14;
 		}
 
 		@Override
 		public int getRangedCombatStrength(AttackableEntity target) {
 			return 7;
+		}
+
+		@Override
+		public UnitType getUnitType() {
+			return UnitType.RANGED;
 		}
 	}
 
@@ -62,7 +67,7 @@ public class Archer extends UnitItem {
 	}
 
 	@Override
-	public UnitItemType getUnitItemType() {
-		return UnitItemType.RANGED;
+	public UnitType getUnitItemType() {
+		return UnitType.RANGED;
 	}
 }

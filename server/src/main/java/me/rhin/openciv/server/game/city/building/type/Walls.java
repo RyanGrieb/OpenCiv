@@ -23,7 +23,7 @@ public class Walls extends Building {
 
 		SetCityHealthPacket cityHealthPacket = new SetCityHealthPacket();
 		cityHealthPacket.setCity(city.getName(), city.getHealth(), city.getMaxHealth() + 50,
-				city.getCombatStrength() + 5);
+				city.getBaseCombatStrength() + 5);
 
 		for (Player player : Server.getInstance().getPlayers()) {
 			player.getConn().send(json.toJson(cityHealthPacket));

@@ -5,9 +5,10 @@ import me.rhin.openciv.server.game.city.City;
 import me.rhin.openciv.server.game.map.tile.Tile;
 import me.rhin.openciv.server.game.map.tile.TileType.TileProperty;
 import me.rhin.openciv.server.game.research.type.SailingTech;
+import me.rhin.openciv.server.game.unit.AttackableEntity;
 import me.rhin.openciv.server.game.unit.Unit;
 import me.rhin.openciv.server.game.unit.UnitItem;
-import me.rhin.openciv.server.game.unit.UnitItem.UnitItemType;
+import me.rhin.openciv.server.game.unit.UnitItem.UnitType;
 
 public class WorkBoat extends UnitItem {
 
@@ -30,8 +31,13 @@ public class WorkBoat extends UnitItem {
 		}
 
 		@Override
-		public int getCombatStrength() {
+		public int getCombatStrength(AttackableEntity target) {
 			return 30;
+		}
+		
+		@Override
+		public UnitType getUnitType() {
+			return UnitType.NAVAL;
 		}
 	}
 
@@ -56,7 +62,7 @@ public class WorkBoat extends UnitItem {
 	}
 
 	@Override
-	public UnitItemType getUnitItemType() {
-		return UnitItemType.SUPPORT;
+	public UnitType getUnitItemType() {
+		return UnitType.SUPPORT;
 	}
 }
