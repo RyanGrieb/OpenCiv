@@ -10,15 +10,16 @@ import com.badlogic.gdx.utils.Align;
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.game.heritage.Heritage;
 import me.rhin.openciv.listener.PickHeritageListener;
+import me.rhin.openciv.listener.ResizeListener;
 import me.rhin.openciv.listener.TopShapeRenderListener;
 import me.rhin.openciv.ui.background.BlankBackground;
 import me.rhin.openciv.ui.button.type.CloseWindowButton;
 import me.rhin.openciv.ui.game.HeritageLeaf;
-import me.rhin.openciv.ui.game.TechnologyLeaf;
 import me.rhin.openciv.ui.label.CustomLabel;
 import me.rhin.openciv.ui.window.AbstractWindow;
 
-public class HeritageWindow extends AbstractWindow implements TopShapeRenderListener, PickHeritageListener {
+public class HeritageWindow extends AbstractWindow
+		implements ResizeListener, TopShapeRenderListener, PickHeritageListener {
 
 	// TODO: Sort by level
 	private ArrayList<HeritageLeaf> heritageLeafs;
@@ -49,8 +50,19 @@ public class HeritageWindow extends AbstractWindow implements TopShapeRenderList
 				35, 150, 45);
 		addActor(closeWindowButton);
 
+		Civilization.getInstance().getEventManager().addListener(ResizeListener.class, this);
 		Civilization.getInstance().getEventManager().addListener(TopShapeRenderListener.class, this);
 		Civilization.getInstance().getEventManager().addListener(PickHeritageListener.class, this);
+	}
+
+	@Override
+	public void onResize(int width, int height) {
+		super.setSize(width, height);
+		blankBackground.setSize(width, height);
+		heritageDescLabel.setBounds(0, height - 25, width, 15);
+		closeWindowButton.setPosition(width / 2 - closeWindowButton.getWidth() / 2, closeWindowButton.getHeight());
+
+		updateLeafPositions(width, height);
 	}
 
 	@Override
@@ -123,16 +135,27 @@ public class HeritageWindow extends AbstractWindow implements TopShapeRenderList
 
 		float y = getHeight() - height - 50;
 
+		HeritageLeaf heritageLeaf = new HeritageLeaf(heritage, x, y, width, height);
+		heritageLeafs.add(heritageLeaf);
+		Collections.sort(heritageLeafs);
+
+		updateLeafPositions(viewport.getWorldWidth(), viewport.getWorldHeight());
+	}
+
+	private void updateLeafPositions(float worldWidth, float worldHeight) {
+		float width = 210;
+		float height = 45;
+
+		float x = 25;
+
+		float y = worldHeight - height - 50;
+
 		for (HeritageLeaf leaf : heritageLeafs) {
 			if (leaf.getStage() != null) {
 				removeActor(leaf);
 				// actor.addAction(Actions.removeActor());
 			}
 		}
-
-		HeritageLeaf heritageLeaf = new HeritageLeaf(heritage, x, y, width, height);
-		heritageLeafs.add(heritageLeaf);
-		Collections.sort(heritageLeafs);
 
 		// Base position based off ourselfs and the previous leaf
 		for (int i = 0; i < heritageLeafs.size(); i++) {
