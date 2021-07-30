@@ -62,14 +62,14 @@ public class ContainerList extends Group implements ScrollListener {
 		this.addListener(new ClickListener() {
 			@Override
 			public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
-				//if (thisContainer != null)
-				//	thisContainer.getStage().setScrollFocus(thisContainer);
+				// if (thisContainer != null)
+				// thisContainer.getStage().setScrollFocus(thisContainer);
 			}
 
 			@Override
 			public void exit(InputEvent event, float x, float y, int pointer, Actor fromActor) {
-				//if (thisContainer != null)
-				//	thisContainer.getStage().setScrollFocus(null);
+				// if (thisContainer != null)
+				// thisContainer.getStage().setScrollFocus(null);
 			}
 		});
 
@@ -158,6 +158,22 @@ public class ContainerList extends Group implements ScrollListener {
 		}
 
 		yOffset = yAmount;
+
+		// Update scrollbar to relevant position
+		// System.out.println(yOffset);
+		// 0 -> top
+		// maxHeight - getHeight() -> bottom
+
+		float offset = yOffset / (maxHeight - getHeight());
+
+		// Scrollbar top -> getY() + getHeight() - scrollbarHeight()
+		// Scrollbar bottom - >getY()
+
+		float scrollbarY = getY() + ((getHeight() - containerScrollbar.getScrubberHeight())
+				- (((getHeight() - containerScrollbar.getScrubberHeight()) * offset)));
+
+		containerScrollbar.setScrubberY(scrollbarY);
+
 		updatePositions();
 	}
 
@@ -181,13 +197,10 @@ public class ContainerList extends Group implements ScrollListener {
 	public void updatePositions() {
 		float nextHeight = 0;
 
-		// Problem:
 		for (ListContainer container : listContainers.values()) {
 			container.setPosition(0, yOffset + (0 + getHeight()) - container.getHeight() - nextHeight);
 			nextHeight += container.getHeight();
 		}
-
-		containerScrollbar.setNextHeight(nextHeight);
 	}
 
 	public void clearList() {

@@ -31,7 +31,7 @@ public class ContainerScrollbar extends Actor implements ScrollListener {
 		backgroundSprite.setBounds(x, y, width, height);
 
 		scrubber = TextureEnum.UI_BLACK.sprite();
-		scrubber.setBounds(x, y, width, height);
+		scrubber.setBounds(x, y + getHeight() - 55, width, 55);
 		this.originY = y;
 		this.prevMouseY = -1;
 
@@ -48,12 +48,12 @@ public class ContainerScrollbar extends Actor implements ScrollListener {
 		this.addListener(new ClickListener() {
 			@Override
 			public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
-				//thisContainer.getStage().setScrollFocus(thisContainer);
+				// thisContainer.getStage().setScrollFocus(thisContainer);
 			}
 
 			@Override
 			public void exit(InputEvent event, float x, float y, int pointer, Actor fromActor) {
-				//thisContainer.getStage().setScrollFocus(null);
+				// thisContainer.getStage().setScrollFocus(null);
 			}
 
 			@Override
@@ -67,27 +67,44 @@ public class ContainerScrollbar extends Actor implements ScrollListener {
 						if (prevMouseY == -1)
 							prevMouseY = event.getStageY();
 
-						float scrubAmount = (event.getStageY() - prevMouseY);
+						float maxHeight = 0;
+						for (ListContainer container : containerList.getListContainers().values()) {
+							maxHeight += container.getHeight();
+						}
 
-						// Contain the scrubber within the bounds
-						if (scrubAmount < 0 && scrubber.getY() < containerList.getY()) {
+						if (containerList.getHeight() > maxHeight)
+							return;
+
+						float dist = ((containerList.getY() + containerList.getHeight() - scrubber.getHeight())
+								- scrubber.getY()) / (containerList.getHeight() - scrubber.getHeight());
+
+						float offset = (maxHeight - (containerList.getHeight())) * dist;
+
+						float scrubberY = event.getStageY() - scrubber.getHeight() / 2;
+
+						if (scrubberY < containerList.getY()) {
 							prevMouseY = -1;
+							scrubber.setPosition(scrubber.getX(), containerList.getY());
+							containerList.setYOffset(maxHeight - containerList.getHeight());
+							containerList.updatePositions();
 							return;
 						}
 
-						if (scrubAmount > 0 && scrubber.getY() + scrubber.getHeight() > containerList.getY()
-								+ containerList.getHeight()) {
+						if (scrubberY + scrubber.getHeight() > containerList.getY() + containerList.getHeight()) {
 							prevMouseY = -1;
+							scrubber.setPosition(scrubber.getX(),
+									containerList.getY() + containerList.getHeight() - scrubber.getHeight());
+
+							containerList.setYOffset(0);
+							containerList.updatePositions();
 							return;
 						}
-
-						// If our scrub amount exceeds our container, clamp the offset to our bounds.
-						float offset = MathHelper.clamp(containerList.getYOffset() - scrubAmount, containerList.getY(),
-								containerList.getY() + (containerList.getHeight() - scrubber.getHeight()));
 
 						containerList.setYOffset(offset);
 						containerList.updatePositions();
 						prevMouseY = event.getStageY();
+
+						scrubber.setPosition(scrubber.getX(), scrubberY);
 					}
 			}
 
@@ -105,15 +122,13 @@ public class ContainerScrollbar extends Actor implements ScrollListener {
 	@Override
 	public void draw(Batch batch, float parentAlpha) {
 		backgroundSprite.draw(batch);
-
-		if (nextHeight > containerList.getHeight())
-			scrubber.draw(batch);
+		scrubber.draw(batch);
 	}
 
 	@Override
 	public void setPosition(float x, float y) {
 		backgroundSprite.setPosition(x, y);
-		scrubber.setPosition(x, y);
+		scrubber.setPosition(x, y + getHeight() - scrubber.getHeight());
 	}
 
 	@Override
@@ -134,11 +149,21 @@ public class ContainerScrollbar extends Actor implements ScrollListener {
 		Civilization.getInstance().getEventManager().clearListenersFromObject(this);
 	}
 
+	public void setScrubberY(float y) {
+		scrubber.setY(y);
+	}
+
+	public float getScrubberHeight() {
+		return scrubber.getHeight();
+	}
+	
+	@Deprecated
 	public void setNextHeight(float nextHeight) {
+
+		float heightDiff = nextHeight - containerList.getHeight();
 		this.nextHeight = nextHeight;
 
 		if (nextHeight > containerList.getHeight()) {
-			float heightDiff = nextHeight - containerList.getHeight();
 			scrubber.setBounds(scrubber.getX(), originY + heightDiff - containerList.getYOffset(), scrubber.getWidth(),
 					containerList.getHeight() - heightDiff);
 		}
