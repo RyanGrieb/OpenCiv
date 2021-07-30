@@ -25,6 +25,7 @@ import me.rhin.openciv.server.game.map.tile.Tile;
 import me.rhin.openciv.server.game.map.tile.TileType.TileProperty;
 import me.rhin.openciv.server.game.production.ProducibleItemManager;
 import me.rhin.openciv.server.game.unit.AttackableEntity;
+import me.rhin.openciv.server.game.unit.RangedUnit;
 import me.rhin.openciv.server.listener.CityGrowthListener.CityGrowthEvent;
 import me.rhin.openciv.server.listener.CityStarveListener.CityStarveEvent;
 import me.rhin.openciv.server.listener.NextTurnListener;
@@ -245,7 +246,14 @@ public class City implements AttackableEntity, SpecialistContainer, NextTurnList
 	@Override
 	public float getDamageTaken(AttackableEntity otherEntity, boolean entityDefending) {
 		// Note: we don't apply terrain modifiers for cities, yet?
-		return (float) (30 * (Math.pow(1.041, otherEntity.getCombatStrength() - getCombatStrength())));
+
+		float otherEntityCombatStrength = otherEntity.getCombatStrength();
+
+		if (otherEntity instanceof RangedUnit) {
+			otherEntityCombatStrength = ((RangedUnit) otherEntity).getRangedCombatStrength(this);
+		}
+
+		return (float) (30 * (Math.pow(1.041, otherEntityCombatStrength - getCombatStrength())));
 	}
 
 	@Override

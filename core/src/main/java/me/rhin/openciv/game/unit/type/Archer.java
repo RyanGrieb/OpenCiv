@@ -5,6 +5,7 @@ import me.rhin.openciv.game.city.City;
 import me.rhin.openciv.game.map.tile.Tile;
 import me.rhin.openciv.game.map.tile.TileType.TileProperty;
 import me.rhin.openciv.game.research.type.ArcheryTech;
+import me.rhin.openciv.game.unit.AttackableEntity;
 import me.rhin.openciv.game.unit.RangedUnit;
 import me.rhin.openciv.game.unit.UnitItem;
 import me.rhin.openciv.game.unit.UnitParameter;
@@ -35,7 +36,7 @@ public class Archer extends UnitItem {
 		}
 
 		@Override
-		public int getRangedCombatStrength() {
+		public int getRangedCombatStrength(AttackableEntity target) {
 			return 7;
 		}
 	}

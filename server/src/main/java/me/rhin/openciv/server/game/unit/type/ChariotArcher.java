@@ -5,6 +5,7 @@ import me.rhin.openciv.server.game.city.City;
 import me.rhin.openciv.server.game.map.tile.Tile;
 import me.rhin.openciv.server.game.map.tile.TileType.TileProperty;
 import me.rhin.openciv.server.game.research.type.WheelTech;
+import me.rhin.openciv.server.game.unit.AttackableEntity;
 import me.rhin.openciv.server.game.unit.RangedUnit;
 import me.rhin.openciv.server.game.unit.Unit;
 import me.rhin.openciv.server.game.unit.UnitItem;
@@ -35,7 +36,7 @@ public class ChariotArcher extends UnitItem {
 		}
 
 		@Override
-		public int getRangedCombatStrength() {
+		public int getRangedCombatStrength(AttackableEntity target) {
 			return 10;
 		}
 	}

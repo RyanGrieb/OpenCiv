@@ -98,7 +98,7 @@ public abstract class Unit implements AttackableEntity, NextTurnListener {
 		// FIXME: This code is not ideal, have separate mele & ranged classes for this
 		float otherEntityCombatStrength = otherEntity.getCombatStrength();
 		if (otherEntity instanceof RangedUnit)
-			otherEntityCombatStrength = ((RangedUnit) otherEntity).getRangedCombatStrength();
+			otherEntityCombatStrength = ((RangedUnit) otherEntity).getRangedCombatStrength(this);
 
 		float tileCombatModifier = entityDefending ? standingTile.getCombatModifier() : 1;
 

@@ -4,21 +4,21 @@ import me.rhin.openciv.server.game.Player;
 import me.rhin.openciv.server.game.city.City;
 import me.rhin.openciv.server.game.map.tile.Tile;
 import me.rhin.openciv.server.game.map.tile.TileType.TileProperty;
-import me.rhin.openciv.server.game.research.type.ArcheryTech;
+import me.rhin.openciv.server.game.research.type.MathematicsTech;
 import me.rhin.openciv.server.game.unit.AttackableEntity;
 import me.rhin.openciv.server.game.unit.RangedUnit;
 import me.rhin.openciv.server.game.unit.Unit;
 import me.rhin.openciv.server.game.unit.UnitItem;
 
-public class Archer extends UnitItem {
+public class Catapult extends UnitItem {
 
-	public Archer(City city) {
+	public Catapult(City city) {
 		super(city);
 	}
 
-	public static class ArcherUnit extends Unit implements RangedUnit {
+	public static class CatapultUnit extends Unit implements RangedUnit {
 
-		public ArcherUnit(Player playerOwner, Tile standingTile) {
+		public CatapultUnit(Player playerOwner, Tile standingTile) {
 			super(playerOwner, standingTile);
 		}
 
@@ -32,33 +32,37 @@ public class Archer extends UnitItem {
 
 		@Override
 		public int getCombatStrength() {
-			return 14;
+			return 7;
 		}
 
 		@Override
 		public int getRangedCombatStrength(AttackableEntity target) {
+			if (target instanceof City) {
+				// FIXME: Support floats.
+				return (int) (7 * 1.75);
+			}
 			return 7;
 		}
 	}
 
 	@Override
 	public float getUnitProductionCost() {
-		return 40;
+		return 75;
 	}
 
 	@Override
 	public float getGoldCost() {
-		return 100;
+		return 200;
 	}
 
 	@Override
 	public boolean meetsProductionRequirements() {
-		return city.getPlayerOwner().getResearchTree().hasResearched(ArcheryTech.class);
+		return city.getPlayerOwner().getResearchTree().hasResearched(MathematicsTech.class);
 	}
 
 	@Override
 	public String getName() {
-		return "Archer";
+		return "Catapult";
 	}
 
 	@Override

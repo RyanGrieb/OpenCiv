@@ -2,6 +2,6 @@ package me.rhin.openciv.server.game.unit;
 
 public interface RangedUnit {
 
-	public int getRangedCombatStrength();
+	public int getRangedCombatStrength(AttackableEntity target);
 
 }
