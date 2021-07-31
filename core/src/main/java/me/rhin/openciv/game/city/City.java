@@ -69,7 +69,6 @@ public class City extends Group implements AttackableEntity, TileObserver, Speci
 	private Healthbar healthbar;
 	private float health;
 	private float maxHealth;
-	private int combatStrength;
 
 	public City(Tile originTile, Player playerOwner, String name) {
 		setName(name);
@@ -94,7 +93,6 @@ public class City extends Group implements AttackableEntity, TileObserver, Speci
 				4, false);
 
 		this.maxHealth = 200; // Default
-		this.combatStrength = 5; // Default
 		this.health = getMaxHealth();
 
 		// FIXME: The actor size & position really shouldn't be confined to the label.
@@ -293,11 +291,6 @@ public class City extends Group implements AttackableEntity, TileObserver, Speci
 	}
 
 	@Override
-	public int getCombatStrength(AttackableEntity targetEntity) {
-		return combatStrength; // 5
-	}
-
-	@Override
 	public boolean isUnitCapturable() {
 		return false;
 	}
@@ -317,11 +310,6 @@ public class City extends Group implements AttackableEntity, TileObserver, Speci
 		this.maxHealth = maxHealth;
 
 		this.healthbar.setHealth(getMaxHealth(), health);
-	}
-
-	@Override
-	public void setCombatStrength(int combatStrength) {
-		this.combatStrength = combatStrength;
 	}
 
 	@Override

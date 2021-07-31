@@ -289,7 +289,7 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 
 				// FIXME: Should be a better way to implement this
 				if (packet.getMaxHealth() != -1 && packet.getCombatStrength() != -1) {
-					city.setCombatStrength(packet.getCombatStrength());
+					//city.setCombatStrength(packet.getCombatStrength());
 					city.setMaxHealth(packet.getMaxHealth());
 				}
 

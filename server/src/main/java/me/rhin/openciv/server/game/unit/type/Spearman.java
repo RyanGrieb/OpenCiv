@@ -1,5 +1,8 @@
 package me.rhin.openciv.server.game.unit.type;
 
+import java.util.Arrays;
+import java.util.List;
+
 import me.rhin.openciv.server.game.Player;
 import me.rhin.openciv.server.game.city.City;
 import me.rhin.openciv.server.game.map.tile.Tile;
@@ -35,7 +38,7 @@ public class Spearman extends UnitItem {
 			if (target instanceof Unit) {
 				Unit targetUnit = (Unit) target;
 
-				if (targetUnit.getUnitType() == UnitType.MOUNTED) {
+				if (targetUnit.getUnitTypes().contains(UnitType.MOUNTED)) {
 					return (int) (22 * 1.5);
 				}
 			}
@@ -43,8 +46,8 @@ public class Spearman extends UnitItem {
 		}
 
 		@Override
-		public UnitType getUnitType() {
-			return UnitType.MELEE;
+		public List<UnitType> getUnitTypes() {
+			return Arrays.asList(UnitType.MELEE);
 		}
 	}
 
@@ -69,7 +72,7 @@ public class Spearman extends UnitItem {
 	}
 
 	@Override
-	public UnitType getUnitItemType() {
-		return UnitType.MELEE;
+	public List<UnitType> getUnitItemTypes() {
+		return Arrays.asList(UnitType.MELEE);
 	}
 }

@@ -1,5 +1,8 @@
 package me.rhin.openciv.game.unit.type;
 
+import java.util.Arrays;
+import java.util.List;
+
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.city.City;
 import me.rhin.openciv.game.map.tile.Tile;
@@ -9,6 +12,7 @@ import me.rhin.openciv.game.unit.AttackableEntity;
 import me.rhin.openciv.game.unit.Unit;
 import me.rhin.openciv.game.unit.UnitItem;
 import me.rhin.openciv.game.unit.UnitParameter;
+import me.rhin.openciv.game.unit.UnitItem.UnitType;
 
 public class Galley extends UnitItem {
 
@@ -29,10 +33,10 @@ public class Galley extends UnitItem {
 			else
 				return tile.getMovementCost(prevTile);
 		}
-
+		
 		@Override
-		public int getCombatStrength(AttackableEntity targetEntity) {
-			return 30;
+		public List<UnitType> getUnitTypes() {
+			return Arrays.asList(UnitType.NAVAL, UnitType.MELEE);
 		}
 	}
 
@@ -67,7 +71,7 @@ public class Galley extends UnitItem {
 	}
 
 	@Override
-	public UnitItemType getUnitItemType() {
-		return UnitItemType.NAVAL;
+	public List<UnitType> getUnitItemTypes() {
+		return Arrays.asList(UnitType.NAVAL, UnitType.MELEE);
 	}
 }

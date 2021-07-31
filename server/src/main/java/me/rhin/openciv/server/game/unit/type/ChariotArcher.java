@@ -1,5 +1,8 @@
 package me.rhin.openciv.server.game.unit.type;
 
+import java.util.Arrays;
+import java.util.List;
+
 import me.rhin.openciv.server.game.Player;
 import me.rhin.openciv.server.game.city.City;
 import me.rhin.openciv.server.game.map.tile.Tile;
@@ -40,10 +43,10 @@ public class ChariotArcher extends UnitItem {
 		public int getRangedCombatStrength(AttackableEntity target) {
 			return 10;
 		}
-		
+
 		@Override
-		public UnitType getUnitType() {
-			return UnitType.MOUNTED; //FIXME: Allow multiple unit types?
+		public List<UnitType> getUnitTypes() {
+			return Arrays.asList(UnitType.RANGED, UnitType.MOUNTED);
 		}
 	}
 
@@ -68,7 +71,7 @@ public class ChariotArcher extends UnitItem {
 	}
 
 	@Override
-	public UnitType getUnitItemType() {
-		return UnitType.RANGED;
+	public List<UnitType> getUnitItemTypes() {
+		return Arrays.asList(UnitType.RANGED, UnitType.MOUNTED);
 	}
 }

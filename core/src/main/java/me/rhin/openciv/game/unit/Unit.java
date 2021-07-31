@@ -2,6 +2,7 @@ package me.rhin.openciv.game.unit;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
@@ -20,6 +21,7 @@ import me.rhin.openciv.game.map.tile.Tile;
 import me.rhin.openciv.game.map.tile.TileObserver;
 import me.rhin.openciv.game.notification.type.AvailableMovementNotification;
 import me.rhin.openciv.game.player.Player;
+import me.rhin.openciv.game.unit.UnitItem.UnitType;
 import me.rhin.openciv.listener.BottomShapeRenderListener;
 import me.rhin.openciv.listener.NextTurnListener;
 import me.rhin.openciv.listener.UnitActListener.UnitActEvent;
@@ -121,6 +123,8 @@ public abstract class Unit extends Actor
 	}
 
 	public abstract float getMovementCost(Tile prevTile, Tile adjTile);
+	
+	public abstract List<UnitType> getUnitTypes();
 
 	@Override
 	public void act(float delta) {
@@ -500,10 +504,6 @@ public abstract class Unit extends Actor
 	public void setMaxHealth(float health) {
 	}
 
-	@Override
-	public void setCombatStrength(int combatStrength) {
-	}
-
 	public void setHealth(float health) {
 
 		if (health <= 0)
@@ -518,10 +518,6 @@ public abstract class Unit extends Actor
 
 	public boolean hasRangedTarget() {
 		return false;
-	}
-
-	public int getCombatStrength() {
-		return getCombatStrength(null);
 	}
 
 	private Tile removeSmallest(ArrayList<Tile> queue, float fScore[][]) {

@@ -2,6 +2,7 @@ package me.rhin.openciv.server.game.unit;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Json;
@@ -44,6 +45,10 @@ public abstract class Unit implements AttackableEntity, NextTurnListener {
 
 		Server.getInstance().getEventManager().addListener(NextTurnListener.class, this);
 	}
+
+	public abstract float getMovementCost(Tile prevTile, Tile adjTile);
+
+	public abstract List<UnitType> getUnitTypes();
 
 	@Override
 	public void onNextTurn() {
@@ -140,10 +145,6 @@ public abstract class Unit implements AttackableEntity, NextTurnListener {
 	public int getBaseCombatStrength() {
 		return getCombatStrength(null);
 	}
-
-	public abstract float getMovementCost(Tile prevTile, Tile adjTile);
-
-	public abstract UnitType getUnitType();
 
 	public void clearListeners() {
 		Server.getInstance().getEventManager().clearListenersFromObject(this);

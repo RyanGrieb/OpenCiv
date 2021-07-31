@@ -19,6 +19,7 @@ import me.rhin.openciv.server.game.map.tile.TileType.TileProperty;
 import me.rhin.openciv.server.game.map.tile.improvement.TileImprovement;
 import me.rhin.openciv.server.game.unit.AttackableEntity;
 import me.rhin.openciv.server.game.unit.Unit;
+import me.rhin.openciv.server.game.unit.UnitItem.UnitType;
 import me.rhin.openciv.shared.packet.type.WorkTilePacket;
 import me.rhin.openciv.shared.stat.StatLine;
 
@@ -475,7 +476,8 @@ public class Tile {
 	public Unit getTopUnit() {
 		Unit topUnit = null;
 		for (Unit unit : units) {
-			if (topUnit == null || topUnit.getBaseCombatStrength() < unit.getBaseCombatStrength())
+			if (topUnit == null || (topUnit.getUnitTypes().contains(UnitType.SUPPORT)
+					&& !unit.getUnitTypes().contains(UnitType.SUPPORT)))
 				topUnit = unit;
 		}
 
@@ -487,7 +489,8 @@ public class Tile {
 		for (Unit unit : units) {
 			if (unit.getPlayerOwner().equals(player))
 				continue;
-			if (topUnit == null || topUnit.getBaseCombatStrength() < unit.getBaseCombatStrength())
+			if (topUnit == null || (topUnit.getUnitTypes().contains(UnitType.SUPPORT)
+					&& !unit.getUnitTypes().contains(UnitType.SUPPORT)))
 				topUnit = unit;
 		}
 

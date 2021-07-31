@@ -42,7 +42,7 @@ public class SailingHeritage extends Heritage implements SettleCityListener {
 			for (ProductionItem item : city.getProducibleItemManager().getPossibleItems().values()) {
 				if (item instanceof UnitItem) {
 					UnitItem unitItem = (UnitItem) item;
-					if (unitItem.getUnitItemType() == UnitType.NAVAL) {
+					if (unitItem.getUnitItemTypes().contains(UnitType.NAVAL)) {
 						item.setProductionModifier(-0.25F);
 					}
 				}
@@ -64,7 +64,7 @@ public class SailingHeritage extends Heritage implements SettleCityListener {
 		for (ProductionItem item : city.getProducibleItemManager().getPossibleItems().values()) {
 			if (item instanceof UnitItem) {
 				UnitItem unitItem = (UnitItem) item;
-				if (unitItem.getUnitItemType() == UnitType.NAVAL) {
+				if (unitItem.getUnitItemTypes().contains(UnitType.NAVAL)) {
 					item.setProductionModifier(-0.25F);
 				}
 			}

@@ -1,16 +1,18 @@
 package me.rhin.openciv.game.unit;
 
+import java.util.List;
+
 import me.rhin.openciv.game.city.City;
 import me.rhin.openciv.game.production.ProductionItem;
-import me.rhin.openciv.shared.stat.Stat;
 import me.rhin.openciv.shared.stat.StatValue;
 
 public abstract class UnitItem implements ProductionItem {
 
-	public static enum UnitItemType {
+	public static enum UnitType {
 		MELEE,
 		RANGED,
 		SUPPORT,
+		MOUNTED,
 		NAVAL;
 	}
 
@@ -22,7 +24,7 @@ public abstract class UnitItem implements ProductionItem {
 		this.productionModifier = 0;
 	}
 
-	public abstract UnitItemType getUnitItemType();
+	public abstract List<UnitType> getUnitItemTypes();
 
 	protected abstract float getUnitProductionCost();
 

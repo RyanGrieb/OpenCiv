@@ -1,5 +1,7 @@
 package me.rhin.openciv.server.game.unit;
 
+import java.util.List;
+
 import com.badlogic.gdx.utils.Json;
 
 import me.rhin.openciv.server.Server;
@@ -30,7 +32,7 @@ public abstract class UnitItem implements ProductionItem {
 
 	public abstract float getUnitProductionCost();
 
-	public abstract UnitType getUnitItemType();
+	public abstract List<UnitType> getUnitItemTypes();
 
 	@SuppressWarnings("unchecked")
 	@Override

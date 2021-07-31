@@ -1,5 +1,8 @@
 package me.rhin.openciv.server.game.unit.type;
 
+import java.util.Arrays;
+import java.util.List;
+
 import me.rhin.openciv.server.game.Player;
 import me.rhin.openciv.server.game.city.City;
 import me.rhin.openciv.server.game.map.tile.Tile;
@@ -34,10 +37,10 @@ public class WorkBoat extends UnitItem {
 		public int getCombatStrength(AttackableEntity target) {
 			return 30;
 		}
-		
+
 		@Override
-		public UnitType getUnitType() {
-			return UnitType.NAVAL;
+		public List<UnitType> getUnitTypes() {
+			return Arrays.asList(UnitType.SUPPORT, UnitType.NAVAL);
 		}
 	}
 
@@ -62,7 +65,7 @@ public class WorkBoat extends UnitItem {
 	}
 
 	@Override
-	public UnitType getUnitItemType() {
-		return UnitType.SUPPORT;
+	public List<UnitType> getUnitItemTypes() {
+		return Arrays.asList(UnitType.SUPPORT, UnitType.NAVAL);
 	}
 }

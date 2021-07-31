@@ -23,6 +23,7 @@ import me.rhin.openciv.game.map.tile.TileType.TileProperty;
 import me.rhin.openciv.game.player.Player;
 import me.rhin.openciv.game.unit.AttackableEntity;
 import me.rhin.openciv.game.unit.Unit;
+import me.rhin.openciv.game.unit.UnitItem.UnitType;
 import me.rhin.openciv.listener.BottomShapeRenderListener;
 import me.rhin.openciv.ui.label.CustomLabel;
 import me.rhin.openciv.ui.screen.type.InGameScreen;
@@ -518,9 +519,10 @@ public class Tile extends Actor implements BottomShapeRenderListener {
 	}
 
 	public Unit getTopUnit() {
-		Unit topUnit = null;
+		Unit topUnit = null; // Top non support unit
 		for (Unit unit : units) {
-			if (topUnit == null || topUnit.getCombatStrength() < unit.getCombatStrength())
+			if (topUnit == null || (topUnit.getUnitTypes().contains(UnitType.SUPPORT)
+					&& !unit.getUnitTypes().contains(UnitType.SUPPORT)))
 				topUnit = unit;
 		}
 
@@ -532,7 +534,8 @@ public class Tile extends Actor implements BottomShapeRenderListener {
 		for (Unit unit : units) {
 			if (unit.getPlayerOwner().equals(player))
 				continue;
-			if (topUnit == null || topUnit.getCombatStrength() < unit.getCombatStrength())
+			if (topUnit == null || (topUnit.getUnitTypes().contains(UnitType.SUPPORT)
+					&& !unit.getUnitTypes().contains(UnitType.SUPPORT)))
 				topUnit = unit;
 		}
 

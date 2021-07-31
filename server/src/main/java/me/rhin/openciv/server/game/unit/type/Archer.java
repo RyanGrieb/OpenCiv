@@ -1,5 +1,8 @@
 package me.rhin.openciv.server.game.unit.type;
 
+import java.util.Arrays;
+import java.util.List;
+
 import me.rhin.openciv.server.game.Player;
 import me.rhin.openciv.server.game.city.City;
 import me.rhin.openciv.server.game.map.tile.Tile;
@@ -9,6 +12,7 @@ import me.rhin.openciv.server.game.unit.AttackableEntity;
 import me.rhin.openciv.server.game.unit.RangedUnit;
 import me.rhin.openciv.server.game.unit.Unit;
 import me.rhin.openciv.server.game.unit.UnitItem;
+import me.rhin.openciv.server.game.unit.UnitItem.UnitType;
 
 public class Archer extends UnitItem {
 
@@ -41,8 +45,8 @@ public class Archer extends UnitItem {
 		}
 
 		@Override
-		public UnitType getUnitType() {
-			return UnitType.RANGED;
+		public List<UnitType> getUnitTypes() {
+			return Arrays.asList(UnitType.RANGED);
 		}
 	}
 
@@ -67,7 +71,7 @@ public class Archer extends UnitItem {
 	}
 
 	@Override
-	public UnitType getUnitItemType() {
-		return UnitType.RANGED;
+	public List<UnitType> getUnitItemTypes() {
+		return Arrays.asList(UnitType.RANGED);
 	}
 }

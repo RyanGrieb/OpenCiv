@@ -1,5 +1,8 @@
 package me.rhin.openciv.game.unit.type;
 
+import java.util.Arrays;
+import java.util.List;
+
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.city.City;
 import me.rhin.openciv.game.map.tile.Tile;
@@ -31,13 +34,13 @@ public class Archer extends UnitItem {
 		}
 
 		@Override
-		public int getCombatStrength(AttackableEntity targetEntity) {
-			return 14;
+		public int getRangedCombatStrength(AttackableEntity target) {
+			return 7;
 		}
 
 		@Override
-		public int getRangedCombatStrength(AttackableEntity target) {
-			return 7;
+		public List<UnitType> getUnitTypes() {
+			return Arrays.asList(UnitType.RANGED);
 		}
 	}
 
@@ -72,7 +75,7 @@ public class Archer extends UnitItem {
 	}
 
 	@Override
-	public UnitItemType getUnitItemType() {
-		return UnitItemType.RANGED;
+	public List<UnitType> getUnitItemTypes() {
+		return Arrays.asList(UnitType.RANGED);
 	}
 }

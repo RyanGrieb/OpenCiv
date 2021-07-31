@@ -1,5 +1,8 @@
 package me.rhin.openciv.server.game.unit.type;
 
+import java.util.Arrays;
+import java.util.List;
+
 import me.rhin.openciv.server.game.Player;
 import me.rhin.openciv.server.game.city.City;
 import me.rhin.openciv.server.game.map.tile.Tile;
@@ -33,10 +36,10 @@ public class Warrior extends UnitItem {
 		public int getCombatStrength(AttackableEntity target) {
 			return 20;
 		}
-		
+
 		@Override
-		public UnitType getUnitType() {
-			return UnitType.MELEE;
+		public List<UnitType> getUnitTypes() {
+			return Arrays.asList(UnitType.MELEE);
 		}
 	}
 
@@ -49,19 +52,19 @@ public class Warrior extends UnitItem {
 	public float getGoldCost() {
 		return 100;
 	}
-	
+
 	@Override
 	public boolean meetsProductionRequirements() {
 		return true;
 	}
-	
+
 	@Override
 	public String getName() {
 		return "Warrior";
 	}
 
 	@Override
-	public UnitType getUnitItemType() {
-		return UnitType.MELEE;
+	public List<UnitType> getUnitItemTypes() {
+		return Arrays.asList(UnitType.MELEE);
 	}
 }

@@ -40,8 +40,8 @@ public class DisciplineHeritage extends Heritage implements SettleCityListener {
 			for (ProductionItem item : city.getProducibleItemManager().getPossibleItems().values()) {
 				if (item instanceof UnitItem) {
 					UnitItem unitItem = (UnitItem) item;
-					if (unitItem.getUnitItemType() == UnitType.MELEE
-							|| unitItem.getUnitItemType() == UnitType.RANGED) {
+					if (unitItem.getUnitItemTypes().contains(UnitType.MELEE)
+							|| (unitItem.getUnitItemTypes().contains(UnitType.RANGED))) {
 						item.setProductionModifier(-0.1F);
 					}
 				}
@@ -63,8 +63,8 @@ public class DisciplineHeritage extends Heritage implements SettleCityListener {
 		for (ProductionItem item : city.getProducibleItemManager().getPossibleItems().values()) {
 			if (item instanceof UnitItem) {
 				UnitItem unitItem = (UnitItem) item;
-				if (unitItem.getUnitItemType() == UnitType.MELEE
-						|| unitItem.getUnitItemType() == UnitType.RANGED) {
+				if (unitItem.getUnitItemTypes().contains(UnitType.MELEE)
+						|| (unitItem.getUnitItemTypes().contains(UnitType.RANGED))) {
 					item.setProductionModifier(-0.1F);
 				}
 			}

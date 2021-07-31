@@ -1,5 +1,8 @@
 package me.rhin.openciv.server.game.unit.type;
 
+import java.util.Arrays;
+import java.util.List;
+
 import me.rhin.openciv.server.game.Player;
 import me.rhin.openciv.server.game.city.City;
 import me.rhin.openciv.server.game.map.tile.Tile;
@@ -40,8 +43,8 @@ public class Settler extends UnitItem {
 		}
 		
 		@Override
-		public UnitType getUnitType() {
-			return UnitType.SUPPORT;
+		public List<UnitType> getUnitTypes() {
+			return Arrays.asList(UnitType.SUPPORT);
 		}
 	}
 
@@ -66,7 +69,7 @@ public class Settler extends UnitItem {
 	}
 
 	@Override
-	public UnitType getUnitItemType() {
-		return UnitType.SUPPORT;
+	public List<UnitType> getUnitItemTypes() {
+		return Arrays.asList(UnitType.SUPPORT);
 	}
 }

@@ -1,10 +1,14 @@
 package me.rhin.openciv.game.unit.type;
 
+import java.util.Arrays;
+import java.util.List;
+
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.map.tile.Tile;
 import me.rhin.openciv.game.map.tile.TileType.TileProperty;
 import me.rhin.openciv.game.unit.AttackableEntity;
 import me.rhin.openciv.game.unit.RangedUnit;
+import me.rhin.openciv.game.unit.UnitItem.UnitType;
 import me.rhin.openciv.game.unit.UnitParameter;
 
 public class Bowman extends RangedUnit {
@@ -22,13 +26,12 @@ public class Bowman extends RangedUnit {
 	}
 
 	@Override
-	public int getCombatStrength(AttackableEntity targetEntity) {
-		return 14;
-	}
-
-	@Override
 	public int getRangedCombatStrength(AttackableEntity target) {
 		return 7;
 	}
 
+	@Override
+	public List<UnitType> getUnitTypes() {
+		return Arrays.asList(UnitType.RANGED);
+	}
 }

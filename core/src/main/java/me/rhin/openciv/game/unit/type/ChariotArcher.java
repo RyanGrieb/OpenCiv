@@ -1,5 +1,8 @@
 package me.rhin.openciv.game.unit.type;
 
+import java.util.Arrays;
+import java.util.List;
+
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.city.City;
 import me.rhin.openciv.game.map.tile.Tile;
@@ -9,6 +12,7 @@ import me.rhin.openciv.game.unit.AttackableEntity;
 import me.rhin.openciv.game.unit.RangedUnit;
 import me.rhin.openciv.game.unit.UnitItem;
 import me.rhin.openciv.game.unit.UnitParameter;
+import me.rhin.openciv.game.unit.UnitItem.UnitType;
 
 public class ChariotArcher extends UnitItem {
 
@@ -32,13 +36,13 @@ public class ChariotArcher extends UnitItem {
 		}
 
 		@Override
-		public int getCombatStrength(AttackableEntity targetEntity) {
-			return 17;
+		public int getRangedCombatStrength(AttackableEntity target) {
+			return 10;
 		}
 
 		@Override
-		public int getRangedCombatStrength(AttackableEntity target) {
-			return 10;
+		public List<UnitType> getUnitTypes() {
+			return Arrays.asList(UnitType.RANGED, UnitType.MOUNTED);
 		}
 	}
 
@@ -73,8 +77,7 @@ public class ChariotArcher extends UnitItem {
 	}
 
 	@Override
-	public UnitItemType getUnitItemType() {
-		return UnitItemType.RANGED;
+	public List<UnitType> getUnitItemTypes() {
+		return Arrays.asList(UnitType.RANGED, UnitType.MOUNTED);
 	}
-
 }

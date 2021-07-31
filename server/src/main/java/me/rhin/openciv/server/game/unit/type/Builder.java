@@ -1,5 +1,8 @@
 package me.rhin.openciv.server.game.unit.type;
 
+import java.util.Arrays;
+import java.util.List;
+
 import me.rhin.openciv.server.game.Player;
 import me.rhin.openciv.server.game.city.City;
 import me.rhin.openciv.server.game.map.tile.Tile;
@@ -7,6 +10,7 @@ import me.rhin.openciv.server.game.map.tile.TileType.TileProperty;
 import me.rhin.openciv.server.game.unit.AttackableEntity;
 import me.rhin.openciv.server.game.unit.Unit;
 import me.rhin.openciv.server.game.unit.UnitItem;
+import me.rhin.openciv.server.game.unit.UnitItem.UnitType;
 
 public class Builder extends UnitItem {
 
@@ -80,8 +84,8 @@ public class Builder extends UnitItem {
 		}
 
 		@Override
-		public UnitType getUnitType() {
-			return UnitType.SUPPORT;
+		public List<UnitType> getUnitTypes() {
+			return Arrays.asList(UnitType.SUPPORT);
 		}
 	}
 
@@ -106,7 +110,7 @@ public class Builder extends UnitItem {
 	}
 	
 	@Override
-	public UnitType getUnitItemType() {
-		return UnitType.SUPPORT;
+	public List<UnitType> getUnitItemTypes() {
+		return Arrays.asList(UnitType.SUPPORT);
 	}
 }
