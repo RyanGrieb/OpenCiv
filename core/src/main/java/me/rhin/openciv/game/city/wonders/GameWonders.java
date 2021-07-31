@@ -5,6 +5,7 @@ import java.util.HashMap;
 import me.rhin.openciv.game.city.building.type.GreatLibrary;
 import me.rhin.openciv.game.city.building.type.GreatPyramids;
 import me.rhin.openciv.game.city.building.type.HangingGardens;
+import me.rhin.openciv.game.city.building.type.StatueOfAres;
 
 public class GameWonders {
 
@@ -16,6 +17,7 @@ public class GameWonders {
 		addWonder(GreatPyramids.class);
 		addWonder(GreatLibrary.class);
 		addWonder(HangingGardens.class);
+		addWonder(StatueOfAres.class);
 	}
 
 	private void addWonder(Class<? extends Wonder> clazz) {

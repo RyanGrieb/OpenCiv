@@ -17,6 +17,7 @@ import me.rhin.openciv.server.game.city.building.type.HangingGardens;
 import me.rhin.openciv.server.game.city.building.type.Library;
 import me.rhin.openciv.server.game.city.building.type.Market;
 import me.rhin.openciv.server.game.city.building.type.Monument;
+import me.rhin.openciv.server.game.city.building.type.StatueOfAres;
 import me.rhin.openciv.server.game.city.building.type.Walls;
 import me.rhin.openciv.server.game.city.building.type.WaterMill;
 import me.rhin.openciv.server.game.unit.type.Archer;
@@ -88,7 +89,8 @@ public class ProducibleItemManager implements NextTurnListener {
 		possibleItems.put("Great Pyramids", new GreatPyramids(city));
 		possibleItems.put("Great Library", new GreatLibrary(city));
 		possibleItems.put("Hanging Gardens", new HangingGardens(city));
-
+		possibleItems.put("Statue Of Ares", new StatueOfAres(city));
+		
 		Server.getInstance().getEventManager().addListener(NextTurnListener.class, this);
 	}
 

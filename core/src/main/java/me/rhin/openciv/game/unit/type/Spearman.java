@@ -4,6 +4,7 @@ import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.city.City;
 import me.rhin.openciv.game.map.tile.Tile;
 import me.rhin.openciv.game.map.tile.TileType.TileProperty;
+import me.rhin.openciv.game.research.type.BronzeWorkingTech;
 import me.rhin.openciv.game.unit.AttackableEntity;
 import me.rhin.openciv.game.unit.Unit;
 import me.rhin.openciv.game.unit.UnitItem;
@@ -49,7 +50,7 @@ public class Spearman extends UnitItem {
 
 	@Override
 	public boolean meetsProductionRequirements() {
-		return true;
+		return city.getPlayerOwner().getResearchTree().hasResearched(BronzeWorkingTech.class);
 	}
 
 	@Override

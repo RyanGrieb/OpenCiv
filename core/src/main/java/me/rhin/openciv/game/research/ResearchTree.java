@@ -6,6 +6,7 @@ import java.util.List;
 
 import me.rhin.openciv.game.research.type.AnimalHusbandryTech;
 import me.rhin.openciv.game.research.type.ArcheryTech;
+import me.rhin.openciv.game.research.type.BronzeWorkingTech;
 import me.rhin.openciv.game.research.type.CalendarTech;
 import me.rhin.openciv.game.research.type.MasonryTech;
 import me.rhin.openciv.game.research.type.MathematicsTech;
@@ -34,6 +35,7 @@ public class ResearchTree {
 		technologies.put(TrappingTech.class, new TrappingTech());
 		technologies.put(WheelTech.class, new WheelTech());
 		technologies.put(MasonryTech.class, new MasonryTech());
+		technologies.put(BronzeWorkingTech.class, new BronzeWorkingTech());
 		technologies.put(MathematicsTech.class, new MathematicsTech());
 	}
 

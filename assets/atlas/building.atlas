@@ -81,6 +81,13 @@ building_pyramids
   orig: 32, 32
   offset: 0, 0
   index: -1
+building_statue_of_ares
+  rotate: false
+  xy: 102, 68
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
 building_stonehenge
   rotate: false
   xy: 132, 130
