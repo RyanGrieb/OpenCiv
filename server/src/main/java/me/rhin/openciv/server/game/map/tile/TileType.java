@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Random;
 
 import me.rhin.openciv.server.game.map.tile.improvement.ChopImprovement;
+import me.rhin.openciv.server.game.map.tile.improvement.ClearImprovement;
 import me.rhin.openciv.server.game.map.tile.improvement.FarmImprovement;
 import me.rhin.openciv.server.game.map.tile.improvement.MineImprovement;
 import me.rhin.openciv.server.game.map.tile.improvement.PastureImprovement;
@@ -218,6 +219,13 @@ public enum TileType implements Comparable<TileType> {
 		@Override
 		public float getMovementCost() {
 			return 2;
+		}
+
+		@Override
+		public List<TileImprovement> getImprovements() {
+			ArrayList<TileImprovement> improvements = new ArrayList<>();
+			improvements.add(new ClearImprovement(3));
+			return improvements;
 		}
 	},
 	HORSES(TileLayer.MIDDLE, TileProperty.RESOURCE) {

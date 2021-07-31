@@ -558,7 +558,6 @@ public class Tile {
 		tileImprovement.addTurnsWorked();
 
 		if (tileImprovement.getTurnsWorked() >= tileImprovement.getMaxTurns()) {
-
 			// Modify the tile here
 			tileImprovement.improveTile();
 
