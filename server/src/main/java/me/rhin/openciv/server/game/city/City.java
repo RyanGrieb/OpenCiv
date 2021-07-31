@@ -219,7 +219,7 @@ public class City implements AttackableEntity, SpecialistContainer, NextTurnList
 	}
 
 	@Override
-	public int getCombatStrength(AttackableEntity targetEntity) {
+	public float getCombatStrength(AttackableEntity targetEntity) {
 		return 8;
 	}
 
@@ -264,10 +264,6 @@ public class City implements AttackableEntity, SpecialistContainer, NextTurnList
 	@Override
 	public void onCombat() {
 		// TODO: Maybe increase health regen when out of combat?
-	}
-
-	public int getBaseCombatStrength() {
-		return getCombatStrength(null);
 	}
 	
 	public int getMaxHealth() {

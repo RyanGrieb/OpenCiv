@@ -6,6 +6,7 @@ import me.rhin.openciv.server.game.city.building.Building;
 import me.rhin.openciv.server.game.city.wonders.Wonder;
 import me.rhin.openciv.server.game.map.tile.Tile;
 import me.rhin.openciv.server.game.research.type.BronzeWorkingTech;
+import me.rhin.openciv.server.game.unit.RangedUnit;
 import me.rhin.openciv.server.game.unit.Unit;
 import me.rhin.openciv.server.listener.UnitFinishedMoveListener;
 import me.rhin.openciv.shared.stat.Stat;
@@ -52,15 +53,25 @@ public class StatueOfAres extends Building implements Wonder, UnitFinishedMoveLi
 
 		// If we moved out of enemy territory
 		if (!prevTileFriendly && !inEnemyTerritory) {
-			System.out.println("Moved out of enemy territory.");
-			//unit.reduceCombatStrength(0.1F);
+			//System.out.println("Moved out of enemy territory.");
+
+			unit.getCombatStatLine().addModifier(Stat.COMBAT_STRENGTH, -0.1F);
+			if (unit instanceof RangedUnit) {
+				((RangedUnit) unit).getRangedCombatStatLine().addModifier(Stat.COMBAT_STRENGTH, -0.1F);
+			}
+
 			return;
 		}
 
 		// If we moved into enemy territory
 		if (prevTileFriendly && inEnemyTerritory) {
-			System.out.println("Moved into enemy territory.");
-			//unit.increaseCombatStrength(0.1F);
+			//System.out.println("Moved into enemy territory.");
+
+			unit.getCombatStatLine().addModifier(Stat.COMBAT_STRENGTH, 0.1F);
+			if (unit instanceof RangedUnit) {
+				((RangedUnit) unit).getRangedCombatStatLine().addModifier(Stat.COMBAT_STRENGTH, 0.1F);
+			}
+
 			return;
 		}
 	}

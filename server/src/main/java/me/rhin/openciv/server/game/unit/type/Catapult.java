@@ -10,9 +10,8 @@ import me.rhin.openciv.server.game.map.tile.TileType.TileProperty;
 import me.rhin.openciv.server.game.research.type.MathematicsTech;
 import me.rhin.openciv.server.game.unit.AttackableEntity;
 import me.rhin.openciv.server.game.unit.RangedUnit;
-import me.rhin.openciv.server.game.unit.Unit;
 import me.rhin.openciv.server.game.unit.UnitItem;
-import me.rhin.openciv.server.game.unit.UnitItem.UnitType;
+import me.rhin.openciv.shared.stat.Stat;
 
 public class Catapult extends UnitItem {
 
@@ -20,10 +19,13 @@ public class Catapult extends UnitItem {
 		super(city);
 	}
 
-	public static class CatapultUnit extends Unit implements RangedUnit {
+	public static class CatapultUnit extends RangedUnit {
 
 		public CatapultUnit(Player playerOwner, Tile standingTile) {
 			super(playerOwner, standingTile);
+
+			combatStrength.setValue(Stat.COMBAT_STRENGTH, 7);
+			rangedCombatStrength.setValue(Stat.COMBAT_STRENGTH, 7);
 		}
 
 		@Override
@@ -35,19 +37,15 @@ public class Catapult extends UnitItem {
 		}
 
 		@Override
-		public int getCombatStrength(AttackableEntity target) {
-			return 7;
+		public float getRangedCombatStrength(AttackableEntity target) {
+			float modifer = 1;
+
+			if (target instanceof City) {
+				modifer = 1.75F;
+			}
+			return rangedCombatStrength.getStatValue(Stat.COMBAT_STRENGTH) * modifer;
 		}
 
-		@Override
-		public int getRangedCombatStrength(AttackableEntity target) {
-			if (target instanceof City) {
-				// FIXME: Support floats.
-				return (int) (7 * 1.75);
-			}
-			return 7;
-		}
-		
 		@Override
 		public List<UnitType> getUnitTypes() {
 			return Arrays.asList(UnitType.RANGED);

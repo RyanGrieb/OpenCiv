@@ -13,11 +13,14 @@ import me.rhin.openciv.server.game.map.tile.Tile;
 import me.rhin.openciv.server.game.unit.UnitItem.UnitType;
 import me.rhin.openciv.server.listener.NextTurnListener;
 import me.rhin.openciv.shared.packet.type.SetUnitHealthPacket;
+import me.rhin.openciv.shared.stat.Stat;
+import me.rhin.openciv.shared.stat.StatLine;
 
 public abstract class Unit implements AttackableEntity, NextTurnListener {
 
 	private static int unitID = 0;
 
+	protected StatLine combatStrength;
 	private int id;
 	private Tile[][] cameFrom;
 	private ArrayList<Vector2[]> pathVectors = new ArrayList<>();
@@ -33,6 +36,7 @@ public abstract class Unit implements AttackableEntity, NextTurnListener {
 
 	public Unit(Player playerOwner, Tile standingTile) {
 		this.id = unitID++;
+		this.combatStrength = new StatLine();
 		this.playerOwner = playerOwner;
 		this.standingTile = standingTile;
 		this.movement = getMaxMovement();
@@ -142,8 +146,9 @@ public abstract class Unit implements AttackableEntity, NextTurnListener {
 		return health;
 	}
 
-	public int getBaseCombatStrength() {
-		return getCombatStrength(null);
+	@Override
+	public float getCombatStrength(AttackableEntity target) {
+		return combatStrength.getStatValue(Stat.COMBAT_STRENGTH);
 	}
 
 	public void clearListeners() {
@@ -281,20 +286,6 @@ public abstract class Unit implements AttackableEntity, NextTurnListener {
 		return true;
 	}
 
-	private Tile removeSmallest(ArrayList<Tile> queue, float fScore[][]) {
-		float smallest = Integer.MAX_VALUE;
-		Tile smallestTile = null;
-		for (Tile tile : queue) {
-			if (fScore[tile.getGridX()][tile.getGridY()] < smallest) {
-				smallest = fScore[tile.getGridX()][tile.getGridY()];
-				smallestTile = tile;
-			}
-		}
-
-		queue.remove(smallestTile);
-		return smallestTile;
-	}
-
 	public void moveToTargetTile() {
 		if (targetTile == null)
 			return;
@@ -380,5 +371,23 @@ public abstract class Unit implements AttackableEntity, NextTurnListener {
 
 	public void kill() {
 		clearListeners();
+	}
+
+	public StatLine getCombatStatLine() {
+		return combatStrength;
+	}
+
+	private Tile removeSmallest(ArrayList<Tile> queue, float fScore[][]) {
+		float smallest = Integer.MAX_VALUE;
+		Tile smallestTile = null;
+		for (Tile tile : queue) {
+			if (fScore[tile.getGridX()][tile.getGridY()] < smallest) {
+				smallest = fScore[tile.getGridX()][tile.getGridY()];
+				smallestTile = tile;
+			}
+		}
+
+		queue.remove(smallestTile);
+		return smallestTile;
 	}
 }

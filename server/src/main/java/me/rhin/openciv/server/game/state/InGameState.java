@@ -45,6 +45,7 @@ import me.rhin.openciv.server.listener.RequestEndTurnListener;
 import me.rhin.openciv.server.listener.SelectUnitListener;
 import me.rhin.openciv.server.listener.SetProductionItemListener;
 import me.rhin.openciv.server.listener.SettleCityListener;
+import me.rhin.openciv.server.listener.UnitFinishedMoveListener.UnitFinishedMoveEvent;
 import me.rhin.openciv.server.listener.UnitMoveListener;
 import me.rhin.openciv.server.listener.WorkTileListener;
 import me.rhin.openciv.shared.packet.type.BuyProductionItemPacket;
@@ -384,6 +385,10 @@ public class InGameState extends GameState
 				}
 
 			}
+
+		if (unit.getHealth() > 0) {
+			Server.getInstance().getEventManager().fireEvent(new UnitFinishedMoveEvent(prevTile, unit));
+		}
 
 	}
 

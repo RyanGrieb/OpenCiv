@@ -8,10 +8,9 @@ import me.rhin.openciv.server.game.city.City;
 import me.rhin.openciv.server.game.map.tile.Tile;
 import me.rhin.openciv.server.game.map.tile.TileType.TileProperty;
 import me.rhin.openciv.server.game.research.type.SailingTech;
-import me.rhin.openciv.server.game.unit.AttackableEntity;
 import me.rhin.openciv.server.game.unit.Unit;
 import me.rhin.openciv.server.game.unit.UnitItem;
-import me.rhin.openciv.server.game.unit.UnitItem.UnitType;
+import me.rhin.openciv.shared.stat.Stat;
 
 public class WorkBoat extends UnitItem {
 
@@ -23,6 +22,8 @@ public class WorkBoat extends UnitItem {
 
 		public WorkBoatUnit(Player playerOwner, Tile standingTile) {
 			super(playerOwner, standingTile);
+
+			combatStrength.setValue(Stat.COMBAT_STRENGTH, 0);
 		}
 
 		@Override
@@ -31,11 +32,6 @@ public class WorkBoat extends UnitItem {
 				return 1000000;
 			else
 				return tile.getMovementCost(prevTile);
-		}
-
-		@Override
-		public int getCombatStrength(AttackableEntity target) {
-			return 30;
 		}
 
 		@Override

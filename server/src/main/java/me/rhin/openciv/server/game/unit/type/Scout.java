@@ -7,10 +7,9 @@ import me.rhin.openciv.server.game.Player;
 import me.rhin.openciv.server.game.city.City;
 import me.rhin.openciv.server.game.map.tile.Tile;
 import me.rhin.openciv.server.game.map.tile.TileType.TileProperty;
-import me.rhin.openciv.server.game.unit.AttackableEntity;
 import me.rhin.openciv.server.game.unit.Unit;
 import me.rhin.openciv.server.game.unit.UnitItem;
-import me.rhin.openciv.server.game.unit.UnitItem.UnitType;
+import me.rhin.openciv.shared.stat.Stat;
 
 public class Scout extends UnitItem {
 
@@ -22,6 +21,8 @@ public class Scout extends UnitItem {
 
 		public ScoutUnit(Player playerOwner, Tile standingTile) {
 			super(playerOwner, standingTile);
+
+			combatStrength.setValue(Stat.COMBAT_STRENGTH, 10);
 		}
 
 		@Override
@@ -39,11 +40,6 @@ public class Scout extends UnitItem {
 			return 3;
 		}
 
-		@Override
-		public int getCombatStrength(AttackableEntity target) {
-			return 10;
-		}
-		
 		@Override
 		public List<UnitType> getUnitTypes() {
 			return Arrays.asList(UnitType.MELEE);

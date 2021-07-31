@@ -7,10 +7,9 @@ import me.rhin.openciv.server.game.Player;
 import me.rhin.openciv.server.game.city.City;
 import me.rhin.openciv.server.game.map.tile.Tile;
 import me.rhin.openciv.server.game.map.tile.TileType.TileProperty;
-import me.rhin.openciv.server.game.unit.AttackableEntity;
 import me.rhin.openciv.server.game.unit.Unit;
 import me.rhin.openciv.server.game.unit.UnitItem;
-import me.rhin.openciv.server.game.unit.UnitItem.UnitType;
+import me.rhin.openciv.shared.stat.Stat;
 
 public class Settler extends UnitItem {
 
@@ -22,6 +21,8 @@ public class Settler extends UnitItem {
 
 		public SettlerUnit(Player playerOwner, Tile standingTile) {
 			super(playerOwner, standingTile);
+
+			combatStrength.setValue(Stat.COMBAT_STRENGTH, 0);
 		}
 
 		@Override
@@ -33,15 +34,10 @@ public class Settler extends UnitItem {
 		}
 
 		@Override
-		public int getCombatStrength(AttackableEntity target) {
-			return 0;
-		}
-
-		@Override
 		public boolean isUnitCapturable() {
 			return true;
 		}
-		
+
 		@Override
 		public List<UnitType> getUnitTypes() {
 			return Arrays.asList(UnitType.SUPPORT);
@@ -52,7 +48,7 @@ public class Settler extends UnitItem {
 	public float getUnitProductionCost() {
 		return 80;
 	}
-	
+
 	@Override
 	public float getGoldCost() {
 		return 250;
@@ -62,7 +58,7 @@ public class Settler extends UnitItem {
 	public boolean meetsProductionRequirements() {
 		return true;
 	}
-	
+
 	@Override
 	public String getName() {
 		return "Settler";

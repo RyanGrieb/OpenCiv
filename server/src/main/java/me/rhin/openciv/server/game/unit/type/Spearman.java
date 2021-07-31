@@ -11,7 +11,7 @@ import me.rhin.openciv.server.game.research.type.BronzeWorkingTech;
 import me.rhin.openciv.server.game.unit.AttackableEntity;
 import me.rhin.openciv.server.game.unit.Unit;
 import me.rhin.openciv.server.game.unit.UnitItem;
-import me.rhin.openciv.server.game.unit.UnitItem.UnitType;
+import me.rhin.openciv.shared.stat.Stat;
 
 public class Spearman extends UnitItem {
 
@@ -23,6 +23,8 @@ public class Spearman extends UnitItem {
 
 		public SpearmanUnit(Player playerOwner, Tile standingTile) {
 			super(playerOwner, standingTile);
+
+			combatStrength.setValue(Stat.COMBAT_STRENGTH, 22);
 		}
 
 		@Override
@@ -34,15 +36,19 @@ public class Spearman extends UnitItem {
 		}
 
 		@Override
-		public int getCombatStrength(AttackableEntity target) {
+		public float getCombatStrength(AttackableEntity target) {
+
+			float modifier = 1;
+
 			if (target instanceof Unit) {
 				Unit targetUnit = (Unit) target;
 
 				if (targetUnit.getUnitTypes().contains(UnitType.MOUNTED)) {
-					return (int) (22 * 1.5);
+					modifier = 1.5F;
 				}
 			}
-			return 22;
+
+			return combatStrength.getStatValue(Stat.COMBAT_STRENGTH) * modifier;
 		}
 
 		@Override

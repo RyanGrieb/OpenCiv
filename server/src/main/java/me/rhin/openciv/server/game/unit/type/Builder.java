@@ -7,10 +7,9 @@ import me.rhin.openciv.server.game.Player;
 import me.rhin.openciv.server.game.city.City;
 import me.rhin.openciv.server.game.map.tile.Tile;
 import me.rhin.openciv.server.game.map.tile.TileType.TileProperty;
-import me.rhin.openciv.server.game.unit.AttackableEntity;
 import me.rhin.openciv.server.game.unit.Unit;
 import me.rhin.openciv.server.game.unit.UnitItem;
-import me.rhin.openciv.server.game.unit.UnitItem.UnitType;
+import me.rhin.openciv.shared.stat.Stat;
 
 public class Builder extends UnitItem {
 
@@ -25,6 +24,8 @@ public class Builder extends UnitItem {
 
 		public BuilderUnit(Player playerOwner, Tile standingTile) {
 			super(playerOwner, standingTile);
+			
+			combatStrength.setValue(Stat.COMBAT_STRENGTH, 0);
 		}
 
 		@Override
@@ -55,11 +56,6 @@ public class Builder extends UnitItem {
 				return 1000000;
 			else
 				return tile.getMovementCost(prevTile);
-		}
-
-		@Override
-		public int getCombatStrength(AttackableEntity target) {
-			return 0;
 		}
 
 		@Override

@@ -10,7 +10,7 @@ public class SetCityHealthPacket extends Packet {
 	private String cityName;
 	private float health;
 	private float maxHealth;
-	private int combatStrength;
+	private float combatStrength;
 
 	@Override
 	public void write(Json json) {
@@ -27,7 +27,7 @@ public class SetCityHealthPacket extends Packet {
 		this.cityName = jsonData.getString("cityName");
 		this.health = jsonData.getFloat("health");
 		this.maxHealth = jsonData.getFloat("maxHealth");
-		this.combatStrength = jsonData.getInt("combatStrength");
+		this.combatStrength = jsonData.getFloat("combatStrength");
 	}
 
 	public void setCity(String cityName, float health) {
@@ -37,7 +37,7 @@ public class SetCityHealthPacket extends Packet {
 		this.combatStrength = -1;
 	}
 
-	public void setCity(String cityName, float health, float maxHealth, int combatStrength) {
+	public void setCity(String cityName, float health, float maxHealth, float combatStrength) {
 		this.cityName = cityName;
 		this.health = health;
 		this.maxHealth = maxHealth;
@@ -56,7 +56,7 @@ public class SetCityHealthPacket extends Packet {
 		return maxHealth;
 	}
 
-	public int getCombatStrength() {
+	public float getCombatStrength() {
 		return combatStrength;
 	}
 }

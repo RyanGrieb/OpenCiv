@@ -8,11 +8,9 @@ import me.rhin.openciv.server.game.city.City;
 import me.rhin.openciv.server.game.map.tile.Tile;
 import me.rhin.openciv.server.game.map.tile.TileType.TileProperty;
 import me.rhin.openciv.server.game.research.type.WheelTech;
-import me.rhin.openciv.server.game.unit.AttackableEntity;
 import me.rhin.openciv.server.game.unit.RangedUnit;
-import me.rhin.openciv.server.game.unit.Unit;
 import me.rhin.openciv.server.game.unit.UnitItem;
-import me.rhin.openciv.server.game.unit.UnitItem.UnitType;
+import me.rhin.openciv.shared.stat.Stat;
 
 public class ChariotArcher extends UnitItem {
 
@@ -20,10 +18,13 @@ public class ChariotArcher extends UnitItem {
 		super(city);
 	}
 
-	public static class ChariotArcherUnit extends Unit implements RangedUnit {
+	public static class ChariotArcherUnit extends RangedUnit {
 
 		public ChariotArcherUnit(Player playerOwner, Tile standingTile) {
 			super(playerOwner, standingTile);
+			
+			combatStrength.setValue(Stat.COMBAT_STRENGTH, 17);
+			rangedCombatStrength.setValue(Stat.COMBAT_STRENGTH, 10);
 		}
 
 		@Override
@@ -32,16 +33,6 @@ public class ChariotArcher extends UnitItem {
 				return 1000000;
 			else
 				return tile.getMovementCost(prevTile);
-		}
-
-		@Override
-		public int getCombatStrength(AttackableEntity target) {
-			return 17;
-		}
-
-		@Override
-		public int getRangedCombatStrength(AttackableEntity target) {
-			return 10;
 		}
 
 		@Override

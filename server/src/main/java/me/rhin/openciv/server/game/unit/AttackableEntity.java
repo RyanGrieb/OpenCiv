@@ -5,7 +5,7 @@ import me.rhin.openciv.server.game.map.tile.Tile;
 
 public interface AttackableEntity {
 
-	public int getCombatStrength(AttackableEntity targetEntity);
+	public float getCombatStrength(AttackableEntity targetEntity);
 
 	public boolean isUnitCapturable();
 

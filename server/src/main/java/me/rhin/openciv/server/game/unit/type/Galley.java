@@ -8,10 +8,9 @@ import me.rhin.openciv.server.game.city.City;
 import me.rhin.openciv.server.game.map.tile.Tile;
 import me.rhin.openciv.server.game.map.tile.TileType.TileProperty;
 import me.rhin.openciv.server.game.research.type.SailingTech;
-import me.rhin.openciv.server.game.unit.AttackableEntity;
 import me.rhin.openciv.server.game.unit.Unit;
 import me.rhin.openciv.server.game.unit.UnitItem;
-import me.rhin.openciv.server.game.unit.UnitItem.UnitType;
+import me.rhin.openciv.shared.stat.Stat;
 
 public class Galley extends UnitItem {
 
@@ -23,6 +22,8 @@ public class Galley extends UnitItem {
 
 		public GalleyUnit(Player playerOwner, Tile standingTile) {
 			super(playerOwner, standingTile);
+
+			combatStrength.setValue(Stat.COMBAT_STRENGTH, 30);
 		}
 
 		@Override
@@ -33,11 +34,6 @@ public class Galley extends UnitItem {
 				return tile.getMovementCost(prevTile);
 		}
 
-		@Override
-		public int getCombatStrength(AttackableEntity target) {
-			return 30;
-		}
-		
 		@Override
 		public List<UnitType> getUnitTypes() {
 			return Arrays.asList(UnitType.MELEE, UnitType.NAVAL);
@@ -53,17 +49,17 @@ public class Galley extends UnitItem {
 	public float getGoldCost() {
 		return 150;
 	}
-	
+
 	@Override
 	public boolean meetsProductionRequirements() {
 		return city.isCoastal() && city.getPlayerOwner().getResearchTree().hasResearched(SailingTech.class);
 	}
-	
+
 	@Override
 	public String getName() {
 		return "Galley";
 	}
-	
+
 	@Override
 	public List<UnitType> getUnitItemTypes() {
 		return Arrays.asList(UnitType.MELEE, UnitType.NAVAL);

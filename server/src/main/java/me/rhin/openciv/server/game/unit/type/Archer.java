@@ -8,11 +8,9 @@ import me.rhin.openciv.server.game.city.City;
 import me.rhin.openciv.server.game.map.tile.Tile;
 import me.rhin.openciv.server.game.map.tile.TileType.TileProperty;
 import me.rhin.openciv.server.game.research.type.ArcheryTech;
-import me.rhin.openciv.server.game.unit.AttackableEntity;
 import me.rhin.openciv.server.game.unit.RangedUnit;
-import me.rhin.openciv.server.game.unit.Unit;
 import me.rhin.openciv.server.game.unit.UnitItem;
-import me.rhin.openciv.server.game.unit.UnitItem.UnitType;
+import me.rhin.openciv.shared.stat.Stat;
 
 public class Archer extends UnitItem {
 
@@ -20,10 +18,13 @@ public class Archer extends UnitItem {
 		super(city);
 	}
 
-	public static class ArcherUnit extends Unit implements RangedUnit {
+	public static class ArcherUnit extends RangedUnit {
 
 		public ArcherUnit(Player playerOwner, Tile standingTile) {
 			super(playerOwner, standingTile);
+
+			combatStrength.setValue(Stat.COMBAT_STRENGTH, 14);
+			rangedCombatStrength.setValue(Stat.COMBAT_STRENGTH, 7);
 		}
 
 		@Override
@@ -32,16 +33,6 @@ public class Archer extends UnitItem {
 				return 1000000;
 			else
 				return tile.getMovementCost(prevTile);
-		}
-
-		@Override
-		public int getCombatStrength(AttackableEntity target) {
-			return 14;
-		}
-
-		@Override
-		public int getRangedCombatStrength(AttackableEntity target) {
-			return 7;
 		}
 
 		@Override
