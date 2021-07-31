@@ -43,6 +43,6 @@ public class Granary extends Building {
 
 	@Override
 	public String getDesc() {
-		return "Provides an additional food source.\n+2 Food\n+1 Maintenance";
+		return "Provides an additional food \nsource.\n+2 Food\n+1 Maintenance";
 	}
 }

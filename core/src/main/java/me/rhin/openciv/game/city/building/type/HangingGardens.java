@@ -49,6 +49,6 @@ public class HangingGardens extends Building implements Wonder {
 
 	@Override
 	public String getDesc() {
-		return "The Hanging Gardens of Babylon \nwere one of the Seven Wonders of\n the Ancient World listed by\n Hellenic culture. \n+10 Food \n+1 Heritage";
+		return "The Hanging Gardens of Babylon \nwere one of the Seven Wonders of\nthe Ancient World listed by\n Hellenic culture. \n+10 Food \n+1 Heritage";
 	}
 }

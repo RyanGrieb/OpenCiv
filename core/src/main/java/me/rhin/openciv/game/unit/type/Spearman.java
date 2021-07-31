@@ -68,7 +68,7 @@ public class Spearman extends UnitItem {
 
 	@Override
 	public String getDesc() {
-		return "An ancient disciplined melee unit. \n50% bonus towards mounted units.";
+		return "An ancient disciplined melee \nunit. \n50% bonus towards mounted units.";
 	}
 
 	@Override

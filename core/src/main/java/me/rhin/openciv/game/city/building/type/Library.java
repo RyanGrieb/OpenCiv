@@ -64,6 +64,6 @@ public class Library extends Building implements SpecialistContainer {
 
 	@Override
 	public String getDesc() {
-		return "Provides +0.5 science for each citizen.\n+2 Science\n+0.5 Science each citizen\n+1 Maintenance";
+		return "Provides +0.5 science for each\n citizen.\n+2 Science\n+0.5 Science for each citizen\n+1 Maintenance";
 	}
 }

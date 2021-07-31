@@ -23,7 +23,7 @@ public class MathematicsTech extends Technology {
 
 	@Override
 	public Sprite getIcon() {
-		return TextureEnum.UI_ERROR.sprite();
+		return TextureEnum.ICON_MATHEMATICS.sprite();
 	}
 
 	@Override

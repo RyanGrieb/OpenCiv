@@ -53,11 +53,11 @@ public class StatueOfAres extends Building implements Wonder, UnitFinishedMoveLi
 
 		// If we moved out of enemy territory
 		if (!prevTileFriendly && !inEnemyTerritory) {
-			//System.out.println("Moved out of enemy territory.");
+			// System.out.println("Moved out of enemy territory.");
 
-			unit.getCombatStatLine().addModifier(Stat.COMBAT_STRENGTH, -0.1F);
+			unit.getCombatStatLine().addModifier(Stat.COMBAT_STRENGTH, -0.15F);
 			if (unit instanceof RangedUnit) {
-				((RangedUnit) unit).getRangedCombatStatLine().addModifier(Stat.COMBAT_STRENGTH, -0.1F);
+				((RangedUnit) unit).getRangedCombatStatLine().addModifier(Stat.COMBAT_STRENGTH, -0.15F);
 			}
 
 			return;
@@ -65,11 +65,11 @@ public class StatueOfAres extends Building implements Wonder, UnitFinishedMoveLi
 
 		// If we moved into enemy territory
 		if (prevTileFriendly && inEnemyTerritory) {
-			//System.out.println("Moved into enemy territory.");
+			// System.out.println("Moved into enemy territory.");
 
-			unit.getCombatStatLine().addModifier(Stat.COMBAT_STRENGTH, 0.1F);
+			unit.getCombatStatLine().addModifier(Stat.COMBAT_STRENGTH, 0.15F);
 			if (unit instanceof RangedUnit) {
-				((RangedUnit) unit).getRangedCombatStatLine().addModifier(Stat.COMBAT_STRENGTH, 0.1F);
+				((RangedUnit) unit).getRangedCombatStatLine().addModifier(Stat.COMBAT_STRENGTH, 0.15F);
 			}
 
 			return;
