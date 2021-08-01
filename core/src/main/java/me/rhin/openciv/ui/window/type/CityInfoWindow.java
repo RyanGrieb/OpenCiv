@@ -13,12 +13,14 @@ import me.rhin.openciv.game.production.ProductionItem;
 import me.rhin.openciv.listener.AddSpecialistToContainerListener;
 import me.rhin.openciv.listener.BuildingConstructedListener;
 import me.rhin.openciv.listener.CompleteResearchListener;
+import me.rhin.openciv.listener.FinishProductionItemListener;
 import me.rhin.openciv.listener.RemoveSpecialistFromContainerListener;
 import me.rhin.openciv.listener.ResizeListener;
 import me.rhin.openciv.listener.SetCitizenTileWorkerListener;
 import me.rhin.openciv.shared.packet.type.AddSpecialistToContainerPacket;
 import me.rhin.openciv.shared.packet.type.BuildingConstructedPacket;
 import me.rhin.openciv.shared.packet.type.CompleteResearchPacket;
+import me.rhin.openciv.shared.packet.type.FinishProductionItemPacket;
 import me.rhin.openciv.shared.packet.type.RemoveSpecialistFromContainerPacket;
 import me.rhin.openciv.shared.packet.type.SetCitizenTileWorkerPacket;
 import me.rhin.openciv.ui.button.type.CloseWindowButton;
@@ -35,9 +37,9 @@ import me.rhin.openciv.ui.list.type.ListUnemployedCitizens;
 import me.rhin.openciv.ui.screen.type.InGameScreen;
 import me.rhin.openciv.ui.window.AbstractWindow;
 
-public class CityInfoWindow extends AbstractWindow
-		implements ResizeListener, BuildingConstructedListener, SetCitizenTileWorkerListener,
-		AddSpecialistToContainerListener, RemoveSpecialistFromContainerListener, CompleteResearchListener {
+public class CityInfoWindow extends AbstractWindow implements ResizeListener, BuildingConstructedListener,
+		SetCitizenTileWorkerListener, AddSpecialistToContainerListener, RemoveSpecialistFromContainerListener,
+		CompleteResearchListener, FinishProductionItemListener {
 
 	private City city;
 	private CloseWindowButton closeWindowButton;
@@ -101,6 +103,7 @@ public class CityInfoWindow extends AbstractWindow
 		Civilization.getInstance().getEventManager().addListener(AddSpecialistToContainerListener.class, this);
 		Civilization.getInstance().getEventManager().addListener(RemoveSpecialistFromContainerListener.class, this);
 		Civilization.getInstance().getEventManager().addListener(CompleteResearchListener.class, this);
+		Civilization.getInstance().getEventManager().addListener(FinishProductionItemListener.class, this);
 	}
 
 	@Override
@@ -160,25 +163,7 @@ public class CityInfoWindow extends AbstractWindow
 	public void onBuildingConstructed(BuildingConstructedPacket packet) {
 
 		// Account for wonders being built.
-		outerloop: for (ListContainer listContainer : productionContainerList.getListContainers().values()) {
-			for (ListObject listObject : listContainer.getListItemActors()) {
-				{
-					if (listObject instanceof ListProductionItem) {
-						ListProductionItem listProdItem = (ListProductionItem) listObject;
-						if (!listProdItem.getProductionItem().meetsProductionRequirements()) {
-							productionContainerList.clearList();
-							for (ProductionItem productionItem : city.getProducibleItemManager().getProducibleItems()) {
-								productionContainerList.addItem(ListContainerType.CATEGORY,
-										productionItem.getCategory(),
-										new ListProductionItem(city, productionItem, 200, 45));
-							}
-							break outerloop;
-						}
-					}
-				}
-
-			}
-		}
+		updateAvailableProductionItems();
 
 		if (!city.getName().equals(packet.getCityName()))
 			return;
@@ -200,6 +185,11 @@ public class CityInfoWindow extends AbstractWindow
 					new ListProductionItem(city, productionItem, 200, 45));
 		}
 
+	}
+
+	@Override
+	public void onFinishProductionItem(FinishProductionItemPacket packet) {
+		updateAvailableProductionItems();
 	}
 
 	@Override
@@ -287,6 +277,29 @@ public class CityInfoWindow extends AbstractWindow
 					.setCitizens(city.getUnemployedWorkerAmount());
 		} else {
 			// TODO: Update the ListBuilding specialist slot.
+		}
+	}
+
+	private void updateAvailableProductionItems() {
+		// Account for wonders being built.
+		outerloop: for (ListContainer listContainer : productionContainerList.getListContainers().values()) {
+			for (ListObject listObject : listContainer.getListItemActors()) {
+				{
+					if (listObject instanceof ListProductionItem) {
+						ListProductionItem listProdItem = (ListProductionItem) listObject;
+						if (!listProdItem.getProductionItem().meetsProductionRequirements()) {
+							productionContainerList.clearList();
+							for (ProductionItem productionItem : city.getProducibleItemManager().getProducibleItems()) {
+								productionContainerList.addItem(ListContainerType.CATEGORY,
+										productionItem.getCategory(),
+										new ListProductionItem(city, productionItem, 200, 45));
+							}
+							break outerloop;
+						}
+					}
+				}
+
+			}
 		}
 	}
 }

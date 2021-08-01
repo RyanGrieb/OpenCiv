@@ -36,6 +36,8 @@ public class Caravan extends UnitItem {
 			super(playerOwner, standingTile);
 
 			combatStrength.setValue(Stat.COMBAT_STRENGTH, 0);
+
+			playerOwner.setCaravanAmount(playerOwner.getCaravanAmount() + 1);
 		}
 
 		@Override
@@ -217,7 +219,8 @@ public class Caravan extends UnitItem {
 
 	@Override
 	public boolean meetsProductionRequirements() {
-		return city.getPlayerOwner().getResearchTree().hasResearched(AnimalHusbandryTech.class);
+		return city.getPlayerOwner().getResearchTree().hasResearched(AnimalHusbandryTech.class)
+				&& city.getPlayerOwner().getCaravanAmount() < 1;
 	}
 
 	@Override

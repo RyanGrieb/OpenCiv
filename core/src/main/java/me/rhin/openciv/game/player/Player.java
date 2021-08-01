@@ -45,14 +45,14 @@ public class Player implements RelativeMouseMoveListener, LeftClickListener, Rig
 	private boolean rightMouseHeld;
 	private Civ civilization;
 	private int clicksPerSecond;
+	private int caravanAmount;
 
 	public Player(String name) {
 		this.name = name;
 		this.ownedCities = new ArrayList<>();
 		this.ownedUnits = new ArrayList<>();
 		this.statLine = new StatLine();
-		
-		
+
 		this.researchTree = new ResearchTree();
 		this.heritageTree = new HeritageTree();
 
@@ -119,10 +119,10 @@ public class Player implements RelativeMouseMoveListener, LeftClickListener, Rig
 	public void onRightClick(ClickType clickType, int x, int y) {
 		if (selectedUnit == null)
 			return;
-		
-		if(!selectedUnit.allowsMovement())
+
+		if (!selectedUnit.allowsMovement())
 			return;
-		
+
 		if (clickType == ClickType.DOWN) {
 			selectedUnit.setTargetTile(hoveredTile, true);
 			rightMouseHeld = true;
@@ -258,5 +258,13 @@ public class Player implements RelativeMouseMoveListener, LeftClickListener, Rig
 
 	public City getCapitalCity() {
 		return ownedCities.get(0);
+	}
+
+	public int getCaravanAmount() {
+		return caravanAmount;
+	}
+
+	public void setCaravanAmount(int caravanAmount) {
+		this.caravanAmount = caravanAmount;
 	}
 }

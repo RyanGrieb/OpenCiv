@@ -38,6 +38,8 @@ public class Caravan extends UnitItem {
 			this.city = standingTile.getCity();
 
 			customActions.add(new TradeWindowAction(this));
+
+			city.getPlayerOwner().setCaravanAmount(city.getPlayerOwner().getCaravanAmount() + 1);
 		}
 
 		@Override
@@ -242,7 +244,8 @@ public class Caravan extends UnitItem {
 
 	@Override
 	public boolean meetsProductionRequirements() {
-		return city.getPlayerOwner().getResearchTree().hasResearched(AnimalHusbandryTech.class);
+		return city.getPlayerOwner().getResearchTree().hasResearched(AnimalHusbandryTech.class)
+				&& city.getPlayerOwner().getCaravanAmount() < 1;
 	}
 
 	@Override

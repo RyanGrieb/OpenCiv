@@ -45,6 +45,7 @@ public class Player implements NextTurnListener, ChooseTechListener, ChooseHerit
 	private ResearchTree researchTree;
 	private HeritageTree heritageTree;
 	private boolean turnDone;
+	private int caravanAmount;
 
 	public Player(WebSocket conn) {
 		this.conn = conn;
@@ -274,5 +275,13 @@ public class Player implements NextTurnListener, ChooseTechListener, ChooseHerit
 		}
 
 		return false;
+	}
+
+	public int getCaravanAmount() {
+		return caravanAmount;
+	}
+
+	public void setCaravanAmount(int caravanAmount) {
+		this.caravanAmount = caravanAmount;
 	}
 }
