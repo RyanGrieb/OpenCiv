@@ -355,7 +355,7 @@ public enum TileType implements Comparable<TileType> {
 		@Override
 		public StatLine getStatLine() {
 			StatLine statLine = new StatLine();
-			statLine.addValue(Stat.GOLD_GAIN, 3);
+			statLine.addValue(Stat.GOLD_GAIN, 4);
 			return statLine;
 		}
 	},
@@ -363,7 +363,7 @@ public enum TileType implements Comparable<TileType> {
 		@Override
 		public StatLine getStatLine() {
 			StatLine statLine = new StatLine();
-			statLine.addValue(Stat.PRODUCTION_GAIN, 1);
+			statLine.addValue(Stat.PRODUCTION_GAIN, 3);
 			return statLine;
 		}
 	},
@@ -371,7 +371,8 @@ public enum TileType implements Comparable<TileType> {
 		@Override
 		public StatLine getStatLine() {
 			StatLine statLine = new StatLine();
-			statLine.addValue(Stat.PRODUCTION_GAIN, 1);
+			statLine.addValue(Stat.PRODUCTION_GAIN, 3);
+			statLine.addValue(Stat.GOLD_GAIN, 2);
 			return statLine;
 		}
 	},
