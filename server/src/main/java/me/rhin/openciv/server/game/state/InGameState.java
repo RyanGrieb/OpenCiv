@@ -634,6 +634,9 @@ public class InGameState extends GameState
 		AttackableEntity targetEntity = map.getTiles()[packet.getTargetGridX()][packet.getTargetGridY()]
 				.getEnemyAttackableEntity(playerOwner);
 
+		if (attackingEntity == null)
+			return;
+
 		if (attackingEntity instanceof RangedUnit) {
 			packet.setUnitDamage(0);
 		} else

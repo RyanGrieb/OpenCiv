@@ -594,6 +594,9 @@ public class Tile {
 		if (containsTileType(TileType.FOREST) || containsTileType(TileType.JUNGLE))
 			combatModifier -= 0.10;
 
+		if (containsTileType(TileType.FORT))
+			combatModifier -= 0.25;
+
 		return combatModifier;
 	}
 

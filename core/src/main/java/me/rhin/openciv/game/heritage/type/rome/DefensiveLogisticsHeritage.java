@@ -9,7 +9,7 @@ public class DefensiveLogisticsHeritage extends Heritage {
 
 	@Override
 	public int getLevel() {
-		return 2;
+		return 1;
 	}
 
 	@Override
@@ -24,7 +24,7 @@ public class DefensiveLogisticsHeritage extends Heritage {
 
 	@Override
 	public float getCost() {
-		return 60;
+		return 40;
 	}
 
 	@Override

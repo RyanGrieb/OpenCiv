@@ -8,6 +8,7 @@ import java.util.Random;
 import me.rhin.openciv.server.game.map.tile.improvement.ChopImprovement;
 import me.rhin.openciv.server.game.map.tile.improvement.ClearImprovement;
 import me.rhin.openciv.server.game.map.tile.improvement.FarmImprovement;
+import me.rhin.openciv.server.game.map.tile.improvement.FortImprovement;
 import me.rhin.openciv.server.game.map.tile.improvement.MineImprovement;
 import me.rhin.openciv.server.game.map.tile.improvement.PastureImprovement;
 import me.rhin.openciv.server.game.map.tile.improvement.PlantationImprovement;
@@ -441,6 +442,18 @@ public enum TileType implements Comparable<TileType> {
 		public float getMovementCost() {
 			return 0.5f;
 		}
+	},
+
+	FORT(TileLayer.MIDDLE) {
+		@Override
+		public StatLine getStatLine() {
+			return new StatLine();
+		}
+
+		@Override
+		public float getMovementCost() {
+			return 0.5f;
+		}
 	};
 
 	public enum TileLayer {
@@ -534,6 +547,9 @@ public enum TileType implements Comparable<TileType> {
 	TileImprovement getImprovement(String improvementName) {
 		if (improvementName.equals("road"))
 			return new RoadImprovement();
+//FIXME: Do this a better way?`
+		if (improvementName.equals("fort"))
+			return new FortImprovement();
 
 		for (TileImprovement tileImprovement : getImprovements()) {
 			if (tileImprovement.getName().equals(improvementName))

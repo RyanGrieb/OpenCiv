@@ -40,6 +40,7 @@ public enum TileType {
 	HORSES_IMPROVED(TextureEnum.TILE_HORSES_IMPROVED, TileLayer.MIDDLE, TileProperty.IMPROVEMENT),
 	CATTLE_IMPROVED(TextureEnum.TILE_CATTLE_IMPROVED, TileLayer.MIDDLE, TileProperty.IMPROVEMENT),
 	SHEEP_IMPROVED(TextureEnum.TILE_SHEEP_IMPROVED, TileLayer.MIDDLE, TileProperty.IMPROVEMENT),
+	FORT(TextureEnum.TILE_FORT, TileLayer.MIDDLE, TileProperty.IMPROVEMENT),
 	ROAD(0.5F, TileProperty.ROAD);
 
 	public enum TileLayer {

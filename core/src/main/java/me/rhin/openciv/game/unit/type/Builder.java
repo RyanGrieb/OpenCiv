@@ -6,6 +6,8 @@ import java.util.List;
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.city.City;
+import me.rhin.openciv.game.civilization.type.Rome;
+import me.rhin.openciv.game.heritage.type.rome.DefensiveLogisticsHeritage;
 import me.rhin.openciv.game.map.tile.ImprovementType;
 import me.rhin.openciv.game.map.tile.Tile;
 import me.rhin.openciv.game.map.tile.TileType;
@@ -49,6 +51,7 @@ public class Builder extends UnitItem {
 			customActions.add(new PlantationAction(this));
 			customActions.add(new RoadAction(this));
 			customActions.add(new ClearAction(this));
+			customActions.add(new FortAction(this));
 			this.canAttack = false;
 			this.building = false;
 
@@ -360,7 +363,7 @@ public class Builder extends UnitItem {
 			return TextureEnum.ICON_CHOP;
 		}
 	}
-	
+
 	public static class PastureAction extends AbstractAction {
 
 		public PastureAction(Unit unit) {
@@ -477,6 +480,61 @@ public class Builder extends UnitItem {
 		@Override
 		public TextureEnum getSprite() {
 			return TileType.valueOf(unit.getStandingTile().getBaseTileType().name() + "_IMPROVED").getTextureEnum();
+		}
+	}
+
+	public static class FortAction extends AbstractAction {
+
+		public FortAction(Unit unit) {
+			super(unit);
+		}
+
+		@Override
+		public boolean act(float delta) {
+			// unit.getPlayerOwner().unselectUnit();
+			unit.reduceMovement(2);
+			WorkTilePacket packet = new WorkTilePacket();
+			packet.setTile("fort", unit.getStandingTile().getGridX(), unit.getStandingTile().getGridY());
+			Civilization.getInstance().getNetworkManager().sendPacket(packet);
+			// unit.removeAction(this);
+
+			BuilderUnit builderUnit = (BuilderUnit) unit;
+			builderUnit.setBuilding(true);
+			builderUnit.setImprovementType(ImprovementType.FORT);
+
+			Civilization.getInstance().getEventManager().fireEvent(new UnitActEvent(unit));
+
+			unit.removeAction(this);
+			return true;
+		}
+
+		@Override
+		public boolean canAct() {
+			Tile tile = unit.getStandingTile();
+
+			if (!unit.getPlayerOwner().getHeritageTree().hasStudied(DefensiveLogisticsHeritage.class)) {
+				return false;
+			}
+
+			boolean farmableTile = !tile.isImproved() && !tile.containsTileType(TileType.FOREST)
+					&& !tile.containsTileType(TileType.JUNGLE);
+
+			BuilderUnit builderUnit = (BuilderUnit) unit;
+			if (unit.getCurrentMovement() < 1 || !farmableTile || builderUnit.isBuilding()) {
+				return false;
+			}
+
+			return true;
+		}
+
+		@Override
+		public String getName() {
+			return "Fort";
+		}
+
+		@Override
+		public TextureEnum getSprite() {
+			return TextureEnum.TILE_FORT;
 		}
 	}
 

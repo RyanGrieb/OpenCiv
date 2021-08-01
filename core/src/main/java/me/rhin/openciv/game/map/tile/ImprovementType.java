@@ -7,7 +7,8 @@ public enum ImprovementType {
 	CHOP("Clearing Forest", 3),
 	PLANTATION("Building Plantation", 5),
 	ROAD("Building Road", 3),
-	CLEAR("Clearing Jungle", 3);
+	CLEAR("Clearing Jungle", 3),
+	FORT("Building Fort", 7);
 
 	private String improvementDesc;
 	private int maxTurns;
