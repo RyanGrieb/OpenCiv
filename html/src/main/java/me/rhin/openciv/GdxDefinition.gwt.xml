@@ -26,4 +26,5 @@
 	<extend-configuration-property name="gdx.reflect.include" value="me.rhin.openciv.networking.PacketParameter" />
 	<extend-configuration-property name="gdx.reflect.include" value="me.rhin.openciv.game.unit.UnitParameter" />
 	<extend-configuration-property name="gdx.reflect.include" value="me.rhin.openciv.game.city.City" />
+	<extend-configuration-property name="gdx.reflect.include" value="me.rhin.openciv.game.heritage.type" />
 </module>

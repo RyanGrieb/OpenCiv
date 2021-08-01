@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 
+import com.badlogic.gdx.utils.reflect.ClassReflection;
+
 import me.rhin.openciv.game.heritage.type.all.CapitalExpansionHeritage;
 import me.rhin.openciv.game.heritage.type.all.StateWorshipHeritage;
 import me.rhin.openciv.game.heritage.type.all.TaxesHeritage;
@@ -40,8 +42,8 @@ public class HeritageTree {
 
 	public Heritage getHeritageFromClassName(String className) {
 		try {
-			return values.get(Class.forName("me.rhin.openciv.game.heritage.type." + className));
-		} catch (ClassNotFoundException e) {
+			return values.get(ClassReflection.forName("me.rhin.openciv.game.heritage.type." + className));
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 

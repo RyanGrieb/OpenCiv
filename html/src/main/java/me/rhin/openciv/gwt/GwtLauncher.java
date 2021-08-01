@@ -12,10 +12,10 @@ public class GwtLauncher extends GwtApplication {
 	@Override
 	public GwtApplicationConfiguration getConfig() {
 		// Resizable application, uses available space in browser
-		// return new GwtApplicationConfiguration(true);
+		return new GwtApplicationConfiguration(true);
 		// Fixed size application:
 
-		return new GwtApplicationConfiguration(800, 700);
+		// return new GwtApplicationConfiguration(800, 700);
 	}
 
 	@Override
