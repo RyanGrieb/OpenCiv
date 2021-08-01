@@ -1,6 +1,9 @@
 package me.rhin.openciv.server.game.city.building.type;
 
+import java.util.ArrayList;
+
 import me.rhin.openciv.server.Server;
+import me.rhin.openciv.server.game.Player;
 import me.rhin.openciv.server.game.city.City;
 import me.rhin.openciv.server.game.city.building.Building;
 import me.rhin.openciv.server.game.city.wonders.Wonder;
@@ -8,10 +11,11 @@ import me.rhin.openciv.server.game.map.tile.Tile;
 import me.rhin.openciv.server.game.research.type.BronzeWorkingTech;
 import me.rhin.openciv.server.game.unit.RangedUnit;
 import me.rhin.openciv.server.game.unit.Unit;
+import me.rhin.openciv.server.listener.CaptureCityListener;
 import me.rhin.openciv.server.listener.UnitFinishedMoveListener;
 import me.rhin.openciv.shared.stat.Stat;
 
-public class StatueOfAres extends Building implements Wonder, UnitFinishedMoveListener {
+public class StatueOfAres extends Building implements Wonder, UnitFinishedMoveListener, CaptureCityListener {
 
 	public StatueOfAres(City city) {
 		super(city);
@@ -19,6 +23,7 @@ public class StatueOfAres extends Building implements Wonder, UnitFinishedMoveLi
 		this.statLine.addValue(Stat.HERITAGE_GAIN, 1);
 
 		Server.getInstance().getEventManager().addListener(UnitFinishedMoveListener.class, this);
+		Server.getInstance().getEventManager().addListener(CaptureCityListener.class, this);
 
 		// FIXME: When we capture a city, we need to update those units inside the
 		// captured enemy city.
@@ -54,25 +59,42 @@ public class StatueOfAres extends Building implements Wonder, UnitFinishedMoveLi
 		// If we moved out of enemy territory
 		if (!prevTileFriendly && !inEnemyTerritory) {
 			// System.out.println("Moved out of enemy territory.");
-
-			unit.getCombatStatLine().addModifier(Stat.COMBAT_STRENGTH, -0.15F);
-			if (unit instanceof RangedUnit) {
-				((RangedUnit) unit).getRangedCombatStatLine().addModifier(Stat.COMBAT_STRENGTH, -0.15F);
-			}
-
+			modifyCombatStrength(unit, -0.15F);
 			return;
 		}
 
 		// If we moved into enemy territory
 		if (prevTileFriendly && inEnemyTerritory) {
 			// System.out.println("Moved into enemy territory.");
+			modifyCombatStrength(unit, 0.15F);
+			return;
+		}
+	}
 
-			unit.getCombatStatLine().addModifier(Stat.COMBAT_STRENGTH, 0.15F);
-			if (unit instanceof RangedUnit) {
-				((RangedUnit) unit).getRangedCombatStatLine().addModifier(Stat.COMBAT_STRENGTH, 0.15F);
+	@Override
+	public void onCaptureCity(City city, Player oldPlayer) {
+		ArrayList<Unit> units = new ArrayList<>();
+
+		if (city.getPlayerOwner().hasBuilt(StatueOfAres.class)) {
+			units.addAll(city.getPlayerOwner().getOwnedUnits());
+		}
+
+		if (oldPlayer.hasBuilt(StatueOfAres.class)) {
+			units.addAll(oldPlayer.getOwnedUnits());
+		}
+
+		for (Unit unit : units) {
+			// If there are units of the old city owner w/ statue of ares buff
+			if (unit.getPlayerOwner().equals(oldPlayer)) {
+				// Now in enemy territory
+				modifyCombatStrength(unit, 0.15F);
 			}
 
-			return;
+			// If there are units of the new city owner w/ statue of ares buff
+			if (unit.getPlayerOwner().equals(city.getPlayerOwner())) {
+				// Out of enemy territory.
+				modifyCombatStrength(unit, -0.15F);
+			}
 		}
 	}
 
@@ -95,5 +117,12 @@ public class StatueOfAres extends Building implements Wonder, UnitFinishedMoveLi
 	@Override
 	public String getName() {
 		return "Statue Of Ares";
+	}
+
+	private void modifyCombatStrength(Unit unit, float amount) {
+		unit.getCombatStatLine().addModifier(Stat.COMBAT_STRENGTH, amount);
+		if (unit instanceof RangedUnit) {
+			((RangedUnit) unit).getRangedCombatStatLine().addModifier(Stat.COMBAT_STRENGTH, amount);
+		}
 	}
 }

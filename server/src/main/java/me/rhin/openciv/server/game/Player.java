@@ -8,6 +8,8 @@ import com.badlogic.gdx.utils.Json;
 
 import me.rhin.openciv.server.Server;
 import me.rhin.openciv.server.game.city.City;
+import me.rhin.openciv.server.game.city.building.Building;
+import me.rhin.openciv.server.game.city.building.type.StatueOfAres;
 import me.rhin.openciv.server.game.civilization.Civ;
 import me.rhin.openciv.server.game.civilization.CivType;
 import me.rhin.openciv.server.game.civilization.type.RandomCivilization;
@@ -89,7 +91,7 @@ public class Player implements NextTurnListener, ChooseTechListener, ChooseHerit
 	}
 
 	public void updateOwnedStatlines(boolean increaseValues) {
-		
+
 		statLine.clearNonAccumulative();
 
 		for (City city : ownedCities) {
@@ -232,6 +234,17 @@ public class Player implements NextTurnListener, ChooseTechListener, ChooseHerit
 
 	public City getCapitalCity() {
 		return ownedCities.get(0);
+	}
+
+	public boolean hasBuilt(Class<StatueOfAres> buildingClass) {
+		for (City city : ownedCities) {
+			for (Building building : city.getBuildings()) {
+				if (building.getClass() == buildingClass)
+					return true;
+			}
+		}
+
+		return false;
 	}
 
 }

@@ -31,6 +31,7 @@ import me.rhin.openciv.server.game.unit.type.Settler.SettlerUnit;
 import me.rhin.openciv.server.game.unit.type.Warrior.WarriorUnit;
 import me.rhin.openciv.server.game.unit.type.WorkBoat.WorkBoatUnit;
 import me.rhin.openciv.server.listener.BuyProductionItemListener;
+import me.rhin.openciv.server.listener.CaptureCityListener.CaptureCityEvent;
 import me.rhin.openciv.server.listener.ClickSpecialistListener;
 import me.rhin.openciv.server.listener.ClickWorkedTileListener;
 import me.rhin.openciv.server.listener.CombatPreviewListener;
@@ -327,6 +328,8 @@ public class InGameState extends GameState
 						// Reduce statline of the original owner
 						city.getPlayerOwner().reduceStatLine(city.getStatLine());
 
+						Player oldPlayer = city.getPlayerOwner();
+
 						city.getPlayerOwner().removeCity(city);
 						city.setOwner(unit.getPlayerOwner());
 						unit.getPlayerOwner().addCity(city);
@@ -366,6 +369,8 @@ public class InGameState extends GameState
 
 							}
 						}
+
+						Server.getInstance().getEventManager().fireEvent(new CaptureCityEvent(city, oldPlayer));
 					}
 				}
 
