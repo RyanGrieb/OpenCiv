@@ -1,6 +1,6 @@
 package me.rhin.openciv.shared.stat;
 
-public class StatValue implements Cloneable {
+public class StatValue {
 	private float value;
 	private float modifier;
 
@@ -9,24 +9,14 @@ public class StatValue implements Cloneable {
 		this.modifier = 0;
 	}
 
-	@Override
-	public Object clone() throws CloneNotSupportedException {
-		return super.clone();
-	}
-
-	public StatValue cloneValue() {
-		try {
-			return (StatValue) clone();
-		} catch (CloneNotSupportedException e) {
-			e.printStackTrace();
-		}
-
-		return null;
-	}
-
 	public StatValue(float value, float modifier) {
 		this.value = value;
 		this.modifier = modifier;
+	}
+
+	public StatValue(StatValue statValue) {
+		this.value = statValue.getValue();
+		this.modifier = statValue.getModifier();
 	}
 
 	public void addValue(float value) {

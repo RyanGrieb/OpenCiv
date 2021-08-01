@@ -55,7 +55,7 @@ public class StatLine {
 
 	public void mergeStatLine(StatLine statLine) {
 		for (Stat stat : statLine.getStatValues().keySet()) {
-			mergeValue(stat, statLine.getStatValues().get(stat).cloneValue());
+			mergeValue(stat, new StatValue(statLine.getStatValues().get(stat)));
 		}
 	}
 
@@ -63,7 +63,7 @@ public class StatLine {
 		for (Stat stat : statLine.getStatValues().keySet()) {
 			if (stat.getStatType() == statType)
 				continue;
-			mergeValue(stat, statLine.getStatValues().get(stat).cloneValue());
+			mergeValue(stat, new StatValue(statLine.getStatValues().get(stat)));
 		}
 	}
 
@@ -79,7 +79,7 @@ public class StatLine {
 
 	public void reduceStatLine(StatLine statLine) {
 		for (Stat stat : statLine.getStatValues().keySet()) {
-			unmergeValue(stat, statLine.getStatValues().get(stat).cloneValue());
+			unmergeValue(stat, new StatValue(statLine.getStatValues().get(stat)));
 		}
 	}
 
