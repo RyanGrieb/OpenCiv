@@ -353,12 +353,16 @@ public class Tile {
 
 			// Skip over the high layer, since the layered tile overrides the base
 			// layer.
-			if (containsTileLayer(TileLayer.HIGH) && !containsTileType(TileType.CITY)
-					&& tileType.getTileLayer() == TileLayer.BASE) {
-				tileType = iterator.next().getTileType();
+
+			// Problem, have the highest tileLayer be everything.
+			if (tileType.getTileLayer() == TileLayer.HIGH) {
+				return tileType.getStatLine();
 			}
 
-			statLine.mergeStatLine(tileType.getStatLine());
+			if ((tileType.getTileLayer() == TileLayer.MIDDLE || tileType.getTileLayer() == TileLayer.BASE)
+					&& !containsTileType(TileType.CITY)) {
+				statLine.mergeStatLine(tileType.getStatLine());
+			}
 		}
 
 		return statLine;
