@@ -27,6 +27,7 @@ import me.rhin.openciv.server.game.unit.AttackableEntity;
 import me.rhin.openciv.server.game.unit.RangedUnit;
 import me.rhin.openciv.server.game.unit.Unit;
 import me.rhin.openciv.server.game.unit.type.Builder.BuilderUnit;
+import me.rhin.openciv.server.game.unit.type.Caravan.CaravanUnit;
 import me.rhin.openciv.server.game.unit.type.Settler.SettlerUnit;
 import me.rhin.openciv.server.game.unit.type.Warrior.WarriorUnit;
 import me.rhin.openciv.server.game.unit.type.WorkBoat.WorkBoatUnit;
@@ -73,6 +74,7 @@ import me.rhin.openciv.shared.packet.type.TerritoryGrowPacket;
 import me.rhin.openciv.shared.packet.type.TurnTimeLeftPacket;
 import me.rhin.openciv.shared.packet.type.UnitAttackPacket;
 import me.rhin.openciv.shared.packet.type.WorkTilePacket;
+import me.rhin.openciv.shared.stat.Stat;
 
 //FIXME: Instead of the civ game listening for everything. Just split them off into the respective classes. (EX: CombatPreviewListener in the Unit class)
 //Or just use reflection so we don't have to implement 20+ classes.
@@ -254,16 +256,39 @@ public class InGameState extends GameState
 
 		// If the tile we are moving on has a capturable unit.
 		if (targetTile.getCaptureableUnit() != null) {
+
 			Unit targetUnit = targetTile.getCaptureableUnit();
 
-			// Problem: Wrong id being set in the packet?
-			targetUnit.setPlayerOwner(unit.getPlayerOwner());
-			SetUnitOwnerPacket setOwnerPacket = new SetUnitOwnerPacket();
-			setOwnerPacket.setUnit(targetUnit.getPlayerOwner().getName(), targetUnit.getID(),
-					targetUnit.getStandingTile().getGridX(), targetUnit.getStandingTile().getGridY());
+			// When we capture a caravan
+			if (targetUnit instanceof CaravanUnit) {
+				unit.getPlayerOwner().getStatLine().addValue(Stat.GOLD, 100);
+				unit.getPlayerOwner().updateOwnedStatlines(false);
 
-			for (Player player : players) {
-				player.getConn().send(json.toJson(setOwnerPacket));
+				targetUnit.getStandingTile().removeUnit(targetUnit);
+
+				targetUnit.kill();
+
+				// FIXME: Redundant code.
+				DeleteUnitPacket removeUnitPacket = new DeleteUnitPacket();
+				removeUnitPacket.setUnit(targetUnit.getID(), targetUnit.getStandingTile().getGridX(),
+						targetUnit.getStandingTile().getGridY());
+
+				for (Player player : players) {
+					player.getConn().send(json.toJson(removeUnitPacket));
+				}
+
+				// When we capture a builder/settler, ect.
+			} else {
+
+				// Problem: Wrong id being set in the packet?
+				targetUnit.setPlayerOwner(unit.getPlayerOwner());
+				SetUnitOwnerPacket setOwnerPacket = new SetUnitOwnerPacket();
+				setOwnerPacket.setUnit(targetUnit.getPlayerOwner().getName(), targetUnit.getID(),
+						targetUnit.getStandingTile().getGridX(), targetUnit.getStandingTile().getGridY());
+
+				for (Player player : players) {
+					player.getConn().send(json.toJson(setOwnerPacket));
+				}
 			}
 		}
 

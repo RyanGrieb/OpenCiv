@@ -62,8 +62,8 @@ public abstract class AbstractScreen implements Screen, InputProcessor {
 	@Override
 	public void show() {
 		inputMultiplexer = new InputMultiplexer();
-		inputMultiplexer.addProcessor(stage);
 		inputMultiplexer.addProcessor(overlayStage);
+		inputMultiplexer.addProcessor(stage);
 		inputMultiplexer.addProcessor(this);
 		Gdx.input.setInputProcessor(inputMultiplexer);
 	}

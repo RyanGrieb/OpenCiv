@@ -21,13 +21,15 @@ public abstract class Unit implements AttackableEntity, NextTurnListener {
 	private static int unitID = 0;
 
 	protected StatLine combatStrength;
+	protected Tile standingTile;
 	private int id;
 	private Tile[][] cameFrom;
 	private ArrayList<Vector2[]> pathVectors = new ArrayList<>();
 	private Player playerOwner;
 	private float x, y;
 	private float width, height;
-	private Tile standingTile, targetTile;
+
+	protected Tile targetTile;
 	private boolean selected;
 	private float pathMovement;
 	private float movement;
@@ -377,7 +379,7 @@ public abstract class Unit implements AttackableEntity, NextTurnListener {
 		return combatStrength;
 	}
 
-	private Tile removeSmallest(ArrayList<Tile> queue, float fScore[][]) {
+	protected Tile removeSmallest(ArrayList<Tile> queue, float fScore[][]) {
 		float smallest = Integer.MAX_VALUE;
 		Tile smallestTile = null;
 		for (Tile tile : queue) {

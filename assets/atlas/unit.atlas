@@ -18,6 +18,13 @@ unit_builder
   orig: 32, 32
   offset: 0, 0
   index: -1
+unit_caravan
+  rotate: false
+  xy: 274, 2
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
 unit_catapult
   rotate: false
   xy: 2, 2
@@ -62,14 +69,14 @@ unit_spearman
   index: -1
 unit_warrior
   rotate: false
-  xy: 274, 2
+  xy: 308, 2
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 unit_work_boat
   rotate: false
-  xy: 308, 2
+  xy: 342, 2
   size: 27, 32
   orig: 27, 32
   offset: 0, 0

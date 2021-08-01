@@ -37,6 +37,7 @@ public abstract class Unit extends Actor
 	protected ArrayList<AbstractAction> customActions;
 	protected Tile standingTile;
 	protected Sprite targetSelectionSprite;
+	protected boolean allowsMovement;
 	private int id;
 	private Player playerOwner;
 	private ArrayList<Vector2[]> pathVectors;
@@ -52,6 +53,7 @@ public abstract class Unit extends Actor
 
 	public Unit(int id, String unitName, Player playerOwner, Tile standingTile, TextureEnum assetEnum) {
 		this.id = id;
+		this.allowsMovement = true;
 		setName(unitName);
 		this.playerOwner = playerOwner;
 		this.customActions = new ArrayList<>();
@@ -105,7 +107,7 @@ public abstract class Unit extends Actor
 
 		@Override
 		public boolean canAct() {
-			if (unit.getPlayerOwner().isRightMouseHeld())
+			if (unit.getPlayerOwner().isRightMouseHeld() || !unit.allowsMovement())
 				return false;
 
 			return unit.getCurrentMovement() > 0;
@@ -123,7 +125,7 @@ public abstract class Unit extends Actor
 	}
 
 	public abstract float getMovementCost(Tile prevTile, Tile adjTile);
-	
+
 	public abstract List<UnitType> getUnitTypes();
 
 	@Override
@@ -150,7 +152,7 @@ public abstract class Unit extends Actor
 	public void onNextTurn(NextTurnPacket packet) {
 		this.movement = getMaxMovement();
 
-		if (Civilization.getInstance().getGame().getPlayer().equals(playerOwner))
+		if (Civilization.getInstance().getGame().getPlayer().equals(playerOwner) && allowsMovement)
 			Civilization.getInstance().getGame().getNotificationHanlder()
 					.fireNotification(new AvailableMovementNotification(this));
 	}
@@ -172,6 +174,10 @@ public abstract class Unit extends Actor
 				sprite.setColor(Color.WHITE);
 			}
 		}, delay);
+	}
+
+	public void forceSetTargetTile(Tile targetTile) {
+		this.targetTile = targetTile;
 	}
 
 	public boolean setTargetTile(Tile targetTile, boolean wasMouseClick) {
@@ -342,7 +348,7 @@ public abstract class Unit extends Actor
 			shapeRenderer.setColor(Color.RED);
 		else
 			shapeRenderer.setColor(Color.YELLOW);
-		for (Vector2[] vectors : pathVectors) {
+		for (Vector2[] vectors : new ArrayList<>(pathVectors)) {
 			// System.out.println(maxMovement + "," + pathMovement);
 			if (getCurrentMovement() < pathMovement)
 				break;
@@ -520,7 +526,7 @@ public abstract class Unit extends Actor
 		return false;
 	}
 
-	private Tile removeSmallest(ArrayList<Tile> queue, float fScore[][]) {
+	protected Tile removeSmallest(ArrayList<Tile> queue, float fScore[][]) {
 		float smallest = Integer.MAX_VALUE;
 		Tile smallestTile = null;
 		for (Tile tile : queue) {
@@ -532,5 +538,9 @@ public abstract class Unit extends Actor
 
 		queue.remove(smallestTile);
 		return smallestTile;
+	}
+
+	public boolean allowsMovement() {
+		return allowsMovement;
 	}
 }

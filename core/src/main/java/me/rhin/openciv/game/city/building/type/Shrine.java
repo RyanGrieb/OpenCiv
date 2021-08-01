@@ -58,6 +58,6 @@ public class Shrine extends Building {
 
 	@Override
 	public String getDesc() {
-		return "A sanctuary for normal citizens. \n10% produciton bonus towards support units. \nSupport units include builders & settlers. \n+1 Heritage";
+		return "A sanctuary for normal citizens. \n10% produciton bonus towards \nsupport units. Support units \ninclude builders & settlers. \n+1 Heritage";
 	}
 }

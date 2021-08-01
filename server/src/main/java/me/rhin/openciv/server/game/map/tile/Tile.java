@@ -87,6 +87,11 @@ public class Tile {
 		this.units = new ArrayList<>();
 	}
 
+	@Override
+	public String toString() {
+		return getBaseTileType() + ": [" + gridX + "," + gridY + "]";
+	}
+
 	public float getWidth() {
 		return width;
 	}

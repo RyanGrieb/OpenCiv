@@ -40,6 +40,7 @@ import me.rhin.openciv.server.listener.SetProductionItemListener.SetProductionIt
 import me.rhin.openciv.server.listener.SetWorldSizeListener.SetWorldSizeEvent;
 import me.rhin.openciv.server.listener.SettleCityListener.SettleCityEvent;
 import me.rhin.openciv.server.listener.StartGameRequestListener.StartGameRequestEvent;
+import me.rhin.openciv.server.listener.TradeCityListener.TradeCityEvent;
 import me.rhin.openciv.server.listener.UnitMoveListener.UnitMoveEvent;
 import me.rhin.openciv.server.listener.WorkTileListener.WorkTileEvent;
 import me.rhin.openciv.shared.listener.Event;
@@ -67,6 +68,7 @@ import me.rhin.openciv.shared.packet.type.SetProductionItemPacket;
 import me.rhin.openciv.shared.packet.type.SetWorldSizePacket;
 import me.rhin.openciv.shared.packet.type.SettleCityPacket;
 import me.rhin.openciv.shared.packet.type.StartGameRequestPacket;
+import me.rhin.openciv.shared.packet.type.TradeCityPacket;
 import me.rhin.openciv.shared.packet.type.WorkTilePacket;
 import me.rhin.openciv.shared.util.ColorHelper;
 
@@ -139,6 +141,7 @@ public class Server extends WebSocketServer {
 		networkEvents.put(BuyProductionItemPacket.class, BuyProductionItemEvent.class);
 		networkEvents.put(RequestEndTurnPacket.class, RequestEndTurnEvent.class);
 		networkEvents.put(ChooseHeritagePacket.class, ChooseHeritageEvent.class);
+		networkEvents.put(TradeCityPacket.class, TradeCityEvent.class);
 
 		this.playerIndex = 0;
 		this.commandProcessor = new CmdProcessor();

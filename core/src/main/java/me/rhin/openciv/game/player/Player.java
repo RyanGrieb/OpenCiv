@@ -119,7 +119,10 @@ public class Player implements RelativeMouseMoveListener, LeftClickListener, Rig
 	public void onRightClick(ClickType clickType, int x, int y) {
 		if (selectedUnit == null)
 			return;
-
+		
+		if(!selectedUnit.allowsMovement())
+			return;
+		
 		if (clickType == ClickType.DOWN) {
 			selectedUnit.setTargetTile(hoveredTile, true);
 			rightMouseHeld = true;

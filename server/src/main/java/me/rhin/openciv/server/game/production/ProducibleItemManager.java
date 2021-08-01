@@ -24,6 +24,7 @@ import me.rhin.openciv.server.game.city.building.type.Walls;
 import me.rhin.openciv.server.game.city.building.type.WaterMill;
 import me.rhin.openciv.server.game.unit.type.Archer;
 import me.rhin.openciv.server.game.unit.type.Builder;
+import me.rhin.openciv.server.game.unit.type.Caravan;
 import me.rhin.openciv.server.game.unit.type.Catapult;
 import me.rhin.openciv.server.game.unit.type.ChariotArcher;
 import me.rhin.openciv.server.game.unit.type.Galley;
@@ -78,6 +79,7 @@ public class ProducibleItemManager implements NextTurnListener {
 		possibleItems.put("Chariot Archer", new ChariotArcher(city));
 		possibleItems.put("Catapult", new Catapult(city));
 		possibleItems.put("Spearman", new Spearman(city));
+		possibleItems.put("Caravan", new Caravan(city));
 
 		// Buildings
 		possibleItems.put("Granary", new Granary(city));
@@ -94,7 +96,7 @@ public class ProducibleItemManager implements NextTurnListener {
 		possibleItems.put("Hanging Gardens", new HangingGardens(city));
 		possibleItems.put("Statue Of Ares", new StatueOfAres(city));
 		possibleItems.put("Stonehenge", new Stonehenge(city));
-		
+
 		Server.getInstance().getEventManager().addListener(NextTurnListener.class, this);
 	}
 

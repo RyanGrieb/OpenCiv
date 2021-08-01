@@ -37,7 +37,15 @@ public class AvailableMovementNotification extends AbstractNotification
 
 		Tile targetTile = Civilization.getInstance().getGame().getMap().getTiles()[packet.getTargetGridX()][packet
 				.getTargetGridY()];
+
+		Tile prevTile = Civilization.getInstance().getGame().getMap().getTiles()[packet.getPrevGridX()][packet
+				.getPrevGridY()];
+
 		Unit unit = targetTile.getUnitFromID(packet.getUnitID());
+
+		if (unit == null) {
+			unit = prevTile.getUnitFromID(packet.getUnitID());
+		}
 
 		if (unit.getCurrentMovement() > 0
 				|| !unit.getPlayerOwner().equals(Civilization.getInstance().getGame().getPlayer()))
@@ -91,6 +99,14 @@ public class AvailableMovementNotification extends AbstractNotification
 
 	@Override
 	public void act() {
+		if (availableUnits.size() < 1) {
+			index = 0;
+			return;
+		}
+
+		if (index >= availableUnits.size())
+			index = 0;
+
 		Unit unit = availableUnits.get(index);
 
 		SelectUnitPacket packet = new SelectUnitPacket();
@@ -99,9 +115,6 @@ public class AvailableMovementNotification extends AbstractNotification
 		Civilization.getInstance().getNetworkManager().sendPacket(packet);
 
 		index++;
-
-		if (index >= availableUnits.size())
-			index = 0;
 	}
 
 	@Override

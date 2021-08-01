@@ -3,13 +3,13 @@ package me.rhin.openciv.ui.window.type;
 import java.util.ArrayList;
 
 import com.badlogic.gdx.graphics.g2d.Batch;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.utils.Align;
 
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.game.unit.AbstractAction;
 import me.rhin.openciv.game.unit.Unit;
 import me.rhin.openciv.game.unit.type.Builder.BuilderUnit;
+import me.rhin.openciv.listener.MoveUnitListener;
 import me.rhin.openciv.listener.NextTurnListener;
 import me.rhin.openciv.listener.RemoveTileTypeListener;
 import me.rhin.openciv.listener.ResizeListener;
@@ -18,6 +18,7 @@ import me.rhin.openciv.listener.SetUnitHealthListener;
 import me.rhin.openciv.listener.UnitActListener;
 import me.rhin.openciv.listener.UnitAttackListener;
 import me.rhin.openciv.listener.WorkTileListener;
+import me.rhin.openciv.shared.packet.type.MoveUnitPacket;
 import me.rhin.openciv.shared.packet.type.NextTurnPacket;
 import me.rhin.openciv.shared.packet.type.RemoveTileTypePacket;
 import me.rhin.openciv.shared.packet.type.SetTileTypePacket;
@@ -31,7 +32,7 @@ import me.rhin.openciv.ui.label.CustomLabel;
 import me.rhin.openciv.ui.window.AbstractWindow;
 
 public class UnitWindow extends AbstractWindow implements ResizeListener, UnitAttackListener, NextTurnListener,
-		UnitActListener, WorkTileListener, SetTileTypeListener, RemoveTileTypeListener, SetUnitHealthListener {
+		UnitActListener, WorkTileListener, SetTileTypeListener, RemoveTileTypeListener, SetUnitHealthListener, MoveUnitListener {
 
 	private CustomLabel unitNameLabel;
 	private CustomLabel movementLabel;
@@ -96,6 +97,7 @@ public class UnitWindow extends AbstractWindow implements ResizeListener, UnitAt
 		Civilization.getInstance().getEventManager().addListener(SetTileTypeListener.class, this);
 		Civilization.getInstance().getEventManager().addListener(RemoveTileTypeListener.class, this);
 		Civilization.getInstance().getEventManager().addListener(SetUnitHealthListener.class, this);
+		Civilization.getInstance().getEventManager().addListener(MoveUnitListener.class, this);
 	}
 
 	@Override
@@ -107,6 +109,11 @@ public class UnitWindow extends AbstractWindow implements ResizeListener, UnitAt
 
 	@Override
 	public void onNextTurn(NextTurnPacket packet) {
+		updateActionButtons();
+	}
+	
+	@Override
+	public void onUnitMove(MoveUnitPacket packet) {
 		updateActionButtons();
 	}
 

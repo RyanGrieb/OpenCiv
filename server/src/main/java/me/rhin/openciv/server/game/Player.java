@@ -16,17 +16,20 @@ import me.rhin.openciv.server.game.civilization.type.RandomCivilization;
 import me.rhin.openciv.server.game.heritage.HeritageTree;
 import me.rhin.openciv.server.game.research.ResearchTree;
 import me.rhin.openciv.server.game.unit.Unit;
+import me.rhin.openciv.server.game.unit.type.Caravan.CaravanUnit;
 import me.rhin.openciv.server.listener.ChooseHeritageListener;
 import me.rhin.openciv.server.listener.ChooseTechListener;
 import me.rhin.openciv.server.listener.NextTurnListener;
+import me.rhin.openciv.server.listener.TradeCityListener;
 import me.rhin.openciv.shared.packet.type.ChooseHeritagePacket;
 import me.rhin.openciv.shared.packet.type.ChooseTechPacket;
 import me.rhin.openciv.shared.packet.type.PlayerStatUpdatePacket;
+import me.rhin.openciv.shared.packet.type.TradeCityPacket;
 import me.rhin.openciv.shared.stat.Stat;
 import me.rhin.openciv.shared.stat.StatLine;
 import me.rhin.openciv.shared.stat.StatType;
 
-public class Player implements NextTurnListener, ChooseTechListener, ChooseHeritageListener {
+public class Player implements NextTurnListener, ChooseTechListener, ChooseHeritageListener, TradeCityListener {
 
 	private WebSocket conn;
 	private String name;
@@ -62,6 +65,7 @@ public class Player implements NextTurnListener, ChooseTechListener, ChooseHerit
 		Server.getInstance().getEventManager().addListener(NextTurnListener.class, this);
 		Server.getInstance().getEventManager().addListener(ChooseTechListener.class, this);
 		Server.getInstance().getEventManager().addListener(ChooseHeritageListener.class, this);
+		Server.getInstance().getEventManager().addListener(TradeCityListener.class, this);
 	}
 
 	@Override
@@ -88,6 +92,31 @@ public class Player implements NextTurnListener, ChooseTechListener, ChooseHerit
 			return;
 
 		heritageTree.studyHeritage(packet.getName());
+	}
+
+	@Override
+	public void onTradeCity(WebSocket conn, TradeCityPacket packet) {
+		if (!conn.equals(this.conn))
+			return;
+
+		Unit unit = Server.getInstance().getMap().getTiles()[packet.getUnitGridX()][packet.getUnitGridY()]
+				.getUnitFromID(packet.getUnitID());
+
+		City city = null;
+
+		for (Player player : Server.getInstance().getPlayers())
+			for (City playerCity : player.getOwnedCities())
+				if (playerCity.getName().equals(packet.getCityName())) {
+					city = playerCity;
+				}
+
+		if (!(unit instanceof CaravanUnit) || city == null)
+			return;
+
+		System.out.println("Attempting to trade w/ city: " + city.getName());
+		CaravanUnit caravanUnit = (CaravanUnit) unit;
+		caravanUnit.setTradingCity(city);
+		caravanUnit.setCityHeadquarters(unit.getStandingTile().getCity());
 	}
 
 	public void updateOwnedStatlines(boolean increaseValues) {
@@ -246,5 +275,4 @@ public class Player implements NextTurnListener, ChooseTechListener, ChooseHerit
 
 		return false;
 	}
-
 }

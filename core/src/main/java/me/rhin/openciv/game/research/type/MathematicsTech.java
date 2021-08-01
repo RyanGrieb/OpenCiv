@@ -28,7 +28,7 @@ public class MathematicsTech extends Technology {
 
 	@Override
 	public String getDesc() {
-		return "- Unlocks catapult\n" + "- Unlocks hanging garden\n" + "- Unlocks courthouse";
+		return "- Unlocks catapult\n" + "- Unlocks hanging gardens\n" + "- Unlocks courthouse";
 	}
 
 }
