@@ -6,6 +6,7 @@ import me.rhin.openciv.server.game.city.building.type.GreatLibrary;
 import me.rhin.openciv.server.game.city.building.type.GreatPyramids;
 import me.rhin.openciv.server.game.city.building.type.HangingGardens;
 import me.rhin.openciv.server.game.city.building.type.StatueOfAres;
+import me.rhin.openciv.server.game.city.building.type.Stonehenge;
 
 public class GameWonders {
 
@@ -18,6 +19,7 @@ public class GameWonders {
 		addWonder(GreatLibrary.class);
 		addWonder(HangingGardens.class);
 		addWonder(StatueOfAres.class);
+		addWonder(Stonehenge.class);
 	}
 
 	private void addWonder(Class<? extends Wonder> clazz) {

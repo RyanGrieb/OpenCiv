@@ -17,6 +17,7 @@ import me.rhin.openciv.game.city.building.type.Library;
 import me.rhin.openciv.game.city.building.type.Market;
 import me.rhin.openciv.game.city.building.type.Monument;
 import me.rhin.openciv.game.city.building.type.StatueOfAres;
+import me.rhin.openciv.game.city.building.type.Stonehenge;
 import me.rhin.openciv.game.city.building.type.Walls;
 import me.rhin.openciv.game.city.building.type.WaterMill;
 import me.rhin.openciv.game.notification.type.AvailableProductionNotification;
@@ -79,7 +80,8 @@ public class ProducibleItemManager {
 		possibleItems.put("Great Library", new GreatLibrary(city));
 		possibleItems.put("Hanging Gardens", new HangingGardens(city));
 		possibleItems.put("Statue Of Ares", new StatueOfAres(city));
-		
+		possibleItems.put("Stonehenge", new Stonehenge(city));
+
 		// FIXME: There should be a better way to do this than just checking if the
 		// player matches
 		if (city.getPlayerOwner().equals(Civilization.getInstance().getGame().getPlayer()))
