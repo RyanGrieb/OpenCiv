@@ -12,6 +12,7 @@ public abstract class Building implements ProductionItem {
 
 	protected City city;
 	protected StatLine statLine;
+	protected boolean built;
 	private float productionModifier;
 
 	public Building(City city) {
@@ -31,6 +32,7 @@ public abstract class Building implements ProductionItem {
 
 		city.addBuilding(this);
 		city.getProducibleItemManager().getPossibleItems().remove(getName());
+		built = true;
 
 		Server.getInstance().getEventManager().fireEvent(new BuildingConstructedEvent(city, this));
 	}

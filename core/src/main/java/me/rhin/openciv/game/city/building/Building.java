@@ -10,6 +10,7 @@ public abstract class Building implements ProductionItem {
 	protected City city;
 	protected StatLine statLine;
 	protected float productionModifier;
+	protected boolean built;
 
 	public Building(City city) {
 		this.city = city;
@@ -51,5 +52,6 @@ public abstract class Building implements ProductionItem {
 	}
 
 	public void onBuilt() {
+		built = true;
 	}
 }

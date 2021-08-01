@@ -31,6 +31,8 @@ public class GreatLibrary extends Building implements SpecialistContainer, Wonde
 
 	@Override
 	public void onBuilt() {
+		super.onBuilt();
+
 		Civilization.getInstance().getGame().getWonders().setBuilt(getClass());
 	}
 

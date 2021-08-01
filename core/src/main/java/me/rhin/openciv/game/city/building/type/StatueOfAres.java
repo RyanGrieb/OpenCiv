@@ -39,6 +39,8 @@ public class StatueOfAres extends Building implements Wonder {
 
 	@Override
 	public void onBuilt() {
+		super.onBuilt();
+		
 		Civilization.getInstance().getGame().getWonders().setBuilt(getClass());
 	}
 
