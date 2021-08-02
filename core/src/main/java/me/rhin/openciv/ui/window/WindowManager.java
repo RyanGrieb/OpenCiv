@@ -71,7 +71,6 @@ public class WindowManager {
 			}
 		}
 
-
 		if (windows.get(windowClass).isGameDisplayWindow()) {
 			hiddenGameDisplayWindows.put(windowClass, windows.get(windowClass));
 
@@ -112,7 +111,7 @@ public class WindowManager {
 	public boolean allowsInput(Actor actor) {
 		AbstractWindow topWindow = getLastElement(windows.values());
 
-		if (allowsInput() || topWindow == null)
+		if (allowsInput() || topWindow == null || actor == null)
 			return true;
 
 		if (topWindow.disablesInput() && actor.getParent().equals(topWindow))
