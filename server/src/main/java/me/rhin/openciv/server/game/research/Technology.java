@@ -46,6 +46,12 @@ public abstract class Technology {
 
 	public void setResearched(boolean researched) {
 		this.researched = researched;
+
+		if (researched)
+			onResearched();
+	}
+
+	public void onResearched() {
 	}
 
 	/*

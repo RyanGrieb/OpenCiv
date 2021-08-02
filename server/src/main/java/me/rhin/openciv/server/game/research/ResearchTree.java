@@ -94,4 +94,8 @@ public class ResearchTree implements NextTurnListener {
 	public int getCurrentTechIDIndex() {
 		return techIDIndex++;
 	}
+
+	public Player getPlayerOwner() {
+		return player;
+	}
 }

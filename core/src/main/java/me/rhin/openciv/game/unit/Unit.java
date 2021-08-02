@@ -543,4 +543,8 @@ public abstract class Unit extends Actor
 	public boolean allowsMovement() {
 		return allowsMovement;
 	}
+
+	public void kill() {
+		Civilization.getInstance().getEventManager().clearListenersFromObject(this);
+	}
 }

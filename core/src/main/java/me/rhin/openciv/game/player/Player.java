@@ -45,7 +45,6 @@ public class Player implements RelativeMouseMoveListener, LeftClickListener, Rig
 	private boolean rightMouseHeld;
 	private Civ civilization;
 	private int clicksPerSecond;
-	private int caravanAmount;
 
 	public Player(String name) {
 		this.name = name;
@@ -258,13 +257,5 @@ public class Player implements RelativeMouseMoveListener, LeftClickListener, Rig
 
 	public City getCapitalCity() {
 		return ownedCities.get(0);
-	}
-
-	public int getCaravanAmount() {
-		return caravanAmount;
-	}
-
-	public void setCaravanAmount(int caravanAmount) {
-		this.caravanAmount = caravanAmount;
 	}
 }

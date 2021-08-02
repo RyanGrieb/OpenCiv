@@ -206,13 +206,12 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 		Unit unit = tile.getUnitFromID(packet.getUnitID());
 		unit.getPlayerOwner().removeUnit(unit);
 		tile.removeUnit(unit);
+		unit.kill();
 		for (Actor actor : ((InGameScreen) Civilization.getInstance().getScreenManager().getCurrentScreen())
 				.getUnitGroup().getChildren()) {
 			if (actor.equals(unit))
 				actor.addAction(Actions.removeActor());
 		}
-
-		Civilization.getInstance().getEventManager().clearListenersFromObject(unit);
 	}
 
 	@Override

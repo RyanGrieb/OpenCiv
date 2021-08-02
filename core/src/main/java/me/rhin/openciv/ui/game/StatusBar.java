@@ -20,9 +20,9 @@ public class StatusBar extends Actor implements PlayerStatUpdateListener, NextTu
 
 	private Sprite sprite;
 
-	private CustomLabel scienceDescLabel, heritageDescLabel, goldDescLabel;
-	private Sprite scienceIcon, heritageIcon, goldIcon;
-	private CustomLabel scienceLabel, hertiageLabel, goldLabel;
+	private CustomLabel scienceDescLabel, heritageDescLabel, goldDescLabel, tradeDescLabel;
+	private Sprite scienceIcon, heritageIcon, goldIcon, tradeIcon;
+	private CustomLabel scienceLabel, hertiageLabel, goldLabel, tradeLabel;
 
 	private CustomLabel turnsLabel;
 
@@ -45,6 +45,11 @@ public class StatusBar extends Actor implements PlayerStatUpdateListener, NextTu
 		this.goldIcon = TextureEnum.ICON_GOLD.sprite();
 		goldIcon.setSize(16, 16);
 		this.goldLabel = new CustomLabel("0");
+
+		this.tradeDescLabel = new CustomLabel("Trade Routes:");
+		this.tradeIcon = TextureEnum.ICON_BARREL.sprite();
+		tradeIcon.setSize(16, 16);
+		this.tradeLabel = new CustomLabel("0/0");
 
 		this.turnsLabel = new CustomLabel("Turns: 0 (0s)");
 
@@ -80,14 +85,17 @@ public class StatusBar extends Actor implements PlayerStatUpdateListener, NextTu
 		scienceDescLabel.draw(batch, parentAlpha);
 		heritageDescLabel.draw(batch, parentAlpha);
 		goldDescLabel.draw(batch, parentAlpha);
+		tradeDescLabel.draw(batch, parentAlpha);
 
 		scienceIcon.draw(batch);
 		heritageIcon.draw(batch);
 		goldIcon.draw(batch);
+		tradeIcon.draw(batch);
 
 		scienceLabel.draw(batch, parentAlpha);
 		hertiageLabel.draw(batch, parentAlpha);
 		goldLabel.draw(batch, parentAlpha);
+		tradeLabel.draw(batch, parentAlpha);
 
 		turnsLabel.draw(batch, parentAlpha);
 	}
@@ -103,6 +111,9 @@ public class StatusBar extends Actor implements PlayerStatUpdateListener, NextTu
 		goldLabel.setText("" + currentGold + "(" + (gainedGold < 0 ? "-" : "+") + gainedGold + ")");
 
 		hertiageLabel.setText("+" + (int) statLine.getStatValue(Stat.HERITAGE_GAIN) + "");
+
+		tradeLabel.setText((int) statLine.getStatValue(Stat.TRADE_ROUTE_AMOUNT) + "/"
+				+ (int) statLine.getStatValue(Stat.MAX_TRADE_ROUTES));
 
 		updatePositions();
 	}
@@ -150,6 +161,15 @@ public class StatusBar extends Actor implements PlayerStatUpdateListener, NextTu
 
 		originX += goldIcon.getWidth() + 5;
 		goldLabel.setPosition(originX, y + goldLabel.getHeight() / 2);
+
+		originX += goldLabel.getWidth() + 15;
+		tradeDescLabel.setPosition(originX, y + tradeDescLabel.getHeight() / 2);
+
+		originX += tradeDescLabel.getWidth() + 5;
+		tradeIcon.setPosition(originX, y + 1);
+
+		originX += tradeIcon.getWidth() + 5;
+		tradeLabel.setPosition(originX, y + scienceLabel.getHeight() / 2);
 
 		turnsLabel.setPosition(getWidth() - turnsLabel.getWidth() - 2, y + 5);
 	}

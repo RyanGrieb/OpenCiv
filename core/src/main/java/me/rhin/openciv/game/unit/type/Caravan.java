@@ -18,6 +18,7 @@ import me.rhin.openciv.game.unit.Unit;
 import me.rhin.openciv.game.unit.UnitItem;
 import me.rhin.openciv.game.unit.UnitParameter;
 import me.rhin.openciv.listener.UnitActListener.UnitActEvent;
+import me.rhin.openciv.shared.stat.Stat;
 import me.rhin.openciv.ui.window.type.TradeWindow;
 
 public class Caravan extends UnitItem {
@@ -38,8 +39,6 @@ public class Caravan extends UnitItem {
 			this.city = standingTile.getCity();
 
 			customActions.add(new TradeWindowAction(this));
-
-			city.getPlayerOwner().setCaravanAmount(city.getPlayerOwner().getCaravanAmount() + 1);
 		}
 
 		@Override
@@ -245,7 +244,8 @@ public class Caravan extends UnitItem {
 	@Override
 	public boolean meetsProductionRequirements() {
 		return city.getPlayerOwner().getResearchTree().hasResearched(AnimalHusbandryTech.class)
-				&& city.getPlayerOwner().getCaravanAmount() < 1;
+				&& city.getPlayerOwner().getStatLine().getStatValue(Stat.TRADE_ROUTE_AMOUNT) < city.getPlayerOwner()
+						.getStatLine().getStatValue(Stat.MAX_TRADE_ROUTES);
 	}
 
 	@Override

@@ -136,18 +136,29 @@ public class StatLine {
 		statValues.clear();
 	}
 
+	/**
+	 * Clear values that we don't accumulate, such as GOLD_GAIN, SCIENCE_GAIN, ect.
+	 * We also don't clear player_exclusive stat types.
+	 */
 	public void clearNonAccumulative() {
 		ArrayList<Stat> accumulativeStats = new ArrayList<>();
-		for (Stat stat : statValues.keySet())
-			if (stat.isGained())
-				accumulativeStats.add(stat.getAddedStat());
+		for (Stat stat : statValues.keySet()) {
 
+			if (stat.isGained()) {
+				accumulativeStats.add(stat.getAddedStat());
+			}
+
+			if (stat.getStatType() == StatType.PLAYER_EXCLUSIVE)
+				accumulativeStats.add(stat);
+		}
 		Iterator<Stat> iterator = statValues.keySet().iterator();
 		while (iterator.hasNext()) {
 			Stat stat = iterator.next();
 
-			if (!accumulativeStats.contains(stat))
+			if (!accumulativeStats.contains(stat)) {
 				iterator.remove();
+
+			}
 		}
 	}
 

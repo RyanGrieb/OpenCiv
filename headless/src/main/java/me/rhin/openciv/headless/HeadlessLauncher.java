@@ -17,32 +17,17 @@ public class HeadlessLauncher {
 		// createApplication();
 
 		StatLine playerStatLine = new StatLine();
-		//System.out.println("playerStatLine:" + playerStatLine.id);
+		// System.out.println("playerStatLine:" + playerStatLine.id);
 
 		StatLine statLine = new StatLine();
-		statLine.addValue(Stat.SCIENCE_GAIN, 5);
-		//System.out.println("statLine:" + statLine.id);
+		statLine.addValue(Stat.MAX_TRADE_ROUTES, 1);
+		statLine.addValue(Stat.TRADE_ROUTE_AMOUNT, 1);
+		statLine.addValue(Stat.GOLD_GAIN, 1);
+		statLine.addValue(Stat.GOLD, 20);
+		
+		statLine.clearNonAccumulative();
 
-		StatLine cityLine = new StatLine();
-		//System.out.println("cityLine:" + cityLine.id);
-		cityLine.addValue(Stat.SCIENCE_GAIN, 5);
-		cityLine.addValue(Stat.FOOD_GAIN, 2);
-
-		StatLine foodLine = new StatLine();
-		foodLine.addValue(Stat.FOOD_GAIN, 2);
-
-		// Problem. Merging more than 1 statline at a time, causes the previous statline
-		// to merge values when it shouldn't.
-
-		playerStatLine.mergeStatLine(statLine);
-		playerStatLine.mergeStatLine(cityLine);
-
-		System.out.println("============ PLAYER STAT LINE");
-		System.out.println(playerStatLine);
-		System.out.println("============  STAT LINE");
 		System.out.println(statLine);
-		System.out.println("============ CITY STAT LINE");
-		System.out.println(cityLine);
 	}
 
 	private static Application createApplication() {

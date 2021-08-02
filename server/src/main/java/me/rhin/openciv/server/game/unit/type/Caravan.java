@@ -36,8 +36,8 @@ public class Caravan extends UnitItem {
 			super(playerOwner, standingTile);
 
 			combatStrength.setValue(Stat.COMBAT_STRENGTH, 0);
-
-			playerOwner.setCaravanAmount(playerOwner.getCaravanAmount() + 1);
+			playerOwner.getStatLine().addValue(Stat.TRADE_ROUTE_AMOUNT, 1);
+			playerOwner.updateOwnedStatlines(false);
 		}
 
 		@Override
@@ -181,6 +181,14 @@ public class Caravan extends UnitItem {
 		}
 
 		@Override
+		public void kill() {
+			super.kill();
+
+			getPlayerOwner().getStatLine().subValue(Stat.TRADE_ROUTE_AMOUNT, 1);
+			getPlayerOwner().updateOwnedStatlines(false);
+		}
+
+		@Override
 		public float getMovementCost(Tile prevTile, Tile tile) {
 			if (tile.containsTileProperty(TileProperty.WATER))
 				return 1000000;
@@ -220,7 +228,8 @@ public class Caravan extends UnitItem {
 	@Override
 	public boolean meetsProductionRequirements() {
 		return city.getPlayerOwner().getResearchTree().hasResearched(AnimalHusbandryTech.class)
-				&& city.getPlayerOwner().getCaravanAmount() < 1;
+				&& city.getPlayerOwner().getStatLine().getStatValue(Stat.TRADE_ROUTE_AMOUNT) < city.getPlayerOwner()
+						.getStatLine().getStatValue(Stat.MAX_TRADE_ROUTES);
 	}
 
 	@Override
