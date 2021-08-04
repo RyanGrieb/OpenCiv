@@ -10,6 +10,7 @@ import com.badlogic.gdx.utils.Json;
 import me.rhin.openciv.server.Server;
 import me.rhin.openciv.server.game.city.City;
 import me.rhin.openciv.server.game.city.building.Building;
+import me.rhin.openciv.server.game.city.building.type.Circus;
 import me.rhin.openciv.server.game.city.building.type.Granary;
 import me.rhin.openciv.server.game.city.building.type.GreatLibrary;
 import me.rhin.openciv.server.game.city.building.type.GreatPyramids;
@@ -89,6 +90,7 @@ public class ProducibleItemManager implements NextTurnListener {
 		possibleItems.put("Water Mill", new WaterMill(city));
 		possibleItems.put("Walls", new Walls(city));
 		possibleItems.put("Shrine", new Shrine(city));
+		possibleItems.put("Circus", new Circus(city));
 
 		// Wonders
 		possibleItems.put("Great Pyramids", new GreatPyramids(city));
