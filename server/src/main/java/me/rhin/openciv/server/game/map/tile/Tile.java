@@ -21,6 +21,7 @@ import me.rhin.openciv.server.game.unit.AttackableEntity;
 import me.rhin.openciv.server.game.unit.Unit;
 import me.rhin.openciv.server.game.unit.UnitItem.UnitType;
 import me.rhin.openciv.shared.packet.type.WorkTilePacket;
+import me.rhin.openciv.shared.stat.Stat;
 import me.rhin.openciv.shared.stat.StatLine;
 
 public class Tile {
@@ -570,8 +571,10 @@ public class Tile {
 			// Modify the tile here
 			tileImprovement.improveTile();
 
-			if (territory != null)
+			if (territory != null) {
+				territory.addMorale(getStatLine().getStatValue(Stat.MORALE));
 				territory.updateWorkedTiles();
+			}
 
 		} else {
 			// Continue to work the tile

@@ -168,4 +168,15 @@ public class StatLine {
 
 		statValues.get(stat).addModifier(modifier);
 	}
+
+	public void setModifier(Stat stat, float modifier) {
+		if (!statValues.containsKey(stat))
+			statValues.put(stat, new StatValue(0));
+
+		statValues.get(stat).setModifier(modifier);
+	}
+
+	public boolean hasStatValue(Stat stat) {
+		return statValues.containsKey(stat);
+	}
 }

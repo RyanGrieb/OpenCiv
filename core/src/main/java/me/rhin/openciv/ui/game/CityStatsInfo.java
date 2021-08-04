@@ -19,11 +19,11 @@ public class CityStatsInfo extends Actor implements CityStatUpdateListener {
 	private City city;
 
 	private Sprite backgroundSprite;
-	private Sprite populationIcon, foodIcon, productionIcon, goldIcon, scienceIcon, heritageIcon;
+	private Sprite populationIcon, foodIcon, productionIcon, goldIcon, scienceIcon, heritageIcon, moraleIcon;
 	private CustomLabel populationDescLabel, populationGrowthDescLabel, foodDescLabel, productionDescLabel,
-			goldDescLabel, scienceDescLabel, heritageDescLabel, borderGrowthDescLabel;
+			goldDescLabel, scienceDescLabel, heritageDescLabel, borderGrowthDescLabel, moraleDescLabel;
 	private CustomLabel populationLabel, populationGrowthLabel, foodLabel, productionLabel, goldLabel, scienceLabel,
-			heritageLabel, borderGrowthLabel;
+			heritageLabel, borderGrowthLabel, moraleLabel;
 
 	public CityStatsInfo(City city, float x, float y, float width, float height) {
 		this.city = city;
@@ -121,7 +121,20 @@ public class CityStatsInfo extends Actor implements CityStatUpdateListener {
 
 		originX = 5;
 
-		originY -= heritageIcon.getHeight() + 3;
+		this.moraleIcon = TextureEnum.ICON_MORALE.sprite();
+		originY -= heritageIcon.getHeight();
+		moraleIcon.setSize(16, 16);
+		moraleIcon.setPosition(originX, originY);
+
+		this.moraleDescLabel = new CustomLabel("Morale:");
+		originX += moraleIcon.getWidth() + 5;
+		moraleDescLabel.setPosition(originX, originY + moraleDescLabel.getHeight() / 2);
+
+		this.moraleLabel = new CustomLabel("100%");
+
+		originX = 5;
+
+		originY -= moraleIcon.getHeight() + 3;
 		this.borderGrowthDescLabel = new CustomLabel("Expansion In:");
 		borderGrowthDescLabel.setPosition(originX, originY + borderGrowthDescLabel.getHeight() / 2);
 
@@ -142,6 +155,7 @@ public class CityStatsInfo extends Actor implements CityStatUpdateListener {
 		goldIcon.draw(batch);
 		scienceIcon.draw(batch);
 		heritageIcon.draw(batch);
+		moraleIcon.draw(batch);
 
 		populationDescLabel.draw(batch, parentAlpha);
 		populationGrowthDescLabel.draw(batch, parentAlpha);
@@ -150,6 +164,7 @@ public class CityStatsInfo extends Actor implements CityStatUpdateListener {
 		goldDescLabel.draw(batch, parentAlpha);
 		scienceDescLabel.draw(batch, parentAlpha);
 		heritageDescLabel.draw(batch, parentAlpha);
+		moraleDescLabel.draw(batch, parentAlpha);
 		borderGrowthDescLabel.draw(batch, parentAlpha);
 
 		populationLabel.draw(batch, parentAlpha);
@@ -159,6 +174,7 @@ public class CityStatsInfo extends Actor implements CityStatUpdateListener {
 		goldLabel.draw(batch, parentAlpha);
 		scienceLabel.draw(batch, parentAlpha);
 		heritageLabel.draw(batch, parentAlpha);
+		moraleLabel.draw(batch, parentAlpha);
 		borderGrowthLabel.draw(batch, parentAlpha);
 	}
 
@@ -206,6 +222,7 @@ public class CityStatsInfo extends Actor implements CityStatUpdateListener {
 		goldLabel.setText("+" + (int) city.getStatLine().getStatValue(Stat.GOLD_GAIN));
 		scienceLabel.setText("+" + city.getStatLine().getStatValue(Stat.SCIENCE_GAIN));
 		heritageLabel.setText("+" + (int) city.getStatLine().getStatValue(Stat.HERITAGE_GAIN));
+		moraleLabel.setText((int) city.getStatLine().getStatValue(Stat.MORALE) + "%");
 
 		int expansionTurns = (int) Math.ceil(((city.getStatLine().getStatValue(Stat.EXPANSION_REQUIREMENT)
 				- city.getStatLine().getStatValue(Stat.EXPANSION_PROGRESS))
@@ -278,7 +295,15 @@ public class CityStatsInfo extends Actor implements CityStatUpdateListener {
 		originX = 5;
 		heritageLabel.setPosition(getWidth() - (heritageLabel.getWidth() + 2),
 				originY + heritageDescLabel.getHeight() / 2);
-		originY -= heritageIcon.getHeight() + 3;
+		originY -= heritageIcon.getHeight();
+
+		// Morale information
+		moraleIcon.setPosition(originX, originY);
+		originX += moraleIcon.getWidth() + 5;
+		moraleDescLabel.setPosition(originX, originY + moraleDescLabel.getHeight() / 2);
+		originX = 5;
+		moraleLabel.setPosition(getWidth() - (moraleLabel.getWidth() + 2), originY + moraleDescLabel.getHeight() / 2);
+		originY -= moraleIcon.getHeight() + 3;
 
 		// Border growth information
 		borderGrowthDescLabel.setPosition(originX, originY + borderGrowthDescLabel.getHeight() / 2);

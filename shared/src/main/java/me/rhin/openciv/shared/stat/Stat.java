@@ -17,7 +17,8 @@ public enum Stat {
 	POLICY_COST(StatType.POLICY_EXCLUSIVE),
 	COMBAT_STRENGTH,
 	TRADE_ROUTE_AMOUNT(StatType.PLAYER_EXCLUSIVE),
-	MAX_TRADE_ROUTES(StatType.PLAYER_EXCLUSIVE);
+	MAX_TRADE_ROUTES(StatType.PLAYER_EXCLUSIVE),
+	MORALE;
 
 	private Stat addedStat;
 	private StatType statType;
