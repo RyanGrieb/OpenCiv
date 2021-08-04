@@ -41,14 +41,14 @@ icon_chop
   index: -1
 icon_citizen
   rotate: false
-  xy: 820, 36
+  xy: 854, 36
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 icon_citizen_city_center
   rotate: false
-  xy: 856, 36
+  xy: 890, 36
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
@@ -69,14 +69,14 @@ icon_citizen_unworked
   index: -1
 icon_england
   rotate: false
-  xy: 750, 20
+  xy: 784, 20
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 icon_faith
   rotate: false
-  xy: 838, 36
+  xy: 872, 36
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
@@ -104,7 +104,7 @@ icon_germany
   index: -1
 icon_gold
   rotate: false
-  xy: 784, 36
+  xy: 818, 36
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
@@ -112,6 +112,13 @@ icon_gold
 icon_goto
   rotate: false
   xy: 410, 20
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+icon_hammer
+  rotate: false
+  xy: 750, 20
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
@@ -188,7 +195,7 @@ icon_rome
   index: -1
 icon_science
   rotate: false
-  xy: 802, 36
+  xy: 836, 36
   size: 16, 16
   orig: 16, 16
   offset: 0, 0

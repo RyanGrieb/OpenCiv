@@ -6,14 +6,21 @@ filter: Nearest, Nearest
 repeat: none
 building_circus
   rotate: false
-  xy: 200, 130
+  xy: 36, 2
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+building_colosseum
+  rotate: false
+  xy: 200, 164
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 building_granary
   rotate: false
-  xy: 102, 68
+  xy: 136, 96
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
@@ -41,7 +48,7 @@ building_hanging_gardens
   index: -1
 building_library
   rotate: false
-  xy: 200, 164
+  xy: 200, 130
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
@@ -90,7 +97,7 @@ building_shrine
   index: -1
 building_statue_of_ares
   rotate: false
-  xy: 136, 96
+  xy: 170, 96
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
@@ -111,7 +118,7 @@ building_wall
   index: -1
 building_watermill
   rotate: false
-  xy: 36, 2
+  xy: 102, 68
   size: 32, 32
   orig: 32, 32
   offset: 0, 0

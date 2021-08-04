@@ -7,6 +7,8 @@ public class CalendarTech extends Technology {
 
 	public CalendarTech(ResearchTree researchTree) {
 		super(researchTree);
+
+		requiredTechs.add(PotteryTech.class);
 	}
 
 	@Override

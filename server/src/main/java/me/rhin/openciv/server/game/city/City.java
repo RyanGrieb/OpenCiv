@@ -430,6 +430,13 @@ public class City implements AttackableEntity, SpecialistContainer, NextTurnList
 
 		statLine.mergeStatLine(building.getStatLine());
 
+		// FIXME: This is not ideal for implementing morale. But we need to update our
+		// production modifier through the method
+		if (building.getStatLine().hasStatValue(Stat.MORALE)) {
+			statLine.subValue(Stat.MORALE, building.getStatLine().getStatValue(Stat.MORALE));
+			addMorale(building.getStatLine().getStatValue(Stat.MORALE));
+		}
+
 		CityStatUpdatePacket packet = new CityStatUpdatePacket();
 		for (Stat stat : this.statLine.getStatValues().keySet()) {
 			packet.addStat(name, stat.name(), this.statLine.getStatValues().get(stat).getValue());

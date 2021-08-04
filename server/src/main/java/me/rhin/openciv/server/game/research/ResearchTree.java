@@ -12,6 +12,8 @@ import me.rhin.openciv.server.game.research.type.AnimalHusbandryTech;
 import me.rhin.openciv.server.game.research.type.ArcheryTech;
 import me.rhin.openciv.server.game.research.type.BronzeWorkingTech;
 import me.rhin.openciv.server.game.research.type.CalendarTech;
+import me.rhin.openciv.server.game.research.type.ConstructionTech;
+import me.rhin.openciv.server.game.research.type.IronWorkingTech;
 import me.rhin.openciv.server.game.research.type.MasonryTech;
 import me.rhin.openciv.server.game.research.type.MathematicsTech;
 import me.rhin.openciv.server.game.research.type.MiningTech;
@@ -49,6 +51,8 @@ public class ResearchTree implements NextTurnListener {
 		technologies.put(MasonryTech.class, new MasonryTech(this));
 		technologies.put(BronzeWorkingTech.class, new BronzeWorkingTech(this));
 		technologies.put(MathematicsTech.class, new MathematicsTech(this));
+		technologies.put(ConstructionTech.class, new ConstructionTech(this));
+		technologies.put(IronWorkingTech.class, new IronWorkingTech(this));
 
 		Server.getInstance().getEventManager().addListener(NextTurnListener.class, this);
 	}

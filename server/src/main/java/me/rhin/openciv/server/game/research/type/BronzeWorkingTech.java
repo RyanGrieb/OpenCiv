@@ -7,6 +7,8 @@ public class BronzeWorkingTech extends Technology {
 
 	public BronzeWorkingTech(ResearchTree researchTree) {
 		super(researchTree);
+
+		requiredTechs.add(MiningTech.class);
 	}
 
 	@Override

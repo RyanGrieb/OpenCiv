@@ -3,22 +3,22 @@ package me.rhin.openciv.server.game.research.type;
 import me.rhin.openciv.server.game.research.ResearchTree;
 import me.rhin.openciv.server.game.research.Technology;
 
-public class MasonryTech extends Technology {
+public class IronWorkingTech extends Technology {
 
-	public MasonryTech(ResearchTree researchTree) {
+	public IronWorkingTech(ResearchTree researchTree) {
 		super(researchTree);
 
-		requiredTechs.add(MiningTech.class);
+		requiredTechs.add(BronzeWorkingTech.class);
 	}
 
 	@Override
 	public int getScienceCost() {
-		return 55;
+		return 105; // 195
 	}
 
 	@Override
 	public String getName() {
-		return "Masonry";
+		return "Iron Working";
 	}
 
 }

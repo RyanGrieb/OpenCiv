@@ -18,6 +18,7 @@ import me.rhin.openciv.listener.PlayerStatUpdateListener;
 import me.rhin.openciv.listener.RemoveSpecialistFromContainerListener;
 import me.rhin.openciv.listener.ResizeListener;
 import me.rhin.openciv.listener.SetCitizenTileWorkerListener;
+import me.rhin.openciv.listener.SetTileTypeListener;
 import me.rhin.openciv.shared.packet.type.AddSpecialistToContainerPacket;
 import me.rhin.openciv.shared.packet.type.BuildingConstructedPacket;
 import me.rhin.openciv.shared.packet.type.CompleteResearchPacket;
@@ -25,6 +26,7 @@ import me.rhin.openciv.shared.packet.type.FinishProductionItemPacket;
 import me.rhin.openciv.shared.packet.type.PlayerStatUpdatePacket;
 import me.rhin.openciv.shared.packet.type.RemoveSpecialistFromContainerPacket;
 import me.rhin.openciv.shared.packet.type.SetCitizenTileWorkerPacket;
+import me.rhin.openciv.shared.packet.type.SetTileTypePacket;
 import me.rhin.openciv.ui.button.type.CloseWindowButton;
 import me.rhin.openciv.ui.button.type.WorkedTileButton;
 import me.rhin.openciv.ui.game.CityProductionInfo;
@@ -41,7 +43,7 @@ import me.rhin.openciv.ui.window.AbstractWindow;
 
 public class CityInfoWindow extends AbstractWindow implements ResizeListener, BuildingConstructedListener,
 		SetCitizenTileWorkerListener, AddSpecialistToContainerListener, RemoveSpecialistFromContainerListener,
-		CompleteResearchListener, FinishProductionItemListener, PlayerStatUpdateListener {
+		CompleteResearchListener, FinishProductionItemListener, PlayerStatUpdateListener, SetTileTypeListener {
 
 	private City city;
 	private CloseWindowButton closeWindowButton;
@@ -107,6 +109,7 @@ public class CityInfoWindow extends AbstractWindow implements ResizeListener, Bu
 		Civilization.getInstance().getEventManager().addListener(CompleteResearchListener.class, this);
 		Civilization.getInstance().getEventManager().addListener(FinishProductionItemListener.class, this);
 		Civilization.getInstance().getEventManager().addListener(PlayerStatUpdateListener.class, this);
+		Civilization.getInstance().getEventManager().addListener(SetTileTypeListener.class, this);
 	}
 
 	@Override
@@ -192,11 +195,20 @@ public class CityInfoWindow extends AbstractWindow implements ResizeListener, Bu
 
 	@Override
 	public void onFinishProductionItem(FinishProductionItemPacket packet) {
+		if (!city.getName().equals(packet.getCityName()))
+			return;
 		updateAvailableProductionItems();
 	}
-	
+
 	@Override
 	public void onPlayerStatUpdate(PlayerStatUpdatePacket packet) {
+		updateAvailableProductionItems();
+	}
+
+	@Override
+	public void onSetTileType(SetTileTypePacket packet) {
+		// TODO: Determine if this is inside our territory.
+		// FIXME: This doesn't work properly.
 		updateAvailableProductionItems();
 	}
 

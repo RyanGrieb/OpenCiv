@@ -8,6 +8,8 @@ import me.rhin.openciv.game.research.type.AnimalHusbandryTech;
 import me.rhin.openciv.game.research.type.ArcheryTech;
 import me.rhin.openciv.game.research.type.BronzeWorkingTech;
 import me.rhin.openciv.game.research.type.CalendarTech;
+import me.rhin.openciv.game.research.type.ConstructionTech;
+import me.rhin.openciv.game.research.type.IronWorkingTech;
 import me.rhin.openciv.game.research.type.MasonryTech;
 import me.rhin.openciv.game.research.type.MathematicsTech;
 import me.rhin.openciv.game.research.type.MiningTech;
@@ -37,6 +39,8 @@ public class ResearchTree {
 		technologies.put(MasonryTech.class, new MasonryTech());
 		technologies.put(BronzeWorkingTech.class, new BronzeWorkingTech());
 		technologies.put(MathematicsTech.class, new MathematicsTech());
+		technologies.put(ConstructionTech.class, new ConstructionTech());
+		technologies.put(IronWorkingTech.class, new IronWorkingTech());
 	}
 
 	public List<Technology> getTechnologies() {

@@ -7,6 +7,8 @@ public class MathematicsTech extends Technology {
 
 	public MathematicsTech(ResearchTree researchTree) {
 		super(researchTree);
+
+		requiredTechs.add(WheelTech.class);
 	}
 
 	@Override

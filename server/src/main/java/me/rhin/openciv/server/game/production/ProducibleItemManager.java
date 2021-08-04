@@ -11,6 +11,7 @@ import me.rhin.openciv.server.Server;
 import me.rhin.openciv.server.game.city.City;
 import me.rhin.openciv.server.game.city.building.Building;
 import me.rhin.openciv.server.game.city.building.type.Circus;
+import me.rhin.openciv.server.game.city.building.type.Colosseum;
 import me.rhin.openciv.server.game.city.building.type.Granary;
 import me.rhin.openciv.server.game.city.building.type.GreatLibrary;
 import me.rhin.openciv.server.game.city.building.type.GreatPyramids;
@@ -32,6 +33,7 @@ import me.rhin.openciv.server.game.unit.type.Galley;
 import me.rhin.openciv.server.game.unit.type.Scout;
 import me.rhin.openciv.server.game.unit.type.Settler;
 import me.rhin.openciv.server.game.unit.type.Spearman;
+import me.rhin.openciv.server.game.unit.type.Swordsman;
 import me.rhin.openciv.server.game.unit.type.Warrior;
 import me.rhin.openciv.server.game.unit.type.WorkBoat;
 import me.rhin.openciv.server.listener.NextTurnListener;
@@ -81,6 +83,7 @@ public class ProducibleItemManager implements NextTurnListener {
 		possibleItems.put("Catapult", new Catapult(city));
 		possibleItems.put("Spearman", new Spearman(city));
 		possibleItems.put("Caravan", new Caravan(city));
+		possibleItems.put("Swordsman", new Swordsman(city));
 
 		// Buildings
 		possibleItems.put("Granary", new Granary(city));
@@ -91,6 +94,7 @@ public class ProducibleItemManager implements NextTurnListener {
 		possibleItems.put("Walls", new Walls(city));
 		possibleItems.put("Shrine", new Shrine(city));
 		possibleItems.put("Circus", new Circus(city));
+		possibleItems.put("Colosseum", new Colosseum(city));
 
 		// Wonders
 		possibleItems.put("Great Pyramids", new GreatPyramids(city));
