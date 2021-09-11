@@ -436,18 +436,6 @@ public enum TileType implements Comparable<TileType> {
 			return statLine;
 		}
 	},
-	ROAD(TileLayer.LOW) {
-		@Override
-		public StatLine getStatLine() {
-			return new StatLine();
-		}
-
-		@Override
-		public float getMovementCost() {
-			return 0.5f;
-		}
-	},
-
 	FORT(TileLayer.MIDDLE) {
 		@Override
 		public StatLine getStatLine() {
@@ -458,7 +446,29 @@ public enum TileType implements Comparable<TileType> {
 		public float getMovementCost() {
 			return 0.5f;
 		}
-	};
+	},
+	BARBARIAN_CAMP(TileLayer.MIDDLE) {
+		@Override
+		public StatLine getStatLine() {
+			return new StatLine();
+		}
+
+		@Override
+		public float getMovementCost() {
+			return 0.5f;
+		}
+	},
+	ROAD(TileLayer.LOW) {
+		@Override
+		public StatLine getStatLine() {
+			return new StatLine();
+		}
+
+		@Override
+		public float getMovementCost() {
+			return 0.5f;
+		}
+	},;
 
 	public enum TileLayer {
 		BASE,

@@ -886,6 +886,9 @@ public class InGameState extends GameState
 			}
 		}
 
+		Tile tile1 = map.getTiles()[players.get(0).getSpawnX() + 1][players.get(0).getSpawnY()];
+		tile1.setTileType(TileType.BARBARIAN_CAMP);
+
 		// Debug code
 		if (players.size() > 1) {
 			players.get(0).setSpawnPos(players.get(1).getSpawnX() + 2, players.get(1).getSpawnY() + 2);

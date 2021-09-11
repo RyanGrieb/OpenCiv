@@ -11,9 +11,16 @@ icon_america
   orig: 32, 32
   offset: 0, 0
   index: -1
+icon_barbarian
+  rotate: false
+  xy: 512, 20
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
 icon_barrel
   rotate: false
-  xy: 682, 20
+  xy: 716, 20
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
@@ -27,7 +34,7 @@ icon_calendar
   index: -1
 icon_cancel
   rotate: false
-  xy: 716, 20
+  xy: 750, 20
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
@@ -41,14 +48,14 @@ icon_chop
   index: -1
 icon_citizen
   rotate: false
-  xy: 854, 36
+  xy: 888, 36
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 icon_citizen_city_center
   rotate: false
-  xy: 890, 36
+  xy: 924, 36
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
@@ -69,14 +76,14 @@ icon_citizen_unworked
   index: -1
 icon_england
   rotate: false
-  xy: 784, 20
+  xy: 818, 20
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 icon_faith
   rotate: false
-  xy: 872, 36
+  xy: 906, 36
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
@@ -104,7 +111,7 @@ icon_germany
   index: -1
 icon_gold
   rotate: false
-  xy: 818, 36
+  xy: 852, 36
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
@@ -118,7 +125,7 @@ icon_goto
   index: -1
 icon_hammer
   rotate: false
-  xy: 750, 20
+  xy: 784, 20
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
@@ -139,7 +146,7 @@ icon_mathematics
   index: -1
 icon_mining
   rotate: false
-  xy: 512, 20
+  xy: 546, 20
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
@@ -153,14 +160,14 @@ icon_morale
   index: -1
 icon_move
   rotate: false
-  xy: 614, 20
+  xy: 648, 20
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 icon_nazi
   rotate: false
-  xy: 546, 20
+  xy: 580, 20
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
@@ -181,7 +188,7 @@ icon_production
   index: -1
 icon_question
   rotate: false
-  xy: 580, 20
+  xy: 614, 20
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
@@ -195,7 +202,7 @@ icon_rome
   index: -1
 icon_science
   rotate: false
-  xy: 836, 36
+  xy: 870, 36
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
@@ -216,7 +223,7 @@ icon_shield
   index: -1
 icon_smelter
   rotate: false
-  xy: 648, 20
+  xy: 682, 20
   size: 32, 32
   orig: 32, 32
   offset: 0, 0

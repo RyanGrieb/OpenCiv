@@ -6,315 +6,322 @@ filter: Nearest, Nearest
 repeat: none
 tile_air
   rotate: false
-  xy: 478, 85
+  xy: 2, 2
   size: 1, 1
   orig: 1, 1
   offset: 0, 0
   index: -1
+tile_barbarian_camp
+  rotate: false
+  xy: 172, 23
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
 tile_cattle
   rotate: false
-  xy: 36, 54
+  xy: 36, 57
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 tile_cattle_improved
   rotate: false
-  xy: 2, 88
+  xy: 2, 91
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 tile_city
   rotate: false
-  xy: 342, 20
+  xy: 376, 57
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 tile_copper
   rotate: false
-  xy: 444, 54
+  xy: 478, 57
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 tile_copper_improved
   rotate: false
-  xy: 206, 20
+  xy: 240, 57
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 tile_cotton
   rotate: false
-  xy: 172, 88
+  xy: 172, 91
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 tile_cotton_improved
   rotate: false
-  xy: 138, 88
+  xy: 138, 91
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 tile_desert
   rotate: false
-  xy: 172, 20
+  xy: 206, 57
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 tile_desert_hill
   rotate: false
-  xy: 206, 54
+  xy: 240, 91
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 tile_desert_hill_mine
   rotate: false
-  xy: 70, 20
+  xy: 70, 23
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 tile_farm
   rotate: false
-  xy: 2, 20
+  xy: 2, 23
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 tile_floodplains
   rotate: false
-  xy: 104, 54
+  xy: 104, 57
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 tile_forest
   rotate: false
-  xy: 36, 20
+  xy: 36, 23
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 tile_fort
   rotate: false
-  xy: 274, 88
+  xy: 240, 23
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 tile_gems
   rotate: false
-  xy: 308, 88
+  xy: 274, 23
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 tile_gems_improved
   rotate: false
-  xy: 376, 20
+  xy: 410, 57
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 tile_gold
   rotate: false
-  xy: 240, 54
+  xy: 274, 91
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 tile_gold_improved
   rotate: false
-  xy: 240, 88
+  xy: 206, 23
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 tile_grass
   rotate: false
-  xy: 410, 88
+  xy: 376, 23
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 tile_grass_hill
   rotate: false
-  xy: 104, 88
+  xy: 104, 91
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 tile_grass_hill_mine
   rotate: false
-  xy: 138, 20
+  xy: 138, 23
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 tile_horses
   rotate: false
-  xy: 36, 88
+  xy: 36, 91
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 tile_horses_improved
   rotate: false
-  xy: 2, 54
+  xy: 2, 57
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 tile_iron
   rotate: false
-  xy: 274, 20
+  xy: 308, 57
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 tile_iron_improved
   rotate: false
-  xy: 342, 54
+  xy: 376, 91
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 tile_jungle
   rotate: false
-  xy: 444, 88
+  xy: 478, 91
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 tile_mountian
   rotate: false
-  xy: 70, 88
+  xy: 70, 91
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 tile_non_visible
   rotate: false
-  xy: 274, 54
+  xy: 308, 91
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 tile_ocean
   rotate: false
-  xy: 376, 88
+  xy: 342, 23
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 tile_oranges
   rotate: false
-  xy: 410, 20
+  xy: 444, 57
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 tile_plains
   rotate: false
-  xy: 376, 54
+  xy: 410, 91
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 tile_plains_hill
   rotate: false
-  xy: 308, 20
+  xy: 342, 57
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 tile_plains_hill_mine
   rotate: false
-  xy: 342, 88
+  xy: 308, 23
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 tile_river
   rotate: false
-  xy: 444, 49
+  xy: 444, 52
   size: 17, 3
   orig: 17, 3
   offset: 0, 0
   index: -1
 tile_select
   rotate: false
-  xy: 2, 2
+  xy: 2, 5
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 tile_shallow_ocean
   rotate: false
-  xy: 206, 88
+  xy: 206, 91
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 tile_sheep
   rotate: false
-  xy: 172, 54
+  xy: 172, 57
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 tile_sheep_improved
   rotate: false
-  xy: 138, 54
+  xy: 138, 57
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 tile_silver
   rotate: false
-  xy: 104, 20
+  xy: 104, 23
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 tile_silver_improved
   rotate: false
-  xy: 70, 54
+  xy: 70, 57
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 tile_tundra
   rotate: false
-  xy: 240, 20
+  xy: 274, 57
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 tile_tundra_hill
   rotate: false
-  xy: 478, 88
+  xy: 410, 23
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 tile_tundra_hill_mine
   rotate: false
-  xy: 410, 54
+  xy: 444, 91
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 tile_undiscovered
   rotate: false
-  xy: 308, 54
+  xy: 342, 91
   size: 32, 32
   orig: 32, 32
   offset: 0, 0

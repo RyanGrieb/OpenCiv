@@ -4,7 +4,7 @@ public enum MapSize {
 
 	DUEL(40, 24),
 	TINY(56, 36),
-	SMALL(66, 42),
+	SMALL(60, 44),
 	STANDARD(80, 52),
 	LARGE(104, 64),
 	HUGE(128, 80);

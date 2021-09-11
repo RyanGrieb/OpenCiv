@@ -1,9 +1,7 @@
 package me.rhin.openciv.server.game.map;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Random;
-import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.java_websocket.WebSocket;
 
@@ -547,7 +545,7 @@ public class GameMap implements MapRequestListener {
 
 		generateResource(TileType.CATTLE, Server.getInstance().getPlayers().size() * 8, TileType.GRASS,
 				TileType.PLAINS);
-		
+
 		generateResource(TileType.IRON, Server.getInstance().getPlayers().size() * 6, TileType.GRASS, TileType.PLAINS,
 				TileType.PLAINS_HILL, TileType.GRASS_HILL, TileType.DESERT, TileType.DESERT_HILL);
 
@@ -577,6 +575,20 @@ public class GameMap implements MapRequestListener {
 		for (Tile tile : tileIndexer.getAdjacentRiverTiles()) {
 			if (tile.getBaseTileType() == TileType.DESERT)
 				tile.setTileType(TileType.FLOODPLAINS);
+		}
+
+		// Spawn barbarians
+		int campAmount = 8 * mapSize;
+		for (int i = 0; i < campAmount; i++) {
+			int x = rnd.nextInt(getWidth());
+			int y = rnd.nextInt(getHeight());
+			Tile tile = tiles[x][y];
+			if (tile.containsTileProperty(TileProperty.WATER) || tile.containsTileType(TileType.MOUNTAIN)) {
+				i--;
+				continue;
+			}
+
+			tile.setTileType(TileType.BARBARIAN_CAMP);
 		}
 
 	}
