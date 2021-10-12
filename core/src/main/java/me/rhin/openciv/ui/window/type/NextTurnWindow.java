@@ -2,7 +2,7 @@ package me.rhin.openciv.ui.window.type;
 
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.TextureEnum;
-import me.rhin.openciv.game.player.Player;
+import me.rhin.openciv.game.player.AbstractPlayer;
 import me.rhin.openciv.listener.NextTurnListener;
 import me.rhin.openciv.listener.RequestEndTurnListener;
 import me.rhin.openciv.listener.ResizeListener;
@@ -38,7 +38,7 @@ public class NextTurnWindow extends AbstractWindow implements RequestEndTurnList
 
 	@Override
 	public void onRequestEndTurn(RequestEndTurnPacket packet) {
-		Player player = Civilization.getInstance().getGame().getPlayers().get(packet.getPlayerName());
+		AbstractPlayer player = Civilization.getInstance().getGame().getPlayers().get(packet.getPlayerName());
 
 		if (!player.equals(Civilization.getInstance().getGame().getPlayer())) {
 

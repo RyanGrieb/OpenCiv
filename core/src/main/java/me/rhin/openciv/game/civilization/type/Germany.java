@@ -7,7 +7,7 @@ import me.rhin.openciv.game.civilization.Civ;
 import me.rhin.openciv.game.heritage.type.germany.BarbarianHeritage;
 import me.rhin.openciv.game.heritage.type.germany.BlitzkriegHeritage;
 import me.rhin.openciv.game.heritage.type.germany.DisciplineHeritage;
-import me.rhin.openciv.game.player.Player;
+import me.rhin.openciv.game.player.AbstractPlayer;
 
 public class Germany extends Civ {
 
@@ -15,9 +15,9 @@ public class Germany extends Civ {
 	 * Germany 10% Production to military units, All military units have +1 movement
 	 * speed, Panzer Unit. Capture Barbarian units.
 	 */
-	public Germany(Player player) {
+	public Germany(AbstractPlayer player) {
 		super(player);
-		
+
 		addHeritage(new BarbarianHeritage());
 		addHeritage(new BlitzkriegHeritage());
 		addHeritage(new DisciplineHeritage());

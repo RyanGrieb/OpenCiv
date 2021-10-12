@@ -16,6 +16,7 @@ import com.badlogic.gdx.utils.JsonValue;
 import me.rhin.openciv.server.command.CmdProcessor;
 import me.rhin.openciv.server.game.GameState;
 import me.rhin.openciv.server.game.Player;
+import me.rhin.openciv.server.game.ai.AIPlayer;
 import me.rhin.openciv.server.game.map.GameMap;
 import me.rhin.openciv.server.game.state.InLobbyState;
 import me.rhin.openciv.server.listener.BuyProductionItemListener.BuyProductionItemEvent;
@@ -86,6 +87,7 @@ public class Server extends WebSocketServer {
 	private CmdProcessor commandProcessor;
 	private GameMap map;
 	private ArrayList<Player> players;
+	private ArrayList<AIPlayer> aiPlayers;
 	private ColorHelper colorHelper;
 
 	public static void main(String[] args) {
@@ -114,6 +116,7 @@ public class Server extends WebSocketServer {
 
 		this.map = new GameMap();
 		this.players = new ArrayList<>();
+		this.aiPlayers = new ArrayList<>();
 		this.colorHelper = new ColorHelper();
 
 		this.game = new InLobbyState();
@@ -212,6 +215,10 @@ public class Server extends WebSocketServer {
 
 	public ArrayList<Player> getPlayers() {
 		return players;
+	}
+
+	public ArrayList<AIPlayer> getAIPlayers() {
+		return aiPlayers;
 	}
 
 	public ColorHelper getColorHelper() {

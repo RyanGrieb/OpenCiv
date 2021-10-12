@@ -8,6 +8,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Json;
 
 import me.rhin.openciv.server.Server;
+import me.rhin.openciv.server.game.AbstractPlayer;
 import me.rhin.openciv.server.game.Player;
 import me.rhin.openciv.server.game.map.tile.Tile;
 import me.rhin.openciv.server.game.unit.UnitItem.UnitType;
@@ -25,7 +26,7 @@ public abstract class Unit implements AttackableEntity, NextTurnListener {
 	private int id;
 	private Tile[][] cameFrom;
 	private ArrayList<Vector2[]> pathVectors = new ArrayList<>();
-	private Player playerOwner;
+	private AbstractPlayer playerOwner;
 	private float x, y;
 	private float width, height;
 
@@ -36,7 +37,7 @@ public abstract class Unit implements AttackableEntity, NextTurnListener {
 	private float health;
 	private int turnsSinceCombat;
 
-	public Unit(Player playerOwner, Tile standingTile) {
+	public Unit(AbstractPlayer playerOwner, Tile standingTile) {
 		this.id = unitID++;
 		this.combatStrength = new StatLine();
 		this.playerOwner = playerOwner;
@@ -347,7 +348,7 @@ public abstract class Unit implements AttackableEntity, NextTurnListener {
 		return targetTile;
 	}
 
-	public Player getPlayerOwner() {
+	public AbstractPlayer getPlayerOwner() {
 		return playerOwner;
 	}
 
@@ -363,7 +364,7 @@ public abstract class Unit implements AttackableEntity, NextTurnListener {
 		return id;
 	}
 
-	public void setPlayerOwner(Player playerOwner) {
+	public void setPlayerOwner(AbstractPlayer playerOwner) {
 		this.playerOwner = playerOwner;
 	}
 

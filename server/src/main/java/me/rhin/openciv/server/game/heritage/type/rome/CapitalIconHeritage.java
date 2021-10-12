@@ -3,7 +3,7 @@ package me.rhin.openciv.server.game.heritage.type.rome;
 import org.java_websocket.WebSocket;
 
 import me.rhin.openciv.server.Server;
-import me.rhin.openciv.server.game.Player;
+import me.rhin.openciv.server.game.AbstractPlayer;
 import me.rhin.openciv.server.game.city.City;
 import me.rhin.openciv.server.game.city.building.Building;
 import me.rhin.openciv.server.game.heritage.Heritage;
@@ -15,7 +15,7 @@ import me.rhin.openciv.shared.packet.type.SettleCityPacket;
 
 public class CapitalIconHeritage extends Heritage implements SettleCityListener, BuildingConstructedListener {
 
-	public CapitalIconHeritage(Player player) {
+	public CapitalIconHeritage(AbstractPlayer player) {
 		super(player);
 	}
 

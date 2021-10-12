@@ -1,11 +1,11 @@
 package me.rhin.openciv.server.game.heritage.type.england;
 
-import me.rhin.openciv.server.game.Player;
+import me.rhin.openciv.server.game.AbstractPlayer;
 import me.rhin.openciv.server.game.heritage.Heritage;
 
 public class LineShipHeritage extends Heritage {
 
-	public LineShipHeritage(Player player) {
+	public LineShipHeritage(AbstractPlayer player) {
 		super(player);
 	}
 

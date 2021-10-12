@@ -54,7 +54,6 @@ public class Swordsman extends UnitItem {
 	public boolean meetsProductionRequirements() {
 		boolean workedIron = false;
 		for (Tile tile : city.getTerritory()) {
-			System.out.println(tile.getBaseTileType().name());
 			if (tile.containsTileType(TileType.IRON_IMPROVED))
 				workedIron = true;
 		}

@@ -11,6 +11,7 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.Json;
 
 import me.rhin.openciv.server.Server;
+import me.rhin.openciv.server.game.AbstractPlayer;
 import me.rhin.openciv.server.game.Player;
 import me.rhin.openciv.server.game.city.building.Building;
 import me.rhin.openciv.server.game.city.building.IncreaseTileStatlineBuilding;
@@ -41,7 +42,7 @@ import me.rhin.openciv.shared.util.MathHelper;
 
 public class City implements AttackableEntity, SpecialistContainer, NextTurnListener {
 
-	private Player playerOwner;
+	private AbstractPlayer playerOwner;
 	private String name;
 	private Tile originTile;
 	private ArrayList<Tile> territory;
@@ -54,7 +55,7 @@ public class City implements AttackableEntity, SpecialistContainer, NextTurnList
 	private StatLine statLine;
 	private float health;
 
-	public City(Player playerOwner, String name, Tile originTile) {
+	public City(AbstractPlayer playerOwner, String name, Tile originTile) {
 		this.playerOwner = playerOwner;
 		this.name = name;
 		this.originTile = originTile;
@@ -400,7 +401,7 @@ public class City implements AttackableEntity, SpecialistContainer, NextTurnList
 		playerOwner.updateOwnedStatlines(false);
 	}
 
-	public Player getPlayerOwner() {
+	public AbstractPlayer getPlayerOwner() {
 		return playerOwner;
 	}
 
@@ -468,7 +469,7 @@ public class City implements AttackableEntity, SpecialistContainer, NextTurnList
 		return buildings;
 	}
 
-	public void setOwner(Player playerOwner) {
+	public void setOwner(AbstractPlayer playerOwner) {
 		this.playerOwner = playerOwner;
 
 		producibleItemManager.clearProducingItem();

@@ -1,10 +1,7 @@
 package me.rhin.openciv.server.game.civilization.type;
 
-import me.rhin.openciv.server.game.Player;
+import me.rhin.openciv.server.game.AbstractPlayer;
 import me.rhin.openciv.server.game.civilization.Civ;
-import me.rhin.openciv.server.game.heritage.type.america.ExpandedVisionHeritage;
-import me.rhin.openciv.server.game.heritage.type.america.ManifestDestinyHeritage;
-import me.rhin.openciv.server.game.heritage.type.america.MinutemanHeritage;
 import me.rhin.openciv.server.game.heritage.type.england.LineShipHeritage;
 import me.rhin.openciv.server.game.heritage.type.england.OceanTradeHeritage;
 import me.rhin.openciv.server.game.heritage.type.england.SailingHeritage;
@@ -17,7 +14,7 @@ public class England extends Civ {
 	 * for each city on the coastline with a strategic resource
 	 */
 
-	public England(Player player) {
+	public England(AbstractPlayer player) {
 		super(player);
 	}
 

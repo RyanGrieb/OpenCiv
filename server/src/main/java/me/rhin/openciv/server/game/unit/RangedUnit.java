@@ -1,6 +1,6 @@
 package me.rhin.openciv.server.game.unit;
 
-import me.rhin.openciv.server.game.Player;
+import me.rhin.openciv.server.game.AbstractPlayer;
 import me.rhin.openciv.server.game.map.tile.Tile;
 import me.rhin.openciv.shared.stat.Stat;
 import me.rhin.openciv.shared.stat.StatLine;
@@ -9,7 +9,7 @@ public abstract class RangedUnit extends Unit {
 
 	protected StatLine rangedCombatStrength;
 
-	public RangedUnit(Player playerOwner, Tile standingTile) {
+	public RangedUnit(AbstractPlayer playerOwner, Tile standingTile) {
 		super(playerOwner, standingTile);
 
 		this.rangedCombatStrength = new StatLine();

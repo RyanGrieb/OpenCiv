@@ -20,7 +20,7 @@ import me.rhin.openciv.game.map.RiverPart;
 import me.rhin.openciv.game.map.road.Road;
 import me.rhin.openciv.game.map.tile.TileType.TileLayer;
 import me.rhin.openciv.game.map.tile.TileType.TileProperty;
-import me.rhin.openciv.game.player.Player;
+import me.rhin.openciv.game.player.AbstractPlayer;
 import me.rhin.openciv.game.unit.AttackableEntity;
 import me.rhin.openciv.game.unit.Unit;
 import me.rhin.openciv.game.unit.UnitItem.UnitType;
@@ -529,7 +529,7 @@ public class Tile extends Actor implements BottomShapeRenderListener {
 		return topUnit;
 	}
 
-	public Unit getTopEnemyUnit(Player player) {
+	public Unit getTopEnemyUnit(AbstractPlayer player) {
 		Unit topUnit = null;
 		for (Unit unit : units) {
 			if (unit.getPlayerOwner().equals(player))
@@ -550,7 +550,7 @@ public class Tile extends Actor implements BottomShapeRenderListener {
 		return improved;
 	}
 
-	public AttackableEntity getEnemyAttackableEntity(Player player) {
+	public AttackableEntity getEnemyAttackableEntity(AbstractPlayer player) {
 
 		// Problem: This can AND WILL pick up friendly units. Fixed by having to return
 		// enemy cities first.

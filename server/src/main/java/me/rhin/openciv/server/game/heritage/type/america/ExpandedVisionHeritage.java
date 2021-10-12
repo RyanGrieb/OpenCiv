@@ -1,13 +1,13 @@
 package me.rhin.openciv.server.game.heritage.type.america;
 
-import me.rhin.openciv.server.game.Player;
+import me.rhin.openciv.server.game.AbstractPlayer;
 import me.rhin.openciv.server.game.heritage.Heritage;
 
 public class ExpandedVisionHeritage extends Heritage {
 
 	// TODO: Use listeners and apply stats & values through events.
 
-	public ExpandedVisionHeritage(Player player) {
+	public ExpandedVisionHeritage(AbstractPlayer player) {
 		super(player);
 	}
 

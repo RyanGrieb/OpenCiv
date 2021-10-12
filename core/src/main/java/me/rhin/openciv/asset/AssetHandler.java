@@ -3,6 +3,7 @@ package me.rhin.openciv.asset;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.assets.loaders.BitmapFontLoader;
 import com.badlogic.gdx.assets.loaders.SkinLoader;
+import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
@@ -23,6 +24,10 @@ public class AssetHandler extends AssetManager {
 		BitmapFontLoader.BitmapFontParameter fontParameter = new BitmapFontLoader.BitmapFontParameter();
 		fontParameter.atlasName = "atlas/ui.atlas";
 		load("fonts/font.fnt", BitmapFont.class, fontParameter);
+
+		for (SoundEnum soundEnum : SoundEnum.values()) {
+			load("sound/" + soundEnum.name().toLowerCase() + ".ogg", Music.class);
+		}
 
 	}
 

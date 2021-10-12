@@ -3,6 +3,7 @@ package me.rhin.openciv.server.game.city.building.type;
 import java.util.ArrayList;
 
 import me.rhin.openciv.server.Server;
+import me.rhin.openciv.server.game.AbstractPlayer;
 import me.rhin.openciv.server.game.Player;
 import me.rhin.openciv.server.game.city.City;
 import me.rhin.openciv.server.game.city.building.Building;
@@ -72,7 +73,7 @@ public class StatueOfAres extends Building implements Wonder, UnitFinishedMoveLi
 	}
 
 	@Override
-	public void onCaptureCity(City city, Player oldPlayer) {
+	public void onCaptureCity(City city, AbstractPlayer oldPlayer) {
 		ArrayList<Unit> units = new ArrayList<>();
 
 		if (city.getPlayerOwner().hasBuilt(StatueOfAres.class)) {

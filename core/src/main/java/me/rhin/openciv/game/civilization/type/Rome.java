@@ -7,7 +7,7 @@ import me.rhin.openciv.game.civilization.Civ;
 import me.rhin.openciv.game.heritage.type.rome.CapitalIconHeritage;
 import me.rhin.openciv.game.heritage.type.rome.DefensiveLogisticsHeritage;
 import me.rhin.openciv.game.heritage.type.rome.LegionHeritage;
-import me.rhin.openciv.game.player.Player;
+import me.rhin.openciv.game.player.AbstractPlayer;
 
 public class Rome extends Civ {
 
@@ -16,7 +16,7 @@ public class Rome extends Civ {
 	 * produce forts immediately, Legion Unit
 	 */
 
-	public Rome(Player player) {
+	public Rome(AbstractPlayer player) {
 		super(player);
 
 		addHeritage(new LegionHeritage());

@@ -15,11 +15,13 @@ import com.badlogic.gdx.utils.Timer;
 import com.badlogic.gdx.utils.Timer.Task;
 
 import me.rhin.openciv.Civilization;
+import me.rhin.openciv.asset.SoundEnum;
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.map.GameMap;
 import me.rhin.openciv.game.map.tile.Tile;
 import me.rhin.openciv.game.map.tile.TileObserver;
 import me.rhin.openciv.game.notification.type.AvailableMovementNotification;
+import me.rhin.openciv.game.player.AbstractPlayer;
 import me.rhin.openciv.game.player.Player;
 import me.rhin.openciv.game.unit.UnitItem.UnitType;
 import me.rhin.openciv.listener.BottomShapeRenderListener;
@@ -39,7 +41,7 @@ public abstract class Unit extends Actor
 	protected Sprite targetSelectionSprite;
 	protected boolean allowsMovement;
 	private int id;
-	private Player playerOwner;
+	private AbstractPlayer playerOwner;
 	private ArrayList<Vector2[]> pathVectors;
 	private float pathMovement;
 	private Tile targetTile;
@@ -51,7 +53,7 @@ public abstract class Unit extends Actor
 	private boolean ignoresTileObstructions;
 	private AttackableEntity targetEntity;
 
-	public Unit(int id, String unitName, Player playerOwner, Tile standingTile, TextureEnum assetEnum) {
+	public Unit(int id, String unitName, AbstractPlayer playerOwner, Tile standingTile, TextureEnum assetEnum) {
 		this.id = id;
 		this.allowsMovement = true;
 		setName(unitName);
@@ -95,7 +97,7 @@ public abstract class Unit extends Actor
 		@Override
 		public boolean act(float delta) {
 
-			Player player = unit.getPlayerOwner();
+			AbstractPlayer player = unit.getPlayerOwner();
 			unit.setTargetTile(player.getHoveredTile(), true);
 			player.setRightMouseHeld(true);
 
@@ -436,6 +438,9 @@ public abstract class Unit extends Actor
 			}
 		});
 
+		if (selected)
+			SoundEnum.playSound(SoundEnum.UNIT_CLICK);
+
 	}
 
 	public void setPlayerOwner(Player playerOwner) {
@@ -480,7 +485,7 @@ public abstract class Unit extends Actor
 		return targetTile;
 	}
 
-	public Player getPlayerOwner() {
+	public AbstractPlayer getPlayerOwner() {
 		return playerOwner;
 	}
 
@@ -546,5 +551,8 @@ public abstract class Unit extends Actor
 
 	public void kill() {
 		Civilization.getInstance().getEventManager().clearListenersFromObject(this);
+	}
+
+	public void setPlayerOwner(AbstractPlayer abstractPlayer) {
 	}
 }

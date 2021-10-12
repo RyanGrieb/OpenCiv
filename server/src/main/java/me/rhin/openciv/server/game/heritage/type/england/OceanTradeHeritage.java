@@ -1,11 +1,11 @@
 package me.rhin.openciv.server.game.heritage.type.england;
 
-import me.rhin.openciv.server.game.Player;
+import me.rhin.openciv.server.game.AbstractPlayer;
 import me.rhin.openciv.server.game.heritage.Heritage;
 
 public class OceanTradeHeritage extends Heritage {
 
-	public OceanTradeHeritage(Player player) {
+	public OceanTradeHeritage(AbstractPlayer player) {
 		super(player);
 	}
 

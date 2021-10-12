@@ -7,6 +7,7 @@ import java.util.List;
 import com.badlogic.gdx.utils.Json;
 
 import me.rhin.openciv.server.Server;
+import me.rhin.openciv.server.game.AbstractPlayer;
 import me.rhin.openciv.server.game.Player;
 import me.rhin.openciv.server.game.research.type.AnimalHusbandryTech;
 import me.rhin.openciv.server.game.research.type.ArcheryTech;
@@ -28,12 +29,12 @@ import me.rhin.openciv.shared.stat.Stat;
 
 public class ResearchTree implements NextTurnListener {
 
-	private Player player;
+	private AbstractPlayer player;
 	private LinkedHashMap<Class<? extends Technology>, Technology> technologies;
 	private Technology techResearching;
 	private int techIDIndex;
 
-	public ResearchTree(Player player) {
+	public ResearchTree(AbstractPlayer player) {
 		this.player = player;
 		this.technologies = new LinkedHashMap<>();
 		this.techIDIndex = 0;
@@ -99,7 +100,7 @@ public class ResearchTree implements NextTurnListener {
 		return techIDIndex++;
 	}
 
-	public Player getPlayerOwner() {
+	public AbstractPlayer getPlayerOwner() {
 		return player;
 	}
 }

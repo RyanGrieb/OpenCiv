@@ -3,7 +3,7 @@ package me.rhin.openciv.server.game.heritage.type.all;
 import org.java_websocket.WebSocket;
 
 import me.rhin.openciv.server.Server;
-import me.rhin.openciv.server.game.Player;
+import me.rhin.openciv.server.game.AbstractPlayer;
 import me.rhin.openciv.server.game.city.City;
 import me.rhin.openciv.server.game.city.building.type.Monument;
 import me.rhin.openciv.server.game.heritage.Heritage;
@@ -13,7 +13,7 @@ import me.rhin.openciv.shared.packet.type.SettleCityPacket;
 
 public class StateWorshipHeritage extends Heritage implements SettleCityListener {
 
-	public StateWorshipHeritage(Player player) {
+	public StateWorshipHeritage(AbstractPlayer player) {
 		super(player);
 
 		Server.getInstance().getEventManager().addListener(SettleCityListener.class, this);

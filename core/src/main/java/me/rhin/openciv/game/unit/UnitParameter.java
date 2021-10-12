@@ -1,6 +1,7 @@
 package me.rhin.openciv.game.unit;
 
 import me.rhin.openciv.game.map.tile.Tile;
+import me.rhin.openciv.game.player.AbstractPlayer;
 import me.rhin.openciv.game.player.Player;
 
 public class UnitParameter {
@@ -8,9 +9,9 @@ public class UnitParameter {
 	private int id;
 	private String unitName;
 	private Tile standingTile;
-	private Player playerOwner;
+	private AbstractPlayer playerOwner;
 
-	public UnitParameter(int id, String unitName, Player playerOwner, Tile standingTile) {
+	public UnitParameter(int id, String unitName, AbstractPlayer playerOwner, Tile standingTile) {
 		this.id = id;
 		this.unitName = unitName;
 		this.playerOwner = playerOwner;
@@ -25,7 +26,7 @@ public class UnitParameter {
 		return unitName;
 	}
 
-	public Player getPlayerOwner() {
+	public AbstractPlayer getPlayerOwner() {
 		return playerOwner;
 	}
 

@@ -1,11 +1,11 @@
 package me.rhin.openciv.server.game.heritage.type.rome;
 
-import me.rhin.openciv.server.game.Player;
+import me.rhin.openciv.server.game.AbstractPlayer;
 import me.rhin.openciv.server.game.heritage.Heritage;
 
 public class DefensiveLogisticsHeritage extends Heritage {
 
-	public DefensiveLogisticsHeritage(Player player) {
+	public DefensiveLogisticsHeritage(AbstractPlayer player) {
 		super(player);
 	}
 
@@ -26,6 +26,6 @@ public class DefensiveLogisticsHeritage extends Heritage {
 
 	@Override
 	protected void onStudied() {
-		
+
 	}
 }

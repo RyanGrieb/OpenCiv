@@ -12,8 +12,11 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Json;
 
 import me.rhin.openciv.server.Server;
+import me.rhin.openciv.server.game.AbstractPlayer;
 import me.rhin.openciv.server.game.GameState;
 import me.rhin.openciv.server.game.Player;
+import me.rhin.openciv.server.game.ai.AIPlayer;
+import me.rhin.openciv.server.game.ai.BarbarianPlayer;
 import me.rhin.openciv.server.game.city.City;
 import me.rhin.openciv.server.game.city.building.Building;
 import me.rhin.openciv.server.game.city.building.type.Palace;
@@ -63,6 +66,7 @@ import me.rhin.openciv.shared.packet.type.NextTurnPacket;
 import me.rhin.openciv.shared.packet.type.PlayerDisconnectPacket;
 import me.rhin.openciv.shared.packet.type.PlayerListRequestPacket;
 import me.rhin.openciv.shared.packet.type.RangedAttackPacket;
+import me.rhin.openciv.shared.packet.type.RemoveTileTypePacket;
 import me.rhin.openciv.shared.packet.type.RequestEndTurnPacket;
 import me.rhin.openciv.shared.packet.type.SelectUnitPacket;
 import me.rhin.openciv.shared.packet.type.SetCityHealthPacket;
@@ -213,7 +217,9 @@ public class InGameState extends GameState
 		Tile prevTile = map.getTiles()[packet.getPrevGridX()][packet.getPrevGridY()];
 
 		Unit unit = prevTile.getUnitFromID(packet.getUnitID());
-		Player playerOwner = unit.getPlayerOwner();
+
+		// NOTE: We assume player owner is a MPPlayer
+		Player playerOwner = (Player) unit.getPlayerOwner();
 
 		if (unit == null) {
 			System.out.println("Error: Unit is NULL");
@@ -243,7 +249,7 @@ public class InGameState extends GameState
 		if (unit.getMovement() >= unit.getPathMovement() && !unit.getStandingTile().equals(targetTile)) {
 
 			unit.moveToTargetTile();
-			unit.getPlayerOwner().setSelectedUnit(null);
+			playerOwner.setSelectedUnit(null);
 			unit.reduceMovement(unit.getPathMovement());
 
 			packet.setMovementCost(unit.getPathMovement());
@@ -261,8 +267,9 @@ public class InGameState extends GameState
 
 			// When we capture a caravan
 			if (targetUnit instanceof CaravanUnit) {
-				unit.getPlayerOwner().getStatLine().addValue(Stat.GOLD, 100);
-				unit.getPlayerOwner().updateOwnedStatlines(false);
+				// TODO: Plunder sound effect
+				playerOwner.getStatLine().addValue(Stat.GOLD, 100);
+				playerOwner.updateOwnedStatlines(false);
 
 				targetUnit.getStandingTile().removeUnit(targetUnit);
 
@@ -333,6 +340,7 @@ public class InGameState extends GameState
 						targetUnit.getStandingTile().removeUnit(targetUnit);
 
 						targetUnit.kill();
+						targetUnit.getPlayerOwner().getOwnedUnits().remove(targetUnit);
 
 						// FIXME: Redundant code.
 						DeleteUnitPacket removeUnitPacket = new DeleteUnitPacket();
@@ -353,7 +361,7 @@ public class InGameState extends GameState
 						// Reduce statline of the original owner
 						city.getPlayerOwner().reduceStatLine(city.getStatLine());
 
-						Player oldPlayer = city.getPlayerOwner();
+						AbstractPlayer oldPlayer = city.getPlayerOwner();
 
 						city.getPlayerOwner().removeCity(city);
 						city.setOwner(unit.getPlayerOwner());
@@ -417,6 +425,24 @@ public class InGameState extends GameState
 			}
 
 		if (unit.getHealth() > 0) {
+
+			// Handle capturing barbarian camps
+			if (unit.getStandingTile().containsTileType(TileType.BARBARIAN_CAMP)) {
+				System.out.println("Handle capture");
+				Tile campTile = unit.getStandingTile();
+				campTile.removeTileType(TileType.BARBARIAN_CAMP);
+
+				RemoveTileTypePacket removeTileTypePacket = new RemoveTileTypePacket();
+				removeTileTypePacket.setTile(TileType.BARBARIAN_CAMP.name(), campTile.getGridX(), campTile.getGridY());
+
+				for (Player player : Server.getInstance().getPlayers())
+					player.getConn().send(json.toJson(removeTileTypePacket));
+
+				// TODO: Plunder sound effect.
+				unit.getPlayerOwner().getStatLine().addValue(Stat.GOLD, 150);
+				playerOwner.updateOwnedStatlines(false);
+			}
+
 			Server.getInstance().getEventManager().fireEvent(new UnitFinishedMoveEvent(prevTile, unit));
 		}
 
@@ -635,8 +661,13 @@ public class InGameState extends GameState
 	public void onPlayerListRequested(WebSocket conn, PlayerListRequestPacket packet) {
 		System.out.println("[SERVER] Player list requested");
 		for (Player player : players) {
-			packet.addPlayer(player.getName(), player.getCiv().getName().toUpperCase());
+			packet.addPlayer(player.getName(), player.getCiv().getName().toUpperCase(), false);
 		}
+
+		for (AIPlayer aiPlayer : aiPlayers) {
+			packet.addPlayer(aiPlayer.getName(), aiPlayer.getCiv().getName().toUpperCase(), true);
+		}
+
 		Json json = new Json();
 		conn.send(json.toJson(packet));
 	}
@@ -806,6 +837,8 @@ public class InGameState extends GameState
 
 	private void loadGame() {
 		System.out.println("[SERVER] Starting game...");
+
+		getAIPlayers().add(new BarbarianPlayer());
 		map.generateTerrain();
 
 		// Start the game
@@ -886,9 +919,6 @@ public class InGameState extends GameState
 			}
 		}
 
-		Tile tile1 = map.getTiles()[players.get(0).getSpawnX() + 1][players.get(0).getSpawnY()];
-		tile1.setTileType(TileType.BARBARIAN_CAMP);
-
 		// Debug code
 		if (players.size() > 1) {
 			players.get(0).setSpawnPos(players.get(1).getSpawnX() + 2, players.get(1).getSpawnY() + 2);
@@ -927,7 +957,8 @@ public class InGameState extends GameState
 
 				for (TileTypeWrapper tileWrapper : tile.getTileTypeWrappers())
 					if (tileWrapper.getTileType().hasProperty(TileProperty.LUXURY)
-							|| tileWrapper.getTileType().hasProperty(TileProperty.RESOURCE))
+							|| tileWrapper.getTileType().hasProperty(TileProperty.RESOURCE)
+							|| tileWrapper.getTileType() == TileType.BARBARIAN_CAMP)
 						continue;
 
 				if (assignedLuxTiles < 3) {

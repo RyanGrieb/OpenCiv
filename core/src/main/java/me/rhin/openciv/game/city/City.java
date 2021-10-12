@@ -16,12 +16,14 @@ import com.badlogic.gdx.utils.Timer.Task;
 import com.badlogic.gdx.utils.reflect.ClassReflection;
 
 import me.rhin.openciv.Civilization;
+import me.rhin.openciv.asset.SoundEnum;
 import me.rhin.openciv.game.city.building.Building;
 import me.rhin.openciv.game.city.specialist.SpecialistContainer;
 import me.rhin.openciv.game.map.tile.Tile;
 import me.rhin.openciv.game.map.tile.TileObserver;
 import me.rhin.openciv.game.map.tile.TileType.TileProperty;
 import me.rhin.openciv.game.notification.type.AvailableProductionNotification;
+import me.rhin.openciv.game.player.AbstractPlayer;
 import me.rhin.openciv.game.player.Player;
 import me.rhin.openciv.game.production.ProducibleItemManager;
 import me.rhin.openciv.game.unit.AttackableEntity;
@@ -57,7 +59,7 @@ public class City extends Group implements AttackableEntity, TileObserver, Speci
 		RemoveSpecialistFromContainerListener, NextTurnListener {
 
 	private Tile originTile;
-	private Player playerOwner;
+	private AbstractPlayer playerOwner;
 	private ArrayList<Tile> territory;
 	private ArrayList<Building> buildings;
 	private HashMap<Tile, WorkerType> citizenWorkers;
@@ -70,7 +72,7 @@ public class City extends Group implements AttackableEntity, TileObserver, Speci
 	private float health;
 	private float maxHealth;
 
-	public City(Tile originTile, Player playerOwner, String name) {
+	public City(Tile originTile, AbstractPlayer playerOwner, String name) {
 		setName(name);
 		this.originTile = originTile;
 		this.playerOwner = playerOwner;
@@ -109,6 +111,8 @@ public class City extends Group implements AttackableEntity, TileObserver, Speci
 
 				City cityActor = (City) event.getListenerActor();
 				cityActor.onClick();
+
+				SoundEnum.playSound(SoundEnum.CITY_CLICK);
 			}
 		});
 
@@ -337,7 +341,7 @@ public class City extends Group implements AttackableEntity, TileObserver, Speci
 
 	}
 
-	public void setOwner(Player playerOwner) {
+	public void setOwner(AbstractPlayer playerOwner) {
 		this.playerOwner = playerOwner;
 
 		this.nameIcon = playerOwner.getCivilization().getIcon().sprite();
@@ -393,7 +397,7 @@ public class City extends Group implements AttackableEntity, TileObserver, Speci
 		return territory;
 	}
 
-	public Player getPlayerOwner() {
+	public AbstractPlayer getPlayerOwner() {
 		return playerOwner;
 	}
 

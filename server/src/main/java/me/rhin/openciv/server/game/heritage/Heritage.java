@@ -1,15 +1,15 @@
 package me.rhin.openciv.server.game.heritage;
 
-import me.rhin.openciv.server.game.Player;
+import me.rhin.openciv.server.game.AbstractPlayer;
 
 public abstract class Heritage {
 
-	protected Player player;
+	protected AbstractPlayer player;
 	protected boolean studied;
 	private float appliedHeritage;
 	private boolean studying;
 
-	public Heritage(Player player) {
+	public Heritage(AbstractPlayer player) {
 		this.player = player;
 	}
 

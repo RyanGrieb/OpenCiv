@@ -1,19 +1,19 @@
 package me.rhin.openciv.server.game.civilization;
 
-import me.rhin.openciv.server.game.Player;
+import me.rhin.openciv.server.game.AbstractPlayer;
 import me.rhin.openciv.server.game.heritage.Heritage;
 import me.rhin.openciv.server.game.map.tile.TileType;
 
 public abstract class Civ {
 
-	protected Player player;
+	protected AbstractPlayer player;
 
-	public Civ(Player player) {
+	public Civ(AbstractPlayer player) {
 		this.player = player;
 	}
 
 	public abstract String getName();
-	
+
 	public abstract void initHeritage();
 
 	public TileType getBiasTileType() {

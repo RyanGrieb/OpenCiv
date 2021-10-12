@@ -1,6 +1,6 @@
 package me.rhin.openciv.server.game.unit;
 
-import me.rhin.openciv.server.game.Player;
+import me.rhin.openciv.server.game.AbstractPlayer;
 import me.rhin.openciv.server.game.map.tile.Tile;
 
 public interface AttackableEntity {
@@ -11,7 +11,7 @@ public interface AttackableEntity {
 
 	public float getHealth();
 
-	public Player getPlayerOwner();
+	public AbstractPlayer getPlayerOwner();
 
 	public Tile getTile();
 
@@ -20,7 +20,7 @@ public interface AttackableEntity {
 	public boolean surviveAttack(AttackableEntity otherEntity);
 
 	public void setHealth(float health);
-	
+
 	public void onCombat();
 
 }

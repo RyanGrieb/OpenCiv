@@ -123,7 +123,6 @@ public class ProducibleItemManager implements NextTurnListener {
 	}
 
 	public void setProducingItem(String itemName) {
-		System.out.println(itemName);
 
 		if (possibleItems.get(itemName) == null) {
 			throw new NullPointerException();

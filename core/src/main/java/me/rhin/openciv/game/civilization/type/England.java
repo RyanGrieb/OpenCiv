@@ -7,7 +7,7 @@ import me.rhin.openciv.game.civilization.Civ;
 import me.rhin.openciv.game.heritage.type.england.LineShipHeritage;
 import me.rhin.openciv.game.heritage.type.england.OceanTradeHeritage;
 import me.rhin.openciv.game.heritage.type.england.SailingHeritage;
-import me.rhin.openciv.game.player.Player;
+import me.rhin.openciv.game.player.AbstractPlayer;
 
 public class England extends Civ {
 
@@ -16,7 +16,7 @@ public class England extends Civ {
 	 * for each city on the coastline with a strategic resource
 	 */
 
-	public England(Player player) {
+	public England(AbstractPlayer player) {
 		super(player);
 
 		addHeritage(new LineShipHeritage());

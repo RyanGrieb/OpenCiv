@@ -1,19 +1,14 @@
 package me.rhin.openciv.game.player;
 
-import java.util.ArrayList;
 import java.util.Iterator;
 
 import com.badlogic.gdx.utils.Timer;
 import com.badlogic.gdx.utils.Timer.Task;
 
 import me.rhin.openciv.Civilization;
-import me.rhin.openciv.game.city.City;
-import me.rhin.openciv.game.civilization.Civ;
-import me.rhin.openciv.game.heritage.HeritageTree;
 import me.rhin.openciv.game.map.tile.Tile;
 import me.rhin.openciv.game.notification.type.MoveUnitHelpNotification;
 import me.rhin.openciv.game.notification.type.MovementRangeHelpNotification;
-import me.rhin.openciv.game.research.ResearchTree;
 import me.rhin.openciv.game.unit.RangedUnit;
 import me.rhin.openciv.game.unit.Unit;
 import me.rhin.openciv.listener.DeleteUnitListener;
@@ -29,31 +24,18 @@ import me.rhin.openciv.shared.packet.type.SelectUnitPacket;
 import me.rhin.openciv.shared.stat.StatLine;
 import me.rhin.openciv.util.ClickType;
 
-public class Player implements RelativeMouseMoveListener, LeftClickListener, RightClickListener, SelectUnitListener,
-		PlayerStatUpdateListener, DeleteUnitListener {
+public class Player extends AbstractPlayer implements RelativeMouseMoveListener, LeftClickListener, RightClickListener,
+		SelectUnitListener, PlayerStatUpdateListener, DeleteUnitListener {
 
 	// NOTE: This class can be the controlled by the player or the MPPlayer. The
 	// distinction is in the listeners firing.
-	private String name;
 	private Tile hoveredTile;
 	private Unit selectedUnit;
-	private ArrayList<City> ownedCities;
-	private ArrayList<Unit> ownedUnits;
-	private StatLine statLine;
-	private ResearchTree researchTree;
-	private HeritageTree heritageTree;
 	private boolean rightMouseHeld;
-	private Civ civilization;
 	private int clicksPerSecond;
 
 	public Player(String name) {
-		this.name = name;
-		this.ownedCities = new ArrayList<>();
-		this.ownedUnits = new ArrayList<>();
-		this.statLine = new StatLine();
-
-		this.researchTree = new ResearchTree();
-		this.heritageTree = new HeritageTree();
+		super(name);
 
 		Timer.schedule(new Task() {
 			@Override
@@ -170,12 +152,16 @@ public class Player implements RelativeMouseMoveListener, LeftClickListener, Rig
 		}
 	}
 
-	public void setRightMouseHeld(boolean rightMouseHeld) {
-		this.rightMouseHeld = rightMouseHeld;
+	@Override
+	public void removeUnit(Unit unit) {
+		ownedUnits.remove(unit);
+
+		if (selectedUnit != null && selectedUnit.equals(unit))
+			unselectUnit();
 	}
 
-	public String getName() {
-		return name;
+	public void setRightMouseHeld(boolean rightMouseHeld) {
+		this.rightMouseHeld = rightMouseHeld;
 	}
 
 	// FIXME: Does the server know we don't have this unit selected anymore?
@@ -188,61 +174,6 @@ public class Player implements RelativeMouseMoveListener, LeftClickListener, Rig
 		rightMouseHeld = false;
 	}
 
-	public void addCity(City city) {
-		ownedCities.add(city);
-	}
-
-	public City getCityFromName(String name) {
-		for (City city : ownedCities)
-			if (city.getName().equals(name))
-				return city;
-
-		return null;
-	}
-
-	public ResearchTree getResearchTree() {
-		return researchTree;
-	}
-
-	public HeritageTree getHeritageTree() {
-		return heritageTree;
-	}
-
-	public ArrayList<City> getOwnedCities() {
-		return ownedCities;
-	}
-
-	public ArrayList<Unit> getOwnedUnits() {
-		return ownedUnits;
-	}
-
-	public void addUnit(Unit unit) {
-		ownedUnits.add(unit);
-	}
-
-	public void removeUnit(Unit unit) {
-		ownedUnits.remove(unit);
-
-		if (selectedUnit != null && selectedUnit.equals(unit))
-			unselectUnit();
-	}
-
-	public Civ getCivilization() {
-		return civilization;
-	}
-
-	public void setCivilization(Civ civilization) {
-		this.civilization = civilization;
-	}
-
-	public void removeCity(City city) {
-		ownedCities.remove(city);
-	}
-
-	public StatLine getStatLine() {
-		return statLine;
-	}
-
 	public Tile getHoveredTile() {
 		return hoveredTile;
 	}
@@ -253,9 +184,5 @@ public class Player implements RelativeMouseMoveListener, LeftClickListener, Rig
 
 	public boolean isRightMouseHeld() {
 		return rightMouseHeld;
-	}
-
-	public City getCapitalCity() {
-		return ownedCities.get(0);
 	}
 }

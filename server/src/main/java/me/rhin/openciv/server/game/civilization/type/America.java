@@ -1,6 +1,6 @@
 package me.rhin.openciv.server.game.civilization.type;
 
-import me.rhin.openciv.server.game.Player;
+import me.rhin.openciv.server.game.AbstractPlayer;
 import me.rhin.openciv.server.game.civilization.Civ;
 import me.rhin.openciv.server.game.heritage.type.america.ExpandedVisionHeritage;
 import me.rhin.openciv.server.game.heritage.type.america.ManifestDestinyHeritage;
@@ -11,7 +11,7 @@ public class America extends Civ {
 	/*
 	 * All units have +1 vision, 15% production to settlers, American Infrantry
 	 */
-	public America(Player player) {
+	public America(AbstractPlayer player) {
 		super(player);
 	}
 

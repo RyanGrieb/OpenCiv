@@ -130,7 +130,7 @@ public class TechnologyLeaf extends Group implements CompleteResearchListener {
 	
 	public void onClicked() {
 		// Start researching the tech, ect.
-		System.out.println("Research: " + tech.getName());
+		//System.out.println("Research: " + tech.getName());
 	}
 
 	public Vector2 getBackVector() {

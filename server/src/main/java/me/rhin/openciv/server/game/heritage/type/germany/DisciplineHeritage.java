@@ -3,7 +3,7 @@ package me.rhin.openciv.server.game.heritage.type.germany;
 import org.java_websocket.WebSocket;
 
 import me.rhin.openciv.server.Server;
-import me.rhin.openciv.server.game.Player;
+import me.rhin.openciv.server.game.AbstractPlayer;
 import me.rhin.openciv.server.game.city.City;
 import me.rhin.openciv.server.game.heritage.Heritage;
 import me.rhin.openciv.server.game.map.tile.Tile;
@@ -15,7 +15,7 @@ import me.rhin.openciv.shared.packet.type.SettleCityPacket;
 
 public class DisciplineHeritage extends Heritage implements SettleCityListener {
 
-	public DisciplineHeritage(Player player) {
+	public DisciplineHeritage(AbstractPlayer player) {
 		super(player);
 	}
 

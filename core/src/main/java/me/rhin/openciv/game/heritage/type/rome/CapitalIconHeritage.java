@@ -104,7 +104,6 @@ public class CapitalIconHeritage extends Heritage implements SettleCityListener,
 				continue;
 			}
 			for (ProductionItem item : otherCity.getProducibleItemManager().getPossibleItems().values()) {
-				System.out.println(item.getName() + "," + packet.getBuildingName());
 				if (item.getName().equals(packet.getBuildingName())) {
 					Building otherBuilding = (Building) item;
 					otherBuilding.setProductionModifier(-0.25F);

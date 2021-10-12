@@ -3,7 +3,7 @@ package me.rhin.openciv.game.unit;
 import com.badlogic.gdx.graphics.Color;
 
 import me.rhin.openciv.game.map.tile.Tile;
-import me.rhin.openciv.game.player.Player;
+import me.rhin.openciv.game.player.AbstractPlayer;
 
 public interface AttackableEntity {
 
@@ -17,7 +17,7 @@ public interface AttackableEntity {
 
 	public float getMaxHealth();
 
-	public Player getPlayerOwner();
+	public AbstractPlayer getPlayerOwner();
 
 	public String getName();
 

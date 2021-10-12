@@ -1,7 +1,7 @@
 package me.rhin.openciv.server.game.heritage.type.all;
 
 import me.rhin.openciv.server.Server;
-import me.rhin.openciv.server.game.Player;
+import me.rhin.openciv.server.game.AbstractPlayer;
 import me.rhin.openciv.server.game.city.City;
 import me.rhin.openciv.server.game.heritage.Heritage;
 import me.rhin.openciv.server.listener.CityGrowthListener;
@@ -10,7 +10,7 @@ import me.rhin.openciv.shared.stat.Stat;
 
 public class TaxesHeritage extends Heritage implements CityGrowthListener, CityStarveListener {
 
-	public TaxesHeritage(Player player) {
+	public TaxesHeritage(AbstractPlayer player) {
 		super(player);
 
 		Server.getInstance().getEventManager().addListener(CityGrowthListener.class, this);

@@ -1,12 +1,12 @@
 package me.rhin.openciv.server.game.heritage.type.all;
 
-import me.rhin.openciv.server.game.Player;
+import me.rhin.openciv.server.game.AbstractPlayer;
 import me.rhin.openciv.server.game.heritage.Heritage;
 import me.rhin.openciv.shared.stat.Stat;
 
 public class CapitalExpansionHeritage extends Heritage {
 
-	public CapitalExpansionHeritage(Player player) {
+	public CapitalExpansionHeritage(AbstractPlayer player) {
 		super(player);
 	}
 

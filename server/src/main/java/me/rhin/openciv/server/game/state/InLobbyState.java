@@ -144,7 +144,7 @@ public class InLobbyState extends GameState implements StartGameRequestListener,
 	public void onPlayerListRequested(WebSocket conn, PlayerListRequestPacket packet) {
 		System.out.println("[SERVER] Player list requested");
 		for (Player player : players) {
-			packet.addPlayer(player.getName(), player.getCiv().getName().toUpperCase());
+			packet.addPlayer(player.getName(), player.getCiv().getName().toUpperCase(), false);
 		}
 		Json json = new Json();
 		conn.send(json.toJson(packet));
@@ -203,7 +203,7 @@ public class InLobbyState extends GameState implements StartGameRequestListener,
 	public String toString() {
 		return "InLobby";
 	}
-	
+
 	@Override
 	public GameWonders getWonders() {
 		return null;

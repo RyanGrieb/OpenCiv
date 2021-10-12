@@ -7,21 +7,20 @@ import me.rhin.openciv.game.civilization.Civ;
 import me.rhin.openciv.game.heritage.type.america.ExpandedVisionHeritage;
 import me.rhin.openciv.game.heritage.type.america.ManifestDestinyHeritage;
 import me.rhin.openciv.game.heritage.type.america.MinutemanHeritage;
-import me.rhin.openciv.game.player.Player;
+import me.rhin.openciv.game.player.AbstractPlayer;
 
 public class America extends Civ {
 
 	/*
 	 * All units have +1 vision, 25% production to settlers, American musketmen
 	 */
-	public America(Player player) {
+	public America(AbstractPlayer player) {
 		super(player);
-		
+
 		addHeritage(new ExpandedVisionHeritage());
 		addHeritage(new ManifestDestinyHeritage());
 		addHeritage(new MinutemanHeritage());
 	}
-	
 
 	@Override
 	public TextureEnum getIcon() {

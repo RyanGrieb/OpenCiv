@@ -1,6 +1,7 @@
 package me.rhin.openciv.ui.button;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.scenes.scene2d.Actor;
@@ -10,6 +11,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Align;
 
 import me.rhin.openciv.Civilization;
+import me.rhin.openciv.asset.SoundEnum;
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.ui.label.CustomLabel;
 
@@ -56,6 +58,8 @@ public abstract class Button extends Actor {
 					return;
 				}
 				onClick();
+				
+				SoundEnum.playSound(SoundEnum.BUTTON_CLICK);
 			}
 
 			@Override

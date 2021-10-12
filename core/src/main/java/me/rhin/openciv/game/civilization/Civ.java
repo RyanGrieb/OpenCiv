@@ -5,13 +5,13 @@ import com.badlogic.gdx.graphics.Color;
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.heritage.Heritage;
-import me.rhin.openciv.game.player.Player;
+import me.rhin.openciv.game.player.AbstractPlayer;
 
 public abstract class Civ {
 
-	private Player player;
+	private AbstractPlayer player;
 
-	public Civ(Player player) {
+	public Civ(AbstractPlayer player) {
 		this.player = player;
 	}
 

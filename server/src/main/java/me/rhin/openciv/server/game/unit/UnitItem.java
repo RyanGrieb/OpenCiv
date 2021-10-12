@@ -5,6 +5,7 @@ import java.util.List;
 import com.badlogic.gdx.utils.Json;
 
 import me.rhin.openciv.server.Server;
+import me.rhin.openciv.server.game.AbstractPlayer;
 import me.rhin.openciv.server.game.Player;
 import me.rhin.openciv.server.game.city.City;
 import me.rhin.openciv.server.game.map.tile.Tile;
@@ -45,8 +46,8 @@ public abstract class UnitItem implements ProductionItem {
 			Class<? extends Unit> unitClass = (Class<? extends Unit>) Class
 					.forName(getClass().getName() + "$" + getClass().getSimpleName() + "Unit");
 
-			unit = (Unit) unitClass.getConstructor(city.getPlayerOwner().getClass(), city.getOriginTile().getClass())
-					.newInstance(city.getPlayerOwner(), city.getOriginTile());
+			unit = (Unit) unitClass.getConstructor(AbstractPlayer.class, Tile.class).newInstance(city.getPlayerOwner(),
+					city.getOriginTile());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

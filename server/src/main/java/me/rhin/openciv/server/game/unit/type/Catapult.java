@@ -3,6 +3,7 @@ package me.rhin.openciv.server.game.unit.type;
 import java.util.Arrays;
 import java.util.List;
 
+import me.rhin.openciv.server.game.AbstractPlayer;
 import me.rhin.openciv.server.game.Player;
 import me.rhin.openciv.server.game.city.City;
 import me.rhin.openciv.server.game.map.tile.Tile;
@@ -21,7 +22,7 @@ public class Catapult extends UnitItem {
 
 	public static class CatapultUnit extends RangedUnit {
 
-		public CatapultUnit(Player playerOwner, Tile standingTile) {
+		public CatapultUnit(AbstractPlayer playerOwner, Tile standingTile) {
 			super(playerOwner, standingTile);
 
 			combatStrength.setValue(Stat.COMBAT_STRENGTH, 7);

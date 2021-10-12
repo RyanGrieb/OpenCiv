@@ -18,7 +18,10 @@ import me.rhin.openciv.game.map.tile.Tile;
 import me.rhin.openciv.game.notification.NotificationHandler;
 import me.rhin.openciv.game.notification.type.NotResearchingNotification;
 import me.rhin.openciv.game.notification.type.NotStudyingNotification;
+import me.rhin.openciv.game.player.AbstractPlayer;
+import me.rhin.openciv.game.player.BarbarianPlayer;
 import me.rhin.openciv.game.player.Player;
+import me.rhin.openciv.game.sounds.GameSounds;
 import me.rhin.openciv.game.unit.AttackableEntity;
 import me.rhin.openciv.game.unit.Unit;
 import me.rhin.openciv.game.unit.UnitParameter;
@@ -75,8 +78,9 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 	private static final int BASE_TURN_TIME = 9;
 
 	private GameMap map;
+	private GameSounds gameSounds;
 	private Player player;
-	private HashMap<String, Player> players;
+	private HashMap<String, AbstractPlayer> players;
 	private NotificationHandler notificationHandler;
 	private GameWonders gameWonders;
 	private int turnTime;
@@ -84,6 +88,8 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 
 	public CivGame() {
 		this.map = new GameMap();
+		this.gameSounds = new GameSounds();
+		gameSounds.playSkyAmbience();
 		this.players = new HashMap<>();
 		this.gameWonders = new GameWonders();
 		this.turnTime = BASE_TURN_TIME;
@@ -125,7 +131,7 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 
 		// Find unit class using reflection & create an instance of it.
 		try {
-			Player playerOwner = players.get(packet.getPlayerOwner());
+			AbstractPlayer playerOwner = players.get(packet.getPlayerOwner());
 
 			Tile tile = map.getTiles()[packet.getTileGridX()][packet.getTileGridY()];
 			UnitParameter unitParameter = new UnitParameter(packet.getUnitID(), packet.getUnitName(), playerOwner,
@@ -158,14 +164,23 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 	public void onPlayerListRequested(PlayerListRequestPacket packet) {
 		for (int i = 0; i < packet.getPlayerList().length; i++) {
 			String playerName = packet.getPlayerList()[i];
+			String civilizationName = packet.getCivList()[i];
 			if (playerName == null)
 				continue;
 
-			if (playerName.equals(player.getName()))
-				players.put(playerName, player);
-			else
-				players.put(playerName, new Player(playerName));
-
+			// TODO: Have a seperate AI playerlist?
+			if (packet.getAIList()[i]) {
+				if (civilizationName.equals("BARBARIANS"))
+					players.put(playerName, new BarbarianPlayer());
+				else {
+					// TODO: Implement AI Civilization player
+				}
+			} else {
+				if (playerName.equals(player.getName()))
+					players.put(playerName, player);
+				else
+					players.put(playerName, new Player(playerName));
+			}
 			// TODO: Use reflection & remove our deprecated enum
 			players.get(playerName)
 					.setCivilization(CivType.valueOf(packet.getCivList()[i]).getCiv(players.get(playerName)));
@@ -204,9 +219,11 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 	public void onUnitDelete(DeleteUnitPacket packet) {
 		Tile tile = map.getTiles()[packet.getTileGridX()][packet.getTileGridY()];
 		Unit unit = tile.getUnitFromID(packet.getUnitID());
-		unit.getPlayerOwner().removeUnit(unit);
-		tile.removeUnit(unit);
+		System.out.println("Deleting unit from: " + unit.getPlayerOwner().getName());
 		unit.kill();
+		tile.removeUnit(unit);
+		unit.getPlayerOwner().removeUnit(unit);
+
 		for (Actor actor : ((InGameScreen) Civilization.getInstance().getScreenManager().getCurrentScreen())
 				.getUnitGroup().getChildren()) {
 			if (actor.equals(unit))
@@ -216,7 +233,7 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 
 	@Override
 	public void onSettleCity(SettleCityPacket packet) {
-		Player playerOwner = players.get(packet.getPlayerOwner());
+		AbstractPlayer playerOwner = players.get(packet.getPlayerOwner());
 
 		Tile tile = map.getTiles()[packet.getGridX()][packet.getGridY()];
 		City city = new City(tile, playerOwner, packet.getCityName());
@@ -254,7 +271,7 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 
 	@Override
 	public void onTerritoryGrow(TerritoryGrowPacket packet) {
-		Player player = players.get(packet.getPlayerOwner());
+		AbstractPlayer player = players.get(packet.getPlayerOwner());
 		City city = player.getCityFromName(packet.getCityName());
 		Tile tile = map.getTiles()[packet.getGridX()][packet.getGridY()];
 		city.growTerritory(tile);
@@ -282,7 +299,7 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 	@Override
 	public void onSetCityHealth(SetCityHealthPacket packet) {
 		// FIXME: Iterating through players to find the city seems silly
-		for (Player player : players.values()) {
+		for (AbstractPlayer player : players.values()) {
 			City city = player.getCityFromName(packet.getCityName());
 			if (city != null) {
 
@@ -300,7 +317,7 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 	@Override
 	public void onSetCityOwner(SetCityOwnerPacket packet) {
 		// FIXME: Iterating through players to find the city seems silly
-		for (Player player : players.values()) {
+		for (AbstractPlayer player : players.values()) {
 			City city = player.getCityFromName(packet.getCityName());
 			if (city != null) {
 				city.setOwner(players.get(packet.getPlayerName()));
@@ -349,7 +366,7 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 
 	public ArrayList<City> getCities() {
 		ArrayList<City> cities = new ArrayList<>();
-		for (Player player : players.values())
+		for (AbstractPlayer player : players.values())
 			cities.addAll(player.getOwnedCities());
 
 		return cities;
@@ -359,11 +376,15 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 		return notificationHandler;
 	}
 
-	public HashMap<String, Player> getPlayers() {
+	public HashMap<String, AbstractPlayer> getPlayers() {
 		return players;
 	}
 
 	public GameWonders getWonders() {
 		return gameWonders;
+	}
+
+	public GameSounds getGameSounds() {
+		return gameSounds;
 	}
 }

@@ -103,6 +103,7 @@ public class GameMap implements MapRequestListener {
 								AddUnitPacket addUnitPacket = new AddUnitPacket();
 								String unitName = unit.getClass().getSimpleName().substring(0,
 										unit.getClass().getSimpleName().indexOf("Unit"));
+								//Problem, clientside doesn't handle AIPlayers.
 								addUnitPacket.setUnit(unit.getPlayerOwner().getName(), unitName, unit.getID(), tileX,
 										tileY);
 								addUnitPackets.add(addUnitPacket);
@@ -589,6 +590,7 @@ public class GameMap implements MapRequestListener {
 			}
 
 			tile.setTileType(TileType.BARBARIAN_CAMP);
+			Server.getInstance().getGame().getBarbarianPlayer().addCampTile(tile);
 		}
 
 	}

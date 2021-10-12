@@ -1,11 +1,11 @@
 package me.rhin.openciv.server.game.heritage.type.america;
 
-import me.rhin.openciv.server.game.Player;
+import me.rhin.openciv.server.game.AbstractPlayer;
 import me.rhin.openciv.server.game.heritage.Heritage;
 
 public class MinutemanHeritage extends Heritage {
 
-	public MinutemanHeritage(Player player) {
+	public MinutemanHeritage(AbstractPlayer player) {
 		super(player);
 	}
 
@@ -26,6 +26,6 @@ public class MinutemanHeritage extends Heritage {
 
 	@Override
 	protected void onStudied() {
-		//TODO: Implement musketmen first
+		// TODO: Implement musketmen first
 	}
 }

@@ -7,11 +7,10 @@ import java.util.List;
 import com.badlogic.gdx.utils.Json;
 
 import me.rhin.openciv.server.Server;
-import me.rhin.openciv.server.game.Player;
+import me.rhin.openciv.server.game.AbstractPlayer;
 import me.rhin.openciv.server.game.heritage.type.all.CapitalExpansionHeritage;
 import me.rhin.openciv.server.game.heritage.type.all.StateWorshipHeritage;
 import me.rhin.openciv.server.game.heritage.type.all.TaxesHeritage;
-import me.rhin.openciv.server.game.heritage.type.rome.LegionHeritage;
 import me.rhin.openciv.server.listener.NextTurnListener;
 import me.rhin.openciv.shared.packet.type.CompleteHeritagePacket;
 import me.rhin.openciv.shared.stat.Stat;
@@ -20,9 +19,9 @@ public class HeritageTree implements NextTurnListener {
 
 	private LinkedHashMap<Class<? extends Heritage>, Heritage> values;
 	private Heritage heritageStudying;
-	private Player player;
+	private AbstractPlayer player;
 
-	public HeritageTree(Player player) {
+	public HeritageTree(AbstractPlayer player) {
 		this.player = player;
 		this.values = new LinkedHashMap<>();
 
