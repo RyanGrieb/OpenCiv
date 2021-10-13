@@ -6,16 +6,19 @@ import me.rhin.openciv.Civilization;
 
 public enum SoundEnum {
 
-	BUTTON_CLICK(0.5F, SoundType.EFFECT),
+	BACKGROUND_MUSIC_1(0.35F, SoundType.SOUNDTRACK_TITLE),
+	SPARTAN_MUSIC(0.35F, SoundType.SOUNDTRACK_TITLE),
 	AMBIENCE_1(0.03F, SoundType.AMBIENCE),
 	AMBIENCE_2(0.65F, SoundType.AMBIENCE),
+	BUTTON_CLICK(0.5F, SoundType.EFFECT),
 	CITY_CLICK(0.5F, SoundType.EFFECT),
 	UNIT_CLICK(0.2F, SoundType.EFFECT),
 	NEXT_TURN(0.3F, SoundType.EFFECT);
 
 	public enum SoundType {
 		AMBIENCE,
-		MUSIC,
+		SOUNDTRACK_TITLE,
+		SOUNDTRACK_INGAME,
 		EFFECT;
 	}
 

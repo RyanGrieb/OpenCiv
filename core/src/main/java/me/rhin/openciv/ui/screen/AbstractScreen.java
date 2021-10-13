@@ -15,6 +15,7 @@ import com.badlogic.gdx.utils.viewport.StretchViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
 import me.rhin.openciv.Civilization;
+import me.rhin.openciv.listener.SetScreenListener;
 import me.rhin.openciv.listener.BottomShapeRenderListener.BottomShapeRenderEvent;
 import me.rhin.openciv.listener.ResizeListener.ResizeEvent;
 import me.rhin.openciv.listener.ScrollListener.ScollEvent;
@@ -66,6 +67,13 @@ public abstract class AbstractScreen implements Screen, InputProcessor {
 		inputMultiplexer.addProcessor(stage);
 		inputMultiplexer.addProcessor(this);
 		Gdx.input.setInputProcessor(inputMultiplexer);
+
+		// Re-implement listener for Soundhandler
+		// FIXME: This is a stopgap measure since we clear all listeners every screen
+		// change
+		Civilization.getInstance().getEventManager().addListener(SetScreenListener.class,
+				Civilization.getInstance().getSoundHandler());
+
 	}
 
 	@Override

@@ -11,6 +11,7 @@ import com.badlogic.gdx.utils.reflect.ClassReflection;
 
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.SoundEnum;
+import me.rhin.openciv.asset.SoundEnum.SoundType;
 import me.rhin.openciv.game.city.City;
 import me.rhin.openciv.game.city.wonders.GameWonders;
 import me.rhin.openciv.game.civilization.CivType;
@@ -89,7 +90,7 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 		this.map = new GameMap();
 		this.players = new HashMap<>();
 		this.gameWonders = new GameWonders();
-		Civilization.getInstance().getSoundHandler().playAmbience();
+		Civilization.getInstance().getSoundHandler().playTrackBySoundtype(SoundType.AMBIENCE);
 		this.turnTime = BASE_TURN_TIME;
 		this.turns = 0;
 

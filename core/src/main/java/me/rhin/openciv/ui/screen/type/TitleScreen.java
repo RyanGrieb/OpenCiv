@@ -4,6 +4,7 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.utils.Align;
 
 import me.rhin.openciv.Civilization;
+import me.rhin.openciv.asset.SoundEnum.SoundType;
 import me.rhin.openciv.listener.LeftClickListener.LeftClickEvent;
 import me.rhin.openciv.listener.MouseMoveListener.MouseMoveEvent;
 import me.rhin.openciv.listener.ResizeListener;
@@ -31,6 +32,9 @@ public class TitleScreen extends AbstractScreen implements ResizeListener {
 	private CustomLabel subTitleLabel;
 
 	public TitleScreen() {
+
+		Civilization.getInstance().getSoundHandler().playTrackBySoundtype(SoundType.SOUNDTRACK_TITLE);
+
 		this.eventManager = Civilization.getInstance().getEventManager();
 		eventManager.clearEvents();
 

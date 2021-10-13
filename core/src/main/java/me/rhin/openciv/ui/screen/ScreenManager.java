@@ -3,6 +3,7 @@ package me.rhin.openciv.ui.screen;
 import java.util.Stack;
 
 import me.rhin.openciv.Civilization;
+import me.rhin.openciv.listener.SetScreenListener.SetScreenEvent;
 
 public class ScreenManager {
 
@@ -17,6 +18,8 @@ public class ScreenManager {
 	}
 
 	public void setScreen(ScreenEnum screenEnum) {
+		ScreenEnum prevScreenEnum = (currentScreen != null ? currentScreen.getType() : null);
+		Civilization.getInstance().getEventManager().fireEvent(new SetScreenEvent(prevScreenEnum, screenEnum));
 		AbstractScreen newScreen = screenEnum.getScreen();
 
 		if (currentScreen != null) {
@@ -33,8 +36,12 @@ public class ScreenManager {
 	}
 
 	public void revertToPreviousScreen() {
-		//FIXME: Remove this redundant code from setScreen()
+		// FIXME: Remove this redundant code from setScreen()
 		AbstractScreen newScreen = previousScreens.pop().getScreen();
+
+		// FIXME: The listener in sound manager doesn't pick this up
+		ScreenEnum prevScreenEnum = (currentScreen != null ? currentScreen.getType() : null);
+		Civilization.getInstance().getEventManager().fireEvent(new SetScreenEvent(prevScreenEnum, newScreen.getType()));
 
 		if (currentScreen != null) {
 			currentScreen.dispose();

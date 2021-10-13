@@ -9,12 +9,17 @@ import com.badlogic.gdx.audio.Music;
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.SoundEnum;
 import me.rhin.openciv.asset.SoundEnum.SoundType;
+import me.rhin.openciv.listener.SetScreenListener;
+import me.rhin.openciv.ui.screen.ScreenEnum;
+import me.rhin.openciv.ui.screen.type.InGameScreen;
+import me.rhin.openciv.ui.screen.type.TitleScreen;
 
 //TODO: Not sure if I should be using this
-public class SoundHandler {
+public class SoundHandler implements SetScreenListener {
 
 	private ArrayList<Music> ambienceTracks;
-	private ArrayList<Music> musicTacks;
+	private ArrayList<Music> titleMusicTacks;
+	private ArrayList<Music> inGameMusicTacks;
 
 	private HashMap<SoundEnum, Music> soundMap;
 	private Music currentMusic;
@@ -23,7 +28,33 @@ public class SoundHandler {
 	public SoundHandler() {
 		this.soundMap = new HashMap<>();
 		this.ambienceTracks = new ArrayList<>();
-		this.musicTacks = new ArrayList<>();
+		this.titleMusicTacks = new ArrayList<>();
+
+		// Civilization.getInstance().getEventManager().addListener(SetScreenListener.class,
+		// this);
+	}
+
+	@Override
+	public void onSetScreen(ScreenEnum prevScreenEnum, ScreenEnum screenEnum) {
+
+		if (prevScreenEnum == ScreenEnum.SERVER_LOBBY && screenEnum == ScreenEnum.IN_GAME) {
+			// Stop playing titlescreen music
+			currentMusic.stop();
+			// currentMusic.dispose();
+			currentMusic = null;
+		}
+
+		if (screenEnum == ScreenEnum.TITLE && prevScreenEnum == ScreenEnum.IN_GAME) {
+			// Stop playing ambient music & ingame music
+
+			currentAmbience.stop();
+
+			if (currentMusic != null)
+				currentMusic.stop();
+			// currentMusic.dispose();
+			currentMusic = null;
+			currentAmbience = null;
+		}
 	}
 
 	public void loadSounds() {
@@ -37,6 +68,13 @@ public class SoundHandler {
 
 			if (soundEnum.getSoundType() == SoundType.AMBIENCE)
 				ambienceTracks.add(sound);
+
+			if (soundEnum.getSoundType() == SoundType.SOUNDTRACK_TITLE)
+				titleMusicTacks.add(sound);
+
+			if (soundEnum.getSoundType() == SoundType.SOUNDTRACK_INGAME)
+				inGameMusicTacks.add(sound);
+
 		}
 	}
 
@@ -47,19 +85,38 @@ public class SoundHandler {
 	/**
 	 * Plays a random ambience soundtrack
 	 */
-	public void playAmbience() {
+	public void playTrackBySoundtype(SoundType soundType) {
+
+		ArrayList<Music> musicTrack = null;
+		switch (soundType) {
+		case AMBIENCE:
+			musicTrack = ambienceTracks;
+			break;
+		case SOUNDTRACK_TITLE:
+			musicTrack = titleMusicTacks;
+			break;
+
+		case SOUNDTRACK_INGAME:
+			musicTrack = inGameMusicTacks;
+			break;
+		default:
+			break;
+		}
 
 		Random rnd = new Random();
 
-		Music rndSound = ambienceTracks.get(rnd.nextInt(ambienceTracks.size()));
+		Music rndSound = musicTrack.get(rnd.nextInt(musicTrack.size()));
 		rndSound.play();
 
-		currentAmbience = rndSound;
+		if (soundType == SoundType.AMBIENCE)
+			currentAmbience = rndSound;
+		else
+			currentMusic = rndSound;
 
 		rndSound.setOnCompletionListener(new Music.OnCompletionListener() {
 			@Override
 			public void onCompletion(Music music) {
-				playAmbience();
+				playTrackBySoundtype(soundType);
 			}
 		});
 	}
