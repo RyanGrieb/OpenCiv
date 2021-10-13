@@ -438,9 +438,10 @@ public abstract class Unit extends Actor
 			}
 		});
 
-		if (selected)
+		if (selected) {
+			// Civilization.getInstance().getSoundHandler().playSound(SoundEnum.UNIT_CLICK);
 			SoundEnum.playSound(SoundEnum.UNIT_CLICK);
-
+		}
 	}
 
 	public void setPlayerOwner(Player playerOwner) {

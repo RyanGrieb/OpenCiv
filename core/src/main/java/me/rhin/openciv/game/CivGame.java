@@ -10,6 +10,7 @@ import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.utils.reflect.ClassReflection;
 
 import me.rhin.openciv.Civilization;
+import me.rhin.openciv.asset.SoundEnum;
 import me.rhin.openciv.game.city.City;
 import me.rhin.openciv.game.city.wonders.GameWonders;
 import me.rhin.openciv.game.civilization.CivType;
@@ -259,7 +260,10 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 			Gdx.app.log(Civilization.LOG_TAG, "Updating turn time to: " + packet.getTurnTime());
 			turnTime = packet.getTurnTime();
 		}
-
+		
+		//Civilization.getInstance().getSoundHandler().playSound(SoundEnum.NEXT_TURN);
+		SoundEnum.playSound(SoundEnum.NEXT_TURN);
+		
 		turns++;
 	}
 

@@ -35,6 +35,7 @@ public class LoadingScreen extends AbstractScreen {
 
 		if (assetHandler.update()) {
 			Civilization.getInstance().getFontHandler().loadStyles();
+			Civilization.getInstance().getSoundHandler().loadSounds();
 			Civilization.getInstance().getScreenManager().setScreen(ScreenEnum.TITLE);
 		} else {
 			float progress = assetHandler.getProgress();
