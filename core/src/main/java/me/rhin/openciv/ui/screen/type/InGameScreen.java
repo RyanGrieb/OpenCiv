@@ -56,7 +56,7 @@ public class InGameScreen extends AbstractScreen {
 		this.gameOverlay = new GameOverlay();
 		overlayStage.addActor(gameOverlay);
 
-		getCamera().zoom = 0.6F; // 0.8 Default
+		getCamera().zoom = 0.4F; // 0.8 Default
 	}
 
 	@Override

@@ -886,9 +886,11 @@ public class InGameState extends GameState
 								adjToTundra = true;
 						}
 
+						//TODO: Implement impassable tile property
 						if (adjToBias && !adjToTundra) {
 							if (!tile.containsTileProperty(TileProperty.WATER)
-									&& !tile.containsTileType(TileType.MOUNTAIN))
+									&& !tile.containsTileType(TileType.MOUNTAIN)
+									&& !tile.containsTileType(TileType.BARBARIAN_CAMP))
 								player.setSpawnPos(tile.getGridX(), tile.getGridY());
 							break;
 

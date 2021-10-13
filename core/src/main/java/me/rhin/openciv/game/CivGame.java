@@ -22,7 +22,6 @@ import me.rhin.openciv.game.notification.type.NotStudyingNotification;
 import me.rhin.openciv.game.player.AbstractPlayer;
 import me.rhin.openciv.game.player.BarbarianPlayer;
 import me.rhin.openciv.game.player.Player;
-import me.rhin.openciv.game.sounds.GameSounds;
 import me.rhin.openciv.game.unit.AttackableEntity;
 import me.rhin.openciv.game.unit.Unit;
 import me.rhin.openciv.game.unit.UnitParameter;
@@ -79,7 +78,6 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 	private static final int BASE_TURN_TIME = 9;
 
 	private GameMap map;
-	private GameSounds gameSounds;
 	private Player player;
 	private HashMap<String, AbstractPlayer> players;
 	private NotificationHandler notificationHandler;
@@ -89,10 +87,9 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 
 	public CivGame() {
 		this.map = new GameMap();
-		this.gameSounds = new GameSounds();
-		gameSounds.playSkyAmbience();
 		this.players = new HashMap<>();
 		this.gameWonders = new GameWonders();
+		Civilization.getInstance().getSoundHandler().playAmbience();
 		this.turnTime = BASE_TURN_TIME;
 		this.turns = 0;
 
@@ -260,10 +257,10 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 			Gdx.app.log(Civilization.LOG_TAG, "Updating turn time to: " + packet.getTurnTime());
 			turnTime = packet.getTurnTime();
 		}
-		
-		//Civilization.getInstance().getSoundHandler().playSound(SoundEnum.NEXT_TURN);
-		SoundEnum.playSound(SoundEnum.NEXT_TURN);
-		
+
+		Civilization.getInstance().getSoundHandler().playSound(SoundEnum.NEXT_TURN);
+		// SoundEnum.playSound(SoundEnum.NEXT_TURN);
+
 		turns++;
 	}
 
@@ -386,9 +383,5 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 
 	public GameWonders getWonders() {
 		return gameWonders;
-	}
-
-	public GameSounds getGameSounds() {
-		return gameSounds;
 	}
 }

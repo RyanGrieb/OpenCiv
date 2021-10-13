@@ -60,7 +60,7 @@ public class NextTurnWindow extends AbstractWindow implements RequestEndTurnList
 	public void onResize(int width, int height) {
 		super.setPosition(width / 2 - 200 / 2, 0);
 
-		nextTurnButton.setPosition(getWidth() / 2 - 125 / 2, 4);
+		//nextTurnButton.setPosition(getWidth() / 2 - 125 / 2, 4);
 	}
 
 	@Override

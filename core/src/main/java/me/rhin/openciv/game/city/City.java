@@ -112,8 +112,8 @@ public class City extends Group implements AttackableEntity, TileObserver, Speci
 				City cityActor = (City) event.getListenerActor();
 				cityActor.onClick();
 
-				// Civilization.getInstance().getSoundHandler().playSound(SoundEnum.CITY_CLICK);
-				SoundEnum.playSound(SoundEnum.CITY_CLICK);
+				Civilization.getInstance().getSoundHandler().playSound(SoundEnum.CITY_CLICK);
+				// SoundEnum.playSound(SoundEnum.CITY_CLICK);
 			}
 		});
 
