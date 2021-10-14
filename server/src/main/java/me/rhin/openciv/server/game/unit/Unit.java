@@ -10,6 +10,7 @@ import com.badlogic.gdx.utils.Json;
 import me.rhin.openciv.server.Server;
 import me.rhin.openciv.server.game.AbstractPlayer;
 import me.rhin.openciv.server.game.Player;
+import me.rhin.openciv.server.game.ai.type.UnitAI;
 import me.rhin.openciv.server.game.map.tile.Tile;
 import me.rhin.openciv.server.game.unit.UnitItem.UnitType;
 import me.rhin.openciv.server.listener.NextTurnListener;
@@ -36,6 +37,7 @@ public abstract class Unit implements AttackableEntity, NextTurnListener {
 	private float movement;
 	private float health;
 	private int turnsSinceCombat;
+	private UnitAI unitAI;
 
 	public Unit(AbstractPlayer playerOwner, Tile standingTile) {
 		this.id = unitID++;
@@ -60,7 +62,8 @@ public abstract class Unit implements AttackableEntity, NextTurnListener {
 	@Override
 	public void onNextTurn() {
 		this.movement = getMaxMovement();
-
+			
+		//Handle health regen
 		if (turnsSinceCombat < 2 || health >= 100) {
 
 			turnsSinceCombat++;
@@ -392,5 +395,9 @@ public abstract class Unit implements AttackableEntity, NextTurnListener {
 
 		queue.remove(smallestTile);
 		return smallestTile;
+	}
+
+	public void addAIBehavior(UnitAI unitAI) {
+		
 	}
 }

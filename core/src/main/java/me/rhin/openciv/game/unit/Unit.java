@@ -144,10 +144,10 @@ public abstract class Unit extends Actor
 			targetSelectionSprite.draw(batch);
 		}
 
-		if (standingTile.getTileObservers().size() > 0) {
+		//if (standingTile.getTileObservers().size() > 0) {
 			sprite.draw(batch);
 			civIconSprite.draw(batch);
-		}
+		//}
 	}
 
 	@Override

@@ -10,6 +10,7 @@ import com.badlogic.gdx.utils.Json;
 
 import me.rhin.openciv.server.Server;
 import me.rhin.openciv.server.game.Player;
+import me.rhin.openciv.server.game.ai.type.BarbarianWarriorAI;
 import me.rhin.openciv.server.game.civilization.type.Barbarians;
 import me.rhin.openciv.server.game.map.tile.Tile;
 import me.rhin.openciv.server.game.unit.Unit;
@@ -42,8 +43,13 @@ public class BarbarianPlayer extends AIPlayer implements NextTurnListener {
 
 			for (Tile tile : campTiles) {
 
+				if (tile.getUnits().size() > 0)
+					continue;
+
 				Unit unit = new WarriorUnit(this, tile);
+				unit.addAIBehavior(new BarbarianWarriorAI(unit, tile));
 				tile.addUnit(unit);
+				addOwnedUnit(unit);
 
 				AddUnitPacket addUnitPacket = new AddUnitPacket();
 				String unitName = unit.getClass().getSimpleName().substring(0,
@@ -62,6 +68,8 @@ public class BarbarianPlayer extends AIPlayer implements NextTurnListener {
 
 			turnsUntilSpawn = spawnTurnLength;
 		}
+
+		// Have all units choose a random tile further from the origin camp
 
 		turnsUntilSpawn--;
 	}

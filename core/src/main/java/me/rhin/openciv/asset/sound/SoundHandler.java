@@ -87,6 +87,12 @@ public class SoundHandler implements SetScreenListener {
 	 */
 	public void playTrackBySoundtype(SoundType soundType) {
 
+		if (currentAmbience != null)
+			currentAmbience.stop();
+
+		if (currentMusic != null)
+			currentMusic.stop();
+
 		ArrayList<Music> musicTrack = null;
 		switch (soundType) {
 		case AMBIENCE:

@@ -193,17 +193,17 @@ public class Tile extends Actor implements BottomShapeRenderListener {
 	@Override
 	public void draw(Batch batch, float parentAlpha) {
 
-		if (discovered)
+		//if (discovered)
 			for (TileTypeWrapper sprite : tileWrappers) {
 				sprite.draw(batch);
 			}
 
 		if (!discovered) {
-			fogSprite.draw(batch);
+			//fogSprite.draw(batch);
 		}
 
 		if (tileObservers.size() < 1) {
-			nonVisibleSprite.draw(batch);
+			//nonVisibleSprite.draw(batch);
 		}
 
 		if (drawSelection) {

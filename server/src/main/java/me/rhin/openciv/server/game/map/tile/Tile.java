@@ -417,7 +417,7 @@ public class Tile {
 
 		float movementCost = 0;
 
-		// Check if the tile were moving to
+		// Check if the tile were moving to has a river
 		int currentSideCheck = -1;
 		for (int i = 0; i < adjTiles.length; i++) {
 			if (prevTile.equals(adjTiles[i])) {

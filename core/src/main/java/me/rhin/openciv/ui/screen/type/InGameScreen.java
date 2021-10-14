@@ -141,17 +141,15 @@ public class InGameScreen extends AbstractScreen {
 		OrthographicCamera cam = getCamera();
 		if (Gdx.input.isKeyPressed(Input.Keys.EQUALS) || Gdx.input.isKeyPressed(Input.Keys.P)) {
 			cam.zoom += 0.04;
-			System.out.println(cam.zoom);
-			if(cam.zoom > 0.6F) {
-				//game.getGameSounds().playSkyAmbience();
+			if (cam.zoom > 0.6F) {
+				// game.getGameSounds().playSkyAmbience();
 			}
 		}
 
 		if (Gdx.input.isKeyPressed(Input.Keys.MINUS) || Gdx.input.isKeyPressed(Input.Keys.O)) {
 			cam.zoom -= 0.04;
-			System.out.println(cam.zoom);
-			if(cam.zoom < 0.4F) {
-				//game.getGameSounds().playTileAmbience();
+			if (cam.zoom < 0.4F) {
+				// game.getGameSounds().playTileAmbience();
 			}
 		}
 		if (Gdx.input.isKeyPressed(Input.Keys.A) || Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
