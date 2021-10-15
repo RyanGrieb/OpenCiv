@@ -16,7 +16,9 @@ public enum SoundEnum {
 	NEXT_TURN(0.3F, SoundType.EFFECT),
 	RUIN_CAPTURE(0.3F, SoundType.EFFECT),
 	CITY_LOSS(0.3F, SoundType.EFFECT),
-	WOOD_CHOP(0.3F, SoundType.EFFECT);
+	WOOD_CHOP(0.3F, SoundType.EFFECT),
+	UNIT_COMBAT(0.20F, SoundType.EFFECT),
+	UNIT_DEATH(0.25F, SoundType.EFFECT);
 
 	public enum SoundType {
 		AMBIENCE,

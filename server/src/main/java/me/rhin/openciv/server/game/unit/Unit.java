@@ -464,6 +464,7 @@ public abstract class Unit implements AttackableEntity, NextTurnListener {
 				DeleteUnitPacket removeUnitPacket = new DeleteUnitPacket();
 				removeUnitPacket.setUnit(targetUnit.getID(), targetUnit.getStandingTile().getGridX(),
 						targetUnit.getStandingTile().getGridY());
+				removeUnitPacket.setKilled(true);
 
 				for (Player player : players) {
 					player.sendPacket(json.toJson(removeUnitPacket));

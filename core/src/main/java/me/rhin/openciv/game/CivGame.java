@@ -231,6 +231,10 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 			if (actor.equals(unit))
 				actor.addAction(Actions.removeActor());
 		}
+
+		if (packet.isKilled()) {
+			Civilization.getInstance().getSoundHandler().playSound(SoundEnum.UNIT_DEATH);
+		}
 	}
 
 	@Override
@@ -292,7 +296,10 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 
 		unit.setHealth(unit.getHealth() - packet.getUnitDamage());
 		unit.reduceMovement(2);
+		unit.flashColor(Color.YELLOW);
 		targetEntity.setHealth(targetEntity.getHealth() - packet.getTargetUnitDamage());
+
+		Civilization.getInstance().getSoundHandler().playSound(SoundEnum.UNIT_COMBAT);
 	}
 
 	@Override

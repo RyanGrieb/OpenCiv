@@ -9,6 +9,7 @@ public class DeleteUnitPacket extends Packet {
 
 	int tileGridX, tileGridY;
 	private int unitID;
+	private boolean killed;
 
 	@Override
 	public void write(Json json) {
@@ -16,6 +17,7 @@ public class DeleteUnitPacket extends Packet {
 		json.writeValue("tileGridX", tileGridX);
 		json.writeValue("tileGridY", tileGridY);
 		json.writeValue("unitID", unitID);
+		json.writeValue("killed", killed);
 	}
 
 	@Override
@@ -24,12 +26,18 @@ public class DeleteUnitPacket extends Packet {
 		this.tileGridX = jsonData.getInt("tileGridX");
 		this.tileGridY = jsonData.getInt("tileGridY");
 		this.unitID = jsonData.getInt("unitID");
+		this.killed = jsonData.getBoolean("killed");
 	}
 
 	public void setUnit(int unitID, int tileGridX, int tileGridY) {
 		this.tileGridX = tileGridX;
 		this.tileGridY = tileGridY;
 		this.unitID = unitID;
+		this.killed = false;
+	}
+
+	public void setKilled(boolean killed) {
+		this.killed = true;
 	}
 
 	public int getTileGridX() {
@@ -42,5 +50,9 @@ public class DeleteUnitPacket extends Packet {
 
 	public int getUnitID() {
 		return unitID;
+	}
+
+	public boolean isKilled() {
+		return killed;
 	}
 }

@@ -155,6 +155,7 @@ public class BarbarianWarriorAI extends UnitAI implements NextTurnListener {
 					DeleteUnitPacket removeUnitPacket = new DeleteUnitPacket();
 					removeUnitPacket.setUnit(enemyUnit.getID(), enemyUnit.getStandingTile().getGridX(),
 							enemyUnit.getStandingTile().getGridY());
+					removeUnitPacket.setKilled(true);
 
 					for (Player player : Server.getInstance().getPlayers()) {
 						player.sendPacket(json.toJson(removeUnitPacket));
