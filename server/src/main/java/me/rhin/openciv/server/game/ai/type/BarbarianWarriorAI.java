@@ -7,7 +7,9 @@ import java.util.Random;
 import com.badlogic.gdx.utils.Json;
 
 import me.rhin.openciv.server.Server;
+import me.rhin.openciv.server.game.AbstractPlayer;
 import me.rhin.openciv.server.game.Player;
+import me.rhin.openciv.server.game.ai.BarbarianPlayer;
 import me.rhin.openciv.server.game.map.tile.Tile;
 import me.rhin.openciv.server.game.map.tile.TileType.TileProperty;
 import me.rhin.openciv.server.game.unit.Unit;
@@ -19,13 +21,12 @@ public class BarbarianWarriorAI extends UnitAI implements NextTurnListener {
 	private Unit unit;
 	private Tile campTile;
 	private Tile targetTile;
-	private boolean leavingCamp;
-	private boolean foundTarget;
+	private AbstractPlayer playerTarget;
+	private Unit targetUnit;
 
 	public BarbarianWarriorAI(Unit unit, Tile campTile) {
 		this.unit = unit;
 		this.campTile = campTile;
-		this.leavingCamp = true;
 
 		Server.getInstance().getEventManager().addListener(NextTurnListener.class, this);
 	}
@@ -35,15 +36,78 @@ public class BarbarianWarriorAI extends UnitAI implements NextTurnListener {
 
 		// Check if we found a target.
 
-		if (foundTarget) {
+		// TODO: Consider tiles obstructing view.
+		findTargets();
+
+		if (playerTarget != null) {
 			doTargetPath();
 		} else {
 			doScoutingPath();
 		}
 	}
 
+	private void findTargets() {
+		ArrayList<Tile> tiles = new ArrayList<>();
+		for (Tile tile1 : unit.getStandingTile().getAdjTiles()) {
+			if (!tiles.contains(tile1))
+				tiles.add(tile1);
+
+			for (Tile tile2 : tile1.getAdjTiles()) {
+				if (!tiles.contains(tile2))
+					tiles.add(tile2);
+			}
+		}
+
+		for (Tile tile : tiles)
+			for (Unit unit : tile.getUnits())
+				if (!(unit.getPlayerOwner() instanceof BarbarianPlayer)) {
+					playerTarget = unit.getPlayerOwner();
+					targetUnit = unit;
+					break;
+				}
+	}
+
+	/**
+	 * Track down and attack player units & cities
+	 */
 	private void doTargetPath() {
 
+		targetTile = targetUnit.getStandingTile();
+
+		ArrayList<Tile> pathTiles = getPathTiles(targetTile);
+		Tile pathingTile = stepTowardTarget(pathTiles);
+
+		// Assume were attacking a unit.
+		// FIXME: Account for units in cities.
+		if (pathingTile.getUnits().size() > 0) {
+			pathingTile = pathTiles.get(1); // Stand outside of enemy unit to attack.
+		}
+
+		unit.setTargetTile(pathingTile);
+
+		MoveUnitPacket packet = new MoveUnitPacket();
+		packet.setUnit(unit.getPlayerOwner().getName(), unit.getID(), unit.getStandingTile().getGridX(),
+				unit.getStandingTile().getGridY(), pathingTile.getGridX(), pathingTile.getGridY());
+		packet.setMovementCost(unit.getPathMovement());
+
+		unit.moveToTargetTile();
+		unit.reduceMovement(unit.getPathMovement());
+
+		Json json = new Json();
+		for (Player player : Server.getInstance().getPlayers()) {
+			player.getConn().send(json.toJson(packet));
+		}
+
+		// FIXME: Handle attacking units inside cities.
+		if (unit.canAttack(targetUnit)) {
+			unit.attackEntity(targetUnit);
+		}
+
+		if (!targetUnit.isAlive()) {
+			playerTarget = null;
+			targetUnit = null;
+			targetTile = null;
+		}
 	}
 
 	private void doScoutingPath() {
@@ -56,16 +120,61 @@ public class BarbarianWarriorAI extends UnitAI implements NextTurnListener {
 			targetTile = null;
 		}
 
-		Tile pathingTile = null;
+		// Get an initial random target tile.
+		while (targetTile == null || targetTile.containsTileProperty(TileProperty.WATER)
+				|| targetTile.getMovementCost() > 10) {
+			targetTile = getRandomTargetTile();
+		}
+
+		ArrayList<Tile> pathTiles = new ArrayList<>();
+
+		while (pathTiles.size() < 1) {
+
+			pathTiles = getPathTiles(targetTile);
+
+			// If there is not a valid path, get another random target.
+			if (pathTiles.size() < 1) {
+				targetTile = null;
+				while (targetTile == null || targetTile.containsTileProperty(TileProperty.WATER)
+						|| targetTile.getMovementCost() > 10) {
+					targetTile = getRandomTargetTile();
+				}
+			}
+		}
+
+		Tile pathingTile = stepTowardTarget(pathTiles);
+		unit.setTargetTile(pathingTile);
+
+		MoveUnitPacket packet = new MoveUnitPacket();
+		packet.setUnit(unit.getPlayerOwner().getName(), unit.getID(), unit.getStandingTile().getGridX(),
+				unit.getStandingTile().getGridY(), pathingTile.getGridX(), pathingTile.getGridY());
+		packet.setMovementCost(unit.getPathMovement());
+
+		unit.moveToTargetTile();
+		unit.reduceMovement(unit.getPathMovement());
+
+		Json json = new Json();
+		for (Player player : Server.getInstance().getPlayers()) {
+			player.getConn().send(json.toJson(packet));
+		}
+	}
+
+	private Tile getRandomTargetTile() {
+		Tile targetTile = null;
 
 		Random rnd = new Random();
 		int width = Server.getInstance().getMap().getWidth();
 		int height = Server.getInstance().getMap().getHeight();
+		targetTile = Server.getInstance().getMap().getTiles()[rnd.nextInt(width)][rnd.nextInt(height)];
 
-		while (targetTile == null || targetTile.containsTileProperty(TileProperty.WATER)
-				|| targetTile.getMovementCost() > 10) {
-			targetTile = Server.getInstance().getMap().getTiles()[rnd.nextInt(width)][rnd.nextInt(height)];
-		}
+		return targetTile;
+	}
+
+	// TODO: Make this a universal method
+	private ArrayList<Tile> getPathTiles(Tile targetTile) {
+
+		int width = Server.getInstance().getMap().getWidth();
+		int height = Server.getInstance().getMap().getHeight();
 
 		int h = 0;
 		ArrayList<Tile> openSet = new ArrayList<>();
@@ -98,6 +207,7 @@ public class BarbarianWarriorAI extends UnitAI implements NextTurnListener {
 				if (adjTile == null)
 					continue;
 
+				// FIXME: Make units & cities increase gScore.
 				float tenativeGScore = gScores[current.getGridX()][current.getGridY()]
 						+ unit.getMovementCost(current, adjTile);
 
@@ -127,7 +237,11 @@ public class BarbarianWarriorAI extends UnitAI implements NextTurnListener {
 		// System.out.println("Target:" + targetTile);
 		int iterations = 0;
 		ArrayList<Tile> pathTiles = new ArrayList<>();
-		pathTiles.add(targetTile);
+
+		if (targetTile != null && parentTile != null) {
+			pathTiles.add(targetTile);
+			pathTiles.add(parentTile);
+		}
 
 		while (parentTile != null) {
 			Tile nextTile = cameFrom[parentTile.getGridX()][parentTile.getGridY()];
@@ -147,6 +261,18 @@ public class BarbarianWarriorAI extends UnitAI implements NextTurnListener {
 			parentTile = nextTile;
 		}
 
+		return pathTiles;
+	}
+
+	/**
+	 * Returns the farthest tile the unit can move to, based on the units movement.
+	 * 
+	 * @param pathTiles The path we want to take.
+	 * @return Tile - The closest tile we can walk to currently.
+	 */
+	private Tile stepTowardTarget(ArrayList<Tile> pathTiles) {
+
+		Tile pathingTile = null;
 		int index = 0;
 		float movementCost = 0;
 		Tile prevPathedTile = unit.getStandingTile();
@@ -159,9 +285,8 @@ public class BarbarianWarriorAI extends UnitAI implements NextTurnListener {
 			}
 
 			// FIXME: When the AI is about to reach the final destination. It ignores
-			// movement cost.
+			// movement cost. Hard to re-create.
 			if (index > 0) {
-				System.out.println("looking:" + prevPathedTile + "," + pathTile);
 				movementCost += unit.getMovementCost(prevPathedTile, pathTile);
 			}
 
@@ -180,24 +305,6 @@ public class BarbarianWarriorAI extends UnitAI implements NextTurnListener {
 			index++;
 		}
 
-		unit.setTargetTile(pathingTile);
-
-		// System.out.println("OLD:" + unit.getStandingTile().getGridX() + "," +
-		// unit.getStandingTile().getGridY()
-		// + " || NEW:" + targetTile.getGridX() + ", " + targetTile.getGridY());
-
-		MoveUnitPacket packet = new MoveUnitPacket();
-		packet.setUnit(unit.getPlayerOwner().getName(), unit.getID(), unit.getStandingTile().getGridX(),
-				unit.getStandingTile().getGridY(), pathingTile.getGridX(), pathingTile.getGridY());
-		packet.setMovementCost(unit.getPathMovement());
-
-		unit.moveToTargetTile();
-		unit.reduceMovement(unit.getPathMovement());
-
-		Json json = new Json();
-		for (Player player : Server.getInstance().getPlayers()) {
-			player.getConn().send(json.toJson(packet));
-		}
+		return pathingTile;
 	}
-
 }

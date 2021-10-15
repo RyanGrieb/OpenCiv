@@ -11,10 +11,16 @@ import me.rhin.openciv.server.Server;
 import me.rhin.openciv.server.game.AbstractPlayer;
 import me.rhin.openciv.server.game.Player;
 import me.rhin.openciv.server.game.ai.type.UnitAI;
+import me.rhin.openciv.server.game.city.City;
 import me.rhin.openciv.server.game.map.tile.Tile;
 import me.rhin.openciv.server.game.unit.UnitItem.UnitType;
 import me.rhin.openciv.server.listener.NextTurnListener;
+import me.rhin.openciv.server.listener.CaptureCityListener.CaptureCityEvent;
+import me.rhin.openciv.shared.packet.type.DeleteUnitPacket;
+import me.rhin.openciv.shared.packet.type.SetCityHealthPacket;
+import me.rhin.openciv.shared.packet.type.SetCityOwnerPacket;
 import me.rhin.openciv.shared.packet.type.SetUnitHealthPacket;
+import me.rhin.openciv.shared.packet.type.UnitAttackPacket;
 import me.rhin.openciv.shared.stat.Stat;
 import me.rhin.openciv.shared.stat.StatLine;
 
@@ -38,6 +44,7 @@ public abstract class Unit implements AttackableEntity, NextTurnListener {
 	private float health;
 	private int turnsSinceCombat;
 	private UnitAI unitAI;
+	private boolean alive;
 
 	public Unit(AbstractPlayer playerOwner, Tile standingTile) {
 		this.id = unitID++;
@@ -47,6 +54,7 @@ public abstract class Unit implements AttackableEntity, NextTurnListener {
 		this.movement = getMaxMovement();
 		this.health = 100;
 		this.turnsSinceCombat = 0;
+		this.alive = true;
 		setPosition(standingTile.getVectors()[0].x - standingTile.getWidth() / 2, standingTile.getVectors()[0].y + 4);
 		setSize(standingTile.getWidth(), standingTile.getHeight());
 
@@ -62,8 +70,8 @@ public abstract class Unit implements AttackableEntity, NextTurnListener {
 	@Override
 	public void onNextTurn() {
 		this.movement = getMaxMovement();
-			
-		//Handle health regen
+
+		// Handle health regen
 		if (turnsSinceCombat < 2 || health >= 100) {
 
 			turnsSinceCombat++;
@@ -158,6 +166,10 @@ public abstract class Unit implements AttackableEntity, NextTurnListener {
 	}
 
 	public void clearListeners() {
+
+		if (unitAI != null)
+			Server.getInstance().getEventManager().clearListenersFromObject(unitAI);
+
 		Server.getInstance().getEventManager().clearListenersFromObject(this);
 	}
 
@@ -377,6 +389,7 @@ public abstract class Unit implements AttackableEntity, NextTurnListener {
 
 	public void kill() {
 		clearListeners();
+		alive = false;
 	}
 
 	public StatLine getCombatStatLine() {
@@ -398,6 +411,147 @@ public abstract class Unit implements AttackableEntity, NextTurnListener {
 	}
 
 	public void addAIBehavior(UnitAI unitAI) {
-		
+		this.unitAI = unitAI;
+	}
+
+	public boolean isAlive() {
+		return alive;
+	}
+
+	public void attackEntity(AttackableEntity targetEntity) {
+
+		// FIXME: Include AI players in this list.
+		ArrayList<Player> players = Server.getInstance().getPlayers();
+
+		Json json = new Json();
+		float unitDamage = this.getDamageTaken(targetEntity, false);
+		float targetDamage = targetEntity.getDamageTaken(this, true);
+
+		this.onCombat();
+		targetEntity.onCombat();
+
+		this.setHealth(this.getHealth() - unitDamage);
+		targetEntity.setHealth(targetEntity.getHealth() - targetDamage);
+
+		if (targetEntity.getHealth() > 0) {
+			UnitAttackPacket attackPacket = new UnitAttackPacket();
+			attackPacket.setUnitLocations(this.getStandingTile().getGridX(), this.getStandingTile().getGridY(),
+					targetEntity.getTile().getGridX(), targetEntity.getTile().getGridY());
+			attackPacket.setUnitDamage(unitDamage);
+			attackPacket.setTargetDamage(targetDamage);
+
+			for (Player player : players) {
+				player.getConn().send(json.toJson(attackPacket));
+			}
+		}
+
+		// Delete units below 1 hp
+
+		// If target is unit, use this method. if city, implement that other one
+
+		// Doesn't get called?
+
+		if (targetEntity.getHealth() <= 0) {
+			if (targetEntity instanceof Unit && targetEntity.getTile().getCity() == null) {
+
+				Unit targetUnit = (Unit) targetEntity;
+				targetUnit.getStandingTile().removeUnit(targetUnit);
+				targetUnit.kill();
+				targetUnit.getPlayerOwner().removeUnit(targetUnit);
+
+				// FIXME: Redundant code.
+				DeleteUnitPacket removeUnitPacket = new DeleteUnitPacket();
+				removeUnitPacket.setUnit(targetUnit.getID(), targetUnit.getStandingTile().getGridX(),
+						targetUnit.getStandingTile().getGridY());
+
+				for (Player player : players) {
+					player.getConn().send(json.toJson(removeUnitPacket));
+				}
+			}
+
+			// When we capture a city
+			if (targetEntity instanceof City) {
+
+				City city = (City) targetEntity;
+				city.setHealth(city.getMaxHealth() / 2);
+
+				// Reduce statline of the original owner
+				city.getPlayerOwner().reduceStatLine(city.getStatLine());
+
+				AbstractPlayer oldPlayer = city.getPlayerOwner();
+
+				city.getPlayerOwner().removeCity(city);
+				city.setOwner(this.getPlayerOwner());
+				this.getPlayerOwner().addCity(city);
+
+				SetCityOwnerPacket cityOwnerPacket = new SetCityOwnerPacket();
+				cityOwnerPacket.setCity(city.getName(), this.getPlayerOwner().getName());
+
+				for (Player player : players) {
+					player.getConn().send(json.toJson(cityOwnerPacket));
+				}
+
+				SetCityHealthPacket cityHealthPacket = new SetCityHealthPacket();
+				cityHealthPacket.setCity(city.getName(), city.getMaxHealth() / 2);
+
+				for (Player player : players) {
+					player.getConn().send(json.toJson(cityHealthPacket));
+				}
+
+				city.updateWorkedTiles();
+				city.getPlayerOwner().updateOwnedStatlines(false);
+
+				// Kill all enemy units inside the city
+				for (Unit cityUnit : city.getTile().getUnits()) {
+					if (!cityUnit.getPlayerOwner().equals(this.getPlayerOwner())) {
+
+						city.getTile().removeUnit(cityUnit);
+
+						cityUnit.kill();
+
+						DeleteUnitPacket removeUnitPacket = new DeleteUnitPacket();
+						removeUnitPacket.setUnit(cityUnit.getID(), cityUnit.getStandingTile().getGridX(),
+								cityUnit.getStandingTile().getGridY());
+
+						for (Player player : players) {
+							player.getConn().send(json.toJson(removeUnitPacket));
+						}
+
+					}
+				}
+
+				Server.getInstance().getEventManager().fireEvent(new CaptureCityEvent(city, oldPlayer));
+			}
+		}
+
+		if (this.getHealth() <= 0) {
+			this.getStandingTile().removeUnit(this);
+			this.playerOwner.removeUnit(this);
+			this.kill();
+
+			DeleteUnitPacket removeUnitPacket = new DeleteUnitPacket();
+			removeUnitPacket.setUnit(this.getID(), this.getStandingTile().getGridX(),
+					this.getStandingTile().getGridY());
+
+			for (Player player : players) {
+				player.getConn().send(json.toJson(removeUnitPacket));
+			}
+
+		}
+	}
+
+	public boolean canAttack(Unit targetUnit) {
+
+		boolean nearTarget = false;
+
+		for (Tile tile : standingTile.getAdjTiles())
+			if (tile.getUnits().contains(targetUnit) && !targetUnit.getPlayerOwner().equals(playerOwner))
+				nearTarget = true;
+
+		if (nearTarget && movement - getMovementCost(standingTile, targetUnit.getStandingTile()) < 0) {
+			return false;
+		}
+
+		return nearTarget;
 	}
 }

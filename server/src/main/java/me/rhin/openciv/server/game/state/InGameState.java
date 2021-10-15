@@ -305,123 +305,7 @@ public class InGameState extends GameState
 					.equals(unit.getPlayerOwner())) {
 				// We are about to attack this unit on the tile
 				AttackableEntity targetEntity = originalTargetTile.getEnemyAttackableEntity(playerOwner);
-
-				float unitDamage = unit.getDamageTaken(targetEntity, false);
-				float targetDamage = targetEntity.getDamageTaken(unit, true);
-
-				unit.onCombat();
-				targetEntity.onCombat();
-
-				unit.setHealth(unit.getHealth() - unitDamage);
-				targetEntity.setHealth(targetEntity.getHealth() - targetDamage);
-
-				if (targetEntity.getHealth() > 0) {
-					UnitAttackPacket attackPacket = new UnitAttackPacket();
-					attackPacket.setUnitLocations(unit.getStandingTile().getGridX(), unit.getStandingTile().getGridY(),
-							targetEntity.getTile().getGridX(), targetEntity.getTile().getGridY());
-					attackPacket.setUnitDamage(unitDamage);
-					attackPacket.setTargetDamage(targetDamage);
-
-					for (Player player : players) {
-						player.getConn().send(json.toJson(attackPacket));
-					}
-				}
-
-				// Delete units below 1 hp
-
-				// If target is unit, use this method. if city, implement that other one
-
-				// Doesn't get called?
-
-				if (targetEntity.getHealth() <= 0) {
-					if (targetEntity instanceof Unit && targetEntity.getTile().getCity() == null) {
-
-						Unit targetUnit = (Unit) targetEntity;
-						targetUnit.getStandingTile().removeUnit(targetUnit);
-
-						targetUnit.kill();
-						targetUnit.getPlayerOwner().getOwnedUnits().remove(targetUnit);
-
-						// FIXME: Redundant code.
-						DeleteUnitPacket removeUnitPacket = new DeleteUnitPacket();
-						removeUnitPacket.setUnit(targetUnit.getID(), targetUnit.getStandingTile().getGridX(),
-								targetUnit.getStandingTile().getGridY());
-
-						for (Player player : players) {
-							player.getConn().send(json.toJson(removeUnitPacket));
-						}
-					}
-
-					// When we capture a city
-					if (targetEntity instanceof City) {
-
-						City city = (City) targetEntity;
-						city.setHealth(city.getMaxHealth() / 2);
-
-						// Reduce statline of the original owner
-						city.getPlayerOwner().reduceStatLine(city.getStatLine());
-
-						AbstractPlayer oldPlayer = city.getPlayerOwner();
-
-						city.getPlayerOwner().removeCity(city);
-						city.setOwner(unit.getPlayerOwner());
-						unit.getPlayerOwner().addCity(city);
-
-						SetCityOwnerPacket cityOwnerPacket = new SetCityOwnerPacket();
-						cityOwnerPacket.setCity(city.getName(), unit.getPlayerOwner().getName());
-
-						for (Player player : players) {
-							player.getConn().send(json.toJson(cityOwnerPacket));
-						}
-
-						SetCityHealthPacket cityHealthPacket = new SetCityHealthPacket();
-						cityHealthPacket.setCity(city.getName(), city.getMaxHealth() / 2);
-
-						for (Player player : players) {
-							player.getConn().send(json.toJson(cityHealthPacket));
-						}
-
-						city.updateWorkedTiles();
-						city.getPlayerOwner().updateOwnedStatlines(false);
-
-						// Kill all enemy units inside the city
-						for (Unit cityUnit : city.getTile().getUnits()) {
-							if (!cityUnit.getPlayerOwner().equals(unit.getPlayerOwner())) {
-
-								city.getTile().removeUnit(cityUnit);
-
-								cityUnit.kill();
-
-								DeleteUnitPacket removeUnitPacket = new DeleteUnitPacket();
-								removeUnitPacket.setUnit(cityUnit.getID(), cityUnit.getStandingTile().getGridX(),
-										cityUnit.getStandingTile().getGridY());
-
-								for (Player player : players) {
-									player.getConn().send(json.toJson(removeUnitPacket));
-								}
-
-							}
-						}
-
-						Server.getInstance().getEventManager().fireEvent(new CaptureCityEvent(city, oldPlayer));
-					}
-				}
-
-				if (unit.getHealth() <= 0) {
-					unit.getStandingTile().removeUnit(unit);
-
-					unit.kill();
-
-					DeleteUnitPacket removeUnitPacket = new DeleteUnitPacket();
-					removeUnitPacket.setUnit(unit.getID(), unit.getStandingTile().getGridX(),
-							unit.getStandingTile().getGridY());
-
-					for (Player player : players) {
-						player.getConn().send(json.toJson(removeUnitPacket));
-					}
-
-				}
-
+				unit.attackEntity(targetEntity);
 			}
 
 		if (unit.getHealth() > 0) {
@@ -886,7 +770,7 @@ public class InGameState extends GameState
 								adjToTundra = true;
 						}
 
-						//TODO: Implement impassable tile property
+						// TODO: Implement impassable tile property
 						if (adjToBias && !adjToTundra) {
 							if (!tile.containsTileProperty(TileProperty.WATER)
 									&& !tile.containsTileType(TileType.MOUNTAIN)

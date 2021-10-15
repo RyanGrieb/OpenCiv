@@ -103,7 +103,7 @@ public class GameMap implements MapRequestListener {
 								AddUnitPacket addUnitPacket = new AddUnitPacket();
 								String unitName = unit.getClass().getSimpleName().substring(0,
 										unit.getClass().getSimpleName().indexOf("Unit"));
-								// Problem, clientside doesn't handle AIPlayers.
+								//Problem, clientside doesn't handle AIPlayers.
 								addUnitPacket.setUnit(unit.getPlayerOwner().getName(), unitName, unit.getID(), tileX,
 										tileY);
 								addUnitPackets.add(addUnitPacket);
@@ -579,7 +579,7 @@ public class GameMap implements MapRequestListener {
 		}
 
 		// Spawn barbarians
-		int campAmount = 1; // 8 * mapSize;
+		int campAmount = 5 * mapSize;
 		for (int i = 0; i < campAmount; i++) {
 			int x = rnd.nextInt(getWidth());
 			int y = rnd.nextInt(getHeight());

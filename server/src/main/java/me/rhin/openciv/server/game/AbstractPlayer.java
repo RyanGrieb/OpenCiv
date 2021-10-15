@@ -110,4 +110,8 @@ public abstract class AbstractPlayer {
 		this.civilization = civType.getCiv(this);
 	}
 
+	public void removeUnit(Unit unit) {
+		ownedUnits.remove(unit);
+	}
+
 }
