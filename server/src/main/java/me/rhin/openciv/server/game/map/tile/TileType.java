@@ -452,10 +452,11 @@ public enum TileType implements Comparable<TileType> {
 		public StatLine getStatLine() {
 			return new StatLine();
 		}
-
+	},
+	RUINS(TileLayer.LOW) {
 		@Override
-		public float getMovementCost() {
-			return 0.5f;
+		public StatLine getStatLine() {
+			return new StatLine();
 		}
 	},
 	ROAD(TileLayer.LOW) {

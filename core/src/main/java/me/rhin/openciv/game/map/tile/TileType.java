@@ -1,8 +1,11 @@
+
 package me.rhin.openciv.game.map.tile;
 
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas.AtlasRegion;
 
+import me.rhin.openciv.Civilization;
+import me.rhin.openciv.asset.SoundEnum;
 import me.rhin.openciv.asset.TextureEnum;
 
 public enum TileType {
@@ -19,7 +22,7 @@ public enum TileType {
 	OCEAN(TextureEnum.TILE_OCEAN, TileLayer.BASE, TileProperty.WATER),
 	SHALLOW_OCEAN(TextureEnum.TILE_SHALLOW_OCEAN, TileLayer.BASE, TileProperty.WATER),
 	MOUNTAIN(TextureEnum.TILE_MOUNTIAN, 1000000, TileLayer.MIDDLE),
-	FOREST(TextureEnum.TILE_FOREST, 2, TileLayer.HIGH),
+	FOREST(TextureEnum.TILE_FOREST, 2, TileLayer.HIGH, SoundEnum.WOOD_CHOP),
 	JUNGLE(TextureEnum.TILE_JUNGLE, 2, TileLayer.HIGH),
 	HORSES(TextureEnum.TILE_HORSES, TileLayer.MIDDLE, TileProperty.RESOURCE, TileProperty.ANIMAL),
 	CATTLE(TextureEnum.TILE_CATTLE, TileLayer.MIDDLE, TileProperty.RESOURCE, TileProperty.ANIMAL),
@@ -42,6 +45,7 @@ public enum TileType {
 	SHEEP_IMPROVED(TextureEnum.TILE_SHEEP_IMPROVED, TileLayer.MIDDLE, TileProperty.IMPROVEMENT),
 	FORT(TextureEnum.TILE_FORT, TileLayer.MIDDLE, TileProperty.IMPROVEMENT),
 	BARBARIAN_CAMP(TextureEnum.TILE_BARBARIAN_CAMP, TileLayer.MIDDLE, TileProperty.IMPROVEMENT),
+	RUINS(TextureEnum.TILE_RUINS, TileLayer.LOW, SoundEnum.RUIN_CAPTURE, TileProperty.IMPROVEMENT),
 	ROAD(0.5F, TileProperty.ROAD);
 
 	public enum TileLayer {
@@ -67,8 +71,10 @@ public enum TileType {
 	private TextureEnum assetEnum;
 	private TileProperty[] tileProperties;
 	private TileLayer tileLayer;
+	private SoundEnum removeSound;
 	private float movementCost;
 
+	// Road Constructor
 	TileType(float movementCost, TileProperty... targetProperties) {
 		this.assetEnum = null;
 		this.movementCost = movementCost;
@@ -83,17 +89,24 @@ public enum TileType {
 	}
 
 	TileType(TextureEnum assetEnum, TileLayer tileLayer, TileProperty... tileProperties) {
-		this.assetEnum = assetEnum;
-		this.tileLayer = tileLayer;
-		this.movementCost = 1;
+		this(assetEnum, tileLayer);
 		this.tileProperties = tileProperties;
 	}
 
 	TileType(TextureEnum assetEnum, int movementCost, TileLayer tileLayer, TileProperty... tileProperties) {
-		this.assetEnum = assetEnum;
+		this(assetEnum, tileLayer, tileProperties);
 		this.movementCost = movementCost;
-		this.tileLayer = tileLayer;
-		this.tileProperties = tileProperties;
+	}
+
+	TileType(TextureEnum assetEnum, TileLayer tileLayer, SoundEnum removeSound, TileProperty... tileProperties) {
+		this(assetEnum, 1, tileLayer, tileProperties);
+		this.removeSound = removeSound;
+	}
+
+	TileType(TextureEnum assetEnum, int movementCost, TileLayer tileLayer, SoundEnum removeSound,
+			TileProperty... tileProperties) {
+		this(assetEnum, tileLayer, removeSound, tileProperties);
+		this.movementCost = movementCost;
 	}
 
 	public static TileType fromId(int i) {
@@ -109,7 +122,7 @@ public enum TileType {
 	public AtlasRegion texture() {
 		return assetEnum.texture();
 	}
-	
+
 	public TextureEnum getTextureEnum() {
 		return assetEnum;
 	}
@@ -153,5 +166,10 @@ public enum TileType {
 		}
 
 		return String.valueOf(chars);
+	}
+
+	public void playRemoveSound() {
+		if (removeSound != null)
+			Civilization.getInstance().getSoundHandler().playSound(removeSound);
 	}
 }

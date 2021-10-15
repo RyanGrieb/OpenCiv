@@ -311,7 +311,6 @@ public class InGameState extends GameState
 
 			// Handle capturing barbarian camps
 			if (unit.getStandingTile().containsTileType(TileType.BARBARIAN_CAMP)) {
-				System.out.println("Handle capture");
 				Tile campTile = unit.getStandingTile();
 				campTile.removeTileType(TileType.BARBARIAN_CAMP);
 
@@ -323,6 +322,24 @@ public class InGameState extends GameState
 
 				// TODO: Plunder sound effect.
 				unit.getPlayerOwner().getStatLine().addValue(Stat.GOLD, 150);
+				playerOwner.updateOwnedStatlines(false);
+			}
+
+			// Handle capturing ruins
+			if (unit.getStandingTile().containsTileType(TileType.RUINS)) {
+				System.out.println("Handle capture");
+				Tile campTile = unit.getStandingTile();
+				campTile.removeTileType(TileType.RUINS);
+
+				RemoveTileTypePacket removeTileTypePacket = new RemoveTileTypePacket();
+				removeTileTypePacket.setTile(TileType.RUINS.name(), campTile.getGridX(), campTile.getGridY());
+
+				for (Player player : Server.getInstance().getPlayers())
+					player.sendPacket(json.toJson(removeTileTypePacket));
+
+				// TODO: Capture ruin sound effect.
+				// FIXME: Players don't get gold if they don't have a city.
+				unit.getPlayerOwner().getStatLine().addValue(Stat.GOLD, 50);
 				playerOwner.updateOwnedStatlines(false);
 			}
 

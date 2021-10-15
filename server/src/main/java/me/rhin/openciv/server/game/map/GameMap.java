@@ -103,7 +103,7 @@ public class GameMap implements MapRequestListener {
 								AddUnitPacket addUnitPacket = new AddUnitPacket();
 								String unitName = unit.getClass().getSimpleName().substring(0,
 										unit.getClass().getSimpleName().indexOf("Unit"));
-								//Problem, clientside doesn't handle AIPlayers.
+								// Problem, clientside doesn't handle AIPlayers.
 								addUnitPacket.setUnit(unit.getPlayerOwner().getName(), unitName, unit.getID(), tileX,
 										tileY);
 								addUnitPackets.add(addUnitPacket);
@@ -579,7 +579,7 @@ public class GameMap implements MapRequestListener {
 		}
 
 		// Spawn barbarians
-		int campAmount = 7 * mapSize;
+		int campAmount = 5 * mapSize;
 		for (int i = 0; i < campAmount; i++) {
 			int x = rnd.nextInt(getWidth());
 			int y = rnd.nextInt(getHeight());
@@ -591,6 +591,21 @@ public class GameMap implements MapRequestListener {
 
 			tile.setTileType(TileType.BARBARIAN_CAMP);
 			Server.getInstance().getGame().getBarbarianPlayer().addCampTile(tile);
+		}
+
+		// Spawn ruins (TODO: REDUNDANT CODE W/ BARBARAIN BAMPS)
+		int ruinsAmount = 10 * mapSize;
+		for (int i = 0; i < ruinsAmount; i++) {
+			int x = rnd.nextInt(getWidth());
+			int y = rnd.nextInt(getHeight());
+			Tile tile = tiles[x][y];
+			if (tile.containsTileProperty(TileProperty.WATER) || tile.containsTileType(TileType.MOUNTAIN)
+					|| tile.containsTileType(TileType.BARBARIAN_CAMP)) {
+				i--;
+				continue;
+			}
+
+			tile.setTileType(TileType.RUINS);
 		}
 
 	}

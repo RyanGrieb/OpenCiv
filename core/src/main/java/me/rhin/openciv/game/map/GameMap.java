@@ -93,7 +93,9 @@ public class GameMap implements ReceiveMapChunkListener, SetTileTypeListener, Re
 	@Override
 	public void onRemoveTileType(RemoveTileTypePacket packet) {
 		Tile tile = tiles[packet.getGridX()][packet.getGridY()];
-		tile.removeTileType(TileType.valueOf(packet.getTileTypeName()));
+		TileType tileType = TileType.valueOf(packet.getTileTypeName());
+		tileType.playRemoveSound();
+		tile.removeTileType(tileType);
 	}
 
 	public Tile getTileFromLocation(float x, float y) {

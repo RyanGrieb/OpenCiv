@@ -48,6 +48,12 @@ public class CreditsScreen extends AbstractScreen {
 				Align.center, 0, viewport.getWorldHeight() - 100 - (creditLabelList.size() * 40),
 				viewport.getWorldWidth(), 20));
 
+		creditLabelList.add(new CustomLabel("\n\nMusic: \nJanne Hanhisuanto for Radakan sound effects", Align.center, 0,
+				viewport.getWorldHeight() - 100 - (creditLabelList.size() * 40), viewport.getWorldWidth(), 20));
+
+		creditLabelList.add(new CustomLabel("", Align.center, 0,
+				viewport.getWorldHeight() - 100 - (creditLabelList.size() * 40), viewport.getWorldWidth(), 20));
+
 		for (CustomLabel label : creditLabelList)
 			stage.addActor(label);
 

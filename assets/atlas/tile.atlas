@@ -41,7 +41,7 @@ tile_city
   index: -1
 tile_copper
   rotate: false
-  xy: 478, 57
+  xy: 444, 23
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
@@ -223,7 +223,7 @@ tile_ocean
   index: -1
 tile_oranges
   rotate: false
-  xy: 444, 57
+  xy: 478, 57
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
@@ -251,9 +251,16 @@ tile_plains_hill_mine
   index: -1
 tile_river
   rotate: false
-  xy: 444, 52
+  xy: 478, 52
   size: 17, 3
   orig: 17, 3
+  offset: 0, 0
+  index: -1
+tile_ruins
+  rotate: false
+  xy: 410, 23
+  size: 32, 32
+  orig: 32, 32
   offset: 0, 0
   index: -1
 tile_select
@@ -307,7 +314,7 @@ tile_tundra
   index: -1
 tile_tundra_hill
   rotate: false
-  xy: 410, 23
+  xy: 444, 57
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
