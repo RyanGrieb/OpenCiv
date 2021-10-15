@@ -140,7 +140,7 @@ public class InGameState extends GameState
 
 					Json json = new Json();
 					for (Player player : players)
-						player.getConn().send(json.toJson(turnTimeLeftPacket));
+						player.sendPacket(json.toJson(turnTimeLeftPacket));
 
 					turnTimeLeft--;
 
@@ -178,12 +178,11 @@ public class InGameState extends GameState
 		players.remove(removedPlayer);
 
 		for (Player player : players) {
-			WebSocket playerConn = player.getConn();
 
 			PlayerDisconnectPacket packet = new PlayerDisconnectPacket();
 			packet.setPlayerName(removedPlayer.getName());
 			Json json = new Json();
-			playerConn.send(json.toJson(packet));
+			player.sendPacket(json.toJson(packet));
 		}
 
 		if (players.size() < 1) {
@@ -256,7 +255,7 @@ public class InGameState extends GameState
 			packet.setLocation(unit.getStandingTile().getGridX(), unit.getStandingTile().getGridY());
 
 			for (Player player : players) {
-				player.getConn().send(json.toJson(packet));
+				player.sendPacket(json.toJson(packet));
 			}
 		}
 
@@ -281,7 +280,7 @@ public class InGameState extends GameState
 						targetUnit.getStandingTile().getGridY());
 
 				for (Player player : players) {
-					player.getConn().send(json.toJson(removeUnitPacket));
+					player.sendPacket(json.toJson(removeUnitPacket));
 				}
 
 				// When we capture a builder/settler, ect.
@@ -294,7 +293,7 @@ public class InGameState extends GameState
 						targetUnit.getStandingTile().getGridX(), targetUnit.getStandingTile().getGridY());
 
 				for (Player player : players) {
-					player.getConn().send(json.toJson(setOwnerPacket));
+					player.sendPacket(json.toJson(setOwnerPacket));
 				}
 			}
 		}
@@ -320,7 +319,7 @@ public class InGameState extends GameState
 				removeTileTypePacket.setTile(TileType.BARBARIAN_CAMP.name(), campTile.getGridX(), campTile.getGridY());
 
 				for (Player player : Server.getInstance().getPlayers())
-					player.getConn().send(json.toJson(removeTileTypePacket));
+					player.sendPacket(json.toJson(removeTileTypePacket));
 
 				// TODO: Plunder sound effect.
 				unit.getPlayerOwner().getStatLine().addValue(Stat.GOLD, 150);
@@ -380,8 +379,8 @@ public class InGameState extends GameState
 
 		Json json = new Json();
 		for (Player player : players) {
-			player.getConn().send(json.toJson(deleteUnitPacket));
-			player.getConn().send(json.toJson(settleCityPacket));
+			player.sendPacket(json.toJson(deleteUnitPacket));
+			player.sendPacket(json.toJson(settleCityPacket));
 
 			for (Tile territoryTile : city.getTerritory()) {
 				if (territoryTile == null)
@@ -390,7 +389,7 @@ public class InGameState extends GameState
 				territoryGrowPacket.setCityName(city.getName());
 				territoryGrowPacket.setLocation(territoryTile.getGridX(), territoryTile.getGridY());
 				territoryGrowPacket.setOwner(city.getPlayerOwner().getName());
-				player.getConn().send(json.toJson(territoryGrowPacket));
+				player.sendPacket(json.toJson(territoryGrowPacket));
 			}
 		}
 
@@ -416,14 +415,14 @@ public class InGameState extends GameState
 		NextTurnPacket turnTimeUpdatePacket = new NextTurnPacket();
 		turnTimeUpdatePacket.setTurnTime(turnTimeLeft);
 		for (Player player : players) {
-			player.getConn().send(json.toJson(turnTimeUpdatePacket));
+			player.sendPacket(json.toJson(turnTimeUpdatePacket));
 		}
 
 		TurnTimeLeftPacket turnTimeLeftPacket = new TurnTimeLeftPacket();
 		turnTimeLeftPacket.setTime(turnTimeLeft);
 
 		for (Player player : players)
-			player.getConn().send(json.toJson(turnTimeLeftPacket));
+			player.sendPacket(json.toJson(turnTimeLeftPacket));
 
 		for (Player player : players)
 			player.setTurnDone(false);
@@ -530,7 +529,7 @@ public class InGameState extends GameState
 
 		Json json = new Json();
 		for (Player otherPlayer : players)
-			otherPlayer.getConn().send(json.toJson(packet));
+			otherPlayer.sendPacket(json.toJson(packet));
 
 		boolean playersTurnsDone = true;
 		for (Player otherPlayer : players)
@@ -626,7 +625,7 @@ public class InGameState extends GameState
 				attackPacket.setTargetDamage(targetDamage);
 
 				for (Player player : players) {
-					player.getConn().send(json.toJson(attackPacket));
+					player.sendPacket(json.toJson(attackPacket));
 				}
 			}
 
@@ -644,7 +643,7 @@ public class InGameState extends GameState
 							targetUnit.getStandingTile().getGridY());
 
 					for (Player player : players) {
-						player.getConn().send(json.toJson(removeUnitPacket));
+						player.sendPacket(json.toJson(removeUnitPacket));
 					}
 				}
 			}
@@ -729,7 +728,7 @@ public class InGameState extends GameState
 		Json json = new Json();
 		GameStartPacket gameStartPacket = new GameStartPacket();
 		for (Player player : players) {
-			player.getConn().send(json.toJson(gameStartPacket));
+			player.sendPacket(json.toJson(gameStartPacket));
 		}
 
 		Random rnd = new Random();

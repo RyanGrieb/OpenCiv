@@ -62,7 +62,7 @@ public class BarbarianPlayer extends AIPlayer implements NextTurnListener {
 
 			for (AddUnitPacket packet : addUnitPackets) {
 				for (Player player : Server.getInstance().getPlayers()) {
-					player.getConn().send(json.toJson(packet));
+					player.sendPacket(json.toJson(packet));
 				}
 			}
 
@@ -79,6 +79,11 @@ public class BarbarianPlayer extends AIPlayer implements NextTurnListener {
 		return Arrays.asList(AIProperties.BARBARIAN);
 	}
 
+	@Override
+	public void sendPacket(String json) {
+		// Don't send anything since were an AI.
+	}
+
 	public void addCampTile(Tile tile) {
 		campTiles.add(tile);
 	}
@@ -89,8 +94,8 @@ public class BarbarianPlayer extends AIPlayer implements NextTurnListener {
 	}
 
 	@Override
-	public WebSocket getConn() {
-		return null;
+	public boolean hasConnection() {
+		// Always true since we an AI
+		return true;
 	}
-
 }

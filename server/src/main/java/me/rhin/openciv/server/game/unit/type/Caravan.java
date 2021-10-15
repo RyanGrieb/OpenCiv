@@ -158,7 +158,7 @@ public class Caravan extends UnitItem {
 			Json json = new Json();
 
 			for (Player player : Server.getInstance().getPlayers())
-				player.getConn().send(json.toJson(packet));
+				player.sendPacket(json.toJson(packet));
 
 			this.moveToTargetTile();
 
@@ -172,7 +172,7 @@ public class Caravan extends UnitItem {
 							movingToCity.getStatLine().getStatValues().get(stat).getValue());
 				}
 
-				movingToCity.getPlayerOwner().getConn().send(json.toJson(statUpdatePacket));
+				movingToCity.getPlayerOwner().sendPacket(json.toJson(statUpdatePacket));
 
 				movingToCity.getPlayerOwner().getStatLine().addValue(Stat.GOLD, 5);
 				movingToCity.getPlayerOwner().updateOwnedStatlines(false);

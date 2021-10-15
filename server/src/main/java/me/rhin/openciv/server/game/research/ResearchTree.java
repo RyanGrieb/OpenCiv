@@ -60,7 +60,8 @@ public class ResearchTree implements NextTurnListener {
 
 	@Override
 	public void onNextTurn() {
-		if (techResearching == null || player.getConn().isClosed())
+
+		if (techResearching == null || !player.hasConnection())
 			return;
 
 		techResearching.applyScience(player.getStatLine().getStatValue(Stat.SCIENCE_GAIN));
@@ -72,7 +73,7 @@ public class ResearchTree implements NextTurnListener {
 			packet.setTech(techResearching.getID());
 
 			Json json = new Json();
-			player.getConn().send(json.toJson(packet));
+			player.sendPacket(json.toJson(packet));
 
 			techResearching = null;
 		}

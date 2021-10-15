@@ -74,7 +74,7 @@ public class InLobbyState extends GameState implements StartGameRequestListener,
 
 				Json json = new Json();
 				for (Player player : Server.getInstance().getPlayers())
-					player.getConn().send(json.toJson(packet));
+					player.sendPacket(json.toJson(packet));
 			}
 		}
 
@@ -88,12 +88,11 @@ public class InLobbyState extends GameState implements StartGameRequestListener,
 		Player newPlayer = new Player(conn);
 
 		for (Player player : players) {
-			WebSocket playerConn = player.getConn();
 
 			PlayerConnectPacket packet = new PlayerConnectPacket();
 			packet.setPlayerName(newPlayer.getName());
 			Json json = new Json();
-			playerConn.send(json.toJson(packet));
+			player.sendPacket(json.toJson(packet));
 		}
 
 		players.add(newPlayer);
@@ -114,12 +113,11 @@ public class InLobbyState extends GameState implements StartGameRequestListener,
 		players.remove(removedPlayer);
 
 		for (Player player : players) {
-			WebSocket playerConn = player.getConn();
 
 			PlayerDisconnectPacket packet = new PlayerDisconnectPacket();
 			packet.setPlayerName(removedPlayer.getName());
 			Json json = new Json();
-			playerConn.send(json.toJson(packet));
+			player.sendPacket(json.toJson(packet));
 		}
 
 		// !
@@ -136,7 +134,7 @@ public class InLobbyState extends GameState implements StartGameRequestListener,
 			packet.setPlayerName(newHostPlayer.getName());
 			Json json = new Json();
 			for (Player player : Server.getInstance().getPlayers())
-				player.getConn().send(json.toJson(packet));
+				player.sendPacket(json.toJson(packet));
 		}
 	}
 
@@ -178,7 +176,7 @@ public class InLobbyState extends GameState implements StartGameRequestListener,
 
 		Json json = new Json();
 		for (Player player : Server.getInstance().getPlayers())
-			player.getConn().send(json.toJson(packet));
+			player.sendPacket(json.toJson(packet));
 
 	}
 
@@ -196,7 +194,7 @@ public class InLobbyState extends GameState implements StartGameRequestListener,
 
 		Json json = new Json();
 		for (Player player : Server.getInstance().getPlayers())
-			player.getConn().send(json.toJson(packet));
+			player.sendPacket(json.toJson(packet));
 	}
 
 	@Override

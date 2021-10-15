@@ -33,7 +33,6 @@ public class BarbarianWarriorAI extends UnitAI implements NextTurnListener {
 
 	@Override
 	public void onNextTurn() {
-
 		// Check if we found a target.
 
 		// TODO: Consider tiles obstructing view.
@@ -77,6 +76,9 @@ public class BarbarianWarriorAI extends UnitAI implements NextTurnListener {
 		ArrayList<Tile> pathTiles = getPathTiles(targetTile);
 		Tile pathingTile = stepTowardTarget(pathTiles);
 
+		if (pathingTile == null)
+			return;
+
 		// Assume were attacking a unit.
 		// FIXME: Account for units in cities.
 		if (pathingTile.getUnits().size() > 0) {
@@ -95,12 +97,36 @@ public class BarbarianWarriorAI extends UnitAI implements NextTurnListener {
 
 		Json json = new Json();
 		for (Player player : Server.getInstance().getPlayers()) {
-			player.getConn().send(json.toJson(packet));
+			player.sendPacket(json.toJson(packet));
 		}
 
 		// FIXME: Handle attacking units inside cities.
 		if (unit.canAttack(targetUnit)) {
-			unit.attackEntity(targetUnit);
+
+			if (targetUnit.getStandingTile().getCity() != null) {
+				unit.attackEntity(targetUnit.getStandingTile().getCity());
+			} else
+				unit.attackEntity(targetUnit);
+
+			// Walk onto the dead target unit
+			// Problem, clientside doesn't pick this up.
+			if (!targetUnit.isAlive() && unit.isAlive()) {
+
+				packet = new MoveUnitPacket();
+
+				unit.setTargetTile(targetUnit.getStandingTile());
+				packet.setUnit(unit.getPlayerOwner().getName(), unit.getID(), unit.getStandingTile().getGridX(),
+						unit.getStandingTile().getGridY(), targetUnit.getStandingTile().getGridX(),
+						targetUnit.getStandingTile().getGridY());
+				packet.setMovementCost(unit.getPathMovement());
+
+				unit.moveToTargetTile();
+				unit.reduceMovement(unit.getPathMovement());
+
+				for (Player player : Server.getInstance().getPlayers()) {
+					player.sendPacket(json.toJson(packet));
+				}
+			}
 		}
 
 		if (!targetUnit.isAlive()) {
@@ -121,26 +147,40 @@ public class BarbarianWarriorAI extends UnitAI implements NextTurnListener {
 		}
 
 		// Get an initial random target tile.
+		int index = 0;
 		while (targetTile == null || targetTile.containsTileProperty(TileProperty.WATER)
 				|| targetTile.getMovementCost() > 10) {
+
+			if (index > 30)
+				break;
 			targetTile = getRandomTargetTile();
+			index++;
 		}
 
 		ArrayList<Tile> pathTiles = new ArrayList<>();
 
-		while (pathTiles.size() < 1) {
+		outerloop: while (pathTiles.size() < 1) {
 
 			pathTiles = getPathTiles(targetTile);
 
 			// If there is not a valid path, get another random target.
 			if (pathTiles.size() < 1) {
 				targetTile = null;
+				index = 0;
 				while (targetTile == null || targetTile.containsTileProperty(TileProperty.WATER)
 						|| targetTile.getMovementCost() > 10) {
+
+					if (index > 30)
+						break outerloop;
 					targetTile = getRandomTargetTile();
+					index++;
 				}
+
 			}
 		}
+
+		if (targetTile == null || pathTiles.size() < 1)
+			return;
 
 		Tile pathingTile = stepTowardTarget(pathTiles);
 		unit.setTargetTile(pathingTile);
@@ -155,7 +195,7 @@ public class BarbarianWarriorAI extends UnitAI implements NextTurnListener {
 
 		Json json = new Json();
 		for (Player player : Server.getInstance().getPlayers()) {
-			player.getConn().send(json.toJson(packet));
+			player.sendPacket(json.toJson(packet));
 		}
 	}
 
@@ -210,6 +250,16 @@ public class BarbarianWarriorAI extends UnitAI implements NextTurnListener {
 				// FIXME: Make units & cities increase gScore.
 				float tenativeGScore = gScores[current.getGridX()][current.getGridY()]
 						+ unit.getMovementCost(current, adjTile);
+
+				// Avoid walking into cities.
+				if (current.getCity() != null && !current.getCity().getPlayerOwner().equals(unit.getPlayerOwner()))
+					tenativeGScore += 10000;
+
+				// Avoid friendly units
+				if (current.getUnits().size() > 0 && current.getTopUnit().getPlayerOwner().equals(unit.getPlayerOwner())
+						&& !current.getTopUnit().equals(unit)) {
+					tenativeGScore += 10000;
+				}
 
 				if (tenativeGScore < gScores[adjTile.getGridX()][adjTile.getGridY()]) {
 

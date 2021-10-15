@@ -30,7 +30,7 @@ public class HeritageTree implements NextTurnListener {
 
 	@Override
 	public void onNextTurn() {
-		if (heritageStudying == null || player.getConn().isClosed())
+		if (heritageStudying == null || !player.hasConnection())
 			return;
 
 		heritageStudying.applyHeritage(player.getStatLine().getStatValue(Stat.HERITAGE_GAIN));
@@ -43,7 +43,7 @@ public class HeritageTree implements NextTurnListener {
 					.substring(heritageStudying.getClass().getName().indexOf("type.") + 5));
 
 			Json json = new Json();
-			player.getConn().send(json.toJson(packet));
+			player.sendPacket(json.toJson(packet));
 
 			heritageStudying = null;
 		}

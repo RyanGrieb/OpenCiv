@@ -6,8 +6,6 @@ import com.badlogic.gdx.utils.Json;
 
 import me.rhin.openciv.server.Server;
 import me.rhin.openciv.server.game.city.City;
-import me.rhin.openciv.server.game.civilization.Civ;
-import me.rhin.openciv.server.game.civilization.CivType;
 import me.rhin.openciv.server.game.civilization.type.RandomCivilization;
 import me.rhin.openciv.server.game.unit.Unit;
 import me.rhin.openciv.server.game.unit.type.Caravan.CaravanUnit;
@@ -141,6 +139,16 @@ public class Player extends AbstractPlayer
 		conn.send(json.toJson(packet));
 	}
 
+	@Override
+	public void sendPacket(String json) {
+		conn.send(json);
+	}
+
+	@Override
+	public boolean hasConnection() {
+		return !conn.isClosed() && !conn.isClosing();
+	}
+
 	public void setSpawnPos(int spawnX, int spawnY) {
 		this.spawnX = spawnX;
 		this.spawnY = spawnY;
@@ -154,10 +162,6 @@ public class Player extends AbstractPlayer
 		if (this.selectedUnit != null)
 			this.selectedUnit.setSelected(false);
 		this.selectedUnit = selectedUnit;
-	}
-
-	public WebSocket getConn() {
-		return conn;
 	}
 
 	public String getName() {
@@ -201,5 +205,9 @@ public class Player extends AbstractPlayer
 
 	public boolean isTurnDone() {
 		return turnDone;
+	}
+
+	public WebSocket getConn() {
+		return conn;
 	}
 }

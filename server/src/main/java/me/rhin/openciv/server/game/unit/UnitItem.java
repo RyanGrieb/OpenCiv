@@ -60,7 +60,7 @@ public abstract class UnitItem implements ProductionItem {
 
 		Json json = new Json();
 		for (Player player : Server.getInstance().getPlayers())
-			player.getConn().send(json.toJson(addUnitPacket));
+			player.sendPacket(json.toJson(addUnitPacket));
 	}
 
 	@Override

@@ -205,6 +205,9 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 		Tile targetTile = map.getTiles()[packet.getTargetGridX()][packet.getTargetGridY()];
 		Unit unit = prevTile.getUnitFromID(packet.getUnitID());
 
+		if (unit == null)
+			System.out.println("NULL:" + packet.getUnitID());
+
 		unit.setTargetTile(targetTile, false);
 		unit.moveToTargetTile();
 

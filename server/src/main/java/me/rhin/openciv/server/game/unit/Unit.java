@@ -2,6 +2,7 @@ package me.rhin.openciv.server.game.unit;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 
 import com.badlogic.gdx.math.Vector2;
@@ -93,7 +94,7 @@ public abstract class Unit implements AttackableEntity, NextTurnListener {
 		packet.setUnit(playerOwner.getName(), id, standingTile.getGridX(), standingTile.getGridY(), health);
 
 		for (Player player : Server.getInstance().getPlayers())
-			player.getConn().send(json.toJson(packet));
+			player.sendPacket(json.toJson(packet));
 
 		turnsSinceCombat++;
 	}
@@ -441,7 +442,7 @@ public abstract class Unit implements AttackableEntity, NextTurnListener {
 			attackPacket.setTargetDamage(targetDamage);
 
 			for (Player player : players) {
-				player.getConn().send(json.toJson(attackPacket));
+				player.sendPacket(json.toJson(attackPacket));
 			}
 		}
 
@@ -465,7 +466,7 @@ public abstract class Unit implements AttackableEntity, NextTurnListener {
 						targetUnit.getStandingTile().getGridY());
 
 				for (Player player : players) {
-					player.getConn().send(json.toJson(removeUnitPacket));
+					player.sendPacket(json.toJson(removeUnitPacket));
 				}
 			}
 
@@ -488,24 +489,27 @@ public abstract class Unit implements AttackableEntity, NextTurnListener {
 				cityOwnerPacket.setCity(city.getName(), this.getPlayerOwner().getName());
 
 				for (Player player : players) {
-					player.getConn().send(json.toJson(cityOwnerPacket));
+					player.sendPacket(json.toJson(cityOwnerPacket));
 				}
 
 				SetCityHealthPacket cityHealthPacket = new SetCityHealthPacket();
 				cityHealthPacket.setCity(city.getName(), city.getMaxHealth() / 2);
 
 				for (Player player : players) {
-					player.getConn().send(json.toJson(cityHealthPacket));
+					player.sendPacket(json.toJson(cityHealthPacket));
 				}
 
 				city.updateWorkedTiles();
 				city.getPlayerOwner().updateOwnedStatlines(false);
 
 				// Kill all enemy units inside the city
-				for (Unit cityUnit : city.getTile().getUnits()) {
+				Iterator<Unit> unitIterator = city.getTile().getUnits().iterator();
+				while (unitIterator.hasNext()) {
+					Unit cityUnit = unitIterator.next();
+
 					if (!cityUnit.getPlayerOwner().equals(this.getPlayerOwner())) {
 
-						city.getTile().removeUnit(cityUnit);
+						unitIterator.remove();
 
 						cityUnit.kill();
 
@@ -514,7 +518,7 @@ public abstract class Unit implements AttackableEntity, NextTurnListener {
 								cityUnit.getStandingTile().getGridY());
 
 						for (Player player : players) {
-							player.getConn().send(json.toJson(removeUnitPacket));
+							player.sendPacket(json.toJson(removeUnitPacket));
 						}
 
 					}
@@ -534,7 +538,7 @@ public abstract class Unit implements AttackableEntity, NextTurnListener {
 					this.getStandingTile().getGridY());
 
 			for (Player player : players) {
-				player.getConn().send(json.toJson(removeUnitPacket));
+				player.sendPacket(json.toJson(removeUnitPacket));
 			}
 
 		}

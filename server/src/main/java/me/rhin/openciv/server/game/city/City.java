@@ -139,12 +139,12 @@ public class City implements AttackableEntity, SpecialistContainer, NextTurnList
 		for (Stat stat : this.statLine.getStatValues().keySet()) {
 			statUpdatePacket.addStat(name, stat.name(), this.statLine.getStatValues().get(stat).getValue());
 		}
-		playerOwner.getConn().send(json.toJson(statUpdatePacket));
+		playerOwner.sendPacket(json.toJson(statUpdatePacket));
 	}
 
 	@Override
 	public void onNextTurn() {
-		if (playerOwner.getConn().isClosed() || playerOwner.getConn().isClosing())
+		if(!playerOwner.hasConnection())
 			return;
 
 		int gainedFood = (int) (statLine.getStatValue(Stat.FOOD_GAIN) - (statLine.getStatValue(Stat.POPULATION) * 2));
@@ -188,7 +188,7 @@ public class City implements AttackableEntity, SpecialistContainer, NextTurnList
 				territoryGrowPacket.setCityName(name);
 				territoryGrowPacket.setLocation(expansionTile.getGridX(), expansionTile.getGridY());
 				territoryGrowPacket.setOwner(playerOwner.getName());
-				player.getConn().send(json.toJson(territoryGrowPacket));
+				player.sendPacket(json.toJson(territoryGrowPacket));
 			}
 
 			// FIXME: Have the client automatically add an empty citizen...
@@ -196,7 +196,7 @@ public class City implements AttackableEntity, SpecialistContainer, NextTurnList
 			setTileWorkerPacket.setWorker(citizenWorker.getWorkerType(), name, citizenWorker.getTile().getGridX(),
 					citizenWorker.getTile().getGridY());
 
-			playerOwner.getConn().send(json.toJson(setTileWorkerPacket));
+			playerOwner.sendPacket(json.toJson(setTileWorkerPacket));
 
 			int tiles = territory.size() - 6;
 			statLine.setValue(Stat.EXPANSION_REQUIREMENT, 10 + 10 * (float) Math.pow(tiles, 1.3));
@@ -213,7 +213,7 @@ public class City implements AttackableEntity, SpecialistContainer, NextTurnList
 			statUpdatePacket.addStat(name, stat.name(), this.statLine.getStatValues().get(stat).getValue());
 		}
 
-		playerOwner.getConn().send(json.toJson(statUpdatePacket));
+		playerOwner.sendPacket(json.toJson(statUpdatePacket));
 
 		if (health < getMaxHealth()) {
 			health = MathUtils.clamp(health + 5, 0, getMaxHealth());
@@ -322,7 +322,7 @@ public class City implements AttackableEntity, SpecialistContainer, NextTurnList
 			packet.setContainer(name, name, -1);
 
 			Json json = new Json();
-			playerOwner.getConn().send(json.toJson(packet));
+			playerOwner.sendPacket(json.toJson(packet));
 		}
 
 		unemployedSpecialists.clear();
@@ -341,7 +341,7 @@ public class City implements AttackableEntity, SpecialistContainer, NextTurnList
 		for (Stat stat : this.statLine.getStatValues().keySet()) {
 			statUpdatePacket.addStat(name, stat.name(), this.statLine.getStatValues().get(stat).getValue());
 		}
-		playerOwner.getConn().send(json.toJson(statUpdatePacket));
+		playerOwner.sendPacket(json.toJson(statUpdatePacket));
 
 	}
 
@@ -353,7 +353,8 @@ public class City implements AttackableEntity, SpecialistContainer, NextTurnList
 				citizenWorker.getTile().getGridY());
 
 		Json json = new Json();
-		playerOwner.getConn().send(json.toJson(packet));
+		playerOwner.sendPacket(json.toJson(packet));
+		playerOwner.sendPacket(json.toJson(packet));
 	}
 
 	public void removeCitizenWorkerFromTile(Tile tile) {
@@ -372,8 +373,8 @@ public class City implements AttackableEntity, SpecialistContainer, NextTurnList
 				emptyCitizenWorker.getTile().getGridY());
 
 		Json json = new Json();
-		playerOwner.getConn().send(json.toJson(tileWorkerPacket));
-		playerOwner.getConn().send(json.toJson(cityStatUpdatePacket));
+		playerOwner.sendPacket(json.toJson(tileWorkerPacket));
+		playerOwner.sendPacket(json.toJson(cityStatUpdatePacket));
 		playerOwner.updateOwnedStatlines(false);
 
 		addSpecialistToContainer(this);
@@ -386,7 +387,7 @@ public class City implements AttackableEntity, SpecialistContainer, NextTurnList
 		packet.setContainer(name, specialistContainer.getName(), 1);
 
 		Json json = new Json();
-		playerOwner.getConn().send(json.toJson(packet));
+		playerOwner.sendPacket(json.toJson(packet));
 	}
 
 	public void removeSpecialistFromContainer(SpecialistContainer specialistContainer) {
@@ -396,7 +397,7 @@ public class City implements AttackableEntity, SpecialistContainer, NextTurnList
 		packet.setContainer(name, specialistContainer.getName(), 1);
 
 		Json json = new Json();
-		playerOwner.getConn().send(json.toJson(packet));
+		playerOwner.sendPacket(json.toJson(packet));
 
 		playerOwner.updateOwnedStatlines(false);
 	}
@@ -426,7 +427,7 @@ public class City implements AttackableEntity, SpecialistContainer, NextTurnList
 
 		Json json = new Json();
 		for (Player player : Server.getInstance().getPlayers()) {
-			player.getConn().send(json.toJson(buildingConstructedPacket));
+			player.sendPacket(json.toJson(buildingConstructedPacket));
 		}
 
 		statLine.mergeStatLine(building.getStatLine());
@@ -442,7 +443,7 @@ public class City implements AttackableEntity, SpecialistContainer, NextTurnList
 		for (Stat stat : this.statLine.getStatValues().keySet()) {
 			packet.addStat(name, stat.name(), this.statLine.getStatValues().get(stat).getValue());
 		}
-		playerOwner.getConn().send(json.toJson(packet));
+		playerOwner.sendPacket(json.toJson(packet));
 	}
 
 	public Tile getOriginTile() {

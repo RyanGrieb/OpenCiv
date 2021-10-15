@@ -160,7 +160,7 @@ public class ProducibleItemManager implements NextTurnListener {
 
 		FinishProductionItemPacket packet = new FinishProductionItemPacket();
 		packet.setProductionItem(city.getName(), item.getProductionItem().getName());
-		city.getPlayerOwner().getConn().send(json.toJson(packet));
+		city.getPlayerOwner().sendPacket(json.toJson(packet));
 
 		city.getPlayerOwner().updateOwnedStatlines(false);
 	}
@@ -179,7 +179,7 @@ public class ProducibleItemManager implements NextTurnListener {
 
 			FinishProductionItemPacket packet = new FinishProductionItemPacket();
 			packet.setCityName(city.getName());
-			city.getPlayerOwner().getConn().send(json.toJson(packet));
+			city.getPlayerOwner().sendPacket(json.toJson(packet));
 
 			return;
 		}
@@ -200,7 +200,7 @@ public class ProducibleItemManager implements NextTurnListener {
 
 			FinishProductionItemPacket packet = new FinishProductionItemPacket();
 			packet.setProductionItem(city.getName(), producingItem.getProductionItem().getName());
-			city.getPlayerOwner().getConn().send(json.toJson(packet));
+			city.getPlayerOwner().sendPacket(json.toJson(packet));
 
 			city.getPlayerOwner().updateOwnedStatlines(false);
 			return;
@@ -209,7 +209,7 @@ public class ProducibleItemManager implements NextTurnListener {
 		ApplyProductionToItemPacket packet = new ApplyProductionToItemPacket();
 		packet.setProductionItem(city.getName(), producingItem.getProductionItem().getName(),
 				city.getStatLine().getStatValue(Stat.PRODUCTION_GAIN));
-		city.getPlayerOwner().getConn().send(json.toJson(packet));
+		city.getPlayerOwner().sendPacket(json.toJson(packet));
 	}
 
 	public void clearProducingItem() {
