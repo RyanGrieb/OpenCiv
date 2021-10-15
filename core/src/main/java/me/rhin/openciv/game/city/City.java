@@ -131,7 +131,7 @@ public class City extends Group implements AttackableEntity, TileObserver, Speci
 	@Override
 	public void draw(Batch batch, float parentAlpha) {
 		if (!Civilization.getInstance().getWindowManager().isOpenWindow(CityInfoWindow.class)
-				&& originTile.getTileObservers().size() > 0) {
+				/*&& originTile.getTileObservers().size() > 0*/) {
 			// FIXME: Since we are a group now, we don't need to override draw.
 			nameLabel.draw(batch, parentAlpha);
 			nameIcon.draw(batch);

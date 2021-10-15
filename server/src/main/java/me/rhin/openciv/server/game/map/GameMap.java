@@ -10,6 +10,10 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Json;
 
 import me.rhin.openciv.server.Server;
+import me.rhin.openciv.server.game.Player;
+import me.rhin.openciv.server.game.ai.AIPlayer;
+import me.rhin.openciv.server.game.ai.type.CityStatePlayer;
+import me.rhin.openciv.server.game.ai.unit.BarbarianWarriorAI;
 import me.rhin.openciv.server.game.map.tile.Tile;
 import me.rhin.openciv.server.game.map.tile.Tile.TileTypeWrapper;
 import me.rhin.openciv.server.game.map.tile.TileIndexer;
@@ -17,6 +21,7 @@ import me.rhin.openciv.server.game.map.tile.TileType;
 import me.rhin.openciv.server.game.map.tile.TileType.TileLayer;
 import me.rhin.openciv.server.game.map.tile.TileType.TileProperty;
 import me.rhin.openciv.server.game.unit.Unit;
+import me.rhin.openciv.server.game.unit.type.Settler.SettlerUnit;
 import me.rhin.openciv.server.listener.MapRequestListener;
 import me.rhin.openciv.shared.map.MapSize;
 import me.rhin.openciv.shared.packet.ChunkTile;

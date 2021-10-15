@@ -20,8 +20,8 @@ import me.rhin.openciv.game.map.tile.Tile;
 import me.rhin.openciv.game.notification.NotificationHandler;
 import me.rhin.openciv.game.notification.type.NotResearchingNotification;
 import me.rhin.openciv.game.notification.type.NotStudyingNotification;
+import me.rhin.openciv.game.player.AIPlayer;
 import me.rhin.openciv.game.player.AbstractPlayer;
-import me.rhin.openciv.game.player.BarbarianPlayer;
 import me.rhin.openciv.game.player.Player;
 import me.rhin.openciv.game.unit.AttackableEntity;
 import me.rhin.openciv.game.unit.Unit;
@@ -131,7 +131,6 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 		// Find unit class using reflection & create an instance of it.
 		try {
 			AbstractPlayer playerOwner = players.get(packet.getPlayerOwner());
-
 			Tile tile = map.getTiles()[packet.getTileGridX()][packet.getTileGridY()];
 			UnitParameter unitParameter = new UnitParameter(packet.getUnitID(), packet.getUnitName(), playerOwner,
 					tile);
@@ -169,18 +168,14 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 
 			// TODO: Have a seperate AI playerlist?
 			if (packet.getAIList()[i]) {
-				if (civilizationName.equals("BARBARIANS"))
-					players.put(playerName, new BarbarianPlayer());
-				else {
-					// TODO: Implement AI Civilization player
-				}
+				players.put(playerName, new AIPlayer(playerName));
 			} else {
 				if (playerName.equals(player.getName()))
 					players.put(playerName, player);
 				else
 					players.put(playerName, new Player(playerName));
 			}
-			// TODO: Use reflection & remove our deprecated enum
+
 			players.get(playerName)
 					.setCivilization(CivType.valueOf(packet.getCivList()[i]).getCiv(players.get(playerName)));
 		}

@@ -3,14 +3,12 @@ package me.rhin.openciv.game.player;
 import me.rhin.openciv.game.map.tile.Tile;
 import me.rhin.openciv.game.unit.Unit;
 
-public class BarbarianPlayer extends AbstractPlayer {
+public class AIPlayer extends AbstractPlayer {
 
-	public BarbarianPlayer() {
-		super("Barbarians");
+	public AIPlayer(String name) {
+		super(name);
 	}
 
-	// NOTE: These are dummy methods used only by Players
-	// FIXME: Find a alternative to this
 	@Override
 	public Tile getHoveredTile() {
 		return null;
@@ -22,6 +20,7 @@ public class BarbarianPlayer extends AbstractPlayer {
 
 	@Override
 	public boolean isRightMouseHeld() {
+		
 		return false;
 	}
 

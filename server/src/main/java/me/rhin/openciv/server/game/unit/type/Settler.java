@@ -3,12 +3,20 @@ package me.rhin.openciv.server.game.unit.type;
 import java.util.Arrays;
 import java.util.List;
 
+import com.badlogic.gdx.utils.Json;
+
+import me.rhin.openciv.server.Server;
 import me.rhin.openciv.server.game.AbstractPlayer;
+import me.rhin.openciv.server.game.Player;
 import me.rhin.openciv.server.game.city.City;
+import me.rhin.openciv.server.game.city.building.type.Palace;
 import me.rhin.openciv.server.game.map.tile.Tile;
 import me.rhin.openciv.server.game.map.tile.TileType.TileProperty;
 import me.rhin.openciv.server.game.unit.Unit;
 import me.rhin.openciv.server.game.unit.UnitItem;
+import me.rhin.openciv.shared.packet.type.DeleteUnitPacket;
+import me.rhin.openciv.shared.packet.type.SettleCityPacket;
+import me.rhin.openciv.shared.packet.type.TerritoryGrowPacket;
 import me.rhin.openciv.shared.stat.Stat;
 
 public class Settler extends UnitItem {
@@ -41,6 +49,48 @@ public class Settler extends UnitItem {
 		@Override
 		public List<UnitType> getUnitTypes() {
 			return Arrays.asList(UnitType.SUPPORT);
+		}
+
+		public void settleCity() {
+
+			Tile tile = getStandingTile();
+			String cityName = City.getRandomCityName();
+
+			City city = new City(playerOwner, cityName, tile);
+			playerOwner.addCity(city);
+			playerOwner.setSelectedUnit(null);
+
+			tile.removeUnit(this);
+			kill();
+
+			SettleCityPacket settleCityPacket = new SettleCityPacket();
+			settleCityPacket.setCityName(cityName);
+			settleCityPacket.setOwner(playerOwner.getName());
+			settleCityPacket.setLocation(standingTile.getGridX(), standingTile.getGridY());
+
+			DeleteUnitPacket deleteUnitPacket = new DeleteUnitPacket();
+			deleteUnitPacket.setUnit(getID(), standingTile.getGridX(), standingTile.getGridY());
+
+			Json json = new Json();
+			for (Player player : Server.getInstance().getPlayers()) {
+				player.sendPacket(json.toJson(deleteUnitPacket));
+				player.sendPacket(json.toJson(settleCityPacket));
+
+				for (Tile territoryTile : city.getTerritory()) {
+					if (territoryTile == null)
+						continue;
+					TerritoryGrowPacket territoryGrowPacket = new TerritoryGrowPacket();
+					territoryGrowPacket.setCityName(city.getName());
+					territoryGrowPacket.setLocation(territoryTile.getGridX(), territoryTile.getGridY());
+					territoryGrowPacket.setOwner(city.getPlayerOwner().getName());
+					player.sendPacket(json.toJson(territoryGrowPacket));
+				}
+			}
+
+			city.addBuilding(new Palace(city));
+			city.updateWorkedTiles();
+
+			city.getPlayerOwner().updateOwnedStatlines(false);
 		}
 	}
 

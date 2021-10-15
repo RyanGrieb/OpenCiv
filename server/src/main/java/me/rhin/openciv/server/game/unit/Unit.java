@@ -11,7 +11,7 @@ import com.badlogic.gdx.utils.Json;
 import me.rhin.openciv.server.Server;
 import me.rhin.openciv.server.game.AbstractPlayer;
 import me.rhin.openciv.server.game.Player;
-import me.rhin.openciv.server.game.ai.type.UnitAI;
+import me.rhin.openciv.server.game.ai.unit.UnitAI;
 import me.rhin.openciv.server.game.city.City;
 import me.rhin.openciv.server.game.map.tile.Tile;
 import me.rhin.openciv.server.game.unit.UnitItem.UnitType;
@@ -34,7 +34,7 @@ public abstract class Unit implements AttackableEntity, NextTurnListener {
 	private int id;
 	private Tile[][] cameFrom;
 	private ArrayList<Vector2[]> pathVectors = new ArrayList<>();
-	private AbstractPlayer playerOwner;
+	protected AbstractPlayer playerOwner;
 	private float x, y;
 	private float width, height;
 

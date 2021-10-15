@@ -1,4 +1,4 @@
-package me.rhin.openciv.server.game.ai.type;
+package me.rhin.openciv.server.game.ai.unit;
 
 import java.util.ArrayList;
 

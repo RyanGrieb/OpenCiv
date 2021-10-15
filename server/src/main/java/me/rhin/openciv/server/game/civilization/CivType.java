@@ -8,6 +8,7 @@ import me.rhin.openciv.server.game.civilization.type.Barbarians;
 import me.rhin.openciv.server.game.civilization.type.England;
 import me.rhin.openciv.server.game.civilization.type.Germany;
 import me.rhin.openciv.server.game.civilization.type.Rome;
+import me.rhin.openciv.server.game.civilization.type.citystate.CityState;
 
 public enum CivType {
 
@@ -17,12 +18,6 @@ public enum CivType {
 		public Civ getCiv(AbstractPlayer player) {
 			Random rnd = new Random();
 			return CivType.values()[rnd.nextInt(CivType.values().length)].getCiv(player);
-		}
-	},
-	BARBARIANS {
-		@Override
-		public Civ getCiv(AbstractPlayer player) {
-			return new Barbarians(player);
 		}
 	},
 	AMERICA {
@@ -56,7 +51,7 @@ public enum CivType {
 	public static CivType randomCiv() {
 		Random rnd = new Random();
 		int max = CivType.values().length - 1;
-		int min = 2;
+		int min = 1;
 		CivType civType = CivType.values()[rnd.nextInt(max - min + 1) + min];
 		// CivType civType = CivType.values()[rnd.nextInt(CivType.values().length - 1) +
 		// 1];

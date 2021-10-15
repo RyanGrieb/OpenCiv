@@ -1,16 +1,13 @@
-package me.rhin.openciv.server.game.ai;
+package me.rhin.openciv.server.game.ai.type;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
-import org.java_websocket.WebSocket;
 
 import com.badlogic.gdx.utils.Json;
 
 import me.rhin.openciv.server.Server;
 import me.rhin.openciv.server.game.Player;
-import me.rhin.openciv.server.game.ai.type.BarbarianWarriorAI;
+import me.rhin.openciv.server.game.ai.AIPlayer;
+import me.rhin.openciv.server.game.ai.unit.BarbarianWarriorAI;
 import me.rhin.openciv.server.game.civilization.type.Barbarians;
 import me.rhin.openciv.server.game.map.tile.Tile;
 import me.rhin.openciv.server.game.unit.Unit;
@@ -74,16 +71,6 @@ public class BarbarianPlayer extends AIPlayer implements NextTurnListener {
 		turnsUntilSpawn--;
 	}
 
-	@Override
-	public List<AIProperties> getProperties() {
-		return Arrays.asList(AIProperties.BARBARIAN);
-	}
-
-	@Override
-	public void sendPacket(String json) {
-		// Don't send anything since were an AI.
-	}
-
 	public void addCampTile(Tile tile) {
 		campTiles.add(tile);
 	}
@@ -93,9 +80,5 @@ public class BarbarianPlayer extends AIPlayer implements NextTurnListener {
 		return "Barbarians";
 	}
 
-	@Override
-	public boolean hasConnection() {
-		// Always true since we an AI
-		return true;
-	}
+
 }

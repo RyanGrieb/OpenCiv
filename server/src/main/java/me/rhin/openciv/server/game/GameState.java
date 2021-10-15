@@ -6,7 +6,7 @@ import org.java_websocket.WebSocket;
 
 import me.rhin.openciv.server.Server;
 import me.rhin.openciv.server.game.ai.AIPlayer;
-import me.rhin.openciv.server.game.ai.BarbarianPlayer;
+import me.rhin.openciv.server.game.ai.type.BarbarianPlayer;
 import me.rhin.openciv.server.game.city.wonders.GameWonders;
 import me.rhin.openciv.server.game.map.GameMap;
 

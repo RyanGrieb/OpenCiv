@@ -4,9 +4,6 @@ import com.badlogic.gdx.graphics.Color;
 
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.civilization.Civ;
-import me.rhin.openciv.game.heritage.type.america.ExpandedVisionHeritage;
-import me.rhin.openciv.game.heritage.type.america.ManifestDestinyHeritage;
-import me.rhin.openciv.game.heritage.type.america.MinutemanHeritage;
 import me.rhin.openciv.game.player.AbstractPlayer;
 
 public class Barbarians extends Civ {

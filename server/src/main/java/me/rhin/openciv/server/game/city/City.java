@@ -91,6 +91,24 @@ public class City implements AttackableEntity, SpecialistContainer, NextTurnList
 	}
 
 	public static String getRandomCityName() {
+		String cityName = "Unknown";
+		boolean identicalName = true;
+
+		while (identicalName) {
+			identicalName = false;
+			cityName = City.getUnorderedCityName();
+			for (Player player : Server.getInstance().getPlayers()) {
+				for (City city : player.getOwnedCities()) {
+					if (city.getName().equals(cityName))
+						identicalName = true;
+				}
+			}
+		}
+
+		return cityName;
+	}
+
+	private static String getUnorderedCityName() {
 		ArrayList<String> names = new ArrayList<>();
 		BufferedReader reader;
 		try {
@@ -144,7 +162,7 @@ public class City implements AttackableEntity, SpecialistContainer, NextTurnList
 
 	@Override
 	public void onNextTurn() {
-		if(!playerOwner.hasConnection())
+		if (!playerOwner.hasConnection())
 			return;
 
 		int gainedFood = (int) (statLine.getStatValue(Stat.FOOD_GAIN) - (statLine.getStatValue(Stat.POPULATION) * 2));

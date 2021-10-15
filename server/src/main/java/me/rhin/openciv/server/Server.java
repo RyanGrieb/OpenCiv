@@ -18,6 +18,7 @@ import me.rhin.openciv.server.game.GameState;
 import me.rhin.openciv.server.game.Player;
 import me.rhin.openciv.server.game.ai.AIPlayer;
 import me.rhin.openciv.server.game.map.GameMap;
+import me.rhin.openciv.server.game.state.InGameState;
 import me.rhin.openciv.server.game.state.InLobbyState;
 import me.rhin.openciv.server.listener.BuyProductionItemListener.BuyProductionItemEvent;
 import me.rhin.openciv.server.listener.ChooseCivListener.ChooseCivEvent;
@@ -267,5 +268,9 @@ public class Server extends WebSocketServer {
 			e.printStackTrace();
 		}
 
+	}
+
+	public InGameState getInGameState() {
+		return (InGameState) game;
 	}
 }

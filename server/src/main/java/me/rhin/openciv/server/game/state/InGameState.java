@@ -12,11 +12,12 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Json;
 
 import me.rhin.openciv.server.Server;
-import me.rhin.openciv.server.game.AbstractPlayer;
 import me.rhin.openciv.server.game.GameState;
 import me.rhin.openciv.server.game.Player;
 import me.rhin.openciv.server.game.ai.AIPlayer;
-import me.rhin.openciv.server.game.ai.BarbarianPlayer;
+import me.rhin.openciv.server.game.ai.type.BarbarianPlayer;
+import me.rhin.openciv.server.game.ai.type.CityStatePlayer;
+import me.rhin.openciv.server.game.ai.type.CityStatePlayer.CityStateType;
 import me.rhin.openciv.server.game.city.City;
 import me.rhin.openciv.server.game.city.building.Building;
 import me.rhin.openciv.server.game.city.building.type.Palace;
@@ -35,7 +36,6 @@ import me.rhin.openciv.server.game.unit.type.Settler.SettlerUnit;
 import me.rhin.openciv.server.game.unit.type.Warrior.WarriorUnit;
 import me.rhin.openciv.server.game.unit.type.WorkBoat.WorkBoatUnit;
 import me.rhin.openciv.server.listener.BuyProductionItemListener;
-import me.rhin.openciv.server.listener.CaptureCityListener.CaptureCityEvent;
 import me.rhin.openciv.server.listener.ClickSpecialistListener;
 import me.rhin.openciv.server.listener.ClickWorkedTileListener;
 import me.rhin.openciv.server.listener.CombatPreviewListener;
@@ -53,6 +53,7 @@ import me.rhin.openciv.server.listener.SettleCityListener;
 import me.rhin.openciv.server.listener.UnitFinishedMoveListener.UnitFinishedMoveEvent;
 import me.rhin.openciv.server.listener.UnitMoveListener;
 import me.rhin.openciv.server.listener.WorkTileListener;
+import me.rhin.openciv.shared.packet.type.AddUnitPacket;
 import me.rhin.openciv.shared.packet.type.BuyProductionItemPacket;
 import me.rhin.openciv.shared.packet.type.ClickSpecialistPacket;
 import me.rhin.openciv.shared.packet.type.ClickWorkedTilePacket;
@@ -69,8 +70,6 @@ import me.rhin.openciv.shared.packet.type.RangedAttackPacket;
 import me.rhin.openciv.shared.packet.type.RemoveTileTypePacket;
 import me.rhin.openciv.shared.packet.type.RequestEndTurnPacket;
 import me.rhin.openciv.shared.packet.type.SelectUnitPacket;
-import me.rhin.openciv.shared.packet.type.SetCityHealthPacket;
-import me.rhin.openciv.shared.packet.type.SetCityOwnerPacket;
 import me.rhin.openciv.shared.packet.type.SetProductionItemPacket;
 import me.rhin.openciv.shared.packet.type.SetUnitOwnerPacket;
 import me.rhin.openciv.shared.packet.type.SettleCityPacket;
@@ -352,69 +351,21 @@ public class InGameState extends GameState
 	// TODO: Move to game map class?
 	@Override
 	public void onSettleCity(WebSocket conn, SettleCityPacket settleCityPacket) {
-		Player cityPlayer = getPlayerByConn(conn);
-		settleCityPacket.setOwner(cityPlayer.getName());
-
 		// FIXME: The server needs to check if the unit has movement & is too close to
 		// other cities.
 
-		String cityName = "Unknown";
-		boolean identicalName = true;
-
-		while (identicalName) {
-			identicalName = false;
-			cityName = City.getRandomCityName();
-			for (Player player : players) {
-				for (City city : player.getOwnedCities()) {
-					if (city.getName().equals(cityName))
-						identicalName = true;
-				}
-			}
-		}
-		settleCityPacket.setCityName(cityName);
-
 		Tile tile = map.getTiles()[settleCityPacket.getGridX()][settleCityPacket.getGridY()];
-		Unit unit = null;
+		SettlerUnit unit = null;
 
 		for (Unit currentUnit : tile.getUnits())
 			if (currentUnit instanceof SettlerUnit)
-				unit = currentUnit;
+				unit = (SettlerUnit) currentUnit;
 
 		// The player is actually trying to hack if this is triggered
 		if (unit == null)
 			return;
 
-		City city = new City(cityPlayer, cityName, tile);
-		cityPlayer.addCity(city);
-		cityPlayer.setSelectedUnit(null);
-
-		tile.removeUnit(unit);
-
-		unit.kill();
-
-		DeleteUnitPacket deleteUnitPacket = new DeleteUnitPacket();
-		deleteUnitPacket.setUnit(unit.getID(), settleCityPacket.getGridX(), settleCityPacket.getGridY());
-
-		Json json = new Json();
-		for (Player player : players) {
-			player.sendPacket(json.toJson(deleteUnitPacket));
-			player.sendPacket(json.toJson(settleCityPacket));
-
-			for (Tile territoryTile : city.getTerritory()) {
-				if (territoryTile == null)
-					continue;
-				TerritoryGrowPacket territoryGrowPacket = new TerritoryGrowPacket();
-				territoryGrowPacket.setCityName(city.getName());
-				territoryGrowPacket.setLocation(territoryTile.getGridX(), territoryTile.getGridY());
-				territoryGrowPacket.setOwner(city.getPlayerOwner().getName());
-				player.sendPacket(json.toJson(territoryGrowPacket));
-			}
-		}
-
-		city.addBuilding(new Palace(city));
-		city.updateWorkedTiles();
-
-		city.getPlayerOwner().updateOwnedStatlines(false);
+		unit.settleCity();
 	}
 
 	@Override
@@ -660,7 +611,7 @@ public class InGameState extends GameState
 					removeUnitPacket.setUnit(targetUnit.getID(), targetUnit.getStandingTile().getGridX(),
 							targetUnit.getStandingTile().getGridY());
 					removeUnitPacket.setKilled(true);
-					
+
 					for (Player player : players) {
 						player.sendPacket(json.toJson(removeUnitPacket));
 					}
@@ -703,6 +654,10 @@ public class InGameState extends GameState
 		return gameWonders;
 	}
 
+	public int getCurrentTurn() {
+		return currentTurn;
+	}
+
 	private boolean playersLoaded() {
 		for (Player player : players)
 			if (!player.isLoaded())
@@ -740,7 +695,12 @@ public class InGameState extends GameState
 	private void loadGame() {
 		System.out.println("[SERVER] Starting game...");
 
+		// Add AI
 		getAIPlayers().add(new BarbarianPlayer());
+
+		for (CityStateType type : CityStateType.values()) {
+			getAIPlayers().add(new CityStatePlayer(type));
+		}
 		map.generateTerrain();
 
 		// Start the game
@@ -874,6 +834,42 @@ public class InGameState extends GameState
 				}
 
 				loopLimit--;
+			}
+		}
+
+		// Spawn in city states
+		// Spawn citystate AI
+		for (AIPlayer aiPlayer : Server.getInstance().getAIPlayers()) {
+			if (aiPlayer instanceof CityStatePlayer) {
+				CityStatePlayer cityStatePlayer = (CityStatePlayer) aiPlayer;
+
+				// Pick random tile to spawn AI
+				Tile tile = null;
+
+				while (tile == null || tile.containsTileProperty(TileProperty.WATER)
+						|| tile.containsTileType(TileType.MOUNTAIN) || tile.getUnits().size() > 0) {
+					int x = rnd.nextInt(map.getWidth());
+					int y = rnd.nextInt(map.getHeight());
+					tile = map.getTiles()[x][y];
+				}
+
+				Unit settlerUnit = new SettlerUnit(cityStatePlayer, tile);
+				tile.addUnit(settlerUnit);
+
+				Unit warriorUnit = new WarriorUnit(cityStatePlayer, tile);
+				tile.addUnit(warriorUnit);
+
+				for (Unit unit : tile.getUnits()) {
+					AddUnitPacket addUnitPacket = new AddUnitPacket();
+					String unitName = unit.getClass().getSimpleName().substring(0,
+							unit.getClass().getSimpleName().indexOf("Unit"));
+					addUnitPacket.setUnit(unit.getPlayerOwner().getName(), unitName, unit.getID(), tile.getGridX(),
+							tile.getGridY());
+
+					for (Player player : Server.getInstance().getPlayers()) {
+						player.sendPacket(json.toJson(addUnitPacket));
+					}
+				}
 			}
 		}
 	}

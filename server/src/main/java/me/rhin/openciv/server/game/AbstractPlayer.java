@@ -35,7 +35,12 @@ public abstract class AbstractPlayer {
 	}
 
 	public abstract String getName();
+
 	public abstract void sendPacket(String json);
+
+	public abstract boolean hasConnection();
+
+	public abstract void setSelectedUnit(Unit unit);
 
 	public void updateOwnedStatlines(boolean increaseValues) {
 
@@ -112,7 +117,4 @@ public abstract class AbstractPlayer {
 	public void removeUnit(Unit unit) {
 		ownedUnits.remove(unit);
 	}
-
-	public abstract boolean hasConnection();
-
 }
