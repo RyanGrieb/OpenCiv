@@ -31,6 +31,7 @@ public class GameMap implements MapRequestListener {
 	private static final int LAND_MASS_PARAM = 5;
 	private static final int TEMPATURE_PARAM = 1;
 	private static final int CLIMATE_PARAM = 2;
+	private static final int MAX_TILE_LAYERS = 5;
 
 	private Tile[][] tiles;
 	private GenerationValue[][] stencilMap;
@@ -50,6 +51,8 @@ public class GameMap implements MapRequestListener {
 		Server.getInstance().getEventManager().addListener(MapRequestListener.class, this);
 	}
 
+	// FIXME: Very rare occasions we get out of bounds error from this method.
+	// Chunks?
 	@Override
 	public void onMapRequest(WebSocket conn) {
 		Json json = new Json();
@@ -63,7 +66,7 @@ public class GameMap implements MapRequestListener {
 					MapChunkPacket mapChunkPacket = new MapChunkPacket();
 
 					ArrayList<int[][]> chunkLayers = new ArrayList<>();
-					for (int i = 0; i < 3; i++) {
+					for (int i = 0; i < MAX_TILE_LAYERS; i++) {
 						int[][] chunkLayer = new int[MapChunkPacket.CHUNK_SIZE][MapChunkPacket.CHUNK_SIZE];
 						for (int a = 0; a < chunkLayer.length; a++)
 							for (int b = 0; b < chunkLayer[a].length; b++)
@@ -103,7 +106,7 @@ public class GameMap implements MapRequestListener {
 								AddUnitPacket addUnitPacket = new AddUnitPacket();
 								String unitName = unit.getClass().getSimpleName().substring(0,
 										unit.getClass().getSimpleName().indexOf("Unit"));
-								// Problem, clientside doesn't handle AIPlayers.
+
 								addUnitPacket.setUnit(unit.getPlayerOwner().getName(), unitName, unit.getID(), tileX,
 										tileY);
 								addUnitPackets.add(addUnitPacket);
@@ -579,7 +582,7 @@ public class GameMap implements MapRequestListener {
 		}
 
 		// Spawn barbarians
-		int campAmount = 5 * mapSize;
+		int campAmount = 8 * mapSize;
 		for (int i = 0; i < campAmount; i++) {
 			int x = rnd.nextInt(getWidth());
 			int y = rnd.nextInt(getHeight());

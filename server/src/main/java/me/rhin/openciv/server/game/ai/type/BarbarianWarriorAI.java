@@ -14,6 +14,7 @@ import me.rhin.openciv.server.game.map.tile.Tile;
 import me.rhin.openciv.server.game.map.tile.TileType.TileProperty;
 import me.rhin.openciv.server.game.unit.Unit;
 import me.rhin.openciv.server.listener.NextTurnListener;
+import me.rhin.openciv.shared.packet.type.DeleteUnitPacket;
 import me.rhin.openciv.shared.packet.type.MoveUnitPacket;
 
 public class BarbarianWarriorAI extends UnitAI implements NextTurnListener {
@@ -71,6 +72,14 @@ public class BarbarianWarriorAI extends UnitAI implements NextTurnListener {
 	 */
 	private void doTargetPath() {
 
+		// Change targetUnit if there are closer units.
+		for (Tile tile : unit.getStandingTile().getAdjTiles()) {
+			Unit enemyUnit = tile.getTopEnemyUnit(unit.getPlayerOwner());
+			if (enemyUnit != null && !enemyUnit.equals(targetUnit)) {
+				targetUnit = enemyUnit;
+			}
+		}
+
 		targetTile = targetUnit.getStandingTile();
 
 		ArrayList<Tile> pathTiles = getPathTiles(targetTile);
@@ -100,6 +109,12 @@ public class BarbarianWarriorAI extends UnitAI implements NextTurnListener {
 			player.sendPacket(json.toJson(packet));
 		}
 
+		Unit topEnemyUnit = targetUnit.getTile().getTopEnemyUnit(unit.getPlayerOwner());
+		// If there is an enemy ontop of our targer, switch to the top unit
+		if (topEnemyUnit != null && !topEnemyUnit.equals(targetUnit)) {
+			this.targetUnit = topEnemyUnit;
+		}
+
 		// FIXME: Handle attacking units inside cities.
 		if (unit.canAttack(targetUnit)) {
 
@@ -108,10 +123,10 @@ public class BarbarianWarriorAI extends UnitAI implements NextTurnListener {
 			} else
 				unit.attackEntity(targetUnit);
 
-			// Walk onto the dead target unit
-			// Problem, clientside doesn't pick this up.
+			// Walk onto the dead target unit. Kill/Capture surviving support units.
 			if (!targetUnit.isAlive() && unit.isAlive()) {
 
+				// Move onto the dead target.
 				packet = new MoveUnitPacket();
 
 				unit.setTargetTile(targetUnit.getStandingTile());
@@ -125,6 +140,25 @@ public class BarbarianWarriorAI extends UnitAI implements NextTurnListener {
 
 				for (Player player : Server.getInstance().getPlayers()) {
 					player.sendPacket(json.toJson(packet));
+				}
+
+				// Kill remaining units.
+				for (Unit enemyUnit : unit.getStandingTile().getUnits()) {
+					if (!enemyUnit.isAlive() || enemyUnit.getPlayerOwner().equals(unit.getPlayerOwner()))
+						continue;
+
+					enemyUnit.getStandingTile().removeUnit(enemyUnit);
+					enemyUnit.kill();
+					enemyUnit.getPlayerOwner().removeUnit(enemyUnit);
+
+					// FIXME: Redundant code.
+					DeleteUnitPacket removeUnitPacket = new DeleteUnitPacket();
+					removeUnitPacket.setUnit(enemyUnit.getID(), enemyUnit.getStandingTile().getGridX(),
+							enemyUnit.getStandingTile().getGridY());
+
+					for (Player player : Server.getInstance().getPlayers()) {
+						player.sendPacket(json.toJson(removeUnitPacket));
+					}
 				}
 			}
 		}

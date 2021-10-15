@@ -193,17 +193,17 @@ public class Tile extends Actor implements BottomShapeRenderListener {
 	@Override
 	public void draw(Batch batch, float parentAlpha) {
 
-		//if (discovered)
-			for (TileTypeWrapper sprite : tileWrappers) {
-				sprite.draw(batch);
-			}
+		// if (discovered)
+		for (TileTypeWrapper sprite : tileWrappers) {
+			sprite.draw(batch);
+		}
 
 		if (!discovered) {
-			//fogSprite.draw(batch);
+			// fogSprite.draw(batch);
 		}
 
 		if (tileObservers.size() < 1) {
-			//nonVisibleSprite.draw(batch);
+			// nonVisibleSprite.draw(batch);
 		}
 
 		if (drawSelection) {
@@ -305,9 +305,13 @@ public class Tile extends Actor implements BottomShapeRenderListener {
 		if (tileType == null)
 			return;
 
-		for (TileTypeWrapper tileWrapper : tileWrappers) {
+		// FIXME: Check to see if this is still concurrent modification
+		//Happens when there is a ruin tile on a sheep & forest tile.
+		Iterator<TileTypeWrapper> iterator = tileWrappers.iterator();
+		while (iterator.hasNext()) {
+			TileTypeWrapper tileWrapper = iterator.next();
 			if (tileWrapper.getTileType() == tileType)
-				tileWrappers.remove(tileWrapper);
+				iterator.remove();
 		}
 	}
 
