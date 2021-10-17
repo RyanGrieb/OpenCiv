@@ -22,9 +22,9 @@ import me.rhin.openciv.server.listener.NextTurnListener;
 public class CityStatePlayer extends AIPlayer implements NextTurnListener {
 
 	public enum CityStateType {
-		GOLD;
-		// PRODUCTION,
-		// SCIENCE;
+		GOLD,
+		PRODUCTION,
+		SCIENCE;
 	}
 
 	private String name;

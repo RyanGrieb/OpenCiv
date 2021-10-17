@@ -4,28 +4,31 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Random;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Music;
+import com.badlogic.gdx.audio.Sound;
 
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.SoundEnum;
 import me.rhin.openciv.asset.SoundEnum.SoundType;
 import me.rhin.openciv.listener.SetScreenListener;
+import me.rhin.openciv.ui.screen.AbstractScreen;
 import me.rhin.openciv.ui.screen.ScreenEnum;
+import me.rhin.openciv.ui.screen.type.TitleScreen;
 
 //TODO: Not sure if I should be using this
 public class SoundHandler implements SetScreenListener {
 
 	private ArrayList<Music> ambienceTracks;
 	private ArrayList<Music> titleMusicTacks;
-	private ArrayList<Music> inGameMusicTacks;
 
-	private HashMap<SoundEnum, Music> soundMap;
+	private HashMap<SoundEnum, Music> musicMap;
+	private HashMap<SoundEnum, Sound> effectMap;
 	private Music currentMusic;
 	private Music currentAmbience;
 
 	public SoundHandler() {
-		this.soundMap = new HashMap<>();
+		this.musicMap = new HashMap<>();
+		this.effectMap = new HashMap<>();
 		this.ambienceTracks = new ArrayList<>();
 		this.titleMusicTacks = new ArrayList<>();
 
@@ -45,7 +48,6 @@ public class SoundHandler implements SetScreenListener {
 
 		if (screenEnum == ScreenEnum.TITLE && prevScreenEnum == ScreenEnum.IN_GAME) {
 			// Stop playing ambient music & ingame music
-
 			currentAmbience.stop();
 
 			if (currentMusic != null)
@@ -59,45 +61,55 @@ public class SoundHandler implements SetScreenListener {
 	public void loadSounds() {
 		for (SoundEnum soundEnum : SoundEnum.values()) {
 
-		
-			Music sound = Civilization.getInstance().getAssetHandler()
-					.get("sound/" + soundEnum.name().toLowerCase() + "ogg", Music.class);
-			sound.setVolume(soundEnum.getVolume());
+			String soundPath = "sound/" + soundEnum.getSoundType().name().toLowerCase() + "/"
+					+ soundEnum.name().toLowerCase() + ".ogg";
 
-			soundMap.put(soundEnum, sound);
-
-			if (soundEnum.getSoundType() == SoundType.AMBIENCE)
-				ambienceTracks.add(sound);
-
-			if (soundEnum.getSoundType() == SoundType.SOUNDTRACK_TITLE)
-				titleMusicTacks.add(sound);
-
-			if (soundEnum.getSoundType() == SoundType.SOUNDTRACK_INGAME)
-				inGameMusicTacks.add(sound);
+			switch (soundEnum.getSoundType()) {
+			case EFFECT:
+				Sound effect = Civilization.getInstance().getAssetHandler().get(soundPath, Sound.class);
+				effectMap.put(soundEnum, effect);
+				break;
+			case AMBIENCE:
+				Music ambience = Civilization.getInstance().getAssetHandler().get(soundPath, Music.class);
+				ambience.setVolume(soundEnum.getVolume());
+				ambienceTracks.add(ambience);
+				break;
+			case MUSIC:
+				Music music = Civilization.getInstance().getAssetHandler().get(soundPath, Music.class);
+				music.setVolume(soundEnum.getVolume());
+				titleMusicTacks.add(music);
+				break;
+			default:
+				break;
+			}
 
 		}
 	}
 
-	public void playSound(SoundEnum soundEnum) {
+	public void playEffect(SoundEnum soundEnum) {
 
-		Music sound = soundMap.get(soundEnum);
+		if (soundEnum.getSoundType() != SoundType.EFFECT) {
+			// TODO: Throw error
+			return;
+		}
 
-		//FIXME, use this: https://libgdx.badlogicgames.com/ci/nightlies/docs/api/com/badlogic/gdx/audio/Sound.html
-		//For short audio clips.
-		
-		if (sound.isPlaying())
-			sound.stop();
+		Sound sound = effectMap.get(soundEnum);
 
-		//sound.play();
+		long id = sound.play();
+		sound.setVolume(id, soundEnum.getVolume());
 	}
 
-	/**
-	 * Plays a random ambience soundtrack
-	 */
 	public void playTrackBySoundtype(SoundType soundType) {
+		playTrackBySoundtype(Civilization.getInstance().getCurrentScreen(), soundType);
+	}
+
+	public void playTrackBySoundtype(AbstractScreen screen, SoundType soundType) {
 
 		if (currentAmbience != null)
 			currentAmbience.stop();
+
+		if (screen instanceof TitleScreen && currentMusic != null)
+			return;
 
 		if (currentMusic != null)
 			currentMusic.stop();
@@ -107,12 +119,8 @@ public class SoundHandler implements SetScreenListener {
 		case AMBIENCE:
 			musicTrack = ambienceTracks;
 			break;
-		case SOUNDTRACK_TITLE:
+		case MUSIC:
 			musicTrack = titleMusicTacks;
-			break;
-
-		case SOUNDTRACK_INGAME:
-			musicTrack = inGameMusicTacks;
 			break;
 		default:
 			break;
@@ -121,7 +129,7 @@ public class SoundHandler implements SetScreenListener {
 		Random rnd = new Random();
 
 		Music rndSound = musicTrack.get(rnd.nextInt(musicTrack.size()));
-		//rndSound.play();
+		rndSound.play();
 
 		if (soundType == SoundType.AMBIENCE)
 			currentAmbience = rndSound;

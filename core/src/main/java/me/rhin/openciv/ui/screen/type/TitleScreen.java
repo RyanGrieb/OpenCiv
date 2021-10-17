@@ -33,7 +33,7 @@ public class TitleScreen extends AbstractScreen implements ResizeListener {
 
 	public TitleScreen() {
 
-		Civilization.getInstance().getSoundHandler().playTrackBySoundtype(SoundType.SOUNDTRACK_TITLE);
+		Civilization.getInstance().getSoundHandler().playTrackBySoundtype(this, SoundType.MUSIC);
 
 		this.eventManager = Civilization.getInstance().getEventManager();
 		eventManager.clearEvents();

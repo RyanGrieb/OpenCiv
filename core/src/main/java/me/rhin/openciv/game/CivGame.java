@@ -228,7 +228,7 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 		}
 
 		if (packet.isKilled() && unit.getPlayerOwner().equals(player)) {
-			Civilization.getInstance().getSoundHandler().playSound(SoundEnum.UNIT_DEATH);
+			Civilization.getInstance().getSoundHandler().playEffect(SoundEnum.UNIT_DEATH);
 		}
 	}
 
@@ -261,7 +261,7 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 			turnTime = packet.getTurnTime();
 		}
 
-		Civilization.getInstance().getSoundHandler().playSound(SoundEnum.NEXT_TURN);
+		Civilization.getInstance().getSoundHandler().playEffect(SoundEnum.NEXT_TURN);
 		// SoundEnum.playSound(SoundEnum.NEXT_TURN);
 
 		turns++;
@@ -295,7 +295,7 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 		targetEntity.setHealth(targetEntity.getHealth() - packet.getTargetUnitDamage());
 
 		if (unit.getPlayerOwner().equals(player) || targetEntity.getPlayerOwner().equals(player))
-			Civilization.getInstance().getSoundHandler().playSound(SoundEnum.UNIT_COMBAT);
+			Civilization.getInstance().getSoundHandler().playEffect(SoundEnum.UNIT_COMBAT);
 	}
 
 	@Override

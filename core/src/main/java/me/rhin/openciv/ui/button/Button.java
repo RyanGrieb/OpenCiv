@@ -59,7 +59,7 @@ public abstract class Button extends Actor {
 				}
 				onClick();
 
-				Civilization.getInstance().getSoundHandler().playSound(SoundEnum.BUTTON_CLICK);
+				Civilization.getInstance().getSoundHandler().playEffect(SoundEnum.BUTTON_CLICK);
 				// SoundEnum.playSound(SoundEnum.BUTTON_CLICK);
 			}
 

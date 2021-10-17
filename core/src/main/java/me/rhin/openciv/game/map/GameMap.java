@@ -1,5 +1,6 @@
 
 package me.rhin.openciv.game.map;
+
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.Vector2;
 
@@ -94,7 +95,10 @@ public class GameMap implements ReceiveMapChunkListener, SetTileTypeListener, Re
 	public void onRemoveTileType(RemoveTileTypePacket packet) {
 		Tile tile = tiles[packet.getGridX()][packet.getGridY()];
 		TileType tileType = TileType.valueOf(packet.getTileTypeName());
-		tileType.playRemoveSound();
+
+		if (tile.isVisible())
+			tileType.playRemoveSound();
+		
 		tile.removeTileType(tileType);
 	}
 

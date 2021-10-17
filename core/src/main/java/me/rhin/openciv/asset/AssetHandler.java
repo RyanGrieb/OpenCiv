@@ -4,9 +4,12 @@ import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.assets.loaders.BitmapFontLoader;
 import com.badlogic.gdx.assets.loaders.SkinLoader;
 import com.badlogic.gdx.audio.Music;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+
+import me.rhin.openciv.Civilization;
 
 public class AssetHandler extends AssetManager {
 
@@ -26,16 +29,27 @@ public class AssetHandler extends AssetManager {
 		load("fonts/font.fnt", BitmapFont.class, fontParameter);
 
 		for (SoundEnum soundEnum : SoundEnum.values()) {
-			load("sound/" + soundEnum.name().toLowerCase() + ".ogg", Music.class);
-		}
 
+			String soundPath = "sound/" + soundEnum.getSoundType().name().toLowerCase() + "/"
+					+ soundEnum.name().toLowerCase() + ".ogg";
+
+			switch (soundEnum.getSoundType()) {
+			case EFFECT:
+				load(soundPath, Sound.class);
+				break;
+			case AMBIENCE:
+			case MUSIC:
+				 load(soundPath, Music.class);
+				break;
+			}
+
+		}
 	}
 
 	@Override
 	public boolean update() {
 		boolean isDone = super.update();
 		if (isDone) {
-
 		}
 
 		return isDone;

@@ -170,6 +170,6 @@ public enum TileType {
 
 	public void playRemoveSound() {
 		if (removeSound != null)
-			Civilization.getInstance().getSoundHandler().playSound(removeSound);
+			Civilization.getInstance().getSoundHandler().playEffect(removeSound);
 	}
 }

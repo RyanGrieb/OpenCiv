@@ -1,5 +1,6 @@
 package me.rhin.openciv.ui.font;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
@@ -16,8 +17,8 @@ public class FontHandler {
 
 	public void loadStyles() {
 		this.defaultLabelStyle = new Label.LabelStyle();
-		this.defaultLabelStyle.font = Civilization.getInstance().getAssetHandler().get("fonts/font.fnt",
-				BitmapFont.class);
+		BitmapFont font = new BitmapFont(Gdx.files.internal("fonts/font.fnt"));
+		this.defaultLabelStyle.font = font;
 		this.defaultLabelStyle.fontColor = Color.WHITE;
 	}
 
