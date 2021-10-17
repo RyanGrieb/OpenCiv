@@ -46,7 +46,6 @@ public class BarbarianWarriorAI extends UnitAI implements NextTurnListener {
 
 	@Override
 	public void clearListeners() {
-		System.out.println("clearing" + unit.getID());
 		Server.getInstance().getEventManager().removeListener(NextTurnListener.class, this);
 	}
 

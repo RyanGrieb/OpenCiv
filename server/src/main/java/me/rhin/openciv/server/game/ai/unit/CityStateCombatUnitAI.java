@@ -62,7 +62,6 @@ public class CityStateCombatUnitAI extends UnitAI implements NextTurnListener, S
 
 	@Override
 	public void clearListeners() {
-		System.out.println("clearing" + unit.getID());
 		Server.getInstance().getEventManager().removeListener(ServerSettleCityListener.class, this);
 		Server.getInstance().getEventManager().removeListener(NextTurnListener.class, this);
 	}
@@ -122,18 +121,18 @@ public class CityStateCombatUnitAI extends UnitAI implements NextTurnListener, S
 
 		// Walk back to city if under threat
 		if (doRetreatTargetCheck()) {
-			System.out.println("Retreating: " + unit.getID());
+			//System.out.println("Retreating: " + unit.getID());
 			return;
 		}
 		// Walk towards enemy units
 		if (doEnemyTargetCheck()) {
-			System.out.println("Attacking as: " + unit.getID());
+			//System.out.println("Attacking as: " + unit.getID());
 			return;
 		}
 		// Walk to a random tile
 		doRandomTarget();
 
-		System.out.println("Guarding to:" + targetTile);
+		//System.out.println("Guarding to:" + targetTile);
 	}
 
 	private void doRandomTarget() {

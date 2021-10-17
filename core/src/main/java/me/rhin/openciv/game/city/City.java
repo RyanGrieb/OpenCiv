@@ -111,8 +111,6 @@ public class City extends Group implements AttackableEntity, TileObserver, Speci
 
 				City cityActor = (City) event.getListenerActor();
 				cityActor.onClick();
-
-				Civilization.getInstance().getSoundHandler().playEffect(SoundEnum.CITY_CLICK);
 				// SoundEnum.playSound(SoundEnum.CITY_CLICK);
 			}
 		});
@@ -131,7 +129,7 @@ public class City extends Group implements AttackableEntity, TileObserver, Speci
 	@Override
 	public void draw(Batch batch, float parentAlpha) {
 		if (!Civilization.getInstance().getWindowManager().isOpenWindow(CityInfoWindow.class)
-				/*&& originTile.getTileObservers().size() > 0*/) {
+		/* && originTile.getTileObservers().size() > 0 */) {
 			// FIXME: Since we are a group now, we don't need to override draw.
 			nameLabel.draw(batch, parentAlpha);
 			nameIcon.draw(batch);
@@ -369,6 +367,8 @@ public class City extends Group implements AttackableEntity, TileObserver, Speci
 
 		Civilization.getInstance().getGame().getPlayer().unselectUnit();
 		Civilization.getInstance().getWindowManager().toggleWindow(new CityInfoWindow(this));
+
+		Civilization.getInstance().getSoundHandler().playEffect(SoundEnum.CITY_CLICK);
 	}
 
 	public void setStatLine(StatLine statLine) {
