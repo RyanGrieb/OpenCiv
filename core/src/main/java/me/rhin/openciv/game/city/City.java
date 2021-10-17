@@ -94,7 +94,7 @@ public class City extends Group implements AttackableEntity, TileObserver, Speci
 		this.healthbar = new Healthbar(nameLabel.getX() + nameLabel.getWidth() / 2 - 50 / 2, nameIcon.getY() + 15, 50,
 				4, false);
 
-		this.maxHealth = 200; // Default
+		this.maxHealth = 300; // Default
 		this.health = getMaxHealth();
 
 		// FIXME: The actor size & position really shouldn't be confined to the label.

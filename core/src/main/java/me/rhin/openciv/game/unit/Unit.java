@@ -137,17 +137,20 @@ public abstract class Unit extends Actor
 
 	@Override
 	public void draw(Batch batch, float parentAlpha) {
-		if (selected)
-			selectionSprite.draw(batch);
 
-		if ((targetTile != null && pathMovement <= getCurrentMovement() && pathMovement > 0) || hasRangedTarget()) {
-			targetSelectionSprite.draw(batch);
+		if (playerOwner instanceof Player) {
+			if (selected)
+				selectionSprite.draw(batch);
+
+			if ((targetTile != null && pathMovement <= getCurrentMovement() && pathMovement > 0) || hasRangedTarget()) {
+				targetSelectionSprite.draw(batch);
+			}
 		}
 
-		//if (standingTile.getTileObservers().size() > 0) {
-			sprite.draw(batch);
-			civIconSprite.draw(batch);
-		//}
+		// if (standingTile.getTileObservers().size() > 0) {
+		sprite.draw(batch);
+		civIconSprite.draw(batch);
+		// }
 	}
 
 	@Override
@@ -345,6 +348,10 @@ public abstract class Unit extends Actor
 
 	@Override
 	public void onBottomShapeRender(ShapeRenderer shapeRenderer) {
+
+		if (!(playerOwner instanceof Player))
+			return;
+
 		// FIXME: We get a concurrency error here at some point
 		if (targetEntity != null)
 			shapeRenderer.setColor(Color.RED);
@@ -352,7 +359,7 @@ public abstract class Unit extends Actor
 			shapeRenderer.setColor(Color.YELLOW);
 		for (Vector2[] vectors : new ArrayList<>(pathVectors)) {
 			// System.out.println(maxMovement + "," + pathMovement);
-			if (getCurrentMovement() < pathMovement)
+			if (getCurrentMovement() < pathMovement || vectors == null)
 				break;
 			shapeRenderer.line(vectors[0], vectors[1]);
 
@@ -439,8 +446,8 @@ public abstract class Unit extends Actor
 		});
 
 		if (selected) {
-			 Civilization.getInstance().getSoundHandler().playSound(SoundEnum.UNIT_CLICK);
-			//SoundEnum.playSound(SoundEnum.UNIT_CLICK);
+			Civilization.getInstance().getSoundHandler().playSound(SoundEnum.UNIT_CLICK);
+			// SoundEnum.playSound(SoundEnum.UNIT_CLICK);
 		}
 	}
 

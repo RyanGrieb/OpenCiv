@@ -1,10 +1,15 @@
 package me.rhin.openciv.server.game.city.building;
 
+import java.util.Map.Entry;
+
 import me.rhin.openciv.server.Server;
+import me.rhin.openciv.server.game.ai.AIPlayer;
 import me.rhin.openciv.server.game.city.City;
+import me.rhin.openciv.server.game.city.wonders.Wonder;
 import me.rhin.openciv.server.game.production.ProductionItem;
 import me.rhin.openciv.server.listener.BuildingConstructedListener.BuildingConstructedEvent;
 import me.rhin.openciv.shared.city.SpecialistType;
+import me.rhin.openciv.shared.stat.Stat;
 import me.rhin.openciv.shared.stat.StatLine;
 import me.rhin.openciv.shared.stat.StatValue;
 
@@ -47,6 +52,58 @@ public abstract class Building implements ProductionItem {
 	@Override
 	public void setProductionModifier(float modifier) {
 		this.productionModifier = modifier;
+	}
+
+	@Override
+	public float getAIValue(AIPlayer aiPlayer) {
+
+		// TODO: Modify value based on the type of AI player.
+		float value = 0;
+
+		for (Entry<Stat, StatValue> entry : statLine.getStatValues().entrySet()) {
+			// FIXME: We can do better than this
+			float modifier = 0;
+			float baseValue = entry.getValue().getValue();
+			switch (entry.getKey()) {
+			case SCIENCE_GAIN:
+				modifier = 3;
+				break;
+
+			case HERITAGE_GAIN:
+				modifier = 4;
+				break;
+
+			case PRODUCTION_GAIN:
+				modifier = 2;
+				break;
+
+			case GOLD_GAIN:
+				modifier = 1;
+				break;
+
+			case FOOD_GAIN:
+				modifier = 2;
+				break;
+
+			case MORALE:
+				modifier = 2;
+				break;
+
+			default:
+				break;
+			}
+
+			value += baseValue * modifier;
+		}
+
+		value *= 8;
+
+		return value;
+	}
+
+	@Override
+	public boolean isWonder() {
+		return this instanceof Wonder;
 	}
 
 	public float getProductionModifier() {

@@ -15,7 +15,7 @@ import me.rhin.openciv.shared.stat.Stat;
 public class Galley extends UnitItem {
 
 	public Galley(City city) {
-		super(city);
+		super(city, 30);
 	}
 
 	public static class GalleyUnit extends Unit {

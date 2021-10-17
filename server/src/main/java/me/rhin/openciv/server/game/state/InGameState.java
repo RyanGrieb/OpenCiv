@@ -270,7 +270,7 @@ public class InGameState extends GameState
 				playerOwner.updateOwnedStatlines(false);
 
 				targetUnit.getStandingTile().removeUnit(targetUnit);
-
+				playerOwner.removeUnit(targetUnit);
 				targetUnit.kill();
 
 				// FIXME: Redundant code.
@@ -311,18 +311,7 @@ public class InGameState extends GameState
 
 			// Handle capturing barbarian camps
 			if (unit.getStandingTile().containsTileType(TileType.BARBARIAN_CAMP)) {
-				Tile campTile = unit.getStandingTile();
-				campTile.removeTileType(TileType.BARBARIAN_CAMP);
-
-				RemoveTileTypePacket removeTileTypePacket = new RemoveTileTypePacket();
-				removeTileTypePacket.setTile(TileType.BARBARIAN_CAMP.name(), campTile.getGridX(), campTile.getGridY());
-
-				for (Player player : Server.getInstance().getPlayers())
-					player.sendPacket(json.toJson(removeTileTypePacket));
-
-				// TODO: Plunder sound effect.
-				unit.getPlayerOwner().getStatLine().addValue(Stat.GOLD, 150);
-				playerOwner.updateOwnedStatlines(false);
+				unit.captureBarbarianCamp();
 			}
 
 			// Handle capturing ruins
@@ -602,9 +591,10 @@ public class InGameState extends GameState
 				if (targetEntity instanceof Unit && targetEntity.getTile().getCity() == null) {
 
 					Unit targetUnit = (Unit) targetEntity;
-					targetUnit.getStandingTile().removeUnit(targetUnit);
 
+					targetUnit.getStandingTile().removeUnit(targetUnit);
 					targetUnit.kill();
+					targetUnit.getPlayerOwner().removeUnit(targetUnit);
 
 					// FIXME: Redundant code.
 					DeleteUnitPacket removeUnitPacket = new DeleteUnitPacket();
@@ -654,6 +644,7 @@ public class InGameState extends GameState
 		return gameWonders;
 	}
 
+	// TODO: Maybe move to Game class.
 	public int getCurrentTurn() {
 		return currentTurn;
 	}
@@ -696,11 +687,12 @@ public class InGameState extends GameState
 		System.out.println("[SERVER] Starting game...");
 
 		// Add AI
-		getAIPlayers().add(new BarbarianPlayer());
-
 		for (CityStateType type : CityStateType.values()) {
 			getAIPlayers().add(new CityStatePlayer(type));
 		}
+
+		getAIPlayers().add(new BarbarianPlayer());
+
 		map.generateTerrain();
 
 		// Start the game

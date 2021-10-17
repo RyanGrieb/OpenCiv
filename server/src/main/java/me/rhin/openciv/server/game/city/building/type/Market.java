@@ -3,11 +3,14 @@ package me.rhin.openciv.server.game.city.building.type;
 import me.rhin.openciv.server.game.city.City;
 import me.rhin.openciv.server.game.city.building.Building;
 import me.rhin.openciv.shared.city.SpecialistType;
+import me.rhin.openciv.shared.stat.Stat;
 
 public class Market extends Building {
 
 	public Market(City city) {
 		super(city);
+
+		this.statLine.addValue(Stat.GOLD_GAIN, 2);
 	}
 
 	@Override
@@ -34,7 +37,7 @@ public class Market extends Building {
 	public SpecialistType getSpecialistType() {
 		return SpecialistType.MERCHANT;
 	}
-	
+
 	@Override
 	public String getName() {
 		return "Market";

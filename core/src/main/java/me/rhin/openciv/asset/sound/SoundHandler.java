@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Random;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Music;
 
 import me.rhin.openciv.Civilization;
@@ -11,8 +12,6 @@ import me.rhin.openciv.asset.SoundEnum;
 import me.rhin.openciv.asset.SoundEnum.SoundType;
 import me.rhin.openciv.listener.SetScreenListener;
 import me.rhin.openciv.ui.screen.ScreenEnum;
-import me.rhin.openciv.ui.screen.type.InGameScreen;
-import me.rhin.openciv.ui.screen.type.TitleScreen;
 
 //TODO: Not sure if I should be using this
 public class SoundHandler implements SetScreenListener {
@@ -60,8 +59,9 @@ public class SoundHandler implements SetScreenListener {
 	public void loadSounds() {
 		for (SoundEnum soundEnum : SoundEnum.values()) {
 
+		
 			Music sound = Civilization.getInstance().getAssetHandler()
-					.get("sound/" + soundEnum.name().toLowerCase() + ".ogg", Music.class);
+					.get("sound/" + soundEnum.name().toLowerCase() + "ogg", Music.class);
 			sound.setVolume(soundEnum.getVolume());
 
 			soundMap.put(soundEnum, sound);
@@ -79,7 +79,16 @@ public class SoundHandler implements SetScreenListener {
 	}
 
 	public void playSound(SoundEnum soundEnum) {
-		soundMap.get(soundEnum).play();
+
+		Music sound = soundMap.get(soundEnum);
+
+		//FIXME, use this: https://libgdx.badlogicgames.com/ci/nightlies/docs/api/com/badlogic/gdx/audio/Sound.html
+		//For short audio clips.
+		
+		if (sound.isPlaying())
+			sound.stop();
+
+		//sound.play();
 	}
 
 	/**
@@ -112,7 +121,7 @@ public class SoundHandler implements SetScreenListener {
 		Random rnd = new Random();
 
 		Music rndSound = musicTrack.get(rnd.nextInt(musicTrack.size()));
-		rndSound.play();
+		//rndSound.play();
 
 		if (soundType == SoundType.AMBIENCE)
 			currentAmbience = rndSound;

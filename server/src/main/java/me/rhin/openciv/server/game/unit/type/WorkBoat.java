@@ -15,7 +15,7 @@ import me.rhin.openciv.shared.stat.Stat;
 public class WorkBoat extends UnitItem {
 
 	public WorkBoat(City city) {
-		super(city);
+		super(city, 0);
 	}
 
 	public static class WorkBoatUnit extends Unit {

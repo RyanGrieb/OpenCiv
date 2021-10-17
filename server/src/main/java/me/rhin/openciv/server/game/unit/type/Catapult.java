@@ -17,7 +17,7 @@ import me.rhin.openciv.shared.stat.Stat;
 public class Catapult extends UnitItem {
 
 	public Catapult(City city) {
-		super(city);
+		super(city, 7);
 	}
 
 	public static class CatapultUnit extends RangedUnit {

@@ -5,6 +5,8 @@ import me.rhin.openciv.server.game.unit.Unit;
 
 public abstract class AIPlayer extends AbstractPlayer {
 
+	protected float intimidation;
+
 	@Override
 	public boolean hasConnection() {
 		// Always true since we an AI
@@ -19,5 +21,9 @@ public abstract class AIPlayer extends AbstractPlayer {
 	@Override
 	public void sendPacket(String json) {
 		// Don't send anything since were an AI.
+	}
+
+	public float getIntimidation() {
+		return intimidation;
 	}
 }

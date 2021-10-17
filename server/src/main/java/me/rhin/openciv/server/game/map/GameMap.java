@@ -412,7 +412,8 @@ public class GameMap implements MapRequestListener {
 			// Apply the river sides
 			ArrayList<Vector2> traversedVectors = new ArrayList<>();
 
-			System.out.println("Generating river sides w/ river size of: " + river.size());
+			// System.out.println("Generating river sides w/ river size of: " +
+			// river.size());
 			for (int i = 0; i < river.size(); i++) {
 				if (i + 1 >= river.size())
 					break;

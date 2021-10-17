@@ -15,7 +15,7 @@ import me.rhin.openciv.shared.stat.Stat;
 public class Archer extends UnitItem {
 
 	public Archer(City city) {
-		super(city);
+		super(city, 14);
 	}
 
 	public static class ArcherUnit extends RangedUnit {

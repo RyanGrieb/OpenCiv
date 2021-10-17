@@ -10,11 +10,12 @@ import me.rhin.openciv.server.game.map.tile.TileType.TileProperty;
 import me.rhin.openciv.server.game.unit.Unit;
 import me.rhin.openciv.server.game.unit.UnitItem;
 import me.rhin.openciv.shared.stat.Stat;
+import me.rhin.openciv.shared.stat.StatValue;
 
 public class Warrior extends UnitItem {
 
 	public Warrior(City city) {
-		super(city);
+		super(city, 20);
 	}
 
 	public static class WarriorUnit extends Unit {

@@ -35,23 +35,6 @@ public enum SoundEnum {
 		this.soundType = soundType;
 	}
 
-	@Deprecated
-	public static void playSound(SoundEnum soundEnum) {
-
-		Music sound = Civilization.getInstance().getAssetHandler()
-				.get("sound/" + soundEnum.name().toLowerCase() + ".ogg", Music.class);
-		sound.setVolume(soundEnum.getVolume());
-
-		sound.play();
-		sound.setOnCompletionListener(new Music.OnCompletionListener() {
-
-			@Override
-			public void onCompletion(Music music) {
-				sound.dispose();
-			}
-		});
-	}
-
 	public float getVolume() {
 		return volume;
 	}

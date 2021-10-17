@@ -14,10 +14,12 @@ import me.rhin.openciv.server.game.Player;
 import me.rhin.openciv.server.game.ai.unit.UnitAI;
 import me.rhin.openciv.server.game.city.City;
 import me.rhin.openciv.server.game.map.tile.Tile;
+import me.rhin.openciv.server.game.map.tile.TileType;
 import me.rhin.openciv.server.game.unit.UnitItem.UnitType;
 import me.rhin.openciv.server.listener.NextTurnListener;
 import me.rhin.openciv.server.listener.CaptureCityListener.CaptureCityEvent;
 import me.rhin.openciv.shared.packet.type.DeleteUnitPacket;
+import me.rhin.openciv.shared.packet.type.RemoveTileTypePacket;
 import me.rhin.openciv.shared.packet.type.SetCityHealthPacket;
 import me.rhin.openciv.shared.packet.type.SetCityOwnerPacket;
 import me.rhin.openciv.shared.packet.type.SetUnitHealthPacket;
@@ -70,6 +72,10 @@ public abstract class Unit implements AttackableEntity, NextTurnListener {
 
 	@Override
 	public void onNextTurn() {
+
+		if (!alive)
+			return;
+
 		this.movement = getMaxMovement();
 
 		// Handle health regen
@@ -169,7 +175,7 @@ public abstract class Unit implements AttackableEntity, NextTurnListener {
 	public void clearListeners() {
 
 		if (unitAI != null)
-			Server.getInstance().getEventManager().clearListenersFromObject(unitAI);
+			unitAI.clearListeners();
 
 		Server.getInstance().getEventManager().clearListenersFromObject(this);
 	}
@@ -511,12 +517,13 @@ public abstract class Unit implements AttackableEntity, NextTurnListener {
 					if (!cityUnit.getPlayerOwner().equals(this.getPlayerOwner())) {
 
 						unitIterator.remove();
-
+						city.getPlayerOwner().removeUnit(cityUnit);
 						cityUnit.kill();
 
 						DeleteUnitPacket removeUnitPacket = new DeleteUnitPacket();
 						removeUnitPacket.setUnit(cityUnit.getID(), cityUnit.getStandingTile().getGridX(),
 								cityUnit.getStandingTile().getGridY());
+						removeUnitPacket.setKilled(true);
 
 						for (Player player : players) {
 							player.sendPacket(json.toJson(removeUnitPacket));
@@ -545,18 +552,46 @@ public abstract class Unit implements AttackableEntity, NextTurnListener {
 		}
 	}
 
-	public boolean canAttack(Unit targetUnit) {
+	public boolean canAttack(AttackableEntity attackableEntity) {
 
 		boolean nearTarget = false;
 
-		for (Tile tile : standingTile.getAdjTiles())
-			if (tile.getUnits().contains(targetUnit) && !targetUnit.getPlayerOwner().equals(playerOwner))
-				nearTarget = true;
+		ArrayList<Tile> adjTiles = new ArrayList<>();
+		adjTiles.add(standingTile);
 
-		if (nearTarget && movement - getMovementCost(standingTile, targetUnit.getStandingTile()) < 0) {
+		for (Tile tile : standingTile.getAdjTiles())
+			adjTiles.add(tile);
+
+		for (Tile tile : adjTiles) {
+			AttackableEntity tileEntity = tile.getEnemyAttackableEntity(playerOwner);
+			if (tileEntity != null && tileEntity.equals(attackableEntity)
+					&& !tileEntity.getPlayerOwner().equals(playerOwner))
+				nearTarget = true;
+		}
+
+		if (nearTarget && movement - getMovementCost(standingTile, attackableEntity.getTile()) < 0) {
 			return false;
 		}
 
 		return nearTarget;
+	}
+
+	public UnitAI getAIBehavior() {
+		return unitAI;
+	}
+
+	public void captureBarbarianCamp() {
+		Tile campTile = standingTile;
+		campTile.removeTileType(TileType.BARBARIAN_CAMP);
+
+		RemoveTileTypePacket removeTileTypePacket = new RemoveTileTypePacket();
+		removeTileTypePacket.setTile(TileType.BARBARIAN_CAMP.name(), campTile.getGridX(), campTile.getGridY());
+
+		Json json = new Json();
+		for (Player player : Server.getInstance().getPlayers())
+			player.sendPacket(json.toJson(removeTileTypePacket));
+
+		playerOwner.getStatLine().addValue(Stat.GOLD, 150);
+		playerOwner.updateOwnedStatlines(false);
 	}
 }

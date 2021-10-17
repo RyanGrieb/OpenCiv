@@ -416,6 +416,9 @@ public class Tile {
 
 	public float getMovementCost(Tile prevTile) {
 
+		if (prevTile.equals(this))
+			return 0;
+
 		float movementCost = 0;
 
 		// Check if the tile were moving to has a river
@@ -508,11 +511,11 @@ public class Tile {
 		return topUnit;
 	}
 
-	public AttackableEntity getEnemyAttackableEntity(Player player) {
+	public AttackableEntity getEnemyAttackableEntity(AbstractPlayer player) {
 
 		// Problem: This can AND WILL pick up friendly units. Fixed by having to return
 		// enemy cities first.
-		if (city != null)
+		if (city != null && !city.getPlayerOwner().equals(player))
 			return city;
 
 		Unit unit = getTopEnemyUnit(player);

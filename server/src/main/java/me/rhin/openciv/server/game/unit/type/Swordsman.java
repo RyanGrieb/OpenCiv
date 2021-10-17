@@ -16,7 +16,7 @@ import me.rhin.openciv.shared.stat.Stat;
 public class Swordsman extends UnitItem {
 
 	public Swordsman(City city) {
-		super(city);
+		super(city, 35);
 	}
 
 	public static class SwordsmanUnit extends Unit {

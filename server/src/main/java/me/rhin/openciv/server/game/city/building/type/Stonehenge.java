@@ -41,5 +41,4 @@ public class Stonehenge extends Building implements Wonder {
 	public String getName() {
 		return "Stonehenge";
 	}
-
 }

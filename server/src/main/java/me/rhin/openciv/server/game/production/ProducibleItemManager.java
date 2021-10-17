@@ -140,7 +140,7 @@ public class ProducibleItemManager implements NextTurnListener {
 			itemQueue.clear();
 		}
 
-		System.out.println("Adding to queue");
+		//System.out.println("Adding to queue");
 		itemQueue.add(new ProducingItem(possibleItems.get(itemName)));
 	}
 
@@ -214,5 +214,19 @@ public class ProducibleItemManager implements NextTurnListener {
 
 	public void clearProducingItem() {
 		itemQueue.clear();
+	}
+
+	public boolean canProduce(String itemName) {
+		if (possibleItems.get(itemName) == null)
+			return false;
+		return possibleItems.get(itemName).meetsProductionRequirements();
+	}
+
+	public boolean isProducingItem() {
+		return itemQueue.size() > 0;
+	}
+
+	public ProducingItem getProducingItem() {
+		return itemQueue.peek();
 	}
 }

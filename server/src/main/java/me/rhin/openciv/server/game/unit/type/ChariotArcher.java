@@ -15,7 +15,7 @@ import me.rhin.openciv.shared.stat.Stat;
 public class ChariotArcher extends UnitItem {
 
 	public ChariotArcher(City city) {
-		super(city);
+		super(city, 10);
 	}
 
 	public static class ChariotArcherUnit extends RangedUnit {

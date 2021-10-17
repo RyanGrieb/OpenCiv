@@ -10,14 +10,16 @@ public abstract class Technology {
 	private boolean researched;
 	private int id;
 	private float appliedScience;
+	private TechProperty[] properties;
 
-	public Technology(ResearchTree researchTree) {
+	public Technology(ResearchTree researchTree, TechProperty... properties) {
 		this.researchTree = researchTree;
 
 		this.requiredTechs = new ArrayList<>();
 		this.researched = false;
 		this.appliedScience = 0;
 		this.id = researchTree.getCurrentTechIDIndex();
+		this.properties = properties;
 	}
 
 	public abstract int getScienceCost();
@@ -54,14 +56,30 @@ public abstract class Technology {
 	public void onResearched() {
 	}
 
-	/*
-	 * public boolean hasResearchedRequiredTechs() { for (Class<? extends
-	 * Technology> techClazz : requiredTechs) { Technology tech =
-	 * Civilization.getInstance().getGame().getPlayer().getResearchTree()
-	 * .getTechnology(techClazz);
-	 * 
-	 * if (!tech.isResearched()) return false; }
-	 * 
-	 * return true; }
-	 */
+	public boolean canResearch() {
+
+		if (researched)
+			return false;
+
+		for (Class<? extends Technology> techClazz : requiredTechs) {
+			Technology tech = researchTree.getTechnology(techClazz);
+
+			if (!tech.isResearched())
+				return false;
+		}
+
+		return true;
+	}
+
+	public float getTechValue() {
+		float topValue = 0;
+		for (TechProperty property : properties) {
+			float value = property.ordinal();
+			if (topValue < value)
+				topValue = value;
+		}
+
+		return topValue;
+	}
+
 }

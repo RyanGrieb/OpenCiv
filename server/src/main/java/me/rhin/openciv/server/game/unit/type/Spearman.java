@@ -16,7 +16,7 @@ import me.rhin.openciv.shared.stat.Stat;
 public class Spearman extends UnitItem {
 
 	public Spearman(City city) {
-		super(city);
+		super(city, 22);
 	}
 
 	public static class SpearmanUnit extends Unit {

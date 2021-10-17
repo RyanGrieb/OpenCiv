@@ -14,6 +14,7 @@ import me.rhin.openciv.server.game.map.tile.Tile;
 import me.rhin.openciv.server.game.map.tile.TileType.TileProperty;
 import me.rhin.openciv.server.game.unit.Unit;
 import me.rhin.openciv.server.game.unit.UnitItem;
+import me.rhin.openciv.server.listener.ServerSettleCityListener.ServerSettleCityEvent;
 import me.rhin.openciv.shared.packet.type.DeleteUnitPacket;
 import me.rhin.openciv.shared.packet.type.SettleCityPacket;
 import me.rhin.openciv.shared.packet.type.TerritoryGrowPacket;
@@ -22,7 +23,7 @@ import me.rhin.openciv.shared.stat.Stat;
 public class Settler extends UnitItem {
 
 	public Settler(City city) {
-		super(city);
+		super(city, 0);
 	}
 
 	public static class SettlerUnit extends Unit {
@@ -52,14 +53,18 @@ public class Settler extends UnitItem {
 		}
 
 		public void settleCity() {
+			settleCity(City.getRandomCityName());
+		}
+
+		public void settleCity(String cityName) {
 
 			Tile tile = getStandingTile();
-			String cityName = City.getRandomCityName();
 
 			City city = new City(playerOwner, cityName, tile);
 			playerOwner.addCity(city);
 			playerOwner.setSelectedUnit(null);
-
+			
+			playerOwner.removeUnit(this);
 			tile.removeUnit(this);
 			kill();
 
@@ -91,6 +96,8 @@ public class Settler extends UnitItem {
 			city.updateWorkedTiles();
 
 			city.getPlayerOwner().updateOwnedStatlines(false);
+			
+			Server.getInstance().getEventManager().fireEvent(new ServerSettleCityEvent(city));
 		}
 	}
 

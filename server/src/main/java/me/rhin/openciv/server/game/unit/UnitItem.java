@@ -7,9 +7,12 @@ import com.badlogic.gdx.utils.Json;
 import me.rhin.openciv.server.Server;
 import me.rhin.openciv.server.game.AbstractPlayer;
 import me.rhin.openciv.server.game.Player;
+import me.rhin.openciv.server.game.ai.AIPlayer;
 import me.rhin.openciv.server.game.city.City;
 import me.rhin.openciv.server.game.map.tile.Tile;
 import me.rhin.openciv.server.game.production.ProductionItem;
+import me.rhin.openciv.server.game.unit.type.Builder;
+import me.rhin.openciv.server.game.unit.type.Settler;
 import me.rhin.openciv.shared.packet.type.AddUnitPacket;
 import me.rhin.openciv.shared.stat.StatValue;
 
@@ -25,10 +28,12 @@ public abstract class UnitItem implements ProductionItem {
 
 	protected City city;
 	protected float productionModifier;
+	private float baseCombatStrength;
 
-	public UnitItem(City city) {
+	public UnitItem(City city, float baseCombatStrength) {
 		this.city = city;
 		this.productionModifier = 0;
+		this.baseCombatStrength = baseCombatStrength;
 	}
 
 	public abstract float getUnitProductionCost();
@@ -75,7 +80,33 @@ public abstract class UnitItem implements ProductionItem {
 		this.productionModifier = modifier;
 	}
 
+	@Override
+	public float getAIValue(AIPlayer aiPlayer) {
+		// Start producing military units
+		if (aiPlayer.getIntimidation() > 70) {
+			// TODO: Throw in a ranged unit here and there.
+			return 50 + baseCombatStrength;
+		}
+
+		if (this instanceof Builder && Server.getInstance().getInGameState().getCurrentTurn() > 8)
+			return 70;
+
+		if (this instanceof Settler && Server.getInstance().getInGameState().getCurrentTurn() > 10)
+			return 70;
+
+		return 0;
+	}
+
+	@Override
+	public boolean isWonder() {
+		return false;
+	}
+
 	public float getProductionModifier() {
 		return productionModifier;
+	}
+
+	public float getBaseCombatStrength() {
+		return baseCombatStrength;
 	}
 }

@@ -1,12 +1,13 @@
 package me.rhin.openciv.server.game.research.type;
 
+import me.rhin.openciv.server.game.research.TechProperty;
 import me.rhin.openciv.server.game.research.ResearchTree;
 import me.rhin.openciv.server.game.research.Technology;
 
 public class WritingTech extends Technology {
 
 	public WritingTech(ResearchTree researchTree) {
-		super(researchTree);
+		super(researchTree, TechProperty.SCIENCE);
 		requiredTechs.add(PotteryTech.class);
 	}
 

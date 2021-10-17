@@ -65,7 +65,7 @@ public class City implements AttackableEntity, SpecialistContainer, NextTurnList
 		this.unemployedSpecialists = new ArrayList<>();
 		this.producibleItemManager = new ProducibleItemManager(this);
 		this.statLine = new StatLine();
-		this.health = 200;
+		this.health = getMaxHealth();
 
 		for (Tile adjTile : originTile.getAdjTiles()) {
 			territory.add(adjTile);
@@ -287,7 +287,7 @@ public class City implements AttackableEntity, SpecialistContainer, NextTurnList
 	}
 
 	public int getMaxHealth() {
-		return 200;
+		return 300;
 	}
 
 	public void updateWorkedTiles() {

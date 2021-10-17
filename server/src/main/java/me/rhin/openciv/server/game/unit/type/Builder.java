@@ -14,7 +14,7 @@ import me.rhin.openciv.shared.stat.Stat;
 public class Builder extends UnitItem {
 
 	public Builder(City city) {
-		super(city);
+		super(city, 0);
 	}
 
 	public static class BuilderUnit extends Unit {

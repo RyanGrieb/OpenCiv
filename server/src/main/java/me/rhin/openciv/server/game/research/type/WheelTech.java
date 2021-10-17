@@ -1,12 +1,13 @@
 package me.rhin.openciv.server.game.research.type;
 
 import me.rhin.openciv.server.game.research.ResearchTree;
+import me.rhin.openciv.server.game.research.TechProperty;
 import me.rhin.openciv.server.game.research.Technology;
 
 public class WheelTech extends Technology {
 
 	public WheelTech(ResearchTree researchTree) {
-		super(researchTree);
+		super(researchTree, TechProperty.FOOD,TechProperty.PRODUCTION,TechProperty.MILITARY);
 		requiredTechs.add(AnimalHusbandryTech.class);
 		requiredTechs.add(ArcheryTech.class);
 	}
