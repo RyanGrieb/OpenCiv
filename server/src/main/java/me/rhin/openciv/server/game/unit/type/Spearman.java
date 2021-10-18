@@ -16,7 +16,7 @@ import me.rhin.openciv.shared.stat.Stat;
 public class Spearman extends UnitItem {
 
 	public Spearman(City city) {
-		super(city, 22);
+		super(city);
 	}
 
 	public static class SpearmanUnit extends Unit {
@@ -80,5 +80,10 @@ public class Spearman extends UnitItem {
 	@Override
 	public List<UnitType> getUnitItemTypes() {
 		return Arrays.asList(UnitType.MELEE);
+	}
+
+	@Override
+	public float getBaseCombatStrength() {
+		return 22;
 	}
 }

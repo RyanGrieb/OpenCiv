@@ -14,7 +14,7 @@ import me.rhin.openciv.shared.stat.Stat;
 public class Builder extends UnitItem {
 
 	public Builder(City city) {
-		super(city, 0);
+		super(city);
 	}
 
 	public static class BuilderUnit extends Unit {
@@ -108,5 +108,10 @@ public class Builder extends UnitItem {
 	@Override
 	public List<UnitType> getUnitItemTypes() {
 		return Arrays.asList(UnitType.SUPPORT);
+	}
+
+	@Override
+	public float getBaseCombatStrength() {
+		return 0;
 	}
 }

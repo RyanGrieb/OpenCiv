@@ -14,7 +14,7 @@ import me.rhin.openciv.shared.stat.Stat;
 public class Scout extends UnitItem {
 
 	public Scout(City city) {
-		super(city, 10);
+		super(city);
 	}
 
 	public static class ScoutUnit extends Unit {
@@ -69,5 +69,10 @@ public class Scout extends UnitItem {
 	@Override
 	public List<UnitType> getUnitItemTypes() {
 		return Arrays.asList(UnitType.MELEE);
+	}
+
+	@Override
+	public float getBaseCombatStrength() {
+		return 10;
 	}
 }

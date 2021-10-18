@@ -17,7 +17,7 @@ import me.rhin.openciv.shared.stat.Stat;
 public class Catapult extends UnitItem {
 
 	public Catapult(City city) {
-		super(city, 7);
+		super(city);
 	}
 
 	public static class CatapultUnit extends RangedUnit {
@@ -76,5 +76,10 @@ public class Catapult extends UnitItem {
 	@Override
 	public List<UnitType> getUnitItemTypes() {
 		return Arrays.asList(UnitType.RANGED);
+	}
+
+	@Override
+	public float getBaseCombatStrength() {
+		return 7;
 	}
 }

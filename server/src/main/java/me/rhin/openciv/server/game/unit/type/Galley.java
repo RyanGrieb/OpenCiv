@@ -15,7 +15,7 @@ import me.rhin.openciv.shared.stat.Stat;
 public class Galley extends UnitItem {
 
 	public Galley(City city) {
-		super(city, 30);
+		super(city);
 	}
 
 	public static class GalleyUnit extends Unit {
@@ -63,5 +63,10 @@ public class Galley extends UnitItem {
 	@Override
 	public List<UnitType> getUnitItemTypes() {
 		return Arrays.asList(UnitType.MELEE, UnitType.NAVAL);
+	}
+
+	@Override
+	public float getBaseCombatStrength() {
+		return 30;
 	}
 }

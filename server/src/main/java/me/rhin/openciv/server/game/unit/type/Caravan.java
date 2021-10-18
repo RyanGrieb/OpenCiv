@@ -22,7 +22,7 @@ import me.rhin.openciv.shared.stat.Stat;
 public class Caravan extends UnitItem {
 
 	public Caravan(City city) {
-		super(city, 0);
+		super(city);
 	}
 
 	public static class CaravanUnit extends Unit {
@@ -239,5 +239,11 @@ public class Caravan extends UnitItem {
 	@Override
 	public List<UnitType> getUnitItemTypes() {
 		return Arrays.asList(UnitType.SUPPORT);
+	}
+
+	@Override
+	public float getBaseCombatStrength() {
+		
+		return 0;
 	}
 }

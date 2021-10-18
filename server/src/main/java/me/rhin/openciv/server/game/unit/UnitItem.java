@@ -28,15 +28,15 @@ public abstract class UnitItem implements ProductionItem {
 
 	protected City city;
 	protected float productionModifier;
-	private float baseCombatStrength;
 
-	public UnitItem(City city, float baseCombatStrength) {
+	public UnitItem(City city) {
 		this.city = city;
 		this.productionModifier = 0;
-		this.baseCombatStrength = baseCombatStrength;
 	}
 
 	public abstract float getUnitProductionCost();
+
+	public abstract float getBaseCombatStrength();
 
 	public abstract List<UnitType> getUnitItemTypes();
 
@@ -85,7 +85,7 @@ public abstract class UnitItem implements ProductionItem {
 		// Start producing military units
 		if (aiPlayer.getIntimidation() > 70) {
 			// TODO: Throw in a ranged unit here and there.
-			return 50 + baseCombatStrength;
+			return 50 + getBaseCombatStrength();
 		}
 
 		if (this instanceof Builder && Server.getInstance().getInGameState().getCurrentTurn() > 8)
@@ -104,9 +104,5 @@ public abstract class UnitItem implements ProductionItem {
 
 	public float getProductionModifier() {
 		return productionModifier;
-	}
-
-	public float getBaseCombatStrength() {
-		return baseCombatStrength;
 	}
 }

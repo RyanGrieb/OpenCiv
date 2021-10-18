@@ -23,7 +23,7 @@ import me.rhin.openciv.shared.stat.Stat;
 public class Settler extends UnitItem {
 
 	public Settler(City city) {
-		super(city, 0);
+		super(city);
 	}
 
 	public static class SettlerUnit extends Unit {
@@ -124,5 +124,11 @@ public class Settler extends UnitItem {
 	@Override
 	public List<UnitType> getUnitItemTypes() {
 		return Arrays.asList(UnitType.SUPPORT);
+	}
+
+	@Override
+	public float getBaseCombatStrength() {
+		
+		return 0;
 	}
 }

@@ -21,6 +21,8 @@ public class Walls extends Building {
 
 		Json json = new Json();
 
+		city.setMaxHealth(city.getMaxHealth() + 50);
+
 		SetCityHealthPacket cityHealthPacket = new SetCityHealthPacket();
 		cityHealthPacket.setCity(city.getName(), city.getHealth(), city.getMaxHealth() + 50,
 				city.getCombatStrength(null) + 5);

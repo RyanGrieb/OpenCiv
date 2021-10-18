@@ -15,7 +15,7 @@ import me.rhin.openciv.shared.stat.Stat;
 public class WorkBoat extends UnitItem {
 
 	public WorkBoat(City city) {
-		super(city, 0);
+		super(city);
 	}
 
 	public static class WorkBoatUnit extends Unit {
@@ -63,5 +63,10 @@ public class WorkBoat extends UnitItem {
 	@Override
 	public List<UnitType> getUnitItemTypes() {
 		return Arrays.asList(UnitType.SUPPORT, UnitType.NAVAL);
+	}
+
+	@Override
+	public float getBaseCombatStrength() {
+		return 0;
 	}
 }

@@ -15,14 +15,14 @@ import me.rhin.openciv.shared.stat.Stat;
 public class ChariotArcher extends UnitItem {
 
 	public ChariotArcher(City city) {
-		super(city, 10);
+		super(city);
 	}
 
 	public static class ChariotArcherUnit extends RangedUnit {
 
 		public ChariotArcherUnit(AbstractPlayer playerOwner, Tile standingTile) {
 			super(playerOwner, standingTile);
-			
+
 			combatStrength.setValue(Stat.COMBAT_STRENGTH, 17);
 			rangedCombatStrength.setValue(Stat.COMBAT_STRENGTH, 10);
 		}
@@ -64,5 +64,10 @@ public class ChariotArcher extends UnitItem {
 	@Override
 	public List<UnitType> getUnitItemTypes() {
 		return Arrays.asList(UnitType.RANGED, UnitType.MOUNTED);
+	}
+
+	@Override
+	public float getBaseCombatStrength() {
+		return 10;
 	}
 }

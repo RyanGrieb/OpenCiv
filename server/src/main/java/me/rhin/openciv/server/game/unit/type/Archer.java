@@ -15,7 +15,7 @@ import me.rhin.openciv.shared.stat.Stat;
 public class Archer extends UnitItem {
 
 	public Archer(City city) {
-		super(city, 14);
+		super(city);
 	}
 
 	public static class ArcherUnit extends RangedUnit {
@@ -64,5 +64,10 @@ public class Archer extends UnitItem {
 	@Override
 	public List<UnitType> getUnitItemTypes() {
 		return Arrays.asList(UnitType.RANGED);
+	}
+
+	@Override
+	public float getBaseCombatStrength() {
+		return 14;
 	}
 }

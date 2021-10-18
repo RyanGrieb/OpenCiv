@@ -53,6 +53,7 @@ public class City implements AttackableEntity, SpecialistContainer, NextTurnList
 	private ArrayList<Specialist> unemployedSpecialists;
 	private ProducibleItemManager producibleItemManager;
 	private StatLine statLine;
+	private float maxHealth;
 	private float health;
 
 	public City(AbstractPlayer playerOwner, String name, Tile originTile) {
@@ -65,7 +66,8 @@ public class City implements AttackableEntity, SpecialistContainer, NextTurnList
 		this.unemployedSpecialists = new ArrayList<>();
 		this.producibleItemManager = new ProducibleItemManager(this);
 		this.statLine = new StatLine();
-		this.health = getMaxHealth();
+		this.maxHealth = 300;
+		this.health = maxHealth;
 
 		for (Tile adjTile : originTile.getAdjTiles()) {
 			territory.add(adjTile);
@@ -286,8 +288,12 @@ public class City implements AttackableEntity, SpecialistContainer, NextTurnList
 		// TODO: Maybe increase health regen when out of combat?
 	}
 
-	public int getMaxHealth() {
-		return 200;
+	public void setMaxHealth(float maxHealth) {
+		this.maxHealth = maxHealth;
+	}
+
+	public float getMaxHealth() {
+		return maxHealth;
 	}
 
 	public void updateWorkedTiles() {
