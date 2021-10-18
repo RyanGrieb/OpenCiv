@@ -8,7 +8,7 @@ import me.rhin.openciv.shared.listener.Event;
 import me.rhin.openciv.shared.listener.Listener;
 
 public interface BottomShapeRenderListener extends Listener {
-	
+
 	public void onBottomShapeRender(ShapeRenderer shapeRenderer);
 
 	public static class BottomShapeRenderEvent extends Event<BottomShapeRenderListener> {
@@ -24,6 +24,8 @@ public interface BottomShapeRenderListener extends Listener {
 		@Override
 		public void fire(ArrayList<BottomShapeRenderListener> listeners) {
 			for (BottomShapeRenderListener listener : listeners) {
+				if (listener == null)
+					continue;
 				listener.onBottomShapeRender(shapeRenderer);
 			}
 		}

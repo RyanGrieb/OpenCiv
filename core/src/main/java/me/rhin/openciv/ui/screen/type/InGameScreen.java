@@ -155,6 +155,13 @@ public class InGameScreen extends AbstractScreen {
 		if (rightClicking)
 			return false;
 
+		if (!windowManager.allowsInput())
+			return false;
+
+		if (!windowManager.allowsCameraMovement()) {
+			return false;
+		}
+
 		// Get the original point of drag. and offset the camera based on the
 		// difference.
 		if (dragOrigin == null) {
