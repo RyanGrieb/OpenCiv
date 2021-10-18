@@ -9,20 +9,24 @@ import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.city.City;
 import me.rhin.openciv.game.notification.AbstractNotification;
 import me.rhin.openciv.game.notification.NotificationPriority;
+import me.rhin.openciv.game.player.AbstractPlayer;
+import me.rhin.openciv.listener.SetCityOwnerListener;
 import me.rhin.openciv.listener.SetProductionItemListener;
+import me.rhin.openciv.shared.packet.type.SetCityOwnerPacket;
 import me.rhin.openciv.shared.packet.type.SetProductionItemPacket;
 import me.rhin.openciv.ui.window.type.CityInfoWindow;
 
-public class AvailableProductionNotification extends AbstractNotification implements SetProductionItemListener {
+public class AvailableProductionNotification extends AbstractNotification
+		implements SetProductionItemListener, SetCityOwnerListener {
 
 	private ArrayList<City> cities;
-	private int index;
 
 	public AvailableProductionNotification(City city) {
 		this.cities = new ArrayList<>();
 		cities.add(city);
 
 		Civilization.getInstance().getEventManager().addListener(SetProductionItemListener.class, this);
+		Civilization.getInstance().getEventManager().addListener(SetCityOwnerListener.class, this);
 	}
 
 	public void merge(AbstractNotification notification) {
@@ -61,13 +65,29 @@ public class AvailableProductionNotification extends AbstractNotification implem
 	}
 
 	@Override
+	public void onSetCityOwner(SetCityOwnerPacket packet) {
+
+		AbstractPlayer oldPlayer = Civilization.getInstance().getGame().getPlayers()
+				.get(packet.getPreviousPlayerName());
+
+		AbstractPlayer newPlayer = Civilization.getInstance().getGame().getPlayers().get(packet.getPlayerName());
+
+		City city = newPlayer.getCityFromName(packet.getCityName());
+
+		// If we contain the captured city and the prev owner is us, remove.
+		if (cities.contains(city) && oldPlayer.equals(Civilization.getInstance().getGame().getPlayer())) {
+
+			cities.remove(city);
+
+			if (oldPlayer.getOwnedCities().size() < 1)
+				Civilization.getInstance().getGame().getNotificationHanlder().removeNotification(this);
+		}
+	}
+
+	@Override
 	public void act() {
-		Civilization.getInstance().getWindowManager().toggleWindow(new CityInfoWindow(cities.get(index)));
-
-		index++;
-
-		if (index >= cities.size())
-			index = 0;
+		if (cities.size() > 0)
+			cities.get(0).onClick();
 	}
 
 	@Override

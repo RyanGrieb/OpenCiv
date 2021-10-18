@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 
+import me.rhin.openciv.Civilization;
 import me.rhin.openciv.game.research.type.AnimalHusbandryTech;
 import me.rhin.openciv.game.research.type.ArcheryTech;
 import me.rhin.openciv.game.research.type.BronzeWorkingTech;
@@ -18,10 +19,14 @@ import me.rhin.openciv.game.research.type.SailingTech;
 import me.rhin.openciv.game.research.type.TrappingTech;
 import me.rhin.openciv.game.research.type.WheelTech;
 import me.rhin.openciv.game.research.type.WritingTech;
+import me.rhin.openciv.listener.CompleteResearchListener;
+import me.rhin.openciv.listener.PickResearchListener;
+import me.rhin.openciv.shared.packet.type.CompleteResearchPacket;
 
-public class ResearchTree {
+public class ResearchTree implements PickResearchListener, CompleteResearchListener {
 
 	private LinkedHashMap<Class<? extends Technology>, Technology> technologies;
+	private Technology researchingTech;
 
 	public ResearchTree() {
 		this.technologies = new LinkedHashMap<>();
@@ -41,6 +46,9 @@ public class ResearchTree {
 		technologies.put(MathematicsTech.class, new MathematicsTech());
 		technologies.put(ConstructionTech.class, new ConstructionTech());
 		technologies.put(IronWorkingTech.class, new IronWorkingTech());
+
+		Civilization.getInstance().getEventManager().addListener(PickResearchListener.class, this);
+		Civilization.getInstance().getEventManager().addListener(CompleteResearchListener.class, this);
 	}
 
 	public List<Technology> getTechnologies() {
@@ -56,4 +64,17 @@ public class ResearchTree {
 		return technologies.get(clazz);
 	}
 
+	@Override
+	public void onCompleteResearch(CompleteResearchPacket packet) {
+		researchingTech = null;
+	}
+
+	@Override
+	public void onPickResearch(Technology tech) {
+		researchingTech = tech;
+	}
+
+	public boolean isResearching() {
+		return researchingTech != null;
+	}
 }

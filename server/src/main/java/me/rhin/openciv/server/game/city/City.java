@@ -287,7 +287,7 @@ public class City implements AttackableEntity, SpecialistContainer, NextTurnList
 	}
 
 	public int getMaxHealth() {
-		return 300;
+		return 200;
 	}
 
 	public void updateWorkedTiles() {

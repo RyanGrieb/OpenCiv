@@ -6,13 +6,18 @@ import java.util.List;
 
 import com.badlogic.gdx.utils.reflect.ClassReflection;
 
+import me.rhin.openciv.Civilization;
 import me.rhin.openciv.game.heritage.type.all.CapitalExpansionHeritage;
 import me.rhin.openciv.game.heritage.type.all.StateWorshipHeritage;
 import me.rhin.openciv.game.heritage.type.all.TaxesHeritage;
+import me.rhin.openciv.listener.CompleteHeritageListener;
+import me.rhin.openciv.listener.PickHeritageListener;
+import me.rhin.openciv.shared.packet.type.CompleteHeritagePacket;
 
-public class HeritageTree {
+public class HeritageTree implements CompleteHeritageListener, PickHeritageListener {
 
 	private LinkedHashMap<Class<? extends Heritage>, Heritage> values;
+	private Heritage studyingHeritage;
 
 	public HeritageTree() {
 		this.values = new LinkedHashMap<>();
@@ -21,6 +26,19 @@ public class HeritageTree {
 		addHeritage(new CapitalExpansionHeritage());
 		addHeritage(new StateWorshipHeritage());
 		addHeritage(new TaxesHeritage());
+
+		Civilization.getInstance().getEventManager().addListener(PickHeritageListener.class, this);
+		Civilization.getInstance().getEventManager().addListener(CompleteHeritageListener.class, this);
+	}
+
+	@Override
+	public void onPickHeritage(Heritage heritage) {
+		studyingHeritage = heritage;
+	}
+
+	@Override
+	public void onCompleteHeritage(CompleteHeritagePacket packet) {
+		studyingHeritage = null;
 	}
 
 	public void addHeritage(Heritage heritage) {
@@ -34,7 +52,7 @@ public class HeritageTree {
 
 	public <T extends Heritage> boolean hasStudied(Class<T> heritageClass) {
 		if (values.get(heritageClass) == null) {
-			//System.out.println("Heritage not found: " + heritageClass);
+			// System.out.println("Heritage not found: " + heritageClass);
 			return false;
 		}
 		return values.get(heritageClass).isStudied();
@@ -52,5 +70,9 @@ public class HeritageTree {
 		}
 
 		return null;
+	}
+
+	public boolean isStudying() {
+		return studyingHeritage != null;
 	}
 }

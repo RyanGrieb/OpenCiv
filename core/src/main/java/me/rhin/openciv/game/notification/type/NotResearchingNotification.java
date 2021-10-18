@@ -8,12 +8,16 @@ import me.rhin.openciv.game.notification.AbstractNotification;
 import me.rhin.openciv.game.notification.NotificationPriority;
 import me.rhin.openciv.game.research.Technology;
 import me.rhin.openciv.listener.PickResearchListener;
+import me.rhin.openciv.listener.SetCityOwnerListener;
+import me.rhin.openciv.shared.packet.type.SetCityOwnerPacket;
 import me.rhin.openciv.ui.window.type.ResearchWindow;
 
-public class NotResearchingNotification extends AbstractNotification implements PickResearchListener {
+public class NotResearchingNotification extends AbstractNotification
+		implements PickResearchListener, SetCityOwnerListener {
 
 	public NotResearchingNotification() {
 		Civilization.getInstance().getEventManager().addListener(PickResearchListener.class, this);
+		Civilization.getInstance().getEventManager().addListener(SetCityOwnerListener.class, this);
 	}
 
 	@Override
@@ -28,6 +32,12 @@ public class NotResearchingNotification extends AbstractNotification implements 
 	@Override
 	public void onPickResearch(Technology tech) {
 		Civilization.getInstance().getGame().getNotificationHanlder().removeNotification(this);
+	}
+
+	@Override
+	public void onSetCityOwner(SetCityOwnerPacket packet) {
+		if (Civilization.getInstance().getGame().getPlayer().getOwnedCities().size() < 1)
+			Civilization.getInstance().getGame().getNotificationHanlder().removeNotification(this);
 	}
 
 	@Override

@@ -9,12 +9,14 @@ public class SetCityOwnerPacket extends Packet {
 
 	private String cityName;
 	private String playerName;
+	private String prevPlayerName;
 
 	@Override
 	public void write(Json json) {
 		super.write(json);
 		json.writeValue("cityName", cityName);
 		json.writeValue("playerName", playerName);
+		json.writeValue("prevPlayerName", prevPlayerName);
 	}
 
 	@Override
@@ -22,11 +24,13 @@ public class SetCityOwnerPacket extends Packet {
 		super.read(json, jsonData);
 		this.cityName = jsonData.getString("cityName");
 		this.playerName = jsonData.getString("playerName");
+		this.prevPlayerName = jsonData.getString("prevPlayerName");
 	}
 
-	public void setCity(String cityName, String playerName) {
+	public void setCity(String cityName, String prevPlayerName, String playerName) {
 		this.cityName = cityName;
 		this.playerName = playerName;
+		this.prevPlayerName = prevPlayerName;
 	}
 
 	public String getCityName() {
@@ -35,6 +39,10 @@ public class SetCityOwnerPacket extends Packet {
 
 	public String getPlayerName() {
 		return playerName;
+	}
+
+	public String getPreviousPlayerName() {
+		return prevPlayerName;
 	}
 
 }

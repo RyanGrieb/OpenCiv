@@ -95,7 +95,7 @@ public class City extends Group implements AttackableEntity, TileObserver, Speci
 		this.healthbar = new Healthbar(nameLabel.getX() + nameLabel.getWidth() / 2 - 50 / 2, nameIcon.getY() + 15, 50,
 				4, false);
 
-		this.maxHealth = 300; // Default
+		this.maxHealth = 200; // Default
 		this.health = getMaxHealth();
 
 		// FIXME: The actor size & position really shouldn't be confined to the label.
@@ -342,6 +342,7 @@ public class City extends Group implements AttackableEntity, TileObserver, Speci
 	}
 
 	public void setOwner(AbstractPlayer playerOwner) {
+
 		this.playerOwner = playerOwner;
 
 		this.nameIcon = playerOwner.getCivilization().getIcon().sprite();

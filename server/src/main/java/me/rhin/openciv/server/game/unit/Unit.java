@@ -489,11 +489,11 @@ public abstract class Unit implements AttackableEntity, NextTurnListener {
 				AbstractPlayer oldPlayer = city.getPlayerOwner();
 
 				city.getPlayerOwner().removeCity(city);
-				city.setOwner(this.getPlayerOwner());
+				city.setOwner(playerOwner);
 				this.getPlayerOwner().addCity(city);
 
 				SetCityOwnerPacket cityOwnerPacket = new SetCityOwnerPacket();
-				cityOwnerPacket.setCity(city.getName(), this.getPlayerOwner().getName());
+				cityOwnerPacket.setCity(city.getName(), oldPlayer.getName(), playerOwner.getName());
 
 				for (Player player : players) {
 					player.sendPacket(json.toJson(cityOwnerPacket));

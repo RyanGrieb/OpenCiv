@@ -8,12 +8,16 @@ import me.rhin.openciv.game.heritage.Heritage;
 import me.rhin.openciv.game.notification.AbstractNotification;
 import me.rhin.openciv.game.notification.NotificationPriority;
 import me.rhin.openciv.listener.PickHeritageListener;
+import me.rhin.openciv.listener.SetCityOwnerListener;
+import me.rhin.openciv.shared.packet.type.SetCityOwnerPacket;
 import me.rhin.openciv.ui.window.type.HeritageWindow;
 
-public class NotStudyingNotification extends AbstractNotification implements PickHeritageListener {
+public class NotStudyingNotification extends AbstractNotification
+		implements PickHeritageListener, SetCityOwnerListener {
 
 	public NotStudyingNotification() {
 		Civilization.getInstance().getEventManager().addListener(PickHeritageListener.class, this);
+		Civilization.getInstance().getEventManager().addListener(SetCityOwnerListener.class, this);
 	}
 
 	@Override
@@ -28,6 +32,12 @@ public class NotStudyingNotification extends AbstractNotification implements Pic
 	@Override
 	public void onPickHeritage(Heritage heritage) {
 		Civilization.getInstance().getGame().getNotificationHanlder().removeNotification(this);
+	}
+
+	@Override
+	public void onSetCityOwner(SetCityOwnerPacket packet) {
+		if (Civilization.getInstance().getGame().getPlayer().getOwnedCities().size() < 1)
+			Civilization.getInstance().getGame().getNotificationHanlder().removeNotification(this);
 	}
 
 	@Override

@@ -11,8 +11,8 @@ import com.badlogic.gdx.utils.reflect.ClassReflection;
 
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.SoundEnum;
-import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.asset.SoundEnum.SoundType;
+import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.city.City;
 import me.rhin.openciv.game.city.wonders.GameWonders;
 import me.rhin.openciv.game.civilization.CivType;
@@ -20,6 +20,7 @@ import me.rhin.openciv.game.map.GameMap;
 import me.rhin.openciv.game.map.tile.CombatActor;
 import me.rhin.openciv.game.map.tile.Tile;
 import me.rhin.openciv.game.notification.NotificationHandler;
+import me.rhin.openciv.game.notification.type.AvailableProductionNotification;
 import me.rhin.openciv.game.notification.type.NotResearchingNotification;
 import me.rhin.openciv.game.notification.type.NotStudyingNotification;
 import me.rhin.openciv.game.player.AIPlayer;
@@ -338,9 +339,40 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 		for (AbstractPlayer player : players.values()) {
 			City city = player.getCityFromName(packet.getCityName());
 			if (city != null) {
-				city.setOwner(players.get(packet.getPlayerName()));
+
+				AbstractPlayer newPlayer = players.get(packet.getPlayerName());
+
+				city.setOwner(newPlayer);
 				player.removeCity(city);
-				players.get(packet.getPlayerName()).addCity(city);
+				newPlayer.addCity(city);
+
+				// Toggle new windows for the player that captured the city.
+				if (newPlayer.equals(this.player) && newPlayer.getOwnedCities().size() <= 1) {
+
+					if (!Civilization.getInstance().getWindowManager().isOpenWindow(CurrentResearchWindow.class))
+						Civilization.getInstance().getWindowManager().toggleWindow(new CurrentResearchWindow());
+
+					if (!Civilization.getInstance().getWindowManager().isOpenWindow(CurrentHeritageWindow.class))
+						Civilization.getInstance().getWindowManager().toggleWindow(new CurrentHeritageWindow());
+
+					if (!newPlayer.getResearchTree().isResearching())
+						Civilization.getInstance().getGame().getNotificationHanlder()
+								.fireNotification(new NotResearchingNotification());
+
+					if (!newPlayer.getHeritageTree().isStudying())
+						Civilization.getInstance().getGame().getNotificationHanlder()
+								.fireNotification(new NotStudyingNotification());
+
+					if (city.getProducibleItemManager().getCurrentProducingItem() == null)
+						Civilization.getInstance().getGame().getNotificationHanlder()
+								.fireNotification(new AvailableProductionNotification(city));
+				}
+
+				// Remove windows for the target player, if they have no cities left.
+				if (player.equals(this.player) && player.getOwnedCities().size() < 1) {
+					Civilization.getInstance().getWindowManager().toggleWindow(new CurrentResearchWindow());
+					Civilization.getInstance().getWindowManager().toggleWindow(new CurrentHeritageWindow());
+				}
 			}
 		}
 	}
