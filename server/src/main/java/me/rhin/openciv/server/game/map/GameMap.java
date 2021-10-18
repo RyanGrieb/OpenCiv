@@ -1,7 +1,9 @@
 package me.rhin.openciv.server.game.map;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Random;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.java_websocket.WebSocket;
 
@@ -185,7 +187,7 @@ public class GameMap implements MapRequestListener {
 		Random rnd = new Random();
 		for (int x = 0; x < getWidth(); x++) {
 			for (int y = 0; y < getHeight(); y++) {
-				int latitude = y - 29; // FIXME: This should be the center of the map
+				int latitude = y - (getHeight() / 2); // FIXME: This should be the center of the map
 				latitude += rnd.nextInt(7);
 				latitude = Math.abs(latitude);
 				latitude += (1 - TEMPATURE_PARAM);
@@ -569,10 +571,16 @@ public class GameMap implements MapRequestListener {
 				TileType.DESERT, TileType.DESERT_HILL);
 
 		ArrayList<Tile> adjGroundTiles = new ArrayList<>();
-		System.out.println(tileIndexer.getAdjacentTilesTo(TileType.GRASS).toString());
-		adjGroundTiles.addAll(tileIndexer.getAdjacentTilesTo(TileType.GRASS));
-		adjGroundTiles.addAll(tileIndexer.getAdjacentTilesTo(TileType.PLAINS));
-		adjGroundTiles.addAll(tileIndexer.getAdjacentTilesTo(TileType.TUNDRA));
+
+		ArrayList<TileType> adjTileTypes = new ArrayList<>();
+		adjTileTypes.addAll(Arrays.asList(TileType.GRASS, TileType.PLAINS, TileType.TUNDRA));
+		for (TileType adjTileType : adjTileTypes) {
+			ConcurrentLinkedQueue<Tile> adjTiles = tileIndexer.getAdjacentTilesTo(adjTileType);
+
+			if (adjTiles == null)
+				continue;
+			adjGroundTiles.addAll(adjTiles);
+		}
 
 		for (Tile tile : adjGroundTiles)
 			if (tile.getBaseTileType().hasProperty(TileProperty.WATER))
@@ -588,7 +596,7 @@ public class GameMap implements MapRequestListener {
 		}
 
 		// Spawn barbarians
-		int campAmount = 5 * mapSize;
+		int campAmount = 4 * (mapSize + 1);
 		for (int i = 0; i < campAmount; i++) {
 			int x = rnd.nextInt(getWidth());
 			int y = rnd.nextInt(getHeight());
@@ -603,7 +611,7 @@ public class GameMap implements MapRequestListener {
 		}
 
 		// Spawn ruins (TODO: REDUNDANT CODE W/ BARBARAIN BAMPS)
-		int ruinsAmount = 4 * (mapSize + 1);
+		int ruinsAmount = 8 * (mapSize + 1);
 		for (int i = 0; i < ruinsAmount; i++) {
 			int x = rnd.nextInt(getWidth());
 			int y = rnd.nextInt(getHeight());
