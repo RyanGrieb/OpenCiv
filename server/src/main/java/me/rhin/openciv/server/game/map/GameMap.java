@@ -603,7 +603,7 @@ public class GameMap implements MapRequestListener {
 		}
 
 		// Spawn ruins (TODO: REDUNDANT CODE W/ BARBARAIN BAMPS)
-		int ruinsAmount = 10 * mapSize;
+		int ruinsAmount = 4 * (mapSize + 1);
 		for (int i = 0; i < ruinsAmount; i++) {
 			int x = rnd.nextInt(getWidth());
 			int y = rnd.nextInt(getHeight());
