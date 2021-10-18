@@ -174,6 +174,13 @@ public class InGameScreen extends AbstractScreen {
 	public boolean scrolled(float amountX, float amountY) {
 		super.scrolled(amountX, amountY);
 
+		if (!windowManager.allowsInput())
+			return false;
+
+		if (!windowManager.allowsCameraMovement()) {
+			return false;
+		}
+
 		OrthographicCamera cam = getCamera();
 		cam.zoom += 0.08 * amountY;
 		return false;

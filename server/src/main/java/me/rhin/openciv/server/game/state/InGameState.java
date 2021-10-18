@@ -678,7 +678,7 @@ public class InGameState extends GameState
 		if (turnLengthOffset < 0) {
 			int cityMultiplier = 1;
 			int unitMultiplier = 1;
-			return 12 + getMaxPlayerCities() * cityMultiplier + getMaxPlayerUnits() * unitMultiplier;
+			return 25 + getMaxPlayerCities() * cityMultiplier + getMaxPlayerUnits() * unitMultiplier;
 		} else if (turnLengthOffset == 0) {
 			// Infinite turn length
 			return Integer.MAX_VALUE;
