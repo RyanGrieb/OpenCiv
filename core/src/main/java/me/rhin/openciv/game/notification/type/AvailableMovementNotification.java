@@ -109,6 +109,10 @@ public class AvailableMovementNotification extends AbstractNotification
 
 		Unit unit = availableUnits.get(index);
 
+		Civilization.getInstance().getScreenManager().getCurrentScreen().setCameraPosition(
+				unit.getStandingTile().getX() + unit.getStandingTile().getWidth() / 2,
+				unit.getStandingTile().getY() + unit.getStandingTile().getHeight() / 2);
+
 		SelectUnitPacket packet = new SelectUnitPacket();
 		packet.setUnitID(unit.getID());
 		packet.setLocation(unit.getStandingTile().getGridX(), unit.getStandingTile().getGridY());
