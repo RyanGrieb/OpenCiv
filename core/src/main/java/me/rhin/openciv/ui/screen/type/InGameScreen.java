@@ -3,17 +3,19 @@ package me.rhin.openciv.ui.screen.type;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Group;
+import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.utils.TimeUtils;
 
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.game.CivGame;
+import me.rhin.openciv.game.map.tile.CombatActor;
 import me.rhin.openciv.listener.LeftClickListener.LeftClickEvent;
 import me.rhin.openciv.listener.MouseMoveListener.MouseMoveEvent;
 import me.rhin.openciv.listener.RelativeMouseMoveListener.RelativeMouseMoveEvent;
 import me.rhin.openciv.listener.RightClickListener.RightClickEvent;
 import me.rhin.openciv.shared.listener.EventManager;
-import me.rhin.openciv.ui.button.type.NextTurnButton;
 import me.rhin.openciv.ui.screen.AbstractScreen;
 import me.rhin.openciv.ui.screen.ScreenEnum;
 import me.rhin.openciv.ui.window.type.EscWindow;
@@ -28,6 +30,7 @@ public class InGameScreen extends AbstractScreen {
 	private Group tileGroup;
 	private Group riverGroup;
 	private Group unitGroup;
+	private Group combatTooltipGroup;
 
 	long lastTimeCounted;
 	private float frameRate;
@@ -42,10 +45,12 @@ public class InGameScreen extends AbstractScreen {
 		this.tileGroup = new Group();
 		this.riverGroup = new Group();
 		this.unitGroup = new Group();
+		this.combatTooltipGroup = new Group();
 
 		stage.addActor(tileGroup);
 		stage.addActor(riverGroup);
 		stage.addActor(unitGroup);
+		stage.addActor(combatTooltipGroup);
 	}
 
 	@Override
@@ -68,6 +73,7 @@ public class InGameScreen extends AbstractScreen {
 		camera.update();
 
 		handleInput();
+		handleCombatTooltips();
 
 		Civilization.getInstance().getEventManager().fireEvent(MouseMoveEvent.INSTANCE);
 		Civilization.getInstance().getEventManager().fireEvent(RelativeMouseMoveEvent.INSTANCE);
@@ -76,6 +82,14 @@ public class InGameScreen extends AbstractScreen {
 		if (timeSince >= 500) {
 			frameRate = Gdx.graphics.getFramesPerSecond();
 			gameOverlay.getFPSLabel().setText("FPS: " + frameRate);
+		}
+	}
+
+	private void handleCombatTooltips() {
+		for (Actor actor : combatTooltipGroup.getChildren()) {
+			CombatActor combatActor = (CombatActor) actor;
+			if (combatActor.getSprite().getColor().a <= 0)
+				combatActor.addAction(Actions.removeActor());
 		}
 	}
 
@@ -185,6 +199,10 @@ public class InGameScreen extends AbstractScreen {
 
 	public Group getUnitGroup() {
 		return unitGroup;
+	}
+
+	public Group getCombatTooltipGroup() {
+		return combatTooltipGroup;
 	}
 
 	@Override

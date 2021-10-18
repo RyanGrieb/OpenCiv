@@ -83,10 +83,15 @@ public class CityStatePlayer extends AIPlayer implements NextTurnListener {
 					borderTiles.add(adjTile);
 
 		int enemyUnitAmount = 0;
-		for (Tile tile : borderTiles)
+		for (Tile tile : borderTiles) {
+
+			if (tile == null)
+				continue;
+
 			for (Unit unit : tile.getUnits())
 				if (!unit.getPlayerOwner().equals(this))
 					enemyUnitAmount++;
+		}
 
 		int combatUnitAmount = 0;
 		for (Unit unit : ownedUnits)

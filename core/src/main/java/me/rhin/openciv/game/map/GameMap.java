@@ -1,10 +1,14 @@
 
 package me.rhin.openciv.game.map;
 
+import java.util.ArrayList;
+
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.Vector2;
 
 import me.rhin.openciv.Civilization;
+import me.rhin.openciv.asset.TextureEnum;
+import me.rhin.openciv.game.map.tile.CombatActor;
 import me.rhin.openciv.game.map.tile.Tile;
 import me.rhin.openciv.game.map.tile.TileType;
 import me.rhin.openciv.listener.ReceiveMapChunkListener;
@@ -98,7 +102,7 @@ public class GameMap implements ReceiveMapChunkListener, SetTileTypeListener, Re
 
 		if (tile.isVisible())
 			tileType.playRemoveSound();
-		
+
 		tile.removeTileType(tileType);
 	}
 

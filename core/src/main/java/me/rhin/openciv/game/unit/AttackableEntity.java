@@ -2,6 +2,7 @@ package me.rhin.openciv.game.unit;
 
 import com.badlogic.gdx.graphics.Color;
 
+import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.map.tile.Tile;
 import me.rhin.openciv.game.player.AbstractPlayer;
 

@@ -418,6 +418,7 @@ public abstract class Unit extends Actor
 		sprite.setPosition(x, y);
 		selectionSprite.setPosition(x, y);
 		civIconSprite.setPosition(x + 10, y + 20);
+
 		super.setPosition(x, y);
 	}
 
@@ -561,6 +562,7 @@ public abstract class Unit extends Actor
 		Civilization.getInstance().getEventManager().clearListenersFromObject(this);
 	}
 
-	public void setPlayerOwner(AbstractPlayer abstractPlayer) {
+	public void setPlayerOwner(AbstractPlayer playerOwner) {
+		this.playerOwner = playerOwner;
 	}
 }

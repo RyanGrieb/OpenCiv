@@ -141,8 +141,8 @@ public class Tile extends Actor implements BottomShapeRenderListener {
 
 	@Override
 	public void onBottomShapeRender(ShapeRenderer shapeRenderer) {
-		//if (tileObservers.size() < 1)
-		//	return;
+		// if (tileObservers.size() < 1)
+		// return;
 
 		// Draw the hexagon outline
 
@@ -210,7 +210,7 @@ public class Tile extends Actor implements BottomShapeRenderListener {
 			selectionSprite.draw(batch);
 		}
 
-		if (territory != null /*&& tileObservers.size() > 0*/ && !rangedTarget)
+		if (territory != null /* && tileObservers.size() > 0 */ && !rangedTarget)
 			territorySprite.draw(batch);
 
 		if (rangedTarget) {
@@ -306,7 +306,7 @@ public class Tile extends Actor implements BottomShapeRenderListener {
 			return;
 
 		// FIXME: Check to see if this is still concurrent modification
-		//Happens when there is a ruin tile on a sheep & forest tile.
+		// Happens when there is a ruin tile on a sheep & forest tile.
 		Iterator<TileTypeWrapper> iterator = tileWrappers.iterator();
 		while (iterator.hasNext()) {
 			TileTypeWrapper tileWrapper = iterator.next();

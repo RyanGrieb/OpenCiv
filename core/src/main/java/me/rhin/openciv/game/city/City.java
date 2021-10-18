@@ -17,6 +17,7 @@ import com.badlogic.gdx.utils.reflect.ClassReflection;
 
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.SoundEnum;
+import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.city.building.Building;
 import me.rhin.openciv.game.city.specialist.SpecialistContainer;
 import me.rhin.openciv.game.map.tile.Tile;

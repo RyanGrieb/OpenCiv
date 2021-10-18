@@ -11,11 +11,13 @@ import com.badlogic.gdx.utils.reflect.ClassReflection;
 
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.SoundEnum;
+import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.asset.SoundEnum.SoundType;
 import me.rhin.openciv.game.city.City;
 import me.rhin.openciv.game.city.wonders.GameWonders;
 import me.rhin.openciv.game.civilization.CivType;
 import me.rhin.openciv.game.map.GameMap;
+import me.rhin.openciv.game.map.tile.CombatActor;
 import me.rhin.openciv.game.map.tile.Tile;
 import me.rhin.openciv.game.notification.NotificationHandler;
 import me.rhin.openciv.game.notification.type.NotResearchingNotification;
@@ -216,6 +218,7 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 	public void onUnitDelete(DeleteUnitPacket packet) {
 		Tile tile = map.getTiles()[packet.getTileGridX()][packet.getTileGridY()];
 		Unit unit = tile.getUnitFromID(packet.getUnitID());
+
 		System.out.println("Deleting unit from: " + unit.getPlayerOwner().getName());
 		unit.kill();
 		tile.removeUnit(unit);
@@ -226,6 +229,9 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 			if (actor.equals(unit))
 				actor.addAction(Actions.removeActor());
 		}
+
+		if (packet.isKilled())
+			flashIcon(tile, TextureEnum.ICON_SKULL);
 
 		if (packet.isKilled() && unit.getPlayerOwner().equals(player)) {
 			Civilization.getInstance().getSoundHandler().playEffect(SoundEnum.UNIT_DEATH);
@@ -292,6 +298,10 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 		unit.setHealth(unit.getHealth() - packet.getUnitDamage());
 		unit.reduceMovement(2);
 		unit.flashColor(Color.YELLOW);
+
+		flashIcon(unit.getStandingTile(), TextureEnum.ICON_COMBAT);
+		flashIcon(targetEntity.getTile(), TextureEnum.ICON_SHIELD);
+
 		targetEntity.setHealth(targetEntity.getHealth() - packet.getTargetUnitDamage());
 
 		if (unit.getPlayerOwner().equals(player) || targetEntity.getPlayerOwner().equals(player))
@@ -340,6 +350,13 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 		Unit unit = map.getTiles()[packet.getTileGridX()][packet.getTileGridY()].getUnitFromID(packet.getUnitID());
 		unit.setHealth(packet.getHealth());
 		unit.flashColor(Color.GREEN);
+	}
+
+	public void flashIcon(Tile standingTile, TextureEnum textureEnum) {
+		CombatActor combatActor = new CombatActor(textureEnum, standingTile.getX() + 6, standingTile.getY() + 8, 16,
+				16);
+		((InGameScreen) Civilization.getInstance().getScreenManager().getCurrentScreen()).getCombatTooltipGroup()
+				.addActor(combatActor);
 	}
 
 	public void endTurn() {
