@@ -3,6 +3,7 @@ package me.rhin.openciv.ui.screen.type;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
@@ -31,6 +32,8 @@ public class InGameScreen extends AbstractScreen {
 	private Group riverGroup;
 	private Group unitGroup;
 	private Group combatTooltipGroup;
+	private Vector2 dragOrigin;
+	private boolean rightClicking;
 
 	long lastTimeCounted;
 	private float frameRate;
@@ -101,26 +104,33 @@ public class InGameScreen extends AbstractScreen {
 
 	@Override
 	public boolean touchUp(int x, int y, int pointer, int button) {
+
+		dragOrigin = null;
+
 		if (!windowManager.allowsInput())
 			return false;
 
 		if (button == Input.Buttons.LEFT)
 			Civilization.getInstance().getEventManager().fireEvent(new LeftClickEvent(x, y));
 
-		if (button == Input.Buttons.RIGHT)
+		if (button == Input.Buttons.RIGHT) {
 			Civilization.getInstance().getEventManager().fireEvent(new RightClickEvent(ClickType.UP, x, y));
+			rightClicking = false;
+		}
 
 		return false;
 	}
 
 	@Override
 	public boolean touchDown(int x, int y, int pointer, int button) {
+
 		if (!windowManager.allowsInput())
 			return false;
 
-		if (button == Input.Buttons.RIGHT)
+		if (button == Input.Buttons.RIGHT) {
 			Civilization.getInstance().getEventManager().fireEvent(new RightClickEvent(ClickType.DOWN, x, y));
-
+			rightClicking = true;
+		}
 		return false;
 	}
 
@@ -136,6 +146,34 @@ public class InGameScreen extends AbstractScreen {
 			windowManager.toggleWindow(new EscWindow());
 		}
 
+		return false;
+	}
+
+	@Override
+	public boolean touchDragged(int screenX, int screenY, int pointer) {
+		if (rightClicking)
+			return false;
+		// Get the original point of drag. and offset the camera based on the
+		// difference.
+		if (dragOrigin == null) {
+			dragOrigin = new Vector2(screenX, screenY);
+		}
+
+		int xDiff = (int) ((dragOrigin.x - screenX) / 1.8);
+		int yDiff = (int) ((screenY - dragOrigin.y) / 1.8);
+
+		translateCamera(xDiff, yDiff, 0);
+		dragOrigin.x -= xDiff;
+		dragOrigin.y += yDiff;
+		return false;
+	}
+
+	@Override
+	public boolean scrolled(float amountX, float amountY) {
+		super.scrolled(amountX, amountY);
+
+		OrthographicCamera cam = getCamera();
+		cam.zoom += 0.08 * amountY;
 		return false;
 	}
 
@@ -167,16 +205,16 @@ public class InGameScreen extends AbstractScreen {
 			}
 		}
 		if (Gdx.input.isKeyPressed(Input.Keys.A) || Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
-			tanslateCamera(-6, 0, 0);
+			translateCamera(-6, 0, 0);
 		}
 		if (Gdx.input.isKeyPressed(Input.Keys.D) || Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
-			tanslateCamera(6, 0, 0);
+			translateCamera(6, 0, 0);
 		}
 		if (Gdx.input.isKeyPressed(Input.Keys.S) || Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
-			tanslateCamera(0, -6, 0);
+			translateCamera(0, -6, 0);
 		}
 		if (Gdx.input.isKeyPressed(Input.Keys.W) || Gdx.input.isKeyPressed(Input.Keys.UP)) {
-			tanslateCamera(0, 6, 0);
+			translateCamera(0, 6, 0);
 		}
 
 	}

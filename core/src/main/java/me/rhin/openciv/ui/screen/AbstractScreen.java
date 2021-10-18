@@ -228,7 +228,7 @@ public abstract class AbstractScreen implements Screen, InputProcessor {
 		this.camY = camY;
 	}
 
-	public void tanslateCamera(int x, int y, int z) {
+	public void translateCamera(int x, int y, int z) {
 		camX += x;
 		camY += y;
 	}
