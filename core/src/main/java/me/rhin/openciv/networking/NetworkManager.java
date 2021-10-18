@@ -45,6 +45,7 @@ import me.rhin.openciv.listener.SetCityHealthListener.SetCityHealthEvent;
 import me.rhin.openciv.listener.SetCityOwnerListener.SetCityOwnerEvent;
 import me.rhin.openciv.listener.SetProductionItemListener.SetProductionItemEvent;
 import me.rhin.openciv.listener.SetTileTypeListener.SetTileTypeEvent;
+import me.rhin.openciv.listener.SetTurnLengthListener.SetTurnLengthEvent;
 import me.rhin.openciv.listener.SetUnitHealthListener.SetUnitHealthEvent;
 import me.rhin.openciv.listener.SetUnitOwnerListener.SetUnitOwnerEvent;
 import me.rhin.openciv.listener.SetWorldSizeListener.SetWorldSizeEvent;
@@ -88,6 +89,7 @@ import me.rhin.openciv.shared.packet.type.SetCityHealthPacket;
 import me.rhin.openciv.shared.packet.type.SetCityOwnerPacket;
 import me.rhin.openciv.shared.packet.type.SetProductionItemPacket;
 import me.rhin.openciv.shared.packet.type.SetTileTypePacket;
+import me.rhin.openciv.shared.packet.type.SetTurnLengthPacket;
 import me.rhin.openciv.shared.packet.type.SetUnitHealthPacket;
 import me.rhin.openciv.shared.packet.type.SetUnitOwnerPacket;
 import me.rhin.openciv.shared.packet.type.SetWorldSizePacket;
@@ -145,6 +147,7 @@ public class NetworkManager {
 		networkEvents.put(RequestEndTurnPacket.class, RequestEndTurnEvent.class);
 		networkEvents.put(CompleteHeritagePacket.class, CompleteHeritageEvent.class);
 		networkEvents.put(RemoveProductionItemPacket.class, RemoveProductionItemEvent.class);
+		networkEvents.put(SetTurnLengthPacket.class, SetTurnLengthEvent.class);
 	}
 
 	public void connect(String ip) {
@@ -212,8 +215,7 @@ public class NetworkManager {
 
 			@Override
 			public boolean onMessage(final WebSocket webSocket, final String packet) {
-				if (!packet.contains("MapChunkPacket") && !packet.contains("TurnTimeLeftPacket"))
-					Gdx.app.log(Civilization.WS_LOG_TAG, "Got message: " + packet);
+				Gdx.app.log(Civilization.WS_LOG_TAG, "Got message: " + packet);
 				fireAssociatedPacketEvents(webSocket, packet);
 				return true;
 			}

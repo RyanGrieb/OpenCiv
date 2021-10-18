@@ -4,16 +4,19 @@ import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.utils.Align;
 
 import me.rhin.openciv.Civilization;
-import me.rhin.openciv.asset.TextureEnum;
+import me.rhin.openciv.listener.SetTurnLengthListener;
 import me.rhin.openciv.listener.SetWorldSizeListener;
 import me.rhin.openciv.shared.map.MapSize;
+import me.rhin.openciv.shared.packet.type.SetTurnLengthPacket;
 import me.rhin.openciv.shared.packet.type.SetWorldSizePacket;
 import me.rhin.openciv.ui.background.BlankBackground;
+import me.rhin.openciv.ui.button.type.IncreaseTurnLengthButton;
 import me.rhin.openciv.ui.button.type.IncreaseWorldSizeButton;
+import me.rhin.openciv.ui.button.type.ReduceTurnLengthButton;
 import me.rhin.openciv.ui.button.type.ReduceWorldSizeButton;
 import me.rhin.openciv.ui.label.CustomLabel;
 
-public class WorldOptionsMenu extends Group implements SetWorldSizeListener {
+public class GameOptionsMenu extends Group implements SetWorldSizeListener, SetTurnLengthListener {
 
 	private BlankBackground blankBackground;
 	private CustomLabel worldOptionsLabel;
@@ -22,15 +25,22 @@ public class WorldOptionsMenu extends Group implements SetWorldSizeListener {
 	private IncreaseWorldSizeButton increaseWorldSizeButton;
 	private ReduceWorldSizeButton reduceWorldSizeButton;
 
-	private int worldSize;
+	private CustomLabel turnOptionDescLabel;
+	private CustomLabel turnLengthLabel;
 
-	public WorldOptionsMenu(float x, float y, float width, float height) {
+	private IncreaseTurnLengthButton increaseTurnLengthButton;
+	private ReduceTurnLengthButton reduceTurnLengthButton;
+
+	private int worldSize;
+	private int turnLengthOffset;
+
+	public GameOptionsMenu(float x, float y, float width, float height) {
 		super.setBounds(x, y, width, height);
 
 		this.blankBackground = new BlankBackground(0, 0, width, height);
 		addActor(blankBackground);
 
-		this.worldOptionsLabel = new CustomLabel("World Options");
+		this.worldOptionsLabel = new CustomLabel("Game Options");
 		worldOptionsLabel.setSize(width, 15);
 		worldOptionsLabel.setAlignment(Align.center);
 		worldOptionsLabel.setPosition(0, height - 17);
@@ -55,9 +65,23 @@ public class WorldOptionsMenu extends Group implements SetWorldSizeListener {
 
 		addActor(this.reduceWorldSizeButton);
 
+		this.turnOptionDescLabel = new CustomLabel("Turn Length:", Align.center, 0, height - 95, width, 15);
+		addActor(turnOptionDescLabel);
+
+		this.turnLengthLabel = new CustomLabel("Dynamic", Align.center, 0, height - 110, width, 15);
+		addActor(turnLengthLabel);
+
+		this.increaseTurnLengthButton = new IncreaseTurnLengthButton(this, ">", width - 52, height - 125, 32, 32);
+		addActor(increaseTurnLengthButton);
+
+		this.reduceTurnLengthButton = new ReduceTurnLengthButton(this, "<", 20, height - 125, 32, 32);
+		addActor(reduceTurnLengthButton);
+
 		this.worldSize = 3; // Standard
+		this.turnLengthOffset = -1; // Dynamic
 
 		Civilization.getInstance().getEventManager().addListener(SetWorldSizeListener.class, this);
+		Civilization.getInstance().getEventManager().addListener(SetTurnLengthListener.class, this);
 	}
 
 	@Override
@@ -82,5 +106,24 @@ public class WorldOptionsMenu extends Group implements SetWorldSizeListener {
 
 	public int getWorldSize() {
 		return worldSize;
+	}
+
+	public int getTurnLengthOffset() {
+		return turnLengthOffset;
+	}
+
+	@Override
+	public void onSetTurnLength(SetTurnLengthPacket packet) {
+
+		this.turnLengthOffset = packet.getTurnLengthOffset();
+
+		if (turnLengthOffset < 0)
+			turnLengthLabel.setText("Dynamic");
+		else if (turnLengthOffset == 0)
+			turnLengthLabel.setText("No Timer");
+		else
+			turnLengthLabel.setText(30 + (5 * turnLengthOffset) + " Seconds");
+
+		turnLengthLabel.setBounds(0, getHeight() - 110, getWidth(), 15);
 	}
 }

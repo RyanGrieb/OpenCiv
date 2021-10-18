@@ -20,9 +20,9 @@ import me.rhin.openciv.server.game.ai.type.CityStatePlayer;
 import me.rhin.openciv.server.game.ai.type.CityStatePlayer.CityStateType;
 import me.rhin.openciv.server.game.city.City;
 import me.rhin.openciv.server.game.city.building.Building;
-import me.rhin.openciv.server.game.city.building.type.Palace;
 import me.rhin.openciv.server.game.city.specialist.SpecialistContainer;
 import me.rhin.openciv.server.game.city.wonders.GameWonders;
+import me.rhin.openciv.server.game.map.GameMap;
 import me.rhin.openciv.server.game.map.tile.Tile;
 import me.rhin.openciv.server.game.map.tile.Tile.TileTypeWrapper;
 import me.rhin.openciv.server.game.map.tile.TileType;
@@ -53,7 +53,6 @@ import me.rhin.openciv.server.listener.SettleCityListener;
 import me.rhin.openciv.server.listener.UnitFinishedMoveListener.UnitFinishedMoveEvent;
 import me.rhin.openciv.server.listener.UnitMoveListener;
 import me.rhin.openciv.server.listener.WorkTileListener;
-import me.rhin.openciv.shared.packet.type.AddUnitPacket;
 import me.rhin.openciv.shared.packet.type.BuyProductionItemPacket;
 import me.rhin.openciv.shared.packet.type.ClickSpecialistPacket;
 import me.rhin.openciv.shared.packet.type.ClickWorkedTilePacket;
@@ -73,7 +72,6 @@ import me.rhin.openciv.shared.packet.type.SelectUnitPacket;
 import me.rhin.openciv.shared.packet.type.SetProductionItemPacket;
 import me.rhin.openciv.shared.packet.type.SetUnitOwnerPacket;
 import me.rhin.openciv.shared.packet.type.SettleCityPacket;
-import me.rhin.openciv.shared.packet.type.TerritoryGrowPacket;
 import me.rhin.openciv.shared.packet.type.TurnTimeLeftPacket;
 import me.rhin.openciv.shared.packet.type.UnitAttackPacket;
 import me.rhin.openciv.shared.packet.type.WorkTilePacket;
@@ -87,16 +85,16 @@ public class InGameState extends GameState
 		ClickSpecialistListener, EndTurnListener, PlayerListRequestListener, FetchPlayerListener, CombatPreviewListener,
 		WorkTileListener, RangedAttackListener, BuyProductionItemListener, RequestEndTurnListener {
 
-	private static final int BASE_TURN_TIME = 9;
-
 	private int currentTurn;
 	private int turnTimeLeft;
 	private ScheduledExecutorService executor;
 	private Runnable turnTimeRunnable;
+	private GameMap map;
 	private GameWonders gameWonders;
 
 	public InGameState() {
 
+		this.map = new GameMap();
 		this.gameWonders = new GameWonders();
 
 		Server.getInstance().getEventManager().addListener(DisconnectListener.class, this);
@@ -674,13 +672,19 @@ public class InGameState extends GameState
 	}
 
 	private int getUpdatedTurnTime() {
-		int cityMultiplier = 1;
-		int unitMultiplier = 1;
-		return BASE_TURN_TIME + getMaxPlayerCities() * cityMultiplier + getMaxPlayerUnits() * unitMultiplier;
-	}
 
-	private int getTurnTimeLeft() {
-		return turnTimeLeft;
+		int turnLengthOffset = Server.getInstance().getGameOptions().getTurnLengthOffset();
+
+		if (turnLengthOffset < 0) {
+			int cityMultiplier = 1;
+			int unitMultiplier = 1;
+			return 12 + getMaxPlayerCities() * cityMultiplier + getMaxPlayerUnits() * unitMultiplier;
+		} else if (turnLengthOffset == 0) {
+			// Infinite turn length
+			return Integer.MAX_VALUE;
+		} else {
+			return 30 + (5 * turnLengthOffset);
+		}
 	}
 
 	private void loadGame() {
@@ -850,18 +854,6 @@ public class InGameState extends GameState
 
 				Unit warriorUnit = new WarriorUnit(cityStatePlayer, tile);
 				tile.addUnit(warriorUnit);
-
-				for (Unit unit : tile.getUnits()) {
-					AddUnitPacket addUnitPacket = new AddUnitPacket();
-					String unitName = unit.getClass().getSimpleName().substring(0,
-							unit.getClass().getSimpleName().indexOf("Unit"));
-					addUnitPacket.setUnit(unit.getPlayerOwner().getName(), unitName, unit.getID(), tile.getGridX(),
-							tile.getGridY());
-
-					for (Player player : Server.getInstance().getPlayers()) {
-						player.sendPacket(json.toJson(addUnitPacket));
-					}
-				}
 			}
 		}
 	}
@@ -877,5 +869,9 @@ public class InGameState extends GameState
 				hasSafeTile = true;
 
 		return hasSafeTile;
+	}
+
+	public GameMap getMap() {
+		return map;
 	}
 }

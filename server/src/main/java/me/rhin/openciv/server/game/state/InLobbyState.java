@@ -2,6 +2,7 @@ package me.rhin.openciv.server.game.state;
 
 import org.java_websocket.WebSocket;
 
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.Json;
 
 import me.rhin.openciv.server.Server;
@@ -17,6 +18,7 @@ import me.rhin.openciv.server.listener.FetchPlayerListener;
 import me.rhin.openciv.server.listener.GetHostListener;
 import me.rhin.openciv.server.listener.NextTurnListener;
 import me.rhin.openciv.server.listener.PlayerListRequestListener;
+import me.rhin.openciv.server.listener.SetTurnLengthListener;
 import me.rhin.openciv.server.listener.SetWorldSizeListener;
 import me.rhin.openciv.server.listener.StartGameRequestListener;
 import me.rhin.openciv.shared.map.MapSize;
@@ -26,10 +28,12 @@ import me.rhin.openciv.shared.packet.type.GetHostPacket;
 import me.rhin.openciv.shared.packet.type.PlayerConnectPacket;
 import me.rhin.openciv.shared.packet.type.PlayerDisconnectPacket;
 import me.rhin.openciv.shared.packet.type.PlayerListRequestPacket;
+import me.rhin.openciv.shared.packet.type.SetTurnLengthPacket;
 import me.rhin.openciv.shared.packet.type.SetWorldSizePacket;
 
-public class InLobbyState extends GameState implements StartGameRequestListener, ConnectionListener, DisconnectListener,
-		PlayerListRequestListener, FetchPlayerListener, GetHostListener, ChooseCivListener, SetWorldSizeListener {
+public class InLobbyState extends GameState
+		implements StartGameRequestListener, ConnectionListener, DisconnectListener, PlayerListRequestListener,
+		FetchPlayerListener, GetHostListener, ChooseCivListener, SetWorldSizeListener, SetTurnLengthListener {
 
 	public InLobbyState() {
 		Server.getInstance().getEventManager().addListener(StartGameRequestListener.class, this);
@@ -40,6 +44,7 @@ public class InLobbyState extends GameState implements StartGameRequestListener,
 		Server.getInstance().getEventManager().addListener(GetHostListener.class, this);
 		Server.getInstance().getEventManager().addListener(ChooseCivListener.class, this);
 		Server.getInstance().getEventManager().addListener(SetWorldSizeListener.class, this);
+		Server.getInstance().getEventManager().addListener(SetTurnLengthListener.class, this);
 	}
 
 	@Override
@@ -189,8 +194,27 @@ public class InLobbyState extends GameState implements StartGameRequestListener,
 		if (mapSize > MapSize.values().length - 1)
 			mapSize = MapSize.values().length - 1;
 
-		Server.getInstance().getMap().setSize(mapSize);
+		Server.getInstance().getGameOptions().setMapSize(mapSize);
+		// Server.getInstance().getMap().setSize(mapSize);
+
 		packet.setWorldSize(mapSize);
+
+		Json json = new Json();
+		for (Player player : Server.getInstance().getPlayers())
+			player.sendPacket(json.toJson(packet));
+	}
+
+	@Override
+	public void onSetTurnLength(WebSocket conn, SetTurnLengthPacket packet) {
+		int turnLengthOffset = packet.getTurnLengthOffset();
+
+		System.out.println(turnLengthOffset);
+
+		if (turnLengthOffset < -1)
+			turnLengthOffset = -1;
+
+		Server.getInstance().getGameOptions().setTurnLengthOffset(turnLengthOffset);
+		packet.setTurnLengthOffset(turnLengthOffset);
 
 		Json json = new Json();
 		for (Player player : Server.getInstance().getPlayers())

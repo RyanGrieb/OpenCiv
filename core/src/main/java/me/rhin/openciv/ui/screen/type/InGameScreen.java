@@ -151,8 +151,10 @@ public class InGameScreen extends AbstractScreen {
 
 	@Override
 	public boolean touchDragged(int screenX, int screenY, int pointer) {
+
 		if (rightClicking)
 			return false;
+
 		// Get the original point of drag. and offset the camera based on the
 		// difference.
 		if (dragOrigin == null) {

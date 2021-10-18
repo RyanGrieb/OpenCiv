@@ -18,6 +18,7 @@ import me.rhin.openciv.server.game.GameState;
 import me.rhin.openciv.server.game.Player;
 import me.rhin.openciv.server.game.ai.AIPlayer;
 import me.rhin.openciv.server.game.map.GameMap;
+import me.rhin.openciv.server.game.options.GameOptions;
 import me.rhin.openciv.server.game.state.InGameState;
 import me.rhin.openciv.server.game.state.InLobbyState;
 import me.rhin.openciv.server.listener.BuyProductionItemListener.BuyProductionItemEvent;
@@ -39,6 +40,7 @@ import me.rhin.openciv.server.listener.RangedAttackListener.RangedAttackEvent;
 import me.rhin.openciv.server.listener.RequestEndTurnListener.RequestEndTurnEvent;
 import me.rhin.openciv.server.listener.SelectUnitListener.SelectUnitEvent;
 import me.rhin.openciv.server.listener.SetProductionItemListener.SetProductionItemEvent;
+import me.rhin.openciv.server.listener.SetTurnLengthListener.SetTurnLengthEvent;
 import me.rhin.openciv.server.listener.SetWorldSizeListener.SetWorldSizeEvent;
 import me.rhin.openciv.server.listener.SettleCityListener.SettleCityEvent;
 import me.rhin.openciv.server.listener.StartGameRequestListener.StartGameRequestEvent;
@@ -67,6 +69,7 @@ import me.rhin.openciv.shared.packet.type.RangedAttackPacket;
 import me.rhin.openciv.shared.packet.type.RequestEndTurnPacket;
 import me.rhin.openciv.shared.packet.type.SelectUnitPacket;
 import me.rhin.openciv.shared.packet.type.SetProductionItemPacket;
+import me.rhin.openciv.shared.packet.type.SetTurnLengthPacket;
 import me.rhin.openciv.shared.packet.type.SetWorldSizePacket;
 import me.rhin.openciv.shared.packet.type.SettleCityPacket;
 import me.rhin.openciv.shared.packet.type.StartGameRequestPacket;
@@ -86,7 +89,7 @@ public class Server extends WebSocketServer {
 	private int playerIndex;
 	private HashMap<Class<? extends Packet>, Class<? extends Event<? extends Listener>>> networkEvents;
 	private CmdProcessor commandProcessor;
-	private GameMap map;
+	private GameOptions gameOptions;
 	private ArrayList<Player> players;
 	private ArrayList<AIPlayer> aiPlayers;
 	private ColorHelper colorHelper;
@@ -115,12 +118,13 @@ public class Server extends WebSocketServer {
 
 		this.eventManager = new EventManager();
 
-		this.map = new GameMap();
 		this.players = new ArrayList<>();
 		this.aiPlayers = new ArrayList<>();
 		this.colorHelper = new ColorHelper();
 
 		this.game = new InLobbyState();
+
+		this.gameOptions = new GameOptions();
 
 		networkEvents = new HashMap<>();
 		networkEvents.put(PlayerListRequestPacket.class, PlayerListRequestEvent.class);
@@ -146,6 +150,7 @@ public class Server extends WebSocketServer {
 		networkEvents.put(RequestEndTurnPacket.class, RequestEndTurnEvent.class);
 		networkEvents.put(ChooseHeritagePacket.class, ChooseHeritageEvent.class);
 		networkEvents.put(TradeCityPacket.class, TradeCityEvent.class);
+		networkEvents.put(SetTurnLengthPacket.class, SetTurnLengthEvent.class);
 
 		this.playerIndex = 0;
 		this.commandProcessor = new CmdProcessor();
@@ -227,7 +232,7 @@ public class Server extends WebSocketServer {
 	}
 
 	public GameMap getMap() {
-		return map;
+		return getInGameState().getMap();
 	}
 
 	public int getPlayerIndex() {
@@ -272,5 +277,9 @@ public class Server extends WebSocketServer {
 
 	public InGameState getInGameState() {
 		return (InGameState) game;
+	}
+
+	public GameOptions getGameOptions() {
+		return gameOptions;
 	}
 }

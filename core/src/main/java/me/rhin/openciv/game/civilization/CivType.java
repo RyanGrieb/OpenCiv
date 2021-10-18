@@ -11,6 +11,7 @@ import me.rhin.openciv.game.civilization.type.Germany;
 import me.rhin.openciv.game.civilization.type.Rome;
 import me.rhin.openciv.game.civilization.type.CityState.CityStateType;
 import me.rhin.openciv.game.player.AbstractPlayer;
+import me.rhin.openciv.shared.util.StrUtil;
 
 public enum CivType {
 
@@ -82,6 +83,6 @@ public enum CivType {
 	}
 
 	public String getName() {
-		return "TODO";
+		return StrUtil.capitalize(name().toLowerCase());
 	}
 }

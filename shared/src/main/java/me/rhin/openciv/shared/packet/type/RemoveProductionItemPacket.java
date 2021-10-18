@@ -7,7 +7,6 @@ import me.rhin.openciv.shared.packet.Packet;
 
 //FIXME: I thought this was different from finishProductionItemPacket.
 //I want to merge some packets in the future.
-@Deprecated
 public class RemoveProductionItemPacket extends Packet {
 
 	private String cityName;

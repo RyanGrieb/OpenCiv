@@ -52,7 +52,7 @@ public class GameMap implements MapRequestListener {
 
 	public GameMap() {
 
-		this.mapSize = 3;
+		this.mapSize = Server.getInstance().getGameOptions().getMapSize();
 		this.mapPartition = new ArrayList<>();
 
 		Server.getInstance().getEventManager().addListener(MapRequestListener.class, this);

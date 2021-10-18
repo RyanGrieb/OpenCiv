@@ -51,7 +51,7 @@ public class StatusBar extends Actor implements PlayerStatUpdateListener, NextTu
 		tradeIcon.setSize(16, 16);
 		this.tradeLabel = new CustomLabel("0/0");
 
-		this.turnsLabel = new CustomLabel("Turns: 0 (0s)");
+		this.turnsLabel = new CustomLabel("Turns: 0 ");
 
 		updatePositions();
 
@@ -120,14 +120,26 @@ public class StatusBar extends Actor implements PlayerStatUpdateListener, NextTu
 
 	@Override
 	public void onNextTurn(NextTurnPacket packet) {
-		turnsLabel.setText("Turns: " + Civilization.getInstance().getGame().getTurn() + "("
-				+ Civilization.getInstance().getGame().getTurnTime() + "s)");
+		int turnTime = Civilization.getInstance().getGame().getTurnTime();
+
+		// TODO: Do this better. We assume high numbers mean no limit.
+		if (turnTime > 100000) {
+			turnsLabel.setText("Turns: " + Civilization.getInstance().getGame().getTurn() + " ");
+		} else
+			turnsLabel.setText("Turns: " + Civilization.getInstance().getGame().getTurn() + "("
+					+ Civilization.getInstance().getGame().getTurnTime() + "s)");
 		updatePositions();
 	}
 
 	@Override
 	public void onTurnTimeLeft(TurnTimeLeftPacket packet) {
-		turnsLabel.setText("Turns: " + Civilization.getInstance().getGame().getTurn() + "(" + packet.getTime() + "s)");
+
+		// TODO: Do this better. We assume high numbers mean no limit.
+		if (packet.getTime() > 100000) {
+			turnsLabel.setText("Turns: " + Civilization.getInstance().getGame().getTurn() + " ");
+		} else
+			turnsLabel.setText(
+					"Turns: " + Civilization.getInstance().getGame().getTurn() + "(" + packet.getTime() + "s)");
 		updatePositions();
 	}
 

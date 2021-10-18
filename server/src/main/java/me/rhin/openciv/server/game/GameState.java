@@ -8,18 +8,15 @@ import me.rhin.openciv.server.Server;
 import me.rhin.openciv.server.game.ai.AIPlayer;
 import me.rhin.openciv.server.game.ai.type.BarbarianPlayer;
 import me.rhin.openciv.server.game.city.wonders.GameWonders;
-import me.rhin.openciv.server.game.map.GameMap;
 
 public abstract class GameState {
 
 	protected ArrayList<Player> players;
 	protected ArrayList<AIPlayer> aiPlayers;
-	protected GameMap map;
 
 	public GameState() {
 		players = Server.getInstance().getPlayers();
 		aiPlayers = Server.getInstance().getAIPlayers();
-		map = Server.getInstance().getMap();
 	}
 
 	public BarbarianPlayer getBarbarianPlayer() {
