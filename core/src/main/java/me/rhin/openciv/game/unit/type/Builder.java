@@ -400,7 +400,7 @@ public class Builder extends UnitItem {
 				return false;
 			}
 
-			boolean farmableTile = !tile.isImproved() && tile.containsTileProperty(TileProperty.ANIMAL)
+			boolean farmableTile = !tile.isImproved() && tile.getBaseTileType().hasProperty(TileProperty.ANIMAL)
 					&& tile.getTerritory() != null
 					&& tile.getTerritory().getPlayerOwner().equals(unit.getPlayerOwner());
 
@@ -460,7 +460,7 @@ public class Builder extends UnitItem {
 				return false;
 			}
 
-			boolean farmableTile = !tile.isImproved() && tile.containsTileProperty(TileProperty.HARVESTABLE)
+			boolean farmableTile = !tile.isImproved() && tile.getBaseTileType().hasProperty(TileProperty.HARVESTABLE)
 					&& tile.getTerritory() != null
 					&& tile.getTerritory().getPlayerOwner().equals(unit.getPlayerOwner());
 

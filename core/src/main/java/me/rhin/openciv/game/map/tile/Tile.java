@@ -247,7 +247,10 @@ public class Tile extends Actor implements BottomShapeRenderListener {
 		riverSides[side] = river;
 	}
 
-	// Note: This gets the top tiletype.
+	/**
+	 * Returns the top tiletype
+	 * @return
+	 */
 	public TileType getBaseTileType() {
 
 		for (int i = tileWrappers.size() - 1; i >= 0; i--) {
