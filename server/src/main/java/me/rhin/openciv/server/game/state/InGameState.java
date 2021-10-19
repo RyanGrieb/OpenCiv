@@ -579,6 +579,7 @@ public class InGameState extends GameState
 						targetEntity.getTile().getGridY());
 				attackPacket.setUnitDamage(unitDamage);
 				attackPacket.setTargetDamage(targetDamage);
+				attackPacket.setIDs(attackingEntity.getID(), targetEntity.getID());
 
 				for (Player player : players) {
 					player.sendPacket(json.toJson(attackPacket));
@@ -691,9 +692,10 @@ public class InGameState extends GameState
 		System.out.println("[SERVER] Starting game...");
 
 		// Add AI
-		for (CityStateType type : CityStateType.values()) {
-			getAIPlayers().add(new CityStatePlayer(type));
-		}
+		for (int i = 0; i < 2; i++)
+			for (CityStateType type : CityStateType.values()) {
+				getAIPlayers().add(new CityStatePlayer(type));
+			}
 
 		getAIPlayers().add(new BarbarianPlayer());
 

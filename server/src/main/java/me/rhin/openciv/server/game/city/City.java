@@ -288,6 +288,11 @@ public class City implements AttackableEntity, SpecialistContainer, NextTurnList
 		// TODO: Maybe increase health regen when out of combat?
 	}
 
+	@Override
+	public int getID() {
+		return -1;
+	}
+
 	public void setMaxHealth(float maxHealth) {
 		this.maxHealth = maxHealth;
 	}

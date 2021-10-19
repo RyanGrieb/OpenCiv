@@ -292,8 +292,11 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 	public void onUnitAttack(UnitAttackPacket packet) {
 		Unit unit = map.getTiles()[packet.getUnitGridX()][packet.getUnitGridY()].getTopUnit();
 		// FIXME: Not having a unit ID here is problematic.
-		AttackableEntity targetEntity = map.getTiles()[packet.getTargetGridX()][packet.getTargetGridY()]
-				.getEnemyAttackableEntity(unit.getPlayerOwner());
+		AttackableEntity targetEntity = map.getTiles()[packet.getTargetGridX()][packet.getTargetGridY()].getTopUnit();
+		// AttackableEntity targetEntity =
+		// map.getTiles()[packet.getTargetGridX()][packet.getTargetGridY()]
+		// .getEnemyAttackableEntity(unit.getPlayerOwner());
+		
 		targetEntity.flashColor(Color.RED);
 
 		unit.setHealth(unit.getHealth() - packet.getUnitDamage());

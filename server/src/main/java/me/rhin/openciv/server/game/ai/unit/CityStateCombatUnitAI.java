@@ -43,7 +43,10 @@ public class CityStateCombatUnitAI extends UnitAI implements NextTurnListener, S
 		if (!unit.isAlive())
 			return;
 
-		// TODO: Don't set target if there is a unit inside.
+		if (targetTile != null && targetTile.equals(unit.getStandingTile()))
+			targetTile = null;
+
+		// If we were attacking,
 		if (unit.getHealth() <= 60 && !unit.getTile().equals(city.getOriginTile())) {
 			targetTile = null;
 		}
@@ -82,6 +85,17 @@ public class CityStateCombatUnitAI extends UnitAI implements NextTurnListener, S
 		if (pathingTile == null)
 			return;
 
+		Unit topUnit = pathingTile.getTopUnit();
+
+		// If our target tile already has a unit on top. Move elsewhere
+		if (topUnit != null && isFriendly(topUnit)) {
+			// System.out.println("Unit in way:" + unit.getStandingTile());
+			pathingTile = unit.getStandingTile();
+			// System.out.println("Stopping at:" + pathingTile);
+			targetTile = null;
+			return;
+		}
+
 		AttackableEntity topEntity = pathingTile.getEnemyAttackableEntity(unit.getPlayerOwner());
 		if (topEntity != null && topEntity.surviveAttack(unit)) {
 			pathingTile = pathTiles.get(1); // Stand outside of enemy unit to attack.
@@ -117,22 +131,29 @@ public class CityStateCombatUnitAI extends UnitAI implements NextTurnListener, S
 			targetTile = null;
 	}
 
+	private boolean isFriendly(Unit unit) {
+		if (unit.getPlayerOwner() instanceof Player)
+			return true;
+
+		return unit.getPlayerOwner().equals(city.getPlayerOwner()) && !unit.isUnitCapturable();
+	}
+
 	private void findTargets() {
 
 		// Walk back to city if under threat
 		if (doRetreatTargetCheck()) {
-			//System.out.println("Retreating: " + unit.getID());
+			// System.out.println("Retreating: " + unit.getID());
 			return;
 		}
 		// Walk towards enemy units
 		if (doEnemyTargetCheck()) {
-			//System.out.println("Attacking as: " + unit.getID());
+			// System.out.println("Attacking as: " + unit.getID());
 			return;
 		}
 		// Walk to a random tile
 		doRandomTarget();
 
-		//System.out.println("Guarding to:" + targetTile);
+		// System.out.println("Guarding to:" + targetTile);
 	}
 
 	private void doRandomTarget() {
@@ -166,6 +187,8 @@ public class CityStateCombatUnitAI extends UnitAI implements NextTurnListener, S
 		}
 
 		for (Tile tile : visibleTiles) {
+			if (tile == null)
+				continue;
 			if (tile.containsTileType(TileType.BARBARIAN_CAMP)) {
 				targetTile = tile;
 				return;
@@ -173,20 +196,57 @@ public class CityStateCombatUnitAI extends UnitAI implements NextTurnListener, S
 		}
 
 		ArrayList<Tile> tiles = getSurroundingTiles(unit.getTile());
-		Random rnd = new Random();
+
 		if (unit.getStandingTile().getTerritory() != null && unit.getStandingTile().getTerritory().equals(city)) {
-			while (targetTile == null || targetTile.containsTileProperty(TileProperty.WATER)
-					|| targetTile.getMovementCost() > 10)
-				targetTile = tiles.get(rnd.nextInt(tiles.size()));
+			targetTile = getRandomTargetTile(tiles);
 		} else
-			targetTile = city.getTerritory().get(rnd.nextInt(city.getTerritory().size()));
+			targetTile = getRandomTargetTile(city.getTerritory());
+	}
+
+	private Tile getRandomTargetTile(ArrayList<Tile> tiles) {
+
+		Random rnd = new Random();
+
+		Tile rndTile = null;
+
+		// While no rndTile, rndTile = water, rndTile is mountain, rndTile contains
+		// Friendly unit. Pick random tile.
+		int index = 0;
+		while (rndTile == null || rndTile.containsTileProperty(TileProperty.WATER) || rndTile.getMovementCost() > 10
+				|| (rndTile.getUnits().size() > 0 && isFriendly(rndTile.getTopUnit())
+						&& !rndTile.getTopUnit().isUnitCapturable())) {
+
+			if (index > 30)
+				return null;
+
+			rndTile = tiles.get(rnd.nextInt(tiles.size()));
+
+			index++;
+		}
+
+		return rndTile;
 	}
 
 	private boolean doRetreatTargetCheck() {
 
+		Tile retreatTile = city.getOriginTile();
+
+		Random rnd = new Random();
+
+		int index = 0;
+		while (retreatTile.getTopUnit() != null && !unit.equals(retreatTile.getTopUnit())
+				&& !retreatTile.getTopUnit().isUnitCapturable()) {
+
+			if (index > 30)
+				return false;
+
+			retreatTile = city.getTerritory().get(rnd.nextInt(city.getTerritory().size()));
+			index++;
+		}
+
 		// Even if were still in the city, don't move if were really low
 		if (unit.getHealth() <= 20) {
-			targetTile = city.getOriginTile();
+			targetTile = retreatTile;
 			return true;
 		}
 
@@ -195,12 +255,12 @@ public class CityStateCombatUnitAI extends UnitAI implements NextTurnListener, S
 
 		if (((AIPlayer) unit.getPlayerOwner()).getIntimidation() > 15
 				&& (targetTile == null || !targetTile.equals(city.getTile()))) {
-			targetTile = city.getOriginTile();
+			targetTile = retreatTile;
 			return true;
 		}
 
 		if (unit.getHealth() <= 60) {
-			targetTile = city.getOriginTile();
+			targetTile = retreatTile;
 			return true;
 		}
 

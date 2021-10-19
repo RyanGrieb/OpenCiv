@@ -23,4 +23,6 @@ public interface AttackableEntity {
 
 	public void onCombat();
 
+	public int getID();
+
 }

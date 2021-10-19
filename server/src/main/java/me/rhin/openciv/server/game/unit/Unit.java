@@ -437,6 +437,12 @@ public abstract class Unit implements AttackableEntity, NextTurnListener {
 		this.onCombat();
 		targetEntity.onCombat();
 
+		// System.out.print(id + " [" + standingTile.getGridX() + "," +
+		// standingTile.getGridY() + "] attacking: ");
+		// System.out.println(targetEntity + " [" + targetEntity.getTile().getGridX() +
+		// ","
+		// + targetEntity.getTile().getGridY() + "] ");
+
 		this.setHealth(this.getHealth() - unitDamage);
 		targetEntity.setHealth(targetEntity.getHealth() - targetDamage);
 
@@ -446,6 +452,7 @@ public abstract class Unit implements AttackableEntity, NextTurnListener {
 					targetEntity.getTile().getGridX(), targetEntity.getTile().getGridY());
 			attackPacket.setUnitDamage(unitDamage);
 			attackPacket.setTargetDamage(targetDamage);
+			attackPacket.setIDs(id, targetEntity.getID());
 
 			for (Player player : players) {
 				player.sendPacket(json.toJson(attackPacket));

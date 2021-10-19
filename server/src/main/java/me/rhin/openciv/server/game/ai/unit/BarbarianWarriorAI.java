@@ -150,6 +150,7 @@ public class BarbarianWarriorAI extends UnitAI implements NextTurnListener {
 
 		ArrayList<Tile> pathTiles = new ArrayList<>();
 
+		index = 0;
 		outerloop: while (pathTiles.size() < 1) {
 
 			pathTiles = getPathTiles(targetTile);
@@ -157,7 +158,6 @@ public class BarbarianWarriorAI extends UnitAI implements NextTurnListener {
 			// If there is not a valid path, get another random target.
 			if (pathTiles.size() < 1) {
 				targetTile = null;
-				index = 0;
 				while (targetTile == null || targetTile.containsTileProperty(TileProperty.WATER)
 						|| targetTile.getMovementCost() > 10) {
 
