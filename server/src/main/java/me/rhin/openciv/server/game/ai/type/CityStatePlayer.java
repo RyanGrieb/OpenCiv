@@ -14,9 +14,9 @@ import me.rhin.openciv.server.game.research.Technology;
 import me.rhin.openciv.server.game.unit.Unit;
 import me.rhin.openciv.server.game.unit.UnitItem;
 import me.rhin.openciv.server.game.unit.UnitItem.UnitType;
+import me.rhin.openciv.server.game.unit.type.Builder.BuilderUnit;
 import me.rhin.openciv.server.game.unit.type.Settler;
 import me.rhin.openciv.server.game.unit.type.Settler.SettlerUnit;
-import me.rhin.openciv.server.game.unit.type.Warrior.WarriorUnit;
 import me.rhin.openciv.server.listener.NextTurnListener;
 
 public class CityStatePlayer extends AIPlayer implements NextTurnListener {
@@ -41,8 +41,20 @@ public class CityStatePlayer extends AIPlayer implements NextTurnListener {
 	public void addOwnedUnit(Unit unit) {
 		ownedUnits.add(unit);
 
-		if (unit instanceof WarriorUnit) {
+		if (unit.getUnitTypes().contains(UnitType.MELEE)) {
 			unit.addAIBehavior(new CityStateCombatUnitAI(unit));
+		}
+
+		if (unit.getUnitTypes().contains(UnitType.RANGED)) {
+
+		}
+
+		if (unit.getUnitTypes().contains(UnitType.NAVAL)) {
+
+		}
+
+		if (unit instanceof BuilderUnit) {
+			
 		}
 	}
 

@@ -17,7 +17,6 @@ import me.rhin.openciv.server.game.unit.AttackableEntity;
 import me.rhin.openciv.server.game.unit.Unit;
 import me.rhin.openciv.server.listener.NextTurnListener;
 import me.rhin.openciv.server.listener.ServerSettleCityListener;
-import me.rhin.openciv.server.listener.SettleCityListener;
 import me.rhin.openciv.shared.packet.type.MoveUnitPacket;
 
 public class CityStateCombatUnitAI extends UnitAI implements NextTurnListener, ServerSettleCityListener {
@@ -39,7 +38,22 @@ public class CityStateCombatUnitAI extends UnitAI implements NextTurnListener, S
 	// Dead units still get called.
 	@Override
 	public void onNextTurn() {
+		moveUnit();
+	}
 
+	@Override
+	public void onSettleCity(City city) {
+		if (city.getPlayerOwner().equals(unit.getPlayerOwner()))
+			this.city = city;
+	}
+
+	@Override
+	public void clearListeners() {
+		Server.getInstance().getEventManager().removeListener(ServerSettleCityListener.class, this);
+		Server.getInstance().getEventManager().removeListener(NextTurnListener.class, this);
+	}
+
+	private void moveUnit() {
 		if (!unit.isAlive())
 			return;
 
@@ -55,18 +69,6 @@ public class CityStateCombatUnitAI extends UnitAI implements NextTurnListener, S
 			findTargets();
 
 		moveToTarget();
-	}
-
-	@Override
-	public void onSettleCity(City city) {
-		if (city.getPlayerOwner().equals(unit.getPlayerOwner()))
-			this.city = city;
-	}
-
-	@Override
-	public void clearListeners() {
-		Server.getInstance().getEventManager().removeListener(ServerSettleCityListener.class, this);
-		Server.getInstance().getEventManager().removeListener(NextTurnListener.class, this);
 	}
 
 	private void moveToTarget() {
@@ -93,6 +95,7 @@ public class CityStateCombatUnitAI extends UnitAI implements NextTurnListener, S
 			pathingTile = unit.getStandingTile();
 			// System.out.println("Stopping at:" + pathingTile);
 			targetTile = null;
+			moveUnit();
 			return;
 		}
 
@@ -132,7 +135,7 @@ public class CityStateCombatUnitAI extends UnitAI implements NextTurnListener, S
 	}
 
 	private boolean isFriendly(Unit unit) {
-		if (unit.getPlayerOwner() instanceof Player)
+		if (unit.getPlayerOwner() instanceof Player || unit.getPlayerOwner() instanceof CityStatePlayer)
 			return true;
 
 		return unit.getPlayerOwner().equals(city.getPlayerOwner()) && !unit.isUnitCapturable();
