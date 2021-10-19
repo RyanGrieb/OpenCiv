@@ -12,6 +12,7 @@ public class UnitAttackPacket extends Packet {
 	private int unitGridX, unitGridY, targetGridX, targetGridY;
 	private int unitID, targetID;
 	private float unitDamage, targetUnitDamage;
+	private boolean targetCity;
 
 	@Override
 	public void write(Json json) {
@@ -41,7 +42,7 @@ public class UnitAttackPacket extends Packet {
 
 		this.unitID = jsonData.getInt("unitID");
 		this.targetID = jsonData.getInt("targetID");
-
+		
 		this.unitDamage = jsonData.getFloat("unitDamage");
 		this.targetUnitDamage = jsonData.getFloat("targetUnitDamage");
 	}

@@ -34,8 +34,6 @@ public class CityStateCombatUnitAI extends UnitAI implements NextTurnListener, S
 		Server.getInstance().getEventManager().addListener(ServerSettleCityListener.class, this);
 	}
 
-	// Problem, we don't clear listeners?
-	// Dead units still get called.
 	@Override
 	public void onNextTurn() {
 		moveUnit();
@@ -73,11 +71,14 @@ public class CityStateCombatUnitAI extends UnitAI implements NextTurnListener, S
 
 	private void moveToTarget() {
 
+		if (targetTile == null)
+			return;
+
 		ArrayList<Tile> pathTiles = new ArrayList<>();
 		pathTiles = getPathTiles(targetTile);
 
 		// If we don't have a valid path, return.
-		if (targetTile == null || pathTiles.size() < 1 || unit.getStandingTile().equals(targetTile)) {
+		if (pathTiles.size() < 1 || unit.getStandingTile().equals(targetTile)) {
 			targetTile = null;
 			return;
 		}
@@ -91,11 +92,11 @@ public class CityStateCombatUnitAI extends UnitAI implements NextTurnListener, S
 
 		// If our target tile already has a unit on top. Move elsewhere
 		if (topUnit != null && isFriendly(topUnit)) {
-			// System.out.println("Unit in way:" + unit.getStandingTile());
 			pathingTile = unit.getStandingTile();
-			// System.out.println("Stopping at:" + pathingTile);
 			targetTile = null;
-			moveUnit();
+
+			// FIXME: Find a way to call this w/ out potential infinite loop
+			// moveUnit();
 			return;
 		}
 

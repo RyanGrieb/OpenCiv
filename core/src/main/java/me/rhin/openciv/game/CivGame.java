@@ -17,8 +17,9 @@ import me.rhin.openciv.game.city.City;
 import me.rhin.openciv.game.city.wonders.GameWonders;
 import me.rhin.openciv.game.civilization.CivType;
 import me.rhin.openciv.game.map.GameMap;
-import me.rhin.openciv.game.map.tile.CombatActor;
 import me.rhin.openciv.game.map.tile.Tile;
+import me.rhin.openciv.game.map.tooltip.CombatActor;
+import me.rhin.openciv.game.map.tooltip.TileTooltipHandler;
 import me.rhin.openciv.game.notification.NotificationHandler;
 import me.rhin.openciv.game.notification.type.AvailableProductionNotification;
 import me.rhin.openciv.game.notification.type.NotResearchingNotification;
@@ -86,6 +87,7 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 	private HashMap<String, AbstractPlayer> players;
 	private NotificationHandler notificationHandler;
 	private GameWonders gameWonders;
+	private TileTooltipHandler tileTooltipHandler;
 	private int turnTime;
 	private int turns;
 
@@ -93,9 +95,11 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 		this.map = new GameMap();
 		this.players = new HashMap<>();
 		this.gameWonders = new GameWonders();
-		Civilization.getInstance().getSoundHandler().playTrackBySoundtype(SoundType.AMBIENCE);
+		this.tileTooltipHandler = new TileTooltipHandler();
 		this.turnTime = BASE_TURN_TIME;
 		this.turns = 0;
+
+		Civilization.getInstance().getSoundHandler().playTrackBySoundtype(SoundType.AMBIENCE);
 
 		NotificationWindow notificationWindow = new NotificationWindow();
 		Civilization.getInstance().getWindowManager().toggleWindow(notificationWindow);
@@ -232,7 +236,7 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 		}
 
 		if (packet.isKilled())
-			flashIcon(tile, TextureEnum.ICON_SKULL);
+			tileTooltipHandler.flashIcon(tile, TextureEnum.ICON_SKULL);
 
 		if (packet.isKilled() && unit.getPlayerOwner().equals(player)) {
 			Civilization.getInstance().getSoundHandler().playEffect(SoundEnum.UNIT_DEATH);
@@ -290,21 +294,26 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 
 	@Override
 	public void onUnitAttack(UnitAttackPacket packet) {
-		Unit unit = map.getTiles()[packet.getUnitGridX()][packet.getUnitGridY()].getTopUnit();
+		Unit unit = map.getTiles()[packet.getUnitGridX()][packet.getUnitGridY()].getUnitFromID(packet.getUnitID());
 		// FIXME: Not having a unit ID here is problematic.
-		AttackableEntity targetEntity = map.getTiles()[packet.getTargetGridX()][packet.getTargetGridY()].getTopUnit();
-		// AttackableEntity targetEntity =
-		// map.getTiles()[packet.getTargetGridX()][packet.getTargetGridY()]
-		// .getEnemyAttackableEntity(unit.getPlayerOwner());
-		
+		AttackableEntity targetEntity = null;
+		// If the target is a city.
+		if (packet.getTargetID() == -1) {
+			targetEntity = map.getTiles()[packet.getTargetGridX()][packet.getTargetGridY()].getCity();
+		} else {
+
+			targetEntity = map.getTiles()[packet.getTargetGridX()][packet.getTargetGridY()]
+					.getUnitFromID(packet.getTargetID());
+		}
+
 		targetEntity.flashColor(Color.RED);
 
 		unit.setHealth(unit.getHealth() - packet.getUnitDamage());
 		unit.reduceMovement(2);
 		unit.flashColor(Color.YELLOW);
 
-		flashIcon(unit.getStandingTile(), TextureEnum.ICON_COMBAT);
-		flashIcon(targetEntity.getTile(), TextureEnum.ICON_SHIELD);
+		tileTooltipHandler.flashIcon(unit.getStandingTile(), TextureEnum.ICON_COMBAT);
+		tileTooltipHandler.flashIcon(targetEntity.getTile(), TextureEnum.ICON_SHIELD);
 
 		targetEntity.setHealth(targetEntity.getHealth() - packet.getTargetUnitDamage());
 
@@ -385,13 +394,6 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 		Unit unit = map.getTiles()[packet.getTileGridX()][packet.getTileGridY()].getUnitFromID(packet.getUnitID());
 		unit.setHealth(packet.getHealth());
 		unit.flashColor(Color.GREEN);
-	}
-
-	public void flashIcon(Tile standingTile, TextureEnum textureEnum) {
-		CombatActor combatActor = new CombatActor(textureEnum, standingTile.getX() + 6, standingTile.getY() + 8, 16,
-				16);
-		((InGameScreen) Civilization.getInstance().getScreenManager().getCurrentScreen()).getCombatTooltipGroup()
-				.addActor(combatActor);
 	}
 
 	public void endTurn() {

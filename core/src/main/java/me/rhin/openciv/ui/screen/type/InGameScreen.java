@@ -11,7 +11,7 @@ import com.badlogic.gdx.utils.TimeUtils;
 
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.game.CivGame;
-import me.rhin.openciv.game.map.tile.CombatActor;
+import me.rhin.openciv.game.map.tooltip.CombatActor;
 import me.rhin.openciv.listener.LeftClickListener.LeftClickEvent;
 import me.rhin.openciv.listener.MouseMoveListener.MouseMoveEvent;
 import me.rhin.openciv.listener.RelativeMouseMoveListener.RelativeMouseMoveEvent;
@@ -76,7 +76,6 @@ public class InGameScreen extends AbstractScreen {
 		camera.update();
 
 		handleInput();
-		handleCombatTooltips();
 
 		Civilization.getInstance().getEventManager().fireEvent(MouseMoveEvent.INSTANCE);
 		Civilization.getInstance().getEventManager().fireEvent(RelativeMouseMoveEvent.INSTANCE);
@@ -85,14 +84,6 @@ public class InGameScreen extends AbstractScreen {
 		if (timeSince >= 500) {
 			frameRate = Gdx.graphics.getFramesPerSecond();
 			gameOverlay.getFPSLabel().setText("FPS: " + frameRate);
-		}
-	}
-
-	private void handleCombatTooltips() {
-		for (Actor actor : combatTooltipGroup.getChildren()) {
-			CombatActor combatActor = (CombatActor) actor;
-			if (combatActor.getSprite().getColor().a <= 0)
-				combatActor.addAction(Actions.removeActor());
 		}
 	}
 

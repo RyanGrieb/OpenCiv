@@ -8,9 +8,9 @@ import com.badlogic.gdx.math.Vector2;
 
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.TextureEnum;
-import me.rhin.openciv.game.map.tile.CombatActor;
 import me.rhin.openciv.game.map.tile.Tile;
 import me.rhin.openciv.game.map.tile.TileType;
+import me.rhin.openciv.game.map.tooltip.CombatActor;
 import me.rhin.openciv.listener.ReceiveMapChunkListener;
 import me.rhin.openciv.listener.RemoveTileTypeListener;
 import me.rhin.openciv.listener.SetTileTypeListener;

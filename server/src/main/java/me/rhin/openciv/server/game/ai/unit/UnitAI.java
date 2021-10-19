@@ -33,7 +33,7 @@ public abstract class UnitAI {
 	}
 
 	protected ArrayList<Tile> getPathTiles(Tile targetTile) {
-
+		
 		int width = Server.getInstance().getMap().getWidth();
 		int height = Server.getInstance().getMap().getHeight();
 

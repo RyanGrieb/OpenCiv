@@ -1,4 +1,4 @@
-package me.rhin.openciv.game.map.tile;
+package me.rhin.openciv.game.map.tooltip;
 
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
@@ -10,21 +10,40 @@ public class CombatActor extends Actor {
 
 	private Sprite sprite;
 	private TextureEnum textureEnum;
+	private boolean isVisible;
 
 	public CombatActor(TextureEnum textureEnum, float x, float y, float width, float height) {
 		this.textureEnum = textureEnum;
-		this.setBounds(x, y, width, height);
 		this.sprite = textureEnum.sprite();
-		sprite.setBounds(x, y, width, height);
+		this.isVisible = true;
+
+		setBounds(x, y, width, height);
 	}
 
 	@Override
 	public void draw(Batch batch, float parentAlpha) {
-		sprite.setAlpha(sprite.getColor().a - 0.01F);
+		sprite.setAlpha(sprite.getColor().a - 0.006F);
 		sprite.draw(batch);
+
+		if (sprite.getColor().a <= 0)
+			isVisible = false;
+	}
+
+	@Override
+	public void setBounds(float x, float y, float width, float height) {
+		super.setBounds(x, y, width, height);
+		sprite.setBounds(x, y, width, height);
 	}
 
 	public Sprite getSprite() {
 		return sprite;
+	}
+
+	public boolean isVisible() {
+		return isVisible;
+	}
+
+	public TextureEnum getTexture() {
+		return textureEnum;
 	}
 }
