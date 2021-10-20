@@ -413,7 +413,7 @@ public abstract class Unit extends Actor
 		return ignoresTileObstructions;
 	}
 
-	public void seTignoresTileObstructions(boolean ignoresTileObstructions) {
+	public void setIgnoresTileObstructions(boolean ignoresTileObstructions) {
 		this.ignoresTileObstructions = ignoresTileObstructions;
 
 		standingTile.removeTileObserver(this);

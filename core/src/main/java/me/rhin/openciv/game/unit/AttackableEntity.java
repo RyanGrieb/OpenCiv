@@ -25,4 +25,6 @@ public interface AttackableEntity {
 
 	public void flashColor(Color red);
 
+	public int getID();
+
 }

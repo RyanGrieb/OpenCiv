@@ -170,8 +170,9 @@ public class UnitCombatWindow extends AbstractWindow
 	private void sendCombatPreviewPacket() {
 		// Attempt to get combat preview values from the server.
 		CombatPreviewPacket combatPacket = new CombatPreviewPacket();
-		combatPacket.setUnitLocations(attackingEntity.getTile().getGridX(), attackingEntity.getTile().getGridY(),
-				targetEntity.getTile().getGridX(), targetEntity.getTile().getGridY());
+		combatPacket.setEntityLocations(attackingEntity.getID(), attackingEntity.getTile().getGridX(),
+				attackingEntity.getTile().getGridY(), targetEntity.getID(), targetEntity.getTile().getGridX(),
+				targetEntity.getTile().getGridY());
 		Civilization.getInstance().getNetworkManager().sendPacket(combatPacket);
 	}
 }

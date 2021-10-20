@@ -44,7 +44,7 @@ public class ExpandedVisionHeritage extends Heritage implements AddUnitListener 
 	@Override
 	protected void onStudied() {
 		for (Unit unit : Civilization.getInstance().getGame().getPlayer().getOwnedUnits())
-			unit.seTignoresTileObstructions(true);
+			unit.setIgnoresTileObstructions(true);
 	}
 
 	@Override
@@ -59,6 +59,6 @@ public class ExpandedVisionHeritage extends Heritage implements AddUnitListener 
 		if (!unit.getPlayerOwner().equals(Civilization.getInstance().getGame().getPlayer()))
 			return;
 
-		unit.seTignoresTileObstructions(true);
+		unit.setIgnoresTileObstructions(true);
 	}
 }

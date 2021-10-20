@@ -16,8 +16,8 @@ import me.rhin.openciv.server.game.city.City;
 import me.rhin.openciv.server.game.map.tile.Tile;
 import me.rhin.openciv.server.game.map.tile.TileType;
 import me.rhin.openciv.server.game.unit.UnitItem.UnitType;
-import me.rhin.openciv.server.listener.NextTurnListener;
 import me.rhin.openciv.server.listener.CaptureCityListener.CaptureCityEvent;
+import me.rhin.openciv.server.listener.NextTurnListener;
 import me.rhin.openciv.shared.packet.type.DeleteUnitPacket;
 import me.rhin.openciv.shared.packet.type.RemoveTileTypePacket;
 import me.rhin.openciv.shared.packet.type.SetCityHealthPacket;
@@ -460,12 +460,15 @@ public abstract class Unit implements AttackableEntity, NextTurnListener {
 		}
 
 		// Delete units below 1 hp
-
-		// If target is unit, use this method. if city, implement that other one
-
-		// Doesn't get called?
-
 		if (targetEntity.getHealth() <= 0) {
+
+			// Update the unit's health to all players
+			SetUnitHealthPacket healthPacket = new SetUnitHealthPacket();
+			healthPacket.setUnit(playerOwner.getName(), id, standingTile.getGridX(), standingTile.getGridY(), health);
+
+			for (Player player : Server.getInstance().getPlayers())
+				player.sendPacket(json.toJson(healthPacket));
+
 			if (targetEntity instanceof Unit && targetEntity.getTile().getCity() == null) {
 
 				Unit targetUnit = (Unit) targetEntity;

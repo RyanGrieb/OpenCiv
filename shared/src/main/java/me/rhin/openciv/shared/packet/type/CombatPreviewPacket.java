@@ -8,6 +8,7 @@ import me.rhin.openciv.shared.packet.Packet;
 public class CombatPreviewPacket extends Packet {
 
 	private int unitGridX, unitGridY, targetGridX, targetGridY;
+	private int unitID, targetID;
 	private float unitDamage, targetUnitDamage;
 
 	@Override
@@ -21,6 +22,9 @@ public class CombatPreviewPacket extends Packet {
 
 		json.writeValue("unitDamage", unitDamage);
 		json.writeValue("targetUnitDamage", targetUnitDamage);
+
+		json.writeValue("unitID", unitID);
+		json.writeValue("targetID", targetID);
 	}
 
 	@Override
@@ -35,6 +39,9 @@ public class CombatPreviewPacket extends Packet {
 
 		this.unitDamage = jsonData.getFloat("unitDamage");
 		this.targetUnitDamage = jsonData.getFloat("targetUnitDamage");
+
+		this.unitID = jsonData.getInt("unitID");
+		this.targetID = jsonData.getInt("targetID");
 	}
 
 	public int getUnitGridX() {
@@ -69,10 +76,21 @@ public class CombatPreviewPacket extends Packet {
 		return targetUnitDamage;
 	}
 
-	public void setUnitLocations(int unitGridX, int unitGridY, int targetGridX, int targetGridY) {
+	public void setEntityLocations(int unitID, int unitGridX, int unitGridY, int targetID, int targetGridX,
+			int targetGridY) {
 		this.unitGridX = unitGridX;
 		this.unitGridY = unitGridY;
 		this.targetGridX = targetGridX;
 		this.targetGridY = targetGridY;
+		this.unitID = unitID;
+		this.targetID = targetID;
+	}
+
+	public int getUnitID() {
+		return unitID;
+	}
+
+	public int getTargetID() {
+		return targetID;
 	}
 }

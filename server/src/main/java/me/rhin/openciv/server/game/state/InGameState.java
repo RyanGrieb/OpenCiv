@@ -525,9 +525,14 @@ public class InGameState extends GameState
 	public void onCombatPreview(WebSocket conn, CombatPreviewPacket packet) {
 		Player playerOwner = Server.getInstance().getPlayerByConn(conn);
 		AttackableEntity attackingEntity = map.getTiles()[packet.getUnitGridX()][packet.getUnitGridY()]
-				.getAttackableEntity();
-		AttackableEntity targetEntity = map.getTiles()[packet.getTargetGridX()][packet.getTargetGridY()]
-				.getEnemyAttackableEntity(playerOwner);
+				.getUnitFromID(packet.getUnitID());
+
+		AttackableEntity targetEntity = null;
+		if (packet.getTargetID() != -1)
+			targetEntity = map.getTiles()[packet.getTargetGridX()][packet.getTargetGridY()]
+					.getUnitFromID(packet.getTargetID());
+		else
+			targetEntity = map.getTiles()[packet.getTargetGridX()][packet.getTargetGridY()].getCity();
 
 		if (attackingEntity == null || targetEntity == null)
 			return;
@@ -845,7 +850,8 @@ public class InGameState extends GameState
 				Tile tile = null;
 
 				while (tile == null || tile.containsTileProperty(TileProperty.WATER)
-						|| tile.containsTileType(TileType.MOUNTAIN) || tile.getUnits().size() > 0 || tile.getNearbyUnits().size() > 0) {
+						|| tile.containsTileType(TileType.MOUNTAIN) || tile.getUnits().size() > 0
+						|| tile.getNearbyUnits().size() > 0) {
 					int x = rnd.nextInt(map.getWidth());
 					int y = rnd.nextInt(map.getHeight());
 					tile = map.getTiles()[x][y];
