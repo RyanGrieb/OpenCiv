@@ -493,7 +493,7 @@ public abstract class Unit extends Actor
 		}
 	}
 
-	public void setPlayerOwner(Player playerOwner) {
+	public void setPlayerOwner(AbstractPlayer playerOwner) {
 		this.playerOwner = playerOwner;
 		this.civIconSprite = playerOwner.getCivilization().getIcon().sprite();
 		civIconSprite.setBounds(getX() + 10, getY() + 20, 8, 8);
@@ -601,10 +601,6 @@ public abstract class Unit extends Actor
 
 	public void kill() {
 		Civilization.getInstance().getEventManager().clearListenersFromObject(this);
-	}
-
-	public void setPlayerOwner(AbstractPlayer playerOwner) {
-		this.playerOwner = playerOwner;
 	}
 
 	private ArrayList<Tile> getMovementPath(Tile tile) {
