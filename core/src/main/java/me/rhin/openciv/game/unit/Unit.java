@@ -2,7 +2,6 @@ package me.rhin.openciv.game.unit;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
 
 import com.badlogic.gdx.Gdx;
@@ -157,6 +156,8 @@ public abstract class Unit extends Actor
 
 		// Move sprite to our standing tile
 
+		// FIXME: We animate attacks to enemies wrong
+
 		// Increment the sprite to the target tile
 		if (movementTiles.size() > 0 && targetTile == null) {
 			Tile tile = movementTiles.get(0);
@@ -168,9 +169,9 @@ public abstract class Unit extends Actor
 			float deltaY = tileY - sprite.getY();
 
 			float angle = (float) Math.atan2(deltaY, deltaX);
-			
+
 			float speed = 2;
-			
+
 			float xIncrement = (float) (speed * Math.cos(angle));
 			float yIncrement = (float) (speed * Math.sin(angle));
 
@@ -215,6 +216,7 @@ public abstract class Unit extends Actor
 	}
 
 	public boolean setTargetTile(Tile targetTile, boolean wasMouseClick) {
+
 		if (targetTile == null)
 			return false;
 
@@ -314,7 +316,6 @@ public abstract class Unit extends Actor
 			Tile nextTile = cameFrom[parentTile.getGridX()][parentTile.getGridY()];
 
 			if (nextTile != null) {
-				movementTiles.add(parentTile);
 				Vector2[] tileVectors = new Vector2[2];
 				tileVectors[0] = new Vector2(parentTile.getX() + parentTile.getWidth() / 2,
 						parentTile.getY() + parentTile.getHeight() / 2 + 4);
@@ -363,7 +364,6 @@ public abstract class Unit extends Actor
 		}
 
 		if (targetEntity != null) {
-
 			// FIXME: Range units should be able to move onto capturable units.
 			if (isUnitCapturable() || isRangedUnit()) {
 				pathVectors.clear();
@@ -436,6 +436,8 @@ public abstract class Unit extends Actor
 		selectionSprite.setPosition(tileX, tileY);
 		civIconSprite.setPosition(tileX + 10, tileY + 20);
 		super.setPosition(tileX, tileY);
+
+		movementTiles = getMovementPath(targetTile);
 
 		standingTile = targetTile;
 
@@ -603,5 +605,90 @@ public abstract class Unit extends Actor
 
 	public void setPlayerOwner(AbstractPlayer playerOwner) {
 		this.playerOwner = playerOwner;
+	}
+
+	private ArrayList<Tile> getMovementPath(Tile tile) {
+
+		ArrayList<Tile> pathTiles = new ArrayList<>();
+
+		int h = 0;
+		ArrayList<Tile> openSet = new ArrayList<>();
+		Tile[][] cameFrom = new Tile[GameMap.WIDTH][GameMap.HEIGHT];
+		float[][] gScores = new float[GameMap.WIDTH][GameMap.HEIGHT];
+		float[][] fScores = new float[GameMap.WIDTH][GameMap.HEIGHT];
+
+		for (float[] gScore : gScores)
+			Arrays.fill(gScore, GameMap.MAX_NODES);
+		for (float[] fScore : fScores)
+			Arrays.fill(fScore, GameMap.MAX_NODES);
+
+		gScores[standingTile.getGridX()][standingTile.getGridY()] = 0;
+		fScores[standingTile.getGridX()][standingTile.getGridY()] = h;
+		openSet.add(standingTile);
+
+		while (openSet.size() > 0) {
+
+			Tile current = removeSmallest(openSet, fScores);
+
+			if (current.equals(targetTile))
+				break;
+
+			openSet.remove(current);
+			for (Tile adjTile : current.getAdjTiles()) {
+				if (adjTile == null)
+					continue;
+
+				float tenativeGScore = gScores[current.getGridX()][current.getGridY()]
+						+ getMovementCost(current, adjTile);
+
+				if (tenativeGScore < gScores[adjTile.getGridX()][adjTile.getGridY()]) {
+
+					cameFrom[adjTile.getGridX()][adjTile.getGridY()] = current;
+					gScores[adjTile.getGridX()][adjTile.getGridY()] = tenativeGScore;
+
+					float adjFScore = gScores[adjTile.getGridX()][adjTile.getGridY()] + h;
+					fScores[adjTile.getGridX()][adjTile.getGridY()] = adjFScore;
+					if (!openSet.contains(adjTile)) {
+						openSet.add(adjTile);
+					}
+				}
+			}
+		}
+
+		// Iterate through the parent array to get back to the origin tile.
+
+		Tile parentTile = cameFrom[targetTile.getGridX()][targetTile.getGridY()];
+
+		int iterations = 0;
+		while (parentTile != null) {
+			Tile nextTile = cameFrom[parentTile.getGridX()][parentTile.getGridY()];
+
+			if (nextTile != null) {
+				pathTiles.add(parentTile);
+				Vector2[] tileVectors = new Vector2[2];
+				tileVectors[0] = new Vector2(parentTile.getX() + parentTile.getWidth() / 2,
+						parentTile.getY() + parentTile.getHeight() / 2 + 4);
+				tileVectors[1] = new Vector2(nextTile.getX() + nextTile.getWidth() / 2,
+						nextTile.getY() + nextTile.getHeight() / 2 + 4);
+				pathVectors.add(tileVectors);
+			}
+
+			if (nextTile == null)
+				nextTile = targetTile;
+
+			if (parentTile.equals(targetTile)) {
+				break;
+			}
+
+			if (iterations >= GameMap.MAX_NODES) {
+				Gdx.app.log(Civilization.LOG_TAG, "ERROR: Pathing iteration error");
+				break;
+			}
+
+			parentTile = nextTile;
+			iterations++;
+		}
+
+		return pathTiles;
 	}
 }
