@@ -2,6 +2,7 @@ package me.rhin.openciv.game.unit;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 
 import com.badlogic.gdx.Gdx;
@@ -43,6 +44,7 @@ public abstract class Unit extends Actor
 	private int id;
 	private AbstractPlayer playerOwner;
 	private ArrayList<Vector2[]> pathVectors;
+	private ArrayList<Tile> movementTiles;
 	private float pathMovement;
 	private Tile targetTile;
 	private Sprite sprite, selectionSprite;
@@ -60,6 +62,7 @@ public abstract class Unit extends Actor
 		this.playerOwner = playerOwner;
 		this.customActions = new ArrayList<>();
 		this.pathVectors = new ArrayList<>();
+		this.movementTiles = new ArrayList<>();
 		this.standingTile = standingTile;
 		this.sprite = assetEnum.sprite();
 		this.selectionSprite = TextureEnum.UI_SELECTION.sprite();
@@ -151,6 +154,32 @@ public abstract class Unit extends Actor
 		sprite.draw(batch);
 		civIconSprite.draw(batch);
 		// }
+
+		// Move sprite to our standing tile
+
+		// Increment the sprite to the target tile
+		if (movementTiles.size() > 0 && targetTile == null) {
+			Tile tile = movementTiles.get(0);
+
+			float tileX = tile.getVectors()[0].x - tile.getWidth() / 2;
+			float tileY = tile.getVectors()[0].y + 4;
+
+			float deltaX = tileX - sprite.getX();
+			float deltaY = tileY - sprite.getY();
+
+			float angle = (float) Math.atan2(deltaY, deltaX);
+			
+			float speed = 2;
+			
+			float xIncrement = (float) (speed * Math.cos(angle));
+			float yIncrement = (float) (speed * Math.sin(angle));
+
+			sprite.setPosition(sprite.getX() + xIncrement, sprite.getY() + yIncrement);
+
+			if (Math.abs(sprite.getX() - tileX) < 1 && Math.abs(sprite.getY() - tileY) < 1) {
+				movementTiles.remove(tile);
+			}
+		}
 	}
 
 	@Override
@@ -193,6 +222,7 @@ public abstract class Unit extends Actor
 			return false;
 
 		pathVectors.clear();
+		movementTiles.clear();
 
 		targetSelectionSprite.setPosition(targetTile.getVectors()[0].x - targetTile.getWidth() / 2,
 				targetTile.getVectors()[0].y + 4);
@@ -284,6 +314,7 @@ public abstract class Unit extends Actor
 			Tile nextTile = cameFrom[parentTile.getGridX()][parentTile.getGridY()];
 
 			if (nextTile != null) {
+				movementTiles.add(parentTile);
 				Vector2[] tileVectors = new Vector2[2];
 				tileVectors[0] = new Vector2(parentTile.getX() + parentTile.getWidth() / 2,
 						parentTile.getY() + parentTile.getHeight() / 2 + 4);
@@ -393,15 +424,23 @@ public abstract class Unit extends Actor
 		if (targetTile == null)
 			return;
 
-		pathVectors.clear();
-
 		standingTile.removeUnit(this);
 		targetTile.addUnit(this);
 
-		setPosition(targetTile.getVectors()[0].x - targetTile.getWidth() / 2, targetTile.getVectors()[0].y + 4);
+		// setPosition(targetTile.getVectors()[0].x - targetTile.getWidth() / 2,
+		// targetTile.getVectors()[0].y + 4);
+
+		float tileX = targetTile.getVectors()[0].x - targetTile.getWidth() / 2;
+		float tileY = targetTile.getVectors()[0].y + 4;
+
+		selectionSprite.setPosition(tileX, tileY);
+		civIconSprite.setPosition(tileX + 10, tileY + 20);
+		super.setPosition(tileX, tileY);
+
 		standingTile = targetTile;
 
 		targetTile = null;
+		pathVectors.clear();
 	}
 
 	public void sendMovementPacket() {

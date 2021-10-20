@@ -240,6 +240,11 @@ public class Tile extends Actor implements BottomShapeRenderListener {
 		return y;
 	}
 
+	@Override
+	public String toString() {
+		return getBaseTileType() + " [" + gridX + "," + gridY + "]";
+	}
+
 	public void addRiver(RiverPart river, int side) {
 		// FIXME: The way our adjTiles are set up, all our possible river sides are:
 		// 5,0,1,2. In the future, we want our adjTiles index to align /w the river.
@@ -249,6 +254,7 @@ public class Tile extends Actor implements BottomShapeRenderListener {
 
 	/**
 	 * Returns the top tiletype
+	 * 
 	 * @return
 	 */
 	public TileType getBaseTileType() {
