@@ -141,8 +141,8 @@ public class Tile extends Actor implements BottomShapeRenderListener {
 
 	@Override
 	public void onBottomShapeRender(ShapeRenderer shapeRenderer) {
-		// if (tileObservers.size() < 1)
-		// return;
+		if (tileObservers.size() < 1 && Civilization.SHOW_FOG)
+			return;
 
 		// Draw the hexagon outline
 
@@ -193,24 +193,24 @@ public class Tile extends Actor implements BottomShapeRenderListener {
 	@Override
 	public void draw(Batch batch, float parentAlpha) {
 
-		// if (discovered)
-		for (TileTypeWrapper sprite : tileWrappers) {
-			sprite.draw(batch);
+		if (discovered || !Civilization.SHOW_FOG)
+			for (TileTypeWrapper sprite : tileWrappers) {
+				sprite.draw(batch);
+			}
+
+		if (!discovered && Civilization.SHOW_FOG) {
+			fogSprite.draw(batch);
 		}
 
-		if (!discovered) {
-			// fogSprite.draw(batch);
-		}
-
-		if (tileObservers.size() < 1) {
-			// nonVisibleSprite.draw(batch);
+		if (tileObservers.size() < 1 && Civilization.SHOW_FOG) {
+			nonVisibleSprite.draw(batch);
 		}
 
 		if (drawSelection) {
 			selectionSprite.draw(batch);
 		}
 
-		if (territory != null /* && tileObservers.size() > 0 */ && !rangedTarget)
+		if (territory != null && (tileObservers.size() > 0 || !Civilization.SHOW_FOG) && !rangedTarget)
 			territorySprite.draw(batch);
 
 		if (rangedTarget) {

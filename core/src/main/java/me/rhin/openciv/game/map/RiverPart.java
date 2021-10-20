@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 
+import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.map.tile.Tile;
 
@@ -67,7 +68,7 @@ public class RiverPart extends Actor {
 	@Override
 	public void draw(Batch batch, float parentAlpha) {
 		// FIXME: Don't draw on top of one another if there are two tile sides.
-		//if(tile.isDiscovered())
+		if(tile.isDiscovered() || !Civilization.SHOW_FOG)
 		sprite.draw(batch);
 	}
 }

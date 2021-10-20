@@ -149,10 +149,10 @@ public abstract class Unit extends Actor
 			}
 		}
 
-		// if (standingTile.getTileObservers().size() > 0) {
-		sprite.draw(batch);
-		civIconSprite.draw(batch);
-		// }
+		if (standingTile.getTileObservers().size() > 0 || !Civilization.SHOW_FOG) {
+			sprite.draw(batch);
+			civIconSprite.draw(batch);
+		}
 
 		// Move sprite to our standing tile
 
