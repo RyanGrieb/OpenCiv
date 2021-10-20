@@ -19,12 +19,12 @@ import me.rhin.openciv.server.listener.NextTurnListener;
 import me.rhin.openciv.server.listener.ServerSettleCityListener;
 import me.rhin.openciv.shared.packet.type.MoveUnitPacket;
 
-public class CityStateCombatUnitAI extends UnitAI implements NextTurnListener, ServerSettleCityListener {
+public class CityStateMeleeAI extends UnitAI implements NextTurnListener, ServerSettleCityListener {
 
 	private City city;
 	private Tile targetTile;
 
-	public CityStateCombatUnitAI(Unit unit) {
+	public CityStateMeleeAI(Unit unit) {
 		super(unit);
 
 		if (unit.getPlayerOwner().getOwnedCities().size() > 0)

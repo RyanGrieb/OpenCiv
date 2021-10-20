@@ -4,7 +4,9 @@ import java.util.ArrayList;
 
 import me.rhin.openciv.server.Server;
 import me.rhin.openciv.server.game.ai.AIPlayer;
-import me.rhin.openciv.server.game.ai.unit.CityStateCombatUnitAI;
+import me.rhin.openciv.server.game.ai.unit.BuilderAI;
+import me.rhin.openciv.server.game.ai.unit.CityStateMeleeAI;
+import me.rhin.openciv.server.game.ai.unit.CityStateNavalAI;
 import me.rhin.openciv.server.game.city.City;
 import me.rhin.openciv.server.game.civilization.type.citystate.CityState;
 import me.rhin.openciv.server.game.map.tile.Tile;
@@ -42,7 +44,7 @@ public class CityStatePlayer extends AIPlayer implements NextTurnListener {
 		ownedUnits.add(unit);
 
 		if (unit.getUnitTypes().contains(UnitType.MELEE)) {
-			unit.addAIBehavior(new CityStateCombatUnitAI(unit));
+			unit.addAIBehavior(new CityStateMeleeAI(unit));
 		}
 
 		if (unit.getUnitTypes().contains(UnitType.RANGED)) {
@@ -50,11 +52,11 @@ public class CityStatePlayer extends AIPlayer implements NextTurnListener {
 		}
 
 		if (unit.getUnitTypes().contains(UnitType.NAVAL)) {
-
+			unit.addAIBehavior(new CityStateNavalAI(unit));
 		}
 
 		if (unit instanceof BuilderUnit) {
-			
+			unit.addAIBehavior(new BuilderAI(unit));
 		}
 	}
 

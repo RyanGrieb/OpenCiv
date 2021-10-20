@@ -845,7 +845,7 @@ public class InGameState extends GameState
 				Tile tile = null;
 
 				while (tile == null || tile.containsTileProperty(TileProperty.WATER)
-						|| tile.containsTileType(TileType.MOUNTAIN) || tile.getUnits().size() > 0) {
+						|| tile.containsTileType(TileType.MOUNTAIN) || tile.getUnits().size() > 0 || tile.getNearbyUnits().size() > 0) {
 					int x = rnd.nextInt(map.getWidth());
 					int y = rnd.nextInt(map.getHeight());
 					tile = map.getTiles()[x][y];

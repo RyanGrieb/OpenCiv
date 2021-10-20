@@ -624,4 +624,15 @@ public class Tile {
 
 		return false;
 	}
+
+	public ArrayList<Unit> getNearbyUnits() {
+		ArrayList<Unit> units = new ArrayList<>();
+		for (Tile tile1 : adjTiles) {
+			units.addAll(tile1.getUnits());
+			for (Tile tile2 : tile1.getAdjTiles()) {
+				units.addAll(tile2.getUnits());
+			}
+		}
+		return units;
+	}
 }
