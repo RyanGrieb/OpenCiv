@@ -1,23 +1,22 @@
 package me.rhin.openciv.server.game.civilization;
 
+import java.util.ArrayList;
 import java.util.Random;
 
+import me.rhin.openciv.server.Server;
 import me.rhin.openciv.server.game.AbstractPlayer;
+import me.rhin.openciv.server.game.Player;
 import me.rhin.openciv.server.game.civilization.type.America;
-import me.rhin.openciv.server.game.civilization.type.Barbarians;
 import me.rhin.openciv.server.game.civilization.type.England;
 import me.rhin.openciv.server.game.civilization.type.Germany;
 import me.rhin.openciv.server.game.civilization.type.Rome;
-import me.rhin.openciv.server.game.civilization.type.citystate.CityState;
 
 public enum CivType {
 
 	RANDOM {
-
 		@Override
 		public Civ getCiv(AbstractPlayer player) {
-			Random rnd = new Random();
-			return CivType.values()[rnd.nextInt(CivType.values().length)].getCiv(player);
+			return null;
 		}
 	},
 	AMERICA {
@@ -48,14 +47,30 @@ public enum CivType {
 		}
 	};
 
+	//TODO: Make this code cleaner.
 	public static CivType randomCiv() {
+
+		ArrayList<String> availableCivs = new ArrayList<String>();
+		for (CivType civType : CivType.values())
+			if (civType != CivType.RANDOM)
+				availableCivs.add(civType.name());
+
+		for (Player player : Server.getInstance().getPlayers())
+			if (player.getCiv() != null && availableCivs.contains(player.getCiv().getName().toUpperCase())) {
+				availableCivs.remove(player.getCiv().getName().toUpperCase());
+			}
+
+		// If there are no more civs left. Just make them all available.
+		if (availableCivs.size() < 1)
+			for (CivType civType : CivType.values())
+				if (civType != CivType.RANDOM)
+					availableCivs.add(civType.name());
+
 		Random rnd = new Random();
-		int max = CivType.values().length - 1;
-		int min = 1;
-		CivType civType = CivType.values()[rnd.nextInt(max - min + 1) + min];
-		// CivType civType = CivType.values()[rnd.nextInt(CivType.values().length - 1) +
-		// 1];
-		return civType;
+		int max = availableCivs.size() - 1;
+		int min = 0;
+		String civName = availableCivs.get(rnd.nextInt(max - min + 1) + min);
+		return CivType.valueOf(civName);
 	}
 
 	public abstract Civ getCiv(AbstractPlayer player);

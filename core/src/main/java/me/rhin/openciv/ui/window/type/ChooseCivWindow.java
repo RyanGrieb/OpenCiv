@@ -15,21 +15,17 @@ public class ChooseCivWindow extends AbstractWindow implements ResizeListener {
 	private ContainerList civContianerList;
 
 	public ChooseCivWindow() {
-		this.blankBackground = new BlankBackground(viewport.getWorldWidth() / 2 - 340, viewport.getWorldHeight() - 360, 200, 300);
+		this.blankBackground = new BlankBackground(viewport.getWorldWidth() / 2 - 340, viewport.getWorldHeight() - 360,
+				200, 300);
 		addActor(blankBackground);
 
-		this.civContianerList = new ContainerList(this, viewport.getWorldWidth() / 2 - 340, viewport.getWorldHeight() - 360, 200, 300);
+		this.civContianerList = new ContainerList(this, viewport.getWorldWidth() / 2 - 340,
+				viewport.getWorldHeight() - 360, 200, 300);
 
-		civContianerList.addItem(ListContainerType.CATEGORY, "Civilizations",
-				new ListCivilization(CivType.RANDOM, 200, 40));
-		civContianerList.addItem(ListContainerType.CATEGORY, "Civilizations",
-				new ListCivilization(CivType.AMERICA, 200, 40));
-		civContianerList.addItem(ListContainerType.CATEGORY, "Civilizations",
-				new ListCivilization(CivType.GERMANY, 200, 40));
-		civContianerList.addItem(ListContainerType.CATEGORY, "Civilizations",
-				new ListCivilization(CivType.ENGLAND, 200, 40));
-		civContianerList.addItem(ListContainerType.CATEGORY, "Civilizations",
-				new ListCivilization(CivType.ROME, 200, 40));
+		for (CivType civType : CivType.values()) {
+			civContianerList.addItem(ListContainerType.CATEGORY, "Civilizations",
+					new ListCivilization(civType, 200, 40));
+		}
 
 		addActor(civContianerList);
 
@@ -42,11 +38,11 @@ public class ChooseCivWindow extends AbstractWindow implements ResizeListener {
 		civContianerList.setPosition(width / 2 - 340, height - 360);
 
 	}
-	
+
 	@Override
 	public void onClose() {
 		super.onClose();
-		
+
 		civContianerList.onClose();
 	}
 

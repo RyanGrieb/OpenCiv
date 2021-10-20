@@ -15,7 +15,10 @@ import me.rhin.openciv.asset.SoundEnum.SoundType;
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.city.City;
 import me.rhin.openciv.game.city.wonders.GameWonders;
+import me.rhin.openciv.game.civilization.Civ;
 import me.rhin.openciv.game.civilization.CivType;
+import me.rhin.openciv.game.civilization.type.CityState;
+import me.rhin.openciv.game.civilization.type.CityState.CityStateType;
 import me.rhin.openciv.game.map.GameMap;
 import me.rhin.openciv.game.map.tile.Tile;
 import me.rhin.openciv.game.map.tooltip.CombatActor;
@@ -51,6 +54,9 @@ import me.rhin.openciv.listener.SetUnitOwnerListener;
 import me.rhin.openciv.listener.SettleCityListener;
 import me.rhin.openciv.listener.TerritoryGrowListener;
 import me.rhin.openciv.listener.UnitAttackListener;
+import me.rhin.openciv.networking.PacketParameter;
+import me.rhin.openciv.shared.listener.Event;
+import me.rhin.openciv.shared.listener.Listener;
 import me.rhin.openciv.shared.packet.type.AddUnitPacket;
 import me.rhin.openciv.shared.packet.type.DeleteUnitPacket;
 import me.rhin.openciv.shared.packet.type.EndTurnPacket;
@@ -68,6 +74,7 @@ import me.rhin.openciv.shared.packet.type.SetUnitOwnerPacket;
 import me.rhin.openciv.shared.packet.type.SettleCityPacket;
 import me.rhin.openciv.shared.packet.type.TerritoryGrowPacket;
 import me.rhin.openciv.shared.packet.type.UnitAttackPacket;
+import me.rhin.openciv.shared.util.StrUtil;
 import me.rhin.openciv.ui.screen.type.InGameScreen;
 import me.rhin.openciv.ui.window.type.CurrentHeritageWindow;
 import me.rhin.openciv.ui.window.type.CurrentResearchWindow;
@@ -183,8 +190,30 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 					players.put(playerName, new Player(playerName));
 			}
 
-			players.get(playerName)
-					.setCivilization(CivType.valueOf(packet.getCivList()[i]).getCiv(players.get(playerName)));
+			
+			//TODO: Handle reflection of citystates better.
+			String civName = StrUtil.capitalize(civilizationName.toLowerCase());
+			try {
+				Class<? extends Civ> civClass = null;
+				if (civName.contains("citystate")) {
+					civClass = ClassReflection.forName("me.rhin.openciv.game.civilization.type.CityState");
+				} else
+					civClass = ClassReflection.forName("me.rhin.openciv.game.civilization.type." + civName);
+
+				Civ civ = (Civ) ClassReflection.getConstructor(civClass, AbstractPlayer.class)
+						.newInstance(players.get(playerName));
+
+				if (civName.contains("citystate")) {
+					CityState cityState = (CityState) civ;
+					civName = civName.toUpperCase();
+					cityState.setCityStateType(CityStateType.valueOf(civName.substring(0, civName.indexOf('_'))));
+				}
+
+				players.get(playerName).setCivilization(civ);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+
 		}
 	}
 

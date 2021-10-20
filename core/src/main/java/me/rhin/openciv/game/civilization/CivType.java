@@ -15,68 +15,17 @@ import me.rhin.openciv.shared.util.StrUtil;
 
 public enum CivType {
 
-	RANDOM(TextureEnum.ICON_UNKNOWN) {
-		public Civ getCiv(AbstractPlayer player) {
-			Random rnd = new Random();
-			return CivType.values()[rnd.nextInt(CivType.values().length)].getCiv(player);
-		}
-	},
-	BARBARIANS(TextureEnum.ICON_BARBARIAN) {
-		@Override
-		public Civ getCiv(AbstractPlayer player) {
-			return new Barbarians(player);
-		}
-	},
-	GOLD_CITYSTATE(TextureEnum.ICON_CITYSTATE_GOLD) {
-		@Override
-		public Civ getCiv(AbstractPlayer player) {
-			return new CityState(player, CityStateType.GOLD);
-		}
-	},
-	PRODUCTION_CITYSTATE(TextureEnum.ICON_CITYSTATE_PRODUCTION) {
-		@Override
-		public Civ getCiv(AbstractPlayer player) {
-			return new CityState(player, CityStateType.PRODUCTION);
-		}
-	},
-	SCIENCE_CITYSTATE(TextureEnum.ICON_CITYSTATE_SCIENCE) {
-		@Override
-		public Civ getCiv(AbstractPlayer player) {
-			return new CityState(player, CityStateType.SCIENCE);
-		}
-	},
-	AMERICA(TextureEnum.ICON_AMERICA) {
-		@Override
-		public Civ getCiv(AbstractPlayer player) {
-			return new America(player);
-		}
-	},
-	ENGLAND(TextureEnum.ICON_ENGLAND) {
-		@Override
-		public Civ getCiv(AbstractPlayer player) {
-			return new England(player);
-		}
-	},
-	GERMANY(TextureEnum.ICON_GERMANY) {
-		@Override
-		public Civ getCiv(AbstractPlayer player) {
-			return new Germany(player);
-		}
-	},
-	ROME(TextureEnum.ICON_ROME) {
-		@Override
-		public Civ getCiv(AbstractPlayer player) {
-			return new Rome(player);
-		}
-	};
+	RANDOM(TextureEnum.ICON_UNKNOWN),
+	AMERICA(TextureEnum.ICON_AMERICA),
+	ENGLAND(TextureEnum.ICON_ENGLAND),
+	GERMANY(TextureEnum.ICON_GERMANY),
+	ROME(TextureEnum.ICON_ROME);
 
 	private TextureEnum icon;
 
 	CivType(TextureEnum civIcon) {
 		icon = civIcon;
 	}
-
-	public abstract Civ getCiv(AbstractPlayer player);
 
 	public TextureEnum getIcon() {
 		return icon;

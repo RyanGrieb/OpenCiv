@@ -26,9 +26,8 @@ public class CityState extends Civ {
 
 	private CityStateType cityStateType;
 
-	public CityState(AbstractPlayer player, CityStateType cityStateType) {
+	public CityState(AbstractPlayer player) {
 		super(player);
-		this.cityStateType = cityStateType;
 	}
 
 	@Override
@@ -46,4 +45,7 @@ public class CityState extends Civ {
 		return "CityState";
 	}
 
+	public void setCityStateType(CityStateType cityStateType) {
+		this.cityStateType = cityStateType;
+	}
 }
