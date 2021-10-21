@@ -374,7 +374,7 @@ public abstract class Unit extends Actor
 			} else
 				targetSelectionSprite.setColor(Color.RED);
 		} else
-			targetSelectionSprite.setColor(Color.YELLOW);
+			targetSelectionSprite.setColor(Color.ORANGE);
 
 		return true;
 	}
@@ -390,7 +390,7 @@ public abstract class Unit extends Actor
 		if (targetEntity != null)
 			shapeRenderer.setColor(Color.RED);
 		else
-			shapeRenderer.setColor(Color.YELLOW);
+			shapeRenderer.setColor(Color.ORANGE);
 		for (Vector2[] vectors : new ArrayList<>(pathVectors)) {
 			// System.out.println(maxMovement + "," + pathMovement);
 			if (getCurrentMovement() < pathMovement || vectors == null)
