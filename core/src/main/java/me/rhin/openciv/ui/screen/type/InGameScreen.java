@@ -223,7 +223,6 @@ public class InGameScreen extends AbstractScreen {
 		if (Gdx.input.isKeyPressed(Input.Keys.W) || Gdx.input.isKeyPressed(Input.Keys.UP)) {
 			translateCamera(0, 6, 0);
 		}
-
 	}
 
 	public CivGame getGame() {

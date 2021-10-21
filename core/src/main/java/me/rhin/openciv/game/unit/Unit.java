@@ -2,6 +2,7 @@ package me.rhin.openciv.game.unit;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import com.badlogic.gdx.Gdx;
@@ -224,7 +225,8 @@ public abstract class Unit extends Actor
 			return false;
 
 		pathVectors.clear();
-		movementTiles.clear();
+		clearMovementTiles();
+
 
 		targetSelectionSprite.setPosition(targetTile.getVectors()[0].x - targetTile.getWidth() / 2,
 				targetTile.getVectors()[0].y + 4);
@@ -377,6 +379,7 @@ public abstract class Unit extends Actor
 		return true;
 	}
 
+
 	@Override
 	public void onBottomShapeRender(ShapeRenderer shapeRenderer) {
 
@@ -424,6 +427,8 @@ public abstract class Unit extends Actor
 		if (targetTile == null)
 			return;
 
+		movementTiles = getMovementPath(targetTile);
+
 		standingTile.removeUnit(this);
 		targetTile.addUnit(this);
 
@@ -436,8 +441,6 @@ public abstract class Unit extends Actor
 		selectionSprite.setPosition(tileX, tileY);
 		civIconSprite.setPosition(tileX + 10, tileY + 20);
 		super.setPosition(tileX, tileY);
-
-		movementTiles = getMovementPath(targetTile);
 
 		standingTile = targetTile;
 
@@ -655,36 +658,43 @@ public abstract class Unit extends Actor
 
 		Tile parentTile = cameFrom[targetTile.getGridX()][targetTile.getGridY()];
 
+		// If it's moving to itself or there isn't a valid path
+		if (parentTile == null) {
+			targetTile = null;
+		}
+
+		// System.out.println("Target:" + targetTile);
 		int iterations = 0;
+
+		if (targetTile != null && parentTile != null) {
+			pathTiles.add(targetTile);
+			pathTiles.add(parentTile);
+		}
+
 		while (parentTile != null) {
 			Tile nextTile = cameFrom[parentTile.getGridX()][parentTile.getGridY()];
 
-			if (nextTile != null) {
-				pathTiles.add(parentTile);
-				Vector2[] tileVectors = new Vector2[2];
-				tileVectors[0] = new Vector2(parentTile.getX() + parentTile.getWidth() / 2,
-						parentTile.getY() + parentTile.getHeight() / 2 + 4);
-				tileVectors[1] = new Vector2(nextTile.getX() + nextTile.getWidth() / 2,
-						nextTile.getY() + nextTile.getHeight() / 2 + 4);
-				pathVectors.add(tileVectors);
-			}
-
 			if (nextTile == null)
-				nextTile = targetTile;
+				break;
 
 			if (parentTile.equals(targetTile)) {
 				break;
 			}
-
 			if (iterations >= GameMap.MAX_NODES) {
-				Gdx.app.log(Civilization.LOG_TAG, "ERROR: Pathing iteration error");
+				targetTile = null;
 				break;
 			}
+			pathTiles.add(nextTile);
 
 			parentTile = nextTile;
-			iterations++;
 		}
 
+		Collections.reverse(pathTiles);
 		return pathTiles;
+	}
+
+	private void clearMovementTiles() {
+		movementTiles.clear();
+		sprite.setPosition(getX(), getY());
 	}
 }
