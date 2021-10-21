@@ -4,9 +4,9 @@ import java.util.ArrayList;
 
 import me.rhin.openciv.server.Server;
 import me.rhin.openciv.server.game.ai.AIPlayer;
+import me.rhin.openciv.server.game.ai.unit.BarbarianWarriorAI;
 import me.rhin.openciv.server.game.ai.unit.BuilderAI;
 import me.rhin.openciv.server.game.ai.unit.CityStateMeleeAI;
-import me.rhin.openciv.server.game.ai.unit.CityStateNavalAI;
 import me.rhin.openciv.server.game.city.City;
 import me.rhin.openciv.server.game.civilization.type.citystate.CityState;
 import me.rhin.openciv.server.game.map.tile.Tile;
@@ -16,6 +16,7 @@ import me.rhin.openciv.server.game.research.Technology;
 import me.rhin.openciv.server.game.unit.Unit;
 import me.rhin.openciv.server.game.unit.UnitItem;
 import me.rhin.openciv.server.game.unit.UnitItem.UnitType;
+import me.rhin.openciv.server.game.unit.type.Builder;
 import me.rhin.openciv.server.game.unit.type.Builder.BuilderUnit;
 import me.rhin.openciv.server.game.unit.type.Settler;
 import me.rhin.openciv.server.game.unit.type.Settler.SettlerUnit;
@@ -52,7 +53,7 @@ public class CityStatePlayer extends AIPlayer implements NextTurnListener {
 		}
 
 		if (unit.getUnitTypes().contains(UnitType.NAVAL)) {
-			unit.addAIBehavior(new CityStateNavalAI(unit));
+			// unit.addAIBehavior(new BarbarianWarriorAI(unit, getCapitalCity().getTile()));
 		}
 
 		if (unit instanceof BuilderUnit) {
@@ -176,6 +177,9 @@ public class CityStatePlayer extends AIPlayer implements NextTurnListener {
 			ProductionItem topItem = null;
 			for (ProductionItem productionItem : itemManager.getProducibleItems()) {
 				if (productionItem instanceof Settler || productionItem.isWonder())
+					continue;
+
+				if (productionItem instanceof Builder && getUnitsOfType(BuilderUnit.class).size() > 0)
 					continue;
 
 				// System.out.println(productionItem.getName() + "-" +

@@ -22,6 +22,8 @@ public abstract class AbstractPlayer {
 	protected ResearchTree researchTree;
 	protected HeritageTree heritageTree;
 	protected Civ civilization;
+	private int spawnX;
+	private int spawnY;
 
 	public AbstractPlayer() {
 
@@ -32,6 +34,9 @@ public abstract class AbstractPlayer {
 
 		this.researchTree = new ResearchTree(this);
 		this.heritageTree = new HeritageTree(this);
+
+		this.spawnX = -1;
+		this.spawnY = -1;
 	}
 
 	public abstract String getName();
@@ -116,5 +121,33 @@ public abstract class AbstractPlayer {
 
 	public void removeUnit(Unit unit) {
 		ownedUnits.remove(unit);
+	}
+
+	public ArrayList<Unit> getUnitsOfType(Class<? extends Unit> unitClass) {
+		ArrayList<Unit> units = new ArrayList<>();
+		for (Unit unit : ownedUnits) {
+			if (unit.getClass() == unitClass) {
+				units.add(unit);
+			}
+		}
+
+		return units;
+	}
+
+	public void setSpawnPos(int spawnX, int spawnY) {
+		this.spawnX = spawnX;
+		this.spawnY = spawnY;
+	}
+
+	public boolean hasSpawnPos() {
+		return spawnX != -1 && spawnY != -1;
+	}
+
+	public int getSpawnX() {
+		return spawnX;
+	}
+
+	public int getSpawnY() {
+		return spawnY;
 	}
 }

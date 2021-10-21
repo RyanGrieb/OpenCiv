@@ -85,6 +85,9 @@ public class ResearchTree implements NextTurnListener {
 	}
 
 	public <T extends Technology> boolean hasResearched(Class<T> technologyClass) {
+		if (technologyClass == null)
+			return true;
+		
 		return technologies.get(technologyClass).isResearched();
 	}
 
@@ -94,12 +97,12 @@ public class ResearchTree implements NextTurnListener {
 
 	public void chooseTech(int techID) {
 		techResearching = getTechnologies().get(techID);
-		//System.out.println("Researching: " + techResearching.getName());
+		// System.out.println("Researching: " + techResearching.getName());
 	}
 
 	public void chooseTech(Technology technology) {
 		techResearching = technology;
-		//System.out.println("Researching: " + techResearching.getName());
+		// System.out.println("Researching: " + techResearching.getName());
 	}
 
 	public int getCurrentTechIDIndex() {

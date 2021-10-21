@@ -1,0 +1,56 @@
+{
+com.badlogic.gdx.graphics.g2d.BitmapFont: {
+	font: {
+		file: font.fnt
+	}
+}
+com.badlogic.gdx.graphics.Color: {
+	RGBA_13_241_180_119: {
+		r: 0.07058824
+		g: 0.6039216
+		b: 0.45882353
+		a: 0.50666666
+	}
+	RGBA_255_255_255_255: {
+		r: 1
+		g: 1
+		b: 1
+		a: 1
+	}
+	RGBA_81_81_81_255: {
+		r: 0
+		g: 0
+		b: 0
+		a: 1
+	}
+}
+com.badlogic.gdx.scenes.scene2d.ui.Skin$TintedDrawable: {
+	test2: {
+		name: white-pixel
+		color: RGBA_255_255_255_255
+		minWidth: 2
+		minHeight: 1
+	}
+	background: {
+		name: white-pixel
+		color: RGBA_81_81_81_255
+		minWidth: 1
+		minHeight: 1
+	}
+	Selection: {
+		name: white-pixel
+		color: RGBA_13_241_180_119
+		minWidth: 1
+		minHeight: 1
+	}
+}
+com.badlogic.gdx.scenes.scene2d.ui.TextField$TextFieldStyle: {
+	default: {
+		font: font
+		fontColor: RGBA_81_81_81_255
+		background: test2
+		cursor: background
+		selection: Selection
+	}
+}
+}

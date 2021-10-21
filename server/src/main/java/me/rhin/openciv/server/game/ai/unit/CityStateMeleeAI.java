@@ -105,20 +105,7 @@ public class CityStateMeleeAI extends UnitAI implements NextTurnListener, Server
 			pathingTile = pathTiles.get(1); // Stand outside of enemy unit to attack.
 		}
 
-		unit.setTargetTile(pathingTile);
-
-		MoveUnitPacket packet = new MoveUnitPacket();
-		packet.setUnit(unit.getPlayerOwner().getName(), unit.getID(), unit.getStandingTile().getGridX(),
-				unit.getStandingTile().getGridY(), pathingTile.getGridX(), pathingTile.getGridY());
-		packet.setMovementCost(unit.getPathMovement());
-
-		unit.moveToTargetTile();
-		unit.reduceMovement(unit.getPathMovement());
-
-		Json json = new Json();
-		for (Player player : Server.getInstance().getPlayers()) {
-			player.sendPacket(json.toJson(packet));
-		}
+		moveToTargetTile(pathingTile);
 
 		if (unit.canAttack(topEntity)) {
 			unit.attackEntity(topEntity);

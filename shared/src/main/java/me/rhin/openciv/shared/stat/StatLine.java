@@ -179,4 +179,17 @@ public class StatLine {
 	public boolean hasStatValue(Stat stat) {
 		return statValues.containsKey(stat);
 	}
+
+	public boolean isGreater(StatLine statLine) {
+
+		float ourValue = 0;
+		float otherValue = 0;
+		for (StatValue statVal : statValues.values())
+			ourValue += statVal.getValue();
+
+		for (StatValue statVal : statLine.getStatValues().values())
+			otherValue += statVal.getValue();
+
+		return ourValue > otherValue;
+	}
 }

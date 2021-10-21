@@ -26,8 +26,7 @@ public class Player extends AbstractPlayer
 
 	private WebSocket conn;
 	private String name;
-	private int spawnX;
-	private int spawnY;
+
 	private Unit selectedUnit;
 	private boolean loaded;
 	private boolean host;
@@ -37,9 +36,6 @@ public class Player extends AbstractPlayer
 		this.conn = conn;
 		this.name = "Player" + Server.getInstance().getPlayerIndex();
 		this.civilization = new RandomCivilization(this);
-
-		this.spawnX = -1;
-		this.spawnY = -1;
 		this.loaded = false;
 
 		this.host = false;
@@ -149,15 +145,6 @@ public class Player extends AbstractPlayer
 		return !conn.isClosed() && !conn.isClosing();
 	}
 
-	public void setSpawnPos(int spawnX, int spawnY) {
-		this.spawnX = spawnX;
-		this.spawnY = spawnY;
-	}
-
-	public boolean hasSpawnPos() {
-		return spawnX != -1 && spawnY != -1;
-	}
-
 	public void setSelectedUnit(Unit selectedUnit) {
 		if (this.selectedUnit != null)
 			this.selectedUnit.setSelected(false);
@@ -166,18 +153,6 @@ public class Player extends AbstractPlayer
 
 	public String getName() {
 		return name;
-	}
-
-	public int getSpawnX() {
-		return spawnX;
-	}
-
-	public int getSpawnY() {
-		return spawnY;
-	}
-
-	public boolean hasSpawnSet() {
-		return spawnX == -1 || spawnY == -1;
 	}
 
 	public void finishLoading() {

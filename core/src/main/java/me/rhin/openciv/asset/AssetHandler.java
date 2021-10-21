@@ -21,8 +21,8 @@ public class AssetHandler extends AssetManager {
 		load("atlas/icon.atlas", TextureAtlas.class);
 		load("atlas/building.atlas", TextureAtlas.class);
 		load("atlas/road.atlas", TextureAtlas.class);
-		load("skin/uiskin.atlas", TextureAtlas.class);
-		load("skin/uiskin.json", Skin.class, new SkinLoader.SkinParameter("skin/uiskin.atlas"));
+		load("skin/skin.atlas", TextureAtlas.class);
+		load("skin/skin.json", Skin.class, new SkinLoader.SkinParameter("skin/skin.atlas"));
 
 		BitmapFontLoader.BitmapFontParameter fontParameter = new BitmapFontLoader.BitmapFontParameter();
 		fontParameter.atlasName = "atlas/ui.atlas";

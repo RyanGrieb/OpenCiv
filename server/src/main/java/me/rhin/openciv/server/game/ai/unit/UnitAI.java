@@ -2,11 +2,16 @@ package me.rhin.openciv.server.game.ai.unit;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+
+import com.badlogic.gdx.utils.Json;
 
 import me.rhin.openciv.server.Server;
+import me.rhin.openciv.server.game.Player;
+import me.rhin.openciv.server.game.map.GameMap;
 import me.rhin.openciv.server.game.map.tile.Tile;
 import me.rhin.openciv.server.game.unit.Unit;
-import me.rhin.openciv.shared.listener.Listener;
+import me.rhin.openciv.shared.packet.type.MoveUnitPacket;
 
 public abstract class UnitAI {
 
@@ -33,7 +38,7 @@ public abstract class UnitAI {
 	}
 
 	protected ArrayList<Tile> getPathTiles(Tile targetTile) {
-		
+
 		int width = Server.getInstance().getMap().getWidth();
 		int height = Server.getInstance().getMap().getHeight();
 
@@ -98,6 +103,8 @@ public abstract class UnitAI {
 
 		// Iterate through the parent array to get back to the origin tile.
 
+		// Iterate through the parent array to get back to the origin tile.
+
 		Tile parentTile = cameFrom[targetTile.getGridX()][targetTile.getGridY()];
 
 		// If it's moving to itself or there isn't a valid path
@@ -123,7 +130,7 @@ public abstract class UnitAI {
 			if (parentTile.equals(targetTile)) {
 				break;
 			}
-			if (iterations >= width * height) {
+			if (iterations >= 10000) {
 				targetTile = null;
 				break;
 			}
@@ -132,6 +139,7 @@ public abstract class UnitAI {
 			parentTile = nextTile;
 		}
 
+		// pathTiles.remove(0);
 		return pathTiles;
 	}
 
@@ -181,5 +189,28 @@ public abstract class UnitAI {
 		// System.out.println("Walking to: " + pathingTile);
 
 		return pathingTile;
+	}
+
+	/**
+	 * Moves the unit to the targetTile, handles all packet and method requirements
+	 * to move a unit
+	 * 
+	 * @param pathingTile
+	 */
+	protected void moveToTargetTile(Tile tile) {
+		unit.setTargetTile(tile);
+
+		MoveUnitPacket packet = new MoveUnitPacket();
+		packet.setUnit(unit.getPlayerOwner().getName(), unit.getID(), unit.getStandingTile().getGridX(),
+				unit.getStandingTile().getGridY(), tile.getGridX(), tile.getGridY());
+		packet.setMovementCost(unit.getPathMovement());
+
+		unit.moveToTargetTile();
+		unit.reduceMovement(unit.getPathMovement());
+
+		Json json = new Json();
+		for (Player player : Server.getInstance().getPlayers()) {
+			player.sendPacket(json.toJson(packet));
+		}
 	}
 }

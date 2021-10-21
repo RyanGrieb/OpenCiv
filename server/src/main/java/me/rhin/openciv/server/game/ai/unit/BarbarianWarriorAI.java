@@ -3,17 +3,13 @@ package me.rhin.openciv.server.game.ai.unit;
 import java.util.ArrayList;
 import java.util.Random;
 
-import com.badlogic.gdx.utils.Json;
-
 import me.rhin.openciv.server.Server;
-import me.rhin.openciv.server.game.Player;
 import me.rhin.openciv.server.game.ai.type.BarbarianPlayer;
 import me.rhin.openciv.server.game.map.tile.Tile;
 import me.rhin.openciv.server.game.map.tile.TileType.TileProperty;
 import me.rhin.openciv.server.game.unit.AttackableEntity;
 import me.rhin.openciv.server.game.unit.Unit;
 import me.rhin.openciv.server.listener.NextTurnListener;
-import me.rhin.openciv.shared.packet.type.MoveUnitPacket;
 
 public class BarbarianWarriorAI extends UnitAI implements NextTurnListener {
 
@@ -99,20 +95,7 @@ public class BarbarianWarriorAI extends UnitAI implements NextTurnListener {
 			pathingTile = pathTiles.get(1); // Stand outside of enemy unit to attack.
 		}
 
-		unit.setTargetTile(pathingTile);
-
-		MoveUnitPacket packet = new MoveUnitPacket();
-		packet.setUnit(unit.getPlayerOwner().getName(), unit.getID(), unit.getStandingTile().getGridX(),
-				unit.getStandingTile().getGridY(), pathingTile.getGridX(), pathingTile.getGridY());
-		packet.setMovementCost(unit.getPathMovement());
-
-		unit.moveToTargetTile();
-		unit.reduceMovement(unit.getPathMovement());
-
-		Json json = new Json();
-		for (Player player : Server.getInstance().getPlayers()) {
-			player.sendPacket(json.toJson(packet));
-		}
+		moveToTargetTile(pathingTile);
 
 		if (unit.canAttack(topEntity)) {
 			unit.attackEntity(topEntity);
@@ -174,20 +157,8 @@ public class BarbarianWarriorAI extends UnitAI implements NextTurnListener {
 			return;
 
 		Tile pathingTile = stepTowardTarget(pathTiles);
-		unit.setTargetTile(pathingTile);
 
-		MoveUnitPacket packet = new MoveUnitPacket();
-		packet.setUnit(unit.getPlayerOwner().getName(), unit.getID(), unit.getStandingTile().getGridX(),
-				unit.getStandingTile().getGridY(), pathingTile.getGridX(), pathingTile.getGridY());
-		packet.setMovementCost(unit.getPathMovement());
-
-		unit.moveToTargetTile();
-		unit.reduceMovement(unit.getPathMovement());
-
-		Json json = new Json();
-		for (Player player : Server.getInstance().getPlayers()) {
-			player.sendPacket(json.toJson(packet));
-		}
+		moveToTargetTile(pathingTile);
 	}
 
 	private Tile getRandomTargetTile() {

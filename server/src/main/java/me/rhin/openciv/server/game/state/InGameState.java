@@ -12,6 +12,7 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Json;
 
 import me.rhin.openciv.server.Server;
+import me.rhin.openciv.server.game.AbstractPlayer;
 import me.rhin.openciv.server.game.GameState;
 import me.rhin.openciv.server.game.Player;
 import me.rhin.openciv.server.game.ai.AIPlayer;
@@ -697,10 +698,10 @@ public class InGameState extends GameState
 		System.out.println("[SERVER] Starting game...");
 
 		// Add AI
-		//for (int i = 0; i < 2; i++)
-		//	for (CityStateType type : CityStateType.values()) {
-		//		getAIPlayers().add(new CityStatePlayer(type));
-		//	}
+		 for (int i = 0; i < 2; i++)
+		for (CityStateType type : CityStateType.values()) {
+			getAIPlayers().add(new CityStatePlayer(type));
+		}
 
 		getAIPlayers().add(new BarbarianPlayer());
 
@@ -791,6 +792,7 @@ public class InGameState extends GameState
 			players.get(0).setSpawnPos(players.get(1).getSpawnX() + 2, players.get(1).getSpawnY() + 2);
 		}
 
+		// Give players a warrior unit
 		for (Player player : players) {
 			Tile tile = map.getTiles()[player.getSpawnX()][player.getSpawnY()];
 			tile.addUnit(new SettlerUnit(player, tile));
@@ -804,7 +806,36 @@ public class InGameState extends GameState
 			}
 		}
 
-		for (Player player : players) {
+		// Spawn city state AI
+		for (AIPlayer aiPlayer : Server.getInstance().getAIPlayers()) {
+			if (aiPlayer instanceof CityStatePlayer) {
+				CityStatePlayer cityStatePlayer = (CityStatePlayer) aiPlayer;
+
+				// Pick random tile to spawn AI
+				Tile tile = null;
+
+				while (tile == null || tile.containsTileProperty(TileProperty.WATER)
+						|| tile.containsTileType(TileType.MOUNTAIN) || tile.getUnits().size() > 0
+						|| tile.getNearbyUnits().size() > 0) {
+					int x = rnd.nextInt(map.getWidth());
+					int y = rnd.nextInt(map.getHeight());
+					tile = map.getTiles()[x][y];
+				}
+
+				Unit settlerUnit = new SettlerUnit(cityStatePlayer, tile);
+				tile.addUnit(settlerUnit);
+
+				Unit warriorUnit = new WarriorUnit(cityStatePlayer, tile);
+				tile.addUnit(warriorUnit);
+				
+				aiPlayer.setSpawnPos(tile.getGridX(), tile.getGridY());
+			}
+		}
+
+		ArrayList<AbstractPlayer> allPlayers = new ArrayList<>();
+		allPlayers.addAll(players);
+		allPlayers.addAll(aiPlayers);
+		for (AbstractPlayer player : allPlayers) {
 			// Add two luxuries around the player
 			int assignedLuxTiles = 0;
 			int assignedResourceTiles = 0;
@@ -837,31 +868,6 @@ public class InGameState extends GameState
 				}
 
 				loopLimit--;
-			}
-		}
-
-		// Spawn in city states
-		// Spawn citystate AI
-		for (AIPlayer aiPlayer : Server.getInstance().getAIPlayers()) {
-			if (aiPlayer instanceof CityStatePlayer) {
-				CityStatePlayer cityStatePlayer = (CityStatePlayer) aiPlayer;
-
-				// Pick random tile to spawn AI
-				Tile tile = null;
-
-				while (tile == null || tile.containsTileProperty(TileProperty.WATER)
-						|| tile.containsTileType(TileType.MOUNTAIN) || tile.getUnits().size() > 0
-						|| tile.getNearbyUnits().size() > 0) {
-					int x = rnd.nextInt(map.getWidth());
-					int y = rnd.nextInt(map.getHeight());
-					tile = map.getTiles()[x][y];
-				}
-
-				Unit settlerUnit = new SettlerUnit(cityStatePlayer, tile);
-				tile.addUnit(settlerUnit);
-
-				Unit warriorUnit = new WarriorUnit(cityStatePlayer, tile);
-				tile.addUnit(warriorUnit);
 			}
 		}
 	}
