@@ -90,7 +90,7 @@ public class ChatboxWindow extends AbstractWindow implements SendChatMessageList
 
 	@Override
 	public boolean isGameDisplayWindow() {
-		return true;
+		return false;
 	}
 
 	private void sendMessage() {
