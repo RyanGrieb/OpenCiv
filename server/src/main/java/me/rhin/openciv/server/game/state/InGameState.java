@@ -531,12 +531,8 @@ public class InGameState extends GameState
 		AttackableEntity attackingEntity = map.getTiles()[packet.getUnitGridX()][packet.getUnitGridY()]
 				.getUnitFromID(packet.getUnitID());
 
-		AttackableEntity targetEntity = null;
-		if (packet.getTargetID() != -1)
-			targetEntity = map.getTiles()[packet.getTargetGridX()][packet.getTargetGridY()]
-					.getUnitFromID(packet.getTargetID());
-		else
-			targetEntity = map.getTiles()[packet.getTargetGridX()][packet.getTargetGridY()].getCity();
+		AttackableEntity targetEntity = map.getTiles()[packet.getTargetGridX()][packet.getTargetGridY()]
+				.getAttackableEntityFromID(packet.getTargetID());
 
 		if (attackingEntity == null || targetEntity == null)
 			return;
@@ -556,9 +552,9 @@ public class InGameState extends GameState
 	public void onRangedAttack(WebSocket conn, RangedAttackPacket packet) {
 		// FIXME: I don't check unit ID's here
 		AttackableEntity attackingEntity = map.getTiles()[packet.getUnitGridX()][packet.getUnitGridY()]
-				.getAttackableEntity();
+				.getUnitFromID(packet.getUnitID());
 		AttackableEntity targetEntity = map.getTiles()[packet.getTargetGridX()][packet.getTargetGridY()]
-				.getAttackableEntity();
+				.getAttackableEntityFromID(packet.getTargetID());
 
 		if (attackingEntity instanceof Unit) {
 			((Unit) attackingEntity).reduceMovement(2);

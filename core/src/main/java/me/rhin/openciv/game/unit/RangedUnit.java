@@ -59,7 +59,8 @@ public abstract class RangedUnit extends Unit
 
 		RangedAttackPacket packet = new RangedAttackPacket();
 		packet.setUnit(getID(), standingTile.getGridX(), standingTile.getGridY());
-		packet.setTargetEntity(rangedTarget.getTile().getGridX(), rangedTarget.getTile().getGridY());
+		packet.setTargetEntity(rangedTarget.getID(), rangedTarget.getTile().getGridX(),
+				rangedTarget.getTile().getGridY());
 
 		Civilization.getInstance().getNetworkManager().sendPacket(packet);
 

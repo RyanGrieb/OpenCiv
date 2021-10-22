@@ -345,6 +345,17 @@ public class Tile {
 		return null;
 	}
 
+	public AttackableEntity getAttackableEntityFromID(int id) {
+		if (id == -1)
+			return city;
+
+		for (Unit unit : units)
+			if (unit.getID() == id)
+				return unit;
+
+		return null;
+	}
+
 	public StatLine getStatLine() {
 		StatLine statLine = new StatLine();
 
