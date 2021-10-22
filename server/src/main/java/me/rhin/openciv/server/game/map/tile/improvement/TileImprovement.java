@@ -1,5 +1,5 @@
-package me.rhin.openciv.server.game.map.tile.improvement;
 
+package me.rhin.openciv.server.game.map.tile.improvement;
 import com.badlogic.gdx.utils.Json;
 
 import me.rhin.openciv.server.Server;

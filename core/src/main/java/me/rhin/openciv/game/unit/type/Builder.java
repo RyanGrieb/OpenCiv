@@ -126,6 +126,7 @@ public class Builder extends UnitItem {
 		}
 
 		public String getImprovementDesc() {
+			//FIXME: This is null sometimes?
 			return improvementType.getImprovementDesc();
 		}
 

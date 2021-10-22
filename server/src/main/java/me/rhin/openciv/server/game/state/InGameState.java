@@ -572,6 +572,9 @@ public class InGameState extends GameState
 			float unitDamage = 0; // A shooting unit takes no damage
 			float targetDamage = targetEntity.getDamageTaken(attackingEntity, true);
 
+			attackingEntity.onCombat();
+			targetEntity.onCombat();
+
 			attackingEntity.setHealth(attackingEntity.getHealth() - unitDamage);
 			targetEntity.setHealth(targetEntity.getHealth() - targetDamage);
 
