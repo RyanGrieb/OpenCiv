@@ -3,7 +3,6 @@ package me.rhin.openciv;
 import com.badlogic.gdx.Application;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.profiling.GLProfiler;
 
@@ -11,6 +10,7 @@ import me.rhin.openciv.asset.AssetHandler;
 import me.rhin.openciv.asset.sound.SoundHandler;
 import me.rhin.openciv.game.CivGame;
 import me.rhin.openciv.networking.NetworkManager;
+import me.rhin.openciv.networking.chat.ChatHandler;
 import me.rhin.openciv.shared.listener.EventManager;
 import me.rhin.openciv.ui.font.FontHandler;
 import me.rhin.openciv.ui.screen.AbstractScreen;
@@ -36,6 +36,7 @@ public class Civilization extends Game {
 	private NetworkManager networkManager;
 	private FontHandler fontHandler;
 	private SoundHandler soundHandler;
+	private ChatHandler chatHandler;
 
 	public static Civilization getInstance() {
 		return instance;
@@ -58,6 +59,7 @@ public class Civilization extends Game {
 		instance = this;
 
 		soundHandler = new SoundHandler();
+		chatHandler = new ChatHandler();
 
 		screenManager.setScreen(ScreenEnum.LOADING);
 	}
@@ -108,5 +110,9 @@ public class Civilization extends Game {
 
 	public SoundHandler getSoundHandler() {
 		return soundHandler;
+	}
+
+	public ChatHandler getChatHandler() {
+		return chatHandler;
 	}
 }

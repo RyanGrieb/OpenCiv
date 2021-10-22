@@ -39,6 +39,7 @@ import me.rhin.openciv.server.listener.PlayerListRequestListener.PlayerListReque
 import me.rhin.openciv.server.listener.RangedAttackListener.RangedAttackEvent;
 import me.rhin.openciv.server.listener.RequestEndTurnListener.RequestEndTurnEvent;
 import me.rhin.openciv.server.listener.SelectUnitListener.SelectUnitEvent;
+import me.rhin.openciv.server.listener.SendChatMessageListener.SendChatMessageEvent;
 import me.rhin.openciv.server.listener.SetProductionItemListener.SetProductionItemEvent;
 import me.rhin.openciv.server.listener.SetTurnLengthListener.SetTurnLengthEvent;
 import me.rhin.openciv.server.listener.SetWorldSizeListener.SetWorldSizeEvent;
@@ -68,6 +69,7 @@ import me.rhin.openciv.shared.packet.type.PlayerListRequestPacket;
 import me.rhin.openciv.shared.packet.type.RangedAttackPacket;
 import me.rhin.openciv.shared.packet.type.RequestEndTurnPacket;
 import me.rhin.openciv.shared.packet.type.SelectUnitPacket;
+import me.rhin.openciv.shared.packet.type.SendChatMessagePacket;
 import me.rhin.openciv.shared.packet.type.SetProductionItemPacket;
 import me.rhin.openciv.shared.packet.type.SetTurnLengthPacket;
 import me.rhin.openciv.shared.packet.type.SetWorldSizePacket;
@@ -151,6 +153,7 @@ public class Server extends WebSocketServer {
 		networkEvents.put(ChooseHeritagePacket.class, ChooseHeritageEvent.class);
 		networkEvents.put(TradeCityPacket.class, TradeCityEvent.class);
 		networkEvents.put(SetTurnLengthPacket.class, SetTurnLengthEvent.class);
+		networkEvents.put(SendChatMessagePacket.class, SendChatMessageEvent.class);
 
 		this.playerIndex = 0;
 		this.commandProcessor = new CmdProcessor();

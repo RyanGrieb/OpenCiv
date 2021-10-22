@@ -39,6 +39,7 @@ import me.rhin.openciv.listener.RemoveSpecialistFromContainerListener.RemoveSpec
 import me.rhin.openciv.listener.RemoveTileTypeListener.RemoveTileTypeEvent;
 import me.rhin.openciv.listener.RequestEndTurnListener.RequestEndTurnEvent;
 import me.rhin.openciv.listener.SelectUnitListener.SelectUnitEvent;
+import me.rhin.openciv.listener.SendChatMessageListener.SendChatMessageEvent;
 import me.rhin.openciv.listener.ServerConnectListener.ServerConnectEvent;
 import me.rhin.openciv.listener.SetCitizenTileWorkerListener.SetCitizenTileWorkerEvent;
 import me.rhin.openciv.listener.SetCityHealthListener.SetCityHealthEvent;
@@ -84,6 +85,7 @@ import me.rhin.openciv.shared.packet.type.RemoveSpecialistFromContainerPacket;
 import me.rhin.openciv.shared.packet.type.RemoveTileTypePacket;
 import me.rhin.openciv.shared.packet.type.RequestEndTurnPacket;
 import me.rhin.openciv.shared.packet.type.SelectUnitPacket;
+import me.rhin.openciv.shared.packet.type.SendChatMessagePacket;
 import me.rhin.openciv.shared.packet.type.SetCitizenTileWorkerPacket;
 import me.rhin.openciv.shared.packet.type.SetCityHealthPacket;
 import me.rhin.openciv.shared.packet.type.SetCityOwnerPacket;
@@ -148,6 +150,7 @@ public class NetworkManager {
 		networkEvents.put(CompleteHeritagePacket.class, CompleteHeritageEvent.class);
 		networkEvents.put(RemoveProductionItemPacket.class, RemoveProductionItemEvent.class);
 		networkEvents.put(SetTurnLengthPacket.class, SetTurnLengthEvent.class);
+		networkEvents.put(SendChatMessagePacket.class, SendChatMessageEvent.class);
 	}
 
 	public void connect(String ip) {

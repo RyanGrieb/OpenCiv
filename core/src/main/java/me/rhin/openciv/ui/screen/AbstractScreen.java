@@ -15,6 +15,7 @@ import com.badlogic.gdx.utils.viewport.StretchViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
 import me.rhin.openciv.Civilization;
+import me.rhin.openciv.listener.SendChatMessageListener;
 import me.rhin.openciv.listener.SetScreenListener;
 import me.rhin.openciv.listener.BottomShapeRenderListener.BottomShapeRenderEvent;
 import me.rhin.openciv.listener.ResizeListener.ResizeEvent;
@@ -73,6 +74,9 @@ public abstract class AbstractScreen implements Screen, InputProcessor {
 		// change
 		Civilization.getInstance().getEventManager().addListener(SetScreenListener.class,
 				Civilization.getInstance().getSoundHandler());
+
+		Civilization.getInstance().getEventManager().addListener(SendChatMessageListener.class,
+				Civilization.getInstance().getChatHandler());
 
 	}
 
