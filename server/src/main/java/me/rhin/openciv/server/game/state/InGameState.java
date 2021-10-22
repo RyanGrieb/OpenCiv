@@ -8,6 +8,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.java_websocket.WebSocket;
 
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Json;
 
@@ -77,6 +78,7 @@ import me.rhin.openciv.shared.packet.type.TurnTimeLeftPacket;
 import me.rhin.openciv.shared.packet.type.UnitAttackPacket;
 import me.rhin.openciv.shared.packet.type.WorkTilePacket;
 import me.rhin.openciv.shared.stat.Stat;
+import me.rhin.openciv.shared.util.MathHelper;
 
 //FIXME: Instead of the civ game listening for everything. Just split them off into the respective classes. (EX: CombatPreviewListener in the Unit class)
 //Or just use reflection so we don't have to implement 20+ classes.
@@ -698,10 +700,10 @@ public class InGameState extends GameState
 		System.out.println("[SERVER] Starting game...");
 
 		// Add AI
-		 for (int i = 0; i < 2; i++)
-		for (CityStateType type : CityStateType.values()) {
-			getAIPlayers().add(new CityStatePlayer(type));
-		}
+		for (int i = 0; i < 2; i++)
+			for (CityStateType type : CityStateType.values()) {
+				getAIPlayers().add(new CityStatePlayer(type));
+			}
 
 		getAIPlayers().add(new BarbarianPlayer());
 
@@ -827,7 +829,7 @@ public class InGameState extends GameState
 
 				Unit warriorUnit = new WarriorUnit(cityStatePlayer, tile);
 				tile.addUnit(warriorUnit);
-				
+
 				aiPlayer.setSpawnPos(tile.getGridX(), tile.getGridY());
 			}
 		}
@@ -836,6 +838,10 @@ public class InGameState extends GameState
 		allPlayers.addAll(players);
 		allPlayers.addAll(aiPlayers);
 		for (AbstractPlayer player : allPlayers) {
+
+			if (player instanceof BarbarianPlayer)
+				continue;
+
 			// Add two luxuries around the player
 			int assignedLuxTiles = 0;
 			int assignedResourceTiles = 0;
@@ -844,7 +850,10 @@ public class InGameState extends GameState
 
 				int randX = rnd.nextInt(5) - 3;
 				int randY = rnd.nextInt(5) - 3;
-				Tile tile = map.getTiles()[player.getSpawnX() + randX][player.getSpawnY() + randY];
+
+				int x = MathHelper.clamp(player.getSpawnX() + randX, 0, map.getWidth());
+				int y = MathHelper.clamp(player.getSpawnY() + randY, 0, map.getHeight());
+				Tile tile = map.getTiles()[x][y];
 
 				// FIXME: Some special resources can be on desert & desert hills.
 				if (tile.getBaseTileType().hasProperty(TileProperty.WATER) || tile.getBaseTileType() == TileType.DESERT
