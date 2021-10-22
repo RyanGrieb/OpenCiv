@@ -22,6 +22,7 @@ import me.rhin.openciv.shared.packet.type.DeleteUnitPacket;
 import me.rhin.openciv.shared.packet.type.PlayerStatUpdatePacket;
 import me.rhin.openciv.shared.packet.type.SelectUnitPacket;
 import me.rhin.openciv.shared.stat.StatLine;
+import me.rhin.openciv.ui.window.type.CityInfoWindow;
 import me.rhin.openciv.util.ClickType;
 
 public class Player extends AbstractPlayer implements RelativeMouseMoveListener, LeftClickListener, RightClickListener,
@@ -69,6 +70,9 @@ public class Player extends AbstractPlayer implements RelativeMouseMoveListener,
 		clicksPerSecond++;
 
 		if (hoveredTile == null)
+			return;
+
+		if (Civilization.getInstance().getWindowManager().isOpenWindow(CityInfoWindow.class))
 			return;
 
 		if (selectedUnit != null && clicksPerSecond > 0 && !(selectedUnit instanceof RangedUnit)

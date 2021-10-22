@@ -236,7 +236,7 @@ public class UnitWindow extends AbstractWindow implements ResizeListener, UnitAt
 
 	@Override
 	public boolean closesOtherWindows() {
-		return true;
+		return false;
 	}
 
 	@Override

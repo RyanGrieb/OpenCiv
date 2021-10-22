@@ -37,6 +37,7 @@ public class CloseWindowButton extends Button {
 	@Override
 	public void draw(Batch batch, float parentAlpha) {
 		super.draw(batch, parentAlpha);
-		iconSprite.draw(batch);
+		if (iconSprite != null)
+			iconSprite.draw(batch);
 	}
 }
