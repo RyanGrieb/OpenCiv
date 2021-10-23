@@ -39,7 +39,6 @@ public class UnitWindow extends AbstractWindow
 	private CustomLabel movementLabel;
 	private BlankBackground blankBackground;
 	private Healthbar healthbar;
-	private CustomLabel healthLabel;
 	private CustomLabel buildDescLabel;
 	private CustomLabel actionDescLabel;
 
@@ -54,12 +53,9 @@ public class UnitWindow extends AbstractWindow
 		this.blankBackground = new BlankBackground(0, 0, 200, 125);
 		addActor(blankBackground);
 
-		this.healthbar = new Healthbar(getWidth() - 200, getHeight() - 35, 200, 15);
+		this.healthbar = new Healthbar(getWidth() - 200, getHeight() - 35, 200, 15, true);
 		healthbar.setHealth(unit.getMaxHealth(), unit.getHealth());
 		addActor(healthbar);
-
-		this.healthLabel = new CustomLabel(unit.getHealth() + "%", Align.center, 0, getHeight() - 35, getWidth(), 15);
-		addActor(healthLabel);
 
 		this.unitNameLabel = new CustomLabel(unit.getName(), Align.center, getWidth() - 200, 125 - 20, 200, 20);
 		addActor(unitNameLabel);
@@ -151,9 +147,6 @@ public class UnitWindow extends AbstractWindow
 
 		if (unit.equals(attackingUnit) || unit.equals(targetUnit)) {
 			healthbar.setHealth(unit.getMaxHealth(), unit.getHealth());
-			healthLabel.setText(unit.getHealth() + "%");
-			healthLabel.setBounds(0, getHeight() - 35, getWidth(), 15);
-			healthLabel.setAlignment(Align.center);
 		}
 	}
 
@@ -164,9 +157,6 @@ public class UnitWindow extends AbstractWindow
 
 		if (unit.equals(this.unit)) {
 			healthbar.setHealth(unit.getMaxHealth(), unit.getHealth());
-			healthLabel.setText(unit.getHealth() + "%");
-			healthLabel.setBounds(0, getHeight() - 35, getWidth(), 15);
-			healthLabel.setAlignment(Align.center);
 		}
 	}
 
@@ -228,8 +218,6 @@ public class UnitWindow extends AbstractWindow
 		blankBackground.setPosition(0, 0);
 		unitNameLabel.setPosition(getWidth() - 200, 125 - 20);
 		movementLabel.setPosition((getWidth() - (200 / 2)) - movementLabel.getWidth() / 2, 5);
-		healthLabel.setBounds(0, getHeight() - 35, getWidth(), 15);
-		healthLabel.setAlignment(Align.center);
 
 		/*
 		 * int index = 0; for (UnitActionButton actionButton : unitActionButtons) {
