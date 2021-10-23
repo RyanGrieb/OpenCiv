@@ -597,7 +597,7 @@ public class GameMap implements MapRequestListener {
 		}
 
 		// Spawn barbarians
-		int campAmount = 8 * (mapSize + 1);
+		int campAmount = 5 * (mapSize + 1);
 		for (int i = 0; i < campAmount; i++) {
 			int x = rnd.nextInt(getWidth());
 			int y = rnd.nextInt(getHeight());

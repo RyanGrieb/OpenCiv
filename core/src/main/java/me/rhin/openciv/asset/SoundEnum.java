@@ -18,7 +18,8 @@ public enum SoundEnum {
 	CITY_LOSS(0.3F, SoundType.EFFECT),
 	WOOD_CHOP(0.3F, SoundType.EFFECT),
 	UNIT_COMBAT(0.20F, SoundType.EFFECT),
-	UNIT_DEATH(0.25F, SoundType.EFFECT);
+	UNIT_DEATH(0.25F, SoundType.EFFECT),
+	CHAT_NOTIFICATION(0.75F, SoundType.EFFECT);
 
 	public enum SoundType {
 		MUSIC,

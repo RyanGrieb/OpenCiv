@@ -12,6 +12,7 @@ import me.rhin.openciv.listener.SendChatMessageListener;
 import me.rhin.openciv.shared.packet.type.SendChatMessagePacket;
 import me.rhin.openciv.ui.background.ColoredBackground;
 import me.rhin.openciv.ui.button.type.CloseWindowButton;
+import me.rhin.openciv.ui.button.type.SendMessageButton;
 import me.rhin.openciv.ui.label.CustomLabel;
 import me.rhin.openciv.ui.window.AbstractWindow;
 
@@ -21,6 +22,7 @@ public class ChatboxWindow extends AbstractWindow implements SendChatMessageList
 	private ColoredBackground coloredBackground;
 	private CloseWindowButton closeWindowButton;
 	private TextField chatTextField;
+	private SendMessageButton sendMessageButton;
 
 	public ChatboxWindow() {
 		super.setBounds(4, 20, 225, 250);
@@ -50,14 +52,17 @@ public class ChatboxWindow extends AbstractWindow implements SendChatMessageList
 			}
 		});
 
+		sendMessageButton = new SendMessageButton(chatTextField.getWidth() + 3, -1, 32, 32);
+		addActor(sendMessageButton);
+
 		// Close info buttons window
 		Civilization.getInstance().getWindowManager().toggleWindow(new InfoButtonsWindow());
 
-		for(String message : Civilization.getInstance().getChatHandler().getSentMessages()) {
+		for (String message : Civilization.getInstance().getChatHandler().getSentMessages()) {
 			System.out.println(message);
 			addMessage(message);
 		}
-		
+
 		Civilization.getInstance().getEventManager().addListener(SendChatMessageListener.class, this);
 	}
 
@@ -93,19 +98,19 @@ public class ChatboxWindow extends AbstractWindow implements SendChatMessageList
 		return false;
 	}
 
-	private void sendMessage() {
+	@Override
+	public void onSentChatMessage(SendChatMessagePacket packet) {
+		String messageText = packet.getPlayerName() + ": " + packet.getMessage();
+		addMessage(messageText);
+	}
+
+	public void sendMessage() {
 		String message = chatTextField.getText();
 		SendChatMessagePacket packet = new SendChatMessagePacket();
 		packet.setMessage(message);
 		Civilization.getInstance().getNetworkManager().sendPacket(packet);
 
 		chatTextField.setText("");
-	}
-
-	@Override
-	public void onSentChatMessage(SendChatMessagePacket packet) {
-		String messageText = packet.getPlayerName() + ": " + packet.getMessage();
-		addMessage(messageText);
 	}
 
 	public void addMessage(String messageText) {
