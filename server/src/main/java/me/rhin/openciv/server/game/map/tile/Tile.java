@@ -262,10 +262,11 @@ public class Tile {
 		return tileWrappers;
 	}
 
-	public boolean containsTileType(TileType tileType) {
-		for (TileTypeWrapper tileWrapper : tileWrappers)
-			if (tileWrapper.getTileType() == tileType)
-				return true;
+	public boolean containsTileType(TileType... tileTypes) {
+		for (TileType tileType : tileTypes)
+			for (TileTypeWrapper tileWrapper : tileWrappers)
+				if (tileWrapper.getTileType() == tileType)
+					return true;
 
 		return false;
 	}

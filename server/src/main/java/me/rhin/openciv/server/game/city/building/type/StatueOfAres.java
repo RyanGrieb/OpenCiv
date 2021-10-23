@@ -28,6 +28,8 @@ public class StatueOfAres extends Building implements Wonder, UnitFinishedMoveLi
 
 		// FIXME: When we capture a city, we need to update those units inside the
 		// captured enemy city.
+		
+		//TODO: Handle territory growth & newly created units.
 	}
 
 	@Override

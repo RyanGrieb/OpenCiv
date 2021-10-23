@@ -15,7 +15,6 @@ public class Library extends Building implements CityGrowthListener, CityStarveL
 		super(city);
 
 		this.statLine.addValue(Stat.SCIENCE_GAIN, 2);
-		// TODO: Convey +1 science for every 2 citizens
 
 		Server.getInstance().getEventManager().addListener(CityGrowthListener.class, this);
 		Server.getInstance().getEventManager().addListener(CityStarveListener.class, this);

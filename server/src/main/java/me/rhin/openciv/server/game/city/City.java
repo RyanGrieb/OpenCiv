@@ -30,6 +30,7 @@ import me.rhin.openciv.server.game.unit.RangedUnit;
 import me.rhin.openciv.server.listener.CityGrowthListener.CityGrowthEvent;
 import me.rhin.openciv.server.listener.CityStarveListener.CityStarveEvent;
 import me.rhin.openciv.server.listener.NextTurnListener;
+import me.rhin.openciv.server.listener.TerritoryGrowListener.TerritoryGrowEvent;
 import me.rhin.openciv.shared.packet.type.AddSpecialistToContainerPacket;
 import me.rhin.openciv.shared.packet.type.BuildingConstructedPacket;
 import me.rhin.openciv.shared.packet.type.CityStatUpdatePacket;
@@ -225,6 +226,8 @@ public class City implements AttackableEntity, SpecialistContainer, NextTurnList
 			// Update the player's statline just in case we start working a non-city value
 			// yielded tile.
 			playerOwner.updateOwnedStatlines(false);
+
+			Server.getInstance().getEventManager().fireEvent(new TerritoryGrowEvent(this, expansionTile));
 		}
 
 		Json json = new Json();

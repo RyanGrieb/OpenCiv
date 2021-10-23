@@ -19,6 +19,7 @@ import me.rhin.openciv.listener.RemoveSpecialistFromContainerListener;
 import me.rhin.openciv.listener.ResizeListener;
 import me.rhin.openciv.listener.SetCitizenTileWorkerListener;
 import me.rhin.openciv.listener.SetTileTypeListener;
+import me.rhin.openciv.listener.TerritoryGrowListener;
 import me.rhin.openciv.shared.packet.type.AddSpecialistToContainerPacket;
 import me.rhin.openciv.shared.packet.type.BuildingConstructedPacket;
 import me.rhin.openciv.shared.packet.type.CompleteResearchPacket;
@@ -27,6 +28,7 @@ import me.rhin.openciv.shared.packet.type.PlayerStatUpdatePacket;
 import me.rhin.openciv.shared.packet.type.RemoveSpecialistFromContainerPacket;
 import me.rhin.openciv.shared.packet.type.SetCitizenTileWorkerPacket;
 import me.rhin.openciv.shared.packet.type.SetTileTypePacket;
+import me.rhin.openciv.shared.packet.type.TerritoryGrowPacket;
 import me.rhin.openciv.ui.button.type.CloseWindowButton;
 import me.rhin.openciv.ui.button.type.WorkedTileButton;
 import me.rhin.openciv.ui.game.CityProductionInfo;
@@ -41,9 +43,10 @@ import me.rhin.openciv.ui.list.type.ListUnemployedCitizens;
 import me.rhin.openciv.ui.screen.type.InGameScreen;
 import me.rhin.openciv.ui.window.AbstractWindow;
 
-public class CityInfoWindow extends AbstractWindow implements ResizeListener, BuildingConstructedListener,
-		SetCitizenTileWorkerListener, AddSpecialistToContainerListener, RemoveSpecialistFromContainerListener,
-		CompleteResearchListener, FinishProductionItemListener, PlayerStatUpdateListener, SetTileTypeListener {
+public class CityInfoWindow extends AbstractWindow
+		implements ResizeListener, BuildingConstructedListener, SetCitizenTileWorkerListener,
+		AddSpecialistToContainerListener, RemoveSpecialistFromContainerListener, CompleteResearchListener,
+		FinishProductionItemListener, PlayerStatUpdateListener, SetTileTypeListener, TerritoryGrowListener {
 
 	private City city;
 	private CloseWindowButton closeWindowButton;
@@ -110,6 +113,7 @@ public class CityInfoWindow extends AbstractWindow implements ResizeListener, Bu
 		Civilization.getInstance().getEventManager().addListener(FinishProductionItemListener.class, this);
 		Civilization.getInstance().getEventManager().addListener(PlayerStatUpdateListener.class, this);
 		Civilization.getInstance().getEventManager().addListener(SetTileTypeListener.class, this);
+		Civilization.getInstance().getEventManager().addListener(TerritoryGrowListener.class, this);
 	}
 
 	@Override
@@ -213,6 +217,11 @@ public class CityInfoWindow extends AbstractWindow implements ResizeListener, Bu
 	}
 
 	@Override
+	public void onTerritoryGrow(TerritoryGrowPacket packet) {
+		updateAvailableProductionItems();
+	}
+
+	@Override
 	public void onSetCitizenTileWorker(SetCitizenTileWorkerPacket packet) {
 		if (!city.getName().equals(packet.getCityName()))
 			return;
@@ -251,23 +260,7 @@ public class CityInfoWindow extends AbstractWindow implements ResizeListener, Bu
 
 	@Override
 	public void onCompleteResearch(CompleteResearchPacket packet) {
-		outerloop: for (ProductionItem productionItem : city.getProducibleItemManager().getProducibleItems()) {
-
-			for (ListContainer listContainer : productionContainerList.getListContainers().values()) {
-				for (ListObject listObj : listContainer.getListItemActors()) {
-					if (listObj instanceof ListProductionItem) {
-						ListProductionItem listProductionItem = (ListProductionItem) listObj;
-
-						if (listProductionItem.getProductionItem().equals(productionItem)) {
-							continue outerloop;
-						}
-					}
-				}
-			}
-
-			productionContainerList.addItem(ListContainerType.CATEGORY, productionItem.getCategory(),
-					new ListProductionItem(city, productionItem, 200, 45));
-		}
+		addAvailableProductionItems();
 	}
 
 	public void updateSpecialistContainers(String cityName, String containerName) {
@@ -300,8 +293,31 @@ public class CityInfoWindow extends AbstractWindow implements ResizeListener, Bu
 		}
 	}
 
+	private void addAvailableProductionItems() {
+		outerloop: for (ProductionItem productionItem : city.getProducibleItemManager().getProducibleItems()) {
+
+			for (ListContainer listContainer : productionContainerList.getListContainers().values()) {
+				for (ListObject listObj : listContainer.getListItemActors()) {
+					if (listObj instanceof ListProductionItem) {
+						ListProductionItem listProductionItem = (ListProductionItem) listObj;
+
+						if (listProductionItem.getProductionItem().equals(productionItem)) {
+							continue outerloop;
+						}
+					}
+				}
+			}
+
+			productionContainerList.addItem(ListContainerType.CATEGORY, productionItem.getCategory(),
+					new ListProductionItem(city, productionItem, 200, 45));
+		}
+	}
+
 	private void updateAvailableProductionItems() {
-		// Account for wonders being built.
+
+		addAvailableProductionItems();
+
+		// If we contain items that we can't produce. Remove
 		outerloop: for (ListContainer listContainer : productionContainerList.getListContainers().values()) {
 			for (ListObject listObject : listContainer.getListItemActors()) {
 				{

@@ -416,6 +416,8 @@ public class Tile extends Actor implements BottomShapeRenderListener {
 	public void defineBorders() {
 		int index = 0;
 		for (Tile adjTile : getAdjTiles()) {
+			if (adjTile == null)
+				continue;
 			if (adjTile.getTerritory() == null || !adjTile.getTerritory().equals(territory)) {
 				// Draw a line at the index here.
 				territoryBorders[index] = true;
@@ -466,11 +468,11 @@ public class Tile extends Actor implements BottomShapeRenderListener {
 		return false;
 	}
 
-	public boolean containsTileType(TileType tileType) {
-		for (TileTypeWrapper tileWrapper : tileWrappers) {
-			if (tileWrapper.getTileType() == tileType)
-				return true;
-		}
+	public boolean containsTileType(TileType... tileTypes) {
+		for (TileType tileType : tileTypes)
+			for (TileTypeWrapper tileWrapper : tileWrappers)
+				if (tileWrapper.getTileType() == tileType)
+					return true;
 
 		return false;
 	}

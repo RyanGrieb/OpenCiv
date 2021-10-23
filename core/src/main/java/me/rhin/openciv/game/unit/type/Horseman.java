@@ -6,20 +6,22 @@ import java.util.List;
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.city.City;
 import me.rhin.openciv.game.map.tile.Tile;
+import me.rhin.openciv.game.map.tile.TileType;
 import me.rhin.openciv.game.map.tile.TileType.TileProperty;
+import me.rhin.openciv.game.research.type.HorsebackRridingTech;
 import me.rhin.openciv.game.unit.Unit;
 import me.rhin.openciv.game.unit.UnitItem;
 import me.rhin.openciv.game.unit.UnitParameter;
 
-public class Scout extends UnitItem {
+public class Horseman extends UnitItem {
 
-	public Scout(City city) {
+	public Horseman(City city) {
 		super(city);
 	}
 
-	public static class ScoutUnit extends Unit {
-		public ScoutUnit(UnitParameter unitParameter) {
-			super(unitParameter, TextureEnum.UNIT_SCOUT);
+	public static class HorsemanUnit extends Unit {
+		public HorsemanUnit(UnitParameter unitParameter) {
+			super(unitParameter, TextureEnum.UNIT_HORSEMAN);
 			this.canAttack = true;
 		}
 
@@ -27,8 +29,6 @@ public class Scout extends UnitItem {
 		public float getMovementCost(Tile prevTile, Tile tile) {
 			if (tile.containsTileProperty(TileProperty.WATER))
 				return 1000000;
-			else if (tile.getMovementCost(prevTile) > 1 && tile.getMovementCost(prevTile) < 3)
-				return 1;
 			else
 				return tile.getMovementCost(prevTile);
 		}
@@ -37,45 +37,51 @@ public class Scout extends UnitItem {
 		public float getMaxMovement() {
 			return 3;
 		}
-		
+
 		@Override
 		public List<UnitType> getUnitTypes() {
-			return Arrays.asList(UnitType.MELEE);
+			return Arrays.asList(UnitType.MELEE, UnitType.MOUNTED);
 		}
 	}
 
 	@Override
 	protected float getUnitProductionCost() {
-		return 25;
+		return 75;
 	}
 
 	@Override
 	public float getGoldCost() {
-		return 100;
+		return 200;
 	}
 
 	@Override
 	public boolean meetsProductionRequirements() {
-		return true;
+		boolean requiredTile = false;
+
+		for (Tile tile : city.getTerritory())
+			if (tile.containsTileType(TileType.HORSES_IMPROVED))
+				requiredTile = true;
+
+		return city.getPlayerOwner().getResearchTree().hasResearched(HorsebackRridingTech.class) && requiredTile;
 	}
 
 	@Override
 	public String getName() {
-		return "Scout";
+		return "Horseman";
 	}
 
 	@Override
 	public TextureEnum getTexture() {
-		return TextureEnum.UNIT_SCOUT;
+		return TextureEnum.UNIT_HORSEMAN;
 	}
 
 	@Override
 	public String getDesc() {
-		return "Ignores movement cost of tiles.";
+		return "A powerful classical era unit.\nRequires the city to contain\nimproved horses.";
 	}
 
 	@Override
 	public List<UnitType> getUnitItemTypes() {
-		return Arrays.asList(UnitType.MELEE);
+		return Arrays.asList(UnitType.MELEE, UnitType.MOUNTED);
 	}
 }

@@ -57,7 +57,7 @@ public class ListProductionItem extends ListObject implements CityStatUpdateList
 		itemTurnCostLabel.setAlignment(Align.bottomLeft);
 
 		this.productionModifierLabel = new CustomLabel(
-				"(+" + 100 * Math.abs(productionItem.getProductionModifier()) + "%)");
+				"(+" + (int) (100 * Math.abs(productionItem.getProductionModifier())) + "%)");
 		productionModifierLabel.setColor(Color.GREEN);
 		productionModifierLabel.setSize(width, height);
 		productionModifierLabel.setAlignment(Align.center);
@@ -94,7 +94,8 @@ public class ListProductionItem extends ListObject implements CityStatUpdateList
 				.ceil((productionItem.getProductionCost() / city.getStatLine().getStatValue(Stat.PRODUCTION_GAIN)))
 				+ " Turns");
 
-		this.productionModifierLabel.setText("(+" + 100 * Math.abs(productionItem.getProductionModifier()) + "%)");
+		this.productionModifierLabel
+				.setText("(+" + (int) (100 * Math.abs(productionItem.getProductionModifier())) + "%)");
 		productionModifierLabel.setSize(getWidth(), getHeight());
 		productionModifierLabel.setAlignment(Align.center);
 	}
