@@ -270,7 +270,7 @@ public class InGameState extends GameState
 				playerOwner.updateOwnedStatlines(false);
 
 				targetUnit.getStandingTile().removeUnit(targetUnit);
-				playerOwner.removeUnit(targetUnit);
+				targetUnit.getPlayerOwner().removeUnit(targetUnit);
 				targetUnit.kill();
 
 				// FIXME: Redundant code.

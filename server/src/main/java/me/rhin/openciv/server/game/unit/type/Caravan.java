@@ -41,6 +41,10 @@ public class Caravan extends UnitItem {
 
 		@Override
 		public void onNextTurn() {
+
+			if (!isAlive())
+				return;
+
 			if (tradingCity == null || cityHeadquarters == null)
 				return;
 
@@ -243,7 +247,7 @@ public class Caravan extends UnitItem {
 
 	@Override
 	public float getBaseCombatStrength() {
-		
+
 		return 0;
 	}
 }
