@@ -15,6 +15,7 @@ import me.rhin.openciv.game.research.type.IronWorkingTech;
 import me.rhin.openciv.game.research.type.MasonryTech;
 import me.rhin.openciv.game.research.type.MathematicsTech;
 import me.rhin.openciv.game.research.type.MiningTech;
+import me.rhin.openciv.game.research.type.PhilosophyTech;
 import me.rhin.openciv.game.research.type.PotteryTech;
 import me.rhin.openciv.game.research.type.SailingTech;
 import me.rhin.openciv.game.research.type.TrappingTech;
@@ -44,6 +45,7 @@ public class ResearchTree implements PickResearchListener, CompleteResearchListe
 		technologies.put(WheelTech.class, new WheelTech());
 		technologies.put(MasonryTech.class, new MasonryTech());
 		technologies.put(BronzeWorkingTech.class, new BronzeWorkingTech());
+		technologies.put(PhilosophyTech.class, new PhilosophyTech());
 		technologies.put(HorsebackRridingTech.class, new HorsebackRridingTech());
 		technologies.put(MathematicsTech.class, new MathematicsTech());
 		technologies.put(ConstructionTech.class, new ConstructionTech());

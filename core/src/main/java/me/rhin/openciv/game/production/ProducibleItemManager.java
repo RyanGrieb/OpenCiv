@@ -18,6 +18,7 @@ import me.rhin.openciv.game.city.building.type.HangingGardens;
 import me.rhin.openciv.game.city.building.type.Library;
 import me.rhin.openciv.game.city.building.type.Market;
 import me.rhin.openciv.game.city.building.type.Monument;
+import me.rhin.openciv.game.city.building.type.NationalCollege;
 import me.rhin.openciv.game.city.building.type.Shrine;
 import me.rhin.openciv.game.city.building.type.Stables;
 import me.rhin.openciv.game.city.building.type.StatueOfAres;
@@ -88,6 +89,7 @@ public class ProducibleItemManager {
 		possibleItems.put("Circus", new Circus(city));
 		possibleItems.put("Colosseum", new Colosseum(city));
 		possibleItems.put("Stables", new Stables(city));
+		possibleItems.put("National College", new NationalCollege(city));
 
 		// Wonders
 		possibleItems.put("Great Pyramids", new GreatPyramids(city));

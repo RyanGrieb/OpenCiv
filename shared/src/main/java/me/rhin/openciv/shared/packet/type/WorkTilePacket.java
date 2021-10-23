@@ -32,12 +32,12 @@ public class WorkTilePacket extends Packet {
 		this.appliedTurns = jsonData.getInt("appliedTurns");
 	}
 
-	public void setTile(String improvementType, int gridX, int gridY) {
+	public void setTile(String improvementType, int unitID, int gridX, int gridY) {
 		this.improvementType = improvementType;
 		this.gridX = gridX;
 		this.gridY = gridY;
 		this.appliedTurns = 0;
-		this.unitID = -1;
+		this.unitID = unitID;
 	}
 
 	public void setTile(String improvementType, int gridX, int gridY, int appliedTurns, int unitID) {

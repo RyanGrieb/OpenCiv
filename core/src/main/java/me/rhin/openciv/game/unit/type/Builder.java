@@ -72,6 +72,10 @@ public class Builder extends UnitItem {
 
 		@Override
 		public void onSetTileType(SetTileTypePacket packet) {
+			Tile tile = Civilization.getInstance().getGame().getMap().getTiles()[packet.getGridX()][packet.getGridY()];
+			if (!standingTile.equals(tile))
+				return;
+
 			if (building) {
 				// Assume we finish building
 				building = false;
@@ -86,6 +90,10 @@ public class Builder extends UnitItem {
 
 		@Override
 		public void onRemoveTileType(RemoveTileTypePacket packet) {
+			Tile tile = Civilization.getInstance().getGame().getMap().getTiles()[packet.getGridX()][packet.getGridY()];
+			if (!standingTile.equals(tile))
+				return;
+			
 			if (building) {
 				// Assume we finish building
 				building = false;
@@ -151,14 +159,15 @@ public class Builder extends UnitItem {
 		public boolean act(float delta) {
 			// unit.getPlayerOwner().unselectUnit();
 			unit.reduceMovement(2);
-			WorkTilePacket packet = new WorkTilePacket();
-			packet.setTile("farm", unit.getStandingTile().getGridX(), unit.getStandingTile().getGridY());
-			Civilization.getInstance().getNetworkManager().sendPacket(packet);
-			// unit.removeAction(this);
 
 			BuilderUnit builderUnit = (BuilderUnit) unit;
 			builderUnit.setBuilding(true);
 			builderUnit.setImprovementType(ImprovementType.FARM);
+
+			WorkTilePacket packet = new WorkTilePacket();
+			packet.setTile("farm", unit.getID(), unit.getStandingTile().getGridX(), unit.getStandingTile().getGridY());
+			Civilization.getInstance().getNetworkManager().sendPacket(packet);
+			// unit.removeAction(this);
 
 			Civilization.getInstance().getEventManager().fireEvent(new UnitActEvent(unit));
 
@@ -202,14 +211,15 @@ public class Builder extends UnitItem {
 		public boolean act(float delta) {
 			// unit.getPlayerOwner().unselectUnit();
 			unit.reduceMovement(2);
-			WorkTilePacket packet = new WorkTilePacket();
-			packet.setTile("mine", unit.getStandingTile().getGridX(), unit.getStandingTile().getGridY());
-			Civilization.getInstance().getNetworkManager().sendPacket(packet);
-			// unit.removeAction(this);
 
 			BuilderUnit builderUnit = (BuilderUnit) unit;
 			builderUnit.setBuilding(true);
 			builderUnit.setImprovementType(ImprovementType.MINE);
+
+			WorkTilePacket packet = new WorkTilePacket();
+			packet.setTile("mine", unit.getID(), unit.getStandingTile().getGridX(), unit.getStandingTile().getGridY());
+			Civilization.getInstance().getNetworkManager().sendPacket(packet);
+			// unit.removeAction(this);
 
 			Civilization.getInstance().getEventManager().fireEvent(new UnitActEvent(unit));
 
@@ -258,14 +268,15 @@ public class Builder extends UnitItem {
 		public boolean act(float delta) {
 			// unit.getPlayerOwner().unselectUnit();
 			unit.reduceMovement(2);
-			WorkTilePacket packet = new WorkTilePacket();
-			packet.setTile("chop", unit.getStandingTile().getGridX(), unit.getStandingTile().getGridY());
-			Civilization.getInstance().getNetworkManager().sendPacket(packet);
-			// unit.removeAction(this);
 
 			BuilderUnit builderUnit = (BuilderUnit) unit;
 			builderUnit.setBuilding(true);
 			builderUnit.setImprovementType(ImprovementType.CHOP);
+
+			WorkTilePacket packet = new WorkTilePacket();
+			packet.setTile("chop", unit.getID(), unit.getStandingTile().getGridX(), unit.getStandingTile().getGridY());
+			Civilization.getInstance().getNetworkManager().sendPacket(packet);
+			// unit.removeAction(this);
 
 			Civilization.getInstance().getEventManager().fireEvent(new UnitActEvent(unit));
 
@@ -317,14 +328,15 @@ public class Builder extends UnitItem {
 		public boolean act(float delta) {
 			// unit.getPlayerOwner().unselectUnit();
 			unit.reduceMovement(2);
-			WorkTilePacket packet = new WorkTilePacket();
-			packet.setTile("clear", unit.getStandingTile().getGridX(), unit.getStandingTile().getGridY());
-			Civilization.getInstance().getNetworkManager().sendPacket(packet);
-			// unit.removeAction(this);
 
 			BuilderUnit builderUnit = (BuilderUnit) unit;
 			builderUnit.setBuilding(true);
 			builderUnit.setImprovementType(ImprovementType.CLEAR);
+
+			WorkTilePacket packet = new WorkTilePacket();
+			packet.setTile("clear", unit.getID(), unit.getStandingTile().getGridX(), unit.getStandingTile().getGridY());
+			Civilization.getInstance().getNetworkManager().sendPacket(packet);
+			// unit.removeAction(this);
 
 			Civilization.getInstance().getEventManager().fireEvent(new UnitActEvent(unit));
 
@@ -376,14 +388,16 @@ public class Builder extends UnitItem {
 		public boolean act(float delta) {
 			// unit.getPlayerOwner().unselectUnit();
 			unit.reduceMovement(2);
-			WorkTilePacket packet = new WorkTilePacket();
-			packet.setTile("pasture", unit.getStandingTile().getGridX(), unit.getStandingTile().getGridY());
-			Civilization.getInstance().getNetworkManager().sendPacket(packet);
-			// unit.removeAction(this);
 
 			BuilderUnit builderUnit = (BuilderUnit) unit;
 			builderUnit.setBuilding(true);
 			builderUnit.setImprovementType(ImprovementType.PASTURE);
+
+			WorkTilePacket packet = new WorkTilePacket();
+			packet.setTile("pasture", unit.getID(), unit.getStandingTile().getGridX(),
+					unit.getStandingTile().getGridY());
+			Civilization.getInstance().getNetworkManager().sendPacket(packet);
+			// unit.removeAction(this);
 
 			Civilization.getInstance().getEventManager().fireEvent(new UnitActEvent(unit));
 
@@ -436,14 +450,16 @@ public class Builder extends UnitItem {
 		public boolean act(float delta) {
 			// unit.getPlayerOwner().unselectUnit();
 			unit.reduceMovement(2);
-			WorkTilePacket packet = new WorkTilePacket();
-			packet.setTile("plantation", unit.getStandingTile().getGridX(), unit.getStandingTile().getGridY());
-			Civilization.getInstance().getNetworkManager().sendPacket(packet);
-			// unit.removeAction(this);
 
 			BuilderUnit builderUnit = (BuilderUnit) unit;
 			builderUnit.setBuilding(true);
 			builderUnit.setImprovementType(ImprovementType.PLANTATION);
+
+			WorkTilePacket packet = new WorkTilePacket();
+			packet.setTile("plantation", unit.getID(), unit.getStandingTile().getGridX(),
+					unit.getStandingTile().getGridY());
+			Civilization.getInstance().getNetworkManager().sendPacket(packet);
+			// unit.removeAction(this);
 
 			Civilization.getInstance().getEventManager().fireEvent(new UnitActEvent(unit));
 
@@ -495,14 +511,15 @@ public class Builder extends UnitItem {
 		public boolean act(float delta) {
 			// unit.getPlayerOwner().unselectUnit();
 			unit.reduceMovement(2);
-			WorkTilePacket packet = new WorkTilePacket();
-			packet.setTile("fort", unit.getStandingTile().getGridX(), unit.getStandingTile().getGridY());
-			Civilization.getInstance().getNetworkManager().sendPacket(packet);
-			// unit.removeAction(this);
 
 			BuilderUnit builderUnit = (BuilderUnit) unit;
 			builderUnit.setBuilding(true);
 			builderUnit.setImprovementType(ImprovementType.FORT);
+
+			WorkTilePacket packet = new WorkTilePacket();
+			packet.setTile("fort", unit.getID(), unit.getStandingTile().getGridX(), unit.getStandingTile().getGridY());
+			Civilization.getInstance().getNetworkManager().sendPacket(packet);
+			// unit.removeAction(this);
 
 			Civilization.getInstance().getEventManager().fireEvent(new UnitActEvent(unit));
 
@@ -550,14 +567,15 @@ public class Builder extends UnitItem {
 		public boolean act(float delta) {
 			// unit.getPlayerOwner().unselectUnit();
 			unit.reduceMovement(2);
-			WorkTilePacket packet = new WorkTilePacket();
-			packet.setTile("road", unit.getStandingTile().getGridX(), unit.getStandingTile().getGridY());
-			Civilization.getInstance().getNetworkManager().sendPacket(packet);
-			// unit.removeAction(this);
 
 			BuilderUnit builderUnit = (BuilderUnit) unit;
 			builderUnit.setBuilding(true);
 			builderUnit.setImprovementType(ImprovementType.ROAD);
+
+			WorkTilePacket packet = new WorkTilePacket();
+			packet.setTile("road", unit.getID(), unit.getStandingTile().getGridX(), unit.getStandingTile().getGridY());
+			Civilization.getInstance().getNetworkManager().sendPacket(packet);
+			// unit.removeAction(this);
 
 			Civilization.getInstance().getEventManager().fireEvent(new UnitActEvent(unit));
 
@@ -606,14 +624,16 @@ public class Builder extends UnitItem {
 		public boolean act(float delta) {
 			// unit.getPlayerOwner().unselectUnit();
 			unit.reduceMovement(2);
-			WorkTilePacket packet = new WorkTilePacket();
-			packet.setTile("quarry", unit.getStandingTile().getGridX(), unit.getStandingTile().getGridY());
-			Civilization.getInstance().getNetworkManager().sendPacket(packet);
-			// unit.removeAction(this);
 
 			BuilderUnit builderUnit = (BuilderUnit) unit;
 			builderUnit.setBuilding(true);
 			builderUnit.setImprovementType(ImprovementType.QUARRY);
+
+			WorkTilePacket packet = new WorkTilePacket();
+			packet.setTile("quarry", unit.getID(), unit.getStandingTile().getGridX(),
+					unit.getStandingTile().getGridY());
+			Civilization.getInstance().getNetworkManager().sendPacket(packet);
+			// unit.removeAction(this);
 
 			Civilization.getInstance().getEventManager().fireEvent(new UnitActEvent(unit));
 

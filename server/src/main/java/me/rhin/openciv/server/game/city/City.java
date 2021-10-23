@@ -15,6 +15,7 @@ import me.rhin.openciv.server.game.AbstractPlayer;
 import me.rhin.openciv.server.game.Player;
 import me.rhin.openciv.server.game.city.building.Building;
 import me.rhin.openciv.server.game.city.building.IncreaseTileStatlineBuilding;
+import me.rhin.openciv.server.game.city.building.type.Library;
 import me.rhin.openciv.server.game.city.citizen.AssignedCitizenWorker;
 import me.rhin.openciv.server.game.city.citizen.CitizenWorker;
 import me.rhin.openciv.server.game.city.citizen.CityCenterCitizenWorker;

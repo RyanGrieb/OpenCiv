@@ -4,12 +4,10 @@ import me.rhin.openciv.server.game.research.ResearchTree;
 import me.rhin.openciv.server.game.research.TechProperty;
 import me.rhin.openciv.server.game.research.Technology;
 
-public class HorsebackRidingTech extends Technology {
+public class PhilosophyTech extends Technology {
 
-	public HorsebackRidingTech(ResearchTree researchTree) {
-		super(researchTree, TechProperty.MILITARY, TechProperty.PRODUCTION);
-
-		requiredTechs.add(WheelTech.class);
+	public PhilosophyTech(ResearchTree researchTree) {
+		super(researchTree, TechProperty.SCIENCE);
 	}
 
 	@Override
@@ -19,7 +17,7 @@ public class HorsebackRidingTech extends Technology {
 
 	@Override
 	public String getName() {
-		return "Horseback Riding";
+		return "Philosophy";
 	}
 
 }
