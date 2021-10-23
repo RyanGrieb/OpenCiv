@@ -15,12 +15,11 @@ public class ChooseCivWindow extends AbstractWindow implements ResizeListener {
 	private ContainerList civContianerList;
 
 	public ChooseCivWindow() {
-		this.blankBackground = new BlankBackground(viewport.getWorldWidth() / 2 - 340, viewport.getWorldHeight() - 360,
-				200, 300);
+		super.setBounds(viewport.getWorldWidth() / 2 - 340, viewport.getWorldHeight() - 360, 200, 300);
+		this.blankBackground = new BlankBackground(0, 0, getWidth(), getHeight());
 		addActor(blankBackground);
 
-		this.civContianerList = new ContainerList(this, viewport.getWorldWidth() / 2 - 340,
-				viewport.getWorldHeight() - 360, 200, 300);
+		this.civContianerList = new ContainerList(this, 0, 0, getWidth(), getHeight());
 
 		for (CivType civType : CivType.values()) {
 			civContianerList.addItem(ListContainerType.CATEGORY, "Civilizations",
@@ -34,8 +33,9 @@ public class ChooseCivWindow extends AbstractWindow implements ResizeListener {
 
 	@Override
 	public void onResize(int width, int height) {
-		blankBackground.setPosition(width / 2 - 340, height - 360);
-		civContianerList.setPosition(width / 2 - 340, height - 360);
+		super.setPosition(width / 2 - 340, height - 360);
+		blankBackground.setPosition(0, 0);
+		civContianerList.setPosition(0, 0);
 
 	}
 

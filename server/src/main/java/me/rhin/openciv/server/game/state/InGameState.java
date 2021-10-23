@@ -8,7 +8,6 @@ import java.util.concurrent.TimeUnit;
 
 import org.java_websocket.WebSocket;
 
-import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Json;
 
@@ -71,7 +70,6 @@ import me.rhin.openciv.shared.packet.type.RangedAttackPacket;
 import me.rhin.openciv.shared.packet.type.RemoveTileTypePacket;
 import me.rhin.openciv.shared.packet.type.RequestEndTurnPacket;
 import me.rhin.openciv.shared.packet.type.SelectUnitPacket;
-import me.rhin.openciv.shared.packet.type.SendChatMessagePacket;
 import me.rhin.openciv.shared.packet.type.SetProductionItemPacket;
 import me.rhin.openciv.shared.packet.type.SetUnitOwnerPacket;
 import me.rhin.openciv.shared.packet.type.SettleCityPacket;

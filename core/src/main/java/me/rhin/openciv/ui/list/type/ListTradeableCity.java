@@ -18,7 +18,7 @@ import me.rhin.openciv.ui.window.type.TradeWindow;
 public class ListTradeableCity extends ListObject {
 
 	private City city;
-	//FIXME: Use colored backgrounds?
+	// FIXME: Use colored backgrounds?
 	private Sprite hoveredBackgroundSprite;
 	private Sprite backgroundSprite;
 	private Sprite citySprite;
@@ -96,9 +96,8 @@ public class ListTradeableCity extends ListObject {
 		backgroundSprite.setPosition(x, y);
 		hoveredBackgroundSprite.setPosition(x, y);
 		citySprite.setPosition(4, y + 5);
-		cityNameLabel.setPosition(citySprite.getX() + citySprite.getWidth() + 4,
-				citySprite.getY() + citySprite.getHeight() / 2 - cityNameLabel.getHeight() / 2);
-		cityOwnerSprite.setPosition(getWidth() - 48, y + 5);
+		cityNameLabel.setPosition(citySprite.getX() + citySprite.getWidth() + 4, getHeight() / 2 - 4);
+		cityOwnerSprite.setPosition(getWidth() - 68, y + 5);
 	}
 
 }

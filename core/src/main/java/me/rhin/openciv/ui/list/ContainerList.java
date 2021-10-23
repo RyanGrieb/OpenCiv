@@ -21,6 +21,7 @@ import me.rhin.openciv.ui.window.AbstractWindow;
 
 public class ContainerList extends Group implements ScrollListener {
 
+	private Object parentObj;
 	private float yOffset;
 	private HashMap<String, ListContainer> listContainers;
 	private ContainerScrollbar containerScrollbar;
@@ -29,11 +30,13 @@ public class ContainerList extends Group implements ScrollListener {
 	public ContainerList(AbstractWindow window, float x, float y, float width, float height) {
 		this(x, y, width, height);
 		window.addActor(containerScrollbar);
+		this.parentObj = window;
 	}
 
 	public ContainerList(Stage stage, float x, float y, float width, float height) {
 		this(x, y, width, height);
 		stage.addActor(containerScrollbar);
+		this.parentObj = stage;
 	}
 
 	public ContainerList(float x, float y, float width, float height) {
@@ -108,30 +111,15 @@ public class ContainerList extends Group implements ScrollListener {
 		if (!Civilization.getInstance().getWindowManager().allowsInput(this)) {
 			return;
 		}
+		// Problem, getX() returns 0 if we put ourselfs inside a window
 
 		float y = Civilization.getInstance().getCurrentScreen().getViewport().getWorldHeight() - Gdx.input.getY();
+
 
 		if (Gdx.input.getX() >= getX() && y >= getY())
 			if (Gdx.input.getX() <= getX() + getWidth() && y <= getY() + getHeight()) {
 				scroll(amountY);
 			}
-	}
-
-	@Deprecated
-	public boolean onScrolled(InputEvent event, float x, float y, int amount) {
-		// FIXME: We shouldn't use a low level listener for this. We shouldn't have to
-		// check for the bounds here.
-		if (!Civilization.getInstance().getWindowManager().allowsInput(event.getListenerActor())) {
-			return false;
-		}
-
-		// FIXME: I would be weary of commenting out the bounding check here.
-		// if (event.getStageX() >= getX() && event.getStageY() >= getY())
-		// if (event.getStageX() <= getX() + getWidth() && event.getStageY() <= getY() +
-		// getHeight()) {
-		scroll(amount);
-		// }
-		return false;
 	}
 
 	public void onClose() {
@@ -221,5 +209,13 @@ public class ContainerList extends Group implements ScrollListener {
 
 	public float getYOffset() {
 		return yOffset;
+	}
+
+	public Object getParentObj() {
+		return parentObj;
+	}
+
+	public void onTouchDragged(InputEvent event, float x, float y) {
+		containerScrollbar.onTouchDragged(event, x, y);
 	}
 }

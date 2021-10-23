@@ -81,8 +81,9 @@ public class Player extends AbstractPlayer
 				.getUnitFromID(packet.getUnitID());
 
 		City city = null;
-
-		for (Player player : Server.getInstance().getPlayers())
+		
+		
+		for (AbstractPlayer player : Server.getInstance().getAbstractPlayers())
 			for (City playerCity : player.getOwnedCities())
 				if (playerCity.getName().equals(packet.getCityName())) {
 					city = playerCity;

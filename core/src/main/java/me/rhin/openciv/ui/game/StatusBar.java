@@ -1,17 +1,18 @@
 package me.rhin.openciv.ui.game;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.TextureEnum;
+import me.rhin.openciv.listener.NextTurnListener;
 import me.rhin.openciv.listener.PlayerStatUpdateListener;
 import me.rhin.openciv.listener.TurnTimeLeftListener;
-import me.rhin.openciv.listener.NextTurnListener;
+import me.rhin.openciv.shared.packet.type.NextTurnPacket;
 import me.rhin.openciv.shared.packet.type.PlayerStatUpdatePacket;
 import me.rhin.openciv.shared.packet.type.TurnTimeLeftPacket;
-import me.rhin.openciv.shared.packet.type.NextTurnPacket;
 import me.rhin.openciv.shared.stat.Stat;
 import me.rhin.openciv.shared.stat.StatLine;
 import me.rhin.openciv.ui.label.CustomLabel;
@@ -102,45 +103,62 @@ public class StatusBar extends Actor implements PlayerStatUpdateListener, NextTu
 
 	@Override
 	public void onPlayerStatUpdate(PlayerStatUpdatePacket packet) {
-		StatLine statLine = StatLine.fromPacket(packet);
+		// NOTE: WE use runnable here since we get weird libgdx sprite bugs when we
+		// update the statline.
+		Gdx.app.postRunnable(new Runnable() {
+			@Override
+			public void run() {
 
-		scienceLabel.setText("+" + statLine.getStatValue(Stat.SCIENCE_GAIN));
+				StatLine statLine = StatLine.fromPacket(packet);
 
-		int currentGold = (int) statLine.getStatValue(Stat.GOLD);
-		int gainedGold = (int) statLine.getStatValue(Stat.GOLD_GAIN);
-		goldLabel.setText("" + currentGold + "(" + (gainedGold < 0 ? "-" : "+") + gainedGold + ")");
+				scienceLabel.setText("+" + statLine.getStatValue(Stat.SCIENCE_GAIN));
 
-		hertiageLabel.setText("+" + (int) statLine.getStatValue(Stat.HERITAGE_GAIN) + "");
+				int currentGold = (int) statLine.getStatValue(Stat.GOLD);
+				int gainedGold = (int) statLine.getStatValue(Stat.GOLD_GAIN);
+				goldLabel.setText("" + currentGold + "(" + (gainedGold < 0 ? "-" : "+") + gainedGold + ")");
 
-		tradeLabel.setText((int) statLine.getStatValue(Stat.TRADE_ROUTE_AMOUNT) + "/"
-				+ (int) statLine.getStatValue(Stat.MAX_TRADE_ROUTES));
+				hertiageLabel.setText("+" + (int) statLine.getStatValue(Stat.HERITAGE_GAIN) + "");
 
-		updatePositions();
+				tradeLabel.setText((int) statLine.getStatValue(Stat.TRADE_ROUTE_AMOUNT) + "/"
+						+ (int) statLine.getStatValue(Stat.MAX_TRADE_ROUTES));
+
+				updatePositions();
+			}
+		});
 	}
 
 	@Override
 	public void onNextTurn(NextTurnPacket packet) {
-		int turnTime = Civilization.getInstance().getGame().getTurnTime();
+		Gdx.app.postRunnable(new Runnable() {
+			@Override
+			public void run() {
+				int turnTime = Civilization.getInstance().getGame().getTurnTime();
 
-		// TODO: Do this better. We assume high numbers mean no limit.
-		if (turnTime > 100000) {
-			turnsLabel.setText("Turns: " + Civilization.getInstance().getGame().getTurn() + " ");
-		} else
-			turnsLabel.setText("Turns: " + Civilization.getInstance().getGame().getTurn() + "("
-					+ Civilization.getInstance().getGame().getTurnTime() + "s)");
-		updatePositions();
+				// TODO: Do this better. We assume high numbers mean no limit.
+				if (turnTime > 100000) {
+					turnsLabel.setText("Turns: " + Civilization.getInstance().getGame().getTurn() + " ");
+				} else
+					turnsLabel.setText("Turns: " + Civilization.getInstance().getGame().getTurn() + "("
+							+ Civilization.getInstance().getGame().getTurnTime() + "s)");
+				updatePositions();
+			}
+		});
 	}
 
 	@Override
 	public void onTurnTimeLeft(TurnTimeLeftPacket packet) {
-
-		// TODO: Do this better. We assume high numbers mean no limit.
-		if (packet.getTime() > 100000) {
-			turnsLabel.setText("Turns: " + Civilization.getInstance().getGame().getTurn() + " ");
-		} else
-			turnsLabel.setText(
-					"Turns: " + Civilization.getInstance().getGame().getTurn() + "(" + packet.getTime() + "s)");
-		updatePositions();
+		Gdx.app.postRunnable(new Runnable() {
+			@Override
+			public void run() {
+				// TODO: Do this better. We assume high numbers mean no limit.
+				if (packet.getTime() > 100000) {
+					turnsLabel.setText("Turns: " + Civilization.getInstance().getGame().getTurn() + " ");
+				} else
+					turnsLabel.setText(
+							"Turns: " + Civilization.getInstance().getGame().getTurn() + "(" + packet.getTime() + "s)");
+				updatePositions();
+			}
+		});
 	}
 
 	private void updatePositions() {

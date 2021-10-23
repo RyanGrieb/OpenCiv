@@ -11,6 +11,7 @@ import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.listener.ScrollListener;
 import me.rhin.openciv.shared.util.MathHelper;
+import me.rhin.openciv.ui.window.AbstractWindow;
 
 public class ContainerScrollbar extends Actor implements ScrollListener {
 
@@ -35,77 +36,12 @@ public class ContainerScrollbar extends Actor implements ScrollListener {
 		this.originY = y;
 		this.prevMouseY = -1;
 
-		/*
-		 * this.addListener(new DragScrollListener(null) {
-		 * 
-		 * @Override public boolean scrolled(InputEvent event, float x, float y, int
-		 * amount) { return containerList.onScrolled(event, x, y, amount); } });
-		 */
-
-		// FIXME: This doesn't seem correct.
-		final ContainerScrollbar thisContainer = this;
-
 		this.addListener(new ClickListener() {
-			@Override
-			public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
-				// thisContainer.getStage().setScrollFocus(thisContainer);
-			}
-
-			@Override
-			public void exit(InputEvent event, float x, float y, int pointer, Actor fromActor) {
-				// thisContainer.getStage().setScrollFocus(null);
-			}
 
 			@Override
 			public void touchDragged(InputEvent event, float x, float y, int pointer) {
 				super.touchDragged(event, x, y, pointer);
-
-				if (event.getStageX() >= scrubber.getX() && event.getStageY() >= scrubber.getY())
-					if (event.getStageX() <= scrubber.getX() + scrubber.getWidth()
-							&& event.getStageY() <= scrubber.getY() + scrubber.getHeight()) {
-
-						if (prevMouseY == -1)
-							prevMouseY = event.getStageY();
-
-						float maxHeight = 0;
-						for (ListContainer container : containerList.getListContainers().values()) {
-							maxHeight += container.getHeight();
-						}
-
-						if (containerList.getHeight() > maxHeight)
-							return;
-
-						float dist = ((containerList.getY() + containerList.getHeight() - scrubber.getHeight())
-								- scrubber.getY()) / (containerList.getHeight() - scrubber.getHeight());
-
-						float offset = (maxHeight - (containerList.getHeight())) * dist;
-
-						float scrubberY = event.getStageY() - scrubber.getHeight() / 2;
-
-						if (scrubberY < containerList.getY()) {
-							prevMouseY = -1;
-							scrubber.setPosition(scrubber.getX(), containerList.getY());
-							containerList.setYOffset(maxHeight - containerList.getHeight());
-							containerList.updatePositions();
-							return;
-						}
-
-						if (scrubberY + scrubber.getHeight() > containerList.getY() + containerList.getHeight()) {
-							prevMouseY = -1;
-							scrubber.setPosition(scrubber.getX(),
-									containerList.getY() + containerList.getHeight() - scrubber.getHeight());
-
-							containerList.setYOffset(0);
-							containerList.updatePositions();
-							return;
-						}
-
-						containerList.setYOffset(offset);
-						containerList.updatePositions();
-						prevMouseY = event.getStageY();
-
-						scrubber.setPosition(scrubber.getX(), scrubberY);
-					}
+				onTouchDragged(event, x, y);
 			}
 
 			@Override
@@ -121,6 +57,7 @@ public class ContainerScrollbar extends Actor implements ScrollListener {
 
 	@Override
 	public void draw(Batch batch, float parentAlpha) {
+		super.draw(batch, parentAlpha);
 		backgroundSprite.draw(batch);
 		scrubber.draw(batch);
 	}
@@ -156,16 +93,54 @@ public class ContainerScrollbar extends Actor implements ScrollListener {
 	public float getScrubberHeight() {
 		return scrubber.getHeight();
 	}
-	
-	@Deprecated
-	public void setNextHeight(float nextHeight) {
 
-		float heightDiff = nextHeight - containerList.getHeight();
-		this.nextHeight = nextHeight;
+	public void onTouchDragged(InputEvent event, float x, float y) {
 
-		if (nextHeight > containerList.getHeight()) {
-			scrubber.setBounds(scrubber.getX(), originY + heightDiff - containerList.getYOffset(), scrubber.getWidth(),
-					containerList.getHeight() - heightDiff);
-		}
+		if (event.getStageX() >= scrubber.getX() && event.getStageY() >= scrubber.getY())
+			if (event.getStageX() <= scrubber.getX() + scrubber.getWidth()
+					&& event.getStageY() <= scrubber.getY() + scrubber.getHeight()) {
+
+				if (prevMouseY == -1)
+					prevMouseY = event.getStageY();
+
+				float maxHeight = 0;
+				for (ListContainer container : containerList.getListContainers().values()) {
+					maxHeight += container.getHeight();
+				}
+
+				if (containerList.getHeight() > maxHeight)
+					return;
+
+				float dist = ((containerList.getY() + containerList.getHeight() - scrubber.getHeight())
+						- scrubber.getY()) / (containerList.getHeight() - scrubber.getHeight());
+
+				float offset = (maxHeight - (containerList.getHeight())) * dist;
+
+				float scrubberY = event.getStageY() - scrubber.getHeight() / 2;
+
+				if (scrubberY < containerList.getY()) {
+					prevMouseY = -1;
+					scrubber.setPosition(scrubber.getX(), containerList.getY());
+					containerList.setYOffset(maxHeight - containerList.getHeight());
+					containerList.updatePositions();
+					return;
+				}
+
+				if (scrubberY + scrubber.getHeight() > containerList.getY() + containerList.getHeight()) {
+					prevMouseY = -1;
+					scrubber.setPosition(scrubber.getX(),
+							containerList.getY() + containerList.getHeight() - scrubber.getHeight());
+
+					containerList.setYOffset(0);
+					containerList.updatePositions();
+					return;
+				}
+
+				containerList.setYOffset(offset);
+				containerList.updatePositions();
+				prevMouseY = event.getStageY();
+
+				scrubber.setPosition(scrubber.getX(), scrubberY);
+			}
 	}
 }

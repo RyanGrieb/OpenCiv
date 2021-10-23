@@ -14,6 +14,7 @@ import com.badlogic.gdx.utils.JsonReader;
 import com.badlogic.gdx.utils.JsonValue;
 
 import me.rhin.openciv.server.command.CmdProcessor;
+import me.rhin.openciv.server.game.AbstractPlayer;
 import me.rhin.openciv.server.game.GameState;
 import me.rhin.openciv.server.game.Player;
 import me.rhin.openciv.server.game.ai.AIPlayer;
@@ -228,6 +229,15 @@ public class Server extends WebSocketServer {
 
 	public ArrayList<AIPlayer> getAIPlayers() {
 		return aiPlayers;
+	}
+
+	public ArrayList<AbstractPlayer> getAbstractPlayers() {
+		ArrayList<AbstractPlayer> abstractPlayers = new ArrayList<>();
+
+		abstractPlayers.addAll(players);
+		abstractPlayers.addAll(aiPlayers);
+
+		return abstractPlayers;
 	}
 
 	public ColorHelper getColorHelper() {
