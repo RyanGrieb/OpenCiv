@@ -31,8 +31,10 @@ public enum TileType {
 	COPPER(TextureEnum.TILE_COPPER, TileLayer.MIDDLE, TileProperty.RESOURCE, TileProperty.MINEABLE),
 	COTTON(TextureEnum.TILE_COTTON, TileLayer.MIDDLE, TileProperty.RESOURCE, TileProperty.HARVESTABLE),
 	GEMS(TextureEnum.TILE_GEMS, TileLayer.MIDDLE, TileProperty.RESOURCE, TileProperty.MINEABLE),
+	MARBLE(TextureEnum.TILE_MARBLE, TileLayer.MIDDLE, TileProperty.RESOURCE, TileProperty.QUARRY),
 	FARM(TextureEnum.TILE_FARM, TileLayer.LOW, TileProperty.IMPROVEMENT),
 	GEMS_IMPROVED(TextureEnum.TILE_GEMS_IMPROVED, TileLayer.MIDDLE, TileProperty.IMPROVEMENT),
+	MARBLE_IMPROVED(TextureEnum.TILE_MARBLE_IMPROVED, TileLayer.MIDDLE, TileProperty.IMPROVEMENT),
 	COTTON_IMPROVED(TextureEnum.TILE_COTTON_IMPROVED, TileLayer.MIDDLE, TileProperty.IMPROVEMENT),
 	IRON_IMPROVED(TextureEnum.TILE_IRON_IMPROVED, TileLayer.MIDDLE, TileProperty.IMPROVEMENT),
 	COPPER_IMPROVED(TextureEnum.TILE_COPPER_IMPROVED, TileLayer.MIDDLE, TileProperty.IMPROVEMENT),
@@ -65,7 +67,8 @@ public enum TileType {
 		ANIMAL,
 		FARMABLE,
 		HARVESTABLE,
-		ROAD;
+		ROAD,
+		QUARRY;
 	}
 
 	private TextureEnum assetEnum;

@@ -6,7 +6,6 @@ import java.util.List;
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.city.City;
-import me.rhin.openciv.game.civilization.type.Rome;
 import me.rhin.openciv.game.heritage.type.rome.DefensiveLogisticsHeritage;
 import me.rhin.openciv.game.map.tile.ImprovementType;
 import me.rhin.openciv.game.map.tile.Tile;
@@ -15,6 +14,7 @@ import me.rhin.openciv.game.map.tile.TileType.TileProperty;
 import me.rhin.openciv.game.research.type.AnimalHusbandryTech;
 import me.rhin.openciv.game.research.type.BronzeWorkingTech;
 import me.rhin.openciv.game.research.type.CalendarTech;
+import me.rhin.openciv.game.research.type.MasonryTech;
 import me.rhin.openciv.game.research.type.MiningTech;
 import me.rhin.openciv.game.research.type.WheelTech;
 import me.rhin.openciv.game.unit.AbstractAction;
@@ -52,6 +52,7 @@ public class Builder extends UnitItem {
 			customActions.add(new RoadAction(this));
 			customActions.add(new ClearAction(this));
 			customActions.add(new FortAction(this));
+			customActions.add(new QuarryAction(this));
 			this.canAttack = false;
 			this.building = false;
 
@@ -126,7 +127,7 @@ public class Builder extends UnitItem {
 		}
 
 		public String getImprovementDesc() {
-			//FIXME: This is null sometimes?
+			// FIXME: This is null sometimes?
 			return improvementType.getImprovementDesc();
 		}
 
@@ -592,6 +593,65 @@ public class Builder extends UnitItem {
 		public TextureEnum getSprite() {
 			// TODO Auto-generated method stub
 			return TextureEnum.ROAD_HORIZONTAL;
+		}
+	}
+
+	public static class QuarryAction extends AbstractAction {
+
+		public QuarryAction(Unit unit) {
+			super(unit);
+		}
+
+		@Override
+		public boolean act(float delta) {
+			// unit.getPlayerOwner().unselectUnit();
+			unit.reduceMovement(2);
+			WorkTilePacket packet = new WorkTilePacket();
+			packet.setTile("quarry", unit.getStandingTile().getGridX(), unit.getStandingTile().getGridY());
+			Civilization.getInstance().getNetworkManager().sendPacket(packet);
+			// unit.removeAction(this);
+
+			BuilderUnit builderUnit = (BuilderUnit) unit;
+			builderUnit.setBuilding(true);
+			builderUnit.setImprovementType(ImprovementType.QUARRY);
+
+			Civilization.getInstance().getEventManager().fireEvent(new UnitActEvent(unit));
+
+			unit.removeAction(this);
+			return true;
+		}
+
+		@Override
+		public boolean canAct() {
+			Tile tile = unit.getStandingTile();
+
+			if (tile.getCity() != null)
+				return false;
+
+			if (!unit.getPlayerOwner().getResearchTree().hasResearched(MasonryTech.class)) {
+				return false;
+			}
+
+			boolean farmableTile = !tile.isImproved() && tile.getBaseTileType().hasProperty(TileProperty.QUARRY)
+					&& tile.getTerritory() != null
+					&& tile.getTerritory().getPlayerOwner().equals(unit.getPlayerOwner());
+
+			BuilderUnit builderUnit = (BuilderUnit) unit;
+			if (unit.getCurrentMovement() < 1 || !farmableTile || builderUnit.isBuilding()) {
+				return false;
+			}
+
+			return true;
+		}
+
+		@Override
+		public String getName() {
+			return "Quarry";
+		}
+
+		@Override
+		public TextureEnum getSprite() {
+			return TileType.valueOf(unit.getStandingTile().getBaseTileType().name() + "_IMPROVED").getTextureEnum();
 		}
 	}
 

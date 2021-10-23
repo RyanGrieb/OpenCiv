@@ -552,6 +552,9 @@ public class GameMap implements MapRequestListener {
 
 		generateResource(TileType.CATTLE, Server.getInstance().getPlayers().size() * 8, TileType.GRASS,
 				TileType.PLAINS);
+		
+		generateResource(TileType.SHEEP, Server.getInstance().getPlayers().size() * 8, TileType.GRASS,
+				TileType.PLAINS);
 
 		generateResource(TileType.IRON, Server.getInstance().getPlayers().size() * 6, TileType.GRASS, TileType.PLAINS,
 				TileType.PLAINS_HILL, TileType.GRASS_HILL, TileType.DESERT, TileType.DESERT_HILL);
@@ -563,8 +566,11 @@ public class GameMap implements MapRequestListener {
 				TileType.PLAINS);
 
 		generateResource(TileType.GEMS, Server.getInstance().getPlayers().size() * 4, TileType.GRASS, TileType.PLAINS,
-				TileType.DESERT, TileType.DESERT_HILL);
+				TileType.PLAINS_HILL, TileType.GRASS_HILL, TileType.DESERT, TileType.DESERT_HILL);
 
+		generateResource(TileType.MARBLE, Server.getInstance().getPlayers().size() * 4, TileType.GRASS, TileType.PLAINS,
+				TileType.PLAINS_HILL, TileType.GRASS_HILL, TileType.DESERT, TileType.DESERT_HILL);
+		
 		ArrayList<Tile> adjGroundTiles = new ArrayList<>();
 
 		ArrayList<TileType> adjTileTypes = new ArrayList<>();

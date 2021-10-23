@@ -24,7 +24,7 @@ public class BarbarianHeritage extends Heritage {
 
 	@Override
 	public float getCost() {
-		return 20;
+		return 8;
 	}
 
 	@Override

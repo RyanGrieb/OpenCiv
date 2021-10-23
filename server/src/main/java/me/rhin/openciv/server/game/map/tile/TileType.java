@@ -12,6 +12,7 @@ import me.rhin.openciv.server.game.map.tile.improvement.FortImprovement;
 import me.rhin.openciv.server.game.map.tile.improvement.MineImprovement;
 import me.rhin.openciv.server.game.map.tile.improvement.PastureImprovement;
 import me.rhin.openciv.server.game.map.tile.improvement.PlantationImprovement;
+import me.rhin.openciv.server.game.map.tile.improvement.QuarryImprovement;
 import me.rhin.openciv.server.game.map.tile.improvement.RoadImprovement;
 import me.rhin.openciv.server.game.map.tile.improvement.TileImprovement;
 import me.rhin.openciv.shared.stat.Stat;
@@ -334,6 +335,21 @@ public enum TileType implements Comparable<TileType> {
 			return improvements;
 		}
 	},
+	MARBLE(TileLayer.MIDDLE, TileProperty.LUXURY) {
+		@Override
+		public StatLine getStatLine() {
+			StatLine statLine = new StatLine();
+			statLine.setValue(Stat.GOLD_GAIN, 2);
+			return statLine;
+		}
+
+		@Override
+		public List<TileImprovement> getImprovements() {
+			ArrayList<TileImprovement> improvements = new ArrayList<>();
+			improvements.add(new QuarryImprovement(TileType.MARBLE_IMPROVED, 5));
+			return improvements;
+		}
+	},
 	FARM(TileLayer.MIDDLE, TileProperty.IMPROVEMENT) {
 		@Override
 		public StatLine getStatLine() {
@@ -347,6 +363,16 @@ public enum TileType implements Comparable<TileType> {
 		public StatLine getStatLine() {
 			StatLine statLine = new StatLine();
 			statLine.addValue(Stat.GOLD_GAIN, 3);
+			statLine.addValue(Stat.PRODUCTION_GAIN, 1);
+			statLine.addValue(Stat.MORALE, 10);
+			return statLine;
+		}
+	},
+	MARBLE_IMPROVED(TileLayer.MIDDLE, TileProperty.IMPROVEMENT) {
+		@Override
+		public StatLine getStatLine() {
+			StatLine statLine = new StatLine();
+			statLine.addValue(Stat.GOLD_GAIN, 2);
 			statLine.addValue(Stat.PRODUCTION_GAIN, 1);
 			statLine.addValue(Stat.MORALE, 10);
 			return statLine;
