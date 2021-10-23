@@ -104,7 +104,7 @@ public class CityStatePlayer extends AIPlayer implements NextTurnListener {
 				continue;
 
 			for (Unit unit : tile.getUnits())
-				if (!unit.getPlayerOwner().equals(this))
+				if (!unit.getPlayerOwner().equals(this) && !(unit.getPlayerOwner() instanceof CityStatePlayer))
 					enemyUnitAmount++;
 		}
 
