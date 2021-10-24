@@ -74,6 +74,7 @@ public class Tile {
 	private City territory;
 	private ArrayList<Unit> units;
 	private TileImprovement tileImprovement;
+	private StatLine statLine;
 
 	public Tile(GameMap map, TileType tileType, float x, float y) {
 		this.map = map;
@@ -87,6 +88,7 @@ public class Tile {
 		this.adjTiles = new Tile[6];
 		this.riverSides = new boolean[6];
 		this.units = new ArrayList<>();
+		this.statLine = initStatLine();
 	}
 
 	@Override
@@ -357,7 +359,7 @@ public class Tile {
 		return null;
 	}
 
-	public StatLine getStatLine() {
+	public StatLine initStatLine() {
 		StatLine statLine = new StatLine();
 
 		Iterator<TileTypeWrapper> iterator = tileWrappers.iterator();
@@ -379,6 +381,10 @@ public class Tile {
 			}
 		}
 
+		return statLine;
+	}
+
+	public StatLine getStatLine() {
 		return statLine;
 	}
 

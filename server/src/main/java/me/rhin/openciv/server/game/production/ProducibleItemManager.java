@@ -17,6 +17,7 @@ import me.rhin.openciv.server.game.city.building.type.GreatLibrary;
 import me.rhin.openciv.server.game.city.building.type.GreatPyramids;
 import me.rhin.openciv.server.game.city.building.type.HangingGardens;
 import me.rhin.openciv.server.game.city.building.type.Library;
+import me.rhin.openciv.server.game.city.building.type.Lighthouse;
 import me.rhin.openciv.server.game.city.building.type.Market;
 import me.rhin.openciv.server.game.city.building.type.Monument;
 import me.rhin.openciv.server.game.city.building.type.NationalCollege;
@@ -101,6 +102,7 @@ public class ProducibleItemManager implements NextTurnListener {
 		possibleItems.put("Colosseum", new Colosseum(city));
 		possibleItems.put("Stables", new Stables(city));
 		possibleItems.put("National College", new NationalCollege(city));
+		possibleItems.put("Lighthouse", new Lighthouse(city));
 
 		// Wonders
 		possibleItems.put("Great Pyramids", new GreatPyramids(city));

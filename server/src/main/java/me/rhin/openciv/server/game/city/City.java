@@ -14,8 +14,6 @@ import me.rhin.openciv.server.Server;
 import me.rhin.openciv.server.game.AbstractPlayer;
 import me.rhin.openciv.server.game.Player;
 import me.rhin.openciv.server.game.city.building.Building;
-import me.rhin.openciv.server.game.city.building.IncreaseTileStatlineBuilding;
-import me.rhin.openciv.server.game.city.building.type.Library;
 import me.rhin.openciv.server.game.city.citizen.AssignedCitizenWorker;
 import me.rhin.openciv.server.game.city.citizen.CitizenWorker;
 import me.rhin.openciv.server.game.city.citizen.CityCenterCitizenWorker;
@@ -530,17 +528,7 @@ public class City implements AttackableEntity, SpecialistContainer, NextTurnList
 			return statLine;
 		}
 
-		StatLine tileStatLine = new StatLine();
-		tileStatLine.mergeStatLine(tile.getStatLine());
-		for (Building building : buildings) {
-			if (building instanceof IncreaseTileStatlineBuilding) {
-				IncreaseTileStatlineBuilding statlineBuilding = (IncreaseTileStatlineBuilding) building;
-
-				tileStatLine.mergeStatLine(statlineBuilding.getTileStatline(tile));
-			}
-		}
-
-		return tileStatLine;
+		return tile.getStatLine();
 	}
 
 	private ArrayList<Tile> getTopWorkableTiles() {
