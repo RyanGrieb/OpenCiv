@@ -145,8 +145,9 @@ public class ChatboxWindow extends AbstractWindow implements SendChatMessageList
 
 		float chatHeight = 17 * chatLabels.size();
 
-		if (chatHeight > getHeight()) {
+		while (chatHeight > getHeight()) {
 			removeActor(chatLabels.remove(0));
+			chatHeight -= 17;
 		}
 	}
 }
