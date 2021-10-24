@@ -1,20 +1,34 @@
 package me.rhin.openciv.ui.window.type;
 
+import java.util.ArrayList;
+
+import com.badlogic.gdx.graphics.g2d.Sprite;
+import com.badlogic.gdx.scenes.scene2d.actions.Actions;
+
 import me.rhin.openciv.Civilization;
+import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.map.tile.Tile;
 import me.rhin.openciv.game.map.tile.Tile.TileTypeWrapper;
 import me.rhin.openciv.listener.ResizeListener;
+import me.rhin.openciv.listener.TileStatlineListener;
+import me.rhin.openciv.shared.packet.type.TileStatlinePacket;
+import me.rhin.openciv.shared.stat.Stat;
+import me.rhin.openciv.shared.stat.StatLine;
+import me.rhin.openciv.ui.background.ColoredBackground;
 import me.rhin.openciv.ui.game.StatusBar;
 import me.rhin.openciv.ui.label.CustomLabel;
 import me.rhin.openciv.ui.window.AbstractWindow;
 
-public class GameOverlay extends AbstractWindow implements ResizeListener {
+public class GameOverlay extends AbstractWindow implements ResizeListener, TileStatlineListener {
 
 	public static final int HEIGHT = 20;
 
 	private CustomLabel fpsLabel;
 	private CustomLabel tileNameLabel;
 	private StatusBar statusBar;
+	private Tile hoveredTile;
+	private ArrayList<ColoredBackground> statIcons;
+	private ArrayList<CustomLabel> statLabels;
 
 	public GameOverlay() {
 		this.statusBar = new StatusBar(0, viewport.getWorldHeight() - HEIGHT, viewport.getWorldWidth(), HEIGHT);
@@ -29,7 +43,11 @@ public class GameOverlay extends AbstractWindow implements ResizeListener {
 		tileNameLabel.setBounds(2, 2, 0, 15); // FIXME: Setting the width to 0 is a workaround
 		this.addActor(tileNameLabel);
 
+		this.statIcons = new ArrayList<>();
+		this.statLabels = new ArrayList<>();
+
 		Civilization.getInstance().getEventManager().addListener(ResizeListener.class, this);
+		Civilization.getInstance().getEventManager().addListener(TileStatlineListener.class, this);
 	}
 
 	public CustomLabel getFPSLabel() {
@@ -75,11 +93,27 @@ public class GameOverlay extends AbstractWindow implements ResizeListener {
 	}
 
 	public void setHoveredTile(Tile tile) {
-		if (!tile.isDiscovered()) {
+		if (!tile.isDiscovered() && Civilization.SHOW_FOG) {
 			tileNameLabel.setText("[" + tile.getGridX() + "," + tile.getGridY() + "] Undiscovered");
 			tileNameLabel.setSize(0, 15);
 			return;
 		}
+
+		if (tile.equals(hoveredTile))
+			return;
+
+		for (ColoredBackground statIcon : new ArrayList<>(statIcons)) {
+			statIcon.addAction(Actions.removeActor());
+		}
+
+		for (CustomLabel label : new ArrayList<>(statLabels)) {
+			label.addAction(Actions.removeActor());
+		}
+
+		statIcons.clear();
+		statLabels.clear();
+
+		this.hoveredTile = tile;
 
 		// [grass,copper]
 		String tileName = "[" + tile.getGridX() + "," + tile.getGridY() + "] ";
@@ -95,6 +129,45 @@ public class GameOverlay extends AbstractWindow implements ResizeListener {
 		}
 
 		tileNameLabel.setText(tileName);
-		tileNameLabel.setSize(0, 15);
+		// tileNameLabel.setSize(0, 15);
+
+		// TODO: Make this more optimized.
+		// Only send a request after 100ms hovered on tile
+
+		TileStatlinePacket packet = new TileStatlinePacket();
+		packet.setTile(tile.getGridX(), tile.getGridY());
+		Civilization.getInstance().getNetworkManager().sendPacket(packet);
+	}
+
+	@Override
+	public void onRecieveTileStatline(TileStatlinePacket packet) {
+		StatLine statline = StatLine.fromPacket(packet);
+
+		float addedWidth = 0;
+		for (Stat stat : statline.getStatValues().keySet()) {
+			if (stat == Stat.MAINTENANCE)
+				continue;
+
+			String name = null;
+			if (stat.name().contains("_")) {
+				name = stat.name().substring(0, stat.name().indexOf('_')).toUpperCase();
+			} else {
+				name = stat.name().toUpperCase();
+			}
+
+			float tileNameWidthOffset = tileNameLabel.getX() + tileNameLabel.getWidth() + 6;
+
+			CustomLabel label = new CustomLabel("+" + (int) statline.getStatValue(stat));
+			label.setPosition(tileNameWidthOffset + addedWidth, 2);
+			addedWidth += label.getWidth();
+			addActor(label);
+			statLabels.add(label);
+
+			Sprite sprite = TextureEnum.valueOf("ICON_" + name).sprite();
+			ColoredBackground statIcon = new ColoredBackground(sprite, tileNameWidthOffset + addedWidth, 0, 16, 16);
+			addedWidth += statIcon.getWidth();
+			addActor(statIcon);
+			statIcons.add(statIcon);
+		}
 	}
 }

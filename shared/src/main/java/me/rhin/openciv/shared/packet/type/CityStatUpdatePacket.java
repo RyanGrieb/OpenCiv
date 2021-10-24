@@ -4,8 +4,9 @@ import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.JsonValue;
 
 import me.rhin.openciv.shared.packet.Packet;
+import me.rhin.openciv.shared.packet.StatPacket;
 
-public class CityStatUpdatePacket extends Packet {
+public class CityStatUpdatePacket extends Packet implements StatPacket {
 	private static final int MAX_STATS = 12;
 
 	private String cityName;
@@ -36,16 +37,18 @@ public class CityStatUpdatePacket extends Packet {
 		statValues = jsonData.get("statValues").asFloatArray();
 	}
 
-	public String getCityName() {
-		return cityName;
-	}
-
+	@Override
 	public String[] getStatNames() {
 		return statNames;
 	}
 
+	@Override
 	public float[] getStatValues() {
 		return statValues;
+	}
+
+	public String getCityName() {
+		return cityName;
 	}
 
 	public void addStat(String cityName, String statName, float statValue) {

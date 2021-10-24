@@ -51,6 +51,7 @@ import me.rhin.openciv.server.listener.RequestEndTurnListener;
 import me.rhin.openciv.server.listener.SelectUnitListener;
 import me.rhin.openciv.server.listener.SetProductionItemListener;
 import me.rhin.openciv.server.listener.SettleCityListener;
+import me.rhin.openciv.server.listener.TileStatlineListener;
 import me.rhin.openciv.server.listener.UnitFinishedMoveListener.UnitFinishedMoveEvent;
 import me.rhin.openciv.server.listener.UnitMoveListener;
 import me.rhin.openciv.server.listener.WorkTileListener;
@@ -73,19 +74,21 @@ import me.rhin.openciv.shared.packet.type.SelectUnitPacket;
 import me.rhin.openciv.shared.packet.type.SetProductionItemPacket;
 import me.rhin.openciv.shared.packet.type.SetUnitOwnerPacket;
 import me.rhin.openciv.shared.packet.type.SettleCityPacket;
+import me.rhin.openciv.shared.packet.type.TileStatlinePacket;
 import me.rhin.openciv.shared.packet.type.TurnTimeLeftPacket;
 import me.rhin.openciv.shared.packet.type.UnitAttackPacket;
 import me.rhin.openciv.shared.packet.type.WorkTilePacket;
 import me.rhin.openciv.shared.stat.Stat;
+import me.rhin.openciv.shared.stat.StatLine;
 import me.rhin.openciv.shared.util.MathHelper;
 
 //FIXME: Instead of the civ game listening for everything. Just split them off into the respective classes. (EX: CombatPreviewListener in the Unit class)
 //Or just use reflection so we don't have to implement 20+ classes.
-public class InGameState extends GameState
-		implements DisconnectListener, SelectUnitListener, UnitMoveListener, SettleCityListener,
-		PlayerFinishLoadingListener, NextTurnListener, SetProductionItemListener, ClickWorkedTileListener,
-		ClickSpecialistListener, EndTurnListener, PlayerListRequestListener, FetchPlayerListener, CombatPreviewListener,
-		WorkTileListener, RangedAttackListener, BuyProductionItemListener, RequestEndTurnListener {
+public class InGameState extends GameState implements DisconnectListener, SelectUnitListener, UnitMoveListener,
+		SettleCityListener, PlayerFinishLoadingListener, NextTurnListener, SetProductionItemListener,
+		ClickWorkedTileListener, ClickSpecialistListener, EndTurnListener, PlayerListRequestListener,
+		FetchPlayerListener, CombatPreviewListener, WorkTileListener, RangedAttackListener, BuyProductionItemListener,
+		RequestEndTurnListener, TileStatlineListener {
 
 	private int currentTurn;
 	private int turnTimeLeft;
@@ -116,6 +119,7 @@ public class InGameState extends GameState
 		Server.getInstance().getEventManager().addListener(RangedAttackListener.class, this);
 		Server.getInstance().getEventManager().addListener(BuyProductionItemListener.class, this);
 		Server.getInstance().getEventManager().addListener(RequestEndTurnListener.class, this);
+		Server.getInstance().getEventManager().addListener(TileStatlineListener.class, this);
 	}
 
 	@Override
@@ -637,6 +641,25 @@ public class InGameState extends GameState
 				workBoat.reduceMovement(2);
 			}
 		}
+	}
+
+	@Override
+	public void onRequestTileStatline(WebSocket conn, TileStatlinePacket packet) {
+
+		if (packet.getGridX() >= map.getWidth() || packet.getGridY() >= map.getHeight())
+			return;
+
+		Tile tile = map.getTiles()[packet.getGridX()][packet.getGridY()];
+
+		StatLine tileStatLine = (tile.getTerritory() != null ? tile.getTerritory().getTileStatLine(tile)
+				: tile.getStatLine());
+
+		for (Stat stat : tileStatLine.getStatValues().keySet()) {
+			packet.addStat(stat.name(), tileStatLine.getStatValues().get(stat).getValue());
+		}
+
+		Json json = new Json();
+		getPlayerByConn(conn).sendPacket(json.toJson(packet));
 	}
 
 	@Override

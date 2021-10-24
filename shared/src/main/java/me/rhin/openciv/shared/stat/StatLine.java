@@ -3,10 +3,8 @@ package me.rhin.openciv.shared.stat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Random;
 
-import me.rhin.openciv.shared.packet.type.CityStatUpdatePacket;
-import me.rhin.openciv.shared.packet.type.PlayerStatUpdatePacket;
+import me.rhin.openciv.shared.packet.StatPacket;
 
 public class StatLine {
 
@@ -16,20 +14,7 @@ public class StatLine {
 		this.statValues = new HashMap<>();
 	}
 
-	public static StatLine fromPacket(PlayerStatUpdatePacket packet) {
-		StatLine statLine = new StatLine();
-		for (int i = 0; i < packet.getStatNames().length; i++) {
-			if (packet.getStatNames()[i] == null)
-				break;
-
-			statLine.setValue(Stat.valueOf(packet.getStatNames()[i]), packet.getStatValues()[i]);
-		}
-		return statLine;
-	}
-
-	// FIXME: This should really be only one method. City & Player Stat update
-	// should extend form an Abstract StatPacket.
-	public static StatLine fromPacket(CityStatUpdatePacket packet) {
+	public static StatLine fromPacket(StatPacket packet) {
 		StatLine statLine = new StatLine();
 		for (int i = 0; i < packet.getStatNames().length; i++) {
 			if (packet.getStatNames()[i] == null)
@@ -130,6 +115,13 @@ public class StatLine {
 			return 0;
 
 		return statValues.get(stat).getValue();
+	}
+
+	public float getStatModifier(Stat stat) {
+		if (!statValues.containsKey(stat))
+			return 0;
+
+		return statValues.get(stat).getModifier();
 	}
 
 	public void clear() {

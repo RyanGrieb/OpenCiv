@@ -52,6 +52,7 @@ import me.rhin.openciv.listener.SetUnitOwnerListener.SetUnitOwnerEvent;
 import me.rhin.openciv.listener.SetWorldSizeListener.SetWorldSizeEvent;
 import me.rhin.openciv.listener.SettleCityListener.SettleCityEvent;
 import me.rhin.openciv.listener.TerritoryGrowListener.TerritoryGrowEvent;
+import me.rhin.openciv.listener.TileStatlineListener.TileStatlineEvent;
 import me.rhin.openciv.listener.TurnTimeLeftListener.TurnTimeLeftEvent;
 import me.rhin.openciv.listener.UnitAttackListener.UnitAttackEvent;
 import me.rhin.openciv.listener.WorkTileListener.WorkTileEvent;
@@ -97,6 +98,7 @@ import me.rhin.openciv.shared.packet.type.SetUnitOwnerPacket;
 import me.rhin.openciv.shared.packet.type.SetWorldSizePacket;
 import me.rhin.openciv.shared.packet.type.SettleCityPacket;
 import me.rhin.openciv.shared.packet.type.TerritoryGrowPacket;
+import me.rhin.openciv.shared.packet.type.TileStatlinePacket;
 import me.rhin.openciv.shared.packet.type.TurnTimeLeftPacket;
 import me.rhin.openciv.shared.packet.type.UnitAttackPacket;
 import me.rhin.openciv.shared.packet.type.WorkTilePacket;
@@ -151,6 +153,7 @@ public class NetworkManager {
 		networkEvents.put(RemoveProductionItemPacket.class, RemoveProductionItemEvent.class);
 		networkEvents.put(SetTurnLengthPacket.class, SetTurnLengthEvent.class);
 		networkEvents.put(SendChatMessagePacket.class, SendChatMessageEvent.class);
+		networkEvents.put(TileStatlinePacket.class, TileStatlineEvent.class);
 	}
 
 	public void connect(String ip) {

@@ -46,6 +46,7 @@ import me.rhin.openciv.server.listener.SetTurnLengthListener.SetTurnLengthEvent;
 import me.rhin.openciv.server.listener.SetWorldSizeListener.SetWorldSizeEvent;
 import me.rhin.openciv.server.listener.SettleCityListener.SettleCityEvent;
 import me.rhin.openciv.server.listener.StartGameRequestListener.StartGameRequestEvent;
+import me.rhin.openciv.server.listener.TileStatlineListener.TileStatlineEvent;
 import me.rhin.openciv.server.listener.TradeCityListener.TradeCityEvent;
 import me.rhin.openciv.server.listener.UnitMoveListener.UnitMoveEvent;
 import me.rhin.openciv.server.listener.WorkTileListener.WorkTileEvent;
@@ -76,6 +77,7 @@ import me.rhin.openciv.shared.packet.type.SetTurnLengthPacket;
 import me.rhin.openciv.shared.packet.type.SetWorldSizePacket;
 import me.rhin.openciv.shared.packet.type.SettleCityPacket;
 import me.rhin.openciv.shared.packet.type.StartGameRequestPacket;
+import me.rhin.openciv.shared.packet.type.TileStatlinePacket;
 import me.rhin.openciv.shared.packet.type.TradeCityPacket;
 import me.rhin.openciv.shared.packet.type.WorkTilePacket;
 import me.rhin.openciv.shared.util.ColorHelper;
@@ -155,6 +157,7 @@ public class Server extends WebSocketServer {
 		networkEvents.put(TradeCityPacket.class, TradeCityEvent.class);
 		networkEvents.put(SetTurnLengthPacket.class, SetTurnLengthEvent.class);
 		networkEvents.put(SendChatMessagePacket.class, SendChatMessageEvent.class);
+		networkEvents.put(TileStatlinePacket.class, TileStatlineEvent.class);
 
 		this.playerIndex = 0;
 		this.commandProcessor = new CmdProcessor();

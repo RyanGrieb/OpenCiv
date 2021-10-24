@@ -6,14 +6,15 @@ import com.badlogic.gdx.utils.JsonValue;
 import me.rhin.openciv.shared.packet.Packet;
 import me.rhin.openciv.shared.packet.StatPacket;
 
-public class PlayerStatUpdatePacket extends Packet implements StatPacket {
+public class TileStatlinePacket extends Packet implements StatPacket {
 
+	private int gridX, gridY;
 	private static final int MAX_STATS = 12;
 
 	private String[] statNames;
 	private float[] statValues;
 
-	public PlayerStatUpdatePacket() {
+	public TileStatlinePacket() {
 		this.statNames = new String[MAX_STATS];
 		this.statValues = new float[MAX_STATS];
 	}
@@ -21,6 +22,8 @@ public class PlayerStatUpdatePacket extends Packet implements StatPacket {
 	@Override
 	public void write(Json json) {
 		super.write(json);
+		json.writeValue("gridX", gridX);
+		json.writeValue("gridY", gridY);
 		json.writeValue("statNames", statNames);
 		json.writeValue("statValues", statValues);
 	}
@@ -28,6 +31,9 @@ public class PlayerStatUpdatePacket extends Packet implements StatPacket {
 	@Override
 	public void read(Json json, JsonValue jsonData) {
 		super.read(json, jsonData);
+		this.gridX = jsonData.getInt("gridX");
+		this.gridY = jsonData.getInt("gridY");
+
 		this.statNames = new String[MAX_STATS];
 		this.statValues = new float[MAX_STATS];
 
@@ -43,6 +49,19 @@ public class PlayerStatUpdatePacket extends Packet implements StatPacket {
 	@Override
 	public float[] getStatValues() {
 		return statValues;
+	}
+
+	public void setTile(int gridX, int gridY) {
+		this.gridX = gridX;
+		this.gridY = gridY;
+	}
+
+	public int getGridX() {
+		return gridX;
+	}
+
+	public int getGridY() {
+		return gridY;
 	}
 
 	public void addStat(String statName, float statValue) {

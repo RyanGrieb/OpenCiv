@@ -14,6 +14,7 @@ import me.rhin.openciv.server.Server;
 import me.rhin.openciv.server.game.AbstractPlayer;
 import me.rhin.openciv.server.game.Player;
 import me.rhin.openciv.server.game.city.building.Building;
+import me.rhin.openciv.server.game.city.building.IncreaseTileStatlineBuilding;
 import me.rhin.openciv.server.game.city.citizen.AssignedCitizenWorker;
 import me.rhin.openciv.server.game.city.citizen.CitizenWorker;
 import me.rhin.openciv.server.game.city.citizen.CityCenterCitizenWorker;
@@ -385,7 +386,6 @@ public class City implements AttackableEntity, SpecialistContainer, NextTurnList
 
 		Json json = new Json();
 		playerOwner.sendPacket(json.toJson(packet));
-		playerOwner.sendPacket(json.toJson(packet));
 	}
 
 	public void removeCitizenWorkerFromTile(Tile tile) {
@@ -509,8 +509,7 @@ public class City implements AttackableEntity, SpecialistContainer, NextTurnList
 		// Note: This assumes were being captured.
 	}
 
-	private StatLine getTileStatLine(Tile tile) {
-		// TODO: Research, religion can effect the output of tiles.
+	public StatLine getTileStatLine(Tile tile) {
 
 		if (tile.equals(originTile)) {
 
@@ -528,7 +527,19 @@ public class City implements AttackableEntity, SpecialistContainer, NextTurnList
 			return statLine;
 		}
 
-		return tile.getStatLine();
+		StatLine tileStatLine = new StatLine();
+		tileStatLine.mergeStatLine(tile.getStatLine());
+		for (Building building : buildings) {
+			if (building instanceof IncreaseTileStatlineBuilding) {
+				// Problem: Lighthouse not detected.
+				IncreaseTileStatlineBuilding statlineBuilding = (IncreaseTileStatlineBuilding) building;
+				System.out.println("!!! increasing by " + statlineBuilding.getAddedStatline(tile));
+
+				tileStatLine.mergeStatLine(statlineBuilding.getAddedStatline(tile));
+			}
+		}
+
+		return tileStatLine;
 	}
 
 	private ArrayList<Tile> getTopWorkableTiles() {

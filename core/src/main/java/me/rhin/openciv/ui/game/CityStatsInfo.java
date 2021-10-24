@@ -1,5 +1,6 @@
 package me.rhin.openciv.ui.game;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.scenes.scene2d.Actor;
@@ -12,7 +13,6 @@ import me.rhin.openciv.shared.packet.type.CityStatUpdatePacket;
 import me.rhin.openciv.shared.stat.Stat;
 import me.rhin.openciv.shared.util.MathHelper;
 import me.rhin.openciv.ui.label.CustomLabel;
-import me.rhin.openciv.ui.window.type.GameOverlay;
 
 public class CityStatsInfo extends Actor implements CityStatUpdateListener {
 
@@ -194,43 +194,49 @@ public class CityStatsInfo extends Actor implements CityStatUpdateListener {
 	}
 
 	private void updateStatValues() {
-		int gainedFood = (int) (city.getStatLine().getStatValue(Stat.FOOD_GAIN)
-				- (city.getStatLine().getStatValue(Stat.POPULATION) * 2));
-		populationLabel.setText((int) city.getStatLine().getStatValue(Stat.POPULATION));
+		Gdx.app.postRunnable(new Runnable() {
+			@Override
+			public void run() {
 
-		int surplusFood = (int) city.getStatLine().getStatValue(Stat.FOOD_SURPLUS);
-		int population = (int) city.getStatLine().getStatValue(Stat.POPULATION);
-		int foodRequired = (int) (15 + 8 * (population - 1) + Math.pow(population - 1, 1.5));
+				int gainedFood = (int) (city.getStatLine().getStatValue(Stat.FOOD_GAIN)
+						- (city.getStatLine().getStatValue(Stat.POPULATION) * 2));
+				populationLabel.setText((int) city.getStatLine().getStatValue(Stat.POPULATION));
 
-		int growthTurns = (foodRequired - surplusFood) / MathHelper.nonZero(gainedFood);
+				int surplusFood = (int) city.getStatLine().getStatValue(Stat.FOOD_SURPLUS);
+				int population = (int) city.getStatLine().getStatValue(Stat.POPULATION);
+				int foodRequired = (int) (15 + 8 * (population - 1) + Math.pow(population - 1, 1.5));
 
-		if (gainedFood < 0) {
-			int starvingTurns = (surplusFood / Math.abs(gainedFood)) + 1;
-			populationGrowthLabel.setText(starvingTurns + (starvingTurns > 1 ? " Turns" : " Turn"));
-			populationGrowthDescLabel.setText("Starve In: ");
+				int growthTurns = (foodRequired - surplusFood) / MathHelper.nonZero(gainedFood);
 
-		} else if (gainedFood == 0) {
-			populationGrowthLabel.setText("Stagnated");
-			populationGrowthDescLabel.setText("Growth: ");
-		} else {
-			populationGrowthLabel.setText(growthTurns + (growthTurns > 1 ? " Turns" : " Turn"));
-			populationGrowthDescLabel.setText("Growth In: ");
-		}
+				if (gainedFood < 0) {
+					int starvingTurns = (surplusFood / Math.abs(gainedFood)) + 1;
+					populationGrowthLabel.setText(starvingTurns + (starvingTurns > 1 ? " Turns" : " Turn"));
+					populationGrowthDescLabel.setText("Starve In: ");
 
-		foodLabel.setText((gainedFood < 0 ? "" : "+") + gainedFood);
-		productionLabel.setText("+" + (int) city.getStatLine().getStatValue(Stat.PRODUCTION_GAIN));
-		goldLabel.setText("+" + (int) city.getStatLine().getStatValue(Stat.GOLD_GAIN));
-		scienceLabel.setText("+" + city.getStatLine().getStatValue(Stat.SCIENCE_GAIN));
-		heritageLabel.setText("+" + (int) city.getStatLine().getStatValue(Stat.HERITAGE_GAIN));
-		moraleLabel.setText((int) city.getStatLine().getStatValue(Stat.MORALE) + "%");
+				} else if (gainedFood == 0) {
+					populationGrowthLabel.setText("Stagnated");
+					populationGrowthDescLabel.setText("Growth: ");
+				} else {
+					populationGrowthLabel.setText(growthTurns + (growthTurns > 1 ? " Turns" : " Turn"));
+					populationGrowthDescLabel.setText("Growth In: ");
+				}
 
-		int expansionTurns = (int) Math.ceil(((city.getStatLine().getStatValue(Stat.EXPANSION_REQUIREMENT)
-				- city.getStatLine().getStatValue(Stat.EXPANSION_PROGRESS))
-				/ city.getStatLine().getStatValue(Stat.HERITAGE_GAIN)));
+				foodLabel.setText((gainedFood < 0 ? "" : "+") + gainedFood);
+				productionLabel.setText("+" + city.getStatLine().getStatValue(Stat.PRODUCTION_GAIN));
+				goldLabel.setText("+" + (int) city.getStatLine().getStatValue(Stat.GOLD_GAIN));
+				scienceLabel.setText("+" + city.getStatLine().getStatValue(Stat.SCIENCE_GAIN));
+				heritageLabel.setText("+" + (int) city.getStatLine().getStatValue(Stat.HERITAGE_GAIN));
+				moraleLabel.setText((int) city.getStatLine().getStatValue(Stat.MORALE) + "%");
 
-		borderGrowthLabel.setText(expansionTurns + (expansionTurns > 1 ? " Turns" : " Turn"));
+				int expansionTurns = (int) Math.ceil(((city.getStatLine().getStatValue(Stat.EXPANSION_REQUIREMENT)
+						- city.getStatLine().getStatValue(Stat.EXPANSION_PROGRESS))
+						/ city.getStatLine().getStatValue(Stat.HERITAGE_GAIN)));
 
-		updatePositions();
+				borderGrowthLabel.setText(expansionTurns + (expansionTurns > 1 ? " Turns" : " Turn"));
+
+				updatePositions();
+			}
+		});
 	}
 
 	private void updatePositions() {
