@@ -531,9 +531,7 @@ public class City implements AttackableEntity, SpecialistContainer, NextTurnList
 		tileStatLine.mergeStatLine(tile.getStatLine());
 		for (Building building : buildings) {
 			if (building instanceof IncreaseTileStatlineBuilding) {
-				// Problem: Lighthouse not detected.
 				IncreaseTileStatlineBuilding statlineBuilding = (IncreaseTileStatlineBuilding) building;
-				System.out.println("!!! increasing by " + statlineBuilding.getAddedStatline(tile));
 
 				tileStatLine.mergeStatLine(statlineBuilding.getAddedStatline(tile));
 			}

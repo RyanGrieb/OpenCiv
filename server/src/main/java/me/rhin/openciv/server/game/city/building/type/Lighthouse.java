@@ -30,14 +30,6 @@ public class Lighthouse extends Building implements IncreaseTileStatlineBuilding
 	}
 
 	@Override
-	public void create() {
-		super.create();
-
-		// for (Tile tile : city.getTerritory())
-
-	}
-
-	@Override
 	public float getBuildingProductionCost() {
 		return 75;
 	}

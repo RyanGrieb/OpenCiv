@@ -25,6 +25,7 @@ import me.rhin.openciv.server.game.city.building.type.Shrine;
 import me.rhin.openciv.server.game.city.building.type.Stables;
 import me.rhin.openciv.server.game.city.building.type.StatueOfAres;
 import me.rhin.openciv.server.game.city.building.type.Stonehenge;
+import me.rhin.openciv.server.game.city.building.type.Stoneworks;
 import me.rhin.openciv.server.game.city.building.type.Walls;
 import me.rhin.openciv.server.game.city.building.type.WaterMill;
 import me.rhin.openciv.server.game.unit.type.Archer;
@@ -103,6 +104,7 @@ public class ProducibleItemManager implements NextTurnListener {
 		possibleItems.put("Stables", new Stables(city));
 		possibleItems.put("National College", new NationalCollege(city));
 		possibleItems.put("Lighthouse", new Lighthouse(city));
+		possibleItems.put("Stoneworks", new Stoneworks(city));
 
 		// Wonders
 		possibleItems.put("Great Pyramids", new GreatPyramids(city));
