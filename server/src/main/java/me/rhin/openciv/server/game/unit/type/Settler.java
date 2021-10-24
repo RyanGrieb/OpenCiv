@@ -11,11 +11,13 @@ import me.rhin.openciv.server.game.Player;
 import me.rhin.openciv.server.game.city.City;
 import me.rhin.openciv.server.game.city.building.type.Palace;
 import me.rhin.openciv.server.game.map.tile.Tile;
+import me.rhin.openciv.server.game.map.tile.TileType;
 import me.rhin.openciv.server.game.map.tile.TileType.TileProperty;
 import me.rhin.openciv.server.game.unit.Unit;
 import me.rhin.openciv.server.game.unit.UnitItem;
 import me.rhin.openciv.server.listener.ServerSettleCityListener.ServerSettleCityEvent;
 import me.rhin.openciv.shared.packet.type.DeleteUnitPacket;
+import me.rhin.openciv.shared.packet.type.RemoveTileTypePacket;
 import me.rhin.openciv.shared.packet.type.SettleCityPacket;
 import me.rhin.openciv.shared.packet.type.TerritoryGrowPacket;
 import me.rhin.openciv.shared.stat.Stat;
@@ -60,10 +62,22 @@ public class Settler extends UnitItem {
 
 			Tile tile = getStandingTile();
 
+			Json json = new Json();
+			if (tile.containsTileType(TileType.FOREST) || tile.containsTileType(TileType.JUNGLE)) {
+
+				TileType type = (tile.containsTileType(TileType.FOREST) ? TileType.FOREST : TileType.JUNGLE);
+
+				RemoveTileTypePacket removeTileTypePacket = new RemoveTileTypePacket();
+				removeTileTypePacket.setTile(type.name(), tile.getGridX(), tile.getGridY());
+
+				for (Player player : Server.getInstance().getPlayers())
+					player.sendPacket(json.toJson(removeTileTypePacket));
+			}
+
 			City city = new City(playerOwner, cityName, tile);
 			playerOwner.addCity(city);
 			playerOwner.setSelectedUnit(null);
-			
+
 			playerOwner.removeUnit(this);
 			tile.removeUnit(this);
 			kill();
@@ -76,7 +90,6 @@ public class Settler extends UnitItem {
 			DeleteUnitPacket deleteUnitPacket = new DeleteUnitPacket();
 			deleteUnitPacket.setUnit(getID(), standingTile.getGridX(), standingTile.getGridY());
 
-			Json json = new Json();
 			for (Player player : Server.getInstance().getPlayers()) {
 				player.sendPacket(json.toJson(deleteUnitPacket));
 				player.sendPacket(json.toJson(settleCityPacket));
@@ -96,7 +109,7 @@ public class Settler extends UnitItem {
 			city.updateWorkedTiles();
 
 			city.getPlayerOwner().updateOwnedStatlines(false);
-			
+
 			Server.getInstance().getEventManager().fireEvent(new ServerSettleCityEvent(city));
 		}
 	}
@@ -128,7 +141,7 @@ public class Settler extends UnitItem {
 
 	@Override
 	public float getBaseCombatStrength() {
-		
+
 		return 0;
 	}
 }
