@@ -244,6 +244,11 @@ public enum TileType implements Comparable<TileType> {
 			improvements.add(new PastureImprovement(TileType.HORSES_IMPROVED, 5));
 			return improvements;
 		}
+
+		@Override
+		public TileType[] getSpawnTileTypes() {
+			return new TileType[] { TileType.GRASS, TileType.PLAINS, TileType.TUNDRA };
+		}
 	},
 	CATTLE(TileLayer.MIDDLE, TileProperty.RESOURCE) {
 		@Override
@@ -258,6 +263,11 @@ public enum TileType implements Comparable<TileType> {
 			ArrayList<TileImprovement> improvements = new ArrayList<>();
 			improvements.add(new PastureImprovement(TileType.CATTLE_IMPROVED, 5));
 			return improvements;
+		}
+
+		@Override
+		public TileType[] getSpawnTileTypes() {
+			return new TileType[] { TileType.GRASS, TileType.GRASS_HILL };
 		}
 	},
 	SHEEP(TileLayer.MIDDLE, TileProperty.RESOURCE) {
@@ -274,6 +284,11 @@ public enum TileType implements Comparable<TileType> {
 			improvements.add(new PastureImprovement(TileType.SHEEP_IMPROVED, 5));
 			return improvements;
 		}
+
+		@Override
+		public TileType[] getSpawnTileTypes() {
+			return new TileType[] { TileType.GRASS_HILL, TileType.PLAINS_HILL, TileType.TUNDRA_HILL };
+		}
 	},
 	IRON(TileLayer.MIDDLE, TileProperty.RESOURCE) {
 		@Override
@@ -288,6 +303,12 @@ public enum TileType implements Comparable<TileType> {
 			ArrayList<TileImprovement> improvements = new ArrayList<>();
 			improvements.add(new MineImprovement(TileType.IRON_IMPROVED, 5));
 			return improvements;
+		}
+
+		@Override
+		public TileType[] getSpawnTileTypes() {
+			return new TileType[] { TileType.GRASS, TileType.GRASS_HILL, TileType.PLAINS, TileType.PLAINS_HILL,
+					TileType.TUNDRA, TileType.TUNDRA_HILL, TileType.DESERT, TileType.DESERT_HILL };
 		}
 	},
 	COPPER(TileLayer.MIDDLE, TileProperty.LUXURY) {
@@ -304,6 +325,12 @@ public enum TileType implements Comparable<TileType> {
 			improvements.add(new MineImprovement(TileType.COPPER_IMPROVED, 5));
 			return improvements;
 		}
+
+		@Override
+		public TileType[] getSpawnTileTypes() {
+			return new TileType[] { TileType.GRASS, TileType.GRASS_HILL, TileType.PLAINS, TileType.PLAINS_HILL,
+					TileType.TUNDRA, TileType.TUNDRA_HILL, TileType.DESERT, TileType.DESERT_HILL };
+		}
 	},
 	COTTON(TileLayer.MIDDLE, TileProperty.LUXURY) {
 		@Override
@@ -318,6 +345,11 @@ public enum TileType implements Comparable<TileType> {
 			ArrayList<TileImprovement> improvements = new ArrayList<>();
 			improvements.add(new PlantationImprovement(TileType.COTTON_IMPROVED, 5));
 			return improvements;
+		}
+
+		@Override
+		public TileType[] getSpawnTileTypes() {
+			return new TileType[] { TileType.GRASS, TileType.PLAINS, TileType.DESERT, TileType.FLOODPLAINS };
 		}
 	},
 	GEMS(TileLayer.MIDDLE, TileProperty.LUXURY) {
@@ -334,6 +366,12 @@ public enum TileType implements Comparable<TileType> {
 			improvements.add(new MineImprovement(TileType.GEMS_IMPROVED, 5));
 			return improvements;
 		}
+
+		@Override
+		public TileType[] getSpawnTileTypes() {
+			return new TileType[] { TileType.GRASS, TileType.GRASS_HILL, TileType.PLAINS, TileType.PLAINS_HILL,
+					TileType.TUNDRA, TileType.TUNDRA_HILL, TileType.DESERT, TileType.DESERT_HILL };
+		}
 	},
 	MARBLE(TileLayer.MIDDLE, TileProperty.LUXURY) {
 		@Override
@@ -348,6 +386,12 @@ public enum TileType implements Comparable<TileType> {
 			ArrayList<TileImprovement> improvements = new ArrayList<>();
 			improvements.add(new QuarryImprovement(TileType.MARBLE_IMPROVED, 5));
 			return improvements;
+		}
+
+		@Override
+		public TileType[] getSpawnTileTypes() {
+			return new TileType[] { TileType.GRASS, TileType.GRASS_HILL, TileType.PLAINS, TileType.PLAINS_HILL,
+					TileType.TUNDRA, TileType.TUNDRA_HILL, TileType.DESERT, TileType.DESERT_HILL };
 		}
 	},
 	FARM(TileLayer.MIDDLE, TileProperty.IMPROVEMENT) {
@@ -522,6 +566,18 @@ public enum TileType implements Comparable<TileType> {
 		this.tileProperties = tileProperties;
 	}
 
+	public static ArrayList<TileType> getTilesOfProperty(TileProperty... tileProperty) {
+
+		ArrayList<TileType> tileTypes = new ArrayList<>();
+
+		for (TileType tileType : values()) {
+			if (tileType.hasProperty(tileProperty))
+				tileTypes.add(tileType);
+		}
+
+		return tileTypes;
+	}
+
 	public abstract StatLine getStatLine();
 
 	public List<TileImprovement> getImprovements() {
@@ -585,7 +641,7 @@ public enum TileType implements Comparable<TileType> {
 		return resourceTypes.get(rnd.nextInt(resourceTypes.size()));
 	}
 
-	TileImprovement getImprovement(String improvementName) {
+	public TileImprovement getImprovement(String improvementName) {
 		if (improvementName.equals("road"))
 			return new RoadImprovement();
 //FIXME: Do this a better way?`
@@ -597,6 +653,15 @@ public enum TileType implements Comparable<TileType> {
 				return tileImprovement;
 		}
 
+		return null;
+	}
+
+	/**
+	 * Returns the tile types that specific tile spawns in
+	 * 
+	 * @return
+	 */
+	public TileType[] getSpawnTileTypes() {
 		return null;
 	}
 }
