@@ -55,14 +55,14 @@ icon_chop
   index: -1
 icon_citizen
   rotate: false
-  xy: 428, 104
+  xy: 38, 2
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 icon_citizen_city_center
   rotate: false
-  xy: 464, 104
+  xy: 74, 2
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
@@ -76,7 +76,7 @@ icon_citizen_locked
   index: -1
 icon_citizen_unworked
   rotate: false
-  xy: 38, 2
+  xy: 446, 104
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
@@ -118,7 +118,7 @@ icon_england
   index: -1
 icon_faith
   rotate: false
-  xy: 446, 104
+  xy: 56, 2
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
@@ -132,7 +132,7 @@ icon_farm
   index: -1
 icon_food
   rotate: false
-  xy: 56, 2
+  xy: 464, 104
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
@@ -180,6 +180,13 @@ icon_hammer
   offset: 0, 0
   index: -1
 icon_heritage
+  rotate: false
+  xy: 410, 104
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+icon_maintenance
   rotate: false
   xy: 376, 70
   size: 16, 16
@@ -230,7 +237,7 @@ icon_pasture
   index: -1
 icon_production
   rotate: false
-  xy: 74, 2
+  xy: 482, 104
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
@@ -251,7 +258,7 @@ icon_rome
   index: -1
 icon_science
   rotate: false
-  xy: 410, 104
+  xy: 20, 2
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
@@ -293,7 +300,7 @@ icon_target
   index: -1
 icon_unemployed_citizen
   rotate: false
-  xy: 20, 2
+  xy: 428, 104
   size: 16, 16
   orig: 16, 16
   offset: 0, 0

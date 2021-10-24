@@ -6,7 +6,6 @@ import me.rhin.openciv.game.city.building.Building;
 import me.rhin.openciv.game.map.tile.Tile;
 import me.rhin.openciv.game.map.tile.TileType.TileProperty;
 import me.rhin.openciv.game.research.type.OpticsTech;
-import me.rhin.openciv.game.research.type.PotteryTech;
 import me.rhin.openciv.shared.stat.Stat;
 
 public class Lighthouse extends Building {
@@ -15,6 +14,7 @@ public class Lighthouse extends Building {
 		super(city);
 
 		this.statLine.addValue(Stat.FOOD_GAIN, 1);
+		this.statLine.addValue(Stat.MAINTENANCE, 1);
 	}
 
 	@Override

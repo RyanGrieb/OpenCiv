@@ -9,11 +9,14 @@ import me.rhin.openciv.game.production.ProductionItem;
 import me.rhin.openciv.game.research.type.HorsebackRridingTech;
 import me.rhin.openciv.game.unit.UnitItem;
 import me.rhin.openciv.game.unit.UnitItem.UnitType;
+import me.rhin.openciv.shared.stat.Stat;
 
 public class Stables extends Building {
 
 	public Stables(City city) {
 		super(city);
+		
+		this.statLine.addValue(Stat.MAINTENANCE, 1);
 	}
 
 	@Override

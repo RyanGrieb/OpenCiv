@@ -40,7 +40,13 @@ public class StatLine {
 
 	public void mergeStatLine(StatLine statLine) {
 		for (Stat stat : statLine.getStatValues().keySet()) {
-			mergeValue(stat, new StatValue(statLine.getStatValues().get(stat)));
+
+			// FIXME: This isn't the best way to do this. Have a universal getValue() method
+			// in the statline, and change gold_gain based on that
+			if (stat == Stat.MAINTENANCE)
+				subValue(Stat.GOLD_GAIN, statLine.getStatValues().get(stat).getValue());
+			else
+				mergeValue(stat, new StatValue(statLine.getStatValues().get(stat)));
 		}
 	}
 

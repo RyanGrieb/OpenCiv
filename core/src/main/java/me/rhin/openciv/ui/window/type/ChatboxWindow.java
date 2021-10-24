@@ -59,7 +59,6 @@ public class ChatboxWindow extends AbstractWindow implements SendChatMessageList
 		Civilization.getInstance().getWindowManager().toggleWindow(new InfoButtonsWindow());
 
 		for (String message : Civilization.getInstance().getChatHandler().getSentMessages()) {
-			System.out.println(message);
 			addMessage(message);
 		}
 

@@ -20,13 +20,9 @@ public class HeadlessLauncher {
 		// System.out.println("playerStatLine:" + playerStatLine.id);
 
 		StatLine statLine = new StatLine();
-		statLine.addValue(Stat.MAX_TRADE_ROUTES, 1);
-		statLine.addValue(Stat.TRADE_ROUTE_AMOUNT, 1);
-		statLine.addValue(Stat.GOLD_GAIN, 1);
-		statLine.addValue(Stat.GOLD, 20);
+		statLine.addValue(Stat.GOLD_GAIN, 2);
+		statLine.subValue(Stat.GOLD_GAIN, 1);
 		
-		statLine.clearNonAccumulative();
-
 		System.out.println(statLine);
 	}
 

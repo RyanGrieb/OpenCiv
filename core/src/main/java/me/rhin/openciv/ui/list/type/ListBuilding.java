@@ -2,6 +2,7 @@ package me.rhin.openciv.ui.list.type;
 
 import java.util.ArrayList;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.utils.Align;
@@ -46,8 +47,6 @@ public class ListBuilding extends ListObject {
 		this.specialistButtons = new ArrayList<>();
 
 		for (Stat stat : building.getStatLine().getStatValues().keySet()) {
-			if (stat == Stat.MAINTENANCE)
-				continue;
 
 			String name = null;
 			if (stat.name().contains("_")) {
@@ -61,6 +60,8 @@ public class ListBuilding extends ListObject {
 			statIcons.add(sprite);
 
 			CustomLabel label = new CustomLabel("+" + (int) building.getStatLine().getStatValue(stat));
+			if (stat == Stat.MAINTENANCE)
+				label.setColor(new Color(66, 0, 0, 1));
 			statLabels.add(label);
 		}
 

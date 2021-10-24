@@ -222,7 +222,8 @@ public class CityStatsInfo extends Actor implements CityStatUpdateListener {
 				}
 
 				foodLabel.setText((gainedFood < 0 ? "" : "+") + gainedFood);
-				productionLabel.setText("+" + city.getStatLine().getStatValue(Stat.PRODUCTION_GAIN));
+				productionLabel
+						.setText("+" + MathHelper.roundDec(city.getStatLine().getStatValue(Stat.PRODUCTION_GAIN)));
 				goldLabel.setText("+" + (int) city.getStatLine().getStatValue(Stat.GOLD_GAIN));
 				scienceLabel.setText("+" + city.getStatLine().getStatValue(Stat.SCIENCE_GAIN));
 				heritageLabel.setText("+" + (int) city.getStatLine().getStatValue(Stat.HERITAGE_GAIN));

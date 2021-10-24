@@ -13,7 +13,7 @@ public class Granary extends Building {
 		super(city);
 
 		this.statLine.addValue(Stat.FOOD_GAIN, 2);
-		this.statLine.addValue(Stat.MAINTENANCE, -1);
+		this.statLine.addValue(Stat.MAINTENANCE, 1);
 	}
 
 	@Override

@@ -4,11 +4,14 @@ import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.city.City;
 import me.rhin.openciv.game.city.building.Building;
 import me.rhin.openciv.game.research.type.MasonryTech;
+import me.rhin.openciv.shared.stat.Stat;
 
 public class Walls extends Building {
 
 	public Walls(City city) {
 		super(city);
+		
+		this.statLine.addValue(Stat.MAINTENANCE, 1);
 	}
 
 	@Override

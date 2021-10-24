@@ -11,6 +11,7 @@ public class Colosseum extends Building {
 		super(city);
 
 		this.statLine.addValue(Stat.MORALE, 10);
+		this.statLine.addValue(Stat.MAINTENANCE, 1);
 	}
 
 	@Override

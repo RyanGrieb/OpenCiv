@@ -11,6 +11,7 @@ public class Stoneworks extends Building {
 		super(city);
 
 		this.statLine.addValue(Stat.PRODUCTION_GAIN, 1);
+		this.statLine.addValue(Stat.MAINTENANCE, 1);
 	}
 
 	@Override

@@ -1,5 +1,8 @@
 package me.rhin.openciv.shared.util;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+
 import com.badlogic.gdx.math.Vector2;
 
 //FIXME: Remove the other MathHelper class and merge it into this
@@ -122,6 +125,12 @@ public class MathHelper {
 			return 0; // colinear
 		}
 		return (val > 0) ? 1 : 2; // clock or counterclock wise
+	}
+
+	public static float roundDec(float value) {
+		BigDecimal bd = new BigDecimal(Float.toString(value));
+		bd = bd.setScale(2, RoundingMode.HALF_UP);
+		return bd.floatValue();
 	}
 
 }

@@ -14,6 +14,7 @@ public class WaterMill extends Building {
 
 		this.statLine.addValue(Stat.FOOD_GAIN, 2);
 		this.statLine.addValue(Stat.PRODUCTION_GAIN, 1);
+		this.statLine.addValue(Stat.MAINTENANCE, 2);
 	}
 
 	@Override

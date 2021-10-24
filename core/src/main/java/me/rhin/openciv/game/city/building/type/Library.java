@@ -15,6 +15,7 @@ public class Library extends Building implements SpecialistContainer {
 		super(city);
 
 		this.statLine.addValue(Stat.SCIENCE_GAIN, 2);
+		this.statLine.addValue(Stat.MAINTENANCE, 1);
 	}
 
 	@Override

@@ -17,6 +17,8 @@ public class Stables extends Building implements TerritoryGrowListener {
 	public Stables(City city) {
 		super(city);
 
+		this.statLine.addValue(Stat.MAINTENANCE, 1);
+		
 		Server.getInstance().getEventManager().addListener(TerritoryGrowListener.class, this);
 	}
 

@@ -723,7 +723,7 @@ public class InGameState extends GameState implements DisconnectListener, Select
 		// Add AI
 		for (int i = 0; i < 2; i++)
 			for (CityStateType type : CityStateType.values()) {
-				getAIPlayers().add(new CityStatePlayer(type));
+				//getAIPlayers().add(new CityStatePlayer(type));
 			}
 
 		getAIPlayers().add(new BarbarianPlayer());
