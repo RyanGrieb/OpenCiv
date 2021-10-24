@@ -9,6 +9,7 @@ import me.rhin.openciv.Civilization;
 import me.rhin.openciv.game.city.City;
 import me.rhin.openciv.game.city.building.Building;
 import me.rhin.openciv.game.map.tile.Tile;
+import me.rhin.openciv.game.player.AbstractPlayer;
 import me.rhin.openciv.game.production.ProductionItem;
 import me.rhin.openciv.listener.AddSpecialistToContainerListener;
 import me.rhin.openciv.listener.BuildingConstructedListener;
@@ -18,6 +19,7 @@ import me.rhin.openciv.listener.PlayerStatUpdateListener;
 import me.rhin.openciv.listener.RemoveSpecialistFromContainerListener;
 import me.rhin.openciv.listener.ResizeListener;
 import me.rhin.openciv.listener.SetCitizenTileWorkerListener;
+import me.rhin.openciv.listener.SetCityOwnerListener;
 import me.rhin.openciv.listener.SetTileTypeListener;
 import me.rhin.openciv.listener.TerritoryGrowListener;
 import me.rhin.openciv.shared.packet.type.AddSpecialistToContainerPacket;
@@ -27,6 +29,7 @@ import me.rhin.openciv.shared.packet.type.FinishProductionItemPacket;
 import me.rhin.openciv.shared.packet.type.PlayerStatUpdatePacket;
 import me.rhin.openciv.shared.packet.type.RemoveSpecialistFromContainerPacket;
 import me.rhin.openciv.shared.packet.type.SetCitizenTileWorkerPacket;
+import me.rhin.openciv.shared.packet.type.SetCityOwnerPacket;
 import me.rhin.openciv.shared.packet.type.SetTileTypePacket;
 import me.rhin.openciv.shared.packet.type.TerritoryGrowPacket;
 import me.rhin.openciv.ui.button.type.CloseWindowButton;
@@ -43,10 +46,10 @@ import me.rhin.openciv.ui.list.type.ListUnemployedCitizens;
 import me.rhin.openciv.ui.screen.type.InGameScreen;
 import me.rhin.openciv.ui.window.AbstractWindow;
 
-public class CityInfoWindow extends AbstractWindow
-		implements ResizeListener, BuildingConstructedListener, SetCitizenTileWorkerListener,
-		AddSpecialistToContainerListener, RemoveSpecialistFromContainerListener, CompleteResearchListener,
-		FinishProductionItemListener, PlayerStatUpdateListener, SetTileTypeListener, TerritoryGrowListener {
+public class CityInfoWindow extends AbstractWindow implements ResizeListener, BuildingConstructedListener,
+		SetCitizenTileWorkerListener, AddSpecialistToContainerListener, RemoveSpecialistFromContainerListener,
+		CompleteResearchListener, FinishProductionItemListener, PlayerStatUpdateListener, SetTileTypeListener,
+		TerritoryGrowListener, SetCityOwnerListener {
 
 	private City city;
 	private CloseWindowButton closeWindowButton;
@@ -114,6 +117,7 @@ public class CityInfoWindow extends AbstractWindow
 		Civilization.getInstance().getEventManager().addListener(PlayerStatUpdateListener.class, this);
 		Civilization.getInstance().getEventManager().addListener(SetTileTypeListener.class, this);
 		Civilization.getInstance().getEventManager().addListener(TerritoryGrowListener.class, this);
+		Civilization.getInstance().getEventManager().addListener(SetCityOwnerListener.class, this);
 	}
 
 	@Override
@@ -261,6 +265,16 @@ public class CityInfoWindow extends AbstractWindow
 	@Override
 	public void onCompleteResearch(CompleteResearchPacket packet) {
 		addAvailableProductionItems();
+	}
+
+	@Override
+	public void onSetCityOwner(SetCityOwnerPacket packet) {
+		for (AbstractPlayer player : Civilization.getInstance().getGame().getPlayers().values()) {
+			City city = player.getCityFromName(packet.getCityName());
+
+			if (this.city.equals(city))
+				Civilization.getInstance().getWindowManager().closeWindow(getClass());
+		}
 	}
 
 	public void updateSpecialistContainers(String cityName, String containerName) {

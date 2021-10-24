@@ -195,8 +195,11 @@ public class Server extends WebSocketServer {
 
 	@Override
 	public void onMessage(WebSocket conn, String message) {
-		System.out.println("[SERVER : " + game.toString() + " - " + getPlayerByConn(conn).getName()
-				+ "] Received Message: " + message);
+
+		if (!message.contains("TileStatlinePacket"))
+			System.out.println("[SERVER : " + game.toString() + " - " + getPlayerByConn(conn).getName()
+					+ "] Received Message: " + message);
+
 		fireAssociatedPacketEvents(conn, message);
 	}
 
