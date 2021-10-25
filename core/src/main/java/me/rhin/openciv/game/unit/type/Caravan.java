@@ -80,7 +80,7 @@ public class Caravan extends UnitItem {
 			if (this.city.equals(city))
 				return new Tradeable("Caravan headquarters", false);
 
-			Tile targetTile = city.getOriginTile();
+			Tile targetTile = city.getTile();
 
 			int h = 0;
 			ArrayList<Tile> openSet = new ArrayList<>();

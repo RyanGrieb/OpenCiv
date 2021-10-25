@@ -37,7 +37,6 @@ public interface MouseMoveListener extends Listener {
 				return;
 
 			for (MouseMoveListener listener : listeners) {
-				// listener.onMouseMove(x, Gdx.graphics.getHeight() - y);
 				listener.onMouseMove(x, y);
 			}
 		}

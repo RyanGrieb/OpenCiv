@@ -360,7 +360,7 @@ public class City implements AttackableEntity, SpecialistContainer, NextTurnList
 					statLine.reduceStatLine(getTileStatLine(citizenWorker.getTile()));
 					addSpecialist();
 				}
-				
+
 				setCitizenTileWorker(new EmptyCitizenWorker(this, citizenWorker.getTile()));
 			}
 		}
@@ -426,7 +426,7 @@ public class City implements AttackableEntity, SpecialistContainer, NextTurnList
 
 	public void removeCitizenWorkerFromTile(Tile tile) {
 		CitizenWorker emptyCitizenWorker = new EmptyCitizenWorker(this, tile);
-		citizenWorkers.put(tile, emptyCitizenWorker);
+		setCitizenTileWorker(emptyCitizenWorker);
 
 		statLine.reduceStatLine(getTileStatLine(tile));
 
@@ -435,13 +435,7 @@ public class City implements AttackableEntity, SpecialistContainer, NextTurnList
 			cityStatUpdatePacket.addStat(name, stat.name(), this.statLine.getStatValues().get(stat).getValue());
 		}
 
-		// FIXME: Use setCitizenTileWorker() ??
-		SetCitizenTileWorkerPacket tileWorkerPacket = new SetCitizenTileWorkerPacket();
-		tileWorkerPacket.setWorker(emptyCitizenWorker.getWorkerType(), name, emptyCitizenWorker.getTile().getGridX(),
-				emptyCitizenWorker.getTile().getGridY());
-
 		Json json = new Json();
-		playerOwner.sendPacket(json.toJson(tileWorkerPacket));
 		playerOwner.sendPacket(json.toJson(cityStatUpdatePacket));
 		playerOwner.updateOwnedStatlines(false);
 

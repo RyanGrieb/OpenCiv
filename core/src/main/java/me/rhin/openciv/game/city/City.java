@@ -17,7 +17,6 @@ import com.badlogic.gdx.utils.reflect.ClassReflection;
 
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.SoundEnum;
-import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.city.building.Building;
 import me.rhin.openciv.game.city.specialist.SpecialistContainer;
 import me.rhin.openciv.game.map.tile.Tile;
@@ -25,7 +24,6 @@ import me.rhin.openciv.game.map.tile.TileObserver;
 import me.rhin.openciv.game.map.tile.TileType.TileProperty;
 import me.rhin.openciv.game.notification.type.AvailableProductionNotification;
 import me.rhin.openciv.game.player.AbstractPlayer;
-import me.rhin.openciv.game.player.Player;
 import me.rhin.openciv.game.production.ProducibleItemManager;
 import me.rhin.openciv.game.unit.AttackableEntity;
 import me.rhin.openciv.listener.AddSpecialistToContainerListener;
@@ -90,15 +88,12 @@ public class City extends Group implements AttackableEntity, TileObserver, Speci
 		this.nameIcon = playerOwner.getCivilization().getIcon().sprite();
 		nameIcon.setBounds(nameLabel.getX() - 20, nameLabel.getY() - 4, 16, 16);
 
-		// FIXME: We really should have the city behave as a group, rather than an
-		// actor...
 		this.healthbar = new Healthbar(nameLabel.getX() + nameLabel.getWidth() / 2 - 50 / 2, nameIcon.getY() + 15, 50,
 				4, false);
 
 		this.maxHealth = 300; // Default
 		this.health = getMaxHealth();
 
-		// FIXME: The actor size & position really shouldn't be confined to the label.
 		this.setPosition(nameLabel.getX() - 20, nameLabel.getY() - 4);
 		this.setSize(nameLabel.getWidth() + 20, nameLabel.getHeight());
 
@@ -112,7 +107,6 @@ public class City extends Group implements AttackableEntity, TileObserver, Speci
 
 				City cityActor = (City) event.getListenerActor();
 				cityActor.onClick();
-				// SoundEnum.playSound(SoundEnum.CITY_CLICK);
 			}
 		});
 
@@ -131,7 +125,6 @@ public class City extends Group implements AttackableEntity, TileObserver, Speci
 	public void draw(Batch batch, float parentAlpha) {
 		if (!Civilization.getInstance().getWindowManager().isOpenWindow(CityInfoWindow.class)
 				&& (originTile.getTileObservers().size() > 0 || !Civilization.SHOW_FOG)) {
-			// FIXME: Since we are a group now, we don't need to override draw.
 			nameLabel.draw(batch, parentAlpha);
 			nameIcon.draw(batch);
 			healthbar.draw(batch, parentAlpha);
@@ -157,8 +150,6 @@ public class City extends Group implements AttackableEntity, TileObserver, Speci
 			Class<? extends Building> buildingClass = (Class<? extends Building>) ClassReflection
 					.forName(buildingClassName);
 
-			// Constructor<?> ctor = buildingClass.getConstructor(City.class);
-			// Building building = (Building) ctor.newInstance(new Object[] { this });
 			Building building = (Building) ClassReflection.getConstructor(buildingClass, City.class).newInstance(this);
 			building.onBuilt();
 			buildings.add(building);
@@ -323,7 +314,7 @@ public class City extends Group implements AttackableEntity, TileObserver, Speci
 
 	@Override
 	public float getMaxHealth() {
-		return maxHealth; // 200
+		return maxHealth;
 	}
 
 	@Override
@@ -338,7 +329,7 @@ public class City extends Group implements AttackableEntity, TileObserver, Speci
 
 	@Override
 	public void setIgnoresTileObstructions(boolean ignoresTileObstructions) {
-
+		// Doesn't include cities
 	}
 
 	@Override
@@ -415,11 +406,6 @@ public class City extends Group implements AttackableEntity, TileObserver, Speci
 
 	public HashMap<Tile, WorkerType> getCitizenWorkers() {
 		return citizenWorkers;
-	}
-
-	// FIXME: Have getTile() replace this redundant method.
-	public Tile getOriginTile() {
-		return originTile;
 	}
 
 	public int getUnemployedWorkerAmount() {

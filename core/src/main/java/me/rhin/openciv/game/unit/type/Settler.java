@@ -77,8 +77,8 @@ public class Settler extends UnitItem {
 			}
 
 			for (City city : Civilization.getInstance().getGame().getCities()) {
-				float distX = Math.abs(unit.getTile().getGridX() - city.getOriginTile().getGridX());
-				float distY = Math.abs(unit.getTile().getGridY() - city.getOriginTile().getGridY());
+				float distX = Math.abs(unit.getTile().getGridX() - city.getTile().getGridX());
+				float distY = Math.abs(unit.getTile().getGridY() - city.getTile().getGridY());
 
 				if (distX + distY < 4)
 					return false;

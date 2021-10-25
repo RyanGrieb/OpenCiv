@@ -29,7 +29,7 @@ public class WaterMill extends Building {
 
 	@Override
 	public boolean meetsProductionRequirements() {
-		return city.getOriginTile().isAdjToRiver()
+		return city.getTile().isAdjToRiver()
 				&& Civilization.getInstance().getGame().getPlayer().getResearchTree().hasResearched(WheelTech.class);
 	}
 
