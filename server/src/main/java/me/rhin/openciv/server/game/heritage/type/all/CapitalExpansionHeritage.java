@@ -28,6 +28,6 @@ public class CapitalExpansionHeritage extends Heritage {
 	@Override
 	protected void onStudied() {
 		// Set capital city stat value
-		player.getOwnedCities().get(0).getStatLine().addModifier(Stat.FOOD_GAIN, 0.15F);
+		player.getCapitalCity().getStatLine().addModifier(Stat.FOOD_GAIN, 0.15F);
 	}
 }

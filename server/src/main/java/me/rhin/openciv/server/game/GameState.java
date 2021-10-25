@@ -43,9 +43,6 @@ public abstract class GameState implements SendChatMessageListener {
 
 	public abstract String toString();
 
-	// FIXME: InGame only method
-	public abstract GameWonders getWonders();
-
 	public BarbarianPlayer getBarbarianPlayer() {
 		for (AIPlayer aiPlayer : aiPlayers)
 			if (aiPlayer instanceof BarbarianPlayer)

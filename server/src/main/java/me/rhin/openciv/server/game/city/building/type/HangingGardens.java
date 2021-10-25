@@ -19,7 +19,7 @@ public class HangingGardens extends Building implements Wonder {
 	@Override
 	public void create() {
 		super.create();
-		Server.getInstance().getGame().getWonders().setBuilt(getClass());
+		Server.getInstance().getInGameState().getWonders().setBuilt(getClass());
 	}
 
 	@Override
@@ -35,7 +35,7 @@ public class HangingGardens extends Building implements Wonder {
 	@Override
 	public boolean meetsProductionRequirements() {
 		return city.getPlayerOwner().getResearchTree().hasResearched(MathematicsTech.class)
-				&& !Server.getInstance().getGame().getWonders().isBuilt(getClass());
+				&& !Server.getInstance().getInGameState().getWonders().isBuilt(getClass());
 	}
 
 	@Override

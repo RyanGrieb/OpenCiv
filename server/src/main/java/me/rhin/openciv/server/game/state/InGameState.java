@@ -20,8 +20,6 @@ import me.rhin.openciv.server.game.ai.type.BarbarianPlayer;
 import me.rhin.openciv.server.game.ai.type.CityStatePlayer;
 import me.rhin.openciv.server.game.ai.type.CityStatePlayer.CityStateType;
 import me.rhin.openciv.server.game.city.City;
-import me.rhin.openciv.server.game.city.building.Building;
-import me.rhin.openciv.server.game.city.specialist.SpecialistContainer;
 import me.rhin.openciv.server.game.city.wonders.GameWonders;
 import me.rhin.openciv.server.game.map.GameMap;
 import me.rhin.openciv.server.game.map.tile.Tile;
@@ -37,8 +35,6 @@ import me.rhin.openciv.server.game.unit.type.Settler.SettlerUnit;
 import me.rhin.openciv.server.game.unit.type.Warrior.WarriorUnit;
 import me.rhin.openciv.server.game.unit.type.WorkBoat.WorkBoatUnit;
 import me.rhin.openciv.server.listener.BuyProductionItemListener;
-import me.rhin.openciv.server.listener.ClickSpecialistListener;
-import me.rhin.openciv.server.listener.ClickWorkedTileListener;
 import me.rhin.openciv.server.listener.CombatPreviewListener;
 import me.rhin.openciv.server.listener.DisconnectListener;
 import me.rhin.openciv.server.listener.EndTurnListener;
@@ -56,8 +52,6 @@ import me.rhin.openciv.server.listener.UnitFinishedMoveListener.UnitFinishedMove
 import me.rhin.openciv.server.listener.UnitMoveListener;
 import me.rhin.openciv.server.listener.WorkTileListener;
 import me.rhin.openciv.shared.packet.type.BuyProductionItemPacket;
-import me.rhin.openciv.shared.packet.type.ClickSpecialistPacket;
-import me.rhin.openciv.shared.packet.type.ClickWorkedTilePacket;
 import me.rhin.openciv.shared.packet.type.CombatPreviewPacket;
 import me.rhin.openciv.shared.packet.type.DeleteUnitPacket;
 import me.rhin.openciv.shared.packet.type.EndTurnPacket;
@@ -85,10 +79,9 @@ import me.rhin.openciv.shared.util.MathHelper;
 //FIXME: Instead of the civ game listening for everything. Just split them off into the respective classes. (EX: CombatPreviewListener in the Unit class)
 //Or just use reflection so we don't have to implement 20+ classes.
 public class InGameState extends GameState implements DisconnectListener, SelectUnitListener, UnitMoveListener,
-		SettleCityListener, PlayerFinishLoadingListener, NextTurnListener, SetProductionItemListener,
-		ClickWorkedTileListener, ClickSpecialistListener, EndTurnListener, PlayerListRequestListener,
-		FetchPlayerListener, CombatPreviewListener, WorkTileListener, RangedAttackListener, BuyProductionItemListener,
-		RequestEndTurnListener, TileStatlineListener {
+		SettleCityListener, PlayerFinishLoadingListener, NextTurnListener, SetProductionItemListener, EndTurnListener,
+		PlayerListRequestListener, FetchPlayerListener, CombatPreviewListener, WorkTileListener, RangedAttackListener,
+		BuyProductionItemListener, RequestEndTurnListener, TileStatlineListener {
 
 	private int currentTurn;
 	private int turnTimeLeft;
@@ -109,8 +102,6 @@ public class InGameState extends GameState implements DisconnectListener, Select
 		Server.getInstance().getEventManager().addListener(PlayerFinishLoadingListener.class, this);
 		Server.getInstance().getEventManager().addListener(NextTurnListener.class, this);
 		Server.getInstance().getEventManager().addListener(SetProductionItemListener.class, this);
-		Server.getInstance().getEventManager().addListener(ClickWorkedTileListener.class, this);
-		Server.getInstance().getEventManager().addListener(ClickSpecialistListener.class, this);
 		Server.getInstance().getEventManager().addListener(EndTurnListener.class, this);
 		Server.getInstance().getEventManager().addListener(PlayerListRequestListener.class, this);
 		Server.getInstance().getEventManager().addListener(FetchPlayerListener.class, this);
@@ -393,13 +384,7 @@ public class InGameState extends GameState implements DisconnectListener, Select
 	// TODO: Move to producibleItemManager
 	@Override
 	public void onSetProductionItem(WebSocket conn, SetProductionItemPacket packet) {
-		// Verify if the player owns that city.
-		Player player = getPlayerByConn(conn);
-		City targetCity = null;
-		for (City city : player.getOwnedCities()) {
-			if (city.getName().equals(packet.getCityName()))
-				targetCity = city;
-		}
+		City targetCity = getCityFromName(packet.getCityName());
 
 		// TODO: Verify if the item can be produced.
 
@@ -415,13 +400,9 @@ public class InGameState extends GameState implements DisconnectListener, Select
 	// TODO: Move to producibleItemManager
 	@Override
 	public void onBuyProductionItem(WebSocket conn, BuyProductionItemPacket packet) {
-		// Verify if the player owns that city.
-		Player player = getPlayerByConn(conn);
-		City targetCity = null;
-		for (City city : player.getOwnedCities()) {
-			if (city.getName().equals(packet.getCityName()))
-				targetCity = city;
-		}
+
+		// TODO: Verify if the player owns that city.
+		City targetCity = getCityFromName(packet.getCityName());
 
 		// TODO: Verify if the item can be produced.
 
@@ -432,49 +413,6 @@ public class InGameState extends GameState implements DisconnectListener, Select
 
 		// Json json = new Json();
 		// conn.send(json.toJson(packet));
-	}
-
-	// TODO: Move to city class
-	@Override
-	public void onClickWorkedTile(WebSocket conn, ClickWorkedTilePacket packet) {
-		Player player = getPlayerByConn(conn);
-		City targetCity = null;
-		for (City city : player.getOwnedCities())
-			if (city.getName().equals(packet.getCityName()))
-				targetCity = city;
-
-		if (targetCity == null)
-			return;
-
-		targetCity.clickWorkedTile(map.getTiles()[packet.getGridX()][packet.getGridY()]);
-	}
-
-	// TODO: Move to city class
-	@Override
-	public void onClickSpecialist(WebSocket conn, ClickSpecialistPacket packet) {
-		// FIXME: This target city stuff is starting to seem redundant, lets fix that
-		// soon.
-		Player player = getPlayerByConn(conn);
-		City targetCity = null;
-		for (City city : player.getOwnedCities())
-			if (city.getName().equals(packet.getCityName()))
-				targetCity = city;
-
-		if (targetCity == null)
-			return;
-
-		// FIXME: Should this be here or in the city class
-
-		ArrayList<SpecialistContainer> specialistContainers = new ArrayList<>();
-		specialistContainers.add(targetCity);
-
-		for (Building building : targetCity.getBuildings())
-			if (building instanceof SpecialistContainer)
-				specialistContainers.add((SpecialistContainer) building);
-
-		for (SpecialistContainer container : specialistContainers)
-			if (container.getName().equals(packet.getContainerName()))
-				targetCity.removeSpecialistFromContainer(container);
 	}
 
 	@Override
@@ -529,7 +467,7 @@ public class InGameState extends GameState implements DisconnectListener, Select
 	// TODO: Split this up into the Unit class
 	@Override
 	public void onCombatPreview(WebSocket conn, CombatPreviewPacket packet) {
-		Player playerOwner = Server.getInstance().getPlayerByConn(conn);
+
 		AttackableEntity attackingEntity = map.getTiles()[packet.getUnitGridX()][packet.getUnitGridY()]
 				.getUnitFromID(packet.getUnitID());
 
@@ -552,7 +490,7 @@ public class InGameState extends GameState implements DisconnectListener, Select
 
 	@Override
 	public void onRangedAttack(WebSocket conn, RangedAttackPacket packet) {
-		// FIXME: I don't check unit ID's here
+
 		AttackableEntity attackingEntity = map.getTiles()[packet.getUnitGridX()][packet.getUnitGridY()]
 				.getUnitFromID(packet.getUnitID());
 		AttackableEntity targetEntity = map.getTiles()[packet.getTargetGridX()][packet.getTargetGridY()]
@@ -667,17 +605,33 @@ public class InGameState extends GameState implements DisconnectListener, Select
 		return "InGame";
 	}
 
-	@Override
 	public GameWonders getWonders() {
 		return gameWonders;
 	}
 
-	// TODO: Maybe move to Game class.
 	public int getCurrentTurn() {
 		return currentTurn;
 	}
 
+	public GameMap getMap() {
+		return map;
+	}
+
+	public City getCityFromName(String cityName) {
+
+		for (AbstractPlayer player : Server.getInstance().getAbstractPlayers()) {
+			for (City city : player.getOwnedCities()) {
+				if (city.getName().equals(cityName))
+					return city;
+			}
+
+		}
+
+		return null;
+	}
+
 	private boolean playersLoaded() {
+
 		for (Player player : players)
 			if (!player.isLoaded())
 				return false;
@@ -687,9 +641,11 @@ public class InGameState extends GameState implements DisconnectListener, Select
 
 	private int getMaxPlayerCities() {
 		int maxCities = 0;
-		for (Player player : players)
-			if (player.getOwnedCities().size() > maxCities)
-				maxCities = player.getOwnedCities().size();
+
+		for (AbstractPlayer player : Server.getInstance().getAbstractPlayers()) {
+			maxCities = player.getOwnedCities().size();
+		}
+
 		return maxCities;
 	}
 
@@ -913,9 +869,5 @@ public class InGameState extends GameState implements DisconnectListener, Select
 				hasSafeTile = true;
 
 		return hasSafeTile;
-	}
-
-	public GameMap getMap() {
-		return map;
 	}
 }

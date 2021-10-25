@@ -225,9 +225,4 @@ public class InLobbyState extends GameState
 	public String toString() {
 		return "InLobby";
 	}
-
-	@Override
-	public GameWonders getWonders() {
-		return null;
-	}
 }

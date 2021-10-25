@@ -25,7 +25,7 @@ public class GreatPyramids extends Building implements Wonder {
 	public void create() {
 		super.create();
 
-		Server.getInstance().getGame().getWonders().setBuilt(getClass());
+		Server.getInstance().getInGameState().getWonders().setBuilt(getClass());
 
 		for (int i = 0; i < 2; i++) {
 			Unit unit = new BuilderUnit(city.getPlayerOwner(), city.getOriginTile());
@@ -54,7 +54,7 @@ public class GreatPyramids extends Building implements Wonder {
 	@Override
 	public boolean meetsProductionRequirements() {
 		return city.getPlayerOwner().getResearchTree().hasResearched(MasonryTech.class)
-				&& !Server.getInstance().getGame().getWonders().isBuilt(getClass());
+				&& !Server.getInstance().getInGameState().getWonders().isBuilt(getClass());
 	}
 
 	@Override

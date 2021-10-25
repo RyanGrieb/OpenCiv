@@ -35,7 +35,7 @@ public class StatueOfAres extends Building implements Wonder, UnitFinishedMoveLi
 	@Override
 	public void create() {
 		super.create();
-		Server.getInstance().getGame().getWonders().setBuilt(getClass());
+		Server.getInstance().getInGameState().getWonders().setBuilt(getClass());
 	}
 
 	@Override
@@ -104,7 +104,7 @@ public class StatueOfAres extends Building implements Wonder, UnitFinishedMoveLi
 	@Override
 	public boolean meetsProductionRequirements() {
 		return city.getPlayerOwner().getResearchTree().hasResearched(BronzeWorkingTech.class)
-				&& !Server.getInstance().getGame().getWonders().isBuilt(getClass());
+				&& !Server.getInstance().getInGameState().getWonders().isBuilt(getClass());
 	}
 
 	@Override

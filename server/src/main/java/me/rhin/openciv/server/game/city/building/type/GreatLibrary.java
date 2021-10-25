@@ -25,7 +25,7 @@ public class GreatLibrary extends Building implements Wonder {
 
 	@Override
 	public void create() {
-		Server.getInstance().getGame().getWonders().setBuilt(getClass());
+		Server.getInstance().getInGameState().getWonders().setBuilt(getClass());
 
 		for (City city : city.getPlayerOwner().getOwnedCities())
 			if (!city.containsBuilding(Library.class))
@@ -53,7 +53,7 @@ public class GreatLibrary extends Building implements Wonder {
 	@Override
 	public boolean meetsProductionRequirements() {
 		return city.getPlayerOwner().getResearchTree().hasResearched(WritingTech.class)
-				&& !Server.getInstance().getGame().getWonders().isBuilt(getClass());
+				&& !Server.getInstance().getInGameState().getWonders().isBuilt(getClass());
 	}
 
 	@Override

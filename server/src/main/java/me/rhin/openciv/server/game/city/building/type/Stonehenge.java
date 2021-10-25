@@ -17,7 +17,7 @@ public class Stonehenge extends Building implements Wonder {
 
 	@Override
 	public boolean meetsProductionRequirements() {
-		return !Server.getInstance().getGame().getWonders().isBuilt(getClass())
+		return !Server.getInstance().getInGameState().getWonders().isBuilt(getClass())
 				&& city.getPlayerOwner().getResearchTree().hasResearched(CalendarTech.class);
 	}
 
@@ -29,7 +29,7 @@ public class Stonehenge extends Building implements Wonder {
 	@Override
 	public void create() {
 		super.create();
-		Server.getInstance().getGame().getWonders().setBuilt(getClass());
+		Server.getInstance().getInGameState().getWonders().setBuilt(getClass());
 	}
 
 	@Override
