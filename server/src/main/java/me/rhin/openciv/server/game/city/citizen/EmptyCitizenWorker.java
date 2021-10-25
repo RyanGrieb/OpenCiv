@@ -12,10 +12,7 @@ public class EmptyCitizenWorker extends CitizenWorker {
 
 	@Override
 	public void onClick() {
-		// TODO: Take any unemployed citizens away. If not, take away any unlocked tiles
-		// first from the city. If not possible, take any locked away.
-		//Set the tile to a locked citizen worker
-		//Update & send the statline to the player.
+		city.lockCitizenAtTile(tile);
 	}
 	
 	@Override

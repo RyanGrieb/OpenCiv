@@ -5,6 +5,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map.Entry;
 import java.util.Random;
 
 import com.badlogic.gdx.math.MathUtils;
@@ -19,6 +20,7 @@ import me.rhin.openciv.server.game.city.citizen.AssignedCitizenWorker;
 import me.rhin.openciv.server.game.city.citizen.CitizenWorker;
 import me.rhin.openciv.server.game.city.citizen.CityCenterCitizenWorker;
 import me.rhin.openciv.server.game.city.citizen.EmptyCitizenWorker;
+import me.rhin.openciv.server.game.city.citizen.LockedCitizenWorker;
 import me.rhin.openciv.server.game.city.specialist.Specialist;
 import me.rhin.openciv.server.game.city.specialist.SpecialistContainer;
 import me.rhin.openciv.server.game.city.specialist.UnemployedSpecialist;
@@ -36,6 +38,7 @@ import me.rhin.openciv.shared.packet.type.BuildingConstructedPacket;
 import me.rhin.openciv.shared.packet.type.CityStatUpdatePacket;
 import me.rhin.openciv.shared.packet.type.RemoveSpecialistFromContainerPacket;
 import me.rhin.openciv.shared.packet.type.SetCitizenTileWorkerPacket;
+import me.rhin.openciv.shared.packet.type.SetCitizenTileWorkerPacket.WorkerType;
 import me.rhin.openciv.shared.packet.type.TerritoryGrowPacket;
 import me.rhin.openciv.shared.stat.Stat;
 import me.rhin.openciv.shared.stat.StatLine;
@@ -309,40 +312,39 @@ public class City implements AttackableEntity, SpecialistContainer, NextTurnList
 		// Make all citizens unemployed
 		for (Tile tile : territory) {
 			CitizenWorker citizenWorker = citizenWorkers.get(tile);
-			if (citizenWorker.isValidTileWorker()) {
+			if (citizenWorker.getWorkerType() != WorkerType.LOCKED && citizenWorker.isValidTileWorker()) {
 
 				statLine.reduceStatLine(getTileStatLine(citizenWorker.getTile()));
 				addSpecialist();
+
+				setCitizenTileWorker(new EmptyCitizenWorker(this, citizenWorker.getTile()));
 			}
-
-			setCitizenTileWorker(new EmptyCitizenWorker(this, citizenWorker.getTile()));
 		}
-
-		// TODO: Remove all specialists from buildings
-
-		// Go through the city population, and assign a worker from our unemployed
-		// specialist
-
-		// ArrayList<Tile> topTiles = getTopWorkableTiles(statLine);
 
 		setCitizenTileWorker(new CityCenterCitizenWorker(this, originTile));
 		unemployedSpecialists.remove(0);
 
 		statLine.mergeStatLine(getTileStatLine(originTile));
 
-		for (int i = 0; i < statLine.getStatValue(Stat.POPULATION); i++) {
+		// Problem, this assumes we remove all worker tiles. change population to the
+		// pop - locked workers
+
+		float unassignedWorkers = statLine.getStatValue(Stat.POPULATION)
+				- getCitizenWorkerAmountOfType(WorkerType.LOCKED);
+
+		for (int i = 0; i < unassignedWorkers; i++) {
 			Tile tile = getTopWorkableTiles().get(0); // FIXME: Make a method that gets single top tile
-			if (citizenWorkers.containsKey(tile) && citizenWorkers.get(tile).isValidTileWorker())
+			if (citizenWorkers.containsKey(tile) && (citizenWorkers.get(tile).isValidTileWorker()))
 				continue;
 
 			// FIXME: This is slow, have bulk packets in the future
 			setCitizenTileWorker(new AssignedCitizenWorker(this, tile));
-			unemployedSpecialists.remove(0);
+
+			if (unemployedSpecialists.size() > 0)
+				unemployedSpecialists.remove(0);
 
 			statLine.mergeStatLine(getTileStatLine(tile));
 		}
-
-		// Clear the assigned unemployed specialists.
 
 		// Assume we lost a citizen, and remove a specialist here. (For starving cities)
 		if (unemployedSpecialists.size() > 0) {
@@ -358,13 +360,6 @@ public class City implements AttackableEntity, SpecialistContainer, NextTurnList
 		}
 
 		unemployedSpecialists.clear();
-
-		// Apply the new stat values for our worked tiles
-		// for (CitizenWorker citizenWorker : citizenWorkers.values()) {
-		// if (citizenWorker.isValidTileWorker()) {
-		// statLine.mergeStatLine(getTileStatLine(citizenWorker.getTile()));
-		// }
-		// }
 
 		Json json = new Json();
 
@@ -399,6 +394,7 @@ public class City implements AttackableEntity, SpecialistContainer, NextTurnList
 			cityStatUpdatePacket.addStat(name, stat.name(), this.statLine.getStatValues().get(stat).getValue());
 		}
 
+		// FIXME: Use setCitizenTileWorker() ??
 		SetCitizenTileWorkerPacket tileWorkerPacket = new SetCitizenTileWorkerPacket();
 		tileWorkerPacket.setWorker(emptyCitizenWorker.getWorkerType(), name, emptyCitizenWorker.getTile().getGridX(),
 				emptyCitizenWorker.getTile().getGridY());
@@ -409,6 +405,49 @@ public class City implements AttackableEntity, SpecialistContainer, NextTurnList
 		playerOwner.updateOwnedStatlines(false);
 
 		addSpecialistToContainer(this);
+	}
+
+	public void lockCitizenAtTile(Tile tile) {
+		// Take non-locked citizens or unemployed citizens and assign them to the tile
+
+		if (unemployedSpecialists.size() < 1) {
+
+			if (citizenWorkers.get(tile).getWorkerType() == WorkerType.ASSIGNED) {
+				removeCitizenWorkerFromTile(tile);
+			} else
+				for (Entry<Tile, CitizenWorker> entrySet : citizenWorkers.entrySet()) {
+					if (entrySet.getValue() instanceof AssignedCitizenWorker) {
+						// FIXME: Don't send packets in this instance since we just remove it
+						// immediatly.
+						removeCitizenWorkerFromTile(entrySet.getKey());
+						break;
+					}
+				}
+		}
+
+		if (unemployedSpecialists.size() < 1)
+			return;
+
+		// Remove unemployed specialist
+		unemployedSpecialists.remove(0);
+
+		RemoveSpecialistFromContainerPacket packet = new RemoveSpecialistFromContainerPacket();
+		packet.setContainer(name, name, 1);
+		Json json = new Json();
+		playerOwner.sendPacket(json.toJson(packet));
+
+		setCitizenTileWorker(new LockedCitizenWorker(this, tile));
+
+		// FIXME: Redundant code w/ removeSpecialist()
+		statLine.mergeStatLine(getTileStatLine(tile));
+
+		CityStatUpdatePacket cityStatUpdatePacket = new CityStatUpdatePacket();
+		for (Stat stat : this.statLine.getStatValues().keySet()) {
+			cityStatUpdatePacket.addStat(name, stat.name(), this.statLine.getStatValues().get(stat).getValue());
+		}
+
+		playerOwner.sendPacket(json.toJson(cityStatUpdatePacket));
+		playerOwner.updateOwnedStatlines(false);
 	}
 
 	public void addSpecialistToContainer(SpecialistContainer specialistContainer) {
@@ -670,5 +709,15 @@ public class City implements AttackableEntity, SpecialistContainer, NextTurnList
 				return true;
 
 		return false;
+	}
+
+	private int getCitizenWorkerAmountOfType(WorkerType workerType) {
+		int amount = 0;
+		for (CitizenWorker citizenWorker : citizenWorkers.values()) {
+			if (citizenWorker.getWorkerType() == workerType)
+				amount++;
+		}
+
+		return amount;
 	}
 }

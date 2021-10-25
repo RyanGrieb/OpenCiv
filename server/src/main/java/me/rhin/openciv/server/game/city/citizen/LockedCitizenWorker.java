@@ -4,18 +4,17 @@ import me.rhin.openciv.server.game.city.City;
 import me.rhin.openciv.server.game.map.tile.Tile;
 import me.rhin.openciv.shared.packet.type.SetCitizenTileWorkerPacket.WorkerType;
 
-public class AssignedCitizenWorker extends CitizenWorker {
+public class LockedCitizenWorker extends CitizenWorker {
 
-	public AssignedCitizenWorker(City city, Tile tile) {
+	public LockedCitizenWorker(City city, Tile tile) {
 		super(city, tile);
 	}
 
 	@Override
 	public void onClick() {
-		city.lockCitizenAtTile(tile);
-		//city.removeCitizenWorkerFromTile(tile);
+		city.removeCitizenWorkerFromTile(tile);
 	}
-
+	
 	@Override
 	public boolean isValidTileWorker() {
 		return true;
@@ -23,6 +22,6 @@ public class AssignedCitizenWorker extends CitizenWorker {
 
 	@Override
 	public WorkerType getWorkerType() {
-		return WorkerType.ASSIGNED;
+		return WorkerType.LOCKED;
 	}
 }
