@@ -603,9 +603,14 @@ public class Tile extends Actor implements BottomShapeRenderListener {
 			adjTiles.add(tile);
 
 		for (Tile tile : adjTiles) {
-
+			
+			if (tile == null)
+				continue;
+			
 			tile.getTileObservers().remove(tileObserver);
 			for (Tile adjTile : tile.getAdjTiles()) {
+				if (adjTile == null)
+					continue;
 				adjTile.getTileObservers().remove(tileObserver);
 			}
 
@@ -632,6 +637,9 @@ public class Tile extends Actor implements BottomShapeRenderListener {
 			adjTiles.add(tile);
 
 		for (Tile tile : adjTiles) {
+
+			if (tile == null)
+				continue;
 
 			boolean denyVisibility = false;
 			for (TileTypeWrapper wrapper : tile.getTileTypeWrappers())

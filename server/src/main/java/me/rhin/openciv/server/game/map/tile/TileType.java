@@ -8,6 +8,7 @@ import java.util.Random;
 import me.rhin.openciv.server.game.map.tile.improvement.ChopImprovement;
 import me.rhin.openciv.server.game.map.tile.improvement.ClearImprovement;
 import me.rhin.openciv.server.game.map.tile.improvement.FarmImprovement;
+import me.rhin.openciv.server.game.map.tile.improvement.FarmOceanImprovement;
 import me.rhin.openciv.server.game.map.tile.improvement.FortImprovement;
 import me.rhin.openciv.server.game.map.tile.improvement.MineImprovement;
 import me.rhin.openciv.server.game.map.tile.improvement.PastureImprovement;
@@ -394,6 +395,43 @@ public enum TileType implements Comparable<TileType> {
 					TileType.TUNDRA, TileType.TUNDRA_HILL, TileType.DESERT, TileType.DESERT_HILL };
 		}
 	},
+	FISH(TileLayer.MIDDLE, TileProperty.RESOURCE, TileProperty.WATER) {
+		@Override
+		public StatLine getStatLine() {
+			StatLine statLine = new StatLine();
+			statLine.setValue(Stat.FOOD_GAIN, 1);
+			return statLine;
+		}
+
+		@Override
+		public List<TileImprovement> getImprovements() {
+			return Arrays.asList(new FarmOceanImprovement(TileType.FISH_IMPROVED));
+		}
+
+		@Override
+		public TileType[] getSpawnTileTypes() {
+			return new TileType[] { TileType.SHALLOW_OCEAN };
+		}
+	},
+	CRABS(TileLayer.MIDDLE, TileProperty.LUXURY, TileProperty.WATER) {
+		@Override
+		public StatLine getStatLine() {
+			StatLine statLine = new StatLine();
+			statLine.setValue(Stat.FOOD_GAIN, 1);
+			statLine.setValue(Stat.GOLD_GAIN, 1);
+			return statLine;
+		}
+
+		@Override
+		public List<TileImprovement> getImprovements() {
+			return Arrays.asList(new FarmOceanImprovement(TileType.CRABS_IMPROVED));
+		}
+		
+		@Override
+		public TileType[] getSpawnTileTypes() {
+			return new TileType[] { TileType.SHALLOW_OCEAN };
+		}
+	},
 	FARM(TileLayer.MIDDLE, TileProperty.IMPROVEMENT) {
 		@Override
 		public StatLine getStatLine() {
@@ -418,6 +456,24 @@ public enum TileType implements Comparable<TileType> {
 			StatLine statLine = new StatLine();
 			statLine.addValue(Stat.GOLD_GAIN, 2);
 			statLine.addValue(Stat.PRODUCTION_GAIN, 1);
+			statLine.addValue(Stat.MORALE, 10);
+			return statLine;
+		}
+	},
+	FISH_IMPROVED(TileLayer.MIDDLE, TileProperty.IMPROVEMENT, TileProperty.WATER) {
+		@Override
+		public StatLine getStatLine() {
+			StatLine statLine = new StatLine();
+			statLine.addValue(Stat.FOOD_GAIN, 2);
+			return statLine;
+		}
+	},
+	CRABS_IMPROVED(TileLayer.MIDDLE, TileProperty.IMPROVEMENT, TileProperty.WATER) {
+		@Override
+		public StatLine getStatLine() {
+			StatLine statLine = new StatLine();
+			statLine.setValue(Stat.GOLD_GAIN, 1);
+			statLine.addValue(Stat.FOOD_GAIN, 2);
 			statLine.addValue(Stat.MORALE, 10);
 			return statLine;
 		}

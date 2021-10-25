@@ -7,6 +7,7 @@ import me.rhin.openciv.server.game.AbstractPlayer;
 import me.rhin.openciv.server.game.city.City;
 import me.rhin.openciv.server.game.map.tile.Tile;
 import me.rhin.openciv.server.game.map.tile.TileType.TileProperty;
+import me.rhin.openciv.server.game.map.tile.improvement.TileImprovement;
 import me.rhin.openciv.server.game.unit.Unit;
 import me.rhin.openciv.server.game.unit.UnitItem;
 import me.rhin.openciv.shared.stat.Stat;
@@ -20,11 +21,11 @@ public class Builder extends UnitItem {
 	public static class BuilderUnit extends Unit {
 
 		private boolean building;
-		private String improvement;
+		private TileImprovement improvement;
 
 		public BuilderUnit(AbstractPlayer playerOwner, Tile standingTile) {
 			super(playerOwner, standingTile);
-			
+
 			combatStrength.setValue(Stat.COMBAT_STRENGTH, 0);
 		}
 
@@ -71,12 +72,12 @@ public class Builder extends UnitItem {
 			return building;
 		}
 
-		public String getImprovement() {
+		public TileImprovement getImprovement() {
 			return improvement;
 		}
 
 		public void setImprovement(String improvement) {
-			this.improvement = improvement;
+			this.improvement = standingTile.getBaseTileType().getImprovement(improvement);
 		}
 
 		@Override
@@ -94,7 +95,7 @@ public class Builder extends UnitItem {
 	public float getGoldCost() {
 		return 175;
 	}
-	
+
 	@Override
 	public boolean meetsProductionRequirements() {
 		return true;
@@ -104,7 +105,7 @@ public class Builder extends UnitItem {
 	public String getName() {
 		return "Builder";
 	}
-	
+
 	@Override
 	public List<UnitType> getUnitItemTypes() {
 		return Arrays.asList(UnitType.SUPPORT);

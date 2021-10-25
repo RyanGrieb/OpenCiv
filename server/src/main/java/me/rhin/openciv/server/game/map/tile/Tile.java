@@ -565,21 +565,15 @@ public class Tile {
 		return capturableUnit;
 	}
 
-	public void workTile(Unit unit, String improvementName) {
-		if (tileImprovement == null) {
-			tileImprovement = getBaseTileType().getImprovement(improvementName);
-			tileImprovement.setTile(this);
-		}
-
-		if (tileImprovement == null) {
-			System.out.println("Tile: Error, no tile improvement found for " + getBaseTileType().name());
-			return;
-		}
+	public void workTile(Unit unit, TileImprovement tileImprovement) {
 
 		// FIXME: This should be called before the builder has a chance to work the tile
 		if (tileImprovement.getRequiredTech() != null
 				&& !unit.getPlayerOwner().getResearchTree().hasResearched(tileImprovement.getRequiredTech()))
 			return;
+
+		this.tileImprovement = tileImprovement;
+		tileImprovement.setTile(this);
 
 		tileImprovement.addTurnsWorked();
 

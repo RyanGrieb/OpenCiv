@@ -1,6 +1,7 @@
 package me.rhin.openciv.server.game.state;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.Random;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -564,7 +565,8 @@ public class InGameState extends GameState implements DisconnectListener, Select
 		// clientside.
 
 		Tile tile = map.getTiles()[packet.getGridX()][packet.getGridY()];
-		for (Unit unit : tile.getUnits()) {
+
+		for (Unit unit : new ArrayList<>(tile.getUnits())) {
 			if (unit instanceof BuilderUnit) {
 				BuilderUnit builder = (BuilderUnit) unit;
 				builder.setBuilding(true);
@@ -574,8 +576,7 @@ public class InGameState extends GameState implements DisconnectListener, Select
 
 			if (unit instanceof WorkBoatUnit) {
 				WorkBoatUnit workBoat = (WorkBoatUnit) unit;
-				// workBoat.setBuilding(true);
-				// workBoat.setImprovement(packet.getImprovementType());
+				workBoat.improveTile(packet.getImprovementType());
 				workBoat.reduceMovement(2);
 			}
 		}
@@ -811,6 +812,7 @@ public class InGameState extends GameState implements DisconnectListener, Select
 			}
 		}
 
+		// FIXME: Rewrite this.
 		ArrayList<AbstractPlayer> allPlayers = new ArrayList<>();
 		allPlayers.addAll(players);
 		allPlayers.addAll(aiPlayers);
@@ -832,12 +834,15 @@ public class InGameState extends GameState implements DisconnectListener, Select
 				int y = MathHelper.clamp(player.getSpawnY() + randY, 0, map.getHeight());
 				Tile tile = map.getTiles()[x][y];
 
-				// FIXME: Some special resources can be on desert & desert hills.
-				if (tile.getBaseTileType().hasProperty(TileProperty.WATER) || tile.getBaseTileType() == TileType.DESERT
-						|| tile.getBaseTileType() == TileType.DESERT_HILL
-						|| tile.getBaseTileType() == TileType.MOUNTAIN) {
+				TileType newTileType = null;
+
+				if (assignedLuxTiles < 3) {
+					newTileType = TileType.getRandomLandLuxuryTile();
+				} else
+					newTileType = TileType.getRandomResourceTile();
+
+				if (!tile.containsTileType(newTileType.getSpawnTileTypes()))
 					continue;
-				}
 
 				for (TileTypeWrapper tileWrapper : tile.getTileTypeWrappers())
 					if (tileWrapper.getTileType().hasProperty(TileProperty.LUXURY)
@@ -845,13 +850,12 @@ public class InGameState extends GameState implements DisconnectListener, Select
 							|| tileWrapper.getTileType() == TileType.BARBARIAN_CAMP)
 						continue;
 
-				if (assignedLuxTiles < 3) {
-					tile.setTileType(TileType.getRandomLandLuxuryTile());
-					assignedLuxTiles++;
-				} else {
-					tile.setTileType(TileType.getRandomResourceTile());
+				tile.setTileType(newTileType);
+
+				if (newTileType.hasProperty(TileProperty.RESOURCE))
 					assignedResourceTiles++;
-				}
+				else
+					assignedLuxTiles++;
 
 				loopLimit--;
 			}

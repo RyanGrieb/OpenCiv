@@ -6,133 +6,161 @@ filter: Nearest, Nearest
 repeat: none
 building_circus
   rotate: false
-  xy: 136, 96
+  xy: 170, 64
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 building_colosseum
   rotate: false
-  xy: 36, 2
+  xy: 170, 98
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+building_forge
+  rotate: false
+  xy: 166, 200
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+building_garden
+  rotate: false
+  xy: 204, 98
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 building_granary
   rotate: false
-  xy: 204, 96
+  xy: 70, 36
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 building_great_library
   rotate: false
-  xy: 2, 102
+  xy: 2, 104
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 building_great_lighthouse
   rotate: false
-  xy: 200, 198
+  xy: 200, 166
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 building_hanging_gardens
   rotate: false
-  xy: 68, 68
+  xy: 132, 166
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 building_library
   rotate: false
-  xy: 102, 68
+  xy: 136, 64
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 building_lighthouse
   rotate: false
-  xy: 200, 164
+  xy: 36, 4
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 building_market
   rotate: false
-  xy: 2, 2
+  xy: 68, 70
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 building_monument
   rotate: false
-  xy: 132, 198
+  xy: 2, 4
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 building_national_college
   rotate: false
-  xy: 200, 130
+  xy: 136, 98
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 building_palace
   rotate: false
-  xy: 2, 36
+  xy: 2, 38
   size: 64, 64
   orig: 64, 64
   offset: 0, 0
   index: -1
 building_pyramids
   rotate: false
-  xy: 166, 198
+  xy: 166, 166
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 building_shrine
   rotate: false
-  xy: 166, 130
+  xy: 200, 132
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 building_statue_of_ares
   rotate: false
-  xy: 136, 62
+  xy: 70, 2
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 building_stonehenge
   rotate: false
-  xy: 132, 130
+  xy: 200, 200
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 building_stoneworks
   rotate: false
-  xy: 166, 164
+  xy: 166, 132
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+building_university
+  rotate: false
+  xy: 132, 200
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 building_wall
   rotate: false
-  xy: 132, 164
+  xy: 132, 132
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 building_watermill
   rotate: false
-  xy: 170, 96
+  xy: 204, 64
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+building_workshop
+  rotate: false
+  xy: 102, 70
   size: 32, 32
   orig: 32, 32
   offset: 0, 0

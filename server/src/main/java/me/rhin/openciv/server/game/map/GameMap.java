@@ -547,10 +547,6 @@ public class GameMap implements MapRequestListener {
 		// Split the map to make resource generation & player spawnpoints balanced
 		splitMapPartition();
 
-		for (TileType tileType : TileType.getTilesOfProperty(TileProperty.LUXURY, TileProperty.RESOURCE)) {
-			generateResource(tileType, (mapSize + 1) * 5, tileType.getSpawnTileTypes());
-		}
-
 		ArrayList<Tile> adjGroundTiles = new ArrayList<>();
 
 		ArrayList<TileType> adjTileTypes = new ArrayList<>();
@@ -574,6 +570,10 @@ public class GameMap implements MapRequestListener {
 		for (Tile tile : tileIndexer.getAdjacentRiverTiles()) {
 			if (tile.getBaseTileType() == TileType.DESERT)
 				tile.setTileType(TileType.FLOODPLAINS);
+		}
+
+		for (TileType tileType : TileType.getTilesOfProperty(TileProperty.LUXURY, TileProperty.RESOURCE)) {
+			generateResource(tileType, (mapSize + 1) * 6, tileType.getSpawnTileTypes());
 		}
 
 		// Spawn barbarians
@@ -686,12 +686,23 @@ public class GameMap implements MapRequestListener {
 		while (amount > 0) {
 			for (Rectangle rect : mapPartition) {
 				while (true) {
-					int rndX = rnd.nextInt((int) (rect.getX() + rect.getWidth() - 1) - (int) rect.getX() + 1)
-							+ (int) rect.getX();
+					Tile tile = null;
+					if (tileType.hasProperty(TileProperty.WATER)) {
+						System.out.println("called");
+						ArrayList<Tile> shallowOceanTiles = getTilesOfTileType(TileType.SHALLOW_OCEAN);
+						System.out.println(shallowOceanTiles.size());
+						tile = shallowOceanTiles.get(rnd.nextInt(shallowOceanTiles.size()));
+					} else {
+						int rndX = rnd.nextInt((int) (rect.getX() + rect.getWidth() - 1) - (int) rect.getX() + 1)
+								+ (int) rect.getX();
 
-					int rndY = rnd.nextInt((int) (rect.getY() + rect.getHeight() - 1) - (int) rect.getY() + 1)
-							+ (int) rect.getY();
-					Tile tile = tiles[rndX][rndY];
+						int rndY = rnd.nextInt((int) (rect.getY() + rect.getHeight() - 1) - (int) rect.getY() + 1)
+								+ (int) rect.getY();
+						tile = tiles[rndX][rndY];
+					}
+
+					// System.out.println(tileType);
+					// System.out.println(tile.getBaseTileType());
 
 					boolean isExclusiveTile = false;
 					boolean containsResource = false;
@@ -893,5 +904,17 @@ public class GameMap implements MapRequestListener {
 
 		queue.remove(smallestTile);
 		return smallestTile;
+	}
+
+	private ArrayList<Tile> getTilesOfTileType(TileType tileType) {
+		ArrayList<Tile> tilesOfType = new ArrayList<>();
+		for (int x = 0; x < getWidth(); x++) {
+			for (int y = 0; y < getHeight(); y++) {
+				if (tiles[x][y].containsTileType(tileType))
+					tilesOfType.add(tiles[x][y]);
+			}
+		}
+
+		return tilesOfType;
 	}
 }

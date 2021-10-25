@@ -611,6 +611,8 @@ public class City implements AttackableEntity, SpecialistContainer, NextTurnList
 			}
 		}
 
+		tileStatLine.subValue(Stat.MORALE, tileStatLine.getStatValue(Stat.MORALE));
+
 		return tileStatLine;
 	}
 
@@ -723,7 +725,8 @@ public class City implements AttackableEntity, SpecialistContainer, NextTurnList
 	}
 
 	public void setMorale(float morale) {
-		morale = MathUtils.clamp(morale, 0, 100);
+		//FIXME: Morale can sometimes be > 100 on the first few turns.
+		//morale = MathUtils.clamp(morale, 0, 100);
 		statLine.setValue(Stat.MORALE, morale);
 
 		float moraleOffset = (morale >= 70 ? (morale - 70) / 100 : (70 - morale) / 100);
