@@ -36,4 +36,9 @@ public class America extends Civ {
 	public Color getColor() {
 		return Color.CYAN;
 	}
+
+	@Override
+	public Color getBorderColor() {
+		return Color.CYAN;
+	}
 }

@@ -164,7 +164,7 @@ public class Tile extends Actor implements BottomShapeRenderListener {
 				v2 = 0;
 			}
 
-			shapeRenderer.setColor(territory.getPlayerOwner().getCivilization().getColor());
+			shapeRenderer.setColor(territory.getPlayerOwner().getCivilization().getBorderColor());
 			shapeRenderer.line(vectors[v1], vectors[v2]);
 		}
 

@@ -18,6 +18,7 @@ public abstract class Civ {
 	public abstract TextureEnum getIcon();
 
 	public abstract Color getColor();
+	public abstract Color getBorderColor();
 
 	public abstract String getName();
 

@@ -29,4 +29,9 @@ public class Barbarians extends Civ {
 	public Color getColor() {
 		return Color.FIREBRICK;
 	}
+	
+	@Override
+	public Color getBorderColor() {
+		return Color.FIREBRICK;
+	}
 }

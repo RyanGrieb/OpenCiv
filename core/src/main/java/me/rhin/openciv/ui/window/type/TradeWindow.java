@@ -9,7 +9,9 @@ import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.city.City;
 import me.rhin.openciv.game.unit.type.Caravan.CaravanUnit;
 import me.rhin.openciv.game.unit.type.Caravan.Tradeable;
+import me.rhin.openciv.listener.MoveUnitListener;
 import me.rhin.openciv.listener.ResizeListener;
+import me.rhin.openciv.shared.packet.type.MoveUnitPacket;
 import me.rhin.openciv.ui.background.ColoredBackground;
 import me.rhin.openciv.ui.button.type.CloseWindowButton;
 import me.rhin.openciv.ui.label.CustomLabel;
@@ -19,7 +21,7 @@ import me.rhin.openciv.ui.list.type.ListTradeableCity;
 import me.rhin.openciv.ui.list.type.ListUntradeableCity;
 import me.rhin.openciv.ui.window.AbstractWindow;
 
-public class TradeWindow extends AbstractWindow implements ResizeListener {
+public class TradeWindow extends AbstractWindow implements ResizeListener, MoveUnitListener {
 
 	private CaravanUnit caravanUnit;
 	private ColoredBackground background;
@@ -50,8 +52,8 @@ public class TradeWindow extends AbstractWindow implements ResizeListener {
 				containerList.addItem(ListContainerType.CATEGORY, "Tradeable Cities",
 						new ListTradeableCity(city, caravanUnit, width, 45));
 			} else {
-				containerList.addItem(ListContainerType.CATEGORY, "Untradeable Cities",
-						new ListUntradeableCity(city, tradeable.getReason(), width, 45));
+				// containerList.addItem(ListContainerType.CATEGORY, "Untradeable Cities",
+				// new ListUntradeableCity(city, tradeable.getReason(), width, 45));
 			}
 		}
 
@@ -69,6 +71,7 @@ public class TradeWindow extends AbstractWindow implements ResizeListener {
 		});
 
 		Civilization.getInstance().getEventManager().addListener(ResizeListener.class, this);
+		Civilization.getInstance().getEventManager().addListener(MoveUnitListener.class, this);
 	}
 
 	@Override
@@ -113,5 +116,11 @@ public class TradeWindow extends AbstractWindow implements ResizeListener {
 	@Override
 	public boolean isGameDisplayWindow() {
 		return false;
+	}
+
+	@Override
+	public void onUnitMove(MoveUnitPacket packet) {
+		if (packet.getUnitID() == caravanUnit.getID())
+			Civilization.getInstance().getWindowManager().closeWindow(getClass());
 	}
 }

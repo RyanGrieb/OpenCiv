@@ -38,4 +38,9 @@ public class England extends Civ {
 	public Color getColor() {
 		return Color.RED;
 	}
+	
+	@Override
+	public Color getBorderColor() {
+		return Color.RED;
+	}
 }

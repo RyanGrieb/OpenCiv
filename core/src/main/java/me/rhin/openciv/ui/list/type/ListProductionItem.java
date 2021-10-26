@@ -135,4 +135,11 @@ public class ListProductionItem extends ListObject implements CityStatUpdateList
 	public ProductionItem getProductionItem() {
 		return productionItem;
 	}
+
+	@Override
+	public int compareTo(ListObject listObj) {
+		ListProductionItem listProductionItem = (ListProductionItem) listObj;
+		return Integer.compare((int) listProductionItem.getProductionItem().getProductionCost(),
+				(int) productionItem.getProductionCost());
+	}
 }

@@ -37,4 +37,9 @@ public class Germany extends Civ {
 	public Color getColor() {
 		return Color.GRAY;
 	}
+	
+	@Override
+	public Color getBorderColor() {
+		return Color.GRAY;
+	}
 }

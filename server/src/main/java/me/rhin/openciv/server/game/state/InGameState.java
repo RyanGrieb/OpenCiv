@@ -212,7 +212,7 @@ public class InGameState extends GameState implements DisconnectListener, Select
 		conn.send(json.toJson(packet));
 	}
 
-	// TODO: Move to map class
+
 	@Override
 	public void onUnitMove(WebSocket conn, MoveUnitPacket packet) {
 
@@ -220,13 +220,13 @@ public class InGameState extends GameState implements DisconnectListener, Select
 
 		Unit unit = prevTile.getUnitFromID(packet.getUnitID());
 
-		// NOTE: We assume player owner is a MPPlayer
-		Player playerOwner = (Player) unit.getPlayerOwner();
-
 		if (unit == null) {
 			System.out.println("Error: Unit is NULL");
 			return;
 		}
+
+		// NOTE: We assume player owner is a MPPlayer
+		Player playerOwner = (Player) unit.getPlayerOwner();
 
 		Tile targetTile = map.getTiles()[packet.getTargetGridX()][packet.getTargetGridY()];
 		Tile originalTargetTile = map.getTiles()[packet.getTargetGridX()][packet.getTargetGridY()];

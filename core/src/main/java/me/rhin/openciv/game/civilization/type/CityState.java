@@ -9,18 +9,24 @@ import me.rhin.openciv.game.player.AbstractPlayer;
 public class CityState extends Civ {
 
 	public enum CityStateType {
-		GOLD(TextureEnum.ICON_CITYSTATE_GOLD),
-		PRODUCTION(TextureEnum.ICON_CITYSTATE_PRODUCTION),
-		SCIENCE(TextureEnum.ICON_CITYSTATE_SCIENCE);
+		GOLD(TextureEnum.ICON_CITYSTATE_GOLD, Color.GOLD),
+		PRODUCTION(TextureEnum.ICON_CITYSTATE_PRODUCTION, Color.ORANGE),
+		SCIENCE(TextureEnum.ICON_CITYSTATE_SCIENCE, Color.BLUE);
 
 		private TextureEnum textureEnum;
+		private Color color;
 
-		CityStateType(TextureEnum texture) {
+		CityStateType(TextureEnum texture, Color color) {
 			textureEnum = texture;
+			this.color = color;
 		}
 
-		TextureEnum getIcon() {
+		public TextureEnum getIcon() {
 			return textureEnum;
+		}
+
+		public Color getColor() {
+			return color;
 		}
 	}
 
@@ -38,6 +44,10 @@ public class CityState extends Civ {
 	@Override
 	public Color getColor() {
 		return Color.DARK_GRAY;
+	}
+
+	public Color getBorderColor() {
+		return cityStateType.getColor();
 	}
 
 	@Override

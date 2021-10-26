@@ -1,6 +1,8 @@
 package me.rhin.openciv.ui.list;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
@@ -15,7 +17,8 @@ import me.rhin.openciv.ui.label.CustomLabel;
 public class ListContainer extends Group {
 
 	public enum ListContainerType {
-		CATEGORY, DEFAULT
+		CATEGORY,
+		DEFAULT
 	}
 
 	private ContainerList containerList;
@@ -61,16 +64,27 @@ public class ListContainer extends Group {
 	public void setPosition(float x, float y) {
 		super.setPosition(x, y);
 
+		updatePositions(x, y);
+	}
+
+	private void updatePositions(float x, float y) {
 		categoryBackgroundSprite.setPosition(x, y + getHeight() - categoryBackgroundSprite.getHeight());
 		backgroundSprite.setPosition(x, y);
 		containerNameLabel.setPosition(x, y + getHeight() - containerNameLabel.getHeight());
 		topSeperatorSprite.setPosition(x, y + getHeight() - (containerType == ListContainerType.CATEGORY ? 18 : 0));
+
+		// FIXME: This is inefficient to have readable code. Improve this.
+		Collections.sort(itemListObjects);
+
+		for (ListObject listObject : itemListObjects)
+			removeActor(listObject);
 
 		for (int i = 0; i < itemListObjects.size(); i++) {
 			Actor itemActor = itemListObjects.get(i);
 			// NOTE: This assumes that all listItems are the same size.
 			itemActor.setPosition(0, (getHeight() - categoryBackgroundSprite.getHeight() - itemActor.getHeight())
 					- (i * itemActor.getHeight()));
+			addActor(itemActor);
 		}
 	}
 
@@ -83,6 +97,7 @@ public class ListContainer extends Group {
 		// shouldn't increase the size further.
 		setHeight(getHeight() + listObject.getHeight());
 		updateHeight();
+		updatePositions(getX(), getY());
 	}
 
 	public void removeItem(String itemKey) {

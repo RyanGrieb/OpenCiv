@@ -107,4 +107,14 @@ public class ListBuilding extends ListObject {
 		}
 	}
 
+	@Override
+	public int compareTo(ListObject listObj) {
+		ListBuilding listBuilding = (ListBuilding) listObj;
+		return Integer.compare((int) building.getProductionCost(),
+				(int) listBuilding.getBuilding().getProductionCost());
+	}
+
+	private Building getBuilding() {
+		return building;
+	}
 }

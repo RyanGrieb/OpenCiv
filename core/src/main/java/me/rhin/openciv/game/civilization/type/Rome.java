@@ -38,4 +38,9 @@ public class Rome extends Civ {
 	public Color getColor() {
 		return Color.PURPLE;
 	}
+	
+	@Override
+	public Color getBorderColor() {
+		return Color.PURPLE;
+	}
 }
