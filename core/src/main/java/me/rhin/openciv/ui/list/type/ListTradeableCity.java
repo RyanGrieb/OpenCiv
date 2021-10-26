@@ -9,7 +9,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.city.City;
-import me.rhin.openciv.game.unit.type.Caravan.CaravanUnit;
+import me.rhin.openciv.game.unit.TradeUnit;
 import me.rhin.openciv.shared.packet.type.TradeCityPacket;
 import me.rhin.openciv.ui.label.CustomLabel;
 import me.rhin.openciv.ui.list.ListObject;
@@ -27,7 +27,7 @@ public class ListTradeableCity extends ListObject {
 	private CustomLabel cityNameLabel;
 	private boolean hovered;
 
-	public ListTradeableCity(final City city, CaravanUnit caravanUnit, float width, float height) {
+	public ListTradeableCity(final City city, TradeUnit tradeUnit, float width, float height) {
 		super(width, height, city.getName());
 
 		this.city = city;
@@ -56,8 +56,8 @@ public class ListTradeableCity extends ListObject {
 				System.out.println("Trade w/ city: " + city.getName());
 
 				TradeCityPacket packet = new TradeCityPacket();
-				packet.setCity(city.getName(), caravanUnit.getID(), caravanUnit.getStandingTile().getGridX(),
-						caravanUnit.getStandingTile().getGridY());
+				packet.setCity(city.getName(), tradeUnit.getID(), tradeUnit.getStandingTile().getGridX(),
+						tradeUnit.getStandingTile().getGridY());
 				Civilization.getInstance().getNetworkManager().sendPacket(packet);
 
 				Civilization.getInstance().getWindowManager().closeWindow(TradeWindow.class);

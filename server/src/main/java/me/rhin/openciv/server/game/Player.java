@@ -7,6 +7,7 @@ import com.badlogic.gdx.utils.Json;
 import me.rhin.openciv.server.Server;
 import me.rhin.openciv.server.game.city.City;
 import me.rhin.openciv.server.game.civilization.type.RandomCivilization;
+import me.rhin.openciv.server.game.unit.TraderUnit;
 import me.rhin.openciv.server.game.unit.Unit;
 import me.rhin.openciv.server.game.unit.type.Caravan.CaravanUnit;
 import me.rhin.openciv.server.listener.ChooseHeritageListener;
@@ -89,13 +90,13 @@ public class Player extends AbstractPlayer
 					city = playerCity;
 				}
 
-		if (!(unit instanceof CaravanUnit) || city == null)
+		if (!(unit instanceof TraderUnit) || city == null)
 			return;
 
 		System.out.println("Attempting to trade w/ city: " + city.getName());
-		CaravanUnit caravanUnit = (CaravanUnit) unit;
-		caravanUnit.setTradingCity(city);
-		caravanUnit.setCityHeadquarters(unit.getStandingTile().getCity());
+		TraderUnit traderUnit = (TraderUnit) unit;
+		traderUnit.setTradingCity(city);
+		traderUnit.setCityHeadquarters(unit.getStandingTile().getCity());
 	}
 
 	@Override
