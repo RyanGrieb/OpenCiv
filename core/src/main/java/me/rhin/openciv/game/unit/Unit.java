@@ -21,15 +21,18 @@ import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.map.GameMap;
 import me.rhin.openciv.game.map.tile.Tile;
 import me.rhin.openciv.game.map.tile.TileObserver;
+import me.rhin.openciv.game.map.tile.TileType;
 import me.rhin.openciv.game.notification.type.AvailableMovementNotification;
 import me.rhin.openciv.game.player.AbstractPlayer;
 import me.rhin.openciv.game.player.Player;
+import me.rhin.openciv.game.research.type.OpticsTech;
 import me.rhin.openciv.game.unit.UnitItem.UnitType;
 import me.rhin.openciv.listener.BottomShapeRenderListener;
 import me.rhin.openciv.listener.NextTurnListener;
 import me.rhin.openciv.listener.UnitActListener.UnitActEvent;
 import me.rhin.openciv.shared.packet.type.MoveUnitPacket;
 import me.rhin.openciv.shared.packet.type.NextTurnPacket;
+import me.rhin.openciv.shared.packet.type.UnitEmbarkPacket;
 import me.rhin.openciv.ui.window.type.UnitCombatWindow;
 import me.rhin.openciv.ui.window.type.UnitWindow;
 
@@ -81,6 +84,7 @@ public abstract class Unit extends Actor
 		playerOwner.addUnit(this);
 
 		customActions.add(new MoveAction(this));
+		customActions.add(new EmbarkAction(this));
 
 		Civilization.getInstance().getEventManager().addListener(NextTurnListener.class, this);
 		Civilization.getInstance().getEventManager().addListener(BottomShapeRenderListener.class, this);
@@ -126,6 +130,55 @@ public abstract class Unit extends Actor
 		@Override
 		public TextureEnum getSprite() {
 			return TextureEnum.ICON_MOVE;
+		}
+	}
+
+	public static class EmbarkAction extends AbstractAction {
+
+		public EmbarkAction(Unit unit) {
+			super(unit);
+		}
+
+		@Override
+		public boolean act(float delta) {
+
+			// Send embark packet
+			UnitEmbarkPacket packet = new UnitEmbarkPacket();
+			packet.setUnit(unit.getID(), unit.getStandingTile().getGridX(), unit.getStandingTile().getGridY());
+
+			Civilization.getInstance().getNetworkManager().sendPacket(packet);
+
+			Civilization.getInstance().getEventManager().fireEvent(new UnitActEvent(unit));
+
+			unit.removeAction(this);
+			return true;
+		}
+
+		@Override
+		public boolean canAct() {
+			if (!unit.allowsMovement())
+				return false;
+
+			if (unit.getUnitTypes().contains(UnitType.NAVAL))
+				return false;
+
+			boolean adjOceanTile = false;
+			for (Tile tile : unit.getStandingTile().getAdjTiles())
+				if (tile.containsTileType(TileType.SHALLOW_OCEAN) && tile.getUnits().size() < 1)
+					adjOceanTile = true;
+
+			return unit.getCurrentMovement() > 0
+					&& unit.getPlayerOwner().getResearchTree().hasResearched(OpticsTech.class) && adjOceanTile;
+		}
+
+		@Override
+		public String getName() {
+			return "Embark";
+		}
+
+		@Override
+		public TextureEnum getSprite() {
+			return TextureEnum.UNIT_TRANSPORT_SHIP;
 		}
 	}
 
@@ -226,7 +279,6 @@ public abstract class Unit extends Actor
 
 		pathVectors.clear();
 		clearMovementTiles();
-
 
 		targetSelectionSprite.setPosition(targetTile.getVectors()[0].x - targetTile.getWidth() / 2,
 				targetTile.getVectors()[0].y + 4);
@@ -379,7 +431,6 @@ public abstract class Unit extends Actor
 		return true;
 	}
 
-
 	@Override
 	public void onBottomShapeRender(ShapeRenderer shapeRenderer) {
 
@@ -512,6 +563,10 @@ public abstract class Unit extends Actor
 
 		if (movement < 0)
 			movement = 0;
+	}
+
+	public void setMovement(int movement) {
+		this.movement = movement;
 	}
 
 	public float getCurrentMovement() {

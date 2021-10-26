@@ -84,6 +84,11 @@ public class Builder extends UnitItem {
 		public List<UnitType> getUnitTypes() {
 			return Arrays.asList(UnitType.SUPPORT);
 		}
+		
+		@Override
+		public String getName() {
+			return "Builder";
+		}
 	}
 
 	@Override

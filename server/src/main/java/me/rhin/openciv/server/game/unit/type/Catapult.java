@@ -51,6 +51,11 @@ public class Catapult extends UnitItem {
 		public List<UnitType> getUnitTypes() {
 			return Arrays.asList(UnitType.RANGED);
 		}
+
+		@Override
+		public String getName() {
+			return "Catapult";
+		}
 	}
 
 	@Override

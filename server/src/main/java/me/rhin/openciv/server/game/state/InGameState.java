@@ -1,7 +1,6 @@
 package me.rhin.openciv.server.game.state;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.Random;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -33,6 +32,7 @@ import me.rhin.openciv.server.game.unit.Unit;
 import me.rhin.openciv.server.game.unit.type.Builder.BuilderUnit;
 import me.rhin.openciv.server.game.unit.type.Caravan.CaravanUnit;
 import me.rhin.openciv.server.game.unit.type.Settler.SettlerUnit;
+import me.rhin.openciv.server.game.unit.type.TransportShipUnit;
 import me.rhin.openciv.server.game.unit.type.Warrior.WarriorUnit;
 import me.rhin.openciv.server.game.unit.type.WorkBoat.WorkBoatUnit;
 import me.rhin.openciv.server.listener.BuyProductionItemListener;
@@ -49,9 +49,12 @@ import me.rhin.openciv.server.listener.SelectUnitListener;
 import me.rhin.openciv.server.listener.SetProductionItemListener;
 import me.rhin.openciv.server.listener.SettleCityListener;
 import me.rhin.openciv.server.listener.TileStatlineListener;
+import me.rhin.openciv.server.listener.UnitDisembarkListener;
+import me.rhin.openciv.server.listener.UnitEmbarkListener;
 import me.rhin.openciv.server.listener.UnitFinishedMoveListener.UnitFinishedMoveEvent;
 import me.rhin.openciv.server.listener.UnitMoveListener;
 import me.rhin.openciv.server.listener.WorkTileListener;
+import me.rhin.openciv.shared.packet.type.AddUnitPacket;
 import me.rhin.openciv.shared.packet.type.BuyProductionItemPacket;
 import me.rhin.openciv.shared.packet.type.CombatPreviewPacket;
 import me.rhin.openciv.shared.packet.type.DeleteUnitPacket;
@@ -72,6 +75,8 @@ import me.rhin.openciv.shared.packet.type.SettleCityPacket;
 import me.rhin.openciv.shared.packet.type.TileStatlinePacket;
 import me.rhin.openciv.shared.packet.type.TurnTimeLeftPacket;
 import me.rhin.openciv.shared.packet.type.UnitAttackPacket;
+import me.rhin.openciv.shared.packet.type.UnitDisembarkPacket;
+import me.rhin.openciv.shared.packet.type.UnitEmbarkPacket;
 import me.rhin.openciv.shared.packet.type.WorkTilePacket;
 import me.rhin.openciv.shared.stat.Stat;
 import me.rhin.openciv.shared.stat.StatLine;
@@ -82,7 +87,8 @@ import me.rhin.openciv.shared.util.MathHelper;
 public class InGameState extends GameState implements DisconnectListener, SelectUnitListener, UnitMoveListener,
 		SettleCityListener, PlayerFinishLoadingListener, NextTurnListener, SetProductionItemListener, EndTurnListener,
 		PlayerListRequestListener, FetchPlayerListener, CombatPreviewListener, WorkTileListener, RangedAttackListener,
-		BuyProductionItemListener, RequestEndTurnListener, TileStatlineListener {
+		BuyProductionItemListener, RequestEndTurnListener, TileStatlineListener, UnitEmbarkListener,
+		UnitDisembarkListener {
 
 	private int currentTurn;
 	private int turnTimeLeft;
@@ -112,6 +118,8 @@ public class InGameState extends GameState implements DisconnectListener, Select
 		Server.getInstance().getEventManager().addListener(BuyProductionItemListener.class, this);
 		Server.getInstance().getEventManager().addListener(RequestEndTurnListener.class, this);
 		Server.getInstance().getEventManager().addListener(TileStatlineListener.class, this);
+		Server.getInstance().getEventManager().addListener(UnitEmbarkListener.class, this);
+		Server.getInstance().getEventManager().addListener(UnitDisembarkListener.class, this);
 	}
 
 	@Override
@@ -599,6 +607,96 @@ public class InGameState extends GameState implements DisconnectListener, Select
 
 		Json json = new Json();
 		getPlayerByConn(conn).sendPacket(json.toJson(packet));
+	}
+
+	@Override
+	public void onUnitEmbark(WebSocket conn, UnitEmbarkPacket packet) {
+		Player unitPlayer = Server.getInstance().getPlayerByConn(conn);
+		Unit unit = map.getTiles()[packet.getTileGridX()][packet.getTileGridY()].getUnitFromID(packet.getUnitID());
+
+		Tile embarkTile = null;
+
+		for (Tile tile : unit.getTile().getAdjTiles()) {
+			if (tile.containsTileType(TileType.SHALLOW_OCEAN) && tile.getUnits().size() < 1)
+				embarkTile = tile;
+		}
+
+		if (embarkTile == null)
+			return;
+
+		unit.getStandingTile().removeUnit(unit);
+		unit.getPlayerOwner().removeUnit(unit);
+		// unit.kill();
+
+		DeleteUnitPacket removeUnitPacket = new DeleteUnitPacket();
+		removeUnitPacket.setUnit(unit.getID(), unit.getStandingTile().getGridX(), unit.getStandingTile().getGridY());
+
+		Json json = new Json();
+		for (Player player : players) {
+			player.sendPacket(json.toJson(removeUnitPacket));
+		}
+
+		TransportShipUnit transportShip = new TransportShipUnit(unitPlayer, unit, embarkTile);
+		embarkTile.addUnit(transportShip);
+
+		AddUnitPacket addUnitPacket = new AddUnitPacket();
+		addUnitPacket.setUnit(unitPlayer.getName(), transportShip.getName(), transportShip.getID(),
+				embarkTile.getGridX(), embarkTile.getGridY());
+
+		for (Player player : Server.getInstance().getPlayers())
+			player.sendPacket(json.toJson(addUnitPacket));
+	}
+
+	@Override
+	public void onUnitDisembark(WebSocket conn, UnitDisembarkPacket packet) {
+		Player unitPlayer = Server.getInstance().getPlayerByConn(conn);
+
+		Unit transportUnit = map.getTiles()[packet.getTileGridX()][packet.getTileGridY()]
+				.getUnitFromID(packet.getUnitID());
+
+		if (!(transportUnit instanceof TransportShipUnit))
+			return;
+
+		TransportShipUnit transportShip = (TransportShipUnit) transportUnit;
+
+		Tile disembarkTile = null;
+
+		for (Tile tile : transportShip.getTile().getAdjTiles()) {
+			if (!tile.containsTileProperty(TileProperty.WATER) && tile.getUnits().size() < 1
+					&& tile.getMovementCost(transportShip.getStandingTile()) < 1000)
+				disembarkTile = tile;
+		}
+
+		if (disembarkTile == null)
+			return;
+
+		transportShip.getStandingTile().removeUnit(transportShip);
+		transportShip.getPlayerOwner().removeUnit(transportShip);
+		transportShip.kill();
+
+		DeleteUnitPacket removeUnitPacket = new DeleteUnitPacket();
+		removeUnitPacket.setUnit(transportShip.getID(), transportShip.getStandingTile().getGridX(),
+				transportShip.getStandingTile().getGridY());
+
+		Json json = new Json();
+		for (Player player : players) {
+			player.sendPacket(json.toJson(removeUnitPacket));
+		}
+
+		Unit unit = transportShip.getTransportUnit();
+		unit.setMovement(0);
+
+		disembarkTile.addUnit(unit);
+		unitPlayer.addOwnedUnit(unit);
+		unit.setStandingTile(disembarkTile);
+
+		AddUnitPacket addUnitPacket = new AddUnitPacket();
+		addUnitPacket.setUnit(unitPlayer.getName(), unit.getName(), unit.getID(), disembarkTile.getGridX(),
+				disembarkTile.getGridY());
+		addUnitPacket.setUnitMovement(0);
+
+		for (Player player : Server.getInstance().getPlayers())
+			player.sendPacket(json.toJson(addUnitPacket));
 	}
 
 	@Override

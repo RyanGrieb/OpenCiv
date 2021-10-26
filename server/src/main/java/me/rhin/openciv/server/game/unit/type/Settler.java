@@ -112,6 +112,11 @@ public class Settler extends UnitItem {
 
 			Server.getInstance().getEventManager().fireEvent(new ServerSettleCityEvent(city));
 		}
+
+		@Override
+		public String getName() {
+			return "Settler";
+		}
 	}
 
 	@Override

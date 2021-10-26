@@ -38,6 +38,11 @@ public class Galley extends UnitItem {
 		public List<UnitType> getUnitTypes() {
 			return Arrays.asList(UnitType.MELEE, UnitType.NAVAL);
 		}
+
+		@Override
+		public String getName() {
+			return "Galley";
+		}
 	}
 
 	@Override

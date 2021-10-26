@@ -39,6 +39,11 @@ public class ChariotArcher extends UnitItem {
 		public List<UnitType> getUnitTypes() {
 			return Arrays.asList(UnitType.RANGED, UnitType.MOUNTED);
 		}
+
+		@Override
+		public String getName() {
+			return "Chariot Archer";
+		}
 	}
 
 	@Override

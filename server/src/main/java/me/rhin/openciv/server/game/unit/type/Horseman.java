@@ -46,6 +46,11 @@ public class Horseman extends UnitItem {
 		public List<UnitType> getUnitTypes() {
 			return Arrays.asList(UnitType.MELEE, UnitType.MOUNTED);
 		}
+
+		@Override
+		public String getName() {
+			return "Horseman";
+		}
 	}
 
 	@Override

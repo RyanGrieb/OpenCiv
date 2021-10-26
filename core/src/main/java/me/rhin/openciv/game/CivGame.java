@@ -152,6 +152,10 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 
 			Unit unit = (Unit) ClassReflection.getConstructor(unitClass, UnitParameter.class)
 					.newInstance(unitParameter);
+
+			if (packet.getUnitMovement() != -1)
+				unit.setMovement(packet.getUnitMovement());
+
 			tile.addUnit(unit);
 
 			((InGameScreen) Civilization.getInstance().getScreenManager().getCurrentScreen()).getUnitGroup()
@@ -187,8 +191,7 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 					players.put(playerName, new Player(playerName));
 			}
 
-			
-			//TODO: Handle reflection of citystates better.
+			// TODO: Handle reflection of citystates better.
 			String civName = StrUtil.capitalize(civilizationName.toLowerCase());
 			try {
 				Class<? extends Civ> civClass = null;

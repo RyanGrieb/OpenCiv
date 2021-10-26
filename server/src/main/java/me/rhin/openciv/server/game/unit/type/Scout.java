@@ -44,6 +44,11 @@ public class Scout extends UnitItem {
 		public List<UnitType> getUnitTypes() {
 			return Arrays.asList(UnitType.MELEE);
 		}
+
+		@Override
+		public String getName() {
+			return "Scout";
+		}
 	}
 
 	@Override

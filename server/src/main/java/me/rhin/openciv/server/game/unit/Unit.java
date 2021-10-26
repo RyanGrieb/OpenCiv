@@ -70,6 +70,8 @@ public abstract class Unit implements AttackableEntity, NextTurnListener {
 
 	public abstract List<UnitType> getUnitTypes();
 
+	public abstract String getName();
+
 	@Override
 	public void onNextTurn() {
 
@@ -170,6 +172,12 @@ public abstract class Unit implements AttackableEntity, NextTurnListener {
 	@Override
 	public float getCombatStrength(AttackableEntity target) {
 		return combatStrength.getStatValue(Stat.COMBAT_STRENGTH);
+	}
+
+	// TODO: Just added this, use this in other places in the unit class.
+	public void setStandingTile(Tile standingTile) {
+		this.standingTile = standingTile;
+		setPosition(standingTile.getVectors()[0].x - standingTile.getWidth() / 2, standingTile.getVectors()[0].y + 4);
 	}
 
 	public void clearListeners() {
@@ -334,6 +342,10 @@ public abstract class Unit implements AttackableEntity, NextTurnListener {
 
 		if (movement < 0)
 			movement = 0;
+	}
+
+	public void setMovement(float movement) {
+		this.movement = movement;
 	}
 
 	public float getMovement() {

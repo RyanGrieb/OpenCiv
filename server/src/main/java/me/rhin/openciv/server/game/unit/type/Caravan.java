@@ -216,6 +216,11 @@ public class Caravan extends UnitItem {
 		public void setCityHeadquarters(City cityHeadquarters) {
 			this.cityHeadquarters = cityHeadquarters;
 		}
+
+		@Override
+		public String getName() {
+			return "Caravan";
+		}
 	}
 
 	@Override

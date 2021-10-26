@@ -163,11 +163,8 @@ public class UnitWindow extends AbstractWindow
 
 	@Override
 	public void onWorkTile(WorkTilePacket packet) {
-		System.out.println("Called");
 		if (unit.getID() != packet.getUnitID())
 			return;
-
-		System.out.println("Called1");
 
 		BuilderUnit builderUnit = (BuilderUnit) unit;
 

@@ -46,7 +46,7 @@ public class WorkBoat extends UnitItem {
 		}
 
 		public void improveTile(String improvementName) {
-			
+
 			TileImprovement improvement = standingTile.getBaseTileType().getImprovement(improvementName);
 			improvement.setTile(standingTile);
 
@@ -78,6 +78,11 @@ public class WorkBoat extends UnitItem {
 				player.sendPacket(json.toJson(removeUnitPacket));
 			}
 
+		}
+
+		@Override
+		public String getName() {
+			return "Work Boat";
 		}
 	}
 
