@@ -145,7 +145,7 @@ public class GameOverlay extends AbstractWindow implements ResizeListener, TileS
 
 		float addedWidth = 0;
 		for (Stat stat : statline.getStatValues().keySet()) {
-			if (stat == Stat.MAINTENANCE)
+			if (stat == Stat.MAINTENANCE || stat == Stat.MORALE)
 				continue;
 
 			String name = null;
