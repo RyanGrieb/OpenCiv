@@ -291,7 +291,9 @@ public class InGameState extends GameState implements DisconnectListener, Select
 			} else {
 
 				// Problem: Wrong id being set in the packet?
+				targetUnit.getPlayerOwner().removeUnit(targetUnit);
 				targetUnit.setPlayerOwner(unit.getPlayerOwner());
+				
 				SetUnitOwnerPacket setOwnerPacket = new SetUnitOwnerPacket();
 				setOwnerPacket.setUnit(targetUnit.getPlayerOwner().getName(), targetUnit.getID(),
 						targetUnit.getStandingTile().getGridX(), targetUnit.getStandingTile().getGridY());

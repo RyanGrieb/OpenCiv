@@ -95,7 +95,8 @@ public class BarbarianWarriorAI extends UnitAI implements NextTurnListener {
 			pathingTile = pathTiles.get(1); // Stand outside of enemy unit to attack.
 		}
 
-		moveToTargetTile(pathingTile);
+		if (!pathingTile.equals(unit.getStandingTile()))
+			moveToTargetTile(pathingTile);
 
 		if (unit.canAttack(topEntity)) {
 			unit.attackEntity(topEntity);

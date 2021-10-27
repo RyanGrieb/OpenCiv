@@ -3,8 +3,6 @@ package me.rhin.openciv.server.game.ai.unit;
 import java.util.ArrayList;
 import java.util.Random;
 
-import com.badlogic.gdx.utils.Json;
-
 import me.rhin.openciv.server.Server;
 import me.rhin.openciv.server.game.Player;
 import me.rhin.openciv.server.game.ai.AIPlayer;
@@ -17,7 +15,6 @@ import me.rhin.openciv.server.game.unit.AttackableEntity;
 import me.rhin.openciv.server.game.unit.Unit;
 import me.rhin.openciv.server.listener.NextTurnListener;
 import me.rhin.openciv.server.listener.ServerSettleCityListener;
-import me.rhin.openciv.shared.packet.type.MoveUnitPacket;
 
 public class CityStateMeleeAI extends UnitAI implements NextTurnListener, ServerSettleCityListener {
 
@@ -105,7 +102,8 @@ public class CityStateMeleeAI extends UnitAI implements NextTurnListener, Server
 			pathingTile = pathTiles.get(1); // Stand outside of enemy unit to attack.
 		}
 
-		moveToTargetTile(pathingTile);
+		if (!pathingTile.equals(unit.getStandingTile()))
+			moveToTargetTile(pathingTile);
 
 		if (unit.canAttack(topEntity)) {
 			unit.attackEntity(topEntity);

@@ -42,7 +42,7 @@ public class CityStatePlayer extends AIPlayer implements NextTurnListener {
 
 	@Override
 	public void addOwnedUnit(Unit unit) {
-		ownedUnits.add(unit);
+		super.addOwnedUnit(unit);
 
 		if (unit.getUnitTypes().contains(UnitType.MELEE)) {
 			unit.addAIBehavior(new CityStateMeleeAI(unit));
@@ -143,7 +143,7 @@ public class CityStatePlayer extends AIPlayer implements NextTurnListener {
 		}
 
 		if (topTech == null) {
-			System.out.println("FIXME: No techs with properties.");
+			//System.out.println("FIXME: No techs with properties.");
 			return;
 		}
 
@@ -189,7 +189,8 @@ public class CityStatePlayer extends AIPlayer implements NextTurnListener {
 					topItem = productionItem;
 			}
 
-			// System.out.println("Citystate " + name + " producing: " + topItem.getName());
+			//System.out.println("Citystate " + name + " producing: " + topItem.getName());
+
 			itemManager.setProducingItem(topItem.getName());
 		}
 	}

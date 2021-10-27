@@ -5,10 +5,10 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
-import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Json;
 
 import me.rhin.openciv.server.Server;
+import me.rhin.openciv.server.errors.SameMovementTargetException;
 import me.rhin.openciv.server.game.AbstractPlayer;
 import me.rhin.openciv.server.game.Player;
 import me.rhin.openciv.server.game.ai.unit.UnitAI;
@@ -35,7 +35,6 @@ public abstract class Unit implements AttackableEntity, NextTurnListener {
 	protected Tile standingTile;
 	private int id;
 	private Tile[][] cameFrom;
-	private ArrayList<Vector2[]> pathVectors = new ArrayList<>();
 	protected AbstractPlayer playerOwner;
 	private float x, y;
 	private float width, height;
@@ -174,6 +173,12 @@ public abstract class Unit implements AttackableEntity, NextTurnListener {
 		return combatStrength.getStatValue(Stat.COMBAT_STRENGTH);
 	}
 
+	@Override
+	public String toString() {
+		return "(ID:" + id + ", Owner:" + playerOwner.getCiv().getName() + " - [" + standingTile.getGridX() + ","
+				+ standingTile.getGridY() + "]" + ")";
+	}
+
 	// TODO: Just added this, use this in other places in the unit class.
 	public void setStandingTile(Tile standingTile) {
 		this.standingTile = standingTile;
@@ -189,37 +194,13 @@ public abstract class Unit implements AttackableEntity, NextTurnListener {
 	}
 
 	public boolean setTargetTile(Tile targetTile) {
-		if (targetTile == null)
-			return false;
 
 		if (targetTile.equals(this.targetTile))
-			return false;
-
-		pathVectors.clear();
-
-		// Find the shortest path to the target tile.
-		// Remember:
-		/*
-		 * EDGES are lines pointing to another node. (Stores the others nodes location
-		 * or instance).
-		 * 
-		 * NODES or VERTICES are the nodes (in this case our hexes) on the map!.
-		 */
-
-		// https://en.wikipedia.org/wiki/A*_search_algorithm
-		// https://www.youtube.com/watch?v=6TsL96NAZCo
-
-		// Remember, stack is LIFO.
-
-		// int aScore = costOfPath + hurestic of the target point.
-
-		// Tile should store is hurestic, tileNode should store is aScore.
-
-		// FIXME: This shouldn't be a static number. (E.g. account for hills, ect.)
-		// SHOULD NEVERRRR OVERESTIMATE tough
-		int h = 0; // Lowest possible cost to reach nearest tile. (Do we want to
-					// overestimate
-		// this?).
+		{
+			throw new SameMovementTargetException();
+		}
+		
+		int h = 0;
 
 		int width = Server.getInstance().getMap().getWidth();
 		int height = Server.getInstance().getMap().getHeight();
@@ -285,15 +266,6 @@ public abstract class Unit implements AttackableEntity, NextTurnListener {
 		while (parentTile != null) {
 			Tile nextTile = cameFrom[parentTile.getGridX()][parentTile.getGridY()];
 
-			if (nextTile != null) {
-				Vector2[] tileVectors = new Vector2[2];
-				tileVectors[0] = new Vector2(parentTile.getX() + parentTile.getWidth() / 2,
-						parentTile.getY() + parentTile.getHeight() / 2 + 4);
-				tileVectors[1] = new Vector2(nextTile.getX() + nextTile.getWidth() / 2,
-						nextTile.getY() + nextTile.getHeight() / 2 + 4);
-				pathVectors.add(tileVectors);
-			}
-
 			if (nextTile == null)
 				nextTile = targetTile;
 
@@ -322,8 +294,6 @@ public abstract class Unit implements AttackableEntity, NextTurnListener {
 	public void moveToTargetTile() {
 		if (targetTile == null)
 			return;
-
-		pathVectors.clear();
 
 		standingTile.removeUnit(this);
 		targetTile.addUnit(this);
@@ -386,10 +356,6 @@ public abstract class Unit implements AttackableEntity, NextTurnListener {
 		return playerOwner;
 	}
 
-	public ArrayList<Vector2[]> getPathVectors() {
-		return pathVectors;
-	}
-
 	public float getPathMovement() {
 		return pathMovement;
 	}
@@ -400,6 +366,11 @@ public abstract class Unit implements AttackableEntity, NextTurnListener {
 
 	public void setPlayerOwner(AbstractPlayer playerOwner) {
 		this.playerOwner = playerOwner;
+
+		if (unitAI != null) {
+			unitAI.clearListeners();
+			unitAI = null;
+		}
 	}
 
 	public Tile[][] getCameFromTiles() {

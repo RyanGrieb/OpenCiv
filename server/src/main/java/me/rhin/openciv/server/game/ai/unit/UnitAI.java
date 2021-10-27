@@ -2,13 +2,12 @@ package me.rhin.openciv.server.game.ai.unit;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 
 import com.badlogic.gdx.utils.Json;
 
 import me.rhin.openciv.server.Server;
+import me.rhin.openciv.server.errors.SameMovementTargetException;
 import me.rhin.openciv.server.game.Player;
-import me.rhin.openciv.server.game.map.GameMap;
 import me.rhin.openciv.server.game.map.tile.Tile;
 import me.rhin.openciv.server.game.unit.Unit;
 import me.rhin.openciv.shared.packet.type.MoveUnitPacket;
@@ -194,13 +193,12 @@ public abstract class UnitAI {
 	 * @param pathingTile
 	 */
 	protected void moveToTargetTile(Tile tile) {
-		unit.setTargetTile(tile);
-		
-		//NOTE: This can be null when units are attacking eachother.
-		if(unit.getTargetTile() == null) {
-			return;
+		if (tile.equals(unit.getStandingTile())) {
+			System.out.println("ERROR: Moving to standing tile." + unit);
+			throw new SameMovementTargetException();
 		}
-		
+		unit.setTargetTile(tile);
+
 		MoveUnitPacket packet = new MoveUnitPacket();
 		packet.setUnit(unit.getPlayerOwner().getName(), unit.getID(), unit.getStandingTile().getGridX(),
 				unit.getStandingTile().getGridY(), unit.getTargetTile().getGridX(), unit.getTargetTile().getGridY());

@@ -23,7 +23,10 @@ public class BuilderAI extends UnitAI implements NextTurnListener {
 
 	@Override
 	public void onNextTurn() {
-
+		
+		if (!unit.isAlive())
+			return;
+		
 		BuilderUnit builder = (BuilderUnit) unit;
 
 		if (builder.isBuilding())
@@ -32,6 +35,11 @@ public class BuilderAI extends UnitAI implements NextTurnListener {
 		// Get the top tile to improve
 		improvementTile = null;
 		tileImprovement = null;
+
+		//TODO: Maybe delete ourselfs?
+		if (unit.getPlayerOwner().getOwnedCities().size() < 1)
+			return;
+
 		for (Tile tile : unit.getPlayerOwner().getCapitalCity().getTerritory()) {
 			if (tile.getBaseTileType().getImprovements() != null) {
 				for (TileImprovement improvement : tile.getBaseTileType().getImprovements()) {

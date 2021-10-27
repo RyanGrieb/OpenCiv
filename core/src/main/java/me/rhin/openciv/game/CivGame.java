@@ -237,14 +237,20 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 		Tile targetTile = map.getTiles()[packet.getTargetGridX()][packet.getTargetGridY()];
 		Unit unit = prevTile.getUnitFromID(packet.getUnitID());
 
-		//FIXME: This still is null sometimes. W/ barbarian AI & cities states
+		// FIXME: This still is null sometimes. W/ barbarian AI & cities states
 		if (unit == null) {
-			System.out.println("NULL:" + packet.getUnitID());
-			//System.exit(1);
+			for (AbstractPlayer player : this.getPlayers().values())
+				for (Unit playerUnit : player.getOwnedUnits())
+					if (playerUnit.getID() == packet.getUnitID()) {
+						System.out.println("Move error at:" + playerUnit.getStandingTile().getGridX() + ","
+								+ playerUnit.getStandingTile().getGridY());
+					}
+			System.out.println("MOVE NULL:" + packet.getUnitID());
+			// System.exit(1);
 		}
-		
-		//TODO: Have force set target tile still init values like setTargetTile()
-		unit.forceSetTargetTile(targetTile);  
+
+		// TODO: Have force set target tile still init values like setTargetTile()
+		unit.forceSetTargetTile(targetTile);
 		unit.moveToTargetTile();
 
 		// If we own this unit, add the movement cooldown.
@@ -257,6 +263,12 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 	public void onUnitDelete(DeleteUnitPacket packet) {
 		Tile tile = map.getTiles()[packet.getTileGridX()][packet.getTileGridY()];
 		Unit unit = tile.getUnitFromID(packet.getUnitID());
+
+		// FIXME: This still is null sometimes. W/ barbarian AI & cities states
+		if (unit == null) {
+			System.out.println("DELETE NULL:" + packet.getUnitID());
+			// System.exit(1);
+		}
 
 		System.out.println("Deleting unit from: " + unit.getPlayerOwner().getName());
 		unit.kill();
