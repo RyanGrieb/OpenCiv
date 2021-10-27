@@ -577,7 +577,7 @@ public class GameMap implements MapRequestListener {
 		}
 
 		// Spawn barbarians
-		int campAmount = 4 * (mapSize + 1);
+		int campAmount = 0 * (mapSize + 1);
 		for (int i = 0; i < campAmount; i++) {
 			int x = rnd.nextInt(getWidth());
 			int y = rnd.nextInt(getHeight());
@@ -688,9 +688,9 @@ public class GameMap implements MapRequestListener {
 				while (true) {
 					Tile tile = null;
 					if (tileType.hasProperty(TileProperty.WATER)) {
-						System.out.println("called");
+						
 						ArrayList<Tile> shallowOceanTiles = getTilesOfTileType(TileType.SHALLOW_OCEAN);
-						System.out.println(shallowOceanTiles.size());
+						
 						tile = shallowOceanTiles.get(rnd.nextInt(shallowOceanTiles.size()));
 					} else {
 						int rndX = rnd.nextInt((int) (rect.getX() + rect.getWidth() - 1) - (int) rect.getX() + 1)

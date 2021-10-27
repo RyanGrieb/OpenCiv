@@ -212,7 +212,6 @@ public class InGameState extends GameState implements DisconnectListener, Select
 		conn.send(json.toJson(packet));
 	}
 
-
 	@Override
 	public void onUnitMove(WebSocket conn, MoveUnitPacket packet) {
 
@@ -293,7 +292,7 @@ public class InGameState extends GameState implements DisconnectListener, Select
 				// Problem: Wrong id being set in the packet?
 				targetUnit.getPlayerOwner().removeUnit(targetUnit);
 				targetUnit.setPlayerOwner(unit.getPlayerOwner());
-				
+
 				SetUnitOwnerPacket setOwnerPacket = new SetUnitOwnerPacket();
 				setOwnerPacket.setUnit(targetUnit.getPlayerOwner().getName(), targetUnit.getID(),
 						targetUnit.getStandingTile().getGridX(), targetUnit.getStandingTile().getGridY());
@@ -780,7 +779,7 @@ public class InGameState extends GameState implements DisconnectListener, Select
 		// Add AI
 		for (int i = 0; i < 2; i++)
 			for (CityStateType type : CityStateType.values()) {
-				getAIPlayers().add(new CityStatePlayer(type));
+				// getAIPlayers().add(new CityStatePlayer(type));
 			}
 
 		getAIPlayers().add(new BarbarianPlayer());

@@ -96,7 +96,7 @@ public class ProducibleItemManager {
 		possibleItems.put("National College", new NationalCollege(city));
 		possibleItems.put("Lighthouse", new Lighthouse(city));
 		possibleItems.put("Stoneworks", new Stoneworks(city));
-		
+
 		// Wonders
 		possibleItems.put("Great Pyramids", new GreatPyramids(city));
 		possibleItems.put("Great Library", new GreatLibrary(city));
@@ -147,6 +147,11 @@ public class ProducibleItemManager {
 	}
 
 	public void applyProduction(float productionAmount) {
+
+		if (itemQueue.peek() == null) {
+			return;
+		}
+
 		itemQueue.peek().applyProduction(productionAmount);
 	}
 

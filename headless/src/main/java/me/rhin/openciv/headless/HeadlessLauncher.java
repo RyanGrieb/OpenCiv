@@ -20,9 +20,10 @@ public class HeadlessLauncher {
 		// System.out.println("playerStatLine:" + playerStatLine.id);
 
 		StatLine statLine = new StatLine();
-		statLine.addValue(Stat.GOLD_GAIN, 2);
-		statLine.subValue(Stat.GOLD_GAIN, 1);
+		statLine.addValue(Stat.GOLD, 50);
 		
+		statLine.clearNonAccumulative();
+		statLine.clearNonAccumulative();
 		System.out.println(statLine);
 	}
 

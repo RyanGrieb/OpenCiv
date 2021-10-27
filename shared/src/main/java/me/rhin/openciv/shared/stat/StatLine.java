@@ -62,7 +62,6 @@ public class StatLine {
 		HashMap<Stat, StatValue> statValuesCopy = (HashMap<Stat, StatValue>) statValues.clone();
 		for (Stat stat : statValuesCopy.keySet()) {
 			if (stat.isGained()) {
-				// FIXME: Implement maintenance cost
 				addValue(stat.getAddedStat(), statValues.get(stat).getValue());
 			}
 		}
@@ -79,7 +78,7 @@ public class StatLine {
 	}
 
 	public void addValue(Stat stat, float value) {
-
+		
 		if (!statValues.containsKey(stat))
 			statValues.put(stat, new StatValue(value));
 		else
@@ -140,8 +139,8 @@ public class StatLine {
 	 */
 	public void clearNonAccumulative() {
 		ArrayList<Stat> accumulativeStats = new ArrayList<>();
-		for (Stat stat : statValues.keySet()) {
-
+		for (Stat stat : Stat.values()) {
+			
 			if (stat.isGained()) {
 				accumulativeStats.add(stat.getAddedStat());
 			}
@@ -155,7 +154,6 @@ public class StatLine {
 
 			if (!accumulativeStats.contains(stat)) {
 				iterator.remove();
-
 			}
 		}
 	}

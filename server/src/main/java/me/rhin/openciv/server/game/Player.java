@@ -82,8 +82,7 @@ public class Player extends AbstractPlayer
 				.getUnitFromID(packet.getUnitID());
 
 		City city = null;
-		
-		
+
 		for (AbstractPlayer player : Server.getInstance().getAbstractPlayers())
 			for (City playerCity : player.getOwnedCities())
 				if (playerCity.getName().equals(packet.getCityName())) {
@@ -103,7 +102,7 @@ public class Player extends AbstractPlayer
 	public void updateOwnedStatlines(boolean increaseValues) {
 
 		super.updateOwnedStatlines(increaseValues);
-
+		
 		PlayerStatUpdatePacket packet = new PlayerStatUpdatePacket();
 		for (Stat stat : statLine.getStatValues().keySet()) {
 			if (stat.getStatType() != StatType.CITY_EXCLUSIVE)
@@ -117,24 +116,14 @@ public class Player extends AbstractPlayer
 	public void mergeStatLine(StatLine statLine) {
 		this.statLine.mergeStatLine(statLine);
 
-		PlayerStatUpdatePacket packet = new PlayerStatUpdatePacket();
-		for (Stat stat : this.statLine.getStatValues().keySet()) {
-			packet.addStat(stat.name(), this.statLine.getStatValues().get(stat).getValue());
-		}
-		Json json = new Json();
-		conn.send(json.toJson(packet));
+		sendStatUpdatePacket();
 	}
 
 	@Override
 	public void reduceStatLine(StatLine statLine) {
 		super.reduceStatLine(statLine);
 
-		PlayerStatUpdatePacket packet = new PlayerStatUpdatePacket();
-		for (Stat stat : this.statLine.getStatValues().keySet()) {
-			packet.addStat(stat.name(), this.statLine.getStatValues().get(stat).getValue());
-		}
-		Json json = new Json();
-		conn.send(json.toJson(packet));
+		sendStatUpdatePacket();
 	}
 
 	@Override
@@ -145,6 +134,15 @@ public class Player extends AbstractPlayer
 	@Override
 	public boolean hasConnection() {
 		return !conn.isClosed() && !conn.isClosing();
+	}
+
+	public void sendStatUpdatePacket() {
+		PlayerStatUpdatePacket packet = new PlayerStatUpdatePacket();
+		for (Stat stat : this.statLine.getStatValues().keySet()) {
+			packet.addStat(stat.name(), this.statLine.getStatValues().get(stat).getValue());
+		}
+		Json json = new Json();
+		conn.send(json.toJson(packet));
 	}
 
 	public void setSelectedUnit(Unit selectedUnit) {

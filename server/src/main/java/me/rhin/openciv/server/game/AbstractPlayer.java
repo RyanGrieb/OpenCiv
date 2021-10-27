@@ -51,13 +51,14 @@ public abstract class AbstractPlayer {
 
 		// Clear previous values other than accumulative ones.
 		statLine.clearNonAccumulative();
-
+		
 		for (City city : ownedCities) {
 			statLine.mergeStatLineExcluding(city.getStatLine(), StatType.CITY_EXCLUSIVE);
 		}
-
+		
 		if (increaseValues)
 			statLine.updateStatLine();
+		
 	}
 
 	public void reduceStatLine(StatLine statLine) {
