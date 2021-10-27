@@ -151,10 +151,6 @@ public abstract class UnitAI {
 	 */
 	protected Tile stepTowardTarget(ArrayList<Tile> pathTiles) {
 
-		// System.out.println("Path tiles");
-		// for (Tile tile : pathTiles)
-		// System.out.println(tile);
-
 		if (pathTiles.size() < 1)
 			return null;
 
@@ -199,10 +195,15 @@ public abstract class UnitAI {
 	 */
 	protected void moveToTargetTile(Tile tile) {
 		unit.setTargetTile(tile);
-
+		
+		//NOTE: This can be null when units are attacking eachother.
+		if(unit.getTargetTile() == null) {
+			return;
+		}
+		
 		MoveUnitPacket packet = new MoveUnitPacket();
 		packet.setUnit(unit.getPlayerOwner().getName(), unit.getID(), unit.getStandingTile().getGridX(),
-				unit.getStandingTile().getGridY(), tile.getGridX(), tile.getGridY());
+				unit.getStandingTile().getGridY(), unit.getTargetTile().getGridX(), unit.getTargetTile().getGridY());
 		packet.setMovementCost(unit.getPathMovement());
 
 		unit.moveToTargetTile();

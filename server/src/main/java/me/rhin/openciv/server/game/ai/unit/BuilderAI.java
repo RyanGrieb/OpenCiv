@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import me.rhin.openciv.server.Server;
 import me.rhin.openciv.server.game.map.tile.Tile;
+import me.rhin.openciv.server.game.map.tile.TileType.TileProperty;
 import me.rhin.openciv.server.game.map.tile.improvement.TileImprovement;
 import me.rhin.openciv.server.game.unit.Unit;
 import me.rhin.openciv.server.game.unit.type.Builder.BuilderUnit;
@@ -35,7 +36,8 @@ public class BuilderAI extends UnitAI implements NextTurnListener {
 			if (tile.getBaseTileType().getImprovements() != null) {
 				for (TileImprovement improvement : tile.getBaseTileType().getImprovements()) {
 
-					if (!unit.getPlayerOwner().getResearchTree().hasResearched(improvement.getRequiredTech()))
+					if (!unit.getPlayerOwner().getResearchTree().hasResearched(improvement.getRequiredTech())
+							|| tile.containsTileProperty(TileProperty.WATER))
 						continue;
 
 					if (tileImprovement == null || improvement.getTileType().getStatLine()
@@ -56,6 +58,7 @@ public class BuilderAI extends UnitAI implements NextTurnListener {
 		// If were not on it, move to target tile.
 		if (!unit.getStandingTile().equals(improvementTile)) {
 			ArrayList<Tile> pathTiles = new ArrayList<>();
+
 			pathTiles = getPathTiles(improvementTile);
 			// If we don't have a valid path, return.
 			if (pathTiles.size() < 1) {
@@ -66,7 +69,6 @@ public class BuilderAI extends UnitAI implements NextTurnListener {
 
 			Tile pathingTile = stepTowardTarget(pathTiles);
 			moveToTargetTile(pathingTile);
-
 			return;
 		}
 

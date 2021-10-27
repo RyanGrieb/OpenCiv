@@ -265,6 +265,7 @@ public abstract class Unit extends Actor
 		}, delay);
 	}
 
+	//TODO: Have force set target tile still init values like setTargetTile()
 	public void forceSetTargetTile(Tile targetTile) {
 		this.targetTile = targetTile;
 	}

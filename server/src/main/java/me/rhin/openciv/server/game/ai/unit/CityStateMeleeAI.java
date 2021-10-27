@@ -204,7 +204,7 @@ public class CityStateMeleeAI extends UnitAI implements NextTurnListener, Server
 		// Friendly unit. Pick random tile.
 		int index = 0;
 		while (rndTile == null || rndTile.containsTileProperty(TileProperty.WATER) || rndTile.getMovementCost() > 10
-				|| (rndTile.getUnits().size() > 0 && isFriendly(rndTile.getTopUnit())
+				|| rndTile.getCity() != null || (rndTile.getUnits().size() > 0 && isFriendly(rndTile.getTopUnit())
 						&& !rndTile.getTopUnit().isUnitCapturable())) {
 
 			if (index > 30)

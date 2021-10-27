@@ -31,6 +31,7 @@ import me.rhin.openciv.game.player.Player;
 import me.rhin.openciv.game.unit.AttackableEntity;
 import me.rhin.openciv.game.unit.Unit;
 import me.rhin.openciv.game.unit.UnitParameter;
+import me.rhin.openciv.game.unit.type.Builder.BuilderUnit;
 import me.rhin.openciv.game.unit.type.Settler.SettlerUnit;
 import me.rhin.openciv.listener.AddUnitListener;
 import me.rhin.openciv.listener.DeleteUnitListener;
@@ -236,10 +237,14 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 		Tile targetTile = map.getTiles()[packet.getTargetGridX()][packet.getTargetGridY()];
 		Unit unit = prevTile.getUnitFromID(packet.getUnitID());
 
-		if (unit == null)
+		//FIXME: This still is null sometimes. W/ barbarian AI & cities states
+		if (unit == null) {
 			System.out.println("NULL:" + packet.getUnitID());
-
-		unit.setTargetTile(targetTile, false);
+			//System.exit(1);
+		}
+		
+		//TODO: Have force set target tile still init values like setTargetTile()
+		unit.forceSetTargetTile(targetTile);  
 		unit.moveToTargetTile();
 
 		// If we own this unit, add the movement cooldown.
