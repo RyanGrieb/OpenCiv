@@ -10,6 +10,7 @@ import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.city.City;
 import me.rhin.openciv.game.map.GameMap;
 import me.rhin.openciv.game.map.tile.Tile;
+import me.rhin.openciv.game.unit.actions.AbstractAction;
 import me.rhin.openciv.game.unit.type.Caravan.CaravanUnit;
 import me.rhin.openciv.listener.UnitActListener.UnitActEvent;
 import me.rhin.openciv.ui.window.type.TradeWindow;

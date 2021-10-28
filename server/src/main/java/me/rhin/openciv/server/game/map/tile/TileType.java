@@ -10,6 +10,7 @@ import me.rhin.openciv.server.game.map.tile.improvement.ClearImprovement;
 import me.rhin.openciv.server.game.map.tile.improvement.FarmImprovement;
 import me.rhin.openciv.server.game.map.tile.improvement.FarmOceanImprovement;
 import me.rhin.openciv.server.game.map.tile.improvement.FortImprovement;
+import me.rhin.openciv.server.game.map.tile.improvement.LumberMillImprovement;
 import me.rhin.openciv.server.game.map.tile.improvement.MineImprovement;
 import me.rhin.openciv.server.game.map.tile.improvement.PastureImprovement;
 import me.rhin.openciv.server.game.map.tile.improvement.PlantationImprovement;
@@ -208,6 +209,7 @@ public enum TileType implements Comparable<TileType> {
 		public List<TileImprovement> getImprovements() {
 			ArrayList<TileImprovement> improvements = new ArrayList<>();
 			improvements.add(new ChopImprovement(3));
+			improvements.add(new LumberMillImprovement(TileType.LUMBERMILL, 5));
 			return improvements;
 		}
 	},
@@ -559,6 +561,15 @@ public enum TileType implements Comparable<TileType> {
 		public StatLine getStatLine() {
 			StatLine statLine = new StatLine();
 			statLine.addValue(Stat.FOOD_GAIN, 2);
+			return statLine;
+		}
+	},
+	LUMBERMILL(TileLayer.HIGH, TileProperty.IMPROVEMENT) {
+		@Override
+		public StatLine getStatLine() {
+			StatLine statLine = new StatLine();
+			statLine.addValue(Stat.PRODUCTION_GAIN, 2);
+			statLine.addValue(Stat.GOLD_GAIN, 1);
 			return statLine;
 		}
 	},

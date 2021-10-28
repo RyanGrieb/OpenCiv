@@ -7,8 +7,8 @@ import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 
 import me.rhin.openciv.asset.TextureEnum;
-import me.rhin.openciv.game.unit.AbstractAction;
 import me.rhin.openciv.game.unit.Unit;
+import me.rhin.openciv.game.unit.actions.AbstractAction;
 import me.rhin.openciv.ui.button.Button;
 import me.rhin.openciv.ui.window.type.UnitWindow;
 

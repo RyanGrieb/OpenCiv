@@ -6,6 +6,7 @@ import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.map.tile.Tile;
 import me.rhin.openciv.game.map.tile.Tile.TileTypeWrapper;
+import me.rhin.openciv.game.unit.actions.AbstractAction;
 import me.rhin.openciv.game.map.tile.TileType;
 import me.rhin.openciv.listener.LeftClickListener;
 import me.rhin.openciv.listener.RelativeMouseMoveListener;

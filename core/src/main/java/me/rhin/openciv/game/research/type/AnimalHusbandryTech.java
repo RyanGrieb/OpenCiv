@@ -24,6 +24,6 @@ public class AnimalHusbandryTech extends Technology {
 
 	@Override
 	public String getDesc() {
-		return "- Unlocks caravans\n" + "- Workers can build pastures";
+		return "- Unlocks caravans\n" + "- Workers can build pastures\n+1 Trade route";
 	}
 }

@@ -7,8 +7,8 @@ import com.badlogic.gdx.utils.Align;
 
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.game.map.tile.ImprovementType;
-import me.rhin.openciv.game.unit.AbstractAction;
 import me.rhin.openciv.game.unit.Unit;
+import me.rhin.openciv.game.unit.actions.AbstractAction;
 import me.rhin.openciv.game.unit.type.Builder.BuilderUnit;
 import me.rhin.openciv.listener.MoveUnitListener;
 import me.rhin.openciv.listener.NextTurnListener;
@@ -47,28 +47,28 @@ public class UnitWindow extends AbstractWindow
 	private ArrayList<UnitActionButton> unitActionButtons;
 
 	public UnitWindow(Unit unit) {
-		super.setBounds(viewport.getWorldWidth() - 200, 0, 200, 125);
+		super.setBounds(viewport.getWorldWidth() - 225, 0, 225, 125);
 		this.unit = unit;
 		this.unitActionButtons = new ArrayList<>();
 
-		this.blankBackground = new BlankBackground(0, 0, 200, 125);
+		this.blankBackground = new BlankBackground(0, 0, 225, 125);
 		addActor(blankBackground);
 
-		this.healthbar = new Healthbar(getWidth() - 200, getHeight() - 35, 200, 15, true);
+		this.healthbar = new Healthbar(getWidth() - 225, getHeight() - 35, 225, 15, true);
 		healthbar.setHealth(unit.getMaxHealth(), unit.getHealth());
 		addActor(healthbar);
 
-		this.unitNameLabel = new CustomLabel(unit.getName(), Align.center, getWidth() - 200, 125 - 20, 200, 20);
+		this.unitNameLabel = new CustomLabel(unit.getName(), Align.center, getWidth() - 225, 125 - 20, 225, 20);
 		addActor(unitNameLabel);
 
 		this.movementLabel = new CustomLabel(
 				"Movement: " + (int) unit.getCurrentMovement() + "/" + unit.getMaxMovement());
-		movementLabel.setPosition((getWidth() - (200 / 2)) - movementLabel.getWidth() / 2, 5);
+		movementLabel.setPosition((getWidth() - (225 / 2)) - movementLabel.getWidth() / 2, 5);
 		addActor(movementLabel);
 
-		this.buildDescLabel = new CustomLabel("??? - (0/0)", 4, 125 - 52, 200, 20);
+		this.buildDescLabel = new CustomLabel("??? - (0/0)", 4, 125 - 52, 225, 20);
 
-		this.actionDescLabel = new CustomLabel("???", 4, 125 - 52, 200, 20);
+		this.actionDescLabel = new CustomLabel("???", 4, 125 - 52, 225, 20);
 
 		if (unit instanceof BuilderUnit) {
 			BuilderUnit builderUnit = (BuilderUnit) unit;
@@ -215,10 +215,10 @@ public class UnitWindow extends AbstractWindow
 
 	@Override
 	public void onResize(int width, int height) {
-		super.setPosition(width - 200, 0);
+		super.setPosition(width - 225, 0);
 		blankBackground.setPosition(0, 0);
-		unitNameLabel.setPosition(getWidth() - 200, 125 - 20);
-		movementLabel.setPosition((getWidth() - (200 / 2)) - movementLabel.getWidth() / 2, 5);
+		unitNameLabel.setPosition(getWidth() - 225, 125 - 20);
+		movementLabel.setPosition((getWidth() - (225 / 2)) - movementLabel.getWidth() / 2, 5);
 
 		/*
 		 * int index = 0; for (UnitActionButton actionButton : unitActionButtons) {

@@ -6,9 +6,10 @@ public enum ImprovementType {
 	PASTURE("Building Pasture", 5),
 	CHOP("Clearing Forest", 3),
 	PLANTATION("Building Plantation", 5),
-	QUARRY("Building Quarry",5),
+	QUARRY("Building Quarry", 5),
 	ROAD("Building Road", 3),
 	CLEAR("Clearing Jungle", 3),
+	LUMBER_MILL("Lumber Mill", 5),
 	FORT("Building Fort", 7);
 
 	private String improvementDesc;

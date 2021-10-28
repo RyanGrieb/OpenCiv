@@ -27,6 +27,7 @@ import me.rhin.openciv.game.player.AbstractPlayer;
 import me.rhin.openciv.game.player.Player;
 import me.rhin.openciv.game.research.type.OpticsTech;
 import me.rhin.openciv.game.unit.UnitItem.UnitType;
+import me.rhin.openciv.game.unit.actions.AbstractAction;
 import me.rhin.openciv.listener.BottomShapeRenderListener;
 import me.rhin.openciv.listener.NextTurnListener;
 import me.rhin.openciv.listener.UnitActListener.UnitActEvent;
