@@ -25,10 +25,12 @@ import me.rhin.openciv.game.map.tile.TileType.TileProperty;
 import me.rhin.openciv.game.notification.type.AvailableProductionNotification;
 import me.rhin.openciv.game.player.AbstractPlayer;
 import me.rhin.openciv.game.production.ProducibleItemManager;
+import me.rhin.openciv.game.production.ProductionItem;
 import me.rhin.openciv.game.unit.AttackableEntity;
 import me.rhin.openciv.listener.AddSpecialistToContainerListener;
 import me.rhin.openciv.listener.ApplyProductionToItemListener;
 import me.rhin.openciv.listener.BuildingConstructedListener;
+import me.rhin.openciv.listener.BuyProductionItemListener;
 import me.rhin.openciv.listener.CityStatUpdateListener;
 import me.rhin.openciv.listener.FinishProductionItemListener;
 import me.rhin.openciv.listener.NextTurnListener;
@@ -39,6 +41,7 @@ import me.rhin.openciv.shared.city.SpecialistType;
 import me.rhin.openciv.shared.packet.type.AddSpecialistToContainerPacket;
 import me.rhin.openciv.shared.packet.type.ApplyProductionToItemPacket;
 import me.rhin.openciv.shared.packet.type.BuildingConstructedPacket;
+import me.rhin.openciv.shared.packet.type.BuyProductionItemPacket;
 import me.rhin.openciv.shared.packet.type.CityStatUpdatePacket;
 import me.rhin.openciv.shared.packet.type.FinishProductionItemPacket;
 import me.rhin.openciv.shared.packet.type.NextTurnPacket;
@@ -55,7 +58,7 @@ import me.rhin.openciv.ui.window.type.CityInfoWindow;
 public class City extends Group implements AttackableEntity, TileObserver, SpecialistContainer,
 		BuildingConstructedListener, CityStatUpdateListener, SetProductionItemListener, ApplyProductionToItemListener,
 		FinishProductionItemListener, SetCitizenTileWorkerListener, AddSpecialistToContainerListener,
-		RemoveSpecialistFromContainerListener, NextTurnListener {
+		RemoveSpecialistFromContainerListener, NextTurnListener, BuyProductionItemListener {
 
 	private Tile originTile;
 	private AbstractPlayer playerOwner;
@@ -119,6 +122,7 @@ public class City extends Group implements AttackableEntity, TileObserver, Speci
 		Civilization.getInstance().getEventManager().addListener(AddSpecialistToContainerListener.class, this);
 		Civilization.getInstance().getEventManager().addListener(RemoveSpecialistFromContainerListener.class, this);
 		Civilization.getInstance().getEventManager().addListener(NextTurnListener.class, this);
+		Civilization.getInstance().getEventManager().addListener(BuyProductionItemListener.class, this);
 	}
 
 	@Override
@@ -197,6 +201,18 @@ public class City extends Group implements AttackableEntity, TileObserver, Speci
 		if (playerOwner.equals(Civilization.getInstance().getGame().getPlayer()))
 			Civilization.getInstance().getGame().getNotificationHanlder()
 					.fireNotification(new AvailableProductionNotification(this));
+	}
+
+	@Override
+	public void onBuyProductionItem(BuyProductionItemPacket packet) {
+		if (!getName().equals(packet.getCityName()))
+			return;
+
+		ProductionItem productionItem = producibleItemManager.getCurrentProducingItem().getProductionItem();
+
+		if (productionItem.getName().equals(packet.getItemName()) && productionItem instanceof Building) {
+			producibleItemManager.getItemQueue().clear();
+		}
 	}
 
 	@Override
@@ -426,4 +442,5 @@ public class City extends Group implements AttackableEntity, TileObserver, Speci
 				return true;
 		return false;
 	}
+
 }

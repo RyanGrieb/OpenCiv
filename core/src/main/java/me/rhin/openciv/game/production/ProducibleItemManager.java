@@ -147,11 +147,6 @@ public class ProducibleItemManager {
 	}
 
 	public void applyProduction(float productionAmount) {
-
-		if (itemQueue.peek() == null) {
-			return;
-		}
-
 		itemQueue.peek().applyProduction(productionAmount);
 	}
 

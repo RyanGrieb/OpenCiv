@@ -8,12 +8,16 @@ import com.badlogic.gdx.scenes.scene2d.Actor;
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.city.City;
+import me.rhin.openciv.game.city.building.Building;
 import me.rhin.openciv.game.production.ProducingItem;
+import me.rhin.openciv.game.production.ProductionItem;
 import me.rhin.openciv.listener.ApplyProductionToItemListener;
+import me.rhin.openciv.listener.BuyProductionItemListener;
 import me.rhin.openciv.listener.CityStatUpdateListener;
 import me.rhin.openciv.listener.FinishProductionItemListener;
 import me.rhin.openciv.listener.SetProductionItemListener;
 import me.rhin.openciv.shared.packet.type.ApplyProductionToItemPacket;
+import me.rhin.openciv.shared.packet.type.BuyProductionItemPacket;
 import me.rhin.openciv.shared.packet.type.CityStatUpdatePacket;
 import me.rhin.openciv.shared.packet.type.FinishProductionItemPacket;
 import me.rhin.openciv.shared.packet.type.SetProductionItemPacket;
@@ -21,7 +25,7 @@ import me.rhin.openciv.shared.stat.Stat;
 import me.rhin.openciv.ui.label.CustomLabel;
 
 public class CityProductionInfo extends Actor implements SetProductionItemListener, ApplyProductionToItemListener,
-		FinishProductionItemListener, CityStatUpdateListener {
+		FinishProductionItemListener, CityStatUpdateListener, BuyProductionItemListener {
 
 	private City city;
 	private Sprite backgroundSprite;
@@ -66,13 +70,13 @@ public class CityProductionInfo extends Actor implements SetProductionItemListen
 			this.turnsLeftLabel = new CustomLabel("???/??? Turns");
 		}
 
-		turnsLeftLabel.setPosition(x + 5,
-				y + productionItemSprite.getHeight() / 2 - turnsLeftLabel.getHeight() / 2);
+		turnsLeftLabel.setPosition(x + 5, y + productionItemSprite.getHeight() / 2 - turnsLeftLabel.getHeight() / 2);
 
 		Civilization.getInstance().getEventManager().addListener(SetProductionItemListener.class, this);
 		Civilization.getInstance().getEventManager().addListener(ApplyProductionToItemListener.class, this);
 		Civilization.getInstance().getEventManager().addListener(FinishProductionItemListener.class, this);
 		Civilization.getInstance().getEventManager().addListener(CityStatUpdateListener.class, this);
+		Civilization.getInstance().getEventManager().addListener(BuyProductionItemListener.class, this);
 	}
 
 	@Override
@@ -90,8 +94,7 @@ public class CityProductionInfo extends Actor implements SetProductionItemListen
 		productionItemSprite.setPosition(x + getWidth() - 34, y + 2);
 		productionDescLabel.setPosition(x, y + getHeight() - productionDescLabel.getHeight());
 		productionItemNameLabel.setPosition(x, y + getHeight() - productionItemNameLabel.getHeight() - 15);
-		turnsLeftLabel.setPosition(x + 5,
-				y + productionItemSprite.getHeight() / 2 - turnsLeftLabel.getHeight() / 2);
+		turnsLeftLabel.setPosition(x + 5, y + productionItemSprite.getHeight() / 2 - turnsLeftLabel.getHeight() / 2);
 	}
 
 	@Override
@@ -109,8 +112,9 @@ public class CityProductionInfo extends Actor implements SetProductionItemListen
 
 		productionItemSprite = sprite;
 
-		int turnsLeft = MathUtils.ceil((producingItem.getProductionItem().getProductionCost() - producingItem.getAppliedProduction())
-				/ city.getStatLine().getStatValue(Stat.PRODUCTION_GAIN));
+		int turnsLeft = MathUtils
+				.ceil((producingItem.getProductionItem().getProductionCost() - producingItem.getAppliedProduction())
+						/ city.getStatLine().getStatValue(Stat.PRODUCTION_GAIN));
 
 		int currentTurns = producingItem.getAppiedTurns();
 
@@ -126,8 +130,9 @@ public class CityProductionInfo extends Actor implements SetProductionItemListen
 
 		ProducingItem producingItem = city.getProducibleItemManager().getCurrentProducingItem();
 
-		int turnsLeft = MathUtils.ceil((producingItem.getProductionItem().getProductionCost() - producingItem.getAppliedProduction())
-				/ city.getStatLine().getStatValue(Stat.PRODUCTION_GAIN));
+		int turnsLeft = MathUtils
+				.ceil((producingItem.getProductionItem().getProductionCost() - producingItem.getAppliedProduction())
+						/ city.getStatLine().getStatValue(Stat.PRODUCTION_GAIN));
 
 		int currentTurns = producingItem.getAppiedTurns();
 
@@ -138,6 +143,38 @@ public class CityProductionInfo extends Actor implements SetProductionItemListen
 
 	@Override
 	public void onFinishProductionItem(FinishProductionItemPacket packet) {
+		clearUI();
+	}
+
+	@Override
+	public void onBuyProductionItem(BuyProductionItemPacket packet) {
+		if (city.getProducibleItemManager().getCurrentProducingItem() == null) {
+			clearUI();
+		}
+	}
+
+	@Override
+	public void onCityStatUpdate(CityStatUpdatePacket packet) {
+		if (!city.getName().equals(packet.getCityName()))
+			return;
+
+		ProducingItem producingItem = city.getProducibleItemManager().getCurrentProducingItem();
+
+		if (producingItem == null)
+			return;
+
+		int turnsLeft = MathUtils
+				.ceil((producingItem.getProductionItem().getProductionCost() - producingItem.getAppliedProduction())
+						/ city.getStatLine().getStatValue(Stat.PRODUCTION_GAIN));
+
+		int currentTurns = producingItem.getAppiedTurns();
+
+		int totalTurns = currentTurns + turnsLeft;
+
+		turnsLeftLabel.setText(currentTurns + "/" + totalTurns + " Turns");
+	}
+
+	private void clearUI() {
 		productionItemNameLabel.setText("Nothing");
 		turnsLeftLabel.setText("???/??? Turns");
 
@@ -146,26 +183,5 @@ public class CityProductionInfo extends Actor implements SetProductionItemListen
 				productionItemSprite.getHeight());
 
 		productionItemSprite = sprite;
-	}
-	
-	@Override
-	public void onCityStatUpdate(CityStatUpdatePacket packet) {
-		if (!city.getName().equals(packet.getCityName()))
-			return;
-
-		ProducingItem producingItem = city.getProducibleItemManager().getCurrentProducingItem();
-
-		if(producingItem == null)
-			return;
-		
-		int turnsLeft = MathUtils.ceil((producingItem.getProductionItem().getProductionCost() - producingItem.getAppliedProduction())
-				/ city.getStatLine().getStatValue(Stat.PRODUCTION_GAIN));
-
-		int currentTurns = producingItem.getAppiedTurns();
-
-		int totalTurns = currentTurns + turnsLeft;
-
-
-		turnsLeftLabel.setText(currentTurns + "/" + totalTurns + " Turns");
 	}
 }

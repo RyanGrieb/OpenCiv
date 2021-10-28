@@ -44,6 +44,7 @@ import me.rhin.openciv.server.game.unit.type.Warrior;
 import me.rhin.openciv.server.game.unit.type.WorkBoat;
 import me.rhin.openciv.server.listener.NextTurnListener;
 import me.rhin.openciv.shared.packet.type.ApplyProductionToItemPacket;
+import me.rhin.openciv.shared.packet.type.BuyProductionItemPacket;
 import me.rhin.openciv.shared.packet.type.FinishProductionItemPacket;
 import me.rhin.openciv.shared.stat.Stat;
 
@@ -170,11 +171,16 @@ public class ProducibleItemManager implements NextTurnListener {
 
 		Json json = new Json();
 
-		FinishProductionItemPacket packet = new FinishProductionItemPacket();
+		BuyProductionItemPacket packet = new BuyProductionItemPacket();
 		packet.setProductionItem(city.getName(), item.getProductionItem().getName());
 		city.getPlayerOwner().sendPacket(json.toJson(packet));
 
 		city.getPlayerOwner().updateOwnedStatlines(false);
+
+		if (itemQueue.peek() != null && itemQueue.peek().getProductionItem().equals(item.getProductionItem())
+				&& item.getProductionItem() instanceof Building) {
+			clearProducingItem();
+		}
 	}
 
 	@Override

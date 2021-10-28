@@ -6,6 +6,7 @@ import com.badlogic.gdx.utils.JsonValue;
 import me.rhin.openciv.shared.packet.Packet;
 
 public class BuyProductionItemPacket extends Packet {
+	
 	private String cityName;
 	private String itemName;
 

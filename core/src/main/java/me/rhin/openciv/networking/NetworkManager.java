@@ -16,6 +16,7 @@ import me.rhin.openciv.listener.AddSpecialistToContainerListener.AddSpecialistTo
 import me.rhin.openciv.listener.AddUnitListener.AddUnitEvent;
 import me.rhin.openciv.listener.ApplyProductionToItemListener.ApplyProductionToItemEvent;
 import me.rhin.openciv.listener.BuildingConstructedListener.BuildingConstructedEvent;
+import me.rhin.openciv.listener.BuyProductionItemListener.BuyProductionItemEvent;
 import me.rhin.openciv.listener.ChooseCivListener.ChooseCivEvent;
 import me.rhin.openciv.listener.CityStatUpdateListener.CityStatUpdateEvent;
 import me.rhin.openciv.listener.CombatPreviewListener.CombatPreviewEvent;
@@ -63,6 +64,7 @@ import me.rhin.openciv.shared.packet.type.AddSpecialistToContainerPacket;
 import me.rhin.openciv.shared.packet.type.AddUnitPacket;
 import me.rhin.openciv.shared.packet.type.ApplyProductionToItemPacket;
 import me.rhin.openciv.shared.packet.type.BuildingConstructedPacket;
+import me.rhin.openciv.shared.packet.type.BuyProductionItemPacket;
 import me.rhin.openciv.shared.packet.type.ChooseCivPacket;
 import me.rhin.openciv.shared.packet.type.CityStatUpdatePacket;
 import me.rhin.openciv.shared.packet.type.CombatPreviewPacket;
@@ -154,6 +156,7 @@ public class NetworkManager {
 		networkEvents.put(SetTurnLengthPacket.class, SetTurnLengthEvent.class);
 		networkEvents.put(SendChatMessagePacket.class, SendChatMessageEvent.class);
 		networkEvents.put(TileStatlinePacket.class, TileStatlineEvent.class);
+		networkEvents.put(BuyProductionItemPacket.class, BuyProductionItemEvent.class);
 	}
 
 	public void connect(String ip) {
