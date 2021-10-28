@@ -23,7 +23,6 @@ public class Galley extends UnitItem {
 	public static class GalleyUnit extends Unit {
 		public GalleyUnit(UnitParameter unitParameter) {
 			super(unitParameter, TextureEnum.UNIT_GALLEY);
-			this.canAttack = true;
 		}
 
 		@Override

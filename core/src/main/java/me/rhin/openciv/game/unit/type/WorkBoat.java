@@ -27,7 +27,6 @@ public class WorkBoat extends UnitItem {
 
 		public WorkBoatUnit(UnitParameter unitParameter) {
 			super(unitParameter, TextureEnum.UNIT_WORK_BOAT);
-			this.canAttack = false;
 
 			customActions.add(new FarmOceanAction(this));
 		}

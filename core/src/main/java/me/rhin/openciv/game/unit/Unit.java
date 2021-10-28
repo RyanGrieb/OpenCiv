@@ -39,7 +39,6 @@ import me.rhin.openciv.ui.window.type.UnitWindow;
 public abstract class Unit extends Actor
 		implements AttackableEntity, TileObserver, BottomShapeRenderListener, NextTurnListener {
 
-	protected boolean canAttack;
 	protected ArrayList<AbstractAction> customActions;
 	protected Tile standingTile;
 	protected Sprite targetSelectionSprite;
@@ -611,7 +610,7 @@ public abstract class Unit extends Actor
 	}
 
 	public boolean canAttack() {
-		return canAttack;
+		return !getUnitTypes().contains(UnitType.SUPPORT);
 	}
 
 	@Override

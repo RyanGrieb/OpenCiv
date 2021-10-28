@@ -24,7 +24,6 @@ public class ChariotArcher extends UnitItem {
 
 		public ChariotArcherUnit(UnitParameter unitParameter) {
 			super(unitParameter, TextureEnum.UNIT_CHARIOT_ARCHER);
-			this.canAttack = true;
 		}
 
 		@Override

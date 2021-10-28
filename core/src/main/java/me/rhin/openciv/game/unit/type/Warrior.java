@@ -23,7 +23,6 @@ public class Warrior extends UnitItem {
 
 		public WarriorUnit(UnitParameter unitParameter) {
 			super(unitParameter, TextureEnum.UNIT_WARRIOR);
-			this.canAttack = true;
 		}
 
 		@Override

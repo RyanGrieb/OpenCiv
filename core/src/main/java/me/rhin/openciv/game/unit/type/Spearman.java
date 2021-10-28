@@ -24,7 +24,6 @@ public class Spearman extends UnitItem {
 
 		public SpearmanUnit(UnitParameter unitParameter) {
 			super(unitParameter, TextureEnum.UNIT_SPEARMAN);
-			this.canAttack = true;
 		}
 
 		@Override

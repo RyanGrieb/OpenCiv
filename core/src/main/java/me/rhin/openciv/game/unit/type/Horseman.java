@@ -22,7 +22,6 @@ public class Horseman extends UnitItem {
 	public static class HorsemanUnit extends Unit {
 		public HorsemanUnit(UnitParameter unitParameter) {
 			super(unitParameter, TextureEnum.UNIT_HORSEMAN);
-			this.canAttack = true;
 		}
 
 		@Override

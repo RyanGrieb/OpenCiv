@@ -53,7 +53,6 @@ public class Builder extends UnitItem {
 			customActions.add(new ClearAction(this));
 			customActions.add(new FortAction(this));
 			customActions.add(new QuarryAction(this));
-			this.canAttack = false;
 			this.building = false;
 
 			// FIXME: REALLY should remove these listeners when this unit gets destroyed

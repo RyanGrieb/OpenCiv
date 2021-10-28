@@ -23,7 +23,6 @@ public class Swordsman extends UnitItem {
 
 		public SwordsmanUnit(UnitParameter unitParameter) {
 			super(unitParameter, TextureEnum.UNIT_SWORDSMAN);
-			this.canAttack = true;
 		}
 
 		@Override

@@ -32,7 +32,6 @@ public abstract class RangedUnit extends Unit
 		customActions.add(new TargetAction(this));
 		customActions.add(untargetAction);
 
-		this.canAttack = true;
 		this.targeting = false;
 
 		Civilization.getInstance().getEventManager().addListener(LeftClickListener.class, this);
