@@ -11,6 +11,7 @@ import me.rhin.openciv.server.game.civilization.CivType;
 import me.rhin.openciv.server.game.heritage.HeritageTree;
 import me.rhin.openciv.server.game.research.ResearchTree;
 import me.rhin.openciv.server.game.unit.Unit;
+import me.rhin.openciv.server.game.unit.UnitItem.UnitType;
 import me.rhin.openciv.shared.stat.StatLine;
 import me.rhin.openciv.shared.stat.StatType;
 
@@ -51,14 +52,14 @@ public abstract class AbstractPlayer {
 
 		// Clear previous values other than accumulative ones.
 		statLine.clearNonAccumulative();
-		
+
 		for (City city : ownedCities) {
 			statLine.mergeStatLineExcluding(city.getStatLine(), StatType.CITY_EXCLUSIVE);
 		}
-		
+
 		if (increaseValues)
 			statLine.updateStatLine();
-		
+
 	}
 
 	public void reduceStatLine(StatLine statLine) {
@@ -150,5 +151,9 @@ public abstract class AbstractPlayer {
 
 	public int getSpawnY() {
 		return spawnY;
+	}
+
+	public boolean canCaptureUnit(Unit unit) {
+		return civilization.canCaptureUnit(unit);
 	}
 }

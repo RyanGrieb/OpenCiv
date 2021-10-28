@@ -293,8 +293,9 @@ public class City implements AttackableEntity, SpecialistContainer, NextTurnList
 		return 8;
 	}
 
+	//FIXME: Rename this method to isCaptureable & return true
 	@Override
-	public boolean isUnitCapturable() {
+	public boolean isUnitCapturable(AttackableEntity attackingEntity) {
 		return false;
 	}
 

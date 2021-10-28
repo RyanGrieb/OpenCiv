@@ -555,10 +555,13 @@ public class Tile {
 		return city;
 	}
 
-	public Unit getCaptureableUnit() {
+	public Unit getCaptureableUnit(AttackableEntity attackingEntity) {
 		Unit capturableUnit = null;
 		for (Unit unit : units) {
-			if (unit.isUnitCapturable())
+			if (unit.getPlayerOwner().equals(attackingEntity.getPlayerOwner()))
+				continue;
+			
+			if (unit.isUnitCapturable(attackingEntity))
 				capturableUnit = unit;
 		}
 

@@ -8,6 +8,7 @@ import me.rhin.openciv.server.game.city.City;
 import me.rhin.openciv.server.game.map.tile.Tile;
 import me.rhin.openciv.server.game.map.tile.TileType.TileProperty;
 import me.rhin.openciv.server.game.map.tile.improvement.TileImprovement;
+import me.rhin.openciv.server.game.unit.AttackableEntity;
 import me.rhin.openciv.server.game.unit.Unit;
 import me.rhin.openciv.server.game.unit.UnitItem;
 import me.rhin.openciv.shared.stat.Stat;
@@ -60,7 +61,7 @@ public class Builder extends UnitItem {
 		}
 
 		@Override
-		public boolean isUnitCapturable() {
+		public boolean isUnitCapturable(AttackableEntity attackingEntity) {
 			return true;
 		}
 
@@ -84,7 +85,7 @@ public class Builder extends UnitItem {
 		public List<UnitType> getUnitTypes() {
 			return Arrays.asList(UnitType.SUPPORT);
 		}
-		
+
 		@Override
 		public String getName() {
 			return "Builder";

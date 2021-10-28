@@ -1,10 +1,13 @@
 package me.rhin.openciv.server.game.civilization.type;
 
+import me.rhin.openciv.server.Server;
 import me.rhin.openciv.server.game.AbstractPlayer;
+import me.rhin.openciv.server.game.ai.type.BarbarianPlayer;
 import me.rhin.openciv.server.game.civilization.Civ;
 import me.rhin.openciv.server.game.heritage.type.germany.BarbarianHeritage;
 import me.rhin.openciv.server.game.heritage.type.germany.BlitzkriegHeritage;
 import me.rhin.openciv.server.game.heritage.type.germany.DisciplineHeritage;
+import me.rhin.openciv.server.game.unit.Unit;
 
 public class Germany extends Civ {
 
@@ -26,5 +29,15 @@ public class Germany extends Civ {
 		addHeritage(new BarbarianHeritage(player));
 		addHeritage(new BlitzkriegHeritage(player));
 		addHeritage(new DisciplineHeritage(player));
+	}
+
+	@Override
+	public boolean canCaptureUnit(Unit unit) {
+
+		if (!player.getHeritageTree().hasStudied(BarbarianHeritage.class))
+			return false;
+
+		return (unit.getPlayerOwner() instanceof BarbarianPlayer && unit.getHealth() < 40
+				&& Server.getInstance().getInGameState().getCurrentTurn() % 2 == 0);
 	}
 }

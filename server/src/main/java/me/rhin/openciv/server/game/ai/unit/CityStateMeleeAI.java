@@ -13,6 +13,7 @@ import me.rhin.openciv.server.game.map.tile.TileType;
 import me.rhin.openciv.server.game.map.tile.TileType.TileProperty;
 import me.rhin.openciv.server.game.unit.AttackableEntity;
 import me.rhin.openciv.server.game.unit.Unit;
+import me.rhin.openciv.server.game.unit.UnitItem.UnitType;
 import me.rhin.openciv.server.listener.NextTurnListener;
 import me.rhin.openciv.server.listener.ServerSettleCityListener;
 
@@ -124,7 +125,7 @@ public class CityStateMeleeAI extends UnitAI implements NextTurnListener, Server
 		if (unit.getPlayerOwner() instanceof Player || unit.getPlayerOwner() instanceof CityStatePlayer)
 			return true;
 
-		return unit.getPlayerOwner().equals(city.getPlayerOwner()) && !unit.isUnitCapturable();
+		return unit.getPlayerOwner().equals(city.getPlayerOwner()) && !unit.getUnitTypes().contains(UnitType.SUPPORT);
 	}
 
 	private void findTargets() {
@@ -203,7 +204,7 @@ public class CityStateMeleeAI extends UnitAI implements NextTurnListener, Server
 		int index = 0;
 		while (rndTile == null || rndTile.containsTileProperty(TileProperty.WATER) || rndTile.getMovementCost() > 10
 				|| rndTile.getCity() != null || (rndTile.getUnits().size() > 0 && isFriendly(rndTile.getTopUnit())
-						&& !rndTile.getTopUnit().isUnitCapturable())) {
+						&& !rndTile.getTopUnit().getUnitTypes().contains(UnitType.SUPPORT))) {
 
 			if (index > 30)
 				return null;
@@ -224,7 +225,7 @@ public class CityStateMeleeAI extends UnitAI implements NextTurnListener, Server
 
 		int index = 0;
 		while (retreatTile.getTopUnit() != null && !unit.equals(retreatTile.getTopUnit())
-				&& !retreatTile.getTopUnit().isUnitCapturable()) {
+				&& !retreatTile.getTopUnit().getUnitTypes().contains(UnitType.SUPPORT)) {
 
 			if (index > 30)
 				return false;

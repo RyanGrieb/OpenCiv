@@ -8,6 +8,7 @@ import me.rhin.openciv.server.game.city.City;
 import me.rhin.openciv.server.game.map.tile.Tile;
 import me.rhin.openciv.server.game.map.tile.TileType.TileProperty;
 import me.rhin.openciv.server.game.research.type.AnimalHusbandryTech;
+import me.rhin.openciv.server.game.unit.AttackableEntity;
 import me.rhin.openciv.server.game.unit.TraderUnit;
 import me.rhin.openciv.server.game.unit.UnitItem;
 import me.rhin.openciv.shared.stat.Stat;
@@ -32,8 +33,9 @@ public class Caravan extends UnitItem {
 				return tile.getMovementCost(prevTile);
 		}
 
+
 		@Override
-		public boolean isUnitCapturable() {
+		public boolean isUnitCapturable(AttackableEntity attackingEntity) {
 			return true;
 		}
 

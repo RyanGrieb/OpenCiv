@@ -107,8 +107,8 @@ public abstract class Unit implements AttackableEntity, NextTurnListener {
 	}
 
 	@Override
-	public boolean isUnitCapturable() {
-		return false;
+	public boolean isUnitCapturable(AttackableEntity attackingEntity) {
+		return attackingEntity.getPlayerOwner().canCaptureUnit(this);
 	}
 
 	// FIXME: Replace getStandingTile method
@@ -119,10 +119,10 @@ public abstract class Unit implements AttackableEntity, NextTurnListener {
 
 	@Override
 	public float getDamageTaken(AttackableEntity otherEntity, boolean entityDefending) {
-		if (isUnitCapturable())
+		if (isUnitCapturable(otherEntity))
 			return 100;
 
-		if (otherEntity.isUnitCapturable())
+		if (otherEntity.isUnitCapturable(this))
 			return 0;
 
 		// y=30*1.041^(x), x= combat diff
@@ -195,11 +195,10 @@ public abstract class Unit implements AttackableEntity, NextTurnListener {
 
 	public boolean setTargetTile(Tile targetTile) {
 
-		if (targetTile.equals(this.targetTile))
-		{
+		if (targetTile.equals(this.targetTile)) {
 			throw new SameMovementTargetException();
 		}
-		
+
 		int h = 0;
 
 		int width = Server.getInstance().getMap().getWidth();

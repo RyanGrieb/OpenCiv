@@ -28,9 +28,9 @@ import me.rhin.openciv.server.game.map.tile.TileType;
 import me.rhin.openciv.server.game.map.tile.TileType.TileProperty;
 import me.rhin.openciv.server.game.unit.AttackableEntity;
 import me.rhin.openciv.server.game.unit.RangedUnit;
+import me.rhin.openciv.server.game.unit.TraderUnit;
 import me.rhin.openciv.server.game.unit.Unit;
 import me.rhin.openciv.server.game.unit.type.Builder.BuilderUnit;
-import me.rhin.openciv.server.game.unit.type.Caravan.CaravanUnit;
 import me.rhin.openciv.server.game.unit.type.Settler.SettlerUnit;
 import me.rhin.openciv.server.game.unit.type.TransportShipUnit;
 import me.rhin.openciv.server.game.unit.type.Warrior.WarriorUnit;
@@ -231,13 +231,14 @@ public class InGameState extends GameState implements DisconnectListener, Select
 		Tile originalTargetTile = map.getTiles()[packet.getTargetGridX()][packet.getTargetGridY()];
 		Json json = new Json();
 
-		unit.setTargetTile(targetTile);
+		if (!targetTile.equals(unit.getTargetTile()))
+			unit.setTargetTile(targetTile);
 
 		// If were moving onto a unit or city. Stop the unit just outside the target
 		// unit.
 		if (targetTile.getEnemyAttackableEntity(playerOwner) != null)
 			if (!targetTile.getEnemyAttackableEntity(playerOwner).getPlayerOwner().equals(unit.getPlayerOwner())
-					&& (!targetTile.getEnemyAttackableEntity(playerOwner).isUnitCapturable()
+					&& (!targetTile.getEnemyAttackableEntity(playerOwner).isUnitCapturable(unit)
 							&& targetTile.getEnemyAttackableEntity(playerOwner).surviveAttack(unit))) {
 				targetTile = unit.getCameFromTiles()[targetTile.getGridX()][targetTile.getGridY()];
 				if (targetTile != null) {
@@ -262,12 +263,11 @@ public class InGameState extends GameState implements DisconnectListener, Select
 		}
 
 		// If the tile we are moving on has a capturable unit.
-		if (targetTile.getCaptureableUnit() != null) {
-
-			Unit targetUnit = targetTile.getCaptureableUnit();
+		if (targetTile.getCaptureableUnit(unit) != null) {
+			Unit targetUnit = targetTile.getCaptureableUnit(unit);
 
 			// When we capture a caravan
-			if (targetUnit instanceof CaravanUnit) {
+			if (targetUnit instanceof TraderUnit) {
 				// TODO: Plunder sound effect
 				playerOwner.getStatLine().addValue(Stat.GOLD, 100);
 				playerOwner.updateOwnedStatlines(false);
@@ -290,8 +290,10 @@ public class InGameState extends GameState implements DisconnectListener, Select
 			} else {
 
 				// Problem: Wrong id being set in the packet?
+
 				targetUnit.getPlayerOwner().removeUnit(targetUnit);
 				targetUnit.setPlayerOwner(unit.getPlayerOwner());
+				targetUnit.setMovement(targetUnit.getMaxMovement());
 
 				SetUnitOwnerPacket setOwnerPacket = new SetUnitOwnerPacket();
 				setOwnerPacket.setUnit(targetUnit.getPlayerOwner().getName(), targetUnit.getID(),
