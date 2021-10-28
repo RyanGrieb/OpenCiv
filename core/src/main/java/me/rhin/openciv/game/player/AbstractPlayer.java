@@ -1,12 +1,13 @@
 package me.rhin.openciv.game.player;
 
 import java.util.ArrayList;
-import java.util.List;
 
+import me.rhin.openciv.Civilization;
 import me.rhin.openciv.game.city.City;
 import me.rhin.openciv.game.civilization.Civ;
 import me.rhin.openciv.game.heritage.HeritageTree;
 import me.rhin.openciv.game.map.tile.Tile;
+import me.rhin.openciv.game.notification.type.AvailableMovementNotification;
 import me.rhin.openciv.game.research.ResearchTree;
 import me.rhin.openciv.game.unit.Unit;
 import me.rhin.openciv.shared.stat.StatLine;
@@ -69,6 +70,10 @@ public abstract class AbstractPlayer {
 
 	public void addUnit(Unit unit) {
 		ownedUnits.add(unit);
+
+		if (Civilization.getInstance().getGame().getPlayer().equals(this) && unit.allowsMovement())
+			Civilization.getInstance().getGame().getNotificationHanlder()
+					.fireNotification(new AvailableMovementNotification(unit));
 	}
 
 	public void removeUnit(Unit unit) {
