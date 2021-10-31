@@ -7,14 +7,14 @@ import me.rhin.openciv.shared.listener.Listener;
 
 public interface ScrollListener extends Listener {
 
-	public void onScroll(float amountX, float amountY);
+	void onScroll(float amountX, float amountY);
 
-	public static class ScollEvent extends Event<ScrollListener> {
+	class ScrollEvent extends Event<ScrollListener> {
 
-		private float amountX;
-		private float amountY;
+		private final float amountX;
+		private final float amountY;
 
-		public ScollEvent(float amountX, float amountY) {
+		public ScrollEvent(float amountX, float amountY) {
 			this.amountX = amountX;
 			this.amountY = amountY;
 		}

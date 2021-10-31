@@ -22,13 +22,15 @@ import me.rhin.openciv.util.ClickType;
 
 public class InGameScreen extends AbstractScreen {
 
+	private static final float ZOOM_LEVEL = 0.04F;
+	private static final float MAX_ZOOM_LEVEL = 0.12F;
+
 	private GameOverlay gameOverlay;
-	private EventManager eventManager;
 	private CivGame game;
-	private Group tileGroup;
-	private Group riverGroup;
-	private Group unitGroup;
-	private Group combatTooltipGroup;
+	private final Group tileGroup;
+	private final Group riverGroup;
+	private final Group unitGroup;
+	private final Group combatTooltipGroup;
 	private Vector2 dragOrigin;
 	private boolean rightClicking;
 
@@ -36,7 +38,7 @@ public class InGameScreen extends AbstractScreen {
 	private float frameRate;
 
 	public InGameScreen() {
-		this.eventManager = Civilization.getInstance().getEventManager();
+		EventManager eventManager = Civilization.getInstance().getEventManager();
 		eventManager.clearEvents();
 
 		lastTimeCounted = TimeUtils.millis();
@@ -196,14 +198,14 @@ public class InGameScreen extends AbstractScreen {
 
 		OrthographicCamera cam = getCamera();
 		if (Gdx.input.isKeyPressed(Input.Keys.EQUALS) || Gdx.input.isKeyPressed(Input.Keys.P)) {
-			cam.zoom += 0.04;
+			cam.zoom += ZOOM_LEVEL;
 			if (cam.zoom > 0.6F) {
 				// game.getGameSounds().playSkyAmbience();
 			}
 		}
 
-		if (Gdx.input.isKeyPressed(Input.Keys.MINUS) || Gdx.input.isKeyPressed(Input.Keys.O)) {
-			cam.zoom -= 0.04;
+		if (canZoomIn(cam) && (Gdx.input.isKeyPressed(Input.Keys.MINUS) || Gdx.input.isKeyPressed(Input.Keys.O))) {
+			cam.zoom -= ZOOM_LEVEL;
 			if (cam.zoom < 0.4F) {
 				// game.getGameSounds().playTileAmbience();
 			}
@@ -250,4 +252,9 @@ public class InGameScreen extends AbstractScreen {
 	public ScreenEnum getType() {
 		return ScreenEnum.IN_GAME;
 	}
+
+	private boolean canZoomIn(OrthographicCamera camera) {
+		return camera.zoom - ZOOM_LEVEL > MAX_ZOOM_LEVEL;
+	}
+
 }
