@@ -15,11 +15,11 @@ import com.badlogic.gdx.utils.viewport.StretchViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
 import me.rhin.openciv.Civilization;
-import me.rhin.openciv.listener.SendChatMessageListener;
-import me.rhin.openciv.listener.SetScreenListener;
 import me.rhin.openciv.listener.BottomShapeRenderListener.BottomShapeRenderEvent;
 import me.rhin.openciv.listener.ResizeListener.ResizeEvent;
 import me.rhin.openciv.listener.ScrollListener.ScrollEvent;
+import me.rhin.openciv.listener.SendChatMessageListener;
+import me.rhin.openciv.listener.SetScreenListener;
 import me.rhin.openciv.listener.TopShapeRenderListener.TopShapeRenderEvent;
 import me.rhin.openciv.ui.window.WindowManager;
 

@@ -22,7 +22,7 @@ import me.rhin.openciv.util.ClickType;
 
 public class InGameScreen extends AbstractScreen {
 
-	private static final float ZOOM_LEVEL = 0.04F;
+	private static final float ZOOM_LEVEL = 0.08F;
 	private static final float MAX_ZOOM_LEVEL = 0.12F;
 
 	private GameOverlay gameOverlay;
@@ -179,7 +179,11 @@ public class InGameScreen extends AbstractScreen {
 		}
 
 		OrthographicCamera cam = getCamera();
-		cam.zoom += 0.08 * amountY;
+
+		if (!canZoomIn(cam) && amountY < 0) {
+			return false;
+		}
+		cam.zoom += ZOOM_LEVEL * amountY;
 		return false;
 	}
 
