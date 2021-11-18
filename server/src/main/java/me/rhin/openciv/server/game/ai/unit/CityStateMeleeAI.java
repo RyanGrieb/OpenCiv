@@ -148,32 +148,16 @@ public class CityStateMeleeAI extends UnitAI implements NextTurnListener, Server
 
 	private void doRandomTarget() {
 
-		// Clear barbarian camps
-		// TODO: Store discovered barbarian camps in memory
-		// Instead of forgetting next turn
 
 		// Get surrounding tiles of all units.
 		ArrayList<Tile> visibleTiles = new ArrayList<>();
+
 		for (Unit unit : unit.getPlayerOwner().getOwnedUnits())
-			for (Tile tile1 : unit.getStandingTile().getAdjTiles()) {
-				if (!visibleTiles.contains(tile1))
-					visibleTiles.add(tile1);
-				for (Tile tile2 : tile1.getAdjTiles()) {
-					if (!visibleTiles.contains(tile2))
-						visibleTiles.add(tile2);
-				}
-			}
+			visibleTiles.addAll(unit.getObservedTiles());
 
 		// Get surrounding tiles of all cities.
 		for (City city : unit.getPlayerOwner().getOwnedCities()) {
-			for (Tile tile : city.getTerritory()) {
-				if (!visibleTiles.contains(tile))
-					visibleTiles.add(tile);
-
-				for (Tile outterTile : tile.getAdjTiles())
-					if (!visibleTiles.contains(outterTile))
-						visibleTiles.add(outterTile);
-			}
+			visibleTiles.addAll(city.getObservedTiles());
 		}
 
 		for (Tile tile : visibleTiles) {
@@ -185,10 +169,8 @@ public class CityStateMeleeAI extends UnitAI implements NextTurnListener, Server
 			}
 		}
 
-		ArrayList<Tile> tiles = getSurroundingTiles(unit.getTile());
-
 		if (unit.getStandingTile().getTerritory() != null && unit.getStandingTile().getTerritory().equals(city)) {
-			targetTile = getRandomTargetTile(tiles);
+			targetTile = getRandomTargetTile(unit.getObservedTiles());
 		} else
 			targetTile = getRandomTargetTile(city.getTerritory());
 	}
@@ -260,10 +242,8 @@ public class CityStateMeleeAI extends UnitAI implements NextTurnListener, Server
 	private boolean doEnemyTargetCheck() {
 		// Walk to enemy units
 
-		ArrayList<Tile> tiles = getSurroundingTiles(unit.getStandingTile());
-
 		// TODO: Target lowest health unit.
-		for (Tile tile : tiles) {
+		for (Tile tile : unit.getObservedTiles()) {
 			AttackableEntity enemyEntity = tile.getEnemyAttackableEntity(unit.getPlayerOwner());
 
 			// FIXME: Determine if were at war w/ this player. Currently we don't attack
@@ -277,21 +257,5 @@ public class CityStateMeleeAI extends UnitAI implements NextTurnListener, Server
 		}
 
 		return false;
-	}
-
-	private ArrayList<Tile> getSurroundingTiles(Tile tile) {
-
-		ArrayList<Tile> tiles = new ArrayList<>();
-		for (Tile tile1 : tile.getAdjTiles()) {
-			if (!tiles.contains(tile1))
-				tiles.add(tile1);
-
-			for (Tile tile2 : tile1.getAdjTiles()) {
-				if (!tiles.contains(tile2))
-					tiles.add(tile2);
-			}
-		}
-
-		return tiles;
 	}
 }

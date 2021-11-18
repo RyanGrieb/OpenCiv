@@ -1,4 +1,4 @@
-package me.rhin.openciv.server.game.civilization.type.citystate;
+package me.rhin.openciv.server.game.civilization.type;
 
 import me.rhin.openciv.server.game.AbstractPlayer;
 import me.rhin.openciv.server.game.ai.type.CityStatePlayer.CityStateType;

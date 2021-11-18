@@ -74,6 +74,7 @@ public class Tile {
 	private City territory;
 	private ArrayList<Unit> units;
 	private TileImprovement tileImprovement;
+	private ArrayList<TileObserver> tileObservers;
 
 	public Tile(GameMap map, TileType tileType, float x, float y) {
 		this.map = map;
@@ -87,6 +88,7 @@ public class Tile {
 		this.adjTiles = new Tile[6];
 		this.riverSides = new boolean[6];
 		this.units = new ArrayList<>();
+		this.tileObservers = new ArrayList<>();
 	}
 
 	@Override
@@ -214,8 +216,84 @@ public class Tile {
 		}
 	}
 
+	public void addTileObserver(TileObserver tileObserver) {
+		// Is hill
+		boolean isHill = getBaseTileType() == TileType.GRASS_HILL || getBaseTileType() == TileType.DESERT_HILL
+				|| getBaseTileType() == TileType.PLAINS_HILL;
+		// Update visibility
+
+		ArrayList<Tile> adjTiles = new ArrayList<>();
+		adjTiles.add(this);
+		for (Tile tile : getAdjTiles())
+			adjTiles.add(tile);
+
+		for (Tile tile : adjTiles) {
+
+			if (tile == null)
+				continue;
+
+			boolean denyVisibility = false;
+			for (TileTypeWrapper wrapper : tile.getTileTypeWrappers())
+				if (wrapper.getTileType().getMovementCost() > 1 && !tile.equals(this)
+						&& !tileObserver.ignoresTileObstructions()) {
+					denyVisibility = true;
+				}
+
+			if (!tile.getTileObservers().contains(tileObserver)) {
+				tile.getTileObservers().add(tileObserver);
+				tileObserver.addObeservedTile(tile);
+			}
+			if (denyVisibility && !isHill) {
+				continue;
+			}
+			for (Tile adjTile : tile.getAdjTiles()) {
+				if (adjTile == null)
+					continue;
+
+				if (!adjTile.getTileObservers().contains(tileObserver)) {
+					adjTile.getTileObservers().add(tileObserver);
+					tileObserver.addObeservedTile(adjTile);
+				}
+			}
+
+		}
+	}
+
+	public void removeTileObserver(TileObserver tileObserver) {
+		// Update visibility
+
+		ArrayList<Tile> adjTiles = new ArrayList<>();
+		adjTiles.add(this);
+		for (Tile tile : getAdjTiles())
+			adjTiles.add(tile);
+
+		for (Tile tile : adjTiles) {
+
+			if (tile == null)
+				continue;
+
+			tile.getTileObservers().remove(tileObserver);
+			tileObserver.removeObeservedTile(tile);
+
+			for (Tile adjTile : tile.getAdjTiles()) {
+				if (adjTile == null)
+					continue;
+
+				adjTile.getTileObservers().remove(tileObserver);
+				tileObserver.removeObeservedTile(adjTile);
+			}
+
+		}
+	}
+
+	public ArrayList<TileObserver> getTileObservers() {
+		return tileObservers;
+	}
+
 	public void addUnit(Unit unit) {
 		units.add(unit);
+
+		addTileObserver(unit);
 	}
 
 	public void setEdge(int index, Tile tile) {
@@ -224,6 +302,8 @@ public class Tile {
 
 	public void removeUnit(Unit unit) {
 		units.remove(unit);
+
+		removeTileObserver(unit);
 	}
 
 	public boolean hasUnitSelected() {
@@ -328,10 +408,14 @@ public class Tile {
 	public void setCity(City city) {
 		this.city = city;
 		setTileType(TileType.CITY);
+
+		addTileObserver(city);
 	}
 
 	public void setTerritory(City territory) {
 		this.territory = territory;
+
+		addTileObserver(territory);
 	}
 
 	public City getTerritory() {
@@ -560,7 +644,7 @@ public class Tile {
 		for (Unit unit : units) {
 			if (unit.getPlayerOwner().equals(attackingEntity.getPlayerOwner()))
 				continue;
-			
+
 			if (unit.isUnitCapturable(attackingEntity))
 				capturableUnit = unit;
 		}

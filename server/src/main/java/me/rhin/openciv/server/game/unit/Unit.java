@@ -14,6 +14,7 @@ import me.rhin.openciv.server.game.Player;
 import me.rhin.openciv.server.game.ai.unit.UnitAI;
 import me.rhin.openciv.server.game.city.City;
 import me.rhin.openciv.server.game.map.tile.Tile;
+import me.rhin.openciv.server.game.map.tile.TileObserver;
 import me.rhin.openciv.server.game.map.tile.TileType;
 import me.rhin.openciv.server.game.unit.UnitItem.UnitType;
 import me.rhin.openciv.server.listener.CaptureCityListener.CaptureCityEvent;
@@ -27,10 +28,11 @@ import me.rhin.openciv.shared.packet.type.UnitAttackPacket;
 import me.rhin.openciv.shared.stat.Stat;
 import me.rhin.openciv.shared.stat.StatLine;
 
-public abstract class Unit implements AttackableEntity, NextTurnListener {
+public abstract class Unit implements AttackableEntity, TileObserver, NextTurnListener {
 
 	private static int unitID = 0;
 
+	private ArrayList<Tile> observedTiles;
 	protected StatLine combatStrength;
 	protected Tile standingTile;
 	private int id;
@@ -50,6 +52,7 @@ public abstract class Unit implements AttackableEntity, NextTurnListener {
 
 	public Unit(AbstractPlayer playerOwner, Tile standingTile) {
 		this.id = unitID++;
+		this.observedTiles = new ArrayList<>();
 		this.combatStrength = new StatLine();
 		this.playerOwner = playerOwner;
 		this.standingTile = standingTile;
@@ -109,6 +112,25 @@ public abstract class Unit implements AttackableEntity, NextTurnListener {
 	@Override
 	public boolean isUnitCapturable(AttackableEntity attackingEntity) {
 		return attackingEntity.getPlayerOwner().canCaptureUnit(this);
+	}
+
+	@Override
+	public boolean ignoresTileObstructions() {
+		return false;
+	}
+
+	@Override
+	public void setIgnoresTileObstructions(boolean ignoresTileObstructions) {
+	}
+
+	@Override
+	public void addObeservedTile(Tile tile) {
+		observedTiles.add(tile);
+	}
+	
+	@Override
+	public void removeObeservedTile(Tile tile) {
+		observedTiles.remove(tile);
 	}
 
 	// FIXME: Replace getStandingTile method
@@ -586,5 +608,9 @@ public abstract class Unit implements AttackableEntity, NextTurnListener {
 
 		playerOwner.getStatLine().addValue(Stat.GOLD, 150);
 		playerOwner.updateOwnedStatlines(false);
+	}
+
+	public ArrayList<Tile> getObservedTiles() {
+		return observedTiles;
 	}
 }

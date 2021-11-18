@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map.Entry;
 import java.util.Random;
@@ -27,6 +28,7 @@ import me.rhin.openciv.server.game.city.specialist.Specialist;
 import me.rhin.openciv.server.game.city.specialist.SpecialistContainer;
 import me.rhin.openciv.server.game.city.specialist.UnemployedSpecialist;
 import me.rhin.openciv.server.game.map.tile.Tile;
+import me.rhin.openciv.server.game.map.tile.TileObserver;
 import me.rhin.openciv.server.game.map.tile.TileType.TileProperty;
 import me.rhin.openciv.server.game.production.ProducibleItemManager;
 import me.rhin.openciv.server.game.unit.AttackableEntity;
@@ -50,12 +52,13 @@ import me.rhin.openciv.shared.stat.Stat;
 import me.rhin.openciv.shared.stat.StatLine;
 import me.rhin.openciv.shared.util.MathHelper;
 
-public class City implements AttackableEntity, SpecialistContainer, NextTurnListener, ClickSpecialistListener,
-		ClickWorkedTileListener {
+public class City implements AttackableEntity, SpecialistContainer, TileObserver, NextTurnListener,
+		ClickSpecialistListener, ClickWorkedTileListener {
 
 	private AbstractPlayer playerOwner;
 	private String name;
 	private Tile originTile;
+	private ArrayList<Tile> observedTiles;
 	private ArrayList<Tile> territory;
 	private ArrayList<Building> buildings;
 	private HashMap<Tile, CitizenWorker> citizenWorkers;
@@ -71,6 +74,7 @@ public class City implements AttackableEntity, SpecialistContainer, NextTurnList
 		this.playerOwner = playerOwner;
 		this.name = name;
 		this.originTile = originTile;
+		this.observedTiles = new ArrayList<>();
 		this.territory = new ArrayList<>();
 		this.buildings = new ArrayList<>();
 		this.citizenWorkers = new HashMap<>();
@@ -293,7 +297,7 @@ public class City implements AttackableEntity, SpecialistContainer, NextTurnList
 		return 8;
 	}
 
-	//FIXME: Rename this method to isCaptureable & return true
+	// FIXME: Rename this method to isCaptureable & return true
 	@Override
 	public boolean isUnitCapturable(AttackableEntity attackingEntity) {
 		return false;
@@ -340,6 +344,26 @@ public class City implements AttackableEntity, SpecialistContainer, NextTurnList
 	@Override
 	public int getID() {
 		return -1;
+	}
+
+	@Override
+	public boolean ignoresTileObstructions() {
+		return false;
+	}
+
+	@Override
+	public void setIgnoresTileObstructions(boolean ignoresTileObstructions) {
+		// Doesn't include cities
+	}
+
+	@Override
+	public void addObeservedTile(Tile tile) {
+		observedTiles.add(tile);
+	}
+
+	@Override
+	public void removeObeservedTile(Tile tile) {
+		observedTiles.remove(tile);
 	}
 
 	public void setMaxHealth(float maxHealth) {
@@ -726,8 +750,8 @@ public class City implements AttackableEntity, SpecialistContainer, NextTurnList
 	}
 
 	public void setMorale(float morale) {
-		//FIXME: Morale can sometimes be > 100 on the first few turns.
-		//morale = MathUtils.clamp(morale, 0, 100);
+		// FIXME: Morale can sometimes be > 100 on the first few turns.
+		// morale = MathUtils.clamp(morale, 0, 100);
 		statLine.setValue(Stat.MORALE, morale);
 
 		float moraleOffset = (morale >= 70 ? (morale - 70) / 100 : (70 - morale) / 100);
@@ -748,6 +772,10 @@ public class City implements AttackableEntity, SpecialistContainer, NextTurnList
 				return true;
 
 		return false;
+	}
+
+	public ArrayList<Tile> getObservedTiles() {
+		return null;
 	}
 
 	private int getCitizenWorkerAmountOfType(WorkerType workerType) {

@@ -468,6 +468,7 @@ public abstract class Unit extends Actor
 		return ignoresTileObstructions;
 	}
 
+	@Override
 	public void setIgnoresTileObstructions(boolean ignoresTileObstructions) {
 		this.ignoresTileObstructions = ignoresTileObstructions;
 

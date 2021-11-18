@@ -46,18 +46,10 @@ public class BarbarianWarriorAI extends UnitAI implements NextTurnListener {
 	}
 
 	private void findTargets() {
-		ArrayList<Tile> tiles = new ArrayList<>();
-		for (Tile tile1 : unit.getStandingTile().getAdjTiles()) {
-			if (!tiles.contains(tile1))
-				tiles.add(tile1);
+		
+		//Get all tiles w/ tile overser
 
-			for (Tile tile2 : tile1.getAdjTiles()) {
-				if (!tiles.contains(tile2))
-					tiles.add(tile2);
-			}
-		}
-
-		for (Tile tile : tiles) {
+		for (Tile tile : unit.getObservedTiles()) {
 			AttackableEntity enemyEntity = tile.getEnemyAttackableEntity(unit.getPlayerOwner());
 			if (enemyEntity != null && !(enemyEntity.getPlayerOwner() instanceof BarbarianPlayer)) {
 				targetEntity = enemyEntity;

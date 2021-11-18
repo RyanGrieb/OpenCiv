@@ -8,7 +8,7 @@ import me.rhin.openciv.server.game.ai.unit.BarbarianWarriorAI;
 import me.rhin.openciv.server.game.ai.unit.BuilderAI;
 import me.rhin.openciv.server.game.ai.unit.CityStateMeleeAI;
 import me.rhin.openciv.server.game.city.City;
-import me.rhin.openciv.server.game.civilization.type.citystate.CityState;
+import me.rhin.openciv.server.game.civilization.type.CityState;
 import me.rhin.openciv.server.game.map.tile.Tile;
 import me.rhin.openciv.server.game.production.ProducibleItemManager;
 import me.rhin.openciv.server.game.production.ProductionItem;
