@@ -88,11 +88,8 @@ public class MathHelper {
 	}
 
 	private static boolean onSegment(Vector2 p, Vector2 q, Vector2 r) {
-		if (q.x <= Math.max(p.x, r.x) && q.x >= Math.min(p.x, r.x) && q.y <= Math.max(p.y, r.y)
-				&& q.y >= Math.min(p.y, r.y)) {
-			return true;
-		}
-		return false;
+		return q.x <= Math.max(p.x, r.x) && q.x >= Math.min(p.x, r.x) && q.y <= Math.max(p.y, r.y)
+				&& q.y >= Math.min(p.y, r.y);
 	}
 
 	// To find orientation of ordered triplet (p, q, r).

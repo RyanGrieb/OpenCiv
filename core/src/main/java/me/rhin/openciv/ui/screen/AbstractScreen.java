@@ -19,9 +19,8 @@ import me.rhin.openciv.listener.SendChatMessageListener;
 import me.rhin.openciv.listener.SetScreenListener;
 import me.rhin.openciv.listener.BottomShapeRenderListener.BottomShapeRenderEvent;
 import me.rhin.openciv.listener.ResizeListener.ResizeEvent;
-import me.rhin.openciv.listener.ScrollListener.ScollEvent;
+import me.rhin.openciv.listener.ScrollListener.ScrollEvent;
 import me.rhin.openciv.listener.TopShapeRenderListener.TopShapeRenderEvent;
-import me.rhin.openciv.ui.window.AbstractWindow;
 import me.rhin.openciv.ui.window.WindowManager;
 
 public abstract class AbstractScreen implements Screen, InputProcessor {
@@ -223,7 +222,7 @@ public abstract class AbstractScreen implements Screen, InputProcessor {
 
 	@Override
 	public boolean scrolled(float amountX, float amountY) {
-		Civilization.getInstance().getEventManager().fireEvent(new ScollEvent(amountX, amountY));
+		Civilization.getInstance().getEventManager().fireEvent(new ScrollEvent(amountX, amountY));
 		return true;
 	}
 
