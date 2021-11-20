@@ -5,24 +5,24 @@ import java.util.Random;
 
 import me.rhin.openciv.server.Server;
 import me.rhin.openciv.server.game.Player;
-import me.rhin.openciv.server.game.ai.AIPlayer;
 import me.rhin.openciv.server.game.ai.type.CityStatePlayer;
 import me.rhin.openciv.server.game.city.City;
 import me.rhin.openciv.server.game.map.tile.Tile;
 import me.rhin.openciv.server.game.map.tile.TileType;
 import me.rhin.openciv.server.game.map.tile.TileType.TileProperty;
 import me.rhin.openciv.server.game.unit.AttackableEntity;
+import me.rhin.openciv.server.game.unit.RangedUnit;
 import me.rhin.openciv.server.game.unit.Unit;
 import me.rhin.openciv.server.game.unit.UnitItem.UnitType;
 import me.rhin.openciv.server.listener.NextTurnListener;
 import me.rhin.openciv.server.listener.ServerSettleCityListener;
 
-public class CityStateMeleeAI extends UnitAI implements NextTurnListener, ServerSettleCityListener {
+public class CityStateRangedAI extends UnitAI implements NextTurnListener, ServerSettleCityListener {
 
 	private City city;
 	private Tile targetTile;
 
-	public CityStateMeleeAI(Unit unit) {
+	public CityStateRangedAI(Unit unit) {
 		super(unit);
 
 		if (unit.getPlayerOwner().getOwnedCities().size() > 0)
@@ -33,20 +33,20 @@ public class CityStateMeleeAI extends UnitAI implements NextTurnListener, Server
 	}
 
 	@Override
-	public void onNextTurn() {
-		moveUnit();
-	}
-
-	@Override
 	public void onSettleCity(City city) {
 		if (city.getPlayerOwner().equals(unit.getPlayerOwner()))
 			this.city = city;
 	}
 
 	@Override
+	public void onNextTurn() {
+		moveUnit();
+	}
+
+	@Override
 	public void clearListeners() {
-		Server.getInstance().getEventManager().removeListener(ServerSettleCityListener.class, this);
 		Server.getInstance().getEventManager().removeListener(NextTurnListener.class, this);
+		Server.getInstance().getEventManager().removeListener(ServerSettleCityListener.class, this);
 	}
 
 	private void moveUnit() {
@@ -56,14 +56,29 @@ public class CityStateMeleeAI extends UnitAI implements NextTurnListener, Server
 		if (targetTile != null && targetTile.equals(unit.getStandingTile()))
 			targetTile = null;
 
-		// If we were attacking,
-		if (unit.getHealth() <= 60 && !unit.getTile().equals(city.getOriginTile())) {
-			targetTile = null;
+		findTargets();
+	}
+
+	private void findTargets() {
+
+		// Walk back to city if under threat
+		if (doRetreatTargetCheck()) {
+			moveToTarget();
+			System.out.println("Retreating: " + unit.getID() + ", " + unit.getName());
 		}
 
-		if (targetTile == null)
-			findTargets();
+		// Attack any enemy units in range if we still have movement left.
+		if (doEnemyTargetCheck()) {
+			System.out.println("Attacking: " + unit.getID() + ", " + unit.getName());
+			return;
+		}
 
+		if (unit.getMovement() < 1)
+			return;
+
+		// Walk to a random tile
+		doRandomTarget();
+		System.out.println("Scouting as: " + unit.getID());
 		moveToTarget();
 	}
 
@@ -99,16 +114,12 @@ public class CityStateMeleeAI extends UnitAI implements NextTurnListener, Server
 		}
 
 		AttackableEntity topEntity = pathingTile.getEnemyAttackableEntity(unit.getPlayerOwner());
-		if (topEntity != null && topEntity.surviveAttack(unit)) {
+		if (topEntity != null) {
 			pathingTile = pathTiles.get(1); // Stand outside of enemy unit to attack.
 		}
 
 		if (!pathingTile.equals(unit.getStandingTile()))
 			moveToTargetTile(pathingTile);
-
-		if (unit.canAttack(topEntity)) {
-			unit.attackEntity(topEntity);
-		}
 
 		if (unit.getHealth() > 0) {
 			// Handle capturing barbarian camps
@@ -121,57 +132,55 @@ public class CityStateMeleeAI extends UnitAI implements NextTurnListener, Server
 			targetTile = null;
 	}
 
-	private boolean isFriendly(Unit unit) {
-		if (unit.getPlayerOwner() instanceof Player || unit.getPlayerOwner() instanceof CityStatePlayer)
-			return true;
+	private boolean doEnemyTargetCheck() {
+		if (unit.getMovement() < 1)
+			return false;
 
-		return unit.getPlayerOwner().equals(city.getPlayerOwner()) && !unit.getUnitTypes().contains(UnitType.SUPPORT);
-	}
+		for (Tile tile : unit.getObservedTiles()) {
+			if (tile.getEnemyAttackableEntity(unit.getPlayerOwner()) != null) {
 
-	private void findTargets() {
-
-		// Walk back to city if under threat
-		if (doRetreatTargetCheck()) {
-			// System.out.println("Retreating: " + unit.getID());
-			return;
-		}
-		// Walk towards enemy units
-		if (doEnemyTargetCheck()) {
-			// System.out.println("Attacking as: " + unit.getID());
-			return;
-		}
-		// Walk to a random tile
-		doRandomTarget();
-
-		// System.out.println("Guarding to:" + targetTile);
-	}
-
-	private void doRandomTarget() {
-
-		// Get surrounding tiles of all units.
-		ArrayList<Tile> visibleTiles = new ArrayList<>();
-
-		for (Unit unit : unit.getPlayerOwner().getOwnedUnits())
-			visibleTiles.addAll(unit.getObservedTiles());
-
-		// Get surrounding tiles of all cities.
-		for (City city : unit.getPlayerOwner().getOwnedCities()) {
-			visibleTiles.addAll(city.getObservedTiles());
-		}
-
-		for (Tile tile : visibleTiles) {
-			if (tile == null)
-				continue;
-			if (tile.containsTileType(TileType.BARBARIAN_CAMP)) {
-				targetTile = tile;
-				return;
+				((RangedUnit) unit).rangeAttack(tile.getEnemyAttackableEntity(unit.getPlayerOwner()));
+				return true;
 			}
 		}
 
+		return false;
+	}
+
+	private boolean doRetreatTargetCheck() {
+
+		Tile retreatTile = city.getOriginTile();
+
+		Random rnd = new Random();
+
+		int index = 0;
+		while (retreatTile.getTopUnit() != null && !unit.equals(retreatTile.getTopUnit())
+				&& !retreatTile.getTopUnit().getUnitTypes().contains(UnitType.SUPPORT)) {
+
+			if (index > 30)
+				return false;
+
+			retreatTile = city.getTerritory().get(rnd.nextInt(city.getTerritory().size()));
+			index++;
+		}
+
+		for (Tile tile : unit.getObservedTiles()) {
+			if (tile.getTopEnemyUnit(unit.getPlayerOwner()) != null) {
+				targetTile = retreatTile;
+				return true;
+			}
+
+		}
+
+		return false;
+	}
+
+	private void doRandomTarget() {
 		if (unit.getStandingTile().getTerritory() != null && unit.getStandingTile().getTerritory().equals(city)) {
 			targetTile = getRandomTargetTile(unit.getObservedTiles());
-		} else
+		} else {
 			targetTile = getRandomTargetTile(city.getTerritory());
+		}
 	}
 
 	private Tile getRandomTargetTile(ArrayList<Tile> tiles) {
@@ -198,63 +207,10 @@ public class CityStateMeleeAI extends UnitAI implements NextTurnListener, Server
 		return rndTile;
 	}
 
-	private boolean doRetreatTargetCheck() {
-
-		Tile retreatTile = city.getOriginTile();
-
-		Random rnd = new Random();
-
-		int index = 0;
-		while (retreatTile.getTopUnit() != null && !unit.equals(retreatTile.getTopUnit())
-				&& !retreatTile.getTopUnit().getUnitTypes().contains(UnitType.SUPPORT)) {
-
-			if (index > 30)
-				return false;
-
-			retreatTile = city.getTerritory().get(rnd.nextInt(city.getTerritory().size()));
-			index++;
-		}
-
-		// Even if were still in the city, don't move if were really low
-		if (unit.getHealth() <= 20) {
-			targetTile = retreatTile;
+	private boolean isFriendly(Unit unit) {
+		if (unit.getPlayerOwner() instanceof Player || unit.getPlayerOwner() instanceof CityStatePlayer)
 			return true;
-		}
 
-		if (unit.getStandingTile().equals(city.getTile()))
-			return false;
-
-		if (((AIPlayer) unit.getPlayerOwner()).getIntimidation() > 15
-				&& (targetTile == null || !targetTile.equals(city.getTile()))) {
-			targetTile = retreatTile;
-			return true;
-		}
-
-		if (unit.getHealth() <= 60) {
-			targetTile = retreatTile;
-			return true;
-		}
-
-		return false;
-	}
-
-	private boolean doEnemyTargetCheck() {
-		// Walk to enemy units
-
-		// TODO: Target lowest health unit.
-		for (Tile tile : unit.getObservedTiles()) {
-			AttackableEntity enemyEntity = tile.getEnemyAttackableEntity(unit.getPlayerOwner());
-
-			// FIXME: Determine if were at war w/ this player. Currently we don't attack
-			// these players
-			if (enemyEntity == null || enemyEntity.getPlayerOwner() instanceof Player
-					|| enemyEntity.getPlayerOwner() instanceof CityStatePlayer)
-				continue;
-
-			targetTile = enemyEntity.getTile();
-			return true;
-		}
-
-		return false;
+		return unit.getPlayerOwner().equals(city.getPlayerOwner()) && !unit.getUnitTypes().contains(UnitType.SUPPORT);
 	}
 }

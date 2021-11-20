@@ -79,7 +79,7 @@ public class Tile extends Actor implements BottomShapeRenderListener {
 	private Sprite rangedTargetSprite;
 	private boolean[] territoryBorders;
 	private boolean drawSelection;
-	private CustomLabel posLabel;
+	private CustomLabel observerLabel;
 	private float x, y, width, height;
 	private int gridX, gridY;
 	private Vector2[] vectors;
@@ -90,6 +90,7 @@ public class Tile extends Actor implements BottomShapeRenderListener {
 	private ArrayList<Unit> units;
 	private boolean discovered;
 	private ArrayList<TileObserver> tileObservers;
+	private ArrayList<TileObserver> serverObservers; // All units from server observing this tile
 	private boolean improved;
 	private int appliedImprovementTurns;
 	private boolean rangedTarget;
@@ -132,11 +133,12 @@ public class Tile extends Actor implements BottomShapeRenderListener {
 		this.riverSides = new RiverPart[6];
 		this.units = new ArrayList<>();
 		this.tileObservers = new ArrayList<>();
+		this.serverObservers = new ArrayList<>();
 		this.appliedImprovementTurns = 0;
 
-		this.posLabel = new CustomLabel(gridX + "," + gridY);
-		posLabel.setSize(width, 20);
-		posLabel.setPosition(vectors[0].x - width / 2, vectors[0].y + 5);
+		this.observerLabel = new CustomLabel("1,1");
+		observerLabel.setSize(width, 20);
+		observerLabel.setPosition(vectors[0].x - width / 2, vectors[0].y + 5);
 	}
 
 	@Override
@@ -217,7 +219,22 @@ public class Tile extends Actor implements BottomShapeRenderListener {
 			rangedTargetSprite.draw(batch);
 		}
 
-		// posLabel.draw(batch, 1);
+		
+		//FIXME: This is debug code. Make this prettier.
+		if (serverObservers.size() < 1)
+			return;
+
+		observerLabel.setText("");
+		int index = 0;
+		for (TileObserver observer : serverObservers) {
+			if (observer == null)
+				continue;
+			observerLabel.setText(observerLabel.getText() + (index > 0 ? "," : "") + observer.getID());
+			index++;
+		}
+
+		observerLabel.draw(batch, 1);
+
 	}
 
 	@Override
@@ -603,10 +620,10 @@ public class Tile extends Actor implements BottomShapeRenderListener {
 			adjTiles.add(tile);
 
 		for (Tile tile : adjTiles) {
-			
+
 			if (tile == null)
 				continue;
-			
+
 			tile.getTileObservers().remove(tileObserver);
 			for (Tile adjTile : tile.getAdjTiles()) {
 				if (adjTile == null)
@@ -642,6 +659,7 @@ public class Tile extends Actor implements BottomShapeRenderListener {
 				continue;
 
 			boolean denyVisibility = false;
+
 			for (TileTypeWrapper wrapper : tile.getTileTypeWrappers())
 				if (wrapper.getTileType().getMovementCost() > 1 && !tile.equals(this)
 						&& !tileObserver.ignoresTileObstructions()) {
@@ -649,15 +667,21 @@ public class Tile extends Actor implements BottomShapeRenderListener {
 				}
 
 			tile.setDiscovered(true);
+
 			if (!tile.getTileObservers().contains(tileObserver))
 				tile.getTileObservers().add(tileObserver);
+
 			if (denyVisibility && !isHill) {
 				continue;
 			}
+
 			for (Tile adjTile : tile.getAdjTiles()) {
+
 				if (adjTile == null)
 					continue;
+
 				adjTile.setDiscovered(true);
+
 				if (!adjTile.getTileObservers().contains(tileObserver))
 					adjTile.getTileObservers().add(tileObserver);
 			}
@@ -781,5 +805,9 @@ public class Tile extends Actor implements BottomShapeRenderListener {
 		roadWrapper.setTileType(TileType.ROAD);
 		roadWrapper.setSprite(roadEnum);
 		tileWrappers.add(roadWrapper);
+	}
+
+	public ArrayList<TileObserver> getServerObservers() {
+		return serverObservers;
 	}
 }

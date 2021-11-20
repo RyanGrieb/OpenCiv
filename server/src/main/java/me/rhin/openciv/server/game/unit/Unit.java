@@ -16,10 +16,13 @@ import me.rhin.openciv.server.game.city.City;
 import me.rhin.openciv.server.game.map.tile.Tile;
 import me.rhin.openciv.server.game.map.tile.TileObserver;
 import me.rhin.openciv.server.game.map.tile.TileType;
+import me.rhin.openciv.server.game.options.GameOptionType;
 import me.rhin.openciv.server.game.unit.UnitItem.UnitType;
 import me.rhin.openciv.server.listener.CaptureCityListener.CaptureCityEvent;
 import me.rhin.openciv.server.listener.NextTurnListener;
+import me.rhin.openciv.shared.packet.type.AddObservedTilePacket;
 import me.rhin.openciv.shared.packet.type.DeleteUnitPacket;
+import me.rhin.openciv.shared.packet.type.RemoveObservedTilePacket;
 import me.rhin.openciv.shared.packet.type.RemoveTileTypePacket;
 import me.rhin.openciv.shared.packet.type.SetCityHealthPacket;
 import me.rhin.openciv.shared.packet.type.SetCityOwnerPacket;
@@ -63,9 +66,10 @@ public abstract class Unit implements AttackableEntity, TileObserver, NextTurnLi
 		setPosition(standingTile.getVectors()[0].x - standingTile.getWidth() / 2, standingTile.getVectors()[0].y + 4);
 		setSize(standingTile.getWidth(), standingTile.getHeight());
 
-		playerOwner.addOwnedUnit(this);
-
+		//Note: This listener needs to be called before the addOwnedUnit() ones.
 		Server.getInstance().getEventManager().addListener(NextTurnListener.class, this);
+
+		playerOwner.addOwnedUnit(this);
 	}
 
 	public abstract float getMovementCost(Tile prevTile, Tile adjTile);
@@ -126,11 +130,35 @@ public abstract class Unit implements AttackableEntity, TileObserver, NextTurnLi
 	@Override
 	public void addObeservedTile(Tile tile) {
 		observedTiles.add(tile);
+
+		// If condition
+		if (Server.getInstance().getGameOptions().getOption(GameOptionType.SHOW_OBSERVED_TILES) == 0)
+			return;
+
+		AddObservedTilePacket packet = new AddObservedTilePacket();
+		packet.setTileObserver(playerOwner.getName(), id, tile.getGridX(), tile.getGridY());
+
+		Json json = new Json();
+
+		for (Player player : Server.getInstance().getPlayers())
+			player.sendPacket(json.toJson(packet));
 	}
-	
+
 	@Override
 	public void removeObeservedTile(Tile tile) {
 		observedTiles.remove(tile);
+
+		// If condition
+		if (Server.getInstance().getGameOptions().getOption(GameOptionType.SHOW_OBSERVED_TILES) == 0)
+			return;
+
+		RemoveObservedTilePacket packet = new RemoveObservedTilePacket();
+		packet.setTileObserver(playerOwner.getName(), id, tile.getGridX(), tile.getGridY());
+
+		Json json = new Json();
+
+		for (Player player : Server.getInstance().getPlayers())
+			player.sendPacket(json.toJson(packet));
 	}
 
 	// FIXME: Replace getStandingTile method
@@ -199,6 +227,11 @@ public abstract class Unit implements AttackableEntity, TileObserver, NextTurnLi
 	public String toString() {
 		return "(ID:" + id + ", Owner:" + playerOwner.getCiv().getName() + " - [" + standingTile.getGridX() + ","
 				+ standingTile.getGridY() + "]" + ")";
+	}
+
+	@Override
+	public ArrayList<Tile> getObservedTiles() {
+		return observedTiles;
 	}
 
 	// TODO: Just added this, use this in other places in the unit class.
@@ -610,7 +643,4 @@ public abstract class Unit implements AttackableEntity, TileObserver, NextTurnLi
 		playerOwner.updateOwnedStatlines(false);
 	}
 
-	public ArrayList<Tile> getObservedTiles() {
-		return observedTiles;
-	}
 }

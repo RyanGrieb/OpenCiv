@@ -18,6 +18,7 @@ import me.rhin.openciv.server.game.map.tile.TileIndexer;
 import me.rhin.openciv.server.game.map.tile.TileType;
 import me.rhin.openciv.server.game.map.tile.TileType.TileLayer;
 import me.rhin.openciv.server.game.map.tile.TileType.TileProperty;
+import me.rhin.openciv.server.game.options.GameOptionType;
 import me.rhin.openciv.server.game.unit.Unit;
 import me.rhin.openciv.server.listener.MapRequestListener;
 import me.rhin.openciv.shared.map.MapSize;
@@ -47,7 +48,7 @@ public class GameMap implements MapRequestListener {
 
 	public GameMap() {
 
-		this.mapSize = Server.getInstance().getGameOptions().getMapSize();
+		this.mapSize = Server.getInstance().getGameOptions().getOption(GameOptionType.MAP_LENGTH);
 		this.mapPartition = new ArrayList<>();
 
 		Server.getInstance().getEventManager().addListener(MapRequestListener.class, this);
@@ -577,7 +578,8 @@ public class GameMap implements MapRequestListener {
 		}
 
 		// Spawn barbarians
-		int campAmount = 5 * (mapSize + 1);
+		int campAmount = Server.getInstance().getGameOptions().getOption(GameOptionType.BARBARIAN_AMOUNT)
+				* (mapSize + 1);
 		for (int i = 0; i < campAmount; i++) {
 			int x = rnd.nextInt(getWidth());
 			int y = rnd.nextInt(getHeight());
@@ -688,9 +690,9 @@ public class GameMap implements MapRequestListener {
 				while (true) {
 					Tile tile = null;
 					if (tileType.hasProperty(TileProperty.WATER)) {
-						
+
 						ArrayList<Tile> shallowOceanTiles = getTilesOfTileType(TileType.SHALLOW_OCEAN);
-						
+
 						tile = shallowOceanTiles.get(rnd.nextInt(shallowOceanTiles.size()));
 					} else {
 						int rndX = rnd.nextInt((int) (rect.getX() + rect.getWidth() - 1) - (int) rect.getX() + 1)

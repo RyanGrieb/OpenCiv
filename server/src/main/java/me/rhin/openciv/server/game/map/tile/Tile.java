@@ -241,18 +241,26 @@ public class Tile {
 
 			if (!tile.getTileObservers().contains(tileObserver)) {
 				tile.getTileObservers().add(tileObserver);
-				tileObserver.addObeservedTile(tile);
+				// System.out.println(tileObserver.getName() + " - " + tile);
+
+				if (!tileObserver.getObservedTiles().contains(tile))
+					tileObserver.addObeservedTile(tile);
 			}
+
 			if (denyVisibility && !isHill) {
 				continue;
 			}
+
 			for (Tile adjTile : tile.getAdjTiles()) {
 				if (adjTile == null)
 					continue;
 
 				if (!adjTile.getTileObservers().contains(tileObserver)) {
 					adjTile.getTileObservers().add(tileObserver);
-					tileObserver.addObeservedTile(adjTile);
+					// System.out.println(tileObserver.getName() + " - " + adjTile);
+
+					if (!tileObserver.getObservedTiles().contains(adjTile))
+						tileObserver.addObeservedTile(adjTile);
 				}
 			}
 

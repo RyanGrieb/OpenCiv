@@ -11,6 +11,7 @@ import me.rhin.openciv.server.game.Player;
 import me.rhin.openciv.server.game.city.wonders.GameWonders;
 import me.rhin.openciv.server.game.civilization.CivType;
 import me.rhin.openciv.server.game.civilization.type.RandomCivilization;
+import me.rhin.openciv.server.game.options.GameOptionType;
 import me.rhin.openciv.server.listener.ChooseCivListener;
 import me.rhin.openciv.server.listener.ConnectionListener;
 import me.rhin.openciv.server.listener.DisconnectListener;
@@ -194,7 +195,7 @@ public class InLobbyState extends GameState
 		if (mapSize > MapSize.values().length - 1)
 			mapSize = MapSize.values().length - 1;
 
-		Server.getInstance().getGameOptions().setMapSize(mapSize);
+		Server.getInstance().getGameOptions().setOptionValue(GameOptionType.MAP_LENGTH, mapSize);
 		// Server.getInstance().getMap().setSize(mapSize);
 
 		packet.setWorldSize(mapSize);
@@ -213,7 +214,7 @@ public class InLobbyState extends GameState
 		if (turnLengthOffset < -1)
 			turnLengthOffset = -1;
 
-		Server.getInstance().getGameOptions().setTurnLengthOffset(turnLengthOffset);
+		Server.getInstance().getGameOptions().setOptionValue(GameOptionType.TURN_LENGTH_OFFSET, turnLengthOffset);
 		packet.setTurnLengthOffset(turnLengthOffset);
 
 		Json json = new Json();

@@ -1,27 +1,30 @@
 
 package me.rhin.openciv.game.map;
 
-import java.util.ArrayList;
-
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.Vector2;
 
 import me.rhin.openciv.Civilization;
-import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.map.tile.Tile;
 import me.rhin.openciv.game.map.tile.TileType;
-import me.rhin.openciv.game.map.tooltip.CombatActor;
+import me.rhin.openciv.game.player.AbstractPlayer;
+import me.rhin.openciv.game.unit.Unit;
+import me.rhin.openciv.listener.AddObservedTileListener;
 import me.rhin.openciv.listener.ReceiveMapChunkListener;
+import me.rhin.openciv.listener.RemoveObservedTileListener;
 import me.rhin.openciv.listener.RemoveTileTypeListener;
 import me.rhin.openciv.listener.SetTileTypeListener;
 import me.rhin.openciv.shared.packet.ChunkTile;
+import me.rhin.openciv.shared.packet.type.AddObservedTilePacket;
 import me.rhin.openciv.shared.packet.type.MapChunkPacket;
+import me.rhin.openciv.shared.packet.type.RemoveObservedTilePacket;
 import me.rhin.openciv.shared.packet.type.RemoveTileTypePacket;
 import me.rhin.openciv.shared.packet.type.SetTileTypePacket;
 import me.rhin.openciv.ui.screen.type.InGameScreen;
 import me.rhin.openciv.util.MathHelper;
 
-public class GameMap implements ReceiveMapChunkListener, SetTileTypeListener, RemoveTileTypeListener {
+public class GameMap implements ReceiveMapChunkListener, SetTileTypeListener, RemoveTileTypeListener,
+		AddObservedTileListener, RemoveObservedTileListener {
 
 	public static final int WIDTH = 128;
 	public static final int HEIGHT = 80;
@@ -51,6 +54,8 @@ public class GameMap implements ReceiveMapChunkListener, SetTileTypeListener, Re
 		Civilization.getInstance().getEventManager().addListener(ReceiveMapChunkListener.class, this);
 		Civilization.getInstance().getEventManager().addListener(SetTileTypeListener.class, this);
 		Civilization.getInstance().getEventManager().addListener(RemoveTileTypeListener.class, this);
+		Civilization.getInstance().getEventManager().addListener(AddObservedTileListener.class, this);
+		Civilization.getInstance().getEventManager().addListener(RemoveObservedTileListener.class, this);
 	}
 
 	@Override
@@ -104,6 +109,39 @@ public class GameMap implements ReceiveMapChunkListener, SetTileTypeListener, Re
 			tileType.playRemoveSound();
 
 		tile.removeTileType(tileType);
+	}
+
+	@Override
+	public void onAddObservedTile(AddObservedTilePacket packet) {
+		Tile tile = tiles[packet.getTileGridX()][packet.getTileGridY()];
+
+		Unit unit = null;
+
+		// FIXME: Slow.
+		for (AbstractPlayer player : Civilization.getInstance().getGame().getPlayers().values()) {
+			for (Unit playerUnit : player.getOwnedUnits())
+				if (playerUnit.getID() == packet.getUnitID())
+					unit = playerUnit;
+		}
+
+		tile.getServerObservers().add(unit);
+	}
+
+	@Override
+	public void onRemoveObservedTile(RemoveObservedTilePacket packet) {
+		Tile tile = tiles[packet.getTileGridX()][packet.getTileGridY()];
+
+		Unit unit = null;
+
+		// FIXME: Slow.
+		for (AbstractPlayer player : Civilization.getInstance().getGame().getPlayers().values()) {
+			for (Unit playerUnit : player.getOwnedUnits())
+				if (playerUnit.getID() == packet.getUnitID())
+					unit = playerUnit;
+		}
+
+		tile.getServerObservers().remove(unit);
+
 	}
 
 	public Tile getTileFromLocation(float x, float y) {

@@ -366,6 +366,16 @@ public class City implements AttackableEntity, SpecialistContainer, TileObserver
 		observedTiles.remove(tile);
 	}
 
+	@Override
+	public ArrayList<Tile> getObservedTiles() {
+		return observedTiles;
+	}
+
+	@Override
+	public String toString() {
+		return name + " - " + playerOwner.getName();
+	}
+
 	public void setMaxHealth(float maxHealth) {
 		this.maxHealth = maxHealth;
 	}
@@ -772,10 +782,6 @@ public class City implements AttackableEntity, SpecialistContainer, TileObserver
 				return true;
 
 		return false;
-	}
-
-	public ArrayList<Tile> getObservedTiles() {
-		return null;
 	}
 
 	private int getCitizenWorkerAmountOfType(WorkerType workerType) {

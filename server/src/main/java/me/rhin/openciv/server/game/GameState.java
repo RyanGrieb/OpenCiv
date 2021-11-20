@@ -9,7 +9,6 @@ import com.badlogic.gdx.utils.Json;
 import me.rhin.openciv.server.Server;
 import me.rhin.openciv.server.game.ai.AIPlayer;
 import me.rhin.openciv.server.game.ai.type.BarbarianPlayer;
-import me.rhin.openciv.server.game.city.wonders.GameWonders;
 import me.rhin.openciv.server.listener.SendChatMessageListener;
 import me.rhin.openciv.shared.packet.type.SendChatMessagePacket;
 
@@ -28,6 +27,10 @@ public abstract class GameState implements SendChatMessageListener {
 	@Override
 	public void onSendChatMessage(WebSocket conn, SendChatMessagePacket packet) {
 		packet.setPlayerName(getPlayerByConn(conn).getName());
+
+		if (packet.getMessage().startsWith("/")) {
+			Server.getInstance().getCommandProcessor().proccessCommand(packet.getMessage().substring(1));
+		}
 
 		Json json = new Json();
 		for (Player player : players) {

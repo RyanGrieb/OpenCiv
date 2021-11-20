@@ -16,6 +16,7 @@ import me.rhin.openciv.listener.RightClickListener.RightClickEvent;
 import me.rhin.openciv.shared.listener.EventManager;
 import me.rhin.openciv.ui.screen.AbstractScreen;
 import me.rhin.openciv.ui.screen.ScreenEnum;
+import me.rhin.openciv.ui.window.type.ChatboxWindow;
 import me.rhin.openciv.ui.window.type.EscWindow;
 import me.rhin.openciv.ui.window.type.GameOverlay;
 import me.rhin.openciv.util.ClickType;
@@ -189,7 +190,7 @@ public class InGameScreen extends AbstractScreen {
 
 	private void handleInput() {
 
-		if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
+		if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE) && !windowManager.isOpenWindow(ChatboxWindow.class)) {
 			game.endTurn();
 		}
 

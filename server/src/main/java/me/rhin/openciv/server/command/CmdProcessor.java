@@ -31,6 +31,7 @@ public class CmdProcessor {
 
 		String[] args = input.split(" ");
 		args = Arrays.copyOfRange(args, 1, args.length);
+		
 		cmd.call(args);
 	}
 

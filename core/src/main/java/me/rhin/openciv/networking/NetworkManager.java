@@ -12,6 +12,7 @@ import com.github.czyzby.websocket.WebSocketAdapter;
 import com.github.czyzby.websocket.WebSockets;
 
 import me.rhin.openciv.Civilization;
+import me.rhin.openciv.listener.AddObservedTileListener.AddObservedTileEvent;
 import me.rhin.openciv.listener.AddSpecialistToContainerListener.AddSpecialistToContainerEvent;
 import me.rhin.openciv.listener.AddUnitListener.AddUnitEvent;
 import me.rhin.openciv.listener.ApplyProductionToItemListener.ApplyProductionToItemEvent;
@@ -35,6 +36,7 @@ import me.rhin.openciv.listener.PlayerDisconnectListener.PlayerDisconnectEvent;
 import me.rhin.openciv.listener.PlayerListRequestListener.PlayerListRequestEvent;
 import me.rhin.openciv.listener.PlayerStatUpdateListener.PlayerStatUpdateEvent;
 import me.rhin.openciv.listener.ReceiveMapChunkListener.ReciveMapChunkEvent;
+import me.rhin.openciv.listener.RemoveObservedTileListener.RemoveObservedTileEvent;
 import me.rhin.openciv.listener.RemoveProductionItemListener.RemoveProductionItemEvent;
 import me.rhin.openciv.listener.RemoveSpecialistFromContainerListener.RemoveSpecialistFromContainerEvent;
 import me.rhin.openciv.listener.RemoveTileTypeListener.RemoveTileTypeEvent;
@@ -60,6 +62,7 @@ import me.rhin.openciv.listener.WorkTileListener.WorkTileEvent;
 import me.rhin.openciv.shared.listener.Event;
 import me.rhin.openciv.shared.listener.Listener;
 import me.rhin.openciv.shared.packet.Packet;
+import me.rhin.openciv.shared.packet.type.AddObservedTilePacket;
 import me.rhin.openciv.shared.packet.type.AddSpecialistToContainerPacket;
 import me.rhin.openciv.shared.packet.type.AddUnitPacket;
 import me.rhin.openciv.shared.packet.type.ApplyProductionToItemPacket;
@@ -83,6 +86,7 @@ import me.rhin.openciv.shared.packet.type.PlayerConnectPacket;
 import me.rhin.openciv.shared.packet.type.PlayerDisconnectPacket;
 import me.rhin.openciv.shared.packet.type.PlayerListRequestPacket;
 import me.rhin.openciv.shared.packet.type.PlayerStatUpdatePacket;
+import me.rhin.openciv.shared.packet.type.RemoveObservedTilePacket;
 import me.rhin.openciv.shared.packet.type.RemoveProductionItemPacket;
 import me.rhin.openciv.shared.packet.type.RemoveSpecialistFromContainerPacket;
 import me.rhin.openciv.shared.packet.type.RemoveTileTypePacket;
@@ -157,6 +161,8 @@ public class NetworkManager {
 		networkEvents.put(SendChatMessagePacket.class, SendChatMessageEvent.class);
 		networkEvents.put(TileStatlinePacket.class, TileStatlineEvent.class);
 		networkEvents.put(BuyProductionItemPacket.class, BuyProductionItemEvent.class);
+		networkEvents.put(AddObservedTilePacket.class, AddObservedTileEvent.class);
+		networkEvents.put(RemoveObservedTilePacket.class, RemoveObservedTileEvent.class);
 	}
 
 	public void connect(String ip) {

@@ -8,8 +8,10 @@ import com.badlogic.gdx.utils.Json;
 import me.rhin.openciv.server.Server;
 import me.rhin.openciv.server.errors.SameMovementTargetException;
 import me.rhin.openciv.server.game.Player;
+import me.rhin.openciv.server.game.ai.type.CityStatePlayer;
 import me.rhin.openciv.server.game.map.tile.Tile;
 import me.rhin.openciv.server.game.unit.Unit;
+import me.rhin.openciv.server.game.unit.UnitItem.UnitType;
 import me.rhin.openciv.shared.packet.type.MoveUnitPacket;
 
 public abstract class UnitAI {

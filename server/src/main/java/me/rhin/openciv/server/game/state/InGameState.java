@@ -26,10 +26,12 @@ import me.rhin.openciv.server.game.map.tile.Tile;
 import me.rhin.openciv.server.game.map.tile.Tile.TileTypeWrapper;
 import me.rhin.openciv.server.game.map.tile.TileType;
 import me.rhin.openciv.server.game.map.tile.TileType.TileProperty;
+import me.rhin.openciv.server.game.options.GameOptionType;
 import me.rhin.openciv.server.game.unit.AttackableEntity;
 import me.rhin.openciv.server.game.unit.RangedUnit;
 import me.rhin.openciv.server.game.unit.TraderUnit;
 import me.rhin.openciv.server.game.unit.Unit;
+import me.rhin.openciv.server.game.unit.type.Archer.ArcherUnit;
 import me.rhin.openciv.server.game.unit.type.Builder.BuilderUnit;
 import me.rhin.openciv.server.game.unit.type.Settler.SettlerUnit;
 import me.rhin.openciv.server.game.unit.type.TransportShipUnit;
@@ -508,65 +510,11 @@ public class InGameState extends GameState implements DisconnectListener, Select
 		AttackableEntity targetEntity = map.getTiles()[packet.getTargetGridX()][packet.getTargetGridY()]
 				.getAttackableEntityFromID(packet.getTargetID());
 
-		if (attackingEntity instanceof Unit) {
-			((Unit) attackingEntity).reduceMovement(2);
-		}
+		if (!(attackingEntity instanceof RangedUnit))
+			return;
 
-		// FIXME: Slight redundant code w/ mele attack.
-		if (!attackingEntity.getPlayerOwner().equals(targetEntity.getPlayerOwner())) {
-			// We are about to attack this unit on the tile
-
-			Json json = new Json();
-			float unitDamage = 0; // A shooting unit takes no damage
-			float targetDamage = targetEntity.getDamageTaken(attackingEntity, true);
-
-			attackingEntity.onCombat();
-			targetEntity.onCombat();
-
-			attackingEntity.setHealth(attackingEntity.getHealth() - unitDamage);
-			targetEntity.setHealth(targetEntity.getHealth() - targetDamage);
-
-			// If our ranged unit reduces the city below health, just set it to the min
-			// amount.
-			if (targetEntity instanceof City && targetEntity.getHealth() < 0) {
-				targetEntity.setHealth(1);
-			}
-
-			if (targetEntity.getHealth() > 0) {
-				UnitAttackPacket attackPacket = new UnitAttackPacket();
-				attackPacket.setUnitLocations(attackingEntity.getTile().getGridX(),
-						attackingEntity.getTile().getGridY(), targetEntity.getTile().getGridX(),
-						targetEntity.getTile().getGridY());
-				attackPacket.setUnitDamage(unitDamage);
-				attackPacket.setTargetDamage(targetDamage);
-				attackPacket.setIDs(attackingEntity.getID(), targetEntity.getID());
-
-				for (Player player : players) {
-					player.sendPacket(json.toJson(attackPacket));
-				}
-			}
-
-			if (targetEntity.getHealth() <= 0) {
-				if (targetEntity instanceof Unit && targetEntity.getTile().getCity() == null) {
-
-					Unit targetUnit = (Unit) targetEntity;
-
-					targetUnit.getStandingTile().removeUnit(targetUnit);
-					targetUnit.kill();
-					targetUnit.getPlayerOwner().removeUnit(targetUnit);
-
-					// FIXME: Redundant code.
-					DeleteUnitPacket removeUnitPacket = new DeleteUnitPacket();
-					removeUnitPacket.setUnit(targetUnit.getID(), targetUnit.getStandingTile().getGridX(),
-							targetUnit.getStandingTile().getGridY());
-					removeUnitPacket.setKilled(true);
-
-					for (Player player : players) {
-						player.sendPacket(json.toJson(removeUnitPacket));
-					}
-				}
-			}
-		}
+		RangedUnit rangedUnit = (RangedUnit) attackingEntity;
+		rangedUnit.rangeAttack(targetEntity);
 	}
 
 	@Override
@@ -761,7 +709,7 @@ public class InGameState extends GameState implements DisconnectListener, Select
 
 	private int getUpdatedTurnTime() {
 
-		int turnLengthOffset = Server.getInstance().getGameOptions().getTurnLengthOffset();
+		int turnLengthOffset = Server.getInstance().getGameOptions().getOption(GameOptionType.TURN_LENGTH_OFFSET);
 
 		if (turnLengthOffset < 0) {
 			int cityMultiplier = 1;
@@ -779,9 +727,9 @@ public class InGameState extends GameState implements DisconnectListener, Select
 		System.out.println("[SERVER] Starting game...");
 
 		// Add AI
-		for (int i = 0; i < 2; i++)
+		for (int i = 0; i < 1; i++)
 			for (CityStateType type : CityStateType.values()) {
-				//getAIPlayers().add(new CityStatePlayer(type));
+				getAIPlayers().add(new CityStatePlayer(type));
 			}
 
 		getAIPlayers().add(new BarbarianPlayer());
@@ -900,14 +848,19 @@ public class InGameState extends GameState implements DisconnectListener, Select
 						|| tile.getNearbyUnits().size() > 0) {
 					int x = rnd.nextInt(map.getWidth());
 					int y = rnd.nextInt(map.getHeight());
-					tile = map.getTiles()[x][y];
+					tile = map.getTiles()[Server.getInstance().getPlayers().get(0).getSpawnX() + 5][Server.getInstance()
+							.getPlayers().get(0).getSpawnY() + 5];
 				}
 
 				Unit settlerUnit = new SettlerUnit(cityStatePlayer, tile);
 				tile.addUnit(settlerUnit);
 
-				Unit warriorUnit = new WarriorUnit(cityStatePlayer, tile);
-				tile.addUnit(warriorUnit);
+				Unit archerUnit = new ArcherUnit(cityStatePlayer, tile);
+				tile.addUnit(archerUnit);
+
+				Unit warriorUnit = new WarriorUnit(cityStatePlayer,
+						map.getTiles()[tile.getGridX() + 1][tile.getGridY()]);
+				map.getTiles()[tile.getGridX() + 1][tile.getGridY()].addUnit(warriorUnit);
 
 				aiPlayer.setSpawnPos(tile.getGridX(), tile.getGridY());
 			}

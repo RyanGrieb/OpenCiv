@@ -4,8 +4,8 @@ import java.util.ArrayList;
 
 import me.rhin.openciv.server.Server;
 import me.rhin.openciv.server.game.ai.AIPlayer;
-import me.rhin.openciv.server.game.ai.unit.BarbarianWarriorAI;
 import me.rhin.openciv.server.game.ai.unit.BuilderAI;
+import me.rhin.openciv.server.game.ai.unit.CityStateRangedAI;
 import me.rhin.openciv.server.game.ai.unit.CityStateMeleeAI;
 import me.rhin.openciv.server.game.city.City;
 import me.rhin.openciv.server.game.civilization.type.CityState;
@@ -26,8 +26,8 @@ public class CityStatePlayer extends AIPlayer implements NextTurnListener {
 
 	public enum CityStateType {
 		GOLD,
-		PRODUCTION,
-		SCIENCE;
+		// PRODUCTION,
+		// SCIENCE;
 	}
 
 	private String name;
@@ -49,7 +49,7 @@ public class CityStatePlayer extends AIPlayer implements NextTurnListener {
 		}
 
 		if (unit.getUnitTypes().contains(UnitType.RANGED)) {
-
+			unit.addAIBehavior(new CityStateRangedAI(unit));
 		}
 
 		if (unit.getUnitTypes().contains(UnitType.NAVAL)) {
@@ -69,8 +69,8 @@ public class CityStatePlayer extends AIPlayer implements NextTurnListener {
 		}
 
 		modifyIntimidation();
-		progressResearch();
-		choseProduction();
+		// progressResearch();
+		// choseProduction();
 	}
 
 	@Override
@@ -143,7 +143,7 @@ public class CityStatePlayer extends AIPlayer implements NextTurnListener {
 		}
 
 		if (topTech == null) {
-			//System.out.println("FIXME: No techs with properties.");
+			// System.out.println("FIXME: No techs with properties.");
 			return;
 		}
 
@@ -189,14 +189,14 @@ public class CityStatePlayer extends AIPlayer implements NextTurnListener {
 					topItem = productionItem;
 			}
 
-			//System.out.println("Citystate " + name + " producing: " + topItem.getName());
+			// System.out.println("Citystate " + name + " producing: " + topItem.getName());
 
 			itemManager.setProducingItem(topItem.getName());
 		}
 	}
 
 	private void settleInitialCity() {
-		for (Unit unit : ownedUnits) {
+		for (Unit unit : new ArrayList<>(ownedUnits)) {
 			if (unit instanceof SettlerUnit) {
 				((SettlerUnit) unit).settleCity(name);
 			}
