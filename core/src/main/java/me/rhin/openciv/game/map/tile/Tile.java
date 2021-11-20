@@ -596,11 +596,8 @@ public class Tile extends Actor implements BottomShapeRenderListener {
 		return null;
 	}
 
-	@Deprecated
 	public AttackableEntity getAttackableEntity() {
 
-		// Problem: This can AND WILL pick up friendly units. Fixed by having to return
-		// enemy cities first.
 		if (city != null)
 			return city;
 

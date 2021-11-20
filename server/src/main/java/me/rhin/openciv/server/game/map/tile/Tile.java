@@ -605,8 +605,10 @@ public class Tile {
 	public Unit getTopEnemyUnit(AbstractPlayer player) {
 		Unit topUnit = null;
 		for (Unit unit : units) {
-			if (unit.getPlayerOwner().equals(player))
+
+			if (!player.getDiplomacy().atWar(unit.getPlayerOwner()))
 				continue;
+
 			if (topUnit == null || (topUnit.getUnitTypes().contains(UnitType.SUPPORT)
 					&& !unit.getUnitTypes().contains(UnitType.SUPPORT)))
 				topUnit = unit;
@@ -619,7 +621,7 @@ public class Tile {
 
 		// Problem: This can AND WILL pick up friendly units. Fixed by having to return
 		// enemy cities first.
-		if (city != null && !city.getPlayerOwner().equals(player))
+		if (city != null && player.getDiplomacy().atWar(city.getPlayerOwner()))
 			return city;
 
 		Unit unit = getTopEnemyUnit(player);
@@ -631,8 +633,6 @@ public class Tile {
 
 	public AttackableEntity getAttackableEntity() {
 
-		// Problem: This can AND WILL pick up friendly units. Fixed by having to return
-		// enemy cities first.
 		if (city != null)
 			return city;
 
@@ -653,7 +653,7 @@ public class Tile {
 			if (unit.getPlayerOwner().equals(attackingEntity.getPlayerOwner()))
 				continue;
 
-			if (unit.isUnitCapturable(attackingEntity))
+			if (unit.isUnitCapturable(attackingEntity.getPlayerOwner()))
 				capturableUnit = unit;
 		}
 

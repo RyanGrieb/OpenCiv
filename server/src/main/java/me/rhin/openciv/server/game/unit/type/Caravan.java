@@ -3,7 +3,11 @@ package me.rhin.openciv.server.game.unit.type;
 import java.util.Arrays;
 import java.util.List;
 
+import com.badlogic.gdx.utils.Json;
+
+import me.rhin.openciv.server.Server;
 import me.rhin.openciv.server.game.AbstractPlayer;
+import me.rhin.openciv.server.game.Player;
 import me.rhin.openciv.server.game.city.City;
 import me.rhin.openciv.server.game.map.tile.Tile;
 import me.rhin.openciv.server.game.map.tile.TileType.TileProperty;
@@ -11,6 +15,7 @@ import me.rhin.openciv.server.game.research.type.AnimalHusbandryTech;
 import me.rhin.openciv.server.game.unit.AttackableEntity;
 import me.rhin.openciv.server.game.unit.TraderUnit;
 import me.rhin.openciv.server.game.unit.UnitItem;
+import me.rhin.openciv.shared.packet.type.DeleteUnitPacket;
 import me.rhin.openciv.shared.stat.Stat;
 
 public class Caravan extends UnitItem {
@@ -33,9 +38,31 @@ public class Caravan extends UnitItem {
 				return tile.getMovementCost(prevTile);
 		}
 
+		@Override
+		public void capture(Player attackingPlayer) {
+			// TODO: Plunder sound effect
+			attackingPlayer.getStatLine().addValue(Stat.GOLD, 100);
+			attackingPlayer.updateOwnedStatlines(false);
+
+			standingTile.removeUnit(this);
+			playerOwner.removeUnit(this);
+			kill();
+
+			// FIXME: Redundant code.
+			DeleteUnitPacket removeUnitPacket = new DeleteUnitPacket();
+			removeUnitPacket.setUnit(id, standingTile.getGridX(), standingTile.getGridY());
+			removeUnitPacket.setKilled(true);
+
+			Json json = new Json();
+			for (Player player : Server.getInstance().getPlayers()) {
+				player.sendPacket(json.toJson(removeUnitPacket));
+			}
+
+			// When we capture a builder/settler, ect.
+		}
 
 		@Override
-		public boolean isUnitCapturable(AttackableEntity attackingEntity) {
+		public boolean isUnitCapturable(AbstractPlayer attackingEntity) {
 			return true;
 		}
 

@@ -2,16 +2,14 @@ package me.rhin.openciv.server.game;
 
 import java.util.ArrayList;
 
-import org.java_websocket.WebSocket;
-
 import me.rhin.openciv.server.game.city.City;
 import me.rhin.openciv.server.game.city.building.Building;
 import me.rhin.openciv.server.game.civilization.Civ;
 import me.rhin.openciv.server.game.civilization.CivType;
+import me.rhin.openciv.server.game.diplomacy.Diplomacy;
 import me.rhin.openciv.server.game.heritage.HeritageTree;
 import me.rhin.openciv.server.game.research.ResearchTree;
 import me.rhin.openciv.server.game.unit.Unit;
-import me.rhin.openciv.server.game.unit.UnitItem.UnitType;
 import me.rhin.openciv.shared.stat.StatLine;
 import me.rhin.openciv.shared.stat.StatType;
 
@@ -19,6 +17,7 @@ public abstract class AbstractPlayer {
 
 	protected ArrayList<City> ownedCities;
 	protected ArrayList<Unit> ownedUnits;
+	protected Diplomacy diplomacy;
 	protected StatLine statLine;
 	protected ResearchTree researchTree;
 	protected HeritageTree heritageTree;
@@ -31,6 +30,7 @@ public abstract class AbstractPlayer {
 		this.ownedCities = new ArrayList<>();
 		this.ownedUnits = new ArrayList<>();
 
+		this.diplomacy = new Diplomacy(this);
 		this.statLine = new StatLine();
 
 		this.researchTree = new ResearchTree(this);
@@ -155,5 +155,9 @@ public abstract class AbstractPlayer {
 
 	public boolean canCaptureUnit(Unit unit) {
 		return civilization.canCaptureUnit(unit);
+	}
+
+	public Diplomacy getDiplomacy() {
+		return diplomacy;
 	}
 }

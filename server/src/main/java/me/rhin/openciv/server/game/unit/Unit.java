@@ -27,6 +27,7 @@ import me.rhin.openciv.shared.packet.type.RemoveTileTypePacket;
 import me.rhin.openciv.shared.packet.type.SetCityHealthPacket;
 import me.rhin.openciv.shared.packet.type.SetCityOwnerPacket;
 import me.rhin.openciv.shared.packet.type.SetUnitHealthPacket;
+import me.rhin.openciv.shared.packet.type.SetUnitOwnerPacket;
 import me.rhin.openciv.shared.packet.type.UnitAttackPacket;
 import me.rhin.openciv.shared.stat.Stat;
 import me.rhin.openciv.shared.stat.StatLine;
@@ -38,7 +39,7 @@ public abstract class Unit implements AttackableEntity, TileObserver, NextTurnLi
 	private ArrayList<Tile> observedTiles;
 	protected StatLine combatStrength;
 	protected Tile standingTile;
-	private int id;
+	protected int id;
 	private Tile[][] cameFrom;
 	protected AbstractPlayer playerOwner;
 	private float x, y;
@@ -66,7 +67,7 @@ public abstract class Unit implements AttackableEntity, TileObserver, NextTurnLi
 		setPosition(standingTile.getVectors()[0].x - standingTile.getWidth() / 2, standingTile.getVectors()[0].y + 4);
 		setSize(standingTile.getWidth(), standingTile.getHeight());
 
-		//Note: This listener needs to be called before the addOwnedUnit() ones.
+		// Note: This listener needs to be called before the addOwnedUnit() ones.
 		Server.getInstance().getEventManager().addListener(NextTurnListener.class, this);
 
 		playerOwner.addOwnedUnit(this);
@@ -114,8 +115,8 @@ public abstract class Unit implements AttackableEntity, TileObserver, NextTurnLi
 	}
 
 	@Override
-	public boolean isUnitCapturable(AttackableEntity attackingEntity) {
-		return attackingEntity.getPlayerOwner().canCaptureUnit(this);
+	public boolean isUnitCapturable(AbstractPlayer player) {
+		return player.canCaptureUnit(this);
 	}
 
 	@Override
@@ -169,10 +170,10 @@ public abstract class Unit implements AttackableEntity, TileObserver, NextTurnLi
 
 	@Override
 	public float getDamageTaken(AttackableEntity otherEntity, boolean entityDefending) {
-		if (isUnitCapturable(otherEntity))
+		if (isUnitCapturable(otherEntity.getPlayerOwner()))
 			return 100;
 
-		if (otherEntity.isUnitCapturable(this))
+		if (otherEntity.isUnitCapturable(playerOwner))
 			return 0;
 
 		// y=30*1.041^(x), x= combat diff
@@ -464,6 +465,9 @@ public abstract class Unit implements AttackableEntity, TileObserver, NextTurnLi
 
 	public void attackEntity(AttackableEntity targetEntity) {
 
+		if (!playerOwner.getDiplomacy().atWar(targetEntity.getPlayerOwner()))
+			playerOwner.getDiplomacy().declareWar(targetEntity.getPlayerOwner());
+
 		// FIXME: Include AI players in this list.
 		ArrayList<Player> players = Server.getInstance().getPlayers();
 
@@ -641,6 +645,31 @@ public abstract class Unit implements AttackableEntity, TileObserver, NextTurnLi
 
 		playerOwner.getStatLine().addValue(Stat.GOLD, 150);
 		playerOwner.updateOwnedStatlines(false);
+	}
+
+	/**
+	 * Captures this unit
+	 * 
+	 * @param playerOwner
+	 */
+	public void capture(Player attackingPlayer) {
+
+		if (!playerOwner.getDiplomacy().atWar(attackingPlayer))
+			attackingPlayer.getDiplomacy().declareWar(playerOwner);
+
+		// Problem: Wrong id being set in the packet?
+
+		playerOwner.removeUnit(this);
+		setPlayerOwner(attackingPlayer);
+		setMovement(getMaxMovement());
+
+		SetUnitOwnerPacket setOwnerPacket = new SetUnitOwnerPacket();
+		setOwnerPacket.setUnit(attackingPlayer.getName(), id, standingTile.getGridX(), standingTile.getGridY());
+
+		Json json = new Json();
+		for (Player player : Server.getInstance().getPlayers()) {
+			player.sendPacket(json.toJson(setOwnerPacket));
+		}
 	}
 
 }

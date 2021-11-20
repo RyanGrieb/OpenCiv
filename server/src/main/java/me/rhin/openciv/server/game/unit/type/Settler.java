@@ -46,7 +46,7 @@ public class Settler extends UnitItem {
 		}
 
 		@Override
-		public boolean isUnitCapturable(AttackableEntity attackingEntity) {
+		public boolean isUnitCapturable(AbstractPlayer attackingEntity) {
 			return true;
 		}
 

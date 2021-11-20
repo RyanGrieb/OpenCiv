@@ -64,12 +64,12 @@ public class CityStateRangedAI extends UnitAI implements NextTurnListener, Serve
 		// Walk back to city if under threat
 		if (doRetreatTargetCheck()) {
 			moveToTarget();
-			System.out.println("Retreating: " + unit.getID() + ", " + unit.getName());
+			//System.out.println("Retreating: " + unit.getID() + ", " + unit.getName());
 		}
 
 		// Attack any enemy units in range if we still have movement left.
 		if (doEnemyTargetCheck()) {
-			System.out.println("Attacking: " + unit.getID() + ", " + unit.getName());
+			//System.out.println("Attacking: " + unit.getID() + ", " + unit.getName());
 			return;
 		}
 
@@ -78,7 +78,7 @@ public class CityStateRangedAI extends UnitAI implements NextTurnListener, Serve
 
 		// Walk to a random tile
 		doRandomTarget();
-		System.out.println("Scouting as: " + unit.getID());
+		//System.out.println("Scouting as: " + unit.getID());
 		moveToTarget();
 	}
 
@@ -148,7 +148,7 @@ public class CityStateRangedAI extends UnitAI implements NextTurnListener, Serve
 	}
 
 	private boolean doRetreatTargetCheck() {
-
+		
 		Tile retreatTile = city.getOriginTile();
 
 		Random rnd = new Random();

@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import com.badlogic.gdx.utils.Json;
 
 import me.rhin.openciv.server.Server;
+import me.rhin.openciv.server.game.AbstractPlayer;
 import me.rhin.openciv.server.game.Player;
 import me.rhin.openciv.server.game.ai.AIPlayer;
 import me.rhin.openciv.server.game.ai.unit.BarbarianWarriorAI;
@@ -28,6 +29,12 @@ public class BarbarianPlayer extends AIPlayer implements NextTurnListener {
 		this.spawnTurnLength = 1000;
 		this.civilization = new Barbarians(this);
 
+		for(AbstractPlayer player : Server.getInstance().getAbstractPlayers()) {
+			System.out.println(player.getName());
+		}
+		
+		diplomacy.declarWarAll();
+		
 		Server.getInstance().getEventManager().addListener(NextTurnListener.class, this);
 	}
 

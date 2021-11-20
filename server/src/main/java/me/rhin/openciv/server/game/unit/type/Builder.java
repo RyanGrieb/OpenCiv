@@ -61,7 +61,7 @@ public class Builder extends UnitItem {
 		}
 
 		@Override
-		public boolean isUnitCapturable(AttackableEntity attackingEntity) {
+		public boolean isUnitCapturable(AbstractPlayer attackingEntity) {
 			return true;
 		}
 

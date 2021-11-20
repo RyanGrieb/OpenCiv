@@ -9,6 +9,7 @@ import me.rhin.openciv.Civilization;
 import me.rhin.openciv.game.map.tile.Tile;
 import me.rhin.openciv.game.notification.type.MoveUnitHelpNotification;
 import me.rhin.openciv.game.notification.type.MovementRangeHelpNotification;
+import me.rhin.openciv.game.unit.AttackableEntity;
 import me.rhin.openciv.game.unit.RangedUnit;
 import me.rhin.openciv.game.unit.Unit;
 import me.rhin.openciv.listener.DeleteUnitListener;
@@ -113,6 +114,17 @@ public class Player extends AbstractPlayer implements RelativeMouseMoveListener,
 			rightMouseHeld = true;
 		} else {
 			if (selectedUnit.getCurrentMovement() >= selectedUnit.getPathMovement()) {
+
+				// If were moving onto a unit thats not ours & not at war. Bring up declare war
+				// window.
+				if (selectedUnit.getTargetTile() != null && selectedUnit.getTargetTile().getAttackableEntity() != null
+						&& !selectedUnit.getTargetTile().getAttackableEntity().getPlayerOwner().equals(this)) {
+
+					AttackableEntity attackableEntity = selectedUnit.getTargetTile().getAttackableEntity();
+					if (!attackableEntity.getPlayerOwner().getDiplomacy().atWar(this)) {
+						System.out.println("Open war window.");
+					}
+				}
 				selectedUnit.sendMovementPacket();
 			} else {
 				if (Civilization.getInstance().getGame().getTurn() < 2)

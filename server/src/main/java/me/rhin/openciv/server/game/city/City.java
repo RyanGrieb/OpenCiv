@@ -299,7 +299,7 @@ public class City implements AttackableEntity, SpecialistContainer, TileObserver
 
 	// FIXME: Rename this method to isCaptureable & return true
 	@Override
-	public boolean isUnitCapturable(AttackableEntity attackingEntity) {
+	public boolean isUnitCapturable(AbstractPlayer attackingEntity) {
 		return false;
 	}
 

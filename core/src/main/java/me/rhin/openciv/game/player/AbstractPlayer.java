@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.game.city.City;
 import me.rhin.openciv.game.civilization.Civ;
+import me.rhin.openciv.game.diplomacy.Diplomacy;
 import me.rhin.openciv.game.heritage.HeritageTree;
 import me.rhin.openciv.game.map.tile.Tile;
 import me.rhin.openciv.game.notification.type.AvailableMovementNotification;
@@ -18,6 +19,7 @@ public abstract class AbstractPlayer {
 	protected ArrayList<City> ownedCities;
 	protected ArrayList<Unit> ownedUnits;
 	protected StatLine statLine;
+	private Diplomacy diplomacy;
 	protected ResearchTree researchTree;
 	protected HeritageTree heritageTree;
 	private Civ civilization;
@@ -29,6 +31,7 @@ public abstract class AbstractPlayer {
 		this.ownedCities = new ArrayList<>();
 		this.ownedUnits = new ArrayList<>();
 		this.statLine = new StatLine();
+		this.diplomacy = new Diplomacy();
 
 		this.researchTree = new ResearchTree();
 		this.heritageTree = new HeritageTree();
@@ -106,6 +109,10 @@ public abstract class AbstractPlayer {
 
 	public StatLine getStatLine() {
 		return statLine;
+	}
+
+	public Diplomacy getDiplomacy() {
+		return diplomacy;
 	}
 
 }

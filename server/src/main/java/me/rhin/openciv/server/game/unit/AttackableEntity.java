@@ -7,7 +7,7 @@ public interface AttackableEntity {
 
 	public float getCombatStrength(AttackableEntity targetEntity);
 
-	public boolean isUnitCapturable(AttackableEntity attackingEntity);
+	public boolean isUnitCapturable(AbstractPlayer attackingEntity);
 
 	public float getHealth();
 

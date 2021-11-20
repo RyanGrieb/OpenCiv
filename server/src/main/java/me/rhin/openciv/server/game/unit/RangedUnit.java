@@ -30,6 +30,7 @@ public abstract class RangedUnit extends Unit {
 		return rangedCombatStrength;
 	}
 
+	//FIXME: Merge some of this code w/ mele attack
 	public void rangeAttack(AttackableEntity targetEntity) {
 
 		if (targetEntity.getPlayerOwner().equals(playerOwner))
@@ -86,6 +87,9 @@ public abstract class RangedUnit extends Unit {
 				}
 			}
 		}
+
+		if (!playerOwner.getDiplomacy().atWar(targetEntity.getPlayerOwner()))
+			playerOwner.getDiplomacy().declareWar(targetEntity.getPlayerOwner());
 
 	}
 }

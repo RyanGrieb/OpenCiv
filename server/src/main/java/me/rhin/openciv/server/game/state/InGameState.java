@@ -29,7 +29,6 @@ import me.rhin.openciv.server.game.map.tile.TileType.TileProperty;
 import me.rhin.openciv.server.game.options.GameOptionType;
 import me.rhin.openciv.server.game.unit.AttackableEntity;
 import me.rhin.openciv.server.game.unit.RangedUnit;
-import me.rhin.openciv.server.game.unit.TraderUnit;
 import me.rhin.openciv.server.game.unit.Unit;
 import me.rhin.openciv.server.game.unit.type.Archer.ArcherUnit;
 import me.rhin.openciv.server.game.unit.type.Builder.BuilderUnit;
@@ -72,11 +71,9 @@ import me.rhin.openciv.shared.packet.type.RemoveTileTypePacket;
 import me.rhin.openciv.shared.packet.type.RequestEndTurnPacket;
 import me.rhin.openciv.shared.packet.type.SelectUnitPacket;
 import me.rhin.openciv.shared.packet.type.SetProductionItemPacket;
-import me.rhin.openciv.shared.packet.type.SetUnitOwnerPacket;
 import me.rhin.openciv.shared.packet.type.SettleCityPacket;
 import me.rhin.openciv.shared.packet.type.TileStatlinePacket;
 import me.rhin.openciv.shared.packet.type.TurnTimeLeftPacket;
-import me.rhin.openciv.shared.packet.type.UnitAttackPacket;
 import me.rhin.openciv.shared.packet.type.UnitDisembarkPacket;
 import me.rhin.openciv.shared.packet.type.UnitEmbarkPacket;
 import me.rhin.openciv.shared.packet.type.WorkTilePacket;
@@ -237,17 +234,73 @@ public class InGameState extends GameState implements DisconnectListener, Select
 			unit.setTargetTile(targetTile);
 
 		// If were moving onto a unit or city. Stop the unit just outside the target
-		// unit.
-		if (targetTile.getEnemyAttackableEntity(playerOwner) != null)
-			if (!targetTile.getEnemyAttackableEntity(playerOwner).getPlayerOwner().equals(unit.getPlayerOwner())
-					&& (!targetTile.getEnemyAttackableEntity(playerOwner).isUnitCapturable(unit)
-							&& targetTile.getEnemyAttackableEntity(playerOwner).surviveAttack(unit))) {
-				targetTile = unit.getCameFromTiles()[targetTile.getGridX()][targetTile.getGridY()];
-				if (targetTile != null) {
-					unit.setTargetTile(targetTile);
-				} else // If the came from tile is null, assume it's where we are standing
-					targetTile = unit.getStandingTile();
+		// unit. Unless if were at war & we can kill or capture a unit, move onto the
+		// tile.
+
+		boolean stopOutside = false;
+
+		if (targetTile.getAttackableEntity() != null) {
+			AttackableEntity targetEntity = targetTile.getAttackableEntity();
+			stopOutside = true;
+
+			// If we are a capturable unit & were moving to a friendly NON-capturable unit
+			// w/o existing units in it. Walk on it. (E.g. Builder moving to warrior)
+			if (unit.isUnitCapturable(playerOwner) && targetEntity.getPlayerOwner().equals(playerOwner)
+					&& (!(targetEntity instanceof City)) && !targetEntity.isUnitCapturable(playerOwner)
+					&& targetEntity.getTile().getUnits().size() < 2) {
+				stopOutside = false;
+
+				// System.out.println("1");
 			}
+
+			// If the targetEntity dies & were at war w/ it. Walk on it. (E.g. Warrior
+			// attacks 1% HP Enemy Warror)
+			if (!targetEntity.surviveAttack(unit) && targetEntity.getPlayerOwner().getDiplomacy().atWar(playerOwner)) {
+				stopOutside = false;
+
+				// System.out.println("2");
+			}
+
+			// If the targetEntity is capturable, & if it's ours OR an enemies & moving unit
+			// isn't capturable. Walk on it. (E.g. Warrior walks on enemy/friendly builder)
+			if (targetEntity.isUnitCapturable(targetEntity.getPlayerOwner())
+					&& (targetEntity.getPlayerOwner().equals(playerOwner)
+							|| targetEntity.getPlayerOwner().getDiplomacy().atWar(playerOwner))
+					&& !unit.isUnitCapturable(playerOwner)) {
+
+				// System.out.println("3");
+				stopOutside = false;
+			}
+
+			// If were moving into a friendly city. & There is room for a capturable & non
+			// capturable unit. Walk on it. (E.g. Warrior walk into city w/ just 1 builder)
+			if ((targetEntity instanceof City) && targetEntity.getPlayerOwner().equals(unit.getPlayerOwner())) {
+				int capturableUnits = 0;
+				int nonCaptureableUnits = 0;
+
+				for (Unit cityUnit : targetEntity.getTile().getUnits()) {
+					if (cityUnit.isUnitCapturable(playerOwner))
+						capturableUnits++;
+					else
+						nonCaptureableUnits++;
+				}
+
+				if (capturableUnits < 1 && unit.isUnitCapturable(playerOwner)
+						|| nonCaptureableUnits < 1 && !unit.isUnitCapturable(playerOwner)) {
+					stopOutside = false;
+
+					// System.out.println("4");
+				}
+			}
+		}
+
+		if (stopOutside) {
+			targetTile = unit.getCameFromTiles()[targetTile.getGridX()][targetTile.getGridY()];
+			if (targetTile != null) {
+				unit.setTargetTile(targetTile);
+			} else
+				targetTile = unit.getStandingTile();
+		}
 
 		// Move to target tile
 		if (unit.getMovement() >= unit.getPathMovement() && !unit.getStandingTile().equals(targetTile)) {
@@ -267,44 +320,7 @@ public class InGameState extends GameState implements DisconnectListener, Select
 		// If the tile we are moving on has a capturable unit.
 		if (targetTile.getCaptureableUnit(unit) != null) {
 			Unit targetUnit = targetTile.getCaptureableUnit(unit);
-
-			// When we capture a caravan
-			if (targetUnit instanceof TraderUnit) {
-				// TODO: Plunder sound effect
-				playerOwner.getStatLine().addValue(Stat.GOLD, 100);
-				playerOwner.updateOwnedStatlines(false);
-
-				targetUnit.getStandingTile().removeUnit(targetUnit);
-				targetUnit.getPlayerOwner().removeUnit(targetUnit);
-				targetUnit.kill();
-
-				// FIXME: Redundant code.
-				DeleteUnitPacket removeUnitPacket = new DeleteUnitPacket();
-				removeUnitPacket.setUnit(targetUnit.getID(), targetUnit.getStandingTile().getGridX(),
-						targetUnit.getStandingTile().getGridY());
-				removeUnitPacket.setKilled(true);
-
-				for (Player player : players) {
-					player.sendPacket(json.toJson(removeUnitPacket));
-				}
-
-				// When we capture a builder/settler, ect.
-			} else {
-
-				// Problem: Wrong id being set in the packet?
-
-				targetUnit.getPlayerOwner().removeUnit(targetUnit);
-				targetUnit.setPlayerOwner(unit.getPlayerOwner());
-				targetUnit.setMovement(targetUnit.getMaxMovement());
-
-				SetUnitOwnerPacket setOwnerPacket = new SetUnitOwnerPacket();
-				setOwnerPacket.setUnit(targetUnit.getPlayerOwner().getName(), targetUnit.getID(),
-						targetUnit.getStandingTile().getGridX(), targetUnit.getStandingTile().getGridY());
-
-				for (Player player : players) {
-					player.sendPacket(json.toJson(setOwnerPacket));
-				}
-			}
+			targetUnit.capture(playerOwner);
 		}
 
 		// Handle the targetTile being a enemy unit.
