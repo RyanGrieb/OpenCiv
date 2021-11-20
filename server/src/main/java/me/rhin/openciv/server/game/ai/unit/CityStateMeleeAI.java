@@ -122,10 +122,7 @@ public class CityStateMeleeAI extends UnitAI implements NextTurnListener, Server
 	}
 
 	private boolean isFriendly(Unit unit) {
-		if (unit.getPlayerOwner() instanceof Player || unit.getPlayerOwner() instanceof CityStatePlayer)
-			return true;
-
-		return unit.getPlayerOwner().equals(city.getPlayerOwner()) && !unit.getUnitTypes().contains(UnitType.SUPPORT);
+		return !this.unit.getPlayerOwner().getDiplomacy().atWar(unit.getPlayerOwner());
 	}
 
 	private void findTargets() {
@@ -247,8 +244,7 @@ public class CityStateMeleeAI extends UnitAI implements NextTurnListener, Server
 
 			// FIXME: Determine if were at war w/ this player. Currently we don't attack
 			// these players
-			if (enemyEntity == null || enemyEntity.getPlayerOwner() instanceof Player
-					|| enemyEntity.getPlayerOwner() instanceof CityStatePlayer)
+			if (enemyEntity == null)
 				continue;
 
 			targetTile = enemyEntity.getTile();

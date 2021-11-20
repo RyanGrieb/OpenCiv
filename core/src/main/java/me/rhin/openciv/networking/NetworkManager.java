@@ -23,6 +23,7 @@ import me.rhin.openciv.listener.CityStatUpdateListener.CityStatUpdateEvent;
 import me.rhin.openciv.listener.CombatPreviewListener.CombatPreviewEvent;
 import me.rhin.openciv.listener.CompleteHeritageListener.CompleteHeritageEvent;
 import me.rhin.openciv.listener.CompleteResearchListener.CompleteResearchEvent;
+import me.rhin.openciv.listener.DeclareWarListener.DeclareWarEvent;
 import me.rhin.openciv.listener.DeleteUnitListener.DeleteUnitEvent;
 import me.rhin.openciv.listener.FetchPlayerListener.FetchPlayerEvent;
 import me.rhin.openciv.listener.FinishLoadingRequestListener.FinishLoadingRequestEvent;
@@ -73,6 +74,7 @@ import me.rhin.openciv.shared.packet.type.CityStatUpdatePacket;
 import me.rhin.openciv.shared.packet.type.CombatPreviewPacket;
 import me.rhin.openciv.shared.packet.type.CompleteHeritagePacket;
 import me.rhin.openciv.shared.packet.type.CompleteResearchPacket;
+import me.rhin.openciv.shared.packet.type.DeclareWarPacket;
 import me.rhin.openciv.shared.packet.type.DeleteUnitPacket;
 import me.rhin.openciv.shared.packet.type.FetchPlayerPacket;
 import me.rhin.openciv.shared.packet.type.FinishLoadingPacket;
@@ -163,6 +165,7 @@ public class NetworkManager {
 		networkEvents.put(BuyProductionItemPacket.class, BuyProductionItemEvent.class);
 		networkEvents.put(AddObservedTilePacket.class, AddObservedTileEvent.class);
 		networkEvents.put(RemoveObservedTilePacket.class, RemoveObservedTileEvent.class);
+		networkEvents.put(DeclareWarPacket.class, DeclareWarEvent.class);
 	}
 
 	public void connect(String ip) {

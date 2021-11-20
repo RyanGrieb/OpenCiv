@@ -31,7 +31,7 @@ public abstract class AbstractPlayer {
 		this.ownedCities = new ArrayList<>();
 		this.ownedUnits = new ArrayList<>();
 		this.statLine = new StatLine();
-		this.diplomacy = new Diplomacy();
+		this.diplomacy = new Diplomacy(this);
 
 		this.researchTree = new ResearchTree();
 		this.heritageTree = new HeritageTree();

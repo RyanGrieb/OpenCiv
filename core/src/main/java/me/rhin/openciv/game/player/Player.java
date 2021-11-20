@@ -24,6 +24,7 @@ import me.rhin.openciv.shared.packet.type.PlayerStatUpdatePacket;
 import me.rhin.openciv.shared.packet.type.SelectUnitPacket;
 import me.rhin.openciv.shared.stat.StatLine;
 import me.rhin.openciv.ui.window.type.CityInfoWindow;
+import me.rhin.openciv.ui.window.type.DeclareWarWindow;
 import me.rhin.openciv.util.ClickType;
 
 public class Player extends AbstractPlayer implements RelativeMouseMoveListener, LeftClickListener, RightClickListener,
@@ -122,7 +123,8 @@ public class Player extends AbstractPlayer implements RelativeMouseMoveListener,
 
 					AttackableEntity attackableEntity = selectedUnit.getTargetTile().getAttackableEntity();
 					if (!attackableEntity.getPlayerOwner().getDiplomacy().atWar(this)) {
-						System.out.println("Open war window.");
+						Civilization.getInstance().getWindowManager()
+								.addWindow(new DeclareWarWindow(this, attackableEntity.getPlayerOwner()));
 					}
 				}
 				selectedUnit.sendMovementPacket();
