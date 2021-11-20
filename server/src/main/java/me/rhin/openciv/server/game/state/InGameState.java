@@ -727,10 +727,11 @@ public class InGameState extends GameState implements DisconnectListener, Select
 		System.out.println("[SERVER] Starting game...");
 
 		// Add AI
-		for (int i = 0; i < 1; i++)
-			for (CityStateType type : CityStateType.values()) {
-				getAIPlayers().add(new CityStatePlayer(type));
-			}
+		Random rnd = new Random();
+		for (int i = 0; i < Server.getInstance().getGameOptions().getOption(GameOptionType.CITY_STATE_AMOUNT); i++) {
+			CityStateType type = CityStateType.values()[rnd.nextInt(CityStateType.values().length)];
+			getAIPlayers().add(new CityStatePlayer(type));
+		}
 
 		getAIPlayers().add(new BarbarianPlayer());
 
@@ -742,8 +743,6 @@ public class InGameState extends GameState implements DisconnectListener, Select
 		for (Player player : players) {
 			player.sendPacket(json.toJson(gameStartPacket));
 		}
-
-		Random rnd = new Random();
 
 		for (int i = 0; i < players.size(); i++) {
 			Player player = players.get(i);
@@ -848,8 +847,7 @@ public class InGameState extends GameState implements DisconnectListener, Select
 						|| tile.getNearbyUnits().size() > 0) {
 					int x = rnd.nextInt(map.getWidth());
 					int y = rnd.nextInt(map.getHeight());
-					tile = map.getTiles()[Server.getInstance().getPlayers().get(0).getSpawnX() + 5][Server.getInstance()
-							.getPlayers().get(0).getSpawnY() + 5];
+					tile = map.getTiles()[x][y];
 				}
 
 				Unit settlerUnit = new SettlerUnit(cityStatePlayer, tile);

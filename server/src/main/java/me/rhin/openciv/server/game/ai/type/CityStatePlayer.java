@@ -69,8 +69,8 @@ public class CityStatePlayer extends AIPlayer implements NextTurnListener {
 		}
 
 		modifyIntimidation();
-		// progressResearch();
-		// choseProduction();
+		progressResearch();
+		choseProduction();
 	}
 
 	@Override

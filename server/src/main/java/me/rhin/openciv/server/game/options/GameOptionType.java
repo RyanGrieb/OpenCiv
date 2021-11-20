@@ -4,7 +4,8 @@ public enum GameOptionType {
 	MAP_LENGTH(3),
 	TURN_LENGTH_OFFSET(-1),
 	SHOW_OBSERVED_TILES(0),
-	BARBARIAN_AMOUNT(5);
+	BARBARIAN_AMOUNT(5),
+	CITY_STATE_AMOUNT(4);
 
 	private int defaultValue;
 
