@@ -7,12 +7,12 @@ import me.rhin.openciv.game.map.tile.Tile;
 import me.rhin.openciv.game.map.tile.TileType.TileProperty;
 import me.rhin.openciv.game.research.type.AnimalHusbandryTech;
 import me.rhin.openciv.game.unit.Unit;
-import me.rhin.openciv.game.unit.actions.AbstractAction;
+import me.rhin.openciv.game.unit.actions.BuilderAction;
 import me.rhin.openciv.game.unit.type.Builder.BuilderUnit;
 import me.rhin.openciv.listener.UnitActListener.UnitActEvent;
 import me.rhin.openciv.shared.packet.type.WorkTilePacket;
 
-public class PastureAction extends AbstractAction {
+public class PastureAction extends BuilderAction {
 
 	public PastureAction(Unit unit) {
 		super(unit);
@@ -20,7 +20,8 @@ public class PastureAction extends AbstractAction {
 
 	@Override
 	public boolean act(float delta) {
-		// unit.getPlayerOwner().unselectUnit();
+		super.act(delta);
+		
 		unit.reduceMovement(2);
 
 		BuilderUnit builderUnit = (BuilderUnit) unit;

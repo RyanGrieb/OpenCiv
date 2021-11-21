@@ -10,16 +10,20 @@ import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.map.tile.Tile;
 import me.rhin.openciv.game.notification.AbstractNotification;
 import me.rhin.openciv.game.unit.Unit;
+import me.rhin.openciv.game.unit.actions.BuilderAction;
+import me.rhin.openciv.listener.BuilderActListener;
 import me.rhin.openciv.listener.DeleteUnitListener;
 import me.rhin.openciv.listener.MoveUnitListener;
 import me.rhin.openciv.listener.SetUnitOwnerListener;
+import me.rhin.openciv.listener.UnitAttackListener;
 import me.rhin.openciv.shared.packet.type.DeleteUnitPacket;
 import me.rhin.openciv.shared.packet.type.MoveUnitPacket;
 import me.rhin.openciv.shared.packet.type.SelectUnitPacket;
 import me.rhin.openciv.shared.packet.type.SetUnitOwnerPacket;
+import me.rhin.openciv.shared.packet.type.UnitAttackPacket;
 
 public class AvailableMovementNotification extends AbstractNotification
-		implements MoveUnitListener, DeleteUnitListener, SetUnitOwnerListener {
+		implements MoveUnitListener, DeleteUnitListener, SetUnitOwnerListener, BuilderActListener, UnitAttackListener {
 
 	private ArrayList<Unit> availableUnits;
 	private int index;
@@ -33,6 +37,8 @@ public class AvailableMovementNotification extends AbstractNotification
 		Civilization.getInstance().getEventManager().addListener(MoveUnitListener.class, this);
 		Civilization.getInstance().getEventManager().addListener(DeleteUnitListener.class, this);
 		Civilization.getInstance().getEventManager().addListener(SetUnitOwnerListener.class, this);
+		Civilization.getInstance().getEventManager().addListener(BuilderActListener.class, this);
+		Civilization.getInstance().getEventManager().addListener(UnitAttackListener.class, this);
 	}
 
 	@Override
@@ -54,55 +60,45 @@ public class AvailableMovementNotification extends AbstractNotification
 				|| !unit.getPlayerOwner().equals(Civilization.getInstance().getGame().getPlayer()))
 			return;
 
-		availableUnits.remove(unit);
-
-		if (availableUnits.size() < 1) {
-			Civilization.getInstance().getGame().getNotificationHanlder().removeNotification(this);
-		}
+		removeUnitFromNotification(unit.getID());
 	}
 
 	@Override
 	public void onUnitDelete(DeleteUnitPacket packet) {
 
-		// Since the unit is already removed from the tile, we need to use the ID here.
+		//NOTE: We don't use unit Object here since it's already deleted from the tile.x
 		int unitID = packet.getUnitID();
-
-		Iterator<Unit> iterator = availableUnits.iterator();
-
-		while (iterator.hasNext()) {
-			Unit unit = iterator.next();
-
-			if (unit.getID() == unitID) {
-				iterator.remove();
-			}
-		}
-
-		if (availableUnits.size() < 1) {
-			Civilization.getInstance().getGame().getNotificationHanlder().removeNotification(this);
-		}
+		removeUnitFromNotification(unitID);
 	}
 
 	@Override
 	public void onSetUnitOwner(SetUnitOwnerPacket packet) {
 		int unitID = packet.getUnitID();
 
-		Iterator<Unit> iterator = availableUnits.iterator();
+		Tile tile = Civilization.getInstance().getGame().getMap().getTiles()[packet.getTileGridX()][packet
+				.getTileGridY()];
+
+		Unit unit = tile.getUnitFromID(unitID);
+
+		if (!Civilization.getInstance().getGame().getPlayer().getName().equals(packet.getPrevPlayerOwner()))
+			return;
 
 		// Remove notification if our unit gets captured.
+		removeUnitFromNotification(unit.getID());
+	}
 
-		while (iterator.hasNext()) {
-			Unit unit = iterator.next();
+	@Override
+	public void onBuilderAct(BuilderAction action) {
+		Unit unit = action.getUnit();
 
-			if (unit.getID() == unitID) {
-				if (Civilization.getInstance().getGame().getPlayer().getName().equals(packet.getPrevPlayerOwner())) {
-					iterator.remove();
-				}
-			}
-		}
+		removeUnitFromNotification(unit.getID());
+	}
 
-		if (availableUnits.size() < 1) {
-			Civilization.getInstance().getGame().getNotificationHanlder().removeNotification(this);
-		}
+	@Override
+	public void onUnitAttack(UnitAttackPacket packet) {
+		int unitID = packet.getUnitID();
+
+		removeUnitFromNotification(unitID);
 	}
 
 	@Override
@@ -164,5 +160,23 @@ public class AvailableMovementNotification extends AbstractNotification
 
 	public ArrayList<Unit> getUnits() {
 		return availableUnits;
+	}
+
+	private void removeUnitFromNotification(int unitID) {
+		Iterator<Unit> iterator = availableUnits.iterator();
+
+		// Remove notification if our unit gets captured.
+
+		while (iterator.hasNext()) {
+			Unit unit = iterator.next();
+
+			if (unit.getID() == unitID) {
+				iterator.remove();
+			}
+		}
+
+		if (availableUnits.size() < 1) {
+			Civilization.getInstance().getGame().getNotificationHanlder().removeNotification(this);
+		}
 	}
 }

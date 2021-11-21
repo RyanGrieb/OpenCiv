@@ -8,12 +8,12 @@ import me.rhin.openciv.game.map.tile.TileType;
 import me.rhin.openciv.game.map.tile.TileType.TileProperty;
 import me.rhin.openciv.game.research.type.CalendarTech;
 import me.rhin.openciv.game.unit.Unit;
-import me.rhin.openciv.game.unit.actions.AbstractAction;
+import me.rhin.openciv.game.unit.actions.BuilderAction;
 import me.rhin.openciv.game.unit.type.Builder.BuilderUnit;
 import me.rhin.openciv.listener.UnitActListener.UnitActEvent;
 import me.rhin.openciv.shared.packet.type.WorkTilePacket;
 
-public class PlantationAction extends AbstractAction {
+public class PlantationAction extends BuilderAction {
 
 	public PlantationAction(Unit unit) {
 		super(unit);
@@ -21,7 +21,8 @@ public class PlantationAction extends AbstractAction {
 
 	@Override
 	public boolean act(float delta) {
-		// unit.getPlayerOwner().unselectUnit();
+		super.act(delta);
+		
 		unit.reduceMovement(2);
 
 		BuilderUnit builderUnit = (BuilderUnit) unit;

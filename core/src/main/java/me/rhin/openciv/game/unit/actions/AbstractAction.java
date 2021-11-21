@@ -18,4 +18,8 @@ public abstract class AbstractAction extends Action {
 	public abstract String getName();
 
 	public abstract TextureEnum getSprite();
+
+	public Unit getUnit() {
+		return unit;
+	}
 }

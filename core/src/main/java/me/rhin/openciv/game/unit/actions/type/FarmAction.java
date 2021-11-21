@@ -6,12 +6,12 @@ import me.rhin.openciv.game.map.tile.ImprovementType;
 import me.rhin.openciv.game.map.tile.Tile;
 import me.rhin.openciv.game.map.tile.TileType.TileProperty;
 import me.rhin.openciv.game.unit.Unit;
-import me.rhin.openciv.game.unit.actions.AbstractAction;
+import me.rhin.openciv.game.unit.actions.BuilderAction;
 import me.rhin.openciv.game.unit.type.Builder.BuilderUnit;
 import me.rhin.openciv.listener.UnitActListener.UnitActEvent;
 import me.rhin.openciv.shared.packet.type.WorkTilePacket;
 
-public class FarmAction extends AbstractAction {
+public class FarmAction extends BuilderAction {
 
 	public FarmAction(Unit unit) {
 		super(unit);
@@ -19,6 +19,8 @@ public class FarmAction extends AbstractAction {
 
 	@Override
 	public boolean act(float delta) {
+		super.act(delta);
+
 		// unit.getPlayerOwner().unselectUnit();
 		unit.reduceMovement(2);
 
@@ -41,8 +43,7 @@ public class FarmAction extends AbstractAction {
 	public boolean canAct() {
 		Tile tile = unit.getStandingTile();
 		boolean farmableTile = !tile.isImproved() && tile.getBaseTileType().hasProperty(TileProperty.FARMABLE)
-				&& tile.getTerritory() != null
-				&& tile.getTerritory().getPlayerOwner().equals(unit.getPlayerOwner());
+				&& tile.getTerritory() != null && tile.getTerritory().getPlayerOwner().equals(unit.getPlayerOwner());
 
 		BuilderUnit builderUnit = (BuilderUnit) unit;
 		if (unit.getCurrentMovement() < 1 || !farmableTile || builderUnit.isBuilding()) {

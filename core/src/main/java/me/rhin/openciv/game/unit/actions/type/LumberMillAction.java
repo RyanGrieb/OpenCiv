@@ -8,12 +8,12 @@ import me.rhin.openciv.game.map.tile.TileType;
 import me.rhin.openciv.game.map.tile.TileType.TileProperty;
 import me.rhin.openciv.game.research.type.ConstructionTech;
 import me.rhin.openciv.game.unit.Unit;
-import me.rhin.openciv.game.unit.actions.AbstractAction;
+import me.rhin.openciv.game.unit.actions.BuilderAction;
 import me.rhin.openciv.game.unit.type.Builder.BuilderUnit;
 import me.rhin.openciv.listener.UnitActListener.UnitActEvent;
 import me.rhin.openciv.shared.packet.type.WorkTilePacket;
 
-public class LumberMillAction extends AbstractAction {
+public class LumberMillAction extends BuilderAction {
 
 	public LumberMillAction(Unit unit) {
 		super(unit);
@@ -21,6 +21,8 @@ public class LumberMillAction extends AbstractAction {
 
 	@Override
 	public boolean act(float delta) {
+		super.act(delta);
+
 		unit.reduceMovement(2);
 
 		BuilderUnit builderUnit = (BuilderUnit) unit;
@@ -40,11 +42,11 @@ public class LumberMillAction extends AbstractAction {
 
 	@Override
 	public boolean canAct() {
-		
+
 		if (!unit.getPlayerOwner().getResearchTree().hasResearched(ConstructionTech.class)) {
 			return false;
 		}
-		
+
 		Tile tile = unit.getStandingTile();
 		boolean farmableTile = !tile.isImproved() && !tile.containsTileProperty(TileProperty.RESOURCE)
 				&& tile.getBaseTileType() == TileType.FOREST && tile.getTerritory() != null

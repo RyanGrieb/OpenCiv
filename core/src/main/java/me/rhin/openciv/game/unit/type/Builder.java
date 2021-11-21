@@ -10,6 +10,7 @@ import me.rhin.openciv.game.map.tile.ImprovementType;
 import me.rhin.openciv.game.map.tile.Tile;
 import me.rhin.openciv.game.map.tile.TileType;
 import me.rhin.openciv.game.map.tile.TileType.TileProperty;
+import me.rhin.openciv.game.notification.type.AvailableMovementNotification;
 import me.rhin.openciv.game.unit.Unit;
 import me.rhin.openciv.game.unit.UnitItem;
 import me.rhin.openciv.game.unit.UnitParameter;
@@ -84,6 +85,10 @@ public class Builder extends UnitItem {
 				improvementType = null;
 				standingTile.setAppliedTurns(0);
 
+				// Notify the player the builder can move again.
+				Civilization.getInstance().getGame().getNotificationHanlder()
+						.fireNotification(new AvailableMovementNotification(this));
+
 				// FIXME: This is a workaround for non improvement builds
 				if (TileType.valueOf(packet.getTileTypeName()) != TileType.ROAD)
 					standingTile.setImproved(true);
@@ -123,11 +128,13 @@ public class Builder extends UnitItem {
 		public boolean isUnitCapturable() {
 			return true;
 		}
-		
+
 		@Override
 		public void onNextTurn(NextTurnPacket packet) {
-			if(!building)
+			if (!building)
 				super.onNextTurn(packet);
+			else // TODO: Make this a method in Unit class if we need other methods called here
+				movement = getMaxMovement();
 		}
 
 		public void setBuilding(boolean building) {
