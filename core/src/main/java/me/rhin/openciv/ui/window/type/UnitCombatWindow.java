@@ -39,7 +39,7 @@ public class UnitCombatWindow extends AbstractWindow
 	private Healthbar targetHealthbar;
 
 	public UnitCombatWindow(AttackableEntity attackingEntity, AttackableEntity targetEntity) {
-		super.setBounds(viewport.getWorldWidth() - 200, 105, 200, 75);
+		super.setBounds(viewport.getWorldWidth() - 200, 135, 200, 75);
 
 		this.attackingEntity = attackingEntity;
 		this.targetEntity = targetEntity;
