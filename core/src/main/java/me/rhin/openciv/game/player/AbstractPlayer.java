@@ -19,7 +19,7 @@ public abstract class AbstractPlayer {
 	protected ArrayList<City> ownedCities;
 	protected ArrayList<Unit> ownedUnits;
 	protected StatLine statLine;
-	private Diplomacy diplomacy;
+	protected Diplomacy diplomacy;
 	protected ResearchTree researchTree;
 	protected HeritageTree heritageTree;
 	private Civ civilization;

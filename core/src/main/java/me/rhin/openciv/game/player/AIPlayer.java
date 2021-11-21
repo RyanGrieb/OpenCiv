@@ -1,5 +1,6 @@
 package me.rhin.openciv.game.player;
 
+import me.rhin.openciv.Civilization;
 import me.rhin.openciv.game.map.tile.Tile;
 import me.rhin.openciv.game.unit.Unit;
 
@@ -20,7 +21,7 @@ public class AIPlayer extends AbstractPlayer {
 
 	@Override
 	public boolean isRightMouseHeld() {
-		
+
 		return false;
 	}
 

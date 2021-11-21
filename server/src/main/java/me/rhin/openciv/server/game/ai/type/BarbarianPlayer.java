@@ -15,6 +15,8 @@ import me.rhin.openciv.server.game.unit.Unit;
 import me.rhin.openciv.server.game.unit.type.Warrior.WarriorUnit;
 import me.rhin.openciv.server.listener.NextTurnListener;
 import me.rhin.openciv.shared.packet.type.AddUnitPacket;
+import me.rhin.openciv.shared.packet.type.DeclareWarAllPacket;
+import me.rhin.openciv.shared.packet.type.DeclareWarPacket;
 
 public class BarbarianPlayer extends AIPlayer implements NextTurnListener {
 
@@ -29,17 +31,24 @@ public class BarbarianPlayer extends AIPlayer implements NextTurnListener {
 		this.spawnTurnLength = 1000;
 		this.civilization = new Barbarians(this);
 
-		for(AbstractPlayer player : Server.getInstance().getAbstractPlayers()) {
-			System.out.println(player.getName());
-		}
-		
-		diplomacy.declarWarAll();
-		
 		Server.getInstance().getEventManager().addListener(NextTurnListener.class, this);
 	}
 
 	@Override
 	public void onNextTurn() {
+
+		if (Server.getInstance().getInGameState().getCurrentTurn() == 1) {
+			diplomacy.declarWarAll();
+
+			DeclareWarAllPacket packet = new DeclareWarAllPacket();
+			packet.setCombatant(getName());
+
+			Json json = new Json();
+			for (Player player : Server.getInstance().getPlayers()) {
+				player.sendPacket(json.toJson(packet));
+			}
+		}
+
 		if (turnsUntilSpawn < 1) {
 
 			ArrayList<AddUnitPacket> addUnitPackets = new ArrayList<>();
@@ -86,6 +95,5 @@ public class BarbarianPlayer extends AIPlayer implements NextTurnListener {
 	public String getName() {
 		return "Barbarians";
 	}
-
 
 }

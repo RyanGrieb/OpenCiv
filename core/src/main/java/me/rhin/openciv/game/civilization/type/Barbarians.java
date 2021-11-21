@@ -2,6 +2,7 @@ package me.rhin.openciv.game.civilization.type;
 
 import com.badlogic.gdx.graphics.Color;
 
+import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.civilization.Civ;
 import me.rhin.openciv.game.player.AbstractPlayer;
@@ -29,7 +30,7 @@ public class Barbarians extends Civ {
 	public Color getColor() {
 		return Color.FIREBRICK;
 	}
-	
+
 	@Override
 	public Color getBorderColor() {
 		return Color.FIREBRICK;
