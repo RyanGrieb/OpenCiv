@@ -659,12 +659,15 @@ public abstract class Unit implements AttackableEntity, TileObserver, NextTurnLi
 
 		// Problem: Wrong id being set in the packet?
 
+		String prevPlayerOwner = playerOwner.getName();
+
 		playerOwner.removeUnit(this);
 		setPlayerOwner(attackingPlayer);
 		setMovement(getMaxMovement());
 
 		SetUnitOwnerPacket setOwnerPacket = new SetUnitOwnerPacket();
-		setOwnerPacket.setUnit(attackingPlayer.getName(), id, standingTile.getGridX(), standingTile.getGridY());
+		setOwnerPacket.setUnit(attackingPlayer.getName(), prevPlayerOwner, id, standingTile.getGridX(),
+				standingTile.getGridY());
 
 		Json json = new Json();
 		for (Player player : Server.getInstance().getPlayers()) {

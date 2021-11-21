@@ -26,6 +26,7 @@ import me.rhin.openciv.game.unit.actions.type.RoadAction;
 import me.rhin.openciv.listener.RemoveTileTypeListener;
 import me.rhin.openciv.listener.SetTileTypeListener;
 import me.rhin.openciv.listener.WorkTileListener;
+import me.rhin.openciv.shared.packet.type.NextTurnPacket;
 import me.rhin.openciv.shared.packet.type.RemoveTileTypePacket;
 import me.rhin.openciv.shared.packet.type.SetTileTypePacket;
 import me.rhin.openciv.shared.packet.type.WorkTilePacket;
@@ -121,6 +122,12 @@ public class Builder extends UnitItem {
 		@Override
 		public boolean isUnitCapturable() {
 			return true;
+		}
+		
+		@Override
+		public void onNextTurn(NextTurnPacket packet) {
+			if(!building)
+				super.onNextTurn(packet);
 		}
 
 		public void setBuilding(boolean building) {

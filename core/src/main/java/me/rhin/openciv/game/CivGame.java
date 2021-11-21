@@ -22,6 +22,7 @@ import me.rhin.openciv.game.map.GameMap;
 import me.rhin.openciv.game.map.tile.Tile;
 import me.rhin.openciv.game.map.tooltip.TileTooltipHandler;
 import me.rhin.openciv.game.notification.NotificationHandler;
+import me.rhin.openciv.game.notification.type.AvailableMovementNotification;
 import me.rhin.openciv.game.notification.type.AvailableProductionNotification;
 import me.rhin.openciv.game.notification.type.NotResearchingNotification;
 import me.rhin.openciv.game.notification.type.NotStudyingNotification;
@@ -31,7 +32,6 @@ import me.rhin.openciv.game.player.Player;
 import me.rhin.openciv.game.unit.AttackableEntity;
 import me.rhin.openciv.game.unit.Unit;
 import me.rhin.openciv.game.unit.UnitParameter;
-import me.rhin.openciv.game.unit.type.Builder.BuilderUnit;
 import me.rhin.openciv.game.unit.type.Settler.SettlerUnit;
 import me.rhin.openciv.listener.AddUnitListener;
 import me.rhin.openciv.listener.DeleteUnitListener;
@@ -374,6 +374,14 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 	public void onSetUnitOwner(SetUnitOwnerPacket packet) {
 		Unit unit = map.getTiles()[packet.getTileGridX()][packet.getTileGridY()].getUnitFromID(packet.getUnitID());
 		unit.setPlayerOwner(players.get(packet.getPlayerOwner()));
+
+		//Send movement notification for captured units
+		if (Civilization.getInstance().getGame().getPlayer().equals(unit.getPlayerOwner())
+				&& unit.getCurrentMovement() > 0) {
+			
+			Civilization.getInstance().getGame().getNotificationHanlder()
+					.fireNotification(new AvailableMovementNotification(unit));
+		}
 	}
 
 	@Override

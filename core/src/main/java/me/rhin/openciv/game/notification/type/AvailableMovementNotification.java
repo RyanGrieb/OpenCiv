@@ -12,12 +12,14 @@ import me.rhin.openciv.game.notification.AbstractNotification;
 import me.rhin.openciv.game.unit.Unit;
 import me.rhin.openciv.listener.DeleteUnitListener;
 import me.rhin.openciv.listener.MoveUnitListener;
+import me.rhin.openciv.listener.SetUnitOwnerListener;
 import me.rhin.openciv.shared.packet.type.DeleteUnitPacket;
 import me.rhin.openciv.shared.packet.type.MoveUnitPacket;
 import me.rhin.openciv.shared.packet.type.SelectUnitPacket;
+import me.rhin.openciv.shared.packet.type.SetUnitOwnerPacket;
 
 public class AvailableMovementNotification extends AbstractNotification
-		implements MoveUnitListener, DeleteUnitListener {
+		implements MoveUnitListener, DeleteUnitListener, SetUnitOwnerListener {
 
 	private ArrayList<Unit> availableUnits;
 	private int index;
@@ -30,6 +32,7 @@ public class AvailableMovementNotification extends AbstractNotification
 
 		Civilization.getInstance().getEventManager().addListener(MoveUnitListener.class, this);
 		Civilization.getInstance().getEventManager().addListener(DeleteUnitListener.class, this);
+		Civilization.getInstance().getEventManager().addListener(SetUnitOwnerListener.class, this);
 	}
 
 	@Override
@@ -71,6 +74,29 @@ public class AvailableMovementNotification extends AbstractNotification
 
 			if (unit.getID() == unitID) {
 				iterator.remove();
+			}
+		}
+
+		if (availableUnits.size() < 1) {
+			Civilization.getInstance().getGame().getNotificationHanlder().removeNotification(this);
+		}
+	}
+
+	@Override
+	public void onSetUnitOwner(SetUnitOwnerPacket packet) {
+		int unitID = packet.getUnitID();
+
+		Iterator<Unit> iterator = availableUnits.iterator();
+
+		// Remove notification if our unit gets captured.
+
+		while (iterator.hasNext()) {
+			Unit unit = iterator.next();
+
+			if (unit.getID() == unitID) {
+				if (Civilization.getInstance().getGame().getPlayer().getName().equals(packet.getPrevPlayerOwner())) {
+					iterator.remove();
+				}
 			}
 		}
 

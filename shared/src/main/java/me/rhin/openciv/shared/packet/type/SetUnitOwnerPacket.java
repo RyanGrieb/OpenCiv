@@ -10,6 +10,7 @@ public class SetUnitOwnerPacket extends Packet {
 	int tileGridX, tileGridY;
 	private int unitID;
 	private String playerOwner;
+	private String prevPlayerOwner;
 
 	@Override
 	public void write(Json json) {
@@ -18,6 +19,7 @@ public class SetUnitOwnerPacket extends Packet {
 		json.writeValue("tileGridY", tileGridY);
 		json.writeValue("unitID", unitID);
 		json.writeValue("playerOwner", playerOwner);
+		json.writeValue("prevPlayerOwner", prevPlayerOwner);
 	}
 
 	@Override
@@ -27,13 +29,15 @@ public class SetUnitOwnerPacket extends Packet {
 		this.tileGridY = jsonData.getInt("tileGridY");
 		this.unitID = jsonData.getInt("unitID");
 		this.playerOwner = jsonData.getString("playerOwner");
+		this.prevPlayerOwner = jsonData.getString("prevPlayerOwner");
 	}
 
-	public void setUnit(String playerOwner, int unitID, int tileGridX, int tileGridY) {
+	public void setUnit(String playerOwner, String prevPlayerOwner, int unitID, int tileGridX, int tileGridY) {
 		this.tileGridX = tileGridX;
 		this.tileGridY = tileGridY;
 		this.unitID = unitID;
 		this.playerOwner = playerOwner;
+		this.prevPlayerOwner = prevPlayerOwner;
 	}
 
 	public int getTileGridX() {
@@ -50,5 +54,9 @@ public class SetUnitOwnerPacket extends Packet {
 
 	public String getPlayerOwner() {
 		return playerOwner;
+	}
+	
+	public String getPrevPlayerOwner() {
+		return prevPlayerOwner;
 	}
 }
