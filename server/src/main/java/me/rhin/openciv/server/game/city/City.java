@@ -97,9 +97,9 @@ public class City implements AttackableEntity, SpecialistContainer, TileObserver
 			citizenWorkers.put(tile, new EmptyCitizenWorker(this, tile));
 		}
 
+		statLine.setValue(Stat.MORALE, 100);
 		setPopulation(1);
 		statLine.setValue(Stat.EXPANSION_REQUIREMENT, 10 + 10 * (float) Math.pow(territory.size() - 6, 1.3));
-		statLine.setValue(Stat.MORALE, 100);
 		// Add our two specialists, one from pop, one city center
 		addSpecialist();
 		addSpecialist();
@@ -741,11 +741,11 @@ public class City implements AttackableEntity, SpecialistContainer, TileObserver
 		if (amount > 0) {
 			Server.getInstance().getEventManager().fireEvent(new CityGrowthEvent(this));
 			statLine.addValue(Stat.SCIENCE_GAIN, 0.5F);
-			subMorale(5 * popDiff);
+			subMorale(10 * popDiff);
 		} else {
 			Server.getInstance().getEventManager().fireEvent(new CityStarveEvent(this));
 			statLine.subValue(Stat.SCIENCE_GAIN, 0.5F);
-			addMorale(5 * popDiff);
+			addMorale(10 * popDiff);
 		}
 
 		playerOwner.updateOwnedStatlines(false);
@@ -762,9 +762,10 @@ public class City implements AttackableEntity, SpecialistContainer, TileObserver
 	public void setMorale(float morale) {
 		// FIXME: Morale can sometimes be > 100 on the first few turns.
 		// morale = MathUtils.clamp(morale, 0, 100);
+		
 		statLine.setValue(Stat.MORALE, morale);
 
-		float moraleOffset = (morale >= 70 ? (morale - 70) / 100 : (70 - morale) / 100);
+		float moraleOffset = (morale >= 70 ? (morale - 70) / 100 : -((70 - morale) / 100));
 		statLine.setModifier(Stat.PRODUCTION_GAIN, moraleOffset);
 	}
 
