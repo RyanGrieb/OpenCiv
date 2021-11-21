@@ -382,6 +382,9 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 			Civilization.getInstance().getGame().getNotificationHanlder()
 					.fireNotification(new AvailableMovementNotification(unit));
 		}
+		
+		if(!unit.getPlayerOwner().equals(Civilization.getInstance().getGame().getPlayer()) && unit.isSelected())
+			unit.setSelected(false);
 	}
 
 	@Override
