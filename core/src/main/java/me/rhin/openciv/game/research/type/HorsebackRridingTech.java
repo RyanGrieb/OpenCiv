@@ -3,11 +3,14 @@ package me.rhin.openciv.game.research.type;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 
 import me.rhin.openciv.asset.TextureEnum;
+import me.rhin.openciv.game.research.ResearchTree;
 import me.rhin.openciv.game.research.Technology;
 
 public class HorsebackRridingTech extends Technology {
 
-	public HorsebackRridingTech() {
+	public HorsebackRridingTech(ResearchTree researchTree) {
+		super(researchTree);
+
 		requiredTechs.add(WheelTech.class);
 	}
 

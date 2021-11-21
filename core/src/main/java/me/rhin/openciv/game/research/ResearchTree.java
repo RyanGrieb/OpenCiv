@@ -30,28 +30,30 @@ public class ResearchTree implements PickResearchListener, CompleteResearchListe
 
 	private LinkedHashMap<Class<? extends Technology>, Technology> technologies;
 	private Technology researchingTech;
+	private int techIDIndex;
 
 	public ResearchTree() {
 		this.technologies = new LinkedHashMap<>();
+		this.techIDIndex = 0;
 
 		// FIXME: This is going to be a crappton of techs
-		technologies.put(PotteryTech.class, new PotteryTech());
-		technologies.put(AnimalHusbandryTech.class, new AnimalHusbandryTech());
-		technologies.put(ArcheryTech.class, new ArcheryTech());
-		technologies.put(MiningTech.class, new MiningTech());
-		technologies.put(SailingTech.class, new SailingTech());
-		technologies.put(CalendarTech.class, new CalendarTech());
-		technologies.put(WritingTech.class, new WritingTech());
-		technologies.put(TrappingTech.class, new TrappingTech());
-		technologies.put(WheelTech.class, new WheelTech());
-		technologies.put(MasonryTech.class, new MasonryTech());
-		technologies.put(BronzeWorkingTech.class, new BronzeWorkingTech());
-		technologies.put(OpticsTech.class, new OpticsTech());
-		technologies.put(PhilosophyTech.class, new PhilosophyTech());
-		technologies.put(HorsebackRridingTech.class, new HorsebackRridingTech());
-		technologies.put(MathematicsTech.class, new MathematicsTech());
-		technologies.put(ConstructionTech.class, new ConstructionTech());
-		technologies.put(IronWorkingTech.class, new IronWorkingTech());
+		technologies.put(PotteryTech.class, new PotteryTech(this));
+		technologies.put(AnimalHusbandryTech.class, new AnimalHusbandryTech(this));
+		technologies.put(ArcheryTech.class, new ArcheryTech(this));
+		technologies.put(MiningTech.class, new MiningTech(this));
+		technologies.put(SailingTech.class, new SailingTech(this));
+		technologies.put(CalendarTech.class, new CalendarTech(this));
+		technologies.put(WritingTech.class, new WritingTech(this));
+		technologies.put(TrappingTech.class, new TrappingTech(this));
+		technologies.put(WheelTech.class, new WheelTech(this));
+		technologies.put(MasonryTech.class, new MasonryTech(this));
+		technologies.put(BronzeWorkingTech.class, new BronzeWorkingTech(this));
+		technologies.put(OpticsTech.class, new OpticsTech(this));
+		technologies.put(PhilosophyTech.class, new PhilosophyTech(this));
+		technologies.put(HorsebackRridingTech.class, new HorsebackRridingTech(this));
+		technologies.put(MathematicsTech.class, new MathematicsTech(this));
+		technologies.put(ConstructionTech.class, new ConstructionTech(this));
+		technologies.put(IronWorkingTech.class, new IronWorkingTech(this));
 
 		Civilization.getInstance().getEventManager().addListener(PickResearchListener.class, this);
 		Civilization.getInstance().getEventManager().addListener(CompleteResearchListener.class, this);
@@ -82,5 +84,9 @@ public class ResearchTree implements PickResearchListener, CompleteResearchListe
 
 	public boolean isResearching() {
 		return researchingTech != null;
+	}
+
+	public int getCurrentTechIDIndex() {
+		return techIDIndex++;
 	}
 }

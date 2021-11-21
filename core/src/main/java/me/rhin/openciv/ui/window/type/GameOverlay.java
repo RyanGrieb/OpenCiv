@@ -95,23 +95,15 @@ public class GameOverlay extends AbstractWindow implements ResizeListener, TileS
 	public void setHoveredTile(Tile tile) {
 		if (!tile.isDiscovered() && Civilization.SHOW_FOG) {
 			tileNameLabel.setText("[" + tile.getGridX() + "," + tile.getGridY() + "] Undiscovered");
-			tileNameLabel.setSize(0, 15);
+			// tileNameLabel.setSize(0, 15);
+			clearTileStatInfo();
 			return;
 		}
 
 		if (tile.equals(hoveredTile))
 			return;
 
-		for (ColoredBackground statIcon : new ArrayList<>(statIcons)) {
-			statIcon.addAction(Actions.removeActor());
-		}
-
-		for (CustomLabel label : new ArrayList<>(statLabels)) {
-			label.addAction(Actions.removeActor());
-		}
-
-		statIcons.clear();
-		statLabels.clear();
+		clearTileStatInfo();
 
 		this.hoveredTile = tile;
 
@@ -169,5 +161,18 @@ public class GameOverlay extends AbstractWindow implements ResizeListener, TileS
 			addActor(statIcon);
 			statIcons.add(statIcon);
 		}
+	}
+
+	private void clearTileStatInfo() {
+		for (ColoredBackground statIcon : new ArrayList<>(statIcons)) {
+			statIcon.addAction(Actions.removeActor());
+		}
+
+		for (CustomLabel label : new ArrayList<>(statLabels)) {
+			label.addAction(Actions.removeActor());
+		}
+
+		statIcons.clear();
+		statLabels.clear();
 	}
 }

@@ -3,9 +3,14 @@ package me.rhin.openciv.game.research.type;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 
 import me.rhin.openciv.asset.TextureEnum;
+import me.rhin.openciv.game.research.ResearchTree;
 import me.rhin.openciv.game.research.Technology;
 
 public class MiningTech extends Technology {
+
+	public MiningTech(ResearchTree researchTree) {
+		super(researchTree);
+	}
 
 	@Override
 	public int getScienceCost() {

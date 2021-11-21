@@ -182,6 +182,9 @@ public class CityStatePlayer extends AIPlayer implements NextTurnListener {
 				if (productionItem instanceof Builder && getUnitsOfType(BuilderUnit.class).size() > 0)
 					continue;
 
+				if (productionItem instanceof UnitItem && ownedUnits.size() > 8)
+					continue;
+
 				// System.out.println(productionItem.getName() + "-" +
 				// productionItem.getAIValue(this));
 
@@ -190,6 +193,9 @@ public class CityStatePlayer extends AIPlayer implements NextTurnListener {
 			}
 
 			// System.out.println("Citystate " + name + " producing: " + topItem.getName());
+
+			if (topItem == null)
+				return;
 
 			itemManager.setProducingItem(topItem.getName());
 		}

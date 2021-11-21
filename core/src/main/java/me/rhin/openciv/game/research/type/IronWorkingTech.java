@@ -3,17 +3,20 @@ package me.rhin.openciv.game.research.type;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 
 import me.rhin.openciv.asset.TextureEnum;
+import me.rhin.openciv.game.research.ResearchTree;
 import me.rhin.openciv.game.research.Technology;
 
 public class IronWorkingTech extends Technology {
 
-	public IronWorkingTech() {
+	public IronWorkingTech(ResearchTree researchTree) {
+		super(researchTree);
+		
 		requiredTechs.add(BronzeWorkingTech.class);
 	}
 
 	@Override
 	public int getScienceCost() {
-		return 105; //195
+		return 105; // 195
 	}
 
 	@Override

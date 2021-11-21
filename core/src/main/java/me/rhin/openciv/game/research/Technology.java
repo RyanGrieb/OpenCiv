@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 
 import me.rhin.openciv.Civilization;
-import me.rhin.openciv.game.notification.type.NotResearchingNotification;
 import me.rhin.openciv.listener.CompleteResearchListener;
 import me.rhin.openciv.listener.NextTurnListener;
 import me.rhin.openciv.shared.packet.type.CompleteResearchPacket;
@@ -13,8 +12,6 @@ import me.rhin.openciv.shared.packet.type.NextTurnPacket;
 import me.rhin.openciv.shared.stat.Stat;
 
 public abstract class Technology implements NextTurnListener, CompleteResearchListener {
-
-	private static int techIDS = 0;
 
 	protected ArrayList<Class<? extends Technology>> requiredTechs;
 
@@ -24,10 +21,10 @@ public abstract class Technology implements NextTurnListener, CompleteResearchLi
 	private float appliedScience;
 	private int appliedTurns;
 
-	public Technology() {
+	public Technology(ResearchTree researchTree) {
 		this.requiredTechs = new ArrayList<>();
 		this.researched = false;
-		this.id = techIDS++;
+		this.id = researchTree.getCurrentTechIDIndex();
 		this.researching = false;
 		this.appliedScience = 0;
 		this.appliedTurns = 0;
@@ -105,4 +102,6 @@ public abstract class Technology implements NextTurnListener, CompleteResearchLi
 	public int getAppliedTurns() {
 		return appliedTurns;
 	}
+	
+	
 }

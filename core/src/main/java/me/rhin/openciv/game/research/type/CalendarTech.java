@@ -3,14 +3,17 @@ package me.rhin.openciv.game.research.type;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 
 import me.rhin.openciv.asset.TextureEnum;
+import me.rhin.openciv.game.research.ResearchTree;
 import me.rhin.openciv.game.research.Technology;
 
 public class CalendarTech extends Technology {
 
-	public CalendarTech() {
+	public CalendarTech(ResearchTree researchTree) {
+		super(researchTree);
+
 		requiredTechs.add(PotteryTech.class);
 	}
-	
+
 	@Override
 	public int getScienceCost() {
 		return 55;
