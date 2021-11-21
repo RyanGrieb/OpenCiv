@@ -358,8 +358,11 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 		unit.reduceMovement(2);
 		unit.flashColor(Color.YELLOW);
 
-		tileTooltipHandler.flashIcon(unit.getStandingTile(), TextureEnum.ICON_COMBAT);
-		tileTooltipHandler.flashIcon(targetEntity.getTile(), TextureEnum.ICON_SHIELD);
+		if (unit.getStandingTile().getTileObservers().size() > 0)
+			tileTooltipHandler.flashIcon(unit.getStandingTile(), TextureEnum.ICON_COMBAT);
+
+		if (targetEntity.getTile().getTileObservers().size() > 0)
+			tileTooltipHandler.flashIcon(targetEntity.getTile(), TextureEnum.ICON_SHIELD);
 
 		targetEntity.setHealth(targetEntity.getHealth() - packet.getTargetUnitDamage());
 

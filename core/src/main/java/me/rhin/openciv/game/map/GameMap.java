@@ -105,7 +105,7 @@ public class GameMap implements ReceiveMapChunkListener, SetTileTypeListener, Re
 		Tile tile = tiles[packet.getGridX()][packet.getGridY()];
 		TileType tileType = TileType.valueOf(packet.getTileTypeName());
 
-		if (tile.isVisible())
+		if (tile.getTileObservers().size() > 0)
 			tileType.playRemoveSound();
 
 		tile.removeTileType(tileType);
