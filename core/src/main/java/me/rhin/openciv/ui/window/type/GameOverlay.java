@@ -166,7 +166,7 @@ public class GameOverlay extends AbstractWindow implements ResizeListener, TileS
 	private void clearTileStatInfo() {
 		for (ColoredBackground statIcon : new ArrayList<>(statIcons)) {
 			statIcon.addAction(Actions.removeActor());
-		}
+		} 
 
 		for (CustomLabel label : new ArrayList<>(statLabels)) {
 			label.addAction(Actions.removeActor());

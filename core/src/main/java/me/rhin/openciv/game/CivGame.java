@@ -400,11 +400,13 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 
 				AbstractPlayer newPlayer = players.get(packet.getPlayerName());
 
+				city.getProducibleItemManager().getItemQueue().clear();
 				city.setOwner(newPlayer);
 				player.removeCity(city);
 				newPlayer.addCity(city);
 
 				// Toggle new windows for the player that captured the city.
+				// FIXME: Move this to notification handler
 				if (newPlayer.equals(this.player) && newPlayer.getOwnedCities().size() <= 1) {
 
 					if (!Civilization.getInstance().getWindowManager().isOpenWindow(CurrentResearchWindow.class))
