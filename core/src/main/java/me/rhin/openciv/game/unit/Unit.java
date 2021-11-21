@@ -41,7 +41,6 @@ public abstract class Unit extends Actor
 	protected ArrayList<AbstractAction> customActions;
 	protected Tile standingTile;
 	protected Sprite targetSelectionSprite;
-	protected boolean allowsMovement;
 	private int id;
 	private AbstractPlayer playerOwner;
 	private ArrayList<Vector2[]> pathVectors;
@@ -58,7 +57,6 @@ public abstract class Unit extends Actor
 
 	public Unit(int id, String unitName, AbstractPlayer playerOwner, Tile standingTile, TextureEnum assetEnum) {
 		this.id = id;
-		this.allowsMovement = true;
 		setName(unitName);
 		this.playerOwner = playerOwner;
 		this.customActions = new ArrayList<>();
@@ -152,7 +150,7 @@ public abstract class Unit extends Actor
 	public void onNextTurn(NextTurnPacket packet) {
 		this.movement = getMaxMovement();
 
-		if (Civilization.getInstance().getGame().getPlayer().equals(playerOwner) && allowsMovement)
+		if (Civilization.getInstance().getGame().getPlayer().equals(playerOwner) && allowsMovement())
 			Civilization.getInstance().getGame().getNotificationHanlder()
 					.fireNotification(new AvailableMovementNotification(this));
 	}
@@ -567,7 +565,7 @@ public abstract class Unit extends Actor
 	}
 
 	public boolean allowsMovement() {
-		return allowsMovement;
+		return true;
 	}
 
 	public void kill() {

@@ -73,7 +73,7 @@ public abstract class AbstractPlayer {
 
 	public void addUnit(Unit unit) {
 		ownedUnits.add(unit);
-
+		System.out.println(unit.getName() + " - " + unit.allowsMovement());
 		if (Civilization.getInstance().getGame().getPlayer().equals(this) && unit.allowsMovement())
 			Civilization.getInstance().getGame().getNotificationHanlder()
 					.fireNotification(new AvailableMovementNotification(unit));

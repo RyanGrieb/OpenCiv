@@ -96,6 +96,7 @@ public class Player extends AbstractPlayer
 		TraderUnit traderUnit = (TraderUnit) unit;
 		traderUnit.setTradingCity(city);
 		traderUnit.setCityHeadquarters(unit.getStandingTile().getCity());
+		traderUnit.trade();
 	}
 
 	@Override

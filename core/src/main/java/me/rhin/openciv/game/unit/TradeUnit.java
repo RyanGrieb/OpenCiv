@@ -23,7 +23,6 @@ public abstract class TradeUnit extends Unit {
 	public TradeUnit(UnitParameter unitParameter, TextureEnum assetEnum) {
 		super(unitParameter, assetEnum);
 
-		this.allowsMovement = false;
 		this.city = standingTile.getCity();
 		this.trading = false;
 
@@ -93,6 +92,11 @@ public abstract class TradeUnit extends Unit {
 
 		trading = true;
 		getPlayerOwner().unselectUnit();
+	}
+
+	@Override
+	public boolean allowsMovement() {
+		return false;
 	}
 
 	public Tradeable canTrade(City city) {

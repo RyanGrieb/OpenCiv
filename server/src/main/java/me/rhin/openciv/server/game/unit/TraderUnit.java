@@ -34,6 +34,26 @@ public abstract class TraderUnit extends Unit {
 
 	@Override
 	public void onNextTurn() {
+		trade();
+	}
+
+	@Override
+	public void kill() {
+		super.kill();
+
+		getPlayerOwner().getStatLine().subValue(Stat.TRADE_ROUTE_AMOUNT, 1);
+		getPlayerOwner().updateOwnedStatlines(false);
+	}
+
+	public void setTradingCity(City tradingCity) {
+		this.tradingCity = tradingCity;
+	}
+
+	public void setCityHeadquarters(City cityHeadquarters) {
+		this.cityHeadquarters = cityHeadquarters;
+	}
+
+	public void trade() {
 		if (!isAlive())
 			return;
 
@@ -178,22 +198,6 @@ public abstract class TraderUnit extends Unit {
 			movingToCity.getPlayerOwner().getStatLine().addValue(Stat.GOLD, goldValue);
 			movingToCity.getPlayerOwner().updateOwnedStatlines(false);
 		}
-	}
-
-	@Override
-	public void kill() {
-		super.kill();
-
-		getPlayerOwner().getStatLine().subValue(Stat.TRADE_ROUTE_AMOUNT, 1);
-		getPlayerOwner().updateOwnedStatlines(false);
-	}
-
-	public void setTradingCity(City tradingCity) {
-		this.tradingCity = tradingCity;
-	}
-
-	public void setCityHeadquarters(City cityHeadquarters) {
-		this.cityHeadquarters = cityHeadquarters;
 	}
 
 }
