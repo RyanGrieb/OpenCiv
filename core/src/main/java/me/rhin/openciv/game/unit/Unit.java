@@ -32,6 +32,7 @@ import me.rhin.openciv.listener.BottomShapeRenderListener;
 import me.rhin.openciv.listener.NextTurnListener;
 import me.rhin.openciv.shared.packet.type.MoveUnitPacket;
 import me.rhin.openciv.shared.packet.type.NextTurnPacket;
+import me.rhin.openciv.ui.game.UnitHealthBubble;
 import me.rhin.openciv.ui.window.type.UnitCombatWindow;
 import me.rhin.openciv.ui.window.type.UnitWindow;
 
@@ -49,6 +50,7 @@ public abstract class Unit extends Actor
 	private Tile targetTile;
 	private Sprite sprite, selectionSprite;
 	private Sprite civIconSprite;
+	private UnitHealthBubble unitHealthBubble;
 	private boolean selected;
 	protected float movement;
 	private float health;
@@ -69,7 +71,9 @@ public abstract class Unit extends Actor
 		this.targetSelectionSprite = TextureEnum.UI_SELECTION.sprite();
 		this.civIconSprite = playerOwner.getCivilization().getIcon().sprite();
 		civIconSprite.setSize(8, 8);
-		civIconSprite.setAlpha(0.8F);
+		//civIconSprite.setAlpha(0.8F);
+		
+		this.unitHealthBubble = new UnitHealthBubble(this);
 
 		setPosition(standingTile.getVectors()[0].x - standingTile.getWidth() / 2, standingTile.getVectors()[0].y + 4);
 		setSize(standingTile.getWidth(), standingTile.getHeight());
@@ -114,6 +118,7 @@ public abstract class Unit extends Actor
 
 		if (standingTile.getTileObservers().size() > 0 || !Civilization.SHOW_FOG) {
 			sprite.draw(batch);
+			unitHealthBubble.draw(batch, parentAlpha);
 			civIconSprite.draw(batch);
 		}
 
@@ -407,6 +412,7 @@ public abstract class Unit extends Actor
 
 		selectionSprite.setPosition(tileX, tileY);
 		civIconSprite.setPosition(tileX + 10, tileY + 20);
+		unitHealthBubble.setPosition(civIconSprite.getX() + 4, civIconSprite.getY() + 4);
 		super.setPosition(tileX, tileY);
 
 		standingTile = targetTile;
@@ -429,6 +435,7 @@ public abstract class Unit extends Actor
 		sprite.setPosition(x, y);
 		selectionSprite.setPosition(x, y);
 		civIconSprite.setPosition(x + 10, y + 20);
+		unitHealthBubble.setPosition(civIconSprite.getX() + 4, civIconSprite.getY() + 4);
 
 		super.setPosition(x, y);
 	}
