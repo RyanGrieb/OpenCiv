@@ -10,17 +10,11 @@ import me.rhin.openciv.shared.stat.Stat;
 
 public class GreatLibrary extends Building implements Wonder {
 
-	private int turnsSpent;
-
 	public GreatLibrary(City city) {
 		super(city);
 
-		this.turnsSpent = 0;
-
 		this.statLine.addValue(Stat.SCIENCE_GAIN, 3);
 		this.statLine.addValue(Stat.HERITAGE_GAIN, 1);
-		// TODO: Convey +1 science for every 2 citizens
-
 	}
 
 	@Override

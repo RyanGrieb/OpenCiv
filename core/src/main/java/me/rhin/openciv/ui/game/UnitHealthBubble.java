@@ -11,11 +11,10 @@ import me.rhin.openciv.game.unit.Unit;
 
 public class UnitHealthBubble extends Actor {
 
-	private ShapeRenderer shapeRenderer;
+	private static final ShapeRenderer shapeRenderer =  new ShapeRenderer();
 	private Unit unit;
 
 	public UnitHealthBubble(Unit unit) {
-		shapeRenderer = new ShapeRenderer();
 		shapeRenderer.setAutoShapeType(true);
 
 		this.unit = unit;
@@ -42,7 +41,7 @@ public class UnitHealthBubble extends Actor {
 		shapeRenderer.arc(getX(), getY(), 5, 90, greenFill);
 
 		shapeRenderer.setColor(Color.RED);
-		shapeRenderer.arc(getX(), getY(), 5, 90 - redFill, redFill);
+		shapeRenderer.arc(getX(), getY(), 5, 90 - redFill , redFill);
 		
 		// shapeRenderer.circle(getX(), getY(), 5);
 

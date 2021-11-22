@@ -2,8 +2,6 @@ package me.rhin.openciv.ui.window.type;
 
 import java.util.ArrayList;
 
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.utils.Align;
 
 import me.rhin.openciv.Civilization;
@@ -13,6 +11,7 @@ import me.rhin.openciv.listener.ResizeListener;
 import me.rhin.openciv.listener.TopShapeRenderListener;
 import me.rhin.openciv.ui.background.BlankBackground;
 import me.rhin.openciv.ui.button.type.CloseWindowButton;
+import me.rhin.openciv.ui.game.TechLineWeb;
 import me.rhin.openciv.ui.game.TechnologyLeaf;
 import me.rhin.openciv.ui.label.CustomLabel;
 import me.rhin.openciv.ui.window.AbstractWindow;
@@ -24,6 +23,8 @@ public class ResearchWindow extends AbstractWindow
 	private BlankBackground blankBackground;
 	private CustomLabel researchDescLabel;
 	private CloseWindowButton closeWindowButton;
+	private TechLineWeb techLineWeb;
+
 
 	public ResearchWindow() {
 		super.setBounds(0, 0, viewport.getWorldWidth(), viewport.getWorldHeight());
@@ -45,6 +46,9 @@ public class ResearchWindow extends AbstractWindow
 		this.closeWindowButton = new CloseWindowButton(this.getClass(), "Close", viewport.getWorldWidth() / 2 - 150 / 2,
 				25, 150, 45);
 		addActor(closeWindowButton);
+		
+		this.techLineWeb = new TechLineWeb(technologyLeafs);
+		addActor(techLineWeb);
 
 		Civilization.getInstance().getEventManager().addListener(ResizeListener.class, this);
 		Civilization.getInstance().getEventManager().addListener(TopShapeRenderListener.class, this);
@@ -128,33 +132,6 @@ public class ResearchWindow extends AbstractWindow
 			}
 
 			leaf.setPosition(x, y);
-		}
-	}
-
-	@Override
-	public void onTopShapeRender(ShapeRenderer shapeRenderer) {
-		// FIXME: More elegant solution
-		if (Civilization.getInstance().getWindowManager().isOpenWindow(PickResearchWindow.class))
-			return;
-
-		for (TechnologyLeaf leaf : technologyLeafs) {
-			if (leaf.getTech().getRequiredTechs().size() > 0) {
-
-				for (Class<? extends Technology> techClazz : leaf.getTech().getRequiredTechs()) {
-
-					Technology tech = Civilization.getInstance().getGame().getPlayer().getResearchTree()
-							.getTechnology(techClazz);
-
-					for (TechnologyLeaf otherLeaf : technologyLeafs) {
-						if (otherLeaf.getTech().equals(tech)) {
-
-							// Draw line to other leaf of the required tech
-							shapeRenderer.setColor(Color.WHITE);
-							shapeRenderer.line(leaf.getBackVector(), otherLeaf.getFrontVector());
-						}
-					}
-				}
-			}
 		}
 	}
 

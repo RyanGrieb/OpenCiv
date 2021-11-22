@@ -17,6 +17,7 @@ public class NationalCollege extends Building {
 	@Override
 	public void create() {
 		super.create();
+		
 		city.getStatLine().addModifier(Stat.SCIENCE_GAIN, 0.5F);
 	}
 

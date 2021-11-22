@@ -11,6 +11,7 @@ import me.rhin.openciv.Civilization;
 import me.rhin.openciv.game.city.City;
 import me.rhin.openciv.game.city.building.type.Circus;
 import me.rhin.openciv.game.city.building.type.Colosseum;
+import me.rhin.openciv.game.city.building.type.Forge;
 import me.rhin.openciv.game.city.building.type.Granary;
 import me.rhin.openciv.game.city.building.type.GreatLibrary;
 import me.rhin.openciv.game.city.building.type.GreatPyramids;
@@ -27,6 +28,7 @@ import me.rhin.openciv.game.city.building.type.Stonehenge;
 import me.rhin.openciv.game.city.building.type.Stoneworks;
 import me.rhin.openciv.game.city.building.type.Walls;
 import me.rhin.openciv.game.city.building.type.WaterMill;
+import me.rhin.openciv.game.city.building.type.Workshop;
 import me.rhin.openciv.game.notification.type.AvailableProductionNotification;
 import me.rhin.openciv.game.unit.type.Archer;
 import me.rhin.openciv.game.unit.type.Builder;
@@ -96,7 +98,9 @@ public class ProducibleItemManager {
 		possibleItems.put("National College", new NationalCollege(city));
 		possibleItems.put("Lighthouse", new Lighthouse(city));
 		possibleItems.put("Stoneworks", new Stoneworks(city));
-
+		possibleItems.put("Forge", new Forge(city));
+		possibleItems.put("Workshop", new Workshop(city));
+		
 		// Wonders
 		possibleItems.put("Great Pyramids", new GreatPyramids(city));
 		possibleItems.put("Great Library", new GreatLibrary(city));
