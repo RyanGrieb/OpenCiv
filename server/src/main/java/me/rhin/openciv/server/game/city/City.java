@@ -625,9 +625,6 @@ public class City
 			int eatenFood = (int) (statLine.getStatValue(Stat.POPULATION) * 2);
 			int foodValue = ((statLine.getStatValue(Stat.FOOD_GAIN) - eatenFood) > 1) ? 1 : 6;
 
-			// System.out.println((statLine.getStatValue(Stat.FOOD_GAIN)) + "=" +
-			// foodValue);
-
 			float value = getTileStatLine(tile).getStatValue(Stat.FOOD_GAIN) * foodValue
 					+ getTileStatLine(tile).getStatValue(Stat.GOLD_GAIN) * 1
 					+ getTileStatLine(tile).getStatValue(Stat.PRODUCTION_GAIN) * 3;
