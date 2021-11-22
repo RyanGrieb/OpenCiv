@@ -1,5 +1,14 @@
 package me.rhin.openciv.ui.window.type;
 
+import java.util.ArrayList;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.scenes.scene2d.actions.Actions;
+import com.badlogic.gdx.utils.Align;
+
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.player.AbstractPlayer;
@@ -20,6 +29,7 @@ public class NextTurnWindow extends AbstractWindow implements RequestEndTurnList
 	private NextTurnButton nextTurnButton;
 	private WaitingNextTurnButton waitingNextTurnButton;
 	private CustomLabel waitingOnDescLabel;
+	private ArrayList<CustomLabel> notificationLabels;
 
 	public NextTurnWindow() {
 		super.setBounds(viewport.getWorldWidth() / 2 - 200 / 2, 0, 200, 125);
@@ -30,6 +40,8 @@ public class NextTurnWindow extends AbstractWindow implements RequestEndTurnList
 		addActor(nextTurnButton);
 
 		this.waitingNextTurnButton = new WaitingNextTurnButton(getWidth() / 2 - 125 / 2, 4, 125, 36);
+
+		this.notificationLabels = new ArrayList<>();
 
 		Civilization.getInstance().getEventManager().addListener(RequestEndTurnListener.class, this);
 		Civilization.getInstance().getEventManager().addListener(NextTurnListener.class, this);
@@ -94,5 +106,44 @@ public class NextTurnWindow extends AbstractWindow implements RequestEndTurnList
 	@Override
 	public boolean isGameDisplayWindow() {
 		return true;
+	}
+
+	public void notify(String text) {
+		for (CustomLabel label : notificationLabels) {
+			if (label.getText().toString().equals(text)) {
+				return;
+			}
+		}
+
+		CustomLabel label = new CustomLabel(text, Align.center, 0, 37 + (13 * notificationLabels.size()), getWidth(),
+				15);
+		notificationLabels.add(label);
+		addActor(label);
+
+		new java.util.Timer().schedule(new java.util.TimerTask() {
+			@Override
+			public void run() {
+
+				Gdx.app.postRunnable(new Runnable() {
+					@Override
+					public void run() {
+						label.addAction(Actions.removeActor());
+						notificationLabels.remove(label);
+
+						int index = 0;
+						for (CustomLabel label : notificationLabels) {
+							label.setPosition(0, 37 + (13 * index));
+							index++;
+						}
+					}
+				});
+
+			}
+		}, 3000);
+
+	}
+
+	public ArrayList<CustomLabel> getNotificationLabels() {
+		return notificationLabels;
 	}
 }

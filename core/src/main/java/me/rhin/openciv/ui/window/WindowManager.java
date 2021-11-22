@@ -164,4 +164,9 @@ public class WindowManager {
 	public Collection<AbstractWindow> getWindows() {
 		return windows.values();
 	}
+
+	public <T> T getWindow(Class<T> type) {
+		Class<? extends AbstractWindow> windowClass = (Class<? extends AbstractWindow>) type;
+		return (T) windows.get(windowClass);
+	}
 }

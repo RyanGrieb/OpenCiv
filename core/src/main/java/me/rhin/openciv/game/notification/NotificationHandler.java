@@ -38,4 +38,12 @@ public class NotificationHandler {
 		Civilization.getInstance().getEventManager().clearListenersFromObject(notification);
 	}
 
+	public boolean isNotificationActive(Class<? extends AbstractNotification> clazz) {
+		for (AbstractNotification activeNotification : activeNotifications) {
+			if(activeNotification.getClass() == clazz)
+				return true;
+		}
+		return false;
+	}
+
 }
