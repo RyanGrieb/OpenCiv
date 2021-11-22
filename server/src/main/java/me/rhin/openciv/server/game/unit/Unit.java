@@ -292,7 +292,7 @@ public abstract class Unit implements AttackableEntity, TileObserver, NextTurnLi
 				float tenativeGScore = gScores[current.getGridX()][current.getGridY()]
 						+ getMovementCost(current, adjTile);
 				
-				if (current.getTopUnit() != null && !current.getTopUnit().getPlayerOwner().equals(playerOwner)) {
+				if (current.getEnemyAttackableEntity(playerOwner) != null) {
 					tenativeGScore += 100;
 				}
 				

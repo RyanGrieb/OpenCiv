@@ -30,7 +30,8 @@ public class InGameScreen extends AbstractScreen {
 	private CivGame game;
 	private final Group tileGroup;
 	private final Group riverGroup;
-	private final Group unitGroup;
+	private final Group mainUnitGroup;
+	private final Group supportUnitGroup;
 	private final Group combatTooltipGroup;
 	private Vector2 dragOrigin;
 	private boolean rightClicking;
@@ -47,13 +48,39 @@ public class InGameScreen extends AbstractScreen {
 
 		this.tileGroup = new Group();
 		this.riverGroup = new Group();
-		this.unitGroup = new Group();
+		this.mainUnitGroup = new Group();
+		this.supportUnitGroup = new Group();
 		this.combatTooltipGroup = new Group();
 
 		stage.addActor(tileGroup);
 		stage.addActor(riverGroup);
-		stage.addActor(unitGroup);
+		stage.addActor(supportUnitGroup);
+		stage.addActor(mainUnitGroup);
 		stage.addActor(combatTooltipGroup);
+	}
+
+	public static float getZoomLevel() {
+		return ZOOM_LEVEL;
+	}
+
+	public static float getMaxZoomLevel() {
+		return MAX_ZOOM_LEVEL;
+	}
+
+	public Vector2 getDragOrigin() {
+		return dragOrigin;
+	}
+
+	public boolean isRightClicking() {
+		return rightClicking;
+	}
+
+	public long getLastTimeCounted() {
+		return lastTimeCounted;
+	}
+
+	public float getFrameRate() {
+		return frameRate;
 	}
 
 	@Override
@@ -188,6 +215,39 @@ public class InGameScreen extends AbstractScreen {
 		return false;
 	}
 
+	@Override
+	public ScreenEnum getType() {
+		return ScreenEnum.IN_GAME;
+	}
+
+	public CivGame getGame() {
+		return game;
+	}
+
+	public GameOverlay getGameOverlay() {
+		return gameOverlay;
+	}
+
+	public Group getTileGroup() {
+		return tileGroup;
+	}
+
+	public Group getMainUnitGroup() {
+		return mainUnitGroup;
+	}
+
+	public Group getSupportUnitGroup() {
+		return supportUnitGroup;
+	}
+
+	public Group getRiverGroup() {
+		return riverGroup;
+	}
+
+	public Group getCombatTooltipGroup() {
+		return combatTooltipGroup;
+	}
+
 	private void handleInput() {
 
 		if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE) && !windowManager.isOpenWindow(ChatboxWindow.class)) {
@@ -227,35 +287,6 @@ public class InGameScreen extends AbstractScreen {
 		if (Gdx.input.isKeyPressed(Input.Keys.W) || Gdx.input.isKeyPressed(Input.Keys.UP)) {
 			translateCamera(0, 6, 0);
 		}
-	}
-
-	public CivGame getGame() {
-		return game;
-	}
-
-	public GameOverlay getGameOverlay() {
-		return gameOverlay;
-	}
-
-	public Group getTileGroup() {
-		return tileGroup;
-	}
-
-	public Group getRiverGroup() {
-		return riverGroup;
-	}
-
-	public Group getUnitGroup() {
-		return unitGroup;
-	}
-
-	public Group getCombatTooltipGroup() {
-		return combatTooltipGroup;
-	}
-
-	@Override
-	public ScreenEnum getType() {
-		return ScreenEnum.IN_GAME;
 	}
 
 	private boolean canZoomIn(OrthographicCamera camera) {

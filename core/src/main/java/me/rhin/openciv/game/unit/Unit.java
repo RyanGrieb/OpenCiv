@@ -248,8 +248,8 @@ public abstract class Unit extends Actor
 				float tenativeGScore = gScores[current.getGridX()][current.getGridY()]
 						+ getMovementCost(current, adjTile);
 
-				//If the tile has a non-friendly unit. Don't allow to pass through
-				if (current.getTopUnit() != null && !current.getTopUnit().getPlayerOwner().equals(playerOwner)) {
+				// If the tile has a non-friendly unit. Don't allow to pass through
+				if (current.getEnemyAttackableEntity(playerOwner) != null) {
 					tenativeGScore += 100;
 				}
 

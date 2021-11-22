@@ -1,6 +1,7 @@
 package me.rhin.openciv.game;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 
 import com.badlogic.gdx.Gdx;
@@ -159,8 +160,12 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 
 			tile.addUnit(unit);
 
-			((InGameScreen) Civilization.getInstance().getScreenManager().getCurrentScreen()).getUnitGroup()
-					.addActor(unit);
+			if (unit.isUnitCapturable())
+				((InGameScreen) Civilization.getInstance().getScreenManager().getCurrentScreen()).getSupportUnitGroup()
+						.addActor(unit);
+			else
+				((InGameScreen) Civilization.getInstance().getScreenManager().getCurrentScreen()).getMainUnitGroup()
+						.addActor(unit);
 
 			if (unit instanceof SettlerUnit && unit.getPlayerOwner().equals(player) && turns < 1) {
 				// Focus camera on unit.
@@ -270,22 +275,29 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 			// System.exit(1);
 		}
 
+		if (packet.isKilled() && tile.getTileObservers().size() > 0)
+			tileTooltipHandler.flashIcon(tile, TextureEnum.ICON_SKULL);
+
+		if (packet.isKilled() && unit.getPlayerOwner().equals(player) && tile.getTileObservers().size() > 0) {
+			Civilization.getInstance().getSoundHandler().playEffect(SoundEnum.UNIT_DEATH);
+		}
+
 		System.out.println("Deleting unit from: " + unit.getPlayerOwner().getName());
 		unit.kill();
 		tile.removeUnit(unit);
 		unit.getPlayerOwner().removeUnit(unit);
 
-		for (Actor actor : ((InGameScreen) Civilization.getInstance().getScreenManager().getCurrentScreen())
-				.getUnitGroup().getChildren()) {
+		ArrayList<Actor> actors = new ArrayList<>();
+
+		Collections.addAll(actors, ((InGameScreen) Civilization.getInstance().getScreenManager().getCurrentScreen())
+				.getMainUnitGroup().getChildren().toArray());
+
+		Collections.addAll(actors, ((InGameScreen) Civilization.getInstance().getScreenManager().getCurrentScreen())
+				.getSupportUnitGroup().getChildren().toArray());
+
+		for (Actor actor : actors) {
 			if (actor.equals(unit))
 				actor.addAction(Actions.removeActor());
-		}
-
-		if (packet.isKilled())
-			tileTooltipHandler.flashIcon(tile, TextureEnum.ICON_SKULL);
-
-		if (packet.isKilled() && unit.getPlayerOwner().equals(player)) {
-			Civilization.getInstance().getSoundHandler().playEffect(SoundEnum.UNIT_DEATH);
 		}
 	}
 
@@ -375,15 +387,15 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 		Unit unit = map.getTiles()[packet.getTileGridX()][packet.getTileGridY()].getUnitFromID(packet.getUnitID());
 		unit.setPlayerOwner(players.get(packet.getPlayerOwner()));
 
-		//Send movement notification for captured units
+		// Send movement notification for captured units
 		if (Civilization.getInstance().getGame().getPlayer().equals(unit.getPlayerOwner())
 				&& unit.getCurrentMovement() > 0) {
-			
+
 			Civilization.getInstance().getGame().getNotificationHanlder()
 					.fireNotification(new AvailableMovementNotification(unit));
 		}
-		
-		if(!unit.getPlayerOwner().equals(Civilization.getInstance().getGame().getPlayer()) && unit.isSelected())
+
+		if (!unit.getPlayerOwner().equals(Civilization.getInstance().getGame().getPlayer()) && unit.isSelected())
 			unit.setSelected(false);
 	}
 
