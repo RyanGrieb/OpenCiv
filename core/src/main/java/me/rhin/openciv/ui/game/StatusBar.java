@@ -113,9 +113,9 @@ public class StatusBar extends Actor implements PlayerStatUpdateListener, NextTu
 
 				scienceLabel.setText("+" + statLine.getStatValue(Stat.SCIENCE_GAIN));
 
-				int currentGold = (int) statLine.getStatValue(Stat.GOLD);
-				int gainedGold = (int) statLine.getStatValue(Stat.GOLD_GAIN);
-				goldLabel.setText("" + currentGold + "(" + (gainedGold < 0 ? "-" : "+") + gainedGold + ")");
+				float currentGold = statLine.getStatValue(Stat.GOLD);
+				float gainedGold = statLine.getStatValue(Stat.GOLD_GAIN);
+				goldLabel.setText("" + currentGold + "(" + (gainedGold < 0 ? "" : "+") + gainedGold + ")");
 
 				hertiageLabel.setText("+" + (int) statLine.getStatValue(Stat.HERITAGE_GAIN) + "");
 

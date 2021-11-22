@@ -71,20 +71,8 @@ public abstract class RangedUnit extends Unit {
 			if (targetEntity instanceof Unit && targetEntity.getTile().getCity() == null) {
 
 				Unit targetUnit = (Unit) targetEntity;
-
-				targetUnit.getStandingTile().removeUnit(targetUnit);
-				targetUnit.kill();
-				targetUnit.getPlayerOwner().removeUnit(targetUnit);
-
-				// FIXME: Redundant code.
-				DeleteUnitPacket removeUnitPacket = new DeleteUnitPacket();
-				removeUnitPacket.setUnit(targetUnit.getID(), targetUnit.getStandingTile().getGridX(),
-						targetUnit.getStandingTile().getGridY());
-				removeUnitPacket.setKilled(true);
-
-				for (Player player : Server.getInstance().getPlayers()) {
-					player.sendPacket(json.toJson(removeUnitPacket));
-				}
+				
+				targetUnit.deleteUnit(true);
 			}
 		}
 

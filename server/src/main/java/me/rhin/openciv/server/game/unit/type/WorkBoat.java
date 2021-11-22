@@ -65,18 +65,7 @@ public class WorkBoat extends UnitItem {
 			}
 
 			// Delete the workboat
-			standingTile.removeUnit(this);
-			playerOwner.removeUnit(this);
-			kill();
-
-			// FIXME: Redundant code.
-			DeleteUnitPacket removeUnitPacket = new DeleteUnitPacket();
-			removeUnitPacket.setUnit(getID(), standingTile.getGridX(), standingTile.getGridY());
-
-			Json json = new Json();
-			for (Player player : Server.getInstance().getPlayers()) {
-				player.sendPacket(json.toJson(removeUnitPacket));
-			}
+			deleteUnit(false);
 
 		}
 

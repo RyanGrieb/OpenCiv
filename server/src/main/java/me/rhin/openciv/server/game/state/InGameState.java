@@ -30,7 +30,6 @@ import me.rhin.openciv.server.game.options.GameOptionType;
 import me.rhin.openciv.server.game.unit.AttackableEntity;
 import me.rhin.openciv.server.game.unit.RangedUnit;
 import me.rhin.openciv.server.game.unit.Unit;
-import me.rhin.openciv.server.game.unit.type.Archer.ArcherUnit;
 import me.rhin.openciv.server.game.unit.type.Builder.BuilderUnit;
 import me.rhin.openciv.server.game.unit.type.Settler.SettlerUnit;
 import me.rhin.openciv.server.game.unit.type.TransportShipUnit;
@@ -637,18 +636,7 @@ public class InGameState extends GameState implements DisconnectListener, Select
 		if (disembarkTile == null)
 			return;
 
-		transportShip.getStandingTile().removeUnit(transportShip);
-		transportShip.getPlayerOwner().removeUnit(transportShip);
-		transportShip.kill();
-
-		DeleteUnitPacket removeUnitPacket = new DeleteUnitPacket();
-		removeUnitPacket.setUnit(transportShip.getID(), transportShip.getStandingTile().getGridX(),
-				transportShip.getStandingTile().getGridY());
-
-		Json json = new Json();
-		for (Player player : players) {
-			player.sendPacket(json.toJson(removeUnitPacket));
-		}
+		transportUnit.deleteUnit(false);
 
 		Unit unit = transportShip.getTransportUnit();
 		unit.setMovement(0);
@@ -662,6 +650,7 @@ public class InGameState extends GameState implements DisconnectListener, Select
 				disembarkTile.getGridY());
 		addUnitPacket.setUnitMovement(0);
 
+		Json json = new Json();
 		for (Player player : Server.getInstance().getPlayers())
 			player.sendPacket(json.toJson(addUnitPacket));
 	}
@@ -869,8 +858,8 @@ public class InGameState extends GameState implements DisconnectListener, Select
 				Unit settlerUnit = new SettlerUnit(cityStatePlayer, tile);
 				tile.addUnit(settlerUnit);
 
-				//Unit archerUnit = new ArcherUnit(cityStatePlayer, tile);
-				//tile.addUnit(archerUnit);
+				// Unit archerUnit = new ArcherUnit(cityStatePlayer, tile);
+				// tile.addUnit(archerUnit);
 
 				Unit warriorUnit = new WarriorUnit(cityStatePlayer,
 						map.getTiles()[tile.getGridX() + 1][tile.getGridY()]);

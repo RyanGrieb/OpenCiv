@@ -38,8 +38,8 @@ public abstract class TraderUnit extends Unit {
 	}
 
 	@Override
-	public void kill() {
-		super.kill();
+	protected void onKill() {
+		super.onKill();
 
 		getPlayerOwner().getStatLine().subValue(Stat.TRADE_ROUTE_AMOUNT, 1);
 		getPlayerOwner().updateOwnedStatlines(false);

@@ -44,21 +44,7 @@ public class Caravan extends UnitItem {
 			attackingPlayer.getStatLine().addValue(Stat.GOLD, 100);
 			attackingPlayer.updateOwnedStatlines(false);
 
-			standingTile.removeUnit(this);
-			playerOwner.removeUnit(this);
-			kill();
-
-			// FIXME: Redundant code.
-			DeleteUnitPacket removeUnitPacket = new DeleteUnitPacket();
-			removeUnitPacket.setUnit(id, standingTile.getGridX(), standingTile.getGridY());
-			removeUnitPacket.setKilled(true);
-
-			Json json = new Json();
-			for (Player player : Server.getInstance().getPlayers()) {
-				player.sendPacket(json.toJson(removeUnitPacket));
-			}
-
-			// When we capture a builder/settler, ect.
+			deleteUnit(true);
 		}
 
 		@Override

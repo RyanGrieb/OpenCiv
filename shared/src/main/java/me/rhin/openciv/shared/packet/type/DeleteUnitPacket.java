@@ -37,7 +37,7 @@ public class DeleteUnitPacket extends Packet {
 	}
 
 	public void setKilled(boolean killed) {
-		this.killed = true;
+		this.killed = killed;
 	}
 
 	public int getTileGridX() {

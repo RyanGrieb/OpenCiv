@@ -79,20 +79,14 @@ public class Settler extends UnitItem {
 			playerOwner.addCity(city);
 			playerOwner.setSelectedUnit(null);
 
-			playerOwner.removeUnit(this);
-			tile.removeUnit(this);
-			kill();
+			deleteUnit(false);
 
 			SettleCityPacket settleCityPacket = new SettleCityPacket();
 			settleCityPacket.setCityName(cityName);
 			settleCityPacket.setOwner(playerOwner.getName());
 			settleCityPacket.setLocation(standingTile.getGridX(), standingTile.getGridY());
 
-			DeleteUnitPacket deleteUnitPacket = new DeleteUnitPacket();
-			deleteUnitPacket.setUnit(getID(), standingTile.getGridX(), standingTile.getGridY());
-
 			for (Player player : Server.getInstance().getPlayers()) {
-				player.sendPacket(json.toJson(deleteUnitPacket));
 				player.sendPacket(json.toJson(settleCityPacket));
 
 				for (Tile territoryTile : city.getTerritory()) {

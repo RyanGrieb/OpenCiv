@@ -53,6 +53,11 @@ public abstract class AbstractPlayer {
 		// Clear previous values other than accumulative ones.
 		statLine.clearNonAccumulative();
 
+		if (ownedCities.size() > 0)
+			for (Unit unit : ownedUnits) {
+				statLine.mergeStatLine(unit.getMaintenance());
+			}
+
 		for (City city : ownedCities) {
 			statLine.mergeStatLineExcluding(city.getStatLine(), StatType.CITY_EXCLUSIVE);
 		}

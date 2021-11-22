@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Random;
 
 import com.badlogic.gdx.utils.Json;
 
@@ -38,6 +39,7 @@ public abstract class Unit implements AttackableEntity, TileObserver, NextTurnLi
 
 	private ArrayList<Tile> observedTiles;
 	protected StatLine combatStrength;
+	private StatLine maintenance;
 	protected Tile standingTile;
 	protected int id;
 	private Tile[][] cameFrom;
@@ -58,12 +60,14 @@ public abstract class Unit implements AttackableEntity, TileObserver, NextTurnLi
 		this.id = unitID++;
 		this.observedTiles = new ArrayList<>();
 		this.combatStrength = new StatLine();
+		this.maintenance = new StatLine();
 		this.playerOwner = playerOwner;
 		this.standingTile = standingTile;
 		this.movement = getMaxMovement();
 		this.health = 100;
 		this.turnsSinceCombat = 0;
 		this.alive = true;
+
 		setPosition(standingTile.getVectors()[0].x - standingTile.getWidth() / 2, standingTile.getVectors()[0].y + 4);
 		setSize(standingTile.getWidth(), standingTile.getHeight());
 
@@ -71,6 +75,8 @@ public abstract class Unit implements AttackableEntity, TileObserver, NextTurnLi
 		Server.getInstance().getEventManager().addListener(NextTurnListener.class, this);
 
 		playerOwner.addOwnedUnit(this);
+		
+		setMaintenance(0.25F);
 	}
 
 	public abstract float getMovementCost(Tile prevTile, Tile adjTile);
@@ -86,6 +92,16 @@ public abstract class Unit implements AttackableEntity, TileObserver, NextTurnLi
 			return;
 
 		this.movement = getMaxMovement();
+
+		// Handle maintenance penalty
+		if (playerOwner.getStatLine().getStatValue(Stat.GOLD) < 0) {
+			Random rnd = new Random();
+			int num = rnd.nextInt(10);
+			if (num == 0) {
+				deleteUnit(true);
+				return;
+			}
+		}
 
 		// Handle health regen
 		if (turnsSinceCombat < 2 || health >= 100) {
@@ -291,11 +307,11 @@ public abstract class Unit implements AttackableEntity, TileObserver, NextTurnLi
 
 				float tenativeGScore = gScores[current.getGridX()][current.getGridY()]
 						+ getMovementCost(current, adjTile);
-				
+
 				if (current.getEnemyAttackableEntity(playerOwner) != null) {
 					tenativeGScore += 100;
 				}
-				
+
 				if (tenativeGScore < gScores[adjTile.getGridX()][adjTile.getGridY()]) {
 
 					cameFrom[adjTile.getGridX()][adjTile.getGridY()] = current;
@@ -436,7 +452,7 @@ public abstract class Unit implements AttackableEntity, TileObserver, NextTurnLi
 		return cameFrom;
 	}
 
-	public void kill() {
+	protected void onKill() {
 		clearListeners();
 		alive = false;
 	}
@@ -517,19 +533,7 @@ public abstract class Unit implements AttackableEntity, TileObserver, NextTurnLi
 			if (targetEntity instanceof Unit && targetEntity.getTile().getCity() == null) {
 
 				Unit targetUnit = (Unit) targetEntity;
-				targetUnit.getStandingTile().removeUnit(targetUnit);
-				targetUnit.kill();
-				targetUnit.getPlayerOwner().removeUnit(targetUnit);
-
-				// FIXME: Redundant code.
-				DeleteUnitPacket removeUnitPacket = new DeleteUnitPacket();
-				removeUnitPacket.setUnit(targetUnit.getID(), targetUnit.getStandingTile().getGridX(),
-						targetUnit.getStandingTile().getGridY());
-				removeUnitPacket.setKilled(true);
-
-				for (Player player : players) {
-					player.sendPacket(json.toJson(removeUnitPacket));
-				}
+				targetUnit.deleteUnit(true);
 			}
 
 			// When we capture a city
@@ -571,19 +575,8 @@ public abstract class Unit implements AttackableEntity, TileObserver, NextTurnLi
 
 					if (!cityUnit.getPlayerOwner().equals(this.getPlayerOwner())) {
 
+						cityUnit.deleteUnit(true);
 						unitIterator.remove();
-						city.getPlayerOwner().removeUnit(cityUnit);
-						cityUnit.kill();
-
-						DeleteUnitPacket removeUnitPacket = new DeleteUnitPacket();
-						removeUnitPacket.setUnit(cityUnit.getID(), cityUnit.getStandingTile().getGridX(),
-								cityUnit.getStandingTile().getGridY());
-						removeUnitPacket.setKilled(true);
-
-						for (Player player : players) {
-							player.sendPacket(json.toJson(removeUnitPacket));
-						}
-
 					}
 				}
 
@@ -592,20 +585,27 @@ public abstract class Unit implements AttackableEntity, TileObserver, NextTurnLi
 		}
 
 		if (this.getHealth() <= 0) {
-			this.getStandingTile().removeUnit(this);
-			this.playerOwner.removeUnit(this);
-			this.kill();
-
-			DeleteUnitPacket removeUnitPacket = new DeleteUnitPacket();
-			removeUnitPacket.setUnit(this.getID(), this.getStandingTile().getGridX(),
-					this.getStandingTile().getGridY());
-			removeUnitPacket.setKilled(true);
-
-			for (Player player : players) {
-				player.sendPacket(json.toJson(removeUnitPacket));
-			}
-
+			deleteUnit(true);
 		}
+	}
+
+	//FIXME: Convey playerKill variable better. It's confusing
+	public void deleteUnit(boolean playerKill) {
+		standingTile.removeUnit(this);
+		onKill();
+		playerOwner.removeUnit(this);
+
+		// FIXME: Redundant code.
+		DeleteUnitPacket removeUnitPacket = new DeleteUnitPacket();
+		removeUnitPacket.setUnit(id, standingTile.getGridX(), standingTile.getGridY());
+		removeUnitPacket.setKilled(playerKill);
+
+		Json json = new Json();
+		for (Player player : Server.getInstance().getPlayers()) {
+			player.sendPacket(json.toJson(removeUnitPacket));
+		}
+		
+		playerOwner.updateOwnedStatlines(false);
 	}
 
 	public boolean canAttack(AttackableEntity attackableEntity) {
@@ -679,4 +679,12 @@ public abstract class Unit implements AttackableEntity, TileObserver, NextTurnLi
 		}
 	}
 
+	protected void setMaintenance(float amount) {
+		maintenance.setValue(Stat.MAINTENANCE, amount);
+		playerOwner.updateOwnedStatlines(false);
+	}
+
+	public StatLine getMaintenance() {
+		return maintenance;
+	}
 }

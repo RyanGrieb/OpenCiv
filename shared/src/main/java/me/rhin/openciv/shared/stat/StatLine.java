@@ -78,7 +78,7 @@ public class StatLine {
 	}
 
 	public void addValue(Stat stat, float value) {
-		
+
 		if (!statValues.containsKey(stat))
 			statValues.put(stat, new StatValue(value));
 		else
@@ -86,10 +86,13 @@ public class StatLine {
 	}
 
 	public void subValue(Stat stat, float value) {
-		if (!statValues.containsKey(stat))
-			statValues.put(stat, new StatValue(value));
-		else
-			statValues.get(stat).subValue(value);
+		if (!statValues.containsKey(stat)) {
+			statValues.put(stat, new StatValue(0));
+			subValue(stat, value);
+			return;
+		}
+
+		statValues.get(stat).subValue(value);
 	}
 
 	public void setValue(Stat stat, float value) {
@@ -140,7 +143,7 @@ public class StatLine {
 	public void clearNonAccumulative() {
 		ArrayList<Stat> accumulativeStats = new ArrayList<>();
 		for (Stat stat : Stat.values()) {
-			
+
 			if (stat.isGained()) {
 				accumulativeStats.add(stat.getAddedStat());
 			}
