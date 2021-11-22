@@ -72,7 +72,7 @@ public abstract class RangedUnit extends Unit {
 
 				Unit targetUnit = (Unit) targetEntity;
 				
-				targetUnit.deleteUnit(true);
+				targetUnit.deleteUnit(DeleteUnitOptions.PLAYER_KILL);
 			}
 		}
 

@@ -13,6 +13,7 @@ import me.rhin.openciv.server.game.map.tile.Tile;
 import me.rhin.openciv.server.game.map.tile.TileType.TileProperty;
 import me.rhin.openciv.server.game.research.type.AnimalHusbandryTech;
 import me.rhin.openciv.server.game.unit.AttackableEntity;
+import me.rhin.openciv.server.game.unit.DeleteUnitOptions;
 import me.rhin.openciv.server.game.unit.TraderUnit;
 import me.rhin.openciv.server.game.unit.UnitItem;
 import me.rhin.openciv.shared.packet.type.DeleteUnitPacket;
@@ -44,7 +45,7 @@ public class Caravan extends UnitItem {
 			attackingPlayer.getStatLine().addValue(Stat.GOLD, 100);
 			attackingPlayer.updateOwnedStatlines(false);
 
-			deleteUnit(true);
+			deleteUnit(DeleteUnitOptions.PLAYER_KILL);
 		}
 
 		@Override

@@ -11,8 +11,8 @@ public class Palace extends Building {
 
 		this.statLine.addValue(Stat.HERITAGE_GAIN, 1);
 		this.statLine.addValue(Stat.GOLD_GAIN, 3);
-		this.statLine.addValue(Stat.SCIENCE_GAIN, 3);
-		this.statLine.addValue(Stat.PRODUCTION_GAIN, 3);
+		this.statLine.addValue(Stat.SCIENCE_GAIN, 999);
+		this.statLine.addValue(Stat.PRODUCTION_GAIN, 999);
 	}
 
 	@Override

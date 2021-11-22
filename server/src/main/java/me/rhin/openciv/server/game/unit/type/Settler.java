@@ -14,6 +14,7 @@ import me.rhin.openciv.server.game.map.tile.Tile;
 import me.rhin.openciv.server.game.map.tile.TileType;
 import me.rhin.openciv.server.game.map.tile.TileType.TileProperty;
 import me.rhin.openciv.server.game.unit.AttackableEntity;
+import me.rhin.openciv.server.game.unit.DeleteUnitOptions;
 import me.rhin.openciv.server.game.unit.Unit;
 import me.rhin.openciv.server.game.unit.UnitItem;
 import me.rhin.openciv.server.listener.ServerSettleCityListener.ServerSettleCityEvent;
@@ -79,7 +80,7 @@ public class Settler extends UnitItem {
 			playerOwner.addCity(city);
 			playerOwner.setSelectedUnit(null);
 
-			deleteUnit(false);
+			deleteUnit(DeleteUnitOptions.SERVER_DELETE);
 
 			SettleCityPacket settleCityPacket = new SettleCityPacket();
 			settleCityPacket.setCityName(cityName);

@@ -28,6 +28,7 @@ import me.rhin.openciv.server.game.map.tile.TileType;
 import me.rhin.openciv.server.game.map.tile.TileType.TileProperty;
 import me.rhin.openciv.server.game.options.GameOptionType;
 import me.rhin.openciv.server.game.unit.AttackableEntity;
+import me.rhin.openciv.server.game.unit.DeleteUnitOptions;
 import me.rhin.openciv.server.game.unit.RangedUnit;
 import me.rhin.openciv.server.game.unit.Unit;
 import me.rhin.openciv.server.game.unit.type.Builder.BuilderUnit;
@@ -57,7 +58,6 @@ import me.rhin.openciv.server.listener.WorkTileListener;
 import me.rhin.openciv.shared.packet.type.AddUnitPacket;
 import me.rhin.openciv.shared.packet.type.BuyProductionItemPacket;
 import me.rhin.openciv.shared.packet.type.CombatPreviewPacket;
-import me.rhin.openciv.shared.packet.type.DeleteUnitPacket;
 import me.rhin.openciv.shared.packet.type.EndTurnPacket;
 import me.rhin.openciv.shared.packet.type.FetchPlayerPacket;
 import me.rhin.openciv.shared.packet.type.GameStartPacket;
@@ -590,17 +590,7 @@ public class InGameState extends GameState implements DisconnectListener, Select
 		if (embarkTile == null)
 			return;
 
-		unit.getStandingTile().removeUnit(unit);
-		unit.getPlayerOwner().removeUnit(unit);
-		// unit.kill();
-
-		DeleteUnitPacket removeUnitPacket = new DeleteUnitPacket();
-		removeUnitPacket.setUnit(unit.getID(), unit.getStandingTile().getGridX(), unit.getStandingTile().getGridY());
-
-		Json json = new Json();
-		for (Player player : players) {
-			player.sendPacket(json.toJson(removeUnitPacket));
-		}
+		unit.deleteUnit(DeleteUnitOptions.SERVER_DELETE, DeleteUnitOptions.KEEP_LISTENERS);
 
 		TransportShipUnit transportShip = new TransportShipUnit(unitPlayer, unit, embarkTile);
 		embarkTile.addUnit(transportShip);
@@ -609,6 +599,7 @@ public class InGameState extends GameState implements DisconnectListener, Select
 		addUnitPacket.setUnit(unitPlayer.getName(), transportShip.getName(), transportShip.getID(),
 				embarkTile.getGridX(), embarkTile.getGridY());
 
+		Json json = new Json();
 		for (Player player : Server.getInstance().getPlayers())
 			player.sendPacket(json.toJson(addUnitPacket));
 	}
@@ -636,7 +627,7 @@ public class InGameState extends GameState implements DisconnectListener, Select
 		if (disembarkTile == null)
 			return;
 
-		transportUnit.deleteUnit(false);
+		transportUnit.deleteUnit(DeleteUnitOptions.SERVER_DELETE);
 
 		Unit unit = transportShip.getTransportUnit();
 		unit.setMovement(0);

@@ -2,6 +2,7 @@ package me.rhin.openciv.server.game.unit;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
@@ -75,7 +76,7 @@ public abstract class Unit implements AttackableEntity, TileObserver, NextTurnLi
 		Server.getInstance().getEventManager().addListener(NextTurnListener.class, this);
 
 		playerOwner.addOwnedUnit(this);
-		
+
 		setMaintenance(0.25F);
 	}
 
@@ -98,7 +99,7 @@ public abstract class Unit implements AttackableEntity, TileObserver, NextTurnLi
 			Random rnd = new Random();
 			int num = rnd.nextInt(10);
 			if (num == 0) {
-				deleteUnit(true);
+				deleteUnit(DeleteUnitOptions.PLAYER_KILL);
 				return;
 			}
 		}
@@ -452,7 +453,11 @@ public abstract class Unit implements AttackableEntity, TileObserver, NextTurnLi
 		return cameFrom;
 	}
 
-	protected void onKill() {
+	protected void onKill(ArrayList<DeleteUnitOptions> optionList) {
+		// Called if we want to store this unit & re-add later.
+		if (optionList.contains(DeleteUnitOptions.KEEP_LISTENERS))
+			return;
+
 		clearListeners();
 		alive = false;
 	}
@@ -533,7 +538,7 @@ public abstract class Unit implements AttackableEntity, TileObserver, NextTurnLi
 			if (targetEntity instanceof Unit && targetEntity.getTile().getCity() == null) {
 
 				Unit targetUnit = (Unit) targetEntity;
-				targetUnit.deleteUnit(true);
+				targetUnit.deleteUnit(DeleteUnitOptions.PLAYER_KILL);
 			}
 
 			// When we capture a city
@@ -575,7 +580,7 @@ public abstract class Unit implements AttackableEntity, TileObserver, NextTurnLi
 
 					if (!cityUnit.getPlayerOwner().equals(this.getPlayerOwner())) {
 
-						cityUnit.deleteUnit(true);
+						cityUnit.deleteUnit(DeleteUnitOptions.PLAYER_KILL);
 						unitIterator.remove();
 					}
 				}
@@ -585,26 +590,33 @@ public abstract class Unit implements AttackableEntity, TileObserver, NextTurnLi
 		}
 
 		if (this.getHealth() <= 0) {
-			deleteUnit(true);
+			deleteUnit(DeleteUnitOptions.PLAYER_KILL);
 		}
 	}
 
-	//FIXME: Convey playerKill variable better. It's confusing
-	public void deleteUnit(boolean playerKill) {
+	// FIXME: Convey playerKill variable better. It's confusing
+	public void deleteUnit(DeleteUnitOptions... options) {
+
+		ArrayList<DeleteUnitOptions> optionList = new ArrayList<>();
+		Collections.addAll(optionList, options);
+
 		standingTile.removeUnit(this);
-		onKill();
+		onKill(optionList);
 		playerOwner.removeUnit(this);
 
 		// FIXME: Redundant code.
 		DeleteUnitPacket removeUnitPacket = new DeleteUnitPacket();
 		removeUnitPacket.setUnit(id, standingTile.getGridX(), standingTile.getGridY());
+
+		boolean playerKill = optionList.contains(DeleteUnitOptions.PLAYER_KILL);
+
 		removeUnitPacket.setKilled(playerKill);
 
 		Json json = new Json();
 		for (Player player : Server.getInstance().getPlayers()) {
 			player.sendPacket(json.toJson(removeUnitPacket));
 		}
-		
+
 		playerOwner.updateOwnedStatlines(false);
 	}
 

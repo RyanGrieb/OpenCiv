@@ -24,9 +24,11 @@ import me.rhin.openciv.game.unit.actions.type.PastureAction;
 import me.rhin.openciv.game.unit.actions.type.PlantationAction;
 import me.rhin.openciv.game.unit.actions.type.QuarryAction;
 import me.rhin.openciv.game.unit.actions.type.RoadAction;
+import me.rhin.openciv.listener.MoveUnitListener;
 import me.rhin.openciv.listener.RemoveTileTypeListener;
 import me.rhin.openciv.listener.SetTileTypeListener;
 import me.rhin.openciv.listener.WorkTileListener;
+import me.rhin.openciv.shared.packet.type.MoveUnitPacket;
 import me.rhin.openciv.shared.packet.type.NextTurnPacket;
 import me.rhin.openciv.shared.packet.type.RemoveTileTypePacket;
 import me.rhin.openciv.shared.packet.type.SetTileTypePacket;
@@ -39,7 +41,7 @@ public class Builder extends UnitItem {
 	}
 
 	public static class BuilderUnit extends Unit
-			implements WorkTileListener, SetTileTypeListener, RemoveTileTypeListener {
+			implements WorkTileListener, SetTileTypeListener, RemoveTileTypeListener, MoveUnitListener {
 
 		private ImprovementType improvementType;
 		private boolean building;
@@ -59,10 +61,10 @@ public class Builder extends UnitItem {
 			customActions.add(new LumberMillAction(this));
 			this.building = false;
 
-			// FIXME: REALLY should remove these listeners when this unit gets destroyed
 			Civilization.getInstance().getEventManager().addListener(WorkTileListener.class, this);
 			Civilization.getInstance().getEventManager().addListener(SetTileTypeListener.class, this);
 			Civilization.getInstance().getEventManager().addListener(RemoveTileTypeListener.class, this);
+			Civilization.getInstance().getEventManager().addListener(MoveUnitListener.class, this);
 		}
 
 		@Override
@@ -135,6 +137,21 @@ public class Builder extends UnitItem {
 				super.onNextTurn(packet);
 			else // TODO: Make this a method in Unit class if we need other methods called here
 				movement = getMaxMovement();
+		}
+
+		@Override
+		public void onUnitMove(MoveUnitPacket packet) {
+			Unit unit = Civilization.getInstance().getGame().getMap().getTiles()[packet.getTargetGridX()][packet
+					.getTargetGridY()].getUnitFromID(packet.getUnitID());
+
+			if (!unit.equals(this))
+				return;
+
+			if (standingTile.getAppliedImprovementTurns() > 0) {
+				building = false;
+				improvementType = null;
+				standingTile.setAppliedTurns(0);
+			}
 		}
 
 		public void setBuilding(boolean building) {

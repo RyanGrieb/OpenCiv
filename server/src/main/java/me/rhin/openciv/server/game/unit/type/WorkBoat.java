@@ -13,6 +13,7 @@ import me.rhin.openciv.server.game.map.tile.Tile;
 import me.rhin.openciv.server.game.map.tile.TileType.TileProperty;
 import me.rhin.openciv.server.game.map.tile.improvement.TileImprovement;
 import me.rhin.openciv.server.game.research.type.SailingTech;
+import me.rhin.openciv.server.game.unit.DeleteUnitOptions;
 import me.rhin.openciv.server.game.unit.Unit;
 import me.rhin.openciv.server.game.unit.UnitItem;
 import me.rhin.openciv.shared.packet.type.DeleteUnitPacket;
@@ -65,7 +66,7 @@ public class WorkBoat extends UnitItem {
 			}
 
 			// Delete the workboat
-			deleteUnit(false);
+			deleteUnit(DeleteUnitOptions.SERVER_DELETE);
 
 		}
 

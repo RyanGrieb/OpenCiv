@@ -1,5 +1,6 @@
 package me.rhin.openciv.server.game.unit.type;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -9,6 +10,7 @@ import me.rhin.openciv.server.game.map.tile.Tile;
 import me.rhin.openciv.server.game.map.tile.TileType.TileProperty;
 import me.rhin.openciv.server.game.map.tile.improvement.TileImprovement;
 import me.rhin.openciv.server.game.unit.AttackableEntity;
+import me.rhin.openciv.server.game.unit.DeleteUnitOptions;
 import me.rhin.openciv.server.game.unit.Unit;
 import me.rhin.openciv.server.game.unit.UnitItem;
 import me.rhin.openciv.shared.stat.Stat;
@@ -63,6 +65,14 @@ public class Builder extends UnitItem {
 		@Override
 		public boolean isUnitCapturable(AbstractPlayer attackingEntity) {
 			return true;
+		}
+
+		@Override
+		protected void onKill(ArrayList<DeleteUnitOptions> optionList) {
+			super.onKill(optionList);
+
+			building = false;
+			improvement = null;
 		}
 
 		public void setBuilding(boolean building) {
