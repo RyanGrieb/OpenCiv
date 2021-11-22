@@ -12,7 +12,8 @@ public class LockedCitizenWorker extends CitizenWorker {
 
 	@Override
 	public void onClick() {
-		city.removeCitizenWorkerFromTile(tile);
+		city.setCitizenTileWorker(new AssignedCitizenWorker(city, tile));
+		city.updateWorkedTiles();
 	}
 	
 	@Override

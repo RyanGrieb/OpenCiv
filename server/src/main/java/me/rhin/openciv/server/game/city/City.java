@@ -4,7 +4,6 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map.Entry;
 import java.util.Random;
@@ -24,9 +23,7 @@ import me.rhin.openciv.server.game.city.citizen.CitizenWorker;
 import me.rhin.openciv.server.game.city.citizen.CityCenterCitizenWorker;
 import me.rhin.openciv.server.game.city.citizen.EmptyCitizenWorker;
 import me.rhin.openciv.server.game.city.citizen.LockedCitizenWorker;
-import me.rhin.openciv.server.game.city.specialist.Specialist;
 import me.rhin.openciv.server.game.city.specialist.SpecialistContainer;
-import me.rhin.openciv.server.game.city.specialist.UnemployedSpecialist;
 import me.rhin.openciv.server.game.map.tile.Tile;
 import me.rhin.openciv.server.game.map.tile.TileObserver;
 import me.rhin.openciv.server.game.map.tile.TileType.TileProperty;
@@ -44,7 +41,6 @@ import me.rhin.openciv.shared.packet.type.BuildingConstructedPacket;
 import me.rhin.openciv.shared.packet.type.CityStatUpdatePacket;
 import me.rhin.openciv.shared.packet.type.ClickSpecialistPacket;
 import me.rhin.openciv.shared.packet.type.ClickWorkedTilePacket;
-import me.rhin.openciv.shared.packet.type.RemoveSpecialistFromContainerPacket;
 import me.rhin.openciv.shared.packet.type.SetCitizenTileWorkerPacket;
 import me.rhin.openciv.shared.packet.type.SetCitizenTileWorkerPacket.WorkerType;
 import me.rhin.openciv.shared.packet.type.TerritoryGrowPacket;
@@ -52,8 +48,8 @@ import me.rhin.openciv.shared.stat.Stat;
 import me.rhin.openciv.shared.stat.StatLine;
 import me.rhin.openciv.shared.util.MathHelper;
 
-public class City implements AttackableEntity, SpecialistContainer, TileObserver, NextTurnListener,
-		ClickSpecialistListener, ClickWorkedTileListener {
+public class City
+		implements AttackableEntity, TileObserver, NextTurnListener, ClickSpecialistListener, ClickWorkedTileListener {
 
 	private AbstractPlayer playerOwner;
 	private String name;
@@ -64,7 +60,6 @@ public class City implements AttackableEntity, SpecialistContainer, TileObserver
 	private HashMap<Tile, CitizenWorker> citizenWorkers;
 	// FIXME: I don't believe we need an array here, we might be able to use just an
 	// int.
-	private ArrayList<Specialist> unemployedSpecialists;
 	private ProducibleItemManager producibleItemManager;
 	private StatLine statLine;
 	private float maxHealth;
@@ -78,7 +73,6 @@ public class City implements AttackableEntity, SpecialistContainer, TileObserver
 		this.territory = new ArrayList<>();
 		this.buildings = new ArrayList<>();
 		this.citizenWorkers = new HashMap<>();
-		this.unemployedSpecialists = new ArrayList<>();
 		this.producibleItemManager = new ProducibleItemManager(this);
 		this.statLine = new StatLine();
 		this.maxHealth = 300;
@@ -101,8 +95,6 @@ public class City implements AttackableEntity, SpecialistContainer, TileObserver
 		setPopulation(1);
 		statLine.setValue(Stat.EXPANSION_REQUIREMENT, 10 + 10 * (float) Math.pow(territory.size() - 6, 1.3));
 		// Add our two specialists, one from pop, one city center
-		addSpecialist();
-		addSpecialist();
 
 		Server.getInstance().getEventManager().addListener(NextTurnListener.class, this);
 		Server.getInstance().getEventManager().addListener(ClickWorkedTileListener.class, this);
@@ -147,39 +139,6 @@ public class City implements AttackableEntity, SpecialistContainer, TileObserver
 	}
 
 	@Override
-	public void addSpecialist() {
-		unemployedSpecialists.add(new UnemployedSpecialist(this));
-	}
-
-	@Override
-	public void removeSpecialist() {
-		unemployedSpecialists.remove(0);
-
-		ArrayList<Tile> topTiles = getTopWorkableTiles();
-
-		Tile topTile = null;
-
-		for (Tile tile : topTiles) {
-			if (citizenWorkers.containsKey(tile) && !citizenWorkers.get(tile).isValidTileWorker()) {
-				topTile = tile;
-				break;
-			}
-		}
-
-		setCitizenTileWorker(new AssignedCitizenWorker(this, topTile));
-
-		statLine.mergeStatLine(getTileStatLine(topTile));
-
-		Json json = new Json();
-
-		CityStatUpdatePacket statUpdatePacket = new CityStatUpdatePacket();
-		for (Stat stat : this.statLine.getStatValues().keySet()) {
-			statUpdatePacket.addStat(name, stat.name(), this.statLine.getStatValues().get(stat).getValue());
-		}
-		playerOwner.sendPacket(json.toJson(statUpdatePacket));
-	}
-
-	@Override
 	public void onNextTurn() {
 		if (!playerOwner.hasConnection())
 			return;
@@ -196,14 +155,14 @@ public class City implements AttackableEntity, SpecialistContainer, TileObserver
 		if (growthTurns < 1 && gainedFood >= 0) {
 
 			setPopulation((int) statLine.getStatValue(Stat.POPULATION) + 1);
-
-			addSpecialist();
 			updateWorkedTiles();
+
 		} else if (gainedFood < 0) {
 			int starvingTurns = (surplusFood / Math.abs(gainedFood)) + 1;
 
 			if (starvingTurns <= 0) {
 				setPopulation((int) statLine.getStatValue(Stat.POPULATION) - 1);
+				removeAnyWorker();
 				updateWorkedTiles();
 			}
 		}
@@ -271,7 +230,9 @@ public class City implements AttackableEntity, SpecialistContainer, TileObserver
 		clickWorkedTile(Server.getInstance().getMap().getTiles()[packet.getGridX()][packet.getGridY()]);
 	}
 
-	// TODO: Move to city class
+	/**
+	 * Called when the player clicks on a builder specialist.
+	 */
 	@Override
 	public void onClickSpecialist(WebSocket conn, ClickSpecialistPacket packet) {
 
@@ -281,7 +242,6 @@ public class City implements AttackableEntity, SpecialistContainer, TileObserver
 			return;
 
 		ArrayList<SpecialistContainer> specialistContainers = new ArrayList<>();
-		specialistContainers.add(city);
 
 		for (Building building : getBuildings())
 			if (building instanceof SpecialistContainer)
@@ -289,7 +249,7 @@ public class City implements AttackableEntity, SpecialistContainer, TileObserver
 
 		for (SpecialistContainer container : specialistContainers)
 			if (container.getName().equals(packet.getContainerName()))
-				removeSpecialistFromContainer(container);
+				container.removeSpecialistFromContainer();
 	}
 
 	@Override
@@ -386,14 +346,13 @@ public class City implements AttackableEntity, SpecialistContainer, TileObserver
 
 	public void updateWorkedTiles() {
 
-		// Make all citizens unemployed
+		// Set all workers to empty
 		for (Tile tile : territory) {
 			CitizenWorker citizenWorker = citizenWorkers.get(tile);
 			if (citizenWorker.getWorkerType() != WorkerType.LOCKED) {
 
 				if (citizenWorker.isValidTileWorker()) {
 					statLine.reduceStatLine(getTileStatLine(citizenWorker.getTile()));
-					addSpecialist();
 				}
 
 				setCitizenTileWorker(new EmptyCitizenWorker(this, citizenWorker.getTile()));
@@ -401,7 +360,6 @@ public class City implements AttackableEntity, SpecialistContainer, TileObserver
 		}
 
 		setCitizenTileWorker(new CityCenterCitizenWorker(this, originTile));
-		unemployedSpecialists.remove(0);
 
 		statLine.mergeStatLine(getTileStatLine(originTile));
 
@@ -416,26 +374,8 @@ public class City implements AttackableEntity, SpecialistContainer, TileObserver
 			// FIXME: This is slow, have bulk packets in the future
 			setCitizenTileWorker(new AssignedCitizenWorker(this, tile));
 
-			if (unemployedSpecialists.size() > 0)
-				unemployedSpecialists.remove(0);
-
 			statLine.mergeStatLine(getTileStatLine(tile));
 		}
-
-		// Assume we lost a citizen, and remove a specialist here. (For starving cities)
-		if (unemployedSpecialists.size() > 0) {
-
-			// FIXME: This is a workaround to avoid send an unnecessary packet from
-			// removeSpecialistFromContainer()
-
-			RemoveSpecialistFromContainerPacket packet = new RemoveSpecialistFromContainerPacket();
-			packet.setContainer(name, name, -1);
-
-			Json json = new Json();
-			playerOwner.sendPacket(json.toJson(packet));
-		}
-
-		unemployedSpecialists.clear();
 
 		Json json = new Json();
 
@@ -473,38 +413,31 @@ public class City implements AttackableEntity, SpecialistContainer, TileObserver
 		Json json = new Json();
 		playerOwner.sendPacket(json.toJson(cityStatUpdatePacket));
 		playerOwner.updateOwnedStatlines(false);
-
-		addSpecialistToContainer(this);
 	}
 
 	public void lockCitizenAtTile(Tile tile) {
 		// Take non-locked citizens or unemployed citizens and assign them to the tile
 
-		if (unemployedSpecialists.size() < 1) {
+		if (citizenWorkers.get(tile).getWorkerType() == WorkerType.ASSIGNED) {
+			removeCitizenWorkerFromTile(tile);
+		} else {
 
-			if (citizenWorkers.get(tile).getWorkerType() == WorkerType.ASSIGNED) {
-				removeCitizenWorkerFromTile(tile);
-			} else
-				for (Entry<Tile, CitizenWorker> entrySet : citizenWorkers.entrySet()) {
-					if (entrySet.getValue() instanceof AssignedCitizenWorker) {
-						// FIXME: Don't send packets in this instance since we just remove it
-						// immediatly.
-						removeCitizenWorkerFromTile(entrySet.getKey());
-						break;
-					}
+			boolean removedWorker = false;
+
+			for (Entry<Tile, CitizenWorker> entrySet : citizenWorkers.entrySet()) {
+				if (entrySet.getValue() instanceof AssignedCitizenWorker) {
+					// FIXME: Don't send packets in this instance since we just remove it
+					// immediatly.
+					removeCitizenWorkerFromTile(entrySet.getKey());
+					removedWorker = true;
+					break;
 				}
+			}
+
+			// If we didn't find any worker to remove. Stop.
+			if (!removedWorker)
+				return;
 		}
-
-		if (unemployedSpecialists.size() < 1)
-			return;
-
-		// Remove unemployed specialist
-		unemployedSpecialists.remove(0);
-
-		RemoveSpecialistFromContainerPacket packet = new RemoveSpecialistFromContainerPacket();
-		packet.setContainer(name, name, 1);
-		Json json = new Json();
-		playerOwner.sendPacket(json.toJson(packet));
 
 		setCitizenTileWorker(new LockedCitizenWorker(this, tile));
 
@@ -516,11 +449,13 @@ public class City implements AttackableEntity, SpecialistContainer, TileObserver
 			cityStatUpdatePacket.addStat(name, stat.name(), this.statLine.getStatValues().get(stat).getValue());
 		}
 
+		Json json = new Json();
 		playerOwner.sendPacket(json.toJson(cityStatUpdatePacket));
 		playerOwner.updateOwnedStatlines(false);
 	}
 
 	public void addSpecialistToContainer(SpecialistContainer specialistContainer) {
+		System.out.println("Adding unemployed citizen - PLAYER");
 		specialistContainer.addSpecialist();
 
 		AddSpecialistToContainerPacket packet = new AddSpecialistToContainerPacket();
@@ -530,28 +465,12 @@ public class City implements AttackableEntity, SpecialistContainer, TileObserver
 		playerOwner.sendPacket(json.toJson(packet));
 	}
 
-	public void removeSpecialistFromContainer(SpecialistContainer specialistContainer) {
-		specialistContainer.removeSpecialist();
-
-		RemoveSpecialistFromContainerPacket packet = new RemoveSpecialistFromContainerPacket();
-		packet.setContainer(name, specialistContainer.getName(), 1);
-
-		Json json = new Json();
-		playerOwner.sendPacket(json.toJson(packet));
-
-		playerOwner.updateOwnedStatlines(false);
-	}
-
 	public AbstractPlayer getPlayerOwner() {
 		return playerOwner;
 	}
 
 	public HashMap<Tile, CitizenWorker> getCitizenWorkers() {
 		return citizenWorkers;
-	}
-
-	public ArrayList<Specialist> getUnemployedSpecialists() {
-		return unemployedSpecialists;
 	}
 
 	public String getName() {
@@ -651,6 +570,40 @@ public class City implements AttackableEntity, SpecialistContainer, TileObserver
 		return tileStatLine;
 	}
 
+	public void addMorale(float morale) {
+		setMorale(statLine.getStatValue(Stat.MORALE) + morale);
+	}
+
+	public void subMorale(float morale) {
+		setMorale(statLine.getStatValue(Stat.MORALE) - morale);
+	}
+
+	public void setMorale(float morale) {
+		// FIXME: Morale can sometimes be > 100 on the first few turns.
+		// morale = MathUtils.clamp(morale, 0, 100);
+
+		statLine.setValue(Stat.MORALE, morale);
+
+		float moraleOffset = (morale >= 70 ? (morale - 70) / 100 : -((70 - morale) / 100));
+		statLine.setModifier(Stat.PRODUCTION_GAIN, moraleOffset);
+	}
+
+	public boolean isCoastal() {
+		for (Tile tile : originTile.getAdjTiles())
+			if (tile.containsTileProperty(TileProperty.WATER))
+				return true;
+
+		return false;
+	}
+
+	public <T extends Building> boolean containsBuilding(Class<T> buildingClass) {
+		for (Building building : buildings)
+			if (building.getClass() == buildingClass)
+				return true;
+
+		return false;
+	}
+
 	private ArrayList<Tile> getTopWorkableTiles() {
 		ArrayList<Tile> topTiles = new ArrayList<>();
 
@@ -741,48 +694,31 @@ public class City implements AttackableEntity, SpecialistContainer, TileObserver
 		if (amount > 0) {
 			Server.getInstance().getEventManager().fireEvent(new CityGrowthEvent(this));
 			statLine.addValue(Stat.SCIENCE_GAIN, 0.5F);
-			subMorale(10 * popDiff);
+			subMorale(5 * popDiff);
 		} else {
 			Server.getInstance().getEventManager().fireEvent(new CityStarveEvent(this));
 			statLine.subValue(Stat.SCIENCE_GAIN, 0.5F);
-			addMorale(10 * popDiff);
+			addMorale(5 * popDiff);
 		}
 
 		playerOwner.updateOwnedStatlines(false);
 	}
 
-	public void addMorale(float morale) {
-		setMorale(statLine.getStatValue(Stat.MORALE) + morale);
-	}
+	/**
+	 * Removes any available workers Building specialists, or tile workers.
+	 */
+	private void removeAnyWorker() {
+		// Remove a tile worker next if the city is still starving.
+		for (Entry<Tile, CitizenWorker> entrySet : citizenWorkers.entrySet()) {
+			if (entrySet.getValue().getWorkerType() == WorkerType.LOCKED
+					|| entrySet.getValue().getWorkerType() == WorkerType.ASSIGNED) {
 
-	public void subMorale(float morale) {
-		setMorale(statLine.getStatValue(Stat.MORALE) - morale);
-	}
+				removeCitizenWorkerFromTile(entrySet.getKey());
+				return;
+			}
+		}
 
-	public void setMorale(float morale) {
-		// FIXME: Morale can sometimes be > 100 on the first few turns.
-		// morale = MathUtils.clamp(morale, 0, 100);
-		
-		statLine.setValue(Stat.MORALE, morale);
-
-		float moraleOffset = (morale >= 70 ? (morale - 70) / 100 : -((70 - morale) / 100));
-		statLine.setModifier(Stat.PRODUCTION_GAIN, moraleOffset);
-	}
-
-	public boolean isCoastal() {
-		for (Tile tile : originTile.getAdjTiles())
-			if (tile.containsTileProperty(TileProperty.WATER))
-				return true;
-
-		return false;
-	}
-
-	public <T extends Building> boolean containsBuilding(Class<T> buildingClass) {
-		for (Building building : buildings)
-			if (building.getClass() == buildingClass)
-				return true;
-
-		return false;
+		// TODO: Remove specialists from buildings.
 	}
 
 	private int getCitizenWorkerAmountOfType(WorkerType workerType) {

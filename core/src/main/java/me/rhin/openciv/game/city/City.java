@@ -265,16 +265,26 @@ public class City extends Group implements AttackableEntity, TileObserver, Speci
 	public void addSpecialist(int amount) {
 		if (amount == -1) {
 			unemployedWorkerAmount = 0;
-		} else
+			System.out.println("Clear unemployed specialist");
+		} else {
 			unemployedWorkerAmount += amount;
+			System.out.println("Add unemployed specialist");
+		}
+
+		System.out.println(unemployedWorkerAmount);
 	}
 
 	@Override
 	public void removeSpecialist(int amount) {
-		if (amount == -1)
+		if (amount == -1) {
 			unemployedWorkerAmount = 0;
-		else
+			System.out.println("Clear unemployed specialist");
+		} else {
 			unemployedWorkerAmount -= amount;
+			System.out.println("Remove unemployed specialist");
+		}
+
+		System.out.println(unemployedWorkerAmount);
 	}
 
 	@Override

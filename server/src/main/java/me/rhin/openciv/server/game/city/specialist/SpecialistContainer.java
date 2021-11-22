@@ -4,7 +4,7 @@ public interface SpecialistContainer {
 
 	void addSpecialist();
 
-	void removeSpecialist();
+	void removeSpecialistFromContainer();
 
 	public String getName();
 }
