@@ -12,11 +12,13 @@ import me.rhin.openciv.server.game.unit.UnitItem.UnitType;
 public class TransportShipUnit extends Unit {
 
 	private Unit transportUnit;
+	private Tile prevTile;
 	
-	public TransportShipUnit(AbstractPlayer playerOwner, Unit transportUnit, Tile standingTile) {
+	public TransportShipUnit(AbstractPlayer playerOwner, Unit transportUnit, Tile standingTile, Tile prevTile) {
 		super(playerOwner, standingTile);
 		
 		this.transportUnit = transportUnit;
+		this.prevTile = prevTile;
 	}
 
 	@Override
@@ -38,5 +40,9 @@ public class TransportShipUnit extends Unit {
 
 	public Unit getTransportUnit() {
 		return transportUnit;
+	}
+	
+	public Tile getPrevTile() {
+		return prevTile;
 	}
 }

@@ -590,10 +590,10 @@ public class InGameState extends GameState implements DisconnectListener, Select
 		if (embarkTile == null)
 			return;
 
-		unit.deleteUnit(DeleteUnitOptions.SERVER_DELETE, DeleteUnitOptions.KEEP_LISTENERS);
-
-		TransportShipUnit transportShip = new TransportShipUnit(unitPlayer, unit, embarkTile);
+		TransportShipUnit transportShip = new TransportShipUnit(unitPlayer, unit, embarkTile, unit.getTile());
 		embarkTile.addUnit(transportShip);
+
+		unit.deleteUnit(DeleteUnitOptions.SERVER_DELETE, DeleteUnitOptions.KEEP_LISTENERS);
 
 		AddUnitPacket addUnitPacket = new AddUnitPacket();
 		addUnitPacket.setUnit(unitPlayer.getName(), transportShip.getName(), transportShip.getID(),
@@ -617,11 +617,37 @@ public class InGameState extends GameState implements DisconnectListener, Select
 		TransportShipUnit transportShip = (TransportShipUnit) transportUnit;
 
 		Tile disembarkTile = null;
+		ArrayList<Tile> disembarkTileCanidates = new ArrayList<>();
+		Tile prevTile = transportShip.getPrevTile();
 
 		for (Tile tile : transportShip.getTile().getAdjTiles()) {
 			if (!tile.containsTileProperty(TileProperty.WATER) && tile.getUnits().size() < 1
 					&& tile.getMovementCost(transportShip.getStandingTile()) < 1000)
+				disembarkTileCanidates.add(tile);
+		}
+
+		if (disembarkTileCanidates.size() < 1)
+			return;
+
+		disembarkTile = disembarkTileCanidates.get(0);
+
+		// > 1 tells us we went right < 1 tells us we went left.
+		float embarkXDiff = transportShip.getTile().getGridX() - prevTile.getGridX();
+
+		// Pick a tile that has the same + or - sign as embark diff
+		for (Tile tile : disembarkTileCanidates) {
+
+			float disembarkXDiff = tile.getGridX() - transportShip.getTile().getGridX();
+
+			if (embarkXDiff < 0 && disembarkXDiff < 0) {
 				disembarkTile = tile;
+				break;
+			}
+
+			if (embarkXDiff > 0 && disembarkXDiff > 0) {
+				disembarkTile = tile;
+				break;
+			}
 		}
 
 		if (disembarkTile == null)
