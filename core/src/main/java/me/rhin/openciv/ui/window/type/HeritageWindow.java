@@ -3,8 +3,6 @@ package me.rhin.openciv.ui.window.type;
 import java.util.ArrayList;
 import java.util.Collections;
 
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.utils.Align;
 
 import me.rhin.openciv.Civilization;
@@ -15,6 +13,7 @@ import me.rhin.openciv.listener.TopShapeRenderListener;
 import me.rhin.openciv.ui.background.BlankBackground;
 import me.rhin.openciv.ui.button.type.CloseWindowButton;
 import me.rhin.openciv.ui.game.HeritageLeaf;
+import me.rhin.openciv.ui.game.HeritageLineWeb;
 import me.rhin.openciv.ui.label.CustomLabel;
 import me.rhin.openciv.ui.window.AbstractWindow;
 
@@ -26,6 +25,7 @@ public class HeritageWindow extends AbstractWindow
 	private BlankBackground blankBackground;
 	private CustomLabel heritageDescLabel;
 	private CloseWindowButton closeWindowButton;
+	private HeritageLineWeb heritageLineWeb;
 
 	public HeritageWindow() {
 		super.setBounds(0, 0, viewport.getWorldWidth(), viewport.getWorldHeight());
@@ -49,6 +49,9 @@ public class HeritageWindow extends AbstractWindow
 		this.closeWindowButton = new CloseWindowButton(this.getClass(), "Close", viewport.getWorldWidth() / 2 - 150 / 2,
 				35, 150, 45);
 		addActor(closeWindowButton);
+		
+		this.heritageLineWeb = new HeritageLineWeb(heritageLeafs);
+		addActor(heritageLineWeb);
 
 		Civilization.getInstance().getEventManager().addListener(ResizeListener.class, this);
 		Civilization.getInstance().getEventManager().addListener(TopShapeRenderListener.class, this);
@@ -64,26 +67,7 @@ public class HeritageWindow extends AbstractWindow
 
 		updateLeafPositions(width, height);
 	}
-
-	@Override
-	public void onTopShapeRender(ShapeRenderer shapeRenderer) {
-		if (Civilization.getInstance().getWindowManager().isOpenWindow(PickHeritageWindow.class))
-			return;
-
-		// Get max level and draw lines on the way down
-		int maxLevel = 0;
-		for (HeritageLeaf leaf : heritageLeafs) {
-			if (maxLevel < leaf.getHeritage().getLevel())
-				maxLevel = leaf.getHeritage().getLevel();
-		}
-
-		for (int i = 0; i < maxLevel + 1; i++) {
-			shapeRenderer.setColor(Color.WHITE);
-			shapeRenderer.line(0, viewport.getWorldHeight() - 125 * (i + 1), viewport.getWorldWidth(),
-					viewport.getWorldHeight() - 125 * (i + 1));
-		}
-	}
-
+	
 	@Override
 	public void onPickHeritage(Heritage heritage) {
 		for (HeritageLeaf leaf : heritageLeafs) {

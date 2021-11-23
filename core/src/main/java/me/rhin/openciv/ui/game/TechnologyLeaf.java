@@ -7,7 +7,6 @@ import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
-import com.badlogic.gdx.utils.Align;
 
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.TextureEnum;
@@ -110,7 +109,7 @@ public class TechnologyLeaf extends Group implements CompleteResearchListener {
 	@Override
 	public void setPosition(float x, float y) {
 		super.setPosition(x, y);
-
+		
 		backVector.set(x, y + getHeight() / 2);
 		frontVector.set(x + getWidth(), y + getHeight() / 2);
 		positionUpdated = true;

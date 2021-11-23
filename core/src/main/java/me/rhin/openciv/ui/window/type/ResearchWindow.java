@@ -2,6 +2,7 @@ package me.rhin.openciv.ui.window.type;
 
 import java.util.ArrayList;
 
+import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.utils.Align;
 
 import me.rhin.openciv.Civilization;
@@ -9,22 +10,25 @@ import me.rhin.openciv.game.research.Technology;
 import me.rhin.openciv.listener.PickResearchListener;
 import me.rhin.openciv.listener.ResizeListener;
 import me.rhin.openciv.listener.TopShapeRenderListener;
+import me.rhin.openciv.shared.listener.Listener;
 import me.rhin.openciv.ui.background.BlankBackground;
 import me.rhin.openciv.ui.button.type.CloseWindowButton;
 import me.rhin.openciv.ui.game.TechLineWeb;
 import me.rhin.openciv.ui.game.TechnologyLeaf;
 import me.rhin.openciv.ui.label.CustomLabel;
+import me.rhin.openciv.ui.scrollbar.HorizontalScrollbar;
 import me.rhin.openciv.ui.window.AbstractWindow;
+import me.rhin.openciv.ui.window.HorizontalWindow;
 
 public class ResearchWindow extends AbstractWindow
-		implements ResizeListener, TopShapeRenderListener, PickResearchListener {
+		implements HorizontalWindow, ResizeListener, TopShapeRenderListener, PickResearchListener {
 
 	private ArrayList<TechnologyLeaf> technologyLeafs;
 	private BlankBackground blankBackground;
 	private CustomLabel researchDescLabel;
 	private CloseWindowButton closeWindowButton;
 	private TechLineWeb techLineWeb;
-
+	private HorizontalScrollbar horizontalScrollbar;
 
 	public ResearchWindow() {
 		super.setBounds(0, 0, viewport.getWorldWidth(), viewport.getWorldHeight());
@@ -46,9 +50,12 @@ public class ResearchWindow extends AbstractWindow
 		this.closeWindowButton = new CloseWindowButton(this.getClass(), "Close", viewport.getWorldWidth() / 2 - 150 / 2,
 				25, 150, 45);
 		addActor(closeWindowButton);
-		
+
 		this.techLineWeb = new TechLineWeb(technologyLeafs);
 		addActor(techLineWeb);
+
+		this.horizontalScrollbar = new HorizontalScrollbar(this, 0, 75, getWidth(), 25);
+		addActor(horizontalScrollbar);
 
 		Civilization.getInstance().getEventManager().addListener(ResizeListener.class, this);
 		Civilization.getInstance().getEventManager().addListener(TopShapeRenderListener.class, this);
@@ -61,6 +68,7 @@ public class ResearchWindow extends AbstractWindow
 		blankBackground.setSize(width, height);
 		researchDescLabel.setBounds(0, height - 25, width, 15);
 		closeWindowButton.setPosition(width / 2 - 150 / 2, 25);
+		horizontalScrollbar.setBounds(0, 75, width, 25);
 
 		for (TechnologyLeaf leaf : technologyLeafs) {
 			leaf.setPositionUpdated(false);
@@ -149,6 +157,11 @@ public class ResearchWindow extends AbstractWindow
 	public void onClose() {
 		super.onClose();
 
+		for (Actor actor : getChildren()) {
+			if (actor instanceof Listener)
+				Civilization.getInstance().getEventManager().clearListenersFromObject((Listener) actor);
+		}
+
 		Civilization.getInstance().getEventManager().clearListenersFromObject(this);
 	}
 
@@ -175,6 +188,23 @@ public class ResearchWindow extends AbstractWindow
 	@Override
 	public boolean isGameDisplayWindow() {
 		return false;
+	}
+
+	@Override
+	public float getTotalWidth() {
+
+		float maxViewedX = 0;
+		for (TechnologyLeaf leaf : technologyLeafs)
+			if (leaf.getX() + leaf.getWidth() > maxViewedX)
+				maxViewedX = leaf.getX() + leaf.getWidth();
+
+		return maxViewedX + 25;
+	}
+
+	@Override
+	public void updatePositions(float xAmount) {
+		for (TechnologyLeaf leaf : technologyLeafs)
+			leaf.setPosition(leaf.getX() + xAmount, leaf.getY());
 	}
 
 	private void addTech(Technology tech) {
@@ -251,5 +281,9 @@ public class ResearchWindow extends AbstractWindow
 		TechnologyLeaf leaf = new TechnologyLeaf(tech, x, y, width, height);
 		technologyLeafs.add(leaf);
 		addActor(leaf);
+	}
+
+	public ArrayList<TechnologyLeaf> getTechnologyLeafs() {
+		return technologyLeafs;
 	}
 }

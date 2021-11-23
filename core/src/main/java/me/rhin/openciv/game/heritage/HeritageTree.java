@@ -13,6 +13,7 @@ import me.rhin.openciv.game.heritage.type.all.TaxesHeritage;
 import me.rhin.openciv.listener.CompleteHeritageListener;
 import me.rhin.openciv.listener.PickHeritageListener;
 import me.rhin.openciv.shared.packet.type.CompleteHeritagePacket;
+import me.rhin.openciv.ui.game.HeritageLineWeb;
 
 public class HeritageTree implements CompleteHeritageListener, PickHeritageListener {
 
