@@ -36,10 +36,11 @@ public class Library extends Building implements CityGrowthListener, CityStarveL
 			return;
 
 		city.getStatLine().subValue(Stat.SCIENCE_GAIN, 0.5F);
-		
+
 	}
+
 	@Override
-	public void onCityGrowth(City city) {
+	public void onCityGrowth(City city, float population, float foodSurplus) {
 		if (!city.getBuildings().contains(this))
 			return;
 
@@ -50,7 +51,7 @@ public class Library extends Building implements CityGrowthListener, CityStarveL
 	public float getBuildingProductionCost() {
 		return 75;
 	}
-	
+
 	@Override
 	public float getGoldCost() {
 		return 175;

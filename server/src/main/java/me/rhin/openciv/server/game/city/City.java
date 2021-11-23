@@ -685,11 +685,13 @@ public class City
 
 	private void setPopulation(int amount) {
 		float popDiff = amount - statLine.getStatValue(Stat.POPULATION);
+		float foodSurplus = statLine.getStatValue(Stat.FOOD_SURPLUS);
+
 		statLine.setValue(Stat.POPULATION, amount);
 		statLine.setValue(Stat.FOOD_SURPLUS, 0);
 
 		if (amount > 0) {
-			Server.getInstance().getEventManager().fireEvent(new CityGrowthEvent(this));
+			Server.getInstance().getEventManager().fireEvent(new CityGrowthEvent(this, amount, foodSurplus));
 			statLine.addValue(Stat.SCIENCE_GAIN, 0.5F);
 			subMorale(5 * popDiff);
 		} else {

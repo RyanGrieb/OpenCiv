@@ -49,7 +49,7 @@ public class TaxesHeritage extends Heritage implements CityGrowthListener, CityS
 	}
 
 	@Override
-	public void onCityGrowth(City city) {
+	public void onCityGrowth(City city, float population, float foodSurplus) {
 		if (!isStudied() || !player.getOwnedCities().contains(city))
 			return;
 

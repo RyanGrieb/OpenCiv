@@ -4,16 +4,23 @@ size: 256, 256
 format: RGBA8888
 filter: Nearest, Nearest
 repeat: none
+building_aqueduct
+  rotate: false
+  xy: 166, 166
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
 building_circus
   rotate: false
-  xy: 170, 64
+  xy: 204, 64
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 building_colosseum
   rotate: false
-  xy: 170, 98
+  xy: 204, 98
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
@@ -27,14 +34,14 @@ building_forge
   index: -1
 building_garden
   rotate: false
-  xy: 204, 98
+  xy: 136, 64
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 building_granary
   rotate: false
-  xy: 70, 36
+  xy: 70, 2
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
@@ -48,7 +55,7 @@ building_great_library
   index: -1
 building_great_lighthouse
   rotate: false
-  xy: 200, 166
+  xy: 200, 132
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
@@ -62,14 +69,14 @@ building_hanging_gardens
   index: -1
 building_library
   rotate: false
-  xy: 136, 64
+  xy: 170, 64
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 building_lighthouse
   rotate: false
-  xy: 36, 4
+  xy: 102, 70
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
@@ -90,7 +97,7 @@ building_monument
   index: -1
 building_national_college
   rotate: false
-  xy: 136, 98
+  xy: 170, 98
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
@@ -104,35 +111,35 @@ building_palace
   index: -1
 building_pyramids
   rotate: false
-  xy: 166, 166
+  xy: 200, 200
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 building_shrine
   rotate: false
-  xy: 200, 132
+  xy: 36, 4
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 building_statue_of_ares
   rotate: false
-  xy: 70, 2
+  xy: 104, 30
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 building_stonehenge
   rotate: false
-  xy: 200, 200
+  xy: 166, 132
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 building_stoneworks
   rotate: false
-  xy: 166, 132
+  xy: 200, 166
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
@@ -153,14 +160,14 @@ building_wall
   index: -1
 building_watermill
   rotate: false
-  xy: 204, 64
+  xy: 70, 36
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 building_workshop
   rotate: false
-  xy: 102, 70
+  xy: 136, 98
   size: 32, 32
   orig: 32, 32
   offset: 0, 0

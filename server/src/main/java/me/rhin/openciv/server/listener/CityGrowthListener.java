@@ -8,20 +8,24 @@ import me.rhin.openciv.shared.listener.Listener;
 
 public interface CityGrowthListener extends Listener {
 
-	public void onCityGrowth(City city);
+	public void onCityGrowth(City city, float population, float foodSurplus);
 
 	public static class CityGrowthEvent extends Event<CityGrowthListener> {
 
 		private City city;
+		private float population;
+		private float foodSurplus;
 
-		public CityGrowthEvent(City city) {
+		public CityGrowthEvent(City city, float population, float foodSurplus) {
 			this.city = city;
+			this.population = population;
+			this.foodSurplus = foodSurplus;
 		}
 
 		@Override
 		public void fire(ArrayList<CityGrowthListener> listeners) {
 			for (CityGrowthListener listener : listeners) {
-				listener.onCityGrowth(city);
+				listener.onCityGrowth(city, population, foodSurplus);
 			}
 		}
 
