@@ -12,6 +12,7 @@ public class HorsebackRridingTech extends Technology {
 		super(researchTree);
 
 		requiredTechs.add(WheelTech.class);
+		requiredTechs.add(TrappingTech.class);
 	}
 
 	@Override

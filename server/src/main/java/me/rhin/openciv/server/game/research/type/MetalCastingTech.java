@@ -8,6 +8,8 @@ public class MetalCastingTech extends Technology {
 
 	public MetalCastingTech(ResearchTree researchTree) {
 		super(researchTree, TechProperty.PRODUCTION, TechProperty.MILITARY);
+		
+		requiredTechs.add(IronWorkingTech.class);
 	}
 
 	@Override

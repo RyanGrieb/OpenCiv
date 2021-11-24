@@ -8,7 +8,9 @@ public class PhilosophyTech extends Technology {
 
 	public PhilosophyTech(ResearchTree researchTree) {
 		super(researchTree, TechProperty.SCIENCE);
+
 		requiredTechs.add(WritingTech.class);
+		requiredTechs.add(CalendarTech.class);
 	}
 
 	@Override
