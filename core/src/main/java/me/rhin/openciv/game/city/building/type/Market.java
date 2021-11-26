@@ -3,8 +3,8 @@ package me.rhin.openciv.game.city.building.type;
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.city.City;
 import me.rhin.openciv.game.city.building.Building;
-import me.rhin.openciv.game.city.specialist.Specialist;
 import me.rhin.openciv.game.city.specialist.SpecialistContainer;
+import me.rhin.openciv.game.research.type.CurrencyTech;
 import me.rhin.openciv.shared.city.SpecialistType;
 import me.rhin.openciv.shared.stat.Stat;
 
@@ -28,7 +28,7 @@ public class Market extends Building implements SpecialistContainer {
 
 	@Override
 	public boolean meetsProductionRequirements() {
-		return true;
+		return city.getPlayerOwner().getResearchTree().hasResearched(CurrencyTech.class);
 	}
 
 	@Override
@@ -65,6 +65,6 @@ public class Market extends Building implements SpecialistContainer {
 
 	@Override
 	public String getDesc() {
-		return "Provides an additional source of \ngold.\n+2 Gold";
+		return "Provides an additional source of \ngold.\n+2 Gold\n+25% Gold in the city";
 	}
 }
