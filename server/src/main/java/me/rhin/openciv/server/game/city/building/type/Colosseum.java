@@ -10,7 +10,7 @@ public class Colosseum extends Building {
 	public Colosseum(City city) {
 		super(city);
 
-		this.statLine.addValue(Stat.MORALE, 10);
+		this.statLine.addValue(Stat.MORALE_CITY, 10);
 		this.statLine.addValue(Stat.MAINTENANCE, 1);
 	}
 

@@ -135,9 +135,18 @@ public class GameOverlay extends AbstractWindow implements ResizeListener, TileS
 	public void onRecieveTileStatline(TileStatlinePacket packet) {
 		StatLine statline = StatLine.fromPacket(packet);
 
+		ArrayList<Stat> statList = new ArrayList<>();
+		statList.addAll(statline.getStatValues().keySet());
+
+		// Put morale at the last part of the set.
+		if (statList.contains(Stat.MORALE_TILE)) {
+			statList.remove(Stat.MORALE_TILE);
+			statList.add(Stat.MORALE_TILE);
+		}
+
 		float addedWidth = 0;
-		for (Stat stat : statline.getStatValues().keySet()) {
-			if (stat == Stat.MAINTENANCE || stat == Stat.MORALE)
+		for (Stat stat : statList) {
+			if (stat == Stat.MAINTENANCE)
 				continue;
 
 			String name = null;
@@ -166,7 +175,7 @@ public class GameOverlay extends AbstractWindow implements ResizeListener, TileS
 	private void clearTileStatInfo() {
 		for (ColoredBackground statIcon : new ArrayList<>(statIcons)) {
 			statIcon.addAction(Actions.removeActor());
-		} 
+		}
 
 		for (CustomLabel label : new ArrayList<>(statLabels)) {
 			label.addAction(Actions.removeActor());

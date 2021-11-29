@@ -10,7 +10,7 @@ public class Circus extends Building {
 	public Circus(City city) {
 		super(city);
 
-		this.statLine.addValue(Stat.MORALE, 10);
+		this.statLine.addValue(Stat.MORALE_CITY, 10);
 	}
 
 	@Override

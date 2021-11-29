@@ -678,7 +678,7 @@ public class Tile {
 			tileImprovement.improveTile();
 
 			if (territory != null) {
-				territory.addMorale(getStatLine().getStatValue(Stat.MORALE));
+				territory.addMorale(getStatLine().getStatValue(Stat.MORALE_TILE));
 				territory.updateWorkedTiles();
 			}
 

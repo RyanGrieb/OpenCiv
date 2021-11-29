@@ -5,7 +5,6 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
 
@@ -92,7 +91,7 @@ public class City
 			citizenWorkers.put(tile, new EmptyCitizenWorker(this, tile));
 		}
 
-		statLine.setValue(Stat.MORALE, 100);
+		statLine.setValue(Stat.MORALE_CITY, 100);
 		setPopulation(1);
 		statLine.setValue(Stat.EXPANSION_REQUIREMENT, 10 + 10 * (float) Math.pow(territory.size() - 6, 1.3));
 		// Add our two specialists, one from pop, one city center
@@ -349,8 +348,11 @@ public class City
 	public void updateWorkedTiles() {
 
 		// Clear & Reset all statline values
-		statLine.clearExcept(Stat.EXPANSION_PROGRESS, Stat.EXPANSION_REQUIREMENT, Stat.FOOD_SURPLUS, Stat.MORALE,
-				Stat.POPULATION);
+		statLine.clearExcept(Stat.EXPANSION_PROGRESS, Stat.EXPANSION_REQUIREMENT, Stat.FOOD_SURPLUS, Stat.MORALE_CITY,
+				Stat.POPULATION, Stat.PRODUCTION_GAIN);
+
+		// Keep the production gain modifier
+		statLine.setValue(Stat.PRODUCTION_GAIN, 0);
 
 		for (Building building : buildings)
 			statLine.mergeStatLine(building.getStatLine());
@@ -510,9 +512,9 @@ public class City
 
 		// FIXME: This is not ideal for implementing morale. But we need to update our
 		// production modifier through the method
-		if (building.getStatLine().hasStatValue(Stat.MORALE)) {
-			statLine.subValue(Stat.MORALE, building.getStatLine().getStatValue(Stat.MORALE));
-			addMorale(building.getStatLine().getStatValue(Stat.MORALE));
+		if (building.getStatLine().hasStatValue(Stat.MORALE_CITY)) {
+			statLine.subValue(Stat.MORALE_CITY, building.getStatLine().getStatValue(Stat.MORALE_CITY));
+			addMorale(building.getStatLine().getStatValue(Stat.MORALE_CITY));
 		}
 
 		CityStatUpdatePacket packet = new CityStatUpdatePacket();
@@ -582,26 +584,27 @@ public class City
 			}
 		}
 
-		tileStatLine.subValue(Stat.MORALE, tileStatLine.getStatValue(Stat.MORALE));
+		// tileStatLine.subValue(Stat.MORALE, tileStatLine.getStatValue(Stat.MORALE));
 
 		return tileStatLine;
 	}
 
 	public void addMorale(float morale) {
-		setMorale(statLine.getStatValue(Stat.MORALE) + morale);
+		setMorale(statLine.getStatValue(Stat.MORALE_CITY) + morale);
 	}
 
 	public void subMorale(float morale) {
-		setMorale(statLine.getStatValue(Stat.MORALE) - morale);
+		setMorale(statLine.getStatValue(Stat.MORALE_CITY) - morale);
 	}
 
 	public void setMorale(float morale) {
 		// FIXME: Morale can sometimes be > 100 on the first few turns.
 		// morale = MathUtils.clamp(morale, 0, 100);
 
-		statLine.setValue(Stat.MORALE, morale);
+		statLine.setValue(Stat.MORALE_CITY, morale);
 
 		float moraleOffset = (morale >= 70 ? (morale - 70) / 100 : -((70 - morale) / 100));
+
 		statLine.setModifier(Stat.PRODUCTION_GAIN, moraleOffset);
 	}
 

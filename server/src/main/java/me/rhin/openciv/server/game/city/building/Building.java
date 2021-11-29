@@ -85,7 +85,7 @@ public abstract class Building implements ProductionItem {
 				modifier = 2;
 				break;
 
-			case MORALE:
+			case MORALE_CITY:
 				modifier = 2;
 				break;
 

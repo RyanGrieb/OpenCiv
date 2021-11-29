@@ -18,7 +18,8 @@ public enum Stat {
 	COMBAT_STRENGTH,
 	TRADE_ROUTE_AMOUNT(StatType.PLAYER_EXCLUSIVE),
 	MAX_TRADE_ROUTES(StatType.PLAYER_EXCLUSIVE),
-	MORALE;
+	MORALE_TILE,
+	MORALE_CITY;
 
 	private Stat addedStat;
 	private StatType statType;

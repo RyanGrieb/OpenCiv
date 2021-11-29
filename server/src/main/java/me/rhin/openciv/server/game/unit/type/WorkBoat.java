@@ -61,7 +61,7 @@ public class WorkBoat extends UnitItem {
 			City city = standingTile.getCity();
 
 			if (city != null) {
-				city.addMorale(standingTile.getStatLine().getStatValue(Stat.MORALE));
+				city.addMorale(standingTile.getStatLine().getStatValue(Stat.MORALE_TILE));
 				city.updateWorkedTiles();
 			}
 
