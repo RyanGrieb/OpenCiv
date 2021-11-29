@@ -16,7 +16,7 @@ public class MetalCastingTech extends Technology {
 
 	@Override
 	public int getScienceCost() {
-		return 275;
+		return 175;
 	}
 
 	@Override

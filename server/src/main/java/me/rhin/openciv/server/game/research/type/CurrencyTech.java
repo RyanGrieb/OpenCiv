@@ -4,12 +4,12 @@ import me.rhin.openciv.server.game.research.ResearchTree;
 import me.rhin.openciv.server.game.research.TechProperty;
 import me.rhin.openciv.server.game.research.Technology;
 
-public class MetalCastingTech extends Technology {
+public class CurrencyTech extends Technology {
 
-	public MetalCastingTech(ResearchTree researchTree) {
-		super(researchTree, TechProperty.PRODUCTION, TechProperty.MILITARY);
+	public CurrencyTech(ResearchTree researchTree) {
+		super(researchTree, TechProperty.GOLD);
 		
-		requiredTechs.add(IronWorkingTech.class);
+		this.requiredTechs.add(MathematicsTech.class);
 	}
 
 	@Override
@@ -19,7 +19,7 @@ public class MetalCastingTech extends Technology {
 
 	@Override
 	public String getName() {
-		return "Metal Casting";
+		return "Currency";
 	}
 
 }
