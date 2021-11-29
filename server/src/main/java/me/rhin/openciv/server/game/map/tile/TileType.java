@@ -434,6 +434,48 @@ public enum TileType implements Comparable<TileType> {
 			return new TileType[] { TileType.SHALLOW_OCEAN };
 		}
 	},
+	SILVER(TileLayer.MIDDLE, TileProperty.LUXURY) {
+		@Override
+		public StatLine getStatLine() {
+			StatLine statLine = new StatLine();
+			statLine.setValue(Stat.GOLD_GAIN, 2);
+			return statLine;
+		}
+
+		@Override
+		public List<TileImprovement> getImprovements() {
+			ArrayList<TileImprovement> improvements = new ArrayList<>();
+			improvements.add(new MineImprovement(TileType.SILVER_IMPROVED, 5));
+			return improvements;
+		}
+
+		@Override
+		public TileType[] getSpawnTileTypes() {
+			return new TileType[] { TileType.GRASS, TileType.GRASS_HILL, TileType.PLAINS, TileType.PLAINS_HILL,
+					TileType.TUNDRA, TileType.TUNDRA_HILL, TileType.DESERT, TileType.DESERT_HILL };
+		}
+	},
+	GOLD(TileLayer.MIDDLE, TileProperty.LUXURY) {
+		@Override
+		public StatLine getStatLine() {
+			StatLine statLine = new StatLine();
+			statLine.setValue(Stat.GOLD_GAIN, 2);
+			return statLine;
+		}
+
+		@Override
+		public List<TileImprovement> getImprovements() {
+			ArrayList<TileImprovement> improvements = new ArrayList<>();
+			improvements.add(new MineImprovement(TileType.GOLD_IMPROVED, 5));
+			return improvements;
+		}
+
+		@Override
+		public TileType[] getSpawnTileTypes() {
+			return new TileType[] { TileType.GRASS, TileType.GRASS_HILL, TileType.PLAINS, TileType.PLAINS_HILL,
+					TileType.TUNDRA, TileType.TUNDRA_HILL, TileType.DESERT, TileType.DESERT_HILL };
+		}
+	},
 	FARM(TileLayer.MIDDLE, TileProperty.IMPROVEMENT) {
 		@Override
 		public StatLine getStatLine() {
@@ -476,6 +518,26 @@ public enum TileType implements Comparable<TileType> {
 			StatLine statLine = new StatLine();
 			statLine.setValue(Stat.GOLD_GAIN, 1);
 			statLine.addValue(Stat.FOOD_GAIN, 2);
+			statLine.addValue(Stat.MORALE, 10);
+			return statLine;
+		}
+	},
+	SILVER_IMPROVED(TileLayer.MIDDLE, TileProperty.IMPROVEMENT) {
+		@Override
+		public StatLine getStatLine() {
+			StatLine statLine = new StatLine();
+			statLine.addValue(Stat.GOLD_GAIN, 2);
+			statLine.addValue(Stat.PRODUCTION_GAIN, 1);
+			statLine.addValue(Stat.MORALE, 10);
+			return statLine;
+		}
+	},
+	GOLD_IMPROVED(TileLayer.MIDDLE, TileProperty.IMPROVEMENT) {
+		@Override
+		public StatLine getStatLine() {
+			StatLine statLine = new StatLine();
+			statLine.addValue(Stat.GOLD_GAIN, 2);
+			statLine.addValue(Stat.PRODUCTION_GAIN, 1);
 			statLine.addValue(Stat.MORALE, 10);
 			return statLine;
 		}

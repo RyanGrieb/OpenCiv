@@ -13,14 +13,14 @@ building_aqueduct
   index: -1
 building_circus
   rotate: false
-  xy: 204, 64
+  xy: 70, 36
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 building_colosseum
   rotate: false
-  xy: 204, 98
+  xy: 136, 64
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
@@ -34,14 +34,14 @@ building_forge
   index: -1
 building_garden
   rotate: false
-  xy: 136, 64
+  xy: 170, 64
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 building_granary
   rotate: false
-  xy: 70, 2
+  xy: 104, 30
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
@@ -69,7 +69,7 @@ building_hanging_gardens
   index: -1
 building_library
   rotate: false
-  xy: 170, 64
+  xy: 204, 64
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
@@ -88,6 +88,13 @@ building_market
   orig: 32, 32
   offset: 0, 0
   index: -1
+building_mint
+  rotate: false
+  xy: 170, 98
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
 building_monument
   rotate: false
   xy: 2, 4
@@ -97,7 +104,7 @@ building_monument
   index: -1
 building_national_college
   rotate: false
-  xy: 170, 98
+  xy: 204, 98
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
@@ -125,7 +132,7 @@ building_shrine
   index: -1
 building_statue_of_ares
   rotate: false
-  xy: 104, 30
+  xy: 138, 30
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
@@ -160,7 +167,7 @@ building_wall
   index: -1
 building_watermill
   rotate: false
-  xy: 70, 36
+  xy: 70, 2
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
