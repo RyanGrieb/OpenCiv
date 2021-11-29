@@ -1,35 +1,28 @@
 package me.rhin.openciv.server.game.city.building.type;
 
-import me.rhin.openciv.server.Server;
 import me.rhin.openciv.server.game.city.City;
 import me.rhin.openciv.server.game.city.building.Building;
+import me.rhin.openciv.server.game.city.building.IncreaseTileStatlineBuilding;
 import me.rhin.openciv.server.game.map.tile.Tile;
 import me.rhin.openciv.server.game.map.tile.TileType;
 import me.rhin.openciv.server.game.production.ProductionItem;
 import me.rhin.openciv.server.game.research.type.MetalCastingTech;
 import me.rhin.openciv.server.game.unit.UnitItem;
 import me.rhin.openciv.server.game.unit.UnitItem.UnitType;
-import me.rhin.openciv.server.listener.TerritoryGrowListener;
 import me.rhin.openciv.shared.stat.Stat;
+import me.rhin.openciv.shared.stat.StatLine;
 
-public class Forge extends Building implements TerritoryGrowListener {
+public class Forge extends Building implements IncreaseTileStatlineBuilding {
 
 	public Forge(City city) {
 		super(city);
 
 		this.statLine.addValue(Stat.MAINTENANCE, 1);
-
-		Server.getInstance().getEventManager().addListener(TerritoryGrowListener.class, this);
 	}
-
+	
 	@Override
 	public void create() {
 		super.create();
-
-		for (Tile tile : city.getTerritory()) {
-			if (isRequiredTile(tile))
-				city.getStatLine().addValue(Stat.PRODUCTION_GAIN, 1);
-		}
 
 		for (ProductionItem item : city.getProducibleItemManager().getPossibleItems().values()) {
 			if (item instanceof UnitItem) {
@@ -43,17 +36,15 @@ public class Forge extends Building implements TerritoryGrowListener {
 	}
 
 	@Override
-	public void onTerritoryGrow(City city, Tile territory) {
-		if (!city.equals(this.city))
-			return;
+	public StatLine getAddedStatline(Tile tile) {
+		StatLine statLine = new StatLine();
 
-		if (!city.getBuildings().contains(this))
-			return;
+		if (isRequiredTile(tile))
+			statLine.addValue(Stat.PRODUCTION_GAIN, 1);
 
-		if (isRequiredTile(territory))
-			city.getStatLine().addValue(Stat.PRODUCTION_GAIN, 1);
+		return statLine;
 	}
-
+	
 	@Override
 	public boolean meetsProductionRequirements() {
 

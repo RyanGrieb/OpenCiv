@@ -4,6 +4,7 @@ import me.rhin.openciv.server.game.city.City;
 import me.rhin.openciv.server.game.city.building.Building;
 import me.rhin.openciv.server.game.city.building.IncreaseTileStatlineBuilding;
 import me.rhin.openciv.server.game.map.tile.Tile;
+import me.rhin.openciv.server.game.map.tile.TileType;
 import me.rhin.openciv.server.game.map.tile.TileType.TileProperty;
 import me.rhin.openciv.server.game.research.type.OpticsTech;
 import me.rhin.openciv.shared.stat.Stat;
@@ -25,6 +26,12 @@ public class Lighthouse extends Building implements IncreaseTileStatlineBuilding
 
 		if (tile.containsTileProperty(TileProperty.WATER))
 			statLine.addValue(Stat.FOOD_GAIN, 1);
+
+		if (tile.containsTileType(TileType.FISH_IMPROVED))
+			statLine.addValue(Stat.FOOD_GAIN, 1);
+
+		if (tile.containsTileType(TileType.FISH_IMPROVED) || tile.containsTileType(TileType.CRABS_IMPROVED))
+			statLine.addValue(Stat.PRODUCTION_GAIN, 1);
 
 		return statLine;
 	}

@@ -674,6 +674,7 @@ public class Tile {
 
 		if (tileImprovement.getTurnsWorked() >= tileImprovement.getMaxTurns()) {
 			// Modify the tile here
+
 			tileImprovement.improveTile();
 
 			if (territory != null) {
@@ -736,4 +737,5 @@ public class Tile {
 		}
 		return units;
 	}
+
 }

@@ -49,6 +49,6 @@ public class Lighthouse extends Building {
 
 	@Override
 	public String getDesc() {
-		return "+1 Food for each worked ocean\ntile.\n+1 Food for every worked fish\ntile.\n+1 Production for every sea\nresource worked.";
+		return "+1 Food for each ocean\ntile.\n+1 Food for every worked fish\ntile.\n+1 Production for every sea\nresource worked.";
 	}
 }

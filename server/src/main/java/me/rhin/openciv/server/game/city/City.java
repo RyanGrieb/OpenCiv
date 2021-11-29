@@ -5,6 +5,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
 
@@ -344,7 +345,15 @@ public class City
 		return maxHealth;
 	}
 
+	// FIXME: Make this method send less unecessary packets.
 	public void updateWorkedTiles() {
+
+		// Clear & Reset all statline values
+		statLine.clearExcept(Stat.EXPANSION_PROGRESS, Stat.EXPANSION_REQUIREMENT, Stat.FOOD_SURPLUS, Stat.MORALE,
+				Stat.POPULATION);
+
+		for (Building building : buildings)
+			statLine.mergeStatLine(building.getStatLine());
 
 		// Set all workers to empty
 		for (Tile tile : territory) {
@@ -352,7 +361,7 @@ public class City
 			if (citizenWorker.getWorkerType() != WorkerType.LOCKED) {
 
 				if (citizenWorker.isValidTileWorker()) {
-					statLine.reduceStatLine(getTileStatLine(citizenWorker.getTile()));
+					// statLine.reduceStatLine(getTileStatLine(citizenWorker.getTile()));
 				}
 
 				setCitizenTileWorker(new EmptyCitizenWorker(this, citizenWorker.getTile()));
@@ -361,7 +370,7 @@ public class City
 
 		setCitizenTileWorker(new CityCenterCitizenWorker(this, originTile));
 
-		statLine.mergeStatLine(getTileStatLine(originTile));
+		// statLine.mergeStatLine(getTileStatLine(originTile));
 
 		float unassignedWorkers = statLine.getStatValue(Stat.POPULATION)
 				- getCitizenWorkerAmountOfType(WorkerType.LOCKED);
@@ -374,7 +383,15 @@ public class City
 			// FIXME: This is slow, have bulk packets in the future
 			setCitizenTileWorker(new AssignedCitizenWorker(this, tile));
 
-			statLine.mergeStatLine(getTileStatLine(tile));
+			// statLine.mergeStatLine(getTileStatLine(tile));
+		}
+
+		// Merge all valid worked tiles statlines.
+		for (Entry<Tile, CitizenWorker> entry : citizenWorkers.entrySet()) {
+			Tile tile = entry.getKey();
+			CitizenWorker worker = entry.getValue();
+			if (worker.isValidTileWorker())
+				statLine.mergeStatLine(getTileStatLine(tile));
 		}
 
 		Json json = new Json();

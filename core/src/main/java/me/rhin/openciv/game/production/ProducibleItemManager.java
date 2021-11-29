@@ -20,6 +20,7 @@ import me.rhin.openciv.game.city.building.type.HangingGardens;
 import me.rhin.openciv.game.city.building.type.Library;
 import me.rhin.openciv.game.city.building.type.Lighthouse;
 import me.rhin.openciv.game.city.building.type.Market;
+import me.rhin.openciv.game.city.building.type.Mint;
 import me.rhin.openciv.game.city.building.type.Monument;
 import me.rhin.openciv.game.city.building.type.NationalCollege;
 import me.rhin.openciv.game.city.building.type.Shrine;
@@ -102,6 +103,7 @@ public class ProducibleItemManager {
 		possibleItems.put("Forge", new Forge(city));
 		possibleItems.put("Workshop", new Workshop(city));
 		possibleItems.put("Aqueduct", new Aqueduct(city));
+		possibleItems.put("Mint", new Mint(city));
 		
 		// Wonders
 		possibleItems.put("Great Pyramids", new GreatPyramids(city));

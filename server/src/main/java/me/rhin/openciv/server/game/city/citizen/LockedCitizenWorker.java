@@ -14,6 +14,7 @@ public class LockedCitizenWorker extends CitizenWorker {
 	public void onClick() {
 		city.setCitizenTileWorker(new AssignedCitizenWorker(city, tile));
 		city.updateWorkedTiles();
+		city.getPlayerOwner().updateOwnedStatlines(false);
 	}
 	
 	@Override

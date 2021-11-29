@@ -21,6 +21,7 @@ import me.rhin.openciv.server.game.city.building.type.HangingGardens;
 import me.rhin.openciv.server.game.city.building.type.Library;
 import me.rhin.openciv.server.game.city.building.type.Lighthouse;
 import me.rhin.openciv.server.game.city.building.type.Market;
+import me.rhin.openciv.server.game.city.building.type.Mint;
 import me.rhin.openciv.server.game.city.building.type.Monument;
 import me.rhin.openciv.server.game.city.building.type.NationalCollege;
 import me.rhin.openciv.server.game.city.building.type.Shrine;
@@ -114,6 +115,7 @@ public class ProducibleItemManager implements NextTurnListener {
 		possibleItems.put("Forge", new Forge(city));
 		possibleItems.put("Workshop", new Workshop(city));
 		possibleItems.put("Aqueduct", new Aqueduct(city));
+		possibleItems.put("Mint", new Mint(city));
 
 		// Wonders
 		possibleItems.put("Great Pyramids", new GreatPyramids(city));
@@ -181,6 +183,7 @@ public class ProducibleItemManager implements NextTurnListener {
 		packet.setProductionItem(city.getName(), item.getProductionItem().getName());
 		city.getPlayerOwner().sendPacket(json.toJson(packet));
 
+		city.updateWorkedTiles();
 		city.getPlayerOwner().updateOwnedStatlines(false);
 
 		if (itemQueue.peek() != null && itemQueue.peek().getProductionItem().equals(item.getProductionItem())
@@ -226,6 +229,7 @@ public class ProducibleItemManager implements NextTurnListener {
 			packet.setProductionItem(city.getName(), producingItem.getProductionItem().getName());
 			city.getPlayerOwner().sendPacket(json.toJson(packet));
 
+			city.updateWorkedTiles();
 			city.getPlayerOwner().updateOwnedStatlines(false);
 			return;
 		}

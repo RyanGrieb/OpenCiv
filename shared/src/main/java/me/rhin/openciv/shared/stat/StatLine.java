@@ -1,8 +1,11 @@
 package me.rhin.openciv.shared.stat;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import me.rhin.openciv.shared.packet.StatPacket;
 
@@ -190,5 +193,19 @@ public class StatLine {
 			otherValue += statVal.getValue();
 
 		return ourValue > otherValue;
+	}
+
+	public void clearExcept(Stat... stats) {
+
+		ArrayList<Stat> statList = new ArrayList<>();
+		Collections.addAll(statList, stats);
+
+		Iterator<Entry<Stat, StatValue>> iterator = statValues.entrySet().iterator();
+		while (iterator.hasNext()) {
+			Entry<Stat, StatValue> entry = iterator.next();
+
+			if (!statList.contains(entry.getKey()))
+				iterator.remove();
+		}
 	}
 }
