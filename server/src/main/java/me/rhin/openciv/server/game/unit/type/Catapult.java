@@ -11,6 +11,7 @@ import me.rhin.openciv.server.game.map.tile.TileType.TileProperty;
 import me.rhin.openciv.server.game.research.type.MathematicsTech;
 import me.rhin.openciv.server.game.unit.AttackableEntity;
 import me.rhin.openciv.server.game.unit.RangedUnit;
+import me.rhin.openciv.server.game.unit.Unit;
 import me.rhin.openciv.server.game.unit.UnitItem;
 import me.rhin.openciv.shared.stat.Stat;
 
@@ -52,6 +53,11 @@ public class Catapult extends UnitItem {
 			return Arrays.asList(UnitType.RANGED);
 		}
 
+		@Override
+		public Class<? extends Unit> getUpgradedUnit() {
+			return null;
+		}
+		
 		@Override
 		public String getName() {
 			return "Catapult";

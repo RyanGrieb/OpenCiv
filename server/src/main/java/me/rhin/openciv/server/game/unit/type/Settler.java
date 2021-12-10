@@ -110,6 +110,11 @@ public class Settler extends UnitItem {
 		}
 
 		@Override
+		public Class<? extends Unit> getUpgradedUnit() {
+			return null;
+		}
+		
+		@Override
 		public String getName() {
 			return "Settler";
 		}

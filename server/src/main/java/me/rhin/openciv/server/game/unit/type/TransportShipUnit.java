@@ -33,6 +33,11 @@ public class TransportShipUnit extends Unit {
 	public List<UnitType> getUnitTypes() {
 		return Arrays.asList(UnitType.SUPPORT);
 	}
+	
+	@Override
+	public Class<? extends Unit> getUpgradedUnit() {
+		return null;
+	}
 
 	public String getName() {
 		return "Transport Ship";

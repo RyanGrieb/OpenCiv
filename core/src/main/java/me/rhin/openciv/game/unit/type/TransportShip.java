@@ -83,5 +83,10 @@ public class TransportShip {
 				return TileType.GRASS.getTextureEnum();
 			}
 		}
+
+		@Override
+		public boolean canUpgrade() {
+			return false;
+		}
 	}
 }

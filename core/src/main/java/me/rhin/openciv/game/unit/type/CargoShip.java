@@ -10,6 +10,7 @@ import me.rhin.openciv.game.map.tile.TileType;
 import me.rhin.openciv.game.map.tile.TileType.TileProperty;
 import me.rhin.openciv.game.research.type.SailingTech;
 import me.rhin.openciv.game.unit.TradeUnit;
+import me.rhin.openciv.game.unit.Unit;
 import me.rhin.openciv.game.unit.UnitItem;
 import me.rhin.openciv.game.unit.UnitParameter;
 import me.rhin.openciv.shared.stat.Stat;
@@ -42,6 +43,11 @@ public class CargoShip extends UnitItem {
 		@Override
 		public List<UnitType> getUnitTypes() {
 			return Arrays.asList(UnitType.SUPPORT);
+		}
+
+		@Override
+		public boolean canUpgrade() {
+			return false;
 		}
 	}
 

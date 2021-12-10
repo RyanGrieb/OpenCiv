@@ -43,6 +43,11 @@ public class WorkBoat extends UnitItem {
 		public List<UnitType> getUnitTypes() {
 			return Arrays.asList(UnitType.SUPPORT, UnitType.NAVAL);
 		}
+
+		@Override
+		public boolean canUpgrade() {
+			return false;
+		}
 	}
 
 	@Override

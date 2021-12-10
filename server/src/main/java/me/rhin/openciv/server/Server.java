@@ -52,6 +52,7 @@ import me.rhin.openciv.server.listener.TradeCityListener.TradeCityEvent;
 import me.rhin.openciv.server.listener.UnitDisembarkListener.UnitDisembarkEvent;
 import me.rhin.openciv.server.listener.UnitEmbarkListener.UnitEmbarkEvent;
 import me.rhin.openciv.server.listener.UnitMoveListener.UnitMoveEvent;
+import me.rhin.openciv.server.listener.UpgradeUnitListener.UpgradeUnitEvent;
 import me.rhin.openciv.server.listener.WorkTileListener.WorkTileEvent;
 import me.rhin.openciv.shared.listener.Event;
 import me.rhin.openciv.shared.listener.EventManager;
@@ -85,6 +86,7 @@ import me.rhin.openciv.shared.packet.type.TileStatlinePacket;
 import me.rhin.openciv.shared.packet.type.TradeCityPacket;
 import me.rhin.openciv.shared.packet.type.UnitDisembarkPacket;
 import me.rhin.openciv.shared.packet.type.UnitEmbarkPacket;
+import me.rhin.openciv.shared.packet.type.UpgradeUnitPacket;
 import me.rhin.openciv.shared.packet.type.WorkTilePacket;
 import me.rhin.openciv.shared.util.ColorHelper;
 
@@ -167,6 +169,7 @@ public class Server extends WebSocketServer {
 		networkEvents.put(UnitEmbarkPacket.class, UnitEmbarkEvent.class);
 		networkEvents.put(UnitDisembarkPacket.class, UnitDisembarkEvent.class);
 		networkEvents.put(DeclareWarPacket.class, DeclareWarEvent.class);
+		networkEvents.put(UpgradeUnitPacket.class, UpgradeUnitEvent.class);
 
 		this.playerIndex = 0;
 		this.commandProcessor = new CmdProcessor();

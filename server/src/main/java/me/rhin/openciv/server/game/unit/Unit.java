@@ -84,6 +84,8 @@ public abstract class Unit implements AttackableEntity, TileObserver, NextTurnLi
 
 	public abstract List<UnitType> getUnitTypes();
 
+	public abstract Class<? extends Unit> getUpgradedUnit();
+
 	public abstract String getName();
 
 	@Override
@@ -691,12 +693,12 @@ public abstract class Unit implements AttackableEntity, TileObserver, NextTurnLi
 		}
 	}
 
+	public StatLine getMaintenance() {
+		return maintenance;
+	}
+
 	protected void setMaintenance(float amount) {
 		maintenance.setValue(Stat.MAINTENANCE, amount);
 		playerOwner.updateOwnedStatlines(false);
-	}
-
-	public StatLine getMaintenance() {
-		return maintenance;
 	}
 }

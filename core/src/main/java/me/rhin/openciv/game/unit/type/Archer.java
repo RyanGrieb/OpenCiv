@@ -10,6 +10,7 @@ import me.rhin.openciv.game.map.tile.TileType.TileProperty;
 import me.rhin.openciv.game.research.type.ArcheryTech;
 import me.rhin.openciv.game.unit.AttackableEntity;
 import me.rhin.openciv.game.unit.RangedUnit;
+import me.rhin.openciv.game.unit.Unit;
 import me.rhin.openciv.game.unit.UnitItem;
 import me.rhin.openciv.game.unit.UnitParameter;
 
@@ -41,6 +42,11 @@ public class Archer extends UnitItem {
 		@Override
 		public List<UnitType> getUnitTypes() {
 			return Arrays.asList(UnitType.RANGED);
+		}
+
+		@Override
+		public boolean canUpgrade() {
+			return false;
 		}
 	}
 

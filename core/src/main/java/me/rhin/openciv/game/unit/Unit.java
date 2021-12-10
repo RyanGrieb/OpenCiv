@@ -28,6 +28,7 @@ import me.rhin.openciv.game.unit.UnitItem.UnitType;
 import me.rhin.openciv.game.unit.actions.AbstractAction;
 import me.rhin.openciv.game.unit.actions.type.EmbarkAction;
 import me.rhin.openciv.game.unit.actions.type.MoveAction;
+import me.rhin.openciv.game.unit.actions.type.UpgradeAction;
 import me.rhin.openciv.listener.BottomShapeRenderListener;
 import me.rhin.openciv.listener.NextTurnListener;
 import me.rhin.openciv.shared.packet.type.MoveUnitPacket;
@@ -43,7 +44,7 @@ public abstract class Unit extends Actor
 	protected Tile standingTile;
 	protected Sprite targetSelectionSprite;
 	private int id;
-	private AbstractPlayer playerOwner;
+	protected AbstractPlayer playerOwner;
 	private ArrayList<Vector2[]> pathVectors;
 	private ArrayList<Tile> movementTiles;
 	private float pathMovement;
@@ -71,8 +72,8 @@ public abstract class Unit extends Actor
 		this.targetSelectionSprite = TextureEnum.UI_SELECTION.sprite();
 		this.civIconSprite = playerOwner.getCivilization().getIcon().sprite();
 		civIconSprite.setSize(8, 8);
-		//civIconSprite.setAlpha(0.8F);
-		
+		// civIconSprite.setAlpha(0.8F);
+
 		this.unitHealthBubble = new UnitHealthBubble(this);
 
 		setPosition(standingTile.getVectors()[0].x - standingTile.getWidth() / 2, standingTile.getVectors()[0].y + 4);
@@ -85,6 +86,7 @@ public abstract class Unit extends Actor
 
 		customActions.add(new MoveAction(this));
 		customActions.add(new EmbarkAction(this));
+		customActions.add(new UpgradeAction(this));
 
 		Civilization.getInstance().getEventManager().addListener(NextTurnListener.class, this);
 		Civilization.getInstance().getEventManager().addListener(BottomShapeRenderListener.class, this);
@@ -98,6 +100,8 @@ public abstract class Unit extends Actor
 	public abstract float getMovementCost(Tile prevTile, Tile adjTile);
 
 	public abstract List<UnitType> getUnitTypes();
+
+	public abstract boolean canUpgrade();
 
 	@Override
 	public void act(float delta) {

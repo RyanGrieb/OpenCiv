@@ -46,6 +46,16 @@ public class WorkBoat extends UnitItem {
 			return Arrays.asList(UnitType.SUPPORT, UnitType.NAVAL);
 		}
 
+		@Override
+		public Class<? extends Unit> getUpgradedUnit() {
+			return null;
+		}
+
+		@Override
+		public String getName() {
+			return "Work Boat";
+		}
+
 		public void improveTile(String improvementName) {
 
 			TileImprovement improvement = standingTile.getBaseTileType().getImprovement(improvementName);
@@ -68,11 +78,6 @@ public class WorkBoat extends UnitItem {
 			// Delete the workboat
 			deleteUnit(DeleteUnitOptions.SERVER_DELETE);
 
-		}
-
-		@Override
-		public String getName() {
-			return "Work Boat";
 		}
 	}
 

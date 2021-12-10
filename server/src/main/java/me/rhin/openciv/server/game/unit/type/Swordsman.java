@@ -40,6 +40,12 @@ public class Swordsman extends UnitItem {
 			return Arrays.asList(UnitType.MELEE);
 		}
 
+		
+		@Override
+		public Class<? extends Unit> getUpgradedUnit() {
+			return null;
+		}
+		
 		@Override
 		public String getName() {
 			return "Swordsman";

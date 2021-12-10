@@ -41,6 +41,12 @@ public class Horseman extends UnitItem {
 		public List<UnitType> getUnitTypes() {
 			return Arrays.asList(UnitType.MELEE, UnitType.MOUNTED);
 		}
+
+
+		@Override
+		public boolean canUpgrade() {
+			return false;
+		}
 	}
 
 	@Override

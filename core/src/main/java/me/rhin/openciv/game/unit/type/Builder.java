@@ -179,6 +179,11 @@ public class Builder extends UnitItem {
 		public List<UnitType> getUnitTypes() {
 			return Arrays.asList(UnitType.SUPPORT);
 		}
+
+		@Override
+		public boolean canUpgrade() {
+			return false;
+		}
 	}
 
 	@Override

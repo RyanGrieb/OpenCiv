@@ -10,6 +10,7 @@ import org.java_websocket.WebSocket;
 
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Json;
+import com.badlogic.gdx.utils.reflect.ClassReflection;
 
 import me.rhin.openciv.server.Server;
 import me.rhin.openciv.server.game.AbstractPlayer;
@@ -54,6 +55,7 @@ import me.rhin.openciv.server.listener.UnitDisembarkListener;
 import me.rhin.openciv.server.listener.UnitEmbarkListener;
 import me.rhin.openciv.server.listener.UnitFinishedMoveListener.UnitFinishedMoveEvent;
 import me.rhin.openciv.server.listener.UnitMoveListener;
+import me.rhin.openciv.server.listener.UpgradeUnitListener;
 import me.rhin.openciv.server.listener.WorkTileListener;
 import me.rhin.openciv.shared.packet.type.AddUnitPacket;
 import me.rhin.openciv.shared.packet.type.BuyProductionItemPacket;
@@ -70,11 +72,13 @@ import me.rhin.openciv.shared.packet.type.RemoveTileTypePacket;
 import me.rhin.openciv.shared.packet.type.RequestEndTurnPacket;
 import me.rhin.openciv.shared.packet.type.SelectUnitPacket;
 import me.rhin.openciv.shared.packet.type.SetProductionItemPacket;
+import me.rhin.openciv.shared.packet.type.SetUnitHealthPacket;
 import me.rhin.openciv.shared.packet.type.SettleCityPacket;
 import me.rhin.openciv.shared.packet.type.TileStatlinePacket;
 import me.rhin.openciv.shared.packet.type.TurnTimeLeftPacket;
 import me.rhin.openciv.shared.packet.type.UnitDisembarkPacket;
 import me.rhin.openciv.shared.packet.type.UnitEmbarkPacket;
+import me.rhin.openciv.shared.packet.type.UpgradeUnitPacket;
 import me.rhin.openciv.shared.packet.type.WorkTilePacket;
 import me.rhin.openciv.shared.stat.Stat;
 import me.rhin.openciv.shared.stat.StatLine;
@@ -86,7 +90,7 @@ public class InGameState extends GameState implements DisconnectListener, Select
 		SettleCityListener, PlayerFinishLoadingListener, NextTurnListener, SetProductionItemListener, EndTurnListener,
 		PlayerListRequestListener, FetchPlayerListener, CombatPreviewListener, WorkTileListener, RangedAttackListener,
 		BuyProductionItemListener, RequestEndTurnListener, TileStatlineListener, UnitEmbarkListener,
-		UnitDisembarkListener {
+		UnitDisembarkListener, UpgradeUnitListener {
 
 	private int currentTurn;
 	private int turnTimeLeft;
@@ -118,6 +122,7 @@ public class InGameState extends GameState implements DisconnectListener, Select
 		Server.getInstance().getEventManager().addListener(TileStatlineListener.class, this);
 		Server.getInstance().getEventManager().addListener(UnitEmbarkListener.class, this);
 		Server.getInstance().getEventManager().addListener(UnitDisembarkListener.class, this);
+		Server.getInstance().getEventManager().addListener(UpgradeUnitListener.class, this);
 	}
 
 	@Override
@@ -670,6 +675,46 @@ public class InGameState extends GameState implements DisconnectListener, Select
 		Json json = new Json();
 		for (Player player : Server.getInstance().getPlayers())
 			player.sendPacket(json.toJson(addUnitPacket));
+	}
+
+	@Override
+	public void onUnitUpgrade(WebSocket conn, UpgradeUnitPacket packet) {
+		Tile tile = map.getTiles()[packet.getTileGridX()][packet.getTileGridY()];
+		Unit oldUnit = tile.getUnitFromID(packet.getUnitID());
+		
+		float health = oldUnit.getHealth();
+		// TODO: Copy XP too
+
+		// Create new unit obj from class
+
+		Unit unit = null;
+		try {
+			unit = (Unit) ClassReflection.getConstructor(oldUnit.getUpgradedUnit(), AbstractPlayer.class, Tile.class)
+					.newInstance(oldUnit.getPlayerOwner(), oldUnit.getStandingTile());
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+
+		unit.getPlayerOwner().getStatLine().subValue(Stat.GOLD, 100);
+		unit.getPlayerOwner().updateOwnedStatlines(false);
+		tile.addUnit(unit);
+		unit.setHealth(health);
+
+		AddUnitPacket addUnitPacket = new AddUnitPacket();
+		addUnitPacket.setUnit(unit.getPlayerOwner().getName(), unit.getName(), unit.getID(), tile.getGridX(),
+				tile.getGridY());
+
+		SetUnitHealthPacket healthPacket = new SetUnitHealthPacket();
+		healthPacket.setUnit(unit.getPlayerOwner().getName(), unit.getID(), tile.getGridX(), tile.getGridY(), health);
+
+		Json json = new Json();
+		for (Player player : Server.getInstance().getPlayers()) {
+			player.sendPacket(json.toJson(addUnitPacket));
+			player.sendPacket(json.toJson(healthPacket));
+		}
+
+		oldUnit.deleteUnit(DeleteUnitOptions.SERVER_DELETE);
 	}
 
 	@Override

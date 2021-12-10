@@ -46,6 +46,11 @@ public class Scout extends UnitItem {
 		}
 
 		@Override
+		public Class<? extends Unit> getUpgradedUnit() {
+			return null;
+		}
+		
+		@Override
 		public String getName() {
 			return "Scout";
 		}

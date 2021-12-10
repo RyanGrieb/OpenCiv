@@ -15,6 +15,7 @@ import me.rhin.openciv.server.game.research.type.AnimalHusbandryTech;
 import me.rhin.openciv.server.game.unit.AttackableEntity;
 import me.rhin.openciv.server.game.unit.DeleteUnitOptions;
 import me.rhin.openciv.server.game.unit.TraderUnit;
+import me.rhin.openciv.server.game.unit.Unit;
 import me.rhin.openciv.server.game.unit.UnitItem;
 import me.rhin.openciv.shared.packet.type.DeleteUnitPacket;
 import me.rhin.openciv.shared.stat.Stat;
@@ -56,6 +57,11 @@ public class Caravan extends UnitItem {
 		@Override
 		public List<UnitType> getUnitTypes() {
 			return Arrays.asList(UnitType.SUPPORT);
+		}
+
+		@Override
+		public Class<? extends Unit> getUpgradedUnit() {
+			return null;
 		}
 
 		@Override

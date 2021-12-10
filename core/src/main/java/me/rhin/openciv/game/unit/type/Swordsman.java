@@ -37,6 +37,11 @@ public class Swordsman extends UnitItem {
 		public List<UnitType> getUnitTypes() {
 			return Arrays.asList(UnitType.MELEE);
 		}
+
+		@Override
+		public boolean canUpgrade() {
+			return false;
+		}
 	}
 
 	@Override

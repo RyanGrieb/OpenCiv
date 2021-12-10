@@ -6,11 +6,13 @@ import java.util.List;
 import me.rhin.openciv.server.game.AbstractPlayer;
 import me.rhin.openciv.server.game.city.City;
 import me.rhin.openciv.server.game.map.tile.Tile;
+import me.rhin.openciv.server.game.map.tile.TileType;
 import me.rhin.openciv.server.game.map.tile.TileType.TileProperty;
+import me.rhin.openciv.server.game.research.type.IronWorkingTech;
 import me.rhin.openciv.server.game.unit.Unit;
 import me.rhin.openciv.server.game.unit.UnitItem;
+import me.rhin.openciv.server.game.unit.type.Swordsman.SwordsmanUnit;
 import me.rhin.openciv.shared.stat.Stat;
-import me.rhin.openciv.shared.stat.StatValue;
 
 public class Warrior extends UnitItem {
 
@@ -40,6 +42,11 @@ public class Warrior extends UnitItem {
 		}
 
 		@Override
+		public Class<? extends Unit> getUpgradedUnit() {
+			return SwordsmanUnit.class;
+		}
+
+		@Override
 		public String getName() {
 			return "Warrior";
 		}
@@ -57,6 +64,16 @@ public class Warrior extends UnitItem {
 
 	@Override
 	public boolean meetsProductionRequirements() {
+
+		boolean workedIron = false;
+		for (Tile tile : city.getTerritory()) {
+			if (tile.containsTileType(TileType.IRON_IMPROVED))
+				workedIron = true;
+		}
+
+		if (city.getPlayerOwner().getResearchTree().hasResearched(IronWorkingTech.class) && workedIron)
+			return false;
+
 		return true;
 	}
 

@@ -10,6 +10,7 @@ import me.rhin.openciv.game.map.tile.TileType.TileProperty;
 import me.rhin.openciv.game.research.type.WheelTech;
 import me.rhin.openciv.game.unit.AttackableEntity;
 import me.rhin.openciv.game.unit.RangedUnit;
+import me.rhin.openciv.game.unit.Unit;
 import me.rhin.openciv.game.unit.UnitItem;
 import me.rhin.openciv.game.unit.UnitParameter;
 import me.rhin.openciv.game.unit.UnitItem.UnitType;
@@ -42,6 +43,11 @@ public class ChariotArcher extends UnitItem {
 		@Override
 		public List<UnitType> getUnitTypes() {
 			return Arrays.asList(UnitType.RANGED, UnitType.MOUNTED);
+		}
+
+		@Override
+		public boolean canUpgrade() {
+			return false;
 		}
 	}
 

@@ -48,6 +48,11 @@ public class Horseman extends UnitItem {
 		}
 
 		@Override
+		public Class<? extends Unit> getUpgradedUnit() {
+			return null;
+		}
+
+		@Override
 		public String getName() {
 			return "Horseman";
 		}

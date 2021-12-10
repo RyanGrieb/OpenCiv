@@ -6,7 +6,9 @@ import java.util.List;
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.city.City;
 import me.rhin.openciv.game.map.tile.Tile;
+import me.rhin.openciv.game.map.tile.TileType;
 import me.rhin.openciv.game.map.tile.TileType.TileProperty;
+import me.rhin.openciv.game.research.type.IronWorkingTech;
 import me.rhin.openciv.game.unit.AttackableEntity;
 import me.rhin.openciv.game.unit.Unit;
 import me.rhin.openciv.game.unit.UnitItem;
@@ -32,10 +34,25 @@ public class Warrior extends UnitItem {
 			else
 				return tile.getMovementCost(prevTile);
 		}
-		
+
 		@Override
 		public List<UnitType> getUnitTypes() {
 			return Arrays.asList(UnitType.MELEE);
+		}
+
+		@Override
+		public boolean canUpgrade() {
+
+			if (!playerOwner.getResearchTree().hasResearched(IronWorkingTech.class))
+				return false;
+
+			for (City city : playerOwner.getOwnedCities()) {
+				for (Tile tile : city.getTerritory())
+					if (tile.containsTileType(TileType.IRON_IMPROVED))
+						return true;
+			}
+
+			return false;
 		}
 	}
 
@@ -48,9 +65,18 @@ public class Warrior extends UnitItem {
 	public float getGoldCost() {
 		return 100;
 	}
-	
+
 	@Override
 	public boolean meetsProductionRequirements() {
+		boolean workedIron = false;
+		for (Tile tile : city.getTerritory()) {
+			if (tile.containsTileType(TileType.IRON_IMPROVED))
+				workedIron = true;
+		}
+
+		if (city.getPlayerOwner().getResearchTree().hasResearched(IronWorkingTech.class) && workedIron)
+			return false;
+
 		return true;
 	}
 
@@ -63,7 +89,7 @@ public class Warrior extends UnitItem {
 	public TextureEnum getTexture() {
 		return TextureEnum.UNIT_WARRIOR;
 	}
-	
+
 	@Override
 	public String getDesc() {
 		return "An ancient melee unit.";
