@@ -12,6 +12,7 @@ import me.rhin.openciv.server.game.research.type.AnimalHusbandryTech;
 import me.rhin.openciv.server.game.research.type.ArcheryTech;
 import me.rhin.openciv.server.game.research.type.BronzeWorkingTech;
 import me.rhin.openciv.server.game.research.type.CalendarTech;
+import me.rhin.openciv.server.game.research.type.CivilServiceTech;
 import me.rhin.openciv.server.game.research.type.ConstructionTech;
 import me.rhin.openciv.server.game.research.type.CurrencyTech;
 import me.rhin.openciv.server.game.research.type.EngineeringTech;
@@ -62,6 +63,7 @@ public class ResearchTree implements NextTurnListener {
 		technologies.put(MathematicsTech.class, new MathematicsTech(this));
 		technologies.put(ConstructionTech.class, new ConstructionTech(this));
 		technologies.put(IronWorkingTech.class, new IronWorkingTech(this));
+		technologies.put(CivilServiceTech.class, new CivilServiceTech(this));
 		technologies.put(CurrencyTech.class, new CurrencyTech(this));
 		technologies.put(EngineeringTech.class, new EngineeringTech(this));
 		technologies.put(MetalCastingTech.class, new MetalCastingTech(this));
@@ -98,7 +100,7 @@ public class ResearchTree implements NextTurnListener {
 	public <T extends Technology> boolean hasResearched(Class<T> technologyClass) {
 		if (technologyClass == null)
 			return true;
-		
+
 		return technologies.get(technologyClass).isResearched();
 	}
 
