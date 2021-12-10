@@ -15,13 +15,17 @@ public abstract class Technology implements NextTurnListener, CompleteResearchLi
 
 	protected ArrayList<Class<? extends Technology>> requiredTechs;
 
+	private ResearchTree researchTree;
+	private TreePosition treePosition;
 	private boolean researched;
 	private int id;
 	private boolean researching;
 	private float appliedScience;
 	private int appliedTurns;
 
-	public Technology(ResearchTree researchTree) {
+	public Technology(ResearchTree researchTree, TreePosition treePosition) {
+		this.researchTree = researchTree;
+		this.treePosition = treePosition;
 		this.requiredTechs = new ArrayList<>();
 		this.researched = false;
 		this.id = researchTree.getCurrentTechIDIndex();
@@ -102,6 +106,19 @@ public abstract class Technology implements NextTurnListener, CompleteResearchLi
 	public int getAppliedTurns() {
 		return appliedTurns;
 	}
-	
-	
+
+	public Class<? extends Technology> getHighestRequiredTech() {
+		Class<? extends Technology> highestTech = null;
+
+		for (Class<? extends Technology> tech : requiredTechs) {
+			if (highestTech == null || researchTree.getTechnology(tech).getScienceCost() > researchTree
+					.getTechnology(highestTech).getScienceCost())
+				highestTech = tech;
+		}
+		return highestTech;
+	}
+
+	public TreePosition getTreePosition() {
+		return treePosition;
+	}
 }

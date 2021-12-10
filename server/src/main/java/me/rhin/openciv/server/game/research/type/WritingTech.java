@@ -8,6 +8,7 @@ public class WritingTech extends Technology {
 
 	public WritingTech(ResearchTree researchTree) {
 		super(researchTree, TechProperty.SCIENCE);
+		
 		requiredTechs.add(PotteryTech.class);
 	}
 

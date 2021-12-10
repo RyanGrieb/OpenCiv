@@ -6,7 +6,7 @@ import me.rhin.openciv.game.city.building.Building;
 import me.rhin.openciv.game.map.tile.Tile;
 import me.rhin.openciv.game.map.tile.TileType;
 import me.rhin.openciv.game.production.ProductionItem;
-import me.rhin.openciv.game.research.type.HorsebackRridingTech;
+import me.rhin.openciv.game.research.type.HorsebackRidingTech;
 import me.rhin.openciv.game.unit.UnitItem;
 import me.rhin.openciv.game.unit.UnitItem.UnitType;
 import me.rhin.openciv.shared.stat.Stat;
@@ -48,7 +48,7 @@ public class Stables extends Building {
 					TileType.CATTLE_IMPROVED, TileType.SHEEP, TileType.SHEEP_IMPROVED))
 				hasRequiredTiles = true;
 
-		return city.getPlayerOwner().getResearchTree().hasResearched(HorsebackRridingTech.class) && hasRequiredTiles;
+		return city.getPlayerOwner().getResearchTree().hasResearched(HorsebackRidingTech.class) && hasRequiredTiles;
 	}
 
 	@Override

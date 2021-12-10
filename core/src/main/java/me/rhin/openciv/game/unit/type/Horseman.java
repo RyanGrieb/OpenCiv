@@ -8,7 +8,7 @@ import me.rhin.openciv.game.city.City;
 import me.rhin.openciv.game.map.tile.Tile;
 import me.rhin.openciv.game.map.tile.TileType;
 import me.rhin.openciv.game.map.tile.TileType.TileProperty;
-import me.rhin.openciv.game.research.type.HorsebackRridingTech;
+import me.rhin.openciv.game.research.type.HorsebackRidingTech;
 import me.rhin.openciv.game.unit.Unit;
 import me.rhin.openciv.game.unit.UnitItem;
 import me.rhin.openciv.game.unit.UnitParameter;
@@ -67,7 +67,7 @@ public class Horseman extends UnitItem {
 			if (tile.containsTileType(TileType.HORSES_IMPROVED))
 				requiredTile = true;
 
-		return city.getPlayerOwner().getResearchTree().hasResearched(HorsebackRridingTech.class) && requiredTile;
+		return city.getPlayerOwner().getResearchTree().hasResearched(HorsebackRidingTech.class) && requiredTile;
 	}
 
 	@Override

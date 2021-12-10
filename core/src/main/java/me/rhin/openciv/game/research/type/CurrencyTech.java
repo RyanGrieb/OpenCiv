@@ -5,11 +5,12 @@ import com.badlogic.gdx.graphics.g2d.Sprite;
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.research.ResearchTree;
 import me.rhin.openciv.game.research.Technology;
+import me.rhin.openciv.game.research.TreePosition;
 
 public class CurrencyTech extends Technology {
 
 	public CurrencyTech(ResearchTree researchTree) {
-		super(researchTree);
+		super(researchTree, new TreePosition(3, 3));
 		
 		this.requiredTechs.add(MathematicsTech.class);
 	}

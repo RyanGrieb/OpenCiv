@@ -8,7 +8,8 @@ public class TrappingTech extends Technology {
 
 	public TrappingTech(ResearchTree researchTree) {
 		super(researchTree, TechProperty.MORALE);
-		requiredTechs.add(PotteryTech.class);
+		
+		requiredTechs.add(AnimalHusbandryTech.class);
 	}
 
 	@Override

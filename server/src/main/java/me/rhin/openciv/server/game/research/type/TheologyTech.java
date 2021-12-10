@@ -4,14 +4,12 @@ import me.rhin.openciv.server.game.research.ResearchTree;
 import me.rhin.openciv.server.game.research.TechProperty;
 import me.rhin.openciv.server.game.research.Technology;
 
-public class CivilServiceTech extends Technology {
+public class TheologyTech extends Technology {
 
-	public CivilServiceTech(ResearchTree researchTree) {
-		super(researchTree, TechProperty.MILITARY, TechProperty.MORALE);
+	public TheologyTech(ResearchTree researchTree) {
+		super(researchTree, TechProperty.FAITH);
 
-		requiredTechs.add(HorsebackRidingTech.class);
-		requiredTechs.add(CurrencyTech.class);
-		requiredTechs.add(DramaPoetryTech.class);
+		requiredTechs.add(PhilosophyTech.class);
 	}
 
 	@Override
@@ -21,7 +19,7 @@ public class CivilServiceTech extends Technology {
 
 	@Override
 	public String getName() {
-		return "Civil Service";
+		return "Theology";
 	}
 
 }

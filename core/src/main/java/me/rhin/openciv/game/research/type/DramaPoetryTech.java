@@ -7,32 +7,32 @@ import me.rhin.openciv.game.research.ResearchTree;
 import me.rhin.openciv.game.research.Technology;
 import me.rhin.openciv.game.research.TreePosition;
 
-public class CalendarTech extends Technology {
+public class DramaPoetryTech extends Technology {
 
-	public CalendarTech(ResearchTree researchTree) {
-		super(researchTree, new TreePosition(1, 8));
+	public DramaPoetryTech(ResearchTree researchTree) {
+		super(researchTree, new TreePosition(3, 7));
 
-		requiredTechs.add(PotteryTech.class);
+		requiredTechs.add(WritingTech.class);
 	}
 
 	@Override
 	public int getScienceCost() {
-		return 55;
+		return 105;
 	}
 
 	@Override
 	public String getName() {
-		return "Calendar";
+		return "Drama and Poetry";
 	}
 
 	@Override
 	public Sprite getIcon() {
-		return TextureEnum.ICON_CALENDAR.sprite();
+		return TextureEnum.BUILDING_AMPHITHEATER.sprite();
 	}
 
 	@Override
 	public String getDesc() {
-		return "- Unlocks stone works\n" + "- Unlocks stonehenge\n" + "- Build plantations";
+		return "- Unlocks amphitheater\nbuilding";
 	}
 
 }

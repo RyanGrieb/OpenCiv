@@ -5,11 +5,12 @@ import com.badlogic.gdx.graphics.g2d.Sprite;
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.research.ResearchTree;
 import me.rhin.openciv.game.research.Technology;
+import me.rhin.openciv.game.research.TreePosition;
 
 public class ConstructionTech extends Technology {
 
 	public ConstructionTech(ResearchTree researchTree) {
-		super(researchTree);
+		super(researchTree, new TreePosition(2, 1));
 
 		requiredTechs.add(MasonryTech.class);
 		requiredTechs.add(WheelTech.class);

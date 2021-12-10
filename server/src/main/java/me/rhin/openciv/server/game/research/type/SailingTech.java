@@ -9,6 +9,7 @@ public class SailingTech extends Technology {
 
 	public SailingTech(ResearchTree researchTree) {
 		super(researchTree, TechProperty.FOOD, TechProperty.GOLD);
+		
 		requiredTechs.add(PotteryTech.class);
 	}
 

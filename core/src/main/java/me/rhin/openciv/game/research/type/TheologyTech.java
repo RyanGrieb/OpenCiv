@@ -5,34 +5,34 @@ import com.badlogic.gdx.graphics.g2d.Sprite;
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.research.ResearchTree;
 import me.rhin.openciv.game.research.Technology;
+import me.rhin.openciv.game.research.TreePosition;
 
-public class HorsebackRridingTech extends Technology {
+public class TheologyTech extends Technology {
 
-	public HorsebackRridingTech(ResearchTree researchTree) {
-		super(researchTree);
-
-		requiredTechs.add(WheelTech.class);
-		requiredTechs.add(TrappingTech.class);
+	public TheologyTech(ResearchTree researchTree) {
+		super(researchTree, new TreePosition(4, 8));
+		
+		requiredTechs.add(PhilosophyTech.class);
 	}
 
 	@Override
 	public int getScienceCost() {
-		return 105;
+		return 175;
 	}
 
 	@Override
 	public String getName() {
-		return "Horseback Riding";
+		return "Theology";
 	}
 
 	@Override
 	public Sprite getIcon() {
-		return TextureEnum.UNIT_HORSEMAN.sprite();
+		return TextureEnum.BUILDING_GARDEN.sprite();
 	}
 
 	@Override
 	public String getDesc() {
-		return "- Unlocks horseman \n- Unlocks Stables";
+		return "- Unlocks garden building\n - Still WIP...";
 	}
 
 }

@@ -4,23 +4,20 @@ import me.rhin.openciv.server.game.research.ResearchTree;
 import me.rhin.openciv.server.game.research.TechProperty;
 import me.rhin.openciv.server.game.research.Technology;
 
-public class WheelTech extends Technology {
+public class DramaPoetryTech extends Technology {
 
-	public WheelTech(ResearchTree researchTree) {
-		super(researchTree, TechProperty.FOOD,TechProperty.PRODUCTION,TechProperty.MILITARY);
-		
-		requiredTechs.add(AnimalHusbandryTech.class);
-		requiredTechs.add(ArcheryTech.class);
+	public DramaPoetryTech(ResearchTree researchTree) {
+		super(researchTree, TechProperty.HERITAGE);
 	}
 
 	@Override
 	public int getScienceCost() {
-		return 55;
+		return 105;
 	}
 
 	@Override
 	public String getName() {
-		return "The Wheel";
+		return "Drama and Poetry";
 	}
 
 }

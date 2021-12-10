@@ -7,32 +7,33 @@ import me.rhin.openciv.game.research.ResearchTree;
 import me.rhin.openciv.game.research.Technology;
 import me.rhin.openciv.game.research.TreePosition;
 
-public class CalendarTech extends Technology {
+public class HorsebackRidingTech extends Technology {
 
-	public CalendarTech(ResearchTree researchTree) {
-		super(researchTree, new TreePosition(1, 8));
+	public HorsebackRidingTech(ResearchTree researchTree) {
+		super(researchTree, new TreePosition(2, 5));
 
-		requiredTechs.add(PotteryTech.class);
+		requiredTechs.add(WheelTech.class);
+		requiredTechs.add(TrappingTech.class);
 	}
 
 	@Override
 	public int getScienceCost() {
-		return 55;
+		return 105;
 	}
 
 	@Override
 	public String getName() {
-		return "Calendar";
+		return "Horseback Riding";
 	}
 
 	@Override
 	public Sprite getIcon() {
-		return TextureEnum.ICON_CALENDAR.sprite();
+		return TextureEnum.UNIT_HORSEMAN.sprite();
 	}
 
 	@Override
 	public String getDesc() {
-		return "- Unlocks stone works\n" + "- Unlocks stonehenge\n" + "- Build plantations";
+		return "- Unlocks horseman \n- Unlocks Stables";
 	}
 
 }

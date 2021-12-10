@@ -5,6 +5,7 @@ public enum TechProperty {
 	MILITARY,
 	MORALE,
 	GOLD,
+	HERITAGE,
 	PRODUCTION,
 	FOOD,
 	SCIENCE;

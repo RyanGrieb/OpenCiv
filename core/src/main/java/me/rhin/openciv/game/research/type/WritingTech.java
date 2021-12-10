@@ -5,11 +5,12 @@ import com.badlogic.gdx.graphics.g2d.Sprite;
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.research.ResearchTree;
 import me.rhin.openciv.game.research.Technology;
+import me.rhin.openciv.game.research.TreePosition;
 
 public class WritingTech extends Technology {
 
 	public WritingTech(ResearchTree researchTree) {
-		super(researchTree);
+		super(researchTree, new TreePosition(1, 7));
 
 		requiredTechs.add(PotteryTech.class);
 	}
