@@ -8,11 +8,10 @@ import me.rhin.openciv.game.city.City;
 import me.rhin.openciv.game.map.tile.Tile;
 import me.rhin.openciv.game.map.tile.TileType.TileProperty;
 import me.rhin.openciv.game.research.type.BronzeWorkingTech;
-import me.rhin.openciv.game.unit.AttackableEntity;
+import me.rhin.openciv.game.research.type.CivilServiceTech;
 import me.rhin.openciv.game.unit.Unit;
 import me.rhin.openciv.game.unit.UnitItem;
 import me.rhin.openciv.game.unit.UnitParameter;
-import me.rhin.openciv.game.unit.UnitItem.UnitType;
 
 public class Spearman extends UnitItem {
 
@@ -33,7 +32,7 @@ public class Spearman extends UnitItem {
 			else
 				return tile.getMovementCost(prevTile);
 		}
-		
+
 		@Override
 		public List<UnitType> getUnitTypes() {
 			return Arrays.asList(UnitType.MELEE);
@@ -41,7 +40,7 @@ public class Spearman extends UnitItem {
 
 		@Override
 		public boolean canUpgrade() {
-			return false;
+			return playerOwner.getResearchTree().hasResearched(CivilServiceTech.class);
 		}
 	}
 
@@ -57,6 +56,10 @@ public class Spearman extends UnitItem {
 
 	@Override
 	public boolean meetsProductionRequirements() {
+		// If we have pikeman, dont show.
+		if (city.getPlayerOwner().getResearchTree().hasResearched(CivilServiceTech.class))
+			return false;
+
 		return city.getPlayerOwner().getResearchTree().hasResearched(BronzeWorkingTech.class);
 	}
 

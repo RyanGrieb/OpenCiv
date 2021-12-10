@@ -8,9 +8,11 @@ import me.rhin.openciv.server.game.city.City;
 import me.rhin.openciv.server.game.map.tile.Tile;
 import me.rhin.openciv.server.game.map.tile.TileType.TileProperty;
 import me.rhin.openciv.server.game.research.type.BronzeWorkingTech;
+import me.rhin.openciv.server.game.research.type.CivilServiceTech;
 import me.rhin.openciv.server.game.unit.AttackableEntity;
 import me.rhin.openciv.server.game.unit.Unit;
 import me.rhin.openciv.server.game.unit.UnitItem;
+import me.rhin.openciv.server.game.unit.type.Pikeman.PikemanUnit;
 import me.rhin.openciv.shared.stat.Stat;
 
 public class Spearman extends UnitItem {
@@ -58,9 +60,9 @@ public class Spearman extends UnitItem {
 
 		@Override
 		public Class<? extends Unit> getUpgradedUnit() {
-			return null;
+			return PikemanUnit.class;
 		}
-		
+
 		@Override
 		public String getName() {
 			return "Spearman";
@@ -79,6 +81,11 @@ public class Spearman extends UnitItem {
 
 	@Override
 	public boolean meetsProductionRequirements() {
+
+		// If we have pikeman, dont show.
+		if (city.getPlayerOwner().getResearchTree().hasResearched(CivilServiceTech.class))
+			return false;
+
 		return city.getPlayerOwner().getResearchTree().hasResearched(BronzeWorkingTech.class);
 	}
 
