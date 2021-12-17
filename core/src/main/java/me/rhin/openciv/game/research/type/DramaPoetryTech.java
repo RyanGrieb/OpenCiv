@@ -11,7 +11,7 @@ public class DramaPoetryTech extends Technology {
 
 	public DramaPoetryTech(ResearchTree researchTree) {
 		super(researchTree, new TreePosition(3, 7));
-
+		
 		requiredTechs.add(WritingTech.class);
 	}
 

@@ -9,6 +9,7 @@ import com.badlogic.gdx.Gdx;
 
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.game.city.City;
+import me.rhin.openciv.game.city.building.type.Amphitheater;
 import me.rhin.openciv.game.city.building.type.Aqueduct;
 import me.rhin.openciv.game.city.building.type.Circus;
 import me.rhin.openciv.game.city.building.type.Colosseum;
@@ -106,6 +107,7 @@ public class ProducibleItemManager {
 		possibleItems.put("Workshop", new Workshop(city));
 		possibleItems.put("Aqueduct", new Aqueduct(city));
 		possibleItems.put("Mint", new Mint(city));
+		possibleItems.put("Amphitheater", new Amphitheater(city));
 		
 		// Wonders
 		possibleItems.put("Great Pyramids", new GreatPyramids(city));
