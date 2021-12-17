@@ -68,7 +68,7 @@ public class WorkBoat extends UnitItem {
 			// FIXME: Redundant code from Tile
 			improvement.improveTile();
 
-			City city = standingTile.getCity();
+			City city = standingTile.getTerritory();
 
 			if (city != null) {
 				city.addMorale(standingTile.getStatLine().getStatValue(Stat.MORALE_TILE));
