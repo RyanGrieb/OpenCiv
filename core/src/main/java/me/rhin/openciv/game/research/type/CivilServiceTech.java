@@ -19,7 +19,7 @@ public class CivilServiceTech extends Technology {
 
 	@Override
 	public int getScienceCost() {
-		return 175;
+		return 275;
 	}
 
 	@Override

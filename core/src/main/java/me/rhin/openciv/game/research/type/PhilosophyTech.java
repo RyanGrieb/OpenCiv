@@ -18,7 +18,7 @@ public class PhilosophyTech extends Technology {
 
 	@Override
 	public int getScienceCost() {
-		return 105;
+		return 175;
 	}
 
 	@Override

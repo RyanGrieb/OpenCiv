@@ -7,32 +7,32 @@ import me.rhin.openciv.game.research.ResearchTree;
 import me.rhin.openciv.game.research.Technology;
 import me.rhin.openciv.game.research.TreePosition;
 
-public class OpticsTech extends Technology {
+public class GuildsTech extends Technology {
 
-	public OpticsTech(ResearchTree researchTree) {
-		super(researchTree, new TreePosition(2, 9));
+	public GuildsTech(ResearchTree researchTree) {
+		super(researchTree, new TreePosition(4, 3));
 
-		requiredTechs.add(SailingTech.class);
+		requiredTechs.add(CurrencyTech.class);
 	}
 
 	@Override
 	public int getScienceCost() {
-		return 85;
+		return 275;
 	}
 
 	@Override
 	public String getName() {
-		return "Optics";
+		return "Guilds";
 	}
 
 	@Override
 	public Sprite getIcon() {
-		return TextureEnum.BUILDING_LIGHTHOUSE.sprite();
+		return TextureEnum.BUILDING_MACHU_PICCHU.sprite();
 	}
 
 	@Override
 	public String getDesc() {
-		return "- Unlocks lighthouse\n- Allows units to traverse\nshallow water";
+		return "- Unlocks Machu Picchu\n- Allow builders to build\ntrading post improvement";
 	}
 
 }

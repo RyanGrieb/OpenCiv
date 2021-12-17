@@ -17,7 +17,7 @@ public class IronWorkingTech extends Technology {
 
 	@Override
 	public int getScienceCost() {
-		return 105; // 195
+		return 195;
 	}
 
 	@Override

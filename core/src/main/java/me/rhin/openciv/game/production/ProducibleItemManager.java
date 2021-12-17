@@ -14,12 +14,14 @@ import me.rhin.openciv.game.city.building.type.Aqueduct;
 import me.rhin.openciv.game.city.building.type.Circus;
 import me.rhin.openciv.game.city.building.type.Colosseum;
 import me.rhin.openciv.game.city.building.type.Forge;
+import me.rhin.openciv.game.city.building.type.Garden;
 import me.rhin.openciv.game.city.building.type.Granary;
 import me.rhin.openciv.game.city.building.type.GreatLibrary;
 import me.rhin.openciv.game.city.building.type.GreatPyramids;
 import me.rhin.openciv.game.city.building.type.HangingGardens;
 import me.rhin.openciv.game.city.building.type.Library;
 import me.rhin.openciv.game.city.building.type.Lighthouse;
+import me.rhin.openciv.game.city.building.type.MachuPicchu;
 import me.rhin.openciv.game.city.building.type.Market;
 import me.rhin.openciv.game.city.building.type.Mint;
 import me.rhin.openciv.game.city.building.type.Monument;
@@ -108,6 +110,7 @@ public class ProducibleItemManager {
 		possibleItems.put("Aqueduct", new Aqueduct(city));
 		possibleItems.put("Mint", new Mint(city));
 		possibleItems.put("Amphitheater", new Amphitheater(city));
+		possibleItems.put("Garden", new Garden(city));
 		
 		// Wonders
 		possibleItems.put("Great Pyramids", new GreatPyramids(city));
@@ -115,6 +118,7 @@ public class ProducibleItemManager {
 		possibleItems.put("Hanging Gardens", new HangingGardens(city));
 		possibleItems.put("Statue Of Ares", new StatueOfAres(city));
 		possibleItems.put("Stonehenge", new Stonehenge(city));
+		possibleItems.put("Machu Picchu", new MachuPicchu(city));
 
 		// FIXME: There should be a better way to do this than just checking if the
 		// player matches

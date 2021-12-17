@@ -17,6 +17,7 @@ import me.rhin.openciv.server.game.research.type.ConstructionTech;
 import me.rhin.openciv.server.game.research.type.CurrencyTech;
 import me.rhin.openciv.server.game.research.type.DramaPoetryTech;
 import me.rhin.openciv.server.game.research.type.EngineeringTech;
+import me.rhin.openciv.server.game.research.type.GuildsTech;
 import me.rhin.openciv.server.game.research.type.HorsebackRidingTech;
 import me.rhin.openciv.server.game.research.type.IronWorkingTech;
 import me.rhin.openciv.server.game.research.type.MasonryTech;
@@ -68,6 +69,7 @@ public class ResearchTree implements NextTurnListener {
 		technologies.put(IronWorkingTech.class, new IronWorkingTech(this));
 		technologies.put(TheologyTech.class, new TheologyTech(this));
 		technologies.put(CivilServiceTech.class, new CivilServiceTech(this));
+		technologies.put(GuildsTech.class, new GuildsTech(this));
 		technologies.put(CurrencyTech.class, new CurrencyTech(this));
 		technologies.put(EngineeringTech.class, new EngineeringTech(this));
 		technologies.put(MetalCastingTech.class, new MetalCastingTech(this));

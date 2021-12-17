@@ -195,7 +195,9 @@ public abstract class TraderUnit extends Unit {
 
 			movingToCity.getPlayerOwner().sendPacket(json.toJson(statUpdatePacket));
 
-			movingToCity.getPlayerOwner().getStatLine().addValue(Stat.GOLD, goldValue);
+			float goldAmount = goldValue * (1 + movingToCity.getStatLine().getStatModifier(Stat.TRADE_GOLD_MODIFIER));
+
+			movingToCity.getPlayerOwner().getStatLine().addValue(Stat.GOLD, goldAmount);
 			movingToCity.getPlayerOwner().updateOwnedStatlines(false);
 		}
 	}

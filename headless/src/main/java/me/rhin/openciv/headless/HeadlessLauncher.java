@@ -22,11 +22,14 @@ public class HeadlessLauncher {
 		// System.out.println("playerStatLine:" + playerStatLine.id);
 
 		StatLine statLine = new StatLine();
-		statLine.addValue(Stat.GOLD, 50);
 		
+		statLine.setValue(Stat.MORALE_CITY, 10);
+		statLine.addModifier(Stat.TRADE_GOLD_MODIFIER, 0.5F);
 		statLine.clearNonAccumulative();
-		statLine.clearNonAccumulative();
-		System.out.println(statLine);
+		
+		float mod = statLine.getStatModifier(Stat.TRADE_GOLD_MODIFIER);
+		
+		System.out.println(mod);
 	}
 
 	private static Application createApplication() {

@@ -17,7 +17,7 @@ public class TheologyTech extends Technology {
 
 	@Override
 	public int getScienceCost() {
-		return 175;
+		return 275;
 	}
 
 	@Override
@@ -32,7 +32,7 @@ public class TheologyTech extends Technology {
 
 	@Override
 	public String getDesc() {
-		return "- Unlocks garden building\n - Still WIP...";
+		return "- Unlocks garden building\n- Still WIP...";
 	}
 
 }

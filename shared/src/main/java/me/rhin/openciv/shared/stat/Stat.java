@@ -19,7 +19,8 @@ public enum Stat {
 	TRADE_ROUTE_AMOUNT(StatType.PLAYER_EXCLUSIVE),
 	MAX_TRADE_ROUTES(StatType.PLAYER_EXCLUSIVE),
 	MORALE_TILE,
-	MORALE_CITY;
+	MORALE_CITY(StatType.CITY_EXCLUSIVE),
+	TRADE_GOLD_MODIFIER(StatType.CITY_EXCLUSIVE);
 
 	private Stat addedStat;
 	private StatType statType;

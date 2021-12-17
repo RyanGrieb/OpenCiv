@@ -58,7 +58,7 @@ public enum TileType {
 	LUMBERMILL(TextureEnum.TILE_LUMBERMILL, TileLayer.HIGH, TileProperty.IMPROVEMENT),
 	FORT(TextureEnum.TILE_FORT, TileLayer.MIDDLE, TileProperty.IMPROVEMENT),
 	BARBARIAN_CAMP(TextureEnum.TILE_BARBARIAN_CAMP, TileLayer.MIDDLE, TileProperty.IMPROVEMENT),
-	RUINS(TextureEnum.TILE_RUINS, TileLayer.LOW, SoundEnum.RUIN_CAPTURE, TileProperty.IMPROVEMENT),
+	RUINS(TextureEnum.TILE_RUINS, TileLayer.MIDDLE, SoundEnum.RUIN_CAPTURE, TileProperty.IMPROVEMENT),
 	ROAD(0.5F, TileProperty.ROAD);
 
 	public enum TileLayer {

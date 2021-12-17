@@ -349,7 +349,7 @@ public class City
 
 		// Clear & Reset all statline values
 		statLine.clearExcept(Stat.EXPANSION_PROGRESS, Stat.EXPANSION_REQUIREMENT, Stat.FOOD_SURPLUS, Stat.MORALE_CITY,
-				Stat.POPULATION, Stat.PRODUCTION_GAIN);
+				Stat.POPULATION, Stat.PRODUCTION_GAIN, Stat.TRADE_GOLD_MODIFIER);
 
 		// Keep the production gain modifier
 		statLine.setValue(Stat.PRODUCTION_GAIN, 0);

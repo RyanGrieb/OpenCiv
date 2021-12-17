@@ -17,7 +17,7 @@ public class DramaPoetryTech extends Technology {
 
 	@Override
 	public int getScienceCost() {
-		return 105;
+		return 175;
 	}
 
 	@Override
