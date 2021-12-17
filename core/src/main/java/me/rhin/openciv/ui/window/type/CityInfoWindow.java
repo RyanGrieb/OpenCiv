@@ -74,7 +74,7 @@ public class CityInfoWindow extends AbstractWindow implements ResizeListener, Bu
 		this.cityProductionInfo = new CityProductionInfo(city, 2, cityStatsInfo.getY() - 105, 200, 100);
 		addActor(cityProductionInfo);
 
-		this.productionContainerList = new ContainerList(this, 0, 0, 200, 255);
+		this.productionContainerList = new ContainerList(this, 0, 0, 200, 325);
 		for (ProductionItem productionItem : city.getProducibleItemManager().getProducibleItems()) {
 			productionContainerList.addItem(ListContainerType.CATEGORY, productionItem.getCategory(),
 					new ListProductionItem(city, productionItem, 200, 45));

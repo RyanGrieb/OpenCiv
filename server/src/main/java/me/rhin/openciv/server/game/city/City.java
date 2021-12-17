@@ -152,7 +152,15 @@ public class City
 
 		int growthTurns = (foodRequired - surplusFood) / MathHelper.nonZero(gainedFood);
 
-		if (growthTurns < 1 && gainedFood >= 0) {
+		boolean openWorkerTile = false;
+
+		for (CitizenWorker worker : citizenWorkers.values())
+			if (worker instanceof EmptyCitizenWorker) {
+				openWorkerTile = true;
+				break;
+			}
+
+		if (growthTurns < 1 && gainedFood >= 0 && openWorkerTile) {
 
 			setPopulation((int) statLine.getStatValue(Stat.POPULATION) + 1);
 			updateWorkedTiles();
