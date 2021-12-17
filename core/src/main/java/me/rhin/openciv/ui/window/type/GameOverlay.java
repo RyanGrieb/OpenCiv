@@ -133,6 +133,8 @@ public class GameOverlay extends AbstractWindow implements ResizeListener, TileS
 
 	@Override
 	public void onRecieveTileStatline(TileStatlinePacket packet) {
+		clearTileStatInfo();
+		
 		StatLine statline = StatLine.fromPacket(packet);
 
 		ArrayList<Stat> statList = new ArrayList<>();

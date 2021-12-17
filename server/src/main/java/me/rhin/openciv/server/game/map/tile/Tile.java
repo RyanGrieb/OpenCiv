@@ -465,8 +465,7 @@ public class Tile {
 				return tileType.getStatLine();
 			}
 
-			if ((tileType.getTileLayer() == TileLayer.MIDDLE || tileType.getTileLayer() == TileLayer.BASE)
-					&& !containsTileType(TileType.CITY)) {
+			if ((tileType.getTileLayer() == TileLayer.MIDDLE || tileType.getTileLayer() == TileLayer.BASE)) {
 				statLine.mergeStatLine(tileType.getStatLine());
 			}
 		}

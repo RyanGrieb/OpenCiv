@@ -582,8 +582,8 @@ public abstract class Unit implements AttackableEntity, TileObserver, NextTurnLi
 
 					if (!cityUnit.getPlayerOwner().equals(this.getPlayerOwner())) {
 
-						cityUnit.deleteUnit(DeleteUnitOptions.PLAYER_KILL);
 						unitIterator.remove();
+						cityUnit.deleteUnit(DeleteUnitOptions.PLAYER_KILL);
 					}
 				}
 

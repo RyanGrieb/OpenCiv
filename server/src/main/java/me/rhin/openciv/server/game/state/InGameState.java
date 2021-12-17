@@ -681,7 +681,7 @@ public class InGameState extends GameState implements DisconnectListener, Select
 	public void onUnitUpgrade(WebSocket conn, UpgradeUnitPacket packet) {
 		Tile tile = map.getTiles()[packet.getTileGridX()][packet.getTileGridY()];
 		Unit oldUnit = tile.getUnitFromID(packet.getUnitID());
-		
+
 		float health = oldUnit.getHealth();
 		// TODO: Copy XP too
 
@@ -694,7 +694,6 @@ public class InGameState extends GameState implements DisconnectListener, Select
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-
 
 		unit.getPlayerOwner().getStatLine().subValue(Stat.GOLD, 100);
 		unit.getPlayerOwner().updateOwnedStatlines(false);
@@ -884,7 +883,8 @@ public class InGameState extends GameState implements DisconnectListener, Select
 
 		// Debug code
 		if (players.size() > 1) {
-			players.get(0).setSpawnPos(players.get(1).getSpawnX() + 2, players.get(1).getSpawnY() + 2);
+			// players.get(0).setSpawnPos(players.get(1).getSpawnX() + 2,
+			// players.get(1).getSpawnY() + 2);
 		}
 
 		// Give players a warrior unit

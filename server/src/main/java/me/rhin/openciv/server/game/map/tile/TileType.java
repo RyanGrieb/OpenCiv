@@ -428,7 +428,7 @@ public enum TileType implements Comparable<TileType> {
 		public List<TileImprovement> getImprovements() {
 			return Arrays.asList(new FarmOceanImprovement(TileType.CRABS_IMPROVED));
 		}
-		
+
 		@Override
 		public TileType[] getSpawnTileTypes() {
 			return new TileType[] { TileType.SHALLOW_OCEAN };
@@ -606,7 +606,7 @@ public enum TileType implements Comparable<TileType> {
 		public StatLine getStatLine() {
 			StatLine statLine = new StatLine();
 			statLine.addValue(Stat.PRODUCTION_GAIN, 2);
-			//statLine.addValue(Stat.FOOD_GAIN, 2);
+			// statLine.addValue(Stat.FOOD_GAIN, 2);
 			return statLine;
 		}
 	},
@@ -732,6 +732,10 @@ public enum TileType implements Comparable<TileType> {
 
 	public TileProperty[] getProperties() {
 		return tileProperties;
+	}
+
+	public List<TileProperty> getPropertiesList() {
+		return Arrays.asList(tileProperties);
 	}
 
 	public boolean hasProperty(TileProperty... targetProperties) {

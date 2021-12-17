@@ -11,6 +11,7 @@ import me.rhin.openciv.server.game.Player;
 import me.rhin.openciv.server.game.city.City;
 import me.rhin.openciv.server.game.city.building.type.Palace;
 import me.rhin.openciv.server.game.map.tile.Tile;
+import me.rhin.openciv.server.game.map.tile.Tile.TileTypeWrapper;
 import me.rhin.openciv.server.game.map.tile.TileType;
 import me.rhin.openciv.server.game.map.tile.TileType.TileProperty;
 import me.rhin.openciv.server.game.unit.AttackableEntity;
@@ -20,6 +21,7 @@ import me.rhin.openciv.server.game.unit.UnitItem;
 import me.rhin.openciv.server.listener.ServerSettleCityListener.ServerSettleCityEvent;
 import me.rhin.openciv.shared.packet.type.DeleteUnitPacket;
 import me.rhin.openciv.shared.packet.type.RemoveTileTypePacket;
+import me.rhin.openciv.shared.packet.type.SetTileTypePacket;
 import me.rhin.openciv.shared.packet.type.SettleCityPacket;
 import me.rhin.openciv.shared.packet.type.TerritoryGrowPacket;
 import me.rhin.openciv.shared.stat.Stat;
@@ -69,11 +71,28 @@ public class Settler extends UnitItem {
 
 				TileType type = (tile.containsTileType(TileType.FOREST) ? TileType.FOREST : TileType.JUNGLE);
 
+				tile.removeTileType(type);
+
 				RemoveTileTypePacket removeTileTypePacket = new RemoveTileTypePacket();
 				removeTileTypePacket.setTile(type.name(), tile.getGridX(), tile.getGridY());
 
 				for (Player player : Server.getInstance().getPlayers())
 					player.sendPacket(json.toJson(removeTileTypePacket));
+			}
+
+			for (TileTypeWrapper wrapper : tile.getTileTypeWrappers()) {
+				if (wrapper.getTileType().getPropertiesList().contains(TileProperty.LUXURY)
+						&& wrapper.getTileType().getImprovements().size() > 0) {
+
+					TileType improvementTileType = wrapper.getTileType().getImprovements().get(0).getTileType();
+					tile.setTileType(improvementTileType);
+
+					SetTileTypePacket setTileTypePacket = new SetTileTypePacket();
+					setTileTypePacket.setTile(improvementTileType.name(), tile.getGridX(), tile.getGridY());
+					
+					for (Player player : Server.getInstance().getPlayers())
+						player.sendPacket(json.toJson(setTileTypePacket));
+				}
 			}
 
 			City city = new City(playerOwner, cityName, tile);
@@ -102,6 +121,11 @@ public class Settler extends UnitItem {
 			}
 
 			city.addBuilding(new Palace(city));
+
+			if (tile.getStatLine().getStatValue(Stat.MORALE_TILE) > 0) {
+				city.addMorale(tile.getStatLine().getStatValue(Stat.MORALE_TILE));
+			}
+
 			city.updateWorkedTiles();
 
 			city.getPlayerOwner().updateOwnedStatlines(false);
@@ -113,7 +137,7 @@ public class Settler extends UnitItem {
 		public Class<? extends Unit> getUpgradedUnit() {
 			return null;
 		}
-		
+
 		@Override
 		public String getName() {
 			return "Settler";

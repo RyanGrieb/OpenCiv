@@ -124,8 +124,16 @@ public class CurrentHeritageWindow extends AbstractWindow
 		heritage = null;
 
 		// FIXME: Move somewhere else?
-		Civilization.getInstance().getGame().getNotificationHanlder()
-				.fireNotification(new NotStudyingNotification());
+		boolean treeComplete = true;
+
+		for (Heritage heritage : Civilization.getInstance().getGame().getPlayer().getHeritageTree().getAllHeritage()) {
+			if (!heritage.isStudied())
+				treeComplete = false;
+		}
+
+		if (!treeComplete)
+			Civilization.getInstance().getGame().getNotificationHanlder()
+					.fireNotification(new NotStudyingNotification());
 	}
 
 	@Override

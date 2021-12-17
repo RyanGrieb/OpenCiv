@@ -569,15 +569,10 @@ public class City
 		if (tile.equals(originTile)) {
 
 			StatLine statLine = new StatLine();
-			statLine.setValue(Stat.FOOD_GAIN, 2);
-			for (Stat stat : tile.getStatLine().getStatValues().keySet()) {
-				if (stat == Stat.FOOD_GAIN)
-					continue;
-				statLine.setValue(stat, tile.getStatLine().getStatValue(stat));
-			}
+			statLine.mergeStatLine(tile.getStatLine());
 
-			if (statLine.getStatValue(Stat.PRODUCTION_GAIN) < 1)
-				statLine.setValue(Stat.PRODUCTION_GAIN, 1);
+			statLine.setValue(Stat.FOOD_GAIN, 2);
+			statLine.setValue(Stat.PRODUCTION_GAIN, 3);
 
 			return statLine;
 		}

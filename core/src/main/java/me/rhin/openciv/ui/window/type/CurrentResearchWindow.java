@@ -4,6 +4,7 @@ import com.badlogic.gdx.math.MathUtils;
 
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.TextureEnum;
+import me.rhin.openciv.game.heritage.Heritage;
 import me.rhin.openciv.game.notification.type.NotResearchingNotification;
 import me.rhin.openciv.game.research.Technology;
 import me.rhin.openciv.listener.CompleteResearchListener;
@@ -116,8 +117,17 @@ public class CurrentResearchWindow extends AbstractWindow
 		tech = null;
 
 		// FIXME: Move somewhere else?
-		Civilization.getInstance().getGame().getNotificationHanlder()
-				.fireNotification(new NotResearchingNotification());
+		boolean treeComplete = true;
+
+		for (Technology technology : Civilization.getInstance().getGame().getPlayer().getResearchTree()
+				.getTechnologies()) {
+			if (!technology.isResearched())
+				treeComplete = false;
+		}
+
+		if (!treeComplete)
+			Civilization.getInstance().getGame().getNotificationHanlder()
+					.fireNotification(new NotResearchingNotification());
 	}
 
 	@Override

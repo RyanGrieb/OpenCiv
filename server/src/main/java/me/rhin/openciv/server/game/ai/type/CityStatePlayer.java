@@ -26,8 +26,8 @@ public class CityStatePlayer extends AIPlayer implements NextTurnListener {
 
 	public enum CityStateType {
 		GOLD,
-		// PRODUCTION,
-		// SCIENCE;
+		PRODUCTION,
+		SCIENCE;
 	}
 
 	private String name;

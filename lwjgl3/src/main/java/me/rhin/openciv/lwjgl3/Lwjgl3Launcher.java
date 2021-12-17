@@ -31,6 +31,7 @@ public class Lwjgl3Launcher {
 		config.setWindowSizeLimits(800, 750, -1, -1);
 		config.setTitle("OpenCiv");
 		config.setWindowIcon(FileType.Internal, "tile_city.png");
+		//config.setFullscreenMode(Lwjgl3ApplicationConfiguration.getDisplayMode());
 		return config;
 	}
 }
