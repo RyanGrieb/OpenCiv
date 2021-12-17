@@ -17,6 +17,7 @@ import me.rhin.openciv.game.research.type.EngineeringTech;
 import me.rhin.openciv.game.research.type.GuildsTech;
 import me.rhin.openciv.game.research.type.HorsebackRidingTech;
 import me.rhin.openciv.game.research.type.IronWorkingTech;
+import me.rhin.openciv.game.research.type.MachineryTech;
 import me.rhin.openciv.game.research.type.MasonryTech;
 import me.rhin.openciv.game.research.type.MathematicsTech;
 import me.rhin.openciv.game.research.type.MetalCastingTech;
@@ -68,6 +69,7 @@ public class ResearchTree implements PickResearchListener, CompleteResearchListe
 		technologies.put(CurrencyTech.class, new CurrencyTech(this));
 		technologies.put(EngineeringTech.class, new EngineeringTech(this));
 		technologies.put(MetalCastingTech.class, new MetalCastingTech(this));
+		technologies.put(MachineryTech.class, new MachineryTech(this));
 
 		Civilization.getInstance().getEventManager().addListener(PickResearchListener.class, this);
 		Civilization.getInstance().getEventManager().addListener(CompleteResearchListener.class, this);

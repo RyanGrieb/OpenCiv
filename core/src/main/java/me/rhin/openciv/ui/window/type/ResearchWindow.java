@@ -23,6 +23,9 @@ import me.rhin.openciv.ui.window.HorizontalWindow;
 public class ResearchWindow extends AbstractWindow
 		implements HorizontalWindow, ResizeListener, TopShapeRenderListener, PickResearchListener {
 
+	private static final int LEAF_WIDTH = 185;
+	private static final int LEAF_HEIGHT = 45;
+
 	private ArrayList<TechnologyLeaf> technologyLeafs;
 	private BlankBackground blankBackground;
 	private CustomLabel researchDescLabel;
@@ -72,11 +75,8 @@ public class ResearchWindow extends AbstractWindow
 
 		for (TechnologyLeaf leaf : technologyLeafs) {
 
-			float leafWidth = 185;
-			float leafHeight = 45;
-
-			float x = (leaf.getTech().getTreePosition().getX() * (leafWidth + 25)) + 25;
-			float y = (leaf.getTech().getTreePosition().getY() * (leafHeight + 10)) + (height / 2 - 500 / 2);
+			float x = (leaf.getTech().getTreePosition().getX() * (LEAF_WIDTH + 25)) + 25;
+			float y = (leaf.getTech().getTreePosition().getY() * (LEAF_HEIGHT + 10)) + (height / 2 - 500 / 2);
 			leaf.setPosition(x, y);
 		}
 	}
@@ -130,13 +130,7 @@ public class ResearchWindow extends AbstractWindow
 
 	@Override
 	public float getTotalWidth() {
-
-		float maxViewedX = 0;
-		for (TechnologyLeaf leaf : technologyLeafs)
-			if (leaf.getX() + leaf.getWidth() > maxViewedX)
-				maxViewedX = leaf.getX() + leaf.getWidth();
-
-		return maxViewedX + 145;
+		return 2075;
 	}
 
 	@Override
@@ -147,13 +141,10 @@ public class ResearchWindow extends AbstractWindow
 
 	private void addTech(Technology tech) {
 
-		float width = 185;
-		float height = 45;
+		float x = (tech.getTreePosition().getX() * (LEAF_WIDTH + 25)) + 25;
+		float y = (tech.getTreePosition().getY() * (LEAF_HEIGHT + 10)) + (getHeight() / 2 - 500 / 2);
 
-		float x = (tech.getTreePosition().getX() * (width + 25)) + 25;
-		float y = (tech.getTreePosition().getY() * (height + 10)) + (getHeight() / 2 - 500 / 2);
-
-		TechnologyLeaf leaf = new TechnologyLeaf(tech, x, y, width, height);
+		TechnologyLeaf leaf = new TechnologyLeaf(tech, x, y, LEAF_WIDTH, LEAF_HEIGHT);
 		technologyLeafs.add(leaf);
 		addActor(leaf);
 	}
