@@ -179,7 +179,7 @@ public enum TileType implements Comparable<TileType> {
 			return statLine;
 		}
 	},
-	MOUNTAIN(TileLayer.MIDDLE) {
+	MOUNTAIN(TileLayer.HIGH) {
 		@Override
 		public StatLine getStatLine() {
 			StatLine statLine = new StatLine();

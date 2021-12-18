@@ -41,6 +41,7 @@ import me.rhin.openciv.game.unit.type.Caravan;
 import me.rhin.openciv.game.unit.type.CargoShip;
 import me.rhin.openciv.game.unit.type.Catapult;
 import me.rhin.openciv.game.unit.type.ChariotArcher;
+import me.rhin.openciv.game.unit.type.CompositeBowman;
 import me.rhin.openciv.game.unit.type.Crossbowman;
 import me.rhin.openciv.game.unit.type.Galley;
 import me.rhin.openciv.game.unit.type.Horseman;
@@ -91,6 +92,7 @@ public class ProducibleItemManager {
 		possibleItems.put("Horseman", new Horseman(city));
 		possibleItems.put("Cargo Ship", new CargoShip(city));
 		possibleItems.put("Pikeman", new Pikeman(city));
+		possibleItems.put("Composite Bowman", new CompositeBowman(city));
 		possibleItems.put("Crossbowman", new Crossbowman(city));
 
 		// Buildings

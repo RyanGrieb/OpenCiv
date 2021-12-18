@@ -8,9 +8,11 @@ import me.rhin.openciv.server.game.city.City;
 import me.rhin.openciv.server.game.map.tile.Tile;
 import me.rhin.openciv.server.game.map.tile.TileType.TileProperty;
 import me.rhin.openciv.server.game.research.type.ArcheryTech;
+import me.rhin.openciv.server.game.research.type.ConstructionTech;
 import me.rhin.openciv.server.game.unit.RangedUnit;
 import me.rhin.openciv.server.game.unit.Unit;
 import me.rhin.openciv.server.game.unit.UnitItem;
+import me.rhin.openciv.server.game.unit.type.CompositeBowman.CompositeBowmanUnit;
 import me.rhin.openciv.shared.stat.Stat;
 
 public class Archer extends UnitItem {
@@ -43,7 +45,7 @@ public class Archer extends UnitItem {
 
 		@Override
 		public Class<? extends Unit> getUpgradedUnit() {
-			return null;
+			return CompositeBowmanUnit.class;
 		}
 
 		@Override
@@ -64,6 +66,11 @@ public class Archer extends UnitItem {
 
 	@Override
 	public boolean meetsProductionRequirements() {
+		
+		//Composite bowman can be built
+		if (city.getPlayerOwner().getResearchTree().hasResearched(ConstructionTech.class))
+			return false;
+		
 		return city.getPlayerOwner().getResearchTree().hasResearched(ArcheryTech.class);
 	}
 

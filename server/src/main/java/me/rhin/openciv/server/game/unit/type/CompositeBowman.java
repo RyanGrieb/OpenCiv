@@ -7,25 +7,27 @@ import me.rhin.openciv.server.game.AbstractPlayer;
 import me.rhin.openciv.server.game.city.City;
 import me.rhin.openciv.server.game.map.tile.Tile;
 import me.rhin.openciv.server.game.map.tile.TileType.TileProperty;
+import me.rhin.openciv.server.game.research.type.ConstructionTech;
 import me.rhin.openciv.server.game.research.type.MachineryTech;
 import me.rhin.openciv.server.game.unit.RangedUnit;
 import me.rhin.openciv.server.game.unit.Unit;
 import me.rhin.openciv.server.game.unit.UnitItem;
+import me.rhin.openciv.server.game.unit.type.Crossbowman.CrossbowmanUnit;
 import me.rhin.openciv.shared.stat.Stat;
 
-public class Crossbowman extends UnitItem {
+public class CompositeBowman extends UnitItem {
 
-	public Crossbowman(City city) {
+	public CompositeBowman(City city) {
 		super(city);
 	}
 
-	public static class CrossbowmanUnit extends RangedUnit {
+	public static class CompositeBowmanUnit extends RangedUnit {
 
-		public CrossbowmanUnit(AbstractPlayer playerOwner, Tile standingTile) {
+		public CompositeBowmanUnit(AbstractPlayer playerOwner, Tile standingTile) {
 			super(playerOwner, standingTile);
 
-			combatStrength.setValue(Stat.COMBAT_STRENGTH, 24);
-			rangedCombatStrength.setValue(Stat.COMBAT_STRENGTH, 18);
+			combatStrength.setValue(Stat.COMBAT_STRENGTH, 18);
+			rangedCombatStrength.setValue(Stat.COMBAT_STRENGTH, 12);
 		}
 
 		@Override
@@ -43,33 +45,38 @@ public class Crossbowman extends UnitItem {
 
 		@Override
 		public Class<? extends Unit> getUpgradedUnit() {
-			return null;
+			return CrossbowmanUnit.class;
 		}
 
 		@Override
 		public String getName() {
-			return "Crossbowman";
+			return "Composite Bowman";
 		}
 	}
 
 	@Override
 	public float getUnitProductionCost() {
-		return 120;
+		return 75;
 	}
 
 	@Override
 	public float getGoldCost() {
-		return 200;
+		return 150;
 	}
 
 	@Override
 	public boolean meetsProductionRequirements() {
-		return city.getPlayerOwner().getResearchTree().hasResearched(MachineryTech.class);
+		
+		//Crossbowman can be built
+		if (city.getPlayerOwner().getResearchTree().hasResearched(MachineryTech.class))
+			return false;
+		
+		return city.getPlayerOwner().getResearchTree().hasResearched(ConstructionTech.class);
 	}
 
 	@Override
 	public String getName() {
-		return "Crossbowman";
+		return "Composite Bowman";
 	}
 
 	@Override
@@ -79,7 +86,7 @@ public class Crossbowman extends UnitItem {
 
 	@Override
 	public float getBaseCombatStrength() {
-		return 24;
+		return 18;
 	}
-	
+
 }

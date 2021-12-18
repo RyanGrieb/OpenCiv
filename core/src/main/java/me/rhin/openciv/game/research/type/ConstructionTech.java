@@ -33,7 +33,7 @@ public class ConstructionTech extends Technology {
 
 	@Override
 	public String getDesc() {
-		return "- Builders can build lumber \nmills\n- Unlocks Colosseum\n- Unlocks Terracotta Army";
+		return "- Builders can build lumber \nmills\n- Unlocks Colosseum\n- Unlocks Terracotta Army\n- Unlocks composite bowman";
 	}
 
 }

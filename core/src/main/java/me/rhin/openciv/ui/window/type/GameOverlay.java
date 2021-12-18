@@ -94,7 +94,8 @@ public class GameOverlay extends AbstractWindow implements ResizeListener, TileS
 
 	public void setHoveredTile(Tile tile) {
 		if (!tile.isDiscovered() && Civilization.SHOW_FOG) {
-			tileNameLabel.setText("[" + tile.getGridX() + "," + tile.getGridY() + "] Undiscovered");
+			tileNameLabel.setText("Undiscovered");
+			//tileNameLabel.setText("[" + tile.getGridX() + "," + tile.getGridY() + "] Undiscovered");
 			// tileNameLabel.setSize(0, 15);
 			clearTileStatInfo();
 			return;
@@ -108,7 +109,8 @@ public class GameOverlay extends AbstractWindow implements ResizeListener, TileS
 		this.hoveredTile = tile;
 
 		// [grass,copper]
-		String tileName = "[" + tile.getGridX() + "," + tile.getGridY() + "] ";
+		//String tileName = "[" + tile.getGridX() + "," + tile.getGridY() + "] ";
+		String tileName = "";
 		int index = 0;
 		for (TileTypeWrapper typeWrapper : tile.getTileTypeWrappers()) {
 

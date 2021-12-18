@@ -7,23 +7,23 @@ import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.city.City;
 import me.rhin.openciv.game.map.tile.Tile;
 import me.rhin.openciv.game.map.tile.TileType.TileProperty;
-import me.rhin.openciv.game.research.type.ArcheryTech;
 import me.rhin.openciv.game.research.type.ConstructionTech;
+import me.rhin.openciv.game.research.type.MachineryTech;
 import me.rhin.openciv.game.unit.AttackableEntity;
 import me.rhin.openciv.game.unit.RangedUnit;
 import me.rhin.openciv.game.unit.UnitItem;
 import me.rhin.openciv.game.unit.UnitParameter;
 
-public class Archer extends UnitItem {
+public class CompositeBowman extends UnitItem {
 
-	public Archer(City city) {
+	public CompositeBowman(City city) {
 		super(city);
 	}
 
-	public static class ArcherUnit extends RangedUnit {
+	public static class CompositeBowmanUnit extends RangedUnit {
 
-		public ArcherUnit(UnitParameter unitParameter) {
-			super(unitParameter, TextureEnum.UNIT_ARCHER);
+		public CompositeBowmanUnit(UnitParameter unitParameter) {
+			super(unitParameter, TextureEnum.UNIT_COMPOSITE_BOWMAN);
 		}
 
 		@Override
@@ -36,7 +36,7 @@ public class Archer extends UnitItem {
 
 		@Override
 		public int getRangedCombatStrength(AttackableEntity target) {
-			return 7;
+			return 11;
 		}
 
 		@Override
@@ -46,47 +46,48 @@ public class Archer extends UnitItem {
 
 		@Override
 		public boolean canUpgrade() {
-			return playerOwner.getResearchTree().hasResearched(ConstructionTech.class);
+			return playerOwner.getResearchTree().hasResearched(MachineryTech.class);
 		}
 	}
 
 	@Override
 	protected float getUnitProductionCost() {
-		return 40;
+		return 75;
 	}
 
 	@Override
 	public float getGoldCost() {
-		return 100;
+		return 150;
 	}
 
 	@Override
 	public boolean meetsProductionRequirements() {
-
-		//Composite bowman can be built
-		if (city.getPlayerOwner().getResearchTree().hasResearched(ConstructionTech.class))
+		
+		//Crossbowman can be built.
+		if (city.getPlayerOwner().getResearchTree().hasResearched(MachineryTech.class))
 			return false;
-
-		return city.getPlayerOwner().getResearchTree().hasResearched(ArcheryTech.class);
+		
+		return city.getPlayerOwner().getResearchTree().hasResearched(ConstructionTech.class);
 	}
 
 	@Override
 	public String getName() {
-		return "Archer";
+		return "Composite Bowman";
 	}
 
 	@Override
 	public TextureEnum getTexture() {
-		return TextureEnum.UNIT_ARCHER;
+		return TextureEnum.UNIT_COMPOSITE_BOWMAN;
 	}
 
 	@Override
 	public String getDesc() {
-		return "A ancient ranged unit.";
+		return "A classical ranged unit.";
 	}
 
 	@Override
 	public List<UnitType> getUnitItemTypes() {
 		return Arrays.asList(UnitType.RANGED);
 	}
+	
 }

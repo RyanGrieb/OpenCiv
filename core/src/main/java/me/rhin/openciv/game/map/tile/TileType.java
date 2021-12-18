@@ -21,7 +21,7 @@ public enum TileType {
 	TUNDRA_HILL(TextureEnum.TILE_TUNDRA_HILL, 2, TileLayer.BASE, TileProperty.MINEABLE),
 	OCEAN(TextureEnum.TILE_OCEAN, TileLayer.BASE, TileProperty.WATER),
 	SHALLOW_OCEAN(TextureEnum.TILE_SHALLOW_OCEAN, TileLayer.BASE, TileProperty.WATER),
-	MOUNTAIN(TextureEnum.TILE_MOUNTIAN, 1000000, TileLayer.MIDDLE),
+	MOUNTAIN(TextureEnum.TILE_MOUNTIAN, 1000000, TileLayer.HIGH),
 	FOREST(TextureEnum.TILE_FOREST, 2, TileLayer.HIGH, SoundEnum.WOOD_CHOP),
 	JUNGLE(TextureEnum.TILE_JUNGLE, 2, TileLayer.HIGH),
 	HORSES(TextureEnum.TILE_HORSES, TileLayer.MIDDLE, TileProperty.RESOURCE, TileProperty.ANIMAL),
