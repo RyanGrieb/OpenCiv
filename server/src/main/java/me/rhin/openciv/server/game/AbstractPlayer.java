@@ -2,6 +2,7 @@ package me.rhin.openciv.server.game;
 
 import java.util.ArrayList;
 
+import me.rhin.openciv.server.Server;
 import me.rhin.openciv.server.game.city.City;
 import me.rhin.openciv.server.game.city.building.Building;
 import me.rhin.openciv.server.game.civilization.Civ;
@@ -10,10 +11,11 @@ import me.rhin.openciv.server.game.diplomacy.Diplomacy;
 import me.rhin.openciv.server.game.heritage.HeritageTree;
 import me.rhin.openciv.server.game.research.ResearchTree;
 import me.rhin.openciv.server.game.unit.Unit;
+import me.rhin.openciv.server.listener.NextTurnListener;
 import me.rhin.openciv.shared.stat.StatLine;
 import me.rhin.openciv.shared.stat.StatType;
 
-public abstract class AbstractPlayer {
+public abstract class AbstractPlayer implements NextTurnListener {
 
 	protected ArrayList<City> ownedCities;
 	protected ArrayList<Unit> ownedUnits;
@@ -38,6 +40,8 @@ public abstract class AbstractPlayer {
 
 		this.spawnX = -1;
 		this.spawnY = -1;
+		
+		Server.getInstance().getEventManager().addListener(NextTurnListener.class, this);
 	}
 
 	public abstract String getName();
@@ -47,6 +51,14 @@ public abstract class AbstractPlayer {
 	public abstract boolean hasConnection();
 
 	public abstract void setSelectedUnit(Unit unit);
+
+	@Override
+	public void onNextTurn() {
+		if (ownedCities.size() < 1)
+			return;
+
+		updateOwnedStatlines(true);
+	}
 
 	public void updateOwnedStatlines(boolean increaseValues) {
 

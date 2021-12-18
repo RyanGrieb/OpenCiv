@@ -14,16 +14,16 @@ import me.rhin.openciv.game.unit.Unit;
 import me.rhin.openciv.game.unit.UnitItem;
 import me.rhin.openciv.game.unit.UnitParameter;
 
-public class Swordsman extends UnitItem {
+public class Legion extends UnitItem {
 
-	public Swordsman(City city) {
+	public Legion(City city) {
 		super(city);
 	}
 
-	public static class SwordsmanUnit extends Unit {
+	public static class LegionUnit extends Unit {
 
-		public SwordsmanUnit(UnitParameter unitParameter) {
-			super(unitParameter, TextureEnum.UNIT_SWORDSMAN);
+		public LegionUnit(UnitParameter unitParameter) {
+			super(unitParameter, TextureEnum.UNIT_LEGION);
 		}
 
 		@Override
@@ -58,8 +58,7 @@ public class Swordsman extends UnitItem {
 	@Override
 	public boolean meetsProductionRequirements() {
 
-		//Don't show swordsman if we can make legions
-		if (city.getPlayerOwner().getHeritageTree().hasStudied(LegionHeritage.class))
+		if (!city.getPlayerOwner().getHeritageTree().hasStudied(LegionHeritage.class))
 			return false;
 
 		boolean workedIron = false;
@@ -72,21 +71,22 @@ public class Swordsman extends UnitItem {
 
 	@Override
 	public String getName() {
-		return "Swordsman";
+		return "Legion";
 	}
 
 	@Override
 	public TextureEnum getTexture() {
-		return TextureEnum.UNIT_SWORDSMAN;
+		return TextureEnum.UNIT_LEGION;
 	}
 
 	@Override
 	public String getDesc() {
-		return "An classical melee unit. \n Requires a worked iron tile.";
+		return "The backbone of the Roman army. \n Requires a worked iron tile.";
 	}
 
 	@Override
 	public List<UnitType> getUnitItemTypes() {
 		return Arrays.asList(UnitType.MELEE);
 	}
+
 }

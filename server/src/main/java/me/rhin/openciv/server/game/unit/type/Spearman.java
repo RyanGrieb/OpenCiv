@@ -64,6 +64,11 @@ public class Spearman extends UnitItem {
 		}
 
 		@Override
+		public boolean canUpgrade() {
+			return playerOwner.getResearchTree().hasResearched(CivilServiceTech.class);
+		}
+
+		@Override
 		public String getName() {
 			return "Spearman";
 		}

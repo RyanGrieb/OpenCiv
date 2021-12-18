@@ -5,6 +5,7 @@ import java.util.List;
 
 import me.rhin.openciv.server.game.AbstractPlayer;
 import me.rhin.openciv.server.game.city.City;
+import me.rhin.openciv.server.game.heritage.type.rome.LegionHeritage;
 import me.rhin.openciv.server.game.map.tile.Tile;
 import me.rhin.openciv.server.game.map.tile.TileType;
 import me.rhin.openciv.server.game.map.tile.TileType.TileProperty;
@@ -40,12 +41,16 @@ public class Swordsman extends UnitItem {
 			return Arrays.asList(UnitType.MELEE);
 		}
 
-		
 		@Override
 		public Class<? extends Unit> getUpgradedUnit() {
 			return null;
 		}
-		
+
+		@Override
+		public boolean canUpgrade() {
+			return false;
+		}
+
 		@Override
 		public String getName() {
 			return "Swordsman";
@@ -64,6 +69,10 @@ public class Swordsman extends UnitItem {
 
 	@Override
 	public boolean meetsProductionRequirements() {
+
+		if (city.getPlayerOwner().getHeritageTree().hasStudied(LegionHeritage.class))
+			return false;
+
 		boolean workedIron = false;
 		for (Tile tile : city.getTerritory()) {
 			if (tile.containsTileType(TileType.IRON_IMPROVED))

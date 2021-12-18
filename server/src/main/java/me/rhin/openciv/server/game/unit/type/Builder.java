@@ -9,6 +9,7 @@ import me.rhin.openciv.server.game.city.City;
 import me.rhin.openciv.server.game.map.tile.Tile;
 import me.rhin.openciv.server.game.map.tile.TileType.TileProperty;
 import me.rhin.openciv.server.game.map.tile.improvement.TileImprovement;
+import me.rhin.openciv.server.game.research.type.MachineryTech;
 import me.rhin.openciv.server.game.unit.AttackableEntity;
 import me.rhin.openciv.server.game.unit.DeleteUnitOptions;
 import me.rhin.openciv.server.game.unit.Unit;
@@ -99,6 +100,11 @@ public class Builder extends UnitItem {
 		@Override
 		public Class<? extends Unit> getUpgradedUnit() {
 			return null;
+		}
+		
+		@Override
+		public boolean canUpgrade() {
+			return false;
 		}
 
 		@Override

@@ -62,6 +62,11 @@ public class Pikeman extends UnitItem {
 		}
 		
 		@Override
+		public boolean canUpgrade() {
+			return false;
+		}
+		
+		@Override
 		public String getName() {
 			return "Pikeman";
 		}

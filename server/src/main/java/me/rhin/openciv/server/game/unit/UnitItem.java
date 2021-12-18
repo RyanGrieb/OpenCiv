@@ -94,7 +94,7 @@ public abstract class UnitItem implements ProductionItem {
 		if (this instanceof Settler && Server.getInstance().getInGameState().getCurrentTurn() > 10)
 			return 70;
 
-		return 0;
+		return getBaseCombatStrength();
 	}
 
 	@Override

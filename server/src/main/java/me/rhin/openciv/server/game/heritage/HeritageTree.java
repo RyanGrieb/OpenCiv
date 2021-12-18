@@ -66,6 +66,10 @@ public class HeritageTree implements NextTurnListener {
 	}
 
 	public <T extends Heritage> boolean hasStudied(Class<T> heritageClass) {
+
+		if (values.get(heritageClass) == null)
+			return false;
+
 		return values.get(heritageClass).isStudied();
 	}
 

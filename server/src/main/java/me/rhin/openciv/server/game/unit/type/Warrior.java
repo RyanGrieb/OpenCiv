@@ -47,6 +47,21 @@ public class Warrior extends UnitItem {
 		}
 
 		@Override
+		public boolean canUpgrade() {
+
+			if (!playerOwner.getResearchTree().hasResearched(IronWorkingTech.class))
+				return false;
+
+			for (City city : playerOwner.getOwnedCities()) {
+				for (Tile tile : city.getTerritory())
+					if (tile.containsTileType(TileType.IRON_IMPROVED))
+						return true;
+			}
+
+			return false;
+		}
+
+		@Override
 		public String getName() {
 			return "Warrior";
 		}

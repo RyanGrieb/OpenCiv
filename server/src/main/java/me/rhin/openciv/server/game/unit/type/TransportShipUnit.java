@@ -38,6 +38,11 @@ public class TransportShipUnit extends Unit {
 	public Class<? extends Unit> getUpgradedUnit() {
 		return null;
 	}
+	
+	@Override
+	public boolean canUpgrade() {
+		return false;
+	}
 
 	public String getName() {
 		return "Transport Ship";

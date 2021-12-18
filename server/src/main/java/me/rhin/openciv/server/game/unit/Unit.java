@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Random;
 
 import com.badlogic.gdx.utils.Json;
+import com.badlogic.gdx.utils.reflect.ClassReflection;
 
 import me.rhin.openciv.server.Server;
 import me.rhin.openciv.server.errors.SameMovementTargetException;
@@ -23,6 +24,7 @@ import me.rhin.openciv.server.game.unit.UnitItem.UnitType;
 import me.rhin.openciv.server.listener.CaptureCityListener.CaptureCityEvent;
 import me.rhin.openciv.server.listener.NextTurnListener;
 import me.rhin.openciv.shared.packet.type.AddObservedTilePacket;
+import me.rhin.openciv.shared.packet.type.AddUnitPacket;
 import me.rhin.openciv.shared.packet.type.DeleteUnitPacket;
 import me.rhin.openciv.shared.packet.type.RemoveObservedTilePacket;
 import me.rhin.openciv.shared.packet.type.RemoveTileTypePacket;
@@ -85,6 +87,8 @@ public abstract class Unit implements AttackableEntity, TileObserver, NextTurnLi
 	public abstract List<UnitType> getUnitTypes();
 
 	public abstract Class<? extends Unit> getUpgradedUnit();
+
+	public abstract boolean canUpgrade();
 
 	public abstract String getName();
 
@@ -695,6 +699,41 @@ public abstract class Unit implements AttackableEntity, TileObserver, NextTurnLi
 
 	public StatLine getMaintenance() {
 		return maintenance;
+	}
+
+	public void upgrade() {
+		// TODO: Copy XP too
+
+		// Create new unit obj from class
+
+		Unit unit = null;
+		try {
+			unit = (Unit) ClassReflection.getConstructor(getUpgradedUnit(), AbstractPlayer.class, Tile.class)
+					.newInstance(playerOwner, standingTile);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		unit.getPlayerOwner().getStatLine().subValue(Stat.GOLD, 100);
+		unit.getPlayerOwner().updateOwnedStatlines(false);
+		standingTile.addUnit(unit);
+		unit.setHealth(health);
+
+		AddUnitPacket addUnitPacket = new AddUnitPacket();
+		addUnitPacket.setUnit(unit.getPlayerOwner().getName(), unit.getName(), unit.getID(), standingTile.getGridX(),
+				standingTile.getGridY());
+
+		SetUnitHealthPacket healthPacket = new SetUnitHealthPacket();
+		healthPacket.setUnit(unit.getPlayerOwner().getName(), unit.getID(), standingTile.getGridX(),
+				standingTile.getGridY(), health);
+
+		Json json = new Json();
+		for (Player player : Server.getInstance().getPlayers()) {
+			player.sendPacket(json.toJson(addUnitPacket));
+			player.sendPacket(json.toJson(healthPacket));
+		}
+
+		deleteUnit(DeleteUnitOptions.SERVER_DELETE);
 	}
 
 	protected void setMaintenance(float amount) {

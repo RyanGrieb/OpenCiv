@@ -44,6 +44,7 @@ import me.rhin.openciv.server.game.unit.type.ChariotArcher;
 import me.rhin.openciv.server.game.unit.type.Crossbowman;
 import me.rhin.openciv.server.game.unit.type.Galley;
 import me.rhin.openciv.server.game.unit.type.Horseman;
+import me.rhin.openciv.server.game.unit.type.Legion;
 import me.rhin.openciv.server.game.unit.type.Pikeman;
 import me.rhin.openciv.server.game.unit.type.Scout;
 import me.rhin.openciv.server.game.unit.type.Settler;
@@ -100,6 +101,7 @@ public class ProducibleItemManager implements NextTurnListener {
 		possibleItems.put("Spearman", new Spearman(city));
 		possibleItems.put("Caravan", new Caravan(city));
 		possibleItems.put("Swordsman", new Swordsman(city));
+		possibleItems.put("Legion", new Legion(city));
 		possibleItems.put("Horseman", new Horseman(city));
 		possibleItems.put("Cargo Ship", new CargoShip(city));
 		possibleItems.put("Pikeman", new Pikeman(city));

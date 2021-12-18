@@ -5,8 +5,8 @@ import java.util.ArrayList;
 import me.rhin.openciv.server.Server;
 import me.rhin.openciv.server.game.ai.AIPlayer;
 import me.rhin.openciv.server.game.ai.unit.BuilderAI;
-import me.rhin.openciv.server.game.ai.unit.CityStateRangedAI;
 import me.rhin.openciv.server.game.ai.unit.CityStateMeleeAI;
+import me.rhin.openciv.server.game.ai.unit.CityStateRangedAI;
 import me.rhin.openciv.server.game.city.City;
 import me.rhin.openciv.server.game.civilization.type.CityState;
 import me.rhin.openciv.server.game.map.tile.Tile;
@@ -18,11 +18,15 @@ import me.rhin.openciv.server.game.unit.UnitItem;
 import me.rhin.openciv.server.game.unit.UnitItem.UnitType;
 import me.rhin.openciv.server.game.unit.type.Builder;
 import me.rhin.openciv.server.game.unit.type.Builder.BuilderUnit;
+import me.rhin.openciv.server.game.unit.type.Caravan;
 import me.rhin.openciv.server.game.unit.type.Settler;
 import me.rhin.openciv.server.game.unit.type.Settler.SettlerUnit;
 import me.rhin.openciv.server.listener.NextTurnListener;
+import me.rhin.openciv.shared.stat.Stat;
 
-public class CityStatePlayer extends AIPlayer implements NextTurnListener {
+public class CityStatePlayer extends AIPlayer {
+
+	private static final int INTIMIDATION_LEVEL = 70;
 
 	public enum CityStateType {
 		GOLD,
@@ -36,8 +40,6 @@ public class CityStatePlayer extends AIPlayer implements NextTurnListener {
 		this.name = City.getRandomCityName();
 
 		this.civilization = new CityState(this, cityStateType);
-
-		Server.getInstance().getEventManager().addListener(NextTurnListener.class, this);
 	}
 
 	@Override
@@ -63,6 +65,7 @@ public class CityStatePlayer extends AIPlayer implements NextTurnListener {
 
 	@Override
 	public void onNextTurn() {
+		super.onNextTurn();
 
 		if (Server.getInstance().getInGameState().getCurrentTurn() == 1) {
 			settleInitialCity();
@@ -71,6 +74,7 @@ public class CityStatePlayer extends AIPlayer implements NextTurnListener {
 		modifyIntimidation();
 		progressResearch();
 		choseProduction();
+		upgradeUnits();
 	}
 
 	@Override
@@ -143,11 +147,11 @@ public class CityStatePlayer extends AIPlayer implements NextTurnListener {
 		}
 
 		if (topTech == null) {
-			// System.out.println("FIXME: No techs with properties.");
+			System.out.println("FIXME: No techs with properties.");
 			return;
 		}
 
-		// System.out.println("Tech Choose:" + topTech.getName());
+		System.out.println("Tech Choose:" + topTech.getName());
 		researchTree.chooseTech(topTech);
 	}
 
@@ -157,7 +161,7 @@ public class CityStatePlayer extends AIPlayer implements NextTurnListener {
 			ProducibleItemManager itemManager = city.getProducibleItemManager();
 
 			// Produce units to fight intimidation.
-			if (intimidation > 70) {
+			if (intimidation > INTIMIDATION_LEVEL) {
 
 				boolean producingMilitaryUnit = false;
 				if (itemManager.getProducingItem() != null
@@ -185,19 +189,45 @@ public class CityStatePlayer extends AIPlayer implements NextTurnListener {
 				if (productionItem instanceof UnitItem && ownedUnits.size() > 8)
 					continue;
 
-				// System.out.println(productionItem.getName() + "-" +
-				// productionItem.getAIValue(this));
+				// FIXME: Support caravans
+				if (productionItem instanceof Caravan)
+					continue;
+
+				if (productionItem instanceof UnitItem) {
+					UnitItem unitItem = (UnitItem) productionItem;
+
+					// Don't produce combat units if were not under threat.
+					if (!unitItem.getUnitItemTypes().contains(UnitType.SUPPORT) && intimidation < INTIMIDATION_LEVEL)
+						continue;
+
+					// FIXME: Support naval units
+					if (unitItem.getUnitItemTypes().contains(UnitType.NAVAL))
+						continue;
+				}
+
+				//System.out.println(productionItem.getName() + "-" + productionItem.getAIValue(this));
 
 				if (topItem == null || topItem.getAIValue(this) < productionItem.getAIValue(this))
 					topItem = productionItem;
 			}
 
-			// System.out.println("Citystate " + name + " producing: " + topItem.getName());
-
 			if (topItem == null)
 				return;
 
+			//System.out.println("Citystate " + name + " producing: " + topItem.getName());
+
 			itemManager.setProducingItem(topItem.getName());
+		}
+	}
+
+	private void upgradeUnits() {
+		for (Unit unit : new ArrayList<>(ownedUnits)) {
+
+			// System.out.println(unit.getName() + " - " + unit.canUpgrade() + "," +
+			// statLine.getStatValue(Stat.GOLD));
+			if (unit.canUpgrade() && statLine.getStatValue(Stat.GOLD) >= 100) {
+				unit.upgrade();
+			}
 		}
 	}
 

@@ -49,6 +49,11 @@ public class CompositeBowman extends UnitItem {
 		}
 
 		@Override
+		public boolean canUpgrade() {
+			return playerOwner.getResearchTree().hasResearched(MachineryTech.class);
+		}
+		
+		@Override
 		public String getName() {
 			return "Composite Bowman";
 		}

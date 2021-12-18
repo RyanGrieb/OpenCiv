@@ -45,6 +45,7 @@ import me.rhin.openciv.game.unit.type.CompositeBowman;
 import me.rhin.openciv.game.unit.type.Crossbowman;
 import me.rhin.openciv.game.unit.type.Galley;
 import me.rhin.openciv.game.unit.type.Horseman;
+import me.rhin.openciv.game.unit.type.Legion;
 import me.rhin.openciv.game.unit.type.Pikeman;
 import me.rhin.openciv.game.unit.type.Scout;
 import me.rhin.openciv.game.unit.type.Settler;
@@ -89,6 +90,7 @@ public class ProducibleItemManager {
 		possibleItems.put("Spearman", new Spearman(city));
 		possibleItems.put("Caravan", new Caravan(city));
 		possibleItems.put("Swordsman", new Swordsman(city));
+		possibleItems.put("Legion", new Legion(city));
 		possibleItems.put("Horseman", new Horseman(city));
 		possibleItems.put("Cargo Ship", new CargoShip(city));
 		possibleItems.put("Pikeman", new Pikeman(city));

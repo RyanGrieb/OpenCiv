@@ -42,14 +42,19 @@ public class CargoShip extends UnitItem {
 
 		@Override
 		public List<UnitType> getUnitTypes() {
-			return Arrays.asList(UnitType.SUPPORT);
+			return Arrays.asList(UnitType.SUPPORT, UnitType.NAVAL);
 		}
 
 		@Override
 		public Class<? extends Unit> getUpgradedUnit() {
 			return null;
 		}
-		
+
+		@Override
+		public boolean canUpgrade() {
+			return false;
+		}
+
 		@Override
 		public String getName() {
 			return "Cargo Ship";
@@ -80,7 +85,7 @@ public class CargoShip extends UnitItem {
 
 	@Override
 	public List<UnitType> getUnitItemTypes() {
-		return Arrays.asList(UnitType.SUPPORT);
+		return Arrays.asList(UnitType.SUPPORT, UnitType.NAVAL);
 	}
 
 	@Override

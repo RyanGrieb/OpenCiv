@@ -22,8 +22,7 @@ import me.rhin.openciv.shared.stat.Stat;
 import me.rhin.openciv.shared.stat.StatLine;
 import me.rhin.openciv.shared.stat.StatType;
 
-public class Player extends AbstractPlayer
-		implements NextTurnListener, ChooseTechListener, ChooseHeritageListener, TradeCityListener {
+public class Player extends AbstractPlayer implements ChooseTechListener, ChooseHeritageListener, TradeCityListener {
 
 	private WebSocket conn;
 	private String name;
@@ -40,19 +39,10 @@ public class Player extends AbstractPlayer
 		this.loaded = false;
 
 		this.host = false;
-
-		Server.getInstance().getEventManager().addListener(NextTurnListener.class, this);
+		
 		Server.getInstance().getEventManager().addListener(ChooseTechListener.class, this);
 		Server.getInstance().getEventManager().addListener(ChooseHeritageListener.class, this);
 		Server.getInstance().getEventManager().addListener(TradeCityListener.class, this);
-	}
-
-	@Override
-	public void onNextTurn() {
-		if (ownedCities.size() < 1)
-			return;
-
-		updateOwnedStatlines(true);
 	}
 
 	// FIXME: Move to researchTree

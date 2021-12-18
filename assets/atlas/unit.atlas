@@ -6,7 +6,7 @@ filter: Nearest, Nearest
 repeat: none
 unit_archer
   rotate: false
-  xy: 36, 70
+  xy: 70, 104
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
@@ -20,7 +20,7 @@ unit_builder
   index: -1
 unit_caravan
   rotate: false
-  xy: 36, 36
+  xy: 70, 70
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
@@ -74,6 +74,13 @@ unit_horseman
   orig: 32, 32
   offset: 0, 0
   index: -1
+unit_legion
+  rotate: false
+  xy: 2, 36
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
 unit_pikeman
   rotate: false
   xy: 36, 138
@@ -83,21 +90,21 @@ unit_pikeman
   index: -1
 unit_scout
   rotate: false
-  xy: 2, 2
+  xy: 36, 36
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 unit_settler
   rotate: false
-  xy: 2, 36
+  xy: 36, 70
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 unit_spearman
   rotate: false
-  xy: 70, 104
+  xy: 2, 2
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
@@ -118,7 +125,7 @@ unit_transport_ship
   index: -1
 unit_warrior
   rotate: false
-  xy: 70, 70
+  xy: 36, 2
   size: 32, 32
   orig: 32, 32
   offset: 0, 0

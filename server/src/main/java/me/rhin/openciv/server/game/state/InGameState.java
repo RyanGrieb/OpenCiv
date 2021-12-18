@@ -682,38 +682,7 @@ public class InGameState extends GameState implements DisconnectListener, Select
 		Tile tile = map.getTiles()[packet.getTileGridX()][packet.getTileGridY()];
 		Unit oldUnit = tile.getUnitFromID(packet.getUnitID());
 
-		float health = oldUnit.getHealth();
-		// TODO: Copy XP too
-
-		// Create new unit obj from class
-
-		Unit unit = null;
-		try {
-			unit = (Unit) ClassReflection.getConstructor(oldUnit.getUpgradedUnit(), AbstractPlayer.class, Tile.class)
-					.newInstance(oldUnit.getPlayerOwner(), oldUnit.getStandingTile());
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
-		unit.getPlayerOwner().getStatLine().subValue(Stat.GOLD, 100);
-		unit.getPlayerOwner().updateOwnedStatlines(false);
-		tile.addUnit(unit);
-		unit.setHealth(health);
-
-		AddUnitPacket addUnitPacket = new AddUnitPacket();
-		addUnitPacket.setUnit(unit.getPlayerOwner().getName(), unit.getName(), unit.getID(), tile.getGridX(),
-				tile.getGridY());
-
-		SetUnitHealthPacket healthPacket = new SetUnitHealthPacket();
-		healthPacket.setUnit(unit.getPlayerOwner().getName(), unit.getID(), tile.getGridX(), tile.getGridY(), health);
-
-		Json json = new Json();
-		for (Player player : Server.getInstance().getPlayers()) {
-			player.sendPacket(json.toJson(addUnitPacket));
-			player.sendPacket(json.toJson(healthPacket));
-		}
-
-		oldUnit.deleteUnit(DeleteUnitOptions.SERVER_DELETE);
+		oldUnit.upgrade();
 	}
 
 	@Override

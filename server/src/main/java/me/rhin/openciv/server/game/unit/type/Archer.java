@@ -49,6 +49,11 @@ public class Archer extends UnitItem {
 		}
 
 		@Override
+		public boolean canUpgrade() {
+			return playerOwner.getResearchTree().hasResearched(ConstructionTech.class);
+		}
+
+		@Override
 		public String getName() {
 			return "Archer";
 		}
@@ -66,11 +71,11 @@ public class Archer extends UnitItem {
 
 	@Override
 	public boolean meetsProductionRequirements() {
-		
-		//Composite bowman can be built
+
+		// Composite bowman can be built
 		if (city.getPlayerOwner().getResearchTree().hasResearched(ConstructionTech.class))
 			return false;
-		
+
 		return city.getPlayerOwner().getResearchTree().hasResearched(ArcheryTech.class);
 	}
 

@@ -43,6 +43,11 @@ public class Galley extends UnitItem {
 		public Class<? extends Unit> getUpgradedUnit() {
 			return null;
 		}
+		
+		@Override
+		public boolean canUpgrade() {
+			return false;
+		}
 
 		@Override
 		public String getName() {
