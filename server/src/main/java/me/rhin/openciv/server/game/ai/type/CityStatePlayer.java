@@ -37,9 +37,8 @@ public class CityStatePlayer extends AIPlayer {
 	private String name;
 
 	public CityStatePlayer(CityStateType cityStateType) {
-		this.name = City.getRandomCityName();
-
 		this.civilization = new CityState(this, cityStateType);
+		this.name = City.getRandomCityName(this);
 	}
 
 	@Override

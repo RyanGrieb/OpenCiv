@@ -24,6 +24,7 @@ import me.rhin.openciv.server.game.city.citizen.CityCenterCitizenWorker;
 import me.rhin.openciv.server.game.city.citizen.EmptyCitizenWorker;
 import me.rhin.openciv.server.game.city.citizen.LockedCitizenWorker;
 import me.rhin.openciv.server.game.city.specialist.SpecialistContainer;
+import me.rhin.openciv.server.game.civilization.Civ;
 import me.rhin.openciv.server.game.map.tile.Tile;
 import me.rhin.openciv.server.game.map.tile.TileObserver;
 import me.rhin.openciv.server.game.map.tile.TileType.TileProperty;
@@ -101,15 +102,15 @@ public class City
 		Server.getInstance().getEventManager().addListener(ClickSpecialistListener.class, this);
 	}
 
-	public static String getRandomCityName() {
+	public static String getRandomCityName(AbstractPlayer player) {
 		String cityName = "Unknown";
 		boolean identicalName = true;
 
 		while (identicalName) {
 			identicalName = false;
-			cityName = City.getUnorderedCityName();
-			for (Player player : Server.getInstance().getPlayers()) {
-				for (City city : player.getOwnedCities()) {
+			cityName = City.getUnorderedCityName(player);
+			for (Player otherPlayer : Server.getInstance().getPlayers()) {
+				for (City city : otherPlayer.getOwnedCities()) {
 					if (city.getName().equals(cityName))
 						identicalName = true;
 				}
@@ -119,11 +120,17 @@ public class City
 		return cityName;
 	}
 
-	private static String getUnorderedCityName() {
+	private static String getUnorderedCityName(AbstractPlayer player) {
 		ArrayList<String> names = new ArrayList<>();
 		BufferedReader reader;
+
+		String civName = player.getCiv().getName().toLowerCase();
+
+		if (civName.contains("citystate"))
+			civName = "default";
+
 		try {
-			reader = new BufferedReader(new FileReader("data/cityNames.txt"));
+			reader = new BufferedReader(new FileReader("data/city_names/" + civName + ".txt"));
 			String line = reader.readLine();
 			while (line != null) {
 				names.add(line);
@@ -133,6 +140,9 @@ public class City
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+
+		if (player.getOwnedCities().size() < 1 && !civName.equals("default"))
+			return names.get(0);
 
 		Random rnd = new Random();
 		return names.get(rnd.nextInt(names.size()));

@@ -59,7 +59,7 @@ public class Settler extends UnitItem {
 		}
 
 		public void settleCity() {
-			settleCity(City.getRandomCityName());
+			settleCity(City.getRandomCityName(playerOwner));
 		}
 
 		public void settleCity(String cityName) {
