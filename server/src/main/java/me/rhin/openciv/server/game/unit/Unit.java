@@ -665,7 +665,7 @@ public abstract class Unit implements AttackableEntity, TileObserver, NextTurnLi
 		for (Player player : Server.getInstance().getPlayers())
 			player.sendPacket(json.toJson(removeTileTypePacket));
 
-		playerOwner.getStatLine().addValue(Stat.GOLD, 150);
+		playerOwner.getStatLine().addValue(Stat.GOLD, 50);
 		playerOwner.updateOwnedStatlines(false);
 	}
 

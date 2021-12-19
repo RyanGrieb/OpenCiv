@@ -13,7 +13,7 @@ public enum SoundEnum {
 	BUTTON_CLICK(0.5F, SoundType.EFFECT),
 	CITY_CLICK(0.5F, SoundType.EFFECT),
 	UNIT_CLICK(0.2F, SoundType.EFFECT),
-	NEXT_TURN(0.3F, SoundType.EFFECT),
+	NEXT_TURN(0.2F, SoundType.EFFECT),
 	RUIN_CAPTURE(0.3F, SoundType.EFFECT),
 	CITY_LOSS(0.3F, SoundType.EFFECT),
 	WOOD_CHOP(0.3F, SoundType.EFFECT),

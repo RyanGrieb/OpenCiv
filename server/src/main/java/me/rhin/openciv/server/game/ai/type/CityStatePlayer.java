@@ -75,6 +75,8 @@ public class CityStatePlayer extends AIPlayer {
 		progressResearch();
 		choseProduction();
 		upgradeUnits();
+		
+		//System.out.println(statLine);
 	}
 
 	@Override
@@ -151,7 +153,7 @@ public class CityStatePlayer extends AIPlayer {
 			return;
 		}
 
-		System.out.println("Tech Choose:" + topTech.getName());
+		//System.out.println("Tech Choose:" + topTech.getName());
 		researchTree.chooseTech(topTech);
 	}
 

@@ -345,7 +345,6 @@ public class InGameState extends GameState implements DisconnectListener, Select
 
 			// Handle capturing ruins
 			if (unit.getStandingTile().containsTileType(TileType.RUINS)) {
-				System.out.println("Handle capture");
 				Tile campTile = unit.getStandingTile();
 				campTile.removeTileType(TileType.RUINS);
 
