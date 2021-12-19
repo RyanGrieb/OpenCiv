@@ -646,6 +646,21 @@ public enum TileType implements Comparable<TileType> {
 			return 0.5f;
 		}
 	},
+	ST_HELENS(TileLayer.HIGH, TileProperty.NATURAL_WONDER) {
+
+		@Override
+		public StatLine getStatLine() {
+			StatLine statLine = new StatLine();
+			statLine.addValue(Stat.HERITAGE_GAIN, 3);
+			statLine.addValue(Stat.GOLD_GAIN, 4);
+			return statLine;
+		}
+
+		@Override
+		public TileType[] getSpawnTileTypes() {
+			return new TileType[] { TileType.GRASS };
+		}
+	},
 	BARBARIAN_CAMP(TileLayer.MIDDLE) {
 		@Override
 		public StatLine getStatLine() {
@@ -684,7 +699,8 @@ public enum TileType implements Comparable<TileType> {
 		LUXURY,
 		RESOURCE,
 		IMPROVEMENT,
-		HILL;
+		HILL,
+		NATURAL_WONDER;
 	}
 
 	private TileLayer tileLayer;

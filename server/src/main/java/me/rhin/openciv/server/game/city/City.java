@@ -126,7 +126,7 @@ public class City
 
 		String civName = player.getCiv().getName().toLowerCase();
 
-		if (civName.contains("citystate"))
+		if (civName.contains("citystate") || player.getOwnedCities().size() > 14)
 			civName = "default";
 
 		try {
@@ -143,7 +143,9 @@ public class City
 
 		if (player.getOwnedCities().size() < 1 && !civName.equals("default"))
 			return names.get(0);
-
+		
+		
+		
 		Random rnd = new Random();
 		return names.get(rnd.nextInt(names.size()));
 	}

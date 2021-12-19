@@ -70,6 +70,7 @@ public class CityStatePlayer extends AIPlayer {
 			settleInitialCity();
 		}
 
+		//TODO: Make these module classed.
 		modifyIntimidation();
 		progressResearch();
 		choseProduction();

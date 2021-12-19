@@ -2,6 +2,7 @@ package me.rhin.openciv.server.game.map;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -364,6 +365,21 @@ public class GameMap implements MapRequestListener {
 				}
 			}
 
+		}
+
+		// Generate wonders
+		for (TileType type : TileType.values()) {
+			if (!type.hasProperty(TileProperty.NATURAL_WONDER))
+				continue;
+
+			List<TileType> spawnTileTypes = Arrays.asList(type.getSpawnTileTypes());
+
+			Tile tile = null;
+			while (tile == null || !spawnTileTypes.contains(tile.getBaseTileType())) {
+				tile = tiles[rnd.nextInt(getWidth())][rnd.nextInt(getHeight())];
+			}
+
+			tile.setTileType(type);
 		}
 
 		// Generate rivers
