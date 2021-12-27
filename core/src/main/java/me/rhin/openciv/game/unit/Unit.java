@@ -415,7 +415,7 @@ public abstract class Unit extends Actor
 		float tileY = targetTile.getVectors()[0].y + 4;
 
 		selectionSprite.setPosition(tileX, tileY);
-		civIconSprite.setPosition(tileX + 10, tileY + 20);
+		civIconSprite.setPosition(tileX + 10, tileY + 25);
 		unitHealthBubble.setPosition(civIconSprite.getX() + 4, civIconSprite.getY() + 4);
 		super.setPosition(tileX, tileY);
 
@@ -438,7 +438,7 @@ public abstract class Unit extends Actor
 	public void setPosition(float x, float y) {
 		sprite.setPosition(x, y);
 		selectionSprite.setPosition(x, y);
-		civIconSprite.setPosition(x + 10, y + 20);
+		civIconSprite.setPosition(x + 10, y + 25);
 		unitHealthBubble.setPosition(civIconSprite.getX() + 4, civIconSprite.getY() + 4);
 
 		super.setPosition(x, y);
@@ -477,7 +477,7 @@ public abstract class Unit extends Actor
 	public void setPlayerOwner(AbstractPlayer playerOwner) {
 		this.playerOwner = playerOwner;
 		this.civIconSprite = playerOwner.getCivilization().getIcon().sprite();
-		civIconSprite.setBounds(getX() + 10, getY() + 20, 8, 8);
+		civIconSprite.setBounds(getX() + 10, getY() + 25, 8, 8);
 
 		if (!playerOwner.equals(Civilization.getInstance().getGame().getPlayer()))
 			standingTile.removeTileObserver(this);

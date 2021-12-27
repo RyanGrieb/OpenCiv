@@ -10,7 +10,7 @@ public class InfoButtonsWindow extends AbstractWindow {
 	private OpenChatButton chatButton;
 
 	public InfoButtonsWindow() {
-		super.setBounds(4, 20, 200, 60);
+		super.setBounds(4, 28, 200, 60);
 
 		// background = new ColoredBackground(TextureEnum.UI_BLACK.sprite(), 0, 0,
 		// getWidth(), getHeight());

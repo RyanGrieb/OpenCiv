@@ -1,8 +1,13 @@
 package me.rhin.openciv.server.game.map;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
 import java.util.Random;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -43,6 +48,8 @@ public class GameMap implements MapRequestListener {
 	private ArrayList<Rectangle> mapPartition;
 	private TileIndexer tileIndexer;
 	private int mapSize;
+	private ArrayList<String> usedGeographyNames;
+	private ArrayList<ArrayList<Tile>> geograpgyFeautres;
 
 	private int[][] oddEdgeAxis = { { 0, -1 }, { 1, -1 }, { 1, 0 }, { 1, 1 }, { 0, 1 }, { -1, 0 } };
 	private int[][] evenEdgeAxis = { { -1, -1 }, { 0, -1 }, { 1, 0 }, { 0, 1 }, { -1, 1 }, { -1, 0 } };
@@ -51,6 +58,8 @@ public class GameMap implements MapRequestListener {
 
 		this.mapSize = Server.getInstance().getGameOptions().getOption(GameOptionType.MAP_LENGTH);
 		this.mapPartition = new ArrayList<>();
+		this.usedGeographyNames = new ArrayList<>();
+		this.geograpgyFeautres = new ArrayList<>();
 
 		Server.getInstance().getEventManager().addListener(MapRequestListener.class, this);
 	}
@@ -201,6 +210,62 @@ public class GameMap implements MapRequestListener {
 					else
 						tiles[x][y].setTileType(TileType.TUNDRA);
 				}
+			}
+		}
+
+		// We determine landmass names here
+		for (int x = 0; x < getWidth(); x++) {
+			for (int y = 0; y < getHeight(); y++) {
+
+				Tile initialTile = tiles[x][y];
+
+				if (getGeograpgyFeautresList(initialTile) != null)
+					continue;
+
+				geograpgyFeautres.add(new ArrayList<>());
+
+				ArrayList<Tile> currentGeograpgyFeautresList = geograpgyFeautres.get(geograpgyFeautres.size() - 1);
+
+				Queue<Tile> visitedTiles = new LinkedList<Tile>();
+
+				visitedTiles.add(initialTile);
+
+				while (!visitedTiles.isEmpty()) {
+
+					Tile indexedTile = visitedTiles.remove();
+
+					// System.out.println("touch: " + indexedTile);
+
+					if (!currentGeograpgyFeautresList.contains(indexedTile))
+						currentGeograpgyFeautresList.add(indexedTile);
+
+					indexedTile.setGeographyName("Generating");
+
+					for (Tile adjTile : indexedTile.getAdjTiles()) {
+
+						if (adjTile == null || adjTile.getGeograpgyName() != null || visitedTiles.contains(adjTile)
+								|| (indexedTile.containsTileProperty(TileProperty.WATER) != adjTile
+										.containsTileProperty(TileProperty.WATER)))
+							continue;
+
+						visitedTiles.add(adjTile);
+					}
+				}
+
+			}
+		}
+
+		// Generate geography names
+		for (ArrayList<Tile> geographyFeatureTiles : geograpgyFeautres) {
+
+			String geographyName = generateGeographyName(geographyFeatureTiles.get(0), geographyFeatureTiles.size());
+			usedGeographyNames.add(geographyName);
+			
+			for (Tile tile : geographyFeatureTiles) {
+
+				if (!tile.getGeograpgyName().equals("Generating"))
+					continue;
+				tile.setGeographyName(geographyName);
 			}
 		}
 
@@ -624,6 +689,69 @@ public class GameMap implements MapRequestListener {
 			tile.setTileType(TileType.RUINS);
 		}
 
+	}
+
+	private String generateGeographyName(Tile tile, int size) {
+
+		if (tile.containsTileProperty(TileProperty.WATER)) {
+			if (size < 5)
+				return getGeographyName("lake");
+			else if (size < 55)
+				return getGeographyName("sea");
+			else
+				return getGeographyName("ocean");
+		}
+
+		if (!tile.containsTileProperty(TileProperty.WATER)) {
+			if (size < 40)
+				return getGeographyName("island");
+			else
+				return getGeographyName("continent");
+		}
+
+		return "Error";
+	}
+
+	private String getGeographyName(String landmassType) {
+		String geographyName = null;
+
+		int index = 0;
+		while ((geographyName == null || usedGeographyNames.contains(geographyName)) && index < 100) {
+			geographyName = getUnorderedGeographyName(landmassType);
+			index++;
+		}
+
+		return geographyName;
+	}
+
+	private String getUnorderedGeographyName(String landmassType) {
+		ArrayList<String> names = new ArrayList<>();
+		BufferedReader reader;
+
+		try {
+			reader = new BufferedReader(new FileReader("data/landmass_names/" + landmassType + ".txt"));
+			String line = reader.readLine();
+			while (line != null) {
+				names.add(line);
+				line = reader.readLine();
+			}
+			reader.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		Random rnd = new Random();
+		return names.get(rnd.nextInt(names.size()));
+	}
+
+	private ArrayList<Tile> getGeograpgyFeautresList(Tile adjTile) {
+		for (ArrayList<Tile> tiles : geograpgyFeautres) {
+			for (Tile tile : tiles)
+				if (tile.equals(adjTile))
+					return tiles;
+		}
+
+		return null;
 	}
 
 	private ArrayList<GenerationValue> generateRandomStencilChunk() {

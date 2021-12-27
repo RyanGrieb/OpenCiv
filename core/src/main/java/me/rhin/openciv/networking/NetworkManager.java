@@ -236,8 +236,7 @@ public class NetworkManager {
 
 			@Override
 			public boolean onMessage(final WebSocket webSocket, final String packet) {
-				if (!packet.contains("MapChunkPacket") && !packet.contains("TurnTimeLeftPacket")
-						&& !packet.contains("TileStatlinePacket"))
+				if (!packet.contains("MapChunkPacket") && !packet.contains("TurnTimeLeftPacket"))
 					Gdx.app.log(Civilization.WS_LOG_TAG, "Got message: " + packet);
 
 				// Fire events on the LibGDX thread instead of the network thread.

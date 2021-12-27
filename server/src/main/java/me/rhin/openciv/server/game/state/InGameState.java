@@ -568,6 +568,8 @@ public class InGameState extends GameState implements DisconnectListener, Select
 
 		Tile tile = map.getTiles()[packet.getGridX()][packet.getGridY()];
 
+		packet.setGeographyName(tile.getGeograpgyName());
+
 		StatLine tileStatLine = (tile.getTerritory() != null ? tile.getTerritory().getTileStatLine(tile)
 				: tile.getStatLine());
 

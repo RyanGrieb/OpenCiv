@@ -29,7 +29,8 @@ public class GameOverlay extends AbstractWindow implements ResizeListener, TileS
 	private Tile hoveredTile;
 	private ArrayList<ColoredBackground> statIcons;
 	private ArrayList<CustomLabel> statLabels;
-
+	private CustomLabel geographyNameLabel;
+	
 	public GameOverlay() {
 		this.statusBar = new StatusBar(0, viewport.getWorldHeight() - HEIGHT, viewport.getWorldWidth(), HEIGHT);
 		addActor(statusBar);
@@ -43,6 +44,10 @@ public class GameOverlay extends AbstractWindow implements ResizeListener, TileS
 		tileNameLabel.setBounds(2, 2, 0, 15); // FIXME: Setting the width to 0 is a workaround
 		this.addActor(tileNameLabel);
 
+		this.geographyNameLabel = new CustomLabel("N/A");
+		geographyNameLabel.setBounds(2, 16, 0, 15); // FIXME: Setting the width to 0 is a workaround
+		this.addActor(geographyNameLabel);
+		
 		this.statIcons = new ArrayList<>();
 		this.statLabels = new ArrayList<>();
 
@@ -136,6 +141,8 @@ public class GameOverlay extends AbstractWindow implements ResizeListener, TileS
 	@Override
 	public void onRecieveTileStatline(TileStatlinePacket packet) {
 		clearTileStatInfo();
+		
+		geographyNameLabel.setText(packet.getGeographyName());
 		
 		StatLine statline = StatLine.fromPacket(packet);
 

@@ -75,6 +75,7 @@ public class Tile {
 	private ArrayList<Unit> units;
 	private TileImprovement tileImprovement;
 	private ArrayList<TileObserver> tileObservers;
+	private String geograpgyName;
 
 	public Tile(GameMap map, TileType tileType, float x, float y) {
 		this.map = map;
@@ -735,6 +736,14 @@ public class Tile {
 			}
 		}
 		return units;
+	}
+
+	public String getGeograpgyName() {
+		return geograpgyName;
+	}
+
+	public void setGeographyName(String geograpgyName) {
+		this.geograpgyName = geograpgyName;
 	}
 
 }

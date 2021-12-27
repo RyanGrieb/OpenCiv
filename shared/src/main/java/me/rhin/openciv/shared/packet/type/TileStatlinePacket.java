@@ -13,6 +13,7 @@ public class TileStatlinePacket extends Packet implements StatPacket {
 
 	private String[] statNames;
 	private float[] statValues;
+	private String geographyName;
 
 	public TileStatlinePacket() {
 		this.statNames = new String[MAX_STATS];
@@ -26,6 +27,7 @@ public class TileStatlinePacket extends Packet implements StatPacket {
 		json.writeValue("gridY", gridY);
 		json.writeValue("statNames", statNames);
 		json.writeValue("statValues", statValues);
+		json.writeValue("geographyName", geographyName);
 	}
 
 	@Override
@@ -36,6 +38,7 @@ public class TileStatlinePacket extends Packet implements StatPacket {
 
 		this.statNames = new String[MAX_STATS];
 		this.statValues = new float[MAX_STATS];
+		this.geographyName = jsonData.getString("geographyName");
 
 		statNames = jsonData.get("statNames").asStringArray();
 		statValues = jsonData.get("statValues").asFloatArray();
@@ -72,5 +75,13 @@ public class TileStatlinePacket extends Packet implements StatPacket {
 				break;
 			}
 		}
+	}
+
+	public void setGeographyName(String geographyName) {
+		this.geographyName = geographyName;
+	}
+	
+	public String getGeographyName() {
+		return geographyName;
 	}
 }
