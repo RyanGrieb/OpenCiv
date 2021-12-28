@@ -132,4 +132,10 @@ public abstract class Button extends Actor {
 		return hovered;
 	}
 
+	public void setText(String text) {
+		btnLabel.setText(text);
+
+		btnLabel.setPosition(getX() + sprite.getWidth() / 2 - btnLabel.getWidth() / 2,
+				(getY() + sprite.getHeight() / 2) - btnLabel.getHeight() / 2);
+	}
 }

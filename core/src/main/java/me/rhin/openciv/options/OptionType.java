@@ -1,5 +1,7 @@
 package me.rhin.openciv.options;
 
+import com.badlogic.gdx.Gdx;
+
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.sound.MusicWrapper;
 
@@ -44,6 +46,20 @@ public enum OptionType {
 		@Override
 		public int getDefaultValue() {
 			return 25;
+		}
+	},
+	FULLSCREEN_ENABLED {
+		@Override
+		public void onUpdate(float value) {
+			if (value == 1)
+				Gdx.graphics.setFullscreenMode(Gdx.graphics.getDisplayMode());
+			else
+				Gdx.graphics.setWindowedMode(800, 750);
+		}
+
+		@Override
+		public int getDefaultValue() {
+			return 0;
 		}
 	};
 

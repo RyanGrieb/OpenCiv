@@ -129,7 +129,7 @@ public abstract class Unit extends Actor
 		// Move sprite to our standing tile
 
 		// FIXME: We animate attacks to enemies wrong
-
+		
 		// Increment the sprite to the target tile
 		if (movementTiles.size() > 0 && targetTile == null) {
 			Tile tile = movementTiles.get(0);

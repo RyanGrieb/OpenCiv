@@ -9,6 +9,7 @@ import me.rhin.openciv.options.GameOptions;
 import me.rhin.openciv.options.OptionType;
 import me.rhin.openciv.ui.background.BlankBackground;
 import me.rhin.openciv.ui.button.type.CloseWindowButton;
+import me.rhin.openciv.ui.button.type.FullscreenButton;
 import me.rhin.openciv.ui.label.CustomLabel;
 import me.rhin.openciv.ui.scrub.ScrubBar;
 import me.rhin.openciv.ui.window.AbstractWindow;
@@ -17,6 +18,8 @@ public class GameOptionsWindow extends AbstractWindow implements ResizeListener,
 
 	private BlankBackground blankBackground;
 	private CloseWindowButton closeWindowButton;
+
+	// Sound settings
 	private CustomLabel soundDescLabel;
 
 	private CustomLabel musicSoundDescLabel;
@@ -31,6 +34,10 @@ public class GameOptionsWindow extends AbstractWindow implements ResizeListener,
 	private CustomLabel effectsSoundLevelLabel;
 	private ScrubBar effectsScrubBar;
 
+	// Display settings
+	private CustomLabel displayDescLabel;
+	private FullscreenButton fullscreenButton;
+
 	public GameOptionsWindow() {
 		super.setBounds(0, 0, viewport.getWorldWidth(), viewport.getWorldHeight());
 
@@ -42,6 +49,8 @@ public class GameOptionsWindow extends AbstractWindow implements ResizeListener,
 		closeWindowButton = new CloseWindowButton(getClass(), "Close", viewport.getWorldWidth() / 2 - 150 / 2, 15, 150,
 				45);
 		addActor(closeWindowButton);
+
+		// Sound settings
 
 		soundDescLabel = new CustomLabel("Sound Settings:");
 		soundDescLabel.setPosition(55, viewport.getWorldHeight() - 35);
@@ -82,6 +91,17 @@ public class GameOptionsWindow extends AbstractWindow implements ResizeListener,
 		effectsScrubBar = new ScrubBar(70, viewport.getWorldHeight() - 290, 100, 20);
 		effectsScrubBar.setValue(gameOptions.getInt(OptionType.EFFECTS_VOLUME));
 		addActor(effectsScrubBar);
+
+		// Display Settings
+
+		displayDescLabel = new CustomLabel("Display Settings:");
+		displayDescLabel.setPosition(270, viewport.getWorldHeight() - 35);
+		addActor(displayDescLabel);
+
+		String fullscreenButtonName = (gameOptions.getInt(OptionType.FULLSCREEN_ENABLED) == 1 ? "Disable Fullscreen"
+				: "Enable Fullscreen");
+		fullscreenButton = new FullscreenButton(fullscreenButtonName, 237, viewport.getWorldHeight() - 100, 220, 40);
+		addActor(fullscreenButton);
 
 		Civilization.getInstance().getEventManager().addListener(ScrubberPositionUpdateListener.class, this);
 		Civilization.getInstance().getEventManager().addListener(ResizeListener.class, this);
@@ -139,6 +159,9 @@ public class GameOptionsWindow extends AbstractWindow implements ResizeListener,
 		effectsSoundLevelLabel.setBounds(55, height - 260, soundDescLabel.getWidth(), 15);
 		effectsSoundLevelLabel.setAlignment(Align.center);
 		effectsScrubBar.setPosition(70, height - 290);
+
+		displayDescLabel.setPosition(270, height - 35);
+		fullscreenButton.setPosition(237, height - 100);
 	}
 
 	@Override

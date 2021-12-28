@@ -17,6 +17,10 @@ public class GameOptions {
 		}
 
 		updatePrefs();
+		
+		//FIXME: Handle startup options better. Move this.
+		if(getInt(OptionType.FULLSCREEN_ENABLED) == 1)
+			Gdx.graphics.setFullscreenMode(Gdx.graphics.getDisplayMode());
 	}
 
 	public int getInt(OptionType option) {
@@ -27,7 +31,6 @@ public class GameOptions {
 		prefs.putInteger(optionType.name(), value);
 		
 		optionType.onUpdate(value);
-		
 		updatePrefs();
 	}
 
