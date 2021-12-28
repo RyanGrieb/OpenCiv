@@ -1,0 +1,175 @@
+package me.rhin.openciv.ui.window.type;
+
+import com.badlogic.gdx.utils.Align;
+
+import me.rhin.openciv.Civilization;
+import me.rhin.openciv.listener.ResizeListener;
+import me.rhin.openciv.listener.ScrubberPositionUpdateListener;
+import me.rhin.openciv.options.GameOptions;
+import me.rhin.openciv.options.OptionType;
+import me.rhin.openciv.ui.background.BlankBackground;
+import me.rhin.openciv.ui.button.type.CloseWindowButton;
+import me.rhin.openciv.ui.label.CustomLabel;
+import me.rhin.openciv.ui.scrub.ScrubBar;
+import me.rhin.openciv.ui.window.AbstractWindow;
+
+public class GameOptionsWindow extends AbstractWindow implements ResizeListener, ScrubberPositionUpdateListener {
+
+	private BlankBackground blankBackground;
+	private CloseWindowButton closeWindowButton;
+	private CustomLabel soundDescLabel;
+
+	private CustomLabel musicSoundDescLabel;
+	private CustomLabel musicSoundLevelLabel;
+	private ScrubBar musicScrubBar;
+
+	private CustomLabel ambienceSoundDescLabel;
+	private CustomLabel ambienceSoundLevelLabel;
+	private ScrubBar ambienceScrubBar;
+
+	private CustomLabel effectsSoundDescLabel;
+	private CustomLabel effectsSoundLevelLabel;
+	private ScrubBar effectsScrubBar;
+
+	public GameOptionsWindow() {
+		super.setBounds(0, 0, viewport.getWorldWidth(), viewport.getWorldHeight());
+
+		GameOptions gameOptions = Civilization.getInstance().getGameOptions();
+
+		blankBackground = new BlankBackground(0, 0, getWidth(), getHeight());
+		addActor(blankBackground);
+
+		closeWindowButton = new CloseWindowButton(getClass(), "Close", viewport.getWorldWidth() / 2 - 150 / 2, 15, 150,
+				45);
+		addActor(closeWindowButton);
+
+		soundDescLabel = new CustomLabel("Sound Settings:");
+		soundDescLabel.setPosition(55, viewport.getWorldHeight() - 35);
+		addActor(soundDescLabel);
+
+		musicSoundDescLabel = new CustomLabel("Music Volume", Align.center, 55, viewport.getWorldHeight() - 70,
+				soundDescLabel.getWidth(), 15);
+		addActor(musicSoundDescLabel);
+
+		musicSoundLevelLabel = new CustomLabel(gameOptions.getInt(OptionType.MUSIC_VOLUME) + "%", Align.center, 55,
+				viewport.getWorldHeight() - 90, soundDescLabel.getWidth(), 15);
+		addActor(musicSoundLevelLabel);
+
+		musicScrubBar = new ScrubBar(70, viewport.getWorldHeight() - 120, 100, 20);
+		musicScrubBar.setValue(gameOptions.getInt(OptionType.MUSIC_VOLUME));
+		addActor(musicScrubBar);
+
+		ambienceSoundDescLabel = new CustomLabel("Ambience Volume", Align.center, 55, viewport.getWorldHeight() - 155,
+				soundDescLabel.getWidth(), 15);
+		addActor(ambienceSoundDescLabel);
+
+		ambienceSoundLevelLabel = new CustomLabel(gameOptions.getInt(OptionType.AMBIENCE_VOLUME) + "%", Align.center,
+				55, viewport.getWorldHeight() - 175, soundDescLabel.getWidth(), 15);
+		addActor(ambienceSoundLevelLabel);
+
+		ambienceScrubBar = new ScrubBar(70, viewport.getWorldHeight() - 205, 100, 20);
+		ambienceScrubBar.setValue(gameOptions.getInt(OptionType.AMBIENCE_VOLUME));
+		addActor(ambienceScrubBar);
+
+		effectsSoundDescLabel = new CustomLabel("Effects Volume", Align.center, 55, viewport.getWorldHeight() - 240,
+				soundDescLabel.getWidth(), 15);
+		addActor(effectsSoundDescLabel);
+
+		effectsSoundLevelLabel = new CustomLabel(gameOptions.getInt(OptionType.EFFECTS_VOLUME) + "%", Align.center, 55,
+				viewport.getWorldHeight() - 260, soundDescLabel.getWidth(), 15);
+		addActor(effectsSoundLevelLabel);
+
+		effectsScrubBar = new ScrubBar(70, viewport.getWorldHeight() - 290, 100, 20);
+		effectsScrubBar.setValue(gameOptions.getInt(OptionType.EFFECTS_VOLUME));
+		addActor(effectsScrubBar);
+
+		Civilization.getInstance().getEventManager().addListener(ScrubberPositionUpdateListener.class, this);
+		Civilization.getInstance().getEventManager().addListener(ResizeListener.class, this);
+	}
+
+	@Override
+	public void onScrubberPositionUpdate(ScrubBar scrubber) {
+
+		GameOptions gameOptions = Civilization.getInstance().getGameOptions();
+
+		// FIXME: Just call updatePositions() method.
+
+		if (scrubber.equals(musicScrubBar)) {
+			gameOptions.setInt(OptionType.MUSIC_VOLUME, (int) scrubber.getValue());
+			musicSoundLevelLabel.setText((int) scrubber.getValue() + "%");
+		}
+
+		if (scrubber.equals(ambienceScrubBar)) {
+			gameOptions.setInt(OptionType.AMBIENCE_VOLUME, (int) scrubber.getValue());
+			ambienceSoundLevelLabel.setText((int) scrubber.getValue() + "%");
+		}
+
+		if (scrubber.equals(effectsScrubBar)) {
+			gameOptions.setInt(OptionType.EFFECTS_VOLUME, (int) scrubber.getValue());
+			effectsSoundLevelLabel.setText((int) scrubber.getValue() + "%");
+		}
+
+		updatePositions(viewport.getWorldWidth(), viewport.getWorldHeight());
+	}
+
+	@Override
+	public void onResize(int width, int height) {
+		updatePositions(width, height);
+	}
+
+	private void updatePositions(float width, float height) {
+
+		blankBackground.setSize(width, height);
+
+		closeWindowButton.setPosition(width / 2 - 150 / 2, 15);
+
+		soundDescLabel.setPosition(55, height - 35);
+
+		musicSoundDescLabel.setPosition(55, height - 70);
+		musicSoundLevelLabel.setBounds(55, height - 90, soundDescLabel.getWidth(), 15);
+		musicSoundLevelLabel.setAlignment(Align.center);
+		musicScrubBar.setPosition(70, height - 120);
+
+		ambienceSoundDescLabel.setPosition(55, height - 155);
+		ambienceSoundLevelLabel.setBounds(55, height - 175, soundDescLabel.getWidth(), 15);
+		ambienceSoundLevelLabel.setAlignment(Align.center);
+		ambienceScrubBar.setPosition(70, height - 205);
+
+		effectsSoundDescLabel.setPosition(55, height - 240);
+		effectsSoundLevelLabel.setBounds(55, height - 260, soundDescLabel.getWidth(), 15);
+		effectsSoundLevelLabel.setAlignment(Align.center);
+		effectsScrubBar.setPosition(70, height - 290);
+	}
+
+	@Override
+	public void onClose() {
+		super.onClose();
+
+		Civilization.getInstance().getEventManager().clearListenersFromObject(this);
+	}
+
+	@Override
+	public boolean disablesInput() {
+		return true;
+	}
+
+	@Override
+	public boolean disablesCameraMovement() {
+		return true;
+	}
+
+	@Override
+	public boolean closesOtherWindows() {
+		return false;
+	}
+
+	@Override
+	public boolean closesGameDisplayWindows() {
+		return false;
+	}
+
+	@Override
+	public boolean isGameDisplayWindow() {
+		return false;
+	}
+}

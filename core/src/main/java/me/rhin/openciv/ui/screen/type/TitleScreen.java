@@ -10,6 +10,7 @@ import me.rhin.openciv.listener.MouseMoveListener.MouseMoveEvent;
 import me.rhin.openciv.listener.ResizeListener;
 import me.rhin.openciv.shared.listener.EventManager;
 import me.rhin.openciv.ui.button.type.AknowledgementsButton;
+import me.rhin.openciv.ui.button.type.GameOptionsButton;
 import me.rhin.openciv.ui.button.type.GithubButton;
 import me.rhin.openciv.ui.button.type.MultiplayerButton;
 import me.rhin.openciv.ui.button.type.PlayButton;
@@ -26,6 +27,7 @@ public class TitleScreen extends AbstractScreen implements ResizeListener {
 	private PlayButton playButton;
 	private GithubButton githubButton;
 	private MultiplayerButton multiplayerButton;
+	private GameOptionsButton gameOptionsButton;
 	private AknowledgementsButton aknowledgementsButton;
 	private QuitGameButton quitGameButton;
 	private CustomLabel titleLabel;
@@ -50,12 +52,17 @@ public class TitleScreen extends AbstractScreen implements ResizeListener {
 		multiplayerButton = new MultiplayerButton(viewport.getWorldWidth() / 2 - 150 / 2,
 				viewport.getWorldHeight() - 260, 150, 45);
 		stage.addActor(multiplayerButton);
-
-		aknowledgementsButton = new AknowledgementsButton(viewport.getWorldWidth() / 2 - 150 / 2,
+		
+		
+		gameOptionsButton = new GameOptionsButton(viewport.getWorldWidth() / 2 - 150 / 2,
 				viewport.getWorldHeight() - 320, 150, 45);
+		stage.addActor(gameOptionsButton);
+		
+		aknowledgementsButton = new AknowledgementsButton(viewport.getWorldWidth() / 2 - 150 / 2,
+				viewport.getWorldHeight() - 380, 150, 45);
 		stage.addActor(aknowledgementsButton);
 
-		quitGameButton = new QuitGameButton(viewport.getWorldWidth() / 2 - 150 / 2, viewport.getWorldHeight() - 380,
+		quitGameButton = new QuitGameButton(viewport.getWorldWidth() / 2 - 150 / 2, viewport.getWorldHeight() - 440,
 				150, 45);
 		stage.addActor(quitGameButton);
 
@@ -82,8 +89,9 @@ public class TitleScreen extends AbstractScreen implements ResizeListener {
 		playButton.setPosition(width / 2 - 150 / 2, height - 200);
 		githubButton.setPosition(74, 4);
 		multiplayerButton.setPosition(width / 2 - 150 / 2, height - 260);
-		aknowledgementsButton.setPosition(width / 2 - 150 / 2, height - 320);
-		quitGameButton.setPosition(width / 2 - 150 / 2, height - 380);
+		gameOptionsButton.setPosition(width / 2 - 150 / 2, height - 320);
+		aknowledgementsButton.setPosition(width / 2 - 150 / 2, height - 380);
+		quitGameButton.setPosition(width / 2 - 150 / 2, height - 440);
 
 		titleLabel.setPosition(0, height / 1.1F);
 		titleLabel.setSize(width, 20);

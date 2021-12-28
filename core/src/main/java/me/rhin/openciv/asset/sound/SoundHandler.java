@@ -11,6 +11,7 @@ import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.SoundEnum;
 import me.rhin.openciv.asset.SoundEnum.SoundType;
 import me.rhin.openciv.listener.SetScreenListener;
+import me.rhin.openciv.options.OptionType;
 import me.rhin.openciv.ui.screen.AbstractScreen;
 import me.rhin.openciv.ui.screen.ScreenEnum;
 import me.rhin.openciv.ui.screen.type.TitleScreen;
@@ -18,13 +19,13 @@ import me.rhin.openciv.ui.screen.type.TitleScreen;
 //TODO: Not sure if I should be using this
 public class SoundHandler implements SetScreenListener {
 
-	private ArrayList<Music> ambienceTracks;
-	private ArrayList<Music> titleMusicTacks;
+	private ArrayList<MusicWrapper> ambienceTracks;
+	private ArrayList<MusicWrapper> titleMusicTacks;
 
 	private HashMap<SoundEnum, Music> musicMap;
 	private HashMap<SoundEnum, Sound> effectMap;
-	private Music currentMusic;
-	private Music currentAmbience;
+	private MusicWrapper currentMusic;
+	private MusicWrapper currentAmbience;
 
 	public SoundHandler() {
 		this.musicMap = new HashMap<>();
@@ -59,6 +60,9 @@ public class SoundHandler implements SetScreenListener {
 	}
 
 	public void loadSounds() {
+
+		float volume = 0;
+
 		for (SoundEnum soundEnum : SoundEnum.values()) {
 
 			String soundPath = "sound/" + soundEnum.getSoundType().name().toLowerCase() + "/"
@@ -71,13 +75,21 @@ public class SoundHandler implements SetScreenListener {
 				break;
 			case AMBIENCE:
 				Music ambience = Civilization.getInstance().getAssetHandler().get(soundPath, Music.class);
-				ambience.setVolume(soundEnum.getVolume());
-				ambienceTracks.add(ambience);
+
+				volume = soundEnum.getVolume()
+						* Civilization.getInstance().getGameOptions().getInt(OptionType.AMBIENCE_VOLUME) / 100;
+				ambience.setVolume(volume);
+
+				ambienceTracks.add(new MusicWrapper(ambience, soundEnum.getVolume()));
 				break;
 			case MUSIC:
 				Music music = Civilization.getInstance().getAssetHandler().get(soundPath, Music.class);
-				music.setVolume(soundEnum.getVolume());
-				titleMusicTacks.add(music);
+
+				volume = soundEnum.getVolume()
+						* Civilization.getInstance().getGameOptions().getInt(OptionType.MUSIC_VOLUME) / 100;
+				music.setVolume(volume);
+
+				titleMusicTacks.add(new MusicWrapper(music, soundEnum.getVolume()));
 				break;
 			default:
 				break;
@@ -96,7 +108,8 @@ public class SoundHandler implements SetScreenListener {
 		Sound sound = effectMap.get(soundEnum);
 
 		long id = sound.play();
-		sound.setVolume(id, soundEnum.getVolume());
+		sound.setVolume(id, soundEnum.getVolume()
+				* Civilization.getInstance().getGameOptions().getInt(OptionType.EFFECTS_VOLUME) / 100);
 	}
 
 	public void playTrackBySoundtype(SoundType soundType) {
@@ -114,7 +127,7 @@ public class SoundHandler implements SetScreenListener {
 		if (currentMusic != null)
 			currentMusic.stop();
 
-		ArrayList<Music> musicTrack = null;
+		ArrayList<MusicWrapper> musicTrack = null;
 		switch (soundType) {
 		case AMBIENCE:
 			musicTrack = ambienceTracks;
@@ -128,7 +141,7 @@ public class SoundHandler implements SetScreenListener {
 
 		Random rnd = new Random();
 
-		Music rndSound = musicTrack.get(rnd.nextInt(musicTrack.size()));
+		MusicWrapper rndSound = musicTrack.get(rnd.nextInt(musicTrack.size()));
 		rndSound.play();
 
 		if (soundType == SoundType.AMBIENCE)
@@ -142,5 +155,13 @@ public class SoundHandler implements SetScreenListener {
 				playTrackBySoundtype(soundType);
 			}
 		});
+	}
+
+	public MusicWrapper getCurrentMusic() {
+		return currentMusic;
+	}
+
+	public MusicWrapper getCurrentAmbience() {
+		return currentAmbience;
 	}
 }

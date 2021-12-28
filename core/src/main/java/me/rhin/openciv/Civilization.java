@@ -11,6 +11,7 @@ import me.rhin.openciv.asset.sound.SoundHandler;
 import me.rhin.openciv.game.CivGame;
 import me.rhin.openciv.networking.NetworkManager;
 import me.rhin.openciv.networking.chat.ChatHandler;
+import me.rhin.openciv.options.GameOptions;
 import me.rhin.openciv.shared.listener.EventManager;
 import me.rhin.openciv.ui.font.FontHandler;
 import me.rhin.openciv.ui.screen.AbstractScreen;
@@ -37,6 +38,7 @@ public class Civilization extends Game {
 	private FontHandler fontHandler;
 	private SoundHandler soundHandler;
 	private ChatHandler chatHandler;
+	private GameOptions gameOptions;
 
 	public static Civilization getInstance() {
 		return instance;
@@ -56,6 +58,7 @@ public class Civilization extends Game {
 		screenManager = new ScreenManager();
 		networkManager = new NetworkManager();
 		fontHandler = new FontHandler();
+		gameOptions = new GameOptions();
 		instance = this;
 
 		soundHandler = new SoundHandler();
@@ -115,4 +118,9 @@ public class Civilization extends Game {
 	public ChatHandler getChatHandler() {
 		return chatHandler;
 	}
+
+	public GameOptions getGameOptions() {
+		return gameOptions;
+	}
+
 }
