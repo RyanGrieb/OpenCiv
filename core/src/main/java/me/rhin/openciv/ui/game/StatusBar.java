@@ -47,7 +47,7 @@ public class StatusBar extends Actor implements PlayerStatUpdateListener, NextTu
 		goldIcon.setSize(16, 16);
 		this.goldLabel = new CustomLabel("0");
 
-		this.tradeDescLabel = new CustomLabel("Trade Routes:");
+		this.tradeDescLabel = new CustomLabel("Trade:");
 		this.tradeIcon = TextureEnum.ICON_BARREL.sprite();
 		tradeIcon.setSize(16, 16);
 		this.tradeLabel = new CustomLabel("0/0");
