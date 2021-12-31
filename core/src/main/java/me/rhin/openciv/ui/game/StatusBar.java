@@ -21,9 +21,9 @@ public class StatusBar extends Actor implements PlayerStatUpdateListener, NextTu
 
 	private Sprite sprite;
 
-	private CustomLabel scienceDescLabel, heritageDescLabel, goldDescLabel, tradeDescLabel;
-	private Sprite scienceIcon, heritageIcon, goldIcon, tradeIcon;
-	private CustomLabel scienceLabel, hertiageLabel, goldLabel, tradeLabel;
+	private CustomLabel scienceDescLabel, heritageDescLabel, goldDescLabel, faithDescLabel, tradeDescLabel;
+	private Sprite scienceIcon, heritageIcon, goldIcon, faithIcon, tradeIcon;
+	private CustomLabel scienceLabel, hertiageLabel, goldLabel, faithLabel, tradeLabel;
 
 	private CustomLabel turnsLabel;
 
@@ -46,6 +46,11 @@ public class StatusBar extends Actor implements PlayerStatUpdateListener, NextTu
 		this.goldIcon = TextureEnum.ICON_GOLD.sprite();
 		goldIcon.setSize(16, 16);
 		this.goldLabel = new CustomLabel("0");
+		
+		this.faithDescLabel = new CustomLabel("Faith:");
+		this.faithIcon = TextureEnum.ICON_FAITH.sprite();
+		faithIcon.setSize(16, 16);
+		this.faithLabel = new CustomLabel("0");
 
 		this.tradeDescLabel = new CustomLabel("Trade:");
 		this.tradeIcon = TextureEnum.ICON_BARREL.sprite();
@@ -86,16 +91,19 @@ public class StatusBar extends Actor implements PlayerStatUpdateListener, NextTu
 		scienceDescLabel.draw(batch, parentAlpha);
 		heritageDescLabel.draw(batch, parentAlpha);
 		goldDescLabel.draw(batch, parentAlpha);
+		faithDescLabel.draw(batch, parentAlpha);
 		tradeDescLabel.draw(batch, parentAlpha);
 
 		scienceIcon.draw(batch);
 		heritageIcon.draw(batch);
 		goldIcon.draw(batch);
+		faithIcon.draw(batch);
 		tradeIcon.draw(batch);
 
 		scienceLabel.draw(batch, parentAlpha);
 		hertiageLabel.draw(batch, parentAlpha);
 		goldLabel.draw(batch, parentAlpha);
+		faithLabel.draw(batch, parentAlpha);
 		tradeLabel.draw(batch, parentAlpha);
 
 		turnsLabel.draw(batch, parentAlpha);
@@ -119,6 +127,10 @@ public class StatusBar extends Actor implements PlayerStatUpdateListener, NextTu
 
 				hertiageLabel.setText("+" + (int) statLine.getStatValue(Stat.HERITAGE_GAIN) + "");
 
+				float gainedFaith = statLine.getStatValue(Stat.FAITH_GAIN);
+				
+				faithLabel.setText("" + statLine.getStatValue(Stat.FAITH) + "(" + (gainedFaith < 0 ? "" : "+") + gainedFaith + ")");
+				
 				tradeLabel.setText((int) statLine.getStatValue(Stat.TRADE_ROUTE_AMOUNT) + "/"
 						+ (int) statLine.getStatValue(Stat.MAX_TRADE_ROUTES));
 
@@ -193,6 +205,15 @@ public class StatusBar extends Actor implements PlayerStatUpdateListener, NextTu
 		goldLabel.setPosition(originX, y + goldLabel.getHeight() / 2);
 
 		originX += goldLabel.getWidth() + 15;
+		faithDescLabel.setPosition(originX, y + faithDescLabel.getHeight() / 2);
+		
+		originX += faithDescLabel.getWidth() + 5;
+		faithIcon.setPosition(originX, y + 1);
+
+		originX += faithIcon.getWidth() + 5;
+		faithLabel.setPosition(originX, y + faithLabel.getHeight() / 2);
+
+		originX += faithLabel.getWidth() + 15;
 		tradeDescLabel.setPosition(originX, y + tradeDescLabel.getHeight() / 2);
 
 		originX += tradeDescLabel.getWidth() + 5;

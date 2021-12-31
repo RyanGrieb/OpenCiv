@@ -54,7 +54,7 @@ public enum OptionType {
 			if (value == 1)
 				Gdx.graphics.setFullscreenMode(Gdx.graphics.getDisplayMode());
 			else
-				Gdx.graphics.setWindowedMode(800, 750);
+				Gdx.graphics.setWindowedMode(900, 750);
 		}
 
 		@Override

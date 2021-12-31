@@ -28,7 +28,7 @@ public class Lwjgl3Launcher {
 	private static Lwjgl3ApplicationConfiguration getDefaultConfiguration() {
 		Lwjgl3ApplicationConfiguration config = new Lwjgl3ApplicationConfiguration();
 		config.useVsync(true);
-		config.setWindowSizeLimits(800, 750, -1, -1);
+		config.setWindowSizeLimits(900, 750, -1, -1);
 		config.setTitle("OpenCiv");
 		config.setWindowIcon(FileType.Internal, "tile_city.png");
 		config.setIdleFPS(60);

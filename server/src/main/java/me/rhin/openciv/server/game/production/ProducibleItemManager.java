@@ -12,6 +12,7 @@ import me.rhin.openciv.server.game.city.City;
 import me.rhin.openciv.server.game.city.building.Building;
 import me.rhin.openciv.server.game.city.building.type.Amphitheater;
 import me.rhin.openciv.server.game.city.building.type.Aqueduct;
+import me.rhin.openciv.server.game.city.building.type.Chapel;
 import me.rhin.openciv.server.game.city.building.type.Circus;
 import me.rhin.openciv.server.game.city.building.type.Colosseum;
 import me.rhin.openciv.server.game.city.building.type.Forge;
@@ -127,6 +128,7 @@ public class ProducibleItemManager implements NextTurnListener {
 		possibleItems.put("Mint", new Mint(city));
 		possibleItems.put("Amphitheater", new Amphitheater(city));
 		possibleItems.put("Garden", new Garden(city));
+		possibleItems.put("Chapel", new Chapel(city));
 
 		// Wonders
 		possibleItems.put("Great Pyramids", new GreatPyramids(city));

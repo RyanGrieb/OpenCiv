@@ -13,42 +13,49 @@ building_amphitheater
   index: -1
 building_aqueduct
   rotate: false
-  xy: 200, 132
+  xy: 332, 198
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+building_chapel
+  rotate: false
+  xy: 2, 2
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 building_circus
   rotate: false
-  xy: 468, 164
+  xy: 102, 68
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 building_colosseum
   rotate: false
-  xy: 366, 164
+  xy: 400, 164
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 building_forge
   rotate: false
-  xy: 166, 132
+  xy: 298, 198
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 building_garden
   rotate: false
-  xy: 400, 164
+  xy: 434, 164
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 building_granary
   rotate: false
-  xy: 136, 98
+  xy: 170, 98
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
@@ -62,28 +69,28 @@ building_great_library
   index: -1
 building_great_lighthouse
   rotate: false
-  xy: 434, 198
+  xy: 468, 198
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 building_hanging_gardens
   rotate: false
-  xy: 264, 198
+  xy: 166, 132
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 building_library
   rotate: false
-  xy: 434, 164
+  xy: 468, 164
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 building_lighthouse
   rotate: false
-  xy: 36, 2
+  xy: 264, 164
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
@@ -97,28 +104,28 @@ building_machu_picchu
   index: -1
 building_market
   rotate: false
-  xy: 132, 132
+  xy: 264, 198
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 building_mint
   rotate: false
-  xy: 298, 164
+  xy: 332, 164
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 building_monument
   rotate: false
-  xy: 68, 68
+  xy: 132, 132
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 building_national_college
   rotate: false
-  xy: 332, 164
+  xy: 366, 164
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
@@ -132,63 +139,63 @@ building_palace
   index: -1
 building_pyramids
   rotate: false
-  xy: 332, 198
+  xy: 366, 198
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 building_shrine
   rotate: false
-  xy: 468, 198
+  xy: 36, 2
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 building_statue_of_ares
   rotate: false
-  xy: 170, 98
+  xy: 136, 64
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 building_stonehenge
   rotate: false
-  xy: 366, 198
+  xy: 400, 198
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 building_stoneworks
   rotate: false
-  xy: 400, 198
+  xy: 434, 198
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 building_university
   rotate: false
-  xy: 2, 2
+  xy: 68, 68
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 building_wall
   rotate: false
-  xy: 298, 198
+  xy: 200, 132
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 building_watermill
   rotate: false
-  xy: 102, 68
+  xy: 136, 98
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 building_workshop
   rotate: false
-  xy: 264, 164
+  xy: 298, 164
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
