@@ -86,7 +86,7 @@ public abstract class RangedUnit extends Unit
 	}
 
 	@Override
-	public void onSelectUnit(SelectUnitPacket packet) {
+	public void onSelectUnit(Unit unit) {
 
 		if (getPlayerOwner().getSelectedUnit() == null || !getPlayerOwner().getSelectedUnit().equals(this))
 			return;

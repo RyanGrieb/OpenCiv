@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import com.badlogic.gdx.utils.Json;
 
+import me.rhin.openciv.game.unit.Unit;
 import me.rhin.openciv.networking.PacketParameter;
 import me.rhin.openciv.shared.listener.Event;
 import me.rhin.openciv.shared.listener.Listener;
@@ -11,25 +12,21 @@ import me.rhin.openciv.shared.packet.type.SelectUnitPacket;
 
 public interface SelectUnitListener extends Listener {
 
-	public void onSelectUnit(SelectUnitPacket packet);
+	public void onSelectUnit(Unit unit);
 
 	public static class SelectUnitEvent extends Event<SelectUnitListener> {
 
-		private SelectUnitPacket packet;
+		private Unit unit;
 
-		public SelectUnitEvent(PacketParameter packetParameter) {
-			try {
-				Json json = new Json();
-				this.packet = json.fromJson(SelectUnitPacket.class, packetParameter.getPacket());
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
+		public SelectUnitEvent(Unit unit) {
+			this.unit = unit;
 		}
 
 		@Override
 		public void fire(ArrayList<SelectUnitListener> listeners) {
-			for (SelectUnitListener listener : listeners)
-				listener.onSelectUnit(packet);
+			for (SelectUnitListener listener : listeners) {
+				listener.onSelectUnit(unit);
+			}
 		}
 
 		@Override

@@ -21,7 +21,6 @@ import me.rhin.openciv.listener.RightClickListener;
 import me.rhin.openciv.listener.SelectUnitListener;
 import me.rhin.openciv.shared.packet.type.DeleteUnitPacket;
 import me.rhin.openciv.shared.packet.type.PlayerStatUpdatePacket;
-import me.rhin.openciv.shared.packet.type.SelectUnitPacket;
 import me.rhin.openciv.shared.stat.StatLine;
 import me.rhin.openciv.ui.window.type.CityInfoWindow;
 import me.rhin.openciv.ui.window.type.DeclareWarWindow;
@@ -96,10 +95,12 @@ public class Player extends AbstractPlayer implements RelativeMouseMoveListener,
 			return;
 		}
 
-		SelectUnitPacket packet = new SelectUnitPacket();
-		packet.setUnitID(unit.getID());
-		packet.setLocation(hoveredTile.getGridX(), hoveredTile.getGridY());
-		Civilization.getInstance().getNetworkManager().sendPacket(packet);
+		// SelectUnitPacket packet = new SelectUnitPacket();
+		// packet.setUnitID(unit.getID());
+		// packet.setLocation(hoveredTile.getGridX(), hoveredTile.getGridY());
+		// Civilization.getInstance().getNetworkManager().sendPacket(packet);
+
+		Civilization.getInstance().getEventManager().fireEvent(new SelectUnitEvent(unit));
 	}
 
 	@Override
@@ -140,12 +141,10 @@ public class Player extends AbstractPlayer implements RelativeMouseMoveListener,
 	}
 
 	@Override
-	public void onSelectUnit(SelectUnitPacket packet) {
+	public void onSelectUnit(Unit unit) {
 		if (selectedUnit != null)
 			unselectUnit();
 
-		Unit unit = Civilization.getInstance().getGame().getMap().getTiles()[packet.getGridX()][packet.getGridY()]
-				.getUnitFromID(packet.getUnitID());
 		unit.setSelected(true);
 		selectedUnit = unit;
 	}
