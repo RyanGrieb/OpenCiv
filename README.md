@@ -6,9 +6,9 @@ If you like game development, java, or pixel art, consider contributing. We can 
 
 Eventually, I'd like to add support modding through [LUAJ](https://www.gamedevelopment.blog/using-luaj-scripting-to-allow-modding-in-games/).
 
-To run & modify the game, 
-* install [GIT](https://git-scm.com/downloads)
-* run -> ```git clone https://github.com/rhin123/OpenCiv.git```
+To run & modify the game --
+* Install [GIT](https://git-scm.com/downloads)
+* Run -> ```git clone https://github.com/rhin123/OpenCiv.git```
 * Open Eclipse or any other java editor, and ```import grade project``` (Eclipse is recommended, haven't tested on other IDEs)
 * Have fun :)
 
@@ -17,3 +17,13 @@ To run & modify the game,
 ![alt text](https://github.com/rhin123/OpenCiv/blob/master/meta/screenshots/world_map.png?raw=true)
 
 ![alt text](https://github.com/rhin123/OpenCiv/blob/master/meta/screenshots/roads_n_improvements.png?raw=true)
+
+Special thanks to:
+
+Contributors - 
+[Will Pewitt](https://github.com/willpewitt)
+
+Artists - 
+[lucasyoung988](https://www.fiverr.com/lucasyoung988?source=order_page_summary_seller_link)
+[brysia](https://www.fiverr.com/brysia?source=order_page_summary_seller_link)
+[pratamacam](https://www.fiverr.com/pratamacam?source=order_page_summary_seller_link)
