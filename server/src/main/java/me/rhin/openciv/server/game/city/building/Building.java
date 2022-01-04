@@ -39,6 +39,11 @@ public abstract class Building implements ProductionItem {
 		city.getProducibleItemManager().getPossibleItems().remove(getName());
 		built = true;
 
+		if(this instanceof Wonder) {
+			System.out.println("Server - built wonder");
+			Server.getInstance().getInGameState().getWonders().setBuilt(getClass());
+		}
+		
 		Server.getInstance().getEventManager().fireEvent(new BuildingConstructedEvent(city, this));
 	}
 

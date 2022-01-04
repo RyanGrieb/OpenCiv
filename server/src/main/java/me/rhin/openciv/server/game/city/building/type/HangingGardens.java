@@ -13,13 +13,7 @@ public class HangingGardens extends Building implements Wonder {
 		super(city);
 
 		this.statLine.addValue(Stat.FOOD_GAIN, 10);
-		this.statLine.addValue(Stat.HERITAGE, 1);
-	}
-
-	@Override
-	public void create() {
-		super.create();
-		Server.getInstance().getInGameState().getWonders().setBuilt(getClass());
+		this.statLine.addValue(Stat.HERITAGE_GAIN, 1);
 	}
 
 	@Override

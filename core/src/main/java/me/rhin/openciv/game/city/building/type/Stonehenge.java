@@ -38,13 +38,6 @@ public class Stonehenge extends Building implements Wonder {
 	}
 
 	@Override
-	public void onBuilt() {
-		super.onBuilt();
-		
-		Civilization.getInstance().getGame().getWonders().setBuilt(getClass());
-	}
-
-	@Override
 	public float getBuildingProductionCost() {
 		return 185;
 	}

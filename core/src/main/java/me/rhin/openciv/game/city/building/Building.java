@@ -1,6 +1,8 @@
 package me.rhin.openciv.game.city.building;
 
+import me.rhin.openciv.Civilization;
 import me.rhin.openciv.game.city.City;
+import me.rhin.openciv.game.city.wonders.Wonder;
 import me.rhin.openciv.game.production.ProductionItem;
 import me.rhin.openciv.shared.stat.StatLine;
 import me.rhin.openciv.shared.stat.StatValue;
@@ -53,5 +55,9 @@ public abstract class Building implements ProductionItem {
 
 	public void onBuilt() {
 		built = true;
+		
+		if(this instanceof Wonder) {
+			Civilization.getInstance().getGame().getWonders().setBuilt(getClass());
+		}
 	}
 }

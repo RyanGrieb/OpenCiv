@@ -28,13 +28,6 @@ public class HangingGardens extends Building implements Wonder {
 	}
 
 	@Override
-	public void onBuilt() {
-		super.onBuilt();
-		
-		Civilization.getInstance().getGame().getWonders().setBuilt(getClass());
-	}
-
-	@Override
 	public boolean meetsProductionRequirements() {
 		return Civilization.getInstance().getGame().getPlayer().getResearchTree().hasResearched(MathematicsTech.class);
 	}

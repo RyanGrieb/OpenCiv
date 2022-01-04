@@ -5,38 +5,38 @@ import me.rhin.openciv.server.game.city.City;
 import me.rhin.openciv.server.game.city.building.Building;
 import me.rhin.openciv.server.game.city.wonders.Wonder;
 import me.rhin.openciv.server.game.map.tile.Tile;
-import me.rhin.openciv.server.game.map.tile.TileType;
-import me.rhin.openciv.server.game.research.type.GuildsTech;
+import me.rhin.openciv.server.game.map.tile.TileType.TileProperty;
+import me.rhin.openciv.server.game.research.type.IronWorkingTech;
 import me.rhin.openciv.shared.stat.Stat;
 
-public class MachuPicchu extends Building implements Wonder {
+public class Colossus extends Building implements Wonder {
 
-	public MachuPicchu(City city) {
+	public Colossus(City city) {
 		super(city);
-
+		
 		this.statLine.addValue(Stat.HERITAGE_GAIN, 1);
 		this.statLine.addValue(Stat.GOLD_GAIN, 5);
 	}
-
+	
 	@Override
 	public void create() {
 		super.create();
-
+		
 		city.getStatLine().addModifier(Stat.TRADE_GOLD_MODIFIER, 0.5F);
+		city.getPlayerOwner().getStatLine().addValue(Stat.MAX_TRADE_ROUTES, 1);
+		city.getPlayerOwner().updateOwnedStatlines(false);
 	}
 
 	@Override
 	public boolean meetsProductionRequirements() {
-
-		boolean adjMountain = false;
-
-		for (Tile adjTile : city.getTile().getAdjTiles()) {
-			if (adjTile.containsTileType(TileType.MOUNTAIN))
-				adjMountain = true;
-		}
-
-		return city.getPlayerOwner().getResearchTree().hasResearched(GuildsTech.class)
-				&& !Server.getInstance().getInGameState().getWonders().isBuilt(getClass()) && adjMountain;
+		
+		boolean nearWater = false;
+		for (Tile tile : city.getTile().getAdjTiles())
+			if (tile.containsTileProperty(TileProperty.WATER))
+				nearWater = true;
+		
+		return city.getPlayerOwner().getResearchTree().hasResearched(IronWorkingTech.class)
+				&& !Server.getInstance().getInGameState().getWonders().isBuilt(getClass()) && nearWater;
 	}
 
 	@Override
@@ -46,12 +46,12 @@ public class MachuPicchu extends Building implements Wonder {
 
 	@Override
 	public float getBuildingProductionCost() {
-		return 300;
+		return 185;
 	}
 
 	@Override
 	public String getName() {
-		return "Machu Picchu";
+		return "Colossus";
 	}
 
 }

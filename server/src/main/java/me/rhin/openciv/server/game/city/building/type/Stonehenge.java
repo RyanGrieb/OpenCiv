@@ -27,12 +27,6 @@ public class Stonehenge extends Building implements Wonder {
 	}
 
 	@Override
-	public void create() {
-		super.create();
-		Server.getInstance().getInGameState().getWonders().setBuilt(getClass());
-	}
-
-	@Override
 	public float getBuildingProductionCost() {
 		return 185;
 	}

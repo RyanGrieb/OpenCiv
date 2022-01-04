@@ -19,7 +19,6 @@ public class GreatLibrary extends Building implements Wonder {
 
 	@Override
 	public void create() {
-		Server.getInstance().getInGameState().getWonders().setBuilt(getClass());
 
 		for (City city : city.getPlayerOwner().getOwnedCities())
 			if (!city.containsBuilding(Library.class))

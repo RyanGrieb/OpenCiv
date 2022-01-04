@@ -33,12 +33,6 @@ public class StatueOfAres extends Building implements Wonder, UnitFinishedMoveLi
 	}
 
 	@Override
-	public void create() {
-		super.create();
-		Server.getInstance().getInGameState().getWonders().setBuilt(getClass());
-	}
-
-	@Override
 	public void onUnitFinishMove(Tile prevTile, Unit unit) {
 
 		if (!unit.getPlayerOwner().equals(city.getPlayerOwner()))

@@ -28,14 +28,7 @@ public class GreatLibrary extends Building implements SpecialistContainer, Wonde
 	public float getGoldCost() {
 		return -1;
 	}
-
-	@Override
-	public void onBuilt() {
-		super.onBuilt();
-
-		Civilization.getInstance().getGame().getWonders().setBuilt(getClass());
-	}
-
+	
 	@Override
 	public boolean meetsProductionRequirements() {
 		return Civilization.getInstance().getGame().getPlayer().getResearchTree().hasResearched(WritingTech.class)
