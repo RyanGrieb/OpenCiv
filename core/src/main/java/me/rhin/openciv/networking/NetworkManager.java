@@ -16,6 +16,7 @@ import me.rhin.openciv.listener.AddObservedTileListener.AddObservedTileEvent;
 import me.rhin.openciv.listener.AddSpecialistToContainerListener.AddSpecialistToContainerEvent;
 import me.rhin.openciv.listener.AddUnitListener.AddUnitEvent;
 import me.rhin.openciv.listener.ApplyProductionToItemListener.ApplyProductionToItemEvent;
+import me.rhin.openciv.listener.AvailablePantheonListener.AvailablePantheonEvent;
 import me.rhin.openciv.listener.BuildingConstructedListener.BuildingConstructedEvent;
 import me.rhin.openciv.listener.BuyProductionItemListener.BuyProductionItemEvent;
 import me.rhin.openciv.listener.ChooseCivListener.ChooseCivEvent;
@@ -33,6 +34,7 @@ import me.rhin.openciv.listener.GameStartListener.GameStartEvent;
 import me.rhin.openciv.listener.GetHostListener.GetHostEvent;
 import me.rhin.openciv.listener.MoveUnitListener.MoveUnitEvent;
 import me.rhin.openciv.listener.NextTurnListener.NextTurnEvent;
+import me.rhin.openciv.listener.PickPantheonListener.PickPantheonEvent;
 import me.rhin.openciv.listener.PlayerConnectListener.PlayerConnectEvent;
 import me.rhin.openciv.listener.PlayerDisconnectListener.PlayerDisconnectEvent;
 import me.rhin.openciv.listener.PlayerListRequestListener.PlayerListRequestEvent;
@@ -68,6 +70,7 @@ import me.rhin.openciv.shared.packet.type.AddObservedTilePacket;
 import me.rhin.openciv.shared.packet.type.AddSpecialistToContainerPacket;
 import me.rhin.openciv.shared.packet.type.AddUnitPacket;
 import me.rhin.openciv.shared.packet.type.ApplyProductionToItemPacket;
+import me.rhin.openciv.shared.packet.type.AvailablePantheonPacket;
 import me.rhin.openciv.shared.packet.type.BuildingConstructedPacket;
 import me.rhin.openciv.shared.packet.type.BuyProductionItemPacket;
 import me.rhin.openciv.shared.packet.type.ChooseCivPacket;
@@ -86,6 +89,7 @@ import me.rhin.openciv.shared.packet.type.GetHostPacket;
 import me.rhin.openciv.shared.packet.type.MapChunkPacket;
 import me.rhin.openciv.shared.packet.type.MoveUnitPacket;
 import me.rhin.openciv.shared.packet.type.NextTurnPacket;
+import me.rhin.openciv.shared.packet.type.PickPantheonPacket;
 import me.rhin.openciv.shared.packet.type.PlayerConnectPacket;
 import me.rhin.openciv.shared.packet.type.PlayerDisconnectPacket;
 import me.rhin.openciv.shared.packet.type.PlayerListRequestPacket;
@@ -169,6 +173,8 @@ public class NetworkManager {
 		networkEvents.put(RemoveObservedTilePacket.class, RemoveObservedTileEvent.class);
 		networkEvents.put(DeclareWarPacket.class, DeclareWarEvent.class);
 		networkEvents.put(DeclareWarAllPacket.class, DeclareWarAllEvent.class);
+		networkEvents.put(AvailablePantheonPacket.class, AvailablePantheonEvent.class);
+		networkEvents.put(PickPantheonPacket.class, PickPantheonEvent.class);
 	}
 
 	public void connect(String ip) {

@@ -25,16 +25,19 @@ import me.rhin.openciv.game.map.tooltip.TileTooltipHandler;
 import me.rhin.openciv.game.notification.NotificationHandler;
 import me.rhin.openciv.game.notification.type.AvailableMovementNotification;
 import me.rhin.openciv.game.notification.type.AvailableProductionNotification;
+import me.rhin.openciv.game.notification.type.FoundPantheonNotification;
 import me.rhin.openciv.game.notification.type.NotResearchingNotification;
 import me.rhin.openciv.game.notification.type.NotStudyingNotification;
 import me.rhin.openciv.game.player.AIPlayer;
 import me.rhin.openciv.game.player.AbstractPlayer;
 import me.rhin.openciv.game.player.Player;
+import me.rhin.openciv.game.religion.bonus.AvailableReligionBonuses;
 import me.rhin.openciv.game.unit.AttackableEntity;
 import me.rhin.openciv.game.unit.Unit;
 import me.rhin.openciv.game.unit.UnitParameter;
 import me.rhin.openciv.game.unit.type.Settler.SettlerUnit;
 import me.rhin.openciv.listener.AddUnitListener;
+import me.rhin.openciv.listener.AvailablePantheonListener;
 import me.rhin.openciv.listener.DeleteUnitListener;
 import me.rhin.openciv.listener.FetchPlayerListener;
 import me.rhin.openciv.listener.FinishLoadingRequestListener;
@@ -55,6 +58,7 @@ import me.rhin.openciv.listener.SettleCityListener;
 import me.rhin.openciv.listener.TerritoryGrowListener;
 import me.rhin.openciv.listener.UnitAttackListener;
 import me.rhin.openciv.shared.packet.type.AddUnitPacket;
+import me.rhin.openciv.shared.packet.type.AvailablePantheonPacket;
 import me.rhin.openciv.shared.packet.type.DeleteUnitPacket;
 import me.rhin.openciv.shared.packet.type.EndTurnPacket;
 import me.rhin.openciv.shared.packet.type.FetchPlayerPacket;
@@ -83,7 +87,7 @@ import me.rhin.openciv.ui.window.type.NotificationWindow;
 public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerListRequestListener, FetchPlayerListener,
 		MoveUnitListener, DeleteUnitListener, SettleCityListener, NextTurnListener, FinishLoadingRequestListener,
 		TerritoryGrowListener, UnitAttackListener, SetUnitOwnerListener, SetCityOwnerListener, SetCityHealthListener,
-		SetUnitHealthListener {
+		SetUnitHealthListener, AvailablePantheonListener {
 
 	private static final int BASE_TURN_TIME = 9;
 
@@ -92,6 +96,7 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 	private HashMap<String, AbstractPlayer> players;
 	private NotificationHandler notificationHandler;
 	private GameWonders gameWonders;
+	private AvailableReligionBonuses availableReligionBonuses;
 	private TileTooltipHandler tileTooltipHandler;
 	private int turnTime;
 	private int turns;
@@ -100,6 +105,7 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 		this.map = new GameMap();
 		this.players = new HashMap<>();
 		this.gameWonders = new GameWonders();
+		this.availableReligionBonuses = new AvailableReligionBonuses();
 		this.tileTooltipHandler = new TileTooltipHandler();
 		this.turnTime = BASE_TURN_TIME;
 		this.turns = 0;
@@ -128,6 +134,7 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 		Civilization.getInstance().getEventManager().addListener(SetCityOwnerListener.class, this);
 		Civilization.getInstance().getEventManager().addListener(SetCityHealthListener.class, this);
 		Civilization.getInstance().getEventManager().addListener(SetUnitHealthListener.class, this);
+		Civilization.getInstance().getEventManager().addListener(AvailablePantheonListener.class, this);
 
 		Civilization.getInstance().getNetworkManager().sendPacket(new FetchPlayerPacket());
 		Civilization.getInstance().getNetworkManager().sendPacket(new PlayerListRequestPacket());
@@ -470,6 +477,15 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 		unit.flashColor(Color.GREEN);
 	}
 
+	@Override
+	public void onAvailablePantheon(AvailablePantheonPacket packet) {
+		// if(packet.getBonusID() != -1)
+		// return;
+		// if(player.getPickedBonuses().size() < 1)
+		Civilization.getInstance().getGame().getNotificationHanlder().fireNotification(new FoundPantheonNotification());
+		// else
+	}
+
 	public void endTurn() {
 		EndTurnPacket packet = new EndTurnPacket();
 		Civilization.getInstance().getNetworkManager().sendPacket(packet);
@@ -518,5 +534,9 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 
 	public GameWonders getWonders() {
 		return gameWonders;
+	}
+	
+	public AvailableReligionBonuses getAvailableReligionBonuses() {
+		return availableReligionBonuses;
 	}
 }

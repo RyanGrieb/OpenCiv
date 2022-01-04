@@ -10,7 +10,6 @@ import org.java_websocket.WebSocket;
 
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Json;
-import com.badlogic.gdx.utils.reflect.ClassReflection;
 
 import me.rhin.openciv.server.Server;
 import me.rhin.openciv.server.game.AbstractPlayer;
@@ -28,6 +27,7 @@ import me.rhin.openciv.server.game.map.tile.Tile.TileTypeWrapper;
 import me.rhin.openciv.server.game.map.tile.TileType;
 import me.rhin.openciv.server.game.map.tile.TileType.TileProperty;
 import me.rhin.openciv.server.game.options.GameOptionType;
+import me.rhin.openciv.server.game.religion.bonus.AvailableReligionBonuses;
 import me.rhin.openciv.server.game.unit.AttackableEntity;
 import me.rhin.openciv.server.game.unit.DeleteUnitOptions;
 import me.rhin.openciv.server.game.unit.RangedUnit;
@@ -72,7 +72,6 @@ import me.rhin.openciv.shared.packet.type.RemoveTileTypePacket;
 import me.rhin.openciv.shared.packet.type.RequestEndTurnPacket;
 import me.rhin.openciv.shared.packet.type.SelectUnitPacket;
 import me.rhin.openciv.shared.packet.type.SetProductionItemPacket;
-import me.rhin.openciv.shared.packet.type.SetUnitHealthPacket;
 import me.rhin.openciv.shared.packet.type.SettleCityPacket;
 import me.rhin.openciv.shared.packet.type.TileStatlinePacket;
 import me.rhin.openciv.shared.packet.type.TurnTimeLeftPacket;
@@ -98,11 +97,13 @@ public class InGameState extends GameState implements DisconnectListener, Select
 	private Runnable turnTimeRunnable;
 	private GameMap map;
 	private GameWonders gameWonders;
+	private AvailableReligionBonuses availableReligionBonuses;
 
 	public InGameState() {
 
 		this.map = new GameMap();
 		this.gameWonders = new GameWonders();
+		this.availableReligionBonuses = new AvailableReligionBonuses();
 
 		Server.getInstance().getEventManager().addListener(DisconnectListener.class, this);
 		Server.getInstance().getEventManager().addListener(SelectUnitListener.class, this);
@@ -714,6 +715,10 @@ public class InGameState extends GameState implements DisconnectListener, Select
 		}
 
 		return null;
+	}
+
+	public AvailableReligionBonuses getAvailableReligionBonuses() {
+		return availableReligionBonuses;
 	}
 
 	private boolean playersLoaded() {

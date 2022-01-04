@@ -24,11 +24,13 @@ import me.rhin.openciv.server.game.city.citizen.CityCenterCitizenWorker;
 import me.rhin.openciv.server.game.city.citizen.EmptyCitizenWorker;
 import me.rhin.openciv.server.game.city.citizen.LockedCitizenWorker;
 import me.rhin.openciv.server.game.city.specialist.SpecialistContainer;
-import me.rhin.openciv.server.game.civilization.Civ;
 import me.rhin.openciv.server.game.map.tile.Tile;
 import me.rhin.openciv.server.game.map.tile.TileObserver;
 import me.rhin.openciv.server.game.map.tile.TileType.TileProperty;
 import me.rhin.openciv.server.game.production.ProducibleItemManager;
+import me.rhin.openciv.server.game.religion.CityReligion;
+import me.rhin.openciv.server.game.religion.bonus.IncreaseTileStatlineBonus;
+import me.rhin.openciv.server.game.religion.bonus.ReligionBonus;
 import me.rhin.openciv.server.game.unit.AttackableEntity;
 import me.rhin.openciv.server.game.unit.RangedUnit;
 import me.rhin.openciv.server.listener.CityGrowthListener.CityGrowthEvent;
@@ -63,6 +65,7 @@ public class City
 	// int.
 	private ProducibleItemManager producibleItemManager;
 	private StatLine statLine;
+	private CityReligion cityReligion;
 	private float maxHealth;
 	private float health;
 
@@ -76,6 +79,7 @@ public class City
 		this.citizenWorkers = new HashMap<>();
 		this.producibleItemManager = new ProducibleItemManager(this);
 		this.statLine = new StatLine();
+		this.cityReligion = new CityReligion(this);
 		this.maxHealth = 300;
 		this.health = maxHealth;
 
@@ -143,9 +147,7 @@ public class City
 
 		if (player.getOwnedCities().size() < 1 && !civName.equals("default"))
 			return names.get(0);
-		
-		
-		
+
 		Random rnd = new Random();
 		return names.get(rnd.nextInt(names.size()));
 	}
@@ -589,6 +591,8 @@ public class City
 			return statLine;
 		}
 
+		// FIXME: Redundant code?
+
 		StatLine tileStatLine = new StatLine();
 		tileStatLine.mergeStatLine(tile.getStatLine());
 		for (Building building : buildings) {
@@ -596,6 +600,17 @@ public class City
 				IncreaseTileStatlineBuilding statlineBuilding = (IncreaseTileStatlineBuilding) building;
 
 				tileStatLine.mergeStatLine(statlineBuilding.getAddedStatline(tile));
+			}
+		}
+
+		if (cityReligion.getMajorityReligion() != null) {
+
+			for (ReligionBonus religionBonus : cityReligion.getMajorityReligion().getPickedBonuses()) {
+				if (religionBonus instanceof IncreaseTileStatlineBonus) {
+					IncreaseTileStatlineBonus statLineBonus = (IncreaseTileStatlineBonus) religionBonus;
+
+					tileStatLine.mergeStatLine(statLineBonus.getAddedStatline(tile));
+				}
 			}
 		}
 

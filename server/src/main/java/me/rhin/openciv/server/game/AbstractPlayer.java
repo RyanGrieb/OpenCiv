@@ -9,6 +9,7 @@ import me.rhin.openciv.server.game.civilization.Civ;
 import me.rhin.openciv.server.game.civilization.CivType;
 import me.rhin.openciv.server.game.diplomacy.Diplomacy;
 import me.rhin.openciv.server.game.heritage.HeritageTree;
+import me.rhin.openciv.server.game.religion.PlayerReligion;
 import me.rhin.openciv.server.game.research.ResearchTree;
 import me.rhin.openciv.server.game.unit.Unit;
 import me.rhin.openciv.server.listener.NextTurnListener;
@@ -23,6 +24,7 @@ public abstract class AbstractPlayer implements NextTurnListener {
 	protected StatLine statLine;
 	protected ResearchTree researchTree;
 	protected HeritageTree heritageTree;
+	protected PlayerReligion playerReligion;
 	protected Civ civilization;
 	private int spawnX;
 	private int spawnY;
@@ -37,6 +39,7 @@ public abstract class AbstractPlayer implements NextTurnListener {
 
 		this.researchTree = new ResearchTree(this);
 		this.heritageTree = new HeritageTree(this);
+		this.playerReligion = new PlayerReligion(this);
 
 		this.spawnX = -1;
 		this.spawnY = -1;
@@ -176,5 +179,10 @@ public abstract class AbstractPlayer implements NextTurnListener {
 
 	public Diplomacy getDiplomacy() {
 		return diplomacy;
+	}
+
+	public PlayerReligion getReligion() {
+		
+		return playerReligion;
 	}
 }
