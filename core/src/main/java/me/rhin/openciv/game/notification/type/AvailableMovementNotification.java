@@ -14,11 +14,11 @@ import me.rhin.openciv.game.unit.actions.BuilderAction;
 import me.rhin.openciv.listener.BuilderActListener;
 import me.rhin.openciv.listener.DeleteUnitListener;
 import me.rhin.openciv.listener.MoveUnitListener;
+import me.rhin.openciv.listener.SelectUnitListener.SelectUnitEvent;
 import me.rhin.openciv.listener.SetUnitOwnerListener;
 import me.rhin.openciv.listener.UnitAttackListener;
 import me.rhin.openciv.shared.packet.type.DeleteUnitPacket;
 import me.rhin.openciv.shared.packet.type.MoveUnitPacket;
-import me.rhin.openciv.shared.packet.type.SelectUnitPacket;
 import me.rhin.openciv.shared.packet.type.SetUnitOwnerPacket;
 import me.rhin.openciv.shared.packet.type.UnitAttackPacket;
 
@@ -135,10 +135,7 @@ public class AvailableMovementNotification extends AbstractNotification
 				unit.getStandingTile().getX() + unit.getStandingTile().getWidth() / 2,
 				unit.getStandingTile().getY() + unit.getStandingTile().getHeight() / 2);
 
-		SelectUnitPacket packet = new SelectUnitPacket();
-		packet.setUnitID(unit.getID());
-		packet.setLocation(unit.getStandingTile().getGridX(), unit.getStandingTile().getGridY());
-		Civilization.getInstance().getNetworkManager().sendPacket(packet);
+		Civilization.getInstance().getEventManager().fireEvent(new SelectUnitEvent(unit));
 
 		index++;
 	}
