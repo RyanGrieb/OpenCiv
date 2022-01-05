@@ -13,7 +13,7 @@ public class Stonehenge extends Building implements Wonder {
 	public Stonehenge(City city) {
 		super(city);
 
-		this.statLine.addValue(Stat.HERITAGE_GAIN, 6);
+		this.statLine.addValue(Stat.FAITH_GAIN, 5);
 	}
 
 	@Override
@@ -29,7 +29,7 @@ public class Stonehenge extends Building implements Wonder {
 
 	@Override
 	public String getDesc() {
-		return "An ancient relegious wonder. \n+6 Heritage";
+		return "An ancient relegious wonder. \n+5 Faith";
 	}
 
 	@Override

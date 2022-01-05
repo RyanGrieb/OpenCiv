@@ -76,6 +76,24 @@ public enum ReligionBonusType {
 			return "+1 Culture & Faith for\neach gold & silver tile";
 		}
 
+	},
+	GOD_OF_THE_OPEN_SKY(ReligionProperty.PANTHEON) {
+
+		@Override
+		public TextureEnum getIcon() {
+			return TextureEnum.TILE_HORSES_IMPROVED;
+		}
+
+		@Override
+		public String getName() {
+			return "God of the Open Sky";
+		}
+
+		@Override
+		public String getDesc() {
+			return "+1 Culture from pastures\n";
+		}
+
 	};
 
 	public enum ReligionProperty {

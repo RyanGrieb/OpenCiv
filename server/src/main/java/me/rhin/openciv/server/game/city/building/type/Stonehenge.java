@@ -12,7 +12,7 @@ public class Stonehenge extends Building implements Wonder {
 	public Stonehenge(City city) {
 		super(city);
 
-		this.statLine.addValue(Stat.HERITAGE_GAIN, 6);
+		this.statLine.addValue(Stat.FAITH_GAIN, 5);
 	}
 
 	@Override

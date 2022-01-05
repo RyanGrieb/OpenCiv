@@ -9,6 +9,7 @@ import com.badlogic.gdx.utils.Json;
 import me.rhin.openciv.server.Server;
 import me.rhin.openciv.server.game.Player;
 import me.rhin.openciv.server.game.religion.bonus.type.PantheonDesertFolklore;
+import me.rhin.openciv.server.game.religion.bonus.type.PantheonGodOfTheOpenSky;
 import me.rhin.openciv.server.game.religion.bonus.type.PantheonGodOfTheSea;
 import me.rhin.openciv.server.game.religion.bonus.type.PantheonReligiousIdols;
 import me.rhin.openciv.server.game.religion.bonus.type.PantheonTearsOfTheGods;
@@ -26,6 +27,7 @@ public class AvailableReligionBonuses implements PickPantheonListener {
 		pantheons.add(new PantheonTearsOfTheGods());
 		pantheons.add(new PantheonDesertFolklore());
 		pantheons.add(new PantheonReligiousIdols());
+		pantheons.add(new PantheonGodOfTheOpenSky());
 
 		Server.getInstance().getEventManager().addListener(PickPantheonListener.class, this);
 	}
