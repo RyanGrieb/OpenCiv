@@ -4,7 +4,12 @@ import java.util.ArrayList;
 
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.game.player.AbstractPlayer;
-import me.rhin.openciv.game.religion.bonus.ReligionBonusType.ReligionProperty;
+import me.rhin.openciv.game.religion.bonus.type.PantheonDesertFolklore;
+import me.rhin.openciv.game.religion.bonus.type.PantheonGodOfTheOpenSky;
+import me.rhin.openciv.game.religion.bonus.type.PantheonGodOfTheSea;
+import me.rhin.openciv.game.religion.bonus.type.PantheonMonumentToTheGods;
+import me.rhin.openciv.game.religion.bonus.type.PantheonReligiousIdols;
+import me.rhin.openciv.game.religion.bonus.type.PantheonTearsOfTheGods;
 import me.rhin.openciv.listener.PickPantheonListener;
 import me.rhin.openciv.shared.packet.type.PickPantheonPacket;
 
@@ -17,10 +22,12 @@ public class AvailableReligionBonuses implements PickPantheonListener {
 	public AvailableReligionBonuses() {
 		this.pantheons = new ArrayList<>();
 
-		for (ReligionBonusType type : ReligionBonusType.values()) {
-			if (type.getProperty() == ReligionProperty.PANTHEON)
-				pantheons.add(new ReligionBonus(type));
-		}
+		pantheons.add(new PantheonGodOfTheSea());
+		pantheons.add(new PantheonTearsOfTheGods());
+		pantheons.add(new PantheonDesertFolklore());
+		pantheons.add(new PantheonReligiousIdols());
+		pantheons.add(new PantheonGodOfTheOpenSky());
+		pantheons.add(new PantheonMonumentToTheGods());
 
 		Civilization.getInstance().getEventManager().addListener(PickPantheonListener.class, this);
 	}

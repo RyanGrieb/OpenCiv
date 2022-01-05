@@ -15,6 +15,7 @@ import me.rhin.openciv.ui.background.ColoredBackground;
 import me.rhin.openciv.ui.button.Button;
 import me.rhin.openciv.ui.button.type.SpecialistCitizenButton;
 import me.rhin.openciv.ui.label.CustomLabel;
+import me.rhin.openciv.ui.list.ContainerList;
 import me.rhin.openciv.ui.list.ListObject;
 
 public class ListBuilding extends ListObject {
@@ -27,8 +28,8 @@ public class ListBuilding extends ListObject {
 	private ArrayList<CustomLabel> statLabels;
 	private ArrayList<Button> specialistButtons;
 
-	public ListBuilding(Building building, float width, float height) {
-		super(width, height, "Building");
+	public ListBuilding(Building building, ContainerList containerList, float width, float height) {
+		super(width, height, containerList, "Building");
 
 		this.building = building;
 		backgroundSprite = TextureEnum.UI_GRAY.sprite();

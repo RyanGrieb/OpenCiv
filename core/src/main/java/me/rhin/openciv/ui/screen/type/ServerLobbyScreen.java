@@ -69,8 +69,8 @@ public class ServerLobbyScreen extends AbstractScreen implements ResizeListener,
 
 		multiplayerStartButton = new MPStartButton(viewport.getWorldWidth() / 2 - 150 / 2, 60, 150, 45);
 
-		gameOptionsMenu = new GameOptionsMenu(viewport.getWorldWidth() / 2 + 120, viewport.getWorldHeight() - 360,
-				200, 300);
+		gameOptionsMenu = new GameOptionsMenu(viewport.getWorldWidth() / 2 + 120, viewport.getWorldHeight() - 360, 200,
+				300);
 
 		backButton = new ServerLobbyBackButton(viewport.getWorldWidth() / 2 - 150 / 2, 20, 150, 45);
 		stage.addActor(backButton);
@@ -102,10 +102,10 @@ public class ServerLobbyScreen extends AbstractScreen implements ResizeListener,
 	@Override
 	public void dispose() {
 		super.dispose();
-		
+
 		playerContainerList.onClose();
 	}
-	
+
 	@Override
 	public boolean touchUp(int screenX, int screenY, int pointer, int button) {
 		if (button == Input.Buttons.LEFT) {
@@ -119,7 +119,7 @@ public class ServerLobbyScreen extends AbstractScreen implements ResizeListener,
 		Gdx.app.log(Civilization.LOG_TAG, packet.getPlayerName() + " has connected to the lobby");
 
 		playerContainerList.addItem(ListContainerType.CATEGORY, "Players",
-				new ListLobbyPlayer(packet.getPlayerName(), CivType.RANDOM, 200, 40));
+				new ListLobbyPlayer(packet.getPlayerName(), CivType.RANDOM, playerContainerList, 200, 40));
 	}
 
 	@Override
@@ -129,8 +129,8 @@ public class ServerLobbyScreen extends AbstractScreen implements ResizeListener,
 			if (playerName == null)
 				continue;
 
-			playerContainerList.addItem(ListContainerType.CATEGORY, "Players",
-					new ListLobbyPlayer(playerName, CivType.valueOf(packet.getCivList()[i]), 200, 40));
+			playerContainerList.addItem(ListContainerType.CATEGORY, "Players", new ListLobbyPlayer(playerName,
+					CivType.valueOf(packet.getCivList()[i]), playerContainerList, 200, 40));
 		}
 
 		ArrayList<ListObject> listItemActors = playerContainerList.getListContainers().get("Players")

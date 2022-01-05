@@ -1,25 +1,38 @@
 package me.rhin.openciv.game.religion.bonus;
 
+import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.player.AbstractPlayer;
+import me.rhin.openciv.game.religion.ReligionProperty;
 
-public class ReligionBonus {
+public abstract class ReligionBonus {
 
-	private ReligionBonusType bonusType;
-	private AbstractPlayer player;
-	
-	public ReligionBonus(ReligionBonusType bonusType) {
-		this.bonusType = bonusType;
+	private static int idIndex = 0;
+
+	private int id;
+
+	public ReligionBonus() {
+		id = idIndex++;
 	}
 
-	public ReligionBonusType getBonusType() {
-		return bonusType;
+	protected AbstractPlayer player;
+
+	public abstract TextureEnum getIcon();
+
+	public abstract String getName();
+
+	public abstract ReligionProperty getProperty();
+
+	public abstract String getDesc();
+
+	public void setPlayer(AbstractPlayer player) {
+		this.player = player;
 	}
 
 	public AbstractPlayer getPlayer() {
 		return player;
 	}
 
-	public void setPlayer(AbstractPlayer player) {
-		this.player = player;
+	public int getID() {
+		return id;
 	}
 }

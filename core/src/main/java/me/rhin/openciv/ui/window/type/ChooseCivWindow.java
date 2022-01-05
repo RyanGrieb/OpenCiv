@@ -23,7 +23,7 @@ public class ChooseCivWindow extends AbstractWindow implements ResizeListener {
 
 		for (CivType civType : CivType.values()) {
 			civContianerList.addItem(ListContainerType.CATEGORY, "Civilizations",
-					new ListCivilization(civType, 200, 40));
+					new ListCivilization(civType, civContianerList, 200, 40));
 		}
 
 		addActor(civContianerList);

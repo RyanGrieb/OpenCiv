@@ -16,6 +16,7 @@ import me.rhin.openciv.listener.CityStatUpdateListener;
 import me.rhin.openciv.shared.packet.type.CityStatUpdatePacket;
 import me.rhin.openciv.shared.stat.Stat;
 import me.rhin.openciv.ui.label.CustomLabel;
+import me.rhin.openciv.ui.list.ContainerList;
 import me.rhin.openciv.ui.list.ListObject;
 import me.rhin.openciv.ui.window.type.ItemInfoWindow;
 
@@ -31,8 +32,9 @@ public class ListProductionItem extends ListObject implements CityStatUpdateList
 	private Sprite hoveredBackgroundSprite;
 	private boolean hovered;
 
-	public ListProductionItem(final City city, final ProductionItem productionItem, float width, float height) {
-		super(width, height, "ProductionItem");
+	public ListProductionItem(final City city, final ProductionItem productionItem, ContainerList containerList,
+			float width, float height) {
+		super(width, height, containerList, "ProductionItem");
 
 		this.city = city;
 		this.productionItem = productionItem;

@@ -9,6 +9,7 @@ import com.badlogic.gdx.utils.Json;
 import me.rhin.openciv.server.Server;
 import me.rhin.openciv.server.game.AbstractPlayer;
 import me.rhin.openciv.server.game.Player;
+import me.rhin.openciv.server.game.city.City;
 import me.rhin.openciv.server.game.religion.bonus.ReligionBonus;
 import me.rhin.openciv.server.listener.NextTurnListener;
 import me.rhin.openciv.server.listener.PickPantheonListener;
@@ -52,6 +53,21 @@ public class PlayerReligion implements NextTurnListener, PickPantheonListener {
 
 	public ArrayList<ReligionBonus> getPickedBonuses() {
 		return pickedBonuses;
+	}
+
+	public ArrayList<City> getFollowerCities() {
+		ArrayList<City> followerCities = new ArrayList<>();
+
+		for (City city : player.getOwnedCities()) {
+			if (city.getCityReligion().getMajorityReligion().equals(this))
+				followerCities.add(city);
+		}
+
+		return followerCities;
+	}
+
+	public AbstractPlayer getPlayer() {
+		return player;
 	}
 
 }

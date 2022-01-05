@@ -11,6 +11,7 @@ import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.civilization.CivType;
 import me.rhin.openciv.shared.packet.type.ChooseCivPacket;
 import me.rhin.openciv.ui.label.CustomLabel;
+import me.rhin.openciv.ui.list.ContainerList;
 import me.rhin.openciv.ui.list.ListObject;
 import me.rhin.openciv.ui.screen.type.ServerLobbyScreen;
 
@@ -23,8 +24,8 @@ public class ListCivilization extends ListObject {
 	private CustomLabel civNameLabel;
 	private boolean hovered;
 
-	public ListCivilization(final CivType civType, float width, float height) {
-		super(width, height, "Civilization");
+	public ListCivilization(final CivType civType, ContainerList containerList, float width, float height) {
+		super(width, height, containerList, "Civilization");
 
 		this.civType = civType;
 		backgroundSprite = TextureEnum.UI_DARK_GRAY.sprite();

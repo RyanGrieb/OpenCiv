@@ -8,27 +8,27 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.TextureEnum;
-import me.rhin.openciv.game.notification.type.FoundPantheonNotification;
-import me.rhin.openciv.game.religion.bonus.ReligionBonusType;
-import me.rhin.openciv.game.religion.bonus.ReligionBonusType.ReligionProperty;
+import me.rhin.openciv.game.religion.ReligionProperty;
+import me.rhin.openciv.game.religion.bonus.ReligionBonus;
 import me.rhin.openciv.shared.packet.type.PickPantheonPacket;
 import me.rhin.openciv.ui.label.CustomLabel;
+import me.rhin.openciv.ui.list.ContainerList;
 import me.rhin.openciv.ui.list.ListObject;
 import me.rhin.openciv.ui.window.type.ChoosePantheonWindow;
 
 public class ListReligionBonus extends ListObject {
 
 	private boolean hovered;
-	private ReligionBonusType bonusType;
+	private ReligionBonus religionBonus;
 	private Sprite backgroundSprite;
 	private Sprite hoveredBackgroundSprite;
 	private Sprite bonusIcon;
 	private CustomLabel bonusDescLabel;
 
-	public ListReligionBonus(ReligionBonusType bonusType, float width, float height) {
-		super(width, height, "Available Bonuses");
+	public ListReligionBonus(ReligionBonus religionBonus, ContainerList containerList, float width, float height) {
+		super(width, height, containerList, "Available Bonuses");
 
-		this.bonusType = bonusType;
+		this.religionBonus = religionBonus;
 
 		backgroundSprite = TextureEnum.UI_DARK_GRAY.sprite();
 		backgroundSprite.setSize(width, height);
@@ -36,18 +36,21 @@ public class ListReligionBonus extends ListObject {
 		this.hoveredBackgroundSprite = TextureEnum.UI_GRAY.sprite();
 		this.hoveredBackgroundSprite.setSize(width, height);
 
-		this.bonusIcon = bonusType.getIcon().sprite();
+		this.bonusIcon = religionBonus.getIcon().sprite();
 		bonusIcon.setSize(32, 32);
 
-		this.bonusDescLabel = new CustomLabel(bonusType.getName() + ": \n" + bonusType.getDesc());
+		this.bonusDescLabel = new CustomLabel(religionBonus.getName() + ": \n" + religionBonus.getDesc());
 
 		this.addListener(new ClickListener() {
 			@Override
 			public void clicked(InputEvent event, float x, float y) {
 
-				if (bonusType.getProperty() == ReligionProperty.PANTHEON) {
+				if (!inContainerListBounds(x, y))
+					return;
+
+				if (religionBonus.getProperty() == ReligionProperty.PANTHEON) {
 					PickPantheonPacket packet = new PickPantheonPacket();
-					packet.setBonusID(bonusType.ordinal());
+					packet.setBonusID(religionBonus.getID());
 					Civilization.getInstance().getNetworkManager().sendPacket(packet);
 				}
 
@@ -56,11 +59,17 @@ public class ListReligionBonus extends ListObject {
 
 			@Override
 			public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
+				if (!inContainerListBounds(x, y))
+					return;
+
 				hovered = true;
 			}
 
 			@Override
 			public void exit(InputEvent event, float x, float y, int pointer, Actor fromActor) {
+				if (!inContainerListBounds(x, y))
+					hovered = false;
+
 				hovered = false;
 			}
 		});
@@ -88,7 +97,7 @@ public class ListReligionBonus extends ListObject {
 		bonusDescLabel.setPosition(x + 40, y + 22);
 	}
 
-	public ReligionBonusType getBonusType() {
-		return bonusType;
+	public ReligionBonus getBonusType() {
+		return religionBonus;
 	}
 }

@@ -11,6 +11,7 @@ import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.city.City;
 import me.rhin.openciv.game.unit.type.Caravan.CaravanUnit;
 import me.rhin.openciv.ui.label.CustomLabel;
+import me.rhin.openciv.ui.list.ContainerList;
 import me.rhin.openciv.ui.list.ListObject;
 
 public class ListUntradeableCity extends ListObject {
@@ -24,8 +25,9 @@ public class ListUntradeableCity extends ListObject {
 	private CustomLabel untradeReasonLabel;
 	private boolean hovered;
 
-	public ListUntradeableCity(final City city, String untradeableReason, float width, float height) {
-		super(width, height, city.getName());
+	public ListUntradeableCity(final City city, String untradeableReason, ContainerList containerList, float width,
+			float height) {
+		super(width, height, containerList, city.getName());
 
 		this.city = city;
 		backgroundSprite = TextureEnum.UI_DARK_GRAY.sprite();

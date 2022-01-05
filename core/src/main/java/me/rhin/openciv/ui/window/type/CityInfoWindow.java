@@ -77,7 +77,7 @@ public class CityInfoWindow extends AbstractWindow implements ResizeListener, Bu
 		this.productionContainerList = new ContainerList(this, 0, 0, 200, 325);
 		for (ProductionItem productionItem : city.getProducibleItemManager().getProducibleItems()) {
 			productionContainerList.addItem(ListContainerType.CATEGORY, productionItem.getCategory(),
-					new ListProductionItem(city, productionItem, 200, 45));
+					new ListProductionItem(city, productionItem, productionContainerList, 200, 45));
 		}
 		addActor(productionContainerList);
 
@@ -88,7 +88,8 @@ public class CityInfoWindow extends AbstractWindow implements ResizeListener, Bu
 				viewport.getWorldHeight() - 195 - topbarHeight, 200, 195);
 
 		for (Building building : city.getBuildings()) {
-			topRightContainerList.addItem(ListContainerType.CATEGORY, "Buildings", new ListBuilding(building, 200, 45));
+			topRightContainerList.addItem(ListContainerType.CATEGORY, "Buildings",
+					new ListBuilding(building, topRightContainerList, 200, 45));
 		}
 
 		this.citizenButtons = new HashMap<>();
@@ -102,7 +103,7 @@ public class CityInfoWindow extends AbstractWindow implements ResizeListener, Bu
 
 		if (city.getUnemployedWorkerAmount() > 0) {
 			topRightContainerList.addItem(ListContainerType.CATEGORY, "Unemployed Citizens",
-					new ListUnemployedCitizens(city, city.getUnemployedWorkerAmount(), 200, 45));
+					new ListUnemployedCitizens(city, city.getUnemployedWorkerAmount(), topRightContainerList, 200, 45));
 		}
 
 		addActor(topRightContainerList);
@@ -185,7 +186,8 @@ public class CityInfoWindow extends AbstractWindow implements ResizeListener, Bu
 		topRightContainerList.clearList();
 
 		for (Building building : city.getBuildings()) {
-			topRightContainerList.addItem(ListContainerType.CATEGORY, "Buildings", new ListBuilding(building, 200, 45));
+			topRightContainerList.addItem(ListContainerType.CATEGORY, "Buildings",
+					new ListBuilding(building, topRightContainerList, 200, 45));
 		}
 
 		if (city.getUnemployedWorkerAmount() > 0) {
@@ -196,7 +198,7 @@ public class CityInfoWindow extends AbstractWindow implements ResizeListener, Bu
 		productionContainerList.clearList();
 		for (ProductionItem productionItem : city.getProducibleItemManager().getProducibleItems()) {
 			productionContainerList.addItem(ListContainerType.CATEGORY, productionItem.getCategory(),
-					new ListProductionItem(city, productionItem, 200, 45));
+					new ListProductionItem(city, productionItem, productionContainerList, 200, 45));
 		}
 
 	}
@@ -296,7 +298,7 @@ public class CityInfoWindow extends AbstractWindow implements ResizeListener, Bu
 			// NOTE: We manually select the listContianer, since were adding to a
 			if (topRightContainerList.getListContainers().get("Unemployed Citizens") == null) {
 				topRightContainerList.addItem(ListContainerType.CATEGORY, "Unemployed Citizens",
-						new ListUnemployedCitizens(city, 200, 45));
+						new ListUnemployedCitizens(city, topRightContainerList, 200, 45));
 			}
 
 			ListContainer listContainer = topRightContainerList.getListContainers().get("Unemployed Citizens");
@@ -323,7 +325,7 @@ public class CityInfoWindow extends AbstractWindow implements ResizeListener, Bu
 			}
 
 			productionContainerList.addItem(ListContainerType.CATEGORY, productionItem.getCategory(),
-					new ListProductionItem(city, productionItem, 200, 45));
+					new ListProductionItem(city, productionItem, productionContainerList, 200, 45));
 		}
 	}
 
@@ -342,7 +344,7 @@ public class CityInfoWindow extends AbstractWindow implements ResizeListener, Bu
 							for (ProductionItem productionItem : city.getProducibleItemManager().getProducibleItems()) {
 								productionContainerList.addItem(ListContainerType.CATEGORY,
 										productionItem.getCategory(),
-										new ListProductionItem(city, productionItem, 200, 45));
+										new ListProductionItem(city, productionItem, productionContainerList, 200, 45));
 							}
 							break outerloop;
 						}

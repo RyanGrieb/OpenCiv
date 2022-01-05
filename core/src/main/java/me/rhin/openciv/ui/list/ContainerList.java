@@ -111,6 +111,7 @@ public class ContainerList extends Group implements ScrollListener {
 		if (!Civilization.getInstance().getWindowManager().allowsInput(this)) {
 			return;
 		}
+
 		// Problem, getX() returns 0 if we put ourselfs inside a window
 
 		float y = Civilization.getInstance().getCurrentScreen().getViewport().getWorldHeight() - Gdx.input.getY();

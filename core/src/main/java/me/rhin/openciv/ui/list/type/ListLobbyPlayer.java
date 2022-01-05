@@ -11,6 +11,7 @@ import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.civilization.CivType;
 import me.rhin.openciv.ui.label.CustomLabel;
+import me.rhin.openciv.ui.list.ContainerList;
 import me.rhin.openciv.ui.list.ListObject;
 import me.rhin.openciv.ui.screen.type.ServerLobbyScreen;
 import me.rhin.openciv.ui.window.type.ChooseCivWindow;
@@ -26,8 +27,9 @@ public class ListLobbyPlayer extends ListObject {
 	private Sprite chosenCivSprite;
 	private boolean hovered;
 
-	public ListLobbyPlayer(final String playerName, CivType civType, float width, float height) {
-		super(width, height, playerName);
+	public ListLobbyPlayer(final String playerName, CivType civType, ContainerList containerList, float width,
+			float height) {
+		super(width, height, containerList, playerName);
 		this.playerName = playerName;
 
 		backgroundSprite = TextureEnum.UI_DARK_GRAY.sprite();

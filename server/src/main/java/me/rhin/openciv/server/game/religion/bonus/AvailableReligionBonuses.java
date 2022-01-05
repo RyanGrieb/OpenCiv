@@ -11,6 +11,7 @@ import me.rhin.openciv.server.game.Player;
 import me.rhin.openciv.server.game.religion.bonus.type.PantheonDesertFolklore;
 import me.rhin.openciv.server.game.religion.bonus.type.PantheonGodOfTheOpenSky;
 import me.rhin.openciv.server.game.religion.bonus.type.PantheonGodOfTheSea;
+import me.rhin.openciv.server.game.religion.bonus.type.PantheonMonumentToTheGods;
 import me.rhin.openciv.server.game.religion.bonus.type.PantheonReligiousIdols;
 import me.rhin.openciv.server.game.religion.bonus.type.PantheonTearsOfTheGods;
 import me.rhin.openciv.server.listener.PickPantheonListener;
@@ -28,21 +29,29 @@ public class AvailableReligionBonuses implements PickPantheonListener {
 		pantheons.add(new PantheonDesertFolklore());
 		pantheons.add(new PantheonReligiousIdols());
 		pantheons.add(new PantheonGodOfTheOpenSky());
+		pantheons.add(new PantheonMonumentToTheGods());
 
 		Server.getInstance().getEventManager().addListener(PickPantheonListener.class, this);
 	}
 
 	@Override
 	public void onPickPantheon(WebSocket conn, PickPantheonPacket packet) {
-		pantheons.get(packet.getReligionBonusID()).setPlayer(Server.getInstance().getPlayerByConn(conn));
 
 		Player player = Server.getInstance().getPlayerByConn(conn);
+		
+		pantheons.get(packet.getReligionBonusID()).setPlayer(Server.getInstance().getPlayerByConn(conn));
+
 		packet.setPlayerName(player.getName());
 
 		Json json = new Json();
 		for (Player otherPlayer : Server.getInstance().getPlayers()) {
 			otherPlayer.sendPacket(json.toJson(packet));
 		}
+		
+		player.getCapitalCity().getCityReligion().setFollowers(player.getReligion(), 1);
+
+		pantheons.get(packet.getReligionBonusID()).onAssigned();
+
 	}
 
 	public boolean availablePantheons() {

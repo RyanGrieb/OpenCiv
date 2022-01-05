@@ -50,7 +50,7 @@ public class TradeWindow extends AbstractWindow implements ResizeListener, MoveU
 			Tradeable tradeable = tradeUnit.canTrade(city);
 			if (tradeable.isTradeable()) {
 				containerList.addItem(ListContainerType.CATEGORY, "Tradeable Cities",
-						new ListTradeableCity(city, tradeUnit, width, 45));
+						new ListTradeableCity(city, tradeUnit, containerList, width, 45));
 			} else {
 				// containerList.addItem(ListContainerType.CATEGORY, "Untradeable Cities",
 				// new ListUntradeableCity(city, tradeable.getReason(), width, 45));

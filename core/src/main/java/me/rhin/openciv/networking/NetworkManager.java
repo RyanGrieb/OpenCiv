@@ -20,6 +20,7 @@ import me.rhin.openciv.listener.AvailablePantheonListener.AvailablePantheonEvent
 import me.rhin.openciv.listener.BuildingConstructedListener.BuildingConstructedEvent;
 import me.rhin.openciv.listener.BuyProductionItemListener.BuyProductionItemEvent;
 import me.rhin.openciv.listener.ChooseCivListener.ChooseCivEvent;
+import me.rhin.openciv.listener.CityReligionFollowersUpdateListener.CityReligionFollowersUpdateEvent;
 import me.rhin.openciv.listener.CityStatUpdateListener.CityStatUpdateEvent;
 import me.rhin.openciv.listener.CombatPreviewListener.CombatPreviewEvent;
 import me.rhin.openciv.listener.CompleteHeritageListener.CompleteHeritageEvent;
@@ -74,6 +75,7 @@ import me.rhin.openciv.shared.packet.type.AvailablePantheonPacket;
 import me.rhin.openciv.shared.packet.type.BuildingConstructedPacket;
 import me.rhin.openciv.shared.packet.type.BuyProductionItemPacket;
 import me.rhin.openciv.shared.packet.type.ChooseCivPacket;
+import me.rhin.openciv.shared.packet.type.CityReligionFollowersUpdatePacket;
 import me.rhin.openciv.shared.packet.type.CityStatUpdatePacket;
 import me.rhin.openciv.shared.packet.type.CombatPreviewPacket;
 import me.rhin.openciv.shared.packet.type.CompleteHeritagePacket;
@@ -175,6 +177,7 @@ public class NetworkManager {
 		networkEvents.put(DeclareWarAllPacket.class, DeclareWarAllEvent.class);
 		networkEvents.put(AvailablePantheonPacket.class, AvailablePantheonEvent.class);
 		networkEvents.put(PickPantheonPacket.class, PickPantheonEvent.class);
+		networkEvents.put(CityReligionFollowersUpdatePacket.class, CityReligionFollowersUpdateEvent.class);
 	}
 
 	public void connect(String ip) {

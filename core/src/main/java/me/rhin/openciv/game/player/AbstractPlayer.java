@@ -9,6 +9,7 @@ import me.rhin.openciv.game.diplomacy.Diplomacy;
 import me.rhin.openciv.game.heritage.HeritageTree;
 import me.rhin.openciv.game.map.tile.Tile;
 import me.rhin.openciv.game.notification.type.AvailableMovementNotification;
+import me.rhin.openciv.game.religion.PlayerReligion;
 import me.rhin.openciv.game.research.ResearchTree;
 import me.rhin.openciv.game.unit.Unit;
 import me.rhin.openciv.shared.stat.StatLine;
@@ -22,6 +23,7 @@ public abstract class AbstractPlayer {
 	protected Diplomacy diplomacy;
 	protected ResearchTree researchTree;
 	protected HeritageTree heritageTree;
+	private PlayerReligion playerReligion;
 	private Civ civilization;
 
 	public AbstractPlayer(String name) {
@@ -35,6 +37,7 @@ public abstract class AbstractPlayer {
 
 		this.researchTree = new ResearchTree();
 		this.heritageTree = new HeritageTree();
+		this.playerReligion = new PlayerReligion(this);
 	}
 
 	public abstract Tile getHoveredTile();
@@ -113,6 +116,10 @@ public abstract class AbstractPlayer {
 
 	public Diplomacy getDiplomacy() {
 		return diplomacy;
+	}
+
+	public PlayerReligion getReligion() {
+		return playerReligion;
 	}
 
 }

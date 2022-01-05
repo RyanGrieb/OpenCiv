@@ -10,6 +10,7 @@ import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.city.City;
 import me.rhin.openciv.ui.button.Button;
 import me.rhin.openciv.ui.button.type.SpecialistCitizenButton;
+import me.rhin.openciv.ui.list.ContainerList;
 import me.rhin.openciv.ui.list.ListObject;
 
 public class ListUnemployedCitizens extends ListObject {
@@ -19,8 +20,8 @@ public class ListUnemployedCitizens extends ListObject {
 	private Sprite backgroundSprite;
 	private ArrayList<Button> citizenButtons;
 
-	public ListUnemployedCitizens(City city, int width, int height) {
-		super(width, height, "UnemployedCitizens");
+	public ListUnemployedCitizens(City city, ContainerList containerList, int width, int height) {
+		super(width, height, containerList, "UnemployedCitizens");
 
 		this.city = city;
 		this.backgroundSprite = TextureEnum.UI_GRAY.sprite();
@@ -29,8 +30,8 @@ public class ListUnemployedCitizens extends ListObject {
 		this.citizenButtons = new ArrayList<>();
 	}
 
-	public ListUnemployedCitizens(City city, int amount, int width, int height) {
-		this(city, width, height);
+	public ListUnemployedCitizens(City city, int amount, ContainerList containerList, int width, int height) {
+		this(city, containerList, width, height);
 		setCitizens(amount);
 	}
 

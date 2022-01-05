@@ -654,6 +654,10 @@ public class City
 		return false;
 	}
 
+	public CityReligion getCityReligion() {
+		return cityReligion;
+	}
+	
 	private ArrayList<Tile> getTopWorkableTiles() {
 		ArrayList<Tile> topTiles = new ArrayList<>();
 

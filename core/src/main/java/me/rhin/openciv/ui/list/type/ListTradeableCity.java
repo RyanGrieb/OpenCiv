@@ -12,6 +12,7 @@ import me.rhin.openciv.game.city.City;
 import me.rhin.openciv.game.unit.TradeUnit;
 import me.rhin.openciv.shared.packet.type.TradeCityPacket;
 import me.rhin.openciv.ui.label.CustomLabel;
+import me.rhin.openciv.ui.list.ContainerList;
 import me.rhin.openciv.ui.list.ListObject;
 import me.rhin.openciv.ui.window.type.TradeWindow;
 
@@ -27,8 +28,9 @@ public class ListTradeableCity extends ListObject {
 	private CustomLabel cityNameLabel;
 	private boolean hovered;
 
-	public ListTradeableCity(final City city, TradeUnit tradeUnit, float width, float height) {
-		super(width, height, city.getName());
+	public ListTradeableCity(final City city, TradeUnit tradeUnit, ContainerList containerList, float width,
+			float height) {
+		super(width, height, containerList, city.getName());
 
 		this.city = city;
 		backgroundSprite = TextureEnum.UI_DARK_GRAY.sprite();

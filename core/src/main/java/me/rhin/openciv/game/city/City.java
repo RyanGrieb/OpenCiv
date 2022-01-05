@@ -26,6 +26,7 @@ import me.rhin.openciv.game.notification.type.AvailableProductionNotification;
 import me.rhin.openciv.game.player.AbstractPlayer;
 import me.rhin.openciv.game.production.ProducibleItemManager;
 import me.rhin.openciv.game.production.ProductionItem;
+import me.rhin.openciv.game.religion.CityReligion;
 import me.rhin.openciv.game.unit.AttackableEntity;
 import me.rhin.openciv.listener.AddSpecialistToContainerListener;
 import me.rhin.openciv.listener.ApplyProductionToItemListener;
@@ -68,6 +69,7 @@ public class City extends Group implements AttackableEntity, TileObserver, Speci
 	private int unemployedWorkerAmount;
 	private ProducibleItemManager producibleItemManager;
 	private StatLine statLine;
+	private CityReligion cityReligion;
 	private CustomLabel nameLabel;
 	private Sprite nameIcon;
 	private Healthbar healthbar;
@@ -84,6 +86,7 @@ public class City extends Group implements AttackableEntity, TileObserver, Speci
 		this.unemployedWorkerAmount = 0;
 		this.producibleItemManager = new ProducibleItemManager(this);
 		this.statLine = new StatLine();
+		this.cityReligion = new CityReligion(this);
 		this.nameLabel = new CustomLabel(name);
 		nameLabel.setPosition(originTile.getX() + originTile.getWidth() / 2 - nameLabel.getWidth() / 2,
 				originTile.getY() + originTile.getHeight() + 5);
@@ -93,7 +96,7 @@ public class City extends Group implements AttackableEntity, TileObserver, Speci
 
 		this.healthbar = new Healthbar(nameLabel.getX() + nameLabel.getWidth() / 2 - 50 / 2, nameIcon.getY() + 15, 50,
 				4, false);
-
+		
 		this.maxHealth = 300; // Default
 		this.health = getMaxHealth();
 
@@ -451,6 +454,10 @@ public class City extends Group implements AttackableEntity, TileObserver, Speci
 			if (building.getClass() == clazz)
 				return true;
 		return false;
+	}
+
+	public CityReligion getCityReligion() {
+		return cityReligion;
 	}
 
 }
