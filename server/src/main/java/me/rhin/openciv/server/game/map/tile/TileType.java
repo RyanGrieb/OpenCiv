@@ -578,6 +578,7 @@ public enum TileType implements Comparable<TileType> {
 			StatLine statLine = new StatLine();
 			statLine.addValue(Stat.GOLD_GAIN, 3);
 			statLine.addValue(Stat.FOOD_GAIN, 2);
+			statLine.addValue(Stat.MORALE_TILE, 10);
 			return statLine;
 		}
 	},
