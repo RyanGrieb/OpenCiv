@@ -72,9 +72,6 @@ public class PantheonMonumentToTheGods extends ReligionBonus
 
 	@Override
 	public String getDesc() {
-		return "10% Production towards wonders\n";
+		return "10% Production towards\nwonders";
 	}
-
-	// FIXME: Implement gainReligionMajority(City city)
-	// FIXME: Implement looseReligionMajority(City city)
 }

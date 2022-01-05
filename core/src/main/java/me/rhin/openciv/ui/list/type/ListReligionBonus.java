@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 
 import me.rhin.openciv.Civilization;
@@ -41,11 +42,24 @@ public class ListReligionBonus extends ListObject {
 
 		this.bonusDescLabel = new CustomLabel(religionBonus.getName() + ": \n" + religionBonus.getDesc());
 
+		this.addListener(new InputListener() {
+			@Override
+			public boolean mouseMoved(InputEvent event, float x, float y) {
+
+				if (!inContainerListBounds())
+					hovered = false;
+				else
+					hovered = true;
+
+				return false;
+			}
+		});
+
 		this.addListener(new ClickListener() {
 			@Override
 			public void clicked(InputEvent event, float x, float y) {
 
-				if (!inContainerListBounds(x, y))
+				if (!inContainerListBounds())
 					return;
 
 				if (religionBonus.getProperty() == ReligionProperty.PANTHEON) {
@@ -59,7 +73,7 @@ public class ListReligionBonus extends ListObject {
 
 			@Override
 			public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
-				if (!inContainerListBounds(x, y))
+				if (!inContainerListBounds())
 					return;
 
 				hovered = true;
@@ -67,7 +81,7 @@ public class ListReligionBonus extends ListObject {
 
 			@Override
 			public void exit(InputEvent event, float x, float y, int pointer, Actor fromActor) {
-				if (!inContainerListBounds(x, y))
+				if (!inContainerListBounds())
 					hovered = false;
 
 				hovered = false;

@@ -211,6 +211,9 @@ public class City extends Group implements AttackableEntity, TileObserver, Speci
 		if (!getName().equals(packet.getCityName()))
 			return;
 
+		if(producibleItemManager.getCurrentProducingItem() == null)
+			return;
+		
 		ProductionItem productionItem = producibleItemManager.getCurrentProducingItem().getProductionItem();
 
 		if (productionItem.getName().equals(packet.getItemName()) && productionItem instanceof Building) {

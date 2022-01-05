@@ -23,11 +23,6 @@ public class ChoosePantheonWindow extends AbstractWindow implements ResizeListen
 				viewport.getWorldHeight() / 2 - 450 / 2, 300, 450);
 		addActor(blankBackground);
 
-		this.closeWindowButton = new CloseWindowButton(getClass(), "Cancel",
-				blankBackground.getX() + blankBackground.getWidth() / 2 - 135 / 2, blankBackground.getY() + 10, 135,
-				35);
-		addActor(closeWindowButton);
-
 		this.bonusContianerList = new ContainerList(this, blankBackground.getX(), blankBackground.getY() + 55,
 				blankBackground.getWidth() - 20, blankBackground.getHeight() - 55);
 		addActor(bonusContianerList);
@@ -38,6 +33,11 @@ public class ChoosePantheonWindow extends AbstractWindow implements ResizeListen
 					new ListReligionBonus(religionBonus, bonusContianerList, blankBackground.getWidth() - 20, 70));
 		}
 
+		this.closeWindowButton = new CloseWindowButton(getClass(), "Cancel",
+				blankBackground.getX() + blankBackground.getWidth() / 2 - 135 / 2, blankBackground.getY() + 10, 135,
+				35);
+		addActor(closeWindowButton);
+		
 		Civilization.getInstance().getEventManager().addListener(PickPantheonListener.class, this);
 	}
 

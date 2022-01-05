@@ -1,9 +1,11 @@
 package me.rhin.openciv.ui.list;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.scenes.scene2d.Group;
 
+import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.TextureEnum;
 
 public abstract class ListObject extends Group implements Comparable<ListObject> {
@@ -39,13 +41,16 @@ public abstract class ListObject extends Group implements Comparable<ListObject>
 		return key.compareTo(listObj.getKey());
 	}
 
-	public boolean inContainerListBounds(float x, float y) {
-		if (x > containerList.getX() && x < (containerList.getX() + containerList.getWidth()))
-			if (y > containerList.getY() && y < (containerList.getY() + containerList.getHeight()))
-				return true;
+	public boolean inContainerListBounds() {
+		float x = Gdx.input.getX();
+		float y = Civilization.getInstance().getCurrentScreen().getViewport().getWorldHeight() - Gdx.input.getY();
 
-		//FIXME: Handle this.
-		return true;
+		if (x > containerList.getX() && x < (containerList.getX() + containerList.getWidth()))
+			if (y > containerList.getY() && y < (containerList.getY() + containerList.getInitialHeight())) {
+				return true;
+			}
+
+		return false;
 	}
 
 	public String getKey() {

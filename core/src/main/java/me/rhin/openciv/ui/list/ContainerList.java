@@ -26,17 +26,22 @@ public class ContainerList extends Group implements ScrollListener {
 	private HashMap<String, ListContainer> listContainers;
 	private ContainerScrollbar containerScrollbar;
 	private Sprite backgroundSprite;
+	private float initialHeight;
 
 	public ContainerList(AbstractWindow window, float x, float y, float width, float height) {
 		this(x, y, width, height);
 		window.addActor(containerScrollbar);
 		this.parentObj = window;
+		
+		initialHeight = height;
 	}
 
 	public ContainerList(Stage stage, float x, float y, float width, float height) {
 		this(x, y, width, height);
 		stage.addActor(containerScrollbar);
 		this.parentObj = stage;
+		
+		initialHeight = height;
 	}
 
 	public ContainerList(float x, float y, float width, float height) {
@@ -50,6 +55,8 @@ public class ContainerList extends Group implements ScrollListener {
 		backgroundSprite = TextureEnum.UI_LIGHT_GRAY.sprite();
 		backgroundSprite.setPosition(x, y);
 		backgroundSprite.setSize(width, height);
+		
+		initialHeight = height;
 		// this.setCullingArea(new Rectangle(x, y, width, height));
 
 		/*
@@ -218,5 +225,9 @@ public class ContainerList extends Group implements ScrollListener {
 
 	public void onTouchDragged(InputEvent event, float x, float y) {
 		containerScrollbar.onTouchDragged(event, x, y);
+	}
+
+	public float getInitialHeight() {
+		return initialHeight;
 	}
 }
