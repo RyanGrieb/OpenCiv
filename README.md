@@ -21,7 +21,9 @@ Right click -> Run as -> Java Application
 ![run_server](https://user-images.githubusercontent.com/6068039/148315505-e3511fbf-d4e5-47d4-bebe-810369c017d0.png)
 
 * Click multiplayer & connect, then start the game.
-* Have fun :)
+
+Debug keybinds:
+```SPACEBAR``` - Skip turns
 
 ![alt text](https://github.com/rhin123/OpenCiv/blob/master/meta/screenshots/title_screen.png?raw=true)
 
