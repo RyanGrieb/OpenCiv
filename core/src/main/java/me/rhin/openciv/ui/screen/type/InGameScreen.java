@@ -8,6 +8,7 @@ import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.utils.TimeUtils;
 
 import me.rhin.openciv.Civilization;
+import me.rhin.openciv.asset.SoundEnum.SoundType;
 import me.rhin.openciv.game.CivGame;
 import me.rhin.openciv.listener.LeftClickListener.LeftClickEvent;
 import me.rhin.openciv.listener.MouseMoveListener.MouseMoveEvent;
@@ -40,6 +41,7 @@ public class InGameScreen extends AbstractScreen {
 	private float frameRate;
 
 	public InGameScreen() {
+
 		EventManager eventManager = Civilization.getInstance().getEventManager();
 		eventManager.clearEvents();
 

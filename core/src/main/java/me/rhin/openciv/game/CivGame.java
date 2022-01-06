@@ -111,7 +111,8 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 		this.turns = 0;
 
 		Civilization.getInstance().getSoundHandler().playTrackBySoundtype(SoundType.AMBIENCE);
-
+		Civilization.getInstance().getSoundHandler().playTrackBySoundtype(SoundType.GENERAL_MUSIC);
+		
 		NotificationWindow notificationWindow = new NotificationWindow();
 		Civilization.getInstance().getWindowManager().toggleWindow(notificationWindow);
 		this.notificationHandler = new NotificationHandler(notificationWindow);

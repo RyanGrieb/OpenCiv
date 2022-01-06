@@ -38,8 +38,9 @@ public class AssetHandler extends AssetManager {
 				load(soundPath, Sound.class);
 				break;
 			case AMBIENCE:
-			case MUSIC:
-				 load(soundPath, Music.class);
+			case TITLE_MUSIC:
+			case GENERAL_MUSIC:
+				load(soundPath, Music.class);
 				break;
 			}
 

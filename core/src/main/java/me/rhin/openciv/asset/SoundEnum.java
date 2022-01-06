@@ -3,11 +3,15 @@ package me.rhin.openciv.asset;
 import com.badlogic.gdx.audio.Music;
 
 import me.rhin.openciv.Civilization;
+import me.rhin.openciv.options.OptionType;
 
 public enum SoundEnum {
 
-	TITLE_MUSIC_1(0.25F, SoundType.MUSIC),
-	TITLE_MUSIC_2(0.25F, SoundType.MUSIC),
+	TITLE_MUSIC_1(0.25F, SoundType.TITLE_MUSIC),
+	TITLE_MUSIC_2(0.25F, SoundType.TITLE_MUSIC),
+	ANGELIC_MUSIC(1F, SoundType.GENERAL_MUSIC),
+	WILDLANDS_MUSIC(1F, SoundType.GENERAL_MUSIC),
+	FANTASY_MOTION_MUSIC(1F,SoundType.GENERAL_MUSIC),
 	AMBIENCE_1(0.03F, SoundType.AMBIENCE),
 	AMBIENCE_2(0.35F, SoundType.AMBIENCE),
 	BUTTON_CLICK(0.5F, SoundType.EFFECT),
@@ -22,9 +26,32 @@ public enum SoundEnum {
 	CHAT_NOTIFICATION(0.75F, SoundType.EFFECT);
 
 	public enum SoundType {
-		MUSIC,
-		AMBIENCE,
-		EFFECT;
+		TITLE_MUSIC {
+			@Override
+			public OptionType getOptionType() {
+				return OptionType.MUSIC_VOLUME;
+			}
+		},
+		GENERAL_MUSIC {
+			@Override
+			public OptionType getOptionType() {
+				return OptionType.MUSIC_VOLUME;
+			}
+		},
+		AMBIENCE {
+			@Override
+			public OptionType getOptionType() {
+				return OptionType.AMBIENCE_VOLUME;
+			}
+		},
+		EFFECT {
+			@Override
+			public OptionType getOptionType() {
+				return OptionType.EFFECTS_VOLUME;
+			}
+		};
+
+		public abstract OptionType getOptionType();
 	}
 
 	private float volume;

@@ -78,12 +78,4 @@ public class CityReligion implements CityReligionFollowersUpdateListener {
 
 		return majorityReligion;
 	}
-
-	public void addFollowers(PlayerReligion playerReligion, int amount) {
-		// Note, if the amount of followers to be added is > total religionFollowers,
-		// remove followers from other religions.
-		if (religionFollowers.get(playerReligion) == null)
-			religionFollowers.put(playerReligion, amount);
-	}
-
 }

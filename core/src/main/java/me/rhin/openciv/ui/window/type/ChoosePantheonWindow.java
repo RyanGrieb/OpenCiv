@@ -37,8 +37,9 @@ public class ChoosePantheonWindow extends AbstractWindow implements ResizeListen
 				blankBackground.getX() + blankBackground.getWidth() / 2 - 135 / 2, blankBackground.getY() + 10, 135,
 				35);
 		addActor(closeWindowButton);
-		
+
 		Civilization.getInstance().getEventManager().addListener(PickPantheonListener.class, this);
+		Civilization.getInstance().getEventManager().addListener(ResizeListener.class, this);
 	}
 
 	@Override
@@ -55,7 +56,10 @@ public class ChoosePantheonWindow extends AbstractWindow implements ResizeListen
 
 	@Override
 	public void onResize(int width, int height) {
-
+		blankBackground.setPosition(width / 2 - 300 / 2, height / 2 - 450 / 2);
+		bonusContianerList.setPosition(blankBackground.getX(), blankBackground.getY() + 55);
+		closeWindowButton.setPosition(blankBackground.getX() + blankBackground.getWidth() / 2 - 135 / 2,
+				blankBackground.getY() + 10);
 	}
 
 	@Override
