@@ -139,8 +139,40 @@ public class FoundReligionWindow extends AbstractWindow implements FoundReligion
 		}
 
 		religionIconButtons.clear();
-
 		addReligionIconButtons();
+
+		// Reset the containerList to show proper available bonuses
+		if (bonusContianerList.hasParent()) {
+			bonusContianerList.clearList();
+			removeActor(bonusContianerList);
+			removeActor(bonusContianerList.getScrollbar());
+		}
+
+		ReligionBonus founderBonus = Civilization.getInstance().getGame().getAvailableReligionBonuses()
+				.getFounderBeliefFromID(packet.getFounderID());
+		ReligionBonus followerBonus = Civilization.getInstance().getGame().getAvailableReligionBonuses()
+				.getFollowerBeliefFromID(packet.getFollowerID());
+		ReligionIcon religionIcon = Civilization.getInstance().getGame().getAvailableReligionIcons().getList()
+				.get(packet.getIconID());
+
+		if (this.founderBonus.equals(founderBonus)) {
+			this.founderBonus = null;
+			founderBeliefLabel.setText("None");
+		}
+
+		if (this.followerBonus.equals(followerBonus)) {
+			this.followerBonus = null;
+			followerBeliefLabel.setText("None");
+		}
+
+		if (this.religionIcon.equals(religionIcon)) {
+			this.religionIcon = null;
+			religionNameLabel.setText("Name: N/A");
+			religionIconBackground.setSprite(TextureEnum.ICON_QUESTION.sprite());
+			religionIconBackground.setBounds(religionNameDescLabel.getX(), religionNameDescLabel.getY() - 35, 32, 32);
+		}
+
+		checkFoundableCondition();
 	}
 
 	private void addReligionIconButtons() {
@@ -222,7 +254,8 @@ public class FoundReligionWindow extends AbstractWindow implements FoundReligion
 		if (religionIcon != null && founderBonus != null && followerBonus != null
 				&& foundReligionButton.getParent() == null) {
 			addActor(foundReligionButton);
-		}
+		} else if (foundReligionButton.hasParent())
+			removeActor(foundReligionButton);
 	}
 
 	public ReligionBonus getFounderBonus() {
