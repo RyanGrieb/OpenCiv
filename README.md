@@ -7,6 +7,7 @@ If you like game development, java, or pixel art, consider contributing. We can 
 Eventually, I'd like to add support modding through [LUAJ](https://www.gamedevelopment.blog/using-luaj-scripting-to-allow-modding-in-games/).
 
 To run & modify the game --
+* Install [Java 11](https://www.oracle.com/java/technologies/javase/jdk11-archive-downloads.html) or higher. NOTE: OpenJDK has problems (at least for me on linux)
 * Install [GIT](https://git-scm.com/downloads)
 * Run -> ```git clone https://github.com/rhin123/OpenCiv.git```
 * Open Eclipse or any other java editor, and ```import grade project``` (Eclipse is recommended, haven't tested on other IDEs)
