@@ -10,6 +10,8 @@ import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.religion.bonus.ReligionBonus;
 import me.rhin.openciv.game.religion.icon.ReligionIcon;
 import me.rhin.openciv.game.unit.Unit;
+import me.rhin.openciv.listener.FoundReligionListener;
+import me.rhin.openciv.shared.packet.type.FoundReligionPacket;
 import me.rhin.openciv.ui.background.ColoredBackground;
 import me.rhin.openciv.ui.button.type.CloseWindowButton;
 import me.rhin.openciv.ui.button.type.FollowerBeliefButton;
@@ -20,7 +22,7 @@ import me.rhin.openciv.ui.label.CustomLabel;
 import me.rhin.openciv.ui.list.ContainerList;
 import me.rhin.openciv.ui.window.AbstractWindow;
 
-public class FoundReligionWindow extends AbstractWindow {
+public class FoundReligionWindow extends AbstractWindow implements FoundReligionListener {
 
 	private ColoredBackground blankBackground;
 	private CloseWindowButton closeWindowButton;
@@ -72,21 +74,7 @@ public class FoundReligionWindow extends AbstractWindow {
 
 		this.religionIconButtons = new ArrayList<>();
 
-		int index = 0;
-		for (ReligionIcon icon : Civilization.getInstance().getGame().getAvailableReligionIcons().getList()) {
-
-			if (icon == ReligionIcon.PANTHEON)
-				continue;
-
-			ReligionIconButton iconButton = new ReligionIconButton(icon,
-					chooseIconLabel.getX() + chooseIconLabel.getWidth() + 15 + (68 * index),
-					chooseIconLabel.getY() - 28, 64, 64);
-
-			religionIconButtons.add(iconButton);
-			addActor(iconButton);
-
-			index++;
-		}
+		addReligionIconButtons();
 
 		this.religionNameDescLabel = new CustomLabel("Religion: ");
 		religionNameDescLabel.setPosition(chooseIconLabel.getX(), chooseIconLabel.getY() - 64);
@@ -140,6 +128,37 @@ public class FoundReligionWindow extends AbstractWindow {
 
 		// FIXME: This is terrible:
 		bonusContianerList.getScrollbar().addAction(Actions.removeActor());
+
+		Civilization.getInstance().getEventManager().addListener(FoundReligionListener.class, this);
+	}
+
+	@Override
+	public void onFoundReligion(FoundReligionPacket packet) {
+		for (ReligionIconButton iconButton : religionIconButtons) {
+			iconButton.addAction(Actions.removeActor());
+		}
+
+		religionIconButtons.clear();
+
+		addReligionIconButtons();
+	}
+
+	private void addReligionIconButtons() {
+		int index = 0;
+		for (ReligionIcon icon : Civilization.getInstance().getGame().getAvailableReligionIcons().getAvailableIcons()) {
+
+			if (icon == ReligionIcon.PANTHEON)
+				continue;
+
+			ReligionIconButton iconButton = new ReligionIconButton(icon,
+					chooseIconLabel.getX() + chooseIconLabel.getWidth() + 15 + (68 * index),
+					chooseIconLabel.getY() - 28, 64, 64);
+
+			religionIconButtons.add(iconButton);
+			addActor(iconButton);
+
+			index++;
+		}
 	}
 
 	@Override

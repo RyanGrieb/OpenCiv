@@ -37,7 +37,7 @@ public class ReligionIconButton extends Button {
 		float y = window.getReligionIconBackground().getY();
 		window.getReligionIconBackground().setSprite(religionIcon.getTexture().sprite());
 		window.getReligionIconBackground().setBounds(x, y, 32, 32);
-		
+
 		window.setReligionIcon(religionIcon);
 		window.checkFoundableCondition();
 	}
@@ -54,5 +54,9 @@ public class ReligionIconButton extends Button {
 	public void setPosition(float x, float y) {
 		super.setPosition(x, y);
 		iconSprite.setPosition(x + (getWidth() / 2) - (32 / 2), y + (getHeight() / 2) - (32 / 2));
+	}
+
+	public ReligionIcon getReligionIcon() {
+		return religionIcon;
 	}
 }
