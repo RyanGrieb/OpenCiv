@@ -52,7 +52,6 @@ public class CityReligion implements CityReligionFollowersUpdateListener {
 				}
 			}
 		}
-
 	}
 
 	public PlayerReligion getMajorityReligion() {
@@ -65,8 +64,8 @@ public class CityReligion implements CityReligionFollowersUpdateListener {
 				noFollowers = false;
 		}
 
-		//Return null if there are no active followers in this city.
-		//Prevents us from returning a majorityReligion of 0.
+		// Return null if there are no active followers in this city.
+		// Prevents us from returning a majorityReligion of 0.
 		if (noFollowers)
 			return null;
 
@@ -77,5 +76,9 @@ public class CityReligion implements CityReligionFollowersUpdateListener {
 		}
 
 		return majorityReligion;
+	}
+
+	public HashMap<PlayerReligion, Integer> getMap() {
+		return religionFollowers;
 	}
 }

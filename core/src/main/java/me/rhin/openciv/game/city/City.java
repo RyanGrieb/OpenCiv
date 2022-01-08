@@ -2,6 +2,7 @@ package me.rhin.openciv.game.city;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map.Entry;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
@@ -286,7 +287,7 @@ public class City extends Group
 
 	@Override
 	public void onReligionIconChange(PlayerReligion religion, ReligionIcon icon) {
-		if (!cityReligion.getMajorityReligion().equals(religion))
+		if (cityReligion.getMajorityReligion() == null || !cityReligion.getMajorityReligion().equals(religion))
 			return;
 
 		religionIcon = icon.getTexture().sprite();
