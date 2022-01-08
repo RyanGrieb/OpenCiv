@@ -30,8 +30,10 @@ public class Lwjgl3Launcher {
 		config.useVsync(true);
 		config.setWindowSizeLimits(900, 750, -1, -1);
 		config.setTitle("OpenCiv");
-		config.setWindowIcon(FileType.Internal, "tile_city.png");
-		config.setIdleFPS(60);
+		
+		//FIXME: Temporarily disable for MACOS compatibility
+		//config.setWindowIcon(FileType.Internal, "tile_city.png");
+		
 		return config;
 	}
 }
