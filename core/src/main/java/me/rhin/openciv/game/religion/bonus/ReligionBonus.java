@@ -6,12 +6,25 @@ import me.rhin.openciv.game.religion.ReligionProperty;
 
 public abstract class ReligionBonus {
 
-	private static int idIndex = 0;
+	private static int pantheonIndex = 0;
+	private static int founderIndex = 0;
+	private static int followerIndex = 0;
 
 	private int id;
 
 	public ReligionBonus() {
-		id = idIndex++;
+
+		switch (getProperty()) {
+		case FOLLOWER_BELIEF:
+			id = followerIndex++;
+			break;
+		case FOUNDER_BELIEF:
+			id = founderIndex++;
+			break;
+		case PANTHEON:
+			id = pantheonIndex++;
+			break;
+		}
 	}
 
 	protected AbstractPlayer player;

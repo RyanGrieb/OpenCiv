@@ -1,4 +1,4 @@
-package me.rhin.openciv.server.game.religion.bonus.type;
+package me.rhin.openciv.server.game.religion.bonus.type.pantheon;
 
 import me.rhin.openciv.server.Server;
 import me.rhin.openciv.server.game.city.City;
@@ -9,10 +9,10 @@ import me.rhin.openciv.server.game.religion.bonus.ReligionBonus;
 import me.rhin.openciv.server.listener.CityGainMajorityReligionListener;
 import me.rhin.openciv.server.listener.CityLooseMajorityReligionListener;
 
-public class PantheonMonumentToTheGods extends ReligionBonus
+public class MonumentToTheGodsBonus extends ReligionBonus
 		implements CityGainMajorityReligionListener, CityLooseMajorityReligionListener {
 
-	public PantheonMonumentToTheGods() {
+	public MonumentToTheGodsBonus() {
 		//FIXME: Init these when were assigned a player.
 		Server.getInstance().getEventManager().addListener(CityGainMajorityReligionListener.class, this);
 		Server.getInstance().getEventManager().addListener(CityLooseMajorityReligionListener.class, this);

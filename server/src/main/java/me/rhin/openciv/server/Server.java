@@ -34,6 +34,7 @@ import me.rhin.openciv.server.listener.DeclareWarListener.DeclareWarEvent;
 import me.rhin.openciv.server.listener.DisconnectListener.DisconnectEvent;
 import me.rhin.openciv.server.listener.EndTurnListener.EndTurnEvent;
 import me.rhin.openciv.server.listener.FetchPlayerListener.FetchPlayerEvent;
+import me.rhin.openciv.server.listener.FoundReligionListener.FoundReligionEvent;
 import me.rhin.openciv.server.listener.GetHostListener.GetHostEvent;
 import me.rhin.openciv.server.listener.MapRequestListener.MapRequestEvent;
 import me.rhin.openciv.server.listener.PickPantheonListener.PickPantheonEvent;
@@ -70,6 +71,7 @@ import me.rhin.openciv.shared.packet.type.DeclareWarPacket;
 import me.rhin.openciv.shared.packet.type.EndTurnPacket;
 import me.rhin.openciv.shared.packet.type.FetchPlayerPacket;
 import me.rhin.openciv.shared.packet.type.FinishLoadingPacket;
+import me.rhin.openciv.shared.packet.type.FoundReligionPacket;
 import me.rhin.openciv.shared.packet.type.GetHostPacket;
 import me.rhin.openciv.shared.packet.type.MapRequestPacket;
 import me.rhin.openciv.shared.packet.type.MoveUnitPacket;
@@ -173,6 +175,7 @@ public class Server extends WebSocketServer {
 		networkEvents.put(DeclareWarPacket.class, DeclareWarEvent.class);
 		networkEvents.put(UpgradeUnitPacket.class, UpgradeUnitEvent.class);
 		networkEvents.put(PickPantheonPacket.class, PickPantheonEvent.class);
+		networkEvents.put(FoundReligionPacket.class, FoundReligionEvent.class);
 
 		this.playerIndex = 0;
 		this.commandProcessor = new CmdProcessor();

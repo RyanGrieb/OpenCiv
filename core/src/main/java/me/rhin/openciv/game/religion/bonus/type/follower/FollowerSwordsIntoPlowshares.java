@@ -1,30 +1,29 @@
-package me.rhin.openciv.game.religion.bonus.type;
+package me.rhin.openciv.game.religion.bonus.type.follower;
 
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.religion.ReligionProperty;
 import me.rhin.openciv.game.religion.bonus.ReligionBonus;
 
-public class PantheonTearsOfTheGods extends ReligionBonus {
+public class FollowerSwordsIntoPlowshares extends ReligionBonus {
 
 	@Override
 	public TextureEnum getIcon() {
-		return TextureEnum.TILE_GEMS;
+		return TextureEnum.ICON_FOOD;
 	}
 
 	@Override
 	public String getName() {
-		return "Tears of the Gods";
+		return "Swords Into Plowshares";
 	}
 
 	@Override
 	public ReligionProperty getProperty() {
-		return ReligionProperty.PANTHEON;
+		return ReligionProperty.FOLLOWER_BELIEF;
 	}
 
 	@Override
 	public String getDesc() {
-		return "+2 Faith from gems\n";
+		return "15% faster growth if\ncity not at war";
 	}
-
 
 }

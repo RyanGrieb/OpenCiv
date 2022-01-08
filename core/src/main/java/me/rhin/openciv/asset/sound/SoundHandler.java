@@ -107,8 +107,6 @@ public class SoundHandler implements SetScreenListener {
 
 	public void playTrackBySoundtype(AbstractScreen screen, SoundType soundType) {
 		
-		System.out.println("Hi");
-		
 		if (currentAmbience != null)
 			currentAmbience.stop();
 

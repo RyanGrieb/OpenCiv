@@ -32,6 +32,7 @@ import me.rhin.openciv.game.player.AIPlayer;
 import me.rhin.openciv.game.player.AbstractPlayer;
 import me.rhin.openciv.game.player.Player;
 import me.rhin.openciv.game.religion.bonus.AvailableReligionBonuses;
+import me.rhin.openciv.game.religion.icon.AvailableReligionIcons;
 import me.rhin.openciv.game.unit.AttackableEntity;
 import me.rhin.openciv.game.unit.Unit;
 import me.rhin.openciv.game.unit.UnitParameter;
@@ -97,6 +98,7 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 	private NotificationHandler notificationHandler;
 	private GameWonders gameWonders;
 	private AvailableReligionBonuses availableReligionBonuses;
+	private AvailableReligionIcons availableReligionIcons;
 	private TileTooltipHandler tileTooltipHandler;
 	private int turnTime;
 	private int turns;
@@ -106,13 +108,14 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 		this.players = new HashMap<>();
 		this.gameWonders = new GameWonders();
 		this.availableReligionBonuses = new AvailableReligionBonuses();
+		this.availableReligionIcons = new AvailableReligionIcons();
 		this.tileTooltipHandler = new TileTooltipHandler();
 		this.turnTime = BASE_TURN_TIME;
 		this.turns = 0;
 
 		Civilization.getInstance().getSoundHandler().playTrackBySoundtype(SoundType.AMBIENCE);
 		Civilization.getInstance().getSoundHandler().playTrackBySoundtype(SoundType.GENERAL_MUSIC);
-		
+
 		NotificationWindow notificationWindow = new NotificationWindow();
 		Civilization.getInstance().getWindowManager().toggleWindow(notificationWindow);
 		this.notificationHandler = new NotificationHandler(notificationWindow);
@@ -536,8 +539,12 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 	public GameWonders getWonders() {
 		return gameWonders;
 	}
-	
+
 	public AvailableReligionBonuses getAvailableReligionBonuses() {
 		return availableReligionBonuses;
+	}
+
+	public AvailableReligionIcons getAvailableReligionIcons() {
+		return availableReligionIcons;
 	}
 }

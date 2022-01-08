@@ -4,16 +4,22 @@ import java.util.ArrayList;
 
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.game.player.AbstractPlayer;
-import me.rhin.openciv.game.religion.bonus.type.PantheonDesertFolklore;
-import me.rhin.openciv.game.religion.bonus.type.PantheonGodOfTheOpenSky;
-import me.rhin.openciv.game.religion.bonus.type.PantheonGodOfTheSea;
-import me.rhin.openciv.game.religion.bonus.type.PantheonMonumentToTheGods;
-import me.rhin.openciv.game.religion.bonus.type.PantheonReligiousIdols;
-import me.rhin.openciv.game.religion.bonus.type.PantheonTearsOfTheGods;
+import me.rhin.openciv.game.religion.bonus.type.follower.FollowerPagodas;
+import me.rhin.openciv.game.religion.bonus.type.follower.FollowerSwordsIntoPlowshares;
+import me.rhin.openciv.game.religion.bonus.type.founder.ChurchPropertyBonus;
+import me.rhin.openciv.game.religion.bonus.type.founder.TitheBonus;
+import me.rhin.openciv.game.religion.bonus.type.pantheon.DesertFolkloreBonus;
+import me.rhin.openciv.game.religion.bonus.type.pantheon.GodOfTheOpenSkyBonus;
+import me.rhin.openciv.game.religion.bonus.type.pantheon.GodOfTheSeaBonus;
+import me.rhin.openciv.game.religion.bonus.type.pantheon.MonumentToTheGodsBonus;
+import me.rhin.openciv.game.religion.bonus.type.pantheon.ReligiousIdolsBonus;
+import me.rhin.openciv.game.religion.bonus.type.pantheon.TearsOfTheGodsBonus;
+import me.rhin.openciv.listener.FoundReligionListener;
 import me.rhin.openciv.listener.PickPantheonListener;
+import me.rhin.openciv.shared.packet.type.FoundReligionPacket;
 import me.rhin.openciv.shared.packet.type.PickPantheonPacket;
 
-public class AvailableReligionBonuses implements PickPantheonListener {
+public class AvailableReligionBonuses implements PickPantheonListener, FoundReligionListener {
 
 	private ArrayList<ReligionBonus> pantheons;
 	private ArrayList<ReligionBonus> founderBeliefs;
@@ -21,21 +27,37 @@ public class AvailableReligionBonuses implements PickPantheonListener {
 
 	public AvailableReligionBonuses() {
 		this.pantheons = new ArrayList<>();
+		this.founderBeliefs = new ArrayList<>();
+		this.followerBeliefs = new ArrayList<>();
 
-		pantheons.add(new PantheonGodOfTheSea());
-		pantheons.add(new PantheonTearsOfTheGods());
-		pantheons.add(new PantheonDesertFolklore());
-		pantheons.add(new PantheonReligiousIdols());
-		pantheons.add(new PantheonGodOfTheOpenSky());
-		pantheons.add(new PantheonMonumentToTheGods());
+		pantheons.add(new GodOfTheSeaBonus());
+		pantheons.add(new TearsOfTheGodsBonus());
+		pantheons.add(new DesertFolkloreBonus());
+		pantheons.add(new ReligiousIdolsBonus());
+		pantheons.add(new GodOfTheOpenSkyBonus());
+		pantheons.add(new MonumentToTheGodsBonus());
+
+		founderBeliefs.add(new ChurchPropertyBonus());
+		founderBeliefs.add(new TitheBonus());
+
+		followerBeliefs.add(new FollowerPagodas());
+		followerBeliefs.add(new FollowerSwordsIntoPlowshares());
 
 		Civilization.getInstance().getEventManager().addListener(PickPantheonListener.class, this);
+		Civilization.getInstance().getEventManager().addListener(FoundReligionListener.class, this);
 	}
 
 	@Override
 	public void onPickPantheon(PickPantheonPacket packet) {
 		AbstractPlayer player = Civilization.getInstance().getGame().getPlayers().get(packet.getPlayerName());
 		pantheons.get(packet.getReligionBonusID()).setPlayer(player);
+	}
+
+	@Override
+	public void onFoundReligion(FoundReligionPacket packet) {
+		AbstractPlayer player = Civilization.getInstance().getGame().getPlayers().get(packet.getPlayerName());
+		founderBeliefs.get(packet.getFounderID()).setPlayer(player);
+		followerBeliefs.get(packet.getFollowerID()).setPlayer(player);
 	}
 
 	public ArrayList<ReligionBonus> getAvailablePantheons() {
@@ -48,8 +70,35 @@ public class AvailableReligionBonuses implements PickPantheonListener {
 		return availablePantheons;
 	}
 
+	public ArrayList<ReligionBonus> getAvailableFounderBeliefs() {
+		ArrayList<ReligionBonus> availableFounderBeliefs = new ArrayList<ReligionBonus>();
+
+		for (ReligionBonus bonus : founderBeliefs)
+			if (bonus.getPlayer() == null)
+				availableFounderBeliefs.add(bonus);
+
+		return availableFounderBeliefs;
+	}
+
+	public ArrayList<ReligionBonus> getAvailableFollowerBeliefs() {
+		ArrayList<ReligionBonus> availableFollowerBeliefs = new ArrayList<ReligionBonus>();
+
+		for (ReligionBonus bonus : followerBeliefs)
+			if (bonus.getPlayer() == null)
+				availableFollowerBeliefs.add(bonus);
+
+		return availableFollowerBeliefs;
+	}
+
 	public ReligionBonus getPantheonFromID(int pantheonID) {
 		return pantheons.get(pantheonID);
 	}
 
+	public ReligionBonus getFounderBeliefFromID(int founderID) {
+		return founderBeliefs.get(founderID);
+	}
+
+	public ReligionBonus getFollowerBeliefFromID(int followerID) {
+		return followerBeliefs.get(followerID);
+	}
 }

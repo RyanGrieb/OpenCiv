@@ -12,6 +12,7 @@ import me.rhin.openciv.server.game.heritage.HeritageTree;
 import me.rhin.openciv.server.game.religion.PlayerReligion;
 import me.rhin.openciv.server.game.research.ResearchTree;
 import me.rhin.openciv.server.game.unit.Unit;
+import me.rhin.openciv.server.game.unit.type.Prophet;
 import me.rhin.openciv.server.listener.NextTurnListener;
 import me.rhin.openciv.shared.stat.StatLine;
 import me.rhin.openciv.shared.stat.StatType;
@@ -43,7 +44,7 @@ public abstract class AbstractPlayer implements NextTurnListener {
 
 		this.spawnX = -1;
 		this.spawnY = -1;
-		
+
 		Server.getInstance().getEventManager().addListener(NextTurnListener.class, this);
 	}
 
@@ -182,7 +183,15 @@ public abstract class AbstractPlayer implements NextTurnListener {
 	}
 
 	public PlayerReligion getReligion() {
-		
+
 		return playerReligion;
+	}
+
+	public boolean hasUnitOfType(Class<? extends Unit> unitClass) {
+		for (Unit unit : ownedUnits) {
+			if (unit.getClass() == unitClass)
+				return true;
+		}
+		return false;
 	}
 }

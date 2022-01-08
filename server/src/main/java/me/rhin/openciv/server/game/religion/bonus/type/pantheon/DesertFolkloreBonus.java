@@ -1,4 +1,4 @@
-package me.rhin.openciv.server.game.religion.bonus.type;
+package me.rhin.openciv.server.game.religion.bonus.type.pantheon;
 
 import me.rhin.openciv.server.game.map.tile.Tile;
 import me.rhin.openciv.server.game.map.tile.TileType;
@@ -7,7 +7,7 @@ import me.rhin.openciv.server.game.religion.bonus.ReligionBonus;
 import me.rhin.openciv.shared.stat.Stat;
 import me.rhin.openciv.shared.stat.StatLine;
 
-public class PantheonDesertFolklore extends ReligionBonus implements IncreaseTileStatlineBonus {
+public class DesertFolkloreBonus extends ReligionBonus implements IncreaseTileStatlineBonus {
 
 	@Override
 	public StatLine getAddedStatline(Tile tile) {

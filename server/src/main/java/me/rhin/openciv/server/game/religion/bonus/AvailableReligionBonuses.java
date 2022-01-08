@@ -8,38 +8,73 @@ import com.badlogic.gdx.utils.Json;
 
 import me.rhin.openciv.server.Server;
 import me.rhin.openciv.server.game.Player;
-import me.rhin.openciv.server.game.religion.bonus.type.PantheonDesertFolklore;
-import me.rhin.openciv.server.game.religion.bonus.type.PantheonGodOfTheOpenSky;
-import me.rhin.openciv.server.game.religion.bonus.type.PantheonGodOfTheSea;
-import me.rhin.openciv.server.game.religion.bonus.type.PantheonMonumentToTheGods;
-import me.rhin.openciv.server.game.religion.bonus.type.PantheonReligiousIdols;
-import me.rhin.openciv.server.game.religion.bonus.type.PantheonTearsOfTheGods;
+import me.rhin.openciv.server.game.religion.bonus.type.follower.FollowerPagodas;
+import me.rhin.openciv.server.game.religion.bonus.type.follower.FollowerSwordsIntoPlowshares;
+import me.rhin.openciv.server.game.religion.bonus.type.founder.ChurchPropertyBonus;
+import me.rhin.openciv.server.game.religion.bonus.type.founder.TitheBonus;
+import me.rhin.openciv.server.game.religion.bonus.type.pantheon.DesertFolkloreBonus;
+import me.rhin.openciv.server.game.religion.bonus.type.pantheon.GodOfTheOpenSkyBonus;
+import me.rhin.openciv.server.game.religion.bonus.type.pantheon.GodOfTheSeaBonus;
+import me.rhin.openciv.server.game.religion.bonus.type.pantheon.MonumentToTheGodsBonus;
+import me.rhin.openciv.server.game.religion.bonus.type.pantheon.ReligiousIdolsBonus;
+import me.rhin.openciv.server.game.religion.bonus.type.pantheon.TearsOfTheGodsBonus;
+import me.rhin.openciv.server.listener.FoundReligionListener;
 import me.rhin.openciv.server.listener.PickPantheonListener;
+import me.rhin.openciv.shared.packet.type.FoundReligionPacket;
 import me.rhin.openciv.shared.packet.type.PickPantheonPacket;
 
-public class AvailableReligionBonuses implements PickPantheonListener {
+public class AvailableReligionBonuses implements PickPantheonListener, FoundReligionListener {
 
 	private ArrayList<ReligionBonus> pantheons;
+	private ArrayList<ReligionBonus> founderBeliefs;
+	private ArrayList<ReligionBonus> followerBeliefs;
 
 	public AvailableReligionBonuses() {
 		this.pantheons = new ArrayList<>();
+		this.founderBeliefs = new ArrayList<>();
+		this.followerBeliefs = new ArrayList<>();
 
-		pantheons.add(new PantheonGodOfTheSea());
-		pantheons.add(new PantheonTearsOfTheGods());
-		pantheons.add(new PantheonDesertFolklore());
-		pantheons.add(new PantheonReligiousIdols());
-		pantheons.add(new PantheonGodOfTheOpenSky());
-		pantheons.add(new PantheonMonumentToTheGods());
+		pantheons.add(new GodOfTheSeaBonus());
+		pantheons.add(new TearsOfTheGodsBonus());
+		pantheons.add(new DesertFolkloreBonus());
+		pantheons.add(new ReligiousIdolsBonus());
+		pantheons.add(new GodOfTheOpenSkyBonus());
+		pantheons.add(new MonumentToTheGodsBonus());
+
+		founderBeliefs.add(new ChurchPropertyBonus());
+		founderBeliefs.add(new TitheBonus());
+
+		followerBeliefs.add(new FollowerPagodas());
+		followerBeliefs.add(new FollowerSwordsIntoPlowshares());
 
 		Server.getInstance().getEventManager().addListener(PickPantheonListener.class, this);
+		Server.getInstance().getEventManager().addListener(FoundReligionListener.class, this);
 	}
 
 	@Override
 	public void onPickPantheon(WebSocket conn, PickPantheonPacket packet) {
 
 		Player player = Server.getInstance().getPlayerByConn(conn);
-		
-		pantheons.get(packet.getReligionBonusID()).setPlayer(Server.getInstance().getPlayerByConn(conn));
+
+		pantheons.get(packet.getReligionBonusID()).setPlayer(player);
+
+		packet.setPlayerName(player.getName());
+
+		Json json = new Json();
+		for (Player otherPlayer : Server.getInstance().getPlayers()) {
+			otherPlayer.sendPacket(json.toJson(packet));
+		}
+
+		player.getCapitalCity().getCityReligion().setFollowers(player.getReligion(), 1);
+	}
+
+	@Override
+	public void onFoundReligion(WebSocket conn, FoundReligionPacket packet) {
+
+		Player player = Server.getInstance().getPlayerByConn(conn);
+
+		founderBeliefs.get(packet.getFounderID()).setPlayer(player);
+		followerBeliefs.get(packet.getFollowerID()).setPlayer(player);
 
 		packet.setPlayerName(player.getName());
 
@@ -48,14 +83,11 @@ public class AvailableReligionBonuses implements PickPantheonListener {
 			otherPlayer.sendPacket(json.toJson(packet));
 		}
 		
-		player.getCapitalCity().getCityReligion().setFollowers(player.getReligion(), 1);
-
-		pantheons.get(packet.getReligionBonusID()).onAssigned();
-
+		//FIXME: Add 1 follower to the city where the prophet founded the religion
+		player.getCapitalCity().getCityReligion().setFollowers(player.getReligion(), 2);
 	}
 
 	public boolean availablePantheons() {
-
 		for (ReligionBonus bonus : pantheons)
 			if (bonus.getPlayer() == null)
 				return true;
@@ -63,8 +95,15 @@ public class AvailableReligionBonuses implements PickPantheonListener {
 		return false;
 	}
 
+	public ArrayList<ReligionBonus> getFounderBeliefs() {
+		return founderBeliefs;
+	}
+
+	public ArrayList<ReligionBonus> getFollowerBeliefs() {
+		return followerBeliefs;
+	}
+
 	public ArrayList<ReligionBonus> getPantheons() {
 		return pantheons;
 	}
-
 }

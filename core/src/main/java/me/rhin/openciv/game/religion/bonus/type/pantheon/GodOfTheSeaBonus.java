@@ -1,19 +1,19 @@
-package me.rhin.openciv.game.religion.bonus.type;
+package me.rhin.openciv.game.religion.bonus.type.pantheon;
 
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.religion.ReligionProperty;
 import me.rhin.openciv.game.religion.bonus.ReligionBonus;
 
-public class PantheonReligiousIdols extends ReligionBonus {
+public class GodOfTheSeaBonus extends ReligionBonus {
 
 	@Override
 	public TextureEnum getIcon() {
-		return TextureEnum.TILE_GOLD;
+		return TextureEnum.UNIT_WORK_BOAT;
 	}
 
 	@Override
 	public String getName() {
-		return "Religious Idols";
+		return "God of the Sea";
 	}
 
 	@Override
@@ -23,7 +23,7 @@ public class PantheonReligiousIdols extends ReligionBonus {
 
 	@Override
 	public String getDesc() {
-		return "+1 Culture & Faith for\neach gold & silver tile";
+		return "+1 Production from\nworkboats";
 	}
 
 }

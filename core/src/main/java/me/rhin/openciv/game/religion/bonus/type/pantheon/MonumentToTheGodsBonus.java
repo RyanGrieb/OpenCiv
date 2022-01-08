@@ -1,4 +1,4 @@
-package me.rhin.openciv.game.religion.bonus.type;
+package me.rhin.openciv.game.religion.bonus.type.pantheon;
 
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.TextureEnum;
@@ -11,10 +11,10 @@ import me.rhin.openciv.game.religion.bonus.ReligionBonus;
 import me.rhin.openciv.listener.CityGainMajorityReligionListener;
 import me.rhin.openciv.listener.CityLooseMajorityReligionListener;
 
-public class PantheonMonumentToTheGods extends ReligionBonus
+public class MonumentToTheGodsBonus extends ReligionBonus
 		implements CityGainMajorityReligionListener, CityLooseMajorityReligionListener {
 
-	public PantheonMonumentToTheGods() {
+	public MonumentToTheGodsBonus() {
 		// FIXME: Assign these when were assigned a player?
 		Civilization.getInstance().getEventManager().addListener(CityGainMajorityReligionListener.class, this);
 		Civilization.getInstance().getEventManager().addListener(CityLooseMajorityReligionListener.class, this);

@@ -230,4 +230,8 @@ public class ContainerList extends Group implements ScrollListener {
 	public float getInitialHeight() {
 		return initialHeight;
 	}
+
+	public ContainerScrollbar getScrollbar() {
+		return containerScrollbar;
+	}
 }

@@ -6,168 +6,182 @@ filter: Nearest, Nearest
 repeat: none
 font
   rotate: false
-  xy: 2, 69
-  size: 512, 32
-  orig: 512, 32
+  xy: 2, 132
+  size: 512, 512
+  orig: 512, 512
   offset: 0, 0
   index: -1
 ui_background
   rotate: false
-  xy: 2, 201
+  xy: 2, 646
   size: 1664, 927
   orig: 1664, 927
   offset: 0, 0
   index: -1
 ui_black
   rotate: false
-  xy: 36, 36
+  xy: 1158, 579
   size: 1, 1
   orig: 1, 1
   offset: 0, 0
   index: -1
 ui_button
   rotate: false
-  xy: 1668, 1043
+  xy: 1158, 616
   size: 142, 28
   orig: 142, 28
   offset: 0, 0
   index: -1
+ui_button_circle
+  rotate: false
+  xy: 2, 36
+  size: 64, 64
+  orig: 64, 64
+  offset: 0, 0
+  index: -1
+ui_button_circle_hovered
+  rotate: false
+  xy: 1668, 1452
+  size: 64, 64
+  orig: 64, 64
+  offset: 0, 0
+  index: -1
 ui_button_disabled
   rotate: false
-  xy: 644, 171
+  xy: 2, 102
   size: 142, 28
   orig: 142, 28
   offset: 0, 0
   index: -1
 ui_button_hovered
   rotate: false
-  xy: 2, 39
+  xy: 516, 518
   size: 142, 28
   orig: 142, 28
   offset: 0, 0
   index: -1
 ui_button_icon
   rotate: false
-  xy: 1668, 1009
+  xy: 1668, 1418
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 ui_button_icon_hovered
   rotate: false
-  xy: 644, 103
+  xy: 1734, 1484
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 ui_button_small
   rotate: false
-  xy: 1815, 1100
+  xy: 146, 102
   size: 71, 28
   orig: 71, 28
   offset: 0, 0
   index: -1
 ui_button_small_hovered
   rotate: false
-  xy: 516, 73
+  xy: 1815, 1545
   size: 71, 28
   orig: 71, 28
   offset: 0, 0
   index: -1
 ui_container_box
   rotate: false
-  xy: 2, 103
+  xy: 516, 548
   size: 640, 96
   orig: 640, 96
   offset: 0, 0
   index: -1
 ui_dark_gray
   rotate: false
-  xy: 1888, 1127
+  xy: 516, 481
   size: 1, 1
   orig: 1, 1
   offset: 0, 0
   index: -1
 ui_error
   rotate: false
-  xy: 788, 183
+  xy: 660, 530
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 ui_github
   rotate: false
-  xy: 678, 137
+  xy: 2, 2
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 ui_gray
   rotate: false
-  xy: 1668, 1006
+  xy: 1192, 613
   size: 1, 1
   orig: 1, 1
   offset: 0, 0
   index: -1
 ui_green
   rotate: false
-  xy: 2, 2
+  xy: 550, 515
   size: 1, 1
   orig: 1, 1
   offset: 0, 0
   index: -1
 ui_light_gray
   rotate: false
-  xy: 1812, 1070
+  xy: 68, 99
   size: 1, 1
   orig: 1, 1
   offset: 0, 0
   index: -1
 ui_lighter_gray
   rotate: false
-  xy: 589, 100
+  xy: 1888, 1572
   size: 1, 1
   orig: 1, 1
   offset: 0, 0
   index: -1
 ui_notification_box
   rotate: false
-  xy: 1668, 1073
+  xy: 1668, 1518
   size: 145, 55
   orig: 145, 55
   offset: 0, 0
   index: -1
 ui_red
   rotate: false
-  xy: 146, 66
+  xy: 1302, 643
   size: 1, 1
   orig: 1, 1
   offset: 0, 0
   index: -1
 ui_selection
   rotate: false
-  xy: 644, 137
+  xy: 516, 484
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 ui_star
   rotate: false
-  xy: 2, 5
+  xy: 1158, 582
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 ui_white
   rotate: false
-  xy: 1815, 1097
+  xy: 219, 129
   size: 1, 1
   orig: 1, 1
   offset: 0, 0
   index: -1
 ui_yellow
   rotate: false
-  xy: 516, 70
+  xy: 1815, 1542
   size: 1, 1
   orig: 1, 1
   offset: 0, 0

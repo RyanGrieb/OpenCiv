@@ -27,14 +27,18 @@ import me.rhin.openciv.game.player.AbstractPlayer;
 import me.rhin.openciv.game.production.ProducibleItemManager;
 import me.rhin.openciv.game.production.ProductionItem;
 import me.rhin.openciv.game.religion.CityReligion;
+import me.rhin.openciv.game.religion.PlayerReligion;
+import me.rhin.openciv.game.religion.icon.ReligionIcon;
 import me.rhin.openciv.game.unit.AttackableEntity;
 import me.rhin.openciv.listener.AddSpecialistToContainerListener;
 import me.rhin.openciv.listener.ApplyProductionToItemListener;
 import me.rhin.openciv.listener.BuildingConstructedListener;
 import me.rhin.openciv.listener.BuyProductionItemListener;
+import me.rhin.openciv.listener.CityGainMajorityReligionListener;
 import me.rhin.openciv.listener.CityStatUpdateListener;
 import me.rhin.openciv.listener.FinishProductionItemListener;
 import me.rhin.openciv.listener.NextTurnListener;
+import me.rhin.openciv.listener.ReligionIconChangeListener;
 import me.rhin.openciv.listener.RemoveSpecialistFromContainerListener;
 import me.rhin.openciv.listener.SetCitizenTileWorkerListener;
 import me.rhin.openciv.listener.SetProductionItemListener;
@@ -56,10 +60,11 @@ import me.rhin.openciv.ui.label.CustomLabel;
 import me.rhin.openciv.ui.window.type.CityInfoWindow;
 
 //FIXME: We should have a interface for these networking interface.
-public class City extends Group implements AttackableEntity, TileObserver, SpecialistContainer,
-		BuildingConstructedListener, CityStatUpdateListener, SetProductionItemListener, ApplyProductionToItemListener,
-		FinishProductionItemListener, SetCitizenTileWorkerListener, AddSpecialistToContainerListener,
-		RemoveSpecialistFromContainerListener, NextTurnListener, BuyProductionItemListener {
+public class City extends Group
+		implements AttackableEntity, TileObserver, SpecialistContainer, BuildingConstructedListener,
+		CityStatUpdateListener, SetProductionItemListener, ApplyProductionToItemListener, FinishProductionItemListener,
+		SetCitizenTileWorkerListener, AddSpecialistToContainerListener, RemoveSpecialistFromContainerListener,
+		NextTurnListener, BuyProductionItemListener, CityGainMajorityReligionListener, ReligionIconChangeListener {
 
 	private Tile originTile;
 	private AbstractPlayer playerOwner;
@@ -72,6 +77,7 @@ public class City extends Group implements AttackableEntity, TileObserver, Speci
 	private CityReligion cityReligion;
 	private CustomLabel nameLabel;
 	private Sprite nameIcon;
+	private Sprite religionIcon;
 	private Healthbar healthbar;
 	private float health;
 	private float maxHealth;
@@ -96,7 +102,7 @@ public class City extends Group implements AttackableEntity, TileObserver, Speci
 
 		this.healthbar = new Healthbar(nameLabel.getX() + nameLabel.getWidth() / 2 - 50 / 2, nameIcon.getY() + 15, 50,
 				4, false);
-		
+
 		this.maxHealth = 300; // Default
 		this.health = getMaxHealth();
 
@@ -126,6 +132,8 @@ public class City extends Group implements AttackableEntity, TileObserver, Speci
 		Civilization.getInstance().getEventManager().addListener(RemoveSpecialistFromContainerListener.class, this);
 		Civilization.getInstance().getEventManager().addListener(NextTurnListener.class, this);
 		Civilization.getInstance().getEventManager().addListener(BuyProductionItemListener.class, this);
+		Civilization.getInstance().getEventManager().addListener(CityGainMajorityReligionListener.class, this);
+		Civilization.getInstance().getEventManager().addListener(ReligionIconChangeListener.class, this);
 	}
 
 	@Override
@@ -135,6 +143,9 @@ public class City extends Group implements AttackableEntity, TileObserver, Speci
 			nameLabel.draw(batch, parentAlpha);
 			nameIcon.draw(batch);
 			healthbar.draw(batch, parentAlpha);
+
+			if (religionIcon != null)
+				religionIcon.draw(batch);
 		}
 	}
 
@@ -211,9 +222,9 @@ public class City extends Group implements AttackableEntity, TileObserver, Speci
 		if (!getName().equals(packet.getCityName()))
 			return;
 
-		if(producibleItemManager.getCurrentProducingItem() == null)
+		if (producibleItemManager.getCurrentProducingItem() == null)
 			return;
-		
+
 		ProductionItem productionItem = producibleItemManager.getCurrentProducingItem().getProductionItem();
 
 		if (productionItem.getName().equals(packet.getItemName()) && productionItem instanceof Building) {
@@ -265,6 +276,18 @@ public class City extends Group implements AttackableEntity, TileObserver, Speci
 		for (SpecialistContainer contianer : specialistContainers)
 			if (contianer.getName().equals(packet.getContainerName()))
 				contianer.removeSpecialist(packet.getAmount());
+	}
+
+	@Override
+	public void onCityGainMajorityReligion(City city, PlayerReligion newReligion) {
+		religionIcon = newReligion.getReligionIcon().getTexture().sprite();
+		religionIcon.setBounds(nameLabel.getX() + nameLabel.getWidth() + 2, nameLabel.getY(), 8, 8);
+	}
+
+	@Override
+	public void onReligionIconChange(PlayerReligion religion, ReligionIcon icon) {
+		religionIcon = icon.getTexture().sprite();
+		religionIcon.setBounds(nameLabel.getX() + nameLabel.getWidth() + 2, nameLabel.getY(), 8, 8);
 	}
 
 	@Override

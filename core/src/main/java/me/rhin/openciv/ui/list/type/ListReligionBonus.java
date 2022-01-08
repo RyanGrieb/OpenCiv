@@ -16,6 +16,7 @@ import me.rhin.openciv.ui.label.CustomLabel;
 import me.rhin.openciv.ui.list.ContainerList;
 import me.rhin.openciv.ui.list.ListObject;
 import me.rhin.openciv.ui.window.type.ChoosePantheonWindow;
+import me.rhin.openciv.ui.window.type.FoundReligionWindow;
 
 public class ListReligionBonus extends ListObject {
 
@@ -66,9 +67,37 @@ public class ListReligionBonus extends ListObject {
 					PickPantheonPacket packet = new PickPantheonPacket();
 					packet.setBonusID(religionBonus.getID());
 					Civilization.getInstance().getNetworkManager().sendPacket(packet);
+
+					Civilization.getInstance().getWindowManager().closeWindow(ChoosePantheonWindow.class);
 				}
 
-				Civilization.getInstance().getWindowManager().closeWindow(ChoosePantheonWindow.class);
+				if (religionBonus.getProperty() == ReligionProperty.FOUNDER_BELIEF) {
+					FoundReligionWindow window = Civilization.getInstance().getWindowManager()
+							.getWindow(FoundReligionWindow.class);
+
+					window.getBonusContianerList().clearList();
+					window.removeActor(window.getBonusContianerList());
+					window.removeActor(window.getBonusContianerList().getScrollbar());
+
+					window.getFounderBeliefLabel().setText(religionBonus.getName() + ":\n" + religionBonus.getDesc());
+					window.setFounderBelief(religionBonus);
+					
+					window.checkFoundableCondition();
+				}
+
+				if (religionBonus.getProperty() == ReligionProperty.FOLLOWER_BELIEF) {
+					FoundReligionWindow window = Civilization.getInstance().getWindowManager()
+							.getWindow(FoundReligionWindow.class);
+
+					window.getBonusContianerList().clearList();
+					window.removeActor(window.getBonusContianerList());
+					window.removeActor(window.getBonusContianerList().getScrollbar());
+
+					window.getFollowerBeliefLabel().setText(religionBonus.getName() + ":\n" + religionBonus.getDesc());
+					window.setFollowerBelief(religionBonus);
+					
+					window.checkFoundableCondition();
+				}
 			}
 
 			@Override

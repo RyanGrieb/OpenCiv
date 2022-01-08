@@ -1,19 +1,19 @@
-package me.rhin.openciv.game.religion.bonus.type;
+package me.rhin.openciv.game.religion.bonus.type.pantheon;
 
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.religion.ReligionProperty;
 import me.rhin.openciv.game.religion.bonus.ReligionBonus;
 
-public class PantheonDesertFolklore extends ReligionBonus {
+public class GodOfTheOpenSkyBonus extends ReligionBonus {
 
 	@Override
 	public TextureEnum getIcon() {
-		return TextureEnum.TILE_DESERT;
+		return TextureEnum.TILE_HORSES_IMPROVED;
 	}
 
 	@Override
 	public String getName() {
-		return "Desert Folklore";
+		return "God of the Open Sky";
 	}
 
 	@Override
@@ -23,7 +23,7 @@ public class PantheonDesertFolklore extends ReligionBonus {
 
 	@Override
 	public String getDesc() {
-		return "+1 Faith from desert tiles\n";
+		return "+1 Culture from pastures\n";
 	}
 
 }

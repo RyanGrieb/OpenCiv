@@ -1,29 +1,29 @@
-package me.rhin.openciv.game.religion.bonus.type;
+package me.rhin.openciv.game.religion.bonus.type.follower;
 
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.religion.ReligionProperty;
 import me.rhin.openciv.game.religion.bonus.ReligionBonus;
 
-public class PantheonGodOfTheSea extends ReligionBonus {
+public class FollowerPagodas extends ReligionBonus {
 
 	@Override
 	public TextureEnum getIcon() {
-		return TextureEnum.UNIT_WORK_BOAT;
+		return TextureEnum.UI_ERROR;
 	}
 
 	@Override
 	public String getName() {
-		return "God of the Sea";
+		return "Pagodas";
 	}
 
 	@Override
 	public ReligionProperty getProperty() {
-		return ReligionProperty.PANTHEON;
+		return ReligionProperty.FOLLOWER_BELIEF;
 	}
 
 	@Override
 	public String getDesc() {
-		return "+1 Production from\nworkboats";
+		return "Use faith to purchase\nPagodas (200 Faith)";
 	}
 
 }

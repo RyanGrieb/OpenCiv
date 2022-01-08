@@ -31,6 +31,7 @@ import me.rhin.openciv.listener.DeleteUnitListener.DeleteUnitEvent;
 import me.rhin.openciv.listener.FetchPlayerListener.FetchPlayerEvent;
 import me.rhin.openciv.listener.FinishLoadingRequestListener.FinishLoadingRequestEvent;
 import me.rhin.openciv.listener.FinishProductionItemListener.FinishProductionItemEvent;
+import me.rhin.openciv.listener.FoundReligionListener.FoundReligionEvent;
 import me.rhin.openciv.listener.GameStartListener.GameStartEvent;
 import me.rhin.openciv.listener.GetHostListener.GetHostEvent;
 import me.rhin.openciv.listener.MoveUnitListener.MoveUnitEvent;
@@ -86,6 +87,7 @@ import me.rhin.openciv.shared.packet.type.DeleteUnitPacket;
 import me.rhin.openciv.shared.packet.type.FetchPlayerPacket;
 import me.rhin.openciv.shared.packet.type.FinishLoadingPacket;
 import me.rhin.openciv.shared.packet.type.FinishProductionItemPacket;
+import me.rhin.openciv.shared.packet.type.FoundReligionPacket;
 import me.rhin.openciv.shared.packet.type.GameStartPacket;
 import me.rhin.openciv.shared.packet.type.GetHostPacket;
 import me.rhin.openciv.shared.packet.type.MapChunkPacket;
@@ -178,6 +180,7 @@ public class NetworkManager {
 		networkEvents.put(AvailablePantheonPacket.class, AvailablePantheonEvent.class);
 		networkEvents.put(PickPantheonPacket.class, PickPantheonEvent.class);
 		networkEvents.put(CityReligionFollowersUpdatePacket.class, CityReligionFollowersUpdateEvent.class);
+		networkEvents.put(FoundReligionPacket.class, FoundReligionEvent.class);
 	}
 
 	public void connect(String ip) {
