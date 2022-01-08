@@ -286,6 +286,9 @@ public class City extends Group
 
 	@Override
 	public void onReligionIconChange(PlayerReligion religion, ReligionIcon icon) {
+		if (!cityReligion.getMajorityReligion().equals(religion))
+			return;
+
 		religionIcon = icon.getTexture().sprite();
 		religionIcon.setBounds(nameLabel.getX() + nameLabel.getWidth() + 2, nameLabel.getY(), 8, 8);
 	}
