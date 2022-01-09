@@ -58,7 +58,7 @@ public class PlayerReligion implements NextTurnListener, PickPantheonListener, F
 
 		// FIXME: Limit the number of religions to be founded
 		if (!player.hasUnitOfType(ProphetUnit.class) && player.getStatLine().getStatValue(Stat.FAITH) > 13
-				&& pickedBonuses.size() < 2 && player instanceof Player) {
+				&& pickedBonuses.size() == 1 && player instanceof Player) {
 
 			ProphetUnit unit = new ProphetUnit(player, player.getCapitalCity().getOriginTile());
 
