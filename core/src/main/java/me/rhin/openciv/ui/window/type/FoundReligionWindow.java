@@ -11,6 +11,7 @@ import me.rhin.openciv.game.religion.bonus.ReligionBonus;
 import me.rhin.openciv.game.religion.icon.ReligionIcon;
 import me.rhin.openciv.game.unit.Unit;
 import me.rhin.openciv.listener.FoundReligionListener;
+import me.rhin.openciv.listener.ResizeListener;
 import me.rhin.openciv.shared.packet.type.FoundReligionPacket;
 import me.rhin.openciv.ui.background.ColoredBackground;
 import me.rhin.openciv.ui.button.type.CloseWindowButton;
@@ -22,7 +23,7 @@ import me.rhin.openciv.ui.label.CustomLabel;
 import me.rhin.openciv.ui.list.ContainerList;
 import me.rhin.openciv.ui.window.AbstractWindow;
 
-public class FoundReligionWindow extends AbstractWindow implements FoundReligionListener {
+public class FoundReligionWindow extends AbstractWindow implements FoundReligionListener, ResizeListener {
 
 	private ColoredBackground blankBackground;
 	private CloseWindowButton closeWindowButton;
@@ -124,12 +125,47 @@ public class FoundReligionWindow extends AbstractWindow implements FoundReligion
 		addActor(followerBeliefLabel);
 
 		this.bonusContianerList = new ContainerList(this, blankBackground.getX() + blankBackground.getWidth() / 2 - 35,
-				165, 300, 400);
+				blankBackground.getY() + 100, 300, 400);
 
 		// FIXME: This is terrible:
 		bonusContianerList.getScrollbar().addAction(Actions.removeActor());
 
 		Civilization.getInstance().getEventManager().addListener(FoundReligionListener.class, this);
+		Civilization.getInstance().getEventManager().addListener(ResizeListener.class, this);
+	}
+
+	@Override
+	public void onResize(int width, int height) {
+		blankBackground.setPosition(width / 2 - 600 / 2, height / 2 - 600 / 2);
+		closeWindowButton.setPosition(blankBackground.getX() + blankBackground.getWidth() / 2 - 135 / 2,
+				blankBackground.getY() + 5);
+		foundReligionButton.setPosition(closeWindowButton.getX(), closeWindowButton.getY() + 35);
+		titleLabel.setPosition(blankBackground.getX(), blankBackground.getY() + blankBackground.getHeight() - 18);
+		chooseIconLabel.setPosition(blankBackground.getX() + 5,
+				blankBackground.getY() + blankBackground.getHeight() - 55);
+
+		for (ReligionIconButton iconButton : religionIconButtons) {
+			iconButton.addAction(Actions.removeActor());
+		}
+
+		religionIconButtons.clear();
+		addReligionIconButtons();
+
+		religionNameDescLabel.setPosition(chooseIconLabel.getX(), chooseIconLabel.getY() - 64);
+		religionIconBackground.setPosition(religionNameDescLabel.getX(), religionNameDescLabel.getY() - 35);
+		religionNameLabel.setPosition(religionNameDescLabel.getX() + 40, religionNameDescLabel.getY() - 25);
+		pantheonDescLabel.setPosition(religionNameDescLabel.getX(), religionNameLabel.getY() - 45);
+		pantheonLabel.setPosition(pantheonDescLabel.getX(), pantheonDescLabel.getY() - 35);
+		founderBeliefDescLabel.setPosition(pantheonLabel.getX(), pantheonLabel.getY() - 45);
+		founderBeliefButton.setPosition(founderBeliefDescLabel.getX() + founderBeliefDescLabel.getWidth(),
+				founderBeliefDescLabel.getY() - 11);
+		founderBeliefLabel.setPosition(founderBeliefDescLabel.getX(), founderBeliefDescLabel.getY() - 55);
+		followerBeliefDescLabel.setPosition(founderBeliefLabel.getX(), founderBeliefLabel.getY() - 45);
+		followerBeliefButton.setPosition(followerBeliefDescLabel.getX() + followerBeliefDescLabel.getWidth(),
+				followerBeliefDescLabel.getY() - 11);
+		followerBeliefLabel.setPosition(followerBeliefDescLabel.getX(), followerBeliefDescLabel.getY() - 55);
+		bonusContianerList.setPosition(blankBackground.getX() + blankBackground.getWidth() / 2 - 35,
+				blankBackground.getY() + 100);
 	}
 
 	@Override

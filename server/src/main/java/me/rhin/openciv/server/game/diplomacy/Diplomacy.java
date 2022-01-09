@@ -9,7 +9,9 @@ import com.badlogic.gdx.utils.Json;
 import me.rhin.openciv.server.Server;
 import me.rhin.openciv.server.game.AbstractPlayer;
 import me.rhin.openciv.server.game.Player;
+import me.rhin.openciv.server.game.ai.type.BarbarianPlayer;
 import me.rhin.openciv.server.listener.DeclareWarListener;
+import me.rhin.openciv.server.listener.ServerDeclareWarListener.ServerDeclareWarEvent;
 import me.rhin.openciv.shared.packet.type.DeclareWarPacket;
 
 public class Diplomacy implements DeclareWarListener {
@@ -66,6 +68,8 @@ public class Diplomacy implements DeclareWarListener {
 
 		addEnemy(targetPlayer);
 		targetPlayer.getDiplomacy().addEnemy(player);
+
+		Server.getInstance().getEventManager().fireEvent(new ServerDeclareWarEvent(player, targetPlayer));
 	}
 
 	public void declarWarAll() {
@@ -83,6 +87,14 @@ public class Diplomacy implements DeclareWarListener {
 
 	public boolean atWar(AbstractPlayer otherPlayer) {
 		return enemies.contains(otherPlayer);
+	}
+
+	public boolean inWar() {
+		for (AbstractPlayer enemy : enemies) {
+			if (enemy instanceof AbstractPlayer && !(enemy instanceof BarbarianPlayer))
+				return true;
+		}
+		return false;
 	}
 
 }

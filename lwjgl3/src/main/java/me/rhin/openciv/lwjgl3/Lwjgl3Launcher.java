@@ -1,5 +1,6 @@
 package me.rhin.openciv.lwjgl3;
 
+import com.badlogic.gdx.Files.FileType;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
@@ -30,7 +31,7 @@ public class Lwjgl3Launcher {
 		config.setTitle("OpenCiv");
 		
 		//FIXME: Temporarily disable for MACOS compatibility
-		//config.setWindowIcon(FileType.Internal, "tile_city.png");
+		config.setWindowIcon(FileType.Internal, "tile_city.png");
 		return config;
 	}
 }
