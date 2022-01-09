@@ -41,6 +41,11 @@ public abstract class UnitItem implements ProductionItem {
 	}
 
 	@Override
+	public float getFaithCost() {
+		return -1;
+	}
+
+	@Override
 	public void setProductionModifier(float modifier) {
 		this.productionModifier = modifier;
 	}

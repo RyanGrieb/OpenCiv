@@ -51,9 +51,13 @@ public class ListProductionItem extends ListObject implements CityStatUpdateList
 		itemNameLabel.setSize(width, height);
 		itemNameLabel.setAlignment(Align.topLeft);
 
-		this.itemTurnCostLabel = new CustomLabel((int) Math
-				.ceil((productionItem.getProductionCost() / city.getStatLine().getStatValue(Stat.PRODUCTION_GAIN)))
-				+ " Turns");
+		if (productionItem.getFaithCost() == -1) {
+			this.itemTurnCostLabel = new CustomLabel((int) Math
+					.ceil((productionItem.getProductionCost() / city.getStatLine().getStatValue(Stat.PRODUCTION_GAIN)))
+					+ " Turns");
+		} else {
+			this.itemTurnCostLabel = new CustomLabel((int) productionItem.getFaithCost() + " Faith");
+		}
 
 		itemTurnCostLabel.setSize(width, height);
 		itemTurnCostLabel.setAlignment(Align.bottomLeft);
@@ -92,6 +96,9 @@ public class ListProductionItem extends ListObject implements CityStatUpdateList
 
 	@Override
 	public void onCityStatUpdate(CityStatUpdatePacket packet) {
+		if (productionItem.getProductionCost() < 0)
+			return;
+
 		itemTurnCostLabel.setText((int) Math
 				.ceil((productionItem.getProductionCost() / city.getStatLine().getStatValue(Stat.PRODUCTION_GAIN)))
 				+ " Turns");

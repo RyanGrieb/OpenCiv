@@ -17,6 +17,8 @@ public interface ProductionItem {
 	public String getDesc();
 
 	public float getGoldCost();
+	
+	public float getFaithCost();
 
 	public void setProductionModifier(float modifier);
 	

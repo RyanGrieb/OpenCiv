@@ -4,16 +4,16 @@ import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.religion.ReligionProperty;
 import me.rhin.openciv.game.religion.bonus.ReligionBonus;
 
-public class FollowerPagodas extends ReligionBonus {
+public class SwordsIntoPlowsharesBonus extends ReligionBonus {
 
 	@Override
 	public TextureEnum getIcon() {
-		return TextureEnum.UI_ERROR;
+		return TextureEnum.ICON_FOOD;
 	}
 
 	@Override
 	public String getName() {
-		return "Pagodas";
+		return "Swords Into Plowshares";
 	}
 
 	@Override
@@ -23,7 +23,7 @@ public class FollowerPagodas extends ReligionBonus {
 
 	@Override
 	public String getDesc() {
-		return "Use faith to purchase\nPagodas (200 Faith)";
+		return "15% faster growth if\ncity not at war";
 	}
 
 }

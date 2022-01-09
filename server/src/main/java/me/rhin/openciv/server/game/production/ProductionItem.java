@@ -12,6 +12,8 @@ public interface ProductionItem {
 	public void create();
 
 	public float getGoldCost();
+	
+	public float getFaithCost();
 
 	public void setProductionModifier(float modifier);
 

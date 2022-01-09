@@ -4,8 +4,8 @@ import java.util.ArrayList;
 
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.game.player.AbstractPlayer;
-import me.rhin.openciv.game.religion.bonus.type.follower.FollowerPagodas;
-import me.rhin.openciv.game.religion.bonus.type.follower.FollowerSwordsIntoPlowshares;
+import me.rhin.openciv.game.religion.bonus.type.follower.PagodasBonus;
+import me.rhin.openciv.game.religion.bonus.type.follower.SwordsIntoPlowsharesBonus;
 import me.rhin.openciv.game.religion.bonus.type.founder.ChurchPropertyBonus;
 import me.rhin.openciv.game.religion.bonus.type.founder.TitheBonus;
 import me.rhin.openciv.game.religion.bonus.type.pantheon.DesertFolkloreBonus;
@@ -40,8 +40,8 @@ public class AvailableReligionBonuses implements PickPantheonListener, FoundReli
 		founderBeliefs.add(new ChurchPropertyBonus());
 		founderBeliefs.add(new TitheBonus());
 
-		followerBeliefs.add(new FollowerPagodas());
-		followerBeliefs.add(new FollowerSwordsIntoPlowshares());
+		followerBeliefs.add(new PagodasBonus());
+		followerBeliefs.add(new SwordsIntoPlowsharesBonus());
 
 		Civilization.getInstance().getEventManager().addListener(PickPantheonListener.class, this);
 		Civilization.getInstance().getEventManager().addListener(FoundReligionListener.class, this);

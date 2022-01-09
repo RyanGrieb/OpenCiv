@@ -10,10 +10,10 @@ import me.rhin.openciv.server.listener.CityLooseMajorityReligionListener;
 import me.rhin.openciv.server.listener.ServerDeclareWarListener;
 import me.rhin.openciv.shared.stat.Stat;
 
-public class FollowerSwordsIntoPlowshares extends ReligionBonus
+public class SwordsIntoPlowsharesBonus extends ReligionBonus
 		implements CityGainMajorityReligionListener, CityLooseMajorityReligionListener, ServerDeclareWarListener {
 
-	public FollowerSwordsIntoPlowshares() {
+	public SwordsIntoPlowsharesBonus() {
 		Server.getInstance().getEventManager().addListener(CityGainMajorityReligionListener.class, this);
 		Server.getInstance().getEventManager().addListener(CityLooseMajorityReligionListener.class, this);
 		Server.getInstance().getEventManager().addListener(ServerDeclareWarListener.class, this);
@@ -52,7 +52,9 @@ public class FollowerSwordsIntoPlowshares extends ReligionBonus
 
 	@Override
 	public void onDeclareWar(AbstractPlayer attacker, AbstractPlayer defender) {
-
+		if (player == null)
+			return;
+		
 		for (City city : attacker.getOwnedCities()) {
 			if (city.getCityReligion().getMajorityReligion().equals(player.getReligion())) {
 				city.getStatLine().subModifier(Stat.FOOD_GAIN, 0.15F);

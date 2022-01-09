@@ -53,6 +53,11 @@ public abstract class Building implements ProductionItem {
 
 		return prodModifier.getValue();
 	}
+	
+	@Override
+	public float getFaithCost() {
+		return -1;
+	}
 
 	@Override
 	public void setProductionModifier(float modifier) {

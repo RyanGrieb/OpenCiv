@@ -287,10 +287,14 @@ public class FoundReligionWindow extends AbstractWindow implements FoundReligion
 	}
 
 	public void checkFoundableCondition() {
+
 		if (religionIcon != null && founderBonus != null && followerBonus != null
 				&& foundReligionButton.getParent() == null) {
 			addActor(foundReligionButton);
-		} else if (foundReligionButton.hasParent())
+		}
+
+		if ((religionIcon == null || founderBonus == null || followerBonus == null)
+				&& foundReligionButton.getParent() != null)
 			removeActor(foundReligionButton);
 	}
 

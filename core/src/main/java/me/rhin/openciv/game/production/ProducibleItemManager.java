@@ -28,6 +28,7 @@ import me.rhin.openciv.game.city.building.type.Market;
 import me.rhin.openciv.game.city.building.type.Mint;
 import me.rhin.openciv.game.city.building.type.Monument;
 import me.rhin.openciv.game.city.building.type.NationalCollege;
+import me.rhin.openciv.game.city.building.type.Pagoda;
 import me.rhin.openciv.game.city.building.type.Shrine;
 import me.rhin.openciv.game.city.building.type.Stables;
 import me.rhin.openciv.game.city.building.type.StatueOfAres;
@@ -56,6 +57,7 @@ import me.rhin.openciv.game.unit.type.Swordsman;
 import me.rhin.openciv.game.unit.type.Warrior;
 import me.rhin.openciv.game.unit.type.WorkBoat;
 import me.rhin.openciv.shared.packet.type.BuyProductionItemPacket;
+import me.rhin.openciv.shared.packet.type.FaithBuyProductionItemPacket;
 import me.rhin.openciv.shared.packet.type.SetProductionItemPacket;
 
 /**
@@ -120,6 +122,7 @@ public class ProducibleItemManager {
 		possibleItems.put("Amphitheater", new Amphitheater(city));
 		possibleItems.put("Garden", new Garden(city));
 		possibleItems.put("Chapel", new Chapel(city));
+		possibleItems.put("Pagoda", new Pagoda(city));
 		
 		// Wonders
 		possibleItems.put("Great Pyramids", new GreatPyramids(city));
@@ -167,6 +170,16 @@ public class ProducibleItemManager {
 				"Requesting to buy: " + productionItem.getName() + " in city: " + city.getName());
 
 		BuyProductionItemPacket packet = new BuyProductionItemPacket();
+		packet.setProductionItem(city.getName(), productionItem.getName());
+
+		Civilization.getInstance().getNetworkManager().sendPacket(packet);
+	}
+	
+	public void requestFaithBuyProductionItem(ProductionItem productionItem) {
+		Gdx.app.log(Civilization.LOG_TAG,
+				"Requesting to faith buy: " + productionItem.getName() + " in city: " + city.getName());
+
+		FaithBuyProductionItemPacket packet = new FaithBuyProductionItemPacket();
 		packet.setProductionItem(city.getName(), productionItem.getName());
 
 		Civilization.getInstance().getNetworkManager().sendPacket(packet);

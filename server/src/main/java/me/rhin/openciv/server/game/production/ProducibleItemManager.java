@@ -29,6 +29,7 @@ import me.rhin.openciv.server.game.city.building.type.Market;
 import me.rhin.openciv.server.game.city.building.type.Mint;
 import me.rhin.openciv.server.game.city.building.type.Monument;
 import me.rhin.openciv.server.game.city.building.type.NationalCollege;
+import me.rhin.openciv.server.game.city.building.type.Pagoda;
 import me.rhin.openciv.server.game.city.building.type.Shrine;
 import me.rhin.openciv.server.game.city.building.type.Stables;
 import me.rhin.openciv.server.game.city.building.type.StatueOfAres;
@@ -130,6 +131,7 @@ public class ProducibleItemManager implements NextTurnListener {
 		possibleItems.put("Amphitheater", new Amphitheater(city));
 		possibleItems.put("Garden", new Garden(city));
 		possibleItems.put("Chapel", new Chapel(city));
+		possibleItems.put("Pagoda", new Pagoda(city));
 
 		// Wonders
 		possibleItems.put("Great Pyramids", new GreatPyramids(city));
@@ -191,6 +193,32 @@ public class ProducibleItemManager implements NextTurnListener {
 			return;
 
 		city.getPlayerOwner().getStatLine().subValue(Stat.GOLD, item.getProductionItem().getGoldCost());
+		item.getProductionItem().create();
+
+		Json json = new Json();
+
+		BuyProductionItemPacket packet = new BuyProductionItemPacket();
+		packet.setProductionItem(city.getName(), item.getProductionItem().getName());
+		city.getPlayerOwner().sendPacket(json.toJson(packet));
+
+		city.updateWorkedTiles();
+		city.getPlayerOwner().updateOwnedStatlines(false);
+
+		if (itemQueue.peek() != null && itemQueue.peek().getProductionItem().equals(item.getProductionItem())
+				&& item.getProductionItem() instanceof Building) {
+			clearProducingItem();
+		}
+	}
+
+	public void faithBuyProducingItem(String itemName) {
+		if (possibleItems.get(itemName) == null)
+			return;
+
+		ProducingItem item = new ProducingItem(possibleItems.get(itemName));
+		if (city.getPlayerOwner().getStatLine().getStatValue(Stat.FAITH) < item.getProductionItem().getFaithCost())
+			return;
+
+		city.getPlayerOwner().getStatLine().subValue(Stat.FAITH, item.getProductionItem().getFaithCost());
 		item.getProductionItem().create();
 
 		Json json = new Json();

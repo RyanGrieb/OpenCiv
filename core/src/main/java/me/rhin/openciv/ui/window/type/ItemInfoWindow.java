@@ -9,6 +9,7 @@ import me.rhin.openciv.game.production.ProductionItem;
 import me.rhin.openciv.listener.ResizeListener;
 import me.rhin.openciv.shared.stat.Stat;
 import me.rhin.openciv.ui.background.ColoredBackground;
+import me.rhin.openciv.ui.button.type.BuyFaithItemButton;
 import me.rhin.openciv.ui.button.type.BuyItemButton;
 import me.rhin.openciv.ui.button.type.CloseWindowButton;
 import me.rhin.openciv.ui.button.type.ProduceItemButton;
@@ -25,12 +26,15 @@ public class ItemInfoWindow extends AbstractWindow implements ResizeListener {
 	private CustomLabel itemDescLabel;
 	private CustomLabel productionCostLabel;
 	private CustomLabel goldCostLabel;
+	private CustomLabel faithCostLabel;
 	private ColoredBackground itemIcon;
 	private ProduceItemButton produceItemButton;
 	private BuyItemButton buyItemButton;
+	private BuyFaithItemButton buyFaithItemButton;
 	private CloseWindowButton closeWindowButton;
 	private ColoredBackground produceIcon;
 	private ColoredBackground buyIcon;
+	private ColoredBackground faithIcon;
 
 	public ItemInfoWindow(City city, ProductionItem productionItem) {
 		this.setBounds(viewport.getWorldWidth() / 2 - 300 / 2, viewport.getWorldHeight() / 2 - 300 / 2, 300, 300);
@@ -53,12 +57,19 @@ public class ItemInfoWindow extends AbstractWindow implements ResizeListener {
 		addActor(itemDescLabel);
 
 		this.produceItemButton = new ProduceItemButton(city, productionItem, 4, 4, 82, 28);
-		addActor(produceItemButton);
+
+		if (productionItem.getProductionCost() > 0)
+			addActor(produceItemButton);
 
 		this.buyItemButton = new BuyItemButton(city, productionItem, getWidth() / 2 - 82 / 2, 4, 82, 28);
 
 		if (productionItem.getGoldCost() > 0)
 			addActor(buyItemButton);
+
+		this.buyFaithItemButton = new BuyFaithItemButton(city, productionItem, getWidth() / 2 - 82 / 2, 4, 82, 28);
+
+		if (productionItem.getFaithCost() > 0)
+			addActor(buyFaithItemButton);
 
 		this.closeWindowButton = new CloseWindowButton(this.getClass(), "Cancel", getWidth() - 86, 4, 82, 28);
 		addActor(closeWindowButton);
@@ -66,7 +77,9 @@ public class ItemInfoWindow extends AbstractWindow implements ResizeListener {
 		this.produceIcon = new ColoredBackground(TextureEnum.ICON_PRODUCTION.sprite(),
 				produceItemButton.getX() + produceItemButton.getWidth() / 2 - 16 / 2,
 				produceItemButton.getY() + produceItemButton.getHeight(), 16, 16);
-		addActor(produceIcon);
+
+		if (productionItem.getProductionCost() > 0)
+			addActor(produceIcon);
 
 		this.buyIcon = new ColoredBackground(TextureEnum.ICON_GOLD.sprite(),
 				buyItemButton.getX() + buyItemButton.getWidth() / 2 - 16 / 2,
@@ -75,19 +88,34 @@ public class ItemInfoWindow extends AbstractWindow implements ResizeListener {
 		if (productionItem.getGoldCost() > 0)
 			addActor(buyIcon);
 
+		this.faithIcon = new ColoredBackground(TextureEnum.ICON_FAITH.sprite(),
+				buyItemButton.getX() + buyItemButton.getWidth() / 2 - 16 / 2,
+				buyItemButton.getY() + buyItemButton.getHeight(), 16, 16);
+
+		if (productionItem.getFaithCost() > 0)
+			addActor(faithIcon);
+
 		this.productionCostLabel = new CustomLabel(
 				(int) Math.ceil(
 						(productionItem.getProductionCost() / city.getStatLine().getStatValue(Stat.PRODUCTION_GAIN)))
 						+ " Turns",
 				Align.center, produceIcon.getX(), produceIcon.getY() + produceIcon.getHeight() + 2,
 				produceIcon.getWidth(), 12);
-		addActor(productionCostLabel);
+
+		if (productionItem.getProductionCost() > 0)
+			addActor(productionCostLabel);
 
 		this.goldCostLabel = new CustomLabel((int) productionItem.getGoldCost() + " Gold", Align.center, buyIcon.getX(),
 				buyIcon.getY() + buyIcon.getHeight() + 2, buyIcon.getWidth(), 12);
 
 		if (productionItem.getGoldCost() > 0)
 			addActor(goldCostLabel);
+
+		this.faithCostLabel = new CustomLabel((int) productionItem.getFaithCost() + " Faith", Align.center,
+				faithIcon.getX(), faithIcon.getY() + faithIcon.getHeight() + 2, faithIcon.getWidth(), 12);
+
+		if (productionItem.getFaithCost() > 0)
+			addActor(faithCostLabel);
 
 		Civilization.getInstance().getEventManager().addListener(ResizeListener.class, this);
 	}
@@ -102,6 +130,7 @@ public class ItemInfoWindow extends AbstractWindow implements ResizeListener {
 		itemDescLabel.setPosition(4, itemIcon.getY() - itemIcon.getHeight() - itemDescLabel.getHeight());
 		produceItemButton.setPosition(4, 4);
 		buyItemButton.setPosition(getWidth() / 2 - 82 / 2, 4);
+		buyFaithItemButton.setPosition(getWidth() / 2 - 82 / 2, 4);
 		closeWindowButton.setPosition(getWidth() - 86, 4);
 
 		produceIcon.setPosition(produceItemButton.getX() + produceItemButton.getWidth() / 2 - 16 / 2,
@@ -109,9 +138,12 @@ public class ItemInfoWindow extends AbstractWindow implements ResizeListener {
 
 		buyIcon.setPosition(buyItemButton.getX() + buyItemButton.getWidth() / 2 - 16 / 2,
 				buyItemButton.getY() + buyItemButton.getHeight());
+		faithIcon.setPosition(buyItemButton.getX() + buyItemButton.getWidth() / 2 - 16 / 2,
+				buyItemButton.getY() + buyItemButton.getHeight());
 
 		productionCostLabel.setPosition(produceIcon.getX(), produceIcon.getY() + produceIcon.getHeight() + 2);
 		goldCostLabel.setPosition(buyIcon.getX(), buyIcon.getY() + buyIcon.getHeight() + 2);
+		faithCostLabel.setPosition(buyIcon.getX(), buyIcon.getY() + buyIcon.getHeight() + 2);
 
 	}
 

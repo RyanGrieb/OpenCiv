@@ -42,6 +42,7 @@ import me.rhin.openciv.server.listener.BuyProductionItemListener;
 import me.rhin.openciv.server.listener.CombatPreviewListener;
 import me.rhin.openciv.server.listener.DisconnectListener;
 import me.rhin.openciv.server.listener.EndTurnListener;
+import me.rhin.openciv.server.listener.FaithBuyProductionItemListener;
 import me.rhin.openciv.server.listener.FetchPlayerListener;
 import me.rhin.openciv.server.listener.NextTurnListener;
 import me.rhin.openciv.server.listener.PlayerFinishLoadingListener;
@@ -62,6 +63,7 @@ import me.rhin.openciv.shared.packet.type.AddUnitPacket;
 import me.rhin.openciv.shared.packet.type.BuyProductionItemPacket;
 import me.rhin.openciv.shared.packet.type.CombatPreviewPacket;
 import me.rhin.openciv.shared.packet.type.EndTurnPacket;
+import me.rhin.openciv.shared.packet.type.FaithBuyProductionItemPacket;
 import me.rhin.openciv.shared.packet.type.FetchPlayerPacket;
 import me.rhin.openciv.shared.packet.type.GameStartPacket;
 import me.rhin.openciv.shared.packet.type.MoveUnitPacket;
@@ -90,7 +92,7 @@ public class InGameState extends GameState implements DisconnectListener, Select
 		SettleCityListener, PlayerFinishLoadingListener, NextTurnListener, SetProductionItemListener, EndTurnListener,
 		PlayerListRequestListener, FetchPlayerListener, CombatPreviewListener, WorkTileListener, RangedAttackListener,
 		BuyProductionItemListener, RequestEndTurnListener, TileStatlineListener, UnitEmbarkListener,
-		UnitDisembarkListener, UpgradeUnitListener {
+		UnitDisembarkListener, UpgradeUnitListener, FaithBuyProductionItemListener {
 
 	private int currentTurn;
 	private int turnTimeLeft;
@@ -127,6 +129,7 @@ public class InGameState extends GameState implements DisconnectListener, Select
 		Server.getInstance().getEventManager().addListener(UnitEmbarkListener.class, this);
 		Server.getInstance().getEventManager().addListener(UnitDisembarkListener.class, this);
 		Server.getInstance().getEventManager().addListener(UpgradeUnitListener.class, this);
+		Server.getInstance().getEventManager().addListener(FaithBuyProductionItemListener.class, this);
 	}
 
 	@Override
@@ -441,8 +444,6 @@ public class InGameState extends GameState implements DisconnectListener, Select
 		// TODO: Verify if the player owns that city.
 		City targetCity = getCityFromName(packet.getCityName());
 
-		// TODO: Verify if the item can be produced.
-
 		if (targetCity == null)
 			return;
 
@@ -450,6 +451,19 @@ public class InGameState extends GameState implements DisconnectListener, Select
 
 		// Json json = new Json();
 		// conn.send(json.toJson(packet));
+	}
+
+	// TODO: Move to producibleItemManager
+	@Override
+	public void onFaithBuyProductionItem(WebSocket conn, FaithBuyProductionItemPacket packet) {
+		
+		City targetCity = getCityFromName(packet.getCityName());
+		
+		if (targetCity == null)
+			return;
+
+		targetCity.getProducibleItemManager().faithBuyProducingItem(packet.getItemName());
+
 	}
 
 	@Override
@@ -723,7 +737,7 @@ public class InGameState extends GameState implements DisconnectListener, Select
 	public AvailableReligionBonuses getAvailableReligionBonuses() {
 		return availableReligionBonuses;
 	}
-	
+
 	public AvailableReligionIcons getAvailableReligionIcons() {
 		return availableReligionIcons;
 	}
@@ -975,4 +989,5 @@ public class InGameState extends GameState implements DisconnectListener, Select
 
 		return hasSafeTile;
 	}
+
 }

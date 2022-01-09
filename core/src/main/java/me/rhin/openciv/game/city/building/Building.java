@@ -31,6 +31,11 @@ public abstract class Building implements ProductionItem {
 	}
 
 	@Override
+	public float getFaithCost() {
+		return -1;
+	}
+
+	@Override
 	public void setProductionModifier(float productionModifier) {
 		this.productionModifier = productionModifier;
 	}
@@ -55,8 +60,8 @@ public abstract class Building implements ProductionItem {
 
 	public void onBuilt() {
 		built = true;
-		
-		if(this instanceof Wonder) {
+
+		if (this instanceof Wonder) {
 			Civilization.getInstance().getGame().getWonders().setBuilt(getClass());
 		}
 	}

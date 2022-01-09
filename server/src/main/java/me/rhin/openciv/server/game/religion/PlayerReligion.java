@@ -131,4 +131,13 @@ public class PlayerReligion implements NextTurnListener, PickPantheonListener, F
 	public StatLine getStatLine() {
 		return statLine;
 	}
+
+	public boolean hasBonus(Class<? extends ReligionBonus> bonusClass) {
+		for (ReligionBonus bonus : pickedBonuses) {
+			if (bonus.getClass() == bonusClass)
+				return true;
+		}
+
+		return false;
+	}
 }
