@@ -277,17 +277,20 @@ public class InGameScreen extends AbstractScreen {
 				// game.getGameSounds().playTileAmbience();
 			}
 		}
+
+		float speed = 6 * (Gdx.graphics.getDeltaTime() * 60);
+
 		if (Gdx.input.isKeyPressed(Input.Keys.A) || Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
-			translateCamera(-6, 0, 0);
+			translateCamera(-speed, 0, 0);
 		}
 		if (Gdx.input.isKeyPressed(Input.Keys.D) || Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
-			translateCamera(6, 0, 0);
+			translateCamera(speed, 0, 0);
 		}
 		if (Gdx.input.isKeyPressed(Input.Keys.S) || Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
-			translateCamera(0, -6, 0);
+			translateCamera(0, -speed, 0);
 		}
 		if (Gdx.input.isKeyPressed(Input.Keys.W) || Gdx.input.isKeyPressed(Input.Keys.UP)) {
-			translateCamera(0, 6, 0);
+			translateCamera(0, speed, 0);
 		}
 	}
 

@@ -122,5 +122,4 @@ public class Civilization extends Game {
 	public GameOptions getGameOptions() {
 		return gameOptions;
 	}
-
 }

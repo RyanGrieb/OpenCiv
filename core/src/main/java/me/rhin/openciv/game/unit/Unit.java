@@ -129,7 +129,7 @@ public abstract class Unit extends Actor
 		// Move sprite to our standing tile
 
 		// FIXME: We animate attacks to enemies wrong
-		
+
 		// Increment the sprite to the target tile
 		if (movementTiles.size() > 0 && targetTile == null) {
 			Tile tile = movementTiles.get(0);
@@ -144,8 +144,8 @@ public abstract class Unit extends Actor
 
 			float speed = 2;
 
-			float xIncrement = (float) (speed * Math.cos(angle));
-			float yIncrement = (float) (speed * Math.sin(angle));
+			float xIncrement = (float) (speed * Math.cos(angle)) * (Gdx.graphics.getDeltaTime() * 60);
+			float yIncrement = (float) (speed * Math.sin(angle)) * (Gdx.graphics.getDeltaTime() * 60);
 
 			sprite.setPosition(sprite.getX() + xIncrement, sprite.getY() + yIncrement);
 
@@ -153,6 +153,7 @@ public abstract class Unit extends Actor
 				movementTiles.remove(tile);
 			}
 		}
+
 	}
 
 	@Override
