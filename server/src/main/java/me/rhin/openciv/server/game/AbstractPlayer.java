@@ -73,11 +73,13 @@ public abstract class AbstractPlayer implements NextTurnListener {
 			for (Unit unit : ownedUnits) {
 				statLine.mergeStatLine(unit.getMaintenance());
 			}
-
+		
 		for (City city : ownedCities) {
 			statLine.mergeStatLineExcluding(city.getStatLine(), StatType.CITY_EXCLUSIVE);
 		}
 
+		statLine.mergeStatLine(playerReligion.getStatLine());
+		
 		if (increaseValues)
 			statLine.updateStatLine();
 

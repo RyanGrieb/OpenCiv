@@ -66,6 +66,8 @@ public class AvailableReligionBonuses implements PickPantheonListener, FoundReli
 		}
 
 		player.getCapitalCity().getCityReligion().setFollowers(player.getReligion(), 1);
+		
+		pantheons.get(packet.getReligionBonusID()).onAssigned();
 	}
 
 	@Override
@@ -85,6 +87,9 @@ public class AvailableReligionBonuses implements PickPantheonListener, FoundReli
 		
 		//FIXME: Add 1 follower to the city where the prophet founded the religion
 		player.getCapitalCity().getCityReligion().setFollowers(player.getReligion(), 2);
+		
+		founderBeliefs.get(packet.getFounderID()).onAssigned();
+		followerBeliefs.get(packet.getFollowerID()).onAssigned();
 	}
 
 	public boolean availablePantheons() {

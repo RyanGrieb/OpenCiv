@@ -15,4 +15,8 @@ public abstract class ReligionBonus {
 		this.player = player;
 	}
 
+	public void onAssigned() {	
+
+	}
+
 }

@@ -23,16 +23,19 @@ import me.rhin.openciv.shared.packet.type.AvailablePantheonPacket;
 import me.rhin.openciv.shared.packet.type.FoundReligionPacket;
 import me.rhin.openciv.shared.packet.type.PickPantheonPacket;
 import me.rhin.openciv.shared.stat.Stat;
+import me.rhin.openciv.shared.stat.StatLine;
 
 public class PlayerReligion implements NextTurnListener, PickPantheonListener, FoundReligionListener {
 
 	private AbstractPlayer player;
 	private ArrayList<ReligionBonus> pickedBonuses;
 	private ReligionIcon religionIcon;
+	private StatLine statLine;
 
 	public PlayerReligion(AbstractPlayer player) {
 		this.player = player;
 		this.pickedBonuses = new ArrayList<>();
+		this.statLine = new StatLine();
 
 		Server.getInstance().getEventManager().addListener(NextTurnListener.class, this);
 		Server.getInstance().getEventManager().addListener(PickPantheonListener.class, this);
@@ -123,5 +126,9 @@ public class PlayerReligion implements NextTurnListener, PickPantheonListener, F
 
 	public AbstractPlayer getPlayer() {
 		return player;
+	}
+
+	public StatLine getStatLine() {
+		return statLine;
 	}
 }
