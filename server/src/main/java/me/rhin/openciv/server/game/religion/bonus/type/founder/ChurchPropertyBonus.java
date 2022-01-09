@@ -1,5 +1,6 @@
 package me.rhin.openciv.server.game.religion.bonus.type.founder;
 
+import me.rhin.openciv.server.Server;
 import me.rhin.openciv.server.game.city.City;
 import me.rhin.openciv.server.game.religion.PlayerReligion;
 import me.rhin.openciv.server.game.religion.bonus.ReligionBonus;
@@ -16,6 +17,11 @@ import me.rhin.openciv.shared.stat.Stat;
 public class ChurchPropertyBonus extends ReligionBonus
 		implements CityGainMajorityReligionListener, CityLooseMajorityReligionListener {
 
+	public ChurchPropertyBonus() {
+		Server.getInstance().getEventManager().addListener(CityGainMajorityReligionListener.class, this);
+		Server.getInstance().getEventManager().addListener(CityLooseMajorityReligionListener.class, this);
+	}
+	
 	@Override
 	public void onAssigned() {
 		player.getReligion().getStatLine().addValue(Stat.GOLD_GAIN,

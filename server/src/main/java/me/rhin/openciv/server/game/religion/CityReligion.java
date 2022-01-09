@@ -10,6 +10,8 @@ import me.rhin.openciv.server.game.Player;
 import me.rhin.openciv.server.game.city.City;
 import me.rhin.openciv.server.listener.CityGainMajorityReligionListener.CityGainMajorityReligionEvent;
 import me.rhin.openciv.server.listener.CityLooseMajorityReligionListener.CityLooseMajorityReligionEvent;
+import me.rhin.openciv.server.listener.GainFollowerListener.GainFollowerEvent;
+import me.rhin.openciv.server.listener.LooseFollowerListener.LooseFollowerEvent;
 import me.rhin.openciv.shared.packet.type.CityReligionFollowersUpdatePacket;
 
 public class CityReligion {
@@ -47,8 +49,13 @@ public class CityReligion {
 	}
 
 	public void setFollowers(PlayerReligion playerReligion, int amount) {
-		// Note, if the amount of followers to be added is > total religionFollowers,
+		// FIXME: Note, if the amount of followers to be added is > total
+		// religionFollowers,
 		// remove followers from other religions.
+
+		int oldFollowerCount = 0;
+		if (religionFollowers.containsKey(playerReligion))
+			oldFollowerCount = religionFollowers.get(playerReligion);
 
 		PlayerReligion oldMajority = getMajorityReligion();
 
@@ -80,5 +87,19 @@ public class CityReligion {
 
 		}
 
+		int newFollowerCount = religionFollowers.get(playerReligion);
+
+		if (amount > 0) {
+			Server.getInstance().getEventManager()
+					.fireEvent(new GainFollowerEvent(playerReligion, city, oldFollowerCount, newFollowerCount));
+		} else {
+			Server.getInstance().getEventManager()
+					.fireEvent(new LooseFollowerEvent(playerReligion, city, oldFollowerCount, newFollowerCount));
+		}
+
+	}
+
+	public int getFollowersOfReligion(PlayerReligion religion) {
+		return religionFollowers.get(religion);
 	}
 }
