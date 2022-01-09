@@ -155,17 +155,17 @@ public class FoundReligionWindow extends AbstractWindow implements FoundReligion
 		ReligionIcon religionIcon = Civilization.getInstance().getGame().getAvailableReligionIcons().getList()
 				.get(packet.getIconID());
 
-		if (this.founderBonus.equals(founderBonus)) {
+		if (this.founderBonus != null && this.founderBonus.equals(founderBonus)) {
 			this.founderBonus = null;
 			founderBeliefLabel.setText("None");
 		}
 
-		if (this.followerBonus.equals(followerBonus)) {
+		if (this.followerBonus != null && this.followerBonus.equals(followerBonus)) {
 			this.followerBonus = null;
 			followerBeliefLabel.setText("None");
 		}
 
-		if (this.religionIcon.equals(religionIcon)) {
+		if (this.religionIcon != null && this.religionIcon.equals(religionIcon)) {
 			this.religionIcon = null;
 			religionNameLabel.setText("Name: N/A");
 			religionIconBackground.setSprite(TextureEnum.ICON_QUESTION.sprite());

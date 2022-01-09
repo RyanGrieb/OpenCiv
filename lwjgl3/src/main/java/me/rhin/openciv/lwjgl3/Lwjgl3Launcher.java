@@ -32,7 +32,6 @@ public class Lwjgl3Launcher {
 		
 		//FIXME: Temporarily disable for MACOS compatibility
 		//config.setWindowIcon(FileType.Internal, "tile_city.png");
-		
 		return config;
 	}
 }
