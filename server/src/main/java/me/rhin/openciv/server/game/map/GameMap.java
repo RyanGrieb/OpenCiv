@@ -260,7 +260,7 @@ public class GameMap implements MapRequestListener {
 
 			String geographyName = generateGeographyName(geographyFeatureTiles.get(0), geographyFeatureTiles.size());
 			usedGeographyNames.add(geographyName);
-			
+
 			for (Tile tile : geographyFeatureTiles) {
 
 				if (!tile.getGeograpgyName().equals("Generating"))
@@ -661,10 +661,18 @@ public class GameMap implements MapRequestListener {
 		// Spawn barbarians
 		int campAmount = Server.getInstance().getGameOptions().getOption(GameOptionType.BARBARIAN_AMOUNT)
 				* (mapSize + 1);
-		for (int i = 0; i < campAmount; i++) {
+		mainLoop: for (int i = 0; i < campAmount; i++) {
 			int x = rnd.nextInt(getWidth());
 			int y = rnd.nextInt(getHeight());
 			Tile tile = tiles[x][y];
+
+			for (Tile adjTile : tile.getAdjTiles()) {
+				if (adjTile != null && adjTile.containsTileType(TileType.BARBARIAN_CAMP)) {
+					i--;
+					continue mainLoop;
+				}
+			}
+
 			if (tile.containsTileProperty(TileProperty.WATER) || tile.containsTileType(TileType.MOUNTAIN)) {
 				i--;
 				continue;
@@ -674,12 +682,20 @@ public class GameMap implements MapRequestListener {
 			Server.getInstance().getGame().getBarbarianPlayer().addCampTile(tile);
 		}
 
-		// Spawn ruins (TODO: REDUNDANT CODE W/ BARBARAIN BAMPS)
+		// Spawn ruins
 		int ruinsAmount = 8 * (mapSize + 1);
-		for (int i = 0; i < ruinsAmount; i++) {
+		mainLoop: for (int i = 0; i < ruinsAmount; i++) {
 			int x = rnd.nextInt(getWidth());
 			int y = rnd.nextInt(getHeight());
 			Tile tile = tiles[x][y];
+
+			for (Tile adjTile : tile.getAdjTiles()) {
+				if (adjTile != null && adjTile.containsTileType(TileType.RUINS)) {
+					i--;
+					continue mainLoop;
+				}
+			}
+
 			if (tile.containsTileProperty(TileProperty.WATER) || tile.containsTileType(TileType.MOUNTAIN)
 					|| tile.containsTileType(TileType.BARBARIAN_CAMP)) {
 				i--;
