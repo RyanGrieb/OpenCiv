@@ -1,9 +1,11 @@
 package me.rhin.openciv.shared.stat;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -57,6 +59,17 @@ public class StatLine {
 		for (Stat stat : statLine.getStatValues().keySet()) {
 			if (stat.getStatType() == statType)
 				continue;
+			mergeValue(stat, new StatValue(statLine.getStatValues().get(stat)));
+		}
+	}
+
+	public void mergeStatLineExcluding(StatLine statLine, Stat... excludeStats) {
+		List<Stat> excludedStats = Arrays.asList(excludeStats);
+
+		for (Stat stat : statLine.getStatValues().keySet()) {
+			if (excludedStats.contains(stat))
+				continue;
+
 			mergeValue(stat, new StatValue(statLine.getStatValues().get(stat)));
 		}
 	}
@@ -170,7 +183,7 @@ public class StatLine {
 
 		statValues.get(stat).addModifier(modifier);
 	}
-	
+
 	public void subModifier(Stat stat, float modifier) {
 		if (!statValues.containsKey(stat))
 			statValues.put(stat, new StatValue(0));

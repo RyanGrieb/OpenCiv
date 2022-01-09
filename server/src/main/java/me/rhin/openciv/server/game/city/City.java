@@ -377,7 +377,7 @@ public class City
 		statLine.setValue(Stat.PRODUCTION_GAIN, 0);
 
 		for (Building building : buildings)
-			statLine.mergeStatLine(building.getStatLine());
+			statLine.mergeStatLineExcluding(building.getStatLine(), Stat.MORALE_CITY);
 
 		// Set all workers to empty
 		for (Tile tile : territory) {
@@ -657,7 +657,7 @@ public class City
 	public CityReligion getCityReligion() {
 		return cityReligion;
 	}
-	
+
 	private ArrayList<Tile> getTopWorkableTiles() {
 		ArrayList<Tile> topTiles = new ArrayList<>();
 
