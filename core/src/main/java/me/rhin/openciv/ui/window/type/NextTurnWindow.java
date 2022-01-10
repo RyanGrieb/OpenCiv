@@ -1,13 +1,12 @@
 package me.rhin.openciv.ui.window.type;
 
 import java.util.ArrayList;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.utils.Align;
+import com.badlogic.gdx.utils.Timer;
+import com.badlogic.gdx.utils.Timer.Task;
 
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.TextureEnum;
@@ -120,10 +119,9 @@ public class NextTurnWindow extends AbstractWindow implements RequestEndTurnList
 		notificationLabels.add(label);
 		addActor(label);
 
-		new java.util.Timer().schedule(new java.util.TimerTask() {
+		Timer.schedule(new Task() {
 			@Override
 			public void run() {
-
 				Gdx.app.postRunnable(new Runnable() {
 					@Override
 					public void run() {
@@ -137,10 +135,9 @@ public class NextTurnWindow extends AbstractWindow implements RequestEndTurnList
 						}
 					}
 				});
-
 			}
-		}, 3000);
 
+		}, 3);
 	}
 
 	public ArrayList<CustomLabel> getNotificationLabels() {
