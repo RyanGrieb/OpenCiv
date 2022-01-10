@@ -1,10 +1,15 @@
-# OpenCiv
+# OpenCiv ![tile_city](https://github.com/rhin123/OpenCiv/blob/master/assets/tile_city.png?raw=true)
 
-A turn based strategy game, with a rouge-like tile set. Inspired by Sid Meier's Civilization, 
-where it strives to improve on certain aspects that were lacking in the series, and experiment with new features. 
-If you like game development, java, or pixel art, consider contributing. We can make something really great. 
+A turn based strategy game built on [LibGDX](https://github.com/libgdx/libgdx), with a rouge-like tile set.
+
+## About
+OpenCiv is a love letter to turn based strategy games inspired by Sid Meier's Civilization. The game strives to improve on certain aspects that were lacking in the series, and experiment with new features. 
+If you like game development, Java, or pixel art, consider contributing. We can make something great. 
 
 Eventually, I'd like to add support modding through [LUAJ](https://www.gamedevelopment.blog/using-luaj-scripting-to-allow-modding-in-games/).
+
+## Screenshot
+![alt text](https://github.com/rhin123/OpenCiv/blob/master/meta/screenshots/latest.png?raw=true)
 
 To run & modify the game --
 * Install [Java 11](https://www.oracle.com/java/technologies/javase/jdk11-archive-downloads.html) or higher. NOTE: OpenJDK has problems (at least for me on linux)
@@ -23,16 +28,19 @@ Right click -> Run as -> Java Application
 
 * Click multiplayer & connect, then start the game.
 
-Debug keybinds:
+
+Currently, there is no releases available as the game is still in heavy development. Once AI is re-written & singleplayer mode is implemented, a release will be available.
+
+## Keybinds
+``WASD`` or ``ARROW KEYS`` or ``LEFT-CLICK DRAG`` - Camera Movement
+
+``SCROLL`` - Zoom In/Out
+
+``LEFT-CLICK`` Unit ``RIGHT-CLICK`` Tile - Unit Movement (In 2 tile radius)
+
 ```SPACEBAR``` - Skip turns
 
-![alt text](https://github.com/rhin123/OpenCiv/blob/master/meta/screenshots/title_screen.png?raw=true)
-
-![alt text](https://github.com/rhin123/OpenCiv/blob/master/meta/screenshots/world_map.png?raw=true)
-
-![alt text](https://github.com/rhin123/OpenCiv/blob/master/meta/screenshots/roads_n_improvements.png?raw=true)
-
-Special thanks to:
+## Special thanks to:
 
 Contributors - 
 [Will Pewitt](https://github.com/willpewitt)
