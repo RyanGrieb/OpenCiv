@@ -3,6 +3,7 @@ package me.rhin.openciv.ui.window.type;
 import java.util.HashMap;
 
 import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 
 import me.rhin.openciv.Civilization;
@@ -22,6 +23,7 @@ import me.rhin.openciv.listener.SetCitizenTileWorkerListener;
 import me.rhin.openciv.listener.SetCityOwnerListener;
 import me.rhin.openciv.listener.SetTileTypeListener;
 import me.rhin.openciv.listener.TerritoryGrowListener;
+import me.rhin.openciv.shared.listener.Listener;
 import me.rhin.openciv.shared.packet.type.AddSpecialistToContainerPacket;
 import me.rhin.openciv.shared.packet.type.BuildingConstructedPacket;
 import me.rhin.openciv.shared.packet.type.CompleteResearchPacket;
@@ -176,6 +178,13 @@ public class CityInfoWindow extends AbstractWindow implements ResizeListener, Bu
 
 		topRightContainerList.onClose();
 		productionContainerList.onClose();
+
+		for (Actor actor : getChildren()) {
+
+			if (actor instanceof Listener) {
+				Civilization.getInstance().getEventManager().clearListenersFromObject((Listener) actor);
+			}
+		}
 
 		Civilization.getInstance().getEventManager().clearListenersFromObject(this);
 	}

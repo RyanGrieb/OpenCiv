@@ -5,14 +5,16 @@ import java.util.Map.Entry;
 
 import com.badlogic.gdx.scenes.scene2d.Group;
 
+import me.rhin.openciv.Civilization;
 import me.rhin.openciv.game.city.City;
 import me.rhin.openciv.game.religion.PlayerReligion;
-import me.rhin.openciv.shared.stat.Stat;
+import me.rhin.openciv.listener.CityReligionFollowersUpdateListener;
+import me.rhin.openciv.shared.packet.type.CityReligionFollowersUpdatePacket;
 import me.rhin.openciv.ui.background.BlankBackground;
 import me.rhin.openciv.ui.background.ColoredBackground;
 import me.rhin.openciv.ui.label.CustomLabel;
 
-public class CityReligionInfo extends Group {
+public class CityReligionInfo extends Group implements CityReligionFollowersUpdateListener {
 
 	private City city;
 	private BlankBackground blankBackground;
@@ -58,6 +60,12 @@ public class CityReligionInfo extends Group {
 				index++;
 			}
 		}
+		
+		Civilization.getInstance().getEventManager().addListener(CityReligionFollowersUpdateListener.class, this);
 	}
-
+	
+	@Override
+	public void onCityReligionFollowerUpdate(CityReligionFollowersUpdatePacket packet) {
+		
+	}
 }

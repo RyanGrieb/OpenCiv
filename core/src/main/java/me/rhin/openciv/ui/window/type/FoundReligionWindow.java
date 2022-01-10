@@ -211,22 +211,9 @@ public class FoundReligionWindow extends AbstractWindow implements FoundReligion
 		checkFoundableCondition();
 	}
 
-	private void addReligionIconButtons() {
-		int index = 0;
-		for (ReligionIcon icon : Civilization.getInstance().getGame().getAvailableReligionIcons().getAvailableIcons()) {
-
-			if (icon == ReligionIcon.PANTHEON)
-				continue;
-
-			ReligionIconButton iconButton = new ReligionIconButton(icon,
-					chooseIconLabel.getX() + chooseIconLabel.getWidth() + 15 + (68 * index),
-					chooseIconLabel.getY() - 28, 64, 64);
-
-			religionIconButtons.add(iconButton);
-			addActor(iconButton);
-
-			index++;
-		}
+	@Override
+	public void onClose() {
+		Civilization.getInstance().getEventManager().clearListenersFromObject(this);
 	}
 
 	@Override
@@ -313,4 +300,23 @@ public class FoundReligionWindow extends AbstractWindow implements FoundReligion
 	public Unit getUnit() {
 		return unit;
 	}
+
+	private void addReligionIconButtons() {
+		int index = 0;
+		for (ReligionIcon icon : Civilization.getInstance().getGame().getAvailableReligionIcons().getAvailableIcons()) {
+
+			if (icon == ReligionIcon.PANTHEON)
+				continue;
+
+			ReligionIconButton iconButton = new ReligionIconButton(icon,
+					chooseIconLabel.getX() + chooseIconLabel.getWidth() + 15 + (68 * index),
+					chooseIconLabel.getY() - 28, 64, 64);
+
+			religionIconButtons.add(iconButton);
+			addActor(iconButton);
+
+			index++;
+		}
+	}
+
 }
