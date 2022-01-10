@@ -27,6 +27,8 @@ import me.rhin.openciv.shared.stat.StatLine;
 
 public class PlayerReligion implements NextTurnListener, PickPantheonListener, FoundReligionListener {
 
+	private static int chosenPantheons;
+
 	private AbstractPlayer player;
 	private ArrayList<ReligionBonus> pickedBonuses;
 	private ReligionIcon religionIcon;
@@ -48,12 +50,15 @@ public class PlayerReligion implements NextTurnListener, PickPantheonListener, F
 
 		Json json = new Json();
 
-		if (Server.getInstance().getInGameState().getAvailableReligionBonuses().availablePantheons()
+		if (chosenPantheons < 8
+				&& Server.getInstance().getInGameState().getAvailableReligionBonuses().availablePantheons()
 				&& player.getStatLine().getStatValue(Stat.FAITH) > 8 && pickedBonuses.size() < 1
 				&& player instanceof Player) {
 
 			AvailablePantheonPacket packet = new AvailablePantheonPacket();
 			player.sendPacket(json.toJson(packet));
+
+			chosenPantheons++;
 		}
 
 		// FIXME: Limit the number of religions to be founded
