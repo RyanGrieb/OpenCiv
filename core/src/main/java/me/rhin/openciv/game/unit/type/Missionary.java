@@ -10,6 +10,7 @@ import me.rhin.openciv.game.map.tile.TileType.TileProperty;
 import me.rhin.openciv.game.unit.Unit;
 import me.rhin.openciv.game.unit.UnitItem;
 import me.rhin.openciv.game.unit.UnitParameter;
+import me.rhin.openciv.game.unit.actions.type.SpreadReligionAction;
 
 public class Missionary extends UnitItem {
 
@@ -21,6 +22,8 @@ public class Missionary extends UnitItem {
 
 		public MissionaryUnit(UnitParameter unitParameter) {
 			super(unitParameter, TextureEnum.UNIT_MISSIONARY);
+
+			customActions.add(new SpreadReligionAction(this));
 		}
 
 		@Override
@@ -59,9 +62,9 @@ public class Missionary extends UnitItem {
 
 	@Override
 	public boolean meetsProductionRequirements() {
-		//TODO: Support buying prophets from religions you didn't create.
+		// TODO: Support buying prophets from religions you didn't create.
 		return city.getPlayerOwner().getReligion().getPickedBonuses().size() > 1
-				&& city.getCityReligion().getMajorityReligion().equals(city.getPlayerOwner().getReligion());
+				&& city.getCityReligion().getFollowersOfReligion(city.getPlayerOwner().getReligion()) > 0;
 	}
 
 	@Override

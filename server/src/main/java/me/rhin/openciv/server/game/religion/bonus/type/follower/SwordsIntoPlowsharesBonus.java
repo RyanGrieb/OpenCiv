@@ -25,7 +25,8 @@ public class SwordsIntoPlowsharesBonus extends ReligionBonus
 			return;
 
 		for (City city : player.getOwnedCities()) {
-			if (city.getCityReligion().getMajorityReligion().equals(player.getReligion()))
+			if (city.getCityReligion().getMajorityReligion() != null
+					&& city.getCityReligion().getMajorityReligion().equals(player.getReligion()))
 				city.getStatLine().addModifier(Stat.FOOD_GAIN, 0.15F);
 		}
 	}
@@ -45,6 +46,9 @@ public class SwordsIntoPlowsharesBonus extends ReligionBonus
 		if (player == null)
 			return;
 
+		if (oldReligion == null)
+			return;
+
 		if (oldReligion.equals(player.getReligion()) && !city.getPlayerOwner().getDiplomacy().inWar()) {
 			city.getStatLine().subModifier(Stat.FOOD_GAIN, 0.15F);
 		}
@@ -54,7 +58,7 @@ public class SwordsIntoPlowsharesBonus extends ReligionBonus
 	public void onDeclareWar(AbstractPlayer attacker, AbstractPlayer defender) {
 		if (player == null)
 			return;
-		
+
 		for (City city : attacker.getOwnedCities()) {
 			if (city.getCityReligion().getMajorityReligion().equals(player.getReligion())) {
 				city.getStatLine().subModifier(Stat.FOOD_GAIN, 0.15F);

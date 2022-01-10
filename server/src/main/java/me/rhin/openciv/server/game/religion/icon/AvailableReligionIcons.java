@@ -19,7 +19,6 @@ public class AvailableReligionIcons {
 	}
 
 	public ReligionIcon getByID(int iconID) {
-		
-		return null;
+		return religionIcons.get(iconID);
 	}
 }

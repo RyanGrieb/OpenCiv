@@ -33,26 +33,30 @@ import me.rhin.openciv.server.game.religion.bonus.IncreaseTileStatlineBonus;
 import me.rhin.openciv.server.game.religion.bonus.ReligionBonus;
 import me.rhin.openciv.server.game.unit.AttackableEntity;
 import me.rhin.openciv.server.game.unit.RangedUnit;
+import me.rhin.openciv.server.game.unit.type.Missionary.MissionaryUnit;
 import me.rhin.openciv.server.listener.CityGrowthListener.CityGrowthEvent;
 import me.rhin.openciv.server.listener.CityStarveListener.CityStarveEvent;
 import me.rhin.openciv.server.listener.ClickSpecialistListener;
 import me.rhin.openciv.server.listener.ClickWorkedTileListener;
 import me.rhin.openciv.server.listener.NextTurnListener;
+import me.rhin.openciv.server.listener.SpreadReligionListener;
 import me.rhin.openciv.server.listener.TerritoryGrowListener.TerritoryGrowEvent;
 import me.rhin.openciv.shared.packet.type.AddSpecialistToContainerPacket;
 import me.rhin.openciv.shared.packet.type.BuildingConstructedPacket;
+import me.rhin.openciv.shared.packet.type.CityPopulationUpdatePacket;
 import me.rhin.openciv.shared.packet.type.CityStatUpdatePacket;
 import me.rhin.openciv.shared.packet.type.ClickSpecialistPacket;
 import me.rhin.openciv.shared.packet.type.ClickWorkedTilePacket;
 import me.rhin.openciv.shared.packet.type.SetCitizenTileWorkerPacket;
 import me.rhin.openciv.shared.packet.type.SetCitizenTileWorkerPacket.WorkerType;
+import me.rhin.openciv.shared.packet.type.SpreadReligionPacket;
 import me.rhin.openciv.shared.packet.type.TerritoryGrowPacket;
 import me.rhin.openciv.shared.stat.Stat;
 import me.rhin.openciv.shared.stat.StatLine;
 import me.rhin.openciv.shared.util.MathHelper;
 
-public class City
-		implements AttackableEntity, TileObserver, NextTurnListener, ClickSpecialistListener, ClickWorkedTileListener {
+public class City implements AttackableEntity, TileObserver, NextTurnListener, ClickSpecialistListener,
+		ClickWorkedTileListener, SpreadReligionListener {
 
 	private AbstractPlayer playerOwner;
 	private String name;
@@ -104,6 +108,7 @@ public class City
 		Server.getInstance().getEventManager().addListener(NextTurnListener.class, this);
 		Server.getInstance().getEventManager().addListener(ClickWorkedTileListener.class, this);
 		Server.getInstance().getEventManager().addListener(ClickSpecialistListener.class, this);
+		Server.getInstance().getEventManager().addListener(SpreadReligionListener.class, this);
 	}
 
 	public static String getRandomCityName(AbstractPlayer player) {
@@ -157,6 +162,8 @@ public class City
 		if (!playerOwner.hasConnection())
 			return;
 
+		Json json = new Json();
+
 		int gainedFood = (int) (statLine.getStatValue(Stat.FOOD_GAIN) - (statLine.getStatValue(Stat.POPULATION) * 2));
 		statLine.addValue(Stat.FOOD_SURPLUS, gainedFood);
 
@@ -179,6 +186,15 @@ public class City
 			setPopulation((int) statLine.getStatValue(Stat.POPULATION) + 1);
 			updateWorkedTiles();
 
+			CityPopulationUpdatePacket packet = new CityPopulationUpdatePacket();
+			packet.setCity(name, (int) statLine.getStatValue(Stat.POPULATION));
+
+			for (Player player : Server.getInstance().getPlayers()) {
+				if (player.equals(playerOwner))
+					continue;
+				player.sendPacket(json.toJson(packet));
+			}
+
 		} else if (gainedFood < 0) {
 			int starvingTurns = (surplusFood / Math.abs(gainedFood)) + 1;
 
@@ -186,6 +202,15 @@ public class City
 				setPopulation((int) statLine.getStatValue(Stat.POPULATION) - 1);
 				removeAnyWorker();
 				updateWorkedTiles();
+
+				CityPopulationUpdatePacket packet = new CityPopulationUpdatePacket();
+				packet.setCity(name, (int) statLine.getStatValue(Stat.POPULATION));
+
+				for (Player player : Server.getInstance().getPlayers()) {
+					if (player.equals(playerOwner))
+						continue;
+					player.sendPacket(json.toJson(packet));
+				}
 			}
 		}
 
@@ -200,7 +225,6 @@ public class City
 			EmptyCitizenWorker citizenWorker = new EmptyCitizenWorker(this, expansionTile);
 			citizenWorkers.put(expansionTile, citizenWorker);
 
-			Json json = new Json();
 			for (Player player : Server.getInstance().getPlayers()) {
 				TerritoryGrowPacket territoryGrowPacket = new TerritoryGrowPacket();
 				territoryGrowPacket.setCityName(name);
@@ -227,7 +251,6 @@ public class City
 			Server.getInstance().getEventManager().fireEvent(new TerritoryGrowEvent(this, expansionTile));
 		}
 
-		Json json = new Json();
 		CityStatUpdatePacket statUpdatePacket = new CityStatUpdatePacket();
 		for (Stat stat : this.statLine.getStatValues().keySet()) {
 			statUpdatePacket.addStat(name, stat.name(), this.statLine.getStatValues().get(stat).getValue());
@@ -272,6 +295,28 @@ public class City
 		for (SpecialistContainer container : specialistContainers)
 			if (container.getName().equals(packet.getContainerName()))
 				container.removeSpecialistFromContainer();
+	}
+
+	@Override
+	public void onSpreadReligion(WebSocket conn, SpreadReligionPacket packet) {
+		if (!name.equals(packet.getCityName()))
+			return;
+
+		MissionaryUnit unit = (MissionaryUnit) Server.getInstance().getMap().getTiles()[packet.getGridX()][packet
+				.getGridY()].getUnitFromID(packet.getUnitID());
+
+		unit.reduceMovement(2);
+
+		// Unable to convert any other citizens
+		if (cityReligion.getFollowersOfReligion(
+				unit.getPlayerOwner().getReligion()) == (int) statLine.getStatValue(Stat.POPULATION))
+			return;
+
+		// Convert 25% of non-followers to the religion
+
+		cityReligion.addFollowers(unit.getPlayerOwner().getReligion(),
+				(int) Math.ceil(statLine.getStatValue(Stat.POPULATION) * 0.25F));
+		cityReligion.sendFollowerUpdatePacket();
 	}
 
 	@Override

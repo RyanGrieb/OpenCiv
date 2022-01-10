@@ -1,5 +1,6 @@
 package me.rhin.openciv.game.religion;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import me.rhin.openciv.Civilization;
@@ -42,12 +43,18 @@ public class CityReligion implements CityReligionFollowersUpdateListener {
 					religionFollowers.put(playerReligion, packet.getFollowers()[i]);
 					PlayerReligion newMajority = getMajorityReligion();
 
-					if (oldMajority == null || !oldMajority.equals(newMajority)) {
+					if (oldMajority != null && newMajority == null) {
 						Civilization.getInstance().getEventManager()
-								.fireEvent(new CityGainMajorityReligionEvent(city, newMajority));
+								.fireEvent(new CityLooseMajorityReligionEvent(city, oldMajority));
+					}
+
+					if (newMajority != null && (oldMajority == null || !oldMajority.equals(newMajority))) {
 
 						Civilization.getInstance().getEventManager()
 								.fireEvent(new CityLooseMajorityReligionEvent(city, oldMajority));
+
+						Civilization.getInstance().getEventManager()
+								.fireEvent(new CityGainMajorityReligionEvent(city, newMajority));
 					}
 				}
 			}
@@ -55,12 +62,13 @@ public class CityReligion implements CityReligionFollowersUpdateListener {
 	}
 
 	public PlayerReligion getMajorityReligion() {
-		// FIXME: There is a better way to do this
-		PlayerReligion majorityReligion = null;
+		// List in order of smallest to Greatest
+		ArrayList<PlayerReligion> topReligions = new ArrayList<>();
+		topReligions.addAll(religionFollowers.keySet());
 
 		boolean noFollowers = true;
 		for (PlayerReligion playerReligion : religionFollowers.keySet()) {
-			if (religionFollowers.get(playerReligion) > 0)
+			if (getFollowersOfReligion(playerReligion) > 0)
 				noFollowers = false;
 		}
 
@@ -69,16 +77,46 @@ public class CityReligion implements CityReligionFollowersUpdateListener {
 		if (noFollowers)
 			return null;
 
-		for (PlayerReligion playerReligion : religionFollowers.keySet()) {
-			if (majorityReligion == null
-					|| religionFollowers.get(playerReligion) > religionFollowers.get(majorityReligion))
-				majorityReligion = playerReligion;
+		for (int i = 1; i < topReligions.size(); i++) {
+			PlayerReligion religion = topReligions.get(i);
+			int j = i - 1;
+
+			// If the next element is > than previous. Move it up once.
+			while (j >= 0 && getFollowersOfReligion(topReligions.get(j)) > getFollowersOfReligion(religion)) {
+				topReligions.set(j + 1, topReligions.get(j));
+				j -= 1;
+			}
+
+			topReligions.set(j + 1, religion);
 		}
 
-		return majorityReligion;
+		// If the top two religions are the same amount, return null.
+		if (topReligions.size() > 1
+				&& getFollowersOfReligion(topReligions.get(topReligions.size() - 1)) == getFollowersOfReligion(
+						topReligions.get(topReligions.size() - 2)))
+			return null;
+
+		return topReligions.get(topReligions.size() - 1);
 	}
 
 	public HashMap<PlayerReligion, Integer> getMap() {
 		return religionFollowers;
+	}
+
+	public int getBelieverCount() {
+
+		int count = 0;
+		for (int num : religionFollowers.values()) {
+			count += num;
+		}
+
+		return count;
+	}
+
+	public int getFollowersOfReligion(PlayerReligion religion) {
+		if (!religionFollowers.containsKey(religion))
+			return 0;
+
+		return religionFollowers.get(religion);
 	}
 }

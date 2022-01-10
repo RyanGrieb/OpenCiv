@@ -43,7 +43,7 @@ public class FoundReligionPacket extends Packet {
 		this.gridX = gridX;
 		this.gridY = gridY;
 		this.iconID = iconID;
-		this.followerID = founderID;
+		this.founderID = founderID;
 		this.followerID = followerID;
 	}
 	

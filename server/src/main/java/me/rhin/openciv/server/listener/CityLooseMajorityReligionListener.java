@@ -16,9 +16,11 @@ public interface CityLooseMajorityReligionListener extends Listener {
 		private City city;
 		private PlayerReligion oldReligion;
 
-		public CityLooseMajorityReligionEvent(City city, PlayerReligion newReligion) {
+		public CityLooseMajorityReligionEvent(City city, PlayerReligion oldReligion) {
+			if (oldReligion != null)
+				System.out.println(city.getName() + " Lost majority - " + oldReligion.getReligionIcon().name());
 			this.city = city;
-			this.oldReligion = newReligion;
+			this.oldReligion = oldReligion;
 		}
 
 		@Override

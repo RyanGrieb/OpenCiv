@@ -1,5 +1,6 @@
 package me.rhin.openciv.server.game.religion;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map.Entry;
 
@@ -13,6 +14,7 @@ import me.rhin.openciv.server.listener.CityLooseMajorityReligionListener.CityLoo
 import me.rhin.openciv.server.listener.GainFollowerListener.GainFollowerEvent;
 import me.rhin.openciv.server.listener.LooseFollowerListener.LooseFollowerEvent;
 import me.rhin.openciv.shared.packet.type.CityReligionFollowersUpdatePacket;
+import me.rhin.openciv.shared.stat.Stat;
 
 public class CityReligion {
 
@@ -25,12 +27,13 @@ public class CityReligion {
 	}
 
 	public PlayerReligion getMajorityReligion() {
-		// FIXME: There is a better way to do this
-		PlayerReligion majorityReligion = null;
+		// List in order of smallest to Greatest
+		ArrayList<PlayerReligion> topReligions = new ArrayList<>();
+		topReligions.addAll(religionFollowers.keySet());
 
 		boolean noFollowers = true;
 		for (PlayerReligion playerReligion : religionFollowers.keySet()) {
-			if (religionFollowers.get(playerReligion) > 0)
+			if (getFollowersOfReligion(playerReligion) > 0)
 				noFollowers = false;
 		}
 
@@ -39,67 +42,122 @@ public class CityReligion {
 		if (noFollowers)
 			return null;
 
-		for (PlayerReligion playerReligion : religionFollowers.keySet()) {
-			if (majorityReligion == null
-					|| religionFollowers.get(playerReligion) > religionFollowers.get(majorityReligion))
-				majorityReligion = playerReligion;
+		for (int i = 1; i < topReligions.size(); i++) {
+			PlayerReligion religion = topReligions.get(i);
+			int j = i - 1;
+
+			// If the next element is > than previous. Move it up once.
+			while (j >= 0 && getFollowersOfReligion(topReligions.get(j)) > getFollowersOfReligion(religion)) {
+				topReligions.set(j + 1, topReligions.get(j));
+				j -= 1;
+			}
+
+			topReligions.set(j + 1, religion);
 		}
 
-		return majorityReligion;
+		// If the top two religions are the same amount, return null. No majority if
+		// there is a tie.
+		if (topReligions.size() > 1
+				&& getFollowersOfReligion(topReligions.get(topReligions.size() - 1)) == getFollowersOfReligion(
+						topReligions.get(topReligions.size() - 2)))
+			return null;
+
+		return topReligions.get(topReligions.size() - 1);
 	}
 
+	// TODO: Make private?
 	public void setFollowers(PlayerReligion playerReligion, int amount) {
-		// FIXME: Note, if the amount of followers to be added is > total
-		// religionFollowers,
-		// remove followers from other religions.
+		religionFollowers.put(playerReligion, amount);
+	}
 
-		int oldFollowerCount = 0;
-		if (religionFollowers.containsKey(playerReligion))
-			oldFollowerCount = religionFollowers.get(playerReligion);
+	public void addFollowers(PlayerReligion playerReligion, int amount) {
 
 		PlayerReligion oldMajority = getMajorityReligion();
 
-		religionFollowers.put(playerReligion, amount);
+		int oldPlayerReligionFollowerCount = getFollowersOfReligion(playerReligion);
+		int atheistsToConvert = (int) city.getStatLine().getStatValue(Stat.POPULATION) - getBelieverCount();
+
+		if (amount - atheistsToConvert > 0) {
+			// Subtract 1 follower from each religion unit we satisfy amount
+			int hereticsToConvert = amount - atheistsToConvert;
+
+			while (hereticsToConvert > 0) {
+				for (PlayerReligion otherReligion : religionFollowers.keySet()) {
+					if (otherReligion.equals(playerReligion) || getFollowersOfReligion(otherReligion) < 1)
+						continue;
+
+					int oldFollowerCount = getFollowersOfReligion(otherReligion);
+
+					// Subtract 1 from other religion
+					setFollowers(otherReligion, getFollowersOfReligion(otherReligion) - 1);
+
+					Server.getInstance().getEventManager().fireEvent(new LooseFollowerEvent(otherReligion, city,
+							oldFollowerCount, getFollowersOfReligion(otherReligion)));
+
+					hereticsToConvert--;
+
+					if (hereticsToConvert < 1)
+						break;
+				}
+			}
+		}
+
+		setFollowers(playerReligion, getFollowersOfReligion(playerReligion) + amount);
+
+		int newPlayerReligionFollowerCount = getFollowersOfReligion(playerReligion);
+
+		Server.getInstance().getEventManager().fireEvent(new GainFollowerEvent(playerReligion, city,
+				oldPlayerReligionFollowerCount, newPlayerReligionFollowerCount));
 
 		PlayerReligion newMajority = getMajorityReligion();
 
-		if (oldMajority == null || !oldMajority.equals(newMajority)) {
+		// System.out.println(oldMajority + "," + newMajority);
+
+		if (oldMajority != null && newMajority == null) {
+			Server.getInstance().getEventManager().fireEvent(new CityLooseMajorityReligionEvent(city, oldMajority));
+			city.updateWorkedTiles();
+			city.getPlayerOwner().updateOwnedStatlines(false);
+		}
+
+		if (newMajority != null && (oldMajority == null || !oldMajority.equals(newMajority))) {
 			Server.getInstance().getEventManager().fireEvent(new CityGainMajorityReligionEvent(city, newMajority));
 
 			Server.getInstance().getEventManager().fireEvent(new CityLooseMajorityReligionEvent(city, oldMajority));
 
-			// FIXME: Only update this if the majority religion changes.
 			city.updateWorkedTiles();
 			city.getPlayerOwner().updateOwnedStatlines(false);
+		}
+	}
 
-			CityReligionFollowersUpdatePacket packet = new CityReligionFollowersUpdatePacket();
-			packet.setCityName(city.getName());
+	public void sendFollowerUpdatePacket() {
+		CityReligionFollowersUpdatePacket packet = new CityReligionFollowersUpdatePacket();
+		packet.setCityName(city.getName());
 
-			for (Entry<PlayerReligion, Integer> entrySet : religionFollowers.entrySet()) {
-				packet.addFollowerGroup(entrySet.getKey().getPlayer().getName(), entrySet.getValue());
-			}
-
-			Json json = new Json();
-
-			for (Player player : Server.getInstance().getPlayers()) {
-				player.sendPacket(json.toJson(packet));
-			}
-
+		for (Entry<PlayerReligion, Integer> entrySet : religionFollowers.entrySet()) {
+			packet.addFollowerGroup(entrySet.getKey().getPlayer().getName(), entrySet.getValue());
 		}
 
-		int newFollowerCount = religionFollowers.get(playerReligion);
+		Json json = new Json();
 
-		if (amount > 0) {
-			Server.getInstance().getEventManager()
-					.fireEvent(new GainFollowerEvent(playerReligion, city, oldFollowerCount, newFollowerCount));
-		} else {
-			Server.getInstance().getEventManager()
-					.fireEvent(new LooseFollowerEvent(playerReligion, city, oldFollowerCount, newFollowerCount));
+		for (Player player : Server.getInstance().getPlayers()) {
+			player.sendPacket(json.toJson(packet));
+		}
+	}
+
+	public int getBelieverCount() {
+
+		int count = 0;
+		for (int num : religionFollowers.values()) {
+			count += num;
 		}
 
+		return count;
 	}
 
 	public int getFollowersOfReligion(PlayerReligion religion) {
+		if (!religionFollowers.containsKey(religion))
+			return 0;
+
 		return religionFollowers.get(religion);
 	}
 }

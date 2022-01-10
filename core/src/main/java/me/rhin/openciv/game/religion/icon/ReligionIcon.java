@@ -1,6 +1,7 @@
 package me.rhin.openciv.game.religion.icon;
 
 import me.rhin.openciv.asset.TextureEnum;
+import me.rhin.openciv.shared.util.StrUtil;
 
 public enum ReligionIcon {
 
@@ -18,5 +19,9 @@ public enum ReligionIcon {
 
 	public TextureEnum getTexture() {
 		return texture;
+	}
+
+	public String getName() {
+		return StrUtil.capitalize(name().toLowerCase());
 	}
 }

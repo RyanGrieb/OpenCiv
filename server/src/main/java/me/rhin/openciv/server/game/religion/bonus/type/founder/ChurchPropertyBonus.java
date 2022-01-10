@@ -21,7 +21,7 @@ public class ChurchPropertyBonus extends ReligionBonus
 		Server.getInstance().getEventManager().addListener(CityGainMajorityReligionListener.class, this);
 		Server.getInstance().getEventManager().addListener(CityLooseMajorityReligionListener.class, this);
 	}
-	
+
 	@Override
 	public void onAssigned() {
 		player.getReligion().getStatLine().addValue(Stat.GOLD_GAIN,
@@ -43,6 +43,7 @@ public class ChurchPropertyBonus extends ReligionBonus
 			return;
 
 		player.getReligion().getStatLine().subValue(Stat.GOLD_GAIN, 2);
+		player.updateOwnedStatlines(false);
 	}
 
 	@Override
@@ -54,6 +55,7 @@ public class ChurchPropertyBonus extends ReligionBonus
 			return;
 
 		player.getReligion().getStatLine().addValue(Stat.GOLD_GAIN, 2);
+		player.updateOwnedStatlines(false);
 	}
 
 }

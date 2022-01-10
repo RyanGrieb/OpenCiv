@@ -14,6 +14,10 @@ public class FoundReligionAction extends AbstractAction {
 
 	@Override
 	public boolean canAct() {
+		
+		if(unit.getStandingTile().getTerritory() == null || !unit.getStandingTile().getTerritory().equals(unit.getPlayerOwner().getCapitalCity()))
+			return false;
+		
 		return unit.getPlayerOwner().getReligion().getPickedBonuses().size() < 2;
 	}
 

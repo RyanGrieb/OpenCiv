@@ -2,7 +2,6 @@ package me.rhin.openciv.game.city;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map.Entry;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
@@ -36,6 +35,8 @@ import me.rhin.openciv.listener.ApplyProductionToItemListener;
 import me.rhin.openciv.listener.BuildingConstructedListener;
 import me.rhin.openciv.listener.BuyProductionItemListener;
 import me.rhin.openciv.listener.CityGainMajorityReligionListener;
+import me.rhin.openciv.listener.CityLooseMajorityReligionListener;
+import me.rhin.openciv.listener.CityPopulationUpdateListener;
 import me.rhin.openciv.listener.CityStatUpdateListener;
 import me.rhin.openciv.listener.FinishProductionItemListener;
 import me.rhin.openciv.listener.NextTurnListener;
@@ -48,6 +49,7 @@ import me.rhin.openciv.shared.packet.type.AddSpecialistToContainerPacket;
 import me.rhin.openciv.shared.packet.type.ApplyProductionToItemPacket;
 import me.rhin.openciv.shared.packet.type.BuildingConstructedPacket;
 import me.rhin.openciv.shared.packet.type.BuyProductionItemPacket;
+import me.rhin.openciv.shared.packet.type.CityPopulationUpdatePacket;
 import me.rhin.openciv.shared.packet.type.CityStatUpdatePacket;
 import me.rhin.openciv.shared.packet.type.FinishProductionItemPacket;
 import me.rhin.openciv.shared.packet.type.NextTurnPacket;
@@ -55,6 +57,7 @@ import me.rhin.openciv.shared.packet.type.RemoveSpecialistFromContainerPacket;
 import me.rhin.openciv.shared.packet.type.SetCitizenTileWorkerPacket;
 import me.rhin.openciv.shared.packet.type.SetCitizenTileWorkerPacket.WorkerType;
 import me.rhin.openciv.shared.packet.type.SetProductionItemPacket;
+import me.rhin.openciv.shared.stat.Stat;
 import me.rhin.openciv.shared.stat.StatLine;
 import me.rhin.openciv.ui.game.Healthbar;
 import me.rhin.openciv.ui.label.CustomLabel;
@@ -65,7 +68,8 @@ public class City extends Group
 		implements AttackableEntity, TileObserver, SpecialistContainer, BuildingConstructedListener,
 		CityStatUpdateListener, SetProductionItemListener, ApplyProductionToItemListener, FinishProductionItemListener,
 		SetCitizenTileWorkerListener, AddSpecialistToContainerListener, RemoveSpecialistFromContainerListener,
-		NextTurnListener, BuyProductionItemListener, CityGainMajorityReligionListener, ReligionIconChangeListener {
+		NextTurnListener, BuyProductionItemListener, CityGainMajorityReligionListener,
+		CityLooseMajorityReligionListener, ReligionIconChangeListener, CityPopulationUpdateListener {
 
 	private Tile originTile;
 	private AbstractPlayer playerOwner;
@@ -93,6 +97,7 @@ public class City extends Group
 		this.unemployedWorkerAmount = 0;
 		this.producibleItemManager = new ProducibleItemManager(this);
 		this.statLine = new StatLine();
+		statLine.setValue(Stat.POPULATION, 1);
 		this.cityReligion = new CityReligion(this);
 		this.nameLabel = new CustomLabel(name);
 		nameLabel.setPosition(originTile.getX() + originTile.getWidth() / 2 - nameLabel.getWidth() / 2,
@@ -134,7 +139,9 @@ public class City extends Group
 		Civilization.getInstance().getEventManager().addListener(NextTurnListener.class, this);
 		Civilization.getInstance().getEventManager().addListener(BuyProductionItemListener.class, this);
 		Civilization.getInstance().getEventManager().addListener(CityGainMajorityReligionListener.class, this);
+		Civilization.getInstance().getEventManager().addListener(CityLooseMajorityReligionListener.class, this);
 		Civilization.getInstance().getEventManager().addListener(ReligionIconChangeListener.class, this);
+		Civilization.getInstance().getEventManager().addListener(CityPopulationUpdateListener.class, this);
 	}
 
 	@Override
@@ -281,8 +288,19 @@ public class City extends Group
 
 	@Override
 	public void onCityGainMajorityReligion(City city, PlayerReligion newReligion) {
+		if (!city.equals(this))
+			return;
+
 		religionIcon = newReligion.getReligionIcon().getTexture().sprite();
 		religionIcon.setBounds(nameLabel.getX() + nameLabel.getWidth() + 2, nameLabel.getY(), 8, 8);
+	}
+
+	@Override
+	public void onCityLooseMajorityReligion(City city, PlayerReligion oldReligion) {
+		if (!city.equals(this))
+			return;
+		
+		religionIcon = null;
 	}
 
 	@Override
@@ -292,6 +310,14 @@ public class City extends Group
 
 		religionIcon = icon.getTexture().sprite();
 		religionIcon.setBounds(nameLabel.getX() + nameLabel.getWidth() + 2, nameLabel.getY(), 8, 8);
+	}
+
+	@Override
+	public void onCityPopulationUpdate(CityPopulationUpdatePacket packet) {
+		if (!getName().equals(packet.getCityName()))
+			return;
+
+		statLine.setValue(Stat.POPULATION, packet.getPopulation());
 	}
 
 	@Override
@@ -489,5 +515,4 @@ public class City extends Group
 	public CityReligion getCityReligion() {
 		return cityReligion;
 	}
-
 }

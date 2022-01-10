@@ -85,6 +85,7 @@ public class PlayerReligion implements NextTurnListener, PickPantheonListener, F
 		if (!player.equals(this.player))
 			return;
 
+		this.religionIcon = ReligionIcon.PANTHEON;
 		pickedBonuses.add(Server.getInstance().getInGameState().getAvailableReligionBonuses().getPantheons()
 				.get(packet.getReligionBonusID()));
 	}
@@ -122,6 +123,10 @@ public class PlayerReligion implements NextTurnListener, PickPantheonListener, F
 		ArrayList<City> followerCities = new ArrayList<>();
 
 		for (City city : player.getOwnedCities()) {
+
+			if (city.getCityReligion().getMajorityReligion() == null)
+				continue;
+
 			if (city.getCityReligion().getMajorityReligion().equals(this))
 				followerCities.add(city);
 		}
@@ -144,5 +149,9 @@ public class PlayerReligion implements NextTurnListener, PickPantheonListener, F
 		}
 
 		return false;
+	}
+
+	public ReligionIcon getReligionIcon() {
+		return religionIcon;
 	}
 }

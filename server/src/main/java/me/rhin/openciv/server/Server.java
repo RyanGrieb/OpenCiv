@@ -49,6 +49,7 @@ import me.rhin.openciv.server.listener.SetProductionItemListener.SetProductionIt
 import me.rhin.openciv.server.listener.SetTurnLengthListener.SetTurnLengthEvent;
 import me.rhin.openciv.server.listener.SetWorldSizeListener.SetWorldSizeEvent;
 import me.rhin.openciv.server.listener.SettleCityListener.SettleCityEvent;
+import me.rhin.openciv.server.listener.SpreadReligionListener.SpreadReligionEvent;
 import me.rhin.openciv.server.listener.StartGameRequestListener.StartGameRequestEvent;
 import me.rhin.openciv.server.listener.TileStatlineListener.TileStatlineEvent;
 import me.rhin.openciv.server.listener.TradeCityListener.TradeCityEvent;
@@ -87,6 +88,7 @@ import me.rhin.openciv.shared.packet.type.SetProductionItemPacket;
 import me.rhin.openciv.shared.packet.type.SetTurnLengthPacket;
 import me.rhin.openciv.shared.packet.type.SetWorldSizePacket;
 import me.rhin.openciv.shared.packet.type.SettleCityPacket;
+import me.rhin.openciv.shared.packet.type.SpreadReligionPacket;
 import me.rhin.openciv.shared.packet.type.StartGameRequestPacket;
 import me.rhin.openciv.shared.packet.type.TileStatlinePacket;
 import me.rhin.openciv.shared.packet.type.TradeCityPacket;
@@ -179,6 +181,7 @@ public class Server extends WebSocketServer {
 		networkEvents.put(PickPantheonPacket.class, PickPantheonEvent.class);
 		networkEvents.put(FoundReligionPacket.class, FoundReligionEvent.class);
 		networkEvents.put(FaithBuyProductionItemPacket.class, FaithBuyProductionItemEvent.class);
+		networkEvents.put(SpreadReligionPacket.class, SpreadReligionEvent.class);
 
 		this.playerIndex = 0;
 		this.commandProcessor = new CmdProcessor();

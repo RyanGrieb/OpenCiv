@@ -17,6 +17,7 @@ public interface CityGainMajorityReligionListener extends Listener {
 		private PlayerReligion newReligion;
 
 		public CityGainMajorityReligionEvent(City city, PlayerReligion newReligion) {
+			System.out.println(city.getName() + " Gained majority - " + newReligion.getReligionIcon().name());
 			this.city = city;
 			this.newReligion = newReligion;
 		}

@@ -456,9 +456,9 @@ public class InGameState extends GameState implements DisconnectListener, Select
 	// TODO: Move to producibleItemManager
 	@Override
 	public void onFaithBuyProductionItem(WebSocket conn, FaithBuyProductionItemPacket packet) {
-		
+
 		City targetCity = getCityFromName(packet.getCityName());
-		
+
 		if (targetCity == null)
 			return;
 
@@ -879,8 +879,7 @@ public class InGameState extends GameState implements DisconnectListener, Select
 
 		// Debug code
 		if (players.size() > 1) {
-			// players.get(0).setSpawnPos(players.get(1).getSpawnX() + 2,
-			// players.get(1).getSpawnY() + 2);
+			players.get(0).setSpawnPos(players.get(1).getSpawnX() + 2, players.get(1).getSpawnY() + 2);
 		}
 
 		// Give players a warrior unit

@@ -10,7 +10,7 @@ public class Chapel extends Building {
 	public Chapel(City city) {
 		super(city);
 
-		this.statLine.addValue(Stat.FAITH_GAIN, 1);
+		this.statLine.addValue(Stat.FAITH_GAIN, 50);
 	}
 
 	@Override

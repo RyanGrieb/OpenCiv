@@ -35,6 +35,7 @@ import me.rhin.openciv.shared.packet.type.TerritoryGrowPacket;
 import me.rhin.openciv.ui.button.type.CloseWindowButton;
 import me.rhin.openciv.ui.button.type.WorkedTileButton;
 import me.rhin.openciv.ui.game.CityProductionInfo;
+import me.rhin.openciv.ui.game.CityReligionInfo;
 import me.rhin.openciv.ui.game.CityStatsInfo;
 import me.rhin.openciv.ui.list.ContainerList;
 import me.rhin.openciv.ui.list.ListContainer;
@@ -54,6 +55,7 @@ public class CityInfoWindow extends AbstractWindow implements ResizeListener, Bu
 	private City city;
 	private CloseWindowButton closeWindowButton;
 	private CityStatsInfo cityStatsInfo;
+	private CityReligionInfo cityReligionInfo;
 	private CityProductionInfo cityProductionInfo;
 	// TODO: buildingContainerList should contain citizen focuses soon
 	private ContainerList topRightContainerList;
@@ -71,7 +73,10 @@ public class CityInfoWindow extends AbstractWindow implements ResizeListener, Bu
 
 		addActor(cityStatsInfo);
 
-		this.cityProductionInfo = new CityProductionInfo(city, 2, cityStatsInfo.getY() - 105, 200, 100);
+		this.cityReligionInfo = new CityReligionInfo(city, 2, cityStatsInfo.getY() - 105, 200, 100);
+		addActor(cityReligionInfo);
+
+		this.cityProductionInfo = new CityProductionInfo(city, 2, cityReligionInfo.getY() - 105, 200, 100);
 		addActor(cityProductionInfo);
 
 		this.productionContainerList = new ContainerList(this, 0, 0, 200, 325);
@@ -130,7 +135,8 @@ public class CityInfoWindow extends AbstractWindow implements ResizeListener, Bu
 	public void onResize(int width, int height) {
 		closeWindowButton.setPosition(width / 2 - 150 / 2, 50);
 		cityStatsInfo.setPosition(2, height - (175 + GameOverlay.HEIGHT + 2));
-		cityProductionInfo.setPosition(2, cityStatsInfo.getY() - 105);
+		cityReligionInfo.setPosition(2, cityStatsInfo.getY() - 105);
+		cityProductionInfo.setPosition(2, cityReligionInfo.getY() - 105);
 
 		float topbarHeight = ((InGameScreen) Civilization.getInstance().getCurrentScreen()).getGameOverlay()
 				.getTopbarHeight();

@@ -255,7 +255,7 @@ public class UnitWindow extends AbstractWindow
 		return unit;
 	}
 
-	private void updateActionButtons() {
+	public void updateActionButtons() {
 
 		for (UnitActionButton button : unitActionButtons) {
 			removeActor(button);
