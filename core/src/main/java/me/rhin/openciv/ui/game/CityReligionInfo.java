@@ -26,6 +26,8 @@ public class CityReligionInfo extends Group implements CityReligionFollowersUpda
 	public CityReligionInfo(City city, float x, float y, float width, float height) {
 		setBounds(x, y, width, height);
 
+		this.city = city;
+
 		this.religionIcons = new ArrayList<>();
 		this.religionFollowerLabels = new ArrayList<>();
 
@@ -38,6 +40,28 @@ public class CityReligionInfo extends Group implements CityReligionFollowersUpda
 
 		this.atheistsLabel = new CustomLabel("None");
 		atheistsLabel.setPosition(2, height - 40);
+
+		initValues();
+
+		Civilization.getInstance().getEventManager().addListener(CityReligionFollowersUpdateListener.class, this);
+	}
+
+	@Override
+	public void onCityReligionFollowerUpdate(CityReligionFollowersUpdatePacket packet) {
+
+		if (atheistsLabel.hasParent())
+			removeActor(atheistsLabel);
+
+		for (ColoredBackground icon : religionIcons)
+			removeActor(icon);
+
+		for (CustomLabel label : religionFollowerLabels)
+			removeActor(label);
+		
+		initValues();
+	}
+
+	private void initValues() {
 		if (city.getCityReligion().getBelieverCount() < 1)
 			addActor(atheistsLabel);
 
@@ -46,8 +70,8 @@ public class CityReligionInfo extends Group implements CityReligionFollowersUpda
 			if (entrySet.getValue() > 0) {
 
 				ColoredBackground religionIcon = new ColoredBackground(
-						entrySet.getKey().getReligionIcon().getTexture().sprite(), 2, height - 40 - (22 * index), 16,
-						16);
+						entrySet.getKey().getReligionIcon().getTexture().sprite(), 2, getHeight() - 40 - (22 * index),
+						16, 16);
 				religionIcons.add(religionIcon);
 				addActor(religionIcon);
 
@@ -60,12 +84,5 @@ public class CityReligionInfo extends Group implements CityReligionFollowersUpda
 				index++;
 			}
 		}
-		
-		Civilization.getInstance().getEventManager().addListener(CityReligionFollowersUpdateListener.class, this);
-	}
-	
-	@Override
-	public void onCityReligionFollowerUpdate(CityReligionFollowersUpdatePacket packet) {
-		
 	}
 }
