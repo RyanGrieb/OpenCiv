@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map.Entry;
 
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.Json;
 
 import me.rhin.openciv.server.Server;
@@ -81,7 +82,7 @@ public class CityReligion {
 			// Subtract 1 follower from each religion unit we satisfy amount
 			int hereticsToConvert = amount - atheistsToConvert;
 
-			while (hereticsToConvert > 0) {
+			while (hereticsToConvert > 0 && getBelieverCountExcluding(playerReligion) > 0) {
 				for (PlayerReligion otherReligion : religionFollowers.keySet()) {
 					if (otherReligion.equals(playerReligion) || getFollowersOfReligion(otherReligion) < 1)
 						continue;
@@ -102,7 +103,10 @@ public class CityReligion {
 			}
 		}
 
-		setFollowers(playerReligion, getFollowersOfReligion(playerReligion) + amount);
+		// Note: We clamp here, since getFollowersOfReligion(playerReligion) + amount
+		// can be > than the cities population
+		setFollowers(playerReligion, MathUtils.clamp(getFollowersOfReligion(playerReligion) + amount, 0,
+				(int) city.getStatLine().getStatValue(Stat.POPULATION)));
 
 		int newPlayerReligionFollowerCount = getFollowersOfReligion(playerReligion);
 
@@ -159,5 +163,18 @@ public class CityReligion {
 			return 0;
 
 		return religionFollowers.get(religion);
+	}
+
+	private int getBelieverCountExcluding(PlayerReligion playerReligion) {
+
+		int count = 0;
+		for (Entry<PlayerReligion, Integer> entrySet : religionFollowers.entrySet()) {
+			if (entrySet.getKey().equals(playerReligion))
+				continue;
+
+			count += entrySet.getValue();
+		}
+
+		return count;
 	}
 }

@@ -316,6 +316,7 @@ public class City implements AttackableEntity, TileObserver, NextTurnListener, C
 
 		cityReligion.addFollowers(unit.getPlayerOwner().getReligion(),
 				(int) Math.ceil(statLine.getStatValue(Stat.POPULATION) * 0.25F));
+
 		cityReligion.sendFollowerUpdatePacket();
 	}
 

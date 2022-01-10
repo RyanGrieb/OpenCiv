@@ -108,7 +108,7 @@ public class FoundReligionWindow extends AbstractWindow implements FoundReligion
 		addActor(founderBeliefButton);
 
 		this.founderBeliefLabel = new CustomLabel("None");
-		founderBeliefLabel.setPosition(founderBeliefDescLabel.getX(), founderBeliefDescLabel.getY() - 55);
+		founderBeliefLabel.setPosition(founderBeliefDescLabel.getX(), founderBeliefDescLabel.getY() - 70);
 		addActor(founderBeliefLabel);
 
 		this.followerBeliefDescLabel = new CustomLabel("Follower Belief:");
@@ -121,7 +121,7 @@ public class FoundReligionWindow extends AbstractWindow implements FoundReligion
 		addActor(followerBeliefButton);
 
 		this.followerBeliefLabel = new CustomLabel("None");
-		followerBeliefLabel.setPosition(followerBeliefDescLabel.getX(), followerBeliefDescLabel.getY() - 55);
+		followerBeliefLabel.setPosition(followerBeliefDescLabel.getX(), followerBeliefDescLabel.getY() - 70);
 		addActor(followerBeliefLabel);
 
 		this.bonusContianerList = new ContainerList(this, blankBackground.getX() + blankBackground.getWidth() / 2 - 35,
@@ -159,11 +159,11 @@ public class FoundReligionWindow extends AbstractWindow implements FoundReligion
 		founderBeliefDescLabel.setPosition(pantheonLabel.getX(), pantheonLabel.getY() - 45);
 		founderBeliefButton.setPosition(founderBeliefDescLabel.getX() + founderBeliefDescLabel.getWidth(),
 				founderBeliefDescLabel.getY() - 11);
-		founderBeliefLabel.setPosition(founderBeliefDescLabel.getX(), founderBeliefDescLabel.getY() - 55);
+		founderBeliefLabel.setPosition(founderBeliefDescLabel.getX(), founderBeliefDescLabel.getY() - 70);
 		followerBeliefDescLabel.setPosition(founderBeliefLabel.getX(), founderBeliefLabel.getY() - 45);
 		followerBeliefButton.setPosition(followerBeliefDescLabel.getX() + followerBeliefDescLabel.getWidth(),
 				followerBeliefDescLabel.getY() - 11);
-		followerBeliefLabel.setPosition(followerBeliefDescLabel.getX(), followerBeliefDescLabel.getY() - 55);
+		followerBeliefLabel.setPosition(followerBeliefDescLabel.getX(), followerBeliefDescLabel.getY() - 70);
 		bonusContianerList.setPosition(blankBackground.getX() + blankBackground.getWidth() / 2 - 35,
 				blankBackground.getY() + 100);
 	}

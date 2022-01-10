@@ -81,7 +81,7 @@ public class ListReligionBonus extends ListObject {
 
 					window.getFounderBeliefLabel().setText(religionBonus.getName() + ":\n" + religionBonus.getDesc());
 					window.setFounderBelief(religionBonus);
-					
+
 					window.checkFoundableCondition();
 				}
 
@@ -95,7 +95,7 @@ public class ListReligionBonus extends ListObject {
 
 					window.getFollowerBeliefLabel().setText(religionBonus.getName() + ":\n" + religionBonus.getDesc());
 					window.setFollowerBelief(religionBonus);
-					
+
 					window.checkFoundableCondition();
 				}
 			}
@@ -137,7 +137,7 @@ public class ListReligionBonus extends ListObject {
 		backgroundSprite.setPosition(x, y);
 		hoveredBackgroundSprite.setPosition(x, y);
 		bonusIcon.setPosition(4, y + (getHeight() / 2) - 12);
-		bonusDescLabel.setPosition(x + 40, y + 22);
+		bonusDescLabel.setPosition(x + 40, y + getHeight() - bonusDescLabel.getHeight() - 4);
 	}
 
 	public ReligionBonus getBonusType() {

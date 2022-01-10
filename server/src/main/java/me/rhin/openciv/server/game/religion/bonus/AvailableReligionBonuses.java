@@ -12,6 +12,7 @@ import me.rhin.openciv.server.game.religion.bonus.type.follower.PagodasBonus;
 import me.rhin.openciv.server.game.religion.bonus.type.follower.SwordsIntoPlowsharesBonus;
 import me.rhin.openciv.server.game.religion.bonus.type.founder.ChurchPropertyBonus;
 import me.rhin.openciv.server.game.religion.bonus.type.founder.TitheBonus;
+import me.rhin.openciv.server.game.religion.bonus.type.founder.WorldChurchBonus;
 import me.rhin.openciv.server.game.religion.bonus.type.pantheon.DesertFolkloreBonus;
 import me.rhin.openciv.server.game.religion.bonus.type.pantheon.GodOfTheOpenSkyBonus;
 import me.rhin.openciv.server.game.religion.bonus.type.pantheon.GodOfTheSeaBonus;
@@ -43,6 +44,7 @@ public class AvailableReligionBonuses implements PickPantheonListener, FoundReli
 
 		founderBeliefs.add(new ChurchPropertyBonus());
 		founderBeliefs.add(new TitheBonus());
+		founderBeliefs.add(new WorldChurchBonus());
 
 		followerBeliefs.add(new PagodasBonus());
 		followerBeliefs.add(new SwordsIntoPlowsharesBonus());
