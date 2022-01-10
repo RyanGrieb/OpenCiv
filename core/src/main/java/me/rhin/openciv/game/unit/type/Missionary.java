@@ -35,6 +35,11 @@ public class Missionary extends UnitItem {
 		}
 
 		@Override
+		public boolean isUnitCapturable() {
+			return true;
+		}
+
+		@Override
 		public List<UnitType> getUnitTypes() {
 			return Arrays.asList(UnitType.SUPPORT);
 		}
