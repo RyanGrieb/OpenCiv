@@ -10,12 +10,12 @@ import me.rhin.openciv.server.listener.LooseFollowerListener;
 import me.rhin.openciv.shared.stat.Stat;
 
 public class TitheBonus extends ReligionBonus implements GainFollowerListener, LooseFollowerListener {
-	
+
 	public TitheBonus() {
 		Server.getInstance().getEventManager().addListener(GainFollowerListener.class, this);
 		Server.getInstance().getEventManager().addListener(LooseFollowerListener.class, this);
 	}
-	
+
 	@Override
 	public void onAssigned() {
 
@@ -41,6 +41,8 @@ public class TitheBonus extends ReligionBonus implements GainFollowerListener, L
 
 		if (oldFollowerCount == 4 && newFollowerCount < 4)
 			player.getReligion().getStatLine().subValue(Stat.GOLD_GAIN, 1);
+
+		player.updateOwnedStatlines(false);
 	}
 
 	@Override
@@ -53,6 +55,8 @@ public class TitheBonus extends ReligionBonus implements GainFollowerListener, L
 
 		if (oldFollowerCount == 3 && newFollowerCount > 3)
 			player.getReligion().getStatLine().addValue(Stat.GOLD_GAIN, 1);
+
+		player.updateOwnedStatlines(false);
 	}
 
 }
