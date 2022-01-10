@@ -23,7 +23,7 @@ public enum TileType {
 	SHALLOW_OCEAN(TextureEnum.TILE_SHALLOW_OCEAN, TileLayer.BASE, TileProperty.WATER),
 	MOUNTAIN(TextureEnum.TILE_MOUNTIAN, 1000000, TileLayer.HIGH),
 	FOREST(TextureEnum.TILE_FOREST, 2, TileLayer.HIGH, SoundEnum.WOOD_CHOP),
-	JUNGLE(TextureEnum.TILE_JUNGLE, 2, TileLayer.HIGH),
+	JUNGLE(TextureEnum.TILE_JUNGLE, 2, TileLayer.HIGH, SoundEnum.WOOD_CHOP),
 	HORSES(TextureEnum.TILE_HORSES, TileLayer.MIDDLE, TileProperty.RESOURCE, TileProperty.ANIMAL),
 	CATTLE(TextureEnum.TILE_CATTLE, TileLayer.MIDDLE, TileProperty.RESOURCE, TileProperty.ANIMAL),
 	SHEEP(TextureEnum.TILE_SHEEP, TileLayer.MIDDLE, TileProperty.RESOURCE, TileProperty.ANIMAL),
@@ -39,7 +39,7 @@ public enum TileType {
 			TileProperty.OCEAN_FARMABLE),
 	SILVER(TextureEnum.TILE_SILVER, TileLayer.MIDDLE, TileProperty.RESOURCE, TileProperty.MINEABLE),
 	GOLD(TextureEnum.TILE_GOLD, TileLayer.MIDDLE, TileProperty.RESOURCE, TileProperty.MINEABLE),
-	FARM(TextureEnum.TILE_FARM, TileLayer.LOW, TileProperty.IMPROVEMENT),
+	FARM(TextureEnum.TILE_FARM, TileLayer.LOW, SoundEnum.FARM_TILL, TileProperty.IMPROVEMENT),
 	GEMS_IMPROVED(TextureEnum.TILE_GEMS_IMPROVED, TileLayer.MIDDLE, TileProperty.IMPROVEMENT),
 	MARBLE_IMPROVED(TextureEnum.TILE_MARBLE_IMPROVED, TileLayer.MIDDLE, TileProperty.IMPROVEMENT),
 	FISH_IMPROVED(TextureEnum.TILE_FISH_IMPROVED, TileLayer.MIDDLE, TileProperty.IMPROVEMENT, TileProperty.WATER),
@@ -90,7 +90,7 @@ public enum TileType {
 	private TextureEnum assetEnum;
 	private TileProperty[] tileProperties;
 	private TileLayer tileLayer;
-	private SoundEnum removeSound;
+	private SoundEnum sound;
 	private float movementCost;
 
 	// Road Constructor
@@ -119,7 +119,7 @@ public enum TileType {
 
 	TileType(TextureEnum assetEnum, TileLayer tileLayer, SoundEnum removeSound, TileProperty... tileProperties) {
 		this(assetEnum, 1, tileLayer, tileProperties);
-		this.removeSound = removeSound;
+		this.sound = removeSound;
 	}
 
 	TileType(TextureEnum assetEnum, int movementCost, TileLayer tileLayer, SoundEnum removeSound,
@@ -187,8 +187,8 @@ public enum TileType {
 		return String.valueOf(chars);
 	}
 
-	public void playRemoveSound() {
-		if (removeSound != null)
-			Civilization.getInstance().getSoundHandler().playEffect(removeSound);
+	public void playTileSound() {
+		if (sound != null)
+			Civilization.getInstance().getSoundHandler().playEffect(sound);
 	}
 }

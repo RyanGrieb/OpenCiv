@@ -96,6 +96,10 @@ public class GameMap implements ReceiveMapChunkListener, SetTileTypeListener, Re
 	@Override
 	public void onSetTileType(SetTileTypePacket packet) {
 		Tile tile = tiles[packet.getGridX()][packet.getGridY()];
+
+		if (tile.getTileObservers().size() > 0)
+			TileType.valueOf(packet.getTileTypeName()).playTileSound();
+
 		// FIXME: Should be using tile Ids?
 		tile.setTileType(TileType.valueOf(packet.getTileTypeName()));
 	}
@@ -106,7 +110,7 @@ public class GameMap implements ReceiveMapChunkListener, SetTileTypeListener, Re
 		TileType tileType = TileType.valueOf(packet.getTileTypeName());
 
 		if (tile.getTileObservers().size() > 0)
-			tileType.playRemoveSound();
+			tileType.playTileSound();
 
 		tile.removeTileType(tileType);
 	}

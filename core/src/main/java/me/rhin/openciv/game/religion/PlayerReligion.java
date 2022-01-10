@@ -3,6 +3,7 @@ package me.rhin.openciv.game.religion;
 import java.util.ArrayList;
 
 import me.rhin.openciv.Civilization;
+import me.rhin.openciv.asset.SoundEnum;
 import me.rhin.openciv.game.city.City;
 import me.rhin.openciv.game.player.AbstractPlayer;
 import me.rhin.openciv.game.religion.bonus.ReligionBonus;
@@ -37,6 +38,8 @@ public class PlayerReligion implements PickPantheonListener, FoundReligionListen
 				.getPantheonFromID(packet.getReligionBonusID()));
 
 		religionIcon = ReligionIcon.PANTHEON;
+
+		Civilization.getInstance().getSoundHandler().playEffect(SoundEnum.ANGELIC_SOUND_1);
 	}
 
 	@Override
@@ -53,6 +56,8 @@ public class PlayerReligion implements PickPantheonListener, FoundReligionListen
 				.get(packet.getIconID());
 
 		Civilization.getInstance().getEventManager().fireEvent(new ReligionIconChangeEvent(this, religionIcon));
+
+		Civilization.getInstance().getSoundHandler().playEffect(SoundEnum.ANGELIC_SOUND_2);
 	}
 
 	public ArrayList<ReligionBonus> getPickedBonuses() {
