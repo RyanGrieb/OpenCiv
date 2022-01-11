@@ -1,5 +1,9 @@
 # OpenCiv ![tile_city](https://github.com/rhin123/OpenCiv/blob/master/assets/tile_city.png?raw=true)
 
+![example workflow](https://github.com/rhin123/OpenCiv/actions/workflows/build.yml/badge.svg)
+[![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=rhin123_OpenCiv&metric=ncloc)](https://sonarcloud.io/summary/new_code?id=rhin123_OpenCiv)
+[![Discord](https://img.shields.io/discord/925176383792087081.svg?logo=discord&logoColor=white&logoWidth=20&labelColor=7289DA&label=Discord&color=17cf48)](https://discord.gg/WFteeen5fu)
+
 A turn based strategy game built on [LibGDX](https://github.com/libgdx/libgdx), with a rouge-like tile set.
 
 ## About
