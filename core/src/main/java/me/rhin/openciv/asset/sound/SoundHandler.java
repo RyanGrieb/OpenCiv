@@ -16,7 +16,6 @@ import me.rhin.openciv.ui.screen.AbstractScreen;
 import me.rhin.openciv.ui.screen.ScreenEnum;
 import me.rhin.openciv.ui.screen.type.TitleScreen;
 
-//TODO: Not sure if I should be using this
 public class SoundHandler implements SetScreenListener {
 
 	private HashMap<SoundType, ArrayList<MusicWrapper>> musicMap;
@@ -37,7 +36,6 @@ public class SoundHandler implements SetScreenListener {
 		if (prevScreenEnum == ScreenEnum.SERVER_LOBBY && screenEnum == ScreenEnum.IN_GAME) {
 			// Stop playing titlescreen music
 			currentMusic.stop();
-			// currentMusic.dispose();
 			currentMusic = null;
 		}
 
@@ -47,7 +45,7 @@ public class SoundHandler implements SetScreenListener {
 
 			if (currentMusic != null)
 				currentMusic.stop();
-			// currentMusic.dispose();
+
 			currentMusic = null;
 			currentAmbience = null;
 		}
@@ -106,7 +104,7 @@ public class SoundHandler implements SetScreenListener {
 	}
 
 	public void playTrackBySoundtype(AbstractScreen screen, SoundType soundType) {
-		
+
 		if (currentAmbience != null)
 			currentAmbience.stop();
 

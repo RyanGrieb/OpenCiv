@@ -48,11 +48,8 @@ public class AssetHandler extends AssetManager {
 	}
 
 	@Override
-	public boolean update() {
+	public synchronized boolean update() {
 		boolean isDone = super.update();
-		if (isDone) {
-		}
-
 		return isDone;
 	}
 }

@@ -262,7 +262,7 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 								+ playerUnit.getStandingTile().getGridY());
 					}
 			System.out.println("MOVE NULL:" + packet.getUnitID());
-			// System.exit(1);
+			// return;
 		}
 
 		// TODO: Have force set target tile still init values like setTargetTile()

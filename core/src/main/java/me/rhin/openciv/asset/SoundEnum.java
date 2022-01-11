@@ -25,8 +25,8 @@ public enum SoundEnum {
 	UNIT_DEATH(0.25F, SoundType.EFFECT),
 	CHAT_NOTIFICATION(0.75F, SoundType.EFFECT),
 	FARM_TILL(0.35F, SoundType.EFFECT),
-	ANGELIC_SOUND_1(0.25F,SoundType.EFFECT),
-	ANGELIC_SOUND_2(0.25F,SoundType.EFFECT);
+	ANGELIC_SOUND_1(0.25F, SoundType.EFFECT),
+	ANGELIC_SOUND_2(0.25F, SoundType.EFFECT);
 
 	public enum SoundType {
 		TITLE_MUSIC {
@@ -72,11 +72,4 @@ public enum SoundEnum {
 	public SoundType getSoundType() {
 		return soundType;
 	}
-
-	@Deprecated
-	public static Music getSound(SoundEnum soundEnum) {
-		return Civilization.getInstance().getAssetHandler().get("sound/" + soundEnum.name().toLowerCase() + ".ogg",
-				Music.class);
-	}
-
 }

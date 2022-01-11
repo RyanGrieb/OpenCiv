@@ -222,12 +222,10 @@ public enum TextureEnum {
 	}
 
 	public Sprite sprite() {
-		Sprite sprite = textureAtlas.createSprite(this.name().toLowerCase());
-		return sprite;
+		return textureAtlas.createSprite(this.name().toLowerCase());
 	}
 
 	public AtlasRegion texture() {
-		AtlasRegion texture = textureAtlas.findRegion(this.name().toLowerCase());
-		return texture;
+		return textureAtlas.findRegion(this.name().toLowerCase());
 	}
 }
