@@ -79,7 +79,7 @@ public class ListReligionBonus extends ListObject {
 					window.removeActor(window.getBonusContianerList());
 					window.removeActor(window.getBonusContianerList().getScrollbar());
 
-					window.getFounderBeliefLabel().setText(religionBonus.getName() + ":\n" + religionBonus.getDesc());
+					window.setFounderBeliefText(religionBonus.getName() + ":\n" + religionBonus.getDesc());
 					window.setFounderBelief(religionBonus);
 
 					window.checkFoundableCondition();
@@ -93,7 +93,7 @@ public class ListReligionBonus extends ListObject {
 					window.removeActor(window.getBonusContianerList());
 					window.removeActor(window.getBonusContianerList().getScrollbar());
 
-					window.getFollowerBeliefLabel().setText(religionBonus.getName() + ":\n" + religionBonus.getDesc());
+					window.setFollowerBeliefText(religionBonus.getName() + ":\n" + religionBonus.getDesc());
 					window.setFollowerBelief(religionBonus);
 
 					window.checkFoundableCondition();

@@ -108,11 +108,12 @@ public class FoundReligionWindow extends AbstractWindow implements FoundReligion
 		addActor(founderBeliefButton);
 
 		this.founderBeliefLabel = new CustomLabel("None");
-		founderBeliefLabel.setPosition(founderBeliefDescLabel.getX(), founderBeliefDescLabel.getY() - 70);
+		founderBeliefLabel.setPosition(founderBeliefDescLabel.getX(),
+				founderBeliefDescLabel.getY() - founderBeliefLabel.getHeight() - 10);
 		addActor(founderBeliefLabel);
 
 		this.followerBeliefDescLabel = new CustomLabel("Follower Belief:");
-		followerBeliefDescLabel.setPosition(founderBeliefLabel.getX(), founderBeliefLabel.getY() - 45);
+		followerBeliefDescLabel.setPosition(founderBeliefLabel.getX(), founderBeliefDescLabel.getY() - 120);
 		addActor(followerBeliefDescLabel);
 
 		this.followerBeliefButton = new FollowerBeliefButton(
@@ -121,13 +122,13 @@ public class FoundReligionWindow extends AbstractWindow implements FoundReligion
 		addActor(followerBeliefButton);
 
 		this.followerBeliefLabel = new CustomLabel("None");
-		followerBeliefLabel.setPosition(followerBeliefDescLabel.getX(), followerBeliefDescLabel.getY() - 70);
+		followerBeliefLabel.setPosition(followerBeliefDescLabel.getX(),
+				followerBeliefDescLabel.getY() - followerBeliefLabel.getHeight() - 10);
 		addActor(followerBeliefLabel);
 
 		this.bonusContianerList = new ContainerList(this, blankBackground.getX() + blankBackground.getWidth() / 2 - 35,
 				blankBackground.getY() + 100, 300, 400);
 
-		// FIXME: This is terrible:
 		bonusContianerList.getScrollbar().addAction(Actions.removeActor());
 
 		Civilization.getInstance().getEventManager().addListener(FoundReligionListener.class, this);
@@ -136,6 +137,7 @@ public class FoundReligionWindow extends AbstractWindow implements FoundReligion
 
 	@Override
 	public void onResize(int width, int height) {
+		// FIXME: This is terrible. Use group. & Have containerList support groups.
 		blankBackground.setPosition(width / 2 - 600 / 2, height / 2 - 600 / 2);
 		closeWindowButton.setPosition(blankBackground.getX() + blankBackground.getWidth() / 2 - 135 / 2,
 				blankBackground.getY() + 5);
@@ -159,11 +161,13 @@ public class FoundReligionWindow extends AbstractWindow implements FoundReligion
 		founderBeliefDescLabel.setPosition(pantheonLabel.getX(), pantheonLabel.getY() - 45);
 		founderBeliefButton.setPosition(founderBeliefDescLabel.getX() + founderBeliefDescLabel.getWidth(),
 				founderBeliefDescLabel.getY() - 11);
-		founderBeliefLabel.setPosition(founderBeliefDescLabel.getX(), founderBeliefDescLabel.getY() - 70);
+		founderBeliefLabel.setPosition(founderBeliefDescLabel.getX(),
+				founderBeliefDescLabel.getY() - founderBeliefLabel.getHeight() - 10);
 		followerBeliefDescLabel.setPosition(founderBeliefLabel.getX(), founderBeliefLabel.getY() - 45);
 		followerBeliefButton.setPosition(followerBeliefDescLabel.getX() + followerBeliefDescLabel.getWidth(),
 				followerBeliefDescLabel.getY() - 11);
-		followerBeliefLabel.setPosition(followerBeliefDescLabel.getX(), followerBeliefDescLabel.getY() - 70);
+		followerBeliefLabel.setPosition(followerBeliefDescLabel.getX(),
+				followerBeliefDescLabel.getY() - followerBeliefLabel.getHeight() - 10);
 		bonusContianerList.setPosition(blankBackground.getX() + blankBackground.getWidth() / 2 - 35,
 				blankBackground.getY() + 100);
 	}
@@ -253,12 +257,16 @@ public class FoundReligionWindow extends AbstractWindow implements FoundReligion
 		return bonusContianerList;
 	}
 
-	public CustomLabel getFounderBeliefLabel() {
-		return founderBeliefLabel;
+	public void setFounderBeliefText(String text) {
+		founderBeliefLabel.setText(text);
+		founderBeliefLabel.setPosition(founderBeliefDescLabel.getX(),
+				founderBeliefDescLabel.getY() - founderBeliefLabel.getHeight() - 10);
 	}
 
-	public CustomLabel getFollowerBeliefLabel() {
-		return followerBeliefLabel;
+	public void setFollowerBeliefText(String text) {
+		followerBeliefLabel.setText(text);
+		followerBeliefLabel.setPosition(followerBeliefDescLabel.getX(),
+				followerBeliefDescLabel.getY() - followerBeliefLabel.getHeight() - 10);
 	}
 
 	public void setFounderBelief(ReligionBonus religionBonus) {
