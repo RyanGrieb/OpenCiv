@@ -22,7 +22,7 @@ import me.rhin.openciv.ui.window.WindowManager;
 
 public class Civilization extends Game {
 
-	public static final boolean SHOW_FOG = false;
+	public static final boolean SHOW_FOG = true;
 	public static final boolean DEBUG_GL = false;
 	public static final boolean DEBUG_BOUNDING_BOXES = false; // NOTE: Overlay only.
 	public static final String LOG_TAG = "OpenCiv-INFO";

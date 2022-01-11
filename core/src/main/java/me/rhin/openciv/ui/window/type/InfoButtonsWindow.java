@@ -2,12 +2,14 @@ package me.rhin.openciv.ui.window.type;
 
 import me.rhin.openciv.ui.background.ColoredBackground;
 import me.rhin.openciv.ui.button.type.OpenChatButton;
+import me.rhin.openciv.ui.button.type.OpenReligionButton;
 import me.rhin.openciv.ui.window.AbstractWindow;
 
 public class InfoButtonsWindow extends AbstractWindow {
 
 	private ColoredBackground background;
 	private OpenChatButton chatButton;
+	private OpenReligionButton openReligionButton;
 
 	public InfoButtonsWindow() {
 		super.setBounds(4, 28, 200, 60);
@@ -18,6 +20,9 @@ public class InfoButtonsWindow extends AbstractWindow {
 
 		this.chatButton = new OpenChatButton(0, 0, 42, 42);
 		addActor(chatButton);
+
+		this.openReligionButton = new OpenReligionButton(52, 0, 42, 42);
+		addActor(openReligionButton);
 	}
 
 	@Override

@@ -58,7 +58,7 @@ public class FoundReligionWindow extends AbstractWindow implements FoundReligion
 		addActor(blankBackground);
 
 		this.closeWindowButton = new CloseWindowButton(getClass(), "Cancel",
-				blankBackground.getX() + blankBackground.getWidth() / 2 - 135 / 2, blankBackground.getY() + 5, 165, 35);
+				blankBackground.getX() + blankBackground.getWidth() / 2 - 165 / 2, blankBackground.getY() + 5, 165, 35);
 		addActor(closeWindowButton);
 
 		this.foundReligionButton = new FoundReligionButton(closeWindowButton.getX(), closeWindowButton.getY() + 35, 165,
@@ -139,7 +139,7 @@ public class FoundReligionWindow extends AbstractWindow implements FoundReligion
 	public void onResize(int width, int height) {
 		// FIXME: This is terrible. Use group. & Have containerList support groups.
 		blankBackground.setPosition(width / 2 - 600 / 2, height / 2 - 600 / 2);
-		closeWindowButton.setPosition(blankBackground.getX() + blankBackground.getWidth() / 2 - 135 / 2,
+		closeWindowButton.setPosition(blankBackground.getX() + blankBackground.getWidth() / 2 - 165 / 2,
 				blankBackground.getY() + 5);
 		foundReligionButton.setPosition(closeWindowButton.getX(), closeWindowButton.getY() + 35);
 		titleLabel.setPosition(blankBackground.getX(), blankBackground.getY() + blankBackground.getHeight() - 18);
