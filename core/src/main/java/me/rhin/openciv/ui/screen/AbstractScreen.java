@@ -141,12 +141,12 @@ public abstract class AbstractScreen implements Screen, InputProcessor {
 		Gdx.gl.glDisable(GL20.GL_BLEND);
 
 		if (Civilization.DEBUG_GL) {
-			System.out.println("  Drawcalls: " + Civilization.GL_PROFILER.getDrawCalls() + ", Calls: "
-					+ Civilization.GL_PROFILER.getCalls() + ", TextureBindings: "
-					+ Civilization.GL_PROFILER.getTextureBindings() + ", ShaderSwitches: "
-					+ Civilization.GL_PROFILER.getShaderSwitches() + ", VertexCount: "
-					+ Civilization.GL_PROFILER.getVertexCount().value);
-			Civilization.GL_PROFILER.reset();
+			System.out.println("  Drawcalls: " + Civilization.getInstance().getProfiler().getDrawCalls() + ", Calls: "
+					+ Civilization.getInstance().getProfiler().getCalls() + ", TextureBindings: "
+					+ Civilization.getInstance().getProfiler().getTextureBindings() + ", ShaderSwitches: "
+					+ Civilization.getInstance().getProfiler().getShaderSwitches() + ", VertexCount: "
+					+ Civilization.getInstance().getProfiler().getVertexCount().value);
+			Civilization.getInstance().getProfiler().reset();
 		}
 	}
 
