@@ -112,7 +112,7 @@ public class InGameScreen extends AbstractScreen {
 		long timeSince = TimeUtils.timeSinceMillis(lastTimeCounted);
 		if (timeSince >= 500) {
 			frameRate = Gdx.graphics.getFramesPerSecond();
-			gameOverlay.getFPSLabel().setText("FPS: " + frameRate);
+			gameOverlay.setFPSText("FPS: " + frameRate);
 		}
 	}
 

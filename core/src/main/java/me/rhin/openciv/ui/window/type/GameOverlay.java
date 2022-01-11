@@ -30,7 +30,7 @@ public class GameOverlay extends AbstractWindow implements ResizeListener, TileS
 	private ArrayList<ColoredBackground> statIcons;
 	private ArrayList<CustomLabel> statLabels;
 	private CustomLabel geographyNameLabel;
-	
+
 	public GameOverlay() {
 		this.statusBar = new StatusBar(0, viewport.getWorldHeight() - HEIGHT, viewport.getWorldWidth(), HEIGHT);
 		addActor(statusBar);
@@ -47,7 +47,7 @@ public class GameOverlay extends AbstractWindow implements ResizeListener, TileS
 		this.geographyNameLabel = new CustomLabel("N/A");
 		geographyNameLabel.setBounds(2, 16, 0, 15); // FIXME: Setting the width to 0 is a workaround
 		this.addActor(geographyNameLabel);
-		
+
 		this.statIcons = new ArrayList<>();
 		this.statLabels = new ArrayList<>();
 
@@ -55,8 +55,10 @@ public class GameOverlay extends AbstractWindow implements ResizeListener, TileS
 		Civilization.getInstance().getEventManager().addListener(TileStatlineListener.class, this);
 	}
 
-	public CustomLabel getFPSLabel() {
-		return fpsLabel;
+	public void setFPSText(String text) {
+		fpsLabel.setText(text);
+		fpsLabel.setPosition(viewport.getWorldWidth() - fpsLabel.getWidth() - 4,
+				viewport.getWorldHeight() - fpsLabel.getHeight() - statusBar.getHeight() - 5);
 	}
 
 	@Override
@@ -101,7 +103,8 @@ public class GameOverlay extends AbstractWindow implements ResizeListener, TileS
 		if (!tile.isDiscovered() && Civilization.SHOW_FOG) {
 			tileNameLabel.setText("Undiscovered");
 			geographyNameLabel.setText("");
-			//tileNameLabel.setText("[" + tile.getGridX() + "," + tile.getGridY() + "] Undiscovered");
+			// tileNameLabel.setText("[" + tile.getGridX() + "," + tile.getGridY() + "]
+			// Undiscovered");
 			// tileNameLabel.setSize(0, 15);
 			clearTileStatInfo();
 			return;
@@ -115,7 +118,7 @@ public class GameOverlay extends AbstractWindow implements ResizeListener, TileS
 		this.hoveredTile = tile;
 
 		// [grass,copper]
-		//String tileName = "[" + tile.getGridX() + "," + tile.getGridY() + "] ";
+		// String tileName = "[" + tile.getGridX() + "," + tile.getGridY() + "] ";
 		String tileName = "";
 		int index = 0;
 		for (TileTypeWrapper typeWrapper : tile.getTileTypeWrappers()) {
@@ -142,9 +145,9 @@ public class GameOverlay extends AbstractWindow implements ResizeListener, TileS
 	@Override
 	public void onRecieveTileStatline(TileStatlinePacket packet) {
 		clearTileStatInfo();
-		
+
 		geographyNameLabel.setText(packet.getGeographyName());
-		
+
 		StatLine statline = StatLine.fromPacket(packet);
 
 		ArrayList<Stat> statList = new ArrayList<>();
