@@ -19,23 +19,21 @@ public class ChoosePantheonWindow extends AbstractWindow implements ResizeListen
 	private ContainerList bonusContianerList;
 
 	public ChoosePantheonWindow() {
-		this.blankBackground = new BlankBackground(viewport.getWorldWidth() / 2 - 300 / 2,
-				viewport.getWorldHeight() / 2 - 450 / 2, 300, 450);
+		setBounds(viewport.getWorldWidth() / 2 - 300 / 2, viewport.getWorldHeight() / 2 - 450 / 2, 300, 450);
+
+		this.blankBackground = new BlankBackground(0, 0, getWidth(), getHeight());
 		addActor(blankBackground);
 
-		this.bonusContianerList = new ContainerList(this, blankBackground.getX(), blankBackground.getY() + 55,
-				blankBackground.getWidth() - 20, blankBackground.getHeight() - 55);
+		this.bonusContianerList = new ContainerList(0, 55, getWidth(), getHeight() - 55);
 		addActor(bonusContianerList);
 
 		for (ReligionBonus religionBonus : Civilization.getInstance().getGame().getAvailableReligionBonuses()
 				.getAvailablePantheons()) {
 			bonusContianerList.addItem(ListContainerType.CATEGORY, "Available Pantheons",
-					new ListReligionBonus(religionBonus, bonusContianerList, blankBackground.getWidth() - 20, 70));
+					new ListReligionBonus(religionBonus, bonusContianerList, getWidth() - 20, 70));
 		}
 
-		this.closeWindowButton = new CloseWindowButton(getClass(), "Cancel",
-				blankBackground.getX() + blankBackground.getWidth() / 2 - 135 / 2, blankBackground.getY() + 10, 135,
-				35);
+		this.closeWindowButton = new CloseWindowButton(getClass(), "Cancel", getWidth() / 2 - 135 / 2, 10, 135, 35);
 		addActor(closeWindowButton);
 
 		Civilization.getInstance().getEventManager().addListener(PickPantheonListener.class, this);
@@ -56,10 +54,7 @@ public class ChoosePantheonWindow extends AbstractWindow implements ResizeListen
 
 	@Override
 	public void onResize(int width, int height) {
-		blankBackground.setPosition(width / 2 - 300 / 2, height / 2 - 450 / 2);
-		bonusContianerList.setPosition(blankBackground.getX(), blankBackground.getY() + 55);
-		closeWindowButton.setPosition(blankBackground.getX() + blankBackground.getWidth() / 2 - 135 / 2,
-				blankBackground.getY() + 10);
+		setPosition(width / 2 - 300 / 2, height / 2 - 450 / 2);
 	}
 
 	@Override

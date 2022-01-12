@@ -54,8 +54,8 @@ public class ServerLobbyScreen extends AbstractScreen implements ResizeListener,
 		this.titleOverlay = new TitleOverlay();
 		stage.addActor(titleOverlay);
 
-		this.playerContainerList = new ContainerList(stage, viewport.getWorldWidth() / 2 - 220 / 2,
-				viewport.getWorldHeight() - 360, 200, 300);
+		this.playerContainerList = new ContainerList(viewport.getWorldWidth() / 2 - 220 / 2,
+				viewport.getWorldHeight() - 360, 220, 300);
 
 		stage.addActor(playerContainerList);
 

@@ -3,9 +3,7 @@ package me.rhin.openciv.ui.list.type;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
-import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
-import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Align;
 
 import me.rhin.openciv.Civilization;
@@ -30,7 +28,6 @@ public class ListProductionItem extends ListObject implements CityStatUpdateList
 	private Sprite itemIconSprite;
 	private Sprite backgroundSprite;
 	private Sprite hoveredBackgroundSprite;
-	private boolean hovered;
 
 	public ListProductionItem(final City city, final ProductionItem productionItem, ContainerList containerList,
 			float width, float height) {
@@ -68,30 +65,17 @@ public class ListProductionItem extends ListObject implements CityStatUpdateList
 		productionModifierLabel.setSize(width, height);
 		productionModifierLabel.setAlignment(Align.center);
 
-		this.hovered = false;
-
-		this.addListener(new ClickListener() {
-			@Override
-			public void clicked(InputEvent event, float x, float y) {
-				// city.getProducibleItemManager().requestSetProductionItem(productionItem);
-				if (!Civilization.getInstance().getWindowManager().allowsInput())
-					return;
-
-				Civilization.getInstance().getWindowManager().addWindow(new ItemInfoWindow(city, productionItem));
-			}
-
-			@Override
-			public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
-				hovered = true;
-			}
-
-			@Override
-			public void exit(InputEvent event, float x, float y, int pointer, Actor fromActor) {
-				hovered = false;
-			}
-		});
-
 		Civilization.getInstance().getEventManager().addListener(CityStatUpdateListener.class, this);
+	}
+	
+
+	@Override
+	protected void onClicked(InputEvent event) {
+		// city.getProducibleItemManager().requestSetProductionItem(productionItem);
+		if (!Civilization.getInstance().getWindowManager().allowsInput())
+			return;
+
+		Civilization.getInstance().getWindowManager().addWindow(new ItemInfoWindow(city, productionItem));
 	}
 
 	@Override

@@ -25,7 +25,6 @@ public class ListLobbyPlayer extends ListObject {
 	private Sprite hostSprite;
 	private CustomLabel playerNameLabel;
 	private Sprite chosenCivSprite;
-	private boolean hovered;
 
 	public ListLobbyPlayer(final String playerName, CivType civType, ContainerList containerList, float width,
 			float height) {
@@ -47,33 +46,15 @@ public class ListLobbyPlayer extends ListObject {
 
 		hostSprite = TextureEnum.UI_STAR.sprite();
 		hostSprite.setSize(16, 16);
+	}
 
-		this.hovered = false;
+	@Override
+	protected void onClicked(InputEvent event) {
+		if (!Civilization.getInstance().getWindowManager().allowsInput(event.getListenerActor()) || !isPlayer()) {
+			return;
+		}
 
-		this.addListener(new ClickListener() {
-			@Override
-			public void clicked(InputEvent event, float x, float y) {
-				if (!Civilization.getInstance().getWindowManager().allowsInput(event.getListenerActor())
-						|| !isPlayer()) {
-					return;
-				}
-
-				Civilization.getInstance().getWindowManager().toggleWindow(new ChooseCivWindow());
-			}
-
-			@Override
-			public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
-				if (isPlayer())
-					hovered = true;
-			}
-
-			@Override
-			public void exit(InputEvent event, float x, float y, int pointer, Actor fromActor) {
-				if (isPlayer())
-					hovered = false;
-			}
-		});
-
+		Civilization.getInstance().getWindowManager().toggleWindow(new ChooseCivWindow());
 	}
 
 	@Override

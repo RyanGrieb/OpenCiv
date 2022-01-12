@@ -45,7 +45,6 @@ import me.rhin.openciv.ui.list.ListContainer.ListContainerType;
 import me.rhin.openciv.ui.list.ListObject;
 import me.rhin.openciv.ui.list.type.ListBuilding;
 import me.rhin.openciv.ui.list.type.ListProductionItem;
-import me.rhin.openciv.ui.list.type.ListUnemployedCitizens;
 import me.rhin.openciv.ui.screen.type.InGameScreen;
 import me.rhin.openciv.ui.window.AbstractWindow;
 
@@ -81,7 +80,7 @@ public class CityInfoWindow extends AbstractWindow implements ResizeListener, Bu
 		this.cityProductionInfo = new CityProductionInfo(city, 2, cityReligionInfo.getY() - 105, 200, 100);
 		addActor(cityProductionInfo);
 
-		this.productionContainerList = new ContainerList(this, 0, 0, 200, 325);
+		this.productionContainerList = new ContainerList(0, 0, 220, 325);
 		for (ProductionItem productionItem : city.getProducibleItemManager().getProducibleItems()) {
 			productionContainerList.addItem(ListContainerType.CATEGORY, productionItem.getCategory(),
 					new ListProductionItem(city, productionItem, productionContainerList, 200, 45));
@@ -91,8 +90,8 @@ public class CityInfoWindow extends AbstractWindow implements ResizeListener, Bu
 		float topbarHeight = ((InGameScreen) Civilization.getInstance().getCurrentScreen()).getGameOverlay()
 				.getTopbarHeight();
 
-		this.topRightContainerList = new ContainerList(this, viewport.getWorldWidth() - 220,
-				viewport.getWorldHeight() - 195 - topbarHeight, 200, 195);
+		this.topRightContainerList = new ContainerList(viewport.getWorldWidth() - 220,
+				viewport.getWorldHeight() - 195 - topbarHeight, 220, 195);
 
 		for (Building building : city.getBuildings()) {
 			topRightContainerList.addItem(ListContainerType.CATEGORY, "Buildings",
@@ -106,11 +105,6 @@ public class CityInfoWindow extends AbstractWindow implements ResizeListener, Bu
 
 			citizenButtons.put(tile, button);
 			Civilization.getInstance().getScreenManager().getCurrentScreen().getStage().addActor(button);
-		}
-
-		if (city.getUnemployedWorkerAmount() > 0) {
-			topRightContainerList.addItem(ListContainerType.CATEGORY, "Unemployed Citizens",
-					new ListUnemployedCitizens(city, city.getUnemployedWorkerAmount(), topRightContainerList, 200, 45));
 		}
 
 		addActor(topRightContainerList);
@@ -309,18 +303,6 @@ public class CityInfoWindow extends AbstractWindow implements ResizeListener, Bu
 				listContainer.addAction(Actions.removeActor());
 				return;
 			}
-
-			// NOTE: We manually select the listContianer, since were adding to a
-			if (topRightContainerList.getListContainers().get("Unemployed Citizens") == null) {
-				topRightContainerList.addItem(ListContainerType.CATEGORY, "Unemployed Citizens",
-						new ListUnemployedCitizens(city, topRightContainerList, 200, 45));
-			}
-
-			ListContainer listContainer = topRightContainerList.getListContainers().get("Unemployed Citizens");
-			((ListUnemployedCitizens) listContainer.getListItemActors().get(0))
-					.setCitizens(city.getUnemployedWorkerAmount());
-		} else {
-			// TODO: Update the ListBuilding specialist slot.
 		}
 	}
 

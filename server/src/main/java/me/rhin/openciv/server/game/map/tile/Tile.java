@@ -241,7 +241,8 @@ public class Tile {
 				}
 
 			if (!tile.getTileObservers().contains(tileObserver)) {
-				tile.getTileObservers().add(tileObserver);
+				//tile.getTileObservers().add(tileObserver);
+				tile.addTileObserverToList(tileObserver);
 				// System.out.println(tileObserver.getName() + " - " + tile);
 
 				if (!tileObserver.getObservedTiles().contains(tile))
@@ -257,12 +258,44 @@ public class Tile {
 					continue;
 
 				if (!adjTile.getTileObservers().contains(tileObserver)) {
-					adjTile.getTileObservers().add(tileObserver);
+					//adjTile.getTileObservers().add(tileObserver);
+					adjTile.addTileObserverToList(tileObserver);
 					// System.out.println(tileObserver.getName() + " - " + adjTile);
 
 					if (!tileObserver.getObservedTiles().contains(adjTile))
 						tileObserver.addObeservedTile(adjTile);
 				}
+			}
+
+		}
+	}
+
+	private void addTileObserverToList(TileObserver tileObserver) {
+		getTileObservers().add(tileObserver);
+
+		AbstractPlayer playerOnTile = null;
+
+		if (territory != null) {
+			playerOnTile = territory.getPlayerOwner();
+		}
+
+		if (getTopUnit() != null) {
+			playerOnTile = getTopUnit().getPlayerOwner();
+		}
+
+		// If there is a player on the tile that isn't the tileObserver..
+		if (playerOnTile != null && !tileObserver.getPlayerOwner().equals(playerOnTile)) {
+
+			if (!tileObserver.getPlayerOwner().getDiplomacy().getDiscoveredPlayers().contains(playerOnTile)) {
+				//tileObserver.getPlayerOwner().getDiplomacy().getDiscoveredPlayers().add(playerOnTile);
+				tileObserver.getPlayerOwner().getDiplomacy().addDiscoveredPlayer(playerOnTile);
+				//System.out.println(tileObserver.getPlayerOwner().getName() + " Discovered " + playerOnTile.getName());
+			}
+
+			if (!playerOnTile.getDiplomacy().getDiscoveredPlayers().contains(tileObserver.getPlayerOwner())) {
+				//playerOnTile.getDiplomacy().getDiscoveredPlayers().add(tileObserver.getPlayerOwner());
+				playerOnTile.getDiplomacy().addDiscoveredPlayer(tileObserver.getPlayerOwner());
+				//System.out.println(playerOnTile.getName() + " Discovered " + tileObserver.getPlayerOwner().getName());
 			}
 
 		}

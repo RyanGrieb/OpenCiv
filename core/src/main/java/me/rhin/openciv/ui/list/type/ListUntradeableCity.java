@@ -49,25 +49,12 @@ public class ListUntradeableCity extends ListObject {
 
 		this.cityNameLabel = new CustomLabel(city.getName());
 		addActor(cityNameLabel);
-
-		this.addListener(new ClickListener() {
-			@Override
-			public void clicked(InputEvent event, float x, float y) {
-
-			}
-
-			@Override
-			public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
-				// hovered = true;
-			}
-
-			@Override
-			public void exit(InputEvent event, float x, float y, int pointer, Actor fromActor) {
-				// hovered = false;
-			}
-		});
 	}
 
+	@Override
+	protected void onClicked(InputEvent event) {
+	}
+	
 	@Override
 	public void draw(Batch batch, float parentAlpha) {
 		if (hovered)

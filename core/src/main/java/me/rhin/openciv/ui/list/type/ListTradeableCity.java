@@ -26,12 +26,13 @@ public class ListTradeableCity extends ListObject {
 	private Sprite capitalSprite;
 	private Sprite cityOwnerSprite;
 	private CustomLabel cityNameLabel;
-	private boolean hovered;
+	private TradeUnit tradeUnit;
 
 	public ListTradeableCity(final City city, TradeUnit tradeUnit, ContainerList containerList, float width,
 			float height) {
 		super(width, height, containerList, city.getName());
 
+		this.tradeUnit = tradeUnit;
 		this.city = city;
 		backgroundSprite = TextureEnum.UI_DARK_GRAY.sprite();
 		backgroundSprite.setSize(width, height);
@@ -52,32 +53,21 @@ public class ListTradeableCity extends ListObject {
 		this.cityNameLabel = new CustomLabel(city.getName());
 		addActor(cityNameLabel);
 
-		this.addListener(new ClickListener() {
-			@Override
-			public void clicked(InputEvent event, float x, float y) {
-				System.out.println("Trade w/ city: " + city.getName());
-
-				TradeCityPacket packet = new TradeCityPacket();
-				packet.setCity(city.getName(), tradeUnit.getID(), tradeUnit.getStandingTile().getGridX(),
-						tradeUnit.getStandingTile().getGridY());
-				Civilization.getInstance().getNetworkManager().sendPacket(packet);
-
-				Civilization.getInstance().getWindowManager().closeWindow(TradeWindow.class);
-			}
-
-			@Override
-			public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
-				hovered = true;
-			}
-
-			@Override
-			public void exit(InputEvent event, float x, float y, int pointer, Actor fromActor) {
-				hovered = false;
-			}
-		});
-
 		// Update our initial positions
 		setPosition(getX(), getY());
+	}
+	
+
+	@Override
+	protected void onClicked(InputEvent event) {
+		System.out.println("Trade w/ city: " + city.getName());
+
+		TradeCityPacket packet = new TradeCityPacket();
+		packet.setCity(city.getName(), tradeUnit.getID(), tradeUnit.getStandingTile().getGridX(),
+				tradeUnit.getStandingTile().getGridY());
+		Civilization.getInstance().getNetworkManager().sendPacket(packet);
+
+		Civilization.getInstance().getWindowManager().closeWindow(TradeWindow.class);
 	}
 
 	@Override
@@ -101,5 +91,4 @@ public class ListTradeableCity extends ListObject {
 		cityNameLabel.setPosition(citySprite.getX() + citySprite.getWidth() + 4, getHeight() / 2 - 4);
 		cityOwnerSprite.setPosition(getWidth() - 68, y + 5);
 	}
-
 }

@@ -8,11 +8,11 @@ import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.ui.button.Button;
 import me.rhin.openciv.ui.window.type.ReligionInfoWindow;
 
-public class OpenReligionButton extends Button {
+public class OpenReligionInfoButton extends Button {
 
 	private Sprite iconSprite;
 
-	public OpenReligionButton(float x, float y, float width, float height) {
+	public OpenReligionInfoButton(float x, float y, float width, float height) {
 		super(TextureEnum.UI_BUTTON_ICON, "", x, y, width, height);
 
 		this.hoveredSprite = TextureEnum.UI_BUTTON_ICON_HOVERED.sprite();

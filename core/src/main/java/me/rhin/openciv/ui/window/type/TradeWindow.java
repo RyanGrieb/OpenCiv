@@ -40,17 +40,17 @@ public class TradeWindow extends AbstractWindow implements ResizeListener, MoveU
 		this.background = new ColoredBackground(TextureEnum.UI_GRAY.sprite(), x, y, width, height);
 		addActor(background);
 
-		this.titleLabel = new CustomLabel("Trade with cities", Align.center, x, y + height - 15, width, 15);
+		this.titleLabel = new CustomLabel("Trade", Align.center, x, y + height - 15, width, 15);
 		addActor(titleLabel);
 
-		this.containerList = new ContainerList(this, x + 6, y + 50, width - 32, height - 75);
+		this.containerList = new ContainerList(x + 6, y + 50, width - 12, height - 75);
 
 		for (City city : Civilization.getInstance().getGame().getCities()) {
 			// TODO: Calculate trade distance from city.
 			Tradeable tradeable = tradeUnit.canTrade(city);
 			if (tradeable.isTradeable()) {
 				containerList.addItem(ListContainerType.CATEGORY, "Tradeable Cities",
-						new ListTradeableCity(city, tradeUnit, containerList, width, 45));
+						new ListTradeableCity(city, tradeUnit, containerList, containerList.getWidth() - 20, 45));
 			} else {
 				// containerList.addItem(ListContainerType.CATEGORY, "Untradeable Cities",
 				// new ListUntradeableCity(city, tradeable.getReason(), width, 45));

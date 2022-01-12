@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.scenes.scene2d.utils.DragListener;
 
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.TextureEnum;
@@ -23,34 +24,17 @@ public class ContainerScrollbar extends Actor implements ScrollListener {
 	private float prevMouseY;
 
 	public ContainerScrollbar(final ContainerList containerList, float x, float y, float width, float height) {
-
-		this.setBounds(x, y, width, height);
+		setBounds(x, y, width, height);
 
 		this.containerList = containerList;
 
 		backgroundSprite = TextureEnum.UI_LIGHTER_GRAY.sprite();
-		backgroundSprite.setBounds(x, y, width, height);
+		backgroundSprite.setBounds(containerList.getWidth() - width, 0, width, height);
 
 		scrubber = TextureEnum.UI_BLACK.sprite();
-		scrubber.setBounds(x, y + getHeight() - 55, width, 55);
+		scrubber.setBounds(containerList.getWidth() - width, getHeight() - 55, width, 55);
 		this.originY = y;
 		this.prevMouseY = -1;
-
-		this.addListener(new ClickListener() {
-
-			@Override
-			public void touchDragged(InputEvent event, float x, float y, int pointer) {
-				super.touchDragged(event, x, y, pointer);
-				onTouchDragged(event, x, y);
-			}
-
-			@Override
-			public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
-				super.touchUp(event, x, y, pointer, button);
-				prevMouseY = -1;
-			}
-
-		});
 
 		Civilization.getInstance().getEventManager().addListener(ScrollListener.class, this);
 	}
@@ -64,8 +48,8 @@ public class ContainerScrollbar extends Actor implements ScrollListener {
 
 	@Override
 	public void setPosition(float x, float y) {
-		backgroundSprite.setPosition(x, y);
-		scrubber.setPosition(x, y + getHeight() - scrubber.getHeight());
+		backgroundSprite.setPosition(containerList.getWidth() - getWidth(), 0);
+		scrubber.setPosition(containerList.getWidth() - getWidth(), getHeight() - 55);
 	}
 
 	@Override
@@ -76,8 +60,15 @@ public class ContainerScrollbar extends Actor implements ScrollListener {
 
 		float y = Civilization.getInstance().getCurrentScreen().getViewport().getWorldHeight() - Gdx.input.getY();
 
-		if (Gdx.input.getX() >= getX() && y >= getY())
-			if (Gdx.input.getX() <= getX() + getWidth() && y <= getY() + getHeight()) {
+		float xPos = getX();
+		float yPos = getY();
+
+		if (getParent() != null) {
+			xPos += getParent().getX();
+			yPos += getParent().getY();
+		}
+		if (Gdx.input.getX() >= xPos && y >= yPos)
+			if (Gdx.input.getX() <= xPos + getWidth() && y <= yPos + getHeight()) {
 				containerList.scroll(amountY);
 			}
 	}
@@ -96,12 +87,19 @@ public class ContainerScrollbar extends Actor implements ScrollListener {
 
 	public void onTouchDragged(InputEvent event, float x, float y) {
 
-		if (event.getStageX() >= scrubber.getX() && event.getStageY() >= scrubber.getY())
-			if (event.getStageX() <= scrubber.getX() + scrubber.getWidth()
-					&& event.getStageY() <= scrubber.getY() + scrubber.getHeight()) {
+		float xPos = scrubber.getX();
+		float yPos = scrubber.getY();
+
+		if (getParent() != null) {
+			// xPos += getParent().getX();
+			// yPos += getParent().getY();
+		}
+
+		if (x >= xPos && y >= yPos)
+			if (x <= xPos + scrubber.getWidth() && y <= yPos + scrubber.getHeight()) {
 
 				if (prevMouseY == -1)
-					prevMouseY = event.getStageY();
+					prevMouseY = y;
 
 				float maxHeight = 0;
 				for (ListContainer container : containerList.getListContainers().values()) {
@@ -111,25 +109,24 @@ public class ContainerScrollbar extends Actor implements ScrollListener {
 				if (containerList.getHeight() > maxHeight)
 					return;
 
-				float dist = ((containerList.getY() + containerList.getHeight() - scrubber.getHeight())
-						- scrubber.getY()) / (containerList.getHeight() - scrubber.getHeight());
+				float dist = ((containerList.getHeight() - scrubber.getHeight()) - yPos)
+						/ (containerList.getHeight() - scrubber.getHeight());
 
 				float offset = (maxHeight - (containerList.getHeight())) * dist;
 
-				float scrubberY = event.getStageY() - scrubber.getHeight() / 2;
+				float scrubberY = y - scrubber.getHeight() / 2;
 
-				if (scrubberY < containerList.getY()) {
+				if (scrubberY < 0) {
 					prevMouseY = -1;
-					scrubber.setPosition(scrubber.getX(), containerList.getY());
+					scrubber.setPosition(xPos, 0);
 					containerList.setYOffset(maxHeight - containerList.getHeight());
 					containerList.updatePositions();
 					return;
 				}
 
-				if (scrubberY + scrubber.getHeight() > containerList.getY() + containerList.getHeight()) {
+				if (scrubberY + scrubber.getHeight() > containerList.getHeight()) {
 					prevMouseY = -1;
-					scrubber.setPosition(scrubber.getX(),
-							containerList.getY() + containerList.getHeight() - scrubber.getHeight());
+					scrubber.setPosition(xPos, containerList.getHeight() - scrubber.getHeight());
 
 					containerList.setYOffset(0);
 					containerList.updatePositions();
@@ -140,7 +137,7 @@ public class ContainerScrollbar extends Actor implements ScrollListener {
 				containerList.updatePositions();
 				prevMouseY = event.getStageY();
 
-				scrubber.setPosition(scrubber.getX(), scrubberY);
+				scrubber.setPosition(xPos, scrubberY);
 			}
 	}
 }

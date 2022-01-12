@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.utils.Align;
 
 import me.rhin.openciv.asset.TextureEnum;
@@ -74,6 +75,10 @@ public class ListBuilding extends ListObject {
 						.add(new SpecialistCitizenButton(building.getCity(), specialistContinaer, 0, 0, 32, 32));
 			}
 		}
+	}
+	
+	@Override
+	protected void onClicked(InputEvent event) {
 	}
 
 	@Override

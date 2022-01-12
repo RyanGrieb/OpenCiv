@@ -114,7 +114,7 @@ public class WindowManager {
 		if (allowsInput() || topWindow == null || actor == null)
 			return true;
 
-		if (topWindow.disablesInput() && actor.getParent().equals(topWindow))
+		if (topWindow.disablesInput() && (actor.getParent() != null && actor.getParent().equals(topWindow)))
 			return true;
 
 		return false;

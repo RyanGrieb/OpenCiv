@@ -219,8 +219,7 @@ public class Tile extends Actor implements BottomShapeRenderListener {
 			rangedTargetSprite.draw(batch);
 		}
 
-		
-		//FIXME: This is debug code. Make this prettier.
+		// FIXME: This is debug code. Make this prettier.
 		if (serverObservers.size() < 1)
 			return;
 
@@ -665,8 +664,9 @@ public class Tile extends Actor implements BottomShapeRenderListener {
 
 			tile.setDiscovered(true);
 
-			if (!tile.getTileObservers().contains(tileObserver))
-				tile.getTileObservers().add(tileObserver);
+			if (!tile.getTileObservers().contains(tileObserver)) {
+				 tile.getTileObservers().add(tileObserver);
+			}
 
 			if (denyVisibility && !isHill) {
 				continue;
@@ -679,8 +679,9 @@ public class Tile extends Actor implements BottomShapeRenderListener {
 
 				adjTile.setDiscovered(true);
 
-				if (!adjTile.getTileObservers().contains(tileObserver))
-					adjTile.getTileObservers().add(tileObserver);
+				if (!adjTile.getTileObservers().contains(tileObserver)) {
+					 adjTile.getTileObservers().add(tileObserver);
+				}
 			}
 
 		}

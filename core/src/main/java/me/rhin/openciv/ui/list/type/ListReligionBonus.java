@@ -20,7 +20,6 @@ import me.rhin.openciv.ui.window.type.FoundReligionWindow;
 
 public class ListReligionBonus extends ListObject {
 
-	private boolean hovered;
 	private ReligionBonus religionBonus;
 	private Sprite backgroundSprite;
 	private Sprite hoveredBackgroundSprite;
@@ -42,80 +41,45 @@ public class ListReligionBonus extends ListObject {
 		bonusIcon.setSize(32, 32);
 
 		this.bonusDescLabel = new CustomLabel(religionBonus.getName() + ": \n" + religionBonus.getDesc());
+	}
 
-		this.addListener(new InputListener() {
-			@Override
-			public boolean mouseMoved(InputEvent event, float x, float y) {
+	@Override
+	protected void onClicked(InputEvent event) {
+		if (religionBonus.getProperty() == ReligionProperty.PANTHEON) {
+			PickPantheonPacket packet = new PickPantheonPacket();
+			packet.setBonusID(religionBonus.getID());
+			Civilization.getInstance().getNetworkManager().sendPacket(packet);
 
-				if (!inContainerListBounds())
-					hovered = false;
-				else
-					hovered = true;
+			Civilization.getInstance().getWindowManager().closeWindow(ChoosePantheonWindow.class);
+		}
 
-				return false;
-			}
-		});
+		if (religionBonus.getProperty() == ReligionProperty.FOUNDER_BELIEF) {
+			FoundReligionWindow window = Civilization.getInstance().getWindowManager()
+					.getWindow(FoundReligionWindow.class);
 
-		this.addListener(new ClickListener() {
-			@Override
-			public void clicked(InputEvent event, float x, float y) {
+			window.getBonusContianerList().clearList();
+			window.removeActor(window.getBonusContianerList());
+			window.removeActor(window.getBonusContianerList().getScrollbar());
 
-				if (!inContainerListBounds())
-					return;
+			window.setFounderBeliefText(religionBonus.getName() + ":\n" + religionBonus.getDesc());
+			window.setFounderBelief(religionBonus);
 
-				if (religionBonus.getProperty() == ReligionProperty.PANTHEON) {
-					PickPantheonPacket packet = new PickPantheonPacket();
-					packet.setBonusID(religionBonus.getID());
-					Civilization.getInstance().getNetworkManager().sendPacket(packet);
+			window.checkFoundableCondition();
+		}
 
-					Civilization.getInstance().getWindowManager().closeWindow(ChoosePantheonWindow.class);
-				}
+		if (religionBonus.getProperty() == ReligionProperty.FOLLOWER_BELIEF) {
+			FoundReligionWindow window = Civilization.getInstance().getWindowManager()
+					.getWindow(FoundReligionWindow.class);
 
-				if (religionBonus.getProperty() == ReligionProperty.FOUNDER_BELIEF) {
-					FoundReligionWindow window = Civilization.getInstance().getWindowManager()
-							.getWindow(FoundReligionWindow.class);
+			window.getBonusContianerList().clearList();
+			window.removeActor(window.getBonusContianerList());
+			window.removeActor(window.getBonusContianerList().getScrollbar());
 
-					window.getBonusContianerList().clearList();
-					window.removeActor(window.getBonusContianerList());
-					window.removeActor(window.getBonusContianerList().getScrollbar());
+			window.setFollowerBeliefText(religionBonus.getName() + ":\n" + religionBonus.getDesc());
+			window.setFollowerBelief(religionBonus);
 
-					window.setFounderBeliefText(religionBonus.getName() + ":\n" + religionBonus.getDesc());
-					window.setFounderBelief(religionBonus);
-
-					window.checkFoundableCondition();
-				}
-
-				if (religionBonus.getProperty() == ReligionProperty.FOLLOWER_BELIEF) {
-					FoundReligionWindow window = Civilization.getInstance().getWindowManager()
-							.getWindow(FoundReligionWindow.class);
-
-					window.getBonusContianerList().clearList();
-					window.removeActor(window.getBonusContianerList());
-					window.removeActor(window.getBonusContianerList().getScrollbar());
-
-					window.setFollowerBeliefText(religionBonus.getName() + ":\n" + religionBonus.getDesc());
-					window.setFollowerBelief(religionBonus);
-
-					window.checkFoundableCondition();
-				}
-			}
-
-			@Override
-			public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
-				if (!inContainerListBounds())
-					return;
-
-				hovered = true;
-			}
-
-			@Override
-			public void exit(InputEvent event, float x, float y, int pointer, Actor fromActor) {
-				if (!inContainerListBounds())
-					hovered = false;
-
-				hovered = false;
-			}
-		});
+			window.checkFoundableCondition();
+		}
 	}
 
 	@Override

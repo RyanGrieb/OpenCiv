@@ -10,22 +10,31 @@ import me.rhin.openciv.server.Server;
 import me.rhin.openciv.server.game.AbstractPlayer;
 import me.rhin.openciv.server.game.Player;
 import me.rhin.openciv.server.game.ai.type.BarbarianPlayer;
+import me.rhin.openciv.server.game.diplomacy.actions.DiplomaticAction;
 import me.rhin.openciv.server.listener.DeclareWarListener;
 import me.rhin.openciv.server.listener.ServerDeclareWarListener.ServerDeclareWarEvent;
+import me.rhin.openciv.shared.packet.Packet;
 import me.rhin.openciv.shared.packet.type.DeclareWarPacket;
+import me.rhin.openciv.shared.packet.type.DiscoveredPlayerPacket;
 
 public class Diplomacy implements DeclareWarListener {
 
 	private AbstractPlayer player;
 
+	private ArrayList<Packet> queuedPackets;
+	private ArrayList<AbstractPlayer> discoveredPlayers;
 	private ArrayList<AbstractPlayer> enemies;
 	private ArrayList<AbstractPlayer> allies;
+	private ArrayList<DiplomaticAction> diplomaticActions;
 
 	public Diplomacy(AbstractPlayer player) {
 		this.player = player;
 
+		this.discoveredPlayers = new ArrayList<>();
 		this.enemies = new ArrayList<>();
 		this.allies = new ArrayList<>();
+		this.diplomaticActions = new ArrayList<>();
+		this.queuedPackets = new ArrayList<>();
 
 		Server.getInstance().getEventManager().addListener(DeclareWarListener.class, this);
 	}
@@ -95,6 +104,37 @@ public class Diplomacy implements DeclareWarListener {
 				return true;
 		}
 		return false;
+	}
+
+	public ArrayList<AbstractPlayer> getDiscoveredPlayers() {
+		return discoveredPlayers;
+	}
+
+	public void addDiscoveredPlayer(AbstractPlayer discoveredPlayer) {
+		discoveredPlayers.add(discoveredPlayer);
+
+		DiscoveredPlayerPacket packet = new DiscoveredPlayerPacket();
+		packet.setPlayers(player.getName(), discoveredPlayer.getName());
+
+		if (!player.isLoaded()) {
+			queuedPackets.add(packet);
+			return;
+		}
+
+		Json json = new Json();
+		for (Player player : Server.getInstance().getPlayers()) {
+			player.sendPacket(json.toJson(packet));
+		}
+	}
+
+	public void sendQueuedPackets() {
+		Json json = new Json();
+		
+		for (Packet packet : queuedPackets) {
+			for (Player player : Server.getInstance().getPlayers()) {
+				player.sendPacket(json.toJson(packet));
+			}
+		}
 	}
 
 }

@@ -2,6 +2,8 @@ package me.rhin.openciv.server.game.map.tile;
 
 import java.util.ArrayList;
 
+import me.rhin.openciv.server.game.AbstractPlayer;
+
 public interface TileObserver {
 
 	public boolean ignoresTileObstructions();
@@ -15,5 +17,7 @@ public interface TileObserver {
 	public String getName();
 
 	public ArrayList<Tile> getObservedTiles();
+
+	public AbstractPlayer getPlayerOwner();
 
 }

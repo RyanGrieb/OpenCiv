@@ -20,7 +20,6 @@ public class FounderBeliefButton extends Button {
 		if (window.getBonusContianerList().hasParent()) {
 			window.getBonusContianerList().clearList();
 			window.removeActor(window.getBonusContianerList());
-			window.removeActor(window.getBonusContianerList().getScrollbar());
 			//window.getBonusContianerList().addAction(Actions.removeActor());
 			//window.getBonusContianerList().getScrollbar().addAction(Actions.removeActor());
 			//return;
@@ -30,11 +29,10 @@ public class FounderBeliefButton extends Button {
 				.getAvailableFounderBeliefs()) {
 			window.getBonusContianerList().addItem(ListContainerType.CATEGORY, "Available Founder Beliefs",
 					new ListReligionBonus(religionBonus, window.getBonusContianerList(),
-							window.getBonusContianerList().getWidth(), 70));
+							window.getBonusContianerList().getWidth() - 20, 70));
 		}
 
 		window.addActor(window.getBonusContianerList());
-		window.addActor(window.getBonusContianerList().getScrollbar());
 	}
 
 }

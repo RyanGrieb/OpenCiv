@@ -9,6 +9,7 @@ import me.rhin.openciv.server.game.Player;
 import me.rhin.openciv.server.game.civilization.type.America;
 import me.rhin.openciv.server.game.civilization.type.England;
 import me.rhin.openciv.server.game.civilization.type.Germany;
+import me.rhin.openciv.server.game.civilization.type.RandomCivilization;
 import me.rhin.openciv.server.game.civilization.type.Rome;
 
 public enum CivType {
@@ -16,7 +17,7 @@ public enum CivType {
 	RANDOM {
 		@Override
 		public Civ getCiv(AbstractPlayer player) {
-			return null;
+			return new RandomCivilization(player);
 		}
 	},
 	AMERICA {

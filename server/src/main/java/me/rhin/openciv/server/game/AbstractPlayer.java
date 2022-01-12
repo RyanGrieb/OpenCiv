@@ -196,4 +196,6 @@ public abstract class AbstractPlayer implements NextTurnListener {
 		}
 		return false;
 	}
+
+	public abstract boolean isLoaded();
 }

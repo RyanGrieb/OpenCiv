@@ -36,16 +36,16 @@ public class ListContainer extends Group {
 		this.containerType = containerType;
 
 		this.categoryBackgroundSprite = TextureEnum.UI_LIGHT_GRAY.sprite();
-		categoryBackgroundSprite.setSize(getWidth(), getHeight());
+		categoryBackgroundSprite.setSize(getWidth() - 20, getHeight());
 		this.backgroundSprite = TextureEnum.UI_GRAY.sprite();
 		backgroundSprite.setSize(getWidth(), getHeight());
 
 		this.containerNameLabel = new CustomLabel(name);
-		containerNameLabel.setSize(getWidth(), getHeight());
+		containerNameLabel.setSize(getWidth() - 20, getHeight());
 		containerNameLabel.setAlignment(Align.center);
 
 		this.topSeperatorSprite = TextureEnum.UI_BLACK.sprite();
-		topSeperatorSprite.setSize(getWidth(), 1);
+		topSeperatorSprite.setSize(getWidth() - 20, 1);
 	}
 
 	@Override

@@ -151,6 +151,7 @@ public class Player extends AbstractPlayer implements ChooseTechListener, Choose
 
 		heritageTree.initHeritage();
 		civilization.initHeritage();
+		diplomacy.sendQueuedPackets();
 	}
 
 	public boolean isLoaded() {

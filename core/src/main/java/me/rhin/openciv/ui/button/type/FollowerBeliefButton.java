@@ -20,19 +20,17 @@ public class FollowerBeliefButton extends Button {
 		if (window.getBonusContianerList().hasParent()) {
 			window.getBonusContianerList().clearList();
 			window.removeActor(window.getBonusContianerList());
-			window.removeActor(window.getBonusContianerList().getScrollbar());
-			//return;
+			// return;
 		}
 
 		for (ReligionBonus religionBonus : Civilization.getInstance().getGame().getAvailableReligionBonuses()
 				.getAvailableFollowerBeliefs()) {
 			window.getBonusContianerList().addItem(ListContainerType.CATEGORY, "Available Follower Beliefs",
 					new ListReligionBonus(religionBonus, window.getBonusContianerList(),
-							window.getBonusContianerList().getWidth(), 70));
+							window.getBonusContianerList().getWidth() - 20, 70));
 		}
 
 		window.addActor(window.getBonusContianerList());
-		window.addActor(window.getBonusContianerList().getScrollbar());
 	}
 
 }

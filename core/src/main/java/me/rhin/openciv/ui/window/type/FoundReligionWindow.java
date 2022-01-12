@@ -51,10 +51,10 @@ public class FoundReligionWindow extends AbstractWindow implements FoundReligion
 
 	public FoundReligionWindow(Unit unit) {
 
+		setBounds(viewport.getWorldWidth() / 2 - 600 / 2, viewport.getWorldHeight() / 2 - 600 / 2, 600, 600);
 		this.unit = unit;
 
-		this.blankBackground = new ColoredBackground(TextureEnum.UI_GRAY.sprite(),
-				viewport.getWorldWidth() / 2 - 600 / 2, viewport.getWorldHeight() / 2 - 600 / 2, 600, 600);
+		this.blankBackground = new ColoredBackground(TextureEnum.UI_GRAY.sprite(), 0, 0, 600, 600);
 		addActor(blankBackground);
 
 		this.closeWindowButton = new CloseWindowButton(getClass(), "Cancel",
@@ -126,10 +126,8 @@ public class FoundReligionWindow extends AbstractWindow implements FoundReligion
 				followerBeliefDescLabel.getY() - followerBeliefLabel.getHeight() - 10);
 		addActor(followerBeliefLabel);
 
-		this.bonusContianerList = new ContainerList(this, blankBackground.getX() + blankBackground.getWidth() / 2 - 35,
-				blankBackground.getY() + 100, 300, 400);
-
-		bonusContianerList.getScrollbar().addAction(Actions.removeActor());
+		this.bonusContianerList = new ContainerList(blankBackground.getX() + blankBackground.getWidth() / 2 - 35,
+				blankBackground.getY() + 100, 320, 400);
 
 		Civilization.getInstance().getEventManager().addListener(FoundReligionListener.class, this);
 		Civilization.getInstance().getEventManager().addListener(ResizeListener.class, this);
@@ -138,38 +136,7 @@ public class FoundReligionWindow extends AbstractWindow implements FoundReligion
 	@Override
 	public void onResize(int width, int height) {
 		// FIXME: This is terrible. Use group. & Have containerList support groups.
-		blankBackground.setPosition(width / 2 - 600 / 2, height / 2 - 600 / 2);
-		closeWindowButton.setPosition(blankBackground.getX() + blankBackground.getWidth() / 2 - 165 / 2,
-				blankBackground.getY() + 5);
-		foundReligionButton.setPosition(closeWindowButton.getX(), closeWindowButton.getY() + 35);
-		titleLabel.setPosition(blankBackground.getX(), blankBackground.getY() + blankBackground.getHeight() - 18);
-		chooseIconLabel.setPosition(blankBackground.getX() + 5,
-				blankBackground.getY() + blankBackground.getHeight() - 55);
-
-		for (ReligionIconButton iconButton : religionIconButtons) {
-			iconButton.addAction(Actions.removeActor());
-		}
-
-		religionIconButtons.clear();
-		addReligionIconButtons();
-
-		religionNameDescLabel.setPosition(chooseIconLabel.getX(), chooseIconLabel.getY() - 64);
-		religionIconBackground.setPosition(religionNameDescLabel.getX(), religionNameDescLabel.getY() - 35);
-		religionNameLabel.setPosition(religionNameDescLabel.getX() + 40, religionNameDescLabel.getY() - 25);
-		pantheonDescLabel.setPosition(religionNameDescLabel.getX(), religionNameLabel.getY() - 45);
-		pantheonLabel.setPosition(pantheonDescLabel.getX(), pantheonDescLabel.getY() - 35);
-		founderBeliefDescLabel.setPosition(pantheonLabel.getX(), pantheonLabel.getY() - 45);
-		founderBeliefButton.setPosition(founderBeliefDescLabel.getX() + founderBeliefDescLabel.getWidth(),
-				founderBeliefDescLabel.getY() - 11);
-		founderBeliefLabel.setPosition(founderBeliefDescLabel.getX(),
-				founderBeliefDescLabel.getY() - founderBeliefLabel.getHeight() - 10);
-		followerBeliefDescLabel.setPosition(founderBeliefLabel.getX(), founderBeliefLabel.getY() - 45);
-		followerBeliefButton.setPosition(followerBeliefDescLabel.getX() + followerBeliefDescLabel.getWidth(),
-				followerBeliefDescLabel.getY() - 11);
-		followerBeliefLabel.setPosition(followerBeliefDescLabel.getX(),
-				followerBeliefDescLabel.getY() - followerBeliefLabel.getHeight() - 10);
-		bonusContianerList.setPosition(blankBackground.getX() + blankBackground.getWidth() / 2 - 35,
-				blankBackground.getY() + 100);
+		setPosition(width / 2 - 600 / 2, height / 2 - 600 / 2);
 	}
 
 	@Override

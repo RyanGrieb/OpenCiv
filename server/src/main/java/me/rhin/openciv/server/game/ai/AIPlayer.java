@@ -4,7 +4,6 @@ import me.rhin.openciv.server.game.AbstractPlayer;
 import me.rhin.openciv.server.game.unit.Unit;
 
 public abstract class AIPlayer extends AbstractPlayer {
-
 	protected float intimidation;
 
 	@Override
@@ -23,7 +22,13 @@ public abstract class AIPlayer extends AbstractPlayer {
 		// Don't send anything since were an AI.
 	}
 
+	@Override
+	public boolean isLoaded() {
+		return true;
+	}
+
 	public float getIntimidation() {
 		return intimidation;
 	}
+
 }

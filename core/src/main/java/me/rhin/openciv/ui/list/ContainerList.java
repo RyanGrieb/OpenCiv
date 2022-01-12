@@ -10,6 +10,7 @@ import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.scenes.scene2d.utils.DragListener;
 
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.TextureEnum;
@@ -21,28 +22,11 @@ import me.rhin.openciv.ui.window.AbstractWindow;
 
 public class ContainerList extends Group implements ScrollListener {
 
-	private Object parentObj;
 	private float yOffset;
 	private HashMap<String, ListContainer> listContainers;
 	private ContainerScrollbar containerScrollbar;
 	private Sprite backgroundSprite;
 	private float initialHeight;
-
-	public ContainerList(AbstractWindow window, float x, float y, float width, float height) {
-		this(x, y, width, height);
-		window.addActor(containerScrollbar);
-		this.parentObj = window;
-		
-		initialHeight = height;
-	}
-
-	public ContainerList(Stage stage, float x, float y, float width, float height) {
-		this(x, y, width, height);
-		stage.addActor(containerScrollbar);
-		this.parentObj = stage;
-		
-		initialHeight = height;
-	}
 
 	public ContainerList(float x, float y, float width, float height) {
 		this.yOffset = 0;
@@ -50,12 +34,13 @@ public class ContainerList extends Group implements ScrollListener {
 
 		this.setBounds(x, y, width, height);
 
-		this.containerScrollbar = new ContainerScrollbar(this, x + width, y, 20, height);
+		this.containerScrollbar = new ContainerScrollbar(this, 0, 0, 20, height);
+		addActor(containerScrollbar);
 
 		backgroundSprite = TextureEnum.UI_LIGHT_GRAY.sprite();
 		backgroundSprite.setPosition(x, y);
 		backgroundSprite.setSize(width, height);
-		
+
 		initialHeight = height;
 		// this.setCullingArea(new Rectangle(x, y, width, height));
 
@@ -69,18 +54,19 @@ public class ContainerList extends Group implements ScrollListener {
 		// FIXME: This doesn't seem correct.
 		final ContainerList thisContainer = this;
 
-		this.addListener(new ClickListener() {
+		this.addListener(new DragListener() {
+
 			@Override
-			public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
-				// if (thisContainer != null)
-				// thisContainer.getStage().setScrollFocus(thisContainer);
+			public void touchDragged(InputEvent event, float x, float y, int pointer) {
+				super.touchDragged(event, x, y, pointer);
+				containerScrollbar.onTouchDragged(event, x, y);
 			}
 
 			@Override
-			public void exit(InputEvent event, float x, float y, int pointer, Actor fromActor) {
-				// if (thisContainer != null)
-				// thisContainer.getStage().setScrollFocus(null);
+			public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
+				super.touchUp(event, x, y, pointer, button);
 			}
+
 		});
 
 		Civilization.getInstance().getEventManager().addListener(ScrollListener.class, this);
@@ -123,9 +109,16 @@ public class ContainerList extends Group implements ScrollListener {
 
 		float y = Civilization.getInstance().getCurrentScreen().getViewport().getWorldHeight() - Gdx.input.getY();
 
+		float xPos = getX();
+		float yPos = getY();
 
-		if (Gdx.input.getX() >= getX() && y >= getY())
-			if (Gdx.input.getX() <= getX() + getWidth() && y <= getY() + getHeight()) {
+		if (getParent() != null) {
+			xPos += getParent().getX();
+			yPos += getParent().getY();
+		}
+
+		if (Gdx.input.getX() >= xPos && y >= yPos)
+			if (Gdx.input.getX() <= xPos + getWidth() && y <= yPos + getHeight()) {
 				scroll(amountY);
 			}
 	}
@@ -165,7 +158,7 @@ public class ContainerList extends Group implements ScrollListener {
 		// Scrollbar top -> getY() + getHeight() - scrollbarHeight()
 		// Scrollbar bottom - >getY()
 
-		float scrollbarY = getY() + ((getHeight() - containerScrollbar.getScrubberHeight())
+		float scrollbarY =  ((getHeight() - containerScrollbar.getScrubberHeight())
 				- (((getHeight() - containerScrollbar.getScrubberHeight()) * offset)));
 
 		containerScrollbar.setScrubberY(scrollbarY);
@@ -217,10 +210,6 @@ public class ContainerList extends Group implements ScrollListener {
 
 	public float getYOffset() {
 		return yOffset;
-	}
-
-	public Object getParentObj() {
-		return parentObj;
 	}
 
 	public void onTouchDragged(InputEvent event, float x, float y) {

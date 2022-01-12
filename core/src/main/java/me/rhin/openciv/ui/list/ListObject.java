@@ -3,7 +3,10 @@ package me.rhin.openciv.ui.list;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
+import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Group;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.TextureEnum;
@@ -13,6 +16,7 @@ public abstract class ListObject extends Group implements Comparable<ListObject>
 	private String key;
 	private Sprite seperatorSprite;
 	protected ContainerList containerList;
+	protected boolean hovered;
 
 	public ListObject(float width, float height, ContainerList containerList, String key) {
 		this.setSize(width, height);
@@ -22,7 +26,26 @@ public abstract class ListObject extends Group implements Comparable<ListObject>
 		seperatorSprite.setSize(width, 1);
 
 		this.containerList = containerList;
+
+		this.addListener(new ClickListener() {
+			@Override
+			public void clicked(InputEvent event, float x, float y) {
+				onClicked(event);
+			}
+
+			@Override
+			public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
+				hovered = true;
+			}
+
+			@Override
+			public void exit(InputEvent event, float x, float y, int pointer, Actor fromActor) {
+				hovered = false;
+			}
+		});
 	}
+	
+	protected abstract void onClicked(InputEvent event);
 
 	@Override
 	public void draw(Batch batch, float parentAlpha) {
