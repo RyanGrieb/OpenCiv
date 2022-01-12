@@ -16,9 +16,9 @@ public class MusicWrapper {
 	public Music getMusic() {
 		return music;
 	}
-
-	public float getInitialVolume() {
-		return initialVolume;
+	
+	public float getVolume() {
+		return music.getVolume();
 	}
 
 	public void stop() {

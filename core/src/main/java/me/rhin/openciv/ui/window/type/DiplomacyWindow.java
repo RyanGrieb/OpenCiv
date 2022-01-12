@@ -45,7 +45,7 @@ public class DiplomacyWindow extends AbstractWindow implements ResizeListener {
 
 			this.noDiscoveredCivsLabel = new CustomLabel("You have not discovered\nany civilizations.");
 			noDiscoveredCivsLabel.setPosition(35, getHeight() / 2);
-			addActor(noDiscoveredCivsLabel); 
+			addActor(noDiscoveredCivsLabel);
 
 			return;
 		}
@@ -53,11 +53,10 @@ public class DiplomacyWindow extends AbstractWindow implements ResizeListener {
 		this.civilizationList = new ContainerList(25, getHeight() - 450, 270, 400);
 		addActor(civilizationList);
 
-		for (int i = 0; i < 10; i++)
-			for (AbstractPlayer discoveredPlayer : player.getDiplomacy().getDiscoveredPlayers()) {
-				civilizationList.addItem(ListContainerType.CATEGORY, "Players",
-						new ListDiplomacyCivilization(discoveredPlayer, civilizationList, 250, 55));
-			}
+		for (AbstractPlayer discoveredPlayer : player.getDiplomacy().getDiscoveredPlayers()) {
+			civilizationList.addItem(ListContainerType.CATEGORY, "Players",
+					new ListDiplomacyCivilization(discoveredPlayer, civilizationList, 250, 55));
+		}
 	}
 
 	@Override

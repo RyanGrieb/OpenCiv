@@ -28,32 +28,20 @@ public class SoundHandler implements SetScreenListener {
 
 		this.musicMap = new HashMap<>();
 		this.effectMap = new HashMap<>();
+
+		Civilization.getInstance().getEventManager().addListener(SetScreenListener.class, this);
 	}
 
 	@Override
 	public void onSetScreen(ScreenEnum prevScreenEnum, ScreenEnum screenEnum) {
-
-		if (prevScreenEnum == ScreenEnum.SERVER_LOBBY && screenEnum == ScreenEnum.IN_GAME) {
-			// Stop playing titlescreen music
-			currentMusic.stop();
-			currentMusic = null;
-		}
-
 		if (screenEnum == ScreenEnum.TITLE && prevScreenEnum == ScreenEnum.IN_GAME) {
 			// Stop playing ambient music & ingame music
 			currentAmbience.stop();
-
-			if (currentMusic != null)
-				currentMusic.stop();
-
-			currentMusic = null;
 			currentAmbience = null;
 		}
 	}
 
 	public void loadSounds() {
-
-		float volume = 0;
 
 		for (SoundEnum soundEnum : SoundEnum.values()) {
 
@@ -67,10 +55,6 @@ public class SoundHandler implements SetScreenListener {
 				break;
 			default:
 				Music music = Civilization.getInstance().getAssetHandler().get(soundPath, Music.class);
-				volume = soundEnum.getVolume()
-						* Civilization.getInstance().getGameOptions().getInt(soundEnum.getSoundType().getOptionType())
-						/ 100;
-				music.setVolume(volume);
 				addMusic(soundEnum.getSoundType(), new MusicWrapper(music, soundEnum.getVolume()));
 				break;
 			}
@@ -95,8 +79,8 @@ public class SoundHandler implements SetScreenListener {
 		Sound sound = effectMap.get(soundEnum);
 
 		long id = sound.play();
-		sound.setVolume(id, soundEnum.getVolume()
-				* Civilization.getInstance().getGameOptions().getInt(OptionType.EFFECTS_VOLUME) / 100);
+		System.out.println(Civilization.getInstance().getGameOptions().getInt(OptionType.EFFECTS_VOLUME) / 100F);
+		sound.setVolume(id, Civilization.getInstance().getGameOptions().getInt(OptionType.EFFECTS_VOLUME) / 100F);
 	}
 
 	public void playTrackBySoundtype(SoundType soundType) {
@@ -105,25 +89,29 @@ public class SoundHandler implements SetScreenListener {
 
 	public void playTrackBySoundtype(AbstractScreen screen, SoundType soundType) {
 
-		if (currentAmbience != null)
-			currentAmbience.stop();
-
-		if (screen instanceof TitleScreen && currentMusic != null)
-			return;
-
-		if (currentMusic != null)
-			currentMusic.stop();
+		// if (screen instanceof TitleScreen && currentMusic != null)
+		// return;
 
 		ArrayList<MusicWrapper> musicTrack = musicMap.get(soundType);
 		Random rnd = new Random();
 
 		MusicWrapper rndSound = musicTrack.get(rnd.nextInt(musicTrack.size()));
-		rndSound.play();
 
-		if (soundType == SoundType.AMBIENCE)
+		if (soundType == SoundType.AMBIENCE) {
+			if (currentAmbience != null)
+				currentAmbience.stop();
 			currentAmbience = rndSound;
-		else
+
+			rndSound.setVolume(Civilization.getInstance().getGameOptions().getInt(OptionType.AMBIENCE_VOLUME) / 100F);
+		} else {
+			if (currentMusic != null)
+				currentMusic.stop();
 			currentMusic = rndSound;
+
+			rndSound.setVolume(Civilization.getInstance().getGameOptions().getInt(OptionType.MUSIC_VOLUME) / 100F);
+		}
+
+		rndSound.play();
 
 		rndSound.setOnCompletionListener(new Music.OnCompletionListener() {
 			@Override

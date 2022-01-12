@@ -14,7 +14,7 @@ public enum OptionType {
 				return;
 
 			MusicWrapper music = Civilization.getInstance().getSoundHandler().getCurrentMusic();
-			music.setVolume(music.getInitialVolume() * (value / 100));
+			music.setVolume(value / 100);
 		}
 
 		@Override
@@ -30,7 +30,7 @@ public enum OptionType {
 				return;
 
 			MusicWrapper music = Civilization.getInstance().getSoundHandler().getCurrentAmbience();
-			music.setVolume(music.getInitialVolume() * (value / 100));
+			music.setVolume(value / 100);
 		}
 
 		@Override
