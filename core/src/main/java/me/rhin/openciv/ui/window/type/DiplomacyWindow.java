@@ -41,6 +41,8 @@ public class DiplomacyWindow extends AbstractWindow implements ResizeListener {
 
 		Player player = Civilization.getInstance().getGame().getPlayer();
 
+		player.unselectUnit();
+		
 		if (player.getDiplomacy().getDiscoveredPlayers().size() < 1) {
 
 			this.noDiscoveredCivsLabel = new CustomLabel("You have not discovered\nany civilizations.");

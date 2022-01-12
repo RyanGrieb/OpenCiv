@@ -34,7 +34,8 @@ public class ReligionInfoWindow extends AbstractWindow implements ResizeListener
 
 	public ReligionInfoWindow() {
 		setBounds(viewport.getWorldWidth() / 2 - 600 / 2, viewport.getWorldHeight() / 2 - 600 / 2, 600, 600);
-
+		
+		
 		this.coloredBackground = new ColoredBackground(TextureEnum.UI_BLACK.sprite(), 0, 0, getWidth(), getHeight());
 		addActor(coloredBackground);
 
@@ -52,7 +53,9 @@ public class ReligionInfoWindow extends AbstractWindow implements ResizeListener
 		Civilization.getInstance().getEventManager().addListener(ResizeListener.class, this);
 
 		Player player = Civilization.getInstance().getGame().getPlayer();
-
+		
+		player.unselectUnit();
+		
 		if (player.getReligion().getPickedBonuses().size() < 1) {
 			addActor(noReligionLabel);
 			return;
