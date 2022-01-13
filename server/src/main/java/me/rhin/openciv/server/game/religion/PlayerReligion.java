@@ -62,7 +62,7 @@ public class PlayerReligion implements NextTurnListener, PickPantheonListener, F
 		}
 
 		// FIXME: Limit the number of religions to be founded
-		if (!player.hasUnitOfType(ProphetUnit.class) && player.getStatLine().getStatValue(Stat.FAITH) > 13
+		if (!player.hasUnitOfType(ProphetUnit.class) && player.getStatLine().getStatValue(Stat.FAITH) > 175 //13
 				&& pickedBonuses.size() == 1 && player instanceof Player) {
 
 			ProphetUnit unit = new ProphetUnit(player, player.getCapitalCity().getOriginTile());
@@ -113,6 +113,9 @@ public class PlayerReligion implements NextTurnListener, PickPantheonListener, F
 		Unit unit = Server.getInstance().getMap().getTiles()[packet.getGridX()][packet.getGridY()]
 				.getUnitFromID(packet.getUnitID());
 		unit.deleteUnit(DeleteUnitOptions.SERVER_DELETE);
+		
+		player.getStatLine().subValue(Stat.FAITH, 175);
+		player.updateOwnedStatlines(false);
 	}
 
 	public ArrayList<ReligionBonus> getPickedBonuses() {

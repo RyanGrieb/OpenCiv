@@ -79,7 +79,7 @@ public class SoundHandler implements SetScreenListener {
 		Sound sound = effectMap.get(soundEnum);
 
 		long id = sound.play();
-		System.out.println(Civilization.getInstance().getGameOptions().getInt(OptionType.EFFECTS_VOLUME) / 100F);
+
 		sound.setVolume(id, Civilization.getInstance().getGameOptions().getInt(OptionType.EFFECTS_VOLUME) / 100F);
 	}
 

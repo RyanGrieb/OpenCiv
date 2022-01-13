@@ -1,10 +1,13 @@
 package me.rhin.openciv.server.game.heritage.type.all;
 
 import me.rhin.openciv.server.game.AbstractPlayer;
+import me.rhin.openciv.server.game.city.City;
 import me.rhin.openciv.server.game.heritage.Heritage;
+import me.rhin.openciv.server.game.heritage.IncreaseCityStatline;
 import me.rhin.openciv.shared.stat.Stat;
+import me.rhin.openciv.shared.stat.StatLine;
 
-public class CapitalExpansionHeritage extends Heritage {
+public class CapitalExpansionHeritage extends Heritage implements IncreaseCityStatline {
 
 	public CapitalExpansionHeritage(AbstractPlayer player) {
 		super(player);
@@ -27,7 +30,12 @@ public class CapitalExpansionHeritage extends Heritage {
 
 	@Override
 	protected void onStudied() {
-		// Set capital city stat value
-		player.getCapitalCity().getStatLine().addModifier(Stat.FOOD_GAIN, 0.15F);
+	}
+
+	@Override
+	public StatLine getStatLine(City city) {
+		StatLine statLine = new StatLine();
+		statLine.addModifier(Stat.FOOD_GAIN, 0.15F);
+		return statLine;
 	}
 }

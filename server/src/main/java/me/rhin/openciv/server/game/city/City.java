@@ -24,6 +24,8 @@ import me.rhin.openciv.server.game.city.citizen.CityCenterCitizenWorker;
 import me.rhin.openciv.server.game.city.citizen.EmptyCitizenWorker;
 import me.rhin.openciv.server.game.city.citizen.LockedCitizenWorker;
 import me.rhin.openciv.server.game.city.specialist.SpecialistContainer;
+import me.rhin.openciv.server.game.heritage.Heritage;
+import me.rhin.openciv.server.game.heritage.IncreaseCityStatline;
 import me.rhin.openciv.server.game.map.tile.Tile;
 import me.rhin.openciv.server.game.map.tile.TileObserver;
 import me.rhin.openciv.server.game.map.tile.TileType.TileProperty;
@@ -422,8 +424,17 @@ public class City implements AttackableEntity, TileObserver, NextTurnListener, C
 		// Keep the production gain modifier
 		statLine.setValue(Stat.PRODUCTION_GAIN, 0);
 
+		// Add building stat values
 		for (Building building : buildings)
 			statLine.mergeStatLineExcluding(building.getStatLine(), Stat.MORALE_CITY);
+
+		// Add heritage stat values
+		for (Heritage heritage : playerOwner.getHeritageTree().getStudiedHeritage()) {
+			if (heritage instanceof IncreaseCityStatline) {
+				IncreaseCityStatline heritageStatLine = (IncreaseCityStatline) heritage;
+				statLine.mergeStatLine(heritageStatLine.getStatLine(this));
+			}
+		}
 
 		// Set all workers to empty
 		for (Tile tile : territory) {

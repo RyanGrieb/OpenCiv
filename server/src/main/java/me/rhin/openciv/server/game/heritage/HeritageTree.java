@@ -84,4 +84,16 @@ public class HeritageTree implements NextTurnListener {
 			e.printStackTrace();
 		}
 	}
+
+	public ArrayList<Heritage> getStudiedHeritage() {
+
+		ArrayList<Heritage> studiedHeritage = new ArrayList<>();
+
+		for (Class<? extends Heritage> heritageClass : values.keySet()) {
+			if (hasStudied(heritageClass))
+				studiedHeritage.add(values.get(heritageClass));
+		}
+
+		return studiedHeritage;
+	}
 }

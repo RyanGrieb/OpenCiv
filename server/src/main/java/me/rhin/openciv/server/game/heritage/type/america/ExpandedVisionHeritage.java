@@ -28,6 +28,6 @@ public class ExpandedVisionHeritage extends Heritage {
 
 	@Override
 	protected void onStudied() {
-		// Clientside.
+		
 	}
 }
