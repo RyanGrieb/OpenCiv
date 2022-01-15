@@ -59,7 +59,10 @@ public class StatLine {
 		for (Stat stat : statLine.getStatValues().keySet()) {
 			if (stat.getStatType() == statType)
 				continue;
-			mergeValue(stat, new StatValue(statLine.getStatValues().get(stat)));
+			if (stat == Stat.MAINTENANCE)
+				subValue(Stat.GOLD_GAIN, statLine.getStatValues().get(stat).getValue());
+			else
+				mergeValue(stat, new StatValue(statLine.getStatValues().get(stat)));
 		}
 	}
 
