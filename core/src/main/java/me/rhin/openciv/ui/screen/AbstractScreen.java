@@ -16,6 +16,7 @@ import com.badlogic.gdx.utils.viewport.Viewport;
 
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.listener.BottomShapeRenderListener.BottomShapeRenderEvent;
+import me.rhin.openciv.listener.MouseHoveredListener.MouseHoveredEvent;
 import me.rhin.openciv.listener.ResizeListener.ResizeEvent;
 import me.rhin.openciv.listener.ScrollListener.ScrollEvent;
 import me.rhin.openciv.listener.SendChatMessageListener;
@@ -37,6 +38,8 @@ public abstract class AbstractScreen implements Screen, InputProcessor {
 	private InputMultiplexer inputMultiplexer;
 	private ShapeRenderer bottomShapeRenderer;
 	protected ShapeRenderer topShapeRenderer;
+	private long movedMouseTime;
+	private boolean mouseHovered;
 
 	protected AbstractScreen() {
 		this.windowManager = new WindowManager();
@@ -77,6 +80,7 @@ public abstract class AbstractScreen implements Screen, InputProcessor {
 		Civilization.getInstance().getEventManager().addListener(SendChatMessageListener.class,
 				Civilization.getInstance().getChatHandler());
 
+		this.movedMouseTime = System.currentTimeMillis();
 	}
 
 	@Override
@@ -148,6 +152,14 @@ public abstract class AbstractScreen implements Screen, InputProcessor {
 					+ Civilization.getInstance().getProfiler().getVertexCount().value);
 			Civilization.getInstance().getProfiler().reset();
 		}
+
+		if (System.currentTimeMillis() - movedMouseTime >= 1000 && !mouseHovered) {
+			float mouseX = Gdx.input.getX();
+			float mouseY = Gdx.graphics.getHeight() - Gdx.input.getY();
+			mouseHovered = true;
+			
+			Civilization.getInstance().getEventManager().fireEvent(new MouseHoveredEvent(mouseX, mouseY));
+		}
 	}
 
 	@Override
@@ -217,6 +229,8 @@ public abstract class AbstractScreen implements Screen, InputProcessor {
 
 	@Override
 	public boolean mouseMoved(int screenX, int screenY) {
+		movedMouseTime = System.currentTimeMillis();
+		mouseHovered = false;
 		return true;
 	}
 

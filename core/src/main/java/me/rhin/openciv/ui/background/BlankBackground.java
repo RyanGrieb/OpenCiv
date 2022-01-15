@@ -38,4 +38,9 @@ public class BlankBackground extends Actor {
 		sprite.draw(batch);
 	}
 
+	@Override
+	public void setColor(float r, float g, float b, float a) {
+		super.setColor(r, g, b, a);
+		sprite.setColor(r, g, b, a);
+	}
 }

@@ -7,6 +7,7 @@ import com.badlogic.gdx.scenes.scene2d.Actor;
 
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.TextureEnum;
+import me.rhin.openciv.listener.MouseHoveredListener;
 import me.rhin.openciv.listener.NextTurnListener;
 import me.rhin.openciv.listener.PlayerStatUpdateListener;
 import me.rhin.openciv.listener.TurnTimeLeftListener;
@@ -16,8 +17,10 @@ import me.rhin.openciv.shared.packet.type.TurnTimeLeftPacket;
 import me.rhin.openciv.shared.stat.Stat;
 import me.rhin.openciv.shared.stat.StatLine;
 import me.rhin.openciv.ui.label.CustomLabel;
+import me.rhin.openciv.ui.window.type.statinfo.type.GoldStatInfoWindow;
 
-public class StatusBar extends Actor implements PlayerStatUpdateListener, NextTurnListener, TurnTimeLeftListener {
+public class StatusBar extends Actor
+		implements PlayerStatUpdateListener, NextTurnListener, TurnTimeLeftListener, MouseHoveredListener {
 
 	private Sprite sprite;
 
@@ -46,7 +49,7 @@ public class StatusBar extends Actor implements PlayerStatUpdateListener, NextTu
 		this.goldIcon = TextureEnum.ICON_GOLD.sprite();
 		goldIcon.setSize(16, 16);
 		this.goldLabel = new CustomLabel("0");
-		
+
 		this.faithDescLabel = new CustomLabel("Faith:");
 		this.faithIcon = TextureEnum.ICON_FAITH.sprite();
 		faithIcon.setSize(16, 16);
@@ -64,6 +67,7 @@ public class StatusBar extends Actor implements PlayerStatUpdateListener, NextTu
 		Civilization.getInstance().getEventManager().addListener(PlayerStatUpdateListener.class, this);
 		Civilization.getInstance().getEventManager().addListener(NextTurnListener.class, this);
 		Civilization.getInstance().getEventManager().addListener(TurnTimeLeftListener.class, this);
+		Civilization.getInstance().getEventManager().addListener(MouseHoveredListener.class, this);
 	}
 
 	@Override
@@ -128,9 +132,10 @@ public class StatusBar extends Actor implements PlayerStatUpdateListener, NextTu
 				hertiageLabel.setText("+" + (int) statLine.getStatValue(Stat.HERITAGE_GAIN) + "");
 
 				float gainedFaith = statLine.getStatValue(Stat.FAITH_GAIN);
-				
-				faithLabel.setText("" + statLine.getStatValue(Stat.FAITH) + "(" + (gainedFaith < 0 ? "" : "+") + gainedFaith + ")");
-				
+
+				faithLabel.setText("" + statLine.getStatValue(Stat.FAITH) + "(" + (gainedFaith < 0 ? "" : "+")
+						+ gainedFaith + ")");
+
 				tradeLabel.setText((int) statLine.getStatValue(Stat.TRADE_ROUTE_AMOUNT) + "/"
 						+ (int) statLine.getStatValue(Stat.MAX_TRADE_ROUTES));
 
@@ -173,6 +178,16 @@ public class StatusBar extends Actor implements PlayerStatUpdateListener, NextTu
 		});
 	}
 
+	@Override
+	public void onMouseHovered(float mouseX, float mouseY) {
+		// Display gold info window
+		if (mouseX > goldDescLabel.getX() && mouseX < (goldLabel.getX() + goldLabel.getWidth()))
+			if (mouseY > goldDescLabel.getY() && mouseY < goldDescLabel.getY() + goldDescLabel.getHeight()) {
+				Civilization.getInstance().getWindowManager()
+						.addWindow(new GoldStatInfoWindow(mouseX + 15, mouseY - 150));
+			}
+	}
+
 	private void updatePositions() {
 		float x = getX();
 		float y = getY();
@@ -206,7 +221,7 @@ public class StatusBar extends Actor implements PlayerStatUpdateListener, NextTu
 
 		originX += goldLabel.getWidth() + 15;
 		faithDescLabel.setPosition(originX, y + faithDescLabel.getHeight() / 2);
-		
+
 		originX += faithDescLabel.getWidth() + 5;
 		faithIcon.setPosition(originX, y + 1);
 
