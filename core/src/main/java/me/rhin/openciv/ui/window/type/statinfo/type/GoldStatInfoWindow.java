@@ -31,11 +31,11 @@ public class GoldStatInfoWindow extends StatInfoWindow {
 		totalIncome += goldFromCities;
 
 		totalIncomeLabel = new CustomLabel("+" + totalIncome + " in total income");
-		totalIncomeLabel.setPosition(4, getHeight() - 25);
+		totalIncomeLabel.setPosition(4, getHeight() - 15);
 		addActor(totalIncomeLabel);
 
-		cityIncomeLabel = new CustomLabel("+" + goldFromCities + " from all cities");
-		cityIncomeLabel.setPosition(4, getHeight() - 45);
+		cityIncomeLabel = new CustomLabel("		* +" + goldFromCities + " from all cities");
+		cityIncomeLabel.setPosition(4, totalIncomeLabel.getY() - 15);
 		addActor(cityIncomeLabel);
 
 		float buildingExpenses = 0;
@@ -51,17 +51,17 @@ public class GoldStatInfoWindow extends StatInfoWindow {
 		totalExpenses += unitMaintenance;
 
 		totalExpensesLabel = new CustomLabel((totalExpenses > 0 ? "-" : "") + totalExpenses + " in total expenses");
-		totalExpensesLabel.setPosition(4, getHeight() - 75);
+		totalExpensesLabel.setPosition(4, cityIncomeLabel.getY() - 25);
 		addActor(totalExpensesLabel);
 
-		this.buildingExpensesLabel = new CustomLabel(
-				(buildingExpenses > 0 ? "-" : "") + buildingExpenses + " spent on building\nmaintenance");
-		buildingExpensesLabel.setPosition(4, getHeight() - 110);
+		this.buildingExpensesLabel = new CustomLabel("		* " + (buildingExpenses > 0 ? "-" : "") + buildingExpenses
+				+ " spent on building\n		maintenance");
+		buildingExpensesLabel.setPosition(4, totalExpensesLabel.getY() - 35);
 		addActor(buildingExpensesLabel);
 
 		this.unitExpensesLabel = new CustomLabel(
-				(unitMaintenance > 0 ? "-" : "") + unitMaintenance + " spent on unit\nmaintenance");
-		unitExpensesLabel.setPosition(4, getHeight() - 145);
+				"		* " + (unitMaintenance > 0 ? "-" : "") + unitMaintenance + " spent on unit\n		maintenance");
+		unitExpensesLabel.setPosition(4, buildingExpensesLabel.getY() - 35);
 		addActor(unitExpensesLabel);
 	}
 
