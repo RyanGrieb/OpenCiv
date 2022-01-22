@@ -104,7 +104,7 @@ public class GameMap implements ReceiveMapChunkListener, SetTileTypeListener, Re
 			TileType.valueOf(packet.getTileTypeName()).playTileSound();
 
 		if (packet.isClearTileTypes()) {
-			for (TileTypeWrapper type : (TreeSet<TileTypeWrapper>) tile.getTileTypeWrappers().clone()) {
+			for (TileTypeWrapper type : new TreeSet<>(tile.getTileTypeWrappers())) {
 				tile.removeTileType(type.getTileType());
 			}
 		}
