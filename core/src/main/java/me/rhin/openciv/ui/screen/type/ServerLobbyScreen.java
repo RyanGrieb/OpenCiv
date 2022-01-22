@@ -24,6 +24,7 @@ import me.rhin.openciv.shared.packet.type.PlayerConnectPacket;
 import me.rhin.openciv.shared.packet.type.PlayerDisconnectPacket;
 import me.rhin.openciv.shared.packet.type.PlayerListRequestPacket;
 import me.rhin.openciv.ui.button.type.MPStartButton;
+import me.rhin.openciv.ui.button.type.OpenChatButton;
 import me.rhin.openciv.ui.button.type.ServerLobbyBackButton;
 import me.rhin.openciv.ui.game.GameOptionsMenu;
 import me.rhin.openciv.ui.list.ContainerList;
@@ -46,6 +47,7 @@ public class ServerLobbyScreen extends AbstractScreen implements ResizeListener,
 	private GameOptionsMenu gameOptionsMenu;
 	private MPStartButton multiplayerStartButton;
 	private ServerLobbyBackButton backButton;
+	private OpenChatButton chatButton;
 
 	public ServerLobbyScreen() {
 		this.eventManager = Civilization.getInstance().getEventManager();
@@ -74,6 +76,9 @@ public class ServerLobbyScreen extends AbstractScreen implements ResizeListener,
 
 		backButton = new ServerLobbyBackButton(viewport.getWorldWidth() / 2 - 150 / 2, 20, 150, 45);
 		stage.addActor(backButton);
+		
+		chatButton = new OpenChatButton(4, 28, 42, 42);
+		stage.addActor(chatButton);
 
 		requestPlayerList();
 	}
