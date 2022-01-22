@@ -99,7 +99,12 @@ public class ChatboxWindow extends AbstractWindow implements SendChatMessageList
 
 	@Override
 	public void onSentChatMessage(SendChatMessagePacket packet) {
-		String messageText = packet.getPlayerName() + ": " + packet.getMessage();
+
+		String messageText = packet.getMessage();
+
+		if (!packet.isServerMessage())
+			messageText = packet.getPlayerName() + ": " + messageText;
+
 		addMessage(messageText);
 	}
 

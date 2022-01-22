@@ -59,6 +59,7 @@ import me.rhin.openciv.server.listener.UnitFinishedMoveListener.UnitFinishedMove
 import me.rhin.openciv.server.listener.UnitMoveListener;
 import me.rhin.openciv.server.listener.UpgradeUnitListener;
 import me.rhin.openciv.server.listener.WorkTileListener;
+import me.rhin.openciv.server.scenarios.Scenario;
 import me.rhin.openciv.shared.packet.type.AddUnitPacket;
 import me.rhin.openciv.shared.packet.type.BuyProductionItemPacket;
 import me.rhin.openciv.shared.packet.type.CombatPreviewPacket;

@@ -10,16 +10,22 @@ import me.rhin.openciv.server.Server;
 import me.rhin.openciv.server.game.ai.AIPlayer;
 import me.rhin.openciv.server.game.ai.type.BarbarianPlayer;
 import me.rhin.openciv.server.listener.SendChatMessageListener;
+import me.rhin.openciv.server.scenarios.Scenario;
+import me.rhin.openciv.server.scenarios.ScenarioList;
 import me.rhin.openciv.shared.packet.type.SendChatMessagePacket;
 
 public abstract class GameState implements SendChatMessageListener {
 
 	protected ArrayList<Player> players;
 	protected ArrayList<AIPlayer> aiPlayers;
+	private ScenarioList scenarioList;
+	private ArrayList<Scenario> gameScenarios;
 
 	public GameState() {
 		players = Server.getInstance().getPlayers();
 		aiPlayers = Server.getInstance().getAIPlayers();
+		scenarioList = new ScenarioList();
+		gameScenarios = new ArrayList<>();
 
 		Server.getInstance().getEventManager().addListener(SendChatMessageListener.class, this);
 	}
@@ -29,7 +35,8 @@ public abstract class GameState implements SendChatMessageListener {
 		packet.setPlayerName(getPlayerByConn(conn).getName());
 
 		if (packet.getMessage().startsWith("/")) {
-			Server.getInstance().getCommandProcessor().proccessCommand(packet.getMessage().substring(1));
+			Server.getInstance().getCommandProcessor().proccessCommand(conn, packet, packet.getMessage().substring(1));
+			return;
 		}
 
 		Json json = new Json();
@@ -60,5 +67,14 @@ public abstract class GameState implements SendChatMessageListener {
 
 	public Player getPlayerByConn(WebSocket conn) {
 		return Server.getInstance().getPlayerByConn(conn);
+	}
+
+	public ScenarioList getScenarioList() {
+		return scenarioList;
+	}
+
+	public void addScenario(Scenario scenario) {
+		gameScenarios.add(scenario);
+		scenario.toggle();
 	}
 }

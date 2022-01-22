@@ -1,11 +1,14 @@
 
 package me.rhin.openciv.game.map;
 
+import java.util.TreeSet;
+
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.Vector2;
 
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.game.map.tile.Tile;
+import me.rhin.openciv.game.map.tile.Tile.TileTypeWrapper;
 import me.rhin.openciv.game.map.tile.TileType;
 import me.rhin.openciv.game.player.AbstractPlayer;
 import me.rhin.openciv.game.unit.Unit;
@@ -99,6 +102,12 @@ public class GameMap implements ReceiveMapChunkListener, SetTileTypeListener, Re
 
 		if (tile.getTileObservers().size() > 0)
 			TileType.valueOf(packet.getTileTypeName()).playTileSound();
+
+		if (packet.isClearTileTypes()) {
+			for (TileTypeWrapper type : (TreeSet<TileTypeWrapper>) tile.getTileTypeWrappers().clone()) {
+				tile.removeTileType(type.getTileType());
+			}
+		}
 
 		// FIXME: Should be using tile Ids?
 		tile.setTileType(TileType.valueOf(packet.getTileTypeName()));

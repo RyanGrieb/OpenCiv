@@ -314,10 +314,13 @@ public class Tile extends Actor implements BottomShapeRenderListener {
 		}
 
 		if (containsTileLayer(tileType.getTileLayer())) {
-			for (TileTypeWrapper tileWrapper : tileWrappers) {
-				// Find the tileType /w the exact layer and replace it.
+
+			Iterator<TileTypeWrapper> iterator = tileWrappers.iterator();
+			
+			while(iterator.hasNext()) {
+				TileTypeWrapper tileWrapper = iterator.next();
 				if (tileWrapper.getTileType().getTileLayer() == tileType.getTileLayer())
-					tileWrappers.remove(tileWrapper);
+					iterator.remove();
 			}
 		}
 		// Add the tileType to the Array in an ordered manner. note: this will never be
@@ -665,7 +668,7 @@ public class Tile extends Actor implements BottomShapeRenderListener {
 			tile.setDiscovered(true);
 
 			if (!tile.getTileObservers().contains(tileObserver)) {
-				 tile.getTileObservers().add(tileObserver);
+				tile.getTileObservers().add(tileObserver);
 			}
 
 			if (denyVisibility && !isHill) {
@@ -680,7 +683,7 @@ public class Tile extends Actor implements BottomShapeRenderListener {
 				adjTile.setDiscovered(true);
 
 				if (!adjTile.getTileObservers().contains(tileObserver)) {
-					 adjTile.getTileObservers().add(tileObserver);
+					adjTile.getTileObservers().add(tileObserver);
 				}
 			}
 
