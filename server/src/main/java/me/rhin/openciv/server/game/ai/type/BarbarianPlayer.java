@@ -60,7 +60,7 @@ public class BarbarianPlayer extends AIPlayer implements NextTurnListener {
 					continue;
 
 				Unit unit = new WarriorUnit(this, tile);
-				unit.addAIBehavior(new BarbarianWarriorAI(unit, tile));
+				//unit.addAIBehavior(new BarbarianWarriorAI(unit, tile));
 				tile.addUnit(unit);
 				addOwnedUnit(unit);
 

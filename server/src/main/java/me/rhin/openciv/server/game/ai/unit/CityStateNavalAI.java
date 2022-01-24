@@ -5,7 +5,7 @@ import me.rhin.openciv.server.game.map.tile.Tile;
 import me.rhin.openciv.server.game.unit.Unit;
 import me.rhin.openciv.server.listener.NextTurnListener;
 
-public class CityStateNavalAI extends UnitAI implements NextTurnListener {
+public class CityStateNavalAI extends UnitAIOld implements NextTurnListener {
 
 	private Tile targetTile;
 

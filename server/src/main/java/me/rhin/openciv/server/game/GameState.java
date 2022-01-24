@@ -77,4 +77,8 @@ public abstract class GameState implements SendChatMessageListener {
 		gameScenarios.add(scenario);
 		scenario.toggle();
 	}
+
+	public ArrayList<Scenario> getEnabledScenarios() {
+		return gameScenarios;
+	}
 }

@@ -110,6 +110,10 @@ public class Diplomacy implements DeclareWarListener {
 		return discoveredPlayers;
 	}
 
+	public ArrayList<AbstractPlayer> getEnemies(){
+		return enemies;
+	}
+	
 	public void addDiscoveredPlayer(AbstractPlayer discoveredPlayer) {
 		discoveredPlayers.add(discoveredPlayer);
 

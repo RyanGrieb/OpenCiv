@@ -15,6 +15,7 @@ import me.rhin.openciv.server.errors.SameMovementTargetException;
 import me.rhin.openciv.server.game.AbstractPlayer;
 import me.rhin.openciv.server.game.Player;
 import me.rhin.openciv.server.game.ai.unit.UnitAI;
+import me.rhin.openciv.server.game.ai.unit.UnitAIOld;
 import me.rhin.openciv.server.game.city.City;
 import me.rhin.openciv.server.game.map.tile.Tile;
 import me.rhin.openciv.server.game.map.tile.TileObserver;
@@ -26,6 +27,7 @@ import me.rhin.openciv.server.listener.NextTurnListener;
 import me.rhin.openciv.shared.packet.type.AddObservedTilePacket;
 import me.rhin.openciv.shared.packet.type.AddUnitPacket;
 import me.rhin.openciv.shared.packet.type.DeleteUnitPacket;
+import me.rhin.openciv.shared.packet.type.MoveUnitPacket;
 import me.rhin.openciv.shared.packet.type.RemoveObservedTilePacket;
 import me.rhin.openciv.shared.packet.type.RemoveTileTypePacket;
 import me.rhin.openciv.shared.packet.type.SetCityHealthPacket;
@@ -387,6 +389,30 @@ public abstract class Unit implements AttackableEntity, TileObserver, NextTurnLi
 
 		targetTile = null;
 		selected = false;
+	}
+
+	public void moveToTile(Tile tile) {
+		
+		//FIXME: Handle distances > 2 && units in the way && units on the tile
+		
+		if (tile.equals(standingTile)) {
+			System.out.println("ERROR: Moving to standing tile." + this);
+			throw new SameMovementTargetException();
+		}
+		setTargetTile(tile);
+
+		MoveUnitPacket packet = new MoveUnitPacket();
+		packet.setUnit(playerOwner.getName(), id, standingTile.getGridX(), standingTile.getGridY(), tile.getGridX(),
+				tile.getGridY());
+		packet.setMovementCost(getPathMovement());
+
+		moveToTargetTile();
+		reduceMovement(getPathMovement());
+
+		Json json = new Json();
+		for (Player player : Server.getInstance().getPlayers()) {
+			player.sendPacket(json.toJson(packet));
+		}
 	}
 
 	public void reduceMovement(float movementCost) {

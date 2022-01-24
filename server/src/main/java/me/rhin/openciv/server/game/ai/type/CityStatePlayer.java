@@ -7,6 +7,7 @@ import me.rhin.openciv.server.game.ai.AIPlayer;
 import me.rhin.openciv.server.game.ai.unit.BuilderAI;
 import me.rhin.openciv.server.game.ai.unit.CityStateMeleeAI;
 import me.rhin.openciv.server.game.ai.unit.CityStateRangedAI;
+import me.rhin.openciv.server.game.ai.unit.LandMeleeAI;
 import me.rhin.openciv.server.game.city.City;
 import me.rhin.openciv.server.game.civilization.type.CityState;
 import me.rhin.openciv.server.game.map.tile.Tile;
@@ -46,11 +47,12 @@ public class CityStatePlayer extends AIPlayer {
 		super.addOwnedUnit(unit);
 
 		if (unit.getUnitTypes().contains(UnitType.MELEE)) {
-			unit.addAIBehavior(new CityStateMeleeAI(unit));
+			unit.addAIBehavior(new LandMeleeAI(unit));
+			//unit.addAIBehavior(new CityStateMeleeAI(unit));
 		}
 
 		if (unit.getUnitTypes().contains(UnitType.RANGED)) {
-			unit.addAIBehavior(new CityStateRangedAI(unit));
+			//unit.addAIBehavior(new CityStateRangedAI(unit));
 		}
 
 		if (unit.getUnitTypes().contains(UnitType.NAVAL)) {
@@ -58,7 +60,7 @@ public class CityStatePlayer extends AIPlayer {
 		}
 
 		if (unit instanceof BuilderUnit) {
-			unit.addAIBehavior(new BuilderAI(unit));
+			//unit.addAIBehavior(new BuilderAI(unit));
 		}
 	}
 
@@ -71,10 +73,10 @@ public class CityStatePlayer extends AIPlayer {
 		}
 
 		//TODO: Make these module classed.
-		modifyIntimidation();
-		progressResearch();
-		choseProduction();
-		upgradeUnits();
+		//modifyIntimidation();
+		//progressResearch();
+		//choseProduction();
+		//upgradeUnits();
 		
 		//System.out.println(statLine);
 	}

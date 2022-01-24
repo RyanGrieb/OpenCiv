@@ -11,7 +11,7 @@ import me.rhin.openciv.server.game.unit.AttackableEntity;
 import me.rhin.openciv.server.game.unit.Unit;
 import me.rhin.openciv.server.listener.NextTurnListener;
 
-public class BarbarianWarriorAI extends UnitAI implements NextTurnListener {
+public class BarbarianWarriorAI extends UnitAIOld implements NextTurnListener {
 
 	private Tile campTile;
 	private Tile targetTile;

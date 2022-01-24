@@ -4,6 +4,7 @@ import org.java_websocket.WebSocket;
 
 import me.rhin.openciv.server.Server;
 import me.rhin.openciv.server.command.Command;
+import me.rhin.openciv.server.game.state.InGameState;
 import me.rhin.openciv.server.scenarios.Scenario;
 import me.rhin.openciv.shared.packet.type.SendChatMessagePacket;
 
@@ -27,10 +28,20 @@ public class ScenarioCommand extends Command {
 			return;
 		}
 
+		if (scenario.preGameOnly() && Server.getInstance().getGame() instanceof InGameState) {
+			sendServerMessage(conn, packet, "Error: Scenario can only be toggled before the game");
+			return;
+		}
+
+		if (Server.getInstance().getGame().getEnabledScenarios().contains(scenario)) {
+			// FIXME: If scenario is already added, remove it.
+			sendServerMessage(conn, packet, "Error: Scenario already enabled");
+			return;
+		}
+
 		Server.getInstance().getGame().addScenario(scenario);
 		sendServerMessage(conn, packet, "Added scenario: " + args[0]);
 
-		// FIXME: If scenario is already added, remove it.
 	}
 
 }

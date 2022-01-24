@@ -10,7 +10,7 @@ import me.rhin.openciv.server.game.unit.Unit;
 import me.rhin.openciv.server.game.unit.type.Builder.BuilderUnit;
 import me.rhin.openciv.server.listener.NextTurnListener;
 
-public class BuilderAI extends UnitAI implements NextTurnListener {
+public class BuilderAI extends UnitAIOld implements NextTurnListener {
 
 	private Tile improvementTile;
 	private TileImprovement tileImprovement;

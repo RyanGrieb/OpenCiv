@@ -966,6 +966,19 @@ public class GameMap implements MapRequestListener {
 		return getWidth() * getHeight();
 	}
 
+	public boolean isSafeSpawnTile(Tile tile) {
+		// If the tile itself isn't safe, return false.
+		if (tile.containsTileProperty(TileProperty.WATER) || tile.containsTileType(TileType.MOUNTAIN))
+			return false;
+
+		boolean hasSafeTile = false;
+		for (Tile adjTile : tile.getAdjTiles())
+			if (!adjTile.containsTileProperty(TileProperty.WATER) && !adjTile.containsTileType(TileType.MOUNTAIN))
+				hasSafeTile = true;
+
+		return hasSafeTile;
+	}
+
 	private void splitMapPartition() {
 		int playerSize = Server.getInstance().getPlayers().size();
 		if (playerSize < 2) {

@@ -17,7 +17,7 @@ import me.rhin.openciv.server.game.unit.UnitItem.UnitType;
 import me.rhin.openciv.server.listener.NextTurnListener;
 import me.rhin.openciv.server.listener.ServerSettleCityListener;
 
-public class CityStateMeleeAI extends UnitAI implements NextTurnListener, ServerSettleCityListener {
+public class CityStateMeleeAI extends UnitAIOld implements NextTurnListener, ServerSettleCityListener {
 
 	private City city;
 	private Tile targetTile;

@@ -22,6 +22,11 @@ public class FloodScenario extends Scenario implements NextTurnListener {
 	}
 
 	@Override
+	public boolean preGameOnly() {
+		return false;
+	}
+
+	@Override
 	public void onNextTurn() {
 
 		if (Server.getInstance().getInGameState().getCurrentTurn() < 1)

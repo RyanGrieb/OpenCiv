@@ -47,6 +47,7 @@ import me.rhin.openciv.server.listener.FetchPlayerListener;
 import me.rhin.openciv.server.listener.NextTurnListener;
 import me.rhin.openciv.server.listener.PlayerFinishLoadingListener;
 import me.rhin.openciv.server.listener.PlayerListRequestListener;
+import me.rhin.openciv.server.listener.PlayersSpawnsSetListener.PlayersSpawnsSetEvent;
 import me.rhin.openciv.server.listener.RangedAttackListener;
 import me.rhin.openciv.server.listener.RequestEndTurnListener;
 import me.rhin.openciv.server.listener.SelectUnitListener;
@@ -59,7 +60,6 @@ import me.rhin.openciv.server.listener.UnitFinishedMoveListener.UnitFinishedMove
 import me.rhin.openciv.server.listener.UnitMoveListener;
 import me.rhin.openciv.server.listener.UpgradeUnitListener;
 import me.rhin.openciv.server.listener.WorkTileListener;
-import me.rhin.openciv.server.scenarios.Scenario;
 import me.rhin.openciv.shared.packet.type.AddUnitPacket;
 import me.rhin.openciv.shared.packet.type.BuyProductionItemPacket;
 import me.rhin.openciv.shared.packet.type.CombatPreviewPacket;
@@ -870,7 +870,7 @@ public class InGameState extends GameState implements DisconnectListener, Select
 					int rndX = rnd.nextInt(maxX - minX + 1) + minX;
 					int rndY = rnd.nextInt(maxY - minY + 1) + minY;
 					Tile tile = map.getTiles()[rndX][rndY];
-					if (hasSafeTile(tile)) {
+					if (map.isSafeSpawnTile(tile)) {
 						player.setSpawnPos(tile.getGridX(), tile.getGridY());
 						break;
 					}
@@ -878,10 +878,31 @@ public class InGameState extends GameState implements DisconnectListener, Select
 			}
 		}
 
-		// Debug code
-		if (players.size() > 1) {
-			players.get(0).setSpawnPos(players.get(1).getSpawnX() + 2, players.get(1).getSpawnY() + 2);
+		for (AIPlayer aiPlayer : aiPlayers) {
+			if (aiPlayer instanceof CityStatePlayer) {
+
+				// Pick random tile to spawn AI
+				Tile tile = null;
+
+				while (tile == null || tile.containsTileProperty(TileProperty.WATER)
+						|| tile.containsTileType(TileType.MOUNTAIN) || tile.getUnits().size() > 0
+						|| tile.getNearbyUnits().size() > 0) {
+					int x = rnd.nextInt(map.getWidth());
+					int y = rnd.nextInt(map.getHeight());
+					tile = map.getTiles()[x][y];
+				}
+
+				aiPlayer.setSpawnPos(tile.getGridX(), tile.getGridY());
+			}
 		}
+
+		Server.getInstance().getEventManager().fireEvent(new PlayersSpawnsSetEvent());
+
+		// Debug code
+		// if (players.size() > 1) {
+		// players.get(0).setSpawnPos(players.get(1).getSpawnX() + 2,
+		// players.get(1).getSpawnY() + 2);
+		// }
 
 		// Give players a warrior unit
 		for (Player player : players) {
@@ -903,15 +924,7 @@ public class InGameState extends GameState implements DisconnectListener, Select
 				CityStatePlayer cityStatePlayer = (CityStatePlayer) aiPlayer;
 
 				// Pick random tile to spawn AI
-				Tile tile = null;
-
-				while (tile == null || tile.containsTileProperty(TileProperty.WATER)
-						|| tile.containsTileType(TileType.MOUNTAIN) || tile.getUnits().size() > 0
-						|| tile.getNearbyUnits().size() > 0) {
-					int x = rnd.nextInt(map.getWidth());
-					int y = rnd.nextInt(map.getHeight());
-					tile = map.getTiles()[x][y];
-				}
+				Tile tile = map.getTiles()[aiPlayer.getSpawnX()][aiPlayer.getSpawnY()];
 
 				Unit settlerUnit = new SettlerUnit(cityStatePlayer, tile);
 				tile.addUnit(settlerUnit);
@@ -922,8 +935,6 @@ public class InGameState extends GameState implements DisconnectListener, Select
 				Unit warriorUnit = new WarriorUnit(cityStatePlayer,
 						map.getTiles()[tile.getGridX() + 1][tile.getGridY()]);
 				map.getTiles()[tile.getGridX() + 1][tile.getGridY()].addUnit(warriorUnit);
-
-				aiPlayer.setSpawnPos(tile.getGridX(), tile.getGridY());
 			}
 		}
 
@@ -976,18 +987,4 @@ public class InGameState extends GameState implements DisconnectListener, Select
 			}
 		}
 	}
-
-	private boolean hasSafeTile(Tile tile) {
-		// If the tile itself isn't safe, return false.
-		if (tile.containsTileProperty(TileProperty.WATER) || tile.containsTileType(TileType.MOUNTAIN))
-			return false;
-
-		boolean hasSafeTile = false;
-		for (Tile adjTile : tile.getAdjTiles())
-			if (!adjTile.containsTileProperty(TileProperty.WATER) && !adjTile.containsTileType(TileType.MOUNTAIN))
-				hasSafeTile = true;
-
-		return hasSafeTile;
-	}
-
 }
