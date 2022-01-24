@@ -20,7 +20,7 @@ public class NearEnemyNode extends ConditionNode {
 		for (Tile tile : unit.getObservedTiles()) {
 			if (tile.getTopUnit() != null
 					&& unit.getPlayerOwner().getDiplomacy().atWar(tile.getTopUnit().getPlayerOwner())) {
-				
+
 				setStatus(BehaviorStatus.SUCCESS);
 				super.tick();
 				return;

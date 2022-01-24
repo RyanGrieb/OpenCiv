@@ -392,18 +392,36 @@ public abstract class Unit implements AttackableEntity, TileObserver, NextTurnLi
 	}
 
 	public void moveToTile(Tile tile) {
-		
-		//FIXME: Handle distances > 2 && units in the way && units on the tile
-		
-		if (tile.equals(standingTile)) {
+
+		ArrayList<Tile> pathTiles = new ArrayList<>();
+		pathTiles = getPathTiles(tile);
+
+		// If we don't have a valid path, return.
+		if (pathTiles.size() < 1 || standingTile.equals(targetTile)) {
+			targetTile = null;
+			return;
+		}
+
+		Tile pathingTile = stepTowardTarget(pathTiles);
+
+		AttackableEntity topEntity = pathingTile.getEnemyAttackableEntity(playerOwner);
+		if (topEntity != null) {
+			pathingTile = pathTiles.get(1); // Stand outside of enemy unit to attack.
+		}
+
+		/*
+		 * The following sends the proper packets & information to move the unit to the
+		 * tile
+		 */
+		if (standingTile.equals(pathingTile)) {
 			System.out.println("ERROR: Moving to standing tile." + this);
 			throw new SameMovementTargetException();
 		}
-		setTargetTile(tile);
+		setTargetTile(pathingTile);
 
 		MoveUnitPacket packet = new MoveUnitPacket();
-		packet.setUnit(playerOwner.getName(), id, standingTile.getGridX(), standingTile.getGridY(), tile.getGridX(),
-				tile.getGridY());
+		packet.setUnit(playerOwner.getName(), id, standingTile.getGridX(), standingTile.getGridY(),
+				pathingTile.getGridX(), pathingTile.getGridY());
 		packet.setMovementCost(getPathMovement());
 
 		moveToTargetTile();
@@ -765,5 +783,154 @@ public abstract class Unit implements AttackableEntity, TileObserver, NextTurnLi
 	protected void setMaintenance(float amount) {
 		maintenance.setValue(Stat.MAINTENANCE, amount);
 		playerOwner.updateOwnedStatlines(false);
+	}
+
+	// FIXME: Combine this with set target tile
+	private ArrayList<Tile> getPathTiles(Tile targetTile) {
+
+		int width = Server.getInstance().getMap().getWidth();
+		int height = Server.getInstance().getMap().getHeight();
+
+		int h = 0;
+		ArrayList<Tile> openSet = new ArrayList<>();
+		Tile[][] cameFrom = new Tile[width][height];
+		float[][] gScores = new float[width][height];
+		float[][] fScores = new float[width][height];
+
+		for (float[] gScore : gScores)
+			Arrays.fill(gScore, width * height);
+		for (float[] fScore : fScores)
+			Arrays.fill(fScore, width * height);
+
+		gScores[standingTile.getGridX()][standingTile.getGridY()] = 0;
+		fScores[standingTile.getGridX()][standingTile.getGridY()] = h;
+		openSet.add(standingTile); // h or 0 ???
+
+		while (openSet.size() > 0) {
+
+			// Get the current tileNode /w the lowest fScore[] value.
+			// FIXME: This can be O(1) /w a proper priority queue.
+			Tile current = removeSmallest(openSet, fScores);
+
+			if (current.equals(targetTile))
+				break;
+
+			openSet.remove(current);
+			for (Tile adjTile : current.getAdjTiles()) {
+				if (adjTile == null)
+					continue;
+
+				// FIXME: Make units & cities increase gScore.
+				float tenativeGScore = gScores[current.getGridX()][current.getGridY()]
+						+ getMovementCost(current, adjTile);
+
+				// Avoid walking into cities.
+				if (current.getCity() != null && !current.getCity().getPlayerOwner().equals(playerOwner))
+					tenativeGScore += 10000;
+
+				// Avoid friendly units
+				if (current.getUnits().size() > 0 && current.getTopUnit().getPlayerOwner().equals(playerOwner)
+						&& !current.getTopUnit().equals(this)) {
+					tenativeGScore += 10000;
+				}
+
+				if (tenativeGScore < gScores[adjTile.getGridX()][adjTile.getGridY()]) {
+
+					cameFrom[adjTile.getGridX()][adjTile.getGridY()] = current;
+					gScores[adjTile.getGridX()][adjTile.getGridY()] = tenativeGScore;
+
+					float adjFScore = gScores[adjTile.getGridX()][adjTile.getGridY()] + h;
+					fScores[adjTile.getGridX()][adjTile.getGridY()] = adjFScore;
+					if (!openSet.contains(adjTile)) {
+						openSet.add(adjTile);
+					}
+				}
+			}
+		}
+
+		// Iterate through the parent array to get back to the origin tile.
+
+		// Iterate through the parent array to get back to the origin tile.
+
+		Tile parentTile = cameFrom[targetTile.getGridX()][targetTile.getGridY()];
+
+		// If it's moving to itself or there isn't a valid path
+		if (parentTile == null) {
+			targetTile = null;
+		}
+
+		// System.out.println("Target:" + targetTile);
+		int iterations = 0;
+		ArrayList<Tile> pathTiles = new ArrayList<>();
+
+		if (targetTile != null && parentTile != null) {
+			pathTiles.add(targetTile);
+			pathTiles.add(parentTile);
+		}
+
+		while (parentTile != null) {
+			Tile nextTile = cameFrom[parentTile.getGridX()][parentTile.getGridY()];
+
+			if (nextTile == null)
+				break;
+
+			if (parentTile.equals(targetTile)) {
+				break;
+			}
+			if (iterations >= 10000) {
+				targetTile = null;
+				break;
+			}
+			pathTiles.add(nextTile);
+
+			parentTile = nextTile;
+		}
+
+		// pathTiles.remove(0);
+		return pathTiles;
+	}
+
+	/**
+	 * Returns the farthest tile the unit can move to, based on the units movement.
+	 * 
+	 * @param pathTiles The path we want to take.
+	 * @return Tile - The closest tile we can walk to currently.
+	 */
+	private Tile stepTowardTarget(ArrayList<Tile> pathTiles) {
+
+		if (pathTiles.size() < 1)
+			return null;
+
+		Tile pathingTile = null;
+		Tile targetTile = pathTiles.get(0);
+		int index = 0;
+		float movementCost = 0;
+		Tile prevPathedTile = standingTile;
+		for (int i = pathTiles.size() - 1; i >= 0; i--) {
+			Tile pathTile = pathTiles.get(i);
+
+			if (pathTile.equals(prevPathedTile))
+				continue;
+			// System.out.println("Comparing:" + prevPathedTile + " | " + pathTile);
+
+			movementCost += getMovementCost(prevPathedTile, pathTile);
+
+			if (movementCost > getMovement()) {
+				pathingTile = prevPathedTile;
+				break;
+			}
+
+			if (movementCost == getMovement() || pathTile.equals(targetTile)) {
+				pathingTile = pathTile;
+				break;
+			}
+
+			prevPathedTile = pathTile;
+			index++;
+		}
+
+		// System.out.println("Walking to: " + pathingTile);
+
+		return pathingTile;
 	}
 }
