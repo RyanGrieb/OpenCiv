@@ -1,11 +1,11 @@
 package me.rhin.openciv.server.game.ai.behavior.nodes;
 
 import me.rhin.openciv.server.game.ai.behavior.BehaviorStatus;
-import me.rhin.openciv.server.game.ai.behavior.ConditionNode;
+import me.rhin.openciv.server.game.ai.behavior.Node;
 import me.rhin.openciv.server.game.map.tile.Tile;
 import me.rhin.openciv.server.game.unit.Unit;
 
-public class NearEnemyNode extends ConditionNode {
+public class NearEnemyNode extends Node {
 
 	private Unit unit;
 
@@ -22,7 +22,6 @@ public class NearEnemyNode extends ConditionNode {
 					&& unit.getPlayerOwner().getDiplomacy().atWar(tile.getTopUnit().getPlayerOwner())) {
 
 				setStatus(BehaviorStatus.SUCCESS);
-				super.tick();
 				return;
 			}
 		}

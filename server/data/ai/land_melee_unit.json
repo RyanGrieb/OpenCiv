@@ -1,0 +1,48 @@
+{
+  "nodeType": "FallbackNode",
+  "children": [
+    {
+      "nodeType": "AtWarNode",
+      "children": [
+        {
+          "nodeType": "FallbackNode",
+          "children": [
+            {
+              "nodeType": "NoEnemyNearNode",
+              "children": [
+                {
+                  "nodeType": "FallbackNode",
+                  "children": [
+                    {
+                      "nodeType": "SequenceNode",
+                      "children": [
+                        {
+                          "nodeType": "InjuredUnitsNode"
+                        },
+                        {
+                          "nodeType": "MoveToDistantUnitNode"
+                        }
+                      ]
+                    },
+                    {
+                      "nodeType": "FallbackNode",
+                      
+                      "children": [{
+                        "nodeType": "SequenceNode",
+                        "children": [{
+                          "nodeType": "MoreEnemyUnitsNode"
+                        },{
+                          "nodeType": "Defend"
+                        }]
+                      }]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -9,6 +9,7 @@ dependencies {
 	implementation project(':shared')
 	
 	api "org.java-websocket:Java-WebSocket:1.5.1"
+	implementation group: 'org.json', name: 'json', version: '20211205'
 }
 
 run {

@@ -1,11 +1,11 @@
 package me.rhin.openciv.server.game.ai.behavior.nodes;
 
 import me.rhin.openciv.server.game.ai.behavior.BehaviorStatus;
-import me.rhin.openciv.server.game.ai.behavior.ConditionNode;
+import me.rhin.openciv.server.game.ai.behavior.Node;
 import me.rhin.openciv.server.game.map.tile.Tile;
 import me.rhin.openciv.server.game.unit.Unit;
 
-public class AdjToEnemyNode extends ConditionNode {
+public class AdjToEnemyNode extends Node {
 
 	private Unit unit;
 
@@ -19,7 +19,7 @@ public class AdjToEnemyNode extends ConditionNode {
 		for (Tile adjTile : unit.getTile().getAdjTiles()) {
 			if (adjTile.getTopUnit() != null
 					&& unit.getPlayerOwner().getDiplomacy().atWar(adjTile.getTopUnit().getPlayerOwner())) {
-				
+
 				setStatus(BehaviorStatus.SUCCESS);
 				return;
 			}
