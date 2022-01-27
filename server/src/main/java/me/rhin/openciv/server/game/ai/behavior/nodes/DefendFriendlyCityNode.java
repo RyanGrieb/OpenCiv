@@ -3,12 +3,10 @@ package me.rhin.openciv.server.game.ai.behavior.nodes;
 import me.rhin.openciv.server.game.ai.behavior.Node;
 import me.rhin.openciv.server.game.unit.Unit;
 
-public class InjuredUnitsNode extends Node {
+public class DefendFriendlyCityNode extends Node {
 
-	private Unit unit;
-
-	public InjuredUnitsNode(Unit unit) {
-		super("InjuredUnitsNode");
+	public DefendFriendlyCityNode(Unit unit) {
+		super("DefendFriendlyCityNode");
 	}
 
 	@Override

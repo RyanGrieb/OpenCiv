@@ -31,4 +31,8 @@ public abstract class Node {
 	public String getName() {
 		return name;
 	}
+
+	public ArrayList<Node> getChildNodes() {
+		return childNodes;
+	}
 }

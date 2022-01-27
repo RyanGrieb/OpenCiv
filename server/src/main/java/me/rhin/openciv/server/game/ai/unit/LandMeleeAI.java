@@ -43,9 +43,9 @@ public class LandMeleeAI implements UnitAI, NextTurnListener {
 
 		JSONObject jsonObj = new JSONObject(text);
 
-		addNode(jsonObj);
-
 		mainNode = new FallbackNode("Main Node");
+
+		addNode(mainNode, jsonObj);
 
 		/*
 		 * SequenceNode healthLowSequenceNode = new
@@ -80,18 +80,34 @@ public class LandMeleeAI implements UnitAI, NextTurnListener {
 		Server.getInstance().getEventManager().addListener(NextTurnListener.class, this);
 	}
 
-	private void addNode(JSONObject jsonObj) {
-		if (jsonObj.has("children")) {
-			JSONArray jsonArray = jsonObj.getJSONArray("children");
-			for (int i = 0; i < jsonArray.length(); i++)
-				addNode(jsonArray.getJSONObject(i));
-		}
-
-		System.out.println("Adding Node: " + jsonObj.getString("nodeType"));
+	private void addNode(Node parentNode, JSONObject jsonObj) {
 
 		String nodeType = jsonObj.getString("nodeType");
 
+		Node childNode = getNodeByName(nodeType);
+
+		System.out.println("Adding Node: " + childNode.getName() + " to parent:" + parentNode.getName());
+
+		parentNode.addChild(childNode);
+
+		if (jsonObj.has("children")) {
+
+			JSONArray jsonArray = jsonObj.getJSONArray("children");
+
+			for (int i = 0; i < jsonArray.length(); i++) {
+				addNode(childNode, jsonArray.getJSONObject(i));
+			}
+		}
+	}
+
+	private Node getNodeByName(String nodeType) {
 		Node node = null;
+
+		// Returns instantiated node in the behavior tree.
+		Node initializedNode = getInitializedNodeByName(nodeType);
+
+		if (initializedNode != null)
+			return initializedNode;
 
 		switch (nodeType) {
 		case "FallbackNode":
@@ -103,8 +119,7 @@ public class LandMeleeAI implements UnitAI, NextTurnListener {
 		default:
 
 			try {
-				Class<?> nodeClass = Class
-						.forName("me.rhin.openciv.server.game.ai.behavior.nodes." + jsonObj.getString("nodeType"));
+				Class<?> nodeClass = Class.forName("me.rhin.openciv.server.game.ai.behavior.nodes." + nodeType);
 				Constructor<?> unitConstructor = nodeClass.getConstructor(Unit.class);
 				node = (Node) unitConstructor.newInstance(unit);
 			} catch (Exception e) {
@@ -114,11 +129,17 @@ public class LandMeleeAI implements UnitAI, NextTurnListener {
 			break;
 		}
 
-		System.out.println(node);
+		return node;
+	}
+
+	private Node getInitializedNodeByName(String nodeType) {
+
+		return null;
 	}
 
 	@Override
 	public void onNextTurn() {
+		System.out.println("Hi");
 		mainNode.tick();
 	}
 

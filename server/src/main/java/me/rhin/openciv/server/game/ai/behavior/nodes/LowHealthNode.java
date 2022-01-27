@@ -4,22 +4,21 @@ import me.rhin.openciv.server.game.ai.behavior.BehaviorStatus;
 import me.rhin.openciv.server.game.ai.behavior.Node;
 import me.rhin.openciv.server.game.unit.Unit;
 
-public class AtWarNode extends Node {
+public class LowHealthNode extends Node {
 
 	private Unit unit;
 
-	public AtWarNode(Unit unit) {
-		super("AtWarNode");
+	public LowHealthNode(Unit unit) {
+		super("LowHealthNode");
 		this.unit = unit;
 	}
 
 	@Override
 	public void tick() {
-		System.out.println("Called");
-		if (unit.getPlayerOwner().getDiplomacy().inWar())
+		if (unit.getHealth() <= 30)
 			setStatus(BehaviorStatus.SUCCESS);
-		else
-			setStatus(BehaviorStatus.FAILURE);
+
+		setStatus(BehaviorStatus.FAILURE);
 	}
 
 }

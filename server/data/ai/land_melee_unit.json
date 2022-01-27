@@ -2,8 +2,11 @@
   "nodeType": "FallbackNode",
   "children": [
     {
-      "nodeType": "AtWarNode",
+      "nodeType": "SequenceNode",
       "children": [
+        {
+          "nodeType": "AtWarNode"
+        },
         {
           "nodeType": "FallbackNode",
           "children": [
@@ -26,15 +29,57 @@
                     },
                     {
                       "nodeType": "FallbackNode",
-                      
-                      "children": [{
-                        "nodeType": "SequenceNode",
-                        "children": [{
-                          "nodeType": "MoreEnemyUnitsNode"
-                        },{
-                          "nodeType": "Defend"
-                        }]
-                      }]
+                      "children": [
+                        {
+                          "nodeType": "SequenceNode",
+                          "children": [
+                            {
+                              "nodeType": "MoreEnemyUnitsNode"
+                            },
+                            {
+                              "nodeType": "DefendFriendlyCityNode"
+                            }
+                          ]
+                        },
+                        {
+                          "nodeType": "ApproachEnemyCityNode"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "nodeType": "FallbackNode",
+              "children": [
+                {
+                  "nodeType": "SequenceNode",
+                  "children": [
+                    {
+                      "nodeType": "AdjToEnemyNode"
+                    },
+                    {
+                      "nodeType": "MeleeAttackNode"
+                    }
+                  ]
+                },
+                {
+                  "nodeType": "FallbackNode",
+                  "children": [
+                    {
+                      "nodeType": "SequenceNode",
+                      "children": [
+                        {
+                          "nodeType": "LowHealthNode"
+                        },
+                        {
+                          "nodeType": "RetreatNode"
+                        }
+                      ]
+                    },
+                    {
+                      "nodeType": "ApproachEnemyNode"
                     }
                   ]
                 }

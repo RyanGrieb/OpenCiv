@@ -5,12 +5,12 @@ import me.rhin.openciv.server.game.ai.behavior.Node;
 import me.rhin.openciv.server.game.map.tile.Tile;
 import me.rhin.openciv.server.game.unit.Unit;
 
-public class NearEnemyNode extends Node {
+public class NoEnemyNearNode extends Node {
 
 	private Unit unit;
 
-	public NearEnemyNode(Unit unit) {
-		super("NearEnemyNode");
+	public NoEnemyNearNode(Unit unit) {
+		super("NoEnemyNearNode");
 		this.unit = unit;
 	}
 
@@ -21,12 +21,12 @@ public class NearEnemyNode extends Node {
 			if (tile.getTopUnit() != null
 					&& unit.getPlayerOwner().getDiplomacy().atWar(tile.getTopUnit().getPlayerOwner())) {
 
-				setStatus(BehaviorStatus.SUCCESS);
+				setStatus(BehaviorStatus.FAILURE);
 				return;
 			}
 		}
 
-		setStatus(BehaviorStatus.FAILURE);
+		setStatus(BehaviorStatus.SUCCESS);
 	}
 
 }
