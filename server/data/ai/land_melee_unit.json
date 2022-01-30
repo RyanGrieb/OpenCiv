@@ -88,6 +88,9 @@
           ]
         }
       ]
+    },
+    {
+      "nodeType": "PatrolNode"
     }
   ]
 }

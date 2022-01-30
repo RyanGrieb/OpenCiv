@@ -391,7 +391,7 @@ public abstract class Unit implements AttackableEntity, TileObserver, NextTurnLi
 		selected = false;
 	}
 
-	public void moveToTile(Tile tile) {
+	public boolean moveToTile(Tile tile) {
 
 		ArrayList<Tile> pathTiles = new ArrayList<>();
 		pathTiles = getPathTiles(tile);
@@ -399,13 +399,15 @@ public abstract class Unit implements AttackableEntity, TileObserver, NextTurnLi
 		// If we don't have a valid path, return.
 		if (pathTiles.size() < 1 || standingTile.equals(targetTile)) {
 			targetTile = null;
-			return;
+			return false;
 		}
 
 		Tile pathingTile = stepTowardTarget(pathTiles);
 
-		AttackableEntity topEntity = pathingTile.getEnemyAttackableEntity(playerOwner);
-		if (topEntity != null) {
+		Unit topUnit = pathingTile.getTopUnit();
+		if (topUnit != null
+				&& (!topUnit.getPlayerOwner().equals(playerOwner) || (topUnit.getPlayerOwner().equals(playerOwner)
+						&& !topUnit.getUnitTypes().contains(UnitType.SUPPORT)))) {
 			pathingTile = pathTiles.get(1); // Stand outside of enemy unit to attack.
 		}
 
@@ -414,8 +416,8 @@ public abstract class Unit implements AttackableEntity, TileObserver, NextTurnLi
 		 * tile
 		 */
 		if (standingTile.equals(pathingTile)) {
-			System.out.println("ERROR: Moving to standing tile." + this);
-			throw new SameMovementTargetException();
+			System.out.println("ERROR: Couldn't move to target");
+			return false;
 		}
 		setTargetTile(pathingTile);
 
@@ -431,6 +433,8 @@ public abstract class Unit implements AttackableEntity, TileObserver, NextTurnLi
 		for (Player player : Server.getInstance().getPlayers()) {
 			player.sendPacket(json.toJson(packet));
 		}
+
+		return true;
 	}
 
 	public void reduceMovement(float movementCost) {
@@ -828,8 +832,8 @@ public abstract class Unit implements AttackableEntity, TileObserver, NextTurnLi
 				if (current.getCity() != null && !current.getCity().getPlayerOwner().equals(playerOwner))
 					tenativeGScore += 10000;
 
-				// Avoid friendly units
-				if (current.getUnits().size() > 0 && current.getTopUnit().getPlayerOwner().equals(playerOwner)
+				// Avoid units
+				if (current.getUnits().size() > 0 && !current.getTopUnit().getPlayerOwner().equals(playerOwner)
 						&& !current.getTopUnit().equals(this)) {
 					tenativeGScore += 10000;
 				}
