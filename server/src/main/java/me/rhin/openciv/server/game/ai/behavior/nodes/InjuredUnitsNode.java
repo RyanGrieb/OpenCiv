@@ -1,14 +1,12 @@
 package me.rhin.openciv.server.game.ai.behavior.nodes;
 
-import me.rhin.openciv.server.game.ai.behavior.Node;
+import me.rhin.openciv.server.game.ai.behavior.UnitNode;
 import me.rhin.openciv.server.game.unit.Unit;
 
-public class InjuredUnitsNode extends Node {
+public class InjuredUnitsNode extends UnitNode {
 
-	private Unit unit;
-
-	public InjuredUnitsNode(Unit unit) {
-		super("InjuredUnitsNode");
+	public InjuredUnitsNode(Unit unit, String name) {
+		super(unit, name);
 	}
 
 	@Override

@@ -1,18 +1,14 @@
 package me.rhin.openciv.server.game.ai.behavior.nodes;
 
 import me.rhin.openciv.server.game.ai.behavior.BehaviorStatus;
-import me.rhin.openciv.server.game.ai.behavior.Node;
+import me.rhin.openciv.server.game.ai.behavior.UnitNode;
 import me.rhin.openciv.server.game.map.tile.Tile;
 import me.rhin.openciv.server.game.unit.Unit;
 
-public class ApproachEnemyNode extends Node {
+public class ApproachEnemyNode extends UnitNode {
 
-	private Unit unit;
-
-	public ApproachEnemyNode(Unit unit) {
-		super("ApproachEnemyNode");
-
-		this.unit = unit;
+	public ApproachEnemyNode(Unit unit, String name) {
+		super(unit, name);
 	}
 
 	@Override

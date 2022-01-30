@@ -12,6 +12,7 @@ import me.rhin.openciv.server.Server;
 import me.rhin.openciv.server.game.ai.behavior.FallbackNode;
 import me.rhin.openciv.server.game.ai.behavior.Node;
 import me.rhin.openciv.server.game.ai.behavior.SequenceNode;
+import me.rhin.openciv.server.game.ai.behavior.UnitNode;
 import me.rhin.openciv.server.game.unit.Unit;
 import me.rhin.openciv.server.listener.NextTurnListener;
 
@@ -120,8 +121,8 @@ public class LandMeleeAI implements UnitAI, NextTurnListener {
 
 			try {
 				Class<?> nodeClass = Class.forName("me.rhin.openciv.server.game.ai.behavior.nodes." + nodeType);
-				Constructor<?> unitConstructor = nodeClass.getConstructor(Unit.class);
-				node = (Node) unitConstructor.newInstance(unit);
+				Constructor<?> unitConstructor = nodeClass.getConstructor(Unit.class, String.class);
+				node = (UnitNode) unitConstructor.newInstance(unit, nodeType);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}

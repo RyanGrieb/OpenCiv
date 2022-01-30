@@ -11,8 +11,11 @@
           "nodeType": "FallbackNode",
           "children": [
             {
-              "nodeType": "NoEnemyNearNode",
+              "nodeType": "SequenceNode",
               "children": [
+                {
+                  "nodeType": "NoEnemyNearNode"
+                },
                 {
                   "nodeType": "FallbackNode",
                   "children": [
@@ -79,7 +82,18 @@
                       ]
                     },
                     {
-                      "nodeType": "ApproachEnemyNode"
+                      "nodeType": "SequenceNode",
+                      "children": [
+                        {
+                          "nodeType": "ApproachEnemyNode"
+                        },
+                        {
+                          "nodeType": "HasMovementNode"
+                        },
+                        {
+                          "nodeType": "MeleeAttackNode"
+                        }
+                      ]
                     }
                   ]
                 }

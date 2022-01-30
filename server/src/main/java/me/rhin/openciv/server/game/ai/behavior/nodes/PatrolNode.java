@@ -3,24 +3,21 @@ package me.rhin.openciv.server.game.ai.behavior.nodes;
 import java.util.Random;
 
 import me.rhin.openciv.server.game.ai.behavior.BehaviorStatus;
-import me.rhin.openciv.server.game.ai.behavior.Node;
+import me.rhin.openciv.server.game.ai.behavior.UnitNode;
 import me.rhin.openciv.server.game.city.City;
 import me.rhin.openciv.server.game.map.tile.Tile;
 import me.rhin.openciv.server.game.map.tile.TileType.TileProperty;
 import me.rhin.openciv.server.game.unit.Unit;
 import me.rhin.openciv.server.game.unit.UnitItem.UnitType;
 
-public class PatrolNode extends Node {
+public class PatrolNode extends UnitNode {
 
 	private City patrolCity;
-	private Unit unit;
 	private int turnsPatrolled;
 	private Tile targetTile;
 
-	public PatrolNode(Unit unit) {
-		super("PatrolNode");
-
-		this.unit = unit;
+	public PatrolNode(Unit unit, String name) {
+		super(unit, name);
 		turnsPatrolled = 0;
 	}
 
