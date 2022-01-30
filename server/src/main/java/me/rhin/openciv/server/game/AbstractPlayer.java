@@ -1,6 +1,7 @@
 package me.rhin.openciv.server.game;
 
 import java.util.ArrayList;
+import java.util.Random;
 
 import me.rhin.openciv.server.Server;
 import me.rhin.openciv.server.game.city.City;
@@ -9,10 +10,10 @@ import me.rhin.openciv.server.game.civilization.Civ;
 import me.rhin.openciv.server.game.civilization.CivType;
 import me.rhin.openciv.server.game.diplomacy.Diplomacy;
 import me.rhin.openciv.server.game.heritage.HeritageTree;
+import me.rhin.openciv.server.game.map.tile.Tile;
 import me.rhin.openciv.server.game.religion.PlayerReligion;
 import me.rhin.openciv.server.game.research.ResearchTree;
 import me.rhin.openciv.server.game.unit.Unit;
-import me.rhin.openciv.server.game.unit.type.Prophet;
 import me.rhin.openciv.server.listener.NextTurnListener;
 import me.rhin.openciv.shared.stat.StatLine;
 import me.rhin.openciv.shared.stat.StatType;
@@ -73,13 +74,13 @@ public abstract class AbstractPlayer implements NextTurnListener {
 			for (Unit unit : ownedUnits) {
 				statLine.mergeStatLine(unit.getMaintenance());
 			}
-		
+
 		for (City city : ownedCities) {
 			statLine.mergeStatLineExcluding(city.getStatLine(), StatType.CITY_EXCLUSIVE);
 		}
 
 		statLine.mergeStatLine(playerReligion.getStatLine());
-		
+
 		if (increaseValues)
 			statLine.updateStatLine();
 
@@ -198,4 +199,42 @@ public abstract class AbstractPlayer implements NextTurnListener {
 	}
 
 	public abstract boolean isLoaded();
+
+	public ArrayList<Tile> getObservedTiles() {
+		ArrayList<Tile> tiles = new ArrayList<>();
+
+		for (City city : ownedCities)
+			tiles.addAll(city.getObservedTiles());
+		for (Unit unit : ownedUnits)
+			tiles.addAll(unit.getObservedTiles());
+
+		return tiles;
+	}
+
+	public City getNearestCityToEnemy() {
+		Random rnd = new Random();
+		City nearestCity = null; // Nearest city by the enemy
+		float distance = Integer.MAX_VALUE;
+
+		ArrayList<City> enemyCities = new ArrayList<>();
+
+		for (AbstractPlayer enemyPlayer : getDiplomacy().getEnemies()) {
+			enemyCities.addAll(enemyPlayer.getOwnedCities());
+		}
+
+		for (City enemyCity : enemyCities) {
+			for (City city : getOwnedCities()) {
+				if (nearestCity == null || city.getTile().getDistanceFrom(enemyCity.getTile()) < distance) {
+					distance = city.getTile().getDistanceFrom(enemyCity.getTile());
+					nearestCity = city;
+				}
+			}
+		}
+
+		if (nearestCity == null && getOwnedCities().size() > 0) {
+			nearestCity = getOwnedCities().get(rnd.nextInt(getOwnedCities().size()));
+		}
+
+		return nearestCity;
+	}
 }

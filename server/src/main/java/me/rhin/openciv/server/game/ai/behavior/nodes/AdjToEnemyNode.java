@@ -14,8 +14,9 @@ public class AdjToEnemyNode extends UnitNode {
 	@Override
 	public void tick() {
 		for (Tile adjTile : unit.getTile().getAdjTiles()) {
-			if (adjTile.getTopUnit() != null
-					&& unit.getPlayerOwner().getDiplomacy().atWar(adjTile.getTopUnit().getPlayerOwner())) {
+
+			// If the player is adj to an enemy city or unit.
+			if (adjTile.getEnemyAttackableEntity(unit.getPlayerOwner()) != null) {
 
 				setStatus(BehaviorStatus.SUCCESS);
 				return;

@@ -24,6 +24,8 @@ public class PatrolNode extends UnitNode {
 	@Override
 	public void tick() {
 
+		System.out.println(patrolCity);
+
 		Random rnd = new Random();
 		if (patrolCity == null || turnsPatrolled > 9) {
 			patrolCity = unit.getPlayerOwner().getOwnedCities()
@@ -37,7 +39,7 @@ public class PatrolNode extends UnitNode {
 		while (targetTile == null || targetTile.equals(unit.getStandingTile())
 				|| (targetTile.containsTileProperty(TileProperty.WATER) && !waterUnit)) {
 			targetTile = patrolCity.getObservedTiles().get(rnd.nextInt(patrolCity.getObservedTiles().size()))
-					.getAdjTiles()[5];
+					.getAdjTiles()[rnd.nextInt(6)];
 		}
 
 		boolean moved = unit.moveToTile(targetTile);

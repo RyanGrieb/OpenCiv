@@ -26,7 +26,7 @@
                           "nodeType": "InjuredUnitsNode"
                         },
                         {
-                          "nodeType": "MoveToDistantUnitNode"
+                          "nodeType": "ApproachEnemyNode"
                         }
                       ]
                     },
@@ -40,7 +40,23 @@
                               "nodeType": "MoreEnemyUnitsNode"
                             },
                             {
-                              "nodeType": "DefendFriendlyCityNode"
+                              "nodeType": "FallbackNode",
+                              "children": [
+                                {
+                                  "nodeType": "SequenceNode",
+                                  "children": [
+                                    {
+                                      "nodeType": "InVunerableCityNode"
+                                    },
+                                    {
+                                      "nodeType": "PatrolNode"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "nodeType": "ApproachVunerableCityNode"
+                                }
+                              ]
                             }
                           ]
                         },
@@ -60,6 +76,17 @@
                   "nodeType": "SequenceNode",
                   "children": [
                     {
+                      "nodeType": "LowHealthNode"
+                    },
+                    {
+                      "nodeType": "RetreatNode"
+                    }
+                  ]
+                },
+                {
+                  "nodeType": "SequenceNode",
+                  "children": [
+                    {
                       "nodeType": "AdjToEnemyNode"
                     },
                     {
@@ -68,36 +95,23 @@
                   ]
                 },
                 {
-                  "nodeType": "FallbackNode",
+                  "nodeType": "SequenceNode",
                   "children": [
                     {
-                      "nodeType": "SequenceNode",
-                      "children": [
-                        {
-                          "nodeType": "LowHealthNode"
-                        },
-                        {
-                          "nodeType": "RetreatNode"
-                        }
-                      ]
+                      "nodeType": "ApproachEnemyNode"
                     },
                     {
-                      "nodeType": "SequenceNode",
-                      "children": [
-                        {
-                          "nodeType": "ApproachEnemyNode"
-                        },
-                        {
-                          "nodeType": "HasMovementNode"
-                        },
-                        {
-                          "nodeType": "MeleeAttackNode"
-                        }
-                      ]
+                      "nodeType": "HasMovementNode"
+                    },
+                    {
+                      "nodeType": "MeleeAttackNode"
                     }
                   ]
                 }
               ]
+            },
+            {
+              "nodeType": "DoNothingNode"
             }
           ]
         }

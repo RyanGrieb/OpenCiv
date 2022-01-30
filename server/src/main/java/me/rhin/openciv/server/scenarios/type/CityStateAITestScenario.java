@@ -49,8 +49,8 @@ public class CityStateAITestScenario extends Scenario implements PlayersSpawnsSe
 			while (rndX == 0 || rndY == 0 || aiPlayer.getSpawnX() + rndX >= Server.getInstance().getMap().getWidth()
 					|| aiPlayer.getSpawnY() + rndY >= Server.getInstance().getMap().getHeight()
 					|| aiPlayer.getSpawnX() + rndX < 0 || aiPlayer.getSpawnY() + rndY < 0) {
-				rndX = MathUtils.random(-3, 3) * 2;
-				rndY = MathUtils.random(-3, 3) * 2;
+				rndX = MathUtils.random(-3, 3);
+				rndY = MathUtils.random(-3, 3);
 			}
 
 			// FIXME: Correct any out of bounds exceptions here

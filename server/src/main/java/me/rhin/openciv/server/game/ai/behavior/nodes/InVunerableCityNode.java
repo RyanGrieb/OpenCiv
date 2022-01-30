@@ -3,12 +3,12 @@ package me.rhin.openciv.server.game.ai.behavior.nodes;
 import me.rhin.openciv.server.game.AbstractPlayer;
 import me.rhin.openciv.server.game.ai.behavior.BehaviorStatus;
 import me.rhin.openciv.server.game.ai.behavior.UnitNode;
-import me.rhin.openciv.server.game.ai.type.BarbarianPlayer;
+import me.rhin.openciv.server.game.city.City;
 import me.rhin.openciv.server.game.unit.Unit;
 
-public class MoreEnemyUnitsNode extends UnitNode {
+public class InVunerableCityNode extends UnitNode {
 
-	public MoreEnemyUnitsNode(Unit unit, String name) {
+	public InVunerableCityNode(Unit unit, String name) {
 		super(unit, name);
 	}
 
@@ -16,18 +16,12 @@ public class MoreEnemyUnitsNode extends UnitNode {
 	public void tick() {
 		AbstractPlayer player = unit.getPlayerOwner();
 
-		int totalEnemyUnits = 0;
-		for (AbstractPlayer enemyPlayer : player.getDiplomacy().getEnemies()) {
+		City city = player.getNearestCityToEnemy();
 
-			if (enemyPlayer instanceof BarbarianPlayer)
-				continue;
-
-			totalEnemyUnits += enemyPlayer.getOwnedUnits().size();
-		}
-
-		if (totalEnemyUnits > player.getOwnedUnits().size())
+		if (unit.getTile().getTerritory() != null && unit.getTile().getTerritory().equals(city))
 			setStatus(BehaviorStatus.SUCCESS);
 		else
 			setStatus(BehaviorStatus.FAILURE);
 	}
+
 }

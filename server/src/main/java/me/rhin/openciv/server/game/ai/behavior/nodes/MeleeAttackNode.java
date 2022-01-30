@@ -13,11 +13,15 @@ public class MeleeAttackNode extends UnitNode {
 
 	@Override
 	public void tick() {
-		for (Tile adjTile : unit.getTile().getAdjTiles()) {
-			if (adjTile.getTopUnit() != null
-					&& unit.getPlayerOwner().getDiplomacy().atWar(adjTile.getTopUnit().getPlayerOwner())) {
 
-				unit.attackEntity(adjTile.getTopUnit());
+		for (Tile adjTile : unit.getTile().getAdjTiles()) {
+
+			if (adjTile.getEnemyAttackableEntity(unit.getPlayerOwner()) != null) {
+				unit.attackEntity(adjTile.getEnemyAttackableEntity(unit.getPlayerOwner()));
+
+				if (adjTile.getEnemyAttackableEntity(unit.getPlayerOwner()) == null)
+					unit.moveToTile(adjTile);
+
 				setStatus(BehaviorStatus.SUCCESS);
 				return;
 			}

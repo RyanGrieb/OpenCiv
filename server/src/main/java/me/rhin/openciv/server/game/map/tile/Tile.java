@@ -778,5 +778,4 @@ public class Tile {
 	public void setGeographyName(String geograpgyName) {
 		this.geograpgyName = geograpgyName;
 	}
-
 }

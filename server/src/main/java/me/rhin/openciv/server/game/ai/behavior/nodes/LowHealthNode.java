@@ -12,10 +12,12 @@ public class LowHealthNode extends UnitNode {
 
 	@Override
 	public void tick() {
-		if (unit.getHealth() <= 30)
+
+		if (unit.getHealth() <= 35) {
 			setStatus(BehaviorStatus.SUCCESS);
+			return;
+		}
 
 		setStatus(BehaviorStatus.FAILURE);
 	}
-
 }

@@ -1,5 +1,7 @@
 package me.rhin.openciv.server.game.ai.behavior.nodes;
 
+import java.util.ArrayList;
+
 import me.rhin.openciv.server.game.ai.behavior.BehaviorStatus;
 import me.rhin.openciv.server.game.ai.behavior.UnitNode;
 import me.rhin.openciv.server.game.map.tile.Tile;
@@ -13,13 +15,18 @@ public class NoEnemyNearNode extends UnitNode {
 
 	@Override
 	public void tick() {
-		// FIXME: Improve this. Reference other units in a 5 tile radius.
-		for (Tile tile : unit.getObservedTiles()) {
-			if (tile.getTopUnit() != null
-					&& unit.getPlayerOwner().getDiplomacy().atWar(tile.getTopUnit().getPlayerOwner())) {
 
-				setStatus(BehaviorStatus.FAILURE);
-				return;
+		ArrayList<Tile> observedTiles = unit.getPlayerOwner().getObservedTiles();
+
+		for (Tile tile : observedTiles) {
+
+			// If the tile contains enemy unit or city...
+			if (tile.getEnemyAttackableEntity(unit.getPlayerOwner()) != null) {
+
+				if (tile.getDistanceFrom(unit.getTile()) < 100) { // 4-5ish tiles
+					setStatus(BehaviorStatus.FAILURE);
+					return;
+				}
 			}
 		}
 
