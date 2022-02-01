@@ -692,6 +692,11 @@ public enum TileType implements Comparable<TileType> {
 		public TileType[] getSpawnTileTypes() {
 			return new TileType[] { TileType.GRASS };
 		}
+
+		@Override
+		public float getMovementCost() {
+			return 1000000;
+		}
 	},
 	BARBARIAN_CAMP(TileLayer.MIDDLE) {
 		@Override

@@ -59,7 +59,7 @@ public enum TileType {
 	SHEEP_IMPROVED(TextureEnum.TILE_SHEEP_IMPROVED, TileLayer.MIDDLE, TileProperty.IMPROVEMENT),
 	LUMBERMILL(TextureEnum.TILE_LUMBERMILL, TileLayer.HIGH, TileProperty.IMPROVEMENT),
 	FORT(TextureEnum.TILE_FORT, TileLayer.MIDDLE, TileProperty.IMPROVEMENT),
-	ST_HELENS(TextureEnum.TILE_ST_HELENS, TileLayer.HIGH, TileProperty.NATURAL_WONDER),
+	ST_HELENS(TextureEnum.TILE_ST_HELENS, 1000000, TileLayer.HIGH, TileProperty.NATURAL_WONDER),
 	BARBARIAN_CAMP(TextureEnum.TILE_BARBARIAN_CAMP, TileLayer.MIDDLE, TileProperty.IMPROVEMENT),
 	RUINS(TextureEnum.TILE_RUINS, TileLayer.MIDDLE, SoundEnum.RUIN_CAPTURE, TileProperty.IMPROVEMENT),
 	ROAD(0.5F, TileProperty.ROAD);

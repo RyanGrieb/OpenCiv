@@ -13,19 +13,30 @@
       ]
     },
     {
-      "nodeType": "SequenceNode",
+      "nodeType": "FallbackNode",
       "children": [
         {
-          "nodeType": "AtWarNode"
-        },
-        {
-          "nodeType": "FallbackNode",
+          "nodeType": "SequenceNode",
           "children": [
             {
-              "nodeType": "SequenceNode",
+              "nodeType": "NoEnemyNearNode"
+            },
+            {
+              "nodeType": "AtWarNode"
+            },
+            {
+              "nodeType": "FallbackNode",
               "children": [
                 {
-                  "nodeType": "NoEnemyNearNode"
+                  "nodeType": "SequenceNode",
+                  "children": [
+                    {
+                      "nodeType": "InjuredUnitsNode"
+                    },
+                    {
+                      "nodeType": "ApproachEnemyNode"
+                    }
+                  ]
                 },
                 {
                   "nodeType": "FallbackNode",
@@ -34,49 +45,46 @@
                       "nodeType": "SequenceNode",
                       "children": [
                         {
-                          "nodeType": "InjuredUnitsNode"
+                          "nodeType": "MoreEnemyUnitsNode"
                         },
                         {
-                          "nodeType": "ApproachEnemyNode"
+                          "nodeType": "FallbackNode",
+                          "children": [
+                            {
+                              "nodeType": "SequenceNode",
+                              "children": [
+                                {
+                                  "nodeType": "InVunerableCityNode"
+                                },
+                                {
+                                  "nodeType": "PatrolNode"
+                                }
+                              ]
+                            },
+                            {
+                              "nodeType": "ApproachVunerableCityNode"
+                            }
+                          ]
                         }
                       ]
                     },
                     {
-                      "nodeType": "FallbackNode",
-                      "children": [
-                        {
-                          "nodeType": "SequenceNode",
-                          "children": [
-                            {
-                              "nodeType": "MoreEnemyUnitsNode"
-                            },
-                            {
-                              "nodeType": "FallbackNode",
-                              "children": [
-                                {
-                                  "nodeType": "SequenceNode",
-                                  "children": [
-                                    {
-                                      "nodeType": "InVunerableCityNode"
-                                    },
-                                    {
-                                      "nodeType": "PatrolNode"
-                                    }
-                                  ]
-                                },
-                                {
-                                  "nodeType": "ApproachVunerableCityNode"
-                                }
-                              ]
-                            }
-                          ]
-                        },
-                        {
-                          "nodeType": "ApproachEnemyCityNode"
-                        }
-                      ]
+                      "nodeType": "ApproachEnemyCityNode"
                     }
                   ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "nodeType": "SequenceNode",
+          "children": [
+            {
+              "nodeType": "InverseNode",
+              "children": [
+                {
+                  "nodeType": "NoEnemyNearNode"
                 }
               ]
             },
@@ -120,9 +128,6 @@
                   ]
                 }
               ]
-            },
-            {
-              "nodeType": "DoNothingNode"
             }
           ]
         }
