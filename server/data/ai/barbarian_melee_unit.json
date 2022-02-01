@@ -1,0 +1,60 @@
+{
+  "nodeType": "FallbackNode",
+  "children": [
+    {
+      "nodeType": "SequenceNode",
+      "children": [
+        {
+          "nodeType": "LowHealthNode"
+        },
+        {
+          "nodeType": "RetreatNode"
+        }
+      ]
+    },
+    {
+      "nodeType": "SequenceNode",
+      "children": [
+        {
+          "nodeType": "EnemyVisibleForUnitNode"
+        },
+        {
+          "nodeType": "FallbackNode",
+          "children": [
+            {
+              "nodeType": "SequenceNode",
+              "children": [
+                {
+                  "nodeType": "AdjToEnemyNode"
+                },
+                {
+                  "nodeType": "MeleeAttackNode"
+                }
+              ]
+            },
+            {
+              "nodeType": "SequenceNode",
+              "children": [
+                {
+                  "nodeType": "ApproachEnemyNode"
+                },
+                {
+                  "nodeType": "HasMovementNode"
+                },
+                {
+                  "nodeType": "MeleeAttackNode"
+                }
+              ]
+            },
+            {
+              "nodeType": "DoNothingNode"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "nodeType": "WanderToTileNode"
+    }
+  ]
+}

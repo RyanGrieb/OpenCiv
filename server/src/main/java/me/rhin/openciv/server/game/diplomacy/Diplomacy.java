@@ -9,7 +9,7 @@ import com.badlogic.gdx.utils.Json;
 import me.rhin.openciv.server.Server;
 import me.rhin.openciv.server.game.AbstractPlayer;
 import me.rhin.openciv.server.game.Player;
-import me.rhin.openciv.server.game.ai.type.BarbarianPlayer;
+import me.rhin.openciv.server.game.civilization.type.Barbarians;
 import me.rhin.openciv.server.game.diplomacy.actions.DiplomaticAction;
 import me.rhin.openciv.server.listener.DeclareWarListener;
 import me.rhin.openciv.server.listener.ServerDeclareWarListener.ServerDeclareWarEvent;
@@ -100,7 +100,7 @@ public class Diplomacy implements DeclareWarListener {
 
 	public boolean inWar() {
 		for (AbstractPlayer enemy : enemies) {
-			if (enemy instanceof AbstractPlayer && !(enemy instanceof BarbarianPlayer))
+			if (enemy instanceof AbstractPlayer && !(enemy.getCiv() instanceof Barbarians))
 				return true;
 		}
 		return false;

@@ -3,7 +3,7 @@ package me.rhin.openciv.server.game.ai.behavior.nodes;
 import me.rhin.openciv.server.game.AbstractPlayer;
 import me.rhin.openciv.server.game.ai.behavior.BehaviorStatus;
 import me.rhin.openciv.server.game.ai.behavior.UnitNode;
-import me.rhin.openciv.server.game.ai.type.BarbarianPlayer;
+import me.rhin.openciv.server.game.civilization.type.Barbarians;
 import me.rhin.openciv.server.game.unit.Unit;
 
 public class MoreEnemyUnitsNode extends UnitNode {
@@ -19,7 +19,7 @@ public class MoreEnemyUnitsNode extends UnitNode {
 		int totalEnemyUnits = 0;
 		for (AbstractPlayer enemyPlayer : player.getDiplomacy().getEnemies()) {
 
-			if (enemyPlayer instanceof BarbarianPlayer)
+			if (enemyPlayer.getCiv() instanceof Barbarians)
 				continue;
 
 			totalEnemyUnits += enemyPlayer.getOwnedUnits().size();

@@ -87,11 +87,6 @@ public abstract class UnitItem implements ProductionItem {
 
 	@Override
 	public float getAIValue(AIPlayer aiPlayer) {
-		// Start producing military units
-		if (aiPlayer.getIntimidation() > 70) {
-			// TODO: Throw in a ranged unit here and there.
-			return 50 + getBaseCombatStrength();
-		}
 
 		if (this instanceof Builder && Server.getInstance().getInGameState().getCurrentTurn() > 8)
 			return 70;

@@ -5,6 +5,17 @@
       "nodeType": "SequenceNode",
       "children": [
         {
+          "nodeType": "CanUpgradeNode"
+        },
+        {
+          "nodeType": "UpgradeUnitNode"
+        }
+      ]
+    },
+    {
+      "nodeType": "SequenceNode",
+      "children": [
+        {
           "nodeType": "AtWarNode"
         },
         {

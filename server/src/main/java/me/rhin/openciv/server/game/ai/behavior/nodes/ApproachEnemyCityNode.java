@@ -18,7 +18,7 @@ public class ApproachEnemyCityNode extends UnitNode {
 
 	@Override
 	public void tick() {
-		
+
 		AbstractPlayer player = unit.getPlayerOwner();
 		City nearestEnemyCity = null; // Nearest city by the enemy
 		float distance = Integer.MAX_VALUE;
@@ -37,7 +37,12 @@ public class ApproachEnemyCityNode extends UnitNode {
 				}
 			}
 		}
-		
+
+		if (nearestEnemyCity == null) {
+			setStatus(BehaviorStatus.FAILURE);
+			return;
+		}
+
 		Tile targetTile = nearestEnemyCity.getTile();
 
 		boolean moved = unit.moveToTile(targetTile);

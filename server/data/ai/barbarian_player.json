@@ -1,0 +1,24 @@
+{
+  "nodeType": "SequenceNode",
+  "children": [
+    {
+      "nodeType": "SmoothNode",
+      "children": [
+        {
+          "nodeType": "SequenceNode",
+          "children": [
+            {
+              "nodeType": "StartOfGameNode"
+            },
+            {
+              "nodeType": "DeclareTotalWarNode"
+            },
+            {
+              "nodeType": "SpawnBarbariansNode"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

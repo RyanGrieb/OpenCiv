@@ -1,10 +1,26 @@
 package me.rhin.openciv.server.game.ai;
 
 import me.rhin.openciv.server.game.AbstractPlayer;
+import me.rhin.openciv.server.game.ai.behavior.FallbackNode;
 import me.rhin.openciv.server.game.unit.Unit;
 
-public abstract class AIPlayer extends AbstractPlayer {
-	protected float intimidation;
+public class AIPlayer extends AbstractPlayer {
+
+	private FallbackNode mainNode;
+	private String name;
+
+	public AIPlayer(AIType aiType) {
+
+		mainNode = new FallbackNode("Main Node");
+		aiType.initBehaviorTree(mainNode, this);
+	}
+
+	@Override
+	public void onNextTurn() {
+		super.onNextTurn();
+
+		mainNode.tick();
+	}
 
 	@Override
 	public boolean hasConnection() {
@@ -12,9 +28,9 @@ public abstract class AIPlayer extends AbstractPlayer {
 		return true;
 	}
 
-	// Methods we don't use
 	@Override
 	public void setSelectedUnit(Unit unit) {
+		// Methods we don't use
 	}
 
 	@Override
@@ -27,8 +43,12 @@ public abstract class AIPlayer extends AbstractPlayer {
 		return true;
 	}
 
-	public float getIntimidation() {
-		return intimidation;
+	@Override
+	public String getName() {
+		return name;
 	}
 
+	public void setName(String name) {
+		this.name = name;
+	}
 }

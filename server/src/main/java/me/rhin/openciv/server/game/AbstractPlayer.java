@@ -141,6 +141,10 @@ public abstract class AbstractPlayer implements NextTurnListener {
 		return civilization;
 	}
 
+	public void setCivilization(Civ civilization) {
+		this.civilization = civilization;
+	}
+	
 	public void setCivilization(CivType civType) {
 		this.civilization = civType.getCiv(this);
 	}

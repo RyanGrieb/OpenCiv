@@ -3,6 +3,7 @@ package me.rhin.openciv.server.game.ai.behavior.nodes;
 import me.rhin.openciv.server.game.ai.behavior.BehaviorStatus;
 import me.rhin.openciv.server.game.ai.behavior.UnitNode;
 import me.rhin.openciv.server.game.map.tile.Tile;
+import me.rhin.openciv.server.game.unit.AttackableEntity;
 import me.rhin.openciv.server.game.unit.Unit;
 
 public class MeleeAttackNode extends UnitNode {
@@ -17,10 +18,15 @@ public class MeleeAttackNode extends UnitNode {
 		for (Tile adjTile : unit.getTile().getAdjTiles()) {
 
 			if (adjTile.getEnemyAttackableEntity(unit.getPlayerOwner()) != null) {
-				unit.attackEntity(adjTile.getEnemyAttackableEntity(unit.getPlayerOwner()));
 
-				if (adjTile.getEnemyAttackableEntity(unit.getPlayerOwner()) == null)
-					unit.moveToTile(adjTile);
+				AttackableEntity entity = adjTile.getEnemyAttackableEntity(unit.getPlayerOwner());
+
+				boolean survivedAttack = entity.surviveAttack(unit);
+
+				unit.attackEntity(entity);
+
+				if (!survivedAttack)
+					unit.moveToTile(entity.getTile());
 
 				setStatus(BehaviorStatus.SUCCESS);
 				return;

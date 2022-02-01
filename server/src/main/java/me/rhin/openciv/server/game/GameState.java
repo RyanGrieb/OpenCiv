@@ -8,7 +8,7 @@ import com.badlogic.gdx.utils.Json;
 
 import me.rhin.openciv.server.Server;
 import me.rhin.openciv.server.game.ai.AIPlayer;
-import me.rhin.openciv.server.game.ai.type.BarbarianPlayer;
+import me.rhin.openciv.server.game.civilization.type.Barbarians;
 import me.rhin.openciv.server.listener.SendChatMessageListener;
 import me.rhin.openciv.server.scenarios.Scenario;
 import me.rhin.openciv.server.scenarios.ScenarioList;
@@ -53,10 +53,10 @@ public abstract class GameState implements SendChatMessageListener {
 
 	public abstract String toString();
 
-	public BarbarianPlayer getBarbarianPlayer() {
+	public AIPlayer getBarbarianPlayer() {
 		for (AIPlayer aiPlayer : aiPlayers)
-			if (aiPlayer instanceof BarbarianPlayer)
-				return (BarbarianPlayer) aiPlayer;
+			if (aiPlayer.getCiv() instanceof Barbarians)
+				return aiPlayer;
 
 		return null;
 	}

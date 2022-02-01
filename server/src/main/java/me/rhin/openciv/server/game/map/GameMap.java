@@ -659,8 +659,7 @@ public class GameMap implements MapRequestListener {
 		}
 
 		// Spawn barbarians
-		int campAmount = Server.getInstance().getGameOptions().getOption(GameOptionType.BARBARIAN_AMOUNT)
-				* (mapSize + 1);
+		int campAmount = Server.getInstance().getGameOptions().getOption(GameOptionType.BARBARIAN_AMOUNT);
 		mainLoop: for (int i = 0; i < campAmount; i++) {
 			int x = rnd.nextInt(getWidth());
 			int y = rnd.nextInt(getHeight());
@@ -679,7 +678,7 @@ public class GameMap implements MapRequestListener {
 			}
 
 			tile.setTileType(TileType.BARBARIAN_CAMP);
-			Server.getInstance().getGame().getBarbarianPlayer().addCampTile(tile);
+			//Server.getInstance().getGame().getBarbarianPlayer().addCampTile(tile);
 		}
 
 		// Spawn ruins

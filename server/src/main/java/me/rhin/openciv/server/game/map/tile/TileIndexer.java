@@ -14,12 +14,13 @@ public class TileIndexer {
 
 	private HashMap<TileType, ConcurrentLinkedQueue<Tile>> adjTileTypeList;
 	private ConcurrentLinkedQueue<Tile> adjRiverTiles;
-	private HashMap<TileType, Tile> tileTypeOf;
+	private HashMap<TileType, ArrayList<Tile>> tileTypeOf;
 	private HashMap<TileProperty, ArrayList<Tile>> tilePropertyOf;
 
 	public TileIndexer(GameMap gameMap) {
 		this.adjTileTypeList = new HashMap<>();
 		this.adjRiverTiles = new ConcurrentLinkedQueue<>();
+		this.tileTypeOf = new HashMap<>();
 		this.tilePropertyOf = new HashMap<>();
 
 		adjTileTypeList.put(TileType.OCEAN, new ConcurrentLinkedQueue<Tile>());
@@ -61,7 +62,7 @@ public class TileIndexer {
 			tilePropertyOf.get(tileProperty).add(tile);
 		}
 	}
-
+	
 	public void removeTilePropertyOf(Tile tile, TileProperty[] tileProperties) {
 
 	}
@@ -76,5 +77,9 @@ public class TileIndexer {
 
 	public ArrayList<Tile> getTilesOf(TileProperty tileProperty) {
 		return tilePropertyOf.get(tileProperty);
+	}
+	
+	public ArrayList<Tile> getTilesOf(TileType tileType) {
+		return tileTypeOf.get(tileType);
 	}
 }

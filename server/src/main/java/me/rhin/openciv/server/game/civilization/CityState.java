@@ -1,7 +1,6 @@
 package me.rhin.openciv.server.game.civilization;
 
 import me.rhin.openciv.server.game.AbstractPlayer;
-import me.rhin.openciv.server.game.ai.type.CityStatePlayer.CityStateType;
 import me.rhin.openciv.server.game.map.tile.TileType;
 import me.rhin.openciv.shared.util.StrUtil;
 

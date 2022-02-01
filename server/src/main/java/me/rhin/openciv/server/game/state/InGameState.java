@@ -16,11 +16,13 @@ import me.rhin.openciv.server.game.AbstractPlayer;
 import me.rhin.openciv.server.game.GameState;
 import me.rhin.openciv.server.game.Player;
 import me.rhin.openciv.server.game.ai.AIPlayer;
-import me.rhin.openciv.server.game.ai.type.BarbarianPlayer;
-import me.rhin.openciv.server.game.ai.type.CityStatePlayer;
-import me.rhin.openciv.server.game.ai.type.CityStatePlayer.CityStateType;
+import me.rhin.openciv.server.game.ai.AIType;
+import me.rhin.openciv.server.game.ai.UnitAI;
 import me.rhin.openciv.server.game.city.City;
 import me.rhin.openciv.server.game.city.wonders.GameWonders;
+import me.rhin.openciv.server.game.civilization.CityStateType;
+import me.rhin.openciv.server.game.civilization.type.Barbarians;
+import me.rhin.openciv.server.game.civilization.type.CityState;
 import me.rhin.openciv.server.game.map.GameMap;
 import me.rhin.openciv.server.game.map.tile.Tile;
 import me.rhin.openciv.server.game.map.tile.Tile.TileTypeWrapper;
@@ -792,11 +794,21 @@ public class InGameState extends GameState implements DisconnectListener, Select
 		// Add AI
 		Random rnd = new Random();
 		for (int i = 0; i < Server.getInstance().getGameOptions().getOption(GameOptionType.CITY_STATE_AMOUNT); i++) {
+
 			CityStateType type = CityStateType.values()[rnd.nextInt(CityStateType.values().length)];
-			getAIPlayers().add(new CityStatePlayer(type));
+
+			AIPlayer cityStatePlayer = new AIPlayer(AIType.PLAYER);
+			cityStatePlayer.setCivilization(new CityState(cityStatePlayer, type));
+			cityStatePlayer.setName(City.getRandomCityName(cityStatePlayer));
+
+			getAIPlayers().add(cityStatePlayer);
 		}
 
-		getAIPlayers().add(new BarbarianPlayer());
+		AIPlayer barbarianPlayer = new AIPlayer(AIType.BARBARIAN_PLAYER);
+		barbarianPlayer.setCivilization(new Barbarians(barbarianPlayer));
+		barbarianPlayer.setName("Barbarians");
+
+		getAIPlayers().add(barbarianPlayer);
 
 		map.generateTerrain();
 
@@ -879,7 +891,7 @@ public class InGameState extends GameState implements DisconnectListener, Select
 		}
 
 		for (AIPlayer aiPlayer : aiPlayers) {
-			if (aiPlayer instanceof CityStatePlayer) {
+			if (aiPlayer.getCiv() instanceof CityState) {
 
 				// Pick random tile to spawn AI
 				Tile tile = null;
@@ -920,20 +932,19 @@ public class InGameState extends GameState implements DisconnectListener, Select
 
 		// Spawn city state AI
 		for (AIPlayer aiPlayer : Server.getInstance().getAIPlayers()) {
-			if (aiPlayer instanceof CityStatePlayer) {
-				CityStatePlayer cityStatePlayer = (CityStatePlayer) aiPlayer;
-
+			if (aiPlayer.getCiv() instanceof CityState) {
 				// Pick random tile to spawn AI
 				Tile tile = map.getTiles()[aiPlayer.getSpawnX()][aiPlayer.getSpawnY()];
 
-				Unit settlerUnit = new SettlerUnit(cityStatePlayer, tile);
+				Unit settlerUnit = new SettlerUnit(aiPlayer, tile);
+				settlerUnit.addAIBehavior(new UnitAI(settlerUnit, AIType.SETTLER_UNIT));
 				tile.addUnit(settlerUnit);
 
 				// Unit archerUnit = new ArcherUnit(cityStatePlayer, tile);
 				// tile.addUnit(archerUnit);
 
-				Unit warriorUnit = new WarriorUnit(cityStatePlayer,
-						map.getTiles()[tile.getGridX() + 1][tile.getGridY()]);
+				Unit warriorUnit = new WarriorUnit(aiPlayer, map.getTiles()[tile.getGridX() + 1][tile.getGridY()]);
+				warriorUnit.addAIBehavior(new UnitAI(warriorUnit, AIType.LAND_MELEE_UNIT));
 				map.getTiles()[tile.getGridX() + 1][tile.getGridY()].addUnit(warriorUnit);
 			}
 		}
@@ -944,7 +955,7 @@ public class InGameState extends GameState implements DisconnectListener, Select
 		allPlayers.addAll(aiPlayers);
 		for (AbstractPlayer player : allPlayers) {
 
-			if (player instanceof BarbarianPlayer)
+			if (player.getCiv() instanceof Barbarians)
 				continue;
 
 			// Add two luxuries around the player
