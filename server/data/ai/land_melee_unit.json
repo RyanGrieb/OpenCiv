@@ -89,41 +89,49 @@
               ]
             },
             {
-              "nodeType": "FallbackNode",
+              "nodeType": "SmoothNode",
               "children": [
                 {
-                  "nodeType": "SequenceNode",
+                  "nodeType": "FallbackNode",
                   "children": [
                     {
-                      "nodeType": "LowHealthNode"
+                      "nodeType": "SequenceNode",
+                      "children": [
+                        {
+                          "nodeType": "LowHealthNode"
+                        },
+                        {
+                          "nodeType": "RetreatNode"
+                        }
+                      ]
                     },
                     {
-                      "nodeType": "RetreatNode"
-                    }
-                  ]
-                },
-                {
-                  "nodeType": "SequenceNode",
-                  "children": [
-                    {
-                      "nodeType": "AdjToEnemyNode"
+                      "nodeType": "SequenceNode",
+                      "children": [
+                        {
+                          "nodeType": "AdjToEnemyNode"
+                        },
+                        {
+                          "nodeType": "MeleeAttackNode"
+                        }
+                      ]
                     },
                     {
-                      "nodeType": "MeleeAttackNode"
-                    }
-                  ]
-                },
-                {
-                  "nodeType": "SequenceNode",
-                  "children": [
-                    {
-                      "nodeType": "ApproachEnemyNode"
-                    },
-                    {
-                      "nodeType": "HasMovementNode"
-                    },
-                    {
-                      "nodeType": "MeleeAttackNode"
+                      "nodeType": "SequenceNode",
+                      "children": [
+                        {
+                          "nodeType": "ApproachEnemyNode"
+                        },
+                        {
+                          "nodeType": "HasMovementNode"
+                        },
+                        {
+                          "nodeType": "AdjToEnemyNode"
+                        },
+                        {
+                          "nodeType": "MeleeAttackNode"
+                        }
+                      ]
                     }
                   ]
                 }

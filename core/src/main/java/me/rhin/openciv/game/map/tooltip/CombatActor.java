@@ -1,5 +1,6 @@
 package me.rhin.openciv.game.map.tooltip;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.scenes.scene2d.Actor;
@@ -7,6 +8,9 @@ import com.badlogic.gdx.scenes.scene2d.Actor;
 import me.rhin.openciv.asset.TextureEnum;
 
 public class CombatActor extends Actor {
+
+	private static final int TIME_TO_FADE = 2;
+	private double timeAcc = 0;
 
 	private Sprite sprite;
 	private TextureEnum textureEnum;
@@ -16,13 +20,16 @@ public class CombatActor extends Actor {
 		this.textureEnum = textureEnum;
 		this.sprite = textureEnum.sprite();
 		this.isVisible = true;
-
 		setBounds(x, y, width, height);
 	}
 
 	@Override
 	public void draw(Batch batch, float parentAlpha) {
-		sprite.setAlpha(sprite.getColor().a - 0.006F);
+
+		timeAcc += Gdx.graphics.getDeltaTime();
+		float alpha = (float) (1 - (timeAcc / TIME_TO_FADE));
+
+		sprite.setAlpha(alpha);
 		sprite.draw(batch);
 
 		if (sprite.getColor().a <= 0)

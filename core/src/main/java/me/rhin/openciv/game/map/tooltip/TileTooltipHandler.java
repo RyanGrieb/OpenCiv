@@ -30,20 +30,6 @@ public class TileTooltipHandler implements RenderListener {
 	public void flashIcon(Tile tile, TextureEnum textureEnum) {
 		CombatActor newCombatActor = new CombatActor(textureEnum, tile.getX() + 6, tile.getY() + 8, 16, 16);
 
-		//TODO: Make this work.
-		/*for (Actor actor : tileTooltipActors) {
-			CombatActor combatActor = (CombatActor) actor;
-
-			if (combatActor.getX() == newCombatActor.getX() && combatActor.getY() == newCombatActor.getY()) {
-
-				if (combatActor.getTexture() == newCombatActor.getTexture())
-					return;
-
-				combatActor.setBounds(tile.getX() + 4, tile.getY() + 12, 10, 10);
-				newCombatActor.setBounds(tile.getX() + 13, tile.getY() + 12, 10, 10);
-			}
-		}*/
-
 		((InGameScreen) Civilization.getInstance().getScreenManager().getCurrentScreen()).getCombatTooltipGroup()
 				.addActor(newCombatActor);
 
