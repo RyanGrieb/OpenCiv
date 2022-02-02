@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
@@ -261,7 +260,7 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 			for (AbstractPlayer player : this.getPlayers().values())
 				for (Unit playerUnit : player.getOwnedUnits())
 					if (playerUnit.getID() == packet.getUnitID()) {
-						LOGGER.info(String.format("Move error at: %d, %d", playerUnit.getStandingTile().getGridX(), playerUnit.getStandingTile().getGridY()));
+						LOGGER.error("Move error at: " + playerUnit.getStandingTile().getGridX() + ", " + playerUnit.getStandingTile().getGridX());
 					}
 			LOGGER.info("MOVE NULL:" + packet.getUnitID());
 		}
@@ -338,7 +337,7 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 	@Override
 	public void onNextTurn(NextTurnPacket packet) {
 		if (turnTime != packet.getTurnTime()) {
-			Gdx.app.log(Civilization.LOG_TAG, "Updating turn time to: " + packet.getTurnTime());
+			LOGGER.debug("Updating turn time to: " + packet.getTurnTime());
 			turnTime = packet.getTurnTime();
 		}
 

@@ -5,8 +5,6 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Queue;
 
-import com.badlogic.gdx.Gdx;
-
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.game.city.City;
 import me.rhin.openciv.game.city.building.type.Amphitheater;
@@ -57,6 +55,9 @@ import me.rhin.openciv.game.unit.type.Spearman;
 import me.rhin.openciv.game.unit.type.Swordsman;
 import me.rhin.openciv.game.unit.type.Warrior;
 import me.rhin.openciv.game.unit.type.WorkBoat;
+import me.rhin.openciv.logging.Logger;
+import me.rhin.openciv.logging.LoggerFactory;
+import me.rhin.openciv.logging.LoggerType;
 import me.rhin.openciv.shared.packet.type.BuyProductionItemPacket;
 import me.rhin.openciv.shared.packet.type.FaithBuyProductionItemPacket;
 import me.rhin.openciv.shared.packet.type.SetProductionItemPacket;
@@ -70,6 +71,8 @@ import me.rhin.openciv.shared.packet.type.SetProductionItemPacket;
  *
  */
 public class ProducibleItemManager {
+
+	private static final Logger LOGGER = LoggerFactory.getInstance(LoggerType.LOG_TAG);
 
 	private City city;
 	private HashMap<String, ProductionItem> possibleItems;
@@ -158,9 +161,7 @@ public class ProducibleItemManager {
 	}
 
 	public void requestSetProductionItem(ProductionItem currentProductionItem) {
-		Gdx.app.log(Civilization.LOG_TAG,
-				"Requesting to build: " + currentProductionItem.getName() + " in city: " + city.getName());
-
+		LOGGER.info("Requesting to build: " + currentProductionItem.getName() + " in city: " + city.getName());
 		SetProductionItemPacket packet = new SetProductionItemPacket();
 		packet.setProductionItem(city.getName(), currentProductionItem.getName());
 
@@ -168,9 +169,7 @@ public class ProducibleItemManager {
 	}
 
 	public void requestBuyProductionItem(ProductionItem productionItem) {
-		Gdx.app.log(Civilization.LOG_TAG,
-				"Requesting to buy: " + productionItem.getName() + " in city: " + city.getName());
-
+		LOGGER.info("Requesting to buy: " + productionItem.getName() + " in city: " + city.getName());
 		BuyProductionItemPacket packet = new BuyProductionItemPacket();
 		packet.setProductionItem(city.getName(), productionItem.getName());
 
@@ -178,9 +177,7 @@ public class ProducibleItemManager {
 	}
 	
 	public void requestFaithBuyProductionItem(ProductionItem productionItem) {
-		Gdx.app.log(Civilization.LOG_TAG,
-				"Requesting to faith buy: " + productionItem.getName() + " in city: " + city.getName());
-
+		LOGGER.info("Requesting to faith buy: " + productionItem.getName() + " in city: " + city.getName());
 		FaithBuyProductionItemPacket packet = new FaithBuyProductionItemPacket();
 		packet.setProductionItem(city.getName(), productionItem.getName());
 

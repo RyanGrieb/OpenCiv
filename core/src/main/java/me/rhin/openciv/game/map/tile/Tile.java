@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.TreeSet;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
@@ -25,6 +24,9 @@ import me.rhin.openciv.game.unit.AttackableEntity;
 import me.rhin.openciv.game.unit.Unit;
 import me.rhin.openciv.game.unit.UnitItem.UnitType;
 import me.rhin.openciv.listener.BottomShapeRenderListener;
+import me.rhin.openciv.logging.Logger;
+import me.rhin.openciv.logging.LoggerFactory;
+import me.rhin.openciv.logging.LoggerType;
 import me.rhin.openciv.ui.label.CustomLabel;
 import me.rhin.openciv.ui.screen.type.InGameScreen;
 
@@ -66,6 +68,8 @@ public class Tile extends Actor implements BottomShapeRenderListener {
 		}
 	}
 
+	private static final Logger LOGGER = LoggerFactory.getInstance(LoggerType.LOG_TAG);
+
 	private static final int SIZE = 16;
 	private static final int SPRITE_WIDTH = 28;
 	private static final int SPRITE_HEIGHT = 32;
@@ -100,8 +104,7 @@ public class Tile extends Actor implements BottomShapeRenderListener {
 		Civilization.getInstance().getEventManager().addListener(BottomShapeRenderListener.class, this);
 		this.map = map;
 		if (tileType.getTileLayer() != TileLayer.BASE) {
-			Gdx.app.log(Civilization.LOG_TAG,
-					"WARNING: TileType " + tileType.name() + " top layer applied to constructor");
+			LOGGER.info("WARNING: TileType " + tileType.name() + " top layer applied to constructor");
 		}
 		this.tileWrappers = new TreeSet<>();
 		tileWrappers.add(new TileTypeWrapper(tileType));

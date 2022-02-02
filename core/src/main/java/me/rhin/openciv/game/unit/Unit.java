@@ -31,6 +31,9 @@ import me.rhin.openciv.game.unit.actions.type.MoveAction;
 import me.rhin.openciv.game.unit.actions.type.UpgradeAction;
 import me.rhin.openciv.listener.BottomShapeRenderListener;
 import me.rhin.openciv.listener.NextTurnListener;
+import me.rhin.openciv.logging.Logger;
+import me.rhin.openciv.logging.LoggerFactory;
+import me.rhin.openciv.logging.LoggerType;
 import me.rhin.openciv.shared.packet.type.MoveUnitPacket;
 import me.rhin.openciv.shared.packet.type.NextTurnPacket;
 import me.rhin.openciv.ui.game.UnitHealthBubble;
@@ -39,6 +42,8 @@ import me.rhin.openciv.ui.window.type.UnitWindow;
 
 public abstract class Unit extends Actor
 		implements AttackableEntity, TileObserver, BottomShapeRenderListener, NextTurnListener {
+
+	private static final Logger LOGGER = LoggerFactory.getInstance(LoggerType.LOG_TAG);
 
 	protected ArrayList<AbstractAction> customActions;
 	protected Tile standingTile;
@@ -315,7 +320,7 @@ public abstract class Unit extends Actor
 			}
 
 			if (iterations >= GameMap.MAX_NODES) {
-				Gdx.app.log(Civilization.LOG_TAG, "ERROR: Pathing iteration error");
+				LOGGER.error("ERROR: Pathing iteration error");
 				break;
 			}
 
