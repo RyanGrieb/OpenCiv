@@ -1,5 +1,6 @@
 package me.rhin.openciv.server.game.ai.behavior.nodes;
 
+import me.rhin.openciv.server.game.ai.behavior.BehaviorStatus;
 import me.rhin.openciv.server.game.ai.behavior.CityNode;
 import me.rhin.openciv.server.game.city.City;
 import me.rhin.openciv.server.game.city.building.Building;
@@ -24,14 +25,22 @@ public class ProduceBuildingsNode extends CityNode {
 			if (!(productionItem instanceof Building))
 				continue;
 
-			if (topItem == null || topItem.getAIValue() < productionItem.getAIValue())
-				topItem = productionItem;
+			Building building = (Building) productionItem;
+
+			if (city.containsBuilding(building.getClass()))
+				continue;
+
+			if (topItem == null || topItem.getAIValue() < building.getAIValue())
+				topItem = building;
 		}
 
-		if (topItem == null)
+		if (topItem == null) {
+			setStatus(BehaviorStatus.FAILURE);
 			return;
+		}
 
 		itemManager.setProducingItem(topItem.getName());
+		setStatus(BehaviorStatus.SUCCESS); 
 	}
 
 }
