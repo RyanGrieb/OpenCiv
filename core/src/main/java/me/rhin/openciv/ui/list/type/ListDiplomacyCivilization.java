@@ -38,9 +38,7 @@ public class ListDiplomacyCivilization extends ListObject {
 	}
 
 	@Override
-	protected void onClicked(InputEvent event) {
-		System.out.println("hi");
-	}
+	protected void onClicked(InputEvent event) {}
 	
 	@Override
 	public void draw(Batch batch, float parentAlpha) {

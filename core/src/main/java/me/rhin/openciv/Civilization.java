@@ -9,6 +9,9 @@ import com.badlogic.gdx.graphics.profiling.GLProfiler;
 import me.rhin.openciv.asset.AssetHandler;
 import me.rhin.openciv.asset.sound.SoundHandler;
 import me.rhin.openciv.game.CivGame;
+import me.rhin.openciv.logging.Logger;
+import me.rhin.openciv.logging.LoggerFactory;
+import me.rhin.openciv.logging.LoggerType;
 import me.rhin.openciv.networking.NetworkManager;
 import me.rhin.openciv.networking.chat.ChatHandler;
 import me.rhin.openciv.options.GameOptions;
@@ -22,15 +25,15 @@ import me.rhin.openciv.ui.window.WindowManager;
 
 public class Civilization extends Game {
 
+	private static final Logger LOGGER = LoggerFactory.getInstance(LoggerType.LOG_TAG);
+
 	public static final boolean SHOW_FOG = false;
 	public static final boolean DEBUG_GL = false;
 	public static final boolean DEBUG_BOUNDING_BOXES = false; // NOTE: Overlay only.
-	public static final String LOG_TAG = "OpenCiv-INFO";
-	public static final String WS_LOG_TAG = "OpenCiv-WebSocket";
-	private GLProfiler profiler;
 
 	private static Civilization instance;
 
+	private GLProfiler profiler;
 	private AssetHandler assetHandler;
 	private EventManager eventManager;
 	private ScreenManager screenManager;
@@ -47,7 +50,7 @@ public class Civilization extends Game {
 	@Override
 	public void create() {
 		Gdx.app.setLogLevel(Application.LOG_INFO);
-		Gdx.app.log(LOG_TAG, "Starting Game...");
+		LOGGER.info("Starting Game...");
 		if (DEBUG_GL) {
 			profiler = new GLProfiler(Gdx.graphics);
 		}
