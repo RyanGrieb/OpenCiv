@@ -7,7 +7,6 @@ import com.badlogic.gdx.utils.Json;
 import me.rhin.openciv.server.Server;
 import me.rhin.openciv.server.game.AbstractPlayer;
 import me.rhin.openciv.server.game.Player;
-import me.rhin.openciv.server.game.ai.AIPlayer;
 import me.rhin.openciv.server.game.city.City;
 import me.rhin.openciv.server.game.map.tile.Tile;
 import me.rhin.openciv.server.game.production.ProductionItem;
@@ -86,7 +85,7 @@ public abstract class UnitItem implements ProductionItem {
 	}
 
 	@Override
-	public float getAIValue(AIPlayer aiPlayer) {
+	public float getAIValue() {
 
 		if (this instanceof Builder && Server.getInstance().getInGameState().getCurrentTurn() > 8)
 			return 70;

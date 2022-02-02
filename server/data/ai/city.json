@@ -1,0 +1,57 @@
+{
+  "nodeType": "FallbackNode",
+  "children": [
+    {
+      "nodeType": "SequenceNode",
+      "children": [
+        {
+          "nodeType": "NotProducingNode"
+        },
+        {
+          "nodeType": "FallbackNode",
+          "children": [
+            {
+              "nodeType": "SequenceNode",
+              "children": [
+                {
+                  "nodeType": "CityAtWarNode"
+                },
+                {
+                  "nodeType": "ProduceMilitaryNode"
+                }
+              ]
+            },
+            {
+              "nodeType": "SequenceNode",
+              "children": [
+                {
+                  "nodeType": "LeastCitiesNode"
+                },
+                {
+                  "nodeType": "SettlerCooldownNode"
+                },
+                {
+                  "nodeType": "ProduceSettlerNode"
+                }
+              ]
+            },
+            {
+              "nodeType": "SequenceNode",
+              "children": [
+                {
+                  "nodeType": "CityNeedsBuilderNode"
+                },
+                {
+                  "nodeType": "ProduceBuilderNode"
+                }
+              ]
+            },
+            {
+              "nodeType": "ProduceBuildingsNode"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

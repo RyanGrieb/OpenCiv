@@ -12,7 +12,6 @@ public class DoNothingNode extends Node {
 	@Override
 	public void tick() {
 		setStatus(BehaviorStatus.SUCCESS);
-		System.out.println("DoNothingNodeTest");
 	}
 
 }

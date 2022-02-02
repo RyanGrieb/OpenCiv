@@ -10,7 +10,6 @@ public class SequenceNode extends Node {
 	public void tick() {
 		for (Node childNode : childNodes) {
 			childNode.tick();
-			System.out.println(name + " ran " + childNode.getName() + " - " + childNode.getStatus().name() + "!!");
 
 			if (childNode.getStatus() == BehaviorStatus.RUNNING) {
 				setStatus(BehaviorStatus.RUNNING);

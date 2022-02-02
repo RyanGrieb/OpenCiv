@@ -16,6 +16,7 @@ import com.badlogic.gdx.utils.Json;
 import me.rhin.openciv.server.Server;
 import me.rhin.openciv.server.game.AbstractPlayer;
 import me.rhin.openciv.server.game.Player;
+import me.rhin.openciv.server.game.ai.CityAI;
 import me.rhin.openciv.server.game.city.building.Building;
 import me.rhin.openciv.server.game.city.building.IncreaseTileStatlineBuilding;
 import me.rhin.openciv.server.game.city.citizen.AssignedCitizenWorker;
@@ -72,6 +73,7 @@ public class City implements AttackableEntity, TileObserver, NextTurnListener, C
 	private ProducibleItemManager producibleItemManager;
 	private StatLine statLine;
 	private CityReligion cityReligion;
+	private CityAI cityAI;
 	private float maxHealth;
 	private float health;
 
@@ -839,5 +841,9 @@ public class City implements AttackableEntity, TileObserver, NextTurnListener, C
 		}
 
 		return amount;
+	}
+
+	public void addAIBehavior(CityAI cityAI) {
+		this.cityAI = cityAI;
 	}
 }

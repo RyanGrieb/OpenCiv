@@ -1,6 +1,6 @@
 package me.rhin.openciv.server.game.production;
 
-import me.rhin.openciv.server.game.ai.AIPlayer;
+import me.rhin.openciv.server.game.AbstractPlayer;
 
 public interface ProductionItem {
 	public String getName();
@@ -19,7 +19,7 @@ public interface ProductionItem {
 
 	public float getProductionModifier();
 	
-	public float getAIValue(AIPlayer aiPlayer);
+	public float getAIValue();
 
 	public boolean isWonder();
 }

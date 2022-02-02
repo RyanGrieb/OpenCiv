@@ -12,7 +12,6 @@ public class AtWarNode extends UnitNode {
 
 	@Override
 	public void tick() {
-		System.out.println("Called");
 		if (unit.getPlayerOwner().getDiplomacy().inWar())
 			setStatus(BehaviorStatus.SUCCESS);
 		else

@@ -39,11 +39,11 @@ public abstract class Building implements ProductionItem {
 		city.getProducibleItemManager().getPossibleItems().remove(getName());
 		built = true;
 
-		if(this instanceof Wonder) {
+		if (this instanceof Wonder) {
 			System.out.println("Server - built wonder");
 			Server.getInstance().getInGameState().getWonders().setBuilt(getClass());
 		}
-		
+
 		Server.getInstance().getEventManager().fireEvent(new BuildingConstructedEvent(city, this));
 	}
 
@@ -53,7 +53,7 @@ public abstract class Building implements ProductionItem {
 
 		return prodModifier.getValue();
 	}
-	
+
 	@Override
 	public float getFaithCost() {
 		return -1;
@@ -65,9 +65,10 @@ public abstract class Building implements ProductionItem {
 	}
 
 	@Override
-	public float getAIValue(AIPlayer aiPlayer) {
+	public float getAIValue() {
 
-		// TODO: Modify value based on the type of AI player.
+		// FIXME: Account for wonders
+
 		float value = 0;
 
 		for (Entry<Stat, StatValue> entry : statLine.getStatValues().entrySet()) {

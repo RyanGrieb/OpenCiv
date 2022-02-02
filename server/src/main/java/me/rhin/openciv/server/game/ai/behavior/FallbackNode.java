@@ -11,8 +11,6 @@ public class FallbackNode extends Node {
 
 		for (Node childNode : childNodes) {
 			childNode.tick();
-			System.out.println(name + " ran " + childNode.getName() + " - " + childNode.getStatus().name() + "!!");
-			System.out.println(childNode.getChildNodes());
 
 			if (childNode.getStatus() == BehaviorStatus.RUNNING) {
 				setStatus(BehaviorStatus.RUNNING);

@@ -38,6 +38,7 @@ import me.rhin.openciv.server.game.city.building.type.Stoneworks;
 import me.rhin.openciv.server.game.city.building.type.Walls;
 import me.rhin.openciv.server.game.city.building.type.WaterMill;
 import me.rhin.openciv.server.game.city.building.type.Workshop;
+import me.rhin.openciv.server.game.unit.UnitItem;
 import me.rhin.openciv.server.game.unit.type.Archer;
 import me.rhin.openciv.server.game.unit.type.Builder;
 import me.rhin.openciv.server.game.unit.type.Caravan;
@@ -77,6 +78,7 @@ public class ProducibleItemManager implements NextTurnListener {
 
 	private City city;
 	private HashMap<String, ProductionItem> possibleItems;
+	private HashMap<Class<? extends ProductionItem>, Integer> producedOnIndexer;
 
 	// Items that the city has already applied production to
 	private HashMap<String, ProducingItem> appliedProductionItems;
@@ -88,6 +90,7 @@ public class ProducibleItemManager implements NextTurnListener {
 	public ProducibleItemManager(City city) {
 		this.city = city;
 		this.possibleItems = new HashMap<>();
+		this.producedOnIndexer = new HashMap<>();
 		this.appliedProductionItems = new HashMap<>();
 		this.itemQueue = new LinkedList<>();
 		this.queueEnabled = false;
@@ -181,7 +184,7 @@ public class ProducibleItemManager implements NextTurnListener {
 			itemQueue.clear();
 		}
 
-		// System.out.println("Adding to queue");
+		System.out.println("Building: " + itemName);
 		itemQueue.add(new ProducingItem(possibleItems.get(itemName)));
 	}
 
@@ -196,6 +199,8 @@ public class ProducibleItemManager implements NextTurnListener {
 
 		city.getPlayerOwner().getStatLine().subValue(Stat.GOLD, item.getProductionItem().getGoldCost());
 		item.getProductionItem().create();
+		producedOnIndexer.put(item.getProductionItem().getClass(),
+				Server.getInstance().getInGameState().getCurrentTurn());
 
 		Json json = new Json();
 
@@ -222,6 +227,8 @@ public class ProducibleItemManager implements NextTurnListener {
 
 		city.getPlayerOwner().getStatLine().subValue(Stat.FAITH, item.getProductionItem().getFaithCost());
 		item.getProductionItem().create();
+		producedOnIndexer.put(item.getProductionItem().getClass(),
+				Server.getInstance().getInGameState().getCurrentTurn());
 
 		Json json = new Json();
 
@@ -270,6 +277,8 @@ public class ProducibleItemManager implements NextTurnListener {
 			}
 
 			producingItem.getProductionItem().create();
+			producedOnIndexer.put(producingItem.getProductionItem().getClass(),
+					Server.getInstance().getInGameState().getCurrentTurn());
 
 			FinishProductionItemPacket packet = new FinishProductionItemPacket();
 			packet.setProductionItem(city.getName(), producingItem.getProductionItem().getName());
@@ -302,5 +311,24 @@ public class ProducibleItemManager implements NextTurnListener {
 
 	public ProducingItem getProducingItem() {
 		return itemQueue.peek();
+	}
+
+	public boolean producingMilitaryUnits() {
+
+		if (getProducingItem() != null && getProducingItem().getProductionItem() instanceof UnitItem) {
+			UnitItem unitItem = (UnitItem) getProducingItem().getProductionItem();
+			if (unitItem.getBaseCombatStrength() > 0)
+				return true;
+		}
+
+		return false;
+	}
+
+	public int turnsSinceProduced(Class<? extends ProductionItem> productionItemClass) {
+
+		if (!producedOnIndexer.containsKey(productionItemClass))
+			return Integer.MAX_VALUE;
+
+		return producedOnIndexer.get(productionItemClass);
 	}
 }

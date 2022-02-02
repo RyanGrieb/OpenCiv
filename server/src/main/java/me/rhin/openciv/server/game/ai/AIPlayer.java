@@ -2,6 +2,7 @@ package me.rhin.openciv.server.game.ai;
 
 import me.rhin.openciv.server.game.AbstractPlayer;
 import me.rhin.openciv.server.game.ai.behavior.FallbackNode;
+import me.rhin.openciv.server.game.city.City;
 import me.rhin.openciv.server.game.unit.Unit;
 
 public class AIPlayer extends AbstractPlayer {
@@ -20,6 +21,11 @@ public class AIPlayer extends AbstractPlayer {
 		super.onNextTurn();
 
 		mainNode.tick();
+	}
+
+	public void addCity(City city) {
+		super.addCity(city);
+		city.addAIBehavior(new CityAI(city, AIType.CITY));
 	}
 
 	@Override

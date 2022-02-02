@@ -18,8 +18,8 @@ import me.rhin.openciv.server.listener.NextTurnListener;
 
 public class UnitAI implements NextTurnListener {
 
-	protected FallbackNode mainNode;
-	protected Unit unit;
+	private FallbackNode mainNode;
+	private Unit unit;
 
 	public UnitAI(Unit unit, AIType aiType) {
 		this.unit = unit;

@@ -16,6 +16,7 @@ import me.rhin.openciv.server.game.ai.behavior.SequenceNode;
 import me.rhin.openciv.server.game.ai.behavior.SmoothNode;
 import me.rhin.openciv.server.game.ai.behavior.nodes.DoNothingNode;
 import me.rhin.openciv.server.game.ai.behavior.nodes.StartOfGameNode;
+import me.rhin.openciv.server.game.city.City;
 import me.rhin.openciv.server.game.unit.Unit;
 
 public enum AIType {
@@ -23,7 +24,8 @@ public enum AIType {
 	LAND_MELEE_UNIT("data/ai/land_melee_unit.json", Unit.class),
 	SETTLER_UNIT("data/ai/settler_unit.json", Unit.class),
 	BARBARIAN_PLAYER("data/ai/barbarian_player.json", AbstractPlayer.class),
-	PLAYER("data/ai/player.json", AbstractPlayer.class);
+	PLAYER("data/ai/player.json", AbstractPlayer.class),
+	CITY("data/ai/city.json", City.class);
 
 	private String aiJSONPath;
 	private Class<?> nodeParameter;
