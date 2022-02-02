@@ -118,8 +118,8 @@ public class GameOverlay extends AbstractWindow implements ResizeListener, TileS
 		this.hoveredTile = tile;
 
 		// [grass,copper]
-		// String tileName = "[" + tile.getGridX() + "," + tile.getGridY() + "] ";
-		String tileName = "";
+		String tileName = "[" + tile.getGridX() + "," + tile.getGridY() + "] ";
+		// String tileName = "";
 		int index = 0;
 		for (TileTypeWrapper typeWrapper : tile.getTileTypeWrappers()) {
 

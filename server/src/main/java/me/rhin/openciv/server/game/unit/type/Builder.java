@@ -101,7 +101,7 @@ public class Builder extends UnitItem {
 		public Class<? extends Unit> getUpgradedUnit() {
 			return null;
 		}
-		
+
 		@Override
 		public boolean canUpgrade() {
 			return false;
@@ -110,6 +110,30 @@ public class Builder extends UnitItem {
 		@Override
 		public String getName() {
 			return "Builder";
+		}
+
+		/**
+		 * Returns the improvement the builder can work on.
+		 * 
+		 * @param tile
+		 * @return
+		 */
+		public TileImprovement getImprovementFromTile(Tile tile) {
+
+			TileImprovement targetImprovement = null;
+
+			if (tile.getBaseTileType().getImprovements() != null)
+				for (TileImprovement improvement : tile.getBaseTileType().getImprovements()) {
+
+					if (!playerOwner.getResearchTree().hasResearched(improvement.getRequiredTech())
+							|| tile.containsTileProperty(TileProperty.WATER) || tile.getTileImprovement() != null)
+						continue;
+
+					targetImprovement = improvement;
+
+				}
+
+			return targetImprovement;
 		}
 	}
 

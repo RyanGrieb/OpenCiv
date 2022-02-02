@@ -729,6 +729,7 @@ public class Tile {
 		}
 	}
 
+	//FIXME: A tile can have multiple improvements, such as a road & farm.
 	public TileImprovement getTileImprovement() {
 		return tileImprovement;
 	}
