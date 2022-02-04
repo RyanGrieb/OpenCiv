@@ -6,9 +6,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Scanner;
 
-import me.rhin.openciv.shared.logging.Logger;
-import me.rhin.openciv.shared.logging.LoggerFactory;
-import me.rhin.openciv.shared.logging.LoggerType;
 import org.java_websocket.WebSocket;
 import org.java_websocket.handshake.ClientHandshake;
 import org.java_websocket.server.WebSocketServer;
@@ -100,10 +97,12 @@ import me.rhin.openciv.shared.packet.type.UnitEmbarkPacket;
 import me.rhin.openciv.shared.packet.type.UpgradeUnitPacket;
 import me.rhin.openciv.shared.packet.type.WorkTilePacket;
 import me.rhin.openciv.shared.util.ColorHelper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Server extends WebSocketServer {
 
-	private static final Logger LOGGER = LoggerFactory.getInstance(LoggerType.WS_LOG_TAG);
+	private static final Logger LOGGER = LoggerFactory.getLogger(Server.class);
 
 	// private static final String HOST = "207.246.89.13";
 	private static final String HOST = "localhost";

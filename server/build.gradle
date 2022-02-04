@@ -5,11 +5,24 @@ mainClassName = 'me.rhin.openciv.server.Server'
 eclipse.project.name = appName + '-server'
 sourceSets.main.resources.srcDirs += [ rootProject.file('server/data').path ]
 
+ext {
+	jsonVersion = '20211205'
+	log4jVersion = '2.17.1'
+	slf4jVersion = '1.7.35'
+	webSocketVersion = '1.5.2'
+}
+
 dependencies {
 	implementation project(':shared')
-	
-	api "org.java-websocket:Java-WebSocket:1.5.1"
-	implementation group: 'org.json', name: 'json', version: '20211205'
+
+	api "org.java-websocket:Java-WebSocket:${webSocketVersion}"
+
+	implementation "org.json:json:${jsonVersion}"
+	implementation "org.slf4j:slf4j-api:${slf4jVersion}"
+
+	runtimeOnly "org.apache.logging.log4j:log4j-slf4j-impl:${log4jVersion}"
+	runtimeOnly "org.apache.logging.log4j:log4j-api:${log4jVersion}"
+	runtimeOnly "org.apache.logging.log4j:log4j-core:${log4jVersion}"
 }
 
 run {

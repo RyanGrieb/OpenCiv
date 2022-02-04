@@ -1,6 +1,8 @@
 package me.rhin.openciv.game.map.tile;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.TreeSet;
 
@@ -156,9 +158,9 @@ public class Tile extends Actor implements BottomShapeRenderListener {
 
 		for (int i = 0; i < territoryBorders.length; i++) {
 			boolean renderLine = territoryBorders[i];
-			if (!renderLine)
+			if (!renderLine) {
 				continue;
-
+			}
 			// 0 = 5 0
 			// 1 = 0 1
 			// 2 = 1 2
@@ -318,13 +320,7 @@ public class Tile extends Actor implements BottomShapeRenderListener {
 
 		if (containsTileLayer(tileType.getTileLayer())) {
 
-			Iterator<TileTypeWrapper> iterator = tileWrappers.iterator();
-			
-			while(iterator.hasNext()) {
-				TileTypeWrapper tileWrapper = iterator.next();
-				if (tileWrapper.getTileType().getTileLayer() == tileType.getTileLayer())
-					iterator.remove();
-			}
+			tileWrappers.removeIf(tileWrapper -> tileWrapper.getTileType().getTileLayer() == tileType.getTileLayer());
 		}
 		// Add the tileType to the Array in an ordered manner. note: this will never be
 		// a baseTile
@@ -338,12 +334,7 @@ public class Tile extends Actor implements BottomShapeRenderListener {
 
 		// FIXME: Check to see if this is still concurrent modification
 		// Happens when there is a ruin tile on a sheep & forest tile.
-		Iterator<TileTypeWrapper> iterator = tileWrappers.iterator();
-		while (iterator.hasNext()) {
-			TileTypeWrapper tileWrapper = iterator.next();
-			if (tileWrapper.getTileType() == tileType)
-				iterator.remove();
-		}
+		tileWrappers.removeIf(tileWrapper -> tileWrapper.getTileType() == tileType);
 	}
 
 	public void addUnit(Unit unit) {
@@ -591,26 +582,18 @@ public class Tile extends Actor implements BottomShapeRenderListener {
 
 		// Problem: This can AND WILL pick up friendly units. Fixed by having to return
 		// enemy cities first.
-		if (city != null && !city.getPlayerOwner().equals(player))
+		if (city != null && !city.getPlayerOwner().equals(player)) {
 			return city;
+		}
 
-		Unit unit = getTopEnemyUnit(player);
-		if (unit != null)
-			return unit;
-
-		return null;
+		return getTopEnemyUnit(player);
 	}
 
 	public AttackableEntity getAttackableEntity() {
-
-		if (city != null)
+		if (city != null) {
 			return city;
-
-		Unit unit = getTopUnit();
-		if (unit != null)
-			return unit;
-
-		return null;
+		}
+		return getTopUnit();
 	}
 
 	public void removeTileObserver(TileObserver tileObserver) {
@@ -618,14 +601,12 @@ public class Tile extends Actor implements BottomShapeRenderListener {
 
 		ArrayList<Tile> adjTiles = new ArrayList<>();
 		adjTiles.add(this);
-		for (Tile tile : getAdjTiles())
-			adjTiles.add(tile);
+		adjTiles.addAll(Arrays.asList(getAdjTiles()));
 
 		for (Tile tile : adjTiles) {
-
-			if (tile == null)
+			if (tile == null) {
 				continue;
-
+			}
 			tile.getTileObservers().remove(tileObserver);
 			for (Tile adjTile : tile.getAdjTiles()) {
 				if (adjTile == null)
@@ -652,14 +633,11 @@ public class Tile extends Actor implements BottomShapeRenderListener {
 
 		ArrayList<Tile> adjTiles = new ArrayList<>();
 		adjTiles.add(this);
-		for (Tile tile : getAdjTiles())
-			adjTiles.add(tile);
-
+		Collections.addAll(adjTiles, getAdjTiles());
 		for (Tile tile : adjTiles) {
-
-			if (tile == null)
+			if (tile == null) {
 				continue;
-
+			}
 			boolean denyVisibility = false;
 
 			for (TileTypeWrapper wrapper : tile.getTileTypeWrappers())
