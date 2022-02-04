@@ -115,7 +115,7 @@ public class CityReligion {
 
 		PlayerReligion newMajority = getMajorityReligion();
 
-		// System.out.println(oldMajority + "," + newMajority);
+		// LOGGER.info(oldMajority + "," + newMajority);
 
 		if (oldMajority != null && newMajority == null) {
 			Server.getInstance().getEventManager().fireEvent(new CityLooseMajorityReligionEvent(city, oldMajority));

@@ -243,7 +243,7 @@ public class Tile {
 			if (!tile.getTileObservers().contains(tileObserver)) {
 				//tile.getTileObservers().add(tileObserver);
 				tile.addTileObserverToList(tileObserver);
-				// System.out.println(tileObserver.getName() + " - " + tile);
+				// LOGGER.info(tileObserver.getName() + " - " + tile);
 
 				if (!tileObserver.getObservedTiles().contains(tile))
 					tileObserver.addObeservedTile(tile);
@@ -260,7 +260,7 @@ public class Tile {
 				if (!adjTile.getTileObservers().contains(tileObserver)) {
 					//adjTile.getTileObservers().add(tileObserver);
 					adjTile.addTileObserverToList(tileObserver);
-					// System.out.println(tileObserver.getName() + " - " + adjTile);
+					// LOGGER.info(tileObserver.getName() + " - " + adjTile);
 
 					if (!tileObserver.getObservedTiles().contains(adjTile))
 						tileObserver.addObeservedTile(adjTile);
@@ -289,13 +289,13 @@ public class Tile {
 			if (!tileObserver.getPlayerOwner().getDiplomacy().getDiscoveredPlayers().contains(playerOnTile)) {
 				//tileObserver.getPlayerOwner().getDiplomacy().getDiscoveredPlayers().add(playerOnTile);
 				tileObserver.getPlayerOwner().getDiplomacy().addDiscoveredPlayer(playerOnTile);
-				//System.out.println(tileObserver.getPlayerOwner().getName() + " Discovered " + playerOnTile.getName());
+				//LOGGER.info(tileObserver.getPlayerOwner().getName() + " Discovered " + playerOnTile.getName());
 			}
 
 			if (!playerOnTile.getDiplomacy().getDiscoveredPlayers().contains(tileObserver.getPlayerOwner())) {
 				//playerOnTile.getDiplomacy().getDiscoveredPlayers().add(tileObserver.getPlayerOwner());
 				playerOnTile.getDiplomacy().addDiscoveredPlayer(tileObserver.getPlayerOwner());
-				//System.out.println(playerOnTile.getName() + " Discovered " + tileObserver.getPlayerOwner().getName());
+				//LOGGER.info(playerOnTile.getName() + " Discovered " + tileObserver.getPlayerOwner().getName());
 			}
 
 		}

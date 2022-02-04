@@ -12,9 +12,14 @@ import me.rhin.openciv.game.notification.type.AvailableMovementNotification;
 import me.rhin.openciv.game.religion.PlayerReligion;
 import me.rhin.openciv.game.research.ResearchTree;
 import me.rhin.openciv.game.unit.Unit;
+import me.rhin.openciv.shared.logging.Logger;
+import me.rhin.openciv.shared.logging.LoggerFactory;
+import me.rhin.openciv.shared.logging.LoggerType;
 import me.rhin.openciv.shared.stat.StatLine;
 
 public abstract class AbstractPlayer {
+
+	private static final Logger LOGGER = LoggerFactory.getInstance(LoggerType.LOG_TAG);
 
 	private String name;
 	protected ArrayList<City> ownedCities;
@@ -76,7 +81,7 @@ public abstract class AbstractPlayer {
 
 	public void addUnit(Unit unit) {
 		ownedUnits.add(unit);
-		System.out.println(unit.getName() + " - " + unit.allowsMovement());
+		LOGGER.info(unit.getName() + " - " + unit.allowsMovement());
 		if (Civilization.getInstance().getGame().getPlayer().equals(this) && unit.allowsMovement())
 			Civilization.getInstance().getGame().getNotificationHanlder()
 					.fireNotification(new AvailableMovementNotification(unit));

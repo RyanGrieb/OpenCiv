@@ -6,6 +6,9 @@ import me.rhin.openciv.server.game.city.City;
 import me.rhin.openciv.server.game.religion.PlayerReligion;
 import me.rhin.openciv.shared.listener.Event;
 import me.rhin.openciv.shared.listener.Listener;
+import me.rhin.openciv.shared.logging.Logger;
+import me.rhin.openciv.shared.logging.LoggerFactory;
+import me.rhin.openciv.shared.logging.LoggerType;
 
 public interface CityLooseMajorityReligionListener extends Listener {
 
@@ -13,12 +16,14 @@ public interface CityLooseMajorityReligionListener extends Listener {
 
 	public static class CityLooseMajorityReligionEvent extends Event<CityLooseMajorityReligionListener> {
 
+		private final Logger LOGGER = LoggerFactory.getInstance(LoggerType.LOG_TAG);
+
 		private City city;
 		private PlayerReligion oldReligion;
 
 		public CityLooseMajorityReligionEvent(City city, PlayerReligion oldReligion) {
 			if (oldReligion != null)
-				System.out.println(city.getName() + " Lost majority - " + oldReligion.getReligionIcon().name());
+				LOGGER.info(city.getName() + " Lost majority - " + oldReligion.getReligionIcon().name());
 			this.city = city;
 			this.oldReligion = oldReligion;
 		}

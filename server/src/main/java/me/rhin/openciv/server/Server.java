@@ -6,6 +6,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Scanner;
 
+import me.rhin.openciv.shared.logging.Logger;
+import me.rhin.openciv.shared.logging.LoggerFactory;
+import me.rhin.openciv.shared.logging.LoggerType;
 import org.java_websocket.WebSocket;
 import org.java_websocket.handshake.ClientHandshake;
 import org.java_websocket.server.WebSocketServer;
@@ -100,6 +103,8 @@ import me.rhin.openciv.shared.util.ColorHelper;
 
 public class Server extends WebSocketServer {
 
+	private static final Logger LOGGER = LoggerFactory.getInstance(LoggerType.WS_LOG_TAG);
+
 	// private static final String HOST = "207.246.89.13";
 	private static final String HOST = "localhost";
 	private static final int PORT = 5222;
@@ -117,7 +122,7 @@ public class Server extends WebSocketServer {
 
 	public static void main(String[] args) {
 		// TODO: Implement proper logging.
-		System.out.println("Starting Server...");
+		LOGGER.info("Starting Server...");
 
 		// FIXME: Check for servers already running
 
@@ -207,13 +212,13 @@ public class Server extends WebSocketServer {
 	@Override
 	public void onOpen(WebSocket conn, ClientHandshake handshake) {
 		playerIndex++;
-		System.out.println("New Connection: " + conn.getLocalSocketAddress());
+		LOGGER.info("New Connection: " + conn.getLocalSocketAddress());
 		eventManager.fireEvent(new ConnectionEvent(conn));
 	}
 
 	@Override
 	public void onClose(WebSocket conn, int code, String reason, boolean remote) {
-		System.out.println("Disconnect event firing..");
+		LOGGER.info("Disconnect event firing..");
 		eventManager.fireEvent(new DisconnectEvent(conn));
 	}
 
@@ -221,7 +226,7 @@ public class Server extends WebSocketServer {
 	public void onMessage(WebSocket conn, String message) {
 
 		if (!message.contains("TileStatlinePacket"))
-			System.out.println("[SERVER : " + game.toString() + " - " + getPlayerByConn(conn).getName()
+			LOGGER.info("[SERVER : " + game.toString() + " - " + getPlayerByConn(conn).getName()
 					+ "] Received Message: " + message);
 
 		fireAssociatedPacketEvents(conn, message);

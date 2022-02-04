@@ -10,9 +10,9 @@ import me.rhin.openciv.game.map.GameMap;
 import me.rhin.openciv.game.map.tile.Tile;
 import me.rhin.openciv.game.unit.actions.AbstractAction;
 import me.rhin.openciv.listener.UnitActListener.UnitActEvent;
-import me.rhin.openciv.logging.Logger;
-import me.rhin.openciv.logging.LoggerFactory;
-import me.rhin.openciv.logging.LoggerType;
+import me.rhin.openciv.shared.logging.Logger;
+import me.rhin.openciv.shared.logging.LoggerFactory;
+import me.rhin.openciv.shared.logging.LoggerType;
 import me.rhin.openciv.ui.window.type.TradeWindow;
 
 public abstract class TradeUnit extends Unit {
@@ -192,7 +192,7 @@ public abstract class TradeUnit extends Unit {
 			return new Tradeable("Too distant", false);
 		}
 
-		System.out.println(city.getName() + "," + pathMovement);
+		LOGGER.debug(city.getName() + "," + pathMovement);
 
 		if (pathMovement > 100) {
 			return new Tradeable("Unnavigable: " + pathMovement, false);

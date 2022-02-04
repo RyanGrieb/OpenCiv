@@ -7,11 +7,16 @@ import me.rhin.openciv.game.player.AbstractPlayer;
 import me.rhin.openciv.listener.DeclareWarAllListener;
 import me.rhin.openciv.listener.DeclareWarListener;
 import me.rhin.openciv.listener.DiscoveredPlayerListener;
+import me.rhin.openciv.shared.logging.Logger;
+import me.rhin.openciv.shared.logging.LoggerFactory;
+import me.rhin.openciv.shared.logging.LoggerType;
 import me.rhin.openciv.shared.packet.type.DeclareWarAllPacket;
 import me.rhin.openciv.shared.packet.type.DeclareWarPacket;
 import me.rhin.openciv.shared.packet.type.DiscoveredPlayerPacket;
 
 public class Diplomacy implements DeclareWarListener, DeclareWarAllListener, DiscoveredPlayerListener {
+
+	private static final Logger LOGGER = LoggerFactory.getInstance(LoggerType.LOG_TAG);
 
 	private AbstractPlayer player;
 	private ArrayList<AbstractPlayer> discoveredPlayers;
@@ -44,8 +49,9 @@ public class Diplomacy implements DeclareWarListener, DeclareWarAllListener, Dis
 			return;
 
 		for (AbstractPlayer player : Civilization.getInstance().getGame().getPlayers().values()) {
-			if (player.getName().equals(packet.getAttacker()))
+			if (player.getName().equals(packet.getAttacker())) {
 				continue;
+			}
 
 			declareWar(player);
 		}
@@ -53,10 +59,11 @@ public class Diplomacy implements DeclareWarListener, DeclareWarAllListener, Dis
 
 	@Override
 	public void onDiscoverPlayer(DiscoveredPlayerPacket packet) {
-		if (!player.getName().equals(packet.getPlayerName()))
+		if (!player.getName().equals(packet.getPlayerName())) {
 			return;
+		}
 
-		System.out.println(player.getName() + " Discovered - " + packet.getDiscoveredPlayerName());
+		LOGGER.info(player.getName() + " Discovered - " + packet.getDiscoveredPlayerName());
 
 		AbstractPlayer discoveredPlayer = Civilization.getInstance().getGame().getPlayers()
 				.get(packet.getDiscoveredPlayerName());
@@ -64,7 +71,7 @@ public class Diplomacy implements DeclareWarListener, DeclareWarAllListener, Dis
 	}
 
 	public void declareWar(AbstractPlayer targetPlayer) {
-		System.out.println(player.getName() + " declared war on " + targetPlayer.getName());
+		LOGGER.info(player.getName() + " declared war on " + targetPlayer.getName());
 
 		addEnemy(targetPlayer);
 		targetPlayer.getDiplomacy().addEnemy(player);

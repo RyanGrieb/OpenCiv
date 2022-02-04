@@ -24,9 +24,9 @@ import me.rhin.openciv.game.unit.AttackableEntity;
 import me.rhin.openciv.game.unit.Unit;
 import me.rhin.openciv.game.unit.UnitItem.UnitType;
 import me.rhin.openciv.listener.BottomShapeRenderListener;
-import me.rhin.openciv.logging.Logger;
-import me.rhin.openciv.logging.LoggerFactory;
-import me.rhin.openciv.logging.LoggerType;
+import me.rhin.openciv.shared.logging.Logger;
+import me.rhin.openciv.shared.logging.LoggerFactory;
+import me.rhin.openciv.shared.logging.LoggerType;
 import me.rhin.openciv.ui.label.CustomLabel;
 import me.rhin.openciv.ui.screen.type.InGameScreen;
 

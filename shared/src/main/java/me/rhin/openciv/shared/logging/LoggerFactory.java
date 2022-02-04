@@ -1,4 +1,4 @@
-package me.rhin.openciv.logging;
+package me.rhin.openciv.shared.logging;
 
 public final class LoggerFactory {
 

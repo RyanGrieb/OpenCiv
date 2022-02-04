@@ -3,6 +3,9 @@ package me.rhin.openciv.server.command;
 import java.util.Arrays;
 import java.util.HashMap;
 
+import me.rhin.openciv.shared.logging.Logger;
+import me.rhin.openciv.shared.logging.LoggerFactory;
+import me.rhin.openciv.shared.logging.LoggerType;
 import org.java_websocket.WebSocket;
 
 import com.badlogic.gdx.utils.Json;
@@ -15,6 +18,9 @@ import me.rhin.openciv.server.game.Player;
 import me.rhin.openciv.shared.packet.type.SendChatMessagePacket;
 
 public class CmdProcessor {
+
+	private static final Logger LOGGER = LoggerFactory.getInstance(LoggerType.LOG_TAG);
+
 	private HashMap<String, Command> commands;
 	public boolean enabled;
 
@@ -47,7 +53,7 @@ public class CmdProcessor {
 				Json json = new Json();
 				player.sendPacket(json.toJson(packet));
 			} else
-				System.out.println("[Server] Error: Command not found");
+				LOGGER.info("[Server] Error: Command not found");
 
 			return;
 		}

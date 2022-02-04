@@ -22,7 +22,7 @@ public class Road implements RoadConstructedListener {
 
 		// Now figure out what direction were going in.
 
-		//System.out.println("Setting road!");
+		//LOGGER.info("Setting road!");
 
 		// FIXME: Account for if the road is being set not by anything.
 
@@ -62,10 +62,10 @@ public class Road implements RoadConstructedListener {
 
 		this.prevTile = prevTile;
 		this.targetTile = targetTile;
-		//System.out.println("We initalizing ourselfs: [" + originTile.getGridX() + "," + originTile.getGridY() + "]");
+		//LOGGER.info("We initalizing ourselfs: [" + originTile.getGridX() + "," + originTile.getGridY() + "]");
 
-		//System.out.println(prevTile + "," + targetTile);
-		//System.out.println("--------------------------");
+		//LOGGER.info(prevTile + "," + targetTile);
+		//LOGGER.info("--------------------------");
 		defineRoadEnum();
 
 		Civilization.getInstance().getEventManager().fireEvent(new RoadConstructedEvent(this));
@@ -85,16 +85,16 @@ public class Road implements RoadConstructedListener {
 		if (!adjRoad || (prevTile != null && targetTile != null))
 			return;
 
-		//System.out.println("Called");
-		//System.out.println("We are: [" + originTile.getGridX() + "," + originTile.getGridY() + "]");
+		//LOGGER.info("Called");
+		//LOGGER.info("We are: [" + originTile.getGridX() + "," + originTile.getGridY() + "]");
 
 		if (targetTile == null)
 			targetTile = road.getOriginTile();
 		else if (prevTile == null)
 			prevTile = road.getOriginTile();
 
-		//System.out.println(prevTile + "," + targetTile);
-		//System.out.println("=======================");
+		//LOGGER.info(prevTile + "," + targetTile);
+		//LOGGER.info("=======================");
 
 		defineRoadEnum();
 		originTile.applyRoad();
@@ -163,16 +163,16 @@ public class Road implements RoadConstructedListener {
 		}
 
 		this.roadPart = RoadPart.fetchRoadPart(prevTileIndex, targetTileIndex);
-		//System.out.println(prevTile + "," + targetTile);
+		//LOGGER.info(prevTile + "," + targetTile);
 
 		//if (prevTile != null)
-		//	System.out.println("prev:" + prevTile.getGridX() + "," + prevTile.getGridY());
+		//	LOGGER.info("prev:" + prevTile.getGridX() + "," + prevTile.getGridY());
 		//if (targetTile != null)
-		//	System.out.println("target:" + targetTile.getGridX() + "," + targetTile.getGridY());
+		//	LOGGER.info("target:" + targetTile.getGridX() + "," + targetTile.getGridY());
 
-		//System.out.println(prevTileIndex + "," + targetTileIndex);
-		//System.out.println("Setting ourselfs +[" + originTile.getGridX() + "," + originTile.getGridY() + "]" + " TO: "
+		//LOGGER.info(prevTileIndex + "," + targetTileIndex);
+		//LOGGER.info("Setting ourselfs +[" + originTile.getGridX() + "," + originTile.getGridY() + "]" + " TO: "
 		//		+ roadPart.name());
-		//System.out.println("***************");
+		//LOGGER.info("***************");
 	}
 }

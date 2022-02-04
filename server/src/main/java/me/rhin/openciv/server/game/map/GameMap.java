@@ -234,7 +234,7 @@ public class GameMap implements MapRequestListener {
 
 					Tile indexedTile = visitedTiles.remove();
 
-					// System.out.println("touch: " + indexedTile);
+					// LOGGER.info("touch: " + indexedTile);
 
 					if (!currentGeograpgyFeautresList.contains(indexedTile))
 						currentGeograpgyFeautresList.add(indexedTile);
@@ -491,7 +491,7 @@ public class GameMap implements MapRequestListener {
 			// Apply the river sides
 			ArrayList<Vector2> traversedVectors = new ArrayList<>();
 
-			// System.out.println("Generating river sides w/ river size of: " +
+			// LOGGER.info("Generating river sides w/ river size of: " +
 			// river.size());
 			for (int i = 0; i < river.size(); i++) {
 				if (i + 1 >= river.size())
@@ -515,7 +515,7 @@ public class GameMap implements MapRequestListener {
 					currentVector = traversedVectors.get(traversedVectors.size() - 1);
 				}
 
-				// System.out.println("Current river vector at: " + currentVector);
+				// LOGGER.info("Current river vector at: " + currentVector);
 
 				while (!containsVector(nextTile, currentVector)) {
 					Vector2 nextVector = null;
@@ -527,7 +527,7 @@ public class GameMap implements MapRequestListener {
 							currentVectorIndex = j;
 					}
 
-					// System.out.println("Current vector index: " + currentVectorIndex);
+					// LOGGER.info("Current vector index: " + currentVectorIndex);
 
 					Vector2 leftVector = tile.getVectors()[currentVectorIndex + 1 > 5 ? 0 : currentVectorIndex + 1];
 					Vector2 rightVector = tile.getVectors()[currentVectorIndex - 1 < 0 ? 5 : currentVectorIndex - 1];
@@ -549,17 +549,17 @@ public class GameMap implements MapRequestListener {
 							((tile.getVectors()[1].x - tile.getVectors()[5].x) / 2) + tile.getVectors()[5].x,
 							((tile.getVectors()[4].y - tile.getVectors()[5].y) / 2) + tile.getVectors()[5].y);
 
-					// System.out.println("Current tile center vector: " + currentTileCenterVector);
-					// System.out.println("Next tile center vector: " + nextTileCenterVector);
+					// LOGGER.info("Current tile center vector: " + currentTileCenterVector);
+					// LOGGER.info("Next tile center vector: " + nextTileCenterVector);
 
-					// System.out.println("Next vector found at: " + nextVector);
+					// LOGGER.info("Next vector found at: " + nextVector);
 
 					int nextVectorIndex = -1;
 					for (int j = 0; j < tile.getVectors().length; j++)
 						if (roundedEquals(nextVector, tile.getVectors()[j]))
 							nextVectorIndex = j;
 
-					// System.out.println("Next vector index: " + nextVectorIndex);
+					// LOGGER.info("Next vector index: " + nextVectorIndex);
 
 					// Determine the side from the current & next vector
 
@@ -570,8 +570,8 @@ public class GameMap implements MapRequestListener {
 						Vector2 firstVector = tile.getVectors()[j - 1 < 0 ? 5 : j - 1];
 						Vector2 lastVector = tile.getVectors()[j];
 
-						// System.out.println("====== Side " + j + " ======");
-						// System.out.println(firstVector + "," + lastVector);
+						// LOGGER.info("====== Side " + j + " ======");
+						// LOGGER.info(firstVector + "," + lastVector);
 
 						// FIXME: Not the prettiest approach
 
@@ -580,7 +580,7 @@ public class GameMap implements MapRequestListener {
 							tileSide = j;
 						}
 					}
-					// System.out.println("Adding river to side: " + tileSide);
+					// LOGGER.info("Adding river to side: " + tileSide);
 					if (tile.getAdjTiles()[tileSide].getBaseTileType() != TileType.OCEAN) {
 						tile.addRiverToSide(tileSide);
 
@@ -862,8 +862,8 @@ public class GameMap implements MapRequestListener {
 						tile = tiles[rndX][rndY];
 					}
 
-					// System.out.println(tileType);
-					// System.out.println(tile.getBaseTileType());
+					// LOGGER.info(tileType);
+					// LOGGER.info(tile.getBaseTileType());
 
 					boolean isExclusiveTile = false;
 					boolean containsResource = false;

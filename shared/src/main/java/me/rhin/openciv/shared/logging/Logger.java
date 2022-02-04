@@ -1,11 +1,11 @@
-package me.rhin.openciv.logging;
+package me.rhin.openciv.shared.logging;
 
 import com.badlogic.gdx.Gdx;
 
 public final class Logger {
 
 	Logger(LoggerType loggerType) {
-		this.tag = loggerType.name();
+		this.tag = loggerType.getType();
 	}
 
 	private final String tag;

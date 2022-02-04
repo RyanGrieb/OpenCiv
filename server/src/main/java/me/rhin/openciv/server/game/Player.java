@@ -1,5 +1,8 @@
 package me.rhin.openciv.server.game;
 
+import me.rhin.openciv.shared.logging.Logger;
+import me.rhin.openciv.shared.logging.LoggerFactory;
+import me.rhin.openciv.shared.logging.LoggerType;
 import org.java_websocket.WebSocket;
 
 import com.badlogic.gdx.utils.Json;
@@ -23,6 +26,8 @@ import me.rhin.openciv.shared.stat.StatLine;
 import me.rhin.openciv.shared.stat.StatType;
 
 public class Player extends AbstractPlayer implements ChooseTechListener, ChooseHeritageListener, TradeCityListener {
+
+	private static final Logger LOGGER = LoggerFactory.getInstance(LoggerType.LOG_TAG);
 
 	private WebSocket conn;
 	private String name;
@@ -82,7 +87,7 @@ public class Player extends AbstractPlayer implements ChooseTechListener, Choose
 		if (!(unit instanceof TraderUnit) || city == null)
 			return;
 
-		System.out.println("Attempting to trade w/ city: " + city.getName());
+		LOGGER.info("Attempting to trade w/ city: " + city.getName());
 		TraderUnit traderUnit = (TraderUnit) unit;
 		traderUnit.setTradingCity(city);
 		traderUnit.setCityHeadquarters(unit.getStandingTile().getCity());

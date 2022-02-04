@@ -6,9 +6,13 @@ import me.rhin.openciv.server.game.religion.PlayerReligion;
 import me.rhin.openciv.server.game.religion.bonus.ReligionBonus;
 import me.rhin.openciv.server.listener.GainFollowerListener;
 import me.rhin.openciv.server.listener.LooseFollowerListener;
+import me.rhin.openciv.shared.logging.Logger;
+import me.rhin.openciv.shared.logging.LoggerFactory;
+import me.rhin.openciv.shared.logging.LoggerType;
 import me.rhin.openciv.shared.stat.Stat;
 
 public class WorldChurchBonus extends ReligionBonus implements GainFollowerListener, LooseFollowerListener {
+	private static final Logger LOGGER = LoggerFactory.getInstance(LoggerType.LOG_TAG);
 
 	public WorldChurchBonus() {
 		Server.getInstance().getEventManager().addListener(GainFollowerListener.class, this);
@@ -45,7 +49,7 @@ public class WorldChurchBonus extends ReligionBonus implements GainFollowerListe
 		if (city.getPlayerOwner().equals(player))
 			return;
 
-		System.out.println(city.getName() + " - " + oldFollowerCount + "," + newFollowerCount);
+		LOGGER.info(city.getName() + " - " + oldFollowerCount + "," + newFollowerCount);
 
 		if (oldFollowerCount <= 4 && newFollowerCount > 4) {
 			player.getReligion().getStatLine().addValue(Stat.HERITAGE_GAIN, 1);

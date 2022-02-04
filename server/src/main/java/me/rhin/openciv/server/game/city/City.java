@@ -8,6 +8,9 @@ import java.util.HashMap;
 import java.util.Map.Entry;
 import java.util.Random;
 
+import me.rhin.openciv.shared.logging.Logger;
+import me.rhin.openciv.shared.logging.LoggerFactory;
+import me.rhin.openciv.shared.logging.LoggerType;
 import org.java_websocket.WebSocket;
 
 import com.badlogic.gdx.math.MathUtils;
@@ -60,6 +63,8 @@ import me.rhin.openciv.shared.util.MathHelper;
 
 public class City implements AttackableEntity, TileObserver, NextTurnListener, ClickSpecialistListener,
 		ClickWorkedTileListener, SpreadReligionListener {
+
+	private static final Logger LOGGER = LoggerFactory.getInstance(LoggerType.LOG_TAG);
 
 	private AbstractPlayer playerOwner;
 	private String name;
@@ -555,7 +560,7 @@ public class City implements AttackableEntity, TileObserver, NextTurnListener, C
 	}
 
 	public void addSpecialistToContainer(SpecialistContainer specialistContainer) {
-		System.out.println("Adding unemployed citizen - PLAYER");
+		LOGGER.info("Adding unemployed citizen - PLAYER");
 		specialistContainer.addSpecialist();
 
 		AddSpecialistToContainerPacket packet = new AddSpecialistToContainerPacket();

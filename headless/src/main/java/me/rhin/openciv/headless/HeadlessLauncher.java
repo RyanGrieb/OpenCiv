@@ -1,7 +1,5 @@
 package me.rhin.openciv.headless;
 
-import java.util.Random;
-
 import com.badlogic.gdx.Application;
 import com.badlogic.gdx.backends.headless.HeadlessApplication;
 import com.badlogic.gdx.backends.headless.HeadlessApplicationConfiguration;
@@ -15,11 +13,12 @@ import me.rhin.openciv.shared.stat.StatLine;
  * or a server application.
  */
 public class HeadlessLauncher {
+
 	public static void main(String[] args) {
 		// createApplication();
 		
 		StatLine playerStatLine = new StatLine();
-		// System.out.println("playerStatLine:" + playerStatLine.id);
+		// LOGGER.info("playerStatLine:" + playerStatLine.id);
 
 		StatLine statLine = new StatLine();
 		
@@ -28,8 +27,6 @@ public class HeadlessLauncher {
 		statLine.clearNonAccumulative();
 		
 		float mod = statLine.getStatModifier(Stat.TRADE_GOLD_MODIFIER);
-		
-		System.out.println(mod);
 	}
 
 	private static Application createApplication() {

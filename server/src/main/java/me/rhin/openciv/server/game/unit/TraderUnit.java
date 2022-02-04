@@ -10,11 +10,16 @@ import me.rhin.openciv.server.game.AbstractPlayer;
 import me.rhin.openciv.server.game.Player;
 import me.rhin.openciv.server.game.city.City;
 import me.rhin.openciv.server.game.map.tile.Tile;
+import me.rhin.openciv.shared.logging.Logger;
+import me.rhin.openciv.shared.logging.LoggerFactory;
+import me.rhin.openciv.shared.logging.LoggerType;
 import me.rhin.openciv.shared.packet.type.CityStatUpdatePacket;
 import me.rhin.openciv.shared.packet.type.MoveUnitPacket;
 import me.rhin.openciv.shared.stat.Stat;
 
 public abstract class TraderUnit extends Unit {
+
+	private final Logger LOGGER = LoggerFactory.getInstance(LoggerType.LOG_TAG);
 
 	private City tradingCity;
 	private City cityHeadquarters;
@@ -127,7 +132,7 @@ public abstract class TraderUnit extends Unit {
 		// If it's moving to itself or there isn't a valid path
 		// Parent tile is null, why.
 		if (parentTile == null) {
-			System.out.println("Invalid path");
+			LOGGER.error("Invalid path");
 			return;
 		}
 
@@ -159,7 +164,7 @@ public abstract class TraderUnit extends Unit {
 			}
 
 			if (iterations >= maxNodes) {
-				System.out.println("pathing error");
+				LOGGER.info("pathing error");
 				break;
 			}
 

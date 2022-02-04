@@ -31,9 +31,9 @@ import me.rhin.openciv.game.unit.actions.type.MoveAction;
 import me.rhin.openciv.game.unit.actions.type.UpgradeAction;
 import me.rhin.openciv.listener.BottomShapeRenderListener;
 import me.rhin.openciv.listener.NextTurnListener;
-import me.rhin.openciv.logging.Logger;
-import me.rhin.openciv.logging.LoggerFactory;
-import me.rhin.openciv.logging.LoggerType;
+import me.rhin.openciv.shared.logging.Logger;
+import me.rhin.openciv.shared.logging.LoggerFactory;
+import me.rhin.openciv.shared.logging.LoggerType;
 import me.rhin.openciv.shared.packet.type.MoveUnitPacket;
 import me.rhin.openciv.shared.packet.type.NextTurnPacket;
 import me.rhin.openciv.ui.game.UnitHealthBubble;
@@ -373,7 +373,7 @@ public abstract class Unit extends Actor
 		else
 			shapeRenderer.setColor(Color.ORANGE);
 		for (Vector2[] vectors : new ArrayList<>(pathVectors)) {
-			// System.out.println(maxMovement + "," + pathMovement);
+			// LOGGER.info(maxMovement + "," + pathMovement);
 			if (getCurrentMovement() < pathMovement || vectors == null)
 				break;
 			shapeRenderer.line(vectors[0], vectors[1]);
@@ -651,7 +651,7 @@ public abstract class Unit extends Actor
 			targetTile = null;
 		}
 
-		// System.out.println("Target:" + targetTile);
+		// LOGGER.info("Target:" + targetTile);
 		int iterations = 0;
 
 		if (targetTile != null && parentTile != null) {

@@ -61,9 +61,9 @@ import me.rhin.openciv.shared.stat.StatLine;
 import me.rhin.openciv.ui.game.Healthbar;
 import me.rhin.openciv.ui.label.CustomLabel;
 import me.rhin.openciv.ui.window.type.CityInfoWindow;
-import me.rhin.openciv.logging.Logger;
-import me.rhin.openciv.logging.LoggerFactory;
-import me.rhin.openciv.logging.LoggerType;
+import me.rhin.openciv.shared.logging.Logger;
+import me.rhin.openciv.shared.logging.LoggerFactory;
+import me.rhin.openciv.shared.logging.LoggerType;
 
 //FIXME: We should have a interface for these networking interface.
 public class City extends Group

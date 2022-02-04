@@ -149,7 +149,7 @@ public class ContainerList extends Group implements ScrollListener {
 		yOffset = yAmount;
 
 		// Update scrollbar to relevant position
-		// System.out.println(yOffset);
+		// LOGGER.info(yOffset);
 		// 0 -> top
 		// maxHeight - getHeight() -> bottom
 

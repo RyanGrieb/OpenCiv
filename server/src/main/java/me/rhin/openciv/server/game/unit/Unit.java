@@ -23,6 +23,9 @@ import me.rhin.openciv.server.game.options.GameOptionType;
 import me.rhin.openciv.server.game.unit.UnitItem.UnitType;
 import me.rhin.openciv.server.listener.CaptureCityListener.CaptureCityEvent;
 import me.rhin.openciv.server.listener.NextTurnListener;
+import me.rhin.openciv.shared.logging.Logger;
+import me.rhin.openciv.shared.logging.LoggerFactory;
+import me.rhin.openciv.shared.logging.LoggerType;
 import me.rhin.openciv.shared.packet.type.AddObservedTilePacket;
 import me.rhin.openciv.shared.packet.type.AddUnitPacket;
 import me.rhin.openciv.shared.packet.type.DeleteUnitPacket;
@@ -38,6 +41,8 @@ import me.rhin.openciv.shared.stat.Stat;
 import me.rhin.openciv.shared.stat.StatLine;
 
 public abstract class Unit implements AttackableEntity, TileObserver, NextTurnListener {
+
+	private static final Logger LOGGER = LoggerFactory.getInstance(LoggerType.WS_LOG_TAG);
 
 	private static int unitID = 0;
 
@@ -209,7 +214,7 @@ public abstract class Unit implements AttackableEntity, TileObserver, NextTurnLi
 
 		float tileCombatModifier = entityDefending ? standingTile.getCombatModifier() : 1;
 
-		// System.out.println(entityDefending + "," + playerOwner.getCivType().name());
+		// LOGGER.info(entityDefending + "," + playerOwner.getCivType().name());
 
 		// FIXME: This doesn't account for units that have > 2 movement
 		if (entityDefending && !(otherEntity instanceof RangedUnit)) {
@@ -415,7 +420,7 @@ public abstract class Unit implements AttackableEntity, TileObserver, NextTurnLi
 		 * tile
 		 */
 		if (standingTile.equals(pathingTile)) {
-			System.out.println("ERROR: Couldn't move to target");
+			LOGGER.error("ERROR: Couldn't move to target");
 			return false;
 		}
 		setTargetTile(pathingTile);
@@ -558,7 +563,7 @@ public abstract class Unit implements AttackableEntity, TileObserver, NextTurnLi
 
 		// System.out.print(id + " [" + standingTile.getGridX() + "," +
 		// standingTile.getGridY() + "] attacking: ");
-		// System.out.println(targetEntity + " [" + targetEntity.getTile().getGridX() +
+		// LOGGER.info(targetEntity + " [" + targetEntity.getTile().getGridX() +
 		// ","
 		// + targetEntity.getTile().getGridY() + "] ");
 
@@ -862,7 +867,7 @@ public abstract class Unit implements AttackableEntity, TileObserver, NextTurnLi
 			targetTile = null;
 		}
 
-		// System.out.println("Target:" + targetTile);
+		// LOGGER.info("Target:" + targetTile);
 		int iterations = 0;
 		ArrayList<Tile> pathTiles = new ArrayList<>();
 
@@ -914,7 +919,7 @@ public abstract class Unit implements AttackableEntity, TileObserver, NextTurnLi
 
 			if (pathTile.equals(prevPathedTile))
 				continue;
-			// System.out.println("Comparing:" + prevPathedTile + " | " + pathTile);
+			// LOGGER.info("Comparing:" + prevPathedTile + " | " + pathTile);
 
 			movementCost += getMovementCost(prevPathedTile, pathTile);
 
@@ -932,7 +937,7 @@ public abstract class Unit implements AttackableEntity, TileObserver, NextTurnLi
 			index++;
 		}
 
-		// System.out.println("Walking to: " + pathingTile);
+		// LOGGER.info("Walking to: " + pathingTile);
 
 		return pathingTile;
 	}

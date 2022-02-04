@@ -4,8 +4,13 @@ import me.rhin.openciv.server.game.AbstractPlayer;
 import me.rhin.openciv.server.game.heritage.Heritage;
 import me.rhin.openciv.server.game.map.tile.TileType;
 import me.rhin.openciv.server.game.unit.Unit;
+import me.rhin.openciv.shared.logging.Logger;
+import me.rhin.openciv.shared.logging.LoggerFactory;
+import me.rhin.openciv.shared.logging.LoggerType;
 
 public abstract class Civ {
+
+	private static final Logger LOGGER = LoggerFactory.getInstance(LoggerType.LOG_TAG);
 
 	protected AbstractPlayer player;
 
@@ -26,7 +31,7 @@ public abstract class Civ {
 	}
 
 	protected void addHeritage(Heritage heritage) {
-		System.out.println("Adding: " + heritage.getName());
+		LOGGER.info("Adding: " + heritage.getName());
 		player.getHeritageTree().addHeritage(heritage);
 	}
 }

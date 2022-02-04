@@ -7,8 +7,13 @@ import me.rhin.openciv.server.game.map.tile.TileType.TileProperty;
 import me.rhin.openciv.server.game.unit.AttackableEntity;
 import me.rhin.openciv.server.game.unit.Unit;
 import me.rhin.openciv.server.game.unit.UnitItem.UnitType;
+import me.rhin.openciv.shared.logging.Logger;
+import me.rhin.openciv.shared.logging.LoggerFactory;
+import me.rhin.openciv.shared.logging.LoggerType;
 
 public class RetreatNode extends UnitNode {
+
+	private static final Logger LOGGER = LoggerFactory.getInstance(LoggerType.LOG_TAG);
 
 	public RetreatNode(Unit unit, String name) {
 		super(unit, name);
@@ -34,7 +39,7 @@ public class RetreatNode extends UnitNode {
 			return;
 		}
 
-		System.out.println("RetreatNode: Enemy adj to us");
+		LOGGER.info("RetreatNode: Enemy adj to us");
 
 		boolean waterUnit = unit.getUnitTypes().contains(UnitType.NAVAL);
 
@@ -49,7 +54,7 @@ public class RetreatNode extends UnitNode {
 				targetTile = tile;
 		}
 
-		System.out.println("Retreat: " + targetTile);
+		LOGGER.info("Retreat: " + targetTile);
 
 		// If were completely surrounded...
 		if (targetTile == null) {

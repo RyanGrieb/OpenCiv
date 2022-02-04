@@ -38,8 +38,6 @@ public class CityStateAITestScenario extends Scenario implements PlayersSpawnsSe
 		Player player = Server.getInstance().getPlayers().get(0);
 		AIPlayer aiPlayer = Server.getInstance().getAIPlayers().get(0);
 
-		System.out.println(Server.getInstance().getAIPlayers());
-
 		Tile tile = null;
 
 		while (tile == null || !Server.getInstance().getMap().isSafeSpawnTile(tile)) {

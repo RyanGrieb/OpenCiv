@@ -31,7 +31,7 @@ public class NotificationHandler {
 	}
 
 	public void removeNotification(AbstractNotification notification) {
-		//System.out.println("remove: " + notification.getName());
+		//LOGGER.info("remove: " + notification.getName());
 		
 		window.removeNotification(notification);
 		activeNotifications.remove(notification);

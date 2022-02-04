@@ -82,9 +82,9 @@ import me.rhin.openciv.ui.window.type.CurrentResearchWindow;
 import me.rhin.openciv.ui.window.type.InfoButtonsWindow;
 import me.rhin.openciv.ui.window.type.NextTurnWindow;
 import me.rhin.openciv.ui.window.type.NotificationWindow;
-import me.rhin.openciv.logging.Logger;
-import me.rhin.openciv.logging.LoggerFactory;
-import me.rhin.openciv.logging.LoggerType;
+import me.rhin.openciv.shared.logging.Logger;
+import me.rhin.openciv.shared.logging.LoggerFactory;
+import me.rhin.openciv.shared.logging.LoggerType;
 
 //FIXME: Instead of the civ game listening for everything. Just split them off into the respective classes. (EX: UnitAttackListener in the Unit class)
 public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerListRequestListener, FetchPlayerListener,

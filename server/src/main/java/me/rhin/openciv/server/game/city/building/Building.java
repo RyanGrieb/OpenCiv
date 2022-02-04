@@ -9,11 +9,16 @@ import me.rhin.openciv.server.game.city.wonders.Wonder;
 import me.rhin.openciv.server.game.production.ProductionItem;
 import me.rhin.openciv.server.listener.BuildingConstructedListener.BuildingConstructedEvent;
 import me.rhin.openciv.shared.city.SpecialistType;
+import me.rhin.openciv.shared.logging.Logger;
+import me.rhin.openciv.shared.logging.LoggerFactory;
+import me.rhin.openciv.shared.logging.LoggerType;
 import me.rhin.openciv.shared.stat.Stat;
 import me.rhin.openciv.shared.stat.StatLine;
 import me.rhin.openciv.shared.stat.StatValue;
 
 public abstract class Building implements ProductionItem {
+
+	private final Logger LOGGER = LoggerFactory.getInstance(LoggerType.LOG_TAG);
 
 	protected City city;
 	protected StatLine statLine;
@@ -40,7 +45,7 @@ public abstract class Building implements ProductionItem {
 		built = true;
 
 		if (this instanceof Wonder) {
-			System.out.println("Server - built wonder");
+			LOGGER.info("Server - built wonder");
 			Server.getInstance().getInGameState().getWonders().setBuilt(getClass());
 		}
 

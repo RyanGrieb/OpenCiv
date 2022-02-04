@@ -58,6 +58,9 @@ import me.rhin.openciv.server.game.unit.type.Swordsman;
 import me.rhin.openciv.server.game.unit.type.Warrior;
 import me.rhin.openciv.server.game.unit.type.WorkBoat;
 import me.rhin.openciv.server.listener.NextTurnListener;
+import me.rhin.openciv.shared.logging.Logger;
+import me.rhin.openciv.shared.logging.LoggerFactory;
+import me.rhin.openciv.shared.logging.LoggerType;
 import me.rhin.openciv.shared.packet.type.ApplyProductionToItemPacket;
 import me.rhin.openciv.shared.packet.type.BuyProductionItemPacket;
 import me.rhin.openciv.shared.packet.type.FinishProductionItemPacket;
@@ -75,6 +78,8 @@ import me.rhin.openciv.shared.stat.Stat;
 //FIXME: Remove modifiers if this city is captured.
 
 public class ProducibleItemManager implements NextTurnListener {
+
+	private static final Logger LOGGER = LoggerFactory.getInstance(LoggerType.LOG_TAG);
 
 	private City city;
 	private HashMap<String, ProductionItem> possibleItems;
@@ -184,7 +189,7 @@ public class ProducibleItemManager implements NextTurnListener {
 			itemQueue.clear();
 		}
 
-		System.out.println("Building: " + itemName);
+		LOGGER.info("Building: " + itemName);
 		itemQueue.add(new ProducingItem(possibleItems.get(itemName)));
 	}
 
