@@ -120,7 +120,6 @@ public class Server extends WebSocketServer {
 	private ColorHelper colorHelper;
 
 	public static void main(String[] args) {
-		// TODO: Implement proper logging.
 		LOGGER.info("Starting Server...");
 
 		// FIXME: Check for servers already running

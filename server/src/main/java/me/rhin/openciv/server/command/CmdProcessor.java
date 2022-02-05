@@ -3,9 +3,6 @@ package me.rhin.openciv.server.command;
 import java.util.Arrays;
 import java.util.HashMap;
 
-import me.rhin.openciv.shared.logging.Logger;
-import me.rhin.openciv.shared.logging.LoggerFactory;
-import me.rhin.openciv.shared.logging.LoggerType;
 import org.java_websocket.WebSocket;
 
 import com.badlogic.gdx.utils.Json;
@@ -16,10 +13,12 @@ import me.rhin.openciv.server.command.type.StartGameCommand;
 import me.rhin.openciv.server.command.type.StopGameCommand;
 import me.rhin.openciv.server.game.Player;
 import me.rhin.openciv.shared.packet.type.SendChatMessagePacket;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class CmdProcessor {
 
-	private static final Logger LOGGER = LoggerFactory.getInstance(LoggerType.LOG_TAG);
+	private static final Logger LOGGER = LoggerFactory.getLogger(CmdProcessor.class);
 
 	private HashMap<String, Command> commands;
 	public boolean enabled;

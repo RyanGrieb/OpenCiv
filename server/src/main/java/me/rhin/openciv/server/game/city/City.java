@@ -8,9 +8,6 @@ import java.util.HashMap;
 import java.util.Map.Entry;
 import java.util.Random;
 
-import me.rhin.openciv.shared.logging.Logger;
-import me.rhin.openciv.shared.logging.LoggerFactory;
-import me.rhin.openciv.shared.logging.LoggerType;
 import org.java_websocket.WebSocket;
 
 import com.badlogic.gdx.math.MathUtils;
@@ -60,11 +57,13 @@ import me.rhin.openciv.shared.packet.type.TerritoryGrowPacket;
 import me.rhin.openciv.shared.stat.Stat;
 import me.rhin.openciv.shared.stat.StatLine;
 import me.rhin.openciv.shared.util.MathHelper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class City implements AttackableEntity, TileObserver, NextTurnListener, ClickSpecialistListener,
 		ClickWorkedTileListener, SpreadReligionListener {
 
-	private static final Logger LOGGER = LoggerFactory.getInstance(LoggerType.LOG_TAG);
+	private static final Logger LOGGER = LoggerFactory.getLogger(City.class);
 
 	private AbstractPlayer playerOwner;
 	private String name;

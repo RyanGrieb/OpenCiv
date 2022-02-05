@@ -6,13 +6,13 @@ import me.rhin.openciv.server.game.AbstractPlayer;
 import me.rhin.openciv.server.game.ai.behavior.BehaviorStatus;
 import me.rhin.openciv.server.game.ai.behavior.PlayerNode;
 import me.rhin.openciv.server.game.research.Technology;
-import me.rhin.openciv.shared.logging.Logger;
-import me.rhin.openciv.shared.logging.LoggerFactory;
-import me.rhin.openciv.shared.logging.LoggerType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 
 public class ResearchNode extends PlayerNode {
 
-	private static final Logger LOGGER = LoggerFactory.getInstance(LoggerType.LOG_TAG);
+	private static final Logger LOGGER = LoggerFactory.getLogger(ResearchNode.class);
 
 	public ResearchNode(AbstractPlayer player, String name) {
 		super(player, name);

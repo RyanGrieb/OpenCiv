@@ -6,13 +6,13 @@ import me.rhin.openciv.server.game.religion.PlayerReligion;
 import me.rhin.openciv.server.game.religion.bonus.ReligionBonus;
 import me.rhin.openciv.server.listener.GainFollowerListener;
 import me.rhin.openciv.server.listener.LooseFollowerListener;
-import me.rhin.openciv.shared.logging.Logger;
-import me.rhin.openciv.shared.logging.LoggerFactory;
-import me.rhin.openciv.shared.logging.LoggerType;
 import me.rhin.openciv.shared.stat.Stat;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class WorldChurchBonus extends ReligionBonus implements GainFollowerListener, LooseFollowerListener {
-	private static final Logger LOGGER = LoggerFactory.getInstance(LoggerType.LOG_TAG);
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(WorldChurchBonus.class);
 
 	public WorldChurchBonus() {
 		Server.getInstance().getEventManager().addListener(GainFollowerListener.class, this);

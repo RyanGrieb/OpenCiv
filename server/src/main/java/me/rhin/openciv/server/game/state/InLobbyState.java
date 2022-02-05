@@ -1,17 +1,14 @@
 package me.rhin.openciv.server.game.state;
 
-import me.rhin.openciv.shared.logging.Logger;
-import me.rhin.openciv.shared.logging.LoggerFactory;
-import me.rhin.openciv.shared.logging.LoggerType;
 import org.java_websocket.WebSocket;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.Json;
 
 import me.rhin.openciv.server.Server;
 import me.rhin.openciv.server.game.GameState;
 import me.rhin.openciv.server.game.Player;
-import me.rhin.openciv.server.game.city.wonders.GameWonders;
 import me.rhin.openciv.server.game.civilization.CivType;
 import me.rhin.openciv.server.game.civilization.type.RandomCivilization;
 import me.rhin.openciv.server.game.options.GameOptionType;
@@ -39,7 +36,7 @@ public class InLobbyState extends GameState
 		implements StartGameRequestListener, ConnectionListener, DisconnectListener, PlayerListRequestListener,
 		FetchPlayerListener, GetHostListener, ChooseCivListener, SetWorldSizeListener, SetTurnLengthListener {
 
-	private static final Logger LOGGER = LoggerFactory.getInstance(LoggerType.LOG_TAG);
+	private static final Logger LOGGER = LoggerFactory.getLogger(InLobbyState.class);
 
 	public InLobbyState() {
 		Server.getInstance().getEventManager().addListener(StartGameRequestListener.class, this);

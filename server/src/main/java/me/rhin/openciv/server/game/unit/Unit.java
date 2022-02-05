@@ -23,9 +23,6 @@ import me.rhin.openciv.server.game.options.GameOptionType;
 import me.rhin.openciv.server.game.unit.UnitItem.UnitType;
 import me.rhin.openciv.server.listener.CaptureCityListener.CaptureCityEvent;
 import me.rhin.openciv.server.listener.NextTurnListener;
-import me.rhin.openciv.shared.logging.Logger;
-import me.rhin.openciv.shared.logging.LoggerFactory;
-import me.rhin.openciv.shared.logging.LoggerType;
 import me.rhin.openciv.shared.packet.type.AddObservedTilePacket;
 import me.rhin.openciv.shared.packet.type.AddUnitPacket;
 import me.rhin.openciv.shared.packet.type.DeleteUnitPacket;
@@ -39,10 +36,12 @@ import me.rhin.openciv.shared.packet.type.SetUnitOwnerPacket;
 import me.rhin.openciv.shared.packet.type.UnitAttackPacket;
 import me.rhin.openciv.shared.stat.Stat;
 import me.rhin.openciv.shared.stat.StatLine;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public abstract class Unit implements AttackableEntity, TileObserver, NextTurnListener {
 
-	private static final Logger LOGGER = LoggerFactory.getInstance(LoggerType.WS_LOG_TAG);
+	private static final Logger LOGGER = LoggerFactory.getLogger(Unit.class);
 
 	private static int unitID = 0;
 

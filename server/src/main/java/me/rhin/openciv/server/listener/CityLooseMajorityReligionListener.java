@@ -6,9 +6,8 @@ import me.rhin.openciv.server.game.city.City;
 import me.rhin.openciv.server.game.religion.PlayerReligion;
 import me.rhin.openciv.shared.listener.Event;
 import me.rhin.openciv.shared.listener.Listener;
-import me.rhin.openciv.shared.logging.Logger;
-import me.rhin.openciv.shared.logging.LoggerFactory;
-import me.rhin.openciv.shared.logging.LoggerType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public interface CityLooseMajorityReligionListener extends Listener {
 
@@ -16,7 +15,7 @@ public interface CityLooseMajorityReligionListener extends Listener {
 
 	public static class CityLooseMajorityReligionEvent extends Event<CityLooseMajorityReligionListener> {
 
-		private final Logger LOGGER = LoggerFactory.getInstance(LoggerType.LOG_TAG);
+		private final Logger LOGGER = LoggerFactory.getLogger(CityLooseMajorityReligionEvent.class);
 
 		private City city;
 		private PlayerReligion oldReligion;

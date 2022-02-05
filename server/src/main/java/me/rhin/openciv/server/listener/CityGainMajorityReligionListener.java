@@ -6,16 +6,15 @@ import me.rhin.openciv.server.game.city.City;
 import me.rhin.openciv.server.game.religion.PlayerReligion;
 import me.rhin.openciv.shared.listener.Event;
 import me.rhin.openciv.shared.listener.Listener;
-import me.rhin.openciv.shared.logging.Logger;
-import me.rhin.openciv.shared.logging.LoggerFactory;
-import me.rhin.openciv.shared.logging.LoggerType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public interface CityGainMajorityReligionListener extends Listener {
 
 	void onCityGainMajorityReligion(City city, PlayerReligion newReligion);
 
 	public static class CityGainMajorityReligionEvent extends Event<CityGainMajorityReligionListener> {
-		private final Logger LOGGER = LoggerFactory.getInstance(LoggerType.LOG_TAG);
+		private final Logger LOGGER = LoggerFactory.getLogger(CityGainMajorityReligionEvent.class);
 
 		private City city;
 		private PlayerReligion newReligion;

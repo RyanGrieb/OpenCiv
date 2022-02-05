@@ -10,16 +10,15 @@ import me.rhin.openciv.server.game.AbstractPlayer;
 import me.rhin.openciv.server.game.Player;
 import me.rhin.openciv.server.game.city.City;
 import me.rhin.openciv.server.game.map.tile.Tile;
-import me.rhin.openciv.shared.logging.Logger;
-import me.rhin.openciv.shared.logging.LoggerFactory;
-import me.rhin.openciv.shared.logging.LoggerType;
 import me.rhin.openciv.shared.packet.type.CityStatUpdatePacket;
 import me.rhin.openciv.shared.packet.type.MoveUnitPacket;
 import me.rhin.openciv.shared.stat.Stat;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public abstract class TraderUnit extends Unit {
 
-	private final Logger LOGGER = LoggerFactory.getInstance(LoggerType.LOG_TAG);
+	private final Logger LOGGER = LoggerFactory.getLogger(TraderUnit.class);
 
 	private City tradingCity;
 	private City cityHeadquarters;

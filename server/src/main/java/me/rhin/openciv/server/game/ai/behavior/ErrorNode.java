@@ -1,12 +1,12 @@
 package me.rhin.openciv.server.game.ai.behavior;
 
-import me.rhin.openciv.shared.logging.Logger;
-import me.rhin.openciv.shared.logging.LoggerFactory;
 import me.rhin.openciv.shared.logging.LoggerType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ErrorNode extends Node {
 
-	private static final Logger LOGGER = LoggerFactory.getInstance(LoggerType.LOG_TAG);
+	private static final Logger LOGGER = LoggerFactory.getLogger(ErrorNode.class);
 
 	public ErrorNode() {
 		super("ErrorNode");

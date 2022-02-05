@@ -1,8 +1,5 @@
 package me.rhin.openciv.server.game;
 
-import me.rhin.openciv.shared.logging.Logger;
-import me.rhin.openciv.shared.logging.LoggerFactory;
-import me.rhin.openciv.shared.logging.LoggerType;
 import org.java_websocket.WebSocket;
 
 import com.badlogic.gdx.utils.Json;
@@ -24,10 +21,12 @@ import me.rhin.openciv.shared.packet.type.TradeCityPacket;
 import me.rhin.openciv.shared.stat.Stat;
 import me.rhin.openciv.shared.stat.StatLine;
 import me.rhin.openciv.shared.stat.StatType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Player extends AbstractPlayer implements ChooseTechListener, ChooseHeritageListener, TradeCityListener {
 
-	private static final Logger LOGGER = LoggerFactory.getInstance(LoggerType.LOG_TAG);
+	private static final Logger LOGGER = LoggerFactory.getLogger(Player.class);
 
 	private WebSocket conn;
 	private String name;

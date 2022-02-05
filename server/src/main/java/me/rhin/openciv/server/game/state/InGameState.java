@@ -6,9 +6,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import me.rhin.openciv.shared.logging.Logger;
-import me.rhin.openciv.shared.logging.LoggerFactory;
-import me.rhin.openciv.shared.logging.LoggerType;
+import me.rhin.openciv.server.game.religion.bonus.type.founder.WorldChurchBonus;
 import org.java_websocket.WebSocket;
 
 import com.badlogic.gdx.math.Rectangle;
@@ -91,6 +89,8 @@ import me.rhin.openciv.shared.packet.type.WorkTilePacket;
 import me.rhin.openciv.shared.stat.Stat;
 import me.rhin.openciv.shared.stat.StatLine;
 import me.rhin.openciv.shared.util.MathHelper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 //FIXME: Instead of the civ game listening for everything. Just split them off into the respective classes. (EX: CombatPreviewListener in the Unit class)
 //Or just use reflection so we don't have to implement 20+ classes.
@@ -100,7 +100,7 @@ public class InGameState extends GameState implements DisconnectListener, Select
 		BuyProductionItemListener, RequestEndTurnListener, TileStatlineListener, UnitEmbarkListener,
 		UnitDisembarkListener, UpgradeUnitListener, FaithBuyProductionItemListener {
 
-	private static final Logger LOGGER = LoggerFactory.getInstance(LoggerType.LOG_TAG);
+	private static final Logger LOGGER = LoggerFactory.getLogger(InGameState.class);
 
 	private int currentTurn;
 	private int turnTimeLeft;

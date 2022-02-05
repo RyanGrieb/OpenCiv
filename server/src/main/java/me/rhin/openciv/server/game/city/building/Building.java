@@ -3,22 +3,20 @@ package me.rhin.openciv.server.game.city.building;
 import java.util.Map.Entry;
 
 import me.rhin.openciv.server.Server;
-import me.rhin.openciv.server.game.ai.AIPlayer;
 import me.rhin.openciv.server.game.city.City;
 import me.rhin.openciv.server.game.city.wonders.Wonder;
 import me.rhin.openciv.server.game.production.ProductionItem;
 import me.rhin.openciv.server.listener.BuildingConstructedListener.BuildingConstructedEvent;
 import me.rhin.openciv.shared.city.SpecialistType;
-import me.rhin.openciv.shared.logging.Logger;
-import me.rhin.openciv.shared.logging.LoggerFactory;
-import me.rhin.openciv.shared.logging.LoggerType;
 import me.rhin.openciv.shared.stat.Stat;
 import me.rhin.openciv.shared.stat.StatLine;
 import me.rhin.openciv.shared.stat.StatValue;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public abstract class Building implements ProductionItem {
 
-	private final Logger LOGGER = LoggerFactory.getInstance(LoggerType.LOG_TAG);
+	private static final Logger LOGGER = LoggerFactory.getLogger(Building.class);
 
 	protected City city;
 	protected StatLine statLine;
