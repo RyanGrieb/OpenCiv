@@ -22,8 +22,6 @@ public class ApproachImproveableTileNode extends UnitNode {
 
 		mainLoop: for (City city : unit.getPlayerOwner().getOwnedCities()) {
 			
-			System.out.println(city.getTerritory());
-			
 			for (Tile tile : city.getTerritory()) {
 
 				if (builder.getImprovementFromTile(tile) != null) {
