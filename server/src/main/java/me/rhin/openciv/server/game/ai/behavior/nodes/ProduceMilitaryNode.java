@@ -35,7 +35,7 @@ public class ProduceMilitaryNode extends CityNode {
 			// FIXME: Add variety here. Archers, mounted units, naval. Not Just based on
 			// pure combat strength.
 
-			if (unitItem == null || topUnitItem.getBaseCombatStrength() < unitItem.getBaseCombatStrength())
+			if (topUnitItem == null || topUnitItem.getBaseCombatStrength() < unitItem.getBaseCombatStrength())
 				topUnitItem = unitItem;
 		}
 

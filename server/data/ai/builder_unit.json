@@ -1,0 +1,51 @@
+{
+  "nodeType": "FallbackNode",
+  "children": [
+    {
+      "nodeType": "SequenceNode",
+      "children": [
+        {
+          "nodeType": "EnemyVisibleForUnitNode"
+        },
+        {
+          "nodeType": "RetreatNode"
+        }
+      ]
+    },
+    {
+      "nodeType": "SequenceNode",
+      "children": [
+        {
+          "nodeType": "NotBuildingNode"
+        },
+        {
+          "nodeType": "FallbackNode",
+          "children": [
+            {
+              "nodeType": "SequenceNode",
+              "children": [
+                {
+                  "nodeType": "OnImproveableTileNode"
+                },
+                {
+                  "nodeType": "ImproveTileNode"
+                }
+              ]
+            },
+            {
+              "nodeType": "SequenceNode",
+              "children": [{
+                "nodeType": "ImproveableTileAvailableNode"
+              },{
+                "nodeType": "ApproachImproveableTileNode"
+              }]
+            },
+            {
+              "nodeType": "PatrolNode"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

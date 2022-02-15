@@ -241,9 +241,9 @@ public class Tile {
 				}
 
 			if (!tile.getTileObservers().contains(tileObserver)) {
-				//tile.getTileObservers().add(tileObserver);
+				// tile.getTileObservers().add(tileObserver);
 				tile.addTileObserverToList(tileObserver);
-				// LOGGER.info(tileObserver.getName() + " - " + tile);
+				// System.out.println(tileObserver.getName() + " - " + tile);
 
 				if (!tileObserver.getObservedTiles().contains(tile))
 					tileObserver.addObeservedTile(tile);
@@ -258,9 +258,9 @@ public class Tile {
 					continue;
 
 				if (!adjTile.getTileObservers().contains(tileObserver)) {
-					//adjTile.getTileObservers().add(tileObserver);
+					// adjTile.getTileObservers().add(tileObserver);
 					adjTile.addTileObserverToList(tileObserver);
-					// LOGGER.info(tileObserver.getName() + " - " + adjTile);
+					// System.out.println(tileObserver.getName() + " - " + adjTile);
 
 					if (!tileObserver.getObservedTiles().contains(adjTile))
 						tileObserver.addObeservedTile(adjTile);
@@ -287,15 +287,17 @@ public class Tile {
 		if (playerOnTile != null && !tileObserver.getPlayerOwner().equals(playerOnTile)) {
 
 			if (!tileObserver.getPlayerOwner().getDiplomacy().getDiscoveredPlayers().contains(playerOnTile)) {
-				//tileObserver.getPlayerOwner().getDiplomacy().getDiscoveredPlayers().add(playerOnTile);
+				// tileObserver.getPlayerOwner().getDiplomacy().getDiscoveredPlayers().add(playerOnTile);
 				tileObserver.getPlayerOwner().getDiplomacy().addDiscoveredPlayer(playerOnTile);
-				//LOGGER.info(tileObserver.getPlayerOwner().getName() + " Discovered " + playerOnTile.getName());
+				// System.out.println(tileObserver.getPlayerOwner().getName() + " Discovered " +
+				// playerOnTile.getName());
 			}
 
 			if (!playerOnTile.getDiplomacy().getDiscoveredPlayers().contains(tileObserver.getPlayerOwner())) {
-				//playerOnTile.getDiplomacy().getDiscoveredPlayers().add(tileObserver.getPlayerOwner());
+				// playerOnTile.getDiplomacy().getDiscoveredPlayers().add(tileObserver.getPlayerOwner());
 				playerOnTile.getDiplomacy().addDiscoveredPlayer(tileObserver.getPlayerOwner());
-				//LOGGER.info(playerOnTile.getName() + " Discovered " + tileObserver.getPlayerOwner().getName());
+				// System.out.println(playerOnTile.getName() + " Discovered " +
+				// tileObserver.getPlayerOwner().getName());
 			}
 
 		}
@@ -729,6 +731,7 @@ public class Tile {
 		}
 	}
 
+	// FIXME: A tile can have multiple improvements, such as a road & farm.
 	public TileImprovement getTileImprovement() {
 		return tileImprovement;
 	}
@@ -777,5 +780,16 @@ public class Tile {
 
 	public void setGeographyName(String geograpgyName) {
 		this.geograpgyName = geograpgyName;
+	}
+
+	//FIXME: Return arrayList?
+	public Unit getUnitByType(UnitType unitType) {
+
+		for (Unit unit : units) {
+			if (unit.getUnitTypes().contains(unitType))
+				return unit;
+		}
+
+		return null;
 	}
 }

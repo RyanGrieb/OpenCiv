@@ -422,6 +422,12 @@ public abstract class Unit implements AttackableEntity, TileObserver, NextTurnLi
 			LOGGER.error("ERROR: Couldn't move to target");
 			return false;
 		}
+
+		if (!canStandOnTile(pathingTile)) {
+			System.out.println("ERROR: Unit can't stand on tile");
+			return false;
+		}
+
 		setTargetTile(pathingTile);
 
 		MoveUnitPacket packet = new MoveUnitPacket();
@@ -438,6 +444,22 @@ public abstract class Unit implements AttackableEntity, TileObserver, NextTurnLi
 		}
 
 		return true;
+	}
+
+	public boolean canStandOnTile(Tile tile) {
+		if (tile.getUnits().size() < 1)
+			return true;
+
+		// Unit can't start on a tile if there is already a support unit & our unit is a
+		// support unit
+		if (tile.getUnitByType(UnitType.SUPPORT) != null && getUnitTypes().contains(UnitType.SUPPORT))
+			return false;
+
+		// Unit can't stand on a tile w/ other similar units
+		if (tile.getUnitByType(UnitType.SUPPORT) == null && !getUnitTypes().contains(UnitType.SUPPORT))
+			return false;
+
+		return false;
 	}
 
 	public void reduceMovement(float movementCost) {

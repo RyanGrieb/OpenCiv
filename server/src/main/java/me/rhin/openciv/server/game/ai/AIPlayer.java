@@ -4,6 +4,9 @@ import me.rhin.openciv.server.game.AbstractPlayer;
 import me.rhin.openciv.server.game.ai.behavior.FallbackNode;
 import me.rhin.openciv.server.game.city.City;
 import me.rhin.openciv.server.game.unit.Unit;
+import me.rhin.openciv.server.game.unit.UnitItem.UnitType;
+import me.rhin.openciv.server.game.unit.type.Builder.BuilderUnit;
+import me.rhin.openciv.server.game.unit.type.Settler.SettlerUnit;
 
 public class AIPlayer extends AbstractPlayer {
 
@@ -23,9 +26,44 @@ public class AIPlayer extends AbstractPlayer {
 		mainNode.tick();
 	}
 
+	@Override
 	public void addCity(City city) {
 		super.addCity(city);
 		city.addAIBehavior(new CityAI(city, AIType.CITY));
+	}
+
+	@Override
+	public void addOwnedUnit(Unit unit) {
+		super.addOwnedUnit(unit);
+
+		for (UnitType unitType : unit.getUnitTypes()) {
+
+			switch (unitType) {
+			case MELEE:
+			case MOUNTED:
+				unit.addAIBehavior(new UnitAI(unit, AIType.LAND_MELEE_UNIT));
+				break;
+			case NAVAL:
+				break;
+			case RANGED:
+				break;
+			case SUPPORT:
+				break;
+			default:
+				break;
+			}
+		}
+
+		//FIXME: In the future were going to have to do this better.
+		
+		if (unit instanceof BuilderUnit) {
+			unit.addAIBehavior(new UnitAI(unit, AIType.BUILDER_UNIT));
+		}
+		
+		if (unit instanceof SettlerUnit) {
+			System.out.println("Called");
+			unit.addAIBehavior(new UnitAI(unit, AIType.SETTLER_UNIT));
+		}
 	}
 
 	@Override

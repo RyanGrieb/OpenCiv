@@ -12,8 +12,8 @@ public class NotProducingNode extends CityNode {
 
 	@Override
 	public void tick() {
-		
-		if (city.getProducibleItemManager().getProducingItem() == null) {
+
+		if (!city.getProducibleItemManager().isProducingItem()) {
 			setStatus(BehaviorStatus.SUCCESS);
 			return;
 		}

@@ -23,6 +23,7 @@ public enum AIType {
 	BARBARIAN_MELEE_UNIT("data/ai/barbarian_melee_unit.json", Unit.class),
 	LAND_MELEE_UNIT("data/ai/land_melee_unit.json", Unit.class),
 	SETTLER_UNIT("data/ai/settler_unit.json", Unit.class),
+	BUILDER_UNIT("data/ai/builder_unit.json", Unit.class),
 	BARBARIAN_PLAYER("data/ai/barbarian_player.json", AbstractPlayer.class),
 	PLAYER("data/ai/player.json", AbstractPlayer.class),
 	CITY("data/ai/city.json", City.class);

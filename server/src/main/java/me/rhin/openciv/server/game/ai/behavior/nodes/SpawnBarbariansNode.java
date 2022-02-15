@@ -9,6 +9,7 @@ import me.rhin.openciv.server.game.AbstractPlayer;
 import me.rhin.openciv.server.game.Player;
 import me.rhin.openciv.server.game.ai.AIType;
 import me.rhin.openciv.server.game.ai.UnitAI;
+import me.rhin.openciv.server.game.ai.behavior.BehaviorStatus;
 import me.rhin.openciv.server.game.ai.behavior.PlayerNode;
 import me.rhin.openciv.server.game.map.tile.Tile;
 import me.rhin.openciv.server.game.map.tile.TileType;
@@ -60,6 +61,7 @@ public class SpawnBarbariansNode extends PlayerNode {
 			}
 		}
 
+		setStatus(BehaviorStatus.SUCCESS);
 	}
 
 }

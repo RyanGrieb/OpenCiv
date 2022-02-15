@@ -942,15 +942,15 @@ public class InGameState extends GameState implements DisconnectListener, Select
 				Tile tile = map.getTiles()[aiPlayer.getSpawnX()][aiPlayer.getSpawnY()];
 
 				Unit settlerUnit = new SettlerUnit(aiPlayer, tile);
-				settlerUnit.addAIBehavior(new UnitAI(settlerUnit, AIType.SETTLER_UNIT));
 				tile.addUnit(settlerUnit);
+				//aiPlayer.addOwnedUnit(settlerUnit);
 
 				// Unit archerUnit = new ArcherUnit(cityStatePlayer, tile);
 				// tile.addUnit(archerUnit);
 
 				Unit warriorUnit = new WarriorUnit(aiPlayer, map.getTiles()[tile.getGridX() + 1][tile.getGridY()]);
-				warriorUnit.addAIBehavior(new UnitAI(warriorUnit, AIType.LAND_MELEE_UNIT));
 				map.getTiles()[tile.getGridX() + 1][tile.getGridY()].addUnit(warriorUnit);
+				//aiPlayer.addOwnedUnit(warriorUnit);
 			}
 		}
 
