@@ -424,7 +424,7 @@ public abstract class Unit implements AttackableEntity, TileObserver, NextTurnLi
 		}
 
 		if (!canStandOnTile(pathingTile)) {
-			System.out.println("ERROR: Unit can't stand on tile");
+			LOGGER.error("ERROR: Unit can't stand on tile");
 			return false;
 		}
 
