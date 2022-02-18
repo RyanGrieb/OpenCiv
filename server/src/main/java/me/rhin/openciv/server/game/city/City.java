@@ -57,9 +57,13 @@ import me.rhin.openciv.shared.packet.type.TerritoryGrowPacket;
 import me.rhin.openciv.shared.stat.Stat;
 import me.rhin.openciv.shared.stat.StatLine;
 import me.rhin.openciv.shared.util.MathHelper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class City implements AttackableEntity, TileObserver, NextTurnListener, ClickSpecialistListener,
 		ClickWorkedTileListener, SpreadReligionListener {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(City.class);
 
 	private AbstractPlayer playerOwner;
 	private String name;
@@ -555,7 +559,7 @@ public class City implements AttackableEntity, TileObserver, NextTurnListener, C
 	}
 
 	public void addSpecialistToContainer(SpecialistContainer specialistContainer) {
-		System.out.println("Adding unemployed citizen - PLAYER");
+		LOGGER.info("Adding unemployed citizen - PLAYER");
 		specialistContainer.addSpecialist();
 
 		AddSpecialistToContainerPacket packet = new AddSpecialistToContainerPacket();

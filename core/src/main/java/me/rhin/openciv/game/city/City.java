@@ -3,7 +3,6 @@ package me.rhin.openciv.game.city;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
@@ -62,6 +61,9 @@ import me.rhin.openciv.shared.stat.StatLine;
 import me.rhin.openciv.ui.game.Healthbar;
 import me.rhin.openciv.ui.label.CustomLabel;
 import me.rhin.openciv.ui.window.type.CityInfoWindow;
+import me.rhin.openciv.shared.logging.Logger;
+import me.rhin.openciv.shared.logging.LoggerFactory;
+import me.rhin.openciv.shared.logging.LoggerType;
 
 //FIXME: We should have a interface for these networking interface.
 public class City extends Group
@@ -70,6 +72,8 @@ public class City extends Group
 		SetCitizenTileWorkerListener, AddSpecialistToContainerListener, RemoveSpecialistFromContainerListener,
 		NextTurnListener, BuyProductionItemListener, CityGainMajorityReligionListener,
 		CityLooseMajorityReligionListener, ReligionIconChangeListener, CityPopulationUpdateListener {
+
+	private static final Logger LOGGER = LoggerFactory.getInstance(LoggerType.LOG_TAG);
 
 	private Tile originTile;
 	private AbstractPlayer playerOwner;
@@ -180,13 +184,12 @@ public class City extends Group
 			building.onBuilt();
 			buildings.add(building);
 		} catch (Exception e) {
-			Gdx.app.log(Civilization.WS_LOG_TAG, e.getMessage());
-			e.printStackTrace();
+			LOGGER.error(e.getMessage(), e);
 		}
 
 		producibleItemManager.getPossibleItems().remove(packet.getBuildingName());
 
-		Gdx.app.log(Civilization.LOG_TAG, "Adding building " + packet.getBuildingName() + " to city " + getName());
+		LOGGER.info("Adding building " + packet.getBuildingName() + " to city " + getName());
 	}
 
 	@Override
@@ -324,26 +327,22 @@ public class City extends Group
 	public void addSpecialist(int amount) {
 		if (amount == -1) {
 			unemployedWorkerAmount = 0;
-			System.out.println("Clear unemployed specialist");
+			LOGGER.debug("Clear unemployed specialist");
 		} else {
 			unemployedWorkerAmount += amount;
-			System.out.println("Add unemployed specialist");
+			LOGGER.debug("Add unemployed specialist");
 		}
-
-		System.out.println(unemployedWorkerAmount);
 	}
 
 	@Override
 	public void removeSpecialist(int amount) {
 		if (amount == -1) {
 			unemployedWorkerAmount = 0;
-			System.out.println("Clear unemployed specialist");
+			LOGGER.debug("Clear unemployed specialist");
 		} else {
 			unemployedWorkerAmount -= amount;
-			System.out.println("Remove unemployed specialist");
+			LOGGER.debug("Remove unemployed specialist");
 		}
-
-		System.out.println(unemployedWorkerAmount);
 	}
 
 	@Override

@@ -68,6 +68,9 @@ import me.rhin.openciv.listener.TileStatlineListener.TileStatlineEvent;
 import me.rhin.openciv.listener.TurnTimeLeftListener.TurnTimeLeftEvent;
 import me.rhin.openciv.listener.UnitAttackListener.UnitAttackEvent;
 import me.rhin.openciv.listener.WorkTileListener.WorkTileEvent;
+import me.rhin.openciv.shared.logging.Logger;
+import me.rhin.openciv.shared.logging.LoggerFactory;
+import me.rhin.openciv.shared.logging.LoggerType;
 import me.rhin.openciv.shared.listener.Event;
 import me.rhin.openciv.shared.listener.Listener;
 import me.rhin.openciv.shared.packet.Packet;
@@ -127,6 +130,8 @@ import me.rhin.openciv.shared.packet.type.UnitAttackPacket;
 import me.rhin.openciv.shared.packet.type.WorkTilePacket;
 
 public class NetworkManager {
+
+	private static final Logger LOGGER = LoggerFactory.getInstance(LoggerType.WS_LOG_TAG);
 
 	private WebSocket socket;
 	private HashMap<Class<? extends Packet>, Class<? extends Event<? extends Listener>>> networkEvents;
@@ -192,14 +197,14 @@ public class NetworkManager {
 
 	public void connect(String ip) {
 		String socketAddress = "ws://" + ip + ":5222";
-		Gdx.app.log(Civilization.LOG_TAG, "Attempting to connect to: " + socketAddress);
+		LOGGER.info("Attempting to connect to: " + socketAddress);
 		try {
 			this.socket = WebSockets.newSocket(socketAddress);
 			// socket.setSendGracefully(true);
 			socket.addListener(getListener());
 			socket.connect();
 		} catch (Exception e) {
-			e.printStackTrace();
+			LOGGER.error(e.getMessage(), e);
 		}
 	}
 
@@ -211,8 +216,6 @@ public class NetworkManager {
 	public void sendPacket(Packet packet) {
 		Json json = new Json();
 		socket.send(json.toJson(packet));
-		// Gdx.app.log(Civilization.WS_LOG_TAG, "Sending message: " +
-		// packet.toString());
 	}
 
 	private void fireAssociatedPacketEvents(WebSocket webSocket, String packet) {
@@ -234,10 +237,8 @@ public class NetworkManager {
 					.newInstance(new PacketParameter(webSocket, packet));
 
 			Civilization.getInstance().getEventManager().fireEvent(eventObj);
-		} catch (ReflectionException e) {
-			Gdx.app.log(Civilization.WS_LOG_TAG, "Error: Reflection-2");
-			Gdx.app.log(Civilization.WS_LOG_TAG, e.getMessage());
-			e.printStackTrace();
+		} catch (Exception e) {
+			LOGGER.error(e.getMessage(), e);
 		}
 
 	}
@@ -247,15 +248,14 @@ public class NetworkManager {
 		return new WebSocketAdapter() {
 			@Override
 			public boolean onOpen(final WebSocket webSocket) {
-				Gdx.app.log(Civilization.WS_LOG_TAG, "Connected!");
-				// webSocket.send("Hello from client!");
+				LOGGER.info("Connected!");
 				Civilization.getInstance().getEventManager().fireEvent(new ServerConnectEvent());
 				return true;
 			}
 
 			@Override
 			public boolean onClose(final WebSocket webSocket, final int closeCode, final String reason) {
-				Gdx.app.log(Civilization.WS_LOG_TAG, "Disconnected - status: " + closeCode + ", reason: " + reason);
+				LOGGER.info("Disconnected - status: " + closeCode + ", reason: " + reason);
 				return true;
 			}
 
@@ -263,15 +263,10 @@ public class NetworkManager {
 			public boolean onMessage(final WebSocket webSocket, final String packet) {
 				if (!packet.contains("MapChunkPacket") && !packet.contains("TurnTimeLeftPacket")
 						&& !packet.contains("TileStatlinePacket"))
-					Gdx.app.log(Civilization.WS_LOG_TAG, "Got message: " + packet);
+					LOGGER.debug("Got message: " + packet);
 
 				// Fire events on the LibGDX thread instead of the network thread.
-				Gdx.app.postRunnable(new Runnable() {
-					@Override
-					public void run() {
-						fireAssociatedPacketEvents(webSocket, packet);
-					}
-				});
+				Gdx.app.postRunnable(() -> fireAssociatedPacketEvents(webSocket, packet));
 
 				return true;
 			}

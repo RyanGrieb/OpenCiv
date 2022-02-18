@@ -118,12 +118,12 @@ public class ResearchTree implements NextTurnListener {
 
 	public void chooseTech(int techID) {
 		techResearching = getTechnologies().get(techID);
-		// System.out.println("Researching: " + techResearching.getName());
+		// LOGGER.info("Researching: " + techResearching.getName());
 	}
 
 	public void chooseTech(Technology technology) {
 		techResearching = technology;
-		// System.out.println("Researching: " + techResearching.getName());
+		// LOGGER.info("Researching: " + techResearching.getName());
 	}
 
 	public int getCurrentTechIDIndex() {

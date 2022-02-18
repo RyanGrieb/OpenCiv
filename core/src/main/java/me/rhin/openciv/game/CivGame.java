@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
@@ -83,6 +82,9 @@ import me.rhin.openciv.ui.window.type.CurrentResearchWindow;
 import me.rhin.openciv.ui.window.type.InfoButtonsWindow;
 import me.rhin.openciv.ui.window.type.NextTurnWindow;
 import me.rhin.openciv.ui.window.type.NotificationWindow;
+import me.rhin.openciv.shared.logging.Logger;
+import me.rhin.openciv.shared.logging.LoggerFactory;
+import me.rhin.openciv.shared.logging.LoggerType;
 
 //FIXME: Instead of the civ game listening for everything. Just split them off into the respective classes. (EX: UnitAttackListener in the Unit class)
 public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerListRequestListener, FetchPlayerListener,
@@ -91,6 +93,7 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 		SetUnitHealthListener, AvailablePantheonListener {
 
 	private static final int BASE_TURN_TIME = 9;
+	private static final Logger LOGGER = LoggerFactory.getInstance(LoggerType.LOG_TAG);
 
 	private GameMap map;
 	private Player player;
@@ -185,8 +188,7 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 			}
 
 		} catch (Exception e) {
-			Gdx.app.log(Civilization.WS_LOG_TAG, e.getMessage());
-			e.printStackTrace();
+			LOGGER.error(e.getMessage(), e);
 		}
 	}
 
@@ -228,7 +230,7 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 
 				players.get(playerName).setCivilization(civ);
 			} catch (Exception e) {
-				e.printStackTrace();
+				LOGGER.error(e.getMessage(), e);
 			}
 
 		}
@@ -258,11 +260,9 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 			for (AbstractPlayer player : this.getPlayers().values())
 				for (Unit playerUnit : player.getOwnedUnits())
 					if (playerUnit.getID() == packet.getUnitID()) {
-						System.out.println("Move error at:" + playerUnit.getStandingTile().getGridX() + ","
-								+ playerUnit.getStandingTile().getGridY());
+						LOGGER.error("Move error at: " + playerUnit.getStandingTile().getGridX() + ", " + playerUnit.getStandingTile().getGridX());
 					}
-			System.out.println("MOVE NULL:" + packet.getUnitID());
-			// return;
+			LOGGER.info("MOVE NULL:" + packet.getUnitID());
 		}
 
 		// TODO: Have force set target tile still init values like setTargetTile()
@@ -282,7 +282,7 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 
 		// FIXME: This still is null sometimes. W/ barbarian AI & cities states
 		if (unit == null) {
-			System.out.println("DELETE NULL:" + packet.getUnitID());
+			LOGGER.debug("DELETE NULL:" + packet.getUnitID());
 			// System.exit(1);
 		}
 
@@ -293,7 +293,7 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 			Civilization.getInstance().getSoundHandler().playEffect(SoundEnum.UNIT_DEATH);
 		}
 
-		System.out.println("Deleting unit from: " + unit.getPlayerOwner().getName());
+		LOGGER.info("Deleting unit from: " + unit.getPlayerOwner().getName());
 		unit.kill();
 		tile.removeUnit(unit);
 		unit.getPlayerOwner().removeUnit(unit);
@@ -337,7 +337,7 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 	@Override
 	public void onNextTurn(NextTurnPacket packet) {
 		if (turnTime != packet.getTurnTime()) {
-			Gdx.app.log(Civilization.LOG_TAG, "Updating turn time to: " + packet.getTurnTime());
+			LOGGER.debug("Updating turn time to: " + packet.getTurnTime());
 			turnTime = packet.getTurnTime();
 		}
 

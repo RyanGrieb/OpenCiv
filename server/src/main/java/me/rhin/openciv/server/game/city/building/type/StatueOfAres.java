@@ -55,14 +55,14 @@ public class StatueOfAres extends Building implements Wonder, UnitFinishedMoveLi
 
 		// If we moved out of enemy territory
 		if (!prevTileFriendly && !inEnemyTerritory) {
-			// System.out.println("Moved out of enemy territory.");
+			// LOGGER.info("Moved out of enemy territory.");
 			modifyCombatStrength(unit, -0.15F);
 			return;
 		}
 
 		// If we moved into enemy territory
 		if (prevTileFriendly && inEnemyTerritory) {
-			// System.out.println("Moved into enemy territory.");
+			// LOGGER.info("Moved into enemy territory.");
 			modifyCombatStrength(unit, 0.15F);
 			return;
 		}

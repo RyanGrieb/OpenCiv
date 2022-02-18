@@ -16,6 +16,9 @@ import me.rhin.openciv.listener.PlayerConnectListener;
 import me.rhin.openciv.listener.PlayerDisconnectListener;
 import me.rhin.openciv.listener.PlayerListRequestListener;
 import me.rhin.openciv.listener.ResizeListener;
+import me.rhin.openciv.shared.logging.Logger;
+import me.rhin.openciv.shared.logging.LoggerFactory;
+import me.rhin.openciv.shared.logging.LoggerType;
 import me.rhin.openciv.shared.listener.EventManager;
 import me.rhin.openciv.shared.packet.type.ChooseCivPacket;
 import me.rhin.openciv.shared.packet.type.GetHostPacket;
@@ -37,6 +40,8 @@ import me.rhin.openciv.ui.window.type.TitleOverlay;
 
 public class ServerLobbyScreen extends AbstractScreen implements ResizeListener, PlayerConnectListener,
 		PlayerDisconnectListener, PlayerListRequestListener, GameStartListener, GetHostListener, ChooseCivListener {
+
+	private static final Logger LOGGER = LoggerFactory.getInstance(LoggerType.LOG_TAG);
 
 	private EventManager eventManager;
 	private TitleOverlay titleOverlay;
@@ -121,7 +126,7 @@ public class ServerLobbyScreen extends AbstractScreen implements ResizeListener,
 
 	@Override
 	public void onPlayerConnect(PlayerConnectPacket packet) {
-		Gdx.app.log(Civilization.LOG_TAG, packet.getPlayerName() + " has connected to the lobby");
+		LOGGER.info(packet.getPlayerName() + " has connected to the lobby");
 
 		playerContainerList.addItem(ListContainerType.CATEGORY, "Players",
 				new ListLobbyPlayer(packet.getPlayerName(), CivType.RANDOM, playerContainerList, 200, 40));

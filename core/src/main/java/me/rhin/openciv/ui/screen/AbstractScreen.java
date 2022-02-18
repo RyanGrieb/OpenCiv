@@ -22,9 +22,13 @@ import me.rhin.openciv.listener.ScrollListener.ScrollEvent;
 import me.rhin.openciv.listener.SendChatMessageListener;
 import me.rhin.openciv.listener.SetScreenListener;
 import me.rhin.openciv.listener.TopShapeRenderListener.TopShapeRenderEvent;
+import me.rhin.openciv.shared.logging.Logger;
+import me.rhin.openciv.shared.logging.LoggerFactory;
+import me.rhin.openciv.shared.logging.LoggerType;
 import me.rhin.openciv.ui.window.WindowManager;
 
 public abstract class AbstractScreen implements Screen, InputProcessor {
+	private static final Logger LOGGER = LoggerFactory.getInstance(LoggerType.LOG_TAG);
 
 	protected WindowManager windowManager;
 	protected OrthographicCamera camera;
@@ -145,7 +149,7 @@ public abstract class AbstractScreen implements Screen, InputProcessor {
 		Gdx.gl.glDisable(GL20.GL_BLEND);
 
 		if (Civilization.DEBUG_GL) {
-			System.out.println("  Drawcalls: " + Civilization.getInstance().getProfiler().getDrawCalls() + ", Calls: "
+			LOGGER.info("  Drawcalls: " + Civilization.getInstance().getProfiler().getDrawCalls() + ", Calls: "
 					+ Civilization.getInstance().getProfiler().getCalls() + ", TextureBindings: "
 					+ Civilization.getInstance().getProfiler().getTextureBindings() + ", ShaderSwitches: "
 					+ Civilization.getInstance().getProfiler().getShaderSwitches() + ", VertexCount: "

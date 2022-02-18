@@ -1,10 +1,11 @@
 package me.rhin.openciv.game.map.tile;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.TreeSet;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
@@ -25,6 +26,9 @@ import me.rhin.openciv.game.unit.AttackableEntity;
 import me.rhin.openciv.game.unit.Unit;
 import me.rhin.openciv.game.unit.UnitItem.UnitType;
 import me.rhin.openciv.listener.BottomShapeRenderListener;
+import me.rhin.openciv.shared.logging.Logger;
+import me.rhin.openciv.shared.logging.LoggerFactory;
+import me.rhin.openciv.shared.logging.LoggerType;
 import me.rhin.openciv.ui.label.CustomLabel;
 import me.rhin.openciv.ui.screen.type.InGameScreen;
 
@@ -66,6 +70,8 @@ public class Tile extends Actor implements BottomShapeRenderListener {
 		}
 	}
 
+	private static final Logger LOGGER = LoggerFactory.getInstance(LoggerType.LOG_TAG);
+
 	private static final int SIZE = 16;
 	private static final int SPRITE_WIDTH = 28;
 	private static final int SPRITE_HEIGHT = 32;
@@ -100,8 +106,7 @@ public class Tile extends Actor implements BottomShapeRenderListener {
 		Civilization.getInstance().getEventManager().addListener(BottomShapeRenderListener.class, this);
 		this.map = map;
 		if (tileType.getTileLayer() != TileLayer.BASE) {
-			Gdx.app.log(Civilization.LOG_TAG,
-					"WARNING: TileType " + tileType.name() + " top layer applied to constructor");
+			LOGGER.info("WARNING: TileType " + tileType.name() + " top layer applied to constructor");
 		}
 		this.tileWrappers = new TreeSet<>();
 		tileWrappers.add(new TileTypeWrapper(tileType));
@@ -153,9 +158,9 @@ public class Tile extends Actor implements BottomShapeRenderListener {
 
 		for (int i = 0; i < territoryBorders.length; i++) {
 			boolean renderLine = territoryBorders[i];
-			if (!renderLine)
+			if (!renderLine) {
 				continue;
-
+			}
 			// 0 = 5 0
 			// 1 = 0 1
 			// 2 = 1 2
@@ -315,13 +320,7 @@ public class Tile extends Actor implements BottomShapeRenderListener {
 
 		if (containsTileLayer(tileType.getTileLayer())) {
 
-			Iterator<TileTypeWrapper> iterator = tileWrappers.iterator();
-			
-			while(iterator.hasNext()) {
-				TileTypeWrapper tileWrapper = iterator.next();
-				if (tileWrapper.getTileType().getTileLayer() == tileType.getTileLayer())
-					iterator.remove();
-			}
+			tileWrappers.removeIf(tileWrapper -> tileWrapper.getTileType().getTileLayer() == tileType.getTileLayer());
 		}
 		// Add the tileType to the Array in an ordered manner. note: this will never be
 		// a baseTile
@@ -335,12 +334,7 @@ public class Tile extends Actor implements BottomShapeRenderListener {
 
 		// FIXME: Check to see if this is still concurrent modification
 		// Happens when there is a ruin tile on a sheep & forest tile.
-		Iterator<TileTypeWrapper> iterator = tileWrappers.iterator();
-		while (iterator.hasNext()) {
-			TileTypeWrapper tileWrapper = iterator.next();
-			if (tileWrapper.getTileType() == tileType)
-				iterator.remove();
-		}
+		tileWrappers.removeIf(tileWrapper -> tileWrapper.getTileType() == tileType);
 	}
 
 	public void addUnit(Unit unit) {
@@ -588,26 +582,18 @@ public class Tile extends Actor implements BottomShapeRenderListener {
 
 		// Problem: This can AND WILL pick up friendly units. Fixed by having to return
 		// enemy cities first.
-		if (city != null && !city.getPlayerOwner().equals(player))
+		if (city != null && !city.getPlayerOwner().equals(player)) {
 			return city;
+		}
 
-		Unit unit = getTopEnemyUnit(player);
-		if (unit != null)
-			return unit;
-
-		return null;
+		return getTopEnemyUnit(player);
 	}
 
 	public AttackableEntity getAttackableEntity() {
-
-		if (city != null)
+		if (city != null) {
 			return city;
-
-		Unit unit = getTopUnit();
-		if (unit != null)
-			return unit;
-
-		return null;
+		}
+		return getTopUnit();
 	}
 
 	public void removeTileObserver(TileObserver tileObserver) {
@@ -615,14 +601,12 @@ public class Tile extends Actor implements BottomShapeRenderListener {
 
 		ArrayList<Tile> adjTiles = new ArrayList<>();
 		adjTiles.add(this);
-		for (Tile tile : getAdjTiles())
-			adjTiles.add(tile);
+		adjTiles.addAll(Arrays.asList(getAdjTiles()));
 
 		for (Tile tile : adjTiles) {
-
-			if (tile == null)
+			if (tile == null) {
 				continue;
-
+			}
 			tile.getTileObservers().remove(tileObserver);
 			for (Tile adjTile : tile.getAdjTiles()) {
 				if (adjTile == null)
@@ -649,14 +633,11 @@ public class Tile extends Actor implements BottomShapeRenderListener {
 
 		ArrayList<Tile> adjTiles = new ArrayList<>();
 		adjTiles.add(this);
-		for (Tile tile : getAdjTiles())
-			adjTiles.add(tile);
-
+		Collections.addAll(adjTiles, getAdjTiles());
 		for (Tile tile : adjTiles) {
-
-			if (tile == null)
+			if (tile == null) {
 				continue;
-
+			}
 			boolean denyVisibility = false;
 
 			for (TileTypeWrapper wrapper : tile.getTileTypeWrappers())

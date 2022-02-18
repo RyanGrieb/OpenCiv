@@ -28,52 +28,47 @@ public class FloodScenario extends Scenario implements NextTurnListener {
 
 	@Override
 	public void onNextTurn() {
-
-		if (Server.getInstance().getInGameState().getCurrentTurn() < 1)
+		if (Server.getInstance().getInGameState().getCurrentTurn() < 1) {
 			return;
+		}
+		HashMap<Tile, Tile> floodTiles = new HashMap<>();
+		Json json = new Json();
 
-		if (true) {
-			System.out.println("called");
-			HashMap<Tile, Tile> floodTiles = new HashMap<>();
-			Json json = new Json();
+		for (int x = 0; x < Server.getInstance().getMap().getWidth(); x++) {
+			for (int y = 0; y < Server.getInstance().getMap().getHeight(); y++) {
 
-			for (int x = 0; x < Server.getInstance().getMap().getWidth(); x++) {
-				for (int y = 0; y < Server.getInstance().getMap().getHeight(); y++) {
+				Tile tile = Server.getInstance().getMap().getTiles()[x][y];
 
-					Tile tile = Server.getInstance().getMap().getTiles()[x][y];
+				if (!tile.containsTileProperty(TileProperty.WATER)) {
+					for (Tile adjTile : tile.getAdjTiles()) {
+						if (adjTile == null)
+							continue;
 
-					if (!tile.containsTileProperty(TileProperty.WATER)) {
-						for (Tile adjTile : tile.getAdjTiles()) {
-							if (adjTile == null)
-								continue;
+						if (adjTile.containsTileProperty(TileProperty.WATER)
+								&& adjTile.getGeograpgyName().toLowerCase().contains("ocean")) {
 
-							if (adjTile.containsTileProperty(TileProperty.WATER)
-									&& adjTile.getGeograpgyName().toLowerCase().contains("ocean")) {
-
-								floodTiles.put(tile, adjTile);
-							}
+							floodTiles.put(tile, adjTile);
 						}
 					}
-
 				}
+
 			}
+		}
 
-			for (Tile tile : floodTiles.keySet()) {
-				// for (TileTypeWrapper type : tile.getTileTypeWrappers()) {
-				// tile.removeTileType(type.getTileType());
-				// }
+		for (Tile tile : floodTiles.keySet()) {
+			// for (TileTypeWrapper type : tile.getTileTypeWrappers()) {
+			// tile.removeTileType(type.getTileType());
+			// }
 
-				tile.setTileType(TileType.SHALLOW_OCEAN);
-				tile.setGeographyName(floodTiles.get(tile).getGeograpgyName());
-				SetTileTypePacket packet = new SetTileTypePacket();
-				packet.setTile(TileType.SHALLOW_OCEAN.name(), tile.getGridX(), tile.getGridY());
-				packet.setClearTileTypes(true);
+			tile.setTileType(TileType.SHALLOW_OCEAN);
+			tile.setGeographyName(floodTiles.get(tile).getGeograpgyName());
+			SetTileTypePacket packet = new SetTileTypePacket();
+			packet.setTile(TileType.SHALLOW_OCEAN.name(), tile.getGridX(), tile.getGridY());
+			packet.setClearTileTypes(true);
 
-				for (Player player : Server.getInstance().getPlayers()) {
-					player.sendPacket(json.toJson(packet));
-				}
+			for (Player player : Server.getInstance().getPlayers()) {
+				player.sendPacket(json.toJson(packet));
 			}
-
 		}
 	}
 }

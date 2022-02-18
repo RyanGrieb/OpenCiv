@@ -6,6 +6,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import me.rhin.openciv.server.game.religion.bonus.type.founder.WorldChurchBonus;
 import org.java_websocket.WebSocket;
 
 import com.badlogic.gdx.math.Rectangle;
@@ -88,6 +89,8 @@ import me.rhin.openciv.shared.packet.type.WorkTilePacket;
 import me.rhin.openciv.shared.stat.Stat;
 import me.rhin.openciv.shared.stat.StatLine;
 import me.rhin.openciv.shared.util.MathHelper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 //FIXME: Instead of the civ game listening for everything. Just split them off into the respective classes. (EX: CombatPreviewListener in the Unit class)
 //Or just use reflection so we don't have to implement 20+ classes.
@@ -96,6 +99,8 @@ public class InGameState extends GameState implements DisconnectListener, Select
 		PlayerListRequestListener, FetchPlayerListener, CombatPreviewListener, WorkTileListener, RangedAttackListener,
 		BuyProductionItemListener, RequestEndTurnListener, TileStatlineListener, UnitEmbarkListener,
 		UnitDisembarkListener, UpgradeUnitListener, FaithBuyProductionItemListener {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(InGameState.class);
 
 	private int currentTurn;
 	private int turnTimeLeft;
@@ -233,7 +238,7 @@ public class InGameState extends GameState implements DisconnectListener, Select
 		Unit unit = prevTile.getUnitFromID(packet.getUnitID());
 
 		if (unit == null) {
-			System.out.println("Error: Unit is NULL");
+			LOGGER.info("Error: Unit is NULL");
 			return;
 		}
 
@@ -264,7 +269,7 @@ public class InGameState extends GameState implements DisconnectListener, Select
 					&& targetEntity.getTile().getUnits().size() < 2) {
 				stopOutside = false;
 
-				// System.out.println("1");
+				// LOGGER.info("1");
 			}
 
 			// If the targetEntity dies & were at war w/ it. Walk on it. (E.g. Warrior
@@ -272,7 +277,7 @@ public class InGameState extends GameState implements DisconnectListener, Select
 			if (!targetEntity.surviveAttack(unit) && targetEntity.getPlayerOwner().getDiplomacy().atWar(playerOwner)) {
 				stopOutside = false;
 
-				// System.out.println("2");
+				// LOGGER.info("2");
 			}
 
 			// If the targetEntity is capturable, & if it's ours OR an enemies & moving unit
@@ -282,7 +287,7 @@ public class InGameState extends GameState implements DisconnectListener, Select
 							|| targetEntity.getPlayerOwner().getDiplomacy().atWar(playerOwner))
 					&& !unit.isUnitCapturable(playerOwner)) {
 
-				// System.out.println("3");
+				// LOGGER.info("3");
 				stopOutside = false;
 			}
 
@@ -303,7 +308,7 @@ public class InGameState extends GameState implements DisconnectListener, Select
 						|| nonCaptureableUnits < 1 && !unit.isUnitCapturable(playerOwner)) {
 					stopOutside = false;
 
-					// System.out.println("4");
+					// LOGGER.info("4");
 				}
 			}
 		}
@@ -496,7 +501,7 @@ public class InGameState extends GameState implements DisconnectListener, Select
 
 	@Override
 	public void onPlayerListRequested(WebSocket conn, PlayerListRequestPacket packet) {
-		System.out.println("[SERVER] Player list requested");
+		LOGGER.info("[SERVER] Player list requested");
 		for (Player player : players) {
 			packet.addPlayer(player.getName(), player.getCiv().getName().toUpperCase(), false);
 		}
@@ -511,7 +516,7 @@ public class InGameState extends GameState implements DisconnectListener, Select
 
 	@Override
 	public void onPlayerFetch(WebSocket conn, FetchPlayerPacket packet) {
-		System.out.println("[SERVER] Fetching player...");
+		LOGGER.info("[SERVER] Fetching player...");
 		Player player = getPlayerByConn(conn);
 		packet.setPlayerName(player.getName());
 		Json json = new Json();
@@ -789,7 +794,7 @@ public class InGameState extends GameState implements DisconnectListener, Select
 	}
 
 	private void loadGame() {
-		System.out.println("[SERVER] Starting game...");
+		LOGGER.info("[SERVER] Starting game...");
 
 		// Add AI
 		Random rnd = new Random();
@@ -875,7 +880,7 @@ public class InGameState extends GameState implements DisconnectListener, Select
 
 			// FIXME: We might not be able to spawn the player within the bounds.
 			if (!player.hasSpawnPos()) {
-				System.out.println("No suitable spawn pos for: " + player.getName());
+				LOGGER.info("No suitable spawn pos for: " + player.getName());
 				while (true) {
 					// Just pick a random tile on the map
 

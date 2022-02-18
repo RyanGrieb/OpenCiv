@@ -13,8 +13,13 @@ import me.rhin.openciv.server.command.type.StartGameCommand;
 import me.rhin.openciv.server.command.type.StopGameCommand;
 import me.rhin.openciv.server.game.Player;
 import me.rhin.openciv.shared.packet.type.SendChatMessagePacket;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class CmdProcessor {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(CmdProcessor.class);
+
 	private HashMap<String, Command> commands;
 	public boolean enabled;
 
@@ -47,7 +52,7 @@ public class CmdProcessor {
 				Json json = new Json();
 				player.sendPacket(json.toJson(packet));
 			} else
-				System.out.println("[Server] Error: Command not found");
+				LOGGER.info("[Server] Error: Command not found");
 
 			return;
 		}

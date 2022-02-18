@@ -6,8 +6,13 @@ import com.badlogic.gdx.utils.Json;
 
 import me.rhin.openciv.server.Server;
 import me.rhin.openciv.shared.packet.type.SendChatMessagePacket;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public abstract class Command {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(Command.class);
+
 	private String name;
 
 	public Command(String name) {
@@ -18,7 +23,7 @@ public abstract class Command {
 
 	protected void sendServerMessage(WebSocket conn, SendChatMessagePacket packet, String message) {
 		if (conn == null) {
-			System.out.println(message);
+			LOGGER.info(message);
 			return;
 		}
 

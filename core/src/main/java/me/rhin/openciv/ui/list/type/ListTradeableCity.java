@@ -10,6 +10,9 @@ import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.city.City;
 import me.rhin.openciv.game.unit.TradeUnit;
+import me.rhin.openciv.shared.logging.Logger;
+import me.rhin.openciv.shared.logging.LoggerFactory;
+import me.rhin.openciv.shared.logging.LoggerType;
 import me.rhin.openciv.shared.packet.type.TradeCityPacket;
 import me.rhin.openciv.ui.label.CustomLabel;
 import me.rhin.openciv.ui.list.ContainerList;
@@ -17,6 +20,7 @@ import me.rhin.openciv.ui.list.ListObject;
 import me.rhin.openciv.ui.window.type.TradeWindow;
 
 public class ListTradeableCity extends ListObject {
+	private static final Logger LOGGER = LoggerFactory.getInstance(LoggerType.LOG_TAG);
 
 	private City city;
 	// FIXME: Use colored backgrounds?
@@ -60,7 +64,7 @@ public class ListTradeableCity extends ListObject {
 
 	@Override
 	protected void onClicked(InputEvent event) {
-		System.out.println("Trade w/ city: " + city.getName());
+		LOGGER.info("Trade w/ city: " + city.getName());
 
 		TradeCityPacket packet = new TradeCityPacket();
 		packet.setCity(city.getName(), tradeUnit.getID(), tradeUnit.getStandingTile().getGridX(),

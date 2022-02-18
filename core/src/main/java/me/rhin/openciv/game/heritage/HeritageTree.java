@@ -53,7 +53,7 @@ public class HeritageTree implements CompleteHeritageListener, PickHeritageListe
 
 	public <T extends Heritage> boolean hasStudied(Class<T> heritageClass) {
 		if (values.get(heritageClass) == null) {
-			// System.out.println("Heritage not found: " + heritageClass);
+			// LOGGER.info("Heritage not found: " + heritageClass);
 			return false;
 		}
 		return values.get(heritageClass).isStudied();

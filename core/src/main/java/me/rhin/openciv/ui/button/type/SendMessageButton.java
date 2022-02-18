@@ -4,10 +4,14 @@ import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 
 import me.rhin.openciv.asset.TextureEnum;
+import me.rhin.openciv.shared.logging.Logger;
+import me.rhin.openciv.shared.logging.LoggerFactory;
+import me.rhin.openciv.shared.logging.LoggerType;
 import me.rhin.openciv.ui.button.Button;
 import me.rhin.openciv.ui.window.type.ChatboxWindow;
 
 public class SendMessageButton extends Button {
+	private static final Logger LOGGER = LoggerFactory.getInstance(LoggerType.LOG_TAG);
 
 	private Sprite iconSprite;
 
@@ -38,6 +42,6 @@ public class SendMessageButton extends Button {
 	public void onClick() {
 		ChatboxWindow window = (ChatboxWindow) getParent();
 		window.sendMessage();
-		System.out.println("yo");
+		LOGGER.info("yo");
 	}
 }
