@@ -52,7 +52,7 @@ public class ServerSelectScreen extends AbstractScreen implements ServerConnectL
 		stage.addActor(serverIPLabel);
 
 		this.ipTextField = new TextField("",
-				Civilization.getInstance().getAssetHandler().get("skin/skin.json", Skin.class));
+				Civilization.getInstance().getAssetHandler().get("skin/uiskin.json", Skin.class));
 		ipTextField.setSize(200, 24);
 		ipTextField.setPosition(viewport.getWorldWidth() / 2 - 200 / 2, viewport.getWorldHeight() - 100);
 		stage.setKeyboardFocus(ipTextField);

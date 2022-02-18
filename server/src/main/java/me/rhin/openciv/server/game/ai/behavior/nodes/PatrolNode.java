@@ -24,12 +24,12 @@ public class PatrolNode extends UnitNode {
 	@Override
 	public void tick() {
 
-		if(unit.getPlayerOwner().getOwnedCities().size() < 1) {
+		if (unit.getPlayerOwner().getOwnedCities().size() < 1) {
 			setStatus(BehaviorStatus.FAILURE);
 			return;
 		}
-		
-		Random rnd = new Random();
+
+		Random rnd = new Random(); 
 		if (patrolCity == null || turnsPatrolled > 9) {
 			patrolCity = unit.getPlayerOwner().getOwnedCities()
 					.get(rnd.nextInt(unit.getPlayerOwner().getOwnedCities().size()));
@@ -38,20 +38,19 @@ public class PatrolNode extends UnitNode {
 		}
 
 		boolean waterUnit = unit.getUnitTypes().contains(UnitType.NAVAL);
-
+    
 		while (targetTile == null || targetTile.equals(unit.getStandingTile())
 				|| (targetTile.containsTileProperty(TileProperty.WATER) && !waterUnit)) {
-			targetTile = patrolCity.getObservedTiles().get(rnd.nextInt(patrolCity.getObservedTiles().size()))
-					.getAdjTiles()[rnd.nextInt(6)];
+			targetTile = patrolCity.getObservedTiles().get(rnd.nextInt(patrolCity.getObservedTiles().size()));
 		}
 
 		boolean moved = unit.moveToTile(targetTile);
 		if (!moved) {
 			targetTile = null;
-			tick();
+			setStatus(BehaviorStatus.FAILURE);
+			return;
 		}
-
-		// FIXME: Set it to success?
+		
 		setStatus(BehaviorStatus.SUCCESS);
 	}
 

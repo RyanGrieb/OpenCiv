@@ -100,7 +100,7 @@ import me.rhin.openciv.shared.util.ColorHelper;
 
 public class Server extends WebSocketServer {
 
-	// private static final String HOST = "207.246.89.13";
+	//private static final String HOST = "207.246.89.13";
 	private static final String HOST = "localhost";
 	private static final int PORT = 5222;
 	private static Server server;

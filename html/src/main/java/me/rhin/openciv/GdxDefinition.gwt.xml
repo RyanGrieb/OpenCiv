@@ -19,12 +19,6 @@
 	<collapse-property name="user.agent" values="*" />
 	<!-- Remove the "user.agent" lines above if you encounter issues with Safari or other Gecko browsers. -->
 	
-	<extend-configuration-property name="gdx.reflect.include" value="me.rhin.openciv.game.unit.type" />
-	<extend-configuration-property name="gdx.reflect.include" value="me.rhin.openciv.game.city.building.type" />
-	<extend-configuration-property name="gdx.reflect.include" value="me.rhin.openciv.listener" />
-	<extend-configuration-property name="gdx.reflect.include" value="me.rhin.openciv.shared" />
-	<extend-configuration-property name="gdx.reflect.include" value="me.rhin.openciv.networking.PacketParameter" />
-	<extend-configuration-property name="gdx.reflect.include" value="me.rhin.openciv.game.unit.UnitParameter" />
-	<extend-configuration-property name="gdx.reflect.include" value="me.rhin.openciv.game.city.City" />
-	<extend-configuration-property name="gdx.reflect.include" value="me.rhin.openciv.game.heritage.type" />
+	<!-- FIXME: This is really bad in practice. But works for now -->
+	<extend-configuration-property name="gdx.reflect.include" value="me.rhin.openciv" />
 </module>
