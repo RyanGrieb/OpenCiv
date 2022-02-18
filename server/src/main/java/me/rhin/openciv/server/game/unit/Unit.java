@@ -459,7 +459,7 @@ public abstract class Unit implements AttackableEntity, TileObserver, NextTurnLi
 		if (tile.getUnitByType(UnitType.SUPPORT) == null && !getUnitTypes().contains(UnitType.SUPPORT))
 			return false;
 
-		return false;
+		return true;
 	}
 
 	public void reduceMovement(float movementCost) {

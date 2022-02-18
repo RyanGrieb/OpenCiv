@@ -47,7 +47,6 @@ public class CustomLabel extends Label {
 	public @Null Actor hit(float x, float y, boolean touchable) {
 		return null;
 	}
-	
 
 	private void updateSize() {
 		GlyphLayout layout = new GlyphLayout(Civilization.getInstance().getFontHandler().getDefaultStyle().font,

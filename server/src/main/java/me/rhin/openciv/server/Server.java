@@ -102,7 +102,7 @@ import org.slf4j.LoggerFactory;
 
 public class Server extends WebSocketServer {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(Server.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(Server.class);
 
 	// private static final String HOST = "207.246.89.13";
 	private static final String HOST = "localhost";

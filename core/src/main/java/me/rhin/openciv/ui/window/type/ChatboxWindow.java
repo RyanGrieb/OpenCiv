@@ -37,7 +37,7 @@ public class ChatboxWindow extends AbstractWindow implements SendChatMessageList
 		addActor(closeWindowButton);
 
 		this.chatTextField = new TextField("",
-				Civilization.getInstance().getAssetHandler().get("skin/skin.json", Skin.class));
+				Civilization.getInstance().getAssetHandler().get("skin/uiskin.json", Skin.class));
 		chatTextField.setBounds(2, 2, getWidth() - 35, 25);
 		stage.setKeyboardFocus(chatTextField);
 		addActor(chatTextField);

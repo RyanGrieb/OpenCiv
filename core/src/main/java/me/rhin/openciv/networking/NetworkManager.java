@@ -7,6 +7,7 @@ import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.JsonReader;
 import com.badlogic.gdx.utils.JsonValue;
 import com.badlogic.gdx.utils.reflect.ClassReflection;
+import com.badlogic.gdx.utils.reflect.ReflectionException;
 import com.github.czyzby.websocket.WebSocket;
 import com.github.czyzby.websocket.WebSocketAdapter;
 import com.github.czyzby.websocket.WebSockets;
@@ -199,7 +200,7 @@ public class NetworkManager {
 		LOGGER.info("Attempting to connect to: " + socketAddress);
 		try {
 			this.socket = WebSockets.newSocket(socketAddress);
-			//socket.setSendGracefully(true);
+			// socket.setSendGracefully(true);
 			socket.addListener(getListener());
 			socket.connect();
 		} catch (Exception e) {
@@ -217,15 +218,20 @@ public class NetworkManager {
 		socket.send(json.toJson(packet));
 	}
 
-	@SuppressWarnings("unchecked")
 	private void fireAssociatedPacketEvents(WebSocket webSocket, String packet) {
 		JsonValue jsonValue = new JsonReader().parse(packet);
 		String packetName = jsonValue.getString("packetName");
 
-		try {
-			Class<? extends Event<? extends Listener>> eventClass = networkEvents
-					.get(ClassReflection.forName(packetName));
+		Class<? extends Event<? extends Listener>> eventClass = null;
 
+		try {
+			eventClass = networkEvents.get(ClassReflection.forName(packetName));
+		} catch (ReflectionException e) {
+			Gdx.app.log(Civilization.WS_LOG_TAG, "Error: Reflection-1");
+			e.printStackTrace();
+		}
+
+		try {
 			Event<? extends Listener> eventObj = (Event<? extends Listener>) ClassReflection
 					.getConstructor(eventClass, PacketParameter.class)
 					.newInstance(new PacketParameter(webSocket, packet));

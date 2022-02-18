@@ -23,8 +23,9 @@ public class CityNeedsBuilderNode extends CityNode {
 				ownedBuilders++;
 		}
 
-		//FIXME: Improve this.
-		
+		System.out.println(ownedBuilders);
+		// FIXME: Improve this.
+
 		if (city.getProducibleItemManager().turnsSinceProduced(Builder.class) > 10
 				&& ownedBuilders < city.getPlayerOwner().getOwnedCities().size()) {
 
