@@ -2,10 +2,9 @@ package me.rhin.openciv.server.game.diplomacy;
 
 import java.util.ArrayList;
 
-import me.rhin.openciv.shared.logging.Logger;
-import me.rhin.openciv.shared.logging.LoggerFactory;
-import me.rhin.openciv.shared.logging.LoggerType;
 import org.java_websocket.WebSocket;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.badlogic.gdx.utils.Json;
 
@@ -22,7 +21,7 @@ import me.rhin.openciv.shared.packet.type.DiscoveredPlayerPacket;
 
 public class Diplomacy implements DeclareWarListener {
 
-	private final Logger LOGGER = LoggerFactory.getInstance(LoggerType.LOG_TAG);
+	private final Logger LOGGER = LoggerFactory.getLogger(Diplomacy.class);
 
 	private AbstractPlayer player;
 
@@ -115,10 +114,10 @@ public class Diplomacy implements DeclareWarListener {
 		return discoveredPlayers;
 	}
 
-	public ArrayList<AbstractPlayer> getEnemies(){
+	public ArrayList<AbstractPlayer> getEnemies() {
 		return enemies;
 	}
-	
+
 	public void addDiscoveredPlayer(AbstractPlayer discoveredPlayer) {
 		discoveredPlayers.add(discoveredPlayer);
 
@@ -138,7 +137,7 @@ public class Diplomacy implements DeclareWarListener {
 
 	public void sendQueuedPackets() {
 		Json json = new Json();
-		
+
 		for (Packet packet : queuedPackets) {
 			for (Player player : Server.getInstance().getPlayers()) {
 				player.sendPacket(json.toJson(packet));

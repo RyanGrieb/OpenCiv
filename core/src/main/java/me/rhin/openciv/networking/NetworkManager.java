@@ -227,7 +227,7 @@ public class NetworkManager {
 		try {
 			eventClass = networkEvents.get(ClassReflection.forName(packetName));
 		} catch (ReflectionException e) {
-			Gdx.app.log(Civilization.WS_LOG_TAG, "Error: Reflection-1");
+			LOGGER.error("Error: Reflection-1");
 			e.printStackTrace();
 		}
 

@@ -1,16 +1,16 @@
 package me.rhin.openciv.server.game.civilization;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import me.rhin.openciv.server.game.AbstractPlayer;
 import me.rhin.openciv.server.game.heritage.Heritage;
 import me.rhin.openciv.server.game.map.tile.TileType;
 import me.rhin.openciv.server.game.unit.Unit;
-import me.rhin.openciv.shared.logging.Logger;
-import me.rhin.openciv.shared.logging.LoggerFactory;
-import me.rhin.openciv.shared.logging.LoggerType;
 
 public abstract class Civ {
 
-	private static final Logger LOGGER = LoggerFactory.getInstance(LoggerType.LOG_TAG);
+	private static final Logger LOGGER = LoggerFactory.getLogger(Civ.class);
 
 	protected AbstractPlayer player;
 

@@ -23,7 +23,7 @@ public class CityNeedsBuilderNode extends CityNode {
 				ownedBuilders++;
 		}
 
-		System.out.println(ownedBuilders);
+		//System.out.println(ownedBuilders);
 		// FIXME: Improve this.
 
 		if (city.getProducibleItemManager().turnsSinceProduced(Builder.class) > 10

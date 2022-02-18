@@ -35,7 +35,6 @@ public class UnitAI implements NextTurnListener {
 
 		// FIXME: This shouldn't be needed. But sometimes listeners don't clear for dead
 		// units?
-		System.out.println(unit.getID() + " - " + unit.getHealth() + "," + unit.isAlive());
 		if (!unit.isAlive())
 			return;
 
