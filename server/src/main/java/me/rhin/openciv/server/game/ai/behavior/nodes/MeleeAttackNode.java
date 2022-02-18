@@ -25,8 +25,14 @@ public class MeleeAttackNode extends UnitNode {
 
 				unit.attackEntity(entity);
 
-				if (!survivedAttack)
+				// FIXME: Redundant code. Figure out which one works. !survivedAttack doesn't
+				// seem too
+				if (!survivedAttack || entity.getHealth() <= 0) {
+					unit.setMovement(unit.getMaxMovement());
+					System.out.println("Attempting to move to tile");
 					unit.moveToTile(entity.getTile());
+					unit.setMovement(0);
+				}
 
 				setStatus(BehaviorStatus.SUCCESS);
 				return;

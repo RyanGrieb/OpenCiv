@@ -45,9 +45,6 @@
                   "nodeType": "MeleeAttackNode"
                 }
               ]
-            },
-            {
-              "nodeType": "DoNothingNode"
             }
           ]
         }

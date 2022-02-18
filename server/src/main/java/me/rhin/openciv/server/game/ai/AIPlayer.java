@@ -61,7 +61,6 @@ public class AIPlayer extends AbstractPlayer {
 		}
 		
 		if (unit instanceof SettlerUnit) {
-			System.out.println("Called");
 			unit.addAIBehavior(new UnitAI(unit, AIType.SETTLER_UNIT));
 		}
 	}

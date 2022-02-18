@@ -4,17 +4,18 @@ import java.util.Arrays;
 import java.util.HashMap;
 
 import org.java_websocket.WebSocket;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.badlogic.gdx.utils.Json;
 
 import me.rhin.openciv.server.Server;
+import me.rhin.openciv.server.command.type.BehaviorTreeCommand;
 import me.rhin.openciv.server.command.type.ScenarioCommand;
 import me.rhin.openciv.server.command.type.StartGameCommand;
 import me.rhin.openciv.server.command.type.StopGameCommand;
 import me.rhin.openciv.server.game.Player;
 import me.rhin.openciv.shared.packet.type.SendChatMessagePacket;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class CmdProcessor {
 
@@ -33,6 +34,7 @@ public class CmdProcessor {
 		commands.put("start", new StartGameCommand());
 		commands.put("stop", new StopGameCommand());
 		commands.put("scenario", new ScenarioCommand());
+		commands.put("tree", new BehaviorTreeCommand());
 	}
 
 	public void proccessCommand(String input) {

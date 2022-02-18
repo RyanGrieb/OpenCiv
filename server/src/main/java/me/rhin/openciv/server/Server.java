@@ -9,6 +9,8 @@ import java.util.Scanner;
 import org.java_websocket.WebSocket;
 import org.java_websocket.handshake.ClientHandshake;
 import org.java_websocket.server.WebSocketServer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.badlogic.gdx.utils.JsonReader;
 import com.badlogic.gdx.utils.JsonValue;
@@ -97,12 +99,10 @@ import me.rhin.openciv.shared.packet.type.UnitEmbarkPacket;
 import me.rhin.openciv.shared.packet.type.UpgradeUnitPacket;
 import me.rhin.openciv.shared.packet.type.WorkTilePacket;
 import me.rhin.openciv.shared.util.ColorHelper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class Server extends WebSocketServer {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(Server.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(Server.class);
 
 	// private static final String HOST = "207.246.89.13";
 	private static final String HOST = "localhost";
@@ -327,5 +327,13 @@ public class Server extends WebSocketServer {
 
 	public GameOptions getGameOptions() {
 		return gameOptions;
+	}
+
+	public AbstractPlayer getPlayerByName(String name) {
+		for (AbstractPlayer player : getAbstractPlayers())
+			if (player.getName().equals(name))
+				return player;
+
+		return null;
 	}
 }

@@ -943,14 +943,14 @@ public class InGameState extends GameState implements DisconnectListener, Select
 
 				Unit settlerUnit = new SettlerUnit(aiPlayer, tile);
 				tile.addUnit(settlerUnit);
-				//aiPlayer.addOwnedUnit(settlerUnit);
+				// aiPlayer.addOwnedUnit(settlerUnit);
 
 				// Unit archerUnit = new ArcherUnit(cityStatePlayer, tile);
 				// tile.addUnit(archerUnit);
 
 				Unit warriorUnit = new WarriorUnit(aiPlayer, map.getTiles()[tile.getGridX() + 1][tile.getGridY()]);
 				map.getTiles()[tile.getGridX() + 1][tile.getGridY()].addUnit(warriorUnit);
-				//aiPlayer.addOwnedUnit(warriorUnit);
+				// aiPlayer.addOwnedUnit(warriorUnit);
 			}
 		}
 
@@ -1002,5 +1002,15 @@ public class InGameState extends GameState implements DisconnectListener, Select
 				loopLimit--;
 			}
 		}
+	}
+
+	public Unit getUnitByID(int unitID) {
+		
+		for (AbstractPlayer player : Server.getInstance().getAbstractPlayers())
+			for (Unit unit : player.getOwnedUnits()) {
+				if (unit.getID() == unitID)
+					return unit;
+			}
+		return null;
 	}
 }

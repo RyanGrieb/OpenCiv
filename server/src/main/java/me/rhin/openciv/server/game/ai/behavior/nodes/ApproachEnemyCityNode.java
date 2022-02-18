@@ -45,6 +45,7 @@ public class ApproachEnemyCityNode extends UnitNode {
 
 		Tile targetTile = nearestEnemyCity.getTile();
 
+		
 		boolean moved = unit.moveToTile(targetTile);
 
 		if (moved)

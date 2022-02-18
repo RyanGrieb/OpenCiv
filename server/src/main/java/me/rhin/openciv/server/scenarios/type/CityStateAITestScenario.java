@@ -19,7 +19,7 @@ public class CityStateAITestScenario extends Scenario implements PlayersSpawnsSe
 	public void toggle() {
 
 		Server.getInstance().getGameOptions().setOptionValue(GameOptionType.MAP_LENGTH, 0);
-		Server.getInstance().getGameOptions().setOptionValue(GameOptionType.BARBARIAN_AMOUNT, 0);
+		Server.getInstance().getGameOptions().setOptionValue(GameOptionType.BARBARIAN_AMOUNT, 4);
 		Server.getInstance().getGameOptions().setOptionValue(GameOptionType.CITY_STATE_AMOUNT, 1);
 
 		Server.getInstance().getEventManager().addListener(PlayersSpawnsSetListener.class, this);

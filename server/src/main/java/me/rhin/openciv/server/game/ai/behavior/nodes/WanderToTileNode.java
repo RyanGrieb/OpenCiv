@@ -23,7 +23,7 @@ public class WanderToTileNode extends UnitNode {
 
 		Random rnd = new Random();
 		boolean waterUnit = unit.getUnitTypes().contains(UnitType.NAVAL);
-
+		
 		while (targetTile == null || targetTile.equals(unit.getStandingTile())
 				|| (targetTile.containsTileProperty(TileProperty.WATER) && !waterUnit)
 				|| targetTile.getMovementCost() > 2) {
