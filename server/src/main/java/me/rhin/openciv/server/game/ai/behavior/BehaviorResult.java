@@ -1,5 +1,8 @@
 package me.rhin.openciv.server.game.ai.behavior;
 
+import me.rhin.openciv.server.Server;
+import me.rhin.openciv.server.listener.NodeBehaviorSetListener.NodeBehaviorSetEvent;
+
 public class BehaviorResult {
 
 	private BehaviorStatus behaviorStatus;
@@ -8,14 +11,17 @@ public class BehaviorResult {
 	public BehaviorResult(BehaviorStatus behaviorStatus, Node node) {
 		this.behaviorStatus = behaviorStatus;
 		this.node = node;
-	}
 
-	public BehaviorStatus getBehaviorStatus() {
-		return behaviorStatus;
+		node.setStatus(behaviorStatus);
+		Server.getInstance().getEventManager().fireEvent(new NodeBehaviorSetEvent(node, behaviorStatus));
 	}
 
 	public Node getNode() {
 		return node;
+	}
+
+	public BehaviorStatus getStatus() {
+		return behaviorStatus;
 	}
 
 }

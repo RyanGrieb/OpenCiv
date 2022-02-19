@@ -1,5 +1,6 @@
 package me.rhin.openciv.server.game.ai.behavior.nodes;
 
+import me.rhin.openciv.server.game.ai.behavior.BehaviorResult;
 import me.rhin.openciv.server.game.ai.behavior.BehaviorStatus;
 import me.rhin.openciv.server.game.ai.behavior.UnitNode;
 import me.rhin.openciv.server.game.map.tile.Tile;
@@ -12,18 +13,16 @@ public class AdjToEnemyNode extends UnitNode {
 	}
 
 	@Override
-	public void tick() {
+	public BehaviorResult tick() {
 		for (Tile adjTile : unit.getTile().getAdjTiles()) {
 
 			// If the player is adj to an enemy city or unit.
 			if (adjTile.getEnemyAttackableEntity(unit.getPlayerOwner()) != null) {
-
-				setStatus(BehaviorStatus.SUCCESS);
-				return;
+				return new BehaviorResult(BehaviorStatus.SUCCESS, this);
 			}
 		}
 
-		setStatus(BehaviorStatus.FAILURE);
+		return new BehaviorResult(BehaviorStatus.FAILURE, this);
 	}
 
 }

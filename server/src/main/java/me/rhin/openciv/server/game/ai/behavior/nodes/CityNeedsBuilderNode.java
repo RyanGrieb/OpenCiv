@@ -1,5 +1,6 @@
 package me.rhin.openciv.server.game.ai.behavior.nodes;
 
+import me.rhin.openciv.server.game.ai.behavior.BehaviorResult;
 import me.rhin.openciv.server.game.ai.behavior.BehaviorStatus;
 import me.rhin.openciv.server.game.ai.behavior.CityNode;
 import me.rhin.openciv.server.game.city.City;
@@ -14,7 +15,7 @@ public class CityNeedsBuilderNode extends CityNode {
 	}
 
 	@Override
-	public void tick() {
+	public BehaviorResult tick() {
 
 		int ownedBuilders = 0;
 
@@ -23,17 +24,16 @@ public class CityNeedsBuilderNode extends CityNode {
 				ownedBuilders++;
 		}
 
-		//System.out.println(ownedBuilders);
+		// System.out.println(ownedBuilders);
 		// FIXME: Improve this.
 
 		if (city.getProducibleItemManager().turnsSinceProduced(Builder.class) > 10
 				&& ownedBuilders < city.getPlayerOwner().getOwnedCities().size()) {
 
-			setStatus(BehaviorStatus.SUCCESS);
-			return;
+			return new BehaviorResult(BehaviorStatus.SUCCESS, this);
 		}
 
-		setStatus(BehaviorStatus.FAILURE);
+		return new BehaviorResult(BehaviorStatus.FAILURE, this);
 	}
 
 }

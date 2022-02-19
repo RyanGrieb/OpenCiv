@@ -2,6 +2,7 @@ package me.rhin.openciv.server.game.ai.behavior.nodes;
 
 import me.rhin.openciv.server.Server;
 import me.rhin.openciv.server.game.AbstractPlayer;
+import me.rhin.openciv.server.game.ai.behavior.BehaviorResult;
 import me.rhin.openciv.server.game.ai.behavior.BehaviorStatus;
 import me.rhin.openciv.server.game.ai.behavior.CityNode;
 import me.rhin.openciv.server.game.city.City;
@@ -13,7 +14,7 @@ public class LeastCitiesNode extends CityNode {
 	}
 
 	@Override
-	public void tick() {
+	public BehaviorResult tick() {
 		AbstractPlayer leastCitiesPlayer = null;
 
 		for (AbstractPlayer player : Server.getInstance().getAbstractPlayers()) {
@@ -23,16 +24,14 @@ public class LeastCitiesNode extends CityNode {
 		}
 
 		if (leastCitiesPlayer == null) {
-			setStatus(BehaviorStatus.FAILURE);
-			return;
+			return new BehaviorResult(BehaviorStatus.FAILURE, this);
 		}
 
 		if (leastCitiesPlayer.equals(city.getPlayerOwner())) {
-			setStatus(BehaviorStatus.SUCCESS);
-			return;
+			return new BehaviorResult(BehaviorStatus.SUCCESS, this);
 		}
 
-		setStatus(BehaviorStatus.FAILURE);
+		return new BehaviorResult(BehaviorStatus.FAILURE, this);
 	}
 
 }

@@ -9,6 +9,7 @@ import me.rhin.openciv.server.game.AbstractPlayer;
 import me.rhin.openciv.server.game.Player;
 import me.rhin.openciv.server.game.ai.AIType;
 import me.rhin.openciv.server.game.ai.UnitAI;
+import me.rhin.openciv.server.game.ai.behavior.BehaviorResult;
 import me.rhin.openciv.server.game.ai.behavior.BehaviorStatus;
 import me.rhin.openciv.server.game.ai.behavior.PlayerNode;
 import me.rhin.openciv.server.game.map.tile.Tile;
@@ -24,7 +25,7 @@ public class SpawnBarbariansNode extends PlayerNode {
 	}
 
 	@Override
-	public void tick() {
+	public BehaviorResult tick() {
 		// FIXME: This is inefficient, update tile indexer to support getting tiles of
 		// tileType.
 
@@ -61,7 +62,7 @@ public class SpawnBarbariansNode extends PlayerNode {
 			}
 		}
 
-		setStatus(BehaviorStatus.SUCCESS);
+		return new BehaviorResult(BehaviorStatus.SUCCESS, this);
 	}
 
 }

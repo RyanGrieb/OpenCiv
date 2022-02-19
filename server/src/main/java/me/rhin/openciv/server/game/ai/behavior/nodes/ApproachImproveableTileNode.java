@@ -1,5 +1,6 @@
 package me.rhin.openciv.server.game.ai.behavior.nodes;
 
+import me.rhin.openciv.server.game.ai.behavior.BehaviorResult;
 import me.rhin.openciv.server.game.ai.behavior.BehaviorStatus;
 import me.rhin.openciv.server.game.ai.behavior.UnitNode;
 import me.rhin.openciv.server.game.city.City;
@@ -14,7 +15,7 @@ public class ApproachImproveableTileNode extends UnitNode {
 	}
 
 	@Override
-	public void tick() {
+	public BehaviorResult tick() {
 		BuilderUnit builder = (BuilderUnit) unit;
 
 		// FIXME: Handle other builders approaching the same tile?
@@ -34,18 +35,16 @@ public class ApproachImproveableTileNode extends UnitNode {
 		}
 
 		if (targetTile == null) {
-			setStatus(BehaviorStatus.FAILURE);
-			return;
+			return new BehaviorResult(BehaviorStatus.FAILURE, this);
 		}
 
 		boolean moved = unit.moveToTile(targetTile);
 
 		if (!moved) {
-			setStatus(BehaviorStatus.FAILURE);
-			return;
+			return new BehaviorResult(BehaviorStatus.FAILURE, this);
 		}
 		
-		setStatus(BehaviorStatus.SUCCESS);
+		return new BehaviorResult(BehaviorStatus.SUCCESS, this);
 	}
 
 }

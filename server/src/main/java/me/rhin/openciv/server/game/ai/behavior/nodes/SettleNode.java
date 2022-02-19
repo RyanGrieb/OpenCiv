@@ -1,5 +1,6 @@
 package me.rhin.openciv.server.game.ai.behavior.nodes;
 
+import me.rhin.openciv.server.game.ai.behavior.BehaviorResult;
 import me.rhin.openciv.server.game.ai.behavior.BehaviorStatus;
 import me.rhin.openciv.server.game.ai.behavior.UnitNode;
 import me.rhin.openciv.server.game.unit.Unit;
@@ -12,11 +13,11 @@ public class SettleNode extends UnitNode {
 	}
 
 	@Override
-	public void tick() {
+	public BehaviorResult tick() {
 		SettlerUnit settlerUnit = (SettlerUnit) unit;
 		settlerUnit.settleCity();
 
-		setStatus(BehaviorStatus.SUCCESS);
+		return new BehaviorResult(BehaviorStatus.SUCCESS, this);
 	}
 
 }

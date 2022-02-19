@@ -1,6 +1,7 @@
 package me.rhin.openciv.server.game.ai.behavior.nodes;
 
 import me.rhin.openciv.server.game.AbstractPlayer;
+import me.rhin.openciv.server.game.ai.behavior.BehaviorResult;
 import me.rhin.openciv.server.game.ai.behavior.BehaviorStatus;
 import me.rhin.openciv.server.game.ai.behavior.PlayerNode;
 
@@ -11,13 +12,12 @@ public class NotResearchingNode extends PlayerNode {
 	}
 
 	@Override
-	public void tick() {
+	public BehaviorResult tick() {
 		if (player.getResearchTree().getTechResearching() == null) {
-			setStatus(BehaviorStatus.SUCCESS);
-			return;
+			return new BehaviorResult(BehaviorStatus.SUCCESS, this);
 		}
 
-		setStatus(BehaviorStatus.FAILURE);
+		return new BehaviorResult(BehaviorStatus.FAILURE, this);
 	}
 
 }

@@ -1,6 +1,7 @@
 package me.rhin.openciv.server.game.ai.behavior.nodes;
 
 import me.rhin.openciv.server.game.AbstractPlayer;
+import me.rhin.openciv.server.game.ai.behavior.BehaviorResult;
 import me.rhin.openciv.server.game.ai.behavior.BehaviorStatus;
 import me.rhin.openciv.server.game.ai.behavior.UnitNode;
 import me.rhin.openciv.server.game.civilization.type.Barbarians;
@@ -13,7 +14,7 @@ public class MoreEnemyUnitsNode extends UnitNode {
 	}
 
 	@Override
-	public void tick() {
+	public BehaviorResult tick() {
 		AbstractPlayer player = unit.getPlayerOwner();
 
 		int totalEnemyUnits = 0;
@@ -26,8 +27,8 @@ public class MoreEnemyUnitsNode extends UnitNode {
 		}
 
 		if (totalEnemyUnits > player.getOwnedUnits().size())
-			setStatus(BehaviorStatus.SUCCESS);
+			return new BehaviorResult(BehaviorStatus.SUCCESS, this);
 		else
-			setStatus(BehaviorStatus.FAILURE);
+			return new BehaviorResult(BehaviorStatus.FAILURE, this);
 	}
 }

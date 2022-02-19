@@ -2,6 +2,7 @@ package me.rhin.openciv.server.game.ai.behavior.nodes;
 
 import java.util.ArrayList;
 
+import me.rhin.openciv.server.game.ai.behavior.BehaviorResult;
 import me.rhin.openciv.server.game.ai.behavior.BehaviorStatus;
 import me.rhin.openciv.server.game.ai.behavior.UnitNode;
 import me.rhin.openciv.server.game.map.tile.Tile;
@@ -15,7 +16,7 @@ public class ApproachEnemyNode extends UnitNode {
 	}
 
 	@Override
-	public void tick() {
+	public BehaviorResult tick() {
 
 		AttackableEntity closestEntity = null;
 
@@ -32,12 +33,11 @@ public class ApproachEnemyNode extends UnitNode {
 		}
 
 		if (closestEntity == null) {
-			setStatus(BehaviorStatus.FAILURE);
-			return;
+			return new BehaviorResult(BehaviorStatus.FAILURE, this);
 		}
 
 		unit.moveToTile(closestEntity.getTile());
-		setStatus(BehaviorStatus.SUCCESS);
+		return new BehaviorResult(BehaviorStatus.SUCCESS, this);
 	}
 
 }

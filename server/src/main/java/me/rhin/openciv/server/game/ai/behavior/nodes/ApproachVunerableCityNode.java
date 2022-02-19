@@ -1,9 +1,7 @@
 package me.rhin.openciv.server.game.ai.behavior.nodes;
 
-import java.util.ArrayList;
-import java.util.Random;
-
 import me.rhin.openciv.server.game.AbstractPlayer;
+import me.rhin.openciv.server.game.ai.behavior.BehaviorResult;
 import me.rhin.openciv.server.game.ai.behavior.BehaviorStatus;
 import me.rhin.openciv.server.game.ai.behavior.UnitNode;
 import me.rhin.openciv.server.game.city.City;
@@ -17,14 +15,13 @@ public class ApproachVunerableCityNode extends UnitNode {
 	}
 
 	@Override
-	public void tick() {
+	public BehaviorResult tick() {
 		AbstractPlayer player = unit.getPlayerOwner();
 
 		City city = player.getNearestCityToEnemy();
 
 		if (city == null) {
-			setStatus(BehaviorStatus.FAILURE);
-			return;
+			return new BehaviorResult(BehaviorStatus.FAILURE, this);
 		}
 
 		Tile targetTile = city.getTile();
@@ -32,9 +29,9 @@ public class ApproachVunerableCityNode extends UnitNode {
 		boolean moved = unit.moveToTile(targetTile);
 
 		if (moved)
-			setStatus(BehaviorStatus.SUCCESS);
+			return new BehaviorResult(BehaviorStatus.SUCCESS, this);
 		else
-			setStatus(BehaviorStatus.FAILURE);
+			return new BehaviorResult(BehaviorStatus.FAILURE, this);
 	}
 
 }

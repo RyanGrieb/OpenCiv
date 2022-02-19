@@ -5,6 +5,7 @@ import com.badlogic.gdx.utils.Json;
 import me.rhin.openciv.server.Server;
 import me.rhin.openciv.server.game.AbstractPlayer;
 import me.rhin.openciv.server.game.Player;
+import me.rhin.openciv.server.game.ai.behavior.BehaviorResult;
 import me.rhin.openciv.server.game.ai.behavior.BehaviorStatus;
 import me.rhin.openciv.server.game.ai.behavior.PlayerNode;
 import me.rhin.openciv.shared.packet.type.DeclareWarAllPacket;
@@ -16,7 +17,7 @@ public class DeclareTotalWarNode extends PlayerNode {
 	}
 
 	@Override
-	public void tick() {
+	public BehaviorResult tick() {
 		player.getDiplomacy().declarWarAll();
 
 		DeclareWarAllPacket packet = new DeclareWarAllPacket();
@@ -26,8 +27,8 @@ public class DeclareTotalWarNode extends PlayerNode {
 		for (Player player : Server.getInstance().getPlayers()) {
 			player.sendPacket(json.toJson(packet));
 		}
-		
-		setStatus(BehaviorStatus.SUCCESS);
+
+		return new BehaviorResult(BehaviorStatus.SUCCESS, this);
 	}
 
 }

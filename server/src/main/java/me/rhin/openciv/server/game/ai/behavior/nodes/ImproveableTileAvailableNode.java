@@ -1,5 +1,6 @@
 package me.rhin.openciv.server.game.ai.behavior.nodes;
 
+import me.rhin.openciv.server.game.ai.behavior.BehaviorResult;
 import me.rhin.openciv.server.game.ai.behavior.BehaviorStatus;
 import me.rhin.openciv.server.game.ai.behavior.UnitNode;
 import me.rhin.openciv.server.game.city.City;
@@ -14,7 +15,7 @@ public class ImproveableTileAvailableNode extends UnitNode {
 	}
 
 	@Override
-	public void tick() {
+	public BehaviorResult tick() {
 
 		BuilderUnit builder = (BuilderUnit) unit;
 
@@ -23,15 +24,14 @@ public class ImproveableTileAvailableNode extends UnitNode {
 			for (Tile tile : city.getTerritory()) {
 
 				if (builder.getImprovementFromTile(tile) != null) {
-					setStatus(BehaviorStatus.SUCCESS);
-					return;
+					return new BehaviorResult(BehaviorStatus.SUCCESS, this);
 				}
 
 			}
 
 		}
 
-		setStatus(BehaviorStatus.FAILURE);
+		return new BehaviorResult(BehaviorStatus.FAILURE, this);
 	}
 
 }

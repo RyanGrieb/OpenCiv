@@ -1,5 +1,6 @@
 package me.rhin.openciv.server.game.ai.behavior.nodes;
 
+import me.rhin.openciv.server.game.ai.behavior.BehaviorResult;
 import me.rhin.openciv.server.game.ai.behavior.BehaviorStatus;
 import me.rhin.openciv.server.game.ai.behavior.Node;
 
@@ -10,8 +11,8 @@ public class DoNothingNode extends Node {
 	}
 
 	@Override
-	public void tick() {
-		setStatus(BehaviorStatus.SUCCESS);
+	public BehaviorResult tick() {
+		return new BehaviorResult(BehaviorStatus.SUCCESS, this);
 	}
 
 }

@@ -1,5 +1,9 @@
 package me.rhin.openciv.server.game.ai.behavior.nodes;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import me.rhin.openciv.server.game.ai.behavior.BehaviorResult;
 import me.rhin.openciv.server.game.ai.behavior.BehaviorStatus;
 import me.rhin.openciv.server.game.ai.behavior.UnitNode;
 import me.rhin.openciv.server.game.map.tile.Tile;
@@ -7,8 +11,6 @@ import me.rhin.openciv.server.game.map.tile.TileType.TileProperty;
 import me.rhin.openciv.server.game.unit.AttackableEntity;
 import me.rhin.openciv.server.game.unit.Unit;
 import me.rhin.openciv.server.game.unit.UnitItem.UnitType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class RetreatNode extends UnitNode {
 
@@ -19,7 +21,7 @@ public class RetreatNode extends UnitNode {
 	}
 
 	@Override
-	public void tick() {
+	public BehaviorResult tick() {
 
 		AttackableEntity enemyEntity = null;
 		Tile targetTile = null;
@@ -34,8 +36,7 @@ public class RetreatNode extends UnitNode {
 		}
 
 		if (enemyEntity == null) {
-			setStatus(BehaviorStatus.SUCCESS);
-			return;
+			return new BehaviorResult(BehaviorStatus.SUCCESS, this);
 		}
 
 		LOGGER.info("RetreatNode: Enemy adj to us");
@@ -58,16 +59,15 @@ public class RetreatNode extends UnitNode {
 		// If were completely surrounded...
 		if (targetTile == null) {
 			// TODO: Implement last stand in the behavior tree?
-			setStatus(BehaviorStatus.FAILURE);
-			return;
+			return new BehaviorResult(BehaviorStatus.FAILURE, this);
 		}
 
 		boolean moved = unit.moveToTile(targetTile);
 
 		if (moved)
-			setStatus(BehaviorStatus.SUCCESS);
+			return new BehaviorResult(BehaviorStatus.SUCCESS, this);
 		else
-			setStatus(BehaviorStatus.FAILURE);
+			return new BehaviorResult(BehaviorStatus.FAILURE, this);
 	}
 
 }

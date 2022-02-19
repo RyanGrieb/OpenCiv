@@ -2,6 +2,7 @@ package me.rhin.openciv.server.game.ai.behavior.nodes;
 
 import java.util.ArrayList;
 
+import me.rhin.openciv.server.game.ai.behavior.BehaviorResult;
 import me.rhin.openciv.server.game.ai.behavior.BehaviorStatus;
 import me.rhin.openciv.server.game.ai.behavior.UnitNode;
 import me.rhin.openciv.server.game.map.tile.Tile;
@@ -14,7 +15,7 @@ public class NoEnemyNearNode extends UnitNode {
 	}
 
 	@Override
-	public void tick() {
+	public BehaviorResult tick() {
 
 		ArrayList<Tile> observedTiles = unit.getPlayerOwner().getObservedTiles();
 
@@ -24,13 +25,12 @@ public class NoEnemyNearNode extends UnitNode {
 			if (tile.getEnemyAttackableEntity(unit.getPlayerOwner()) != null) {
 
 				if (tile.getDistanceFrom(unit.getTile()) < 100) { // 4-5ish tiles
-					setStatus(BehaviorStatus.FAILURE);
-					return;
+					return new BehaviorResult(BehaviorStatus.FAILURE, this);
 				}
 			}
 		}
 
-		setStatus(BehaviorStatus.SUCCESS);
+		return new BehaviorResult(BehaviorStatus.SUCCESS, this);
 	}
 
 }

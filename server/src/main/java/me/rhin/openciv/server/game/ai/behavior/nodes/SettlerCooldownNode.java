@@ -1,6 +1,7 @@
 package me.rhin.openciv.server.game.ai.behavior.nodes;
 
 import me.rhin.openciv.server.Server;
+import me.rhin.openciv.server.game.ai.behavior.BehaviorResult;
 import me.rhin.openciv.server.game.ai.behavior.BehaviorStatus;
 import me.rhin.openciv.server.game.ai.behavior.CityNode;
 import me.rhin.openciv.server.game.city.City;
@@ -20,20 +21,18 @@ public class SettlerCooldownNode extends CityNode {
 	}
 
 	@Override
-	public void tick() {
+	public BehaviorResult tick() {
 
 		// Don't start immediately producing settlers
 		if (Server.getInstance().getInGameState().getCurrentTurn() < 10) {
-			setStatus(BehaviorStatus.FAILURE);
-			return;
+			return new BehaviorResult(BehaviorStatus.FAILURE, this);
 		}
 
 		if (city.getProducibleItemManager().turnsSinceProduced(Settler.class) > 14) {
-			setStatus(BehaviorStatus.SUCCESS);
-			return;
+			return new BehaviorResult(BehaviorStatus.SUCCESS, this);
 		}
 
-		setStatus(BehaviorStatus.FAILURE);
+		return new BehaviorResult(BehaviorStatus.FAILURE, this);
 	}
 
 }

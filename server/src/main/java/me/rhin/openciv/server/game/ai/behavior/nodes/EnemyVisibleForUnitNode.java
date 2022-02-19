@@ -1,5 +1,6 @@
 package me.rhin.openciv.server.game.ai.behavior.nodes;
 
+import me.rhin.openciv.server.game.ai.behavior.BehaviorResult;
 import me.rhin.openciv.server.game.ai.behavior.BehaviorStatus;
 import me.rhin.openciv.server.game.ai.behavior.UnitNode;
 import me.rhin.openciv.server.game.map.tile.Tile;
@@ -12,17 +13,16 @@ public class EnemyVisibleForUnitNode extends UnitNode {
 	}
 
 	@Override
-	public void tick() {
+	public BehaviorResult tick() {
 
 		for (Tile tile : unit.getObservedTiles()) {
 			// If the tile contains enemy unit or city...
 			if (tile.getEnemyAttackableEntity(unit.getPlayerOwner()) != null) {
-				setStatus(BehaviorStatus.SUCCESS);
-				return;
+				return new BehaviorResult(BehaviorStatus.SUCCESS, this);
 			}
 		}
 
-		setStatus(BehaviorStatus.FAILURE);
+		return new BehaviorResult(BehaviorStatus.FAILURE, this);
 	}
 
 }

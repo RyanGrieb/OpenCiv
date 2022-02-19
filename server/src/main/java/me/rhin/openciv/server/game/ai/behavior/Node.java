@@ -14,7 +14,7 @@ public abstract class Node {
 		status = BehaviorStatus.UNDEFINED;
 	}
 
-	public abstract void tick();
+	public abstract BehaviorResult tick();
 
 	public void addChild(Node node) {
 		childNodes.add(node);
@@ -34,5 +34,32 @@ public abstract class Node {
 
 	public ArrayList<Node> getChildNodes() {
 		return childNodes;
+	}
+
+	public boolean hasChild(Node node) {
+
+		for (Node childNode : getNodeTree()) {
+			if (childNode.equals(node))
+				return true;
+		}
+
+		return false;
+	}
+
+	private ArrayList<Node> getNodeTree() {
+		ArrayList<Node> nodeTree = new ArrayList<>();
+
+		defineTree(nodeTree, this);
+		return nodeTree;
+	}
+
+	private void defineTree(ArrayList<Node> nodeTree, Node node) {
+		for (Node childNode : node.getChildNodes()) {
+
+			if (childNode.getChildNodes().size() > 0)
+				defineTree(nodeTree, childNode);
+
+			nodeTree.add(childNode);
+		}
 	}
 }

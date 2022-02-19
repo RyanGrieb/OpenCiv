@@ -1,5 +1,6 @@
 package me.rhin.openciv.server.game.ai.behavior.nodes;
 
+import me.rhin.openciv.server.game.ai.behavior.BehaviorResult;
 import me.rhin.openciv.server.game.ai.behavior.BehaviorStatus;
 import me.rhin.openciv.server.game.ai.behavior.CityNode;
 import me.rhin.openciv.server.game.city.City;
@@ -14,14 +15,13 @@ public class ProduceMilitaryNode extends CityNode {
 	}
 
 	@Override
-	public void tick() {
+	public BehaviorResult tick() {
 		ProducibleItemManager itemManager = city.getProducibleItemManager();
 
 		if (!itemManager.producingMilitaryUnits())
 			itemManager.clearProducingItem();
 		else {
-			setStatus(BehaviorStatus.RUNNING);
-			return;
+			return new BehaviorResult(BehaviorStatus.RUNNING, this);
 		}
 
 		UnitItem topUnitItem = null;
@@ -40,12 +40,11 @@ public class ProduceMilitaryNode extends CityNode {
 		}
 
 		if (topUnitItem == null) {
-			setStatus(BehaviorStatus.FAILURE);
-			return;
+			return new BehaviorResult(BehaviorStatus.FAILURE, this);
 		}
 
 		itemManager.setProducingItem(topUnitItem.getName());
-		setStatus(BehaviorStatus.SUCCESS);
+		return new BehaviorResult(BehaviorStatus.SUCCESS, this);
 	}
 
 }

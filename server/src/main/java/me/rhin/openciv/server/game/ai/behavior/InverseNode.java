@@ -13,23 +13,21 @@ public class InverseNode extends Node {
 	}
 
 	@Override
-	public void tick() {
+	public BehaviorResult tick() {
 
 		for (Node childNode : childNodes) {
-			childNode.tick();
+			BehaviorResult result = childNode.tick();
 
-			if (childNode.getStatus() == BehaviorStatus.FAILURE) {
-				setStatus(BehaviorStatus.SUCCESS);
-				return;
+			if (result.getStatus() == BehaviorStatus.FAILURE) {
+				return new BehaviorResult(BehaviorStatus.SUCCESS, this);
 			}
 
-			if (childNode.getStatus() == BehaviorStatus.SUCCESS) {
-				setStatus(BehaviorStatus.FAILURE);
-				return;
+			if (result.getStatus() == BehaviorStatus.SUCCESS) {
+				return new BehaviorResult(BehaviorStatus.FAILURE, this);
 			}
 		}
 
-		setStatus(BehaviorStatus.UNDEFINED);
+		return new BehaviorResult(BehaviorStatus.UNDEFINED, this);
 	}
 
 }

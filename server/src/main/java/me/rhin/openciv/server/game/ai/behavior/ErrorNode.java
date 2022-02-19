@@ -1,6 +1,5 @@
 package me.rhin.openciv.server.game.ai.behavior;
 
-import me.rhin.openciv.shared.logging.LoggerType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,8 +12,9 @@ public class ErrorNode extends Node {
 	}
 
 	@Override
-	public void tick() {
+	public BehaviorResult tick() {
 		LOGGER.info("Error node called");
+		return new BehaviorResult(BehaviorStatus.SUCCESS, this);
 	}
 
 }

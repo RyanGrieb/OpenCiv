@@ -1,6 +1,8 @@
 
 package me.rhin.openciv.server.game.ai.behavior.nodes;
 
+import me.rhin.openciv.server.game.ai.behavior.BehaviorResult;
+import me.rhin.openciv.server.game.ai.behavior.BehaviorStatus;
 import me.rhin.openciv.server.game.ai.behavior.UnitNode;
 import me.rhin.openciv.server.game.map.tile.improvement.TileImprovement;
 import me.rhin.openciv.server.game.unit.Unit;
@@ -13,13 +15,15 @@ public class ImproveTileNode extends UnitNode {
 	}
 
 	@Override
-	public void tick() {
+	public BehaviorResult tick() {
 		BuilderUnit builder = (BuilderUnit) unit;
 		TileImprovement tileImprovement = builder.getImprovementFromTile(builder.getTile());
-		
+
 		builder.setBuilding(true);
 		builder.setImprovement(tileImprovement.getName());
 		builder.reduceMovement(2);
+
+		return new BehaviorResult(BehaviorStatus.SUCCESS, this);
 	}
 
 }

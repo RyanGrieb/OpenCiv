@@ -1,6 +1,7 @@
 package me.rhin.openciv.server.game.ai.behavior.nodes;
 
 import me.rhin.openciv.server.Server;
+import me.rhin.openciv.server.game.ai.behavior.BehaviorResult;
 import me.rhin.openciv.server.game.ai.behavior.BehaviorStatus;
 import me.rhin.openciv.server.game.ai.behavior.Node;
 
@@ -11,14 +12,13 @@ public class StartOfGameNode extends Node {
 	}
 
 	@Override
-	public void tick() {
+	public BehaviorResult tick() {
 
 		if (Server.getInstance().getInGameState().getCurrentTurn() <= 1) {
-			setStatus(BehaviorStatus.SUCCESS);
-			return;
+			return new BehaviorResult(BehaviorStatus.SUCCESS, this);
 		}
 
-		setStatus(BehaviorStatus.FAILURE);
+		return new BehaviorResult(BehaviorStatus.FAILURE, this);
 	}
 
 }

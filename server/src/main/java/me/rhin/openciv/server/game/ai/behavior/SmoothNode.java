@@ -14,11 +14,11 @@ public class SmoothNode extends Node {
 	}
 
 	@Override
-	public void tick() {
+	public BehaviorResult tick() {
 		for (Node childNode : childNodes) {
 			childNode.tick();
 		}
 
-		setStatus(BehaviorStatus.SUCCESS);
+		return new BehaviorResult(BehaviorStatus.SUCCESS, this);
 	}
 }

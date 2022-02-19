@@ -1,5 +1,6 @@
 package me.rhin.openciv.server.game.ai.behavior.nodes;
 
+import me.rhin.openciv.server.game.ai.behavior.BehaviorResult;
 import me.rhin.openciv.server.game.ai.behavior.BehaviorStatus;
 import me.rhin.openciv.server.game.ai.behavior.CityNode;
 import me.rhin.openciv.server.game.city.City;
@@ -14,7 +15,7 @@ public class ProduceBuildingsNode extends CityNode {
 	}
 
 	@Override
-	public void tick() {
+	public BehaviorResult tick() {
 
 		ProducibleItemManager itemManager = city.getProducibleItemManager();
 
@@ -35,12 +36,11 @@ public class ProduceBuildingsNode extends CityNode {
 		}
 
 		if (topItem == null) {
-			setStatus(BehaviorStatus.FAILURE);
-			return;
+			return new BehaviorResult(BehaviorStatus.FAILURE, this);
 		}
 
 		itemManager.setProducingItem(topItem.getName());
-		setStatus(BehaviorStatus.SUCCESS); 
+		return new BehaviorResult(BehaviorStatus.SUCCESS, this);
 	}
 
 }

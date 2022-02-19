@@ -7,19 +7,18 @@ public class FallbackNode extends Node {
 	}
 
 	@Override
-	public void tick() {
+	public BehaviorResult tick() {
 
 		for (Node childNode : childNodes) {
-			childNode.tick();
+			BehaviorResult result = childNode.tick();
 
-			if (childNode.getStatus() == BehaviorStatus.RUNNING) {
-				setStatus(BehaviorStatus.RUNNING);
-				return;
-			} else if (childNode.getStatus() == BehaviorStatus.SUCCESS) {
-				setStatus(BehaviorStatus.SUCCESS);
-				return;
+			if (result.getStatus() == BehaviorStatus.RUNNING) {
+				return new BehaviorResult(BehaviorStatus.RUNNING, this);
+			} else if (result.getStatus() == BehaviorStatus.SUCCESS) {
+				return new BehaviorResult(BehaviorStatus.SUCCESS, this);
 			}
 		}
-		setStatus(BehaviorStatus.FAILURE);
+
+		return new BehaviorResult(BehaviorStatus.FAILURE, this);
 	}
 }

@@ -15,13 +15,4 @@ public abstract class UnitNode extends Node {
 		super(name);
 		this.unit = unit;
 	}
-
-	@Override
-	public void setStatus(BehaviorStatus status) {
-		super.setStatus(status);
-
-		if (status == BehaviorStatus.SUCCESS)
-			System.out.println(unit.getName() + ":" + unit.getID() + " - " + getName() + " - " + status);
-
-	}
 }

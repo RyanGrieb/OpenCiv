@@ -7,21 +7,21 @@ public class SequenceNode extends Node {
 	}
 
 	@Override
-	public void tick() {
-		for (Node childNode : childNodes) {
-			childNode.tick();
+	public BehaviorResult tick() {
 
-			if (childNode.getStatus() == BehaviorStatus.RUNNING) {
-				setStatus(BehaviorStatus.RUNNING);
-				return;
+		for (Node childNode : childNodes) {
+
+			BehaviorResult result = childNode.tick();
+
+			if (result.getStatus() == BehaviorStatus.RUNNING) {
+				return new BehaviorResult(BehaviorStatus.RUNNING, this);
 			}
 
-			if (childNode.getStatus() == BehaviorStatus.FAILURE) {
-				setStatus(BehaviorStatus.FAILURE);
-				return;
+			if (result.getStatus() == BehaviorStatus.FAILURE) {
+				return new BehaviorResult(BehaviorStatus.FAILURE, this);
 			}
 		}
 
-		setStatus(BehaviorStatus.SUCCESS);
+		return new BehaviorResult(BehaviorStatus.SUCCESS, this);
 	}
 }

@@ -3,12 +3,12 @@ package me.rhin.openciv.server.game.ai.behavior.nodes;
 import java.util.ArrayList;
 
 import me.rhin.openciv.server.game.AbstractPlayer;
+import me.rhin.openciv.server.game.ai.behavior.BehaviorResult;
 import me.rhin.openciv.server.game.ai.behavior.BehaviorStatus;
 import me.rhin.openciv.server.game.ai.behavior.PlayerNode;
 import me.rhin.openciv.server.game.research.Technology;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 
 public class ResearchNode extends PlayerNode {
 
@@ -19,7 +19,7 @@ public class ResearchNode extends PlayerNode {
 	}
 
 	@Override
-	public void tick() {
+	public BehaviorResult tick() {
 		ArrayList<Technology> availableTechs = new ArrayList<>();
 		for (Technology tech : player.getResearchTree().getTechnologies()) {
 			if (tech.canResearch())
@@ -39,14 +39,13 @@ public class ResearchNode extends PlayerNode {
 
 		if (topTech == null) {
 			// LOGGER.info("FIXME: No techs with properties.");
-			setStatus(BehaviorStatus.FAILURE);
-			return;
+			return new BehaviorResult(BehaviorStatus.FAILURE, this);
 		}
 
 		LOGGER.info("Tech Choose:" + topTech.getName());
 		player.getResearchTree().chooseTech(topTech);
 
-		setStatus(BehaviorStatus.SUCCESS);
+		return new BehaviorResult(BehaviorStatus.SUCCESS, this);
 	}
 
 }

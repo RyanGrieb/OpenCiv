@@ -2,6 +2,7 @@ package me.rhin.openciv.server.game.ai.behavior.nodes;
 
 import java.util.Random;
 
+import me.rhin.openciv.server.game.ai.behavior.BehaviorResult;
 import me.rhin.openciv.server.game.ai.behavior.BehaviorStatus;
 import me.rhin.openciv.server.game.ai.behavior.UnitNode;
 import me.rhin.openciv.server.game.city.City;
@@ -22,11 +23,10 @@ public class PatrolNode extends UnitNode {
 	}
 
 	@Override
-	public void tick() {
+	public BehaviorResult tick() {
 
 		if (unit.getPlayerOwner().getOwnedCities().size() < 1) {
-			setStatus(BehaviorStatus.FAILURE);
-			return;
+			return new BehaviorResult(BehaviorStatus.FAILURE, this);
 		}
 
 		Random rnd = new Random(); 
@@ -47,11 +47,10 @@ public class PatrolNode extends UnitNode {
 		boolean moved = unit.moveToTile(targetTile);
 		if (!moved) {
 			targetTile = null;
-			setStatus(BehaviorStatus.FAILURE);
-			return;
+			return new BehaviorResult(BehaviorStatus.FAILURE, this);
 		}
 		
-		setStatus(BehaviorStatus.SUCCESS);
+		return new BehaviorResult(BehaviorStatus.SUCCESS, this);
 	}
 
 }
