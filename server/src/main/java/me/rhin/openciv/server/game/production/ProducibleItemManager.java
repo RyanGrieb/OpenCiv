@@ -283,8 +283,9 @@ public class ProducibleItemManager implements NextTurnListener {
 			producingItem.getProductionItem().create();
 			producedOnIndexer.put(producingItem.getProductionItem().getClass(),
 					Server.getInstance().getInGameState().getCurrentTurn());
-			
-			//System.out.println(city.getName() + " Built: " + producingItem.getProductionItem().getName());
+
+			// System.out.println(city.getName() + " Built: " +
+			// producingItem.getProductionItem().getName());
 
 			FinishProductionItemPacket packet = new FinishProductionItemPacket();
 			packet.setProductionItem(city.getName(), producingItem.getProductionItem().getName());
@@ -335,6 +336,6 @@ public class ProducibleItemManager implements NextTurnListener {
 		if (!producedOnIndexer.containsKey(productionItemClass))
 			return Integer.MAX_VALUE;
 
-		return producedOnIndexer.get(productionItemClass);
+		return Server.getInstance().getInGameState().getCurrentTurn() - producedOnIndexer.get(productionItemClass);
 	}
 }
