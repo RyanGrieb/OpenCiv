@@ -285,6 +285,11 @@ public abstract class Unit implements AttackableEntity, TileObserver, NextTurnLi
 			throw new SameMovementTargetException();
 		}
 
+		// FIXME: This only accounts for units w/ movement < 3
+		if (standingTile.getDistanceFrom(targetTile) > 60) {
+			LOGGER.warn("WARNING: Set target tile w/ unexcpected distance: " + this);
+		}
+
 		int h = 0;
 
 		int width = Server.getInstance().getMap().getWidth();
@@ -408,13 +413,6 @@ public abstract class Unit implements AttackableEntity, TileObserver, NextTurnLi
 		}
 
 		Tile pathingTile = stepTowardTarget(pathTiles);
-
-		Unit topUnit = pathingTile.getTopUnit();
-		if (topUnit != null
-				&& (!topUnit.getPlayerOwner().equals(playerOwner) || (topUnit.getPlayerOwner().equals(playerOwner)
-						&& !topUnit.getUnitTypes().contains(UnitType.SUPPORT)))) {
-			pathingTile = pathTiles.get(1); // Stand outside of enemy unit to attack.
-		}
 
 		/*
 		 * The following sends the proper packets & information to move the unit to the
@@ -955,6 +953,15 @@ public abstract class Unit implements AttackableEntity, TileObserver, NextTurnLi
 
 			movementCost += getMovementCost(prevPathedTile, pathTile);
 
+			// Stop the unit the tile before an enemy unit. Or a tile that has the same
+			// unitType on it.
+			Unit topUnit = pathTile.getTopUnit();
+			if (topUnit != null && (!topUnit.getPlayerOwner().equals(playerOwner)
+					|| (topUnit.getPlayerOwner().equals(playerOwner) && pathTile.containsUnitTypes(getUnitTypes())))) {
+				pathingTile = prevPathedTile;
+				break;
+			}
+
 			if (movementCost > getMovement()) {
 				pathingTile = prevPathedTile;
 				break;
@@ -970,7 +977,6 @@ public abstract class Unit implements AttackableEntity, TileObserver, NextTurnLi
 		}
 
 		// LOGGER.info("Walking to: " + pathingTile);
-
 		return pathingTile;
 	}
 }

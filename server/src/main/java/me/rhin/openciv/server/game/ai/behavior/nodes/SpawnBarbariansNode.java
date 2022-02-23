@@ -38,8 +38,6 @@ public class SpawnBarbariansNode extends PlayerNode {
 				if (tile.containsTileType(TileType.BARBARIAN_CAMP)) {
 
 					Unit unit = new WarriorUnit(player, tile);
-
-					unit.addAIBehavior(new UnitAI(unit, AIType.BARBARIAN_MELEE_UNIT));
 					tile.addUnit(unit);
 
 					AddUnitPacket addUnitPacket = new AddUnitPacket();

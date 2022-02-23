@@ -39,8 +39,10 @@ public class AIPlayer extends AbstractPlayer {
 		super.addOwnedUnit(unit);
 
 		// FIXME: Account for barbarian AI better.
-		if (aiType == AIType.BARBARIAN_PLAYER)
+		if (aiType == AIType.BARBARIAN_PLAYER) {
+			unit.addAIBehavior(new UnitAI(unit, AIType.BARBARIAN_MELEE_UNIT));
 			return;
+		}
 
 		for (UnitType unitType : unit.getUnitTypes()) {
 

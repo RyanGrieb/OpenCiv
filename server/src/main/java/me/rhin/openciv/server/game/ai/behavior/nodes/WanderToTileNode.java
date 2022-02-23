@@ -36,11 +36,11 @@ public class WanderToTileNode extends UnitNode {
 					Server.getInstance().getMap().getWidth())][rnd.nextInt(Server.getInstance().getMap().getHeight())];
 		}
 
-		// FIXME: Recursion here might be infinite.
 		boolean moved = unit.moveToTile(targetTile);
 		if (!moved) {
 			targetTile = null;
-			tick();
+			return new BehaviorResult(BehaviorStatus.FAILURE, this);
+			// tick();
 		}
 
 		return new BehaviorResult(BehaviorStatus.SUCCESS, this);

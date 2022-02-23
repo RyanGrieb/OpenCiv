@@ -3,6 +3,7 @@ package me.rhin.openciv.server.game.map.tile;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
@@ -782,7 +783,7 @@ public class Tile {
 		this.geograpgyName = geograpgyName;
 	}
 
-	//FIXME: Return arrayList?
+	// FIXME: Return arrayList?
 	public Unit getUnitByType(UnitType unitType) {
 
 		for (Unit unit : units) {
@@ -791,5 +792,17 @@ public class Tile {
 		}
 
 		return null;
+	}
+
+	public boolean containsUnitTypes(List<UnitType> unitTypes) {
+
+		for (Unit unit : units) {
+			for (UnitType unitType : unitTypes) {
+				if (unit.getUnitTypes().contains(unitType))
+					return true;
+			}
+		}
+
+		return false;
 	}
 }
