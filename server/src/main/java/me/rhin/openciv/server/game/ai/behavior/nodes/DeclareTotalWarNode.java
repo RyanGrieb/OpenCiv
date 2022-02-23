@@ -21,7 +21,7 @@ public class DeclareTotalWarNode extends PlayerNode {
 		player.getDiplomacy().declarWarAll();
 
 		DeclareWarAllPacket packet = new DeclareWarAllPacket();
-		packet.setCombatant(getName());
+		packet.setCombatant(player.getName());
 
 		Json json = new Json();
 		for (Player player : Server.getInstance().getPlayers()) {

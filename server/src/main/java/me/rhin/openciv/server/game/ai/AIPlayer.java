@@ -10,11 +10,13 @@ import me.rhin.openciv.server.game.unit.type.Settler.SettlerUnit;
 
 public class AIPlayer extends AbstractPlayer {
 
+	private AIType aiType;
 	private FallbackNode mainNode;
 	private String name;
 
 	public AIPlayer(AIType aiType) {
 
+		this.aiType = aiType;
 		mainNode = new FallbackNode("Main Node");
 		aiType.initBehaviorTree(mainNode, this);
 	}
@@ -36,6 +38,10 @@ public class AIPlayer extends AbstractPlayer {
 	public void addOwnedUnit(Unit unit) {
 		super.addOwnedUnit(unit);
 
+		// FIXME: Account for barbarian AI better.
+		if (aiType == AIType.BARBARIAN_PLAYER)
+			return;
+
 		for (UnitType unitType : unit.getUnitTypes()) {
 
 			switch (unitType) {
@@ -54,12 +60,12 @@ public class AIPlayer extends AbstractPlayer {
 			}
 		}
 
-		//FIXME: In the future were going to have to do this better.
-		
+		// FIXME: In the future were going to have to do this better.
+
 		if (unit instanceof BuilderUnit) {
 			unit.addAIBehavior(new UnitAI(unit, AIType.BUILDER_UNIT));
 		}
-		
+
 		if (unit instanceof SettlerUnit) {
 			unit.addAIBehavior(new UnitAI(unit, AIType.SETTLER_UNIT));
 		}

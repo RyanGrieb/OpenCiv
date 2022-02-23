@@ -6,8 +6,9 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import me.rhin.openciv.server.game.religion.bonus.type.founder.WorldChurchBonus;
 import org.java_websocket.WebSocket;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Json;
@@ -18,7 +19,6 @@ import me.rhin.openciv.server.game.GameState;
 import me.rhin.openciv.server.game.Player;
 import me.rhin.openciv.server.game.ai.AIPlayer;
 import me.rhin.openciv.server.game.ai.AIType;
-import me.rhin.openciv.server.game.ai.UnitAI;
 import me.rhin.openciv.server.game.city.City;
 import me.rhin.openciv.server.game.city.wonders.GameWonders;
 import me.rhin.openciv.server.game.civilization.CityStateType;
@@ -89,8 +89,6 @@ import me.rhin.openciv.shared.packet.type.WorkTilePacket;
 import me.rhin.openciv.shared.stat.Stat;
 import me.rhin.openciv.shared.stat.StatLine;
 import me.rhin.openciv.shared.util.MathHelper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 //FIXME: Instead of the civ game listening for everything. Just split them off into the respective classes. (EX: CombatPreviewListener in the Unit class)
 //Or just use reflection so we don't have to implement 20+ classes.

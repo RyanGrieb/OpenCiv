@@ -41,7 +41,6 @@ public class SpawnBarbariansNode extends PlayerNode {
 
 					unit.addAIBehavior(new UnitAI(unit, AIType.BARBARIAN_MELEE_UNIT));
 					tile.addUnit(unit);
-					player.addOwnedUnit(unit);
 
 					AddUnitPacket addUnitPacket = new AddUnitPacket();
 					String unitName = unit.getClass().getSimpleName().substring(0,

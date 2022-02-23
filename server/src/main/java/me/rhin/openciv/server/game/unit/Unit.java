@@ -7,10 +7,14 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.reflect.ClassReflection;
 
 import me.rhin.openciv.server.Server;
+import me.rhin.openciv.server.errors.AIDefinedException;
 import me.rhin.openciv.server.errors.SameMovementTargetException;
 import me.rhin.openciv.server.game.AbstractPlayer;
 import me.rhin.openciv.server.game.Player;
@@ -36,8 +40,6 @@ import me.rhin.openciv.shared.packet.type.SetUnitOwnerPacket;
 import me.rhin.openciv.shared.packet.type.UnitAttackPacket;
 import me.rhin.openciv.shared.stat.Stat;
 import me.rhin.openciv.shared.stat.StatLine;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public abstract class Unit implements AttackableEntity, TileObserver, NextTurnListener {
 
@@ -560,6 +562,10 @@ public abstract class Unit implements AttackableEntity, TileObserver, NextTurnLi
 	}
 
 	public void addAIBehavior(UnitAI unitAI) {
+		if (this.unitAI != null) {
+			LOGGER.error("Error: AI behavior already defined for unit: " + this);
+		}
+
 		this.unitAI = unitAI;
 	}
 
@@ -814,7 +820,12 @@ public abstract class Unit implements AttackableEntity, TileObserver, NextTurnLi
 		playerOwner.updateOwnedStatlines(false);
 	}
 
-	// FIXME: Combine this with set target tile
+	/**
+	 * Returns the shortest path of tiles to the target.
+	 * 
+	 * @param targetTile
+	 * @return
+	 */
 	private ArrayList<Tile> getPathTiles(Tile targetTile) {
 
 		int width = Server.getInstance().getMap().getWidth();

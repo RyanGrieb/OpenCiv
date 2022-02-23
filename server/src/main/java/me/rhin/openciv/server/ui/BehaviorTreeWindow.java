@@ -55,7 +55,7 @@ public class BehaviorTreeWindow extends JFrame implements NextTurnListener, Node
 	}
 
 	private void constructTree() {
-		addLeaf("LowHealthNode", 100, 100);
+		addLeaf(mainNode.getName(), 100, 100);
 	}
 
 	private void addLeaf(String text, int x, int y) {

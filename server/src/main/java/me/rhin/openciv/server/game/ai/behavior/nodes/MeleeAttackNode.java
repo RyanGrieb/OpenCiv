@@ -30,7 +30,6 @@ public class MeleeAttackNode extends UnitNode {
 				// seem too
 				if (!survivedAttack || entity.getHealth() <= 0) {
 					unit.setMovement(unit.getMaxMovement());
-					System.out.println("Attempting to move to tile");
 					unit.moveToTile(entity.getTile());
 					unit.setMovement(0);
 				}

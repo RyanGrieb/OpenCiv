@@ -22,6 +22,9 @@ public class WanderToTileNode extends UnitNode {
 	@Override
 	public BehaviorResult tick() {
 
+		if (unit.getMovement() <= 0)
+			return new BehaviorResult(BehaviorStatus.FAILURE, this);
+
 		Random rnd = new Random();
 		boolean waterUnit = unit.getUnitTypes().contains(UnitType.NAVAL);
 
