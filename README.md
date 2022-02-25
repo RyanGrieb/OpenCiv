@@ -44,7 +44,7 @@ Currently, there is no releases available as the game is still in heavy developm
 
 ```SPACEBAR``` - Skip turns
 
-## Special thanks to:
+## Special thanks to the following:
 
 Contributors - 
 [Will Pewitt](https://github.com/willpewitt)
