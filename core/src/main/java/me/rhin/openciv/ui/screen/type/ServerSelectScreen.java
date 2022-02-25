@@ -8,6 +8,8 @@ import com.badlogic.gdx.scenes.scene2d.ui.TextField.TextFieldListener;
 import com.badlogic.gdx.utils.Align;
 
 import me.rhin.openciv.Civilization;
+import me.rhin.openciv.listener.AttemptConnectionListener;
+import me.rhin.openciv.listener.ConnectionFailedListener;
 import me.rhin.openciv.listener.LeftClickListener.LeftClickEvent;
 import me.rhin.openciv.listener.MouseMoveListener.MouseMoveEvent;
 import me.rhin.openciv.listener.ResizeListener;
@@ -74,12 +76,6 @@ public class ServerSelectScreen extends AbstractScreen implements ServerConnectL
 	}
 
 	@Override
-	public void show() {
-		super.show();
-
-	}
-
-	@Override
 	public void onResize(int width, int height) {
 		// TODO Auto-generated method stub
 		titleOverlay.setSize(width, height);
@@ -98,7 +94,7 @@ public class ServerSelectScreen extends AbstractScreen implements ServerConnectL
 
 	@Override
 	public void dispose() {
-
+		Civilization.getInstance().getEventManager().clearListenersFromObject(connectServerButton);
 	}
 
 	@Override
@@ -108,10 +104,6 @@ public class ServerSelectScreen extends AbstractScreen implements ServerConnectL
 		}
 		return false;
 
-	}
-
-	public TextField getIPTextField() {
-		return ipTextField;
 	}
 
 	@Override
@@ -129,5 +121,9 @@ public class ServerSelectScreen extends AbstractScreen implements ServerConnectL
 	@Override
 	public ScreenEnum getType() {
 		return ScreenEnum.SERVER_SELECT;
+	}
+
+	public TextField getIPTextField() {
+		return ipTextField;
 	}
 }

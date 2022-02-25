@@ -17,6 +17,7 @@ import me.rhin.openciv.listener.AddObservedTileListener.AddObservedTileEvent;
 import me.rhin.openciv.listener.AddSpecialistToContainerListener.AddSpecialistToContainerEvent;
 import me.rhin.openciv.listener.AddUnitListener.AddUnitEvent;
 import me.rhin.openciv.listener.ApplyProductionToItemListener.ApplyProductionToItemEvent;
+import me.rhin.openciv.listener.AttemptConnectionListener.AttemptConnectionEvent;
 import me.rhin.openciv.listener.AvailablePantheonListener.AvailablePantheonEvent;
 import me.rhin.openciv.listener.BuildingConstructedListener.BuildingConstructedEvent;
 import me.rhin.openciv.listener.BuyProductionItemListener.BuyProductionItemEvent;
@@ -27,6 +28,7 @@ import me.rhin.openciv.listener.CityStatUpdateListener.CityStatUpdateEvent;
 import me.rhin.openciv.listener.CombatPreviewListener.CombatPreviewEvent;
 import me.rhin.openciv.listener.CompleteHeritageListener.CompleteHeritageEvent;
 import me.rhin.openciv.listener.CompleteResearchListener.CompleteResearchEvent;
+import me.rhin.openciv.listener.ConnectionFailedListener.ConnectionFailedEvent;
 import me.rhin.openciv.listener.DeclareWarAllListener.DeclareWarAllEvent;
 import me.rhin.openciv.listener.DeclareWarListener.DeclareWarEvent;
 import me.rhin.openciv.listener.DeleteUnitListener.DeleteUnitEvent;
@@ -68,11 +70,11 @@ import me.rhin.openciv.listener.TileStatlineListener.TileStatlineEvent;
 import me.rhin.openciv.listener.TurnTimeLeftListener.TurnTimeLeftEvent;
 import me.rhin.openciv.listener.UnitAttackListener.UnitAttackEvent;
 import me.rhin.openciv.listener.WorkTileListener.WorkTileEvent;
+import me.rhin.openciv.shared.listener.Event;
+import me.rhin.openciv.shared.listener.Listener;
 import me.rhin.openciv.shared.logging.Logger;
 import me.rhin.openciv.shared.logging.LoggerFactory;
 import me.rhin.openciv.shared.logging.LoggerType;
-import me.rhin.openciv.shared.listener.Event;
-import me.rhin.openciv.shared.listener.Listener;
 import me.rhin.openciv.shared.packet.Packet;
 import me.rhin.openciv.shared.packet.type.AddObservedTilePacket;
 import me.rhin.openciv.shared.packet.type.AddSpecialistToContainerPacket;
@@ -203,6 +205,8 @@ public class NetworkManager {
 			// socket.setSendGracefully(true);
 			socket.addListener(getListener());
 			socket.connect();
+
+			Civilization.getInstance().getEventManager().fireEvent(new AttemptConnectionEvent());
 		} catch (Exception e) {
 			LOGGER.error(e.getMessage(), e);
 		}
@@ -256,6 +260,7 @@ public class NetworkManager {
 			@Override
 			public boolean onClose(final WebSocket webSocket, final int closeCode, final String reason) {
 				LOGGER.info("Disconnected - status: " + closeCode + ", reason: " + reason);
+				Civilization.getInstance().getEventManager().fireEvent(new ConnectionFailedEvent());
 				return true;
 			}
 
