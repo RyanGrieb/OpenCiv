@@ -24,8 +24,8 @@ public class UnitAI implements NextTurnListener {
 	public void onNextTurn() {
 
 		// FIXME: This shouldn't be needed. But sometimes listeners don't clear for dead
-		// units?
-		if (!unit.isAlive())
+		// units? I believe it's the ordering of our listeners.
+		if (!unit.isAlive() || unit.getHealth() <= 0)
 			return;
 
 		mainNode.tick();

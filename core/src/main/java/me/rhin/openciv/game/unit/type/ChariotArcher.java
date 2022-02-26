@@ -34,12 +34,7 @@ public class ChariotArcher extends UnitItem {
 			else
 				return tile.getMovementCost(prevTile);
 		}
-
-		@Override
-		public int getRangedCombatStrength(AttackableEntity target) {
-			return 10;
-		}
-
+		
 		@Override
 		public List<UnitType> getUnitTypes() {
 			return Arrays.asList(UnitType.RANGED, UnitType.MOUNTED);

@@ -144,7 +144,7 @@ public abstract class AbstractPlayer implements NextTurnListener {
 	public void setCivilization(Civ civilization) {
 		this.civilization = civilization;
 	}
-	
+
 	public void setCivilization(CivType civType) {
 		this.civilization = civType.getCiv(this);
 	}
@@ -240,5 +240,13 @@ public abstract class AbstractPlayer implements NextTurnListener {
 		}
 
 		return nearestCity;
+	}
+
+	public float getTotalCombatStrength() {
+		float totalCombatStrength = 0;
+		for (Unit unit : ownedUnits) {
+			totalCombatStrength += unit.getCombatStrength(null);
+		}
+		return totalCombatStrength;
 	}
 }

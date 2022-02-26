@@ -35,11 +35,6 @@ public class CompositeBowman extends UnitItem {
 		}
 
 		@Override
-		public int getRangedCombatStrength(AttackableEntity target) {
-			return 11;
-		}
-
-		@Override
 		public List<UnitType> getUnitTypes() {
 			return Arrays.asList(UnitType.RANGED);
 		}

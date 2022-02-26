@@ -43,8 +43,6 @@ public abstract class RangedUnit extends Unit
 
 	public abstract float getMovementCost(Tile prevTile, Tile adjTile);
 
-	public abstract int getRangedCombatStrength(AttackableEntity target);
-
 	@Override
 	public void onLeftClick(float x, float y) {
 

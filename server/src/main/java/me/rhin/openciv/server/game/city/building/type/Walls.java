@@ -14,7 +14,7 @@ public class Walls extends Building {
 
 	public Walls(City city) {
 		super(city);
-		
+
 		this.statLine.addValue(Stat.MAINTENANCE, 1);
 	}
 
@@ -25,10 +25,11 @@ public class Walls extends Building {
 		Json json = new Json();
 
 		city.setMaxHealth(city.getMaxHealth() + 50);
+		city.setCombatStrength(city.getCombatStrength() + 5);
 
 		SetCityHealthPacket cityHealthPacket = new SetCityHealthPacket();
 		cityHealthPacket.setCity(city.getName(), city.getHealth(), city.getMaxHealth() + 50,
-				city.getCombatStrength(null) + 5);
+				city.getCombatStrength() + 5);
 
 		for (Player player : Server.getInstance().getPlayers()) {
 			player.getConn().send(json.toJson(cityHealthPacket));

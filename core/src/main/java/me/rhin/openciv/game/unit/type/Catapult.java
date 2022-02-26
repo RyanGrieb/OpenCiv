@@ -29,15 +29,6 @@ public class Catapult extends UnitItem {
 		}
 
 		@Override
-		public int getRangedCombatStrength(AttackableEntity target) {
-			if (target instanceof City) {
-				// FIXME: Support floats.
-				return (int) (7 * 1.35);
-			}
-			return 7;
-		}
-
-		@Override
 		public float getMovementCost(Tile prevTile, Tile tile) {
 			if (tile.containsTileProperty(TileProperty.WATER))
 				return 1000000;

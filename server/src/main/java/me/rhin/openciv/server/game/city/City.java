@@ -80,6 +80,7 @@ public class City implements AttackableEntity, TileObserver, NextTurnListener, C
 	private CityAI cityAI;
 	private float maxHealth;
 	private float health;
+	private float combatStrength;
 
 	public City(AbstractPlayer playerOwner, String name, Tile originTile) {
 		this.playerOwner = playerOwner;
@@ -93,6 +94,7 @@ public class City implements AttackableEntity, TileObserver, NextTurnListener, C
 		this.statLine = new StatLine();
 		this.cityReligion = new CityReligion(this);
 		this.maxHealth = 300;
+		this.combatStrength = 8;
 		this.health = maxHealth;
 
 		for (Tile adjTile : originTile.getAdjTiles()) {
@@ -330,7 +332,7 @@ public class City implements AttackableEntity, TileObserver, NextTurnListener, C
 
 	@Override
 	public float getCombatStrength(AttackableEntity targetEntity) {
-		return 8;
+		return combatStrength;
 	}
 
 	// FIXME: Rename this method to isCaptureable & return true
@@ -410,6 +412,10 @@ public class City implements AttackableEntity, TileObserver, NextTurnListener, C
 	@Override
 	public String toString() {
 		return name + " - " + playerOwner.getName();
+	}
+
+	public float getCombatStrength() {
+		return this.getCombatStrength(null);
 	}
 
 	public void setMaxHealth(float maxHealth) {
@@ -721,6 +727,14 @@ public class City implements AttackableEntity, TileObserver, NextTurnListener, C
 		return cityReligion;
 	}
 
+	public void addAIBehavior(CityAI cityAI) {
+		this.cityAI = cityAI;
+	}
+
+	public void setCombatStrength(float combatStrength) {
+		this.combatStrength = combatStrength;
+	}
+
 	private ArrayList<Tile> getTopWorkableTiles() {
 		ArrayList<Tile> topTiles = new ArrayList<>();
 
@@ -845,9 +859,5 @@ public class City implements AttackableEntity, TileObserver, NextTurnListener, C
 		}
 
 		return amount;
-	}
-
-	public void addAIBehavior(CityAI cityAI) {
-		this.cityAI = cityAI;
 	}
 }

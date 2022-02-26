@@ -1003,7 +1003,7 @@ public class InGameState extends GameState implements DisconnectListener, Select
 	}
 
 	public Unit getUnitByID(int unitID) {
-		
+
 		for (AbstractPlayer player : Server.getInstance().getAbstractPlayers())
 			for (Unit unit : player.getOwnedUnits()) {
 				if (unit.getID() == unitID)

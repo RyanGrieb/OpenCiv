@@ -27,11 +27,6 @@ public class Bowman extends RangedUnit {
 	}
 
 	@Override
-	public int getRangedCombatStrength(AttackableEntity target) {
-		return 7;
-	}
-
-	@Override
 	public List<UnitType> getUnitTypes() {
 		return Arrays.asList(UnitType.RANGED);
 	}

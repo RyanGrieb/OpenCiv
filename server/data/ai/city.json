@@ -16,6 +16,9 @@
                 {
                   "nodeType": "CityAtWarNode"
                 },
+				{
+                  "nodeType": "WeakerThanEnemyNode"
+                },
                 {
                   "nodeType": "ProduceMilitaryNode"
                 }

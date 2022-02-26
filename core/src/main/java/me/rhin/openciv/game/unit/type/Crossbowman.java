@@ -34,11 +34,6 @@ public class Crossbowman extends UnitItem {
 		}
 
 		@Override
-		public int getRangedCombatStrength(AttackableEntity target) {
-			return 18;
-		}
-
-		@Override
 		public List<UnitType> getUnitTypes() {
 			return Arrays.asList(UnitType.RANGED);
 		}

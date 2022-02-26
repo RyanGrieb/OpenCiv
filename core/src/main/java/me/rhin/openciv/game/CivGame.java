@@ -260,7 +260,8 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 			for (AbstractPlayer player : this.getPlayers().values())
 				for (Unit playerUnit : player.getOwnedUnits())
 					if (playerUnit.getID() == packet.getUnitID()) {
-						LOGGER.error("Move error at: " + playerUnit.getStandingTile().getGridX() + ", " + playerUnit.getStandingTile().getGridX());
+						LOGGER.error("Move error at: " + playerUnit.getStandingTile().getGridX() + ", "
+								+ playerUnit.getStandingTile().getGridX());
 					}
 			LOGGER.info("MOVE NULL:" + packet.getUnitID());
 		}
@@ -419,7 +420,6 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 
 				// FIXME: Should be a better way to implement this
 				if (packet.getMaxHealth() != -1 && packet.getCombatStrength() != -1) {
-					// city.setCombatStrength(packet.getCombatStrength());
 					city.setMaxHealth(packet.getMaxHealth());
 				}
 

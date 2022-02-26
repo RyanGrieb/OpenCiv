@@ -5,6 +5,9 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Queue;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.badlogic.gdx.utils.Json;
 
 import me.rhin.openciv.server.Server;
@@ -45,6 +48,7 @@ import me.rhin.openciv.server.game.unit.type.Caravan;
 import me.rhin.openciv.server.game.unit.type.CargoShip;
 import me.rhin.openciv.server.game.unit.type.Catapult;
 import me.rhin.openciv.server.game.unit.type.ChariotArcher;
+import me.rhin.openciv.server.game.unit.type.CompositeBowman;
 import me.rhin.openciv.server.game.unit.type.Crossbowman;
 import me.rhin.openciv.server.game.unit.type.Galley;
 import me.rhin.openciv.server.game.unit.type.Horseman;
@@ -62,8 +66,6 @@ import me.rhin.openciv.shared.packet.type.ApplyProductionToItemPacket;
 import me.rhin.openciv.shared.packet.type.BuyProductionItemPacket;
 import me.rhin.openciv.shared.packet.type.FinishProductionItemPacket;
 import me.rhin.openciv.shared.stat.Stat;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Manager that handles the available items to be produced by cities. Producible
@@ -116,6 +118,7 @@ public class ProducibleItemManager implements NextTurnListener {
 		possibleItems.put("Horseman", new Horseman(city));
 		possibleItems.put("Cargo Ship", new CargoShip(city));
 		possibleItems.put("Pikeman", new Pikeman(city));
+		possibleItems.put("Composite Bowman", new CompositeBowman(city));
 		possibleItems.put("Crossbowman", new Crossbowman(city));
 		possibleItems.put("Missionary", new Missionary(city));
 

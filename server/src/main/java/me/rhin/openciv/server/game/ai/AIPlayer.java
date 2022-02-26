@@ -44,21 +44,21 @@ public class AIPlayer extends AbstractPlayer {
 			return;
 		}
 
-		for (UnitType unitType : unit.getUnitTypes()) {
+		if (unit.getUnitTypes().contains(UnitType.NAVAL)) {
+			//TODO: Implement naval ai
+		} else {
+			for (UnitType unitType : unit.getUnitTypes()) {
 
-			switch (unitType) {
-			case MELEE:
-			case MOUNTED:
-				unit.addAIBehavior(new UnitAI(unit, AIType.LAND_MELEE_UNIT));
-				break;
-			case NAVAL:
-				break;
-			case RANGED:
-				break;
-			case SUPPORT:
-				break;
-			default:
-				break;
+				switch (unitType) {
+				case MELEE:
+				case MOUNTED:
+					unit.addAIBehavior(new UnitAI(unit, AIType.LAND_MELEE_UNIT));
+					break;
+				case RANGED:
+					break;
+				default:
+					break;
+				}
 			}
 		}
 
