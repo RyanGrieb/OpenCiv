@@ -20,6 +20,7 @@ Eventually, I'd like to add support modding through [LUAJ](https://www.gamedevel
 * Install [GIT](https://git-scm.com/downloads)
 * Run -> ```git clone https://github.com/rhin123/OpenCiv.git```
 * Open Eclipse or any other java editor, and ```import grade project``` (Eclipse is recommended, haven't tested on other IDEs)
+* To import the project properly, make sure you select the ```OpenCiv``` folder, and not the subfolders.
 * To get the game running you would run the OpenCiv-lwjgl3 ```Lwjgl3Launcher.java``` class & the OpenCiv-server ```Server.jar``` To start the Client & Server
 
 Right click -> Run as -> Java Application
