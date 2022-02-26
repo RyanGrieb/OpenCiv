@@ -1,12 +1,22 @@
 package me.rhin.openciv.server.game.heritage.type.england;
 
-import me.rhin.openciv.server.game.AbstractPlayer;
-import me.rhin.openciv.server.game.heritage.Heritage;
+import org.java_websocket.WebSocket;
 
-public class OceanTradeHeritage extends Heritage {
+import me.rhin.openciv.server.Server;
+import me.rhin.openciv.server.game.AbstractPlayer;
+import me.rhin.openciv.server.game.city.City;
+import me.rhin.openciv.server.game.heritage.Heritage;
+import me.rhin.openciv.server.game.map.tile.Tile;
+import me.rhin.openciv.server.listener.SettleCityListener;
+import me.rhin.openciv.shared.packet.type.SettleCityPacket;
+import me.rhin.openciv.shared.stat.Stat;
+
+public class OceanTradeHeritage extends Heritage implements SettleCityListener {
 
 	public OceanTradeHeritage(AbstractPlayer player) {
 		super(player);
+
+		Server.getInstance().getEventManager().addListener(SettleCityListener.class, this);
 	}
 
 	@Override
@@ -26,6 +36,38 @@ public class OceanTradeHeritage extends Heritage {
 
 	@Override
 	protected void onStudied() {
+		int costalCities = 0;
+		for (City playerCity : player.getOwnedCities())
+			if (playerCity.isCoastal())
+				costalCities++;
 
+		// Every 2 coastal cities, add a trade route.
+		int tradeRoutes = costalCities / 2;
+		player.getStatLine().addValue(Stat.MAX_TRADE_ROUTES, tradeRoutes);
+		player.updateOwnedStatlines(false);
+	}
+
+	@Override
+	public void onSettleCity(WebSocket conn, SettleCityPacket packet) {
+
+		if (!isStudied())
+			return;
+
+		Tile tile = Server.getInstance().getMap().getTiles()[packet.getGridX()][packet.getGridY()];
+		City city = tile.getCity();
+
+		if (!city.isCoastal() || !city.getPlayerOwner().equals(player))
+			return;
+
+		int costalCities = 0;
+		for (City playerCity : player.getOwnedCities())
+			if (playerCity.isCoastal())
+				costalCities++;
+
+		// Every 2 coastal cities, add a trade route.
+		if (costalCities % 2 == 0) {
+			player.getStatLine().addValue(Stat.MAX_TRADE_ROUTES, 1);
+			player.updateOwnedStatlines(false);
+		}
 	}
 }

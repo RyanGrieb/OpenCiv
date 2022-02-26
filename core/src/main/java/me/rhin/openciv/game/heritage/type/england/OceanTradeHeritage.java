@@ -19,7 +19,7 @@ public class OceanTradeHeritage extends Heritage {
 
 	@Override
 	public Sprite getIcon() {
-		return TextureEnum.ICON_GOLD.sprite();
+		return TextureEnum.UNIT_CARGO_SHIP.sprite();
 	}
 
 	@Override
@@ -29,7 +29,7 @@ public class OceanTradeHeritage extends Heritage {
 
 	@Override
 	public String getDesc() {
-		return "+1 Trade route for\neach coastal city.";
+		return "+1 Trade route for\nevery two costal cities.";
 	}
 
 	@Override
