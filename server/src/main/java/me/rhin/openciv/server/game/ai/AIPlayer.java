@@ -55,6 +55,7 @@ public class AIPlayer extends AbstractPlayer {
 					unit.addAIBehavior(new UnitAI(unit, AIType.LAND_MELEE_UNIT));
 					break;
 				case RANGED:
+					unit.addAIBehavior(new UnitAI(unit,AIType.LAND_RANGED_UNIT));
 					break;
 				default:
 					break;

@@ -1,5 +1,7 @@
 package me.rhin.openciv.server.game.unit;
 
+import java.util.ArrayList;
+
 import com.badlogic.gdx.utils.Json;
 
 import me.rhin.openciv.server.Server;
@@ -7,6 +9,8 @@ import me.rhin.openciv.server.game.AbstractPlayer;
 import me.rhin.openciv.server.game.Player;
 import me.rhin.openciv.server.game.city.City;
 import me.rhin.openciv.server.game.map.tile.Tile;
+import me.rhin.openciv.server.game.map.tile.TileType;
+import me.rhin.openciv.server.game.map.tile.Tile.TileTypeWrapper;
 import me.rhin.openciv.shared.packet.type.DeleteUnitPacket;
 import me.rhin.openciv.shared.packet.type.UnitAttackPacket;
 import me.rhin.openciv.shared.stat.Stat;
@@ -30,7 +34,7 @@ public abstract class RangedUnit extends Unit {
 		return rangedCombatStrength;
 	}
 
-	//FIXME: Merge some of this code w/ mele attack
+	// FIXME: Merge some of this code w/ mele attack
 	public void rangeAttack(AttackableEntity targetEntity) {
 
 		if (targetEntity.getPlayerOwner().equals(playerOwner))
@@ -71,7 +75,7 @@ public abstract class RangedUnit extends Unit {
 			if (targetEntity instanceof Unit && targetEntity.getTile().getCity() == null) {
 
 				Unit targetUnit = (Unit) targetEntity;
-				
+
 				targetUnit.deleteUnit(DeleteUnitOptions.PLAYER_KILL);
 			}
 		}
@@ -79,5 +83,42 @@ public abstract class RangedUnit extends Unit {
 		if (!playerOwner.getDiplomacy().atWar(targetEntity.getPlayerOwner()))
 			playerOwner.getDiplomacy().declareWar(targetEntity.getPlayerOwner());
 
+	}
+
+	public ArrayList<Tile> getTargetableTiles() {
+		return getTargetableTiles(standingTile);
+	}
+
+	public ArrayList<Tile> getTargetableTiles(Tile tile) {
+
+		ArrayList<Tile> targetTiles = new ArrayList<>();
+
+		boolean isHill = tile.getBaseTileType() == TileType.GRASS_HILL || tile.getBaseTileType() == TileType.DESERT_HILL
+				|| tile.getBaseTileType() == TileType.PLAINS_HILL;
+
+		for (Tile adjTile : tile.getAdjTiles()) {
+
+			boolean denyVisibility = false;
+			for (TileTypeWrapper wrapper : adjTile.getTileTypeWrappers())
+				if (wrapper.getTileType().getMovementCost() > 1 && !adjTile.equals(tile)) {
+					denyVisibility = true;
+				}
+
+			// FIXME: confusing name. maybe like, setRangedVisibiltiy ?
+			targetTiles.add(adjTile);
+
+			if (denyVisibility && !isHill)
+				continue;
+
+			for (Tile adjAdjTile : adjTile.getAdjTiles()) {
+
+				if (adjAdjTile == null)
+					continue;
+
+				targetTiles.add(adjAdjTile);
+			}
+		}
+
+		return targetTiles;
 	}
 }

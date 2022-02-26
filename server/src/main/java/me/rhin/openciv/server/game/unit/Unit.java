@@ -824,7 +824,7 @@ public abstract class Unit implements AttackableEntity, TileObserver, NextTurnLi
 	 * @param targetTile
 	 * @return
 	 */
-	private ArrayList<Tile> getPathTiles(Tile targetTile) {
+	public ArrayList<Tile> getPathTiles(Tile targetTile) {
 
 		int width = Server.getInstance().getMap().getWidth();
 		int height = Server.getInstance().getMap().getHeight();
@@ -934,7 +934,7 @@ public abstract class Unit implements AttackableEntity, TileObserver, NextTurnLi
 	 * @param pathTiles The path we want to take.
 	 * @return Tile - The closest tile we can walk to currently.
 	 */
-	private Tile stepTowardTarget(ArrayList<Tile> pathTiles) {
+	public Tile stepTowardTarget(ArrayList<Tile> pathTiles) {
 
 		if (pathTiles.size() < 1)
 			return null;
