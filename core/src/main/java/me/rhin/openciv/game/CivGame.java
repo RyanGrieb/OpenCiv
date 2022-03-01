@@ -263,7 +263,7 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 						LOGGER.error("Move error at: " + playerUnit.getStandingTile().getGridX() + ", "
 								+ playerUnit.getStandingTile().getGridX());
 					}
-			LOGGER.info("MOVE NULL:" + packet.getUnitID());
+			LOGGER.error("MOVE NULL:" + packet.getUnitID());
 		}
 
 		// TODO: Have force set target tile still init values like setTargetTile()

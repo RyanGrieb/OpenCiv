@@ -38,8 +38,9 @@ public class ListDiplomacyCivilization extends ListObject {
 	}
 
 	@Override
-	protected void onClicked(InputEvent event) {}
-	
+	protected void onClicked(InputEvent event) {
+	}
+
 	@Override
 	public void draw(Batch batch, float parentAlpha) {
 		if (hovered)
@@ -59,7 +60,7 @@ public class ListDiplomacyCivilization extends ListObject {
 		super.setPosition(x, y);
 		backgroundSprite.setPosition(x, y);
 		hoveredBackgroundSprite.setPosition(x, y);
-		civSprite.setPosition(x + getHeight() / 2 - 16, getHeight() / 2 - 16);
+		civSprite.setPosition(x+5, y + 12);
 		civNameLabel.setPosition(x + 50, y + 13);
 		playerNameLabel.setPosition(x + 50, y + 36);
 	}
