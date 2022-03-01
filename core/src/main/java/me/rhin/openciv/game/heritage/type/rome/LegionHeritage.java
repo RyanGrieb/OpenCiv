@@ -30,7 +30,7 @@ public class LegionHeritage extends Heritage {
 
 	@Override
 	public String getDesc() {
-		return "The largest military unit of \nthe roman army.\nAn enhanced version of swordsman.";
+		return "The largest military unit of \nthe roman army.\nAn enhanced version of\nthe swordsman.";
 	}
 
 	@Override

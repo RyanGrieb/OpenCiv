@@ -1,5 +1,7 @@
 package me.rhin.openciv.ui.window.type;
 
+import java.util.ArrayList;
+
 import com.badlogic.gdx.utils.Align;
 
 import me.rhin.openciv.Civilization;
@@ -19,6 +21,7 @@ public class PickResearchWindow extends AbstractWindow implements ResizeListener
 	private ColoredBackground coloredBackground;
 	private CustomLabel titleLabel;
 	private ColoredBackground icon;
+	private ArrayList<CustomLabel> descLabels;
 	private CustomLabel descLabel;
 	private CustomLabel turnsLabel;
 	private PickResearchButton pickResearchButton;
@@ -27,6 +30,8 @@ public class PickResearchWindow extends AbstractWindow implements ResizeListener
 	public PickResearchWindow(Technology tech) {
 		super.setBounds(viewport.getWorldWidth() / 2 - 270 / 2, viewport.getWorldHeight() / 2 - 300 / 2, 270, 300);
 		this.tech = tech;
+
+		this.descLabels = new ArrayList<>();
 
 		this.coloredBackground = new ColoredBackground(TextureEnum.UI_LIGHT_GRAY.sprite(), 0, 0, getWidth(),
 				getHeight());
@@ -39,8 +44,15 @@ public class PickResearchWindow extends AbstractWindow implements ResizeListener
 		this.icon = new ColoredBackground(tech.getIcon(), getWidth() / 2 - 32 / 2, getHeight() - 55, 32, 32);
 		addActor(icon);
 
-		this.descLabel = new CustomLabel(tech.getDesc(), Align.left, 5, getHeight() - 87, getWidth(), 15);
-		addActor(descLabel);
+		int index = 0;
+		for (String text : tech.getDesc().split("\n")) {
+			CustomLabel descLabel = new CustomLabel(text);
+			descLabel.setAlignment(Align.left);
+			descLabel.setPosition(5, (getHeight() - 87) - (15 * index));
+			descLabels.add(descLabel);
+			addActor(descLabel);
+			index++;
+		}
 
 		int turns = (int) Math.ceil(tech.getScienceCost()
 				/ Civilization.getInstance().getGame().getPlayer().getStatLine().getStatValue(Stat.SCIENCE_GAIN));
