@@ -56,7 +56,7 @@ public class DiplomacyWindow extends AbstractWindow implements ResizeListener {
 		addActor(civilizationList);
 
 		for (AbstractPlayer discoveredPlayer : player.getDiplomacy().getDiscoveredPlayers()) {
-			civilizationList.addItem(ListContainerType.CATEGORY, "Players",
+			civilizationList.addItem(ListContainerType.CATEGORY, "Civilizations",
 					new ListDiplomacyCivilization(discoveredPlayer, civilizationList, 250, 55));
 		}
 	}

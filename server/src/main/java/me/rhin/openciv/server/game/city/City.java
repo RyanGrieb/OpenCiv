@@ -145,6 +145,10 @@ public class City implements AttackableEntity, TileObserver, NextTurnListener, C
 
 		String civName = player.getCiv().getName().toLowerCase();
 
+		if (civName.contains("citystate") && player.getName() != null) {
+			return player.getName();
+		}
+
 		if (civName.contains("citystate") || player.getOwnedCities().size() > 14)
 			civName = "default";
 

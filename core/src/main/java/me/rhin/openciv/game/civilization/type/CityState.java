@@ -52,7 +52,7 @@ public class CityState extends Civ {
 
 	@Override
 	public String getName() {
-		return "CityState";
+		return "City State";
 	}
 
 	public void setCityStateType(CityStateType cityStateType) {
