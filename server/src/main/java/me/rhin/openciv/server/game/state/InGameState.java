@@ -42,6 +42,7 @@ import me.rhin.openciv.server.game.unit.type.TransportShipUnit;
 import me.rhin.openciv.server.game.unit.type.Warrior.WarriorUnit;
 import me.rhin.openciv.server.game.unit.type.WorkBoat.WorkBoatUnit;
 import me.rhin.openciv.server.listener.BuyProductionItemListener;
+import me.rhin.openciv.server.listener.CancelQueuedMovementListener;
 import me.rhin.openciv.server.listener.CombatPreviewListener;
 import me.rhin.openciv.server.listener.DisconnectListener;
 import me.rhin.openciv.server.listener.EndTurnListener;
@@ -51,6 +52,7 @@ import me.rhin.openciv.server.listener.NextTurnListener;
 import me.rhin.openciv.server.listener.PlayerFinishLoadingListener;
 import me.rhin.openciv.server.listener.PlayerListRequestListener;
 import me.rhin.openciv.server.listener.PlayersSpawnsSetListener.PlayersSpawnsSetEvent;
+import me.rhin.openciv.server.listener.QueuedUnitMoveListener;
 import me.rhin.openciv.server.listener.RangedAttackListener;
 import me.rhin.openciv.server.listener.RequestEndTurnListener;
 import me.rhin.openciv.server.listener.SelectUnitListener;
@@ -65,6 +67,7 @@ import me.rhin.openciv.server.listener.UpgradeUnitListener;
 import me.rhin.openciv.server.listener.WorkTileListener;
 import me.rhin.openciv.shared.packet.type.AddUnitPacket;
 import me.rhin.openciv.shared.packet.type.BuyProductionItemPacket;
+import me.rhin.openciv.shared.packet.type.CancelQueuedMovementPacket;
 import me.rhin.openciv.shared.packet.type.CombatPreviewPacket;
 import me.rhin.openciv.shared.packet.type.EndTurnPacket;
 import me.rhin.openciv.shared.packet.type.FaithBuyProductionItemPacket;
@@ -74,6 +77,7 @@ import me.rhin.openciv.shared.packet.type.MoveUnitPacket;
 import me.rhin.openciv.shared.packet.type.NextTurnPacket;
 import me.rhin.openciv.shared.packet.type.PlayerDisconnectPacket;
 import me.rhin.openciv.shared.packet.type.PlayerListRequestPacket;
+import me.rhin.openciv.shared.packet.type.QueuedUnitMovementPacket;
 import me.rhin.openciv.shared.packet.type.RangedAttackPacket;
 import me.rhin.openciv.shared.packet.type.RemoveTileTypePacket;
 import me.rhin.openciv.shared.packet.type.RequestEndTurnPacket;
@@ -93,10 +97,11 @@ import me.rhin.openciv.shared.util.MathHelper;
 //FIXME: Instead of the civ game listening for everything. Just split them off into the respective classes. (EX: CombatPreviewListener in the Unit class)
 //Or just use reflection so we don't have to implement 20+ classes.
 public class InGameState extends GameState implements DisconnectListener, SelectUnitListener, UnitMoveListener,
-		SettleCityListener, PlayerFinishLoadingListener, NextTurnListener, SetProductionItemListener, EndTurnListener,
-		PlayerListRequestListener, FetchPlayerListener, CombatPreviewListener, WorkTileListener, RangedAttackListener,
-		BuyProductionItemListener, RequestEndTurnListener, TileStatlineListener, UnitEmbarkListener,
-		UnitDisembarkListener, UpgradeUnitListener, FaithBuyProductionItemListener {
+		QueuedUnitMoveListener, CancelQueuedMovementListener, SettleCityListener, PlayerFinishLoadingListener,
+		NextTurnListener, SetProductionItemListener, EndTurnListener, PlayerListRequestListener, FetchPlayerListener,
+		CombatPreviewListener, WorkTileListener, RangedAttackListener, BuyProductionItemListener,
+		RequestEndTurnListener, TileStatlineListener, UnitEmbarkListener, UnitDisembarkListener, UpgradeUnitListener,
+		FaithBuyProductionItemListener {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(InGameState.class);
 
@@ -119,6 +124,8 @@ public class InGameState extends GameState implements DisconnectListener, Select
 		Server.getInstance().getEventManager().addListener(DisconnectListener.class, this);
 		Server.getInstance().getEventManager().addListener(SelectUnitListener.class, this);
 		Server.getInstance().getEventManager().addListener(UnitMoveListener.class, this);
+		Server.getInstance().getEventManager().addListener(QueuedUnitMoveListener.class, this);
+		Server.getInstance().getEventManager().addListener(CancelQueuedMovementListener.class, this);
 		Server.getInstance().getEventManager().addListener(SettleCityListener.class, this);
 		Server.getInstance().getEventManager().addListener(PlayerFinishLoadingListener.class, this);
 		Server.getInstance().getEventManager().addListener(NextTurnListener.class, this);
@@ -235,6 +242,9 @@ public class InGameState extends GameState implements DisconnectListener, Select
 
 		Unit unit = prevTile.getUnitFromID(packet.getUnitID());
 
+		// Reset queued tile since player moved to a valid near tile
+		unit.setQueuedTile(null);
+
 		if (unit == null) {
 			LOGGER.info("Error: Unit is NULL");
 			return;
@@ -350,32 +360,24 @@ public class InGameState extends GameState implements DisconnectListener, Select
 			}
 
 		if (unit.getHealth() > 0) {
-
-			// Handle capturing barbarian camps
-			if (unit.getStandingTile().containsTileType(TileType.BARBARIAN_CAMP)) {
-				unit.captureBarbarianCamp();
-			}
-
-			// Handle capturing ruins
-			if (unit.getStandingTile().containsTileType(TileType.RUINS)) {
-				Tile campTile = unit.getStandingTile();
-				campTile.removeTileType(TileType.RUINS);
-
-				RemoveTileTypePacket removeTileTypePacket = new RemoveTileTypePacket();
-				removeTileTypePacket.setTile(TileType.RUINS.name(), campTile.getGridX(), campTile.getGridY());
-
-				for (Player player : Server.getInstance().getPlayers())
-					player.sendPacket(json.toJson(removeTileTypePacket));
-
-				// TODO: Capture ruin sound effect.
-				// FIXME: Players don't get gold if they don't have a city.
-				unit.getPlayerOwner().getStatLine().addValue(Stat.GOLD, 50);
-				playerOwner.updateOwnedStatlines(false);
-			}
-
 			Server.getInstance().getEventManager().fireEvent(new UnitFinishedMoveEvent(prevTile, unit));
 		}
 
+	}
+
+	@Override
+	public void onQueuedUnitMove(WebSocket conn, QueuedUnitMovementPacket packet) {
+		Tile tile = map.getTiles()[packet.getPrevGridX()][packet.getPrevGridY()];
+		Tile queuedTile = map.getTiles()[packet.getTargetGridX()][packet.getTargetGridY()];
+		Unit unit = tile.getUnitFromID(packet.getUnitID());
+		unit.setQueuedTile(queuedTile);
+	}
+
+	@Override
+	public void onCancelQueuedMovement(WebSocket conn, CancelQueuedMovementPacket packet) {
+		Tile tile = map.getTiles()[packet.getTileGridX()][packet.getTileGridY()];
+		Unit unit = tile.getUnitFromID(packet.getUnitID());
+		unit.setQueuedTile(null);
 	}
 
 	// TODO: Move to game map class?

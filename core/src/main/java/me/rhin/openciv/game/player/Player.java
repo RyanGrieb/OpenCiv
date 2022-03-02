@@ -21,6 +21,7 @@ import me.rhin.openciv.listener.RightClickListener;
 import me.rhin.openciv.listener.SelectUnitListener;
 import me.rhin.openciv.shared.packet.type.DeleteUnitPacket;
 import me.rhin.openciv.shared.packet.type.PlayerStatUpdatePacket;
+import me.rhin.openciv.shared.packet.type.QueuedUnitMovementPacket;
 import me.rhin.openciv.shared.stat.StatLine;
 import me.rhin.openciv.ui.window.type.CityInfoWindow;
 import me.rhin.openciv.ui.window.type.DeclareWarWindow;
@@ -128,11 +129,21 @@ public class Player extends AbstractPlayer implements RelativeMouseMoveListener,
 								.addWindow(new DeclareWarWindow(this, attackableEntity.getPlayerOwner()));
 					}
 				}
+
+				selectedUnit.setQueuedTile(null);
 				selectedUnit.sendMovementPacket();
 			} else {
-				if (Civilization.getInstance().getGame().getTurn() < 2)
-					Civilization.getInstance().getGame().getNotificationHanlder()
-							.fireNotification(new MovementRangeHelpNotification());
+				// if (Civilization.getInstance().getGame().getTurn() < 2)
+				// Civilization.getInstance().getGame().getNotificationHanlder()
+				// .fireNotification(new MovementRangeHelpNotification());
+				selectedUnit.setQueuedTile(selectedUnit.getTargetTile());
+
+				QueuedUnitMovementPacket packet = new QueuedUnitMovementPacket();
+				packet.setUnit(selectedUnit.getPlayerOwner().getName(), selectedUnit.getID(),
+						selectedUnit.getTile().getGridX(), selectedUnit.getTile().getGridY(),
+						selectedUnit.getQueuedTile().getGridX(), selectedUnit.getQueuedTile().getGridY());
+				Civilization.getInstance().getNetworkManager().sendPacket(packet);
+
 			}
 
 			unselectUnit();

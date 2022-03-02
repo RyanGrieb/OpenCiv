@@ -26,6 +26,7 @@ import me.rhin.openciv.game.player.AbstractPlayer;
 import me.rhin.openciv.game.player.Player;
 import me.rhin.openciv.game.unit.UnitItem.UnitType;
 import me.rhin.openciv.game.unit.actions.AbstractAction;
+import me.rhin.openciv.game.unit.actions.type.CancelQueuedMovementAction;
 import me.rhin.openciv.game.unit.actions.type.EmbarkAction;
 import me.rhin.openciv.game.unit.actions.type.MoveAction;
 import me.rhin.openciv.game.unit.actions.type.UpgradeAction;
@@ -54,6 +55,7 @@ public abstract class Unit extends Actor
 	private ArrayList<Tile> movementTiles;
 	private float pathMovement;
 	private Tile targetTile;
+	private Tile queuedTile;
 	private Sprite sprite, selectionSprite;
 	private Sprite civIconSprite;
 	private UnitHealthBubble unitHealthBubble;
@@ -90,6 +92,7 @@ public abstract class Unit extends Actor
 		playerOwner.addUnit(this);
 
 		customActions.add(new MoveAction(this));
+		customActions.add(new CancelQueuedMovementAction(this));
 		customActions.add(new EmbarkAction(this));
 		customActions.add(new UpgradeAction(this));
 
@@ -120,7 +123,7 @@ public abstract class Unit extends Actor
 			if (selected)
 				selectionSprite.draw(batch);
 
-			if ((targetTile != null && pathMovement <= getCurrentMovement() && pathMovement > 0) || hasRangedTarget()) {
+			if (targetTile != null || hasRangedTarget() || (selected && queuedTile != null)) {
 				targetSelectionSprite.draw(batch);
 			}
 		}
@@ -200,7 +203,9 @@ public abstract class Unit extends Actor
 		if (targetTile.equals(this.targetTile))
 			return false;
 
+		// if (queuedTile == null)
 		pathVectors.clear();
+
 		clearMovementTiles();
 
 		targetSelectionSprite.setPosition(targetTile.getVectors()[0].x - targetTile.getWidth() / 2,
@@ -297,15 +302,6 @@ public abstract class Unit extends Actor
 		while (parentTile != null) {
 			Tile nextTile = cameFrom[parentTile.getGridX()][parentTile.getGridY()];
 
-			if (nextTile != null) {
-				Vector2[] tileVectors = new Vector2[2];
-				tileVectors[0] = new Vector2(parentTile.getX() + parentTile.getWidth() / 2,
-						parentTile.getY() + parentTile.getHeight() / 2 + 4);
-				tileVectors[1] = new Vector2(nextTile.getX() + nextTile.getWidth() / 2,
-						nextTile.getY() + nextTile.getHeight() / 2 + 4);
-				pathVectors.add(tileVectors);
-			}
-
 			if (nextTile == null)
 				nextTile = targetTile;
 
@@ -328,6 +324,7 @@ public abstract class Unit extends Actor
 
 		this.targetTile = targetTile;
 		this.pathMovement = pathMovement;
+		definePathVectors(targetTile);
 
 		targetEntity = null;
 		if (targetTile.getTopUnit() != null && !targetTile.getTopUnit().getPlayerOwner().equals(playerOwner))
@@ -356,13 +353,33 @@ public abstract class Unit extends Actor
 		} else
 			targetSelectionSprite.setColor(Color.ORANGE);
 
+		if (pathMovement > getCurrentMovement()) {
+			targetSelectionSprite.setColor(Color.BLACK);
+		}
+
 		return true;
+	}
+
+	private void definePathVectors(Tile tile) {
+		// FIXME: This is slow & redundant w/ setTargetTile
+		ArrayList<Tile> movementPath = getMovementPath(tile);
+		Tile parentTile = standingTile;
+
+		for (Tile nextTile : movementPath) {
+			Vector2[] tileVectors = new Vector2[2];
+			tileVectors[0] = new Vector2(parentTile.getX() + parentTile.getWidth() / 2,
+					parentTile.getY() + parentTile.getHeight() / 2 + 4);
+			tileVectors[1] = new Vector2(nextTile.getX() + nextTile.getWidth() / 2,
+					nextTile.getY() + nextTile.getHeight() / 2 + 4);
+			pathVectors.add(tileVectors);
+			parentTile = nextTile;
+		}
 	}
 
 	@Override
 	public void onBottomShapeRender(ShapeRenderer shapeRenderer) {
 
-		if (!(playerOwner instanceof Player))
+		if (!(playerOwner instanceof Player) || !selected)
 			return;
 
 		// FIXME: We get a concurrency error here at some point
@@ -372,8 +389,11 @@ public abstract class Unit extends Actor
 			shapeRenderer.setColor(Color.ORANGE);
 		for (Vector2[] vectors : new ArrayList<>(pathVectors)) {
 			// LOGGER.info(maxMovement + "," + pathMovement);
-			if (getCurrentMovement() < pathMovement || vectors == null)
+			if (vectors == null)
 				break;
+			if (getCurrentMovement() < pathMovement) {
+				shapeRenderer.setColor(Color.WHITE);
+			}
 			shapeRenderer.line(vectors[0], vectors[1]);
 
 		}
@@ -426,7 +446,16 @@ public abstract class Unit extends Actor
 		standingTile = targetTile;
 
 		targetTile = null;
-		pathVectors.clear();
+
+		if (standingTile.equals(queuedTile)) {
+			queuedTile = null;
+			pathVectors.clear();
+		}
+
+		if (queuedTile != null) {
+			pathVectors.clear();
+			definePathVectors(queuedTile);
+		}
 	}
 
 	public void sendMovementPacket() {
@@ -468,6 +497,10 @@ public abstract class Unit extends Actor
 					Civilization.getInstance().getWindowManager().closeWindow(UnitCombatWindow.class);
 				} else {
 					Civilization.getInstance().getWindowManager().addWindow(new UnitWindow(thisUnit));
+					if (queuedTile != null) {
+						definePathVectors(queuedTile);
+
+					}
 				}
 			}
 		});
@@ -592,6 +625,17 @@ public abstract class Unit extends Actor
 		Civilization.getInstance().getEventManager().clearListenersFromObject(this);
 	}
 
+	public void setQueuedTile(Tile queuedTile) {
+		this.queuedTile = queuedTile;
+
+		if (queuedTile == null)
+			pathVectors.clear();
+	}
+
+	public Tile getQueuedTile() {
+		return queuedTile;
+	}
+
 	private ArrayList<Tile> getMovementPath(Tile tile) {
 
 		ArrayList<Tile> pathTiles = new ArrayList<>();
@@ -615,7 +659,7 @@ public abstract class Unit extends Actor
 
 			Tile current = removeSmallest(openSet, fScores);
 
-			if (current.equals(targetTile))
+			if (current.equals(tile))
 				break;
 
 			openSet.remove(current);
@@ -642,18 +686,18 @@ public abstract class Unit extends Actor
 
 		// Iterate through the parent array to get back to the origin tile.
 
-		Tile parentTile = cameFrom[targetTile.getGridX()][targetTile.getGridY()];
+		Tile parentTile = cameFrom[tile.getGridX()][tile.getGridY()];
 
 		// If it's moving to itself or there isn't a valid path
 		if (parentTile == null) {
-			targetTile = null;
+			tile = null;
 		}
 
-		// LOGGER.info("Target:" + targetTile);
+		// LOGGER.info("Target:" + tile);
 		int iterations = 0;
 
-		if (targetTile != null && parentTile != null) {
-			pathTiles.add(targetTile);
+		if (tile != null && parentTile != null) {
+			pathTiles.add(tile);
 			pathTiles.add(parentTile);
 		}
 
@@ -663,11 +707,11 @@ public abstract class Unit extends Actor
 			if (nextTile == null)
 				break;
 
-			if (parentTile.equals(targetTile)) {
+			if (parentTile.equals(tile)) {
 				break;
 			}
 			if (iterations >= GameMap.MAX_NODES) {
-				targetTile = null;
+				tile = null;
 				break;
 			}
 			pathTiles.add(nextTile);

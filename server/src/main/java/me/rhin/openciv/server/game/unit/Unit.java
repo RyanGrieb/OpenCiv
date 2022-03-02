@@ -14,12 +14,12 @@ import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.reflect.ClassReflection;
 
 import me.rhin.openciv.server.Server;
-import me.rhin.openciv.server.errors.AIDefinedException;
 import me.rhin.openciv.server.errors.SameMovementTargetException;
 import me.rhin.openciv.server.game.AbstractPlayer;
 import me.rhin.openciv.server.game.Player;
 import me.rhin.openciv.server.game.ai.UnitAI;
 import me.rhin.openciv.server.game.city.City;
+import me.rhin.openciv.server.game.civilization.type.Barbarians;
 import me.rhin.openciv.server.game.map.tile.Tile;
 import me.rhin.openciv.server.game.map.tile.TileObserver;
 import me.rhin.openciv.server.game.map.tile.TileType;
@@ -27,6 +27,7 @@ import me.rhin.openciv.server.game.options.GameOptionType;
 import me.rhin.openciv.server.game.unit.UnitItem.UnitType;
 import me.rhin.openciv.server.listener.CaptureCityListener.CaptureCityEvent;
 import me.rhin.openciv.server.listener.NextTurnListener;
+import me.rhin.openciv.server.listener.UnitFinishedMoveListener;
 import me.rhin.openciv.shared.packet.type.AddObservedTilePacket;
 import me.rhin.openciv.shared.packet.type.AddUnitPacket;
 import me.rhin.openciv.shared.packet.type.DeleteUnitPacket;
@@ -41,7 +42,7 @@ import me.rhin.openciv.shared.packet.type.UnitAttackPacket;
 import me.rhin.openciv.shared.stat.Stat;
 import me.rhin.openciv.shared.stat.StatLine;
 
-public abstract class Unit implements AttackableEntity, TileObserver, NextTurnListener {
+public abstract class Unit implements AttackableEntity, TileObserver, NextTurnListener, UnitFinishedMoveListener {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(Unit.class);
 
@@ -58,6 +59,7 @@ public abstract class Unit implements AttackableEntity, TileObserver, NextTurnLi
 	private float width, height;
 
 	protected Tile targetTile;
+	private Tile queuedTile;
 	private boolean selected;
 	private float pathMovement;
 	private float movement;
@@ -83,6 +85,7 @@ public abstract class Unit implements AttackableEntity, TileObserver, NextTurnLi
 
 		// Note: This listener needs to be called before the addOwnedUnit() ones.
 		Server.getInstance().getEventManager().addListener(NextTurnListener.class, this);
+		Server.getInstance().getEventManager().addListener(UnitFinishedMoveListener.class, this);
 
 		playerOwner.addOwnedUnit(this);
 
@@ -117,6 +120,14 @@ public abstract class Unit implements AttackableEntity, TileObserver, NextTurnLi
 			}
 		}
 
+		// Handle queued movement ----
+		if (queuedTile != null) {
+			moveToTile(queuedTile);
+
+			if (standingTile == queuedTile)
+				queuedTile = null;
+		}
+
 		// Handle health regen
 		if (turnsSinceCombat < 2 || health >= 100) {
 
@@ -142,6 +153,37 @@ public abstract class Unit implements AttackableEntity, TileObserver, NextTurnLi
 			player.sendPacket(json.toJson(packet));
 
 		turnsSinceCombat++;
+	}
+
+	@Override
+	public void onUnitFinishMove(Tile prevTile, Unit unit) {
+		if (health <= 0)
+			return;
+
+		Json json = new Json();
+
+		// Handle capturing barbarian camps
+		if (unit.getStandingTile().containsTileType(TileType.BARBARIAN_CAMP)
+				&& !(unit.getPlayerOwner().getCiv() instanceof Barbarians)) {
+			unit.captureBarbarianCamp();
+		}
+
+		// Handle capturing ruins
+		if (unit.getStandingTile().containsTileType(TileType.RUINS) && unit.getPlayerOwner() instanceof Player) {
+			Tile campTile = unit.getStandingTile();
+			campTile.removeTileType(TileType.RUINS);
+
+			RemoveTileTypePacket removeTileTypePacket = new RemoveTileTypePacket();
+			removeTileTypePacket.setTile(TileType.RUINS.name(), campTile.getGridX(), campTile.getGridY());
+
+			for (Player player : Server.getInstance().getPlayers())
+				player.sendPacket(json.toJson(removeTileTypePacket));
+
+			// TODO: Capture ruin sound effect.
+			// FIXME: Players don't get gold if they don't have a city.
+			unit.getPlayerOwner().getStatLine().addValue(Stat.GOLD, 50);
+			playerOwner.updateOwnedStatlines(false);
+		}
 	}
 
 	@Override
@@ -403,6 +445,7 @@ public abstract class Unit implements AttackableEntity, TileObserver, NextTurnLi
 
 	public boolean moveToTile(Tile tile) {
 
+		Tile prevTile = standingTile;
 		ArrayList<Tile> pathTiles = new ArrayList<>();
 		pathTiles = getPathTiles(tile);
 
@@ -442,6 +485,8 @@ public abstract class Unit implements AttackableEntity, TileObserver, NextTurnLi
 		for (Player player : Server.getInstance().getPlayers()) {
 			player.sendPacket(json.toJson(packet));
 		}
+
+		Server.getInstance().getEventManager().fireEvent(new UnitFinishedMoveEvent(prevTile, this));
 
 		return true;
 	}
@@ -813,9 +858,8 @@ public abstract class Unit implements AttackableEntity, TileObserver, NextTurnLi
 		deleteUnit(DeleteUnitOptions.SERVER_DELETE);
 	}
 
-	protected void setMaintenance(float amount) {
-		maintenance.setValue(Stat.MAINTENANCE, amount);
-		playerOwner.updateOwnedStatlines(false);
+	public void setQueuedTile(Tile queuedTile) {
+		this.queuedTile = queuedTile;
 	}
 
 	/**
@@ -978,5 +1022,10 @@ public abstract class Unit implements AttackableEntity, TileObserver, NextTurnLi
 
 		// LOGGER.info("Walking to: " + pathingTile);
 		return pathingTile;
+	}
+
+	protected void setMaintenance(float amount) {
+		maintenance.setValue(Stat.MAINTENANCE, amount);
+		playerOwner.updateOwnedStatlines(false);
 	}
 }
