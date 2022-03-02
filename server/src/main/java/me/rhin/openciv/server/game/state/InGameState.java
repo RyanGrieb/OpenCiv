@@ -371,6 +371,7 @@ public class InGameState extends GameState implements DisconnectListener, Select
 		Tile queuedTile = map.getTiles()[packet.getTargetGridX()][packet.getTargetGridY()];
 		Unit unit = tile.getUnitFromID(packet.getUnitID());
 		unit.setQueuedTile(queuedTile);
+		unit.moveToTile(queuedTile);
 	}
 
 	@Override
