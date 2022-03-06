@@ -33,6 +33,8 @@ Right click -> Run as -> Java Application
 
 * Click multiplayer & connect, then start the game.
 
+If you have any issues when trying to set up a build environment, please comment [Here](https://github.com/rhin123/OpenCiv/issues/65).
+I'm trying new ways make the set-up of this development environment easier. 
 
 Currently, there is no releases available as the game is still in heavy development. Once AI is re-written & singleplayer mode is implemented, a release will be available.
 
