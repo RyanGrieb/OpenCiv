@@ -59,6 +59,11 @@ public class CargoShip extends UnitItem {
 		public String getName() {
 			return "Cargo Ship";
 		}
+
+		@Override
+		public float getBaseCombatStrength() {
+			return 0;
+		}
 	}
 
 	@Override

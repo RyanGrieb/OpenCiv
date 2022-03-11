@@ -24,7 +24,10 @@ public abstract class RangedUnit extends Unit {
 		super(playerOwner, standingTile);
 
 		this.rangedCombatStrength = new StatLine();
+		rangedCombatStrength.setValue(Stat.COMBAT_STRENGTH, getBaseRangedStrength());
 	}
+
+	public abstract int getBaseRangedStrength();
 
 	public float getRangedCombatStrength(AttackableEntity target) {
 		return rangedCombatStrength.getStatValue(Stat.COMBAT_STRENGTH);

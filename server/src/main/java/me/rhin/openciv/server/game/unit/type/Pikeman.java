@@ -11,7 +11,6 @@ import me.rhin.openciv.server.game.research.type.CivilServiceTech;
 import me.rhin.openciv.server.game.unit.AttackableEntity;
 import me.rhin.openciv.server.game.unit.Unit;
 import me.rhin.openciv.server.game.unit.UnitItem;
-import me.rhin.openciv.shared.stat.Stat;
 
 public class Pikeman extends UnitItem {
 
@@ -23,8 +22,6 @@ public class Pikeman extends UnitItem {
 
 		public PikemanUnit(AbstractPlayer playerOwner, Tile standingTile) {
 			super(playerOwner, standingTile);
-
-			combatStrength.setValue(Stat.COMBAT_STRENGTH, 28);
 		}
 
 		@Override
@@ -48,7 +45,7 @@ public class Pikeman extends UnitItem {
 				}
 			}
 
-			return combatStrength.getStatValue(Stat.COMBAT_STRENGTH) * modifier;
+			return super.getCombatStrength(target) * modifier;
 		}
 
 		@Override
@@ -60,15 +57,20 @@ public class Pikeman extends UnitItem {
 		public Class<? extends Unit> getUpgradedUnit() {
 			return null;
 		}
-		
+
 		@Override
 		public boolean canUpgrade() {
 			return false;
 		}
-		
+
 		@Override
 		public String getName() {
 			return "Pikeman";
+		}
+
+		@Override
+		public float getBaseCombatStrength() {
+			return 28;
 		}
 	}
 
@@ -101,5 +103,5 @@ public class Pikeman extends UnitItem {
 	public float getBaseCombatStrength() {
 		return 28;
 	}
-	
+
 }

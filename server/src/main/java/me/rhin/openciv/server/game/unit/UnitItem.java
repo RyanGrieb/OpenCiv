@@ -12,6 +12,7 @@ import me.rhin.openciv.server.game.map.tile.Tile;
 import me.rhin.openciv.server.game.production.ProductionItem;
 import me.rhin.openciv.server.game.unit.type.Builder;
 import me.rhin.openciv.server.game.unit.type.Settler;
+import me.rhin.openciv.server.listener.NewUnitListener.NewUnitEvent;
 import me.rhin.openciv.shared.packet.type.AddUnitPacket;
 import me.rhin.openciv.shared.stat.StatValue;
 
@@ -58,6 +59,8 @@ public abstract class UnitItem implements ProductionItem {
 
 		tile.addUnit(unit);
 
+		Server.getInstance().getEventManager().fireEvent(new NewUnitEvent(unit));
+		
 		AddUnitPacket addUnitPacket = new AddUnitPacket();
 		addUnitPacket.setUnit(unit.getPlayerOwner().getName(), getName(), unit.getID(), tile.getGridX(),
 				tile.getGridY());

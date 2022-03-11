@@ -25,8 +25,6 @@ public class Spearman extends UnitItem {
 
 		public SpearmanUnit(AbstractPlayer playerOwner, Tile standingTile) {
 			super(playerOwner, standingTile);
-
-			combatStrength.setValue(Stat.COMBAT_STRENGTH, 22);
 		}
 
 		@Override
@@ -44,13 +42,13 @@ public class Spearman extends UnitItem {
 
 			if (target instanceof Unit) {
 				Unit targetUnit = (Unit) target;
-
+ 
 				if (targetUnit.getUnitTypes().contains(UnitType.MOUNTED)) {
 					modifier = 1.5F;
 				}
 			}
 
-			return combatStrength.getStatValue(Stat.COMBAT_STRENGTH) * modifier;
+			return super.getCombatStrength(target) * modifier;
 		}
 
 		@Override
@@ -71,6 +69,11 @@ public class Spearman extends UnitItem {
 		@Override
 		public String getName() {
 			return "Spearman";
+		}
+
+		@Override
+		public float getBaseCombatStrength() {
+			return 22;
 		}
 	}
 

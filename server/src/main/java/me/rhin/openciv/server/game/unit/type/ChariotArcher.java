@@ -11,7 +11,6 @@ import me.rhin.openciv.server.game.research.type.WheelTech;
 import me.rhin.openciv.server.game.unit.RangedUnit;
 import me.rhin.openciv.server.game.unit.Unit;
 import me.rhin.openciv.server.game.unit.UnitItem;
-import me.rhin.openciv.shared.stat.Stat;
 
 public class ChariotArcher extends UnitItem {
 
@@ -23,9 +22,6 @@ public class ChariotArcher extends UnitItem {
 
 		public ChariotArcherUnit(AbstractPlayer playerOwner, Tile standingTile) {
 			super(playerOwner, standingTile);
-
-			combatStrength.setValue(Stat.COMBAT_STRENGTH, 17);
-			rangedCombatStrength.setValue(Stat.COMBAT_STRENGTH, 10);
 		}
 
 		@Override
@@ -40,12 +36,12 @@ public class ChariotArcher extends UnitItem {
 		public List<UnitType> getUnitTypes() {
 			return Arrays.asList(UnitType.RANGED, UnitType.MOUNTED);
 		}
-		
+
 		@Override
 		public Class<? extends Unit> getUpgradedUnit() {
 			return null;
 		}
-		
+
 		@Override
 		public boolean canUpgrade() {
 			return false;
@@ -54,6 +50,16 @@ public class ChariotArcher extends UnitItem {
 		@Override
 		public String getName() {
 			return "Chariot Archer";
+		}
+
+		@Override
+		public int getBaseRangedStrength() {
+			return 10;
+		}
+
+		@Override
+		public float getBaseCombatStrength() {
+			return 17;
 		}
 	}
 

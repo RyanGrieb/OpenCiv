@@ -13,10 +13,10 @@ public class TransportShipUnit extends Unit {
 
 	private Unit transportUnit;
 	private Tile prevTile;
-	
+
 	public TransportShipUnit(AbstractPlayer playerOwner, Unit transportUnit, Tile standingTile, Tile prevTile) {
 		super(playerOwner, standingTile);
-		
+
 		this.transportUnit = transportUnit;
 		this.prevTile = prevTile;
 	}
@@ -33,12 +33,12 @@ public class TransportShipUnit extends Unit {
 	public List<UnitType> getUnitTypes() {
 		return Arrays.asList(UnitType.SUPPORT);
 	}
-	
+
 	@Override
 	public Class<? extends Unit> getUpgradedUnit() {
 		return null;
 	}
-	
+
 	@Override
 	public boolean canUpgrade() {
 		return false;
@@ -51,8 +51,13 @@ public class TransportShipUnit extends Unit {
 	public Unit getTransportUnit() {
 		return transportUnit;
 	}
-	
+
 	public Tile getPrevTile() {
 		return prevTile;
+	}
+
+	@Override
+	public float getBaseCombatStrength() {
+		return 0;
 	}
 }

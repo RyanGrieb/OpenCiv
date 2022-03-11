@@ -29,8 +29,6 @@ public class WorkBoat extends UnitItem {
 
 		public WorkBoatUnit(AbstractPlayer playerOwner, Tile standingTile) {
 			super(playerOwner, standingTile);
-
-			combatStrength.setValue(Stat.COMBAT_STRENGTH, 0);
 		}
 
 		@Override
@@ -55,7 +53,7 @@ public class WorkBoat extends UnitItem {
 		public boolean canUpgrade() {
 			return false;
 		}
-		
+
 		@Override
 		public String getName() {
 			return "Work Boat";
@@ -83,6 +81,11 @@ public class WorkBoat extends UnitItem {
 			// Delete the workboat
 			deleteUnit(DeleteUnitOptions.SERVER_DELETE);
 
+		}
+
+		@Override
+		public float getBaseCombatStrength() {
+			return 0;
 		}
 	}
 

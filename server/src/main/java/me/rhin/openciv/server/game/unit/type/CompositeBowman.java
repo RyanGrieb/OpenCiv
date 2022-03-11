@@ -13,7 +13,6 @@ import me.rhin.openciv.server.game.unit.RangedUnit;
 import me.rhin.openciv.server.game.unit.Unit;
 import me.rhin.openciv.server.game.unit.UnitItem;
 import me.rhin.openciv.server.game.unit.type.Crossbowman.CrossbowmanUnit;
-import me.rhin.openciv.shared.stat.Stat;
 
 public class CompositeBowman extends UnitItem {
 
@@ -25,9 +24,6 @@ public class CompositeBowman extends UnitItem {
 
 		public CompositeBowmanUnit(AbstractPlayer playerOwner, Tile standingTile) {
 			super(playerOwner, standingTile);
-
-			combatStrength.setValue(Stat.COMBAT_STRENGTH, 18);
-			rangedCombatStrength.setValue(Stat.COMBAT_STRENGTH, 12);
 		}
 
 		@Override
@@ -56,6 +52,16 @@ public class CompositeBowman extends UnitItem {
 		@Override
 		public String getName() {
 			return "Composite Bowman";
+		}
+
+		@Override
+		public int getBaseRangedStrength() {
+			return 12;
+		}
+
+		@Override
+		public float getBaseCombatStrength() {
+			return 18;
 		}
 	}
 

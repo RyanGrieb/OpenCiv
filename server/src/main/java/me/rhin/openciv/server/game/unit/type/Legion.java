@@ -24,8 +24,6 @@ public class Legion extends UnitItem {
 
 		public LegionUnit(AbstractPlayer playerOwner, Tile standingTile) {
 			super(playerOwner, standingTile);
-
-			combatStrength.setValue(Stat.COMBAT_STRENGTH, 38);
 		}
 
 		@Override
@@ -55,6 +53,11 @@ public class Legion extends UnitItem {
 		public String getName() {
 			return "Legion";
 		}
+
+		@Override
+		public float getBaseCombatStrength() {
+			return 38;
+		}
 	}
 
 	@Override
@@ -78,7 +81,7 @@ public class Legion extends UnitItem {
 			if (tile.containsTileType(TileType.IRON_IMPROVED))
 				workedIron = true;
 		}
-		
+
 		return city.getPlayerOwner().getResearchTree().hasResearched(IronWorkingTech.class) && workedIron;
 	}
 

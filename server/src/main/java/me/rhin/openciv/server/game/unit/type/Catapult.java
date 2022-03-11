@@ -25,9 +25,6 @@ public class Catapult extends UnitItem {
 
 		public CatapultUnit(AbstractPlayer playerOwner, Tile standingTile) {
 			super(playerOwner, standingTile);
-
-			combatStrength.setValue(Stat.COMBAT_STRENGTH, 7);
-			rangedCombatStrength.setValue(Stat.COMBAT_STRENGTH, 7);
 		}
 
 		@Override
@@ -57,15 +54,25 @@ public class Catapult extends UnitItem {
 		public Class<? extends Unit> getUpgradedUnit() {
 			return null;
 		}
-		
+
 		@Override
 		public boolean canUpgrade() {
 			return false;
 		}
-		
+
 		@Override
 		public String getName() {
 			return "Catapult";
+		}
+
+		@Override
+		public int getBaseRangedStrength() {
+			return 7;
+		}
+
+		@Override
+		public float getBaseCombatStrength() {
+			return 7;
 		}
 	}
 

@@ -32,6 +32,7 @@ import me.rhin.openciv.game.unit.AttackableEntity;
 import me.rhin.openciv.listener.AddSpecialistToContainerListener;
 import me.rhin.openciv.listener.ApplyProductionToItemListener;
 import me.rhin.openciv.listener.BuildingConstructedListener;
+import me.rhin.openciv.listener.BuildingRemovedListener;
 import me.rhin.openciv.listener.BuyProductionItemListener;
 import me.rhin.openciv.listener.CityGainMajorityReligionListener;
 import me.rhin.openciv.listener.CityLooseMajorityReligionListener;
@@ -44,9 +45,13 @@ import me.rhin.openciv.listener.RemoveSpecialistFromContainerListener;
 import me.rhin.openciv.listener.SetCitizenTileWorkerListener;
 import me.rhin.openciv.listener.SetProductionItemListener;
 import me.rhin.openciv.shared.city.SpecialistType;
+import me.rhin.openciv.shared.logging.Logger;
+import me.rhin.openciv.shared.logging.LoggerFactory;
+import me.rhin.openciv.shared.logging.LoggerType;
 import me.rhin.openciv.shared.packet.type.AddSpecialistToContainerPacket;
 import me.rhin.openciv.shared.packet.type.ApplyProductionToItemPacket;
 import me.rhin.openciv.shared.packet.type.BuildingConstructedPacket;
+import me.rhin.openciv.shared.packet.type.BuildingRemovedPacket;
 import me.rhin.openciv.shared.packet.type.BuyProductionItemPacket;
 import me.rhin.openciv.shared.packet.type.CityPopulationUpdatePacket;
 import me.rhin.openciv.shared.packet.type.CityStatUpdatePacket;
@@ -61,17 +66,14 @@ import me.rhin.openciv.shared.stat.StatLine;
 import me.rhin.openciv.ui.game.Healthbar;
 import me.rhin.openciv.ui.label.CustomLabel;
 import me.rhin.openciv.ui.window.type.CityInfoWindow;
-import me.rhin.openciv.shared.logging.Logger;
-import me.rhin.openciv.shared.logging.LoggerFactory;
-import me.rhin.openciv.shared.logging.LoggerType;
 
 //FIXME: We should have a interface for these networking interface.
-public class City extends Group
-		implements AttackableEntity, TileObserver, SpecialistContainer, BuildingConstructedListener,
-		CityStatUpdateListener, SetProductionItemListener, ApplyProductionToItemListener, FinishProductionItemListener,
-		SetCitizenTileWorkerListener, AddSpecialistToContainerListener, RemoveSpecialistFromContainerListener,
-		NextTurnListener, BuyProductionItemListener, CityGainMajorityReligionListener,
-		CityLooseMajorityReligionListener, ReligionIconChangeListener, CityPopulationUpdateListener {
+public class City extends Group implements AttackableEntity, TileObserver, SpecialistContainer,
+		BuildingConstructedListener, BuildingRemovedListener, CityStatUpdateListener, SetProductionItemListener,
+		ApplyProductionToItemListener, FinishProductionItemListener, SetCitizenTileWorkerListener,
+		AddSpecialistToContainerListener, RemoveSpecialistFromContainerListener, NextTurnListener,
+		BuyProductionItemListener, CityGainMajorityReligionListener, CityLooseMajorityReligionListener,
+		ReligionIconChangeListener, CityPopulationUpdateListener {
 
 	private static final Logger LOGGER = LoggerFactory.getInstance(LoggerType.LOG_TAG);
 
@@ -133,6 +135,7 @@ public class City extends Group
 		});
 
 		Civilization.getInstance().getEventManager().addListener(BuildingConstructedListener.class, this);
+		Civilization.getInstance().getEventManager().addListener(BuildingRemovedListener.class, this);
 		Civilization.getInstance().getEventManager().addListener(CityStatUpdateListener.class, this);
 		Civilization.getInstance().getEventManager().addListener(SetProductionItemListener.class, this);
 		Civilization.getInstance().getEventManager().addListener(ApplyProductionToItemListener.class, this);
@@ -190,6 +193,33 @@ public class City extends Group
 		producibleItemManager.getPossibleItems().remove(packet.getBuildingName());
 
 		LOGGER.info("Adding building " + packet.getBuildingName() + " to city " + getName());
+	}
+
+	@Override
+	public void onBuildingRemoved(BuildingRemovedPacket packet) {
+		if (!getName().equals(packet.getCityName()))
+			return;
+
+		String buildingClassName = "me.rhin.openciv.game.city.building.type."
+				+ packet.getBuildingName().replaceAll(" ", "");
+
+		try {
+			Class<? extends Building> buildingClass = (Class<? extends Building>) ClassReflection
+					.forName(buildingClassName);
+
+			Building targetBuilding = null;
+
+			for (Building building : buildings) {
+				if (building.getClass() == buildingClass) {
+					targetBuilding = building;
+				}
+			}
+
+			buildings.remove(targetBuilding);
+
+		} catch (Exception e) {
+			LOGGER.error(e.getMessage(), e);
+		}
 	}
 
 	@Override
@@ -302,7 +332,7 @@ public class City extends Group
 	public void onCityLooseMajorityReligion(City city, PlayerReligion oldReligion) {
 		if (!city.equals(this))
 			return;
-		
+
 		religionIcon = null;
 	}
 

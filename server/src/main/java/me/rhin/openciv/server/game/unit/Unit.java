@@ -3,6 +3,7 @@ package me.rhin.openciv.server.game.unit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
@@ -49,8 +50,7 @@ public abstract class Unit implements AttackableEntity, TileObserver, NextTurnLi
 	private static int unitID = 0;
 
 	private ArrayList<Tile> observedTiles;
-	protected StatLine combatStrength;
-	private StatLine maintenance;
+	protected HashMap<String, StatLine> statLineMap;
 	protected Tile standingTile;
 	protected int id;
 	private Tile[][] cameFrom;
@@ -63,7 +63,6 @@ public abstract class Unit implements AttackableEntity, TileObserver, NextTurnLi
 	private boolean selected;
 	private float pathMovement;
 	private float movement;
-	private float health;
 	private int turnsSinceCombat;
 	private UnitAI unitAI;
 	private boolean alive;
@@ -71,14 +70,19 @@ public abstract class Unit implements AttackableEntity, TileObserver, NextTurnLi
 	public Unit(AbstractPlayer playerOwner, Tile standingTile) {
 		this.id = unitID++;
 		this.observedTiles = new ArrayList<>();
-		this.combatStrength = new StatLine();
-		this.maintenance = new StatLine();
+		this.statLineMap = new HashMap<>();
 		this.playerOwner = playerOwner;
 		this.standingTile = standingTile;
 		this.movement = getMaxMovement();
-		this.health = 100;
 		this.turnsSinceCombat = 0;
 		this.alive = true;
+
+		statLineMap.put("maintenance", new StatLine());
+		statLineMap.put("combat_strength", new StatLine());
+		StatLine healthStat = new StatLine();
+		healthStat.addValue(Stat.HEALTH_GAIN, 15);
+		healthStat.addValue(Stat.HEALTH, 100);
+		statLineMap.put("health", healthStat);
 
 		setPosition(standingTile.getVectors()[0].x - standingTile.getWidth() / 2, standingTile.getVectors()[0].y + 4);
 		setSize(standingTile.getWidth(), standingTile.getHeight());
@@ -90,7 +94,10 @@ public abstract class Unit implements AttackableEntity, TileObserver, NextTurnLi
 		playerOwner.addOwnedUnit(this);
 
 		setMaintenance(0.25F);
+		setCombatStrength(getBaseCombatStrength());
 	}
+
+	public abstract float getBaseCombatStrength();
 
 	public abstract float getMovementCost(Tile prevTile, Tile adjTile);
 
@@ -129,7 +136,7 @@ public abstract class Unit implements AttackableEntity, TileObserver, NextTurnLi
 		}
 
 		// Handle health regen
-		if (turnsSinceCombat < 2 || health >= 100) {
+		if (turnsSinceCombat < 2 || getHealth() >= 100) {
 
 			turnsSinceCombat++;
 			return;
@@ -137,17 +144,17 @@ public abstract class Unit implements AttackableEntity, TileObserver, NextTurnLi
 
 		if (standingTile.getTerritory() != null && standingTile.getTerritory().getPlayerOwner().equals(playerOwner)) {
 			// Set health.
-			this.health += 15;
+			setHealth(getHealth() + statLineMap.get("health").getStatValue(Stat.HEALTH_GAIN));
 		} else
-			this.health += 10;
+			setHealth(getHealth() + statLineMap.get("health").getStatValue(Stat.HEALTH_GAIN) - 5);
 
-		if (health > 100)
-			health = 100;
+		if (getHealth() > 100)
+			setHealth(100);
 
 		Json json = new Json();
 
 		SetUnitHealthPacket packet = new SetUnitHealthPacket();
-		packet.setUnit(playerOwner.getName(), id, standingTile.getGridX(), standingTile.getGridY(), health);
+		packet.setUnit(playerOwner.getName(), id, standingTile.getGridX(), standingTile.getGridY(), getHealth());
 
 		for (Player player : Server.getInstance().getPlayers())
 			player.sendPacket(json.toJson(packet));
@@ -157,7 +164,7 @@ public abstract class Unit implements AttackableEntity, TileObserver, NextTurnLi
 
 	@Override
 	public void onUnitFinishMove(Tile prevTile, Unit unit) {
-		if (health <= 0)
+		if (getHealth() <= 0)
 			return;
 
 		Json json = new Json();
@@ -273,12 +280,12 @@ public abstract class Unit implements AttackableEntity, TileObserver, NextTurnLi
 
 	@Override
 	public boolean surviveAttack(AttackableEntity otherEntity) {
-		return health - getDamageTaken(otherEntity, true) > 0;
+		return getHealth() - getDamageTaken(otherEntity, true) > 0;
 	}
 
 	@Override
 	public void setHealth(float health) {
-		this.health = health;
+		statLineMap.get("health").setValue(Stat.HEALTH, health);
 	}
 
 	@Override
@@ -288,12 +295,12 @@ public abstract class Unit implements AttackableEntity, TileObserver, NextTurnLi
 
 	@Override
 	public float getHealth() {
-		return health;
+		return statLineMap.get("health").getStatValue(Stat.HEALTH);
 	}
 
 	@Override
 	public float getCombatStrength(AttackableEntity target) {
-		return combatStrength.getStatValue(Stat.COMBAT_STRENGTH);
+		return statLineMap.get("combat_strength").getStatValue(Stat.COMBAT_STRENGTH);
 	}
 
 	@Override
@@ -587,7 +594,7 @@ public abstract class Unit implements AttackableEntity, TileObserver, NextTurnLi
 	}
 
 	public StatLine getCombatStatLine() {
-		return combatStrength;
+		return statLineMap.get("combat_strength");
 	}
 
 	protected Tile removeSmallest(ArrayList<Tile> queue, float fScore[][]) {
@@ -658,7 +665,8 @@ public abstract class Unit implements AttackableEntity, TileObserver, NextTurnLi
 
 			// Update the unit's health to all players
 			SetUnitHealthPacket healthPacket = new SetUnitHealthPacket();
-			healthPacket.setUnit(playerOwner.getName(), id, standingTile.getGridX(), standingTile.getGridY(), health);
+			healthPacket.setUnit(playerOwner.getName(), id, standingTile.getGridX(), standingTile.getGridY(),
+					getHealth());
 
 			for (Player player : Server.getInstance().getPlayers())
 				player.sendPacket(json.toJson(healthPacket));
@@ -819,10 +827,6 @@ public abstract class Unit implements AttackableEntity, TileObserver, NextTurnLi
 		}
 	}
 
-	public StatLine getMaintenance() {
-		return maintenance;
-	}
-
 	public void upgrade() {
 		// TODO: Copy XP too
 
@@ -839,7 +843,7 @@ public abstract class Unit implements AttackableEntity, TileObserver, NextTurnLi
 		unit.getPlayerOwner().getStatLine().subValue(Stat.GOLD, 100);
 		unit.getPlayerOwner().updateOwnedStatlines(false);
 		standingTile.addUnit(unit);
-		unit.setHealth(health);
+		unit.setHealth(getHealth());
 
 		AddUnitPacket addUnitPacket = new AddUnitPacket();
 		addUnitPacket.setUnit(unit.getPlayerOwner().getName(), unit.getName(), unit.getID(), standingTile.getGridX(),
@@ -847,7 +851,7 @@ public abstract class Unit implements AttackableEntity, TileObserver, NextTurnLi
 
 		SetUnitHealthPacket healthPacket = new SetUnitHealthPacket();
 		healthPacket.setUnit(unit.getPlayerOwner().getName(), unit.getID(), standingTile.getGridX(),
-				standingTile.getGridY(), health);
+				standingTile.getGridY(), getHealth());
 
 		Json json = new Json();
 		for (Player player : Server.getInstance().getPlayers()) {
@@ -1024,8 +1028,20 @@ public abstract class Unit implements AttackableEntity, TileObserver, NextTurnLi
 		return pathingTile;
 	}
 
+	public HashMap<String, StatLine> getStatLineMap() {
+		return statLineMap;
+	}
+
+	public StatLine getMaintenance() {
+		return statLineMap.get("maintenance");
+	}
+
+	protected void setCombatStrength(float amount) {
+		statLineMap.get("combat_strength").setValue(Stat.COMBAT_STRENGTH, amount);
+	}
+
 	protected void setMaintenance(float amount) {
-		maintenance.setValue(Stat.MAINTENANCE, amount);
+		statLineMap.get("maintenance").setValue(Stat.MAINTENANCE, amount);
 		playerOwner.updateOwnedStatlines(false);
 	}
 }

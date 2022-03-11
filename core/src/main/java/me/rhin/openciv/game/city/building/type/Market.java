@@ -4,6 +4,7 @@ import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.city.City;
 import me.rhin.openciv.game.city.building.Building;
 import me.rhin.openciv.game.city.specialist.SpecialistContainer;
+import me.rhin.openciv.game.heritage.type.mamluks.BazaarHeritage;
 import me.rhin.openciv.game.research.type.CurrencyTech;
 import me.rhin.openciv.shared.city.SpecialistType;
 import me.rhin.openciv.shared.stat.Stat;
@@ -20,7 +21,7 @@ public class Market extends Building implements SpecialistContainer {
 	public float getBuildingProductionCost() {
 		return 100;
 	}
-	
+
 	@Override
 	public float getGoldCost() {
 		return 200;
@@ -28,6 +29,10 @@ public class Market extends Building implements SpecialistContainer {
 
 	@Override
 	public boolean meetsProductionRequirements() {
+
+		if (city.getPlayerOwner().getHeritageTree().hasStudied(BazaarHeritage.class))
+			return false;
+
 		return city.getPlayerOwner().getResearchTree().hasResearched(CurrencyTech.class);
 	}
 

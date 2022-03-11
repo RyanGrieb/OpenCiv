@@ -20,6 +20,7 @@ import me.rhin.openciv.listener.ApplyProductionToItemListener.ApplyProductionToI
 import me.rhin.openciv.listener.AttemptConnectionListener.AttemptConnectionEvent;
 import me.rhin.openciv.listener.AvailablePantheonListener.AvailablePantheonEvent;
 import me.rhin.openciv.listener.BuildingConstructedListener.BuildingConstructedEvent;
+import me.rhin.openciv.listener.BuildingRemovedListener.BuildingRemovedEvent;
 import me.rhin.openciv.listener.BuyProductionItemListener.BuyProductionItemEvent;
 import me.rhin.openciv.listener.ChooseCivListener.ChooseCivEvent;
 import me.rhin.openciv.listener.CityPopulationUpdateListener.CityPopulationUpdateEvent;
@@ -82,6 +83,7 @@ import me.rhin.openciv.shared.packet.type.AddUnitPacket;
 import me.rhin.openciv.shared.packet.type.ApplyProductionToItemPacket;
 import me.rhin.openciv.shared.packet.type.AvailablePantheonPacket;
 import me.rhin.openciv.shared.packet.type.BuildingConstructedPacket;
+import me.rhin.openciv.shared.packet.type.BuildingRemovedPacket;
 import me.rhin.openciv.shared.packet.type.BuyProductionItemPacket;
 import me.rhin.openciv.shared.packet.type.ChooseCivPacket;
 import me.rhin.openciv.shared.packet.type.CityPopulationUpdatePacket;
@@ -153,6 +155,7 @@ public class NetworkManager {
 		networkEvents.put(DeleteUnitPacket.class, DeleteUnitEvent.class);
 		networkEvents.put(SettleCityPacket.class, SettleCityEvent.class);
 		networkEvents.put(BuildingConstructedPacket.class, BuildingConstructedEvent.class);
+		networkEvents.put(BuildingRemovedPacket.class, BuildingRemovedEvent.class);
 		networkEvents.put(NextTurnPacket.class, NextTurnEvent.class);
 		networkEvents.put(FinishLoadingPacket.class, FinishLoadingRequestEvent.class);
 		networkEvents.put(TerritoryGrowPacket.class, TerritoryGrowEvent.class);

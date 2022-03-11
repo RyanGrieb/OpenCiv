@@ -25,9 +25,6 @@ public class Archer extends UnitItem {
 
 		public ArcherUnit(AbstractPlayer playerOwner, Tile standingTile) {
 			super(playerOwner, standingTile);
-
-			combatStrength.setValue(Stat.COMBAT_STRENGTH, 14);
-			rangedCombatStrength.setValue(Stat.COMBAT_STRENGTH, 7);
 		}
 
 		@Override
@@ -56,6 +53,16 @@ public class Archer extends UnitItem {
 		@Override
 		public String getName() {
 			return "Archer";
+		}
+
+		@Override
+		public float getBaseCombatStrength() {
+			return 14;
+		}
+
+		@Override
+		public int getBaseRangedStrength() {
+			return 7;
 		}
 	}
 

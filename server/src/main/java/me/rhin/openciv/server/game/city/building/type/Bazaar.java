@@ -4,17 +4,15 @@ import me.rhin.openciv.server.game.city.City;
 import me.rhin.openciv.server.game.city.building.Building;
 import me.rhin.openciv.server.game.heritage.type.mamluks.BazaarHeritage;
 import me.rhin.openciv.server.game.research.type.CurrencyTech;
-import me.rhin.openciv.shared.city.SpecialistType;
 import me.rhin.openciv.shared.stat.Stat;
 
-public class Market extends Building {
+public class Bazaar extends Building {
 
-	public Market(City city) {
+	public Bazaar(City city) {
 		super(city);
 
 		this.statLine.addValue(Stat.GOLD_GAIN, 2);
-
-		// TODO: Implement gold for every trade route to this city.
+		this.statLine.addValue(Stat.SCIENCE_GAIN, 2);
 	}
 
 	@Override
@@ -22,6 +20,12 @@ public class Market extends Building {
 		super.create();
 
 		city.getStatLine().addModifier(Stat.GOLD_GAIN, 0.25F);
+	}
+
+	@Override
+	public boolean meetsProductionRequirements() {
+		return city.getPlayerOwner().getHeritageTree().hasStudied(BazaarHeritage.class)
+				&& city.getPlayerOwner().getResearchTree().hasResearched(CurrencyTech.class);
 	}
 
 	@Override
@@ -35,26 +39,8 @@ public class Market extends Building {
 	}
 
 	@Override
-	public boolean meetsProductionRequirements() {
-		
-		if (city.getPlayerOwner().getHeritageTree().hasStudied(BazaarHeritage.class))
-			return false;
-		
-		return city.getPlayerOwner().getResearchTree().hasResearched(CurrencyTech.class);
-	}
-
-	@Override
-	public int getSpecialistSlots() {
-		return 1;
-	}
-
-	@Override
-	public SpecialistType getSpecialistType() {
-		return SpecialistType.MERCHANT;
-	}
-
-	@Override
 	public String getName() {
-		return "Market";
+		return "Bazaar";
 	}
+
 }

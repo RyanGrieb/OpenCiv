@@ -24,8 +24,6 @@ public class Swordsman extends UnitItem {
 
 		public SwordsmanUnit(AbstractPlayer playerOwner, Tile standingTile) {
 			super(playerOwner, standingTile);
-
-			combatStrength.setValue(Stat.COMBAT_STRENGTH, 35);
 		}
 
 		@Override
@@ -54,6 +52,11 @@ public class Swordsman extends UnitItem {
 		@Override
 		public String getName() {
 			return "Swordsman";
+		}
+
+		@Override
+		public float getBaseCombatStrength() {
+			return 35;
 		}
 	}
 

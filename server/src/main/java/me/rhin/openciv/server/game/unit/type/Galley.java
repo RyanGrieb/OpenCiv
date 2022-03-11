@@ -22,8 +22,6 @@ public class Galley extends UnitItem {
 
 		public GalleyUnit(AbstractPlayer playerOwner, Tile standingTile) {
 			super(playerOwner, standingTile);
-
-			combatStrength.setValue(Stat.COMBAT_STRENGTH, 30);
 		}
 
 		@Override
@@ -38,12 +36,12 @@ public class Galley extends UnitItem {
 		public List<UnitType> getUnitTypes() {
 			return Arrays.asList(UnitType.MELEE, UnitType.NAVAL);
 		}
-		
+
 		@Override
 		public Class<? extends Unit> getUpgradedUnit() {
 			return null;
 		}
-		
+
 		@Override
 		public boolean canUpgrade() {
 			return false;
@@ -52,6 +50,11 @@ public class Galley extends UnitItem {
 		@Override
 		public String getName() {
 			return "Galley";
+		}
+
+		@Override
+		public float getBaseCombatStrength() {
+			return 30;
 		}
 	}
 

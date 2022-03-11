@@ -23,8 +23,6 @@ public class Horseman extends UnitItem {
 
 		public HorsemanUnit(AbstractPlayer playerOwner, Tile standingTile) {
 			super(playerOwner, standingTile);
-
-			combatStrength.setValue(Stat.COMBAT_STRENGTH, 28);
 		}
 
 		@Override
@@ -51,7 +49,7 @@ public class Horseman extends UnitItem {
 		public Class<? extends Unit> getUpgradedUnit() {
 			return null;
 		}
-		
+
 		@Override
 		public boolean canUpgrade() {
 			return false;
@@ -60,6 +58,11 @@ public class Horseman extends UnitItem {
 		@Override
 		public String getName() {
 			return "Horseman";
+		}
+
+		@Override
+		public float getBaseCombatStrength() {
+			return 28;
 		}
 	}
 

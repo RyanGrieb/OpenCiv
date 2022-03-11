@@ -19,7 +19,7 @@ public class BazaarHeritage extends Heritage {
 
 	@Override
 	public Sprite getIcon() {
-		return TextureEnum.ICON_GOLD.sprite();
+		return TextureEnum.BUILDING_BAZAAR.sprite();
 	}
 
 	@Override

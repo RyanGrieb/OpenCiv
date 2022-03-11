@@ -23,9 +23,6 @@ public class Crossbowman extends UnitItem {
 
 		public CrossbowmanUnit(AbstractPlayer playerOwner, Tile standingTile) {
 			super(playerOwner, standingTile);
-
-			combatStrength.setValue(Stat.COMBAT_STRENGTH, 24);
-			rangedCombatStrength.setValue(Stat.COMBAT_STRENGTH, 18);
 		}
 
 		@Override
@@ -45,7 +42,7 @@ public class Crossbowman extends UnitItem {
 		public Class<? extends Unit> getUpgradedUnit() {
 			return null;
 		}
-		
+
 		@Override
 		public boolean canUpgrade() {
 			return false;
@@ -54,6 +51,16 @@ public class Crossbowman extends UnitItem {
 		@Override
 		public String getName() {
 			return "Crossbowman";
+		}
+
+		@Override
+		public int getBaseRangedStrength() {
+			return 18;
+		}
+
+		@Override
+		public float getBaseCombatStrength() {
+			return 24;
 		}
 	}
 
@@ -86,5 +93,5 @@ public class Crossbowman extends UnitItem {
 	public float getBaseCombatStrength() {
 		return 24;
 	}
-	
+
 }

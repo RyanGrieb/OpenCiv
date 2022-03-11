@@ -63,7 +63,7 @@ public class Caravan extends UnitItem {
 		public Class<? extends Unit> getUpgradedUnit() {
 			return null;
 		}
-		
+
 		@Override
 		public boolean canUpgrade() {
 			return false;
@@ -72,6 +72,11 @@ public class Caravan extends UnitItem {
 		@Override
 		public String getName() {
 			return "Caravan";
+		}
+
+		@Override
+		public float getBaseCombatStrength() {
+			return 0;
 		}
 	}
 

@@ -21,8 +21,6 @@ public class Scout extends UnitItem {
 
 		public ScoutUnit(AbstractPlayer playerOwner, Tile standingTile) {
 			super(playerOwner, standingTile);
-
-			combatStrength.setValue(Stat.COMBAT_STRENGTH, 10);
 		}
 
 		@Override
@@ -58,6 +56,11 @@ public class Scout extends UnitItem {
 		@Override
 		public String getName() {
 			return "Scout";
+		}
+
+		@Override
+		public float getBaseCombatStrength() {
+			return 10;
 		}
 	}
 

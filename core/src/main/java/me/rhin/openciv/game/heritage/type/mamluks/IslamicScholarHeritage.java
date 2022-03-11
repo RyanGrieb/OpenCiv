@@ -29,12 +29,12 @@ public class IslamicScholarHeritage extends Heritage {
 
 	@Override
 	public String getDesc() {
-		return "5% Total science gain for the player";
+		return "Gain 10% more science in\nthe capital.";
 	}
 
 	@Override
 	protected void onStudied() {
-		
+
 	}
 
 }

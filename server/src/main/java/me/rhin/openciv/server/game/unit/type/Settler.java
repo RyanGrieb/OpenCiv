@@ -36,8 +36,6 @@ public class Settler extends UnitItem {
 
 		public SettlerUnit(AbstractPlayer playerOwner, Tile standingTile) {
 			super(playerOwner, standingTile);
-
-			combatStrength.setValue(Stat.COMBAT_STRENGTH, 0);
 		}
 
 		@Override
@@ -147,6 +145,11 @@ public class Settler extends UnitItem {
 		public String getName() {
 			return "Settler";
 		}
+
+		@Override
+		public float getBaseCombatStrength() {
+			return 0;
+		}
 	}
 
 	@Override
@@ -176,7 +179,6 @@ public class Settler extends UnitItem {
 
 	@Override
 	public float getBaseCombatStrength() {
-
 		return 0;
 	}
 }

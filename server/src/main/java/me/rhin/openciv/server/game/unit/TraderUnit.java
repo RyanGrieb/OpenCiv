@@ -31,7 +31,7 @@ public abstract class TraderUnit extends Unit {
 		this.goldValue = goldValue;
 		this.foodValue = foodValue;
 
-		combatStrength.setValue(Stat.COMBAT_STRENGTH, 0);
+		setCombatStrength(0);
 		playerOwner.getStatLine().addValue(Stat.TRADE_ROUTE_AMOUNT, 1);
 		playerOwner.updateOwnedStatlines(false);
 	}

@@ -21,8 +21,6 @@ public class Missionary extends UnitItem {
 
 		public MissionaryUnit(AbstractPlayer playerOwner, Tile standingTile) {
 			super(playerOwner, standingTile);
-
-			combatStrength.setValue(Stat.COMBAT_STRENGTH, 0);
 		}
 
 		@Override
@@ -56,6 +54,11 @@ public class Missionary extends UnitItem {
 		@Override
 		public String getName() {
 			return "Missionary";
+		}
+
+		@Override
+		public float getBaseCombatStrength() {
+			return 0;
 		}
 	}
 

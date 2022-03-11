@@ -29,8 +29,6 @@ public class Builder extends UnitItem {
 
 		public BuilderUnit(AbstractPlayer playerOwner, Tile standingTile) {
 			super(playerOwner, standingTile);
-
-			combatStrength.setValue(Stat.COMBAT_STRENGTH, 0);
 		}
 
 		@Override
@@ -134,6 +132,11 @@ public class Builder extends UnitItem {
 				}
 
 			return targetImprovement;
+		}
+
+		@Override
+		public float getBaseCombatStrength() {
+			return 0;
 		}
 	}
 

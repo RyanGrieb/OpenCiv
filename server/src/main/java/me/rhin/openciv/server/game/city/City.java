@@ -9,6 +9,8 @@ import java.util.Map.Entry;
 import java.util.Random;
 
 import org.java_websocket.WebSocket;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.Json;
@@ -46,6 +48,7 @@ import me.rhin.openciv.server.listener.SpreadReligionListener;
 import me.rhin.openciv.server.listener.TerritoryGrowListener.TerritoryGrowEvent;
 import me.rhin.openciv.shared.packet.type.AddSpecialistToContainerPacket;
 import me.rhin.openciv.shared.packet.type.BuildingConstructedPacket;
+import me.rhin.openciv.shared.packet.type.BuildingRemovedPacket;
 import me.rhin.openciv.shared.packet.type.CityPopulationUpdatePacket;
 import me.rhin.openciv.shared.packet.type.CityStatUpdatePacket;
 import me.rhin.openciv.shared.packet.type.ClickSpecialistPacket;
@@ -57,8 +60,6 @@ import me.rhin.openciv.shared.packet.type.TerritoryGrowPacket;
 import me.rhin.openciv.shared.stat.Stat;
 import me.rhin.openciv.shared.stat.StatLine;
 import me.rhin.openciv.shared.util.MathHelper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class City implements AttackableEntity, TileObserver, NextTurnListener, ClickSpecialistListener,
 		ClickWorkedTileListener, SpreadReligionListener {
@@ -619,6 +620,29 @@ public class City implements AttackableEntity, TileObserver, NextTurnListener, C
 		playerOwner.sendPacket(json.toJson(packet));
 	}
 
+	public void removeBuilding(Class<? extends Building> buildingClass) {
+
+		Building targetBuilding = null;
+
+		for (Building building : buildings)
+			if (building.getClass() == buildingClass) {
+				targetBuilding = building;
+			}
+
+		buildings.remove(targetBuilding);
+
+		BuildingRemovedPacket buildingRemovedPacket = new BuildingRemovedPacket();
+		buildingRemovedPacket.setBuildingName(targetBuilding.getName());
+		buildingRemovedPacket.setCityName(name);
+
+		Json json = new Json();
+		for (Player player : Server.getInstance().getPlayers()) {
+			player.sendPacket(json.toJson(buildingRemovedPacket));
+		}
+
+		statLine.reduceStatLine(targetBuilding.getStatLine());
+	}
+
 	public Tile getOriginTile() {
 		return originTile;
 	}
@@ -737,6 +761,10 @@ public class City implements AttackableEntity, TileObserver, NextTurnListener, C
 
 	public void setCombatStrength(float combatStrength) {
 		this.combatStrength = combatStrength;
+	}
+
+	public boolean isCapital() {
+		return playerOwner.getOwnedCities().get(0).equals(this);
 	}
 
 	private ArrayList<Tile> getTopWorkableTiles() {

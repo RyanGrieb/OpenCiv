@@ -24,8 +24,6 @@ public class Warrior extends UnitItem {
 
 		public WarriorUnit(AbstractPlayer playerOwner, Tile standingTile) {
 			super(playerOwner, standingTile);
-
-			combatStrength.setValue(Stat.COMBAT_STRENGTH, 20);
 		}
 
 		@Override
@@ -64,6 +62,11 @@ public class Warrior extends UnitItem {
 		@Override
 		public String getName() {
 			return "Warrior";
+		}
+
+		@Override
+		public float getBaseCombatStrength() {
+			return 20;
 		}
 	}
 
