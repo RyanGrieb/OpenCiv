@@ -40,7 +40,7 @@ public abstract class AbstractPlayer {
 		this.statLine = new StatLine();
 		this.diplomacy = new Diplomacy(this);
 
-		this.researchTree = new ResearchTree();
+		this.researchTree = new ResearchTree(this);
 		this.heritageTree = new HeritageTree();
 		this.playerReligion = new PlayerReligion(this);
 	}

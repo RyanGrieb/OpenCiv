@@ -1,11 +1,13 @@
 package me.rhin.openciv.ui.window.type;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 
 import com.badlogic.gdx.utils.Align;
 
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.TextureEnum;
+import me.rhin.openciv.game.research.ResearchTree;
 import me.rhin.openciv.game.research.Technology;
 import me.rhin.openciv.listener.ResizeListener;
 import me.rhin.openciv.shared.stat.Stat;
@@ -57,7 +59,14 @@ public class PickResearchWindow extends AbstractWindow implements ResizeListener
 		int turns = (int) Math.ceil(tech.getScienceCost()
 				/ Civilization.getInstance().getGame().getPlayer().getStatLine().getStatValue(Stat.SCIENCE_GAIN));
 
-		this.turnsLabel = new CustomLabel(turns + " Turns", Align.center, 0, 50, getWidth(), 15);
+		if (tech.hasResearchedRequiredTechs()) {
+			this.turnsLabel = new CustomLabel(turns + " Turns", Align.center, 0, 50, getWidth(), 15);
+
+		} else {
+			this.turnsLabel = new CustomLabel("Queue " + (tech.getRequiedTechsQueue().size() - 1) + " Technologies",
+					Align.center, 0, 50, getWidth(), 15);
+		}
+
 		addActor(turnsLabel);
 
 		this.pickResearchButton = new PickResearchButton(tech, 0, 5, 100, 35);

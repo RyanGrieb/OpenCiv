@@ -1,15 +1,20 @@
 package me.rhin.openciv.game.research;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 
 import com.badlogic.gdx.graphics.g2d.Sprite;
 
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.listener.CompleteResearchListener;
 import me.rhin.openciv.listener.NextTurnListener;
+import me.rhin.openciv.listener.PickResearchListener.PickResearchEvent;
+import me.rhin.openciv.shared.packet.type.ChooseTechPacket;
 import me.rhin.openciv.shared.packet.type.CompleteResearchPacket;
 import me.rhin.openciv.shared.packet.type.NextTurnPacket;
 import me.rhin.openciv.shared.stat.Stat;
+import me.rhin.openciv.ui.label.CustomLabel;
+import me.rhin.openciv.ui.window.type.PickResearchWindow;
 
 public abstract class Technology implements NextTurnListener, CompleteResearchListener {
 
@@ -120,5 +125,52 @@ public abstract class Technology implements NextTurnListener, CompleteResearchLi
 
 	public TreePosition getTreePosition() {
 		return treePosition;
+	}
+
+	/**
+	 * Returns ordered list of all techs required to research up to this technology.
+	 * 
+	 * @return
+	 */
+	public ArrayList<Class<? extends Technology>> getRequiedTechsQueue() {
+		// Get ordered list of techs to research leading up to this one..
+		ResearchTree researchTree = Civilization.getInstance().getGame().getPlayer().getResearchTree();
+		ArrayList<Class<? extends Technology>> requiredTechs = new ArrayList<>();
+
+		LinkedList<Technology> techQueue = new LinkedList<>();
+		techQueue.add(this);
+
+		while (techQueue.size() > 0) {
+			Technology currentTech = techQueue.pop();
+
+			ArrayList<Class<? extends Technology>> techRequirements = currentTech.getRequiredTechs();
+
+			for (Class<? extends Technology> techClass : techRequirements) {
+				if (!researchTree.hasResearched(techClass))
+					techQueue.add(researchTree.getTechnology(techClass));
+			}
+
+			if (!requiredTechs.contains(currentTech.getClass()))
+				requiredTechs.add(0, currentTech.getClass());
+		}
+
+		return requiredTechs;
+	}
+
+	/**
+	 * Sends the required packet & other events to properly research a tech.
+	 */
+	public void research() {
+		ChooseTechPacket packet = new ChooseTechPacket();
+		packet.setTech(id);
+		Civilization.getInstance().getNetworkManager().sendPacket(packet);
+		Civilization.getInstance().getWindowManager().closeWindow(PickResearchWindow.class);
+
+		for (Technology tech : Civilization.getInstance().getGame().getPlayer().getResearchTree().getTechnologies())
+			tech.setResearching(false);
+
+		setResearching(true);
+
+		Civilization.getInstance().getEventManager().fireEvent(new PickResearchEvent(this));
 	}
 }

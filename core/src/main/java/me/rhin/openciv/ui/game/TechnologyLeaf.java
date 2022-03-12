@@ -1,5 +1,7 @@
 package me.rhin.openciv.ui.game;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
@@ -15,6 +17,7 @@ import me.rhin.openciv.listener.CompleteResearchListener;
 import me.rhin.openciv.shared.packet.type.CompleteResearchPacket;
 import me.rhin.openciv.ui.background.ColoredBackground;
 import me.rhin.openciv.ui.label.CustomLabel;
+import me.rhin.openciv.ui.screen.type.InGameScreen;
 import me.rhin.openciv.ui.window.type.PickResearchWindow;
 
 public class TechnologyLeaf extends Group implements CompleteResearchListener {
@@ -27,7 +30,7 @@ public class TechnologyLeaf extends Group implements CompleteResearchListener {
 	private Vector2 backVector;
 	private Vector2 frontVector;
 	private boolean positionUpdated;
-	
+
 	public TechnologyLeaf(final Technology tech, float x, float y, float width, float height) {
 		this.tech = tech;
 		this.setTouchable(Touchable.enabled);
@@ -65,8 +68,13 @@ public class TechnologyLeaf extends Group implements CompleteResearchListener {
 
 			@Override
 			public void clicked(InputEvent event, float x, float y) {
+
+				if (Gdx.input.isKeyPressed(Keys.SHIFT_LEFT)) {
+					// TODO: Allow shift left of techs.
+				}
+
 				if (!Civilization.getInstance().getWindowManager().allowsInput(event.getListenerActor())
-						|| !tech.hasResearchedRequiredTechs() || tech.isResearched()) {
+						|| tech.isResearched()) {
 					return;
 				}
 
@@ -109,7 +117,7 @@ public class TechnologyLeaf extends Group implements CompleteResearchListener {
 	@Override
 	public void setPosition(float x, float y) {
 		super.setPosition(x, y);
-		
+
 		backVector.set(x, y + getHeight() / 2);
 		frontVector.set(x + getWidth(), y + getHeight() / 2);
 		positionUpdated = true;
@@ -118,7 +126,7 @@ public class TechnologyLeaf extends Group implements CompleteResearchListener {
 	public Technology getTech() {
 		return tech;
 	}
-	
+
 	public void setPositionUpdated(boolean positionUpdated) {
 		this.positionUpdated = positionUpdated;
 	}
@@ -126,10 +134,10 @@ public class TechnologyLeaf extends Group implements CompleteResearchListener {
 	public boolean isPositionUpdated() {
 		return positionUpdated;
 	}
-	
+
 	public void onClicked() {
 		// Start researching the tech, ect.
-		//LOGGER.info("Research: " + tech.getName());
+		// LOGGER.info("Research: " + tech.getName());
 	}
 
 	public Vector2 getBackVector() {

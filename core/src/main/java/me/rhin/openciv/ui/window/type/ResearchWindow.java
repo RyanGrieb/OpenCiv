@@ -21,7 +21,7 @@ import me.rhin.openciv.ui.window.AbstractWindow;
 import me.rhin.openciv.ui.window.HorizontalWindow;
 
 public class ResearchWindow extends AbstractWindow
-		implements HorizontalWindow, ResizeListener, TopShapeRenderListener, PickResearchListener {
+		implements HorizontalWindow, ResizeListener, TopShapeRenderListener, PickResearchListener{
 
 	private static final int LEAF_WIDTH = 185;
 	private static final int LEAF_HEIGHT = 45;

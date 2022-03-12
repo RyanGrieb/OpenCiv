@@ -5,6 +5,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 
 import me.rhin.openciv.Civilization;
+import me.rhin.openciv.game.player.AbstractPlayer;
+import me.rhin.openciv.game.player.Player;
 import me.rhin.openciv.game.research.type.AnimalHusbandryTech;
 import me.rhin.openciv.game.research.type.ArcheryTech;
 import me.rhin.openciv.game.research.type.BronzeWorkingTech;
@@ -36,12 +38,16 @@ import me.rhin.openciv.shared.packet.type.CompleteResearchPacket;
 
 public class ResearchTree implements PickResearchListener, CompleteResearchListener {
 
+	private AbstractPlayer player;
 	private LinkedHashMap<Class<? extends Technology>, Technology> technologies;
+	private ArrayList<Class<? extends Technology>> techQueue;
 	private Technology researchingTech;
 	private int techIDIndex;
 
-	public ResearchTree() {
+	public ResearchTree(AbstractPlayer player) {
+		this.player = player;
 		this.technologies = new LinkedHashMap<>();
+		// this.techQueue = new ArrayList<>();
 		this.techIDIndex = 0;
 
 		// FIXME: This is going to be a crappton of techs
@@ -71,6 +77,7 @@ public class ResearchTree implements PickResearchListener, CompleteResearchListe
 		technologies.put(MetalCastingTech.class, new MetalCastingTech(this));
 		technologies.put(MachineryTech.class, new MachineryTech(this));
 
+		// FIXME: Don't add listeners for other players
 		Civilization.getInstance().getEventManager().addListener(PickResearchListener.class, this);
 		Civilization.getInstance().getEventManager().addListener(CompleteResearchListener.class, this);
 	}
@@ -90,11 +97,29 @@ public class ResearchTree implements PickResearchListener, CompleteResearchListe
 
 	@Override
 	public void onCompleteResearch(CompleteResearchPacket packet) {
+		if (!player.equals(Civilization.getInstance().getGame().getPlayer()))
+			return;
+
+		if (techQueue != null && techQueue.contains(researchingTech.getClass())) {
+
+			techQueue.remove(researchingTech.getClass());
+
+			if (techQueue.size() > 0)
+				getTechnology(techQueue.get(0)).research();
+			else
+				techQueue = null;
+
+			return;
+		}
+
 		researchingTech = null;
 	}
 
 	@Override
 	public void onPickResearch(Technology tech) {
+		if (!player.equals(Civilization.getInstance().getGame().getPlayer()))
+			return;
+
 		researchingTech = tech;
 	}
 
@@ -104,5 +129,10 @@ public class ResearchTree implements PickResearchListener, CompleteResearchListe
 
 	public int getCurrentTechIDIndex() {
 		return techIDIndex++;
+	}
+
+	public void setTechQueue(ArrayList<Class<? extends Technology>> techQueue) {
+		this.techQueue = techQueue;
+		getTechnology(techQueue.get(0)).research();
 	}
 }

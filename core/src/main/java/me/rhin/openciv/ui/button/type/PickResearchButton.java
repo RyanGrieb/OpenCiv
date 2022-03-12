@@ -6,6 +6,7 @@ import me.rhin.openciv.listener.PickResearchListener.PickResearchEvent;
 import me.rhin.openciv.shared.packet.type.ChooseTechPacket;
 import me.rhin.openciv.ui.button.Button;
 import me.rhin.openciv.ui.window.type.PickResearchWindow;
+import me.rhin.openciv.ui.window.type.ResearchWindow;
 
 public class PickResearchButton extends Button {
 
@@ -19,16 +20,14 @@ public class PickResearchButton extends Button {
 
 	@Override
 	public void onClick() {
-		ChooseTechPacket packet = new ChooseTechPacket();
-		packet.setTech(tech.getID());
-		Civilization.getInstance().getNetworkManager().sendPacket(packet);
-		Civilization.getInstance().getWindowManager().closeWindow(PickResearchWindow.class);
 
-		for (Technology tech : Civilization.getInstance().getGame().getPlayer().getResearchTree().getTechnologies())
-			tech.setResearching(false);
+		if (tech.hasResearchedRequiredTechs()) {
+			tech.research();
+		} else {
+			Civilization.getInstance().getGame().getPlayer().getResearchTree()
+					.setTechQueue(tech.getRequiedTechsQueue());
 
-		tech.setResearching(true);
-
-		Civilization.getInstance().getEventManager().fireEvent(new PickResearchEvent(tech));
+			// TODO: Reference tech leafs to represent a queued tech.
+		}
 	}
 }

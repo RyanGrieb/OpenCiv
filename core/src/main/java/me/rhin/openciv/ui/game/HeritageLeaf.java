@@ -15,6 +15,7 @@ import me.rhin.openciv.listener.CompleteHeritageListener;
 import me.rhin.openciv.shared.packet.type.CompleteHeritagePacket;
 import me.rhin.openciv.ui.background.ColoredBackground;
 import me.rhin.openciv.ui.label.CustomLabel;
+import me.rhin.openciv.ui.screen.type.InGameScreen;
 import me.rhin.openciv.ui.window.type.PickHeritageWindow;
 
 public class HeritageLeaf extends Group implements Comparable<HeritageLeaf>, CompleteHeritageListener {
@@ -66,6 +67,7 @@ public class HeritageLeaf extends Group implements Comparable<HeritageLeaf>, Com
 
 			@Override
 			public void clicked(InputEvent event, float x, float y) {
+
 				if (!Civilization.getInstance().getWindowManager().allowsInput(event.getListenerActor())
 						|| !heritage.ableToStudy() || heritage.isStudied()) {
 					return;
@@ -81,6 +83,7 @@ public class HeritageLeaf extends Group implements Comparable<HeritageLeaf>, Com
 			@Override
 			public void exit(InputEvent event, float x, float y, int pointer, Actor fromActor) {
 			}
+
 		});
 
 		Civilization.getInstance().getEventManager().addListener(CompleteHeritageListener.class, this);
