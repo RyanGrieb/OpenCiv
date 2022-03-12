@@ -5,21 +5,23 @@ import me.rhin.openciv.server.game.city.building.Building;
 import me.rhin.openciv.server.game.heritage.type.mamluks.BazaarHeritage;
 import me.rhin.openciv.server.game.research.type.CurrencyTech;
 import me.rhin.openciv.shared.stat.Stat;
+import me.rhin.openciv.shared.stat.StatLine;
 
 public class Bazaar extends Building {
 
 	public Bazaar(City city) {
 		super(city);
-
-		this.statLine.addValue(Stat.GOLD_GAIN, 2);
-		this.statLine.addValue(Stat.SCIENCE_GAIN, 2);
 	}
 
 	@Override
-	public void create() {
-		super.create();
+	public StatLine getStatLine() {
+		StatLine statLine = new StatLine();
 
-		city.getStatLine().addModifier(Stat.GOLD_GAIN, 0.25F);
+		statLine.addValue(Stat.GOLD_GAIN, 2);
+		statLine.addValue(Stat.SCIENCE_GAIN, 2);
+		statLine.addModifier(Stat.GOLD_GAIN, 0.25F);
+
+		return statLine;
 	}
 
 	@Override

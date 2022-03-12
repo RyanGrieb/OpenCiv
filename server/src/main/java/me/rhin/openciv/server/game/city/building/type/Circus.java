@@ -4,13 +4,21 @@ import me.rhin.openciv.server.game.city.City;
 import me.rhin.openciv.server.game.city.building.Building;
 import me.rhin.openciv.server.game.research.type.TrappingTech;
 import me.rhin.openciv.shared.stat.Stat;
+import me.rhin.openciv.shared.stat.StatLine;
 
 public class Circus extends Building {
 
 	public Circus(City city) {
 		super(city);
+	}
 
-		this.statLine.addValue(Stat.MORALE_CITY, 10);
+	@Override
+	public StatLine getStatLine() {
+		StatLine statLine = new StatLine();
+
+		statLine.addValue(Stat.MORALE_CITY, 10);
+
+		return statLine;
 	}
 
 	@Override

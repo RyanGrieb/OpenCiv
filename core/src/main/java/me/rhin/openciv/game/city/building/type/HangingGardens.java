@@ -7,14 +7,22 @@ import me.rhin.openciv.game.city.building.Building;
 import me.rhin.openciv.game.city.wonders.Wonder;
 import me.rhin.openciv.game.research.type.MathematicsTech;
 import me.rhin.openciv.shared.stat.Stat;
+import me.rhin.openciv.shared.stat.StatLine;
 
 public class HangingGardens extends Building implements Wonder {
 
 	public HangingGardens(City city) {
 		super(city);
+	}
 
-		this.statLine.addValue(Stat.FOOD_GAIN, 10);
-		this.statLine.addValue(Stat.HERITAGE_GAIN, 1);
+	@Override
+	public StatLine getStatLine() {
+		StatLine statLine = new StatLine();
+
+		statLine.addValue(Stat.FOOD_GAIN, 10);
+		statLine.addValue(Stat.HERITAGE_GAIN, 1);
+
+		return statLine;
 	}
 
 	@Override
@@ -44,6 +52,6 @@ public class HangingGardens extends Building implements Wonder {
 
 	@Override
 	public String getDesc() {
-		return "The Hanging Gardens of Babylon \nwere one of the Seven Wonders of\nthe Ancient World listed by\n Hellenic culture. \n+10 Food \n+1 Heritage";
+		return "The Hanging Gardens of Babylon \nwere one of the Seven Wonders of\nthe Ancient World listed by\nHellenic culture. \n+10 Food \n+1 Heritage";
 	}
 }

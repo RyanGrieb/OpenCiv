@@ -7,14 +7,22 @@ import me.rhin.openciv.game.map.tile.Tile;
 import me.rhin.openciv.game.map.tile.TileType.TileProperty;
 import me.rhin.openciv.game.research.type.OpticsTech;
 import me.rhin.openciv.shared.stat.Stat;
+import me.rhin.openciv.shared.stat.StatLine;
 
 public class Lighthouse extends Building {
 
 	public Lighthouse(City city) {
 		super(city);
+	}
 
-		this.statLine.addValue(Stat.FOOD_GAIN, 1);
-		this.statLine.addValue(Stat.MAINTENANCE, 1);
+	@Override
+	public StatLine getStatLine() {
+		StatLine statLine = new StatLine();
+
+		statLine.addValue(Stat.FOOD_GAIN, 1);
+		statLine.addValue(Stat.MAINTENANCE, 1);
+
+		return statLine;
 	}
 
 	@Override

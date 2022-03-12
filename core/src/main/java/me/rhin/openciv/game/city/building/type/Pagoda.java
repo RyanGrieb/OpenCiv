@@ -5,15 +5,23 @@ import me.rhin.openciv.game.city.City;
 import me.rhin.openciv.game.city.building.Building;
 import me.rhin.openciv.game.religion.bonus.type.follower.PagodasBonus;
 import me.rhin.openciv.shared.stat.Stat;
+import me.rhin.openciv.shared.stat.StatLine;
 
 public class Pagoda extends Building {
 
 	public Pagoda(City city) {
 		super(city);
+	}
 
-		this.statLine.addValue(Stat.HERITAGE_GAIN, 2);
-		this.statLine.addValue(Stat.FAITH_GAIN, 2);
-		this.statLine.addValue(Stat.MORALE_CITY, 10);
+	@Override
+	public StatLine getStatLine() {
+		StatLine statLine = new StatLine();
+
+		statLine.addValue(Stat.HERITAGE_GAIN, 2);
+		statLine.addValue(Stat.FAITH_GAIN, 2);
+		statLine.addValue(Stat.MORALE_CITY, 10);
+
+		return statLine;
 	}
 
 	@Override

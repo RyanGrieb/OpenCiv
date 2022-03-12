@@ -14,10 +14,16 @@ public class Lighthouse extends Building implements IncreaseTileStatlineBuilding
 
 	public Lighthouse(City city) {
 		super(city);
+	}
 
-		this.statLine.addValue(Stat.FOOD_GAIN, 1);
-		this.statLine.addValue(Stat.MAINTENANCE, 1);
+	@Override
+	public StatLine getStatLine() {
+		StatLine statLine = new StatLine();
 
+		statLine.addValue(Stat.FOOD_GAIN, 1);
+		statLine.addValue(Stat.MAINTENANCE, 1);
+
+		return statLine;
 	}
 
 	@Override

@@ -7,13 +7,21 @@ import me.rhin.openciv.game.city.building.Building;
 import me.rhin.openciv.game.city.wonders.Wonder;
 import me.rhin.openciv.game.research.type.BronzeWorkingTech;
 import me.rhin.openciv.shared.stat.Stat;
+import me.rhin.openciv.shared.stat.StatLine;
 
 public class StatueOfAres extends Building implements Wonder {
 
 	public StatueOfAres(City city) {
 		super(city);
+	}
 
-		this.statLine.addValue(Stat.HERITAGE_GAIN, 1);
+	@Override
+	public StatLine getStatLine() {
+		StatLine statLine = new StatLine();
+
+		statLine.addValue(Stat.HERITAGE_GAIN, 1);
+
+		return statLine;
 	}
 
 	@Override

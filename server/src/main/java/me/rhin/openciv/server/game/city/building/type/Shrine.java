@@ -7,14 +7,22 @@ import me.rhin.openciv.server.game.research.type.PotteryTech;
 import me.rhin.openciv.server.game.unit.UnitItem;
 import me.rhin.openciv.server.game.unit.UnitItem.UnitType;
 import me.rhin.openciv.shared.stat.Stat;
+import me.rhin.openciv.shared.stat.StatLine;
 
 public class Shrine extends Building {
 
 	public Shrine(City city) {
 		super(city);
+	}
 
-		this.statLine.addValue(Stat.HERITAGE_GAIN, 1);
-		this.statLine.addValue(Stat.MAINTENANCE, 1);
+	@Override
+	public StatLine getStatLine() {
+		StatLine statLine = new StatLine();
+
+		statLine.addValue(Stat.HERITAGE_GAIN, 1);
+		statLine.addValue(Stat.MAINTENANCE, 1);
+
+		return statLine;
 	}
 
 	@Override

@@ -4,16 +4,23 @@ import me.rhin.openciv.server.game.city.City;
 import me.rhin.openciv.server.game.city.building.Building;
 import me.rhin.openciv.server.game.research.type.WheelTech;
 import me.rhin.openciv.shared.stat.Stat;
+import me.rhin.openciv.shared.stat.StatLine;
 
 public class WaterMill extends Building {
 
 	public WaterMill(City city) {
 		super(city);
+	}
 
-		this.statLine.addValue(Stat.FOOD_GAIN, 2);
-		this.statLine.addValue(Stat.PRODUCTION_GAIN, 1);
-		this.statLine.addValue(Stat.MAINTENANCE, 2);
-		// TODO: Implement maintenance
+	@Override
+	public StatLine getStatLine() {
+		StatLine statLine = new StatLine();
+
+		statLine.addValue(Stat.FOOD_GAIN, 2);
+		statLine.addValue(Stat.PRODUCTION_GAIN, 1);
+		statLine.addValue(Stat.MAINTENANCE, 2);
+
+		return statLine;
 	}
 
 	@Override

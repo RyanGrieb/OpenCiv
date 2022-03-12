@@ -7,13 +7,21 @@ import me.rhin.openciv.game.city.building.Building;
 import me.rhin.openciv.game.city.wonders.Wonder;
 import me.rhin.openciv.game.research.type.CalendarTech;
 import me.rhin.openciv.shared.stat.Stat;
+import me.rhin.openciv.shared.stat.StatLine;
 
 public class Stonehenge extends Building implements Wonder {
 
 	public Stonehenge(City city) {
 		super(city);
+	}
 
-		this.statLine.addValue(Stat.FAITH_GAIN, 5);
+	@Override
+	public StatLine getStatLine() {
+		StatLine statLine = new StatLine();
+
+		statLine.addValue(Stat.FAITH_GAIN, 5);
+
+		return statLine;
 	}
 
 	@Override

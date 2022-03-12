@@ -16,6 +16,13 @@ public class Mint extends Building implements IncreaseTileStatlineBuilding {
 	}
 
 	@Override
+	public StatLine getStatLine() {
+		StatLine statLine = new StatLine();
+
+		return statLine;
+	}
+	
+	@Override
 	public StatLine getAddedStatline(Tile tile) {
 		StatLine statLine = new StatLine();
 

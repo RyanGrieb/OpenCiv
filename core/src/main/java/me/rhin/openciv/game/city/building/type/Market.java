@@ -8,13 +8,21 @@ import me.rhin.openciv.game.heritage.type.mamluks.BazaarHeritage;
 import me.rhin.openciv.game.research.type.CurrencyTech;
 import me.rhin.openciv.shared.city.SpecialistType;
 import me.rhin.openciv.shared.stat.Stat;
+import me.rhin.openciv.shared.stat.StatLine;
 
 public class Market extends Building implements SpecialistContainer {
 
 	public Market(City city) {
 		super(city);
+	}
 
-		this.statLine.addValue(Stat.GOLD_GAIN, 2);
+	@Override
+	public StatLine getStatLine() {
+		StatLine statLine = new StatLine();
+
+		statLine.addValue(Stat.GOLD_GAIN, 2);
+
+		return statLine;
 	}
 
 	@Override

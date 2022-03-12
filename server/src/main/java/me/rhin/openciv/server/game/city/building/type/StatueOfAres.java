@@ -4,7 +4,6 @@ import java.util.ArrayList;
 
 import me.rhin.openciv.server.Server;
 import me.rhin.openciv.server.game.AbstractPlayer;
-import me.rhin.openciv.server.game.Player;
 import me.rhin.openciv.server.game.city.City;
 import me.rhin.openciv.server.game.city.building.Building;
 import me.rhin.openciv.server.game.city.wonders.Wonder;
@@ -15,13 +14,12 @@ import me.rhin.openciv.server.game.unit.Unit;
 import me.rhin.openciv.server.listener.CaptureCityListener;
 import me.rhin.openciv.server.listener.UnitFinishedMoveListener;
 import me.rhin.openciv.shared.stat.Stat;
+import me.rhin.openciv.shared.stat.StatLine;
 
 public class StatueOfAres extends Building implements Wonder, UnitFinishedMoveListener, CaptureCityListener {
 
 	public StatueOfAres(City city) {
 		super(city);
-
-		this.statLine.addValue(Stat.HERITAGE_GAIN, 1);
 
 		Server.getInstance().getEventManager().addListener(UnitFinishedMoveListener.class, this);
 		Server.getInstance().getEventManager().addListener(CaptureCityListener.class, this);
@@ -30,6 +28,15 @@ public class StatueOfAres extends Building implements Wonder, UnitFinishedMoveLi
 		// captured enemy city.
 		
 		//TODO: Handle territory growth & newly created units.
+	}
+	
+	@Override
+	public StatLine getStatLine() {
+		StatLine statLine = new StatLine();
+
+		statLine.addValue(Stat.HERITAGE_GAIN, 1);
+
+		return statLine;
 	}
 
 	@Override

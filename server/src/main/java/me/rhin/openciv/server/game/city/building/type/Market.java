@@ -6,22 +6,22 @@ import me.rhin.openciv.server.game.heritage.type.mamluks.BazaarHeritage;
 import me.rhin.openciv.server.game.research.type.CurrencyTech;
 import me.rhin.openciv.shared.city.SpecialistType;
 import me.rhin.openciv.shared.stat.Stat;
+import me.rhin.openciv.shared.stat.StatLine;
 
 public class Market extends Building {
 
 	public Market(City city) {
 		super(city);
-
-		this.statLine.addValue(Stat.GOLD_GAIN, 2);
-
-		// TODO: Implement gold for every trade route to this city.
 	}
 
 	@Override
-	public void create() {
-		super.create();
+	public StatLine getStatLine() {
+		StatLine statLine = new StatLine();
 
-		city.getStatLine().addModifier(Stat.GOLD_GAIN, 0.25F);
+		statLine.addValue(Stat.GOLD_GAIN, 2);
+		statLine.addModifier(Stat.GOLD_GAIN, 0.25F);
+
+		return statLine;
 	}
 
 	@Override
@@ -36,10 +36,10 @@ public class Market extends Building {
 
 	@Override
 	public boolean meetsProductionRequirements() {
-		
+
 		if (city.getPlayerOwner().getHeritageTree().hasStudied(BazaarHeritage.class))
 			return false;
-		
+
 		return city.getPlayerOwner().getResearchTree().hasResearched(CurrencyTech.class);
 	}
 

@@ -8,20 +8,28 @@ import me.rhin.openciv.server.game.map.tile.Tile;
 import me.rhin.openciv.server.game.map.tile.TileType.TileProperty;
 import me.rhin.openciv.server.game.research.type.IronWorkingTech;
 import me.rhin.openciv.shared.stat.Stat;
+import me.rhin.openciv.shared.stat.StatLine;
 
 public class Colossus extends Building implements Wonder {
 
 	public Colossus(City city) {
 		super(city);
-		
-		this.statLine.addValue(Stat.HERITAGE_GAIN, 1);
-		this.statLine.addValue(Stat.GOLD_GAIN, 5);
 	}
-	
+
+	@Override
+	public StatLine getStatLine() {
+		StatLine statLine = new StatLine();
+
+		statLine.addValue(Stat.HERITAGE_GAIN, 1);
+		statLine.addValue(Stat.GOLD_GAIN, 5);
+
+		return statLine;
+	}
+
 	@Override
 	public void create() {
 		super.create();
-		
+
 		city.getStatLine().addModifier(Stat.TRADE_GOLD_MODIFIER, 0.5F);
 		city.getPlayerOwner().getStatLine().addValue(Stat.MAX_TRADE_ROUTES, 1);
 		city.getPlayerOwner().updateOwnedStatlines(false);
@@ -29,12 +37,12 @@ public class Colossus extends Building implements Wonder {
 
 	@Override
 	public boolean meetsProductionRequirements() {
-		
+
 		boolean nearWater = false;
 		for (Tile tile : city.getTile().getAdjTiles())
 			if (tile.containsTileProperty(TileProperty.WATER))
 				nearWater = true;
-		
+
 		return city.getPlayerOwner().getResearchTree().hasResearched(IronWorkingTech.class)
 				&& !Server.getInstance().getInGameState().getWonders().isBuilt(getClass()) && nearWater;
 	}

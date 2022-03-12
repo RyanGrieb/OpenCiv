@@ -16,9 +16,15 @@ public class Stables extends Building implements IncreaseTileStatlineBuilding {
 
 	public Stables(City city) {
 		super(city);
+	}
 
-		this.statLine.addValue(Stat.MAINTENANCE, 1);
+	@Override
+	public StatLine getStatLine() {
+		StatLine statLine = new StatLine();
 
+		statLine.addValue(Stat.MAINTENANCE, 1);
+
+		return statLine;
 	}
 
 	@Override

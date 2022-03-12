@@ -8,21 +8,29 @@ import me.rhin.openciv.game.city.specialist.SpecialistContainer;
 import me.rhin.openciv.game.research.type.WritingTech;
 import me.rhin.openciv.shared.city.SpecialistType;
 import me.rhin.openciv.shared.stat.Stat;
+import me.rhin.openciv.shared.stat.StatLine;
 
 public class Library extends Building implements SpecialistContainer {
 
 	public Library(City city) {
 		super(city);
+	}
 
-		this.statLine.addValue(Stat.SCIENCE_GAIN, 2);
-		this.statLine.addValue(Stat.MAINTENANCE, 1);
+	@Override
+	public StatLine getStatLine() {
+		StatLine statLine = new StatLine();
+
+		statLine.addValue(Stat.SCIENCE_GAIN, 2);
+		statLine.addValue(Stat.MAINTENANCE, 1);
+
+		return statLine;
 	}
 
 	@Override
 	public float getBuildingProductionCost() {
 		return 75;
 	}
-	
+
 	@Override
 	public float getGoldCost() {
 		return 175;

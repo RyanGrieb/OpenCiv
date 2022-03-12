@@ -6,15 +6,23 @@ import me.rhin.openciv.server.game.city.building.Building;
 import me.rhin.openciv.server.game.research.type.EngineeringTech;
 import me.rhin.openciv.server.listener.CityGrowthListener;
 import me.rhin.openciv.shared.stat.Stat;
+import me.rhin.openciv.shared.stat.StatLine;
 
 public class Aqueduct extends Building implements CityGrowthListener {
 
 	public Aqueduct(City city) {
 		super(city);
 
-		this.statLine.addValue(Stat.MAINTENANCE, 1);
-
 		Server.getInstance().getEventManager().addListener(CityGrowthListener.class, this);
+	}
+
+	@Override
+	public StatLine getStatLine() {
+		StatLine statLine = new StatLine();
+
+		statLine.addValue(Stat.MAINTENANCE, 1);
+
+		return statLine;
 	}
 
 	@Override

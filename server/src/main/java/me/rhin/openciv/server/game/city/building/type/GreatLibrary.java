@@ -7,14 +7,23 @@ import me.rhin.openciv.server.game.city.wonders.Wonder;
 import me.rhin.openciv.server.game.research.type.WritingTech;
 import me.rhin.openciv.shared.city.SpecialistType;
 import me.rhin.openciv.shared.stat.Stat;
+import me.rhin.openciv.shared.stat.StatLine;
 
 public class GreatLibrary extends Building implements Wonder {
 
 	public GreatLibrary(City city) {
 		super(city);
+	}
 
-		this.statLine.addValue(Stat.SCIENCE_GAIN, 3);
-		this.statLine.addValue(Stat.HERITAGE_GAIN, 1);
+	@Override
+	public StatLine getStatLine() {
+		StatLine statLine = new StatLine();
+
+		statLine.addValue(Stat.SCIENCE_GAIN, 3);
+		statLine.addValue(Stat.HERITAGE_GAIN, 1);
+		statLine.addModifier(Stat.SCIENCE_GAIN, 0.1F);
+
+		return statLine;
 	}
 
 	@Override
@@ -24,13 +33,11 @@ public class GreatLibrary extends Building implements Wonder {
 			if (!city.containsBuilding(Library.class))
 				city.addBuilding(new Library(city));
 
-		city.getStatLine().addModifier(Stat.SCIENCE_GAIN, 0.10F);
-
 		// NOTE: We call this after we modify the cities statline since we send stat
 		// update packet here.
 		super.create();
 
-		//city.getPlayerOwner().updateOwnedStatlines(false);
+		// city.getPlayerOwner().updateOwnedStatlines(false);
 	}
 
 	@Override

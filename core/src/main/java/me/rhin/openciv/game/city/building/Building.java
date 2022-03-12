@@ -10,14 +10,14 @@ import me.rhin.openciv.shared.stat.StatValue;
 public abstract class Building implements ProductionItem {
 
 	protected City city;
-	protected StatLine statLine;
 	protected float productionModifier;
 	protected boolean built;
 
 	public Building(City city) {
 		this.city = city;
-		this.statLine = new StatLine();
 	}
+
+	public abstract StatLine getStatLine();
 
 	public abstract float getBuildingProductionCost();
 
@@ -48,10 +48,6 @@ public abstract class Building implements ProductionItem {
 	@Override
 	public String getCategory() {
 		return "Buildings";
-	}
-
-	public StatLine getStatLine() {
-		return statLine;
 	}
 
 	public City getCity() {

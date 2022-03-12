@@ -9,14 +9,22 @@ import me.rhin.openciv.game.map.tile.Tile;
 import me.rhin.openciv.game.map.tile.TileType.TileProperty;
 import me.rhin.openciv.game.research.type.IronWorkingTech;
 import me.rhin.openciv.shared.stat.Stat;
+import me.rhin.openciv.shared.stat.StatLine;
 
 public class Colossus extends Building implements Wonder {
 
 	public Colossus(City city) {
 		super(city);
-		
-		this.statLine.addValue(Stat.HERITAGE_GAIN, 1);
-		this.statLine.addValue(Stat.GOLD_GAIN, 5);
+	}
+
+	@Override
+	public StatLine getStatLine() {
+		StatLine statLine = new StatLine();
+
+		statLine.addValue(Stat.HERITAGE_GAIN, 1);
+		statLine.addValue(Stat.GOLD_GAIN, 5);
+
+		return statLine;
 	}
 
 	@Override

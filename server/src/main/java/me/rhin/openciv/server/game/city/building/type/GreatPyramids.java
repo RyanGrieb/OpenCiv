@@ -12,13 +12,21 @@ import me.rhin.openciv.server.game.unit.Unit;
 import me.rhin.openciv.server.game.unit.type.Builder.BuilderUnit;
 import me.rhin.openciv.shared.packet.type.AddUnitPacket;
 import me.rhin.openciv.shared.stat.Stat;
+import me.rhin.openciv.shared.stat.StatLine;
 
 public class GreatPyramids extends Building implements Wonder {
 
 	public GreatPyramids(City city) {
 		super(city);
+	}
 
-		this.statLine.addValue(Stat.HERITAGE_GAIN, 1);
+	@Override
+	public StatLine getStatLine() {
+		StatLine statLine = new StatLine();
+
+		statLine.addValue(Stat.HERITAGE_GAIN, 1);
+
+		return statLine;
 	}
 
 	@Override

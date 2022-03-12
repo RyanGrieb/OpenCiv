@@ -6,14 +6,22 @@ import me.rhin.openciv.server.game.city.building.Building;
 import me.rhin.openciv.server.game.city.wonders.Wonder;
 import me.rhin.openciv.server.game.research.type.MathematicsTech;
 import me.rhin.openciv.shared.stat.Stat;
+import me.rhin.openciv.shared.stat.StatLine;
 
 public class HangingGardens extends Building implements Wonder {
 
 	public HangingGardens(City city) {
 		super(city);
+	}
 
-		this.statLine.addValue(Stat.FOOD_GAIN, 10);
-		this.statLine.addValue(Stat.HERITAGE_GAIN, 1);
+	@Override
+	public StatLine getStatLine() {
+		StatLine statLine = new StatLine();
+
+		statLine.addValue(Stat.FOOD_GAIN, 10);
+		statLine.addValue(Stat.HERITAGE_GAIN, 1);
+
+		return statLine;
 	}
 
 	@Override

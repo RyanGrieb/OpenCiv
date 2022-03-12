@@ -4,21 +4,23 @@ import me.rhin.openciv.server.game.city.City;
 import me.rhin.openciv.server.game.city.building.Building;
 import me.rhin.openciv.server.game.research.type.PhilosophyTech;
 import me.rhin.openciv.shared.stat.Stat;
+import me.rhin.openciv.shared.stat.StatLine;
 
 public class NationalCollege extends Building {
 
 	public NationalCollege(City city) {
 		super(city);
-
-		this.statLine.addValue(Stat.SCIENCE_GAIN, 3);
-		this.statLine.addValue(Stat.HERITAGE_GAIN, 1);
 	}
 
 	@Override
-	public void create() {
-		super.create();
-		
-		city.getStatLine().addModifier(Stat.SCIENCE_GAIN, 0.5F);
+	public StatLine getStatLine() {
+		StatLine statLine = new StatLine();
+
+		statLine.addValue(Stat.SCIENCE_GAIN, 3);
+		statLine.addValue(Stat.HERITAGE_GAIN, 1);
+		statLine.addModifier(Stat.SCIENCE_GAIN, 0.5F);
+
+		return statLine;
 	}
 
 	@Override

@@ -5,13 +5,21 @@ import me.rhin.openciv.game.city.City;
 import me.rhin.openciv.game.city.building.Building;
 import me.rhin.openciv.game.research.type.MasonryTech;
 import me.rhin.openciv.shared.stat.Stat;
+import me.rhin.openciv.shared.stat.StatLine;
 
 public class Walls extends Building {
 
 	public Walls(City city) {
 		super(city);
-		
-		this.statLine.addValue(Stat.MAINTENANCE, 1);
+	}
+
+	@Override
+	public StatLine getStatLine() {
+		StatLine statLine = new StatLine();
+
+		statLine.addValue(Stat.MAINTENANCE, 1);
+
+		return statLine;
 	}
 
 	@Override

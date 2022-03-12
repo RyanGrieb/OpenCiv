@@ -16,10 +16,17 @@ public class Forge extends Building implements IncreaseTileStatlineBuilding {
 
 	public Forge(City city) {
 		super(city);
-
-		this.statLine.addValue(Stat.MAINTENANCE, 1);
 	}
-	
+
+	@Override
+	public StatLine getStatLine() {
+		StatLine statLine = new StatLine();
+
+		statLine.addValue(Stat.HERITAGE_GAIN, 1);
+
+		return statLine;
+	}
+
 	@Override
 	public void create() {
 		super.create();
@@ -44,7 +51,7 @@ public class Forge extends Building implements IncreaseTileStatlineBuilding {
 
 		return statLine;
 	}
-	
+
 	@Override
 	public boolean meetsProductionRequirements() {
 

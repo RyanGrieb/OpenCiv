@@ -19,14 +19,14 @@ public abstract class Building implements ProductionItem {
 	private static final Logger LOGGER = LoggerFactory.getLogger(Building.class);
 
 	protected City city;
-	protected StatLine statLine;
 	protected boolean built;
 	private float productionModifier;
 
 	public Building(City city) {
 		this.city = city;
-		this.statLine = new StatLine();
 	}
+
+	public abstract StatLine getStatLine();
 
 	public abstract float getBuildingProductionCost();
 
@@ -74,7 +74,7 @@ public abstract class Building implements ProductionItem {
 
 		float value = 0;
 
-		for (Entry<Stat, StatValue> entry : statLine.getStatValues().entrySet()) {
+		for (Entry<Stat, StatValue> entry : getStatLine().getStatValues().entrySet()) {
 			// FIXME: We can do better than this
 			float modifier = 0;
 			float baseValue = entry.getValue().getValue();
@@ -130,9 +130,5 @@ public abstract class Building implements ProductionItem {
 
 	public SpecialistType getSpecialistType() {
 		return null;
-	}
-
-	public StatLine getStatLine() {
-		return statLine;
 	}
 }

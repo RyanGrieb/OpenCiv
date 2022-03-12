@@ -4,21 +4,23 @@ import me.rhin.openciv.server.game.city.City;
 import me.rhin.openciv.server.game.city.building.Building;
 import me.rhin.openciv.server.game.research.type.TheologyTech;
 import me.rhin.openciv.shared.stat.Stat;
+import me.rhin.openciv.shared.stat.StatLine;
 
 public class Garden extends Building {
 
 	public Garden(City city) {
 		super(city);
-
-		this.statLine.addValue(Stat.FOOD_GAIN, 1);
-		this.statLine.addValue(Stat.MAINTENANCE, 1);
 	}
 
 	@Override
-	public void create() {
-		super.create();
+	public StatLine getStatLine() {
+		StatLine statLine = new StatLine();
 
-		city.getStatLine().addModifier(Stat.FOOD_GAIN, 0.1F);
+		statLine.addValue(Stat.FOOD_GAIN, 1);
+		statLine.addValue(Stat.MAINTENANCE, 1);
+		statLine.addModifier(Stat.FOOD_GAIN, 0.1F);
+
+		return statLine;
 	}
 
 	@Override

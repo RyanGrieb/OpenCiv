@@ -5,13 +5,21 @@ import me.rhin.openciv.game.city.City;
 import me.rhin.openciv.game.city.building.Building;
 import me.rhin.openciv.game.research.type.EngineeringTech;
 import me.rhin.openciv.shared.stat.Stat;
+import me.rhin.openciv.shared.stat.StatLine;
 
 public class Aqueduct extends Building {
 
 	public Aqueduct(City city) {
 		super(city);
-		
-		this.statLine.addValue(Stat.MAINTENANCE, 1);
+	}
+
+	@Override
+	public StatLine getStatLine() {
+		StatLine statLine = new StatLine();
+
+		statLine.addValue(Stat.MAINTENANCE, 1);
+
+		return statLine;
 	}
 
 	@Override

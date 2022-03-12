@@ -5,7 +5,6 @@ import me.rhin.openciv.server.game.city.building.Building;
 import me.rhin.openciv.server.game.city.building.IncreaseTileStatlineBuilding;
 import me.rhin.openciv.server.game.map.tile.Tile;
 import me.rhin.openciv.server.game.map.tile.TileType;
-import me.rhin.openciv.server.game.map.tile.TileType.TileProperty;
 import me.rhin.openciv.server.game.research.type.CalendarTech;
 import me.rhin.openciv.shared.stat.Stat;
 import me.rhin.openciv.shared.stat.StatLine;
@@ -15,9 +14,17 @@ public class Stoneworks extends Building implements IncreaseTileStatlineBuilding
 	public Stoneworks(City city) {
 		super(city);
 
-		this.statLine.addValue(Stat.PRODUCTION_GAIN, 1);
-		this.statLine.addValue(Stat.MORALE_CITY, 5);
-		this.statLine.addValue(Stat.MAINTENANCE, 1);
+	}
+
+	@Override
+	public StatLine getStatLine() {
+		StatLine statLine = new StatLine();
+
+		statLine.addValue(Stat.PRODUCTION_GAIN, 1);
+		statLine.addValue(Stat.MORALE_CITY, 5);
+		statLine.addValue(Stat.MAINTENANCE, 1);
+
+		return statLine;
 	}
 
 	@Override
