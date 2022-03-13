@@ -128,6 +128,23 @@ public abstract class Technology implements NextTurnListener, CompleteResearchLi
 	}
 
 	/**
+	 * Sends the required packet & other events to properly research a tech.
+	 */
+	public void research() {
+		ChooseTechPacket packet = new ChooseTechPacket();
+		packet.setTech(id);
+		Civilization.getInstance().getNetworkManager().sendPacket(packet);
+		Civilization.getInstance().getWindowManager().closeWindow(PickResearchWindow.class);
+
+		for (Technology tech : Civilization.getInstance().getGame().getPlayer().getResearchTree().getTechnologies())
+			tech.setResearching(false);
+
+		setResearching(true);
+
+		Civilization.getInstance().getEventManager().fireEvent(new PickResearchEvent(this));
+	}
+
+	/**
 	 * Returns ordered list of all techs required to research up to this technology.
 	 * 
 	 * @return
@@ -146,31 +163,43 @@ public abstract class Technology implements NextTurnListener, CompleteResearchLi
 			ArrayList<Class<? extends Technology>> techRequirements = currentTech.getRequiredTechs();
 
 			for (Class<? extends Technology> techClass : techRequirements) {
-				if (!researchTree.hasResearched(techClass))
+				if (!researchTree.hasResearched(techClass)) {
 					techQueue.add(researchTree.getTechnology(techClass));
+				}
 			}
 
 			if (!requiredTechs.contains(currentTech.getClass()))
 				requiredTechs.add(0, currentTech.getClass());
 		}
 
+		sortTechList(requiredTechs);
+
+		// for (Class<? extends Technology> techClass : requiredTechs)
+		// System.out.println(techClass);
+
 		return requiredTechs;
 	}
 
 	/**
-	 * Sends the required packet & other events to properly research a tech.
+	 * Sorts the following tech list by the position of the technologies Uses simple
+	 * linked list
+	 * 
+	 * @param techQueue
 	 */
-	public void research() {
-		ChooseTechPacket packet = new ChooseTechPacket();
-		packet.setTech(id);
-		Civilization.getInstance().getNetworkManager().sendPacket(packet);
-		Civilization.getInstance().getWindowManager().closeWindow(PickResearchWindow.class);
+	private void sortTechList(ArrayList<Class<? extends Technology>> techList) {
 
-		for (Technology tech : Civilization.getInstance().getGame().getPlayer().getResearchTree().getTechnologies())
-			tech.setResearching(false);
+		for (int i = 1; i < techList.size(); i++) {
+			Technology key = Civilization.getInstance().getGame().getPlayer().getResearchTree()
+					.getTechnology(techList.get(i));
+			int j = i - 1;
 
-		setResearching(true);
+			while (j >= 0 && key.getTreePosition().getX() < Civilization.getInstance().getGame().getPlayer()
+					.getResearchTree().getTechnology(techList.get(j)).getTreePosition().getX()) {
+				techList.set(j + 1, techList.get(j));
+				--j;
+			}
 
-		Civilization.getInstance().getEventManager().fireEvent(new PickResearchEvent(this));
+			techList.set(j + 1, key.getClass());
+		}
 	}
 }
