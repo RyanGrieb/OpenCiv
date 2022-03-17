@@ -8,6 +8,7 @@ import com.badlogic.gdx.utils.Json;
 
 import me.rhin.openciv.server.Server;
 import me.rhin.openciv.server.game.AbstractPlayer;
+import me.rhin.openciv.server.game.heritage.type.all.CapitalDefenseHeritage;
 import me.rhin.openciv.server.game.heritage.type.all.CapitalExpansionHeritage;
 import me.rhin.openciv.server.game.heritage.type.all.StateWorshipHeritage;
 import me.rhin.openciv.server.game.heritage.type.all.TaxesHeritage;
@@ -54,6 +55,7 @@ public class HeritageTree implements NextTurnListener {
 		addHeritage(new CapitalExpansionHeritage(player));
 		addHeritage(new StateWorshipHeritage(player));
 		addHeritage(new TaxesHeritage(player));
+		addHeritage(new CapitalDefenseHeritage(player));
 	}
 
 	public void addHeritage(Heritage heritage) {

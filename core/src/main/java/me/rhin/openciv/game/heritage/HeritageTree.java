@@ -7,13 +7,13 @@ import java.util.List;
 import com.badlogic.gdx.utils.reflect.ClassReflection;
 
 import me.rhin.openciv.Civilization;
+import me.rhin.openciv.game.heritage.type.all.CapitalDefenseHeritage;
 import me.rhin.openciv.game.heritage.type.all.CapitalExpansionHeritage;
 import me.rhin.openciv.game.heritage.type.all.StateWorshipHeritage;
 import me.rhin.openciv.game.heritage.type.all.TaxesHeritage;
 import me.rhin.openciv.listener.CompleteHeritageListener;
 import me.rhin.openciv.listener.PickHeritageListener;
 import me.rhin.openciv.shared.packet.type.CompleteHeritagePacket;
-import me.rhin.openciv.ui.game.HeritageLineWeb;
 
 public class HeritageTree implements CompleteHeritageListener, PickHeritageListener {
 
@@ -27,6 +27,7 @@ public class HeritageTree implements CompleteHeritageListener, PickHeritageListe
 		addHeritage(new CapitalExpansionHeritage());
 		addHeritage(new StateWorshipHeritage());
 		addHeritage(new TaxesHeritage());
+		addHeritage(new CapitalDefenseHeritage());
 
 		Civilization.getInstance().getEventManager().addListener(PickHeritageListener.class, this);
 		Civilization.getInstance().getEventManager().addListener(CompleteHeritageListener.class, this);
