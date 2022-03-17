@@ -69,6 +69,16 @@ public abstract class Heritage implements NextTurnListener, CompleteHeritageList
 			if (heritage.getLevel() == maxStudiedLevel && heritage.isStudied())
 				maxAmountStudied++;
 
+		// Deny study if we already researched two heritage on the same level.
+		int studiedOnLevel = 0;
+		for (Heritage heritage : Civilization.getInstance().getGame().getPlayer().getHeritageTree().getAllHeritage())
+			if (heritage.getLevel() == getLevel() && heritage.isStudied())
+				studiedOnLevel++;
+
+		if (studiedOnLevel >= 2)
+			return false;
+
+		// Unlock heritage on the next level if we research two heritage
 		return getLevel() == 0 || maxStudiedLevel >= getLevel()
 				|| (getLevel() <= maxStudiedLevel + 1 && maxAmountStudied >= 2);
 	}

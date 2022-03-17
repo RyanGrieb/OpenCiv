@@ -99,6 +99,9 @@ public class HeritageLeaf extends Group implements Comparable<HeritageLeaf>, Com
 			if (heritage.ableToStudy() && !heritage.isStudied()) {
 				background.setSprite(TextureEnum.UI_YELLOW.sprite());
 				background.setBounds(0, 0, getWidth(), getHeight());
+			} else if (!heritage.ableToStudy() && !heritage.isStudied()) {
+				background.setSprite(TextureEnum.UI_RED.sprite());
+				background.setBounds(0, 0, getWidth(), getHeight());
 			}
 
 			return;

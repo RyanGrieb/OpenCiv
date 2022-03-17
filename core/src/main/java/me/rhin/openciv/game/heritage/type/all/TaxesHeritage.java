@@ -29,7 +29,7 @@ public class TaxesHeritage extends Heritage {
 
 	@Override
 	public String getDesc() {
-		return "+1 Gold for every\n2 citizens in cities.";
+		return "+1 Gold for every 2 citizens\nin cities.";
 	}
 
 	@Override

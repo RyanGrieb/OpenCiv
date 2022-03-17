@@ -29,7 +29,7 @@ public class CapitalExpansionHeritage extends Heritage {
 
 	@Override
 	public String getDesc() {
-		return "%15 Growth bonus in the \ncapital.";
+		return "15% Growth bonus in the \ncapital.";
 	}
 
 	@Override

@@ -38,7 +38,7 @@ public class ExpandedVisionHeritage extends Heritage implements AddUnitListener 
 
 	@Override
 	public String getDesc() {
-		return "Allow units to see past hills.";
+		return "Allow units to see past\nhills.";
 	}
 
 	@Override

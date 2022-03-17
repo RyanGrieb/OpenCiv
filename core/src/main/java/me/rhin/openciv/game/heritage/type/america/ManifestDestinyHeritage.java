@@ -40,7 +40,7 @@ public class ManifestDestinyHeritage extends Heritage implements SettleCityListe
 
 	@Override
 	public String getDesc() {
-		return "25% Production bonus\ntowards settlers.";
+		return "25% Production bonus towards\nsettlers.";
 	}
 
 	@Override

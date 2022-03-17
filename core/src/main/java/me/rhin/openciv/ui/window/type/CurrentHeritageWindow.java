@@ -127,7 +127,7 @@ public class CurrentHeritageWindow extends AbstractWindow
 		boolean treeComplete = true;
 
 		for (Heritage heritage : Civilization.getInstance().getGame().getPlayer().getHeritageTree().getAllHeritage()) {
-			if (!heritage.isStudied())
+			if (!heritage.isStudied() && heritage.ableToStudy())
 				treeComplete = false;
 		}
 

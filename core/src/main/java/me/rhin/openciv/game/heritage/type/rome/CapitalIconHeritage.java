@@ -43,7 +43,7 @@ public class CapitalIconHeritage extends Heritage implements SettleCityListener,
 
 	@Override
 	public String getDesc() {
-		return "30% Production bonus for buildings\nalready built in the\ncapital.";
+		return "30% Production bonus for\nbuildings already built\nin the capital.";
 	}
 
 	protected void onStudied() {

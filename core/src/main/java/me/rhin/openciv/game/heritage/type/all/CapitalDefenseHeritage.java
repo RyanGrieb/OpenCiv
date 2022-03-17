@@ -29,7 +29,7 @@ public class CapitalDefenseHeritage extends Heritage {
 
 	@Override
 	public String getDesc() {
-		return "Increase city health by 33%";
+		return "Increase city health by 33%.";
 	}
 
 	@Override
