@@ -1,6 +1,8 @@
 package me.rhin.openciv.server.game;
 
 import org.java_websocket.WebSocket;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.badlogic.gdx.utils.Json;
 
@@ -9,20 +11,17 @@ import me.rhin.openciv.server.game.city.City;
 import me.rhin.openciv.server.game.civilization.type.RandomCivilization;
 import me.rhin.openciv.server.game.unit.TraderUnit;
 import me.rhin.openciv.server.game.unit.Unit;
-import me.rhin.openciv.server.game.unit.type.Caravan.CaravanUnit;
 import me.rhin.openciv.server.listener.ChooseHeritageListener;
 import me.rhin.openciv.server.listener.ChooseTechListener;
-import me.rhin.openciv.server.listener.NextTurnListener;
 import me.rhin.openciv.server.listener.TradeCityListener;
 import me.rhin.openciv.shared.packet.type.ChooseHeritagePacket;
 import me.rhin.openciv.shared.packet.type.ChooseTechPacket;
 import me.rhin.openciv.shared.packet.type.PlayerStatUpdatePacket;
+import me.rhin.openciv.shared.packet.type.ServerNotificationPacket;
 import me.rhin.openciv.shared.packet.type.TradeCityPacket;
 import me.rhin.openciv.shared.stat.Stat;
 import me.rhin.openciv.shared.stat.StatLine;
 import me.rhin.openciv.shared.stat.StatType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class Player extends AbstractPlayer implements ChooseTechListener, ChooseHeritageListener, TradeCityListener {
 
@@ -43,10 +42,20 @@ public class Player extends AbstractPlayer implements ChooseTechListener, Choose
 		this.loaded = false;
 
 		this.host = false;
-		
+
 		Server.getInstance().getEventManager().addListener(ChooseTechListener.class, this);
 		Server.getInstance().getEventManager().addListener(ChooseHeritageListener.class, this);
 		Server.getInstance().getEventManager().addListener(TradeCityListener.class, this);
+	}
+
+	@Override
+	public void sendNotification(String iconName, String text) {
+		ServerNotificationPacket packet = new ServerNotificationPacket();
+		packet.setNotification(iconName, text);
+
+		Json json = new Json();
+
+		sendPacket(json.toJson(packet));
 	}
 
 	// FIXME: Move to researchTree
@@ -97,7 +106,7 @@ public class Player extends AbstractPlayer implements ChooseTechListener, Choose
 	public void updateOwnedStatlines(boolean increaseValues) {
 
 		super.updateOwnedStatlines(increaseValues);
-		
+
 		PlayerStatUpdatePacket packet = new PlayerStatUpdatePacket();
 		for (Stat stat : statLine.getStatValues().keySet()) {
 			if (stat.getStatType() != StatType.CITY_EXCLUSIVE)

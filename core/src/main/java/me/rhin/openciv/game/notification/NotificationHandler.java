@@ -3,9 +3,13 @@ package me.rhin.openciv.game.notification;
 import java.util.PriorityQueue;
 
 import me.rhin.openciv.Civilization;
+import me.rhin.openciv.asset.TextureEnum;
+import me.rhin.openciv.game.notification.type.ServerNotification;
+import me.rhin.openciv.listener.ServerNotificationListener;
+import me.rhin.openciv.shared.packet.type.ServerNotificationPacket;
 import me.rhin.openciv.ui.window.type.NotificationWindow;
 
-public class NotificationHandler {
+public class NotificationHandler implements ServerNotificationListener {
 
 	private NotificationWindow window;
 	private PriorityQueue<AbstractNotification> activeNotifications;
@@ -14,6 +18,16 @@ public class NotificationHandler {
 		this.window = window;
 
 		this.activeNotifications = new PriorityQueue<>();
+
+		Civilization.getInstance().getEventManager().addListener(ServerNotificationListener.class, this);
+	}
+
+	@Override
+	public void onServerNotification(ServerNotificationPacket packet) {
+		TextureEnum texture = TextureEnum.valueOf(packet.getIconName());
+		String text = packet.getText();
+
+		fireNotification(new ServerNotification(texture, text));
 	}
 
 	public void fireNotification(AbstractNotification notification) {
@@ -31,8 +45,8 @@ public class NotificationHandler {
 	}
 
 	public void removeNotification(AbstractNotification notification) {
-		//LOGGER.info("remove: " + notification.getName());
-		
+		// LOGGER.info("remove: " + notification.getName());
+
 		window.removeNotification(notification);
 		activeNotifications.remove(notification);
 		Civilization.getInstance().getEventManager().clearListenersFromObject(notification);
@@ -40,10 +54,9 @@ public class NotificationHandler {
 
 	public boolean isNotificationActive(Class<? extends AbstractNotification> clazz) {
 		for (AbstractNotification activeNotification : activeNotifications) {
-			if(activeNotification.getClass() == clazz)
+			if (activeNotification.getClass() == clazz)
 				return true;
 		}
 		return false;
 	}
-
 }

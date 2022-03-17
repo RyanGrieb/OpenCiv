@@ -45,7 +45,7 @@ public class AIPlayer extends AbstractPlayer {
 		}
 
 		if (unit.getUnitTypes().contains(UnitType.NAVAL)) {
-			//TODO: Implement naval ai
+			// TODO: Implement naval ai
 		} else {
 			for (UnitType unitType : unit.getUnitTypes()) {
 
@@ -55,7 +55,7 @@ public class AIPlayer extends AbstractPlayer {
 					unit.addAIBehavior(new UnitAI(unit, AIType.LAND_MELEE_UNIT));
 					break;
 				case RANGED:
-					unit.addAIBehavior(new UnitAI(unit,AIType.LAND_RANGED_UNIT));
+					unit.addAIBehavior(new UnitAI(unit, AIType.LAND_RANGED_UNIT));
 					break;
 				default:
 					break;
@@ -87,6 +87,11 @@ public class AIPlayer extends AbstractPlayer {
 
 	@Override
 	public void sendPacket(String json) {
+		// Don't send anything since were an AI.
+	}
+
+	@Override
+	public void sendNotification(String iconName, String text) {
 		// Don't send anything since were an AI.
 	}
 

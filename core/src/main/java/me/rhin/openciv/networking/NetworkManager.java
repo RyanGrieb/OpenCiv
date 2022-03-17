@@ -56,6 +56,7 @@ import me.rhin.openciv.listener.RequestEndTurnListener.RequestEndTurnEvent;
 import me.rhin.openciv.listener.SelectUnitListener.SelectUnitEvent;
 import me.rhin.openciv.listener.SendChatMessageListener.SendChatMessageEvent;
 import me.rhin.openciv.listener.ServerConnectListener.ServerConnectEvent;
+import me.rhin.openciv.listener.ServerNotificationListener.ServerNotificationEvent;
 import me.rhin.openciv.listener.SetCitizenTileWorkerListener.SetCitizenTileWorkerEvent;
 import me.rhin.openciv.listener.SetCityHealthListener.SetCityHealthEvent;
 import me.rhin.openciv.listener.SetCityOwnerListener.SetCityOwnerEvent;
@@ -117,6 +118,7 @@ import me.rhin.openciv.shared.packet.type.RemoveTileTypePacket;
 import me.rhin.openciv.shared.packet.type.RequestEndTurnPacket;
 import me.rhin.openciv.shared.packet.type.SelectUnitPacket;
 import me.rhin.openciv.shared.packet.type.SendChatMessagePacket;
+import me.rhin.openciv.shared.packet.type.ServerNotificationPacket;
 import me.rhin.openciv.shared.packet.type.SetCitizenTileWorkerPacket;
 import me.rhin.openciv.shared.packet.type.SetCityHealthPacket;
 import me.rhin.openciv.shared.packet.type.SetCityOwnerPacket;
@@ -198,6 +200,7 @@ public class NetworkManager {
 		networkEvents.put(FoundReligionPacket.class, FoundReligionEvent.class);
 		networkEvents.put(CityPopulationUpdatePacket.class, CityPopulationUpdateEvent.class);
 		networkEvents.put(DiscoveredPlayerPacket.class, DiscoveredPlayerEvent.class);
+		networkEvents.put(ServerNotificationPacket.class, ServerNotificationEvent.class);
 	}
 
 	public void connect(String ip) {

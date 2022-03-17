@@ -186,10 +186,9 @@ public abstract class Unit implements AttackableEntity, TileObserver, NextTurnLi
 			for (Player player : Server.getInstance().getPlayers())
 				player.sendPacket(json.toJson(removeTileTypePacket));
 
-			// TODO: Capture ruin sound effect.
-			// FIXME: Players don't get gold if they don't have a city.
 			unit.getPlayerOwner().getStatLine().addValue(Stat.GOLD, 50);
 			playerOwner.updateOwnedStatlines(false);
+			playerOwner.sendNotification("TILE_RUINS", "You looted 50\ngold from the\nruins.");
 		}
 	}
 
@@ -797,6 +796,8 @@ public abstract class Unit implements AttackableEntity, TileObserver, NextTurnLi
 
 		playerOwner.getStatLine().addValue(Stat.GOLD, 50);
 		playerOwner.updateOwnedStatlines(false);
+
+		playerOwner.sendNotification("TILE_BARBARIAN_CAMP", "You looted 50\ngold from the\nbarbarian camp.");
 	}
 
 	/**

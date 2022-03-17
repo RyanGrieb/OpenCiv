@@ -57,6 +57,8 @@ public abstract class AbstractPlayer implements NextTurnListener {
 
 	public abstract void setSelectedUnit(Unit unit);
 
+	public abstract void sendNotification(String iconName, String text);
+
 	@Override
 	public void onNextTurn() {
 		if (ownedCities.size() < 1)
@@ -249,4 +251,5 @@ public abstract class AbstractPlayer implements NextTurnListener {
 		}
 		return totalCombatStrength;
 	}
+
 }
