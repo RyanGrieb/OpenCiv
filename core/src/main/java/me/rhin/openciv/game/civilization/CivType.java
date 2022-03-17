@@ -10,7 +10,8 @@ public enum CivType {
 	ENGLAND(TextureEnum.ICON_ENGLAND),
 	GERMANY(TextureEnum.ICON_GERMANY),
 	ROME(TextureEnum.ICON_ROME),
-	MAMLUKS(TextureEnum.ICON_MAMLUKS);
+	MAMLUKS(TextureEnum.ICON_MAMLUKS),
+	MONGOLIA(TextureEnum.ICON_MONGOLIA);
 
 	private TextureEnum icon;
 
