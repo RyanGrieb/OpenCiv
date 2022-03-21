@@ -2,6 +2,7 @@ package me.rhin.openciv.game.research;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.List;
 
 import com.badlogic.gdx.graphics.g2d.Sprite;
 
@@ -13,7 +14,6 @@ import me.rhin.openciv.shared.packet.type.ChooseTechPacket;
 import me.rhin.openciv.shared.packet.type.CompleteResearchPacket;
 import me.rhin.openciv.shared.packet.type.NextTurnPacket;
 import me.rhin.openciv.shared.stat.Stat;
-import me.rhin.openciv.ui.label.CustomLabel;
 import me.rhin.openciv.ui.window.type.PickResearchWindow;
 
 public abstract class Technology implements NextTurnListener, CompleteResearchListener {
@@ -44,6 +44,11 @@ public abstract class Technology implements NextTurnListener, CompleteResearchLi
 
 	public static Technology fromID(int techID) {
 		return Civilization.getInstance().getGame().getPlayer().getResearchTree().getTechnologies().get(techID);
+
+	}
+
+	public List<Unlockable> getUnlockables() {
+		return null;
 	}
 
 	@Override

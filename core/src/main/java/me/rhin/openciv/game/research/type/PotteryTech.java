@@ -1,11 +1,15 @@
 package me.rhin.openciv.game.research.type;
 
+import java.util.List;
+
 import com.badlogic.gdx.graphics.g2d.Sprite;
 
+import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.research.ResearchTree;
 import me.rhin.openciv.game.research.Technology;
 import me.rhin.openciv.game.research.TreePosition;
+import me.rhin.openciv.game.research.Unlockable;
 
 public class PotteryTech extends Technology {
 
@@ -31,5 +35,10 @@ public class PotteryTech extends Technology {
 	@Override
 	public String getDesc() {
 		return "- Unlocks granary building \n" + "- Unlocks shrine building \n" + "- Unlocks chapel building";
+	}
+
+	@Override
+	public List<Unlockable> getUnlockables() {
+		return Civilization.getInstance().getGame().getPlayer().getUnlockablesByName("Granary", "Shrine", "Chapel");
 	}
 }

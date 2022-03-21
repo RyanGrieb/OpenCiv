@@ -1,6 +1,8 @@
 package me.rhin.openciv.game.player;
 
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 import com.badlogic.gdx.utils.Timer;
 import com.badlogic.gdx.utils.Timer.Task;
@@ -8,7 +10,8 @@ import com.badlogic.gdx.utils.Timer.Task;
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.game.map.tile.Tile;
 import me.rhin.openciv.game.notification.type.MoveUnitHelpNotification;
-import me.rhin.openciv.game.notification.type.MovementRangeHelpNotification;
+import me.rhin.openciv.game.production.ProductionItem;
+import me.rhin.openciv.game.research.Unlockable;
 import me.rhin.openciv.game.unit.AttackableEntity;
 import me.rhin.openciv.game.unit.RangedUnit;
 import me.rhin.openciv.game.unit.Unit;
@@ -212,5 +215,15 @@ public class Player extends AbstractPlayer implements RelativeMouseMoveListener,
 
 	public boolean isRightMouseHeld() {
 		return rightMouseHeld;
+	}
+
+	public List<Unlockable> getUnlockablesByName(String... items) {
+		List<Unlockable> productionItems = new ArrayList<>();
+
+		for (String item : items) {
+			productionItems.add(getCapitalCity().getProducibleItemManager().getPossibleItems().get(item));
+		}
+
+		return productionItems;
 	}
 }

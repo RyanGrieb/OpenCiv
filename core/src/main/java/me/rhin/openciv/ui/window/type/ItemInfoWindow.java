@@ -6,6 +6,7 @@ import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.city.City;
 import me.rhin.openciv.game.production.ProductionItem;
+import me.rhin.openciv.game.research.Unlockable;
 import me.rhin.openciv.listener.ResizeListener;
 import me.rhin.openciv.shared.stat.Stat;
 import me.rhin.openciv.ui.background.ColoredBackground;
@@ -118,6 +119,27 @@ public class ItemInfoWindow extends AbstractWindow implements ResizeListener {
 			addActor(faithCostLabel);
 
 		Civilization.getInstance().getEventManager().addListener(ResizeListener.class, this);
+	}
+
+	public ItemInfoWindow(Unlockable unlockable) {
+		this.setBounds(viewport.getWorldWidth() / 2 - 300 / 2, viewport.getWorldHeight() / 2 - 300 / 2, 300, 300);
+
+		this.background = new ColoredBackground(TextureEnum.UI_LIGHT_GRAY.sprite(), 0, 0, getWidth(), getHeight());
+		addActor(background);
+
+		this.itemNameLabel = new CustomLabel(unlockable.getName(), Align.center, 0, getHeight() - 14, getWidth(), 14);
+		addActor(itemNameLabel);
+
+		this.itemIcon = new ColoredBackground(unlockable.getTexture().sprite(), getWidth() / 2 - 32 / 2,
+				getHeight() - 48, 32, 32);
+		addActor(itemIcon);
+
+		this.itemDescLabel = new CustomLabel(unlockable.getDesc());
+		itemDescLabel.setPosition(4, itemIcon.getY() - itemIcon.getHeight() - itemDescLabel.getHeight());
+		addActor(itemDescLabel);
+
+		this.closeWindowButton = new CloseWindowButton(this.getClass(), "Cancel", getWidth() - 86, 4, 82, 28);
+		addActor(closeWindowButton);
 	}
 
 	@Override

@@ -1,19 +1,19 @@
 package me.rhin.openciv.ui.window.type;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
 
 import com.badlogic.gdx.utils.Align;
 
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.TextureEnum;
-import me.rhin.openciv.game.research.ResearchTree;
 import me.rhin.openciv.game.research.Technology;
+import me.rhin.openciv.game.research.Unlockable;
 import me.rhin.openciv.listener.ResizeListener;
 import me.rhin.openciv.shared.stat.Stat;
 import me.rhin.openciv.ui.background.ColoredBackground;
 import me.rhin.openciv.ui.button.type.CloseWindowButton;
 import me.rhin.openciv.ui.button.type.PickResearchButton;
+import me.rhin.openciv.ui.button.type.ResearchUnlockableButton;
 import me.rhin.openciv.ui.label.CustomLabel;
 import me.rhin.openciv.ui.window.AbstractWindow;
 
@@ -23,8 +23,9 @@ public class PickResearchWindow extends AbstractWindow implements ResizeListener
 	private ColoredBackground coloredBackground;
 	private CustomLabel titleLabel;
 	private ColoredBackground icon;
+	private ArrayList<ResearchUnlockableButton> descButtons;
 	private ArrayList<CustomLabel> descLabels;
-	private CustomLabel descLabel;
+	private CustomLabel descTitleLabel;
 	private CustomLabel turnsLabel;
 	private PickResearchButton pickResearchButton;
 	private CloseWindowButton closeWindowButton;
@@ -33,6 +34,7 @@ public class PickResearchWindow extends AbstractWindow implements ResizeListener
 		super.setBounds(viewport.getWorldWidth() / 2 - 270 / 2, viewport.getWorldHeight() / 2 - 300 / 2, 270, 300);
 		this.tech = tech;
 
+		this.descButtons = new ArrayList<>();
 		this.descLabels = new ArrayList<>();
 
 		this.coloredBackground = new ColoredBackground(TextureEnum.UI_LIGHT_GRAY.sprite(), 0, 0, getWidth(),
@@ -46,11 +48,24 @@ public class PickResearchWindow extends AbstractWindow implements ResizeListener
 		this.icon = new ColoredBackground(tech.getIcon(), getWidth() / 2 - 32 / 2, getHeight() - 55, 32, 32);
 		addActor(icon);
 
+		this.descTitleLabel = new CustomLabel("Enables The Following:", 15, getHeight() - 80, getWidth(), 15);
+		addActor(descTitleLabel);
+
 		int index = 0;
+		if (tech.getUnlockables() != null)
+			for (Unlockable unlockable : tech.getUnlockables()) {
+				ResearchUnlockableButton button = new ResearchUnlockableButton(unlockable, 5 + (50 * index),
+						getHeight() - 135);
+				descButtons.add(button);
+				addActor(button);
+				index++;
+			}
+
+		index = 0;
 		for (String text : tech.getDesc().split("\n")) {
 			CustomLabel descLabel = new CustomLabel(text);
 			descLabel.setAlignment(Align.left);
-			descLabel.setPosition(5, (getHeight() - 87) - (15 * index));
+			descLabel.setPosition(5, (getHeight() - 155) - (15 * index));
 			descLabels.add(descLabel);
 			addActor(descLabel);
 			index++;
