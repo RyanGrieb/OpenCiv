@@ -1,5 +1,8 @@
 package me.rhin.openciv.game.city.building.type;
 
+import java.util.Arrays;
+import java.util.List;
+
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.city.City;
 import me.rhin.openciv.game.city.building.Building;
@@ -33,8 +36,9 @@ public class Workshop extends Building {
 	}
 
 	@Override
-	public String getDesc() {
-		return "Improves production in the city.\n+2 Production\n+10% Production gain";
+	public List<String> getDesc() {
+		return Arrays.asList("Improves the production in the city", "+2 Production", "+10% Production Output",
+				"+2 Maintenance");
 	}
 
 	@Override

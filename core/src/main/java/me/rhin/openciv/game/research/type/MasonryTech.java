@@ -1,11 +1,17 @@
 package me.rhin.openciv.game.research.type;
 
+import java.util.Arrays;
+import java.util.List;
+
 import com.badlogic.gdx.graphics.g2d.Sprite;
 
+import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.TextureEnum;
+import me.rhin.openciv.game.research.CustomUnlockable;
 import me.rhin.openciv.game.research.ResearchTree;
 import me.rhin.openciv.game.research.Technology;
 import me.rhin.openciv.game.research.TreePosition;
+import me.rhin.openciv.game.research.Unlockable;
 
 public class MasonryTech extends Technology {
 
@@ -31,8 +37,19 @@ public class MasonryTech extends Technology {
 	}
 
 	@Override
-	public String getDesc() {
-		return "- Unlocks great pyramids\n- Build quarrys\n- Unlocks walls";
+	public List<String> getDesc() {
+		return Arrays
+				.asList("Masonry is the art of building massive stone structures, and working with stone in general.");
 	}
 
+	@Override
+	public List<Unlockable> getUnlockables() {
+		List<Unlockable> unlockables = Civilization.getInstance().getGame().getPlayer().getUnlockablesByName("Walls",
+				"Great Pyramids");
+
+		unlockables.add(new CustomUnlockable("Quarry", TextureEnum.TILE_MARBLE_IMPROVED,
+				Arrays.asList("Enables builders to improve marble or stone tiles.")));
+
+		return unlockables;
+	}
 }

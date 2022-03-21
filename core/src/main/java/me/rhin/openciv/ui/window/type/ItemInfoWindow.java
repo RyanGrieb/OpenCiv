@@ -1,5 +1,7 @@
 package me.rhin.openciv.ui.window.type;
 
+import java.util.ArrayList;
+
 import com.badlogic.gdx.utils.Align;
 
 import me.rhin.openciv.Civilization;
@@ -24,7 +26,7 @@ public class ItemInfoWindow extends AbstractWindow implements ResizeListener {
 
 	private ColoredBackground background;
 	private CustomLabel itemNameLabel;
-	private CustomLabel itemDescLabel;
+	private ArrayList<CustomLabel> descLabels;
 	private CustomLabel productionCostLabel;
 	private CustomLabel goldCostLabel;
 	private CustomLabel faithCostLabel;
@@ -38,9 +40,10 @@ public class ItemInfoWindow extends AbstractWindow implements ResizeListener {
 	private ColoredBackground faithIcon;
 
 	public ItemInfoWindow(City city, ProductionItem productionItem) {
-		this.setBounds(viewport.getWorldWidth() / 2 - 300 / 2, viewport.getWorldHeight() / 2 - 300 / 2, 300, 300);
+		this.setBounds(viewport.getWorldWidth() / 2 - 300 / 2, viewport.getWorldHeight() / 2 - 350 / 2, 300, 350);
 		this.city = city;
 		this.productionItem = productionItem;
+		this.descLabels = new ArrayList<>();
 
 		this.background = new ColoredBackground(TextureEnum.UI_BLACK.sprite(), 0, 0, getWidth(), getHeight());
 		addActor(background);
@@ -53,9 +56,22 @@ public class ItemInfoWindow extends AbstractWindow implements ResizeListener {
 				getHeight() - 48, 32, 32);
 		addActor(itemIcon);
 
-		this.itemDescLabel = new CustomLabel(productionItem.getDesc());
-		itemDescLabel.setPosition(4, itemIcon.getY() - itemIcon.getHeight() - itemDescLabel.getHeight());
-		addActor(itemDescLabel);
+		float lastYIndex = itemIcon.getY() - itemIcon.getHeight();
+		for (String text : productionItem.getDesc()) {
+			CustomLabel descLabel = new CustomLabel(text);
+			descLabel.setWrap(true);
+			descLabel.setWidth(getWidth() - 10);
+			descLabel.setAlignment(Align.left);
+			descLabel.pack();
+			float labelHeight = descLabel.getHeight();
+			descLabel.setPosition(4, lastYIndex - labelHeight);
+			descLabel.setWidth(getWidth() - 10);
+
+			descLabels.add(descLabel);
+			addActor(descLabel);
+
+			lastYIndex -= labelHeight;
+		}
 
 		this.produceItemButton = new ProduceItemButton(city, productionItem, 4, 4, 82, 28);
 
@@ -122,7 +138,8 @@ public class ItemInfoWindow extends AbstractWindow implements ResizeListener {
 	}
 
 	public ItemInfoWindow(Unlockable unlockable) {
-		this.setBounds(viewport.getWorldWidth() / 2 - 300 / 2, viewport.getWorldHeight() / 2 - 300 / 2, 300, 300);
+		this.setBounds(viewport.getWorldWidth() / 2 - 300 / 2, viewport.getWorldHeight() / 2 - 350 / 2, 300, 350);
+		this.descLabels = new ArrayList<>();
 
 		this.background = new ColoredBackground(TextureEnum.UI_LIGHT_GRAY.sprite(), 0, 0, getWidth(), getHeight());
 		addActor(background);
@@ -134,39 +151,32 @@ public class ItemInfoWindow extends AbstractWindow implements ResizeListener {
 				getHeight() - 48, 32, 32);
 		addActor(itemIcon);
 
-		this.itemDescLabel = new CustomLabel(unlockable.getDesc());
-		itemDescLabel.setPosition(4, itemIcon.getY() - itemIcon.getHeight() - itemDescLabel.getHeight());
-		addActor(itemDescLabel);
+		float lastYIndex = itemIcon.getY() - itemIcon.getHeight();
+		for (String text : unlockable.getDesc()) {
+			CustomLabel descLabel = new CustomLabel(text);
+			descLabel.setWrap(true);
+			descLabel.setWidth(getWidth() - 10);
+			descLabel.setAlignment(Align.left);
+			descLabel.pack();
+			float labelHeight = descLabel.getHeight();
+			descLabel.setPosition(4, lastYIndex - labelHeight);
+			descLabel.setWidth(getWidth() - 10);
 
-		this.closeWindowButton = new CloseWindowButton(this.getClass(), "Cancel", getWidth() - 86, 4, 82, 28);
+			descLabels.add(descLabel);
+			addActor(descLabel);
+
+			lastYIndex -= labelHeight;
+		}
+
+		this.closeWindowButton = new CloseWindowButton(this.getClass(), "Close", getWidth() - 100, 5, 100, 35);
 		addActor(closeWindowButton);
+
+		Civilization.getInstance().getEventManager().addListener(ResizeListener.class, this);
 	}
 
 	@Override
 	public void onResize(int width, int height) {
-		this.setBounds(width / 2 - 300 / 2, height / 2 - 300 / 2, 300, 300);
-
-		background.setPosition(0, 0);
-		itemNameLabel.setPosition(0, getHeight() - 14);
-		itemIcon.setPosition(getWidth() / 2 - 32 / 2, getHeight() - 48);
-		itemDescLabel.setPosition(4, itemIcon.getY() - itemIcon.getHeight() - itemDescLabel.getHeight());
-		produceItemButton.setPosition(4, 4);
-		buyItemButton.setPosition(getWidth() / 2 - 82 / 2, 4);
-		buyFaithItemButton.setPosition(getWidth() / 2 - 82 / 2, 4);
-		closeWindowButton.setPosition(getWidth() - 86, 4);
-
-		produceIcon.setPosition(produceItemButton.getX() + produceItemButton.getWidth() / 2 - 16 / 2,
-				produceItemButton.getY() + produceItemButton.getHeight());
-
-		buyIcon.setPosition(buyItemButton.getX() + buyItemButton.getWidth() / 2 - 16 / 2,
-				buyItemButton.getY() + buyItemButton.getHeight());
-		faithIcon.setPosition(buyItemButton.getX() + buyItemButton.getWidth() / 2 - 16 / 2,
-				buyItemButton.getY() + buyItemButton.getHeight());
-
-		productionCostLabel.setPosition(produceIcon.getX(), produceIcon.getY() + produceIcon.getHeight() + 2);
-		goldCostLabel.setPosition(buyIcon.getX(), buyIcon.getY() + buyIcon.getHeight() + 2);
-		faithCostLabel.setPosition(buyIcon.getX(), buyIcon.getY() + buyIcon.getHeight() + 2);
-
+		this.setBounds(width / 2 - 300 / 2, height / 2 - 350 / 2, 300, 350);
 	}
 
 	@Override

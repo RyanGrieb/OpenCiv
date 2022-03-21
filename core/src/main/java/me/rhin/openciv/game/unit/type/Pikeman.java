@@ -31,7 +31,7 @@ public class Pikeman extends UnitItem {
 			else
 				return tile.getMovementCost(prevTile);
 		}
-		
+
 		@Override
 		public List<UnitType> getUnitTypes() {
 			return Arrays.asList(UnitType.MELEE);
@@ -69,13 +69,13 @@ public class Pikeman extends UnitItem {
 	}
 
 	@Override
-	public String getDesc() {
-		return "An medieval melee unit. \n50% bonus towards mounted units.";
+	public List<String> getDesc() {
+		return Arrays.asList("A medieval melee unit. 50% bonus towards mounted units.");
 	}
 
 	@Override
 	public List<UnitType> getUnitItemTypes() {
 		return Arrays.asList(UnitType.MELEE);
 	}
-	
+
 }

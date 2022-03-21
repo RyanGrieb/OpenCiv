@@ -36,7 +36,7 @@ public class Scout extends UnitItem {
 		public float getMaxMovement() {
 			return 3;
 		}
-		
+
 		@Override
 		public List<UnitType> getUnitTypes() {
 			return Arrays.asList(UnitType.MELEE);
@@ -74,8 +74,8 @@ public class Scout extends UnitItem {
 	}
 
 	@Override
-	public String getDesc() {
-		return "Ignores movement cost of tiles.";
+	public List<String> getDesc() {
+		return Arrays.asList("The fundemental scouting unit. Ignores the movement cost of tiles.");
 	}
 
 	@Override

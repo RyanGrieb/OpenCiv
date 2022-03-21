@@ -1,5 +1,8 @@
 package me.rhin.openciv.game.city.building.type;
 
+import java.util.Arrays;
+import java.util.List;
+
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.city.City;
 import me.rhin.openciv.game.city.building.Building;
@@ -56,7 +59,9 @@ public class Lighthouse extends Building {
 	}
 
 	@Override
-	public String getDesc() {
-		return "+1 Food for each ocean\ntile.\n+1 Food for every worked fish\ntile.\n+1 Production for every sea\nresource worked.";
+	public List<String> getDesc() {
+		return Arrays.asList("Bonus sea building. Can only be constructed in coastal cities.",
+				"+1 Food from ocean tiles", "+1 Food from fish worked by the city",
+				"+1 Production for every sea resource worked");
 	}
 }

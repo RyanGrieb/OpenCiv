@@ -1,5 +1,8 @@
 package me.rhin.openciv.game.city.building.type;
 
+import java.util.Arrays;
+import java.util.List;
+
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.city.City;
 import me.rhin.openciv.game.city.building.Building;
@@ -39,8 +42,10 @@ public class Mint extends Building {
 	}
 
 	@Override
-	public String getDesc() {
-		return "+2 Gold for each source of\ngold or silver";
+	public List<String> getDesc() {
+		return Arrays.asList(
+				"Bonus building. Can only be constructed in cities with at least one improved Gold or Silver resource nearby.",
+				"+2 Gold for each improved gold or silver tile.");
 	}
 
 	@Override

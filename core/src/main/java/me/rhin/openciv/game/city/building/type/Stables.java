@@ -1,5 +1,8 @@
 package me.rhin.openciv.game.city.building.type;
 
+import java.util.Arrays;
+import java.util.List;
+
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.city.City;
 import me.rhin.openciv.game.city.building.Building;
@@ -60,8 +63,9 @@ public class Stables extends Building {
 	}
 
 	@Override
-	public String getDesc() {
-		return "Improves production from animals.\n\n15% Production towards mounted\nunits in the city.+1 Production\nfor every horse, sheep, and\ncattle tiles.";
+	public List<String> getDesc() {
+		return Arrays.asList("Improves production using animals", "+15% Production towards mounted units.",
+				"+1 Production for every horse, sheep, and cattle tile.");
 	}
 
 	@Override

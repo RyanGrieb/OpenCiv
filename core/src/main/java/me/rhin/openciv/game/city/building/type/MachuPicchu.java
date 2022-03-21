@@ -1,5 +1,8 @@
 package me.rhin.openciv.game.city.building.type;
 
+import java.util.Arrays;
+import java.util.List;
+
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.city.City;
@@ -47,8 +50,9 @@ public class MachuPicchu extends Building implements Wonder {
 	}
 
 	@Override
-	public String getDesc() {
-		return "A world wonder of the Medieval\nera.\nCity must adjacent to a mountain.\n\n+1 Heritage\n+5 Gold\n+50% gold from trade";
+	public List<String> getDesc() {
+		return Arrays.asList("A world wonder of the Medieval era. City must be adjacent to a mountain.", "+1 Heritage",
+				"+5 Gold", "50% gold from trade routes");
 	}
 
 	@Override

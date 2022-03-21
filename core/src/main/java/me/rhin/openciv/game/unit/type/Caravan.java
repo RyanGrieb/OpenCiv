@@ -78,8 +78,9 @@ public class Caravan extends UnitItem {
 	}
 
 	@Override
-	public String getDesc() {
-		return "An ancient trader unit. \n+5 Gold each trade run. \n+5 Food each trade run.";
+	public List<String> getDesc() {
+		return Arrays.asList("An ancient trader unit.", "+5 Gold every route complete",
+				"+5 Food every route complete.");
 	}
 
 	@Override

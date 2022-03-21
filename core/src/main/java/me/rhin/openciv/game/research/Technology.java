@@ -75,7 +75,7 @@ public abstract class Technology implements NextTurnListener, CompleteResearchLi
 
 	public abstract Sprite getIcon();
 
-	public abstract String getDesc();
+	public abstract List<String> getDesc();
 
 	public boolean isResearched() {
 		return researched;

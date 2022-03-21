@@ -42,7 +42,6 @@ public class Horseman extends UnitItem {
 			return Arrays.asList(UnitType.MELEE, UnitType.MOUNTED);
 		}
 
-
 		@Override
 		public boolean canUpgrade() {
 			return false;
@@ -81,8 +80,8 @@ public class Horseman extends UnitItem {
 	}
 
 	@Override
-	public String getDesc() {
-		return "A powerful classical era unit.\nRequires the city to contain\nimproved horses.";
+	public List<String> getDesc() {
+		return Arrays.asList("A powerful classical era unit. Requires the city to contain an improved horses tile.");
 	}
 
 	@Override

@@ -1,6 +1,7 @@
 package me.rhin.openciv.game.research.type;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import com.badlogic.gdx.graphics.g2d.Sprite;
@@ -34,8 +35,8 @@ public class MiningTech extends Technology {
 	}
 
 	@Override
-	public String getDesc() {
-		return "- Workers can build mines\n" + "- Workers can clear forests";
+	public List<String> getDesc() {
+		return Arrays.asList("Mining develops the ability to extract mineral resources from the bowels of the earth.");
 	}
 
 	@Override
@@ -43,10 +44,10 @@ public class MiningTech extends Technology {
 		List<Unlockable> unlockables = new ArrayList<>();
 
 		unlockables.add(new CustomUnlockable("Mines", TextureEnum.TILE_IRON_IMPROVED,
-				"Enable builders to improve\nmineable tiles."));
+				Arrays.asList("Enable builders to improve mineable tiles.")));
 
-		unlockables.add(
-				new CustomUnlockable("Clear Forests", TextureEnum.ICON_CHOP, "Enable builders to remove\nforests."));
+		unlockables.add(new CustomUnlockable("Clear Forests", TextureEnum.ICON_CHOP,
+				Arrays.asList("Enable builders to remove forests.")));
 
 		return unlockables;
 	}

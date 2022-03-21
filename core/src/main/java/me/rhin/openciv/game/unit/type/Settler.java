@@ -24,7 +24,7 @@ public class Settler extends UnitItem {
 	public static class SettlerUnit extends Unit {
 		public SettlerUnit(UnitParameter unitParameter) {
 			super(unitParameter, TextureEnum.UNIT_SETTLER);
-			
+
 			customActions.add(new SettleAction(this));
 		}
 
@@ -132,8 +132,8 @@ public class Settler extends UnitItem {
 	}
 
 	@Override
-	public String getDesc() {
-		return "Can settle new cities.\nCan be captured by enemy units.";
+	public List<String> getDesc() {
+		return Arrays.asList("Can settle new cities. Can be captured by enemy units.");
 	}
 
 	@Override

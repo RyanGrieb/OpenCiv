@@ -58,7 +58,7 @@ public class Swordsman extends UnitItem {
 	@Override
 	public boolean meetsProductionRequirements() {
 
-		//Don't show swordsman if we can make legions
+		// Don't show swordsman if we can make legions
 		if (city.getPlayerOwner().getHeritageTree().hasStudied(LegionHeritage.class))
 			return false;
 
@@ -81,8 +81,8 @@ public class Swordsman extends UnitItem {
 	}
 
 	@Override
-	public String getDesc() {
-		return "An classical melee unit. \n Requires a worked iron tile.";
+	public List<String> getDesc() {
+		return Arrays.asList("A classical melee unit. Requires an improved iron tile.");
 	}
 
 	@Override

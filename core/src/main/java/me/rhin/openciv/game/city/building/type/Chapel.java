@@ -1,5 +1,8 @@
 package me.rhin.openciv.game.city.building.type;
 
+import java.util.Arrays;
+import java.util.List;
+
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.city.City;
@@ -49,8 +52,7 @@ public class Chapel extends Building {
 	}
 
 	@Override
-	public String getDesc() {
-		return "Provides the city +1 faith";
+	public List<String> getDesc() {
+		return Arrays.asList("Basic faith building of the Ancient Era.", "+1 Faith");
 	}
-
 }

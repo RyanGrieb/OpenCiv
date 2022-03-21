@@ -83,8 +83,9 @@ public class Missionary extends UnitItem {
 	}
 
 	@Override
-	public String getDesc() {
-		return "A unit that spreads your\nreligion.\nCan spread religion twice.";
+	public List<String> getDesc() {
+		return Arrays.asList(
+				"A unit that spreads your religion to other cities. The missionary must be adjacent to the city, and can only spread faith twice.");
 	}
 
 	@Override

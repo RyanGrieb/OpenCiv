@@ -75,8 +75,8 @@ public class Prophet extends UnitItem {
 	}
 
 	@Override
-	public String getDesc() {
-		return "Can found or improve an \nexisting religion. Can also \nact as a missionary.";
+	public List<String> getDesc() {
+		return Arrays.asList("Can found or improve an existing religion. Can also act as a missionary.");
 	}
 
 	@Override

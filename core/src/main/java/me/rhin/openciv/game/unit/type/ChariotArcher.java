@@ -34,7 +34,7 @@ public class ChariotArcher extends UnitItem {
 			else
 				return tile.getMovementCost(prevTile);
 		}
-		
+
 		@Override
 		public List<UnitType> getUnitTypes() {
 			return Arrays.asList(UnitType.RANGED, UnitType.MOUNTED);
@@ -72,8 +72,8 @@ public class ChariotArcher extends UnitItem {
 	}
 
 	@Override
-	public String getDesc() {
-		return "An ancient mounted ranged unit.";
+	public List<String> getDesc() {
+		return Arrays.asList("An ancient mounted ranged unit.");
 	}
 
 	@Override

@@ -1,5 +1,8 @@
 package me.rhin.openciv.game.city.building.type;
 
+import java.util.Arrays;
+import java.util.List;
+
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.city.City;
 import me.rhin.openciv.game.city.building.Building;
@@ -36,8 +39,9 @@ public class Bazaar extends Building {
 	}
 
 	@Override
-	public String getDesc() {
-		return "A unique market building\nfor the Mamluks.\n+2 Gold\n+25% Gold in the city";
+	public List<String> getDesc() {
+		return Arrays.asList("A unique market building for the Mamluks.", "+2 Science", "+2 Gold",
+				"+25% Gold Production");
 	}
 
 	@Override

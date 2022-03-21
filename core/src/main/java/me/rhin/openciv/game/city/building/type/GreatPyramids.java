@@ -1,5 +1,8 @@
 package me.rhin.openciv.game.city.building.type;
 
+import java.util.Arrays;
+import java.util.List;
+
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.city.City;
@@ -51,7 +54,8 @@ public class GreatPyramids extends Building implements Wonder {
 	}
 
 	@Override
-	public String getDesc() {
-		return "A great ancient wonder. \nOnce built, recieve 2 builders.\n+1 Heritage";
+	public List<String> getDesc() {
+		return Arrays.asList("A great ancient wonder for improving tiles rapidly. Gives two builders once constructed.",
+				"+1 Heritage");
 	}
 }

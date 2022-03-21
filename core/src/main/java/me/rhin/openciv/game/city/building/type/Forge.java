@@ -1,5 +1,8 @@
 package me.rhin.openciv.game.city.building.type;
 
+import java.util.Arrays;
+import java.util.List;
+
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.city.City;
 import me.rhin.openciv.game.city.building.Building;
@@ -60,8 +63,11 @@ public class Forge extends Building {
 	}
 
 	@Override
-	public String getDesc() {
-		return "+15% Production towards land units.\n+1 Production for every improved\niron tile.";
+	public List<String> getDesc() {
+		return Arrays.asList(
+				"A building containing a furnace capable of generating the temperatures necessary to melt and shape iron into whatever you can imagine.",
+				"Requires an improved iron tile.", "+15% Production towards land units",
+				"+1 Production for every improved iron tile", "+1 Maintenance");
 	}
 
 	@Override

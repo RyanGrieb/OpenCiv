@@ -31,7 +31,7 @@ public class PickResearchWindow extends AbstractWindow implements ResizeListener
 	private CloseWindowButton closeWindowButton;
 
 	public PickResearchWindow(Technology tech) {
-		super.setBounds(viewport.getWorldWidth() / 2 - 270 / 2, viewport.getWorldHeight() / 2 - 300 / 2, 270, 300);
+		super.setBounds(viewport.getWorldWidth() / 2 - 300 / 2, viewport.getWorldHeight() / 2 - 350 / 2, 300, 350);
 		this.tech = tech;
 
 		this.descButtons = new ArrayList<>();
@@ -61,11 +61,17 @@ public class PickResearchWindow extends AbstractWindow implements ResizeListener
 				index++;
 			}
 
+		// FIXME: Handle multiple lines...
 		index = 0;
-		for (String text : tech.getDesc().split("\n")) {
+		for (String text : tech.getDesc()) {
 			CustomLabel descLabel = new CustomLabel(text);
+			descLabel.setWrap(true);
+			descLabel.setWidth(getWidth() - 10);
 			descLabel.setAlignment(Align.left);
-			descLabel.setPosition(5, (getHeight() - 155) - (15 * index));
+			descLabel.pack();
+			descLabel.setPosition(5, (getHeight() - 155) - descLabel.getHeight());
+			descLabel.setWidth(getWidth() - 10);
+			
 			descLabels.add(descLabel);
 			addActor(descLabel);
 			index++;
@@ -95,7 +101,7 @@ public class PickResearchWindow extends AbstractWindow implements ResizeListener
 
 	@Override
 	public void onResize(int width, int height) {
-		super.setPosition(width / 2 - 270 / 2, height / 2 - 300 / 2);
+		super.setPosition(width / 2 - 300 / 2, height / 2 - 350 / 2);
 	}
 
 	@Override

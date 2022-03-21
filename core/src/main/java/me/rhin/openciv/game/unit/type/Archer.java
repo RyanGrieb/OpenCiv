@@ -58,7 +58,7 @@ public class Archer extends UnitItem {
 	@Override
 	public boolean meetsProductionRequirements() {
 
-		//Composite bowman can be built
+		// Composite bowman can be built
 		if (city.getPlayerOwner().getResearchTree().hasResearched(ConstructionTech.class))
 			return false;
 
@@ -76,8 +76,8 @@ public class Archer extends UnitItem {
 	}
 
 	@Override
-	public String getDesc() {
-		return "A ancient ranged unit.";
+	public List<String> getDesc() {
+		return Arrays.asList("A ancient ranged unit.");
 	}
 
 	@Override

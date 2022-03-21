@@ -1,11 +1,17 @@
 package me.rhin.openciv.game.research.type;
 
+import java.util.Arrays;
+import java.util.List;
+
 import com.badlogic.gdx.graphics.g2d.Sprite;
 
+import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.TextureEnum;
+import me.rhin.openciv.game.research.CustomUnlockable;
 import me.rhin.openciv.game.research.ResearchTree;
 import me.rhin.openciv.game.research.Technology;
 import me.rhin.openciv.game.research.TreePosition;
+import me.rhin.openciv.game.research.Unlockable;
 
 public class PhilosophyTech extends Technology {
 
@@ -32,8 +38,20 @@ public class PhilosophyTech extends Technology {
 	}
 
 	@Override
-	public String getDesc() {
-		return "- Unlocks National College";
+	public List<String> getDesc() {
+		return Arrays.asList(
+				"Philosophy is the first abstract science developed by man."
+				+ " By delving into concepts which are not immediately present in the surrounding world, it allows civilization to further advance its intellectual power.");
 	}
 
+	@Override
+	public List<Unlockable> getUnlockables() {
+		List<Unlockable> unlockables = Civilization.getInstance().getGame().getPlayer()
+				.getUnlockablesByName("National College");
+
+
+		// FIXME: Add temple & oracle.
+
+		return unlockables;
+	}
 }

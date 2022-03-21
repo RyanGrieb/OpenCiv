@@ -1,5 +1,8 @@
 package me.rhin.openciv.game.city.building.type;
 
+import java.util.Arrays;
+import java.util.List;
+
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.city.City;
 import me.rhin.openciv.game.city.building.Building;
@@ -50,7 +53,8 @@ public class Palace extends Building {
 	}
 
 	@Override
-	public String getDesc() {
-		return "???";
+	public List<String> getDesc() {
+		return Arrays.asList("The starter building for every city.", "+1 Heritage", "+3 Gold", "+3 Science",
+				"+3 Production");
 	}
 }

@@ -1,11 +1,17 @@
 package me.rhin.openciv.game.research.type;
 
+import java.util.Arrays;
+import java.util.List;
+
 import com.badlogic.gdx.graphics.g2d.Sprite;
 
+import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.TextureEnum;
+import me.rhin.openciv.game.research.CustomUnlockable;
 import me.rhin.openciv.game.research.ResearchTree;
 import me.rhin.openciv.game.research.Technology;
 import me.rhin.openciv.game.research.TreePosition;
+import me.rhin.openciv.game.research.Unlockable;
 
 public class WritingTech extends Technology {
 
@@ -31,7 +37,16 @@ public class WritingTech extends Technology {
 	}
 
 	@Override
-	public String getDesc() {
-		return "- Unlocks great library\n" + "- Unlocks library\n" + "- Unlocks embassies";
+	public List<String> getDesc() {
+		return Arrays.asList(
+				"One of the cornerstones of civilization, Writing is the ability to transfer information to durable materials (stone, paper), and thus preserve it for the generations.");
+	}
+
+	@Override
+	public List<Unlockable> getUnlockables() {
+		List<Unlockable> unlockables = Civilization.getInstance().getGame().getPlayer().getUnlockablesByName("Library",
+				"Great Library");
+
+		return unlockables;
 	}
 }

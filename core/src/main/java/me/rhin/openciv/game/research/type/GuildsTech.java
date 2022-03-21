@@ -1,11 +1,16 @@
 package me.rhin.openciv.game.research.type;
 
+import java.util.Arrays;
+import java.util.List;
+
 import com.badlogic.gdx.graphics.g2d.Sprite;
 
+import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.research.ResearchTree;
 import me.rhin.openciv.game.research.Technology;
 import me.rhin.openciv.game.research.TreePosition;
+import me.rhin.openciv.game.research.Unlockable;
 
 public class GuildsTech extends Technology {
 
@@ -31,8 +36,19 @@ public class GuildsTech extends Technology {
 	}
 
 	@Override
-	public String getDesc() {
-		return "- Unlocks Machu Picchu\n- Allow builders to build\ntrading post improvement";
+	public List<String> getDesc() {
+		return Arrays.asList(
+				"Guilds are the first unions in history, an instance when entire class of workers in a particular branch organize and are able to better control their trade.");
+	}
+
+	@Override
+	public List<Unlockable> getUnlockables() {
+		List<Unlockable> unlockables = Civilization.getInstance().getGame().getPlayer()
+				.getUnlockablesByName("Machu Picchu");
+
+		// TODO: Add Trading post
+
+		return unlockables;
 	}
 
 }

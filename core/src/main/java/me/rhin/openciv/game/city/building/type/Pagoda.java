@@ -1,5 +1,8 @@
 package me.rhin.openciv.game.city.building.type;
 
+import java.util.Arrays;
+import java.util.List;
+
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.city.City;
 import me.rhin.openciv.game.city.building.Building;
@@ -38,8 +41,9 @@ public class Pagoda extends Building {
 	}
 
 	@Override
-	public String getDesc() {
-		return "Constructed in Asia, where the\nbuilding provided storage to\nhouse sacred relics.\n\n+2 Heritage\n+2 Faith\n+10 Morale";
+	public List<String> getDesc() {
+		return Arrays.asList("Constructed in Asia, where the building provided storage to house sacred relics.",
+				"+2 Heritage", "+2 Faith", "+10 Morale");
 	}
 
 	@Override

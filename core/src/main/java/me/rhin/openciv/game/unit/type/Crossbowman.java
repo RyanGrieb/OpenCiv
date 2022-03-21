@@ -70,13 +70,13 @@ public class Crossbowman extends UnitItem {
 	}
 
 	@Override
-	public String getDesc() {
-		return "A powerful medieval ranged unit.";
+	public List<String> getDesc() {
+		return Arrays.asList("A powerful medieval ranged unit.");
 	}
 
 	@Override
 	public List<UnitType> getUnitItemTypes() {
 		return Arrays.asList(UnitType.RANGED);
 	}
-	
+
 }

@@ -80,8 +80,8 @@ public class Legion extends UnitItem {
 	}
 
 	@Override
-	public String getDesc() {
-		return "The backbone of the Roman army. \n Requires a worked iron tile.";
+	public List<String> getDesc() {
+		return Arrays.asList("The backbone of the Roman army. Requires a worked iron tile.");
 	}
 
 	@Override

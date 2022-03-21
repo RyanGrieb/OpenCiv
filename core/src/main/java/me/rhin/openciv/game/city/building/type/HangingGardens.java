@@ -1,5 +1,8 @@
 package me.rhin.openciv.game.city.building.type;
 
+import java.util.Arrays;
+import java.util.List;
+
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.city.City;
@@ -51,7 +54,9 @@ public class HangingGardens extends Building implements Wonder {
 	}
 
 	@Override
-	public String getDesc() {
-		return "The Hanging Gardens of Babylon \nwere one of the Seven Wonders of\nthe Ancient World listed by\nHellenic culture. \n+10 Food \n+1 Heritage";
+	public List<String> getDesc() {
+		return Arrays.asList(
+				"The Hanging Gardens of Babylon were one of the Server Wonders of the Ancient World listed by Hellenic culture.",
+				"+10 Food", "+1 Heritage");
 	}
 }

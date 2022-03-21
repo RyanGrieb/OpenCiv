@@ -1,5 +1,8 @@
 package me.rhin.openciv.game.city.building.type;
 
+import java.util.Arrays;
+import java.util.List;
+
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.city.City;
 import me.rhin.openciv.game.city.building.Building;
@@ -34,8 +37,9 @@ public class Garden extends Building {
 	}
 
 	@Override
-	public String getDesc() {
-		return "+1 Food in the city\n+10% Food gain in the city";
+	public List<String> getDesc() {
+		return Arrays.asList("A food bonus building. Requires the city to be next to a river.", "+1 Food",
+				"+10% Food Production", "+1 Maintenance");
 	}
 
 	@Override

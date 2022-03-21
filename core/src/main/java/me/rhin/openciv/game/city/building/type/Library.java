@@ -1,5 +1,8 @@
 package me.rhin.openciv.game.city.building.type;
 
+import java.util.Arrays;
+import java.util.List;
+
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.city.City;
@@ -72,7 +75,8 @@ public class Library extends Building implements SpecialistContainer {
 	}
 
 	@Override
-	public String getDesc() {
-		return "Provides +0.5 science for each\n citizen.\n+2 Science\n+0.5 Science for each citizen\n+1 Maintenance";
+	public List<String> getDesc() {
+		return Arrays.asList("An ancient era science building.", "+0.5 Science for each citizen", "+2 Science",
+				"+1 Maintenance");
 	}
 }

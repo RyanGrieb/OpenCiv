@@ -1,11 +1,17 @@
 package me.rhin.openciv.game.research.type;
 
+import java.util.Arrays;
+import java.util.List;
+
 import com.badlogic.gdx.graphics.g2d.Sprite;
 
+import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.TextureEnum;
+import me.rhin.openciv.game.research.CustomUnlockable;
 import me.rhin.openciv.game.research.ResearchTree;
 import me.rhin.openciv.game.research.Technology;
 import me.rhin.openciv.game.research.TreePosition;
+import me.rhin.openciv.game.research.Unlockable;
 
 public class WheelTech extends Technology {
 
@@ -32,7 +38,19 @@ public class WheelTech extends Technology {
 	}
 
 	@Override
-	public String getDesc() {
-		return "- Unlocks chariot archer\n" + "- Workers can build roads\n" + "- Unlocks water mill";
+	public List<String> getDesc() {
+		return Arrays.asList(
+				"The Wheel is another key technology, which fundamentally changes the way humans move around and transport things.");
+	}
+
+	@Override
+	public List<Unlockable> getUnlockables() {
+		List<Unlockable> unlockables = Civilization.getInstance().getGame().getPlayer()
+				.getUnlockablesByName("Water Mill", "Chariot Archer");
+
+		unlockables.add(new CustomUnlockable("Roads", TextureEnum.ROAD_HORIZONTAL,
+				Arrays.asList("Enables builders to construct roads.")));
+
+		return unlockables;
 	}
 }

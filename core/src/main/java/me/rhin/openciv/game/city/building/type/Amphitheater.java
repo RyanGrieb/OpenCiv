@@ -1,5 +1,8 @@
 package me.rhin.openciv.game.city.building.type;
 
+import java.util.Arrays;
+import java.util.List;
+
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.city.City;
 import me.rhin.openciv.game.city.building.Building;
@@ -34,8 +37,8 @@ public class Amphitheater extends Building {
 	}
 
 	@Override
-	public String getDesc() {
-		return "+3 Heritage in the city";
+	public List<String> getDesc() {
+		return Arrays.asList("Classical Era culture building. Requires Monument or Stele.", "+3 Heritage in the city", "+2 Maintenance");
 	}
 
 	@Override

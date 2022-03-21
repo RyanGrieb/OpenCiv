@@ -1,5 +1,8 @@
 package me.rhin.openciv.game.city.building.type;
 
+import java.util.Arrays;
+import java.util.List;
+
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.city.City;
@@ -36,8 +39,9 @@ public class StatueOfAres extends Building implements Wonder {
 	}
 
 	@Override
-	public String getDesc() {
-		return "An ancient wonder. \nProvides units 15% combat \nstrength in enemy territory. \n+1 Heritage";
+	public List<String> getDesc() {
+		return Arrays.asList("An ancient wonder for agressive expansion.",
+				"Provides units +15% combat strength in enemy territory.", "+1 Heritage");
 	}
 
 	@Override

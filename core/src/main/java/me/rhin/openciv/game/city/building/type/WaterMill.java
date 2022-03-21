@@ -1,5 +1,8 @@
 package me.rhin.openciv.game.city.building.type;
 
+import java.util.Arrays;
+import java.util.List;
+
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.city.City;
@@ -42,8 +45,9 @@ public class WaterMill extends Building {
 	}
 
 	@Override
-	public String getDesc() {
-		return "Uses the power of water to\ngenerate food & production.\n+2 Food\n+1 Production\n+2 Maintenance";
+	public List<String> getDesc() {
+		return Arrays.asList("Uses the power water to generate food & production.", "+2 Food", "+1 Production",
+				"+2 Maintenance");
 	}
 
 	@Override

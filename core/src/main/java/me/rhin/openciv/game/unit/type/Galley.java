@@ -32,12 +32,11 @@ public class Galley extends UnitItem {
 			else
 				return tile.getMovementCost(prevTile);
 		}
-		
+
 		@Override
 		public List<UnitType> getUnitTypes() {
 			return Arrays.asList(UnitType.NAVAL, UnitType.MELEE);
 		}
-
 
 		@Override
 		public boolean canUpgrade() {
@@ -71,8 +70,8 @@ public class Galley extends UnitItem {
 	}
 
 	@Override
-	public String getDesc() {
-		return "An ancient naval unit.";
+	public List<String> getDesc() {
+		return Arrays.asList("An ancient era naval melee unit.");
 	}
 
 	@Override

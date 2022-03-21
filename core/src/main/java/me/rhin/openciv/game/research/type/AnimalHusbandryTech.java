@@ -1,5 +1,6 @@
 package me.rhin.openciv.game.research.type;
 
+import java.util.Arrays;
 import java.util.List;
 
 import com.badlogic.gdx.graphics.g2d.Sprite;
@@ -34,19 +35,20 @@ public class AnimalHusbandryTech extends Technology {
 	}
 
 	@Override
-	public String getDesc() {
-		return "- Unlocks caravans\n" + "- Workers can build pastures\n+1 Trade route";
+	public List<String> getDesc() {
+		return Arrays.asList(
+				"A cornerstone of human development, Animal Husbandry allows the access to various animal resources via the Pasture.");
 	}
 
 	@Override
 	public List<Unlockable> getUnlockables() {
 		List<Unlockable> unlockables = Civilization.getInstance().getGame().getPlayer().getUnlockablesByName("Caravan");
 
-		unlockables.add(
-				new CustomUnlockable("Additional Trade Route", TextureEnum.ICON_BARREL, "+1 Additional Trade Route"));
+		unlockables.add(new CustomUnlockable("Additional Trade Route", TextureEnum.ICON_BARREL,
+				Arrays.asList("+1 Additional Trade Route")));
 
 		unlockables.add(new CustomUnlockable("Pastures", TextureEnum.ICON_PASTURE,
-				"Improve horeses, cattle, and\nsheep tiles.\n\n+1 Production\n+1 Food for sheep"));
+				Arrays.asList("Improve horeses, cattle, and sheep tiles.", "+1 Production", "+1 Food for sheep")));
 
 		return unlockables;
 	}

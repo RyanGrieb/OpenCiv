@@ -1,5 +1,8 @@
 package me.rhin.openciv.game.city.building.type;
 
+import java.util.Arrays;
+import java.util.List;
+
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.city.City;
@@ -50,8 +53,8 @@ public class Colosseum extends Building {
 	}
 
 	@Override
-	public String getDesc() {
-		return "Provides the city +10 morale";
+	public List<String> getDesc() {
+		return Arrays.asList("Basic happiness-boosting building of the Classical Era.", "+10 Morale", "+1 Maintenance");
 	}
 
 }

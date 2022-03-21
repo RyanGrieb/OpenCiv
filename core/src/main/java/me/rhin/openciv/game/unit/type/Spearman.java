@@ -74,8 +74,8 @@ public class Spearman extends UnitItem {
 	}
 
 	@Override
-	public String getDesc() {
-		return "An ancient disciplined melee \nunit. \n50% bonus towards mounted units.";
+	public List<String> getDesc() {
+		return Arrays.asList("An ancient disciplined melee unit. 50% bonus towards mounted units.");
 	}
 
 	@Override

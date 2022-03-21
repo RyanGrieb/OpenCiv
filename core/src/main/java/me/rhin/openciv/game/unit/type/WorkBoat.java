@@ -76,8 +76,9 @@ public class WorkBoat extends UnitItem {
 	}
 
 	@Override
-	public String getDesc() {
-		return "A naval builder. Can improve\nocean tiles.\nCan be captured by enemy units.";
+	public List<String> getDesc() {
+		return Arrays.asList(
+				"The naval version of the builder which can improve ocean tiles. Can be captured by enemy units.");
 	}
 
 	@Override

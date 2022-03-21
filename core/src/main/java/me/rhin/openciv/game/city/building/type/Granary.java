@@ -1,5 +1,8 @@
 package me.rhin.openciv.game.city.building.type;
 
+import java.util.Arrays;
+import java.util.List;
+
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.city.City;
@@ -50,7 +53,7 @@ public class Granary extends Building {
 	}
 
 	@Override
-	public String getDesc() {
-		return "Provides an additional food \nsource.\n+2 Food\n+1 Maintenance";
+	public List<String> getDesc() {
+		return Arrays.asList("Basic growth-enhancing building of the Ancient Era.", "+2 Food", "+1 Maintenance");
 	}
 }

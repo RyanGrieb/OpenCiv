@@ -1,5 +1,8 @@
 package me.rhin.openciv.game.city.building.type;
 
+import java.util.Arrays;
+import java.util.List;
+
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.city.City;
 import me.rhin.openciv.game.city.building.Building;
@@ -53,8 +56,10 @@ public class NationalCollege extends Building {
 	}
 
 	@Override
-	public String getDesc() {
-		return "Requires a library in all cities.\n\n+3 Science\n50% Science in this city";
+	public List<String> getDesc() {
+		return Arrays.asList(
+				"An essential building to keep up with science as the game progresses. Requires a library in all cities.",
+				"+3 Science", "+1 Heritage", "+50% Science Production");
 	}
 
 }

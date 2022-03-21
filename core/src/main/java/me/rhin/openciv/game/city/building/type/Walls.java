@@ -1,5 +1,8 @@
 package me.rhin.openciv.game.city.building.type;
 
+import java.util.Arrays;
+import java.util.List;
+
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.city.City;
 import me.rhin.openciv.game.city.building.Building;
@@ -33,8 +36,8 @@ public class Walls extends Building {
 	}
 
 	@Override
-	public String getDesc() {
-		return "Basic ancient defensive building. \n+5 City combat strength \n+50 City health";
+	public List<String> getDesc() {
+		return Arrays.asList("A basic ancient defensive building.", "+5 City combat strength", "+50 City health");
 	}
 
 	@Override

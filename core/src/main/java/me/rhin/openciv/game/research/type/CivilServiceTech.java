@@ -1,11 +1,16 @@
 package me.rhin.openciv.game.research.type;
 
+import java.util.Arrays;
+import java.util.List;
+
 import com.badlogic.gdx.graphics.g2d.Sprite;
 
+import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.research.ResearchTree;
 import me.rhin.openciv.game.research.Technology;
 import me.rhin.openciv.game.research.TreePosition;
+import me.rhin.openciv.game.research.Unlockable;
 
 public class CivilServiceTech extends Technology {
 
@@ -33,8 +38,17 @@ public class CivilServiceTech extends Technology {
 	}
 
 	@Override
-	public String getDesc() {
-		return "- Unlocks pikeman\n- Unlocks Chichen Itza wonder";
+	public List<String> getDesc() {
+		return Arrays.asList(
+				"Civil Service, the creation of the first true state organ, provides many benefits related with better food production.");
 	}
 
+	@Override
+	public List<Unlockable> getUnlockables() {
+		List<Unlockable> unlockables = Civilization.getInstance().getGame().getPlayer().getUnlockablesByName("Pikeman");
+
+		// TODO: Add Chichen Itza
+
+		return unlockables;
+	}
 }

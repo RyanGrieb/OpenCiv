@@ -1,5 +1,8 @@
 package me.rhin.openciv.game.city.building.type;
 
+import java.util.Arrays;
+import java.util.List;
+
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.city.City;
@@ -36,8 +39,8 @@ public class Stonehenge extends Building implements Wonder {
 	}
 
 	@Override
-	public String getDesc() {
-		return "An ancient relegious wonder. \n+5 Faith";
+	public List<String> getDesc() {
+		return Arrays.asList("An ancient religious wonder for faith output.", "+5 Faith");
 	}
 
 	@Override

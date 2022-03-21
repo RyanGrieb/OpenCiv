@@ -1,5 +1,8 @@
 package me.rhin.openciv.game.city.building.type;
 
+import java.util.Arrays;
+import java.util.List;
+
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.city.City;
 import me.rhin.openciv.game.city.building.Building;
@@ -77,7 +80,7 @@ public class Market extends Building implements SpecialistContainer {
 	}
 
 	@Override
-	public String getDesc() {
-		return "Provides an additional source of \ngold.\n+2 Gold\n+25% Gold in the city";
+	public List<String> getDesc() {
+		return Arrays.asList("Basic Gold-boosting building of the Classical Era.", "+2 Gold", "+25% Gold Production");
 	}
 }

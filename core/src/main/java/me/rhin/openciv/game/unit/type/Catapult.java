@@ -63,8 +63,8 @@ public class Catapult extends UnitItem {
 	}
 
 	@Override
-	public String getDesc() {
-		return "One of the first ancient siege \nunits. \n+35% Bonus damage towards cities.";
+	public List<String> getDesc() {
+		return Arrays.asList("One of the first ancient siege units.", "35% Bonus damage towards cities.");
 	}
 
 	@Override

@@ -1,5 +1,8 @@
 package me.rhin.openciv.game.city.building.type;
 
+import java.util.Arrays;
+import java.util.List;
+
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.city.City;
 import me.rhin.openciv.game.city.building.Building;
@@ -48,7 +51,9 @@ public class Monument extends Building {
 	}
 
 	@Override
-	public String getDesc() {
-		return "Provides an additonal source of \nheritage to further increase \nborder growth.\n+2 Heritage\n+1 Maintenance";
+	public List<String> getDesc() {
+		return Arrays.asList("Basic culture building of the Ancient Era, improving territory growth early.",
+				"+2 Heritage", "+1 Maintenance");
 	}
+
 }

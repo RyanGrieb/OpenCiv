@@ -1,5 +1,8 @@
 package me.rhin.openciv.game.city.building.type;
 
+import java.util.Arrays;
+import java.util.List;
+
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.city.City;
 import me.rhin.openciv.game.city.building.Building;
@@ -25,7 +28,7 @@ public class Stoneworks extends Building {
 
 		return statLine;
 	}
-	
+
 	@Override
 	public float getBuildingProductionCost() {
 		return 75;
@@ -57,7 +60,8 @@ public class Stoneworks extends Building {
 	}
 
 	@Override
-	public String getDesc() {
-		return "Improves the output of quarries\n\n+5 Morale\n+1 Production\n+1 Production for each improved\nquarry tile.";
+	public List<String> getDesc() {
+		return Arrays.asList("Improves the output of quarries", "+1 Production for every improved quarry tile",
+				"+1 Production", "+5 Morale");
 	}
 }

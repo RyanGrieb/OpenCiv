@@ -91,8 +91,8 @@ public class Warrior extends UnitItem {
 	}
 
 	@Override
-	public String getDesc() {
-		return "An ancient melee unit.";
+	public List<String> getDesc() {
+		return Arrays.asList("An ancient melee unit.");
 	}
 
 	@Override

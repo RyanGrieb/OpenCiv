@@ -79,8 +79,9 @@ public class CargoShip extends UnitItem {
 	}
 
 	@Override
-	public String getDesc() {
-		return "An classical era trade ship. \n+10 Gold each trade run. \n+10 Food each trade run.";
+	public List<String> getDesc() {
+		return Arrays.asList("A water based trade unit similar to the caravan.", "+10 Gold every route complete",
+				"+10 Food every route complete.");
 	}
 
 	@Override

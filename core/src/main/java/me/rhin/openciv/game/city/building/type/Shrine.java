@@ -1,5 +1,8 @@
 package me.rhin.openciv.game.city.building.type;
 
+import java.util.Arrays;
+import java.util.List;
+
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.city.City;
 import me.rhin.openciv.game.city.building.Building;
@@ -66,7 +69,8 @@ public class Shrine extends Building {
 	}
 
 	@Override
-	public String getDesc() {
-		return "A sanctuary for normal citizens. \n10% produciton bonus towards \nsupport units. Support units \ninclude builders & settlers. \n+1 Heritage";
+	public List<String> getDesc() {
+		return Arrays.asList("A sanctuary for all citizens.",
+				"+10% Production towards support units. Support units include builders & settlers.", "+1 Heritage");
 	}
 }

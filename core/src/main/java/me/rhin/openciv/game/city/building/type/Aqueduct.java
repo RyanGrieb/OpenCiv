@@ -1,5 +1,8 @@
 package me.rhin.openciv.game.city.building.type;
 
+import java.util.Arrays;
+import java.util.List;
+
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.city.City;
 import me.rhin.openciv.game.city.building.Building;
@@ -33,8 +36,10 @@ public class Aqueduct extends Building {
 	}
 
 	@Override
-	public String getDesc() {
-		return "On city growth, 40% of stored\nfood carries over.";
+	public List<String> getDesc() {
+		return Arrays.asList(
+				"Classical Era growth-enhancing building. 40% of food stored in the city is carried over after a new citizen is born.",
+				"+1 Maintenance");
 	}
 
 	@Override

@@ -1,5 +1,6 @@
 package me.rhin.openciv.game.research.type;
 
+import java.util.Arrays;
 import java.util.List;
 
 import com.badlogic.gdx.graphics.g2d.Sprite;
@@ -37,8 +38,9 @@ public class ConstructionTech extends Technology {
 	}
 
 	@Override
-	public String getDesc() {
-		return "- Builders can build lumber \nmills\n- Unlocks Colosseum\n- Unlocks Terracotta Army\n- Unlocks composite bowman";
+	public List<String> getDesc() {
+		return Arrays.asList(
+				"The Construction technology represents further advancements in building and combining materials.");
 	}
 
 	@Override
@@ -47,7 +49,7 @@ public class ConstructionTech extends Technology {
 				.getUnlockablesByName("Colosseum", "Composite Bowman");
 
 		unlockables.add(new CustomUnlockable("Lumber Mill", TextureEnum.TILE_LUMBERMILL,
-				"Improve forest tiles.\n+1 Production"));
+				Arrays.asList("Improve forest tiles.", "Provides +1 Production.")));
 
 		// FIXME: Add terracota army.
 

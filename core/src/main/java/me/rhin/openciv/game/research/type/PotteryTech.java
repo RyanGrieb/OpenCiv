@@ -1,5 +1,6 @@
 package me.rhin.openciv.game.research.type;
 
+import java.util.Arrays;
 import java.util.List;
 
 import com.badlogic.gdx.graphics.g2d.Sprite;
@@ -33,8 +34,9 @@ public class PotteryTech extends Technology {
 	}
 
 	@Override
-	public String getDesc() {
-		return "- Unlocks granary building \n" + "- Unlocks shrine building \n" + "- Unlocks chapel building";
+	public List<String> getDesc() {
+		return Arrays.asList(
+				"As the art of building objects from clay, Pottery is also a fundament of civilization, creating the means for long-term storage of food and materials and their protection from the elements.");
 	}
 
 	@Override

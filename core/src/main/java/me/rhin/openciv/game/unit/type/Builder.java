@@ -212,8 +212,9 @@ public class Builder extends UnitItem {
 	}
 
 	@Override
-	public String getDesc() {
-		return "Can improve tiles on the map. \nCertain tiles require a specific \nresearch.\nCan be captured by enemy units.";
+	public List<String> getDesc() {
+		return Arrays.asList(
+				"Can improve tiles on the map. Certain tiles required a specific research. Can be captured by enemy units.");
 	}
 
 	@Override

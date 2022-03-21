@@ -1,5 +1,8 @@
 package me.rhin.openciv.game.city.building.type;
 
+import java.util.Arrays;
+import java.util.List;
+
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.city.City;
@@ -74,7 +77,8 @@ public class GreatLibrary extends Building implements SpecialistContainer, Wonde
 	}
 
 	@Override
-	public String getDesc() {
-		return "A great ancient wonder.\n+3 Science \n+1 Heritage \n10% Science in the city";
+	public List<String> getDesc() {
+		return Arrays.asList("A great ancient wonder for a technology boost.", "+3 Science", "+1 Heritage",
+				"+10% Science Production");
 	}
 }

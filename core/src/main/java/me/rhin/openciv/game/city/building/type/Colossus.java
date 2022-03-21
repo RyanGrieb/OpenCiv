@@ -1,5 +1,8 @@
 package me.rhin.openciv.game.city.building.type;
 
+import java.util.Arrays;
+import java.util.List;
+
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.city.City;
@@ -45,8 +48,9 @@ public class Colossus extends Building implements Wonder {
 	}
 
 	@Override
-	public String getDesc() {
-		return "A bronze statue of Helios,\nthe Greek God of the Sun.\nMust be built on the coast.\n\n\n+1 Heritage\n+5 Gold\n+1 Trade slot\n25% Gold from trade routes";
+	public List<String> getDesc() {
+		return Arrays.asList("A bronze statue of Helios, the Greek God of the Sun. Must be built on the cost",
+				"+1 Heritage", "+5 Gold", "+1 Trade Slot", "+25% Gold from trade routes");
 	}
 
 	@Override

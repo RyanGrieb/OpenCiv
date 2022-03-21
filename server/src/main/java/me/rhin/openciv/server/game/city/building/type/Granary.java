@@ -19,6 +19,8 @@ public class Granary extends Building {
 		statLine.addValue(Stat.FOOD_GAIN, 2);
 		statLine.addValue(Stat.MAINTENANCE, 1);
 
+		// TODO: Give bonus towards wheat, bananas, and deer tiles when added.
+
 		return statLine;
 	}
 

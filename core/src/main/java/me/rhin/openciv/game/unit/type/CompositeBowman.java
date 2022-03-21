@@ -57,11 +57,11 @@ public class CompositeBowman extends UnitItem {
 
 	@Override
 	public boolean meetsProductionRequirements() {
-		
-		//Crossbowman can be built.
+
+		// Crossbowman can be built.
 		if (city.getPlayerOwner().getResearchTree().hasResearched(MachineryTech.class))
 			return false;
-		
+
 		return city.getPlayerOwner().getResearchTree().hasResearched(ConstructionTech.class);
 	}
 
@@ -76,13 +76,13 @@ public class CompositeBowman extends UnitItem {
 	}
 
 	@Override
-	public String getDesc() {
-		return "A classical ranged unit.";
+	public List<String> getDesc() {
+		return Arrays.asList("A classical ranged unit.");
 	}
 
 	@Override
 	public List<UnitType> getUnitItemTypes() {
 		return Arrays.asList(UnitType.RANGED);
 	}
-	
+
 }
