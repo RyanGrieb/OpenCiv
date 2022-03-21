@@ -135,4 +135,8 @@ public class ResearchTree implements PickResearchListener, CompleteResearchListe
 		this.techQueue = techQueue;
 		getTechnology(techQueue.get(0)).research();
 	}
+
+	public void clearTechQueue() {
+		techQueue = null;
+	}
 }

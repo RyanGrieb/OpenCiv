@@ -22,7 +22,12 @@ public class PickResearchButton extends Button {
 	public void onClick() {
 
 		if (tech.hasResearchedRequiredTechs()) {
+
+			// Reset the tech queue if the player manually changes the tech.
+			Civilization.getInstance().getGame().getPlayer().getResearchTree().clearTechQueue();
+
 			tech.research();
+
 		} else {
 			Civilization.getInstance().getGame().getPlayer().getResearchTree()
 					.setTechQueue(tech.getRequiedTechsQueue());
