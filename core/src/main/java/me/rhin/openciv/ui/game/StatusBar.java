@@ -125,8 +125,9 @@ public class StatusBar extends Actor
 
 				scienceLabel.setText("+" + statLine.getStatValue(Stat.SCIENCE_GAIN));
 
-				float currentGold = statLine.getStatValue(Stat.GOLD);
-				float gainedGold = statLine.getStatValue(Stat.GOLD_GAIN);
+				float currentGold = (float) (Math.floor(statLine.getStatValue(Stat.GOLD) * 100F) / 100F);
+				float gainedGold = (float) (Math.floor(statLine.getStatValue(Stat.GOLD_GAIN) * 100F) / 100F);
+
 				goldLabel.setText("" + currentGold + "(" + (gainedGold < 0 ? "" : "+") + gainedGold + ")");
 
 				hertiageLabel.setText("+" + (int) statLine.getStatValue(Stat.HERITAGE_GAIN) + "");
