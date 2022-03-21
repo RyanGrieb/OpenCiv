@@ -51,6 +51,12 @@ public class PickResearchWindow extends AbstractWindow implements ResizeListener
 		this.descTitleLabel = new CustomLabel("Enables The Following:", 15, getHeight() - 80, getWidth(), 15);
 		addActor(descTitleLabel);
 
+		this.pickResearchButton = new PickResearchButton(tech, 0, 5, 100, 35);
+		addActor(pickResearchButton);
+
+		this.closeWindowButton = new CloseWindowButton(this.getClass(), "Cancel", getWidth() - 100, 5, 100, 35);
+		addActor(closeWindowButton);
+
 		int index = 0;
 		if (tech.getUnlockables() != null)
 			for (Unlockable unlockable : tech.getUnlockables()) {
@@ -71,7 +77,7 @@ public class PickResearchWindow extends AbstractWindow implements ResizeListener
 			descLabel.pack();
 			descLabel.setPosition(5, (getHeight() - 155) - descLabel.getHeight());
 			descLabel.setWidth(getWidth() - 10);
-			
+
 			descLabels.add(descLabel);
 			addActor(descLabel);
 			index++;
@@ -86,15 +92,14 @@ public class PickResearchWindow extends AbstractWindow implements ResizeListener
 		} else {
 			this.turnsLabel = new CustomLabel("Queue " + (tech.getRequiedTechsQueue().size() - 1) + " Technologies",
 					Align.center, 0, 50, getWidth(), 15);
+
+			ColoredBackground clockIcon = new ColoredBackground(TextureEnum.ICON_CLOCK.sprite(),
+					pickResearchButton.getX() + pickResearchButton.getWidth() + 4, pickResearchButton.getY() + 1, 32,
+					32);
+			addActor(clockIcon);
 		}
 
 		addActor(turnsLabel);
-
-		this.pickResearchButton = new PickResearchButton(tech, 0, 5, 100, 35);
-		addActor(pickResearchButton);
-
-		this.closeWindowButton = new CloseWindowButton(this.getClass(), "Cancel", getWidth() - 100, 5, 100, 35);
-		addActor(closeWindowButton);
 
 		Civilization.getInstance().getEventManager().addListener(ResizeListener.class, this);
 	}
