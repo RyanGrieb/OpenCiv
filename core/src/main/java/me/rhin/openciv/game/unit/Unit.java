@@ -166,7 +166,8 @@ public abstract class Unit extends Actor
 	public void onNextTurn(NextTurnPacket packet) {
 		this.movement = getMaxMovement();
 
-		if (Civilization.getInstance().getGame().getPlayer().equals(playerOwner) && allowsMovement())
+		if (Civilization.getInstance().getGame().getPlayer().equals(playerOwner) && allowsMovement()
+				&& queuedTile == null)
 			Civilization.getInstance().getGame().getNotificationHanlder()
 					.fireNotification(new AvailableMovementNotification(this));
 	}
