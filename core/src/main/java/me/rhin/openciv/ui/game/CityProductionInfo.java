@@ -178,7 +178,7 @@ public class CityProductionInfo extends Actor implements SetProductionItemListen
 		productionItemNameLabel.setText("Nothing");
 		turnsLeftLabel.setText("???/??? Turns");
 
-		Sprite sprite = TextureEnum.UI_BLACK.sprite();
+		Sprite sprite = TextureEnum.UI_CLEAR.sprite();
 		sprite.setBounds(productionItemSprite.getX(), productionItemSprite.getY(), productionItemSprite.getWidth(),
 				productionItemSprite.getHeight());
 

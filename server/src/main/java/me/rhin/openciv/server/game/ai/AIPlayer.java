@@ -38,6 +38,18 @@ public class AIPlayer extends AbstractPlayer {
 	public void addOwnedUnit(Unit unit) {
 		super.addOwnedUnit(unit);
 
+		// FIXME: In the future were going to have to do this better.
+
+		if (unit instanceof BuilderUnit) {
+			unit.addAIBehavior(new UnitAI(unit, AIType.BUILDER_UNIT));
+			return;
+		}
+
+		if (unit instanceof SettlerUnit) {
+			unit.addAIBehavior(new UnitAI(unit, AIType.SETTLER_UNIT));
+			return;
+		}
+
 		// FIXME: Account for barbarian AI better.
 		if (aiType == AIType.BARBARIAN_PLAYER) {
 			unit.addAIBehavior(new UnitAI(unit, AIType.BARBARIAN_MELEE_UNIT));
@@ -61,16 +73,6 @@ public class AIPlayer extends AbstractPlayer {
 					break;
 				}
 			}
-		}
-
-		// FIXME: In the future were going to have to do this better.
-
-		if (unit instanceof BuilderUnit) {
-			unit.addAIBehavior(new UnitAI(unit, AIType.BUILDER_UNIT));
-		}
-
-		if (unit instanceof SettlerUnit) {
-			unit.addAIBehavior(new UnitAI(unit, AIType.SETTLER_UNIT));
 		}
 	}
 

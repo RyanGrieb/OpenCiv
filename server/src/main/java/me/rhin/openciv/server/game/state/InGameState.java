@@ -783,9 +783,9 @@ public class InGameState extends GameState implements DisconnectListener, Select
 		int turnLengthOffset = Server.getInstance().getGameOptions().getOption(GameOptionType.TURN_LENGTH_OFFSET);
 
 		if (turnLengthOffset < 0) {
-			int cityMultiplier = 1;
-			int unitMultiplier = 1;
-			return 25 + getMaxPlayerCities() * cityMultiplier + getMaxPlayerUnits() * unitMultiplier;
+			int cityMultiplier = 2;
+			int unitMultiplier = 2;
+			return 60 + (getMaxPlayerCities() * cityMultiplier) + (getMaxPlayerUnits() * unitMultiplier);
 		} else if (turnLengthOffset == 0) {
 			// Infinite turn length
 			return Integer.MAX_VALUE;
