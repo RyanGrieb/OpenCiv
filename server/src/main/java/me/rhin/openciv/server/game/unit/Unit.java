@@ -498,10 +498,17 @@ public abstract class Unit implements AttackableEntity, TileObserver, NextTurnLi
 	}
 
 	public boolean canStandOnTile(Tile tile) {
+
+		System.out.println(tile);
+		// Unit can't stand on an enemy city
+		if (tile.getCity() != null && !tile.getCity().getPlayerOwner().equals(playerOwner)) {
+			return false;
+		}
+
 		if (tile.getUnits().size() < 1)
 			return true;
 
-		// Unit can't start on a tile if there is already a support unit & our unit is a
+		// Unit can't stand on a tile if there is already a support unit & our unit is a
 		// support unit
 		if (tile.getUnitByType(UnitType.SUPPORT) != null && getUnitTypes().contains(UnitType.SUPPORT))
 			return false;
