@@ -45,15 +45,15 @@ public class ItemInfoWindow extends AbstractWindow implements ResizeListener {
 		this.productionItem = productionItem;
 		this.descLabels = new ArrayList<>();
 
-		this.background = new ColoredBackground(TextureEnum.UI_BLACK.sprite(), 0, 0, getWidth(), getHeight());
+		this.background = new ColoredBackground(TextureEnum.UI_POPUP_BOX_A.sprite(), 0, 0, getWidth(), getHeight());
 		addActor(background);
 
-		this.itemNameLabel = new CustomLabel(productionItem.getName(), Align.center, 0, getHeight() - 14, getWidth(),
+		this.itemNameLabel = new CustomLabel(productionItem.getName(), Align.center, 0, getHeight() - 20, getWidth(),
 				14);
 		addActor(itemNameLabel);
 
 		this.itemIcon = new ColoredBackground(productionItem.getTexture().sprite(), getWidth() / 2 - 32 / 2,
-				getHeight() - 48, 32, 32);
+				getHeight() - 55, 32, 32);
 		addActor(itemIcon);
 
 		float lastYIndex = itemIcon.getY() - itemIcon.getHeight();
@@ -64,7 +64,7 @@ public class ItemInfoWindow extends AbstractWindow implements ResizeListener {
 			descLabel.setAlignment(Align.left);
 			descLabel.pack();
 			float labelHeight = descLabel.getHeight();
-			descLabel.setPosition(4, lastYIndex - labelHeight);
+			descLabel.setPosition(6, lastYIndex - labelHeight);
 			descLabel.setWidth(getWidth() - 10);
 
 			descLabels.add(descLabel);
@@ -141,14 +141,14 @@ public class ItemInfoWindow extends AbstractWindow implements ResizeListener {
 		this.setBounds(viewport.getWorldWidth() / 2 - 300 / 2, viewport.getWorldHeight() / 2 - 350 / 2, 300, 350);
 		this.descLabels = new ArrayList<>();
 
-		this.background = new ColoredBackground(TextureEnum.UI_LIGHT_GRAY.sprite(), 0, 0, getWidth(), getHeight());
+		this.background = new ColoredBackground(TextureEnum.UI_POPUP_BOX_A.sprite(), 0, 0, getWidth(), getHeight());
 		addActor(background);
 
-		this.itemNameLabel = new CustomLabel(unlockable.getName(), Align.center, 0, getHeight() - 14, getWidth(), 14);
+		this.itemNameLabel = new CustomLabel(unlockable.getName(), Align.center, 0, getHeight() - 20, getWidth(), 14);
 		addActor(itemNameLabel);
 
 		this.itemIcon = new ColoredBackground(unlockable.getTexture().sprite(), getWidth() / 2 - 32 / 2,
-				getHeight() - 48, 32, 32);
+				getHeight() - 55, 32, 32);
 		addActor(itemIcon);
 
 		float lastYIndex = itemIcon.getY() - itemIcon.getHeight();
@@ -159,7 +159,7 @@ public class ItemInfoWindow extends AbstractWindow implements ResizeListener {
 			descLabel.setAlignment(Align.left);
 			descLabel.pack();
 			float labelHeight = descLabel.getHeight();
-			descLabel.setPosition(4, lastYIndex - labelHeight);
+			descLabel.setPosition(6, lastYIndex - labelHeight);
 			descLabel.setWidth(getWidth() - 10);
 
 			descLabels.add(descLabel);

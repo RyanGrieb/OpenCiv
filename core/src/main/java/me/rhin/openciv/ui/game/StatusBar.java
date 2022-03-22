@@ -33,7 +33,7 @@ public class StatusBar extends Actor
 	public StatusBar(float x, float y, float width, float height) {
 		this.setPosition(x, y);
 		this.setSize(width, height);
-		this.sprite = TextureEnum.UI_BLACK.sprite();
+		this.sprite = TextureEnum.UI_STATUSBAR.sprite();
 
 		this.scienceDescLabel = new CustomLabel("Science:");
 		this.scienceIcon = TextureEnum.ICON_SCIENCE.sprite();

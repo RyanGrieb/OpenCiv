@@ -36,8 +36,8 @@ public class PickResearchWindow extends AbstractWindow implements ResizeListener
 
 		this.descButtons = new ArrayList<>();
 		this.descLabels = new ArrayList<>();
-
-		this.coloredBackground = new ColoredBackground(TextureEnum.UI_LIGHT_GRAY.sprite(), 0, 0, getWidth(),
+		
+		this.coloredBackground = new ColoredBackground(TextureEnum.UI_POPUP_BOX_A.sprite(), 0, 0, getWidth(),
 				getHeight());
 		addActor(coloredBackground);
 
@@ -75,7 +75,7 @@ public class PickResearchWindow extends AbstractWindow implements ResizeListener
 			descLabel.setWidth(getWidth() - 10);
 			descLabel.setAlignment(Align.left);
 			descLabel.pack();
-			descLabel.setPosition(5, (getHeight() - 155) - descLabel.getHeight());
+			descLabel.setPosition(6, (getHeight() - 155) - descLabel.getHeight());
 			descLabel.setWidth(getWidth() - 10);
 
 			descLabels.add(descLabel);
