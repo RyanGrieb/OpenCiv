@@ -6,6 +6,7 @@ import java.util.Map.Entry;
 import com.badlogic.gdx.scenes.scene2d.Group;
 
 import me.rhin.openciv.Civilization;
+import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.city.City;
 import me.rhin.openciv.game.religion.PlayerReligion;
 import me.rhin.openciv.listener.CityReligionFollowersUpdateListener;
@@ -17,7 +18,7 @@ import me.rhin.openciv.ui.label.CustomLabel;
 public class CityReligionInfo extends Group implements CityReligionFollowersUpdateListener {
 
 	private City city;
-	private BlankBackground blankBackground;
+	private ColoredBackground blankBackground;
 	private CustomLabel religionInfoDescLabel;
 	private CustomLabel atheistsLabel;
 	private ArrayList<ColoredBackground> religionIcons;
@@ -31,15 +32,15 @@ public class CityReligionInfo extends Group implements CityReligionFollowersUpda
 		this.religionIcons = new ArrayList<>();
 		this.religionFollowerLabels = new ArrayList<>();
 
-		this.blankBackground = new BlankBackground(0, 0, width, height);
+		this.blankBackground = new ColoredBackground(TextureEnum.UI_POPUP_BOX_C.sprite(), 0, 0, width, height);
 		addActor(blankBackground);
 
 		this.religionInfoDescLabel = new CustomLabel("Religion Followers: ");
-		religionInfoDescLabel.setPosition(2, height - 15);
+		religionInfoDescLabel.setPosition(6, height - 17);
 		addActor(religionInfoDescLabel);
 
 		this.atheistsLabel = new CustomLabel("None");
-		atheistsLabel.setPosition(2, height - 40);
+		atheistsLabel.setPosition(6, height - 44);
 
 		initValues();
 
@@ -57,7 +58,7 @@ public class CityReligionInfo extends Group implements CityReligionFollowersUpda
 
 		for (CustomLabel label : religionFollowerLabels)
 			removeActor(label);
-		
+
 		initValues();
 	}
 
@@ -70,7 +71,7 @@ public class CityReligionInfo extends Group implements CityReligionFollowersUpda
 			if (entrySet.getValue() > 0) {
 
 				ColoredBackground religionIcon = new ColoredBackground(
-						entrySet.getKey().getReligionIcon().getTexture().sprite(), 2, getHeight() - 40 - (22 * index),
+						entrySet.getKey().getReligionIcon().getTexture().sprite(), 6, getHeight() - 44 - (22 * index),
 						16, 16);
 				religionIcons.add(religionIcon);
 				addActor(religionIcon);

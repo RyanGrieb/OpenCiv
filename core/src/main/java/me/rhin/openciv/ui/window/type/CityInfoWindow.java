@@ -69,15 +69,15 @@ public class CityInfoWindow extends AbstractWindow implements ResizeListener, Bu
 				150, 45);
 		addActor(closeWindowButton);
 
-		this.cityStatsInfo = new CityStatsInfo(city, 2, viewport.getWorldHeight() - (175 + GameOverlay.HEIGHT + 2), 200,
+		this.cityStatsInfo = new CityStatsInfo(city, 2, viewport.getWorldHeight() - (175 + GameOverlay.HEIGHT + 2), 210,
 				175);
 
 		addActor(cityStatsInfo);
 
-		this.cityReligionInfo = new CityReligionInfo(city, 2, cityStatsInfo.getY() - 105, 200, 100);
+		this.cityReligionInfo = new CityReligionInfo(city, 2, cityStatsInfo.getY() - 105, 210, 100);
 		addActor(cityReligionInfo);
 
-		this.cityProductionInfo = new CityProductionInfo(city, 2, cityReligionInfo.getY() - 105, 200, 100);
+		this.cityProductionInfo = new CityProductionInfo(city, 2, cityReligionInfo.getY() - 105, 210, 100);
 		addActor(cityProductionInfo);
 
 		this.productionContainerList = new ContainerList(0, 0, 220, 325);

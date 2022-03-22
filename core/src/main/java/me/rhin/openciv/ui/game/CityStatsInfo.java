@@ -29,115 +29,56 @@ public class CityStatsInfo extends Actor implements CityStatUpdateListener {
 		this.city = city;
 		this.setBounds(x, y, width, height);
 
-		this.backgroundSprite = TextureEnum.UI_BLACK.sprite();
+		this.backgroundSprite = TextureEnum.UI_POPUP_BOX_B.sprite();
 		backgroundSprite.setBounds(x, y, width, height);
 
-		float originX = 5;
-		float originY = backgroundSprite.getY() + backgroundSprite.getHeight() - 20;
 
 		this.populationIcon = TextureEnum.ICON_CITIZEN.sprite();
 		populationIcon.setSize(16, 16);
-		populationIcon.setPosition(originX, originY);
 
 		this.populationDescLabel = new CustomLabel("Citizens:");
-		originX += populationIcon.getWidth() + 5;
-		populationDescLabel.setPosition(originX, originY + populationDescLabel.getHeight() / 2);
-
 		this.populationLabel = new CustomLabel("0");
-
-		originX = 5;
-		originY -= populationIcon.getHeight() + 3;
-
 		this.populationGrowthDescLabel = new CustomLabel("Growth In:");
-		populationGrowthDescLabel.setPosition(originX, originY + populationGrowthDescLabel.getHeight() / 2);
-
 		this.populationGrowthLabel = new CustomLabel("0 Turns");
 
-		originX = 5;
 
 		this.foodIcon = TextureEnum.ICON_FOOD.sprite();
-		originY -= populationIcon.getHeight();
 		foodIcon.setSize(16, 16);
-		foodIcon.setPosition(originX, originY);
 
 		this.foodDescLabel = new CustomLabel("Food:");
-		originX += foodIcon.getWidth() + 5;
-		foodDescLabel.setPosition(originX, originY + foodDescLabel.getHeight() / 2);
-
 		this.foodLabel = new CustomLabel("+0");
 
-		originX = 5;
-
 		this.productionIcon = TextureEnum.ICON_PRODUCTION.sprite();
-		originY -= foodIcon.getHeight();
 		productionIcon.setSize(16, 16);
-		productionIcon.setPosition(originX, originY);
 
 		this.productionDescLabel = new CustomLabel("Production:");
-		originX += productionIcon.getWidth() + 5;
-		productionDescLabel.setPosition(originX, originY + productionDescLabel.getHeight() / 2);
-
 		this.productionLabel = new CustomLabel("+0");
-		originX += productionIcon.getWidth() + 2;
-
-		originX = 5;
 
 		this.goldIcon = TextureEnum.ICON_GOLD.sprite();
-		originY -= productionIcon.getHeight();
 		goldIcon.setSize(16, 16);
-		goldIcon.setPosition(originX, originY);
 
 		this.goldDescLabel = new CustomLabel("Gold:");
-		originX += goldIcon.getWidth() + 5;
-		goldDescLabel.setPosition(originX, originY + goldDescLabel.getHeight() / 2);
-
 		this.goldLabel = new CustomLabel("+0");
 
-		originX = 5;
 
 		this.scienceIcon = TextureEnum.ICON_SCIENCE.sprite();
-		originY -= goldIcon.getHeight();
 		scienceIcon.setSize(16, 16);
-		scienceIcon.setPosition(originX, originY);
 
 		this.scienceDescLabel = new CustomLabel("Science:");
-		originX += scienceIcon.getWidth() + 5;
-		scienceDescLabel.setPosition(originX, originY + scienceDescLabel.getHeight() / 2);
-
 		this.scienceLabel = new CustomLabel("+0");
 
-		originX = 5;
-
 		this.heritageIcon = TextureEnum.ICON_HERITAGE.sprite();
-		originY -= scienceIcon.getHeight();
 		heritageIcon.setSize(16, 16);
-		heritageIcon.setPosition(originX, originY);
 
 		this.heritageDescLabel = new CustomLabel("Heritage:");
-		originX += heritageIcon.getWidth() + 5;
-		heritageDescLabel.setPosition(originX, originY + heritageDescLabel.getHeight() / 2);
-
 		this.heritageLabel = new CustomLabel("+0");
 
-		originX = 5;
-
 		this.moraleIcon = TextureEnum.ICON_MORALE.sprite();
-		originY -= heritageIcon.getHeight();
 		moraleIcon.setSize(16, 16);
-		moraleIcon.setPosition(originX, originY);
 
 		this.moraleDescLabel = new CustomLabel("Morale:");
-		originX += moraleIcon.getWidth() + 5;
-		moraleDescLabel.setPosition(originX, originY + moraleDescLabel.getHeight() / 2);
-
 		this.moraleLabel = new CustomLabel("100%");
-
-		originX = 5;
-
-		originY -= moraleIcon.getHeight() + 3;
 		this.borderGrowthDescLabel = new CustomLabel("Expansion In:");
-		borderGrowthDescLabel.setPosition(originX, originY + borderGrowthDescLabel.getHeight() / 2);
-
 		this.borderGrowthLabel = new CustomLabel("0 Turns");
 
 		updateStatValues();
@@ -241,23 +182,23 @@ public class CityStatsInfo extends Actor implements CityStatUpdateListener {
 	}
 
 	private void updatePositions() {
-		float originX = 5;
-		float originY = backgroundSprite.getY() + backgroundSprite.getHeight() - 20;
+		float originX = 7;
+		float originY = backgroundSprite.getY() + backgroundSprite.getHeight() - 22;
 
 		// Population information
 		populationIcon.setPosition(originX, originY);
 		this.populationDescLabel = new CustomLabel("Citizens:");
 		originX += populationIcon.getWidth() + 5;
 		populationDescLabel.setPosition(originX, originY + populationDescLabel.getHeight() / 2);
-		originX = 5;
-		populationLabel.setPosition(getWidth() - (populationLabel.getWidth() + 2),
+		originX = 7;
+		populationLabel.setPosition(getWidth() - (populationLabel.getWidth() + 4),
 				originY + populationDescLabel.getHeight() / 2);
 		originY -= populationIcon.getHeight() + 3;
 
 		// Population growth information
 		populationGrowthDescLabel.setPosition(originX, originY + populationGrowthDescLabel.getHeight() / 2);
-		originX = 5;
-		populationGrowthLabel.setPosition(getWidth() - (populationGrowthLabel.getWidth() + 2),
+		originX = 7;
+		populationGrowthLabel.setPosition(getWidth() - (populationGrowthLabel.getWidth() + 4),
 				originY + populationGrowthDescLabel.getHeight() / 2);
 		originY -= populationIcon.getHeight();
 
@@ -265,16 +206,16 @@ public class CityStatsInfo extends Actor implements CityStatUpdateListener {
 		foodIcon.setPosition(originX, originY);
 		originX += foodIcon.getWidth() + 5;
 		foodDescLabel.setPosition(originX, originY + foodDescLabel.getHeight() / 2);
-		originX = 5;
-		foodLabel.setPosition(getWidth() - (foodLabel.getWidth() + 2), originY + foodDescLabel.getHeight() / 2);
+		originX = 7;
+		foodLabel.setPosition(getWidth() - (foodLabel.getWidth() + 4), originY + foodDescLabel.getHeight() / 2);
 		originY -= foodIcon.getHeight();
 
 		// Production information
 		productionIcon.setPosition(originX, originY);
 		originX += productionIcon.getWidth() + 5;
 		productionDescLabel.setPosition(originX, originY + productionDescLabel.getHeight() / 2);
-		originX = 5;
-		productionLabel.setPosition(getWidth() - (productionLabel.getWidth() + 2),
+		originX = 7;
+		productionLabel.setPosition(getWidth() - (productionLabel.getWidth() + 4),
 				originY + productionDescLabel.getHeight() / 2);
 		originY -= productionIcon.getHeight();
 
@@ -282,16 +223,16 @@ public class CityStatsInfo extends Actor implements CityStatUpdateListener {
 		goldIcon.setPosition(originX, originY);
 		originX += productionIcon.getWidth() + 5;
 		goldDescLabel.setPosition(originX, originY + goldDescLabel.getHeight() / 2);
-		originX = 5;
-		goldLabel.setPosition(getWidth() - (goldLabel.getWidth() + 2), originY + goldDescLabel.getHeight() / 2);
+		originX = 7;
+		goldLabel.setPosition(getWidth() - (goldLabel.getWidth() + 4), originY + goldDescLabel.getHeight() / 2);
 		originY -= goldIcon.getHeight();
 
 		// Science information
 		scienceIcon.setPosition(originX, originY);
 		originX += scienceIcon.getWidth() + 5;
 		scienceDescLabel.setPosition(originX, originY + scienceDescLabel.getHeight() / 2);
-		originX = 5;
-		scienceLabel.setPosition(getWidth() - (scienceLabel.getWidth() + 2),
+		originX = 7;
+		scienceLabel.setPosition(getWidth() - (scienceLabel.getWidth() + 4),
 				originY + scienceDescLabel.getHeight() / 2);
 		originY -= scienceIcon.getHeight();
 
@@ -299,8 +240,8 @@ public class CityStatsInfo extends Actor implements CityStatUpdateListener {
 		heritageIcon.setPosition(originX, originY);
 		originX += heritageIcon.getWidth() + 5;
 		heritageDescLabel.setPosition(originX, originY + heritageDescLabel.getHeight() / 2);
-		originX = 5;
-		heritageLabel.setPosition(getWidth() - (heritageLabel.getWidth() + 2),
+		originX = 7;
+		heritageLabel.setPosition(getWidth() - (heritageLabel.getWidth() + 4),
 				originY + heritageDescLabel.getHeight() / 2);
 		originY -= heritageIcon.getHeight();
 
@@ -308,13 +249,13 @@ public class CityStatsInfo extends Actor implements CityStatUpdateListener {
 		moraleIcon.setPosition(originX, originY);
 		originX += moraleIcon.getWidth() + 5;
 		moraleDescLabel.setPosition(originX, originY + moraleDescLabel.getHeight() / 2);
-		originX = 5;
-		moraleLabel.setPosition(getWidth() - (moraleLabel.getWidth() + 2), originY + moraleDescLabel.getHeight() / 2);
+		originX = 7;
+		moraleLabel.setPosition(getWidth() - (moraleLabel.getWidth() + 4), originY + moraleDescLabel.getHeight() / 2);
 		originY -= moraleIcon.getHeight() + 3;
 
 		// Border growth information
 		borderGrowthDescLabel.setPosition(originX, originY + borderGrowthDescLabel.getHeight() / 2);
-		borderGrowthLabel.setPosition(getWidth() - (borderGrowthLabel.getWidth() + 2),
+		borderGrowthLabel.setPosition(getWidth() - (borderGrowthLabel.getWidth() + 4),
 				originY + foodDescLabel.getHeight() / 2);
 	}
 }

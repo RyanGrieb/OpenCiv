@@ -27,7 +27,7 @@ public class Civilization extends Game {
 
 	private static final Logger LOGGER = LoggerFactory.getInstance(LoggerType.LOG_TAG);
 
-	public static final boolean SHOW_FOG = false;
+	public static final boolean SHOW_FOG = true;
 	public static final boolean DEBUG_GL = false;
 	public static final boolean DEBUG_BOUNDING_BOXES = false; // NOTE: Overlay only.
 

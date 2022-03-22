@@ -38,24 +38,24 @@ public class CityProductionInfo extends Actor implements SetProductionItemListen
 		this.city = city;
 		this.setBounds(x, y, width, height);
 
-		backgroundSprite = TextureEnum.UI_BLACK.sprite();
+		backgroundSprite = TextureEnum.UI_POPUP_BOX_C.sprite();
 		backgroundSprite.setBounds(x, y, width, height);
 
 		ProducingItem producingItem = city.getProducibleItemManager().getCurrentProducingItem();
 
 		if (producingItem == null)
-			productionItemSprite = TextureEnum.UI_BLACK.sprite();
+			productionItemSprite = TextureEnum.UI_CLEAR.sprite();
 		else
 			productionItemSprite = producingItem.getProductionItem().getTexture().sprite();
 
-		productionItemSprite.setBounds(x + width - 34, y + 2, 32, 32);
+		productionItemSprite.setBounds(x + width - 40, y + 8, 32, 32);
 
 		this.productionDescLabel = new CustomLabel("Producing:");
-		productionDescLabel.setPosition(x, y + height - productionDescLabel.getHeight());
+		productionDescLabel.setPosition(x + 6, y + height - productionDescLabel.getHeight() - 8);
 
 		this.productionItemNameLabel = new CustomLabel(
 				(producingItem == null ? "Nothing" : producingItem.getProductionItem().getName()));
-		productionItemNameLabel.setPosition(x, y + height - productionItemNameLabel.getHeight() - 15);
+		productionItemNameLabel.setPosition(x + 6, y + height - productionItemNameLabel.getHeight() - 25);
 
 		if (producingItem != null) {
 
@@ -91,10 +91,10 @@ public class CityProductionInfo extends Actor implements SetProductionItemListen
 	@Override
 	public void setPosition(float x, float y) {
 		backgroundSprite.setPosition(x, y);
-		productionItemSprite.setPosition(x + getWidth() - 34, y + 2);
-		productionDescLabel.setPosition(x, y + getHeight() - productionDescLabel.getHeight());
-		productionItemNameLabel.setPosition(x, y + getHeight() - productionItemNameLabel.getHeight() - 15);
-		turnsLeftLabel.setPosition(x + 5, y + productionItemSprite.getHeight() / 2 - turnsLeftLabel.getHeight() / 2);
+		productionItemSprite.setPosition(x + getWidth() - 40, y + 8);
+		productionDescLabel.setPosition(x + 6, y + getHeight() - productionDescLabel.getHeight() - 8);
+		productionItemNameLabel.setPosition(x + 6, y + getHeight() - productionItemNameLabel.getHeight() - 25);
+		turnsLeftLabel.setPosition(x + 6, y + productionItemSprite.getHeight() / 2 - turnsLeftLabel.getHeight() / 2);
 	}
 
 	@Override
