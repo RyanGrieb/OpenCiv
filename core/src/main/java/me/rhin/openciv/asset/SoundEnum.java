@@ -27,7 +27,8 @@ public enum SoundEnum {
 	CHAT_NOTIFICATION(0.75F, SoundType.EFFECT),
 	FARM_TILL(0.35F, SoundType.EFFECT),
 	ANGELIC_SOUND_1(0.25F, SoundType.EFFECT),
-	ANGELIC_SOUND_2(0.25F, SoundType.EFFECT);
+	ANGELIC_SOUND_2(0.25F, SoundType.EFFECT),
+	BUY_ITEM(0.25F,SoundType.EFFECT);
 
 	public enum SoundType {
 		TITLE_MUSIC {

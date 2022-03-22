@@ -1,6 +1,7 @@
 package me.rhin.openciv.ui.button.type;
 
 import me.rhin.openciv.Civilization;
+import me.rhin.openciv.asset.SoundEnum;
 import me.rhin.openciv.game.city.City;
 import me.rhin.openciv.game.production.ProductionItem;
 import me.rhin.openciv.shared.stat.Stat;
@@ -26,6 +27,8 @@ public class BuyItemButton extends Button {
 
 		city.getProducibleItemManager().requestBuyProductionItem(productionItem);
 		Civilization.getInstance().getWindowManager().closeWindow(ItemInfoWindow.class);
+		
+		Civilization.getInstance().getSoundHandler().playEffect(SoundEnum.BUY_ITEM);
 	}
 
 }
