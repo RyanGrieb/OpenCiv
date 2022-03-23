@@ -11,7 +11,9 @@ public class CityState extends Civ {
 	public enum CityStateType {
 		GOLD(TextureEnum.ICON_CITYSTATE_GOLD, Color.GOLD),
 		PRODUCTION(TextureEnum.ICON_CITYSTATE_PRODUCTION, Color.ORANGE),
-		SCIENCE(TextureEnum.ICON_CITYSTATE_SCIENCE, Color.BLUE);
+		SCIENCE(TextureEnum.ICON_CITYSTATE_SCIENCE, Color.BLUE),
+		FAITH(TextureEnum.ICON_CITYSTATE_FAITH, Color.LIGHT_GRAY),
+		HERITAGE(TextureEnum.ICON_CITYSTATE_HERITAGE, Color.PINK);
 
 		private TextureEnum textureEnum;
 		private Color color;

@@ -13,7 +13,6 @@ import me.rhin.openciv.listener.ResizeListener;
 import me.rhin.openciv.shared.packet.type.CompleteHeritagePacket;
 import me.rhin.openciv.shared.packet.type.NextTurnPacket;
 import me.rhin.openciv.shared.stat.Stat;
-import me.rhin.openciv.ui.background.BlankBackground;
 import me.rhin.openciv.ui.background.ColoredBackground;
 import me.rhin.openciv.ui.button.type.OpenHeritageButton;
 import me.rhin.openciv.ui.label.CustomLabel;
@@ -22,7 +21,7 @@ import me.rhin.openciv.ui.window.AbstractWindow;
 public class CurrentHeritageWindow extends AbstractWindow
 		implements ResizeListener, PickHeritageListener, NextTurnListener, CompleteHeritageListener {
 
-	private BlankBackground blankBackground;
+	private ColoredBackground blankBackground;
 	private CustomLabel heritageNameDescLabel;
 	private CustomLabel heritageTurnsLabel;
 	private CustomLabel heritageNameLabel;
@@ -31,14 +30,15 @@ public class CurrentHeritageWindow extends AbstractWindow
 	private Heritage heritage;
 
 	public CurrentHeritageWindow() {
-		super.setBounds(5, viewport.getWorldHeight() - 145, 225, 60);
+		super.setBounds(5, viewport.getWorldHeight() - 155, 225, 60);
 
-		this.blankBackground = new BlankBackground(0, 0, getWidth(), getHeight());
+		this.blankBackground = new ColoredBackground(TextureEnum.UI_POPUP_BOX_D.sprite(), 0, 0, getWidth(),
+				getHeight());
 		addActor(blankBackground);
 
 		heritageNameDescLabel = new CustomLabel("Studying: ");
 		heritageNameDescLabel.setPosition(5 + 3,
-				blankBackground.getY() + blankBackground.getHeight() - heritageNameDescLabel.getHeight() - 3);
+				blankBackground.getY() + blankBackground.getHeight() - heritageNameDescLabel.getHeight() - 6);
 		addActor(heritageNameDescLabel);
 
 		heritageTurnsLabel = new CustomLabel("??/?? Turns");
@@ -47,15 +47,15 @@ public class CurrentHeritageWindow extends AbstractWindow
 		addActor(heritageTurnsLabel);
 
 		heritageNameLabel = new CustomLabel("Nothing");
-		heritageNameLabel.setPosition(blankBackground.getX() + 36,
-				blankBackground.getY() + heritageNameLabel.getHeight() - 3);
+		heritageNameLabel.setPosition(blankBackground.getX() + 40,
+				blankBackground.getY() + heritageNameLabel.getHeight() - 2);
 		addActor(heritageNameLabel);
 
 		openHeritageButton = new OpenHeritageButton(blankBackground.getX() + blankBackground.getWidth() - 52,
-				blankBackground.getY(), 48, 32);
+				blankBackground.getY() + 3, 48, 32);
 		addActor(openHeritageButton);
 
-		this.heritageIcon = new ColoredBackground(TextureEnum.UI_BLACK.sprite(), 2, 2, 32, 32);
+		this.heritageIcon = new ColoredBackground(TextureEnum.UI_CLEAR.sprite(), 6, 6, 32, 32);
 		addActor(heritageIcon);
 
 		Civilization.getInstance().getEventManager().addListener(ResizeListener.class, this);
@@ -66,7 +66,7 @@ public class CurrentHeritageWindow extends AbstractWindow
 
 	@Override
 	public void onResize(int width, int height) {
-		super.setPosition(5, height - 145);
+		super.setPosition(5, height - 155);
 	}
 
 	@Override
@@ -74,6 +74,7 @@ public class CurrentHeritageWindow extends AbstractWindow
 		this.heritage = heritage;
 
 		heritageIcon.setSprite(heritage.getIcon());
+		heritageIcon.setBounds(6, 6, 32, 32);
 		heritageNameLabel.setText(heritage.getName());
 
 		if (heritageNameLabel.getWidth() > 120)
@@ -117,7 +118,8 @@ public class CurrentHeritageWindow extends AbstractWindow
 				.getHeritageFromClassName(packet.getHeritageName()).equals(heritage))
 			return;
 
-		heritageIcon.setSprite(TextureEnum.UI_BLACK.sprite());
+		heritageIcon.setSprite(TextureEnum.UI_CLEAR.sprite());
+		heritageIcon.setBounds(6, 6, 32, 32);
 		heritageNameLabel.setText("Nothing");
 		heritageTurnsLabel.setText("??/?? Turns");
 
