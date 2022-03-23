@@ -57,6 +57,9 @@ import me.rhin.openciv.listener.SetUnitOwnerListener;
 import me.rhin.openciv.listener.SettleCityListener;
 import me.rhin.openciv.listener.TerritoryGrowListener;
 import me.rhin.openciv.listener.UnitAttackListener;
+import me.rhin.openciv.shared.logging.Logger;
+import me.rhin.openciv.shared.logging.LoggerFactory;
+import me.rhin.openciv.shared.logging.LoggerType;
 import me.rhin.openciv.shared.packet.type.AddUnitPacket;
 import me.rhin.openciv.shared.packet.type.AvailablePantheonPacket;
 import me.rhin.openciv.shared.packet.type.DeleteUnitPacket;
@@ -82,9 +85,6 @@ import me.rhin.openciv.ui.window.type.CurrentResearchWindow;
 import me.rhin.openciv.ui.window.type.InfoButtonsWindow;
 import me.rhin.openciv.ui.window.type.NextTurnWindow;
 import me.rhin.openciv.ui.window.type.NotificationWindow;
-import me.rhin.openciv.shared.logging.Logger;
-import me.rhin.openciv.shared.logging.LoggerFactory;
-import me.rhin.openciv.shared.logging.LoggerType;
 
 //FIXME: Instead of the civ game listening for everything. Just split them off into the respective classes. (EX: UnitAttackListener in the Unit class)
 public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerListRequestListener, FetchPlayerListener,
@@ -268,11 +268,20 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 
 		// TODO: Have force set target tile still init values like setTargetTile()
 		unit.forceSetTargetTile(targetTile);
+
+		boolean hadMovementQueue = unit.getQueuedTile() != null;
 		unit.moveToTargetTile();
 
 		// If we own this unit, add the movement cooldown.
 		if (unit.getPlayerOwner().equals(player)) {
 			unit.reduceMovement(packet.getMovementCost());
+		}
+
+		// If the unit finished it's movement queue
+		if (hadMovementQueue && unit.getQueuedTile() == null) {
+			if (unit.getCurrentMovement() > 0)
+				Civilization.getInstance().getGame().getNotificationHanlder()
+						.fireNotification(new AvailableMovementNotification(unit));
 		}
 	}
 

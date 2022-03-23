@@ -344,6 +344,9 @@ public abstract class Unit extends Actor
 		}
 
 		if (targetEntity != null) {
+
+			// TODO: Use the code below to prevent moving queue into cities.
+
 			// FIXME: Range units should be able to move onto capturable units.
 			if (isUnitCapturable() || isRangedUnit()) {
 				pathVectors.clear();
