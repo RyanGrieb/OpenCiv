@@ -119,11 +119,13 @@ public class Player extends AbstractPlayer implements RelativeMouseMoveListener,
 			selectedUnit.setTargetTile(hoveredTile, true);
 			rightMouseHeld = true;
 		} else {
-			if (selectedUnit.getCurrentMovement() >= selectedUnit.getPathMovement()) {
+
+			if (selectedUnit.getCurrentMovement() >= selectedUnit.getPathMovement()
+					&& selectedUnit.getTargetTile() != null) {
 
 				// If were moving onto a unit thats not ours & not at war. Bring up declare war
 				// window.
-				if (selectedUnit.getTargetTile() != null && selectedUnit.getTargetTile().getAttackableEntity() != null
+				if (selectedUnit.getTargetTile().getAttackableEntity() != null
 						&& !selectedUnit.getTargetTile().getAttackableEntity().getPlayerOwner().equals(this)) {
 
 					AttackableEntity attackableEntity = selectedUnit.getTargetTile().getAttackableEntity();
@@ -135,6 +137,7 @@ public class Player extends AbstractPlayer implements RelativeMouseMoveListener,
 
 				selectedUnit.setQueuedTile(null);
 				selectedUnit.sendMovementPacket();
+
 			} else {
 
 				if (selectedUnit.getTargetTile() != null) {

@@ -510,9 +510,13 @@ public abstract class Unit extends Actor
 					Civilization.getInstance().getWindowManager().closeWindow(UnitCombatWindow.class);
 				} else {
 					Civilization.getInstance().getWindowManager().addWindow(new UnitWindow(thisUnit));
+
 					if (queuedTile != null) {
 						definePathVectors(queuedTile);
 
+						targetSelectionSprite.setPosition(queuedTile.getVectors()[0].x - queuedTile.getWidth() / 2,
+								queuedTile.getVectors()[0].y + 4);
+						targetSelectionSprite.setSize(queuedTile.getWidth(), queuedTile.getHeight());
 					}
 				}
 			}
