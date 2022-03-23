@@ -136,16 +136,19 @@ public class Player extends AbstractPlayer implements RelativeMouseMoveListener,
 				selectedUnit.setQueuedTile(null);
 				selectedUnit.sendMovementPacket();
 			} else {
-				// if (Civilization.getInstance().getGame().getTurn() < 2)
-				// Civilization.getInstance().getGame().getNotificationHanlder()
-				// .fireNotification(new MovementRangeHelpNotification());
-				selectedUnit.setQueuedTile(selectedUnit.getTargetTile());
 
-				QueuedUnitMovementPacket packet = new QueuedUnitMovementPacket();
-				packet.setUnit(selectedUnit.getPlayerOwner().getName(), selectedUnit.getID(),
-						selectedUnit.getTile().getGridX(), selectedUnit.getTile().getGridY(),
-						selectedUnit.getQueuedTile().getGridX(), selectedUnit.getQueuedTile().getGridY());
-				Civilization.getInstance().getNetworkManager().sendPacket(packet);
+				if (selectedUnit.getTargetTile() != null) {
+					// if (Civilization.getInstance().getGame().getTurn() < 2)
+					// Civilization.getInstance().getGame().getNotificationHanlder()
+					// .fireNotification(new MovementRangeHelpNotification());
+					selectedUnit.setQueuedTile(selectedUnit.getTargetTile());
+
+					QueuedUnitMovementPacket packet = new QueuedUnitMovementPacket();
+					packet.setUnit(selectedUnit.getPlayerOwner().getName(), selectedUnit.getID(),
+							selectedUnit.getTile().getGridX(), selectedUnit.getTile().getGridY(),
+							selectedUnit.getQueuedTile().getGridX(), selectedUnit.getQueuedTile().getGridY());
+					Civilization.getInstance().getNetworkManager().sendPacket(packet);
+				}
 
 			}
 

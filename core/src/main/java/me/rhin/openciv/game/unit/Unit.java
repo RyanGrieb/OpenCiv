@@ -323,6 +323,14 @@ public abstract class Unit extends Actor
 			iterations++;
 		}
 
+		if (pathMovement > getCurrentMovement()
+				&& (targetTile.getCity() != null && !targetTile.getCity().getPlayerOwner().equals(playerOwner))) {
+			pathMovement = 0;
+			this.targetTile = null;
+			Civilization.getInstance().getWindowManager().closeWindow(UnitCombatWindow.class);
+			return false;
+		}
+
 		this.targetTile = targetTile;
 		this.pathMovement = pathMovement;
 		definePathVectors(targetTile);
