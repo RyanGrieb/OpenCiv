@@ -123,7 +123,7 @@ public abstract class Unit extends Actor
 			if (selected)
 				selectionSprite.draw(batch);
 
-			if (targetTile != null || hasRangedTarget() || (selected && queuedTile != null)) {
+			if (targetTile != null || hasRangedTarget() || (selected && queuedTile != null && pathVectors.size() > 0)) {
 				targetSelectionSprite.draw(batch);
 			}
 		}
@@ -399,6 +399,7 @@ public abstract class Unit extends Actor
 			shapeRenderer.setColor(Color.RED);
 		else
 			shapeRenderer.setColor(Color.ORANGE);
+
 		for (Vector2[] vectors : new ArrayList<>(pathVectors)) {
 			// LOGGER.info(maxMovement + "," + pathMovement);
 			if (vectors == null)
