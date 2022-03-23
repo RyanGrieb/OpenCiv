@@ -400,13 +400,15 @@ public abstract class Unit extends Actor
 		else
 			shapeRenderer.setColor(Color.ORANGE);
 
+		if (queuedTile != null || getCurrentMovement() < pathMovement) {
+			shapeRenderer.setColor(Color.WHITE);
+		}
+
 		for (Vector2[] vectors : new ArrayList<>(pathVectors)) {
 			// LOGGER.info(maxMovement + "," + pathMovement);
 			if (vectors == null)
 				break;
-			if (getCurrentMovement() < pathMovement) {
-				shapeRenderer.setColor(Color.WHITE);
-			}
+
 			shapeRenderer.line(vectors[0], vectors[1]);
 
 		}

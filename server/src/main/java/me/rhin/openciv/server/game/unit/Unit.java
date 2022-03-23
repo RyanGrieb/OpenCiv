@@ -499,7 +499,6 @@ public abstract class Unit implements AttackableEntity, TileObserver, NextTurnLi
 
 	public boolean canStandOnTile(Tile tile) {
 
-		System.out.println(tile);
 		// Unit can't stand on an enemy city
 		if (tile.getCity() != null && !tile.getCity().getPlayerOwner().equals(playerOwner)) {
 			return false;
