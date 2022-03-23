@@ -13,7 +13,7 @@ If you like game development, Java, or pixel art, consider contributing. We can 
 Eventually, I'd like to add support modding through [LUAJ](https://www.gamedevelopment.blog/using-luaj-scripting-to-allow-modding-in-games/).
 
 ## Screenshot
-![alt text](https://github.com/rhin123/OpenCiv/blob/master/meta/screenshots/latest.png?raw=true)
+![alt text](https://github.com/rhin123/OpenCiv/blob/master/meta/screenshots/new_ui_2.png?raw=true)
 
 ## How do I build and run this?
 * Install [Java 11](https://www.oracle.com/java/technologies/javase/jdk11-archive-downloads.html) or higher. NOTE: OpenJDK has problems (at least for me on linux)
