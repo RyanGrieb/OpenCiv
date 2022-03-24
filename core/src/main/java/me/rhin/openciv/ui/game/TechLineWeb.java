@@ -57,10 +57,17 @@ public class TechLineWeb extends Actor {
 			}
 		}
 
-		shapeRenderer.end();
 		Gdx.gl.glDisable(GL20.GL_BLEND);
+		shapeRenderer.setColor(Color.WHITE);
+		shapeRenderer.end();
 
 		batch.begin();
+	}
+
+	@Override
+	public boolean remove() {
+		shapeRenderer.dispose();
+		return super.remove();
 	}
 
 	@Override

@@ -64,7 +64,9 @@ import me.rhin.openciv.shared.packet.type.SetProductionItemPacket;
 import me.rhin.openciv.shared.stat.Stat;
 import me.rhin.openciv.shared.stat.StatLine;
 import me.rhin.openciv.ui.game.Healthbar;
+import me.rhin.openciv.ui.game.TileTerritoryLines;
 import me.rhin.openciv.ui.label.CustomLabel;
+import me.rhin.openciv.ui.screen.type.InGameScreen;
 import me.rhin.openciv.ui.window.type.CityInfoWindow;
 
 //FIXME: We should have a interface for these networking interface.
@@ -82,6 +84,7 @@ public class City extends Group implements AttackableEntity, TileObserver, Speci
 	private ArrayList<Tile> territory;
 	private ArrayList<Building> buildings;
 	private HashMap<Tile, WorkerType> citizenWorkers;
+	private TileTerritoryLines tileTerritoryLines;
 	private int unemployedWorkerAmount;
 	private ProducibleItemManager producibleItemManager;
 	private StatLine statLine;
@@ -100,6 +103,7 @@ public class City extends Group implements AttackableEntity, TileObserver, Speci
 		this.territory = new ArrayList<>();
 		this.buildings = new ArrayList<>();
 		this.citizenWorkers = new HashMap<>();
+		this.tileTerritoryLines = new TileTerritoryLines(this);
 		this.unemployedWorkerAmount = 0;
 		this.producibleItemManager = new ProducibleItemManager(this);
 		this.statLine = new StatLine();
@@ -122,6 +126,9 @@ public class City extends Group implements AttackableEntity, TileObserver, Speci
 		this.setSize(nameLabel.getWidth() + 20, nameLabel.getHeight());
 
 		Civilization.getInstance().getScreenManager().getCurrentScreen().getStage().addActor(this);
+		((InGameScreen) Civilization.getInstance().getScreenManager().getCurrentScreen()).getTerritoryGroup()
+				.addActor(tileTerritoryLines);
+
 		addListener(new ClickListener() {
 			@Override
 			public void clicked(InputEvent event, float x, float y) {
@@ -155,6 +162,7 @@ public class City extends Group implements AttackableEntity, TileObserver, Speci
 	public void draw(Batch batch, float parentAlpha) {
 		if (!Civilization.getInstance().getWindowManager().isOpenWindow(CityInfoWindow.class)
 				&& (originTile.getTileObservers().size() > 0 || !Civilization.SHOW_FOG)) {
+
 			nameLabel.draw(batch, parentAlpha);
 			nameIcon.draw(batch);
 			healthbar.draw(batch, parentAlpha);

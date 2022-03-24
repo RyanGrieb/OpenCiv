@@ -32,7 +32,7 @@ import me.rhin.openciv.shared.logging.LoggerType;
 import me.rhin.openciv.ui.label.CustomLabel;
 import me.rhin.openciv.ui.screen.type.InGameScreen;
 
-public class Tile extends Actor implements BottomShapeRenderListener {
+public class Tile extends Actor {
 
 	public class TileTypeWrapper extends Sprite implements Comparable<TileTypeWrapper> {
 
@@ -103,7 +103,6 @@ public class Tile extends Actor implements BottomShapeRenderListener {
 	private Road road;
 
 	public Tile(GameMap map, TileType tileType, float x, float y) {
-		Civilization.getInstance().getEventManager().addListener(BottomShapeRenderListener.class, this);
 		this.map = map;
 		if (tileType.getTileLayer() != TileLayer.BASE) {
 			LOGGER.info("WARNING: TileType " + tileType.name() + " top layer applied to constructor");
@@ -144,52 +143,6 @@ public class Tile extends Actor implements BottomShapeRenderListener {
 		this.observerLabel = new CustomLabel("1,1");
 		observerLabel.setSize(width, 20);
 		observerLabel.setPosition(vectors[0].x - width / 2, vectors[0].y + 5);
-	}
-
-	@Override
-	public void onBottomShapeRender(ShapeRenderer shapeRenderer) {
-		if (tileObservers.size() < 1 && Civilization.SHOW_FOG)
-			return;
-
-		// Draw the hexagon outline
-
-		// FIXME: Don't render lines if they're off the screen. This isn't part of the
-		// actor class so we need to manually put that in.
-
-		for (int i = 0; i < territoryBorders.length; i++) {
-			boolean renderLine = territoryBorders[i];
-			if (!renderLine) {
-				continue;
-			}
-			// 0 = 5 0
-			// 1 = 0 1
-			// 2 = 1 2
-			int v1 = i - 1;
-			int v2 = i;
-			if (v1 == -1) {
-				v1 = 5;
-				v2 = 0;
-			}
-
-			shapeRenderer.setColor(territory.getPlayerOwner().getCivilization().getBorderColor());
-			shapeRenderer.line(vectors[v1], vectors[v2]);
-		}
-
-		shapeRenderer.setColor(0, 0, 0, 0.3F);
-		for (int i = 0; i < adjTiles.length; i++) {
-			Tile adjTile = adjTiles[i];
-
-			int v1 = i - 1;
-			int v2 = i;
-			if (v1 == -1) {
-				v1 = 5;
-				v2 = 0;
-			}
-
-			if ((adjTile == null || adjTile.getTerritory() == null) && territory == null) {
-				// shapeRenderer.line(vectors[v1], vectors[v2]);
-			}
-		}
 	}
 
 	@Override
@@ -791,5 +744,9 @@ public class Tile extends Actor implements BottomShapeRenderListener {
 
 	public ArrayList<TileObserver> getServerObservers() {
 		return serverObservers;
+	}
+
+	public boolean[] getTerritoryBorders() {
+		return territoryBorders;
 	}
 }

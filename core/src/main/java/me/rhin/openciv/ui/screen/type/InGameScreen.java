@@ -8,7 +8,6 @@ import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.utils.TimeUtils;
 
 import me.rhin.openciv.Civilization;
-import me.rhin.openciv.asset.SoundEnum.SoundType;
 import me.rhin.openciv.game.CivGame;
 import me.rhin.openciv.listener.LeftClickListener.LeftClickEvent;
 import me.rhin.openciv.listener.MouseMoveListener.MouseMoveEvent;
@@ -33,6 +32,7 @@ public class InGameScreen extends AbstractScreen {
 	private final Group riverGroup;
 	private final Group mainUnitGroup;
 	private final Group supportUnitGroup;
+	private final Group territoryGroup;
 	private final Group combatTooltipGroup;
 	private Vector2 dragOrigin;
 	private boolean rightClicking;
@@ -52,10 +52,12 @@ public class InGameScreen extends AbstractScreen {
 		this.riverGroup = new Group();
 		this.mainUnitGroup = new Group();
 		this.supportUnitGroup = new Group();
+		this.territoryGroup = new Group();
 		this.combatTooltipGroup = new Group();
 
 		stage.addActor(tileGroup);
 		stage.addActor(riverGroup);
+		stage.addActor(territoryGroup);
 		stage.addActor(supportUnitGroup);
 		stage.addActor(mainUnitGroup);
 		stage.addActor(combatTooltipGroup);
@@ -248,6 +250,10 @@ public class InGameScreen extends AbstractScreen {
 
 	public Group getCombatTooltipGroup() {
 		return combatTooltipGroup;
+	}
+
+	public Group getTerritoryGroup() {
+		return territoryGroup;
 	}
 
 	private void handleInput() {

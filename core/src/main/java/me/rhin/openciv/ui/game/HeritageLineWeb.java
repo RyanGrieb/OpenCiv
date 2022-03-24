@@ -34,7 +34,7 @@ public class HeritageLineWeb extends Actor {
 
 		Gdx.gl.glEnable(GL20.GL_BLEND);
 		Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
-		
+
 		shapeRenderer.begin();
 
 		// Get max level and draw lines on the way down
@@ -43,18 +43,25 @@ public class HeritageLineWeb extends Actor {
 			if (maxLevel < leaf.getHeritage().getLevel())
 				maxLevel = leaf.getHeritage().getLevel();
 		}
-		
+
 		Viewport viewport = Civilization.getInstance().getCurrentScreen().getViewport();
-		
+
 		for (int i = 0; i < maxLevel + 1; i++) {
 			shapeRenderer.setColor(Color.WHITE);
 			shapeRenderer.line(0, viewport.getWorldHeight() - 125 * (i + 1), viewport.getWorldWidth(),
 					viewport.getWorldHeight() - 125 * (i + 1));
 		}
 
-		shapeRenderer.end();
 		Gdx.gl.glDisable(GL20.GL_BLEND);
+		shapeRenderer.setColor(Color.WHITE);
+		shapeRenderer.end();
 
 		batch.begin();
+	}
+
+	@Override
+	public boolean remove() {
+		shapeRenderer.dispose();
+		return super.remove();
 	}
 }

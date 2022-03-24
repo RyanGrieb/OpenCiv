@@ -916,7 +916,8 @@ public class InGameState extends GameState implements DisconnectListener, Select
 					tile = map.getTiles()[x][y];
 
 					// Prevent spawning near by other spawnpoints.
-					if (iterations < 1000) {
+					// FIXME: This is slow when our iterators > 1000
+					if (iterations < 10) {
 						for (AIPlayer otherAIPlayer : aiPlayers) {
 							if (otherAIPlayer.getSpawnX() != -1 || otherAIPlayer.getSpawnY() != -1) {
 
