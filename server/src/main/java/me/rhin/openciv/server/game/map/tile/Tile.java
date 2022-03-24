@@ -1,6 +1,7 @@
 package me.rhin.openciv.server.game.map.tile;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -627,6 +628,88 @@ public class Tile {
 
 	}
 
+	public int getTileDistanceFrom(Tile targetTile) {
+
+		int width = Server.getInstance().getMap().getWidth();
+		int height = Server.getInstance().getMap().getHeight();
+
+		int h = 0;
+		ArrayList<Tile> openSet = new ArrayList<>();
+		Tile[][] cameFrom = new Tile[width][height];
+		float[][] gScores = new float[width][height];
+		float[][] fScores = new float[width][height];
+
+		for (float[] gScore : gScores)
+			Arrays.fill(gScore, width * height);
+		for (float[] fScore : fScores)
+			Arrays.fill(fScore, width * height);
+
+		gScores[getGridX()][getGridY()] = 0;
+		fScores[getGridX()][getGridY()] = h;
+		openSet.add(this);
+
+		while (openSet.size() > 0) {
+
+			Tile current = removeSmallest(openSet, fScores);
+
+			if (current.equals(targetTile))
+				break;
+
+			openSet.remove(current);
+			for (Tile adjTile : current.getAdjTiles()) {
+				if (adjTile == null)
+					continue;
+
+				float tenativeGScore = gScores[current.getGridX()][current.getGridY()];
+
+				if (tenativeGScore < gScores[adjTile.getGridX()][adjTile.getGridY()]) {
+
+					cameFrom[adjTile.getGridX()][adjTile.getGridY()] = current;
+					gScores[adjTile.getGridX()][adjTile.getGridY()] = tenativeGScore;
+
+					float adjFScore = gScores[adjTile.getGridX()][adjTile.getGridY()] + h;
+					fScores[adjTile.getGridX()][adjTile.getGridY()] = adjFScore;
+					if (!openSet.contains(adjTile)) {
+						openSet.add(adjTile);
+					}
+				}
+			}
+		}
+
+		// Iterate through the parent array to get back to the origin tile.
+
+		Tile parentTile = cameFrom[targetTile.getGridX()][targetTile.getGridY()];
+
+		// If it's moving to itself or there isn't a valid path
+		if (parentTile == null) {
+			return 0;
+		}
+
+		ArrayList<Tile> pathTiles = new ArrayList<>();
+
+		if (targetTile != null && parentTile != null) {
+			pathTiles.add(targetTile);
+			pathTiles.add(parentTile);
+		}
+
+		while (parentTile != null) {
+			Tile nextTile = cameFrom[parentTile.getGridX()][parentTile.getGridY()];
+
+			if (nextTile == null)
+				break;
+
+			if (parentTile.equals(targetTile)) {
+				break;
+			}
+
+			pathTiles.add(nextTile);
+
+			parentTile = nextTile;
+		}
+
+		return pathTiles.size() - 1;
+	}
+
 	public Unit getTopUnit() {
 		Unit topUnit = null;
 		for (Unit unit : units) {
@@ -804,5 +887,20 @@ public class Tile {
 		}
 
 		return false;
+	}
+
+	// FIXME: Redundant code found in Unit.class
+	private Tile removeSmallest(ArrayList<Tile> queue, float fScore[][]) {
+		float smallest = Integer.MAX_VALUE;
+		Tile smallestTile = null;
+		for (Tile tile : queue) {
+			if (fScore[tile.getGridX()][tile.getGridY()] < smallest) {
+				smallest = fScore[tile.getGridX()][tile.getGridY()];
+				smallestTile = tile;
+			}
+		}
+
+		queue.remove(smallestTile);
+		return smallestTile;
 	}
 }

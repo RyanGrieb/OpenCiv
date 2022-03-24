@@ -825,6 +825,9 @@ public class InGameState extends GameState implements DisconnectListener, Select
 			player.sendPacket(json.toJson(gameStartPacket));
 		}
 
+		// FIXME: Rewrite the spawn system. Have a list of available spawn tiles, and
+		// remove the surrounding tiles when a spawn position is set.
+
 		for (int i = 0; i < players.size(); i++) {
 			Player player = players.get(i);
 			Rectangle rect = map.getMapPartition().get(i);
@@ -901,13 +904,32 @@ public class InGameState extends GameState implements DisconnectListener, Select
 
 				// Pick random tile to spawn AI
 				Tile tile = null;
+				boolean nearPlayer = false;
 
+				int iterations = 0;
 				while (tile == null || tile.containsTileProperty(TileProperty.WATER)
 						|| tile.containsTileType(TileType.MOUNTAIN) || tile.getUnits().size() > 0
-						|| tile.getNearbyUnits().size() > 0) {
+						|| tile.getNearbyUnits().size() > 0 || nearPlayer) {
+
 					int x = rnd.nextInt(map.getWidth());
 					int y = rnd.nextInt(map.getHeight());
 					tile = map.getTiles()[x][y];
+
+					// Prevent spawning near by other spawnpoints.
+					if (iterations < 1000) {
+						for (AIPlayer otherAIPlayer : aiPlayers) {
+							if (otherAIPlayer.getSpawnX() != -1 || otherAIPlayer.getSpawnY() != -1) {
+
+								if (tile.getTileDistanceFrom(
+										map.getTiles()[otherAIPlayer.getSpawnX()][otherAIPlayer.getSpawnY()]) < 5)
+									nearPlayer = true;
+							}
+						}
+					} else {
+						nearPlayer = false;
+					}
+
+					iterations++;
 				}
 
 				aiPlayer.setSpawnPos(tile.getGridX(), tile.getGridY());
