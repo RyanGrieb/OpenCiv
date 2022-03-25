@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Queue;
 
+import org.java_websocket.WebSocket;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -62,10 +63,17 @@ import me.rhin.openciv.server.game.unit.type.Spearman;
 import me.rhin.openciv.server.game.unit.type.Swordsman;
 import me.rhin.openciv.server.game.unit.type.Warrior;
 import me.rhin.openciv.server.game.unit.type.WorkBoat;
+import me.rhin.openciv.server.listener.BuyProductionItemListener;
+import me.rhin.openciv.server.listener.FaithBuyProductionItemListener;
 import me.rhin.openciv.server.listener.NextTurnListener;
+import me.rhin.openciv.server.listener.QueueProductionItemListener;
+import me.rhin.openciv.server.listener.SetProductionItemListener;
 import me.rhin.openciv.shared.packet.type.ApplyProductionToItemPacket;
 import me.rhin.openciv.shared.packet.type.BuyProductionItemPacket;
+import me.rhin.openciv.shared.packet.type.FaithBuyProductionItemPacket;
 import me.rhin.openciv.shared.packet.type.FinishProductionItemPacket;
+import me.rhin.openciv.shared.packet.type.QueueProductionItemPacket;
+import me.rhin.openciv.shared.packet.type.SetProductionItemPacket;
 import me.rhin.openciv.shared.stat.Stat;
 
 /**
@@ -79,7 +87,8 @@ import me.rhin.openciv.shared.stat.Stat;
 
 //FIXME: Remove modifiers if this city is captured.
 
-public class ProducibleItemManager implements NextTurnListener {
+public class ProducibleItemManager implements NextTurnListener, FaithBuyProductionItemListener,
+		BuyProductionItemListener, SetProductionItemListener, QueueProductionItemListener {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(ProducibleItemManager.class);
 
@@ -157,6 +166,108 @@ public class ProducibleItemManager implements NextTurnListener {
 		possibleItems.put("Colossus", new Colossus(city));
 
 		Server.getInstance().getEventManager().addListener(NextTurnListener.class, this);
+		Server.getInstance().getEventManager().addListener(SetProductionItemListener.class, this);
+		Server.getInstance().getEventManager().addListener(BuyProductionItemListener.class, this);
+		Server.getInstance().getEventManager().addListener(FaithBuyProductionItemListener.class, this);
+		Server.getInstance().getEventManager().addListener(QueueProductionItemListener.class, this);
+	}
+
+	@Override
+	public void onNextTurn() {
+		ProducingItem producingItem = itemQueue.peek();
+
+		if (producingItem == null)
+			return;
+
+		Json json = new Json();
+
+		if (!producingItem.getProductionItem().meetsProductionRequirements()) {
+			itemQueue.remove();
+
+			FinishProductionItemPacket packet = new FinishProductionItemPacket();
+			packet.setCityName(city.getName());
+			city.getPlayerOwner().sendPacket(json.toJson(packet));
+
+			return;
+		}
+
+		producingItem.applyProduction(city.getStatLine().getStatValue(Stat.PRODUCTION_GAIN));
+
+		if (producingItem.getAppliedProduction() >= producingItem.getProductionItem().getProductionCost()) {
+			itemQueue.remove();
+
+			producingItem.getProductionItem().create();
+			producedOnIndexer.put(producingItem.getProductionItem().getClass(),
+					Server.getInstance().getInGameState().getCurrentTurn());
+
+			// System.out.println(city.getName() + " Built: " +
+			// producingItem.getProductionItem().getName());
+
+			FinishProductionItemPacket packet = new FinishProductionItemPacket();
+			packet.setProductionItem(city.getName(), producingItem.getProductionItem().getName());
+			city.getPlayerOwner().sendPacket(json.toJson(packet));
+
+			city.updateWorkedTiles();
+			city.getPlayerOwner().updateOwnedStatlines(false);
+			return;
+		}
+
+		ApplyProductionToItemPacket packet = new ApplyProductionToItemPacket();
+		packet.setProductionItem(city.getName(), producingItem.getProductionItem().getName(),
+				city.getStatLine().getStatValue(Stat.PRODUCTION_GAIN));
+		city.getPlayerOwner().sendPacket(json.toJson(packet));
+	}
+
+	@Override
+	public void onSetProductionItem(WebSocket conn, SetProductionItemPacket packet) {
+
+		City targetCity = Server.getInstance().getInGameState().getCityFromName(packet.getCityName());
+
+		// TODO: Verify if the item can be produced.
+
+		if (targetCity == null || !targetCity.equals(city))
+			return;
+
+		setProducingItem(packet.getItemName());
+
+		Json json = new Json();
+		conn.send(json.toJson(packet));
+	}
+
+	@Override
+	public void onBuyProductionItem(WebSocket conn, BuyProductionItemPacket packet) {
+
+		// TODO: Verify if the player owns that city.
+		City targetCity = Server.getInstance().getInGameState().getCityFromName(packet.getCityName());
+
+		if (targetCity == null || !targetCity.equals(city))
+			return;
+
+		buyProducingItem(packet.getItemName());
+	}
+
+	@Override
+	public void onFaithBuyProductionItem(WebSocket conn, FaithBuyProductionItemPacket packet) {
+
+		City targetCity = Server.getInstance().getInGameState().getCityFromName(packet.getCityName());
+
+		if (targetCity == null || !targetCity.equals(city))
+			return;
+
+		faithBuyProducingItem(packet.getItemName());
+	}
+
+	@Override
+	public void onQueueProductionItem(WebSocket conn, QueueProductionItemPacket packet) {
+		City targetCity = Server.getInstance().getInGameState().getCityFromName(packet.getCityName());
+
+		if (targetCity == null || !targetCity.equals(city))
+			return;
+
+		queueProducingItem(packet.getItemName());
+
+		Json json = new Json();
+		conn.send(json.toJson(packet));
 	}
 
 	public HashMap<String, ProductionItem> getPossibleItems() {
@@ -188,6 +299,7 @@ public class ProducibleItemManager implements NextTurnListener {
 			}
 		}
 
+		// FIXME: Remove?
 		if (!queueEnabled) {
 			// TODO: Implement appliedProductionItems here to save applied production.
 			itemQueue.clear();
@@ -254,57 +366,12 @@ public class ProducibleItemManager implements NextTurnListener {
 		}
 	}
 
-	@Override
-	public void onNextTurn() {
-		ProducingItem producingItem = itemQueue.peek();
-
-		if (producingItem == null)
+	public void queueProducingItem(String itemName) {
+		if (possibleItems.get(itemName) == null)
 			return;
 
-		Json json = new Json();
-
-		if (!producingItem.getProductionItem().meetsProductionRequirements()) {
-			itemQueue.remove();
-
-			FinishProductionItemPacket packet = new FinishProductionItemPacket();
-			packet.setCityName(city.getName());
-			city.getPlayerOwner().sendPacket(json.toJson(packet));
-
-			return;
-		}
-
-		producingItem.applyProduction(city.getStatLine().getStatValue(Stat.PRODUCTION_GAIN));
-
-		if (producingItem.getAppliedProduction() >= producingItem.getProductionItem().getProductionCost()) {
-			itemQueue.remove();
-
-			// FIXME: Not only should this apply to the queue. We should save the leftover
-			// production if the queue is not enabled.
-			if (itemQueue.peek() != null) {
-				itemQueue.peek().applyProduction(itemQueue.peek().getAppliedProduction()
-						- producingItem.getProductionItem().getProductionCost());
-			}
-
-			producingItem.getProductionItem().create();
-			producedOnIndexer.put(producingItem.getProductionItem().getClass(),
-					Server.getInstance().getInGameState().getCurrentTurn());
-
-			// System.out.println(city.getName() + " Built: " +
-			// producingItem.getProductionItem().getName());
-
-			FinishProductionItemPacket packet = new FinishProductionItemPacket();
-			packet.setProductionItem(city.getName(), producingItem.getProductionItem().getName());
-			city.getPlayerOwner().sendPacket(json.toJson(packet));
-
-			city.updateWorkedTiles();
-			city.getPlayerOwner().updateOwnedStatlines(false);
-			return;
-		}
-
-		ApplyProductionToItemPacket packet = new ApplyProductionToItemPacket();
-		packet.setProductionItem(city.getName(), producingItem.getProductionItem().getName(),
-				city.getStatLine().getStatValue(Stat.PRODUCTION_GAIN));
-		city.getPlayerOwner().sendPacket(json.toJson(packet));
+		ProducingItem item = new ProducingItem(possibleItems.get(itemName));
+		itemQueue.add(item);
 	}
 
 	public void clearProducingItem() {

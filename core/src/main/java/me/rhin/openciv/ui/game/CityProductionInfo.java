@@ -143,13 +143,19 @@ public class CityProductionInfo extends Actor implements SetProductionItemListen
 
 	@Override
 	public void onFinishProductionItem(FinishProductionItemPacket packet) {
-		clearUI();
+		if (!city.getName().equals(packet.getCityName()))
+			return;
+
+		updateUI();
 	}
 
 	@Override
 	public void onBuyProductionItem(BuyProductionItemPacket packet) {
+		if (!city.getName().equals(packet.getCityName()))
+			return;
+
 		if (city.getProducibleItemManager().getCurrentProducingItem() == null) {
-			clearUI();
+			updateUI();
 		}
 	}
 
@@ -158,30 +164,43 @@ public class CityProductionInfo extends Actor implements SetProductionItemListen
 		if (!city.getName().equals(packet.getCityName()))
 			return;
 
-		ProducingItem producingItem = city.getProducibleItemManager().getCurrentProducingItem();
-
-		if (producingItem == null)
-			return;
-
-		int turnsLeft = MathUtils
-				.ceil((producingItem.getProductionItem().getProductionCost() - producingItem.getAppliedProduction())
-						/ city.getStatLine().getStatValue(Stat.PRODUCTION_GAIN));
-
-		int currentTurns = producingItem.getAppiedTurns();
-
-		int totalTurns = currentTurns + turnsLeft;
-
-		turnsLeftLabel.setText(currentTurns + "/" + totalTurns + " Turns");
+		updateUI();
 	}
 
-	private void clearUI() {
-		productionItemNameLabel.setText("Nothing");
-		turnsLeftLabel.setText("???/??? Turns");
+	private void updateUI() {
+		if (city.getProducibleItemManager().getCurrentProducingItem() == null) {
+			productionItemNameLabel.setText("Nothing");
+			turnsLeftLabel.setText("???/??? Turns");
 
-		Sprite sprite = TextureEnum.UI_CLEAR.sprite();
-		sprite.setBounds(productionItemSprite.getX(), productionItemSprite.getY(), productionItemSprite.getWidth(),
-				productionItemSprite.getHeight());
+			Sprite sprite = TextureEnum.UI_CLEAR.sprite();
+			sprite.setBounds(productionItemSprite.getX(), productionItemSprite.getY(), productionItemSprite.getWidth(),
+					productionItemSprite.getHeight());
 
-		productionItemSprite = sprite;
+			productionItemSprite = sprite;
+		} else {
+			System.out.println("UPDATING UI! "
+					+ city.getProducibleItemManager().getCurrentProducingItem().getProductionItem().getName());
+			ProducingItem producingItem = city.getProducibleItemManager().getCurrentProducingItem();
+
+			if (producingItem == null)
+				return;
+
+			Sprite sprite = producingItem.getProductionItem().getTexture().sprite();
+			sprite.setBounds(productionItemSprite.getX(), productionItemSprite.getY(), productionItemSprite.getWidth(),
+					productionItemSprite.getHeight());
+
+			productionItemSprite = sprite;
+
+			int turnsLeft = MathUtils
+					.ceil((producingItem.getProductionItem().getProductionCost() - producingItem.getAppliedProduction())
+							/ city.getStatLine().getStatValue(Stat.PRODUCTION_GAIN));
+
+			int currentTurns = producingItem.getAppiedTurns();
+
+			int totalTurns = currentTurns + turnsLeft;
+
+			productionItemNameLabel.setText(producingItem.getProductionItem().getName());
+			turnsLeftLabel.setText(currentTurns + "/" + totalTurns + " Turns");
+		}
 	}
 }

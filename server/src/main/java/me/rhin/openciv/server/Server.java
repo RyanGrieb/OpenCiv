@@ -44,6 +44,7 @@ import me.rhin.openciv.server.listener.MapRequestListener.MapRequestEvent;
 import me.rhin.openciv.server.listener.PickPantheonListener.PickPantheonEvent;
 import me.rhin.openciv.server.listener.PlayerFinishLoadingListener.PlayerFinishLoadingEvent;
 import me.rhin.openciv.server.listener.PlayerListRequestListener.PlayerListRequestEvent;
+import me.rhin.openciv.server.listener.QueueProductionItemListener.QueueProductionItemEvent;
 import me.rhin.openciv.server.listener.QueuedUnitMoveListener.QueuedUnitMoveEvent;
 import me.rhin.openciv.server.listener.RangedAttackListener.RangedAttackEvent;
 import me.rhin.openciv.server.listener.RequestEndTurnListener.RequestEndTurnEvent;
@@ -85,6 +86,7 @@ import me.rhin.openciv.shared.packet.type.MapRequestPacket;
 import me.rhin.openciv.shared.packet.type.MoveUnitPacket;
 import me.rhin.openciv.shared.packet.type.PickPantheonPacket;
 import me.rhin.openciv.shared.packet.type.PlayerListRequestPacket;
+import me.rhin.openciv.shared.packet.type.QueueProductionItemPacket;
 import me.rhin.openciv.shared.packet.type.QueuedUnitMovementPacket;
 import me.rhin.openciv.shared.packet.type.RangedAttackPacket;
 import me.rhin.openciv.shared.packet.type.RequestEndTurnPacket;
@@ -191,6 +193,7 @@ public class Server extends WebSocketServer {
 		networkEvents.put(FoundReligionPacket.class, FoundReligionEvent.class);
 		networkEvents.put(FaithBuyProductionItemPacket.class, FaithBuyProductionItemEvent.class);
 		networkEvents.put(SpreadReligionPacket.class, SpreadReligionEvent.class);
+		networkEvents.put(QueueProductionItemPacket.class, QueueProductionItemEvent.class);
 
 		this.playerIndex = 0;
 		this.commandProcessor = new CmdProcessor();

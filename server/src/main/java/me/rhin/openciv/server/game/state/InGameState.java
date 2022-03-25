@@ -98,10 +98,9 @@ import me.rhin.openciv.shared.util.MathHelper;
 //Or just use reflection so we don't have to implement 20+ classes.
 public class InGameState extends GameState implements DisconnectListener, SelectUnitListener, UnitMoveListener,
 		QueuedUnitMoveListener, CancelQueuedMovementListener, SettleCityListener, PlayerFinishLoadingListener,
-		NextTurnListener, SetProductionItemListener, EndTurnListener, PlayerListRequestListener, FetchPlayerListener,
-		CombatPreviewListener, WorkTileListener, RangedAttackListener, BuyProductionItemListener,
-		RequestEndTurnListener, TileStatlineListener, UnitEmbarkListener, UnitDisembarkListener, UpgradeUnitListener,
-		FaithBuyProductionItemListener {
+		NextTurnListener, EndTurnListener, PlayerListRequestListener, FetchPlayerListener,
+		CombatPreviewListener, WorkTileListener, RangedAttackListener,
+		RequestEndTurnListener, TileStatlineListener, UnitEmbarkListener, UnitDisembarkListener, UpgradeUnitListener {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(InGameState.class);
 
@@ -129,20 +128,17 @@ public class InGameState extends GameState implements DisconnectListener, Select
 		Server.getInstance().getEventManager().addListener(SettleCityListener.class, this);
 		Server.getInstance().getEventManager().addListener(PlayerFinishLoadingListener.class, this);
 		Server.getInstance().getEventManager().addListener(NextTurnListener.class, this);
-		Server.getInstance().getEventManager().addListener(SetProductionItemListener.class, this);
 		Server.getInstance().getEventManager().addListener(EndTurnListener.class, this);
 		Server.getInstance().getEventManager().addListener(PlayerListRequestListener.class, this);
 		Server.getInstance().getEventManager().addListener(FetchPlayerListener.class, this);
 		Server.getInstance().getEventManager().addListener(CombatPreviewListener.class, this);
 		Server.getInstance().getEventManager().addListener(WorkTileListener.class, this);
 		Server.getInstance().getEventManager().addListener(RangedAttackListener.class, this);
-		Server.getInstance().getEventManager().addListener(BuyProductionItemListener.class, this);
 		Server.getInstance().getEventManager().addListener(RequestEndTurnListener.class, this);
 		Server.getInstance().getEventManager().addListener(TileStatlineListener.class, this);
 		Server.getInstance().getEventManager().addListener(UnitEmbarkListener.class, this);
 		Server.getInstance().getEventManager().addListener(UnitDisembarkListener.class, this);
 		Server.getInstance().getEventManager().addListener(UpgradeUnitListener.class, this);
-		Server.getInstance().getEventManager().addListener(FaithBuyProductionItemListener.class, this);
 	}
 
 	@Override
@@ -428,51 +424,6 @@ public class InGameState extends GameState implements DisconnectListener, Select
 
 		for (Player player : players)
 			player.setTurnDone(false);
-	}
-
-	// TODO: Move to producibleItemManager
-	@Override
-	public void onSetProductionItem(WebSocket conn, SetProductionItemPacket packet) {
-		City targetCity = getCityFromName(packet.getCityName());
-
-		// TODO: Verify if the item can be produced.
-
-		if (targetCity == null)
-			return;
-
-		targetCity.getProducibleItemManager().setProducingItem(packet.getItemName());
-
-		Json json = new Json();
-		conn.send(json.toJson(packet));
-	}
-
-	// TODO: Move to producibleItemManager
-	@Override
-	public void onBuyProductionItem(WebSocket conn, BuyProductionItemPacket packet) {
-
-		// TODO: Verify if the player owns that city.
-		City targetCity = getCityFromName(packet.getCityName());
-
-		if (targetCity == null)
-			return;
-
-		targetCity.getProducibleItemManager().buyProducingItem(packet.getItemName());
-
-		// Json json = new Json();
-		// conn.send(json.toJson(packet));
-	}
-
-	// TODO: Move to producibleItemManager
-	@Override
-	public void onFaithBuyProductionItem(WebSocket conn, FaithBuyProductionItemPacket packet) {
-
-		City targetCity = getCityFromName(packet.getCityName());
-
-		if (targetCity == null)
-			return;
-
-		targetCity.getProducibleItemManager().faithBuyProducingItem(packet.getItemName());
-
 	}
 
 	@Override

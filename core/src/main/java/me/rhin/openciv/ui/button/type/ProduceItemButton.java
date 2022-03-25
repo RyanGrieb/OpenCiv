@@ -5,6 +5,7 @@ import me.rhin.openciv.game.city.City;
 import me.rhin.openciv.game.production.ProductionItem;
 import me.rhin.openciv.ui.button.Button;
 import me.rhin.openciv.ui.window.type.ItemInfoWindow;
+import me.rhin.openciv.ui.window.type.QueueItemWindow;
 
 public class ProduceItemButton extends Button {
 
@@ -20,8 +21,13 @@ public class ProduceItemButton extends Button {
 
 	@Override
 	public void onClick() {
-		city.getProducibleItemManager().requestSetProductionItem(productionItem);
-		Civilization.getInstance().getWindowManager().closeWindow(ItemInfoWindow.class);
+		if (city.getProducibleItemManager().getCurrentProducingItem() == null) {
+			city.getProducibleItemManager().requestSetProductionItem(productionItem);
+			Civilization.getInstance().getWindowManager().closeWindow(ItemInfoWindow.class);
+		} else {
+			// Civilization.getInstance().getWindowManager().closeWindow(ItemInfoWindow.class);
+			Civilization.getInstance().getWindowManager().toggleWindow(new QueueItemWindow(city, productionItem));
+		}
 	}
 
 }

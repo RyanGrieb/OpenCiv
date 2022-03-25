@@ -47,6 +47,7 @@ import me.rhin.openciv.listener.PlayerConnectListener.PlayerConnectEvent;
 import me.rhin.openciv.listener.PlayerDisconnectListener.PlayerDisconnectEvent;
 import me.rhin.openciv.listener.PlayerListRequestListener.PlayerListRequestEvent;
 import me.rhin.openciv.listener.PlayerStatUpdateListener.PlayerStatUpdateEvent;
+import me.rhin.openciv.listener.QueueProductionItemListener.QueueProductionItemEvent;
 import me.rhin.openciv.listener.ReceiveMapChunkListener.ReciveMapChunkEvent;
 import me.rhin.openciv.listener.RemoveObservedTileListener.RemoveObservedTileEvent;
 import me.rhin.openciv.listener.RemoveProductionItemListener.RemoveProductionItemEvent;
@@ -111,6 +112,7 @@ import me.rhin.openciv.shared.packet.type.PlayerConnectPacket;
 import me.rhin.openciv.shared.packet.type.PlayerDisconnectPacket;
 import me.rhin.openciv.shared.packet.type.PlayerListRequestPacket;
 import me.rhin.openciv.shared.packet.type.PlayerStatUpdatePacket;
+import me.rhin.openciv.shared.packet.type.QueueProductionItemPacket;
 import me.rhin.openciv.shared.packet.type.RemoveObservedTilePacket;
 import me.rhin.openciv.shared.packet.type.RemoveProductionItemPacket;
 import me.rhin.openciv.shared.packet.type.RemoveSpecialistFromContainerPacket;
@@ -201,6 +203,7 @@ public class NetworkManager {
 		networkEvents.put(CityPopulationUpdatePacket.class, CityPopulationUpdateEvent.class);
 		networkEvents.put(DiscoveredPlayerPacket.class, DiscoveredPlayerEvent.class);
 		networkEvents.put(ServerNotificationPacket.class, ServerNotificationEvent.class);
+		networkEvents.put(QueueProductionItemPacket.class, QueueProductionItemEvent.class);
 	}
 
 	public void connect(String ip) {

@@ -61,6 +61,7 @@ import me.rhin.openciv.shared.logging.LoggerFactory;
 import me.rhin.openciv.shared.logging.LoggerType;
 import me.rhin.openciv.shared.packet.type.BuyProductionItemPacket;
 import me.rhin.openciv.shared.packet.type.FaithBuyProductionItemPacket;
+import me.rhin.openciv.shared.packet.type.QueueProductionItemPacket;
 import me.rhin.openciv.shared.packet.type.SetProductionItemPacket;
 
 /**
@@ -78,13 +79,11 @@ public class ProducibleItemManager {
 	private City city;
 	private HashMap<String, ProductionItem> possibleItems;
 	private Queue<ProducingItem> itemQueue;
-	private boolean queueEnabled;
 
 	public ProducibleItemManager(City city) {
 		this.city = city;
 		this.possibleItems = new HashMap<>();
 		this.itemQueue = new LinkedList<>();
-		this.queueEnabled = false;
 
 		// Units
 		possibleItems.put("Warrior", new Warrior(city));
@@ -130,7 +129,7 @@ public class ProducibleItemManager {
 		possibleItems.put("Chapel", new Chapel(city));
 		possibleItems.put("Pagoda", new Pagoda(city));
 		possibleItems.put("Bazaar", new Bazaar(city));
-		
+
 		// Wonders
 		possibleItems.put("Great Pyramids", new GreatPyramids(city));
 		possibleItems.put("Great Library", new GreatLibrary(city));
@@ -177,10 +176,18 @@ public class ProducibleItemManager {
 
 		Civilization.getInstance().getNetworkManager().sendPacket(packet);
 	}
-	
+
 	public void requestFaithBuyProductionItem(ProductionItem productionItem) {
 		LOGGER.info("Requesting to faith buy: " + productionItem.getName() + " in city: " + city.getName());
 		FaithBuyProductionItemPacket packet = new FaithBuyProductionItemPacket();
+		packet.setProductionItem(city.getName(), productionItem.getName());
+
+		Civilization.getInstance().getNetworkManager().sendPacket(packet);
+	}
+
+	public void requestQueueProductionItem(ProductionItem productionItem) {
+		LOGGER.info("Requesting to queue item: " + productionItem.getName() + " in city: " + city.getName());
+		QueueProductionItemPacket packet = new QueueProductionItemPacket();
 		packet.setProductionItem(city.getName(), productionItem.getName());
 
 		Civilization.getInstance().getNetworkManager().sendPacket(packet);
@@ -191,12 +198,12 @@ public class ProducibleItemManager {
 	}
 
 	public void setCurrentProductionItem(String itemName) {
-		if (queueEnabled)
-			itemQueue.add(new ProducingItem(possibleItems.get(itemName)));
-		else {
-			itemQueue.clear();
-			itemQueue.add(new ProducingItem(possibleItems.get(itemName)));
-		}
+		itemQueue.clear();
+		itemQueue.add(new ProducingItem(possibleItems.get(itemName)));
+	}
+
+	public void queueProductionItem(String itemName) {
+		itemQueue.add(new ProducingItem(possibleItems.get(itemName)));
 	}
 
 	public Queue<ProducingItem> getItemQueue() {

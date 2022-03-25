@@ -24,6 +24,7 @@ import me.rhin.openciv.game.map.tile.TileType.TileProperty;
 import me.rhin.openciv.game.notification.type.AvailableProductionNotification;
 import me.rhin.openciv.game.player.AbstractPlayer;
 import me.rhin.openciv.game.production.ProducibleItemManager;
+import me.rhin.openciv.game.production.ProducingItem;
 import me.rhin.openciv.game.production.ProductionItem;
 import me.rhin.openciv.game.religion.CityReligion;
 import me.rhin.openciv.game.religion.PlayerReligion;
@@ -40,6 +41,7 @@ import me.rhin.openciv.listener.CityPopulationUpdateListener;
 import me.rhin.openciv.listener.CityStatUpdateListener;
 import me.rhin.openciv.listener.FinishProductionItemListener;
 import me.rhin.openciv.listener.NextTurnListener;
+import me.rhin.openciv.listener.QueueProductionItemListener;
 import me.rhin.openciv.listener.ReligionIconChangeListener;
 import me.rhin.openciv.listener.RemoveSpecialistFromContainerListener;
 import me.rhin.openciv.listener.SetCitizenTileWorkerListener;
@@ -57,6 +59,7 @@ import me.rhin.openciv.shared.packet.type.CityPopulationUpdatePacket;
 import me.rhin.openciv.shared.packet.type.CityStatUpdatePacket;
 import me.rhin.openciv.shared.packet.type.FinishProductionItemPacket;
 import me.rhin.openciv.shared.packet.type.NextTurnPacket;
+import me.rhin.openciv.shared.packet.type.QueueProductionItemPacket;
 import me.rhin.openciv.shared.packet.type.RemoveSpecialistFromContainerPacket;
 import me.rhin.openciv.shared.packet.type.SetCitizenTileWorkerPacket;
 import me.rhin.openciv.shared.packet.type.SetCitizenTileWorkerPacket.WorkerType;
@@ -75,7 +78,7 @@ public class City extends Group implements AttackableEntity, TileObserver, Speci
 		ApplyProductionToItemListener, FinishProductionItemListener, SetCitizenTileWorkerListener,
 		AddSpecialistToContainerListener, RemoveSpecialistFromContainerListener, NextTurnListener,
 		BuyProductionItemListener, CityGainMajorityReligionListener, CityLooseMajorityReligionListener,
-		ReligionIconChangeListener, CityPopulationUpdateListener {
+		ReligionIconChangeListener, CityPopulationUpdateListener, QueueProductionItemListener {
 
 	private static final Logger LOGGER = LoggerFactory.getInstance(LoggerType.LOG_TAG);
 
@@ -156,6 +159,7 @@ public class City extends Group implements AttackableEntity, TileObserver, Speci
 		Civilization.getInstance().getEventManager().addListener(CityLooseMajorityReligionListener.class, this);
 		Civilization.getInstance().getEventManager().addListener(ReligionIconChangeListener.class, this);
 		Civilization.getInstance().getEventManager().addListener(CityPopulationUpdateListener.class, this);
+		Civilization.getInstance().getEventManager().addListener(QueueProductionItemListener.class, this);
 	}
 
 	@Override
@@ -247,6 +251,14 @@ public class City extends Group implements AttackableEntity, TileObserver, Speci
 	}
 
 	@Override
+	public void onQueueProductionItem(QueueProductionItemPacket packet) {
+		if (!getName().equals(packet.getCityName()))
+			return;
+
+		getProducibleItemManager().queueProductionItem(packet.getItemName());
+	}
+
+	@Override
 	public void onApplyProductionToItem(ApplyProductionToItemPacket packet) {
 		if (!getName().equals(packet.getCityName()))
 			return;
@@ -259,11 +271,21 @@ public class City extends Group implements AttackableEntity, TileObserver, Speci
 		if (!getName().equals(packet.getCityName()))
 			return;
 
-		getProducibleItemManager().getItemQueue().clear();
+		System.out.println("BEFORE:");
+		for (ProducingItem item : producibleItemManager.getItemQueue()) {
+			System.out.println(item.getProductionItem().getName());
+		}
+		getProducibleItemManager().getItemQueue().remove();
+		System.out.println("AFTER:");
+		for (ProducingItem item : producibleItemManager.getItemQueue()) {
+			System.out.println(item.getProductionItem().getName());
+		}
 
-		if (playerOwner.equals(Civilization.getInstance().getGame().getPlayer()))
-			Civilization.getInstance().getGame().getNotificationHanlder()
-					.fireNotification(new AvailableProductionNotification(this));
+		if (getProducibleItemManager().getItemQueue().size() < 1) {
+			if (playerOwner.equals(Civilization.getInstance().getGame().getPlayer()))
+				Civilization.getInstance().getGame().getNotificationHanlder()
+						.fireNotification(new AvailableProductionNotification(this));
+		}
 	}
 
 	@Override
