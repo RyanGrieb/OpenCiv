@@ -271,15 +271,7 @@ public class City extends Group implements AttackableEntity, TileObserver, Speci
 		if (!getName().equals(packet.getCityName()))
 			return;
 
-		System.out.println("BEFORE:");
-		for (ProducingItem item : producibleItemManager.getItemQueue()) {
-			System.out.println(item.getProductionItem().getName());
-		}
 		getProducibleItemManager().getItemQueue().remove();
-		System.out.println("AFTER:");
-		for (ProducingItem item : producibleItemManager.getItemQueue()) {
-			System.out.println(item.getProductionItem().getName());
-		}
 
 		if (getProducibleItemManager().getItemQueue().size() < 1) {
 			if (playerOwner.equals(Civilization.getInstance().getGame().getPlayer()))

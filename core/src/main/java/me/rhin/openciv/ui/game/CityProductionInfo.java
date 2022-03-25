@@ -178,8 +178,6 @@ public class CityProductionInfo extends Actor implements SetProductionItemListen
 
 			productionItemSprite = sprite;
 		} else {
-			System.out.println("UPDATING UI! "
-					+ city.getProducibleItemManager().getCurrentProducingItem().getProductionItem().getName());
 			ProducingItem producingItem = city.getProducibleItemManager().getCurrentProducingItem();
 
 			if (producingItem == null)

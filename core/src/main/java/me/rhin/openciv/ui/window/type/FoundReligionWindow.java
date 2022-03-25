@@ -332,14 +332,14 @@ public class FoundReligionWindow extends AbstractWindow implements FoundReligion
 
 			iconButton.onClick(() -> {
 
-				getReligionNameLabel().setText(StrUtil.capitalize(religionIcon.name().toLowerCase()));
+				getReligionNameLabel().setText(StrUtil.capitalize(icon.name().toLowerCase()));
 
 				float x = getReligionIconBackground().getX();
 				float y = getReligionIconBackground().getY();
-				getReligionIconBackground().setSprite(religionIcon.getTexture().sprite());
+				getReligionIconBackground().setSprite(icon.getTexture().sprite());
 				getReligionIconBackground().setBounds(x, y, 32, 32);
 
-				setReligionIcon(religionIcon);
+				setReligionIcon(icon);
 				checkFoundableCondition();
 			});
 
