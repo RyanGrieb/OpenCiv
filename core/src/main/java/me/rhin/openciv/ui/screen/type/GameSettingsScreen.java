@@ -24,7 +24,7 @@ public class GameSettingsScreen extends AbstractScreen {
 				"TODO: Multiplayer is only supported.\nOnce a proper AI is coded i'll start working on SP again.",
 				Align.center, 0, viewport.getWorldHeight() - 100, viewport.getWorldWidth(), 20);
 
-		stage.addActor(new PreviousScreenButton(viewport.getWorldWidth() / 2 - 150 / 2, 50, 150, 45));
+		stage.addActor(new PreviousScreenButton("Back", viewport.getWorldWidth() / 2 - 150 / 2, 50, 150, 45));
 
 		stage.addActor(todoLabel);
 	}
@@ -43,7 +43,7 @@ public class GameSettingsScreen extends AbstractScreen {
 		}
 		return false;
 	}
-	
+
 	@Override
 	public ScreenEnum getType() {
 		return ScreenEnum.GAME_SETTINGS;

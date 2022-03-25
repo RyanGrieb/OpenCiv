@@ -13,24 +13,24 @@ import me.rhin.openciv.game.unit.Unit;
 import me.rhin.openciv.listener.FoundReligionListener;
 import me.rhin.openciv.listener.ResizeListener;
 import me.rhin.openciv.shared.packet.type.FoundReligionPacket;
+import me.rhin.openciv.shared.util.StrUtil;
 import me.rhin.openciv.ui.background.ColoredBackground;
+import me.rhin.openciv.ui.button.CustomButton;
 import me.rhin.openciv.ui.button.type.CloseWindowButton;
-import me.rhin.openciv.ui.button.type.FollowerBeliefButton;
-import me.rhin.openciv.ui.button.type.FoundReligionButton;
-import me.rhin.openciv.ui.button.type.FounderBeliefButton;
-import me.rhin.openciv.ui.button.type.ReligionIconButton;
 import me.rhin.openciv.ui.label.CustomLabel;
 import me.rhin.openciv.ui.list.ContainerList;
+import me.rhin.openciv.ui.list.ListContainer.ListContainerType;
+import me.rhin.openciv.ui.list.type.ListReligionBonus;
 import me.rhin.openciv.ui.window.AbstractWindow;
 
 public class FoundReligionWindow extends AbstractWindow implements FoundReligionListener, ResizeListener {
 
 	private ColoredBackground blankBackground;
 	private CloseWindowButton closeWindowButton;
-	private FoundReligionButton foundReligionButton;
+	private CustomButton foundReligionButton;
 	private CustomLabel titleLabel;
 	private CustomLabel chooseIconLabel;
-	private ArrayList<ReligionIconButton> religionIconButtons;
+	private ArrayList<CustomButton> religionIconButtons;
 	private CustomLabel religionNameDescLabel;
 	private ColoredBackground religionIconBackground;
 	private CustomLabel religionNameLabel;
@@ -40,8 +40,8 @@ public class FoundReligionWindow extends AbstractWindow implements FoundReligion
 	private CustomLabel founderBeliefLabel;
 	private CustomLabel followerBeliefDescLabel;
 	private CustomLabel followerBeliefLabel;
-	private FounderBeliefButton founderBeliefButton;
-	private FollowerBeliefButton followerBeliefButton;
+	private CustomButton founderBeliefButton;
+	private CustomButton followerBeliefButton;
 	private ContainerList bonusContianerList;
 
 	private Unit unit;
@@ -61,8 +61,16 @@ public class FoundReligionWindow extends AbstractWindow implements FoundReligion
 				blankBackground.getX() + blankBackground.getWidth() / 2 - 165 / 2, blankBackground.getY() + 5, 165, 35);
 		addActor(closeWindowButton);
 
-		this.foundReligionButton = new FoundReligionButton(closeWindowButton.getX(), closeWindowButton.getY() + 35, 165,
-				35);
+		this.foundReligionButton = new CustomButton("Found Religion", closeWindowButton.getX(),
+				closeWindowButton.getY() + 35, 165, 35);
+		foundReligionButton.onClick(() -> {
+			FoundReligionPacket packet = new FoundReligionPacket();
+			packet.setReligion(unit.getID(), unit.getStandingTile().getGridX(), unit.getStandingTile().getGridY(),
+					getReligionIcon().ordinal(), getFounderBonus().getID(), getFollowerBonus().getID());
+
+			Civilization.getInstance().getNetworkManager().sendPacket(packet);
+			Civilization.getInstance().getWindowManager().closeWindow(getClass());
+		});
 
 		this.titleLabel = new CustomLabel("Found a Religion", Align.center, blankBackground.getX(),
 				blankBackground.getY() + blankBackground.getHeight() - 18, blankBackground.getWidth(), 15);
@@ -102,9 +110,27 @@ public class FoundReligionWindow extends AbstractWindow implements FoundReligion
 		founderBeliefDescLabel.setPosition(pantheonLabel.getX(), pantheonLabel.getY() - 45);
 		addActor(founderBeliefDescLabel);
 
-		this.founderBeliefButton = new FounderBeliefButton(
+		this.founderBeliefButton = new CustomButton("Choose",
 				founderBeliefDescLabel.getX() + founderBeliefDescLabel.getWidth(), founderBeliefDescLabel.getY() - 11,
 				80, 32);
+		founderBeliefButton.onClick(() -> {
+			if (getBonusContianerList().hasParent()) {
+				getBonusContianerList().clearList();
+				removeActor(getBonusContianerList());
+				// window.getBonusContianerList().addAction(Actions.removeActor());
+				// window.getBonusContianerList().getScrollbar().addAction(Actions.removeActor());
+				// return;
+			}
+
+			for (ReligionBonus religionBonus : Civilization.getInstance().getGame().getAvailableReligionBonuses()
+					.getAvailableFounderBeliefs()) {
+				getBonusContianerList().addItem(ListContainerType.CATEGORY, "Available Founder Beliefs",
+						new ListReligionBonus(religionBonus, getBonusContianerList(),
+								getBonusContianerList().getWidth() - 20, 70));
+			}
+
+			addActor(getBonusContianerList());
+		});
 		addActor(founderBeliefButton);
 
 		this.founderBeliefLabel = new CustomLabel("None");
@@ -116,9 +142,25 @@ public class FoundReligionWindow extends AbstractWindow implements FoundReligion
 		followerBeliefDescLabel.setPosition(founderBeliefLabel.getX(), founderBeliefDescLabel.getY() - 120);
 		addActor(followerBeliefDescLabel);
 
-		this.followerBeliefButton = new FollowerBeliefButton(
+		this.followerBeliefButton = new CustomButton("Choose",
 				followerBeliefDescLabel.getX() + followerBeliefDescLabel.getWidth(),
 				followerBeliefDescLabel.getY() - 11, 80, 32);
+		followerBeliefButton.onClick(() -> {
+			if (getBonusContianerList().hasParent()) {
+				getBonusContianerList().clearList();
+				removeActor(getBonusContianerList());
+				// return;
+			}
+
+			for (ReligionBonus religionBonus : Civilization.getInstance().getGame().getAvailableReligionBonuses()
+					.getAvailableFollowerBeliefs()) {
+				getBonusContianerList().addItem(ListContainerType.CATEGORY, "Available Follower Beliefs",
+						new ListReligionBonus(religionBonus, getBonusContianerList(),
+								getBonusContianerList().getWidth() - 20, 70));
+			}
+
+			addActor(getBonusContianerList());
+		});
 		addActor(followerBeliefButton);
 
 		this.followerBeliefLabel = new CustomLabel("None");
@@ -141,7 +183,7 @@ public class FoundReligionWindow extends AbstractWindow implements FoundReligion
 
 	@Override
 	public void onFoundReligion(FoundReligionPacket packet) {
-		for (ReligionIconButton iconButton : religionIconButtons) {
+		for (CustomButton iconButton : religionIconButtons) {
 			iconButton.addAction(Actions.removeActor());
 		}
 
@@ -283,9 +325,23 @@ public class FoundReligionWindow extends AbstractWindow implements FoundReligion
 			if (icon == ReligionIcon.PANTHEON)
 				continue;
 
-			ReligionIconButton iconButton = new ReligionIconButton(icon,
+			CustomButton iconButton = new CustomButton(TextureEnum.UI_BUTTON_CIRCLE,
+					TextureEnum.UI_BUTTON_CIRCLE_HOVERED, icon.getTexture(),
 					chooseIconLabel.getX() + chooseIconLabel.getWidth() + 15 + (68 * index),
 					chooseIconLabel.getY() - 28, 64, 64);
+
+			iconButton.onClick(() -> {
+
+				getReligionNameLabel().setText(StrUtil.capitalize(religionIcon.name().toLowerCase()));
+
+				float x = getReligionIconBackground().getX();
+				float y = getReligionIconBackground().getY();
+				getReligionIconBackground().setSprite(religionIcon.getTexture().sprite());
+				getReligionIconBackground().setBounds(x, y, 32, 32);
+
+				setReligionIcon(religionIcon);
+				checkFoundableCondition();
+			});
 
 			religionIconButtons.add(iconButton);
 			addActor(iconButton);

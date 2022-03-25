@@ -1,35 +1,19 @@
 package me.rhin.openciv.ui.button.type;
 
-import com.badlogic.gdx.graphics.g2d.Batch;
-import com.badlogic.gdx.graphics.g2d.Sprite;
-
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.TextureEnum;
-import me.rhin.openciv.ui.button.Button;
+import me.rhin.openciv.ui.button.AbstractButton;
 import me.rhin.openciv.ui.window.type.ChatboxWindow;
 
-public class OpenChatButton extends Button {
-
-	private Sprite iconSprite;
+public class OpenChatButton extends AbstractButton {
 
 	public OpenChatButton(float x, float y, float width, float height) {
-		super(TextureEnum.UI_BUTTON_ICON, "", x, y, width, height);
-
-		this.hoveredSprite = TextureEnum.UI_BUTTON_ICON_HOVERED.sprite();
-		hoveredSprite.setBounds(x, y, width, height);
-
-		this.iconSprite = TextureEnum.ICON_CHAT.sprite();
-		iconSprite.setBounds(x + (width / 2) - (24 / 2), y + (height / 2) - (24 / 2), 24, 24);
+		super(TextureEnum.UI_BUTTON_ICON, TextureEnum.UI_BUTTON_ICON_HOVERED, TextureEnum.ICON_CHAT, x, y, width,
+				height);
 	}
 
 	@Override
-	public void draw(Batch batch, float parentAlpha) {
-		super.draw(batch, parentAlpha);
-		iconSprite.draw(batch);
-	}
-
-	@Override
-	public void onClick() {
+	public void onClicked() {
 		Civilization.getInstance().getWindowManager().toggleWindow(new ChatboxWindow());
 	}
 

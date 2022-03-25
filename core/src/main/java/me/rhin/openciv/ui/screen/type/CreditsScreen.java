@@ -57,7 +57,7 @@ public class CreditsScreen extends AbstractScreen {
 		for (CustomLabel label : creditLabelList)
 			stage.addActor(label);
 
-		stage.addActor(new PreviousScreenButton(viewport.getWorldWidth() / 2 - 150 / 2, 50, 150, 45));
+		stage.addActor(new PreviousScreenButton("Back", viewport.getWorldWidth() / 2 - 150 / 2, 50, 150, 45));
 
 	}
 

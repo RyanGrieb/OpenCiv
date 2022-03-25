@@ -10,11 +10,8 @@ import com.badlogic.gdx.utils.Align;
 
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.city.building.Building;
-import me.rhin.openciv.game.city.specialist.SpecialistContainer;
 import me.rhin.openciv.shared.stat.Stat;
 import me.rhin.openciv.ui.background.ColoredBackground;
-import me.rhin.openciv.ui.button.Button;
-import me.rhin.openciv.ui.button.type.SpecialistCitizenButton;
 import me.rhin.openciv.ui.label.CustomLabel;
 import me.rhin.openciv.ui.list.ContainerList;
 import me.rhin.openciv.ui.list.ListObject;
@@ -27,7 +24,6 @@ public class ListBuilding extends ListObject {
 	private CustomLabel buildingNameLabel;
 	private ArrayList<Sprite> statIcons;
 	private ArrayList<CustomLabel> statLabels;
-	private ArrayList<Button> specialistButtons;
 
 	public ListBuilding(Building building, ContainerList containerList, float width, float height) {
 		super(width, height, containerList, "Building");
@@ -46,7 +42,6 @@ public class ListBuilding extends ListObject {
 
 		this.statIcons = new ArrayList<>();
 		this.statLabels = new ArrayList<>();
-		this.specialistButtons = new ArrayList<>();
 
 		for (Stat stat : building.getStatLine().getStatValues().keySet()) {
 
@@ -67,16 +62,16 @@ public class ListBuilding extends ListObject {
 			statLabels.add(label);
 		}
 
-		if (building instanceof SpecialistContainer) {
-			SpecialistContainer specialistContinaer = (SpecialistContainer) building;
-			for (int i = 0; i < specialistContinaer.getSpecialistSlots(); i++) {
-				specialistContinaer.getSpecialistType();
-				specialistButtons
-						.add(new SpecialistCitizenButton(building.getCity(), specialistContinaer, 0, 0, 32, 32));
-			}
-		}
+		/*
+		 * if (building instanceof SpecialistContainer) { SpecialistContainer
+		 * specialistContinaer = (SpecialistContainer) building; for (int i = 0; i <
+		 * specialistContinaer.getSpecialistSlots(); i++) {
+		 * specialistContinaer.getSpecialistType(); specialistButtons .add(new
+		 * SpecialistCitizenButton(building.getCity(), specialistContinaer, 0, 0, 32,
+		 * 32)); } }
+		 */
 	}
-	
+
 	@Override
 	protected void onClicked(InputEvent event) {
 	}

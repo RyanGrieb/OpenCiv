@@ -2,13 +2,13 @@ package me.rhin.openciv.ui.window.type;
 
 import com.badlogic.gdx.utils.Align;
 
+import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.city.City;
 import me.rhin.openciv.game.production.ProductionItem;
 import me.rhin.openciv.ui.background.ColoredBackground;
+import me.rhin.openciv.ui.button.CustomButton;
 import me.rhin.openciv.ui.button.type.CloseWindowButton;
-import me.rhin.openciv.ui.button.type.QueueItemButton;
-import me.rhin.openciv.ui.button.type.ReplaceItemButton;
 import me.rhin.openciv.ui.label.CustomLabel;
 import me.rhin.openciv.ui.window.AbstractWindow;
 
@@ -20,9 +20,9 @@ public class QueueItemWindow extends AbstractWindow {
 	private CustomLabel itemNameLabel;
 	private ColoredBackground itemIcon;
 	private CustomLabel queueDescLabel;
-	private QueueItemButton queueItemButton;
+	private CustomButton queueItemButton;
 	private CloseWindowButton closeWindowButton;
-	private ReplaceItemButton produceItemButton;
+	private CustomButton produceItemButton;
 	private ColoredBackground queueIcon;
 	private ColoredBackground produceIcon;
 
@@ -53,11 +53,20 @@ public class QueueItemWindow extends AbstractWindow {
 		queueDescLabel.setWidth(getWidth() - 10);
 		addActor(queueDescLabel);
 
-		this.queueItemButton = new QueueItemButton(city, productionItem, 4, 4, 82, 28);
+		this.queueItemButton = new CustomButton("Queue", 4, 4, 82, 28);
+		queueItemButton.onClick(() -> {
+			city.getProducibleItemManager().requestQueueProductionItem(productionItem);
+			Civilization.getInstance().getWindowManager().closeWindow(QueueItemWindow.class);
+			Civilization.getInstance().getWindowManager().closeWindow(ItemInfoWindow.class);
+		});
 		addActor(queueItemButton);
 
-		this.produceItemButton = new ReplaceItemButton(city, productionItem, getWidth() / 2 - 82 / 2, 4, 82,
-				28);
+		this.produceItemButton = new CustomButton("Replace", getWidth() / 2 - 82 / 2, 4, 82, 28);
+		produceItemButton.onClick(() -> {
+			city.getProducibleItemManager().requestSetProductionItem(productionItem);
+			Civilization.getInstance().getWindowManager().closeWindow(QueueItemWindow.class);
+			Civilization.getInstance().getWindowManager().closeWindow(ItemInfoWindow.class);
+		});
 		addActor(produceItemButton);
 
 		this.closeWindowButton = new CloseWindowButton(this.getClass(), "Cancel", getWidth() - 86, 4, 82, 28);

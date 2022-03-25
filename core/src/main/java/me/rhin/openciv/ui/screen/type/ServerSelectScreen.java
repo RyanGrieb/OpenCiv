@@ -44,7 +44,7 @@ public class ServerSelectScreen extends AbstractScreen implements ServerConnectL
 				viewport.getWorldHeight() - 200, 150, 45);
 		stage.addActor(connectServerButton);
 
-		previousScreenButton = new PreviousScreenButton(viewport.getWorldWidth() / 2 - 150 / 2,
+		previousScreenButton = new PreviousScreenButton("Back", viewport.getWorldWidth() / 2 - 150 / 2,
 				viewport.getWorldHeight() - 260, 150, 45);
 		stage.addActor(previousScreenButton);
 

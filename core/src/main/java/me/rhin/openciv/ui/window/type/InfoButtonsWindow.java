@@ -1,17 +1,18 @@
 package me.rhin.openciv.ui.window.type;
 
+import me.rhin.openciv.Civilization;
+import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.ui.background.ColoredBackground;
+import me.rhin.openciv.ui.button.CustomButton;
 import me.rhin.openciv.ui.button.type.OpenChatButton;
-import me.rhin.openciv.ui.button.type.OpenDiplomacyButton;
-import me.rhin.openciv.ui.button.type.OpenReligionInfoButton;
 import me.rhin.openciv.ui.window.AbstractWindow;
 
 public class InfoButtonsWindow extends AbstractWindow {
 
 	private ColoredBackground background;
 	private OpenChatButton chatButton;
-	private OpenReligionInfoButton openReligionInfoButton;
-	private OpenDiplomacyButton openDiplomacyButton;
+	private CustomButton openReligionInfoButton;
+	private CustomButton openDiplomacyButton;
 
 	public InfoButtonsWindow() {
 		super.setBounds(4, 28, 200, 60);
@@ -23,10 +24,18 @@ public class InfoButtonsWindow extends AbstractWindow {
 		this.chatButton = new OpenChatButton(0, 0, 42, 42);
 		addActor(chatButton);
 
-		this.openReligionInfoButton = new OpenReligionInfoButton(52, 0, 42, 42);
+		this.openReligionInfoButton = new CustomButton(TextureEnum.UI_BUTTON_ICON, TextureEnum.UI_BUTTON_ICON_HOVERED,
+				TextureEnum.ICON_FAITH, 52, 0, 42, 42);
+		openReligionInfoButton.onClick(() -> {
+			Civilization.getInstance().getWindowManager().toggleWindow(new ReligionInfoWindow());
+		});
 		addActor(openReligionInfoButton);
 
-		this.openDiplomacyButton = new OpenDiplomacyButton(104, 0, 42, 42);
+		this.openDiplomacyButton = new CustomButton(TextureEnum.UI_BUTTON_ICON, TextureEnum.UI_BUTTON_ICON_HOVERED,
+				TextureEnum.ICON_DIPLOMACY, 104, 0, 42, 42);
+		openDiplomacyButton.onClick(() -> {
+			Civilization.getInstance().getWindowManager().toggleWindow(new DiplomacyWindow());
+		});
 		addActor(openDiplomacyButton);
 	}
 

@@ -8,8 +8,8 @@ import me.rhin.openciv.listener.ScrubberPositionUpdateListener;
 import me.rhin.openciv.options.GameOptions;
 import me.rhin.openciv.options.OptionType;
 import me.rhin.openciv.ui.background.BlankBackground;
+import me.rhin.openciv.ui.button.CustomButton;
 import me.rhin.openciv.ui.button.type.CloseWindowButton;
-import me.rhin.openciv.ui.button.type.FullscreenButton;
 import me.rhin.openciv.ui.label.CustomLabel;
 import me.rhin.openciv.ui.scrub.ScrubBar;
 import me.rhin.openciv.ui.window.AbstractWindow;
@@ -36,7 +36,7 @@ public class GameOptionsWindow extends AbstractWindow implements ResizeListener,
 
 	// Display settings
 	private CustomLabel displayDescLabel;
-	private FullscreenButton fullscreenButton;
+	private CustomButton fullscreenButton;
 
 	public GameOptionsWindow() {
 		super.setBounds(0, 0, viewport.getWorldWidth(), viewport.getWorldHeight());
@@ -100,7 +100,13 @@ public class GameOptionsWindow extends AbstractWindow implements ResizeListener,
 
 		String fullscreenButtonName = (gameOptions.getInt(OptionType.FULLSCREEN_ENABLED) == 1 ? "Disable Fullscreen"
 				: "Enable Fullscreen");
-		fullscreenButton = new FullscreenButton(fullscreenButtonName, 237, viewport.getWorldHeight() - 100, 220, 40);
+		fullscreenButton = new CustomButton(fullscreenButtonName, 237, viewport.getWorldHeight() - 100, 220, 40);
+		fullscreenButton.onClick(() -> {
+			int currentValue = Civilization.getInstance().getGameOptions().getInt(OptionType.FULLSCREEN_ENABLED);
+			Civilization.getInstance().getGameOptions().setInt(OptionType.FULLSCREEN_ENABLED,
+					(currentValue == 0 ? 1 : 0));
+			fullscreenButton.setText(fullscreenButtonName);
+		});
 		addActor(fullscreenButton);
 
 		Civilization.getInstance().getEventManager().addListener(ScrubberPositionUpdateListener.class, this);

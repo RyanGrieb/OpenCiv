@@ -14,7 +14,7 @@ import me.rhin.openciv.shared.packet.type.CompleteResearchPacket;
 import me.rhin.openciv.shared.packet.type.NextTurnPacket;
 import me.rhin.openciv.shared.stat.Stat;
 import me.rhin.openciv.ui.background.ColoredBackground;
-import me.rhin.openciv.ui.button.type.OpenResearchButton;
+import me.rhin.openciv.ui.button.CustomButton;
 import me.rhin.openciv.ui.label.CustomLabel;
 import me.rhin.openciv.ui.window.AbstractWindow;
 
@@ -25,7 +25,7 @@ public class CurrentResearchWindow extends AbstractWindow
 	private CustomLabel researchNameDesc;
 	private CustomLabel researchTurnsLabel;
 	private CustomLabel researchName;
-	private OpenResearchButton researchButton;
+	private CustomButton researchButton;
 	private ColoredBackground techIcon;
 	private Technology tech;
 
@@ -50,8 +50,15 @@ public class CurrentResearchWindow extends AbstractWindow
 		researchName.setPosition(blankBackground.getX() + 40, blankBackground.getY() + researchName.getHeight() - 2);
 		addActor(researchName);
 
-		researchButton = new OpenResearchButton(blankBackground.getX() + blankBackground.getWidth() - 52,
-				blankBackground.getY() + 3, 48, 32);
+		researchButton = new CustomButton(TextureEnum.UI_BUTTON_SMALL, TextureEnum.UI_BUTTON_SMALL_HOVERED,
+				TextureEnum.ICON_SCIENCE, blankBackground.getX() + blankBackground.getWidth() - 52,
+				blankBackground.getY() + 3, 48, 32, 16, 16);
+		researchButton.onClick(() -> {
+			if (Civilization.getInstance().getGame().getPlayer().getOwnedCities().size() < 1)
+				return;
+
+			Civilization.getInstance().getWindowManager().toggleWindow(new ResearchWindow());
+		});
 		addActor(researchButton);
 
 		this.techIcon = new ColoredBackground(TextureEnum.UI_CLEAR.sprite(), 6, 6, 32, 32);

@@ -1,18 +1,14 @@
 package me.rhin.openciv.ui.button.type;
 
-import com.badlogic.gdx.graphics.g2d.Batch;
-import com.badlogic.gdx.graphics.g2d.Sprite;
-
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.TextureEnum;
-import me.rhin.openciv.ui.button.Button;
+import me.rhin.openciv.ui.button.AbstractButton;
 import me.rhin.openciv.ui.window.AbstractWindow;
 import me.rhin.openciv.ui.window.type.ChatboxWindow;
 
-public class CloseWindowButton extends Button {
+public class CloseWindowButton extends AbstractButton {
 
 	private Class<? extends AbstractWindow> windowClass;
-	private Sprite iconSprite;
 
 	public CloseWindowButton(Class<? extends AbstractWindow> windowClass, String name, float x, float y, float width,
 			float height) {
@@ -21,23 +17,14 @@ public class CloseWindowButton extends Button {
 		this.windowClass = windowClass;
 	}
 
-	public CloseWindowButton(Class<? extends ChatboxWindow> windowClass, TextureEnum textureEnum, float x, float y,
+	public CloseWindowButton(Class<? extends ChatboxWindow> windowClass, TextureEnum iconTexture, float x, float y,
 			int width, int height) {
-		this(windowClass, "", x, y, width, height);
-
-		this.iconSprite = textureEnum.sprite();
-		iconSprite.setBounds(x + (width / 2) - (20 / 2), y + (height / 2) - (20 / 2), 20, 20);
+		super(TextureEnum.UI_BUTTON_ICON, TextureEnum.UI_BUTTON_ICON_HOVERED, iconTexture, x, y, width, height);
+		this.windowClass = windowClass;
 	}
 
 	@Override
-	public void onClick() {
+	public void onClicked() {
 		Civilization.getInstance().getWindowManager().closeWindow(windowClass);
-	}
-
-	@Override
-	public void draw(Batch batch, float parentAlpha) {
-		super.draw(batch, parentAlpha);
-		if (iconSprite != null)
-			iconSprite.draw(batch);
 	}
 }

@@ -10,10 +10,7 @@ import me.rhin.openciv.shared.map.MapSize;
 import me.rhin.openciv.shared.packet.type.SetTurnLengthPacket;
 import me.rhin.openciv.shared.packet.type.SetWorldSizePacket;
 import me.rhin.openciv.ui.background.BlankBackground;
-import me.rhin.openciv.ui.button.type.IncreaseTurnLengthButton;
-import me.rhin.openciv.ui.button.type.IncreaseWorldSizeButton;
-import me.rhin.openciv.ui.button.type.ReduceTurnLengthButton;
-import me.rhin.openciv.ui.button.type.ReduceWorldSizeButton;
+import me.rhin.openciv.ui.button.CustomButton;
 import me.rhin.openciv.ui.label.CustomLabel;
 
 public class GameOptionsMenu extends Group implements SetWorldSizeListener, SetTurnLengthListener {
@@ -22,14 +19,14 @@ public class GameOptionsMenu extends Group implements SetWorldSizeListener, SetT
 	private CustomLabel worldOptionsLabel;
 	private CustomLabel worldSizeDescLabel;
 	private CustomLabel worldSizeLabel;
-	private IncreaseWorldSizeButton increaseWorldSizeButton;
-	private ReduceWorldSizeButton reduceWorldSizeButton;
+	private CustomButton increaseWorldSizeButton;
+	private CustomButton reduceWorldSizeButton;
 
 	private CustomLabel turnOptionDescLabel;
 	private CustomLabel turnLengthLabel;
 
-	private IncreaseTurnLengthButton increaseTurnLengthButton;
-	private ReduceTurnLengthButton reduceTurnLengthButton;
+	private CustomButton increaseTurnLengthButton;
+	private CustomButton reduceTurnLengthButton;
 
 	private int worldSize;
 	private int turnLengthOffset;
@@ -58,11 +55,20 @@ public class GameOptionsMenu extends Group implements SetWorldSizeListener, SetT
 		worldSizeLabel.setPosition(0, height - 55);
 		addActor(worldSizeLabel);
 
-		this.increaseWorldSizeButton = new IncreaseWorldSizeButton(this, ">", width - 52, height - 72, 32, 32);
+		this.increaseWorldSizeButton = new CustomButton(">", width - 52, height - 72, 32, 32);
+		increaseWorldSizeButton.onClick(() -> {
+			SetWorldSizePacket packet = new SetWorldSizePacket();
+			packet.setWorldSize(getWorldSize() + 1);
+			Civilization.getInstance().getNetworkManager().sendPacket(packet);
+		});
 		addActor(increaseWorldSizeButton);
 
-		this.reduceWorldSizeButton = new ReduceWorldSizeButton(this, "<", 20, height - 72, 32, 32);
-
+		this.reduceWorldSizeButton = new CustomButton("<", 20, height - 72, 32, 32);
+		reduceWorldSizeButton.onClick(() -> {
+			SetWorldSizePacket packet = new SetWorldSizePacket();
+			packet.setWorldSize(getWorldSize() - 1);
+			Civilization.getInstance().getNetworkManager().sendPacket(packet);
+		});
 		addActor(this.reduceWorldSizeButton);
 
 		this.turnOptionDescLabel = new CustomLabel("Turn Length:", Align.center, 0, height - 95, width, 15);
@@ -71,10 +77,20 @@ public class GameOptionsMenu extends Group implements SetWorldSizeListener, SetT
 		this.turnLengthLabel = new CustomLabel("Dynamic", Align.center, 0, height - 110, width, 15);
 		addActor(turnLengthLabel);
 
-		this.increaseTurnLengthButton = new IncreaseTurnLengthButton(this, ">", width - 52, height - 125, 32, 32);
+		this.increaseTurnLengthButton = new CustomButton(">", width - 52, height - 125, 32, 32);
+		increaseTurnLengthButton.onClick(() -> {
+			SetTurnLengthPacket packet = new SetTurnLengthPacket();
+			packet.setTurnLengthOffset(getTurnLengthOffset() + 1);
+			Civilization.getInstance().getNetworkManager().sendPacket(packet);
+		});
 		addActor(increaseTurnLengthButton);
 
-		this.reduceTurnLengthButton = new ReduceTurnLengthButton(this, "<", 20, height - 125, 32, 32);
+		this.reduceTurnLengthButton = new CustomButton("<", 20, height - 125, 32, 32);
+		reduceTurnLengthButton.onClick(() -> {
+			SetTurnLengthPacket packet = new SetTurnLengthPacket();
+			packet.setTurnLengthOffset(getTurnLengthOffset() - 1);
+			Civilization.getInstance().getNetworkManager().sendPacket(packet);
+		});
 		addActor(reduceTurnLengthButton);
 
 		this.worldSize = 3; // Standard

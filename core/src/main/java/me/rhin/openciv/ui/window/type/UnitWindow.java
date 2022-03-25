@@ -6,7 +6,7 @@ import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.utils.Align;
 
 import me.rhin.openciv.Civilization;
-import me.rhin.openciv.game.map.tile.ImprovementType;
+import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.unit.Unit;
 import me.rhin.openciv.game.unit.actions.AbstractAction;
 import me.rhin.openciv.game.unit.type.Builder.BuilderUnit;
@@ -27,7 +27,7 @@ import me.rhin.openciv.shared.packet.type.SetUnitHealthPacket;
 import me.rhin.openciv.shared.packet.type.UnitAttackPacket;
 import me.rhin.openciv.shared.packet.type.WorkTilePacket;
 import me.rhin.openciv.ui.background.BlankBackground;
-import me.rhin.openciv.ui.button.type.UnitActionButton;
+import me.rhin.openciv.ui.button.CustomButton;
 import me.rhin.openciv.ui.game.Healthbar;
 import me.rhin.openciv.ui.label.CustomLabel;
 import me.rhin.openciv.ui.window.AbstractWindow;
@@ -44,7 +44,7 @@ public class UnitWindow extends AbstractWindow
 	private CustomLabel actionDescLabel;
 
 	private Unit unit;
-	private ArrayList<UnitActionButton> unitActionButtons;
+	private ArrayList<CustomButton> unitActionButtons;
 
 	public UnitWindow(Unit unit) {
 		super.setBounds(viewport.getWorldWidth() - 225, 0, 225, 125);
@@ -85,7 +85,14 @@ public class UnitWindow extends AbstractWindow
 		for (AbstractAction action : unit.getCustomActions()) {
 			if (!action.canAct())
 				continue;
-			UnitActionButton actionButton = new UnitActionButton(unit, action, this, 4 + (52 * index), 17, 48, 48);
+			CustomButton actionButton = new CustomButton(TextureEnum.UI_BUTTON_ICON, TextureEnum.UI_BUTTON_ICON_HOVERED,
+					action.getSprite(), 4 + (52 * index), 17, 48, 48, 32, 32);
+
+			actionButton.onClick(() -> {
+				if (action.canAct())
+					unit.addAction(action);
+			});
+
 			unitActionButtons.add(actionButton);
 			addActor(actionButton);
 			index++;
@@ -257,7 +264,7 @@ public class UnitWindow extends AbstractWindow
 
 	public void updateActionButtons() {
 
-		for (UnitActionButton button : unitActionButtons) {
+		for (CustomButton button : unitActionButtons) {
 			removeActor(button);
 		}
 
@@ -265,7 +272,15 @@ public class UnitWindow extends AbstractWindow
 		for (AbstractAction action : unit.getCustomActions()) {
 			if (!action.canAct())
 				continue;
-			UnitActionButton actionButton = new UnitActionButton(unit, action, this, 4 + (52 * index), 17, 48, 48);
+
+			CustomButton actionButton = new CustomButton(TextureEnum.UI_BUTTON_ICON, TextureEnum.UI_BUTTON_ICON_HOVERED,
+					action.getSprite(), 4 + (52 * index), 17, 48, 48, 32, 32);
+
+			actionButton.onClick(() -> {
+				if (action.canAct())
+					unit.addAction(action);
+			});
+
 			unitActionButtons.add(actionButton);
 			addActor(actionButton);
 			index++;

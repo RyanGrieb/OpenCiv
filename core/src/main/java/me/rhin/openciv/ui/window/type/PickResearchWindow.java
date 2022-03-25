@@ -11,9 +11,8 @@ import me.rhin.openciv.game.research.Unlockable;
 import me.rhin.openciv.listener.ResizeListener;
 import me.rhin.openciv.shared.stat.Stat;
 import me.rhin.openciv.ui.background.ColoredBackground;
+import me.rhin.openciv.ui.button.CustomButton;
 import me.rhin.openciv.ui.button.type.CloseWindowButton;
-import me.rhin.openciv.ui.button.type.PickResearchButton;
-import me.rhin.openciv.ui.button.type.ResearchUnlockableButton;
 import me.rhin.openciv.ui.label.CustomLabel;
 import me.rhin.openciv.ui.window.AbstractWindow;
 
@@ -23,11 +22,11 @@ public class PickResearchWindow extends AbstractWindow implements ResizeListener
 	private ColoredBackground coloredBackground;
 	private CustomLabel titleLabel;
 	private ColoredBackground icon;
-	private ArrayList<ResearchUnlockableButton> descButtons;
+	private ArrayList<CustomButton> descButtons;
 	private ArrayList<CustomLabel> descLabels;
 	private CustomLabel descTitleLabel;
 	private CustomLabel turnsLabel;
-	private PickResearchButton pickResearchButton;
+	private CustomButton pickResearchButton;
 	private CloseWindowButton closeWindowButton;
 
 	public PickResearchWindow(Technology tech) {
@@ -36,7 +35,7 @@ public class PickResearchWindow extends AbstractWindow implements ResizeListener
 
 		this.descButtons = new ArrayList<>();
 		this.descLabels = new ArrayList<>();
-		
+
 		this.coloredBackground = new ColoredBackground(TextureEnum.UI_POPUP_BOX_A.sprite(), 0, 0, getWidth(),
 				getHeight());
 		addActor(coloredBackground);
@@ -51,7 +50,22 @@ public class PickResearchWindow extends AbstractWindow implements ResizeListener
 		this.descTitleLabel = new CustomLabel("Enables The Following:", 15, getHeight() - 80, getWidth(), 15);
 		addActor(descTitleLabel);
 
-		this.pickResearchButton = new PickResearchButton(tech, 0, 5, 100, 35);
+		this.pickResearchButton = new CustomButton("Research", 0, 5, 100, 35);
+		pickResearchButton.onClick(() -> {
+			if (tech.hasResearchedRequiredTechs()) {
+
+				// Reset the tech queue if the player manually changes the tech.
+				Civilization.getInstance().getGame().getPlayer().getResearchTree().clearTechQueue();
+
+				tech.research();
+
+			} else {
+				Civilization.getInstance().getGame().getPlayer().getResearchTree()
+						.setTechQueue(tech.getRequiedTechsQueue());
+
+				// TODO: Reference tech leafs to represent a queued tech.
+			}
+		});
 		addActor(pickResearchButton);
 
 		this.closeWindowButton = new CloseWindowButton(this.getClass(), "Cancel", getWidth() - 100, 5, 100, 35);
@@ -60,8 +74,11 @@ public class PickResearchWindow extends AbstractWindow implements ResizeListener
 		int index = 0;
 		if (tech.getUnlockables() != null)
 			for (Unlockable unlockable : tech.getUnlockables()) {
-				ResearchUnlockableButton button = new ResearchUnlockableButton(unlockable, 5 + (50 * index),
-						getHeight() - 135);
+				CustomButton button = new CustomButton(TextureEnum.UI_BUTTON_ICON, TextureEnum.UI_BUTTON_ICON_HOVERED,
+						unlockable.getTexture(), 5 + (50 * index), getHeight() - 135, 48, 48);
+				button.onClick(() -> {
+					Civilization.getInstance().getWindowManager().addWindow(new ItemInfoWindow(unlockable));
+				});
 				descButtons.add(button);
 				addActor(button);
 				index++;

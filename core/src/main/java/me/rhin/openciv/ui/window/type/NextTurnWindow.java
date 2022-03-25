@@ -10,6 +10,9 @@ import com.badlogic.gdx.utils.Timer.Task;
 
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.TextureEnum;
+import me.rhin.openciv.game.notification.type.AvailableProductionNotification;
+import me.rhin.openciv.game.notification.type.NotResearchingNotification;
+import me.rhin.openciv.game.notification.type.NotStudyingNotification;
 import me.rhin.openciv.game.player.AbstractPlayer;
 import me.rhin.openciv.listener.NextTurnListener;
 import me.rhin.openciv.listener.RequestEndTurnListener;
@@ -17,16 +20,15 @@ import me.rhin.openciv.listener.ResizeListener;
 import me.rhin.openciv.shared.packet.type.NextTurnPacket;
 import me.rhin.openciv.shared.packet.type.RequestEndTurnPacket;
 import me.rhin.openciv.ui.background.ColoredBackground;
-import me.rhin.openciv.ui.button.type.NextTurnButton;
-import me.rhin.openciv.ui.button.type.WaitingNextTurnButton;
+import me.rhin.openciv.ui.button.CustomButton;
 import me.rhin.openciv.ui.label.CustomLabel;
 import me.rhin.openciv.ui.window.AbstractWindow;
 
 public class NextTurnWindow extends AbstractWindow implements RequestEndTurnListener, NextTurnListener, ResizeListener {
 
 	private ColoredBackground background;
-	private NextTurnButton nextTurnButton;
-	private WaitingNextTurnButton waitingNextTurnButton;
+	private CustomButton nextTurnButton;
+	private CustomButton waitingNextTurnButton;
 	private CustomLabel waitingOnDescLabel;
 	private ArrayList<CustomLabel> notificationLabels;
 
@@ -35,10 +37,38 @@ public class NextTurnWindow extends AbstractWindow implements RequestEndTurnList
 
 		this.background = new ColoredBackground(TextureEnum.UI_BLACK.sprite(), 0, 0, getWidth(), getHeight());
 		// addActor(background);
-		this.nextTurnButton = new NextTurnButton(getWidth() / 2 - 125 / 2, 4, 125, 36);
+		this.nextTurnButton = new CustomButton("Next Turn", getWidth() / 2 - 125 / 2, 4, 125, 36);
+		nextTurnButton.onClick(() -> {
+			if (Civilization.getInstance().getGame().getNotificationHanlder()
+					.isNotificationActive(AvailableProductionNotification.class)) {
+				Civilization.getInstance().getWindowManager().getWindow(NextTurnWindow.class)
+						.notify("Chose a production item...");
+			}
+
+			if (Civilization.getInstance().getGame().getNotificationHanlder()
+					.isNotificationActive(NotResearchingNotification.class)) {
+				Civilization.getInstance().getWindowManager().getWindow(NextTurnWindow.class)
+						.notify("Choose a technology...");
+			}
+
+			if (Civilization.getInstance().getGame().getNotificationHanlder()
+					.isNotificationActive(NotStudyingNotification.class)) {
+				Civilization.getInstance().getWindowManager().getWindow(NextTurnWindow.class)
+						.notify("Choose a heritage...");
+			}
+
+			if (Civilization.getInstance().getWindowManager().getWindow(NextTurnWindow.class).getNotificationLabels()
+					.size() > 0)
+				return;
+
+			Civilization.getInstance().getGame().requestEndTurn();
+		});
 		addActor(nextTurnButton);
 
-		this.waitingNextTurnButton = new WaitingNextTurnButton(getWidth() / 2 - 125 / 2, 4, 125, 36);
+		this.waitingNextTurnButton = new CustomButton("Waiting...", getWidth() / 2 - 125 / 2, 4, 125, 36);
+		waitingNextTurnButton.onClick(() -> {
+			Civilization.getInstance().getGame().cancelEndTurn();
+		});
 
 		this.notificationLabels = new ArrayList<>();
 

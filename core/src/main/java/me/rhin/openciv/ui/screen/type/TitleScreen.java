@@ -1,35 +1,33 @@
 package me.rhin.openciv.ui.screen.type;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.utils.Align;
 
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.SoundEnum.SoundType;
+import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.listener.LeftClickListener.LeftClickEvent;
 import me.rhin.openciv.listener.MouseMoveListener.MouseMoveEvent;
 import me.rhin.openciv.listener.ResizeListener;
 import me.rhin.openciv.shared.listener.EventManager;
-import me.rhin.openciv.ui.button.type.AknowledgementsButton;
-import me.rhin.openciv.ui.button.type.GameOptionsButton;
-import me.rhin.openciv.ui.button.type.GithubButton;
-import me.rhin.openciv.ui.button.type.MultiplayerButton;
-import me.rhin.openciv.ui.button.type.PlayButton;
-import me.rhin.openciv.ui.button.type.QuitGameButton;
+import me.rhin.openciv.ui.button.CustomButton;
 import me.rhin.openciv.ui.label.CustomLabel;
 import me.rhin.openciv.ui.screen.AbstractScreen;
 import me.rhin.openciv.ui.screen.ScreenEnum;
+import me.rhin.openciv.ui.window.type.GameOptionsWindow;
 import me.rhin.openciv.ui.window.type.TitleOverlay;
 
 public class TitleScreen extends AbstractScreen implements ResizeListener {
 
 	private EventManager eventManager;
 	private TitleOverlay titleOverlay;
-	private PlayButton playButton;
-	private GithubButton githubButton;
-	private MultiplayerButton multiplayerButton;
-	private GameOptionsButton gameOptionsButton;
-	private AknowledgementsButton aknowledgementsButton;
-	private QuitGameButton quitGameButton;
+	private CustomButton playButton;
+	private CustomButton githubButton;
+	private CustomButton multiplayerButton;
+	private CustomButton gameOptionsButton;
+	private CustomButton aknowledgementsButton;
+	private CustomButton quitGameButton;
 	private CustomLabel titleLabel;
 	private CustomLabel subTitleLabel;
 
@@ -43,27 +41,45 @@ public class TitleScreen extends AbstractScreen implements ResizeListener {
 		this.titleOverlay = new TitleOverlay();
 		stage.addActor(titleOverlay);
 
-		playButton = new PlayButton(viewport.getWorldWidth() / 2 - 150 / 2, viewport.getWorldHeight() - 200, 150, 45);
+		playButton = new CustomButton("Singleplayer", viewport.getWorldWidth() / 2 - 150 / 2,
+				viewport.getWorldHeight() - 200, 150, 45);
+		playButton.onClick(() -> {
+			Civilization.getInstance().getScreenManager().setScreen(ScreenEnum.GAME_SETTINGS);
+		});
 		stage.addActor(playButton);
 
-		githubButton = new GithubButton(74, 4, 32, 32);
+		githubButton = new CustomButton(TextureEnum.UI_GITHUB, TextureEnum.UI_GITHUB, 74, 4, 32, 32);
+		githubButton.onClick(() -> {
+			Gdx.net.openURI("https://github.com/rhin123/OpenCiv");
+		});
 		stage.addActor(githubButton);
 
-		multiplayerButton = new MultiplayerButton(viewport.getWorldWidth() / 2 - 150 / 2,
+		multiplayerButton = new CustomButton("Multiplayer", viewport.getWorldWidth() / 2 - 150 / 2,
 				viewport.getWorldHeight() - 260, 150, 45);
+		multiplayerButton.onClick(() -> {
+			Civilization.getInstance().getScreenManager().setScreen(ScreenEnum.SERVER_SELECT);
+		});
 		stage.addActor(multiplayerButton);
-		
-		
-		gameOptionsButton = new GameOptionsButton(viewport.getWorldWidth() / 2 - 150 / 2,
+
+		gameOptionsButton = new CustomButton("Options", viewport.getWorldWidth() / 2 - 150 / 2,
 				viewport.getWorldHeight() - 320, 150, 45);
+		gameOptionsButton.onClick(() -> {
+			Civilization.getInstance().getWindowManager().addWindow(new GameOptionsWindow());
+		});
 		stage.addActor(gameOptionsButton);
-		
-		aknowledgementsButton = new AknowledgementsButton(viewport.getWorldWidth() / 2 - 150 / 2,
+
+		aknowledgementsButton = new CustomButton("Credits", viewport.getWorldWidth() / 2 - 150 / 2,
 				viewport.getWorldHeight() - 380, 150, 45);
+		aknowledgementsButton.onClick(() -> {
+			Civilization.getInstance().getScreenManager().setScreen(ScreenEnum.CREDITS);
+		});
 		stage.addActor(aknowledgementsButton);
 
-		quitGameButton = new QuitGameButton(viewport.getWorldWidth() / 2 - 150 / 2, viewport.getWorldHeight() - 440,
-				150, 45);
+		quitGameButton = new CustomButton("Quit Game", viewport.getWorldWidth() / 2 - 150 / 2,
+				viewport.getWorldHeight() - 440, 150, 45);
+		quitGameButton.onClick(() -> {
+			Gdx.app.exit();
+		});
 		stage.addActor(quitGameButton);
 
 		this.titleLabel = new CustomLabel("Kingdomraiders: Civilization", Align.center, 0,

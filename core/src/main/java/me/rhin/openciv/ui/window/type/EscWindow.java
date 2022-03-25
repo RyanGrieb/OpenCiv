@@ -3,17 +3,17 @@ package me.rhin.openciv.ui.window.type;
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.listener.ResizeListener;
 import me.rhin.openciv.ui.background.BlankBackground;
+import me.rhin.openciv.ui.button.CustomButton;
 import me.rhin.openciv.ui.button.type.CloseWindowButton;
-import me.rhin.openciv.ui.button.type.GameOptionsButton;
-import me.rhin.openciv.ui.button.type.MainMenuButton;
+import me.rhin.openciv.ui.screen.ScreenEnum;
 import me.rhin.openciv.ui.window.AbstractWindow;
 
 public class EscWindow extends AbstractWindow implements ResizeListener {
 
 	private BlankBackground blankBackground;
 	private CloseWindowButton closeWindowButton;
-	private GameOptionsButton gameOptionsButton;
-	private MainMenuButton mainMenuButton;
+	private CustomButton gameOptionsButton;
+	private CustomButton mainMenuButton;
 
 	public EscWindow() {
 
@@ -24,13 +24,19 @@ public class EscWindow extends AbstractWindow implements ResizeListener {
 		closeWindowButton = new CloseWindowButton(this.getClass(), "Back", viewport.getWorldWidth() / 2 - 150 / 2,
 				blankBackground.getY() + blankBackground.getHeight() - 55, 150, 45);
 		addActor(closeWindowButton);
-		
-		gameOptionsButton = new GameOptionsButton(viewport.getWorldWidth() / 2 - 150 / 2,
+
+		gameOptionsButton = new CustomButton("Options", viewport.getWorldWidth() / 2 - 150 / 2,
 				blankBackground.getY() + blankBackground.getHeight() - 110, 150, 45);
+		gameOptionsButton.onClick(() -> {
+			Civilization.getInstance().getWindowManager().addWindow(new GameOptionsWindow());
+		});
 		addActor(gameOptionsButton);
-		
-		mainMenuButton = new MainMenuButton(viewport.getWorldWidth() / 2 - 150 / 2,
+
+		mainMenuButton = new CustomButton("Main Menu", viewport.getWorldWidth() / 2 - 150 / 2,
 				blankBackground.getY() + blankBackground.getHeight() - 165, 150, 45);
+		mainMenuButton.onClick(() -> {
+			Civilization.getInstance().getScreenManager().setScreen(ScreenEnum.TITLE);
+		});
 		addActor(mainMenuButton);
 
 		Civilization.getInstance().getGame().getPlayer().unselectUnit();

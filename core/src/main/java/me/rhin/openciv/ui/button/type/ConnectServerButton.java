@@ -3,10 +3,10 @@ package me.rhin.openciv.ui.button.type;
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.listener.AttemptConnectionListener;
 import me.rhin.openciv.listener.ConnectionFailedListener;
-import me.rhin.openciv.ui.button.Button;
+import me.rhin.openciv.ui.button.AbstractButton;
 import me.rhin.openciv.ui.screen.type.ServerSelectScreen;
 
-public class ConnectServerButton extends Button implements AttemptConnectionListener, ConnectionFailedListener {
+public class ConnectServerButton extends AbstractButton implements AttemptConnectionListener, ConnectionFailedListener {
 
 	private ServerSelectScreen screen;
 	private boolean connecting;
@@ -20,7 +20,7 @@ public class ConnectServerButton extends Button implements AttemptConnectionList
 	}
 
 	@Override
-	public void onClick() {
+	public void onClicked() {
 		if (!connecting)
 			Civilization.getInstance().getNetworkManager().connect(screen.getIPTextField().getText());
 		else {

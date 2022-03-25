@@ -16,19 +16,20 @@ import me.rhin.openciv.listener.PlayerConnectListener;
 import me.rhin.openciv.listener.PlayerDisconnectListener;
 import me.rhin.openciv.listener.PlayerListRequestListener;
 import me.rhin.openciv.listener.ResizeListener;
+import me.rhin.openciv.shared.listener.EventManager;
 import me.rhin.openciv.shared.logging.Logger;
 import me.rhin.openciv.shared.logging.LoggerFactory;
 import me.rhin.openciv.shared.logging.LoggerType;
-import me.rhin.openciv.shared.listener.EventManager;
 import me.rhin.openciv.shared.packet.type.ChooseCivPacket;
 import me.rhin.openciv.shared.packet.type.GetHostPacket;
 import me.rhin.openciv.shared.packet.type.MapRequestPacket;
 import me.rhin.openciv.shared.packet.type.PlayerConnectPacket;
 import me.rhin.openciv.shared.packet.type.PlayerDisconnectPacket;
 import me.rhin.openciv.shared.packet.type.PlayerListRequestPacket;
-import me.rhin.openciv.ui.button.type.MPStartButton;
+import me.rhin.openciv.shared.packet.type.StartGameRequestPacket;
+import me.rhin.openciv.ui.button.CustomButton;
 import me.rhin.openciv.ui.button.type.OpenChatButton;
-import me.rhin.openciv.ui.button.type.ServerLobbyBackButton;
+import me.rhin.openciv.ui.button.type.PreviousScreenButton;
 import me.rhin.openciv.ui.game.GameOptionsMenu;
 import me.rhin.openciv.ui.list.ContainerList;
 import me.rhin.openciv.ui.list.ListContainer.ListContainerType;
@@ -50,8 +51,8 @@ public class ServerLobbyScreen extends AbstractScreen implements ResizeListener,
 	private String hostPlayerName;
 	private ContainerList playerContainerList;
 	private GameOptionsMenu gameOptionsMenu;
-	private MPStartButton multiplayerStartButton;
-	private ServerLobbyBackButton backButton;
+	private CustomButton multiplayerStartButton;
+	private CustomButton backButton;
 	private OpenChatButton chatButton;
 
 	public ServerLobbyScreen() {
@@ -74,14 +75,21 @@ public class ServerLobbyScreen extends AbstractScreen implements ResizeListener,
 		eventManager.addListener(GetHostListener.class, this);
 		eventManager.addListener(ChooseCivListener.class, this);
 
-		multiplayerStartButton = new MPStartButton(viewport.getWorldWidth() / 2 - 150 / 2, 60, 150, 45);
+		multiplayerStartButton = new CustomButton("Start Game", viewport.getWorldWidth() / 2 - 150 / 2, 60, 150, 45);
+		multiplayerStartButton.onClick(() -> {
+			Civilization.getInstance().getNetworkManager().sendPacket(new StartGameRequestPacket());
+		});
 
 		gameOptionsMenu = new GameOptionsMenu(viewport.getWorldWidth() / 2 + 120, viewport.getWorldHeight() - 360, 200,
 				300);
 
-		backButton = new ServerLobbyBackButton(viewport.getWorldWidth() / 2 - 150 / 2, 20, 150, 45);
+		backButton = new CustomButton("Back", viewport.getWorldWidth() / 2 - 150 / 2, 20, 150, 45);
+		backButton.onClick(() -> {
+			Civilization.getInstance().getScreenManager().revertToPreviousScreen();
+			Civilization.getInstance().getNetworkManager().disconnect();
+		});
 		stage.addActor(backButton);
-		
+
 		chatButton = new OpenChatButton(4, 28, 42, 42);
 		stage.addActor(chatButton);
 

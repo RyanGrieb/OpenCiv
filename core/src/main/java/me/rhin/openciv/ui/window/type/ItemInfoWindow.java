@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import com.badlogic.gdx.utils.Align;
 
 import me.rhin.openciv.Civilization;
+import me.rhin.openciv.asset.SoundEnum;
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.city.City;
 import me.rhin.openciv.game.production.ProductionItem;
@@ -12,10 +13,8 @@ import me.rhin.openciv.game.research.Unlockable;
 import me.rhin.openciv.listener.ResizeListener;
 import me.rhin.openciv.shared.stat.Stat;
 import me.rhin.openciv.ui.background.ColoredBackground;
-import me.rhin.openciv.ui.button.type.BuyFaithItemButton;
-import me.rhin.openciv.ui.button.type.BuyItemButton;
+import me.rhin.openciv.ui.button.CustomButton;
 import me.rhin.openciv.ui.button.type.CloseWindowButton;
-import me.rhin.openciv.ui.button.type.ProduceItemButton;
 import me.rhin.openciv.ui.label.CustomLabel;
 import me.rhin.openciv.ui.window.AbstractWindow;
 
@@ -31,9 +30,9 @@ public class ItemInfoWindow extends AbstractWindow implements ResizeListener {
 	private CustomLabel goldCostLabel;
 	private CustomLabel faithCostLabel;
 	private ColoredBackground itemIcon;
-	private ProduceItemButton produceItemButton;
-	private BuyItemButton buyItemButton;
-	private BuyFaithItemButton buyFaithItemButton;
+	private CustomButton produceItemButton;
+	private CustomButton buyItemButton;
+	private CustomButton buyFaithItemButton;
 	private CloseWindowButton closeWindowButton;
 	private ColoredBackground produceIcon;
 	private ColoredBackground buyIcon;
@@ -73,17 +72,42 @@ public class ItemInfoWindow extends AbstractWindow implements ResizeListener {
 			lastYIndex -= labelHeight;
 		}
 
-		this.produceItemButton = new ProduceItemButton(city, productionItem, 4, 4, 82, 28);
+		this.produceItemButton = new CustomButton("Produce", 4, 4, 82, 28);
+		produceItemButton.onClick(() -> {
+			if (city.getProducibleItemManager().getCurrentProducingItem() == null) {
+				city.getProducibleItemManager().requestSetProductionItem(productionItem);
+				Civilization.getInstance().getWindowManager().closeWindow(ItemInfoWindow.class);
+			} else {
+				// Civilization.getInstance().getWindowManager().closeWindow(ItemInfoWindow.class);
+				Civilization.getInstance().getWindowManager().toggleWindow(new QueueItemWindow(city, productionItem));
+			}
+		});
 
 		if (productionItem.getProductionCost() > 0)
 			addActor(produceItemButton);
 
-		this.buyItemButton = new BuyItemButton(city, productionItem, getWidth() / 2 - 82 / 2, 4, 82, 28);
+		this.buyItemButton = new CustomButton("Buy", getWidth() / 2 - 82 / 2, 4, 82, 28);
+		buyItemButton.onClick(() -> {
+			if (city.getPlayerOwner().getStatLine().getStatValue(Stat.GOLD) < productionItem.getGoldCost())
+				return;
+
+			city.getProducibleItemManager().requestBuyProductionItem(productionItem);
+			Civilization.getInstance().getWindowManager().closeWindow(ItemInfoWindow.class);
+
+			Civilization.getInstance().getSoundHandler().playEffect(SoundEnum.BUY_ITEM);
+		});
 
 		if (productionItem.getGoldCost() > 0)
 			addActor(buyItemButton);
 
-		this.buyFaithItemButton = new BuyFaithItemButton(city, productionItem, getWidth() / 2 - 82 / 2, 4, 82, 28);
+		this.buyFaithItemButton = new CustomButton("Buy", getWidth() / 2 - 82 / 2, 4, 82, 28);
+		buyFaithItemButton.onClick(() -> {
+			if (city.getPlayerOwner().getStatLine().getStatValue(Stat.FAITH) < productionItem.getFaithCost())
+				return;
+
+			city.getProducibleItemManager().requestFaithBuyProductionItem(productionItem);
+			Civilization.getInstance().getWindowManager().closeWindow(ItemInfoWindow.class);
+		});
 
 		if (productionItem.getFaithCost() > 0)
 			addActor(buyFaithItemButton);

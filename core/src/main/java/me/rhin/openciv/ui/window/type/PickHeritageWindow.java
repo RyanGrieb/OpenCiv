@@ -7,11 +7,13 @@ import com.badlogic.gdx.utils.Align;
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.heritage.Heritage;
+import me.rhin.openciv.listener.PickHeritageListener.PickHeritageEvent;
 import me.rhin.openciv.listener.ResizeListener;
+import me.rhin.openciv.shared.packet.type.ChooseHeritagePacket;
 import me.rhin.openciv.shared.stat.Stat;
 import me.rhin.openciv.ui.background.ColoredBackground;
+import me.rhin.openciv.ui.button.CustomButton;
 import me.rhin.openciv.ui.button.type.CloseWindowButton;
-import me.rhin.openciv.ui.button.type.PickHeritageButton;
 import me.rhin.openciv.ui.label.CustomLabel;
 import me.rhin.openciv.ui.window.AbstractWindow;
 
@@ -23,7 +25,7 @@ public class PickHeritageWindow extends AbstractWindow implements ResizeListener
 	private ColoredBackground icon;
 	private ArrayList<CustomLabel> descLabels;
 	private CustomLabel turnsLabel;
-	private PickHeritageButton pickResearchButton;
+	private CustomButton pickHeritageButton;
 	private CloseWindowButton closeWindowButton;
 
 	public PickHeritageWindow(Heritage heritage) {
@@ -60,8 +62,23 @@ public class PickHeritageWindow extends AbstractWindow implements ResizeListener
 		this.turnsLabel = new CustomLabel(turns + " Turns", Align.center, 0, 50, getWidth(), 15);
 		addActor(turnsLabel);
 
-		this.pickResearchButton = new PickHeritageButton(heritage, 0, 5, 100, 35);
-		addActor(pickResearchButton);
+		this.pickHeritageButton = new CustomButton("Study", 0, 5, 100, 35);
+		pickHeritageButton.onClick(() -> {
+			ChooseHeritagePacket packet = new ChooseHeritagePacket();
+			// FIXME: I don't like this substring stuff
+			packet.setName(heritage.getClass().getName().substring(heritage.getClass().getName().indexOf("type.") + 5));
+			Civilization.getInstance().getNetworkManager().sendPacket(packet);
+			Civilization.getInstance().getWindowManager().closeWindow(PickHeritageWindow.class);
+
+			for (Heritage playerHeritage : Civilization.getInstance().getGame().getPlayer().getHeritageTree()
+					.getAllHeritage())
+				playerHeritage.setStudying(false);
+
+			heritage.setStudying(true);
+
+			Civilization.getInstance().getEventManager().fireEvent(new PickHeritageEvent(heritage));
+		});
+		addActor(pickHeritageButton);
 
 		this.closeWindowButton = new CloseWindowButton(this.getClass(), "Cancel", getWidth() - 100, 5, 100, 35);
 		addActor(closeWindowButton);

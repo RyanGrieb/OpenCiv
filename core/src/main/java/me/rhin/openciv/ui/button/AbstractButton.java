@@ -20,6 +20,14 @@ public abstract class AbstractButton extends Actor {
 	private CustomLabel label;
 	private boolean hovered;
 
+	public AbstractButton(float x, float y, float width, float height) {
+		this(TextureEnum.UI_BUTTON, TextureEnum.UI_BUTTON_HOVERED, x, y, width, height);
+	}
+
+	public AbstractButton(String text, float x, float y, float width, float height) {
+		this(TextureEnum.UI_BUTTON, TextureEnum.UI_BUTTON_HOVERED, text, x, y, width, height);
+	}
+
 	public AbstractButton(TextureEnum mainTexture, TextureEnum hoveredTexture, float x, float y, float width,
 			float height) {
 		setBounds(x, y, width, height);
@@ -58,11 +66,17 @@ public abstract class AbstractButton extends Actor {
 	}
 
 	public AbstractButton(TextureEnum mainTexture, TextureEnum hoveredTexture, TextureEnum iconTexture, float x,
-			float y, float width, float height) {
+			float y, float width, float height, float iconWidth, float iconHeight) {
 		this(mainTexture, hoveredTexture, x, y, width, height);
 
 		this.iconSprite = iconTexture.sprite();
-		iconSprite.setBounds(x, y, width, height);
+		iconSprite.setBounds(x + (width / 2) - (iconWidth / 2), y + (height / 2) - (iconHeight / 2), iconWidth,
+				iconHeight);
+	}
+
+	public AbstractButton(TextureEnum mainTexture, TextureEnum hoveredTexture, TextureEnum iconTexture, float x,
+			float y, float width, float height) {
+		this(mainTexture, hoveredTexture, iconTexture, x, y, width, height, width / 2, height / 2);
 	}
 
 	public AbstractButton(TextureEnum mainTexture, TextureEnum hoveredTexture, String text, float x, float y,
@@ -90,6 +104,9 @@ public abstract class AbstractButton extends Actor {
 
 		if (label != null)
 			label.draw(batch, parentAlpha);
+
+		if (iconSprite != null)
+			iconSprite.draw(batch);
 	}
 
 	@Override
@@ -102,8 +119,9 @@ public abstract class AbstractButton extends Actor {
 		if (hoveredSprite != null)
 			hoveredSprite.setPosition(x, y);
 
-		label.setPosition(x + mainSprite.getWidth() / 2 - label.getWidth() / 2,
-				(y + mainSprite.getHeight() / 2) - label.getHeight() / 2);
+		if (label != null)
+			label.setPosition(x + mainSprite.getWidth() / 2 - label.getWidth() / 2,
+					(y + mainSprite.getHeight() / 2) - label.getHeight() / 2);
 	}
 
 	public void setTexture(TextureEnum textureEnum) {

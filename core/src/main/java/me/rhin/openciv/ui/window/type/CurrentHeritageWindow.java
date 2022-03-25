@@ -14,7 +14,7 @@ import me.rhin.openciv.shared.packet.type.CompleteHeritagePacket;
 import me.rhin.openciv.shared.packet.type.NextTurnPacket;
 import me.rhin.openciv.shared.stat.Stat;
 import me.rhin.openciv.ui.background.ColoredBackground;
-import me.rhin.openciv.ui.button.type.OpenHeritageButton;
+import me.rhin.openciv.ui.button.CustomButton;
 import me.rhin.openciv.ui.label.CustomLabel;
 import me.rhin.openciv.ui.window.AbstractWindow;
 
@@ -25,7 +25,7 @@ public class CurrentHeritageWindow extends AbstractWindow
 	private CustomLabel heritageNameDescLabel;
 	private CustomLabel heritageTurnsLabel;
 	private CustomLabel heritageNameLabel;
-	private OpenHeritageButton openHeritageButton;
+	private CustomButton openHeritageButton;
 	private ColoredBackground heritageIcon;
 	private Heritage heritage;
 
@@ -51,8 +51,15 @@ public class CurrentHeritageWindow extends AbstractWindow
 				blankBackground.getY() + heritageNameLabel.getHeight() - 2);
 		addActor(heritageNameLabel);
 
-		openHeritageButton = new OpenHeritageButton(blankBackground.getX() + blankBackground.getWidth() - 52,
-				blankBackground.getY() + 3, 48, 32);
+		openHeritageButton = new CustomButton(TextureEnum.UI_BUTTON_SMALL, TextureEnum.UI_BUTTON_SMALL_HOVERED,
+				TextureEnum.ICON_HERITAGE, blankBackground.getX() + blankBackground.getWidth() - 52,
+				blankBackground.getY() + 3, 48, 32, 16, 16);
+		openHeritageButton.onClick(() -> {
+			if (Civilization.getInstance().getGame().getPlayer().getOwnedCities().size() < 1)
+				return;
+
+			Civilization.getInstance().getWindowManager().toggleWindow(new HeritageWindow());
+		});
 		addActor(openHeritageButton);
 
 		this.heritageIcon = new ColoredBackground(TextureEnum.UI_CLEAR.sprite(), 6, 6, 32, 32);

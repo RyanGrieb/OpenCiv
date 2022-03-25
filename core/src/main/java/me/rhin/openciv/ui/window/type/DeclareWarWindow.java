@@ -6,9 +6,10 @@ import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.player.AbstractPlayer;
 import me.rhin.openciv.listener.ResizeListener;
+import me.rhin.openciv.shared.packet.type.DeclareWarPacket;
 import me.rhin.openciv.ui.background.ColoredBackground;
+import me.rhin.openciv.ui.button.CustomButton;
 import me.rhin.openciv.ui.button.type.CloseWindowButton;
-import me.rhin.openciv.ui.button.type.DeclareWarButton;
 import me.rhin.openciv.ui.label.CustomLabel;
 import me.rhin.openciv.ui.window.AbstractWindow;
 
@@ -16,7 +17,7 @@ public class DeclareWarWindow extends AbstractWindow implements ResizeListener {
 
 	private ColoredBackground background;
 	private CloseWindowButton closeWindowButton;
-	private DeclareWarButton declareWarButton;
+	private CustomButton declareWarButton;
 	private CustomLabel declareWarDescLabel;
 	private ColoredBackground attackerIcon;
 	private ColoredBackground swordsIcon;
@@ -43,7 +44,14 @@ public class DeclareWarWindow extends AbstractWindow implements ResizeListener {
 				getHeight() - 100, 32, 32);
 		addActor(defenderIcon);
 
-		this.declareWarButton = new DeclareWarButton(attacker, defender, getWidth() / 2 - 127 / 2, 50, 127, 35);
+		this.declareWarButton = new CustomButton("Declare War", getWidth() / 2 - 127 / 2, 50, 127, 35);
+		declareWarButton.onClick(() -> {
+			DeclareWarPacket packet = new DeclareWarPacket();
+			packet.setCombatants(attacker.getName(), defender.getName());
+
+			Civilization.getInstance().getNetworkManager().sendPacket(packet);
+			Civilization.getInstance().getWindowManager().closeWindow(DeclareWarWindow.class);
+		});
 		addActor(declareWarButton);
 
 		this.closeWindowButton = new CloseWindowButton(getClass(), "Cancel", getWidth() / 2 - 127 / 2, 5, 127, 35);

@@ -5,8 +5,7 @@ import com.badlogic.gdx.scenes.scene2d.Group;
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.notification.AbstractNotification;
 import me.rhin.openciv.ui.background.ColoredBackground;
-import me.rhin.openciv.ui.button.type.ActNotificationButton;
-import me.rhin.openciv.ui.button.type.NotificationInfoButton;
+import me.rhin.openciv.ui.button.CustomButton;
 import me.rhin.openciv.ui.label.CustomLabel;
 
 public class GameNotificationBox extends Group implements Comparable<GameNotificationBox> {
@@ -15,8 +14,7 @@ public class GameNotificationBox extends Group implements Comparable<GameNotific
 	private ColoredBackground background;
 	private ColoredBackground notificationIcon;
 	private CustomLabel notificationLabel;
-	private ActNotificationButton actNotificationButton;
-	private NotificationInfoButton notificationInfoButton;
+	private CustomButton actNotificationButton;
 	// private IgnoreNotificationButton ignoreNotificationButton;
 
 	public GameNotificationBox(AbstractNotification notification, float x, float y) {
@@ -34,7 +32,12 @@ public class GameNotificationBox extends Group implements Comparable<GameNotific
 		notificationLabel.setPosition(80, getHeight() / 2 - notificationLabel.getHeight() / 2);
 		addActor(notificationLabel);
 
-		this.actNotificationButton = new ActNotificationButton(notification, 0, getHeight() - 38, 36, 36);
+		this.actNotificationButton = new CustomButton(TextureEnum.UI_BUTTON_ICON, TextureEnum.UI_BUTTON_ICON_HOVERED,
+				TextureEnum.ICON_GOTO_LEFT, 0, getHeight() - 38, 36, 36);
+		actNotificationButton.onClick(() -> {
+			notification.act();
+		});
+
 		addActor(actNotificationButton);
 	}
 
