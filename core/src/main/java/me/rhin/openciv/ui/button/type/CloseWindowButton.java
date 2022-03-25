@@ -4,7 +4,6 @@ import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.ui.button.AbstractButton;
 import me.rhin.openciv.ui.window.AbstractWindow;
-import me.rhin.openciv.ui.window.type.ChatboxWindow;
 
 public class CloseWindowButton extends AbstractButton {
 
@@ -17,7 +16,7 @@ public class CloseWindowButton extends AbstractButton {
 		this.windowClass = windowClass;
 	}
 
-	public CloseWindowButton(Class<? extends ChatboxWindow> windowClass, TextureEnum iconTexture, float x, float y,
+	public CloseWindowButton(Class<? extends AbstractWindow> windowClass, TextureEnum iconTexture, float x, float y,
 			int width, int height) {
 		super(TextureEnum.UI_BUTTON_ICON, TextureEnum.UI_BUTTON_ICON_HOVERED, iconTexture, x, y, width, height);
 		this.windowClass = windowClass;

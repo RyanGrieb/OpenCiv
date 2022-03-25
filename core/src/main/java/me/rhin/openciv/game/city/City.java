@@ -43,6 +43,7 @@ import me.rhin.openciv.listener.FinishProductionItemListener;
 import me.rhin.openciv.listener.NextTurnListener;
 import me.rhin.openciv.listener.QueueProductionItemListener;
 import me.rhin.openciv.listener.ReligionIconChangeListener;
+import me.rhin.openciv.listener.RemoveQueuedProductionItemListener;
 import me.rhin.openciv.listener.RemoveSpecialistFromContainerListener;
 import me.rhin.openciv.listener.SetCitizenTileWorkerListener;
 import me.rhin.openciv.listener.SetProductionItemListener;
@@ -60,6 +61,7 @@ import me.rhin.openciv.shared.packet.type.CityStatUpdatePacket;
 import me.rhin.openciv.shared.packet.type.FinishProductionItemPacket;
 import me.rhin.openciv.shared.packet.type.NextTurnPacket;
 import me.rhin.openciv.shared.packet.type.QueueProductionItemPacket;
+import me.rhin.openciv.shared.packet.type.RemoveQueuedProductionItemPacket;
 import me.rhin.openciv.shared.packet.type.RemoveSpecialistFromContainerPacket;
 import me.rhin.openciv.shared.packet.type.SetCitizenTileWorkerPacket;
 import me.rhin.openciv.shared.packet.type.SetCitizenTileWorkerPacket.WorkerType;
@@ -73,12 +75,13 @@ import me.rhin.openciv.ui.screen.type.InGameScreen;
 import me.rhin.openciv.ui.window.type.CityInfoWindow;
 
 //FIXME: We should have a interface for these networking interface.
-public class City extends Group implements AttackableEntity, TileObserver, SpecialistContainer,
-		BuildingConstructedListener, BuildingRemovedListener, CityStatUpdateListener, SetProductionItemListener,
-		ApplyProductionToItemListener, FinishProductionItemListener, SetCitizenTileWorkerListener,
-		AddSpecialistToContainerListener, RemoveSpecialistFromContainerListener, NextTurnListener,
-		BuyProductionItemListener, CityGainMajorityReligionListener, CityLooseMajorityReligionListener,
-		ReligionIconChangeListener, CityPopulationUpdateListener, QueueProductionItemListener {
+public class City extends Group
+		implements AttackableEntity, TileObserver, SpecialistContainer, BuildingConstructedListener,
+		BuildingRemovedListener, CityStatUpdateListener, SetProductionItemListener, ApplyProductionToItemListener,
+		FinishProductionItemListener, SetCitizenTileWorkerListener, AddSpecialistToContainerListener,
+		RemoveSpecialistFromContainerListener, NextTurnListener, BuyProductionItemListener,
+		CityGainMajorityReligionListener, CityLooseMajorityReligionListener, ReligionIconChangeListener,
+		CityPopulationUpdateListener, QueueProductionItemListener, RemoveQueuedProductionItemListener {
 
 	private static final Logger LOGGER = LoggerFactory.getInstance(LoggerType.LOG_TAG);
 
@@ -160,6 +163,7 @@ public class City extends Group implements AttackableEntity, TileObserver, Speci
 		Civilization.getInstance().getEventManager().addListener(ReligionIconChangeListener.class, this);
 		Civilization.getInstance().getEventManager().addListener(CityPopulationUpdateListener.class, this);
 		Civilization.getInstance().getEventManager().addListener(QueueProductionItemListener.class, this);
+		Civilization.getInstance().getEventManager().addListener(RemoveQueuedProductionItemListener.class, this);
 	}
 
 	@Override
@@ -259,6 +263,14 @@ public class City extends Group implements AttackableEntity, TileObserver, Speci
 	}
 
 	@Override
+	public void onRemoveQueuedProductionItem(RemoveQueuedProductionItemPacket packet) {
+		if (!getName().equals(packet.getCityName()))
+			return;
+
+		getProducibleItemManager().getItemQueue().remove(packet.getIndex());
+	}
+
+	@Override
 	public void onApplyProductionToItem(ApplyProductionToItemPacket packet) {
 		if (!getName().equals(packet.getCityName()))
 			return;
@@ -271,7 +283,7 @@ public class City extends Group implements AttackableEntity, TileObserver, Speci
 		if (!getName().equals(packet.getCityName()))
 			return;
 
-		getProducibleItemManager().getItemQueue().remove();
+		getProducibleItemManager().getItemQueue().remove(0);
 
 		if (getProducibleItemManager().getItemQueue().size() < 1) {
 			if (playerOwner.equals(Civilization.getInstance().getGame().getPlayer()))

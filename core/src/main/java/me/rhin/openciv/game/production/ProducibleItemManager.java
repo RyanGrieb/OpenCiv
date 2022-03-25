@@ -2,8 +2,6 @@ package me.rhin.openciv.game.production;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Queue;
 
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.game.city.City;
@@ -78,12 +76,12 @@ public class ProducibleItemManager {
 
 	private City city;
 	private HashMap<String, ProductionItem> possibleItems;
-	private Queue<ProducingItem> itemQueue;
+	private ArrayList<ProducingItem> itemQueue;
 
 	public ProducibleItemManager(City city) {
 		this.city = city;
 		this.possibleItems = new HashMap<>();
-		this.itemQueue = new LinkedList<>();
+		this.itemQueue = new ArrayList<>();
 
 		// Units
 		possibleItems.put("Warrior", new Warrior(city));
@@ -194,7 +192,7 @@ public class ProducibleItemManager {
 	}
 
 	public void applyProduction(float productionAmount) {
-		itemQueue.peek().applyProduction(productionAmount);
+		itemQueue.get(0).applyProduction(productionAmount);
 	}
 
 	public void setCurrentProductionItem(String itemName) {
@@ -206,12 +204,15 @@ public class ProducibleItemManager {
 		itemQueue.add(new ProducingItem(possibleItems.get(itemName)));
 	}
 
-	public Queue<ProducingItem> getItemQueue() {
+	public ArrayList<ProducingItem> getItemQueue() {
 		return itemQueue;
 	}
 
 	public ProducingItem getCurrentProducingItem() {
-		return itemQueue.peek();
+		if (itemQueue.size() < 1)
+			return null;
+
+		return itemQueue.get(0);
 	}
 
 	public boolean isItemInQueue(ProductionItem productionItem) {
@@ -222,4 +223,5 @@ public class ProducibleItemManager {
 
 		return false;
 	}
+
 }

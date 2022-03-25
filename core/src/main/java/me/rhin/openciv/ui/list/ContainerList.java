@@ -182,6 +182,12 @@ public class ContainerList extends Group implements ScrollListener {
 		listContainers.get(listContainerName).removeItem(itemKey);
 		updatePositions();
 	}
+	
+	public void removeItem(String listContainerName, int index) {
+		listContainers.get(listContainerName).clearListeners();
+		listContainers.get(listContainerName).removeItem(index);
+		updatePositions();
+	}
 
 	public void updatePositions() {
 		float nextHeight = 0;

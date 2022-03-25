@@ -115,6 +115,17 @@ public class ListContainer extends Group {
 		}
 	}
 
+	public void removeItem(int index) {
+		ListObject listObject = itemListObjects.get(index);
+
+		listObject.addAction(Actions.removeActor());
+		itemListObjects.remove(listObject);
+
+		setHeight(getHeight() - listObject.getHeight());
+		updateHeight();
+
+	}
+
 	private void updateHeight() {
 		backgroundSprite.setSize(getWidth(), getHeight());
 	}

@@ -2,8 +2,6 @@ package me.rhin.openciv.server.game.production;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Queue;
 
 import org.java_websocket.WebSocket;
 import org.slf4j.Logger;
@@ -65,14 +63,20 @@ import me.rhin.openciv.server.game.unit.type.Warrior;
 import me.rhin.openciv.server.game.unit.type.WorkBoat;
 import me.rhin.openciv.server.listener.BuyProductionItemListener;
 import me.rhin.openciv.server.listener.FaithBuyProductionItemListener;
+import me.rhin.openciv.server.listener.MoveDownQueuedProductionItemListener;
+import me.rhin.openciv.server.listener.MoveUpQueuedProductionItemListener;
 import me.rhin.openciv.server.listener.NextTurnListener;
 import me.rhin.openciv.server.listener.QueueProductionItemListener;
+import me.rhin.openciv.server.listener.RemoveQueuedProductionItemListener;
 import me.rhin.openciv.server.listener.SetProductionItemListener;
 import me.rhin.openciv.shared.packet.type.ApplyProductionToItemPacket;
 import me.rhin.openciv.shared.packet.type.BuyProductionItemPacket;
 import me.rhin.openciv.shared.packet.type.FaithBuyProductionItemPacket;
 import me.rhin.openciv.shared.packet.type.FinishProductionItemPacket;
+import me.rhin.openciv.shared.packet.type.MoveDownQueuedProductionItemPacket;
+import me.rhin.openciv.shared.packet.type.MoveUpQueuedProductionItemPacket;
 import me.rhin.openciv.shared.packet.type.QueueProductionItemPacket;
+import me.rhin.openciv.shared.packet.type.RemoveQueuedProductionItemPacket;
 import me.rhin.openciv.shared.packet.type.SetProductionItemPacket;
 import me.rhin.openciv.shared.stat.Stat;
 
@@ -88,7 +92,8 @@ import me.rhin.openciv.shared.stat.Stat;
 //FIXME: Remove modifiers if this city is captured.
 
 public class ProducibleItemManager implements NextTurnListener, FaithBuyProductionItemListener,
-		BuyProductionItemListener, SetProductionItemListener, QueueProductionItemListener {
+		BuyProductionItemListener, SetProductionItemListener, QueueProductionItemListener,
+		RemoveQueuedProductionItemListener, MoveUpQueuedProductionItemListener, MoveDownQueuedProductionItemListener {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(ProducibleItemManager.class);
 
@@ -100,7 +105,7 @@ public class ProducibleItemManager implements NextTurnListener, FaithBuyProducti
 	private HashMap<String, ProducingItem> appliedProductionItems;
 
 	// A queue of items to produce
-	private Queue<ProducingItem> itemQueue;
+	private ArrayList<ProducingItem> itemQueue;
 	private boolean queueEnabled;
 
 	public ProducibleItemManager(City city) {
@@ -108,7 +113,7 @@ public class ProducibleItemManager implements NextTurnListener, FaithBuyProducti
 		this.possibleItems = new HashMap<>();
 		this.producedOnIndexer = new HashMap<>();
 		this.appliedProductionItems = new HashMap<>();
-		this.itemQueue = new LinkedList<>();
+		this.itemQueue = new ArrayList<>();
 		this.queueEnabled = false;
 
 		// Units
@@ -170,19 +175,23 @@ public class ProducibleItemManager implements NextTurnListener, FaithBuyProducti
 		Server.getInstance().getEventManager().addListener(BuyProductionItemListener.class, this);
 		Server.getInstance().getEventManager().addListener(FaithBuyProductionItemListener.class, this);
 		Server.getInstance().getEventManager().addListener(QueueProductionItemListener.class, this);
+		Server.getInstance().getEventManager().addListener(RemoveQueuedProductionItemListener.class, this);
+		Server.getInstance().getEventManager().addListener(MoveUpQueuedProductionItemListener.class, this);
+		Server.getInstance().getEventManager().addListener(MoveDownQueuedProductionItemListener.class, this);
 	}
 
 	@Override
 	public void onNextTurn() {
-		ProducingItem producingItem = itemQueue.peek();
 
-		if (producingItem == null)
+		if (itemQueue.size() < 1)
 			return;
+
+		ProducingItem producingItem = itemQueue.get(0);
 
 		Json json = new Json();
 
 		if (!producingItem.getProductionItem().meetsProductionRequirements()) {
-			itemQueue.remove();
+			itemQueue.remove(0);
 
 			FinishProductionItemPacket packet = new FinishProductionItemPacket();
 			packet.setCityName(city.getName());
@@ -194,7 +203,7 @@ public class ProducibleItemManager implements NextTurnListener, FaithBuyProducti
 		producingItem.applyProduction(city.getStatLine().getStatValue(Stat.PRODUCTION_GAIN));
 
 		if (producingItem.getAppliedProduction() >= producingItem.getProductionItem().getProductionCost()) {
-			itemQueue.remove();
+			itemQueue.remove(0);
 
 			producingItem.getProductionItem().create();
 			producedOnIndexer.put(producingItem.getProductionItem().getClass(),
@@ -270,6 +279,30 @@ public class ProducibleItemManager implements NextTurnListener, FaithBuyProducti
 		conn.send(json.toJson(packet));
 	}
 
+	@Override
+	public void onMoveDownQueuedProductionItem(WebSocket conn, MoveDownQueuedProductionItemPacket packet) {
+	}
+
+	@Override
+	public void onMoveUpQueuedProductionItem(WebSocket conn, MoveUpQueuedProductionItemPacket packet) {
+	}
+
+	@Override
+	public void onRemoveQueuedProductionItem(WebSocket conn, RemoveQueuedProductionItemPacket packet) {
+		City targetCity = Server.getInstance().getInGameState().getCityFromName(packet.getCityName());
+
+		if (targetCity == null || !targetCity.equals(city))
+			return;
+
+		if (possibleItems.get(packet.getItemName()) == null)
+			return;
+
+		itemQueue.remove(packet.getIndex());
+
+		Json json = new Json();
+		conn.send(json.toJson(packet));
+	}
+
 	public HashMap<String, ProductionItem> getPossibleItems() {
 		return possibleItems;
 	}
@@ -299,7 +332,6 @@ public class ProducibleItemManager implements NextTurnListener, FaithBuyProducti
 			}
 		}
 
-		// FIXME: Remove?
 		if (!queueEnabled) {
 			// TODO: Implement appliedProductionItems here to save applied production.
 			itemQueue.clear();
@@ -332,7 +364,7 @@ public class ProducibleItemManager implements NextTurnListener, FaithBuyProducti
 		city.updateWorkedTiles();
 		city.getPlayerOwner().updateOwnedStatlines(false);
 
-		if (itemQueue.peek() != null && itemQueue.peek().getProductionItem().equals(item.getProductionItem())
+		if (itemQueue.get(0) != null && itemQueue.get(0).getProductionItem().equals(item.getProductionItem())
 				&& item.getProductionItem() instanceof Building) {
 			clearProducingItem();
 		}
@@ -360,7 +392,7 @@ public class ProducibleItemManager implements NextTurnListener, FaithBuyProducti
 		city.updateWorkedTiles();
 		city.getPlayerOwner().updateOwnedStatlines(false);
 
-		if (itemQueue.peek() != null && itemQueue.peek().getProductionItem().equals(item.getProductionItem())
+		if (itemQueue.get(0) != null && itemQueue.get(0).getProductionItem().equals(item.getProductionItem())
 				&& item.getProductionItem() instanceof Building) {
 			clearProducingItem();
 		}
@@ -389,7 +421,7 @@ public class ProducibleItemManager implements NextTurnListener, FaithBuyProducti
 	}
 
 	public ProducingItem getProducingItem() {
-		return itemQueue.peek();
+		return itemQueue.get(0);
 	}
 
 	public boolean producingMilitaryUnits() {

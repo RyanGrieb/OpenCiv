@@ -8,24 +8,25 @@ import com.badlogic.gdx.scenes.scene2d.Actor;
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.city.City;
-import me.rhin.openciv.game.city.building.Building;
 import me.rhin.openciv.game.production.ProducingItem;
-import me.rhin.openciv.game.production.ProductionItem;
 import me.rhin.openciv.listener.ApplyProductionToItemListener;
 import me.rhin.openciv.listener.BuyProductionItemListener;
 import me.rhin.openciv.listener.CityStatUpdateListener;
 import me.rhin.openciv.listener.FinishProductionItemListener;
+import me.rhin.openciv.listener.RemoveQueuedProductionItemListener;
 import me.rhin.openciv.listener.SetProductionItemListener;
 import me.rhin.openciv.shared.packet.type.ApplyProductionToItemPacket;
 import me.rhin.openciv.shared.packet.type.BuyProductionItemPacket;
 import me.rhin.openciv.shared.packet.type.CityStatUpdatePacket;
 import me.rhin.openciv.shared.packet.type.FinishProductionItemPacket;
+import me.rhin.openciv.shared.packet.type.RemoveQueuedProductionItemPacket;
 import me.rhin.openciv.shared.packet.type.SetProductionItemPacket;
 import me.rhin.openciv.shared.stat.Stat;
 import me.rhin.openciv.ui.label.CustomLabel;
 
-public class CityProductionInfo extends Actor implements SetProductionItemListener, ApplyProductionToItemListener,
-		FinishProductionItemListener, CityStatUpdateListener, BuyProductionItemListener {
+public class CityProductionInfo extends Actor
+		implements SetProductionItemListener, ApplyProductionToItemListener, FinishProductionItemListener,
+		CityStatUpdateListener, BuyProductionItemListener, RemoveQueuedProductionItemListener {
 
 	private City city;
 	private Sprite backgroundSprite;
@@ -77,6 +78,7 @@ public class CityProductionInfo extends Actor implements SetProductionItemListen
 		Civilization.getInstance().getEventManager().addListener(FinishProductionItemListener.class, this);
 		Civilization.getInstance().getEventManager().addListener(CityStatUpdateListener.class, this);
 		Civilization.getInstance().getEventManager().addListener(BuyProductionItemListener.class, this);
+		Civilization.getInstance().getEventManager().addListener(RemoveQueuedProductionItemListener.class, this);
 	}
 
 	@Override
@@ -163,6 +165,18 @@ public class CityProductionInfo extends Actor implements SetProductionItemListen
 	public void onCityStatUpdate(CityStatUpdatePacket packet) {
 		if (!city.getName().equals(packet.getCityName()))
 			return;
+
+		updateUI();
+	}
+
+	@Override
+	public void onRemoveQueuedProductionItem(RemoveQueuedProductionItemPacket packet) {
+		if (!city.getName().equals(packet.getCityName()))
+			return;
+
+		// System.out.println(packet.getItemName() + ","
+		// +
+		// city.getProducibleItemManager().getCurrentProducingItem().getProductionItem().getName());
 
 		updateUI();
 	}
