@@ -12,7 +12,7 @@ public class WorkedTileButton extends AbstractButton {
 	private Tile tile;
 
 	public WorkedTileButton(WorkerType workerType, Tile tile, float x, float y, float width, float height) {
-		super(TextureEnum.ICON_CITIZEN_UNWORKED, TextureEnum.ICON_CITIZEN_UNWORKED, x, y, width, height);
+		super(TextureEnum.ICON_CITIZEN_UNWORKED, x, y, width, height);
 		this.tile = tile;
 
 		this.setTexture(getTextureFromWorkerType(workerType));

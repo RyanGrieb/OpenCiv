@@ -16,7 +16,7 @@ import me.rhin.openciv.ui.label.CustomLabel;
 
 public abstract class AbstractButton extends Actor {
 
-	private Sprite mainSprite, hoveredSprite, iconSprite;
+	protected Sprite mainSprite, hoveredSprite, iconSprite;
 	private CustomLabel label;
 	private boolean hovered;
 
@@ -28,16 +28,12 @@ public abstract class AbstractButton extends Actor {
 		this(TextureEnum.UI_BUTTON, TextureEnum.UI_BUTTON_HOVERED, text, x, y, width, height);
 	}
 
-	public AbstractButton(TextureEnum mainTexture, TextureEnum hoveredTexture, float x, float y, float width,
-			float height) {
+	public AbstractButton(TextureEnum mainTexture, float x, float y, float width, float height) {
 		setBounds(x, y, width, height);
 		this.setTouchable(Touchable.enabled);
 
 		this.mainSprite = mainTexture.sprite();
 		mainSprite.setBounds(x, y, width, height);
-
-		this.hoveredSprite = hoveredTexture.sprite();
-		hoveredSprite.setBounds(x, y, width, height);
 
 		addListener(new ClickListener() {
 
@@ -63,6 +59,13 @@ public abstract class AbstractButton extends Actor {
 		});
 
 		this.hovered = false;
+	}
+
+	public AbstractButton(TextureEnum mainTexture, TextureEnum hoveredTexture, float x, float y, float width,
+			float height) {
+		this(mainTexture, x, y, width, height);
+		this.hoveredSprite = hoveredTexture.sprite();
+		hoveredSprite.setBounds(x, y, width, height);
 	}
 
 	public AbstractButton(TextureEnum mainTexture, TextureEnum hoveredTexture, TextureEnum iconTexture, float x,
@@ -118,6 +121,11 @@ public abstract class AbstractButton extends Actor {
 
 		if (hoveredSprite != null)
 			hoveredSprite.setPosition(x, y);
+
+		if (iconSprite != null) {
+			iconSprite.setPosition(x + (getWidth() / 2) - (iconSprite.getWidth() / 2),
+					y + (getHeight() / 2) - (iconSprite.getHeight() / 2));
+		}
 
 		if (label != null)
 			label.setPosition(x + mainSprite.getWidth() / 2 - label.getWidth() / 2,

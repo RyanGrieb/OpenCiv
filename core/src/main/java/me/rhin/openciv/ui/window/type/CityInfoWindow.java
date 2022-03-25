@@ -7,6 +7,7 @@ import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 
 import me.rhin.openciv.Civilization;
+import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.city.City;
 import me.rhin.openciv.game.city.building.Building;
 import me.rhin.openciv.game.map.tile.Tile;
@@ -36,6 +37,7 @@ import me.rhin.openciv.shared.packet.type.SetCitizenTileWorkerPacket;
 import me.rhin.openciv.shared.packet.type.SetCityOwnerPacket;
 import me.rhin.openciv.shared.packet.type.SetTileTypePacket;
 import me.rhin.openciv.shared.packet.type.TerritoryGrowPacket;
+import me.rhin.openciv.ui.button.CustomButton;
 import me.rhin.openciv.ui.button.type.CloseWindowButton;
 import me.rhin.openciv.ui.button.type.WorkedTileButton;
 import me.rhin.openciv.ui.game.CityProductionInfo;
@@ -64,6 +66,7 @@ public class CityInfoWindow extends AbstractWindow implements ResizeListener, Bu
 	private ContainerList topRightContainerList;
 	private ContainerList productionContainerList;
 	private HashMap<Tile, WorkedTileButton> citizenButtons;
+	private CustomButton queueListButton;
 
 	public CityInfoWindow(City city) {
 		this.city = city;
@@ -110,6 +113,17 @@ public class CityInfoWindow extends AbstractWindow implements ResizeListener, Bu
 		}
 
 		addActor(topRightContainerList);
+
+		this.queueListButton = new CustomButton(TextureEnum.UI_BUTTON_ICON, TextureEnum.UI_BUTTON_ICON_HOVERED,
+				TextureEnum.ICON_CLOCK, cityProductionInfo.getX() + cityProductionInfo.getWidth() - 38,
+				cityProductionInfo.getY() + cityProductionInfo.getHeight() - 38, 32, 32);
+		queueListButton.onClick(() -> {
+			Civilization.getInstance().getWindowManager().toggleWindow(new QueuedItemsListWindow(city));
+		});
+
+		if (city.getProducibleItemManager().getItemQueue().size() > 1) {
+			addActor(queueListButton);
+		}
 
 		Civilization.getInstance().getEventManager().addListener(ResizeListener.class, this);
 		Civilization.getInstance().getEventManager().addListener(BuildingConstructedListener.class, this);
@@ -219,7 +233,11 @@ public class CityInfoWindow extends AbstractWindow implements ResizeListener, Bu
 	public void onFinishProductionItem(FinishProductionItemPacket packet) {
 		if (!city.getName().equals(packet.getCityName()))
 			return;
+
 		updateAvailableProductionItems();
+
+		if (city.getProducibleItemManager().getItemQueue().size() < 2)
+			queueListButton.addAction(Actions.removeActor());
 	}
 
 	@Override
@@ -293,7 +311,7 @@ public class CityInfoWindow extends AbstractWindow implements ResizeListener, Bu
 
 	@Override
 	public void onQueueProductionItem(QueueProductionItemPacket packet) {
-		
+		addActor(queueListButton);
 	}
 
 	public void updateSpecialistContainers(String cityName, String containerName) {
