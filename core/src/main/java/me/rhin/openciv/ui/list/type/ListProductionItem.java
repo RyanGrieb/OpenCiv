@@ -74,10 +74,6 @@ public class ListProductionItem extends ListObject implements CityStatUpdateList
 		if (!Civilization.getInstance().getWindowManager().allowsInput())
 			return;
 
-		if (city.getProducibleItemManager().getCurrentProducingItem() != null
-				&& city.getProducibleItemManager().getCurrentProducingItem().getProductionItem().equals(productionItem))
-			return;
-
 		Civilization.getInstance().getWindowManager().addWindow(new ItemInfoWindow(city, productionItem));
 	}
 

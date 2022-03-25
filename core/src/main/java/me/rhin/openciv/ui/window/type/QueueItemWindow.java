@@ -5,6 +5,7 @@ import com.badlogic.gdx.utils.Align;
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.city.City;
+import me.rhin.openciv.game.city.building.Building;
 import me.rhin.openciv.game.production.ProductionItem;
 import me.rhin.openciv.ui.background.ColoredBackground;
 import me.rhin.openciv.ui.button.CustomButton;
@@ -59,7 +60,9 @@ public class QueueItemWindow extends AbstractWindow {
 			Civilization.getInstance().getWindowManager().closeWindow(QueueItemWindow.class);
 			Civilization.getInstance().getWindowManager().closeWindow(ItemInfoWindow.class);
 		});
-		addActor(queueItemButton);
+
+		if (!(productionItem instanceof Building) || !city.getProducibleItemManager().isItemInQueue(productionItem))
+			addActor(queueItemButton);
 
 		this.produceItemButton = new CustomButton("Replace", getWidth() / 2 - 82 / 2, 4, 82, 28);
 		produceItemButton.onClick(() -> {
@@ -75,7 +78,9 @@ public class QueueItemWindow extends AbstractWindow {
 		this.queueIcon = new ColoredBackground(TextureEnum.ICON_CLOCK.sprite(),
 				queueItemButton.getX() + queueItemButton.getWidth() / 2 - 16 / 2,
 				queueItemButton.getY() + queueItemButton.getHeight(), 16, 16);
-		addActor(queueIcon);
+
+		if (!(productionItem instanceof Building) || !city.getProducibleItemManager().isItemInQueue(productionItem))
+			addActor(queueIcon);
 
 		this.produceIcon = new ColoredBackground(TextureEnum.ICON_PRODUCTION.sprite(),
 				produceItemButton.getX() + produceItemButton.getWidth() / 2 - 16 / 2,

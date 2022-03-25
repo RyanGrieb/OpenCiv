@@ -8,6 +8,7 @@ import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.SoundEnum;
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.city.City;
+import me.rhin.openciv.game.city.building.Building;
 import me.rhin.openciv.game.production.ProductionItem;
 import me.rhin.openciv.game.research.Unlockable;
 import me.rhin.openciv.listener.ResizeListener;
@@ -83,7 +84,8 @@ public class ItemInfoWindow extends AbstractWindow implements ResizeListener {
 			}
 		});
 
-		if (productionItem.getProductionCost() > 0)
+		if (productionItem.getProductionCost() > 0 && (!(productionItem instanceof Building)
+				|| !city.getProducibleItemManager().isItemInQueue(productionItem)))
 			addActor(produceItemButton);
 
 		this.buyItemButton = new CustomButton("Buy", getWidth() / 2 - 82 / 2, 4, 82, 28);
@@ -119,7 +121,8 @@ public class ItemInfoWindow extends AbstractWindow implements ResizeListener {
 				produceItemButton.getX() + produceItemButton.getWidth() / 2 - 16 / 2,
 				produceItemButton.getY() + produceItemButton.getHeight(), 16, 16);
 
-		if (productionItem.getProductionCost() > 0)
+		if (productionItem.getProductionCost() > 0 && (!(productionItem instanceof Building)
+				|| !city.getProducibleItemManager().isItemInQueue(productionItem)))
 			addActor(produceIcon);
 
 		this.buyIcon = new ColoredBackground(TextureEnum.ICON_GOLD.sprite(),
@@ -143,7 +146,8 @@ public class ItemInfoWindow extends AbstractWindow implements ResizeListener {
 				Align.center, produceIcon.getX(), produceIcon.getY() + produceIcon.getHeight() + 2,
 				produceIcon.getWidth(), 12);
 
-		if (productionItem.getProductionCost() > 0)
+		if (productionItem.getProductionCost() > 0 && (!(productionItem instanceof Building)
+				|| !city.getProducibleItemManager().isItemInQueue(productionItem)))
 			addActor(productionCostLabel);
 
 		this.goldCostLabel = new CustomLabel((int) productionItem.getGoldCost() + " Gold", Align.center, buyIcon.getX(),

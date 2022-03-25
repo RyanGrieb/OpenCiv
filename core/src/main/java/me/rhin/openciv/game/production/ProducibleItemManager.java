@@ -213,4 +213,13 @@ public class ProducibleItemManager {
 	public ProducingItem getCurrentProducingItem() {
 		return itemQueue.peek();
 	}
+
+	public boolean isItemInQueue(ProductionItem productionItem) {
+		for (ProducingItem item : itemQueue) {
+			if (item.getProductionItem().equals(productionItem))
+				return true;
+		}
+
+		return false;
+	}
 }
