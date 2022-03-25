@@ -116,7 +116,7 @@ public class CityInfoWindow extends AbstractWindow implements ResizeListener, Bu
 
 		this.queueListButton = new CustomButton(TextureEnum.UI_BUTTON_ICON, TextureEnum.UI_BUTTON_ICON_HOVERED,
 				TextureEnum.ICON_CLOCK, cityProductionInfo.getX() + cityProductionInfo.getWidth() - 38,
-				cityProductionInfo.getY() + cityProductionInfo.getHeight() - 38, 32, 32);
+				viewport.getWorldHeight() - (323 + GameOverlay.HEIGHT + 2), 32, 32);
 		queueListButton.onClick(() -> {
 			Civilization.getInstance().getWindowManager().toggleWindow(new QueuedItemsListWindow(city));
 		});
@@ -154,6 +154,9 @@ public class CityInfoWindow extends AbstractWindow implements ResizeListener, Bu
 		float topbarHeight = ((InGameScreen) Civilization.getInstance().getCurrentScreen()).getGameOverlay()
 				.getTopbarHeight();
 		topRightContainerList.setPosition(width - 220, height - 195 - topbarHeight);
+
+		queueListButton.setPosition(cityProductionInfo.getX() + cityProductionInfo.getWidth() - 38,
+				height - (323 + GameOverlay.HEIGHT + 2));
 	}
 
 	@Override

@@ -1,5 +1,5 @@
-package me.rhin.openciv.ui.window.type;
 
+package me.rhin.openciv.ui.window.type;
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.ui.background.ColoredBackground;
