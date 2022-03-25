@@ -2,6 +2,7 @@ package me.rhin.openciv.server.game.production;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 
 import org.java_websocket.WebSocket;
 import org.slf4j.Logger;
@@ -106,7 +107,6 @@ public class ProducibleItemManager implements NextTurnListener, FaithBuyProducti
 
 	// A queue of items to produce
 	private ArrayList<ProducingItem> itemQueue;
-	private boolean queueEnabled;
 
 	public ProducibleItemManager(City city) {
 		this.city = city;
@@ -114,7 +114,6 @@ public class ProducibleItemManager implements NextTurnListener, FaithBuyProducti
 		this.producedOnIndexer = new HashMap<>();
 		this.appliedProductionItems = new HashMap<>();
 		this.itemQueue = new ArrayList<>();
-		this.queueEnabled = false;
 
 		// Units
 		possibleItems.put("Warrior", new Warrior(city));
@@ -332,10 +331,10 @@ public class ProducibleItemManager implements NextTurnListener, FaithBuyProducti
 			}
 		}
 
-		if (!queueEnabled) {
-			// TODO: Implement appliedProductionItems here to save applied production.
-			itemQueue.clear();
-		}
+		// if (!queueEnabled) {
+		// // TODO: Implement appliedProductionItems here to save applied production.
+		// itemQueue.clear();
+		// }
 
 		LOGGER.info("Building: " + itemName);
 		itemQueue.add(new ProducingItem(possibleItems.get(itemName)));
@@ -364,9 +363,17 @@ public class ProducibleItemManager implements NextTurnListener, FaithBuyProducti
 		city.updateWorkedTiles();
 		city.getPlayerOwner().updateOwnedStatlines(false);
 
-		if (itemQueue.get(0) != null && itemQueue.get(0).getProductionItem().equals(item.getProductionItem())
-				&& item.getProductionItem() instanceof Building) {
-			clearProducingItem();
+		// Remove buildings from queue upon purchase.
+		// NOTE: We remove by name since our objects are different
+		if (item.getProductionItem() instanceof Building) {
+			Iterator<ProducingItem> iterator = itemQueue.iterator();
+
+			while (iterator.hasNext()) {
+				ProducingItem producingItem = iterator.next();
+
+				if (producingItem.getProductionItem().getName().equals(item.getProductionItem().getName()))
+					iterator.remove();
+			}
 		}
 	}
 

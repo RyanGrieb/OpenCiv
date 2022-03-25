@@ -2,6 +2,7 @@ package me.rhin.openciv.game.production;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.game.city.City;
@@ -222,6 +223,17 @@ public class ProducibleItemManager {
 		}
 
 		return false;
+	}
+
+	public void removeItemFromQueue(ProductionItem productionItem) {
+
+		Iterator<ProducingItem> iterator = itemQueue.iterator();
+		while (iterator.hasNext()) {
+			ProducingItem item = iterator.next();
+
+			if (item.getProductionItem().getName().equals(productionItem.getName()))
+				iterator.remove();
+		}
 	}
 
 }

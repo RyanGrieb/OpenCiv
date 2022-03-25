@@ -24,7 +24,6 @@ import me.rhin.openciv.game.map.tile.TileType.TileProperty;
 import me.rhin.openciv.game.notification.type.AvailableProductionNotification;
 import me.rhin.openciv.game.player.AbstractPlayer;
 import me.rhin.openciv.game.production.ProducibleItemManager;
-import me.rhin.openciv.game.production.ProducingItem;
 import me.rhin.openciv.game.production.ProductionItem;
 import me.rhin.openciv.game.religion.CityReligion;
 import me.rhin.openciv.game.religion.PlayerReligion;
@@ -300,10 +299,17 @@ public class City extends Group
 		if (producibleItemManager.getCurrentProducingItem() == null)
 			return;
 
-		ProductionItem productionItem = producibleItemManager.getCurrentProducingItem().getProductionItem();
+		// NOTE: The following code assumes BuyProductionItemPacket is called after
+		// BuildingConstructedPacket
+		Building boughtBuilding = null;
 
-		if (productionItem.getName().equals(packet.getItemName()) && productionItem instanceof Building) {
-			producibleItemManager.getItemQueue().clear();
+		for (Building building : buildings) {
+			if (building.getName().equals(packet.getItemName()))
+				boughtBuilding = building;
+		}
+
+		if (boughtBuilding != null) {
+			producibleItemManager.removeItemFromQueue(boughtBuilding);
 		}
 	}
 

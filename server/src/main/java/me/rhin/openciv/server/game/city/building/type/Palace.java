@@ -16,10 +16,9 @@ public class Palace extends Building {
 		StatLine statLine = new StatLine();
 
 		statLine.addValue(Stat.HERITAGE_GAIN, 1);
-		statLine.addValue(Stat.GOLD_GAIN, 3);
+		statLine.addValue(Stat.GOLD_GAIN, 99);
 		statLine.addValue(Stat.SCIENCE_GAIN, 3);
 		statLine.addValue(Stat.PRODUCTION_GAIN, 3);
-		statLine.addValue(Stat.FAITH_GAIN, 10);
 
 		return statLine;
 	}
