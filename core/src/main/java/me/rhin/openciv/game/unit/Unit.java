@@ -153,13 +153,15 @@ public abstract class Unit extends Actor
 			float xIncrement = (float) (speed * Math.cos(angle)) * (Gdx.graphics.getDeltaTime() * 60);
 			float yIncrement = (float) (speed * Math.sin(angle)) * (Gdx.graphics.getDeltaTime() * 60);
 
-			// TODO: Work
 			sprite.setPosition(sprite.getX() + xIncrement, sprite.getY() + yIncrement);
 			civIconSprite.setPosition(sprite.getX() + 10 + xIncrement, sprite.getY() + 25 + yIncrement);
 			unitHealthBubble.setPosition(civIconSprite.getX() + 4 + xIncrement, civIconSprite.getY() + 4 + yIncrement);
 
 			if (Math.abs(sprite.getX() - tileX) < 1 && Math.abs(sprite.getY() - tileY) < 1) {
 				movementTiles.remove(tile);
+				sprite.setPosition(tileX, tileY);
+				civIconSprite.setPosition(tileX + 10, tileY + 25);
+				unitHealthBubble.setPosition(civIconSprite.getX() + 4, civIconSprite.getY() + 4);
 			}
 		}
 
@@ -210,8 +212,7 @@ public abstract class Unit extends Actor
 		// if (queuedTile == null)
 		pathVectors.clear();
 
-		movementTiles.clear();
-		// clearMovementTiles();
+		clearMovementTiles();
 
 		targetSelectionSprite.setPosition(targetTile.getVectors()[0].x - targetTile.getWidth() / 2,
 				targetTile.getVectors()[0].y + 4);
@@ -458,8 +459,6 @@ public abstract class Unit extends Actor
 		float tileY = targetTile.getVectors()[0].y + 4;
 
 		selectionSprite.setPosition(tileX, tileY);
-		// civIconSprite.setPosition(tileX + 10, tileY + 25);
-		unitHealthBubble.setPosition(civIconSprite.getX() + 4, civIconSprite.getY() + 4);
 		super.setPosition(tileX, tileY);
 
 		standingTile = targetTile;
