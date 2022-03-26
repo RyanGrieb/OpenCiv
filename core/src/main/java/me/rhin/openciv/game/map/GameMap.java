@@ -86,8 +86,11 @@ public class GameMap implements ReceiveMapChunkListener, SetTileTypeListener, Re
 
 				Gdx.app.postRunnable(new Runnable() {
 					public void run() {
-						((InGameScreen) Civilization.getInstance().getScreenManager().getCurrentScreen()).getTileGroup()
-								.addActor(tile);
+						((InGameScreen) Civilization.getInstance().getScreenManager().getCurrentScreen())
+								.getBottomTileGroup().addActor(tile.getBottomActor());
+
+						((InGameScreen) Civilization.getInstance().getScreenManager().getCurrentScreen())
+								.getTopTileGroup().addActor(tile.getTopTileGroup());
 					}
 				});
 

@@ -9,7 +9,6 @@ import java.util.TreeSet;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 
@@ -25,14 +24,13 @@ import me.rhin.openciv.game.player.AbstractPlayer;
 import me.rhin.openciv.game.unit.AttackableEntity;
 import me.rhin.openciv.game.unit.Unit;
 import me.rhin.openciv.game.unit.UnitItem.UnitType;
-import me.rhin.openciv.listener.BottomShapeRenderListener;
 import me.rhin.openciv.shared.logging.Logger;
 import me.rhin.openciv.shared.logging.LoggerFactory;
 import me.rhin.openciv.shared.logging.LoggerType;
 import me.rhin.openciv.ui.label.CustomLabel;
 import me.rhin.openciv.ui.screen.type.InGameScreen;
 
-public class Tile extends Actor {
+public class Tile {
 
 	public class TileTypeWrapper extends Sprite implements Comparable<TileTypeWrapper> {
 
@@ -79,12 +77,12 @@ public class Tile extends Actor {
 	private GameMap map;
 	private TreeSet<TileTypeWrapper> tileWrappers;
 	private Sprite territorySprite;
-	private Sprite selectionSprite;
+	private Sprite hoveredSprite;
 	private Sprite fogSprite;
 	private Sprite nonVisibleSprite;
 	private Sprite rangedTargetSprite;
 	private boolean[] territoryBorders;
-	private boolean drawSelection;
+	private boolean hovered;
 	private CustomLabel observerLabel;
 	private float x, y, width, height;
 	private int gridX, gridY;
@@ -101,6 +99,8 @@ public class Tile extends Actor {
 	private int appliedImprovementTurns;
 	private boolean rangedTarget;
 	private Road road;
+	private BottomTileActor bottomTileActor;
+	private TopTileGroup topTileGroup;
 
 	public Tile(GameMap map, TileType tileType, float x, float y) {
 		this.map = map;
@@ -110,8 +110,8 @@ public class Tile extends Actor {
 		this.tileWrappers = new TreeSet<>();
 		tileWrappers.add(new TileTypeWrapper(tileType));
 
-		this.selectionSprite = new Sprite(TextureEnum.TILE_SELECT.sprite());
-		selectionSprite.setAlpha(0.2f);
+		this.hoveredSprite = new Sprite(TextureEnum.TILE_SELECT.sprite());
+		hoveredSprite.setAlpha(0.2f);
 		this.territorySprite = new Sprite(TextureEnum.TILE_SELECT.sprite());
 		this.territoryBorders = new boolean[6];
 
@@ -123,7 +123,7 @@ public class Tile extends Actor {
 		this.nonVisibleSprite = new Sprite(TextureEnum.TILE_NON_VISIBLE.sprite());
 		nonVisibleSprite.setAlpha(0.7f);
 
-		this.drawSelection = false;
+		this.hovered = false;
 		this.improved = false;
 		this.rangedTarget = false;
 
@@ -143,73 +143,23 @@ public class Tile extends Actor {
 		this.observerLabel = new CustomLabel("1,1");
 		observerLabel.setSize(width, 20);
 		observerLabel.setPosition(vectors[0].x - width / 2, vectors[0].y + 5);
+
+		this.bottomTileActor = new BottomTileActor(this);
+		this.topTileGroup = new TopTileGroup(this);
 	}
 
-	@Override
-	public void act(float delta) {
-		super.act(delta);
-	}
-
-	@Override
-	public void draw(Batch batch, float parentAlpha) {
-
-		if (discovered || !Civilization.SHOW_FOG)
-			for (TileTypeWrapper sprite : tileWrappers) {
-				sprite.draw(batch);
-			}
-
-		if (!discovered && Civilization.SHOW_FOG) {
-			fogSprite.draw(batch);
-		}
-
-		if (tileObservers.size() < 1 && Civilization.SHOW_FOG) {
-			nonVisibleSprite.draw(batch);
-		}
-
-		if (drawSelection) {
-			selectionSprite.draw(batch);
-		}
-
-		if (territory != null && (tileObservers.size() > 0 || !Civilization.SHOW_FOG) && !rangedTarget)
-			territorySprite.draw(batch);
-
-		if (rangedTarget) {
-			rangedTargetSprite.draw(batch);
-		}
-
-		// FIXME: This is debug code. Make this prettier.
-		if (serverObservers.size() < 1)
-			return;
-
-		observerLabel.setText("");
-		int index = 0;
-		for (TileObserver observer : serverObservers) {
-			if (observer == null)
-				continue;
-			observerLabel.setText(observerLabel.getText() + (index > 0 ? "," : "") + observer.getID());
-			index++;
-		}
-
-		observerLabel.draw(batch, 1);
-
-	}
-
-	@Override
 	public float getWidth() {
 		return width;
 	}
 
-	@Override
 	public float getHeight() {
 		return height;
 	}
 
-	@Override
 	public float getX() {
 		return x;
 	}
 
-	@Override
 	public float getY() {
 		return y;
 	}
@@ -253,13 +203,13 @@ public class Tile extends Actor {
 	}
 
 	public void onMouseHover() {
-		drawSelection = true;
+		hovered = true;
 
 		((InGameScreen) Civilization.getInstance().getCurrentScreen()).getGameOverlay().setHoveredTile(this);
 	}
 
 	public void onMouseUnhover() {
-		drawSelection = false;
+		hovered = false;
 	}
 
 	public void setTileType(TileType tileType) {
@@ -702,8 +652,8 @@ public class Tile extends Actor {
 			sprite.setBounds(x, y, 28, 32);
 		}
 
-		selectionSprite.setSize(28, 32);
-		selectionSprite.setPosition(x, y);
+		hoveredSprite.setSize(28, 32);
+		hoveredSprite.setPosition(x, y);
 
 		territorySprite.setSize(28, 32);
 		territorySprite.setPosition(x, y);
@@ -748,5 +698,47 @@ public class Tile extends Actor {
 
 	public boolean[] getTerritoryBorders() {
 		return territoryBorders;
+	}
+
+	public BottomTileActor getBottomActor() {
+		return bottomTileActor;
+	}
+
+	public TopTileGroup getTopTileGroup() {
+		return topTileGroup;
+	}
+
+	public void setColor(float r, float g, float b, int a) {
+		bottomTileActor.setColor(r, g, b, a);
+		topTileGroup.setColor(r, g, b, a);
+	}
+
+	public void setColor(Color color) {
+		bottomTileActor.setColor(color);
+		topTileGroup.setColor(color);
+	}
+
+	public Sprite getFogSprite() {
+		return fogSprite;
+	}
+
+	public Sprite getNonVisibleSprite() {
+		return nonVisibleSprite;
+	}
+
+	public boolean isHovered() {
+		return hovered;
+	}
+
+	public Sprite getHoveredSprite() {
+		return hoveredSprite;
+	}
+
+	public Sprite getTerritorySprite() {
+		return territorySprite;
+	}
+
+	public Sprite getRangedTargetSprite() {
+		return rangedTargetSprite;
 	}
 }

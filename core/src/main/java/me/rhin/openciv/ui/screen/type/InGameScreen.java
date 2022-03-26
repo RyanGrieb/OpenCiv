@@ -28,7 +28,8 @@ public class InGameScreen extends AbstractScreen {
 
 	private GameOverlay gameOverlay;
 	private CivGame game;
-	private final Group tileGroup;
+	private final Group bottomTileGroup;
+	private final Group topTileGroup;
 	private final Group riverGroup;
 	private final Group mainUnitGroup;
 	private final Group supportUnitGroup;
@@ -48,15 +49,17 @@ public class InGameScreen extends AbstractScreen {
 		lastTimeCounted = TimeUtils.millis();
 		frameRate = Gdx.graphics.getFramesPerSecond();
 
-		this.tileGroup = new Group();
+		this.bottomTileGroup = new Group();
+		this.topTileGroup = new Group();
 		this.riverGroup = new Group();
 		this.mainUnitGroup = new Group();
 		this.supportUnitGroup = new Group();
 		this.territoryGroup = new Group();
 		this.combatTooltipGroup = new Group();
 
-		stage.addActor(tileGroup);
+		stage.addActor(bottomTileGroup);
 		stage.addActor(riverGroup);
+		stage.addActor(topTileGroup);
 		stage.addActor(territoryGroup);
 		stage.addActor(supportUnitGroup);
 		stage.addActor(mainUnitGroup);
@@ -232,10 +235,6 @@ public class InGameScreen extends AbstractScreen {
 		return gameOverlay;
 	}
 
-	public Group getTileGroup() {
-		return tileGroup;
-	}
-
 	public Group getMainUnitGroup() {
 		return mainUnitGroup;
 	}
@@ -302,6 +301,14 @@ public class InGameScreen extends AbstractScreen {
 
 	private boolean canZoomIn(OrthographicCamera camera) {
 		return camera.zoom - ZOOM_LEVEL > MAX_ZOOM_LEVEL;
+	}
+
+	public Group getBottomTileGroup() {
+		return bottomTileGroup;
+	}
+
+	public Group getTopTileGroup() {
+		return topTileGroup;
 	}
 
 }
