@@ -43,7 +43,7 @@ public abstract class Building implements ProductionItem {
 		built = true;
 
 		if (this instanceof Wonder) {
-			LOGGER.info("Server - built wonder");
+			LOGGER.info("Server - " + city.getPlayerOwner().getName() + " built wonder: " + getName());
 			Server.getInstance().getInGameState().getWonders().setBuilt(getClass());
 		}
 

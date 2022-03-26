@@ -88,6 +88,14 @@ public class UnitWindow extends AbstractWindow
 			CustomButton actionButton = new CustomButton(TextureEnum.UI_BUTTON_ICON, TextureEnum.UI_BUTTON_ICON_HOVERED,
 					action.getSprite(), 4 + (52 * index), 17, 48, 48, 32, 32);
 
+			actionButton.onHover(() -> {
+				setHoveredAction(action);
+			});
+
+			actionButton.onUnhover(() -> {
+				unsetHoveredAction();
+			});
+
 			actionButton.onClick(() -> {
 				if (action.canAct())
 					unit.addAction(action);

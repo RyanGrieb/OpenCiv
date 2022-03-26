@@ -20,6 +20,7 @@ public abstract class AbstractButton extends Actor {
 	private CustomLabel label;
 	private boolean hovered;
 	private Runnable hoveredRunnable;
+	private Runnable unhoveredRunnable;
 
 	public AbstractButton(float x, float y, float width, float height) {
 		this(TextureEnum.UI_BUTTON, TextureEnum.UI_BUTTON_HOVERED, x, y, width, height);
@@ -59,6 +60,9 @@ public abstract class AbstractButton extends Actor {
 			@Override
 			public void exit(InputEvent event, float x, float y, int pointer, Actor fromActor) {
 				hovered = false;
+
+				if (unhoveredRunnable != null)
+					unhoveredRunnable.run();
 			}
 		});
 
@@ -138,6 +142,10 @@ public abstract class AbstractButton extends Actor {
 
 	public void onHover(Runnable hoveredRunnable) {
 		this.hoveredRunnable = hoveredRunnable;
+	}
+
+	public void onUnhover(Runnable unhoveredRunnable) {
+		this.unhoveredRunnable = unhoveredRunnable;
 	}
 
 	public void setTexture(TextureEnum textureEnum) {
