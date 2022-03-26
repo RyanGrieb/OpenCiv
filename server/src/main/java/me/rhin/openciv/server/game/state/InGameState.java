@@ -98,9 +98,9 @@ import me.rhin.openciv.shared.util.MathHelper;
 //Or just use reflection so we don't have to implement 20+ classes.
 public class InGameState extends GameState implements DisconnectListener, SelectUnitListener, UnitMoveListener,
 		QueuedUnitMoveListener, CancelQueuedMovementListener, SettleCityListener, PlayerFinishLoadingListener,
-		NextTurnListener, EndTurnListener, PlayerListRequestListener, FetchPlayerListener,
-		CombatPreviewListener, WorkTileListener, RangedAttackListener,
-		RequestEndTurnListener, TileStatlineListener, UnitEmbarkListener, UnitDisembarkListener, UpgradeUnitListener {
+		NextTurnListener, EndTurnListener, PlayerListRequestListener, FetchPlayerListener, CombatPreviewListener,
+		WorkTileListener, RangedAttackListener, RequestEndTurnListener, TileStatlineListener, UnitEmbarkListener,
+		UnitDisembarkListener, UpgradeUnitListener {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(InGameState.class);
 
