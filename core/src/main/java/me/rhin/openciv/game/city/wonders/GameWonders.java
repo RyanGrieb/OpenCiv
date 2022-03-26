@@ -10,6 +10,7 @@ import me.rhin.openciv.game.city.building.type.HangingGardens;
 import me.rhin.openciv.game.city.building.type.MachuPicchu;
 import me.rhin.openciv.game.city.building.type.StatueOfAres;
 import me.rhin.openciv.game.city.building.type.Stonehenge;
+import me.rhin.openciv.game.city.building.type.TerracottaArmy;
 
 public class GameWonders {
 
@@ -25,6 +26,7 @@ public class GameWonders {
 		addWonder(Stonehenge.class);
 		addWonder(MachuPicchu.class);
 		addWonder(Colossus.class);
+		addWonder(TerracottaArmy.class);
 	}
 
 	private void addWonder(Class<? extends Building> clazz) {

@@ -46,7 +46,7 @@ public class ConstructionTech extends Technology {
 	@Override
 	public List<Unlockable> getUnlockables() {
 		List<Unlockable> unlockables = Civilization.getInstance().getGame().getPlayer()
-				.getUnlockablesByName("Colosseum", "Composite Bowman");
+				.getUnlockablesByName("Colosseum", "Terracotta Army", "Composite Bowman");
 
 		unlockables.add(new CustomUnlockable("Lumber Mill", TextureEnum.TILE_LUMBERMILL,
 				Arrays.asList("Improve forest tiles.", "Provides +1 Production.")));

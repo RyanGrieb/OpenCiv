@@ -1,5 +1,6 @@
 
 package me.rhin.openciv.server.game.city.wonders;
+
 import java.util.HashMap;
 
 import me.rhin.openciv.server.game.city.building.Building;
@@ -10,6 +11,7 @@ import me.rhin.openciv.server.game.city.building.type.HangingGardens;
 import me.rhin.openciv.server.game.city.building.type.MachuPicchu;
 import me.rhin.openciv.server.game.city.building.type.StatueOfAres;
 import me.rhin.openciv.server.game.city.building.type.Stonehenge;
+import me.rhin.openciv.server.game.city.building.type.TerracottaArmy;
 
 public class GameWonders {
 
@@ -25,6 +27,7 @@ public class GameWonders {
 		addWonder(Stonehenge.class);
 		addWonder(MachuPicchu.class);
 		addWonder(Colossus.class);
+		addWonder(TerracottaArmy.class);
 	}
 
 	private void addWonder(Class<? extends Building> clazz) {

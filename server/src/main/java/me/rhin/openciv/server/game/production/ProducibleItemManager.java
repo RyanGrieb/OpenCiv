@@ -39,6 +39,7 @@ import me.rhin.openciv.server.game.city.building.type.Stables;
 import me.rhin.openciv.server.game.city.building.type.StatueOfAres;
 import me.rhin.openciv.server.game.city.building.type.Stonehenge;
 import me.rhin.openciv.server.game.city.building.type.Stoneworks;
+import me.rhin.openciv.server.game.city.building.type.TerracottaArmy;
 import me.rhin.openciv.server.game.city.building.type.Walls;
 import me.rhin.openciv.server.game.city.building.type.WaterMill;
 import me.rhin.openciv.server.game.city.building.type.Workshop;
@@ -168,6 +169,7 @@ public class ProducibleItemManager implements NextTurnListener, FaithBuyProducti
 		possibleItems.put("Stonehenge", new Stonehenge(city));
 		possibleItems.put("Machu Picchu", new MachuPicchu(city));
 		possibleItems.put("Colossus", new Colossus(city));
+		possibleItems.put("Terracotta Army", new TerracottaArmy(city));
 
 		Server.getInstance().getEventManager().addListener(NextTurnListener.class, this);
 		Server.getInstance().getEventManager().addListener(SetProductionItemListener.class, this);
@@ -331,10 +333,7 @@ public class ProducibleItemManager implements NextTurnListener, FaithBuyProducti
 			}
 		}
 
-		// if (!queueEnabled) {
-		// // TODO: Implement appliedProductionItems here to save applied production.
-		// itemQueue.clear();
-		// }
+		itemQueue.clear();
 
 		LOGGER.info("Building: " + itemName);
 		itemQueue.add(new ProducingItem(possibleItems.get(itemName)));

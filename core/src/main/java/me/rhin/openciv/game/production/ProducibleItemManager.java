@@ -32,6 +32,7 @@ import me.rhin.openciv.game.city.building.type.Stables;
 import me.rhin.openciv.game.city.building.type.StatueOfAres;
 import me.rhin.openciv.game.city.building.type.Stonehenge;
 import me.rhin.openciv.game.city.building.type.Stoneworks;
+import me.rhin.openciv.game.city.building.type.TerracottaArmy;
 import me.rhin.openciv.game.city.building.type.Walls;
 import me.rhin.openciv.game.city.building.type.WaterMill;
 import me.rhin.openciv.game.city.building.type.Workshop;
@@ -137,6 +138,7 @@ public class ProducibleItemManager {
 		possibleItems.put("Stonehenge", new Stonehenge(city));
 		possibleItems.put("Machu Picchu", new MachuPicchu(city));
 		possibleItems.put("Colossus", new Colossus(city));
+		possibleItems.put("Terracotta Army", new TerracottaArmy(city));
 
 		// FIXME: There should be a better way to do this than just checking if the
 		// player matches

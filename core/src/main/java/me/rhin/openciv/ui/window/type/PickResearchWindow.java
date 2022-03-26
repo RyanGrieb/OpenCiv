@@ -75,7 +75,7 @@ public class PickResearchWindow extends AbstractWindow implements ResizeListener
 		if (tech.getUnlockables() != null)
 			for (Unlockable unlockable : tech.getUnlockables()) {
 				CustomButton button = new CustomButton(TextureEnum.UI_BUTTON_ICON, TextureEnum.UI_BUTTON_ICON_HOVERED,
-						unlockable.getTexture(), 5 + (50 * index), getHeight() - 135, 48, 48);
+						unlockable.getTexture(), 5 + (50 * index), getHeight() - 135, 48, 48, 32, 32);
 				button.onClick(() -> {
 					Civilization.getInstance().getWindowManager().addWindow(new ItemInfoWindow(unlockable));
 				});

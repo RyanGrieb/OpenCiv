@@ -754,7 +754,7 @@ public class InGameState extends GameState implements DisconnectListener, Select
 
 			CityStateType type = CityStateType.values()[rnd.nextInt(CityStateType.values().length)];
 
-			AIPlayer cityStatePlayer = new AIPlayer(AIType.PLAYER);
+			AIPlayer cityStatePlayer = new AIPlayer(AIType.CITY_STATE_PLAYER);
 			cityStatePlayer.setCivilization(new CityState(cityStatePlayer, type));
 			cityStatePlayer.setName(City.getRandomCityName(cityStatePlayer));
 

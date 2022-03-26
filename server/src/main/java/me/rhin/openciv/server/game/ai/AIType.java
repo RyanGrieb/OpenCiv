@@ -26,7 +26,7 @@ public enum AIType {
 	SETTLER_UNIT("data/ai/settler_unit.json", Unit.class),
 	BUILDER_UNIT("data/ai/builder_unit.json", Unit.class),
 	BARBARIAN_PLAYER("data/ai/barbarian_player.json", AbstractPlayer.class),
-	PLAYER("data/ai/player.json", AbstractPlayer.class),
+	CITY_STATE_PLAYER("data/ai/city_state_player.json", AbstractPlayer.class),
 	CITY("data/ai/city.json", City.class);
 
 	private String aiJSONPath;

@@ -24,6 +24,7 @@ import me.rhin.openciv.server.game.civilization.type.Barbarians;
 import me.rhin.openciv.server.game.map.tile.Tile;
 import me.rhin.openciv.server.game.map.tile.TileObserver;
 import me.rhin.openciv.server.game.map.tile.TileType;
+import me.rhin.openciv.server.game.map.tile.TileType.TileProperty;
 import me.rhin.openciv.server.game.options.GameOptionType;
 import me.rhin.openciv.server.game.unit.UnitItem.UnitType;
 import me.rhin.openciv.server.listener.CaptureCityListener.CaptureCityEvent;
@@ -503,6 +504,18 @@ public abstract class Unit implements AttackableEntity, TileObserver, NextTurnLi
 		if (tile.getCity() != null && !tile.getCity().getPlayerOwner().equals(playerOwner)) {
 			return false;
 		}
+
+		// FIXME: Just have mountain wonders contain montain tile property.
+		if (tile.containsTileProperty(TileProperty.NATURAL_WONDER) || tile.containsTileType(TileType.MOUNTAIN))
+			return false;
+
+		// We can't stand on water...
+		if (tile.containsTileProperty(TileProperty.WATER) && !getUnitTypes().contains(UnitType.NAVAL))
+			return false;
+
+		// We can't sail on land...
+		if (!tile.containsTileProperty(TileProperty.WATER) && getUnitTypes().contains(UnitType.NAVAL))
+			return false;
 
 		if (tile.getUnits().size() < 1)
 			return true;
@@ -1041,6 +1054,22 @@ public abstract class Unit implements AttackableEntity, TileObserver, NextTurnLi
 
 	public StatLine getMaintenance() {
 		return statLineMap.get("maintenance");
+	}
+
+	public Unit copy() {
+
+		try {
+			Class<? extends Unit> unitClass = (Class<? extends Unit>) Class
+					.forName("me.rhin.openciv.server.game.unit.type." + getName().replaceAll("\\s", "") + "$"
+							+ getName().replaceAll("\\s", "") + "Unit");
+
+			return unitClass.getDeclaredConstructor(AbstractPlayer.class, Tile.class).newInstance(playerOwner,
+					standingTile);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return null;
 	}
 
 	protected void setCombatStrength(float amount) {

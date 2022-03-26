@@ -5,6 +5,7 @@ import me.rhin.openciv.server.game.ai.behavior.BehaviorStatus;
 import me.rhin.openciv.server.game.ai.behavior.CityNode;
 import me.rhin.openciv.server.game.city.City;
 import me.rhin.openciv.server.game.city.building.Building;
+import me.rhin.openciv.server.game.city.wonders.Wonder;
 import me.rhin.openciv.server.game.production.ProducibleItemManager;
 import me.rhin.openciv.server.game.production.ProductionItem;
 
@@ -28,7 +29,8 @@ public class ProduceBuildingsNode extends CityNode {
 
 			Building building = (Building) productionItem;
 
-			if (city.containsBuilding(building.getClass()))
+			if (city.containsBuilding(building.getClass())
+					|| (city.getPlayerOwner().isCityStatePlayer() && building instanceof Wonder))
 				continue;
 
 			if (topItem == null || topItem.getAIValue() < building.getAIValue())

@@ -110,4 +110,8 @@ public class AIPlayer extends AbstractPlayer {
 	public void setName(String name) {
 		this.name = name;
 	}
+
+	public AIType getAIType() {
+		return aiType;
+	}
 }

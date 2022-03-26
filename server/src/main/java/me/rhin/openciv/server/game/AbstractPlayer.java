@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Random;
 
 import me.rhin.openciv.server.Server;
+import me.rhin.openciv.server.game.ai.AIPlayer;
+import me.rhin.openciv.server.game.ai.AIType;
 import me.rhin.openciv.server.game.city.City;
 import me.rhin.openciv.server.game.city.building.Building;
 import me.rhin.openciv.server.game.civilization.Civ;
@@ -250,6 +252,16 @@ public abstract class AbstractPlayer implements NextTurnListener {
 			totalCombatStrength += unit.getCombatStrength(null);
 		}
 		return totalCombatStrength;
+	}
+
+	public boolean isCityStatePlayer() {
+		if (this instanceof AIPlayer) {
+			AIPlayer aiPlayer = (AIPlayer) this;
+
+			if (aiPlayer.getAIType() == AIType.CITY_STATE_PLAYER)
+				return true;
+		}
+		return false;
 	}
 
 }
