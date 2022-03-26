@@ -655,7 +655,7 @@ public class GameMap implements MapRequestListener {
 		}
 
 		for (TileType tileType : TileType.getTilesOfProperty(TileProperty.LUXURY, TileProperty.RESOURCE)) {
-			generateResource(tileType, (mapSize + 1) * 6, tileType.getSpawnTileTypes());
+			generateResource(tileType, (mapSize + 1) * 5, tileType.getSpawnTileTypes());
 		}
 
 		// Spawn barbarians
@@ -678,7 +678,7 @@ public class GameMap implements MapRequestListener {
 			}
 
 			tile.setTileType(TileType.BARBARIAN_CAMP);
-			//Server.getInstance().getGame().getBarbarianPlayer().addCampTile(tile);
+			// Server.getInstance().getGame().getBarbarianPlayer().addCampTile(tile);
 		}
 
 		// Spawn ruins

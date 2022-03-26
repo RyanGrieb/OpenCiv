@@ -4,13 +4,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.Random;
 import java.util.TreeSet;
 
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.scenes.scene2d.Actor;
 
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.TextureEnum;
@@ -39,6 +38,12 @@ public class Tile {
 		public TileTypeWrapper(TileType tileType) {
 			super(tileType.texture());
 			this.tileType = tileType;
+
+			Random rnd = new Random();
+
+			if (rnd.nextInt(2) == 0) {
+				flip(true, false);
+			}
 		}
 
 		public TileTypeWrapper(TileType tileType, float x, float y, float width, float height) {
