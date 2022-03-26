@@ -455,6 +455,25 @@ public enum TileType implements Comparable<TileType> {
 			return new TileType[] { TileType.SHALLOW_OCEAN };
 		}
 	},
+	WHALES(TileLayer.MIDDLE, TileProperty.LUXURY, TileProperty.WATER) {
+		@Override
+		public StatLine getStatLine() {
+			StatLine statLine = new StatLine();
+			statLine.setValue(Stat.FOOD_GAIN, 1);
+			statLine.setValue(Stat.GOLD_GAIN, 1);
+			return statLine;
+		}
+
+		@Override
+		public List<TileImprovement> getImprovements() {
+			return Arrays.asList(new FarmOceanImprovement(TileType.WHALES_IMPROVED));
+		}
+
+		@Override
+		public TileType[] getSpawnTileTypes() {
+			return new TileType[] { TileType.SHALLOW_OCEAN };
+		}
+	},
 	SILVER(TileLayer.MIDDLE, TileProperty.LUXURY) {
 		@Override
 		public StatLine getStatLine() {
@@ -539,6 +558,16 @@ public enum TileType implements Comparable<TileType> {
 			StatLine statLine = new StatLine();
 			statLine.setValue(Stat.GOLD_GAIN, 1);
 			statLine.addValue(Stat.FOOD_GAIN, 2);
+			statLine.addValue(Stat.MORALE_TILE, 10);
+			return statLine;
+		}
+	},
+	WHALES_IMPROVED(TileLayer.MIDDLE, TileProperty.IMPROVEMENT, TileProperty.WATER) {
+		@Override
+		public StatLine getStatLine() {
+			StatLine statLine = new StatLine();
+			statLine.addValue(Stat.FOOD_GAIN, 2);
+			statLine.addValue(Stat.PRODUCTION_GAIN, 1);
 			statLine.addValue(Stat.MORALE_TILE, 10);
 			return statLine;
 		}
