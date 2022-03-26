@@ -104,7 +104,7 @@ public abstract class RangedUnit extends Unit
 		if (!targeting || tile == null || tile.getEnemyAttackableEntity(getPlayerOwner()) == null
 				|| !tile.hasRangedTarget()) {
 			rangedTarget = null;
-			targetSelectionSprite.setColor(Color.YELLOW);
+			//targetSelectionSprite.setColor(targetSelectionSprite.getColor());
 			Civilization.getInstance().getWindowManager().closeWindow(UnitCombatWindow.class);
 			return;
 		}
