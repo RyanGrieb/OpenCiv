@@ -23,6 +23,6 @@ public class PickHeritageEvent implements Event {
 
 	@Override
 	public Class<?>[] getMethodParamClasses() {
-		return new Class<?>[] { heritage.getClass() };
+		return new Class<?>[] { Heritage.class };
 	}
 }
