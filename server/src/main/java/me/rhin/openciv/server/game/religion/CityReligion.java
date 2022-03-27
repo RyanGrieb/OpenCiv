@@ -8,12 +8,12 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.Json;
 
 import me.rhin.openciv.server.Server;
+import me.rhin.openciv.server.events.type.CityGainMajorityReligionEvent;
+import me.rhin.openciv.server.events.type.CityLooseMajorityReligionEvent;
+import me.rhin.openciv.server.events.type.GainFollowerEvent;
+import me.rhin.openciv.server.events.type.LooseFollowerEvent;
 import me.rhin.openciv.server.game.Player;
 import me.rhin.openciv.server.game.city.City;
-import me.rhin.openciv.server.listener.CityGainMajorityReligionListener.CityGainMajorityReligionEvent;
-import me.rhin.openciv.server.listener.CityLooseMajorityReligionListener.CityLooseMajorityReligionEvent;
-import me.rhin.openciv.server.listener.GainFollowerListener.GainFollowerEvent;
-import me.rhin.openciv.server.listener.LooseFollowerListener.LooseFollowerEvent;
 import me.rhin.openciv.shared.packet.type.CityReligionFollowersUpdatePacket;
 import me.rhin.openciv.shared.stat.Stat;
 

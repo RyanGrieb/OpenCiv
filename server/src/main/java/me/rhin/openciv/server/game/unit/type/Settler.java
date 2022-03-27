@@ -6,6 +6,7 @@ import java.util.List;
 import com.badlogic.gdx.utils.Json;
 
 import me.rhin.openciv.server.Server;
+import me.rhin.openciv.server.events.type.ServerSettleCityEvent;
 import me.rhin.openciv.server.game.AbstractPlayer;
 import me.rhin.openciv.server.game.Player;
 import me.rhin.openciv.server.game.city.City;
@@ -14,12 +15,9 @@ import me.rhin.openciv.server.game.map.tile.Tile;
 import me.rhin.openciv.server.game.map.tile.Tile.TileTypeWrapper;
 import me.rhin.openciv.server.game.map.tile.TileType;
 import me.rhin.openciv.server.game.map.tile.TileType.TileProperty;
-import me.rhin.openciv.server.game.unit.AttackableEntity;
 import me.rhin.openciv.server.game.unit.DeleteUnitOptions;
 import me.rhin.openciv.server.game.unit.Unit;
 import me.rhin.openciv.server.game.unit.UnitItem;
-import me.rhin.openciv.server.listener.ServerSettleCityListener.ServerSettleCityEvent;
-import me.rhin.openciv.shared.packet.type.DeleteUnitPacket;
 import me.rhin.openciv.shared.packet.type.RemoveTileTypePacket;
 import me.rhin.openciv.shared.packet.type.SetTileTypePacket;
 import me.rhin.openciv.shared.packet.type.SettleCityPacket;
@@ -87,7 +85,7 @@ public class Settler extends UnitItem {
 
 					SetTileTypePacket setTileTypePacket = new SetTileTypePacket();
 					setTileTypePacket.setTile(improvementTileType.name(), tile.getGridX(), tile.getGridY());
-					
+
 					for (Player player : Server.getInstance().getPlayers())
 						player.sendPacket(json.toJson(setTileTypePacket));
 				}
@@ -135,7 +133,7 @@ public class Settler extends UnitItem {
 		public Class<? extends Unit> getUpgradedUnit() {
 			return null;
 		}
-		
+
 		@Override
 		public boolean canUpgrade() {
 			return false;

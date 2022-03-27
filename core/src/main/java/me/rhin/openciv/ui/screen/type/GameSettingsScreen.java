@@ -4,8 +4,7 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.utils.Align;
 
 import me.rhin.openciv.Civilization;
-import me.rhin.openciv.listener.LeftClickListener.LeftClickEvent;
-import me.rhin.openciv.listener.MouseMoveListener.MouseMoveEvent;
+import me.rhin.openciv.events.type.LeftClickEvent;
 import me.rhin.openciv.shared.listener.EventManager;
 import me.rhin.openciv.ui.button.type.PreviousScreenButton;
 import me.rhin.openciv.ui.label.CustomLabel;
@@ -18,7 +17,7 @@ public class GameSettingsScreen extends AbstractScreen {
 
 	public GameSettingsScreen() {
 		this.eventManager = Civilization.getInstance().getEventManager();
-		eventManager.clearEvents();
+		eventManager.clearListeners();
 
 		CustomLabel todoLabel = new CustomLabel(
 				"TODO: Multiplayer is only supported.\nOnce a proper AI is coded i'll start working on SP again.",
@@ -27,13 +26,6 @@ public class GameSettingsScreen extends AbstractScreen {
 		stage.addActor(new PreviousScreenButton("Back", viewport.getWorldWidth() / 2 - 150 / 2, 50, 150, 45));
 
 		stage.addActor(todoLabel);
-	}
-
-	@Override
-	public void render(float delta) {
-		super.render(delta);
-
-		Civilization.getInstance().getEventManager().fireEvent(MouseMoveEvent.INSTANCE);
 	}
 
 	@Override

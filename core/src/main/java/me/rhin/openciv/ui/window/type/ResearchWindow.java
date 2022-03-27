@@ -7,9 +7,7 @@ import com.badlogic.gdx.utils.Align;
 
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.game.research.Technology;
-import me.rhin.openciv.listener.PickResearchListener;
-import me.rhin.openciv.listener.ResizeListener;
-import me.rhin.openciv.listener.TopShapeRenderListener;
+import me.rhin.openciv.shared.listener.EventHandler;
 import me.rhin.openciv.shared.listener.Listener;
 import me.rhin.openciv.ui.background.BlankBackground;
 import me.rhin.openciv.ui.button.type.CloseWindowButton;
@@ -20,8 +18,7 @@ import me.rhin.openciv.ui.scrollbar.HorizontalScrollbar;
 import me.rhin.openciv.ui.window.AbstractWindow;
 import me.rhin.openciv.ui.window.HorizontalWindow;
 
-public class ResearchWindow extends AbstractWindow
-		implements HorizontalWindow, ResizeListener, TopShapeRenderListener, PickResearchListener{
+public class ResearchWindow extends AbstractWindow implements HorizontalWindow {
 
 	private static final int LEAF_WIDTH = 185;
 	private static final int LEAF_HEIGHT = 45;
@@ -59,13 +56,9 @@ public class ResearchWindow extends AbstractWindow
 
 		this.horizontalScrollbar = new HorizontalScrollbar(this, 0, 75, getWidth(), 25);
 		addActor(horizontalScrollbar);
-
-		Civilization.getInstance().getEventManager().addListener(ResizeListener.class, this);
-		Civilization.getInstance().getEventManager().addListener(TopShapeRenderListener.class, this);
-		Civilization.getInstance().getEventManager().addListener(PickResearchListener.class, this);
 	}
 
-	@Override
+	@EventHandler
 	public void onResize(int width, int height) {
 		super.setSize(width, height);
 		blankBackground.setSize(width, height);
@@ -81,7 +74,7 @@ public class ResearchWindow extends AbstractWindow
 		}
 	}
 
-	@Override
+	@EventHandler
 	public void onPickResearch(Technology tech) {
 		for (TechnologyLeaf leaf : technologyLeafs) {
 			if (leaf.getTech().equals(tech))
@@ -97,10 +90,8 @@ public class ResearchWindow extends AbstractWindow
 
 		for (Actor actor : getChildren()) {
 			if (actor instanceof Listener)
-				Civilization.getInstance().getEventManager().clearListenersFromObject((Listener) actor);
+				Civilization.getInstance().getEventManager().removeListener((Listener) actor);
 		}
-
-		Civilization.getInstance().getEventManager().clearListenersFromObject(this);
 	}
 
 	@Override

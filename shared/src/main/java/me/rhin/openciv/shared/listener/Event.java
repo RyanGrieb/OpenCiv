@@ -1,21 +1,13 @@
 package me.rhin.openciv.shared.listener;
 
-import java.util.ArrayList;
+import java.util.List;
 
-public abstract class Event<T extends Listener> {
+public interface Event {
 
-	private boolean cancelled;
+	public String getMethodName();
 
-	public abstract void fire(ArrayList<T> listeners);
+	public Object[] getMethodParams();
 
-	public abstract Class<T> getListenerType();
-
-	public void cancel() {
-		cancelled = true;
-	}
-
-	public boolean isCancelled() {
-		return cancelled;
-	}
+	public Class<?>[] getMethodParamClasses();
 
 }

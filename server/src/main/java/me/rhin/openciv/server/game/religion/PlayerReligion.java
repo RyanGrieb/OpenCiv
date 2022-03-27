@@ -15,9 +15,8 @@ import me.rhin.openciv.server.game.religion.icon.ReligionIcon;
 import me.rhin.openciv.server.game.unit.DeleteUnitOptions;
 import me.rhin.openciv.server.game.unit.Unit;
 import me.rhin.openciv.server.game.unit.type.Prophet.ProphetUnit;
-import me.rhin.openciv.server.listener.FoundReligionListener;
-import me.rhin.openciv.server.listener.NextTurnListener;
-import me.rhin.openciv.server.listener.PickPantheonListener;
+import me.rhin.openciv.shared.listener.EventHandler;
+import me.rhin.openciv.shared.listener.Listener;
 import me.rhin.openciv.shared.packet.type.AddUnitPacket;
 import me.rhin.openciv.shared.packet.type.AvailablePantheonPacket;
 import me.rhin.openciv.shared.packet.type.FoundReligionPacket;
@@ -25,7 +24,7 @@ import me.rhin.openciv.shared.packet.type.PickPantheonPacket;
 import me.rhin.openciv.shared.stat.Stat;
 import me.rhin.openciv.shared.stat.StatLine;
 
-public class PlayerReligion implements NextTurnListener, PickPantheonListener, FoundReligionListener {
+public class PlayerReligion implements Listener {
 
 	private static int chosenPantheons;
 
@@ -39,12 +38,10 @@ public class PlayerReligion implements NextTurnListener, PickPantheonListener, F
 		this.pickedBonuses = new ArrayList<>();
 		this.statLine = new StatLine();
 
-		Server.getInstance().getEventManager().addListener(NextTurnListener.class, this);
-		Server.getInstance().getEventManager().addListener(PickPantheonListener.class, this);
-		Server.getInstance().getEventManager().addListener(FoundReligionListener.class, this);
+		Server.getInstance().getEventManager().addListener(this);
 	}
 
-	@Override
+	@EventHandler
 	public void onNextTurn() {
 		// Choose bonus at 10 faith - NOTE: Were behind the statLine update here.
 
@@ -62,7 +59,7 @@ public class PlayerReligion implements NextTurnListener, PickPantheonListener, F
 		}
 
 		// FIXME: Limit the number of religions to be founded
-		if (!player.hasUnitOfType(ProphetUnit.class) && player.getStatLine().getStatValue(Stat.FAITH) > 175 //13
+		if (!player.hasUnitOfType(ProphetUnit.class) && player.getStatLine().getStatValue(Stat.FAITH) > 175 // 13
 				&& pickedBonuses.size() == 1 && player instanceof Player) {
 
 			ProphetUnit unit = new ProphetUnit(player, player.getCapitalCity().getOriginTile());
@@ -78,7 +75,7 @@ public class PlayerReligion implements NextTurnListener, PickPantheonListener, F
 		}
 	}
 
-	@Override
+	@EventHandler
 	public void onPickPantheon(WebSocket conn, PickPantheonPacket packet) {
 		Player player = Server.getInstance().getPlayerByConn(conn);
 
@@ -90,7 +87,7 @@ public class PlayerReligion implements NextTurnListener, PickPantheonListener, F
 				.get(packet.getReligionBonusID()));
 	}
 
-	@Override
+	@EventHandler
 	public void onFoundReligion(WebSocket conn, FoundReligionPacket packet) {
 		Player player = Server.getInstance().getPlayerByConn(conn);
 
@@ -113,7 +110,7 @@ public class PlayerReligion implements NextTurnListener, PickPantheonListener, F
 		Unit unit = Server.getInstance().getMap().getTiles()[packet.getGridX()][packet.getGridY()]
 				.getUnitFromID(packet.getUnitID());
 		unit.deleteUnit(DeleteUnitOptions.SERVER_DELETE);
-		
+
 		player.getStatLine().subValue(Stat.FAITH, 175);
 		player.updateOwnedStatlines(false);
 	}

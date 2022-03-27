@@ -26,15 +26,17 @@ import me.rhin.openciv.server.game.map.tile.TileType.TileLayer;
 import me.rhin.openciv.server.game.map.tile.TileType.TileProperty;
 import me.rhin.openciv.server.game.options.GameOptionType;
 import me.rhin.openciv.server.game.unit.Unit;
-import me.rhin.openciv.server.listener.MapRequestListener;
+import me.rhin.openciv.shared.listener.EventHandler;
+import me.rhin.openciv.shared.listener.Listener;
 import me.rhin.openciv.shared.map.MapSize;
 import me.rhin.openciv.shared.packet.ChunkTile;
 import me.rhin.openciv.shared.packet.type.AddUnitPacket;
 import me.rhin.openciv.shared.packet.type.FinishLoadingPacket;
 import me.rhin.openciv.shared.packet.type.MapChunkPacket;
+import me.rhin.openciv.shared.packet.type.MapRequestPacket;
 import me.rhin.openciv.shared.util.MathHelper;
 
-public class GameMap implements MapRequestListener {
+public class GameMap implements Listener {
 
 	// Modify these too.
 	private static final int LAND_MASS_PARAM = 5;
@@ -61,13 +63,13 @@ public class GameMap implements MapRequestListener {
 		this.usedGeographyNames = new ArrayList<>();
 		this.geograpgyFeautres = new ArrayList<>();
 
-		Server.getInstance().getEventManager().addListener(MapRequestListener.class, this);
+		Server.getInstance().getEventManager().addListener(this);
 	}
 
 	// FIXME: Very rare occasions we get out of bounds error from this method.
 	// Chunks?
-	@Override
-	public void onMapRequest(WebSocket conn) {
+	@EventHandler
+	public void onMapRequest(WebSocket conn, MapRequestPacket mapRequestPacket) {
 		Json json = new Json();
 
 		ArrayList<AddUnitPacket> addUnitPackets = new ArrayList<>();

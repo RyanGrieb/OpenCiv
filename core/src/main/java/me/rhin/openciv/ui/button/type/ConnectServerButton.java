@@ -1,12 +1,12 @@
 package me.rhin.openciv.ui.button.type;
 
 import me.rhin.openciv.Civilization;
-import me.rhin.openciv.listener.AttemptConnectionListener;
-import me.rhin.openciv.listener.ConnectionFailedListener;
+import me.rhin.openciv.shared.listener.EventHandler;
+import me.rhin.openciv.shared.listener.Listener;
 import me.rhin.openciv.ui.button.AbstractButton;
 import me.rhin.openciv.ui.screen.type.ServerSelectScreen;
 
-public class ConnectServerButton extends AbstractButton implements AttemptConnectionListener, ConnectionFailedListener {
+public class ConnectServerButton extends AbstractButton implements Listener {
 
 	private ServerSelectScreen screen;
 	private boolean connecting;
@@ -15,8 +15,7 @@ public class ConnectServerButton extends AbstractButton implements AttemptConnec
 		super("Connect", x, y, width, height);
 		this.screen = screen;
 
-		Civilization.getInstance().getEventManager().addListener(AttemptConnectionListener.class, this);
-		Civilization.getInstance().getEventManager().addListener(ConnectionFailedListener.class, this);
+		Civilization.getInstance().getEventManager().addListener(this);
 	}
 
 	@Override
@@ -30,13 +29,13 @@ public class ConnectServerButton extends AbstractButton implements AttemptConnec
 		}
 	}
 
-	@Override
+	@EventHandler
 	public void onConnectionFailed() {
 		connecting = false;
 		setText("Connect");
 	}
 
-	@Override
+	@EventHandler
 	public void onAttemptedConnection() {
 		connecting = true;
 		setText("Connecting...");

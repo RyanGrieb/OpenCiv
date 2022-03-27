@@ -6,10 +6,7 @@ import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.notification.type.NotResearchingNotification;
 import me.rhin.openciv.game.research.Technology;
-import me.rhin.openciv.listener.CompleteResearchListener;
-import me.rhin.openciv.listener.NextTurnListener;
-import me.rhin.openciv.listener.PickResearchListener;
-import me.rhin.openciv.listener.ResizeListener;
+import me.rhin.openciv.shared.listener.EventHandler;
 import me.rhin.openciv.shared.packet.type.CompleteResearchPacket;
 import me.rhin.openciv.shared.packet.type.NextTurnPacket;
 import me.rhin.openciv.shared.stat.Stat;
@@ -18,8 +15,7 @@ import me.rhin.openciv.ui.button.CustomButton;
 import me.rhin.openciv.ui.label.CustomLabel;
 import me.rhin.openciv.ui.window.AbstractWindow;
 
-public class CurrentResearchWindow extends AbstractWindow
-		implements ResizeListener, PickResearchListener, NextTurnListener, CompleteResearchListener {
+public class CurrentResearchWindow extends AbstractWindow {
 
 	private ColoredBackground blankBackground;
 	private CustomLabel researchNameDesc;
@@ -63,19 +59,14 @@ public class CurrentResearchWindow extends AbstractWindow
 
 		this.techIcon = new ColoredBackground(TextureEnum.UI_CLEAR.sprite(), 6, 6, 32, 32);
 		addActor(techIcon);
-
-		Civilization.getInstance().getEventManager().addListener(ResizeListener.class, this);
-		Civilization.getInstance().getEventManager().addListener(PickResearchListener.class, this);
-		Civilization.getInstance().getEventManager().addListener(NextTurnListener.class, this);
-		Civilization.getInstance().getEventManager().addListener(CompleteResearchListener.class, this);
 	}
 
-	@Override
+	@EventHandler
 	public void onResize(int width, int height) {
 		super.setPosition(5, height - 85);
 	}
 
-	@Override
+	@EventHandler
 	public void onPickResearch(Technology tech) {
 		this.tech = tech;
 		techIcon.setSprite(tech.getIcon());
@@ -90,7 +81,7 @@ public class CurrentResearchWindow extends AbstractWindow
 		researchTurnsLabel.setText(currentTurns + "/" + totalTurns + " Turns");
 	}
 
-	@Override
+	@EventHandler
 	public void onNextTurn(NextTurnPacket packet) {
 		if (tech == null)
 			return;
@@ -112,7 +103,7 @@ public class CurrentResearchWindow extends AbstractWindow
 		researchTurnsLabel.setText(currentTurns + "/" + totalTurns + " Turns");
 	}
 
-	@Override
+	@EventHandler
 	public void onCompleteResearch(CompleteResearchPacket packet) {
 		if (tech.getID() != packet.getTechID())
 			return;

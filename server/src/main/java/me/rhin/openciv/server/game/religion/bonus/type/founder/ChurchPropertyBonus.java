@@ -4,8 +4,8 @@ import me.rhin.openciv.server.Server;
 import me.rhin.openciv.server.game.city.City;
 import me.rhin.openciv.server.game.religion.PlayerReligion;
 import me.rhin.openciv.server.game.religion.bonus.ReligionBonus;
-import me.rhin.openciv.server.listener.CityGainMajorityReligionListener;
-import me.rhin.openciv.server.listener.CityLooseMajorityReligionListener;
+import me.rhin.openciv.shared.listener.EventHandler;
+import me.rhin.openciv.shared.listener.Listener;
 import me.rhin.openciv.shared.stat.Stat;
 
 /**
@@ -14,12 +14,10 @@ import me.rhin.openciv.shared.stat.Stat;
  * @author Ryan
  *
  */
-public class ChurchPropertyBonus extends ReligionBonus
-		implements CityGainMajorityReligionListener, CityLooseMajorityReligionListener {
+public class ChurchPropertyBonus extends ReligionBonus implements Listener {
 
 	public ChurchPropertyBonus() {
-		Server.getInstance().getEventManager().addListener(CityGainMajorityReligionListener.class, this);
-		Server.getInstance().getEventManager().addListener(CityLooseMajorityReligionListener.class, this);
+		Server.getInstance().getEventManager().addListener(this);
 	}
 
 	@Override
@@ -30,7 +28,7 @@ public class ChurchPropertyBonus extends ReligionBonus
 		player.updateOwnedStatlines(false);
 	}
 
-	@Override
+	@EventHandler
 	public void onCityLooseMajorityReligion(City city, PlayerReligion oldReligion) {
 
 		if (player == null)
@@ -46,7 +44,7 @@ public class ChurchPropertyBonus extends ReligionBonus
 		player.updateOwnedStatlines(false);
 	}
 
-	@Override
+	@EventHandler
 	public void onCityGainMajorityReligion(City city, PlayerReligion newReligion) {
 		if (player == null)
 			return;

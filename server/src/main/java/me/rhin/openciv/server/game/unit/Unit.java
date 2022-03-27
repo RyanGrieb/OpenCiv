@@ -16,6 +16,8 @@ import com.badlogic.gdx.utils.reflect.ClassReflection;
 
 import me.rhin.openciv.server.Server;
 import me.rhin.openciv.server.errors.SameMovementTargetException;
+import me.rhin.openciv.server.events.type.CaptureCityEvent;
+import me.rhin.openciv.server.events.type.UnitFinishedMoveEvent;
 import me.rhin.openciv.server.game.AbstractPlayer;
 import me.rhin.openciv.server.game.Player;
 import me.rhin.openciv.server.game.ai.UnitAI;
@@ -27,9 +29,8 @@ import me.rhin.openciv.server.game.map.tile.TileType;
 import me.rhin.openciv.server.game.map.tile.TileType.TileProperty;
 import me.rhin.openciv.server.game.options.GameOptionType;
 import me.rhin.openciv.server.game.unit.UnitItem.UnitType;
-import me.rhin.openciv.server.listener.CaptureCityListener.CaptureCityEvent;
-import me.rhin.openciv.server.listener.NextTurnListener;
-import me.rhin.openciv.server.listener.UnitFinishedMoveListener;
+import me.rhin.openciv.shared.listener.EventHandler;
+import me.rhin.openciv.shared.listener.Listener;
 import me.rhin.openciv.shared.packet.type.AddObservedTilePacket;
 import me.rhin.openciv.shared.packet.type.AddUnitPacket;
 import me.rhin.openciv.shared.packet.type.DeleteUnitPacket;
@@ -44,7 +45,7 @@ import me.rhin.openciv.shared.packet.type.UnitAttackPacket;
 import me.rhin.openciv.shared.stat.Stat;
 import me.rhin.openciv.shared.stat.StatLine;
 
-public abstract class Unit implements AttackableEntity, TileObserver, NextTurnListener, UnitFinishedMoveListener {
+public abstract class Unit implements AttackableEntity, TileObserver, Listener {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(Unit.class);
 
@@ -89,8 +90,7 @@ public abstract class Unit implements AttackableEntity, TileObserver, NextTurnLi
 		setSize(standingTile.getWidth(), standingTile.getHeight());
 
 		// Note: This listener needs to be called before the addOwnedUnit() ones.
-		Server.getInstance().getEventManager().addListener(NextTurnListener.class, this);
-		Server.getInstance().getEventManager().addListener(UnitFinishedMoveListener.class, this);
+		Server.getInstance().getEventManager().addListener(this);
 
 		playerOwner.addOwnedUnit(this);
 
@@ -110,7 +110,7 @@ public abstract class Unit implements AttackableEntity, TileObserver, NextTurnLi
 
 	public abstract String getName();
 
-	@Override
+	@EventHandler
 	public void onNextTurn() {
 
 		if (!alive)
@@ -163,7 +163,7 @@ public abstract class Unit implements AttackableEntity, TileObserver, NextTurnLi
 		turnsSinceCombat++;
 	}
 
-	@Override
+	@EventHandler
 	public void onUnitFinishMove(Tile prevTile, Unit unit) {
 		if (getHealth() <= 0)
 			return;
@@ -325,7 +325,7 @@ public abstract class Unit implements AttackableEntity, TileObserver, NextTurnLi
 		if (unitAI != null)
 			unitAI.clearListeners();
 
-		Server.getInstance().getEventManager().clearListenersFromObject(this);
+		Server.getInstance().getEventManager().removeListener(this);
 	}
 
 	public boolean setTargetTile(Tile targetTile) {

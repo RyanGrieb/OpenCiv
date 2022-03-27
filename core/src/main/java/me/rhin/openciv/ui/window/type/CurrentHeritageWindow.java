@@ -6,10 +6,7 @@ import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.heritage.Heritage;
 import me.rhin.openciv.game.notification.type.NotStudyingNotification;
-import me.rhin.openciv.listener.CompleteHeritageListener;
-import me.rhin.openciv.listener.NextTurnListener;
-import me.rhin.openciv.listener.PickHeritageListener;
-import me.rhin.openciv.listener.ResizeListener;
+import me.rhin.openciv.shared.listener.EventHandler;
 import me.rhin.openciv.shared.packet.type.CompleteHeritagePacket;
 import me.rhin.openciv.shared.packet.type.NextTurnPacket;
 import me.rhin.openciv.shared.stat.Stat;
@@ -18,8 +15,7 @@ import me.rhin.openciv.ui.button.CustomButton;
 import me.rhin.openciv.ui.label.CustomLabel;
 import me.rhin.openciv.ui.window.AbstractWindow;
 
-public class CurrentHeritageWindow extends AbstractWindow
-		implements ResizeListener, PickHeritageListener, NextTurnListener, CompleteHeritageListener {
+public class CurrentHeritageWindow extends AbstractWindow {
 
 	private ColoredBackground blankBackground;
 	private CustomLabel heritageNameDescLabel;
@@ -64,19 +60,14 @@ public class CurrentHeritageWindow extends AbstractWindow
 
 		this.heritageIcon = new ColoredBackground(TextureEnum.UI_CLEAR.sprite(), 6, 6, 32, 32);
 		addActor(heritageIcon);
-
-		Civilization.getInstance().getEventManager().addListener(ResizeListener.class, this);
-		Civilization.getInstance().getEventManager().addListener(PickHeritageListener.class, this);
-		Civilization.getInstance().getEventManager().addListener(NextTurnListener.class, this);
-		Civilization.getInstance().getEventManager().addListener(CompleteHeritageListener.class, this);
 	}
 
-	@Override
+	@EventHandler
 	public void onResize(int width, int height) {
 		super.setPosition(5, height - 155);
 	}
 
-	@Override
+	@EventHandler
 	public void onPickHeritage(Heritage heritage) {
 		this.heritage = heritage;
 
@@ -95,7 +86,7 @@ public class CurrentHeritageWindow extends AbstractWindow
 		heritageTurnsLabel.setText(currentTurns + "/" + totalTurns + " Turns");
 	}
 
-	@Override
+	@EventHandler
 	public void onNextTurn(NextTurnPacket packet) {
 
 		// FIXME: Null when we choose a tech?
@@ -115,7 +106,7 @@ public class CurrentHeritageWindow extends AbstractWindow
 		heritageTurnsLabel.setText(currentTurns + "/" + totalTurns + " Turns");
 	}
 
-	@Override
+	@EventHandler
 	public void onCompleteHeritage(CompleteHeritagePacket packet) {
 
 		// FIXME: We really should check if this is correct.

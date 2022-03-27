@@ -14,6 +14,9 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Json;
 
 import me.rhin.openciv.server.Server;
+import me.rhin.openciv.server.events.type.NextTurnEvent;
+import me.rhin.openciv.server.events.type.PlayerSpawnsSetEvent;
+import me.rhin.openciv.server.events.type.UnitFinishedMoveEvent;
 import me.rhin.openciv.server.game.AbstractPlayer;
 import me.rhin.openciv.server.game.GameState;
 import me.rhin.openciv.server.game.Player;
@@ -41,36 +44,11 @@ import me.rhin.openciv.server.game.unit.type.Settler.SettlerUnit;
 import me.rhin.openciv.server.game.unit.type.TransportShipUnit;
 import me.rhin.openciv.server.game.unit.type.Warrior.WarriorUnit;
 import me.rhin.openciv.server.game.unit.type.WorkBoat.WorkBoatUnit;
-import me.rhin.openciv.server.listener.BuyProductionItemListener;
-import me.rhin.openciv.server.listener.CancelQueuedMovementListener;
-import me.rhin.openciv.server.listener.CombatPreviewListener;
-import me.rhin.openciv.server.listener.DisconnectListener;
-import me.rhin.openciv.server.listener.EndTurnListener;
-import me.rhin.openciv.server.listener.FaithBuyProductionItemListener;
-import me.rhin.openciv.server.listener.FetchPlayerListener;
-import me.rhin.openciv.server.listener.NextTurnListener;
-import me.rhin.openciv.server.listener.PlayerFinishLoadingListener;
-import me.rhin.openciv.server.listener.PlayerListRequestListener;
-import me.rhin.openciv.server.listener.PlayersSpawnsSetListener.PlayersSpawnsSetEvent;
-import me.rhin.openciv.server.listener.QueuedUnitMoveListener;
-import me.rhin.openciv.server.listener.RangedAttackListener;
-import me.rhin.openciv.server.listener.RequestEndTurnListener;
-import me.rhin.openciv.server.listener.SelectUnitListener;
-import me.rhin.openciv.server.listener.SetProductionItemListener;
-import me.rhin.openciv.server.listener.SettleCityListener;
-import me.rhin.openciv.server.listener.TileStatlineListener;
-import me.rhin.openciv.server.listener.UnitDisembarkListener;
-import me.rhin.openciv.server.listener.UnitEmbarkListener;
-import me.rhin.openciv.server.listener.UnitFinishedMoveListener.UnitFinishedMoveEvent;
-import me.rhin.openciv.server.listener.UnitMoveListener;
-import me.rhin.openciv.server.listener.UpgradeUnitListener;
-import me.rhin.openciv.server.listener.WorkTileListener;
+import me.rhin.openciv.shared.listener.EventHandler;
 import me.rhin.openciv.shared.packet.type.AddUnitPacket;
-import me.rhin.openciv.shared.packet.type.BuyProductionItemPacket;
 import me.rhin.openciv.shared.packet.type.CancelQueuedMovementPacket;
 import me.rhin.openciv.shared.packet.type.CombatPreviewPacket;
 import me.rhin.openciv.shared.packet.type.EndTurnPacket;
-import me.rhin.openciv.shared.packet.type.FaithBuyProductionItemPacket;
 import me.rhin.openciv.shared.packet.type.FetchPlayerPacket;
 import me.rhin.openciv.shared.packet.type.GameStartPacket;
 import me.rhin.openciv.shared.packet.type.MoveUnitPacket;
@@ -79,10 +57,8 @@ import me.rhin.openciv.shared.packet.type.PlayerDisconnectPacket;
 import me.rhin.openciv.shared.packet.type.PlayerListRequestPacket;
 import me.rhin.openciv.shared.packet.type.QueuedUnitMovementPacket;
 import me.rhin.openciv.shared.packet.type.RangedAttackPacket;
-import me.rhin.openciv.shared.packet.type.RemoveTileTypePacket;
 import me.rhin.openciv.shared.packet.type.RequestEndTurnPacket;
 import me.rhin.openciv.shared.packet.type.SelectUnitPacket;
-import me.rhin.openciv.shared.packet.type.SetProductionItemPacket;
 import me.rhin.openciv.shared.packet.type.SettleCityPacket;
 import me.rhin.openciv.shared.packet.type.TileStatlinePacket;
 import me.rhin.openciv.shared.packet.type.TurnTimeLeftPacket;
@@ -94,13 +70,7 @@ import me.rhin.openciv.shared.stat.Stat;
 import me.rhin.openciv.shared.stat.StatLine;
 import me.rhin.openciv.shared.util.MathHelper;
 
-//FIXME: Instead of the civ game listening for everything. Just split them off into the respective classes. (EX: CombatPreviewListener in the Unit class)
-//Or just use reflection so we don't have to implement 20+ classes.
-public class InGameState extends GameState implements DisconnectListener, SelectUnitListener, UnitMoveListener,
-		QueuedUnitMoveListener, CancelQueuedMovementListener, SettleCityListener, PlayerFinishLoadingListener,
-		NextTurnListener, EndTurnListener, PlayerListRequestListener, FetchPlayerListener, CombatPreviewListener,
-		WorkTileListener, RangedAttackListener, RequestEndTurnListener, TileStatlineListener, UnitEmbarkListener,
-		UnitDisembarkListener, UpgradeUnitListener {
+public class InGameState extends GameState {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(InGameState.class);
 
@@ -119,26 +89,6 @@ public class InGameState extends GameState implements DisconnectListener, Select
 		this.gameWonders = new GameWonders();
 		this.availableReligionBonuses = new AvailableReligionBonuses();
 		this.availableReligionIcons = new AvailableReligionIcons();
-
-		Server.getInstance().getEventManager().addListener(DisconnectListener.class, this);
-		Server.getInstance().getEventManager().addListener(SelectUnitListener.class, this);
-		Server.getInstance().getEventManager().addListener(UnitMoveListener.class, this);
-		Server.getInstance().getEventManager().addListener(QueuedUnitMoveListener.class, this);
-		Server.getInstance().getEventManager().addListener(CancelQueuedMovementListener.class, this);
-		Server.getInstance().getEventManager().addListener(SettleCityListener.class, this);
-		Server.getInstance().getEventManager().addListener(PlayerFinishLoadingListener.class, this);
-		Server.getInstance().getEventManager().addListener(NextTurnListener.class, this);
-		Server.getInstance().getEventManager().addListener(EndTurnListener.class, this);
-		Server.getInstance().getEventManager().addListener(PlayerListRequestListener.class, this);
-		Server.getInstance().getEventManager().addListener(FetchPlayerListener.class, this);
-		Server.getInstance().getEventManager().addListener(CombatPreviewListener.class, this);
-		Server.getInstance().getEventManager().addListener(WorkTileListener.class, this);
-		Server.getInstance().getEventManager().addListener(RangedAttackListener.class, this);
-		Server.getInstance().getEventManager().addListener(RequestEndTurnListener.class, this);
-		Server.getInstance().getEventManager().addListener(TileStatlineListener.class, this);
-		Server.getInstance().getEventManager().addListener(UnitEmbarkListener.class, this);
-		Server.getInstance().getEventManager().addListener(UnitDisembarkListener.class, this);
-		Server.getInstance().getEventManager().addListener(UpgradeUnitListener.class, this);
 	}
 
 	@Override
@@ -178,7 +128,7 @@ public class InGameState extends GameState implements DisconnectListener, Select
 
 	@Override
 	public void onStateEnd() {
-		Server.getInstance().getEventManager().clearListenersFromObject(this);
+		Server.getInstance().getEventManager().removeListener(this);
 	}
 
 	@Override
@@ -189,14 +139,14 @@ public class InGameState extends GameState implements DisconnectListener, Select
 	// TODO: On player connection, don't allow him to join yet. Since we haven't
 	// implemented hot joining.
 
-	@Override
+	@EventHandler
 	public void onDisconnect(WebSocket conn) {
 		Player removedPlayer = getPlayerByConn(conn);
 
 		if (removedPlayer == null)
 			return;
 
-		Server.getInstance().getEventManager().removeListener(NextTurnListener.class, removedPlayer);
+		Server.getInstance().getEventManager().removeListener(removedPlayer);
 		players.remove(removedPlayer);
 
 		for (Player player : players) {
@@ -213,7 +163,7 @@ public class InGameState extends GameState implements DisconnectListener, Select
 	}
 
 	// TODO: Move to map class
-	@Override
+	@EventHandler
 	public void onUnitSelect(WebSocket conn, SelectUnitPacket packet) {
 
 		// FIXME: Use a hashmap to get by unit name?
@@ -231,7 +181,7 @@ public class InGameState extends GameState implements DisconnectListener, Select
 		conn.send(json.toJson(packet));
 	}
 
-	@Override
+	@EventHandler
 	public void onUnitMove(WebSocket conn, MoveUnitPacket packet) {
 
 		Tile prevTile = map.getTiles()[packet.getPrevGridX()][packet.getPrevGridY()];
@@ -361,7 +311,7 @@ public class InGameState extends GameState implements DisconnectListener, Select
 
 	}
 
-	@Override
+	@EventHandler
 	public void onQueuedUnitMove(WebSocket conn, QueuedUnitMovementPacket packet) {
 		Tile tile = map.getTiles()[packet.getPrevGridX()][packet.getPrevGridY()];
 		Tile queuedTile = map.getTiles()[packet.getTargetGridX()][packet.getTargetGridY()];
@@ -370,7 +320,7 @@ public class InGameState extends GameState implements DisconnectListener, Select
 		unit.moveToTile(queuedTile);
 	}
 
-	@Override
+	@EventHandler
 	public void onCancelQueuedMovement(WebSocket conn, CancelQueuedMovementPacket packet) {
 		Tile tile = map.getTiles()[packet.getTileGridX()][packet.getTileGridY()];
 		Unit unit = tile.getUnitFromID(packet.getUnitID());
@@ -378,7 +328,7 @@ public class InGameState extends GameState implements DisconnectListener, Select
 	}
 
 	// TODO: Move to game map class?
-	@Override
+	@EventHandler
 	public void onSettleCity(WebSocket conn, SettleCityPacket settleCityPacket) {
 		// FIXME: The server needs to check if the unit has movement & is too close to
 		// other cities.
@@ -397,12 +347,12 @@ public class InGameState extends GameState implements DisconnectListener, Select
 		unit.settleCity();
 	}
 
-	@Override
+	@EventHandler
 	public void onPlayerFinishLoading(WebSocket conn) {
 		getPlayerByConn(conn).finishLoading();
 	}
 
-	@Override
+	@EventHandler
 	public void onNextTurn() {
 
 		Json json = new Json();
@@ -426,12 +376,12 @@ public class InGameState extends GameState implements DisconnectListener, Select
 			player.setTurnDone(false);
 	}
 
-	@Override
+	@EventHandler
 	public void onEndTurn(WebSocket conn, EndTurnPacket packet) {
 		Server.getInstance().getEventManager().fireEvent(new NextTurnEvent());
 	}
 
-	@Override
+	@EventHandler
 	public void onRequestEndTurn(WebSocket conn, RequestEndTurnPacket packet) {
 		Player player = Server.getInstance().getPlayerByConn(conn);
 		player.setTurnDone(true);
@@ -451,7 +401,7 @@ public class InGameState extends GameState implements DisconnectListener, Select
 			Server.getInstance().getEventManager().fireEvent(new NextTurnEvent());
 	}
 
-	@Override
+	@EventHandler
 	public void onPlayerListRequested(WebSocket conn, PlayerListRequestPacket packet) {
 		LOGGER.info("[SERVER] Player list requested");
 		for (Player player : players) {
@@ -466,7 +416,7 @@ public class InGameState extends GameState implements DisconnectListener, Select
 		conn.send(json.toJson(packet));
 	}
 
-	@Override
+	@EventHandler
 	public void onPlayerFetch(WebSocket conn, FetchPlayerPacket packet) {
 		LOGGER.info("[SERVER] Fetching player...");
 		Player player = getPlayerByConn(conn);
@@ -476,7 +426,7 @@ public class InGameState extends GameState implements DisconnectListener, Select
 	}
 
 	// TODO: Split this up into the Unit class
-	@Override
+	@EventHandler
 	public void onCombatPreview(WebSocket conn, CombatPreviewPacket packet) {
 
 		AttackableEntity attackingEntity = map.getTiles()[packet.getUnitGridX()][packet.getUnitGridY()]
@@ -499,7 +449,7 @@ public class InGameState extends GameState implements DisconnectListener, Select
 		conn.send(json.toJson(packet));
 	}
 
-	@Override
+	@EventHandler
 	public void onRangedAttack(WebSocket conn, RangedAttackPacket packet) {
 
 		AttackableEntity attackingEntity = map.getTiles()[packet.getUnitGridX()][packet.getUnitGridY()]
@@ -514,7 +464,7 @@ public class InGameState extends GameState implements DisconnectListener, Select
 		rangedUnit.rangeAttack(targetEntity);
 	}
 
-	@Override
+	@EventHandler
 	public void onWorkTile(WebSocket conn, WorkTilePacket packet) {
 
 		// TODO: !! We need to do territory & ownership &research checks like in
@@ -538,7 +488,7 @@ public class InGameState extends GameState implements DisconnectListener, Select
 		}
 	}
 
-	@Override
+	@EventHandler
 	public void onRequestTileStatline(WebSocket conn, TileStatlinePacket packet) {
 
 		if (packet.getGridX() >= map.getWidth() || packet.getGridY() >= map.getHeight())
@@ -559,7 +509,7 @@ public class InGameState extends GameState implements DisconnectListener, Select
 		getPlayerByConn(conn).sendPacket(json.toJson(packet));
 	}
 
-	@Override
+	@EventHandler
 	public void onUnitEmbark(WebSocket conn, UnitEmbarkPacket packet) {
 		Player unitPlayer = Server.getInstance().getPlayerByConn(conn);
 		Unit unit = map.getTiles()[packet.getTileGridX()][packet.getTileGridY()].getUnitFromID(packet.getUnitID());
@@ -588,7 +538,7 @@ public class InGameState extends GameState implements DisconnectListener, Select
 			player.sendPacket(json.toJson(addUnitPacket));
 	}
 
-	@Override
+	@EventHandler
 	public void onUnitDisembark(WebSocket conn, UnitDisembarkPacket packet) {
 		Player unitPlayer = Server.getInstance().getPlayerByConn(conn);
 
@@ -656,7 +606,7 @@ public class InGameState extends GameState implements DisconnectListener, Select
 			player.sendPacket(json.toJson(addUnitPacket));
 	}
 
-	@Override
+	@EventHandler
 	public void onUnitUpgrade(WebSocket conn, UpgradeUnitPacket packet) {
 		Tile tile = map.getTiles()[packet.getTileGridX()][packet.getTileGridY()];
 		Unit oldUnit = tile.getUnitFromID(packet.getUnitID());
@@ -888,7 +838,7 @@ public class InGameState extends GameState implements DisconnectListener, Select
 			}
 		}
 
-		Server.getInstance().getEventManager().fireEvent(new PlayersSpawnsSetEvent());
+		Server.getInstance().getEventManager().fireEvent(new PlayerSpawnsSetEvent());
 
 		// Debug code
 		// if (players.size() > 1) {

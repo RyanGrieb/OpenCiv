@@ -8,20 +8,16 @@ import com.badlogic.gdx.utils.Timer;
 import com.badlogic.gdx.utils.Timer.Task;
 
 import me.rhin.openciv.Civilization;
+import me.rhin.openciv.events.type.LeftClickEnemyUnitEvent;
+import me.rhin.openciv.events.type.SelectUnitEvent;
 import me.rhin.openciv.game.map.tile.Tile;
 import me.rhin.openciv.game.notification.type.MoveUnitHelpNotification;
-import me.rhin.openciv.game.production.ProductionItem;
 import me.rhin.openciv.game.research.Unlockable;
 import me.rhin.openciv.game.unit.AttackableEntity;
 import me.rhin.openciv.game.unit.RangedUnit;
 import me.rhin.openciv.game.unit.Unit;
-import me.rhin.openciv.listener.DeleteUnitListener;
-import me.rhin.openciv.listener.LeftClickEnemyUnitListener.LeftClickEnemyUnitEvent;
-import me.rhin.openciv.listener.LeftClickListener;
-import me.rhin.openciv.listener.PlayerStatUpdateListener;
-import me.rhin.openciv.listener.RelativeMouseMoveListener;
-import me.rhin.openciv.listener.RightClickListener;
-import me.rhin.openciv.listener.SelectUnitListener;
+import me.rhin.openciv.shared.listener.EventHandler;
+import me.rhin.openciv.shared.listener.Listener;
 import me.rhin.openciv.shared.packet.type.DeleteUnitPacket;
 import me.rhin.openciv.shared.packet.type.PlayerStatUpdatePacket;
 import me.rhin.openciv.shared.packet.type.QueuedUnitMovementPacket;
@@ -30,8 +26,7 @@ import me.rhin.openciv.ui.window.type.CityInfoWindow;
 import me.rhin.openciv.ui.window.type.DeclareWarWindow;
 import me.rhin.openciv.util.ClickType;
 
-public class Player extends AbstractPlayer implements RelativeMouseMoveListener, LeftClickListener, RightClickListener,
-		SelectUnitListener, PlayerStatUpdateListener, DeleteUnitListener {
+public class Player extends AbstractPlayer implements Listener {
 
 	// NOTE: This class can be the controlled by the player or the MPPlayer. The
 	// distinction is in the listeners firing.
@@ -49,9 +44,11 @@ public class Player extends AbstractPlayer implements RelativeMouseMoveListener,
 				clicksPerSecond = 0;
 			}
 		}, 0, 1);
+
+		Civilization.getInstance().getEventManager().addListener(this);
 	}
 
-	@Override
+	@EventHandler
 	public void onRelativeMouseMove(float x, float y) {
 		Tile currentHoveredTile = Civilization.getInstance().getGame().getMap().getTileFromLocation(x, y);
 
@@ -70,8 +67,8 @@ public class Player extends AbstractPlayer implements RelativeMouseMoveListener,
 		hoveredTile.onMouseHover();
 	}
 
-	@Override
-	public void onLeftClick(float x, float y) {
+	@EventHandler
+	public void onLeftClick(int x, int y) {
 		clicksPerSecond++;
 
 		if (hoveredTile == null)
@@ -107,7 +104,7 @@ public class Player extends AbstractPlayer implements RelativeMouseMoveListener,
 		Civilization.getInstance().getEventManager().fireEvent(new SelectUnitEvent(unit));
 	}
 
-	@Override
+	@EventHandler
 	public void onRightClick(ClickType clickType, int x, int y) {
 		if (selectedUnit == null)
 			return;
@@ -160,7 +157,7 @@ public class Player extends AbstractPlayer implements RelativeMouseMoveListener,
 		}
 	}
 
-	@Override
+	@EventHandler
 	public void onSelectUnit(Unit unit) {
 		if (selectedUnit != null)
 			unselectUnit();
@@ -169,12 +166,12 @@ public class Player extends AbstractPlayer implements RelativeMouseMoveListener,
 		selectedUnit = unit;
 	}
 
-	@Override
+	@EventHandler
 	public void onPlayerStatUpdate(PlayerStatUpdatePacket packet) {
 		this.statLine = StatLine.fromPacket(packet);
 	}
 
-	@Override
+	@EventHandler
 	public void onUnitDelete(DeleteUnitPacket packet) {
 		int unitID = packet.getUnitID();
 

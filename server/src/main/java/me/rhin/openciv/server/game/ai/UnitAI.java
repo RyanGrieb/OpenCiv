@@ -4,9 +4,10 @@ import me.rhin.openciv.server.Server;
 import me.rhin.openciv.server.game.ai.behavior.FallbackNode;
 import me.rhin.openciv.server.game.ai.behavior.Node;
 import me.rhin.openciv.server.game.unit.Unit;
-import me.rhin.openciv.server.listener.NextTurnListener;
+import me.rhin.openciv.shared.listener.EventHandler;
+import me.rhin.openciv.shared.listener.Listener;
 
-public class UnitAI implements NextTurnListener {
+public class UnitAI implements Listener {
 
 	private FallbackNode mainNode;
 	private Unit unit;
@@ -17,10 +18,10 @@ public class UnitAI implements NextTurnListener {
 		mainNode = new FallbackNode("Main Node");
 		aiType.initBehaviorTree(mainNode, unit);
 
-		Server.getInstance().getEventManager().addListener(NextTurnListener.class, this);
+		Server.getInstance().getEventManager().addListener(this);
 	}
 
-	@Override
+	@EventHandler
 	public void onNextTurn() {
 
 		// FIXME: This shouldn't be needed. But sometimes listeners don't clear for dead
@@ -32,7 +33,7 @@ public class UnitAI implements NextTurnListener {
 	}
 
 	public void clearListeners() {
-		Server.getInstance().getEventManager().clearListenersFromObject(this);
+		Server.getInstance().getEventManager().removeListener(this);
 	}
 
 	public Node getMainNode() {

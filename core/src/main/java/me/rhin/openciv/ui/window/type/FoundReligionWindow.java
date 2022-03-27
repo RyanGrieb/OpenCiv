@@ -10,8 +10,7 @@ import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.religion.bonus.ReligionBonus;
 import me.rhin.openciv.game.religion.icon.ReligionIcon;
 import me.rhin.openciv.game.unit.Unit;
-import me.rhin.openciv.listener.FoundReligionListener;
-import me.rhin.openciv.listener.ResizeListener;
+import me.rhin.openciv.shared.listener.EventHandler;
 import me.rhin.openciv.shared.packet.type.FoundReligionPacket;
 import me.rhin.openciv.shared.util.StrUtil;
 import me.rhin.openciv.ui.background.ColoredBackground;
@@ -23,7 +22,7 @@ import me.rhin.openciv.ui.list.ListContainer.ListContainerType;
 import me.rhin.openciv.ui.list.type.ListReligionBonus;
 import me.rhin.openciv.ui.window.AbstractWindow;
 
-public class FoundReligionWindow extends AbstractWindow implements FoundReligionListener, ResizeListener {
+public class FoundReligionWindow extends AbstractWindow {
 
 	private ColoredBackground blankBackground;
 	private CloseWindowButton closeWindowButton;
@@ -170,18 +169,15 @@ public class FoundReligionWindow extends AbstractWindow implements FoundReligion
 
 		this.bonusContianerList = new ContainerList(blankBackground.getX() + blankBackground.getWidth() / 2 - 35,
 				blankBackground.getY() + 100, 320, 400);
-
-		Civilization.getInstance().getEventManager().addListener(FoundReligionListener.class, this);
-		Civilization.getInstance().getEventManager().addListener(ResizeListener.class, this);
 	}
 
-	@Override
+	@EventHandler
 	public void onResize(int width, int height) {
 		// FIXME: This is terrible. Use group. & Have containerList support groups.
 		setPosition(width / 2 - 600 / 2, height / 2 - 600 / 2);
 	}
 
-	@Override
+	@EventHandler
 	public void onFoundReligion(FoundReligionPacket packet) {
 		for (CustomButton iconButton : religionIconButtons) {
 			iconButton.addAction(Actions.removeActor());
@@ -222,11 +218,6 @@ public class FoundReligionWindow extends AbstractWindow implements FoundReligion
 		}
 
 		checkFoundableCondition();
-	}
-
-	@Override
-	public void onClose() {
-		Civilization.getInstance().getEventManager().clearListenersFromObject(this);
 	}
 
 	@Override

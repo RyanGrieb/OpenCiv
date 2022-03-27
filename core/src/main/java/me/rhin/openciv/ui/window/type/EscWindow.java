@@ -1,14 +1,14 @@
 package me.rhin.openciv.ui.window.type;
 
 import me.rhin.openciv.Civilization;
-import me.rhin.openciv.listener.ResizeListener;
+import me.rhin.openciv.shared.listener.EventHandler;
 import me.rhin.openciv.ui.background.BlankBackground;
 import me.rhin.openciv.ui.button.CustomButton;
 import me.rhin.openciv.ui.button.type.CloseWindowButton;
 import me.rhin.openciv.ui.screen.ScreenEnum;
 import me.rhin.openciv.ui.window.AbstractWindow;
 
-public class EscWindow extends AbstractWindow implements ResizeListener {
+public class EscWindow extends AbstractWindow {
 
 	private BlankBackground blankBackground;
 	private CloseWindowButton closeWindowButton;
@@ -40,11 +40,9 @@ public class EscWindow extends AbstractWindow implements ResizeListener {
 		addActor(mainMenuButton);
 
 		Civilization.getInstance().getGame().getPlayer().unselectUnit();
-
-		Civilization.getInstance().getEventManager().addListener(ResizeListener.class, this);
 	}
 
-	@Override
+	@EventHandler
 	public void onResize(int width, int height) {
 		blankBackground.setPosition(width / 2 - 200 / 2, height / 2 - 400 / 2);
 		closeWindowButton.setPosition(width / 2 - 150 / 2, blankBackground.getY() + blankBackground.getHeight() - 55);

@@ -4,15 +4,14 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 
-import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.notification.AbstractNotification;
-import me.rhin.openciv.listener.ResizeListener;
+import me.rhin.openciv.shared.listener.EventHandler;
 import me.rhin.openciv.ui.background.ColoredBackground;
 import me.rhin.openciv.ui.game.GameNotificationBox;
 import me.rhin.openciv.ui.window.AbstractWindow;
 
-public class NotificationWindow extends AbstractWindow implements ResizeListener {
+public class NotificationWindow extends AbstractWindow {
 
 	private ArrayList<GameNotificationBox> gameNotifications;
 	private ColoredBackground backgroundSprite;
@@ -24,11 +23,9 @@ public class NotificationWindow extends AbstractWindow implements ResizeListener
 		// addActor(backgroundSprite);
 
 		this.gameNotifications = new ArrayList<>();
-
-		Civilization.getInstance().getEventManager().addListener(ResizeListener.class, this);
 	}
 
-	@Override
+	@EventHandler
 	public void onResize(int width, int height) {
 		this.setPosition(width - 244, height - 450);
 	}

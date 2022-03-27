@@ -13,69 +13,11 @@ import com.github.czyzby.websocket.WebSocketAdapter;
 import com.github.czyzby.websocket.WebSockets;
 
 import me.rhin.openciv.Civilization;
-import me.rhin.openciv.listener.AddObservedTileListener.AddObservedTileEvent;
-import me.rhin.openciv.listener.AddSpecialistToContainerListener.AddSpecialistToContainerEvent;
-import me.rhin.openciv.listener.AddUnitListener.AddUnitEvent;
-import me.rhin.openciv.listener.ApplyProductionToItemListener.ApplyProductionToItemEvent;
-import me.rhin.openciv.listener.AttemptConnectionListener.AttemptConnectionEvent;
-import me.rhin.openciv.listener.AvailablePantheonListener.AvailablePantheonEvent;
-import me.rhin.openciv.listener.BuildingConstructedListener.BuildingConstructedEvent;
-import me.rhin.openciv.listener.BuildingRemovedListener.BuildingRemovedEvent;
-import me.rhin.openciv.listener.BuyProductionItemListener.BuyProductionItemEvent;
-import me.rhin.openciv.listener.ChooseCivListener.ChooseCivEvent;
-import me.rhin.openciv.listener.CityPopulationUpdateListener.CityPopulationUpdateEvent;
-import me.rhin.openciv.listener.CityReligionFollowersUpdateListener.CityReligionFollowersUpdateEvent;
-import me.rhin.openciv.listener.CityStatUpdateListener.CityStatUpdateEvent;
-import me.rhin.openciv.listener.CombatPreviewListener.CombatPreviewEvent;
-import me.rhin.openciv.listener.CompleteHeritageListener.CompleteHeritageEvent;
-import me.rhin.openciv.listener.CompleteResearchListener.CompleteResearchEvent;
-import me.rhin.openciv.listener.ConnectionFailedListener.ConnectionFailedEvent;
-import me.rhin.openciv.listener.DeclareWarAllListener.DeclareWarAllEvent;
-import me.rhin.openciv.listener.DeclareWarListener.DeclareWarEvent;
-import me.rhin.openciv.listener.DeleteUnitListener.DeleteUnitEvent;
-import me.rhin.openciv.listener.DiscoveredPlayerListener.DiscoveredPlayerEvent;
-import me.rhin.openciv.listener.FetchPlayerListener.FetchPlayerEvent;
-import me.rhin.openciv.listener.FinishLoadingRequestListener.FinishLoadingRequestEvent;
-import me.rhin.openciv.listener.FinishProductionItemListener.FinishProductionItemEvent;
-import me.rhin.openciv.listener.FoundReligionListener.FoundReligionEvent;
-import me.rhin.openciv.listener.GameStartListener.GameStartEvent;
-import me.rhin.openciv.listener.GetHostListener.GetHostEvent;
-import me.rhin.openciv.listener.MoveUnitListener.MoveUnitEvent;
-import me.rhin.openciv.listener.NextTurnListener.NextTurnEvent;
-import me.rhin.openciv.listener.PickPantheonListener.PickPantheonEvent;
-import me.rhin.openciv.listener.PlayerConnectListener.PlayerConnectEvent;
-import me.rhin.openciv.listener.PlayerDisconnectListener.PlayerDisconnectEvent;
-import me.rhin.openciv.listener.PlayerListRequestListener.PlayerListRequestEvent;
-import me.rhin.openciv.listener.PlayerStatUpdateListener.PlayerStatUpdateEvent;
-import me.rhin.openciv.listener.QueueProductionItemListener.QueueProductionItemEvent;
-import me.rhin.openciv.listener.ReceiveMapChunkListener.ReciveMapChunkEvent;
-import me.rhin.openciv.listener.RemoveObservedTileListener.RemoveObservedTileEvent;
-import me.rhin.openciv.listener.RemoveProductionItemListener.RemoveProductionItemEvent;
-import me.rhin.openciv.listener.RemoveQueuedProductionItemListener.RemoveQueuedProductionItemEvent;
-import me.rhin.openciv.listener.RemoveSpecialistFromContainerListener.RemoveSpecialistFromContainerEvent;
-import me.rhin.openciv.listener.RemoveTileTypeListener.RemoveTileTypeEvent;
-import me.rhin.openciv.listener.RequestEndTurnListener.RequestEndTurnEvent;
-import me.rhin.openciv.listener.SelectUnitListener.SelectUnitEvent;
-import me.rhin.openciv.listener.SendChatMessageListener.SendChatMessageEvent;
-import me.rhin.openciv.listener.ServerConnectListener.ServerConnectEvent;
-import me.rhin.openciv.listener.ServerNotificationListener.ServerNotificationEvent;
-import me.rhin.openciv.listener.SetCitizenTileWorkerListener.SetCitizenTileWorkerEvent;
-import me.rhin.openciv.listener.SetCityHealthListener.SetCityHealthEvent;
-import me.rhin.openciv.listener.SetCityOwnerListener.SetCityOwnerEvent;
-import me.rhin.openciv.listener.SetProductionItemListener.SetProductionItemEvent;
-import me.rhin.openciv.listener.SetTileTypeListener.SetTileTypeEvent;
-import me.rhin.openciv.listener.SetTurnLengthListener.SetTurnLengthEvent;
-import me.rhin.openciv.listener.SetUnitHealthListener.SetUnitHealthEvent;
-import me.rhin.openciv.listener.SetUnitOwnerListener.SetUnitOwnerEvent;
-import me.rhin.openciv.listener.SetWorldSizeListener.SetWorldSizeEvent;
-import me.rhin.openciv.listener.SettleCityListener.SettleCityEvent;
-import me.rhin.openciv.listener.TerritoryGrowListener.TerritoryGrowEvent;
-import me.rhin.openciv.listener.TileStatlineListener.TileStatlineEvent;
-import me.rhin.openciv.listener.TurnTimeLeftListener.TurnTimeLeftEvent;
-import me.rhin.openciv.listener.UnitAttackListener.UnitAttackEvent;
-import me.rhin.openciv.listener.WorkTileListener.WorkTileEvent;
+import me.rhin.openciv.events.NetworkEvent;
+import me.rhin.openciv.events.type.AttemptConnectionEvent;
+import me.rhin.openciv.events.type.ConnectionFailedEvent;
+import me.rhin.openciv.events.type.ServerConnectEvent;
 import me.rhin.openciv.shared.listener.Event;
-import me.rhin.openciv.shared.listener.Listener;
 import me.rhin.openciv.shared.logging.Logger;
 import me.rhin.openciv.shared.logging.LoggerFactory;
 import me.rhin.openciv.shared.logging.LoggerType;
@@ -120,7 +62,6 @@ import me.rhin.openciv.shared.packet.type.RemoveQueuedProductionItemPacket;
 import me.rhin.openciv.shared.packet.type.RemoveSpecialistFromContainerPacket;
 import me.rhin.openciv.shared.packet.type.RemoveTileTypePacket;
 import me.rhin.openciv.shared.packet.type.RequestEndTurnPacket;
-import me.rhin.openciv.shared.packet.type.SelectUnitPacket;
 import me.rhin.openciv.shared.packet.type.SendChatMessagePacket;
 import me.rhin.openciv.shared.packet.type.ServerNotificationPacket;
 import me.rhin.openciv.shared.packet.type.SetCitizenTileWorkerPacket;
@@ -144,69 +85,69 @@ public class NetworkManager {
 	private static final Logger LOGGER = LoggerFactory.getInstance(LoggerType.WS_LOG_TAG);
 
 	private WebSocket socket;
-	private HashMap<Class<? extends Packet>, Class<? extends Event<? extends Listener>>> networkEvents;
+	private HashMap<Class<? extends Packet>, String> networkEvents;
 
 	public NetworkManager() {
 		networkEvents = new HashMap<>();
 
-		networkEvents.put(PlayerConnectPacket.class, PlayerConnectEvent.class);
-		networkEvents.put(PlayerDisconnectPacket.class, PlayerDisconnectEvent.class);
-		networkEvents.put(PlayerListRequestPacket.class, PlayerListRequestEvent.class);
-		networkEvents.put(MapChunkPacket.class, ReciveMapChunkEvent.class);
-		networkEvents.put(GameStartPacket.class, GameStartEvent.class);
-		networkEvents.put(AddUnitPacket.class, AddUnitEvent.class);
-		networkEvents.put(FetchPlayerPacket.class, FetchPlayerEvent.class);
-		networkEvents.put(SelectUnitPacket.class, SelectUnitEvent.class);
-		networkEvents.put(MoveUnitPacket.class, MoveUnitEvent.class);
-		networkEvents.put(DeleteUnitPacket.class, DeleteUnitEvent.class);
-		networkEvents.put(SettleCityPacket.class, SettleCityEvent.class);
-		networkEvents.put(BuildingConstructedPacket.class, BuildingConstructedEvent.class);
-		networkEvents.put(BuildingRemovedPacket.class, BuildingRemovedEvent.class);
-		networkEvents.put(NextTurnPacket.class, NextTurnEvent.class);
-		networkEvents.put(FinishLoadingPacket.class, FinishLoadingRequestEvent.class);
-		networkEvents.put(TerritoryGrowPacket.class, TerritoryGrowEvent.class);
-		networkEvents.put(PlayerStatUpdatePacket.class, PlayerStatUpdateEvent.class);
-		networkEvents.put(CityStatUpdatePacket.class, CityStatUpdateEvent.class);
-		networkEvents.put(SetProductionItemPacket.class, SetProductionItemEvent.class);
-		networkEvents.put(ApplyProductionToItemPacket.class, ApplyProductionToItemEvent.class);
-		networkEvents.put(FinishProductionItemPacket.class, FinishProductionItemEvent.class);
-		networkEvents.put(SetCitizenTileWorkerPacket.class, SetCitizenTileWorkerEvent.class);
-		networkEvents.put(AddSpecialistToContainerPacket.class, AddSpecialistToContainerEvent.class);
-		networkEvents.put(RemoveSpecialistFromContainerPacket.class, RemoveSpecialistFromContainerEvent.class);
-		networkEvents.put(TurnTimeLeftPacket.class, TurnTimeLeftEvent.class);
-		networkEvents.put(GetHostPacket.class, GetHostEvent.class);
-		networkEvents.put(ChooseCivPacket.class, ChooseCivEvent.class);
-		networkEvents.put(SetWorldSizePacket.class, SetWorldSizeEvent.class);
-		networkEvents.put(CombatPreviewPacket.class, CombatPreviewEvent.class);
-		networkEvents.put(UnitAttackPacket.class, UnitAttackEvent.class);
-		networkEvents.put(SetUnitOwnerPacket.class, SetUnitOwnerEvent.class);
-		networkEvents.put(SetCityOwnerPacket.class, SetCityOwnerEvent.class);
-		networkEvents.put(SetCityHealthPacket.class, SetCityHealthEvent.class);
-		networkEvents.put(WorkTilePacket.class, WorkTileEvent.class);
-		networkEvents.put(SetTileTypePacket.class, SetTileTypeEvent.class);
-		networkEvents.put(CompleteResearchPacket.class, CompleteResearchEvent.class);
-		networkEvents.put(RemoveTileTypePacket.class, RemoveTileTypeEvent.class);
-		networkEvents.put(SetUnitHealthPacket.class, SetUnitHealthEvent.class);
-		networkEvents.put(RequestEndTurnPacket.class, RequestEndTurnEvent.class);
-		networkEvents.put(CompleteHeritagePacket.class, CompleteHeritageEvent.class);
-		networkEvents.put(RemoveProductionItemPacket.class, RemoveProductionItemEvent.class);
-		networkEvents.put(SetTurnLengthPacket.class, SetTurnLengthEvent.class);
-		networkEvents.put(SendChatMessagePacket.class, SendChatMessageEvent.class);
-		networkEvents.put(TileStatlinePacket.class, TileStatlineEvent.class);
-		networkEvents.put(BuyProductionItemPacket.class, BuyProductionItemEvent.class);
-		networkEvents.put(AddObservedTilePacket.class, AddObservedTileEvent.class);
-		networkEvents.put(RemoveObservedTilePacket.class, RemoveObservedTileEvent.class);
-		networkEvents.put(DeclareWarPacket.class, DeclareWarEvent.class);
-		networkEvents.put(DeclareWarAllPacket.class, DeclareWarAllEvent.class);
-		networkEvents.put(AvailablePantheonPacket.class, AvailablePantheonEvent.class);
-		networkEvents.put(PickPantheonPacket.class, PickPantheonEvent.class);
-		networkEvents.put(CityReligionFollowersUpdatePacket.class, CityReligionFollowersUpdateEvent.class);
-		networkEvents.put(FoundReligionPacket.class, FoundReligionEvent.class);
-		networkEvents.put(CityPopulationUpdatePacket.class, CityPopulationUpdateEvent.class);
-		networkEvents.put(DiscoveredPlayerPacket.class, DiscoveredPlayerEvent.class);
-		networkEvents.put(ServerNotificationPacket.class, ServerNotificationEvent.class);
-		networkEvents.put(QueueProductionItemPacket.class, QueueProductionItemEvent.class);
-		networkEvents.put(RemoveQueuedProductionItemPacket.class, RemoveQueuedProductionItemEvent.class);
+		networkEvents.put(PlayerConnectPacket.class, "onPlayerConnect");
+		networkEvents.put(PlayerDisconnectPacket.class, "onPlayerDisconnect");
+		networkEvents.put(PlayerListRequestPacket.class, "onPlayerListRequested");
+		networkEvents.put(MapChunkPacket.class, "onReceiveMapChunk");
+		networkEvents.put(GameStartPacket.class, "onGameStart");
+		networkEvents.put(AddUnitPacket.class, "onUnitAdd");
+		networkEvents.put(FetchPlayerPacket.class, "onFetchPlayer");
+		// networkEvents.put(SelectUnitPacket.class, SelectUnitEvent.class);
+		networkEvents.put(MoveUnitPacket.class, "onUnitMove");
+		networkEvents.put(DeleteUnitPacket.class, "onUnitDelete");
+		networkEvents.put(SettleCityPacket.class, "onSettleCity");
+		networkEvents.put(BuildingConstructedPacket.class, "onBuildingConstructed");
+		networkEvents.put(BuildingRemovedPacket.class, "onBuildingRemoved");
+		networkEvents.put(NextTurnPacket.class, "onNextTurn");
+		networkEvents.put(FinishLoadingPacket.class, "onFinishedLoading");
+		networkEvents.put(TerritoryGrowPacket.class, "onTerritoryGrow");
+		networkEvents.put(PlayerStatUpdatePacket.class, "onPlayerStatUpdate");
+		networkEvents.put(CityStatUpdatePacket.class, "onCityStatUpdate");
+		networkEvents.put(SetProductionItemPacket.class, "onSetProductionItem");
+		networkEvents.put(ApplyProductionToItemPacket.class, "onApplyProductionToItem");
+		networkEvents.put(FinishProductionItemPacket.class, "onFinishProductionItem");
+		networkEvents.put(SetCitizenTileWorkerPacket.class, "onSetCitizenTileWorker");
+		networkEvents.put(AddSpecialistToContainerPacket.class, "onAddSpecialistToContainer");
+		networkEvents.put(RemoveSpecialistFromContainerPacket.class, "onRemoveSpecialistFromContainer");
+		networkEvents.put(TurnTimeLeftPacket.class, "onTurnTimeLeftPacket");
+		networkEvents.put(GetHostPacket.class, "onGetHost");
+		networkEvents.put(ChooseCivPacket.class, "onChooseCiv");
+		networkEvents.put(SetWorldSizePacket.class, "onSetWorldSize");
+		networkEvents.put(CombatPreviewPacket.class, "onCombatPreview");
+		networkEvents.put(UnitAttackPacket.class, "onUnitAttack");
+		networkEvents.put(SetUnitOwnerPacket.class, "onSetUnitOwner");
+		networkEvents.put(SetCityOwnerPacket.class, "onSetCityOwner");
+		networkEvents.put(SetCityHealthPacket.class, "onSetCityHelath");
+		networkEvents.put(WorkTilePacket.class, "onWorkTile");
+		networkEvents.put(SetTileTypePacket.class, "onSetTileType");
+		networkEvents.put(CompleteResearchPacket.class, "onCompleteResearch");
+		networkEvents.put(RemoveTileTypePacket.class, "onRemoveTileType");
+		networkEvents.put(SetUnitHealthPacket.class, "onSetUnitHealth");
+		networkEvents.put(RequestEndTurnPacket.class, "onRequestEndTurn");
+		networkEvents.put(CompleteHeritagePacket.class, "onCompleteHeritagePacket");
+		networkEvents.put(RemoveProductionItemPacket.class, "onRemoveProductionItemPacket");
+		networkEvents.put(SetTurnLengthPacket.class, "onSetTurnLength");
+		networkEvents.put(SendChatMessagePacket.class, "onSendChatMessage");
+		networkEvents.put(TileStatlinePacket.class, "onRecieveTileStatline");
+		networkEvents.put(BuyProductionItemPacket.class, "onBuyProductionItem");
+		networkEvents.put(AddObservedTilePacket.class, "onAddObservedTilePacket");
+		networkEvents.put(RemoveObservedTilePacket.class, "onRemoveObservedTilePacket");
+		networkEvents.put(DeclareWarPacket.class, "onDelcareWar");
+		networkEvents.put(DeclareWarAllPacket.class, "onDeclareWarAll");
+		networkEvents.put(AvailablePantheonPacket.class, "onAvailablePantheon");
+		networkEvents.put(PickPantheonPacket.class, "onPickPantheon");
+		networkEvents.put(CityReligionFollowersUpdatePacket.class, "onCityReligionFollowersUpdate");
+		networkEvents.put(FoundReligionPacket.class, "onFoundReligion");
+		networkEvents.put(CityPopulationUpdatePacket.class, "onCityPopulationUpdate");
+		networkEvents.put(DiscoveredPlayerPacket.class, "onDiscoveredPlayer");
+		networkEvents.put(ServerNotificationPacket.class, "onServerNotification");
+		networkEvents.put(QueueProductionItemPacket.class, "onQueueProductionItem");
+		networkEvents.put(RemoveQueuedProductionItemPacket.class, "onRemoveQueuedProductionItem");
 	}
 
 	public void connect(String ip) {
@@ -237,26 +178,19 @@ public class NetworkManager {
 	private void fireAssociatedPacketEvents(WebSocket webSocket, String packet) {
 		JsonValue jsonValue = new JsonReader().parse(packet);
 		String packetName = jsonValue.getString("packetName");
-
-		Class<? extends Event<? extends Listener>> eventClass = null;
+		Class<? extends Packet> packetClass = null;
 
 		try {
-			eventClass = networkEvents.get(ClassReflection.forName(packetName));
+			packetClass = ClassReflection.forName(packetName);
 		} catch (ReflectionException e) {
 			LOGGER.error("Error: Reflection-1");
 			e.printStackTrace();
 		}
 
-		try {
-			Event<? extends Listener> eventObj = (Event<? extends Listener>) ClassReflection
-					.getConstructor(eventClass, PacketParameter.class)
-					.newInstance(new PacketParameter(webSocket, packet));
+		String methodName = networkEvents.get(packetClass);
 
-			Civilization.getInstance().getEventManager().fireEvent(eventObj);
-		} catch (Exception e) {
-			LOGGER.error(e.getMessage(), e);
-		}
-
+		Event eventObj = new NetworkEvent(methodName, packetClass, packet);
+		Civilization.getInstance().getEventManager().fireEvent(eventObj);
 	}
 
 	// TODO: Seperate class??

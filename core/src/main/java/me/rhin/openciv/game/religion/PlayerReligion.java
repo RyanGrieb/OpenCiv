@@ -4,18 +4,17 @@ import java.util.ArrayList;
 
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.SoundEnum;
+import me.rhin.openciv.events.type.ReligionIconChangeEvent;
 import me.rhin.openciv.game.city.City;
 import me.rhin.openciv.game.player.AbstractPlayer;
 import me.rhin.openciv.game.religion.bonus.ReligionBonus;
-import me.rhin.openciv.game.religion.bonus.type.follower.PagodasBonus;
 import me.rhin.openciv.game.religion.icon.ReligionIcon;
-import me.rhin.openciv.listener.FoundReligionListener;
-import me.rhin.openciv.listener.PickPantheonListener;
-import me.rhin.openciv.listener.ReligionIconChangeListener.ReligionIconChangeEvent;
+import me.rhin.openciv.shared.listener.EventHandler;
+import me.rhin.openciv.shared.listener.Listener;
 import me.rhin.openciv.shared.packet.type.FoundReligionPacket;
 import me.rhin.openciv.shared.packet.type.PickPantheonPacket;
 
-public class PlayerReligion implements PickPantheonListener, FoundReligionListener {
+public class PlayerReligion implements Listener {
 
 	private AbstractPlayer player;
 	private ArrayList<ReligionBonus> pickedBonuses;
@@ -25,11 +24,10 @@ public class PlayerReligion implements PickPantheonListener, FoundReligionListen
 		this.player = player;
 		this.pickedBonuses = new ArrayList<>();
 
-		Civilization.getInstance().getEventManager().addListener(PickPantheonListener.class, this);
-		Civilization.getInstance().getEventManager().addListener(FoundReligionListener.class, this);
+		Civilization.getInstance().getEventManager().addListener(this);
 	}
 
-	@Override
+	@EventHandler
 	public void onPickPantheon(PickPantheonPacket packet) {
 		if (!player.getName().equals(packet.getPlayerName()))
 			return;
@@ -42,7 +40,7 @@ public class PlayerReligion implements PickPantheonListener, FoundReligionListen
 		Civilization.getInstance().getSoundHandler().playEffect(SoundEnum.ANGELIC_SOUND_1);
 	}
 
-	@Override
+	@EventHandler
 	public void onFoundReligion(FoundReligionPacket packet) {
 		if (!player.getName().equals(packet.getPlayerName()))
 			return;

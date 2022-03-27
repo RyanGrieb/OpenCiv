@@ -8,13 +8,14 @@ import com.badlogic.gdx.scenes.scene2d.Actor;
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.city.City;
-import me.rhin.openciv.listener.CityStatUpdateListener;
+import me.rhin.openciv.shared.listener.EventHandler;
+import me.rhin.openciv.shared.listener.Listener;
 import me.rhin.openciv.shared.packet.type.CityStatUpdatePacket;
 import me.rhin.openciv.shared.stat.Stat;
 import me.rhin.openciv.shared.util.MathHelper;
 import me.rhin.openciv.ui.label.CustomLabel;
 
-public class CityStatsInfo extends Actor implements CityStatUpdateListener {
+public class CityStatsInfo extends Actor implements Listener {
 
 	private City city;
 
@@ -32,7 +33,6 @@ public class CityStatsInfo extends Actor implements CityStatUpdateListener {
 		this.backgroundSprite = TextureEnum.UI_POPUP_BOX_B.sprite();
 		backgroundSprite.setBounds(x, y, width, height);
 
-
 		this.populationIcon = TextureEnum.ICON_CITIZEN.sprite();
 		populationIcon.setSize(16, 16);
 
@@ -40,7 +40,6 @@ public class CityStatsInfo extends Actor implements CityStatUpdateListener {
 		this.populationLabel = new CustomLabel("0");
 		this.populationGrowthDescLabel = new CustomLabel("Growth In:");
 		this.populationGrowthLabel = new CustomLabel("0 Turns");
-
 
 		this.foodIcon = TextureEnum.ICON_FOOD.sprite();
 		foodIcon.setSize(16, 16);
@@ -59,7 +58,6 @@ public class CityStatsInfo extends Actor implements CityStatUpdateListener {
 
 		this.goldDescLabel = new CustomLabel("Gold:");
 		this.goldLabel = new CustomLabel("+0");
-
 
 		this.scienceIcon = TextureEnum.ICON_SCIENCE.sprite();
 		scienceIcon.setSize(16, 16);
@@ -83,7 +81,7 @@ public class CityStatsInfo extends Actor implements CityStatUpdateListener {
 
 		updateStatValues();
 
-		Civilization.getInstance().getEventManager().addListener(CityStatUpdateListener.class, this);
+		Civilization.getInstance().getEventManager().addListener(this);
 	}
 
 	@Override
@@ -126,7 +124,7 @@ public class CityStatsInfo extends Actor implements CityStatUpdateListener {
 		updatePositions();
 	}
 
-	@Override
+	@EventHandler
 	public void onCityStatUpdate(CityStatUpdatePacket packet) {
 		if (!city.getName().equals(packet.getCityName()))
 			return;

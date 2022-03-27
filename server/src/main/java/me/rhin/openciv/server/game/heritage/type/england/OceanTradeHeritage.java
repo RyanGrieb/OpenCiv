@@ -7,16 +7,17 @@ import me.rhin.openciv.server.game.AbstractPlayer;
 import me.rhin.openciv.server.game.city.City;
 import me.rhin.openciv.server.game.heritage.Heritage;
 import me.rhin.openciv.server.game.map.tile.Tile;
-import me.rhin.openciv.server.listener.SettleCityListener;
+import me.rhin.openciv.shared.listener.EventHandler;
+import me.rhin.openciv.shared.listener.Listener;
 import me.rhin.openciv.shared.packet.type.SettleCityPacket;
 import me.rhin.openciv.shared.stat.Stat;
 
-public class OceanTradeHeritage extends Heritage implements SettleCityListener {
+public class OceanTradeHeritage extends Heritage implements Listener {
 
 	public OceanTradeHeritage(AbstractPlayer player) {
 		super(player);
 
-		Server.getInstance().getEventManager().addListener(SettleCityListener.class, this);
+		Server.getInstance().getEventManager().addListener(this);
 	}
 
 	@Override
@@ -47,7 +48,7 @@ public class OceanTradeHeritage extends Heritage implements SettleCityListener {
 		player.updateOwnedStatlines(false);
 	}
 
-	@Override
+	@EventHandler
 	public void onSettleCity(WebSocket conn, SettleCityPacket packet) {
 
 		if (!isStudied())

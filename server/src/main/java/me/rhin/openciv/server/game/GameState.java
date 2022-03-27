@@ -9,12 +9,13 @@ import com.badlogic.gdx.utils.Json;
 import me.rhin.openciv.server.Server;
 import me.rhin.openciv.server.game.ai.AIPlayer;
 import me.rhin.openciv.server.game.civilization.type.Barbarians;
-import me.rhin.openciv.server.listener.SendChatMessageListener;
 import me.rhin.openciv.server.scenarios.Scenario;
 import me.rhin.openciv.server.scenarios.ScenarioList;
+import me.rhin.openciv.shared.listener.EventHandler;
+import me.rhin.openciv.shared.listener.Listener;
 import me.rhin.openciv.shared.packet.type.SendChatMessagePacket;
 
-public abstract class GameState implements SendChatMessageListener {
+public abstract class GameState implements Listener {
 
 	protected ArrayList<Player> players;
 	protected ArrayList<AIPlayer> aiPlayers;
@@ -26,11 +27,10 @@ public abstract class GameState implements SendChatMessageListener {
 		aiPlayers = Server.getInstance().getAIPlayers();
 		scenarioList = new ScenarioList();
 		gameScenarios = new ArrayList<>();
-
-		Server.getInstance().getEventManager().addListener(SendChatMessageListener.class, this);
+		Server.getInstance().getEventManager().addListener(this);
 	}
 
-	@Override
+	@EventHandler
 	public void onSendChatMessage(WebSocket conn, SendChatMessagePacket packet) {
 		packet.setPlayerName(getPlayerByConn(conn).getName());
 

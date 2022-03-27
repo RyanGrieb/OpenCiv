@@ -8,7 +8,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.TextField.TextFieldListener;
 
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.TextureEnum;
-import me.rhin.openciv.listener.SendChatMessageListener;
+import me.rhin.openciv.shared.listener.EventHandler;
 import me.rhin.openciv.shared.packet.type.SendChatMessagePacket;
 import me.rhin.openciv.ui.background.ColoredBackground;
 import me.rhin.openciv.ui.button.CustomButton;
@@ -16,7 +16,7 @@ import me.rhin.openciv.ui.button.type.CloseWindowButton;
 import me.rhin.openciv.ui.label.CustomLabel;
 import me.rhin.openciv.ui.window.AbstractWindow;
 
-public class ChatboxWindow extends AbstractWindow implements SendChatMessageListener {
+public class ChatboxWindow extends AbstractWindow {
 
 	private ArrayList<CustomLabel> chatLabels;
 	private ColoredBackground coloredBackground;
@@ -65,8 +65,6 @@ public class ChatboxWindow extends AbstractWindow implements SendChatMessageList
 		for (String message : Civilization.getInstance().getChatHandler().getSentMessages()) {
 			addMessage(message);
 		}
-
-		Civilization.getInstance().getEventManager().addListener(SendChatMessageListener.class, this);
 	}
 
 	@Override
@@ -101,8 +99,10 @@ public class ChatboxWindow extends AbstractWindow implements SendChatMessageList
 		return false;
 	}
 
-	@Override
+	@EventHandler
 	public void onSentChatMessage(SendChatMessagePacket packet) {
+
+		System.out.println("I hear you too.");
 
 		String messageText = packet.getMessage();
 

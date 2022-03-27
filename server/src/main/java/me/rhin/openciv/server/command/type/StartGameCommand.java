@@ -4,7 +4,7 @@ import org.java_websocket.WebSocket;
 
 import me.rhin.openciv.server.Server;
 import me.rhin.openciv.server.command.Command;
-import me.rhin.openciv.server.listener.StartGameRequestListener.StartGameRequestEvent;
+import me.rhin.openciv.server.events.type.StartGameRequestEvent;
 import me.rhin.openciv.shared.packet.type.SendChatMessagePacket;
 
 public class StartGameCommand extends Command {

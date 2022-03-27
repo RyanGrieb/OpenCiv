@@ -1,15 +1,14 @@
 package me.rhin.openciv.ui.window.type;
 
-import me.rhin.openciv.Civilization;
 import me.rhin.openciv.game.civilization.CivType;
-import me.rhin.openciv.listener.ResizeListener;
+import me.rhin.openciv.shared.listener.EventHandler;
 import me.rhin.openciv.ui.background.BlankBackground;
 import me.rhin.openciv.ui.list.ContainerList;
 import me.rhin.openciv.ui.list.ListContainer.ListContainerType;
 import me.rhin.openciv.ui.list.type.ListCivilization;
 import me.rhin.openciv.ui.window.AbstractWindow;
 
-public class ChooseCivWindow extends AbstractWindow implements ResizeListener {
+public class ChooseCivWindow extends AbstractWindow {
 
 	private BlankBackground blankBackground;
 	private ContainerList civContianerList;
@@ -27,11 +26,9 @@ public class ChooseCivWindow extends AbstractWindow implements ResizeListener {
 		}
 
 		addActor(civContianerList);
-
-		Civilization.getInstance().getEventManager().addListener(ResizeListener.class, this);
 	}
 
-	@Override
+	@EventHandler
 	public void onResize(int width, int height) {
 		super.setPosition(width / 2 - 340, height - 360);
 		blankBackground.setPosition(0, 0);

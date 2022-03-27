@@ -6,21 +6,16 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 
 import me.rhin.openciv.Civilization;
+import me.rhin.openciv.events.type.LeftClickEvent;
 import me.rhin.openciv.game.civilization.CivType;
-import me.rhin.openciv.listener.ChooseCivListener;
-import me.rhin.openciv.listener.GameStartListener;
-import me.rhin.openciv.listener.GetHostListener;
-import me.rhin.openciv.listener.LeftClickListener.LeftClickEvent;
-import me.rhin.openciv.listener.MouseMoveListener.MouseMoveEvent;
-import me.rhin.openciv.listener.PlayerConnectListener;
-import me.rhin.openciv.listener.PlayerDisconnectListener;
-import me.rhin.openciv.listener.PlayerListRequestListener;
-import me.rhin.openciv.listener.ResizeListener;
+import me.rhin.openciv.shared.listener.EventHandler;
 import me.rhin.openciv.shared.listener.EventManager;
+import me.rhin.openciv.shared.listener.Listener;
 import me.rhin.openciv.shared.logging.Logger;
 import me.rhin.openciv.shared.logging.LoggerFactory;
 import me.rhin.openciv.shared.logging.LoggerType;
 import me.rhin.openciv.shared.packet.type.ChooseCivPacket;
+import me.rhin.openciv.shared.packet.type.GameStartPacket;
 import me.rhin.openciv.shared.packet.type.GetHostPacket;
 import me.rhin.openciv.shared.packet.type.MapRequestPacket;
 import me.rhin.openciv.shared.packet.type.PlayerConnectPacket;
@@ -29,7 +24,6 @@ import me.rhin.openciv.shared.packet.type.PlayerListRequestPacket;
 import me.rhin.openciv.shared.packet.type.StartGameRequestPacket;
 import me.rhin.openciv.ui.button.CustomButton;
 import me.rhin.openciv.ui.button.type.OpenChatButton;
-import me.rhin.openciv.ui.button.type.PreviousScreenButton;
 import me.rhin.openciv.ui.game.GameOptionsMenu;
 import me.rhin.openciv.ui.list.ContainerList;
 import me.rhin.openciv.ui.list.ListContainer.ListContainerType;
@@ -39,8 +33,7 @@ import me.rhin.openciv.ui.screen.AbstractScreen;
 import me.rhin.openciv.ui.screen.ScreenEnum;
 import me.rhin.openciv.ui.window.type.TitleOverlay;
 
-public class ServerLobbyScreen extends AbstractScreen implements ResizeListener, PlayerConnectListener,
-		PlayerDisconnectListener, PlayerListRequestListener, GameStartListener, GetHostListener, ChooseCivListener {
+public class ServerLobbyScreen extends AbstractScreen implements Listener {
 
 	private static final Logger LOGGER = LoggerFactory.getInstance(LoggerType.LOG_TAG);
 
@@ -57,7 +50,7 @@ public class ServerLobbyScreen extends AbstractScreen implements ResizeListener,
 
 	public ServerLobbyScreen() {
 		this.eventManager = Civilization.getInstance().getEventManager();
-		eventManager.clearEvents();
+		eventManager.clearListeners();
 
 		this.titleOverlay = new TitleOverlay();
 		stage.addActor(titleOverlay);
@@ -66,14 +59,6 @@ public class ServerLobbyScreen extends AbstractScreen implements ResizeListener,
 				viewport.getWorldHeight() - 360, 220, 300);
 
 		stage.addActor(playerContainerList);
-
-		eventManager.addListener(ResizeListener.class, this);
-		eventManager.addListener(PlayerConnectListener.class, this);
-		eventManager.addListener(PlayerDisconnectListener.class, this);
-		eventManager.addListener(PlayerListRequestListener.class, this);
-		eventManager.addListener(GameStartListener.class, this);
-		eventManager.addListener(GetHostListener.class, this);
-		eventManager.addListener(ChooseCivListener.class, this);
 
 		multiplayerStartButton = new CustomButton("Start Game", viewport.getWorldWidth() / 2 - 150 / 2, 60, 150, 45);
 		multiplayerStartButton.onClick(() -> {
@@ -94,6 +79,8 @@ public class ServerLobbyScreen extends AbstractScreen implements ResizeListener,
 		stage.addActor(chatButton);
 
 		requestPlayerList();
+
+		eventManager.addListener(this);
 	}
 
 	@Override
@@ -101,7 +88,7 @@ public class ServerLobbyScreen extends AbstractScreen implements ResizeListener,
 		super.show();
 	}
 
-	@Override
+	@EventHandler
 	public void onResize(int width, int height) {
 		titleOverlay.setSize(width, height);
 		playerContainerList.setPosition(width / 2 - 220 / 2, height - 360);
@@ -109,12 +96,6 @@ public class ServerLobbyScreen extends AbstractScreen implements ResizeListener,
 		gameOptionsMenu.setPosition(width / 2 + 120, height - 360);
 		backButton.setPosition(width / 2 - 150 / 2, 20);
 		gameOptionsMenu.setPosition(width / 2 + 120, height - 360);
-	}
-
-	@Override
-	public void render(float delta) {
-		super.render(delta);
-		eventManager.fireEvent(MouseMoveEvent.INSTANCE);
 	}
 
 	@Override
@@ -132,7 +113,7 @@ public class ServerLobbyScreen extends AbstractScreen implements ResizeListener,
 		return false;
 	}
 
-	@Override
+	@EventHandler
 	public void onPlayerConnect(PlayerConnectPacket packet) {
 		LOGGER.info(packet.getPlayerName() + " has connected to the lobby");
 
@@ -140,7 +121,7 @@ public class ServerLobbyScreen extends AbstractScreen implements ResizeListener,
 				new ListLobbyPlayer(packet.getPlayerName(), CivType.RANDOM, playerContainerList, 200, 40));
 	}
 
-	@Override
+	@EventHandler
 	public void onPlayerListRequested(PlayerListRequestPacket packet) {
 		for (int i = 0; i < packet.getPlayerList().length; i++) {
 			String playerName = packet.getPlayerList()[i];
@@ -159,14 +140,14 @@ public class ServerLobbyScreen extends AbstractScreen implements ResizeListener,
 		this.playerName = listItemActors.get(listItemActors.size() - 1).getKey();
 	}
 
-	@Override
+	@EventHandler
 	public void onPlayerDisconnect(PlayerDisconnectPacket packet) {
 		playerContainerList.removeItem("Players", packet.getPlayerName());
 
 	}
 
-	@Override
-	public void onGameStart() {
+	@EventHandler
+	public void onGameStart(GameStartPacket packet) {
 		Gdx.app.postRunnable(new Runnable() {
 			public void run() {
 				Civilization.getInstance().getScreenManager().setScreen(ScreenEnum.IN_GAME);
@@ -175,7 +156,7 @@ public class ServerLobbyScreen extends AbstractScreen implements ResizeListener,
 		});
 	}
 
-	@Override
+	@EventHandler
 	public void onGetHost(GetHostPacket packet) {
 		hostPlayerName = packet.getPlayer();
 		if (playerName.equals(packet.getPlayer()))
@@ -196,7 +177,7 @@ public class ServerLobbyScreen extends AbstractScreen implements ResizeListener,
 		return ScreenEnum.SERVER_LOBBY;
 	}
 
-	@Override
+	@EventHandler
 	public void onChooseCiv(ChooseCivPacket packet) {
 		ArrayList<ListObject> listItemActors = playerContainerList.getListContainers().get("Players")
 				.getListItemActors();

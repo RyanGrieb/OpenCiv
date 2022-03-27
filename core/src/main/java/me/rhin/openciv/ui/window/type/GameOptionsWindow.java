@@ -3,10 +3,9 @@ package me.rhin.openciv.ui.window.type;
 import com.badlogic.gdx.utils.Align;
 
 import me.rhin.openciv.Civilization;
-import me.rhin.openciv.listener.ResizeListener;
-import me.rhin.openciv.listener.ScrubberPositionUpdateListener;
 import me.rhin.openciv.options.GameOptions;
 import me.rhin.openciv.options.OptionType;
+import me.rhin.openciv.shared.listener.EventHandler;
 import me.rhin.openciv.ui.background.BlankBackground;
 import me.rhin.openciv.ui.button.CustomButton;
 import me.rhin.openciv.ui.button.type.CloseWindowButton;
@@ -14,7 +13,7 @@ import me.rhin.openciv.ui.label.CustomLabel;
 import me.rhin.openciv.ui.scrub.ScrubBar;
 import me.rhin.openciv.ui.window.AbstractWindow;
 
-public class GameOptionsWindow extends AbstractWindow implements ResizeListener, ScrubberPositionUpdateListener {
+public class GameOptionsWindow extends AbstractWindow {
 
 	private BlankBackground blankBackground;
 	private CloseWindowButton closeWindowButton;
@@ -135,12 +134,9 @@ public class GameOptionsWindow extends AbstractWindow implements ResizeListener,
 		animationsScrubBar = new ScrubBar(270, viewport.getWorldHeight() - 205, 100, 20);
 		animationsScrubBar.setValue(gameOptions.getInt(OptionType.ANIMATION_LEVEL) * 50);
 		addActor(animationsScrubBar);
-
-		Civilization.getInstance().getEventManager().addListener(ScrubberPositionUpdateListener.class, this);
-		Civilization.getInstance().getEventManager().addListener(ResizeListener.class, this);
 	}
 
-	@Override
+	@EventHandler
 	public void onScrubberPositionUpdate(ScrubBar scrubber) {
 
 		GameOptions gameOptions = Civilization.getInstance().getGameOptions();
@@ -198,7 +194,7 @@ public class GameOptionsWindow extends AbstractWindow implements ResizeListener,
 		updatePositions(viewport.getWorldWidth(), viewport.getWorldHeight());
 	}
 
-	@Override
+	@EventHandler
 	public void onResize(int width, int height) {
 		updatePositions(width, height);
 	}
@@ -229,13 +225,6 @@ public class GameOptionsWindow extends AbstractWindow implements ResizeListener,
 
 		displayDescLabel.setPosition(270, height - 35);
 		fullscreenButton.setPosition(237, height - 100);
-	}
-
-	@Override
-	public void onClose() {
-		super.onClose();
-
-		Civilization.getInstance().getEventManager().clearListenersFromObject(this);
 	}
 
 	@Override

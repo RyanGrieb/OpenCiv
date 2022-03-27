@@ -8,11 +8,10 @@ import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.utils.TimeUtils;
 
 import me.rhin.openciv.Civilization;
+import me.rhin.openciv.events.type.LeftClickEvent;
+import me.rhin.openciv.events.type.RelativeMouseMoveEvent;
+import me.rhin.openciv.events.type.RightClickEvent;
 import me.rhin.openciv.game.CivGame;
-import me.rhin.openciv.listener.LeftClickListener.LeftClickEvent;
-import me.rhin.openciv.listener.MouseMoveListener.MouseMoveEvent;
-import me.rhin.openciv.listener.RelativeMouseMoveListener.RelativeMouseMoveEvent;
-import me.rhin.openciv.listener.RightClickListener.RightClickEvent;
 import me.rhin.openciv.shared.listener.EventManager;
 import me.rhin.openciv.ui.screen.AbstractScreen;
 import me.rhin.openciv.ui.screen.ScreenEnum;
@@ -44,7 +43,7 @@ public class InGameScreen extends AbstractScreen {
 	public InGameScreen() {
 
 		EventManager eventManager = Civilization.getInstance().getEventManager();
-		eventManager.clearEvents();
+		eventManager.clearListeners();
 
 		lastTimeCounted = TimeUtils.millis();
 		frameRate = Gdx.graphics.getFramesPerSecond();
@@ -111,8 +110,8 @@ public class InGameScreen extends AbstractScreen {
 
 		handleInput();
 
-		Civilization.getInstance().getEventManager().fireEvent(MouseMoveEvent.INSTANCE);
-		Civilization.getInstance().getEventManager().fireEvent(RelativeMouseMoveEvent.INSTANCE);
+		if (RelativeMouseMoveEvent.hasMouseMoved())
+			Civilization.getInstance().getEventManager().fireEvent(RelativeMouseMoveEvent.INSTANCE);
 
 		long timeSince = TimeUtils.timeSinceMillis(lastTimeCounted);
 		if (timeSince >= 500) {

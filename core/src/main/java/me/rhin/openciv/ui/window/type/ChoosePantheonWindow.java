@@ -2,8 +2,7 @@ package me.rhin.openciv.ui.window.type;
 
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.game.religion.bonus.ReligionBonus;
-import me.rhin.openciv.listener.PickPantheonListener;
-import me.rhin.openciv.listener.ResizeListener;
+import me.rhin.openciv.shared.listener.EventHandler;
 import me.rhin.openciv.shared.packet.type.PickPantheonPacket;
 import me.rhin.openciv.ui.background.BlankBackground;
 import me.rhin.openciv.ui.button.type.CloseWindowButton;
@@ -12,7 +11,7 @@ import me.rhin.openciv.ui.list.ListContainer.ListContainerType;
 import me.rhin.openciv.ui.list.type.ListReligionBonus;
 import me.rhin.openciv.ui.window.AbstractWindow;
 
-public class ChoosePantheonWindow extends AbstractWindow implements ResizeListener, PickPantheonListener {
+public class ChoosePantheonWindow extends AbstractWindow {
 
 	private BlankBackground blankBackground;
 	private CloseWindowButton closeWindowButton;
@@ -35,12 +34,9 @@ public class ChoosePantheonWindow extends AbstractWindow implements ResizeListen
 
 		this.closeWindowButton = new CloseWindowButton(getClass(), "Cancel", getWidth() / 2 - 135 / 2, 10, 135, 35);
 		addActor(closeWindowButton);
-
-		Civilization.getInstance().getEventManager().addListener(PickPantheonListener.class, this);
-		Civilization.getInstance().getEventManager().addListener(ResizeListener.class, this);
 	}
 
-	@Override
+	@EventHandler
 	public void onPickPantheon(PickPantheonPacket packet) {
 
 		bonusContianerList.clearList();
@@ -52,7 +48,7 @@ public class ChoosePantheonWindow extends AbstractWindow implements ResizeListen
 		}
 	}
 
-	@Override
+	@EventHandler
 	public void onResize(int width, int height) {
 		setPosition(width / 2 - 300 / 2, height / 2 - 450 / 2);
 	}

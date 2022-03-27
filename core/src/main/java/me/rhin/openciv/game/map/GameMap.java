@@ -12,11 +12,8 @@ import me.rhin.openciv.game.map.tile.Tile.TileTypeWrapper;
 import me.rhin.openciv.game.map.tile.TileType;
 import me.rhin.openciv.game.player.AbstractPlayer;
 import me.rhin.openciv.game.unit.Unit;
-import me.rhin.openciv.listener.AddObservedTileListener;
-import me.rhin.openciv.listener.ReceiveMapChunkListener;
-import me.rhin.openciv.listener.RemoveObservedTileListener;
-import me.rhin.openciv.listener.RemoveTileTypeListener;
-import me.rhin.openciv.listener.SetTileTypeListener;
+import me.rhin.openciv.shared.listener.EventHandler;
+import me.rhin.openciv.shared.listener.Listener;
 import me.rhin.openciv.shared.packet.ChunkTile;
 import me.rhin.openciv.shared.packet.type.AddObservedTilePacket;
 import me.rhin.openciv.shared.packet.type.MapChunkPacket;
@@ -26,8 +23,7 @@ import me.rhin.openciv.shared.packet.type.SetTileTypePacket;
 import me.rhin.openciv.ui.screen.type.InGameScreen;
 import me.rhin.openciv.util.MathHelper;
 
-public class GameMap implements ReceiveMapChunkListener, SetTileTypeListener, RemoveTileTypeListener,
-		AddObservedTileListener, RemoveObservedTileListener {
+public class GameMap implements Listener {
 
 	public static final int WIDTH = 128;
 	public static final int HEIGHT = 80;
@@ -54,15 +50,11 @@ public class GameMap implements ReceiveMapChunkListener, SetTileTypeListener, Re
 		// generateTerrain();
 
 		// FIXME: I don't believe we clear these
-		Civilization.getInstance().getEventManager().addListener(ReceiveMapChunkListener.class, this);
-		Civilization.getInstance().getEventManager().addListener(SetTileTypeListener.class, this);
-		Civilization.getInstance().getEventManager().addListener(RemoveTileTypeListener.class, this);
-		Civilization.getInstance().getEventManager().addListener(AddObservedTileListener.class, this);
-		Civilization.getInstance().getEventManager().addListener(RemoveObservedTileListener.class, this);
+		Civilization.getInstance().getEventManager().addListener(this);
 	}
 
-	@Override
-	public void onReciveMapChunk(MapChunkPacket packet) {
+	@EventHandler
+	public void onReceiveMapChunk(MapChunkPacket packet) {
 		// Start from 0 and go up the Y axis.
 		int chunkTileIndex = 0;
 		for (int i = 0; i < MapChunkPacket.CHUNK_SIZE; i++) {
@@ -99,7 +91,7 @@ public class GameMap implements ReceiveMapChunkListener, SetTileTypeListener, Re
 		}
 	}
 
-	@Override
+	@EventHandler
 	public void onSetTileType(SetTileTypePacket packet) {
 		Tile tile = tiles[packet.getGridX()][packet.getGridY()];
 
@@ -116,7 +108,7 @@ public class GameMap implements ReceiveMapChunkListener, SetTileTypeListener, Re
 		tile.setTileType(TileType.valueOf(packet.getTileTypeName()));
 	}
 
-	@Override
+	@EventHandler
 	public void onRemoveTileType(RemoveTileTypePacket packet) {
 		Tile tile = tiles[packet.getGridX()][packet.getGridY()];
 		TileType tileType = TileType.valueOf(packet.getTileTypeName());
@@ -127,7 +119,7 @@ public class GameMap implements ReceiveMapChunkListener, SetTileTypeListener, Re
 		tile.removeTileType(tileType);
 	}
 
-	@Override
+	@EventHandler
 	public void onAddObservedTile(AddObservedTilePacket packet) {
 		Tile tile = tiles[packet.getTileGridX()][packet.getTileGridY()];
 
@@ -143,7 +135,7 @@ public class GameMap implements ReceiveMapChunkListener, SetTileTypeListener, Re
 		tile.getServerObservers().add(unit);
 	}
 
-	@Override
+	@EventHandler
 	public void onRemoveObservedTile(RemoveObservedTilePacket packet) {
 		Tile tile = tiles[packet.getTileGridX()][packet.getTileGridY()];
 

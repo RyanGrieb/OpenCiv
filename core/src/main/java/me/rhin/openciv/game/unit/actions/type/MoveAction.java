@@ -2,10 +2,10 @@ package me.rhin.openciv.game.unit.actions.type;
 
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.TextureEnum;
+import me.rhin.openciv.events.type.UnitActEvent;
 import me.rhin.openciv.game.player.AbstractPlayer;
 import me.rhin.openciv.game.unit.Unit;
 import me.rhin.openciv.game.unit.actions.AbstractAction;
-import me.rhin.openciv.listener.UnitActListener.UnitActEvent;
 
 public class MoveAction extends AbstractAction {
 

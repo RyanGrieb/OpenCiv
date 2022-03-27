@@ -1,12 +1,10 @@
 package me.rhin.openciv.headless;
 
-import com.badlogic.gdx.Application;
-import com.badlogic.gdx.backends.headless.HeadlessApplication;
-import com.badlogic.gdx.backends.headless.HeadlessApplicationConfiguration;
-
-import me.rhin.openciv.Civilization;
-import me.rhin.openciv.shared.stat.Stat;
-import me.rhin.openciv.shared.stat.StatLine;
+import me.rhin.openciv.headless.demo.AppleObj;
+import me.rhin.openciv.headless.demo.GroundObj;
+import me.rhin.openciv.headless.demo.TreeObj;
+import me.rhin.openciv.headless.listener.EventManager;
+import me.rhin.openciv.headless.listener.events.type.NoParamEvent;
 
 /**
  * Launches the headless application. Can be converted into a utilities project
@@ -14,36 +12,42 @@ import me.rhin.openciv.shared.stat.StatLine;
  */
 public class HeadlessLauncher {
 
+	private static HeadlessLauncher instance;
+
+	private EventManager eventManager;
+
+	public HeadlessLauncher() {
+		eventManager = new EventManager();
+
+		instance = this;
+
+		GroundObj ground = new GroundObj();
+		TreeObj tree = new TreeObj();
+		AppleObj apple = new AppleObj();
+
+		eventManager.fireEvent(new NoParamEvent());
+
+		tree.getApples().add(apple);
+
+		System.out.println(apple);
+
+		apple.fall();
+
+		System.out.println("==== Removing Listener - Ground =====");
+		eventManager.removeListener(ground);
+
+		apple.fall();
+	}
+
 	public static void main(String[] args) {
-		// createApplication();
-		
-		StatLine playerStatLine = new StatLine();
-		// LOGGER.info("playerStatLine:" + playerStatLine.id);
-
-		playerStatLine.setValue(Stat.GOLD_GAIN, 100);
-		
-		StatLine statLine = new StatLine();
-		
-		statLine.setValue(Stat.GOLD_GAIN, 2);
-		statLine.addModifier(Stat.GOLD_GAIN, 0.25F);
-		
-		playerStatLine.mergeStatLine(statLine);
-		
-		System.out.println(playerStatLine);
-		
-		float mod = statLine.getStatModifier(Stat.TRADE_GOLD_MODIFIER);
+		new HeadlessLauncher();
 	}
 
-	private static Application createApplication() {
-		// Note: you can use a custom ApplicationListener implementation for the
-		// headless project instead of Civilization.
-		return new HeadlessApplication(new Civilization(), getDefaultConfiguration());
+	public static final HeadlessLauncher getInstance() {
+		return instance;
 	}
 
-	private static HeadlessApplicationConfiguration getDefaultConfiguration() {
-		HeadlessApplicationConfiguration configuration = new HeadlessApplicationConfiguration();
-		// configuration.renderInterval = -1f; // When this value is negative,
-		// Civilization#render() is never called.
-		return configuration;
+	public EventManager getEventManager() {
+		return eventManager;
 	}
 }

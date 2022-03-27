@@ -6,9 +6,9 @@ import com.badlogic.gdx.utils.Align;
 
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.TextureEnum;
+import me.rhin.openciv.events.type.PickHeritageEvent;
 import me.rhin.openciv.game.heritage.Heritage;
-import me.rhin.openciv.listener.PickHeritageListener.PickHeritageEvent;
-import me.rhin.openciv.listener.ResizeListener;
+import me.rhin.openciv.shared.listener.EventHandler;
 import me.rhin.openciv.shared.packet.type.ChooseHeritagePacket;
 import me.rhin.openciv.shared.stat.Stat;
 import me.rhin.openciv.ui.background.ColoredBackground;
@@ -17,7 +17,7 @@ import me.rhin.openciv.ui.button.type.CloseWindowButton;
 import me.rhin.openciv.ui.label.CustomLabel;
 import me.rhin.openciv.ui.window.AbstractWindow;
 
-public class PickHeritageWindow extends AbstractWindow implements ResizeListener {
+public class PickHeritageWindow extends AbstractWindow {
 
 	private Heritage heritage;
 	private ColoredBackground coloredBackground;
@@ -82,11 +82,9 @@ public class PickHeritageWindow extends AbstractWindow implements ResizeListener
 
 		this.closeWindowButton = new CloseWindowButton(this.getClass(), "Cancel", getWidth() - 100, 5, 100, 35);
 		addActor(closeWindowButton);
-
-		Civilization.getInstance().getEventManager().addListener(ResizeListener.class, this);
 	}
 
-	@Override
+	@EventHandler
 	public void onResize(int width, int height) {
 		super.setPosition(width / 2 - 270 / 2, height / 2 - 300 / 2);
 	}

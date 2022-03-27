@@ -1,13 +1,12 @@
 package me.rhin.openciv.game.notification;
 
-import java.util.Comparator;
-
 import com.badlogic.gdx.graphics.g2d.Sprite;
 
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.shared.listener.Listener;
 
 public abstract class AbstractNotification implements Listener, Comparable<AbstractNotification> {
+
 
 	public abstract void act();
 
@@ -22,7 +21,7 @@ public abstract class AbstractNotification implements Listener, Comparable<Abstr
 	}
 
 	public void merge(AbstractNotification notification) {
-		Civilization.getInstance().getEventManager().clearListenersFromObject(notification);
+		Civilization.getInstance().getEventManager().removeListener(notification);
 	}
 
 	@Override

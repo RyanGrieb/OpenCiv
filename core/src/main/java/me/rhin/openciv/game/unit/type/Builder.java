@@ -24,10 +24,7 @@ import me.rhin.openciv.game.unit.actions.type.PastureAction;
 import me.rhin.openciv.game.unit.actions.type.PlantationAction;
 import me.rhin.openciv.game.unit.actions.type.QuarryAction;
 import me.rhin.openciv.game.unit.actions.type.RoadAction;
-import me.rhin.openciv.listener.MoveUnitListener;
-import me.rhin.openciv.listener.RemoveTileTypeListener;
-import me.rhin.openciv.listener.SetTileTypeListener;
-import me.rhin.openciv.listener.WorkTileListener;
+import me.rhin.openciv.shared.listener.EventHandler;
 import me.rhin.openciv.shared.packet.type.MoveUnitPacket;
 import me.rhin.openciv.shared.packet.type.NextTurnPacket;
 import me.rhin.openciv.shared.packet.type.RemoveTileTypePacket;
@@ -40,8 +37,7 @@ public class Builder extends UnitItem {
 		super(city);
 	}
 
-	public static class BuilderUnit extends Unit
-			implements WorkTileListener, SetTileTypeListener, RemoveTileTypeListener, MoveUnitListener {
+	public static class BuilderUnit extends Unit {
 
 		private ImprovementType improvementType;
 		private boolean building;
@@ -60,14 +56,9 @@ public class Builder extends UnitItem {
 			customActions.add(new QuarryAction(this));
 			customActions.add(new LumberMillAction(this));
 			this.building = false;
-
-			Civilization.getInstance().getEventManager().addListener(WorkTileListener.class, this);
-			Civilization.getInstance().getEventManager().addListener(SetTileTypeListener.class, this);
-			Civilization.getInstance().getEventManager().addListener(RemoveTileTypeListener.class, this);
-			Civilization.getInstance().getEventManager().addListener(MoveUnitListener.class, this);
 		}
 
-		@Override
+		@EventHandler
 		public void onWorkTile(WorkTilePacket packet) {
 			if (packet.getUnitID() != getID())
 				return;
@@ -75,7 +66,7 @@ public class Builder extends UnitItem {
 			getStandingTile().setAppliedTurns(packet.getAppliedTurns());
 		}
 
-		@Override
+		@EventHandler
 		public void onSetTileType(SetTileTypePacket packet) {
 			Tile tile = Civilization.getInstance().getGame().getMap().getTiles()[packet.getGridX()][packet.getGridY()];
 			if (!standingTile.equals(tile))
@@ -97,7 +88,7 @@ public class Builder extends UnitItem {
 			}
 		}
 
-		@Override
+		@EventHandler
 		public void onRemoveTileType(RemoveTileTypePacket packet) {
 			Tile tile = Civilization.getInstance().getGame().getMap().getTiles()[packet.getGridX()][packet.getGridY()];
 			if (!standingTile.equals(tile))
@@ -139,7 +130,7 @@ public class Builder extends UnitItem {
 				movement = getMaxMovement();
 		}
 
-		@Override
+		@EventHandler
 		public void onUnitMove(MoveUnitPacket packet) {
 			Unit unit = Civilization.getInstance().getGame().getMap().getTiles()[packet.getTargetGridX()][packet
 					.getTargetGridY()].getUnitFromID(packet.getUnitID());

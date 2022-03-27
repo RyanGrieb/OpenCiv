@@ -6,7 +6,7 @@ import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.player.AbstractPlayer;
 import me.rhin.openciv.game.player.Player;
-import me.rhin.openciv.listener.ResizeListener;
+import me.rhin.openciv.shared.listener.EventHandler;
 import me.rhin.openciv.ui.background.ColoredBackground;
 import me.rhin.openciv.ui.button.type.CloseWindowButton;
 import me.rhin.openciv.ui.label.CustomLabel;
@@ -15,7 +15,7 @@ import me.rhin.openciv.ui.list.ListContainer.ListContainerType;
 import me.rhin.openciv.ui.list.type.ListDiplomacyCivilization;
 import me.rhin.openciv.ui.window.AbstractWindow;
 
-public class DiplomacyWindow extends AbstractWindow implements ResizeListener {
+public class DiplomacyWindow extends AbstractWindow {
 
 	private ColoredBackground background;
 	private CloseWindowButton closeWindowButton;
@@ -37,12 +37,10 @@ public class DiplomacyWindow extends AbstractWindow implements ResizeListener {
 				15);
 		addActor(diplomacyDescLabel);
 
-		Civilization.getInstance().getEventManager().addListener(ResizeListener.class, this);
-
 		Player player = Civilization.getInstance().getGame().getPlayer();
 
 		player.unselectUnit();
-		
+
 		if (player.getDiplomacy().getDiscoveredPlayers().size() < 1) {
 
 			this.noDiscoveredCivsLabel = new CustomLabel("You have not discovered\nany civilizations.");
@@ -61,7 +59,7 @@ public class DiplomacyWindow extends AbstractWindow implements ResizeListener {
 		}
 	}
 
-	@Override
+	@EventHandler
 	public void onResize(int width, int height) {
 		setPosition(width / 2 - 600 / 2, height / 2 - 600 / 2);
 	}

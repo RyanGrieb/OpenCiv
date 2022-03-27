@@ -63,14 +63,8 @@ import me.rhin.openciv.server.game.unit.type.Spearman;
 import me.rhin.openciv.server.game.unit.type.Swordsman;
 import me.rhin.openciv.server.game.unit.type.Warrior;
 import me.rhin.openciv.server.game.unit.type.WorkBoat;
-import me.rhin.openciv.server.listener.BuyProductionItemListener;
-import me.rhin.openciv.server.listener.FaithBuyProductionItemListener;
-import me.rhin.openciv.server.listener.MoveDownQueuedProductionItemListener;
-import me.rhin.openciv.server.listener.MoveUpQueuedProductionItemListener;
-import me.rhin.openciv.server.listener.NextTurnListener;
-import me.rhin.openciv.server.listener.QueueProductionItemListener;
-import me.rhin.openciv.server.listener.RemoveQueuedProductionItemListener;
-import me.rhin.openciv.server.listener.SetProductionItemListener;
+import me.rhin.openciv.shared.listener.EventHandler;
+import me.rhin.openciv.shared.listener.Listener;
 import me.rhin.openciv.shared.packet.type.ApplyProductionToItemPacket;
 import me.rhin.openciv.shared.packet.type.BuyProductionItemPacket;
 import me.rhin.openciv.shared.packet.type.FaithBuyProductionItemPacket;
@@ -93,9 +87,7 @@ import me.rhin.openciv.shared.stat.Stat;
 
 //FIXME: Remove modifiers if this city is captured.
 
-public class ProducibleItemManager implements NextTurnListener, FaithBuyProductionItemListener,
-		BuyProductionItemListener, SetProductionItemListener, QueueProductionItemListener,
-		RemoveQueuedProductionItemListener, MoveUpQueuedProductionItemListener, MoveDownQueuedProductionItemListener {
+public class ProducibleItemManager implements Listener {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(ProducibleItemManager.class);
 
@@ -171,17 +163,10 @@ public class ProducibleItemManager implements NextTurnListener, FaithBuyProducti
 		possibleItems.put("Colossus", new Colossus(city));
 		possibleItems.put("Terracotta Army", new TerracottaArmy(city));
 
-		Server.getInstance().getEventManager().addListener(NextTurnListener.class, this);
-		Server.getInstance().getEventManager().addListener(SetProductionItemListener.class, this);
-		Server.getInstance().getEventManager().addListener(BuyProductionItemListener.class, this);
-		Server.getInstance().getEventManager().addListener(FaithBuyProductionItemListener.class, this);
-		Server.getInstance().getEventManager().addListener(QueueProductionItemListener.class, this);
-		Server.getInstance().getEventManager().addListener(RemoveQueuedProductionItemListener.class, this);
-		Server.getInstance().getEventManager().addListener(MoveUpQueuedProductionItemListener.class, this);
-		Server.getInstance().getEventManager().addListener(MoveDownQueuedProductionItemListener.class, this);
+		Server.getInstance().getEventManager().addListener(this);
 	}
 
-	@Override
+	@EventHandler
 	public void onNextTurn() {
 
 		if (itemQueue.size() < 1)
@@ -228,7 +213,7 @@ public class ProducibleItemManager implements NextTurnListener, FaithBuyProducti
 		city.getPlayerOwner().sendPacket(json.toJson(packet));
 	}
 
-	@Override
+	@EventHandler
 	public void onSetProductionItem(WebSocket conn, SetProductionItemPacket packet) {
 
 		City targetCity = Server.getInstance().getInGameState().getCityFromName(packet.getCityName());
@@ -244,7 +229,7 @@ public class ProducibleItemManager implements NextTurnListener, FaithBuyProducti
 		conn.send(json.toJson(packet));
 	}
 
-	@Override
+	@EventHandler
 	public void onBuyProductionItem(WebSocket conn, BuyProductionItemPacket packet) {
 
 		// TODO: Verify if the player owns that city.
@@ -256,7 +241,7 @@ public class ProducibleItemManager implements NextTurnListener, FaithBuyProducti
 		buyProducingItem(packet.getItemName());
 	}
 
-	@Override
+	@EventHandler
 	public void onFaithBuyProductionItem(WebSocket conn, FaithBuyProductionItemPacket packet) {
 
 		City targetCity = Server.getInstance().getInGameState().getCityFromName(packet.getCityName());
@@ -267,7 +252,7 @@ public class ProducibleItemManager implements NextTurnListener, FaithBuyProducti
 		faithBuyProducingItem(packet.getItemName());
 	}
 
-	@Override
+	@EventHandler
 	public void onQueueProductionItem(WebSocket conn, QueueProductionItemPacket packet) {
 		City targetCity = Server.getInstance().getInGameState().getCityFromName(packet.getCityName());
 
@@ -280,15 +265,15 @@ public class ProducibleItemManager implements NextTurnListener, FaithBuyProducti
 		conn.send(json.toJson(packet));
 	}
 
-	@Override
+	@EventHandler
 	public void onMoveDownQueuedProductionItem(WebSocket conn, MoveDownQueuedProductionItemPacket packet) {
 	}
 
-	@Override
+	@EventHandler
 	public void onMoveUpQueuedProductionItem(WebSocket conn, MoveUpQueuedProductionItemPacket packet) {
 	}
 
-	@Override
+	@EventHandler
 	public void onRemoveQueuedProductionItem(WebSocket conn, RemoveQueuedProductionItemPacket packet) {
 		City targetCity = Server.getInstance().getInGameState().getCityFromName(packet.getCityName());
 

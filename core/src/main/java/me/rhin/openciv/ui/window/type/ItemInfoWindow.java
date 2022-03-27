@@ -11,7 +11,7 @@ import me.rhin.openciv.game.city.City;
 import me.rhin.openciv.game.city.building.Building;
 import me.rhin.openciv.game.production.ProductionItem;
 import me.rhin.openciv.game.research.Unlockable;
-import me.rhin.openciv.listener.ResizeListener;
+import me.rhin.openciv.shared.listener.EventHandler;
 import me.rhin.openciv.shared.stat.Stat;
 import me.rhin.openciv.ui.background.ColoredBackground;
 import me.rhin.openciv.ui.button.CustomButton;
@@ -19,7 +19,7 @@ import me.rhin.openciv.ui.button.type.CloseWindowButton;
 import me.rhin.openciv.ui.label.CustomLabel;
 import me.rhin.openciv.ui.window.AbstractWindow;
 
-public class ItemInfoWindow extends AbstractWindow implements ResizeListener {
+public class ItemInfoWindow extends AbstractWindow {
 
 	private City city;
 	private ProductionItem productionItem;
@@ -161,8 +161,6 @@ public class ItemInfoWindow extends AbstractWindow implements ResizeListener {
 
 		if (productionItem.getFaithCost() > 0)
 			addActor(faithCostLabel);
-
-		Civilization.getInstance().getEventManager().addListener(ResizeListener.class, this);
 	}
 
 	public ItemInfoWindow(Unlockable unlockable) {
@@ -198,11 +196,9 @@ public class ItemInfoWindow extends AbstractWindow implements ResizeListener {
 
 		this.closeWindowButton = new CloseWindowButton(this.getClass(), "Close", getWidth() - 100, 5, 100, 35);
 		addActor(closeWindowButton);
-
-		Civilization.getInstance().getEventManager().addListener(ResizeListener.class, this);
 	}
 
-	@Override
+	@EventHandler
 	public void onResize(int width, int height) {
 		this.setBounds(width / 2 - 300 / 2, height / 2 - 350 / 2, 300, 350);
 	}

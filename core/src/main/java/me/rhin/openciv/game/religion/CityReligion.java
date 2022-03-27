@@ -4,14 +4,15 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import me.rhin.openciv.Civilization;
+import me.rhin.openciv.events.type.CityGainMajorityReligionEvent;
+import me.rhin.openciv.events.type.CityLooseMajorityReligionEvent;
 import me.rhin.openciv.game.city.City;
 import me.rhin.openciv.game.player.AbstractPlayer;
-import me.rhin.openciv.listener.CityGainMajorityReligionListener.CityGainMajorityReligionEvent;
-import me.rhin.openciv.listener.CityLooseMajorityReligionListener.CityLooseMajorityReligionEvent;
-import me.rhin.openciv.listener.CityReligionFollowersUpdateListener;
+import me.rhin.openciv.shared.listener.EventHandler;
+import me.rhin.openciv.shared.listener.Listener;
 import me.rhin.openciv.shared.packet.type.CityReligionFollowersUpdatePacket;
 
-public class CityReligion implements CityReligionFollowersUpdateListener {
+public class CityReligion implements Listener {
 
 	private City city;
 	private HashMap<PlayerReligion, Integer> religionFollowers;
@@ -24,10 +25,10 @@ public class CityReligion implements CityReligionFollowersUpdateListener {
 			religionFollowers.put(player.getReligion(), 0);
 		}
 
-		Civilization.getInstance().getEventManager().addListener(CityReligionFollowersUpdateListener.class, this);
+		Civilization.getInstance().getEventManager().addListener(this);
 	}
 
-	@Override
+	@EventHandler
 	public void onCityReligionFollowerUpdate(CityReligionFollowersUpdatePacket packet) {
 		if (!city.getName().equals(packet.getCityName()))
 			return;

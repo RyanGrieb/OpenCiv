@@ -10,14 +10,11 @@ import me.rhin.openciv.game.city.City;
 import me.rhin.openciv.game.notification.AbstractNotification;
 import me.rhin.openciv.game.notification.NotificationPriority;
 import me.rhin.openciv.game.player.AbstractPlayer;
-import me.rhin.openciv.listener.SetCityOwnerListener;
-import me.rhin.openciv.listener.SetProductionItemListener;
+import me.rhin.openciv.shared.listener.EventHandler;
 import me.rhin.openciv.shared.packet.type.SetCityOwnerPacket;
 import me.rhin.openciv.shared.packet.type.SetProductionItemPacket;
-import me.rhin.openciv.ui.window.type.CityInfoWindow;
 
-public class AvailableProductionNotification extends AbstractNotification
-		implements SetProductionItemListener, SetCityOwnerListener {
+public class AvailableProductionNotification extends AbstractNotification {
 
 	private ArrayList<City> cities;
 
@@ -25,8 +22,7 @@ public class AvailableProductionNotification extends AbstractNotification
 		this.cities = new ArrayList<>();
 		cities.add(city);
 
-		Civilization.getInstance().getEventManager().addListener(SetProductionItemListener.class, this);
-		Civilization.getInstance().getEventManager().addListener(SetCityOwnerListener.class, this);
+		Civilization.getInstance().getEventManager().addListener(this);
 	}
 
 	public void merge(AbstractNotification notification) {
@@ -46,7 +42,7 @@ public class AvailableProductionNotification extends AbstractNotification
 		}
 	}
 
-	@Override
+	@EventHandler
 	public void onSetProductionItem(SetProductionItemPacket packet) {
 		City city = Civilization.getInstance().getGame().getPlayer().getCityFromName(packet.getCityName());
 
@@ -64,7 +60,7 @@ public class AvailableProductionNotification extends AbstractNotification
 		}
 	}
 
-	@Override
+	@EventHandler
 	public void onSetCityOwner(SetCityOwnerPacket packet) {
 
 		AbstractPlayer oldPlayer = Civilization.getInstance().getGame().getPlayers()

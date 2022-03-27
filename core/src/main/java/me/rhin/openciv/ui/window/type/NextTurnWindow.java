@@ -14,9 +14,7 @@ import me.rhin.openciv.game.notification.type.AvailableProductionNotification;
 import me.rhin.openciv.game.notification.type.NotResearchingNotification;
 import me.rhin.openciv.game.notification.type.NotStudyingNotification;
 import me.rhin.openciv.game.player.AbstractPlayer;
-import me.rhin.openciv.listener.NextTurnListener;
-import me.rhin.openciv.listener.RequestEndTurnListener;
-import me.rhin.openciv.listener.ResizeListener;
+import me.rhin.openciv.shared.listener.EventHandler;
 import me.rhin.openciv.shared.packet.type.NextTurnPacket;
 import me.rhin.openciv.shared.packet.type.RequestEndTurnPacket;
 import me.rhin.openciv.ui.background.ColoredBackground;
@@ -24,7 +22,7 @@ import me.rhin.openciv.ui.button.CustomButton;
 import me.rhin.openciv.ui.label.CustomLabel;
 import me.rhin.openciv.ui.window.AbstractWindow;
 
-public class NextTurnWindow extends AbstractWindow implements RequestEndTurnListener, NextTurnListener, ResizeListener {
+public class NextTurnWindow extends AbstractWindow {
 
 	private ColoredBackground background;
 	private CustomButton nextTurnButton;
@@ -71,13 +69,9 @@ public class NextTurnWindow extends AbstractWindow implements RequestEndTurnList
 		});
 
 		this.notificationLabels = new ArrayList<>();
-
-		Civilization.getInstance().getEventManager().addListener(RequestEndTurnListener.class, this);
-		Civilization.getInstance().getEventManager().addListener(NextTurnListener.class, this);
-		Civilization.getInstance().getEventManager().addListener(ResizeListener.class, this);
 	}
 
-	@Override
+	@EventHandler
 	public void onRequestEndTurn(RequestEndTurnPacket packet) {
 		AbstractPlayer player = Civilization.getInstance().getGame().getPlayers().get(packet.getPlayerName());
 
@@ -91,13 +85,13 @@ public class NextTurnWindow extends AbstractWindow implements RequestEndTurnList
 		addActor(waitingNextTurnButton);
 	}
 
-	@Override
+	@EventHandler
 	public void onNextTurn(NextTurnPacket packet) {
 		addActor(nextTurnButton);
 		removeActor(waitingNextTurnButton);
 	}
 
-	@Override
+	@EventHandler
 	public void onResize(int width, int height) {
 		super.setPosition(width / 2 - 200 / 2, 0);
 

@@ -4,9 +4,7 @@ import java.util.ArrayList;
 
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.game.player.AbstractPlayer;
-import me.rhin.openciv.listener.DeclareWarAllListener;
-import me.rhin.openciv.listener.DeclareWarListener;
-import me.rhin.openciv.listener.DiscoveredPlayerListener;
+import me.rhin.openciv.shared.listener.EventHandler;
 import me.rhin.openciv.shared.logging.Logger;
 import me.rhin.openciv.shared.logging.LoggerFactory;
 import me.rhin.openciv.shared.logging.LoggerType;
@@ -14,7 +12,7 @@ import me.rhin.openciv.shared.packet.type.DeclareWarAllPacket;
 import me.rhin.openciv.shared.packet.type.DeclareWarPacket;
 import me.rhin.openciv.shared.packet.type.DiscoveredPlayerPacket;
 
-public class Diplomacy implements DeclareWarListener, DeclareWarAllListener, DiscoveredPlayerListener {
+public class Diplomacy {
 
 	private static final Logger LOGGER = LoggerFactory.getInstance(LoggerType.LOG_TAG);
 
@@ -27,13 +25,9 @@ public class Diplomacy implements DeclareWarListener, DeclareWarAllListener, Dis
 
 		this.discoveredPlayers = new ArrayList<>();
 		this.enemies = new ArrayList<>();
-
-		Civilization.getInstance().getEventManager().addListener(DeclareWarListener.class, this);
-		Civilization.getInstance().getEventManager().addListener(DeclareWarAllListener.class, this);
-		Civilization.getInstance().getEventManager().addListener(DiscoveredPlayerListener.class, this);
 	}
 
-	@Override
+	@EventHandler
 	public void onDeclareWar(DeclareWarPacket packet) {
 		if (!player.getName().equals(packet.getAttacker()))
 			return;
@@ -43,7 +37,7 @@ public class Diplomacy implements DeclareWarListener, DeclareWarAllListener, Dis
 		declareWar(defender);
 	}
 
-	@Override
+	@EventHandler
 	public void onDeclareWarAll(DeclareWarAllPacket packet) {
 		if (!player.getName().equals(packet.getAttacker()))
 			return;
@@ -57,7 +51,7 @@ public class Diplomacy implements DeclareWarListener, DeclareWarAllListener, Dis
 		}
 	}
 
-	@Override
+	@EventHandler
 	public void onDiscoverPlayer(DiscoveredPlayerPacket packet) {
 		if (!player.getName().equals(packet.getPlayerName())) {
 			return;

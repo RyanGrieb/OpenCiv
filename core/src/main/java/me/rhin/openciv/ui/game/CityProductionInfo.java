@@ -9,12 +9,8 @@ import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.city.City;
 import me.rhin.openciv.game.production.ProducingItem;
-import me.rhin.openciv.listener.ApplyProductionToItemListener;
-import me.rhin.openciv.listener.BuyProductionItemListener;
-import me.rhin.openciv.listener.CityStatUpdateListener;
-import me.rhin.openciv.listener.FinishProductionItemListener;
-import me.rhin.openciv.listener.RemoveQueuedProductionItemListener;
-import me.rhin.openciv.listener.SetProductionItemListener;
+import me.rhin.openciv.shared.listener.EventHandler;
+import me.rhin.openciv.shared.listener.Listener;
 import me.rhin.openciv.shared.packet.type.ApplyProductionToItemPacket;
 import me.rhin.openciv.shared.packet.type.BuyProductionItemPacket;
 import me.rhin.openciv.shared.packet.type.CityStatUpdatePacket;
@@ -24,9 +20,9 @@ import me.rhin.openciv.shared.packet.type.SetProductionItemPacket;
 import me.rhin.openciv.shared.stat.Stat;
 import me.rhin.openciv.ui.label.CustomLabel;
 
-public class CityProductionInfo extends Actor
-		implements SetProductionItemListener, ApplyProductionToItemListener, FinishProductionItemListener,
-		CityStatUpdateListener, BuyProductionItemListener, RemoveQueuedProductionItemListener {
+public class CityProductionInfo extends Actor implements Listener {
+
+	// FIXME: Check if listener is removed properly
 
 	private City city;
 	private Sprite backgroundSprite;
@@ -73,12 +69,7 @@ public class CityProductionInfo extends Actor
 
 		turnsLeftLabel.setPosition(x + 5, y + productionItemSprite.getHeight() / 2 - turnsLeftLabel.getHeight() / 2);
 
-		Civilization.getInstance().getEventManager().addListener(SetProductionItemListener.class, this);
-		Civilization.getInstance().getEventManager().addListener(ApplyProductionToItemListener.class, this);
-		Civilization.getInstance().getEventManager().addListener(FinishProductionItemListener.class, this);
-		Civilization.getInstance().getEventManager().addListener(CityStatUpdateListener.class, this);
-		Civilization.getInstance().getEventManager().addListener(BuyProductionItemListener.class, this);
-		Civilization.getInstance().getEventManager().addListener(RemoveQueuedProductionItemListener.class, this);
+		Civilization.getInstance().getEventManager().addListener(this);
 	}
 
 	@Override
@@ -99,7 +90,7 @@ public class CityProductionInfo extends Actor
 		turnsLeftLabel.setPosition(x + 6, y + productionItemSprite.getHeight() / 2 - turnsLeftLabel.getHeight() / 2);
 	}
 
-	@Override
+	@EventHandler
 	public void onSetProductionItem(SetProductionItemPacket packet) {
 		if (!city.getName().equals(packet.getCityName()))
 			return;
@@ -125,7 +116,7 @@ public class CityProductionInfo extends Actor
 		turnsLeftLabel.setText(currentTurns + "/" + totalTurns + " Turns");
 	}
 
-	@Override
+	@EventHandler
 	public void onApplyProductionToItem(ApplyProductionToItemPacket packet) {
 		if (!city.getName().equals(packet.getCityName()))
 			return;
@@ -143,7 +134,7 @@ public class CityProductionInfo extends Actor
 		turnsLeftLabel.setText(currentTurns + "/" + totalTurns + " Turns");
 	}
 
-	@Override
+	@EventHandler
 	public void onFinishProductionItem(FinishProductionItemPacket packet) {
 		if (!city.getName().equals(packet.getCityName()))
 			return;
@@ -151,7 +142,7 @@ public class CityProductionInfo extends Actor
 		updateUI();
 	}
 
-	@Override
+	@EventHandler
 	public void onBuyProductionItem(BuyProductionItemPacket packet) {
 		if (!city.getName().equals(packet.getCityName()))
 			return;
@@ -161,7 +152,7 @@ public class CityProductionInfo extends Actor
 		}
 	}
 
-	@Override
+	@EventHandler
 	public void onCityStatUpdate(CityStatUpdatePacket packet) {
 		if (!city.getName().equals(packet.getCityName()))
 			return;
@@ -169,7 +160,7 @@ public class CityProductionInfo extends Actor
 		updateUI();
 	}
 
-	@Override
+	@EventHandler
 	public void onRemoveQueuedProductionItem(RemoveQueuedProductionItemPacket packet) {
 		if (!city.getName().equals(packet.getCityName()))
 			return;

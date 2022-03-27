@@ -5,18 +5,14 @@ import me.rhin.openciv.server.game.AbstractPlayer;
 import me.rhin.openciv.server.game.city.City;
 import me.rhin.openciv.server.game.religion.PlayerReligion;
 import me.rhin.openciv.server.game.religion.bonus.ReligionBonus;
-import me.rhin.openciv.server.listener.CityGainMajorityReligionListener;
-import me.rhin.openciv.server.listener.CityLooseMajorityReligionListener;
-import me.rhin.openciv.server.listener.ServerDeclareWarListener;
+import me.rhin.openciv.shared.listener.EventHandler;
+import me.rhin.openciv.shared.listener.Listener;
 import me.rhin.openciv.shared.stat.Stat;
 
-public class SwordsIntoPlowsharesBonus extends ReligionBonus
-		implements CityGainMajorityReligionListener, CityLooseMajorityReligionListener, ServerDeclareWarListener {
+public class SwordsIntoPlowsharesBonus extends ReligionBonus implements Listener {
 
 	public SwordsIntoPlowsharesBonus() {
-		Server.getInstance().getEventManager().addListener(CityGainMajorityReligionListener.class, this);
-		Server.getInstance().getEventManager().addListener(CityLooseMajorityReligionListener.class, this);
-		Server.getInstance().getEventManager().addListener(ServerDeclareWarListener.class, this);
+		Server.getInstance().getEventManager().addListener(this);
 	}
 
 	@Override
@@ -31,7 +27,7 @@ public class SwordsIntoPlowsharesBonus extends ReligionBonus
 		}
 	}
 
-	@Override
+	@EventHandler
 	public void onCityGainMajorityReligion(City city, PlayerReligion newReligion) {
 		if (player == null)
 			return;
@@ -41,7 +37,7 @@ public class SwordsIntoPlowsharesBonus extends ReligionBonus
 		}
 	}
 
-	@Override
+	@EventHandler
 	public void onCityLooseMajorityReligion(City city, PlayerReligion oldReligion) {
 		if (player == null)
 			return;
@@ -54,7 +50,7 @@ public class SwordsIntoPlowsharesBonus extends ReligionBonus
 		}
 	}
 
-	@Override
+	@EventHandler
 	public void onDeclareWar(AbstractPlayer attacker, AbstractPlayer defender) {
 		if (player == null)
 			return;

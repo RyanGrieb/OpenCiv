@@ -4,15 +4,14 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
 import javax.swing.JFrame;
-import javax.swing.JLabel;
 
 import me.rhin.openciv.server.Server;
 import me.rhin.openciv.server.game.ai.behavior.BehaviorStatus;
 import me.rhin.openciv.server.game.ai.behavior.Node;
-import me.rhin.openciv.server.listener.NextTurnListener;
-import me.rhin.openciv.server.listener.NodeBehaviorSetListener;
+import me.rhin.openciv.shared.listener.EventHandler;
+import me.rhin.openciv.shared.listener.Listener;
 
-public class BehaviorTreeWindow extends JFrame implements NextTurnListener, NodeBehaviorSetListener {
+public class BehaviorTreeWindow extends JFrame implements Listener {
 
 	private static final long serialVersionUID = 1L;
 
@@ -31,25 +30,24 @@ public class BehaviorTreeWindow extends JFrame implements NextTurnListener, Node
 		constructTree();
 		setVisible(true);
 
-		Server.getInstance().getEventManager().addListener(NextTurnListener.class, this);
-		Server.getInstance().getEventManager().addListener(NodeBehaviorSetListener.class, this);
+		Server.getInstance().getEventManager().addListener(this);
 
 		BehaviorTreeWindow thisObj = this;
 
 		this.addWindowListener(new WindowAdapter() {
 			public void windowClosing(WindowEvent e) {
-				Server.getInstance().getEventManager().clearListenersFromObject(thisObj);
+				Server.getInstance().getEventManager().removeListener(thisObj);
 			}
 		});
 	}
 
-	@Override
+	@EventHandler
 	public void onNodeBehaviorSet(Node node, BehaviorStatus behavior) {
 		if (!mainNode.hasChild(node))
 			return;
 	}
 
-	@Override
+	@EventHandler
 	public void onNextTurn() {
 
 	}

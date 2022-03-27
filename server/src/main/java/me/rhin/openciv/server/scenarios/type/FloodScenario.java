@@ -9,16 +9,17 @@ import me.rhin.openciv.server.game.Player;
 import me.rhin.openciv.server.game.map.tile.Tile;
 import me.rhin.openciv.server.game.map.tile.TileType;
 import me.rhin.openciv.server.game.map.tile.TileType.TileProperty;
-import me.rhin.openciv.server.listener.NextTurnListener;
 import me.rhin.openciv.server.scenarios.Scenario;
+import me.rhin.openciv.shared.listener.EventHandler;
+import me.rhin.openciv.shared.listener.Listener;
 import me.rhin.openciv.shared.packet.type.SetTileTypePacket;
 
-public class FloodScenario extends Scenario implements NextTurnListener {
+public class FloodScenario extends Scenario implements Listener {
 
 	@Override
 	public void toggle() {
 		// Change settings, ect.
-		Server.getInstance().getEventManager().addListener(NextTurnListener.class, this);
+		Server.getInstance().getEventManager().addListener(this);
 	}
 
 	@Override
@@ -26,7 +27,7 @@ public class FloodScenario extends Scenario implements NextTurnListener {
 		return false;
 	}
 
-	@Override
+	@EventHandler
 	public void onNextTurn() {
 		if (Server.getInstance().getInGameState().getCurrentTurn() < 1) {
 			return;

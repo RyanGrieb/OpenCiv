@@ -12,11 +12,12 @@ import me.rhin.openciv.server.game.heritage.type.all.CapitalDefenseHeritage;
 import me.rhin.openciv.server.game.heritage.type.all.CapitalExpansionHeritage;
 import me.rhin.openciv.server.game.heritage.type.all.StateWorshipHeritage;
 import me.rhin.openciv.server.game.heritage.type.all.TaxesHeritage;
-import me.rhin.openciv.server.listener.NextTurnListener;
+import me.rhin.openciv.shared.listener.EventHandler;
+import me.rhin.openciv.shared.listener.Listener;
 import me.rhin.openciv.shared.packet.type.CompleteHeritagePacket;
 import me.rhin.openciv.shared.stat.Stat;
 
-public class HeritageTree implements NextTurnListener {
+public class HeritageTree implements Listener {
 
 	private LinkedHashMap<Class<? extends Heritage>, Heritage> values;
 	private Heritage heritageStudying;
@@ -26,10 +27,10 @@ public class HeritageTree implements NextTurnListener {
 		this.player = player;
 		this.values = new LinkedHashMap<>();
 
-		Server.getInstance().getEventManager().addListener(NextTurnListener.class, this);
+		Server.getInstance().getEventManager().addListener(this);
 	}
 
-	@Override
+	@EventHandler
 	public void onNextTurn() {
 		if (heritageStudying == null || !player.hasConnection())
 			return;

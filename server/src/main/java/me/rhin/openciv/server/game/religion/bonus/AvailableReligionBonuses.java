@@ -19,12 +19,12 @@ import me.rhin.openciv.server.game.religion.bonus.type.pantheon.GodOfTheSeaBonus
 import me.rhin.openciv.server.game.religion.bonus.type.pantheon.MonumentToTheGodsBonus;
 import me.rhin.openciv.server.game.religion.bonus.type.pantheon.ReligiousIdolsBonus;
 import me.rhin.openciv.server.game.religion.bonus.type.pantheon.TearsOfTheGodsBonus;
-import me.rhin.openciv.server.listener.FoundReligionListener;
-import me.rhin.openciv.server.listener.PickPantheonListener;
+import me.rhin.openciv.shared.listener.EventHandler;
+import me.rhin.openciv.shared.listener.Listener;
 import me.rhin.openciv.shared.packet.type.FoundReligionPacket;
 import me.rhin.openciv.shared.packet.type.PickPantheonPacket;
 
-public class AvailableReligionBonuses implements PickPantheonListener, FoundReligionListener {
+public class AvailableReligionBonuses implements Listener {
 
 	private ArrayList<ReligionBonus> pantheons;
 	private ArrayList<ReligionBonus> founderBeliefs;
@@ -49,11 +49,10 @@ public class AvailableReligionBonuses implements PickPantheonListener, FoundReli
 		followerBeliefs.add(new PagodasBonus());
 		followerBeliefs.add(new SwordsIntoPlowsharesBonus());
 
-		Server.getInstance().getEventManager().addListener(PickPantheonListener.class, this);
-		Server.getInstance().getEventManager().addListener(FoundReligionListener.class, this);
+		Server.getInstance().getEventManager().addListener(this);
 	}
 
-	@Override
+	@EventHandler
 	public void onPickPantheon(WebSocket conn, PickPantheonPacket packet) {
 
 		Player player = Server.getInstance().getPlayerByConn(conn);
@@ -73,7 +72,7 @@ public class AvailableReligionBonuses implements PickPantheonListener, FoundReli
 		pantheons.get(packet.getReligionBonusID()).onAssigned();
 	}
 
-	@Override
+	@EventHandler
 	public void onFoundReligion(WebSocket conn, FoundReligionPacket packet) {
 
 		Player player = Server.getInstance().getPlayerByConn(conn);
@@ -89,7 +88,8 @@ public class AvailableReligionBonuses implements PickPantheonListener, FoundReli
 		}
 
 		// FIXME: Add 1 follower to the city where the prophet founded the religion
-		//player.getCapitalCity().getCityReligion().setFollowers(player.getReligion(), 2);
+		// player.getCapitalCity().getCityReligion().setFollowers(player.getReligion(),
+		// 2);
 
 		founderBeliefs.get(packet.getFounderID()).onAssigned();
 		followerBeliefs.get(packet.getFollowerID()).onAssigned();

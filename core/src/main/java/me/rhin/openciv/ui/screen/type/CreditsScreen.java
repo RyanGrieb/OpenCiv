@@ -6,8 +6,7 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.utils.Align;
 
 import me.rhin.openciv.Civilization;
-import me.rhin.openciv.listener.LeftClickListener.LeftClickEvent;
-import me.rhin.openciv.listener.MouseMoveListener.MouseMoveEvent;
+import me.rhin.openciv.events.type.LeftClickEvent;
 import me.rhin.openciv.shared.listener.EventManager;
 import me.rhin.openciv.ui.button.type.PreviousScreenButton;
 import me.rhin.openciv.ui.label.CustomLabel;
@@ -23,7 +22,7 @@ public class CreditsScreen extends AbstractScreen {
 
 	public CreditsScreen() {
 		this.eventManager = Civilization.getInstance().getEventManager();
-		eventManager.clearEvents();
+		eventManager.clearListeners();
 
 		this.titleOverlay = new TitleOverlay();
 		stage.addActor(titleOverlay);
@@ -59,13 +58,6 @@ public class CreditsScreen extends AbstractScreen {
 
 		stage.addActor(new PreviousScreenButton("Back", viewport.getWorldWidth() / 2 - 150 / 2, 50, 150, 45));
 
-	}
-
-	@Override
-	public void render(float delta) {
-		super.render(delta);
-
-		Civilization.getInstance().getEventManager().fireEvent(MouseMoveEvent.INSTANCE);
 	}
 
 	@Override

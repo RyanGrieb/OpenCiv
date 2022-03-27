@@ -16,6 +16,9 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.Json;
 
 import me.rhin.openciv.server.Server;
+import me.rhin.openciv.server.events.type.CityGrowthEvent;
+import me.rhin.openciv.server.events.type.CityStarveEvent;
+import me.rhin.openciv.server.events.type.TerritoryGrowEvent;
 import me.rhin.openciv.server.game.AbstractPlayer;
 import me.rhin.openciv.server.game.Player;
 import me.rhin.openciv.server.game.ai.CityAI;
@@ -39,13 +42,8 @@ import me.rhin.openciv.server.game.religion.bonus.ReligionBonus;
 import me.rhin.openciv.server.game.unit.AttackableEntity;
 import me.rhin.openciv.server.game.unit.RangedUnit;
 import me.rhin.openciv.server.game.unit.type.Missionary.MissionaryUnit;
-import me.rhin.openciv.server.listener.CityGrowthListener.CityGrowthEvent;
-import me.rhin.openciv.server.listener.CityStarveListener.CityStarveEvent;
-import me.rhin.openciv.server.listener.ClickSpecialistListener;
-import me.rhin.openciv.server.listener.ClickWorkedTileListener;
-import me.rhin.openciv.server.listener.NextTurnListener;
-import me.rhin.openciv.server.listener.SpreadReligionListener;
-import me.rhin.openciv.server.listener.TerritoryGrowListener.TerritoryGrowEvent;
+import me.rhin.openciv.shared.listener.EventHandler;
+import me.rhin.openciv.shared.listener.Listener;
 import me.rhin.openciv.shared.packet.type.AddSpecialistToContainerPacket;
 import me.rhin.openciv.shared.packet.type.BuildingConstructedPacket;
 import me.rhin.openciv.shared.packet.type.BuildingRemovedPacket;
@@ -61,8 +59,7 @@ import me.rhin.openciv.shared.stat.Stat;
 import me.rhin.openciv.shared.stat.StatLine;
 import me.rhin.openciv.shared.util.MathHelper;
 
-public class City implements AttackableEntity, TileObserver, NextTurnListener, ClickSpecialistListener,
-		ClickWorkedTileListener, SpreadReligionListener {
+public class City implements AttackableEntity, TileObserver, Listener {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(City.class);
 
@@ -116,10 +113,7 @@ public class City implements AttackableEntity, TileObserver, NextTurnListener, C
 		statLine.setValue(Stat.EXPANSION_REQUIREMENT, 10 + 10 * (float) Math.pow(territory.size() - 6, 1.3));
 		// Add our two specialists, one from pop, one city center
 
-		Server.getInstance().getEventManager().addListener(NextTurnListener.class, this);
-		Server.getInstance().getEventManager().addListener(ClickWorkedTileListener.class, this);
-		Server.getInstance().getEventManager().addListener(ClickSpecialistListener.class, this);
-		Server.getInstance().getEventManager().addListener(SpreadReligionListener.class, this);
+		Server.getInstance().getEventManager().addListener(this);
 	}
 
 	public static String getRandomCityName(AbstractPlayer player) {
@@ -172,7 +166,7 @@ public class City implements AttackableEntity, TileObserver, NextTurnListener, C
 		return names.get(rnd.nextInt(names.size()));
 	}
 
-	@Override
+	@EventHandler
 	public void onNextTurn() {
 		if (!playerOwner.hasConnection())
 			return;
@@ -279,7 +273,7 @@ public class City implements AttackableEntity, TileObserver, NextTurnListener, C
 	}
 
 	// TODO: Move to city class
-	@Override
+	@EventHandler
 	public void onClickWorkedTile(WebSocket conn, ClickWorkedTilePacket packet) {
 
 		City city = Server.getInstance().getInGameState().getCityFromName(packet.getCityName());
@@ -293,7 +287,7 @@ public class City implements AttackableEntity, TileObserver, NextTurnListener, C
 	/**
 	 * Called when the player clicks on a builder specialist.
 	 */
-	@Override
+	@EventHandler
 	public void onClickSpecialist(WebSocket conn, ClickSpecialistPacket packet) {
 
 		City city = Server.getInstance().getInGameState().getCityFromName(packet.getCityName());
@@ -312,7 +306,7 @@ public class City implements AttackableEntity, TileObserver, NextTurnListener, C
 				container.removeSpecialistFromContainer();
 	}
 
-	@Override
+	@EventHandler
 	public void onSpreadReligion(WebSocket conn, SpreadReligionPacket packet) {
 		if (!name.equals(packet.getCityName()))
 			return;

@@ -12,16 +12,7 @@ import me.rhin.openciv.server.game.Player;
 import me.rhin.openciv.server.game.civilization.CivType;
 import me.rhin.openciv.server.game.civilization.type.RandomCivilization;
 import me.rhin.openciv.server.game.options.GameOptionType;
-import me.rhin.openciv.server.listener.ChooseCivListener;
-import me.rhin.openciv.server.listener.ConnectionListener;
-import me.rhin.openciv.server.listener.DisconnectListener;
-import me.rhin.openciv.server.listener.FetchPlayerListener;
-import me.rhin.openciv.server.listener.GetHostListener;
-import me.rhin.openciv.server.listener.NextTurnListener;
-import me.rhin.openciv.server.listener.PlayerListRequestListener;
-import me.rhin.openciv.server.listener.SetTurnLengthListener;
-import me.rhin.openciv.server.listener.SetWorldSizeListener;
-import me.rhin.openciv.server.listener.StartGameRequestListener;
+import me.rhin.openciv.shared.listener.EventHandler;
 import me.rhin.openciv.shared.map.MapSize;
 import me.rhin.openciv.shared.packet.type.ChooseCivPacket;
 import me.rhin.openciv.shared.packet.type.FetchPlayerPacket;
@@ -31,31 +22,19 @@ import me.rhin.openciv.shared.packet.type.PlayerDisconnectPacket;
 import me.rhin.openciv.shared.packet.type.PlayerListRequestPacket;
 import me.rhin.openciv.shared.packet.type.SetTurnLengthPacket;
 import me.rhin.openciv.shared.packet.type.SetWorldSizePacket;
+import me.rhin.openciv.shared.packet.type.StartGameRequestPacket;
 
-public class InLobbyState extends GameState
-		implements StartGameRequestListener, ConnectionListener, DisconnectListener, PlayerListRequestListener,
-		FetchPlayerListener, GetHostListener, ChooseCivListener, SetWorldSizeListener, SetTurnLengthListener {
+public class InLobbyState extends GameState {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(InLobbyState.class);
 
-	public InLobbyState() {
-		Server.getInstance().getEventManager().addListener(StartGameRequestListener.class, this);
-		Server.getInstance().getEventManager().addListener(ConnectionListener.class, this);
-		Server.getInstance().getEventManager().addListener(DisconnectListener.class, this);
-		Server.getInstance().getEventManager().addListener(PlayerListRequestListener.class, this);
-		Server.getInstance().getEventManager().addListener(FetchPlayerListener.class, this);
-		Server.getInstance().getEventManager().addListener(GetHostListener.class, this);
-		Server.getInstance().getEventManager().addListener(ChooseCivListener.class, this);
-		Server.getInstance().getEventManager().addListener(SetWorldSizeListener.class, this);
-		Server.getInstance().getEventManager().addListener(SetTurnLengthListener.class, this);
+	@Override
+	public void onStateBegin() {
 	}
 
 	@Override
-	public void onStateBegin() {}
-
-	@Override
 	public void onStateEnd() {
-		Server.getInstance().getEventManager().clearListenersFromObject(this);
+		Server.getInstance().getEventManager().removeListener(this);
 	}
 
 	@Override
@@ -63,8 +42,8 @@ public class InLobbyState extends GameState
 		// Game already stopped
 	}
 
-	@Override
-	public void onStartGameRequest(WebSocket conn) {
+	@EventHandler
+	public void onStartGameRequest(WebSocket conn, StartGameRequestPacket packet) {
 		if (conn != null && !getPlayerByConn(conn).isHost())
 			return;
 
@@ -74,25 +53,24 @@ public class InLobbyState extends GameState
 				// TODO: Set to a random civ not already being played.
 				rndPlayer.setCivilization(CivType.randomCiv());
 
-				ChooseCivPacket packet = new ChooseCivPacket();
-				packet.setPlayerName(rndPlayer.getName());
-				packet.setCivName(rndPlayer.getCiv().getName().toUpperCase());
+				ChooseCivPacket chooseCivPacket = new ChooseCivPacket();
+				chooseCivPacket.setPlayerName(rndPlayer.getName());
+				chooseCivPacket.setCivName(rndPlayer.getCiv().getName().toUpperCase());
 
 				Json json = new Json();
 				for (Player player : Server.getInstance().getPlayers())
-					player.sendPacket(json.toJson(packet));
+					player.sendPacket(json.toJson(chooseCivPacket));
 			}
 		}
 
 		Server.getInstance().setGameState(new InGameState());
 	}
 
-	@Override
+	@EventHandler
 	public void onConnection(WebSocket conn) {
 		// FIXME: Check for multiple connections
-
 		Player newPlayer = new Player(conn);
-
+		System.out.println("Called");
 		for (Player player : players) {
 
 			PlayerConnectPacket packet = new PlayerConnectPacket();
@@ -108,14 +86,14 @@ public class InLobbyState extends GameState
 		}
 	}
 
-	@Override
+	@EventHandler
 	public void onDisconnect(WebSocket conn) {
 		Player removedPlayer = getPlayerByConn(conn);
 
 		if (removedPlayer == null)
 			return;
 
-		Server.getInstance().getEventManager().removeListener(NextTurnListener.class, removedPlayer);
+		Server.getInstance().getEventManager().removeListener(removedPlayer);
 		players.remove(removedPlayer);
 
 		for (Player player : players) {
@@ -144,7 +122,7 @@ public class InLobbyState extends GameState
 		}
 	}
 
-	@Override
+	@EventHandler
 	public void onPlayerListRequested(WebSocket conn, PlayerListRequestPacket packet) {
 		LOGGER.info("[SERVER] Player list requested");
 		for (Player player : players) {
@@ -154,7 +132,7 @@ public class InLobbyState extends GameState
 		conn.send(json.toJson(packet));
 	}
 
-	@Override
+	@EventHandler
 	public void onPlayerFetch(WebSocket conn, FetchPlayerPacket packet) {
 		LOGGER.info("[SERVER] Fetching player...");
 		Player player = getPlayerByConn(conn);
@@ -163,7 +141,7 @@ public class InLobbyState extends GameState
 		conn.send(json.toJson(packet));
 	}
 
-	@Override
+	@EventHandler
 	public void onGetHost(WebSocket conn, GetHostPacket packet) {
 		for (Player player : Server.getInstance().getPlayers())
 			if (player.isHost()) {
@@ -173,7 +151,7 @@ public class InLobbyState extends GameState
 			}
 	}
 
-	@Override
+	@EventHandler
 	public void onChooseCiv(WebSocket conn, ChooseCivPacket packet) {
 
 		Player packetPlayer = getPlayerByConn(conn);
@@ -186,7 +164,7 @@ public class InLobbyState extends GameState
 
 	}
 
-	@Override
+	@EventHandler
 	public void onSetWorldSize(WebSocket conn, SetWorldSizePacket packet) {
 		int mapSize = packet.getWorldSize();
 
@@ -205,7 +183,7 @@ public class InLobbyState extends GameState
 			player.sendPacket(json.toJson(packet));
 	}
 
-	@Override
+	@EventHandler
 	public void onSetTurnLength(WebSocket conn, SetTurnLengthPacket packet) {
 		int turnLengthOffset = packet.getTurnLengthOffset();
 		if (turnLengthOffset < -1)

@@ -10,13 +10,13 @@ import com.badlogic.gdx.audio.Sound;
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.SoundEnum;
 import me.rhin.openciv.asset.SoundEnum.SoundType;
-import me.rhin.openciv.listener.SetScreenListener;
 import me.rhin.openciv.options.OptionType;
+import me.rhin.openciv.shared.listener.EventHandler;
+import me.rhin.openciv.shared.listener.Listener;
 import me.rhin.openciv.ui.screen.AbstractScreen;
 import me.rhin.openciv.ui.screen.ScreenEnum;
-import me.rhin.openciv.ui.screen.type.TitleScreen;
 
-public class SoundHandler implements SetScreenListener {
+public class SoundHandler implements Listener {
 
 	private HashMap<SoundType, ArrayList<MusicWrapper>> musicMap;
 	private HashMap<SoundEnum, Sound> effectMap;
@@ -28,11 +28,9 @@ public class SoundHandler implements SetScreenListener {
 
 		this.musicMap = new HashMap<>();
 		this.effectMap = new HashMap<>();
-
-		Civilization.getInstance().getEventManager().addListener(SetScreenListener.class, this);
 	}
 
-	@Override
+	@EventHandler
 	public void onSetScreen(ScreenEnum prevScreenEnum, ScreenEnum screenEnum) {
 		if (screenEnum == ScreenEnum.TITLE && prevScreenEnum == ScreenEnum.IN_GAME) {
 			// Stop playing ambient music & ingame music

@@ -15,13 +15,11 @@ import com.badlogic.gdx.utils.viewport.StretchViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
 import me.rhin.openciv.Civilization;
-import me.rhin.openciv.listener.BottomShapeRenderListener.BottomShapeRenderEvent;
-import me.rhin.openciv.listener.MouseHoveredListener.MouseHoveredEvent;
-import me.rhin.openciv.listener.ResizeListener.ResizeEvent;
-import me.rhin.openciv.listener.ScrollListener.ScrollEvent;
-import me.rhin.openciv.listener.SendChatMessageListener;
-import me.rhin.openciv.listener.SetScreenListener;
-import me.rhin.openciv.listener.TopShapeRenderListener.TopShapeRenderEvent;
+import me.rhin.openciv.events.type.BottomShapeRenderEvent;
+import me.rhin.openciv.events.type.MouseHoveredEvent;
+import me.rhin.openciv.events.type.ResizeEvent;
+import me.rhin.openciv.events.type.ScrollEvent;
+import me.rhin.openciv.events.type.TopShapeRenderEvent;
 import me.rhin.openciv.shared.logging.Logger;
 import me.rhin.openciv.shared.logging.LoggerFactory;
 import me.rhin.openciv.shared.logging.LoggerType;
@@ -78,11 +76,9 @@ public abstract class AbstractScreen implements Screen, InputProcessor {
 		// Re-implement listener for Soundhandler
 		// FIXME: This is a stopgap measure since we clear all listeners every screen
 		// change
-		Civilization.getInstance().getEventManager().addListener(SetScreenListener.class,
-				Civilization.getInstance().getSoundHandler());
+		Civilization.getInstance().getEventManager().addListener(Civilization.getInstance().getSoundHandler());
 
-		Civilization.getInstance().getEventManager().addListener(SendChatMessageListener.class,
-				Civilization.getInstance().getChatHandler());
+		Civilization.getInstance().getEventManager().addListener(Civilization.getInstance().getChatHandler());
 
 		this.movedMouseTime = System.currentTimeMillis();
 	}
@@ -161,7 +157,7 @@ public abstract class AbstractScreen implements Screen, InputProcessor {
 			float mouseX = Gdx.input.getX();
 			float mouseY = Gdx.graphics.getHeight() - Gdx.input.getY();
 			mouseHovered = true;
-			
+
 			Civilization.getInstance().getEventManager().fireEvent(new MouseHoveredEvent(mouseX, mouseY));
 		}
 	}

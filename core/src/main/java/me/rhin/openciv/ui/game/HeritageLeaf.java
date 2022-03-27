@@ -11,14 +11,16 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.heritage.Heritage;
-import me.rhin.openciv.listener.CompleteHeritageListener;
+import me.rhin.openciv.shared.listener.EventHandler;
+import me.rhin.openciv.shared.listener.Listener;
 import me.rhin.openciv.shared.packet.type.CompleteHeritagePacket;
 import me.rhin.openciv.ui.background.ColoredBackground;
 import me.rhin.openciv.ui.label.CustomLabel;
-import me.rhin.openciv.ui.screen.type.InGameScreen;
 import me.rhin.openciv.ui.window.type.PickHeritageWindow;
 
-public class HeritageLeaf extends Group implements Comparable<HeritageLeaf>, CompleteHeritageListener {
+public class HeritageLeaf extends Group implements Comparable<HeritageLeaf>, Listener {
+
+	// FIXME: Dispose these listeners properly
 
 	private Heritage heritage;
 	private ColoredBackground background;
@@ -86,10 +88,10 @@ public class HeritageLeaf extends Group implements Comparable<HeritageLeaf>, Com
 
 		});
 
-		Civilization.getInstance().getEventManager().addListener(CompleteHeritageListener.class, this);
+		Civilization.getInstance().getEventManager().addListener(this);
 	}
 
-	@Override
+	@EventHandler
 	public void onCompleteHeritage(CompleteHeritagePacket packet) {
 
 		if (!Civilization.getInstance().getGame().getPlayer().getHeritageTree()

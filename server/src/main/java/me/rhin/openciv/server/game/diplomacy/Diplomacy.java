@@ -9,17 +9,18 @@ import org.slf4j.LoggerFactory;
 import com.badlogic.gdx.utils.Json;
 
 import me.rhin.openciv.server.Server;
+import me.rhin.openciv.server.events.type.ServerDeclareWarEvent;
 import me.rhin.openciv.server.game.AbstractPlayer;
 import me.rhin.openciv.server.game.Player;
 import me.rhin.openciv.server.game.civilization.type.Barbarians;
 import me.rhin.openciv.server.game.diplomacy.actions.DiplomaticAction;
-import me.rhin.openciv.server.listener.DeclareWarListener;
-import me.rhin.openciv.server.listener.ServerDeclareWarListener.ServerDeclareWarEvent;
+import me.rhin.openciv.shared.listener.EventHandler;
+import me.rhin.openciv.shared.listener.Listener;
 import me.rhin.openciv.shared.packet.Packet;
 import me.rhin.openciv.shared.packet.type.DeclareWarPacket;
 import me.rhin.openciv.shared.packet.type.DiscoveredPlayerPacket;
 
-public class Diplomacy implements DeclareWarListener {
+public class Diplomacy implements Listener {
 
 	private final Logger LOGGER = LoggerFactory.getLogger(Diplomacy.class);
 
@@ -40,10 +41,10 @@ public class Diplomacy implements DeclareWarListener {
 		this.diplomaticActions = new ArrayList<>();
 		this.queuedPackets = new ArrayList<>();
 
-		Server.getInstance().getEventManager().addListener(DeclareWarListener.class, this);
+		Server.getInstance().getEventManager().addListener(this);
 	}
 
-	@Override
+	@EventHandler
 	public void onDeclareWar(WebSocket conn, DeclareWarPacket packet) {
 
 		AbstractPlayer attacker = Server.getInstance().getPlayerByConn(conn);

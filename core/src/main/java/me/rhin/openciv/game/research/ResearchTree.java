@@ -6,7 +6,6 @@ import java.util.List;
 
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.game.player.AbstractPlayer;
-import me.rhin.openciv.game.player.Player;
 import me.rhin.openciv.game.research.type.AnimalHusbandryTech;
 import me.rhin.openciv.game.research.type.ArcheryTech;
 import me.rhin.openciv.game.research.type.BronzeWorkingTech;
@@ -32,11 +31,11 @@ import me.rhin.openciv.game.research.type.TheologyTech;
 import me.rhin.openciv.game.research.type.TrappingTech;
 import me.rhin.openciv.game.research.type.WheelTech;
 import me.rhin.openciv.game.research.type.WritingTech;
-import me.rhin.openciv.listener.CompleteResearchListener;
-import me.rhin.openciv.listener.PickResearchListener;
+import me.rhin.openciv.shared.listener.EventHandler;
+import me.rhin.openciv.shared.listener.Listener;
 import me.rhin.openciv.shared.packet.type.CompleteResearchPacket;
 
-public class ResearchTree implements PickResearchListener, CompleteResearchListener {
+public class ResearchTree implements Listener {
 
 	private AbstractPlayer player;
 	private LinkedHashMap<Class<? extends Technology>, Technology> technologies;
@@ -78,8 +77,7 @@ public class ResearchTree implements PickResearchListener, CompleteResearchListe
 		technologies.put(MachineryTech.class, new MachineryTech(this));
 
 		// FIXME: Don't add listeners for other players
-		Civilization.getInstance().getEventManager().addListener(PickResearchListener.class, this);
-		Civilization.getInstance().getEventManager().addListener(CompleteResearchListener.class, this);
+		Civilization.getInstance().getEventManager().addListener(this);
 	}
 
 	public List<Technology> getTechnologies() {
@@ -95,7 +93,7 @@ public class ResearchTree implements PickResearchListener, CompleteResearchListe
 		return technologies.get(clazz);
 	}
 
-	@Override
+	@EventHandler
 	public void onCompleteResearch(CompleteResearchPacket packet) {
 		if (!player.equals(Civilization.getInstance().getGame().getPlayer()))
 			return;
@@ -115,7 +113,7 @@ public class ResearchTree implements PickResearchListener, CompleteResearchListe
 		researchingTech = null;
 	}
 
-	@Override
+	@EventHandler
 	public void onPickResearch(Technology tech) {
 		if (!player.equals(Civilization.getInstance().getGame().getPlayer()))
 			return;

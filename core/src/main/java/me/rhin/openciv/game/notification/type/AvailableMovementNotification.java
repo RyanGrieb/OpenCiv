@@ -7,23 +7,18 @@ import com.badlogic.gdx.graphics.g2d.Sprite;
 
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.TextureEnum;
+import me.rhin.openciv.events.type.SelectUnitEvent;
 import me.rhin.openciv.game.map.tile.Tile;
 import me.rhin.openciv.game.notification.AbstractNotification;
 import me.rhin.openciv.game.unit.Unit;
 import me.rhin.openciv.game.unit.actions.BuilderAction;
-import me.rhin.openciv.listener.BuilderActListener;
-import me.rhin.openciv.listener.DeleteUnitListener;
-import me.rhin.openciv.listener.MoveUnitListener;
-import me.rhin.openciv.listener.SelectUnitListener.SelectUnitEvent;
-import me.rhin.openciv.listener.SetUnitOwnerListener;
-import me.rhin.openciv.listener.UnitAttackListener;
+import me.rhin.openciv.shared.listener.EventHandler;
 import me.rhin.openciv.shared.packet.type.DeleteUnitPacket;
 import me.rhin.openciv.shared.packet.type.MoveUnitPacket;
 import me.rhin.openciv.shared.packet.type.SetUnitOwnerPacket;
 import me.rhin.openciv.shared.packet.type.UnitAttackPacket;
 
-public class AvailableMovementNotification extends AbstractNotification
-		implements MoveUnitListener, DeleteUnitListener, SetUnitOwnerListener, BuilderActListener, UnitAttackListener {
+public class AvailableMovementNotification extends AbstractNotification {
 
 	private ArrayList<Unit> availableUnits;
 	private int index;
@@ -34,14 +29,10 @@ public class AvailableMovementNotification extends AbstractNotification
 
 		availableUnits.add(unit);
 
-		Civilization.getInstance().getEventManager().addListener(MoveUnitListener.class, this);
-		Civilization.getInstance().getEventManager().addListener(DeleteUnitListener.class, this);
-		Civilization.getInstance().getEventManager().addListener(SetUnitOwnerListener.class, this);
-		Civilization.getInstance().getEventManager().addListener(BuilderActListener.class, this);
-		Civilization.getInstance().getEventManager().addListener(UnitAttackListener.class, this);
+		Civilization.getInstance().getEventManager().addListener(this);
 	}
 
-	@Override
+	@EventHandler
 	public void onUnitMove(MoveUnitPacket packet) {
 
 		Tile targetTile = Civilization.getInstance().getGame().getMap().getTiles()[packet.getTargetGridX()][packet
@@ -63,15 +54,16 @@ public class AvailableMovementNotification extends AbstractNotification
 		removeUnitFromNotification(unit.getID());
 	}
 
-	@Override
+	@EventHandler
 	public void onUnitDelete(DeleteUnitPacket packet) {
 
-		//NOTE: We don't use unit Object here since it's already deleted from the tile.x
+		// NOTE: We don't use unit Object here since it's already deleted from the
+		// tile.x
 		int unitID = packet.getUnitID();
 		removeUnitFromNotification(unitID);
 	}
 
-	@Override
+	@EventHandler
 	public void onSetUnitOwner(SetUnitOwnerPacket packet) {
 		int unitID = packet.getUnitID();
 
@@ -87,14 +79,14 @@ public class AvailableMovementNotification extends AbstractNotification
 		removeUnitFromNotification(unit.getID());
 	}
 
-	@Override
+	@EventHandler
 	public void onBuilderAct(BuilderAction action) {
 		Unit unit = action.getUnit();
 
 		removeUnitFromNotification(unit.getID());
 	}
 
-	@Override
+	@EventHandler
 	public void onUnitAttack(UnitAttackPacket packet) {
 		int unitID = packet.getUnitID();
 

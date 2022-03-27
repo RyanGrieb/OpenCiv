@@ -7,16 +7,18 @@ import java.util.List;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 
 import me.rhin.openciv.Civilization;
-import me.rhin.openciv.listener.CompleteResearchListener;
-import me.rhin.openciv.listener.NextTurnListener;
-import me.rhin.openciv.listener.PickResearchListener.PickResearchEvent;
+import me.rhin.openciv.events.type.PickResearchEvent;
+import me.rhin.openciv.shared.listener.EventHandler;
+import me.rhin.openciv.shared.listener.Listener;
 import me.rhin.openciv.shared.packet.type.ChooseTechPacket;
 import me.rhin.openciv.shared.packet.type.CompleteResearchPacket;
 import me.rhin.openciv.shared.packet.type.NextTurnPacket;
 import me.rhin.openciv.shared.stat.Stat;
 import me.rhin.openciv.ui.window.type.PickResearchWindow;
 
-public abstract class Technology implements NextTurnListener, CompleteResearchListener {
+public abstract class Technology implements Listener {
+
+	// FIXME: Handle removing this listener properly
 
 	protected ArrayList<Class<? extends Technology>> requiredTechs;
 
@@ -38,8 +40,7 @@ public abstract class Technology implements NextTurnListener, CompleteResearchLi
 		this.appliedScience = 0;
 		this.appliedTurns = 0;
 
-		Civilization.getInstance().getEventManager().addListener(NextTurnListener.class, this);
-		Civilization.getInstance().getEventManager().addListener(CompleteResearchListener.class, this);
+		Civilization.getInstance().getEventManager().addListener(this);
 	}
 
 	public static Technology fromID(int techID) {
@@ -51,7 +52,7 @@ public abstract class Technology implements NextTurnListener, CompleteResearchLi
 		return null;
 	}
 
-	@Override
+	@EventHandler
 	public void onNextTurn(NextTurnPacket packet) {
 		if (researching) {
 			appliedScience += Civilization.getInstance().getGame().getPlayer().getStatLine()
@@ -60,7 +61,7 @@ public abstract class Technology implements NextTurnListener, CompleteResearchLi
 		}
 	}
 
-	@Override
+	@EventHandler
 	public void onCompleteResearch(CompleteResearchPacket packet) {
 		if (packet.getTechID() != id)
 			return;

@@ -6,10 +6,10 @@ import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.notification.AbstractNotification;
 import me.rhin.openciv.game.notification.NotificationPriority;
-import me.rhin.openciv.listener.NextTurnListener;
+import me.rhin.openciv.shared.listener.EventHandler;
 import me.rhin.openciv.shared.packet.type.NextTurnPacket;
 
-public class ServerNotification extends AbstractNotification implements NextTurnListener {
+public class ServerNotification extends AbstractNotification {
 
 	private TextureEnum icon;
 	private String text;
@@ -18,10 +18,10 @@ public class ServerNotification extends AbstractNotification implements NextTurn
 		this.icon = icon;
 		this.text = text;
 
-		Civilization.getInstance().getEventManager().addListener(NextTurnListener.class, this);
+		Civilization.getInstance().getEventManager().addListener(this);
 	}
 
-	@Override
+	@EventHandler
 	public void onNextTurn(NextTurnPacket packet) {
 		Civilization.getInstance().getGame().getNotificationHanlder().removeNotification(this);
 	}

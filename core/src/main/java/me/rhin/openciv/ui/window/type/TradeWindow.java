@@ -9,9 +9,7 @@ import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.city.City;
 import me.rhin.openciv.game.unit.TradeUnit;
 import me.rhin.openciv.game.unit.TradeUnit.Tradeable;
-import me.rhin.openciv.game.unit.type.Caravan.CaravanUnit;
-import me.rhin.openciv.listener.MoveUnitListener;
-import me.rhin.openciv.listener.ResizeListener;
+import me.rhin.openciv.shared.listener.EventHandler;
 import me.rhin.openciv.shared.packet.type.MoveUnitPacket;
 import me.rhin.openciv.ui.background.ColoredBackground;
 import me.rhin.openciv.ui.button.type.CloseWindowButton;
@@ -21,7 +19,7 @@ import me.rhin.openciv.ui.list.ListContainer.ListContainerType;
 import me.rhin.openciv.ui.list.type.ListTradeableCity;
 import me.rhin.openciv.ui.window.AbstractWindow;
 
-public class TradeWindow extends AbstractWindow implements ResizeListener, MoveUnitListener {
+public class TradeWindow extends AbstractWindow {
 
 	private TradeUnit tradeUnit;
 	private ColoredBackground background;
@@ -69,12 +67,9 @@ public class TradeWindow extends AbstractWindow implements ResizeListener, MoveU
 				containerList.onTouchDragged(event, x, y);
 			}
 		});
-
-		Civilization.getInstance().getEventManager().addListener(ResizeListener.class, this);
-		Civilization.getInstance().getEventManager().addListener(MoveUnitListener.class, this);
 	}
 
-	@Override
+	@EventHandler
 	public void onResize(int width, int height) {
 		float x = width / 2 - 285 / 2;
 		float y = height / 2 - 350 / 2;
@@ -85,6 +80,12 @@ public class TradeWindow extends AbstractWindow implements ResizeListener, MoveU
 		containerList.setPosition(x + 6, y + 50);
 		closeWindowButton.setPosition(x + windowWidth / 2 - 95 / 2, y + 4);
 
+	}
+
+	@EventHandler
+	public void onUnitMove(MoveUnitPacket packet) {
+		if (packet.getUnitID() == tradeUnit.getID())
+			Civilization.getInstance().getWindowManager().closeWindow(getClass());
 	}
 
 	@Override
@@ -116,11 +117,5 @@ public class TradeWindow extends AbstractWindow implements ResizeListener, MoveU
 	@Override
 	public boolean isGameDisplayWindow() {
 		return false;
-	}
-
-	@Override
-	public void onUnitMove(MoveUnitPacket packet) {
-		if (packet.getUnitID() == tradeUnit.getID())
-			Civilization.getInstance().getWindowManager().closeWindow(getClass());
 	}
 }

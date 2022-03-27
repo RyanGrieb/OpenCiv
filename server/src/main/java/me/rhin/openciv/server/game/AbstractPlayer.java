@@ -16,11 +16,12 @@ import me.rhin.openciv.server.game.map.tile.Tile;
 import me.rhin.openciv.server.game.religion.PlayerReligion;
 import me.rhin.openciv.server.game.research.ResearchTree;
 import me.rhin.openciv.server.game.unit.Unit;
-import me.rhin.openciv.server.listener.NextTurnListener;
+import me.rhin.openciv.shared.listener.EventHandler;
+import me.rhin.openciv.shared.listener.Listener;
 import me.rhin.openciv.shared.stat.StatLine;
 import me.rhin.openciv.shared.stat.StatType;
 
-public abstract class AbstractPlayer implements NextTurnListener {
+public abstract class AbstractPlayer implements Listener {
 
 	protected ArrayList<City> ownedCities;
 	protected ArrayList<Unit> ownedUnits;
@@ -48,7 +49,7 @@ public abstract class AbstractPlayer implements NextTurnListener {
 		this.spawnX = -1;
 		this.spawnY = -1;
 
-		Server.getInstance().getEventManager().addListener(NextTurnListener.class, this);
+		Server.getInstance().getEventManager().addListener(this);
 	}
 
 	public abstract String getName();
@@ -61,7 +62,7 @@ public abstract class AbstractPlayer implements NextTurnListener {
 
 	public abstract void sendNotification(String iconName, String text);
 
-	@Override
+	@EventHandler
 	public void onNextTurn() {
 		if (ownedCities.size() < 1)
 			return;
