@@ -32,6 +32,7 @@ import me.rhin.openciv.game.unit.actions.type.MoveAction;
 import me.rhin.openciv.game.unit.actions.type.UpgradeAction;
 import me.rhin.openciv.listener.BottomShapeRenderListener;
 import me.rhin.openciv.listener.NextTurnListener;
+import me.rhin.openciv.options.OptionType;
 import me.rhin.openciv.shared.logging.Logger;
 import me.rhin.openciv.shared.logging.LoggerFactory;
 import me.rhin.openciv.shared.logging.LoggerType;
@@ -153,10 +154,25 @@ public abstract class Unit extends Actor
 			float xIncrement = (float) (speed * Math.cos(angle)) * (Gdx.graphics.getDeltaTime() * 60);
 			float yIncrement = (float) (speed * Math.sin(angle)) * (Gdx.graphics.getDeltaTime() * 60);
 
-			sprite.setPosition(sprite.getX() + xIncrement, sprite.getY() + yIncrement);
+			if (Civilization.getInstance().getGameOptions().getInt(OptionType.ANIMATION_LEVEL) > 0)
+				sprite.setPosition(sprite.getX() + xIncrement, sprite.getY() + yIncrement);
+
+			if (Civilization.getInstance().getGameOptions().getInt(OptionType.ANIMATION_LEVEL) > 1) {
+				civIconSprite.setPosition(sprite.getX() + 10 + xIncrement, sprite.getY() + 25 + yIncrement);
+				unitHealthBubble.setPosition(civIconSprite.getX() + 4 + xIncrement,
+						civIconSprite.getY() + 4 + yIncrement);
+			}
 
 			if (Math.abs(sprite.getX() - tileX) < 1 && Math.abs(sprite.getY() - tileY) < 1) {
 				movementTiles.remove(tile);
+
+				if (Civilization.getInstance().getGameOptions().getInt(OptionType.ANIMATION_LEVEL) > 0)
+					sprite.setPosition(tileX, tileY);
+
+				if (Civilization.getInstance().getGameOptions().getInt(OptionType.ANIMATION_LEVEL) > 1) {
+					civIconSprite.setPosition(tileX + 10, tileY + 25);
+					unitHealthBubble.setPosition(civIconSprite.getX() + 4, civIconSprite.getY() + 4);
+				}
 			}
 		}
 
@@ -453,9 +469,15 @@ public abstract class Unit extends Actor
 		float tileX = targetTile.getVectors()[0].x - targetTile.getWidth() / 2;
 		float tileY = targetTile.getVectors()[0].y + 4;
 
+		if (Civilization.getInstance().getGameOptions().getInt(OptionType.ANIMATION_LEVEL) < 1)
+			sprite.setPosition(tileX, tileY);
+
+		if (Civilization.getInstance().getGameOptions().getInt(OptionType.ANIMATION_LEVEL) < 2) {
+			civIconSprite.setPosition(tileX + 10, tileY + 25);
+			unitHealthBubble.setPosition(civIconSprite.getX() + 4, civIconSprite.getY() + 4);
+		}
+
 		selectionSprite.setPosition(tileX, tileY);
-		civIconSprite.setPosition(tileX + 10, tileY + 25);
-		unitHealthBubble.setPosition(civIconSprite.getX() + 4, civIconSprite.getY() + 4);
 		super.setPosition(tileX, tileY);
 
 		standingTile = targetTile;
@@ -745,5 +767,7 @@ public abstract class Unit extends Actor
 	private void clearMovementTiles() {
 		movementTiles.clear();
 		sprite.setPosition(getX(), getY());
+		civIconSprite.setPosition(sprite.getX() + 10, sprite.getY() + 25);
+		unitHealthBubble.setPosition(civIconSprite.getX() + 4, civIconSprite.getY() + 4);
 	}
 }

@@ -38,6 +38,9 @@ public class GameOptionsWindow extends AbstractWindow implements ResizeListener,
 	private CustomLabel displayDescLabel;
 	private CustomButton fullscreenButton;
 
+	private CustomLabel animationsLevelLabel;
+	private ScrubBar animationsScrubBar;
+
 	public GameOptionsWindow() {
 		super.setBounds(0, 0, viewport.getWorldWidth(), viewport.getWorldHeight());
 
@@ -109,6 +112,30 @@ public class GameOptionsWindow extends AbstractWindow implements ResizeListener,
 		});
 		addActor(fullscreenButton);
 
+		String animationLevel = "N/A";
+		switch (gameOptions.getInt(OptionType.ANIMATION_LEVEL)) {
+		case 0:
+			animationLevel = "None";
+			break;
+		case 1:
+			animationLevel = "Partial";
+			break;
+		case 2:
+			animationLevel = "Full";
+			break;
+		default:
+			animationLevel = "Error";
+			break;
+		}
+
+		animationsLevelLabel = new CustomLabel("Animation Level: " + animationLevel);
+		animationsLevelLabel.setPosition(270, viewport.getWorldHeight() - 155);
+		addActor(animationsLevelLabel);
+
+		animationsScrubBar = new ScrubBar(270, viewport.getWorldHeight() - 205, 100, 20);
+		animationsScrubBar.setValue(gameOptions.getInt(OptionType.ANIMATION_LEVEL) * 50);
+		addActor(animationsScrubBar);
+
 		Civilization.getInstance().getEventManager().addListener(ScrubberPositionUpdateListener.class, this);
 		Civilization.getInstance().getEventManager().addListener(ResizeListener.class, this);
 	}
@@ -135,6 +162,39 @@ public class GameOptionsWindow extends AbstractWindow implements ResizeListener,
 			effectsSoundLevelLabel.setText((int) scrubber.getValue() + "%");
 		}
 
+		if (scrubber.equals(animationsScrubBar)) {
+
+			int optionLevel = -1;
+
+			if (scrubber.getValue() < 25) {
+				optionLevel = 0;
+			} else if (scrubber.getValue() >= 25 && scrubber.getValue() < 75) {
+				optionLevel = 1;
+			} else {
+				optionLevel = 2;
+			}
+
+			String animationLevel = "N/A";
+
+			switch (optionLevel) {
+			case 0:
+				animationLevel = "None";
+				break;
+			case 1:
+				animationLevel = "Partial";
+				break;
+			case 2:
+				animationLevel = "Full";
+				break;
+			default:
+				animationLevel = "Error";
+				break;
+			}
+
+			gameOptions.setInt(OptionType.ANIMATION_LEVEL, optionLevel);
+			animationsLevelLabel.setText("Animation Level: " + animationLevel);
+		}
+
 		updatePositions(viewport.getWorldWidth(), viewport.getWorldHeight());
 	}
 
@@ -144,6 +204,7 @@ public class GameOptionsWindow extends AbstractWindow implements ResizeListener,
 	}
 
 	private void updatePositions(float width, float height) {
+		super.setBounds(0, 0, width, height);
 
 		blankBackground.setSize(width, height);
 
