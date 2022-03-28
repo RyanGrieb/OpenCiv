@@ -1,7 +1,5 @@
 package me.rhin.openciv.shared.listener;
 
-import java.lang.reflect.InvocationTargetException;
-
 import com.badlogic.gdx.utils.reflect.Method;
 import com.badlogic.gdx.utils.reflect.ReflectionException;
 
@@ -33,13 +31,8 @@ public class MethodWrapper implements Comparable<MethodWrapper> {
 		return method;
 	}
 
-	public void invoke() throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-		try {
-			method.invoke(listener, event.getMethodParams());
-		} catch (ReflectionException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+	public void invoke() throws ReflectionException {
+		method.invoke(listener, event.getMethodParams());
 	}
 
 }
