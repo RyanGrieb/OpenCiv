@@ -132,7 +132,7 @@ public class Server extends WebSocketServer {
 		networkEvents.put(SettleCityPacket.class, "onSettleCity");
 		networkEvents.put(FinishLoadingPacket.class, "onPlayerFinishLoading");
 		networkEvents.put(SetProductionItemPacket.class, "onSetProductionItem");
-		networkEvents.put(ClickWorkedTilePacket.class, "onClickedWorkedTile");
+		networkEvents.put(ClickWorkedTilePacket.class, "onClickWorkedTile");
 		networkEvents.put(ClickSpecialistPacket.class, "onClickSpecialist");
 		networkEvents.put(EndTurnPacket.class, "onEndTurn");
 		networkEvents.put(GetHostPacket.class, "onGetHost");
