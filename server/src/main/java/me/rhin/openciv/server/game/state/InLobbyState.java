@@ -43,6 +43,11 @@ public class InLobbyState extends GameState {
 	}
 
 	@EventHandler
+	public void onStartGameRequest() {
+		onStartGameRequest(null, null);
+	}
+
+	@EventHandler
 	public void onStartGameRequest(WebSocket conn, StartGameRequestPacket packet) {
 		if (conn != null && !getPlayerByConn(conn).isHost())
 			return;

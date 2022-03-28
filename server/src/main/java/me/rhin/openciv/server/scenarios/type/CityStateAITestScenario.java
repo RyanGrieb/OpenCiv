@@ -32,7 +32,7 @@ public class CityStateAITestScenario extends Scenario implements Listener {
 	}
 
 	@EventHandler
-	public void onPlayersSpawnSet() {
+	public void onPlayerSpawnsSet() {
 
 		Player player = Server.getInstance().getPlayers().get(0);
 		AIPlayer aiPlayer = Server.getInstance().getAIPlayers().get(0);
