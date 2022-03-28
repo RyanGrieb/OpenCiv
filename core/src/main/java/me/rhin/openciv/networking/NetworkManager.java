@@ -137,7 +137,7 @@ public class NetworkManager {
 		networkEvents.put(BuyProductionItemPacket.class, "onBuyProductionItem");
 		networkEvents.put(AddObservedTilePacket.class, "onAddObservedTilePacket");
 		networkEvents.put(RemoveObservedTilePacket.class, "onRemoveObservedTilePacket");
-		networkEvents.put(DeclareWarPacket.class, "onDelcareWar");
+		networkEvents.put(DeclareWarPacket.class, "onDeclareWar");
 		networkEvents.put(DeclareWarAllPacket.class, "onDeclareWarAll");
 		networkEvents.put(AvailablePantheonPacket.class, "onAvailablePantheon");
 		networkEvents.put(PickPantheonPacket.class, "onPickPantheon");

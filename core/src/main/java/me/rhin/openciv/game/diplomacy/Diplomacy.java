@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.game.player.AbstractPlayer;
 import me.rhin.openciv.shared.listener.EventHandler;
+import me.rhin.openciv.shared.listener.Listener;
 import me.rhin.openciv.shared.logging.Logger;
 import me.rhin.openciv.shared.logging.LoggerFactory;
 import me.rhin.openciv.shared.logging.LoggerType;
@@ -12,7 +13,7 @@ import me.rhin.openciv.shared.packet.type.DeclareWarAllPacket;
 import me.rhin.openciv.shared.packet.type.DeclareWarPacket;
 import me.rhin.openciv.shared.packet.type.DiscoveredPlayerPacket;
 
-public class Diplomacy {
+public class Diplomacy implements Listener {
 
 	private static final Logger LOGGER = LoggerFactory.getInstance(LoggerType.LOG_TAG);
 
@@ -25,6 +26,8 @@ public class Diplomacy {
 
 		this.discoveredPlayers = new ArrayList<>();
 		this.enemies = new ArrayList<>();
+
+		Civilization.getInstance().getEventManager().addListener(this);
 	}
 
 	@EventHandler
