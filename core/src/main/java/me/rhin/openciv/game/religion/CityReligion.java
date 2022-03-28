@@ -51,8 +51,9 @@ public class CityReligion implements Listener {
 
 					if (newMajority != null && (oldMajority == null || !oldMajority.equals(newMajority))) {
 
-						Civilization.getInstance().getEventManager()
-								.fireEvent(new CityLooseMajorityReligionEvent(city, oldMajority));
+						if (oldMajority != null)
+							Civilization.getInstance().getEventManager()
+									.fireEvent(new CityLooseMajorityReligionEvent(city, oldMajority));
 
 						Civilization.getInstance().getEventManager()
 								.fireEvent(new CityGainMajorityReligionEvent(city, newMajority));
