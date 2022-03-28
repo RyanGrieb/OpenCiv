@@ -64,4 +64,8 @@ public class EventManager {
 		listeners.clear();
 	}
 
+	public void verifyListener(Listener listener) {
+		System.out.println(listeners.contains(listener));
+	}
+
 }

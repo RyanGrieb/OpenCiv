@@ -100,9 +100,7 @@ public class ChatboxWindow extends AbstractWindow {
 	}
 
 	@EventHandler
-	public void onSentChatMessage(SendChatMessagePacket packet) {
-
-		System.out.println("I hear you too.");
+	public void onSendChatMessage(SendChatMessagePacket packet) {
 
 		String messageText = packet.getMessage();
 

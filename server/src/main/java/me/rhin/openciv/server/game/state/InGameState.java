@@ -50,6 +50,7 @@ import me.rhin.openciv.shared.packet.type.CancelQueuedMovementPacket;
 import me.rhin.openciv.shared.packet.type.CombatPreviewPacket;
 import me.rhin.openciv.shared.packet.type.EndTurnPacket;
 import me.rhin.openciv.shared.packet.type.FetchPlayerPacket;
+import me.rhin.openciv.shared.packet.type.FinishLoadingPacket;
 import me.rhin.openciv.shared.packet.type.GameStartPacket;
 import me.rhin.openciv.shared.packet.type.MoveUnitPacket;
 import me.rhin.openciv.shared.packet.type.NextTurnPacket;
@@ -101,8 +102,10 @@ public class InGameState extends GameState {
 		this.turnTimeRunnable = new Runnable() {
 			public void run() {
 				try {
+
 					if (!playersLoaded())
 						return;
+
 					if (turnTimeLeft <= 0) {
 						Server.getInstance().getEventManager().fireEvent(new NextTurnEvent());
 					}
@@ -348,7 +351,7 @@ public class InGameState extends GameState {
 	}
 
 	@EventHandler
-	public void onPlayerFinishLoading(WebSocket conn) {
+	public void onPlayerFinishLoading(WebSocket conn, FinishLoadingPacket packet) {
 		getPlayerByConn(conn).finishLoading();
 	}
 

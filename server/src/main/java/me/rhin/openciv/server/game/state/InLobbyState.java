@@ -70,7 +70,7 @@ public class InLobbyState extends GameState {
 	public void onConnection(WebSocket conn) {
 		// FIXME: Check for multiple connections
 		Player newPlayer = new Player(conn);
-		System.out.println("Called");
+
 		for (Player player : players) {
 
 			PlayerConnectPacket packet = new PlayerConnectPacket();

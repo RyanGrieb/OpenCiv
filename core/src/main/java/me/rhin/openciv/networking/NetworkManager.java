@@ -104,7 +104,7 @@ public class NetworkManager {
 		networkEvents.put(BuildingConstructedPacket.class, "onBuildingConstructed");
 		networkEvents.put(BuildingRemovedPacket.class, "onBuildingRemoved");
 		networkEvents.put(NextTurnPacket.class, "onNextTurn");
-		networkEvents.put(FinishLoadingPacket.class, "onFinishedLoading");
+		networkEvents.put(FinishLoadingPacket.class, "onFinishLoadingRequest");
 		networkEvents.put(TerritoryGrowPacket.class, "onTerritoryGrow");
 		networkEvents.put(PlayerStatUpdatePacket.class, "onPlayerStatUpdate");
 		networkEvents.put(CityStatUpdatePacket.class, "onCityStatUpdate");

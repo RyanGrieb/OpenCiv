@@ -9,12 +9,10 @@ import me.rhin.openciv.server.game.city.City;
 import me.rhin.openciv.server.game.map.tile.Tile;
 import me.rhin.openciv.server.game.map.tile.TileType.TileProperty;
 import me.rhin.openciv.server.game.map.tile.improvement.TileImprovement;
-import me.rhin.openciv.server.game.research.type.MachineryTech;
-import me.rhin.openciv.server.game.unit.AttackableEntity;
 import me.rhin.openciv.server.game.unit.DeleteUnitOptions;
 import me.rhin.openciv.server.game.unit.Unit;
 import me.rhin.openciv.server.game.unit.UnitItem;
-import me.rhin.openciv.shared.stat.Stat;
+import me.rhin.openciv.shared.listener.EventHandler;
 
 public class Builder extends UnitItem {
 
@@ -31,7 +29,7 @@ public class Builder extends UnitItem {
 			super(playerOwner, standingTile);
 		}
 
-		@Override
+		@EventHandler
 		public void onNextTurn() {
 			super.onNextTurn();
 			// Update all the worked tiles
