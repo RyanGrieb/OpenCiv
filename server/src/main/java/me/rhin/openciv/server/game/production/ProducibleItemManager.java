@@ -383,9 +383,17 @@ public class ProducibleItemManager implements Listener {
 		city.updateWorkedTiles();
 		city.getPlayerOwner().updateOwnedStatlines(false);
 
-		if (itemQueue.get(0) != null && itemQueue.get(0).getProductionItem().equals(item.getProductionItem())
-				&& item.getProductionItem() instanceof Building) {
-			clearProducingItem();
+		// Remove buildings from queue upon purchase.
+		// NOTE: We remove by name since our objects are different
+		if (item.getProductionItem() instanceof Building) {
+			Iterator<ProducingItem> iterator = itemQueue.iterator();
+
+			while (iterator.hasNext()) {
+				ProducingItem producingItem = iterator.next();
+
+				if (producingItem.getProductionItem().getName().equals(item.getProductionItem().getName()))
+					iterator.remove();
+			}
 		}
 	}
 

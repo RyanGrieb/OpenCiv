@@ -124,9 +124,11 @@ public class CityReligion {
 		}
 
 		if (newMajority != null && (oldMajority == null || !oldMajority.equals(newMajority))) {
+
 			Server.getInstance().getEventManager().fireEvent(new CityGainMajorityReligionEvent(city, newMajority));
 
-			Server.getInstance().getEventManager().fireEvent(new CityLooseMajorityReligionEvent(city, oldMajority));
+			if (oldMajority != null)
+				Server.getInstance().getEventManager().fireEvent(new CityLooseMajorityReligionEvent(city, oldMajority));
 
 			city.updateWorkedTiles();
 			city.getPlayerOwner().updateOwnedStatlines(false);
