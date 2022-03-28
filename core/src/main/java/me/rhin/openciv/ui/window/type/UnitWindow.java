@@ -10,15 +10,7 @@ import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.unit.Unit;
 import me.rhin.openciv.game.unit.actions.AbstractAction;
 import me.rhin.openciv.game.unit.type.Builder.BuilderUnit;
-import me.rhin.openciv.listener.MoveUnitListener;
-import me.rhin.openciv.listener.NextTurnListener;
-import me.rhin.openciv.listener.RemoveTileTypeListener;
-import me.rhin.openciv.listener.ResizeListener;
-import me.rhin.openciv.listener.SetTileTypeListener;
-import me.rhin.openciv.listener.SetUnitHealthListener;
-import me.rhin.openciv.listener.UnitActListener;
-import me.rhin.openciv.listener.UnitAttackListener;
-import me.rhin.openciv.listener.WorkTileListener;
+import me.rhin.openciv.shared.listener.EventHandler;
 import me.rhin.openciv.shared.packet.type.MoveUnitPacket;
 import me.rhin.openciv.shared.packet.type.NextTurnPacket;
 import me.rhin.openciv.shared.packet.type.RemoveTileTypePacket;
@@ -32,9 +24,7 @@ import me.rhin.openciv.ui.game.Healthbar;
 import me.rhin.openciv.ui.label.CustomLabel;
 import me.rhin.openciv.ui.window.AbstractWindow;
 
-public class UnitWindow extends AbstractWindow
-		implements ResizeListener, UnitAttackListener, NextTurnListener, UnitActListener, WorkTileListener,
-		SetTileTypeListener, RemoveTileTypeListener, SetUnitHealthListener, MoveUnitListener {
+public class UnitWindow extends AbstractWindow {
 
 	private CustomLabel unitNameLabel;
 	private CustomLabel movementLabel;
@@ -105,36 +95,19 @@ public class UnitWindow extends AbstractWindow
 			addActor(actionButton);
 			index++;
 		}
-
-		Civilization.getInstance().getEventManager().addListener(ResizeListener.class, this);
-		Civilization.getInstance().getEventManager().addListener(UnitAttackListener.class, this);
-		Civilization.getInstance().getEventManager().addListener(NextTurnListener.class, this);
-		Civilization.getInstance().getEventManager().addListener(UnitActListener.class, this);
-		Civilization.getInstance().getEventManager().addListener(WorkTileListener.class, this);
-		Civilization.getInstance().getEventManager().addListener(SetTileTypeListener.class, this);
-		Civilization.getInstance().getEventManager().addListener(RemoveTileTypeListener.class, this);
-		Civilization.getInstance().getEventManager().addListener(SetUnitHealthListener.class, this);
-		Civilization.getInstance().getEventManager().addListener(MoveUnitListener.class, this);
 	}
 
-	@Override
-	public void onClose() {
-		super.onClose();
-
-		Civilization.getInstance().getEventManager().clearListenersFromObject(this);
-	}
-
-	@Override
+	@EventHandler
 	public void onNextTurn(NextTurnPacket packet) {
 		updateActionButtons();
 	}
 
-	@Override
+	@EventHandler
 	public void onUnitMove(MoveUnitPacket packet) {
 		updateActionButtons();
 	}
 
-	@Override
+	@EventHandler
 	public void onUnitAct(Unit unit) {
 
 		// FIXME: This is pretty much hard coded into the UI. Maybe each required unit
@@ -153,7 +126,7 @@ public class UnitWindow extends AbstractWindow
 		updateActionButtons();
 	}
 
-	@Override
+	@EventHandler
 	public void onUnitAttack(UnitAttackPacket packet) {
 		// FIXME: Is this the best way to do this? How about onUnitSetHealth event?
 		Unit attackingUnit = Civilization.getInstance().getGame().getMap().getTiles()[packet.getUnitGridX()][packet
@@ -166,7 +139,7 @@ public class UnitWindow extends AbstractWindow
 		}
 	}
 
-	@Override
+	@EventHandler
 	public void onSetUnitHealth(SetUnitHealthPacket packet) {
 		Unit unit = Civilization.getInstance().getGame().getMap().getTiles()[packet.getTileGridX()][packet
 				.getTileGridY()].getUnitFromID(packet.getUnitID());
@@ -176,8 +149,9 @@ public class UnitWindow extends AbstractWindow
 		}
 	}
 
-	@Override
+	@EventHandler
 	public void onWorkTile(WorkTilePacket packet) {
+
 		if (unit.getID() != packet.getUnitID())
 			return;
 
@@ -187,7 +161,7 @@ public class UnitWindow extends AbstractWindow
 				+ builderUnit.getStandingTile().getAppliedImprovementTurns() + "/" + builderUnit.getMaxTurns() + ")");
 	}
 
-	@Override
+	@EventHandler
 	public void onSetTileType(SetTileTypePacket packet) {
 		if (!(unit instanceof BuilderUnit))
 			return;
@@ -204,7 +178,7 @@ public class UnitWindow extends AbstractWindow
 		updateActionButtons();
 	}
 
-	@Override
+	@EventHandler
 	public void onRemoveTileType(RemoveTileTypePacket packet) {
 		if (!(unit instanceof BuilderUnit))
 			return;
@@ -221,14 +195,7 @@ public class UnitWindow extends AbstractWindow
 		updateActionButtons();
 	}
 
-	@Override
-	public void draw(Batch batch, float parentAlpha) {
-		super.draw(batch, parentAlpha);
-		// FIXME: This is not ideal
-		movementLabel.setText("Movement: " + unit.getCurrentMovement() + "/" + unit.getMaxMovement());
-	}
-
-	@Override
+	@EventHandler
 	public void onResize(int width, int height) {
 		super.setPosition(width - 225, 0);
 		blankBackground.setPosition(0, 0);
@@ -239,6 +206,13 @@ public class UnitWindow extends AbstractWindow
 		 * int index = 0; for (UnitActionButton actionButton : unitActionButtons) {
 		 * actionButton.setPosition((52 * index), 17); index++; }
 		 */
+	}
+
+	@Override
+	public void draw(Batch batch, float parentAlpha) {
+		super.draw(batch, parentAlpha);
+		// FIXME: This is not ideal
+		movementLabel.setText("Movement: " + unit.getCurrentMovement() + "/" + unit.getMaxMovement());
 	}
 
 	@Override

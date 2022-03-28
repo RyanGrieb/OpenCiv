@@ -4,22 +4,18 @@ import com.badlogic.gdx.graphics.Color;
 
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.TextureEnum;
+import me.rhin.openciv.events.type.UnitActEvent;
 import me.rhin.openciv.game.map.tile.Tile;
 import me.rhin.openciv.game.map.tile.Tile.TileTypeWrapper;
-import me.rhin.openciv.game.unit.actions.AbstractAction;
 import me.rhin.openciv.game.map.tile.TileType;
-import me.rhin.openciv.listener.LeftClickListener;
-import me.rhin.openciv.listener.RelativeMouseMoveListener;
-import me.rhin.openciv.listener.RightClickListener;
-import me.rhin.openciv.listener.SelectUnitListener;
-import me.rhin.openciv.listener.UnitActListener.UnitActEvent;
+import me.rhin.openciv.game.unit.actions.AbstractAction;
+import me.rhin.openciv.shared.listener.EventHandler;
+import me.rhin.openciv.shared.listener.Listener;
 import me.rhin.openciv.shared.packet.type.RangedAttackPacket;
-import me.rhin.openciv.shared.packet.type.SelectUnitPacket;
 import me.rhin.openciv.ui.window.type.UnitCombatWindow;
 import me.rhin.openciv.util.ClickType;
 
-public abstract class RangedUnit extends Unit
-		implements LeftClickListener, RightClickListener, SelectUnitListener, RelativeMouseMoveListener {
+public abstract class RangedUnit extends Unit implements Listener {
 
 	private UntargetAction untargetAction;
 	private boolean targeting;
@@ -34,17 +30,12 @@ public abstract class RangedUnit extends Unit
 		customActions.add(untargetAction);
 
 		this.targeting = false;
-
-		Civilization.getInstance().getEventManager().addListener(LeftClickListener.class, this);
-		Civilization.getInstance().getEventManager().addListener(RightClickListener.class, this);
-		Civilization.getInstance().getEventManager().addListener(SelectUnitListener.class, this);
-		Civilization.getInstance().getEventManager().addListener(RelativeMouseMoveListener.class, this);
 	}
 
 	public abstract float getMovementCost(Tile prevTile, Tile adjTile);
 
-	@Override
-	public void onLeftClick(float x, float y) {
+	@EventHandler
+	public void onLeftClick(int x, int y) {
 
 		if (getPlayerOwner().getSelectedUnit() == null || !getPlayerOwner().getSelectedUnit().equals(this))
 			return;
@@ -65,7 +56,7 @@ public abstract class RangedUnit extends Unit
 		addAction(untargetAction);
 	}
 
-	@Override
+	@EventHandler
 	public void onRightClick(ClickType clickType, int x, int y) {
 
 		if (getPlayerOwner().getSelectedUnit() == null || !getPlayerOwner().getSelectedUnit().equals(this))
@@ -83,7 +74,7 @@ public abstract class RangedUnit extends Unit
 			addAction(untargetAction);
 	}
 
-	@Override
+	@EventHandler
 	public void onSelectUnit(Unit unit) {
 
 		if (getPlayerOwner().getSelectedUnit() == null || !getPlayerOwner().getSelectedUnit().equals(this))
@@ -93,7 +84,7 @@ public abstract class RangedUnit extends Unit
 			addAction(untargetAction);
 	}
 
-	@Override
+	@EventHandler
 	public void onRelativeMouseMove(float x, float y) {
 
 		if (getPlayerOwner().getSelectedUnit() == null || !getPlayerOwner().getSelectedUnit().equals(this))
@@ -104,7 +95,7 @@ public abstract class RangedUnit extends Unit
 		if (!targeting || tile == null || tile.getEnemyAttackableEntity(getPlayerOwner()) == null
 				|| !tile.hasRangedTarget()) {
 			rangedTarget = null;
-			//targetSelectionSprite.setColor(targetSelectionSprite.getColor());
+			// targetSelectionSprite.setColor(targetSelectionSprite.getColor());
 			Civilization.getInstance().getWindowManager().closeWindow(UnitCombatWindow.class);
 			return;
 		}

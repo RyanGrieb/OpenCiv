@@ -9,17 +9,11 @@ import me.rhin.openciv.game.city.building.Building;
 import me.rhin.openciv.game.heritage.Heritage;
 import me.rhin.openciv.game.map.tile.Tile;
 import me.rhin.openciv.game.production.ProductionItem;
-import me.rhin.openciv.listener.BuildingConstructedListener;
-import me.rhin.openciv.listener.SettleCityListener;
+import me.rhin.openciv.shared.listener.EventHandler;
 import me.rhin.openciv.shared.packet.type.BuildingConstructedPacket;
 import me.rhin.openciv.shared.packet.type.SettleCityPacket;
 
-public class CapitalIconHeritage extends Heritage implements SettleCityListener, BuildingConstructedListener {
-
-	public CapitalIconHeritage() {
-		Civilization.getInstance().getEventManager().addListener(SettleCityListener.class, this);
-		Civilization.getInstance().getEventManager().addListener(BuildingConstructedListener.class, this);
-	}
+public class CapitalIconHeritage extends Heritage {
 
 	@Override
 	public int getLevel() {
@@ -67,7 +61,7 @@ public class CapitalIconHeritage extends Heritage implements SettleCityListener,
 		}
 	}
 
-	@Override
+	@EventHandler
 	public void onSettleCity(SettleCityPacket packet) {
 		if (!studied)
 			return;
@@ -88,7 +82,7 @@ public class CapitalIconHeritage extends Heritage implements SettleCityListener,
 		}
 	}
 
-	@Override
+	@EventHandler
 	public void onBuildingConstructed(BuildingConstructedPacket packet) {
 		City city = Civilization.getInstance().getGame().getPlayer().getCityFromName(packet.getCityName());
 		if (!studied || city == null)

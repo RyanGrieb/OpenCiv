@@ -2,13 +2,10 @@ package me.rhin.openciv.ui.list.type;
 
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
-import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
-import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.player.AbstractPlayer;
-import me.rhin.openciv.listener.ResizeListener;
 import me.rhin.openciv.ui.label.CustomLabel;
 import me.rhin.openciv.ui.list.ContainerList;
 import me.rhin.openciv.ui.list.ListObject;

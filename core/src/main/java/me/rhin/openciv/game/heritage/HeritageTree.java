@@ -11,11 +11,11 @@ import me.rhin.openciv.game.heritage.type.all.CapitalDefenseHeritage;
 import me.rhin.openciv.game.heritage.type.all.CapitalExpansionHeritage;
 import me.rhin.openciv.game.heritage.type.all.StateWorshipHeritage;
 import me.rhin.openciv.game.heritage.type.all.TaxesHeritage;
-import me.rhin.openciv.listener.CompleteHeritageListener;
-import me.rhin.openciv.listener.PickHeritageListener;
+import me.rhin.openciv.shared.listener.EventHandler;
+import me.rhin.openciv.shared.listener.Listener;
 import me.rhin.openciv.shared.packet.type.CompleteHeritagePacket;
 
-public class HeritageTree implements CompleteHeritageListener, PickHeritageListener {
+public class HeritageTree implements Listener {
 
 	private LinkedHashMap<Class<? extends Heritage>, Heritage> values;
 	private Heritage studyingHeritage;
@@ -29,16 +29,15 @@ public class HeritageTree implements CompleteHeritageListener, PickHeritageListe
 		addHeritage(new TaxesHeritage());
 		addHeritage(new CapitalDefenseHeritage());
 
-		Civilization.getInstance().getEventManager().addListener(PickHeritageListener.class, this);
-		Civilization.getInstance().getEventManager().addListener(CompleteHeritageListener.class, this);
+		Civilization.getInstance().getEventManager().addListener(this);
 	}
 
-	@Override
+	@EventHandler
 	public void onPickHeritage(Heritage heritage) {
 		studyingHeritage = heritage;
 	}
 
-	@Override
+	@EventHandler
 	public void onCompleteHeritage(CompleteHeritagePacket packet) {
 		studyingHeritage = null;
 	}

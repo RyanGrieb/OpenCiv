@@ -8,9 +8,10 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
 import me.rhin.openciv.Civilization;
-import me.rhin.openciv.listener.TopShapeRenderListener;
+import me.rhin.openciv.shared.listener.EventHandler;
+import me.rhin.openciv.shared.listener.Listener;
 
-public abstract class AbstractWindow extends Group implements TopShapeRenderListener {
+public abstract class AbstractWindow extends Group implements Listener {
 
 	protected Stage stage;
 	protected Viewport viewport;
@@ -23,10 +24,10 @@ public abstract class AbstractWindow extends Group implements TopShapeRenderList
 
 		open = true;
 
-		Civilization.getInstance().getEventManager().addListener(TopShapeRenderListener.class, this);
+		Civilization.getInstance().getEventManager().addListener(this);
 	}
 
-	@Override
+	@EventHandler
 	public void onTopShapeRender(ShapeRenderer shapeRenderer) {
 		if (Civilization.DEBUG_BOUNDING_BOXES) {
 			for (Actor actor : getChildren()) {
@@ -66,7 +67,7 @@ public abstract class AbstractWindow extends Group implements TopShapeRenderList
 
 	public void onClose() {
 		open = false;
-		Civilization.getInstance().getEventManager().removeListener(TopShapeRenderListener.class, this);
+		Civilization.getInstance().getEventManager().removeListener(this);
 	}
 
 	public void setClosedBy(Class<? extends AbstractWindow> closedByWindow) {

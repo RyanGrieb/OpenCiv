@@ -5,7 +5,7 @@ import com.badlogic.gdx.utils.Align;
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.player.AbstractPlayer;
-import me.rhin.openciv.listener.ResizeListener;
+import me.rhin.openciv.shared.listener.EventHandler;
 import me.rhin.openciv.shared.packet.type.DeclareWarPacket;
 import me.rhin.openciv.ui.background.ColoredBackground;
 import me.rhin.openciv.ui.button.CustomButton;
@@ -13,7 +13,7 @@ import me.rhin.openciv.ui.button.type.CloseWindowButton;
 import me.rhin.openciv.ui.label.CustomLabel;
 import me.rhin.openciv.ui.window.AbstractWindow;
 
-public class DeclareWarWindow extends AbstractWindow implements ResizeListener {
+public class DeclareWarWindow extends AbstractWindow {
 
 	private ColoredBackground background;
 	private CloseWindowButton closeWindowButton;
@@ -56,12 +56,9 @@ public class DeclareWarWindow extends AbstractWindow implements ResizeListener {
 
 		this.closeWindowButton = new CloseWindowButton(getClass(), "Cancel", getWidth() / 2 - 127 / 2, 5, 127, 35);
 		addActor(closeWindowButton);
-
-		Civilization.getInstance().getEventManager().addListener(ResizeListener.class, this);
-
 	}
 
-	@Override
+	@EventHandler
 	public void onResize(int width, int height) {
 		super.setBounds(width / 2 - 250 / 2, height / 2 - 250 / 2, 250, 250);
 	}

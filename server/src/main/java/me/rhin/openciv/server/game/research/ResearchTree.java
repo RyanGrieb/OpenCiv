@@ -33,11 +33,12 @@ import me.rhin.openciv.server.game.research.type.TheologyTech;
 import me.rhin.openciv.server.game.research.type.TrappingTech;
 import me.rhin.openciv.server.game.research.type.WheelTech;
 import me.rhin.openciv.server.game.research.type.WritingTech;
-import me.rhin.openciv.server.listener.NextTurnListener;
+import me.rhin.openciv.shared.listener.EventHandler;
+import me.rhin.openciv.shared.listener.Listener;
 import me.rhin.openciv.shared.packet.type.CompleteResearchPacket;
 import me.rhin.openciv.shared.stat.Stat;
 
-public class ResearchTree implements NextTurnListener {
+public class ResearchTree implements Listener {
 
 	private AbstractPlayer player;
 	private LinkedHashMap<Class<? extends Technology>, Technology> technologies;
@@ -76,10 +77,10 @@ public class ResearchTree implements NextTurnListener {
 		technologies.put(MetalCastingTech.class, new MetalCastingTech(this));
 		technologies.put(MachineryTech.class, new MachineryTech(this));
 
-		Server.getInstance().getEventManager().addListener(NextTurnListener.class, this);
+		Server.getInstance().getEventManager().addListener(this);
 	}
 
-	@Override
+	@EventHandler
 	public void onNextTurn() {
 
 		if (techResearching == null || !player.hasConnection())

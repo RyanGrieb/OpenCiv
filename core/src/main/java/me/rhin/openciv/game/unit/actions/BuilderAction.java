@@ -1,8 +1,8 @@
 package me.rhin.openciv.game.unit.actions;
 
 import me.rhin.openciv.Civilization;
+import me.rhin.openciv.events.type.BuilderActEvent;
 import me.rhin.openciv.game.unit.Unit;
-import me.rhin.openciv.listener.BuilderActListener.BuilderActEvent;
 
 public abstract class BuilderAction extends AbstractAction {
 

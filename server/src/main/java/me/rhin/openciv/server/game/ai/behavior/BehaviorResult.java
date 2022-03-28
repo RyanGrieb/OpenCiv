@@ -1,7 +1,7 @@
 package me.rhin.openciv.server.game.ai.behavior;
 
 import me.rhin.openciv.server.Server;
-import me.rhin.openciv.server.listener.NodeBehaviorSetListener.NodeBehaviorSetEvent;
+import me.rhin.openciv.server.events.type.NodeBehaviorSetEvent;
 
 public class BehaviorResult {
 

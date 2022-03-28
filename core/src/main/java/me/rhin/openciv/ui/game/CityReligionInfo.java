@@ -9,13 +9,15 @@ import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.city.City;
 import me.rhin.openciv.game.religion.PlayerReligion;
-import me.rhin.openciv.listener.CityReligionFollowersUpdateListener;
+import me.rhin.openciv.shared.listener.EventHandler;
+import me.rhin.openciv.shared.listener.Listener;
 import me.rhin.openciv.shared.packet.type.CityReligionFollowersUpdatePacket;
-import me.rhin.openciv.ui.background.BlankBackground;
 import me.rhin.openciv.ui.background.ColoredBackground;
 import me.rhin.openciv.ui.label.CustomLabel;
 
-public class CityReligionInfo extends Group implements CityReligionFollowersUpdateListener {
+public class CityReligionInfo extends Group implements Listener {
+
+	// FIXME: Check if listener is removed properly
 
 	private City city;
 	private ColoredBackground blankBackground;
@@ -44,10 +46,10 @@ public class CityReligionInfo extends Group implements CityReligionFollowersUpda
 
 		initValues();
 
-		Civilization.getInstance().getEventManager().addListener(CityReligionFollowersUpdateListener.class, this);
+		Civilization.getInstance().getEventManager().addListener(this);
 	}
 
-	@Override
+	@EventHandler
 	public void onCityReligionFollowerUpdate(CityReligionFollowersUpdatePacket packet) {
 
 		if (atheistsLabel.hasParent())

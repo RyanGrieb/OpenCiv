@@ -13,14 +13,16 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.research.Technology;
-import me.rhin.openciv.listener.CompleteResearchListener;
+import me.rhin.openciv.shared.listener.EventHandler;
+import me.rhin.openciv.shared.listener.Listener;
 import me.rhin.openciv.shared.packet.type.CompleteResearchPacket;
 import me.rhin.openciv.ui.background.ColoredBackground;
 import me.rhin.openciv.ui.label.CustomLabel;
-import me.rhin.openciv.ui.screen.type.InGameScreen;
 import me.rhin.openciv.ui.window.type.PickResearchWindow;
 
-public class TechnologyLeaf extends Group implements CompleteResearchListener {
+public class TechnologyLeaf extends Group implements Listener {
+
+	// FIXME: Dispose this listener properly
 
 	private Technology tech;
 	private ColoredBackground background;
@@ -90,10 +92,10 @@ public class TechnologyLeaf extends Group implements CompleteResearchListener {
 			}
 		});
 
-		Civilization.getInstance().getEventManager().addListener(CompleteResearchListener.class, this);
+		Civilization.getInstance().getEventManager().addListener(this);
 	}
 
-	@Override
+	@EventHandler
 	public void onCompleteResearch(CompleteResearchPacket packet) {
 		if (packet.getTechID() != tech.getID()) {
 			Technology completedTech = Technology.fromID(packet.getTechID());

@@ -5,13 +5,13 @@ import com.badlogic.gdx.utils.Align;
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.player.Player;
-import me.rhin.openciv.listener.ResizeListener;
+import me.rhin.openciv.shared.listener.EventHandler;
 import me.rhin.openciv.ui.background.ColoredBackground;
 import me.rhin.openciv.ui.button.type.CloseWindowButton;
 import me.rhin.openciv.ui.label.CustomLabel;
 import me.rhin.openciv.ui.window.AbstractWindow;
 
-public class ReligionInfoWindow extends AbstractWindow implements ResizeListener {
+public class ReligionInfoWindow extends AbstractWindow {
 
 	private ColoredBackground coloredBackground;
 	private CustomLabel religionInfoDescLabel;
@@ -34,8 +34,7 @@ public class ReligionInfoWindow extends AbstractWindow implements ResizeListener
 
 	public ReligionInfoWindow() {
 		setBounds(viewport.getWorldWidth() / 2 - 600 / 2, viewport.getWorldHeight() / 2 - 600 / 2, 600, 600);
-		
-		
+
 		this.coloredBackground = new ColoredBackground(TextureEnum.UI_BLACK.sprite(), 0, 0, getWidth(), getHeight());
 		addActor(coloredBackground);
 
@@ -50,12 +49,10 @@ public class ReligionInfoWindow extends AbstractWindow implements ResizeListener
 				"You have not founded a religion\nor pantheon. Research pottery &\nbuild a chapel.");
 		noReligionLabel.setPosition(getWidth() / 2 - noReligionLabel.getWidth() / 2, getHeight() / 2 + 100);
 
-		Civilization.getInstance().getEventManager().addListener(ResizeListener.class, this);
-
 		Player player = Civilization.getInstance().getGame().getPlayer();
-		
+
 		player.unselectUnit();
-		
+
 		if (player.getReligion().getPickedBonuses().size() < 1) {
 			addActor(noReligionLabel);
 			return;
@@ -126,7 +123,7 @@ public class ReligionInfoWindow extends AbstractWindow implements ResizeListener
 		addActor(religionIcon);
 	}
 
-	@Override
+	@EventHandler
 	public void onResize(int width, int height) {
 		setPosition(width / 2 - 600 / 2, height / 2 - 600 / 2);
 	}

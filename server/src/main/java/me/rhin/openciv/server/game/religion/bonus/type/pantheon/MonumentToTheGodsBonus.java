@@ -6,19 +6,17 @@ import me.rhin.openciv.server.game.city.wonders.Wonder;
 import me.rhin.openciv.server.game.production.ProductionItem;
 import me.rhin.openciv.server.game.religion.PlayerReligion;
 import me.rhin.openciv.server.game.religion.bonus.ReligionBonus;
-import me.rhin.openciv.server.listener.CityGainMajorityReligionListener;
-import me.rhin.openciv.server.listener.CityLooseMajorityReligionListener;
+import me.rhin.openciv.shared.listener.EventHandler;
+import me.rhin.openciv.shared.listener.Listener;
 
-public class MonumentToTheGodsBonus extends ReligionBonus
-		implements CityGainMajorityReligionListener, CityLooseMajorityReligionListener {
+public class MonumentToTheGodsBonus extends ReligionBonus implements Listener {
 
 	public MonumentToTheGodsBonus() {
-		//FIXME: Init these when were assigned a player.
-		Server.getInstance().getEventManager().addListener(CityGainMajorityReligionListener.class, this);
-		Server.getInstance().getEventManager().addListener(CityLooseMajorityReligionListener.class, this);
+		// FIXME: Init these when were assigned a player.
+		Server.getInstance().getEventManager().addListener(this);
 	}
 
-	@Override
+	@EventHandler
 	public void onCityGainMajorityReligion(City city, PlayerReligion newReligion) {
 
 		if (player == null)
@@ -34,7 +32,7 @@ public class MonumentToTheGodsBonus extends ReligionBonus
 		}
 	}
 
-	@Override
+	@EventHandler
 	public void onCityLooseMajorityReligion(City city, PlayerReligion oldReligion) {
 
 		if (player == null)

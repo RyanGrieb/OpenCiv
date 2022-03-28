@@ -10,14 +10,10 @@ import me.rhin.openciv.game.map.tile.Tile;
 import me.rhin.openciv.game.production.ProductionItem;
 import me.rhin.openciv.game.unit.UnitItem;
 import me.rhin.openciv.game.unit.UnitItem.UnitType;
-import me.rhin.openciv.listener.SettleCityListener;
+import me.rhin.openciv.shared.listener.EventHandler;
 import me.rhin.openciv.shared.packet.type.SettleCityPacket;
 
-public class HorseIntegrationHeritage extends Heritage implements SettleCityListener {
-
-	public HorseIntegrationHeritage() {
-		Civilization.getInstance().getEventManager().addListener(SettleCityListener.class, this);
-	}
+public class HorseIntegrationHeritage extends Heritage {
 
 	@Override
 	public int getLevel() {
@@ -58,7 +54,7 @@ public class HorseIntegrationHeritage extends Heritage implements SettleCityList
 		}
 	}
 
-	@Override
+	@EventHandler
 	public void onSettleCity(SettleCityPacket packet) {
 		if (!studied)
 			return;

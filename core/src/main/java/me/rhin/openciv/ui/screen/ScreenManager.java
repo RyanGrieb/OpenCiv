@@ -3,7 +3,7 @@ package me.rhin.openciv.ui.screen;
 import java.util.Stack;
 
 import me.rhin.openciv.Civilization;
-import me.rhin.openciv.listener.SetScreenListener.SetScreenEvent;
+import me.rhin.openciv.events.type.SetScreenEvent;
 
 public class ScreenManager {
 

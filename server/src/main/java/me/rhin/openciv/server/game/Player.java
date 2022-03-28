@@ -11,9 +11,7 @@ import me.rhin.openciv.server.game.city.City;
 import me.rhin.openciv.server.game.civilization.type.RandomCivilization;
 import me.rhin.openciv.server.game.unit.TraderUnit;
 import me.rhin.openciv.server.game.unit.Unit;
-import me.rhin.openciv.server.listener.ChooseHeritageListener;
-import me.rhin.openciv.server.listener.ChooseTechListener;
-import me.rhin.openciv.server.listener.TradeCityListener;
+import me.rhin.openciv.shared.listener.EventHandler;
 import me.rhin.openciv.shared.packet.type.ChooseHeritagePacket;
 import me.rhin.openciv.shared.packet.type.ChooseTechPacket;
 import me.rhin.openciv.shared.packet.type.PlayerStatUpdatePacket;
@@ -23,7 +21,7 @@ import me.rhin.openciv.shared.stat.Stat;
 import me.rhin.openciv.shared.stat.StatLine;
 import me.rhin.openciv.shared.stat.StatType;
 
-public class Player extends AbstractPlayer implements ChooseTechListener, ChooseHeritageListener, TradeCityListener {
+public class Player extends AbstractPlayer {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(Player.class);
 
@@ -42,10 +40,6 @@ public class Player extends AbstractPlayer implements ChooseTechListener, Choose
 		this.loaded = false;
 
 		this.host = false;
-
-		Server.getInstance().getEventManager().addListener(ChooseTechListener.class, this);
-		Server.getInstance().getEventManager().addListener(ChooseHeritageListener.class, this);
-		Server.getInstance().getEventManager().addListener(TradeCityListener.class, this);
 	}
 
 	@Override
@@ -59,7 +53,7 @@ public class Player extends AbstractPlayer implements ChooseTechListener, Choose
 	}
 
 	// FIXME: Move to researchTree
-	@Override
+	@EventHandler
 	public void onChooseTech(WebSocket conn, ChooseTechPacket packet) {
 		if (!conn.equals(this.conn))
 			return;
@@ -68,7 +62,7 @@ public class Player extends AbstractPlayer implements ChooseTechListener, Choose
 		researchTree.chooseTech(packet.getTechID());
 	}
 
-	@Override
+	@EventHandler
 	public void onChooseHeritage(WebSocket conn, ChooseHeritagePacket packet) {
 		if (!conn.equals(this.conn))
 			return;
@@ -76,7 +70,7 @@ public class Player extends AbstractPlayer implements ChooseTechListener, Choose
 		heritageTree.studyHeritage(packet.getName());
 	}
 
-	@Override
+	@EventHandler
 	public void onTradeCity(WebSocket conn, TradeCityPacket packet) {
 		if (!conn.equals(this.conn))
 			return;

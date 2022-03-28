@@ -5,15 +5,14 @@ import me.rhin.openciv.server.game.AbstractPlayer;
 import me.rhin.openciv.server.game.city.City;
 import me.rhin.openciv.server.game.religion.PlayerReligion;
 import me.rhin.openciv.server.game.religion.bonus.ReligionBonus;
-import me.rhin.openciv.server.listener.GainFollowerListener;
-import me.rhin.openciv.server.listener.LooseFollowerListener;
+import me.rhin.openciv.shared.listener.EventHandler;
+import me.rhin.openciv.shared.listener.Listener;
 import me.rhin.openciv.shared.stat.Stat;
 
-public class TitheBonus extends ReligionBonus implements GainFollowerListener, LooseFollowerListener {
+public class TitheBonus extends ReligionBonus implements Listener {
 
 	public TitheBonus() {
-		Server.getInstance().getEventManager().addListener(GainFollowerListener.class, this);
-		Server.getInstance().getEventManager().addListener(LooseFollowerListener.class, this);
+		Server.getInstance().getEventManager().addListener(this);
 	}
 
 	@Override
@@ -32,7 +31,7 @@ public class TitheBonus extends ReligionBonus implements GainFollowerListener, L
 		player.updateOwnedStatlines(false);
 	}
 
-	@Override
+	@EventHandler
 	public void onLooseFollower(PlayerReligion religion, City city, int oldFollowerCount, int newFollowerCount) {
 		if (player == null)
 			return;
@@ -46,7 +45,7 @@ public class TitheBonus extends ReligionBonus implements GainFollowerListener, L
 		}
 	}
 
-	@Override
+	@EventHandler
 	public void onGainFollower(PlayerReligion religion, City city, int oldFollowerCount, int newFollowerCount) {
 		if (player == null)
 			return;

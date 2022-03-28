@@ -3,13 +3,13 @@ package me.rhin.openciv.game.heritage;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 
 import me.rhin.openciv.Civilization;
-import me.rhin.openciv.listener.CompleteHeritageListener;
-import me.rhin.openciv.listener.NextTurnListener;
+import me.rhin.openciv.shared.listener.EventHandler;
+import me.rhin.openciv.shared.listener.Listener;
 import me.rhin.openciv.shared.packet.type.CompleteHeritagePacket;
 import me.rhin.openciv.shared.packet.type.NextTurnPacket;
 import me.rhin.openciv.shared.stat.Stat;
 
-public abstract class Heritage implements NextTurnListener, CompleteHeritageListener {
+public abstract class Heritage implements Listener {
 
 	protected boolean studied;
 	private float appliedHeritage;
@@ -17,11 +17,10 @@ public abstract class Heritage implements NextTurnListener, CompleteHeritageList
 	private int appliedTurns;
 
 	public Heritage() {
-		Civilization.getInstance().getEventManager().addListener(NextTurnListener.class, this);
-		Civilization.getInstance().getEventManager().addListener(CompleteHeritageListener.class, this);
+		Civilization.getInstance().getEventManager().addListener(this);
 	}
 
-	@Override
+	@EventHandler
 	public void onNextTurn(NextTurnPacket packet) {
 		if (studying) {
 			appliedHeritage += Civilization.getInstance().getGame().getPlayer().getStatLine()
@@ -30,7 +29,7 @@ public abstract class Heritage implements NextTurnListener, CompleteHeritageList
 		}
 	}
 
-	@Override
+	@EventHandler
 	public void onCompleteHeritage(CompleteHeritagePacket packet) {
 		if (!Civilization.getInstance().getGame().getPlayer().getHeritageTree()
 				.getHeritageFromClassName(packet.getHeritageName()).equals(this))

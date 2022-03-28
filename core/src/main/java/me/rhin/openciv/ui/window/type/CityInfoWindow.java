@@ -13,20 +13,7 @@ import me.rhin.openciv.game.city.building.Building;
 import me.rhin.openciv.game.map.tile.Tile;
 import me.rhin.openciv.game.player.AbstractPlayer;
 import me.rhin.openciv.game.production.ProductionItem;
-import me.rhin.openciv.listener.AddSpecialistToContainerListener;
-import me.rhin.openciv.listener.BuildingConstructedListener;
-import me.rhin.openciv.listener.CompleteResearchListener;
-import me.rhin.openciv.listener.FinishProductionItemListener;
-import me.rhin.openciv.listener.PlayerStatUpdateListener;
-import me.rhin.openciv.listener.QueueProductionItemListener;
-import me.rhin.openciv.listener.RemoveQueuedProductionItemListener;
-import me.rhin.openciv.listener.RemoveSpecialistFromContainerListener;
-import me.rhin.openciv.listener.ResizeListener;
-import me.rhin.openciv.listener.SetCitizenTileWorkerListener;
-import me.rhin.openciv.listener.SetCityOwnerListener;
-import me.rhin.openciv.listener.SetProductionItemListener;
-import me.rhin.openciv.listener.SetTileTypeListener;
-import me.rhin.openciv.listener.TerritoryGrowListener;
+import me.rhin.openciv.shared.listener.EventHandler;
 import me.rhin.openciv.shared.listener.Listener;
 import me.rhin.openciv.shared.packet.type.AddSpecialistToContainerPacket;
 import me.rhin.openciv.shared.packet.type.BuildingConstructedPacket;
@@ -56,11 +43,7 @@ import me.rhin.openciv.ui.list.type.ListProductionItem;
 import me.rhin.openciv.ui.screen.type.InGameScreen;
 import me.rhin.openciv.ui.window.AbstractWindow;
 
-public class CityInfoWindow extends AbstractWindow implements ResizeListener, BuildingConstructedListener,
-		SetCitizenTileWorkerListener, AddSpecialistToContainerListener, RemoveSpecialistFromContainerListener,
-		CompleteResearchListener, FinishProductionItemListener, PlayerStatUpdateListener, SetTileTypeListener,
-		TerritoryGrowListener, SetCityOwnerListener, QueueProductionItemListener, SetProductionItemListener,
-		RemoveQueuedProductionItemListener {
+public class CityInfoWindow extends AbstractWindow {
 
 	private City city;
 	private CloseWindowButton closeWindowButton;
@@ -129,21 +112,6 @@ public class CityInfoWindow extends AbstractWindow implements ResizeListener, Bu
 		if (city.getProducibleItemManager().getItemQueue().size() > 1) {
 			addActor(queueListButton);
 		}
-
-		Civilization.getInstance().getEventManager().addListener(ResizeListener.class, this);
-		Civilization.getInstance().getEventManager().addListener(BuildingConstructedListener.class, this);
-		Civilization.getInstance().getEventManager().addListener(SetCitizenTileWorkerListener.class, this);
-		Civilization.getInstance().getEventManager().addListener(AddSpecialistToContainerListener.class, this);
-		Civilization.getInstance().getEventManager().addListener(RemoveSpecialistFromContainerListener.class, this);
-		Civilization.getInstance().getEventManager().addListener(CompleteResearchListener.class, this);
-		Civilization.getInstance().getEventManager().addListener(FinishProductionItemListener.class, this);
-		Civilization.getInstance().getEventManager().addListener(PlayerStatUpdateListener.class, this);
-		Civilization.getInstance().getEventManager().addListener(SetTileTypeListener.class, this);
-		Civilization.getInstance().getEventManager().addListener(TerritoryGrowListener.class, this);
-		Civilization.getInstance().getEventManager().addListener(SetCityOwnerListener.class, this);
-		Civilization.getInstance().getEventManager().addListener(QueueProductionItemListener.class, this);
-		Civilization.getInstance().getEventManager().addListener(SetProductionItemListener.class, this);
-		Civilization.getInstance().getEventManager().addListener(RemoveQueuedProductionItemListener.class, this);
 	}
 
 	@Override
@@ -151,7 +119,7 @@ public class CityInfoWindow extends AbstractWindow implements ResizeListener, Bu
 		super.draw(batch, parentAlpha);
 	}
 
-	@Override
+	@EventHandler
 	public void onResize(int width, int height) {
 		closeWindowButton.setPosition(width / 2 - 150 / 2, 50);
 		cityStatsInfo.setPosition(2, height - (175 + GameOverlay.HEIGHT + 2));
@@ -193,6 +161,8 @@ public class CityInfoWindow extends AbstractWindow implements ResizeListener, Bu
 
 	@Override
 	public void onClose() {
+		super.onClose();
+
 		for (WorkedTileButton button : citizenButtons.values()) {
 			button.addAction(Actions.removeActor());
 		}
@@ -203,14 +173,12 @@ public class CityInfoWindow extends AbstractWindow implements ResizeListener, Bu
 		for (Actor actor : getChildren()) {
 
 			if (actor instanceof Listener) {
-				Civilization.getInstance().getEventManager().clearListenersFromObject((Listener) actor);
+				Civilization.getInstance().getEventManager().removeListener((Listener) actor);
 			}
 		}
-
-		Civilization.getInstance().getEventManager().clearListenersFromObject(this);
 	}
 
-	@Override
+	@EventHandler
 	public void onBuildingConstructed(BuildingConstructedPacket packet) {
 
 		// Account for wonders being built.
@@ -239,7 +207,7 @@ public class CityInfoWindow extends AbstractWindow implements ResizeListener, Bu
 
 	}
 
-	@Override
+	@EventHandler
 	public void onFinishProductionItem(FinishProductionItemPacket packet) {
 		if (!city.getName().equals(packet.getCityName()))
 			return;
@@ -250,24 +218,24 @@ public class CityInfoWindow extends AbstractWindow implements ResizeListener, Bu
 			queueListButton.addAction(Actions.removeActor());
 	}
 
-	@Override
+	@EventHandler
 	public void onPlayerStatUpdate(PlayerStatUpdatePacket packet) {
 		updateAvailableProductionItems();
 	}
 
-	@Override
+	@EventHandler
 	public void onSetTileType(SetTileTypePacket packet) {
 		// TODO: Determine if this is inside our territory.
 		// FIXME: This doesn't work properly.
 		updateAvailableProductionItems();
 	}
 
-	@Override
+	@EventHandler
 	public void onTerritoryGrow(TerritoryGrowPacket packet) {
 		updateAvailableProductionItems();
 	}
 
-	@Override
+	@EventHandler
 	public void onSetCitizenTileWorker(SetCitizenTileWorkerPacket packet) {
 		if (!city.getName().equals(packet.getCityName()))
 			return;
@@ -288,7 +256,7 @@ public class CityInfoWindow extends AbstractWindow implements ResizeListener, Bu
 		citizenButtons.get(tile).setTexture(WorkedTileButton.getTextureFromWorkerType(packet.getWorkerType()));
 	}
 
-	@Override
+	@EventHandler
 	public void onAddSpecialistToContainer(AddSpecialistToContainerPacket packet) {
 		if (!city.getName().equals(packet.getCityName()))
 			return;
@@ -296,7 +264,7 @@ public class CityInfoWindow extends AbstractWindow implements ResizeListener, Bu
 		updateSpecialistContainers(packet.getCityName(), packet.getContainerName());
 	}
 
-	@Override
+	@EventHandler
 	public void onRemoveSpecialistFromContainer(RemoveSpecialistFromContainerPacket packet) {
 		if (!city.getName().equals(packet.getCityName()))
 			return;
@@ -304,12 +272,12 @@ public class CityInfoWindow extends AbstractWindow implements ResizeListener, Bu
 		updateSpecialistContainers(packet.getCityName(), packet.getContainerName());
 	}
 
-	@Override
+	@EventHandler
 	public void onCompleteResearch(CompleteResearchPacket packet) {
 		addAvailableProductionItems();
 	}
 
-	@Override
+	@EventHandler
 	public void onSetCityOwner(SetCityOwnerPacket packet) {
 		for (AbstractPlayer player : Civilization.getInstance().getGame().getPlayers().values()) {
 			City city = player.getCityFromName(packet.getCityName());
@@ -319,18 +287,18 @@ public class CityInfoWindow extends AbstractWindow implements ResizeListener, Bu
 		}
 	}
 
-	@Override
+	@EventHandler
 	public void onQueueProductionItem(QueueProductionItemPacket packet) {
 		addActor(queueListButton);
 	}
 
-	@Override
+	@EventHandler
 	public void onRemoveQueuedProductionItem(RemoveQueuedProductionItemPacket packet) {
 		if (city.getProducibleItemManager().getItemQueue().size() < 2)
 			removeActor(queueListButton);
 	}
 
-	@Override
+	@EventHandler
 	public void onSetProductionItem(SetProductionItemPacket packet) {
 		if (city.getProducibleItemManager().getItemQueue().size() < 2)
 			removeActor(queueListButton);

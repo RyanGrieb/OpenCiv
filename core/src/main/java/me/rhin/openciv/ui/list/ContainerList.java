@@ -5,22 +5,19 @@ import java.util.HashMap;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
-import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
-import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.DragListener;
 
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.TextureEnum;
-import me.rhin.openciv.listener.ScrollListener;
+import me.rhin.openciv.shared.listener.EventHandler;
+import me.rhin.openciv.shared.listener.Listener;
 import me.rhin.openciv.ui.list.ListContainer.ListContainerType;
-import me.rhin.openciv.ui.window.AbstractWindow;
 
 //FIXME: The naming of ContainerList and ListContainer is bad.
 
-public class ContainerList extends Group implements ScrollListener {
+public class ContainerList extends Group implements Listener {
 
 	private float yOffset;
 	private HashMap<String, ListContainer> listContainers;
@@ -69,7 +66,7 @@ public class ContainerList extends Group implements ScrollListener {
 
 		});
 
-		Civilization.getInstance().getEventManager().addListener(ScrollListener.class, this);
+		Civilization.getInstance().getEventManager().addListener(this);
 	}
 
 	@Override
@@ -99,7 +96,7 @@ public class ContainerList extends Group implements ScrollListener {
 		containerScrollbar.setPosition(x + getWidth(), y);
 	}
 
-	@Override
+	@EventHandler
 	public void onScroll(float amountX, float amountY) {
 		if (!Civilization.getInstance().getWindowManager().allowsInput(this)) {
 			return;
@@ -125,8 +122,7 @@ public class ContainerList extends Group implements ScrollListener {
 
 	public void onClose() {
 		containerScrollbar.onClose();
-
-		Civilization.getInstance().getEventManager().clearListenersFromObject(this);
+		Civilization.getInstance().getEventManager().removeListener(this);
 	}
 
 	public void scroll(float amount) {
@@ -158,7 +154,7 @@ public class ContainerList extends Group implements ScrollListener {
 		// Scrollbar top -> getY() + getHeight() - scrollbarHeight()
 		// Scrollbar bottom - >getY()
 
-		float scrollbarY =  ((getHeight() - containerScrollbar.getScrubberHeight())
+		float scrollbarY = ((getHeight() - containerScrollbar.getScrubberHeight())
 				- (((getHeight() - containerScrollbar.getScrubberHeight()) * offset)));
 
 		containerScrollbar.setScrubberY(scrollbarY);
@@ -182,7 +178,7 @@ public class ContainerList extends Group implements ScrollListener {
 		listContainers.get(listContainerName).removeItem(itemKey);
 		updatePositions();
 	}
-	
+
 	public void removeItem(String listContainerName, int index) {
 		listContainers.get(listContainerName).clearListeners();
 		listContainers.get(listContainerName).removeItem(index);

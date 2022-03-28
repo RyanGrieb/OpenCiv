@@ -15,12 +15,12 @@ import me.rhin.openciv.game.religion.bonus.type.pantheon.GodOfTheSeaBonus;
 import me.rhin.openciv.game.religion.bonus.type.pantheon.MonumentToTheGodsBonus;
 import me.rhin.openciv.game.religion.bonus.type.pantheon.ReligiousIdolsBonus;
 import me.rhin.openciv.game.religion.bonus.type.pantheon.TearsOfTheGodsBonus;
-import me.rhin.openciv.listener.FoundReligionListener;
-import me.rhin.openciv.listener.PickPantheonListener;
+import me.rhin.openciv.shared.listener.EventHandler;
+import me.rhin.openciv.shared.listener.Listener;
 import me.rhin.openciv.shared.packet.type.FoundReligionPacket;
 import me.rhin.openciv.shared.packet.type.PickPantheonPacket;
 
-public class AvailableReligionBonuses implements PickPantheonListener, FoundReligionListener {
+public class AvailableReligionBonuses implements Listener {
 
 	private ArrayList<ReligionBonus> pantheons;
 	private ArrayList<ReligionBonus> founderBeliefs;
@@ -45,17 +45,16 @@ public class AvailableReligionBonuses implements PickPantheonListener, FoundReli
 		followerBeliefs.add(new PagodasBonus());
 		followerBeliefs.add(new SwordsIntoPlowsharesBonus());
 
-		Civilization.getInstance().getEventManager().addListener(PickPantheonListener.class, this);
-		Civilization.getInstance().getEventManager().addListener(FoundReligionListener.class, this);
+		Civilization.getInstance().getEventManager().addListener(this);
 	}
 
-	@Override
+	@EventHandler
 	public void onPickPantheon(PickPantheonPacket packet) {
 		AbstractPlayer player = Civilization.getInstance().getGame().getPlayers().get(packet.getPlayerName());
 		pantheons.get(packet.getReligionBonusID()).setPlayer(player);
 	}
 
-	@Override
+	@EventHandler
 	public void onFoundReligion(FoundReligionPacket packet) {
 		AbstractPlayer player = Civilization.getInstance().getGame().getPlayers().get(packet.getPlayerName());
 		founderBeliefs.get(packet.getFounderID()).setPlayer(player);

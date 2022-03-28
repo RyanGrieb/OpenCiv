@@ -5,11 +5,12 @@ import java.util.PriorityQueue;
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.notification.type.ServerNotification;
-import me.rhin.openciv.listener.ServerNotificationListener;
+import me.rhin.openciv.shared.listener.EventHandler;
+import me.rhin.openciv.shared.listener.Listener;
 import me.rhin.openciv.shared.packet.type.ServerNotificationPacket;
 import me.rhin.openciv.ui.window.type.NotificationWindow;
 
-public class NotificationHandler implements ServerNotificationListener {
+public class NotificationHandler implements Listener {
 
 	private NotificationWindow window;
 	private PriorityQueue<AbstractNotification> activeNotifications;
@@ -19,10 +20,10 @@ public class NotificationHandler implements ServerNotificationListener {
 
 		this.activeNotifications = new PriorityQueue<>();
 
-		Civilization.getInstance().getEventManager().addListener(ServerNotificationListener.class, this);
+		Civilization.getInstance().getEventManager().addListener(this);
 	}
 
-	@Override
+	@EventHandler
 	public void onServerNotification(ServerNotificationPacket packet) {
 		TextureEnum texture = TextureEnum.valueOf(packet.getIconName());
 		String text = packet.getText();
@@ -49,7 +50,7 @@ public class NotificationHandler implements ServerNotificationListener {
 
 		window.removeNotification(notification);
 		activeNotifications.remove(notification);
-		Civilization.getInstance().getEventManager().clearListenersFromObject(notification);
+		Civilization.getInstance().getEventManager().removeListener(notification);
 	}
 
 	public boolean isNotificationActive(Class<? extends AbstractNotification> clazz) {

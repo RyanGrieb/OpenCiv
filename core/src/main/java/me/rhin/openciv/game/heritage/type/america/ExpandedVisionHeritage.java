@@ -7,14 +7,10 @@ import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.heritage.Heritage;
 import me.rhin.openciv.game.map.tile.Tile;
 import me.rhin.openciv.game.unit.Unit;
-import me.rhin.openciv.listener.AddUnitListener;
+import me.rhin.openciv.shared.listener.EventHandler;
 import me.rhin.openciv.shared.packet.type.AddUnitPacket;
 
-public class ExpandedVisionHeritage extends Heritage implements AddUnitListener {
-
-	public ExpandedVisionHeritage() {
-		Civilization.getInstance().getEventManager().addListener(AddUnitListener.class, this);
-	}
+public class ExpandedVisionHeritage extends Heritage {
 
 	@Override
 	public int getLevel() {
@@ -47,7 +43,7 @@ public class ExpandedVisionHeritage extends Heritage implements AddUnitListener 
 			unit.setIgnoresTileObstructions(true);
 	}
 
-	@Override
+	@EventHandler
 	public void onUnitAdd(AddUnitPacket packet) {
 		if (!isStudied())
 			return;

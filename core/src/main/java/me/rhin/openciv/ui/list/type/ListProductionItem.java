@@ -10,7 +10,8 @@ import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.city.City;
 import me.rhin.openciv.game.production.ProductionItem;
-import me.rhin.openciv.listener.CityStatUpdateListener;
+import me.rhin.openciv.shared.listener.EventHandler;
+import me.rhin.openciv.shared.listener.Listener;
 import me.rhin.openciv.shared.packet.type.CityStatUpdatePacket;
 import me.rhin.openciv.shared.stat.Stat;
 import me.rhin.openciv.ui.label.CustomLabel;
@@ -18,7 +19,7 @@ import me.rhin.openciv.ui.list.ContainerList;
 import me.rhin.openciv.ui.list.ListObject;
 import me.rhin.openciv.ui.window.type.ItemInfoWindow;
 
-public class ListProductionItem extends ListObject implements CityStatUpdateListener {
+public class ListProductionItem extends ListObject implements Listener {
 
 	private City city;
 	private ProductionItem productionItem;
@@ -65,7 +66,7 @@ public class ListProductionItem extends ListObject implements CityStatUpdateList
 		productionModifierLabel.setSize(width, height);
 		productionModifierLabel.setAlignment(Align.center);
 
-		Civilization.getInstance().getEventManager().addListener(CityStatUpdateListener.class, this);
+		Civilization.getInstance().getEventManager().addListener(this);
 	}
 
 	@Override
@@ -77,7 +78,7 @@ public class ListProductionItem extends ListObject implements CityStatUpdateList
 		Civilization.getInstance().getWindowManager().addWindow(new ItemInfoWindow(city, productionItem));
 	}
 
-	@Override
+	@EventHandler
 	public void onCityStatUpdate(CityStatUpdatePacket packet) {
 		if (productionItem.getProductionCost() < 0)
 			return;
@@ -95,7 +96,7 @@ public class ListProductionItem extends ListObject implements CityStatUpdateList
 	@Override
 	public void clearListeners() {
 		super.clearListeners();
-		Civilization.getInstance().getEventManager().clearListenersFromObject(this);
+		Civilization.getInstance().getEventManager().removeListener(this);
 	}
 
 	@Override

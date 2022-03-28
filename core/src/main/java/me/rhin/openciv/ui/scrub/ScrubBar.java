@@ -6,7 +6,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.TextureEnum;
-import me.rhin.openciv.listener.ScrubberPositionUpdateListener.ScrubberPositionUpdateEvent;
+import me.rhin.openciv.events.type.ScrubberPositionUpdateEvent;
 import me.rhin.openciv.ui.background.ColoredBackground;
 
 public class ScrubBar extends Group {

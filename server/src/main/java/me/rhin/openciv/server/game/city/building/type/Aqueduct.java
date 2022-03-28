@@ -4,16 +4,17 @@ import me.rhin.openciv.server.Server;
 import me.rhin.openciv.server.game.city.City;
 import me.rhin.openciv.server.game.city.building.Building;
 import me.rhin.openciv.server.game.research.type.EngineeringTech;
-import me.rhin.openciv.server.listener.CityGrowthListener;
+import me.rhin.openciv.shared.listener.EventHandler;
+import me.rhin.openciv.shared.listener.Listener;
 import me.rhin.openciv.shared.stat.Stat;
 import me.rhin.openciv.shared.stat.StatLine;
 
-public class Aqueduct extends Building implements CityGrowthListener {
+public class Aqueduct extends Building implements Listener {
 
 	public Aqueduct(City city) {
 		super(city);
 
-		Server.getInstance().getEventManager().addListener(CityGrowthListener.class, this);
+		Server.getInstance().getEventManager().addListener(this);
 	}
 
 	@Override
@@ -25,7 +26,7 @@ public class Aqueduct extends Building implements CityGrowthListener {
 		return statLine;
 	}
 
-	@Override
+	@EventHandler
 	public void onCityGrowth(City city, float population, float foodSurplus) {
 		if (!city.getBuildings().contains(this))
 			return;

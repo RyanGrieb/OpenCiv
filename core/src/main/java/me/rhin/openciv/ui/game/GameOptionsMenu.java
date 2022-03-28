@@ -4,8 +4,8 @@ import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.utils.Align;
 
 import me.rhin.openciv.Civilization;
-import me.rhin.openciv.listener.SetTurnLengthListener;
-import me.rhin.openciv.listener.SetWorldSizeListener;
+import me.rhin.openciv.shared.listener.EventHandler;
+import me.rhin.openciv.shared.listener.Listener;
 import me.rhin.openciv.shared.map.MapSize;
 import me.rhin.openciv.shared.packet.type.SetTurnLengthPacket;
 import me.rhin.openciv.shared.packet.type.SetWorldSizePacket;
@@ -13,7 +13,9 @@ import me.rhin.openciv.ui.background.BlankBackground;
 import me.rhin.openciv.ui.button.CustomButton;
 import me.rhin.openciv.ui.label.CustomLabel;
 
-public class GameOptionsMenu extends Group implements SetWorldSizeListener, SetTurnLengthListener {
+public class GameOptionsMenu extends Group implements Listener {
+
+	// FIXME: Check if listener gets removed properly
 
 	private BlankBackground blankBackground;
 	private CustomLabel worldOptionsLabel;
@@ -96,8 +98,7 @@ public class GameOptionsMenu extends Group implements SetWorldSizeListener, SetT
 		this.worldSize = 3; // Standard
 		this.turnLengthOffset = -1; // Dynamic
 
-		Civilization.getInstance().getEventManager().addListener(SetWorldSizeListener.class, this);
-		Civilization.getInstance().getEventManager().addListener(SetTurnLengthListener.class, this);
+		Civilization.getInstance().getEventManager().addListener(this);
 	}
 
 	@Override
@@ -111,7 +112,7 @@ public class GameOptionsMenu extends Group implements SetWorldSizeListener, SetT
 		reduceWorldSizeButton.setPosition(20, getHeight() - 72);
 	}
 
-	@Override
+	@EventHandler
 	public void onSetWorldSize(SetWorldSizePacket packet) {
 		worldSizeLabel.setText(MapSize.values()[packet.getWorldSize()].getName());
 		worldSizeLabel.setSize(getWidth(), 15);
@@ -128,7 +129,7 @@ public class GameOptionsMenu extends Group implements SetWorldSizeListener, SetT
 		return turnLengthOffset;
 	}
 
-	@Override
+	@EventHandler
 	public void onSetTurnLength(SetTurnLengthPacket packet) {
 
 		this.turnLengthOffset = packet.getTurnLengthOffset();

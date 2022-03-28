@@ -4,10 +4,11 @@ import java.util.ArrayList;
 
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.SoundEnum;
-import me.rhin.openciv.listener.SendChatMessageListener;
+import me.rhin.openciv.shared.listener.EventHandler;
+import me.rhin.openciv.shared.listener.Listener;
 import me.rhin.openciv.shared.packet.type.SendChatMessagePacket;
 
-public class ChatHandler implements SendChatMessageListener {
+public class ChatHandler implements Listener {
 
 	private ArrayList<String> messages;
 
@@ -16,7 +17,7 @@ public class ChatHandler implements SendChatMessageListener {
 		this.messages = new ArrayList<>();
 	}
 
-	@Override
+	@EventHandler
 	public void onSentChatMessage(SendChatMessagePacket packet) {
 		String messageText = packet.getPlayerName() + ": " + packet.getMessage();
 		messages.add(messageText);

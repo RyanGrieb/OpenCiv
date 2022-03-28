@@ -36,27 +36,8 @@ import me.rhin.openciv.game.unit.AttackableEntity;
 import me.rhin.openciv.game.unit.Unit;
 import me.rhin.openciv.game.unit.UnitParameter;
 import me.rhin.openciv.game.unit.type.Settler.SettlerUnit;
-import me.rhin.openciv.listener.AddUnitListener;
-import me.rhin.openciv.listener.AvailablePantheonListener;
-import me.rhin.openciv.listener.DeleteUnitListener;
-import me.rhin.openciv.listener.FetchPlayerListener;
-import me.rhin.openciv.listener.FinishLoadingRequestListener;
-import me.rhin.openciv.listener.LeftClickListener;
-import me.rhin.openciv.listener.MoveUnitListener;
-import me.rhin.openciv.listener.NextTurnListener;
-import me.rhin.openciv.listener.PlayerConnectListener;
-import me.rhin.openciv.listener.PlayerListRequestListener;
-import me.rhin.openciv.listener.PlayerStatUpdateListener;
-import me.rhin.openciv.listener.RelativeMouseMoveListener;
-import me.rhin.openciv.listener.RightClickListener;
-import me.rhin.openciv.listener.SelectUnitListener;
-import me.rhin.openciv.listener.SetCityHealthListener;
-import me.rhin.openciv.listener.SetCityOwnerListener;
-import me.rhin.openciv.listener.SetUnitHealthListener;
-import me.rhin.openciv.listener.SetUnitOwnerListener;
-import me.rhin.openciv.listener.SettleCityListener;
-import me.rhin.openciv.listener.TerritoryGrowListener;
-import me.rhin.openciv.listener.UnitAttackListener;
+import me.rhin.openciv.shared.listener.EventHandler;
+import me.rhin.openciv.shared.listener.Listener;
 import me.rhin.openciv.shared.logging.Logger;
 import me.rhin.openciv.shared.logging.LoggerFactory;
 import me.rhin.openciv.shared.logging.LoggerType;
@@ -86,11 +67,7 @@ import me.rhin.openciv.ui.window.type.InfoButtonsWindow;
 import me.rhin.openciv.ui.window.type.NextTurnWindow;
 import me.rhin.openciv.ui.window.type.NotificationWindow;
 
-//FIXME: Instead of the civ game listening for everything. Just split them off into the respective classes. (EX: UnitAttackListener in the Unit class)
-public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerListRequestListener, FetchPlayerListener,
-		MoveUnitListener, DeleteUnitListener, SettleCityListener, NextTurnListener, FinishLoadingRequestListener,
-		TerritoryGrowListener, UnitAttackListener, SetUnitOwnerListener, SetCityOwnerListener, SetCityHealthListener,
-		SetUnitHealthListener, AvailablePantheonListener {
+public class CivGame implements Listener {
 
 	private static final int BASE_TURN_TIME = 9;
 	private static final Logger LOGGER = LoggerFactory.getInstance(LoggerType.LOG_TAG);
@@ -126,33 +103,18 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 		Civilization.getInstance().getWindowManager().toggleWindow(new NextTurnWindow());
 		Civilization.getInstance().getWindowManager().toggleWindow(new InfoButtonsWindow());
 
-		Civilization.getInstance().getEventManager().addListener(PlayerConnectListener.class, this);
-		Civilization.getInstance().getEventManager().addListener(AddUnitListener.class, this);
-		Civilization.getInstance().getEventManager().addListener(PlayerListRequestListener.class, this);
-		Civilization.getInstance().getEventManager().addListener(FetchPlayerListener.class, this);
-		Civilization.getInstance().getEventManager().addListener(MoveUnitListener.class, this);
-		Civilization.getInstance().getEventManager().addListener(DeleteUnitListener.class, this);
-		Civilization.getInstance().getEventManager().addListener(SettleCityListener.class, this);
-		Civilization.getInstance().getEventManager().addListener(NextTurnListener.class, this);
-		Civilization.getInstance().getEventManager().addListener(FinishLoadingRequestListener.class, this);
-		Civilization.getInstance().getEventManager().addListener(TerritoryGrowListener.class, this);
-		Civilization.getInstance().getEventManager().addListener(UnitAttackListener.class, this);
-		Civilization.getInstance().getEventManager().addListener(SetUnitOwnerListener.class, this);
-		Civilization.getInstance().getEventManager().addListener(SetCityOwnerListener.class, this);
-		Civilization.getInstance().getEventManager().addListener(SetCityHealthListener.class, this);
-		Civilization.getInstance().getEventManager().addListener(SetUnitHealthListener.class, this);
-		Civilization.getInstance().getEventManager().addListener(AvailablePantheonListener.class, this);
+		Civilization.getInstance().getEventManager().addListener(this);
 
 		Civilization.getInstance().getNetworkManager().sendPacket(new FetchPlayerPacket());
 		Civilization.getInstance().getNetworkManager().sendPacket(new PlayerListRequestPacket());
 	}
 
-	@Override
+	@EventHandler
 	public void onPlayerConnect(PlayerConnectPacket packet) {
 		//
 	}
 
-	@Override
+	@EventHandler
 	public void onUnitAdd(AddUnitPacket packet) {
 
 		// Find unit class using reflection & create an instance of it.
@@ -192,7 +154,7 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 		}
 	}
 
-	@Override
+	@EventHandler
 	public void onPlayerListRequested(PlayerListRequestPacket packet) {
 		for (int i = 0; i < packet.getPlayerList().length; i++) {
 			String playerName = packet.getPlayerList()[i];
@@ -236,20 +198,14 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 		}
 	}
 
-	@Override
+	@EventHandler
 	public void onFetchPlayer(FetchPlayerPacket packet) {
 		this.player = new Player(packet.getPlayerName());
-		Civilization.getInstance().getEventManager().addListener(RelativeMouseMoveListener.class, player);
-		Civilization.getInstance().getEventManager().addListener(LeftClickListener.class, player);
-		Civilization.getInstance().getEventManager().addListener(RightClickListener.class, player);
-		Civilization.getInstance().getEventManager().addListener(SelectUnitListener.class, player);
-		Civilization.getInstance().getEventManager().addListener(PlayerStatUpdateListener.class, player);
-		Civilization.getInstance().getEventManager().addListener(DeleteUnitListener.class, player);
 
 	}
 
 	// FIXME: Move these 2 tile methods to map class?
-	@Override
+	@EventHandler
 	public void onUnitMove(MoveUnitPacket packet) {
 		Tile prevTile = map.getTiles()[packet.getPrevGridX()][packet.getPrevGridY()];
 		Tile targetTile = map.getTiles()[packet.getTargetGridX()][packet.getTargetGridY()];
@@ -285,7 +241,7 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 		}
 	}
 
-	@Override
+	@EventHandler
 	public void onUnitDelete(DeleteUnitPacket packet) {
 		Tile tile = map.getTiles()[packet.getTileGridX()][packet.getTileGridY()];
 		Unit unit = tile.getUnitFromID(packet.getUnitID());
@@ -322,7 +278,7 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 		}
 	}
 
-	@Override
+	@EventHandler
 	public void onSettleCity(SettleCityPacket packet) {
 		AbstractPlayer playerOwner = players.get(packet.getPlayerOwner());
 
@@ -344,7 +300,7 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 		}
 	}
 
-	@Override
+	@EventHandler
 	public void onNextTurn(NextTurnPacket packet) {
 		if (turnTime != packet.getTurnTime()) {
 			LOGGER.debug("Updating turn time to: " + packet.getTurnTime());
@@ -357,21 +313,25 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 		turns++;
 	}
 
-	@Override
+	@EventHandler
 	public void onFinishLoadingRequest(FinishLoadingPacket packet) {
 		// FIXME: Actually check were done loading.
 		Civilization.getInstance().getNetworkManager().sendPacket(packet);
 	}
 
-	@Override
+	@EventHandler
 	public void onTerritoryGrow(TerritoryGrowPacket packet) {
 		AbstractPlayer player = players.get(packet.getPlayerOwner());
 		City city = player.getCityFromName(packet.getCityName());
 		Tile tile = map.getTiles()[packet.getGridX()][packet.getGridY()];
+
+		// FIXME: City can be null here? I think barbs take it, then another city state
+		// takes it?
+
 		city.growTerritory(tile);
 	}
 
-	@Override
+	@EventHandler
 	public void onUnitAttack(UnitAttackPacket packet) {
 		Unit unit = map.getTiles()[packet.getUnitGridX()][packet.getUnitGridY()].getUnitFromID(packet.getUnitID());
 		// FIXME: Not having a unit ID here is problematic.
@@ -403,7 +363,7 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 			Civilization.getInstance().getSoundHandler().playEffect(SoundEnum.UNIT_COMBAT);
 	}
 
-	@Override
+	@EventHandler
 	public void onSetUnitOwner(SetUnitOwnerPacket packet) {
 		Unit unit = map.getTiles()[packet.getTileGridX()][packet.getTileGridY()].getUnitFromID(packet.getUnitID());
 		unit.setPlayerOwner(players.get(packet.getPlayerOwner()));
@@ -420,7 +380,7 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 			unit.setSelected(false);
 	}
 
-	@Override
+	@EventHandler
 	public void onSetCityHealth(SetCityHealthPacket packet) {
 		// FIXME: Iterating through players to find the city seems silly
 		for (AbstractPlayer player : players.values()) {
@@ -437,7 +397,7 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 		}
 	}
 
-	@Override
+	@EventHandler
 	public void onSetCityOwner(SetCityOwnerPacket packet) {
 		// FIXME: Iterating through players to find the city seems silly
 		for (AbstractPlayer player : players.values()) {
@@ -483,14 +443,14 @@ public class CivGame implements PlayerConnectListener, AddUnitListener, PlayerLi
 		}
 	}
 
-	@Override
+	@EventHandler
 	public void onSetUnitHealth(SetUnitHealthPacket packet) {
 		Unit unit = map.getTiles()[packet.getTileGridX()][packet.getTileGridY()].getUnitFromID(packet.getUnitID());
 		unit.setHealth(packet.getHealth());
 		unit.flashColor(Color.GREEN);
 	}
 
-	@Override
+	@EventHandler
 	public void onAvailablePantheon(AvailablePantheonPacket packet) {
 		// if(packet.getBonusID() != -1)
 		// return;

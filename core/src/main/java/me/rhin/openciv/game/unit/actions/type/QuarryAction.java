@@ -2,6 +2,7 @@ package me.rhin.openciv.game.unit.actions.type;
 
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.TextureEnum;
+import me.rhin.openciv.events.type.UnitActEvent;
 import me.rhin.openciv.game.map.tile.ImprovementType;
 import me.rhin.openciv.game.map.tile.Tile;
 import me.rhin.openciv.game.map.tile.TileType;
@@ -10,7 +11,6 @@ import me.rhin.openciv.game.research.type.MasonryTech;
 import me.rhin.openciv.game.unit.Unit;
 import me.rhin.openciv.game.unit.actions.BuilderAction;
 import me.rhin.openciv.game.unit.type.Builder.BuilderUnit;
-import me.rhin.openciv.listener.UnitActListener.UnitActEvent;
 import me.rhin.openciv.shared.packet.type.WorkTilePacket;
 
 public class QuarryAction extends BuilderAction {

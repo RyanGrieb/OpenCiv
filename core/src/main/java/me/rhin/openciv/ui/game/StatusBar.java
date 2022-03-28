@@ -7,10 +7,8 @@ import com.badlogic.gdx.scenes.scene2d.Actor;
 
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.TextureEnum;
-import me.rhin.openciv.listener.MouseHoveredListener;
-import me.rhin.openciv.listener.NextTurnListener;
-import me.rhin.openciv.listener.PlayerStatUpdateListener;
-import me.rhin.openciv.listener.TurnTimeLeftListener;
+import me.rhin.openciv.shared.listener.EventHandler;
+import me.rhin.openciv.shared.listener.Listener;
 import me.rhin.openciv.shared.packet.type.NextTurnPacket;
 import me.rhin.openciv.shared.packet.type.PlayerStatUpdatePacket;
 import me.rhin.openciv.shared.packet.type.TurnTimeLeftPacket;
@@ -19,8 +17,9 @@ import me.rhin.openciv.shared.stat.StatLine;
 import me.rhin.openciv.ui.label.CustomLabel;
 import me.rhin.openciv.ui.window.type.statinfo.type.GoldStatInfoWindow;
 
-public class StatusBar extends Actor
-		implements PlayerStatUpdateListener, NextTurnListener, TurnTimeLeftListener, MouseHoveredListener {
+public class StatusBar extends Actor implements Listener {
+
+	// FIXME: Dispose these listeners properly.
 
 	private Sprite sprite;
 
@@ -64,10 +63,7 @@ public class StatusBar extends Actor
 
 		updatePositions();
 
-		Civilization.getInstance().getEventManager().addListener(PlayerStatUpdateListener.class, this);
-		Civilization.getInstance().getEventManager().addListener(NextTurnListener.class, this);
-		Civilization.getInstance().getEventManager().addListener(TurnTimeLeftListener.class, this);
-		Civilization.getInstance().getEventManager().addListener(MouseHoveredListener.class, this);
+		Civilization.getInstance().getEventManager().addListener(this);
 	}
 
 	@Override
@@ -113,7 +109,7 @@ public class StatusBar extends Actor
 		turnsLabel.draw(batch, parentAlpha);
 	}
 
-	@Override
+	@EventHandler
 	public void onPlayerStatUpdate(PlayerStatUpdatePacket packet) {
 		// NOTE: WE use runnable here since we get weird libgdx sprite bugs when we
 		// update the statline.
@@ -145,7 +141,7 @@ public class StatusBar extends Actor
 		});
 	}
 
-	@Override
+	@EventHandler
 	public void onNextTurn(NextTurnPacket packet) {
 		Gdx.app.postRunnable(new Runnable() {
 			@Override
@@ -163,7 +159,7 @@ public class StatusBar extends Actor
 		});
 	}
 
-	@Override
+	@EventHandler
 	public void onTurnTimeLeft(TurnTimeLeftPacket packet) {
 		Gdx.app.postRunnable(new Runnable() {
 			@Override
@@ -179,7 +175,7 @@ public class StatusBar extends Actor
 		});
 	}
 
-	@Override
+	@EventHandler
 	public void onMouseHovered(float mouseX, float mouseY) {
 		// Display gold info window
 		if (mouseX > goldDescLabel.getX() && mouseX < (goldLabel.getX() + goldLabel.getWidth()))

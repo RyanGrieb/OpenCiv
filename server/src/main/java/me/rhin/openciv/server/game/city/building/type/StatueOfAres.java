@@ -11,25 +11,24 @@ import me.rhin.openciv.server.game.map.tile.Tile;
 import me.rhin.openciv.server.game.research.type.BronzeWorkingTech;
 import me.rhin.openciv.server.game.unit.RangedUnit;
 import me.rhin.openciv.server.game.unit.Unit;
-import me.rhin.openciv.server.listener.CaptureCityListener;
-import me.rhin.openciv.server.listener.UnitFinishedMoveListener;
+import me.rhin.openciv.shared.listener.EventHandler;
+import me.rhin.openciv.shared.listener.Listener;
 import me.rhin.openciv.shared.stat.Stat;
 import me.rhin.openciv.shared.stat.StatLine;
 
-public class StatueOfAres extends Building implements Wonder, UnitFinishedMoveListener, CaptureCityListener {
+public class StatueOfAres extends Building implements Wonder, Listener {
 
 	public StatueOfAres(City city) {
 		super(city);
 
-		Server.getInstance().getEventManager().addListener(UnitFinishedMoveListener.class, this);
-		Server.getInstance().getEventManager().addListener(CaptureCityListener.class, this);
+		Server.getInstance().getEventManager().addListener(this);
 
 		// FIXME: When we capture a city, we need to update those units inside the
 		// captured enemy city.
-		
-		//TODO: Handle territory growth & newly created units.
+
+		// TODO: Handle territory growth & newly created units.
 	}
-	
+
 	@Override
 	public StatLine getStatLine() {
 		StatLine statLine = new StatLine();
@@ -39,7 +38,7 @@ public class StatueOfAres extends Building implements Wonder, UnitFinishedMoveLi
 		return statLine;
 	}
 
-	@Override
+	@EventHandler
 	public void onUnitFinishMove(Tile prevTile, Unit unit) {
 
 		if (!unit.getPlayerOwner().equals(city.getPlayerOwner()))
@@ -75,7 +74,7 @@ public class StatueOfAres extends Building implements Wonder, UnitFinishedMoveLi
 		}
 	}
 
-	@Override
+	@EventHandler
 	public void onCaptureCity(City city, AbstractPlayer oldPlayer) {
 		ArrayList<Unit> units = new ArrayList<>();
 

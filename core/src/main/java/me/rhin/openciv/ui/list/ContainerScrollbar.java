@@ -5,16 +5,13 @@ import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
-import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
-import com.badlogic.gdx.scenes.scene2d.utils.DragListener;
 
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.TextureEnum;
-import me.rhin.openciv.listener.ScrollListener;
-import me.rhin.openciv.shared.util.MathHelper;
-import me.rhin.openciv.ui.window.AbstractWindow;
+import me.rhin.openciv.shared.listener.EventHandler;
+import me.rhin.openciv.shared.listener.Listener;
 
-public class ContainerScrollbar extends Actor implements ScrollListener {
+public class ContainerScrollbar extends Actor implements Listener {
 
 	private ContainerList containerList;
 	private Sprite backgroundSprite;
@@ -36,7 +33,7 @@ public class ContainerScrollbar extends Actor implements ScrollListener {
 		this.originY = y;
 		this.prevMouseY = -1;
 
-		Civilization.getInstance().getEventManager().addListener(ScrollListener.class, this);
+		Civilization.getInstance().getEventManager().addListener(this);
 	}
 
 	@Override
@@ -52,7 +49,7 @@ public class ContainerScrollbar extends Actor implements ScrollListener {
 		scrubber.setPosition(containerList.getWidth() - getWidth(), getHeight() - 55);
 	}
 
-	@Override
+	@EventHandler
 	public void onScroll(float amountX, float amountY) {
 		if (!Civilization.getInstance().getWindowManager().allowsInput(this)) {
 			return;
@@ -74,7 +71,7 @@ public class ContainerScrollbar extends Actor implements ScrollListener {
 	}
 
 	public void onClose() {
-		Civilization.getInstance().getEventManager().clearListenersFromObject(this);
+		Civilization.getInstance().getEventManager().removeListener(this);
 	}
 
 	public void setScrubberY(float y) {

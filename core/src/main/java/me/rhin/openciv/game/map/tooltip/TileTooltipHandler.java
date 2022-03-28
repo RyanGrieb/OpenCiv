@@ -9,20 +9,21 @@ import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.map.tile.Tile;
-import me.rhin.openciv.listener.RenderListener;
+import me.rhin.openciv.shared.listener.EventHandler;
+import me.rhin.openciv.shared.listener.Listener;
 import me.rhin.openciv.ui.screen.type.InGameScreen;
 
-public class TileTooltipHandler implements RenderListener {
+public class TileTooltipHandler implements Listener {
 
 	ArrayList<Actor> tileTooltipActors;
 
 	public TileTooltipHandler() {
 		this.tileTooltipActors = new ArrayList<>();
 
-		Civilization.getInstance().getEventManager().addListener(RenderListener.class, this);
+		Civilization.getInstance().getEventManager().addListener(this);
 	}
 
-	@Override
+	@EventHandler
 	public void onRender() {
 		handleCombatTooltips();
 	}

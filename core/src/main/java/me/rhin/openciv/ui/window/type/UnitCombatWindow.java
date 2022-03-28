@@ -6,11 +6,7 @@ import me.rhin.openciv.Civilization;
 import me.rhin.openciv.game.map.GameMap;
 import me.rhin.openciv.game.unit.AttackableEntity;
 import me.rhin.openciv.game.unit.Unit;
-import me.rhin.openciv.listener.CombatPreviewListener;
-import me.rhin.openciv.listener.NextTurnListener;
-import me.rhin.openciv.listener.ResizeListener;
-import me.rhin.openciv.listener.SetCityHealthListener;
-import me.rhin.openciv.listener.UnitAttackListener;
+import me.rhin.openciv.shared.listener.EventHandler;
 import me.rhin.openciv.shared.packet.type.CombatPreviewPacket;
 import me.rhin.openciv.shared.packet.type.NextTurnPacket;
 import me.rhin.openciv.shared.packet.type.SetCityHealthPacket;
@@ -21,8 +17,7 @@ import me.rhin.openciv.ui.game.Healthbar;
 import me.rhin.openciv.ui.label.CustomLabel;
 import me.rhin.openciv.ui.window.AbstractWindow;
 
-public class UnitCombatWindow extends AbstractWindow
-		implements ResizeListener, CombatPreviewListener, NextTurnListener, SetCityHealthListener, UnitAttackListener {
+public class UnitCombatWindow extends AbstractWindow {
 
 	// Show preview of health amounts of the unit, and the unit being attacked.
 	private AttackableEntity attackingEntity;
@@ -82,14 +77,9 @@ public class UnitCombatWindow extends AbstractWindow
 
 		// Attempt to get combat preview values from the server.
 		sendCombatPreviewPacket();
-
-		Civilization.getInstance().getEventManager().addListener(CombatPreviewListener.class, this);
-		Civilization.getInstance().getEventManager().addListener(NextTurnListener.class, this);
-		Civilization.getInstance().getEventManager().addListener(SetCityHealthListener.class, this);
-		Civilization.getInstance().getEventManager().addListener(UnitAttackListener.class, this);
 	}
 
-	@Override
+	@EventHandler
 	public void onCombatPreview(CombatPreviewPacket packet) {
 		float unitDamage = packet.getUnitDamage();
 		float targetUnitDamage = packet.getTargetUnitDamage();
@@ -98,7 +88,7 @@ public class UnitCombatWindow extends AbstractWindow
 		targetHealthbar.setHealth(targetEntity.getMaxHealth(), targetEntity.getHealth() - targetUnitDamage);
 	}
 
-	@Override
+	@EventHandler
 	public void onNextTurn(NextTurnPacket packet) {
 		if (targetEntity == null || attackingEntity == null)
 			return;
@@ -106,7 +96,7 @@ public class UnitCombatWindow extends AbstractWindow
 		sendCombatPreviewPacket();
 	}
 
-	@Override
+	@EventHandler
 	public void onSetCityHealth(SetCityHealthPacket packet) {
 		if (targetEntity == null || attackingEntity == null)
 			return;
@@ -114,7 +104,7 @@ public class UnitCombatWindow extends AbstractWindow
 		sendCombatPreviewPacket();
 	}
 
-	@Override
+	@EventHandler
 	public void onUnitAttack(UnitAttackPacket packet) {
 		GameMap map = Civilization.getInstance().getGame().getMap();
 
@@ -132,12 +122,7 @@ public class UnitCombatWindow extends AbstractWindow
 
 	}
 
-	@Override
-	public void onClose() {
-		Civilization.getInstance().getEventManager().clearListenersFromObject(this);
-	}
-
-	@Override
+	@EventHandler
 	public void onResize(int width, int height) {
 
 	}

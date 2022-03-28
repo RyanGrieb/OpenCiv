@@ -6,13 +6,11 @@ import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 
-import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.TextureEnum;
-import me.rhin.openciv.listener.ResizeListener;
-import me.rhin.openciv.listener.ScrollListener;
+import me.rhin.openciv.shared.listener.EventHandler;
 import me.rhin.openciv.ui.window.HorizontalWindow;
 
-public class HorizontalScrollbar extends Actor implements ScrollListener {
+public class HorizontalScrollbar extends Actor {
 
 	private HorizontalWindow window;
 	private Sprite backgroundSprite;
@@ -48,11 +46,9 @@ public class HorizontalScrollbar extends Actor implements ScrollListener {
 			}
 
 		});
-
-		Civilization.getInstance().getEventManager().addListener(ScrollListener.class, this);
 	}
 
-	@Override
+	@EventHandler
 	public void onScroll(float amountX, float amountY) {
 		float scrubberX = (scrubber.getX() + (amountY * 10));
 

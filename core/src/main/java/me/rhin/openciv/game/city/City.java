@@ -24,29 +24,13 @@ import me.rhin.openciv.game.map.tile.TileType.TileProperty;
 import me.rhin.openciv.game.notification.type.AvailableProductionNotification;
 import me.rhin.openciv.game.player.AbstractPlayer;
 import me.rhin.openciv.game.production.ProducibleItemManager;
-import me.rhin.openciv.game.production.ProductionItem;
 import me.rhin.openciv.game.religion.CityReligion;
 import me.rhin.openciv.game.religion.PlayerReligion;
 import me.rhin.openciv.game.religion.icon.ReligionIcon;
 import me.rhin.openciv.game.unit.AttackableEntity;
-import me.rhin.openciv.listener.AddSpecialistToContainerListener;
-import me.rhin.openciv.listener.ApplyProductionToItemListener;
-import me.rhin.openciv.listener.BuildingConstructedListener;
-import me.rhin.openciv.listener.BuildingRemovedListener;
-import me.rhin.openciv.listener.BuyProductionItemListener;
-import me.rhin.openciv.listener.CityGainMajorityReligionListener;
-import me.rhin.openciv.listener.CityLooseMajorityReligionListener;
-import me.rhin.openciv.listener.CityPopulationUpdateListener;
-import me.rhin.openciv.listener.CityStatUpdateListener;
-import me.rhin.openciv.listener.FinishProductionItemListener;
-import me.rhin.openciv.listener.NextTurnListener;
-import me.rhin.openciv.listener.QueueProductionItemListener;
-import me.rhin.openciv.listener.ReligionIconChangeListener;
-import me.rhin.openciv.listener.RemoveQueuedProductionItemListener;
-import me.rhin.openciv.listener.RemoveSpecialistFromContainerListener;
-import me.rhin.openciv.listener.SetCitizenTileWorkerListener;
-import me.rhin.openciv.listener.SetProductionItemListener;
 import me.rhin.openciv.shared.city.SpecialistType;
+import me.rhin.openciv.shared.listener.EventHandler;
+import me.rhin.openciv.shared.listener.Listener;
 import me.rhin.openciv.shared.logging.Logger;
 import me.rhin.openciv.shared.logging.LoggerFactory;
 import me.rhin.openciv.shared.logging.LoggerType;
@@ -74,14 +58,7 @@ import me.rhin.openciv.ui.screen.type.InGameScreen;
 import me.rhin.openciv.ui.window.type.CityInfoWindow;
 
 //FIXME: We should have a interface for these networking interface.
-public class City extends Group
-		implements AttackableEntity, TileObserver, SpecialistContainer, BuildingConstructedListener,
-		BuildingRemovedListener, CityStatUpdateListener, SetProductionItemListener, ApplyProductionToItemListener,
-		FinishProductionItemListener, SetCitizenTileWorkerListener, AddSpecialistToContainerListener,
-		RemoveSpecialistFromContainerListener, NextTurnListener, BuyProductionItemListener,
-		CityGainMajorityReligionListener, CityLooseMajorityReligionListener, ReligionIconChangeListener,
-		CityPopulationUpdateListener, QueueProductionItemListener, RemoveQueuedProductionItemListener {
-
+public class City extends Group implements AttackableEntity, TileObserver, SpecialistContainer, Listener {
 	private static final Logger LOGGER = LoggerFactory.getInstance(LoggerType.LOG_TAG);
 
 	private Tile originTile;
@@ -146,23 +123,7 @@ public class City extends Group
 			}
 		});
 
-		Civilization.getInstance().getEventManager().addListener(BuildingConstructedListener.class, this);
-		Civilization.getInstance().getEventManager().addListener(BuildingRemovedListener.class, this);
-		Civilization.getInstance().getEventManager().addListener(CityStatUpdateListener.class, this);
-		Civilization.getInstance().getEventManager().addListener(SetProductionItemListener.class, this);
-		Civilization.getInstance().getEventManager().addListener(ApplyProductionToItemListener.class, this);
-		Civilization.getInstance().getEventManager().addListener(FinishProductionItemListener.class, this);
-		Civilization.getInstance().getEventManager().addListener(SetCitizenTileWorkerListener.class, this);
-		Civilization.getInstance().getEventManager().addListener(AddSpecialistToContainerListener.class, this);
-		Civilization.getInstance().getEventManager().addListener(RemoveSpecialistFromContainerListener.class, this);
-		Civilization.getInstance().getEventManager().addListener(NextTurnListener.class, this);
-		Civilization.getInstance().getEventManager().addListener(BuyProductionItemListener.class, this);
-		Civilization.getInstance().getEventManager().addListener(CityGainMajorityReligionListener.class, this);
-		Civilization.getInstance().getEventManager().addListener(CityLooseMajorityReligionListener.class, this);
-		Civilization.getInstance().getEventManager().addListener(ReligionIconChangeListener.class, this);
-		Civilization.getInstance().getEventManager().addListener(CityPopulationUpdateListener.class, this);
-		Civilization.getInstance().getEventManager().addListener(QueueProductionItemListener.class, this);
-		Civilization.getInstance().getEventManager().addListener(RemoveQueuedProductionItemListener.class, this);
+		Civilization.getInstance().getEventManager().addListener(this);
 	}
 
 	@Override
@@ -179,14 +140,14 @@ public class City extends Group
 		}
 	}
 
-	@Override
+	@EventHandler
 	public void onNextTurn(NextTurnPacket packet) {
 		if (health < getMaxHealth()) {
 			setHealth(MathUtils.clamp(health + 5, 0, getMaxHealth()));
 		}
 	}
 
-	@Override
+	@EventHandler
 	public void onBuildingConstructed(BuildingConstructedPacket packet) {
 		if (!getName().equals(packet.getCityName()))
 			return;
@@ -210,7 +171,7 @@ public class City extends Group
 		LOGGER.info("Adding building " + packet.getBuildingName() + " to city " + getName());
 	}
 
-	@Override
+	@EventHandler
 	public void onBuildingRemoved(BuildingRemovedPacket packet) {
 		if (!getName().equals(packet.getCityName()))
 			return;
@@ -237,7 +198,7 @@ public class City extends Group
 		}
 	}
 
-	@Override
+	@EventHandler
 	public void onCityStatUpdate(CityStatUpdatePacket packet) {
 		if (!getName().equals(packet.getCityName()))
 			return;
@@ -245,7 +206,7 @@ public class City extends Group
 		setStatLine(StatLine.fromPacket(packet));
 	}
 
-	@Override
+	@EventHandler
 	public void onSetProductionItem(SetProductionItemPacket packet) {
 		if (!getName().equals(packet.getCityName()))
 			return;
@@ -253,7 +214,7 @@ public class City extends Group
 		getProducibleItemManager().setCurrentProductionItem(packet.getItemName());
 	}
 
-	@Override
+	@EventHandler
 	public void onQueueProductionItem(QueueProductionItemPacket packet) {
 		if (!getName().equals(packet.getCityName()))
 			return;
@@ -261,7 +222,7 @@ public class City extends Group
 		getProducibleItemManager().queueProductionItem(packet.getItemName());
 	}
 
-	@Override
+	@EventHandler
 	public void onRemoveQueuedProductionItem(RemoveQueuedProductionItemPacket packet) {
 		if (!getName().equals(packet.getCityName()))
 			return;
@@ -269,7 +230,7 @@ public class City extends Group
 		getProducibleItemManager().getItemQueue().remove(packet.getIndex());
 	}
 
-	@Override
+	@EventHandler
 	public void onApplyProductionToItem(ApplyProductionToItemPacket packet) {
 		if (!getName().equals(packet.getCityName()))
 			return;
@@ -277,7 +238,7 @@ public class City extends Group
 		getProducibleItemManager().applyProduction(packet.getProductionAmount());
 	}
 
-	@Override
+	@EventHandler
 	public void onFinishProductionItem(FinishProductionItemPacket packet) {
 		if (!getName().equals(packet.getCityName()))
 			return;
@@ -291,7 +252,7 @@ public class City extends Group
 		}
 	}
 
-	@Override
+	@EventHandler
 	public void onBuyProductionItem(BuyProductionItemPacket packet) {
 		if (!getName().equals(packet.getCityName()))
 			return;
@@ -313,7 +274,7 @@ public class City extends Group
 		}
 	}
 
-	@Override
+	@EventHandler
 	public void onSetCitizenTileWorker(SetCitizenTileWorkerPacket packet) {
 		if (!getName().equals(packet.getCityName()))
 			return;
@@ -323,7 +284,7 @@ public class City extends Group
 		citizenWorkers.put(tile, packet.getWorkerType());
 	}
 
-	@Override
+	@EventHandler
 	public void onAddSpecialistToContainer(AddSpecialistToContainerPacket packet) {
 		if (!getName().equals(packet.getCityName()))
 			return;
@@ -341,7 +302,7 @@ public class City extends Group
 				contianer.addSpecialist(packet.getAmount());
 	}
 
-	@Override
+	@EventHandler
 	public void onRemoveSpecialistFromContainer(RemoveSpecialistFromContainerPacket packet) {
 		if (!getName().equals(packet.getCityName()))
 			return;
@@ -359,7 +320,7 @@ public class City extends Group
 				contianer.removeSpecialist(packet.getAmount());
 	}
 
-	@Override
+	@EventHandler
 	public void onCityGainMajorityReligion(City city, PlayerReligion newReligion) {
 		if (!city.equals(this))
 			return;
@@ -368,7 +329,7 @@ public class City extends Group
 		religionIcon.setBounds(nameLabel.getX() + nameLabel.getWidth() + 2, nameLabel.getY(), 8, 8);
 	}
 
-	@Override
+	@EventHandler
 	public void onCityLooseMajorityReligion(City city, PlayerReligion oldReligion) {
 		if (!city.equals(this))
 			return;
@@ -376,7 +337,7 @@ public class City extends Group
 		religionIcon = null;
 	}
 
-	@Override
+	@EventHandler
 	public void onReligionIconChange(PlayerReligion religion, ReligionIcon icon) {
 		if (cityReligion.getMajorityReligion() == null || !cityReligion.getMajorityReligion().equals(religion))
 			return;
@@ -385,7 +346,7 @@ public class City extends Group
 		religionIcon.setBounds(nameLabel.getX() + nameLabel.getWidth() + 2, nameLabel.getY(), 8, 8);
 	}
 
-	@Override
+	@EventHandler
 	public void onCityPopulationUpdate(CityPopulationUpdatePacket packet) {
 		if (!getName().equals(packet.getCityName()))
 			return;

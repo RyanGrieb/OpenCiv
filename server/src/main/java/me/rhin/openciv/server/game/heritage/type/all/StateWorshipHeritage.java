@@ -8,15 +8,16 @@ import me.rhin.openciv.server.game.city.City;
 import me.rhin.openciv.server.game.city.building.type.Monument;
 import me.rhin.openciv.server.game.heritage.Heritage;
 import me.rhin.openciv.server.game.map.tile.Tile;
-import me.rhin.openciv.server.listener.SettleCityListener;
+import me.rhin.openciv.shared.listener.EventHandler;
+import me.rhin.openciv.shared.listener.Listener;
 import me.rhin.openciv.shared.packet.type.SettleCityPacket;
 
-public class StateWorshipHeritage extends Heritage implements SettleCityListener {
+public class StateWorshipHeritage extends Heritage implements Listener {
 
 	public StateWorshipHeritage(AbstractPlayer player) {
 		super(player);
 
-		Server.getInstance().getEventManager().addListener(SettleCityListener.class, this);
+		Server.getInstance().getEventManager().addListener(this);
 	}
 
 	@Override
@@ -42,7 +43,7 @@ public class StateWorshipHeritage extends Heritage implements SettleCityListener
 				city.addBuilding(new Monument(city));
 	}
 
-	@Override
+	@EventHandler
 	public void onSettleCity(WebSocket conn, SettleCityPacket packet) {
 		if (!isStudied())
 			return;

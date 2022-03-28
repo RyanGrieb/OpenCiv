@@ -7,10 +7,10 @@ import com.badlogic.gdx.utils.Align;
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.SoundEnum.SoundType;
 import me.rhin.openciv.asset.TextureEnum;
-import me.rhin.openciv.listener.LeftClickListener.LeftClickEvent;
-import me.rhin.openciv.listener.MouseMoveListener.MouseMoveEvent;
-import me.rhin.openciv.listener.ResizeListener;
+import me.rhin.openciv.events.type.LeftClickEvent;
+import me.rhin.openciv.shared.listener.EventHandler;
 import me.rhin.openciv.shared.listener.EventManager;
+import me.rhin.openciv.shared.listener.Listener;
 import me.rhin.openciv.ui.button.CustomButton;
 import me.rhin.openciv.ui.label.CustomLabel;
 import me.rhin.openciv.ui.screen.AbstractScreen;
@@ -18,7 +18,7 @@ import me.rhin.openciv.ui.screen.ScreenEnum;
 import me.rhin.openciv.ui.window.type.GameOptionsWindow;
 import me.rhin.openciv.ui.window.type.TitleOverlay;
 
-public class TitleScreen extends AbstractScreen implements ResizeListener {
+public class TitleScreen extends AbstractScreen implements Listener {
 
 	private EventManager eventManager;
 	private TitleOverlay titleOverlay;
@@ -36,7 +36,7 @@ public class TitleScreen extends AbstractScreen implements ResizeListener {
 		Civilization.getInstance().getSoundHandler().playTrackBySoundtype(this, SoundType.TITLE_MUSIC);
 
 		this.eventManager = Civilization.getInstance().getEventManager();
-		eventManager.clearEvents();
+		eventManager.clearListeners();
 
 		this.titleOverlay = new TitleOverlay();
 		stage.addActor(titleOverlay);
@@ -91,7 +91,7 @@ public class TitleScreen extends AbstractScreen implements ResizeListener {
 		subTitleLabel.setWidth(0);
 		stage.addActor(subTitleLabel);
 
-		Civilization.getInstance().getEventManager().addListener(ResizeListener.class, this);
+		eventManager.addListener(this);
 	}
 
 	@Override
@@ -99,7 +99,7 @@ public class TitleScreen extends AbstractScreen implements ResizeListener {
 		super.show();
 	}
 
-	@Override
+	@EventHandler
 	public void onResize(int width, int height) {
 		titleOverlay.setSize(width, height);
 		playButton.setPosition(width / 2 - 150 / 2, height - 200);
@@ -111,12 +111,6 @@ public class TitleScreen extends AbstractScreen implements ResizeListener {
 
 		titleLabel.setPosition(0, height / 1.1F);
 		titleLabel.setSize(width, 20);
-	}
-
-	@Override
-	public void render(float delta) {
-		super.render(delta);
-		eventManager.fireEvent(MouseMoveEvent.INSTANCE);
 	}
 
 	@Override

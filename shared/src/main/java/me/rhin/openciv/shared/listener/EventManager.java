@@ -1,84 +1,74 @@
 package me.rhin.openciv.shared.listener;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.Collections;
+
+import com.badlogic.gdx.utils.reflect.ClassReflection;
+import com.badlogic.gdx.utils.reflect.Method;
 
 public class EventManager {
 
-	private final ConcurrentHashMap<Class<? extends Listener>, ArrayList<? extends Listener>> listenerMap = new ConcurrentHashMap<>();
+	private ArrayList<Listener> listeners;
 
-	public <L extends Listener> void addListener(Class<L> listenerType, L listener) {
+	public EventManager() {
+		listeners = new ArrayList<>();
+	}
 
-		@SuppressWarnings("unchecked")
-		ArrayList<L> listeners = (ArrayList<L>) listenerMap.get(listenerType);
-
-		if (listeners == null) {
-			listeners = new ArrayList<>(Arrays.asList(listener));
-			listenerMap.put(listenerType, listeners);
-			return;
-		}
-
+	public void addListener(Listener listener) {
 		listeners.add(listener);
-
 	}
 
-	public <L extends Listener, E extends Event<L>> void fireEvent(E event) {
-		Class<L> listenerType = event.getListenerType();
-
-		@SuppressWarnings("unchecked")
-		ArrayList<L> listeners = (ArrayList<L>) listenerMap.get(listenerType);
-
-		if (listeners == null || listeners.isEmpty())
-			return;
-
-		// FIXME: This is inefficient
-		ArrayList<L> listenersCopy = new ArrayList<>(listeners);
-
-		event.fire(listenersCopy);
+	public void fireEvent(Event event) {
+		callListeners(event);
 	}
 
-	public <L extends Listener> void removeListener(Class<L> listenerType, L listener) {
-		@SuppressWarnings("unchecked")
-		ArrayList<L> listeners = (ArrayList<L>) listenerMap.get(listenerType);
+	private void callListeners(Event event) {
 
-		if (listeners != null)
-			listeners.remove(listener);
+		ArrayList<MethodWrapper> methods = new ArrayList<>();
 
-	}
-
-	public void clearEvents() {
-		listenerMap.clear();
-	}
-
-	@SuppressWarnings("unchecked")
-	public <L extends Listener> void clearListenersFromObject(L listener) {
 		try {
+			for (Listener listener : listeners) {
+				Method method = null;
+				try {
 
-			/*
-			 * Iterator<Class<? extends Listener>> iterator =
-			 * listenerMap.keySet().iterator();
-			 * 
-			 * while (iterator.hasNext()) { ArrayList<L> listeners = (ArrayList<L>)
-			 * listenerMap.get(iterator.next());
-			 * 
-			 * if (listeners != null) { Iterator<L> listenersIterator =
-			 * listeners.iterator();
-			 * 
-			 * while (listenersIterator.hasNext()) { if
-			 * (listenersIterator.next().equals(listener)) listenersIterator.remove(); } } }
-			 */
-
-			// Go through all the listeners
-			for (Class<? extends Listener> listenerType : listenerMap.keySet()) {
-				ArrayList<L> listeners = (ArrayList<L>) listenerMap.get(listenerType);
-
-				// Remove object attached all listeners
-				if (listeners != null)
-					listeners.remove(listener);
+					method = ClassReflection.getMethod(listener.getClass(), event.getMethodName(),
+							event.getMethodParamClasses());
+				} catch (Exception e) {
+					// System.out.println("No method in -" + listener + ": " + method);
+					continue;
+				}
+				if (method.isAnnotationPresent(EventHandler.class)) {
+					MethodWrapper methodWrapper = new MethodWrapper(method, event, listener);
+					methods.add(methodWrapper);
+				}
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+
+		Collections.sort(methods);
+
+		for (MethodWrapper method : methods) {
+			try {
+				method.invoke();
+			} catch (Exception e) {
+				System.out.println("Invoke err: " + method.getMethod().getName());
+				e.printStackTrace();
+			}
+		}
+
 	}
+
+	public void removeListener(Listener listener) {
+		listeners.remove(listener);
+	}
+
+	public void clearListeners() {
+		listeners.clear();
+	}
+
+	public void verifyListener(Listener listener) {
+		System.out.println(listeners.contains(listener));
+	}
+
 }

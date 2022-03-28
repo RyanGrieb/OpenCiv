@@ -7,9 +7,7 @@ import com.badlogic.gdx.utils.Align;
 
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.game.heritage.Heritage;
-import me.rhin.openciv.listener.PickHeritageListener;
-import me.rhin.openciv.listener.ResizeListener;
-import me.rhin.openciv.listener.TopShapeRenderListener;
+import me.rhin.openciv.shared.listener.EventHandler;
 import me.rhin.openciv.ui.background.BlankBackground;
 import me.rhin.openciv.ui.button.type.CloseWindowButton;
 import me.rhin.openciv.ui.game.HeritageLeaf;
@@ -17,8 +15,7 @@ import me.rhin.openciv.ui.game.HeritageLineWeb;
 import me.rhin.openciv.ui.label.CustomLabel;
 import me.rhin.openciv.ui.window.AbstractWindow;
 
-public class HeritageWindow extends AbstractWindow
-		implements ResizeListener, TopShapeRenderListener, PickHeritageListener {
+public class HeritageWindow extends AbstractWindow {
 
 	// TODO: Sort by level
 	private ArrayList<HeritageLeaf> heritageLeafs;
@@ -49,16 +46,12 @@ public class HeritageWindow extends AbstractWindow
 		this.closeWindowButton = new CloseWindowButton(this.getClass(), "Close", viewport.getWorldWidth() / 2 - 150 / 2,
 				35, 150, 45);
 		addActor(closeWindowButton);
-		
+
 		this.heritageLineWeb = new HeritageLineWeb(heritageLeafs);
 		addActor(heritageLineWeb);
-
-		Civilization.getInstance().getEventManager().addListener(ResizeListener.class, this);
-		Civilization.getInstance().getEventManager().addListener(TopShapeRenderListener.class, this);
-		Civilization.getInstance().getEventManager().addListener(PickHeritageListener.class, this);
 	}
 
-	@Override
+	@EventHandler
 	public void onResize(int width, int height) {
 		super.setSize(width, height);
 		blankBackground.setSize(width, height);
@@ -67,8 +60,8 @@ public class HeritageWindow extends AbstractWindow
 
 		updateLeafPositions(width, height);
 	}
-	
-	@Override
+
+	@EventHandler
 	public void onPickHeritage(Heritage heritage) {
 		for (HeritageLeaf leaf : heritageLeafs) {
 			if (leaf.getHeritage().equals(heritage))
@@ -76,13 +69,6 @@ public class HeritageWindow extends AbstractWindow
 			else
 				leaf.setStudying(false);
 		}
-	}
-
-	@Override
-	public void onClose() {
-		super.onClose();
-
-		Civilization.getInstance().getEventManager().clearListenersFromObject(this);
 	}
 
 	@Override

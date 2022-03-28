@@ -8,7 +8,7 @@ import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.research.Technology;
 import me.rhin.openciv.game.research.Unlockable;
-import me.rhin.openciv.listener.ResizeListener;
+import me.rhin.openciv.shared.listener.EventHandler;
 import me.rhin.openciv.shared.stat.Stat;
 import me.rhin.openciv.ui.background.ColoredBackground;
 import me.rhin.openciv.ui.button.CustomButton;
@@ -16,7 +16,7 @@ import me.rhin.openciv.ui.button.type.CloseWindowButton;
 import me.rhin.openciv.ui.label.CustomLabel;
 import me.rhin.openciv.ui.window.AbstractWindow;
 
-public class PickResearchWindow extends AbstractWindow implements ResizeListener {
+public class PickResearchWindow extends AbstractWindow {
 
 	private Technology tech;
 	private ColoredBackground coloredBackground;
@@ -117,11 +117,9 @@ public class PickResearchWindow extends AbstractWindow implements ResizeListener
 		}
 
 		addActor(turnsLabel);
-
-		Civilization.getInstance().getEventManager().addListener(ResizeListener.class, this);
 	}
 
-	@Override
+	@EventHandler
 	public void onResize(int width, int height) {
 		super.setPosition(width / 2 - 300 / 2, height / 2 - 350 / 2);
 	}

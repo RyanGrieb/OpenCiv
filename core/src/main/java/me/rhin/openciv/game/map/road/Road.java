@@ -2,13 +2,13 @@ package me.rhin.openciv.game.map.road;
 
 import java.util.ArrayList;
 
-import com.badlogic.gdx.Gdx;
-
 import me.rhin.openciv.Civilization;
+import me.rhin.openciv.events.type.RoadConstructedEvent;
 import me.rhin.openciv.game.map.tile.Tile;
-import me.rhin.openciv.listener.RoadConstructedListener;
+import me.rhin.openciv.shared.listener.EventHandler;
+import me.rhin.openciv.shared.listener.Listener;
 
-public class Road implements RoadConstructedListener {
+public class Road implements Listener {
 
 	private Tile originTile;
 	private Tile targetTile;
@@ -18,11 +18,11 @@ public class Road implements RoadConstructedListener {
 	public Road(Tile originTile) {
 		this.originTile = originTile;
 
-		Civilization.getInstance().getEventManager().addListener(RoadConstructedListener.class, this);
+		Civilization.getInstance().getEventManager().addListener(this);
 
 		// Now figure out what direction were going in.
 
-		//LOGGER.info("Setting road!");
+		// LOGGER.info("Setting road!");
 
 		// FIXME: Account for if the road is being set not by anything.
 
@@ -62,16 +62,17 @@ public class Road implements RoadConstructedListener {
 
 		this.prevTile = prevTile;
 		this.targetTile = targetTile;
-		//LOGGER.info("We initalizing ourselfs: [" + originTile.getGridX() + "," + originTile.getGridY() + "]");
+		// LOGGER.info("We initalizing ourselfs: [" + originTile.getGridX() + "," +
+		// originTile.getGridY() + "]");
 
-		//LOGGER.info(prevTile + "," + targetTile);
-		//LOGGER.info("--------------------------");
+		// LOGGER.info(prevTile + "," + targetTile);
+		// LOGGER.info("--------------------------");
 		defineRoadEnum();
 
 		Civilization.getInstance().getEventManager().fireEvent(new RoadConstructedEvent(this));
 	}
 
-	@Override
+	@EventHandler
 	public void onRoadConstructed(Road road) {
 		if (road.getOriginTile().equals(originTile))
 			return;
@@ -85,16 +86,17 @@ public class Road implements RoadConstructedListener {
 		if (!adjRoad || (prevTile != null && targetTile != null))
 			return;
 
-		//LOGGER.info("Called");
-		//LOGGER.info("We are: [" + originTile.getGridX() + "," + originTile.getGridY() + "]");
+		// LOGGER.info("Called");
+		// LOGGER.info("We are: [" + originTile.getGridX() + "," + originTile.getGridY()
+		// + "]");
 
 		if (targetTile == null)
 			targetTile = road.getOriginTile();
 		else if (prevTile == null)
 			prevTile = road.getOriginTile();
 
-		//LOGGER.info(prevTile + "," + targetTile);
-		//LOGGER.info("=======================");
+		// LOGGER.info(prevTile + "," + targetTile);
+		// LOGGER.info("=======================");
 
 		defineRoadEnum();
 		originTile.applyRoad();
@@ -163,16 +165,17 @@ public class Road implements RoadConstructedListener {
 		}
 
 		this.roadPart = RoadPart.fetchRoadPart(prevTileIndex, targetTileIndex);
-		//LOGGER.info(prevTile + "," + targetTile);
+		// LOGGER.info(prevTile + "," + targetTile);
 
-		//if (prevTile != null)
-		//	LOGGER.info("prev:" + prevTile.getGridX() + "," + prevTile.getGridY());
-		//if (targetTile != null)
-		//	LOGGER.info("target:" + targetTile.getGridX() + "," + targetTile.getGridY());
+		// if (prevTile != null)
+		// LOGGER.info("prev:" + prevTile.getGridX() + "," + prevTile.getGridY());
+		// if (targetTile != null)
+		// LOGGER.info("target:" + targetTile.getGridX() + "," + targetTile.getGridY());
 
-		//LOGGER.info(prevTileIndex + "," + targetTileIndex);
-		//LOGGER.info("Setting ourselfs +[" + originTile.getGridX() + "," + originTile.getGridY() + "]" + " TO: "
-		//		+ roadPart.name());
-		//LOGGER.info("***************");
+		// LOGGER.info(prevTileIndex + "," + targetTileIndex);
+		// LOGGER.info("Setting ourselfs +[" + originTile.getGridX() + "," +
+		// originTile.getGridY() + "]" + " TO: "
+		// + roadPart.name());
+		// LOGGER.info("***************");
 	}
 }

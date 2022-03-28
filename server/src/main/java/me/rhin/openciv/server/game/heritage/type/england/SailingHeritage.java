@@ -10,15 +10,16 @@ import me.rhin.openciv.server.game.map.tile.Tile;
 import me.rhin.openciv.server.game.production.ProductionItem;
 import me.rhin.openciv.server.game.unit.UnitItem;
 import me.rhin.openciv.server.game.unit.UnitItem.UnitType;
-import me.rhin.openciv.server.listener.SettleCityListener;
+import me.rhin.openciv.shared.listener.EventHandler;
+import me.rhin.openciv.shared.listener.Listener;
 import me.rhin.openciv.shared.packet.type.SettleCityPacket;
 
-public class SailingHeritage extends Heritage implements SettleCityListener {
+public class SailingHeritage extends Heritage implements Listener {
 
 	public SailingHeritage(AbstractPlayer player) {
 		super(player);
 
-		Server.getInstance().getEventManager().addListener(SettleCityListener.class, this);
+		Server.getInstance().getEventManager().addListener(this);
 	}
 
 	@Override
@@ -50,7 +51,7 @@ public class SailingHeritage extends Heritage implements SettleCityListener {
 		}
 	}
 
-	@Override
+	@EventHandler
 	public void onSettleCity(WebSocket conn, SettleCityPacket packet) {
 		if (!studied)
 			return;

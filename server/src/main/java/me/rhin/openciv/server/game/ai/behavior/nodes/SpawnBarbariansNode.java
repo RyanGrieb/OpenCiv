@@ -50,7 +50,6 @@ public class SpawnBarbariansNode extends PlayerNode {
 		}
 
 		Json json = new Json();
-
 		for (AddUnitPacket packet : addUnitPackets) {
 			for (Player player : Server.getInstance().getPlayers()) {
 				player.sendPacket(json.toJson(packet));

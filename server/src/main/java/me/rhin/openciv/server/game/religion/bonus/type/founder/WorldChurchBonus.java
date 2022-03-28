@@ -1,25 +1,25 @@
 package me.rhin.openciv.server.game.religion.bonus.type.founder;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import me.rhin.openciv.server.Server;
 import me.rhin.openciv.server.game.city.City;
 import me.rhin.openciv.server.game.religion.PlayerReligion;
 import me.rhin.openciv.server.game.religion.bonus.ReligionBonus;
-import me.rhin.openciv.server.listener.GainFollowerListener;
-import me.rhin.openciv.server.listener.LooseFollowerListener;
+import me.rhin.openciv.shared.listener.EventHandler;
+import me.rhin.openciv.shared.listener.Listener;
 import me.rhin.openciv.shared.stat.Stat;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-public class WorldChurchBonus extends ReligionBonus implements GainFollowerListener, LooseFollowerListener {
+public class WorldChurchBonus extends ReligionBonus implements Listener {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(WorldChurchBonus.class);
 
 	public WorldChurchBonus() {
-		Server.getInstance().getEventManager().addListener(GainFollowerListener.class, this);
-		Server.getInstance().getEventManager().addListener(LooseFollowerListener.class, this);
+		Server.getInstance().getEventManager().addListener(this);
 	}
 
-	@Override
+	@EventHandler
 	public void onLooseFollower(PlayerReligion religion, City city, int oldFollowerCount, int newFollowerCount) {
 		if (player == null)
 			return;
@@ -37,7 +37,7 @@ public class WorldChurchBonus extends ReligionBonus implements GainFollowerListe
 		}
 	}
 
-	@Override
+	@EventHandler
 	public void onGainFollower(PlayerReligion religion, City city, int oldFollowerCount, int newFollowerCount) {
 		if (player == null)
 			return;

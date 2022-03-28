@@ -1,19 +1,18 @@
 package me.rhin.openciv.server.scenarios.type;
 
-import java.util.Random;
-
 import com.badlogic.gdx.math.MathUtils;
 
 import me.rhin.openciv.server.Server;
+import me.rhin.openciv.server.events.type.StartGameRequestEvent;
 import me.rhin.openciv.server.game.Player;
 import me.rhin.openciv.server.game.ai.AIPlayer;
 import me.rhin.openciv.server.game.map.tile.Tile;
 import me.rhin.openciv.server.game.options.GameOptionType;
-import me.rhin.openciv.server.listener.PlayersSpawnsSetListener;
-import me.rhin.openciv.server.listener.StartGameRequestListener.StartGameRequestEvent;
 import me.rhin.openciv.server.scenarios.Scenario;
+import me.rhin.openciv.shared.listener.EventHandler;
+import me.rhin.openciv.shared.listener.Listener;
 
-public class CityStateAITestScenario extends Scenario implements PlayersSpawnsSetListener {
+public class CityStateAITestScenario extends Scenario implements Listener {
 
 	@Override
 	public void toggle() {
@@ -22,7 +21,7 @@ public class CityStateAITestScenario extends Scenario implements PlayersSpawnsSe
 		Server.getInstance().getGameOptions().setOptionValue(GameOptionType.BARBARIAN_AMOUNT, 0);
 		Server.getInstance().getGameOptions().setOptionValue(GameOptionType.CITY_STATE_AMOUNT, 1);
 
-		Server.getInstance().getEventManager().addListener(PlayersSpawnsSetListener.class, this);
+		Server.getInstance().getEventManager().addListener(this);
 
 		Server.getInstance().getEventManager().fireEvent(new StartGameRequestEvent());
 	}
@@ -32,8 +31,8 @@ public class CityStateAITestScenario extends Scenario implements PlayersSpawnsSe
 		return true;
 	}
 
-	@Override
-	public void onPlayersSpawnSet() {
+	@EventHandler
+	public void onPlayerSpawnsSet() {
 
 		Player player = Server.getInstance().getPlayers().get(0);
 		AIPlayer aiPlayer = Server.getInstance().getAIPlayers().get(0);

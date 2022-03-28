@@ -9,14 +9,10 @@ import me.rhin.openciv.game.heritage.Heritage;
 import me.rhin.openciv.game.map.tile.Tile;
 import me.rhin.openciv.game.production.ProductionItem;
 import me.rhin.openciv.game.unit.type.Settler;
-import me.rhin.openciv.listener.SettleCityListener;
+import me.rhin.openciv.shared.listener.EventHandler;
 import me.rhin.openciv.shared.packet.type.SettleCityPacket;
 
-public class ManifestDestinyHeritage extends Heritage implements SettleCityListener {
-
-	public ManifestDestinyHeritage() {
-		Civilization.getInstance().getEventManager().addListener(SettleCityListener.class, this);
-	}
+public class ManifestDestinyHeritage extends Heritage {
 
 	@Override
 	public int getLevel() {
@@ -54,7 +50,7 @@ public class ManifestDestinyHeritage extends Heritage implements SettleCityListe
 		}
 	}
 
-	@Override
+	@EventHandler
 	public void onSettleCity(SettleCityPacket packet) {
 		if (!studied)
 			return;

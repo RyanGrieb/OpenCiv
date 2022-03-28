@@ -3,10 +3,11 @@ package me.rhin.openciv.game.religion.icon;
 import java.util.ArrayList;
 
 import me.rhin.openciv.Civilization;
-import me.rhin.openciv.listener.FoundReligionListener;
+import me.rhin.openciv.shared.listener.EventHandler;
+import me.rhin.openciv.shared.listener.Listener;
 import me.rhin.openciv.shared.packet.type.FoundReligionPacket;
 
-public class AvailableReligionIcons implements FoundReligionListener {
+public class AvailableReligionIcons implements Listener {
 
 	private ArrayList<ReligionIcon> religionIcons;
 	private ArrayList<ReligionIcon> availableIcons;
@@ -20,8 +21,8 @@ public class AvailableReligionIcons implements FoundReligionListener {
 		}
 
 		availableIcons.addAll(religionIcons);
-		
-		Civilization.getInstance().getEventManager().addListener(FoundReligionListener.class, this);
+
+		Civilization.getInstance().getEventManager().addListener(this);
 	}
 
 	public ArrayList<ReligionIcon> getList() {
@@ -32,7 +33,7 @@ public class AvailableReligionIcons implements FoundReligionListener {
 		return availableIcons;
 	}
 
-	@Override
+	@EventHandler
 	public void onFoundReligion(FoundReligionPacket packet) {
 		availableIcons.remove(religionIcons.get(packet.getIconID()));
 	}

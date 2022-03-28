@@ -4,12 +4,11 @@ import com.badlogic.gdx.Gdx;
 
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.TextureEnum;
-import me.rhin.openciv.listener.MouseMoveListener;
-import me.rhin.openciv.shared.stat.Stat;
+import me.rhin.openciv.shared.listener.EventHandler;
 import me.rhin.openciv.ui.background.ColoredBackground;
 import me.rhin.openciv.ui.window.AbstractWindow;
 
-public class StatInfoWindow extends AbstractWindow implements MouseMoveListener {
+public class StatInfoWindow extends AbstractWindow {
 
 	private ColoredBackground background;
 
@@ -22,14 +21,12 @@ public class StatInfoWindow extends AbstractWindow implements MouseMoveListener 
 
 		this.mouseX = Gdx.input.getX();
 		this.mouseY = Gdx.graphics.getHeight() - Gdx.input.getY();
-
-		Civilization.getInstance().getEventManager().addListener(MouseMoveListener.class, this);
 	}
 
-	@Override
-	public void onClose() {
-		super.onClose();
-		Civilization.getInstance().getEventManager().clearListenersFromObject(this);
+	@EventHandler
+	public void onMouseMove(float x, float y) {
+		if (x != mouseX || y != mouseY)
+			Civilization.getInstance().getWindowManager().closeWindow(getClass());
 	}
 
 	@Override
@@ -56,11 +53,4 @@ public class StatInfoWindow extends AbstractWindow implements MouseMoveListener 
 	public boolean isGameDisplayWindow() {
 		return false;
 	}
-
-	@Override
-	public void onMouseMove(float x, float y) {
-		if (x != mouseX || y != mouseY)
-			Civilization.getInstance().getWindowManager().closeWindow(getClass());
-	}
-
 }

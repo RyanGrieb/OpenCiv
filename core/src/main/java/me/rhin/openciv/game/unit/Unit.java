@@ -30,9 +30,9 @@ import me.rhin.openciv.game.unit.actions.type.CancelQueuedMovementAction;
 import me.rhin.openciv.game.unit.actions.type.EmbarkAction;
 import me.rhin.openciv.game.unit.actions.type.MoveAction;
 import me.rhin.openciv.game.unit.actions.type.UpgradeAction;
-import me.rhin.openciv.listener.BottomShapeRenderListener;
-import me.rhin.openciv.listener.NextTurnListener;
 import me.rhin.openciv.options.OptionType;
+import me.rhin.openciv.shared.listener.EventHandler;
+import me.rhin.openciv.shared.listener.Listener;
 import me.rhin.openciv.shared.logging.Logger;
 import me.rhin.openciv.shared.logging.LoggerFactory;
 import me.rhin.openciv.shared.logging.LoggerType;
@@ -42,8 +42,7 @@ import me.rhin.openciv.ui.game.UnitHealthBubble;
 import me.rhin.openciv.ui.window.type.UnitCombatWindow;
 import me.rhin.openciv.ui.window.type.UnitWindow;
 
-public abstract class Unit extends Actor
-		implements AttackableEntity, TileObserver, BottomShapeRenderListener, NextTurnListener {
+public abstract class Unit extends Actor implements AttackableEntity, TileObserver, Listener {
 
 	private static final Logger LOGGER = LoggerFactory.getInstance(LoggerType.LOG_TAG);
 
@@ -97,8 +96,7 @@ public abstract class Unit extends Actor
 		customActions.add(new EmbarkAction(this));
 		customActions.add(new UpgradeAction(this));
 
-		Civilization.getInstance().getEventManager().addListener(NextTurnListener.class, this);
-		Civilization.getInstance().getEventManager().addListener(BottomShapeRenderListener.class, this);
+		Civilization.getInstance().getEventManager().addListener(this);
 	}
 
 	public Unit(UnitParameter unitParameter, TextureEnum assetEnum) {
@@ -178,7 +176,7 @@ public abstract class Unit extends Actor
 
 	}
 
-	@Override
+	@EventHandler
 	public void onNextTurn(NextTurnPacket packet) {
 		this.movement = getMaxMovement();
 
@@ -404,7 +402,7 @@ public abstract class Unit extends Actor
 		}
 	}
 
-	@Override
+	@EventHandler
 	public void onBottomShapeRender(ShapeRenderer shapeRenderer) {
 
 		if (!(playerOwner instanceof Player) || !selected)
@@ -663,7 +661,7 @@ public abstract class Unit extends Actor
 	}
 
 	public void kill() {
-		Civilization.getInstance().getEventManager().clearListenersFromObject(this);
+		Civilization.getInstance().getEventManager().removeListener(this);
 	}
 
 	public void setQueuedTile(Tile queuedTile) {

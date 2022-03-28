@@ -4,15 +4,16 @@ import me.rhin.openciv.server.Server;
 import me.rhin.openciv.server.game.AbstractPlayer;
 import me.rhin.openciv.server.game.heritage.Heritage;
 import me.rhin.openciv.server.game.unit.Unit;
-import me.rhin.openciv.server.listener.NewUnitListener;
+import me.rhin.openciv.shared.listener.EventHandler;
+import me.rhin.openciv.shared.listener.Listener;
 import me.rhin.openciv.shared.stat.Stat;
 
-public class MamlukMoraleHeritage extends Heritage implements NewUnitListener {
+public class MamlukMoraleHeritage extends Heritage implements Listener {
 
 	public MamlukMoraleHeritage(AbstractPlayer player) {
 		super(player);
 
-		Server.getInstance().getEventManager().addListener(NewUnitListener.class, this);
+		Server.getInstance().getEventManager().addListener(this);
 	}
 
 	@Override
@@ -37,7 +38,7 @@ public class MamlukMoraleHeritage extends Heritage implements NewUnitListener {
 		}
 	}
 
-	@Override
+	@EventHandler
 	public void onNewUnit(Unit unit) {
 
 		if (!unit.getPlayerOwner().equals(player) || !studied)

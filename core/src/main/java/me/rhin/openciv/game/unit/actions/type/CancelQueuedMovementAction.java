@@ -2,9 +2,9 @@ package me.rhin.openciv.game.unit.actions.type;
 
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.TextureEnum;
+import me.rhin.openciv.events.type.UnitActEvent;
 import me.rhin.openciv.game.unit.Unit;
 import me.rhin.openciv.game.unit.actions.AbstractAction;
-import me.rhin.openciv.listener.UnitActListener.UnitActEvent;
 import me.rhin.openciv.shared.packet.type.CancelQueuedMovementPacket;
 
 public class CancelQueuedMovementAction extends AbstractAction {
@@ -38,7 +38,7 @@ public class CancelQueuedMovementAction extends AbstractAction {
 
 		Civilization.getInstance().getEventManager().fireEvent(new UnitActEvent(unit));
 		unit.removeAction(this);
-		
+
 		return true;
 	}
 

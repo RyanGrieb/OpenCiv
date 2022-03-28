@@ -8,13 +8,10 @@ import com.badlogic.gdx.scenes.scene2d.ui.TextField.TextFieldListener;
 import com.badlogic.gdx.utils.Align;
 
 import me.rhin.openciv.Civilization;
-import me.rhin.openciv.listener.AttemptConnectionListener;
-import me.rhin.openciv.listener.ConnectionFailedListener;
-import me.rhin.openciv.listener.LeftClickListener.LeftClickEvent;
-import me.rhin.openciv.listener.MouseMoveListener.MouseMoveEvent;
-import me.rhin.openciv.listener.ResizeListener;
-import me.rhin.openciv.listener.ServerConnectListener;
+import me.rhin.openciv.events.type.LeftClickEvent;
+import me.rhin.openciv.shared.listener.EventHandler;
 import me.rhin.openciv.shared.listener.EventManager;
+import me.rhin.openciv.shared.listener.Listener;
 import me.rhin.openciv.ui.button.type.ConnectServerButton;
 import me.rhin.openciv.ui.button.type.PreviousScreenButton;
 import me.rhin.openciv.ui.label.CustomLabel;
@@ -22,7 +19,7 @@ import me.rhin.openciv.ui.screen.AbstractScreen;
 import me.rhin.openciv.ui.screen.ScreenEnum;
 import me.rhin.openciv.ui.window.type.TitleOverlay;
 
-public class ServerSelectScreen extends AbstractScreen implements ServerConnectListener, ResizeListener {
+public class ServerSelectScreen extends AbstractScreen implements Listener {
 
 	private EventManager eventManager;
 	private TitleOverlay titleOverlay;
@@ -34,8 +31,7 @@ public class ServerSelectScreen extends AbstractScreen implements ServerConnectL
 
 	public ServerSelectScreen() {
 		this.eventManager = Civilization.getInstance().getEventManager();
-		eventManager.clearEvents();
-		eventManager.addListener(ServerConnectListener.class, this);
+		eventManager.clearListeners();
 
 		this.titleOverlay = new TitleOverlay();
 		stage.addActor(titleOverlay);
@@ -72,10 +68,10 @@ public class ServerSelectScreen extends AbstractScreen implements ServerConnectL
 		// DEBUG
 		ipTextField.setText("localhost");
 
-		Civilization.getInstance().getEventManager().addListener(ResizeListener.class, this);
+		eventManager.addListener(this);
 	}
 
-	@Override
+	@EventHandler
 	public void onResize(int width, int height) {
 		// TODO Auto-generated method stub
 		titleOverlay.setSize(width, height);
@@ -86,15 +82,8 @@ public class ServerSelectScreen extends AbstractScreen implements ServerConnectL
 	}
 
 	@Override
-	public void render(float delta) {
-		super.render(delta);
-
-		eventManager.fireEvent(MouseMoveEvent.INSTANCE);
-	}
-
-	@Override
 	public void dispose() {
-		Civilization.getInstance().getEventManager().clearListenersFromObject(connectServerButton);
+		Civilization.getInstance().getEventManager().removeListener(connectServerButton);
 	}
 
 	@Override
@@ -106,7 +95,7 @@ public class ServerSelectScreen extends AbstractScreen implements ServerConnectL
 
 	}
 
-	@Override
+	@EventHandler
 	public void onServerConnect() {
 		// NOTE: This method runs on a separate thread (shared library from gradle), we
 		// need to get the libgdx thread first.

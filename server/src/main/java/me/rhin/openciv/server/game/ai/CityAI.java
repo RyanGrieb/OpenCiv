@@ -3,9 +3,10 @@ package me.rhin.openciv.server.game.ai;
 import me.rhin.openciv.server.Server;
 import me.rhin.openciv.server.game.ai.behavior.FallbackNode;
 import me.rhin.openciv.server.game.city.City;
-import me.rhin.openciv.server.listener.NextTurnListener;
+import me.rhin.openciv.shared.listener.EventHandler;
+import me.rhin.openciv.shared.listener.Listener;
 
-public class CityAI implements NextTurnListener {
+public class CityAI implements Listener {
 
 	private FallbackNode mainNode;
 	private City city;
@@ -18,10 +19,10 @@ public class CityAI implements NextTurnListener {
 
 		mainNode.tick();
 
-		Server.getInstance().getEventManager().addListener(NextTurnListener.class, this);
+		Server.getInstance().getEventManager().addListener(this);
 	}
 
-	@Override
+	@EventHandler
 	public void onNextTurn() {
 		mainNode.tick();
 	}
