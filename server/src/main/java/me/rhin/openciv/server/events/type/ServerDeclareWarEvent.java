@@ -5,6 +5,8 @@ import me.rhin.openciv.shared.listener.Event;
 
 public class ServerDeclareWarEvent implements Event {
 
+	// FIXME: Remove this once we fix event priority
+
 	private AbstractPlayer player, targetPlayer;
 
 	public ServerDeclareWarEvent(AbstractPlayer player, AbstractPlayer targetPlayer) {
@@ -14,7 +16,7 @@ public class ServerDeclareWarEvent implements Event {
 
 	@Override
 	public String getMethodName() {
-		return "onServerDeclareWar";
+		return "onDeclareWar";
 	}
 
 	@Override
@@ -24,6 +26,6 @@ public class ServerDeclareWarEvent implements Event {
 
 	@Override
 	public Class<?>[] getMethodParamClasses() {
-		return new Class<?>[] { player.getClass(), targetPlayer.getClass() };
+		return new Class<?>[] { AbstractPlayer.class, AbstractPlayer.class };
 	}
 }

@@ -16,7 +16,7 @@ public class UnitFinishedMoveEvent implements Event {
 
 	@Override
 	public String getMethodName() {
-		return "onUnitFinishedMove";
+		return "onUnitFinishMove";
 	}
 
 	@Override
@@ -26,7 +26,7 @@ public class UnitFinishedMoveEvent implements Event {
 
 	@Override
 	public Class<?>[] getMethodParamClasses() {
-		return new Class<?>[] { prevTile.getClass(), unit.getClass() };
+		return new Class<?>[] { prevTile.getClass(), Unit.class };
 	}
 
 }

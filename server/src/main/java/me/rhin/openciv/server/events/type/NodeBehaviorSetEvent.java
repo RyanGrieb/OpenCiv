@@ -26,7 +26,7 @@ public class NodeBehaviorSetEvent implements Event {
 
 	@Override
 	public Class<?>[] getMethodParamClasses() {
-		return new Class<?>[] { node.getClass(), behaviorStatus.getClass() };
+		return new Class<?>[] { Node.class, behaviorStatus.getClass() };
 	}
 
 }
