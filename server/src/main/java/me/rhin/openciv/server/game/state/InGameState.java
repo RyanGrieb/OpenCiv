@@ -319,6 +319,12 @@ public class InGameState extends GameState {
 		Tile tile = map.getTiles()[packet.getPrevGridX()][packet.getPrevGridY()];
 		Tile queuedTile = map.getTiles()[packet.getTargetGridX()][packet.getTargetGridY()];
 		Unit unit = tile.getUnitFromID(packet.getUnitID());
+
+		// FIXME: This can happen if the players moves a unit before this packet can
+		// keep up.
+		if (unit == null)
+			return;
+
 		unit.setQueuedTile(queuedTile);
 		unit.moveToTile(queuedTile);
 	}

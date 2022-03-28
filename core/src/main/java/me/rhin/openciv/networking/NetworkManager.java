@@ -30,6 +30,7 @@ import me.rhin.openciv.shared.packet.type.AvailablePantheonPacket;
 import me.rhin.openciv.shared.packet.type.BuildingConstructedPacket;
 import me.rhin.openciv.shared.packet.type.BuildingRemovedPacket;
 import me.rhin.openciv.shared.packet.type.BuyProductionItemPacket;
+import me.rhin.openciv.shared.packet.type.ChangeNamePacket;
 import me.rhin.openciv.shared.packet.type.ChooseCivPacket;
 import me.rhin.openciv.shared.packet.type.CityPopulationUpdatePacket;
 import me.rhin.openciv.shared.packet.type.CityReligionFollowersUpdatePacket;
@@ -148,6 +149,7 @@ public class NetworkManager {
 		networkEvents.put(ServerNotificationPacket.class, "onServerNotification");
 		networkEvents.put(QueueProductionItemPacket.class, "onQueueProductionItem");
 		networkEvents.put(RemoveQueuedProductionItemPacket.class, "onRemoveQueuedProductionItem");
+		networkEvents.put(ChangeNamePacket.class, "onChangeName");
 	}
 
 	public void connect(String ip) {

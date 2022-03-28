@@ -14,6 +14,7 @@ import me.rhin.openciv.server.game.civilization.type.RandomCivilization;
 import me.rhin.openciv.server.game.options.GameOptionType;
 import me.rhin.openciv.shared.listener.EventHandler;
 import me.rhin.openciv.shared.map.MapSize;
+import me.rhin.openciv.shared.packet.type.ChangeNamePacket;
 import me.rhin.openciv.shared.packet.type.ChooseCivPacket;
 import me.rhin.openciv.shared.packet.type.FetchPlayerPacket;
 import me.rhin.openciv.shared.packet.type.GetHostPacket;
@@ -40,6 +41,20 @@ public class InLobbyState extends GameState {
 	@Override
 	public void stop() {
 		// Game already stopped
+	}
+
+	@EventHandler
+	public void onChangeName(WebSocket conn, ChangeNamePacket packet) {
+		Player player = Server.getInstance().getPlayerByConn(conn);
+
+		packet.setPrevName(player.getName());
+		player.setName(packet.getName());
+
+		Json json = new Json();
+
+		for (Player serverPlayer : Server.getInstance().getPlayers()) {
+			serverPlayer.sendPacket(json.toJson(packet));
+		}
 	}
 
 	@EventHandler

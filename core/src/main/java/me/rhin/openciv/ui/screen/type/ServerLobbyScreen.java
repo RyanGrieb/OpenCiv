@@ -6,6 +6,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 
 import me.rhin.openciv.Civilization;
+import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.events.type.LeftClickEvent;
 import me.rhin.openciv.game.civilization.CivType;
 import me.rhin.openciv.shared.listener.EventHandler;
@@ -14,6 +15,7 @@ import me.rhin.openciv.shared.listener.Listener;
 import me.rhin.openciv.shared.logging.Logger;
 import me.rhin.openciv.shared.logging.LoggerFactory;
 import me.rhin.openciv.shared.logging.LoggerType;
+import me.rhin.openciv.shared.packet.type.ChangeNamePacket;
 import me.rhin.openciv.shared.packet.type.ChooseCivPacket;
 import me.rhin.openciv.shared.packet.type.GameStartPacket;
 import me.rhin.openciv.shared.packet.type.GetHostPacket;
@@ -31,6 +33,7 @@ import me.rhin.openciv.ui.list.ListObject;
 import me.rhin.openciv.ui.list.type.ListLobbyPlayer;
 import me.rhin.openciv.ui.screen.AbstractScreen;
 import me.rhin.openciv.ui.screen.ScreenEnum;
+import me.rhin.openciv.ui.window.type.ChangeNameWindow;
 import me.rhin.openciv.ui.window.type.TitleOverlay;
 
 public class ServerLobbyScreen extends AbstractScreen implements Listener {
@@ -47,6 +50,7 @@ public class ServerLobbyScreen extends AbstractScreen implements Listener {
 	private CustomButton multiplayerStartButton;
 	private CustomButton backButton;
 	private OpenChatButton chatButton;
+	private CustomButton changeNameButton;
 
 	public ServerLobbyScreen() {
 		this.eventManager = Civilization.getInstance().getEventManager();
@@ -78,9 +82,29 @@ public class ServerLobbyScreen extends AbstractScreen implements Listener {
 		chatButton = new OpenChatButton(4, 28, 42, 42);
 		stage.addActor(chatButton);
 
+		changeNameButton = new CustomButton(TextureEnum.UI_BUTTON_ICON, TextureEnum.UI_BUTTON_ICON_HOVERED,
+				TextureEnum.ICON_PROFILE, 50, 28, 42, 42, 32, 32);
+		changeNameButton.onClick(() -> {
+			Civilization.getInstance().getWindowManager().toggleWindow(new ChangeNameWindow());
+		});
+
+		stage.addActor(changeNameButton);
+
 		requestPlayerList();
 
 		eventManager.addListener(this);
+	}
+
+	@EventHandler
+	public void onChangeName(ChangeNamePacket packet) {
+
+		if (packet.getPrevPlayerName().equals(hostPlayerName)) {
+			hostPlayerName = packet.getName();
+		}
+
+		if (packet.getPrevPlayerName().equals(playerName)) {
+			playerName = packet.getName();
+		}
 	}
 
 	@Override
@@ -96,6 +120,7 @@ public class ServerLobbyScreen extends AbstractScreen implements Listener {
 		gameOptionsMenu.setPosition(width / 2 + 120, height - 360);
 		backButton.setPosition(width / 2 - 150 / 2, 20);
 		gameOptionsMenu.setPosition(width / 2 + 120, height - 360);
+
 	}
 
 	@Override

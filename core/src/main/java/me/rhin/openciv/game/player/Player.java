@@ -18,6 +18,7 @@ import me.rhin.openciv.game.unit.RangedUnit;
 import me.rhin.openciv.game.unit.Unit;
 import me.rhin.openciv.shared.listener.EventHandler;
 import me.rhin.openciv.shared.listener.Listener;
+import me.rhin.openciv.shared.packet.type.ChangeNamePacket;
 import me.rhin.openciv.shared.packet.type.DeleteUnitPacket;
 import me.rhin.openciv.shared.packet.type.PlayerStatUpdatePacket;
 import me.rhin.openciv.shared.packet.type.QueuedUnitMovementPacket;

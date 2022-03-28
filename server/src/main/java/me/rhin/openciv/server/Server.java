@@ -11,7 +11,6 @@ import org.java_websocket.server.WebSocketServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.JsonReader;
 import com.badlogic.gdx.utils.JsonValue;
 
@@ -32,6 +31,7 @@ import me.rhin.openciv.shared.listener.EventManager;
 import me.rhin.openciv.shared.packet.Packet;
 import me.rhin.openciv.shared.packet.type.BuyProductionItemPacket;
 import me.rhin.openciv.shared.packet.type.CancelQueuedMovementPacket;
+import me.rhin.openciv.shared.packet.type.ChangeNamePacket;
 import me.rhin.openciv.shared.packet.type.ChooseCivPacket;
 import me.rhin.openciv.shared.packet.type.ChooseHeritagePacket;
 import me.rhin.openciv.shared.packet.type.ChooseTechPacket;
@@ -163,6 +163,7 @@ public class Server extends WebSocketServer {
 		// MoveUpQueuedProductionItemEvent.class);
 		// networkEvents.put(MoveDownQueuedProductionItemPacket.class,
 		// MoveDownQueuedProductionItemEvent.class);
+		networkEvents.put(ChangeNamePacket.class, "onChangeName");
 
 		this.playerIndex = 0;
 		this.commandProcessor = new CmdProcessor();

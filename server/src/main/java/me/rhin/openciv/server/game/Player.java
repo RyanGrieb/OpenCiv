@@ -184,4 +184,8 @@ public class Player extends AbstractPlayer {
 	public WebSocket getConn() {
 		return conn;
 	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
 }

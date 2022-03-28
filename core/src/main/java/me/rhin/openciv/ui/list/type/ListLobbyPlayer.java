@@ -2,21 +2,22 @@ package me.rhin.openciv.ui.list.type;
 
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
-import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
-import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Align;
 
 import me.rhin.openciv.Civilization;
 import me.rhin.openciv.asset.TextureEnum;
 import me.rhin.openciv.game.civilization.CivType;
+import me.rhin.openciv.shared.listener.EventHandler;
+import me.rhin.openciv.shared.listener.Listener;
+import me.rhin.openciv.shared.packet.type.ChangeNamePacket;
 import me.rhin.openciv.ui.label.CustomLabel;
 import me.rhin.openciv.ui.list.ContainerList;
 import me.rhin.openciv.ui.list.ListObject;
 import me.rhin.openciv.ui.screen.type.ServerLobbyScreen;
 import me.rhin.openciv.ui.window.type.ChooseCivWindow;
 
-public class ListLobbyPlayer extends ListObject {
+public class ListLobbyPlayer extends ListObject implements Listener {
 
 	private String playerName;
 	private boolean isHost;
@@ -46,6 +47,18 @@ public class ListLobbyPlayer extends ListObject {
 
 		hostSprite = TextureEnum.UI_STAR.sprite();
 		hostSprite.setSize(16, 16);
+
+		Civilization.getInstance().getEventManager().addListener(this);
+	}
+
+	@EventHandler
+	public void onChangeName(ChangeNamePacket packet) {
+		if (playerName.equals(packet.getPrevPlayerName())) {
+			playerName = packet.getName();
+			playerNameLabel.setText(playerName);
+			playerNameLabel.setSize(getWidth(), getHeight());
+			playerNameLabel.setAlignment(Align.center);
+		}
 	}
 
 	@Override

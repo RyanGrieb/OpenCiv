@@ -21,7 +21,7 @@ public abstract class AbstractPlayer {
 
 	private static final Logger LOGGER = LoggerFactory.getInstance(LoggerType.LOG_TAG);
 
-	private String name;
+	protected String name;
 	protected ArrayList<City> ownedCities;
 	protected ArrayList<Unit> ownedUnits;
 	protected StatLine statLine;
