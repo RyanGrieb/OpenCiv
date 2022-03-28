@@ -1,8 +1,10 @@
 package me.rhin.openciv.shared.listener;
 
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
+
+import com.badlogic.gdx.utils.reflect.ClassReflection;
+import com.badlogic.gdx.utils.reflect.Method;
 
 public class EventManager {
 
@@ -29,8 +31,9 @@ public class EventManager {
 				Method method = null;
 				try {
 
-					method = listener.getClass().getMethod(event.getMethodName(), event.getMethodParamClasses());
-				} catch (NoSuchMethodException noMethodException) {
+					method = ClassReflection.getMethod(listener.getClass(), event.getMethodName(),
+							event.getMethodParamClasses());
+				} catch (Exception e) {
 					// System.out.println("No method in -" + listener + ": " + method);
 					continue;
 				}

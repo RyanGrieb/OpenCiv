@@ -324,6 +324,10 @@ public class CivGame implements Listener {
 		AbstractPlayer player = players.get(packet.getPlayerOwner());
 		City city = player.getCityFromName(packet.getCityName());
 		Tile tile = map.getTiles()[packet.getGridX()][packet.getGridY()];
+
+		// FIXME: City can be null here? I think barbs take it, then another city state
+		// takes it?
+
 		city.growTerritory(tile);
 	}
 

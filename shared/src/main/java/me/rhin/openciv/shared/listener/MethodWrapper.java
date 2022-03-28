@@ -1,7 +1,9 @@
 package me.rhin.openciv.shared.listener;
 
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
+
+import com.badlogic.gdx.utils.reflect.Method;
+import com.badlogic.gdx.utils.reflect.ReflectionException;
 
 public class MethodWrapper implements Comparable<MethodWrapper> {
 
@@ -17,8 +19,13 @@ public class MethodWrapper implements Comparable<MethodWrapper> {
 
 	@Override
 	public int compareTo(MethodWrapper otherMethod) {
-		return otherMethod.getMethod().getAnnotation(EventHandler.class).priority().ordinal()
-				- method.getAnnotation(EventHandler.class).priority().ordinal();
+		// FIXME: LibGDX GWT doesn't support the lines below. We don't use event
+		// priority anyway.
+
+		// return
+		// otherMethod.getMethod().getAnnotation(EventHandler.class).priority().ordinal()
+		// - method.getAnnotation(EventHandler.class).priority().ordinal();
+		return 0;
 	}
 
 	public Method getMethod() {
@@ -27,7 +34,12 @@ public class MethodWrapper implements Comparable<MethodWrapper> {
 	}
 
 	public void invoke() throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-		method.invoke(listener, event.getMethodParams());
+		try {
+			method.invoke(listener, event.getMethodParams());
+		} catch (ReflectionException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 }
