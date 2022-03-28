@@ -420,6 +420,9 @@ public class ProducibleItemManager implements Listener {
 	}
 
 	public ProducingItem getProducingItem() {
+		if (itemQueue.size() < 1)
+			return null;
+
 		return itemQueue.get(0);
 	}
 
@@ -427,7 +430,7 @@ public class ProducibleItemManager implements Listener {
 
 		if (getProducingItem() != null && getProducingItem().getProductionItem() instanceof UnitItem) {
 			UnitItem unitItem = (UnitItem) getProducingItem().getProductionItem();
-			if (unitItem.getBaseCombatStrength() > 0)
+			if (unitItem.getBaseCombatStrength() > 0) 
 				return true;
 		}
 
