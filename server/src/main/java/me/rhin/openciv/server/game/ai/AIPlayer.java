@@ -7,6 +7,7 @@ import me.rhin.openciv.server.game.unit.Unit;
 import me.rhin.openciv.server.game.unit.UnitItem.UnitType;
 import me.rhin.openciv.server.game.unit.type.Builder.BuilderUnit;
 import me.rhin.openciv.server.game.unit.type.Settler.SettlerUnit;
+import me.rhin.openciv.shared.listener.EventHandler;
 
 public class AIPlayer extends AbstractPlayer {
 
@@ -21,7 +22,7 @@ public class AIPlayer extends AbstractPlayer {
 		aiType.initBehaviorTree(mainNode, this);
 	}
 
-	@Override
+	@EventHandler
 	public void onNextTurn() {
 		super.onNextTurn();
 
