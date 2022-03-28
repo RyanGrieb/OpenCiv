@@ -1,6 +1,7 @@
 package me.rhin.openciv.headless;
 
 import me.rhin.openciv.headless.demo.AppleObj;
+import me.rhin.openciv.headless.demo.BranchObj;
 import me.rhin.openciv.headless.demo.GroundObj;
 import me.rhin.openciv.headless.demo.TreeObj;
 import me.rhin.openciv.headless.listener.EventManager;
@@ -23,6 +24,7 @@ public class HeadlessLauncher {
 
 		GroundObj ground = new GroundObj();
 		TreeObj tree = new TreeObj();
+		BranchObj branch = new BranchObj();
 		AppleObj apple = new AppleObj();
 
 		eventManager.fireEvent(new NoParamEvent());

@@ -23,7 +23,7 @@ public class UnitActEvent implements Event {
 
 	@Override
 	public Class<?>[] getMethodParamClasses() {
-		return new Class<?>[] { unit.getClass() };
+		return new Class<?>[] { Unit.class };
 	}
 
 }

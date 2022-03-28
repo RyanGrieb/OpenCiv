@@ -122,8 +122,9 @@ public class Builder extends UnitItem {
 			return true;
 		}
 
-		@Override
+		@EventHandler
 		public void onNextTurn(NextTurnPacket packet) {
+			
 			if (!building)
 				super.onNextTurn(packet);
 			else // TODO: Make this a method in Unit class if we need other methods called here

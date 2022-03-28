@@ -151,6 +151,7 @@ public class UnitWindow extends AbstractWindow {
 
 	@EventHandler
 	public void onWorkTile(WorkTilePacket packet) {
+
 		if (unit.getID() != packet.getUnitID())
 			return;
 
