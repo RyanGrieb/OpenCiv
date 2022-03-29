@@ -7,7 +7,11 @@ import java.util.List;
 import me.rhin.openciv.server.game.AbstractPlayer;
 import me.rhin.openciv.server.game.city.City;
 import me.rhin.openciv.server.game.map.tile.Tile;
+import me.rhin.openciv.server.game.map.tile.TileType;
 import me.rhin.openciv.server.game.map.tile.TileType.TileProperty;
+import me.rhin.openciv.server.game.map.tile.improvement.ChopImprovement;
+import me.rhin.openciv.server.game.map.tile.improvement.ClearImprovement;
+import me.rhin.openciv.server.game.map.tile.improvement.LumberMillImprovement;
 import me.rhin.openciv.server.game.map.tile.improvement.TileImprovement;
 import me.rhin.openciv.server.game.unit.DeleteUnitOptions;
 import me.rhin.openciv.server.game.unit.Unit;
@@ -124,6 +128,22 @@ public class Builder extends UnitItem {
 					if (!playerOwner.getResearchTree().hasResearched(improvement.getRequiredTech())
 							|| tile.containsTileProperty(TileProperty.WATER) || tile.getTileImprovement() != null)
 						continue;
+
+					// Prioritize chop improvement if there are resources under forests
+					if (tile.containsTileType(TileType.FOREST)
+							&& (tile.containsTileProperty(TileProperty.LUXURY)
+									|| tile.containsTileProperty(TileProperty.RESOURCE))
+							&& improvement instanceof ChopImprovement) {
+						return improvement;
+					}
+
+					// Prioritize clear improvement if there are resources under jungle
+					if (tile.containsTileType(TileType.JUNGLE)
+							&& (tile.containsTileProperty(TileProperty.LUXURY)
+									|| tile.containsTileProperty(TileProperty.RESOURCE))
+							&& improvement instanceof ClearImprovement) {
+						return improvement;
+					}
 
 					targetImprovement = improvement;
 
