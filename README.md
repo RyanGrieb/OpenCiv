@@ -4,6 +4,11 @@
 [![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=rhin123_OpenCiv&metric=ncloc)](https://sonarcloud.io/summary/new_code?id=rhin123_OpenCiv)
 [![Discord](https://img.shields.io/discord/925176383792087081.svg?logo=discord&logoColor=white&logoWidth=20&labelColor=7289DA&label=Discord&color=17cf48)](https://discord.gg/WFteeen5fu)
 
+# *** NOTE- Project to be rewritten ***
+Currently this project is written in Java using LibGDX as it's rendering engine, and a tool to port to HTML. As I continued to add more
+features, programming them in felt cumbersome with how the events are handled. Also, I noticed performance is starting to become impacted. HTML is also having compatibility issues. Because of this, I feel inclined to switch over to another language, preferably a low-level one. With this rewrite I have the opportunity to add features on the back burner. Such as support for an infinite map, LUA modding, and more.
+
+
 A turn based strategy game built on [LibGDX](https://github.com/libgdx/libgdx), with a rouge-like tile set.
 
 ## About
