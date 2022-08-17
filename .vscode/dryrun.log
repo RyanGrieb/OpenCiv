@@ -1,0 +1,9 @@
+make --dry-run --always-make --keep-going --print-directory
+make: Entering directory '/home/ryan/Documents/Coding/OpenCiv'
+g++ -w -I . -c OpenCiv/ApplicationWindow.cpp OpenCiv/main.cpp       OpenCiv/texture/LTexture.cpp     OpenCiv/util/FileUtils.cpp  
+make link_files
+make[1]: Entering directory '/home/ryan/Documents/Coding/OpenCiv'
+g++ ApplicationWindow.o FileUtils.o LTexture.o main.o -g -lSDL2 -lSDL2_image -o main
+make[1]: Leaving directory '/home/ryan/Documents/Coding/OpenCiv'
+make: Leaving directory '/home/ryan/Documents/Coding/OpenCiv'
+ 

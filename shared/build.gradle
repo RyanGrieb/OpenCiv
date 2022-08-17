@@ -1,5 +1,0 @@
-eclipse.project.name = appName + '-shared'
-
-dependencies {
-	api "com.badlogicgames.gdx:gdx-tools:$gdxVersion"
-}
