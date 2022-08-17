@@ -1,12 +1,13 @@
-# OpenWargame - An open source [wargame](https://en.wikipedia.org/wiki/Wargame) simulator 
+# OpenCiv
 
-A program where the user can simulate local and global battle scenarios.
-An emphasis on customization is given. Where mods can enable the user to
-come up with anything they can imagine. From actual military wargames to
-videogames like Hearts of Iron 4.
+![example workflow](https://github.com/rhin123/OpenCiv/actions/workflows/build.yml/badge.svg)
+[![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=rhin123_OpenCiv&metric=ncloc)](https://sonarcloud.io/summary/new_code?id=rhin123_OpenCiv)
+[![Discord](https://img.shields.io/discord/925176383792087081.svg?logo=discord&logoColor=white&logoWidth=20&labelColor=7289DA&label=Discord&color=17cf48)](https://discord.gg/WFteeen5fu)
+
+A turn based strategy game built on [SDL2](https://www.libsdl.org/), with a rouge-like tile set.
 
 ### Development Setup Instructions:
-<sub><sup>Please post an issue if you run into problems. I want these instructions to be as clear as possible.</sup></sub>
+<sup>Please post an issue if you run into problems. I want these instructions to be as clear as possible.</sup>
 
 ### Windows:
 * Install [git](https://git-scm.com/downloads)
