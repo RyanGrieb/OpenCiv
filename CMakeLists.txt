@@ -43,8 +43,13 @@ else ()
     # We don't need to call link_directories here since we already know where the libraries are w/ 'find_package'
 endif ()
 
-set(SOURCE_FILES main.cpp) # Define our source files for the project. These turn into our executables...
+set(SOURCE_FILES main.cpp
+        LTexture.cpp
+        AppWindow.cpp) # Define our source files for the project. These turn into our executables...
 add_executable(${PROJECT_NAME} ${SOURCE_FILES}) # Set our main.cpp as our executable file
+
+# Copy assets file into our executable directory
+file(COPY assets DESTINATION ${CMAKE_BINARY_DIR})
 
 if (WIN32)
     target_link_libraries(${PROJECT_NAME} SDL2main SDL2 SDL2_image) # Link our .lib files for our linker - enables our program to compile w/ that dependency

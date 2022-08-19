@@ -1,0 +1,4 @@
+/snap/clion/204/bin/cmake/linux/bin/cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_MAKE_PROGRAM=/snap/clion/204/bin/ninja/linux/ninja -G Ninja -S /home/ryan/Documents/Coding/OpenCiv -B /home/ryan/Documents/Coding/OpenCiv/cmake-build-debug
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /home/ryan/Documents/Coding/OpenCiv/cmake-build-debug

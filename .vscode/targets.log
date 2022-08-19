@@ -1,12 +1,15 @@
 make all --print-data-base --no-builtin-variables --no-builtin-rules --question
+make: *** No rule to make target 'all'.  Stop.
+
 # GNU Make 4.3
+ 
 # Built for x86_64-pc-linux-gnu
 # Copyright (C) 1988-2020 Free Software Foundation, Inc.
 # License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
 # This is free software: you are free to change and redistribute it.
 # There is NO WARRANTY, to the extent permitted by law.
 
-# Make data base, printed on Wed Aug 17 14:09:58 2022
+# Make data base, printed on Wed Aug 17 17:05:02 2022
 
 # Variables
 
@@ -58,8 +61,6 @@ CURDIR := /home/ryan/Documents/Coding/OpenCiv
 APPLICATION_INSIGHTS_NO_DIAGNOSTIC_CHANNEL = true
 # environment
 LESSOPEN = | /usr/bin/lesspipe %s
-# makefile (from 'Makefile', line 17)
-SRCS = $(call rwildcard, OpenCiv/,*.cpp)
 # automatic
 *D = $(patsubst %/,%,$(dir $*))
 # environment
@@ -74,12 +75,12 @@ XDG_CONFIG_DIRS = /etc/xdg/xdg-xubuntu:/etc/xdg:/etc/xdg
 +D = $(patsubst %/,%,$(dir $+))
 # environment
 XDG_SESSION_DESKTOP = xubuntu
-# makefile (from 'Makefile', line 1)
-MAKEFILE_LIST := Makefile
+# makefile
+MAKEFILE_LIST := 
 # automatic
 @F = $(notdir $@)
 # environment
-VSCODE_PID = 57342
+VSCODE_PID = 66454
 # environment
 XDG_SESSION_TYPE = x11
 # automatic
@@ -151,15 +152,13 @@ LOGNAME = ryan
 # environment
 XDG_VTNR = 7
 # makefile
-.DEFAULT_GOAL := all
+.DEFAULT_GOAL := 
 # environment
 DISPLAY = :0.0
 # environment
 USER = ryan
 # default
 MAKE_VERSION := 4.3
-# makefile (from 'Makefile', line 9)
-COMPILER_FLAGS = -w -I .
 # environment
 _ = /usr/share/code/code
 # environment
@@ -190,24 +189,16 @@ PANEL_GDK_CORE_DEVICE_EVENTS = 0
 <F = $(notdir $<)
 # default
 SUFFIXES := 
-# makefile (from 'Makefile', line 20)
-TARGET = main
 # environment
 XDG_GREETER_DATA_DIR = /var/lib/lightdm-data/ryan
 # default
 .FEATURES := target-specific order-only second-expansion else-if shortest-stem undefine oneshell nocomment grouped-target extra-prereqs archives jobserver output-sync check-symlink load
-# makefile (from 'Makefile', line 2)
-CXX = g++
 # environment
 XDG_MENU_PREFIX = xfce-
-# makefile (from 'Makefile', line 10)
-LINKER_FLAGS = -g -lSDL2 -lSDL2_image
 # environment
 GDMSESSION = xubuntu
-# makefile (from 'Makefile', line 13)
-rwildcard = $(wildcard $1$2) $(foreach d,$(wildcard $1*),$(call rwildcard,$d/,$2))
 # variable set hash-table stats:
-# Load=98/1024=10%, Rehash=0, Collisions=9/175=5%
+# Load=92/1024=9%, Rehash=0, Collisions=2/119=2%
 
 # Pattern-specific Variable Values
 
@@ -215,18 +206,9 @@ rwildcard = $(wildcard $1$2) $(foreach d,$(wildcard $1*),$(call rwildcard,$d/,$2
 
 # Directories
 
-# OpenCiv/util/FileUtils.cpp (device 2054, inode 2644841): could not be opened.
-# OpenCiv/util (device 2054, inode 2644840): 3 files, no impossibilities.
-# OpenCiv/main.cpp (device 2054, inode 2646296): could not be opened.
-# OpenCiv/texture/LTexture.hpp (device 2054, inode 2622784): could not be opened.
 # . (device 2054, inode 2644247): 16 files, no impossibilities.
-# OpenCiv/texture/LTexture.cpp (device 2054, inode 2644463): could not be opened.
-# OpenCiv/ApplicationWindow.hpp (device 2054, inode 2644798): could not be opened.
-# OpenCiv/ApplicationWindow.cpp (device 2054, inode 2644797): could not be opened.
-# OpenCiv (device 2054, inode 2646268): 7 files, no impossibilities.
-# OpenCiv/texture (device 2054, inode 2645091): 4 files, no impossibilities.
 
-# 30 files, no impossibilities in 10 directories.
+# 16 files, no impossibilities in 1 directories.
 
 # Implicit Rules
 
@@ -237,31 +219,9 @@ rwildcard = $(wildcard $1$2) $(foreach d,$(wildcard $1*),$(call rwildcard,$d/,$2
 # Not a target:
 Makefile:
 #  Implicit rule search has been done.
-#  Last modified 2022-08-17 14:00:48.794448585
-#  File has been updated.
-#  Successfully updated.
-
-# Not a target:
-OpenCiv/main.cpp:
-#  Implicit rule search has been done.
-#  Last modified 2022-08-17 14:06:57.822726401
-#  File has been updated.
-#  Successfully updated.
-
-clean:
-#  Phony target (prerequisite of .PHONY).
-#  Implicit rule search has not been done.
 #  File does not exist.
-#  File has not been updated.
-#  recipe to execute (from 'Makefile', line 42):
-	$(RM) $(wildcard *.o)
-	$(RM) main
-
-# Not a target:
-ApplicationWindow.o:
-#  Implicit rule search has not been done.
-#  Modification time never checked.
-#  File has not been updated.
+#  File has been updated.
+#  Failed to be updated.
 
 # Not a target:
 .DEFAULT:
@@ -269,117 +229,41 @@ ApplicationWindow.o:
 #  Modification time never checked.
 #  File has not been updated.
 
-all: main
-#  Phony target (prerequisite of .PHONY).
+# Not a target:
+all:
 #  Command line target.
-#  Implicit rule search has not been done.
-#  File does not exist.
-#  File has been updated.
-#  Needs to be updated (-q is set).
-# variable set hash-table stats:
-# Load=0/32=0%, Rehash=0, Collisions=0/26=0%
-
- 
-# Not a target:
-OpenCiv/texture/LTexture.cpp:
 #  Implicit rule search has been done.
-#  Last modified 2022-08-17 14:09:36.120562582
-#  File has been updated.
-#  Successfully updated.
-
-link_files: ApplicationWindow.o FileUtils.o LTexture.o main.o
-#  Phony target (prerequisite of .PHONY).
-#  Implicit rule search has not been done.
 #  File does not exist.
 #  File has not been updated.
-#  recipe to execute (from 'Makefile', line 30):
-	$(CXX) $(wildcard *.o) $(LINKER_FLAGS) -o $(TARGET)
 
-main: OpenCiv/ApplicationWindow.cpp OpenCiv/main.cpp OpenCiv/texture/LTexture.cpp OpenCiv/util/FileUtils.cpp
-#  Implicit rule search has not been done.
-#  Implicit/static pattern stem: ''
+# Not a target:
+makefile:
+#  Implicit rule search has been done.
 #  File does not exist.
 #  File has been updated.
-#  Needs to be updated (-q is set).
-# automatic
-# @ := main
-# automatic
-# * := 
-# automatic
-# < := OpenCiv/ApplicationWindow.cpp
-# automatic
-# + := OpenCiv/ApplicationWindow.cpp OpenCiv/main.cpp OpenCiv/texture/LTexture.cpp OpenCiv/util/FileUtils.cpp
-# automatic
-# % := 
-# automatic
-# ^ := OpenCiv/ApplicationWindow.cpp OpenCiv/main.cpp OpenCiv/texture/LTexture.cpp OpenCiv/util/FileUtils.cpp
-# automatic
-# ? := OpenCiv/ApplicationWindow.cpp OpenCiv/main.cpp OpenCiv/texture/LTexture.cpp OpenCiv/util/FileUtils.cpp
-# automatic
-# | := 
-# variable set hash-table stats:
-# Load=8/32=25%, Rehash=0, Collisions=78/34=229%
-#  recipe to execute (from 'Makefile', line 35):
-	$(CXX) $(COMPILER_FLAGS) -c $(SRCS)
-	$(MAKE) link_files
+#  Failed to be updated.
 
 # Not a target:
-OpenCiv/ApplicationWindow.cpp:
+GNUmakefile:
 #  Implicit rule search has been done.
-#  Last modified 2022-08-17 14:01:02.238604338
+#  File does not exist.
 #  File has been updated.
-#  Successfully updated.
-
-# Not a target:
-main.o:
-#  Implicit rule search has not been done.
-#  Modification time never checked.
-#  File has not been updated.
-
-# Not a target:
-OpenCiv/util/FileUtils.cpp:
-#  Implicit rule search has been done.
-#  Last modified 2022-08-17 13:49:20.25849134
-#  File has been updated.
-#  Successfully updated.
-
-# Not a target:
-LTexture.o:
-#  Implicit rule search has not been done.
-#  Modification time never checked.
-#  File has not been updated.
-
-# Not a target:
-.SUFFIXES:
-#  Implicit rule search has not been done.
-#  Modification time never checked.
-#  File has not been updated.
-
-.PHONY: all link_files clean
-#  Implicit rule search has not been done.
-#  Modification time never checked.
-#  File has not been updated.
-
-# Not a target:
-FileUtils.o:
-#  Implicit rule search has not been done.
-#  Modification time never checked.
-#  File has not been updated.
+#  Failed to be updated.
 
 # files hash-table stats:
-# Load=16/1024=2%, Rehash=0, Collisions=0/43=0%
+# Load=6/1024=1%, Rehash=0, Collisions=0/15=0%
 # VPATH Search Paths
 
 # No 'vpath' search paths.
 
 # No general ('VPATH' variable) search path.
 
-# strcache buffers: 1 (0) / strings = 41 / storage = 515 B / avg = 12 B
-# current buf: size = 8162 B / used = 515 B / count = 41 / avg = 12 B
+# strcache buffers: 1 (0) / strings = 24 / storage = 239 B / avg = 9 B
+# current buf: size = 8162 B / used = 239 B / count = 24 / avg = 9 B
 
-# strcache performance: lookups = 71 / hit rate = 42%
+# strcache performance: lookups = 27 / hit rate = 11%
 # hash-table stats:
-# Load=41/8192=1%, Rehash=0, Collisions=0/71=0%
-# Finished Make data base on Wed Aug 17 14:10:00 2022
+# Load=24/8192=0%, Rehash=0, Collisions=0/27=0%
+# Finished Make data base on Wed Aug 17 17:05:02 2022
 
  
