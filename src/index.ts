@@ -1,29 +1,23 @@
-import { Engine, Actor, Color, Random } from 'excalibur'
+import * as ex from 'excalibur'
+import { loader } from './resources'
+//import { Loader } from './resources'
+import { Button } from './button'
 
-const game = new Engine({
-	width: 600,
-	height: 600,
+
+
+//TODO: Update game size when the browser resizes...
+const game = new ex.Engine({
+	width: window.innerWidth,
+	height: window.innerHeight,
+	suppressHiDPIScaling: true,
 })
 
-const player = new Actor({
-	name: 'player', // optionally assign a name
-	width: 50,
-	height: 50,
-	x: 300,
-	y: 300,
-	color: Color.Green
-})
+
+const button = new Button(game.canvasWidth / 2 - 300 / 2, 300, 300, 60)
 
 
-const rnd = new Random()
-
-// move the player
-player.vel.x = rnd.integer(-15, 15)
-player.vel.y = rnd.integer(-15, 15)
+const rnd = new ex.Random()
 
 // add player to the current scene
-game.add(player)
-
-
-
-game.start()
+game.add(button)
+game.start(loader)

@@ -533,27 +533,22 @@ function hmrAcceptRun(bundle, id) {
 
 },{}],"h7u1C":[function(require,module,exports) {
 var _excalibur = require("excalibur");
-const game = new (0, _excalibur.Engine)({
-    width: 600,
-    height: 600
+var _resources = require("./resources");
+//import { Loader } from './resources'
+var _button = require("./button");
+//TODO: Update game size when the browser resizes...
+const game = new _excalibur.Engine({
+    width: window.innerWidth,
+    height: window.innerHeight,
+    suppressHiDPIScaling: true
 });
-const player = new (0, _excalibur.Actor)({
-    name: "player",
-    width: 50,
-    height: 50,
-    x: 300,
-    y: 300,
-    color: (0, _excalibur.Color).Green
-});
-const rnd = new (0, _excalibur.Random)();
-// move the player
-player.vel.x = rnd.integer(-15, 15);
-player.vel.y = rnd.integer(-15, 15);
+const button = new (0, _button.Button)(game.canvasWidth / 2 - 150, 300, 300, 60);
+const rnd = new _excalibur.Random();
 // add player to the current scene
-game.add(player);
-game.start();
+game.add(button);
+game.start((0, _resources.loader));
 
-},{"excalibur":"bDskv"}],"bDskv":[function(require,module,exports) {
+},{"excalibur":"bDskv","./resources":"hEdRW","./button":"hHDeU"}],"bDskv":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "ActionContext", ()=>__webpack_exports__ActionContext);
@@ -25249,6 +25244,135 @@ exports.export = function(dest, destName, get) {
     });
 };
 
-},{}]},["kWLYM","h7u1C"], "h7u1C", "parcelRequire94c2")
+},{}],"hEdRW":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "Resources", ()=>Resources);
+parcelHelpers.export(exports, "loader", ()=>loader);
+parcelHelpers.export(exports, "spritesheet", ()=>spritesheet);
+var _excalibur = require("excalibur");
+const spritesheetFile = require("../assets/spritesheet.png");
+const buttonFile = require("../assets/ui_button.png");
+const buttonHoveredFile = require("../assets/ui_button_hovered.png");
+const Resources = {
+    spritesheet: new _excalibur.ImageSource(spritesheetFile),
+    button: new _excalibur.ImageSource(buttonFile),
+    buttonHovered: new _excalibur.ImageSource(buttonHoveredFile)
+};
+const loader = new _excalibur.Loader();
+const spritesheet = _excalibur.SpriteSheet.fromImageSource({
+    image: Resources.spritesheet,
+    grid: {
+        columns: 5,
+        rows: 5,
+        spriteWidth: 32,
+        spriteHeight: 32
+    }
+});
+for(const res in Resources)loader.addResource(Resources[res]);
+
+},{"excalibur":"bDskv","../assets/spritesheet.png":"f5ulb","@parcel/transformer-js/src/esmodule-helpers.js":"jwO6f","../assets/ui_button.png":"8SkDX","../assets/ui_button_hovered.png":"4sFWj"}],"f5ulb":[function(require,module,exports) {
+module.exports = require("./helpers/bundle-url").getBundleURL("7UhFu") + "spritesheet.266f7776.png" + "?" + Date.now();
+
+},{"./helpers/bundle-url":"3RKZ0"}],"3RKZ0":[function(require,module,exports) {
+"use strict";
+var bundleURL = {};
+function getBundleURLCached(id) {
+    var value = bundleURL[id];
+    if (!value) {
+        value = getBundleURL();
+        bundleURL[id] = value;
+    }
+    return value;
+}
+function getBundleURL() {
+    try {
+        throw new Error();
+    } catch (err) {
+        var matches = ("" + err.stack).match(/(https?|file|ftp|(chrome|moz|safari-web)-extension):\/\/[^)\n]+/g);
+        if (matches) // The first two stack frames will be this function and getBundleURLCached.
+        // Use the 3rd one, which will be a runtime in the original bundle.
+        return getBaseURL(matches[2]);
+    }
+    return "/";
+}
+function getBaseURL(url) {
+    return ("" + url).replace(/^((?:https?|file|ftp|(chrome|moz|safari-web)-extension):\/\/.+)\/[^/]+$/, "$1") + "/";
+} // TODO: Replace uses with `new URL(url).origin` when ie11 is no longer supported.
+function getOrigin(url) {
+    var matches = ("" + url).match(/(https?|file|ftp|(chrome|moz|safari-web)-extension):\/\/[^/]+/);
+    if (!matches) throw new Error("Origin not found");
+    return matches[0];
+}
+exports.getBundleURL = getBundleURLCached;
+exports.getBaseURL = getBaseURL;
+exports.getOrigin = getOrigin;
+
+},{}],"8SkDX":[function(require,module,exports) {
+module.exports = require("./helpers/bundle-url").getBundleURL("7UhFu") + "ui_button.42edd01b.png" + "?" + Date.now();
+
+},{"./helpers/bundle-url":"3RKZ0"}],"4sFWj":[function(require,module,exports) {
+module.exports = require("./helpers/bundle-url").getBundleURL("7UhFu") + "ui_button_hovered.38ff7ffe.png" + "?" + Date.now();
+
+},{"./helpers/bundle-url":"3RKZ0"}],"hHDeU":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "Button", ()=>Button);
+var _excalibur = require("excalibur");
+var _resources = require("./resources");
+class Button extends _excalibur.Actor {
+    constructor(x, y, w, h){
+        super({
+            x: x,
+            y: y,
+            width: w,
+            height: h
+        });
+        //FIXME: Correct button sprite image
+        let spriteWidth = this.width;
+        let spriteHeight = this.height;
+        this.defaultSprite = new _excalibur.Sprite({
+            image: (0, _resources.Resources).button,
+            destSize: {
+                width: spriteWidth,
+                height: spriteHeight
+            }
+        });
+        this.hoveredSprite = new _excalibur.Sprite({
+            image: (0, _resources.Resources).buttonHovered,
+            destSize: {
+                width: spriteWidth,
+                height: spriteHeight
+            }
+        });
+        //FIXME: Scale text to be inside button properly
+        //FIXME: Load my custom font
+        this.text = new _excalibur.Text({
+            text: "Test",
+            font: new _excalibur.Font({
+                family: "impact",
+                size: 24,
+                unit: _excalibur.FontUnit.Px
+            })
+        });
+    }
+    onInitialize(engine) {
+        this.graphics.use(this.defaultSprite);
+        this.graphics.add(this.text);
+        this.on("pointerup", (event)=>{
+            console.log("Button click", event);
+        });
+        this.on("pointerenter", (event)=>{
+            this.graphics.use(this.hoveredSprite);
+            this.graphics.add(this.text);
+        });
+        this.on("pointerleave", (event)=>{
+            this.graphics.use(this.defaultSprite);
+            this.graphics.add(this.text);
+        });
+    }
+}
+
+},{"excalibur":"bDskv","@parcel/transformer-js/src/esmodule-helpers.js":"jwO6f","./resources":"hEdRW"}]},["kWLYM","h7u1C"], "h7u1C", "parcelRequire94c2")
 
 //# sourceMappingURL=index.b71e74eb.js.map

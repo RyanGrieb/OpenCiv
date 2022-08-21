@@ -1,0 +1,1 @@
+{"mappings":"AAAA;;;;;;;AAOA","sources":["styles.css"],"sourcesContent":["body {\n\tmargin: 0;\n\tpadding: 0;\n\toverflow: hidden;\n\tbackground-color: #222222;\n}\n\ncanvas {\n    cursor: default;\n    outline: none;\n}"],"names":[],"version":3,"file":"index.1303bb05.css.map","sourceRoot":"/__parcel_source_root/"}
