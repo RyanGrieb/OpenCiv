@@ -1,0 +1,36 @@
+import { Color } from '../../Color';
+import { ExcaliburGraphicsContext } from '../../Graphics/Context/ExcaliburGraphicsContext';
+import { LineSegment } from '../../Math/line-segment';
+import { Projection } from '../../Math/projection';
+import { Ray } from '../../Math/ray';
+import { Vector } from '../../Math/vector';
+import { BoundingBox } from '../BoundingBox';
+import { CollisionContact } from '../Detection/CollisionContact';
+import { Collider } from './Collider';
+import { Transform } from '../../Math/transform';
+export declare class CompositeCollider extends Collider {
+    private _transform;
+    private _collisionProcessor;
+    private _dynamicAABBTree;
+    private _colliders;
+    constructor(colliders: Collider[]);
+    clearColliders(): void;
+    addCollider(collider: Collider): void;
+    removeCollider(collider: Collider): void;
+    getColliders(): Collider[];
+    get worldPos(): Vector;
+    get center(): Vector;
+    get bounds(): BoundingBox;
+    get localBounds(): BoundingBox;
+    get axes(): Vector[];
+    getFurthestPoint(direction: Vector): Vector;
+    getInertia(mass: number): number;
+    collide(other: Collider): CollisionContact[];
+    getClosestLineBetween(other: Collider): LineSegment;
+    contains(point: Vector): boolean;
+    rayCast(ray: Ray, max?: number): Vector;
+    project(axis: Vector): Projection;
+    update(transform: Transform): void;
+    debug(ex: ExcaliburGraphicsContext, color: Color): void;
+    clone(): Collider;
+}

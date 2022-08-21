@@ -1,0 +1,36 @@
+import { AffineMatrix } from './affine-matrix';
+import { Vector } from './vector';
+export declare class Transform {
+    private _parent;
+    get parent(): Transform;
+    set parent(transform: Transform);
+    get children(): readonly Transform[];
+    private _children;
+    private _pos;
+    set pos(v: Vector);
+    get pos(): Vector;
+    set globalPos(v: Vector);
+    get globalPos(): Vector;
+    private _rotation;
+    set rotation(rotation: number);
+    get rotation(): number;
+    set globalRotation(rotation: number);
+    get globalRotation(): number;
+    private _scale;
+    set scale(v: Vector);
+    get scale(): Vector;
+    set globalScale(v: Vector);
+    get globalScale(): Vector;
+    private _isDirty;
+    private _isInverseDirty;
+    private _matrix;
+    private _inverse;
+    get matrix(): AffineMatrix;
+    get inverse(): AffineMatrix;
+    private _calculateMatrix;
+    flagDirty(): void;
+    apply(point: Vector): Vector;
+    applyInverse(point: Vector): Vector;
+    setTransform(pos: Vector, rotation: number, scale: Vector): void;
+    clone(dest?: Transform): void;
+}

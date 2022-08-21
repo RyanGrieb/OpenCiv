@@ -1,0 +1,174 @@
+import { Engine } from './../Engine';
+import * as Events from './../Events';
+import { Scene } from '../Scene';
+import { ExcaliburGraphicsContext } from '../Graphics';
+export interface _initialize {
+    _initialize(engine: Engine): void;
+}
+/**
+ * Type guard checking for internal initialize method
+ * @internal
+ * @param a
+ */
+export declare function has_initialize(a: any): a is _initialize;
+export interface OnInitialize {
+    onInitialize(engine: Engine): void;
+}
+/**
+ *
+ */
+export declare function hasOnInitialize(a: any): a is OnInitialize;
+export interface _preupdate {
+    _preupdate(engine: Engine, delta: number): void;
+}
+/**
+ *
+ */
+export declare function has_preupdate(a: any): a is _preupdate;
+export interface OnPreUpdate {
+    onPreUpdate(engine: Engine, delta: number): void;
+}
+/**
+ *
+ */
+export declare function hasOnPreUpdate(a: any): a is OnPreUpdate;
+export interface _postupdate {
+    _postupdate(engine: Engine, delta: number): void;
+}
+/**
+ *
+ */
+export declare function has_postupdate(a: any): a is _postupdate;
+export interface OnPostUpdate {
+    onPostUpdate(engine: Engine, delta: number): void;
+}
+/**
+ *
+ */
+export declare function hasOnPostUpdate(a: any): a is OnPostUpdate;
+export interface CanInitialize {
+    /**
+     * Overridable implementation
+     */
+    onInitialize(_engine: Engine): void;
+    /**
+     * Event signatures
+     */
+    on(eventName: Events.initialize, handler: (event: Events.InitializeEvent<any>) => void): void;
+    once(eventName: Events.initialize, handler: (event: Events.InitializeEvent<any>) => void): void;
+    off(eventName: Events.initialize, handler?: (event: Events.InitializeEvent<any>) => void): void;
+}
+export interface SceneActivationContext<TData = undefined> {
+    data?: TData;
+    previousScene: Scene;
+    nextScene: Scene;
+    engine: Engine;
+}
+export interface CanActivate<TData = undefined> {
+    /**
+     * Overridable implementation
+     */
+    onActivate(context: SceneActivationContext<TData>): void;
+    /**
+     * Event signatures
+     */
+    on(eventName: Events.activate, handler: (event: Events.ActivateEvent) => void): void;
+    once(eventName: Events.activate, handler: (event: Events.ActivateEvent) => void): void;
+    off(eventName: Events.activate, handler?: (event: Events.ActivateEvent) => void): void;
+}
+export interface CanDeactivate {
+    /**
+     * Overridable implementation
+     */
+    onDeactivate(context: SceneActivationContext<never>): void;
+    /**
+     * Event signature
+     */
+    on(eventName: Events.deactivate, handler: (event: Events.DeactivateEvent) => void): void;
+    once(eventName: Events.deactivate, handler: (event: Events.DeactivateEvent) => void): void;
+    off(eventName: Events.deactivate, handler?: (event: Events.DeactivateEvent) => void): void;
+}
+export interface CanUpdate {
+    /**
+     * Overridable implementation
+     */
+    onPreUpdate(_engine: Engine, _delta: number): void;
+    /**
+     * Event signature
+     */
+    on(eventName: Events.preupdate, handler: (event: Events.PreUpdateEvent<any>) => void): void;
+    once(eventName: Events.preupdate, handler: (event: Events.PreUpdateEvent<any>) => void): void;
+    off(eventName: Events.preupdate, handler?: (event: Events.PreUpdateEvent<any>) => void): void;
+    /**
+     * Overridable implementation
+     */
+    onPostUpdate(_engine: Engine, _delta: number): void;
+    /**
+     * Event signatures
+     */
+    on(eventName: Events.postupdate, handler: (event: Events.PostUpdateEvent<any>) => void): void;
+    once(eventName: Events.postupdate, handler: (event: Events.PostUpdateEvent<any>) => void): void;
+    off(eventName: Events.postupdate, handler?: (event: Events.PostUpdateEvent<any>) => void): void;
+}
+export interface OnPreDraw {
+    /**
+     * Overridable implementation
+     */
+    onPreDraw(_ctx: ExcaliburGraphicsContext, _delta: number): void;
+    /**
+     * Event signatures
+     */
+    on(eventName: Events.predraw, handler: (event: Events.PreDrawEvent) => void): void;
+    once(eventName: Events.predraw, handler: (event: Events.PreDrawEvent) => void): void;
+    off(eventName: Events.predraw, handler?: (event: Events.PreDrawEvent) => void): void;
+}
+export interface OnPostDraw {
+    /**
+     * Overridable implementation
+     */
+    onPostDraw(_ctx: ExcaliburGraphicsContext, _delta: number): void;
+    /**
+     * Event signatures
+     */
+    on(eventName: Events.postdraw, handler: (event: Events.PostDrawEvent) => void): void;
+    once(eventName: Events.postdraw, handler: (event: Events.PostDrawEvent) => void): void;
+    off(eventName: Events.postdraw, handler?: (event: Events.PostDrawEvent) => void): void;
+}
+export interface CanDraw extends OnPreDraw, OnPostDraw {
+    on(eventName: Events.predraw, handler: (event: Events.PreDrawEvent) => void): void;
+    on(eventName: Events.postdraw, handler: (event: Events.PostDrawEvent) => void): void;
+    once(eventName: Events.predraw, handler: (event: Events.PreDrawEvent) => void): void;
+    once(eventName: Events.postdraw, handler: (event: Events.PostDrawEvent) => void): void;
+    off(eventName: Events.predraw, handler?: (event: Events.PreDrawEvent) => void): void;
+    off(eventName: Events.postdraw, handler?: (event: Events.PostDrawEvent) => void): void;
+}
+/**
+ *
+ */
+export declare function hasPreDraw(a: any): a is OnPreDraw;
+/**
+ *
+ */
+export declare function hasPostDraw(a: any): a is OnPostDraw;
+export interface CanBeKilled {
+    /**
+     * Overridable implementation
+     */
+    onPreKill(_scene: Scene): void;
+    /**
+     * Event signatures
+     */
+    on(eventName: Events.prekill, handler: (event: Events.PreKillEvent) => void): void;
+    once(eventName: Events.prekill, handler: (event: Events.PreKillEvent) => void): void;
+    off(eventName: Events.prekill, handler: (event: Events.PreKillEvent) => void): void;
+    /**
+     * Overridable implementation
+     */
+    onPostKill(_scene: Scene): void;
+    /**
+     * Event signatures
+     */
+    on(eventName: Events.postkill, handler: (event: Events.PostKillEvent) => void): void;
+    once(eventName: Events.postkill, handler: (event: Events.PostKillEvent) => void): void;
+    off(eventName: Events.postkill, handler: (event: Events.PostKillEvent) => void): void;
+}
