@@ -1,74 +1,85 @@
-import * as ex from 'excalibur'
-import { Resources } from './resources'
+import * as ex from "excalibur";
+import { Resources, spriteFont } from "./resources";
 
 class Button extends ex.Actor {
+  private text;
 
-	private text;
+  private defaultSprite: ex.Sprite;
+  private hoveredSprite: ex.Sprite;
+  private clickFunction: Function;
 
-	private defaultSprite: ex.Sprite;
-	private hoveredSprite: ex.Sprite;
+  constructor(
+    title: string,
+    x: number,
+    y: number,
+    w: number,
+    h: number,
+    clickFunction: Function
+  ) {
+    super({ x: x, y: y, width: w, height: h });
 
-	constructor(x: number, y: number, w: number, h: number) {
-		super({ x: x, y: y, width: w, height: h });
+    this.clickFunction = clickFunction;
 
+    let spriteWidth = this.width;
+    let spriteHeight = this.height;
 
-		//FIXME: Correct button sprite image
+    this.defaultSprite = new ex.Sprite({
+      image: Resources.button,
+      destSize: {
+        width: spriteWidth,
+        height: spriteHeight,
+      },
+    });
 
-		let spriteWidth = this.width;
-		let spriteHeight = this.height;
+    this.hoveredSprite = new ex.Sprite({
+      image: Resources.buttonHovered,
+      destSize: {
+        width: spriteWidth,
+        height: spriteHeight,
+      },
+    });
 
-		this.defaultSprite = new ex.Sprite({
-			image: Resources.button,
-			destSize: {
-				width: spriteWidth,
-				height: spriteHeight,
-			},
-		})
+    //TODO: Load my custom font
+    this.text = new ex.Text({
+      text: title,
+      color: ex.Color.White,
+      font: new ex.Font({
+        family: "impact",
+        size: 24,
+        unit: ex.FontUnit.Px,
+        baseAlign: ex.BaseAlign.Top,
+      }),
+    });
+  }
 
-		this.hoveredSprite = new ex.Sprite({
-			image: Resources.buttonHovered,
-			destSize: {
-				width: spriteWidth,
-				height: spriteHeight,
-			},
-		})
+  public onInitialize() {
+    this.graphics.add("idle", this.defaultSprite);
+    this.graphics.add("hover", this.hoveredSprite);
 
-		//FIXME: Scale text to be inside button properly
-		//FIXME: Load my custom font
-		this.text = new ex.Text({
-			text: 'Test',
-			font: new ex.Font({
-				family: 'impact',
-				size: 24,
-				unit: ex.FontUnit.Px
-			})
-		});
+    this.graphics.show("idle");
+    this.graphics.show(this.text, {
+      offset: ex.vec(0, 2),
+    });
 
-		
+    this.on("pointerup", (event) => {
+      //console.log("Button click", event);
+      this.clickFunction();
+    });
 
-	}
+    this.on("pointerenter", (event) => {
+      this.graphics.show("hover");
+      this.graphics.show(this.text, {
+        offset: ex.vec(0, 2),
+      });
+    });
 
-	public onInitialize(engine: ex.Engine) {
-
-
-		this.graphics.use(this.defaultSprite)
-		this.graphics.add(this.text);
-
-		this.on('pointerup', (event) => {
-			console.log('Button click', event)
-		})
-
-		this.on('pointerenter', (event) => {
-			this.graphics.use(this.hoveredSprite)
-			this.graphics.add(this.text);
-
-		})
-
-		this.on('pointerleave', (event) => {
-			this.graphics.use(this.defaultSprite)
-			this.graphics.add(this.text);
-		})
-	}
+    this.on("pointerleave", (event) => {
+      this.graphics.show("idle");
+      this.graphics.show(this.text, {
+        offset: ex.vec(0, 2),
+      });
+    });
+  }
 }
 
-export { Button }
+export { Button };
