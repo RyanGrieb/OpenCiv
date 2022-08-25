@@ -1,11 +1,39 @@
 body {
-	margin: 0;
-	padding: 0;
-	overflow: hidden;
-	background-color: #222222;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  background-color: #222222;
 }
 
 canvas {
-    cursor: default;
-    outline: none;
+  cursor: default;
+  outline: none;
+}
+
+button {
+  image-rendering: crisp-edges;
+  border: none !important;
+  width: 300px !important;
+  height: 60px !important;
+  background: url("./assets/ui_button.png") no-repeat !important;
+  background-size: 300px 60px !important;
+  color: white;
+  font-family: Impact, Haettenschweiler, "Arial Narrow Bold", sans-serif;
+  font-size: 24;
+}
+
+button:hover {
+  image-rendering: crisp-edges;
+  border: none !important;
+  width: 300px !important;
+  height: 60px !important;
+  background: url("./assets/ui_button_hovered.png") no-repeat !important;
+  background-size: 300px 60px !important;
+  color: white;
+  font-family: Impact, Haettenschweiler, "Arial Narrow Bold", sans-serif;
+  font-size: 24;
+}
+
+input[type="button"] {
+  font-family: Impact, Haettenschweiler, "Arial Narrow Bold", sans-serif;
 }

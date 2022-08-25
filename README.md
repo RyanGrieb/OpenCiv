@@ -8,7 +8,7 @@ A turn based strategy game built on [excaliburjs](https://excaliburjs.com), with
 
 ## About
 OpenCiv is a love letter to turn based strategy games inspired by Sid Meier's Civilization. The game strives to improve on certain aspects that were lacking in the series, and experiment with new features. 
-If you like game development, Java, or pixel art, consider contributing. We can make something great. 
+If you like game development, typescript, or pixel art, consider contributing. We can make something great. 
 
 Eventually, I'd like to add support modding through [LUAJ](https://www.gamedevelopment.blog/using-luaj-scripting-to-allow-modding-in-games/).
 

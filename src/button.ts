@@ -44,7 +44,7 @@ class Button extends ex.Actor {
       text: title,
       color: ex.Color.White,
       font: new ex.Font({
-        family: "impact",
+        family: "sans-serif",
         size: 24,
         unit: ex.FontUnit.Px,
         baseAlign: ex.BaseAlign.Top,
