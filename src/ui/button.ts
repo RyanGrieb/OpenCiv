@@ -1,5 +1,5 @@
 import * as ex from "excalibur";
-import { Resources, spriteFont } from "./resources";
+import { Resources, spriteFont } from "../resources";
 
 class Button extends ex.Actor {
   private text;
@@ -53,9 +53,10 @@ class Button extends ex.Actor {
   }
 
   public onInitialize() {
+    //FIXME: I think we should .hide() old graphics...
+
     this.graphics.add("idle", this.defaultSprite);
     this.graphics.add("hover", this.hoveredSprite);
-
     this.graphics.show("idle");
     this.graphics.show(this.text, {
       offset: ex.vec(0, 2),

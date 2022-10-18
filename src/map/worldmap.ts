@@ -19,7 +19,7 @@ class WorldMap extends ex.Actor {
     this.graphics.use(group);
   }
 
-  public setTile(tileType: TileType, x: number, y: number) {
+  public static setTile(tileType: TileType, x: number, y: number) {
     console.log("hello.");
   }
 }

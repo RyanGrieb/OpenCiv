@@ -3,16 +3,15 @@ import { GraphicsComponent } from "excalibur";
 import { WorldMap } from "../map/worldmap";
 import { TileType } from "../map/tile";
 import test from "node:test";
-import { Button } from "../button";
+import { Button } from "../ui/button";
 import { spritesheet } from "../resources";
+import { GameScene } from "./gameScene";
+import { Resources } from "../resources";
+import { Textbox } from "../ui/textbox";
 
-class MainMenu extends ex.Scene {
-  private map: WorldMap;
-
+class MainMenu extends GameScene {
   public onInitialize(engine: ex.Engine): void {
-    this.map = new WorldMap();
-
-    this.map.setTile(TileType.GRASS, 0, 0);
+    this.engine = engine;
 
     const singleplayerButton = new Button(
       "Singleplayer",
@@ -22,6 +21,7 @@ class MainMenu extends ex.Scene {
       60,
       () => {
         console.log("singleplayer");
+        this.game.goToScene("ingame");
       }
     );
     const multiplayerButton = new Button(
@@ -32,6 +32,7 @@ class MainMenu extends ex.Scene {
       60,
       () => {
         console.log("multiplayer");
+        this.game.goToScene("multiplayeroptions");
       }
     );
     const optionsButton = new Button(
@@ -54,18 +55,17 @@ class MainMenu extends ex.Scene {
   }
 
   private renderBackground() {
-    const testActor = new ex.Actor({
-      width: 28,
-      height: 32,
-      x: 100,
+    const logoActor = new ex.Actor({
+      width: 400,
+      height: 107,
+      x: this.engine.canvasWidth / 2,
       y: 100,
     });
 
-    testActor.graphics.use(spritesheet.getSprite(3, 6) as ex.Graphic);
+    logoActor.graphics.use(Resources.logo.toSprite());
+    this.add(logoActor);
 
-    this.add(testActor);
-
-    this.add(this.map );
+    this.add(new Textbox("ex. 4F31K", this.engine.canvasWidth / 2, 50, 200, 32));
     //TODO: Move this later
     //let map = new WorldMap();
     //map.setTile(null, 0, 0);
