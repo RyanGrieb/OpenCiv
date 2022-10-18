@@ -3,6 +3,10 @@
 <html>
   <head>
     <link href="./styles.css" rel="stylesheet" type="text/css">
+
+    <!-- Prevents our "Start" button from flickering when loading the image. -->
+    <link rel="preload" as="image" href="./assets/ui_button.png">
+    <link rel="preload" as="image" href="./assets/ui_button_hovered.png">
   </head>
   <body>
     <script type="module" src="./src/index.ts" />
