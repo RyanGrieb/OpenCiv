@@ -11,6 +11,8 @@ const game = new ex.Engine({
   suppressHiDPIScaling: true,
 });
 
+game.backgroundColor = ex.Color.fromHex("#222222")
+
 game.add("mainMenu", new MainMenu());
 game.goToScene("mainMenu");
 game.start(loader);

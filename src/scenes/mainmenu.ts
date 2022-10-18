@@ -1,12 +1,19 @@
 import * as ex from "excalibur";
 import { GraphicsComponent } from "excalibur";
-import { WorldMap } from "map/worldmap";
+import { WorldMap } from "../map/worldmap";
+import { TileType } from "../map/tile";
 import test from "node:test";
 import { Button } from "../button";
 import { spritesheet } from "../resources";
 
 class MainMenu extends ex.Scene {
+  private map: WorldMap;
+
   public onInitialize(engine: ex.Engine): void {
+    this.map = new WorldMap();
+
+    this.map.setTile(TileType.GRASS, 0, 0);
+
     const singleplayerButton = new Button(
       "Singleplayer",
       engine.canvasWidth / 2,
@@ -58,6 +65,7 @@ class MainMenu extends ex.Scene {
 
     this.add(testActor);
 
+    this.add(this.map );
     //TODO: Move this later
     //let map = new WorldMap();
     //map.setTile(null, 0, 0);

@@ -10,6 +10,7 @@ canvas {
   outline: none;
 }
 
+/*FIXME: Prevent the button from flickering by pre-loading our pngs */
 button {
   image-rendering: crisp-edges;
   border: none !important;

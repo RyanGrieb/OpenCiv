@@ -1,11 +1,27 @@
-import { GraphicsGroup } from "excalibur";
-import { Tile } from "./tile";
+import * as ex from "excalibur";
+import { Tile, TileType } from "./tile";
 
-class WorldMap {
+class WorldMap extends ex.Actor {
   //private group: GraphicsGroup
-  constructor() {}
+  constructor() {
+    super({
+      x: 0,
+      y: 0,
+      //
+    });
 
-  public setTile(tile: Tile, x: number, y: number) {}
+    let group = new ex.GraphicsGroup({
+      members: [],
+    });
+
+    // Hard part :)
+
+    this.graphics.use(group);
+  }
+
+  public setTile(tileType: TileType, x: number, y: number) {
+    console.log("hello.");
+  }
 }
 
 export { WorldMap };
