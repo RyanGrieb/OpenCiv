@@ -4,7 +4,7 @@
 [![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=rhin123_OpenCiv&metric=ncloc)](https://sonarcloud.io/summary/new_code?id=rhin123_OpenCiv)
 [![Discord](https://img.shields.io/discord/925176383792087081.svg?logo=discord&logoColor=white&logoWidth=20&labelColor=7289DA&label=Discord&color=17cf48)](https://discord.gg/WFteeen5fu)
 
-A turn based strategy game built on [excaliburjs](https://excaliburjs.com), with a rouge-like tile set.
+A turn based strategy game built on typescript & HTML5, with a rouge-like tile set.
 
 ## About
 OpenCiv is a love letter to turn based strategy games inspired by Sid Meier's Civilization. The game strives to improve on certain aspects that were lacking in the series, and experiment with new features. 

@@ -1,14 +1,12 @@
 {
-  "scripts": {
-    "dev": "parcel index.html",
-    "build": "parcel build dist"
-  },
-  "dependencies": {
-    "excalibur": "^0.27.0"
-  },
-  "devDependencies": {
-    "@types/node": "^18.7.8",
-    "parcel": "^2.7.0",
-    "parcel-bundler": "^1.12.5"
-  }
+    "scripts": {
+        "dev": "parcel index.html",
+        "build": "parcel build dist"
+    },
+    "devDependencies": {
+        "@types/node": "^18.7.8",
+        "parcel": "^2.7.0",
+        "parcel-bundler": "^1.12.5"
+    },
+    "assetsPath": "assets"
 }

@@ -2,13 +2,24 @@
 
 <html>
   <head>
-    <link href="./styles.css" rel="stylesheet" type="text/css">
+    <link href="./styles.css" rel="stylesheet" type="text/css" />
 
-    <!-- Prevents our "Start" button from flickering when loading the image. -->
+    <!-- Prevents our "Start" button from flickering when loading the image. 
     <link rel="preload" as="image" href="./assets/ui_button.png">
     <link rel="preload" as="image" href="./assets/ui_button_hovered.png">
+    -->
   </head>
   <body>
+    <div id="loading_element"><p>Loading Assets...</p></div>
+    <canvas
+      id="canvas"
+      hidden="true"
+      id="canvas"
+      width="640"
+      height="640"
+      style="border: 4px solid rgb(92, 88, 91)"
+    >
+    </canvas>
     <script type="module" src="./src/index.ts" />
   </body>
 </html>
