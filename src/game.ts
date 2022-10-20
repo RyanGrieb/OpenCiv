@@ -1,6 +1,14 @@
 import { Actor } from "./scene/actor";
 import { Scene } from "./scene/scene";
 
+export interface TextOptions {
+  text: string;
+  x?: number;
+  y?: number;
+  actor?: Actor;
+  color?: string;
+}
+
 export interface GameOptions {
   /**
    * List of NodeRequire[] objects
@@ -58,7 +66,7 @@ export class Game {
   }
 
   public static gameLoop() {
-    //this.canvasContext.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    this.canvasContext.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
     if (Date.now() - this.lastTimeUpdate >= 1000) {
       this.fps = this.countedFrames;
@@ -69,7 +77,8 @@ export class Game {
     // Call the gameloop
     this.currentScene.gameLoop();
 
-    this.canvasContext.fillText("FPS: " + this.fps, 0, 10);
+    this.drawText({ text: "FPS: " + this.fps, x: 0, y: 10, color: "black" });
+
     this.countedFrames++;
     window.requestAnimationFrame(() => {
       this.gameLoop();
@@ -114,6 +123,7 @@ export class Game {
     console.log("Add actor");
     this.actors.push(actor);
     this.drawImageFromActor(actor);
+    actor.onCreated();
   }
 
   public static drawImageFromActor(actor: Actor) {
@@ -126,6 +136,25 @@ export class Game {
     );
   }
 
+  public static drawText(textOptions: TextOptions) {
+    //FIXME: Use cache for meausring text..
+    const metrics = this.canvasContext.measureText(textOptions.text);
+    let textHeight =
+      metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent;
+
+    const xPos = textOptions.x ?? textOptions.actor.getX();
+    const yPos =
+      textOptions.y ??
+      textOptions.actor.getY() +
+        textOptions.actor.getHeight() / 2 +
+        textHeight / 2;
+    const oldColor = this.canvasContext.fillStyle;
+
+    this.canvasContext.fillStyle = textOptions.color;
+    this.canvasContext.fillText(textOptions.text, xPos, yPos);
+    this.canvasContext.fillStyle = oldColor;
+  }
+
   public static getImages(): HTMLImageElement[] {
     return this.images;
   }
@@ -136,5 +165,9 @@ export class Game {
 
   public static getWidth(): number {
     return this.canvas.width;
+  }
+
+  public static getCanvasContext() {
+    return this.canvasContext;
   }
 }

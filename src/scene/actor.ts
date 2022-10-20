@@ -10,6 +10,7 @@ export interface ActorOptions {
 }
 
 export class Actor {
+  protected text: string;
   private color: string;
   private image: HTMLImageElement;
   private x: number;
@@ -43,6 +44,25 @@ export class Actor {
     });
   }
 
+  public draw() {
+    Game.drawImageFromActor(this);
+    //TODO: Allow user to change where the text is drawn...
+    if (this.text) {
+      const metrics = Game.getCanvasContext().measureText(this.text);
+      let textHeight =
+        metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent;
+
+      Game.drawText({
+        text: this.text,
+        x: this.x + this.width / 2 - metrics.width / 2,
+        y: this.y + this.height / 2 + textHeight / 2,
+        color: "black",
+      });
+    }
+  }
+
+  public onCreated() {}
+
   public call(eventName: string, options?) {
     if (this.storedEvents.has(eventName)) {
       //Call the stored callback function
@@ -69,6 +89,10 @@ export class Actor {
     //FIXME: We need to clear canvas & add back all images.
     this.image = image;
     Game.drawImageFromActor(this);
+  }
+
+  public addText(text: string) {
+    this.text = text;
   }
 
   public getImage(): HTMLImageElement {

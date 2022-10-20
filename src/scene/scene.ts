@@ -11,7 +11,11 @@ export abstract class Scene {
     this.actors.push(actor);
     Game.addActor(actor);
   }
-  public gameLoop() {}
+  public gameLoop() {
+    this.actors.forEach((actor: Actor) => {
+      actor.draw();
+    });
+  }
 
   public onInitialize() {}
   public onDestroyed() {}

@@ -1,4 +1,4 @@
-import { Actor, ActorOptions } from "../scene/actor";
+import { Actor } from "../scene/actor";
 import { Game } from "../game";
 
 //FIXME: Redundant argument options code?
@@ -12,6 +12,8 @@ export interface ButtonOptions {
 }
 
 export class Button extends Actor {
+  private title: string;
+
   constructor(options: ButtonOptions) {
     super({
       image: Game.getImages()[0],
@@ -27,8 +29,14 @@ export class Button extends Actor {
     });
 
     this.on("mouse_exit", () => {
-        console.log("Mouse exited button actor");
-        this.setImage(Game.getImages()[0])
+      console.log("Mouse exited button actor");
+      this.setImage(Game.getImages()[0]);
     });
+
+    this.title = options.title;
+  }
+
+  public onCreated() {
+    this.addText(this.title);
   }
 }
