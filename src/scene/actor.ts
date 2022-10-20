@@ -1,9 +1,10 @@
-import { Textures } from "../assets";
+import { Sprites, Textures } from "../assets";
 import { Game } from "../game";
 
 export interface ActorOptions {
   color?: string;
-  image: HTMLImageElement;
+  texture?: Textures;
+  sprite?: Sprites;
   x: number;
   y: number;
   width: number;
@@ -13,7 +14,8 @@ export interface ActorOptions {
 export class Actor {
   protected text: string;
   private color: string;
-  private image: HTMLImageElement;
+  private texture?: Textures;
+  private sprite?: Sprites;
   private x: number;
   private y: number;
   private width: number;
@@ -24,7 +26,8 @@ export class Actor {
   constructor(actorOptions: ActorOptions) {
     this.storedEvents = new Map<string, Function>();
     this.color = actorOptions.color;
-    this.image = actorOptions.image;
+    this.texture = actorOptions.texture;
+    this.sprite = actorOptions.sprite;
     this.x = actorOptions.x;
     this.y = actorOptions.y;
     this.width = actorOptions.width;
@@ -86,10 +89,8 @@ export class Actor {
     return false;
   }
 
-  public setImage(texture: Textures) {
-    //FIXME: We need to clear canvas & add back all images.
-    this.image = Game.getImage(texture);
-    Game.drawImageFromActor(this);
+  public setTexture(texture: Textures) {
+    this.texture = texture;
   }
 
   public addText(text: string) {
@@ -97,7 +98,7 @@ export class Actor {
   }
 
   public getImage(): HTMLImageElement {
-    return this.image;
+    return Game.getImage(this.texture);
   }
 
   public getX(): number {
@@ -118,5 +119,13 @@ export class Actor {
 
   public getColor(): string {
     return this.color;
+  }
+
+  public getSprite() {
+    return this.sprite;
+  }
+
+  public getTexture() {
+    return this.texture;
   }
 }

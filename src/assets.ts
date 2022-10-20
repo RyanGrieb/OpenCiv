@@ -3,9 +3,19 @@
 //TODO: Handle spritesheet into textures
 //TODO: Preload all sounds
 
+export const spritehseetSize = 20; //20x20
+
+
 export enum Textures {
   BUTTON,
   BUTTON_HOVERED,
+  SPRITESHEET,
+}
+
+export enum Sprites {
+  ARCHER,
+  BUILDER,
+  CAMEL_ARCHER,
 }
 
 export const assetList = [

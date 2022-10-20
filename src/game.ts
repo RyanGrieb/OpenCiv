@@ -1,6 +1,6 @@
 import { Actor } from "./scene/actor";
 import { Scene } from "./scene/scene";
-import {Textures} from "./assets"
+import { Sprites, Textures, spritehseetSize } from "./assets";
 
 export interface TextOptions {
   text: string;
@@ -128,13 +128,28 @@ export class Game {
   }
 
   public static drawImageFromActor(actor: Actor) {
-    this.canvasContext.drawImage(
-      actor.getImage(),
-      actor.getX(),
-      actor.getY(),
-      actor.getWidth(),
-      actor.getHeight()
-    );
+    if (actor.getSprite() != undefined) {
+      this.canvasContext.drawImage(
+        this.getImage(Textures.SPRITESHEET),
+        //TODO: Calculate sprite position
+        actor.getSprite() * 32,
+        0,
+        32,
+        32,
+        actor.getX(),
+        actor.getY(),
+        actor.getWidth(),
+        actor.getHeight()
+      );
+    } else {
+      this.canvasContext.drawImage(
+        actor.getImage(),
+        actor.getX(),
+        actor.getY(),
+        actor.getWidth(),
+        actor.getHeight()
+      );
+    }
   }
 
   public static drawText(textOptions: TextOptions) {
@@ -156,12 +171,10 @@ export class Game {
     this.canvasContext.fillStyle = oldColor;
   }
 
-  private static getImages(): HTMLImageElement[] {
-    return this.images;
-  }
-
-  public static getImage(textureType: Textures){
-    return this.images[textureType];
+  public static getImage(imageType: Textures) {
+    //FIXME: Check imageType, if texture call: this.images[textureType];
+    // If Sprite, get image from spritesheet & then call this.images[textureFromSprite]
+    return this.images[imageType];
   }
 
   public static getHeight(): number {

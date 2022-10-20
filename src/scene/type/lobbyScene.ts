@@ -2,7 +2,7 @@ import { Scene } from "../scene";
 import { Actor } from "../actor";
 import { Game } from "../../game";
 import { Button } from "../../ui/button";
-import { Textures } from "../../assets";
+import { Sprites, Textures } from "../../assets";
 export class LobbyScene extends Scene {
   public onInitialize(): void {
     // TODO: onclick callback function...
@@ -18,8 +18,17 @@ export class LobbyScene extends Scene {
 
     this.addActor(
       new Actor({
-        image: Game.getImage(Textures.BUTTON),
+        sprite: Sprites.BUILDER,
         x: 32,
+        y: 32,
+        width: 32,
+        height: 32,
+      })
+    );
+    this.addActor(
+      new Actor({
+        sprite: Sprites.ARCHER,
+        x: 64,
         y: 32,
         width: 32,
         height: 32,
