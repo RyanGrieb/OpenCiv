@@ -113,6 +113,10 @@ export class Game {
   public static addActor(actor: Actor) {
     console.log("Add actor");
     this.actors.push(actor);
+    this.drawImageFromActor(actor);
+  }
+
+  public static drawImageFromActor(actor: Actor) {
     this.canvasContext.drawImage(
       actor.getImage(),
       actor.getX(),

@@ -4,24 +4,25 @@ import { Game } from "../../game";
 import { Button } from "../../ui/button";
 export class LobbyScene extends Scene {
   public onInitialize(): void {
+    // TODO: onclick callback function...
     this.addActor(
       new Button({
-        title: "Button",
-        x: 0,
-        y: Game.getHeight() - 32,
-        width: 32,
-        height: 32,
+        title: "Singleplayer",
+        x: Game.getWidth() / 2 - 142 / 2,
+        y: Game.getHeight() / 3,
+        width: 142,
+        height: 42,
       })
     );
 
     this.addActor(
-        new Actor({
-          image: Game.getImages()[1],
-          x: 32,
-          y: Game.getHeight() - 32,
-          width: 32,
-          height: 32,
-        })
-      );
+      new Actor({
+        image: Game.getImages()[1],
+        x: 32,
+        y: 32,
+        width: 32,
+        height: 32,
+      })
+    );
   }
 }

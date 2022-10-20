@@ -1,3 +1,5 @@
+import { Game } from "../game";
+
 export interface ActorOptions {
   color?: string;
   image: HTMLImageElement;
@@ -33,6 +35,9 @@ export class Actor {
           this.mouseInside = true;
         }
       } else {
+        if (this.mouseInside) {
+          this.call("mouse_exit");
+        }
         this.mouseInside = false;
       }
     });
@@ -58,6 +63,12 @@ export class Actor {
       }
     }
     return false;
+  }
+
+  public setImage(image: HTMLImageElement) {
+    //FIXME: We need to clear canvas & add back all images.
+    this.image = image;
+    Game.drawImageFromActor(this);
   }
 
   public getImage(): HTMLImageElement {

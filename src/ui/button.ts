@@ -22,7 +22,13 @@ export class Button extends Actor {
     });
 
     this.on("mouse_enter", () => {
-        console.log("Mouse entered button actor")
+      console.log("Mouse entered button actor");
+      this.setImage(Game.getImages()[1]);
+    });
+
+    this.on("mouse_exit", () => {
+        console.log("Mouse exited button actor");
+        this.setImage(Game.getImages()[0])
     });
   }
 }
