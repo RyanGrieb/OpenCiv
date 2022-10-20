@@ -1,3 +1,4 @@
+import { Textures } from "../assets";
 import { Game } from "../game";
 
 export interface ActorOptions {
@@ -85,9 +86,9 @@ export class Actor {
     return false;
   }
 
-  public setImage(image: HTMLImageElement) {
+  public setImage(texture: Textures) {
     //FIXME: We need to clear canvas & add back all images.
-    this.image = image;
+    this.image = Game.getImage(texture);
     Game.drawImageFromActor(this);
   }
 

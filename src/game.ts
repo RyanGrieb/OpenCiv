@@ -1,5 +1,6 @@
 import { Actor } from "./scene/actor";
 import { Scene } from "./scene/scene";
+import {Textures} from "./assets"
 
 export interface TextOptions {
   text: string;
@@ -155,8 +156,12 @@ export class Game {
     this.canvasContext.fillStyle = oldColor;
   }
 
-  public static getImages(): HTMLImageElement[] {
+  private static getImages(): HTMLImageElement[] {
     return this.images;
+  }
+
+  public static getImage(textureType: Textures){
+    return this.images[textureType];
   }
 
   public static getHeight(): number {
