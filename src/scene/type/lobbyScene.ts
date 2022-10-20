@@ -1,11 +1,12 @@
 import { Scene } from "../scene";
 import { Actor } from "../actor";
 import { Game } from "../../game";
+import { Button } from "../../ui/button";
 export class LobbyScene extends Scene {
   public onInitialize(): void {
     this.addActor(
-      new Actor({
-        image: Game.getImages()[0],
+      new Button({
+        title: "Button",
         x: 0,
         y: Game.getHeight() - 32,
         width: 32,

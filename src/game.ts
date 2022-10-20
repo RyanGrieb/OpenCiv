@@ -33,6 +33,13 @@ export class Game {
     this.canvasContext.fillRect(0, 0, this.canvas.width, this.canvas.height);
     this.canvasContext.font = "12px Times new Roman";
 
+    //Initialize canvas listeners
+    this.canvas.addEventListener("mousemove", (event) => {
+      this.actors.forEach((actor) => {
+        actor.call("mouse_move", { x: event.clientX, y: event.clientY });
+      });
+    });
+
     let promise = this.loadAssetPromise(options.assetList);
 
     promise.then((res) => {
