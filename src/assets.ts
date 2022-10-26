@@ -13,9 +13,10 @@ export enum Textures {
 }
 
 export enum Sprites {
-  ARCHER,
-  BUILDER,
-  CAMEL_ARCHER,
+  ARCHER="0,0",
+  BUILDER="1,0",
+  CAMEL_ARCHER = "2,0",
+  OCEAN = "16,6"
 }
 
 export const assetList = [

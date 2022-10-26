@@ -37,6 +37,8 @@ export class Game {
     this.scenes = new Map<string, Scene>();
     //Initialize canvas
     this.canvas = document.getElementById("canvas") as HTMLCanvasElement;
+    this.canvas.width = window.innerWidth;
+    this.canvas.height = window.innerHeight;
     this.canvasContext = this.canvas.getContext("2d");
     this.canvasContext.fillStyle = options.canvasColor ?? "white";
     this.canvasContext.fillRect(0, 0, this.canvas.width, this.canvas.height);
@@ -46,6 +48,12 @@ export class Game {
     this.canvas.addEventListener("mousemove", (event) => {
       this.actors.forEach((actor) => {
         actor.call("mouse_move", { x: event.clientX, y: event.clientY });
+      });
+    });
+
+    this.canvas.addEventListener("mouseup", (event) => {
+      this.actors.forEach((actor) => {
+        actor.call("mouse_up", { x: event.clientX, y: event.clientY });
       });
     });
 
@@ -129,11 +137,13 @@ export class Game {
 
   public static drawImageFromActor(actor: Actor) {
     if (actor.getSprite() != undefined) {
+      const spriteX = parseInt(actor.getSprite().split(",")[0]) * 32;
+      const spriteY = parseInt(actor.getSprite().split(",")[1]) * 32;
       this.canvasContext.drawImage(
         this.getImage(Textures.SPRITESHEET),
         //TODO: Calculate sprite position
-        actor.getSprite() * 32,
-        0,
+        spriteX,
+        spriteY,
         32,
         32,
         actor.getX(),
@@ -166,9 +176,10 @@ export class Game {
         textHeight / 2;
     const oldColor = this.canvasContext.fillStyle;
 
+    this.canvasContext.save();
     this.canvasContext.fillStyle = textOptions.color;
     this.canvasContext.fillText(textOptions.text, xPos, yPos);
-    this.canvasContext.fillStyle = oldColor;
+    this.canvasContext.restore();
   }
 
   public static getImage(imageType: Textures) {
@@ -187,5 +198,9 @@ export class Game {
 
   public static getCanvasContext() {
     return this.canvasContext;
+  }
+
+  public static getCanvas() {
+    return this.canvas;
   }
 }

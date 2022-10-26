@@ -46,6 +46,13 @@ export class Actor {
         this.mouseInside = false;
       }
     });
+
+    this.on("mouse_up", (options) => {
+      if (this.insideActor(options.x, options.y)) {
+        //FIXME: Distinguish mouse_up & mouse_click_up better?
+        this.call("mouse_click_up");
+      }
+    });
   }
 
   public draw() {
