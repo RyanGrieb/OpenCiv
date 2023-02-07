@@ -13,16 +13,16 @@ export interface ActorOptions {
 
 export class Actor {
   protected text: string;
-  private color: string;
-  private image: HTMLImageElement;
-  private spriteRegion?: SpriteRegion;
+  protected color: string;
+  protected image: HTMLImageElement;
+  protected spriteRegion?: SpriteRegion;
 
-  private x: number;
-  private y: number;
-  private width: number;
-  private height: number;
-  private storedEvents: Map<string, Function>;
-  private mouseInside: boolean;
+  protected x: number;
+  protected y: number;
+  protected width: number;
+  protected height: number;
+  protected storedEvents: Map<string, Function>;
+  protected mouseInside: boolean;
 
   constructor(actorOptions: ActorOptions) {
     this.storedEvents = new Map<string, Function>();
@@ -58,18 +58,6 @@ export class Actor {
 
   public draw() {
     Game.drawImageFromActor(this);
-    //TODO: Allow user to change where the text is drawn...
-    if (this.text) {
-      const metrics = Game.getCanvasContext().measureText(this.text);
-      let textHeight = metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent;
-
-      Game.drawText({
-        text: this.text,
-        x: this.x + this.width / 2 - metrics.width / 2,
-        y: this.y + this.height / 2 + textHeight / 2,
-        color: "black",
-      });
-    }
   }
 
   public onCreated() {}

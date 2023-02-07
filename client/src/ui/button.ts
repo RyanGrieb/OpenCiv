@@ -10,12 +10,16 @@ export interface ButtonOptions {
   y: number;
   width: number;
   height: number;
+  font?: string;
+  fontColor?: string;
   onClicked: Function;
 }
 
 export class Button extends Actor {
   private title: string;
   private callbackFunction: Function;
+  private font: string;
+  private fontColor: string;
 
   constructor(options: ButtonOptions) {
     super({
@@ -27,6 +31,8 @@ export class Button extends Actor {
     });
 
     this.callbackFunction = options.onClicked;
+    this.font = options.font ?? "24px sans-serif";
+    this.fontColor = options.fontColor ?? "black";
 
     this.on("mouse_enter", () => {
       //console.log("Mouse entered button actor");
@@ -43,6 +49,23 @@ export class Button extends Actor {
     });
 
     this.title = options.title;
+  }
+
+  public draw() {
+    super.draw();
+
+    //TODO: Allow user to change where the text is drawn...
+    if (this.text) {
+      Game.measureText(this.text, this.font).then(([textWidth, textHeight]) => {
+        Game.drawText({
+          text: this.text,
+          x: this.x + this.width / 2 - textWidth / 2,
+          y: this.y + this.height / 2 + textHeight / 2,
+          color: this.fontColor,
+          font: this.font,
+        });
+      });
+    }
   }
 
   public onCreated() {

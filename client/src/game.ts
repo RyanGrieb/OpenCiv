@@ -1,6 +1,6 @@
 import { Actor } from "./scene/actor";
 import { Scene } from "./scene/scene";
-import { SpriteRegion, GameImage } from "./assets";
+import { GameImage } from "./assets";
 
 export interface TextOptions {
   text: string;
@@ -8,6 +8,7 @@ export interface TextOptions {
   y?: number;
   actor?: Actor;
   color?: string;
+  font?: string;
 }
 
 export interface GameOptions {
@@ -32,6 +33,8 @@ export class Game {
   private static lastTimeUpdate = Date.now();
   private static fps: number = 0;
   private static actors: Actor[] = [];
+  private static fontLoading;
+  private static queuedFontFunctions = [];
 
   public static init(options: GameOptions, callback: () => void) {
     this.scenes = new Map<string, Scene>();
@@ -86,7 +89,7 @@ export class Game {
     // Call the gameloop
     this.currentScene.gameLoop();
 
-    this.drawText({ text: "FPS: " + this.fps, x: 0, y: 10, color: "black" });
+    this.drawText({ text: "FPS: " + this.fps, x: 0, y: 10, color: "black", font: "12px sans" });
 
     this.countedFrames++;
     window.requestAnimationFrame(() => {
@@ -121,6 +124,8 @@ export class Game {
   }
 
   public static setScene(sceneName: string) {
+    this.actors = [];
+
     if (this.currentScene != null) {
       this.currentScene.onDestroyed();
     }
@@ -136,7 +141,7 @@ export class Game {
   }
 
   public static drawImageFromActor(actor: Actor) {
-    if (actor.getSpriteRegion() != undefined) {
+    if (actor.getSpriteRegion()) {
       const spriteX = parseInt(actor.getSpriteRegion().split(",")[0]) * 32;
       const spriteY = parseInt(actor.getSpriteRegion().split(",")[1]) * 32;
       this.canvasContext.drawImage(
@@ -162,22 +167,28 @@ export class Game {
     }
   }
 
+  public static async measureText(text: string, font: string): Promise<[number, number]> {
+    this.canvasContext.save();
+    this.canvasContext.font = font ?? "24px sans-serif";
+
+    await document.fonts.ready; // Wait for the async function to complete, then measure text.s
+
+    const metrics = this.canvasContext.measureText(text);
+    let height = metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent;
+    this.canvasContext.restore();
+
+    return [metrics.width, height];
+  }
+
   public static drawText(textOptions: TextOptions) {
     //FIXME: Use cache for meausring text..
-    const metrics = this.canvasContext.measureText(textOptions.text);
-    let textHeight =
-      metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent;
-
-    const xPos = textOptions.x ?? textOptions.actor.getX();
-    const yPos =
-      textOptions.y ??
-      textOptions.actor.getY() +
-        textOptions.actor.getHeight() / 2 +
-        textHeight / 2;
-    const oldColor = this.canvasContext.fillStyle;
 
     this.canvasContext.save();
     this.canvasContext.fillStyle = textOptions.color;
+    this.canvasContext.font = textOptions.font ?? "24px sans-serif";
+
+    const xPos = textOptions.x;
+    const yPos = textOptions.y;
     this.canvasContext.fillText(textOptions.text, xPos, yPos);
     this.canvasContext.restore();
   }

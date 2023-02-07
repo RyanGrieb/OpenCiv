@@ -57,6 +57,7 @@ export abstract class Scene {
           actor.getHeight()
         );
     });
+    
     let image = new Image();
     image.src = canvas.toDataURL();
 
@@ -72,5 +73,7 @@ export abstract class Scene {
   }
 
   public onInitialize() {}
-  public onDestroyed() {}
+  public onDestroyed() {
+    this.actors = [];
+  }
 }
