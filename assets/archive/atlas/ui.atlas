@@ -1,0 +1,244 @@
+
+ui.png
+size: 2048, 2048
+format: RGBA8888
+filter: Nearest, Nearest
+repeat: none
+font
+  rotate: false
+  xy: 2, 243
+  size: 512, 512
+  orig: 512, 512
+  offset: 0, 0
+  index: -1
+ui_background
+  rotate: false
+  xy: 2, 757
+  size: 1664, 927
+  orig: 1664, 927
+  offset: 0, 0
+  index: -1
+ui_black
+  rotate: false
+  xy: 1385, 724
+  size: 1, 1
+  orig: 1, 1
+  offset: 0, 0
+  index: -1
+ui_button
+  rotate: false
+  xy: 728, 629
+  size: 142, 28
+  orig: 142, 28
+  offset: 0, 0
+  index: -1
+ui_button_circle
+  rotate: false
+  xy: 1668, 1211
+  size: 64, 64
+  orig: 64, 64
+  offset: 0, 0
+  index: -1
+ui_button_circle_hovered
+  rotate: false
+  xy: 1970, 1620
+  size: 64, 64
+  orig: 64, 64
+  offset: 0, 0
+  index: -1
+ui_button_dark
+  rotate: false
+  xy: 1158, 667
+  size: 127, 26
+  orig: 127, 26
+  offset: 0, 0
+  index: -1
+ui_button_dark_hovered
+  rotate: false
+  xy: 204, 213
+  size: 142, 28
+  orig: 142, 28
+  offset: 0, 0
+  index: -1
+ui_button_disabled
+  rotate: false
+  xy: 2, 36
+  size: 142, 28
+  orig: 142, 28
+  offset: 0, 0
+  index: -1
+ui_button_hovered
+  rotate: false
+  xy: 516, 527
+  size: 142, 28
+  orig: 142, 28
+  offset: 0, 0
+  index: -1
+ui_button_icon
+  rotate: false
+  xy: 516, 493
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+ui_button_icon_hovered
+  rotate: false
+  xy: 728, 595
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+ui_button_small
+  rotate: false
+  xy: 1815, 1304
+  size: 71, 28
+  orig: 71, 28
+  offset: 0, 0
+  index: -1
+ui_button_small_hovered
+  rotate: false
+  xy: 1385, 727
+  size: 71, 28
+  orig: 71, 28
+  offset: 0, 0
+  index: -1
+ui_clear
+  rotate: false
+  xy: 1815, 1301
+  size: 1, 1
+  orig: 1, 1
+  offset: 0, 0
+  index: -1
+ui_container_box
+  rotate: false
+  xy: 516, 659
+  size: 640, 96
+  orig: 640, 96
+  offset: 0, 0
+  index: -1
+ui_dark_gray
+  rotate: false
+  xy: 1668, 1208
+  size: 1, 1
+  orig: 1, 1
+  offset: 0, 0
+  index: -1
+ui_error
+  rotate: false
+  xy: 348, 225
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+ui_github
+  rotate: false
+  xy: 1970, 1586
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+ui_gray
+  rotate: false
+  xy: 1458, 754
+  size: 1, 1
+  orig: 1, 1
+  offset: 0, 0
+  index: -1
+ui_green
+  rotate: false
+  xy: 1734, 1274
+  size: 1, 1
+  orig: 1, 1
+  offset: 0, 0
+  index: -1
+ui_light_gray
+  rotate: false
+  xy: 872, 656
+  size: 1, 1
+  orig: 1, 1
+  offset: 0, 0
+  index: -1
+ui_lighter_gray
+  rotate: false
+  xy: 1287, 692
+  size: 1, 1
+  orig: 1, 1
+  offset: 0, 0
+  index: -1
+ui_notification_box
+  rotate: false
+  xy: 1668, 1277
+  size: 145, 55
+  orig: 145, 55
+  offset: 0, 0
+  index: -1
+ui_popup_box_a
+  rotate: false
+  xy: 1668, 1334
+  size: 300, 350
+  orig: 300, 350
+  offset: 0, 0
+  index: -1
+ui_popup_box_b
+  rotate: false
+  xy: 2, 66
+  size: 200, 175
+  orig: 200, 175
+  offset: 0, 0
+  index: -1
+ui_popup_box_c
+  rotate: false
+  xy: 516, 557
+  size: 210, 100
+  orig: 210, 100
+  offset: 0, 0
+  index: -1
+ui_popup_box_d
+  rotate: false
+  xy: 1158, 695
+  size: 225, 60
+  orig: 225, 60
+  offset: 0, 0
+  index: -1
+ui_red
+  rotate: false
+  xy: 660, 554
+  size: 1, 1
+  orig: 1, 1
+  offset: 0, 0
+  index: -1
+ui_selection
+  rotate: false
+  xy: 2, 2
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+ui_star
+  rotate: false
+  xy: 204, 179
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+ui_statusbar
+  rotate: false
+  xy: 146, 38
+  size: 26, 26
+  orig: 26, 26
+  offset: 0, 0
+  index: -1
+ui_white
+  rotate: false
+  xy: 2036, 1683
+  size: 1, 1
+  orig: 1, 1
+  offset: 0, 0
+  index: -1
+ui_yellow
+  rotate: false
+  xy: 1158, 664
+  size: 1, 1
+  orig: 1, 1
+  offset: 0, 0
+  index: -1
