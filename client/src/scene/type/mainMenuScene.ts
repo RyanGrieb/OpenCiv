@@ -6,7 +6,6 @@ import { Sprite, SpriteSheet } from "../../assets";
 
 export class MainMenuScene extends Scene {
   public onInitialize(): void {
-    console.log("FUCKKKKKKKKKK");
 
     let tileActors: Actor[] = [];
     //FIXME: Optimize multiple actors

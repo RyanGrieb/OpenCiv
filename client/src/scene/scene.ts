@@ -1,5 +1,6 @@
 import { Actor } from "./actor";
 import { Game } from "../game";
+import { SpriteSheet } from "../assets";
 
 export abstract class Scene {
   // Use a Map<> ?
@@ -18,30 +19,56 @@ export abstract class Scene {
   }
 
   public generateSingleActor(actors: Actor[]): Actor {
+    // Create dummy canvas to get pixel data of the actor sprite
+
+    let canvas = document.createElement("canvas");
+    let greatestXWidth = 0; // The width of the actor w/ the greatest x.
+    let greatestYHeight = 0; // The height of the actor w/ the greatest y.
+    let greatestX = 0;
+    let greatestY = 0;
+
+    actors.forEach((actor: Actor) => {
+      if (actor.getX() > greatestX) {
+        greatestX = actor.getX();
+        greatestXWidth = actor.getWidth();
+      }
+      if (actor.getY() > greatestY) {
+        greatestY = actor.getY();
+        greatestYHeight = actor.getHeight();
+      }
+    });
+    canvas.width = greatestX + greatestXWidth;
+    canvas.height = greatestY + greatestYHeight;
+
     actors.forEach((actor: Actor) => {
       const spriteX = parseInt(actor.getSprite().split(",")[0]) * 32;
       const spriteY = parseInt(actor.getSprite().split(",")[1]) * 32;
-
-      // Create dummy canvas to get pixel data of the actor sprite
-      let canvas = document.createElement("canvas"); // TODO: Hide this guy.
-      canvas.width = actor.getWidth();
-      canvas.height = actor.getHeight();
-      canvas.getContext("2d").drawImage(
-        actor.getImage(),
-        spriteX,
-        spriteY,
-        32,
-        32,
-        actor.getX(),
-        actor.getY(),
-        actor.getWidth(),
-        actor.getHeight()
-      );
-
-      var pixelData = canvas.getContext('2d').getImageData(0, 0, 1, 1).data;
-      console.log(pixelData)
+      canvas
+        .getContext("2d")
+        .drawImage(
+          Game.getImage(SpriteSheet.MAIN),
+          spriteX,
+          spriteY,
+          32,
+          32,
+          actor.getX(),
+          actor.getY(),
+          actor.getWidth(),
+          actor.getHeight()
+        );
     });
-    return actors[0];
+    let image = new Image();
+    image.src = canvas.toDataURL();
+
+    let mergedActor: Actor = new Actor({
+      image: image,
+      x: actors[0].getX(),
+      y: actors[0].getY(),
+      width: canvas.width,
+      height: canvas.height,
+    });
+
+    return mergedActor;
   }
 
   public onInitialize() {}

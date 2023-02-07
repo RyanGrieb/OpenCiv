@@ -1,6 +1,6 @@
 import { Actor } from "../scene/actor";
 import { Game } from "../game";
-import { Textures } from "../assets";
+import { SpriteSheet } from "../assets";
 
 //FIXME: Redundant argument options code?
 
@@ -19,7 +19,7 @@ export class Button extends Actor {
 
   constructor(options: ButtonOptions) {
     super({
-      texture: Textures.BUTTON,
+      spritesheet: SpriteSheet.BUTTON,
       x: options.x,
       y: options.y,
       width: options.width,
@@ -30,12 +30,12 @@ export class Button extends Actor {
 
     this.on("mouse_enter", () => {
       //console.log("Mouse entered button actor");
-      this.setTexture(Textures.BUTTON_HOVERED);
+      this.setSpritesheet(SpriteSheet.BUTTON_HOVERED);
     });
 
     this.on("mouse_exit", () => {
       //console.log("Mouse exited button actor");
-      this.setTexture(Textures.BUTTON);
+      this.setSpritesheet(SpriteSheet.BUTTON);
     });
 
     this.on("mouse_click_up", () => {

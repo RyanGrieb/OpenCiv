@@ -5,6 +5,7 @@ export interface ActorOptions {
   color?: string;
   spritesheet?: SpriteSheet;
   sprite?: Sprite;
+  image?: HTMLImageElement;
   x: number;
   y: number;
   width: number;
@@ -14,8 +15,10 @@ export interface ActorOptions {
 export class Actor {
   protected text: string;
   private color: string;
-  private spritesheet?: SpriteSheet;
+  private spritesheet: SpriteSheet;
   private sprite?: Sprite;
+  private image?: HTMLImageElement;
+
   private x: number;
   private y: number;
   private width: number;
@@ -26,8 +29,10 @@ export class Actor {
   constructor(actorOptions: ActorOptions) {
     this.storedEvents = new Map<string, Function>();
     this.color = actorOptions.color;
-    this.spritesheet = actorOptions.spritesheet;
+    this.spritesheet =
+      actorOptions.spritesheet == undefined ? SpriteSheet.MAIN : actorOptions.spritesheet;
     this.sprite = actorOptions.sprite;
+    this.image = actorOptions.image;
     this.x = actorOptions.x;
     this.y = actorOptions.y;
     this.width = actorOptions.width;
@@ -104,6 +109,10 @@ export class Actor {
   }
 
   public getImage(): HTMLImageElement {
+    console.log(this.spritesheet);
+    if (this.image) {
+      return this.image;
+    }
     return Game.getImage(this.spritesheet);
   }
 
