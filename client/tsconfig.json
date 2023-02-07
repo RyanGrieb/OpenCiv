@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {
+      "target": "es2017",
+      "sourceMap": true,
+      "lib": [
+          "es5",
+          "dom"
+      ],
+      "noUnusedLocals": true,
+      "module": "commonjs"
+  }
+}
