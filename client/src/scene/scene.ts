@@ -1,6 +1,6 @@
 import { Actor } from "./actor";
 import { Game } from "../game";
-import { SpriteSheet } from "../assets";
+import { GameImage } from "../assets";
 
 export abstract class Scene {
   // Use a Map<> ?
@@ -41,12 +41,12 @@ export abstract class Scene {
     canvas.height = greatestY + greatestYHeight;
 
     actors.forEach((actor: Actor) => {
-      const spriteX = parseInt(actor.getSprite().split(",")[0]) * 32;
-      const spriteY = parseInt(actor.getSprite().split(",")[1]) * 32;
+      const spriteX = parseInt(actor.getSpriteRegion().split(",")[0]) * 32;
+      const spriteY = parseInt(actor.getSpriteRegion().split(",")[1]) * 32;
       canvas
         .getContext("2d")
         .drawImage(
-          Game.getImage(SpriteSheet.MAIN),
+          actor.getImage(),
           spriteX,
           spriteY,
           32,

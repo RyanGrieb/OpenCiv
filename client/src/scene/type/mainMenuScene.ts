@@ -2,7 +2,7 @@ import { Scene } from "../scene";
 import { Actor } from "../actor";
 import { Game } from "../../game";
 import { Button } from "../../ui/button";
-import { Sprite, SpriteSheet } from "../../assets";
+import { SpriteRegion, GameImage } from "../../assets";
 
 export class MainMenuScene extends Scene {
   public onInitialize(): void {
@@ -18,7 +18,8 @@ export class MainMenuScene extends Scene {
         }
         tileActors.push(
           new Actor({
-            sprite: Sprite.OCEAN,
+            image: Game.getImage(GameImage.SPRITESHEET),
+            spriteRegion: SpriteRegion.OCEAN,
             x: xPos,
             y: yPos,
             width: 32,
@@ -72,7 +73,8 @@ export class MainMenuScene extends Scene {
 
     this.addActor(
       new Actor({
-        sprite: Sprite.BUILDER,
+        image: Game.getImage(GameImage.SPRITESHEET),
+        spriteRegion: SpriteRegion.BUILDER,
         x: 32,
         y: 32,
         width: 32,
@@ -81,7 +83,8 @@ export class MainMenuScene extends Scene {
     );
     this.addActor(
       new Actor({
-        sprite: Sprite.ARCHER,
+        image: Game.getImage(GameImage.SPRITESHEET),
+        spriteRegion: SpriteRegion.ARCHER,
         x: 64,
         y: 32,
         width: 32,

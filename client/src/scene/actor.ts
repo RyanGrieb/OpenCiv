@@ -1,11 +1,10 @@
-import { Sprite, SpriteSheet } from "../assets";
+import { SpriteRegion, GameImage } from "../assets";
 import { Game } from "../game";
 
 export interface ActorOptions {
   color?: string;
-  spritesheet?: SpriteSheet;
-  sprite?: Sprite;
-  image?: HTMLImageElement;
+  image: HTMLImageElement;
+  spriteRegion?: SpriteRegion; // Select a portion of the provided image
   x: number;
   y: number;
   width: number;
@@ -15,9 +14,8 @@ export interface ActorOptions {
 export class Actor {
   protected text: string;
   private color: string;
-  private spritesheet: SpriteSheet;
-  private sprite?: Sprite;
-  private image?: HTMLImageElement;
+  private image: HTMLImageElement;
+  private spriteRegion?: SpriteRegion;
 
   private x: number;
   private y: number;
@@ -29,10 +27,8 @@ export class Actor {
   constructor(actorOptions: ActorOptions) {
     this.storedEvents = new Map<string, Function>();
     this.color = actorOptions.color;
-    this.spritesheet =
-      actorOptions.spritesheet == undefined ? SpriteSheet.MAIN : actorOptions.spritesheet;
-    this.sprite = actorOptions.sprite;
     this.image = actorOptions.image;
+    this.spriteRegion = actorOptions.spriteRegion;
     this.x = actorOptions.x;
     this.y = actorOptions.y;
     this.width = actorOptions.width;
@@ -100,8 +96,9 @@ export class Actor {
     return false;
   }
 
-  public setSpritesheet(spritesheet: SpriteSheet) {
-    this.spritesheet = spritesheet;
+  public setImage(image: GameImage) {
+    //TODO: Support HTMLImageElement
+    this.image = Game.getImage(image);
   }
 
   public addText(text: string) {
@@ -109,11 +106,7 @@ export class Actor {
   }
 
   public getImage(): HTMLImageElement {
-    console.log(this.spritesheet);
-    if (this.image) {
-      return this.image;
-    }
-    return Game.getImage(this.spritesheet);
+    return this.image;
   }
 
   public getX(): number {
@@ -136,11 +129,7 @@ export class Actor {
     return this.color;
   }
 
-  public getSprite() {
-    return this.sprite;
-  }
-
-  public getSpritesheet() {
-    return this.spritesheet;
+  public getSpriteRegion() {
+    return this.spriteRegion;
   }
 }

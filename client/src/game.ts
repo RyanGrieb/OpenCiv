@@ -1,6 +1,6 @@
 import { Actor } from "./scene/actor";
 import { Scene } from "./scene/scene";
-import { Sprite, SpriteSheet, spritehseetSize } from "./assets";
+import { SpriteRegion, GameImage } from "./assets";
 
 export interface TextOptions {
   text: string;
@@ -136,9 +136,9 @@ export class Game {
   }
 
   public static drawImageFromActor(actor: Actor) {
-    if (actor.getSprite() != undefined) {
-      const spriteX = parseInt(actor.getSprite().split(",")[0]) * 32;
-      const spriteY = parseInt(actor.getSprite().split(",")[1]) * 32;
+    if (actor.getSpriteRegion() != undefined) {
+      const spriteX = parseInt(actor.getSpriteRegion().split(",")[0]) * 32;
+      const spriteY = parseInt(actor.getSpriteRegion().split(",")[1]) * 32;
       this.canvasContext.drawImage(
         actor.getImage(),
         //TODO: Calculate sprite position
@@ -182,10 +182,8 @@ export class Game {
     this.canvasContext.restore();
   }
 
-  public static getImage(imageType: SpriteSheet) {
-    //FIXME: Check imageType, if texture call: this.images[textureType];
-    // If Sprite, get image from spritesheet & then call this.images[textureFromSprite]
-    return this.images[imageType];
+  public static getImage(gameImage: GameImage) {
+    return this.images[gameImage];
   }
 
   public static getHeight(): number {

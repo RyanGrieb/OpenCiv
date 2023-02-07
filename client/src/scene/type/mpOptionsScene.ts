@@ -2,7 +2,7 @@ import { Scene } from "../scene";
 import { Actor } from "../actor";
 import { Game } from "../../game";
 import { Button } from "../../ui/button";
-import { Sprite, SpriteSheet } from "../../assets";
+import { SpriteRegion, GameImage } from "../../assets";
 import { WebsocketClient } from "../../network/client";
 
 export class MPOptionsScene extends Scene {
@@ -19,7 +19,8 @@ export class MPOptionsScene extends Scene {
         }
         this.addActor(
           new Actor({
-            sprite: Sprite.OCEAN,
+            image: Game.getImage(GameImage.SPRITESHEET),
+            spriteRegion: SpriteRegion.OCEAN,
             x: xPos,
             y: yPos,
             width: 32,
