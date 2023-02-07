@@ -2,10 +2,13 @@ import { Scene } from "../scene";
 import { Actor } from "../actor";
 import { Game } from "../../game";
 import { Button } from "../../ui/button";
-import { Sprites, Textures } from "../../assets";
+import { Sprite, SpriteSheet } from "../../assets";
 
 export class MainMenuScene extends Scene {
   public onInitialize(): void {
+    console.log("FUCKKKKKKKKKK");
+
+    let tileActors: Actor[] = [];
     //FIXME: Optimize multiple actors
     for (let y = -1; y < Game.getHeight() / 24; y++) {
       for (let x = -1; x < Game.getWidth() / 32; x++) {
@@ -14,9 +17,9 @@ export class MainMenuScene extends Scene {
         if (y % 2 != 0) {
           xPos += 16;
         }
-        this.addActor(
+        tileActors.push(
           new Actor({
-            sprite: Sprites.OCEAN,
+            sprite: Sprite.OCEAN,
             x: xPos,
             y: yPos,
             width: 32,
@@ -25,6 +28,8 @@ export class MainMenuScene extends Scene {
         );
       }
     }
+
+    this.addActor(this.generateSingleActor(tileActors));
 
     // TODO: onclick callback function...
     this.addActor(
@@ -48,7 +53,7 @@ export class MainMenuScene extends Scene {
         width: 142,
         height: 42,
         onClicked: () => {
-          Game.setScene("mp_options")
+          Game.setScene("mp_options");
         },
       })
     );
@@ -68,7 +73,7 @@ export class MainMenuScene extends Scene {
 
     this.addActor(
       new Actor({
-        sprite: Sprites.BUILDER,
+        sprite: Sprite.BUILDER,
         x: 32,
         y: 32,
         width: 32,
@@ -77,7 +82,7 @@ export class MainMenuScene extends Scene {
     );
     this.addActor(
       new Actor({
-        sprite: Sprites.ARCHER,
+        sprite: Sprite.ARCHER,
         x: 64,
         y: 32,
         width: 32,

@@ -6,13 +6,13 @@
 export const spritehseetSize = 20; //20x20
 
 
-export enum Textures {
+export enum SpriteSheet {
   BUTTON,
   BUTTON_HOVERED,
-  SPRITESHEET,
+  MAIN,
 }
 
-export enum Sprites {
+export enum Sprite {
   ARCHER="0,0",
   BUILDER="1,0",
   CAMEL_ARCHER = "2,0",

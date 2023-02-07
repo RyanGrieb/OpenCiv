@@ -1,6 +1,6 @@
 import { Actor } from "./scene/actor";
 import { Scene } from "./scene/scene";
-import { Sprites, Textures, spritehseetSize } from "./assets";
+import { Sprite, SpriteSheet, spritehseetSize } from "./assets";
 
 export interface TextOptions {
   text: string;
@@ -140,7 +140,7 @@ export class Game {
       const spriteX = parseInt(actor.getSprite().split(",")[0]) * 32;
       const spriteY = parseInt(actor.getSprite().split(",")[1]) * 32;
       this.canvasContext.drawImage(
-        this.getImage(Textures.SPRITESHEET),
+        actor.getImage(),
         //TODO: Calculate sprite position
         spriteX,
         spriteY,
@@ -182,7 +182,7 @@ export class Game {
     this.canvasContext.restore();
   }
 
-  public static getImage(imageType: Textures) {
+  public static getImage(imageType: SpriteSheet) {
     //FIXME: Check imageType, if texture call: this.images[textureType];
     // If Sprite, get image from spritesheet & then call this.images[textureFromSprite]
     return this.images[imageType];

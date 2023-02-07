@@ -16,7 +16,9 @@ Eventually, I'd like to add support modding through [LUAJ](https://www.gamedevel
 ![alt text](https://github.com/rhin123/OpenCiv/blob/master/meta/screenshots/new_ui_2.png?raw=true)
 
 ## How do I build and run this?
-To run a local instance, type ```npm run dev``` in the project directory.
+The game isn't complete, so its not recommended, but if you want - 
+To run a local instance, type ```npm run dev``` in the client directory,
+then type ```npm start``` in the server directory.
 
 ## How do I play this?
 TODO: Demo website

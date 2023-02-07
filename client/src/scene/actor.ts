@@ -1,10 +1,10 @@
-import { Sprites, Textures } from "../assets";
+import { Sprite, SpriteSheet } from "../assets";
 import { Game } from "../game";
 
 export interface ActorOptions {
   color?: string;
-  texture?: Textures;
-  sprite?: Sprites;
+  spritesheet?: SpriteSheet;
+  sprite?: Sprite;
   x: number;
   y: number;
   width: number;
@@ -14,8 +14,8 @@ export interface ActorOptions {
 export class Actor {
   protected text: string;
   private color: string;
-  private texture?: Textures;
-  private sprite?: Sprites;
+  private spritesheet?: SpriteSheet;
+  private sprite?: Sprite;
   private x: number;
   private y: number;
   private width: number;
@@ -26,7 +26,7 @@ export class Actor {
   constructor(actorOptions: ActorOptions) {
     this.storedEvents = new Map<string, Function>();
     this.color = actorOptions.color;
-    this.texture = actorOptions.texture;
+    this.spritesheet = actorOptions.spritesheet;
     this.sprite = actorOptions.sprite;
     this.x = actorOptions.x;
     this.y = actorOptions.y;
@@ -60,8 +60,7 @@ export class Actor {
     //TODO: Allow user to change where the text is drawn...
     if (this.text) {
       const metrics = Game.getCanvasContext().measureText(this.text);
-      let textHeight =
-        metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent;
+      let textHeight = metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent;
 
       Game.drawText({
         text: this.text,
@@ -96,8 +95,8 @@ export class Actor {
     return false;
   }
 
-  public setTexture(texture: Textures) {
-    this.texture = texture;
+  public setSpritesheet(spritesheet: SpriteSheet) {
+    this.spritesheet = spritesheet;
   }
 
   public addText(text: string) {
@@ -105,7 +104,7 @@ export class Actor {
   }
 
   public getImage(): HTMLImageElement {
-    return Game.getImage(this.texture);
+    return Game.getImage(this.spritesheet);
   }
 
   public getX(): number {
@@ -132,7 +131,7 @@ export class Actor {
     return this.sprite;
   }
 
-  public getTexture() {
-    return this.texture;
+  public getSpritesheet() {
+    return this.spritesheet;
   }
 }
