@@ -57,7 +57,11 @@ export abstract class Scene {
           actor.getHeight()
         );
     });
-    
+
+    canvas.getContext("2d").globalCompositeOperation = "saturation";
+    canvas.getContext("2d").fillStyle = "hsl(35,35%,35%)";
+    canvas.getContext("2d").fillRect(0, 0, canvas.width, canvas.height);
+
     let image = new Image();
     image.src = canvas.toDataURL();
 

@@ -5,7 +5,7 @@ import { GameImage } from "../assets";
 //FIXME: Redundant argument options code?
 
 export interface ButtonOptions {
-  title: string;
+  text: string;
   x: number;
   y: number;
   width: number;
@@ -16,7 +16,7 @@ export interface ButtonOptions {
 }
 
 export class Button extends Actor {
-  private title: string;
+  private text: string;
   private callbackFunction: Function;
   private font: string;
   private fontColor: string;
@@ -31,7 +31,7 @@ export class Button extends Actor {
     });
 
     this.callbackFunction = options.onClicked;
-    this.font = options.font ?? "24px sans-serif";
+    this.font = options.font ?? "24px serif";
     this.fontColor = options.fontColor ?? "black";
 
     this.on("mouse_enter", () => {
@@ -48,7 +48,7 @@ export class Button extends Actor {
       this.callbackFunction();
     });
 
-    this.title = options.title;
+    this.text = options.text;
   }
 
   public draw() {
@@ -66,9 +66,5 @@ export class Button extends Actor {
         });
       });
     }
-  }
-
-  public onCreated() {
-    this.addText(this.title);
   }
 }

@@ -9,6 +9,9 @@ export interface TextOptions {
   actor?: Actor;
   color?: string;
   font?: string;
+  shadowColor?: string;
+  lineWidth?: number;
+  shadowBlur?: number;
 }
 
 export interface GameOptions {
@@ -136,11 +139,15 @@ export class Game {
   public static addActor(actor: Actor) {
     console.log("Add actor");
     this.actors.push(actor);
-    this.drawImageFromActor(actor);
     actor.onCreated();
   }
 
   public static drawImageFromActor(actor: Actor) {
+    if (!actor.getImage()) {
+      console.log("Warning: Attempted to draw empty actor: " + actor.getWidth());
+      return;
+    }
+
     if (actor.getSpriteRegion()) {
       const spriteX = parseInt(actor.getSpriteRegion().split(",")[0]) * 32;
       const spriteY = parseInt(actor.getSpriteRegion().split(",")[1]) * 32;
@@ -169,7 +176,7 @@ export class Game {
 
   public static async measureText(text: string, font: string): Promise<[number, number]> {
     this.canvasContext.save();
-    this.canvasContext.font = font ?? "24px sans-serif";
+    this.canvasContext.font = font ?? "24px serif";
 
     await document.fonts.ready; // Wait for the async function to complete, then measure text.s
 
@@ -186,10 +193,17 @@ export class Game {
     this.canvasContext.save();
     this.canvasContext.fillStyle = textOptions.color;
     this.canvasContext.font = textOptions.font ?? "24px sans-serif";
-
+    this.canvasContext.shadowColor = textOptions.shadowColor ?? "white";
+    this.canvasContext.shadowBlur = textOptions.shadowBlur ?? 0; // 20
+    this.canvasContext.lineWidth = textOptions.lineWidth ?? 0; // 4
     const xPos = textOptions.x;
     const yPos = textOptions.y;
+    if (textOptions.lineWidth > 0) {
+      this.canvasContext.strokeText(textOptions.text, xPos, yPos);
+    }
+
     this.canvasContext.fillText(textOptions.text, xPos, yPos);
+
     this.canvasContext.restore();
   }
 

@@ -5,7 +5,6 @@
 
 export const spritehseetSize = 20; //20x20
 
-
 export enum GameImage {
   BUTTON,
   BUTTON_HOVERED,
@@ -13,10 +12,18 @@ export enum GameImage {
 }
 
 export enum SpriteRegion {
-  ARCHER="0,0",
-  BUILDER="1,0",
+  ARCHER = "0,0",
+  BUILDER = "1,0",
   CAMEL_ARCHER = "2,0",
-  OCEAN = "16,6"
+  CARAVAN = "3,0",
+  CATAPULT = "5,0",
+  COMPOSITE_BOWMAN = "7,0",
+  CROSSBOWMAN = "8,0",
+  HORSEMAN = "10,0",
+  ROMAN_LEGION = "11,0",
+  OCEAN = "16,6",
+  GRASS = "3,6",
+  GRASS_HILL = "4,6",
 }
 
 export const assetList = [

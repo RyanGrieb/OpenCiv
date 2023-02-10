@@ -3,7 +3,7 @@ import { Game } from "../game";
 
 export interface ActorOptions {
   color?: string;
-  image: HTMLImageElement;
+  image?: HTMLImageElement;
   spriteRegion?: SpriteRegion; // Select a portion of the provided image
   x: number;
   y: number;
@@ -12,7 +12,6 @@ export interface ActorOptions {
 }
 
 export class Actor {
-  protected text: string;
   protected color: string;
   protected image: HTMLImageElement;
   protected spriteRegion?: SpriteRegion;
@@ -89,10 +88,6 @@ export class Actor {
     this.image = Game.getImage(image);
   }
 
-  public addText(text: string) {
-    this.text = text;
-  }
-
   public getImage(): HTMLImageElement {
     return this.image;
   }
@@ -119,5 +114,10 @@ export class Actor {
 
   public getSpriteRegion() {
     return this.spriteRegion;
+  }
+
+  public setPosition(x: number, y: number): void {
+    this.x = x;
+    this.y = y;
   }
 }
