@@ -3,7 +3,7 @@ import { Actor } from "../actor";
 import { Game } from "../../game";
 import { Button } from "../../ui/button";
 import { SpriteRegion, GameImage } from "../../assets";
-import { WebsocketClient } from "../../network/client";
+//import { WebsocketClient } from "../../network/client";
 
 export class MPOptionsScene extends Scene {
   public onInitialize(): void {

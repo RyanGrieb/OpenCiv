@@ -1,6 +1,5 @@
 import { Actor } from "../scene/actor";
 import { Game } from "../game";
-import { Label } from "./label";
 
 export interface TextBoxOptions {
   x: number;

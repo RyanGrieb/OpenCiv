@@ -1,6 +1,5 @@
 import { Actor } from "./actor";
 import { Game } from "../game";
-import { GameImage } from "../assets";
 
 export abstract class Scene {
   // Use a Map<> ?

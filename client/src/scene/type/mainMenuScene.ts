@@ -32,7 +32,7 @@ export class MainMenuScene extends Scene {
     }
 
     // Sparse background with a random unit
-    const spriteRegionNum = Math.floor(Math.random() * 9); // Random sprite region b/w 0-2
+    //const spriteRegionNum = Math.floor(Math.random() * 9); // Random sprite region b/w 0-2
     for (let y = -1; y < (Game.getHeight() + 24) / 24; y++) {
       for (let x = -1; x < (Game.getWidth() + 32) / 32; x++) {
         let yPos = y * 24;
