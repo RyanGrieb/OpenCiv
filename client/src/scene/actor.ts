@@ -20,11 +20,11 @@ export class Actor {
   protected y: number;
   protected width: number;
   protected height: number;
-  protected storedEvents: Map<string, Function>;
+  protected storedEvents: Map<string, Function[]>;
   protected mouseInside: boolean;
 
   constructor(actorOptions: ActorOptions) {
-    this.storedEvents = new Map<string, Function>();
+    this.storedEvents = new Map<string, Function[]>();
     this.color = actorOptions.color;
     this.image = actorOptions.image;
     this.spriteRegion = actorOptions.spriteRegion;
@@ -50,7 +50,7 @@ export class Actor {
     this.on("mouse_up", (options) => {
       if (this.insideActor(options.x, options.y)) {
         //FIXME: Distinguish mouse_up & mouse_click_up better?
-        this.call("mouse_click_up");
+        this.call("clicked");
       }
     });
   }
@@ -60,23 +60,29 @@ export class Actor {
   }
 
   public onCreated() {}
+  public onDestroyed(){}
 
   public call(eventName: string, options?) {
     if (this.storedEvents.has(eventName)) {
       //Call the stored callback function
-      this.storedEvents.get(eventName)(options);
+      const functions = this.storedEvents.get(eventName);
+      for(let currentFunction of functions){
+        currentFunction(options);
+      }
     }
   }
 
   public on(eventName: string, callback: (options) => void) {
-    this.storedEvents.set(eventName, callback);
+    //Get the list of stored callback functions or an empty list
+    let functions: Function[] = this.storedEvents.get(eventName) ?? [];
+    // Append the to functions
+    functions.push(callback);
+    this.storedEvents.set(eventName, functions);
   }
 
   public insideActor(x: number, y: number): boolean {
     if (x >= this.x && x <= this.x + this.width) {
-      //console.log("in x-bounds");
       if (y >= this.y && y <= this.y + this.height) {
-        //console.log("in y-bounds");
         return true;
       }
     }

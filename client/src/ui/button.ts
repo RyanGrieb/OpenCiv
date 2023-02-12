@@ -20,6 +20,8 @@ export class Button extends Actor {
   private callbackFunction: Function;
   private font: string;
   private fontColor: string;
+  private textWidth: number;
+  private textHeight: number;
 
   constructor(options: ButtonOptions) {
     super({
@@ -30,6 +32,8 @@ export class Button extends Actor {
       height: options.height,
     });
 
+    this.textWidth = -1;
+    this.textHeight = -1;
     this.callbackFunction = options.onClicked;
     this.font = options.font ?? "24px serif";
     this.fontColor = options.fontColor ?? "black";
@@ -44,7 +48,7 @@ export class Button extends Actor {
       this.setImage(GameImage.BUTTON);
     });
 
-    this.on("mouse_click_up", () => {
+    this.on("clicked", () => {
       this.callbackFunction();
     });
 
@@ -52,18 +56,24 @@ export class Button extends Actor {
   }
 
   public draw() {
-    super.draw();
+    super.draw(); //FIXME: Don't draw until we know textWidth & height.
+
+    if (this.textWidth == -1 && this.textHeight == -1) {
+      Game.measureText(this.text, this.font).then(([textWidth, textHeight]) => {
+        this.textWidth = textWidth;
+        this.textHeight = textHeight;
+      });
+      return; // Don't render text before we know the height & width of the text
+    }
 
     //TODO: Allow user to change where the text is drawn...
     if (this.text) {
-      Game.measureText(this.text, this.font).then(([textWidth, textHeight]) => {
-        Game.drawText({
-          text: this.text,
-          x: this.x + this.width / 2 - textWidth / 2,
-          y: this.y + this.height / 2 + textHeight / 2,
-          color: this.fontColor,
-          font: this.font,
-        });
+      Game.drawText({
+        text: this.text,
+        x: this.x + this.width / 2 - this.textWidth / 2,
+        y: this.y + this.height / 2 + this.textHeight / 2,
+        color: this.fontColor,
+        font: this.font,
       });
     }
   }

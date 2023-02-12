@@ -76,8 +76,13 @@ export abstract class Scene {
     return mergedActor;
   }
 
-  public onInitialize() {}
+  public onInitialize() {
+  }
+
   public onDestroyed() {
+    this.actors.forEach((actor) => {
+      actor.onDestroyed();
+    });
     this.actors = [];
   }
 }

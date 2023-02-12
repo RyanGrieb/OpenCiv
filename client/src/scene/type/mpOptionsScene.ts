@@ -7,6 +7,7 @@ import { WebsocketClient } from "../../network/client";
 
 export class MPOptionsScene extends Scene {
   public onInitialize(): void {
+    super.onInitialize();
     //WebsocketClient.init();
 
     let tileActors: Actor[] = [];
