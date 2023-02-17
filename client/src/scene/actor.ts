@@ -56,17 +56,29 @@ export class Actor {
   }
 
   public draw() {
-    Game.drawImageFromActor(this);
+    if (!this.image && this.color) {
+      Game.drawRect({
+        x: this.x,
+        y: this.y,
+        width: this.width,
+        height: this.height,
+        color: this.color,
+      });
+    } else if (this.image) {
+      Game.drawImageFromActor(this);
+    } else {
+      console.log("Warning: Nothing for actor can be drawn:" + this);
+    }
   }
 
   public onCreated() {}
-  public onDestroyed(){}
+  public onDestroyed() {}
 
   public call(eventName: string, options?) {
     if (this.storedEvents.has(eventName)) {
       //Call the stored callback function
       const functions = this.storedEvents.get(eventName);
-      for(let currentFunction of functions){
+      for (let currentFunction of functions) {
         currentFunction(options);
       }
     }
@@ -125,5 +137,63 @@ export class Actor {
   public setPosition(x: number, y: number): void {
     this.x = x;
     this.y = y;
+  }
+
+  public static mergeActors(actors: Actor[]): Actor {
+    // Create dummy canvas to get pixel data of the actor sprite
+
+    let canvas = document.createElement("canvas");
+    let greatestXWidth = 0; // The width of the actor w/ the greatest x.
+    let greatestYHeight = 0; // The height of the actor w/ the greatest y.
+    let greatestX = 0;
+    let greatestY = 0;
+
+    actors.forEach((actor: Actor) => {
+      if (actor.getX() > greatestX) {
+        greatestX = actor.getX();
+        greatestXWidth = actor.getWidth();
+      }
+      if (actor.getY() > greatestY) {
+        greatestY = actor.getY();
+        greatestYHeight = actor.getHeight();
+      }
+    });
+    canvas.width = greatestX + greatestXWidth;
+    canvas.height = greatestY + greatestYHeight;
+
+    actors.forEach((actor: Actor) => {
+      const spriteX = parseInt(actor.getSpriteRegion().split(",")[0]) * 32;
+      const spriteY = parseInt(actor.getSpriteRegion().split(",")[1]) * 32;
+      canvas
+        .getContext("2d")
+        .drawImage(
+          actor.getImage(),
+          spriteX,
+          spriteY,
+          32,
+          32,
+          actor.getX(),
+          actor.getY(),
+          actor.getWidth(),
+          actor.getHeight()
+        );
+    });
+
+    canvas.getContext("2d").globalCompositeOperation = "saturation";
+    canvas.getContext("2d").fillStyle = "hsl(35,35%,35%)";
+    canvas.getContext("2d").fillRect(0, 0, canvas.width, canvas.height);
+
+    let image = new Image();
+    image.src = canvas.toDataURL();
+
+    let mergedActor: Actor = new Actor({
+      image: image,
+      x: actors[0].getX(),
+      y: actors[0].getY(),
+      width: canvas.width,
+      height: canvas.height,
+    });
+
+    return mergedActor;
   }
 }

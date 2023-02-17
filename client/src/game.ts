@@ -1,6 +1,7 @@
 import { Actor } from "./scene/actor";
 import { Scene } from "./scene/scene";
 import { GameImage } from "./assets";
+import { Rectangle } from "./ui/rectangle";
 
 export interface TextOptions {
   text: string;
@@ -205,7 +206,7 @@ export class Game {
     let height = metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent;
     this.canvasContext.restore();
     //FIXME: This fails when we have a queue of the same text, support text & font simultaneously
-    this.measureQueue = this.measureQueue.filter((element) => element !== text); 
+    this.measureQueue = this.measureQueue.filter((element) => element !== text);
 
     return [metrics.width, height];
   }
@@ -230,7 +231,19 @@ export class Game {
     this.canvasContext.restore();
   }
 
-  public static drawRect({ x, y, width, height, color }) {
+  public static drawRect({
+    x,
+    y,
+    width,
+    height,
+    color,
+  }: {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+    color: string;
+  }) {
     this.canvasContext.fillStyle = color;
     this.canvasContext.fillRect(x, y, width, height);
   }
