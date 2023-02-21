@@ -17,11 +17,11 @@ export abstract class Scene {
     });
   }
 
-  public onInitialize() {
-  }
+  public onInitialize() {}
 
   public onDestroyed() {
     this.actors.forEach((actor) => {
+      actor.call("mouse_exit");
       actor.onDestroyed();
     });
     this.actors = [];

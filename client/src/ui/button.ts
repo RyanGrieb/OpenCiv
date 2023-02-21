@@ -39,12 +39,10 @@ export class Button extends Actor {
     this.fontColor = options.fontColor ?? "black";
 
     this.on("mouse_enter", () => {
-      //console.log("Mouse entered button actor");
       this.setImage(GameImage.BUTTON_HOVERED);
     });
 
     this.on("mouse_exit", () => {
-      //console.log("Mouse exited button actor");
       this.setImage(GameImage.BUTTON);
     });
 

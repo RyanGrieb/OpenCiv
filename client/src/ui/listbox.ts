@@ -4,15 +4,32 @@ import { Rectangle, RectangleOptions } from "./rectangle";
 
 interface RowOptions extends RectangleOptions {
   color: string;
+  text?: string;
 }
 
 class Row extends Rectangle {
   public color: string;
+  public textHeight: number;
+  private text: string;
   // TODO: Support image
   constructor(options: RowOptions) {
     super(options);
 
     this.color = options.color;
+    this.text = options.text;
+  }
+
+  public setText(text: string) {
+    this.text = undefined;
+    Game.measureText(text, "12px sans").then(([width, height]) => {
+      //TODO: Update width and height values for text
+      this.text = text;
+      this.textHeight = height;
+    });
+  }
+
+  public getText() {
+    return this.text;
   }
 }
 
@@ -67,6 +84,20 @@ export class ListBox extends Actor {
 
     this.rows.forEach((row) => {
       Game.drawRect(row);
+      if (row.getText()) {
+        //TODO: Only draw text if row is visible.
+        Game.drawText({
+          text: row.getText(),
+          x: row.x + 2,
+          y: row.y + this.rowHeight / 2 + row.textHeight / 2,
+          color: "black",
+          font: "12px sans",
+        });
+      }
     });
+  }
+
+  public getRows(): Row[] {
+    return this.rows;
   }
 }

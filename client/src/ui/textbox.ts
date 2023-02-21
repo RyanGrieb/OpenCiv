@@ -122,4 +122,19 @@ export class TextBox extends Actor {
       y: this.y + this.height / 2 + this.textHeight / 2,
     });
   }
+
+  public setSelected(selected: boolean) {
+    if (selected && !this.selected) {
+      this.selected = true;
+      this.shouldBlink = true;
+
+      this.blinkInterval = setInterval(() => {
+        this.shouldBlink = !this.shouldBlink;
+      }, 500);
+    } else if (!selected && this.selected) {
+      this.selected = false;
+      this.shouldBlink = false;
+      clearInterval(this.blinkInterval);
+    }
+  }
 }
