@@ -1,4 +1,5 @@
 import { Game } from "../../game";
+import { WebsocketClient } from "../../network/client";
 import { Button } from "../../ui/button";
 import { ListBox } from "../../ui/listbox";
 import { TextBox } from "../../ui/textbox";
@@ -43,7 +44,9 @@ export class JoinGameScene extends Scene {
         width: 242,
         height: 62,
         fontColor: "white",
-        onClicked: () => {},
+        onClicked: () => {
+          WebsocketClient.init();
+        },
       })
     );
 

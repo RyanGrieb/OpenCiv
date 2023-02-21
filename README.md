@@ -17,9 +17,10 @@ Eventually, my main objective is to implement server-sided modding. Where the se
 ![alt text](https://github.com/rhin123/OpenCiv/blob/master/meta/screenshots/new_ui_2.png?raw=true)
 
 ## How do I build and run this?
-The game isn't complete, so its not recommended, but if you want - 
-To run a local instance, type ```npm run dev``` in the client directory,
-then type ```npm start``` in the server directory.
+The game isn't complete, so its not recommended:
+
+
+To run a local instance, type ```npm install``` then, ```npm start```
 
 ## How do I play this?
 Currently the project is being rewritten, so no playable version is available. Check back in a few months!
