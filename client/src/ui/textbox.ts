@@ -137,4 +137,8 @@ export class TextBox extends Actor {
       clearInterval(this.blinkInterval);
     }
   }
+
+  public getText(): string {
+    return this.text;
+  }
 }

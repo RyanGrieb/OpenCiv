@@ -3,7 +3,6 @@ import { WebsocketClient } from "../../network/client";
 import { Button } from "../../ui/button";
 import { ListBox } from "../../ui/listbox";
 import { TextBox } from "../../ui/textbox";
-import { Actor } from "../actor";
 import { Scene } from "../scene";
 import { SceneBackground } from "../sceneBackground";
 export class JoinGameScene extends Scene {
@@ -45,7 +44,7 @@ export class JoinGameScene extends Scene {
         height: 62,
         fontColor: "white",
         onClicked: () => {
-          WebsocketClient.init();
+          WebsocketClient.init(serverTextBox.getText());
         },
       })
     );

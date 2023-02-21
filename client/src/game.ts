@@ -1,7 +1,6 @@
 import { Actor } from "./scene/actor";
 import { Scene } from "./scene/scene";
 import { GameImage } from "./assets";
-import { Rectangle } from "./ui/rectangle";
 
 export interface TextOptions {
   text: string;

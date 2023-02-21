@@ -1,9 +1,9 @@
 {
     "scripts": {
-        "preinstall": "npm ls concurrently || npm i concurrently",
         "start": "concurrently \"npm start --prefix server\" \"npm run dev --prefix client\""
     },
     "dependencies": {
-        "concurrently": "^7.6.0"
+        "concurrently": "^7.6.0",
+        "ts-node-dev": "^2.0.0"
     }
 }
