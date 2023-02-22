@@ -1,6 +1,7 @@
 import { State } from "./state/state";
 
 export class Game {
+  private constructor() {}
   private static currentState: State;
   private static states: Map<string, State>;
   private static storedEvents: Map<string, Function[]>;
@@ -42,8 +43,9 @@ export class Game {
 
   public static call(eventName: string, data: Record<string, any>) {
     if (this.storedEvents.has(eventName)) {
-      //Call the stored callback function
       const functions = this.storedEvents.get(eventName) as Function[];
+
+      //Call the stored callback functions
       for (let currentFunction of functions) {
         currentFunction(data);
       }

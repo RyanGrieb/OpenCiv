@@ -1,6 +1,7 @@
 import { Actor } from "./scene/actor";
 import { Scene } from "./scene/scene";
 import { GameImage } from "./assets";
+import { NetworkEvents } from "./network/client";
 
 export interface TextOptions {
   text: string;
@@ -36,6 +37,8 @@ export class Game {
   private static fps: number = 0;
   private static actors: Actor[] = [];
   private static measureQueue: string[];
+
+  private constructor() {}
 
   public static init(options: GameOptions, callback: () => void) {
     this.scenes = new Map<string, Scene>();
@@ -82,6 +85,10 @@ export class Game {
 
       // Call the callback loop, now we can progress with adding actors,scenes,ect.
       callback();
+    });
+
+    NetworkEvents.on("setScene", (data) => {
+      Game.setScene(data["scene"]);
     });
   }
 
