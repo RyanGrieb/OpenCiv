@@ -58,13 +58,28 @@ export class TextBox extends Actor {
 
     this.on("keydown", (options) => {
       if (!this.selected) return;
+      if (options.key.charAt(0) === "F" && options.key.length > 1) {
+        return;
+      }
+
+      if (options.key.startsWith("Arrow")) {
+        return;
+      }
 
       switch (options.key) {
+        case "WakeUp":
         case "Enter":
         case "Escape":
         case "Shift":
         case "Alt":
         case "CapsLock":
+        case "Home":
+        case "End":
+        case "Insert":
+        case "Delete":
+        case "PageDown":
+        case "PageUp":
+        case "OS":
         case "Tab":
           return;
         case "Backspace":
