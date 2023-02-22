@@ -250,8 +250,10 @@ export class Game {
     height: number;
     color: string;
   }) {
+    this.canvasContext.save();
     this.canvasContext.fillStyle = color;
     this.canvasContext.fillRect(x, y, width, height);
+    this.canvasContext.restore();
   }
 
   public static getImage(gameImage: GameImage) {
