@@ -38,7 +38,6 @@ export class WebsocketClient {
 
     this.websocket.addEventListener("open", (event) => {
       console.log("Connected to server: " + event);
-      this.websocket.send("Here's some text that the server is urgently awaiting!");
     });
 
     this.websocket.addEventListener("message", (event) => {
@@ -50,5 +49,9 @@ export class WebsocketClient {
     this.websocket.addEventListener("close", (event) => {
       NetworkEvents.call("connectionClosed", JSON.parse("{}"));
     });
+  }
+
+  public static sendMessage(message) {
+    this.websocket.send(message);
   }
 }

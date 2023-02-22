@@ -1,3 +1,4 @@
+import { Player } from "./player";
 import { State } from "./state/state";
 
 export class Game {
@@ -5,6 +6,7 @@ export class Game {
   private static currentState: State;
   private static states: Map<string, State>;
   private static storedEvents: Map<string, Function[]>;
+  private static players: Map<string, Player>;
 
   public static addState(stateName: string, state: State) {
     if (!this.states) {
@@ -50,5 +52,13 @@ export class Game {
         currentFunction(data);
       }
     }
+  }
+
+  public static getPlayers() {
+    if (!this.players) {
+      this.players = new Map<string, Player>();
+    }
+
+    return this.players;
   }
 }
