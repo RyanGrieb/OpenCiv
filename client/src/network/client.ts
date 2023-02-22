@@ -46,5 +46,9 @@ export class WebsocketClient {
       const eventJSON = JSON.parse(event.data);
       NetworkEvents.call(eventJSON["event"], eventJSON);
     });
+
+    this.websocket.addEventListener("close", (event) => {
+      NetworkEvents.call("connectionClosed", JSON.parse("{}"));
+    });
   }
 }

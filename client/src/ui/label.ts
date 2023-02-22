@@ -52,7 +52,7 @@ export class Label extends Actor {
   /**
    * Updates the width and height of the label to conform to whatever the text is
    */
-  public async conformWidth() {
+  public async conformSize() {
     const [textWidth, textHeight] = await Game.measureText(this.text, this.font);
     this.width = textWidth;
     this.height = textHeight;

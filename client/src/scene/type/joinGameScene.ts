@@ -1,6 +1,7 @@
 import { Game } from "../../game";
-import { WebsocketClient } from "../../network/client";
+import { NetworkEvents, WebsocketClient } from "../../network/client";
 import { Button } from "../../ui/button";
+import { Label } from "../../ui/label";
 import { ListBox } from "../../ui/listbox";
 import { TextBox } from "../../ui/textbox";
 import { Scene } from "../scene";
@@ -35,6 +36,15 @@ export class JoinGameScene extends Scene {
 
     this.addActor(serverTextBox);
 
+    const infoLabel = new Label({ text: "Enter server code: (e.g. ED2FG)", fontColor: "white" });
+    infoLabel.conformSize().then(() => {
+      infoLabel.setPosition(
+        Game.getWidth() / 2 - infoLabel.getWidth() / 2,
+        serverTextBox.getY() - infoLabel.getHeight() + 10
+      );
+    });
+    this.addActor(infoLabel);
+
     this.addActor(
       new Button({
         text: "Join",
@@ -44,6 +54,14 @@ export class JoinGameScene extends Scene {
         height: 62,
         fontColor: "white",
         onClicked: () => {
+          infoLabel.setText("Connecting...");
+          infoLabel.conformSize().then(() => {
+            infoLabel.setPosition(
+              Game.getWidth() / 2 - infoLabel.getWidth() / 2,
+              serverTextBox.getY() - infoLabel.getHeight() + 10
+            );
+          });
+
           WebsocketClient.init(serverTextBox.getText());
         },
       })
@@ -74,5 +92,15 @@ export class JoinGameScene extends Scene {
         },
       })
     );
+
+    NetworkEvents.on("connectionClosed", (event) => {
+      infoLabel.setText("Connection Failed.");
+      infoLabel.conformSize().then(() => {
+        infoLabel.setPosition(
+          Game.getWidth() / 2 - infoLabel.getWidth() / 2,
+          serverTextBox.getY() - infoLabel.getHeight() + 10
+        );
+      });
+    });
   }
 }

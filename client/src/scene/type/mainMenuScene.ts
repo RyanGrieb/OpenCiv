@@ -16,7 +16,7 @@ export class MainMenuScene extends Scene {
       lineWidth: 4,
       shadowBlur: 20,
     });
-    titleLabel.conformWidth().then(() => {
+    titleLabel.conformSize().then(() => {
       titleLabel.setPosition(Game.getWidth() / 2 - titleLabel.getWidth() / 2, 135);
     });
 
