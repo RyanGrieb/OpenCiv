@@ -1,28 +1,92 @@
+export class CallbackData {
+  public callbackFunction: Function;
+  public globalEvent: boolean; // Not associated with the current scene.
+
+  constructor(callbackFunctions: Function, globalEvent: boolean) {
+    this.callbackFunction = callbackFunctions;
+    this.globalEvent = globalEvent;
+  }
+}
+
+export interface OnNetworkEventOptions {
+  eventName: string;
+  callback: (data: JSON) => void;
+  globalEvent?: boolean;
+}
+
 export class NetworkEvents {
-  private static storedEvents: Map<string, Function[]>;
+  private static storedEvents: Map<string, CallbackData[]>;
 
   private constructor() {}
 
   public static call(eventName: string, data: JSON) {
     if (this.storedEvents.has(eventName)) {
       //Call the stored callback function
-      const functions = this.storedEvents.get(eventName);
-      for (let currentFunction of functions) {
-        currentFunction(data);
+      const callbackDataList = this.storedEvents.get(eventName);
+      for (let callbackData of callbackDataList) {
+        callbackData.callbackFunction(data);
       }
     }
   }
 
-  public static on(eventName: string, callback: (data: JSON) => void) {
+  /**
+   * Register a callback function to be called when a network event is received.
+   *
+   * @param {OnNetworkEventOptions} options - Options for the event listener.
+   * @param {string} options.eventName - The name of the event to listen for.
+   * @param {(data: JSON) => void} options.callback - The callback function to be called when the event is received.
+   * @param {boolean} [options.globalEvent=false] - Determine if we don't remove the event when the scene changes.
+   */
+  public static on(options: OnNetworkEventOptions) {
     if (!this.storedEvents) {
-      this.storedEvents = new Map<string, Function[]>();
+      this.storedEvents = new Map<string, CallbackData[]>();
     }
+    this.addCallbackEvent(
+      this.storedEvents,
+      options.eventName,
+      options.callback,
+      options.globalEvent
+    );
+  }
 
+  /**
+   * Removes all associated CallbackData that isn't a globalEvent
+   */
+  public static clear() {
+    const globalEventCallbacks = this.getGlobalEventCallbacks(this.storedEvents);
+    this.storedEvents = globalEventCallbacks;
+  }
+
+  private static getGlobalEventCallbacks(storedEvents: Map<string, CallbackData[]>) {
+    // Create new map w/ CallbackData..globalEvent == true
+    const globalEventCallbacks = new Map<string, CallbackData[]>();
+    this.storedEvents.forEach((callbackDataList, eventName) => {
+      for (const callbackData of callbackDataList) {
+        if (callbackData.globalEvent) {
+          this.addCallbackEvent(
+            globalEventCallbacks,
+            eventName,
+            callbackData.callbackFunction,
+            true
+          );
+        }
+      }
+    });
+
+    return globalEventCallbacks;
+  }
+
+  private static addCallbackEvent(
+    storedEvents: Map<string, CallbackData[]>,
+    eventName: string,
+    callback: Function,
+    globalEvent?: boolean
+  ) {
     //Get the list of stored callback functions or an empty list
-    let functions: Function[] = this.storedEvents.get(eventName) ?? [];
+    let callbackDataList: CallbackData[] = storedEvents.get(eventName) ?? [];
     // Append the to functions
-    functions.push(callback);
-    this.storedEvents.set(eventName, functions);
+    callbackDataList.push(new CallbackData(callback, globalEvent));
+    storedEvents.set(eventName, callbackDataList);
   }
 }
 
@@ -51,7 +115,7 @@ export class WebsocketClient {
     });
   }
 
-  public static sendMessage(message) {
+  public static sendMessage(message: string) {
     this.websocket.send(message);
   }
 }

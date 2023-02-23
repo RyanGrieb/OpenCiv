@@ -1,5 +1,6 @@
 import { Actor } from "./actor";
 import { Game } from "../game";
+import { NetworkEvents } from "../network/client";
 
 export abstract class Scene {
   // Use a Map<> ?
@@ -25,5 +26,6 @@ export abstract class Scene {
       actor.onDestroyed();
     });
     this.actors = [];
+    NetworkEvents.clear();
   }
 }

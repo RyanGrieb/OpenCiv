@@ -14,6 +14,8 @@ export class InGameState extends State {
     Game.getPlayers().forEach((player, playerName) => {
       player.sendNetworkEvent(JSON.stringify({ event: "setScene", scene: "in_game" }));
     });
+
+    // TODO: Initialize game map
   }
 
   public onDestroyed() {}

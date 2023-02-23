@@ -1,5 +1,5 @@
 import { Game } from "../../game";
-import { WebsocketClient } from "../../network/client";
+import { NetworkEvents, WebsocketClient } from "../../network/client";
 import { Button } from "../../ui/button";
 import { ListBox } from "../../ui/listbox";
 import { Scene } from "../scene";
@@ -33,6 +33,7 @@ export class LobbyScene extends Scene {
         height: 62,
         fontColor: "white",
         onClicked: () => {
+          // TODO: Change text of this button & prevent repeated clicks.
           WebsocketClient.sendMessage(JSON.stringify({ event: "setState", state: "in_game" }));
         },
       })
@@ -52,5 +53,13 @@ export class LobbyScene extends Scene {
         },
       })
     );
+
+    WebsocketClient.sendMessage(JSON.stringify({ event: "playerNames" }));
+    NetworkEvents.on({
+      eventName: "playerNames",
+      callback: (data) => {
+        // Update listbox
+      },
+    });
   }
 }

@@ -30,11 +30,8 @@ wss.on("close", (args: any) => {
 
 console.log("Server initialized on port: " + port);
 
+Game.init();
 Game.addState("lobby", new LobbyState());
 Game.addState("in_game", new InGameState());
 
 Game.setState("lobby");
-
-Game.on("setState", (data) => {
-  Game.setState(data["state"]);
-});

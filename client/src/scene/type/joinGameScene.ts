@@ -93,14 +93,17 @@ export class JoinGameScene extends Scene {
       })
     );
 
-    NetworkEvents.on("connectionClosed", (event) => {
-      infoLabel.setText("Connection Failed.");
-      infoLabel.conformSize().then(() => {
-        infoLabel.setPosition(
-          Game.getWidth() / 2 - infoLabel.getWidth() / 2,
-          serverTextBox.getY() - infoLabel.getHeight() + 10
-        );
-      });
+    NetworkEvents.on({
+      eventName: "connectionClose",
+      callback: (event) => {
+        infoLabel.setText("Connection Failed.");
+        infoLabel.conformSize().then(() => {
+          infoLabel.setPosition(
+            Game.getWidth() / 2 - infoLabel.getWidth() / 2,
+            serverTextBox.getY() - infoLabel.getHeight() + 10
+          );
+        });
+      },
     });
   }
 }

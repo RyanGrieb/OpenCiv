@@ -8,10 +8,19 @@ export class Game {
   private static storedEvents: Map<string, Function[]>;
   private static players: Map<string, Player>;
 
+  public static init() {
+    this.states = new Map<string, State>();
+
+    this.on("setState", (data) => {
+      this.setState(data["state"]);
+    });
+
+    this.on("playerNames", (data) => {
+      console.log("TODO: Get player names");
+    });
+  }
+
   public static addState(stateName: string, state: State) {
-    if (!this.states) {
-      this.states = new Map<string, State>();
-    }
     this.states.set(stateName, state);
   }
 

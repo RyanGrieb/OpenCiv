@@ -87,8 +87,12 @@ export class Game {
       callback();
     });
 
-    NetworkEvents.on("setScene", (data) => {
-      Game.setScene(data["scene"]);
+    NetworkEvents.on({
+      eventName: "setScene",
+      callback: (data) => {
+        this.setScene(data["scene"]);
+      },
+      globalEvent: true,
     });
   }
 
