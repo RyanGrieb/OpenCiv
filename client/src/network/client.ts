@@ -50,7 +50,7 @@ export class NetworkEvents {
   }
 
   /**
-   * Removes all associated CallbackData that isn't a globalEvent
+   * Removes all associated callback functions that isn't a globalEvent
    */
   public static clear() {
     const globalEventCallbacks = this.getGlobalEventCallbacks(this.storedEvents);
@@ -58,8 +58,8 @@ export class NetworkEvents {
   }
 
   private static getGlobalEventCallbacks(storedEvents: Map<string, CallbackData[]>) {
-    // Create new map w/ CallbackData..globalEvent == true
     const globalEventCallbacks = new Map<string, CallbackData[]>();
+
     this.storedEvents.forEach((callbackDataList, eventName) => {
       for (const callbackData of callbackDataList) {
         if (callbackData.globalEvent) {

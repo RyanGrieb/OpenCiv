@@ -17,10 +17,6 @@ export class LobbyScene extends Scene {
       height: Game.getHeight() - 175,
       rowHeight: 50,
     });
-    const testNames = ["server1", "test", "foo"];
-    for (let i = 0; i < testNames.length; i++) {
-      playerList.getRows()[i].setText(testNames[i]);
-    }
 
     this.addActor(playerList);
 
@@ -58,7 +54,12 @@ export class LobbyScene extends Scene {
     NetworkEvents.on({
       eventName: "playerNames",
       callback: (data) => {
+        console.log(data);
+        const playerNames = data["names"];
         // Update listbox
+        for (let i = 0; i < playerNames.length; i++) {
+          playerList.getRows()[i].setText(playerNames[i]);
+        }
       },
     });
   }

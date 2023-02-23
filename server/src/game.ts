@@ -1,5 +1,6 @@
 import { Player } from "./player";
 import { State } from "./state/state";
+import { WebSocket } from "ws";
 
 export class Game {
   private constructor() {}
@@ -15,8 +16,9 @@ export class Game {
       this.setState(data["state"]);
     });
 
-    this.on("playerNames", (data) => {
-      console.log("TODO: Get player names");
+    this.on("playerNames", (data, websocket) => {
+      const playerNames = Array.from(this.players.keys());
+      websocket.send(JSON.stringify({ event: "playerNames", names: playerNames }));
     });
   }
 
@@ -40,7 +42,10 @@ export class Game {
    * @param eventName Name of the event.
    * @param callback Function that is called when the event triggers.
    */
-  public static on(eventName: string, callback: (data: Record<string, any>) => void) {
+  public static on(
+    eventName: string,
+    callback: (data: Record<string, any>, websocket: WebSocket) => void
+  ) {
     if (!this.storedEvents) {
       this.storedEvents = new Map<string, Function[]>();
     }
@@ -52,13 +57,13 @@ export class Game {
     this.storedEvents.set(eventName, functions);
   }
 
-  public static call(eventName: string, data: Record<string, any>) {
+  public static call(eventName: string, data: Record<string, any>, websocket: WebSocket) {
     if (this.storedEvents.has(eventName)) {
       const functions = this.storedEvents.get(eventName) as Function[];
 
       //Call the stored callback functions
       for (let currentFunction of functions) {
-        currentFunction(data);
+        currentFunction(data, websocket);
       }
     }
   }

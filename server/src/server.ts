@@ -6,20 +6,23 @@ import { LobbyState } from "./state/type/lobbyState";
 
 const port = 2000; //TODO: This will be assigned by the server indexer.
 const wss = new WebSocketServer({ port });
+let playerIndex = 1;
 
 wss.on("connection", (websocket, request) => {
   websocket.on("message", (data: string) => {
     console.log("Message: " + data);
     const jsonData = JSON.parse(data);
-    Game.call(jsonData["event"], jsonData);
+    Game.call(jsonData["event"], jsonData, websocket);
   });
 
   // Initialize player object
-  const playerName = "Player1";
+  const playerName = "Player" + playerIndex;
   const newPlayer = new Player(playerName, websocket);
   Game.getPlayers().set(playerName, newPlayer);
-  Game.call("playerJoin", { playerName: "Player1" });
 
+  playerIndex++;
+
+  Game.call("playerJoin", { playerName: "Player1" }, websocket);
   websocket.send(JSON.stringify({ event: "setScene", scene: "lobby" }));
 });
 
