@@ -18,13 +18,13 @@ export class Player {
         if (player === this) {
           continue;
         }
-        player.sendNetworkEvent(JSON.stringify({ event: "playerQuit", playerName: this.name }));
+        player.sendNetworkEvent({ event: "playerQuit", playerName: this.name });
       }
     });
   }
 
-  public sendNetworkEvent(event: string) {
-    this.wsConnection.send(event);
+  public sendNetworkEvent(event: Record<string, any>) {
+    this.wsConnection.send(JSON.stringify(event));
   }
 
   public getName(): string {

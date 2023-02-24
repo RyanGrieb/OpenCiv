@@ -96,7 +96,7 @@ export class JoinGameScene extends Scene {
 
     NetworkEvents.on({
       eventName: "connectionClose",
-      callback: (event) => {
+      callback: (data) => {
         infoLabel.setText("Connection Failed.");
         infoLabel.conformSize().then(() => {
           infoLabel.setPosition(
@@ -104,6 +104,22 @@ export class JoinGameScene extends Scene {
             serverTextBox.getY() - infoLabel.getHeight() + 10
           );
         });
+      },
+    });
+
+    NetworkEvents.on({
+      eventName: "messageBox",
+      callback: (data) => {
+        const messageName = data["messageName"];
+        if (messageName === "gameInProgress") {
+          infoLabel.setText("Connection Failed: Game in progress.");
+          infoLabel.conformSize().then(() => {
+            infoLabel.setPosition(
+              Game.getWidth() / 2 - infoLabel.getWidth() / 2,
+              serverTextBox.getY() - infoLabel.getHeight() + 10
+            );
+          });
+        }
       },
     });
   }

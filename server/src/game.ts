@@ -1,31 +1,37 @@
 import { Player } from "./player";
 import { State } from "./state/state";
 import { WebSocket } from "ws";
+import { ServerEvents } from "./events";
 
 export class Game {
   private constructor() {}
   private static currentState: State;
   private static states: Map<string, State>;
-  private static storedEvents: Map<string, Function[]>;
   private static players: Map<string, Player>;
 
   public static init() {
     this.states = new Map<string, State>();
 
-    this.on("setState", (data) => {
-      this.setState(data["state"]);
+    ServerEvents.on({
+      eventName: "setState",
+      callback: (data: JSON) => {
+        this.setState(data["state"]);
+      },
     });
 
-    this.on("playerNames", (data, websocket) => {
-      const playerNames = Array.from(this.players.keys());
-      const requestingPlayerName = this.getPlayerFromWebsocket(websocket)?.getName();
-      websocket.send(
-        JSON.stringify({
-          event: "playerNames",
-          names: playerNames,
-          requestingName: requestingPlayerName,
-        })
-      );
+    ServerEvents.on({
+      eventName: "playerNames",
+      callback: (data: JSON, websocket) => {
+        const playerNames = Array.from(this.players.keys());
+        const requestingPlayerName = this.getPlayerFromWebsocket(websocket)?.getName();
+        websocket.send(
+          JSON.stringify({
+            event: "playerNames",
+            names: playerNames,
+            requestingName: requestingPlayerName,
+          })
+        );
+      },
     });
   }
 
@@ -42,37 +48,6 @@ export class Game {
 
     this.currentState = newState;
     this.currentState.onInitialize();
-  }
-
-  /**
-   * Stores a callback function to be called when the event is triggered.
-   * @param eventName Name of the event.
-   * @param callback Function that is called when the event triggers.
-   */
-  public static on(
-    eventName: string,
-    callback: (data: Record<string, any>, websocket: WebSocket) => void
-  ) {
-    if (!this.storedEvents) {
-      this.storedEvents = new Map<string, Function[]>();
-    }
-
-    //Get the list of stored callback functions or an empty list
-    let functions: Function[] = this.storedEvents.get(eventName) ?? [];
-    // Append the to functions
-    functions.push(callback);
-    this.storedEvents.set(eventName, functions);
-  }
-
-  public static call(eventName: string, data: Record<string, any>, websocket: WebSocket) {
-    if (this.storedEvents.has(eventName)) {
-      const functions = this.storedEvents.get(eventName) as Function[];
-
-      //Call the stored callback functions
-      for (let currentFunction of functions) {
-        currentFunction(data, websocket);
-      }
-    }
   }
 
   public static getPlayers() {
