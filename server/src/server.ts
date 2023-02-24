@@ -1,6 +1,7 @@
 import { WebSocketServer } from "ws";
 import { ServerEvents } from "./events";
 import { Game } from "./game";
+import { GameMap } from "./map/gameMap";
 import { Player } from "./player";
 import { InGameState } from "./state/type/inGameState";
 import { LobbyState } from "./state/type/lobbyState";

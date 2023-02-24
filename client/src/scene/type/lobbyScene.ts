@@ -32,7 +32,7 @@ export class LobbyScene extends Scene {
         fontColor: "white",
         onClicked: () => {
           // TODO: Change text of this button & prevent repeated clicks.
-          WebsocketClient.sendMessage(JSON.stringify({ event: "setState", state: "in_game" }));
+          WebsocketClient.sendMessage({ event: "setState", state: "in_game" });
         },
       })
     );
@@ -108,6 +108,6 @@ export class LobbyScene extends Scene {
   }
 
   private updatePlayerList() {
-    WebsocketClient.sendMessage(JSON.stringify({ event: "playerNames" }));
+    WebsocketClient.sendMessage({ event: "playerNames" });
   }
 }

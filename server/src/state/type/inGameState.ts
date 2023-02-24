@@ -1,9 +1,12 @@
 import { Game } from "../../game";
 import { ServerEvents } from "../../events";
 import { State } from "../state";
+import { GameMap } from "../../map/gameMap";
 
 export class InGameState extends State {
   public onInitialize() {
+    GameMap.init();
+
     console.log("InGame state initialized");
     //TODO: Instead of an error message, make the player a spectator
     ServerEvents.on({
@@ -21,11 +24,17 @@ export class InGameState extends State {
       },
     });
 
-    Game.getPlayers().forEach((player, playerName) => {
-      player.sendNetworkEvent({ event: "setScene", scene: "in_game" });
+    ServerEvents.on({
+      eventName: "requestMap",
+      callback: (data, websocket) => {
+        const player = Game.getPlayerFromWebsocket(websocket);
+        GameMap.sendMapChunksToPlayer(player);
+      },
     });
 
-    // TODO: Initialize game map
+    Game.getPlayers().forEach((player) => {
+      player.sendNetworkEvent({ event: "setScene", scene: "in_game" });
+    });
   }
 
   public onDestroyed() {

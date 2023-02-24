@@ -3,9 +3,7 @@ import { Game } from "../game";
 import { NetworkEvents } from "../network/client";
 
 export abstract class Scene {
-  private static ExitReceipt = new (class {
-    public property: string = "";
-  })();
+  private static ExitReceipt = new (class {})();
 
   // Use a Map<> ?
   private actors: Actor[] = [];
