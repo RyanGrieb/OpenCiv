@@ -1,7 +1,9 @@
+import { GameImage, SpriteRegion } from "../../assets";
 import { Game } from "../../game";
 import { NetworkEvents, WebsocketClient } from "../../network/client";
 import { Button } from "../../ui/button";
 import { ListBox } from "../../ui/listbox";
+import { Actor } from "../actor";
 import { Scene } from "../scene";
 import { SceneBackground } from "../sceneBackground";
 
@@ -69,10 +71,27 @@ export class LobbyScene extends Scene {
       eventName: "playerNames",
       callback: (data) => {
         const playerNames = data["names"];
-        // Update listbox
+        const requestingName = data["requestingName"];
         playerList.clearRowText();
+
         for (let i = 0; i < playerNames.length; i++) {
-          playerList.getRows()[i].setText(playerNames[i]);
+          const currentRow = playerList.getRows()[i];
+          const playerName = playerNames[i];
+
+          if (playerName === requestingName) {
+            // TODO: Indicate this row is the users player
+            currentRow.addActorIcon(
+              new Actor({
+                image: Game.getImage(GameImage.SPRITESHEET),
+                spriteRegion: SpriteRegion.STAR,
+                x: currentRow.x + currentRow.width - 32 - 8,
+                y: currentRow.y - 32 / 2 + currentRow.height / 2,
+                width: 32,
+                height: 32,
+              })
+            );
+          }
+          currentRow.setText(playerName);
         }
       },
     });

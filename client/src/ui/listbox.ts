@@ -3,20 +3,31 @@ import { Actor } from "../scene/actor";
 import { Rectangle, RectangleOptions } from "./rectangle";
 
 interface RowOptions extends RectangleOptions {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
   color: string;
   text?: string;
 }
 
-class Row extends Rectangle {
-  public color: string;
+class Row {
+  public rectangle: Rectangle;
   public textHeight: number;
+  public x: number;
+  public y: number;
+  public width: number;
+  public height: number;
   private text: string;
+  private actorIcon: Actor; //TODO: Make this a list
   // TODO: Support image
   constructor(options: RowOptions) {
-    super(options);
-
-    this.color = options.color;
+    this.rectangle = new Rectangle(options);
     this.text = options.text;
+    this.x = options.x;
+    this.y = options.y;
+    this.width = options.width;
+    this.height = options.height;
   }
 
   public setText(text: string) {
@@ -30,6 +41,15 @@ class Row extends Rectangle {
 
   public getText() {
     return this.text;
+  }
+
+  public getActorIcon() {
+    return this.actorIcon;
+  }
+
+  //TODO: Intend for this to be an array
+  public addActorIcon(actorIcon: Actor) {
+    this.actorIcon = actorIcon;
   }
 }
 
@@ -65,7 +85,7 @@ export class ListBox extends Actor {
           y: y,
           width: this.width,
           height: rowHeight,
-          color: index % 2 == 0 ? "#e9e9e9" : " #bbbbbb",
+          color: index % 2 == 0 ? "#9e9e9e" : " #bbbbbb",
         })
       );
       index += 1;
@@ -83,7 +103,8 @@ export class ListBox extends Actor {
     });
 
     this.rows.forEach((row) => {
-      Game.drawRect(row);
+      Game.drawRect(row.rectangle);
+
       if (row.getText()) {
         //TODO: Only draw text if row is visible.
         Game.drawText({
@@ -94,12 +115,17 @@ export class ListBox extends Actor {
           font: "12px sans",
         });
       }
+
+      if (row.getActorIcon()) {
+        Game.drawImageFromActor(row.getActorIcon());
+      }
     });
   }
 
   public clearRowText() {
     for (const row of this.rows) {
       row.setText("");
+      row.addActorIcon(undefined);
     }
   }
 

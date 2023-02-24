@@ -25,8 +25,8 @@ export class MainMenuScene extends Scene {
     this.addActor(
       new Button({
         text: "Singleplayer",
-        x: Game.getWidth() / 2 - 242 / 2,
-        y: Game.getHeight() / 3,
+        x: Game.getWidth() / 2 - 242 / 2 - 250 / 2,
+        y: Game.getHeight() / 3 + 68,
         width: 242,
         height: 62,
         fontColor: "white",
@@ -38,14 +38,28 @@ export class MainMenuScene extends Scene {
 
     this.addActor(
       new Button({
-        text: "Multiplayer",
-        x: Game.getWidth() / 2 - 242 / 2,
+        text: "Host Game",
+        x: Game.getWidth() / 2 - 242 / 2 + 250 / 2,
         y: Game.getHeight() / 3 + 68,
         width: 242,
         height: 62,
         fontColor: "white",
         onClicked: () => {
-          Game.setScene("mp_options");
+          console.log("singleplayer scene");
+        },
+      })
+    );
+
+    this.addActor(
+      new Button({
+        text: "Join Game",
+        x: Game.getWidth() / 2 - 242 / 2 + 250 / 2,
+        y: Game.getHeight() / 3 + 136,
+        width: 242,
+        height: 62,
+        fontColor: "white",
+        onClicked: () => {
+          Game.setScene("join_game");
         },
       })
     );
@@ -53,7 +67,7 @@ export class MainMenuScene extends Scene {
     this.addActor(
       new Button({
         text: "Options",
-        x: Game.getWidth() / 2 - 242 / 2,
+        x: Game.getWidth() / 2 - 242 / 2 - 250 / 2,
         y: Game.getHeight() / 3 + 136,
         width: 242,
         height: 62,

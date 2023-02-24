@@ -18,7 +18,14 @@ export class Game {
 
     this.on("playerNames", (data, websocket) => {
       const playerNames = Array.from(this.players.keys());
-      websocket.send(JSON.stringify({ event: "playerNames", names: playerNames }));
+      const requestingPlayerName = this.getPlayerFromWebsocket(websocket)?.getName();
+      websocket.send(
+        JSON.stringify({
+          event: "playerNames",
+          names: playerNames,
+          requestingName: requestingPlayerName,
+        })
+      );
     });
   }
 
@@ -74,5 +81,15 @@ export class Game {
     }
 
     return this.players;
+  }
+
+  public static getPlayerFromWebsocket(websocket: WebSocket) {
+    for (const player of this.players.values()) {
+      if (player.getWebsocket() === websocket) {
+        return player;
+      }
+    }
+
+    return undefined;
   }
 }

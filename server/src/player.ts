@@ -30,4 +30,8 @@ export class Player {
   public getName(): string {
     return this.name;
   }
+
+  public getWebsocket() {
+    return this.wsConnection;
+  }
 }

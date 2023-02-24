@@ -33,6 +33,7 @@ export class JoinGameScene extends Scene {
     });
 
     serverTextBox.setSelected(true);
+    serverTextBox.setText("localhost");
 
     this.addActor(serverTextBox);
 
@@ -88,7 +89,7 @@ export class JoinGameScene extends Scene {
         height: 62,
         fontColor: "white",
         onClicked: () => {
-          Game.setScene("mp_options");
+          Game.setScene("main_menu");
         },
       })
     );

@@ -83,21 +83,16 @@ export class TextBox extends Actor {
         case "Tab":
           return;
         case "Backspace":
-          this.text = this.text.slice(0, -1);
+          this.setText(this.text.slice(0, -1));
           break;
         case "Control":
           //TODO: Handle Ctrl+A,V,C
           return;
         default:
-          this.text += options.key;
+          this.setText(this.getText() + options.key);
           break;
       }
       //FIXME: Handle special keys (Backspace, ect.)
-
-      Game.measureText(this.text, "24px sans-serif").then(([width, height]) => {
-        //this.textHeight = height;
-        this.blinkerX = this.x + 2 + width;
-      });
     });
   }
 
@@ -155,5 +150,13 @@ export class TextBox extends Actor {
 
   public getText(): string {
     return this.text;
+  }
+
+  public setText(text: string) {
+    this.text = text;
+    Game.measureText(this.text, "24px sans-serif").then(([width, height]) => {
+      //this.textHeight = height;
+      this.blinkerX = this.x + 2 + width;
+    });
   }
 }
