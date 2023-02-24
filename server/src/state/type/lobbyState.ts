@@ -32,7 +32,6 @@ export class LobbyState extends State {
   }
 
   public onDestroyed() {
-    super.onDestroyed();
-    // We need ot remove the on("Connection")
+    return super.onDestroyed();
   }
 }

@@ -29,6 +29,6 @@ export class InGameState extends State {
   }
 
   public onDestroyed() {
-    super.onDestroyed();
+    return super.onDestroyed();
   }
 }

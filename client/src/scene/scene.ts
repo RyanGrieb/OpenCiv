@@ -3,6 +3,10 @@ import { Game } from "../game";
 import { NetworkEvents } from "../network/client";
 
 export abstract class Scene {
+  private static ExitReceipt = new (class {
+    public property: string = "";
+  })();
+
   // Use a Map<> ?
   private actors: Actor[] = [];
 
@@ -20,12 +24,14 @@ export abstract class Scene {
 
   public onInitialize() {}
 
-  public onDestroyed(newScene: Scene) {
+  public onDestroyed(newScene: Scene): typeof Scene.ExitReceipt {
     this.actors.forEach((actor) => {
       actor.call("mouse_exit");
       actor.onDestroyed();
     });
     this.actors = [];
     NetworkEvents.clear();
+
+    return Scene.ExitReceipt;
   }
 }

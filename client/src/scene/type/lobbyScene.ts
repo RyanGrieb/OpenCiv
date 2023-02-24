@@ -97,12 +97,14 @@ export class LobbyScene extends Scene {
     });
   }
 
-  public onDestroyed(newScene: Scene): void {
-    super.onDestroyed(newScene);
+  public onDestroyed(newScene: Scene) {
+    const exitReceipt = super.onDestroyed(newScene);
     // Disconnect from the server if we go back
     if (newScene.constructor.name !== "InGameScene") {
       WebsocketClient.disconnect();
     }
+
+    return exitReceipt;
   }
 
   private updatePlayerList() {
