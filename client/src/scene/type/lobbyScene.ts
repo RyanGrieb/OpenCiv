@@ -50,17 +50,43 @@ export class LobbyScene extends Scene {
       })
     );
 
-    WebsocketClient.sendMessage(JSON.stringify({ event: "playerNames" }));
+    this.updatePlayerList();
+
+    NetworkEvents.on({
+      eventName: "playerJoin",
+      callback: this.updatePlayerList,
+    });
+    NetworkEvents.on({
+      eventName: "playerQuit",
+      callback: this.updatePlayerList,
+    });
+    NetworkEvents.on({
+      eventName: "playerLeave",
+      callback: this.updatePlayerList,
+    });
+
     NetworkEvents.on({
       eventName: "playerNames",
       callback: (data) => {
-        console.log(data);
         const playerNames = data["names"];
         // Update listbox
+        playerList.clearRowText();
         for (let i = 0; i < playerNames.length; i++) {
           playerList.getRows()[i].setText(playerNames[i]);
         }
       },
     });
+  }
+
+  public onDestroyed(newScene: Scene): void {
+    super.onDestroyed(newScene);
+    // Disconnect from the server if we go back
+    if (newScene.constructor.name !== "InGameScene") {
+      WebsocketClient.disconnect();
+    }
+  }
+
+  private updatePlayerList() {
+    WebsocketClient.sendMessage(JSON.stringify({ event: "playerNames" }));
   }
 }

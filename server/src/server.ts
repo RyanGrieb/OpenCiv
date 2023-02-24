@@ -17,18 +17,18 @@ wss.on("connection", (websocket, request) => {
 
   // Initialize player object
   const playerName = "Player" + playerIndex;
+
+  // Send playerJoin data to other connected players
+  for (const player of Array.from(Game.getPlayers().values())) {
+    player.sendNetworkEvent(JSON.stringify({ event: "playerJoin", playerName: playerName }));
+  }
+
   const newPlayer = new Player(playerName, websocket);
   Game.getPlayers().set(playerName, newPlayer);
-
+  console.log(newPlayer.getName() + " connected");
   playerIndex++;
-
-  Game.call("playerJoin", { playerName: "Player1" }, websocket);
-  websocket.send(JSON.stringify({ event: "setScene", scene: "lobby" }));
-});
-
-wss.on("close", (args: any) => {
-  console.log("Leave?");
-  console.log(args); // Is it called args?
+  //Game.call("playerJoin", { playerName: "Player1" }, websocket);
+  newPlayer.sendNetworkEvent(JSON.stringify({ event: "setScene", scene: "lobby" }));
 });
 
 console.log("Server initialized on port: " + port);

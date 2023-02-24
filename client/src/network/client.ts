@@ -101,11 +101,11 @@ export class WebsocketClient {
     this.websocket = new WebSocket("ws://" + serverAddress + ":2000/");
 
     this.websocket.addEventListener("open", (event) => {
-      console.log("Connected to server: " + event);
+      console.log("Connected to server");
     });
 
     this.websocket.addEventListener("message", (event) => {
-      console.log(event.data);
+      console.log("Message from server: " + event.data);
       const eventJSON = JSON.parse(event.data);
       NetworkEvents.call(eventJSON["event"], eventJSON);
     });
@@ -113,6 +113,10 @@ export class WebsocketClient {
     this.websocket.addEventListener("close", (event) => {
       NetworkEvents.call("connectionClosed", JSON.parse("{}"));
     });
+  }
+
+  public static disconnect() {
+    this.websocket.close();
   }
 
   public static sendMessage(message: string) {

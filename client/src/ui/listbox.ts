@@ -97,6 +97,12 @@ export class ListBox extends Actor {
     });
   }
 
+  public clearRowText() {
+    for (const row of this.rows) {
+      row.setText("");
+    }
+  }
+
   public getRows(): Row[] {
     return this.rows;
   }

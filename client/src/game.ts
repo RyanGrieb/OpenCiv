@@ -148,7 +148,7 @@ export class Game {
     const newScene = this.scenes.get(sceneName);
 
     if (this.currentScene != null) {
-      this.currentScene.onDestroyed();
+      this.currentScene.onDestroyed(newScene);
     }
 
     this.currentScene = newScene;
@@ -156,7 +156,6 @@ export class Game {
   }
 
   public static addActor(actor: Actor) {
-    console.log("Add actor");
     this.actors.push(actor);
     actor.onCreated();
   }
@@ -278,5 +277,9 @@ export class Game {
 
   public static getCanvas() {
     return this.canvas;
+  }
+
+  public static getCurrentScene() {
+    return this.currentScene;
   }
 }

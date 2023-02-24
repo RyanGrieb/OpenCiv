@@ -20,7 +20,7 @@ export abstract class Scene {
 
   public onInitialize() {}
 
-  public onDestroyed() {
+  public onDestroyed(newScene: Scene) {
     this.actors.forEach((actor) => {
       actor.call("mouse_exit");
       actor.onDestroyed();
