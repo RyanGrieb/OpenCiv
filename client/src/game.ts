@@ -176,6 +176,9 @@ export class Game {
       return;
     }
 
+    this.canvasContext.save();
+    //this.canvasContext.scale(1.5,1.5)
+
     if (actor.getSpriteRegion()) {
       const spriteX = parseInt(actor.getSpriteRegion().split(",")[0]) * 32;
       const spriteY = parseInt(actor.getSpriteRegion().split(",")[1]) * 32;
@@ -200,6 +203,8 @@ export class Game {
         actor.getHeight()
       );
     }
+
+    this.canvasContext.restore();
   }
 
   public static async waitUntilMeasureQueueIsEmpty(): Promise<void> {

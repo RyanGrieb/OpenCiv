@@ -17,6 +17,7 @@ export class Game {
       callback: (data: JSON) => {
         this.setState(data["state"]);
       },
+      globalEvent: true,
     });
 
     ServerEvents.on({
@@ -32,6 +33,17 @@ export class Game {
           })
         );
       },
+      globalEvent: true,
+    });
+
+    ServerEvents.on({
+      eventName: "playerQuit",
+      callback: (data: JSON) => {
+        if (this.players.size <= 1) {
+          Game.setState("lobby");
+        }
+      },
+      globalEvent: true,
     });
   }
 

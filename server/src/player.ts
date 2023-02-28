@@ -1,4 +1,5 @@
 import { WebSocket } from "ws";
+import { ServerEvents } from "./events";
 import { Game } from "./game";
 
 export class Player {
@@ -11,6 +12,7 @@ export class Player {
 
     this.wsConnection.on("close", (data) => {
       console.log(name + " quit");
+      ServerEvents.call("playerQuit", {}, this.wsConnection);
       Game.getPlayers().delete(this.name);
 
       // Send playerQuit data to other connected players

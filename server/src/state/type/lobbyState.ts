@@ -8,6 +8,7 @@ let playerIndex = 1;
 export class LobbyState extends State {
   public onInitialize() {
     console.log("Lobby state initialized");
+    playerIndex = 1;
 
     ServerEvents.on({
       eventName: "connection",
