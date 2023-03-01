@@ -66,8 +66,18 @@ export class Game {
     });
 
     document.body.addEventListener("keydown", (event) => {
+      if (this.currentScene) this.currentScene.call("keydown", { key: event.key });
+
       this.actors.forEach((actor) => {
         actor.call("keydown", { key: event.key });
+      });
+    });
+
+    document.body.addEventListener("keyup", (event) => {
+      if (this.currentScene) this.currentScene.call("keyup", { key: event.key });
+
+      this.actors.forEach((actor) => {
+        actor.call("keyup", { key: event.key });
       });
     });
 
@@ -178,6 +188,8 @@ export class Game {
 
     this.canvasContext.save();
     //this.canvasContext.scale(1.5,1.5)
+    const camX = this.currentScene.getCamera()?.getX() ?? 0;
+    const camY = this.currentScene.getCamera()?.getY() ?? 0;
 
     if (actor.getSpriteRegion()) {
       const spriteX = parseInt(actor.getSpriteRegion().split(",")[0]) * 32;
@@ -185,8 +197,8 @@ export class Game {
       this.canvasContext.drawImage(
         actor.getImage(),
         //TODO: Calculate sprite position
-        spriteX,
-        spriteY,
+        spriteX + camX,
+        spriteY + camY,
         32,
         32,
         actor.getX(),
@@ -197,8 +209,8 @@ export class Game {
     } else {
       this.canvasContext.drawImage(
         actor.getImage(),
-        actor.getX(),
-        actor.getY(),
+        actor.getX() + camX,
+        actor.getY() + camY,
         actor.getWidth(),
         actor.getHeight()
       );
