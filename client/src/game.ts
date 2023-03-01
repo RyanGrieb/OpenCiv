@@ -37,6 +37,8 @@ export class Game {
   private static fps: number = 0;
   private static actors: Actor[] = [];
   private static measureQueue: string[];
+  private static mouseX: number;
+  private static mouseY: number;
 
   private constructor() {}
 
@@ -50,9 +52,10 @@ export class Game {
     this.canvasContext.fillStyle = options.canvasColor ?? "white";
     this.canvasContext.fillRect(0, 0, this.canvas.width, this.canvas.height);
     this.canvasContext.font = "12px Times new Roman";
+    this.canvasContext.imageSmoothingEnabled = false;
     this.measureQueue = [];
 
-    //Initialize canvas listeners
+    //Initialize canvas listeners. TODO: Make this less redundant w/ a helper function
     this.canvas.addEventListener("mousemove", (event) => {
       if (this.currentScene) {
         this.currentScene.call("mousemove", { x: event.clientX, y: event.clientY });
@@ -61,6 +64,9 @@ export class Game {
       this.actors.forEach((actor) => {
         actor.call("mousemove", { x: event.clientX, y: event.clientY });
       });
+
+      this.mouseX = event.clientX;
+      this.mouseY = event.clientY;
     });
 
     this.canvas.addEventListener("mousedown", (event) => {
@@ -80,6 +86,30 @@ export class Game {
 
       this.actors.forEach((actor) => {
         actor.call("mouseup", { x: event.clientX, y: event.clientY });
+      });
+    });
+
+    this.canvas.addEventListener("mouseleave", (event) => {
+      if (this.currentScene) {
+        this.currentScene.call("mouseleave", { x: event.clientX, y: event.clientY });
+      }
+
+      this.actors.forEach((actor) => {
+        actor.call("mouseleave", { x: event.clientX, y: event.clientY });
+      });
+    });
+
+    this.canvas.addEventListener("wheel", (event) => {
+      if (this.currentScene) {
+        this.currentScene.call("wheel", {
+          x: event.offsetX,
+          y: event.offsetY,
+          deltaY: event.deltaY,
+        });
+      }
+
+      this.actors.forEach((actor) => {
+        actor.call("wheel", { deltaY: event.deltaY });
       });
     });
 
@@ -202,6 +232,11 @@ export class Game {
     actor.onCreated();
   }
 
+  public static removeActor(actor: Actor) {
+    this.actors = this.actors.filter((element) => element !== actor);
+    actor.onDestroyed();
+  }
+
   public static drawImageFromActor(actor: Actor) {
     if (!actor.getImage()) {
       console.log("Warning: Attempted to draw empty actor: " + actor.getWidth());
@@ -209,9 +244,13 @@ export class Game {
     }
 
     this.canvasContext.save();
-    //this.canvasContext.scale(1.5,1.5)
-    const camX = this.currentScene.getCamera()?.getX() ?? 0;
-    const camY = this.currentScene.getCamera()?.getY() ?? 0;
+
+    if (this.currentScene.getCamera()) {
+      const zoom = this.currentScene.getCamera().getZoomAmount();
+      const cameraX = this.currentScene.getCamera().getX();
+      const cameraY = this.currentScene.getCamera().getY();
+      this.canvasContext.setTransform(zoom, 0, 0, zoom, cameraX, cameraY);
+    }
 
     if (actor.getSpriteRegion()) {
       const spriteX = parseInt(actor.getSpriteRegion().split(",")[0]) * 32;
@@ -219,8 +258,8 @@ export class Game {
       this.canvasContext.drawImage(
         actor.getImage(),
         //TODO: Calculate sprite position
-        spriteX + camX,
-        spriteY + camY,
+        spriteX,
+        spriteY,
         32,
         32,
         actor.getX(),
@@ -231,13 +270,12 @@ export class Game {
     } else {
       this.canvasContext.drawImage(
         actor.getImage(),
-        actor.getX() + camX,
-        actor.getY() + camY,
+        actor.getX(),
+        actor.getY(),
         actor.getWidth(),
         actor.getHeight()
       );
     }
-
     this.canvasContext.restore();
   }
 
@@ -330,5 +368,19 @@ export class Game {
 
   public static getCurrentScene() {
     return this.currentScene;
+  }
+
+  public static getMouseX() {
+    return this.mouseX;
+  }
+  public static getMouseY() {
+    return this.mouseY;
+  }
+
+  public static getRelativeMouseX() {
+    return this.mouseX - (this.currentScene.getCamera()?.getX() ?? 0);
+  }
+  public static getRelativeMouseY() {
+    return this.mouseY - (this.currentScene.getCamera()?.getY() ?? 0);
   }
 }

@@ -29,6 +29,7 @@ export class GameMap {
     }
 
     this.tiles[20][20].setTileType("grass");
+    this.tiles[21][20].setTileType("grass_hill");
   }
 
   public static generateTerrain() {

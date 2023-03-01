@@ -73,5 +73,20 @@ export class InGameScene extends Scene {
       this.lastMouseY = options.y - this.getCamera().getY();
       this.mouseHeld = false;
     });
+
+    this.on("wheel", (options) => {
+      if (options.deltaY > 0) {
+        this.getCamera().zoom(options.x, options.y, 1 / 1.1);
+      }
+      if (options.deltaY < 0) {
+        this.getCamera().zoom(options.x, options.y, 1.1);
+      }
+    });
+
+    this.on("mouseleave", (options) => {
+      this.lastMouseX = options.x - this.getCamera().getX();
+      this.lastMouseY = options.y - this.getCamera().getY();
+      this.mouseHeld = false;
+    });
   }
 }

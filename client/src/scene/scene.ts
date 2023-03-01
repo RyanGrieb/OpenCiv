@@ -18,6 +18,12 @@ export abstract class Scene {
     this.actors.push(actor);
     Game.addActor(actor);
   }
+
+  public removeActor(actor: Actor) {
+    this.actors = this.actors.filter((element) => element !== actor);
+    Game.removeActor(actor);
+  }
+
   public gameLoop() {
     if (this.camera) {
       this.camera.updateOffset();

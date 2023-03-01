@@ -60,4 +60,25 @@ export class GameMap {
       },
     });
   }
+
+  public static refreshMap() {
+    Game.getCurrentScene().removeActor(this.mapActor);
+    const tileActorList = [];
+
+    for (let x = 0; x < this.mapWidth; x++) {
+      for (let y = 0; y < this.mapHeight; y++) {
+        let yPos = y * 24;
+        let xPos = x * 32;
+        if (y % 2 != 0) {
+          xPos += 16;
+        }
+
+        const tile = new Tile({ tileType: this.tiles[x][y].getTileType(), x: xPos, y: yPos });
+        tileActorList.push(tile);
+      }
+    }
+
+    this.mapActor = Actor.mergeActors(tileActorList);
+    Game.getCurrentScene().addActor(this.mapActor);
+  }
 }
