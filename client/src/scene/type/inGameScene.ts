@@ -4,8 +4,13 @@ import { Scene } from "../scene";
 
 export class InGameScene extends Scene {
   private keysHeld: string[];
+  private lastMouseX: number;
+  private lastMouseY: number;
+  private mouseHeld: boolean;
   public onInitialize(): void {
     this.keysHeld = [];
+    this.lastMouseX = 0;
+    this.lastMouseY = 0;
 
     GameMap.init();
     this.setCamera(new Camera());
@@ -49,6 +54,24 @@ export class InGameScene extends Scene {
       if (options.key == "s" || options.key == "S") {
         this.getCamera().addVel(0, 5);
       }
+    });
+
+    this.on("mousedown", (options) => {
+      this.lastMouseX = options.x - this.getCamera().getX();
+      this.lastMouseY = options.y - this.getCamera().getY();
+      this.mouseHeld = true;
+    });
+
+    this.on("mousemove", (options) => {
+      if (this.mouseHeld) {
+        this.getCamera().setPosition(options.x - this.lastMouseX, options.y - this.lastMouseY);
+      }
+    });
+
+    this.on("mouseup", (options) => {
+      this.lastMouseX = options.x - this.getCamera().getX();
+      this.lastMouseY = options.y - this.getCamera().getY();
+      this.mouseHeld = false;
     });
   }
 }

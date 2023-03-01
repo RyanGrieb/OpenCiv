@@ -54,19 +54,39 @@ export class Game {
 
     //Initialize canvas listeners
     this.canvas.addEventListener("mousemove", (event) => {
+      if (this.currentScene) {
+        this.currentScene.call("mousemove", { x: event.clientX, y: event.clientY });
+      }
+
       this.actors.forEach((actor) => {
-        actor.call("mouse_move", { x: event.clientX, y: event.clientY });
+        actor.call("mousemove", { x: event.clientX, y: event.clientY });
+      });
+    });
+
+    this.canvas.addEventListener("mousedown", (event) => {
+      if (this.currentScene) {
+        this.currentScene.call("mousedown", { x: event.clientX, y: event.clientY });
+      }
+
+      this.actors.forEach((actor) => {
+        actor.call("mousedown", { x: event.clientX, y: event.clientY });
       });
     });
 
     this.canvas.addEventListener("mouseup", (event) => {
+      if (this.currentScene) {
+        this.currentScene.call("mouseup", { x: event.clientX, y: event.clientY });
+      }
+
       this.actors.forEach((actor) => {
-        actor.call("mouse_up", { x: event.clientX, y: event.clientY });
+        actor.call("mouseup", { x: event.clientX, y: event.clientY });
       });
     });
 
     document.body.addEventListener("keydown", (event) => {
-      if (this.currentScene) this.currentScene.call("keydown", { key: event.key });
+      if (this.currentScene) {
+        this.currentScene.call("keydown", { key: event.key });
+      }
 
       this.actors.forEach((actor) => {
         actor.call("keydown", { key: event.key });
@@ -74,7 +94,9 @@ export class Game {
     });
 
     document.body.addEventListener("keyup", (event) => {
-      if (this.currentScene) this.currentScene.call("keyup", { key: event.key });
+      if (this.currentScene) {
+        this.currentScene.call("keyup", { key: event.key });
+      }
 
       this.actors.forEach((actor) => {
         actor.call("keyup", { key: event.key });

@@ -33,7 +33,7 @@ export class Actor {
     this.width = actorOptions.width;
     this.height = actorOptions.height;
 
-    this.on("mouse_move", (options) => {
+    this.on("mousemove", (options) => {
       if (this.insideActor(options.x, options.y)) {
         if (!this.mouseInside) {
           this.call("mouse_enter");
@@ -47,7 +47,7 @@ export class Actor {
       }
     });
 
-    this.on("mouse_up", (options) => {
+    this.on("mouseup", (options) => {
       if (this.insideActor(options.x, options.y)) {
         //FIXME: Distinguish mouse_up & mouse_click_up better?
         this.call("clicked");

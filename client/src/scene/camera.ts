@@ -26,8 +26,9 @@ export class Camera {
     return this.y;
   }
 
-  public getXVel() {
-    return this.xVelAmount;
+  public setPosition(x: number, y: number) {
+    this.x = x;
+    this.y = y;
   }
 
   public updateOffset() {
