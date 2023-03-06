@@ -11,15 +11,34 @@ enum MapSize {
 }
 
 export class GameMap {
+  private static oddEdgeAxis = [
+    [0, -1],
+    [1, -1],
+    [1, 0],
+    [1, 1],
+    [0, 1],
+    [-1, 0],
+  ];
+  private static evenEdgeAxis = [
+    [-1, -1],
+    [0, -1],
+    [1, 0],
+    [0, 1],
+    [-1, 1],
+    [-1, 0],
+  ];
+
   private static tiles: Tile[][];
   private static mapWidth: number;
   private static mapHeight: number;
 
   public static init() {
+    // Assign map dimension values
     const mapDimensions = this.getDimensionValues(MapSize.STANDARD);
     this.mapWidth = mapDimensions[0];
     this.mapHeight = mapDimensions[1];
 
+    // Initialize all tiles as ocean tiles
     this.tiles = [];
     for (let x = 0; x < this.mapWidth; x++) {
       this.tiles[x] = [];
@@ -28,8 +47,15 @@ export class GameMap {
       }
     }
 
+    // After creating all tile objects, assign their respective adjacent tiles
+    this.initAdjacentTiles();
+
+    // Current debug code:
     this.tiles[20][20].setTileType("grass");
-    this.tiles[21][20].setTileType("grass_hill");
+
+    for (let tile of this.tiles[20][20].getAdjacentTiles()) {
+      tile.setTileType("grass");
+    }
   }
 
   public static generateTerrain() {
@@ -61,6 +87,40 @@ export class GameMap {
           lastChunk = true;
         }
         player.sendNetworkEvent({ event: "mapChunk", tiles: chunkTiles, lastChunk: lastChunk });
+      }
+    }
+  }
+
+  /**
+   * Iterate through every tile & assign it's adjacent neighboring tiles through: setAdjacentTile()
+   */
+  private static initAdjacentTiles() {
+    for (let x = 0; x < this.mapWidth; x++) {
+      for (let y = 0; y < this.mapHeight; y++) {
+        // Set the 6 edges of the hexagon.
+
+        let edgeAxis: number[][];
+        if (y % 2 == 0) edgeAxis = this.evenEdgeAxis;
+        else edgeAxis = this.oddEdgeAxis;
+
+        for (let i = 0; i < edgeAxis.length; i++) {
+          let edgeX = x + edgeAxis[i][0];
+          let edgeY = y + edgeAxis[i][1];
+
+          if (
+            edgeX == -1 ||
+            edgeY == -1 ||
+            edgeX > this.mapWidth - 1 ||
+            edgeY > this.mapHeight - 1
+          ) {
+            this.tiles[x][y].setAdjacentTile(i, null);
+            continue;
+          }
+
+          this.tiles[x][y].setAdjacentTile(i, this.tiles[x + edgeAxis[i][0]][y + edgeAxis[i][1]]);
+          //stencilMap[x][y].setEdge(i, stencilMap[x + edgeAxis[i][0]][y + edgeAxis[i][1]]);
+          //geographyMap[x][y].setEdge(i, geographyMap[x + edgeAxis[i][0]][y + edgeAxis[i][1]]);
+        }
       }
     }
   }
