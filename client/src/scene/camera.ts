@@ -1,5 +1,15 @@
+import { Game } from "../game";
+
+export interface CameraOptions {
+  wasd_controls: boolean;
+  mouse_controls: boolean;
+  initial_position?: [number, number];
+}
+
 export class Camera {
   //TODO: Implement zoom: https://stackoverflow.com/questions/5189968/zoom-canvas-to-mouse-cursor/5526721#5526721
+
+  private keysHeld: string[];
 
   private x: number;
   private y: number;
@@ -8,12 +18,100 @@ export class Camera {
   private yVelAmount: number;
   private zoomAmount: number;
 
-  constructor() {
+  private lastMouseX: number;
+  private lastMouseY: number;
+  private mouseHeld: boolean;
+
+  constructor(options: CameraOptions) {
+    this.keysHeld = [];
     this.x = 0;
     this.y = 0;
+
     this.xVelAmount = 0;
     this.yVelAmount = 0;
     this.zoomAmount = 1;
+
+    this.lastMouseX = 0;
+    this.lastMouseY = 0;
+
+    const scene = Game.getCurrentScene();
+    if (options.wasd_controls) {
+      scene.on("keydown", (options) => {
+        if (this.keysHeld.includes(options.key)) {
+          return;
+        }
+
+        this.keysHeld.push(options.key);
+
+        if (options.key == "a" || options.key == "A") {
+          console.log("a");
+          scene.getCamera().addVel(5, 0);
+        }
+        if (options.key == "d" || options.key == "D") {
+          scene.getCamera().addVel(-5, 0);
+        }
+        if (options.key == "w" || options.key == "W") {
+          scene.getCamera().addVel(0, 5);
+        }
+        if (options.key == "s" || options.key == "S") {
+          scene.getCamera().addVel(0, -5);
+        }
+      });
+
+      scene.on("keyup", (options) => {
+        this.keysHeld = this.keysHeld.filter((element) => element !== options.key); // Remove key from held lits
+
+        if (options.key == "a" || options.key == "A") {
+          console.log("no a ");
+          scene.getCamera().addVel(-5, 0);
+        }
+        if (options.key == "d" || options.key == "D") {
+          scene.getCamera().addVel(5, 0);
+        }
+
+        if (options.key == "w" || options.key == "W") {
+          scene.getCamera().addVel(0, -5);
+        }
+        if (options.key == "s" || options.key == "S") {
+          scene.getCamera().addVel(0, 5);
+        }
+      });
+    }
+
+    if (options.mouse_controls) {
+      scene.on("mousedown", (options) => {
+        this.lastMouseX = options.x - scene.getCamera().getX();
+        this.lastMouseY = options.y - scene.getCamera().getY();
+        this.mouseHeld = true;
+      });
+
+      scene.on("mousemove", (options) => {
+        if (this.mouseHeld) {
+          scene.getCamera().setPosition(options.x - this.lastMouseX, options.y - this.lastMouseY);
+        }
+      });
+
+      scene.on("mouseup", (options) => {
+        this.lastMouseX = options.x - scene.getCamera().getX();
+        this.lastMouseY = options.y - scene.getCamera().getY();
+        this.mouseHeld = false;
+      });
+
+      scene.on("wheel", (options) => {
+        if (options.deltaY > 0) {
+          scene.getCamera().zoom(options.x, options.y, 1 / 1.1);
+        }
+        if (options.deltaY < 0) {
+          scene.getCamera().zoom(options.x, options.y, 1.1);
+        }
+      });
+
+      scene.on("mouseleave", (options) => {
+        this.lastMouseX = options.x - scene.getCamera().getX();
+        this.lastMouseY = options.y - scene.getCamera().getY();
+        this.mouseHeld = false;
+      });
+    }
   }
   public addVel(x: number, y: number) {
     this.xVelAmount += x;
@@ -33,6 +131,9 @@ export class Camera {
     this.y = y;
   }
 
+  /**
+   * Updates x & y position of camera based on assigned xVel and yVel. To be called every render frame.
+   */
   public updateOffset() {
     if (this.xVelAmount) {
       this.x += this.xVelAmount * Math.max(1, this.zoomAmount);
@@ -45,6 +146,7 @@ export class Camera {
 
   public zoom(atX: number, atY: number, amount: number) {
     // Calculate the new position of the camera
+    //https://stackoverflow.com/questions/5189968/zoom-canvas-to-mouse-cursor/5526721#5526721
     this.x = atX - (atX - this.x) * amount;
     this.y = atY - (atY - this.y) * amount;
     this.zoomAmount *= amount;
