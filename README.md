@@ -22,8 +22,7 @@ Eventually, my main objective is to implement server-sided modding. Where the se
 
 The game isn't complete, so its not recommended:
 
-To run a local instance, type `npm install` in /OpenCiv/, /OpenCiv/client, /OpenCiv/server then, `npm start` in /OpenCiv/
-TODO: Make a npm script to install all dependencies in all directories
+To run a local instance, type `npm run install-all`, then `npm start` in the /OpenCiv/ directory
 
 ## How do I play this?
 
