@@ -1,5 +1,6 @@
 import { Player } from "../player";
 import { Tile } from "./tile";
+import random from "random";
 
 enum MapSize {
   DUEL = "40x24",
@@ -49,17 +50,108 @@ export class GameMap {
 
     // After creating all tile objects, assign their respective adjacent tiles
     this.initAdjacentTiles();
-
-    // Current debug code:
-    this.tiles[20][20].setTileType("grass");
-
-    for (let tile of this.tiles[20][20].getAdjacentTiles()) {
-      tile.setTileType("grass");
-    }
+    this.generateTerrain();
   }
 
   public static generateTerrain() {
     //TODO: Lets re-do our generation code with something better.
+
+    /**
+     * Map generation:
+     * == Generate grass circles ==
+     * 1. Define a paint tool that draws a circle of grass around a certain point
+     * 2. Randomly paint these circles on the map, where the closer to the center you are, the higher chance we paint
+     * 3. Keep doing this until (90% - pangaea, 50% - Normal, 25% - Island) of the map is grass.
+     * == Generate hills & mountains ==
+     * 3. Keep track of tiles that are already painted. If we paint over an existing tile, store that increment in a 2D array.
+     * 4. Once finally painted (For pangaea ensure no islands), we now focus on hills & mountains.
+     * 5. Take the highest values and assign those to mountain tiles, other tiles will be hills.
+     * 6. Note, we only want 5% of tiles to be mountains, 10-25% to be hills. We would
+     * == Generate biomes (based on hot, cold, wet, dry)
+     * 7. First, we focus on hot & cold factors. We generate a random gradient, where there are higher chances of cold tiles at the top and bottom parts of the map & vice. versa for hot tiles.
+     * 8. Then for wet and dry tiles, we assign another gradient, but this would be random blobs on the map.
+     * 9. Then based on hot,cold,wet,and dry values, we assign the respective tiles:
+      Hot and wet: Jungle (For jungle create a darker grassland tile)
+      Hot and dry: Desert
+      Cold and wet: Tundra
+      Cold and dry: Snow
+      Avg. Temp and wet: Grassland
+      Avg. Temp and dry: Plains
+     *  
+     */
+
+    // == Generate grass circles ==
+    const LAND_MASS_PARAM = 5;
+    const landMassSize = ((this.mapWidth * this.mapHeight) / 12.5) * (LAND_MASS_PARAM + 2);
+    const maxPathLength = 140;
+
+    while (this.getTotalGeographyLandMass() < landMassSize) {
+      let rndX = random.int(10, this.mapWidth - 11);
+      let rndY = random.int(10, this.mapHeight - 11);
+      const currentPathLength = random.int(40, maxPathLength);
+
+      // Draw a bunch of broken circles in a random direction until currentPathLength limit is reached.
+      for (let i = 0; i < currentPathLength; i++) {
+        let generationTiles: Tile[] = [];
+        const selectedTile = this.tiles[rndX][rndY];
+        let nextPathTile: Tile = undefined;
+
+        generationTiles.push(selectedTile);
+        generationTiles = generationTiles.concat(selectedTile.getAdjacentTiles());
+
+        const adjacentOceanTiles: Tile[] = [];
+        for (const tile of generationTiles) {
+          if (!tile) continue;
+
+          if (Math.random() > 0.5) {
+            tile.setTileType("grass");
+            tile.setGenerationHeight(tile.getGenerationHeight() + 1);
+          }
+
+          // Populate tiles w/ adj ocean array
+          for (const adjTile of tile.getAdjacentTiles()) {
+            if (!adjTile) continue;
+
+            if (adjTile.containsTileType("ocean")) {
+              adjacentOceanTiles.push(adjTile);
+            }
+          }
+        }
+
+        // Get the nextPathTile randomly, which has to be an adjacent ocean tile
+        nextPathTile = adjacentOceanTiles[random.int(0, adjacentOceanTiles.length)];
+
+        // If we can't get get a tile adjacent to ocean, the path ends.
+        if (!nextPathTile) break;
+        rndX = nextPathTile.getX();
+        rndY = nextPathTile.getY();
+      }
+    }
+    // == Generate grass circles ==
+
+    // == Clear isolated single ocean tiles
+
+    for (let x = 0; x < this.mapWidth; x++) {
+      for (let y = 0; y < this.mapHeight; y++) {
+        const tile = this.tiles[x][y];
+
+        if (tile.containsTileType("ocean")) {
+          let surroundedByLand = true;
+          for (const adjTile of tile.getAdjacentTiles()) {
+            if (!adjTile) continue;
+
+            if (adjTile.containsTileType("ocean")) {
+              surroundedByLand = false;
+            }
+          }
+
+          if (surroundedByLand) {
+            tile.setTileType("grass");
+          }
+        }
+      }
+    }
+    // == Clear isolated single ocean tiles
   }
 
   public static getDimensionValues(mapSize: MapSize) {
@@ -89,6 +181,17 @@ export class GameMap {
         player.sendNetworkEvent({ event: "mapChunk", tiles: chunkTiles, lastChunk: lastChunk });
       }
     }
+  }
+
+  private static getTotalGeographyLandMass() {
+    let total = 0;
+    for (let x = 0; x < this.mapWidth; x++) {
+      for (let y = 0; y < this.mapHeight; y++) {
+        if (this.tiles[x][y].getGenerationHeight() != 0) total++;
+      }
+    }
+
+    return total;
   }
 
   /**

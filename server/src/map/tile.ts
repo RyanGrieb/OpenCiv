@@ -1,4 +1,7 @@
 export class Tile {
+  //== Generation Values ==
+  private generationHeight: number;
+  //== Generation Values ==
   private tileType: string;
   private adjacentTiles: Tile[];
 
@@ -6,6 +9,8 @@ export class Tile {
   private y: number;
 
   constructor(tileType: string, x: number, y: number) {
+    this.generationHeight = 0;
+
     this.tileType = tileType;
     this.adjacentTiles = [];
 
@@ -25,7 +30,28 @@ export class Tile {
     this.adjacentTiles[index] = tile;
   }
 
+  public containsTileType(tileType: String) {
+    //FIXME: Tile tiles should be in an array.
+    return this.tileType === tileType;
+  }
+
   public getAdjacentTiles() {
     return this.adjacentTiles;
+  }
+
+  public setGenerationHeight(generationHeight: number) {
+    this.generationHeight = generationHeight;
+  }
+
+  public getGenerationHeight() {
+    return this.generationHeight;
+  }
+
+  public getX() {
+    return this.x;
+  }
+
+  public getY() {
+    return this.y;
   }
 }
