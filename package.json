@@ -4,7 +4,6 @@
     },
     "dependencies": {
         "concurrently": "^7.6.0",
-        "ts-node-dev": "^2.0.0",
-        "random": "3.0.6"
+        "ts-node-dev": "^2.0.0"
     }
 }
