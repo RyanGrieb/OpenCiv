@@ -1,0 +1,468 @@
+
+icon.png
+size: 2048, 64
+format: RGBA8888
+filter: Nearest, Nearest
+repeat: none
+icon_america
+  rotate: false
+  xy: 512, 20
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+icon_barbarian
+  rotate: false
+  xy: 954, 20
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+icon_barrel
+  rotate: false
+  xy: 1464, 20
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+icon_calendar
+  rotate: false
+  xy: 70, 20
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+icon_canada
+  rotate: false
+  xy: 36, 20
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+icon_cancel
+  rotate: false
+  xy: 1498, 20
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+icon_cancel_move
+  rotate: false
+  xy: 1056, 20
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+icon_chat
+  rotate: false
+  xy: 988, 20
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+icon_chop
+  rotate: false
+  xy: 546, 20
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+icon_christianity
+  rotate: false
+  xy: 580, 20
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+icon_citizen
+  rotate: false
+  xy: 56, 2
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+icon_citizen_city_center
+  rotate: false
+  xy: 1894, 36
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+icon_citizen_locked
+  rotate: false
+  xy: 2, 2
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+icon_citizen_unworked
+  rotate: false
+  xy: 1858, 36
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+icon_citystate_faith
+  rotate: false
+  xy: 1090, 20
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+icon_citystate_gold
+  rotate: false
+  xy: 308, 20
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+icon_citystate_heritage
+  rotate: false
+  xy: 1396, 20
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+icon_citystate_production
+  rotate: false
+  xy: 1362, 20
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+icon_citystate_science
+  rotate: false
+  xy: 1600, 20
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+icon_clock
+  rotate: false
+  xy: 74, 2
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+icon_combat
+  rotate: false
+  xy: 886, 20
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+icon_cuba
+  rotate: false
+  xy: 138, 20
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+icon_diplomacy
+  rotate: false
+  xy: 478, 20
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+icon_england
+  rotate: false
+  xy: 1770, 20
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+icon_faith
+  rotate: false
+  xy: 1876, 36
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+icon_farm
+  rotate: false
+  xy: 1736, 20
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+icon_food
+  rotate: false
+  xy: 92, 2
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+icon_gear
+  rotate: false
+  xy: 1702, 20
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+icon_germany
+  rotate: false
+  xy: 614, 20
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+icon_gold
+  rotate: false
+  xy: 20, 2
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+icon_goto_down
+  rotate: false
+  xy: 750, 20
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+icon_goto_left
+  rotate: false
+  xy: 1634, 20
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+icon_goto_right
+  rotate: false
+  xy: 920, 20
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+icon_goto_up
+  rotate: false
+  xy: 648, 20
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+icon_hammer
+  rotate: false
+  xy: 1668, 20
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+icon_heart
+  rotate: false
+  xy: 1226, 20
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+icon_heritage
+  rotate: false
+  xy: 1822, 36
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+icon_holybook
+  rotate: false
+  xy: 1328, 20
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+icon_islam
+  rotate: false
+  xy: 240, 20
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+icon_lvl_up
+  rotate: false
+  xy: 1158, 20
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+icon_maintenance
+  rotate: false
+  xy: 1804, 36
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+icon_mamluks
+  rotate: false
+  xy: 104, 20
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+icon_mathematics
+  rotate: false
+  xy: 206, 20
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+icon_mining
+  rotate: false
+  xy: 1022, 20
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+icon_mongolia
+  rotate: false
+  xy: 1566, 20
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+icon_morale
+  rotate: false
+  xy: 274, 20
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+icon_move
+  rotate: false
+  xy: 1260, 20
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+icon_orthodox
+  rotate: false
+  xy: 376, 20
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+icon_pantheon
+  rotate: false
+  xy: 1124, 20
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+icon_pasture
+  rotate: false
+  xy: 2, 20
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+icon_production
+  rotate: false
+  xy: 110, 2
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+icon_profile
+  rotate: false
+  xy: 172, 20
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+icon_question
+  rotate: false
+  xy: 1192, 20
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+icon_rome
+  rotate: false
+  xy: 784, 20
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+icon_science
+  rotate: false
+  xy: 38, 2
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+icon_settle
+  rotate: false
+  xy: 342, 20
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+icon_shield
+  rotate: false
+  xy: 682, 20
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+icon_skull
+  rotate: false
+  xy: 852, 20
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+icon_smelter
+  rotate: false
+  xy: 1430, 20
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+icon_taoism
+  rotate: false
+  xy: 1294, 20
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+icon_target
+  rotate: false
+  xy: 818, 20
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+icon_trash
+  rotate: false
+  xy: 1532, 20
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+icon_unemployed_citizen
+  rotate: false
+  xy: 1840, 36
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+icon_unknown
+  rotate: false
+  xy: 410, 20
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+icon_untarget
+  rotate: false
+  xy: 444, 20
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+icon_upgrade_unit
+  rotate: false
+  xy: 716, 20
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
