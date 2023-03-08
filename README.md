@@ -1,4 +1,4 @@
-# OpenCiv ![tile_city](https://github.com/rhin123/OpenCiv/blob/master/assets/archive/tile_city.png?raw=true)
+# OpenCiv ![tile_city](https://github.com/rhin123/OpenCiv/blob/master/client/assets/archive/tile_city.png?raw=true)
 
 ![example workflow](https://github.com/rhin123/OpenCiv/actions/workflows/build.yml/badge.svg)
 [![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=rhin123_OpenCiv&metric=ncloc)](https://sonarcloud.io/summary/new_code?id=rhin123_OpenCiv)

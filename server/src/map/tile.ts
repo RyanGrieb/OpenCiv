@@ -1,6 +1,7 @@
 export class Tile {
   //== Generation Values ==
   private generationHeight: number;
+  private generationTemp: number;
   //== Generation Values ==
   private tileType: string;
   private adjacentTiles: Tile[];
@@ -10,6 +11,7 @@ export class Tile {
 
   constructor(tileType: string, x: number, y: number) {
     this.generationHeight = 0;
+    this.generationTemp = 0;
 
     this.tileType = tileType;
     this.adjacentTiles = [];
@@ -43,8 +45,20 @@ export class Tile {
     this.generationHeight = generationHeight;
   }
 
+  public setGenerationTemp(generationTemp: number) {
+    this.generationTemp = generationTemp;
+  }
+
+  public getGenerationTemp() {
+    return this.generationTemp;
+  }
+
   public getGenerationHeight() {
     return this.generationHeight;
+  }
+
+  public getTileType() {
+    return this.tileType;
   }
 
   public getX() {

@@ -47,3 +47,12 @@ button:hover {
 input[type="button"] {
   font-family: Impact, Haettenschweiler, "Arial Narrow Bold", sans-serif;
 }
+
+#loading_element {
+  font-size: 42;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100vw;
+  height: 100vh;
+}

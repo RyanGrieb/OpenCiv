@@ -139,7 +139,7 @@ export class Game {
       console.log("All assets loaded...");
 
       //Update HTML & show canvas
-      document.getElementById("loading_element").setAttribute("hidden", "true");
+      document.getElementById("loading_element").style.display = "none";
       document.getElementById("canvas").removeAttribute("hidden");
       window.requestAnimationFrame(() => {
         this.gameLoop();
