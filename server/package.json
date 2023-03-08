@@ -14,7 +14,8 @@
     "random": "3.0.6",
     "ts-node": "^10.9.1",
     "ts-node-dev": "^2.0.0",
-    "ws": "^8.10.0"
+    "ws": "^8.10.0",
+    "shared": "file:../shared"
   },
   "devDependencies": {
     "@types/node": "^18.11.6",

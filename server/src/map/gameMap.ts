@@ -54,8 +54,6 @@ export class GameMap {
   }
 
   public static generateTerrain() {
-    //TODO: Lets re-do our generation code with something better.
-
     /**
      * Map generation:
      * == Generate grass circles ==
@@ -66,7 +64,7 @@ export class GameMap {
      * 3. Keep track of tiles that are already painted. If we paint over an existing tile, store that increment in a 2D array.
      * 4. Once finally painted (For pangaea ensure no islands), we now focus on hills & mountains.
      * 5. Take the highest values and assign those to mountain tiles, other tiles will be hills.
-     * 6. Note, we only want 5% of tiles to be mountains, 10-25% to be hills. We would
+     * 6. Note, we only want 3% of tiles to be mountains, 10-25% to be hills. We would
      * == Generate biomes (based on hot, cold, wet, dry)
      * 7. First, we focus on hot & cold factors. We generate a random gradient, where there are higher chances of cold tiles at the top and bottom parts of the map & vice. versa for hot tiles.
      * 8. Then for wet and dry tiles, we assign another gradient, but this would be random blobs on the map.
@@ -152,6 +150,53 @@ export class GameMap {
       }
     }
     // == Clear isolated single ocean tiles
+
+    // == Generate hills & mountains
+    const tallestTiles: Tile[] = [];
+
+    console.log("Generating tallest tiles...");
+    for (let x = 0; x < this.mapWidth; x++) {
+      for (let y = 0; y < this.mapHeight; y++) {
+        // Insert into tallestTiles while maintaining a sorted order
+        const currentTile = this.tiles[x][y];
+
+        if (currentTile.containsTileType("ocean")) continue;
+
+        let low = 0;
+        let high = tallestTiles.length;
+
+        while (low < high) {
+          var mid = (low + high) >>> 1; // Same as: (low + high) / 2
+          if (tallestTiles[mid].getGenerationHeight() > currentTile.getGenerationHeight())
+            low = mid + 1;
+          else high = mid;
+        }
+        const insertionIndex = low;
+
+        tallestTiles.splice(insertionIndex, 0, currentTile);
+      }
+    }
+
+    console.log("Done generating tallest tiles - " + tallestTiles.length);
+
+    //Assign top 25% of tiles to have a 50% of becoming a hill tile
+    const totalHills = tallestTiles.length * 0.1;
+    for (let i = 0; i < totalHills; i++) {
+      if (Math.random() < 0.5) tallestTiles[i].setTileType("grass_hill");
+    }
+
+    // TODO: Spawn hills in patches
+    // For all other grass tiles, make it a 3% of becoming a hill tile.
+    for (let i = 0; i < tallestTiles.length; i++) {
+      if (Math.random() < 0.1) tallestTiles[i].setTileType("grass_hill");
+    }
+
+    //Assign the top 3% of tiles to be mountains
+    const totalMountains = tallestTiles.length * 0.03;
+    for (let i = 0; i < totalMountains; i++) {
+      tallestTiles[i].setTileType("mountain");
+    }
+    // == Generate hills & mountains
   }
 
   public static getDimensionValues(mapSize: MapSize) {
@@ -221,8 +266,6 @@ export class GameMap {
           }
 
           this.tiles[x][y].setAdjacentTile(i, this.tiles[x + edgeAxis[i][0]][y + edgeAxis[i][1]]);
-          //stencilMap[x][y].setEdge(i, stencilMap[x + edgeAxis[i][0]][y + edgeAxis[i][1]]);
-          //geographyMap[x][y].setEdge(i, geographyMap[x + edgeAxis[i][0]][y + edgeAxis[i][1]]);
         }
       }
     }
