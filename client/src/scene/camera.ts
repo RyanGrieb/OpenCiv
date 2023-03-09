@@ -56,6 +56,12 @@ export class Camera {
         if (options.key == "s" || options.key == "S") {
           scene.getCamera().addVel(0, -5);
         }
+        if (options.key == "=") {
+          scene.getCamera().zoom(Game.getWidth() / 2, Game.getHeight() / 2, 1.2);
+        }
+        if (options.key == "-") {
+          scene.getCamera().zoom(Game.getWidth() / 2, Game.getHeight() / 2, 0.8);
+        }
       });
 
       scene.on("keyup", (options) => {

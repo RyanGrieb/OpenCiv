@@ -3,7 +3,7 @@ export class Tile {
   private generationHeight: number;
   private generationTemp: number;
   //== Generation Values ==
-  private tileType: string;
+  private tileTypes: string[];
   private adjacentTiles: Tile[];
 
   private x: number;
@@ -13,7 +13,9 @@ export class Tile {
     this.generationHeight = 0;
     this.generationTemp = 0;
 
-    this.tileType = tileType;
+    this.tileTypes = [];
+    this.tileTypes.push(tileType);
+
     this.adjacentTiles = [];
 
     this.x = x;
@@ -21,20 +23,57 @@ export class Tile {
   }
 
   public getTileJSON() {
-    return { tileType: this.tileType, x: this.x, y: this.y };
+    return { tileTypes: this.tileTypes, x: this.x, y: this.y };
   }
 
-  public setTileType(tileType: string) {
-    this.tileType = tileType;
+  public addTileType(tileType: string, index?: number) {
+    if (tileType === undefined) {
+      throw new Error();
+    }
+
+    if (this.tileTypes.includes(tileType)) {
+      console.log("Warning: Tried to add existing tile type for: " + this.getTileJSON());
+      return;
+    }
+
+    if (index !== undefined) {
+      this.tileTypes.splice(index, 0, tileType);
+    } else {
+      this.tileTypes.push(tileType);
+    }
+  }
+
+  public removeTileType(removeType: string) {
+    this.tileTypes = this.tileTypes.filter((type) => type != removeType);
   }
 
   public setAdjacentTile(index: number, tile: Tile) {
     this.adjacentTiles[index] = tile;
   }
 
-  public containsTileType(tileType: String) {
-    //FIXME: Tile tiles should be in an array.
-    return this.tileType === tileType;
+  public replaceTileType(oldTileType: string, newTileType: string) {
+    this.tileTypes = this.tileTypes.map((type) => (type === oldTileType ? newTileType : type));
+  }
+
+  public clearTileTypes() {
+    this.tileTypes = [];
+  }
+
+  public containsTileType(tileType: string) {
+    return this.tileTypes.includes(tileType);
+  }
+
+  /**
+   *
+   * @param tileTypes
+   * @returns True if at least ONE provided tileType is inside this tile.
+   */
+  public containsTileTypes(tileTypes: string[]) {
+    return this.tileTypes.every((tileType) => tileTypes.includes(tileType));
+  }
+
+  public containsAllTileTypes(tileTypes: string[]) {
+    return tileTypes.every((tileType) => this.tileTypes.includes(tileType));
   }
 
   public getAdjacentTiles() {
@@ -57,8 +96,8 @@ export class Tile {
     return this.generationHeight;
   }
 
-  public getTileType() {
-    return this.tileType;
+  public getTileTypes() {
+    return this.tileTypes;
   }
 
   public getX() {

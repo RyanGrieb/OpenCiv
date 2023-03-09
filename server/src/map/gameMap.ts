@@ -36,7 +36,7 @@ export class GameMap {
 
   public static init() {
     // Assign map dimension values
-    const mapDimensions = this.getDimensionValues(MapSize.HUGE);
+    const mapDimensions = this.getDimensionValues(MapSize.TINY);
     this.mapWidth = mapDimensions[0];
     this.mapHeight = mapDimensions[1];
     this.mapArea = this.mapWidth * this.mapHeight;
@@ -69,15 +69,7 @@ export class GameMap {
      * 6. Note, we only want 3% of tiles to be mountains, 10-25% to be hills. We would
      * == Generate biomes (based on hot, cold, wet, dry)
      * 7. First, we focus on hot & cold factors. We generate a random gradient, where there are higher chances of cold tiles at the top and bottom parts of the map & vice. versa for hot tiles.
-     * 8. Then for wet and dry tiles, we assign another gradient, but this would be random blobs on the map.
-     * 9. Then based on hot,cold,wet,and dry values, we assign the respective tiles:
-      Hot and wet: Jungle (For jungle create a darker grassland tile)
-      Hot and dry: Desert
-      Cold and wet: Tundra
-      Cold and dry: Snow
-      Avg. Temp and wet: Grassland
-      Avg. Temp and dry: Plains
-     *  
+     *
      */
 
     // == Generate grass circles ==
@@ -94,14 +86,20 @@ export class GameMap {
       const currentPathLength = random.int(40, maxPathLength);
 
       // Draw a bunch of broken circles in a random direction until currentPathLength limit is reached.
-      this.generateTilePath(this.tiles[rndX][rndY], currentPathLength, "grass", "ocean", 0.5);
+      this.generateTilePath({
+        tile: this.tiles[rndX][rndY],
+        pathLength: currentPathLength,
+        setTileType: "grass",
+        followTileTypes: ["ocean"],
+        setTileChance: 0.5,
+        overrideWater: true,
+      });
 
       if (landmassIterations >= maxLandmassIterations) break;
     }
     // == Generate grass circles ==
 
     // == Clear isolated single ocean tiles
-
     for (let x = 0; x < this.mapWidth; x++) {
       for (let y = 0; y < this.mapHeight; y++) {
         const tile = this.tiles[x][y];
@@ -117,7 +115,7 @@ export class GameMap {
           }
 
           if (surroundedByLand) {
-            tile.setTileType("grass");
+            tile.replaceTileType("ocean", "grass");
           }
         }
       }
@@ -155,19 +153,19 @@ export class GameMap {
     //Assign top 25% of tiles to have a 50% of becoming a hill tile
     const totalHills = tallestTiles.length * 0.1;
     for (let i = 0; i < totalHills; i++) {
-      if (Math.random() < 0.5) tallestTiles[i].setTileType("grass_hill");
+      if (Math.random() < 0.5) tallestTiles[i].replaceTileType("grass", "grass_hill");
     }
 
     // TODO: Spawn hills in patches?
     // For all other grass tiles, make it a 13% of becoming a hill tile.
     for (let i = 0; i < tallestTiles.length; i++) {
-      if (Math.random() < 0.13) tallestTiles[i].setTileType("grass_hill");
+      if (Math.random() < 0.13) tallestTiles[i].replaceTileType("grass", "grass_hill");
     }
 
     //Assign the top 3% of tiles to be mountains
-    const totalMountains = tallestTiles.length * 0.03;
+    const totalMountains = tallestTiles.length * 0.05;
     for (let i = 0; i < totalMountains; i++) {
-      tallestTiles[i].setTileType("mountain");
+      tallestTiles[i].replaceTileType("grass", "mountain");
     }
     // == Generate hills & mountains
 
@@ -201,15 +199,16 @@ export class GameMap {
         if (currentTile.containsTileType("ocean")) continue;
 
         if (yPercent <= 0.1 || yPercent >= 0.9) {
-          this.setTileBiome(currentTile, "snow");
+          this.setTileBiome({ tile: currentTile, tileType: "snow" });
         } else if ((yPercent > 0.1 && yPercent < 0.15) || (yPercent > 0.85 && yPercent < 0.9)) {
           if (Math.random() > 0.25) {
             for (const adjTile of currentTile.getAdjacentTiles()) {
               if (!adjTile) continue;
+              //FIXME: This can create single ocean/freshwater tiles.
               this.setTilesBiome(adjTile.getAdjacentTiles(), "tundra", 0.1);
             }
           }
-          this.setTileBiome(currentTile, "tundra");
+          this.setTileBiome({ tile: currentTile, tileType: "tundra" });
         } else {
         }
       }
@@ -224,7 +223,14 @@ export class GameMap {
     for (let i = 0; i < numberOfPlainsBiomes; i++) {
       const originTile = this.getRandomTileWith({ tileType: "grass", tempRange: [60, 80] });
       if (!originTile) continue;
-      this.generateTilePath(originTile, 15, "plains", "grass", 0.95);
+      this.generateTilePath({
+        tile: originTile,
+        pathLength: 15,
+        setTileType: "plains",
+        followTileTypes: ["grass"],
+        setTileChance: 0.95,
+        overrideWater: false,
+      });
     }
     console.log("Done generating plains biomes!");
 
@@ -235,12 +241,96 @@ export class GameMap {
       const originTile = this.getRandomTileWith({ tileType: "grass", tempRange: [95, 100] });
       if (!originTile) continue;
       // Now we have random origin, create path
-      this.generateTilePath(originTile, 15, "desert", "grass", 0.95);
+      this.generateTilePath({
+        tile: originTile,
+        pathLength: 15,
+        setTileType: "desert",
+        followTileTypes: ["grass"],
+        setTileChance: 0.95,
+        overrideWater: false,
+      });
     }
     console.log("Done generating desert biomes!");
 
     // For Jungle, pick temp b/w 60, 80 & wetness (todo: figure that out..)
+    const numberOfJungleBiomes = Math.ceil(this.mapArea * 0.000721154); // 3 for a standard map...
+    console.log("Generating jungle biomes... - " + numberOfJungleBiomes);
+    for (let i = 0; i < numberOfJungleBiomes; i++) {
+      const originTile = this.getRandomTileWith({ tileType: "grass", tempRange: [60, 75] });
+      if (!originTile) continue;
+      // Now we have random origin, create path
+      this.generateTilePath({
+        tile: originTile,
+        pathLength: 15,
+        setTileType: "jungle",
+        followTileTypes: ["grass", "grass_hill"],
+        setTileChance: 0.5,
+        overrideWater: false,
+        setFollowTileTypeOnly: true,
+        clearExistingTileTypes: false,
+      });
+    }
+    console.log("Done generating jungle tiles!");
+
+    const numberOfForestBiomes = Math.ceil(this.mapArea * 0.024038462); // 50 for a standard map...
+    console.log("Generating forest biomes... - " + numberOfForestBiomes);
+    for (let i = 0; i < numberOfForestBiomes; i++) {
+      const originTile = this.getRandomTileWith({ tileType: "grass", tempRange: [32, 90] });
+      if (!originTile) continue;
+      // Now we have random origin, create path
+      this.generateTilePath({
+        tile: originTile,
+        pathLength: 5,
+        setTileType: "forest",
+        followTileTypes: ["grass", "grass_hill", "plains", "plains_hill", "tundra", "tundra_hill"],
+        setTileChance: 0.1,
+        overrideWater: false,
+        setFollowTileTypeOnly: true,
+        clearExistingTileTypes: false,
+      });
+    }
+    console.log("Done generating forest tiles!");
     // == Generate biomes (deserts,jungle,plains,tundra,snow)
+
+    // == Generate freshwater tiles. FIXME: This is slow.
+    console.log("Generating freshwater tiles...");
+    /*for (let x = 0; x < this.mapWidth; x++) {
+      for (let y = 0; y < this.mapHeight; y++) {
+        const tile = this.tiles[x][y];
+
+        if (!tile.containsTileType("ocean")) {
+          continue;
+        }
+
+        let freshwater = true; // False if one of the adj tile is undefined (map edge)
+        let traverseQueue: Tile[] = [];
+        let traversedTiles: Tile[] = [];
+
+        traverseQueue.push(tile);
+        while (traverseQueue.length > 0) {
+          let currentTile: Tile = traverseQueue.shift();
+          traversedTiles.push(currentTile);
+
+          for (const adjTile of currentTile.getAdjacentTiles()) {
+            if (!adjTile) {
+              freshwater = false;
+            } else if (adjTile.containsTileType("ocean")) {
+              if (!traversedTiles.includes(adjTile) && !traverseQueue.includes(adjTile)) {
+                traverseQueue.push(adjTile);
+              }
+            }
+          }
+        }
+
+        if (freshwater) {
+          for (let tile of traversedTiles) {
+            tile.replaceTileType("ocean", "freshwater");
+          }
+        }
+      }
+    }*/
+    console.log("Done generating freshwater tiles!");
+    // == Generate freshwater tiles
   }
 
   public static getDimensionValues(mapSize: MapSize) {
@@ -318,14 +408,16 @@ export class GameMap {
   private static setTilesBiome(tiles: Tile[], tileType: string, setChance: number) {
     for (const tile of tiles) {
       if (!tile || Math.random() > setChance) continue;
-      this.setTileBiome(tile, tileType);
+      this.setTileBiome({ tile: tile, tileType: tileType });
     }
   }
 
-  private static setTileBiome(tile: Tile, tileType: string) {
+  private static setTileBiome(options: { tile: Tile; tileType: string; clearTileTypes?: boolean }) {
+    const clearTileTypes = options.clearTileTypes ?? true; // By default this is true.
+
     let newTileType = undefined;
-    if (tile.containsTileType("grass_hill")) {
-      switch (tileType) {
+    if (options.tile.containsTileType("grass_hill")) {
+      switch (options.tileType) {
         case "snow":
           newTileType = "snow_hill";
           break;
@@ -338,34 +430,56 @@ export class GameMap {
         case "desert":
           newTileType = "desert_hill";
           break;
+        default:
+          newTileType = options.tileType;
+          break;
       }
     } else {
-      newTileType = tileType;
+      newTileType = options.tileType;
     }
 
-    tile.setTileType(newTileType);
+    if (clearTileTypes) {
+      options.tile.clearTileTypes();
+    }
+
+    options.tile.addTileType(newTileType);
   }
 
-  private static generateTilePath(
-    originTile: Tile,
-    pathLength: number,
-    setTileType: string,
-    followTileType: string,
-    setTileChance: number
-  ) {
-    for (let i = 0; i < pathLength; i++) {
+  private static generateTilePath(options: {
+    tile: Tile;
+    pathLength: number;
+    setTileType: string;
+    followTileTypes: string[];
+    setTileChance: number;
+    overrideWater: boolean;
+    setFollowTileTypeOnly?: boolean;
+    clearExistingTileTypes?: boolean;
+  }) {
+    const setFollowTileTypeOnly = options.setFollowTileTypeOnly ?? false;
+    let tile = options.tile;
+
+    for (let i = 0; i < options.pathLength; i++) {
       let generationTiles: Tile[] = [];
       let nextPathTile: Tile = undefined;
 
-      generationTiles.push(originTile);
-      generationTiles = generationTiles.concat(originTile.getAdjacentTiles());
+      generationTiles.push(tile);
+      generationTiles = generationTiles.concat(tile.getAdjacentTiles());
 
       const adjacentFollowTiles: Tile[] = [];
       for (const tile of generationTiles) {
-        if (!tile) continue;
+        if (
+          !tile ||
+          (tile.containsTileType("ocean") && !options.overrideWater) ||
+          (!tile.containsTileTypes(options.followTileTypes) && setFollowTileTypeOnly)
+        )
+          continue;
 
-        if (Math.random() <= setTileChance) {
-          this.setTileBiome(tile, setTileType);
+        if (Math.random() <= options.setTileChance) {
+          this.setTileBiome({
+            tile: tile,
+            tileType: options.setTileType,
+            clearTileTypes: options.clearExistingTileTypes,
+          });
           tile.setGenerationHeight(tile.getGenerationHeight() + 1);
         }
 
@@ -373,7 +487,7 @@ export class GameMap {
         for (const adjTile of tile.getAdjacentTiles()) {
           if (!adjTile) continue;
 
-          if (adjTile.containsTileType(followTileType)) {
+          if (adjTile.containsTileTypes(options.followTileTypes)) {
             adjacentFollowTiles.push(adjTile);
           }
         }
@@ -385,7 +499,7 @@ export class GameMap {
       // If we can't get get a tile adjacent to follow tile, the path ends.
       if (!nextPathTile) break;
 
-      originTile = nextPathTile; // Traverse onto the next tile.
+      tile = nextPathTile; // Traverse onto the next tile.
     }
   }
 

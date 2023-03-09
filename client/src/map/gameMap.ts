@@ -33,12 +33,12 @@ export class GameMap {
 
     NetworkEvents.on({
       eventName: "mapChunk",
-      callback: (data) => {
+      callback: async (data) => {
         const tileList = data["tiles"] as Array<JSON>;
         const lastChunk = JSON.parse(data["lastChunk"]);
 
         for (const tileJSON of tileList) {
-          const tileType = tileJSON["tileType"];
+          const tileTypes = tileJSON["tileTypes"];
           const x = parseInt(tileJSON["x"]);
           const y = parseInt(tileJSON["y"]);
 
@@ -48,13 +48,22 @@ export class GameMap {
             xPos += 16;
           }
 
-          const tile = new Tile({ tileType: tileType, x: xPos, y: yPos });
+          const tile = new Tile({ tileTypes: tileTypes, x: xPos, y: yPos });
           this.tiles[x][y] = tile;
           tileActorList.push(tile);
         }
 
         if (lastChunk) {
-          this.mapActor = Actor.mergeActors(tileActorList);
+          console.log("Loading tile images..");
+          for (let x = 0; x < this.mapWidth; x++) {
+            for (let y = 0; y < this.mapHeight; y++) {
+              await this.tiles[x][y].loadImage();
+            }
+          }
+
+          console.log("All tile images loaded, generating map");
+          //TODO: Instead of a single map actor, we need to do this in chunks (4x4?). B/c it's going to be slow on map updates.
+          this.mapActor = Actor.mergeActors({ actors: tileActorList, spriteRegion: false });
           scene.addActor(this.mapActor);
         }
       },
@@ -73,12 +82,12 @@ export class GameMap {
           xPos += 16;
         }
 
-        const tile = new Tile({ tileType: this.tiles[x][y].getTileType(), x: xPos, y: yPos });
+        const tile = new Tile({ tileTypes: this.tiles[x][y].getTileTypes(), x: xPos, y: yPos });
         tileActorList.push(tile);
       }
     }
 
-    this.mapActor = Actor.mergeActors(tileActorList);
+    this.mapActor = Actor.mergeActors({ actors: tileActorList, spriteRegion: false });
     Game.getCurrentScene().addActor(this.mapActor);
   }
 }

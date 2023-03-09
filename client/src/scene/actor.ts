@@ -139,16 +139,20 @@ export class Actor {
     this.y = y;
   }
 
-  public static mergeActors(actors: Actor[]): Actor {
+  public static mergeActors(options: {
+    actors: Actor[];
+    spriteRegion: boolean;
+    spriteSize?: number;
+  }): Actor {
     // Create dummy canvas to get pixel data of the actor sprite
 
-    let canvas = document.createElement("canvas");
+    let canvas = document.getElementById("auxillary_canvas") as HTMLCanvasElement;
     let greatestXWidth = 0; // The width of the actor w/ the greatest x.
     let greatestYHeight = 0; // The height of the actor w/ the greatest y.
     let greatestX = 0;
     let greatestY = 0;
 
-    actors.forEach((actor: Actor) => {
+    options.actors.forEach((actor: Actor) => {
       if (actor.getX() > greatestX) {
         greatestX = actor.getX();
         greatestXWidth = actor.getWidth();
@@ -161,22 +165,37 @@ export class Actor {
     canvas.width = greatestX + greatestXWidth;
     canvas.height = greatestY + greatestYHeight;
 
-    actors.forEach((actor: Actor) => {
-      const spriteX = parseInt(actor.getSpriteRegion().split(",")[0]) * 32;
-      const spriteY = parseInt(actor.getSpriteRegion().split(",")[1]) * 32;
-      canvas
-        .getContext("2d")
-        .drawImage(
-          actor.getImage(),
-          spriteX,
-          spriteY,
-          32,
-          32,
-          actor.getX(),
-          actor.getY(),
-          actor.getWidth(),
-          actor.getHeight()
-        );
+    canvas.getContext("2d").fillStyle = "grey";
+    canvas.getContext("2d").fillRect(0, 0, canvas.width, canvas.height);
+
+    options.actors.forEach((actor: Actor) => {
+      if (options.spriteRegion) {
+        const spriteX = parseInt(actor.getSpriteRegion().split(",")[0]) * options.spriteSize;
+        const spriteY = parseInt(actor.getSpriteRegion().split(",")[1]) * options.spriteSize;
+        canvas
+          .getContext("2d")
+          .drawImage(
+            actor.getImage(),
+            spriteX,
+            spriteY,
+            options.spriteSize,
+            options.spriteSize,
+            actor.getX(),
+            actor.getY(),
+            actor.getWidth(),
+            actor.getHeight()
+          );
+      } else {
+        canvas
+          .getContext("2d")
+          .drawImage(
+            actor.getImage(),
+            actor.getX(),
+            actor.getY(),
+            actor.getWidth(),
+            actor.getHeight()
+          );
+      }
     });
 
     //canvas.getContext("2d").globalCompositeOperation = "saturation";
@@ -188,8 +207,8 @@ export class Actor {
 
     let mergedActor: Actor = new Actor({
       image: image,
-      x: actors[0].getX(),
-      y: actors[0].getY(),
+      x: options.actors[0].getX(),
+      y: options.actors[0].getY(),
       width: canvas.width,
       height: canvas.height,
     });

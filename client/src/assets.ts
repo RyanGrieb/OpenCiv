@@ -22,6 +22,7 @@ export enum SpriteRegion {
   HORSEMAN = "10,0",
   ROMAN_LEGION = "11,0",
   OCEAN = "16,6",
+  FRESHWATER = "7,7",
   GRASS = "3,6",
   GRASS_HILL = "4,6",
   MOUNTAIN = "14,6",
@@ -33,6 +34,8 @@ export enum SpriteRegion {
   TUNDRA_HILL = "16,7",
   SNOW = "3,8",
   SNOW_HILL = "4,8",
+  JUNGLE = "10,6",
+  FOREST = "17,5",
   STAR = "0,3",
 }
 

@@ -26,7 +26,7 @@ export class SceneBackground {
       }
     }
 
-    return Actor.mergeActors(tileActors);
+    return Actor.mergeActors({ actors: tileActors, spriteRegion: true, spriteSize: 32 });
   }
   public static generateRandomGrassland(): Actor {
     let tileActors: Actor[] = [];
@@ -74,6 +74,6 @@ export class SceneBackground {
       }
     }
 
-    return Actor.mergeActors(tileActors);
+    return Actor.mergeActors({ actors: tileActors, spriteRegion: true, spriteSize: 32 });
   }
 }
