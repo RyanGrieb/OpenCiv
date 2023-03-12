@@ -269,6 +269,7 @@ export class GameMap {
         overrideWater: false,
         setFollowTileTypeOnly: true,
         clearExistingTileTypes: false,
+        onAdditionalTileTypes: false,
       });
     }
     console.log("Done generating jungle tiles!");
@@ -291,6 +292,7 @@ export class GameMap {
         overrideWater: false,
         setFollowTileTypeOnly: true,
         clearExistingTileTypes: false,
+        onAdditionalTileTypes: false,
       });
     }
     console.log("Done generating forest tiles!");
@@ -495,8 +497,10 @@ export class GameMap {
     setFollowTileTypeOnly?: boolean;
     clearExistingTileTypes?: boolean;
     insertIndex?: number;
+    onAdditionalTileTypes?: boolean;
   }) {
     const setFollowTileTypeOnly = options.setFollowTileTypeOnly ?? false;
+    const onAdditionalTileTypes = options.onAdditionalTileTypes ?? true;
     let tile = options.tile;
 
     for (let i = 0; i < options.pathLength; i++) {
@@ -511,7 +515,7 @@ export class GameMap {
         if (
           !tile ||
           (tile.containsTileType("ocean") && !options.overrideWater) ||
-          (!tile.containsTileTypes(options.followTileTypes) && setFollowTileTypeOnly)
+          (!tile.containsTileTypes(options.followTileTypes) && setFollowTileTypeOnly) || (!onAdditionalTileTypes && tile.getTileTypes().length > 1)
         )
           continue;
 

@@ -1,0 +1,2 @@
+Map:
+* Ensure there are no tiles w/ forest and jungle on the same tile.
