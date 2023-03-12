@@ -1,4 +1,4 @@
-import { GameMap } from "../../map/gameMap";
+import { GameMap } from "../../map/GameMap";
 import { Camera } from "../Camera";
 import { Scene } from "../Scene";
 

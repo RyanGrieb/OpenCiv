@@ -1,9 +1,9 @@
 import { assetList } from "./Assets";
 import { Game } from "./Game";
-import { InGameScene } from "./scene/type/inGameScene";
-import { JoinGameScene } from "./scene/type/joinGameScene";
-import { LobbyScene } from "./scene/type/lobbyScene";
-import { MainMenuScene } from "./scene/type/mainMenuScene";
+import { InGameScene } from "./scene/type/InGameScene";
+import { JoinGameScene } from "./scene/type/JoinGameScene";
+import { LobbyScene } from "./scene/type/LobbyScene";
+import { MainMenuScene } from "./scene/type/MainMenuScene";
 
 Game.init({ assetList: assetList, canvasColor: "gray" }, () => {
   Game.addScene("main_menu", new MainMenuScene());
