@@ -1,6 +1,7 @@
 import { Player } from "../player";
 import { Tile } from "./tile";
 import random from "random";
+import { BONUS_RESOURCES, LUXURY_RESOURCES, MapResource, STRATEGIC_RESOURCES } from "./MapResources";
 
 enum MapSize {
   DUEL = "40x24",
@@ -221,7 +222,7 @@ export class GameMap {
     const numberOfPlainsBiomes = Math.ceil(this.mapArea * 0.002403846); // 10 For a standard map...
     console.log("Generating plains biomes... - " + numberOfPlainsBiomes);
     for (let i = 0; i < numberOfPlainsBiomes; i++) {
-      const originTile = this.getRandomTileWith({ tileType: "grass", tempRange: [60, 80] });
+      const originTile = this.getRandomTileWith({ tileTypes: ["grass"], tempRange: [60, 80] });
       if (!originTile) continue;
       this.generateTilePath({
         tile: originTile,
@@ -238,7 +239,7 @@ export class GameMap {
     const numberOfDesertBiomes = Math.ceil(this.mapArea * 0.000721154); // 3 for a standard map...
     console.log("Generating desert biomes... - " + numberOfDesertBiomes);
     for (let i = 0; i < numberOfDesertBiomes; i++) {
-      const originTile = this.getRandomTileWith({ tileType: "grass", tempRange: [95, 100] });
+      const originTile = this.getRandomTileWith({ tileTypes: ["grass"], tempRange: [95, 100] });
       if (!originTile) continue;
       // Now we have random origin, create path
       this.generateTilePath({
@@ -256,7 +257,7 @@ export class GameMap {
     const numberOfJungleBiomes = Math.ceil(this.mapArea * 0.000721154); // 3 for a standard map...
     console.log("Generating jungle biomes... - " + numberOfJungleBiomes);
     for (let i = 0; i < numberOfJungleBiomes; i++) {
-      const originTile = this.getRandomTileWith({ tileType: "grass", tempRange: [60, 75] });
+      const originTile = this.getRandomTileWith({ tileTypes: ["grass"], tempRange: [60, 75] });
       if (!originTile) continue;
       // Now we have random origin, create path
       this.generateTilePath({
@@ -272,10 +273,13 @@ export class GameMap {
     }
     console.log("Done generating jungle tiles!");
 
+
+    // FIXME: getRandomTileWith ["grass"] includes tiles w/ jungle already on top. Think of way to specify that we don't want this.
+
     const numberOfForestBiomes = Math.ceil(this.mapArea * 0.024038462); // 50 for a standard map...
     console.log("Generating forest biomes... - " + numberOfForestBiomes);
     for (let i = 0; i < numberOfForestBiomes; i++) {
-      const originTile = this.getRandomTileWith({ tileType: "grass", tempRange: [32, 90] });
+      const originTile = this.getRandomTileWith({ tileTypes: ["grass"], onAdditionalTileTypes: false, tempRange: [32, 90] });
       if (!originTile) continue;
       // Now we have random origin, create path
       this.generateTilePath({
@@ -290,7 +294,39 @@ export class GameMap {
       });
     }
     console.log("Done generating forest tiles!");
-    // == Generate biomes (deserts,jungle,plains,tundra,snow)
+
+    // == Generate strategic, bonus and luxury resources
+    const numberOfResources = 75; // Each resource type will have xx each.
+    for (let i = 0; i < numberOfResources * 3; i++) {
+      let mapResourceType = "N/A";
+      if (i < numberOfResources) {
+        mapResourceType = "bonus";
+      } else if (i > numberOfResources && i < numberOfResources * 2) {
+        mapResourceType = "strategic";
+      } else {
+        mapResourceType = "luxury"
+      }
+      const mapResource = this.getRandomMapResource({ mapResourceType: mapResourceType });
+      const originTile = this.getRandomTileWith({ tileTypes: mapResource.originTiles, tempRange: mapResource.tempRange });
+      if (!originTile) continue;
+
+      console.log("Generate resource: " + mapResource.name)
+      // Now we have random origin, create path
+      this.generateTilePath({
+        tile: originTile,
+        pathLength: mapResource.pathLength,
+        setTileType: mapResource.name,
+        followTileTypes: mapResource.followTiles,
+        setTileChance: mapResource.setTileChance,
+        overrideWater: mapResource.originTiles.includes("ocean") ? true : false,
+        setFollowTileTypeOnly: true,
+        clearExistingTileTypes: false,
+        insertIndex: 1,
+      });
+    }
+    // == Generate strategic, bonus and luxury resources
+
+    // == Test: Apply forest to every tile
 
     // == Generate freshwater tiles. FIXME: This is slow.
     console.log("Generating freshwater tiles...");
@@ -412,7 +448,7 @@ export class GameMap {
     }
   }
 
-  private static setTileBiome(options: { tile: Tile; tileType: string; clearTileTypes?: boolean }) {
+  private static setTileBiome(options: { tile: Tile; tileType: string; clearTileTypes?: boolean, insertIndex?: number }) {
     const clearTileTypes = options.clearTileTypes ?? true; // By default this is true.
 
     let newTileType = undefined;
@@ -442,7 +478,11 @@ export class GameMap {
       options.tile.clearTileTypes();
     }
 
-    options.tile.addTileType(newTileType);
+    if (options.insertIndex !== undefined) {
+      options.tile.addTileType(newTileType, options.insertIndex)
+    } else {
+      options.tile.addTileType(newTileType);
+    }
   }
 
   private static generateTilePath(options: {
@@ -454,6 +494,7 @@ export class GameMap {
     overrideWater: boolean;
     setFollowTileTypeOnly?: boolean;
     clearExistingTileTypes?: boolean;
+    insertIndex?: number;
   }) {
     const setFollowTileTypeOnly = options.setFollowTileTypeOnly ?? false;
     let tile = options.tile;
@@ -479,6 +520,7 @@ export class GameMap {
             tile: tile,
             tileType: options.setTileType,
             clearTileTypes: options.clearExistingTileTypes,
+            insertIndex: options.insertIndex,
           });
           tile.setGenerationHeight(tile.getGenerationHeight() + 1);
         }
@@ -504,30 +546,53 @@ export class GameMap {
   }
 
   public static getRandomTileWith(options: {
-    tileType: string;
+    tileTypes: string[];
     tempRange?: [number, number];
+    onAdditionalTileTypes?: boolean
   }): Tile | undefined {
     let originTile = undefined;
     let iterations = 0;
 
-    const minTemp = options.tempRange[0] ?? 0;
-    const maxTemp = options.tempRange[1] ?? 100;
+    const { tempRange = [0, 100], onAdditionalTileTypes = true } = options;
+    const minTemp = tempRange[0];
+    const maxTemp = tempRange[1];
     const maxIterations = 5000;
+
 
     while (!originTile) {
       iterations++;
+
       const randomTile =
         this.tiles[random.int(0, this.mapWidth - 1)][random.int(0, this.mapHeight - 1)];
+
       if (
-        randomTile.containsTileType(options.tileType) &&
+        randomTile.containsTileTypes(options.tileTypes) &&
         randomTile.getGenerationTemp() >= minTemp &&
         randomTile.getGenerationTemp() <= maxTemp
       ) {
+        if (!onAdditionalTileTypes && randomTile.getTileTypes().length > 1) continue;
+
         originTile = randomTile;
       }
-      if (iterations >= maxIterations) break;
+      if (iterations >= maxIterations) {
+        console.log("Reached max iterations for random tile: " + options.tileTypes)
+        break;
+      }
     }
 
     return originTile;
+  }
+
+  private static getRandomMapResource(options: { mapResourceType: string }): MapResource {
+    switch (options.mapResourceType) {
+      case "bonus":
+        return BONUS_RESOURCES[random.int(0, BONUS_RESOURCES.length - 1)]
+      case "strategic":
+        return STRATEGIC_RESOURCES[random.int(0, STRATEGIC_RESOURCES.length - 1)]
+      case "luxury":
+        return LUXURY_RESOURCES[random.int(0, LUXURY_RESOURCES.length - 1)]
+    }
+
+    return undefined;
   }
 }

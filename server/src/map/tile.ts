@@ -69,7 +69,11 @@ export class Tile {
    * @returns True if at least ONE provided tileType is inside this tile.
    */
   public containsTileTypes(tileTypes: string[]) {
-    return this.tileTypes.every((tileType) => tileTypes.includes(tileType));
+    for (let i = 0; i < this.tileTypes.length; i++) {
+      if (tileTypes.includes(this.tileTypes[i]))
+        return true;
+    }
+    return false;
   }
 
   public containsAllTileTypes(tileTypes: string[]) {
