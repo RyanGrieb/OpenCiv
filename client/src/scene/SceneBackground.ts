@@ -26,7 +26,11 @@ export class SceneBackground {
       }
     }
 
-    return Actor.mergeActors({ actors: tileActors, spriteRegion: true, spriteSize: 32 });
+    return Actor.mergeActors({
+      actors: tileActors,
+      spriteRegion: true,
+      spriteSize: 32,
+    });
   }
   public static generateRandomGrassland(): Actor {
     let tileActors: Actor[] = [];
@@ -40,7 +44,10 @@ export class SceneBackground {
         tileActors.push(
           new Actor({
             image: Game.getImage(GameImage.SPRITESHEET),
-            spriteRegion: Math.random() < 0.1 ? SpriteRegion.GRASS_HILL : SpriteRegion.GRASS,
+            spriteRegion:
+              Math.random() < 0.1
+                ? SpriteRegion.GRASS_HILL
+                : SpriteRegion.GRASS,
             x: xPos,
             y: yPos,
             width: 32,
@@ -64,7 +71,8 @@ export class SceneBackground {
         tileActors.push(
           new Actor({
             image: Game.getImage(GameImage.SPRITESHEET),
-            spriteRegion: Object.values(SpriteRegion)[Math.floor(Math.random() * 9)],
+            spriteRegion:
+              Object.values(SpriteRegion)[Math.floor(Math.random() * 9)],
             x: xPos,
             y: yPos,
             width: 32,
@@ -74,6 +82,10 @@ export class SceneBackground {
       }
     }
 
-    return Actor.mergeActors({ actors: tileActors, spriteRegion: true, spriteSize: 32 });
+    return Actor.mergeActors({
+      actors: tileActors,
+      spriteRegion: true,
+      spriteSize: 32,
+    });
   }
 }

@@ -2,6 +2,7 @@ import { Game } from "../../Game";
 import { ServerEvents } from "../../Events";
 import { State } from "../State";
 import { GameMap } from "../../map/GameMap";
+import { Server } from "http";
 
 export class InGameState extends State {
   public onInitialize() {
@@ -29,6 +30,27 @@ export class InGameState extends State {
       callback: (data, websocket) => {
         const player = Game.getPlayerFromWebsocket(websocket);
         GameMap.sendMapChunksToPlayer(player);
+      },
+    });
+
+    ServerEvents.on({
+      eventName: "playersData",
+      callback: (data, websocket) => {
+        const playersDataJSON = [];
+
+        Game.getPlayers().forEach((player) => {
+          playersDataJSON.push({
+            name: player.getName(),
+            clientPlayer: player.getWebsocket() === websocket,
+          });
+        });
+
+        websocket.send(
+          JSON.stringify({
+            event: "playersData",
+            players: playersDataJSON,
+          })
+        );
       },
     });
 

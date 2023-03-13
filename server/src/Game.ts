@@ -4,7 +4,7 @@ import { WebSocket } from "ws";
 import { ServerEvents } from "./Events";
 
 export class Game {
-  private constructor() { }
+  private constructor() {}
   private static currentState: State;
   private static states: Map<string, State>;
   private static players: Map<string, Player>;
@@ -24,7 +24,8 @@ export class Game {
       eventName: "playerNames",
       callback: (data: JSON, websocket) => {
         const playerNames = Array.from(this.players.keys());
-        const requestingPlayerName = this.getPlayerFromWebsocket(websocket)?.getName();
+        const requestingPlayerName =
+          this.getPlayerFromWebsocket(websocket)?.getName();
         websocket.send(
           JSON.stringify({
             event: "playerNames",

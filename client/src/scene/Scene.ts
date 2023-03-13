@@ -4,7 +4,7 @@ import { NetworkEvents } from "../network/Client";
 import { Camera } from "./Camera";
 
 export abstract class Scene {
-  private static ExitReceipt = new (class { })();
+  private static ExitReceipt = new (class {})();
 
   protected storedEvents: Map<string, Function[]>;
   private actors: Actor[] = [];
@@ -34,7 +34,7 @@ export abstract class Scene {
     });
   }
 
-  public onInitialize() { }
+  public onInitialize() {}
 
   public onDestroyed(newScene: Scene): typeof Scene.ExitReceipt {
     this.actors.forEach((actor) => {

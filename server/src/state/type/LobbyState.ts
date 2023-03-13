@@ -24,7 +24,10 @@ export class LobbyState extends State {
 
         // Send playerJoin data to other connected players
         for (const player of Array.from(Game.getPlayers().values())) {
-          player.sendNetworkEvent({ event: "playerJoin", playerName: playerName });
+          player.sendNetworkEvent({
+            event: "playerJoin",
+            playerName: playerName,
+          });
         }
 
         newPlayer.sendNetworkEvent({ event: "setScene", scene: "lobby" });

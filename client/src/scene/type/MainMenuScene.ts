@@ -17,7 +17,10 @@ export class MainMenuScene extends Scene {
       shadowBlur: 20,
     });
     titleLabel.conformSize().then(() => {
-      titleLabel.setPosition(Game.getWidth() / 2 - titleLabel.getWidth() / 2, 135);
+      titleLabel.setPosition(
+        Game.getWidth() / 2 - titleLabel.getWidth() / 2,
+        135
+      );
     });
 
     this.addActor(titleLabel);

@@ -4,7 +4,6 @@ import { Game } from "./Game";
 import { InGameState } from "./state/type/InGameState";
 import { LobbyState } from "./state/type/LobbyState";
 
-
 const port = 2000; //TODO: This will be assigned by the server indexer.
 const wss = new WebSocketServer({ port });
 

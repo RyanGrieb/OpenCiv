@@ -37,7 +37,10 @@ export class JoinGameScene extends Scene {
 
     this.addActor(serverTextBox);
 
-    const infoLabel = new Label({ text: "Enter server code: (e.g. ED2FG)", fontColor: "white" });
+    const infoLabel = new Label({
+      text: "Enter server code: (e.g. ED2FG)",
+      fontColor: "white",
+    });
     infoLabel.conformSize().then(() => {
       infoLabel.setPosition(
         Game.getWidth() / 2 - infoLabel.getWidth() / 2,
@@ -76,7 +79,7 @@ export class JoinGameScene extends Scene {
         width: 242,
         height: 62,
         fontColor: "white",
-        onClicked: () => { },
+        onClicked: () => {},
       })
     );
 

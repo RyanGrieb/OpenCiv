@@ -1,6 +1,9 @@
-export class Player {
+export class AbstractPlayer {
   private name: string;
-  constructor() {}
+
+  constructor(name: string) {
+    this.name = name;
+  }
 
   public getName(): string {
     return this.name;

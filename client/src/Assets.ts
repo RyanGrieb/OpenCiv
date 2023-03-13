@@ -45,6 +45,7 @@ export enum SpriteRegion {
   HORSES = "6,6",
   COPPER = "4,5",
   STAR = "0,3",
+  HOVERED_TILE = "6,8",
 }
 
 export const assetList = [

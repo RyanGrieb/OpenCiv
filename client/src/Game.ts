@@ -40,7 +40,7 @@ export class Game {
   private static mouseX: number;
   private static mouseY: number;
 
-  private constructor() { }
+  private constructor() {}
 
   public static init(options: GameOptions, callback: () => void) {
     this.scenes = new Map<string, Scene>();
@@ -58,7 +58,10 @@ export class Game {
     //Initialize canvas listeners. TODO: Make this less redundant w/ a helper function
     this.canvas.addEventListener("mousemove", (event) => {
       if (this.currentScene) {
-        this.currentScene.call("mousemove", { x: event.clientX, y: event.clientY });
+        this.currentScene.call("mousemove", {
+          x: event.clientX,
+          y: event.clientY,
+        });
       }
 
       this.actors.forEach((actor) => {
@@ -71,7 +74,10 @@ export class Game {
 
     this.canvas.addEventListener("mousedown", (event) => {
       if (this.currentScene) {
-        this.currentScene.call("mousedown", { x: event.clientX, y: event.clientY });
+        this.currentScene.call("mousedown", {
+          x: event.clientX,
+          y: event.clientY,
+        });
       }
 
       this.actors.forEach((actor) => {
@@ -81,7 +87,10 @@ export class Game {
 
     this.canvas.addEventListener("mouseup", (event) => {
       if (this.currentScene) {
-        this.currentScene.call("mouseup", { x: event.clientX, y: event.clientY });
+        this.currentScene.call("mouseup", {
+          x: event.clientX,
+          y: event.clientY,
+        });
       }
 
       this.actors.forEach((actor) => {
@@ -91,7 +100,10 @@ export class Game {
 
     this.canvas.addEventListener("mouseleave", (event) => {
       if (this.currentScene) {
-        this.currentScene.call("mouseleave", { x: event.clientX, y: event.clientY });
+        this.currentScene.call("mouseleave", {
+          x: event.clientX,
+          y: event.clientY,
+        });
       }
 
       this.actors.forEach((actor) => {
@@ -180,7 +192,13 @@ export class Game {
     // Call the gameloop for the current scene
     this.currentScene.gameLoop();
 
-    this.drawText({ text: "FPS: " + this.fps, x: 0, y: 10, color: "black", font: "12px sans" });
+    this.drawText({
+      text: "FPS: " + this.fps,
+      x: 0,
+      y: 10,
+      color: "black",
+      font: "12px sans",
+    });
 
     this.countedFrames++;
     window.requestAnimationFrame(() => {
@@ -239,7 +257,9 @@ export class Game {
 
   public static drawImageFromActor(actor: Actor) {
     if (!actor.getImage()) {
-      console.log("Warning: Attempted to draw empty actor: " + actor.getWidth());
+      console.log(
+        "Warning: Attempted to draw empty actor: " + actor.getWidth()
+      );
       return;
     }
 
@@ -290,7 +310,10 @@ export class Game {
     });
   }
 
-  public static async measureText(text: string, font: string): Promise<[number, number]> {
+  public static async measureText(
+    text: string,
+    font: string
+  ): Promise<[number, number]> {
     await this.waitUntilMeasureQueueIsEmpty(); // Wait for other measurements to complete, then continue..
     this.measureQueue.push(text);
     this.canvasContext.save();
@@ -299,7 +322,8 @@ export class Game {
     await document.fonts.ready; // Wait for the async function to complete, then measure text.s
 
     const metrics = this.canvasContext.measureText(text);
-    let height = metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent;
+    let height =
+      metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent;
     this.canvasContext.restore();
     //FIXME: This fails when we have a queue of the same text, support text & font simultaneously
     this.measureQueue = this.measureQueue.filter((element) => element !== text);

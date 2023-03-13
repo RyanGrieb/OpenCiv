@@ -57,15 +57,21 @@ export class Camera {
           scene.getCamera().addVel(0, -5);
         }
         if (options.key == "=") {
-          scene.getCamera().zoom(Game.getWidth() / 2, Game.getHeight() / 2, 1.2);
+          scene
+            .getCamera()
+            .zoom(Game.getWidth() / 2, Game.getHeight() / 2, 1.2);
         }
         if (options.key == "-") {
-          scene.getCamera().zoom(Game.getWidth() / 2, Game.getHeight() / 2, 0.8);
+          scene
+            .getCamera()
+            .zoom(Game.getWidth() / 2, Game.getHeight() / 2, 0.8);
         }
       });
 
       scene.on("keyup", (options) => {
-        this.keysHeld = this.keysHeld.filter((element) => element !== options.key); // Remove key from held lits
+        this.keysHeld = this.keysHeld.filter(
+          (element) => element !== options.key
+        ); // Remove key from held lits
 
         if (options.key == "a" || options.key == "A") {
           console.log("no a ");
@@ -93,7 +99,12 @@ export class Camera {
 
       scene.on("mousemove", (options) => {
         if (this.mouseHeld) {
-          scene.getCamera().setPosition(options.x - this.lastMouseX, options.y - this.lastMouseY);
+          scene
+            .getCamera()
+            .setPosition(
+              options.x - this.lastMouseX,
+              options.y - this.lastMouseY
+            );
         }
       });
 

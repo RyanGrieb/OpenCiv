@@ -71,8 +71,8 @@ export class Actor {
     }
   }
 
-  public onCreated() { }
-  public onDestroyed() { }
+  public onCreated() {}
+  public onDestroyed() {}
 
   public call(eventName: string, options?) {
     if (this.storedEvents.has(eventName)) {
@@ -146,7 +146,9 @@ export class Actor {
   }): Actor {
     // Create dummy canvas to get pixel data of the actor sprite
 
-    let canvas = document.getElementById("auxillary_canvas") as HTMLCanvasElement;
+    let canvas = document.getElementById(
+      "auxillary_canvas"
+    ) as HTMLCanvasElement;
     let greatestXWidth = 0; // The width of the actor w/ the greatest x.
     let greatestYHeight = 0; // The height of the actor w/ the greatest y.
     let greatestX = 0;
@@ -170,8 +172,10 @@ export class Actor {
 
     options.actors.forEach((actor: Actor) => {
       if (options.spriteRegion) {
-        const spriteX = parseInt(actor.getSpriteRegion().split(",")[0]) * options.spriteSize;
-        const spriteY = parseInt(actor.getSpriteRegion().split(",")[1]) * options.spriteSize;
+        const spriteX =
+          parseInt(actor.getSpriteRegion().split(",")[0]) * options.spriteSize;
+        const spriteY =
+          parseInt(actor.getSpriteRegion().split(",")[1]) * options.spriteSize;
         canvas
           .getContext("2d")
           .drawImage(

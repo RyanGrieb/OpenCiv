@@ -53,11 +53,15 @@ export class NetworkEvents {
    * Removes all associated callback functions that isn't a globalEvent
    */
   public static clear() {
-    const globalEventCallbacks = this.getGlobalEventCallbacks(this.storedEvents);
+    const globalEventCallbacks = this.getGlobalEventCallbacks(
+      this.storedEvents
+    );
     this.storedEvents = globalEventCallbacks;
   }
 
-  private static getGlobalEventCallbacks(storedEvents: Map<string, CallbackData[]>) {
+  private static getGlobalEventCallbacks(
+    storedEvents: Map<string, CallbackData[]>
+  ) {
     const globalEventCallbacks = new Map<string, CallbackData[]>();
 
     this.storedEvents.forEach((callbackDataList, eventName) => {

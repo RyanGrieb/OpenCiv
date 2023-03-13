@@ -21,10 +21,16 @@ export class ServerEvents {
 
   private constructor() {}
 
-  public static call(eventName: string, data: Record<string, any>, websocket?: WebSocket) {
+  public static call(
+    eventName: string,
+    data: Record<string, any>,
+    websocket?: WebSocket
+  ) {
     if (this.storedEvents.has(eventName)) {
       //Call the stored callback function
-      const callbackDataList = this.storedEvents.get(eventName) as CallbackData[];
+      const callbackDataList = this.storedEvents.get(
+        eventName
+      ) as CallbackData[];
       for (let callbackData of callbackDataList) {
         callbackData.callbackFunction(data, websocket);
       }
@@ -55,11 +61,15 @@ export class ServerEvents {
    * Removes all associated callback functions that isn't a globalEvent
    */
   public static clear() {
-    const globalEventCallbacks = this.getGlobalEventCallbacks(this.storedEvents);
+    const globalEventCallbacks = this.getGlobalEventCallbacks(
+      this.storedEvents
+    );
     this.storedEvents = globalEventCallbacks;
   }
 
-  private static getGlobalEventCallbacks(storedEvents: Map<string, CallbackData[]>) {
+  private static getGlobalEventCallbacks(
+    storedEvents: Map<string, CallbackData[]>
+  ) {
     const globalEventCallbacks = new Map<string, CallbackData[]>();
 
     this.storedEvents.forEach((callbackDataList, eventName) => {
