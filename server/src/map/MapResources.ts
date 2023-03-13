@@ -7,6 +7,7 @@ export interface MapResource {
     pathLength: number,
     setTileChance: number,
     tempRange: [number, number];
+    onAdditionalTileTypes?: boolean;
 }
 
 export const BONUS_RESOURCES: MapResource[] = [
@@ -20,5 +21,5 @@ export const STRATEGIC_RESOURCES: MapResource[] = [
 ]
 
 export const LUXURY_RESOURCES: MapResource[] = [
-    { name: "copper", originTiles: ["grass", "grass_hill", "plains", "plains_hill", "tundra", "tundra_hill", "desert", "desert_hill"], followTiles: ["grass", "grass_hill", "plains", "plains_hill", "tundra", "tundra_hill", "desert", "desert_hill"], pathLength: 2, setTileChance: 0.01, tempRange: [0, 100] }
+    { name: "copper", originTiles: ["grass", "grass_hill", "plains", "plains_hill", "tundra", "tundra_hill", "desert", "desert_hill"], followTiles: ["grass", "grass_hill", "plains", "plains_hill", "tundra", "tundra_hill", "desert", "desert_hill"], pathLength: 2, setTileChance: 0.01, tempRange: [0, 100], onAdditionalTileTypes: true }
 ]

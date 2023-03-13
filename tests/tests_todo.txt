@@ -1,2 +1,3 @@
 Map:
 * Ensure there are no tiles w/ forest and jungle on the same tile.
+* Ensure there are no tiles w/ more than one resource on the same tile.

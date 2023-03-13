@@ -257,7 +257,7 @@ export class GameMap {
     const numberOfJungleBiomes = Math.ceil(this.mapArea * 0.000721154); // 3 for a standard map...
     console.log("Generating jungle biomes... - " + numberOfJungleBiomes);
     for (let i = 0; i < numberOfJungleBiomes; i++) {
-      const originTile = this.getRandomTileWith({ tileTypes: ["grass"], onAdditionalTileTypes: false, tempRange: [60, 75] });
+      const originTile = this.getRandomTileWith({ tileTypes: ["grass"], tempRange: [60, 75] });
       if (!originTile) continue;
       // Now we have random origin, create path
       this.generateTilePath({
@@ -269,7 +269,6 @@ export class GameMap {
         overrideWater: false,
         setFollowTileTypeOnly: true,
         clearExistingTileTypes: false,
-        onAdditionalTileTypes: false,
       });
     }
     console.log("Done generating jungle tiles!");
@@ -280,7 +279,7 @@ export class GameMap {
     const numberOfForestBiomes = Math.ceil(this.mapArea * 0.024038462); // 50 for a standard map...
     console.log("Generating forest biomes... - " + numberOfForestBiomes);
     for (let i = 0; i < numberOfForestBiomes; i++) {
-      const originTile = this.getRandomTileWith({ tileTypes: ["grass"], onAdditionalTileTypes: false, tempRange: [32, 90] });
+      const originTile = this.getRandomTileWith({ tileTypes: ["grass"], tempRange: [32, 90] });
       if (!originTile) continue;
       // Now we have random origin, create path
       this.generateTilePath({
@@ -292,7 +291,6 @@ export class GameMap {
         overrideWater: false,
         setFollowTileTypeOnly: true,
         clearExistingTileTypes: false,
-        onAdditionalTileTypes: false,
       });
     }
     console.log("Done generating forest tiles!");
@@ -309,7 +307,7 @@ export class GameMap {
         mapResourceType = "luxury"
       }
       const mapResource = this.getRandomMapResource({ mapResourceType: mapResourceType });
-      const originTile = this.getRandomTileWith({ tileTypes: mapResource.originTiles, tempRange: mapResource.tempRange });
+      const originTile = this.getRandomTileWith({ tileTypes: mapResource.originTiles, onAdditionalTileTypes: mapResource.onAdditionalTileTypes, avoidResourceTiles: true, tempRange: mapResource.tempRange });
       if (!originTile) continue;
 
       console.log("Generate resource: " + mapResource.name)
@@ -323,14 +321,16 @@ export class GameMap {
         overrideWater: mapResource.originTiles.includes("ocean") ? true : false,
         setFollowTileTypeOnly: true,
         clearExistingTileTypes: false,
-        insertIndex: 1,
+        insertIndex: 1, // Puts the resource behind trees, jungle
+        onAdditionalTileTypes: mapResource.onAdditionalTileTypes,
+        avoidResourceTiles: true
       });
     }
     // == Generate strategic, bonus and luxury resources
 
     // == Test: Apply forest to every tile
 
-    // == Generate freshwater tiles. FIXME: This is slow.
+    // == Generate freshwater tiles. FIXME: This is slow. Create a tileIndexer("ocean"): Tiles[] function?
     console.log("Generating freshwater tiles...");
     /*for (let x = 0; x < this.mapWidth; x++) {
       for (let y = 0; y < this.mapHeight; y++) {
@@ -498,9 +498,10 @@ export class GameMap {
     clearExistingTileTypes?: boolean;
     insertIndex?: number;
     onAdditionalTileTypes?: boolean;
+    avoidResourceTiles?: boolean;
   }) {
-    const setFollowTileTypeOnly = options.setFollowTileTypeOnly ?? false;
-    const onAdditionalTileTypes = options.onAdditionalTileTypes ?? true;
+
+    const { setFollowTileTypeOnly = false, onAdditionalTileTypes = false, avoidResourceTiles = false } = options;
     let tile = options.tile;
 
     for (let i = 0; i < options.pathLength; i++) {
@@ -512,12 +513,21 @@ export class GameMap {
 
       const adjacentFollowTiles: Tile[] = [];
       for (const tile of generationTiles) {
-        if (
-          !tile ||
-          (tile.containsTileType("ocean") && !options.overrideWater) ||
-          (!tile.containsTileTypes(options.followTileTypes) && setFollowTileTypeOnly) || (!onAdditionalTileTypes && tile.getTileTypes().length > 1)
-        )
-          continue;
+
+        // If the tile doesn't exist, skip.
+        if (!tile) continue;
+
+        // Skip if we don't want to override water
+        if (tile.containsTileType("ocean") && !options.overrideWater) continue;
+
+        // Skip if we don't spread to the tile types we follow
+        if (!tile.containsTileTypes(options.followTileTypes) && setFollowTileTypeOnly) continue;
+
+        // Skip if we end up in a tile w/ tileTypes > 1 and we want to avoid them
+        if (!onAdditionalTileTypes && tile.getTileTypes().length > 1) continue;
+
+        // Skip if we want to avoid resource tiles
+        if (avoidResourceTiles && this.isResourceTile(tile)) continue;
 
         if (Math.random() <= options.setTileChance) {
           this.setTileBiome({
@@ -549,18 +559,28 @@ export class GameMap {
     }
   }
 
+  /**
+ * This method iterates through tiles randomly until it finds a tile that meets the specified criteria.
+ * If the method cannot find a suitable Tile object after 7500 iterations, it returns undefined.
+ * @param options.tileTypes - The tiletypes of tiles that can be randomly picked.
+ * @param options.tempRange - (Optional) A tuple of two numbers that specify the temperature range for the generated Tile object. If not provided, the default temperature range is [0, 100].
+ * @param options.onAdditionalTileTypes - (Optional) A boolean value that indicates if we allow the random tile to contain more than 1 tile type. (E.g. a forest). Default value = FALSE
+ * @param options.avoidResourceTiles - (Optional) A boolean value that indicates if we allow the random tile to be an existing resource tile(E.g. coal, horses, fish, ect.). Default value = FALSE
+ * @returns A Tile object that meets the specified criteria, or undefined if no such Tile is found.
+ */
   public static getRandomTileWith(options: {
     tileTypes: string[];
     tempRange?: [number, number];
     onAdditionalTileTypes?: boolean
+    avoidResourceTiles?: boolean
   }): Tile | undefined {
     let originTile = undefined;
     let iterations = 0;
 
-    const { tempRange = [0, 100], onAdditionalTileTypes = true } = options;
+    const { tempRange = [0, 100], onAdditionalTileTypes = false, avoidResourceTiles = false } = options;
     const minTemp = tempRange[0];
     const maxTemp = tempRange[1];
-    const maxIterations = 5000;
+    const maxIterations = 7500;
 
 
     while (!originTile) {
@@ -569,15 +589,20 @@ export class GameMap {
       const randomTile =
         this.tiles[random.int(0, this.mapWidth - 1)][random.int(0, this.mapHeight - 1)];
 
-      if (
-        randomTile.containsTileTypes(options.tileTypes) &&
-        randomTile.getGenerationTemp() >= minTemp &&
-        randomTile.getGenerationTemp() <= maxTemp
-      ) {
-        if (!onAdditionalTileTypes && randomTile.getTileTypes().length > 1) continue;
+      // Ensure at least one tile type is in this randomTile.
+      if (!randomTile.containsTileTypes(options.tileTypes)) continue;
 
-        originTile = randomTile;
-      }
+      // Ensure we are within the provided tempature range
+      if (randomTile.getGenerationTemp() < minTemp || randomTile.getGenerationTemp() > maxTemp) continue;
+
+      // If we don't want additional tileTypes, check for that
+      if (!onAdditionalTileTypes && randomTile.getTileTypes().length > 1) continue;
+
+      // If we don't want to spawn on existing resource, natural wonder tiles, check for that
+      if (avoidResourceTiles && this.isResourceTile(randomTile)) continue;
+
+      originTile = randomTile;
+
       if (iterations >= maxIterations) {
         console.log("Reached max iterations for random tile: " + options.tileTypes)
         break;
@@ -598,5 +623,19 @@ export class GameMap {
     }
 
     return undefined;
+  }
+
+  /**
+   * Determine if the tile is a resource or a natural wonder
+   * @param tile 
+   * @returns 
+   */
+  public static isResourceTile(tile: Tile) {
+    const resourceTileTypes = [
+      ...BONUS_RESOURCES.map(resource => resource.name),
+      ...STRATEGIC_RESOURCES.map(resource => resource.name),
+      ...LUXURY_RESOURCES.map(resource => resource.name),
+    ];
+    return tile.containsTileTypes(resourceTileTypes);
   }
 }
