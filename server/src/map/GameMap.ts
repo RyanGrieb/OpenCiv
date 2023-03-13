@@ -295,44 +295,9 @@ export class GameMap {
     }
     console.log("Done generating forest tiles!");
 
-    // == Generate strategic, bonus and luxury resources
-    const numberOfResources = 75; // Each resource type will have xx each.
-    for (let i = 0; i < numberOfResources * 3; i++) {
-      let mapResourceType = "N/A";
-      if (i < numberOfResources) {
-        mapResourceType = "bonus";
-      } else if (i > numberOfResources && i < numberOfResources * 2) {
-        mapResourceType = "strategic";
-      } else {
-        mapResourceType = "luxury"
-      }
-      const mapResource = this.getRandomMapResource({ mapResourceType: mapResourceType });
-      const originTile = this.getRandomTileWith({ tileTypes: mapResource.originTiles, onAdditionalTileTypes: mapResource.onAdditionalTileTypes, avoidResourceTiles: true, tempRange: mapResource.tempRange });
-      if (!originTile) continue;
-
-      console.log("Generate resource: " + mapResource.name)
-      // Now we have random origin, create path
-      this.generateTilePath({
-        tile: originTile,
-        pathLength: mapResource.pathLength,
-        setTileType: mapResource.name,
-        followTileTypes: mapResource.followTiles,
-        setTileChance: mapResource.setTileChance,
-        overrideWater: mapResource.originTiles.includes("ocean") ? true : false,
-        setFollowTileTypeOnly: true,
-        clearExistingTileTypes: false,
-        insertIndex: 1, // Puts the resource behind trees, jungle
-        onAdditionalTileTypes: mapResource.onAdditionalTileTypes,
-        avoidResourceTiles: true
-      });
-    }
-    // == Generate strategic, bonus and luxury resources
-
-    // == Test: Apply forest to every tile
-
     // == Generate freshwater tiles. FIXME: This is slow. Create a tileIndexer("ocean"): Tiles[] function?
     console.log("Generating freshwater tiles...");
-    /*for (let x = 0; x < this.mapWidth; x++) {
+    for (let x = 0; x < this.mapWidth; x++) {
       for (let y = 0; y < this.mapHeight; y++) {
         const tile = this.tiles[x][y];
 
@@ -366,9 +331,79 @@ export class GameMap {
           }
         }
       }
-    }*/
+    }
     console.log("Done generating freshwater tiles!");
     // == Generate freshwater tiles
+
+    // == Generate shallow ocean tiles FIXME: Also slow.
+    for (let x = 0; x < this.mapWidth; x++) {
+      for (let y = 0; y < this.mapHeight; y++) {
+        const tile = this.tiles[x][y];
+
+        if (!tile.containsTileType("ocean")) {
+          continue;
+        }
+
+        for (const adjTile of tile.getAdjacentTiles()) {
+          if (!adjTile) continue;
+          if (!adjTile.containsTileTypes(["ocean", "shallow_ocean"])) {
+            tile.replaceTileType("ocean", "shallow_ocean")
+          }
+        }
+      }
+    }
+
+    for (let x = 0; x < this.mapWidth; x++) {
+      for (let y = 0; y < this.mapHeight; y++) {
+        const tile = this.tiles[x][y];
+
+        if (!tile.containsTileType("ocean")) {
+          continue;
+        }
+
+        for (const adjTile of tile.getAdjacentTiles()) {
+          if (!adjTile) continue;
+          if (adjTile.containsTileType("shallow_ocean") && Math.random() > 0.75) {
+            tile.replaceTileType("ocean", "shallow_ocean")
+          }
+        }
+      }
+    }
+    // == Generate shallow ocean tiles
+
+
+    // == Generate strategic, bonus and luxury resources
+    const numberOfResources = 75; // Each resource type will have xx each.
+    for (let i = 0; i < numberOfResources * 3; i++) {
+      let mapResourceType = "N/A";
+      if (i < numberOfResources) {
+        mapResourceType = "bonus";
+      } else if (i > numberOfResources && i < numberOfResources * 2) {
+        mapResourceType = "strategic";
+      } else {
+        mapResourceType = "luxury"
+      }
+      const mapResource = this.getRandomMapResource({ mapResourceType: mapResourceType });
+      const originTile = this.getRandomTileWith({ tileTypes: mapResource.originTiles, onAdditionalTileTypes: mapResource.onAdditionalTileTypes, avoidResourceTiles: true, tempRange: mapResource.tempRange });
+      if (!originTile) continue;
+
+      console.log("Generate resource: " + mapResource.name)
+      // Now we have random origin, create path
+      this.generateTilePath({
+        tile: originTile,
+        pathLength: mapResource.pathLength,
+        setTileType: mapResource.name,
+        followTileTypes: mapResource.followTiles,
+        setTileChance: mapResource.setTileChance,
+        overrideWater: mapResource.originTiles.includes("ocean") ? true : false,
+        setFollowTileTypeOnly: true,
+        clearExistingTileTypes: false,
+        insertIndex: 1, // Puts the resource behind trees, jungle
+        onAdditionalTileTypes: mapResource.onAdditionalTileTypes,
+        avoidResourceTiles: true
+      });
+    }
+    // == Generate strategic, bonus and luxury resources
   }
 
   public static getDimensionValues(mapSize: MapSize) {
