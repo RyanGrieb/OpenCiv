@@ -146,6 +146,7 @@ export class Game {
         actor.call("keyup", { key: event.key });
       });
     });
+    document.addEventListener("contextmenu", (event) => event.preventDefault());
 
     let promise = this.loadAssetPromise(options.assetList);
 

@@ -86,7 +86,6 @@ export class GameMap {
             actors: tileActorList,
             spriteRegion: false,
           });
-          console.log(this.mapActor);
           scene.addActor(this.mapActor);
           Game.getCurrentScene().call("mapLoaded");
         }

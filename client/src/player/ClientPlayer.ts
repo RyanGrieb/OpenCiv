@@ -2,7 +2,7 @@ import { Game } from "../Game";
 import { GameMap } from "../map/GameMap";
 import { HoveredTile } from "../map/HoveredTile";
 import { Tile } from "../map/Tile";
-import { clamp, Vector } from "../util/Util";
+import { Vector } from "../util/Util";
 import { AbstractPlayer } from "./AbstractPlayer";
 
 export class ClientPlayer extends AbstractPlayer {
