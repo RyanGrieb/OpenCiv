@@ -614,12 +614,14 @@ export class GameMap {
     for (let i = 0; i < options.pathLength; i++) {
       let generationTiles: Tile[] = [];
       let nextPathTile: Tile = undefined;
+      console.log("path loop");
 
       generationTiles.push(tile);
       generationTiles = generationTiles.concat(tile.getAdjacentTiles());
 
       const adjacentFollowTiles: Tile[] = [];
       for (const tile of generationTiles) {
+        console.log("Path adj gen. tiles loop");
         // If the tile doesn't exist, skip.
         if (!tile) continue;
 
@@ -679,6 +681,9 @@ export class GameMap {
    * @param options.avoidResourceTiles - (Optional) A boolean value that indicates if we allow the random tile to be an existing resource tile(E.g. coal, horses, fish, ect.). Default value = FALSE
    * @returns A Tile object that meets the specified criteria, or undefined if no such Tile is found.
    */
+
+  //FIXME: We really should use a tileMap to get tiles w/ the associated tileTypes in O(1) time.
+  // Then we can apply the rest of the options in O(n)
   public static getRandomTileWith(options: {
     tileTypes: string[];
     tempRange?: [number, number];

@@ -101,8 +101,6 @@ export class ClientPlayer extends AbstractPlayer {
     //console.log("Tile: " + accurateTile.getX() + "," + accurateTile.getY());
 
     if (this.hoveredTile !== accurateTile) {
-      //this.hoveredTile.setPosition(newTile.getX(), newTile.getY());
-      //console.log("new tile: " + newTile);
       this.hoveredTile.setRepresentedTile(accurateTile);
     }
   }

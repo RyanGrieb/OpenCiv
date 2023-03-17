@@ -55,6 +55,28 @@ export class InGameScene extends Scene {
         );
         this.addActor(this.tileInformationLabel);
       });
+
+      this.on("tileHovered", (options) => {
+        if (!options.tile) {
+          this.tileInformationLabel.setText("");
+        } else {
+          let tileTypes: string = options.tile.getTileTypes().toString();
+          tileTypes = tileTypes.replace("_", " ");
+          tileTypes = tileTypes.replace(",", ", ");
+          let strArray = tileTypes.split("");
+          strArray[0] = strArray[0].toUpperCase();
+
+          for (let i = 1; i < tileTypes.length; i++) {
+            if (tileTypes[i - 1] === " ") {
+              strArray[i] = tileTypes[i].toUpperCase();
+            }
+          }
+
+          tileTypes = strArray.join("");
+
+          this.tileInformationLabel.setText(tileTypes);
+        }
+      });
     });
   }
 }

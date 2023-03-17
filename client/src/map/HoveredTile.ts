@@ -1,3 +1,4 @@
+import { Game } from "../Game";
 import { Tile } from "./Tile";
 
 export class HoveredTile extends Tile {
@@ -17,9 +18,17 @@ export class HoveredTile extends Tile {
     this.representedTile = representedTile;
 
     if (!representedTile) {
+      Game.getCurrentScene().call("tileHovered", {
+        tile: undefined,
+      });
+
       this.setPosition(9999, 9999);
       return;
     }
+
+    Game.getCurrentScene().call("tileHovered", {
+      tile: representedTile,
+    });
 
     this.setPosition(representedTile.getX(), representedTile.getY());
   }
