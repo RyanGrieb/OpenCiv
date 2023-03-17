@@ -2,7 +2,7 @@ import { Game } from "../Game";
 import { GameMap } from "../map/GameMap";
 import { HoveredTile } from "../map/HoveredTile";
 import { Tile } from "../map/Tile";
-import { Vector } from "../util/Util";
+import { clamp, Vector } from "../util/Util";
 import { AbstractPlayer } from "./AbstractPlayer";
 
 export class ClientPlayer extends AbstractPlayer {
@@ -41,7 +41,7 @@ export class ClientPlayer extends AbstractPlayer {
     mouseY /= zoom;
 
     let gridX = Math.floor(mouseX / Tile.WIDTH);
-    let gridY = Math.floor(mouseY / 24); // NOTE: We use 24 since thats how much were offsetting the tiles during map creation. (Height is still 32)
+    let gridY = Math.floor(mouseY / 25); // NOTE: We use 25 since thats how much were offsetting the tiles during map creation. (Height is still 32)
 
     // gridX is shifted 0.5 to the right on odd y values...
     if (gridY % 2 != 0) {
@@ -59,6 +59,9 @@ export class ClientPlayer extends AbstractPlayer {
       this.hoveredTile.setRepresentedTile(undefined);
       return;
     }
+
+    //gridX = clamp(gridX, 0, GameMap.getWidth() - 1);
+    //gridY = clamp(gridY, 0, GameMap.getHeight() - 1);
 
     // Get rough estimate of where the nearest tile to the mouse is. (Accurate enough to just check it's adjacent tiles)
     const estimatedTile: Tile = GameMap.getTiles()[gridX][gridY];

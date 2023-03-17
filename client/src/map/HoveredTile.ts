@@ -9,7 +9,7 @@ export class HoveredTile extends Tile {
       y: y,
       tileTypes: ["hovered_tile"],
       width: 32,
-      height: 31.5,
+      height: 32,
     });
   }
 

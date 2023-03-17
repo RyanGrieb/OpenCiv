@@ -59,7 +59,7 @@ export class GameMap {
           const x = parseInt(tileJSON["x"]);
           const y = parseInt(tileJSON["y"]);
 
-          let yPos = y * 24;
+          let yPos = y * 25;
           let xPos = x * 32;
           if (y % 2 != 0) {
             xPos += 16;
@@ -67,7 +67,7 @@ export class GameMap {
 
           const tile = new Tile({ tileTypes: tileTypes, x: xPos, y: yPos });
           this.tiles[x][y] = tile;
-          tileActorList.push(tile);
+          tileActorList.push(tile); // TODO: Make separate tile/layer for tileTypes > 1 (were currently clipping)
         }
 
         if (lastChunk) {
@@ -86,6 +86,7 @@ export class GameMap {
             actors: tileActorList,
             spriteRegion: false,
           });
+          console.log(this.mapActor);
           scene.addActor(this.mapActor);
           Game.getCurrentScene().call("mapLoaded");
         }
@@ -100,7 +101,7 @@ export class GameMap {
     for (let x = 0; x < this.mapWidth; x++) {
       for (let y = 0; y < this.mapHeight; y++) {
         let yPos = y * 24;
-        let xPos = x * 32;
+        let xPos = x * 33;
         if (y % 2 != 0) {
           xPos += 16;
         }

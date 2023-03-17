@@ -93,17 +93,25 @@ export class ListBox extends Actor {
     //TODO: Initialize rows here
   }
 
-  public draw() {
+  public draw(canvasContext: CanvasRenderingContext2D) {
     Game.drawRect({
       x: this.x,
       y: this.y,
       width: this.width,
       height: this.height,
       color: "white",
+      canvasContext: canvasContext,
     });
 
     this.rows.forEach((row) => {
-      Game.drawRect(row.rectangle);
+      Game.drawRect({
+        x: row.x,
+        y: row.y,
+        width: row.width,
+        height: row.height,
+        color: row.rectangle.color,
+        canvasContext: canvasContext,
+      });
 
       if (row.getText()) {
         //TODO: Only draw text if row is visible.
@@ -117,7 +125,7 @@ export class ListBox extends Actor {
       }
 
       if (row.getActorIcon()) {
-        Game.drawImageFromActor(row.getActorIcon());
+        Game.drawImageFromActor(row.getActorIcon(), canvasContext);
       }
     });
   }

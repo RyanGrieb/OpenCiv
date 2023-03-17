@@ -53,8 +53,8 @@ export class Button extends Actor {
     this.text = options.text;
   }
 
-  public draw() {
-    super.draw(); //FIXME: Don't draw until we know textWidth & height.
+  public draw(canvasContext: CanvasRenderingContext2D) {
+    super.draw(canvasContext); //FIXME: Don't draw until we know textWidth & height.
 
     if (this.textWidth == -1 && this.textHeight == -1) {
       Game.measureText(this.text, this.font).then(([textWidth, textHeight]) => {

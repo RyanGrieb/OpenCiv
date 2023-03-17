@@ -39,6 +39,7 @@ export class Game {
   private static measureQueue: string[];
   private static mouseX: number;
   private static mouseY: number;
+  private static runGameLoop: boolean;
 
   private constructor() {}
 
@@ -54,6 +55,7 @@ export class Game {
     this.canvasContext.font = "12px Times new Roman";
     this.canvasContext.imageSmoothingEnabled = false;
     this.measureQueue = [];
+    this.runGameLoop = true;
 
     //Initialize canvas listeners. TODO: Make this less redundant w/ a helper function
     this.canvas.addEventListener("mousemove", (event) => {
@@ -181,6 +183,8 @@ export class Game {
   }
 
   public static gameLoop() {
+    if (!this.runGameLoop) return;
+
     this.canvasContext.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
     if (Date.now() - this.lastTimeUpdate >= 1000) {
@@ -255,7 +259,10 @@ export class Game {
     actor.onDestroyed();
   }
 
-  public static drawImageFromActor(actor: Actor) {
+  public static drawImageFromActor(
+    actor: Actor,
+    context: CanvasRenderingContext2D
+  ) {
     if (!actor.getImage()) {
       console.log(
         "Warning: Attempted to draw empty actor: " + actor.getWidth()
@@ -263,19 +270,21 @@ export class Game {
       return;
     }
 
-    this.canvasContext.save();
+    const canvasContext = context;
+    canvasContext.save();
 
-    if (this.currentScene.getCamera()) {
+    // Only apply camera to the Game's main canvas context.
+    if (this.currentScene.getCamera() && canvasContext === this.canvasContext) {
       const zoom = this.currentScene.getCamera().getZoomAmount();
       const cameraX = this.currentScene.getCamera().getX();
       const cameraY = this.currentScene.getCamera().getY();
-      this.canvasContext.setTransform(zoom, 0, 0, zoom, cameraX, cameraY);
+      canvasContext.setTransform(zoom, 0, 0, zoom, cameraX, cameraY);
     }
 
     if (actor.getSpriteRegion()) {
       const spriteX = parseInt(actor.getSpriteRegion().split(",")[0]) * 32;
       const spriteY = parseInt(actor.getSpriteRegion().split(",")[1]) * 32;
-      this.canvasContext.drawImage(
+      canvasContext.drawImage(
         actor.getImage(),
         //TODO: Calculate sprite position
         spriteX,
@@ -288,7 +297,7 @@ export class Game {
         actor.getHeight()
       );
     } else {
-      this.canvasContext.drawImage(
+      canvasContext.drawImage(
         actor.getImage(),
         actor.getX(),
         actor.getY(),
@@ -296,7 +305,7 @@ export class Game {
         actor.getHeight()
       );
     }
-    this.canvasContext.restore();
+    canvasContext.restore();
   }
 
   public static async waitUntilMeasureQueueIsEmpty(): Promise<void> {
@@ -357,17 +366,19 @@ export class Game {
     width,
     height,
     color,
+    canvasContext,
   }: {
     x: number;
     y: number;
     width: number;
     height: number;
     color: string;
+    canvasContext: CanvasRenderingContext2D;
   }) {
-    this.canvasContext.save();
-    this.canvasContext.fillStyle = color;
-    this.canvasContext.fillRect(x, y, width, height);
-    this.canvasContext.restore();
+    canvasContext.save();
+    canvasContext.fillStyle = color;
+    canvasContext.fillRect(x, y, width, height);
+    canvasContext.restore();
   }
 
   public static getImage(gameImage: GameImage) {
@@ -406,5 +417,9 @@ export class Game {
   }
   public static getRelativeMouseY() {
     return this.mouseY - (this.currentScene.getCamera()?.getY() ?? 0);
+  }
+
+  public static toggleGameLoop() {
+    this.runGameLoop = !this.runGameLoop;
   }
 }

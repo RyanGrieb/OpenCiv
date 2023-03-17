@@ -46,6 +46,21 @@ export class Tile extends Actor {
     }
   }
 
+  public draw(canvasContext: CanvasRenderingContext2D) {
+    super.draw(canvasContext);
+
+    /*this.vectors.forEach((vector) => {
+      Game.drawRect({
+        x: vector.x,
+        y: vector.y,
+        height: 1,
+        width: 1,
+        color: "black",
+        canvasContext: canvasContext,
+      });
+    });*/
+  }
+
   public getTileTypes() {
     return this.tileTypes;
   }
@@ -113,10 +128,20 @@ export class Tile extends Actor {
   private initializeVectors() {
     this.vectors.push(new Vector(this.x + this.width / 2, this.y + 32)); // Bottom center
     this.vectors.push(new Vector(this.x + 32, this.y + 24)); // Bottom right
-    this.vectors.push(new Vector(this.x + 32, this.y + 8)); // Top right
-    this.vectors.push(new Vector(this.x + this.width / 2, this.y)); // Top center
+    this.vectors.push(new Vector(this.x + 32, this.y + 7)); // Top right
+    this.vectors.push(new Vector(this.x + this.width / 2, this.y - 1)); // Top center
 
-    this.vectors.push(new Vector(this.x, this.y + 8)); // Top left
+    this.vectors.push(new Vector(this.x, this.y + 7)); // Top left
     this.vectors.push(new Vector(this.x, this.y + 24)); // Bottom left
+  }
+
+  public getCenterPosition(): [number, number] {
+    return [this.x + Tile.WIDTH / 2, this.y + Tile.HEIGHT / 2];
+  }
+
+  public getDistanceFrom(x1: number, y1: number) {
+    let x2 = this.getCenterPosition()[0];
+    let y2 = this.getCenterPosition()[1];
+    return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
   }
 }

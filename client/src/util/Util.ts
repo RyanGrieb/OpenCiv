@@ -1,6 +1,8 @@
 const delay = (ms) => new Promise((res) => setTimeout(res, ms));
+const clamp = (num, min, max) => Math.min(Math.max(num, min), max);
 
 export { delay };
+export { clamp };
 
 export class Vector {
   public x: number;

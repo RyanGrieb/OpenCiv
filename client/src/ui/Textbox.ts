@@ -100,7 +100,7 @@ export class TextBox extends Actor {
     clearInterval(this.blinkInterval);
   }
 
-  public draw() {
+  public draw(canvasContext: CanvasRenderingContext2D) {
     if (this.textHeight == -1) {
       Game.measureText("M", "24px sans-serif").then(([width, height]) => {
         this.textHeight = height;
@@ -113,6 +113,7 @@ export class TextBox extends Actor {
       width: this.width,
       height: this.height,
       color: "#FFFFFF",
+      canvasContext: canvasContext,
     });
 
     if (this.shouldBlink) {
@@ -122,6 +123,7 @@ export class TextBox extends Actor {
         width: 2,
         height: this.height - 8,
         color: "black",
+        canvasContext: canvasContext,
       });
     }
 

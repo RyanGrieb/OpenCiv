@@ -30,7 +30,7 @@ export abstract class Scene {
     }
 
     this.actors.forEach((actor: Actor) => {
-      actor.draw();
+      actor.draw(Game.getCanvasContext());
     });
   }
 

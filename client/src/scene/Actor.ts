@@ -55,7 +55,7 @@ export class Actor {
     });
   }
 
-  public draw() {
+  public draw(canvasContext: CanvasRenderingContext2D) {
     if (!this.image && this.color) {
       Game.drawRect({
         x: this.x,
@@ -63,9 +63,10 @@ export class Actor {
         width: this.width,
         height: this.height,
         color: this.color,
+        canvasContext: canvasContext,
       });
     } else if (this.image) {
-      Game.drawImageFromActor(this);
+      Game.drawImageFromActor(this, canvasContext);
     } else {
       console.log("Warning: Nothing for actor can be drawn:" + this);
     }
@@ -169,37 +170,10 @@ export class Actor {
 
     canvas.getContext("2d").fillStyle = "grey";
     canvas.getContext("2d").fillRect(0, 0, canvas.width, canvas.height);
-
+    const ctx = canvas.getContext("2d");
     options.actors.forEach((actor: Actor) => {
-      if (options.spriteRegion) {
-        const spriteX =
-          parseInt(actor.getSpriteRegion().split(",")[0]) * options.spriteSize;
-        const spriteY =
-          parseInt(actor.getSpriteRegion().split(",")[1]) * options.spriteSize;
-        canvas
-          .getContext("2d")
-          .drawImage(
-            actor.getImage(),
-            spriteX,
-            spriteY,
-            options.spriteSize,
-            options.spriteSize,
-            actor.getX(),
-            actor.getY(),
-            actor.getWidth(),
-            actor.getHeight()
-          );
-      } else {
-        canvas
-          .getContext("2d")
-          .drawImage(
-            actor.getImage(),
-            actor.getX(),
-            actor.getY(),
-            actor.getWidth(),
-            actor.getHeight()
-          );
-      }
+      actor.draw(ctx); // Never gets called b/c i'ts already called to frequently?
+      //actor.test(ctx); // This gets called.
     });
 
     //canvas.getContext("2d").globalCompositeOperation = "saturation";
