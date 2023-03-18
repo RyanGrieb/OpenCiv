@@ -133,6 +133,31 @@ export class GameMap {
     return this.tiles[0].length;
   }
 
+  public static getAdjacentTiles(gridX: number, gridY: number): Tile[] {
+    const adjTiles: Tile[] = [];
+    let edgeAxis: number[][];
+    if (gridY % 2 == 0) edgeAxis = this.evenEdgeAxis;
+    else edgeAxis = this.oddEdgeAxis;
+
+    for (let i = 0; i < edgeAxis.length; i++) {
+      let edgeX = gridX + edgeAxis[i][0];
+      let edgeY = gridY + edgeAxis[i][1];
+
+      if (
+        edgeX == -1 ||
+        edgeY == -1 ||
+        edgeX > this.mapWidth - 1 ||
+        edgeY > this.mapHeight - 1 ||
+        gridX + edgeAxis[i][0] < 0
+      ) {
+        continue;
+      }
+      adjTiles.push(this.tiles[gridX + edgeAxis[i][0]][gridY + edgeAxis[i][1]]);
+    }
+
+    return adjTiles;
+  }
+
   /**
    * Iterate through every tile & assign it's adjacent neighboring tiles through: setAdjacentTile()
    */

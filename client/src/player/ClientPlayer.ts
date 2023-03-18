@@ -2,7 +2,7 @@ import { Game } from "../Game";
 import { GameMap } from "../map/GameMap";
 import { HoveredTile } from "../map/HoveredTile";
 import { Tile } from "../map/Tile";
-import { Vector } from "../util/Util";
+import { Vector, clamp } from "../util/Util";
 import { AbstractPlayer } from "./AbstractPlayer";
 
 export class ClientPlayer extends AbstractPlayer {
@@ -40,47 +40,40 @@ export class ClientPlayer extends AbstractPlayer {
     mouseX /= zoom;
     mouseY /= zoom;
 
+    let mouseVector = new Vector(mouseX, mouseY);
+    let mouseExtremeVector = new Vector(mouseX + 1000, mouseY);
+
     let gridX = Math.floor(mouseX / Tile.WIDTH);
-    let gridY = Math.floor(mouseY / 25); // NOTE: We use 25 since thats how much were offsetting the tiles during map creation. (Height is still 32)
+    let gridY = Math.floor(mouseY / 25); // NOTE: We use 25 since thats how much were offsetting the tiles during map creation. (Height is still 32..)
 
     // gridX is shifted 0.5 to the right on odd y values...
     if (gridY % 2 != 0) {
       gridX = Math.floor((mouseX - Tile.WIDTH / 2) / Tile.WIDTH);
     }
 
-    //console.log("Mouse: " + mouseX + "," + mouseY);
+    let estimatedTile: Tile = undefined;
+    let accurateTile: Tile = undefined;
 
-    // Ensure tile is inside map dimensions
-    if (gridX >= GameMap.getWidth() || gridX < 0) {
-      this.hoveredTile.setRepresentedTile(undefined);
-      return;
-    }
-    if (gridY >= GameMap.getHeight() || gridY < 0) {
-      this.hoveredTile.setRepresentedTile(undefined);
-      return;
-    }
-
-    //gridX = clamp(gridX, 0, GameMap.getWidth() - 1);
-    //gridY = clamp(gridY, 0, GameMap.getHeight() - 1);
-
-    // Get rough estimate of where the nearest tile to the mouse is. (Accurate enough to just check it's adjacent tiles)
-    const estimatedTile: Tile = GameMap.getTiles()[gridX][gridY];
-    if (!estimatedTile) return;
-
-    let accurateTile = undefined;
-    let mouseVector = new Vector(mouseX, mouseY);
-    let mouseExtremeVector = new Vector(mouseX + 1000, mouseY);
-
+    // Ensure tile is inside map dimensions, if not account for border tiles...
     if (
-      Vector.isInsidePolygon(
-        estimatedTile.getVectors(),
-        mouseVector,
-        mouseExtremeVector
-      )
+      gridX >= GameMap.getWidth() ||
+      gridX < 0 ||
+      gridY >= GameMap.getHeight() ||
+      gridY < 0 ||
+      // We also check for mouse values that could indicate were out of bounds...
+      mouseY < 6 ||
+      mouseX < 15 ||
+      mouseX > GameMap.getWidth() * 32
     ) {
-      accurateTile = estimatedTile;
-    } else {
-      for (const adjTile of estimatedTile.getAdjacentTiles()) {
+      const adjBorderTiles = GameMap.getAdjacentTiles(gridX, gridY);
+      const clampedBorderTile =
+        GameMap.getTiles()[clamp(gridX, 0, GameMap.getWidth() - 1)][
+          clamp(gridY, 0, GameMap.getHeight() - 1)
+        ];
+      adjBorderTiles.push(clampedBorderTile); // Also push clamped tile.
+
+      let foundAdjBorderTile = false;
+      for (const adjTile of adjBorderTiles) {
         if (!adjTile) continue;
         if (
           Vector.isInsidePolygon(
@@ -90,6 +83,42 @@ export class ClientPlayer extends AbstractPlayer {
           )
         ) {
           accurateTile = adjTile;
+          foundAdjBorderTile = true;
+        }
+      }
+      if (!foundAdjBorderTile) {
+        this.hoveredTile.setRepresentedTile(undefined);
+        return;
+      }
+    } else {
+      // If were inside the map, handle things in our original manner...
+      // Get rough estimate of where the nearest tile to the mouse is. (Accurate enough to just check it's adjacent tiles)
+      estimatedTile = GameMap.getTiles()[gridX][gridY];
+      if (!estimatedTile) {
+        console.log("on border of map?");
+        return;
+      }
+
+      if (
+        Vector.isInsidePolygon(
+          estimatedTile.getVectors(),
+          mouseVector,
+          mouseExtremeVector
+        )
+      ) {
+        accurateTile = estimatedTile;
+      } else {
+        for (const adjTile of estimatedTile.getAdjacentTiles()) {
+          if (!adjTile) continue;
+          if (
+            Vector.isInsidePolygon(
+              adjTile.getVectors(),
+              mouseVector,
+              mouseExtremeVector
+            )
+          ) {
+            accurateTile = adjTile;
+          }
         }
       }
     }
