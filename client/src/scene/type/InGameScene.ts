@@ -61,8 +61,8 @@ export class InGameScene extends Scene {
           this.tileInformationLabel.setText("");
         } else {
           let tileTypes: string = options.tile.getTileTypes().toString();
-          tileTypes = tileTypes.replace("_", " ");
-          tileTypes = tileTypes.replace(",", ", ");
+          tileTypes = tileTypes.replaceAll("_", " ");
+          tileTypes = tileTypes.replaceAll(",", ", ");
           let strArray = tileTypes.split("");
           strArray[0] = strArray[0].toUpperCase();
 

@@ -1,9 +1,9 @@
 {
   "compilerOptions": {
-      "target": "es2017",
+      "target": "ES2021",
       "sourceMap": true,
       "lib": [
-          "es5",
+          "ES2021",
           "dom"
       ],
       "noUnusedLocals": true,
