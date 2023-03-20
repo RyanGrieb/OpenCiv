@@ -269,7 +269,7 @@ export class GameMap {
         tile: originTile,
         pathLength: 15,
         setTileType: "desert",
-        followTileTypes: ["grass"],
+        followTileTypes: ["grass", "grass_hill"],
         setTileChance: 0.95,
         overrideWater: false,
       });

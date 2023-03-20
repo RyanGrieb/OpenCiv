@@ -21,6 +21,9 @@ export class Tile extends Actor {
   private adjacentTiles: Tile[];
   private vectors: Vector[];
 
+  private gridX: number;
+  private gridY: number;
+
   constructor(options: TileOptions) {
     super({
       x: options.x,
@@ -31,6 +34,9 @@ export class Tile extends Actor {
     this.tileTypes = options.tileTypes;
     this.adjacentTiles = [];
     this.vectors = [];
+
+    this.gridX = Math.floor(this.x / 32);
+    this.gridY = Math.floor(this.y / 25);
 
     this.initializeVectors();
   }
@@ -63,6 +69,18 @@ export class Tile extends Actor {
 
   public getTileTypes() {
     return this.tileTypes;
+  }
+
+  public setTileTypes(tileTypes: string[]) {
+    this.tileTypes = tileTypes;
+  }
+
+  public getGridX() {
+    return this.gridX;
+  }
+
+  public getGridY() {
+    return this.gridY;
   }
 
   public static async generateImageFromTileTypes(

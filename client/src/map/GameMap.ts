@@ -46,7 +46,8 @@ export class GameMap {
         }
       },
     });
-    const tileActorList = [];
+    const tileActorList: Tile[] = [];
+    const topLayerTileActorList: Tile[] = [];
 
     NetworkEvents.on({
       eventName: "mapChunk",
@@ -55,7 +56,7 @@ export class GameMap {
         const lastChunk = JSON.parse(data["lastChunk"]);
 
         for (const tileJSON of tileList) {
-          const tileTypes = tileJSON["tileTypes"];
+          const tileTypes: string[] = tileJSON["tileTypes"];
           const x = parseInt(tileJSON["x"]);
           const y = parseInt(tileJSON["y"]);
 
@@ -65,28 +66,56 @@ export class GameMap {
             xPos += 16;
           }
 
-          const tile = new Tile({ tileTypes: tileTypes, x: xPos, y: yPos });
+          const tile = new Tile({
+            tileTypes: [tileTypes[0]], // Only assign the base tile type, for now....
+            x: xPos,
+            y: yPos,
+          });
           this.tiles[x][y] = tile;
-          tileActorList.push(tile); // TODO: Make separate tile/layer for tileTypes > 1 (were currently clipping)
+          tileActorList.push(tile);
+
+          if (tileTypes.length > 1) {
+            const topLayerTileTypes = [...tileTypes];
+            topLayerTileTypes.shift();
+            const topLayerTile = new Tile({
+              tileTypes: topLayerTileTypes,
+              x: xPos,
+              y: yPos,
+            });
+            topLayerTileActorList.push(topLayerTile);
+          }
         }
 
         if (lastChunk) {
           this.initAdjacentTiles();
 
           console.log("Loading tile images..");
-          for (let x = 0; x < this.mapWidth; x++) {
-            for (let y = 0; y < this.mapHeight; y++) {
-              await this.tiles[x][y].loadImage();
-            }
+
+          for (let tile of tileActorList) {
+            await tile.loadImage();
+          }
+          for (let tile of topLayerTileActorList) {
+            await tile.loadImage();
           }
 
           console.log("All tile images loaded, generating map");
           //TODO: Instead of a single map actor, we need to do this in chunks (4x4?). B/c it's going to be slow on map updates.
           this.mapActor = Actor.mergeActors({
-            actors: tileActorList,
+            actors: tileActorList.concat(topLayerTileActorList),
             spriteRegion: false,
           });
           scene.addActor(this.mapActor);
+
+          // Now combine the base tile-type layer & the rest of the layers above..
+          for (let topLayerTile of topLayerTileActorList) {
+            const baseLayerTile =
+              this.tiles[topLayerTile.getGridX()][topLayerTile.getGridY()];
+
+            baseLayerTile.setTileTypes(
+              baseLayerTile.getTileTypes().concat(topLayerTile.getTileTypes())
+            );
+          }
+
           Game.getCurrentScene().call("mapLoaded");
         }
       },

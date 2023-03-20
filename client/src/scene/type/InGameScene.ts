@@ -74,7 +74,14 @@ export class InGameScene extends Scene {
 
           tileTypes = strArray.join("");
 
-          this.tileInformationLabel.setText(tileTypes);
+          this.tileInformationLabel.setText(
+            "[" +
+              options.tile.getGridX() +
+              "," +
+              options.tile.getGridY() +
+              "] " +
+              tileTypes
+          );
         }
       });
     });
