@@ -82,6 +82,32 @@ export const STRATEGIC_RESOURCES: MapResource[] = [
     setTileChance: 0.05,
     tempRange: [32, 90],
   },
+  {
+    name: "iron",
+    originTiles: [
+      "grass",
+      "grass_hill",
+      "plains",
+      "plains_hill",
+      "tundra",
+      "tundra_hill",
+      "desert",
+      "desert_hill",
+    ],
+    followTiles: [
+      "grass",
+      "grass_hill",
+      "plains",
+      "plains_hill",
+      "tundra",
+      "tundra_hill",
+      "desert",
+      "desert_hill",
+    ],
+    pathLength: 2,
+    setTileChance: 0.05,
+    tempRange: [0, 100],
+  },
 ];
 
 export const LUXURY_RESOURCES: MapResource[] = [

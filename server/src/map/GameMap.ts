@@ -413,7 +413,7 @@ export class GameMap {
     // == Generate shallow ocean tiles
 
     // == Generate strategic, bonus and luxury resources
-    const numberOfResources = 75; // Each resource type will have xx each.
+    const numberOfResources = Math.ceil(this.mapArea * 0.0418526785714286); // 75 for tiny map..
     for (let i = 0; i < numberOfResources * 3; i++) {
       let mapResourceType = "N/A";
       if (i < numberOfResources) {
