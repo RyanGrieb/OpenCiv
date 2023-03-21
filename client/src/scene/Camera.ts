@@ -121,6 +121,9 @@ export class Camera {
         if (options.deltaY < 0) {
           scene.getCamera().zoom(options.x, options.y, 1.1);
         }
+
+        this.lastMouseX = options.x - scene.getCamera().getX();
+        this.lastMouseY = options.y - scene.getCamera().getY();
       });
 
       scene.on("mouseleave", (options) => {
