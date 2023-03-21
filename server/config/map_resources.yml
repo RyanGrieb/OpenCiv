@@ -1,0 +1,117 @@
+bonus_resources:
+  - name: cattle
+    spawn_tiles:
+      - grass
+    path_length: 1
+    min_tiles_set: 1
+    max_tiles_set: 3
+    set_chance: 0.05
+    min_temp: 32
+    max_temp: 90
+  - name: sheep
+    spawn_tiles:
+      - grass
+      - grass_hill
+      - plains
+      - plains_hill
+    path_length: 1
+    min_tiles_set: 1
+    max_tiles_set: 3
+    set_chance: 0.05
+    min_temp: 0
+    max_temp: 90
+  - name: fish
+    spawn_tiles:
+      - freshwater
+      - shallow_ocean
+    path_length: 1
+    min_tiles_set: 1
+    max_tiles_set: 4
+    set_chance: 0.1
+    min_temp: 0
+    max_temp: 100
+strategic_resources:
+  - name: horses
+    spawn_tiles:
+      - grass
+      - grass_hill
+      - plains
+      - plains_hill
+      - tundra
+      - tundra_hill
+    path_length: 1
+    min_tiles_set: 1
+    max_tiles_set: 2
+    set_chance: 0.1
+    min_temp: 0
+    max_temp: 90
+  - name: iron
+    spawn_tiles:
+      - grass
+      - grass_hill
+      - plains
+      - plains_hill
+      - tundra
+      - tundra_hill
+      - desert
+      - desert_hill
+      - snow
+      - snow_hill
+    path_length: 1
+    min_tiles_set: 1
+    max_tiles_set: 3
+    set_chance: 0.05
+    min_temp: 0
+    max_temp: 100
+    spawn_on_additional_tile_types: true
+luxury_resources:
+  - name: copper
+    spawn_tiles:
+      - grass
+      - grass_hill
+      - plains
+      - plains_hill
+      - tundra
+      - tundra_hill
+      - desert
+      - desert_hill
+      - snow
+      - snow_hill
+    path_length: 1
+    min_tiles_set: 1
+    max_tiles_set: 2
+    set_chance: 0.1
+    min_temp: 0
+    max_temp: 100
+    spawn_on_additional_tile_types: true
+  - name: crab
+    spawn_tiles:
+      - freshwater
+      - shallow_ocean
+    path_length: 1
+    min_tiles_set: 1
+    max_tiles_set: 2
+    set_chance: 0.05
+    min_temp: 0
+    max_temp: 100
+  - name: whales
+    spawn_tiles:
+      - freshwater
+      - shallow_ocean
+      - ocean
+    path_length: 1
+    min_tiles_set: 1
+    max_tiles_set: 2
+    set_chance: 0.05
+    min_temp: 0
+    max_temp: 100
+  - name: turtles
+    spawn_tiles:
+      - freshwater
+      - shallow_ocean
+    path_length: 1
+    min_tiles_set: 1
+    max_tiles_set: 2
+    set_chance: 0.05
+    min_temp: 0
+    max_temp: 100

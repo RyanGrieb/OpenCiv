@@ -1,12 +1,7 @@
 import { Player } from "../Player";
 import { Tile } from "./Tile";
 import random from "random";
-import {
-  BONUS_RESOURCES,
-  LUXURY_RESOURCES,
-  MapResource,
-  STRATEGIC_RESOURCES,
-} from "./MapResources";
+import { MapResources } from "./MapResources";
 
 enum MapSize {
   DUEL = "40x24",
@@ -423,17 +418,21 @@ export class GameMap {
       } else {
         mapResourceType = "luxury";
       }
-      const mapResource = this.getRandomMapResource({
+      const mapResource = MapResources.getRandomMapResource({
         mapResourceType: mapResourceType,
       });
+      if (mapResourceType === "strategic") console.log(mapResource);
       const originTile = this.getRandomTileWith({
-        tileTypes: mapResource.originTiles,
-        onAdditionalTileTypes: mapResource.onAdditionalTileTypes,
+        tileTypes: mapResource.getSpawnTiles(),
+        onAdditionalTileTypes: mapResource.spawnOnAdditionalTileTypes(),
         avoidResourceTiles: true,
-        tempRange: mapResource.tempRange,
+        tempRange: [mapResource.getMinTemp(), mapResource.getMaxTemp()],
       });
 
-      if (!originTile) continue;
+      if (!originTile) {
+        console.log("no origin tile found");
+        continue;
+      }
 
       console.log("Generate resource: " + mapResource.name);
       // Now we have random origin, create path
@@ -441,9 +440,13 @@ export class GameMap {
         tile: originTile,
         pathLength: mapResource.pathLength,
         setTileType: mapResource.name,
-        followTileTypes: mapResource.followTiles,
-        setTileChance: mapResource.setTileChance,
-        overrideWater: mapResource.originTiles.includes("ocean") ? true : false,
+        followTileTypes: mapResource.getSpawnTiles(),
+        setTileChance: mapResource.getSetChance(),
+        minTilesSet: mapResource.getMinTilesSet(),
+        maxTilesSet: mapResource.getMaxTilesSet(),
+        overrideWater: mapResource.getSpawnTiles().includes("ocean")
+          ? true
+          : false,
         setFollowTileTypeOnly: true,
         clearExistingTileTypes: false,
         insertIndex: 1, // Puts the resource behind trees, jungle
@@ -597,6 +600,8 @@ export class GameMap {
     setTileType: string;
     followTileTypes: string[];
     setTileChance: number;
+    minTilesSet?: number;
+    maxTilesSet?: number;
     overrideWater: boolean;
     setFollowTileTypeOnly?: boolean;
     clearExistingTileTypes?: boolean;
@@ -608,22 +613,28 @@ export class GameMap {
       setFollowTileTypeOnly = false,
       onAdditionalTileTypes = false,
       avoidResourceTiles = false,
+      minTilesSet = 0,
+      maxTilesSet = 99999,
     } = options;
     let tile = options.tile;
+    let tilesSet = 0;
+    const skippedValidGenerationTiles: Tile[] = []; // List of all possible tiles we "could have" set to our desired tiletype.
 
     for (let i = 0; i < options.pathLength; i++) {
       let generationTiles: Tile[] = [];
       let nextPathTile: Tile = undefined;
-      console.log("path loop");
+      //console.log("path loop");
 
       generationTiles.push(tile);
       generationTiles = generationTiles.concat(tile.getAdjacentTiles());
 
       const adjacentFollowTiles: Tile[] = [];
       for (const tile of generationTiles) {
-        console.log("Path adj gen. tiles loop");
         // If the tile doesn't exist, skip.
         if (!tile) continue;
+
+        // If we reached our max set Tiles, skip
+        if (tilesSet >= maxTilesSet) continue;
 
         // Skip if we don't want to override water
         if (tile.containsTileType("ocean") && !options.overrideWater) continue;
@@ -639,7 +650,7 @@ export class GameMap {
         if (!onAdditionalTileTypes && tile.getTileTypes().length > 1) continue;
 
         // Skip if we want to avoid resource tiles
-        if (avoidResourceTiles && this.isResourceTile(tile)) continue;
+        if (avoidResourceTiles && MapResources.isResourceTile(tile)) continue;
 
         if (Math.random() <= options.setTileChance) {
           this.setTileBiome({
@@ -648,7 +659,12 @@ export class GameMap {
             clearTileTypes: options.clearExistingTileTypes,
             insertIndex: options.insertIndex,
           });
-          tile.setGenerationHeight(tile.getGenerationHeight() + 1);
+
+          tilesSet++;
+
+          tile.setGenerationHeight(tile.getGenerationHeight() + 1); //FIXME: This really shouldn't be called anymore after generating all land tiles
+        } else {
+          skippedValidGenerationTiles.push(tile);
         }
 
         // Populate tiles w/ adj follow tile array
@@ -669,6 +685,23 @@ export class GameMap {
       if (!nextPathTile) break;
 
       tile = nextPathTile; // Traverse onto the next tile.
+    }
+
+    // Ensure the minimum amount of tiles have been set.
+    if (tilesSet < minTilesSet) {
+      for (let i = minTilesSet; i < tilesSet; i++) {
+        const rndTile =
+          skippedValidGenerationTiles[
+            random.int(0, skippedValidGenerationTiles.length - 1)
+          ];
+        this.setTileBiome({
+          tile: rndTile,
+          tileType: options.setTileType,
+          clearTileTypes: options.clearExistingTileTypes,
+          insertIndex: options.insertIndex,
+        });
+        tilesSet++;
+      }
     }
   }
 
@@ -725,7 +758,8 @@ export class GameMap {
         continue;
 
       // If we don't want to spawn on existing resource, natural wonder tiles, check for that
-      if (avoidResourceTiles && this.isResourceTile(randomTile)) continue;
+      if (avoidResourceTiles && MapResources.isResourceTile(randomTile))
+        continue;
 
       originTile = randomTile;
 
@@ -738,36 +772,5 @@ export class GameMap {
     }
 
     return originTile;
-  }
-
-  private static getRandomMapResource(options: {
-    mapResourceType: string;
-  }): MapResource {
-    switch (options.mapResourceType) {
-      case "bonus":
-        return BONUS_RESOURCES[random.int(0, BONUS_RESOURCES.length - 1)];
-      case "strategic":
-        return STRATEGIC_RESOURCES[
-          random.int(0, STRATEGIC_RESOURCES.length - 1)
-        ];
-      case "luxury":
-        return LUXURY_RESOURCES[random.int(0, LUXURY_RESOURCES.length - 1)];
-    }
-
-    return undefined;
-  }
-
-  /**
-   * Determine if the tile is a resource or a natural wonder
-   * @param tile
-   * @returns
-   */
-  public static isResourceTile(tile: Tile) {
-    const resourceTileTypes = [
-      ...BONUS_RESOURCES.map((resource) => resource.name),
-      ...STRATEGIC_RESOURCES.map((resource) => resource.name),
-      ...LUXURY_RESOURCES.map((resource) => resource.name),
-    ];
-    return tile.containsTileTypes(resourceTileTypes);
   }
 }
