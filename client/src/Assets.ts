@@ -46,6 +46,9 @@ export enum SpriteRegion {
   HORSES = "6,6",
   COPPER = "4,5",
   IRON = "8,6",
+  COTTON = "6,5",
+  CITRUS = "17,6",
+  STONE = "13,7",
   STAR = "0,3",
   HOVERED_TILE = "6,8",
 }
