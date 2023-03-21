@@ -96,9 +96,7 @@ luxury_resources:
     max_temp: 100
   - name: whales
     spawn_tiles:
-      - freshwater
       - shallow_ocean
-      - ocean
     path_length: 1
     min_tiles_set: 1
     max_tiles_set: 2

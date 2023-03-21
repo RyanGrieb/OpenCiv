@@ -421,7 +421,7 @@ export class GameMap {
       const mapResource = MapResources.getRandomMapResource({
         mapResourceType: mapResourceType,
       });
-      if (mapResourceType === "strategic") console.log(mapResource);
+
       const originTile = this.getRandomTileWith({
         tileTypes: mapResource.getSpawnTiles(),
         onAdditionalTileTypes: mapResource.spawnOnAdditionalTileTypes(),
@@ -689,11 +689,12 @@ export class GameMap {
 
     // Ensure the minimum amount of tiles have been set.
     if (tilesSet < minTilesSet) {
-      for (let i = minTilesSet; i < tilesSet; i++) {
+      for (let i = tilesSet; i < minTilesSet; i++) {
         const rndTile =
           skippedValidGenerationTiles[
             random.int(0, skippedValidGenerationTiles.length - 1)
           ];
+
         this.setTileBiome({
           tile: rndTile,
           tileType: options.setTileType,
@@ -733,7 +734,7 @@ export class GameMap {
     } = options;
     const minTemp = tempRange[0];
     const maxTemp = tempRange[1];
-    const maxIterations = 7500;
+    const maxIterations = 10000;
 
     while (!originTile) {
       iterations++;
