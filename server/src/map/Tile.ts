@@ -5,6 +5,7 @@ export class Tile {
   //== Generation Values ==
   private tileTypes: string[];
   private adjacentTiles: Tile[];
+  private riverSides: boolean[];
 
   private x: number;
   private y: number;
@@ -17,13 +18,23 @@ export class Tile {
     this.tileTypes.push(tileType);
 
     this.adjacentTiles = [];
+    this.riverSides = new Array(6).fill(false);
 
     this.x = x;
     this.y = y;
   }
 
+  public getRiverSides() {
+    return this.riverSides;
+  }
+
   public getTileJSON() {
-    return { tileTypes: this.tileTypes, x: this.x, y: this.y };
+    return {
+      tileTypes: this.tileTypes,
+      riverSides: this.riverSides,
+      x: this.x,
+      y: this.y,
+    };
   }
 
   public addTileType(tileType: string, index?: number) {
@@ -32,7 +43,9 @@ export class Tile {
     }
 
     if (this.tileTypes.includes(tileType)) {
-      console.log("Warning: Tried to add existing tile type for: " + this.getTileJSON());
+      console.log(
+        "Warning: Tried to add existing tile type for: " + this.getTileJSON()
+      );
       return;
     }
 
@@ -52,7 +65,9 @@ export class Tile {
   }
 
   public replaceTileType(oldTileType: string, newTileType: string) {
-    this.tileTypes = this.tileTypes.map((type) => (type === oldTileType ? newTileType : type));
+    this.tileTypes = this.tileTypes.map((type) =>
+      type === oldTileType ? newTileType : type
+    );
   }
 
   public clearTileTypes() {
@@ -70,8 +85,7 @@ export class Tile {
    */
   public containsTileTypes(tileTypes: string[]) {
     for (let i = 0; i < this.tileTypes.length; i++) {
-      if (tileTypes.includes(this.tileTypes[i]))
-        return true;
+      if (tileTypes.includes(this.tileTypes[i])) return true;
     }
     return false;
   }

@@ -9,6 +9,7 @@ export enum GameImage {
   BUTTON,
   BUTTON_HOVERED,
   SPRITESHEET,
+  RIVER,
 }
 
 export enum SpriteRegion {
@@ -57,6 +58,7 @@ export const assetList = [
   require("../assets/images/ui_button.png"),
   require("../assets/images/ui_button_hovered.png"),
   require("../assets/images/spritesheet.png"),
+  require("../assets/images/river.png"),
   require("../assets/images/font.png"),
   require("../assets/images/logo.png"),
 ];

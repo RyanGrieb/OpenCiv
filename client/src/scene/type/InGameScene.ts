@@ -1,5 +1,6 @@
 import { Game } from "../../Game";
 import { GameMap } from "../../map/GameMap";
+import { River } from "../../map/River";
 import { NetworkEvents, WebsocketClient } from "../../network/Client";
 import { AbstractPlayer } from "../../player/AbstractPlayer";
 import { ClientPlayer } from "../../player/ClientPlayer";
@@ -54,6 +55,15 @@ export class InGameScene extends Scene {
           Game.getHeight() - this.tileInformationLabel.getHeight() + 6
         );
         this.addActor(this.tileInformationLabel);
+
+        const rivers = [
+          new River({ tile: GameMap.getTiles()[16][16], side: 1 }),
+          new River({ tile: GameMap.getTiles()[17][16], side: 0 }),
+          new River({ tile: GameMap.getTiles()[17][16], side: 5 }),
+        ];
+        for (let river of rivers) {
+          this.addActor(river);
+        }
       });
 
       this.on("tileHovered", (options) => {
@@ -80,7 +90,8 @@ export class InGameScene extends Scene {
               "," +
               options.tile.getGridY() +
               "] " +
-              tileTypes
+              tileTypes +
+              (options.tile.hasRiver() ? ", River" : "")
           );
         }
       });

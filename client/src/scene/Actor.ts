@@ -9,6 +9,8 @@ export interface ActorOptions {
   y: number;
   width: number;
   height: number;
+  rotation?: number;
+  transparency?: number;
 }
 
 export class Actor {
@@ -20,6 +22,8 @@ export class Actor {
   protected y: number;
   protected width: number;
   protected height: number;
+  protected rotation: number;
+  protected transparency: number;
   protected storedEvents: Map<string, Function[]>;
   protected mouseInside: boolean;
 
@@ -32,6 +36,8 @@ export class Actor {
     this.y = actorOptions.y;
     this.width = actorOptions.width;
     this.height = actorOptions.height;
+    this.rotation = actorOptions.rotation ?? 0;
+    this.transparency = actorOptions.transparency ?? 1;
 
     this.on("mousemove", (options) => {
       if (this.insideActor(options.x, options.y)) {
@@ -135,9 +141,29 @@ export class Actor {
     return this.spriteRegion;
   }
 
+  public getRotation(): number {
+    return this.rotation;
+  }
+
+  public setRotation(rotation: number) {
+    this.rotation = rotation;
+  }
+
   public setPosition(x: number, y: number): void {
     this.x = x;
     this.y = y;
+  }
+
+  public getRotationOriginX(): number {
+    return 0;
+  }
+
+  public getRotationOriginY(): number {
+    return 0;
+  }
+
+  public getTransparency(): number {
+    return this.transparency;
   }
 
   public static mergeActors(options: {

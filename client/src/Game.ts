@@ -282,6 +282,17 @@ export class Game {
       canvasContext.setTransform(zoom, 0, 0, zoom, cameraX, cameraY);
     }
 
+    canvasContext.translate(
+      actor.getRotationOriginX(),
+      actor.getRotationOriginY()
+    );
+    canvasContext.rotate(actor.getRotation());
+    canvasContext.translate(
+      -actor.getRotationOriginX(),
+      -actor.getRotationOriginY()
+    );
+
+    canvasContext.globalAlpha = actor.getTransparency();
     if (actor.getSpriteRegion()) {
       const spriteX = parseInt(actor.getSpriteRegion().split(",")[0]) * 32;
       const spriteY = parseInt(actor.getSpriteRegion().split(",")[1]) * 32;
@@ -306,6 +317,8 @@ export class Game {
         actor.getHeight()
       );
     }
+    canvasContext.globalAlpha = 1;
+
     canvasContext.restore();
   }
 

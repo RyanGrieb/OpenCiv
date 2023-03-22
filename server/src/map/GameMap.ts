@@ -74,7 +74,7 @@ export class GameMap {
      */
 
     // == Generate grass circles ==
-    const LAND_MASS_PARAM = 5;
+    const LAND_MASS_PARAM = 6;
     const landMassSize =
       ((this.mapWidth * this.mapHeight) / 12.5) * (LAND_MASS_PARAM + 2);
     const maxPathLength = 140;
@@ -455,6 +455,13 @@ export class GameMap {
       });
     }
     // == Generate strategic, bonus and luxury resources
+
+    // == Generate rivers
+    this.tiles[0][0].getRiverSides()[0] = true;
+
+    //TODO: For rivers, when we apply river-sides, ensure the new tile we apply to is further away from the origin tile than the previous tile we set.
+    // If this makes rivers too straight, add a variable to determine if the distance b/w old & new is "good enough", but not straight up going backwards to the origin.
+    // == Generate rivers
   }
 
   public static getDimensionValues(mapSize: MapSize) {

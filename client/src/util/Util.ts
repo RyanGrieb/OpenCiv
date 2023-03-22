@@ -12,6 +12,16 @@ export class Vector {
     this.y = y;
   }
 
+  public static angleBetweenVectors(vector1: Vector, vector2: Vector): number {
+    const dotProduct = vector1.x * vector2.x + vector1.y * vector2.y;
+    const mag1 = Math.sqrt(vector1.x ** 2 + vector1.y ** 2);
+    const mag2 = Math.sqrt(vector2.x ** 2 + vector2.y ** 2);
+    const cosTheta = dotProduct / (mag1 * mag2);
+    const angleInRadians = Math.acos(cosTheta);
+    const angleInDegrees = angleInRadians * (180 / Math.PI);
+    return angleInDegrees;
+  }
+
   public static isInsidePolygon(
     vectors: Vector[],
     mouseVector: Vector,

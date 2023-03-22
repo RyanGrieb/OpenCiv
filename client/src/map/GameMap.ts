@@ -1,6 +1,7 @@
 import { Game } from "../Game";
 import { NetworkEvents, WebsocketClient } from "../network/Client";
 import { Actor } from "../scene/Actor";
+import { River } from "./River";
 import { Tile } from "./Tile";
 
 export class GameMap {
@@ -48,6 +49,7 @@ export class GameMap {
     });
     const tileActorList: Tile[] = [];
     const topLayerTileActorList: Tile[] = [];
+    const riverSides: River[] = [];
 
     NetworkEvents.on({
       eventName: "mapChunk",
@@ -57,6 +59,7 @@ export class GameMap {
 
         for (const tileJSON of tileList) {
           const tileTypes: string[] = tileJSON["tileTypes"];
+          const riverSides: boolean[] = tileJSON["riverSides"];
           const x = parseInt(tileJSON["x"]);
           const y = parseInt(tileJSON["y"]);
 
@@ -68,6 +71,7 @@ export class GameMap {
 
           const tile = new Tile({
             tileTypes: [tileTypes[0]], // Only assign the base tile type, for now....
+            riverSides: riverSides,
             x: xPos,
             y: yPos,
           });
@@ -94,6 +98,10 @@ export class GameMap {
           for (let tile of tileActorList) {
             await tile.loadImage();
           }
+
+          for (let riverSide of riverSides) {
+          }
+
           for (let tile of topLayerTileActorList) {
             await tile.loadImage();
           }

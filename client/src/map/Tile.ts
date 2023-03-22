@@ -7,6 +7,7 @@ export interface TileOptions {
   tileTypes: string[];
   x: number;
   y: number;
+  riverSides?: boolean[];
   width?: number;
   height?: number;
 }
@@ -20,6 +21,7 @@ export class Tile extends Actor {
   private tileTypes: string[];
   private adjacentTiles: Tile[];
   private vectors: Vector[];
+  private riverSides: boolean[];
 
   private gridX: number;
   private gridY: number;
@@ -34,6 +36,7 @@ export class Tile extends Actor {
     this.tileTypes = options.tileTypes;
     this.adjacentTiles = [];
     this.vectors = [];
+    this.riverSides = options.riverSides ?? Array(6).fill(false);
 
     this.gridX = Math.floor(this.x / 32);
     this.gridY = Math.floor(this.y / 25);
@@ -65,6 +68,18 @@ export class Tile extends Actor {
         canvasContext: canvasContext,
       });
     });*/
+  }
+
+  public hasRiver(): boolean {
+    for (const riverSide of this.riverSides) {
+      if (riverSide) return true;
+    }
+
+    return false;
+  }
+
+  public getRiverSides() {
+    return this.riverSides;
   }
 
   public getTileTypes() {
@@ -144,13 +159,13 @@ export class Tile extends Actor {
   }
 
   private initializeVectors() {
+    // Note: The ordering of this matters since we need to form a polygon from these vectors
     this.vectors.push(new Vector(this.x + this.width / 2, this.y + 32)); // Bottom center
-    this.vectors.push(new Vector(this.x + 32, this.y + 24)); // Bottom right
+    this.vectors.push(new Vector(this.x + 32, this.y + 25)); // Bottom right
     this.vectors.push(new Vector(this.x + 32, this.y + 7)); // Top right
-    this.vectors.push(new Vector(this.x + this.width / 2, this.y - 1)); // Top center
-
+    this.vectors.push(new Vector(this.x + this.width / 2, this.y)); // Top center
     this.vectors.push(new Vector(this.x, this.y + 7)); // Top left
-    this.vectors.push(new Vector(this.x, this.y + 24)); // Bottom left
+    this.vectors.push(new Vector(this.x, this.y + 25)); // Bottom left
   }
 
   public getCenterPosition(): [number, number] {
