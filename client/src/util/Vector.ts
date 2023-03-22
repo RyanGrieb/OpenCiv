@@ -1,15 +1,66 @@
-const delay = (ms) => new Promise((res) => setTimeout(res, ms));
-const clamp = (num, min, max) => Math.min(Math.max(num, min), max);
-
-export { delay };
-export { clamp };
-
 export class Vector {
   public x: number;
   public y: number;
   constructor(x: number, y: number) {
     this.x = x;
     this.y = y;
+  }
+
+  public clone() {
+    return new Vector(this.x, this.y);
+  }
+
+  public distance(vector: Vector) {
+    const dx = this.x - vector.x;
+    const dy = this.y - vector.y;
+    return Math.sqrt(dx * dx + dy * dy);
+  }
+
+  public subtract(vector: Vector) {
+    return new Vector(this.x - vector.x, this.y - vector.y);
+  }
+
+  public multiplyScalar(scalar: number) {
+    return new Vector(this.x * scalar, this.y * scalar);
+  }
+
+  public add(otherVec: Vector) {
+    return new Vector(this.x + otherVec.x, this.y + otherVec.y);
+  }
+
+  public static getCenterOfPolygon(vectors: Vector[]): Vector {
+    const centerPoint = vectors.reduce(
+      (acc, curr) => new Vector(acc.x + curr.x, acc.y + curr.y),
+      new Vector(0, 0)
+    );
+    centerPoint.x /= vectors.length;
+    centerPoint.y /= vectors.length;
+
+    return centerPoint;
+  }
+
+  public static shiftVectorsAwayFromCenter(
+    centerX: number,
+    centerY: number,
+    vectors: Vector[],
+    shiftDistance: number
+  ): Vector[] {
+    let centerPoint = new Vector(centerX, centerY);
+
+    const shiftedVectors = vectors.map((vector) => {
+      const distanceFromCenter = vector.distance(
+        new Vector(centerPoint.x, centerPoint.y)
+      );
+      const shiftAmount = 1 - shiftDistance / distanceFromCenter;
+      const shiftedVector = vector
+        .clone()
+        .subtract(new Vector(centerPoint.x, centerPoint.y))
+        .multiplyScalar(shiftAmount)
+        .add(new Vector(centerPoint.x, centerPoint.y));
+      return shiftedVector;
+    });
+
+    return shiftedVectors;
   }
 
   public static angleBetweenVectors(vector1: Vector, vector2: Vector): number {

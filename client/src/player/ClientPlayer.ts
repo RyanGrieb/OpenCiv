@@ -2,7 +2,8 @@ import { Game } from "../Game";
 import { GameMap } from "../map/GameMap";
 import { HoveredTile } from "../map/HoveredTile";
 import { Tile } from "../map/Tile";
-import { Vector, clamp } from "../util/Util";
+import { Numbers } from "../util/Numbers";
+import { Vector } from "../util/Vector";
 import { AbstractPlayer } from "./AbstractPlayer";
 
 export class ClientPlayer extends AbstractPlayer {
@@ -67,8 +68,8 @@ export class ClientPlayer extends AbstractPlayer {
     ) {
       const adjBorderTiles = GameMap.getAdjacentTiles(gridX, gridY);
       const clampedBorderTile =
-        GameMap.getTiles()[clamp(gridX, 0, GameMap.getWidth() - 1)][
-          clamp(gridY, 0, GameMap.getHeight() - 1)
+        GameMap.getTiles()[Numbers.clamp(gridX, 0, GameMap.getWidth() - 1)][
+          Numbers.clamp(gridY, 0, GameMap.getHeight() - 1)
         ];
       adjBorderTiles.push(clampedBorderTile); // Also push clamped tile.
 

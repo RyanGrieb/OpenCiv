@@ -1,7 +1,7 @@
 import { GameImage, SpriteRegion } from "../Assets";
 import { Game } from "../Game";
 import { Actor } from "../scene/Actor";
-import { Vector } from "../util/Util";
+import { Vector } from "../util/Vector";
 
 export interface TileOptions {
   tileTypes: string[];

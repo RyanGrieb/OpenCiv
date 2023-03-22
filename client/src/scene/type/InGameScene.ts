@@ -57,9 +57,9 @@ export class InGameScene extends Scene {
         this.addActor(this.tileInformationLabel);
 
         const rivers = [
+          new River({ tile: GameMap.getTiles()[16][16], side: 0 }),
+          new River({ tile: GameMap.getTiles()[15][17], side: 2 }),
           new River({ tile: GameMap.getTiles()[16][16], side: 1 }),
-          new River({ tile: GameMap.getTiles()[17][16], side: 0 }),
-          new River({ tile: GameMap.getTiles()[17][16], side: 5 }),
         ];
         for (let river of rivers) {
           this.addActor(river);
