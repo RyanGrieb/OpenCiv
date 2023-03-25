@@ -1,6 +1,5 @@
 import { Game } from "../../Game";
 import { GameMap } from "../../map/GameMap";
-import { River } from "../../map/River";
 import { NetworkEvents, WebsocketClient } from "../../network/Client";
 import { AbstractPlayer } from "../../player/AbstractPlayer";
 import { ClientPlayer } from "../../player/ClientPlayer";

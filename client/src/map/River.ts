@@ -1,7 +1,6 @@
-import { GameImage, SpriteRegion } from "../Assets";
+import { GameImage } from "../Assets";
 import { Game } from "../Game";
 import { Actor } from "../scene/Actor";
-import { Numbers } from "../util/Numbers";
 import { Vector } from "../util/Vector";
 import { Tile } from "./Tile";
 

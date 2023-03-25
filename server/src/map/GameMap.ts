@@ -34,6 +34,7 @@ export class GameMap {
   private static mapWidth: number;
   private static mapHeight: number;
   private static mapArea: number;
+  private static riverSideHistory: Map<Tile, number[]>[];
 
   public static init() {
     // Assign map dimension values
@@ -41,6 +42,7 @@ export class GameMap {
     this.mapWidth = mapDimensions[0];
     this.mapHeight = mapDimensions[1];
     this.mapArea = this.mapWidth * this.mapHeight;
+    this.riverSideHistory = [];
 
     // Initialize all tiles as ocean tiles
     this.tiles = [];
@@ -458,11 +460,34 @@ export class GameMap {
 
     const determinedRiverTiles: Tile[][] = [];
 
-    const riverAmount = 45; //TODO: Change based on map-area
+    const riverAmount = 30; //TODO: Change based on map-area
     for (let i = 0; i < riverAmount; i++) {
-      // FIXME: Prevent this from already being a river tile w/ the debug 1 or 2
-      const originTile =
-        tallestTiles[random.int(0, Math.floor(tallestTiles.length) - 1)]; // Get random to 25% tile
+      // FIXME: Prevent this from already being a river tile w/ river_candidate tiletype.
+
+      let originTile: Tile = undefined;
+      while (!originTile) {
+        originTile =
+          tallestTiles[
+            random.int(0, Math.floor(tallestTiles.length * 0.75) - 1)
+          ]; // Get random to 25% tile
+
+        if (originTile.containsTileType("river_candidate")) {
+          originTile = undefined;
+          continue;
+        }
+
+        for (const adjTile of originTile.getAdjacentTiles()) {
+          if (!adjTile) continue;
+
+          if (
+            adjTile.containsTileType("river_candidate") ||
+            adjTile.isWater()
+          ) {
+            originTile = undefined;
+            break;
+          }
+        }
+      }
 
       //originTile.addTileType("debug1");
       originTile.addTileType("river_candidate");
@@ -511,16 +536,48 @@ export class GameMap {
           continue;
         }
 
-        currentTile =
-          nextTileCandidates[random.int(0, nextTileCandidates.length - 1)];
+        currentTile = undefined;
+        let iterations = 0;
+        while (!currentTile) {
+          let adjRiverCandidateAmount = 0;
+          currentTile =
+            nextTileCandidates[random.int(0, nextTileCandidates.length - 1)];
+
+          for (const adjTile of currentTile.getAdjacentTiles()) {
+            if (adjTile && adjTile.isWater()) {
+              // FIXME: We still want to flow into the ocean, but we branch out too much in Tile.class
+              //currentTile = undefined;
+              //break;
+            }
+
+            if (adjTile && adjTile.containsTileType("river_candidate")) {
+              adjRiverCandidateAmount++;
+            }
+          }
+
+          // Don't nest ourselves around a-ton of river candidates, this can mess up our river generation
+          if (adjRiverCandidateAmount > 2) {
+            //currentTile = undefined;
+            //break;
+          }
+
+          iterations++;
+
+          if (iterations > nextTileCandidates.length) break;
+        }
+
+        if (!currentTile) {
+          riverEnds = true;
+          break;
+        }
+
         //currentTile.addTileType("debug2");
         currentTile.addTileType("river_candidate");
-        determinedRiverTiles.push();
 
         currentRiverTiles.push(currentTile);
         riverLength++;
 
-        if (riverLength >= 35) riverEnds = true;
+        if (riverLength >= 25) riverEnds = true;
       }
 
       determinedRiverTiles.push(currentRiverTiles);
@@ -868,5 +925,37 @@ export class GameMap {
     }
 
     return originTile;
+  }
+
+  public static cacheSetRiverSides() {
+    const riverSidesMap = new Map<Tile, number[]>();
+    this.riverSideHistory.unshift(riverSidesMap);
+    //console.log("Cache");
+  }
+
+  public static restoreCachedRiverSides() {
+    //console.log("restore");
+    //FIFO
+    const riverSidesMap = this.riverSideHistory.shift();
+    //console.log(riverSidesMap);
+    for (const [effectedTile, riverSides] of riverSidesMap.entries()) {
+      for (const riverSide of riverSides) {
+        effectedTile.getRiverSides()[riverSide] = false; // Note, we don't use the this.setRiverSide() method as I don't want to effect other tiles
+      }
+    }
+  }
+
+  public static storeSetRiverSideEntry(tilesEffected: Map<Tile, number>) {
+    if (this.riverSideHistory.length < 1) return;
+
+    const riverSidesMap = this.riverSideHistory[0];
+
+    for (const [effectedTile, riverSide] of tilesEffected.entries()) {
+      if (riverSidesMap.has(effectedTile)) {
+        riverSidesMap.get(effectedTile).push(riverSide);
+      } else {
+        riverSidesMap.set(effectedTile, [riverSide]);
+      }
+    }
   }
 }

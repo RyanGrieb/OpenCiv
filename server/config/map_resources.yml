@@ -156,3 +156,12 @@ luxury_resources:
     set_chance: 0.05
     min_temp: 0
     max_temp: 100
+  - name: olives
+    spawn_tiles:
+      - grass
+    path_length: 1
+    min_tiles_set: 1
+    max_tiles_set: 2
+    set_chance: 0.05
+    min_temp: 60
+    max_temp: 90

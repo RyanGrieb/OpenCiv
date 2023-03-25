@@ -1,4 +1,5 @@
 import random from "random";
+import { GameMap } from "./GameMap";
 
 export class Tile {
   //== Generation Values ==
@@ -31,7 +32,7 @@ export class Tile {
   }
 
   public setRiverSide(side: number, value: boolean): Map<Tile, number> {
-    const tilesAffected = new Map<Tile, number>();
+    const tilesEffected = new Map<Tile, number>();
 
     this.riverSides[side] = value;
     console.log(
@@ -43,7 +44,7 @@ export class Tile {
         this.y +
         "]"
     );
-    tilesAffected.set(this, side);
+    tilesEffected.set(this, side);
 
     const oppositeSides: number[] = [3, 4, 5, 0, 1, 2];
     let oppositeSide = oppositeSides[side];
@@ -54,10 +55,12 @@ export class Tile {
       this.adjacentTiles[side].getRiverSides[oppositeSide] !== value
     ) {
       this.adjacentTiles[side].getRiverSides()[oppositeSide] = value;
-      tilesAffected.set(this.adjacentTiles[side], oppositeSide);
+      tilesEffected.set(this.adjacentTiles[side], oppositeSide);
     }
 
-    return tilesAffected;
+    GameMap.storeSetRiverSideEntry(tilesEffected);
+
+    return tilesEffected;
   }
 
   public getTileJSON() {
@@ -115,6 +118,7 @@ export class Tile {
     nextTile?: Tile;
     originTile?: boolean;
   }) {
+    console.log("Applying river side for: [" + this.x + "," + this.y + "]");
     /**
      * Rules:
      * * If we place down a river side, and that side already has a river. Thats okay, but if it's our only tile-side we place, we need to do additional placements to define that tile candidate better & show that we actually placed a river on that tile.
@@ -128,46 +132,30 @@ export class Tile {
 
     // Start by applying a random river side, if we make a connection to the other tiles, we can return.
     if (options.originTile) {
-      currentRiverSide = this.applyRandomRiverSide();
+      this.setRiverSide(this.getIndexOfAdjTile(nextTile), true);
+      return;
+    }
 
-      console.log("Starting river side: " + currentRiverSide);
-
-      if (this.riverConnectsToTile(currentRiverSide, nextTile)) {
-        console.log(
-          "Origin tile connects to the next tile down the line, returning..."
-        );
-        return;
-      }
-
-      while (!this.riverConnectsToTile(currentRiverSide, nextTile)) {
-        const potentialRiverConnections = this.getConnectedRiverSides({
-          emptySidesOnly: true,
-          ofRiverSide: currentRiverSide,
-        });
-        if (potentialRiverConnections.length < 1) {
-          console.log(
-            "No potential river connections: " +
-              potentialRiverConnections.length
-          );
+    // If we already have a river on this tile (usually from us setting a previous river-side)
+    // Check if it already connects to the next tile, if so move on..
+    if (nextTile) {
+      for (const riverSide of this.getRiverSideIndexes({ value: true })) {
+        if (this.riverConnectsToTile(riverSide, nextTile)) {
+          console.log("EVER CALLED???????????");
           return;
         }
-
-        let randomConnectedRiverSide =
-          potentialRiverConnections[
-            random.int(0, potentialRiverConnections.length - 1)
-          ];
-        console.log(
-          "Setting random connected side: " + randomConnectedRiverSide
-        );
-        this.setRiverSide(randomConnectedRiverSide, true);
-        currentRiverSide = randomConnectedRiverSide;
       }
     }
+
+    // List of river-sides that we can potentially set, we choose the smallest nested-list from this list.
+    const riverSideCandidates: number[][] = [];
 
     // If the connected tile has a river side, make sure to attach to that.
     const connectedTilesWithRivers: Tile[] = [];
     // If connected tile doesn't have a river side, just make sure our new river just connects with it then.
     const connectedTilesNoRivers: Tile[] = [];
+
+    let connectedToExternalRiverTiles = true;
 
     for (const tile of [previousTile, nextTile]) {
       if (!tile) continue;
@@ -183,77 +171,161 @@ export class Tile {
     for (const riverTile of connectedTilesWithRivers) {
       // Check if we are already connected to this riverTile
       if (!this.riverConnects(riverTile)) {
+        connectedToExternalRiverTiles = false;
         const validRiverConnections = this.getValidRiverConnections(riverTile);
 
-        // Choose random valid side & set.
-        let randomConnectedRiverSide =
-          validRiverConnections[
-            random.int(0, validRiverConnections.length - 1)
-          ];
+        // We choose all valid connections to connect to the previous tile w/ the river,
+        // From these, we then flow to the next tile
+        // Then we determine the shortest path & set that.
 
-        // Check if we can link up with the next tile. This prevents random deviations in our river.
-        // NOTE: This doesn't completely stop deviations,
-        if (nextTile) {
-          for (const validConnection of validRiverConnections) {
-            if (
-              this.getTilesAdjacentToRiver(validConnection).includes(nextTile)
-            ) {
-              randomConnectedRiverSide = validConnection;
+        /**
+         * key: validRiverConnection
+         * value: Map<Tile,number[]> river sides set for this validRiverConnection
+         */
+        const potentialRiverPaths = new Map<number, Map<Tile, number[]>>();
+
+        //FIXME: I don't know if this is our best option, as we still sometimes get random branches.
+        // So instead of doing this loop, choose the closest connection to the next tile?
+        for (const validRiverConnection of validRiverConnections) {
+          const tilesSet = new Map<Tile, number[]>();
+          GameMap.cacheSetRiverSides();
+
+          if (!this.getAdjacentTiles()[validRiverConnection].isWater()) {
+            this.setRiverSide(validRiverConnection, true);
+
+            // Update tilesSet to store in our potentialRiverPaths
+            if (tilesSet.has(this)) {
+              tilesSet.get(this).push(validRiverConnection);
+            } else {
+              tilesSet.set(this, [validRiverConnection]);
+            }
+          }
+
+          currentRiverSide = validRiverConnection;
+
+          const smallestRiverPathToNextTile = this.flowRiverToNextTile(
+            currentRiverSide,
+            nextTile
+          );
+
+          if (!smallestRiverPathToNextTile) {
+            GameMap.restoreCachedRiverSides();
+            continue;
+          }
+
+          for (const riverSide of smallestRiverPathToNextTile) {
+            if (!this.getAdjacentTiles()[validRiverConnection].isWater()) {
+              this.setRiverSide(riverSide, true);
+
+              // Update tilesSet to store in our potentialRiverPaths
+              if (tilesSet.has(this)) {
+                tilesSet.get(this).push(riverSide);
+              } else {
+                tilesSet.set(this, [riverSide]);
+              }
+            }
+          }
+
+          potentialRiverPaths.set(validRiverConnection, tilesSet);
+          GameMap.restoreCachedRiverSides();
+        }
+
+        console.log(potentialRiverPaths);
+        if (potentialRiverPaths.size > 0) {
+          // TODO: Iterate through potentialRiverPaths & choose the smallest path
+          let smallestRiverConnectionIndex = 0;
+          let smallestRiverSidesSet = Infinity;
+          for (const [
+            validRiverConnection,
+            tilesSet,
+          ] of potentialRiverPaths.entries()) {
+            let totalRiverSidesSet = 0;
+
+            for (const riverSideSet of tilesSet.values()) {
+              totalRiverSidesSet += riverSideSet.length;
+            }
+
+            if (totalRiverSidesSet < smallestRiverSidesSet) {
+              smallestRiverConnectionIndex = validRiverConnection;
+              smallestRiverSidesSet = totalRiverSidesSet;
+            }
+          }
+
+          for (const [tile, riverSides] of potentialRiverPaths
+            .get(smallestRiverConnectionIndex)
+            .entries()) {
+            for (const riverSide of riverSides) {
+              if (!tile.getAdjacentTiles()[riverSide].isWater()) {
+                tile.setRiverSide(riverSide, true);
+              }
             }
           }
         }
-
-        //FIXME: We should not set a random side here... This causes random deviations in the river.
-        console.log("Connecting to riverTile... - " + randomConnectedRiverSide);
-        this.setRiverSide(randomConnectedRiverSide, true);
-        currentRiverSide = randomConnectedRiverSide;
       }
     }
 
+    // If this tile already connects to the previous tile (with the river), then just flow to the next tile.
+    if (connectedToExternalRiverTiles) {
+      const smallestRiverPathToNextTile = this.flowRiverToNextTile(
+        currentRiverSide,
+        nextTile
+      );
+
+      if (!smallestRiverPathToNextTile) return;
+
+      console.log("Smallest path: " + smallestRiverPathToNextTile);
+
+      for (const riverSide of smallestRiverPathToNextTile) {
+        if (!this.getAdjacentTiles()[riverSide].isWater()) {
+          this.setRiverSide(riverSide, true);
+        }
+      }
+    }
+  }
+
+  private flowRiverToNextTile(
+    startingRiverSide: number,
+    nextTile: Tile
+  ): number[] {
     // Do this rotating left or right, pick smallest amount of tile-sides set.
     const orientations = new Map<string, number[]>();
 
     for (let orientation of ["left", "right"]) {
-      const riverSidesSet: number[] = [];
-      let prevRiverSide = currentRiverSide;
-      const riverSideHistory = new Map<Tile, number[]>();
+      const orientationRiverSidesSet: number[] = [];
+      let prevRiverSide = startingRiverSide;
+      GameMap.cacheSetRiverSides();
 
       while (
-        options.nextTile &&
-        !this.riverConnectsToTile(currentRiverSide, options.nextTile)
+        nextTile &&
+        !this.riverConnectsToTile(startingRiverSide, nextTile)
       ) {
-        console.log("No connection");
+        console.log(
+          "No connection to next tile as: [" + this.x + "," + this.y + "]"
+        );
 
         const potentialRiverConnections = this.getConnectedRiverSides({
           emptySidesOnly: true,
-          ofRiverSide: currentRiverSide,
+          ofRiverSide: startingRiverSide,
         });
         const validRiverConnections = [];
 
         for (const potentialConnectionIndex of potentialRiverConnections) {
-          if (
-            this.getAdjacentTiles()[potentialConnectionIndex] &&
-            !this.getAdjacentTiles()[potentialConnectionIndex].isWater() &&
-            !this.getAdjacentTiles()[potentialConnectionIndex].hasRiver()
-          ) {
+          if (this.getAdjacentTiles()[potentialConnectionIndex]) {
             validRiverConnections.push(potentialConnectionIndex);
           }
         }
 
-        /*console.log(
-          "For tile [" +
-            this.x +
-            "," +
-            this.y +
-            "] valid connections: " +
-            validRiverConnections
-        );*/
-
         if (validRiverConnections.length < 1) {
           console.log(
-            "No potential river connections: " + validRiverConnections.length
+            "******* No potential river connections: " +
+              validRiverConnections.length +
+              " *******"
           );
-          return; //FIXME: Returning here sometimes prevents the rest of the river from forming.
+
+          console.log("Current river side: " + startingRiverSide);
+          console.log("Our river sides: ");
+          console.log(this.riverSides);
+          return [];
         }
 
         const side =
@@ -264,30 +336,15 @@ export class Tile {
         // Choose either the smallest connection index or largest. Count how many potential connections we make, choose the smallest of the two.
         console.log("Setting connected side: " + side + " - " + orientation);
 
-        riverSidesSet.push(side);
-        const tilesEffected = this.setRiverSide(side, true);
-
-        for (const [effectedTile, riverSide] of tilesEffected.entries()) {
-          if (riverSideHistory.has(effectedTile)) {
-            riverSideHistory.get(effectedTile).push(riverSide);
-          } else {
-            riverSideHistory.set(effectedTile, [riverSide]);
-          }
-        }
-
-        currentRiverSide = side;
+        orientationRiverSidesSet.push(side);
+        this.setRiverSide(side, true);
+        startingRiverSide = side;
       }
 
-      orientations.set(orientation, riverSidesSet);
-      currentRiverSide = prevRiverSide;
-
-      //console.log("History");
-      //console.log(riverSideHistory);
-      for (const [effectedTile, riverSides] of riverSideHistory.entries()) {
-        for (const riverSide of riverSides) {
-          effectedTile.getRiverSides()[riverSide] = false; // Note, we don't use the this.setRiverSide() method as I don't want to effect other tiles
-        }
-      }
+      // Store which river-sides were set for this orientation, and reset our changes.
+      orientations.set(orientation, orientationRiverSidesSet);
+      startingRiverSide = prevRiverSide;
+      GameMap.restoreCachedRiverSides();
     }
 
     let smallestRiverPath: number[] | undefined = undefined;
@@ -297,13 +354,7 @@ export class Tile {
       }
     }
 
-    console.log("Path candidates for [" + this.x + "," + this.y + "]:");
-    console.log(orientations.values());
-    console.log("Smallest path: " + smallestRiverPath);
-
-    for (const riverSide of smallestRiverPath) {
-      this.setRiverSide(riverSide, true);
-    }
+    return smallestRiverPath;
   }
 
   /**
@@ -437,6 +488,8 @@ export class Tile {
    * Gets a list of adjacent river-side indexes that connect with existing river-sides of this tile, or a specified river side.
    * @returns
    */
+
+  //FIXME: This doesn't work sometimes?
   public getConnectedRiverSides(options: {
     ofRiverSide?: number;
     emptySidesOnly: boolean;
@@ -469,7 +522,7 @@ export class Tile {
 
       for (const adjacentIndex of adjacentSidesIndexes) {
         if (options.emptySidesOnly) {
-          if (!this.riverSides[adjacentIndex]) {
+          if (this.riverSides[adjacentIndex] === false) {
             adjacentSides.push(adjacentIndex);
           }
         } else {
@@ -492,6 +545,8 @@ export class Tile {
    * @param connectedTiles
    * @returns
    */
+
+  //FIXME: Check if this is correct for riverSide = 5, connected tile is adj tile w /index =4.
   public riverConnectsToTile(riverSide: number, connectedTile: Tile) {
     const adjRiverTiles = this.getTilesAdjacentToRiver(riverSide);
     return adjRiverTiles.includes(connectedTile);
@@ -623,5 +678,10 @@ export class Tile {
     const dx = this.x + 0.5 - (tile.x + 0.5);
     const dy = this.y + 0.5 - (tile.y + 0.5);
     return Math.sqrt(dx ** 2 + dy ** 2);
+  }
+
+  public equals(tile: Tile) {
+    //TODO: Do a few more checks.
+    return this.x === tile.x && this.y == tile.y;
   }
 }
