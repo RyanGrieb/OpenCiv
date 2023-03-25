@@ -49,7 +49,7 @@ export class GameMap {
     });
     const tileActorList: Tile[] = [];
     const topLayerTileActorList: Tile[] = [];
-    const riverSides: River[] = [];
+    const riverActors: River[] = [];
 
     NetworkEvents.on({
       eventName: "mapChunk",
@@ -77,7 +77,13 @@ export class GameMap {
           });
           this.tiles[x][y] = tile;
           tileActorList.push(tile);
-
+          if (tile.hasRiver()) {
+            for (let numberedRiverSide of tile.getNumberedRiverSides()) {
+              riverActors.push(
+                new River({ tile: tile, side: numberedRiverSide })
+              );
+            }
+          }
           if (tileTypes.length > 1) {
             const topLayerTileTypes = [...tileTypes];
             topLayerTileTypes.shift();
@@ -99,17 +105,21 @@ export class GameMap {
             await tile.loadImage();
           }
 
-          for (let riverSide of riverSides) {
-          }
-
           for (let tile of topLayerTileActorList) {
             await tile.loadImage();
           }
 
           console.log("All tile images loaded, generating map");
+
+          // Generate one big list of actors in the order of, baseTileActor, river, topLayerTileActor
+          const mapActors: Actor[] = [
+            ...tileActorList,
+            ...riverActors,
+            ...topLayerTileActorList,
+          ];
           //TODO: Instead of a single map actor, we need to do this in chunks (4x4?). B/c it's going to be slow on map updates.
           this.mapActor = Actor.mergeActors({
-            actors: tileActorList.concat(topLayerTileActorList),
+            actors: mapActors,
             spriteRegion: false,
           });
           scene.addActor(this.mapActor);

@@ -1,6 +1,7 @@
 import { GameImage, SpriteRegion } from "../Assets";
 import { Game } from "../Game";
 import { Actor } from "../scene/Actor";
+import { Numbers } from "../util/Numbers";
 import { Vector } from "../util/Vector";
 import { Tile } from "./Tile";
 
@@ -14,13 +15,26 @@ export class River extends Actor {
 
   constructor(options: RiverOptions) {
     const vectorOffset = -1.75; // Shift all vectors away from the center by 1.5 pixels.. (Causes our rivers to reside between tiles)
-    const side = options.side;
+
+    /**
+     * server -> client
+     * 0 -> 4
+     * 1 -> 3
+     * 2 -> 2
+     * 3 -> 1
+     * 4 -> 0
+     * 5 -> 5
+     * We do this because the position of our vectors starts at the bottom-center of the tile, while for the server the position of tile sides starts at the top-left.
+     */
+    //FIXME: We should have uniform adjacency and sides for server and client. Converting between is dumb and confusing.
+    let side = River.mapServerSideToClientSide(options.side);
+
     let otherVectorSide = side - 1;
 
-    // Since we draw backwards to the other sides, the otherSide for 0 would be 5...
     if (side == 0) {
       otherVectorSide = 5;
     }
+
     // Get angle b/w two vectors for 0 it's b/w 0 & 5
     const shiftedTileVectors = Vector.shiftVectorsAwayFromCenter(
       options.tile.getX() + options.tile.getWidth() / 2,
@@ -45,19 +59,24 @@ export class River extends Actor {
 
     console.log(x + "," + y);
     // Again align our sides some more to have a flush surface if they are against each other.
-
+    console.log(distance);
     super({
       x: x,
       y: y,
       image: Game.getImage(GameImage.RIVER),
       width: distance,
       height: 3,
-      transparency: 0.75,
+      transparency: 1,
     });
 
     this.tile = options.tile;
 
     this.setRotation(rotation * (Math.PI / 180));
+  }
+
+  public static mapServerSideToClientSide(serverSide: number): number {
+    const clientMap = [4, 3, 2, 1, 0, 5];
+    return clientMap[serverSide];
   }
 
   //FIXME: Remove these?

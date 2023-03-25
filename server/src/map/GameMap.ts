@@ -155,7 +155,7 @@ export class GameMap {
 
     console.log("Done generating tallest tiles - " + tallestTiles.length);
 
-    //Assign top 25% of tiles to have a 50% of becoming a hill tile
+    //Assign top 10% of tiles to have a 50% of becoming a hill tile
     const totalHills = tallestTiles.length * 0.1;
     for (let i = 0; i < totalHills; i++) {
       if (Math.random() < 0.5)
@@ -169,7 +169,7 @@ export class GameMap {
         tallestTiles[i].replaceTileType("grass", "grass_hill");
     }
 
-    //Assign the top 3% of tiles to be mountains
+    //Assign the top 5% of tiles to be mountains
     const totalMountains = tallestTiles.length * 0.05;
     for (let i = 0; i < totalMountains; i++) {
       tallestTiles[i].replaceTileType("grass", "mountain");
@@ -456,8 +456,96 @@ export class GameMap {
     }
     // == Generate strategic, bonus and luxury resources
 
-    // == Generate rivers
-    this.tiles[0][0].getRiverSides()[0] = true;
+    const determinedRiverTiles: Tile[][] = [];
+
+    const riverAmount = 45; //TODO: Change based on map-area
+    for (let i = 0; i < riverAmount; i++) {
+      // FIXME: Prevent this from already being a river tile w/ the debug 1 or 2
+      const originTile =
+        tallestTiles[random.int(0, Math.floor(tallestTiles.length) - 1)]; // Get random to 25% tile
+
+      //originTile.addTileType("debug1");
+      originTile.addTileType("river_candidate");
+
+      const currentRiverTiles: Tile[] = [originTile];
+
+      let currentTile = originTile;
+      let lastTraversedTile = undefined;
+      let riverEnds = false;
+      let riverLength = 1;
+
+      while (!riverEnds) {
+        const nextTileCandidates = [];
+        for (const adjTile of currentTile.getAdjacentTiles()) {
+          let deleteCandidate = false;
+
+          if (!adjTile) {
+            continue;
+          }
+          // Don't allow tiles to be water, thats where rivers end!
+          if (adjTile.isWater()) {
+            continue;
+          }
+
+          if (
+            adjTile.containsTileTypes(["river_candidate", "debug1", "debug2"])
+          ) {
+            continue;
+          }
+
+          // Check if the distance of the candidate is closer to the origin than the lastTraversedTile, if so remove it
+          if (lastTraversedTile) {
+            if (
+              originTile.getDistanceFrom(adjTile) <=
+              originTile.getDistanceFrom(lastTraversedTile)
+            ) {
+              continue;
+            }
+          }
+          nextTileCandidates.push(adjTile);
+        }
+        lastTraversedTile = currentTile;
+
+        if (nextTileCandidates.length < 1) {
+          riverEnds = true;
+          continue;
+        }
+
+        currentTile =
+          nextTileCandidates[random.int(0, nextTileCandidates.length - 1)];
+        //currentTile.addTileType("debug2");
+        currentTile.addTileType("river_candidate");
+        determinedRiverTiles.push();
+
+        currentRiverTiles.push(currentTile);
+        riverLength++;
+
+        if (riverLength >= 35) riverEnds = true;
+      }
+
+      determinedRiverTiles.push(currentRiverTiles);
+    }
+
+    for (const currentRiverTiles of determinedRiverTiles) {
+      for (let i = 0; i < currentRiverTiles.length; i++) {
+        const tile = currentRiverTiles[i];
+        const connectedTiles: Tile[] = [];
+        let prevTile: Tile = undefined;
+        let nextTile: Tile = undefined;
+
+        if (i < currentRiverTiles.length - 1)
+          nextTile = currentRiverTiles[i + 1]; // Include the next tile we are traversing
+
+        if (i > 0) prevTile = currentRiverTiles[i - 1]; // Ensure we are including the previous tile such that we can connect to it through our method.
+
+        tile.removeTileType("river_candidate");
+        tile.applyRiverSide({
+          originTile: i == 0,
+          previousTile: prevTile,
+          nextTile: nextTile,
+        });
+      }
+    }
 
     //TODO: For rivers, when we apply river-sides, ensure the new tile we apply to is further away from the origin tile than the previous tile we set.
     // If this makes rivers too straight, add a variable to determine if the distance b/w old & new is "good enough", but not straight up going backwards to the origin.

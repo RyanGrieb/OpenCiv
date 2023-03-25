@@ -71,15 +71,19 @@ export class Tile extends Actor {
   }
 
   public hasRiver(): boolean {
-    for (const riverSide of this.riverSides) {
-      if (riverSide) return true;
-    }
-
-    return false;
+    return this.riverSides.some((side) => side);
   }
 
   public getRiverSides() {
     return this.riverSides;
+  }
+
+  public getNumberedRiverSides(): number[] {
+    const numberedSides: number[] = [];
+    for (let i = 0; i < this.riverSides.length; i++) {
+      if (this.riverSides[i]) numberedSides.push(i);
+    }
+    return numberedSides;
   }
 
   public getTileTypes() {

@@ -197,9 +197,11 @@ export class Actor {
     canvas.getContext("2d").fillStyle = "grey";
     canvas.getContext("2d").fillRect(0, 0, canvas.width, canvas.height);
     const ctx = canvas.getContext("2d");
+    ctx.fillStyle = "grey";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
     options.actors.forEach((actor: Actor) => {
-      actor.draw(ctx); // Never gets called b/c i'ts already called to frequently?
-      //actor.test(ctx); // This gets called.
+      actor.draw(ctx);
     });
 
     //canvas.getContext("2d").globalCompositeOperation = "saturation";
@@ -218,5 +220,10 @@ export class Actor {
     });
 
     return mergedActor;
+  }
+
+  public setSize(width: number, height: number) {
+    this.width = width;
+    this.height = height;
   }
 }

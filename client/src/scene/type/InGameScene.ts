@@ -55,15 +55,6 @@ export class InGameScene extends Scene {
           Game.getHeight() - this.tileInformationLabel.getHeight() + 6
         );
         this.addActor(this.tileInformationLabel);
-
-        const rivers = [
-          new River({ tile: GameMap.getTiles()[16][16], side: 0 }),
-          new River({ tile: GameMap.getTiles()[15][17], side: 2 }),
-          new River({ tile: GameMap.getTiles()[16][16], side: 1 }),
-        ];
-        for (let river of rivers) {
-          this.addActor(river);
-        }
       });
 
       this.on("tileHovered", (options) => {
