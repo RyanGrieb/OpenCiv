@@ -65,7 +65,7 @@ export class Tile {
       tilesEffected.set(oppositeTile, oppositeTileSide);
     }
 
-    if (cacheEntry && value) GameMap.storeSetRiverSideEntry(tilesEffected);
+    if (cacheEntry) GameMap.storeSetRiverSideEntry(tilesEffected);
 
     return tilesEffected;
   }

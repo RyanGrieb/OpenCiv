@@ -38,7 +38,7 @@ export class GameMap {
 
   public static init() {
     // Assign map dimension values
-    const mapDimensions = this.getDimensionValues(MapSize.HUGE);
+    const mapDimensions = this.getDimensionValues(MapSize.TINY);
     this.mapWidth = mapDimensions[0];
     this.mapHeight = mapDimensions[1];
     this.mapArea = this.mapWidth * this.mapHeight;
@@ -460,7 +460,7 @@ export class GameMap {
 
     //const determinedRiverTiles: Tile[][] = [];
 
-    const riverAmount = 150; //FIXME: The higher number the higher chance of infinite loop.
+    const riverAmount = 25; //FIXME: The higher number the higher chance of infinite loop.
     rivenGenLoop: for (
       let riverIndex = 0;
       riverIndex < riverAmount;
@@ -474,8 +474,8 @@ export class GameMap {
             "grass_hill",
             "plains_hill",
             "desert_hill",
-            "snow_hill",
             "tundra_hill",
+            "snow_hill",
             "mountain",
           ],
         });
@@ -498,7 +498,7 @@ export class GameMap {
         }
       }
 
-      //originTile.addTileType("debug3");
+      // originTile.addTileType("debug3");
       originTile.addTileType("river_candidate");
 
       const currentRiverTiles: Tile[] = [originTile];
@@ -552,10 +552,11 @@ export class GameMap {
         tile.removeTileType("river_candidate");
       }
 
-      if (currentRiverTiles.length < 10) {
-        riverIndex--;
-        continue;
-      }
+      //FIXME: This causes infinite loop on smaller maps...
+      //if (currentRiverTiles.length < 10) {
+      //  riverIndex--;
+      //  continue;
+      //}
 
       GameMap.cacheSetRiverSides();
       let appliedRiverSides = 0;
@@ -641,19 +642,19 @@ export class GameMap {
     originTile: Tile
   ) {
     const nextTileCandidates = [];
-    for (const adjacentCandidateTile of currentTile.getAdjacentTiles()) {
+    adjCandidateTilesLoop: for (const adjacentCandidateTile of currentTile.getAdjacentTiles()) {
       let deleteCandidate = false;
 
       if (!adjacentCandidateTile) {
-        continue;
+        continue adjCandidateTilesLoop;
       }
       // Don't allow tiles to be water, thats where rivers end!
       if (adjacentCandidateTile.isWater()) {
-        continue;
+        continue adjCandidateTilesLoop;
       }
 
       if (adjacentCandidateTile.containsTileTypes(["river_candidate"])) {
-        continue;
+        continue adjCandidateTilesLoop;
       }
 
       // Check if the distance of the candidate is closer to the origin than the lastTraversedTile, if so remove it
@@ -662,7 +663,14 @@ export class GameMap {
           originTile.getDistanceFrom(adjacentCandidateTile) <=
           originTile.getDistanceFrom(lastTraversedTile)
         ) {
-          continue;
+          continue adjCandidateTilesLoop;
+        }
+      }
+
+      // Don't allow riverCandidate tiles to be adjacent to the map border
+      for (const adjTile of adjacentCandidateTile.getAdjacentTiles()) {
+        if (!adjTile) {
+          continue adjCandidateTilesLoop;
         }
       }
 
@@ -675,7 +683,7 @@ export class GameMap {
 
       // Don't nest ourselves around a-ton of river candidates, this can mess up our river generation
       if (adjRiverCandidateAmount > 2) {
-        continue;
+        continue adjCandidateTilesLoop;
       }
 
       nextTileCandidates.push(adjacentCandidateTile);
