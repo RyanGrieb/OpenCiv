@@ -34,11 +34,11 @@ export class GameMap {
   private static mapWidth: number;
   private static mapHeight: number;
   private static mapArea: number;
-  private static riverSideHistory: Map<Tile, number[]>[];
+  public static riverSideHistory: Map<Tile, number[]>[];
 
   public static init() {
     // Assign map dimension values
-    const mapDimensions = this.getDimensionValues(MapSize.TINY);
+    const mapDimensions = this.getDimensionValues(MapSize.HUGE);
     this.mapWidth = mapDimensions[0];
     this.mapHeight = mapDimensions[1];
     this.mapArea = this.mapWidth * this.mapHeight;
@@ -458,23 +458,27 @@ export class GameMap {
     }
     // == Generate strategic, bonus and luxury resources
 
-    const determinedRiverTiles: Tile[][] = [];
+    //const determinedRiverTiles: Tile[][] = [];
 
-    const riverAmount = 30; //TODO: Change based on map-area
-    for (let i = 0; i < riverAmount; i++) {
-      // FIXME: Prevent this from already being a river tile w/ river_candidate tiletype.
-
+    const riverAmount = 150; //FIXME: The higher number the higher chance of infinite loop.
+    rivenGenLoop: for (
+      let riverIndex = 0;
+      riverIndex < riverAmount;
+      riverIndex++
+    ) {
+      console.log("riverGenLoop");
       let originTile: Tile = undefined;
-      while (!originTile) {
-        originTile =
-          tallestTiles[
-            random.int(0, Math.floor(tallestTiles.length * 0.75) - 1)
-          ]; // Get random to 25% tile
-
-        if (originTile.containsTileType("river_candidate")) {
-          originTile = undefined;
-          continue;
-        }
+      findRiverOriginLoop: while (!originTile) {
+        originTile = GameMap.getRandomTileWith({
+          tileTypes: [
+            "grass_hill",
+            "plains_hill",
+            "desert_hill",
+            "snow_hill",
+            "tundra_hill",
+            "mountain",
+          ],
+        });
 
         for (const adjTile of originTile.getAdjacentTiles()) {
           if (!adjTile) continue;
@@ -484,91 +488,46 @@ export class GameMap {
             adjTile.isWater()
           ) {
             originTile = undefined;
-            break;
+            continue findRiverOriginLoop;
           }
+        }
+
+        if (originTile.hasRiver()) {
+          originTile = undefined;
+          continue;
         }
       }
 
-      //originTile.addTileType("debug1");
+      //originTile.addTileType("debug3");
       originTile.addTileType("river_candidate");
 
       const currentRiverTiles: Tile[] = [originTile];
 
       let currentTile = originTile;
       let lastTraversedTile = undefined;
-      let riverEnds = false;
       let riverLength = 1;
 
-      while (!riverEnds) {
-        const nextTileCandidates = [];
-        for (const adjTile of currentTile.getAdjacentTiles()) {
-          let deleteCandidate = false;
+      riverPathLoop: while (true) {
+        const nextTileCandidates: Tile[] = GameMap.getNextPotentialRiverTiles(
+          currentTile,
+          lastTraversedTile,
+          originTile
+        );
 
-          if (!adjTile) {
-            continue;
-          }
-          // Don't allow tiles to be water, thats where rivers end!
-          if (adjTile.isWater()) {
-            continue;
-          }
-
-          if (
-            adjTile.containsTileTypes(["river_candidate", "debug1", "debug2"])
-          ) {
-            continue;
-          }
-
-          // Check if the distance of the candidate is closer to the origin than the lastTraversedTile, if so remove it
-          if (lastTraversedTile) {
-            if (
-              originTile.getDistanceFrom(adjTile) <=
-              originTile.getDistanceFrom(lastTraversedTile)
-            ) {
-              continue;
-            }
-          }
-          nextTileCandidates.push(adjTile);
-        }
         lastTraversedTile = currentTile;
 
         if (nextTileCandidates.length < 1) {
-          riverEnds = true;
-          continue;
+          currentTile = undefined;
+          break riverPathLoop;
         }
 
-        currentTile = undefined;
-        let iterations = 0;
-        while (!currentTile) {
-          let adjRiverCandidateAmount = 0;
-          currentTile =
-            nextTileCandidates[random.int(0, nextTileCandidates.length - 1)];
-
-          for (const adjTile of currentTile.getAdjacentTiles()) {
-            if (adjTile && adjTile.isWater()) {
-              // FIXME: We still want to flow into the ocean, but we branch out too much in Tile.class
-              //currentTile = undefined;
-              //break;
-            }
-
-            if (adjTile && adjTile.containsTileType("river_candidate")) {
-              adjRiverCandidateAmount++;
-            }
-          }
-
-          // Don't nest ourselves around a-ton of river candidates, this can mess up our river generation
-          if (adjRiverCandidateAmount > 2) {
-            //currentTile = undefined;
-            //break;
-          }
-
-          iterations++;
-
-          if (iterations > nextTileCandidates.length) break;
-        }
+        // Traverse to the next tile from nextTileCandidates[]
+        currentTile =
+          nextTileCandidates[random.int(0, nextTileCandidates.length - 1)];
 
         if (!currentTile) {
-          riverEnds = true;
-          break;
+          riverIndex--;
+          break riverPathLoop;
         }
 
         //currentTile.addTileType("debug2");
@@ -577,16 +536,34 @@ export class GameMap {
         currentRiverTiles.push(currentTile);
         riverLength++;
 
-        if (riverLength >= 25) riverEnds = true;
+        // If the next tile already has a river, we can end this river, and attempt to connect later on.
+        if (currentTile.hasRiver()) break riverPathLoop;
+
+        // If the next tile has an adjacent river, we can end this river, and attempt to flow into that body of water.
+        for (const adjTile of currentTile.getAdjacentTiles()) {
+          if (adjTile && adjTile.isWater()) break riverPathLoop;
+        }
+
+        if (riverLength >= 50) break riverPathLoop;
       }
 
-      determinedRiverTiles.push(currentRiverTiles);
-    }
-
-    for (const currentRiverTiles of determinedRiverTiles) {
       for (let i = 0; i < currentRiverTiles.length; i++) {
         const tile = currentRiverTiles[i];
-        const connectedTiles: Tile[] = [];
+        tile.removeTileType("river_candidate");
+      }
+
+      if (currentRiverTiles.length < 10) {
+        riverIndex--;
+        continue;
+      }
+
+      GameMap.cacheSetRiverSides();
+      let appliedRiverSides = 0;
+
+      for (let i = 0; i < currentRiverTiles.length; i++) {
+        const tile = currentRiverTiles[i];
+        //tile.removeTileType("river_candidate");
+
         let prevTile: Tile = undefined;
         let nextTile: Tile = undefined;
 
@@ -595,18 +572,116 @@ export class GameMap {
 
         if (i > 0) prevTile = currentRiverTiles[i - 1]; // Ensure we are including the previous tile such that we can connect to it through our method.
 
-        tile.removeTileType("river_candidate");
+        if (!tile.containsTileType("debug3")) {
+          //tile.addTileType("debug2");
+        }
+        console.log(
+          "Generating river for tile: [" +
+            tile.getX() +
+            "," +
+            tile.getY() +
+            "] on river index: " +
+            riverIndex
+        );
         tile.applyRiverSide({
           originTile: i == 0,
           previousTile: prevTile,
           nextTile: nextTile,
         });
+        appliedRiverSides++;
       }
+
+      //TODO: Try to attach to water tiles at the end of our river, and try to attach to other existing rivers if possible.
+
+      // Determine if we created a tile w/ more than 4 river-sides, remove this river if we did that.
+      let tooManyRiverSides = false;
+      for (let i = 0; i < currentRiverTiles.length; i++) {
+        const tile = currentRiverTiles[i];
+        if (tile.getRiverSideIndexes({ value: true }).length > 3)
+          tooManyRiverSides = true;
+      }
+
+      if (tooManyRiverSides || appliedRiverSides < 3) {
+        console.log(
+          "Failed to generate tile, starting at: " +
+            currentRiverTiles[0].getX() +
+            "," +
+            currentRiverTiles[0].getY() +
+            " - " +
+            tooManyRiverSides +
+            " || " +
+            appliedRiverSides
+        );
+        //console.log(tooManyRiverSides + "," + tooManyRiverSides);
+
+        for (let i = 0; i < currentRiverTiles.length; i++) {
+          const tile = currentRiverTiles[i];
+          tile.removeTileType("debug3");
+          tile.removeTileType("debug2");
+        }
+      }
+
+      if (tooManyRiverSides || appliedRiverSides < 3) {
+        riverIndex--;
+        console.log("Oh no!");
+        //currentRiverTiles[0].addTileType("debug1");
+        GameMap.restoreCachedRiverSides(); //FIXME: This fails to delete river-sides adj to border sometimes
+      }
+      GameMap.removeTopRiverSideCache();
     }
 
     //TODO: For rivers, when we apply river-sides, ensure the new tile we apply to is further away from the origin tile than the previous tile we set.
     // If this makes rivers too straight, add a variable to determine if the distance b/w old & new is "good enough", but not straight up going backwards to the origin.
     // == Generate rivers
+  }
+
+  public static getNextPotentialRiverTiles(
+    currentTile: Tile,
+    lastTraversedTile: Tile,
+    originTile: Tile
+  ) {
+    const nextTileCandidates = [];
+    for (const adjacentCandidateTile of currentTile.getAdjacentTiles()) {
+      let deleteCandidate = false;
+
+      if (!adjacentCandidateTile) {
+        continue;
+      }
+      // Don't allow tiles to be water, thats where rivers end!
+      if (adjacentCandidateTile.isWater()) {
+        continue;
+      }
+
+      if (adjacentCandidateTile.containsTileTypes(["river_candidate"])) {
+        continue;
+      }
+
+      // Check if the distance of the candidate is closer to the origin than the lastTraversedTile, if so remove it
+      if (lastTraversedTile) {
+        if (
+          originTile.getDistanceFrom(adjacentCandidateTile) <=
+          originTile.getDistanceFrom(lastTraversedTile)
+        ) {
+          continue;
+        }
+      }
+
+      let adjRiverCandidateAmount = 0;
+      for (const adjTile of adjacentCandidateTile.getAdjacentTiles()) {
+        if (adjTile && adjTile.containsTileType("river_candidate")) {
+          adjRiverCandidateAmount++;
+        }
+      }
+
+      // Don't nest ourselves around a-ton of river candidates, this can mess up our river generation
+      if (adjRiverCandidateAmount > 2) {
+        continue;
+      }
+
+      nextTileCandidates.push(adjacentCandidateTile);
+    }
+
+    return nextTileCandidates;
   }
 
   public static getDimensionValues(mapSize: MapSize) {
@@ -927,6 +1002,10 @@ export class GameMap {
     return originTile;
   }
 
+  public static removeTopRiverSideCache() {
+    this.riverSideHistory.shift();
+  }
+
   public static cacheSetRiverSides() {
     const riverSidesMap = new Map<Tile, number[]>();
     this.riverSideHistory.unshift(riverSidesMap);
@@ -939,9 +1018,26 @@ export class GameMap {
     const riverSidesMap = this.riverSideHistory.shift();
     //console.log(riverSidesMap);
     for (const [effectedTile, riverSides] of riverSidesMap.entries()) {
+      //effectedTile.setRiverSide(riverSide, false, false);
+
+      /*if (effectedTile.containsTileType("snow")) {
+        console.log("BEFORE:");
+        console.log(
+          "Tile: [" + effectedTile.getX() + "," + effectedTile.getY() + "]"
+        );
+        console.log(effectedTile.getRiverSideIndexes({ value: true }));
+        console.log("Cached river sides: " + riverSides);
+      }*/
+
       for (const riverSide of riverSides) {
         effectedTile.getRiverSides()[riverSide] = false; // Note, we don't use the this.setRiverSide() method as I don't want to effect other tiles
       }
+
+      /*if (effectedTile.containsTileType("snow")) {
+        console.log("AFTER:");
+        console.log(effectedTile.getX() + "," + effectedTile.getY());
+        console.log(effectedTile.getRiverSideIndexes({ value: true }));
+      }*/
     }
   }
 

@@ -1,4 +1,4 @@
-import { GameImage, SpriteRegion } from "../Assets";
+import { GameImage, spritehseetSize, SpriteRegion } from "../Assets";
 import { Game } from "../Game";
 import { Actor } from "../scene/Actor";
 import { Vector } from "../util/Vector";
@@ -116,6 +116,7 @@ export class Tile extends Actor {
 
     //Note: Tile sizes in spritesheet are always 32x32 regardless of anything else.
     for (let tileType of tileTypes) {
+      console.log(tileType);
       const spritesheetImage = Game.getImage(GameImage.SPRITESHEET);
       const spriteRegion = SpriteRegion[tileType.toUpperCase()];
       const spriteX = parseInt(spriteRegion.split(",")[0]) * 32;

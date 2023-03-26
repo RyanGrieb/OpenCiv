@@ -111,6 +111,7 @@ export class GameMap {
 
           console.log("All tile images loaded, generating map");
 
+          // TODO: Sort our actors such that hill actors go AFTER riverActors. (Allows the river to flow under the hills...)
           // Generate one big list of actors in the order of, baseTileActor, river, topLayerTileActor
           const mapActors: Actor[] = [
             ...tileActorList,

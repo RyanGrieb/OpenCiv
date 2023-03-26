@@ -191,8 +191,8 @@ export class Actor {
         greatestYHeight = actor.getHeight();
       }
     });
-    canvas.width = greatestX + greatestXWidth;
-    canvas.height = greatestY + greatestYHeight;
+    canvas.width = greatestX + greatestXWidth + 1000;
+    canvas.height = greatestY + greatestYHeight + 1000;
 
     canvas.getContext("2d").fillStyle = "grey";
     canvas.getContext("2d").fillRect(0, 0, canvas.width, canvas.height);

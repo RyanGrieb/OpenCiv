@@ -92,7 +92,7 @@ luxury_resources:
     min_tiles_set: 1
     max_tiles_set: 1
     set_chance: 0.1
-    min_temp: 0
+    min_temp: 60
     max_temp: 100
     spawn_on_additional_tile_types: true
   - name: cotton
