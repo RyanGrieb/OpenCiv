@@ -19,25 +19,38 @@ export class Tile {
     this.generationTemp = 0;
 
     this.tileTypes = [];
-    this.addTileType(tileType);
 
     this.adjacentTiles = [];
     this.riverSides = new Array(6).fill(false);
 
     this.x = x;
     this.y = y;
+
+    this.addTileType(tileType);
   }
 
   public getRiverSides() {
     return this.riverSides;
   }
 
-  public setRiverSide(side: number, value: boolean, cacheEntry = true): Map<Tile, number> {
+  public setRiverSide(
+    side: number,
+    value: boolean,
+    cacheEntry = true
+  ): Map<Tile, number> {
     const tilesEffected = new Map<Tile, number>();
 
     this.riverSides[side] = value;
     if (this.containsTileType("snow")) {
-      console.log("Setting river side: " + side + " for tile: [" + this.x + "," + this.y + "]");
+      console.log(
+        "Setting river side: " +
+          side +
+          " for tile: [" +
+          this.x +
+          "," +
+          this.y +
+          "]"
+      );
     }
     tilesEffected.set(this, side);
 
@@ -46,7 +59,10 @@ export class Tile {
     const oppositeTileSide = oppositeSides[side]; // The side that matches this tile's river-side
 
     // Set the opposite river-side too, since it's also on that adjacent tile.
-    if (oppositeTile && oppositeTile.getRiverSides()[oppositeTileSide] !== value) {
+    if (
+      oppositeTile &&
+      oppositeTile.getRiverSides()[oppositeTileSide] !== value
+    ) {
       oppositeTile.getRiverSides()[oppositeTileSide] = value;
       tilesEffected.set(oppositeTile, oppositeTileSide);
     }
@@ -97,7 +113,9 @@ export class Tile {
   }
 
   public replaceTileType(oldTileType: string, newTileType: string) {
-    this.tileTypes = this.tileTypes.map((type) => (type === oldTileType ? newTileType : type));
+    this.tileTypes = this.tileTypes.map((type) =>
+      type === oldTileType ? newTileType : type
+    );
 
     TileIndexer.removeTileType(oldTileType, this);
     TileIndexer.addTileType(newTileType, this);
@@ -113,7 +131,11 @@ export class Tile {
     return this.tileTypes.includes(tileType);
   }
 
-  public applyRiverSide(options: { previousTile?: Tile; nextTile?: Tile; originTile?: boolean }) {
+  public applyRiverSide(options: {
+    previousTile?: Tile;
+    nextTile?: Tile;
+    originTile?: boolean;
+  }) {
     //console.log("Applying river side for: [" + this.x + "," + this.y + "]");
     /**
      * Rules:
@@ -156,7 +178,8 @@ export class Tile {
 
       for (const validRiverConnection of validRiverConnections) {
         const tilesSet = new Map<Tile, number[]>();
-        const adjTileOfRiverConnection = this.getAdjacentTiles()[validRiverConnection];
+        const adjTileOfRiverConnection =
+          this.getAdjacentTiles()[validRiverConnection];
 
         if (!adjTileOfRiverConnection) continue;
 
@@ -175,7 +198,10 @@ export class Tile {
 
         currentRiverSide = validRiverConnection;
 
-        const smallestRiverPathToNextTile = this.flowRiverToNextTile(currentRiverSide, nextTile);
+        const smallestRiverPathToNextTile = this.flowRiverToNextTile(
+          currentRiverSide,
+          nextTile
+        );
 
         if (!smallestRiverPathToNextTile) {
           GameMap.restoreCachedRiverSides();
@@ -203,7 +229,10 @@ export class Tile {
         // TODO: Iterate through potentialRiverPaths & choose the smallest path
         let smallestRiverConnectionIndex = 0;
         let smallestRiverSidesSet = Infinity;
-        for (const [validRiverConnection, tilesSet] of potentialRiverPaths.entries()) {
+        for (const [
+          validRiverConnection,
+          tilesSet,
+        ] of potentialRiverPaths.entries()) {
           let totalRiverSidesSet = 0;
 
           for (const riverSideSet of tilesSet.values()) {
@@ -230,7 +259,10 @@ export class Tile {
 
     // If this tile already connects to the previous tile (with the river), then just flow to the next tile.
     if (connectedToPreviousTile) {
-      const smallestRiverPathToNextTile = this.flowRiverToNextTile(currentRiverSide, nextTile);
+      const smallestRiverPathToNextTile = this.flowRiverToNextTile(
+        currentRiverSide,
+        nextTile
+      );
 
       if (!smallestRiverPathToNextTile) return;
 
@@ -242,7 +274,10 @@ export class Tile {
     }
   }
 
-  private flowRiverToNextTile(startingRiverSide: number, nextTile: Tile): number[] {
+  private flowRiverToNextTile(
+    startingRiverSide: number,
+    nextTile: Tile
+  ): number[] {
     // Do this rotating left or right, pick smallest amount of tile-sides set.
     const orientations = new Map<string, number[]>();
 
@@ -251,7 +286,10 @@ export class Tile {
       let prevRiverSide = startingRiverSide;
       GameMap.cacheSetRiverSides();
 
-      while (nextTile && !this.riverConnectsToTile(startingRiverSide, nextTile)) {
+      while (
+        nextTile &&
+        !this.riverConnectsToTile(startingRiverSide, nextTile)
+      ) {
         //console.log(
         //  "No connection to next tile as: [" + this.x + "," + this.y + "]"
         //);
@@ -361,7 +399,9 @@ export class Tile {
       if (!this.getAllConnectedRiverSides(riverSide).get(tile)) return false;
 
       // Ensure at least one river-side in our comparing tile is inside our valid connection list.
-      for (const validConnectionSide of this.getAllConnectedRiverSides(riverSide).get(tile)) {
+      for (const validConnectionSide of this.getAllConnectedRiverSides(
+        riverSide
+      ).get(tile)) {
         if (riverSidesOfTile.includes(validConnectionSide)) return true;
       }
     }
@@ -562,7 +602,9 @@ export class Tile {
     }
 
     if (unusedSides.length < 1) {
-      console.log("Warning: Tried to apply random river side to all occupied sides...");
+      console.log(
+        "Warning: Tried to apply random river side to all occupied sides..."
+      );
       return;
     }
 
