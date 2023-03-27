@@ -2,6 +2,7 @@ import { Player } from "../Player";
 import { Tile } from "./Tile";
 import random from "random";
 import { MapResources } from "./MapResources";
+import { TileIndexer } from "./TileIndexer";
 
 enum MapSize {
   DUEL = "40x24",
@@ -77,8 +78,7 @@ export class GameMap {
 
     // == Generate grass circles ==
     const LAND_MASS_PARAM = 6;
-    const landMassSize =
-      ((this.mapWidth * this.mapHeight) / 12.5) * (LAND_MASS_PARAM + 2);
+    const landMassSize = ((this.mapWidth * this.mapHeight) / 12.5) * (LAND_MASS_PARAM + 2);
     const maxPathLength = 140;
     const maxLandmassIterations = 10000;
     let landmassIterations = 0;
@@ -142,10 +142,7 @@ export class GameMap {
 
         while (low < high) {
           var mid = (low + high) >>> 1; // Same as: (low + high) / 2
-          if (
-            tallestTiles[mid].getGenerationHeight() >
-            currentTile.getGenerationHeight()
-          )
+          if (tallestTiles[mid].getGenerationHeight() > currentTile.getGenerationHeight())
             low = mid + 1;
           else high = mid;
         }
@@ -160,15 +157,13 @@ export class GameMap {
     //Assign top 10% of tiles to have a 50% of becoming a hill tile
     const totalHills = tallestTiles.length * 0.1;
     for (let i = 0; i < totalHills; i++) {
-      if (Math.random() < 0.5)
-        tallestTiles[i].replaceTileType("grass", "grass_hill");
+      if (Math.random() < 0.5) tallestTiles[i].replaceTileType("grass", "grass_hill");
     }
 
     // TODO: Spawn hills in patches?
     // For all other grass tiles, make it a 13% of becoming a hill tile.
     for (let i = 0; i < tallestTiles.length; i++) {
-      if (Math.random() < 0.13)
-        tallestTiles[i].replaceTileType("grass", "grass_hill");
+      if (Math.random() < 0.13) tallestTiles[i].replaceTileType("grass", "grass_hill");
     }
 
     //Assign the top 5% of tiles to be mountains
@@ -189,10 +184,7 @@ export class GameMap {
 
         if (yPercent <= 0.1 || yPercent >= 0.9) {
           tile.setGenerationTemp(random.int(0, 31)); //TODO: Higher temp on y-values closer to midpoint.
-        } else if (
-          (yPercent > 0.1 && yPercent < 0.3) ||
-          (yPercent > 0.7 && yPercent < 0.9)
-        ) {
+        } else if ((yPercent > 0.1 && yPercent < 0.3) || (yPercent > 0.7 && yPercent < 0.9)) {
           tile.setGenerationTemp(random.int(32, 60));
         } else {
           tile.setGenerationTemp(random.int(60, 100));
@@ -212,10 +204,7 @@ export class GameMap {
 
         if (yPercent <= 0.1 || yPercent >= 0.9) {
           this.setTileBiome({ tile: currentTile, tileType: "snow" });
-        } else if (
-          (yPercent > 0.1 && yPercent < 0.15) ||
-          (yPercent > 0.85 && yPercent < 0.9)
-        ) {
+        } else if ((yPercent > 0.1 && yPercent < 0.15) || (yPercent > 0.85 && yPercent < 0.9)) {
           if (Math.random() > 0.25) {
             for (const adjTile of currentTile.getAdjacentTiles()) {
               if (!adjTile) continue;
@@ -311,14 +300,7 @@ export class GameMap {
         tile: originTile,
         pathLength: 5,
         setTileType: "forest",
-        followTileTypes: [
-          "grass",
-          "grass_hill",
-          "plains",
-          "plains_hill",
-          "tundra",
-          "tundra_hill",
-        ],
+        followTileTypes: ["grass", "grass_hill", "plains", "plains_hill", "tundra", "tundra_hill"],
         setTileChance: 0.1,
         overrideWater: false,
         setFollowTileTypeOnly: true,
@@ -350,10 +332,7 @@ export class GameMap {
             if (!adjTile) {
               freshwater = false;
             } else if (adjTile.containsTileType("ocean")) {
-              if (
-                !traversedTiles.includes(adjTile) &&
-                !traverseQueue.includes(adjTile)
-              ) {
+              if (!traversedTiles.includes(adjTile) && !traverseQueue.includes(adjTile)) {
                 traverseQueue.push(adjTile);
               }
             }
@@ -398,10 +377,7 @@ export class GameMap {
 
         for (const adjTile of tile.getAdjacentTiles()) {
           if (!adjTile) continue;
-          if (
-            adjTile.containsTileType("shallow_ocean") &&
-            Math.random() > 0.75
-          ) {
+          if (adjTile.containsTileType("shallow_ocean") && Math.random() > 0.75) {
             tile.replaceTileType("ocean", "shallow_ocean");
           }
         }
@@ -446,9 +422,7 @@ export class GameMap {
         setTileChance: mapResource.getSetChance(),
         minTilesSet: mapResource.getMinTilesSet(),
         maxTilesSet: mapResource.getMaxTilesSet(),
-        overrideWater: mapResource.getSpawnTiles().includes("ocean")
-          ? true
-          : false,
+        overrideWater: mapResource.getSpawnTiles().includes("ocean") ? true : false,
         setFollowTileTypeOnly: true,
         clearExistingTileTypes: false,
         insertIndex: 1, // Puts the resource behind trees, jungle
@@ -458,14 +432,9 @@ export class GameMap {
     }
     // == Generate strategic, bonus and luxury resources
 
-    //const determinedRiverTiles: Tile[][] = [];
-
+    // == Generate rivers
     const riverAmount = 25; //FIXME: The higher number the higher chance of infinite loop.
-    rivenGenLoop: for (
-      let riverIndex = 0;
-      riverIndex < riverAmount;
-      riverIndex++
-    ) {
+    rivenGenLoop: for (let riverIndex = 0; riverIndex < riverAmount; riverIndex++) {
       console.log("riverGenLoop");
       let originTile: Tile = undefined;
       findRiverOriginLoop: while (!originTile) {
@@ -483,10 +452,7 @@ export class GameMap {
         for (const adjTile of originTile.getAdjacentTiles()) {
           if (!adjTile) continue;
 
-          if (
-            adjTile.containsTileType("river_candidate") ||
-            adjTile.isWater()
-          ) {
+          if (adjTile.containsTileType("river_candidate") || adjTile.isWater()) {
             originTile = undefined;
             continue findRiverOriginLoop;
           }
@@ -522,8 +488,7 @@ export class GameMap {
         }
 
         // Traverse to the next tile from nextTileCandidates[]
-        currentTile =
-          nextTileCandidates[random.int(0, nextTileCandidates.length - 1)];
+        currentTile = nextTileCandidates[random.int(0, nextTileCandidates.length - 1)];
 
         if (!currentTile) {
           riverIndex--;
@@ -568,8 +533,7 @@ export class GameMap {
         let prevTile: Tile = undefined;
         let nextTile: Tile = undefined;
 
-        if (i < currentRiverTiles.length - 1)
-          nextTile = currentRiverTiles[i + 1]; // Include the next tile we are traversing
+        if (i < currentRiverTiles.length - 1) nextTile = currentRiverTiles[i + 1]; // Include the next tile we are traversing
 
         if (i > 0) prevTile = currentRiverTiles[i - 1]; // Ensure we are including the previous tile such that we can connect to it through our method.
 
@@ -598,8 +562,7 @@ export class GameMap {
       let tooManyRiverSides = false;
       for (let i = 0; i < currentRiverTiles.length; i++) {
         const tile = currentRiverTiles[i];
-        if (tile.getRiverSideIndexes({ value: true }).length > 3)
-          tooManyRiverSides = true;
+        if (tile.getRiverSideIndexes({ value: true }).length > 3) tooManyRiverSides = true;
       }
 
       if (tooManyRiverSides || appliedRiverSides < 3) {
@@ -630,10 +593,15 @@ export class GameMap {
       }
       GameMap.removeTopRiverSideCache();
     }
-
-    //TODO: For rivers, when we apply river-sides, ensure the new tile we apply to is further away from the origin tile than the previous tile we set.
-    // If this makes rivers too straight, add a variable to determine if the distance b/w old & new is "good enough", but not straight up going backwards to the origin.
     // == Generate rivers
+
+    // == Apply floodplains for desert tiles w/ river tiles.
+    const desertTiles = TileIndexer.getTileByTileType("desert");
+    for (const tile of desertTiles) {
+      if (tile.hasRiver()) {
+        tile.replaceTileType("desert", "floodplains");
+      }
+    }
   }
 
   public static getNextPotentialRiverTiles(
@@ -766,20 +734,13 @@ export class GameMap {
             continue;
           }
 
-          this.tiles[x][y].setAdjacentTile(
-            i,
-            this.tiles[x + edgeAxis[i][0]][y + edgeAxis[i][1]]
-          );
+          this.tiles[x][y].setAdjacentTile(i, this.tiles[x + edgeAxis[i][0]][y + edgeAxis[i][1]]);
         }
       }
     }
   }
 
-  private static setTilesBiome(
-    tiles: Tile[],
-    tileType: string,
-    setChance: number
-  ) {
+  private static setTilesBiome(tiles: Tile[], tileType: string, setChance: number) {
     for (const tile of tiles) {
       if (!tile || Math.random() > setChance) continue;
       this.setTileBiome({ tile: tile, tileType: tileType });
@@ -875,11 +836,7 @@ export class GameMap {
         if (tile.containsTileType("ocean") && !options.overrideWater) continue;
 
         // Skip if we don't spread to the tile types we follow
-        if (
-          !tile.containsTileTypes(options.followTileTypes) &&
-          setFollowTileTypeOnly
-        )
-          continue;
+        if (!tile.containsTileTypes(options.followTileTypes) && setFollowTileTypeOnly) continue;
 
         // Skip if we end up in a tile w/ tileTypes > 1 and we want to avoid them
         if (!onAdditionalTileTypes && tile.getTileTypes().length > 1) continue;
@@ -913,8 +870,7 @@ export class GameMap {
       }
 
       // Get the nextPathTile randomly, which has to be an adjacent follow tile
-      nextPathTile =
-        adjacentFollowTiles[random.int(0, adjacentFollowTiles.length)];
+      nextPathTile = adjacentFollowTiles[random.int(0, adjacentFollowTiles.length)];
 
       // If we can't get get a tile adjacent to follow tile, the path ends.
       if (!nextPathTile) break;
@@ -926,9 +882,7 @@ export class GameMap {
     if (tilesSet < minTilesSet) {
       for (let i = tilesSet; i < minTilesSet; i++) {
         const rndTile =
-          skippedValidGenerationTiles[
-            random.int(0, skippedValidGenerationTiles.length - 1)
-          ];
+          skippedValidGenerationTiles[random.int(0, skippedValidGenerationTiles.length - 1)];
 
         this.setTileBiome({
           tile: rndTile,
@@ -975,34 +929,25 @@ export class GameMap {
       iterations++;
 
       const randomTile =
-        this.tiles[random.int(0, this.mapWidth - 1)][
-          random.int(0, this.mapHeight - 1)
-        ];
+        this.tiles[random.int(0, this.mapWidth - 1)][random.int(0, this.mapHeight - 1)];
 
       // Ensure at least one tile type is in this randomTile.
       if (!randomTile.containsTileTypes(options.tileTypes)) continue;
 
       // Ensure we are within the provided temperature range
-      if (
-        randomTile.getGenerationTemp() < minTemp ||
-        randomTile.getGenerationTemp() > maxTemp
-      )
+      if (randomTile.getGenerationTemp() < minTemp || randomTile.getGenerationTemp() > maxTemp)
         continue;
 
       // If we don't want additional tileTypes, check for that
-      if (!onAdditionalTileTypes && randomTile.getTileTypes().length > 1)
-        continue;
+      if (!onAdditionalTileTypes && randomTile.getTileTypes().length > 1) continue;
 
       // If we don't want to spawn on existing resource, natural wonder tiles, check for that
-      if (avoidResourceTiles && MapResources.isResourceTile(randomTile))
-        continue;
+      if (avoidResourceTiles && MapResources.isResourceTile(randomTile)) continue;
 
       originTile = randomTile;
 
       if (iterations >= maxIterations) {
-        console.log(
-          "Reached max iterations for random tile: " + options.tileTypes
-        );
+        console.log("Reached max iterations for random tile: " + options.tileTypes);
         break;
       }
     }
