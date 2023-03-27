@@ -309,83 +309,64 @@ export class GameMap {
     }
     console.log("Done generating forest tiles!");
 
-    // == Generate freshwater tiles. FIXME: This is slow. Create a tileIndexer("ocean"): Tiles[] function?
+    // == Generate freshwater tiles.
     console.log("Generating freshwater tiles...");
-    for (let x = 0; x < this.mapWidth; x++) {
-      for (let y = 0; y < this.mapHeight; y++) {
-        const tile = this.tiles[x][y];
 
-        if (!tile.containsTileType("ocean")) {
-          continue;
-        }
+    for (const tile of TileIndexer.getTilesByTileType("ocean")) {
+      let freshwater = true; // False if one of the adj tile is undefined (map edge)
+      let traverseQueue: Tile[] = [];
+      let traversedTiles: Tile[] = [];
 
-        let freshwater = true; // False if one of the adj tile is undefined (map edge)
-        let traverseQueue: Tile[] = [];
-        let traversedTiles: Tile[] = [];
+      traverseQueue.push(tile);
+      while (traverseQueue.length > 0) {
+        let currentTile: Tile = traverseQueue.shift();
+        traversedTiles.push(currentTile);
 
-        traverseQueue.push(tile);
-        while (traverseQueue.length > 0) {
-          let currentTile: Tile = traverseQueue.shift();
-          traversedTiles.push(currentTile);
-
-          for (const adjTile of currentTile.getAdjacentTiles()) {
-            if (!adjTile) {
-              freshwater = false;
-            } else if (adjTile.containsTileType("ocean")) {
-              if (!traversedTiles.includes(adjTile) && !traverseQueue.includes(adjTile)) {
-                traverseQueue.push(adjTile);
-              }
+        for (const adjTile of currentTile.getAdjacentTiles()) {
+          if (!adjTile) {
+            freshwater = false;
+          } else if (adjTile.containsTileType("ocean")) {
+            if (!traversedTiles.includes(adjTile) && !traverseQueue.includes(adjTile)) {
+              traverseQueue.push(adjTile);
             }
           }
         }
+      }
 
-        if (freshwater) {
-          for (let tile of traversedTiles) {
-            tile.replaceTileType("ocean", "freshwater");
-          }
+      if (freshwater) {
+        for (let tile of traversedTiles) {
+          tile.replaceTileType("ocean", "freshwater");
         }
       }
     }
     console.log("Done generating freshwater tiles!");
     // == Generate freshwater tiles
 
-    // == Generate shallow ocean tiles FIXME: Also slow.
-    for (let x = 0; x < this.mapWidth; x++) {
-      for (let y = 0; y < this.mapHeight; y++) {
-        const tile = this.tiles[x][y];
-
-        if (!tile.containsTileType("ocean")) {
-          continue;
-        }
-
-        for (const adjTile of tile.getAdjacentTiles()) {
-          if (!adjTile) continue;
-          if (!adjTile.containsTileTypes(["ocean", "shallow_ocean"])) {
-            tile.replaceTileType("ocean", "shallow_ocean");
-          }
+    // == Generate shallow ocean tiles
+    console.log("Generating shallow ocean tiles...");
+    for (const tile of TileIndexer.getTilesByTileType("ocean")) {
+      for (const adjTile of tile.getAdjacentTiles()) {
+        if (!adjTile) continue;
+        if (!adjTile.containsTileTypes(["ocean", "shallow_ocean"])) {
+          tile.replaceTileType("ocean", "shallow_ocean");
         }
       }
     }
 
-    for (let x = 0; x < this.mapWidth; x++) {
-      for (let y = 0; y < this.mapHeight; y++) {
-        const tile = this.tiles[x][y];
-
-        if (!tile.containsTileType("ocean")) {
-          continue;
-        }
-
-        for (const adjTile of tile.getAdjacentTiles()) {
-          if (!adjTile) continue;
-          if (adjTile.containsTileType("shallow_ocean") && Math.random() > 0.75) {
-            tile.replaceTileType("ocean", "shallow_ocean");
-          }
+    for (const tile of TileIndexer.getTilesByTileType("ocean")) {
+      for (const adjTile of tile.getAdjacentTiles()) {
+        if (!adjTile) continue;
+        if (adjTile.containsTileType("shallow_ocean") && Math.random() > 0.75) {
+          tile.replaceTileType("ocean", "shallow_ocean");
         }
       }
     }
+
+    console.log("Done generating shallow ocean tiles!");
     // == Generate shallow ocean tiles
 
     // == Generate strategic, bonus and luxury resources
+    console.log("Generating resources...");
     const numberOfResources = Math.ceil(this.mapArea * 0.0418526785714286); // 75 for tiny map..
     for (let i = 0; i < numberOfResources * 3; i++) {
       let mapResourceType = "N/A";
@@ -430,9 +411,11 @@ export class GameMap {
         avoidResourceTiles: true,
       });
     }
+    console.log("Done generating resources!");
     // == Generate strategic, bonus and luxury resources
 
     // == Generate rivers
+    console.log("Generating rivers...");
     const riverAmount = 25; //FIXME: The higher number the higher chance of infinite loop.
     rivenGenLoop: for (let riverIndex = 0; riverIndex < riverAmount; riverIndex++) {
       console.log("riverGenLoop");
@@ -518,10 +501,10 @@ export class GameMap {
       }
 
       //FIXME: This causes infinite loop on smaller maps...
-      //if (currentRiverTiles.length < 10) {
-      //  riverIndex--;
-      //  continue;
-      //}
+      if (currentRiverTiles.length < 10) {
+        riverIndex--;
+        continue;
+      }
 
       GameMap.cacheSetRiverSides();
       let appliedRiverSides = 0;
@@ -593,15 +576,20 @@ export class GameMap {
       }
       GameMap.removeTopRiverSideCache();
     }
+    console.log("Done generating rivers!");
     // == Generate rivers
 
     // == Apply floodplains for desert tiles w/ river tiles.
-    const desertTiles = TileIndexer.getTileByTileType("desert");
+    console.log("Generating floodplains...");
+    const desertTiles = TileIndexer.getTilesByTileType("desert");
     for (const tile of desertTiles) {
       if (tile.hasRiver()) {
         tile.replaceTileType("desert", "floodplains");
       }
     }
+
+    // == Apply floodplains for desert tiles w/ river tiles
+    console.log("Done generating floodplains!");
   }
 
   public static getNextPotentialRiverTiles(

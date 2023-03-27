@@ -22,7 +22,11 @@ export class TileIndexer {
       }
     }
   }
-  public static getTileByTileType(tileType: string) {
+  public static getTilesByTileType(tileType: string): Tile[] {
+    if (!this.tileIndex.has(tileType)) {
+      console.log("WARNING: Couldn't find any tiles w/ tile-type: " + tileType);
+      return [];
+    }
     return this.tileIndex.get(tileType);
   }
 }

@@ -19,7 +19,7 @@ export class Tile {
     this.generationTemp = 0;
 
     this.tileTypes = [];
-    this.tileTypes.push(tileType);
+    this.addTileType(tileType);
 
     this.adjacentTiles = [];
     this.riverSides = new Array(6).fill(false);
