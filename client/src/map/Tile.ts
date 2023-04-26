@@ -1,4 +1,4 @@
-import { GameImage, spritehseetSize, SpriteRegion } from "../Assets";
+import { GameImage, SpriteRegion } from "../Assets";
 import { Game } from "../Game";
 import { Actor } from "../scene/Actor";
 import { Vector } from "../util/Vector";

@@ -520,9 +520,7 @@ export class GameMap {
         if (currentTile.hasRiver()) break riverPathLoop;
 
         // If the next tile has an adjacent river, we can end this river, and attempt to flow into that body of water.
-        for (const adjTile of currentTile.getAdjacentTiles()) {
-          if (adjTile && adjTile.isWater()) break riverPathLoop;
-        }
+        if (currentTile.isWater()) break riverPathLoop;
 
         if (riverLength >= 50) break riverPathLoop;
       }
@@ -554,7 +552,7 @@ export class GameMap {
         if (i > 0) prevTile = currentRiverTiles[i - 1]; // Ensure we are including the previous tile such that we can connect to it through our method.
 
         if (!tile.containsTileType("debug3")) {
-          //tile.addTileType("debug2");
+          tile.addTileType("debug2");
         }
         /*console.log(
           "Generating river for tile: [" +
