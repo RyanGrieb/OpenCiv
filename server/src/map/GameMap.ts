@@ -367,6 +367,7 @@ export class GameMap {
     // == Generate shallow ocean tiles
     console.log("Generating shallow ocean tiles...");
     for (const tile of [...TileIndexer.getTilesByTileType("ocean")]) {
+      tile.addTileType("debug2");
       for (const adjTile of tile.getAdjacentTiles()) {
         if (!adjTile) continue;
         if (!adjTile.containsTileTypes(["ocean", "shallow_ocean"])) {
@@ -958,10 +959,18 @@ export class GameMap {
     } = options;
     const minTemp = tempRange[0];
     const maxTemp = tempRange[1];
-    const maxIterations = 10000;
+    const maxIterations = 100;
 
     while (!originTile) {
       iterations++;
+      console.log(iterations);
+
+      if (iterations >= maxIterations) {
+        console.log(
+          "Reached max iterations for random tile: " + options.tileTypes
+        );
+        break;
+      }
 
       const randomTile =
         this.tiles[random.int(0, this.mapWidth - 1)][
@@ -987,13 +996,6 @@ export class GameMap {
         continue;
 
       originTile = randomTile;
-
-      if (iterations >= maxIterations) {
-        console.log(
-          "Reached max iterations for random tile: " + options.tileTypes
-        );
-        break;
-      }
     }
 
     return originTile;
