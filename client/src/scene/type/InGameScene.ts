@@ -85,6 +85,8 @@ export class InGameScene extends Scene {
           );
         }
       });
+
+      WebsocketClient.sendMessage({ event: "loadedIn" });
     });
   }
 }

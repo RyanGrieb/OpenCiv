@@ -28,9 +28,21 @@ export class ClientPlayer extends AbstractPlayer {
     });
 
     NetworkEvents.on({
-      eventName: "setZoom",
+      eventName: "zoomToLocation",
       callback: (data) => {
-        console.log(data);
+        const gridX = data["x"];
+        const gridY = data["y"];
+        const tile = GameMap.getTiles()[gridX][gridY];
+        const zoomAmount = data["zoomAmount"];
+        const x = tile.getCenterPosition()[0];
+        const y = tile.getCenterPosition()[1];
+
+        Game.getCurrentScene()
+          .getCamera()
+          .setPosition(-x + Game.getWidth() / 2, -y + Game.getHeight() / 2);
+        Game.getCurrentScene()
+          .getCamera()
+          .zoom(Game.getWidth() / 2, Game.getHeight() / 2, zoomAmount);
       },
     });
   }

@@ -5,10 +5,13 @@ import { Game } from "./Game";
 export class Player {
   private name: string;
   private wsConnection: WebSocket;
+  private loadedIn: boolean;
+  private loadedInCallback: () => void;
 
   constructor(name: string, wsConnection: WebSocket) {
     this.name = name;
     this.wsConnection = wsConnection;
+    this.loadedIn = false;
 
     this.wsConnection.on("close", (data) => {
       console.log(name + " quit");
@@ -23,17 +26,31 @@ export class Player {
         player.sendNetworkEvent({ event: "playerQuit", playerName: this.name });
       }
     });
+
+    ServerEvents.on({
+      eventName: "loadedIn",
+      callback: (data, websocket) => {
+        if (this.wsConnection != websocket) return;
+
+        this.loadedInCallback.call(undefined);
+      },
+      globalEvent: true,
+    });
   }
 
   public static allZoomOnto(x: number, y: number, zoomAmount: number) {
     for (let player of Game.getPlayers().values()) {
-      player.setZoom(x, y, zoomAmount);
+      player.zoomToLocation(x, y, zoomAmount);
     }
   }
 
-  public setZoom(x: number, y: number, zoomAmount: number) {
+  public onLoadedIn(callback: () => void) {
+    this.loadedInCallback = callback;
+  }
+
+  public zoomToLocation(x: number, y: number, zoomAmount: number) {
     this.sendNetworkEvent({
-      event: "setZoom",
+      event: "zoomToLocation",
       x: x,
       y: y,
       zoomAmount: zoomAmount,

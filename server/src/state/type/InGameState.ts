@@ -60,7 +60,23 @@ export class InGameState extends State {
     });
 
     Game.getPlayers().forEach((player) => {
+      const spawnTile = GameMap.getRandomTileWith({
+        avoidTileTypes: [
+          "ocean",
+          "shallow_ocean",
+          "freshwater",
+          "mountain",
+          "snow",
+          "snow_hill",
+          "tundra",
+          "tundra_hill",
+        ],
+      });
       player.sendNetworkEvent({ event: "setScene", scene: "in_game" });
+
+      player.onLoadedIn(() => {
+        player.zoomToLocation(spawnTile.getX(), spawnTile.getY(), 7);
+      });
     });
   }
 

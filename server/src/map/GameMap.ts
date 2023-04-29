@@ -442,7 +442,7 @@ export class GameMap {
     // == Generate rivers
     console.log("Generating rivers...");
     //const riverAmount = 25; //FIXME: The higher number the higher chance of infinite loop.
-    const riverAmount = this.mapArea * 0.0124007937;
+    const riverAmount = this.mapArea * 0.015;
     rivenGenLoop: for (
       let riverIndex = 0;
       riverIndex < riverAmount;
@@ -947,10 +947,11 @@ export class GameMap {
   //FIXME: We really should use a tileMap to get tiles w/ the associated tileTypes in O(1) time.
   // Then we can apply the rest of the options in O(n)
   public static getRandomTileWith(options: {
-    tileTypes: string[];
+    tileTypes?: string[];
     tempRange?: [number, number];
     onAdditionalTileTypes?: boolean;
     avoidResourceTiles?: boolean;
+    avoidTileTypes?: string[];
   }): Tile | undefined {
     let originTile = undefined;
     let iterations = 0;
@@ -979,8 +980,16 @@ export class GameMap {
           random.int(0, this.mapHeight - 1)
         ];
 
+      // Ensure we are avoiding any tile types we don't want
+      if (
+        options.avoidTileTypes &&
+        randomTile.containsTileTypes(options.avoidTileTypes)
+      )
+        continue;
+
       // Ensure at least one tile type is in this randomTile.
-      if (!randomTile.containsTileTypes(options.tileTypes)) continue;
+      if (options.tileTypes && !randomTile.containsTileTypes(options.tileTypes))
+        continue;
 
       // Ensure we are within the provided temperature range
       if (
