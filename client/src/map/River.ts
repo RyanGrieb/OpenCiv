@@ -10,8 +10,6 @@ export interface RiverOptions {
 }
 
 export class River extends Actor {
-  private tile: Tile;
-
   constructor(options: RiverOptions) {
     const vectorOffset = -1.75; // Shift all vectors away from the center by 1.5 pixels.. (Causes our rivers to reside between tiles)
 
@@ -65,8 +63,6 @@ export class River extends Actor {
       height: 3,
       transparency: 1,
     });
-
-    this.tile = options.tile;
 
     this.setRotation(rotation * (Math.PI / 180));
   }
