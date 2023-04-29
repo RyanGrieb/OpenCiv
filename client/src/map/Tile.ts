@@ -1,5 +1,6 @@
 import { GameImage, SpriteRegion } from "../Assets";
 import { Game } from "../Game";
+import { Unit } from "../Unit";
 import { Actor } from "../scene/Actor";
 import { Vector } from "../util/Vector";
 
@@ -22,6 +23,7 @@ export class Tile extends Actor {
   private adjacentTiles: Tile[];
   private vectors: Vector[];
   private riverSides: boolean[];
+  private units: Unit[];
 
   private gridX: number;
   private gridY: number;
@@ -37,6 +39,7 @@ export class Tile extends Actor {
     this.adjacentTiles = [];
     this.vectors = [];
     this.riverSides = options.riverSides ?? Array(6).fill(false);
+    this.units = [];
 
     this.gridX = Math.floor(this.x / 32);
     this.gridY = Math.floor(this.y / 25);
@@ -68,6 +71,10 @@ export class Tile extends Actor {
         canvasContext: canvasContext,
       });
     });*/
+  }
+
+  public addUnit(unit: Unit) {
+    this.units.push(unit);
   }
 
   public hasRiver(): boolean {

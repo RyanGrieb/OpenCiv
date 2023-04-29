@@ -1,6 +1,7 @@
 import random from "random";
 import { GameMap } from "./GameMap";
 import { TileIndexer } from "./TileIndexer";
+import { Unit } from "../Unit";
 
 export class Tile {
   //== Generation Values ==
@@ -10,6 +11,7 @@ export class Tile {
   private tileTypes: string[];
   private adjacentTiles: Tile[];
   private riverSides: boolean[];
+  private units: Unit[];
 
   private x: number;
   private y: number;
@@ -22,11 +24,16 @@ export class Tile {
 
     this.adjacentTiles = [];
     this.riverSides = new Array(6).fill(false);
+    this.units = [];
 
     this.x = x;
     this.y = y;
 
     this.addTileType(tileType);
+  }
+
+  public addUnit(unit: Unit) {
+    this.units.push(unit);
   }
 
   public getRiverSides() {
@@ -76,9 +83,20 @@ export class Tile {
     return {
       tileTypes: this.tileTypes,
       riverSides: this.riverSides,
+      units: this.getUnitsJSON(),
       x: this.x,
       y: this.y,
     };
+  }
+
+  public getUnitsJSON() {
+    const unitJSON = [];
+
+    for (const unit of this.units) {
+      unitJSON.push(unit.asJSON());
+    }
+
+    return unitJSON;
   }
 
   public addTileType(tileType: string, index?: number) {

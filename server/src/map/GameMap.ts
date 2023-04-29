@@ -3,6 +3,7 @@ import { Tile } from "./Tile";
 import random from "random";
 import { MapResources } from "./MapResources";
 import { TileIndexer } from "./TileIndexer";
+import { Unit } from "../Unit";
 
 enum MapSize {
   DUEL = "40x24",

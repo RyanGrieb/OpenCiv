@@ -1,4 +1,5 @@
 import { Game } from "../Game";
+import { Unit } from "../Unit";
 import { NetworkEvents, WebsocketClient } from "../network/Client";
 import { Actor } from "../scene/Actor";
 import { River } from "./River";
@@ -49,6 +50,7 @@ export class GameMap {
     });
     const tileActorList: Tile[] = [];
     const topLayerTileActorList: Tile[] = [];
+    const unitActorList: Unit[] = [];
     const riverActors: River[] = [];
 
     NetworkEvents.on({
@@ -60,6 +62,8 @@ export class GameMap {
         for (const tileJSON of tileList) {
           const tileTypes: string[] = tileJSON["tileTypes"];
           const riverSides: boolean[] = tileJSON["riverSides"];
+          const jsonUnits = tileJSON["units"];
+
           const x = parseInt(tileJSON["x"]);
           const y = parseInt(tileJSON["y"]);
 
@@ -94,6 +98,12 @@ export class GameMap {
             });
             topLayerTileActorList.push(topLayerTile);
           }
+
+          for (const jsonUnit of jsonUnits) {
+            const unit = new Unit(jsonUnit["type"], tile);
+            tile.addUnit(unit);
+            unitActorList.push(unit);
+          }
         }
 
         if (lastChunk) {
@@ -124,6 +134,10 @@ export class GameMap {
             spriteRegion: false,
           });
           scene.addActor(this.mapActor);
+
+          for (const unit of unitActorList) {
+            scene.addActor(unit);
+          }
 
           // Now combine the base tile-type layer & the rest of the layers above..
           for (let topLayerTile of topLayerTileActorList) {

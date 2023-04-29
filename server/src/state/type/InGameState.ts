@@ -3,6 +3,7 @@ import { ServerEvents } from "../../Events";
 import { State } from "../State";
 import { GameMap } from "../../map/GameMap";
 import { Server } from "http";
+import { Unit } from "../../Unit";
 
 export class InGameState extends State {
   public onInitialize() {
@@ -60,6 +61,8 @@ export class InGameState extends State {
     });
 
     Game.getPlayers().forEach((player) => {
+      player.sendNetworkEvent({ event: "setScene", scene: "in_game" });
+
       const spawnTile = GameMap.getRandomTileWith({
         avoidTileTypes: [
           "ocean",
@@ -72,7 +75,8 @@ export class InGameState extends State {
           "tundra_hill",
         ],
       });
-      player.sendNetworkEvent({ event: "setScene", scene: "in_game" });
+
+      spawnTile.addUnit(new Unit({ type: "settler" }));
 
       player.onLoadedIn(() => {
         player.zoomToLocation(spawnTile.getX(), spawnTile.getY(), 7);
