@@ -17,6 +17,8 @@ export class ClientPlayer extends AbstractPlayer {
       this.hoveredTile = new HoveredTile(9999, 9999);
       this.hoveredTile.loadImage().then(() => {
         Game.getCurrentScene().addActor(this.hoveredTile);
+
+        this.updateHoveredTile(Game.getMouseX(), Game.getMouseY());
       });
     });
 
@@ -24,6 +26,7 @@ export class ClientPlayer extends AbstractPlayer {
       const mouseX = options.x;
       const mouseY = options.y;
 
+      console.log(mouseX + "," + mouseY);
       this.updateHoveredTile(mouseX, mouseY);
     });
 
