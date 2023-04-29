@@ -6,6 +6,11 @@ import { Server } from "http";
 
 export class InGameState extends State {
   public onInitialize() {
+    // Set loading screen for players
+    Game.getPlayers().forEach((player) => {
+      player.sendNetworkEvent({ event: "setScene", scene: "loading_scene" });
+    });
+
     GameMap.init();
 
     console.log("InGame state initialized");

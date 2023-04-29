@@ -39,7 +39,7 @@ export class GameMap {
 
   public static init() {
     // Assign map dimension values
-    const mapDimensions = this.getDimensionValues(MapSize.HUGE);
+    const mapDimensions = this.getDimensionValues(MapSize.TINY);
     this.mapWidth = mapDimensions[0];
     this.mapHeight = mapDimensions[1];
     this.mapArea = this.mapWidth * this.mapHeight;
