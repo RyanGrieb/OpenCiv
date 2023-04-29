@@ -42,7 +42,7 @@ export class Tile {
 
     this.riverSides[side] = value;
     if (this.containsTileType("snow")) {
-      console.log(
+      /*console.log(
         "Setting river side: " +
           side +
           " for tile: [" +
@@ -50,7 +50,7 @@ export class Tile {
           "," +
           this.y +
           "]"
-      );
+      );*/
     }
     tilesEffected.set(this, side);
 

@@ -25,6 +25,21 @@ export class Player {
     });
   }
 
+  public static allZoomOnto(x: number, y: number, zoomAmount: number) {
+    for (let player of Game.getPlayers().values()) {
+      player.setZoom(x, y, zoomAmount);
+    }
+  }
+
+  public setZoom(x: number, y: number, zoomAmount: number) {
+    this.sendNetworkEvent({
+      event: "setZoom",
+      x: x,
+      y: y,
+      zoomAmount: zoomAmount,
+    });
+  }
+
   public sendNetworkEvent(event: Record<string, any>) {
     this.wsConnection.send(JSON.stringify(event));
   }

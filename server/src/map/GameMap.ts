@@ -39,7 +39,7 @@ export class GameMap {
 
   public static init() {
     // Assign map dimension values
-    const mapDimensions = this.getDimensionValues(MapSize.TINY);
+    const mapDimensions = this.getDimensionValues(MapSize.HUGE);
     this.mapWidth = mapDimensions[0];
     this.mapHeight = mapDimensions[1];
     this.mapArea = this.mapWidth * this.mapHeight;
@@ -394,7 +394,7 @@ export class GameMap {
       let mapResourceType = "N/A";
       if (i < numberOfResources) {
         mapResourceType = "bonus";
-      } else if (i > numberOfResources && i < numberOfResources * 2) {
+      } else if (i > numberOfResources && i < numberOfResources * 1.5) {
         mapResourceType = "strategic";
       } else {
         mapResourceType = "luxury";
@@ -440,13 +440,14 @@ export class GameMap {
 
     // == Generate rivers
     console.log("Generating rivers...");
-    const riverAmount = 25; //FIXME: The higher number the higher chance of infinite loop.
+    //const riverAmount = 25; //FIXME: The higher number the higher chance of infinite loop.
+    const riverAmount = this.mapArea * 0.0124007937;
     rivenGenLoop: for (
       let riverIndex = 0;
       riverIndex < riverAmount;
       riverIndex++
     ) {
-      //console.log("riverGenLoop");
+      console.log("riverGenLoop");
       let originTile: Tile = undefined;
       findRiverOriginLoop: while (!originTile) {
         originTile = GameMap.getRandomTileWith({
@@ -552,7 +553,7 @@ export class GameMap {
         if (i > 0) prevTile = currentRiverTiles[i - 1]; // Ensure we are including the previous tile such that we can connect to it through our method.
 
         if (!tile.containsTileType("debug3")) {
-          tile.addTileType("debug2");
+          //tile.addTileType("debug2");
         }
         /*console.log(
           "Generating river for tile: [" +
@@ -581,7 +582,7 @@ export class GameMap {
       }
 
       if (tooManyRiverSides || appliedRiverSides < 3) {
-        console.log(
+        /*console.log(
           "Failed to generate tile, starting at: " +
             currentRiverTiles[0].getX() +
             "," +
@@ -590,7 +591,7 @@ export class GameMap {
             tooManyRiverSides +
             " || " +
             appliedRiverSides
-        );
+        );*/
         //console.log(tooManyRiverSides + "," + tooManyRiverSides);
 
         for (let i = 0; i < currentRiverTiles.length; i++) {
@@ -602,7 +603,7 @@ export class GameMap {
 
       if (tooManyRiverSides || appliedRiverSides < 3) {
         riverIndex--;
-        console.log("Oh no!");
+        //console.log("Oh no!");
         //currentRiverTiles[0].addTileType("debug1");
         GameMap.restoreCachedRiverSides(); //FIXME: This fails to delete river-sides adj to border sometimes
       }

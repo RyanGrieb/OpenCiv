@@ -56,9 +56,7 @@ export class River extends Actor {
     let x = v1.x;
     let y = v1.y;
 
-    console.log(x + "," + y);
     // Again align our sides some more to have a flush surface if they are against each other.
-    console.log(distance);
     super({
       x: x,
       y: y,

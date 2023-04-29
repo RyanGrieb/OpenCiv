@@ -2,6 +2,7 @@ import { Game } from "../Game";
 import { GameMap } from "../map/GameMap";
 import { HoveredTile } from "../map/HoveredTile";
 import { Tile } from "../map/Tile";
+import { NetworkEvents } from "../network/Client";
 import { Numbers } from "../util/Numbers";
 import { Vector } from "../util/Vector";
 import { AbstractPlayer } from "./AbstractPlayer";
@@ -24,6 +25,13 @@ export class ClientPlayer extends AbstractPlayer {
       const mouseY = options.y;
 
       this.updateHoveredTile(mouseX, mouseY);
+    });
+
+    NetworkEvents.on({
+      eventName: "setZoom",
+      callback: (data) => {
+        console.log(data);
+      },
     });
   }
 
