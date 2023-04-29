@@ -367,7 +367,7 @@ export class GameMap {
     // == Generate shallow ocean tiles
     console.log("Generating shallow ocean tiles...");
     for (const tile of [...TileIndexer.getTilesByTileType("ocean")]) {
-      tile.addTileType("debug2");
+      //tile.addTileType("debug2");
       for (const adjTile of tile.getAdjacentTiles()) {
         if (!adjTile) continue;
         if (!adjTile.containsTileTypes(["ocean", "shallow_ocean"])) {
@@ -448,7 +448,7 @@ export class GameMap {
       riverIndex < riverAmount;
       riverIndex++
     ) {
-      console.log("riverGenLoop");
+      //console.log("riverGenLoop");
       let originTile: Tile = undefined;
       findRiverOriginLoop: while (!originTile) {
         originTile = GameMap.getRandomTileWith({
@@ -461,6 +461,9 @@ export class GameMap {
             "mountain",
           ],
         });
+
+        // If we couldn't find a random tile, just give up.
+        if (!originTile) continue;
 
         for (const adjTile of originTile.getAdjacentTiles()) {
           if (!adjTile) continue;
@@ -963,7 +966,6 @@ export class GameMap {
 
     while (!originTile) {
       iterations++;
-      console.log(iterations);
 
       if (iterations >= maxIterations) {
         console.log(

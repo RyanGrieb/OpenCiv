@@ -671,4 +671,8 @@ export class Tile {
     const dy = this.y + 0.5 - (tile.y + 0.5);
     return Math.sqrt(dx ** 2 + dy ** 2);
   }
+
+  public toString(): string {
+    return this.tileTypes.toString();
+  }
 }
