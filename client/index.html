@@ -1,23 +1,22 @@
 <!DOCTYPE html>
 
 <html>
+  <head>
+    <link href="./styles.css" rel="stylesheet" type="text/css" />
 
-<head>
-  <link href="./styles.css" rel="stylesheet" type="text/css" />
-
-  <!-- Prevents our "Start" button from flickering when loading the image. 
+    <!-- Prevents our "Start" button from flickering when loading the image. 
     <link rel="preload" as="image" href="./assets/ui_button.png">
     <link rel="preload" as="image" href="./assets/ui_button_hovered.png">
     -->
-</head>
+    <link rel="shortcut icon" href="./assets/archive/tile_city.png" />
+  </head>
 
-<body>
-  <div id="loading_element">
-    <p>Loading Assets...</p>
-  </div>
-  <canvas id="canvas" hidden="true"> </canvas>
-  <canvas id="auxillary_canvas" hidden="true"></canvas>
-  <script type="module" src="./src/Index.ts" />
-</body>
-
+  <body>
+    <div id="loading_element">
+      <p>Loading Assets...</p>
+    </div>
+    <canvas id="canvas" hidden="true"> </canvas>
+    <canvas id="auxillary_canvas" hidden="true"></canvas>
+    <script type="module" src="./src/Index.ts" />
+  </body>
 </html>
