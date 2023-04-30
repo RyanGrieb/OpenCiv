@@ -8,5 +8,10 @@
       ],
       "noUnusedLocals": true,
       "module": "commonjs"
+  },
+  "typedocOptions": {
+    "entryPointStrategy": "expand",
+    "entryPoints": ["src"],
+    "out": "../documentation/client"
   }
 }

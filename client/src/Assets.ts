@@ -58,6 +58,7 @@ export enum SpriteRegion {
   DEBUG1 = "3,11",
   DEBUG2 = "14,13",
   DEBUG3 = "17,13",
+  UI_STATUSBAR = "3,4",
 }
 
 export const assetList = [

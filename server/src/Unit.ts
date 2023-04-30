@@ -1,6 +1,6 @@
 export interface UnitOptions {
   type: string;
-  attackType?: string; //melee, ranged, none
+  attackType?: string;
   defaultMoveDistance?: number;
 }
 

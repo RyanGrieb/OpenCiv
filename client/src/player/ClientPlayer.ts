@@ -26,7 +26,6 @@ export class ClientPlayer extends AbstractPlayer {
       const mouseX = options.x;
       const mouseY = options.y;
 
-      console.log(mouseX + "," + mouseY);
       this.updateHoveredTile(mouseX, mouseY);
     });
 
