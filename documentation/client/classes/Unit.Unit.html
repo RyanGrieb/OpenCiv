@@ -19,11 +19,11 @@
 <section class="tsd-panel tsd-hierarchy">
 <h4>Hierarchy</h4>
 <ul class="tsd-hierarchy">
-<li><a href="scene_Actor.Actor.html" class="tsd-signature-type tsd-kind-class">Actor</a>
+<li><a href="scene_ActorGroup.ActorGroup.html" class="tsd-signature-type tsd-kind-class">ActorGroup</a>
 <ul class="tsd-hierarchy">
 <li><span class="target">Unit</span></li></ul></li></ul></section><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/3cf3eafa/client/src/Unit.ts#L6">Unit.ts:6</a></li></ul></aside>
+<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/2612df9b/client/src/Unit.ts#L7">Unit.ts:7</a></li></ul></aside>
 <section class="tsd-panel-group tsd-index-group">
 <section class="tsd-panel tsd-index-panel">
 <details class="tsd-index-content tsd-index-accordion" open><summary class="tsd-accordion-summary tsd-index-summary">
@@ -40,6 +40,8 @@
 <a href="Unit.Unit.html#image" class="tsd-index-link tsd-is-protected tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg><span>image</span></a>
 <a href="Unit.Unit.html#mouseInside" class="tsd-index-link tsd-is-protected tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg><span>mouse<wbr/>Inside</span></a>
 <a href="Unit.Unit.html#rotation" class="tsd-index-link tsd-is-protected tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg><span>rotation</span></a>
+<a href="Unit.Unit.html#selected" class="tsd-index-link tsd-is-private"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg><span>selected</span></a>
+<a href="Unit.Unit.html#selectionActors" class="tsd-index-link tsd-is-private"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg><span>selection<wbr/>Actors</span></a>
 <a href="Unit.Unit.html#spriteRegion" class="tsd-index-link tsd-is-protected tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg><span>sprite<wbr/>Region?</span></a>
 <a href="Unit.Unit.html#storedEvents" class="tsd-index-link tsd-is-protected tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg><span>stored<wbr/>Events</span></a>
 <a href="Unit.Unit.html#tile" class="tsd-index-link tsd-is-private"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg><span>tile</span></a>
@@ -51,7 +53,8 @@
 </div></section>
 <section class="tsd-index-section">
 <h3 class="tsd-index-heading">Methods</h3>
-<div class="tsd-index-list"><a href="Unit.Unit.html#call" class="tsd-index-link tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><rect fill="var(--color-icon-background)" stroke="#FF4DB8" stroke-width="1.5" x="1" y="1" width="22" height="22" rx="12" id="icon-2048-path"></rect><path d="M9.162 16V7.24H10.578L11.514 10.072C11.602 10.328 11.674 10.584 11.73 10.84C11.794 11.088 11.842 11.28 11.874 11.416C11.906 11.28 11.954 11.088 12.018 10.84C12.082 10.584 12.154 10.324 12.234 10.06L13.122 7.24H14.538V16H13.482V12.82C13.482 12.468 13.49 12.068 13.506 11.62C13.53 11.172 13.558 10.716 13.59 10.252C13.622 9.78 13.654 9.332 13.686 8.908C13.726 8.476 13.762 8.1 13.794 7.78L12.366 12.16H11.334L9.894 7.78C9.934 8.092 9.97 8.456 10.002 8.872C10.042 9.28 10.078 9.716 10.11 10.18C10.142 10.636 10.166 11.092 10.182 11.548C10.206 12.004 10.218 12.428 10.218 12.82V16H9.162Z" fill="var(--color-text)" id="icon-2048-text"></path></svg><span>call</span></a>
+<div class="tsd-index-list"><a href="Unit.Unit.html#addActor" class="tsd-index-link tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><rect fill="var(--color-icon-background)" stroke="#FF4DB8" stroke-width="1.5" x="1" y="1" width="22" height="22" rx="12" id="icon-2048-path"></rect><path d="M9.162 16V7.24H10.578L11.514 10.072C11.602 10.328 11.674 10.584 11.73 10.84C11.794 11.088 11.842 11.28 11.874 11.416C11.906 11.28 11.954 11.088 12.018 10.84C12.082 10.584 12.154 10.324 12.234 10.06L13.122 7.24H14.538V16H13.482V12.82C13.482 12.468 13.49 12.068 13.506 11.62C13.53 11.172 13.558 10.716 13.59 10.252C13.622 9.78 13.654 9.332 13.686 8.908C13.726 8.476 13.762 8.1 13.794 7.78L12.366 12.16H11.334L9.894 7.78C9.934 8.092 9.97 8.456 10.002 8.872C10.042 9.28 10.078 9.716 10.11 10.18C10.142 10.636 10.166 11.092 10.182 11.548C10.206 12.004 10.218 12.428 10.218 12.82V16H9.162Z" fill="var(--color-text)" id="icon-2048-text"></path></svg><span>add<wbr/>Actor</span></a>
+<a href="Unit.Unit.html#call" class="tsd-index-link tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>call</span></a>
 <a href="Unit.Unit.html#draw" class="tsd-index-link tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>draw</span></a>
 <a href="Unit.Unit.html#getColor" class="tsd-index-link tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>get<wbr/>Color</span></a>
 <a href="Unit.Unit.html#getHeight" class="tsd-index-link tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>get<wbr/>Height</span></a>
@@ -67,13 +70,17 @@
 <a href="Unit.Unit.html#getX" class="tsd-index-link tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>getX</span></a>
 <a href="Unit.Unit.html#getY" class="tsd-index-link tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>getY</span></a>
 <a href="Unit.Unit.html#insideActor" class="tsd-index-link tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>inside<wbr/>Actor</span></a>
+<a href="Unit.Unit.html#isSelected" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>is<wbr/>Selected</span></a>
 <a href="Unit.Unit.html#on" class="tsd-index-link tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>on</span></a>
 <a href="Unit.Unit.html#onCreated" class="tsd-index-link tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>on<wbr/>Created</span></a>
 <a href="Unit.Unit.html#onDestroyed" class="tsd-index-link tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>on<wbr/>Destroyed</span></a>
+<a href="Unit.Unit.html#removeActor" class="tsd-index-link tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>remove<wbr/>Actor</span></a>
+<a href="Unit.Unit.html#select" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>select</span></a>
 <a href="Unit.Unit.html#setImage" class="tsd-index-link tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>set<wbr/>Image</span></a>
 <a href="Unit.Unit.html#setPosition" class="tsd-index-link tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>set<wbr/>Position</span></a>
 <a href="Unit.Unit.html#setRotation" class="tsd-index-link tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>set<wbr/>Rotation</span></a>
 <a href="Unit.Unit.html#setSize" class="tsd-index-link tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>set<wbr/>Size</span></a>
+<a href="Unit.Unit.html#unselect" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>unselect</span></a>
 <a href="Unit.Unit.html#mergeActors" class="tsd-index-link tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>merge<wbr/>Actors</span></a>
 </div></section></div></details></section></section>
 <section class="tsd-panel-group tsd-member-group">
@@ -91,89 +98,113 @@
 <li>
 <h5><span class="tsd-kind-parameter">tile</span>: <a href="map_Tile.Tile.html" class="tsd-signature-type tsd-kind-class">Tile</a></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <a href="Unit.Unit.html" class="tsd-signature-type tsd-kind-class">Unit</a></h4><aside class="tsd-sources">
-<p>Overrides <a href="scene_Actor.Actor.html">Actor</a>.<a href="scene_Actor.Actor.html#constructor">constructor</a></p>
+<p>Overrides <a href="scene_ActorGroup.ActorGroup.html">ActorGroup</a>.<a href="scene_ActorGroup.ActorGroup.html#constructor">constructor</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/3cf3eafa/client/src/Unit.ts#L10">Unit.ts:10</a></li></ul></aside></li></ul></section></section>
+<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/2612df9b/client/src/Unit.ts#L13">Unit.ts:13</a></li></ul></aside></li></ul></section></section>
 <section class="tsd-panel-group tsd-member-group">
 <h2>Properties</h2>
 <section class="tsd-panel tsd-member tsd-is-protected tsd-is-inherited"><a id="color" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagProtected">Protected</code> <span>color</span><a href="#color" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">color</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div><aside class="tsd-sources">
-<p>Inherited from <a href="scene_Actor.Actor.html">Actor</a>.<a href="scene_Actor.Actor.html#color">color</a></p>
+<p>Inherited from <a href="scene_ActorGroup.ActorGroup.html">ActorGroup</a>.<a href="scene_ActorGroup.ActorGroup.html#color">color</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/3cf3eafa/client/src/scene/Actor.ts#L17">scene/Actor.ts:17</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/2612df9b/client/src/scene/Actor.ts#L17">scene/Actor.ts:17</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-is-protected tsd-is-inherited"><a id="height" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagProtected">Protected</code> <span>height</span><a href="#height" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">height</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span></div><aside class="tsd-sources">
-<p>Inherited from <a href="scene_Actor.Actor.html">Actor</a>.<a href="scene_Actor.Actor.html#height">height</a></p>
+<p>Inherited from <a href="scene_ActorGroup.ActorGroup.html">ActorGroup</a>.<a href="scene_ActorGroup.ActorGroup.html#height">height</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/3cf3eafa/client/src/scene/Actor.ts#L24">scene/Actor.ts:24</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/2612df9b/client/src/scene/Actor.ts#L24">scene/Actor.ts:24</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-is-protected tsd-is-inherited"><a id="image" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagProtected">Protected</code> <span>image</span><a href="#image" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">image</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type ">HTMLImageElement</span></div><aside class="tsd-sources">
-<p>Inherited from <a href="scene_Actor.Actor.html">Actor</a>.<a href="scene_Actor.Actor.html#image">image</a></p>
+<p>Inherited from <a href="scene_ActorGroup.ActorGroup.html">ActorGroup</a>.<a href="scene_ActorGroup.ActorGroup.html#image">image</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/3cf3eafa/client/src/scene/Actor.ts#L18">scene/Actor.ts:18</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/2612df9b/client/src/scene/Actor.ts#L18">scene/Actor.ts:18</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-is-protected tsd-is-inherited"><a id="mouseInside" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagProtected">Protected</code> <span>mouse<wbr/>Inside</span><a href="#mouseInside" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">mouse<wbr/>Inside</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span></div><aside class="tsd-sources">
-<p>Inherited from <a href="scene_Actor.Actor.html">Actor</a>.<a href="scene_Actor.Actor.html#mouseInside">mouseInside</a></p>
+<p>Inherited from <a href="scene_ActorGroup.ActorGroup.html">ActorGroup</a>.<a href="scene_ActorGroup.ActorGroup.html#mouseInside">mouseInside</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/3cf3eafa/client/src/scene/Actor.ts#L28">scene/Actor.ts:28</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/2612df9b/client/src/scene/Actor.ts#L28">scene/Actor.ts:28</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-is-protected tsd-is-inherited"><a id="rotation" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagProtected">Protected</code> <span>rotation</span><a href="#rotation" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">rotation</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span></div><aside class="tsd-sources">
-<p>Inherited from <a href="scene_Actor.Actor.html">Actor</a>.<a href="scene_Actor.Actor.html#rotation">rotation</a></p>
+<p>Inherited from <a href="scene_ActorGroup.ActorGroup.html">ActorGroup</a>.<a href="scene_ActorGroup.ActorGroup.html#rotation">rotation</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/3cf3eafa/client/src/scene/Actor.ts#L25">scene/Actor.ts:25</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/2612df9b/client/src/scene/Actor.ts#L25">scene/Actor.ts:25</a></li></ul></aside></section>
+<section class="tsd-panel tsd-member tsd-is-private"><a id="selected" class="tsd-anchor"></a>
+<h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagPrivate">Private</code> <span>selected</span><a href="#selected" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
+<div class="tsd-signature"><span class="tsd-kind-property">selected</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span></div><aside class="tsd-sources">
+<ul>
+<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/2612df9b/client/src/Unit.ts#L11">Unit.ts:11</a></li></ul></aside></section>
+<section class="tsd-panel tsd-member tsd-is-private"><a id="selectionActors" class="tsd-anchor"></a>
+<h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagPrivate">Private</code> <span>selection<wbr/>Actors</span><a href="#selectionActors" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
+<div class="tsd-signature"><span class="tsd-kind-property">selection<wbr/>Actors</span><span class="tsd-signature-symbol">:</span> <a href="scene_Actor.Actor.html" class="tsd-signature-type tsd-kind-class">Actor</a><span class="tsd-signature-symbol">[]</span></div><aside class="tsd-sources">
+<ul>
+<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/2612df9b/client/src/Unit.ts#L10">Unit.ts:10</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-is-protected tsd-is-inherited"><a id="spriteRegion" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagProtected">Protected</code> <code class="tsd-tag ts-flagOptional">Optional</code> <span>sprite<wbr/>Region</span><a href="#spriteRegion" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">sprite<wbr/>Region</span><span class="tsd-signature-symbol">?:</span> <a href="../enums/Assets.SpriteRegion.html" class="tsd-signature-type tsd-kind-enum">SpriteRegion</a></div><aside class="tsd-sources">
-<p>Inherited from <a href="scene_Actor.Actor.html">Actor</a>.<a href="scene_Actor.Actor.html#spriteRegion">spriteRegion</a></p>
+<p>Inherited from <a href="scene_ActorGroup.ActorGroup.html">ActorGroup</a>.<a href="scene_ActorGroup.ActorGroup.html#spriteRegion">spriteRegion</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/3cf3eafa/client/src/scene/Actor.ts#L19">scene/Actor.ts:19</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/2612df9b/client/src/scene/Actor.ts#L19">scene/Actor.ts:19</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-is-protected tsd-is-inherited"><a id="storedEvents" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagProtected">Protected</code> <span>stored<wbr/>Events</span><a href="#storedEvents" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">stored<wbr/>Events</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type ">Map</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type ">Function</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">&gt;</span></div><aside class="tsd-sources">
-<p>Inherited from <a href="scene_Actor.Actor.html">Actor</a>.<a href="scene_Actor.Actor.html#storedEvents">storedEvents</a></p>
+<p>Inherited from <a href="scene_ActorGroup.ActorGroup.html">ActorGroup</a>.<a href="scene_ActorGroup.ActorGroup.html#storedEvents">storedEvents</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/3cf3eafa/client/src/scene/Actor.ts#L27">scene/Actor.ts:27</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/2612df9b/client/src/scene/Actor.ts#L27">scene/Actor.ts:27</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-is-private"><a id="tile" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagPrivate">Private</code> <span>tile</span><a href="#tile" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">tile</span><span class="tsd-signature-symbol">:</span> <a href="map_Tile.Tile.html" class="tsd-signature-type tsd-kind-class">Tile</a></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/3cf3eafa/client/src/Unit.ts#L8">Unit.ts:8</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/2612df9b/client/src/Unit.ts#L9">Unit.ts:9</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-is-protected tsd-is-inherited"><a id="transparency" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagProtected">Protected</code> <span>transparency</span><a href="#transparency" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">transparency</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span></div><aside class="tsd-sources">
-<p>Inherited from <a href="scene_Actor.Actor.html">Actor</a>.<a href="scene_Actor.Actor.html#transparency">transparency</a></p>
+<p>Inherited from <a href="scene_ActorGroup.ActorGroup.html">ActorGroup</a>.<a href="scene_ActorGroup.ActorGroup.html#transparency">transparency</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/3cf3eafa/client/src/scene/Actor.ts#L26">scene/Actor.ts:26</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/2612df9b/client/src/scene/Actor.ts#L26">scene/Actor.ts:26</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-is-private"><a id="type" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagPrivate">Private</code> <span>type</span><a href="#type" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">type</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/3cf3eafa/client/src/Unit.ts#L7">Unit.ts:7</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/2612df9b/client/src/Unit.ts#L8">Unit.ts:8</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-is-protected tsd-is-inherited"><a id="width" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagProtected">Protected</code> <span>width</span><a href="#width" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">width</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span></div><aside class="tsd-sources">
-<p>Inherited from <a href="scene_Actor.Actor.html">Actor</a>.<a href="scene_Actor.Actor.html#width">width</a></p>
+<p>Inherited from <a href="scene_ActorGroup.ActorGroup.html">ActorGroup</a>.<a href="scene_ActorGroup.ActorGroup.html#width">width</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/3cf3eafa/client/src/scene/Actor.ts#L23">scene/Actor.ts:23</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/2612df9b/client/src/scene/Actor.ts#L23">scene/Actor.ts:23</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-is-protected tsd-is-inherited"><a id="x" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagProtected">Protected</code> <span>x</span><a href="#x" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">x</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span></div><aside class="tsd-sources">
-<p>Inherited from <a href="scene_Actor.Actor.html">Actor</a>.<a href="scene_Actor.Actor.html#x">x</a></p>
+<p>Inherited from <a href="scene_ActorGroup.ActorGroup.html">ActorGroup</a>.<a href="scene_ActorGroup.ActorGroup.html#x">x</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/3cf3eafa/client/src/scene/Actor.ts#L21">scene/Actor.ts:21</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/2612df9b/client/src/scene/Actor.ts#L21">scene/Actor.ts:21</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-is-protected tsd-is-inherited"><a id="y" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagProtected">Protected</code> <span>y</span><a href="#y" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">y</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span></div><aside class="tsd-sources">
-<p>Inherited from <a href="scene_Actor.Actor.html">Actor</a>.<a href="scene_Actor.Actor.html#y">y</a></p>
+<p>Inherited from <a href="scene_ActorGroup.ActorGroup.html">ActorGroup</a>.<a href="scene_ActorGroup.ActorGroup.html#y">y</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/3cf3eafa/client/src/scene/Actor.ts#L22">scene/Actor.ts:22</a></li></ul></aside></section></section>
+<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/2612df9b/client/src/scene/Actor.ts#L22">scene/Actor.ts:22</a></li></ul></aside></section></section>
 <section class="tsd-panel-group tsd-member-group">
 <h2>Methods</h2>
+<section class="tsd-panel tsd-member tsd-is-inherited"><a id="addActor" class="tsd-anchor"></a>
+<h3 class="tsd-anchor-link"><span>add<wbr/>Actor</span><a href="#addActor" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
+<ul class="tsd-signatures tsd-is-inherited">
+<li class="tsd-signature tsd-anchor-link" id="addActor.addActor-1"><span class="tsd-kind-call-signature">add<wbr/>Actor</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">actor</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span><a href="#addActor.addActor-1" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></li>
+<li class="tsd-description">
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li>
+<h5><span class="tsd-kind-parameter">actor</span>: <a href="scene_Actor.Actor.html" class="tsd-signature-type tsd-kind-class">Actor</a></h5></li></ul></div>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4><aside class="tsd-sources">
+<p>Inherited from <a href="scene_ActorGroup.ActorGroup.html">ActorGroup</a>.<a href="scene_ActorGroup.ActorGroup.html#addActor">addActor</a></p>
+<ul>
+<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/2612df9b/client/src/scene/ActorGroup.ts#L32">scene/ActorGroup.ts:32</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="call" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>call</span><a href="#call" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
@@ -187,9 +218,9 @@
 <li>
 <h5><code class="tsd-tag ts-flagOptional">Optional</code> <span class="tsd-kind-parameter">options</span>: <span class="tsd-signature-type">any</span></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4><aside class="tsd-sources">
-<p>Inherited from <a href="scene_Actor.Actor.html">Actor</a>.<a href="scene_Actor.Actor.html#call">call</a></p>
+<p>Inherited from <a href="scene_ActorGroup.ActorGroup.html">ActorGroup</a>.<a href="scene_ActorGroup.ActorGroup.html#call">call</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/3cf3eafa/client/src/scene/Actor.ts#L84">scene/Actor.ts:84</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/2612df9b/client/src/scene/Actor.ts#L84">scene/Actor.ts:84</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="draw" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>draw</span><a href="#draw" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
@@ -201,72 +232,72 @@
 <li>
 <h5><span class="tsd-kind-parameter">canvasContext</span>: <span class="tsd-signature-type ">CanvasRenderingContext2D</span></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4><aside class="tsd-sources">
-<p>Inherited from <a href="scene_Actor.Actor.html">Actor</a>.<a href="scene_Actor.Actor.html#draw">draw</a></p>
+<p>Inherited from <a href="scene_ActorGroup.ActorGroup.html">ActorGroup</a>.<a href="scene_ActorGroup.ActorGroup.html#draw">draw</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/3cf3eafa/client/src/scene/Actor.ts#L64">scene/Actor.ts:64</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/2612df9b/client/src/scene/ActorGroup.ts#L26">scene/ActorGroup.ts:26</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="getColor" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>get<wbr/>Color</span><a href="#getColor" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
 <li class="tsd-signature tsd-anchor-link" id="getColor.getColor-1"><span class="tsd-kind-call-signature">get<wbr/>Color</span><span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><a href="#getColor.getColor-1" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></li>
 <li class="tsd-description">
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span></h4><aside class="tsd-sources">
-<p>Inherited from <a href="scene_Actor.Actor.html">Actor</a>.<a href="scene_Actor.Actor.html#getColor">getColor</a></p>
+<p>Inherited from <a href="scene_ActorGroup.ActorGroup.html">ActorGroup</a>.<a href="scene_ActorGroup.ActorGroup.html#getColor">getColor</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/3cf3eafa/client/src/scene/Actor.ts#L136">scene/Actor.ts:136</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/2612df9b/client/src/scene/Actor.ts#L136">scene/Actor.ts:136</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="getHeight" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>get<wbr/>Height</span><a href="#getHeight" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
 <li class="tsd-signature tsd-anchor-link" id="getHeight.getHeight-1"><span class="tsd-kind-call-signature">get<wbr/>Height</span><span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><a href="#getHeight.getHeight-1" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></li>
 <li class="tsd-description">
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">number</span></h4><aside class="tsd-sources">
-<p>Inherited from <a href="scene_Actor.Actor.html">Actor</a>.<a href="scene_Actor.Actor.html#getHeight">getHeight</a></p>
+<p>Inherited from <a href="scene_ActorGroup.ActorGroup.html">ActorGroup</a>.<a href="scene_ActorGroup.ActorGroup.html#getHeight">getHeight</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/3cf3eafa/client/src/scene/Actor.ts#L132">scene/Actor.ts:132</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/2612df9b/client/src/scene/Actor.ts#L132">scene/Actor.ts:132</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="getImage" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>get<wbr/>Image</span><a href="#getImage" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
 <li class="tsd-signature tsd-anchor-link" id="getImage.getImage-1"><span class="tsd-kind-call-signature">get<wbr/>Image</span><span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type ">HTMLImageElement</span><a href="#getImage.getImage-1" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></li>
 <li class="tsd-description">
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type ">HTMLImageElement</span></h4><aside class="tsd-sources">
-<p>Inherited from <a href="scene_Actor.Actor.html">Actor</a>.<a href="scene_Actor.Actor.html#getImage">getImage</a></p>
+<p>Inherited from <a href="scene_ActorGroup.ActorGroup.html">ActorGroup</a>.<a href="scene_ActorGroup.ActorGroup.html#getImage">getImage</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/3cf3eafa/client/src/scene/Actor.ts#L116">scene/Actor.ts:116</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/2612df9b/client/src/scene/Actor.ts#L116">scene/Actor.ts:116</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="getRotation" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>get<wbr/>Rotation</span><a href="#getRotation" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
 <li class="tsd-signature tsd-anchor-link" id="getRotation.getRotation-1"><span class="tsd-kind-call-signature">get<wbr/>Rotation</span><span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><a href="#getRotation.getRotation-1" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></li>
 <li class="tsd-description">
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">number</span></h4><aside class="tsd-sources">
-<p>Inherited from <a href="scene_Actor.Actor.html">Actor</a>.<a href="scene_Actor.Actor.html#getRotation">getRotation</a></p>
+<p>Inherited from <a href="scene_ActorGroup.ActorGroup.html">ActorGroup</a>.<a href="scene_ActorGroup.ActorGroup.html#getRotation">getRotation</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/3cf3eafa/client/src/scene/Actor.ts#L144">scene/Actor.ts:144</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/2612df9b/client/src/scene/Actor.ts#L144">scene/Actor.ts:144</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="getRotationOriginX" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>get<wbr/>Rotation<wbr/>OriginX</span><a href="#getRotationOriginX" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
 <li class="tsd-signature tsd-anchor-link" id="getRotationOriginX.getRotationOriginX-1"><span class="tsd-kind-call-signature">get<wbr/>Rotation<wbr/>OriginX</span><span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><a href="#getRotationOriginX.getRotationOriginX-1" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></li>
 <li class="tsd-description">
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">number</span></h4><aside class="tsd-sources">
-<p>Inherited from <a href="scene_Actor.Actor.html">Actor</a>.<a href="scene_Actor.Actor.html#getRotationOriginX">getRotationOriginX</a></p>
+<p>Inherited from <a href="scene_ActorGroup.ActorGroup.html">ActorGroup</a>.<a href="scene_ActorGroup.ActorGroup.html#getRotationOriginX">getRotationOriginX</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/3cf3eafa/client/src/scene/Actor.ts#L157">scene/Actor.ts:157</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/2612df9b/client/src/scene/Actor.ts#L157">scene/Actor.ts:157</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="getRotationOriginY" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>get<wbr/>Rotation<wbr/>OriginY</span><a href="#getRotationOriginY" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
 <li class="tsd-signature tsd-anchor-link" id="getRotationOriginY.getRotationOriginY-1"><span class="tsd-kind-call-signature">get<wbr/>Rotation<wbr/>OriginY</span><span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><a href="#getRotationOriginY.getRotationOriginY-1" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></li>
 <li class="tsd-description">
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">number</span></h4><aside class="tsd-sources">
-<p>Inherited from <a href="scene_Actor.Actor.html">Actor</a>.<a href="scene_Actor.Actor.html#getRotationOriginY">getRotationOriginY</a></p>
+<p>Inherited from <a href="scene_ActorGroup.ActorGroup.html">ActorGroup</a>.<a href="scene_ActorGroup.ActorGroup.html#getRotationOriginY">getRotationOriginY</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/3cf3eafa/client/src/scene/Actor.ts#L161">scene/Actor.ts:161</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/2612df9b/client/src/scene/Actor.ts#L161">scene/Actor.ts:161</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="getSpriteRegion" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>get<wbr/>Sprite<wbr/>Region</span><a href="#getSpriteRegion" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
 <li class="tsd-signature tsd-anchor-link" id="getSpriteRegion.getSpriteRegion-1"><span class="tsd-kind-call-signature">get<wbr/>Sprite<wbr/>Region</span><span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../enums/Assets.SpriteRegion.html" class="tsd-signature-type tsd-kind-enum">SpriteRegion</a><a href="#getSpriteRegion.getSpriteRegion-1" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></li>
 <li class="tsd-description">
 <h4 class="tsd-returns-title">Returns <a href="../enums/Assets.SpriteRegion.html" class="tsd-signature-type tsd-kind-enum">SpriteRegion</a></h4><aside class="tsd-sources">
-<p>Inherited from <a href="scene_Actor.Actor.html">Actor</a>.<a href="scene_Actor.Actor.html#getSpriteRegion">getSpriteRegion</a></p>
+<p>Inherited from <a href="scene_ActorGroup.ActorGroup.html">ActorGroup</a>.<a href="scene_ActorGroup.ActorGroup.html#getSpriteRegion">getSpriteRegion</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/3cf3eafa/client/src/scene/Actor.ts#L140">scene/Actor.ts:140</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/2612df9b/client/src/scene/Actor.ts#L140">scene/Actor.ts:140</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="getTile" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>get<wbr/>Tile</span><a href="#getTile" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -274,16 +305,16 @@
 <li class="tsd-description">
 <h4 class="tsd-returns-title">Returns <a href="map_Tile.Tile.html" class="tsd-signature-type tsd-kind-class">Tile</a></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/3cf3eafa/client/src/Unit.ts#L28">Unit.ts:28</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/2612df9b/client/src/Unit.ts#L81">Unit.ts:81</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="getTransparency" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>get<wbr/>Transparency</span><a href="#getTransparency" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
 <li class="tsd-signature tsd-anchor-link" id="getTransparency.getTransparency-1"><span class="tsd-kind-call-signature">get<wbr/>Transparency</span><span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><a href="#getTransparency.getTransparency-1" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></li>
 <li class="tsd-description">
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">number</span></h4><aside class="tsd-sources">
-<p>Inherited from <a href="scene_Actor.Actor.html">Actor</a>.<a href="scene_Actor.Actor.html#getTransparency">getTransparency</a></p>
+<p>Inherited from <a href="scene_ActorGroup.ActorGroup.html">ActorGroup</a>.<a href="scene_ActorGroup.ActorGroup.html#getTransparency">getTransparency</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/3cf3eafa/client/src/scene/Actor.ts#L165">scene/Actor.ts:165</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/2612df9b/client/src/scene/Actor.ts#L165">scene/Actor.ts:165</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="getType" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>get<wbr/>Type</span><a href="#getType" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -291,34 +322,34 @@
 <li class="tsd-description">
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/3cf3eafa/client/src/Unit.ts#L24">Unit.ts:24</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/2612df9b/client/src/Unit.ts#L77">Unit.ts:77</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="getWidth" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>get<wbr/>Width</span><a href="#getWidth" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
 <li class="tsd-signature tsd-anchor-link" id="getWidth.getWidth-1"><span class="tsd-kind-call-signature">get<wbr/>Width</span><span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><a href="#getWidth.getWidth-1" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></li>
 <li class="tsd-description">
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">number</span></h4><aside class="tsd-sources">
-<p>Inherited from <a href="scene_Actor.Actor.html">Actor</a>.<a href="scene_Actor.Actor.html#getWidth">getWidth</a></p>
+<p>Inherited from <a href="scene_ActorGroup.ActorGroup.html">ActorGroup</a>.<a href="scene_ActorGroup.ActorGroup.html#getWidth">getWidth</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/3cf3eafa/client/src/scene/Actor.ts#L128">scene/Actor.ts:128</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/2612df9b/client/src/scene/Actor.ts#L128">scene/Actor.ts:128</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="getX" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>getX</span><a href="#getX" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
 <li class="tsd-signature tsd-anchor-link" id="getX.getX-1"><span class="tsd-kind-call-signature">getX</span><span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><a href="#getX.getX-1" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></li>
 <li class="tsd-description">
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">number</span></h4><aside class="tsd-sources">
-<p>Inherited from <a href="scene_Actor.Actor.html">Actor</a>.<a href="scene_Actor.Actor.html#getX">getX</a></p>
+<p>Inherited from <a href="scene_ActorGroup.ActorGroup.html">ActorGroup</a>.<a href="scene_ActorGroup.ActorGroup.html#getX">getX</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/3cf3eafa/client/src/scene/Actor.ts#L120">scene/Actor.ts:120</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/2612df9b/client/src/scene/Actor.ts#L120">scene/Actor.ts:120</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="getY" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>getY</span><a href="#getY" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
 <li class="tsd-signature tsd-anchor-link" id="getY.getY-1"><span class="tsd-kind-call-signature">getY</span><span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><a href="#getY.getY-1" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></li>
 <li class="tsd-description">
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">number</span></h4><aside class="tsd-sources">
-<p>Inherited from <a href="scene_Actor.Actor.html">Actor</a>.<a href="scene_Actor.Actor.html#getY">getY</a></p>
+<p>Inherited from <a href="scene_ActorGroup.ActorGroup.html">ActorGroup</a>.<a href="scene_ActorGroup.ActorGroup.html#getY">getY</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/3cf3eafa/client/src/scene/Actor.ts#L124">scene/Actor.ts:124</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/2612df9b/client/src/scene/Actor.ts#L124">scene/Actor.ts:124</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="insideActor" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>inside<wbr/>Actor</span><a href="#insideActor" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
@@ -332,9 +363,17 @@
 <li>
 <h5><span class="tsd-kind-parameter">y</span>: <span class="tsd-signature-type">number</span></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">boolean</span></h4><aside class="tsd-sources">
-<p>Inherited from <a href="scene_Actor.Actor.html">Actor</a>.<a href="scene_Actor.Actor.html#insideActor">insideActor</a></p>
+<p>Inherited from <a href="scene_ActorGroup.ActorGroup.html">ActorGroup</a>.<a href="scene_ActorGroup.ActorGroup.html#insideActor">insideActor</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/3cf3eafa/client/src/scene/Actor.ts#L102">scene/Actor.ts:102</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/2612df9b/client/src/scene/Actor.ts#L102">scene/Actor.ts:102</a></li></ul></aside></li></ul></section>
+<section class="tsd-panel tsd-member"><a id="isSelected" class="tsd-anchor"></a>
+<h3 class="tsd-anchor-link"><span>is<wbr/>Selected</span><a href="#isSelected" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
+<ul class="tsd-signatures">
+<li class="tsd-signature tsd-anchor-link" id="isSelected.isSelected-1"><span class="tsd-kind-call-signature">is<wbr/>Selected</span><span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">boolean</span><a href="#isSelected.isSelected-1" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></li>
+<li class="tsd-description">
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">boolean</span></h4><aside class="tsd-sources">
+<ul>
+<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/2612df9b/client/src/Unit.ts#L85">Unit.ts:85</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="on" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>on</span><a href="#on" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
@@ -359,27 +398,49 @@
 <h5><span class="tsd-kind-parameter">options</span>: <span class="tsd-signature-type">any</span></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4></li></ul></li></ul></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4><aside class="tsd-sources">
-<p>Inherited from <a href="scene_Actor.Actor.html">Actor</a>.<a href="scene_Actor.Actor.html#on">on</a></p>
+<p>Inherited from <a href="scene_ActorGroup.ActorGroup.html">ActorGroup</a>.<a href="scene_ActorGroup.ActorGroup.html#on">on</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/3cf3eafa/client/src/scene/Actor.ts#L94">scene/Actor.ts:94</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/2612df9b/client/src/scene/Actor.ts#L94">scene/Actor.ts:94</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="onCreated" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>on<wbr/>Created</span><a href="#onCreated" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
 <li class="tsd-signature tsd-anchor-link" id="onCreated.onCreated-1"><span class="tsd-kind-call-signature">on<wbr/>Created</span><span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span><a href="#onCreated.onCreated-1" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></li>
 <li class="tsd-description">
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4><aside class="tsd-sources">
-<p>Inherited from <a href="scene_Actor.Actor.html">Actor</a>.<a href="scene_Actor.Actor.html#onCreated">onCreated</a></p>
+<p>Inherited from <a href="scene_ActorGroup.ActorGroup.html">ActorGroup</a>.<a href="scene_ActorGroup.ActorGroup.html#onCreated">onCreated</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/3cf3eafa/client/src/scene/Actor.ts#L81">scene/Actor.ts:81</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/2612df9b/client/src/scene/Actor.ts#L81">scene/Actor.ts:81</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="onDestroyed" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>on<wbr/>Destroyed</span><a href="#onDestroyed" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
 <li class="tsd-signature tsd-anchor-link" id="onDestroyed.onDestroyed-1"><span class="tsd-kind-call-signature">on<wbr/>Destroyed</span><span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span><a href="#onDestroyed.onDestroyed-1" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></li>
 <li class="tsd-description">
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4><aside class="tsd-sources">
-<p>Inherited from <a href="scene_Actor.Actor.html">Actor</a>.<a href="scene_Actor.Actor.html#onDestroyed">onDestroyed</a></p>
+<p>Inherited from <a href="scene_ActorGroup.ActorGroup.html">ActorGroup</a>.<a href="scene_ActorGroup.ActorGroup.html#onDestroyed">onDestroyed</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/3cf3eafa/client/src/scene/Actor.ts#L82">scene/Actor.ts:82</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/2612df9b/client/src/scene/Actor.ts#L82">scene/Actor.ts:82</a></li></ul></aside></li></ul></section>
+<section class="tsd-panel tsd-member tsd-is-inherited"><a id="removeActor" class="tsd-anchor"></a>
+<h3 class="tsd-anchor-link"><span>remove<wbr/>Actor</span><a href="#removeActor" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
+<ul class="tsd-signatures tsd-is-inherited">
+<li class="tsd-signature tsd-anchor-link" id="removeActor.removeActor-1"><span class="tsd-kind-call-signature">remove<wbr/>Actor</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">actor</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span><a href="#removeActor.removeActor-1" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></li>
+<li class="tsd-description">
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li>
+<h5><span class="tsd-kind-parameter">actor</span>: <a href="scene_Actor.Actor.html" class="tsd-signature-type tsd-kind-class">Actor</a></h5></li></ul></div>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4><aside class="tsd-sources">
+<p>Inherited from <a href="scene_ActorGroup.ActorGroup.html">ActorGroup</a>.<a href="scene_ActorGroup.ActorGroup.html#removeActor">removeActor</a></p>
+<ul>
+<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/2612df9b/client/src/scene/ActorGroup.ts#L36">scene/ActorGroup.ts:36</a></li></ul></aside></li></ul></section>
+<section class="tsd-panel tsd-member"><a id="select" class="tsd-anchor"></a>
+<h3 class="tsd-anchor-link"><span>select</span><a href="#select" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
+<ul class="tsd-signatures">
+<li class="tsd-signature tsd-anchor-link" id="select.select-1"><span class="tsd-kind-call-signature">select</span><span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span><a href="#select.select-1" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></li>
+<li class="tsd-description">
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4><aside class="tsd-sources">
+<ul>
+<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/2612df9b/client/src/Unit.ts#L48">Unit.ts:48</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="setImage" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>set<wbr/>Image</span><a href="#setImage" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
@@ -391,9 +452,9 @@
 <li>
 <h5><span class="tsd-kind-parameter">image</span>: <a href="../enums/Assets.GameImage.html" class="tsd-signature-type tsd-kind-enum">GameImage</a></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4><aside class="tsd-sources">
-<p>Inherited from <a href="scene_Actor.Actor.html">Actor</a>.<a href="scene_Actor.Actor.html#setImage">setImage</a></p>
+<p>Inherited from <a href="scene_ActorGroup.ActorGroup.html">ActorGroup</a>.<a href="scene_ActorGroup.ActorGroup.html#setImage">setImage</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/3cf3eafa/client/src/scene/Actor.ts#L111">scene/Actor.ts:111</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/2612df9b/client/src/scene/Actor.ts#L111">scene/Actor.ts:111</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="setPosition" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>set<wbr/>Position</span><a href="#setPosition" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
@@ -407,9 +468,9 @@
 <li>
 <h5><span class="tsd-kind-parameter">y</span>: <span class="tsd-signature-type">number</span></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4><aside class="tsd-sources">
-<p>Inherited from <a href="scene_Actor.Actor.html">Actor</a>.<a href="scene_Actor.Actor.html#setPosition">setPosition</a></p>
+<p>Inherited from <a href="scene_ActorGroup.ActorGroup.html">ActorGroup</a>.<a href="scene_ActorGroup.ActorGroup.html#setPosition">setPosition</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/3cf3eafa/client/src/scene/Actor.ts#L152">scene/Actor.ts:152</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/2612df9b/client/src/scene/Actor.ts#L152">scene/Actor.ts:152</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="setRotation" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>set<wbr/>Rotation</span><a href="#setRotation" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
@@ -421,9 +482,9 @@
 <li>
 <h5><span class="tsd-kind-parameter">rotation</span>: <span class="tsd-signature-type">number</span></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4><aside class="tsd-sources">
-<p>Inherited from <a href="scene_Actor.Actor.html">Actor</a>.<a href="scene_Actor.Actor.html#setRotation">setRotation</a></p>
+<p>Inherited from <a href="scene_ActorGroup.ActorGroup.html">ActorGroup</a>.<a href="scene_ActorGroup.ActorGroup.html#setRotation">setRotation</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/3cf3eafa/client/src/scene/Actor.ts#L148">scene/Actor.ts:148</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/2612df9b/client/src/scene/Actor.ts#L148">scene/Actor.ts:148</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="setSize" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>set<wbr/>Size</span><a href="#setSize" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
@@ -437,9 +498,17 @@
 <li>
 <h5><span class="tsd-kind-parameter">height</span>: <span class="tsd-signature-type">number</span></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4><aside class="tsd-sources">
-<p>Inherited from <a href="scene_Actor.Actor.html">Actor</a>.<a href="scene_Actor.Actor.html#setSize">setSize</a></p>
+<p>Inherited from <a href="scene_ActorGroup.ActorGroup.html">ActorGroup</a>.<a href="scene_ActorGroup.ActorGroup.html#setSize">setSize</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/3cf3eafa/client/src/scene/Actor.ts#L225">scene/Actor.ts:225</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/2612df9b/client/src/scene/Actor.ts#L225">scene/Actor.ts:225</a></li></ul></aside></li></ul></section>
+<section class="tsd-panel tsd-member"><a id="unselect" class="tsd-anchor"></a>
+<h3 class="tsd-anchor-link"><span>unselect</span><a href="#unselect" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
+<ul class="tsd-signatures">
+<li class="tsd-signature tsd-anchor-link" id="unselect.unselect-1"><span class="tsd-kind-call-signature">unselect</span><span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span><a href="#unselect.unselect-1" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></li>
+<li class="tsd-description">
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4><aside class="tsd-sources">
+<ul>
+<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/2612df9b/client/src/Unit.ts#L39">Unit.ts:39</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="mergeActors" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagStatic">Static</code> <span>merge<wbr/>Actors</span><a href="#mergeActors" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
@@ -458,9 +527,9 @@
 <li class="tsd-parameter">
 <h5><code class="tsd-tag ts-flagOptional">Optional</code> <span class="tsd-kind-property">sprite<wbr/>Size</span><span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">number</span></h5></li></ul></li></ul></div>
 <h4 class="tsd-returns-title">Returns <a href="scene_Actor.Actor.html" class="tsd-signature-type tsd-kind-class">Actor</a></h4><aside class="tsd-sources">
-<p>Inherited from <a href="scene_Actor.Actor.html">Actor</a>.<a href="scene_Actor.Actor.html#mergeActors">mergeActors</a></p>
+<p>Inherited from <a href="scene_ActorGroup.ActorGroup.html">ActorGroup</a>.<a href="scene_ActorGroup.ActorGroup.html#mergeActors">mergeActors</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/3cf3eafa/client/src/scene/Actor.ts#L169">scene/Actor.ts:169</a></li></ul></aside></li></ul></section></section></div>
+<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/2612df9b/client/src/scene/Actor.ts#L169">scene/Actor.ts:169</a></li></ul></aside></li></ul></section></section></div>
 <div class="col-sidebar">
 <div class="page-menu">
 <div class="tsd-navigation settings">
@@ -486,6 +555,8 @@
 <li><a href="#image" class="tsd-is-protected tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg><span>image</span></a></li>
 <li><a href="#mouseInside" class="tsd-is-protected tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg><span>mouse<wbr/>Inside</span></a></li>
 <li><a href="#rotation" class="tsd-is-protected tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg><span>rotation</span></a></li>
+<li><a href="#selected" class="tsd-is-private"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg><span>selected</span></a></li>
+<li><a href="#selectionActors" class="tsd-is-private"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg><span>selection<wbr/>Actors</span></a></li>
 <li><a href="#spriteRegion" class="tsd-is-protected tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg><span>sprite<wbr/>Region</span></a></li>
 <li><a href="#storedEvents" class="tsd-is-protected tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg><span>stored<wbr/>Events</span></a></li>
 <li><a href="#tile" class="tsd-is-private"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg><span>tile</span></a></li>
@@ -494,6 +565,7 @@
 <li><a href="#width" class="tsd-is-protected tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg><span>width</span></a></li>
 <li><a href="#x" class="tsd-is-protected tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg><span>x</span></a></li>
 <li><a href="#y" class="tsd-is-protected tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg><span>y</span></a></li>
+<li><a href="#addActor" class="tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>add<wbr/>Actor</span></a></li>
 <li><a href="#call" class="tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>call</span></a></li>
 <li><a href="#draw" class="tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>draw</span></a></li>
 <li><a href="#getColor" class="tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>get<wbr/>Color</span></a></li>
@@ -510,13 +582,17 @@
 <li><a href="#getX" class="tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>getX</span></a></li>
 <li><a href="#getY" class="tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>getY</span></a></li>
 <li><a href="#insideActor" class="tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>inside<wbr/>Actor</span></a></li>
+<li><a href="#isSelected" class=""><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>is<wbr/>Selected</span></a></li>
 <li><a href="#on" class="tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>on</span></a></li>
 <li><a href="#onCreated" class="tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>on<wbr/>Created</span></a></li>
 <li><a href="#onDestroyed" class="tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>on<wbr/>Destroyed</span></a></li>
+<li><a href="#removeActor" class="tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>remove<wbr/>Actor</span></a></li>
+<li><a href="#select" class=""><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>select</span></a></li>
 <li><a href="#setImage" class="tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>set<wbr/>Image</span></a></li>
 <li><a href="#setPosition" class="tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>set<wbr/>Position</span></a></li>
 <li><a href="#setRotation" class="tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>set<wbr/>Rotation</span></a></li>
 <li><a href="#setSize" class="tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>set<wbr/>Size</span></a></li>
+<li><a href="#unselect" class=""><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>unselect</span></a></li>
 <li><a href="#mergeActors" class="tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>merge<wbr/>Actors</span></a></li></ul></div></details></div>
 <div class="site-menu">
 <nav class="tsd-navigation"><a href="../index.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><rect fill="var(--color-icon-background)" stroke="var(--color-ts-namespace)" stroke-width="1.5" x="1" y="1" width="22" height="22" rx="6" id="icon-4-path"></rect><path d="M9.33 16V7.24H10.77L13.446 14.74C13.43 14.54 13.41 14.296 13.386 14.008C13.37 13.712 13.354 13.404 13.338 13.084C13.33 12.756 13.326 12.448 13.326 12.16V7.24H14.37V16H12.93L10.266 8.5C10.282 8.692 10.298 8.936 10.314 9.232C10.33 9.52 10.342 9.828 10.35 10.156C10.366 10.476 10.374 10.784 10.374 11.08V16H9.33Z" fill="var(--color-text)" id="icon-4-text"></path></svg><span>openciv/client</span></a>
@@ -593,6 +669,12 @@
 <ul class="tsd-nested-navigation">
 <li><a href="scene_Actor.Actor.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-128-path"></use><use href="#icon-128-text"></use></svg><span>Actor</span></a></li>
 <li><a href="../interfaces/scene_Actor.ActorOptions.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-256-path"></use><use href="#icon-256-text"></use></svg><span>Actor<wbr/>Options</span></a></li></ul></div></details></li>
+<li>
+<details class="tsd-index-accordion" data-key="scene/ActorGroup"><summary class="tsd-accordion-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M4.93896 8.531L12 15.591L19.061 8.531L16.939 6.409L12 11.349L7.06098 6.409L4.93896 8.531Z" fill="var(--color-text)"></path></svg><a href="../modules/scene_ActorGroup.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-4-path"></use><use href="#icon-4-text"></use></svg><span>scene/<wbr/>Actor<wbr/>Group</span></a></summary>
+<div class="tsd-accordion-details">
+<ul class="tsd-nested-navigation">
+<li><a href="scene_ActorGroup.ActorGroup.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-128-path"></use><use href="#icon-128-text"></use></svg><span>Actor<wbr/>Group</span></a></li>
+<li><a href="../interfaces/scene_ActorGroup.ActorGroupOptions.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-256-path"></use><use href="#icon-256-text"></use></svg><span>Actor<wbr/>Group<wbr/>Options</span></a></li></ul></div></details></li>
 <li>
 <details class="tsd-index-accordion" data-key="scene/Camera"><summary class="tsd-accordion-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M4.93896 8.531L12 15.591L19.061 8.531L16.939 6.409L12 11.349L7.06098 6.409L4.93896 8.531Z" fill="var(--color-text)"></path></svg><a href="../modules/scene_Camera.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-4-path"></use><use href="#icon-4-text"></use></svg><span>scene/<wbr/>Camera</span></a></summary>
 <div class="tsd-accordion-details">

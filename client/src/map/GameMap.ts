@@ -6,7 +6,9 @@ import { River } from "./River";
 import { Tile } from "./Tile";
 
 export class GameMap {
-  private static oddEdgeAxis = [
+  private static instance: GameMap;
+
+  private oddEdgeAxis = [
     [0, -1],
     [1, -1],
     [1, 0],
@@ -14,7 +16,7 @@ export class GameMap {
     [0, 1],
     [-1, 0],
   ];
-  private static evenEdgeAxis = [
+  private evenEdgeAxis = [
     [-1, -1],
     [0, -1],
     [1, 0],
@@ -23,12 +25,95 @@ export class GameMap {
     [-1, 0],
   ];
 
-  private static tiles: Tile[][];
-  private static mapActor: Actor;
-  private static mapWidth: number;
-  private static mapHeight: number;
+  private tiles: Tile[][];
+  private mapActor: Actor;
+  private mapWidth: number;
+  private mapHeight: number;
 
+  public static getInstance() {
+    return this.instance;
+  }
+
+  /**
+   * Initializes the GameMap singleton object, starts a map request to the server.
+   */
   public static init() {
+    GameMap.instance = new GameMap();
+    this.instance.requestMapFromServer();
+  }
+
+  public refreshMap() {
+    Game.getCurrentScene().removeActor(this.mapActor);
+    const tileActorList = [];
+
+    for (let x = 0; x < this.mapWidth; x++) {
+      for (let y = 0; y < this.mapHeight; y++) {
+        let yPos = y * 24;
+        let xPos = x * 33;
+        if (y % 2 != 0) {
+          xPos += 16;
+        }
+
+        const tile = new Tile({
+          tileTypes: this.tiles[x][y].getTileTypes(),
+          x: xPos,
+          y: yPos,
+        });
+        tileActorList.push(tile);
+      }
+    }
+
+    this.mapActor = Actor.mergeActors({
+      actors: tileActorList,
+      spriteRegion: false,
+    });
+    Game.getCurrentScene().addActor(this.mapActor);
+  }
+
+  public getTiles() {
+    return this.tiles;
+  }
+
+  public getWidth() {
+    return this.tiles.length;
+  }
+
+  public getHeight() {
+    return this.tiles[0].length;
+  }
+
+  /**
+   * Returns an array of adjacent tiles to the given grid coordinates.
+   * @param {number} gridX - The x coordinate of the tile on the grid.
+   * @param {number} gridY - The y coordinate of the tile on the grid.
+   * @returns {Tile[]} An array of adjacent tiles to the given grid coordinates.
+   */
+  public getAdjacentTiles(gridX: number, gridY: number): Tile[] {
+    const adjTiles: Tile[] = [];
+    let edgeAxis: number[][];
+    if (gridY % 2 == 0) edgeAxis = this.evenEdgeAxis;
+    else edgeAxis = this.oddEdgeAxis;
+
+    for (let i = 0; i < edgeAxis.length; i++) {
+      let edgeX = gridX + edgeAxis[i][0];
+      let edgeY = gridY + edgeAxis[i][1];
+
+      if (
+        edgeX == -1 ||
+        edgeY == -1 ||
+        edgeX > this.mapWidth - 1 ||
+        edgeY > this.mapHeight - 1 ||
+        gridX + edgeAxis[i][0] < 0
+      ) {
+        continue;
+      }
+      adjTiles.push(this.tiles[gridX + edgeAxis[i][0]][gridY + edgeAxis[i][1]]);
+    }
+
+    return adjTiles;
+  }
+
+  private requestMapFromServer() {
     const scene = Game.getCurrentScene();
     this.tiles = [];
 
@@ -121,8 +206,6 @@ export class GameMap {
 
           console.log("All tile images loaded, generating map");
 
-          // TODO: Sort our actors such that hill actors go AFTER riverActors. (Allows the river to flow under the hills...)
-          // Generate one big list of actors in the order of, baseTileActor, river, topLayerTileActor
           const mapActors: Actor[] = [
             ...tileActorList,
             ...riverActors,
@@ -155,75 +238,10 @@ export class GameMap {
     });
   }
 
-  public static refreshMap() {
-    Game.getCurrentScene().removeActor(this.mapActor);
-    const tileActorList = [];
-
-    for (let x = 0; x < this.mapWidth; x++) {
-      for (let y = 0; y < this.mapHeight; y++) {
-        let yPos = y * 24;
-        let xPos = x * 33;
-        if (y % 2 != 0) {
-          xPos += 16;
-        }
-
-        const tile = new Tile({
-          tileTypes: this.tiles[x][y].getTileTypes(),
-          x: xPos,
-          y: yPos,
-        });
-        tileActorList.push(tile);
-      }
-    }
-
-    this.mapActor = Actor.mergeActors({
-      actors: tileActorList,
-      spriteRegion: false,
-    });
-    Game.getCurrentScene().addActor(this.mapActor);
-  }
-
-  public static getTiles() {
-    return this.tiles;
-  }
-
-  public static getWidth() {
-    return this.tiles.length;
-  }
-
-  public static getHeight() {
-    return this.tiles[0].length;
-  }
-
-  public static getAdjacentTiles(gridX: number, gridY: number): Tile[] {
-    const adjTiles: Tile[] = [];
-    let edgeAxis: number[][];
-    if (gridY % 2 == 0) edgeAxis = this.evenEdgeAxis;
-    else edgeAxis = this.oddEdgeAxis;
-
-    for (let i = 0; i < edgeAxis.length; i++) {
-      let edgeX = gridX + edgeAxis[i][0];
-      let edgeY = gridY + edgeAxis[i][1];
-
-      if (
-        edgeX == -1 ||
-        edgeY == -1 ||
-        edgeX > this.mapWidth - 1 ||
-        edgeY > this.mapHeight - 1 ||
-        gridX + edgeAxis[i][0] < 0
-      ) {
-        continue;
-      }
-      adjTiles.push(this.tiles[gridX + edgeAxis[i][0]][gridY + edgeAxis[i][1]]);
-    }
-
-    return adjTiles;
-  }
-
   /**
    * Iterate through every tile & assign it's adjacent neighboring tiles through: setAdjacentTile()
    */
-  private static initAdjacentTiles() {
+  private initAdjacentTiles() {
     for (let x = 0; x < this.mapWidth; x++) {
       for (let y = 0; y < this.mapHeight; y++) {
         // Set the 6 edges of the hexagon.

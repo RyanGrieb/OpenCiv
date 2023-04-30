@@ -61,8 +61,6 @@ export class InGameState extends State {
     });
 
     Game.getPlayers().forEach((player) => {
-      player.sendNetworkEvent({ event: "setScene", scene: "in_game" });
-
       const spawnTile = GameMap.getRandomTileWith({
         avoidTileTypes: [
           "ocean",
@@ -81,6 +79,8 @@ export class InGameState extends State {
       player.onLoadedIn(() => {
         player.zoomToLocation(spawnTile.getX(), spawnTile.getY(), 7);
       });
+
+      player.sendNetworkEvent({ event: "setScene", scene: "in_game" });
     });
   }
 

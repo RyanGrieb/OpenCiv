@@ -10,6 +10,7 @@ export enum GameImage {
   BUTTON_HOVERED,
   SPRITESHEET,
   RIVER,
+  UNIT_SELECTION_CIRCLE,
 }
 
 export enum SpriteRegion {
@@ -55,10 +56,12 @@ export enum SpriteRegion {
   STONE = "13,7",
   STAR = "0,3",
   HOVERED_TILE = "6,8",
+  UNIT_SELECTION_TILE = "7,8",
   DEBUG1 = "3,11",
   DEBUG2 = "14,13",
   DEBUG3 = "17,13",
   UI_STATUSBAR = "3,4",
+  UNIT_SELECTION_CIRCLE = "1,3",
 }
 
 export const assetList = [
@@ -66,6 +69,7 @@ export const assetList = [
   require("../assets/images/ui_button_hovered.png"),
   require("../assets/images/spritesheet.png"),
   require("../assets/images/river.png"),
+  require("../assets/images/unit_selection_circle.png"),
   require("../assets/images/font.png"),
   require("../assets/images/logo.png"),
 ];

@@ -188,4 +188,8 @@ export class Tile extends Actor {
     let y2 = this.getCenterPosition()[1];
     return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
   }
+
+  public getUnits(): Unit[] {
+    return this.units;
+  }
 }

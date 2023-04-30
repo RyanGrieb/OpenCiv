@@ -21,7 +21,7 @@
 <ul class="tsd-hierarchy">
 <li><span class="target">GameMap</span></li></ul></section><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/3cf3eafa/client/src/map/GameMap.ts#L8">map/GameMap.ts:8</a></li></ul></aside>
+<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/2612df9b/client/src/map/GameMap.ts#L8">map/GameMap.ts:8</a></li></ul></aside>
 <section class="tsd-panel-group tsd-index-group">
 <section class="tsd-panel tsd-index-panel">
 <details class="tsd-index-content tsd-index-accordion" open><summary class="tsd-accordion-summary tsd-index-summary">
@@ -39,6 +39,7 @@
 <a href="map_GameMap.GameMap.html#mapWidth" class="tsd-index-link tsd-is-private"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg><span>map<wbr/>Width</span></a>
 <a href="map_GameMap.GameMap.html#oddEdgeAxis" class="tsd-index-link tsd-is-private"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg><span>odd<wbr/>Edge<wbr/>Axis</span></a>
 <a href="map_GameMap.GameMap.html#tiles" class="tsd-index-link tsd-is-private"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg><span>tiles</span></a>
+<a href="map_GameMap.GameMap.html#instance" class="tsd-index-link tsd-is-private"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg><span>instance</span></a>
 </div></section>
 <section class="tsd-index-section">
 <h3 class="tsd-index-heading">Methods</h3>
@@ -46,9 +47,11 @@
 <a href="map_GameMap.GameMap.html#getHeight" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>get<wbr/>Height</span></a>
 <a href="map_GameMap.GameMap.html#getTiles" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>get<wbr/>Tiles</span></a>
 <a href="map_GameMap.GameMap.html#getWidth" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>get<wbr/>Width</span></a>
-<a href="map_GameMap.GameMap.html#init" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>init</span></a>
 <a href="map_GameMap.GameMap.html#initAdjacentTiles" class="tsd-index-link tsd-is-private"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>init<wbr/>Adjacent<wbr/>Tiles</span></a>
 <a href="map_GameMap.GameMap.html#refreshMap" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>refresh<wbr/>Map</span></a>
+<a href="map_GameMap.GameMap.html#requestMapFromServer" class="tsd-index-link tsd-is-private"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>request<wbr/>Map<wbr/>From<wbr/>Server</span></a>
+<a href="map_GameMap.GameMap.html#getInstance" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>get<wbr/>Instance</span></a>
+<a href="map_GameMap.GameMap.html#init" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>init</span></a>
 </div></section></div></details></section></section>
 <section class="tsd-panel-group tsd-member-group">
 <h2>Constructors</h2>
@@ -61,86 +64,90 @@
 <section class="tsd-panel-group tsd-member-group">
 <h2>Properties</h2>
 <section class="tsd-panel tsd-member tsd-is-private"><a id="evenEdgeAxis" class="tsd-anchor"></a>
-<h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagStatic">Static</code> <code class="tsd-tag ts-flagPrivate">Private</code> <span>even<wbr/>Edge<wbr/>Axis</span><a href="#evenEdgeAxis" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
+<h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagPrivate">Private</code> <span>even<wbr/>Edge<wbr/>Axis</span><a href="#evenEdgeAxis" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">even<wbr/>Edge<wbr/>Axis</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol"> = ...</span></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/3cf3eafa/client/src/map/GameMap.ts#L17">map/GameMap.ts:17</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/2612df9b/client/src/map/GameMap.ts#L19">map/GameMap.ts:19</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-is-private"><a id="mapActor" class="tsd-anchor"></a>
-<h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagStatic">Static</code> <code class="tsd-tag ts-flagPrivate">Private</code> <span>map<wbr/>Actor</span><a href="#mapActor" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
+<h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagPrivate">Private</code> <span>map<wbr/>Actor</span><a href="#mapActor" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">map<wbr/>Actor</span><span class="tsd-signature-symbol">:</span> <a href="scene_Actor.Actor.html" class="tsd-signature-type tsd-kind-class">Actor</a></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/3cf3eafa/client/src/map/GameMap.ts#L27">map/GameMap.ts:27</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/2612df9b/client/src/map/GameMap.ts#L29">map/GameMap.ts:29</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-is-private"><a id="mapHeight" class="tsd-anchor"></a>
-<h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagStatic">Static</code> <code class="tsd-tag ts-flagPrivate">Private</code> <span>map<wbr/>Height</span><a href="#mapHeight" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
+<h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagPrivate">Private</code> <span>map<wbr/>Height</span><a href="#mapHeight" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">map<wbr/>Height</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/3cf3eafa/client/src/map/GameMap.ts#L29">map/GameMap.ts:29</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/2612df9b/client/src/map/GameMap.ts#L31">map/GameMap.ts:31</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-is-private"><a id="mapWidth" class="tsd-anchor"></a>
-<h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagStatic">Static</code> <code class="tsd-tag ts-flagPrivate">Private</code> <span>map<wbr/>Width</span><a href="#mapWidth" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
+<h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagPrivate">Private</code> <span>map<wbr/>Width</span><a href="#mapWidth" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">map<wbr/>Width</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/3cf3eafa/client/src/map/GameMap.ts#L28">map/GameMap.ts:28</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/2612df9b/client/src/map/GameMap.ts#L30">map/GameMap.ts:30</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-is-private"><a id="oddEdgeAxis" class="tsd-anchor"></a>
-<h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagStatic">Static</code> <code class="tsd-tag ts-flagPrivate">Private</code> <span>odd<wbr/>Edge<wbr/>Axis</span><a href="#oddEdgeAxis" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
+<h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagPrivate">Private</code> <span>odd<wbr/>Edge<wbr/>Axis</span><a href="#oddEdgeAxis" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">odd<wbr/>Edge<wbr/>Axis</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol"> = ...</span></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/3cf3eafa/client/src/map/GameMap.ts#L9">map/GameMap.ts:9</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/2612df9b/client/src/map/GameMap.ts#L11">map/GameMap.ts:11</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-is-private"><a id="tiles" class="tsd-anchor"></a>
-<h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagStatic">Static</code> <code class="tsd-tag ts-flagPrivate">Private</code> <span>tiles</span><a href="#tiles" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
+<h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagPrivate">Private</code> <span>tiles</span><a href="#tiles" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">tiles</span><span class="tsd-signature-symbol">:</span> <a href="map_Tile.Tile.html" class="tsd-signature-type tsd-kind-class">Tile</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">[]</span></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/3cf3eafa/client/src/map/GameMap.ts#L26">map/GameMap.ts:26</a></li></ul></aside></section></section>
+<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/2612df9b/client/src/map/GameMap.ts#L28">map/GameMap.ts:28</a></li></ul></aside></section>
+<section class="tsd-panel tsd-member tsd-is-private"><a id="instance" class="tsd-anchor"></a>
+<h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagStatic">Static</code> <code class="tsd-tag ts-flagPrivate">Private</code> <span>instance</span><a href="#instance" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
+<div class="tsd-signature"><span class="tsd-kind-property">instance</span><span class="tsd-signature-symbol">:</span> <a href="map_GameMap.GameMap.html" class="tsd-signature-type tsd-kind-class">GameMap</a></div><aside class="tsd-sources">
+<ul>
+<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/2612df9b/client/src/map/GameMap.ts#L9">map/GameMap.ts:9</a></li></ul></aside></section></section>
 <section class="tsd-panel-group tsd-member-group">
 <h2>Methods</h2>
 <section class="tsd-panel tsd-member"><a id="getAdjacentTiles" class="tsd-anchor"></a>
-<h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagStatic">Static</code> <span>get<wbr/>Adjacent<wbr/>Tiles</span><a href="#getAdjacentTiles" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
+<h3 class="tsd-anchor-link"><span>get<wbr/>Adjacent<wbr/>Tiles</span><a href="#getAdjacentTiles" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <ul class="tsd-signatures">
 <li class="tsd-signature tsd-anchor-link" id="getAdjacentTiles.getAdjacentTiles-1"><span class="tsd-kind-call-signature">get<wbr/>Adjacent<wbr/>Tiles</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">gridX</span>, <span class="tsd-kind-parameter">gridY</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="map_Tile.Tile.html" class="tsd-signature-type tsd-kind-class">Tile</a><span class="tsd-signature-symbol">[]</span><a href="#getAdjacentTiles.getAdjacentTiles-1" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></li>
 <li class="tsd-description">
+<div class="tsd-comment tsd-typography"><p>Returns an array of adjacent tiles to the given grid coordinates.</p>
+</div>
 <div class="tsd-parameters">
 <h4 class="tsd-parameters-title">Parameters</h4>
 <ul class="tsd-parameter-list">
 <li>
-<h5><span class="tsd-kind-parameter">gridX</span>: <span class="tsd-signature-type">number</span></h5></li>
+<h5><span class="tsd-kind-parameter">gridX</span>: <span class="tsd-signature-type">number</span></h5>
+<div class="tsd-comment tsd-typography"><p>The x coordinate of the tile on the grid.</p>
+</div></li>
 <li>
-<h5><span class="tsd-kind-parameter">gridY</span>: <span class="tsd-signature-type">number</span></h5></li></ul></div>
-<h4 class="tsd-returns-title">Returns <a href="map_Tile.Tile.html" class="tsd-signature-type tsd-kind-class">Tile</a><span class="tsd-signature-symbol">[]</span></h4><aside class="tsd-sources">
+<h5><span class="tsd-kind-parameter">gridY</span>: <span class="tsd-signature-type">number</span></h5>
+<div class="tsd-comment tsd-typography"><p>The y coordinate of the tile on the grid.</p>
+</div></li></ul></div>
+<h4 class="tsd-returns-title">Returns <a href="map_Tile.Tile.html" class="tsd-signature-type tsd-kind-class">Tile</a><span class="tsd-signature-symbol">[]</span></h4><p>An array of adjacent tiles to the given grid coordinates.</p>
+<aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/3cf3eafa/client/src/map/GameMap.ts#L198">map/GameMap.ts:198</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/2612df9b/client/src/map/GameMap.ts#L91">map/GameMap.ts:91</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="getHeight" class="tsd-anchor"></a>
-<h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagStatic">Static</code> <span>get<wbr/>Height</span><a href="#getHeight" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
+<h3 class="tsd-anchor-link"><span>get<wbr/>Height</span><a href="#getHeight" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <ul class="tsd-signatures">
 <li class="tsd-signature tsd-anchor-link" id="getHeight.getHeight-1"><span class="tsd-kind-call-signature">get<wbr/>Height</span><span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><a href="#getHeight.getHeight-1" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></li>
 <li class="tsd-description">
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">number</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/3cf3eafa/client/src/map/GameMap.ts#L194">map/GameMap.ts:194</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/2612df9b/client/src/map/GameMap.ts#L81">map/GameMap.ts:81</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="getTiles" class="tsd-anchor"></a>
-<h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagStatic">Static</code> <span>get<wbr/>Tiles</span><a href="#getTiles" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
+<h3 class="tsd-anchor-link"><span>get<wbr/>Tiles</span><a href="#getTiles" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <ul class="tsd-signatures">
 <li class="tsd-signature tsd-anchor-link" id="getTiles.getTiles-1"><span class="tsd-kind-call-signature">get<wbr/>Tiles</span><span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="map_Tile.Tile.html" class="tsd-signature-type tsd-kind-class">Tile</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">[]</span><a href="#getTiles.getTiles-1" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></li>
 <li class="tsd-description">
 <h4 class="tsd-returns-title">Returns <a href="map_Tile.Tile.html" class="tsd-signature-type tsd-kind-class">Tile</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">[]</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/3cf3eafa/client/src/map/GameMap.ts#L186">map/GameMap.ts:186</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/2612df9b/client/src/map/GameMap.ts#L73">map/GameMap.ts:73</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="getWidth" class="tsd-anchor"></a>
-<h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagStatic">Static</code> <span>get<wbr/>Width</span><a href="#getWidth" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
+<h3 class="tsd-anchor-link"><span>get<wbr/>Width</span><a href="#getWidth" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <ul class="tsd-signatures">
 <li class="tsd-signature tsd-anchor-link" id="getWidth.getWidth-1"><span class="tsd-kind-call-signature">get<wbr/>Width</span><span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><a href="#getWidth.getWidth-1" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></li>
 <li class="tsd-description">
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">number</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/3cf3eafa/client/src/map/GameMap.ts#L190">map/GameMap.ts:190</a></li></ul></aside></li></ul></section>
-<section class="tsd-panel tsd-member"><a id="init" class="tsd-anchor"></a>
-<h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagStatic">Static</code> <span>init</span><a href="#init" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
-<ul class="tsd-signatures">
-<li class="tsd-signature tsd-anchor-link" id="init.init-1"><span class="tsd-kind-call-signature">init</span><span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span><a href="#init.init-1" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></li>
-<li class="tsd-description">
-<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4><aside class="tsd-sources">
-<ul>
-<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/3cf3eafa/client/src/map/GameMap.ts#L31">map/GameMap.ts:31</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/2612df9b/client/src/map/GameMap.ts#L77">map/GameMap.ts:77</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-private"><a id="initAdjacentTiles" class="tsd-anchor"></a>
-<h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagStatic">Static</code> <code class="tsd-tag ts-flagPrivate">Private</code> <span>init<wbr/>Adjacent<wbr/>Tiles</span><a href="#initAdjacentTiles" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
+<h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagPrivate">Private</code> <span>init<wbr/>Adjacent<wbr/>Tiles</span><a href="#initAdjacentTiles" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-private">
 <li class="tsd-signature tsd-anchor-link" id="initAdjacentTiles.initAdjacentTiles-1"><span class="tsd-kind-call-signature">init<wbr/>Adjacent<wbr/>Tiles</span><span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span><a href="#initAdjacentTiles.initAdjacentTiles-1" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></li>
 <li class="tsd-description">
@@ -148,15 +155,41 @@
 </div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/3cf3eafa/client/src/map/GameMap.ts#L226">map/GameMap.ts:226</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/2612df9b/client/src/map/GameMap.ts#L244">map/GameMap.ts:244</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="refreshMap" class="tsd-anchor"></a>
-<h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagStatic">Static</code> <span>refresh<wbr/>Map</span><a href="#refreshMap" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
+<h3 class="tsd-anchor-link"><span>refresh<wbr/>Map</span><a href="#refreshMap" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <ul class="tsd-signatures">
 <li class="tsd-signature tsd-anchor-link" id="refreshMap.refreshMap-1"><span class="tsd-kind-call-signature">refresh<wbr/>Map</span><span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span><a href="#refreshMap.refreshMap-1" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></li>
 <li class="tsd-description">
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/3cf3eafa/client/src/map/GameMap.ts#L158">map/GameMap.ts:158</a></li></ul></aside></li></ul></section></section></div>
+<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/2612df9b/client/src/map/GameMap.ts#L45">map/GameMap.ts:45</a></li></ul></aside></li></ul></section>
+<section class="tsd-panel tsd-member tsd-is-private"><a id="requestMapFromServer" class="tsd-anchor"></a>
+<h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagPrivate">Private</code> <span>request<wbr/>Map<wbr/>From<wbr/>Server</span><a href="#requestMapFromServer" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
+<ul class="tsd-signatures tsd-is-private">
+<li class="tsd-signature tsd-anchor-link" id="requestMapFromServer.requestMapFromServer-1"><span class="tsd-kind-call-signature">request<wbr/>Map<wbr/>From<wbr/>Server</span><span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span><a href="#requestMapFromServer.requestMapFromServer-1" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></li>
+<li class="tsd-description">
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4><aside class="tsd-sources">
+<ul>
+<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/2612df9b/client/src/map/GameMap.ts#L116">map/GameMap.ts:116</a></li></ul></aside></li></ul></section>
+<section class="tsd-panel tsd-member"><a id="getInstance" class="tsd-anchor"></a>
+<h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagStatic">Static</code> <span>get<wbr/>Instance</span><a href="#getInstance" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
+<ul class="tsd-signatures">
+<li class="tsd-signature tsd-anchor-link" id="getInstance.getInstance-1"><span class="tsd-kind-call-signature">get<wbr/>Instance</span><span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="map_GameMap.GameMap.html" class="tsd-signature-type tsd-kind-class">GameMap</a><a href="#getInstance.getInstance-1" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></li>
+<li class="tsd-description">
+<h4 class="tsd-returns-title">Returns <a href="map_GameMap.GameMap.html" class="tsd-signature-type tsd-kind-class">GameMap</a></h4><aside class="tsd-sources">
+<ul>
+<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/2612df9b/client/src/map/GameMap.ts#L33">map/GameMap.ts:33</a></li></ul></aside></li></ul></section>
+<section class="tsd-panel tsd-member"><a id="init" class="tsd-anchor"></a>
+<h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagStatic">Static</code> <span>init</span><a href="#init" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
+<ul class="tsd-signatures">
+<li class="tsd-signature tsd-anchor-link" id="init.init-1"><span class="tsd-kind-call-signature">init</span><span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span><a href="#init.init-1" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></li>
+<li class="tsd-description">
+<div class="tsd-comment tsd-typography"><p>Initializes the GameMap singleton object, starts a map request to the server.</p>
+</div>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4><aside class="tsd-sources">
+<ul>
+<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/2612df9b/client/src/map/GameMap.ts#L40">map/GameMap.ts:40</a></li></ul></aside></li></ul></section></section></div>
 <div class="col-sidebar">
 <div class="page-menu">
 <div class="tsd-navigation settings">
@@ -183,13 +216,16 @@
 <li><a href="#mapWidth" class="tsd-is-private"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg><span>map<wbr/>Width</span></a></li>
 <li><a href="#oddEdgeAxis" class="tsd-is-private"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg><span>odd<wbr/>Edge<wbr/>Axis</span></a></li>
 <li><a href="#tiles" class="tsd-is-private"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg><span>tiles</span></a></li>
+<li><a href="#instance" class="tsd-is-private"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg><span>instance</span></a></li>
 <li><a href="#getAdjacentTiles" class=""><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>get<wbr/>Adjacent<wbr/>Tiles</span></a></li>
 <li><a href="#getHeight" class=""><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>get<wbr/>Height</span></a></li>
 <li><a href="#getTiles" class=""><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>get<wbr/>Tiles</span></a></li>
 <li><a href="#getWidth" class=""><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>get<wbr/>Width</span></a></li>
-<li><a href="#init" class=""><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>init</span></a></li>
 <li><a href="#initAdjacentTiles" class="tsd-is-private"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>init<wbr/>Adjacent<wbr/>Tiles</span></a></li>
-<li><a href="#refreshMap" class=""><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>refresh<wbr/>Map</span></a></li></ul></div></details></div>
+<li><a href="#refreshMap" class=""><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>refresh<wbr/>Map</span></a></li>
+<li><a href="#requestMapFromServer" class="tsd-is-private"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>request<wbr/>Map<wbr/>From<wbr/>Server</span></a></li>
+<li><a href="#getInstance" class=""><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>get<wbr/>Instance</span></a></li>
+<li><a href="#init" class=""><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>init</span></a></li></ul></div></details></div>
 <div class="site-menu">
 <nav class="tsd-navigation"><a href="../index.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><rect fill="var(--color-icon-background)" stroke="var(--color-ts-namespace)" stroke-width="1.5" x="1" y="1" width="22" height="22" rx="6" id="icon-4-path"></rect><path d="M9.33 16V7.24H10.77L13.446 14.74C13.43 14.54 13.41 14.296 13.386 14.008C13.37 13.712 13.354 13.404 13.338 13.084C13.33 12.756 13.326 12.448 13.326 12.16V7.24H14.37V16H12.93L10.266 8.5C10.282 8.692 10.298 8.936 10.314 9.232C10.33 9.52 10.342 9.828 10.35 10.156C10.366 10.476 10.374 10.784 10.374 11.08V16H9.33Z" fill="var(--color-text)" id="icon-4-text"></path></svg><span>openciv/client</span></a>
 <ul class="tsd-small-nested-navigation">
@@ -265,6 +301,12 @@
 <ul class="tsd-nested-navigation">
 <li><a href="scene_Actor.Actor.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-128-path"></use><use href="#icon-128-text"></use></svg><span>Actor</span></a></li>
 <li><a href="../interfaces/scene_Actor.ActorOptions.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-256-path"></use><use href="#icon-256-text"></use></svg><span>Actor<wbr/>Options</span></a></li></ul></div></details></li>
+<li>
+<details class="tsd-index-accordion" data-key="scene/ActorGroup"><summary class="tsd-accordion-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M4.93896 8.531L12 15.591L19.061 8.531L16.939 6.409L12 11.349L7.06098 6.409L4.93896 8.531Z" fill="var(--color-text)"></path></svg><a href="../modules/scene_ActorGroup.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-4-path"></use><use href="#icon-4-text"></use></svg><span>scene/<wbr/>Actor<wbr/>Group</span></a></summary>
+<div class="tsd-accordion-details">
+<ul class="tsd-nested-navigation">
+<li><a href="scene_ActorGroup.ActorGroup.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-128-path"></use><use href="#icon-128-text"></use></svg><span>Actor<wbr/>Group</span></a></li>
+<li><a href="../interfaces/scene_ActorGroup.ActorGroupOptions.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-256-path"></use><use href="#icon-256-text"></use></svg><span>Actor<wbr/>Group<wbr/>Options</span></a></li></ul></div></details></li>
 <li>
 <details class="tsd-index-accordion" data-key="scene/Camera"><summary class="tsd-accordion-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M4.93896 8.531L12 15.591L19.061 8.531L16.939 6.409L12 11.349L7.06098 6.409L4.93896 8.531Z" fill="var(--color-text)"></path></svg><a href="../modules/scene_Camera.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-4-path"></use><use href="#icon-4-text"></use></svg><span>scene/<wbr/>Camera</span></a></summary>
 <div class="tsd-accordion-details">

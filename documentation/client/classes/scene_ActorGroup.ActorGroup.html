@@ -1,4 +1,4 @@
-<!DOCTYPE html><html class="default" lang="en"><head><meta charSet="utf-8"/><meta http-equiv="x-ua-compatible" content="IE=edge"/><title>Tile | openciv/client</title><meta name="description" content="Documentation for openciv/client"/><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="../assets/style.css"/><link rel="stylesheet" href="../assets/highlight.css"/><script defer src="../assets/main.js"></script><script async src="../assets/search.js" id="tsd-search-script"></script></head><body><script>document.documentElement.dataset.theme = localStorage.getItem("tsd-theme") || "os"</script><header class="tsd-page-toolbar">
+<!DOCTYPE html><html class="default" lang="en"><head><meta charSet="utf-8"/><meta http-equiv="x-ua-compatible" content="IE=edge"/><title>ActorGroup | openciv/client</title><meta name="description" content="Documentation for openciv/client"/><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="../assets/style.css"/><link rel="stylesheet" href="../assets/highlight.css"/><script defer src="../assets/main.js"></script><script async src="../assets/search.js" id="tsd-search-script"></script></head><body><script>document.documentElement.dataset.theme = localStorage.getItem("tsd-theme") || "os"</script><header class="tsd-page-toolbar">
 <div class="tsd-toolbar-contents container">
 <div class="table-cell" id="tsd-search" data-base="..">
 <div class="field"><label for="tsd-search-field" class="tsd-widget tsd-toolbar-icon search no-caption"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M15.7824 13.833L12.6666 10.7177C12.5259 10.5771 12.3353 10.499 12.1353 10.499H11.6259C12.4884 9.39596 13.001 8.00859 13.001 6.49937C13.001 2.90909 10.0914 0 6.50048 0C2.90959 0 0 2.90909 0 6.49937C0 10.0896 2.90959 12.9987 6.50048 12.9987C8.00996 12.9987 9.39756 12.4863 10.5008 11.6239V12.1332C10.5008 12.3332 10.5789 12.5238 10.7195 12.6644L13.8354 15.7797C14.1292 16.0734 14.6042 16.0734 14.8948 15.7797L15.7793 14.8954C16.0731 14.6017 16.0731 14.1267 15.7824 13.833ZM6.50048 10.499C4.29094 10.499 2.50018 8.71165 2.50018 6.49937C2.50018 4.29021 4.28781 2.49976 6.50048 2.49976C8.71001 2.49976 10.5008 4.28708 10.5008 6.49937C10.5008 8.70852 8.71314 10.499 6.50048 10.499Z" fill="var(--color-text)"></path></svg></label><input type="text" id="tsd-search-field" aria-label="Search"/></div>
@@ -13,19 +13,19 @@
 <div class="tsd-page-title">
 <ul class="tsd-breadcrumb">
 <li><a href="../index.html">openciv/client</a></li>
-<li><a href="../modules/map_Tile.html">map/Tile</a></li>
-<li><a href="map_Tile.Tile.html">Tile</a></li></ul>
-<h1>Class Tile</h1></div>
+<li><a href="../modules/scene_ActorGroup.html">scene/ActorGroup</a></li>
+<li><a href="scene_ActorGroup.ActorGroup.html">ActorGroup</a></li></ul>
+<h1>Class ActorGroup</h1></div>
 <section class="tsd-panel tsd-hierarchy">
 <h4>Hierarchy</h4>
 <ul class="tsd-hierarchy">
 <li><a href="scene_Actor.Actor.html" class="tsd-signature-type tsd-kind-class">Actor</a>
 <ul class="tsd-hierarchy">
-<li><span class="target">Tile</span>
+<li><span class="target">ActorGroup</span>
 <ul class="tsd-hierarchy">
-<li><a href="map_HoveredTile.HoveredTile.html" class="tsd-signature-type tsd-kind-class">HoveredTile</a></li></ul></li></ul></li></ul></section><aside class="tsd-sources">
+<li><a href="Unit.Unit.html" class="tsd-signature-type tsd-kind-class">Unit</a></li></ul></li></ul></li></ul></section><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/2612df9b/client/src/map/Tile.ts#L16">map/Tile.ts:16</a></li></ul></aside>
+<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/2612df9b/client/src/scene/ActorGroup.ts#L12">scene/ActorGroup.ts:12</a></li></ul></aside>
 <section class="tsd-panel-group tsd-index-group">
 <section class="tsd-panel tsd-index-panel">
 <details class="tsd-index-content tsd-index-accordion" open><summary class="tsd-accordion-summary tsd-index-summary">
@@ -33,113 +33,79 @@
 <div class="tsd-accordion-details">
 <section class="tsd-index-section">
 <h3 class="tsd-index-heading">Constructors</h3>
-<div class="tsd-index-list"><a href="map_Tile.Tile.html#constructor" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><rect fill="var(--color-icon-background)" stroke="#4D7FFF" stroke-width="1.5" x="1" y="1" width="22" height="22" rx="12" id="icon-512-path"></rect><path d="M11.898 16.1201C11.098 16.1201 10.466 15.8961 10.002 15.4481C9.53803 15.0001 9.30603 14.3841 9.30603 13.6001V9.64012C9.30603 8.85612 9.53803 8.24012 10.002 7.79212C10.466 7.34412 11.098 7.12012 11.898 7.12012C12.682 7.12012 13.306 7.34812 13.77 7.80412C14.234 8.25212 14.466 8.86412 14.466 9.64012H13.386C13.386 9.14412 13.254 8.76412 12.99 8.50012C12.734 8.22812 12.37 8.09212 11.898 8.09212C11.426 8.09212 11.054 8.22412 10.782 8.48812C10.518 8.75212 10.386 9.13212 10.386 9.62812V13.6001C10.386 14.0961 10.518 14.4801 10.782 14.7521C11.054 15.0161 11.426 15.1481 11.898 15.1481C12.37 15.1481 12.734 15.0161 12.99 14.7521C13.254 14.4801 13.386 14.0961 13.386 13.6001H14.466C14.466 14.3761 14.234 14.9921 13.77 15.4481C13.306 15.8961 12.682 16.1201 11.898 16.1201Z" fill="var(--color-text)" id="icon-512-text"></path></svg><span>constructor</span></a>
+<div class="tsd-index-list"><a href="scene_ActorGroup.ActorGroup.html#constructor" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><rect fill="var(--color-icon-background)" stroke="#4D7FFF" stroke-width="1.5" x="1" y="1" width="22" height="22" rx="12" id="icon-512-path"></rect><path d="M11.898 16.1201C11.098 16.1201 10.466 15.8961 10.002 15.4481C9.53803 15.0001 9.30603 14.3841 9.30603 13.6001V9.64012C9.30603 8.85612 9.53803 8.24012 10.002 7.79212C10.466 7.34412 11.098 7.12012 11.898 7.12012C12.682 7.12012 13.306 7.34812 13.77 7.80412C14.234 8.25212 14.466 8.86412 14.466 9.64012H13.386C13.386 9.14412 13.254 8.76412 12.99 8.50012C12.734 8.22812 12.37 8.09212 11.898 8.09212C11.426 8.09212 11.054 8.22412 10.782 8.48812C10.518 8.75212 10.386 9.13212 10.386 9.62812V13.6001C10.386 14.0961 10.518 14.4801 10.782 14.7521C11.054 15.0161 11.426 15.1481 11.898 15.1481C12.37 15.1481 12.734 15.0161 12.99 14.7521C13.254 14.4801 13.386 14.0961 13.386 13.6001H14.466C14.466 14.3761 14.234 14.9921 13.77 15.4481C13.306 15.8961 12.682 16.1201 11.898 16.1201Z" fill="var(--color-text)" id="icon-512-text"></path></svg><span>constructor</span></a>
 </div></section>
 <section class="tsd-index-section">
 <h3 class="tsd-index-heading">Properties</h3>
-<div class="tsd-index-list"><a href="map_Tile.Tile.html#adjacentTiles" class="tsd-index-link tsd-is-private"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><rect fill="var(--color-icon-background)" stroke="#FF984D" stroke-width="1.5" x="1" y="1" width="22" height="22" rx="12" id="icon-1024-path"></rect><path d="M9.354 16V7.24H12.174C12.99 7.24 13.638 7.476 14.118 7.948C14.606 8.412 14.85 9.036 14.85 9.82C14.85 10.604 14.606 11.232 14.118 11.704C13.638 12.168 12.99 12.4 12.174 12.4H10.434V16H9.354ZM10.434 11.428H12.174C12.646 11.428 13.022 11.284 13.302 10.996C13.59 10.7 13.734 10.308 13.734 9.82C13.734 9.324 13.59 8.932 13.302 8.644C13.022 8.356 12.646 8.212 12.174 8.212H10.434V11.428Z" fill="var(--color-text)" id="icon-1024-text"></path></svg><span>adjacent<wbr/>Tiles</span></a>
-<a href="map_Tile.Tile.html#color" class="tsd-index-link tsd-is-protected tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg><span>color</span></a>
-<a href="map_Tile.Tile.html#gridX" class="tsd-index-link tsd-is-private"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg><span>gridX</span></a>
-<a href="map_Tile.Tile.html#gridY" class="tsd-index-link tsd-is-private"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg><span>gridY</span></a>
-<a href="map_Tile.Tile.html#height" class="tsd-index-link tsd-is-protected tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg><span>height</span></a>
-<a href="map_Tile.Tile.html#image" class="tsd-index-link tsd-is-protected tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg><span>image</span></a>
-<a href="map_Tile.Tile.html#mouseInside" class="tsd-index-link tsd-is-protected tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg><span>mouse<wbr/>Inside</span></a>
-<a href="map_Tile.Tile.html#riverSides" class="tsd-index-link tsd-is-private"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg><span>river<wbr/>Sides</span></a>
-<a href="map_Tile.Tile.html#rotation" class="tsd-index-link tsd-is-protected tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg><span>rotation</span></a>
-<a href="map_Tile.Tile.html#spriteRegion" class="tsd-index-link tsd-is-protected tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg><span>sprite<wbr/>Region?</span></a>
-<a href="map_Tile.Tile.html#storedEvents" class="tsd-index-link tsd-is-protected tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg><span>stored<wbr/>Events</span></a>
-<a href="map_Tile.Tile.html#tileTypes" class="tsd-index-link tsd-is-private"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg><span>tile<wbr/>Types</span></a>
-<a href="map_Tile.Tile.html#transparency" class="tsd-index-link tsd-is-protected tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg><span>transparency</span></a>
-<a href="map_Tile.Tile.html#units" class="tsd-index-link tsd-is-private"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg><span>units</span></a>
-<a href="map_Tile.Tile.html#vectors" class="tsd-index-link tsd-is-private"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg><span>vectors</span></a>
-<a href="map_Tile.Tile.html#width" class="tsd-index-link tsd-is-protected tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg><span>width</span></a>
-<a href="map_Tile.Tile.html#x" class="tsd-index-link tsd-is-protected tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg><span>x</span></a>
-<a href="map_Tile.Tile.html#y" class="tsd-index-link tsd-is-protected tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg><span>y</span></a>
-<a href="map_Tile.Tile.html#HEIGHT-1" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg><span>HEIGHT</span></a>
-<a href="map_Tile.Tile.html#WIDTH-1" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg><span>WIDTH</span></a>
-<a href="map_Tile.Tile.html#loadedTileImages" class="tsd-index-link tsd-is-private"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg><span>loaded<wbr/>Tile<wbr/>Images</span></a>
+<div class="tsd-index-list"><a href="scene_ActorGroup.ActorGroup.html#actors" class="tsd-index-link tsd-is-private"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><rect fill="var(--color-icon-background)" stroke="#FF984D" stroke-width="1.5" x="1" y="1" width="22" height="22" rx="12" id="icon-1024-path"></rect><path d="M9.354 16V7.24H12.174C12.99 7.24 13.638 7.476 14.118 7.948C14.606 8.412 14.85 9.036 14.85 9.82C14.85 10.604 14.606 11.232 14.118 11.704C13.638 12.168 12.99 12.4 12.174 12.4H10.434V16H9.354ZM10.434 11.428H12.174C12.646 11.428 13.022 11.284 13.302 10.996C13.59 10.7 13.734 10.308 13.734 9.82C13.734 9.324 13.59 8.932 13.302 8.644C13.022 8.356 12.646 8.212 12.174 8.212H10.434V11.428Z" fill="var(--color-text)" id="icon-1024-text"></path></svg><span>actors</span></a>
+<a href="scene_ActorGroup.ActorGroup.html#color" class="tsd-index-link tsd-is-protected tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg><span>color</span></a>
+<a href="scene_ActorGroup.ActorGroup.html#height" class="tsd-index-link tsd-is-protected tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg><span>height</span></a>
+<a href="scene_ActorGroup.ActorGroup.html#image" class="tsd-index-link tsd-is-protected tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg><span>image</span></a>
+<a href="scene_ActorGroup.ActorGroup.html#mouseInside" class="tsd-index-link tsd-is-protected tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg><span>mouse<wbr/>Inside</span></a>
+<a href="scene_ActorGroup.ActorGroup.html#rotation" class="tsd-index-link tsd-is-protected tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg><span>rotation</span></a>
+<a href="scene_ActorGroup.ActorGroup.html#spriteRegion" class="tsd-index-link tsd-is-protected tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg><span>sprite<wbr/>Region?</span></a>
+<a href="scene_ActorGroup.ActorGroup.html#storedEvents" class="tsd-index-link tsd-is-protected tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg><span>stored<wbr/>Events</span></a>
+<a href="scene_ActorGroup.ActorGroup.html#transparency" class="tsd-index-link tsd-is-protected tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg><span>transparency</span></a>
+<a href="scene_ActorGroup.ActorGroup.html#width" class="tsd-index-link tsd-is-protected tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg><span>width</span></a>
+<a href="scene_ActorGroup.ActorGroup.html#x" class="tsd-index-link tsd-is-protected tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg><span>x</span></a>
+<a href="scene_ActorGroup.ActorGroup.html#y" class="tsd-index-link tsd-is-protected tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg><span>y</span></a>
 </div></section>
 <section class="tsd-index-section">
 <h3 class="tsd-index-heading">Methods</h3>
-<div class="tsd-index-list"><a href="map_Tile.Tile.html#addUnit" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><rect fill="var(--color-icon-background)" stroke="#FF4DB8" stroke-width="1.5" x="1" y="1" width="22" height="22" rx="12" id="icon-2048-path"></rect><path d="M9.162 16V7.24H10.578L11.514 10.072C11.602 10.328 11.674 10.584 11.73 10.84C11.794 11.088 11.842 11.28 11.874 11.416C11.906 11.28 11.954 11.088 12.018 10.84C12.082 10.584 12.154 10.324 12.234 10.06L13.122 7.24H14.538V16H13.482V12.82C13.482 12.468 13.49 12.068 13.506 11.62C13.53 11.172 13.558 10.716 13.59 10.252C13.622 9.78 13.654 9.332 13.686 8.908C13.726 8.476 13.762 8.1 13.794 7.78L12.366 12.16H11.334L9.894 7.78C9.934 8.092 9.97 8.456 10.002 8.872C10.042 9.28 10.078 9.716 10.11 10.18C10.142 10.636 10.166 11.092 10.182 11.548C10.206 12.004 10.218 12.428 10.218 12.82V16H9.162Z" fill="var(--color-text)" id="icon-2048-text"></path></svg><span>add<wbr/>Unit</span></a>
-<a href="map_Tile.Tile.html#call" class="tsd-index-link tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>call</span></a>
-<a href="map_Tile.Tile.html#draw" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>draw</span></a>
-<a href="map_Tile.Tile.html#getAdjacentTiles" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>get<wbr/>Adjacent<wbr/>Tiles</span></a>
-<a href="map_Tile.Tile.html#getCenterPosition" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>get<wbr/>Center<wbr/>Position</span></a>
-<a href="map_Tile.Tile.html#getColor" class="tsd-index-link tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>get<wbr/>Color</span></a>
-<a href="map_Tile.Tile.html#getDistanceFrom" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>get<wbr/>Distance<wbr/>From</span></a>
-<a href="map_Tile.Tile.html#getGridX" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>get<wbr/>GridX</span></a>
-<a href="map_Tile.Tile.html#getGridY" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>get<wbr/>GridY</span></a>
-<a href="map_Tile.Tile.html#getHeight" class="tsd-index-link tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>get<wbr/>Height</span></a>
-<a href="map_Tile.Tile.html#getImage" class="tsd-index-link tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>get<wbr/>Image</span></a>
-<a href="map_Tile.Tile.html#getNumberedRiverSides" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>get<wbr/>Numbered<wbr/>River<wbr/>Sides</span></a>
-<a href="map_Tile.Tile.html#getRiverSides" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>get<wbr/>River<wbr/>Sides</span></a>
-<a href="map_Tile.Tile.html#getRotation" class="tsd-index-link tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>get<wbr/>Rotation</span></a>
-<a href="map_Tile.Tile.html#getRotationOriginX" class="tsd-index-link tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>get<wbr/>Rotation<wbr/>OriginX</span></a>
-<a href="map_Tile.Tile.html#getRotationOriginY" class="tsd-index-link tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>get<wbr/>Rotation<wbr/>OriginY</span></a>
-<a href="map_Tile.Tile.html#getSpriteRegion" class="tsd-index-link tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>get<wbr/>Sprite<wbr/>Region</span></a>
-<a href="map_Tile.Tile.html#getTileTypes" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>get<wbr/>Tile<wbr/>Types</span></a>
-<a href="map_Tile.Tile.html#getTransparency" class="tsd-index-link tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>get<wbr/>Transparency</span></a>
-<a href="map_Tile.Tile.html#getUnits" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>get<wbr/>Units</span></a>
-<a href="map_Tile.Tile.html#getVectors" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>get<wbr/>Vectors</span></a>
-<a href="map_Tile.Tile.html#getWidth" class="tsd-index-link tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>get<wbr/>Width</span></a>
-<a href="map_Tile.Tile.html#getX" class="tsd-index-link tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>getX</span></a>
-<a href="map_Tile.Tile.html#getY" class="tsd-index-link tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>getY</span></a>
-<a href="map_Tile.Tile.html#hasRiver" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>has<wbr/>River</span></a>
-<a href="map_Tile.Tile.html#initializeVectors" class="tsd-index-link tsd-is-private"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>initialize<wbr/>Vectors</span></a>
-<a href="map_Tile.Tile.html#insideActor" class="tsd-index-link tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>inside<wbr/>Actor</span></a>
-<a href="map_Tile.Tile.html#loadImage" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>load<wbr/>Image</span></a>
-<a href="map_Tile.Tile.html#on" class="tsd-index-link tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>on</span></a>
-<a href="map_Tile.Tile.html#onCreated" class="tsd-index-link tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>on<wbr/>Created</span></a>
-<a href="map_Tile.Tile.html#onDestroyed" class="tsd-index-link tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>on<wbr/>Destroyed</span></a>
-<a href="map_Tile.Tile.html#setAdjacentTile" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>set<wbr/>Adjacent<wbr/>Tile</span></a>
-<a href="map_Tile.Tile.html#setImage" class="tsd-index-link tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>set<wbr/>Image</span></a>
-<a href="map_Tile.Tile.html#setPosition" class="tsd-index-link tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>set<wbr/>Position</span></a>
-<a href="map_Tile.Tile.html#setRotation" class="tsd-index-link tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>set<wbr/>Rotation</span></a>
-<a href="map_Tile.Tile.html#setSize" class="tsd-index-link tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>set<wbr/>Size</span></a>
-<a href="map_Tile.Tile.html#setTileTypes" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>set<wbr/>Tile<wbr/>Types</span></a>
-<a href="map_Tile.Tile.html#generateImageFromTileTypes" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>generate<wbr/>Image<wbr/>From<wbr/>Tile<wbr/>Types</span></a>
-<a href="map_Tile.Tile.html#mergeActors" class="tsd-index-link tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>merge<wbr/>Actors</span></a>
+<div class="tsd-index-list"><a href="scene_ActorGroup.ActorGroup.html#addActor" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><rect fill="var(--color-icon-background)" stroke="#FF4DB8" stroke-width="1.5" x="1" y="1" width="22" height="22" rx="12" id="icon-2048-path"></rect><path d="M9.162 16V7.24H10.578L11.514 10.072C11.602 10.328 11.674 10.584 11.73 10.84C11.794 11.088 11.842 11.28 11.874 11.416C11.906 11.28 11.954 11.088 12.018 10.84C12.082 10.584 12.154 10.324 12.234 10.06L13.122 7.24H14.538V16H13.482V12.82C13.482 12.468 13.49 12.068 13.506 11.62C13.53 11.172 13.558 10.716 13.59 10.252C13.622 9.78 13.654 9.332 13.686 8.908C13.726 8.476 13.762 8.1 13.794 7.78L12.366 12.16H11.334L9.894 7.78C9.934 8.092 9.97 8.456 10.002 8.872C10.042 9.28 10.078 9.716 10.11 10.18C10.142 10.636 10.166 11.092 10.182 11.548C10.206 12.004 10.218 12.428 10.218 12.82V16H9.162Z" fill="var(--color-text)" id="icon-2048-text"></path></svg><span>add<wbr/>Actor</span></a>
+<a href="scene_ActorGroup.ActorGroup.html#call" class="tsd-index-link tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>call</span></a>
+<a href="scene_ActorGroup.ActorGroup.html#draw" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>draw</span></a>
+<a href="scene_ActorGroup.ActorGroup.html#getColor" class="tsd-index-link tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>get<wbr/>Color</span></a>
+<a href="scene_ActorGroup.ActorGroup.html#getHeight" class="tsd-index-link tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>get<wbr/>Height</span></a>
+<a href="scene_ActorGroup.ActorGroup.html#getImage" class="tsd-index-link tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>get<wbr/>Image</span></a>
+<a href="scene_ActorGroup.ActorGroup.html#getRotation" class="tsd-index-link tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>get<wbr/>Rotation</span></a>
+<a href="scene_ActorGroup.ActorGroup.html#getRotationOriginX" class="tsd-index-link tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>get<wbr/>Rotation<wbr/>OriginX</span></a>
+<a href="scene_ActorGroup.ActorGroup.html#getRotationOriginY" class="tsd-index-link tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>get<wbr/>Rotation<wbr/>OriginY</span></a>
+<a href="scene_ActorGroup.ActorGroup.html#getSpriteRegion" class="tsd-index-link tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>get<wbr/>Sprite<wbr/>Region</span></a>
+<a href="scene_ActorGroup.ActorGroup.html#getTransparency" class="tsd-index-link tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>get<wbr/>Transparency</span></a>
+<a href="scene_ActorGroup.ActorGroup.html#getWidth" class="tsd-index-link tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>get<wbr/>Width</span></a>
+<a href="scene_ActorGroup.ActorGroup.html#getX" class="tsd-index-link tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>getX</span></a>
+<a href="scene_ActorGroup.ActorGroup.html#getY" class="tsd-index-link tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>getY</span></a>
+<a href="scene_ActorGroup.ActorGroup.html#insideActor" class="tsd-index-link tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>inside<wbr/>Actor</span></a>
+<a href="scene_ActorGroup.ActorGroup.html#on" class="tsd-index-link tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>on</span></a>
+<a href="scene_ActorGroup.ActorGroup.html#onCreated" class="tsd-index-link tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>on<wbr/>Created</span></a>
+<a href="scene_ActorGroup.ActorGroup.html#onDestroyed" class="tsd-index-link tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>on<wbr/>Destroyed</span></a>
+<a href="scene_ActorGroup.ActorGroup.html#removeActor" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>remove<wbr/>Actor</span></a>
+<a href="scene_ActorGroup.ActorGroup.html#setImage" class="tsd-index-link tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>set<wbr/>Image</span></a>
+<a href="scene_ActorGroup.ActorGroup.html#setPosition" class="tsd-index-link tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>set<wbr/>Position</span></a>
+<a href="scene_ActorGroup.ActorGroup.html#setRotation" class="tsd-index-link tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>set<wbr/>Rotation</span></a>
+<a href="scene_ActorGroup.ActorGroup.html#setSize" class="tsd-index-link tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>set<wbr/>Size</span></a>
+<a href="scene_ActorGroup.ActorGroup.html#mergeActors" class="tsd-index-link tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>merge<wbr/>Actors</span></a>
 </div></section></div></details></section></section>
 <section class="tsd-panel-group tsd-member-group">
 <h2>Constructors</h2>
 <section class="tsd-panel tsd-member"><a id="constructor" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>constructor</span><a href="#constructor" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none" id="icon-anchor-a"></path><path d="M10 14a3.5 3.5 0 0 0 5 0l4 -4a3.5 3.5 0 0 0 -5 -5l-.5 .5" id="icon-anchor-b"></path><path d="M14 10a3.5 3.5 0 0 0 -5 0l-4 4a3.5 3.5 0 0 0 5 5l.5 -.5" id="icon-anchor-c"></path></svg></a></h3>
 <ul class="tsd-signatures">
-<li class="tsd-signature tsd-anchor-link" id="constructor.new_Tile"><span class="tsd-kind-constructor-signature">new <wbr/>Tile</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">options</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="map_Tile.Tile.html" class="tsd-signature-type tsd-kind-class">Tile</a><a href="#constructor.new_Tile" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></li>
+<li class="tsd-signature tsd-anchor-link" id="constructor.new_ActorGroup"><span class="tsd-kind-constructor-signature">new <wbr/>Actor<wbr/>Group</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">options</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="scene_ActorGroup.ActorGroup.html" class="tsd-signature-type tsd-kind-class">ActorGroup</a><a href="#constructor.new_ActorGroup" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></li>
 <li class="tsd-description">
 <div class="tsd-parameters">
 <h4 class="tsd-parameters-title">Parameters</h4>
 <ul class="tsd-parameter-list">
 <li>
-<h5><span class="tsd-kind-parameter">options</span>: <a href="../interfaces/map_Tile.TileOptions.html" class="tsd-signature-type tsd-kind-interface">TileOptions</a></h5></li></ul></div>
-<h4 class="tsd-returns-title">Returns <a href="map_Tile.Tile.html" class="tsd-signature-type tsd-kind-class">Tile</a></h4><aside class="tsd-sources">
+<h5><span class="tsd-kind-parameter">options</span>: <a href="../interfaces/scene_ActorGroup.ActorGroupOptions.html" class="tsd-signature-type tsd-kind-interface">ActorGroupOptions</a></h5></li></ul></div>
+<h4 class="tsd-returns-title">Returns <a href="scene_ActorGroup.ActorGroup.html" class="tsd-signature-type tsd-kind-class">ActorGroup</a></h4><aside class="tsd-sources">
 <p>Overrides <a href="scene_Actor.Actor.html">Actor</a>.<a href="scene_Actor.Actor.html#constructor">constructor</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/2612df9b/client/src/map/Tile.ts#L31">map/Tile.ts:31</a></li></ul></aside></li></ul></section></section>
+<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/2612df9b/client/src/scene/ActorGroup.ts#L15">scene/ActorGroup.ts:15</a></li></ul></aside></li></ul></section></section>
 <section class="tsd-panel-group tsd-member-group">
 <h2>Properties</h2>
-<section class="tsd-panel tsd-member tsd-is-private"><a id="adjacentTiles" class="tsd-anchor"></a>
-<h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagPrivate">Private</code> <span>adjacent<wbr/>Tiles</span><a href="#adjacentTiles" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
-<div class="tsd-signature"><span class="tsd-kind-property">adjacent<wbr/>Tiles</span><span class="tsd-signature-symbol">:</span> <a href="map_Tile.Tile.html" class="tsd-signature-type tsd-kind-class">Tile</a><span class="tsd-signature-symbol">[]</span></div><aside class="tsd-sources">
+<section class="tsd-panel tsd-member tsd-is-private"><a id="actors" class="tsd-anchor"></a>
+<h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagPrivate">Private</code> <span>actors</span><a href="#actors" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
+<div class="tsd-signature"><span class="tsd-kind-property">actors</span><span class="tsd-signature-symbol">:</span> <a href="scene_Actor.Actor.html" class="tsd-signature-type tsd-kind-class">Actor</a><span class="tsd-signature-symbol">[]</span></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/2612df9b/client/src/map/Tile.ts#L23">map/Tile.ts:23</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/2612df9b/client/src/scene/ActorGroup.ts#L13">scene/ActorGroup.ts:13</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-is-protected tsd-is-inherited"><a id="color" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagProtected">Protected</code> <span>color</span><a href="#color" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">color</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div><aside class="tsd-sources">
 <p>Inherited from <a href="scene_Actor.Actor.html">Actor</a>.<a href="scene_Actor.Actor.html#color">color</a></p>
 <ul>
 <li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/2612df9b/client/src/scene/Actor.ts#L17">scene/Actor.ts:17</a></li></ul></aside></section>
-<section class="tsd-panel tsd-member tsd-is-private"><a id="gridX" class="tsd-anchor"></a>
-<h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagPrivate">Private</code> <span>gridX</span><a href="#gridX" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
-<div class="tsd-signature"><span class="tsd-kind-property">gridX</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span></div><aside class="tsd-sources">
-<ul>
-<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/2612df9b/client/src/map/Tile.ts#L28">map/Tile.ts:28</a></li></ul></aside></section>
-<section class="tsd-panel tsd-member tsd-is-private"><a id="gridY" class="tsd-anchor"></a>
-<h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagPrivate">Private</code> <span>gridY</span><a href="#gridY" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
-<div class="tsd-signature"><span class="tsd-kind-property">gridY</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span></div><aside class="tsd-sources">
-<ul>
-<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/2612df9b/client/src/map/Tile.ts#L29">map/Tile.ts:29</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-is-protected tsd-is-inherited"><a id="height" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagProtected">Protected</code> <span>height</span><a href="#height" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">height</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span></div><aside class="tsd-sources">
@@ -158,11 +124,6 @@
 <p>Inherited from <a href="scene_Actor.Actor.html">Actor</a>.<a href="scene_Actor.Actor.html#mouseInside">mouseInside</a></p>
 <ul>
 <li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/2612df9b/client/src/scene/Actor.ts#L28">scene/Actor.ts:28</a></li></ul></aside></section>
-<section class="tsd-panel tsd-member tsd-is-private"><a id="riverSides" class="tsd-anchor"></a>
-<h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagPrivate">Private</code> <span>river<wbr/>Sides</span><a href="#riverSides" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
-<div class="tsd-signature"><span class="tsd-kind-property">river<wbr/>Sides</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">[]</span></div><aside class="tsd-sources">
-<ul>
-<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/2612df9b/client/src/map/Tile.ts#L25">map/Tile.ts:25</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-is-protected tsd-is-inherited"><a id="rotation" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagProtected">Protected</code> <span>rotation</span><a href="#rotation" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">rotation</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span></div><aside class="tsd-sources">
@@ -181,27 +142,12 @@
 <p>Inherited from <a href="scene_Actor.Actor.html">Actor</a>.<a href="scene_Actor.Actor.html#storedEvents">storedEvents</a></p>
 <ul>
 <li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/2612df9b/client/src/scene/Actor.ts#L27">scene/Actor.ts:27</a></li></ul></aside></section>
-<section class="tsd-panel tsd-member tsd-is-private"><a id="tileTypes" class="tsd-anchor"></a>
-<h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagPrivate">Private</code> <span>tile<wbr/>Types</span><a href="#tileTypes" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
-<div class="tsd-signature"><span class="tsd-kind-property">tile<wbr/>Types</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span></div><aside class="tsd-sources">
-<ul>
-<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/2612df9b/client/src/map/Tile.ts#L22">map/Tile.ts:22</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-is-protected tsd-is-inherited"><a id="transparency" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagProtected">Protected</code> <span>transparency</span><a href="#transparency" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">transparency</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span></div><aside class="tsd-sources">
 <p>Inherited from <a href="scene_Actor.Actor.html">Actor</a>.<a href="scene_Actor.Actor.html#transparency">transparency</a></p>
 <ul>
 <li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/2612df9b/client/src/scene/Actor.ts#L26">scene/Actor.ts:26</a></li></ul></aside></section>
-<section class="tsd-panel tsd-member tsd-is-private"><a id="units" class="tsd-anchor"></a>
-<h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagPrivate">Private</code> <span>units</span><a href="#units" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
-<div class="tsd-signature"><span class="tsd-kind-property">units</span><span class="tsd-signature-symbol">:</span> <a href="Unit.Unit.html" class="tsd-signature-type tsd-kind-class">Unit</a><span class="tsd-signature-symbol">[]</span></div><aside class="tsd-sources">
-<ul>
-<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/2612df9b/client/src/map/Tile.ts#L26">map/Tile.ts:26</a></li></ul></aside></section>
-<section class="tsd-panel tsd-member tsd-is-private"><a id="vectors" class="tsd-anchor"></a>
-<h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagPrivate">Private</code> <span>vectors</span><a href="#vectors" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
-<div class="tsd-signature"><span class="tsd-kind-property">vectors</span><span class="tsd-signature-symbol">:</span> <a href="util_Vector.Vector.html" class="tsd-signature-type tsd-kind-class">Vector</a><span class="tsd-signature-symbol">[]</span></div><aside class="tsd-sources">
-<ul>
-<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/2612df9b/client/src/map/Tile.ts#L24">map/Tile.ts:24</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-is-protected tsd-is-inherited"><a id="width" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagProtected">Protected</code> <span>width</span><a href="#width" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">width</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span></div><aside class="tsd-sources">
@@ -219,37 +165,22 @@
 <div class="tsd-signature"><span class="tsd-kind-property">y</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span></div><aside class="tsd-sources">
 <p>Inherited from <a href="scene_Actor.Actor.html">Actor</a>.<a href="scene_Actor.Actor.html#y">y</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/2612df9b/client/src/scene/Actor.ts#L22">scene/Actor.ts:22</a></li></ul></aside></section>
-<section class="tsd-panel tsd-member"><a id="HEIGHT-1" class="tsd-anchor"></a>
-<h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagStatic">Static</code> <span>HEIGHT</span><a href="#HEIGHT-1" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
-<div class="tsd-signature"><span class="tsd-kind-property">HEIGHT</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> = 32</span></div><aside class="tsd-sources">
-<ul>
-<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/2612df9b/client/src/map/Tile.ts#L18">map/Tile.ts:18</a></li></ul></aside></section>
-<section class="tsd-panel tsd-member"><a id="WIDTH-1" class="tsd-anchor"></a>
-<h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagStatic">Static</code> <span>WIDTH</span><a href="#WIDTH-1" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
-<div class="tsd-signature"><span class="tsd-kind-property">WIDTH</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> = 32</span></div><aside class="tsd-sources">
-<ul>
-<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/2612df9b/client/src/map/Tile.ts#L17">map/Tile.ts:17</a></li></ul></aside></section>
-<section class="tsd-panel tsd-member tsd-is-private"><a id="loadedTileImages" class="tsd-anchor"></a>
-<h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagStatic">Static</code> <code class="tsd-tag ts-flagPrivate">Private</code> <span>loaded<wbr/>Tile<wbr/>Images</span><a href="#loadedTileImages" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
-<div class="tsd-signature"><span class="tsd-kind-property">loaded<wbr/>Tile<wbr/>Images</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type ">Map</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type ">HTMLImageElement</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol"> = ...</span></div><aside class="tsd-sources">
-<ul>
-<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/2612df9b/client/src/map/Tile.ts#L20">map/Tile.ts:20</a></li></ul></aside></section></section>
+<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/2612df9b/client/src/scene/Actor.ts#L22">scene/Actor.ts:22</a></li></ul></aside></section></section>
 <section class="tsd-panel-group tsd-member-group">
 <h2>Methods</h2>
-<section class="tsd-panel tsd-member"><a id="addUnit" class="tsd-anchor"></a>
-<h3 class="tsd-anchor-link"><span>add<wbr/>Unit</span><a href="#addUnit" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
+<section class="tsd-panel tsd-member"><a id="addActor" class="tsd-anchor"></a>
+<h3 class="tsd-anchor-link"><span>add<wbr/>Actor</span><a href="#addActor" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <ul class="tsd-signatures">
-<li class="tsd-signature tsd-anchor-link" id="addUnit.addUnit-1"><span class="tsd-kind-call-signature">add<wbr/>Unit</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">unit</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span><a href="#addUnit.addUnit-1" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></li>
+<li class="tsd-signature tsd-anchor-link" id="addActor.addActor-1"><span class="tsd-kind-call-signature">add<wbr/>Actor</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">actor</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span><a href="#addActor.addActor-1" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></li>
 <li class="tsd-description">
 <div class="tsd-parameters">
 <h4 class="tsd-parameters-title">Parameters</h4>
 <ul class="tsd-parameter-list">
 <li>
-<h5><span class="tsd-kind-parameter">unit</span>: <a href="Unit.Unit.html" class="tsd-signature-type tsd-kind-class">Unit</a></h5></li></ul></div>
+<h5><span class="tsd-kind-parameter">actor</span>: <a href="scene_Actor.Actor.html" class="tsd-signature-type tsd-kind-class">Actor</a></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/2612df9b/client/src/map/Tile.ts#L76">map/Tile.ts:76</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/2612df9b/client/src/scene/ActorGroup.ts#L32">scene/ActorGroup.ts:32</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="call" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>call</span><a href="#call" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
@@ -279,23 +210,7 @@
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4><aside class="tsd-sources">
 <p>Overrides <a href="scene_Actor.Actor.html">Actor</a>.<a href="scene_Actor.Actor.html#draw">draw</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/2612df9b/client/src/map/Tile.ts#L61">map/Tile.ts:61</a></li></ul></aside></li></ul></section>
-<section class="tsd-panel tsd-member"><a id="getAdjacentTiles" class="tsd-anchor"></a>
-<h3 class="tsd-anchor-link"><span>get<wbr/>Adjacent<wbr/>Tiles</span><a href="#getAdjacentTiles" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
-<ul class="tsd-signatures">
-<li class="tsd-signature tsd-anchor-link" id="getAdjacentTiles.getAdjacentTiles-1"><span class="tsd-kind-call-signature">get<wbr/>Adjacent<wbr/>Tiles</span><span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="map_Tile.Tile.html" class="tsd-signature-type tsd-kind-class">Tile</a><span class="tsd-signature-symbol">[]</span><a href="#getAdjacentTiles.getAdjacentTiles-1" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></li>
-<li class="tsd-description">
-<h4 class="tsd-returns-title">Returns <a href="map_Tile.Tile.html" class="tsd-signature-type tsd-kind-class">Tile</a><span class="tsd-signature-symbol">[]</span></h4><aside class="tsd-sources">
-<ul>
-<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/2612df9b/client/src/map/Tile.ts#L160">map/Tile.ts:160</a></li></ul></aside></li></ul></section>
-<section class="tsd-panel tsd-member"><a id="getCenterPosition" class="tsd-anchor"></a>
-<h3 class="tsd-anchor-link"><span>get<wbr/>Center<wbr/>Position</span><a href="#getCenterPosition" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
-<ul class="tsd-signatures">
-<li class="tsd-signature tsd-anchor-link" id="getCenterPosition.getCenterPosition-1"><span class="tsd-kind-call-signature">get<wbr/>Center<wbr/>Position</span><span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">[</span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">]</span><a href="#getCenterPosition.getCenterPosition-1" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></li>
-<li class="tsd-description">
-<h4 class="tsd-returns-title">Returns <span class="tsd-signature-symbol">[</span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">]</span></h4><aside class="tsd-sources">
-<ul>
-<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/2612df9b/client/src/map/Tile.ts#L182">map/Tile.ts:182</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/2612df9b/client/src/scene/ActorGroup.ts#L26">scene/ActorGroup.ts:26</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="getColor" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>get<wbr/>Color</span><a href="#getColor" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
@@ -305,37 +220,6 @@
 <p>Inherited from <a href="scene_Actor.Actor.html">Actor</a>.<a href="scene_Actor.Actor.html#getColor">getColor</a></p>
 <ul>
 <li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/2612df9b/client/src/scene/Actor.ts#L136">scene/Actor.ts:136</a></li></ul></aside></li></ul></section>
-<section class="tsd-panel tsd-member"><a id="getDistanceFrom" class="tsd-anchor"></a>
-<h3 class="tsd-anchor-link"><span>get<wbr/>Distance<wbr/>From</span><a href="#getDistanceFrom" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
-<ul class="tsd-signatures">
-<li class="tsd-signature tsd-anchor-link" id="getDistanceFrom.getDistanceFrom-1"><span class="tsd-kind-call-signature">get<wbr/>Distance<wbr/>From</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">x1</span>, <span class="tsd-kind-parameter">y1</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><a href="#getDistanceFrom.getDistanceFrom-1" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></li>
-<li class="tsd-description">
-<div class="tsd-parameters">
-<h4 class="tsd-parameters-title">Parameters</h4>
-<ul class="tsd-parameter-list">
-<li>
-<h5><span class="tsd-kind-parameter">x1</span>: <span class="tsd-signature-type">number</span></h5></li>
-<li>
-<h5><span class="tsd-kind-parameter">y1</span>: <span class="tsd-signature-type">number</span></h5></li></ul></div>
-<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">number</span></h4><aside class="tsd-sources">
-<ul>
-<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/2612df9b/client/src/map/Tile.ts#L186">map/Tile.ts:186</a></li></ul></aside></li></ul></section>
-<section class="tsd-panel tsd-member"><a id="getGridX" class="tsd-anchor"></a>
-<h3 class="tsd-anchor-link"><span>get<wbr/>GridX</span><a href="#getGridX" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
-<ul class="tsd-signatures">
-<li class="tsd-signature tsd-anchor-link" id="getGridX.getGridX-1"><span class="tsd-kind-call-signature">get<wbr/>GridX</span><span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><a href="#getGridX.getGridX-1" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></li>
-<li class="tsd-description">
-<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">number</span></h4><aside class="tsd-sources">
-<ul>
-<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/2612df9b/client/src/map/Tile.ts#L104">map/Tile.ts:104</a></li></ul></aside></li></ul></section>
-<section class="tsd-panel tsd-member"><a id="getGridY" class="tsd-anchor"></a>
-<h3 class="tsd-anchor-link"><span>get<wbr/>GridY</span><a href="#getGridY" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
-<ul class="tsd-signatures">
-<li class="tsd-signature tsd-anchor-link" id="getGridY.getGridY-1"><span class="tsd-kind-call-signature">get<wbr/>GridY</span><span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><a href="#getGridY.getGridY-1" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></li>
-<li class="tsd-description">
-<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">number</span></h4><aside class="tsd-sources">
-<ul>
-<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/2612df9b/client/src/map/Tile.ts#L108">map/Tile.ts:108</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="getHeight" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>get<wbr/>Height</span><a href="#getHeight" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
@@ -354,22 +238,6 @@
 <p>Inherited from <a href="scene_Actor.Actor.html">Actor</a>.<a href="scene_Actor.Actor.html#getImage">getImage</a></p>
 <ul>
 <li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/2612df9b/client/src/scene/Actor.ts#L116">scene/Actor.ts:116</a></li></ul></aside></li></ul></section>
-<section class="tsd-panel tsd-member"><a id="getNumberedRiverSides" class="tsd-anchor"></a>
-<h3 class="tsd-anchor-link"><span>get<wbr/>Numbered<wbr/>River<wbr/>Sides</span><a href="#getNumberedRiverSides" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
-<ul class="tsd-signatures">
-<li class="tsd-signature tsd-anchor-link" id="getNumberedRiverSides.getNumberedRiverSides-1"><span class="tsd-kind-call-signature">get<wbr/>Numbered<wbr/>River<wbr/>Sides</span><span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">[]</span><a href="#getNumberedRiverSides.getNumberedRiverSides-1" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></li>
-<li class="tsd-description">
-<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">[]</span></h4><aside class="tsd-sources">
-<ul>
-<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/2612df9b/client/src/map/Tile.ts#L88">map/Tile.ts:88</a></li></ul></aside></li></ul></section>
-<section class="tsd-panel tsd-member"><a id="getRiverSides" class="tsd-anchor"></a>
-<h3 class="tsd-anchor-link"><span>get<wbr/>River<wbr/>Sides</span><a href="#getRiverSides" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
-<ul class="tsd-signatures">
-<li class="tsd-signature tsd-anchor-link" id="getRiverSides.getRiverSides-1"><span class="tsd-kind-call-signature">get<wbr/>River<wbr/>Sides</span><span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">[]</span><a href="#getRiverSides.getRiverSides-1" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></li>
-<li class="tsd-description">
-<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">[]</span></h4><aside class="tsd-sources">
-<ul>
-<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/2612df9b/client/src/map/Tile.ts#L84">map/Tile.ts:84</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="getRotation" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>get<wbr/>Rotation</span><a href="#getRotation" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
@@ -406,14 +274,6 @@
 <p>Inherited from <a href="scene_Actor.Actor.html">Actor</a>.<a href="scene_Actor.Actor.html#getSpriteRegion">getSpriteRegion</a></p>
 <ul>
 <li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/2612df9b/client/src/scene/Actor.ts#L140">scene/Actor.ts:140</a></li></ul></aside></li></ul></section>
-<section class="tsd-panel tsd-member"><a id="getTileTypes" class="tsd-anchor"></a>
-<h3 class="tsd-anchor-link"><span>get<wbr/>Tile<wbr/>Types</span><a href="#getTileTypes" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
-<ul class="tsd-signatures">
-<li class="tsd-signature tsd-anchor-link" id="getTileTypes.getTileTypes-1"><span class="tsd-kind-call-signature">get<wbr/>Tile<wbr/>Types</span><span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span><a href="#getTileTypes.getTileTypes-1" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></li>
-<li class="tsd-description">
-<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span></h4><aside class="tsd-sources">
-<ul>
-<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/2612df9b/client/src/map/Tile.ts#L96">map/Tile.ts:96</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="getTransparency" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>get<wbr/>Transparency</span><a href="#getTransparency" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
@@ -423,22 +283,6 @@
 <p>Inherited from <a href="scene_Actor.Actor.html">Actor</a>.<a href="scene_Actor.Actor.html#getTransparency">getTransparency</a></p>
 <ul>
 <li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/2612df9b/client/src/scene/Actor.ts#L165">scene/Actor.ts:165</a></li></ul></aside></li></ul></section>
-<section class="tsd-panel tsd-member"><a id="getUnits" class="tsd-anchor"></a>
-<h3 class="tsd-anchor-link"><span>get<wbr/>Units</span><a href="#getUnits" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
-<ul class="tsd-signatures">
-<li class="tsd-signature tsd-anchor-link" id="getUnits.getUnits-1"><span class="tsd-kind-call-signature">get<wbr/>Units</span><span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="Unit.Unit.html" class="tsd-signature-type tsd-kind-class">Unit</a><span class="tsd-signature-symbol">[]</span><a href="#getUnits.getUnits-1" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></li>
-<li class="tsd-description">
-<h4 class="tsd-returns-title">Returns <a href="Unit.Unit.html" class="tsd-signature-type tsd-kind-class">Unit</a><span class="tsd-signature-symbol">[]</span></h4><aside class="tsd-sources">
-<ul>
-<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/2612df9b/client/src/map/Tile.ts#L192">map/Tile.ts:192</a></li></ul></aside></li></ul></section>
-<section class="tsd-panel tsd-member"><a id="getVectors" class="tsd-anchor"></a>
-<h3 class="tsd-anchor-link"><span>get<wbr/>Vectors</span><a href="#getVectors" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
-<ul class="tsd-signatures">
-<li class="tsd-signature tsd-anchor-link" id="getVectors.getVectors-1"><span class="tsd-kind-call-signature">get<wbr/>Vectors</span><span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="util_Vector.Vector.html" class="tsd-signature-type tsd-kind-class">Vector</a><span class="tsd-signature-symbol">[]</span><a href="#getVectors.getVectors-1" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></li>
-<li class="tsd-description">
-<h4 class="tsd-returns-title">Returns <a href="util_Vector.Vector.html" class="tsd-signature-type tsd-kind-class">Vector</a><span class="tsd-signature-symbol">[]</span></h4><aside class="tsd-sources">
-<ul>
-<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/2612df9b/client/src/map/Tile.ts#L168">map/Tile.ts:168</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="getWidth" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>get<wbr/>Width</span><a href="#getWidth" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
@@ -466,22 +310,6 @@
 <p>Inherited from <a href="scene_Actor.Actor.html">Actor</a>.<a href="scene_Actor.Actor.html#getY">getY</a></p>
 <ul>
 <li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/2612df9b/client/src/scene/Actor.ts#L124">scene/Actor.ts:124</a></li></ul></aside></li></ul></section>
-<section class="tsd-panel tsd-member"><a id="hasRiver" class="tsd-anchor"></a>
-<h3 class="tsd-anchor-link"><span>has<wbr/>River</span><a href="#hasRiver" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
-<ul class="tsd-signatures">
-<li class="tsd-signature tsd-anchor-link" id="hasRiver.hasRiver-1"><span class="tsd-kind-call-signature">has<wbr/>River</span><span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">boolean</span><a href="#hasRiver.hasRiver-1" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></li>
-<li class="tsd-description">
-<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">boolean</span></h4><aside class="tsd-sources">
-<ul>
-<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/2612df9b/client/src/map/Tile.ts#L80">map/Tile.ts:80</a></li></ul></aside></li></ul></section>
-<section class="tsd-panel tsd-member tsd-is-private"><a id="initializeVectors" class="tsd-anchor"></a>
-<h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagPrivate">Private</code> <span>initialize<wbr/>Vectors</span><a href="#initializeVectors" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
-<ul class="tsd-signatures tsd-is-private">
-<li class="tsd-signature tsd-anchor-link" id="initializeVectors.initializeVectors-1"><span class="tsd-kind-call-signature">initialize<wbr/>Vectors</span><span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span><a href="#initializeVectors.initializeVectors-1" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></li>
-<li class="tsd-description">
-<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4><aside class="tsd-sources">
-<ul>
-<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/2612df9b/client/src/map/Tile.ts#L172">map/Tile.ts:172</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="insideActor" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>inside<wbr/>Actor</span><a href="#insideActor" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
@@ -498,14 +326,6 @@
 <p>Inherited from <a href="scene_Actor.Actor.html">Actor</a>.<a href="scene_Actor.Actor.html#insideActor">insideActor</a></p>
 <ul>
 <li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/2612df9b/client/src/scene/Actor.ts#L102">scene/Actor.ts:102</a></li></ul></aside></li></ul></section>
-<section class="tsd-panel tsd-member"><a id="loadImage" class="tsd-anchor"></a>
-<h3 class="tsd-anchor-link"><span>load<wbr/>Image</span><a href="#loadImage" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
-<ul class="tsd-signatures">
-<li class="tsd-signature tsd-anchor-link" id="loadImage.loadImage-1"><span class="tsd-kind-call-signature">load<wbr/>Image</span><span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span><a href="#loadImage.loadImage-1" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></li>
-<li class="tsd-description">
-<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
-<ul>
-<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/2612df9b/client/src/map/Tile.ts#L50">map/Tile.ts:50</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="on" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>on</span><a href="#on" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
@@ -551,21 +371,19 @@
 <p>Inherited from <a href="scene_Actor.Actor.html">Actor</a>.<a href="scene_Actor.Actor.html#onDestroyed">onDestroyed</a></p>
 <ul>
 <li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/2612df9b/client/src/scene/Actor.ts#L82">scene/Actor.ts:82</a></li></ul></aside></li></ul></section>
-<section class="tsd-panel tsd-member"><a id="setAdjacentTile" class="tsd-anchor"></a>
-<h3 class="tsd-anchor-link"><span>set<wbr/>Adjacent<wbr/>Tile</span><a href="#setAdjacentTile" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
+<section class="tsd-panel tsd-member"><a id="removeActor" class="tsd-anchor"></a>
+<h3 class="tsd-anchor-link"><span>remove<wbr/>Actor</span><a href="#removeActor" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <ul class="tsd-signatures">
-<li class="tsd-signature tsd-anchor-link" id="setAdjacentTile.setAdjacentTile-1"><span class="tsd-kind-call-signature">set<wbr/>Adjacent<wbr/>Tile</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">index</span>, <span class="tsd-kind-parameter">tile</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span><a href="#setAdjacentTile.setAdjacentTile-1" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></li>
+<li class="tsd-signature tsd-anchor-link" id="removeActor.removeActor-1"><span class="tsd-kind-call-signature">remove<wbr/>Actor</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">actor</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span><a href="#removeActor.removeActor-1" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></li>
 <li class="tsd-description">
 <div class="tsd-parameters">
 <h4 class="tsd-parameters-title">Parameters</h4>
 <ul class="tsd-parameter-list">
 <li>
-<h5><span class="tsd-kind-parameter">index</span>: <span class="tsd-signature-type">number</span></h5></li>
-<li>
-<h5><span class="tsd-kind-parameter">tile</span>: <a href="map_Tile.Tile.html" class="tsd-signature-type tsd-kind-class">Tile</a></h5></li></ul></div>
+<h5><span class="tsd-kind-parameter">actor</span>: <a href="scene_Actor.Actor.html" class="tsd-signature-type tsd-kind-class">Actor</a></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/2612df9b/client/src/map/Tile.ts#L164">map/Tile.ts:164</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/2612df9b/client/src/scene/ActorGroup.ts#L36">scene/ActorGroup.ts:36</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="setImage" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>set<wbr/>Image</span><a href="#setImage" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
@@ -626,32 +444,6 @@
 <p>Inherited from <a href="scene_Actor.Actor.html">Actor</a>.<a href="scene_Actor.Actor.html#setSize">setSize</a></p>
 <ul>
 <li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/2612df9b/client/src/scene/Actor.ts#L225">scene/Actor.ts:225</a></li></ul></aside></li></ul></section>
-<section class="tsd-panel tsd-member"><a id="setTileTypes" class="tsd-anchor"></a>
-<h3 class="tsd-anchor-link"><span>set<wbr/>Tile<wbr/>Types</span><a href="#setTileTypes" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
-<ul class="tsd-signatures">
-<li class="tsd-signature tsd-anchor-link" id="setTileTypes.setTileTypes-1"><span class="tsd-kind-call-signature">set<wbr/>Tile<wbr/>Types</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">tileTypes</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span><a href="#setTileTypes.setTileTypes-1" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></li>
-<li class="tsd-description">
-<div class="tsd-parameters">
-<h4 class="tsd-parameters-title">Parameters</h4>
-<ul class="tsd-parameter-list">
-<li>
-<h5><span class="tsd-kind-parameter">tileTypes</span>: <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span></h5></li></ul></div>
-<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4><aside class="tsd-sources">
-<ul>
-<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/2612df9b/client/src/map/Tile.ts#L100">map/Tile.ts:100</a></li></ul></aside></li></ul></section>
-<section class="tsd-panel tsd-member"><a id="generateImageFromTileTypes" class="tsd-anchor"></a>
-<h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagStatic">Static</code> <span>generate<wbr/>Image<wbr/>From<wbr/>Tile<wbr/>Types</span><a href="#generateImageFromTileTypes" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
-<ul class="tsd-signatures">
-<li class="tsd-signature tsd-anchor-link" id="generateImageFromTileTypes.generateImageFromTileTypes-1"><span class="tsd-kind-call-signature">generate<wbr/>Image<wbr/>From<wbr/>Tile<wbr/>Types</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">tileTypes</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type ">HTMLImageElement</span><span class="tsd-signature-symbol">&gt;</span><a href="#generateImageFromTileTypes.generateImageFromTileTypes-1" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></li>
-<li class="tsd-description">
-<div class="tsd-parameters">
-<h4 class="tsd-parameters-title">Parameters</h4>
-<ul class="tsd-parameter-list">
-<li>
-<h5><span class="tsd-kind-parameter">tileTypes</span>: <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span></h5></li></ul></div>
-<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type ">HTMLImageElement</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
-<ul>
-<li>Defined in <a href="https://github.com/RyanGrieb/OpenCiv/blob/2612df9b/client/src/map/Tile.ts#L112">map/Tile.ts:112</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="mergeActors" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagStatic">Static</code> <span>merge<wbr/>Actors</span><a href="#mergeActors" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
@@ -693,65 +485,41 @@
 <div class="tsd-accordion-details">
 <ul>
 <li><a href="#constructor" class=""><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-512-path"></use><use href="#icon-512-text"></use></svg><span>constructor</span></a></li>
-<li><a href="#adjacentTiles" class="tsd-is-private"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg><span>adjacent<wbr/>Tiles</span></a></li>
+<li><a href="#actors" class="tsd-is-private"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg><span>actors</span></a></li>
 <li><a href="#color" class="tsd-is-protected tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg><span>color</span></a></li>
-<li><a href="#gridX" class="tsd-is-private"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg><span>gridX</span></a></li>
-<li><a href="#gridY" class="tsd-is-private"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg><span>gridY</span></a></li>
 <li><a href="#height" class="tsd-is-protected tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg><span>height</span></a></li>
 <li><a href="#image" class="tsd-is-protected tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg><span>image</span></a></li>
 <li><a href="#mouseInside" class="tsd-is-protected tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg><span>mouse<wbr/>Inside</span></a></li>
-<li><a href="#riverSides" class="tsd-is-private"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg><span>river<wbr/>Sides</span></a></li>
 <li><a href="#rotation" class="tsd-is-protected tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg><span>rotation</span></a></li>
 <li><a href="#spriteRegion" class="tsd-is-protected tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg><span>sprite<wbr/>Region</span></a></li>
 <li><a href="#storedEvents" class="tsd-is-protected tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg><span>stored<wbr/>Events</span></a></li>
-<li><a href="#tileTypes" class="tsd-is-private"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg><span>tile<wbr/>Types</span></a></li>
 <li><a href="#transparency" class="tsd-is-protected tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg><span>transparency</span></a></li>
-<li><a href="#units" class="tsd-is-private"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg><span>units</span></a></li>
-<li><a href="#vectors" class="tsd-is-private"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg><span>vectors</span></a></li>
 <li><a href="#width" class="tsd-is-protected tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg><span>width</span></a></li>
 <li><a href="#x" class="tsd-is-protected tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg><span>x</span></a></li>
 <li><a href="#y" class="tsd-is-protected tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg><span>y</span></a></li>
-<li><a href="#HEIGHT-1" class=""><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg><span>HEIGHT</span></a></li>
-<li><a href="#WIDTH-1" class=""><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg><span>WIDTH</span></a></li>
-<li><a href="#loadedTileImages" class="tsd-is-private"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg><span>loaded<wbr/>Tile<wbr/>Images</span></a></li>
-<li><a href="#addUnit" class=""><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>add<wbr/>Unit</span></a></li>
+<li><a href="#addActor" class=""><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>add<wbr/>Actor</span></a></li>
 <li><a href="#call" class="tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>call</span></a></li>
 <li><a href="#draw" class=""><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>draw</span></a></li>
-<li><a href="#getAdjacentTiles" class=""><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>get<wbr/>Adjacent<wbr/>Tiles</span></a></li>
-<li><a href="#getCenterPosition" class=""><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>get<wbr/>Center<wbr/>Position</span></a></li>
 <li><a href="#getColor" class="tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>get<wbr/>Color</span></a></li>
-<li><a href="#getDistanceFrom" class=""><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>get<wbr/>Distance<wbr/>From</span></a></li>
-<li><a href="#getGridX" class=""><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>get<wbr/>GridX</span></a></li>
-<li><a href="#getGridY" class=""><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>get<wbr/>GridY</span></a></li>
 <li><a href="#getHeight" class="tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>get<wbr/>Height</span></a></li>
 <li><a href="#getImage" class="tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>get<wbr/>Image</span></a></li>
-<li><a href="#getNumberedRiverSides" class=""><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>get<wbr/>Numbered<wbr/>River<wbr/>Sides</span></a></li>
-<li><a href="#getRiverSides" class=""><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>get<wbr/>River<wbr/>Sides</span></a></li>
 <li><a href="#getRotation" class="tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>get<wbr/>Rotation</span></a></li>
 <li><a href="#getRotationOriginX" class="tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>get<wbr/>Rotation<wbr/>OriginX</span></a></li>
 <li><a href="#getRotationOriginY" class="tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>get<wbr/>Rotation<wbr/>OriginY</span></a></li>
 <li><a href="#getSpriteRegion" class="tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>get<wbr/>Sprite<wbr/>Region</span></a></li>
-<li><a href="#getTileTypes" class=""><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>get<wbr/>Tile<wbr/>Types</span></a></li>
 <li><a href="#getTransparency" class="tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>get<wbr/>Transparency</span></a></li>
-<li><a href="#getUnits" class=""><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>get<wbr/>Units</span></a></li>
-<li><a href="#getVectors" class=""><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>get<wbr/>Vectors</span></a></li>
 <li><a href="#getWidth" class="tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>get<wbr/>Width</span></a></li>
 <li><a href="#getX" class="tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>getX</span></a></li>
 <li><a href="#getY" class="tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>getY</span></a></li>
-<li><a href="#hasRiver" class=""><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>has<wbr/>River</span></a></li>
-<li><a href="#initializeVectors" class="tsd-is-private"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>initialize<wbr/>Vectors</span></a></li>
 <li><a href="#insideActor" class="tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>inside<wbr/>Actor</span></a></li>
-<li><a href="#loadImage" class=""><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>load<wbr/>Image</span></a></li>
 <li><a href="#on" class="tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>on</span></a></li>
 <li><a href="#onCreated" class="tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>on<wbr/>Created</span></a></li>
 <li><a href="#onDestroyed" class="tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>on<wbr/>Destroyed</span></a></li>
-<li><a href="#setAdjacentTile" class=""><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>set<wbr/>Adjacent<wbr/>Tile</span></a></li>
+<li><a href="#removeActor" class=""><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>remove<wbr/>Actor</span></a></li>
 <li><a href="#setImage" class="tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>set<wbr/>Image</span></a></li>
 <li><a href="#setPosition" class="tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>set<wbr/>Position</span></a></li>
 <li><a href="#setRotation" class="tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>set<wbr/>Rotation</span></a></li>
 <li><a href="#setSize" class="tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>set<wbr/>Size</span></a></li>
-<li><a href="#setTileTypes" class=""><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>set<wbr/>Tile<wbr/>Types</span></a></li>
-<li><a href="#generateImageFromTileTypes" class=""><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>generate<wbr/>Image<wbr/>From<wbr/>Tile<wbr/>Types</span></a></li>
 <li><a href="#mergeActors" class="tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>merge<wbr/>Actors</span></a></li></ul></div></details></div>
 <div class="site-menu">
 <nav class="tsd-navigation"><a href="../index.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><rect fill="var(--color-icon-background)" stroke="var(--color-ts-namespace)" stroke-width="1.5" x="1" y="1" width="22" height="22" rx="6" id="icon-4-path"></rect><path d="M9.33 16V7.24H10.77L13.446 14.74C13.43 14.54 13.41 14.296 13.386 14.008C13.37 13.712 13.354 13.404 13.338 13.084C13.33 12.756 13.326 12.448 13.326 12.16V7.24H14.37V16H12.93L10.266 8.5C10.282 8.692 10.298 8.936 10.314 9.232C10.33 9.52 10.342 9.828 10.35 10.156C10.366 10.476 10.374 10.784 10.374 11.08V16H9.33Z" fill="var(--color-text)" id="icon-4-text"></path></svg><span>openciv/client</span></a>
@@ -794,10 +562,10 @@
 <li><a href="map_River.River.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-128-path"></use><use href="#icon-128-text"></use></svg><span>River</span></a></li>
 <li><a href="../interfaces/map_River.RiverOptions.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-256-path"></use><use href="#icon-256-text"></use></svg><span>River<wbr/>Options</span></a></li></ul></div></details></li>
 <li>
-<details class="tsd-index-accordion" open data-key="map/Tile"><summary class="tsd-accordion-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M4.93896 8.531L12 15.591L19.061 8.531L16.939 6.409L12 11.349L7.06098 6.409L4.93896 8.531Z" fill="var(--color-text)"></path></svg><a href="../modules/map_Tile.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-4-path"></use><use href="#icon-4-text"></use></svg><span>map/<wbr/>Tile</span></a></summary>
+<details class="tsd-index-accordion" data-key="map/Tile"><summary class="tsd-accordion-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M4.93896 8.531L12 15.591L19.061 8.531L16.939 6.409L12 11.349L7.06098 6.409L4.93896 8.531Z" fill="var(--color-text)"></path></svg><a href="../modules/map_Tile.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-4-path"></use><use href="#icon-4-text"></use></svg><span>map/<wbr/>Tile</span></a></summary>
 <div class="tsd-accordion-details">
 <ul class="tsd-nested-navigation">
-<li><a href="map_Tile.Tile.html" class="current"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-128-path"></use><use href="#icon-128-text"></use></svg><span>Tile</span></a></li>
+<li><a href="map_Tile.Tile.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-128-path"></use><use href="#icon-128-text"></use></svg><span>Tile</span></a></li>
 <li><a href="../interfaces/map_Tile.TileOptions.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-256-path"></use><use href="#icon-256-text"></use></svg><span>Tile<wbr/>Options</span></a></li></ul></div></details></li>
 <li>
 <details class="tsd-index-accordion" data-key="network/Client"><summary class="tsd-accordion-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M4.93896 8.531L12 15.591L19.061 8.531L16.939 6.409L12 11.349L7.06098 6.409L4.93896 8.531Z" fill="var(--color-text)"></path></svg><a href="../modules/network_Client.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-4-path"></use><use href="#icon-4-text"></use></svg><span>network/<wbr/>Client</span></a></summary>
@@ -829,10 +597,10 @@
 <li><a href="scene_Actor.Actor.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-128-path"></use><use href="#icon-128-text"></use></svg><span>Actor</span></a></li>
 <li><a href="../interfaces/scene_Actor.ActorOptions.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-256-path"></use><use href="#icon-256-text"></use></svg><span>Actor<wbr/>Options</span></a></li></ul></div></details></li>
 <li>
-<details class="tsd-index-accordion" data-key="scene/ActorGroup"><summary class="tsd-accordion-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M4.93896 8.531L12 15.591L19.061 8.531L16.939 6.409L12 11.349L7.06098 6.409L4.93896 8.531Z" fill="var(--color-text)"></path></svg><a href="../modules/scene_ActorGroup.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-4-path"></use><use href="#icon-4-text"></use></svg><span>scene/<wbr/>Actor<wbr/>Group</span></a></summary>
+<details class="tsd-index-accordion" open data-key="scene/ActorGroup"><summary class="tsd-accordion-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M4.93896 8.531L12 15.591L19.061 8.531L16.939 6.409L12 11.349L7.06098 6.409L4.93896 8.531Z" fill="var(--color-text)"></path></svg><a href="../modules/scene_ActorGroup.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-4-path"></use><use href="#icon-4-text"></use></svg><span>scene/<wbr/>Actor<wbr/>Group</span></a></summary>
 <div class="tsd-accordion-details">
 <ul class="tsd-nested-navigation">
-<li><a href="scene_ActorGroup.ActorGroup.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-128-path"></use><use href="#icon-128-text"></use></svg><span>Actor<wbr/>Group</span></a></li>
+<li><a href="scene_ActorGroup.ActorGroup.html" class="current"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-128-path"></use><use href="#icon-128-text"></use></svg><span>Actor<wbr/>Group</span></a></li>
 <li><a href="../interfaces/scene_ActorGroup.ActorGroupOptions.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-256-path"></use><use href="#icon-256-text"></use></svg><span>Actor<wbr/>Group<wbr/>Options</span></a></li></ul></div></details></li>
 <li>
 <details class="tsd-index-accordion" data-key="scene/Camera"><summary class="tsd-accordion-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M4.93896 8.531L12 15.591L19.061 8.531L16.939 6.409L12 11.349L7.06098 6.409L4.93896 8.531Z" fill="var(--color-text)"></path></svg><a href="../modules/scene_Camera.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-4-path"></use><use href="#icon-4-text"></use></svg><span>scene/<wbr/>Camera</span></a></summary>

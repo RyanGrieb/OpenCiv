@@ -1,4 +1,5 @@
 import { Game } from "../Game";
+import { Unit } from "../Unit";
 import { GameMap } from "../map/GameMap";
 import { HoveredTile } from "../map/HoveredTile";
 import { Tile } from "../map/Tile";
@@ -8,6 +9,7 @@ import { Vector } from "../util/Vector";
 import { AbstractPlayer } from "./AbstractPlayer";
 
 export class ClientPlayer extends AbstractPlayer {
+  private selectedUnit: Unit;
   private hoveredTile: HoveredTile;
 
   constructor(name: string) {
@@ -29,24 +31,46 @@ export class ClientPlayer extends AbstractPlayer {
       this.updateHoveredTile(mouseX, mouseY);
     });
 
+    Game.getCurrentScene().on("mouseup", (options) => {
+      const clickedTile = this.hoveredTile.getRepresentedTile();
+      if (clickedTile.getUnits().length > 0) {
+        this.onClickedTileWithUnit(clickedTile);
+      }
+    });
+
     NetworkEvents.on({
       eventName: "zoomToLocation",
       callback: (data) => {
         const gridX = data["x"];
         const gridY = data["y"];
-        const tile = GameMap.getTiles()[gridX][gridY];
+        const tile = GameMap.getInstance().getTiles()[gridX][gridY];
         const zoomAmount = data["zoomAmount"];
         const x = tile.getCenterPosition()[0];
         const y = tile.getCenterPosition()[1];
 
-        Game.getCurrentScene()
-          .getCamera()
-          .setPosition(-x + Game.getWidth() / 2, -y + Game.getHeight() / 2);
-        Game.getCurrentScene()
-          .getCamera()
-          .zoom(Game.getWidth() / 2, Game.getHeight() / 2, zoomAmount);
+        this.zoomToLocation(x, y, zoomAmount);
       },
     });
+  }
+
+  public zoomToLocation(x: number, y: number, zoomAmount: number) {
+    Game.getCurrentScene()
+      .getCamera()
+      .setPosition(-x + Game.getWidth() / 2, -y + Game.getHeight() / 2);
+    Game.getCurrentScene()
+      .getCamera()
+      .zoom(Game.getWidth() / 2, Game.getHeight() / 2, zoomAmount);
+  }
+
+  private onClickedTileWithUnit(tile: Tile) {
+    const units = tile.getUnits();
+    console.log(units);
+    //TODO: Cycle through units on the tile
+    const unit = units[0];
+
+    if (this.selectedUnit) this.selectedUnit.unselect();
+    unit.select();
+    this.selectedUnit = unit;
   }
 
   private updateHoveredTile(mouseX: number, mouseY: number) {
@@ -79,20 +103,23 @@ export class ClientPlayer extends AbstractPlayer {
 
     // Ensure tile is inside map dimensions, if not account for border tiles...
     if (
-      gridX >= GameMap.getWidth() ||
+      gridX >= GameMap.getInstance().getWidth() ||
       gridX < 0 ||
-      gridY >= GameMap.getHeight() ||
+      gridY >= GameMap.getInstance().getHeight() ||
       gridY < 0 ||
       // We also check for mouse values that could indicate were out of bounds...
       mouseY < 6 ||
       mouseX < 15 ||
-      mouseX > GameMap.getWidth() * 32
+      mouseX > GameMap.getInstance().getWidth() * 32
     ) {
-      const adjBorderTiles = GameMap.getAdjacentTiles(gridX, gridY);
+      const adjBorderTiles = GameMap.getInstance().getAdjacentTiles(
+        gridX,
+        gridY
+      );
       const clampedBorderTile =
-        GameMap.getTiles()[Numbers.clamp(gridX, 0, GameMap.getWidth() - 1)][
-          Numbers.clamp(gridY, 0, GameMap.getHeight() - 1)
-        ];
+        GameMap.getInstance().getTiles()[
+          Numbers.clamp(gridX, 0, GameMap.getInstance().getWidth() - 1)
+        ][Numbers.clamp(gridY, 0, GameMap.getInstance().getHeight() - 1)];
       adjBorderTiles.push(clampedBorderTile); // Also push clamped tile.
 
       let foundAdjBorderTile = false;
@@ -116,7 +143,7 @@ export class ClientPlayer extends AbstractPlayer {
     } else {
       // If were inside the map, handle things in our original manner...
       // Get rough estimate of where the nearest tile to the mouse is. (Accurate enough to just check it's adjacent tiles)
-      estimatedTile = GameMap.getTiles()[gridX][gridY];
+      estimatedTile = GameMap.getInstance().getTiles()[gridX][gridY];
       if (!estimatedTile) {
         console.log("on border of map?");
         return;
