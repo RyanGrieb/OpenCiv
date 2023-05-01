@@ -33,7 +33,7 @@ export class ClientPlayer extends AbstractPlayer {
 
     Game.getCurrentScene().on("mouseup", (options) => {
       const clickedTile = this.hoveredTile.getRepresentedTile();
-      if (clickedTile.getUnits().length > 0) {
+      if (clickedTile && clickedTile.getUnits().length > 0) {
         this.onClickedTileWithUnit(clickedTile);
       }
     });
@@ -66,7 +66,7 @@ export class ClientPlayer extends AbstractPlayer {
     const units = tile.getUnits();
     console.log(units);
     //TODO: Cycle through units on the tile
-    const unit = units[0];
+    const unit = units[1];
 
     if (this.selectedUnit) this.selectedUnit.unselect();
     unit.select();

@@ -37,7 +37,6 @@ export class ActorGroup extends Actor {
     const actorIndex = this.actors.indexOf(actor);
     if (actorIndex < 0) return;
 
-    console.log("hi");
     this.actors.splice(actorIndex, 1);
   }
 }

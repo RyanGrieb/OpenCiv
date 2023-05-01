@@ -17,7 +17,7 @@ export class InGameScene extends Scene {
     this.players = [];
 
     const camera = new Camera({
-      wasd_controls: true,
+      wasd_controls: false,
       mouse_controls: true,
       //initial_position: [1, 1],
     });
