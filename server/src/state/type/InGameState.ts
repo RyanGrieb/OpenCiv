@@ -74,8 +74,8 @@ export class InGameState extends State {
         ],
       });
 
-      spawnTile.addUnit(new Unit({ type: "settler" }));
-      spawnTile.addUnit(new Unit({ type: "archer" }));
+      spawnTile.addUnit(new Unit({ name: "settler" }));
+      //spawnTile.addUnit(new Unit({ name: "archer", attackType: "ranged" }));
 
       player.onLoadedIn(() => {
         player.zoomToLocation(spawnTile.getX(), spawnTile.getY(), 7);

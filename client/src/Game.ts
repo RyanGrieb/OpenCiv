@@ -2,6 +2,7 @@ import { Actor } from "./scene/Actor";
 import { Scene } from "./scene/Scene";
 import { GameImage } from "./Assets";
 import { NetworkEvents } from "./network/Client";
+import { Line } from "./ui/Line";
 
 export interface TextOptions {
   text: string;
@@ -36,6 +37,7 @@ export class Game {
   private static lastTimeUpdate = Date.now();
   private static fps: number = 0;
   private static actors: Actor[] = [];
+  private static lines: Line[] = [];
   private static measureQueue: string[];
   private static mouseX: number;
   private static mouseY: number;
@@ -255,6 +257,14 @@ export class Game {
     actor.onCreated();
   }
 
+  public static addLine(line: Line) {
+    this.lines.push(line);
+  }
+
+  public static removeLine(line: Line) {
+    this.lines = this.lines.filter((element) => element !== line);
+  }
+
   public static removeActor(actor: Actor) {
     this.actors = this.actors.filter((element) => element !== actor);
     actor.onDestroyed();
@@ -372,6 +382,34 @@ export class Game {
     this.canvasContext.fillText(textOptions.text, xPos, yPos);
 
     this.canvasContext.restore();
+  }
+
+  public static drawLine(line: Line, canvasContext: CanvasRenderingContext2D) {
+    canvasContext.save();
+
+    // Only apply camera to the Game's main canvas context.
+    if (this.currentScene.getCamera() && canvasContext === this.canvasContext) {
+      const zoom = this.currentScene.getCamera().getZoomAmount();
+      const cameraX = this.currentScene.getCamera().getX();
+      const cameraY = this.currentScene.getCamera().getY();
+      canvasContext.setTransform(zoom, 0, 0, zoom, cameraX, cameraY);
+    }
+
+    const x1 = line.getX1();
+    const x2 = line.getX2();
+    const y1 = line.getY1();
+    const y2 = line.getY2();
+
+    canvasContext.strokeStyle = line.getColor();
+    canvasContext.lineWidth = line.getGirth();
+    canvasContext.lineCap = "round";
+
+    canvasContext.beginPath();
+    canvasContext.moveTo(x1, y1);
+    canvasContext.lineTo(x2, y2);
+    canvasContext.stroke();
+
+    canvasContext.restore();
   }
 
   public static drawRect({

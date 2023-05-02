@@ -185,7 +185,11 @@ export class GameMap {
           }
 
           for (const jsonUnit of jsonUnits) {
-            const unit = new Unit(jsonUnit["type"], tile);
+            const unit = new Unit({
+              name: jsonUnit["name"],
+              attackType: jsonUnit["attackType"],
+              tile: tile,
+            });
             tile.addUnit(unit);
             unitActorList.push(unit);
           }

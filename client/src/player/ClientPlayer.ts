@@ -4,6 +4,7 @@ import { GameMap } from "../map/GameMap";
 import { HoveredTile } from "../map/HoveredTile";
 import { Tile } from "../map/Tile";
 import { NetworkEvents } from "../network/Client";
+import { Line } from "../ui/Line";
 import { Numbers } from "../util/Numbers";
 import { Vector } from "../util/Vector";
 import { AbstractPlayer } from "./AbstractPlayer";
@@ -11,6 +12,7 @@ import { AbstractPlayer } from "./AbstractPlayer";
 export class ClientPlayer extends AbstractPlayer {
   private selectedUnit: Unit;
   private hoveredTile: HoveredTile;
+  private movementLine: Line;
 
   constructor(name: string) {
     super(name);
@@ -29,6 +31,10 @@ export class ClientPlayer extends AbstractPlayer {
       const mouseY = options.y;
 
       this.updateHoveredTile(mouseX, mouseY);
+
+      if (this.selectedUnit) {
+        this.updateDisplayedUnitMovementPath();
+      }
     });
 
     Game.getCurrentScene().on("mouseup", (options) => {
@@ -62,11 +68,28 @@ export class ClientPlayer extends AbstractPlayer {
       .zoom(Game.getWidth() / 2, Game.getHeight() / 2, zoomAmount);
   }
 
+  private updateDisplayedUnitMovementPath() {
+    if (this.movementLine) {
+      Game.getCurrentScene().removeLine(this.movementLine);
+    }
+
+    this.movementLine = new Line({
+      color: "aqua",
+      girth: 2,
+      x1: this.selectedUnit.getTile().getCenterPosition()[0],
+      y1: this.selectedUnit.getTile().getCenterPosition()[1],
+      x2: this.hoveredTile.getCenterPosition()[0],
+      y2: this.hoveredTile.getCenterPosition()[1],
+    });
+
+    Game.getCurrentScene().addLine(this.movementLine);
+  }
+
   private onClickedTileWithUnit(tile: Tile) {
     const units = tile.getUnits();
     console.log(units);
     //TODO: Cycle through units on the tile
-    const unit = units[1];
+    const unit = units[0];
 
     if (this.selectedUnit) this.selectedUnit.unselect();
     unit.select();

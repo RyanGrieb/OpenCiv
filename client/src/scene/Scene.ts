@@ -2,16 +2,28 @@ import { Actor } from "./Actor";
 import { Game } from "../Game";
 import { NetworkEvents } from "../network/Client";
 import { Camera } from "./Camera";
+import { Line } from "../ui/Line";
 
 export abstract class Scene {
   private static ExitReceipt = new (class {})();
 
   protected storedEvents: Map<string, Function[]>;
   private actors: Actor[] = [];
+  private lines: Line[] = [];
   private camera: Camera;
 
   constructor() {
     this.storedEvents = new Map<string, Function[]>();
+  }
+
+  public addLine(line: Line) {
+    this.lines.push(line);
+    Game.addLine(line);
+  }
+
+  public removeLine(line: Line) {
+    this.lines = this.lines.filter((element) => element !== line);
+    Game.removeLine(line);
   }
 
   public addActor(actor: Actor) {
@@ -31,6 +43,10 @@ export abstract class Scene {
 
     this.actors.forEach((actor: Actor) => {
       actor.draw(Game.getCanvasContext());
+    });
+
+    this.lines.forEach((line: Line) => {
+      line.draw(Game.getCanvasContext());
     });
   }
 

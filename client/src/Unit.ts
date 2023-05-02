@@ -4,18 +4,25 @@ import { Tile } from "./map/Tile";
 import { Actor } from "./scene/Actor";
 import { ActorGroup } from "./scene/ActorGroup";
 
+export interface options {
+  name: string;
+  attackType: string;
+  tile: Tile;
+}
+
 export class Unit extends ActorGroup {
-  private type: string;
+  private name: string;
   private tile: Tile;
+  private attackType: string;
   private selectionActors: Actor[];
   private selected: boolean;
 
-  constructor(type: string, tile: Tile) {
+  constructor(options: options) {
     super({
       //image: Game.getImage(GameImage.SPRITESHEET),
       //spriteRegion: SpriteRegion[type.toUpperCase()],
-      x: tile.getCenterPosition()[0] - 28 / 2,
-      y: tile.getCenterPosition()[1] - 28 / 2,
+      x: options.tile.getCenterPosition()[0] - 28 / 2,
+      y: options.tile.getCenterPosition()[1] - 28 / 2,
       width: 28,
       height: 28,
     });
@@ -23,17 +30,22 @@ export class Unit extends ActorGroup {
     this.addActor(
       new Actor({
         image: Game.getImage(GameImage.SPRITESHEET),
-        spriteRegion: SpriteRegion[type.toUpperCase()],
-        x: tile.getCenterPosition()[0] - 28 / 2,
-        y: tile.getCenterPosition()[1] - 28 / 2,
+        spriteRegion: SpriteRegion[options.name.toUpperCase()],
+        x: options.tile.getCenterPosition()[0] - 28 / 2,
+        y: options.tile.getCenterPosition()[1] - 28 / 2,
         width: 28,
         height: 28,
       })
     );
 
-    this.type = type;
-    this.tile = tile;
+    this.name = options.name;
+    this.tile = options.tile;
+    this.attackType = options.attackType;
     this.selectionActors = [];
+  }
+
+  public toString(): String {
+    return JSON.stringify({ name: this.name, attackType: this.attackType });
   }
 
   public unselect() {
@@ -74,8 +86,12 @@ export class Unit extends ActorGroup {
     }
   }
 
-  public getType(): string {
-    return this.type;
+  public getName(): string {
+    return this.name;
+  }
+
+  public getAttackType(): string {
+    return this.attackType;
   }
 
   public getTile(): Tile {
