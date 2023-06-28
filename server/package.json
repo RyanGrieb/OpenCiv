@@ -1,5 +1,5 @@
 {
-  "name": "server",
+  "name": "server-package",
   "version": "1.0.0",
   "description": "",
   "main": "Server.ts",
@@ -11,6 +11,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "parent-package": "file:..",
     "random": "3.0.6",
     "ts-node": "^10.9.1",
     "ts-node-dev": "^2.0.0",
