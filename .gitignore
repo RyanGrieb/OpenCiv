@@ -2,4 +2,4 @@
 **/dist/
 **/.vscode/
 **/.parcel-cache/
-
+**/client/.cache

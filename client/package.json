@@ -4,8 +4,8 @@
         "build": "parcel build dist"
     },
     "devDependencies": {
-        "@types/node": "^18.11.6",
-        "parcel": "^2.7.0",
+        "@types/node": "^18.16.18",
+        "parcel": "^1.12.4",
         "parcel-bundler": "^1.12.5"
     },
     "assetsPath": "assets"
