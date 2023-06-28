@@ -73,6 +73,8 @@ export class ClientPlayer extends AbstractPlayer {
       Game.getCurrentScene().removeLine(this.movementLine);
     }
 
+    if (!this.selectedUnit || (this.selectedUnit.getTile() === this.hoveredTile.getRepresentedTile())) return;
+
     this.movementLine = new Line({
       color: "aqua",
       girth: 2,
@@ -91,7 +93,17 @@ export class ClientPlayer extends AbstractPlayer {
     //TODO: Cycle through units on the tile
     const unit = units[0];
 
-    if (this.selectedUnit) this.selectedUnit.unselect();
+    if (this.selectedUnit) {
+      console.log("Hi")
+      this.selectedUnit.unselect();
+
+      if (this.selectedUnit == unit) {
+        this.selectedUnit = undefined;
+        this.updateDisplayedUnitMovementPath();
+        return;
+      }
+    }
+
     unit.select();
     this.selectedUnit = unit;
   }
@@ -141,7 +153,7 @@ export class ClientPlayer extends AbstractPlayer {
       );
       const clampedBorderTile =
         GameMap.getInstance().getTiles()[
-          Numbers.clamp(gridX, 0, GameMap.getInstance().getWidth() - 1)
+        Numbers.clamp(gridX, 0, GameMap.getInstance().getWidth() - 1)
         ][Numbers.clamp(gridY, 0, GameMap.getInstance().getHeight() - 1)];
       adjBorderTiles.push(clampedBorderTile); // Also push clamped tile.
 
