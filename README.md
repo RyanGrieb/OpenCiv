@@ -2,14 +2,12 @@
 
 ![example workflow](https://github.com/rhin123/OpenCiv/actions/workflows/build.yml/badge.svg)
 [![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=rhin123_OpenCiv&metric=ncloc)](https://sonarcloud.io/summary/new_code?id=rhin123_OpenCiv)
-[![Discord](https://img.shields.io/discord/925176383792087081.svg?logo=discord&logoColor=white&logoWidth=20&labelColor=7289DA&label=Discord&color=17cf48)](https://discord.gg/WFteeen5fu)
-
-A turn based strategy game built on typescript & HTML5, with a rouge-like tile set.
-Previously written in Java with LibGDX, currently in the process of a complete rewrite.
+[![Discord]A turn-based strategy game built on typescript & HTML5, with a rouge-like tile set.
+Previously written in Java with LibGDX, **currently in the process of a complete rewrite.**
 
 ## About
 
-OpenCiv is a love letter to turn based strategy games inspired by Sid Meier's Civilization. The game strives to improve on certain aspects that were lacking in the series, and experiment with new features.
+OpenCiv is a love letter to turn-based strategy games inspired by Sid Meier's Civilization. The game strives to improve on certain aspects that were lacking in the series, and experiment with new features.
 If you like game development, typescript, or pixel art, consider contributing. We can make something great.
 
 Eventually, my main objective is to implement server-sided modding. Where the server would instruct the client to include modded units, terrain, and even custom UI elements.
