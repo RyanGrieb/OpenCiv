@@ -12,10 +12,12 @@ import { AbstractPlayer } from "./AbstractPlayer";
 export class ClientPlayer extends AbstractPlayer {
   private selectedUnit: Unit;
   private hoveredTile: HoveredTile;
-  private movementLine: Line;
+  private movementLines: Line[];
 
   constructor(name: string) {
     super(name);
+
+    this.movementLines = [];
 
     Game.getCurrentScene().on("mapLoaded", () => {
       this.hoveredTile = new HoveredTile(9999, 9999);
@@ -30,9 +32,15 @@ export class ClientPlayer extends AbstractPlayer {
       const mouseX = options.x;
       const mouseY = options.y;
 
+      let oldHoveredTile = this.hoveredTile
+        ? this.hoveredTile.getRepresentedTile()
+        : undefined;
       this.updateHoveredTile(mouseX, mouseY);
 
-      if (this.selectedUnit) {
+      if (
+        this.selectedUnit &&
+        oldHoveredTile != this.hoveredTile.getRepresentedTile()
+      ) {
         this.updateDisplayedUnitMovementPath();
       }
     });
@@ -69,32 +77,53 @@ export class ClientPlayer extends AbstractPlayer {
   }
 
   private updateDisplayedUnitMovementPath() {
-    if (this.movementLine) {
-      Game.getCurrentScene().removeLine(this.movementLine);
+    if (this.movementLines.length > 0) {
+      for (const line of this.movementLines) {
+        Game.getCurrentScene().removeLine(line);
+      }
     }
 
-    if (!this.selectedUnit || (this.selectedUnit.getTile() === this.hoveredTile.getRepresentedTile())) return;
+    if (
+      !this.selectedUnit ||
+      this.selectedUnit.getTile() === this.hoveredTile.getRepresentedTile()
+    )
+      return;
 
-    this.movementLine = new Line({
-      color: "aqua",
-      girth: 2,
-      x1: this.selectedUnit.getTile().getCenterPosition()[0],
-      y1: this.selectedUnit.getTile().getCenterPosition()[1],
-      x2: this.hoveredTile.getCenterPosition()[0],
-      y2: this.hoveredTile.getCenterPosition()[1],
-    });
+    const startTile = this.selectedUnit.getTile();
+    const goalTile = this.hoveredTile.getRepresentedTile();
 
-    Game.getCurrentScene().addLine(this.movementLine);
+    const pathTiles = GameMap.getInstance().constructShortestPath(
+      this.selectedUnit,
+      startTile,
+      goalTile
+    );
+
+    //console.log(pathTiles);
+
+    for (let i = 0; i < pathTiles.length - 1; i++) {
+      const tile1 = pathTiles[i];
+      const tile2 = pathTiles[i + 1];
+
+      const line = new Line({
+        color: "aqua",
+        girth: 2,
+        x1: tile1.getCenterPosition()[0],
+        y1: tile1.getCenterPosition()[1],
+        x2: tile2.getCenterPosition()[0],
+        y2: tile2.getCenterPosition()[1],
+      });
+      this.movementLines.push(line);
+      Game.getCurrentScene().addLine(line);
+    }
   }
 
   private onClickedTileWithUnit(tile: Tile) {
     const units = tile.getUnits();
-    console.log(units);
+    //console.log(units);
     //TODO: Cycle through units on the tile
     const unit = units[0];
 
     if (this.selectedUnit) {
-      console.log("Hi")
       this.selectedUnit.unselect();
 
       if (this.selectedUnit == unit) {
@@ -153,7 +182,7 @@ export class ClientPlayer extends AbstractPlayer {
       );
       const clampedBorderTile =
         GameMap.getInstance().getTiles()[
-        Numbers.clamp(gridX, 0, GameMap.getInstance().getWidth() - 1)
+          Numbers.clamp(gridX, 0, GameMap.getInstance().getWidth() - 1)
         ][Numbers.clamp(gridY, 0, GameMap.getInstance().getHeight() - 1)];
       adjBorderTiles.push(clampedBorderTile); // Also push clamped tile.
 

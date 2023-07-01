@@ -3,11 +3,13 @@ import { Game } from "../Game";
 import { Unit } from "../Unit";
 import { Actor } from "../scene/Actor";
 import { Vector } from "../util/Vector";
+import { GameMap } from "./GameMap";
 
 export interface TileOptions {
   tileTypes: string[];
   x: number;
   y: number;
+  movementCost: number;
   riverSides?: boolean[];
   width?: number;
   height?: number;
@@ -24,6 +26,7 @@ export class Tile extends Actor {
   private vectors: Vector[];
   private riverSides: boolean[];
   private units: Unit[];
+  private movementCost: number; // Default movement cost of the tile (e.g., Hill=2, Mountain=999)
 
   private gridX: number;
   private gridY: number;
@@ -40,11 +43,24 @@ export class Tile extends Actor {
     this.vectors = [];
     this.riverSides = options.riverSides ?? Array(6).fill(false);
     this.units = [];
+    this.movementCost = options.movementCost;
 
     this.gridX = Math.floor(this.x / 32);
     this.gridY = Math.floor(this.y / 25);
 
     this.initializeVectors();
+  }
+
+  public static gridDistance(tile1: Tile, tile2: Tile) {
+    return Math.sqrt(
+      Math.pow(tile2.getGridX() - tile1.getGridX(), 2) +
+        Math.pow(tile2.getGridY() - tile1.getGridY(), 2)
+    );
+  }
+
+  //TODO: Suport unit as argument (e.g. account for naval units in water.)
+  public static getWeight(tile1: Tile, tile2: Tile): number {
+    return tile1.getMovementCost() + tile2.getMovementCost();
   }
 
   public async loadImage() {
@@ -71,6 +87,10 @@ export class Tile extends Actor {
         canvasContext: canvasContext,
       });
     });*/
+  }
+
+  public getMovementCost() {
+    return this.movementCost;
   }
 
   public addUnit(unit: Unit) {
@@ -191,5 +211,14 @@ export class Tile extends Actor {
 
   public getUnits(): Unit[] {
     return this.units;
+  }
+
+  //public getNodeIndex(): number {
+  //  return GameMap.getInstance().getWidth() * this.gridY + this.gridX;
+  //}
+
+  public isWater(): boolean {
+    const waterTileTypes = ["ocean", "shallow_ocean", "freshwater"];
+    return this.tileTypes.some((type) => waterTileTypes.includes(type));
   }
 }

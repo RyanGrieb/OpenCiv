@@ -1,9 +1,11 @@
+import PriorityQueue from "ts-priority-queue";
 import { Game } from "../Game";
 import { Unit } from "../Unit";
 import { NetworkEvents, WebsocketClient } from "../network/Client";
 import { Actor } from "../scene/Actor";
 import { River } from "./River";
 import { Tile } from "./Tile";
+import { QueueUtils } from "../util/Queues";
 
 export class GameMap {
   private static instance: GameMap;
@@ -58,6 +60,7 @@ export class GameMap {
           tileTypes: this.tiles[x][y].getTileTypes(),
           x: xPos,
           y: yPos,
+          movementCost: this.tiles[x][y].getMovementCost(),
         });
         tileActorList.push(tile);
       }
@@ -113,6 +116,106 @@ export class GameMap {
     return adjTiles;
   }
 
+  // https://en.wikipedia.org/wiki/A*_search_algorithm
+  public constructShortestPath(unit: Unit, startTile: Tile, goalTile: Tile) {
+    if (!startTile || !goalTile) return [];
+
+    const totalNodes =
+      GameMap.getInstance().getWidth() * GameMap.getInstance().getHeight();
+
+    //TODO: Maybe we get the distance of the last path & apply it to h? Since it's just going to be a single tile off from the previous.
+    let h = (n: Tile) => Math.floor(Tile.gridDistance(n, goalTile));
+
+    // For node n, gScore[n] is the cost of the cheapest path from start to n currently known.
+    let gScore: number[][] = [];
+    let fScore: number[][] = [];
+    let cameFrom: Tile[][] = [];
+    for (let x = 0; x < GameMap.getInstance().getWidth(); x++) {
+      gScore[x] = [];
+      fScore[x] = [];
+      cameFrom[x] = [];
+      for (let y = 0; y < GameMap.getInstance().getHeight(); y++) {
+        gScore[x][y] = Number.MAX_VALUE;
+        fScore[x][y] = 0;
+      }
+    }
+
+    gScore[startTile.getGridX()][startTile.getGridY()] = 0;
+    // For node n, fScore[n] := gScore[n] + h(n). fScore[n] represents our current best guess as to
+    // how cheap a path could be from start to finish if it goes through n.
+    fScore[startTile.getGridX()][startTile.getGridY()] = h(startTile);
+
+    // Openset is a pirority queue of tiles w/ the lowerest fscore
+    // fscore[myTile.getNodeIndex()]
+    let openSet = new PriorityQueue({
+      comparator: (a: Tile, b: Tile) => {
+        const fscoreA = fScore[a.getGridX()][a.getGridY()];
+        const fscoreB = fScore[b.getGridX()][b.getGridY()];
+
+        if (fscoreA < fscoreB) {
+          return -1; // a should have higher priority (lower fscore)
+        } else if (fscoreA > fscoreB) {
+          return 1; // b should have higher priority (lower fscore)
+        } else {
+          return 0; // fscoreA and fscoreB are equal
+        }
+      },
+      initialValues: [startTile],
+    });
+
+    //cameFrom.fill(undefined, 0, totalNodes);
+
+    while (openSet.length > 0) {
+      let currentTile = openSet.dequeue();
+
+      if (currentTile == goalTile) {
+        return this.reconstructPath(cameFrom, currentTile);
+      }
+
+      for (let neighborTile of currentTile.getAdjacentTiles()) {
+        if (!neighborTile) continue;
+
+        let d = (current: Tile, neighbor: Tile) =>
+          unit.getTileWeight(current, neighbor);
+
+        let tentativeGScore =
+          gScore[currentTile.getGridX()][currentTile.getGridY()] +
+          d(currentTile, neighborTile);
+        //console.log(neighborTile.getNodeIndex());
+        //console.log(gScore[neighborTile.getNodeIndex()]);
+
+        if (
+          tentativeGScore <
+          gScore[neighborTile.getGridX()][neighborTile.getGridY()]
+        ) {
+          cameFrom[neighborTile.getGridX()][neighborTile.getGridY()] =
+            currentTile;
+          gScore[neighborTile.getGridX()][neighborTile.getGridY()] =
+            tentativeGScore;
+          fScore[neighborTile.getGridX()][neighborTile.getGridY()] =
+            tentativeGScore + h(neighborTile);
+
+          if (!QueueUtils.valuePresent(openSet, neighborTile)) {
+            openSet.queue(neighborTile);
+          }
+        }
+      }
+    }
+
+    return [];
+  }
+
+  private reconstructPath(cameFrom: Tile[][], currentTile: Tile) {
+    const totalPath = [currentTile];
+
+    while (currentTile != undefined) {
+      currentTile = cameFrom[currentTile.getGridX()][currentTile.getGridY()];
+      if (currentTile) totalPath.unshift(currentTile);
+    }
+
+    return totalPath;
+  }
+
   private requestMapFromServer() {
     const scene = Game.getCurrentScene();
     this.tiles = [];
@@ -151,6 +254,7 @@ export class GameMap {
 
           const x = parseInt(tileJSON["x"]);
           const y = parseInt(tileJSON["y"]);
+          const movementCost = parseInt(tileJSON["movementCost"]);
 
           let yPos = y * 25;
           let xPos = x * 32;
@@ -163,6 +267,7 @@ export class GameMap {
             riverSides: riverSides,
             x: xPos,
             y: yPos,
+            movementCost: movementCost,
           });
           this.tiles[x][y] = tile;
           tileActorList.push(tile);
@@ -180,6 +285,7 @@ export class GameMap {
               tileTypes: topLayerTileTypes,
               x: xPos,
               y: yPos,
+              movementCost: movementCost,
             });
             topLayerTileActorList.push(topLayerTile);
           }

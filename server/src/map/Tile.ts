@@ -86,6 +86,7 @@ export class Tile {
       units: this.getUnitsJSON(),
       x: this.x,
       y: this.y,
+      movementCost: this.getMovementCost(),
     };
   }
 
@@ -97,6 +98,26 @@ export class Tile {
     }
 
     return unitJSON;
+  }
+
+  public getMovementCost(): number {
+    const tileTypesWithIncreasedCost = ["hill", "forest", "jungle"];
+    const tileTypesWithInfiniteCost = ["mountain"];
+
+    let cost = 1;
+
+    for (const tileType of this.tileTypes) {
+      if (tileTypesWithIncreasedCost.some((type) => tileType.includes(type))) {
+        cost = 2;
+      }
+
+      if (tileTypesWithInfiniteCost.some((type) => tileType.includes(type))) {
+        cost = 9999;
+        break;
+      }
+    }
+
+    return cost;
   }
 
   public addTileType(tileType: string, index?: number) {

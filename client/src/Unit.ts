@@ -3,6 +3,7 @@ import { Game } from "./Game";
 import { Tile } from "./map/Tile";
 import { Actor } from "./scene/Actor";
 import { ActorGroup } from "./scene/ActorGroup";
+import { Numbers } from "./util/Numbers";
 
 export interface options {
   name: string;
@@ -44,12 +45,20 @@ export class Unit extends ActorGroup {
     this.selectionActors = [];
   }
 
+  public getTileWeight(current: Tile, neighbor: Tile) {
+    //FIXME: Unit's should have land OR sea variable to distinguish
+    if (current.isWater()) {
+      return 9999;
+    }
+    return Tile.getWeight(current, neighbor);
+  }
+
   public toString(): String {
     return JSON.stringify({ name: this.name, attackType: this.attackType });
   }
 
   public unselect() {
-    console.log("Unselect");
+    //console.log("Unselect");
     this.selected = false;
     for (const actor of this.selectionActors) {
       this.removeActor(actor);
@@ -58,7 +67,7 @@ export class Unit extends ActorGroup {
   }
 
   public select() {
-    console.log("Select");
+    //console.log("Select");
     this.selected = true;
     this.selectionActors.push(
       new Actor({

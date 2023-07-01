@@ -11,6 +11,7 @@ export class HoveredTile extends Tile {
       tileTypes: ["hovered_tile"],
       width: 32,
       height: 32,
+      movementCost: 0,
     });
   }
 

@@ -12,6 +12,7 @@
     },
     "assetsPath": "assets",
     "dependencies": {
-        "parent-package": "file:.."
+        "parent-package": "file:..",
+        "ts-priority-queue": "0.1.1"
     }
 }
