@@ -31,6 +31,8 @@ export class GameMap {
   private mapActor: Actor;
   private mapWidth: number;
   private mapHeight: number;
+  private previousGScore;
+  private previousFScore;
 
   public static getInstance() {
     return this.instance;
@@ -42,6 +44,11 @@ export class GameMap {
   public static init() {
     GameMap.instance = new GameMap();
     this.instance.requestMapFromServer();
+  }
+
+  private constructor() {
+    this.previousGScore = undefined;
+    this.previousFScore = undefined;
   }
 
   public refreshMap() {
@@ -138,6 +145,11 @@ export class GameMap {
       for (let y = 0; y < GameMap.getInstance().getHeight(); y++) {
         gScore[x][y] = Number.MAX_VALUE;
         fScore[x][y] = 0;
+
+        if (this.previousGScore || this.previousFScore) {
+          gScore = this.previousGScore; // Use previous gScore value
+          fScore = this.previousFScore; // Use previous fScore value
+        }
       }
     }
 
@@ -170,6 +182,8 @@ export class GameMap {
       let currentTile = openSet.dequeue();
 
       if (currentTile == goalTile) {
+        this.previousGScore = gScore;
+        this.previousFScore = fScore;
         return this.reconstructPath(unit, cameFrom, currentTile);
       }
 
@@ -196,9 +210,9 @@ export class GameMap {
           fScore[neighborTile.getGridX()][neighborTile.getGridY()] =
             tentativeGScore + h(neighborTile);
 
-          if (!QueueUtils.valuePresent(openSet, neighborTile)) {
-            openSet.queue(neighborTile);
-          }
+          //if (!QueueUtils.valuePresent(openSet, neighborTile)) {
+          openSet.queue(neighborTile);
+          //}
         }
       }
     }

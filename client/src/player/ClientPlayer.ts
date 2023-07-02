@@ -81,6 +81,7 @@ export class ClientPlayer extends AbstractPlayer {
       for (const line of this.movementLines) {
         Game.getCurrentScene().removeLine(line);
       }
+      this.movementLines = [];
     }
 
     if (
@@ -92,13 +93,13 @@ export class ClientPlayer extends AbstractPlayer {
     const startTile = this.selectedUnit.getTile();
     const goalTile = this.hoveredTile.getRepresentedTile();
 
+    console.time("constructShortestPath()");
     const pathTiles = GameMap.getInstance().constructShortestPath(
       this.selectedUnit,
       startTile,
       goalTile
     );
-
-    //console.log(pathTiles);
+    console.timeEnd("constructShortestPath()");
 
     for (let i = 0; i < pathTiles.length - 1; i++) {
       const tile1 = pathTiles[i];
