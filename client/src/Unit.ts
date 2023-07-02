@@ -50,6 +50,9 @@ export class Unit extends ActorGroup {
     if (current.isWater()) {
       return 9999;
     }
+
+    if (!neighbor) return current.getMovementCost();
+
     return Tile.getWeight(current, neighbor);
   }
 

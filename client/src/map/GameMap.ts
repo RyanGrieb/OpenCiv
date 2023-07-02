@@ -130,6 +130,7 @@ export class GameMap {
     let gScore: number[][] = [];
     let fScore: number[][] = [];
     let cameFrom: Tile[][] = [];
+
     for (let x = 0; x < GameMap.getInstance().getWidth(); x++) {
       gScore[x] = [];
       fScore[x] = [];
@@ -169,7 +170,7 @@ export class GameMap {
       let currentTile = openSet.dequeue();
 
       if (currentTile == goalTile) {
-        return this.reconstructPath(cameFrom, currentTile);
+        return this.reconstructPath(unit, cameFrom, currentTile);
       }
 
       for (let neighborTile of currentTile.getAdjacentTiles()) {
@@ -205,12 +206,24 @@ export class GameMap {
     return [];
   }
 
-  private reconstructPath(cameFrom: Tile[][], currentTile: Tile) {
+  private reconstructPath(unit: Unit, cameFrom: Tile[][], currentTile: Tile) {
     const totalPath = [currentTile];
+    let movementCost = 0;
+
+    movementCost += unit.getTileWeight(currentTile, undefined);
 
     while (currentTile != undefined) {
       currentTile = cameFrom[currentTile.getGridX()][currentTile.getGridY()];
-      if (currentTile) totalPath.unshift(currentTile);
+      if (currentTile) {
+        totalPath.unshift(currentTile);
+
+        movementCost += unit.getTileWeight(currentTile, undefined);
+      }
+    }
+
+    //FIXME: This may break pathing on large maps
+    if (movementCost >= 9999) {
+      return [];
     }
 
     return totalPath;
