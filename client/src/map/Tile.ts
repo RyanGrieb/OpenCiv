@@ -231,6 +231,14 @@ export class Tile extends Actor {
     return this.units;
   }
 
+  public getUnitByID(id: number): Unit | undefined {
+    return this.units.find((unit) => unit.getID() === id);
+  }
+
+  public removeUnit(unit: Unit) {
+    this.units.splice(this.units.indexOf(unit), 1);
+  }
+
   //public getNodeIndex(): number {
   //  return GameMap.getInstance().getWidth() * this.gridY + this.gridX;
   //}

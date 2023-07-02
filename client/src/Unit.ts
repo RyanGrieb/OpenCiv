@@ -1,19 +1,24 @@
 import { GameImage, SpriteRegion } from "./Assets";
 import { Game } from "./Game";
+import { GameMap } from "./map/GameMap";
 import { Tile } from "./map/Tile";
+import { NetworkEvents } from "./network/Client";
 import { Actor } from "./scene/Actor";
 import { ActorGroup } from "./scene/ActorGroup";
 
 export interface options {
   name: string;
+  id: number;
   attackType: string;
   tile: Tile;
 }
 
 export class Unit extends ActorGroup {
   private name: string;
+  private id: number;
   private tile: Tile;
   private attackType: string;
+  private unitActor: Actor;
   private selectionActors: Actor[];
   private selected: boolean;
   private availableMovement: number;
@@ -28,22 +33,46 @@ export class Unit extends ActorGroup {
       height: 28,
     });
 
-    this.addActor(
-      new Actor({
-        image: Game.getImage(GameImage.SPRITESHEET),
-        spriteRegion: SpriteRegion[options.name.toUpperCase()],
-        x: options.tile.getCenterPosition()[0] - 28 / 2,
-        y: options.tile.getCenterPosition()[1] - 28 / 2,
-        width: 28,
-        height: 28,
-      })
-    );
+    this.unitActor = new Actor({
+      image: Game.getImage(GameImage.SPRITESHEET),
+      spriteRegion: SpriteRegion[options.name.toUpperCase()],
+      x: options.tile.getCenterPosition()[0] - 28 / 2,
+      y: options.tile.getCenterPosition()[1] - 28 / 2,
+      width: 28,
+      height: 28,
+    });
+
+    this.addActor(this.unitActor);
 
     this.name = options.name;
+    this.id = options.id;
     this.tile = options.tile;
     this.attackType = options.attackType;
     this.selectionActors = [];
     this.availableMovement = 2;
+
+    console.log("new unit with id: " + this.id);
+
+    NetworkEvents.on({
+      eventName: "moveUnit",
+      callback: (data) => {
+        const unitTile =
+          GameMap.getInstance().getTiles()[data["unitX"]][data["unitY"]];
+
+        if (this.tile !== unitTile) {
+          return;
+        }
+
+        this.tile.removeUnit(this);
+
+        const targetTile =
+          GameMap.getInstance().getTiles()[data["targetX"]][data["targetY"]];
+        this.tile = targetTile;
+        targetTile.addUnit(this);
+
+        this.updatePosition(targetTile);
+      },
+    });
   }
 
   public getTileWeight(current: Tile, neighbor: Tile) {
@@ -67,6 +96,10 @@ export class Unit extends ActorGroup {
 
   public getAvailableMovement() {
     return this.availableMovement;
+  }
+
+  public getID() {
+    return this.id;
   }
 
   public toString(): String {
@@ -125,5 +158,23 @@ export class Unit extends ActorGroup {
 
   public isSelected(): boolean {
     return this.selected;
+  }
+
+  /**
+   * Updates the unit position, modify sub-actors locations
+   * @param tile The tile we are now positioned on.
+   */
+  public updatePosition(tile: Tile): void {
+    // Ensure group-actor location is updated
+    super.setPosition(
+      tile.getCenterPosition()[0] - 28 / 2,
+      tile.getCenterPosition()[1] - 28 / 2
+    );
+
+    // Update unit sub-actor location
+    this.unitActor.setPosition(
+      tile.getCenterPosition()[0] - 28 / 2,
+      tile.getCenterPosition()[1] - 28 / 2
+    );
   }
 }

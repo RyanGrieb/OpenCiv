@@ -316,6 +316,7 @@ export class GameMap {
           for (const jsonUnit of jsonUnits) {
             const unit = new Unit({
               name: jsonUnit["name"],
+              id: jsonUnit["id"],
               attackType: jsonUnit["attackType"],
               tile: tile,
             });

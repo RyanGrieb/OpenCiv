@@ -94,6 +94,7 @@ export class Game {
         this.currentScene.call("mouseup", {
           x: event.clientX,
           y: event.clientY,
+          button: event.button,
         });
       }
 

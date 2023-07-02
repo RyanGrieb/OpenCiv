@@ -36,6 +36,10 @@ export class Tile {
     this.units.push(unit);
   }
 
+  public removeUnit(unit: Unit) {
+    this.units = this.units.filter((existingUnit) => existingUnit !== unit);
+  }
+
   public getRiverSides() {
     return this.riverSides;
   }

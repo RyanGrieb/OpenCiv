@@ -74,7 +74,7 @@ export class InGameState extends State {
         ],
       });
 
-      spawnTile.addUnit(new Unit({ name: "settler" }));
+      spawnTile.addUnit(new Unit({ name: "settler", tile: spawnTile }));
       //spawnTile.addUnit(new Unit({ name: "archer", attackType: "ranged" }));
 
       player.onLoadedIn(() => {

@@ -60,6 +60,10 @@ export class GameMap {
     this.generateTerrain();
   }
 
+  public static getTiles() {
+    return this.tiles;
+  }
+
   public static generateTerrain() {
     /**
      * Map generation:

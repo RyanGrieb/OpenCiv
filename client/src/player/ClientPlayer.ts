@@ -3,7 +3,7 @@ import { Unit } from "../Unit";
 import { GameMap } from "../map/GameMap";
 import { HoveredTile } from "../map/HoveredTile";
 import { Tile } from "../map/Tile";
-import { NetworkEvents } from "../network/Client";
+import { NetworkEvents, WebsocketClient } from "../network/Client";
 import { Line } from "../ui/Line";
 import { Numbers } from "../util/Numbers";
 import { Vector } from "../util/Vector";
@@ -47,8 +47,19 @@ export class ClientPlayer extends AbstractPlayer {
 
     Game.getCurrentScene().on("mouseup", (options) => {
       const clickedTile = this.hoveredTile.getRepresentedTile();
-      if (clickedTile && clickedTile.getUnits().length > 0) {
-        this.onClickedTileWithUnit(clickedTile);
+
+      //left-click
+      if (options.button === 0) {
+        if (clickedTile && clickedTile.getUnits().length > 0) {
+          this.onClickedTileWithUnit(clickedTile);
+        }
+      }
+
+      //right-click
+      if (options.button === 2) {
+        if (clickedTile && this.selectedUnit) {
+          this.moveSelectedUnit(clickedTile);
+        }
       }
     });
 
@@ -114,12 +125,18 @@ export class ClientPlayer extends AbstractPlayer {
       //const riverCross = Tile.riverCrosses(tile1, tile2);
       movementCost += tileCost;
 
+      let color = "lightgray";
+      if (this.selectedUnit.getAvailableMovement() > 0) {
+        color = "lime";
+      } else {
+      }
+
       this.selectedUnit.reduceMovement(tileCost);
 
       console.log("Current Cost: " + movementCost);
 
       const line = new Line({
-        color: "lime",
+        color: color,
         girth: 2,
         x1: tile1.getCenterPosition()[0],
         y1: tile1.getCenterPosition()[1],
@@ -132,6 +149,22 @@ export class ClientPlayer extends AbstractPlayer {
     console.log("---");
 
     //console.log("Movement cost: " + movementCost);
+  }
+
+  private moveSelectedUnit(targetTile: Tile) {
+    WebsocketClient.sendMessage({
+      event: "moveUnit",
+      unitX: this.selectedUnit.getTile().getGridX(),
+      unitY: this.selectedUnit.getTile().getGridY(),
+      id: this.selectedUnit.getID(),
+      targetX: targetTile.getGridX(),
+      targetY: targetTile.getGridY(),
+    });
+
+    // Unselect unit before moving
+    this.selectedUnit.unselect();
+    this.selectedUnit = undefined;
+    this.updateDisplayedUnitMovementPath();
   }
 
   private onClickedTileWithUnit(tile: Tile) {
