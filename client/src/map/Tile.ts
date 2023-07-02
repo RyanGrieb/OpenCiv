@@ -3,7 +3,6 @@ import { Game } from "../Game";
 import { Unit } from "../Unit";
 import { Actor } from "../scene/Actor";
 import { Vector } from "../util/Vector";
-import { GameMap } from "./GameMap";
 
 export interface TileOptions {
   tileTypes: string[];
@@ -78,7 +77,7 @@ export class Tile extends Actor {
     if (Tile.riverCrosses(tile1, tile2)) {
       return 2;
     }
-    
+
     return tile2.getMovementCost();
   }
 

@@ -1,4 +1,3 @@
-import PriorityQueue from "ts-priority-queue";
 import { assetList } from "./Assets";
 import { Game } from "./Game";
 import { InGameScene } from "./scene/type/InGameScene";

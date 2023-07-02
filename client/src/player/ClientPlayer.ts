@@ -111,7 +111,7 @@ export class ClientPlayer extends AbstractPlayer {
       const tile1 = pathTiles[i];
       const tile2 = pathTiles[i + 1];
       const tileCost = Tile.getWeight(tile1, tile2);
-      const riverCross = Tile.riverCrosses(tile1, tile2);
+      //const riverCross = Tile.riverCrosses(tile1, tile2);
       movementCost += tileCost;
 
       this.selectedUnit.reduceMovement(tileCost);

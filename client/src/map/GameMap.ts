@@ -5,7 +5,6 @@ import { NetworkEvents, WebsocketClient } from "../network/Client";
 import { Actor } from "../scene/Actor";
 import { River } from "./River";
 import { Tile } from "./Tile";
-import { QueueUtils } from "../util/Queues";
 
 export class GameMap {
   private static instance: GameMap;
@@ -126,9 +125,6 @@ export class GameMap {
   // https://en.wikipedia.org/wiki/A*_search_algorithm
   public constructShortestPath(unit: Unit, startTile: Tile, goalTile: Tile) {
     if (!startTile || !goalTile) return [];
-
-    const totalNodes =
-      GameMap.getInstance().getWidth() * GameMap.getInstance().getHeight();
 
     //TODO: Maybe we get the distance of the last path & apply it to h? Since it's just going to be a single tile off from the previous.
     let h = (n: Tile) => Math.floor(Tile.gridDistance(n, goalTile));

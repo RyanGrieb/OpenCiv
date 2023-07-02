@@ -3,7 +3,6 @@ import { Game } from "./Game";
 import { Tile } from "./map/Tile";
 import { Actor } from "./scene/Actor";
 import { ActorGroup } from "./scene/ActorGroup";
-import { Numbers } from "./util/Numbers";
 
 export interface options {
   name: string;
