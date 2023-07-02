@@ -17,6 +17,7 @@ export class Unit extends ActorGroup {
   private attackType: string;
   private selectionActors: Actor[];
   private selected: boolean;
+  private availableMovement: number;
 
   constructor(options: options) {
     super({
@@ -43,6 +44,7 @@ export class Unit extends ActorGroup {
     this.tile = options.tile;
     this.attackType = options.attackType;
     this.selectionActors = [];
+    this.availableMovement = 2;
   }
 
   public getTileWeight(current: Tile, neighbor: Tile) {
@@ -54,6 +56,18 @@ export class Unit extends ActorGroup {
     if (!neighbor) return current.getMovementCost();
 
     return Tile.getWeight(current, neighbor);
+  }
+
+  public reduceMovement(amount) {
+    this.availableMovement -= amount;
+  }
+
+  public setAvailableMovement(amount) {
+    this.availableMovement = amount;
+  }
+
+  public getAvailableMovement() {
+    return this.availableMovement;
   }
 
   public toString(): String {

@@ -58,9 +58,28 @@ export class Tile extends Actor {
     );
   }
 
+  public static riverCrosses(tile1: Tile, tile2: Tile) {
+    let tile1RiverSide = -1;
+    for (let i = 0; i < tile1.getAdjacentTiles().length; i++) {
+      if (tile2 === tile1.getAdjacentTiles()[i]) {
+        tile1RiverSide = i;
+      }
+    }
+
+    if (tile1.getRiverSides()[tile1RiverSide]) {
+      return true;
+    }
+
+    return false;
+  }
+
   //TODO: Suport unit as argument (e.g. account for naval units in water.)
   public static getWeight(tile1: Tile, tile2: Tile): number {
-    return tile1.getMovementCost() + tile2.getMovementCost();
+    if (Tile.riverCrosses(tile1, tile2)) {
+      return 2;
+    }
+    
+    return tile2.getMovementCost();
   }
 
   public async loadImage() {

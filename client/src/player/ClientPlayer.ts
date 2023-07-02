@@ -90,23 +90,36 @@ export class ClientPlayer extends AbstractPlayer {
     )
       return;
 
+    //FIXME: TEMP
+    this.selectedUnit.setAvailableMovement(2);
+
     const startTile = this.selectedUnit.getTile();
     const goalTile = this.hoveredTile.getRepresentedTile();
 
-    console.time("constructShortestPath()");
+    //console.time("constructShortestPath()");
     const pathTiles = GameMap.getInstance().constructShortestPath(
       this.selectedUnit,
       startTile,
       goalTile
     );
-    console.timeEnd("constructShortestPath()");
+    //console.timeEnd("constructShortestPath()");
 
+    if (pathTiles.length < 1) return;
+
+    let movementCost = 0;
     for (let i = 0; i < pathTiles.length - 1; i++) {
       const tile1 = pathTiles[i];
       const tile2 = pathTiles[i + 1];
+      const tileCost = Tile.getWeight(tile1, tile2);
+      const riverCross = Tile.riverCrosses(tile1, tile2);
+      movementCost += tileCost;
+
+      this.selectedUnit.reduceMovement(tileCost);
+
+      console.log("Current Cost: " + movementCost);
 
       const line = new Line({
-        color: "aqua",
+        color: "lime",
         girth: 2,
         x1: tile1.getCenterPosition()[0],
         y1: tile1.getCenterPosition()[1],
@@ -116,6 +129,9 @@ export class ClientPlayer extends AbstractPlayer {
       this.movementLines.push(line);
       Game.getCurrentScene().addLine(line);
     }
+    console.log("---");
+
+    //console.log("Movement cost: " + movementCost);
   }
 
   private onClickedTileWithUnit(tile: Tile) {
