@@ -133,7 +133,7 @@ export class ClientPlayer extends AbstractPlayer {
 
       this.selectedUnit.reduceMovement(tileCost);
 
-      console.log("Current Cost: " + movementCost);
+      //console.log("Current Cost: " + movementCost);
 
       const line = new Line({
         color: color,
@@ -146,7 +146,7 @@ export class ClientPlayer extends AbstractPlayer {
       this.movementLines.push(line);
       Game.getCurrentScene().addLine(line);
     }
-    console.log("---");
+    //console.log("---");
 
     //console.log("Movement cost: " + movementCost);
   }
