@@ -7,6 +7,7 @@ export interface ActorGroupOptions {
   width: number;
   height: number;
   actors?: Actor[];
+  cameraApplies?: boolean;
 }
 
 export class ActorGroup extends Actor {
@@ -18,6 +19,7 @@ export class ActorGroup extends Actor {
       y: options.y,
       width: options.width,
       height: options.height,
+      cameraApplies: options.cameraApplies,
     });
 
     this.actors = [];
@@ -25,11 +27,12 @@ export class ActorGroup extends Actor {
 
   public draw(canvasContext: CanvasRenderingContext2D) {
     for (const actor of this.actors) {
-      Game.drawImageFromActor(actor, canvasContext);
+      actor.draw(canvasContext);
     }
   }
 
   public addActor(actor: Actor) {
+    actor.setCameraApplies(this.cameraApplies);
     this.actors.push(actor);
   }
 

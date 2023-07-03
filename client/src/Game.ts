@@ -202,8 +202,8 @@ export class Game {
 
     this.drawText({
       text: "FPS: " + this.fps,
-      x: 0,
-      y: 10,
+      x: Game.getWidth() - 40,
+      y: Game.getHeight() - 4,
       color: "black",
       font: "12px sans",
     });
@@ -286,7 +286,11 @@ export class Game {
     canvasContext.save();
 
     // Only apply camera to the Game's main canvas context.
-    if (this.currentScene.getCamera() && canvasContext === this.canvasContext) {
+    if (
+      actor.isCameraApplied() &&
+      this.currentScene.getCamera() &&
+      canvasContext === this.canvasContext
+    ) {
       const zoom = this.currentScene.getCamera().getZoomAmount();
       const cameraX = this.currentScene.getCamera().getX();
       const cameraY = this.currentScene.getCamera().getY();

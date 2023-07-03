@@ -30,6 +30,7 @@ export class Button extends Actor {
       y: options.y,
       width: options.width,
       height: options.height,
+      cameraApplies: false,
     });
 
     this.textWidth = -1;

@@ -60,8 +60,13 @@ export enum SpriteRegion {
   DEBUG1 = "3,11",
   DEBUG2 = "14,13",
   DEBUG3 = "17,13",
-  UI_STATUSBAR = "3,4",
+  UI_STATUSBAR = "4,3",
   UNIT_SELECTION_CIRCLE = "1,3",
+  SCIENCE_ICON = "12,11",
+  CULTURE_ICON = "10,12",
+  GOLD_ICON = "17,12",
+  FAITH_ICON = "2,13",
+  TRADE_ICON = "5,14",
 }
 
 export const assetList = [

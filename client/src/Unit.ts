@@ -25,8 +25,6 @@ export class Unit extends ActorGroup {
 
   constructor(options: options) {
     super({
-      //image: Game.getImage(GameImage.SPRITESHEET),
-      //spriteRegion: SpriteRegion[type.toUpperCase()],
       x: options.tile.getCenterPosition()[0] - 28 / 2,
       y: options.tile.getCenterPosition()[1] - 28 / 2,
       width: 28,

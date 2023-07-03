@@ -11,6 +11,7 @@ export interface ActorOptions {
   height: number;
   rotation?: number;
   transparency?: number;
+  cameraApplies?: boolean;
 }
 
 export class Actor {
@@ -26,6 +27,7 @@ export class Actor {
   protected transparency: number;
   protected storedEvents: Map<string, Function[]>;
   protected mouseInside: boolean;
+  protected cameraApplies: boolean;
 
   constructor(actorOptions: ActorOptions) {
     this.storedEvents = new Map<string, Function[]>();
@@ -38,6 +40,10 @@ export class Actor {
     this.height = actorOptions.height;
     this.rotation = actorOptions.rotation ?? 0;
     this.transparency = actorOptions.transparency ?? 1;
+    this.cameraApplies =
+      actorOptions.cameraApplies === undefined
+        ? true
+        : actorOptions.cameraApplies;
 
     this.on("mousemove", (options) => {
       if (this.insideActor(options.x, options.y)) {
@@ -225,5 +231,13 @@ export class Actor {
   public setSize(width: number, height: number) {
     this.width = width;
     this.height = height;
+  }
+
+  public setCameraApplies(value: boolean) {
+    this.cameraApplies = value;
+  }
+
+  public isCameraApplied() {
+    return this.cameraApplies;
   }
 }

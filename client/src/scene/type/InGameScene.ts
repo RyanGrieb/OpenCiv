@@ -4,13 +4,16 @@ import { NetworkEvents, WebsocketClient } from "../../network/Client";
 import { AbstractPlayer } from "../../player/AbstractPlayer";
 import { ClientPlayer } from "../../player/ClientPlayer";
 import { ExternalPlayer } from "../../player/ExternalPlayer";
+import { Button } from "../../ui/Button";
 import { Label } from "../../ui/Label";
+import { StatusBar } from "../../ui/StatusBar";
 import { Camera } from "../Camera";
 import { Scene } from "../Scene";
 
 export class InGameScene extends Scene {
   private players: AbstractPlayer[];
   private tileInformationLabel: Label;
+  private statusBar: StatusBar;
 
   public onInitialize(): void {
     GameMap.init();
@@ -55,6 +58,23 @@ export class InGameScene extends Scene {
         );
         this.addActor(this.tileInformationLabel);
       });
+
+      this.statusBar = new StatusBar();
+      this.addActor(this.statusBar);
+
+      this.addActor(
+        new Button({
+          text: "Next Turn",
+          x: Game.getWidth() / 2 - 150 / 2,
+          y: Game.getHeight() - 44,
+          width: 150,
+          height: 42,
+          fontColor: "white",
+          onClicked: () => {
+            console.log("Hi");
+          },
+        })
+      );
 
       this.on("tileHovered", (options) => {
         if (!options.tile) {
