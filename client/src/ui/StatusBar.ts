@@ -1,11 +1,14 @@
 import { GameImage, SpriteRegion } from "../Assets";
 import { Game } from "../Game";
+import { NetworkEvents } from "../network/Client";
 import { Actor } from "../scene/Actor";
 import { ActorGroup } from "../scene/ActorGroup";
 import { Label } from "./Label";
 
 export class StatusBar extends ActorGroup {
   private statusBarActor: Actor;
+
+  private currentTurnText: string; //when currentTurnLabel may not be initalized yet
   private currentTurnLabel: Label;
 
   private scienceDescLabel: Label;
@@ -38,6 +41,20 @@ export class StatusBar extends ActorGroup {
     });
 
     this.generateActors();
+    // Wait until this async method is done
+
+    NetworkEvents.on({
+      eventName: "newTurn",
+      callback: (data) => {
+        const text = `Turns: ${data["turn"]} (${data["turnTime"]}s)`;
+
+        if (!this.currentTurnLabel) {
+          this.currentTurnText = text;
+        } else {
+          this.currentTurnLabel.setText(text);
+        }
+      },
+    });
   }
 
   private async generateActors() {
@@ -231,7 +248,7 @@ export class StatusBar extends ActorGroup {
 
     // Current turn information
     this.currentTurnLabel = new Label({
-      text: "Turns: 0",
+      text: this.currentTurnText,
       font: "16px serif",
       fontColor: "white",
     });

@@ -46,6 +46,7 @@ export class Player {
       callback: (data, websocket) => {
         if (this.wsConnection != websocket) return;
 
+        this.loadedIn = true;
         this.loadedInCallback.call(undefined);
       },
       globalEvent: true,
@@ -109,5 +110,9 @@ export class Player {
    */
   public getWebsocket() {
     return this.wsConnection;
+  }
+
+  public isLoadedIn() {
+    return this.loadedIn;
   }
 }

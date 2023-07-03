@@ -45,7 +45,7 @@ export class InGameScene extends Scene {
 
     this.on("mapLoaded", () => {
       this.tileInformationLabel = new Label({
-        text: "TODO: Show tile information here",
+        text: "N/A",
         font: "16px serif",
         fontColor: "white",
         x: 0,
