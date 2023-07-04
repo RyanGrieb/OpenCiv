@@ -43,7 +43,6 @@ export class ClientPlayer extends AbstractPlayer {
         oldHoveredTile != this.hoveredTile.getRepresentedTile()
       ) {
         this.updateDisplayedUnitMovementPath();
-
         //Draw outline of final target tile
         if (this.movementLines.length > 0) {
           GameMap.getInstance().setOutline({
@@ -178,6 +177,9 @@ export class ClientPlayer extends AbstractPlayer {
       targetX: targetTile.getGridX(),
       targetY: targetTile.getGridY(),
     });
+
+    // Remove target tile outline
+    GameMap.getInstance().removeOutline(targetTile);
 
     // Unselect unit before moving
     this.selectedUnit.unselect();

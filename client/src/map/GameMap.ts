@@ -382,9 +382,9 @@ export class GameMap {
 
     if (!lines) return;
 
-    //console.log(
-    //  `Removing outline at x:${tile.getGridX()} y:${tile.getGridY()}`
-    //);
+    console.log(
+      `Removing outline at x:${tile.getGridX()} y:${tile.getGridY()}`
+    );
 
     for (const line of lines) {
       Game.getCurrentScene().removeLine(line);
@@ -409,7 +409,7 @@ export class GameMap {
       this.tileOutlines.delete(tile);
     }
 
-    //console.log(`Setting outline at x:${tile.getGridX()} y:${tile.getGridY()}`);
+    console.log(`Setting outline at x:${tile.getGridX()} y:${tile.getGridY()}`);
 
     for (let i = 0; i < 6; i++) {
       if (!options.edges[i]) continue;
