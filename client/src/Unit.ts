@@ -105,12 +105,13 @@ export class Unit extends ActorGroup {
   }
 
   public unselect() {
-    //console.log("Unselect");
     this.selected = false;
     for (const actor of this.selectionActors) {
       this.removeActor(actor);
     }
     this.selectionActors = [];
+
+    GameMap.getInstance().removeOutline(this.tile);
   }
 
   public select() {
@@ -127,7 +128,7 @@ export class Unit extends ActorGroup {
       })
     );
 
-    this.selectionActors.push(
+    /*this.selectionActors.push(
       new Actor({
         image: Game.getImage(GameImage.UNIT_SELECTION_CIRCLE),
         x: this.getTile().getX(),
@@ -135,7 +136,13 @@ export class Unit extends ActorGroup {
         width: 32,
         height: 32,
       })
-    );
+    );*/
+    GameMap.getInstance().setOutline({
+      tile: this.tile,
+      edges: [1, 1, 1, 1, 1, 1],
+      thickness: 1,
+      color: "aqua",
+    });
 
     for (const actor of this.selectionActors) {
       this.addActor(actor);

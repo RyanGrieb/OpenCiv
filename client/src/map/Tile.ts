@@ -2,7 +2,9 @@ import { GameImage, SpriteRegion } from "../Assets";
 import { Game } from "../Game";
 import { Unit } from "../Unit";
 import { Actor } from "../scene/Actor";
+import { Line } from "../ui/Line";
 import { Vector } from "../util/Vector";
+import { GameMap } from "./GameMap";
 
 export interface TileOptions {
   tileTypes: string[];
@@ -29,6 +31,11 @@ export class Tile extends Actor {
 
   private gridX: number;
   private gridY: number;
+
+  private outlineLines: Line[];
+  private outlineEdges: number[];
+  private outlineThickness: number;
+  private outlineColor: string;
 
   constructor(options: TileOptions) {
     super({

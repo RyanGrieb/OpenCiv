@@ -125,9 +125,9 @@ export class ClientPlayer extends AbstractPlayer {
       //const riverCross = Tile.riverCrosses(tile1, tile2);
       movementCost += tileCost;
 
-      let color = "lightgray";
+      let color = "rgba(154, 158, 153, 0.75)";
       if (this.selectedUnit.getAvailableMovement() > 0) {
-        color = "lime";
+        color = "rgba(7, 250, 214, 0.75)";
       } else {
       }
 

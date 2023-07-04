@@ -5,6 +5,7 @@ import { NetworkEvents, WebsocketClient } from "../network/Client";
 import { Actor } from "../scene/Actor";
 import { River } from "./River";
 import { Tile } from "./Tile";
+import { Line } from "../ui/Line";
 
 export class GameMap {
   private static instance: GameMap;
@@ -32,6 +33,8 @@ export class GameMap {
   private mapHeight: number;
   private previousGScore;
   private previousFScore;
+  private mapActors: Actor[];
+  private tileOutlines: Map<Tile, Line[]>;
 
   public static getInstance() {
     return this.instance;
@@ -48,6 +51,8 @@ export class GameMap {
   private constructor() {
     this.previousGScore = undefined;
     this.previousFScore = undefined;
+    this.mapActors = [];
+    this.tileOutlines = new Map<Tile, Line[]>();
   }
 
   public refreshMap() {
@@ -340,14 +345,14 @@ export class GameMap {
 
           console.log("All tile images loaded, generating map");
 
-          const mapActors: Actor[] = [
+          this.mapActors = [
             ...tileActorList,
             ...riverActors,
             ...topLayerTileActorList,
           ];
           //TODO: Instead of a single map actor, we need to do this in chunks (4x4?). B/c it's going to be slow on map updates.
           this.mapActor = Actor.mergeActors({
-            actors: mapActors,
+            actors: this.mapActors,
             spriteRegion: false,
           });
           scene.addActor(this.mapActor);
@@ -370,6 +375,55 @@ export class GameMap {
         }
       },
     });
+  }
+
+  public removeOutline(tile: Tile) {
+    const lines = this.tileOutlines.get(tile);
+    console.log("Removing: " + lines);
+    for (const line of lines) {
+      Game.getCurrentScene().removeLine(line);
+    }
+  }
+
+  public setOutline(options: {
+    tile: Tile;
+    edges: number[];
+    thickness: number;
+    color: string;
+  }) {
+    const tile = options.tile;
+    const outlineLines = [];
+
+    for (let i = 0; i < 6; i++) {
+      if (!options.edges[i]) continue;
+
+      const iNext = i < 5 ? i + 1 : 0;
+      let line = new Line({
+        color: options.color,
+        girth: options.thickness,
+        x1: tile.getVectors()[i].x,
+        y1: tile.getVectors()[i].y,
+        x2: tile.getVectors()[iNext].x,
+        y2: tile.getVectors()[iNext].y,
+      });
+
+      outlineLines.push(line);
+    }
+
+    for (const line of outlineLines) {
+      Game.getCurrentScene().addLine(line);
+    }
+
+    this.tileOutlines.set(tile, outlineLines);
+  }
+
+  public redrawMap() {
+    Game.getCurrentScene().removeActor(this.mapActor);
+    this.mapActor = Actor.mergeActors({
+      actors: this.mapActors,
+      spriteRegion: false,
+    });
+    Game.getCurrentScene().addActor(this.mapActor);
   }
 
   /**
