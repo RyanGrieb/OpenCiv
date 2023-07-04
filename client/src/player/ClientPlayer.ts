@@ -13,6 +13,7 @@ export class ClientPlayer extends AbstractPlayer {
   private selectedUnit: Unit;
   private hoveredTile: HoveredTile;
   private movementLines: Line[];
+  private queuedMovement: boolean;
 
   constructor(name: string) {
     super(name);
@@ -42,6 +43,20 @@ export class ClientPlayer extends AbstractPlayer {
         oldHoveredTile != this.hoveredTile.getRepresentedTile()
       ) {
         this.updateDisplayedUnitMovementPath();
+
+        //Draw outline of final target tile
+        if (this.movementLines.length > 0) {
+          GameMap.getInstance().setOutline({
+            tile: this.hoveredTile.getRepresentedTile(),
+            edges: [1, 1, 1, 1, 1, 1],
+            thickness: 1,
+            color: this.queuedMovement ? "lightgrey" : "aqua",
+          });
+        }
+
+        if (oldHoveredTile !== this.selectedUnit.getTile()) {
+          GameMap.getInstance().removeOutline(oldHoveredTile);
+        }
       }
     });
 
@@ -88,6 +103,8 @@ export class ClientPlayer extends AbstractPlayer {
   }
 
   private updateDisplayedUnitMovementPath() {
+    this.queuedMovement = false;
+
     if (this.movementLines.length > 0) {
       for (const line of this.movementLines) {
         Game.getCurrentScene().removeLine(line);
@@ -129,6 +146,7 @@ export class ClientPlayer extends AbstractPlayer {
       if (this.selectedUnit.getAvailableMovement() > 0) {
         color = "rgba(7, 250, 214, 0.75)";
       } else {
+        this.queuedMovement = true;
       }
 
       this.selectedUnit.reduceMovement(tileCost);

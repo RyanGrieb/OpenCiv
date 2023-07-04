@@ -379,7 +379,13 @@ export class GameMap {
 
   public removeOutline(tile: Tile) {
     const lines = this.tileOutlines.get(tile);
-    console.log("Removing: " + lines);
+
+    if (!lines) return;
+
+    //console.log(
+    //  `Removing outline at x:${tile.getGridX()} y:${tile.getGridY()}`
+    //);
+
     for (const line of lines) {
       Game.getCurrentScene().removeLine(line);
     }
@@ -393,6 +399,17 @@ export class GameMap {
   }) {
     const tile = options.tile;
     const outlineLines = [];
+
+    // Remove existing lines and replace
+    if (this.tileOutlines.has(tile)) {
+      for (const line of this.tileOutlines.get(tile)) {
+        Game.getCurrentScene().removeLine(line);
+      }
+
+      this.tileOutlines.delete(tile);
+    }
+
+    //console.log(`Setting outline at x:${tile.getGridX()} y:${tile.getGridY()}`);
 
     for (let i = 0; i < 6; i++) {
       if (!options.edges[i]) continue;

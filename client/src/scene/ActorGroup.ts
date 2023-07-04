@@ -1,4 +1,3 @@
-import { Game } from "../Game";
 import { Actor } from "./Actor";
 
 export interface ActorGroupOptions {
