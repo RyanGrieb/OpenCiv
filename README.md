@@ -19,8 +19,6 @@ The main objective of this project is to allow players who enjoy Civilization ga
 
 ## How do I build and run this?
 
-The game isn't complete, so its not recommended:
-
 To run a local instance, type `npm run install-all`, then `npm start` in the /OpenCiv/ directory
 
 ## How do I play this?

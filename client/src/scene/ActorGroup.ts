@@ -7,6 +7,7 @@ export interface ActorGroupOptions {
   height: number;
   actors?: Actor[];
   cameraApplies?: boolean;
+  z?: number;
 }
 
 export class ActorGroup extends Actor {
@@ -19,6 +20,7 @@ export class ActorGroup extends Actor {
       width: options.width,
       height: options.height,
       cameraApplies: options.cameraApplies,
+      z: options.z,
     });
 
     this.actors = [];
@@ -32,6 +34,7 @@ export class ActorGroup extends Actor {
 
   public addActor(actor: Actor) {
     actor.setCameraApplies(this.cameraApplies);
+    actor.setZValue(this.z);
     this.actors.push(actor);
   }
 

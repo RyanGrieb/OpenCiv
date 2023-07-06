@@ -1,11 +1,11 @@
-import PriorityQueue from "ts-priority-queue";
 import { Game } from "../Game";
 import { Unit } from "../Unit";
 import { NetworkEvents, WebsocketClient } from "../network/Client";
 import { Actor } from "../scene/Actor";
 import { River } from "./River";
 import { Tile } from "./Tile";
-import { Line } from "../ui/Line";
+import { Line } from "../scene/Line";
+import PriorityQueue from "ts-priority-queue";
 
 export class GameMap {
   private static instance: GameMap;
@@ -148,8 +148,8 @@ export class GameMap {
         fScore[x][y] = 0;
 
         if (this.previousGScore || this.previousFScore) {
-          gScore = this.previousGScore; // Use previous gScore value
-          fScore = this.previousFScore; // Use previous fScore value
+          //gScore = this.previousGScore; // Use previous gScore value
+          //fScore = this.previousFScore; // Use previous fScore value
         }
       }
     }
@@ -324,6 +324,7 @@ export class GameMap {
               id: jsonUnit["id"],
               attackType: jsonUnit["attackType"],
               tile: tile,
+              actionsJSONList: jsonUnit["actions"],
             });
             tile.addUnit(unit);
             unitActorList.push(unit);
@@ -382,9 +383,9 @@ export class GameMap {
 
     if (!lines) return;
 
-    console.log(
-      `Removing outline at x:${tile.getGridX()} y:${tile.getGridY()}`
-    );
+    //console.log(
+    //  `Removing outline at x:${tile.getGridX()} y:${tile.getGridY()}`
+    //);
 
     for (const line of lines) {
       Game.getCurrentScene().removeLine(line);
@@ -409,7 +410,7 @@ export class GameMap {
       this.tileOutlines.delete(tile);
     }
 
-    console.log(`Setting outline at x:${tile.getGridX()} y:${tile.getGridY()}`);
+    // console.log(`Setting outline at x:${tile.getGridX()} y:${tile.getGridY()}`);
 
     for (let i = 0; i < 6; i++) {
       if (!options.edges[i]) continue;

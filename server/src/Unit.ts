@@ -8,6 +8,12 @@ export interface UnitOptions {
   tile: Tile;
   attackType?: string;
   defaultMoveDistance?: number;
+  actions: {
+    name: string;
+    icon: string;
+    requirements: string[];
+    onAction: (unit: Unit) => void;
+  }[];
 }
 
 export class Unit {
@@ -18,12 +24,19 @@ export class Unit {
 
   private static nextId = 0;
   private id: number; // Increment this every time a unit object is created
+  private actions: {
+    name: string;
+    icon: string;
+    requirements: string[];
+    onAction: (unit: Unit) => void;
+  }[];
 
   constructor(options: UnitOptions) {
     this.name = options.name;
     this.tile = options.tile;
     this.attackType = options.attackType || "none";
     this.defaultMoveDistance = options.defaultMoveDistance || 2;
+    this.actions = options.actions || [];
 
     this.id = Unit.nextId;
     Unit.nextId += 1;
@@ -54,6 +67,20 @@ export class Unit {
       name: this.name,
       attackType: this.attackType,
       id: this.id,
+      actions: this.getUnitActionsJSON(),
     };
+  }
+
+  public getUnitActionsJSON() {
+    const actions: { name: string; requirements: string[] }[] = [];
+
+    actions.push(
+      ...this.actions.map(({ name, icon, requirements }) => ({
+        name,
+        icon,
+        requirements,
+      }))
+    );
+    return actions;
   }
 }

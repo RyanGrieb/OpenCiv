@@ -1,5 +1,6 @@
 import { SpriteRegion, GameImage } from "../Assets";
 import { Game } from "../Game";
+import { SceneObject } from "./SceneObject";
 
 export interface ActorOptions {
   color?: string;
@@ -9,18 +10,20 @@ export interface ActorOptions {
   y: number;
   width: number;
   height: number;
+  z?: number;
   rotation?: number;
   transparency?: number;
   cameraApplies?: boolean;
 }
 
-export class Actor {
+export class Actor implements SceneObject {
   protected color: string;
   protected image: HTMLImageElement;
   protected spriteRegion?: SpriteRegion;
 
   protected x: number;
   protected y: number;
+  protected z: number;
   protected width: number;
   protected height: number;
   protected rotation: number;
@@ -36,6 +39,7 @@ export class Actor {
     this.spriteRegion = actorOptions.spriteRegion;
     this.x = actorOptions.x;
     this.y = actorOptions.y;
+    this.z = actorOptions.z ?? 0;
     this.width = actorOptions.width;
     this.height = actorOptions.height;
     this.rotation = actorOptions.rotation ?? 0;
@@ -65,6 +69,14 @@ export class Actor {
         this.call("clicked");
       }
     });
+  }
+
+  public getZIndex(): number {
+    return this.z;
+  }
+
+  public setZValue(value: number): void {
+    this.z = value;
   }
 
   public draw(canvasContext: CanvasRenderingContext2D) {

@@ -5,12 +5,89 @@ import { Tile } from "./map/Tile";
 import { NetworkEvents } from "./network/Client";
 import { Actor } from "./scene/Actor";
 import { ActorGroup } from "./scene/ActorGroup";
+import { UnitDisplayInfo } from "./ui/UnitDisplayInfo";
+
+export class UnitActionManager {
+  private static instance: UnitActionManager;
+
+  private actionMap: Map<string, UnitAction>;
+
+  private constructor() {
+    this.actionMap = new Map<string, UnitAction>();
+  }
+
+  // Public static method to access the singleton instance
+  public static getInstance(): UnitActionManager {
+    if (!UnitActionManager.instance) {
+      UnitActionManager.instance = new UnitActionManager();
+    }
+    return UnitActionManager.instance;
+  }
+
+  public getActionMap() {
+    return this.actionMap;
+  }
+}
+
+// On unit creation, the server assigns UnitActions to the unit, along with the requirements for it to be enabled
+export class UnitAction {
+  private actionName: string;
+  private requirements: string[]; // We assign these strings to client-side functions to check if there met.
+  private icon: SpriteRegion;
+
+  public constructor(
+    actionName: string,
+    requirements: string[],
+    icon: SpriteRegion
+  ) {
+    this.actionName = actionName;
+    this.requirements = requirements;
+    this.icon = icon;
+  }
+
+  public getName() {
+    return this.actionName;
+  }
+
+  public getIcon() {
+    return this.icon;
+  }
+
+  public requirementsMet(unit: Unit): boolean {
+    for (const requirement of this.requirements) {
+      const requirementMethod = this[requirement] as Function;
+
+      if (requirementMethod && requirementMethod.call(this, unit)) {
+        return true;
+      }
+    }
+    return true;
+  }
+
+  // Requirement methodss
+  protected movement(unit: Unit) {
+    return unit.getAvailableMovement() > 0;
+  }
+
+  /*protected nearEnemy(unit: Unit) {
+    return false;
+  }*/
+
+  protected awayFromCity(unit: Unit) {
+    return true;
+  }
+}
 
 export interface options {
   name: string;
   id: number;
   attackType: string;
   tile: Tile;
+  actionsJSONList: {
+    name: string;
+    icon: string;
+    requirements: string[];
+  }[];
 }
 
 export class Unit extends ActorGroup {
@@ -21,7 +98,10 @@ export class Unit extends ActorGroup {
   private unitActor: Actor;
   private selectionActors: Actor[];
   private selected: boolean;
+  private totalMovement: number;
   private availableMovement: number;
+  private unitDisplayInfo: UnitDisplayInfo;
+  private actions: UnitAction[];
 
   constructor(options: options) {
     super({
@@ -47,7 +127,21 @@ export class Unit extends ActorGroup {
     this.tile = options.tile;
     this.attackType = options.attackType;
     this.selectionActors = [];
+    this.totalMovement = 2; // TODO: Have server define this.
     this.availableMovement = 2;
+    this.actions = [];
+
+    if (options.actionsJSONList) {
+      for (const actionJSON of options.actionsJSONList) {
+        this.actions.push(
+          new UnitAction(
+            actionJSON.name,
+            actionJSON.requirements,
+            SpriteRegion[actionJSON.icon]
+          )
+        );
+      }
+    }
 
     console.log("new unit with id: " + this.id);
 
@@ -92,6 +186,10 @@ export class Unit extends ActorGroup {
     this.availableMovement = amount;
   }
 
+  public getTotalMovement() {
+    return this.totalMovement;
+  }
+
   public getAvailableMovement() {
     return this.availableMovement;
   }
@@ -112,6 +210,7 @@ export class Unit extends ActorGroup {
     this.selectionActors = [];
 
     GameMap.getInstance().removeOutline(this.tile);
+    Game.getCurrentScene().removeActor(this.unitDisplayInfo);
   }
 
   public select() {
@@ -147,6 +246,13 @@ export class Unit extends ActorGroup {
     for (const actor of this.selectionActors) {
       this.addActor(actor);
     }
+
+    this.unitDisplayInfo = new UnitDisplayInfo(this);
+    Game.getCurrentScene().addActor(this.unitDisplayInfo);
+  }
+
+  public getActions() {
+    return this.actions;
   }
 
   public getName(): string {

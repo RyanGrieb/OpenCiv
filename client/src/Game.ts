@@ -2,7 +2,7 @@ import { Actor } from "./scene/Actor";
 import { Scene } from "./scene/Scene";
 import { GameImage } from "./Assets";
 import { NetworkEvents } from "./network/Client";
-import { Line } from "./ui/Line";
+import { Line } from "./scene/Line";
 
 export interface TextOptions {
   text: string;
@@ -204,7 +204,7 @@ export class Game {
       text: "FPS: " + this.fps,
       x: Game.getWidth() - 40,
       y: Game.getHeight() - 4,
-      color: "black",
+      color: "white",
       font: "12px sans",
     });
 

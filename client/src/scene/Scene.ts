@@ -2,37 +2,44 @@ import { Actor } from "./Actor";
 import { Game } from "../Game";
 import { NetworkEvents } from "../network/Client";
 import { Camera } from "./Camera";
-import { Line } from "../ui/Line";
+import { Line } from "./Line";
+import { SceneObject } from "./SceneObject";
 
 export abstract class Scene {
   private static ExitReceipt = new (class {})();
 
   protected storedEvents: Map<string, Function[]>;
-  private actors: Actor[] = [];
-  private lines: Line[] = [];
+  private sceneObjects: SceneObject[];
   private camera: Camera;
 
   constructor() {
     this.storedEvents = new Map<string, Function[]>();
+    this.sceneObjects = [];
   }
 
   public addLine(line: Line) {
-    this.lines.push(line);
+    this.sceneObjects.push(line);
+    this.sortSceneObjects();
     Game.addLine(line);
   }
 
   public removeLine(line: Line) {
-    this.lines = this.lines.filter((element) => element !== line);
+    this.sceneObjects = this.sceneObjects.filter((element) => element !== line);
+    this.sortSceneObjects();
     Game.removeLine(line);
   }
 
   public addActor(actor: Actor) {
-    this.actors.push(actor);
+    this.sceneObjects.push(actor);
+    this.sortSceneObjects();
     Game.addActor(actor);
   }
 
   public removeActor(actor: Actor) {
-    this.actors = this.actors.filter((element) => element !== actor);
+    this.sceneObjects = this.sceneObjects.filter(
+      (element) => element !== actor
+    );
+    this.sortSceneObjects();
     Game.removeActor(actor);
   }
 
@@ -41,23 +48,23 @@ export abstract class Scene {
       this.camera.updateOffset();
     }
 
-    this.actors.forEach((actor: Actor) => {
-      actor.draw(Game.getCanvasContext());
-    });
-
-    this.lines.forEach((line: Line) => {
-      line.draw(Game.getCanvasContext());
+    this.sceneObjects.forEach((object: SceneObject) => {
+      object.draw(Game.getCanvasContext());
     });
   }
 
   public onInitialize() {}
 
   public onDestroyed(newScene: Scene): typeof Scene.ExitReceipt {
-    this.actors.forEach((actor) => {
-      actor.call("mouse_exit");
-      actor.onDestroyed();
+    this.sceneObjects.forEach((object) => {
+      if (object instanceof Actor) {
+        const actor = object as Actor;
+        actor.call("mouse_exit");
+        actor.onDestroyed();
+      }
     });
-    this.actors = [];
+
+    this.sceneObjects = [];
     this.storedEvents.clear();
     NetworkEvents.clear();
 
@@ -88,5 +95,11 @@ export abstract class Scene {
 
   public getCamera() {
     return this.camera;
+  }
+
+  public sortSceneObjects() {
+    this.sceneObjects.sort((obj1, obj2) => {
+      return obj1.getZIndex() - obj2.getZIndex();
+    });
   }
 }

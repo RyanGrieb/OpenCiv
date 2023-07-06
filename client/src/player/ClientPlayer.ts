@@ -4,7 +4,7 @@ import { GameMap } from "../map/GameMap";
 import { HoveredTile } from "../map/HoveredTile";
 import { Tile } from "../map/Tile";
 import { NetworkEvents, WebsocketClient } from "../network/Client";
-import { Line } from "../ui/Line";
+import { Line } from "../scene/Line";
 import { Numbers } from "../util/Numbers";
 import { Vector } from "../util/Vector";
 import { AbstractPlayer } from "./AbstractPlayer";

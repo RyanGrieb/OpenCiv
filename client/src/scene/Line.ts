@@ -1,4 +1,5 @@
 import { Game } from "../Game";
+import { SceneObject } from "./SceneObject";
 
 export interface LineOptions {
   color: string;
@@ -7,15 +8,17 @@ export interface LineOptions {
   y1: number;
   x2: number;
   y2: number;
+  z?: number;
 }
 
-export class Line {
+export class Line implements SceneObject {
   color: string;
   girth: number;
   x1: number;
   y1: number;
   x2: number;
   y2: number;
+  z: number;
 
   constructor(options: LineOptions) {
     this.color = options.color;
@@ -24,6 +27,15 @@ export class Line {
     this.y1 = options.y1;
     this.x2 = options.x2;
     this.y2 = options.y2;
+    this.z = options.z ?? 0;
+  }
+
+  public getZIndex(): number {
+    return this.z;
+  }
+
+  public setZValue(value: number): void {
+    this.z = value;
   }
 
   public draw(canvasContext: CanvasRenderingContext2D) {

@@ -5,6 +5,7 @@ export interface LabelOptions {
   text: string;
   x?: number;
   y?: number;
+  z?: number;
   font?: string;
   fontColor?: string;
   lineWidth?: number;
@@ -24,6 +25,7 @@ export class Label extends Actor {
     super({
       x: options.x,
       y: options.y,
+      z: options.z,
       width: 0,
       height: 0,
     });

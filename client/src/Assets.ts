@@ -10,7 +10,7 @@ export enum GameImage {
   BUTTON_HOVERED,
   SPRITESHEET,
   RIVER,
-  UNIT_SELECTION_CIRCLE,
+  POPUP_BOX,
 }
 
 export enum SpriteRegion {
@@ -67,6 +67,7 @@ export enum SpriteRegion {
   GOLD_ICON = "17,12",
   FAITH_ICON = "2,13",
   TRADE_ICON = "5,14",
+  SETTLE_ICON = "11,11",
 }
 
 export const assetList = [
@@ -74,7 +75,7 @@ export const assetList = [
   require("../assets/images/ui_button_hovered.png"),
   require("../assets/images/spritesheet.png"),
   require("../assets/images/river.png"),
-  require("../assets/images/unit_selection_circle.png"),
+  require("../assets/images/ui_popup_box.png"),
   require("../assets/images/font.png"),
   require("../assets/images/logo.png"),
 ];

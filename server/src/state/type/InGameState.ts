@@ -80,7 +80,23 @@ export class InGameState extends State {
         ],
       });
 
-      spawnTile.addUnit(new Unit({ name: "settler", tile: spawnTile }));
+      //FIXME: Make Unit have a createSettler() method?
+      spawnTile.addUnit(
+        new Unit({
+          name: "settler",
+          tile: spawnTile,
+          actions: [
+            {
+              name: "settle",
+              icon: "SETTLE_ICON",
+              requirements: ["awayFromCity"],
+              onAction: (unit: Unit) => {
+                console.log("ACTION: Act on settle city.");
+              },
+            },
+          ],
+        })
+      );
       //spawnTile.addUnit(new Unit({ name: "archer", attackType: "ranged" }));
 
       player.onLoadedIn(() => {
