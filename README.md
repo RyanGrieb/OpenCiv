@@ -5,14 +5,13 @@
 [![Discord](https://img.shields.io/discord/925176383792087081.svg?logo=discord&logoColor=white&logoWidth=20&labelColor=7289DA&label=Discord&color=17cf48)](https://discord.gg/WFteeen5fu)
 
 A turn-based strategy game built on typescript & HTML5, with a rouge-like tile set.
-Previously written in Java with LibGDX, **currently in the process of a complete rewrite.**
 
 ## About
 
-OpenCiv is a love letter to turn-based strategy games inspired by Sid Meier's Civilization. The game strives to improve on certain aspects that were lacking in the series, and experiment with new features.
-If you like game development, typescript, or pixel art, consider contributing. We can make something great.
+OpenCiv is a love letter to turn-based strategy games inspired by Sid Meier's Civilization. The game mainly focuses on Civ5 features and strives to improve on certain aspects that were lacking in the series.
 
-Eventually, my main objective is to implement server-sided modding. Where the server would instruct the client to include modded units, terrain, and even custom UI elements.
+
+The main objective of this project is to allow players who enjoy Civilization games to play it directly on a web browser.
 
 ## Screenshot
 
