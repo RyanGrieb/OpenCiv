@@ -24,6 +24,31 @@ export class ActorGroup extends Actor {
     });
 
     this.actors = [];
+
+    this.on("mousemove", (options) => {
+      for (const actor of this.actors) {
+        if (actor.insideActor(options.x, options.y)) {
+          if (!actor.isMouseInside()) {
+            actor.call("mouse_enter");
+            actor.setMouseInside(true);
+          }
+        } else {
+          if (actor.isMouseInside()) {
+            actor.call("mouse_exit");
+          }
+          actor.setMouseInside(false);
+        }
+      }
+    });
+
+    this.on("mouseup", (options) => {
+      for (const actor of this.actors) {
+        if (actor.insideActor(options.x, options.y)) {
+          //FIXME: Distinguish mouse_up & mouse_click_up better?
+          actor.call("clicked");
+        }
+      }
+    });
   }
 
   public draw(canvasContext: CanvasRenderingContext2D) {

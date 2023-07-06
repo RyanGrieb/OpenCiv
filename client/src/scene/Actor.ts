@@ -252,4 +252,16 @@ export class Actor implements SceneObject {
   public isCameraApplied() {
     return this.cameraApplies;
   }
+
+  /**
+   * Returns the variable that keeps track of this. NOT always true as this is outdated compared to insideActor().
+   * @returns
+   */
+  public isMouseInside() {
+    return this.mouseInside;
+  }
+
+  public setMouseInside(value: boolean) {
+    this.mouseInside = value;
+  }
 }
