@@ -20,6 +20,8 @@ export interface ButtonOptions {
   font?: string;
   fontColor?: string;
   onClicked: Function;
+  onMouseEnter?: Function;
+  onMouseExit?: Function;
 }
 
 export class Button extends ActorGroup {
@@ -28,6 +30,8 @@ export class Button extends ActorGroup {
   private text: string;
   private icon: SpriteRegion;
   private callbackFunction: Function;
+  private mouseEnterCallbackFunction: Function;
+  private mouseExitCallbackFunction: Function;
   private font: string;
   private fontColor: string;
   private textWidth: number;
@@ -48,11 +52,16 @@ export class Button extends ActorGroup {
     this.textWidth = -1;
     this.textHeight = -1;
     this.callbackFunction = options.onClicked;
+    this.mouseEnterCallbackFunction = options.onMouseEnter || function () {};
+    this.mouseExitCallbackFunction = options.onMouseExit || function () {};
     this.font = options.font ?? "24px serif";
     this.fontColor = options.fontColor ?? "black";
+    this.buttonImage = options.buttonImage || GameImage.BUTTON;
+    this.buttonHoveredImage =
+      options.buttonHoveredImage || GameImage.BUTTON_HOVERED;
 
     this.buttonActor = new Actor({
-      image: Game.getImage(options.buttonImage || GameImage.BUTTON),
+      image: Game.getImage(this.buttonImage),
       x: this.x,
       y: this.y,
       width: this.width,
@@ -76,13 +85,13 @@ export class Button extends ActorGroup {
     }
 
     this.on("mouse_enter", () => {
-      this.buttonActor.setImage(
-        this.buttonHoveredImage || GameImage.BUTTON_HOVERED
-      );
+      this.buttonActor.setImage(this.buttonHoveredImage);
+      this.mouseEnterCallbackFunction();
     });
 
     this.on("mouse_exit", () => {
-      this.buttonActor.setImage(this.buttonImage || GameImage.BUTTON);
+      this.buttonActor.setImage(this.buttonImage);
+      this.mouseExitCallbackFunction();
     });
 
     this.on("clicked", () => {

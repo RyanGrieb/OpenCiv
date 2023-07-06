@@ -73,7 +73,7 @@ export class InGameScene extends Scene {
           height: 42,
           fontColor: "white",
           onClicked: () => {
-            console.log("Hi");
+            console.log("Next turn");
           },
         })
       );

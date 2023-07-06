@@ -1,6 +1,7 @@
 import { GameImage } from "../Assets";
 import { Game } from "../Game";
 import { Unit } from "../Unit";
+import { WebsocketClient } from "../network/Client";
 import { Actor } from "../scene/Actor";
 import { ActorGroup } from "../scene/ActorGroup";
 import { Strings } from "../util/Strings";
@@ -8,6 +9,9 @@ import { Button } from "./Button";
 import { Label } from "./Label";
 
 export class UnitDisplayInfo extends ActorGroup {
+  private unit: Unit;
+  private movementLabel: Label;
+
   constructor(unit: Unit) {
     super({
       x: Game.getWidth() - 250,
@@ -17,6 +21,8 @@ export class UnitDisplayInfo extends ActorGroup {
       cameraApplies: false,
       z: 1,
     });
+
+    this.unit = unit;
 
     this.addActor(
       new Actor({
@@ -45,7 +51,7 @@ export class UnitDisplayInfo extends ActorGroup {
       this.addActor(nameLabel);
     });
 
-    const movementLabel = new Label({
+    this.movementLabel = new Label({
       text: `Movement: ${unit.getAvailableMovement()}/${unit.getTotalMovement()}`,
       x: this.x,
       y: this.y,
@@ -53,31 +59,57 @@ export class UnitDisplayInfo extends ActorGroup {
       fontColor: "white",
     });
 
-    movementLabel.conformSize().then(() => {
-      movementLabel.setPosition(
-        this.x + this.width / 2 - movementLabel.getWidth() / 2,
-        this.y + this.height - movementLabel.getHeight()
-      );
-      this.addActor(movementLabel);
-    });
+    this.updateMovementLabel({ updateText: false });
+    this.addActor(this.movementLabel);
 
     for (const action of unit.getActions()) {
       this.addActor(
         new Button({
+          buttonImage: GameImage.ICON_BUTTON,
+          buttonHoveredImage: GameImage.ICON_BUTTON_HOVERED,
           icon: action.getIcon(),
           iconWidth: 32,
           iconHeight: 32,
-          x: this.x,
-          y: this.y,
-          width: 42,
-          height: 42,
+          x: this.x + 8,
+          y: this.y + 28,
+          width: 50,
+          height: 50,
           onClicked: () => {
             // Send action event to server
             console.log(`Action: ${action.getName()} clicked`);
+
+            WebsocketClient.sendMessage({
+              event: "unitAction",
+              unitX: this.unit.getTile().getGridX(),
+              unitY: this.unit.getTile().getGridY(),
+              id: this.unit.getID(),
+              actionName: action.getName(),
+            });
+          },
+          onMouseEnter: () => {
+            this.movementLabel.setText(action.getDesc());
+            this.updateMovementLabel({ updateText: false });
+          },
+          onMouseExit: () => {
+            this.updateMovementLabel({ updateText: true });
           },
         })
       );
-      console.log(action.getName());
     }
+  }
+
+  private updateMovementLabel(options: { updateText: boolean }) {
+    if (options.updateText) {
+      this.movementLabel.setText(
+        `Movement: ${this.unit.getAvailableMovement()}/${this.unit.getTotalMovement()}`
+      );
+    }
+
+    this.movementLabel.conformSize().then(() => {
+      this.movementLabel.setPosition(
+        this.x + this.width / 2 - this.movementLabel.getWidth() / 2,
+        this.y + this.height - 12
+      );
+    });
   }
 }

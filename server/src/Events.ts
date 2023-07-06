@@ -1,10 +1,16 @@
 import { WebSocket } from "ws";
 
 export class CallbackData {
+  public parentObject: object;
   public callbackFunction: Function;
   public globalEvent: boolean; // Not associated with the current scene.
 
-  constructor(callbackFunctions: Function, globalEvent: boolean) {
+  constructor(
+    parentObject: object,
+    callbackFunctions: Function,
+    globalEvent: boolean
+  ) {
+    this.parentObject = parentObject;
     this.callbackFunction = callbackFunctions;
     this.globalEvent = globalEvent;
   }
@@ -12,6 +18,7 @@ export class CallbackData {
 
 export interface OnServerEventOptions {
   eventName: string;
+  parentObject: object;
   callback: (data: Record<string, any>, websocket?: WebSocket) => void;
   globalEvent?: boolean;
 }
@@ -52,6 +59,7 @@ export class ServerEvents {
     this.addCallbackEvent(
       this.storedEvents,
       options.eventName,
+      options.parentObject,
       options.callback,
       options.globalEvent
     );
@@ -61,15 +69,24 @@ export class ServerEvents {
    * Removes all associated callback functions that isn't a globalEvent
    */
   public static clear() {
-    const globalEventCallbacks = this.getGlobalEventCallbacks(
-      this.storedEvents
-    );
+    const globalEventCallbacks = this.getGlobalEventCallbacks();
     this.storedEvents = globalEventCallbacks;
   }
+  public static removeCallbacksByParentObject(parentObj: object): void {
+    this.storedEvents.forEach((callbackDataList, eventName) => {
+      const filteredDataList = callbackDataList.filter(
+        (callbackData) => callbackData.parentObject !== parentObj
+      );
 
-  private static getGlobalEventCallbacks(
-    storedEvents: Map<string, CallbackData[]>
-  ) {
+      if (filteredDataList.length === 0) {
+        this.storedEvents.delete(eventName);
+      } else {
+        this.storedEvents.set(eventName, filteredDataList);
+      }
+    });
+  }
+
+  private static getGlobalEventCallbacks() {
     const globalEventCallbacks = new Map<string, CallbackData[]>();
 
     this.storedEvents.forEach((callbackDataList, eventName) => {
@@ -78,6 +95,7 @@ export class ServerEvents {
           this.addCallbackEvent(
             globalEventCallbacks,
             eventName,
+            callbackData.parentObject,
             callbackData.callbackFunction,
             true
           );
@@ -91,13 +109,16 @@ export class ServerEvents {
   private static addCallbackEvent(
     storedEvents: Map<string, CallbackData[]>,
     eventName: string,
+    parentObject: object,
     callback: Function,
     globalEvent = false
   ) {
     //Get the list of stored callback functions or an empty list
     let callbackDataList: CallbackData[] = storedEvents.get(eventName) ?? [];
     // Append the to functions
-    callbackDataList.push(new CallbackData(callback, globalEvent));
+    callbackDataList.push(
+      new CallbackData(parentObject, callback, globalEvent)
+    );
     storedEvents.set(eventName, callbackDataList);
   }
 }

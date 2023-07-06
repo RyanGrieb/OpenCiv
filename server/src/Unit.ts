@@ -12,6 +12,7 @@ export interface UnitOptions {
     name: string;
     icon: string;
     requirements: string[];
+    desc: string;
     onAction: (unit: Unit) => void;
   }[];
 }
@@ -28,6 +29,7 @@ export class Unit {
     name: string;
     icon: string;
     requirements: string[];
+    desc: string;
     onAction: (unit: Unit) => void;
   }[];
 
@@ -43,6 +45,7 @@ export class Unit {
 
     ServerEvents.on({
       eventName: "moveUnit",
+      parentObject: this,
       callback: (data, websocket) => {
         const unitTile = GameMap.getTiles()[data["unitX"]][data["unitY"]];
 
@@ -60,6 +63,39 @@ export class Unit {
         });
       },
     });
+
+    ServerEvents.on({
+      eventName: "unitAction",
+      parentObject: this,
+      callback: (data, websocket) => {
+        const unitTile = GameMap.getTiles()[data["unitX"]][data["unitY"]];
+
+        if (this.tile !== unitTile) return;
+
+        const action = this.getActionByName(data["actionName"]);
+        if (action) {
+          action.onAction(this);
+        }
+      },
+    });
+  }
+
+  public delete() {
+    this.tile.removeUnit(this);
+    ServerEvents.removeCallbacksByParentObject(this);
+
+    Game.getPlayers().forEach((player) => {
+      player.sendNetworkEvent({
+        event: "removeUnit",
+        id: this.id,
+        unitX: this.tile.getX(),
+        unitY: this.tile.getY(),
+      });
+    });
+  }
+
+  public getTile() {
+    return this.tile;
   }
 
   public asJSON() {
@@ -71,14 +107,26 @@ export class Unit {
     };
   }
 
+  public getActionByName(name: string) {
+    for (const action of this.actions) {
+      if (action.name === name) {
+        return action;
+      }
+    }
+
+    return undefined;
+  }
+
   public getUnitActionsJSON() {
-    const actions: { name: string; requirements: string[] }[] = [];
+    const actions: { name: string; requirements: string[]; desc: string }[] =
+      [];
 
     actions.push(
-      ...this.actions.map(({ name, icon, requirements }) => ({
+      ...this.actions.map(({ name, icon, requirements, desc }) => ({
         name,
         icon,
         requirements,
+        desc,
       }))
     );
     return actions;

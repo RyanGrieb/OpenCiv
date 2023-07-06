@@ -355,7 +355,7 @@ export class Game {
     await this.waitUntilMeasureQueueIsEmpty(); // Wait for other measurements to complete, then continue..
     this.measureQueue.push(text);
     this.canvasContext.save();
-    this.canvasContext.font = font ?? "24px serif";
+    this.canvasContext.font = font || "24px serif";
 
     await document.fonts.ready; // Wait for the async function to complete, then measure text.s
 

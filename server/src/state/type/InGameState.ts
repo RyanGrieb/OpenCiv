@@ -24,6 +24,7 @@ export class InGameState extends State {
     //TODO: Instead of an error message, make the player a spectator
     ServerEvents.on({
       eventName: "connection",
+      parentObject: this,
       callback: (data, websocket) => {
         console.log("Connection attempted while game in progress...");
         websocket.send(
@@ -39,6 +40,7 @@ export class InGameState extends State {
 
     ServerEvents.on({
       eventName: "requestMap",
+      parentObject: this,
       callback: (data, websocket) => {
         const player = Game.getPlayerFromWebsocket(websocket);
         GameMap.sendMapChunksToPlayer(player);
@@ -47,6 +49,7 @@ export class InGameState extends State {
 
     ServerEvents.on({
       eventName: "playersData",
+      parentObject: this,
       callback: (data, websocket) => {
         const playersDataJSON = [];
 
@@ -90,8 +93,10 @@ export class InGameState extends State {
               name: "settle",
               icon: "SETTLE_ICON",
               requirements: ["awayFromCity"],
+              desc: "Settle City",
               onAction: (unit: Unit) => {
                 console.log("ACTION: Act on settle city.");
+                unit.delete();
               },
             },
           ],
@@ -120,6 +125,7 @@ export class InGameState extends State {
 
     ServerEvents.on({
       eventName: "allPlayersLoaded",
+      parentObject: this,
       callback: () => {
         // Increment the turn
         this.incrementTurn();

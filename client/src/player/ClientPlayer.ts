@@ -90,6 +90,19 @@ export class ClientPlayer extends AbstractPlayer {
         this.zoomToLocation(x, y, zoomAmount);
       },
     });
+
+    NetworkEvents.on({
+      eventName: "removeUnit",
+      callback: (data) => {
+        if (this.selectedUnit.getID() === data["id"]) {
+          this.selectedUnit = undefined;
+          this.updateDisplayedUnitMovementPath();
+          GameMap.getInstance().removeOutline(
+            this.hoveredTile.getRepresentedTile()
+          );
+        }
+      },
+    });
   }
 
   public zoomToLocation(x: number, y: number, zoomAmount: number) {

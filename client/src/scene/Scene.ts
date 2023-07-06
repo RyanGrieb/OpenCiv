@@ -36,6 +36,8 @@ export abstract class Scene {
   }
 
   public removeActor(actor: Actor) {
+    if (!actor) return;
+
     this.sceneObjects = this.sceneObjects.filter(
       (element) => element !== actor
     );

@@ -8,6 +8,8 @@ export const spritehseetSize = 20; //20x20
 export enum GameImage {
   BUTTON,
   BUTTON_HOVERED,
+  ICON_BUTTON,
+  ICON_BUTTON_HOVERED,
   SPRITESHEET,
   RIVER,
   POPUP_BOX,
@@ -73,6 +75,8 @@ export enum SpriteRegion {
 export const assetList = [
   require("../assets/images/ui_button.png"),
   require("../assets/images/ui_button_hovered.png"),
+  require("../assets/images/ui_icon_button.png"),
+  require("../assets/images/ui_icon_button_hovered.png"),
   require("../assets/images/spritesheet.png"),
   require("../assets/images/river.png"),
   require("../assets/images/ui_popup_box.png"),

@@ -32,21 +32,28 @@ export class UnitActionManager {
 // On unit creation, the server assigns UnitActions to the unit, along with the requirements for it to be enabled
 export class UnitAction {
   private actionName: string;
+  private desc: string;
   private requirements: string[]; // We assign these strings to client-side functions to check if there met.
   private icon: SpriteRegion;
 
   public constructor(
     actionName: string,
+    desc: string,
     requirements: string[],
     icon: SpriteRegion
   ) {
     this.actionName = actionName;
+    this.desc = desc;
     this.requirements = requirements;
     this.icon = icon;
   }
 
   public getName() {
     return this.actionName;
+  }
+
+  public getDesc() {
+    return this.desc;
   }
 
   public getIcon() {
@@ -87,6 +94,7 @@ export interface options {
     name: string;
     icon: string;
     requirements: string[];
+    desc: string;
   }[];
 }
 
@@ -136,6 +144,7 @@ export class Unit extends ActorGroup {
         this.actions.push(
           new UnitAction(
             actionJSON.name,
+            actionJSON.desc,
             actionJSON.requirements,
             SpriteRegion[actionJSON.icon]
           )
@@ -163,6 +172,23 @@ export class Unit extends ActorGroup {
         targetTile.addUnit(this);
 
         this.updatePosition(targetTile);
+      },
+    });
+
+    NetworkEvents.on({
+      eventName: "removeUnit",
+      callback: (data) => {
+        const unitTile =
+          GameMap.getInstance().getTiles()[data["unitX"]][data["unitY"]];
+
+        if (this.tile !== unitTile) {
+          return;
+        }
+
+        //FIXME: Tell client player to stop drawing lines.
+        this.unselect();
+        this.tile.removeUnit(this);
+        Game.getCurrentScene().removeActor(this);
       },
     });
   }
