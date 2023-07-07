@@ -43,6 +43,7 @@ export class Player {
     // Add event listener for when the player has loaded into the game
     ServerEvents.on({
       eventName: "loadedIn",
+      parentObject: this,
       callback: (data, websocket) => {
         if (this.wsConnection != websocket) return;
 

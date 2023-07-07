@@ -6,7 +6,7 @@ import { TileIndexer } from "./TileIndexer";
 import { Unit } from "../Unit";
 
 enum MapSize {
-  DUEL = "40x24",
+  DUEL = "48x32",
   TINY = "56x36",
   SMALL = "68x44",
   STANDARD = "80x52",
@@ -40,7 +40,7 @@ export class GameMap {
 
   public static init() {
     // Assign map dimension values
-    const mapDimensions = this.getDimensionValues(MapSize.TINY);
+    const mapDimensions = this.getDimensionValues(MapSize.DUEL);
     this.mapWidth = mapDimensions[0];
     this.mapHeight = mapDimensions[1];
     this.mapArea = this.mapWidth * this.mapHeight;
@@ -720,6 +720,8 @@ export class GameMap {
         }
         player.sendNetworkEvent({
           event: "mapChunk",
+          chunkX: x,
+          chunkY: y,
           tiles: chunkTiles,
           lastChunk: lastChunk,
         });

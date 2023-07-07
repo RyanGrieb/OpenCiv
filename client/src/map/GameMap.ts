@@ -6,6 +6,8 @@ import { River } from "./River";
 import { Tile } from "./Tile";
 import { Line } from "../scene/Line";
 import PriorityQueue from "ts-priority-queue";
+import { AbstractPlayer } from "../player/AbstractPlayer";
+import { City } from "../city/City";
 
 export class GameMap {
   private static instance: GameMap;
@@ -28,13 +30,17 @@ export class GameMap {
   ];
 
   private tiles: Tile[][];
-  private mapActor: Actor;
   private mapWidth: number;
   private mapHeight: number;
   private previousGScore;
   private previousFScore;
-  private mapActors: Actor[];
   private tileOutlines: Map<Tile, Line[]>;
+
+  private mapActor: Actor;
+  private baseLayerTileActorList: Tile[] = [];
+  private topLayerTileActorList: Tile[] = [];
+  private unitActorList: Unit[] = [];
+  private riverActors: River[] = [];
 
   public static getInstance() {
     return this.instance;
@@ -51,37 +57,20 @@ export class GameMap {
   private constructor() {
     this.previousGScore = undefined;
     this.previousFScore = undefined;
-    this.mapActors = [];
     this.tileOutlines = new Map<Tile, Line[]>();
-  }
 
-  public refreshMap() {
-    Game.getCurrentScene().removeActor(this.mapActor);
-    const tileActorList = [];
+    NetworkEvents.on({
+      eventName: "newCity",
+      callback: (data) => {
+        const tile = this.tiles[data["tileX"]][data["tileY"]];
+        const player = AbstractPlayer.getPlayerByName(data["player"]);
 
-    for (let x = 0; x < this.mapWidth; x++) {
-      for (let y = 0; y < this.mapHeight; y++) {
-        let yPos = y * 24;
-        let xPos = x * 33;
-        if (y % 2 != 0) {
-          xPos += 16;
-        }
-
-        const tile = new Tile({
-          tileTypes: this.tiles[x][y].getTileTypes(),
-          x: xPos,
-          y: yPos,
-          movementCost: this.tiles[x][y].getMovementCost(),
-        });
-        tileActorList.push(tile);
-      }
-    }
-
-    this.mapActor = Actor.mergeActors({
-      actors: tileActorList,
-      spriteRegion: false,
+        const city = new City({ tile: tile, player: player });
+        tile.setCity(city);
+        //2. Add city tileType to tile (tileType & obj are different)
+        //3. Somehow refresh the map (do it asynchronously?)
+      },
     });
-    Game.getCurrentScene().addActor(this.mapActor);
   }
 
   public getTiles() {
@@ -264,10 +253,6 @@ export class GameMap {
         }
       },
     });
-    const tileActorList: Tile[] = [];
-    const topLayerTileActorList: Tile[] = [];
-    const unitActorList: Unit[] = [];
-    const riverActors: River[] = [];
 
     NetworkEvents.on({
       eventName: "mapChunk",
@@ -298,10 +283,10 @@ export class GameMap {
             movementCost: movementCost,
           });
           this.tiles[x][y] = tile;
-          tileActorList.push(tile);
+          this.baseLayerTileActorList.push(tile);
           if (tile.hasRiver()) {
             for (let numberedRiverSide of tile.getNumberedRiverSides()) {
-              riverActors.push(
+              this.riverActors.push(
                 new River({ tile: tile, side: numberedRiverSide })
               );
             }
@@ -315,7 +300,7 @@ export class GameMap {
               y: yPos,
               movementCost: movementCost,
             });
-            topLayerTileActorList.push(topLayerTile);
+            this.topLayerTileActorList.push(topLayerTile);
           }
 
           for (const jsonUnit of jsonUnits) {
@@ -327,7 +312,7 @@ export class GameMap {
               actionsJSONList: jsonUnit["actions"],
             });
             tile.addUnit(unit);
-            unitActorList.push(unit);
+            this.unitActorList.push(unit);
           }
         }
 
@@ -336,34 +321,34 @@ export class GameMap {
 
           console.log("Loading tile images..");
 
-          for (let tile of tileActorList) {
+          for (let tile of this.baseLayerTileActorList) {
             await tile.loadImage();
           }
 
-          for (let tile of topLayerTileActorList) {
+          for (let tile of this.topLayerTileActorList) {
             await tile.loadImage();
           }
 
           console.log("All tile images loaded, generating map");
 
-          this.mapActors = [
-            ...tileActorList,
-            ...riverActors,
-            ...topLayerTileActorList,
+          const mapActors = [
+            ...this.baseLayerTileActorList,
+            ...this.riverActors,
+            ...this.topLayerTileActorList,
           ];
           //TODO: Instead of a single map actor, we need to do this in chunks (4x4?). B/c it's going to be slow on map updates.
           this.mapActor = Actor.mergeActors({
-            actors: this.mapActors,
+            actors: mapActors,
             spriteRegion: false,
           });
           scene.addActor(this.mapActor);
 
-          for (const unit of unitActorList) {
+          for (const unit of this.unitActorList) {
             scene.addActor(unit);
           }
 
           // Now combine the base tile-type layer & the rest of the layers above..
-          for (let topLayerTile of topLayerTileActorList) {
+          for (let topLayerTile of this.topLayerTileActorList) {
             const baseLayerTile =
               this.tiles[topLayerTile.getGridX()][topLayerTile.getGridY()];
 
@@ -435,13 +420,44 @@ export class GameMap {
     this.tileOutlines.set(tile, outlineLines);
   }
 
-  public redrawMap() {
-    Game.getCurrentScene().removeActor(this.mapActor);
-    this.mapActor = Actor.mergeActors({
-      actors: this.mapActors,
+  public async redrawMap(modifiedTiles: Tile[]) {
+    this.topLayerTileActorList = [];
+    // Update topLayerActor list
+    for (let x = 0; x < this.mapWidth; x++) {
+      for (let y = 0; y < this.mapHeight; y++) {
+        const tile = this.tiles[x][y];
+
+        if (tile.getTileTypes().length > 1) {
+          const topLayerTile = new Tile({
+            tileTypes: tile.getTileTypes().slice(1),
+            x: tile.getX(),
+            y: tile.getY(),
+            movementCost: tile.getMovementCost(),
+          });
+
+          this.topLayerTileActorList.push(topLayerTile);
+        }
+      }
+    }
+
+    for (let tile of this.topLayerTileActorList) {
+      await tile.loadImage();
+    }
+
+    const mapActors = [
+      ...this.baseLayerTileActorList,
+      ...this.riverActors,
+      ...this.topLayerTileActorList,
+    ];
+
+    const mapActor = Actor.mergeActors({
+      actors: mapActors,
       spriteRegion: false,
     });
-    Game.getCurrentScene().addActor(this.mapActor);
+
+    Game.getCurrentScene().addActor(mapActor);
+    Game.getCurrentScene().removeActor(this.mapActor);
+    this.mapActor = mapActor;
   }
 
   /**

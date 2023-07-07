@@ -4,6 +4,7 @@ import { State } from "../State";
 import { GameMap } from "../../map/GameMap";
 import { Server } from "http";
 import { Unit } from "../../Unit";
+import { City } from "../../city/City";
 
 export class InGameState extends State {
   private currentTurn: number;
@@ -70,23 +71,26 @@ export class InGameState extends State {
     });
 
     Game.getPlayers().forEach((player) => {
+      const badTileTypes = [
+        "ocean",
+        "shallow_ocean",
+        "freshwater",
+        "mountain",
+        "snow",
+        "snow_hill",
+        "tundra",
+        "tundra_hill",
+      ];
+
       const spawnTile = GameMap.getRandomTileWith({
-        avoidTileTypes: [
-          "ocean",
-          "shallow_ocean",
-          "freshwater",
-          "mountain",
-          "snow",
-          "snow_hill",
-          "tundra",
-          "tundra_hill",
-        ],
+        avoidTileTypes: badTileTypes,
       });
 
       //FIXME: Make Unit have a createSettler() method?
       spawnTile.addUnit(
         new Unit({
           name: "settler",
+          player: player,
           tile: spawnTile,
           actions: [
             {
@@ -96,13 +100,30 @@ export class InGameState extends State {
               desc: "Settle City",
               onAction: (unit: Unit) => {
                 console.log("ACTION: Act on settle city.");
+                const tile = unit.getTile();
                 unit.delete();
+                tile.setCity(new City({ player: player, tile: tile }));
               },
             },
           ],
         })
       );
-      //spawnTile.addUnit(new Unit({ name: "archer", attackType: "ranged" }));
+
+      //TODO: Re-choose spawn location if warrior can't spawn
+      for (const adjTile of spawnTile.getAdjacentTiles()) {
+        if (!adjTile || adjTile.containsTileTypes(badTileTypes)) continue;
+
+        adjTile.addUnit(
+          new Unit({
+            name: "warrior",
+            player: player,
+            tile: adjTile,
+            attackType: "melee",
+            actions: [],
+          })
+        );
+        break;
+      }
 
       player.onLoadedIn(() => {
         player.zoomToLocation(spawnTile.getX(), spawnTile.getY(), 7);

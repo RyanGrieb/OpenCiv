@@ -9,6 +9,10 @@ import { Numbers } from "../util/Numbers";
 import { Vector } from "../util/Vector";
 import { AbstractPlayer } from "./AbstractPlayer";
 
+/**
+ * Currently client player handles selected units, the hovered tile, and movement lines from selecting a unit.
+ * ClientPlayer will handle in the future: Ranged Attacks
+ */
 export class ClientPlayer extends AbstractPlayer {
   private selectedUnit: Unit;
   private hoveredTile: HoveredTile;

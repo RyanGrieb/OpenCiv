@@ -2,6 +2,7 @@ import random from "random";
 import { GameMap } from "./GameMap";
 import { TileIndexer } from "./TileIndexer";
 import { Unit } from "../Unit";
+import { City } from "../city/City";
 
 export class Tile {
   //== Generation Values ==
@@ -15,6 +16,8 @@ export class Tile {
 
   private x: number;
   private y: number;
+
+  private city: City;
 
   constructor(tileType: string, x: number, y: number) {
     this.generationHeight = 0;
@@ -30,6 +33,10 @@ export class Tile {
     this.y = y;
 
     this.addTileType(tileType);
+  }
+
+  public setCity(city: City) {
+    this.city = city;
   }
 
   public addUnit(unit: Unit) {

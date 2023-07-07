@@ -1,11 +1,13 @@
 import { ServerEvents } from "./Events";
 import { Game } from "./Game";
+import { Player } from "./Player";
 import { GameMap } from "./map/GameMap";
 import { Tile } from "./map/Tile";
 
 export interface UnitOptions {
   name: string;
   tile: Tile;
+  player: Player;
   attackType?: string;
   defaultMoveDistance?: number;
   actions: {
@@ -19,6 +21,7 @@ export interface UnitOptions {
 
 export class Unit {
   private name: string;
+  private player: Player;
   private attackType: string;
   private defaultMoveDistance: number;
   private tile: Tile;
@@ -35,6 +38,7 @@ export class Unit {
 
   constructor(options: UnitOptions) {
     this.name = options.name;
+    this.player = options.player;
     this.tile = options.tile;
     this.attackType = options.attackType || "none";
     this.defaultMoveDistance = options.defaultMoveDistance || 2;
@@ -92,6 +96,10 @@ export class Unit {
         unitY: this.tile.getY(),
       });
     });
+  }
+
+  public getPlayer() {
+    return this.player;
   }
 
   public getTile() {

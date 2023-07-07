@@ -115,6 +115,7 @@ export class Unit extends ActorGroup {
     super({
       x: options.tile.getCenterPosition()[0] - 28 / 2,
       y: options.tile.getCenterPosition()[1] - 28 / 2,
+      z: 1,
       width: 28,
       height: 28,
     });

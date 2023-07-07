@@ -16,6 +16,7 @@ export enum GameImage {
 }
 
 export enum SpriteRegion {
+  WARRIOR = "0,1",
   ARCHER = "0,0",
   BUILDER = "1,0",
   CAMEL_ARCHER = "2,0",
@@ -56,6 +57,7 @@ export enum SpriteRegion {
   CITRUS = "17,6",
   OLIVES = "14,7",
   STONE = "13,7",
+  CITY = "8,8",
   STAR = "0,3",
   HOVERED_TILE = "6,8",
   UNIT_SELECTION_TILE = "7,8",

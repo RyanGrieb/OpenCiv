@@ -1,8 +1,10 @@
 import { GameImage, SpriteRegion } from "../Assets";
 import { Game } from "../Game";
 import { Unit } from "../Unit";
+import { City } from "../city/City";
 import { Actor } from "../scene/Actor";
 import { Vector } from "../util/Vector";
+import { GameMap } from "./GameMap";
 
 export interface TileOptions {
   tileTypes: string[];
@@ -29,6 +31,8 @@ export class Tile extends Actor {
 
   private gridX: number;
   private gridY: number;
+
+  private city: City;
 
   constructor(options: TileOptions) {
     super({
@@ -105,6 +109,20 @@ export class Tile extends Actor {
         canvasContext: canvasContext,
       });
     });*/
+  }
+
+  public setCity(city: City) {
+    this.city = city;
+    this.tileTypes.push("city");
+    GameMap.getInstance().redrawMap([this]);
+  }
+
+  public getCity() {
+    return this.city;
+  }
+
+  public samePosition(tile: Tile) {
+    return this.gridX === tile.getGridX() && this.gridY === tile.getGridY();
   }
 
   public getMovementCost() {
