@@ -12,6 +12,7 @@ export class LobbyState extends State {
 
     ServerEvents.on({
       eventName: "connection",
+      parentObject: this,
       callback: (data, websocket) => {
         // Initialize player name
         const playerName = "Player" + playerIndex;

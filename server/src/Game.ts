@@ -21,6 +21,7 @@ export class Game {
     // Set up the listener for the "setState" event. Changes the game-state.
     ServerEvents.on({
       eventName: "setState",
+      parentObject: this,
       callback: (data: JSON) => {
         this.setState(data["state"]);
       },
@@ -30,6 +31,7 @@ export class Game {
     // Set up the listener for the "playerNames" event. Return all connected players in-game.
     ServerEvents.on({
       eventName: "playerNames",
+      parentObject: this,
       callback: (data: JSON, websocket) => {
         // Get all player names and the name of the requesting player.
         const playerNames = Array.from(this.players.keys());
@@ -50,6 +52,7 @@ export class Game {
     // Set up the listener for the "playerQuit" event.
     ServerEvents.on({
       eventName: "playerQuit",
+      parentObject: this,
       callback: (data: JSON) => {
         // If only one player is remaining, set the state to "lobby".
         if (this.players.size <= 1) {
