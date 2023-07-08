@@ -1,3 +1,4 @@
+import { GameImage } from "../../Assets";
 import { Game } from "../../Game";
 import { GameMap } from "../../map/GameMap";
 import { NetworkEvents, WebsocketClient } from "../../network/Client";
@@ -7,6 +8,7 @@ import { ExternalPlayer } from "../../player/ExternalPlayer";
 import { Button } from "../../ui/Button";
 import { Label } from "../../ui/Label";
 import { StatusBar } from "../../ui/StatusBar";
+import { Actor } from "../Actor";
 import { Camera } from "../Camera";
 import { Scene } from "../Scene";
 
@@ -108,11 +110,31 @@ export class InGameScene extends Scene {
         }
       });
 
+      //DEBUG top layer chunks -
+      /* GameMap.getInstance()
+        .getTopLayerChunks()
+        .forEach((tiles, chunkActor) => {
+          this.addActor(
+            new Actor({
+              image: Game.getImage(GameImage.DEBUG),
+              x: chunkActor.getX(),
+              y: chunkActor.getY(),
+              width: chunkActor.getWidth(),
+              height: chunkActor.getHeight(),
+              transparency: 0.25,
+            })
+          );
+        });*/
+
       WebsocketClient.sendMessage({ event: "loadedIn" });
     });
   }
 
   public getPlayers() {
     return this.players;
+  }
+
+  public gameLoop(): void {
+    super.gameLoop();
   }
 }

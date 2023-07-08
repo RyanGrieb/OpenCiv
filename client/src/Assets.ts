@@ -13,6 +13,7 @@ export enum GameImage {
   SPRITESHEET,
   RIVER,
   POPUP_BOX,
+  DEBUG,
 }
 
 export enum SpriteRegion {
@@ -82,6 +83,7 @@ export const assetList = [
   require("../assets/images/spritesheet.png"),
   require("../assets/images/river.png"),
   require("../assets/images/ui_popup_box.png"),
+  require("../assets/images/debug.png"),
   require("../assets/images/font.png"),
   require("../assets/images/logo.png"),
 ];

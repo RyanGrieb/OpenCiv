@@ -8,6 +8,7 @@ import { Line } from "../scene/Line";
 import PriorityQueue from "ts-priority-queue";
 import { AbstractPlayer } from "../player/AbstractPlayer";
 import { City } from "../city/City";
+import { GameImage } from "../Assets";
 
 export class GameMap {
   private static instance: GameMap;
@@ -36,11 +37,9 @@ export class GameMap {
   private previousFScore;
   private tileOutlines: Map<Tile, Line[]>;
 
-  private mapActor: Actor;
-  private baseLayerTileActorList: Tile[] = [];
+  private topLayerMapChunks: Map<Actor, Tile[]>;
   private topLayerTileActorList: Tile[] = [];
   private unitActorList: Unit[] = [];
-  private riverActors: River[] = [];
 
   public static getInstance() {
     return this.instance;
@@ -57,6 +56,7 @@ export class GameMap {
   private constructor() {
     this.previousGScore = undefined;
     this.previousFScore = undefined;
+    this.topLayerMapChunks = new Map<Actor, Tile[]>();
     this.tileOutlines = new Map<Tile, Line[]>();
 
     NetworkEvents.on({
@@ -236,6 +236,8 @@ export class GameMap {
   private requestMapFromServer() {
     const scene = Game.getCurrentScene();
     this.tiles = [];
+    const baseLayerTiles = [];
+    const riverActors = [];
 
     WebsocketClient.sendMessage({ event: "requestMap" });
 
@@ -259,20 +261,44 @@ export class GameMap {
       callback: async (data) => {
         const tileList = data["tiles"] as Array<JSON>;
         const lastChunk = JSON.parse(data["lastChunk"]);
+        const chunkX = data["chunkX"] * 32;
+        const chunkY = data["chunkY"] * 25;
+
+        const topLayerTiles = [];
+
+        // X,Y values relative to a map chunk. (starts at 0.)
+        let relativeX = 0;
+        let relativeY = 0;
 
         for (const tileJSON of tileList) {
           const tileTypes: string[] = tileJSON["tileTypes"];
           const riverSides: boolean[] = tileJSON["riverSides"];
           const jsonUnits = tileJSON["units"];
 
-          const x = parseInt(tileJSON["x"]);
-          const y = parseInt(tileJSON["y"]);
+          const gridX = parseInt(tileJSON["x"]);
+          const gridY = parseInt(tileJSON["y"]);
           const movementCost = parseInt(tileJSON["movementCost"]);
 
-          let yPos = y * 25;
-          let xPos = x * 32;
-          if (y % 2 != 0) {
+          // For non-chunk tiles, that uses non-relative position. (Base-layer, river)
+          let yPos = gridY * 25;
+          let xPos = gridX * 32;
+          if (gridY % 2 != 0) {
             xPos += 16;
+          }
+
+          //For chunk tiles, that uses relative position to canvas (top-layer)
+          let yPosRelative = relativeY * 25;
+          let xPosRelative = relativeX * 32;
+          if (relativeY % 2 != 0) {
+            xPosRelative += 16;
+          }
+
+          // Increment our relative x,y values each tile.
+          relativeY += 1;
+
+          if (relativeY > 3) {
+            relativeY = 0;
+            relativeX++;
           }
 
           const tile = new Tile({
@@ -280,13 +306,16 @@ export class GameMap {
             riverSides: riverSides,
             x: xPos,
             y: yPos,
+            gridX: gridX,
+            gridY: gridY,
             movementCost: movementCost,
           });
-          this.tiles[x][y] = tile;
-          this.baseLayerTileActorList.push(tile);
+          this.tiles[gridX][gridY] = tile;
+
+          baseLayerTiles.push(tile);
           if (tile.hasRiver()) {
             for (let numberedRiverSide of tile.getNumberedRiverSides()) {
-              this.riverActors.push(
+              riverActors.push(
                 new River({ tile: tile, side: numberedRiverSide })
               );
             }
@@ -296,10 +325,14 @@ export class GameMap {
             topLayerTileTypes.shift();
             const topLayerTile = new Tile({
               tileTypes: topLayerTileTypes,
-              x: xPos,
-              y: yPos,
+              x: xPosRelative,
+              y: yPosRelative,
+              gridX: gridX,
+              gridY: gridY,
               movementCost: movementCost,
             });
+
+            topLayerTiles.push(topLayerTile);
             this.topLayerTileActorList.push(topLayerTile);
           }
 
@@ -316,32 +349,55 @@ export class GameMap {
           }
         }
 
+        // Create top-layer tile chunk
+        for (let tile of topLayerTiles) {
+          await tile.loadImage();
+        }
+
+        const mapActors = [...topLayerTiles];
+        //Include empty actor for chunks with no top-layers.
+        const placeholderActor = new Actor({
+          color: "black",
+          x: 0,
+          y: 0,
+          width: 0,
+          height: 0,
+        });
+        mapActors.push(placeholderActor);
+
+        //TODO: Instead of a single map actor, we need to do this in chunks (4x4?). B/c it's going to be slow on map updates.
+        const canvasWidth = 32 * 4 + 16;
+        const canvasHeight = 25 * 4 + 7; // +7 For the last row of chunks.
+        const mapChunk = Actor.mergeActors({
+          actors: mapActors,
+          spriteRegion: false,
+          canvasWidth: canvasWidth,
+          canvasHeight: canvasHeight,
+        });
+
+        mapChunk.setPosition(chunkX, chunkY);
+        this.topLayerMapChunks.set(mapChunk, topLayerTiles);
+
         if (lastChunk) {
           this.initAdjacentTiles();
 
-          console.log("Loading tile images..");
-
-          for (let tile of this.baseLayerTileActorList) {
+          // Add base-layer & river tile actors
+          for (let tile of baseLayerTiles) {
             await tile.loadImage();
           }
 
-          for (let tile of this.topLayerTileActorList) {
-            await tile.loadImage();
-          }
-
-          console.log("All tile images loaded, generating map");
-
-          const mapActors = [
-            ...this.baseLayerTileActorList,
-            ...this.riverActors,
-            ...this.topLayerTileActorList,
-          ];
-          //TODO: Instead of a single map actor, we need to do this in chunks (4x4?). B/c it's going to be slow on map updates.
-          this.mapActor = Actor.mergeActors({
-            actors: mapActors,
+          const bottomLayerActors = [...baseLayerTiles, ...riverActors];
+          const bottomLayerActor = Actor.mergeActors({
+            actors: bottomLayerActors,
             spriteRegion: false,
           });
-          scene.addActor(this.mapActor);
+
+          scene.addActor(bottomLayerActor);
+
+          // Add the top-layer chunks
+          this.topLayerMapChunks.forEach((_, chunkActor) => {
+            scene.addActor(chunkActor);
+          });
 
           for (const unit of this.unitActorList) {
             scene.addActor(unit);
@@ -421,43 +477,57 @@ export class GameMap {
   }
 
   public async redrawMap(modifiedTiles: Tile[]) {
-    this.topLayerTileActorList = [];
-    // Update topLayerActor list
-    for (let x = 0; x < this.mapWidth; x++) {
-      for (let y = 0; y < this.mapHeight; y++) {
-        const tile = this.tiles[x][y];
+    for (const tile of modifiedTiles) {
+      this.topLayerMapChunks.forEach(async (topLayerTiles, chunk) => {
+        // Check if tile is contained in the topLayerTiles
+        // Use getX(), getY() for the chunkActor & tile
 
-        if (tile.getTileTypes().length > 1) {
+        if (
+          tile.getX() >= chunk.getX() &&
+          tile.getX() + tile.getWidth() <= chunk.getX() + chunk.getWidth() &&
+          tile.getY() >= chunk.getY() &&
+          tile.getY() + tile.getHeight() <= chunk.getY() + chunk.getHeight()
+        ) {
+          //Game.getCurrentScene().removeActor(chunk);
+          const xPosRelative = tile.getX() - chunk.getX();
+          const yPosRelative = tile.getY() - chunk.getY();
           const topLayerTile = new Tile({
             tileTypes: tile.getTileTypes().slice(1),
-            x: tile.getX(),
-            y: tile.getY(),
+            x: xPosRelative,
+            y: yPosRelative,
+            gridX: tile.getGridX(),
+            gridY: tile.getGridY(),
             movementCost: tile.getMovementCost(),
           });
 
-          this.topLayerTileActorList.push(topLayerTile);
+          this.topLayerTileActorList.push(topLayerTile); // Not needed, but for continuity.
+          const chunkTileActors = [...topLayerTiles, topLayerTile];
+
+          // Create top-layer tile chunk
+          for (let tile of chunkTileActors) {
+            await tile.loadImage();
+          }
+
+          //TODO: Instead of a single map actor, we need to do this in chunks (4x4?). B/c it's going to be slow on map updates.
+          const canvasWidth = 32 * 4 + 16;
+          const canvasHeight = 25 * 4 + 7; // +7 For the last row of chunks.
+          const updatedMapChunk = Actor.mergeActors({
+            actors: chunkTileActors,
+            spriteRegion: false,
+            canvasWidth: canvasWidth,
+            canvasHeight: canvasHeight,
+          });
+          updatedMapChunk.setPosition(chunk.getX(), chunk.getY());
+
+          Game.getCurrentScene().addActor(updatedMapChunk);
+          Game.getCurrentScene().removeActor(chunk);
+
+          // Update the chunk map
+          this.topLayerMapChunks.delete(chunk);
+          this.topLayerMapChunks.set(updatedMapChunk, chunkTileActors);
         }
-      }
+      });
     }
-
-    for (let tile of this.topLayerTileActorList) {
-      await tile.loadImage();
-    }
-
-    const mapActors = [
-      ...this.baseLayerTileActorList,
-      ...this.riverActors,
-      ...this.topLayerTileActorList,
-    ];
-
-    const mapActor = Actor.mergeActors({
-      actors: mapActors,
-      spriteRegion: false,
-    });
-
-    Game.getCurrentScene().addActor(mapActor);
-    Game.getCurrentScene().removeActor(this.mapActor);
-    this.mapActor = mapActor;
   }
 
   /**
@@ -493,5 +563,9 @@ export class GameMap {
         }
       }
     }
+  }
+
+  public getTopLayerChunks() {
+    return this.topLayerMapChunks;
   }
 }

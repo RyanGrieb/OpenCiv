@@ -61,7 +61,7 @@ export class River extends Actor {
       image: Game.getImage(GameImage.RIVER),
       width: distance,
       height: 3,
-      transparency: 1,
+      transparency: 0.95,
     });
 
     this.setRotation(rotation * (Math.PI / 180));

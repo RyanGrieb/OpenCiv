@@ -10,6 +10,8 @@ export interface TileOptions {
   tileTypes: string[];
   x: number;
   y: number;
+  gridX: number;
+  gridY: number;
   movementCost: number;
   riverSides?: boolean[];
   width?: number;
@@ -48,8 +50,8 @@ export class Tile extends Actor {
     this.units = [];
     this.movementCost = options.movementCost;
 
-    this.gridX = Math.floor(this.x / 32);
-    this.gridY = Math.floor(this.y / 25);
+    this.gridX = options.gridX;
+    this.gridY = options.gridY;
 
     this.initializeVectors();
   }

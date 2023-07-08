@@ -188,6 +188,8 @@ export class Actor implements SceneObject {
     actors: Actor[];
     spriteRegion: boolean;
     spriteSize?: number;
+    canvasWidth?: number;
+    canvasHeight?: number;
   }): Actor {
     // Create dummy canvas to get pixel data of the actor sprite
 
@@ -209,22 +211,14 @@ export class Actor implements SceneObject {
         greatestYHeight = actor.getHeight();
       }
     });
-    canvas.width = greatestX + greatestXWidth + 1000;
-    canvas.height = greatestY + greatestYHeight + 1000;
+    canvas.width = options.canvasWidth || greatestX + greatestXWidth + 1000;
+    canvas.height = options.canvasHeight || greatestY + greatestYHeight + 1000;
 
-    canvas.getContext("2d").fillStyle = "grey";
-    canvas.getContext("2d").fillRect(0, 0, canvas.width, canvas.height);
     const ctx = canvas.getContext("2d");
-    ctx.fillStyle = "grey";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     options.actors.forEach((actor: Actor) => {
       actor.draw(ctx);
     });
-
-    //canvas.getContext("2d").globalCompositeOperation = "saturation";
-    //canvas.getContext("2d").fillStyle = "hsl(35,35%,35%)";
-    //canvas.getContext("2d").fillRect(0, 0, canvas.width, canvas.height);
 
     let image = new Image();
     image.src = canvas.toDataURL();
