@@ -19,7 +19,7 @@ export class UnitDisplayInfo extends ActorGroup {
       width: 250,
       height: 150,
       cameraApplies: false,
-      z: 1,
+      z: 3,
     });
 
     this.unit = unit;

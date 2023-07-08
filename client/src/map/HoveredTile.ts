@@ -8,6 +8,9 @@ export class HoveredTile extends Tile {
     super({
       x: x,
       y: y,
+      z: 2,
+      gridX: 0, //Grid values don't matter.
+      gridY: 0,
       tileTypes: ["hovered_tile"],
       width: 32,
       height: 32,

@@ -8,7 +8,6 @@ import { Line } from "../scene/Line";
 import PriorityQueue from "ts-priority-queue";
 import { AbstractPlayer } from "../player/AbstractPlayer";
 import { City } from "../city/City";
-import { GameImage } from "../Assets";
 
 export class GameMap {
   private static instance: GameMap;
@@ -67,8 +66,8 @@ export class GameMap {
 
         const city = new City({ tile: tile, player: player });
         tile.setCity(city);
-        //2. Add city tileType to tile (tileType & obj are different)
-        //3. Somehow refresh the map (do it asynchronously?)
+        // Add the city actor to the scene (borders, nametag)
+        Game.getCurrentScene().addActor(city);
       },
     });
   }

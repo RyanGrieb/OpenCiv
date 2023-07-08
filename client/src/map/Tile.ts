@@ -10,6 +10,7 @@ export interface TileOptions {
   tileTypes: string[];
   x: number;
   y: number;
+  z?: number;
   gridX: number;
   gridY: number;
   movementCost: number;
@@ -40,6 +41,7 @@ export class Tile extends Actor {
     super({
       x: options.x,
       y: options.y,
+      z: options.z || 0,
       width: options.width ?? Tile.WIDTH,
       height: options.height ?? Tile.HEIGHT,
     });

@@ -15,7 +15,7 @@ export class City extends ActorGroup {
   private tile: Tile;
 
   constructor(options: CityOptions) {
-    super({ x: 0, y: 0, width: 0, height: 0 });
+    super({ x: 0, y: 0, z: 2, width: 0, height: 0 });
 
     this.player = options.player;
     this.tile = options.tile;

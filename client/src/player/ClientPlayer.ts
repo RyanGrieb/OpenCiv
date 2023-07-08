@@ -172,6 +172,7 @@ export class ClientPlayer extends AbstractPlayer {
       const line = new Line({
         color: color,
         girth: 2,
+        z: 2,
         x1: tile1.getCenterPosition()[0],
         y1: tile1.getCenterPosition()[1],
         x2: tile2.getCenterPosition()[0],

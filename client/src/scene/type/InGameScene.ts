@@ -1,4 +1,3 @@
-import { GameImage } from "../../Assets";
 import { Game } from "../../Game";
 import { GameMap } from "../../map/GameMap";
 import { NetworkEvents, WebsocketClient } from "../../network/Client";
@@ -8,7 +7,6 @@ import { ExternalPlayer } from "../../player/ExternalPlayer";
 import { Button } from "../../ui/Button";
 import { Label } from "../../ui/Label";
 import { StatusBar } from "../../ui/StatusBar";
-import { Actor } from "../Actor";
 import { Camera } from "../Camera";
 import { Scene } from "../Scene";
 
@@ -52,7 +50,7 @@ export class InGameScene extends Scene {
         fontColor: "white",
         x: 0,
         y: 0,
-        z: 1,
+        z: 3,
       });
       this.tileInformationLabel.conformSize().then(() => {
         this.tileInformationLabel.setPosition(
@@ -70,7 +68,7 @@ export class InGameScene extends Scene {
           text: "Next Turn",
           x: Game.getWidth() / 2 - 150 / 2,
           y: Game.getHeight() - 44,
-          z: 1,
+          z: 3,
           width: 150,
           height: 42,
           fontColor: "white",
