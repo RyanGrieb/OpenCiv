@@ -14,6 +14,8 @@ export interface TextOptions {
   shadowColor?: string;
   lineWidth?: number;
   shadowBlur?: number;
+  applyCamera?: boolean;
+  transparency?: number;
 }
 export interface GameOptions {
   /**
@@ -200,13 +202,16 @@ export class Game {
     // Call the gameloop for the current scene
     this.currentScene.gameLoop();
 
-    this.drawText({
-      text: "FPS: " + this.fps,
-      x: Game.getWidth() - 40,
-      y: Game.getHeight() - 4,
-      color: "white",
-      font: "12px sans",
-    });
+    this.drawText(
+      {
+        text: "FPS: " + this.fps,
+        x: Game.getWidth() - 40,
+        y: Game.getHeight() - 4,
+        color: "white",
+        font: "12px sans",
+      },
+      this.canvasContext
+    );
 
     this.countedFrames++;
     window.requestAnimationFrame(() => {
@@ -282,7 +287,8 @@ export class Game {
       return;
     }
 
-    const canvasContext = context;
+    let canvasContext = context;
+
     canvasContext.save();
 
     // Only apply camera to the Game's main canvas context.
@@ -308,9 +314,11 @@ export class Game {
     );
 
     canvasContext.globalAlpha = actor.getTransparency();
-    if (actor.getSpriteRegion()) {
+
+    if (actor.canDrawSpriteRegion()) {
       const spriteX = parseInt(actor.getSpriteRegion().split(",")[0]) * 32;
       const spriteY = parseInt(actor.getSpriteRegion().split(",")[1]) * 32;
+
       canvasContext.drawImage(
         actor.getImage(),
         //TODO: Calculate sprite position
@@ -332,6 +340,7 @@ export class Game {
         actor.getHeight()
       );
     }
+
     canvasContext.globalAlpha = 1;
 
     canvasContext.restore();
@@ -369,24 +378,41 @@ export class Game {
     return [metrics.width, height];
   }
 
-  public static drawText(textOptions: TextOptions) {
+  public static drawText(
+    textOptions: TextOptions,
+    canvasContext: CanvasRenderingContext2D
+  ) {
     //FIXME: Use cache for meausring text..
 
-    this.canvasContext.save();
-    this.canvasContext.fillStyle = textOptions.color;
-    this.canvasContext.font = textOptions.font ?? "24px sans-serif";
-    this.canvasContext.shadowColor = textOptions.shadowColor ?? "white";
+    canvasContext.save();
+
+    // Only apply camera to the Game's main canvas context. (canvasContext === this.canvasContext)
+    if (
+      textOptions.applyCamera &&
+      this.currentScene.getCamera() &&
+      canvasContext === this.canvasContext
+    ) {
+      const zoom = this.currentScene.getCamera().getZoomAmount();
+      const cameraX = this.currentScene.getCamera().getX();
+      const cameraY = this.currentScene.getCamera().getY();
+      canvasContext.setTransform(zoom, 0, 0, zoom, cameraX, cameraY);
+    }
+
+    canvasContext.globalAlpha = textOptions.transparency;
+    canvasContext.fillStyle = textOptions.color;
+    canvasContext.font = textOptions.font ?? "24px sans-serif";
+    canvasContext.shadowColor = textOptions.shadowColor ?? "white";
     //this.canvasContext.shadowBlur = textOptions.shadowBlur ?? 0; // FIXME: Find alternative that provides better performance
-    this.canvasContext.lineWidth = textOptions.lineWidth ?? 0; // 4
+    canvasContext.lineWidth = textOptions.lineWidth ?? 0; // 4
     const xPos = textOptions.x;
     const yPos = textOptions.y;
     if (textOptions.lineWidth > 0) {
-      this.canvasContext.strokeText(textOptions.text, xPos, yPos);
+      canvasContext.strokeText(textOptions.text, xPos, yPos);
     }
 
-    this.canvasContext.fillText(textOptions.text, xPos, yPos);
+    canvasContext.fillText(textOptions.text, xPos, yPos);
 
-    this.canvasContext.restore();
+    canvasContext.restore();
   }
 
   public static drawLine(line: Line, canvasContext: CanvasRenderingContext2D) {

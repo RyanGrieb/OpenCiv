@@ -1,6 +1,7 @@
 import { Game } from "../Game";
 import { Tile } from "./Tile";
 
+//FIXME: Replace with colored tile?
 export class HoveredTile extends Tile {
   private representedTile: Tile;
 

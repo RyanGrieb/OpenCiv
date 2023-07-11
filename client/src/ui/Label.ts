@@ -11,6 +11,8 @@ export interface LabelOptions {
   lineWidth?: number;
   shadowColor?: string;
   shadowBlur?: number;
+  cameraApplies?: boolean;
+  transparency?: number;
 }
 
 export class Label extends Actor {
@@ -26,8 +28,10 @@ export class Label extends Actor {
       x: options.x,
       y: options.y,
       z: options.z,
+      cameraApplies: options.cameraApplies || false,
       width: 0,
       height: 0,
+      transparency: options.transparency,
     });
 
     this.text = options.text;
@@ -38,17 +42,22 @@ export class Label extends Actor {
     this.shadowBlur = options.shadowBlur ?? 0;
   }
 
-  public draw() {
-    Game.drawText({
-      text: this.text,
-      x: this.x,
-      y: this.y,
-      color: this.fontColor,
-      font: this.font,
-      shadowColor: this.shadowColor,
-      shadowBlur: this.shadowBlur,
-      lineWidth: this.lineWidth,
-    });
+  public draw(canvasContext: CanvasRenderingContext2D) {
+    Game.drawText(
+      {
+        text: this.text,
+        x: this.x,
+        y: this.y,
+        color: this.fontColor,
+        font: this.font,
+        shadowColor: this.shadowColor,
+        shadowBlur: this.shadowBlur,
+        lineWidth: this.lineWidth,
+        applyCamera: this.cameraApplies,
+        transparency: this.transparency,
+      },
+      canvasContext
+    );
   }
 
   /**

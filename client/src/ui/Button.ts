@@ -115,13 +115,16 @@ export class Button extends ActorGroup {
 
     //TODO: Allow user to change where the text is drawn...
     if (this.text) {
-      Game.drawText({
-        text: this.text,
-        x: this.x + this.width / 2 - this.textWidth / 2,
-        y: this.y + this.height / 2 + this.textHeight / 2,
-        color: this.fontColor,
-        font: this.font,
-      });
+      Game.drawText(
+        {
+          text: this.text,
+          x: this.x + this.width / 2 - this.textWidth / 2,
+          y: this.y + this.height / 2 + this.textHeight / 2,
+          color: this.fontColor,
+          font: this.font,
+        },
+        canvasContext
+      );
     }
 
     if (this.icon) {

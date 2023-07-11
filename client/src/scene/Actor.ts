@@ -19,7 +19,7 @@ export interface ActorOptions {
 export class Actor implements SceneObject {
   protected color: string;
   protected image: HTMLImageElement;
-  protected spriteRegion?: SpriteRegion;
+  protected spriteRegion?: SpriteRegion; // Location of sprite on spritesheet
 
   protected x: number;
   protected y: number;
@@ -31,6 +31,7 @@ export class Actor implements SceneObject {
   protected storedEvents: Map<string, Function[]>;
   protected mouseInside: boolean;
   protected cameraApplies: boolean;
+  protected drawSpriteRegion: boolean; // Draw region from spritesheet
 
   constructor(actorOptions: ActorOptions) {
     this.storedEvents = new Map<string, Function[]>();
@@ -69,6 +70,65 @@ export class Actor implements SceneObject {
         this.call("clicked");
       }
     });
+
+    if (this.spriteRegion) {
+      this.drawSpriteRegion = true; // Since we reference a sprite region variable
+    }
+
+    // Apply color to actor image.. TODO: Handle non-sprite region actors.
+    if (this.color && this.image && this.spriteRegion) {
+      this.setColor(this.color);
+    }
+  }
+
+  public setColor(color: string) {
+    this.color = color;
+
+    const canvas = document.getElementById(
+      "auxillary_canvas"
+    ) as HTMLCanvasElement;
+    const context = canvas.getContext("2d");
+
+    // Set the canvas dimensions to match the image dimensions.
+    canvas.width = this.width;
+    canvas.height = this.height;
+    context.clearRect(0, 0, canvas.width, canvas.height);
+
+    //TODO: Handle non-sprite region actors
+    if (this.spriteRegion) {
+      // Draw the image on the canvas.
+      const spriteX = parseInt(this.getSpriteRegion().split(",")[0]) * 32;
+      const spriteY = parseInt(this.getSpriteRegion().split(",")[1]) * 32;
+
+      context.drawImage(
+        Game.getImage(GameImage.SPRITESHEET),
+        spriteX,
+        spriteY,
+        32,
+        32,
+        0,
+        0,
+        this.getWidth(),
+        this.getHeight()
+      );
+    }
+
+    // Apply color using globalCompositeOperation.
+    context.globalCompositeOperation = "source-in";
+
+    context.fillStyle = this.color;
+    context.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Replace the original image source with the modified canvas image.
+    const dataURL = canvas.toDataURL();
+    const image = new Image();
+    image.width = canvas.width;
+    image.height = canvas.height;
+    image.src = dataURL;
+    this.image = image;
+
+    this.drawSpriteRegion = false; // Since we are not referencing the sprite region directly anymore.
+    context.globalCompositeOperation = "source-out";
   }
 
   public getZIndex(): number {
@@ -157,6 +217,10 @@ export class Actor implements SceneObject {
 
   public getSpriteRegion() {
     return this.spriteRegion;
+  }
+
+  public canDrawSpriteRegion() {
+    return this.drawSpriteRegion;
   }
 
   public getRotation(): number {

@@ -127,12 +127,15 @@ export class TextBox extends Actor {
       });
     }
 
-    Game.drawText({
-      text: this.text,
-      color: "black",
-      x: this.x,
-      y: this.y + this.height / 2 + this.textHeight / 2,
-    });
+    Game.drawText(
+      {
+        text: this.text,
+        color: "black",
+        x: this.x,
+        y: this.y + this.height / 2 + this.textHeight / 2,
+      },
+      canvasContext
+    );
   }
 
   public setSelected(selected: boolean) {

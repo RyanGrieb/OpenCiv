@@ -432,6 +432,10 @@ export class GameMap {
     }
   }
 
+  public drawBorder(tile: Tile[]) {
+    // Create outline from the outer border tiles.
+  }
+
   public setOutline(options: {
     tile: Tile;
     edges: number[];
@@ -451,6 +455,8 @@ export class GameMap {
     }
 
     // console.log(`Setting outline at x:${tile.getGridX()} y:${tile.getGridY()}`);
+
+    // TOOD: Handle existing lines on tiles, split the space to allow for two lines.
 
     for (let i = 0; i < 6; i++) {
       if (!options.edges[i]) continue;

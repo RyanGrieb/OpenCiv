@@ -115,13 +115,16 @@ export class ListBox extends Actor {
 
       if (row.getText()) {
         //TODO: Only draw text if row is visible.
-        Game.drawText({
-          text: row.getText(),
-          x: row.x + 2,
-          y: row.y + this.rowHeight / 2 + row.textHeight / 2,
-          color: "black",
-          font: "12px sans",
-        });
+        Game.drawText(
+          {
+            text: row.getText(),
+            x: row.x + 2,
+            y: row.y + this.rowHeight / 2 + row.textHeight / 2,
+            color: "black",
+            font: "12px sans",
+          },
+          canvasContext
+        );
       }
 
       if (row.getActorIcon()) {

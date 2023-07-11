@@ -17,6 +17,7 @@ export interface TileOptions {
   riverSides?: boolean[];
   width?: number;
   height?: number;
+  color?: string;
 }
 
 export class Tile extends Actor {
@@ -44,6 +45,7 @@ export class Tile extends Actor {
       z: options.z || 0,
       width: options.width ?? Tile.WIDTH,
       height: options.height ?? Tile.HEIGHT,
+      color: options.color,
     });
     this.tileTypes = options.tileTypes;
     this.adjacentTiles = [];

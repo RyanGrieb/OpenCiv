@@ -27,7 +27,6 @@ export class UnitDisplayInfo extends ActorGroup {
     this.addActor(
       new Actor({
         image: Game.getImage(GameImage.POPUP_BOX),
-        color: "black",
         x: this.x,
         y: this.y,
         width: this.width,

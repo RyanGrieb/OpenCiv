@@ -11,7 +11,7 @@ export interface ActorGroupOptions {
 }
 
 export class ActorGroup extends Actor {
-  private actors: Actor[];
+  protected actors: Actor[];
 
   constructor(options: ActorGroupOptions) {
     super({
