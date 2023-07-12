@@ -129,11 +129,11 @@ export class GameMap {
     let fScore: number[][] = [];
     let cameFrom: Tile[][] = [];
 
-    for (let x = 0; x < GameMap.getInstance().getWidth(); x++) {
+    for (let x = 0; x < this.getWidth(); x++) {
       gScore[x] = [];
       fScore[x] = [];
       cameFrom[x] = [];
-      for (let y = 0; y < GameMap.getInstance().getHeight(); y++) {
+      for (let y = 0; y < this.getHeight(); y++) {
         gScore[x][y] = Number.MAX_VALUE;
         fScore[x][y] = 0;
 

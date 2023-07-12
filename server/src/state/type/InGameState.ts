@@ -5,12 +5,16 @@ import { GameMap } from "../../map/GameMap";
 import { Server } from "http";
 import { Unit } from "../../Unit";
 import { City } from "../../city/City";
+import { Job, gracefulShutdown, scheduleJob } from "node-schedule";
 
 export class InGameState extends State {
+  private turnTimeJob: Job;
   private currentTurn: number;
+  private totalTurnTime: number;
   private turnTime: number;
 
   public onInitialize() {
+    this.totalTurnTime = 3; //TODO: Allow modification
     this.currentTurn = 0;
     this.turnTime = 0;
 
@@ -150,13 +154,29 @@ export class InGameState extends State {
       callback: () => {
         // Increment the turn
         this.incrementTurn();
+        this.beginTurnTimer();
       },
     });
   }
 
-  public incrementTurn() {
+  // Decrease trunTime by -1 every 1 second
+  private beginTurnTimer() {
+    this.turnTimeJob = scheduleJob("* * * * * *", () => {
+      // Send turn time increment to player
+
+      //FIXME: WAIT for all players timers to be 0!
+      if (this.turnTime <= 0) {
+        console.log("NEW turn");
+        this.incrementTurn();
+      }
+
+      this.turnTime -= 1;
+    });
+  }
+
+  private incrementTurn() {
     this.currentTurn++;
-    this.turnTime += 60;
+    this.turnTime += this.totalTurnTime;
     Game.getPlayers().forEach((player) => {
       player.sendNetworkEvent({
         event: "newTurn",
@@ -166,6 +186,9 @@ export class InGameState extends State {
     });
   }
   public onDestroyed() {
+    if (this.turnTimeJob) {
+      gracefulShutdown();
+    }
     GameMap.destroyInstance();
     return super.onDestroyed();
   }

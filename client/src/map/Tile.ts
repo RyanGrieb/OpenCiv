@@ -82,7 +82,6 @@ export class Tile extends Actor {
     return false;
   }
 
-  //TODO: Suport unit as argument (e.g. account for naval units in water.)
   public static getWeight(tile1: Tile, tile2: Tile): number {
     if (Tile.riverCrosses(tile1, tile2)) {
       return Math.max(2, tile2.getMovementCost());

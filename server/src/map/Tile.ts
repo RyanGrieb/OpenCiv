@@ -725,4 +725,35 @@ export class Tile {
   public toString(): string {
     return this.tileTypes.toString();
   }
+
+  public static riverCrosses(tile1: Tile, tile2: Tile) {
+    let tile1RiverSide = -1;
+    for (let i = 0; i < tile1.getAdjacentTiles().length; i++) {
+      if (tile2 === tile1.getAdjacentTiles()[i]) {
+        tile1RiverSide = i;
+      }
+    }
+
+    if (tile1.getRiverSides()[tile1RiverSide]) {
+      return true;
+    }
+
+    return false;
+  }
+
+  //TODO: Function works but naming is confusing, we don't use grid variables in server.
+  public static gridDistance(tile1: Tile, tile2: Tile) {
+    return Math.sqrt(
+      Math.pow(tile2.getX() - tile1.getX(), 2) +
+        Math.pow(tile2.getY() - tile1.getY(), 2)
+    );
+  }
+
+  public static getWeight(tile1: Tile, tile2: Tile): number {
+    if (Tile.riverCrosses(tile1, tile2)) {
+      return Math.max(2, tile2.getMovementCost());
+    }
+
+    return tile2.getMovementCost();
+  }
 }

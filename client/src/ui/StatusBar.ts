@@ -53,6 +53,12 @@ export class StatusBar extends ActorGroup {
           this.currentTurnText = text;
         } else {
           this.currentTurnLabel.setText(text);
+          this.currentTurnLabel.conformSize().then(() => {
+            this.currentTurnLabel.setPosition(
+              Game.getWidth() - this.currentTurnLabel.getWidth() - 1,
+              15
+            );
+          });
         }
       },
     });

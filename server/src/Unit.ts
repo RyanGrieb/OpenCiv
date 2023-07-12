@@ -24,6 +24,7 @@ export class Unit {
   private player: Player;
   private attackType: string;
   private defaultMoveDistance: number;
+  private availableMovement: number;
   private tile: Tile;
 
   private static nextId = 0;
@@ -42,6 +43,7 @@ export class Unit {
     this.tile = options.tile;
     this.attackType = options.attackType || "none";
     this.defaultMoveDistance = options.defaultMoveDistance || 2;
+    this.availableMovement = this.defaultMoveDistance;
     this.actions = options.actions || [];
 
     this.id = Unit.nextId;
@@ -56,12 +58,30 @@ export class Unit {
 
         if (this.tile !== unitTile) return;
 
-        this.tile.removeUnit(this);
-
         const targetTile =
           GameMap.getInstance().getTiles()[data["targetX"]][data["targetY"]];
-        targetTile.addUnit(this);
-        this.tile = targetTile;
+
+        if (this.tile === targetTile) return;
+
+        this.tile.removeUnit(this);
+
+        // Move the furthest we can possibly go, and queue the rest of tiles for next turn.
+        const [arrivedTile, remainingTiles] =
+          this.moveTowardsTargetTile(targetTile);
+
+        if (!arrivedTile) return;
+
+        arrivedTile.addUnit(this);
+
+        // Update packet data.
+        data["targetX"] = arrivedTile.getX();
+        data["targetY"] = arrivedTile.getY();
+
+        if (arrivedTile !== targetTile) {
+          // Update packet data with the tiles we have queued?
+        }
+
+        this.tile = arrivedTile;
 
         // Send back packet, telling client server updated the unit location
         Game.getPlayers().forEach((player) => {
@@ -85,6 +105,46 @@ export class Unit {
         }
       },
     });
+  }
+
+  public moveTowardsTargetTile(tile: Tile): [Tile, Tile[]] {
+    const shortestPath: Tile[] = GameMap.getInstance().constructShortestPath(
+      this,
+      this.tile, // Starting tile
+      tile // Target tile
+    );
+
+    const traversedTiles: Tile[] = [this.tile];
+
+    // Traverse tile by tile, removing our movement incrementally.
+    for (let i = 0; i < shortestPath.length; i++) {
+      const currentTile = shortestPath[i];
+      const nextTile =
+        i + 1 >= shortestPath.length ? undefined : shortestPath[i + 1];
+
+      if (!nextTile) continue;
+
+      if (this.availableMovement <= 0) {
+        break;
+      }
+
+      const movementCost = this.getTileWeight(currentTile, nextTile);
+      console.log(
+        `From (${currentTile.getX()}, ${currentTile.getY()}) to (${nextTile.getX()}, ${nextTile.getY()}) - cost: ${movementCost}`
+      );
+
+      this.availableMovement = Math.max(
+        this.availableMovement - movementCost,
+        0
+      );
+      traversedTiles.push(nextTile);
+    }
+
+    const remainingTiles: Tile[] = shortestPath.filter(
+      (tile) => !traversedTiles.includes(tile)
+    );
+
+    return [traversedTiles.pop(), remainingTiles];
   }
 
   public delete() {
@@ -141,5 +201,16 @@ export class Unit {
       }))
     );
     return actions;
+  }
+
+  public getTileWeight(current: Tile, neighbor: Tile) {
+    //FIXME: Unit's should have land OR sea variable to distinguish
+    if (current.isWater()) {
+      return 9999;
+    }
+
+    if (!neighbor) return current.getMovementCost();
+
+    return Tile.getWeight(current, neighbor);
   }
 }

@@ -4,6 +4,7 @@ import random from "random";
 import { MapResources } from "./MapResources";
 import { TileIndexer } from "./TileIndexer";
 import { Unit } from "../Unit";
+import PriorityQueue from "ts-priority-queue";
 
 enum MapSize {
   DUEL = "48x32",
@@ -1086,5 +1087,112 @@ export class GameMap {
         riverSidesMap.set(effectedTile, [riverSide]);
       }
     }
+  }
+
+  // https://en.wikipedia.org/wiki/A*_search_algorithm
+  public constructShortestPath(unit: Unit, startTile: Tile, goalTile: Tile) {
+    if (!startTile || !goalTile) return [];
+
+    //TODO: Maybe we get the distance of the last path & apply it to h? Since it's just going to be a single tile off from the previous.
+    let h = (n: Tile) => Math.floor(Tile.gridDistance(n, goalTile));
+
+    // For node n, gScore[n] is the cost of the cheapest path from start to n currently known.
+    let gScore: number[][] = [];
+    let fScore: number[][] = [];
+    let cameFrom: Tile[][] = [];
+
+    for (let x = 0; x < this.mapWidth; x++) {
+      gScore[x] = [];
+      fScore[x] = [];
+      cameFrom[x] = [];
+      for (let y = 0; y < this.mapHeight; y++) {
+        gScore[x][y] = Number.MAX_VALUE;
+        fScore[x][y] = 0;
+      }
+    }
+
+    gScore[startTile.getX()][startTile.getY()] = 0;
+    // For node n, fScore[n] := gScore[n] + h(n). fScore[n] represents our current best guess as to
+    // how cheap a path could be from start to finish if it goes through n.
+    fScore[startTile.getX()][startTile.getY()] = h(startTile);
+
+    // Openset is a pirority queue of tiles w/ the lowerest fscore
+    // fscore[myTile.getNodeIndex()]
+    let openSet = new PriorityQueue({
+      comparator: (a: Tile, b: Tile) => {
+        const fscoreA = fScore[a.getX()][a.getY()];
+        const fscoreB = fScore[b.getX()][b.getY()];
+
+        if (fscoreA < fscoreB) {
+          return -1; // a should have higher priority (lower fscore)
+        } else if (fscoreA > fscoreB) {
+          return 1; // b should have higher priority (lower fscore)
+        } else {
+          return 0; // fscoreA and fscoreB are equal
+        }
+      },
+      initialValues: [startTile],
+    });
+
+    //cameFrom.fill(undefined, 0, totalNodes);
+
+    while (openSet.length > 0) {
+      let currentTile = openSet.dequeue();
+
+      if (currentTile == goalTile) {
+        return this.reconstructPath(unit, cameFrom, currentTile);
+      }
+
+      for (let neighborTile of currentTile.getAdjacentTiles()) {
+        if (!neighborTile) continue;
+
+        let d = (current: Tile, neighbor: Tile) =>
+          unit.getTileWeight(current, neighbor);
+
+        let tentativeGScore =
+          gScore[currentTile.getX()][currentTile.getY()] +
+          d(currentTile, neighborTile);
+        //console.log(neighborTile.getNodeIndex());
+        //console.log(gScore[neighborTile.getNodeIndex()]);
+
+        if (
+          tentativeGScore < gScore[neighborTile.getX()][neighborTile.getY()]
+        ) {
+          cameFrom[neighborTile.getX()][neighborTile.getY()] = currentTile;
+          gScore[neighborTile.getX()][neighborTile.getY()] = tentativeGScore;
+          fScore[neighborTile.getX()][neighborTile.getY()] =
+            tentativeGScore + h(neighborTile);
+
+          //if (!QueueUtils.valuePresent(openSet, neighborTile)) {
+          openSet.queue(neighborTile);
+          //}
+        }
+      }
+    }
+
+    return [];
+  }
+
+  private reconstructPath(unit: Unit, cameFrom: Tile[][], currentTile: Tile) {
+    const totalPath = [currentTile];
+    let movementCost = 0;
+
+    movementCost += unit.getTileWeight(currentTile, undefined);
+
+    while (currentTile != undefined) {
+      currentTile = cameFrom[currentTile.getX()][currentTile.getY()];
+      if (currentTile) {
+        totalPath.unshift(currentTile);
+
+        movementCost += unit.getTileWeight(currentTile, undefined);
+      }
+    }
+
+    //FIXME: This may break pathing on large maps
+    if (movementCost >= 9999) {
+      return [];
+    }
+
+    return totalPath;
   }
 }
