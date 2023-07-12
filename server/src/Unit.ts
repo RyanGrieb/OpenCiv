@@ -51,13 +51,15 @@ export class Unit {
       eventName: "moveUnit",
       parentObject: this,
       callback: (data, websocket) => {
-        const unitTile = GameMap.getTiles()[data["unitX"]][data["unitY"]];
+        const unitTile =
+          GameMap.getInstance().getTiles()[data["unitX"]][data["unitY"]];
 
         if (this.tile !== unitTile) return;
 
         this.tile.removeUnit(this);
 
-        const targetTile = GameMap.getTiles()[data["targetX"]][data["targetY"]];
+        const targetTile =
+          GameMap.getInstance().getTiles()[data["targetX"]][data["targetY"]];
         targetTile.addUnit(this);
         this.tile = targetTile;
 
@@ -72,7 +74,8 @@ export class Unit {
       eventName: "unitAction",
       parentObject: this,
       callback: (data, websocket) => {
-        const unitTile = GameMap.getTiles()[data["unitX"]][data["unitY"]];
+        const unitTile =
+          GameMap.getInstance().getTiles()[data["unitX"]][data["unitY"]];
 
         if (this.tile !== unitTile) return;
 

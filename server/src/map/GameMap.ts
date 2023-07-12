@@ -15,6 +15,8 @@ enum MapSize {
 }
 
 export class GameMap {
+  private static instance: GameMap;
+
   private static oddEdgeAxis = [
     [0, -1],
     [1, -1],
@@ -32,13 +34,31 @@ export class GameMap {
     [-1, 0],
   ];
 
-  private static tiles: Tile[][];
-  private static mapWidth: number;
-  private static mapHeight: number;
-  private static mapArea: number;
-  public static riverSideHistory: Map<Tile, number[]>[];
+  private tiles: Tile[][];
+  private mapWidth: number;
+  private mapHeight: number;
+  private mapArea: number;
+  public riverSideHistory: Map<Tile, number[]>[];
 
+  public static getInstance() {
+    return this.instance;
+  }
+
+  /**
+   * Initializes the GameMap singleton object, starts a map request to the server.
+   */
   public static init() {
+    GameMap.instance = new GameMap();
+    GameMap.instance.startGeneration(); // We don't call from inside constructor to reference instance on creation.
+  }
+
+  public static destroyInstance() {
+    GameMap.instance = undefined;
+  }
+
+  private constructor() {}
+
+  private startGeneration() {
     // Assign map dimension values
     const mapDimensions = this.getDimensionValues(MapSize.DUEL);
     this.mapWidth = mapDimensions[0];
@@ -60,11 +80,11 @@ export class GameMap {
     this.generateTerrain();
   }
 
-  public static getTiles() {
+  public getTiles() {
     return this.tiles;
   }
 
-  public static generateTerrain() {
+  public generateTerrain() {
     /**
      * Map generation:
      * == Generate grass circles ==
@@ -456,7 +476,7 @@ export class GameMap {
       //console.log("riverGenLoop");
       let originTile: Tile = undefined;
       findRiverOriginLoop: while (!originTile) {
-        originTile = GameMap.getRandomTileWith({
+        originTile = this.getRandomTileWith({
           tileTypes: [
             "grass_hill",
             "plains_hill",
@@ -498,7 +518,7 @@ export class GameMap {
       let riverLength = 1;
 
       riverPathLoop: while (true) {
-        const nextTileCandidates: Tile[] = GameMap.getNextPotentialRiverTiles(
+        const nextTileCandidates: Tile[] = this.getNextPotentialRiverTiles(
           currentTile,
           lastTraversedTile,
           originTile
@@ -546,7 +566,7 @@ export class GameMap {
         continue;
       }
 
-      GameMap.cacheSetRiverSides();
+      this.cacheSetRiverSides();
       let appliedRiverSides = 0;
 
       for (let i = 0; i < currentRiverTiles.length; i++) {
@@ -614,9 +634,9 @@ export class GameMap {
         riverIndex--;
         //console.log("Oh no!");
         //currentRiverTiles[0].addTileType("debug1");
-        GameMap.restoreCachedRiverSides(); //FIXME: This fails to delete river-sides adj to border sometimes
+        this.restoreCachedRiverSides(); //FIXME: This fails to delete river-sides adj to border sometimes
       }
-      GameMap.removeTopRiverSideCache();
+      this.removeTopRiverSideCache();
     }
     console.log("Done generating rivers!");
     // == Generate rivers
@@ -634,7 +654,7 @@ export class GameMap {
     console.log("Done generating floodplains!");
   }
 
-  public static getNextPotentialRiverTiles(
+  public getNextPotentialRiverTiles(
     currentTile: Tile,
     lastTraversedTile: Tile,
     originTile: Tile
@@ -690,14 +710,14 @@ export class GameMap {
     return nextTileCandidates;
   }
 
-  public static getDimensionValues(mapSize: MapSize) {
+  public getDimensionValues(mapSize: MapSize) {
     const values = [
       parseInt(mapSize.substring(0, mapSize.indexOf("x"))),
       parseInt(mapSize.substring(mapSize.indexOf("x") + 1)),
     ];
     return values;
   }
-  public static sendMapChunksToPlayer(player: Player) {
+  public sendMapChunksToPlayer(player: Player) {
     player.sendNetworkEvent({
       event: "mapSize",
       width: this.mapWidth,
@@ -729,7 +749,7 @@ export class GameMap {
     }
   }
 
-  private static getTotalGeographyLandMass() {
+  private getTotalGeographyLandMass() {
     let total = 0;
     for (let x = 0; x < this.mapWidth; x++) {
       for (let y = 0; y < this.mapHeight; y++) {
@@ -743,14 +763,14 @@ export class GameMap {
   /**
    * Iterate through every tile & assign it's adjacent neighboring tiles through: setAdjacentTile()
    */
-  private static initAdjacentTiles() {
+  private initAdjacentTiles() {
     for (let x = 0; x < this.mapWidth; x++) {
       for (let y = 0; y < this.mapHeight; y++) {
         // Set the 6 edges of the hexagon.
 
         let edgeAxis: number[][];
-        if (y % 2 == 0) edgeAxis = this.evenEdgeAxis;
-        else edgeAxis = this.oddEdgeAxis;
+        if (y % 2 == 0) edgeAxis = GameMap.evenEdgeAxis;
+        else edgeAxis = GameMap.oddEdgeAxis;
 
         for (let i = 0; i < edgeAxis.length; i++) {
           let edgeX = x + edgeAxis[i][0];
@@ -775,18 +795,14 @@ export class GameMap {
     }
   }
 
-  private static setTilesBiome(
-    tiles: Tile[],
-    tileType: string,
-    setChance: number
-  ) {
+  private setTilesBiome(tiles: Tile[], tileType: string, setChance: number) {
     for (const tile of tiles) {
       if (!tile || Math.random() > setChance) continue;
       this.setTileBiome({ tile: tile, tileType: tileType });
     }
   }
 
-  private static setTileBiome(options: {
+  private setTileBiome(options: {
     tile: Tile;
     tileType: string;
     clearTileTypes?: boolean;
@@ -829,7 +845,7 @@ export class GameMap {
   }
 
   //TODO: Implement min-tiles & max-tiles per path iteration ontop of setTileChance.
-  private static generateTilePath(options: {
+  private generateTilePath(options: {
     tile: Tile;
     pathLength: number;
     setTileType: string;
@@ -953,7 +969,7 @@ export class GameMap {
 
   //FIXME: We really should use a tileMap to get tiles w/ the associated tileTypes in O(1) time.
   // Then we can apply the rest of the options in O(n)
-  public static getRandomTileWith(options: {
+  public getRandomTileWith(options: {
     tileTypes?: string[];
     tempRange?: [number, number];
     onAdditionalTileTypes?: boolean;
@@ -1019,17 +1035,17 @@ export class GameMap {
     return originTile;
   }
 
-  public static removeTopRiverSideCache() {
+  public removeTopRiverSideCache() {
     this.riverSideHistory.shift();
   }
 
-  public static cacheSetRiverSides() {
+  public cacheSetRiverSides() {
     const riverSidesMap = new Map<Tile, number[]>();
     this.riverSideHistory.unshift(riverSidesMap);
     //console.log("Cache");
   }
 
-  public static restoreCachedRiverSides() {
+  public restoreCachedRiverSides() {
     //console.log("restore");
     //FIFO
     const riverSidesMap = this.riverSideHistory.shift();
@@ -1058,7 +1074,7 @@ export class GameMap {
     }
   }
 
-  public static storeSetRiverSideEntry(tilesEffected: Map<Tile, number>) {
+  public storeSetRiverSideEntry(tilesEffected: Map<Tile, number>) {
     if (this.riverSideHistory.length < 1) return;
 
     const riverSidesMap = this.riverSideHistory[0];

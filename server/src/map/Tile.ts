@@ -85,7 +85,7 @@ export class Tile {
       tilesEffected.set(oppositeTile, oppositeTileSide);
     }
 
-    if (cacheEntry) GameMap.storeSetRiverSideEntry(tilesEffected);
+    if (cacheEntry) GameMap.getInstance().storeSetRiverSideEntry(tilesEffected);
 
     return tilesEffected;
   }
@@ -233,7 +233,7 @@ export class Tile {
 
         if (!adjTileOfRiverConnection) continue;
 
-        GameMap.cacheSetRiverSides();
+        GameMap.getInstance().cacheSetRiverSides();
 
         if (!adjTileOfRiverConnection.isWater()) {
           this.setRiverSide(validRiverConnection, true); // MAYBE bug here
@@ -254,7 +254,7 @@ export class Tile {
         );
 
         if (!smallestRiverPathToNextTile) {
-          GameMap.restoreCachedRiverSides();
+          GameMap.getInstance().restoreCachedRiverSides();
           continue;
         }
 
@@ -272,7 +272,7 @@ export class Tile {
         }
 
         potentialRiverPaths.set(validRiverConnection, tilesSet);
-        GameMap.restoreCachedRiverSides();
+        GameMap.getInstance().restoreCachedRiverSides();
       }
 
       if (potentialRiverPaths.size > 0) {
@@ -334,7 +334,7 @@ export class Tile {
     for (let orientation of ["left", "right"]) {
       const orientationRiverSidesSet: number[] = [];
       let prevRiverSide = startingRiverSide;
-      GameMap.cacheSetRiverSides();
+      GameMap.getInstance().cacheSetRiverSides();
 
       while (
         nextTile &&
@@ -366,7 +366,7 @@ export class Tile {
           console.log("Current river side: " + startingRiverSide);
           console.log("Our river sides: ");
           console.log(this.riverSides);*/
-          GameMap.removeTopRiverSideCache();
+          GameMap.getInstance().removeTopRiverSideCache();
           return [];
         }
 
@@ -386,7 +386,7 @@ export class Tile {
       // Store which river-sides were set for this orientation, and reset our changes.
       orientations.set(orientation, orientationRiverSidesSet);
       startingRiverSide = prevRiverSide;
-      GameMap.restoreCachedRiverSides();
+      GameMap.getInstance().restoreCachedRiverSides();
     }
 
     let smallestRiverPath: number[] | undefined = undefined;

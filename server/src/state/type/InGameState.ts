@@ -44,7 +44,7 @@ export class InGameState extends State {
       parentObject: this,
       callback: (data, websocket) => {
         const player = Game.getPlayerFromWebsocket(websocket);
-        GameMap.sendMapChunksToPlayer(player);
+        GameMap.getInstance().sendMapChunksToPlayer(player);
       },
     });
 
@@ -82,7 +82,7 @@ export class InGameState extends State {
         "tundra_hill",
       ];
 
-      const spawnTile = GameMap.getRandomTileWith({
+      const spawnTile = GameMap.getInstance().getRandomTileWith({
         avoidTileTypes: badTileTypes,
       });
 
@@ -166,6 +166,7 @@ export class InGameState extends State {
     });
   }
   public onDestroyed() {
+    GameMap.destroyInstance();
     return super.onDestroyed();
   }
 }
