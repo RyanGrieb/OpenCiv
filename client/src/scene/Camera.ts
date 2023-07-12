@@ -92,6 +92,10 @@ export class Camera {
 
     if (options.mouse_controls) {
       scene.on("mousedown", (options) => {
+        if (options.button !== 0) {
+          return;
+        }
+
         this.lastMouseX = options.x - scene.getCamera().getX();
         this.lastMouseY = options.y - scene.getCamera().getY();
         this.mouseHeld = true;

@@ -67,11 +67,15 @@ export class Game {
         this.currentScene.call("mousemove", {
           x: event.clientX,
           y: event.clientY,
+          button: event.button,
         });
       }
 
       this.actors.forEach((actor) => {
-        actor.call("mousemove", { x: event.clientX, y: event.clientY });
+        actor.call("mousemove", {
+          x: event.clientX,
+          y: event.clientY,
+        });
       });
 
       this.mouseX = event.clientX;
@@ -83,6 +87,7 @@ export class Game {
         this.currentScene.call("mousedown", {
           x: event.clientX,
           y: event.clientY,
+          button: event.button,
         });
       }
 
