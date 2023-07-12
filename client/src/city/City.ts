@@ -67,7 +67,7 @@ export class City extends ActorGroup {
         width: 32,
         height: 32,
         color: "yellow",
-        transparency: 0.25,
+        transparency: 0.1,
       });
 
       this.addActor(territoryOverlay);

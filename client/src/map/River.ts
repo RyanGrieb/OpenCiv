@@ -54,11 +54,6 @@ export class River extends Actor {
     this.setRotation(rotation * (Math.PI / 180));
   }
 
-  public static mapServerSideToClientSide(serverSide: number): number {
-    const clientMap = [4, 3, 2, 1, 0, 5];
-    return clientMap[serverSide];
-  }
-
   //FIXME: Remove these?
   public getRotationOriginX(): number {
     return this.x;

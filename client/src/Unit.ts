@@ -236,7 +236,10 @@ export class Unit extends ActorGroup {
     }
     this.selectionActors = [];
 
-    GameMap.getInstance().removeOutline(this.tile);
+    GameMap.getInstance().removeOutline({
+      tile: this.tile,
+      cityOutline: false,
+    });
     Game.getCurrentScene().removeActor(this.unitDisplayInfo);
   }
 
@@ -268,6 +271,8 @@ export class Unit extends ActorGroup {
       edges: [1, 1, 1, 1, 1, 1],
       thickness: 1,
       color: "aqua",
+      cityOutline: false,
+      z: 3,
     });
 
     for (const actor of this.selectionActors) {

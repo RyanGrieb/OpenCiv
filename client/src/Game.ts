@@ -431,6 +431,7 @@ export class Game {
     const y1 = line.getY1();
     const y2 = line.getY2();
 
+    canvasContext.globalAlpha = line.getTransparency();
     canvasContext.strokeStyle = line.getColor();
     canvasContext.lineWidth = line.getGirth();
     canvasContext.lineCap = "round";

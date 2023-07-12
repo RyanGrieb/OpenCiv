@@ -46,6 +46,13 @@ export class ClientPlayer extends AbstractPlayer {
         this.selectedUnit &&
         oldHoveredTile != this.hoveredTile.getRepresentedTile()
       ) {
+        if (oldHoveredTile !== this.selectedUnit.getTile()) {
+          GameMap.getInstance().removeOutline({
+            tile: oldHoveredTile,
+            cityOutline: false,
+          });
+        }
+
         this.updateDisplayedUnitMovementPath();
         //Draw outline of final target tile
         if (this.movementLines.length > 0) {
@@ -54,11 +61,9 @@ export class ClientPlayer extends AbstractPlayer {
             edges: [1, 1, 1, 1, 1, 1],
             thickness: 1,
             color: this.queuedMovement ? "lightgrey" : "aqua",
+            cityOutline: false,
+            z: 3,
           });
-        }
-
-        if (oldHoveredTile !== this.selectedUnit.getTile()) {
-          GameMap.getInstance().removeOutline(oldHoveredTile);
         }
       }
     });
@@ -98,12 +103,15 @@ export class ClientPlayer extends AbstractPlayer {
     NetworkEvents.on({
       eventName: "removeUnit",
       callback: (data) => {
+        if (!this.selectedUnit) return;
+
         if (this.selectedUnit.getID() === data["id"]) {
           this.selectedUnit = undefined;
           this.updateDisplayedUnitMovementPath();
-          GameMap.getInstance().removeOutline(
-            this.hoveredTile.getRepresentedTile()
-          );
+          GameMap.getInstance().removeOutline({
+            tile: this.hoveredTile.getRepresentedTile(),
+            cityOutline: false,
+          });
         }
       },
     });
@@ -158,9 +166,9 @@ export class ClientPlayer extends AbstractPlayer {
       //const riverCross = Tile.riverCrosses(tile1, tile2);
       movementCost += tileCost;
 
-      let color = "rgba(154, 158, 153, 0.75)";
+      let color = "rgba(154, 158, 153, 1)";
       if (this.selectedUnit.getAvailableMovement() > 0) {
-        color = "rgba(7, 250, 214, 0.75)";
+        color = "rgba(7, 250, 214, 1)";
       } else {
         this.queuedMovement = true;
       }
@@ -172,7 +180,7 @@ export class ClientPlayer extends AbstractPlayer {
       const line = new Line({
         color: color,
         girth: 2,
-        z: 2,
+        z: 3,
         x1: tile1.getCenterPosition()[0],
         y1: tile1.getCenterPosition()[1],
         x2: tile2.getCenterPosition()[0],
@@ -197,7 +205,10 @@ export class ClientPlayer extends AbstractPlayer {
     });
 
     // Remove target tile outline
-    GameMap.getInstance().removeOutline(targetTile);
+    GameMap.getInstance().removeOutline({
+      tile: targetTile,
+      cityOutline: false,
+    });
 
     // Unselect unit before moving
     this.selectedUnit.unselect();

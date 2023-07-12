@@ -8,6 +8,8 @@ import { Line } from "../scene/Line";
 import PriorityQueue from "ts-priority-queue";
 import { AbstractPlayer } from "../player/AbstractPlayer";
 import { City } from "../city/City";
+import { TileOutline } from "./TileOutline";
+import { Vector } from "../util/Vector";
 
 export class GameMap {
   private static instance: GameMap;
@@ -34,7 +36,7 @@ export class GameMap {
   private mapHeight: number;
   private previousGScore;
   private previousFScore;
-  private tileOutlines: Map<Tile, Line[]>;
+  private tileOutlines: Map<Tile, TileOutline[]>;
 
   private topLayerMapChunks: Map<Actor, Tile[]>;
   private topLayerTileActorList: Tile[] = [];
@@ -56,7 +58,7 @@ export class GameMap {
     this.previousGScore = undefined;
     this.previousFScore = undefined;
     this.topLayerMapChunks = new Map<Actor, Tile[]>();
-    this.tileOutlines = new Map<Tile, Line[]>();
+    this.tileOutlines = new Map<Tile, TileOutline[]>();
 
     NetworkEvents.on({
       eventName: "newCity",
@@ -418,20 +420,6 @@ export class GameMap {
     });
   }
 
-  public removeOutline(tile: Tile) {
-    const lines = this.tileOutlines.get(tile);
-
-    if (!lines) return;
-
-    //console.log(
-    //  `Removing outline at x:${tile.getGridX()} y:${tile.getGridY()}`
-    //);
-
-    for (const line of lines) {
-      Game.getCurrentScene().removeLine(line);
-    }
-  }
-
   public drawBorder(tiles: Tile[]) {
     // Create outline from the outer border tiles.
 
@@ -442,8 +430,6 @@ export class GameMap {
         .getAdjacentTiles()
         .every((adjTile) => tiles.includes(adjTile));
     });
-
-    console.log(tiles.length);
 
     //2. Apply outline to the outer tiles. We want to only apply outlines on the exterior
     // So the edges e.g. [0,1,1,0,0,0] cannot include a tile from tiles
@@ -466,7 +452,41 @@ export class GameMap {
         edges: outlineEdges,
         thickness: 1,
         color: "red",
+        cityOutline: true,
       });
+    }
+  }
+
+  /**
+   * BUG: If we hover inside a city territory, then place an adjacent city, we remove city lines improperly, causing no effect to occur.
+   */
+  public removeOutline(options: { tile: Tile; cityOutline: boolean }) {
+    const outlines = this.tileOutlines.get(options.tile);
+
+    if (!outlines) return;
+
+    for (const outline of [...outlines]) {
+      if (outline.cityOutline && !options.cityOutline) continue;
+
+      Game.getCurrentScene().removeLine(outline.line);
+      outlines.splice(outlines.indexOf(outline), 1); // Remove outline from list (NO CITY OUTLINES EVER!!! UNLESS SPECIFIED)
+
+      // Reset any outlines effected by this outline
+      for (const [_, effectedOutlines] of outline
+        .getEffectedOutlines()
+        .entries()) {
+        for (const effectedOutline of effectedOutlines) {
+          effectedOutline.line.setZValue(2);
+          effectedOutline.line.setToOriginalPositions();
+        }
+      }
+    }
+
+    if (outlines.length < 1) {
+      //console.log(
+      //  `Deleting tile from this.tileOutlines: (${options.tile.getGridX()},${options.tile.getGridY()})`
+      //);
+      this.tileOutlines.delete(options.tile);
     }
   }
 
@@ -475,25 +495,12 @@ export class GameMap {
     edges: number[];
     thickness: number;
     color: string;
+    cityOutline: boolean;
+    z?: number;
   }) {
     const tile = options.tile;
-    const outlineLines = [];
-
-    //Rotate edges array +3 to match adj-tiles index
-    //options.edges = Lists.shiftList(options.edges, );
-
-    // Remove existing lines and replace
-    if (this.tileOutlines.has(tile)) {
-      for (const line of this.tileOutlines.get(tile)) {
-        Game.getCurrentScene().removeLine(line);
-      }
-
-      this.tileOutlines.delete(tile);
-    }
-
-    // console.log(`Setting outline at x:${tile.getGridX()} y:${tile.getGridY()}`);
-
-    // TOOD: Handle existing lines on tiles, split the space to allow for two lines.
+    const tileOutlines: TileOutline[] = [];
+    const oppositeSides: number[] = [3, 4, 5, 0, 1, 2];
 
     for (let i = 0; i < 6; i++) {
       if (!options.edges[i]) continue;
@@ -506,16 +513,79 @@ export class GameMap {
         y1: tile.getVectors()[i].y,
         x2: tile.getVectors()[iNext].x,
         y2: tile.getVectors()[iNext].y,
+        z: options.z ?? 2,
       });
 
-      outlineLines.push(line);
+      // Draw non-city outlines closer to the tile
+      if (!options.cityOutline) {
+        this.setLinePositionCloserToTile(line, tile, 1);
+      }
+
+      tileOutlines.push(new TileOutline(line, i, options.cityOutline));
     }
 
-    for (const line of outlineLines) {
-      Game.getCurrentScene().addLine(line);
+    // Before drawing the new line, check if we have overlapping tile outlines - FROM THE OUTSIDE
+    if (options.cityOutline) {
+      for (const outline of tileOutlines) {
+        const adjTile = tile.getAdjacentTiles()[outline.edge];
+
+        if (this.tileOutlines.has(adjTile)) {
+          const oppositeAdjEdge = oppositeSides[outline.edge];
+
+          // If were drawing on the same line
+          if (this.isOutlineDrawn(adjTile, oppositeAdjEdge)) {
+            //Draw lines closer to parent tile, such that they don't overlap each other. Also reduce girth on both lines
+            this.setLinePositionCloserToTile(outline.line, tile, 0.5);
+
+            // Modify adjTile line, and set what effected it (so we can reset it later).
+            for (const adjTileOutline of this.tileOutlines.get(adjTile)) {
+              if (adjTileOutline.edge === oppositeAdjEdge) {
+                const adjLine = adjTileOutline.line;
+                adjLine.setZValue(outline.line.getZIndex() + 1);
+                this.setLinePositionCloserToTile(adjLine, adjTile, 0.5);
+                adjLine.increaseDistance(0.75); //Increase length of line since the adjLine has more distance to cover
+                outline.addEffectedOutlines(adjTile, adjTileOutline);
+              }
+            }
+          }
+        }
+      }
     }
 
-    this.tileOutlines.set(tile, outlineLines);
+    for (const outline of tileOutlines) {
+      Game.getCurrentScene().addLine(outline.line);
+    }
+
+    // Update our tileOutlines map
+    if (this.tileOutlines.has(tile)) {
+      this.tileOutlines.get(tile).push(...tileOutlines);
+    } else {
+      this.tileOutlines.set(tile, tileOutlines);
+    }
+  }
+
+  private setLinePositionCloserToTile(line: Line, tile: Tile, amount: number) {
+    // FIXME: This functions works, but the naming of shiftVectorsAwayFromCenter() is confusing.
+    const shiftedTileVectors = Vector.shiftVectorsAwayFromCenter(
+      tile.getCenterPosition()[0],
+      tile.getCenterPosition()[1],
+      line.getVectors(),
+      amount
+    );
+    line.setPosition({
+      x1: shiftedTileVectors[0].x,
+      y1: shiftedTileVectors[0].y,
+      x2: shiftedTileVectors[1].x,
+      y2: shiftedTileVectors[1].y,
+    });
+  }
+
+  private isOutlineDrawn(tile: Tile, edge: number) {
+    for (const tileOutline of this.tileOutlines.get(tile)) {
+      if (tileOutline.edge === edge) return true;
+    }
+
+    return false;
   }
 
   public async redrawMap(modifiedTiles: Tile[]) {
