@@ -18,6 +18,7 @@ export class ClientPlayer extends AbstractPlayer {
   private hoveredTile: HoveredTile;
   private movementLines: Line[];
   private queuedMovement: boolean;
+  private rightMouseDrag: boolean;
 
   constructor(name: string) {
     super(name);
@@ -40,12 +41,15 @@ export class ClientPlayer extends AbstractPlayer {
       let oldHoveredTile = this.hoveredTile
         ? this.hoveredTile.getRepresentedTile()
         : undefined;
+
       this.updateHoveredTile(mouseX, mouseY);
 
       if (
         this.selectedUnit &&
-        oldHoveredTile != this.hoveredTile.getRepresentedTile()
+        oldHoveredTile != this.hoveredTile.getRepresentedTile() &&
+        this.rightMouseDrag
       ) {
+        // Remove target-outline from previous hovered tile.
         if (oldHoveredTile !== this.selectedUnit.getTile()) {
           GameMap.getInstance().removeOutline({
             tile: oldHoveredTile,
@@ -53,6 +57,31 @@ export class ClientPlayer extends AbstractPlayer {
           });
         }
 
+        // Draw movement lines to new target tile
+        this.updateDisplayedUnitMovementPath();
+
+        //Draw outline of final target tile
+        if (this.movementLines.length > 0) {
+          GameMap.getInstance().setOutline({
+            tile: this.hoveredTile.getRepresentedTile(),
+            edges: [1, 1, 1, 1, 1, 1],
+            thickness: 1,
+            color: this.queuedMovement ? "lightgrey" : "aqua",
+            cityOutline: false,
+            z: 3,
+          });
+        }
+      }
+    });
+
+    Game.getCurrentScene().on("mousedown", (options) => {
+      if (options.button !== 2) {
+        return;
+      }
+
+      this.rightMouseDrag = true;
+
+      if (this.selectedUnit) {
         this.updateDisplayedUnitMovementPath();
         //Draw outline of final target tile
         if (this.movementLines.length > 0) {
@@ -80,6 +109,7 @@ export class ClientPlayer extends AbstractPlayer {
 
       //right-click
       if (options.button === 2) {
+        this.rightMouseDrag = false;
         if (clickedTile && this.selectedUnit) {
           this.moveSelectedUnit(clickedTile);
         }
