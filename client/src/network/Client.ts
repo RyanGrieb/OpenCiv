@@ -109,7 +109,7 @@ export class WebsocketClient {
     });
 
     this.websocket.addEventListener("message", (event) => {
-      console.log("Message from server: " + event.data);
+      //console.log("Message from server: " + event.data);
       const eventJSON = JSON.parse(event.data);
       NetworkEvents.call(eventJSON["event"], eventJSON);
     });

@@ -233,11 +233,11 @@ export class Tile extends Actor {
 
   private initializeVectors() {
     // Note: The ordering of this matters since we need to form a polygon from these vectors
-    this.vectors.push(new Vector(this.x + this.width / 2, this.y + 32)); // Bottom center
-    this.vectors.push(new Vector(this.x + 32, this.y + 25)); // Bottom right
-    this.vectors.push(new Vector(this.x + 32, this.y + 7)); // Top right
-    this.vectors.push(new Vector(this.x + this.width / 2, this.y)); // Top center
     this.vectors.push(new Vector(this.x, this.y + 7)); // Top left
+    this.vectors.push(new Vector(this.x + this.width / 2, this.y)); // Top center
+    this.vectors.push(new Vector(this.x + 32, this.y + 7)); // Top right
+    this.vectors.push(new Vector(this.x + 32, this.y + 25)); // Bottom right
+    this.vectors.push(new Vector(this.x + this.width / 2, this.y + 32)); // Bottom center
     this.vectors.push(new Vector(this.x, this.y + 25)); // Bottom left
   }
 

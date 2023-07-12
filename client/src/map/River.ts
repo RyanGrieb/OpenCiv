@@ -12,24 +12,11 @@ export interface RiverOptions {
 export class River extends Actor {
   constructor(options: RiverOptions) {
     const vectorOffset = -1.75; // Shift all vectors away from the center by 1.5 pixels.. (Causes our rivers to reside between tiles)
+    let side = options.side;
+    let otherVectorSide = side + 1;
 
-    /**
-     * server -> client
-     * 0 -> 4
-     * 1 -> 3
-     * 2 -> 2
-     * 3 -> 1
-     * 4 -> 0
-     * 5 -> 5
-     * We do this because the position of our vectors starts at the bottom-center of the tile, while for the server the position of tile sides starts at the top-left.
-     */
-    //FIXME: We should have uniform adjacency and sides for server and client. Converting between is dumb and confusing.
-    let side = River.mapServerSideToClientSide(options.side);
-
-    let otherVectorSide = side - 1;
-
-    if (side == 0) {
-      otherVectorSide = 5;
+    if (otherVectorSide === 6) {
+      otherVectorSide = 0;
     }
 
     // Get angle b/w two vectors for 0 it's b/w 0 & 5

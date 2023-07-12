@@ -432,8 +432,42 @@ export class GameMap {
     }
   }
 
-  public drawBorder(tile: Tile[]) {
+  public drawBorder(tiles: Tile[]) {
     // Create outline from the outer border tiles.
+
+    //1. Get outter tiles
+    // Condition: At least 1 adj tile is NOT in tiles list.
+    const outerTiles: Tile[] = tiles.filter((tile) => {
+      return !tile
+        .getAdjacentTiles()
+        .every((adjTile) => tiles.includes(adjTile));
+    });
+
+    console.log(tiles.length);
+
+    //2. Apply outline to the outer tiles. We want to only apply outlines on the exterior
+    // So the edges e.g. [0,1,1,0,0,0] cannot include a tile from tiles
+    for (const tile of outerTiles) {
+      const outlineEdges = [0, 0, 0, 0, 0, 0];
+      for (let i = 0; i < 6; i++) {
+        const adjTile = tile.getAdjacentTiles()[i];
+
+        if (adjTile && tiles.includes(adjTile)) {
+          continue;
+        }
+
+        let index = i;
+
+        outlineEdges[index] = 1;
+      }
+
+      this.setOutline({
+        tile: tile,
+        edges: outlineEdges,
+        thickness: 1,
+        color: "red",
+      });
+    }
   }
 
   public setOutline(options: {
@@ -444,6 +478,9 @@ export class GameMap {
   }) {
     const tile = options.tile;
     const outlineLines = [];
+
+    //Rotate edges array +3 to match adj-tiles index
+    //options.edges = Lists.shiftList(options.edges, );
 
     // Remove existing lines and replace
     if (this.tileOutlines.has(tile)) {

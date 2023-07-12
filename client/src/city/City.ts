@@ -1,5 +1,6 @@
 import { GameImage, SpriteRegion } from "../Assets";
 import { Game } from "../Game";
+import { GameMap } from "../map/GameMap";
 import { Tile } from "../map/Tile";
 import { AbstractPlayer } from "../player/AbstractPlayer";
 import { Actor } from "../scene/Actor";
@@ -72,6 +73,8 @@ export class City extends ActorGroup {
       this.addActor(territoryOverlay);
       this.territoryOverlays.push(territoryOverlay);
     }
+
+    GameMap.getInstance().drawBorder(this.territory);
   }
 
   public getTerritory() {
