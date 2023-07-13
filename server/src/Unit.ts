@@ -105,6 +105,15 @@ export class Unit {
         }
       },
     });
+
+    ServerEvents.on({
+      eventName: "nextTurn",
+      parentObject: this,
+      callback: (data) => {
+        console.log("FOOO");
+        this.availableMovement = this.defaultMoveDistance;
+      },
+    });
   }
 
   public moveTowardsTargetTile(tile: Tile): [Tile, Tile[]] {

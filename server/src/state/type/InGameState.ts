@@ -204,6 +204,9 @@ export class InGameState extends State {
   private incrementTurn() {
     this.currentTurn++;
     this.turnTime = this.totalTurnTime;
+
+    ServerEvents.call("nextTurn", { turn: this.currentTurn });
+
     Game.getPlayers().forEach((player) => {
       player.sendNetworkEvent({
         event: "newTurn",
