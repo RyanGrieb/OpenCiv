@@ -14,6 +14,7 @@ export class Player {
   private loadedIn: boolean;
   /** The callback to execute when the player has loaded into the game. */
   private loadedInCallback: () => void;
+  private requestedNextTurn: boolean;
 
   /**
    * Creates a new player object.
@@ -24,6 +25,7 @@ export class Player {
     this.name = name;
     this.wsConnection = wsConnection;
     this.loadedIn = false;
+    this.requestedNextTurn = false;
 
     // Add event listener for when the player disconnects
     this.wsConnection.on("close", (data) => {
@@ -72,6 +74,14 @@ export class Player {
    */
   public onLoadedIn(callback: () => void) {
     this.loadedInCallback = callback;
+  }
+
+  public setRequestedNextTurn(value: boolean) {
+    this.requestedNextTurn = value;
+  }
+
+  public hasRequestedNextTurn() {
+    return this.requestedNextTurn;
   }
 
   /**

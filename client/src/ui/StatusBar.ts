@@ -47,21 +47,32 @@ export class StatusBar extends ActorGroup {
     NetworkEvents.on({
       eventName: "newTurn",
       callback: (data) => {
-        const text = `Turns: ${data["turn"]} (${data["turnTime"]}s)`;
-
-        if (!this.currentTurnLabel) {
-          this.currentTurnText = text;
-        } else {
-          this.currentTurnLabel.setText(text);
-          this.currentTurnLabel.conformSize().then(() => {
-            this.currentTurnLabel.setPosition(
-              Game.getWidth() - this.currentTurnLabel.getWidth() - 1,
-              15
-            );
-          });
-        }
+        this.updateCurrentTurnLabel(data);
       },
     });
+
+    NetworkEvents.on({
+      eventName: "turnTimeDecrement",
+      callback: (data) => {
+        this.updateCurrentTurnLabel(data);
+      },
+    });
+  }
+
+  private updateCurrentTurnLabel(data: JSON) {
+    const text = `Turns: ${data["turn"]} (${data["turnTime"]}s)`;
+
+    if (!this.currentTurnLabel) {
+      this.currentTurnText = text;
+    } else {
+      this.currentTurnLabel.setText(text);
+      this.currentTurnLabel.conformSize().then(() => {
+        this.currentTurnLabel.setPosition(
+          Game.getWidth() - this.currentTurnLabel.getWidth() - 1,
+          15
+        );
+      });
+    }
   }
 
   private async generateActors() {

@@ -14,7 +14,7 @@ export class InGameState extends State {
   private turnTime: number;
 
   public onInitialize() {
-    this.totalTurnTime = 3; //TODO: Allow modification
+    this.totalTurnTime = 60; //TODO: Allow modification
     this.currentTurn = 0;
     this.turnTime = 0;
 
@@ -157,16 +157,43 @@ export class InGameState extends State {
         this.beginTurnTimer();
       },
     });
+
+    ServerEvents.on({
+      eventName: "nextTurnRequest",
+      parentObject: this,
+      callback: (data, websocket) => {
+        const player = Game.getPlayerFromWebsocket(websocket);
+        player.setRequestedNextTurn(true);
+
+        const allRequested = Array.from(Game.getPlayers().values()).every(
+          (player) => player.hasRequestedNextTurn()
+        );
+
+        if (allRequested) {
+          this.incrementTurn();
+          Game.getPlayers().forEach((player) => {
+            player.setRequestedNextTurn(false);
+          });
+        }
+      },
+    });
   }
 
   // Decrease trunTime by -1 every 1 second
   private beginTurnTimer() {
     this.turnTimeJob = scheduleJob("* * * * * *", () => {
       // Send turn time increment to player
+      Game.getPlayers().forEach((player) => {
+        player.sendNetworkEvent({
+          event: "turnTimeDecrement",
+          turn: this.currentTurn,
+          turnTime: this.turnTime,
+        });
+      });
 
       //FIXME: WAIT for all players timers to be 0!
       if (this.turnTime <= 0) {
-        console.log("NEW turn");
+        // CHECK IF ALL PLAYERS TIME'S ARE <= 0, THEN INCREMENT.
         this.incrementTurn();
       }
 
@@ -176,7 +203,7 @@ export class InGameState extends State {
 
   private incrementTurn() {
     this.currentTurn++;
-    this.turnTime += this.totalTurnTime;
+    this.turnTime = this.totalTurnTime;
     Game.getPlayers().forEach((player) => {
       player.sendNetworkEvent({
         event: "newTurn",
