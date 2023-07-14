@@ -26,6 +26,7 @@ export class Unit {
   private defaultMoveDistance: number;
   private availableMovement: number;
   private tile: Tile;
+  private queuedMovementTiles: Tile[];
 
   private static nextId = 0;
   private id: number; // Increment this every time a unit object is created
@@ -45,6 +46,7 @@ export class Unit {
     this.defaultMoveDistance = options.defaultMoveDistance || 2;
     this.availableMovement = this.defaultMoveDistance;
     this.actions = options.actions || [];
+    this.queuedMovementTiles = [];
 
     this.id = Unit.nextId;
     Unit.nextId += 1;
@@ -52,40 +54,26 @@ export class Unit {
     ServerEvents.on({
       eventName: "moveUnit",
       parentObject: this,
-      callback: (data, websocket) => {
-        const unitTile =
-          GameMap.getInstance().getTiles()[data["unitX"]][data["unitY"]];
-
-        if (this.tile !== unitTile) return;
-
+      callback: (data) => {
         const targetTile =
           GameMap.getInstance().getTiles()[data["targetX"]][data["targetY"]];
 
-        if (this.tile === targetTile) return;
-
-        this.tile.removeUnit(this);
+        if (this.id !== data["id"] || this.tile === targetTile) return;
 
         // Move the furthest we can possibly go, and queue the rest of tiles for next turn.
+
+        //FIXME: Allow this function to use our existing queuedMovementTiles,
+        // This should stop the path from being redrawn every turn.
+        console.log("Manual move:");
         const [arrivedTile, remainingTiles] =
-          this.moveTowardsTargetTile(targetTile);
+          this.getMovementTowardsTargetTile(targetTile);
 
         if (!arrivedTile) return;
 
-        arrivedTile.addUnit(this);
-
-        // Update packet data.
-        data["targetX"] = arrivedTile.getX();
-        data["targetY"] = arrivedTile.getY();
-
-        if (arrivedTile !== targetTile) {
-          // Update packet data with the tiles we have queued?
-        }
-
-        this.tile = arrivedTile;
-
-        // Send back packet, telling client server updated the unit location
-        Game.getPlayers().forEach((player) => {
-          player.sendNetworkEvent(data);
+        this.moveToTile({
+          previousTile: this.tile,
+          targetTile: arrivedTile,
+          remainingTiles: remainingTiles,
         });
       },
     });
@@ -110,18 +98,87 @@ export class Unit {
       eventName: "nextTurn",
       parentObject: this,
       callback: (data) => {
-        console.log("FOOO");
         this.availableMovement = this.defaultMoveDistance;
+
+        if (this.queuedMovementTiles.length > 0) {
+          this.moveWithMovementQueue();
+        }
       },
     });
   }
 
-  public moveTowardsTargetTile(tile: Tile): [Tile, Tile[]] {
-    const shortestPath: Tile[] = GameMap.getInstance().constructShortestPath(
-      this,
-      this.tile, // Starting tile
-      tile // Target tile
+  public moveToTile(options: {
+    previousTile: Tile;
+    targetTile: Tile;
+    remainingTiles: Tile[];
+  }) {
+    const previousTile = options.previousTile;
+    const targetTile = options.targetTile;
+    const remainingTiles = options.remainingTiles;
+
+    this.tile.removeUnit(this);
+    targetTile.addUnit(this);
+    this.tile = targetTile;
+    this.queuedMovementTiles = remainingTiles;
+
+    const dataPacket = {
+      event: "moveUnit",
+      id: this.id,
+      unitX: previousTile.getX(),
+      unitY: previousTile.getY(),
+      targetX: targetTile.getX(),
+      targetY: targetTile.getY(),
+    };
+
+    // Store a list of queued tiles if we have remaining tiles
+    if (remainingTiles.length > 0) {
+      const remainingTilesJSON = [];
+      for (const tile of remainingTiles) {
+        remainingTilesJSON.push({ x: tile.getX(), y: tile.getY() });
+      }
+      dataPacket["queuedTiles"] = remainingTilesJSON;
+    }
+
+    // Send back packet, telling client server updated the unit location
+    Game.getPlayers().forEach((player) => {
+      player.sendNetworkEvent(dataPacket);
+    });
+  }
+
+  private moveWithMovementQueue() {
+    const targetTile = this.getTargetQueuedTile();
+    const existingPath = [this.tile, ...this.queuedMovementTiles];
+
+    console.log("Queued move:");
+    const [arrivedTile, remainingTiles] = this.getMovementTowardsTargetTile(
+      targetTile,
+      existingPath
     );
+
+    if (!arrivedTile) return;
+
+    this.moveToTile({
+      previousTile: this.tile,
+      targetTile: arrivedTile,
+      remainingTiles,
+    });
+  }
+
+  private getMovementTowardsTargetTile(
+    tile: Tile,
+    existingPath?: Tile[]
+  ): [Tile, Tile[]] {
+    const shortestPath =
+      existingPath ??
+      GameMap.getInstance().constructShortestPath(
+        this,
+        this.tile, // Starting tile
+        tile // Target tile
+      );
+
+    if (!existingPath) {
+      console.log("Regenerate....");
+    }
 
     const traversedTiles: Tile[] = [this.tile];
 
@@ -138,9 +195,9 @@ export class Unit {
       }
 
       const movementCost = this.getTileWeight(currentTile, nextTile);
-      console.log(
-        `From (${currentTile.getX()}, ${currentTile.getY()}) to (${nextTile.getX()}, ${nextTile.getY()}) - cost: ${movementCost}`
-      );
+      //console.log(
+      //  `From (${currentTile.getX()}, ${currentTile.getY()}) to (${nextTile.getX()}, ${nextTile.getY()}) - cost: ${movementCost}`
+      //);
 
       this.availableMovement = Math.max(
         this.availableMovement - movementCost,
@@ -221,5 +278,11 @@ export class Unit {
     if (!neighbor) return current.getMovementCost();
 
     return Tile.getWeight(current, neighbor);
+  }
+
+  public getTargetQueuedTile() {
+    if (this.queuedMovementTiles.length < 1) return undefined;
+
+    return this.queuedMovementTiles[this.queuedMovementTiles.length - 1];
   }
 }

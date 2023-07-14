@@ -109,8 +109,13 @@ export class WebsocketClient {
     });
 
     this.websocket.addEventListener("message", (event) => {
-      //console.log("Message from server: " + event.data);
+      const eventsToIgnore = ["turnTimeDecrement"];
       const eventJSON = JSON.parse(event.data);
+
+      if (!eventsToIgnore.includes(eventJSON["event"])) {
+        console.log("Message from server: " + event.data);
+      }
+
       NetworkEvents.call(eventJSON["event"], eventJSON);
     });
 

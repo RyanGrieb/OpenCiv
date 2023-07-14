@@ -490,6 +490,17 @@ export class GameMap {
     }
   }
 
+  public drawUnitSelectionOutline(tile: Tile, color: string) {
+    GameMap.getInstance().setOutline({
+      tile: tile,
+      edges: [1, 1, 1, 1, 1, 1],
+      thickness: 1,
+      color: color,
+      cityOutline: false,
+      z: 3,
+    });
+  }
+
   public setOutline(options: {
     tile: Tile;
     edges: number[];

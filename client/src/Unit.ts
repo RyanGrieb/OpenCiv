@@ -110,6 +110,7 @@ export class Unit extends ActorGroup {
   private availableMovement: number;
   private unitDisplayInfo: UnitDisplayInfo;
   private actions: UnitAction[];
+  private queuedMovementTiles: Tile[];
 
   constructor(options: options) {
     super({
@@ -137,8 +138,9 @@ export class Unit extends ActorGroup {
     this.attackType = options.attackType;
     this.selectionActors = [];
     this.totalMovement = 2; // TODO: Have server define this.
-    this.availableMovement = 2;
+    this.availableMovement = this.totalMovement;
     this.actions = [];
+    this.queuedMovementTiles = [];
 
     if (options.actionsJSONList) {
       for (const actionJSON of options.actionsJSONList) {
@@ -160,19 +162,37 @@ export class Unit extends ActorGroup {
       callback: (data) => {
         const unitTile =
           GameMap.getInstance().getTiles()[data["unitX"]][data["unitY"]];
+        const targetTile =
+          GameMap.getInstance().getTiles()[data["targetX"]][data["targetY"]];
 
         if (this.tile !== unitTile) {
           return;
         }
 
-        this.tile.removeUnit(this);
+        // Update selection location if this unit is selected
+        if (this.selected) {
+          this.removeSelectionActors();
+        }
 
-        const targetTile =
-          GameMap.getInstance().getTiles()[data["targetX"]][data["targetY"]];
+        this.queuedMovementTiles = [];
+        this.tile.removeUnit(this);
         this.tile = targetTile;
         targetTile.addUnit(this);
-
         this.updatePosition(targetTile);
+
+        if (this.selected) {
+          this.addSelectionActors();
+        }
+
+        // Assign queued tiles
+        if ("queuedTiles" in data) {
+          console.log("Unit assigned a movement queue from server:");
+          for (const tileJSON of data["queuedTiles"] as []) {
+            const tile =
+              GameMap.getInstance().getTiles()[tileJSON["x"]][tileJSON["y"]];
+            this.queuedMovementTiles.push(tile);
+          }
+        }
       },
     });
 
@@ -205,11 +225,11 @@ export class Unit extends ActorGroup {
     return Tile.getWeight(current, neighbor);
   }
 
-  public reduceMovement(amount) {
+  public reduceMovement(amount: number) {
     this.availableMovement -= amount;
   }
 
-  public setAvailableMovement(amount) {
+  public setAvailableMovement(amount: number) {
     this.availableMovement = amount;
   }
 
@@ -231,56 +251,31 @@ export class Unit extends ActorGroup {
 
   public unselect() {
     this.selected = false;
-    for (const actor of this.selectionActors) {
-      this.removeActor(actor);
-    }
-    this.selectionActors = [];
-
-    GameMap.getInstance().removeOutline({
-      tile: this.tile,
-      cityOutline: false,
-    });
+    this.removeSelectionActors();
     Game.getCurrentScene().removeActor(this.unitDisplayInfo);
   }
 
   public select() {
     //console.log("Select");
     this.selected = true;
-    this.selectionActors.push(
-      new Actor({
-        image: Game.getImage(GameImage.SPRITESHEET),
-        spriteRegion: SpriteRegion.UNIT_SELECTION_TILE,
-        x: this.getTile().getX(),
-        y: this.getTile().getY(),
-        width: 32,
-        height: 32,
-      })
-    );
-
-    /*this.selectionActors.push(
-      new Actor({
-        image: Game.getImage(GameImage.UNIT_SELECTION_CIRCLE),
-        x: this.getTile().getX(),
-        y: this.getTile().getY(),
-        width: 32,
-        height: 32,
-      })
-    );*/
-    GameMap.getInstance().setOutline({
-      tile: this.tile,
-      edges: [1, 1, 1, 1, 1, 1],
-      thickness: 1,
-      color: "aqua",
-      cityOutline: false,
-      z: 3,
-    });
-
-    for (const actor of this.selectionActors) {
-      this.addActor(actor);
-    }
+    this.addSelectionActors();
 
     this.unitDisplayInfo = new UnitDisplayInfo(this);
     Game.getCurrentScene().addActor(this.unitDisplayInfo);
+  }
+
+  public getQueuedMovementTiles() {
+    return this.queuedMovementTiles;
+  }
+
+  public getTargetQueuedTile() {
+    if (this.queuedMovementTiles.length < 1) return undefined;
+
+    return this.queuedMovementTiles[this.queuedMovementTiles.length - 1];
+  }
+
+  public hasMovementQueue() {
+    return this.queuedMovementTiles.length > 0;
   }
 
   public getActions() {
@@ -319,5 +314,46 @@ export class Unit extends ActorGroup {
       tile.getCenterPosition()[0] - 28 / 2,
       tile.getCenterPosition()[1] - 28 / 2
     );
+  }
+
+  private removeSelectionActors() {
+    for (const actor of this.selectionActors) {
+      this.removeActor(actor);
+    }
+    this.selectionActors = [];
+
+    GameMap.getInstance().removeOutline({
+      tile: this.tile,
+      cityOutline: false,
+    });
+  }
+
+  private addSelectionActors() {
+    this.selectionActors.push(
+      new Actor({
+        image: Game.getImage(GameImage.SPRITESHEET),
+        spriteRegion: SpriteRegion.UNIT_SELECTION_TILE,
+        x: this.getTile().getX(),
+        y: this.getTile().getY(),
+        width: 32,
+        height: 32,
+      })
+    );
+
+    /*this.selectionActors.push(
+      new Actor({
+        image: Game.getImage(GameImage.UNIT_SELECTION_CIRCLE),
+        x: this.getTile().getX(),
+        y: this.getTile().getY(),
+        width: 32,
+        height: 32,
+      })
+    );*/
+
+    GameMap.getInstance().drawUnitSelectionOutline(this.tile, "aqua");
+
+    for (const actor of this.selectionActors) {
+      this.addActor(actor);
+    }
   }
 }

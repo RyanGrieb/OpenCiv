@@ -17,7 +17,6 @@ export class ClientPlayer extends AbstractPlayer {
   private selectedUnit: Unit;
   private hoveredTile: HoveredTile;
   private movementLines: Line[];
-  private queuedMovement: boolean;
   private rightMouseDrag: boolean;
 
   constructor(name: string) {
@@ -45,55 +44,44 @@ export class ClientPlayer extends AbstractPlayer {
       this.updateHoveredTile(mouseX, mouseY);
 
       if (
-        this.selectedUnit &&
-        oldHoveredTile != this.hoveredTile.getRepresentedTile() &&
-        this.rightMouseDrag
+        !this.selectedUnit ||
+        oldHoveredTile === this.hoveredTile.getRepresentedTile() ||
+        !this.rightMouseDrag
       ) {
-        // Remove target-outline from previous hovered tile.
-        if (oldHoveredTile !== this.selectedUnit.getTile()) {
-          GameMap.getInstance().removeOutline({
-            tile: oldHoveredTile,
-            cityOutline: false,
-          });
-        }
+        return;
+      }
 
-        // Draw movement lines to new target tile
-        this.updateDisplayedUnitMovementPath();
+      // Remove target-outline from previous hovered tile.
+      if (oldHoveredTile !== this.selectedUnit.getTile()) {
+        GameMap.getInstance().removeOutline({
+          tile: oldHoveredTile,
+          cityOutline: false,
+        });
+      }
 
-        //Draw outline of final target tile
-        if (this.movementLines.length > 0) {
-          GameMap.getInstance().setOutline({
-            tile: this.hoveredTile.getRepresentedTile(),
-            edges: [1, 1, 1, 1, 1, 1],
-            thickness: 1,
-            color: this.queuedMovement ? "lightgrey" : "aqua",
-            cityOutline: false,
-            z: 3,
-          });
-        }
+      if (!this.hoveredTile.getRepresentedTile()) {
+        this.clearMovementPath();
+        return;
+      }
+
+      // Draw movement lines to new target tile
+      this.drawMovementPath(
+        this.selectedUnit.getTile(),
+        this.hoveredTile.getRepresentedTile()
+      );
+
+      //Draw outline of final target tile
+      if (this.movementLines.length > 0) {
+        GameMap.getInstance().drawUnitSelectionOutline(
+          this.hoveredTile.getRepresentedTile(),
+          "aqua"
+        );
       }
     });
 
     Game.getCurrentScene().on("mousedown", (options) => {
-      if (options.button !== 2) {
-        return;
-      }
-
-      this.rightMouseDrag = true;
-
-      if (this.selectedUnit) {
-        this.updateDisplayedUnitMovementPath();
-        //Draw outline of final target tile
-        if (this.movementLines.length > 0) {
-          GameMap.getInstance().setOutline({
-            tile: this.hoveredTile.getRepresentedTile(),
-            edges: [1, 1, 1, 1, 1, 1],
-            thickness: 1,
-            color: this.queuedMovement ? "lightgrey" : "aqua",
-            cityOutline: false,
-            z: 3,
-          });
-        }
+      if (options.button === 2) {
+        this.onMouseRightClick();
       }
     });
 
@@ -137,7 +125,8 @@ export class ClientPlayer extends AbstractPlayer {
 
         if (this.selectedUnit.getID() === data["id"]) {
           this.selectedUnit = undefined;
-          this.updateDisplayedUnitMovementPath();
+          this.clearMovementPath();
+
           GameMap.getInstance().removeOutline({
             tile: this.hoveredTile.getRepresentedTile(),
             cityOutline: false,
@@ -145,9 +134,34 @@ export class ClientPlayer extends AbstractPlayer {
         }
       },
     });
+
+    NetworkEvents.on({
+      eventName: "moveUnit",
+      callback: (data) => {
+        if (!this.selectedUnit || this.selectedUnit.getID() !== data["id"]) {
+          return;
+        }
+
+        this.clearMovementPath();
+
+        if ("queuedTiles" in data) {
+          const movementPath: Tile[] = [this.selectedUnit.getTile()];
+
+          for (const tileLocation of data["queuedTiles"] as []) {
+            movementPath.push(
+              GameMap.getInstance().getTiles()[tileLocation["x"]][
+                tileLocation["y"]
+              ]
+            );
+          }
+
+          this.drawMovementPathFromTiles(movementPath);
+        }
+      },
+    });
   }
 
-  public zoomToLocation(x: number, y: number, zoomAmount: number) {
+  private zoomToLocation(x: number, y: number, zoomAmount: number) {
     Game.getCurrentScene()
       .getCamera()
       .setPosition(-x + Game.getWidth() / 2, -y + Game.getHeight() / 2);
@@ -156,72 +170,30 @@ export class ClientPlayer extends AbstractPlayer {
       .zoom(Game.getWidth() / 2, Game.getHeight() / 2, zoomAmount);
   }
 
-  private updateDisplayedUnitMovementPath() {
-    this.queuedMovement = false;
+  private onMouseRightClick() {
+    this.rightMouseDrag = true;
 
-    if (this.movementLines.length > 0) {
-      for (const line of this.movementLines) {
-        Game.getCurrentScene().removeLine(line);
-      }
-      this.movementLines = [];
-    }
-
-    if (
-      !this.selectedUnit ||
-      this.selectedUnit.getTile() === this.hoveredTile.getRepresentedTile()
-    )
+    if (!this.selectedUnit || !this.hoveredTile.getRepresentedTile()) {
       return;
-
-    //FIXME: TEMP
-    this.selectedUnit.setAvailableMovement(2);
-
-    const startTile = this.selectedUnit.getTile();
-    const goalTile = this.hoveredTile.getRepresentedTile();
-
-    //console.time("constructShortestPath()");
-    const pathTiles = GameMap.getInstance().constructShortestPath(
-      this.selectedUnit,
-      startTile,
-      goalTile
-    );
-    //console.timeEnd("constructShortestPath()");
-
-    if (pathTiles.length < 1) return;
-
-    let movementCost = 0;
-    for (let i = 0; i < pathTiles.length - 1; i++) {
-      const tile1 = pathTiles[i];
-      const tile2 = pathTiles[i + 1];
-      const tileCost = Tile.getWeight(tile1, tile2);
-      //const riverCross = Tile.riverCrosses(tile1, tile2);
-      movementCost += tileCost;
-
-      let color = "rgba(154, 158, 153, 1)";
-      if (this.selectedUnit.getAvailableMovement() > 0) {
-        color = "rgba(7, 250, 214, 1)";
-      } else {
-        this.queuedMovement = true;
-      }
-
-      this.selectedUnit.reduceMovement(tileCost);
-
-      //console.log("Current Cost: " + movementCost);
-
-      const line = new Line({
-        color: color,
-        girth: 2,
-        z: 3,
-        x1: tile1.getCenterPosition()[0],
-        y1: tile1.getCenterPosition()[1],
-        x2: tile2.getCenterPosition()[0],
-        y2: tile2.getCenterPosition()[1],
-      });
-      this.movementLines.push(line);
-      Game.getCurrentScene().addLine(line);
     }
-    //console.log("---");
 
-    //console.log("Movement cost: " + movementCost);
+    this.drawMovementPath(
+      this.selectedUnit.getTile(),
+      this.hoveredTile.getRepresentedTile()
+    );
+
+    // Remove queued target outline if it exists
+    if (this.selectedUnit.hasMovementQueue()) {
+      GameMap.getInstance().removeOutline({
+        tile: this.selectedUnit.getTargetQueuedTile(),
+        cityOutline: false,
+      });
+    }
+
+    GameMap.getInstance().drawUnitSelectionOutline(
+      this.hoveredTile.getRepresentedTile(),
+      "aqua"
+    );
   }
 
   private moveSelectedUnit(targetTile: Tile) {
@@ -243,27 +215,56 @@ export class ClientPlayer extends AbstractPlayer {
     // Unselect unit before moving
     this.selectedUnit.unselect();
     this.selectedUnit = undefined;
-    this.updateDisplayedUnitMovementPath();
+    this.clearMovementPath();
   }
 
   private onClickedTileWithUnit(tile: Tile) {
     const units = tile.getUnits();
-    //console.log(units);
+
     //TODO: Cycle through units on the tile
     const unit = units[0];
 
-    if (this.selectedUnit) {
-      this.selectedUnit.unselect();
+    // Clear previously defined movement paths.
+    this.clearMovementPath();
 
-      if (this.selectedUnit == unit) {
-        this.selectedUnit = undefined;
-        this.updateDisplayedUnitMovementPath();
-        return;
-      }
+    const unselectedUnit = this.unselectUnit();
+
+    if (unselectedUnit === unit) {
+      return;
     }
 
     unit.select();
     this.selectedUnit = unit;
+
+    // TOOD: Draw full outline of final queued tile or hovered tile.
+    if (this.selectedUnit.hasMovementQueue()) {
+      this.drawMovementPathFromTiles([
+        unit.getTile(),
+        ...unit.getQueuedMovementTiles(),
+      ]);
+
+      GameMap.getInstance().drawUnitSelectionOutline(
+        this.selectedUnit.getTargetQueuedTile(),
+        "aqua"
+      );
+    }
+  }
+
+  private unselectUnit(): Unit {
+    const unselectedUnit = this.selectedUnit;
+    if (this.selectedUnit) {
+      this.selectedUnit.unselect();
+
+      if (this.selectedUnit.hasMovementQueue()) {
+        GameMap.getInstance().removeOutline({
+          tile: this.selectedUnit.getTargetQueuedTile(),
+          cityOutline: false,
+        });
+      }
+    }
+
+    this.selectedUnit = undefined;
+    return unselectedUnit; // Will we return undefined?
   }
 
   private updateHoveredTile(mouseX: number, mouseY: number) {
@@ -374,6 +375,58 @@ export class ClientPlayer extends AbstractPlayer {
 
     if (this.hoveredTile !== accurateTile) {
       this.hoveredTile.setRepresentedTile(accurateTile);
+    }
+  }
+
+  private clearMovementPath() {
+    for (const line of this.movementLines) {
+      Game.getCurrentScene().removeLine(line);
+    }
+    this.movementLines = [];
+  }
+
+  private drawMovementPath(startTile: Tile, goalTile: Tile) {
+    if (this.movementLines.length > 0) {
+      this.clearMovementPath();
+    }
+
+    console.log(
+      `Drawing path from (${startTile.getGridX()},${startTile.getGridY()}) to (${goalTile.getGridX()},${goalTile.getGridY()})`
+    );
+
+    //console.time("constructShortestPath()");
+    const pathTiles = GameMap.getInstance().constructShortestPath(
+      this.selectedUnit,
+      startTile,
+      goalTile
+    );
+
+    this.drawMovementPathFromTiles(pathTiles);
+  }
+
+  private drawMovementPathFromTiles(pathTiles: Tile[]) {
+    if (pathTiles.length < 1) return;
+
+    let movementCost = 0;
+    for (let i = 0; i < pathTiles.length - 1; i++) {
+      const tile1 = pathTiles[i];
+      const tile2 = pathTiles[i + 1];
+      const tileCost = Tile.getWeight(tile1, tile2);
+      movementCost += tileCost;
+
+      let color = "rgba(7, 250, 214, 1)";
+
+      const line = new Line({
+        color: color,
+        girth: 2,
+        z: 3,
+        x1: tile1.getCenterPosition()[0],
+        y1: tile1.getCenterPosition()[1],
+        x2: tile2.getCenterPosition()[0],
+        y2: tile2.getCenterPosition()[1],
+      });
+      this.movementLines.push(line);
+      Game.getCurrentScene().addLine(line);
     }
   }
 }
