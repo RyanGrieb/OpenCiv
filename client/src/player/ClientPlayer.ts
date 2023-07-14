@@ -264,7 +264,7 @@ export class ClientPlayer extends AbstractPlayer {
     }
 
     this.selectedUnit = undefined;
-    return unselectedUnit; // Will we return undefined?
+    return unselectedUnit;
   }
 
   private updateHoveredTile(mouseX: number, mouseY: number) {

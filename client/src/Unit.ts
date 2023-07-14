@@ -165,7 +165,7 @@ export class Unit extends ActorGroup {
         const targetTile =
           GameMap.getInstance().getTiles()[data["targetX"]][data["targetY"]];
 
-        if (this.tile !== unitTile) {
+        if (this.tile !== unitTile || this.id !== data["id"]) {
           return;
         }
 
@@ -186,7 +186,8 @@ export class Unit extends ActorGroup {
 
         // Assign queued tiles
         if ("queuedTiles" in data) {
-          console.log("Unit assigned a movement queue from server:");
+          //console.log("Unit assigned a movement queue from server:");
+
           for (const tileJSON of data["queuedTiles"] as []) {
             const tile =
               GameMap.getInstance().getTiles()[tileJSON["x"]][tileJSON["y"]];
