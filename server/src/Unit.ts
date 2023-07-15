@@ -64,7 +64,6 @@ export class Unit {
 
         //FIXME: Allow this function to use our existing queuedMovementTiles,
         // This should stop the path from being redrawn every turn.
-        console.log("Manual move:");
         const [arrivedTile, remainingTiles, remainingMovement] =
           this.getMovementTowardsTargetTile(targetTile);
 
@@ -154,7 +153,6 @@ export class Unit {
     const targetTile = this.getTargetQueuedTile();
     const existingPath = [this.tile, ...this.queuedMovementTiles];
 
-    console.log("Queued move:");
     const [arrivedTile, remainingTiles, remainingMovement] =
       this.getMovementTowardsTargetTile(targetTile, existingPath);
 
@@ -180,9 +178,9 @@ export class Unit {
         tile // Target tile
       );
 
-    if (!existingPath) {
-      console.log("Regenerate....");
-    }
+    //if (!existingPath) {
+    //  console.log("Regenerate....");
+    // }
 
     const traversedTiles: Tile[] = [this.tile];
     let remainingMovement = this.availableMovement;

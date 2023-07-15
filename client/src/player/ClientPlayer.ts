@@ -65,16 +65,16 @@ export class ClientPlayer extends AbstractPlayer {
       }
 
       // Draw movement lines to new target tile
-      this.drawMovementPath(
+      const isQueuedMovement = this.drawMovementPath(
         this.selectedUnit.getTile(),
         this.hoveredTile.getRepresentedTile()
       );
 
       //Draw outline of final target tile
       if (this.movementLines.length > 0) {
-        GameMap.getInstance().drawUnitSelectionOutline(
+        this.drawTargetTileOutline(
           this.hoveredTile.getRepresentedTile(),
-          "aqua"
+          isQueuedMovement
         );
       }
     });
@@ -177,7 +177,7 @@ export class ClientPlayer extends AbstractPlayer {
       return;
     }
 
-    this.drawMovementPath(
+    const isQueuedMovement = this.drawMovementPath(
       this.selectedUnit.getTile(),
       this.hoveredTile.getRepresentedTile()
     );
@@ -190,9 +190,9 @@ export class ClientPlayer extends AbstractPlayer {
       });
     }
 
-    GameMap.getInstance().drawUnitSelectionOutline(
+    this.drawTargetTileOutline(
       this.hoveredTile.getRepresentedTile(),
-      "aqua"
+      isQueuedMovement
     );
   }
 
@@ -238,14 +238,14 @@ export class ClientPlayer extends AbstractPlayer {
 
     // TOOD: Draw full outline of final queued tile or hovered tile.
     if (this.selectedUnit.hasMovementQueue()) {
-      this.drawMovementPathFromTiles([
+      const isQueuedMovement = this.drawMovementPathFromTiles([
         unit.getTile(),
         ...unit.getQueuedMovementTiles(),
       ]);
 
-      GameMap.getInstance().drawUnitSelectionOutline(
+      this.drawTargetTileOutline(
         this.selectedUnit.getTargetQueuedTile(),
-        "aqua"
+        isQueuedMovement
       );
     }
   }
@@ -385,14 +385,14 @@ export class ClientPlayer extends AbstractPlayer {
     this.movementLines = [];
   }
 
-  private drawMovementPath(startTile: Tile, goalTile: Tile) {
+  private drawMovementPath(startTile: Tile, goalTile: Tile): boolean {
     if (this.movementLines.length > 0) {
       this.clearMovementPath();
     }
 
-    console.log(
-      `Drawing path from (${startTile.getGridX()},${startTile.getGridY()}) to (${goalTile.getGridX()},${goalTile.getGridY()})`
-    );
+    //console.log(
+    //  `Drawing path from (${startTile.getGridX()},${startTile.getGridY()}) to (${goalTile.getGridX()},${goalTile.getGridY()})`
+    //);
 
     //console.time("constructShortestPath()");
     const pathTiles = GameMap.getInstance().constructShortestPath(
@@ -401,20 +401,28 @@ export class ClientPlayer extends AbstractPlayer {
       goalTile
     );
 
-    this.drawMovementPathFromTiles(pathTiles);
+    return this.drawMovementPathFromTiles(pathTiles);
   }
 
-  private drawMovementPathFromTiles(pathTiles: Tile[]) {
-    if (pathTiles.length < 1) return;
+  private drawMovementPathFromTiles(pathTiles: Tile[]): boolean {
+    if (pathTiles.length < 1) return false;
 
-    let movementCost = 0;
+    let availableMovement = this.selectedUnit.getAvailableMovement();
+    let queuedPath = false;
+
     for (let i = 0; i < pathTiles.length - 1; i++) {
       const tile1 = pathTiles[i];
       const tile2 = pathTiles[i + 1];
       const tileCost = Tile.getWeight(tile1, tile2);
-      movementCost += tileCost;
 
       let color = "rgba(7, 250, 214, 1)";
+
+      if (availableMovement <= 0) {
+        color = "rgba(154, 158, 153, 1)";
+        queuedPath = true;
+      }
+
+      availableMovement -= tileCost;
 
       const line = new Line({
         color: color,
@@ -428,5 +436,12 @@ export class ClientPlayer extends AbstractPlayer {
       this.movementLines.push(line);
       Game.getCurrentScene().addLine(line);
     }
+
+    return queuedPath;
+  }
+
+  private drawTargetTileOutline(tile: Tile, queuedPath: boolean) {
+    let color = queuedPath ? "lightgrey" : "aqua";
+    GameMap.getInstance().drawUnitSelectionOutline(tile, color);
   }
 }
