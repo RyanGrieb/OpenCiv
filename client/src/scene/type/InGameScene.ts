@@ -31,6 +31,7 @@ export class InGameScene extends Scene {
 
     NetworkEvents.on({
       eventName: "playersData",
+      parentObject: this,
       callback: (data) => {
         for (let i = 0; i < data["players"].length; i++) {
           const playerJSON = data["players"][i];

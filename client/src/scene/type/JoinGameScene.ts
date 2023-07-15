@@ -99,6 +99,7 @@ export class JoinGameScene extends Scene {
 
     NetworkEvents.on({
       eventName: "connectionClose",
+      parentObject: this,
       callback: (data) => {
         infoLabel.setText("Connection Failed.");
         infoLabel.conformSize().then(() => {
@@ -112,6 +113,7 @@ export class JoinGameScene extends Scene {
 
     NetworkEvents.on({
       eventName: "messageBox",
+      parentObject: this,
       callback: (data) => {
         const messageName = data["messageName"];
         if (messageName === "gameInProgress") {

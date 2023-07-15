@@ -61,14 +61,16 @@ export class UnitAction {
   }
 
   public requirementsMet(unit: Unit): boolean {
+    let allMet = true;
+
     for (const requirement of this.requirements) {
       const requirementMethod = this[requirement] as Function;
 
-      if (requirementMethod && requirementMethod.call(this, unit)) {
-        return true;
+      if (requirementMethod && !requirementMethod.call(this, unit)) {
+        allMet = false;
       }
     }
-    return true;
+    return allMet;
   }
 
   // Requirement methods
@@ -159,6 +161,7 @@ export class Unit extends ActorGroup {
 
     NetworkEvents.on({
       eventName: "moveUnit",
+      parentObject: this,
       callback: (data) => {
         const unitTile =
           GameMap.getInstance().getTiles()[data["unitX"]][data["unitY"]];
@@ -200,6 +203,7 @@ export class Unit extends ActorGroup {
 
     NetworkEvents.on({
       eventName: "newTurn",
+      parentObject: this,
       callback: (data) => {
         this.availableMovement = this.defaultMoveDistance;
       },
@@ -207,6 +211,7 @@ export class Unit extends ActorGroup {
 
     NetworkEvents.on({
       eventName: "removeUnit",
+      parentObject: this,
       callback: (data) => {
         const unitTile =
           GameMap.getInstance().getTiles()[data["unitX"]][data["unitY"]];

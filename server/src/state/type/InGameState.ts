@@ -100,7 +100,7 @@ export class InGameState extends State {
             {
               name: "settle",
               icon: "SETTLE_ICON",
-              requirements: ["awayFromCity"],
+              requirements: ["awayFromCity", "movement"],
               desc: "Settle City",
               onAction: (unit: Unit) => {
                 console.log("ACTION: Act on settle city.");

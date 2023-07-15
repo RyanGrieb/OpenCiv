@@ -62,6 +62,7 @@ export class GameMap {
 
     NetworkEvents.on({
       eventName: "newCity",
+      parentObject: this,
       callback: (data) => {
         const tile = this.tiles[data["tileX"]][data["tileY"]];
         const player = AbstractPlayer.getPlayerByName(data["player"]);
@@ -244,6 +245,7 @@ export class GameMap {
 
     NetworkEvents.on({
       eventName: "mapSize",
+      parentObject: this,
       callback: (data) => {
         this.mapWidth = parseInt(data["width"]);
         this.mapHeight = parseInt(data["height"]);
@@ -259,6 +261,7 @@ export class GameMap {
 
     NetworkEvents.on({
       eventName: "mapChunk",
+      parentObject: this,
       callback: async (data) => {
         const tileList = data["tiles"] as Array<JSON>;
         const lastChunk = JSON.parse(data["lastChunk"]);

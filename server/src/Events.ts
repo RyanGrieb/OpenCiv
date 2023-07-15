@@ -72,6 +72,7 @@ export class ServerEvents {
     const globalEventCallbacks = this.getGlobalEventCallbacks();
     this.storedEvents = globalEventCallbacks;
   }
+
   public static removeCallbacksByParentObject(parentObj: object): void {
     this.storedEvents.forEach((callbackDataList, eventName) => {
       const filteredDataList = callbackDataList.filter(

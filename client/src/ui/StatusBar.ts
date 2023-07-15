@@ -46,6 +46,7 @@ export class StatusBar extends ActorGroup {
 
     NetworkEvents.on({
       eventName: "newTurn",
+      parentObject: this,
       callback: (data) => {
         this.updateCurrentTurnLabel(data);
       },
@@ -53,6 +54,7 @@ export class StatusBar extends ActorGroup {
 
     NetworkEvents.on({
       eventName: "turnTimeDecrement",
+      parentObject: this,
       callback: (data) => {
         this.updateCurrentTurnLabel(data);
       },

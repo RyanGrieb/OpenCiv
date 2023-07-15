@@ -106,6 +106,7 @@ export class ClientPlayer extends AbstractPlayer {
 
     NetworkEvents.on({
       eventName: "zoomToLocation",
+      parentObject: this,
       callback: (data) => {
         const gridX = data["x"];
         const gridY = data["y"];
@@ -120,6 +121,7 @@ export class ClientPlayer extends AbstractPlayer {
 
     NetworkEvents.on({
       eventName: "removeUnit",
+      parentObject: this,
       callback: (data) => {
         if (!this.selectedUnit) return;
 
@@ -137,6 +139,7 @@ export class ClientPlayer extends AbstractPlayer {
 
     NetworkEvents.on({
       eventName: "moveUnit",
+      parentObject: this,
       callback: (data) => {
         if (!this.selectedUnit || this.selectedUnit.getID() !== data["id"]) {
           return;

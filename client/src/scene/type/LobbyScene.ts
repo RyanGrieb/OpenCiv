@@ -56,19 +56,23 @@ export class LobbyScene extends Scene {
 
     NetworkEvents.on({
       eventName: "playerJoin",
+      parentObject: this,
       callback: this.updatePlayerList,
     });
     NetworkEvents.on({
       eventName: "playerQuit",
+      parentObject: this,
       callback: this.updatePlayerList,
     });
     NetworkEvents.on({
       eventName: "playerLeave",
+      parentObject: this,
       callback: this.updatePlayerList,
     });
 
     NetworkEvents.on({
       eventName: "playerNames",
+      parentObject: this,
       callback: (data) => {
         const playerNames = data["names"];
         const requestingName = data["requestingName"];

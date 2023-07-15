@@ -1,8 +1,14 @@
 export class CallbackData {
+  public parentObject: object;
   public callbackFunction: Function;
   public globalEvent: boolean; // Not associated with the current scene.
 
-  constructor(callbackFunctions: Function, globalEvent: boolean) {
+  constructor(
+    parentObject: object,
+    callbackFunctions: Function,
+    globalEvent: boolean
+  ) {
+    this.parentObject = parentObject;
     this.callbackFunction = callbackFunctions;
     this.globalEvent = globalEvent;
   }
@@ -10,6 +16,7 @@ export class CallbackData {
 
 export interface OnNetworkEventOptions {
   eventName: string;
+  parentObject: object;
   callback: (data: JSON) => void;
   globalEvent?: boolean;
 }
@@ -44,6 +51,7 @@ export class NetworkEvents {
     this.addCallbackEvent(
       this.storedEvents,
       options.eventName,
+      options.parentObject,
       options.callback,
       options.globalEvent
     );
@@ -59,6 +67,20 @@ export class NetworkEvents {
     this.storedEvents = globalEventCallbacks;
   }
 
+  public static removeCallbacksByParentObject(parentObj: object): void {
+    this.storedEvents.forEach((callbackDataList, eventName) => {
+      const filteredDataList = callbackDataList.filter(
+        (callbackData) => callbackData.parentObject !== parentObj
+      );
+
+      if (filteredDataList.length === 0) {
+        this.storedEvents.delete(eventName);
+      } else {
+        this.storedEvents.set(eventName, filteredDataList);
+      }
+    });
+  }
+
   private static getGlobalEventCallbacks(
     storedEvents: Map<string, CallbackData[]>
   ) {
@@ -70,6 +92,7 @@ export class NetworkEvents {
           this.addCallbackEvent(
             globalEventCallbacks,
             eventName,
+            callbackData.parentObject,
             callbackData.callbackFunction,
             true
           );
@@ -83,13 +106,16 @@ export class NetworkEvents {
   private static addCallbackEvent(
     storedEvents: Map<string, CallbackData[]>,
     eventName: string,
+    parentObject: object,
     callback: Function,
     globalEvent?: boolean
   ) {
     //Get the list of stored callback functions or an empty list
     let callbackDataList: CallbackData[] = storedEvents.get(eventName) ?? [];
     // Append the to functions
-    callbackDataList.push(new CallbackData(callback, globalEvent));
+    callbackDataList.push(
+      new CallbackData(parentObject, callback, globalEvent)
+    );
     storedEvents.set(eventName, callbackDataList);
   }
 }

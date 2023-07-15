@@ -177,6 +177,7 @@ export class Game {
     // Initialize our global network events
     NetworkEvents.on({
       eventName: "setScene",
+      parentObject: this,
       callback: (data) => {
         this.setScene(data["scene"]);
       },
@@ -184,6 +185,7 @@ export class Game {
     });
     NetworkEvents.on({
       eventName: "messageBox",
+      parentObject: this,
       callback: (data) => {
         //{"event":"messageBox","messageName":"gameInProgress","message":"Error: Game in progress!"}
         const message = data["message"];

@@ -11,6 +11,7 @@ import { Label } from "./Label";
 export class UnitDisplayInfo extends ActorGroup {
   private unit: Unit;
   private movementLabel: Label;
+  private actionButtons: Button[];
 
   constructor(unit: Unit) {
     super({
@@ -23,6 +24,7 @@ export class UnitDisplayInfo extends ActorGroup {
     });
 
     this.unit = unit;
+    this.actionButtons = [];
 
     this.addActor(
       new Actor({
@@ -61,57 +63,31 @@ export class UnitDisplayInfo extends ActorGroup {
     this.updateMovementLabel({ updateText: false });
     this.addActor(this.movementLabel);
 
-    for (const action of unit.getActions()) {
-      this.addActor(
-        new Button({
-          buttonImage: GameImage.ICON_BUTTON,
-          buttonHoveredImage: GameImage.ICON_BUTTON_HOVERED,
-          icon: action.getIcon(),
-          iconWidth: 32,
-          iconHeight: 32,
-          x: this.x + 8,
-          y: this.y + 28,
-          width: 50,
-          height: 50,
-          onClicked: () => {
-            // Send action event to server
-            console.log(`Action: ${action.getName()} clicked`);
-
-            WebsocketClient.sendMessage({
-              event: "unitAction",
-              unitX: this.unit.getTile().getGridX(),
-              unitY: this.unit.getTile().getGridY(),
-              id: this.unit.getID(),
-              actionName: action.getName(),
-            });
-          },
-          onMouseEnter: () => {
-            this.movementLabel.setText(action.getDesc());
-            this.updateMovementLabel({ updateText: false });
-          },
-          onMouseExit: () => {
-            this.updateMovementLabel({ updateText: true });
-          },
-        })
-      );
-    }
+    this.updateActionButtons();
 
     NetworkEvents.on({
       eventName: "newTurn",
+      parentObject: this,
       callback: (data) => {
-        this.updateMovementLabel({ updateText: true });
+        this.refreshDisplayInfo();
       },
     });
 
     NetworkEvents.on({
       eventName: "moveUnit",
+      parentObject: this,
       callback: (data) => {
         if (this.unit.getID() !== data["id"]) {
           return;
         }
-        this.updateMovementLabel({ updateText: true });
+        this.refreshDisplayInfo();
       },
     });
+  }
+
+  // Clear our networks events associated with this object
+  public onDestroyed() {
+    NetworkEvents.removeCallbacksByParentObject(this);
   }
 
   private updateMovementLabel(options: { updateText: boolean }) {
@@ -127,5 +103,60 @@ export class UnitDisplayInfo extends ActorGroup {
         this.y + this.height - 12
       );
     });
+  }
+
+  private updateActionButtons() {
+    let xOffset = 0;
+
+    const newActionButtons = [];
+    for (const action of this.unit.getActions()) {
+      if (!action.requirementsMet(this.unit)) continue;
+
+      const button = new Button({
+        buttonImage: GameImage.ICON_BUTTON,
+        buttonHoveredImage: GameImage.ICON_BUTTON_HOVERED,
+        icon: action.getIcon(),
+        iconWidth: 32,
+        iconHeight: 32,
+        x: this.x + 8 + xOffset,
+        y: this.y + 28,
+        width: 50,
+        height: 50,
+        onClicked: () => {
+          // Send action event to server
+          console.log(`Action: ${action.getName()} clicked`);
+
+          WebsocketClient.sendMessage({
+            event: "unitAction",
+            unitX: this.unit.getTile().getGridX(),
+            unitY: this.unit.getTile().getGridY(),
+            id: this.unit.getID(),
+            actionName: action.getName(),
+          });
+        },
+        onMouseEnter: () => {
+          this.movementLabel.setText(action.getDesc());
+          this.updateMovementLabel({ updateText: false });
+        },
+        onMouseExit: () => {
+          this.updateMovementLabel({ updateText: true });
+        },
+      });
+
+      this.addActor(button);
+      newActionButtons.push(button);
+      xOffset += 38;
+    }
+
+    for (const button of this.actionButtons) {
+      this.removeActor(button);
+    }
+
+    this.actionButtons = newActionButtons;
+  }
+
+  private refreshDisplayInfo() {
+    this.updateMovementLabel({ updateText: true });
+    this.updateActionButtons();
   }
 }
