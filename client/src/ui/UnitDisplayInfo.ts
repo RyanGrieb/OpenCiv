@@ -1,7 +1,7 @@
 import { GameImage } from "../Assets";
 import { Game } from "../Game";
 import { Unit } from "../Unit";
-import { WebsocketClient } from "../network/Client";
+import { NetworkEvents, WebsocketClient } from "../network/Client";
 import { Actor } from "../scene/Actor";
 import { ActorGroup } from "../scene/ActorGroup";
 import { Strings } from "../util/Strings";
@@ -51,7 +51,7 @@ export class UnitDisplayInfo extends ActorGroup {
     });
 
     this.movementLabel = new Label({
-      text: `Movement: ${unit.getAvailableMovement()}/${unit.getTotalMovement()}`,
+      text: `Movement: ${unit.getAvailableMovement()}/${unit.getDefaultMoveDistance()}`,
       x: this.x,
       y: this.y,
       font: "18px serif",
@@ -95,12 +95,29 @@ export class UnitDisplayInfo extends ActorGroup {
         })
       );
     }
+
+    NetworkEvents.on({
+      eventName: "newTurn",
+      callback: (data) => {
+        this.updateMovementLabel({ updateText: true });
+      },
+    });
+
+    NetworkEvents.on({
+      eventName: "moveUnit",
+      callback: (data) => {
+        if (this.unit.getID() !== data["id"]) {
+          return;
+        }
+        this.updateMovementLabel({ updateText: true });
+      },
+    });
   }
 
   private updateMovementLabel(options: { updateText: boolean }) {
     if (options.updateText) {
       this.movementLabel.setText(
-        `Movement: ${this.unit.getAvailableMovement()}/${this.unit.getTotalMovement()}`
+        `Movement: ${this.unit.getAvailableMovement()}/${this.unit.getDefaultMoveDistance()}`
       );
     }
 

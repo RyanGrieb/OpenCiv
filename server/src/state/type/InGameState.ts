@@ -205,8 +205,6 @@ export class InGameState extends State {
     this.currentTurn++;
     this.turnTime = this.totalTurnTime;
 
-    ServerEvents.call("nextTurn", { turn: this.currentTurn });
-
     Game.getPlayers().forEach((player) => {
       player.sendNetworkEvent({
         event: "newTurn",
@@ -214,6 +212,8 @@ export class InGameState extends State {
         turnTime: this.turnTime,
       });
     });
+
+    ServerEvents.call("nextTurn", { turn: this.currentTurn });
   }
   public onDestroyed() {
     if (this.turnTimeJob) {

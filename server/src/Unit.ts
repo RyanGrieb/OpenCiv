@@ -65,7 +65,7 @@ export class Unit {
         //FIXME: Allow this function to use our existing queuedMovementTiles,
         // This should stop the path from being redrawn every turn.
         console.log("Manual move:");
-        const [arrivedTile, remainingTiles] =
+        const [arrivedTile, remainingTiles, remainingMovement] =
           this.getMovementTowardsTargetTile(targetTile);
 
         if (!arrivedTile) return;
@@ -74,6 +74,7 @@ export class Unit {
           previousTile: this.tile,
           targetTile: arrivedTile,
           remainingTiles: remainingTiles,
+          remainingMovement: remainingMovement,
         });
       },
     });
@@ -111,19 +112,23 @@ export class Unit {
     previousTile: Tile;
     targetTile: Tile;
     remainingTiles: Tile[];
+    remainingMovement: number;
   }) {
     const previousTile = options.previousTile;
     const targetTile = options.targetTile;
     const remainingTiles = options.remainingTiles;
+    const remainingMovement = options.remainingMovement;
 
     this.tile.removeUnit(this);
     targetTile.addUnit(this);
     this.tile = targetTile;
     this.queuedMovementTiles = remainingTiles;
+    this.availableMovement = remainingMovement;
 
     const dataPacket = {
       event: "moveUnit",
       id: this.id,
+      remainingMovement: remainingMovement,
       unitX: previousTile.getX(),
       unitY: previousTile.getY(),
       targetX: targetTile.getX(),
@@ -150,10 +155,8 @@ export class Unit {
     const existingPath = [this.tile, ...this.queuedMovementTiles];
 
     console.log("Queued move:");
-    const [arrivedTile, remainingTiles] = this.getMovementTowardsTargetTile(
-      targetTile,
-      existingPath
-    );
+    const [arrivedTile, remainingTiles, remainingMovement] =
+      this.getMovementTowardsTargetTile(targetTile, existingPath);
 
     if (!arrivedTile) return;
 
@@ -161,13 +164,14 @@ export class Unit {
       previousTile: this.tile,
       targetTile: arrivedTile,
       remainingTiles,
+      remainingMovement: remainingMovement,
     });
   }
 
   private getMovementTowardsTargetTile(
     tile: Tile,
     existingPath?: Tile[]
-  ): [Tile, Tile[]] {
+  ): [Tile, Tile[], number] {
     const shortestPath =
       existingPath ??
       GameMap.getInstance().constructShortestPath(
@@ -181,6 +185,7 @@ export class Unit {
     }
 
     const traversedTiles: Tile[] = [this.tile];
+    let remainingMovement = this.availableMovement;
 
     // Traverse tile by tile, removing our movement incrementally.
     for (let i = 0; i < shortestPath.length; i++) {
@@ -190,7 +195,7 @@ export class Unit {
 
       if (!nextTile) continue;
 
-      if (this.availableMovement <= 0) {
+      if (remainingMovement <= 0) {
         break;
       }
 
@@ -199,10 +204,7 @@ export class Unit {
       //  `From (${currentTile.getX()}, ${currentTile.getY()}) to (${nextTile.getX()}, ${nextTile.getY()}) - cost: ${movementCost}`
       //);
 
-      this.availableMovement = Math.max(
-        this.availableMovement - movementCost,
-        0
-      );
+      remainingMovement = Math.max(remainingMovement - movementCost, 0);
       traversedTiles.push(nextTile);
     }
 
@@ -210,7 +212,7 @@ export class Unit {
       (tile) => !traversedTiles.includes(tile)
     );
 
-    return [traversedTiles.pop(), remainingTiles];
+    return [traversedTiles.pop(), remainingTiles, remainingMovement];
   }
 
   public delete() {

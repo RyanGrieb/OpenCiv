@@ -71,7 +71,7 @@ export class UnitAction {
     return true;
   }
 
-  // Requirement methodss
+  // Requirement methods
   protected movement(unit: Unit) {
     return unit.getAvailableMovement() > 0;
   }
@@ -106,7 +106,7 @@ export class Unit extends ActorGroup {
   private unitActor: Actor;
   private selectionActors: Actor[];
   private selected: boolean;
-  private totalMovement: number;
+  private defaultMoveDistance: number;
   private availableMovement: number;
   private unitDisplayInfo: UnitDisplayInfo;
   private actions: UnitAction[];
@@ -137,8 +137,8 @@ export class Unit extends ActorGroup {
     this.tile = options.tile;
     this.attackType = options.attackType;
     this.selectionActors = [];
-    this.totalMovement = 2; // TODO: Have server define this.
-    this.availableMovement = this.totalMovement;
+    this.defaultMoveDistance = 2; // TODO: Have server define this.
+    this.availableMovement = this.defaultMoveDistance;
     this.actions = [];
     this.queuedMovementTiles = [];
 
@@ -175,6 +175,7 @@ export class Unit extends ActorGroup {
         }
 
         this.queuedMovementTiles = [];
+        this.availableMovement = data["remainingMovement"];
         this.tile.removeUnit(this);
         this.tile = targetTile;
         targetTile.addUnit(this);
@@ -194,6 +195,13 @@ export class Unit extends ActorGroup {
             this.queuedMovementTiles.push(tile);
           }
         }
+      },
+    });
+
+    NetworkEvents.on({
+      eventName: "newTurn",
+      callback: (data) => {
+        this.availableMovement = this.defaultMoveDistance;
       },
     });
 
@@ -234,8 +242,8 @@ export class Unit extends ActorGroup {
     this.availableMovement = amount;
   }
 
-  public getTotalMovement() {
-    return this.totalMovement;
+  public getDefaultMoveDistance() {
+    return this.defaultMoveDistance;
   }
 
   public getAvailableMovement() {
