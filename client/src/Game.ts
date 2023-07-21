@@ -3,9 +3,11 @@ import { Scene } from "./scene/Scene";
 import { GameImage } from "./Assets";
 import { NetworkEvents } from "./network/Client";
 import { Line } from "./scene/Line";
+import { Label } from "./ui/Label";
 
 export interface TextOptions {
   text: string;
+  height?: number;
   x?: number;
   y?: number;
   actor?: Actor;
@@ -213,7 +215,7 @@ export class Game {
       {
         text: "FPS: " + this.fps,
         x: Game.getWidth() - 40,
-        y: Game.getHeight() - 4,
+        y: Game.getHeight() - 12,
         color: "white",
         font: "12px sans",
       },
@@ -393,6 +395,7 @@ export class Game {
 
     canvasContext.save();
 
+    canvasContext.textBaseline = "top";
     // Only apply camera to the Game's main canvas context. (canvasContext === this.canvasContext)
     if (
       textOptions.applyCamera &&
@@ -458,6 +461,7 @@ export class Game {
     height,
     color,
     canvasContext,
+    fill,
   }: {
     x: number;
     y: number;
@@ -465,10 +469,16 @@ export class Game {
     height: number;
     color: string;
     canvasContext: CanvasRenderingContext2D;
+    fill: boolean;
   }) {
     canvasContext.save();
-    canvasContext.fillStyle = color;
-    canvasContext.fillRect(x, y, width, height);
+    if (fill) {
+      canvasContext.fillStyle = color;
+      canvasContext.fillRect(x, y, width, height);
+    } else {
+      canvasContext.strokeStyle = color;
+      canvasContext.strokeRect(x, y, width, height);
+    }
     canvasContext.restore();
   }
 

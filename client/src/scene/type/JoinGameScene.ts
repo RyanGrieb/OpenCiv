@@ -44,7 +44,7 @@ export class JoinGameScene extends Scene {
     infoLabel.conformSize().then(() => {
       infoLabel.setPosition(
         Game.getWidth() / 2 - infoLabel.getWidth() / 2,
-        serverTextBox.getY() - infoLabel.getHeight() + 10
+        serverTextBox.getY() - infoLabel.getHeight() - 10
       );
     });
     this.addActor(infoLabel);

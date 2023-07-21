@@ -147,6 +147,7 @@ export class Actor implements SceneObject {
         width: this.width,
         height: this.height,
         color: this.color,
+        fill: false,
         canvasContext: canvasContext,
       });
     } else if (this.image) {
@@ -178,6 +179,17 @@ export class Actor implements SceneObject {
   }
 
   public insideActor(x: number, y: number): boolean {
+    //FIXME: The actor should have a scene parent object
+    if (this.cameraApplies && Game.getCurrentScene().getCamera()) {
+      const zoom = Game.getCurrentScene().getCamera().getZoomAmount();
+      const cameraX = Game.getCurrentScene().getCamera().getX();
+      const cameraY = Game.getCurrentScene().getCamera().getY();
+
+      // Adjust the x and y coordinates relative to the camera
+      x = (x - cameraX) / zoom;
+      y = (y - cameraY) / zoom;
+    }
+
     if (x >= this.x && x <= this.x + this.width) {
       if (y >= this.y && y <= this.y + this.height) {
         return true;

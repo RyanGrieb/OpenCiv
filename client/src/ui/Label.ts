@@ -13,6 +13,7 @@ export interface LabelOptions {
   shadowBlur?: number;
   cameraApplies?: boolean;
   transparency?: number;
+  onClick?: Function;
 }
 
 export class Label extends Actor {
@@ -22,6 +23,7 @@ export class Label extends Actor {
   private lineWidth: number;
   private shadowColor: string;
   private shadowBlur: number;
+  private onClick: Function;
 
   constructor(options: LabelOptions) {
     super({
@@ -40,6 +42,13 @@ export class Label extends Actor {
     this.lineWidth = options.lineWidth ?? 0;
     this.shadowColor = options.shadowColor ?? this.color;
     this.shadowBlur = options.shadowBlur ?? 0;
+    this.onClick = options.onClick;
+
+    if (this.onClick) {
+      this.on("clicked", () => {
+        this.onClick();
+      });
+    }
   }
 
   public draw(canvasContext: CanvasRenderingContext2D) {
@@ -48,6 +57,7 @@ export class Label extends Actor {
         text: this.text,
         x: this.x,
         y: this.y,
+        height: this.height,
         color: this.fontColor,
         font: this.font,
         shadowColor: this.shadowColor,

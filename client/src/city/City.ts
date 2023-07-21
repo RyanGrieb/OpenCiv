@@ -46,6 +46,9 @@ export class City extends ActorGroup {
       shadowBlur: 1,
       shadowColor: "black",
       lineWidth: 1,
+      onClick: () => {
+        console.log("Show city UI");
+      },
     });
 
     this.nameLabel.conformSize().then(() => {
@@ -53,7 +56,7 @@ export class City extends ActorGroup {
         this.tile.getX() -
           this.nameLabel.getWidth() / 2 +
           this.tile.getWidth() / 2,
-        this.tile.getY()
+        this.tile.getY() - this.nameLabel.getHeight()
       );
       this.addActor(this.nameLabel);
     });

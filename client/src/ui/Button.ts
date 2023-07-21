@@ -119,7 +119,7 @@ export class Button extends ActorGroup {
         {
           text: this.text,
           x: this.x + this.width / 2 - this.textWidth / 2,
-          y: this.y + this.height / 2 + this.textHeight / 2,
+          y: this.y + this.height / 2 - this.textHeight / 2,
           color: this.fontColor,
           font: this.font,
         },

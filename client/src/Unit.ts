@@ -270,7 +270,7 @@ export class Unit extends ActorGroup {
   }
 
   public select() {
-    //console.log("Select");
+    console.log("Select Unit");
     this.selected = true;
     this.addSelectionActors();
 

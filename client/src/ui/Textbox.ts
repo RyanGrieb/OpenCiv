@@ -113,6 +113,7 @@ export class TextBox extends Actor {
       width: this.width,
       height: this.height,
       color: "#FFFFFF",
+      fill: true,
       canvasContext: canvasContext,
     });
 
@@ -123,6 +124,7 @@ export class TextBox extends Actor {
         width: 2,
         height: this.height - 8,
         color: "black",
+        fill: true,
         canvasContext: canvasContext,
       });
     }
@@ -132,7 +134,7 @@ export class TextBox extends Actor {
         text: this.text,
         color: "black",
         x: this.x,
-        y: this.y + this.height / 2 + this.textHeight / 2,
+        y: this.y + this.height / 2 - this.textHeight / 2,
       },
       canvasContext
     );

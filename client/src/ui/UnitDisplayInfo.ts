@@ -47,7 +47,7 @@ export class UnitDisplayInfo extends ActorGroup {
     nameLabel.conformSize().then(() => {
       nameLabel.setPosition(
         this.x + this.width / 2 - nameLabel.getWidth() / 2,
-        this.y + 21
+        this.y + 10
       );
       this.addActor(nameLabel);
     });
@@ -100,7 +100,7 @@ export class UnitDisplayInfo extends ActorGroup {
     this.movementLabel.conformSize().then(() => {
       this.movementLabel.setPosition(
         this.x + this.width / 2 - this.movementLabel.getWidth() / 2,
-        this.y + this.height - 12
+        this.y + this.height - 20
       );
     });
   }

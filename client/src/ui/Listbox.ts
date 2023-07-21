@@ -100,6 +100,7 @@ export class ListBox extends Actor {
       width: this.width,
       height: this.height,
       color: "white",
+      fill: true,
       canvasContext: canvasContext,
     });
 
@@ -110,6 +111,7 @@ export class ListBox extends Actor {
         width: row.width,
         height: row.height,
         color: row.rectangle.color,
+        fill: true,
         canvasContext: canvasContext,
       });
 
@@ -119,7 +121,7 @@ export class ListBox extends Actor {
           {
             text: row.getText(),
             x: row.x + 2,
-            y: row.y + this.rowHeight / 2 + row.textHeight / 2,
+            y: row.y + this.rowHeight / 2 - row.textHeight / 2,
             color: "black",
             font: "12px sans",
           },

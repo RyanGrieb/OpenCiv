@@ -71,7 +71,7 @@ export class StatusBar extends ActorGroup {
       this.currentTurnLabel.conformSize().then(() => {
         this.currentTurnLabel.setPosition(
           Game.getWidth() - this.currentTurnLabel.getWidth() - 1,
-          15
+          3
         );
       });
     }
@@ -95,7 +95,7 @@ export class StatusBar extends ActorGroup {
       fontColor: "white",
     });
     await this.scienceDescLabel.conformSize();
-    this.scienceDescLabel.setPosition(this.x + 1, 15);
+    this.scienceDescLabel.setPosition(this.x + 1, 3);
     this.addActor(this.scienceDescLabel);
 
     this.scienceIcon = new Actor({
@@ -117,7 +117,7 @@ export class StatusBar extends ActorGroup {
     await this.scienceLabel.conformSize();
     this.scienceLabel.setPosition(
       this.scienceIcon.getX() + this.scienceIcon.getWidth() - 6,
-      15
+      3
     );
     this.addActor(this.scienceLabel);
 
@@ -130,7 +130,7 @@ export class StatusBar extends ActorGroup {
     await this.cultureDescLabel.conformSize();
     this.cultureDescLabel.setPosition(
       this.scienceLabel.getX() + this.scienceLabel.getWidth() + 10,
-      15
+      3
     );
     this.addActor(this.cultureDescLabel);
 
@@ -153,7 +153,7 @@ export class StatusBar extends ActorGroup {
     await this.cultureLabel.conformSize();
     this.cultureLabel.setPosition(
       this.cultureIcon.getX() + this.cultureIcon.getWidth() - 6,
-      15
+      3
     );
     this.addActor(this.cultureLabel);
 
@@ -166,7 +166,7 @@ export class StatusBar extends ActorGroup {
     await this.goldDescLabel.conformSize();
     this.goldDescLabel.setPosition(
       this.cultureLabel.getX() + this.cultureLabel.getWidth() + 10,
-      15
+      3
     );
     this.addActor(this.goldDescLabel);
 
@@ -189,7 +189,7 @@ export class StatusBar extends ActorGroup {
     await this.goldLabel.conformSize();
     this.goldLabel.setPosition(
       this.goldIcon.getX() + this.goldIcon.getWidth() - 6,
-      15
+      3
     );
     this.addActor(this.goldLabel);
 
@@ -203,7 +203,7 @@ export class StatusBar extends ActorGroup {
     await this.faithDescLabel.conformSize();
     this.faithDescLabel.setPosition(
       this.goldLabel.getX() + this.goldLabel.getWidth() + 10,
-      15
+      3
     );
     this.addActor(this.faithDescLabel);
 
@@ -226,7 +226,7 @@ export class StatusBar extends ActorGroup {
     await this.faithLabel.conformSize();
     this.faithLabel.setPosition(
       this.faithIcon.getX() + this.faithIcon.getWidth() - 6,
-      15
+      3
     );
     this.addActor(this.faithLabel);
 
@@ -239,7 +239,7 @@ export class StatusBar extends ActorGroup {
     await this.tradeDescLabel.conformSize();
     this.tradeDescLabel.setPosition(
       this.faithLabel.getX() + this.faithLabel.getWidth() + 10,
-      15
+      3
     );
     this.addActor(this.tradeDescLabel);
 
@@ -262,7 +262,7 @@ export class StatusBar extends ActorGroup {
     await this.tradeLabel.conformSize();
     this.tradeLabel.setPosition(
       this.tradeIcon.getX() + this.tradeIcon.getWidth() + 4,
-      15
+      3
     );
     this.addActor(this.tradeLabel);
 
@@ -275,7 +275,7 @@ export class StatusBar extends ActorGroup {
     await this.currentTurnLabel.conformSize();
     this.currentTurnLabel.setPosition(
       Game.getWidth() - this.currentTurnLabel.getWidth() - 1,
-      15
+      3
     );
     this.addActor(this.currentTurnLabel);
   }

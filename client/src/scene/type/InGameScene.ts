@@ -56,7 +56,7 @@ export class InGameScene extends Scene {
       this.tileInformationLabel.conformSize().then(() => {
         this.tileInformationLabel.setPosition(
           2,
-          Game.getHeight() - this.tileInformationLabel.getHeight() + 6
+          Game.getHeight() - this.tileInformationLabel.getHeight() - 6
         );
         this.addActor(this.tileInformationLabel);
       });
