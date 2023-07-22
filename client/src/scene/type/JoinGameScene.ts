@@ -11,7 +11,7 @@ export class JoinGameScene extends Scene {
     super.onInitialize();
     this.addActor(SceneBackground.generateRandomGrassland());
 
-    const serverList = new ListBox({
+    /* const serverList = new ListBox({
       x: Game.getWidth() / 2 - 800 / 2,
       y: 25,
       width: 800,
@@ -20,8 +20,15 @@ export class JoinGameScene extends Scene {
     });
     const testNames = ["server1", "test", "foo"];
     for (let i = 0; i < testNames.length; i++) {
-      serverList.getRows()[i].setText(testNames[i]);
-    }
+      const row = serverList.getRows()[i];
+      serverList
+        .getRows()
+        [i].setText({
+          text: testNames[i],
+          x: row.getTextX(),
+          y: row.getTextY(),
+        });
+    }*/
 
     //this.addActor(serverList);
 

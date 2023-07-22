@@ -21,6 +21,8 @@ export class LobbyScene extends Scene {
       width: 600,
       height: Game.getHeight() - 230,
       rowHeight: 50,
+      textFont: "20px serif",
+      fontColor: "white",
     });
 
     this.addActor(playerList);
@@ -125,7 +127,26 @@ export class LobbyScene extends Scene {
               })
             );
           }
-          currentRow.setText(playerName);
+
+          currentRow.addActorIcon(
+            new Actor({
+              image: Game.getImage(GameImage.SPRITESHEET),
+              spriteRegion: SpriteRegion.UNKNOWN_ICON,
+              x: currentRow.x + 8,
+              y: currentRow.y - 32 / 2 + currentRow.height / 2,
+              width: 32,
+              height: 32,
+            })
+          );
+
+          currentRow.setText(playerName).then(() => {
+            currentRow.setTextPosition(
+              currentRow.x + 48,
+              currentRow.y +
+                currentRow.height / 2 -
+                currentRow.getTextHeight() / 2
+            );
+          });
         }
       },
     });

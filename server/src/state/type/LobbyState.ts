@@ -65,6 +65,34 @@ export class LobbyState extends State {
         });
       },
     });
+
+    ServerEvents.on({
+      eventName: "civInfo",
+      parentObject: this,
+      callback: (data, websocket) => {
+        const player = Game.getPlayerFromWebsocket(websocket);
+
+        // Get civ from this.playerCivs JSON list:
+        let civilization = undefined;
+        for (const civ of this.playableCivs) {
+          if (civ.name === data["name"]) {
+            civilization = civ;
+          }
+        }
+
+        if (civilization) {
+          console.log(civilization);
+          player.sendNetworkEvent({
+            event: "civInfo",
+            name: civilization.name,
+            icon_name: civilization.icon_name,
+            start_bias_desc: civilization.start_bias_desc,
+            unique_unit_descs: civilization.unique_unit_descs,
+            ability_descs: civilization.ability_descs,
+          });
+        }
+      },
+    });
   }
 
   public onDestroyed() {

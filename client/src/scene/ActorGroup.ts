@@ -73,7 +73,8 @@ export class ActorGroup extends Actor {
     const actorIndex = this.actors.indexOf(actor);
     if (actorIndex < 0) return;
 
-    this.actors.splice(actorIndex, 1);
+    const deletedActor = this.actors.splice(actorIndex, 1)[0];
+    deletedActor.onDestroyed();
   }
 
   public onDestroyed(): void {

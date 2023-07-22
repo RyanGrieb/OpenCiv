@@ -1,6 +1,13 @@
 civilizations:
   - name: Rome
     icon_name: ROME_ICON
+    start_bias: none
+    start_bias_desc: No start bias
+    unique_unit_descs:
+      - Balista (Replaces Catapult)
+      - Legion (Replaces Swordsman)
+    ability_descs:
+      - 25% production towards any buildings that already exist in the capital.
     cities:
       - Rome
       - Antium
@@ -14,6 +21,14 @@ civilizations:
       - Setia
   - name: Mongolia
     icon_name: MONGOLIA_ICON
+    start_bias: plains
+    start_bias_desc: "Start bias for: Plains"
+    unique_unit_descs:
+      - Keshik (Replaces Knight)
+      - Kahn (Replaces Great General)
+    ability_descs:
+      - 30% Combat Strength when fighting City-States.
+      - All cavalry units have +1 movement.
     cities:
       - Karakorum
       - Beshbalik
@@ -27,6 +42,13 @@ civilizations:
       - Sanchu
   - name: Mamluks
     icon_name: MAMLUKS_ICON
+    start_bias: desert
+    start_bias_desc: "Start bias for: Desert"
+    unique_unit_descs:
+      - Salihi (Replaces Knight)
+    ability_descs:
+      - Forts provide +1 production, an additional +1 gold during war.
+      - Receive free mounted units whenever a Great Prophet is born.
     cities:
       - Cairo
       - Damascus

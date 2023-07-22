@@ -68,6 +68,7 @@ export enum SpriteRegion {
   DEBUG3 = "17,13",
   UI_STATUSBAR = "4,3",
   UNIT_SELECTION_CIRCLE = "1,3",
+  UNKNOWN_ICON = "2,11",
   ROME_ICON = "13,11",
   MONGOLIA_ICON = "2,12",
   MAMLUKS_ICON = "5,12",

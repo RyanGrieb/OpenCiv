@@ -9,6 +9,10 @@ interface RowOptions extends RectangleOptions {
   height: number;
   color: string;
   text?: string;
+  font?: string;
+  fontColor?: string;
+  textX?: number;
+  textY?: number;
 }
 
 class Row {
@@ -19,37 +23,80 @@ class Row {
   public width: number;
   public height: number;
   private text: string;
-  private actorIcon: Actor; //TODO: Make this a list
+  private actorIcons: Actor[];
+  private textX: number;
+  private textY: number;
+  private font: string;
+  private fontColor: string;
+
   // TODO: Support image
   constructor(options: RowOptions) {
+    this.actorIcons = [];
     this.rectangle = new Rectangle(options);
     this.text = options.text;
     this.x = options.x;
     this.y = options.y;
     this.width = options.width;
     this.height = options.height;
+    this.font = options.font ?? "12px sans";
+    this.fontColor = options.fontColor ?? "black";
+    this.textX = options.textX ?? this.x;
+    this.textY = options.textY ?? this.y;
   }
 
-  public setText(text: string) {
+  public async setText(text: string) {
     this.text = undefined;
-    Game.measureText(text, "12px sans").then(([width, height]) => {
+    await Game.measureText(text, this.font).then(([width, height]) => {
       //TODO: Update width and height values for text
       this.text = text;
       this.textHeight = height;
     });
   }
 
+  public setTextPosition(x: number, y: number) {
+    this.textX = x;
+    this.textY = y;
+  }
+
   public getText() {
     return this.text;
   }
 
-  public getActorIcon() {
-    return this.actorIcon;
+  public getActorIcons() {
+    return this.actorIcons;
   }
 
-  //TODO: Intend for this to be an array
-  public addActorIcon(actorIcon: Actor) {
-    this.actorIcon = actorIcon;
+  public clearActorIcons() {
+    this.actorIcons = [];
+  }
+
+  public addActorIcon(actor: Actor) {
+    this.actorIcons.push(actor);
+  }
+
+  public getTextX() {
+    return this.textX;
+  }
+
+  public getTextY() {
+    return this.textY;
+  }
+
+  public clearText() {
+    this.text = undefined;
+    //this.textHeight = undefined;
+  }
+
+  public getFont() {
+    return this.font;
+  }
+
+  public getFontColor() {
+    return this.fontColor;
+  }
+
+  public getTextHeight() {
+    return this.textHeight;
   }
 }
 
@@ -59,16 +106,22 @@ export interface ListBoxOptions {
   width: number;
   height: number;
   rowHeight?: number;
+  textFont: string;
+  fontColor: string;
 }
 
 export class ListBox extends Actor {
   private rowHeight: number;
   private rows: Row[];
+  private textFont: string;
+  private fontColor: string;
 
   constructor(options: ListBoxOptions) {
     super(options);
 
     this.rowHeight = options.rowHeight ?? 32;
+    this.textFont = options.textFont;
+    this.fontColor = options.fontColor;
     this.rows = [];
 
     let index = 0;
@@ -86,6 +139,8 @@ export class ListBox extends Actor {
           width: this.width,
           height: rowHeight,
           color: index % 2 == 0 ? "#9e9e9e" : " #bbbbbb",
+          font: this.textFont,
+          fontColor: this.fontColor,
         })
       );
       index += 1;
@@ -120,25 +175,25 @@ export class ListBox extends Actor {
         Game.drawText(
           {
             text: row.getText(),
-            x: row.x + 2,
-            y: row.y + this.rowHeight / 2 - row.textHeight / 2,
-            color: "black",
-            font: "12px sans",
+            x: row.getTextX(),
+            y: row.getTextY(),
+            color: row.getFontColor(),
+            font: row.getFont(),
           },
           canvasContext
         );
       }
 
-      if (row.getActorIcon()) {
-        Game.drawImageFromActor(row.getActorIcon(), canvasContext);
+      for (const actorIcon of row.getActorIcons()) {
+        actorIcon.draw(canvasContext);
       }
     });
   }
 
   public clearRowText() {
     for (const row of this.rows) {
-      row.setText("");
-      row.addActorIcon(undefined);
+      row.clearText();
+      row.clearActorIcons();
     }
   }
 
