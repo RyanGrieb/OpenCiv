@@ -27,6 +27,8 @@ export class ActorGroup extends Actor {
 
     this.on("mousemove", (options) => {
       for (const actor of this.actors) {
+        actor.call("mousemove", options);
+
         if (actor.insideActor(options.x, options.y)) {
           if (!actor.isMouseInside()) {
             actor.call("mouse_enter");
@@ -42,6 +44,10 @@ export class ActorGroup extends Actor {
     });
 
     this.on("mouseup", (options) => {
+      if (options.button !== 0) {
+        return;
+      }
+
       for (const actor of this.actors) {
         if (actor.insideActor(options.x, options.y)) {
           //FIXME: Distinguish mouse_up & mouse_click_up better?
@@ -68,5 +74,13 @@ export class ActorGroup extends Actor {
     if (actorIndex < 0) return;
 
     this.actors.splice(actorIndex, 1);
+  }
+
+  public onDestroyed(): void {
+    super.onDestroyed();
+
+    for (const actor of this.actors) {
+      actor.onDestroyed();
+    }
   }
 }

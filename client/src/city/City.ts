@@ -20,6 +20,7 @@ export class City extends ActorGroup {
   private tile: Tile;
   private territory: Tile[];
   private territoryOverlays: Actor[];
+  private name: string;
   private nameLabel: Label;
 
   constructor(options: CityOptions) {
@@ -27,6 +28,7 @@ export class City extends ActorGroup {
 
     this.player = options.player;
     this.tile = options.tile;
+    this.name = "Athens"; //FIXME: Generate city names server-side
 
     this.territoryOverlays = [];
     this.territory = [this.tile];
@@ -37,7 +39,7 @@ export class City extends ActorGroup {
     }
 
     this.nameLabel = new Label({
-      text: "Athens",
+      text: this.name,
       x: this.tile.getX(),
       y: this.tile.getY(),
       font: "12px serif",
@@ -47,7 +49,7 @@ export class City extends ActorGroup {
       shadowColor: "black",
       lineWidth: 1,
       onClick: () => {
-        console.log("Show city UI");
+        Game.getCurrentScene().call("toggleCityUI", { city: this });
       },
     });
 
@@ -90,5 +92,9 @@ export class City extends ActorGroup {
 
   public getTile() {
     return this.tile;
+  }
+
+  public getName() {
+    return this.name;
   }
 }

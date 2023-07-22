@@ -1,10 +1,12 @@
 import { Game } from "../../Game";
+import { City } from "../../city/City";
 import { GameMap } from "../../map/GameMap";
 import { NetworkEvents, WebsocketClient } from "../../network/Client";
 import { AbstractPlayer } from "../../player/AbstractPlayer";
 import { ClientPlayer } from "../../player/ClientPlayer";
 import { ExternalPlayer } from "../../player/ExternalPlayer";
 import { Button } from "../../ui/Button";
+import { CityDisplayInfo } from "../../ui/CityDisplayInfo";
 import { Label } from "../../ui/Label";
 import { StatusBar } from "../../ui/StatusBar";
 import { Camera } from "../Camera";
@@ -14,6 +16,7 @@ export class InGameScene extends Scene {
   private players: AbstractPlayer[];
   private tileInformationLabel: Label;
   private statusBar: StatusBar;
+  private cityDisplayInfo: CityDisplayInfo;
 
   public onInitialize(): void {
     GameMap.init();
@@ -106,6 +109,20 @@ export class InGameScene extends Scene {
               tileTypes +
               (options.tile.hasRiver() ? ", River" : "")
           );
+        }
+      });
+
+      this.on("toggleCityUI", (options) => {
+        const city = options.city as City;
+
+        if (!this.cityDisplayInfo) {
+          this.cityDisplayInfo = new CityDisplayInfo(city);
+          this.addActor(this.cityDisplayInfo);
+          this.getCamera().lock(true);
+        } else {
+          this.removeActor(this.cityDisplayInfo);
+          this.cityDisplayInfo = undefined;
+          this.getCamera().lock(false);
         }
       });
 

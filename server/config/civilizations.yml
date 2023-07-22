@@ -1,0 +1,105 @@
+civilizations:
+  - name: Rome
+    icon_name: ROME_ICON
+    cities:
+      - Rome
+      - Antium
+      - Cumae
+      - Neapolis
+      -	Ravenna
+      - Arretium
+      - Mediolanum
+      - Arpinum
+      - Circei
+      - Setia
+  - name: Mongolia
+    icon_name: MONGOLIA_ICON
+    cities:
+      - Karakorum
+      - Beshbalik
+      - Turfan
+      - Hsia
+      - Old Sarai
+      -	New Sarai
+      - Tabriz
+      - Tiflis
+      - Otrar
+      - Sanchu
+  - name: Mamluks
+    icon_name: MAMLUKS_ICON
+    cities:
+      - Cairo
+      - Damascus
+      - Aleppo
+      - Hama
+      - Alexandria
+      - Gaza
+      - Tripoli
+      - Jerusalem
+      - Aswan
+      - Mosul
+  - name: America
+    icon_name: AMERICA_ICON
+    cities:
+      - Washington
+      - New York
+      - Boston
+      - Philadelphia
+      - Atlanta
+      - Chicago
+      - Seattle
+      - San Francisco
+      - Los Angeles
+      - Houston
+  - name: Germany
+    icon_name: GERMANY_ICON
+    cities:
+      - Berlin
+      - Hamburg
+      - Munich
+      - Cologne
+      - Frankfurt
+      - Essen
+      - Dortmund
+      - Stuttgart
+      - Düsseldorf
+      - Bremen
+  - name: England
+    icon_name: ENGLAND_ICON
+    cities:
+      - London
+      - York
+      - Nottingham
+      - Hastings
+      - Canterbury
+      - Coventry
+      - Warwick
+      - Newcastle
+      - Oxford
+      - Liverpool
+  - name: Cuba
+    icon_name: CUBA_ICON
+    cities:
+      - Havana
+      - Santiago de Cuba
+      - Camagüey
+      - Holguín
+      - Santa Clara
+      - Guantanamo
+      - Bayamo
+      - Cienfuegos
+      - Pinar del Río
+      - Matanzas
+  - name: Canada
+    icon_name: CANADA_ICON
+    cities:
+      - Toronto
+      - Montréal
+      - Quebec City
+      - Hamilton
+      - Winnipeg
+      - Halifax
+      - Saint John
+      - Vancouver
+      - Victoria
+      - Kingston

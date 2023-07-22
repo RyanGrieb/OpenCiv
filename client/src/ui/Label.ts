@@ -23,7 +23,7 @@ export class Label extends Actor {
   private lineWidth: number;
   private shadowColor: string;
   private shadowBlur: number;
-  private onClick: Function;
+  private onClickCallback: Function;
 
   constructor(options: LabelOptions) {
     super({
@@ -42,11 +42,11 @@ export class Label extends Actor {
     this.lineWidth = options.lineWidth ?? 0;
     this.shadowColor = options.shadowColor ?? this.color;
     this.shadowBlur = options.shadowBlur ?? 0;
-    this.onClick = options.onClick;
+    this.onClickCallback = options.onClick;
 
-    if (this.onClick) {
+    if (this.onClickCallback) {
       this.on("clicked", () => {
-        this.onClick();
+        this.onClickCallback();
       });
     }
   }

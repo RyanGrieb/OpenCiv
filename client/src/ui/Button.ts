@@ -8,6 +8,7 @@ import { ActorGroup } from "../scene/ActorGroup";
 export interface ButtonOptions {
   text?: string;
   icon?: SpriteRegion;
+  iconOnly?: boolean;
   iconWidth?: number;
   iconHeight?: number;
   buttonImage?: GameImage;
@@ -37,6 +38,7 @@ export class Button extends ActorGroup {
   private textWidth: number;
   private textHeight: number;
   private buttonActor: Actor;
+  private iconOnly: boolean;
 
   constructor(options: ButtonOptions) {
     super({
@@ -59,15 +61,18 @@ export class Button extends ActorGroup {
     this.buttonImage = options.buttonImage || GameImage.BUTTON;
     this.buttonHoveredImage =
       options.buttonHoveredImage || GameImage.BUTTON_HOVERED;
+    this.iconOnly = options.iconOnly || false;
 
-    this.buttonActor = new Actor({
-      image: Game.getImage(this.buttonImage),
-      x: this.x,
-      y: this.y,
-      width: this.width,
-      height: this.height,
-    });
-    this.addActor(this.buttonActor);
+    if (!this.iconOnly) {
+      this.buttonActor = new Actor({
+        image: Game.getImage(this.buttonImage),
+        x: this.x,
+        y: this.y,
+        width: this.width,
+        height: this.height,
+      });
+      this.addActor(this.buttonActor);
+    }
 
     if (this.icon) {
       const iconWidth = options.iconWidth || this.width;
@@ -84,13 +89,27 @@ export class Button extends ActorGroup {
       );
     }
 
+    this.on("mousemove", (options) => {
+      if (this.mouseInside) {
+        Game.setCursor("pointer");
+      }
+    });
+
     this.on("mouse_enter", () => {
-      this.buttonActor.setImage(this.buttonHoveredImage);
+      if (!this.iconOnly) {
+        this.buttonActor.setImage(this.buttonHoveredImage);
+      }
+
+      Game.setCursor("pointer");
       this.mouseEnterCallbackFunction();
     });
 
     this.on("mouse_exit", () => {
-      this.buttonActor.setImage(this.buttonImage);
+      if (!this.iconOnly) {
+        this.buttonActor.setImage(this.buttonImage);
+      }
+
+      Game.setCursor("default");
       this.mouseExitCallbackFunction();
     });
 
@@ -129,6 +148,13 @@ export class Button extends ActorGroup {
 
     if (this.icon) {
       //Game.drawImageFromActor()
+    }
+  }
+
+  public onDestroyed(): void {
+    super.onDestroyed();
+    if (this.mouseInside) {
+      Game.setCursor("default");
     }
   }
 }

@@ -3,11 +3,14 @@ import { Game } from "../../Game";
 import { NetworkEvents, WebsocketClient } from "../../network/Client";
 import { Button } from "../../ui/Button";
 import { ListBox } from "../../ui/Listbox";
+import { SelectCivilizationGroup } from "../../ui/SelectCivilizationGroup";
 import { Actor } from "../Actor";
 import { Scene } from "../Scene";
 import { SceneBackground } from "../SceneBackground";
 
 export class LobbyScene extends Scene {
+  private selectCivGroup: SelectCivilizationGroup;
+
   public onInitialize(): void {
     super.onInitialize();
     this.addActor(SceneBackground.generateRandomGrassland());
@@ -16,7 +19,7 @@ export class LobbyScene extends Scene {
       x: Game.getWidth() / 2 - 600 / 2,
       y: 25,
       width: 600,
-      height: Game.getHeight() - 175,
+      height: Game.getHeight() - 230,
       rowHeight: 50,
     });
 
@@ -24,9 +27,36 @@ export class LobbyScene extends Scene {
 
     this.addActor(
       new Button({
-        text: "Start Game",
+        text: "Choose Civilization",
         x: Game.getWidth() / 2 - 242 / 2,
         y: playerList.getY() + playerList.getHeight() + 10,
+        width: 242,
+        height: 62,
+        fontColor: "white",
+        onClicked: () => {
+          console.log("Choose civilization");
+
+          if (!this.selectCivGroup) {
+            this.selectCivGroup = new SelectCivilizationGroup(
+              playerList.getX() + playerList.getWidth() / 2 - 400 / 2,
+              playerList.getY() + playerList.getHeight() / 2 - 400 / 2,
+              420,
+              420
+            );
+            this.addActor(this.selectCivGroup);
+          } else {
+            this.removeActor(this.selectCivGroup);
+            this.selectCivGroup = undefined;
+          }
+        },
+      })
+    );
+
+    this.addActor(
+      new Button({
+        text: "Ready Up",
+        x: Game.getWidth() / 2 - 242 / 2,
+        y: playerList.getY() + playerList.getHeight() + 75,
         width: 242,
         height: 62,
         fontColor: "white",
@@ -41,7 +71,7 @@ export class LobbyScene extends Scene {
       new Button({
         text: "Back",
         x: Game.getWidth() / 2 - 242 / 2,
-        y: playerList.getY() + playerList.getHeight() + 75,
+        y: playerList.getY() + playerList.getHeight() + 140,
         width: 242,
         height: 62,
         fontColor: "white",

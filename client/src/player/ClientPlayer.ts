@@ -86,6 +86,10 @@ export class ClientPlayer extends AbstractPlayer {
     });
 
     Game.getCurrentScene().on("mouseup", (options) => {
+      if (Game.getCurrentScene().getCamera().isLocked()) {
+        return;
+      }
+
       const clickedTile = this.hoveredTile.getRepresentedTile();
 
       //left-click
@@ -161,6 +165,12 @@ export class ClientPlayer extends AbstractPlayer {
           this.drawMovementPathFromTiles(movementPath);
         }
       },
+    });
+
+    Game.getCurrentScene().on("toggleCityUI", (options) => {
+      if (this.selectedUnit) {
+        this.unselectUnit();
+      }
     });
   }
 

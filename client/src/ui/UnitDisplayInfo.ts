@@ -87,6 +87,7 @@ export class UnitDisplayInfo extends ActorGroup {
 
   // Clear our networks events associated with this object
   public onDestroyed() {
+    super.onDestroyed();
     NetworkEvents.removeCallbacksByParentObject(this);
   }
 

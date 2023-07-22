@@ -3,7 +3,6 @@ import { Scene } from "./scene/Scene";
 import { GameImage } from "./Assets";
 import { NetworkEvents } from "./network/Client";
 import { Line } from "./scene/Line";
-import { Label } from "./ui/Label";
 
 export interface TextOptions {
   text: string;
@@ -65,6 +64,13 @@ export class Game {
 
     //Initialize canvas listeners. TODO: Make this less redundant w/ a helper function
     this.canvas.addEventListener("mousemove", (event) => {
+      this.actors.forEach((actor) => {
+        actor.call("mousemove", {
+          x: event.clientX,
+          y: event.clientY,
+        });
+      });
+
       if (this.currentScene) {
         this.currentScene.call("mousemove", {
           x: event.clientX,
@@ -73,18 +79,19 @@ export class Game {
         });
       }
 
-      this.actors.forEach((actor) => {
-        actor.call("mousemove", {
-          x: event.clientX,
-          y: event.clientY,
-        });
-      });
-
       this.mouseX = event.clientX;
       this.mouseY = event.clientY;
     });
 
     this.canvas.addEventListener("mousedown", (event) => {
+      this.actors.forEach((actor) => {
+        actor.call("mousedown", {
+          x: event.clientX,
+          y: event.clientY,
+          button: event.button,
+        });
+      });
+
       if (this.currentScene) {
         this.currentScene.call("mousedown", {
           x: event.clientX,
@@ -92,13 +99,17 @@ export class Game {
           button: event.button,
         });
       }
-
-      this.actors.forEach((actor) => {
-        actor.call("mousedown", { x: event.clientX, y: event.clientY });
-      });
     });
 
     this.canvas.addEventListener("mouseup", (event) => {
+      this.actors.forEach((actor) => {
+        actor.call("mouseup", {
+          x: event.clientX,
+          y: event.clientY,
+          button: event.button,
+        });
+      });
+
       if (this.currentScene) {
         this.currentScene.call("mouseup", {
           x: event.clientX,
@@ -106,26 +117,26 @@ export class Game {
           button: event.button,
         });
       }
-
-      this.actors.forEach((actor) => {
-        actor.call("mouseup", { x: event.clientX, y: event.clientY });
-      });
     });
 
     this.canvas.addEventListener("mouseleave", (event) => {
+      this.actors.forEach((actor) => {
+        actor.call("mouseleave", { x: event.clientX, y: event.clientY });
+      });
+
       if (this.currentScene) {
         this.currentScene.call("mouseleave", {
           x: event.clientX,
           y: event.clientY,
         });
       }
-
-      this.actors.forEach((actor) => {
-        actor.call("mouseleave", { x: event.clientX, y: event.clientY });
-      });
     });
 
     this.canvas.addEventListener("wheel", (event) => {
+      this.actors.forEach((actor) => {
+        actor.call("wheel", { deltaY: event.deltaY });
+      });
+
       if (this.currentScene) {
         this.currentScene.call("wheel", {
           x: event.offsetX,
@@ -133,30 +144,26 @@ export class Game {
           deltaY: event.deltaY,
         });
       }
-
-      this.actors.forEach((actor) => {
-        actor.call("wheel", { deltaY: event.deltaY });
-      });
     });
 
     document.body.addEventListener("keydown", (event) => {
-      if (this.currentScene) {
-        this.currentScene.call("keydown", { key: event.key });
-      }
-
       this.actors.forEach((actor) => {
         actor.call("keydown", { key: event.key });
       });
+
+      if (this.currentScene) {
+        this.currentScene.call("keydown", { key: event.key });
+      }
     });
 
     document.body.addEventListener("keyup", (event) => {
-      if (this.currentScene) {
-        this.currentScene.call("keyup", { key: event.key });
-      }
-
       this.actors.forEach((actor) => {
         actor.call("keyup", { key: event.key });
       });
+
+      if (this.currentScene) {
+        this.currentScene.call("keyup", { key: event.key });
+      }
     });
     document.addEventListener("contextmenu", (event) => event.preventDefault());
 
@@ -522,5 +529,9 @@ export class Game {
 
   public static toggleGameLoop() {
     this.runGameLoop = !this.runGameLoop;
+  }
+
+  public static setCursor(type: string) {
+    this.canvas.style.cursor = type;
   }
 }

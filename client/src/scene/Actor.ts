@@ -65,7 +65,7 @@ export class Actor implements SceneObject {
     });
 
     this.on("mouseup", (options) => {
-      if (this.insideActor(options.x, options.y)) {
+      if (this.insideActor(options.x, options.y) && options.button === 0) {
         //FIXME: Distinguish mouse_up & mouse_click_up better?
         this.call("clicked");
       }
@@ -147,7 +147,7 @@ export class Actor implements SceneObject {
         width: this.width,
         height: this.height,
         color: this.color,
-        fill: false,
+        fill: true,
         canvasContext: canvasContext,
       });
     } else if (this.image) {

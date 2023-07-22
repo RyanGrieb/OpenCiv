@@ -21,6 +21,7 @@ export class Camera {
   private lastMouseX: number;
   private lastMouseY: number;
   private mouseHeld: boolean;
+  private locked: boolean;
 
   constructor(options: CameraOptions) {
     this.keysHeld = [];
@@ -33,11 +34,12 @@ export class Camera {
 
     this.lastMouseX = 0;
     this.lastMouseY = 0;
+    this.locked = false;
 
     const scene = Game.getCurrentScene();
     if (options.wasd_controls) {
       scene.on("keydown", (options) => {
-        if (this.keysHeld.includes(options.key)) {
+        if (this.keysHeld.includes(options.key) || this.locked) {
           return;
         }
 
@@ -92,7 +94,7 @@ export class Camera {
 
     if (options.mouse_controls) {
       scene.on("mousedown", (options) => {
-        if (options.button !== 0) {
+        if (options.button !== 0 || this.locked) {
           return;
         }
 
@@ -119,6 +121,10 @@ export class Camera {
       });
 
       scene.on("wheel", (options) => {
+        if (this.locked) {
+          return;
+        }
+
         if (options.deltaY > 0) {
           scene.getCamera().zoom(options.x, options.y, 1 / 1.1);
         }
@@ -178,5 +184,13 @@ export class Camera {
 
   public getZoomAmount() {
     return this.zoomAmount;
+  }
+
+  public lock(value: boolean) {
+    this.locked = value;
+  }
+
+  public isLocked() {
+    return this.locked;
   }
 }
