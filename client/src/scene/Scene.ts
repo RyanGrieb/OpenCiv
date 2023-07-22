@@ -91,6 +91,13 @@ export abstract class Scene {
     this.storedEvents.set(eventName, functions);
   }
 
+  public hasActor(actor: Actor) {
+    const actorIndex = this.sceneObjects.indexOf(actor);
+    if (actorIndex < 0) return false;
+
+    return true;
+  }
+
   public setCamera(camera: Camera) {
     this.camera = camera;
   }

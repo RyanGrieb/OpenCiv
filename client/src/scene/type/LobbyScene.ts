@@ -38,17 +38,16 @@ export class LobbyScene extends Scene {
         onClicked: () => {
           console.log("Choose civilization");
 
-          if (!this.selectCivGroup) {
+          if (!this.selectCivGroup || !this.hasActor(this.selectCivGroup)) {
             this.selectCivGroup = new SelectCivilizationGroup(
-              playerList.getX() + playerList.getWidth() / 2 - 400 / 2,
-              playerList.getY() + playerList.getHeight() / 2 - 400 / 2,
-              420,
-              420
+              playerList.getX() + playerList.getWidth() / 2 - 432 / 2,
+              playerList.getY() + playerList.getHeight() / 2 - 440 / 2,
+              432,
+              440
             );
             this.addActor(this.selectCivGroup);
           } else {
             this.removeActor(this.selectCivGroup);
-            this.selectCivGroup = undefined;
           }
         },
       })

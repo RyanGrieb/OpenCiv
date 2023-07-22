@@ -7,7 +7,7 @@ civilizations:
       - Balista (Replaces Catapult)
       - Legion (Replaces Swordsman)
     ability_descs:
-      - 25% production towards any buildings that already exist in the capital.
+      - +25% production towards any buildings that already exist in the capital.
     cities:
       - Rome
       - Antium
@@ -27,7 +27,7 @@ civilizations:
       - Keshik (Replaces Knight)
       - Kahn (Replaces Great General)
     ability_descs:
-      - 30% Combat Strength when fighting City-States.
+      - +30% Combat Strength when fighting City-States.
       - All cavalry units have +1 movement.
     cities:
       - Karakorum
@@ -46,6 +46,8 @@ civilizations:
     start_bias_desc: "Start bias for: Desert"
     unique_unit_descs:
       - Salihi (Replaces Knight)
+    unique_building_descs:
+      - Madrasah (Replaces University)
     ability_descs:
       - Forts provide +1 production, an additional +1 gold during war.
       - Receive free mounted units whenever a Great Prophet is born.
@@ -62,6 +64,14 @@ civilizations:
       - Mosul
   - name: America
     icon_name: AMERICA_ICON
+    start_bias: none
+    start_bias_desc: No start bias
+    unique_unit_descs:
+      - B17 Bomber (Replaces Bomber)
+      - Minuteman (Replaces Musketman)
+    ability_descs:
+      - All land military units have +1 sight.
+      - +50% Discount when purchasing tiles.
     cities:
       - Washington
       - New York
@@ -75,6 +85,16 @@ civilizations:
       - Houston
   - name: Germany
     icon_name: GERMANY_ICON
+    start_bias: none
+    start_bias_desc: No start bias
+    unique_unit_descs:
+      - Landsknecht (Replaces Pikeman)
+      - Panzer (Replaces Tank)
+    unique_building_descs:
+      - Hanse (Replaces Bank)
+    ability_descs:
+      - Ability to convert barbarian camps to German units.
+      - +25% Less unit maintenance costs.
     cities:
       - Berlin
       - Hamburg
@@ -88,6 +108,14 @@ civilizations:
       - Bremen
   - name: England
     icon_name: ENGLAND_ICON
+    start_bias: shallow_ocean
+    start_bias_desc: "Start bias for: Shallow Ocean"
+    unique_unit_descs:
+      - Longbowman (Replaces Crossbowman)
+      - Ship of the Line (Replaces Frigate)
+    ability_descs:
+      - +2 Movement for all naval units.
+      - +1 Extra spy.
     cities:
       - London
       - York
@@ -101,6 +129,14 @@ civilizations:
       - Liverpool
   - name: Cuba
     icon_name: CUBA_ICON
+    start_bias: shallow_ocean
+    start_bias_desc: "Start bias for: Shallow Ocean"
+    unique_unit_descs:
+      - Guerrillero (Replaces Great War Infrantry)
+    unique_building_descs:
+      - Dance Hall (Replaces Opera House)
+    ability_descs:
+      - +20% Combat strength on shallow ocean tiles.
     cities:
       - Havana
       - Santiago de Cuba
@@ -114,6 +150,16 @@ civilizations:
       - Matanzas
   - name: Canada
     icon_name: CANADA_ICON
+    start_bias: tundra
+    start_bias_desc: "Start bias for: Tundra"
+    unique_unit_descs:
+      - Mountie (Replaces Light Cavalry)
+      - Great Voyageur (Replaces Great Merchant)
+    unique_building_descs:
+      - Hudson's Bay Company (Replaces Bank)
+    ability_descs:
+      - Cannot declare war on city-states.
+      - Can build farms on tundra tiles.
     cities:
       - Toronto
       - Montréal

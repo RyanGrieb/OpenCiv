@@ -14,16 +14,20 @@ export interface LabelOptions {
   cameraApplies?: boolean;
   transparency?: number;
   onClick?: Function;
+  maxWidth?: number;
 }
 
 export class Label extends Actor {
   private text: string;
   private font: string;
   private fontColor: string;
-  private lineWidth: number;
+  private lineWidth: number; // For drawing bold text
   private shadowColor: string;
   private shadowBlur: number;
   private onClickCallback: Function;
+  private maxWidth: number;
+  private wrappedText: string;
+  private unwrappedWordHeight: number;
 
   constructor(options: LabelOptions) {
     super({
@@ -43,6 +47,7 @@ export class Label extends Actor {
     this.shadowColor = options.shadowColor ?? this.color;
     this.shadowBlur = options.shadowBlur ?? 0;
     this.onClickCallback = options.onClick;
+    this.maxWidth = options.maxWidth;
 
     if (this.onClickCallback) {
       this.on("clicked", () => {
@@ -54,10 +59,10 @@ export class Label extends Actor {
   public draw(canvasContext: CanvasRenderingContext2D) {
     Game.drawText(
       {
-        text: this.text,
+        text: this.wrappedText ? this.wrappedText : this.text,
         x: this.x,
         y: this.y,
-        height: this.height,
+        height: this.wrappedText ? this.unwrappedWordHeight : this.height,
         color: this.fontColor,
         font: this.font,
         shadowColor: this.shadowColor,
@@ -65,6 +70,7 @@ export class Label extends Actor {
         lineWidth: this.lineWidth,
         applyCamera: this.cameraApplies,
         transparency: this.transparency,
+        maxWidth: this.maxWidth,
       },
       canvasContext
     );
@@ -74,12 +80,21 @@ export class Label extends Actor {
    * Updates the width and height of the label to conform to whatever the text is
    */
   public async conformSize() {
-    const [textWidth, textHeight] = await Game.measureText(
-      this.text,
-      this.font
-    );
-    this.width = textWidth;
-    this.height = textHeight;
+    if (this.maxWidth) {
+      const [wrappedText, wrappedHeight, unwrappedWordHeight] =
+        await Game.getWrappedText(this.text, this.font, this.maxWidth);
+      this.wrappedText = wrappedText;
+      this.width = this.maxWidth;
+      this.height = wrappedHeight;
+      this.unwrappedWordHeight = unwrappedWordHeight;
+    } else {
+      const [textWidth, textHeight] = await Game.measureText(
+        this.text,
+        this.font
+      );
+      this.width = textWidth;
+      this.height = textHeight;
+    }
   }
 
   public setText(text: string) {

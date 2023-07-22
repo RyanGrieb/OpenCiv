@@ -14,9 +14,11 @@ export interface TextOptions {
   font?: string;
   shadowColor?: string;
   lineWidth?: number;
+  lineHeight?: number;
   shadowBlur?: number;
   applyCamera?: boolean;
   transparency?: number;
+  maxWidth?: number;
 }
 export interface GameOptions {
   /**
@@ -45,6 +47,8 @@ export class Game {
   private static mouseX: number;
   private static mouseY: number;
   private static runGameLoop: boolean;
+  private static wrappedTextCache: { [key: string]: [string, number, number] } =
+    {};
 
   private constructor() {}
 
@@ -263,6 +267,7 @@ export class Game {
 
   public static setScene(sceneName: string) {
     this.actors = [];
+    this.wrappedTextCache = {};
 
     const newScene = this.scenes.get(sceneName);
 
@@ -394,11 +399,56 @@ export class Game {
     return [metrics.width, height];
   }
 
+  /**
+   * Returns a wrapped text string and height of the wrapped text, and stores the wrapped text in a cache.
+   */
+  public static async getWrappedText(
+    text: string,
+    font: string,
+    maxWidth: number
+  ): Promise<[string, number, number]> {
+    let currentWidth = 0;
+
+    // Check if we have the wrapped text in cache:
+    if (this.wrappedTextCache[text]) {
+      return this.wrappedTextCache[text];
+    }
+
+    const [_, unwrappedWordHeight] = await this.measureText(text, font);
+
+    //Copy the string
+    let modifiedText = text + "";
+    let wrappedHeight = unwrappedWordHeight;
+
+    for (const word of modifiedText.split(" ")) {
+      const [wordWidth, wordHeight] = await this.measureText(word + " ", font);
+
+      if (currentWidth + wordWidth > maxWidth) {
+        modifiedText = modifiedText.replace(word, "\n" + word);
+        currentWidth = wordWidth;
+        wrappedHeight += wordHeight;
+      } else {
+        currentWidth += wordWidth;
+      }
+    }
+
+    //Store wrapped text in cache
+    this.wrappedTextCache[text] = [
+      modifiedText,
+      wrappedHeight,
+      unwrappedWordHeight,
+    ];
+
+    return [modifiedText, wrappedHeight, unwrappedWordHeight];
+  }
+
   public static drawText(
     textOptions: TextOptions,
     canvasContext: CanvasRenderingContext2D
   ) {
     //FIXME: Use cache for meausring text..
+
+    let text = textOptions.text;
 
     canvasContext.save();
 
@@ -423,11 +473,28 @@ export class Game {
     canvasContext.lineWidth = textOptions.lineWidth ?? 0; // 4
     const xPos = textOptions.x;
     const yPos = textOptions.y;
+
     if (textOptions.lineWidth > 0) {
-      canvasContext.strokeText(textOptions.text, xPos, yPos);
+      if (text.includes("\n")) {
+        for (const [index, line] of text.split("\n").entries()) {
+          canvasContext.strokeText(
+            line,
+            xPos,
+            yPos + textOptions.height * index
+          );
+        }
+      } else {
+        canvasContext.strokeText(text, xPos, yPos);
+      }
     }
 
-    canvasContext.fillText(textOptions.text, xPos, yPos);
+    if (text.includes("\n")) {
+      for (const [index, line] of text.split("\n").entries()) {
+        canvasContext.fillText(line, xPos, yPos + textOptions.height * index);
+      }
+    } else {
+      canvasContext.fillText(text, xPos, yPos);
+    }
 
     canvasContext.restore();
   }

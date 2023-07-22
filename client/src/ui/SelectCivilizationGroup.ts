@@ -44,10 +44,10 @@ export class SelectCivilizationGroup extends ActorGroup {
         // For each civ JSON object
         for (const civJSON of data["civs"]) {
           // Calculate the X and Y coordinates of the icon and add it
-          let iconX = this.x + 68 * xOffsset + 8;
+          let iconX = this.x + 68 * xOffsset + 14;
 
           if (iconX + 64 > this.x + this.width) {
-            iconX = this.x + 68 * (xOffsset = 0) + 8;
+            iconX = this.x + 68 * (xOffsset = 0) + 14;
             yOffset++;
           }
 
@@ -61,7 +61,6 @@ export class SelectCivilizationGroup extends ActorGroup {
             width: 64,
             height: 64,
             onClicked: () => {
-              console.log(civJSON["name"]);
               WebsocketClient.sendMessage({
                 event: "civInfo",
                 name: civJSON["name"],
@@ -116,7 +115,7 @@ export class SelectCivilizationGroup extends ActorGroup {
     const closeButton = new Button({
       text: "Close",
       x: this.x + this.width / 2 - 150 / 2,
-      y: this.y + this.height - 55,
+      y: this.y + this.height - 60,
       width: 150,
       height: 50,
       fontColor: "white",
@@ -131,7 +130,7 @@ export class SelectCivilizationGroup extends ActorGroup {
     WebsocketClient.sendMessage({ event: "availableCivs" });
   }
 
-  public displayCivInformation(data: JSON) {
+  public async displayCivInformation(data: JSON) {
     // Rename title label:
     this.titleLabel.setText(data["name"]);
     this.titleLabel.conformSize().then(() => {
@@ -162,49 +161,124 @@ export class SelectCivilizationGroup extends ActorGroup {
 
     //Start-bias label:
     const startBiasLabel = new Label({
-      text: "* " + data["start_bias_desc"],
+      text: data["start_bias_desc"],
       font: "20px serif",
       fontColor: "white",
-      x: this.x + 8,
+      x: this.x + 12,
       y: this.y + 80,
     });
+
+    await startBiasLabel.conformSize();
 
     this.civInformationActors.push(startBiasLabel);
     informationLabels.push(startBiasLabel);
     this.addActor(startBiasLabel);
 
-    let yIndex = 0;
+    const uniqueUnitDescLabel = new Label({
+      text: "Unique Units:",
+      font: "bold 20px serif",
+      fontColor: "white",
+      x: this.x + 12,
+      y: startBiasLabel.getY() + startBiasLabel.getHeight() + 30,
+      maxWidth: this.width - 12,
+    });
+
+    await uniqueUnitDescLabel.conformSize();
+
+    this.civInformationActors.push(uniqueUnitDescLabel);
+    this.addActor(uniqueUnitDescLabel);
+
     for (const uniqueUnitDesc of data["unique_unit_descs"]) {
+      const lastLabel =
+        this.civInformationActors[this.civInformationActors.length - 1];
+
       const unitLabel = new Label({
         text: "* " + uniqueUnitDesc,
         font: "20px serif",
         fontColor: "white",
-        x: this.x + 8,
-        y: startBiasLabel.getY() + 35 + 20 * yIndex,
+        x: this.x + 12,
+        y: lastLabel.getY() + lastLabel.getHeight() + 5,
+        maxWidth: this.width - 12,
       });
 
+      await unitLabel.conformSize();
+
       this.civInformationActors.push(unitLabel);
-      informationLabels.push(unitLabel);
       this.addActor(unitLabel);
-      yIndex++;
     }
 
-    yIndex = 0;
+    if ("unique_building_descs" in data) {
+      const lastLabel =
+        this.civInformationActors[this.civInformationActors.length - 1];
+
+      const uniqueBuildingsDescLabel = new Label({
+        text: "Unique Buildings:",
+        font: "bold 20px serif",
+        fontColor: "white",
+        x: this.x + 12,
+        y: lastLabel.getY() + lastLabel.getHeight() + 30,
+        maxWidth: this.width - 12,
+      });
+
+      await uniqueBuildingsDescLabel.conformSize();
+
+      this.civInformationActors.push(uniqueBuildingsDescLabel);
+      this.addActor(uniqueBuildingsDescLabel);
+
+      for (const buildingDesc of data["unique_building_descs"] as []) {
+        const lastLabel =
+          this.civInformationActors[this.civInformationActors.length - 1];
+
+        const abilityLabel = new Label({
+          text: "* " + buildingDesc,
+          font: "20px serif",
+          fontColor: "white",
+          x: this.x + 12,
+          y: lastLabel.getY() + lastLabel.getHeight() + 5,
+          maxWidth: this.width - 12,
+        });
+
+        await abilityLabel.conformSize();
+
+        this.civInformationActors.push(abilityLabel);
+        this.addActor(abilityLabel);
+      }
+    }
+
+    const lastLabel =
+      this.civInformationActors[this.civInformationActors.length - 1];
+
+    const uniqueAbilityDescLabel = new Label({
+      text: "Special Abilities:",
+      font: "bold 20px serif",
+      fontColor: "white",
+      x: this.x + 12,
+      y: lastLabel.getY() + lastLabel.getHeight() + 30,
+      maxWidth: this.width - 12,
+    });
+
+    await uniqueAbilityDescLabel.conformSize();
+
+    this.civInformationActors.push(uniqueAbilityDescLabel);
+    this.addActor(uniqueAbilityDescLabel);
+
     for (const abilityDesc of data["ability_descs"]) {
-      const lastInformationlabel =
-        informationLabels[informationLabels.length - 1];
+      const lastLabel =
+        this.civInformationActors[this.civInformationActors.length - 1];
 
       const abilityLabel = new Label({
         text: "* " + abilityDesc,
         font: "20px serif",
         fontColor: "white",
-        x: this.x + 8,
-        y: lastInformationlabel.getY() + 35 + 20 * yIndex,
+        x: this.x + 12,
+        y: lastLabel.getY() + lastLabel.getHeight() + 5,
+        maxWidth: this.width - 12,
       });
+
+      await abilityLabel.conformSize();
 
       this.civInformationActors.push(abilityLabel);
       this.addActor(abilityLabel);
-      yIndex++;
     }
 
     // Add select button:
@@ -212,7 +286,7 @@ export class SelectCivilizationGroup extends ActorGroup {
       text: "Select",
       fontColor: "white",
       x: this.x + this.width / 2 - 100 - 150 / 2,
-      y: this.y + this.height - 55,
+      y: this.y + this.height - 60,
       width: 150,
       height: 50,
       onClicked: () => {
@@ -230,7 +304,7 @@ export class SelectCivilizationGroup extends ActorGroup {
       text: "Back",
       fontColor: "white",
       x: this.x + this.width / 2 + 100 - 150 / 2,
-      y: this.y + this.height - 55,
+      y: this.y + this.height - 60,
       width: 150,
       height: 50,
       onClicked: () => {

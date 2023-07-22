@@ -81,13 +81,13 @@ export class LobbyState extends State {
         }
 
         if (civilization) {
-          console.log(civilization);
           player.sendNetworkEvent({
             event: "civInfo",
             name: civilization.name,
             icon_name: civilization.icon_name,
             start_bias_desc: civilization.start_bias_desc,
             unique_unit_descs: civilization.unique_unit_descs,
+            unique_building_descs: civilization.unique_building_descs,
             ability_descs: civilization.ability_descs,
           });
         }
