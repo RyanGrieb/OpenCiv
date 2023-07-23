@@ -65,8 +65,8 @@ export class JoinGameScene extends Scene {
         Game.getWidth() / 2 - infoLabel.getWidth() / 2,
         serverTextBox.getY() - 30
       );
+      this.addActor(infoLabel);
     });
-    this.addActor(infoLabel);
 
     this.addActor(
       new Button({

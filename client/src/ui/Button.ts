@@ -23,6 +23,7 @@ export interface ButtonOptions {
   onClicked: Function;
   onMouseEnter?: Function;
   onMouseExit?: Function;
+  disableHovenWhen?: () => boolean;
 }
 
 export class Button extends ActorGroup {
@@ -39,6 +40,7 @@ export class Button extends ActorGroup {
   private textHeight: number;
   private buttonActor: Actor;
   private iconOnly: boolean;
+  private disableHovenWhen?: () => boolean;
 
   constructor(options: ButtonOptions) {
     super({
@@ -62,6 +64,7 @@ export class Button extends ActorGroup {
     this.buttonHoveredImage =
       options.buttonHoveredImage || GameImage.BUTTON_HOVERED;
     this.iconOnly = options.iconOnly || false;
+    this.disableHovenWhen = options.disableHovenWhen;
 
     if (!this.iconOnly) {
       this.buttonActor = new Actor({
@@ -91,11 +94,19 @@ export class Button extends ActorGroup {
 
     this.on("mousemove", (options) => {
       if (this.mouseInside) {
+        if (this.disableHovenWhen && this.disableHovenWhen()) {
+          return;
+        }
+
         Game.setCursor("pointer");
       }
     });
 
     this.on("mouse_enter", () => {
+      if (this.disableHovenWhen && this.disableHovenWhen()) {
+        return;
+      }
+
       if (!this.iconOnly) {
         this.buttonActor.setImage(this.buttonHoveredImage);
       }

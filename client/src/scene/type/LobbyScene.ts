@@ -17,9 +17,9 @@ export class LobbyScene extends Scene {
 
     const playerList = new ListBox({
       x: Game.getWidth() / 2 - 600 / 2,
-      y: 25,
+      y: 35,
       width: 600,
-      height: Game.getHeight() - 230,
+      height: Game.getHeight() - 275,
       rowHeight: 50,
       textFont: "20px serif",
       fontColor: "white",
@@ -36,12 +36,16 @@ export class LobbyScene extends Scene {
         height: 62,
         fontColor: "white",
         onClicked: () => {
+          if (this.hasActor(this.selectCivGroup)) {
+            return;
+          }
+
           console.log("Choose civilization");
 
           if (!this.selectCivGroup || !this.hasActor(this.selectCivGroup)) {
             this.selectCivGroup = new SelectCivilizationGroup(
               playerList.getX() + playerList.getWidth() / 2 - 432 / 2,
-              playerList.getY() + playerList.getHeight() / 2 - 440 / 2,
+              Game.getHeight() / 2 - 440 / 2,
               432,
               440
             );
@@ -49,6 +53,10 @@ export class LobbyScene extends Scene {
           } else {
             this.removeActor(this.selectCivGroup);
           }
+        },
+
+        disableHoverWhen: () => {
+          return this.hasActor(this.selectCivGroup);
         },
       })
     );
@@ -62,8 +70,15 @@ export class LobbyScene extends Scene {
         height: 62,
         fontColor: "white",
         onClicked: () => {
+          if (this.hasActor(this.selectCivGroup)) {
+            return;
+          }
           // TODO: Change text of this button & prevent repeated clicks.
           WebsocketClient.sendMessage({ event: "setState", state: "in_game" });
+        },
+
+        disableHoverWhen: () => {
+          return this.hasActor(this.selectCivGroup);
         },
       })
     );
@@ -77,8 +92,16 @@ export class LobbyScene extends Scene {
         height: 62,
         fontColor: "white",
         onClicked: () => {
+          if (this.hasActor(this.selectCivGroup)) {
+            return;
+          }
+
           Game.setScene("join_game");
           //TODO: Disconnect player
+        },
+
+        disableHoverWhen: () => {
+          return this.hasActor(this.selectCivGroup);
         },
       })
     );
