@@ -3,9 +3,11 @@ import { InGameScene } from "../scene/type/InGameScene";
 
 export class AbstractPlayer {
   private name: string;
+  private civData: JSON;
 
-  constructor(name: string) {
+  constructor(name: string, civData: JSON) {
     this.name = name;
+    this.civData = civData;
   }
 
   public static getPlayerByName(name: string) {

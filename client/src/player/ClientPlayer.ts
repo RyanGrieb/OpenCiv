@@ -19,8 +19,8 @@ export class ClientPlayer extends AbstractPlayer {
   private movementLines: Line[];
   private rightMouseDrag: boolean;
 
-  constructor(name: string) {
-    super(name);
+  constructor(name: string, civData: JSON) {
+    super(name, civData);
 
     this.movementLines = [];
 

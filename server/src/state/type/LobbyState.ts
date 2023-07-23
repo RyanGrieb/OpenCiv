@@ -123,6 +123,29 @@ export class LobbyState extends State {
   }
 
   public onDestroyed() {
+    //Assign players w/o a civ a non-assigned random civilization:
+    Game.getPlayers().forEach((player) => {
+      if (!player.getCivilizationData()) {
+        player.setCivilizationData(this.getRandomNonAssignedCiv());
+      }
+    });
+
     return super.onDestroyed();
+  }
+
+  private getRandomNonAssignedCiv(): Record<string, any> {
+    const assignedCivs = [];
+    Game.getPlayers().forEach((player) => {
+      if (player.getCivilizationData()) {
+        assignedCivs.push(player.getCivilizationData());
+      }
+    });
+    const nonAssignedCivs = this.playableCivs.filter((civ) => {
+      return !assignedCivs.includes(civ);
+    });
+
+    //Pick random non-assigned civ:
+    const randomIndex = random.int(0, nonAssignedCivs.length - 1);
+    return nonAssignedCivs[randomIndex];
   }
 }

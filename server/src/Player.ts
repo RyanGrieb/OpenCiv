@@ -138,4 +138,8 @@ export class Player {
       civData: this.civilizationData,
     };
   }
+
+  public getCivilizationData() {
+    return this.civilizationData;
+  }
 }
