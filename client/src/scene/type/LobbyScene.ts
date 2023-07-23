@@ -102,16 +102,31 @@ export class LobbyScene extends Scene {
     });
 
     NetworkEvents.on({
-      eventName: "playerNames",
+      eventName: "connectedPlayers",
       parentObject: this,
       callback: (data) => {
-        const playerNames = data["names"];
+        const players = data["players"];
         const requestingName = data["requestingName"];
-        playerList.clearRowText();
+        playerList.clearRow();
 
-        for (let i = 0; i < playerNames.length; i++) {
+        for (let i = 0; i < players.length; i++) {
           const currentRow = playerList.getRows()[i];
-          const playerName = playerNames[i];
+          const playerName = players[i]["name"];
+          let civIcon = SpriteRegion.UNKNOWN_ICON;
+          if ("civData" in players[i]) {
+            civIcon = SpriteRegion[players[i]["civData"]["icon_name"]];
+          }
+
+          currentRow.addActorIcon(
+            new Actor({
+              image: Game.getImage(GameImage.SPRITESHEET),
+              spriteRegion: civIcon,
+              x: currentRow.x + 8,
+              y: currentRow.y - 32 / 2 + currentRow.height / 2,
+              width: 32,
+              height: 32,
+            })
+          );
 
           if (playerName === requestingName) {
             // TODO: Indicate this row is the users player
@@ -127,17 +142,6 @@ export class LobbyScene extends Scene {
             );
           }
 
-          currentRow.addActorIcon(
-            new Actor({
-              image: Game.getImage(GameImage.SPRITESHEET),
-              spriteRegion: SpriteRegion.UNKNOWN_ICON,
-              x: currentRow.x + 8,
-              y: currentRow.y - 32 / 2 + currentRow.height / 2,
-              width: 32,
-              height: 32,
-            })
-          );
-
           currentRow.setText(playerName).then(() => {
             currentRow.setTextPosition(
               currentRow.x + 48,
@@ -146,6 +150,28 @@ export class LobbyScene extends Scene {
                 currentRow.getTextHeight() / 2
             );
           });
+        }
+      },
+    });
+
+    NetworkEvents.on({
+      eventName: "selectCiv",
+      parentObject: this,
+      callback: (data) => {
+        for (const row of playerList.getRows()) {
+          if (row.getText() !== data["playerName"]) {
+            continue;
+          }
+
+          for (const rowActor of row.getActorIcons()) {
+            if (rowActor.getSpriteRegion() === SpriteRegion.STAR) {
+              continue;
+            }
+
+            rowActor.setSpriteRegion(
+              SpriteRegion[data["civData"]["icon_name"]]
+            );
+          }
         }
       },
     });
@@ -162,6 +188,6 @@ export class LobbyScene extends Scene {
   }
 
   private updatePlayerList() {
-    WebsocketClient.sendMessage({ event: "playerNames" });
+    WebsocketClient.sendMessage({ event: "connectedPlayers" });
   }
 }

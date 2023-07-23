@@ -1,6 +1,8 @@
 civilizations:
   - name: Rome
     icon_name: ROME_ICON
+    border_inside_color: rgb(31,51,120)
+    border_outside_color: rgb(255,255,255)
     start_bias: none
     start_bias_desc: No start bias
     unique_unit_descs:
@@ -136,7 +138,7 @@ civilizations:
     unique_building_descs:
       - Dance Hall (Replaces Opera House)
     ability_descs:
-      - +20% Combat strength on shallow ocean tiles.
+      - +20% Combat strength for land units adjacent to shallow ocean tiles.
     cities:
       - Havana
       - Santiago de Cuba

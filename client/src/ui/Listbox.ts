@@ -190,7 +190,7 @@ export class ListBox extends Actor {
     });
   }
 
-  public clearRowText() {
+  public clearRow() {
     for (const row of this.rows) {
       row.clearText();
       row.clearActorIcons();

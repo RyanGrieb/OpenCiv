@@ -9,7 +9,7 @@ import YAML from "yaml";
 let playerIndex = 1;
 
 export class LobbyState extends State {
-  private playableCivs: any[];
+  private playableCivs: Record<string, any>[];
 
   public onInitialize() {
     console.log("Lobby state initialized");
@@ -73,12 +73,7 @@ export class LobbyState extends State {
         const player = Game.getPlayerFromWebsocket(websocket);
 
         // Get civ from this.playerCivs JSON list:
-        let civilization = undefined;
-        for (const civ of this.playableCivs) {
-          if (civ.name === data["name"]) {
-            civilization = civ;
-          }
-        }
+        const civilization = this.getCivByName(data["name"]);
 
         if (civilization) {
           player.sendNetworkEvent({
@@ -93,6 +88,38 @@ export class LobbyState extends State {
         }
       },
     });
+
+    ServerEvents.on({
+      eventName: "selectCiv",
+      parentObject: this,
+      callback: (data, websocket) => {
+        const player = Game.getPlayerFromWebsocket(websocket);
+        //TODO: Check if this civ is already selected.
+
+        const civilization = this.getCivByName(data["name"]);
+        player.setCivilizationData(civilization);
+
+        Game.getPlayers().forEach((gamePlayer) => {
+          gamePlayer.sendNetworkEvent({
+            event: "selectCiv",
+            name: civilization.name,
+            playerName: player.getName(),
+            civData: civilization,
+          });
+        });
+      },
+    });
+  }
+
+  public getCivByName(name: string) {
+    let civilization = undefined;
+    for (const civ of this.playableCivs) {
+      if (civ.name === name) {
+        civilization = civ;
+      }
+    }
+
+    return civilization;
   }
 
   public onDestroyed() {

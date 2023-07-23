@@ -15,6 +15,7 @@ export class Player {
   /** The callback to execute when the player has loaded into the game. */
   private loadedInCallback: () => void;
   private requestedNextTurn: boolean;
+  private civilizationData: Record<string, any>;
 
   /**
    * Creates a new player object.
@@ -84,6 +85,10 @@ export class Player {
     return this.requestedNextTurn;
   }
 
+  public setCivilizationData(civilizationData: Record<string, any>) {
+    this.civilizationData = civilizationData;
+  }
+
   /**
    * Send a network packet to instruct the client to zoom onto a specified location.
    * @param x The x coordinate of the location.
@@ -125,5 +130,12 @@ export class Player {
 
   public isLoadedIn() {
     return this.loadedIn;
+  }
+
+  public toJSON() {
+    return {
+      name: this.name,
+      civData: this.civilizationData,
+    };
   }
 }

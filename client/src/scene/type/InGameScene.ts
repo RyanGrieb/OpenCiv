@@ -30,15 +30,15 @@ export class InGameScene extends Scene {
     this.setCamera(camera);
 
     // Initialize all existing players
-    WebsocketClient.sendMessage({ event: "playersData" });
+    WebsocketClient.sendMessage({ event: "connectedPlayers" });
 
     NetworkEvents.on({
-      eventName: "playersData",
+      eventName: "connectedPlayers",
       parentObject: this,
       callback: (data) => {
         for (let i = 0; i < data["players"].length; i++) {
           const playerJSON = data["players"][i];
-          if (playerJSON["clientPlayer"]) {
+          if (playerJSON["name"] === data["requestingName"]) {
             this.players.push(new ClientPlayer(playerJSON["name"]));
           } else {
             this.players.push(new ExternalPlayer(playerJSON["name"]));

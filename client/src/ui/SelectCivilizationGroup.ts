@@ -85,6 +85,14 @@ export class SelectCivilizationGroup extends ActorGroup {
         this.displayCivInformation(data);
       },
     });
+
+    NetworkEvents.on({
+      eventName: "selectCiv",
+      parentObject: this,
+      callback: () => {
+        Game.getCurrentScene().removeActor(this);
+      },
+    });
   }
 
   public listAvailableCivs() {
@@ -293,6 +301,7 @@ export class SelectCivilizationGroup extends ActorGroup {
         // Select this civilization and close this window:
         // Fire event for lobby to handle this. Or network event..?
         //Game.getCurrentScene().removeActor(this);
+        WebsocketClient.sendMessage({ event: "selectCiv", name: data["name"] });
       },
     });
 

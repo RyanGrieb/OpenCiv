@@ -203,6 +203,10 @@ export class Actor implements SceneObject {
     this.image = Game.getImage(image);
   }
 
+  public setSpriteRegion(spriteRegion: SpriteRegion) {
+    this.spriteRegion = spriteRegion;
+  }
+
   public getImage(): HTMLImageElement {
     return this.image;
   }

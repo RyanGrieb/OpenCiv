@@ -52,28 +52,6 @@ export class InGameState extends State {
       },
     });
 
-    ServerEvents.on({
-      eventName: "playersData",
-      parentObject: this,
-      callback: (data, websocket) => {
-        const playersDataJSON = [];
-
-        Game.getPlayers().forEach((player) => {
-          playersDataJSON.push({
-            name: player.getName(),
-            clientPlayer: player.getWebsocket() === websocket,
-          });
-        });
-
-        websocket.send(
-          JSON.stringify({
-            event: "playersData",
-            players: playersDataJSON,
-          })
-        );
-      },
-    });
-
     Game.getPlayers().forEach((player) => {
       const badTileTypes = [
         "ocean",

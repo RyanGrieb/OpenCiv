@@ -28,20 +28,19 @@ export class Game {
       globalEvent: true,
     });
 
-    // Set up the listener for the "playerNames" event. Return all connected players in-game.
+    // Set up the listener for the "connectedPlayers" event. Return all connected players in-game.
     ServerEvents.on({
-      eventName: "playerNames",
+      eventName: "connectedPlayers",
       parentObject: this,
       callback: (data: JSON, websocket) => {
         // Get all player names and the name of the requesting player.
-        const playerNames = Array.from(this.players.keys());
         const requestingPlayerName =
           this.getPlayerFromWebsocket(websocket)?.getName();
         // Send the names to the requesting player.
         websocket.send(
           JSON.stringify({
-            event: "playerNames",
-            names: playerNames,
+            event: "connectedPlayers",
+            players: this.getPlayerJSONS(),
             requestingName: requestingPlayerName,
           })
         );
@@ -112,5 +111,15 @@ export class Game {
     }
 
     return undefined;
+  }
+
+  private static getPlayerJSONS() {
+    const playerJSONS = [];
+
+    for (const player of this.players.values()) {
+      playerJSONS.push(player.toJSON());
+    }
+
+    return playerJSONS;
   }
 }
