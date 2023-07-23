@@ -1,7 +1,7 @@
 civilizations:
   - name: Rome
     icon_name: ROME_ICON
-    inside_border_color: rgba(70,0,118,0.25)
+    inside_border_color: rgba(70,0,118,0.20)
     outside_border_color: rgb(240,199,0)
     start_bias: none
     start_bias_desc: No start bias

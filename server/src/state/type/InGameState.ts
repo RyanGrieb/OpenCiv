@@ -90,8 +90,8 @@ export class InGameState extends State {
                 tile.setCity(city);
                 player.getCities().push(city);
 
-                Game.getPlayers().forEach((player) => {
-                  player.sendNetworkEvent({
+                Game.getPlayers().forEach((gamePlayer) => {
+                  gamePlayer.sendNetworkEvent({
                     event: "newCity",
                     player: player.getName(),
                     cityName: city.getName(),

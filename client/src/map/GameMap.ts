@@ -67,7 +67,6 @@ export class GameMap {
         const tile = this.tiles[data["tileX"]][data["tileY"]];
         const player = AbstractPlayer.getPlayerByName(data["player"]);
         const cityName = data["cityName"];
-
         const city = new City({ tile: tile, player: player, name: cityName });
         tile.setCity(city);
         // Add the city actor to the scene (borders, nametag)
