@@ -3,7 +3,6 @@ import { Game } from "../../Game";
 import { Button } from "../../ui/Button";
 import { Label } from "../../ui/Label";
 import { SceneBackground } from "../SceneBackground";
-import { Actor } from "../Actor";
 
 export class MainMenuScene extends Scene {
   public onInitialize(): void {
