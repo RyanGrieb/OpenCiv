@@ -23,7 +23,7 @@ civilizations:
       - Setia
   - name: Mongolia
     icon_name: MONGOLIA_ICON
-    inside_border_color: rgba(81,0,9,0.35)
+    inside_border_color: rgba(81,0,9,0.25)
     outside_border_color: rgb(255,120,0)
     start_bias: plains
     start_bias_desc: "Start bias for: Plains"

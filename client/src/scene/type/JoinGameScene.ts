@@ -2,7 +2,6 @@ import { Game } from "../../Game";
 import { NetworkEvents, WebsocketClient } from "../../network/Client";
 import { Button } from "../../ui/Button";
 import { Label } from "../../ui/Label";
-import { ListBox } from "../../ui/Listbox";
 import { TextBox } from "../../ui/Textbox";
 import { Scene } from "../Scene";
 import { SceneBackground } from "../SceneBackground";
