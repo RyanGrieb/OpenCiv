@@ -6,6 +6,7 @@ export interface TextBoxOptions {
   y: number;
   width: number;
   height: number;
+  font?: string;
 }
 
 export class TextBox extends Actor {
@@ -15,6 +16,7 @@ export class TextBox extends Actor {
   private text: string;
   private textHeight: number;
   private blinkerX: number;
+  private font: string;
 
   constructor(options: TextBoxOptions) {
     super({
@@ -29,6 +31,7 @@ export class TextBox extends Actor {
     this.textHeight = -1;
     this.text = "";
     this.blinkerX = this.x + 5;
+    this.font = options.font ?? "24px sans-serif";
 
     this.on("mouse_enter", () => {
       document.getElementById("canvas").style.cursor = "text";
@@ -102,7 +105,7 @@ export class TextBox extends Actor {
 
   public draw(canvasContext: CanvasRenderingContext2D) {
     if (this.textHeight == -1) {
-      Game.measureText("M", "24px sans-serif").then(([width, height]) => {
+      Game.measureText("M", this.font).then(([width, height]) => {
         this.textHeight = height;
       });
     }
@@ -132,6 +135,7 @@ export class TextBox extends Actor {
     Game.drawText(
       {
         text: this.text,
+        font: this.font,
         color: "black",
         x: this.x,
         y: this.y + this.height / 2 - this.textHeight / 2,
@@ -161,7 +165,7 @@ export class TextBox extends Actor {
 
   public setText(text: string) {
     this.text = text;
-    Game.measureText(this.text, "24px sans-serif").then(([width, height]) => {
+    Game.measureText(this.text, this.font).then(([width, height]) => {
       //this.textHeight = height;
       this.blinkerX = this.x + 2 + width;
     });

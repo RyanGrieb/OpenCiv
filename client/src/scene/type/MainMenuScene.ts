@@ -3,6 +3,8 @@ import { Game } from "../../Game";
 import { Button } from "../../ui/Button";
 import { Label } from "../../ui/Label";
 import { SceneBackground } from "../SceneBackground";
+import { Actor } from "../Actor";
+
 export class MainMenuScene extends Scene {
   public onInitialize(): void {
     super.onInitialize();
@@ -24,6 +26,16 @@ export class MainMenuScene extends Scene {
     });
 
     this.addActor(titleLabel);
+
+    /*const backgroundActor = new Actor({
+      color: "rgba(0, 0, 0, 0.5)",
+      x: Game.getWidth() / 2 - 600 / 2,
+      y: Game.getHeight() / 3 + 68 / 2,
+      width: 600,
+      height: 200,
+    });
+
+    this.addActor(backgroundActor);*/
 
     this.addActor(
       new Button({

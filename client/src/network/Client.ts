@@ -130,6 +130,10 @@ export class WebsocketClient {
   public static init(serverAddress: string) {
     this.websocket = new WebSocket("ws://" + serverAddress + ":2000/");
 
+    this.websocket.onerror = (event) => {
+      NetworkEvents.call("websocketError", JSON.parse("{}"));
+    };
+
     this.websocket.addEventListener("open", (event) => {
       console.log("Connected to server");
     });

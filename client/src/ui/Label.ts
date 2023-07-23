@@ -28,6 +28,7 @@ export class Label extends Actor {
   private maxWidth: number;
   private wrappedText: string;
   private unwrappedWordHeight: number;
+  private oldText: string; // When were waiting to conform label size.
 
   constructor(options: LabelOptions) {
     super({
@@ -41,7 +42,7 @@ export class Label extends Actor {
     });
 
     this.text = options.text;
-    this.font = options.font;
+    this.font = options.font ?? "24px sans-serif";
     this.fontColor = options.fontColor;
     this.lineWidth = options.lineWidth ?? 0;
     this.shadowColor = options.shadowColor ?? this.color;
@@ -57,9 +58,19 @@ export class Label extends Actor {
   }
 
   public draw(canvasContext: CanvasRenderingContext2D) {
+    let text = this.text;
+
+    if (this.wrappedText) {
+      text = this.wrappedText;
+    }
+
+    if (this.oldText) {
+      text = this.oldText;
+    }
+
     Game.drawText(
       {
-        text: this.wrappedText ? this.wrappedText : this.text,
+        text: text,
         x: this.x,
         y: this.y,
         height: this.wrappedText ? this.unwrappedWordHeight : this.height,
@@ -95,9 +106,15 @@ export class Label extends Actor {
       this.width = textWidth;
       this.height = textHeight;
     }
+
+    this.oldText = undefined;
   }
 
-  public setText(text: string) {
+  public setText(text: string, waitForConformSize: boolean = false) {
+    if (waitForConformSize) {
+      this.oldText = this.text;
+    }
+
     this.text = text;
   }
 

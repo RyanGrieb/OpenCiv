@@ -467,7 +467,7 @@ export class Game {
 
     canvasContext.globalAlpha = textOptions.transparency;
     canvasContext.fillStyle = textOptions.color;
-    canvasContext.font = textOptions.font ?? "24px sans-serif";
+    canvasContext.font = textOptions.font;
     canvasContext.shadowColor = textOptions.shadowColor ?? "white";
     //this.canvasContext.shadowBlur = textOptions.shadowBlur ?? 0; // FIXME: Find alternative that provides better performance
     canvasContext.lineWidth = textOptions.lineWidth ?? 0; // 4
