@@ -10,6 +10,7 @@ import { Label } from "../ui/Label";
 export interface CityOptions {
   player: AbstractPlayer;
   tile: Tile;
+  name: string;
 }
 
 /**
@@ -22,13 +23,20 @@ export class City extends ActorGroup {
   private territoryOverlays: Actor[];
   private name: string;
   private nameLabel: Label;
+  private innerBorderColor: string;
+  private outsideBorderColor: string;
 
   constructor(options: CityOptions) {
     super({ x: 0, y: 0, z: 2, width: 0, height: 0 });
 
     this.player = options.player;
     this.tile = options.tile;
-    this.name = "Athens"; //FIXME: Generate city names server-side
+    this.name = options.name;
+
+    this.innerBorderColor =
+      this.player.getCivilizationData()["inside_border_color"];
+    this.outsideBorderColor =
+      this.player.getCivilizationData()["outside_border_color"];
 
     this.territoryOverlays = [];
     this.territory = [this.tile];
@@ -71,15 +79,14 @@ export class City extends ActorGroup {
         y: tile.getY(),
         width: 32,
         height: 32,
-        color: "yellow",
-        transparency: 0.1,
+        color: this.innerBorderColor,
       });
 
       this.addActor(territoryOverlay);
       this.territoryOverlays.push(territoryOverlay);
     }
 
-    GameMap.getInstance().drawBorder(this.territory);
+    GameMap.getInstance().drawBorder(this.territory, this.outsideBorderColor);
   }
 
   public getTerritory() {

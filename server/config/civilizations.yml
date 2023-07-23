@@ -1,8 +1,8 @@
 civilizations:
   - name: Rome
     icon_name: ROME_ICON
-    border_inside_color: rgb(31,51,120)
-    border_outside_color: rgb(255,255,255)
+    inside_border_color: rgba(70,0,118,0.25)
+    outside_border_color: rgb(240,199,0)
     start_bias: none
     start_bias_desc: No start bias
     unique_unit_descs:
@@ -23,6 +23,8 @@ civilizations:
       - Setia
   - name: Mongolia
     icon_name: MONGOLIA_ICON
+    inside_border_color: rgba(81,0,9,0.35)
+    outside_border_color: rgb(255,120,0)
     start_bias: plains
     start_bias_desc: "Start bias for: Plains"
     unique_unit_descs:
@@ -44,6 +46,8 @@ civilizations:
       - Sanchu
   - name: Mamluks
     icon_name: MAMLUKS_ICON
+    inside_border_color: rgba(255,252,3,0.25)
+    outside_border_color: rgb(255,255,255)
     start_bias: desert
     start_bias_desc: "Start bias for: Desert"
     unique_unit_descs:
@@ -66,6 +70,8 @@ civilizations:
       - Mosul
   - name: America
     icon_name: AMERICA_ICON
+    inside_border_color: rgba(31,51,120,0.35)
+    outside_border_color: rgb(255,255,255)
     start_bias: none
     start_bias_desc: No start bias
     unique_unit_descs:
@@ -87,6 +93,8 @@ civilizations:
       - Houston
   - name: Germany
     icon_name: GERMANY_ICON
+    inside_border_color: rgba(179,178,184,0.35)
+    outside_border_color: rgb(37,43,33)
     start_bias: none
     start_bias_desc: No start bias
     unique_unit_descs:
@@ -109,6 +117,8 @@ civilizations:
       - Düsseldorf
       - Bremen
   - name: England
+    inside_border_color: rgba(109,2,0,0.30)
+    outside_border_color: rgb(255,255,255)
     icon_name: ENGLAND_ICON
     start_bias: shallow_ocean
     start_bias_desc: "Start bias for: Shallow Ocean"
@@ -131,6 +141,8 @@ civilizations:
       - Liverpool
   - name: Cuba
     icon_name: CUBA_ICON
+    inside_border_color: rgba(31,51,120,0.35)
+    outside_border_color: blue
     start_bias: shallow_ocean
     start_bias_desc: "Start bias for: Shallow Ocean"
     unique_unit_descs:
@@ -152,6 +164,8 @@ civilizations:
       - Matanzas
   - name: Canada
     icon_name: CANADA_ICON
+    inside_border_color: rgba(255,255,255,0.35)
+    outside_border_color: red
     start_bias: tundra
     start_bias_desc: "Start bias for: Tundra"
     unique_unit_descs:

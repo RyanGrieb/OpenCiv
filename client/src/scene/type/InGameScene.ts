@@ -38,7 +38,7 @@ export class InGameScene extends Scene {
       callback: (data) => {
         for (let i = 0; i < data["players"].length; i++) {
           const playerJSON = data["players"][i];
-          const civData = data["civData"];
+          const civData = playerJSON["civData"];
           if (playerJSON["name"] === data["requestingName"]) {
             this.players.push(new ClientPlayer(playerJSON["name"], civData));
           } else {

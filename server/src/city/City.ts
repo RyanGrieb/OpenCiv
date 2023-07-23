@@ -10,6 +10,7 @@ export interface CityOptions {
 export class City {
   private tile: Tile;
   private player: Player;
+  private name: string;
   /**
    * Creates a new City instance.
    * @param options - The options for initializing the city.
@@ -19,15 +20,7 @@ export class City {
   constructor(options: CityOptions) {
     this.tile = options.tile;
     this.player = options.player;
-
-    Game.getPlayers().forEach((player) => {
-      player.sendNetworkEvent({
-        event: "newCity",
-        player: this.player.getName(),
-        tileX: this.tile.getX(),
-        tileY: this.tile.getY(),
-      });
-    });
+    this.name = this.player.getNextAvailableCityName();
   }
 
   public getTile(): Tile {
@@ -36,5 +29,9 @@ export class City {
 
   public getPlayer(): Player {
     return this.player;
+  }
+
+  public getName() {
+    return this.name;
   }
 }

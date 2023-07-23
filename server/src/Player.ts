@@ -1,6 +1,7 @@
 import { WebSocket } from "ws";
 import { ServerEvents } from "./Events";
 import { Game } from "./Game";
+import { City } from "./city/City";
 
 /**
  * Represents a player in the game.
@@ -16,6 +17,7 @@ export class Player {
   private loadedInCallback: () => void;
   private requestedNextTurn: boolean;
   private civilizationData: Record<string, any>;
+  private cities: City[];
 
   /**
    * Creates a new player object.
@@ -27,6 +29,7 @@ export class Player {
     this.wsConnection = wsConnection;
     this.loadedIn = false;
     this.requestedNextTurn = false;
+    this.cities = [];
 
     // Add event listener for when the player disconnects
     this.wsConnection.on("close", (data) => {
@@ -141,5 +144,29 @@ export class Player {
 
   public getCivilizationData() {
     return this.civilizationData;
+  }
+
+  /**
+   * Checks for exsting city names, and returns the next available city name.
+   */
+  public getNextAvailableCityName(): string {
+    const eixtingNames = [];
+    const allCityNames = this.civilizationData["cities"];
+    for (const city of this.cities) {
+      eixtingNames.push(city.getName());
+    }
+
+    for (const name of allCityNames) {
+      if (!eixtingNames.includes(name)) {
+        return name;
+      }
+    }
+
+    //FIXME: This should never happen!
+    return "MAX_CITIES_REACHED";
+  }
+
+  public getCities() {
+    return this.cities;
   }
 }

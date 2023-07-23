@@ -82,9 +82,23 @@ export class InGameState extends State {
               desc: "Settle City",
               onAction: (unit: Unit) => {
                 console.log("ACTION: Act on settle city.");
+
                 const tile = unit.getTile();
                 unit.delete();
-                tile.setCity(new City({ player: player, tile: tile }));
+
+                const city = new City({ player: player, tile: tile });
+                tile.setCity(city);
+                player.getCities().push(city);
+
+                Game.getPlayers().forEach((player) => {
+                  player.sendNetworkEvent({
+                    event: "newCity",
+                    player: player.getName(),
+                    cityName: city.getName(),
+                    tileX: tile.getX(),
+                    tileY: tile.getY(),
+                  });
+                });
               },
             },
           ],

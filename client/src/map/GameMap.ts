@@ -66,8 +66,9 @@ export class GameMap {
       callback: (data) => {
         const tile = this.tiles[data["tileX"]][data["tileY"]];
         const player = AbstractPlayer.getPlayerByName(data["player"]);
+        const cityName = data["cityName"];
 
-        const city = new City({ tile: tile, player: player });
+        const city = new City({ tile: tile, player: player, name: cityName });
         tile.setCity(city);
         // Add the city actor to the scene (borders, nametag)
         Game.getCurrentScene().addActor(city);
@@ -423,7 +424,7 @@ export class GameMap {
     });
   }
 
-  public drawBorder(tiles: Tile[]) {
+  public drawBorder(tiles: Tile[], color: string) {
     // Create outline from the outer border tiles.
 
     //1. Get outter tiles
@@ -454,7 +455,7 @@ export class GameMap {
         tile: tile,
         edges: outlineEdges,
         thickness: 1,
-        color: "red",
+        color: color,
         cityOutline: true,
       });
     }

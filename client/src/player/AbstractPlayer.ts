@@ -28,4 +28,8 @@ export class AbstractPlayer {
   public setName(name: string) {
     this.name = name;
   }
+
+  public getCivilizationData() {
+    return this.civData;
+  }
 }
