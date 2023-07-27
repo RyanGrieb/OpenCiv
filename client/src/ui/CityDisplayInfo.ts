@@ -28,29 +28,77 @@ export class CityDisplayInfo extends ActorGroup {
 
   private initializeBuildingsWindow() {
     const listbox = new ListBox({
-      x: Game.getWidth() - 250,
+      x: Game.getWidth() - 275,
       y: 21,
-      width: 250,
+      width: 275,
       height: Game.getHeight() - 21,
       textFont: "20px serif",
       fontColor: "white",
     });
 
     listbox.addCategory("Citizen Management");
-    listbox.addItem({
+    listbox.addRow({
       category: "Citizen Management",
       text: "Default Focus",
+      textX: listbox.getNextRowPosition().x + 48,
+      centerTextY: true,
+      rowHeight: 50,
       actorIcons: [
         new RadioButton({
-          x: listbox.getNextItemPosition().x,
-          y: listbox.getNextItemPosition().y,
+          x: listbox.getNextRowPosition().x - 8,
+          y: listbox.getNextRowPosition().y + 50 / 2 - 64 / 2,
           z: this.z,
-          width: 32,
-          height: 32,
+          width: 64,
+          height: 64,
           getOtherRadioButtons: this.getCitizenMgmtRadioButtons,
         }),
       ],
     });
+
+    const focuses = [
+      { name: "Food Focus", icon: SpriteRegion.FOOD_ICON },
+      { name: "Production Focus", icon: SpriteRegion.PRODUCTION_ICON },
+      { name: "Gold Focus", icon: SpriteRegion.GOLD_ICON },
+      { name: "Science Focus", icon: SpriteRegion.SCIENCE_ICON },
+      { name: "Culture Focus", icon: SpriteRegion.CULTURE_ICON },
+    ];
+
+    for (const focus of focuses) {
+      listbox.addRow({
+        category: "Citizen Management",
+        text: focus.name,
+        textX: listbox.getNextRowPosition().x + 68,
+        centerTextY: true,
+        rowHeight: 50,
+        actorIcons: [
+          new RadioButton({
+            x: listbox.getNextRowPosition().x - 8,
+            y: listbox.getNextRowPosition().y + 50 / 2 - 64 / 2,
+            z: this.z,
+            width: 64,
+            height: 64,
+            getOtherRadioButtons: this.getCitizenMgmtRadioButtons,
+          }),
+          new Actor({
+            image: Game.getImage(GameImage.SPRITESHEET),
+            spriteRegion: focus.icon,
+            x: listbox.getNextRowPosition().x + 38,
+            y: listbox.getNextRowPosition().y + 50 / 2 - 32 / 2,
+            z: this.z,
+            width: 32,
+            height: 32,
+            cameraApplies: false,
+          }),
+        ],
+      });
+    }
+
+    // If progress towards great people, add category & relevant rows:
+
+    // Add wonders category if any wonders are built in city:
+
+    // Add buildings category for existing city buildings:
+    listbox.addCategory("Buildings");
 
     this.addActor(listbox);
   }

@@ -21,6 +21,7 @@ export class RadioButton extends Actor {
       z: options.z,
       width: options.width,
       height: options.height,
+      cameraApplies: false,
     });
   }
 }

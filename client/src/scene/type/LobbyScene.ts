@@ -130,22 +130,25 @@ export class LobbyScene extends Scene {
       callback: (data) => {
         const players = data["players"];
         const requestingName = data["requestingName"];
-        playerList.clearRow();
+        playerList.clearRows();
 
         for (let i = 0; i < players.length; i++) {
-          const currentRow = playerList.getRows()[i];
           const playerName = players[i]["name"];
           let civIcon = SpriteRegion.UNKNOWN_ICON;
           if ("civData" in players[i]) {
             civIcon = SpriteRegion[players[i]["civData"]["icon_name"]];
           }
 
+          const currentRow = playerList.addRow({
+            text: playerName,
+          });
+
           currentRow.addActorIcon(
             new Actor({
               image: Game.getImage(GameImage.SPRITESHEET),
               spriteRegion: civIcon,
-              x: currentRow.x + 8,
-              y: currentRow.y - 32 / 2 + currentRow.height / 2,
+              x: currentRow.getX() + 8,
+              y: currentRow.getY() - 32 / 2 + currentRow.getHeight() / 2,
               width: 32,
               height: 32,
             })
@@ -157,8 +160,8 @@ export class LobbyScene extends Scene {
               new Actor({
                 image: Game.getImage(GameImage.SPRITESHEET),
                 spriteRegion: SpriteRegion.STAR,
-                x: currentRow.x + currentRow.width - 32 - 8,
-                y: currentRow.y - 32 / 2 + currentRow.height / 2,
+                x: currentRow.getX() + currentRow.getWidth() - 32 - 8,
+                y: currentRow.getY() - 32 / 2 + currentRow.getHeight() / 2,
                 width: 32,
                 height: 32,
               })
@@ -167,9 +170,9 @@ export class LobbyScene extends Scene {
 
           currentRow.setText(playerName).then(() => {
             currentRow.setTextPosition(
-              currentRow.x + 48,
-              currentRow.y +
-                currentRow.height / 2 -
+              currentRow.getX() + 48,
+              currentRow.getY() +
+                currentRow.getHeight() / 2 -
                 currentRow.getTextHeight() / 2
             );
           });
