@@ -99,6 +99,11 @@ export class InGameState extends State {
                     tileY: tile.getY(),
                   });
                 });
+
+                // Add palace to city if it's the first city
+                if (player.getCities().length < 2) {
+                  city.addBuilding("palace");
+                }
               },
             },
           ],

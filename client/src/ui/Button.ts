@@ -23,7 +23,7 @@ export interface ButtonOptions {
   onClicked: Function;
   onMouseEnter?: Function;
   onMouseExit?: Function;
-  disableHovenWhen?: () => boolean;
+  disableHoverWhen?: () => boolean;
 }
 
 export class Button extends ActorGroup {
@@ -40,7 +40,7 @@ export class Button extends ActorGroup {
   private textHeight: number;
   private buttonActor: Actor;
   private iconOnly: boolean;
-  private disableHovenWhen?: () => boolean;
+  private disableHoverWhen?: () => boolean;
 
   constructor(options: ButtonOptions) {
     super({
@@ -64,7 +64,7 @@ export class Button extends ActorGroup {
     this.buttonHoveredImage =
       options.buttonHoveredImage || GameImage.BUTTON_HOVERED;
     this.iconOnly = options.iconOnly || false;
-    this.disableHovenWhen = options.disableHovenWhen;
+    this.disableHoverWhen = options.disableHoverWhen;
 
     if (!this.iconOnly) {
       this.buttonActor = new Actor({
@@ -94,7 +94,7 @@ export class Button extends ActorGroup {
 
     this.on("mousemove", (options) => {
       if (this.mouseInside) {
-        if (this.disableHovenWhen && this.disableHovenWhen()) {
+        if (this.disableHoverWhen && this.disableHoverWhen()) {
           return;
         }
 
@@ -103,7 +103,7 @@ export class Button extends ActorGroup {
     });
 
     this.on("mouse_enter", () => {
-      if (this.disableHovenWhen && this.disableHovenWhen()) {
+      if (this.disableHoverWhen && this.disableHoverWhen()) {
         return;
       }
 

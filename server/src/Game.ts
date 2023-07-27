@@ -3,6 +3,9 @@ import { State } from "./state/State";
 import { WebSocket } from "ws";
 import { ServerEvents } from "./Events";
 
+import fs from "fs";
+import YAML from "yaml";
+
 /**
  * Game class is responsible for managing the state of the game, and players.
  */
@@ -11,12 +14,20 @@ export class Game {
   private static currentState: State;
   private static states: Map<string, State>;
   private static players: Map<string, Player>;
+  private static cityBuildings: Record<string, any>[];
 
   /**
    * Initializes the game by setting up server event listeners for various events.
    */
   public static init() {
     this.states = new Map<string, State>();
+
+    // Load available buildings from config file
+    const buildingsYMLData = YAML.parse(
+      fs.readFileSync("./config/buildings.yml", "utf-8")
+    );
+    //Convert civsData from YAML to JSON:
+    this.cityBuildings = JSON.parse(JSON.stringify(buildingsYMLData.buildings));
 
     // Set up the listener for the "setState" event. Changes the game-state.
     ServerEvents.on({
@@ -107,6 +118,19 @@ export class Game {
     for (const player of this.players.values()) {
       if (player.getWebsocket() === websocket) {
         return player;
+      }
+    }
+
+    return undefined;
+  }
+
+  public static getBuildingDataByName(name: string) {
+    for (const building of this.cityBuildings) {
+      if (
+        (building.name as string).toLocaleLowerCase() ===
+        name.toLocaleLowerCase()
+      ) {
+        return building;
       }
     }
 

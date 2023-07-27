@@ -2,10 +2,12 @@ import { GameImage, SpriteRegion } from "../Assets";
 import { Game } from "../Game";
 import { GameMap } from "../map/GameMap";
 import { Tile } from "../map/Tile";
+import { NetworkEvents } from "../network/Client";
 import { AbstractPlayer } from "../player/AbstractPlayer";
 import { Actor } from "../scene/Actor";
 import { ActorGroup } from "../scene/ActorGroup";
 import { Label } from "../ui/Label";
+import { Buidling } from "./Building";
 
 export interface CityOptions {
   player: AbstractPlayer;
@@ -25,6 +27,7 @@ export class City extends ActorGroup {
   private nameLabel: Label;
   private innerBorderColor: string;
   private outsideBorderColor: string;
+  private buildings: Buidling[];
 
   constructor(options: CityOptions) {
     super({ x: 0, y: 0, z: 2, width: 0, height: 0 });
@@ -32,6 +35,7 @@ export class City extends ActorGroup {
     this.player = options.player;
     this.tile = options.tile;
     this.name = options.name;
+    this.buildings = [];
 
     this.innerBorderColor =
       this.player.getCivilizationData()["inside_border_color"];
@@ -87,6 +91,15 @@ export class City extends ActorGroup {
     }
 
     GameMap.getInstance().drawBorder(this.territory, this.outsideBorderColor);
+
+    NetworkEvents.on({
+      eventName: "addBuilding",
+      parentObject: this,
+      callback: (data: any) => {
+        const buildingData = data["building"];
+        this.buildings.push(new Buidling(buildingData));
+      },
+    });
   }
 
   public getTerritory() {
@@ -103,5 +116,9 @@ export class City extends ActorGroup {
 
   public getName() {
     return this.name;
+  }
+
+  public getBuildings() {
+    return this.buildings;
   }
 }

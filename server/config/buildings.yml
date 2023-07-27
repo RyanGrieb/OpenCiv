@@ -1,0 +1,10 @@
+buildings:
+  - name: Palace
+    asset_name: BUILDING_PALACE
+    stats:
+      - science: 3
+      - production: 3
+      - gold: 2
+      - defense: 2
+      - culture: 1
+    

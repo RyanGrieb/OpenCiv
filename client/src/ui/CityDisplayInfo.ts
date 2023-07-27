@@ -4,8 +4,12 @@ import { City } from "../city/City";
 import { Actor } from "../scene/Actor";
 import { ActorGroup } from "../scene/ActorGroup";
 import { Label } from "./Label";
+import { ListBox } from "./Listbox";
+import { RadioButton } from "./RadioButton";
 
 export class CityDisplayInfo extends ActorGroup {
+  private city: City;
+
   constructor(city: City) {
     super({
       x: 0,
@@ -16,6 +20,46 @@ export class CityDisplayInfo extends ActorGroup {
       cameraApplies: false,
     });
 
+    this.city = city;
+
+    this.initializeStatsWindow();
+    this.initializeBuildingsWindow();
+  }
+
+  private initializeBuildingsWindow() {
+    const listbox = new ListBox({
+      x: Game.getWidth() - 250,
+      y: 21,
+      width: 250,
+      height: Game.getHeight() - 21,
+      textFont: "20px serif",
+      fontColor: "white",
+    });
+
+    listbox.addCategory("Citizen Management");
+    listbox.addItem({
+      category: "Citizen Management",
+      text: "Default Focus",
+      actorIcons: [
+        new RadioButton({
+          x: listbox.getNextItemPosition().x,
+          y: listbox.getNextItemPosition().y,
+          z: this.z,
+          width: 32,
+          height: 32,
+          getOtherRadioButtons: this.getCitizenMgmtRadioButtons,
+        }),
+      ],
+    });
+
+    this.addActor(listbox);
+  }
+
+  private getCitizenMgmtRadioButtons() {
+    return [];
+  }
+
+  private initializeStatsWindow() {
     this.addActor(
       new Actor({
         image: Game.getImage(GameImage.POPUP_BOX),
@@ -27,7 +71,7 @@ export class CityDisplayInfo extends ActorGroup {
     );
 
     const nameLabel = new Label({
-      text: city.getName(),
+      text: this.city.getName(),
       font: "20px serif",
       fontColor: "white",
     });

@@ -1,5 +1,6 @@
 import { Game } from "../Game";
 import { Actor } from "../scene/Actor";
+import { Vector } from "../util/Vector";
 import { Rectangle, RectangleOptions } from "./Rectangle";
 
 interface RowOptions extends RectangleOptions {
@@ -146,6 +147,21 @@ export class ListBox extends Actor {
       index += 1;
     }
     //TODO: Initialize rows here
+  }
+
+  public addCategory(name: string) {
+    // Add row with category name & hide/view option button on left side.
+    // this
+  }
+
+  public addItem(options: {
+    category: string;
+    text: string;
+    actorIcons: Actor[];
+  }) {}
+
+  public getNextItemPosition(): Vector {
+    return new Vector(0, 0);
   }
 
   public draw(canvasContext: CanvasRenderingContext2D) {
