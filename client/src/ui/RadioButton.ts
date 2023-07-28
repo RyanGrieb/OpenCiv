@@ -30,7 +30,6 @@ export class RadioButton extends Actor {
 
     this.selected = options.selected ?? false;
     this.getOtherRadioButtons = options.getOtherRadioButtons;
-    console.log(this.getOtherRadioButtons());
 
     if (this.selected) {
       this.spriteRegion = SpriteRegion.RADIO_BUTTON_SELECTED;
@@ -51,7 +50,6 @@ export class RadioButton extends Actor {
     });
 
     this.on("clicked", () => {
-      console.log("RADIO CLICKED");
       this.select(true);
     });
   }
@@ -62,7 +60,6 @@ export class RadioButton extends Actor {
     if (this.selected) {
       this.spriteRegion = SpriteRegion.RADIO_BUTTON_SELECTED;
 
-      console.log(this);
       // Unselect other radio buttons
       for (const radioButton of this.getOtherRadioButtons()) {
         if (radioButton === this) {

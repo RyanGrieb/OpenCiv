@@ -54,6 +54,21 @@ export class Label extends Actor {
       this.on("clicked", () => {
         this.onClickCallback();
       });
+
+      // Change cursor to pointer when mouse is over label
+      this.on("mousemove", () => {
+        if (this.mouseInside) {
+          Game.setCursor("pointer");
+        }
+      });
+
+      this.on("mouse_enter", () => {
+        Game.setCursor("pointer");
+      });
+
+      this.on("mouse_exit", () => {
+        Game.setCursor("default");
+      });
     }
   }
 

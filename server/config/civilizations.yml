@@ -164,7 +164,7 @@ civilizations:
       - Matanzas
   - name: Canada
     icon_name: CANADA_ICON
-    inside_border_color: rgba(255,255,255,0.35)
+    inside_border_color: rgba(255,255,255,0.25)
     outside_border_color: red
     start_bias: tundra
     start_bias_desc: "Start bias for: Tundra"
