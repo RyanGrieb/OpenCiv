@@ -143,7 +143,7 @@ export class LobbyScene extends Scene {
             text: playerName,
           });
 
-          currentRow.addActorIcon(
+          currentRow.addActor(
             new Actor({
               image: Game.getImage(GameImage.SPRITESHEET),
               spriteRegion: civIcon,
@@ -156,7 +156,7 @@ export class LobbyScene extends Scene {
 
           if (playerName === requestingName) {
             // TODO: Indicate this row is the users player
-            currentRow.addActorIcon(
+            currentRow.addActor(
               new Actor({
                 image: Game.getImage(GameImage.SPRITESHEET),
                 spriteRegion: SpriteRegion.STAR,
@@ -168,12 +168,12 @@ export class LobbyScene extends Scene {
             );
           }
 
-          currentRow.setText(playerName).then(() => {
-            currentRow.setTextPosition(
+          currentRow.conformLabelSize().then(() => {
+            currentRow.setLabelPosition(
               currentRow.getX() + 48,
               currentRow.getY() +
                 currentRow.getHeight() / 2 -
-                currentRow.getTextHeight() / 2
+                currentRow.getLabel().getHeight() / 2
             );
           });
         }
@@ -185,11 +185,11 @@ export class LobbyScene extends Scene {
       parentObject: this,
       callback: (data) => {
         for (const row of playerList.getRows()) {
-          if (row.getText() !== data["playerName"]) {
+          if (row.getLabel().getText() !== data["playerName"]) {
             continue;
           }
 
-          for (const rowActor of row.getActorIcons()) {
+          for (const rowActor of row.getActors()) {
             if (rowActor.getSpriteRegion() === SpriteRegion.STAR) {
               continue;
             }

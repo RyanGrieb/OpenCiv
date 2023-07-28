@@ -10,6 +10,8 @@ import { RadioButton } from "./RadioButton";
 export class CityDisplayInfo extends ActorGroup {
   private city: City;
 
+  private citizenMgmtRadioButtons: RadioButton[];
+
   constructor(city: City) {
     super({
       x: 0,
@@ -21,6 +23,7 @@ export class CityDisplayInfo extends ActorGroup {
     });
 
     this.city = city;
+    this.citizenMgmtRadioButtons = [];
 
     this.initializeStatsWindow();
     this.initializeBuildingsWindow();
@@ -37,22 +40,25 @@ export class CityDisplayInfo extends ActorGroup {
     });
 
     listbox.addCategory("Citizen Management");
+
+    const radioButton = new RadioButton({
+      x: listbox.getNextRowPosition().x - 8,
+      y: listbox.getNextRowPosition().y + 50 / 2 - 64 / 2,
+      z: this.z,
+      width: 64,
+      height: 64,
+      getOtherRadioButtons: this.getCitizenMgmtRadioButtons.bind(this),
+      selected: true,
+    });
+    this.citizenMgmtRadioButtons.push(radioButton);
+
     listbox.addRow({
       category: "Citizen Management",
       text: "Default Focus",
       textX: listbox.getNextRowPosition().x + 48,
       centerTextY: true,
       rowHeight: 50,
-      actorIcons: [
-        new RadioButton({
-          x: listbox.getNextRowPosition().x - 8,
-          y: listbox.getNextRowPosition().y + 50 / 2 - 64 / 2,
-          z: this.z,
-          width: 64,
-          height: 64,
-          getOtherRadioButtons: this.getCitizenMgmtRadioButtons,
-        }),
-      ],
+      actorIcons: [radioButton],
     });
 
     const focuses = [
@@ -64,6 +70,16 @@ export class CityDisplayInfo extends ActorGroup {
     ];
 
     for (const focus of focuses) {
+      const radioButton = new RadioButton({
+        x: listbox.getNextRowPosition().x - 8,
+        y: listbox.getNextRowPosition().y + 50 / 2 - 64 / 2,
+        z: this.z,
+        width: 64,
+        height: 64,
+        getOtherRadioButtons: this.getCitizenMgmtRadioButtons.bind(this),
+      });
+      this.citizenMgmtRadioButtons.push(radioButton);
+
       listbox.addRow({
         category: "Citizen Management",
         text: focus.name,
@@ -71,14 +87,7 @@ export class CityDisplayInfo extends ActorGroup {
         centerTextY: true,
         rowHeight: 50,
         actorIcons: [
-          new RadioButton({
-            x: listbox.getNextRowPosition().x - 8,
-            y: listbox.getNextRowPosition().y + 50 / 2 - 64 / 2,
-            z: this.z,
-            width: 64,
-            height: 64,
-            getOtherRadioButtons: this.getCitizenMgmtRadioButtons,
-          }),
+          radioButton,
           new Actor({
             image: Game.getImage(GameImage.SPRITESHEET),
             spriteRegion: focus.icon,
@@ -104,7 +113,7 @@ export class CityDisplayInfo extends ActorGroup {
   }
 
   private getCitizenMgmtRadioButtons() {
-    return [];
+    return this.citizenMgmtRadioButtons;
   }
 
   private initializeStatsWindow() {

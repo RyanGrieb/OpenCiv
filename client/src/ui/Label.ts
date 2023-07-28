@@ -121,4 +121,8 @@ export class Label extends Actor {
   public getText(): string {
     return this.text;
   }
+
+  public getFont() {
+    return this.font;
+  }
 }

@@ -3,7 +3,7 @@
     "version": "1.0.0",
     "description": "",
     "scripts": {
-        "dev": "parcel index.html --no-cache",
+        "dev": "parcel --no-cache index.html",
         "build": "parcel build dist"
     },
     "devDependencies": {

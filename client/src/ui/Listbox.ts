@@ -1,11 +1,13 @@
-import { Game } from "../Game";
 import { Actor } from "../scene/Actor";
+import { ActorGroup } from "../scene/ActorGroup";
 import { Vector } from "../util/Vector";
-import { Rectangle, RectangleOptions } from "./Rectangle";
+import { Label } from "./Label";
+import { RectangleOptions } from "./Rectangle";
 
 interface RowOptions extends RectangleOptions {
   x: number;
   y: number;
+  z: number;
   width: number;
   height: number;
   color: string;
@@ -16,44 +18,48 @@ interface RowOptions extends RectangleOptions {
   textY?: number;
 }
 
-class Row {
-  public rectangle: Rectangle;
-  private textHeight: number;
-  private textWidth: number;
-  private x: number;
-  private y: number;
-  private width: number;
-  private height: number;
-  private text: string;
-  private actorIcons: Actor[];
-  private textX: number;
-  private textY: number;
-  private font: string;
-  private fontColor: string;
+class Row extends ActorGroup {
+  private label: Label;
 
   // TODO: Support image
   constructor(options: RowOptions) {
-    this.actorIcons = [];
-    this.rectangle = new Rectangle(options);
-    this.text = options.text;
-    this.x = options.x;
-    this.y = options.y;
-    this.width = options.width;
-    this.height = options.height;
-    this.font = options.font ?? "12px sans";
-    this.fontColor = options.fontColor ?? "black";
-    this.textX = options.textX ?? this.x;
-    this.textY = options.textY ?? this.y;
+    super({
+      x: options.x,
+      y: options.y,
+      z: options.z,
+      width: options.width,
+      height: options.height,
+      cameraApplies: false,
+    });
+
+    this.addActor(
+      new Actor({
+        x: this.x,
+        y: this.y,
+        width: this.width,
+        height: this.height,
+        color: options.color,
+      })
+    );
+
+    const label = new Label({
+      text: options.text,
+      fontColor: options.fontColor,
+      font: options.font,
+      x: options.textX ?? this.x,
+      y: options.textY ?? this.y,
+    });
+
+    this.label = label;
+    this.addActor(label);
   }
 
-  public async setText(text: string) {
-    this.text = undefined;
-    await Game.measureText(text, this.font).then(([width, height]) => {
-      //TODO: Update width and height values for text
-      this.text = text;
-      this.textHeight = height;
-      this.textWidth = width;
-    });
+  public conformLabelSize(): Promise<void> {
+    return this.label.conformSize();
+  }
+
+  public setLabelPosition(x: number, y: number) {
+    this.label.setPosition(x, y);
   }
 
   public getWidth() {
@@ -72,54 +78,8 @@ class Row {
     return this.height;
   }
 
-  public setTextPosition(x: number, y: number) {
-    this.textX = x;
-    this.textY = y;
-  }
-
-  public getText() {
-    return this.text;
-  }
-
-  public getActorIcons() {
-    return this.actorIcons;
-  }
-
-  public clearActorIcons() {
-    this.actorIcons = [];
-  }
-
-  public addActorIcon(actor: Actor) {
-    this.actorIcons.push(actor);
-  }
-
-  public getTextX() {
-    return this.textX;
-  }
-
-  public getTextY() {
-    return this.textY;
-  }
-
-  public clearText() {
-    this.text = undefined;
-    //this.textHeight = undefined;
-  }
-
-  public getFont() {
-    return this.font;
-  }
-
-  public getFontColor() {
-    return this.fontColor;
-  }
-
-  public getTextHeight() {
-    return this.textHeight;
-  }
-
-  public getTextWidth() {
-    return this.textWidth;
+  public getLabel() {
+    return this.label;
   }
 }
 
@@ -133,7 +93,7 @@ export interface ListBoxOptions {
   fontColor: string;
 }
 
-export class ListBox extends Actor {
+export class ListBox extends ActorGroup {
   private rowHeight: number;
   private rows: Row[];
   private textFont: string;
@@ -146,6 +106,16 @@ export class ListBox extends Actor {
     this.textFont = options.textFont;
     this.fontColor = options.fontColor;
     this.rows = [];
+
+    this.addActor(
+      new Actor({
+        x: this.x,
+        y: this.y,
+        width: this.width,
+        height: this.height,
+        color: "black",
+      })
+    );
   }
 
   public addCategory(name: string) {
@@ -154,6 +124,7 @@ export class ListBox extends Actor {
     const row = new Row({
       x: this.getNextRowPosition().x,
       y: this.getNextRowPosition().y,
+      z: this.z,
       width: this.width,
       height: 25, //FIXME: Should be dependent on text height
       color: this.rows.length % 2 == 0 ? "#9e9e9e" : " #bbbbbb",
@@ -162,14 +133,19 @@ export class ListBox extends Actor {
       text: name,
     });
 
-    row.setText(name).then(() => {
-      row.setTextPosition(
-        row.getTextX() + row.getWidth() / 2 - row.getTextWidth() / 2,
-        row.getTextY() + row.getHeight() / 2 - row.getTextHeight() / 2
+    row.conformLabelSize().then(() => {
+      row.setLabelPosition(
+        row.getLabel().getX() +
+          row.getWidth() / 2 -
+          row.getLabel().getWidth() / 2,
+        row.getLabel().getY() +
+          row.getHeight() / 2 -
+          row.getLabel().getHeight() / 2
       );
     });
 
     this.rows.push(row);
+    this.addActor(row);
   }
 
   public addRow(options: {
@@ -185,6 +161,7 @@ export class ListBox extends Actor {
     const row = new Row({
       x: this.getNextRowPosition().x,
       y: this.getNextRowPosition().y,
+      z: this.z,
       text: options.text,
       width: this.width,
       height: options.rowHeight ?? this.rowHeight,
@@ -197,19 +174,23 @@ export class ListBox extends Actor {
     });
 
     for (const actionIcon of options.actorIcons ?? []) {
-      row.addActorIcon(actionIcon);
+      row.addActor(actionIcon);
     }
 
     if (options.centerTextY) {
-      row.setText(options.text).then(() => {
-        row.setTextPosition(
-          row.getTextX(),
-          row.getTextY() + row.getHeight() / 2 - row.getTextHeight() / 2
+      row.getLabel().setText(options.text, true);
+      row.conformLabelSize().then(() => {
+        row.setLabelPosition(
+          row.getLabel().getX(),
+          row.getLabel().getY() +
+            row.getHeight() / 2 -
+            row.getLabel().getHeight() / 2
         );
       });
     }
 
     this.rows.push(row);
+    this.addActor(row);
 
     return row;
   }
@@ -223,52 +204,9 @@ export class ListBox extends Actor {
     return new Vector(this.x, nextY);
   }
 
-  public draw(canvasContext: CanvasRenderingContext2D) {
-    Game.drawRect({
-      x: this.x,
-      y: this.y,
-      width: this.width,
-      height: this.height,
-      color: "black",
-      fill: true,
-      canvasContext: canvasContext,
-    });
-
-    this.rows.forEach((row) => {
-      Game.drawRect({
-        x: row.getX(),
-        y: row.getY(),
-        width: row.getWidth(),
-        height: row.getHeight(),
-        color: row.rectangle.color,
-        fill: true,
-        canvasContext: canvasContext,
-      });
-
-      if (row.getText()) {
-        //TODO: Only draw text if row is visible.
-        Game.drawText(
-          {
-            text: row.getText(),
-            x: row.getTextX(),
-            y: row.getTextY(),
-            color: row.getFontColor(),
-            font: row.getFont(),
-          },
-          canvasContext
-        );
-      }
-
-      for (const actorIcon of row.getActorIcons()) {
-        actorIcon.draw(canvasContext);
-      }
-    });
-  }
-
   public clearRows() {
     for (const row of this.rows) {
-      row.clearText();
-      row.clearActorIcons();
+      this.removeActor(row);
     }
 
     this.rows = [];

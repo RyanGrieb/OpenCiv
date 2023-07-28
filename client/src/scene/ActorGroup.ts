@@ -26,7 +26,7 @@ export class ActorGroup extends Actor {
     this.actors = [];
 
     this.on("mousemove", (options) => {
-      for (const actor of this.actors) {
+      for (const actor of this.getActors()) {
         actor.call("mousemove", options);
 
         if (actor.insideActor(options.x, options.y)) {
@@ -48,13 +48,28 @@ export class ActorGroup extends Actor {
         return;
       }
 
-      for (const actor of this.actors) {
+      for (const actor of this.getActors()) {
         if (actor.insideActor(options.x, options.y)) {
           //FIXME: Distinguish mouse_up & mouse_click_up better?
           actor.call("clicked");
         }
       }
     });
+  }
+
+  /**
+   *
+   * @returns All actors in this group and all subgroups
+   */
+  public getActors() {
+    const actors = [...this.actors];
+    for (const actor of this.actors) {
+      if (actor instanceof ActorGroup) {
+        actors.push(...actor.getActors());
+      }
+    }
+
+    return actors;
   }
 
   public draw(canvasContext: CanvasRenderingContext2D) {
