@@ -18,6 +18,8 @@ export class InGameScene extends Scene {
   private tileInformationLabel: Label;
   private statusBar: StatusBar;
   private cityDisplayInfo: CityDisplayInfo;
+  private nextTurnButton: Button;
+  private closeCityDisplayButton: Button;
 
   public onInitialize(): void {
     GameMap.init();
@@ -69,20 +71,32 @@ export class InGameScene extends Scene {
       this.statusBar = new StatusBar();
       this.addActor(this.statusBar);
 
-      this.addActor(
-        new Button({
-          text: "Next Turn",
-          x: Game.getWidth() / 2 - 150 / 2,
-          y: Game.getHeight() - 44,
-          z: 4,
-          width: 150,
-          height: 42,
-          fontColor: "white",
-          onClicked: () => {
-            WebsocketClient.sendMessage({ event: "nextTurnRequest" });
-          },
-        })
-      );
+      this.nextTurnButton = new Button({
+        text: "Next Turn",
+        x: Game.getWidth() / 2 - 150 / 2,
+        y: Game.getHeight() - 44,
+        z: 4,
+        width: 150,
+        height: 42,
+        fontColor: "white",
+        onClicked: () => {
+          WebsocketClient.sendMessage({ event: "nextTurnRequest" });
+        },
+      });
+      this.addActor(this.nextTurnButton);
+
+      this.closeCityDisplayButton = new Button({
+        text: "Return to Map",
+        x: Game.getWidth() / 2 - 275 / 2,
+        y: Game.getHeight() - 88,
+        z: 4,
+        width: 275,
+        height: 52,
+        fontColor: "white",
+        onClicked: () => {
+          this.toggleCityUI();
+        },
+      });
 
       this.on("tileHovered", (options) => {
         if (!options.tile) {
@@ -113,24 +127,6 @@ export class InGameScene extends Scene {
           );
         }
       });
-
-      this.on("toggleCityUI", (options) => {
-        const city = options.city as City;
-
-        if (!this.cityDisplayInfo) {
-          this.cityDisplayInfo = new CityDisplayInfo(city);
-          this.addActor(this.cityDisplayInfo);
-
-          //Center camera on city
-          this.focusOnTile(city.getTile(), 3);
-          this.getCamera().lock(true);
-        } else {
-          this.removeActor(this.cityDisplayInfo);
-          this.cityDisplayInfo = undefined;
-          this.getCamera().lock(false);
-        }
-      });
-
       //DEBUG top layer chunks -
       /* GameMap.getInstance()
         .getTopLayerChunks()
@@ -158,7 +154,40 @@ export class InGameScene extends Scene {
     Game.getCurrentScene().getCamera().zoomToLocation(x, y, zoomAmount);
   }
 
+  public toggleCityUI(city?: City) {
+    if (!this.cityDisplayInfo && city) {
+      this.openCityUI(city);
+    } else {
+      this.closeCityUI();
+    }
+  }
+
   public getPlayers() {
     return this.players;
+  }
+
+  private openCityUI(city: City) {
+    this.cityDisplayInfo = new CityDisplayInfo(city);
+    this.addActor(this.cityDisplayInfo);
+
+    //Center camera on city
+    this.focusOnTile(city.getTile(), 3);
+    this.getCamera().lock(true);
+
+    this.removeActor(this.nextTurnButton);
+    this.removeActor(this.tileInformationLabel);
+
+    this.addActor(this.closeCityDisplayButton);
+  }
+
+  private closeCityUI() {
+    this.removeActor(this.cityDisplayInfo);
+    this.cityDisplayInfo = undefined;
+    this.getCamera().lock(false);
+
+    this.addActor(this.nextTurnButton);
+    this.addActor(this.tileInformationLabel);
+
+    this.removeActor(this.closeCityDisplayButton);
   }
 }

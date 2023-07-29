@@ -6,6 +6,7 @@ import { NetworkEvents } from "../network/Client";
 import { AbstractPlayer } from "../player/AbstractPlayer";
 import { Actor } from "../scene/Actor";
 import { ActorGroup } from "../scene/ActorGroup";
+import { InGameScene } from "../scene/type/InGameScene";
 import { Label } from "../ui/Label";
 import { Buidling } from "./Building";
 
@@ -61,7 +62,7 @@ export class City extends ActorGroup {
       shadowColor: "black",
       lineWidth: 1,
       onClick: () => {
-        Game.getCurrentScene().call("toggleCityUI", { city: this });
+        Game.getCurrentSceneAs<InGameScene>().toggleCityUI(this);
       },
     });
 
