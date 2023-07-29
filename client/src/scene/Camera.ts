@@ -143,6 +143,12 @@ export class Camera {
       });
     }
   }
+
+  public zoomToLocation(x: number, y: number, zoomAmount: number) {
+    this.setPosition(-x + Game.getWidth() / 2, -y + Game.getHeight() / 2);
+    this.zoom(Game.getWidth() / 2, Game.getHeight() / 2, zoomAmount, false);
+  }
+
   public addVel(x: number, y: number) {
     this.xVelAmount += x;
     this.yVelAmount += y;
@@ -174,12 +180,16 @@ export class Camera {
     }
   }
 
-  public zoom(atX: number, atY: number, amount: number) {
+  public zoom(atX: number, atY: number, amount: number, incrementZoom = true) {
     // Calculate the new position of the camera
     //https://stackoverflow.com/questions/5189968/zoom-canvas-to-mouse-cursor/5526721#5526721
     this.x = atX - (atX - this.x) * amount;
     this.y = atY - (atY - this.y) * amount;
-    this.zoomAmount *= amount;
+    if (incrementZoom) {
+      this.zoomAmount *= amount;
+    } else {
+      this.zoomAmount = amount;
+    }
   }
 
   public getZoomAmount() {

@@ -580,6 +580,14 @@ export class Game {
     return this.currentScene;
   }
 
+  /**
+   * Return the current scene & cast the class specified in the generic type.
+   * @returns
+   */
+  public static getCurrentSceneAs<T extends Scene>(): T {
+    return this.currentScene as T;
+  }
+
   public static getMouseX() {
     return this.mouseX;
   }

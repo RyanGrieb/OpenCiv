@@ -5,6 +5,7 @@ import { HoveredTile } from "../map/HoveredTile";
 import { Tile } from "../map/Tile";
 import { NetworkEvents, WebsocketClient } from "../network/Client";
 import { Line } from "../scene/Line";
+import { InGameScene } from "../scene/type/InGameScene";
 import { Numbers } from "../util/Numbers";
 import { Vector } from "../util/Vector";
 import { AbstractPlayer } from "./AbstractPlayer";
@@ -116,10 +117,7 @@ export class ClientPlayer extends AbstractPlayer {
         const gridY = data["y"];
         const tile = GameMap.getInstance().getTiles()[gridX][gridY];
         const zoomAmount = data["zoomAmount"];
-        const x = tile.getCenterPosition()[0];
-        const y = tile.getCenterPosition()[1];
-
-        this.zoomToLocation(x, y, zoomAmount);
+        Game.getCurrentSceneAs<InGameScene>().focusOnTile(tile, zoomAmount);
       },
     });
 
@@ -167,20 +165,11 @@ export class ClientPlayer extends AbstractPlayer {
       },
     });
 
-    Game.getCurrentScene().on("toggleCityUI", (options) => {
+    Game.getCurrentScene().on("toggleCityUI", () => {
       if (this.selectedUnit) {
         this.unselectUnit();
       }
     });
-  }
-
-  private zoomToLocation(x: number, y: number, zoomAmount: number) {
-    Game.getCurrentScene()
-      .getCamera()
-      .setPosition(-x + Game.getWidth() / 2, -y + Game.getHeight() / 2);
-    Game.getCurrentScene()
-      .getCamera()
-      .zoom(Game.getWidth() / 2, Game.getHeight() / 2, zoomAmount);
   }
 
   private onMouseRightClick() {

@@ -1,6 +1,7 @@
 import { Game } from "../../Game";
 import { City } from "../../city/City";
 import { GameMap } from "../../map/GameMap";
+import { Tile } from "../../map/Tile";
 import { NetworkEvents, WebsocketClient } from "../../network/Client";
 import { AbstractPlayer } from "../../player/AbstractPlayer";
 import { ClientPlayer } from "../../player/ClientPlayer";
@@ -119,6 +120,9 @@ export class InGameScene extends Scene {
         if (!this.cityDisplayInfo) {
           this.cityDisplayInfo = new CityDisplayInfo(city);
           this.addActor(this.cityDisplayInfo);
+
+          //Center camera on city
+          this.focusOnTile(city.getTile(), 3);
           this.getCamera().lock(true);
         } else {
           this.removeActor(this.cityDisplayInfo);
@@ -147,11 +151,14 @@ export class InGameScene extends Scene {
     });
   }
 
-  public getPlayers() {
-    return this.players;
+  public focusOnTile(tile: Tile, zoomAmount: number) {
+    const x = tile.getCenterPosition()[0];
+    const y = tile.getCenterPosition()[1];
+
+    Game.getCurrentScene().getCamera().zoomToLocation(x, y, zoomAmount);
   }
 
-  public gameLoop(): void {
-    super.gameLoop();
+  public getPlayers() {
+    return this.players;
   }
 }
