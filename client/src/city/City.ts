@@ -53,6 +53,7 @@ export class City extends ActorGroup {
 
     this.nameLabel = new Label({
       text: this.name,
+      cameraApplies: true,
       x: this.tile.getX(),
       y: this.tile.getY(),
       font: "12px serif",
@@ -61,6 +62,7 @@ export class City extends ActorGroup {
       shadowBlur: 1,
       shadowColor: "black",
       lineWidth: 1,
+      z: 4,
       onClick: () => {
         Game.getCurrentSceneAs<InGameScene>().toggleCityUI(this);
       },
@@ -73,7 +75,8 @@ export class City extends ActorGroup {
           this.tile.getWidth() / 2,
         this.tile.getY() - this.nameLabel.getHeight()
       );
-      this.addActor(this.nameLabel);
+      Game.getCurrentScene().addActor(this.nameLabel);
+      console.log(this.nameLabel.getZIndex());
     });
 
     for (const tile of this.territory) {
@@ -101,6 +104,11 @@ export class City extends ActorGroup {
         this.buildings.push(new Buidling(buildingData));
       },
     });
+  }
+
+  public onDestroyed(): void {
+    super.onDestroyed();
+    Game.getCurrentScene().removeActor(this.nameLabel);
   }
 
   public getTerritory() {

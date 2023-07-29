@@ -35,7 +35,7 @@ export class StatusBar extends ActorGroup {
     super({
       x: 0,
       y: 0,
-      z: 4,
+      z: 5,
       width: Game.getWidth(),
       height: 21,
       cameraApplies: false,

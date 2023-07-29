@@ -58,7 +58,7 @@ export class InGameScene extends Scene {
         fontColor: "white",
         x: 0,
         y: 0,
-        z: 4,
+        z: 5,
       });
       this.tileInformationLabel.conformSize().then(() => {
         this.tileInformationLabel.setPosition(
@@ -75,7 +75,7 @@ export class InGameScene extends Scene {
         text: "Next Turn",
         x: Game.getWidth() / 2 - 150 / 2,
         y: Game.getHeight() - 44,
-        z: 4,
+        z: 5,
         width: 150,
         height: 42,
         fontColor: "white",
@@ -89,7 +89,7 @@ export class InGameScene extends Scene {
         text: "Return to Map",
         x: Game.getWidth() / 2 - 275 / 2,
         y: Game.getHeight() - 88,
-        z: 4,
+        z: 5,
         width: 275,
         height: 52,
         fontColor: "white",
