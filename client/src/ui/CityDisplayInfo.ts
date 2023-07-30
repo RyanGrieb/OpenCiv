@@ -11,6 +11,7 @@ export class CityDisplayInfo extends ActorGroup {
   private city: City;
 
   private citizenMgmtRadioButtons: RadioButton[];
+  private statLabels: Map<string, Label>;
 
   constructor(city: City) {
     super({
@@ -24,6 +25,7 @@ export class CityDisplayInfo extends ActorGroup {
 
     this.city = city;
     this.citizenMgmtRadioButtons = [];
+    this.statLabels = new Map<string, Label>();
 
     this.initializeStatsWindow();
     this.initializeBuildingsWindow();
@@ -117,13 +119,17 @@ export class CityDisplayInfo extends ActorGroup {
   }
 
   private initializeStatsWindow() {
+    const x = 0;
+    const y = 21;
+    const width = 250;
+    const height = 300;
     this.addActor(
       new Actor({
         image: Game.getImage(GameImage.POPUP_BOX),
-        x: 0,
-        y: 21, // (Height of status-bar)
-        width: 250,
-        height: 300,
+        x: x,
+        y: y, // (Height of status-bar)
+        width: width,
+        height: height,
       })
     );
 
@@ -157,6 +163,21 @@ export class CityDisplayInfo extends ActorGroup {
       })
     );
 
+    const populationLabel = new Label({
+      text: this.city.getStat("population").toString(),
+      font: "20px serif",
+      fontColor: "white",
+    });
+    populationLabel.conformSize().then(() => {
+      populationLabel.setPosition(
+        width - populationLabel.getWidth() - 10,
+        populationIcon.getY() + 8
+      );
+
+      this.addActor(populationLabel);
+    });
+    this.statLabels.set("population", populationLabel);
+
     const moraleIcon = new Actor({
       image: Game.getImage(GameImage.SPRITESHEET),
       spriteRegion: SpriteRegion.MORALE_ICON,
@@ -176,6 +197,21 @@ export class CityDisplayInfo extends ActorGroup {
         y: moraleIcon.getY() + 8,
       })
     );
+
+    const moraleLabel = new Label({
+      text: this.city.getStat("morale").toString(),
+      font: "20px serif",
+      fontColor: "white",
+    });
+    moraleLabel.conformSize().then(() => {
+      moraleLabel.setPosition(
+        width - moraleLabel.getWidth() - 10,
+        moraleIcon.getY() + 8
+      );
+
+      this.addActor(moraleLabel);
+    });
+    this.statLabels.set("morale", moraleLabel);
 
     const foodIcon = new Actor({
       image: Game.getImage(GameImage.SPRITESHEET),
@@ -197,6 +233,21 @@ export class CityDisplayInfo extends ActorGroup {
       })
     );
 
+    const foodLabel = new Label({
+      text: this.city.getStat("food").toString(),
+      font: "20px serif",
+      fontColor: "white",
+    });
+    foodLabel.conformSize().then(() => {
+      foodLabel.setPosition(
+        width - foodLabel.getWidth() - 10,
+        foodIcon.getY() + 8
+      );
+
+      this.addActor(foodLabel);
+    });
+    this.statLabels.set("food", foodLabel);
+
     const productionIcon = new Actor({
       image: Game.getImage(GameImage.SPRITESHEET),
       spriteRegion: SpriteRegion.PRODUCTION_ICON,
@@ -216,6 +267,21 @@ export class CityDisplayInfo extends ActorGroup {
         y: productionIcon.getY() + 8,
       })
     );
+
+    const productionLabel = new Label({
+      text: this.city.getStat("production").toString(),
+      font: "20px serif",
+      fontColor: "white",
+    });
+    productionLabel.conformSize().then(() => {
+      productionLabel.setPosition(
+        width - productionLabel.getWidth() - 10,
+        productionIcon.getY() + 8
+      );
+
+      this.addActor(productionLabel);
+    });
+    this.statLabels.set("production", productionLabel);
 
     const goldIcon = new Actor({
       image: Game.getImage(GameImage.SPRITESHEET),
@@ -237,6 +303,21 @@ export class CityDisplayInfo extends ActorGroup {
       })
     );
 
+    const goldLabel = new Label({
+      text: this.city.getStat("gold").toString(),
+      font: "20px serif",
+      fontColor: "white",
+    });
+    goldLabel.conformSize().then(() => {
+      goldLabel.setPosition(
+        width - goldLabel.getWidth() - 10,
+        goldIcon.getY() + 8
+      );
+
+      this.addActor(goldLabel);
+    });
+    this.statLabels.set("gold", goldLabel);
+
     const scienceIcon = new Actor({
       image: Game.getImage(GameImage.SPRITESHEET),
       spriteRegion: SpriteRegion.SCIENCE_ICON,
@@ -257,6 +338,21 @@ export class CityDisplayInfo extends ActorGroup {
       })
     );
 
+    const scienceLabel = new Label({
+      text: this.city.getStat("science").toString(),
+      font: "20px serif",
+      fontColor: "white",
+    });
+    scienceLabel.conformSize().then(() => {
+      scienceLabel.setPosition(
+        width - scienceLabel.getWidth() - 10,
+        scienceIcon.getY() + 8
+      );
+
+      this.addActor(scienceLabel);
+    });
+    this.statLabels.set("science", scienceLabel);
+
     const cultureIcon = new Actor({
       image: Game.getImage(GameImage.SPRITESHEET),
       spriteRegion: SpriteRegion.CULTURE_ICON,
@@ -276,5 +372,20 @@ export class CityDisplayInfo extends ActorGroup {
         y: cultureIcon.getY() + 8,
       })
     );
+
+    const cultureLabel = new Label({
+      text: this.city.getStat("culture").toString(),
+      font: "20px serif",
+      fontColor: "white",
+    });
+    cultureLabel.conformSize().then(() => {
+      cultureLabel.setPosition(
+        width - cultureLabel.getWidth() - 10,
+        cultureIcon.getY() + 8
+      );
+
+      this.addActor(cultureLabel);
+    });
+    this.statLabels.set("culture", cultureLabel);
   }
 }

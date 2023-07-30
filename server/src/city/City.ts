@@ -57,16 +57,19 @@ export class City {
   }
 
   public getStatline() {
-    const cityStats = {
-      population: this.population,
-      science: 0,
-      gold: 0,
-      production: 0,
-      faith: 0,
-      culture: 0,
-      food: 0,
-      foodSurplus: this.foodSurplus,
-    };
+    const cityStats = [
+      {
+        population: this.population,
+      },
+      { science: 0 },
+      { gold: 0 },
+      { production: 0 },
+      { faith: 0 },
+      { culture: 0 },
+      { food: 0 },
+      { morale: 0 }, //TODO: Implement morale
+      { foodSurplus: this.foodSurplus },
+    ];
 
     // Add all buildings to existing stat-line dictionary
     for (const buildingData of this.buildings) {
@@ -74,8 +77,10 @@ export class City {
         const statType = Object.keys(stat)[0]; // Get the stat type, e.g., "science", "gold", etc.
         const statValue = stat[statType]; // Get the stat value
 
-        if (cityStats.hasOwnProperty(statType)) {
-          cityStats[statType] += statValue;
+        for (const cityStat of cityStats) {
+          if (Object.keys(cityStat)[0] === statType) {
+            cityStat[statType] += statValue;
+          }
         }
       }
     }

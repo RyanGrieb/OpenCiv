@@ -29,6 +29,7 @@ export class City extends ActorGroup {
   private innerBorderColor: string;
   private outsideBorderColor: string;
   private buildings: Buidling[];
+  private stats: Map<string, number>;
 
   constructor(options: CityOptions) {
     super({ x: 0, y: 0, z: 2, width: 0, height: 0 });
@@ -37,6 +38,7 @@ export class City extends ActorGroup {
     this.tile = options.tile;
     this.name = options.name;
     this.buildings = [];
+    this.stats = new Map<string, number>();
 
     this.innerBorderColor =
       this.player.getCivilizationData()["inside_border_color"];
@@ -76,7 +78,6 @@ export class City extends ActorGroup {
         this.tile.getY() - this.nameLabel.getHeight()
       );
       Game.getCurrentScene().addActor(this.nameLabel);
-      console.log(this.nameLabel.getZIndex());
     });
 
     for (const tile of this.territory) {
@@ -104,6 +105,23 @@ export class City extends ActorGroup {
         this.buildings.push(new Buidling(buildingData));
       },
     });
+
+    NetworkEvents.on({
+      eventName: "updateCityStats",
+      parentObject: this,
+      callback: (data: any) => {
+        const stats = data["cityStats"];
+        for (const stat of stats) {
+          const statType = Object.keys(stat)[0]; // Get the stat type, e.g., "science", "gold", etc.
+          const statValue = stat[statType]; // Get the stat value
+          this.stats.set(statType, statValue);
+        }
+      },
+    });
+  }
+
+  public getStat(stat: string): number {
+    return this.stats.get(stat);
   }
 
   public onDestroyed(): void {
