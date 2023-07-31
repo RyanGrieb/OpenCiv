@@ -3,6 +3,7 @@ import { Game } from "../Game";
 import { City } from "../city/City";
 import { Actor } from "../scene/Actor";
 import { ActorGroup } from "../scene/ActorGroup";
+import { Strings } from "../util/Strings";
 import { Label } from "./Label";
 import { ListBox } from "./Listbox";
 import { RadioButton } from "./RadioButton";
@@ -234,7 +235,7 @@ export class CityDisplayInfo extends ActorGroup {
     );
 
     const foodLabel = new Label({
-      text: this.city.getStat("food").toString(),
+      text: Strings.convertToStatUnit(this.city.getStat("food")),
       font: "20px serif",
       fontColor: "white",
     });
@@ -269,7 +270,7 @@ export class CityDisplayInfo extends ActorGroup {
     );
 
     const productionLabel = new Label({
-      text: this.city.getStat("production").toString(),
+      text: Strings.convertToStatUnit(this.city.getStat("production")),
       font: "20px serif",
       fontColor: "white",
     });
@@ -304,7 +305,7 @@ export class CityDisplayInfo extends ActorGroup {
     );
 
     const goldLabel = new Label({
-      text: this.city.getStat("gold").toString(),
+      text: Strings.convertToStatUnit(this.city.getStat("gold")),
       font: "20px serif",
       fontColor: "white",
     });
@@ -339,7 +340,7 @@ export class CityDisplayInfo extends ActorGroup {
     );
 
     const scienceLabel = new Label({
-      text: this.city.getStat("science").toString(),
+      text: Strings.convertToStatUnit(this.city.getStat("science")),
       font: "20px serif",
       fontColor: "white",
     });
@@ -374,7 +375,7 @@ export class CityDisplayInfo extends ActorGroup {
     );
 
     const cultureLabel = new Label({
-      text: this.city.getStat("culture").toString(),
+      text: Strings.convertToStatUnit(this.city.getStat("culture")),
       font: "20px serif",
       fontColor: "white",
     });
