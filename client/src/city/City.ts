@@ -95,7 +95,11 @@ export class City extends ActorGroup {
       this.territoryOverlays.push(territoryOverlay);
     }
 
-    GameMap.getInstance().drawBorder(this.territory, this.outsideBorderColor);
+    GameMap.getInstance().drawBorder(
+      this.territory,
+      this.outsideBorderColor,
+      3
+    );
 
     NetworkEvents.on({
       eventName: "addBuilding",

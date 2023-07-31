@@ -423,7 +423,7 @@ export class GameMap {
     });
   }
 
-  public drawBorder(tiles: Tile[], color: string) {
+  public drawBorder(tiles: Tile[], color: string, z?: number) {
     // Create outline from the outer border tiles.
 
     //1. Get outter tiles
@@ -456,6 +456,7 @@ export class GameMap {
         thickness: 1,
         color: color,
         cityOutline: true,
+        z: z,
       });
     }
   }
