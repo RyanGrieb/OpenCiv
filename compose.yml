@@ -1,0 +1,27 @@
+services:
+  server:
+    build:
+      context: server
+    ports:
+      - "2000:2000"
+    networks:
+      - backnet
+    healthcheck:
+      test: ["CMD", "true"]
+      interval: 5s
+      timeout: 10s
+      retries: 3
+  client:
+    build:
+      context: client
+    ports:
+      - "1234:1234"
+    networks:
+      - backnet
+      - frontnet
+    depends_on:
+      server:
+        condition: service_healthy
+networks:
+  backnet:
+  frontnet:

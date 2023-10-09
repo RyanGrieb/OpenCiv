@@ -205,8 +205,11 @@ export class LobbyScene extends Scene {
 
   public onDestroyed(newScene: Scene) {
     const exitReceipt = super.onDestroyed(newScene);
-    // Disconnect from the server if we go back
-    if (newScene.constructor.name !== "LoadingScene") {
+    // Disconnect from the server if we go back, unless were going into the loading scene or reloading this scene.
+    if (
+      newScene.getName() !== "loading_scene" &&
+      newScene.getName() !== "lobby"
+    ) {
       WebsocketClient.disconnect();
     }
 

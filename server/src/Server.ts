@@ -32,6 +32,8 @@ export class Server {
      * When a connection is established, listen for message events.
      * Parse the incoming message into JSON and call the corresponding function in ServerEvents module.
      * Call the "connection" function in ServerEvents module with an empty object and the WebSocket object.
+     * See: https://stackoverflow.com/questions/71787172/websocket-server-has-massive-delay-in-multiplayer-game
+     * for optimization.
      */
     this.wss.on("connection", (websocket, request) => {
       websocket.on("message", (data: string) => {

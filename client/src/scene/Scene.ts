@@ -11,10 +11,19 @@ export abstract class Scene {
   protected storedEvents: Map<string, Function[]>;
   private sceneObjects: SceneObject[];
   private camera: Camera;
+  private name: string;
 
   constructor() {
     this.storedEvents = new Map<string, Function[]>();
     this.sceneObjects = [];
+  }
+
+  public setName(name: string) {
+    this.name = name;
+  }
+
+  public getName() {
+    return this.name;
   }
 
   public addLine(line: Line) {
@@ -53,6 +62,11 @@ export abstract class Scene {
     this.sceneObjects.forEach((object: SceneObject) => {
       object.draw(Game.getCanvasContext());
     });
+  }
+
+  public redraw() {
+    this.onDestroyed(this);
+    this.onInitialize();
   }
 
   public onInitialize() {}

@@ -7,7 +7,9 @@ import { TextBox } from "../../ui/Textbox";
 import { Actor } from "../Actor";
 import { Scene } from "../Scene";
 import { SceneBackground } from "../SceneBackground";
+
 export class JoinGameScene extends Scene {
+  private serverTextBox: TextBox;
   public onInitialize(): void {
     super.onInitialize();
     this.addActor(SceneBackground.generateRandomGrassland());
@@ -43,17 +45,17 @@ export class JoinGameScene extends Scene {
 
     this.addActor(backgroundActor);
 
-    const serverTextBox = new TextBox({
+    this.serverTextBox = new TextBox({
       x: Game.getWidth() / 2 - 400 / 2,
       y: Game.getHeight() / 2 - 100,
       width: 400,
       height: 50,
     });
 
-    serverTextBox.setSelected(true);
-    serverTextBox.setText("localhost");
+    this.serverTextBox.setSelected(true);
+    this.serverTextBox.setText("localhost");
 
-    this.addActor(serverTextBox);
+    this.addActor(this.serverTextBox);
 
     const infoLabel = new Label({
       text: "Enter server code: (e.g. ED2FG)",
@@ -63,7 +65,7 @@ export class JoinGameScene extends Scene {
     infoLabel.conformSize().then(() => {
       infoLabel.setPosition(
         Game.getWidth() / 2 - infoLabel.getWidth() / 2,
-        serverTextBox.getY() - 30
+        this.serverTextBox.getY() - 30
       );
       this.addActor(infoLabel);
     });
@@ -81,11 +83,11 @@ export class JoinGameScene extends Scene {
           infoLabel.conformSize().then(() => {
             infoLabel.setPosition(
               Game.getWidth() / 2 - infoLabel.getWidth() / 2,
-              serverTextBox.getY() - 30
+              this.serverTextBox.getY() - 30
             );
           });
 
-          WebsocketClient.init(serverTextBox.getText());
+          WebsocketClient.init(this.serverTextBox.getText());
         },
       })
     );
@@ -124,7 +126,7 @@ export class JoinGameScene extends Scene {
         infoLabel.conformSize().then(() => {
           infoLabel.setPosition(
             Game.getWidth() / 2 - infoLabel.getWidth() / 2,
-            serverTextBox.getY() - 30
+            this.serverTextBox.getY() - 30
           );
         });
       },
@@ -140,11 +142,17 @@ export class JoinGameScene extends Scene {
           infoLabel.conformSize().then(() => {
             infoLabel.setPosition(
               Game.getWidth() / 2 - infoLabel.getWidth() / 2,
-              serverTextBox.getY() - 30
+              this.serverTextBox.getY() - 30
             );
           });
         }
       },
     });
+  }
+
+  public redraw() {
+    const oldText = this.serverTextBox.getText();
+    super.redraw();
+    this.serverTextBox.setText(oldText);
   }
 }

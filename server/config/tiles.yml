@@ -1,0 +1,169 @@
+tiles:
+  GRASS:
+    name: Grass
+    stats:
+      - food: 2
+  PLAINS:
+    name: Plains
+    stats:
+      - food: 1
+      - production: 1
+  TUNDRA:
+    name: Tundra
+    stats:
+      - food: 1
+  DESERT:
+    name: Desert
+    stats: []
+  FLOODPLAINS:
+    name: Floodplains
+    stats:
+      - food: 2
+  SNOW:
+    name: Snow
+    stats: []
+  FRESHWATER:
+    name: Freshwater
+    stats:
+      - food: 2
+  SHALLOW_OCEAN:
+    name: Shallow Ocean
+    stats:
+      - food: 1
+  OCEAN:
+    name: Ocean
+    stats:
+      - food: 1
+  GRASS_HILL:
+    name: Grass Hill
+    stats:
+      - production: 2
+  PLAINS_HILL:
+    name: Plains Hill
+    stats:
+      - production: 2
+  DESERT_HILL:
+    name: Desert Hill
+    stats:
+      - production: 2
+  TUNDRA_HILL:
+    name: Tundra Hill
+    stats:
+      - production: 2
+  SNOW_HILL:
+    name: Snow Hill
+    stats:
+      - production: 2
+  HORSES:
+    name: Horses
+    stats:
+      - production: 1
+  IMPROVED_HORSES:
+    name: Improved Horses
+    stats:
+      - production: 2
+  CATTLE:
+    name: Cattle
+    stats:
+      - production: 1
+  IMPROVED_CATTLE:
+    name: Improved Cattle
+    stats:
+      - production: 2
+  SHEEP:
+    name: Sheep
+    stats:
+      - production: 1
+  IMPROVED_SHEEP:
+    name: Improved Sheep
+    stats:
+      - production: 2
+  COPPER:
+    name: Copper
+    stats:
+      - gold: 2
+  COPPER_MINE:
+    name: Copper Mine
+    stats:
+      - gold: 2
+      - production: 1
+  IRON:
+    name: Iron
+    stats:
+      - production: 1
+  IRON_MINE:
+    name: Iron Mine
+    stats:
+      - production: 2
+  STONE:
+    name: Stone
+    stats:
+      - production: 1
+  STONE_QUARRY:
+    name: Stone Quarry
+    stats:
+      - production: 2
+  FISH:
+    name: Fish
+    stats:
+      - food: 1
+  IMPROVED_FISH:
+    name: Improved Fish
+    stats:
+      - food: 2
+  CRAB:
+    name: Crab
+    stats:
+      - food: 1
+  IMPROVED_CRAB:
+    name: Improved Crab
+    stats:
+      - food: 2
+  WHALES:
+    name: Whales
+    stats:
+      - food: 1
+      - gold: 1
+  IMPROVED_WHALES:
+    name: Improved Whales
+    stats:
+      - food: 2
+      - gold: 1
+  TURTLES:
+    name: Turtles
+    stats:
+      - food: 1
+      - gold: 1
+  IMPROVED_TURTLES:
+    name: Improved Turtles
+    stats:
+      - food: 2
+      - gold: 1
+  CITRUS:
+    name: Citrus
+    stats:
+      - food: 1
+      - gold: 1
+  CITRUS_PLANTATION:
+    name: Citrus Plantation
+    stats:
+      - food: 1
+      - gold: 2
+  COTTON:
+    name: Cotton
+    stats:
+      - gold: 2
+  COTTON_PLANTATION:
+    name: Cotton Plantation
+    stats:
+      - gold: 3
+  OLIVES:
+    name: Olives
+    stats:
+      - gold: 1
+      - production: 1
+  OLIVE_PLANTATION:
+    name: Olive Plantation
+    stats:
+      - gold: 2
+      - production: 1

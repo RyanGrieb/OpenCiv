@@ -1,5 +1,6 @@
 import { Game } from "../Game";
 import { Player } from "../Player";
+import { GameMap } from "../map/GameMap";
 import { Tile } from "../map/Tile";
 
 export interface CityOptions {
@@ -14,6 +15,8 @@ export class City {
   private buildings: Record<string, any>[];
   private population: number;
   private foodSurplus: number;
+  private territory: Tile[];
+  private workedTiles: Tile[];
 
   /**
    * Creates a new City instance.
@@ -28,6 +31,42 @@ export class City {
     this.buildings = [];
     this.population = 1;
     this.foodSurplus = 0;
+
+    this.territory = [this.tile];
+    for (const adjTile of this.tile.getAdjacentTiles()) {
+      if (!adjTile) continue;
+
+      this.territory.push(adjTile);
+    }
+    this.sendTerritoryUpdate();
+
+    this.updateWorkedTiles({ sendStatUpdate: true });
+  }
+
+  public updateWorkedTiles(options?: { sendStatUpdate: boolean }) {
+    // Reset worked tiles
+    this.workedTiles = [];
+
+    // For default focus, find all tiles and get the best tile with the highest yield
+    // Note, if our food stat from the current worked tiles is negative, find the tiles with the highest food yeild.
+    // If our food stat is positive, find the tiles with the highest total yeild.
+    for (let i = 0; i < this.population; i++) {
+      const statline = this.getStatline({ asArray: false });
+      //TODO: Change default with whatever value the player has set for the city.
+      const tileFocus = statline["food"] < 0 ? "food" : "default";
+      // Get a tile with the highest food yeild
+      const tile = GameMap.getInstance().getTileWithHighestYeild({
+        stats: [tileFocus],
+        tiles: this.territory,
+        ignoreTiles: this.workedTiles,
+      });
+
+      this.workedTiles.push(tile);
+    }
+
+    if (options.sendStatUpdate) {
+      this.sendStatUpdate();
+    }
   }
 
   public addBuilding(name: string) {
@@ -46,8 +85,16 @@ export class City {
       building: buildingData,
     });
 
-    // Update the city-stat line, and send it to the player
-    const cityStats = this.getStatline();
+    this.updateWorkedTiles({ sendStatUpdate: true });
+  }
+
+  public sendTerritoryUpdate() {}
+
+  /*
+  Get the city-stat line, and send it to the player
+*/
+  public sendStatUpdate() {
+    const cityStats = this.getStatline({ asArray: true });
 
     this.player.sendNetworkEvent({
       event: "updateCityStats",
@@ -56,20 +103,55 @@ export class City {
     });
   }
 
-  public getStatline() {
-    const cityStats = [
-      {
-        population: this.population,
-      },
-      { science: 0 },
-      { gold: 0 },
-      { production: 0 },
-      { faith: 0 },
-      { culture: 0 },
-      { food: 0 },
-      { morale: 0 }, //TODO: Implement morale
-      { foodSurplus: this.foodSurplus },
-    ];
+  public getStatline(options: { asArray: boolean }) {
+    //FIXME: Include worked tiles
+    if (options.asArray) {
+      const cityStats = [
+        {
+          population: this.population,
+        },
+        { science: 0 },
+        { gold: 0 },
+        { production: 0 },
+        { faith: 0 },
+        { culture: 0 },
+        { food: -(this.population * 2) },
+        { morale: 0 }, //TODO: Implement morale
+        { foodSurplus: this.foodSurplus },
+      ];
+
+      // Add all buildings to existing stat-line dictionary
+      for (const buildingData of this.buildings) {
+        for (const stat of buildingData.stats) {
+          const statType = Object.keys(stat)[0]; // Get the stat type, e.g., "science", "gold", etc.
+          const statValue = stat[statType]; // Get the stat value
+
+          for (const cityStat of cityStats) {
+            if (Object.keys(cityStat)[0] === statType) {
+              cityStat[statType] += statValue;
+            }
+          }
+        }
+      }
+
+      return cityStats;
+    }
+
+    // If we're not returning an array, return a dictionary
+    const cityStats = {
+      population: this.population,
+      science: 0,
+      gold: 0,
+      production: 0,
+      faith: 0,
+      culture: 0,
+      food: -(this.population * 2),
+      morale: 0, //TODO: Implement morale
+      foodSurplus: this.foodSurplus,
+    };
+
+    // Feed citizens
+    cityStats["food"] -= this.population * 2;
 
     // Add all buildings to existing stat-line dictionary
     for (const buildingData of this.buildings) {
@@ -77,10 +159,20 @@ export class City {
         const statType = Object.keys(stat)[0]; // Get the stat type, e.g., "science", "gold", etc.
         const statValue = stat[statType]; // Get the stat value
 
-        for (const cityStat of cityStats) {
-          if (Object.keys(cityStat)[0] === statType) {
-            cityStat[statType] += statValue;
-          }
+        if (cityStats.hasOwnProperty(statType)) {
+          cityStats[statType] += statValue;
+        }
+      }
+    }
+
+    // Add all worked tiles to existing stat-line dictionary
+    for (const tile of this.workedTiles) {
+      for (const stat of tile.getStats()) {
+        const statType = Object.keys(stat)[0]; // Get the stat type, e.g., "science", "gold", etc.
+        const statValue = stat[statType]; // Get the stat value
+
+        if (cityStats.hasOwnProperty(statType)) {
+          cityStats[statType] += statValue;
         }
       }
     }

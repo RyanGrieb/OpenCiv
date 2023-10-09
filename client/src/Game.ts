@@ -49,6 +49,7 @@ export class Game {
   private static runGameLoop: boolean;
   private static wrappedTextCache: { [key: string]: [string, number, number] } =
     {};
+  private static resizeTimer: NodeJS.Timeout;
 
   private constructor() {}
 
@@ -171,6 +172,18 @@ export class Game {
     });
     document.addEventListener("contextmenu", (event) => event.preventDefault());
 
+    window.addEventListener("resize", () => {
+      clearTimeout(this.resizeTimer);
+
+      this.resizeTimer = setTimeout(() => {
+        this.canvas.width = window.innerWidth;
+        this.canvas.height = window.innerHeight;
+        if (this.currentScene) {
+          this.currentScene.redraw();
+        }
+      }, 300);
+    });
+
     let promise = this.loadAssetPromise(options.assetList);
 
     promise.then((res) => {
@@ -263,6 +276,7 @@ export class Game {
 
   public static addScene(sceneName: string, scene: Scene) {
     this.scenes.set(sceneName, scene);
+    scene.setName(sceneName);
   }
 
   public static setScene(sceneName: string) {

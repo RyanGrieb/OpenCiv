@@ -46,6 +46,8 @@ export class City extends ActorGroup {
       this.player.getCivilizationData()["outside_border_color"];
 
     this.territoryOverlays = [];
+
+    //FIXME: Have the server communicate what tiles are our territory.
     this.territory = [this.tile];
     for (const adjTile of this.tile.getAdjacentTiles()) {
       if (!adjTile) continue;

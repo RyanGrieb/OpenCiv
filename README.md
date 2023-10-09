@@ -15,7 +15,8 @@ The main objective of this project is to allow players who enjoy Civilization ga
 
 ## How do I build and run this?
 
-To run a local instance, type `npm run install-all`, then `npm start` in the `/OpenCiv/` directory
+To run a local instance, type `docker compose up -d`. (Make sure to have docker installed!)
+To play, go to `localhost:1234` in your browser.
 
 ## How do I play this?
 

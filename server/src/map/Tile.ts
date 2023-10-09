@@ -3,8 +3,12 @@ import { GameMap } from "./GameMap";
 import { TileIndexer } from "./TileIndexer";
 import { Unit } from "../Unit";
 import { City } from "../city/City";
+import fs from "fs";
+import YAML from "yaml";
 
 export class Tile {
+  private static allTileStats;
+
   //== Generation Values ==
   private generationHeight: number;
   private generationTemp: number;
@@ -33,6 +37,19 @@ export class Tile {
     this.y = y;
 
     this.addTileType(tileType);
+  }
+
+  public static getAllTileStats() {
+    if (!Tile.allTileStats) {
+      // Load available civilizations from config file
+      const tileYAMLData = YAML.parse(
+        fs.readFileSync("./config/tiles.yml", "utf-8")
+      );
+      //Convert civsData from YAML to JSON:
+      Tile.allTileStats = JSON.parse(JSON.stringify(tileYAMLData.tiles));
+    }
+
+    return Tile.allTileStats;
   }
 
   public setCity(city: City) {
@@ -755,5 +772,34 @@ export class Tile {
     }
 
     return tile2.getMovementCost();
+  }
+
+  public getStats() {
+    const tileStats = [
+      { science: 0 },
+      { gold: 0 },
+      { production: 0 },
+      { faith: 0 },
+      { culture: 0 },
+      { food: 0 },
+      { morale: 0 },
+    ];
+    for (const tileType of this.tileTypes) {
+      const tileTypeStats = Tile.getAllTileStats()[tileType];
+      if (!tileTypeStats) continue;
+
+      for (const stat of tileStats) {
+        const statName = Object.keys(stat)[0];
+        if (tileTypeStats[statName]) {
+          stat[statName] += tileTypeStats[statName];
+        }
+      }
+    }
+
+    return tileStats;
+  }
+
+  public getTotalStatValue(stats: string[]): number {
+    return 0;
   }
 }

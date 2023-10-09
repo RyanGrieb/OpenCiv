@@ -719,10 +719,17 @@ export class GameMap {
     return values;
   }
   public sendMapChunksToPlayer(player: Player) {
+    // Send the map-size to player
     player.sendNetworkEvent({
       event: "mapSize",
       width: this.mapWidth,
       height: this.mapHeight,
+    });
+
+    //Send tile stats to player
+    player.sendNetworkEvent({
+      event: "tileStats",
+      tiles: Tile.getAllTileStats(),
     });
 
     for (let x = 0; x < this.mapWidth; x += 4) {
@@ -1171,6 +1178,28 @@ export class GameMap {
     }
 
     return [];
+  }
+
+  public getTileWithHighestYeild(options: {
+    stats: string[];
+    tiles: Tile[];
+    ignoreTiles: Tile[];
+  }) {
+    let highestTile: Tile = undefined;
+    let highestValue = 0;
+
+    for (const tile of options.tiles) {
+      if (options.ignoreTiles.includes(tile)) continue;
+
+      let value = tile.getTotalStatValue(options.stats);
+
+      if (value > highestValue || highestTile === undefined) {
+        highestValue = value;
+        highestTile = tile;
+      }
+    }
+
+    return highestTile;
   }
 
   private reconstructPath(unit: Unit, cameFrom: Tile[][], currentTile: Tile) {
