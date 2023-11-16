@@ -40,7 +40,7 @@ export class Actor implements SceneObject {
     this.spriteRegion = actorOptions.spriteRegion;
     this.x = actorOptions.x;
     this.y = actorOptions.y;
-    this.z = actorOptions.z ?? 0;
+    this.z = actorOptions.z;
     this.width = actorOptions.width;
     this.height = actorOptions.height;
     this.rotation = actorOptions.rotation ?? 0;

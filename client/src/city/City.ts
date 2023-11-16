@@ -25,6 +25,7 @@ export class City extends ActorGroup {
   private territory: Tile[];
   private territoryOverlays: Actor[];
   private name: string;
+  private civIcon: Actor;
   private nameLabel: Label;
   private innerBorderColor: string;
   private outsideBorderColor: string;
@@ -76,10 +77,25 @@ export class City extends ActorGroup {
       this.nameLabel.setPosition(
         this.tile.getX() -
           this.nameLabel.getWidth() / 2 +
-          this.tile.getWidth() / 2,
+          this.tile.getWidth() / 2 +
+          7,
         this.tile.getY() - this.nameLabel.getHeight()
       );
       Game.getCurrentScene().addActor(this.nameLabel);
+
+      this.civIcon = new Actor({
+        image: Game.getImage(GameImage.SPRITESHEET),
+        spriteRegion:
+          SpriteRegion[this.player.getCivilizationData()["icon_name"]],
+        x: this.nameLabel.getX() - 14,
+        y: this.nameLabel.getY(),
+        z: 14,
+        width: 12,
+        height: 12,
+      });
+      //this.addActor(this.civIcon);
+
+      Game.getCurrentScene().addActor(this.civIcon);
     });
 
     for (const tile of this.territory) {
