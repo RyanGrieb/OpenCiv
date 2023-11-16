@@ -181,6 +181,7 @@ export class Game {
         if (this.currentScene) {
           this.currentScene.redraw();
         }
+        this.canvasContext.imageSmoothingEnabled = false;
       }, 300);
     });
 

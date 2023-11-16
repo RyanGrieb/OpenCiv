@@ -87,7 +87,7 @@ export class ClientPlayer extends AbstractPlayer {
     });
 
     Game.getCurrentScene().on("mouseup", (options) => {
-      if (Game.getCurrentScene().getCamera().isLocked()) {
+      if (Game.getCurrentScene().getCamera().isLocked() || !this.hoveredTile) {
         return;
       }
 

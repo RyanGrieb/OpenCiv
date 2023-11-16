@@ -6,9 +6,10 @@ import { Line } from "./Line";
 import { SceneObject } from "./SceneObject";
 
 export abstract class Scene {
-  private static ExitReceipt = new (class {})();
+  protected static ExitReceipt = new (class {})();
 
   protected storedEvents: Map<string, Function[]>;
+  protected firstLoad: boolean;
   private sceneObjects: SceneObject[];
   private camera: Camera;
   private name: string;
@@ -16,6 +17,7 @@ export abstract class Scene {
   constructor() {
     this.storedEvents = new Map<string, Function[]>();
     this.sceneObjects = [];
+    this.firstLoad = true;
   }
 
   public setName(name: string) {
@@ -80,10 +82,12 @@ export abstract class Scene {
       }
     });
 
+    this.camera = undefined;
     this.sceneObjects = [];
     this.storedEvents.clear();
     NetworkEvents.clear();
 
+    this.firstLoad = false;
     return Scene.ExitReceipt;
   }
 
