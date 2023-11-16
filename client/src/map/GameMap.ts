@@ -646,6 +646,8 @@ export class GameMap {
           });
           updatedMapChunk.setPosition(chunk.getX(), chunk.getY());
 
+          console.log(updatedMapChunk.getZIndex());
+
           Game.getCurrentScene().addActor(updatedMapChunk);
           Game.getCurrentScene().removeActor(chunk);
 

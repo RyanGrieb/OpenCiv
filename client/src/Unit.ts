@@ -118,7 +118,7 @@ export class Unit extends ActorGroup {
     super({
       x: options.tile.getCenterPosition()[0] - 28 / 2,
       y: options.tile.getCenterPosition()[1] - 28 / 2,
-      z: 1,
+      z: 2,
       width: 28,
       height: 28,
     });
@@ -128,6 +128,7 @@ export class Unit extends ActorGroup {
       spriteRegion: SpriteRegion[options.name.toUpperCase()],
       x: options.tile.getCenterPosition()[0] - 28 / 2,
       y: options.tile.getCenterPosition()[1] - 28 / 2,
+      z: 2,
       width: 28,
       height: 28,
     });

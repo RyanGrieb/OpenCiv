@@ -68,10 +68,15 @@ export class City extends ActorGroup {
       shadowColor: "black",
       lineWidth: 1,
       z: 4,
-      onClick: () => {
-        Game.getCurrentSceneAs<InGameScene>().toggleCityUI(this);
-      },
     });
+
+    if (
+      this.player == Game.getCurrentSceneAs<InGameScene>().getClientPlayer()
+    ) {
+      this.nameLabel.setOnClick(() => {
+        Game.getCurrentSceneAs<InGameScene>().toggleCityUI(this);
+      });
+    }
 
     this.nameLabel.conformSize().then(() => {
       this.nameLabel.setPosition(
@@ -89,7 +94,7 @@ export class City extends ActorGroup {
           SpriteRegion[this.player.getCivilizationData()["icon_name"]],
         x: this.nameLabel.getX() - 14,
         y: this.nameLabel.getY(),
-        z: 14,
+        z: 4,
         width: 12,
         height: 12,
       });

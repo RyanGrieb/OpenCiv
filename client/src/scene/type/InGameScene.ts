@@ -15,6 +15,7 @@ import { Scene } from "../Scene";
 
 export class InGameScene extends Scene {
   private players: AbstractPlayer[];
+  private clientPlayer: ClientPlayer;
   private tileInformationLabel: Label;
   private statusBar: StatusBar;
   private cityDisplayInfo: CityDisplayInfo;
@@ -43,7 +44,8 @@ export class InGameScene extends Scene {
           const playerJSON = data["players"][i];
           const civData = playerJSON["civData"];
           if (playerJSON["name"] === data["requestingName"]) {
-            this.players.push(new ClientPlayer(playerJSON["name"], civData));
+            this.clientPlayer = new ClientPlayer(playerJSON["name"], civData);
+            this.players.push(this.clientPlayer);
           } else {
             this.players.push(new ExternalPlayer(playerJSON["name"], civData));
           }
@@ -75,7 +77,7 @@ export class InGameScene extends Scene {
         text: "Next Turn",
         x: Game.getWidth() / 2 - 150 / 2,
         y: Game.getHeight() - 44,
-        z: 5,
+        z: 6,
         width: 150,
         height: 42,
         fontColor: "white",
@@ -166,7 +168,15 @@ export class InGameScene extends Scene {
     return this.players;
   }
 
+  public getClientPlayer() {
+    return this.clientPlayer;
+  }
+
   private openCityUI(city: City) {
+    if (city.getPlayer() != this.clientPlayer) {
+      return;
+    }
+
     this.cityDisplayInfo = new CityDisplayInfo(city);
     this.addActor(this.cityDisplayInfo);
 

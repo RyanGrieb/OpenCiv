@@ -280,6 +280,7 @@ export class Actor implements SceneObject {
     let greatestYHeight = 0; // The height of the actor w/ the greatest y.
     let greatestX = 0;
     let greatestY = 0;
+    let greatestZ = 0;
 
     options.actors.forEach((actor: Actor) => {
       if (actor.getX() > greatestX) {
@@ -289,6 +290,9 @@ export class Actor implements SceneObject {
       if (actor.getY() > greatestY) {
         greatestY = actor.getY();
         greatestYHeight = actor.getHeight();
+      }
+      if (actor.getZIndex() > greatestZ) {
+        greatestZ = actor.getZIndex();
       }
     });
     canvas.width = options.canvasWidth || greatestX + greatestXWidth + 1000;
@@ -307,6 +311,7 @@ export class Actor implements SceneObject {
       image: image,
       x: options.actors[0].getX(),
       y: options.actors[0].getY(),
+      z: greatestZ,
       width: canvas.width,
       height: canvas.height,
     });

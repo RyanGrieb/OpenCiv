@@ -47,9 +47,15 @@ export class Label extends Actor {
     this.lineWidth = options.lineWidth ?? 0;
     this.shadowColor = options.shadowColor ?? this.color;
     this.shadowBlur = options.shadowBlur ?? 0;
-    this.onClickCallback = options.onClick;
     this.maxWidth = options.maxWidth;
 
+    if (options.onClick) {
+      this.setOnClick(options.onClick);
+    }
+  }
+
+  public setOnClick(onClickCallback: Function) {
+    this.onClickCallback = onClickCallback;
     if (this.onClickCallback) {
       this.on("clicked", () => {
         this.onClickCallback();
