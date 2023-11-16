@@ -4,6 +4,7 @@ import { NetworkEvents } from "../network/Client";
 import { Camera } from "./Camera";
 import { Line } from "./Line";
 import { SceneObject } from "./SceneObject";
+import { ActorGroup } from "./ActorGroup";
 
 export abstract class Scene {
   protected static ExitReceipt = new (class {})();
@@ -76,10 +77,10 @@ export abstract class Scene {
 
   public onDestroyed(newScene: Scene): typeof Scene.ExitReceipt {
     this.sceneObjects.forEach((object) => {
-      if (object instanceof Actor) {
+      if (object instanceof Actor || object instanceof ActorGroup) {
         const actor = object as Actor;
         actor.call("mouse_exit");
-        actor.onDestroyed();
+        this.removeActor(object);
       }
     });
 
