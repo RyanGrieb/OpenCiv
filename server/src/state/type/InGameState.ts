@@ -2,21 +2,31 @@ import { Game } from "../../Game";
 import { ServerEvents } from "../../Events";
 import { State } from "../State";
 import { GameMap } from "../../map/GameMap";
-import { Server } from "http";
 import { Unit } from "../../Unit";
 import { City } from "../../city/City";
 import { Job, gracefulShutdown, scheduleJob } from "node-schedule";
+
+import fs from "fs";
+import YAML from "yaml";
 
 export class InGameState extends State {
   private turnTimeJob: Job;
   private currentTurn: number;
   private totalTurnTime: number;
   private turnTime: number;
+  private cityBuildings: Record<string, any>[];
 
   public onInitialize() {
     this.totalTurnTime = 60; //TODO: Allow modification
     this.currentTurn = 0;
     this.turnTime = 0;
+
+    // Load available buildings from config file
+    const buildingsYMLData = YAML.parse(
+      fs.readFileSync("./config/buildings.yml", "utf-8")
+    );
+    //Convert civsData from YAML to JSON:
+    this.cityBuildings = JSON.parse(JSON.stringify(buildingsYMLData.buildings));
 
     // Set loading screen for players
     Game.getPlayers().forEach((player) => {
@@ -174,6 +184,19 @@ export class InGameState extends State {
         }
       },
     });
+  }
+
+  public getBuildingDataByName(name: string) {
+    for (const building of this.cityBuildings) {
+      if (
+        (building.name as string).toLocaleLowerCase() ===
+        name.toLocaleLowerCase()
+      ) {
+        return building;
+      }
+    }
+
+    return undefined;
   }
 
   // Decrease trunTime by -1 every 1 second

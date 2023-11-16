@@ -2,6 +2,7 @@ import { Game } from "../Game";
 import { Player } from "../Player";
 import { GameMap } from "../map/GameMap";
 import { Tile } from "../map/Tile";
+import { InGameState } from "../state/type/InGameState";
 
 export interface CityOptions {
   tile: Tile;
@@ -71,7 +72,8 @@ export class City {
 
   public addBuilding(name: string) {
     // Get the building data from YML
-    const buildingData = Game.getBuildingDataByName(name);
+    const buildingData =
+      Game.getCurrentStateAs<InGameState>().getBuildingDataByName(name);
 
     // Apply any effects to the building if any (faith, culture, bonuses, etc.)):
     //...

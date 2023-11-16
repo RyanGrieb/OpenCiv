@@ -10,8 +10,9 @@ export abstract class Scene {
 
   protected storedEvents: Map<string, Function[]>;
   protected firstLoad: boolean;
-  private sceneObjects: SceneObject[];
   private camera: Camera;
+  private oldCamera: Camera;
+  private sceneObjects: SceneObject[];
   private name: string;
 
   constructor() {
@@ -82,6 +83,10 @@ export abstract class Scene {
       }
     });
 
+    if (this.camera) {
+      this.oldCamera = this.camera;
+    }
+
     this.camera = undefined;
     this.sceneObjects = [];
     this.storedEvents.clear();
@@ -122,6 +127,10 @@ export abstract class Scene {
 
   public getCamera() {
     return this.camera;
+  }
+
+  public restoreCamera() {
+    this.camera = Camera.fromCamera(this.oldCamera);
   }
 
   public sortSceneObjects() {

@@ -15,6 +15,8 @@ export class Player {
   private loadedIn: boolean;
   /** The callback to execute when the player has loaded into the game. */
   private loadedInCallback: () => void;
+  /** The callback to execute when the player resizes their window. */
+  private resizeWindowCallback: () => void;
   private requestedNextTurn: boolean;
   private civilizationData: Record<string, any>;
   private cities: City[];
@@ -58,6 +60,17 @@ export class Player {
       },
       globalEvent: true,
     });
+
+    ServerEvents.on({
+      eventName: "resizeWindow",
+      parentObject: this,
+      callback: (data, websocket) => {
+        if (this.wsConnection != websocket) return;
+
+        this.resizeWindowCallback.call(undefined);
+      },
+      globalEvent: true,
+    });
   }
 
   /**
@@ -78,6 +91,10 @@ export class Player {
    */
   public onLoadedIn(callback: () => void) {
     this.loadedInCallback = callback;
+  }
+
+  public onResizeWindow(callback: () => void) {
+    this.resizeWindowCallback = callback;
   }
 
   public setRequestedNextTurn(value: boolean) {

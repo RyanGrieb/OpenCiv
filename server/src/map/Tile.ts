@@ -53,6 +53,7 @@ export class Tile {
   }
 
   public setCity(city: City) {
+    this.addTileType("city");
     this.city = city;
   }
 

@@ -25,13 +25,16 @@ export class InGameScene extends Scene {
   public onInitialize(): void {
     GameMap.init();
     this.players = [];
-
-    const camera = new Camera({
-      wasd_controls: false,
-      mouse_controls: true,
-      //initial_position: [1, 1],
-    });
-    this.setCamera(camera);
+    if (this.firstLoad) {
+      const camera = new Camera({
+        wasd_controls: false,
+        mouse_controls: true,
+        //initial_position: [1, 1],
+      });
+      this.setCamera(camera);
+    } else {
+      this.restoreCamera();
+    }
 
     // Initialize all existing players
     WebsocketClient.sendMessage({ event: "connectedPlayers" });
@@ -82,6 +85,7 @@ export class InGameScene extends Scene {
         height: 42,
         fontColor: "white",
         onClicked: () => {
+          console.log("next turn!");
           WebsocketClient.sendMessage({ event: "nextTurnRequest" });
         },
       });
@@ -145,7 +149,11 @@ export class InGameScene extends Scene {
           );
         });*/
 
-      WebsocketClient.sendMessage({ event: "loadedIn" });
+      //FIXME: re-create cities if they already exist (resizing, loading in existing game).
+
+      if (this.firstLoad) {
+        WebsocketClient.sendMessage({ event: "loadedIn" });
+      }
     });
   }
 

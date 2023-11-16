@@ -22,12 +22,27 @@ export class Camera {
   private lastMouseY: number;
   private mouseHeld: boolean;
   private locked: boolean;
+  private wasdControls: boolean;
+  private mouseControls: boolean;
+
+  public static fromCamera(camera: Camera) {
+    const newCamera = new Camera({
+      wasd_controls: camera.hasWASDControls(),
+      mouse_controls: camera.hasMouseControls(),
+    });
+
+    newCamera.setPosition(camera.getX(), camera.getY());
+    newCamera.setZoom(camera.getZoomAmount());
+    return newCamera;
+  }
 
   constructor(options: CameraOptions) {
     this.keysHeld = [];
     this.x = 0;
     this.y = 0;
 
+    this.wasdControls = options.wasd_controls;
+    this.mouseControls = options.mouse_controls;
     this.xVelAmount = 0;
     this.yVelAmount = 0;
     this.zoomAmount = 1;
@@ -142,6 +157,18 @@ export class Camera {
         this.mouseHeld = false;
       });
     }
+  }
+
+  public hasWASDControls() {
+    return this.wasdControls;
+  }
+
+  public hasMouseControls() {
+    return this.mouseControls;
+  }
+
+  public setZoom(amount: number) {
+    this.zoomAmount = amount;
   }
 
   public zoomToLocation(x: number, y: number, zoomAmount: number) {
