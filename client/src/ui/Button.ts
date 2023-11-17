@@ -168,4 +168,8 @@ export class Button extends ActorGroup {
       Game.setCursor("default");
     }
   }
+
+  public setText(text: string) {
+    this.text = text;
+  }
 }

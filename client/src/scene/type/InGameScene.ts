@@ -44,12 +44,11 @@ export class InGameScene extends Scene {
       callback: (data) => {
         for (let i = 0; i < data["players"].length; i++) {
           const playerJSON = data["players"][i];
-          const civData = playerJSON["civData"];
           if (playerJSON["name"] === data["requestingName"]) {
-            this.clientPlayer = new ClientPlayer(playerJSON["name"], civData);
+            this.clientPlayer = new ClientPlayer(playerJSON);
             this.players.push(this.clientPlayer);
           } else {
-            this.players.push(new ExternalPlayer(playerJSON["name"], civData));
+            this.players.push(new ExternalPlayer(playerJSON));
           }
         }
       },
@@ -78,7 +77,9 @@ export class InGameScene extends Scene {
       this.addActor(this.statusBar);
 
       this.nextTurnButton = new Button({
-        text: "Next Turn",
+        text: this.clientPlayer.hasRequestedNextTurn()
+          ? "Waiting..."
+          : "Next Turn",
         x: Game.getWidth() / 2 - 150 / 2,
         y: Game.getHeight() - 44,
         z: 6,
@@ -86,7 +87,22 @@ export class InGameScene extends Scene {
         height: 42,
         fontColor: "white",
         onClicked: () => {
-          WebsocketClient.sendMessage({ event: "nextTurnRequest" });
+          // Undo next turn request.
+          if (this.clientPlayer.hasRequestedNextTurn()) {
+            this.nextTurnButton.setText("Next Turn");
+            WebsocketClient.sendMessage({
+              event: "nextTurnRequest",
+              value: false,
+            });
+            this.clientPlayer.setRequestedNextTurn(false);
+          } else {
+            WebsocketClient.sendMessage({
+              event: "nextTurnRequest",
+              value: true,
+            });
+            this.nextTurnButton.setText("Waiting...");
+            this.clientPlayer.setRequestedNextTurn(true);
+          }
         },
       });
       this.addActor(this.nextTurnButton);
@@ -152,6 +168,15 @@ export class InGameScene extends Scene {
       if (this.firstLoad) {
         WebsocketClient.sendMessage({ event: "loadedIn" });
       }
+
+      NetworkEvents.on({
+        eventName: "newTurn",
+        parentObject: this,
+        callback: (data) => {
+          this.nextTurnButton.setText("Next Turn");
+          this.clientPlayer.setRequestedNextTurn(false);
+        },
+      });
     });
   }
 

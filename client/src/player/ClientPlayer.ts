@@ -19,11 +19,13 @@ export class ClientPlayer extends AbstractPlayer {
   private hoveredTile: HoveredTile;
   private movementLines: Line[];
   private rightMouseDrag: boolean;
+  private requestedNextTurn: boolean;
 
-  constructor(name: string, civData: JSON) {
-    super(name, civData);
+  constructor(playerJSON: JSON) {
+    super(playerJSON);
 
     this.movementLines = [];
+    this.requestedNextTurn = playerJSON["requestedNextTurn"];
 
     Game.getCurrentScene().on("mapLoaded", () => {
       this.hoveredTile = new HoveredTile(9999, 9999);
@@ -178,6 +180,14 @@ export class ClientPlayer extends AbstractPlayer {
         this.clearMovementPath();
       },
     });
+  }
+
+  public setRequestedNextTurn(value: boolean) {
+    this.requestedNextTurn = value;
+  }
+
+  public hasRequestedNextTurn() {
+    return this.requestedNextTurn;
   }
 
   private onMouseRightClick() {

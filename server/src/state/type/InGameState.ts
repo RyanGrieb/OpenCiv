@@ -167,7 +167,7 @@ export class InGameState extends State {
       parentObject: this,
       callback: (data, websocket) => {
         const player = Game.getPlayerFromWebsocket(websocket);
-        player.setRequestedNextTurn(true);
+        player.setRequestedNextTurn(data["value"]);
 
         const allRequested = Array.from(Game.getPlayers().values()).every(
           (player) => player.hasRequestedNextTurn()

@@ -6,7 +6,6 @@ import { NetworkEvents } from "./network/Client";
 import { AbstractPlayer } from "./player/AbstractPlayer";
 import { Actor } from "./scene/Actor";
 import { ActorGroup } from "./scene/ActorGroup";
-import { InGameScene } from "./scene/type/InGameScene";
 import { UnitDisplayInfo } from "./ui/UnitDisplayInfo";
 
 export class UnitActionManager {

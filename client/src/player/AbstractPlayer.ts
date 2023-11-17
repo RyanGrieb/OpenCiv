@@ -5,9 +5,9 @@ export class AbstractPlayer {
   private name: string;
   private civData: JSON;
 
-  constructor(name: string, civData: JSON) {
-    this.name = name;
-    this.civData = civData;
+  constructor(playerJSON: JSON) {
+    this.civData = playerJSON["civData"];
+    this.name = playerJSON["name"];
   }
 
   public static getPlayerByName(name: string) {

@@ -156,6 +156,7 @@ export class Player {
     return {
       name: this.name,
       civData: this.civilizationData,
+      requestedNextTurn: this.requestedNextTurn,
     };
   }
 
