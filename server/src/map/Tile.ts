@@ -57,6 +57,10 @@ export class Tile {
     this.city = city;
   }
 
+  public getCity(): City {
+    return this.city;
+  }
+
   public addUnit(unit: Unit) {
     this.units.push(unit);
   }
@@ -116,6 +120,7 @@ export class Tile {
       x: this.x,
       y: this.y,
       movementCost: this.getMovementCost(),
+      city: this.city ? this.city.getJSON() : null,
     };
   }
 

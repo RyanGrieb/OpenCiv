@@ -13,6 +13,7 @@ import { Buidling } from "./Building";
 export interface CityOptions {
   player: AbstractPlayer;
   tile: Tile;
+  territory: Tile[];
   name: string;
 }
 
@@ -31,6 +32,7 @@ export class City extends ActorGroup {
   private outsideBorderColor: string;
   private buildings: Buidling[];
   private stats: Map<string, number>;
+  private statsPresent: boolean;
 
   constructor(options: CityOptions) {
     super({ x: 0, y: 0, z: 2, width: 0, height: 0 });
@@ -40,6 +42,7 @@ export class City extends ActorGroup {
     this.name = options.name;
     this.buildings = [];
     this.stats = new Map<string, number>();
+    this.statsPresent = false;
 
     this.innerBorderColor =
       this.player.getCivilizationData()["inside_border_color"];
@@ -49,12 +52,7 @@ export class City extends ActorGroup {
     this.territoryOverlays = [];
 
     //FIXME: Have the server communicate what tiles are our territory.
-    this.territory = [this.tile];
-    for (const adjTile of this.tile.getAdjacentTiles()) {
-      if (!adjTile) continue;
-
-      this.territory.push(adjTile);
-    }
+    this.territory = options.territory;
 
     this.nameLabel = new Label({
       text: this.name,
@@ -143,8 +141,14 @@ export class City extends ActorGroup {
           const statValue = stat[statType]; // Get the stat value
           this.stats.set(statType, statValue);
         }
+
+        this.statsPresent = true;
       },
     });
+  }
+
+  public hasStats(): boolean {
+    return this.statsPresent;
   }
 
   public getStat(stat: string): number {

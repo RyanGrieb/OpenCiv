@@ -735,10 +735,15 @@ export class GameMap {
     for (let x = 0; x < this.mapWidth; x += 4) {
       for (let y = 0; y < this.mapHeight; y += 4) {
         const chunkTiles = [];
+        const chunkCities = [];
 
         for (let chunkX = 0; chunkX < 4; chunkX++) {
           for (let chunkY = 0; chunkY < 4; chunkY++) {
-            chunkTiles.push(this.tiles[x + chunkX][y + chunkY].getTileJSON());
+            const tile = this.tiles[x + chunkX][y + chunkY];
+            if (tile.getCity()) {
+              chunkCities.push(tile.getCity());
+            }
+            chunkTiles.push(tile.getTileJSON());
           }
         }
 

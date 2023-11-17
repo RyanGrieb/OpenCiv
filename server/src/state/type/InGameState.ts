@@ -103,10 +103,7 @@ export class InGameState extends State {
                 Game.getPlayers().forEach((gamePlayer) => {
                   gamePlayer.sendNetworkEvent({
                     event: "newCity",
-                    player: player.getName(),
-                    cityName: city.getName(),
-                    tileX: tile.getX(),
-                    tileY: tile.getY(),
+                    ...city.getJSON(),
                   });
                 });
 

@@ -150,8 +150,6 @@ export class InGameScene extends Scene {
           );
         });*/
 
-      //FIXME: re-create cities if they already exist (resizing, loading in existing game).
-
       if (this.firstLoad) {
         WebsocketClient.sendMessage({ event: "loadedIn" });
       }
@@ -182,7 +180,7 @@ export class InGameScene extends Scene {
   }
 
   private openCityUI(city: City) {
-    if (city.getPlayer() != this.clientPlayer) {
+    if (city.getPlayer() != this.clientPlayer || !city.hasStats()) {
       return;
     }
 

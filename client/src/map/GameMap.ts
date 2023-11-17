@@ -64,11 +64,8 @@ export class GameMap {
       eventName: "newCity",
       parentObject: this,
       callback: (data) => {
-        const tile = this.tiles[data["tileX"]][data["tileY"]];
-        const player = AbstractPlayer.getPlayerByName(data["player"]);
-        const cityName = data["cityName"];
-        const city = new City({ tile: tile, player: player, name: cityName });
-        tile.setCity(city);
+        const city = this.getCityFromJSONData(data);
+        city.getTile().setCity(city); // Assign the city variable inside the tile variable.
         // Add the city actor to the scene (borders, nametag)
         Game.getCurrentScene().addActor(city);
       },
@@ -240,6 +237,7 @@ export class GameMap {
     this.tiles = [];
     const baseLayerTiles = [];
     const riverActors = [];
+    const cityJSONS: JSON[] = [];
 
     WebsocketClient.sendMessage({ event: "requestMap" });
 
@@ -338,6 +336,12 @@ export class GameMap {
 
             topLayerTiles.push(topLayerTile);
             this.topLayerTileActorList.push(topLayerTile);
+
+            // Add new city if it already exists in the world
+            if (topLayerTileTypes.includes("city")) {
+              const cityJSON = tileJSON["city"];
+              cityJSONS.push(cityJSON);
+            }
           }
 
           for (const jsonUnit of jsonUnits) {
@@ -415,6 +419,18 @@ export class GameMap {
             baseLayerTile.setTileTypes(
               baseLayerTile.getTileTypes().concat(topLayerTile.getTileTypes())
             );
+          }
+
+          // Now create any cities that already exist on the map
+          for (const cityJSON of cityJSONS) {
+            const city = this.getCityFromJSONData(cityJSON);
+            city.getTile().setCity(city);
+            scene.addActor(city);
+
+            WebsocketClient.sendMessage({
+              event: "requestCityStats",
+              cityName: city.getName(),
+            });
           }
 
           Game.getCurrentScene().call("mapLoaded");
@@ -694,5 +710,25 @@ export class GameMap {
 
   public getTopLayerChunks() {
     return this.topLayerMapChunks;
+  }
+
+  private getCityFromJSONData(data: JSON): City {
+    const tile = this.tiles[data["tileX"]][data["tileY"]];
+    const player = AbstractPlayer.getPlayerByName(data["player"]);
+    const cityName = data["cityName"];
+    const territory: Tile[] = [];
+    for (const territoryJSON of data["territory"]) {
+      territory.push(
+        this.tiles[territoryJSON["tileX"]][territoryJSON["tileY"]]
+      );
+    }
+    const city = new City({
+      tile: tile,
+      territory: territory,
+      player: player,
+      name: cityName,
+    });
+
+    return city;
   }
 }

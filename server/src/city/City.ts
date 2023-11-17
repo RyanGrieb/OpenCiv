@@ -1,3 +1,4 @@
+import { ServerEvents } from "../Events";
 import { Game } from "../Game";
 import { Player } from "../Player";
 import { GameMap } from "../map/GameMap";
@@ -42,6 +43,19 @@ export class City {
     this.sendTerritoryUpdate();
 
     this.updateWorkedTiles({ sendStatUpdate: true });
+
+    ServerEvents.on({
+      eventName: "requestCityStats",
+      parentObject: this,
+      callback: (data, websocket) => {
+        const player = Game.getPlayerFromWebsocket(websocket);
+        if (this.name != data["cityName"] || this.player != player) {
+          return;
+        }
+
+        this.sendStatUpdate(player);
+      },
+    });
   }
 
   public updateWorkedTiles(options?: { sendStatUpdate: boolean }) {
@@ -66,7 +80,7 @@ export class City {
     }
 
     if (options.sendStatUpdate) {
-      this.sendStatUpdate();
+      this.sendStatUpdate(this.player);
     }
   }
 
@@ -80,6 +94,7 @@ export class City {
 
     this.buildings.push(buildingData);
 
+    //FIXME: Just append building data to stateUpdate
     // Send new-building packet to player
     this.player.sendNetworkEvent({
       event: "addBuilding",
@@ -95,10 +110,11 @@ export class City {
   /*
   Get the city-stat line, and send it to the player
 */
-  public sendStatUpdate() {
+  public sendStatUpdate(player: Player) {
     const cityStats = this.getStatline({ asArray: true });
 
-    this.player.sendNetworkEvent({
+    //FIXME: Append building data to stateUpdate
+    player.sendNetworkEvent({
       event: "updateCityStats",
       cityName: this.name,
       cityStats: cityStats,
@@ -192,5 +208,20 @@ export class City {
 
   public getName() {
     return this.name;
+  }
+
+  public getJSON() {
+    const territoryCoords = this.territory.map((tile) => ({
+      tileX: tile.getX(),
+      tileY: tile.getY(),
+    }));
+
+    return {
+      cityName: this.name,
+      player: this.player.getName(),
+      tileX: this.tile.getX(),
+      tileY: this.tile.getY(),
+      territory: territoryCoords,
+    };
   }
 }
