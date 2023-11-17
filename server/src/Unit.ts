@@ -236,11 +236,21 @@ export class Unit {
   }
 
   public asJSON() {
+    const queuedTilesJSON = this.queuedMovementTiles.map((tile) => ({
+      x: tile.getX(),
+      y: tile.getY(),
+    }));
+
     return {
       name: this.name,
+      tileX: this.tile.getX(),
+      tileY: this.tile.getY(),
       attackType: this.attackType,
       id: this.id,
       actions: this.getUnitActionsJSON(),
+      queuedTiles: queuedTilesJSON,
+      remainingMovement: this.availableMovement,
+      defaultMoveDistance: this.defaultMoveDistance,
     };
   }
 

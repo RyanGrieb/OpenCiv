@@ -86,7 +86,6 @@ export class InGameScene extends Scene {
         height: 42,
         fontColor: "white",
         onClicked: () => {
-          console.log("next turn!");
           WebsocketClient.sendMessage({ event: "nextTurnRequest" });
         },
       });

@@ -114,20 +114,23 @@ export class Unit extends ActorGroup {
   private actions: UnitAction[];
   private queuedMovementTiles: Tile[];
 
-  constructor(options: options) {
+  constructor(tile: Tile, unitJSON: JSON) {
     super({
-      x: options.tile.getCenterPosition()[0] - 28 / 2,
-      y: options.tile.getCenterPosition()[1] - 28 / 2,
+      x: tile.getCenterPosition()[0] - 28 / 2,
+      y: tile.getCenterPosition()[1] - 28 / 2,
       z: 2,
       width: 28,
       height: 28,
     });
 
+    this.tile = tile;
+    this.name = unitJSON["name"];
+
     this.unitActor = new Actor({
       image: Game.getImage(GameImage.SPRITESHEET),
-      spriteRegion: SpriteRegion[options.name.toUpperCase()],
-      x: options.tile.getCenterPosition()[0] - 28 / 2,
-      y: options.tile.getCenterPosition()[1] - 28 / 2,
+      spriteRegion: SpriteRegion[this.name.toUpperCase()],
+      x: tile.getCenterPosition()[0] - 28 / 2,
+      y: tile.getCenterPosition()[1] - 28 / 2,
       z: 2,
       width: 28,
       height: 28,
@@ -135,27 +138,30 @@ export class Unit extends ActorGroup {
 
     this.addActor(this.unitActor);
 
-    this.name = options.name;
-    this.id = options.id;
-    this.tile = options.tile;
-    this.attackType = options.attackType;
-    this.selectionActors = [];
-    this.defaultMoveDistance = 2; // TODO: Have server define this.
-    this.availableMovement = this.defaultMoveDistance;
-    this.actions = [];
-    this.queuedMovementTiles = [];
+    this.id = unitJSON["id"];
+    this.attackType = unitJSON["attackType"];
+    this.availableMovement = unitJSON["remainingMovement"];
+    this.defaultMoveDistance = unitJSON["defaultMoveDistance"];
 
-    if (options.actionsJSONList) {
-      for (const actionJSON of options.actionsJSONList) {
-        this.actions.push(
-          new UnitAction(
-            actionJSON.name,
-            actionJSON.desc,
-            actionJSON.requirements,
-            SpriteRegion[actionJSON.icon]
-          )
-        );
-      }
+    this.queuedMovementTiles = [];
+    for (const jsonTile of unitJSON["queuedTiles"]) {
+      this.queuedMovementTiles.push(
+        GameMap.getInstance().getTiles()[jsonTile["x"]][jsonTile["y"]]
+      );
+    }
+
+    this.selectionActors = [];
+    this.actions = [];
+
+    for (const actionJSON of unitJSON["actions"]) {
+      this.actions.push(
+        new UnitAction(
+          actionJSON.name,
+          actionJSON.desc,
+          actionJSON.requirements,
+          SpriteRegion[actionJSON.icon]
+        )
+      );
     }
 
     console.log("new unit with id: " + this.id);

@@ -29,7 +29,6 @@ export class ClientPlayer extends AbstractPlayer {
       this.hoveredTile = new HoveredTile(9999, 9999);
       this.hoveredTile.loadImage().then(() => {
         Game.getCurrentScene().addActor(this.hoveredTile);
-        console.log("update hovered tile.");
         this.updateHoveredTile(Game.getMouseX(), Game.getMouseY());
       });
     });
@@ -170,6 +169,15 @@ export class ClientPlayer extends AbstractPlayer {
         this.unselectUnit();
       }
     });
+
+    NetworkEvents.on({
+      eventName: "newTurn",
+      parentObject: this,
+      callback: (data) => {
+        this.unselectUnit();
+        this.clearMovementPath();
+      },
+    });
   }
 
   private onMouseRightClick() {
@@ -238,7 +246,6 @@ export class ClientPlayer extends AbstractPlayer {
     unit.select();
     this.selectedUnit = unit;
 
-    // TOOD: Draw full outline of final queued tile or hovered tile.
     if (this.selectedUnit.hasMovementQueue()) {
       const isQueuedMovement = this.drawMovementPathFromTiles([
         unit.getTile(),

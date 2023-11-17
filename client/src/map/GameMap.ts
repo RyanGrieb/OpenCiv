@@ -40,7 +40,6 @@ export class GameMap {
 
   private topLayerMapChunks: Map<Actor, Tile[]>;
   private topLayerTileActorList: Tile[] = [];
-  private unitActorList: Unit[] = [];
 
   public static getInstance() {
     return this.instance;
@@ -238,6 +237,7 @@ export class GameMap {
     const baseLayerTiles = [];
     const riverActors = [];
     const cityJSONS: JSON[] = [];
+    const unitJSONS: JSON[] = [];
 
     WebsocketClient.sendMessage({ event: "requestMap" });
 
@@ -345,15 +345,7 @@ export class GameMap {
           }
 
           for (const jsonUnit of jsonUnits) {
-            const unit = new Unit({
-              name: jsonUnit["name"],
-              id: jsonUnit["id"],
-              attackType: jsonUnit["attackType"],
-              tile: tile,
-              actionsJSONList: jsonUnit["actions"],
-            });
-            tile.addUnit(unit);
-            this.unitActorList.push(unit);
+            unitJSONS.push(jsonUnit);
           }
         }
 
@@ -407,7 +399,11 @@ export class GameMap {
             scene.addActor(chunkActor);
           });
 
-          for (const unit of this.unitActorList) {
+          // Now create any units that already exist on the map
+          for (const unitJSON of unitJSONS) {
+            const tile = this.tiles[unitJSON["tileX"]][unitJSON["tileY"]];
+            const unit = new Unit(tile, unitJSON);
+            tile.addUnit(unit);
             scene.addActor(unit);
           }
 
