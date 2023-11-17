@@ -1,10 +1,10 @@
 # OpenCiv ![tile_city](https://github.com/rhin123/OpenCiv/blob/master/client/assets/archive/tile_city.png?raw=true)
 
-![alt text](https://github.com/rhin123/OpenCiv/blob/master/meta/screenshots/new_ui_2.png?raw=true)
-
 ![example workflow](https://github.com/rhin123/OpenCiv/actions/workflows/build.yml/badge.svg)
-[![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=rhin123_OpenCiv&metric=ncloc)](https://sonarcloud.io/summary/new_code?id=RyanGrieb_OpenCiv)
+[![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=RyanGrieb_OpenCiv&metric=ncloc)](https://sonarcloud.io/summary/new_code?id=RyanGrieb_OpenCiv)
 [![Discord](https://img.shields.io/discord/925176383792087081.svg?logo=discord&logoColor=white&logoWidth=20&labelColor=7289DA&label=Discord&color=17cf48)](https://discord.gg/WFteeen5fu)
+
+![alt text](https://github.com/rhin123/OpenCiv/blob/master/meta/screenshots/new_ui_2.png?raw=true)
 
 ## About
 
