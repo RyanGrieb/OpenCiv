@@ -3,8 +3,10 @@ import { Game } from "./Game";
 import { GameMap } from "./map/GameMap";
 import { Tile } from "./map/Tile";
 import { NetworkEvents } from "./network/Client";
+import { AbstractPlayer } from "./player/AbstractPlayer";
 import { Actor } from "./scene/Actor";
 import { ActorGroup } from "./scene/ActorGroup";
+import { InGameScene } from "./scene/type/InGameScene";
 import { UnitDisplayInfo } from "./ui/UnitDisplayInfo";
 
 export class UnitActionManager {
@@ -113,6 +115,7 @@ export class Unit extends ActorGroup {
   private unitDisplayInfo: UnitDisplayInfo;
   private actions: UnitAction[];
   private queuedMovementTiles: Tile[];
+  private player: AbstractPlayer;
 
   constructor(tile: Tile, unitJSON: JSON) {
     super({
@@ -142,6 +145,7 @@ export class Unit extends ActorGroup {
     this.attackType = unitJSON["attackType"];
     this.availableMovement = unitJSON["remainingMovement"];
     this.defaultMoveDistance = unitJSON["defaultMoveDistance"];
+    this.player = AbstractPlayer.getPlayerByName(unitJSON["player"]);
 
     this.queuedMovementTiles = [];
     for (const jsonTile of unitJSON["queuedTiles"]) {
@@ -376,5 +380,9 @@ export class Unit extends ActorGroup {
     for (const actor of this.selectionActors) {
       this.addActor(actor);
     }
+  }
+
+  public getPlayer() {
+    return this.player;
   }
 }

@@ -54,11 +54,17 @@ export class Unit {
     ServerEvents.on({
       eventName: "moveUnit",
       parentObject: this,
-      callback: (data) => {
+      callback: (data, websocket) => {
         const targetTile =
           GameMap.getInstance().getTiles()[data["targetX"]][data["targetY"]];
+        const player = Game.getPlayerFromWebsocket(websocket);
 
-        if (this.id !== data["id"] || this.tile === targetTile) return;
+        if (
+          this.id !== data["id"] ||
+          this.tile === targetTile ||
+          this.player != player
+        )
+          return;
 
         // Move the furthest we can possibly go, and queue the rest of tiles for next turn.
 
@@ -245,6 +251,7 @@ export class Unit {
       name: this.name,
       tileX: this.tile.getX(),
       tileY: this.tile.getY(),
+      player: this.player.getName(),
       attackType: this.attackType,
       id: this.id,
       actions: this.getUnitActionsJSON(),

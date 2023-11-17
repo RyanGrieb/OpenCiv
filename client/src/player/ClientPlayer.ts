@@ -234,6 +234,11 @@ export class ClientPlayer extends AbstractPlayer {
     //TODO: Cycle through units on the tile
     const unit = units[0];
 
+    // Don't allow selection of other player's units
+    if (unit.getPlayer() != this) {
+      return;
+    }
+
     // Clear previously defined movement paths.
     this.clearMovementPath();
 
