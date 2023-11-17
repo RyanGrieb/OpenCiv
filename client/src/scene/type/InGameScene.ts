@@ -23,7 +23,6 @@ export class InGameScene extends Scene {
   private closeCityDisplayButton: Button;
 
   public onInitialize(): void {
-    GameMap.init();
     this.players = [];
     if (this.firstLoad) {
       const camera = new Camera({
@@ -55,6 +54,8 @@ export class InGameScene extends Scene {
         }
       },
     });
+
+    GameMap.init();
 
     this.on("mapLoaded", () => {
       this.tileInformationLabel = new Label({
