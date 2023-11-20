@@ -11,6 +11,7 @@ export abstract class Scene {
 
   protected storedEvents: Map<string, Function[]>;
   protected firstLoad: boolean;
+  protected controlsLocked: boolean;
   private camera: Camera;
   private oldCamera: Camera;
   private sceneObjects: SceneObject[];
@@ -138,5 +139,9 @@ export abstract class Scene {
     this.sceneObjects.sort((obj1, obj2) => {
       return obj1.getZIndex() - obj2.getZIndex();
     });
+  }
+
+  public hasControlsLocked() {
+    return this.controlsLocked;
   }
 }

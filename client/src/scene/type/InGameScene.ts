@@ -1,3 +1,4 @@
+import { GameImage } from "../../Assets";
 import { Game } from "../../Game";
 import { City } from "../../city/City";
 import { GameMap } from "../../map/GameMap";
@@ -10,6 +11,8 @@ import { Button } from "../../ui/Button";
 import { CityDisplayInfo } from "../../ui/CityDisplayInfo";
 import { Label } from "../../ui/Label";
 import { StatusBar } from "../../ui/StatusBar";
+import { Actor } from "../Actor";
+import { ActorGroup } from "../ActorGroup";
 import { Camera } from "../Camera";
 import { Scene } from "../Scene";
 
@@ -21,6 +24,7 @@ export class InGameScene extends Scene {
   private cityDisplayInfo: CityDisplayInfo;
   private nextTurnButton: Button;
   private closeCityDisplayButton: Button;
+  private escMenu: ActorGroup;
 
   public onInitialize(): void {
     this.players = [];
@@ -34,6 +38,12 @@ export class InGameScene extends Scene {
     } else {
       this.restoreCamera();
     }
+
+    this.on("keyup", (options) => {
+      if (options.key === "Escape") {
+        this.toggleEscMenu();
+      }
+    });
 
     // Initialize all existing players
     WebsocketClient.sendMessage({ event: "connectedPlayers" });
@@ -230,5 +240,93 @@ export class InGameScene extends Scene {
     this.addActor(this.tileInformationLabel);
 
     this.removeActor(this.closeCityDisplayButton);
+  }
+
+  private toggleEscMenu() {
+    if (this.escMenu) {
+      this.removeActor(this.escMenu);
+      this.escMenu = undefined;
+      this.controlsLocked = false;
+      return;
+    }
+
+    this.controlsLocked = true;
+
+    this.escMenu = new ActorGroup({
+      x: Game.getWidth() / 2 - 275 / 2,
+      y: Game.getHeight() / 2 - 275 / 2,
+      width: 275,
+      height: 275,
+      cameraApplies: false,
+    });
+
+    this.escMenu.addActor(
+      new Actor({
+        x: this.escMenu.getX(),
+        y: this.escMenu.getY(),
+        width: this.escMenu.getWidth(),
+        height: this.escMenu.getHeight(),
+        image: Game.getImage(GameImage.POPUP_BOX),
+      })
+    );
+
+    this.escMenu.addActor(
+      new Button({
+        text: "Return to Game",
+        x: this.escMenu.getX() + this.escMenu.getWidth() / 2 - 242 / 2,
+        y: this.escMenu.getY() + 14,
+        width: 242,
+        height: 62,
+        fontColor: "white",
+        onClicked: () => {
+          this.removeActor(this.escMenu);
+          this.escMenu = undefined;
+        },
+      })
+    );
+
+    this.escMenu.addActor(
+      new Button({
+        text: "Settings",
+        x: this.escMenu.getX() + this.escMenu.getWidth() / 2 - 242 / 2,
+        y: this.escMenu.getY() + 76,
+        width: 242,
+        height: 62,
+        fontColor: "white",
+        onClicked: () => {
+          console.log("Toggle settings menu");
+        },
+      })
+    );
+
+    this.escMenu.addActor(
+      new Button({
+        text: "Save Game",
+        x: this.escMenu.getX() + this.escMenu.getWidth() / 2 - 242 / 2,
+        y: this.escMenu.getY() + 138,
+        width: 242,
+        height: 62,
+        fontColor: "white",
+        onClicked: () => {},
+      })
+    );
+
+    this.escMenu.addActor(
+      new Button({
+        text: "Exit to Main Menu",
+        x: this.escMenu.getX() + this.escMenu.getWidth() / 2 - 242 / 2,
+        y: this.escMenu.getY() + 200,
+        width: 242,
+        height: 62,
+        fontColor: "white",
+        onClicked: () => {
+          WebsocketClient.disconnect();
+          Game.setScene("main_menu");
+          this.firstLoad = true;
+        },
+      })
+    );
+
+    this.addActor(this.escMenu);
   }
 }
