@@ -52,16 +52,15 @@ export class Camera {
     this.locked = false;
 
     const scene = Game.getCurrentScene();
-    if (options.wasd_controls) {
-      scene.on("keydown", (options) => {
-        if (this.keysHeld.includes(options.key) || this.locked) {
-          return;
-        }
+    scene.on("keydown", (options) => {
+      if (this.keysHeld.includes(options.key) || this.locked) {
+        return;
+      }
 
+      if (this.wasdControls) {
         this.keysHeld.push(options.key);
 
         if (options.key == "a" || options.key == "A") {
-          console.log("a");
           scene.getCamera().addVel(5, 0);
         }
         if (options.key == "d" || options.key == "D") {
@@ -73,25 +72,23 @@ export class Camera {
         if (options.key == "s" || options.key == "S") {
           scene.getCamera().addVel(0, -5);
         }
-        if (options.key == "=") {
-          scene
-            .getCamera()
-            .zoom(Game.getWidth() / 2, Game.getHeight() / 2, 1.2);
-        }
-        if (options.key == "-") {
-          scene
-            .getCamera()
-            .zoom(Game.getWidth() / 2, Game.getHeight() / 2, 0.8);
-        }
-      });
+      }
 
-      scene.on("keyup", (options) => {
+      if (options.key == "=") {
+        scene.getCamera().zoom(Game.getWidth() / 2, Game.getHeight() / 2, 1.2);
+      }
+      if (options.key == "-") {
+        scene.getCamera().zoom(Game.getWidth() / 2, Game.getHeight() / 2, 0.8);
+      }
+    });
+
+    scene.on("keyup", (options) => {
+      if (this.wasdControls) {
         this.keysHeld = this.keysHeld.filter(
           (element) => element !== options.key
         ); // Remove key from held lits
 
         if (options.key == "a" || options.key == "A") {
-          console.log("no a ");
           scene.getCamera().addVel(-5, 0);
         }
         if (options.key == "d" || options.key == "D") {
@@ -104,8 +101,8 @@ export class Camera {
         if (options.key == "s" || options.key == "S") {
           scene.getCamera().addVel(0, 5);
         }
-      });
-    }
+      }
+    });
 
     if (options.mouse_controls) {
       scene.on("mousedown", (options) => {

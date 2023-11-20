@@ -182,10 +182,14 @@ export class Game {
           this.currentScene.redraw();
         }
         this.canvasContext.fillStyle = options.canvasColor ?? "white";
-        this.canvasContext.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        this.canvasContext.fillRect(
+          0,
+          0,
+          this.canvas.width,
+          this.canvas.height
+        );
         this.canvasContext.font = "12px Times new Roman";
         this.canvasContext.imageSmoothingEnabled = false;
-
       }, 300);
     });
 
