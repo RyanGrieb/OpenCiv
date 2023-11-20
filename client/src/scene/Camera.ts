@@ -3,6 +3,7 @@ import { Game } from "../Game";
 export interface CameraOptions {
   wasd_controls: boolean;
   mouse_controls: boolean;
+  arrow_controls: boolean;
   initial_position?: [number, number];
 }
 
@@ -24,11 +25,13 @@ export class Camera {
   private locked: boolean;
   private wasdControls: boolean;
   private mouseControls: boolean;
+  private arrowControls: boolean;
 
   public static fromCamera(camera: Camera) {
     const newCamera = new Camera({
       wasd_controls: camera.hasWASDControls(),
       mouse_controls: camera.hasMouseControls(),
+      arrow_controls: camera.hasArrowControls(),
     });
 
     newCamera.setPosition(camera.getX(), camera.getY());
@@ -43,6 +46,7 @@ export class Camera {
 
     this.wasdControls = options.wasd_controls;
     this.mouseControls = options.mouse_controls;
+    this.arrowControls = options.arrow_controls;
     this.xVelAmount = 0;
     this.yVelAmount = 0;
     this.zoomAmount = 1;
@@ -57,9 +61,9 @@ export class Camera {
         return;
       }
 
-      if (this.wasdControls) {
-        this.keysHeld.push(options.key);
+      this.keysHeld.push(options.key);
 
+      if (this.wasdControls) {
         if (options.key == "a" || options.key == "A") {
           scene.getCamera().addVel(5, 0);
         }
@@ -70,6 +74,22 @@ export class Camera {
           scene.getCamera().addVel(0, 5);
         }
         if (options.key == "s" || options.key == "S") {
+          scene.getCamera().addVel(0, -5);
+        }
+      }
+
+      if (this.arrowControls) {
+        if (options.key == "ArrowLeft") {
+          scene.getCamera().addVel(5, 0);
+        }
+        if (options.key == "ArrowRight") {
+          scene.getCamera().addVel(-5, 0);
+        }
+
+        if (options.key == "ArrowUp") {
+          scene.getCamera().addVel(0, 5);
+        }
+        if (options.key == "ArrowDown") {
           scene.getCamera().addVel(0, -5);
         }
       }
@@ -99,6 +119,26 @@ export class Camera {
           scene.getCamera().addVel(0, -5);
         }
         if (options.key == "s" || options.key == "S") {
+          scene.getCamera().addVel(0, 5);
+        }
+      }
+
+      if (this.arrowControls) {
+        this.keysHeld = this.keysHeld.filter(
+          (element) => element !== options.key
+        ); // Remove key from held lits
+
+        if (options.key == "ArrowLeft") {
+          scene.getCamera().addVel(-5, 0);
+        }
+        if (options.key == "ArrowRight") {
+          scene.getCamera().addVel(5, 0);
+        }
+
+        if (options.key == "ArrowUp") {
+          scene.getCamera().addVel(0, -5);
+        }
+        if (options.key == "ArrowDown") {
           scene.getCamera().addVel(0, 5);
         }
       }
@@ -162,6 +202,10 @@ export class Camera {
 
   public hasMouseControls() {
     return this.mouseControls;
+  }
+
+  public hasArrowControls() {
+    return this.arrowControls;
   }
 
   public setZoom(amount: number) {
