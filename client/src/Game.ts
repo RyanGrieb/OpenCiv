@@ -50,6 +50,8 @@ export class Game {
   private static wrappedTextCache: { [key: string]: [string, number, number] } =
     {};
   private static resizeTimer: NodeJS.Timeout;
+  private static oldWidth: number;
+  private static oldHeight: number;
 
   private constructor() {}
 
@@ -176,6 +178,8 @@ export class Game {
       clearTimeout(this.resizeTimer);
 
       this.resizeTimer = setTimeout(() => {
+        this.oldWidth = this.canvas.width;
+        this.oldHeight = this.canvas.height;
         this.canvas.width = window.innerWidth;
         this.canvas.height = window.innerHeight;
         if (this.currentScene) {
@@ -594,6 +598,14 @@ export class Game {
     return this.canvas.width;
   }
 
+  public static getOldHeight(): number {
+    return this.oldHeight;
+  }
+
+  public static getOldWidth(): number {
+    return this.oldWidth;
+  }
+  
   public static getCanvasContext() {
     return this.canvasContext;
   }

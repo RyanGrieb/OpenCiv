@@ -133,6 +133,14 @@ export abstract class Scene {
 
   public restoreCamera() {
     this.camera = Camera.fromCamera(this.oldCamera);
+    // Shift the camera position to account for our new window size (We do this for alignment)
+    const wDiff = Game.getWidth() - Game.getOldWidth();
+    const hDiff = Game.getHeight() - Game.getOldHeight();
+
+    this.camera.setPosition(
+      this.camera.getX() + wDiff / 2,
+      this.camera.getY() + hDiff / 2
+    );
   }
 
   public sortSceneObjects() {
