@@ -23,7 +23,7 @@ export class TextBox extends Actor {
       x: options.x,
       y: options.y,
       width: options.width,
-      height: options.height,
+      height: options.height
     });
 
     this.selected = false;
@@ -105,40 +105,42 @@ export class TextBox extends Actor {
 
   public draw(canvasContext: CanvasRenderingContext2D) {
     if (this.textHeight == -1) {
-      Game.measureText("M", this.font).then(([width, height]) => {
-        this.textHeight = height;
-      });
+      Game.getInstance()
+        .measureText("M", this.font)
+        .then(([width, height]) => {
+          this.textHeight = height;
+        });
     }
 
-    Game.drawRect({
+    Game.getInstance().drawRect({
       x: this.x,
       y: this.y,
       width: this.width,
       height: this.height,
       color: "#FFFFFF",
       fill: true,
-      canvasContext: canvasContext,
+      canvasContext: canvasContext
     });
 
     if (this.shouldBlink) {
-      Game.drawRect({
+      Game.getInstance().drawRect({
         x: this.blinkerX,
         y: this.y + 4,
         width: 2,
         height: this.height - 8,
         color: "black",
         fill: true,
-        canvasContext: canvasContext,
+        canvasContext: canvasContext
       });
     }
 
-    Game.drawText(
+    Game.getInstance().drawText(
       {
         text: this.text,
         font: this.font,
         color: "black",
         x: this.x,
-        y: this.y + this.height / 2 - this.textHeight / 2,
+        y: this.y + this.height / 2 - this.textHeight / 2
       },
       canvasContext
     );
@@ -165,9 +167,11 @@ export class TextBox extends Actor {
 
   public setText(text: string) {
     this.text = text;
-    Game.measureText(this.text, this.font).then(([width, height]) => {
-      //this.textHeight = height;
-      this.blinkerX = this.x + 2 + width;
-    });
+    Game.getInstance()
+      .measureText(this.text, this.font)
+      .then(([width, height]) => {
+        //this.textHeight = height;
+        this.blinkerX = this.x + 2 + width;
+      });
   }
 }

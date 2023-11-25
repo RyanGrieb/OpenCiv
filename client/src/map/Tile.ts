@@ -45,7 +45,7 @@ export class Tile extends Actor {
       z: options.z || 0,
       width: options.width ?? Tile.WIDTH,
       height: options.height ?? Tile.HEIGHT,
-      color: options.color,
+      color: options.color
     });
     this.tileTypes = options.tileTypes;
     this.adjacentTiles = [];
@@ -62,8 +62,7 @@ export class Tile extends Actor {
 
   public static gridDistance(tile1: Tile, tile2: Tile) {
     return Math.sqrt(
-      Math.pow(tile2.getGridX() - tile1.getGridX(), 2) +
-        Math.pow(tile2.getGridY() - tile1.getGridY(), 2)
+      Math.pow(tile2.getGridX() - tile1.getGridX(), 2) + Math.pow(tile2.getGridY() - tile1.getGridY(), 2)
     );
   }
 
@@ -170,12 +169,8 @@ export class Tile extends Actor {
     return this.gridY;
   }
 
-  public static async generateImageFromTileTypes(
-    tileTypes: string[]
-  ): Promise<HTMLImageElement> {
-    let canvas = document.getElementById(
-      "auxillary_canvas"
-    ) as HTMLCanvasElement;
+  public static async generateImageFromTileTypes(tileTypes: string[]): Promise<HTMLImageElement> {
+    let canvas = document.getElementById("auxillary_canvas") as HTMLCanvasElement;
 
     canvas.width = Tile.WIDTH;
     canvas.height = Tile.HEIGHT;
@@ -184,23 +179,11 @@ export class Tile extends Actor {
 
     //Note: Tile sizes in spritesheet are always 32x32 regardless of anything else.
     for (let tileType of tileTypes) {
-      const spritesheetImage = Game.getImage(GameImage.SPRITESHEET);
+      const spritesheetImage = Game.getInstance().getImage(GameImage.SPRITESHEET);
       const spriteRegion = SpriteRegion[tileType.toUpperCase()];
       const spriteX = parseInt(spriteRegion.split(",")[0]) * 32;
       const spriteY = parseInt(spriteRegion.split(",")[1]) * 32;
-      canvas
-        .getContext("2d")
-        .drawImage(
-          spritesheetImage,
-          spriteX,
-          spriteY,
-          32,
-          32,
-          0,
-          0,
-          Tile.WIDTH,
-          Tile.HEIGHT
-        );
+      canvas.getContext("2d").drawImage(spritesheetImage, spriteX, spriteY, 32, 32, 0, 0, Tile.WIDTH, Tile.HEIGHT);
     }
 
     //canvas.getContext("2d").globalCompositeOperation = "saturation";

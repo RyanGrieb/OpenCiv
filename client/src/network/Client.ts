@@ -3,11 +3,7 @@ export class CallbackData {
   public callbackFunction: Function;
   public globalEvent: boolean; // Not associated with the current scene.
 
-  constructor(
-    parentObject: object,
-    callbackFunctions: Function,
-    globalEvent: boolean
-  ) {
+  constructor(parentObject: object, callbackFunctions: Function, globalEvent: boolean) {
     this.parentObject = parentObject;
     this.callbackFunction = callbackFunctions;
     this.globalEvent = globalEvent;
@@ -61,17 +57,13 @@ export class NetworkEvents {
    * Removes all associated callback functions that isn't a globalEvent
    */
   public static clear() {
-    const globalEventCallbacks = this.getGlobalEventCallbacks(
-      this.storedEvents
-    );
+    const globalEventCallbacks = this.getGlobalEventCallbacks(this.storedEvents);
     this.storedEvents = globalEventCallbacks;
   }
 
   public static removeCallbacksByParentObject(parentObj: object): void {
     this.storedEvents.forEach((callbackDataList, eventName) => {
-      const filteredDataList = callbackDataList.filter(
-        (callbackData) => callbackData.parentObject !== parentObj
-      );
+      const filteredDataList = callbackDataList.filter((callbackData) => callbackData.parentObject !== parentObj);
 
       if (filteredDataList.length === 0) {
         this.storedEvents.delete(eventName);
@@ -81,9 +73,7 @@ export class NetworkEvents {
     });
   }
 
-  private static getGlobalEventCallbacks(
-    storedEvents: Map<string, CallbackData[]>
-  ) {
+  private static getGlobalEventCallbacks(storedEvents: Map<string, CallbackData[]>) {
     const globalEventCallbacks = new Map<string, CallbackData[]>();
 
     this.storedEvents.forEach((callbackDataList, eventName) => {
@@ -113,9 +103,7 @@ export class NetworkEvents {
     //Get the list of stored callback functions or an empty list
     let callbackDataList: CallbackData[] = storedEvents.get(eventName) ?? [];
     // Append the to functions
-    callbackDataList.push(
-      new CallbackData(parentObject, callback, globalEvent)
-    );
+    callbackDataList.push(new CallbackData(parentObject, callback, globalEvent));
     storedEvents.set(eventName, callbackDataList);
   }
 }

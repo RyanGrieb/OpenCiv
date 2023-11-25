@@ -16,7 +16,7 @@ export class SelectCivilizationGroup extends ActorGroup {
       x: x,
       y: y,
       width: width,
-      height: height,
+      height: height
     });
 
     this.selectCivActors = [];
@@ -24,11 +24,11 @@ export class SelectCivilizationGroup extends ActorGroup {
 
     this.addActor(
       new Actor({
-        image: Game.getImage(GameImage.POPUP_BOX),
+        image: Game.getInstance().getImage(GameImage.POPUP_BOX),
         x: this.x,
         y: this.y,
         width: this.width,
-        height: this.height,
+        height: this.height
       })
     );
 
@@ -63,19 +63,19 @@ export class SelectCivilizationGroup extends ActorGroup {
             onClicked: () => {
               WebsocketClient.sendMessage({
                 event: "civInfo",
-                name: civJSON["name"],
+                name: civJSON["name"]
               });
             },
             onMouseEnter: () => {
               console.log("Mouse enter");
-            },
+            }
           });
 
           this.selectCivActors.push(selectCivButton);
           this.addActor(selectCivButton);
           xOffsset++;
         }
-      },
+      }
     });
 
     NetworkEvents.on({
@@ -83,15 +83,15 @@ export class SelectCivilizationGroup extends ActorGroup {
       parentObject: this,
       callback: (data) => {
         this.displayCivInformation(data);
-      },
+      }
     });
 
     NetworkEvents.on({
       eventName: "selectCiv",
       parentObject: this,
       callback: () => {
-        Game.getCurrentScene().removeActor(this);
-      },
+        Game.getInstance().getCurrentScene().removeActor(this);
+      }
     });
   }
 
@@ -106,7 +106,7 @@ export class SelectCivilizationGroup extends ActorGroup {
       this.titleLabel = new Label({
         text: "Select a Civilization",
         font: "20px serif",
-        fontColor: "white",
+        fontColor: "white"
       });
       this.addActor(this.titleLabel);
     } else {
@@ -114,10 +114,7 @@ export class SelectCivilizationGroup extends ActorGroup {
     }
 
     this.titleLabel.conformSize().then(() => {
-      this.titleLabel.setPosition(
-        this.x + this.width / 2 - this.titleLabel.getWidth() / 2,
-        this.y + 12
-      );
+      this.titleLabel.setPosition(this.x + this.width / 2 - this.titleLabel.getWidth() / 2, this.y + 12);
     });
 
     const closeButton = new Button({
@@ -128,8 +125,8 @@ export class SelectCivilizationGroup extends ActorGroup {
       height: 50,
       fontColor: "white",
       onClicked: () => {
-        Game.getCurrentScene().removeActor(this);
-      },
+        Game.getInstance().getCurrentScene().removeActor(this);
+      }
     });
 
     this.selectCivActors.push(closeButton);
@@ -142,10 +139,7 @@ export class SelectCivilizationGroup extends ActorGroup {
     // Rename title label:
     this.titleLabel.setText(data["name"]);
     this.titleLabel.conformSize().then(() => {
-      this.titleLabel.setPosition(
-        this.x + this.width / 2 - this.titleLabel.getWidth() / 2,
-        this.y + 12
-      );
+      this.titleLabel.setPosition(this.x + this.width / 2 - this.titleLabel.getWidth() / 2, this.y + 12);
     });
 
     // Remove select civ actors:
@@ -155,12 +149,12 @@ export class SelectCivilizationGroup extends ActorGroup {
 
     // Display civ information:
     const civIcon = new Actor({
-      image: Game.getImage(GameImage.SPRITESHEET),
+      image: Game.getInstance().getImage(GameImage.SPRITESHEET),
       spriteRegion: SpriteRegion[data["icon_name"]],
       x: this.x + this.width / 2 - 32 / 2,
       y: this.y + 40,
       width: 32,
-      height: 32,
+      height: 32
     });
     this.addActor(civIcon);
     this.civInformationActors.push(civIcon);
@@ -173,7 +167,7 @@ export class SelectCivilizationGroup extends ActorGroup {
       font: "20px serif",
       fontColor: "white",
       x: this.x + 12,
-      y: this.y + 80,
+      y: this.y + 80
     });
 
     await startBiasLabel.conformSize();
@@ -188,7 +182,7 @@ export class SelectCivilizationGroup extends ActorGroup {
       fontColor: "white",
       x: this.x + 12,
       y: startBiasLabel.getY() + startBiasLabel.getHeight() + 30,
-      maxWidth: this.width - 12,
+      maxWidth: this.width - 12
     });
 
     await uniqueUnitDescLabel.conformSize();
@@ -197,8 +191,7 @@ export class SelectCivilizationGroup extends ActorGroup {
     this.addActor(uniqueUnitDescLabel);
 
     for (const uniqueUnitDesc of data["unique_unit_descs"]) {
-      const lastLabel =
-        this.civInformationActors[this.civInformationActors.length - 1];
+      const lastLabel = this.civInformationActors[this.civInformationActors.length - 1];
 
       const unitLabel = new Label({
         text: "* " + uniqueUnitDesc,
@@ -206,7 +199,7 @@ export class SelectCivilizationGroup extends ActorGroup {
         fontColor: "white",
         x: this.x + 12,
         y: lastLabel.getY() + lastLabel.getHeight() + 5,
-        maxWidth: this.width - 12,
+        maxWidth: this.width - 12
       });
 
       await unitLabel.conformSize();
@@ -216,8 +209,7 @@ export class SelectCivilizationGroup extends ActorGroup {
     }
 
     if ("unique_building_descs" in data) {
-      const lastLabel =
-        this.civInformationActors[this.civInformationActors.length - 1];
+      const lastLabel = this.civInformationActors[this.civInformationActors.length - 1];
 
       const uniqueBuildingsDescLabel = new Label({
         text: "Unique Buildings:",
@@ -225,7 +217,7 @@ export class SelectCivilizationGroup extends ActorGroup {
         fontColor: "white",
         x: this.x + 12,
         y: lastLabel.getY() + lastLabel.getHeight() + 30,
-        maxWidth: this.width - 12,
+        maxWidth: this.width - 12
       });
 
       await uniqueBuildingsDescLabel.conformSize();
@@ -234,8 +226,7 @@ export class SelectCivilizationGroup extends ActorGroup {
       this.addActor(uniqueBuildingsDescLabel);
 
       for (const buildingDesc of data["unique_building_descs"] as []) {
-        const lastLabel =
-          this.civInformationActors[this.civInformationActors.length - 1];
+        const lastLabel = this.civInformationActors[this.civInformationActors.length - 1];
 
         const abilityLabel = new Label({
           text: "* " + buildingDesc,
@@ -243,7 +234,7 @@ export class SelectCivilizationGroup extends ActorGroup {
           fontColor: "white",
           x: this.x + 12,
           y: lastLabel.getY() + lastLabel.getHeight() + 5,
-          maxWidth: this.width - 12,
+          maxWidth: this.width - 12
         });
 
         await abilityLabel.conformSize();
@@ -253,8 +244,7 @@ export class SelectCivilizationGroup extends ActorGroup {
       }
     }
 
-    const lastLabel =
-      this.civInformationActors[this.civInformationActors.length - 1];
+    const lastLabel = this.civInformationActors[this.civInformationActors.length - 1];
 
     const uniqueAbilityDescLabel = new Label({
       text: "Special Abilities:",
@@ -262,7 +252,7 @@ export class SelectCivilizationGroup extends ActorGroup {
       fontColor: "white",
       x: this.x + 12,
       y: lastLabel.getY() + lastLabel.getHeight() + 30,
-      maxWidth: this.width - 12,
+      maxWidth: this.width - 12
     });
 
     await uniqueAbilityDescLabel.conformSize();
@@ -271,8 +261,7 @@ export class SelectCivilizationGroup extends ActorGroup {
     this.addActor(uniqueAbilityDescLabel);
 
     for (const abilityDesc of data["ability_descs"]) {
-      const lastLabel =
-        this.civInformationActors[this.civInformationActors.length - 1];
+      const lastLabel = this.civInformationActors[this.civInformationActors.length - 1];
 
       const abilityLabel = new Label({
         text: "* " + abilityDesc,
@@ -280,7 +269,7 @@ export class SelectCivilizationGroup extends ActorGroup {
         fontColor: "white",
         x: this.x + 12,
         y: lastLabel.getY() + lastLabel.getHeight() + 5,
-        maxWidth: this.width - 12,
+        maxWidth: this.width - 12
       });
 
       await abilityLabel.conformSize();
@@ -302,7 +291,7 @@ export class SelectCivilizationGroup extends ActorGroup {
         // Fire event for lobby to handle this. Or network event..?
         //Game.getCurrentScene().removeActor(this);
         WebsocketClient.sendMessage({ event: "selectCiv", name: data["name"] });
-      },
+      }
     });
 
     this.civInformationActors.push(selectButton);
@@ -319,7 +308,7 @@ export class SelectCivilizationGroup extends ActorGroup {
       onClicked: () => {
         // Clear current civ information actors, restore select civ buttons:
         this.listAvailableCivs();
-      },
+      }
     });
 
     this.civInformationActors.push(backButton);

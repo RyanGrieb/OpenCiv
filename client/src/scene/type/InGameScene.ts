@@ -32,7 +32,7 @@ export class InGameScene extends Scene {
       const camera = new Camera({
         wasd_controls: false,
         mouse_controls: true,
-        arrow_controls: true,
+        arrow_controls: true
         //initial_position: [1, 1],
       });
       this.setCamera(camera);
@@ -62,7 +62,7 @@ export class InGameScene extends Scene {
             this.players.push(new ExternalPlayer(playerJSON));
           }
         }
-      },
+      }
     });
 
     GameMap.init();
@@ -74,12 +74,13 @@ export class InGameScene extends Scene {
         fontColor: "white",
         x: 0,
         y: 0,
-        z: 5,
+        z: 5
       });
+
       this.tileInformationLabel.conformSize().then(() => {
         this.tileInformationLabel.setPosition(
           2,
-          Game.getHeight() - this.tileInformationLabel.getHeight() - 6
+          Game.getInstance().getHeight() - this.tileInformationLabel.getHeight() - 6
         );
         this.addActor(this.tileInformationLabel);
       });
@@ -88,11 +89,9 @@ export class InGameScene extends Scene {
       this.addActor(this.statusBar);
 
       this.nextTurnButton = new Button({
-        text: this.clientPlayer.hasRequestedNextTurn()
-          ? "Waiting..."
-          : "Next Turn",
-        x: Game.getWidth() / 2 - 150 / 2,
-        y: Game.getHeight() - 44,
+        text: this.clientPlayer.hasRequestedNextTurn() ? "Waiting..." : "Next Turn",
+        x: Game.getInstance().getWidth() / 2 - 150 / 2,
+        y: Game.getInstance().getHeight() - 44,
         z: 6,
         width: 150,
         height: 42,
@@ -103,32 +102,32 @@ export class InGameScene extends Scene {
             this.nextTurnButton.setText("Next Turn");
             WebsocketClient.sendMessage({
               event: "nextTurnRequest",
-              value: false,
+              value: false
             });
             this.clientPlayer.setRequestedNextTurn(false);
           } else {
             WebsocketClient.sendMessage({
               event: "nextTurnRequest",
-              value: true,
+              value: true
             });
             this.nextTurnButton.setText("Waiting...");
             this.clientPlayer.setRequestedNextTurn(true);
           }
-        },
+        }
       });
       this.addActor(this.nextTurnButton);
 
       this.closeCityDisplayButton = new Button({
         text: "Return to Map",
-        x: Game.getWidth() / 2 - 275 / 2,
-        y: Game.getHeight() - 88,
+        x: Game.getInstance().getWidth() / 2 - 275 / 2,
+        y: Game.getInstance().getHeight() - 88,
         z: 5,
         width: 275,
         height: 52,
         fontColor: "white",
         onClicked: () => {
           this.toggleCityUI();
-        },
+        }
       });
 
       this.on("tileHovered", (options) => {
@@ -186,7 +185,7 @@ export class InGameScene extends Scene {
         callback: (data) => {
           this.nextTurnButton.setText("Next Turn");
           this.clientPlayer.setRequestedNextTurn(false);
-        },
+        }
       });
     });
   }
@@ -203,7 +202,7 @@ export class InGameScene extends Scene {
     const x = tile.getCenterPosition()[0];
     const y = tile.getCenterPosition()[1];
 
-    Game.getCurrentScene().getCamera().zoomToLocation(x, y, zoomAmount);
+    Game.getInstance().getCurrentScene().getCamera().zoomToLocation(x, y, zoomAmount);
   }
 
   public toggleCityUI(city?: City) {
@@ -262,11 +261,11 @@ export class InGameScene extends Scene {
     this.controlsLocked = true;
 
     this.escMenu = new ActorGroup({
-      x: Game.getWidth() / 2 - 275 / 2,
-      y: Game.getHeight() / 2 - 275 / 2,
+      x: Game.getInstance().getWidth() / 2 - 275 / 2,
+      y: Game.getInstance().getHeight() / 2 - 275 / 2,
       width: 275,
       height: 275,
-      cameraApplies: false,
+      cameraApplies: false
     });
 
     this.escMenu.addActor(
@@ -275,7 +274,7 @@ export class InGameScene extends Scene {
         y: this.escMenu.getY(),
         width: this.escMenu.getWidth(),
         height: this.escMenu.getHeight(),
-        image: Game.getImage(GameImage.POPUP_BOX),
+        image: Game.getInstance().getImage(GameImage.POPUP_BOX)
       })
     );
 
@@ -290,7 +289,7 @@ export class InGameScene extends Scene {
         onClicked: () => {
           this.removeActor(this.escMenu);
           this.escMenu = undefined;
-        },
+        }
       })
     );
 
@@ -304,7 +303,7 @@ export class InGameScene extends Scene {
         fontColor: "white",
         onClicked: () => {
           console.log("Toggle settings menu");
-        },
+        }
       })
     );
 
@@ -316,7 +315,7 @@ export class InGameScene extends Scene {
         width: 242,
         height: 62,
         fontColor: "white",
-        onClicked: () => {},
+        onClicked: () => {}
       })
     );
 
@@ -330,9 +329,9 @@ export class InGameScene extends Scene {
         fontColor: "white",
         onClicked: () => {
           WebsocketClient.disconnect();
-          Game.setScene("main_menu");
+          Game.getInstance().setScene("main_menu");
           this.firstLoad = true;
-        },
+        }
       })
     );
 

@@ -22,8 +22,7 @@ export class MapResource {
     this.setChance = resourceData.set_chance;
     this.minTemp = resourceData.min_temp;
     this.maxTemp = resourceData.max_temp;
-    this.onAdditionalTileTypes =
-      resourceData.spawn_on_additional_tile_types ?? false;
+    this.onAdditionalTileTypes = resourceData.spawn_on_additional_tile_types ?? false;
   }
 
   public getName(): string {
@@ -73,31 +72,22 @@ export class MapResources {
     this.resourcesData = YAML.parse(file);
   }
 
-  public static getRandomMapResource(options: {
-    mapResourceType: string;
-  }): MapResource {
+  public static getRandomMapResource(options: { mapResourceType: string }): MapResource {
     if (!this.resourcesData) this.loadConfigurationFile();
 
     let resourceData = undefined;
 
     switch (options.mapResourceType) {
       case "bonus":
-        resourceData =
-          this.resourcesData.bonus_resources[
-            random.int(0, this.resourcesData.bonus_resources.length - 1)
-          ];
+        resourceData = this.resourcesData.bonus_resources[random.int(0, this.resourcesData.bonus_resources.length - 1)];
         break;
       case "strategic":
         resourceData =
-          this.resourcesData.strategic_resources[
-            random.int(0, this.resourcesData.strategic_resources.length - 1)
-          ];
+          this.resourcesData.strategic_resources[random.int(0, this.resourcesData.strategic_resources.length - 1)];
         break;
       case "luxury":
         resourceData =
-          this.resourcesData.luxury_resources[
-            random.int(0, this.resourcesData.luxury_resources.length - 1)
-          ];
+          this.resourcesData.luxury_resources[random.int(0, this.resourcesData.luxury_resources.length - 1)];
         break;
     }
 
@@ -114,10 +104,8 @@ export class MapResources {
 
     const resourceTileTypes = [
       ...this.resourcesData.bonus_resources.map((resource) => resource.name),
-      ...this.resourcesData.strategic_resources.map(
-        (resource) => resource.name
-      ),
-      ...this.resourcesData.luxury_resources.map((resource) => resource.name),
+      ...this.resourcesData.strategic_resources.map((resource) => resource.name),
+      ...this.resourcesData.luxury_resources.map((resource) => resource.name)
     ];
     return tile.containsTileTypes(resourceTileTypes);
   }

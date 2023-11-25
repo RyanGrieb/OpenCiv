@@ -31,7 +31,7 @@ export class Camera {
     const newCamera = new Camera({
       wasd_controls: camera.hasWASDControls(),
       mouse_controls: camera.hasMouseControls(),
-      arrow_controls: camera.hasArrowControls(),
+      arrow_controls: camera.hasArrowControls()
     });
 
     newCamera.setPosition(camera.getX(), camera.getY());
@@ -55,7 +55,7 @@ export class Camera {
     this.lastMouseY = 0;
     this.locked = false;
 
-    const scene = Game.getCurrentScene();
+    const scene = Game.getInstance().getCurrentScene();
     scene.on("keydown", (options) => {
       if (this.keysHeld.includes(options.key) || this.locked) {
         return;
@@ -95,18 +95,16 @@ export class Camera {
       }
 
       if (options.key == "=") {
-        scene.getCamera().zoom(Game.getWidth() / 2, Game.getHeight() / 2, 1.2);
+        scene.getCamera().zoom(Game.getInstance().getWidth() / 2, Game.getInstance().getHeight() / 2, 1.2);
       }
       if (options.key == "-") {
-        scene.getCamera().zoom(Game.getWidth() / 2, Game.getHeight() / 2, 0.8);
+        scene.getCamera().zoom(Game.getInstance().getWidth() / 2, Game.getInstance().getHeight() / 2, 0.8);
       }
     });
 
     scene.on("keyup", (options) => {
       if (this.wasdControls) {
-        this.keysHeld = this.keysHeld.filter(
-          (element) => element !== options.key
-        ); // Remove key from held lits
+        this.keysHeld = this.keysHeld.filter((element) => element !== options.key); // Remove key from held lits
 
         if (options.key == "a" || options.key == "A") {
           scene.getCamera().addVel(-5, 0);
@@ -124,9 +122,7 @@ export class Camera {
       }
 
       if (this.arrowControls) {
-        this.keysHeld = this.keysHeld.filter(
-          (element) => element !== options.key
-        ); // Remove key from held lits
+        this.keysHeld = this.keysHeld.filter((element) => element !== options.key); // Remove key from held lits
 
         if (options.key == "ArrowLeft") {
           scene.getCamera().addVel(-5, 0);
@@ -157,12 +153,7 @@ export class Camera {
 
       scene.on("mousemove", (options) => {
         if (this.mouseHeld) {
-          scene
-            .getCamera()
-            .setPosition(
-              options.x - this.lastMouseX,
-              options.y - this.lastMouseY
-            );
+          scene.getCamera().setPosition(options.x - this.lastMouseX, options.y - this.lastMouseY);
         }
       });
 
@@ -213,8 +204,8 @@ export class Camera {
   }
 
   public zoomToLocation(x: number, y: number, zoomAmount: number) {
-    this.setPosition(-x + Game.getWidth() / 2, -y + Game.getHeight() / 2);
-    this.zoom(Game.getWidth() / 2, Game.getHeight() / 2, zoomAmount, false);
+    this.setPosition(-x + Game.getInstance().getWidth() / 2, -y + Game.getInstance().getHeight() / 2);
+    this.zoom(Game.getInstance().getWidth() / 2, Game.getInstance().getHeight() / 2, zoomAmount, false);
   }
 
   public addVel(x: number, y: number) {

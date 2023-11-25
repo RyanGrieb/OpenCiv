@@ -49,7 +49,7 @@ export class Button extends ActorGroup {
       z: options.z,
       width: options.width,
       height: options.height,
-      cameraApplies: false,
+      cameraApplies: false
     });
 
     this.icon = options.icon;
@@ -61,18 +61,17 @@ export class Button extends ActorGroup {
     this.font = options.font ?? "24px serif";
     this.fontColor = options.fontColor ?? "black";
     this.buttonImage = options.buttonImage || GameImage.BUTTON;
-    this.buttonHoveredImage =
-      options.buttonHoveredImage || GameImage.BUTTON_HOVERED;
+    this.buttonHoveredImage = options.buttonHoveredImage || GameImage.BUTTON_HOVERED;
     this.iconOnly = options.iconOnly || false;
     this.disableHoverWhen = options.disableHoverWhen;
 
     if (!this.iconOnly) {
       this.buttonActor = new Actor({
-        image: Game.getImage(this.buttonImage),
+        image: Game.getInstance().getImage(this.buttonImage),
         x: this.x,
         y: this.y,
         width: this.width,
-        height: this.height,
+        height: this.height
       });
       this.addActor(this.buttonActor);
     }
@@ -82,12 +81,12 @@ export class Button extends ActorGroup {
       const iconHeight = options.iconHeight || this.height;
       this.addActor(
         new Actor({
-          image: Game.getImage(GameImage.SPRITESHEET),
+          image: Game.getInstance().getImage(GameImage.SPRITESHEET),
           spriteRegion: this.icon,
           x: this.x + this.width / 2 - iconWidth / 2,
           y: this.y + this.height / 2 - iconHeight / 2,
           width: iconWidth,
-          height: iconHeight,
+          height: iconHeight
         })
       );
     }
@@ -98,7 +97,7 @@ export class Button extends ActorGroup {
           return;
         }
 
-        Game.setCursor("pointer");
+        Game.getInstance().setCursor("pointer");
       }
     });
 
@@ -111,7 +110,7 @@ export class Button extends ActorGroup {
         this.buttonActor.setImage(this.buttonHoveredImage);
       }
 
-      Game.setCursor("pointer");
+      Game.getInstance().setCursor("pointer");
       this.mouseEnterCallbackFunction();
     });
 
@@ -120,7 +119,7 @@ export class Button extends ActorGroup {
         this.buttonActor.setImage(this.buttonImage);
       }
 
-      Game.setCursor("default");
+      Game.getInstance().setCursor("default");
       this.mouseExitCallbackFunction();
     });
 
@@ -136,22 +135,24 @@ export class Button extends ActorGroup {
     super.draw(canvasContext); //FIXME: Don't draw until we know textWidth & height.
 
     if (this.textWidth == -1 && this.textHeight == -1) {
-      Game.measureText(this.text, this.font).then(([textWidth, textHeight]) => {
-        this.textWidth = textWidth;
-        this.textHeight = textHeight;
-      });
+      Game.getInstance()
+        .measureText(this.text, this.font)
+        .then(([textWidth, textHeight]) => {
+          this.textWidth = textWidth;
+          this.textHeight = textHeight;
+        });
       return; // Don't render text before we know the height & width of the text
     }
 
     //TODO: Allow user to change where the text is drawn...
     if (this.text) {
-      Game.drawText(
+      Game.getInstance().drawText(
         {
           text: this.text,
           x: this.x + this.width / 2 - this.textWidth / 2,
           y: this.y + this.height / 2 - this.textHeight / 2,
           color: this.fontColor,
-          font: this.font,
+          font: this.font
         },
         canvasContext
       );
@@ -165,7 +166,7 @@ export class Button extends ActorGroup {
   public onDestroyed(): void {
     super.onDestroyed();
     if (this.mouseInside) {
-      Game.setCursor("default");
+      Game.getInstance().setCursor("default");
     }
   }
 

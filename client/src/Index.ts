@@ -6,11 +6,11 @@ import { LoadingScene } from "./scene/type/LoadingScene";
 import { LobbyScene } from "./scene/type/LobbyScene";
 import { MainMenuScene } from "./scene/type/MainMenuScene";
 
-Game.init({ assetList: assetList, canvasColor: "gray" }, () => {
-  Game.addScene("main_menu", new MainMenuScene());
-  Game.addScene("join_game", new JoinGameScene());
-  Game.addScene("lobby", new LobbyScene());
-  Game.addScene("in_game", new InGameScene());
-  Game.addScene("loading_scene", new LoadingScene());
-  Game.setScene("main_menu");
+Game.createInstance({ assetList: assetList, canvasColor: "gray" }, () => {
+  Game.getInstance().addScene("main_menu", new MainMenuScene());
+  Game.getInstance().addScene("join_game", new JoinGameScene());
+  Game.getInstance().addScene("lobby", new LobbyScene());
+  Game.getInstance().addScene("in_game", new InGameScene());
+  Game.getInstance().addScene("loading_scene", new LoadingScene());
+  Game.getInstance().setScene("main_menu");
 });

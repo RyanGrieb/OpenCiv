@@ -15,12 +15,12 @@ export class UnitDisplayInfo extends ActorGroup {
 
   constructor(unit: Unit) {
     super({
-      x: Game.getWidth() - 250,
-      y: Game.getHeight() - 150,
+      x: Game.getInstance().getWidth() - 250,
+      y: Game.getInstance().getHeight() - 150,
       width: 250,
       height: 150,
       cameraApplies: false,
-      z: 5,
+      z: 5
     });
 
     this.unit = unit;
@@ -28,11 +28,11 @@ export class UnitDisplayInfo extends ActorGroup {
 
     this.addActor(
       new Actor({
-        image: Game.getImage(GameImage.POPUP_BOX),
+        image: Game.getInstance().getImage(GameImage.POPUP_BOX),
         x: this.x,
         y: this.y,
         width: this.width,
-        height: this.height,
+        height: this.height
       })
     );
 
@@ -41,14 +41,11 @@ export class UnitDisplayInfo extends ActorGroup {
       x: this.x,
       y: this.y,
       font: "18px serif",
-      fontColor: "white",
+      fontColor: "white"
     });
 
     nameLabel.conformSize().then(() => {
-      nameLabel.setPosition(
-        this.x + this.width / 2 - nameLabel.getWidth() / 2,
-        this.y + 10
-      );
+      nameLabel.setPosition(this.x + this.width / 2 - nameLabel.getWidth() / 2, this.y + 10);
       this.addActor(nameLabel);
     });
 
@@ -57,7 +54,7 @@ export class UnitDisplayInfo extends ActorGroup {
       x: this.x,
       y: this.y,
       font: "18px serif",
-      fontColor: "white",
+      fontColor: "white"
     });
 
     this.updateMovementLabel({ updateText: false });
@@ -70,7 +67,7 @@ export class UnitDisplayInfo extends ActorGroup {
       parentObject: this,
       callback: (data) => {
         this.refreshDisplayInfo();
-      },
+      }
     });
 
     NetworkEvents.on({
@@ -81,7 +78,7 @@ export class UnitDisplayInfo extends ActorGroup {
           return;
         }
         this.refreshDisplayInfo();
-      },
+      }
     });
   }
 
@@ -93,9 +90,7 @@ export class UnitDisplayInfo extends ActorGroup {
 
   private updateMovementLabel(options: { updateText: boolean }) {
     if (options.updateText) {
-      this.movementLabel.setText(
-        `Movement: ${this.unit.getAvailableMovement()}/${this.unit.getDefaultMoveDistance()}`
-      );
+      this.movementLabel.setText(`Movement: ${this.unit.getAvailableMovement()}/${this.unit.getDefaultMoveDistance()}`);
     }
 
     this.movementLabel.conformSize().then(() => {
@@ -132,7 +127,7 @@ export class UnitDisplayInfo extends ActorGroup {
             unitX: this.unit.getTile().getGridX(),
             unitY: this.unit.getTile().getGridY(),
             id: this.unit.getID(),
-            actionName: action.getName(),
+            actionName: action.getName()
           });
         },
         onMouseEnter: () => {
@@ -141,7 +136,7 @@ export class UnitDisplayInfo extends ActorGroup {
         },
         onMouseExit: () => {
           this.updateMovementLabel({ updateText: true });
-        },
+        }
       });
 
       this.addActor(button);

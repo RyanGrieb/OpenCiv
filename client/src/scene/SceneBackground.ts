@@ -6,8 +6,8 @@ import { SpriteRegion } from "../Assets";
 export class SceneBackground {
   public static generateOcean() {
     let tileActors: Actor[] = [];
-    for (let y = -1; y < (Game.getHeight() + 24) / 24; y++) {
-      for (let x = -1; x < (Game.getWidth() + 32) / 32; x++) {
+    for (let y = -1; y < (Game.getInstance().getHeight() + 24) / 24; y++) {
+      for (let x = -1; x < (Game.getInstance().getWidth() + 32) / 32; x++) {
         let yPos = y * 24;
         let xPos = x * 32;
         if (y % 2 != 0) {
@@ -15,12 +15,12 @@ export class SceneBackground {
         }
         tileActors.push(
           new Actor({
-            image: Game.getImage(GameImage.SPRITESHEET),
+            image: Game.getInstance().getImage(GameImage.SPRITESHEET),
             spriteRegion: SpriteRegion.OCEAN,
             x: xPos,
             y: yPos,
             width: 32,
-            height: 32,
+            height: 32
           })
         );
       }
@@ -29,13 +29,13 @@ export class SceneBackground {
     return Actor.mergeActors({
       actors: tileActors,
       spriteRegion: true,
-      spriteSize: 32,
+      spriteSize: 32
     });
   }
   public static generateRandomGrassland(): Actor {
     let tileActors: Actor[] = [];
-    for (let y = -1; y < (Game.getHeight() + 24) / 24; y++) {
-      for (let x = -1; x < (Game.getWidth() + 32) / 32; x++) {
+    for (let y = -1; y < (Game.getInstance().getHeight() + 24) / 24; y++) {
+      for (let x = -1; x < (Game.getInstance().getWidth() + 32) / 32; x++) {
         let yPos = y * 24;
         let xPos = x * 32;
         if (y % 2 != 0) {
@@ -43,15 +43,12 @@ export class SceneBackground {
         }
         tileActors.push(
           new Actor({
-            image: Game.getImage(GameImage.SPRITESHEET),
-            spriteRegion:
-              Math.random() < 0.1
-                ? SpriteRegion.GRASS_HILL
-                : SpriteRegion.GRASS,
+            image: Game.getInstance().getImage(GameImage.SPRITESHEET),
+            spriteRegion: Math.random() < 0.1 ? SpriteRegion.GRASS_HILL : SpriteRegion.GRASS,
             x: xPos,
             y: yPos,
             width: 32,
-            height: 32,
+            height: 32
           })
         );
       }
@@ -59,8 +56,8 @@ export class SceneBackground {
 
     // Sparse background with a random unit
     //const spriteRegionNum = Math.floor(Math.random() * 9); // Random sprite region b/w 0-2
-    for (let y = -1; y < (Game.getHeight() + 24) / 24; y++) {
-      for (let x = -1; x < (Game.getWidth() + 32) / 32; x++) {
+    for (let y = -1; y < (Game.getInstance().getHeight() + 24) / 24; y++) {
+      for (let x = -1; x < (Game.getInstance().getWidth() + 32) / 32; x++) {
         let yPos = y * 24;
         let xPos = x * 32;
         if (y % 2 != 0) {
@@ -70,13 +67,12 @@ export class SceneBackground {
 
         tileActors.push(
           new Actor({
-            image: Game.getImage(GameImage.SPRITESHEET),
-            spriteRegion:
-              Object.values(SpriteRegion)[Math.floor(Math.random() * 9)],
+            image: Game.getInstance().getImage(GameImage.SPRITESHEET),
+            spriteRegion: Object.values(SpriteRegion)[Math.floor(Math.random() * 9)],
             x: xPos,
             y: yPos,
             width: 32,
-            height: 32,
+            height: 32
           })
         );
       }
@@ -85,7 +81,7 @@ export class SceneBackground {
     return Actor.mergeActors({
       actors: tileActors,
       spriteRegion: true,
-      spriteSize: 32,
+      spriteSize: 32
     });
   }
 }

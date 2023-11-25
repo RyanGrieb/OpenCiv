@@ -5,11 +5,7 @@ export class CallbackData {
   public callbackFunction: Function;
   public globalEvent: boolean; // Not associated with the current scene.
 
-  constructor(
-    parentObject: object,
-    callbackFunctions: Function,
-    globalEvent: boolean
-  ) {
+  constructor(parentObject: object, callbackFunctions: Function, globalEvent: boolean) {
     this.parentObject = parentObject;
     this.callbackFunction = callbackFunctions;
     this.globalEvent = globalEvent;
@@ -28,16 +24,10 @@ export class ServerEvents {
 
   private constructor() {}
 
-  public static call(
-    eventName: string,
-    data: Record<string, any>,
-    websocket?: WebSocket
-  ) {
+  public static call(eventName: string, data: Record<string, any>, websocket?: WebSocket) {
     if (this.storedEvents.has(eventName)) {
       //Call the stored callback function
-      const callbackDataList = this.storedEvents.get(
-        eventName
-      ) as CallbackData[];
+      const callbackDataList = this.storedEvents.get(eventName) as CallbackData[];
       for (let callbackData of callbackDataList) {
         callbackData.callbackFunction(data, websocket);
       }
@@ -75,9 +65,7 @@ export class ServerEvents {
 
   public static removeCallbacksByParentObject(parentObj: object): void {
     this.storedEvents.forEach((callbackDataList, eventName) => {
-      const filteredDataList = callbackDataList.filter(
-        (callbackData) => callbackData.parentObject !== parentObj
-      );
+      const filteredDataList = callbackDataList.filter((callbackData) => callbackData.parentObject !== parentObj);
 
       if (filteredDataList.length === 0) {
         this.storedEvents.delete(eventName);
@@ -117,9 +105,7 @@ export class ServerEvents {
     //Get the list of stored callback functions or an empty list
     let callbackDataList: CallbackData[] = storedEvents.get(eventName) ?? [];
     // Append the to functions
-    callbackDataList.push(
-      new CallbackData(parentObject, callback, globalEvent)
-    );
+    callbackDataList.push(new CallbackData(parentObject, callback, globalEvent));
     storedEvents.set(eventName, callbackDataList);
   }
 }

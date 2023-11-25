@@ -14,13 +14,13 @@ export class LoadingScene extends Scene {
       fontColor: "white",
       shadowColor: "black",
       lineWidth: 4,
-      shadowBlur: 20,
+      shadowBlur: 20
     });
 
     loadingLabel.conformSize().then(() => {
       loadingLabel.setPosition(
-        Game.getWidth() / 2 - loadingLabel.getWidth() / 2,
-        Game.getHeight() / 2 - loadingLabel.getHeight() / 2
+        Game.getInstance().getWidth() / 2 - loadingLabel.getWidth() / 2,
+        Game.getInstance().getHeight() / 2 - loadingLabel.getHeight() / 2
       );
     });
 

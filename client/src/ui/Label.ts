@@ -38,7 +38,7 @@ export class Label extends Actor {
       cameraApplies: options.cameraApplies || false,
       width: 0,
       height: 0,
-      transparency: options.transparency,
+      transparency: options.transparency
     });
 
     this.text = options.text;
@@ -64,16 +64,16 @@ export class Label extends Actor {
       // Change cursor to pointer when mouse is over label
       this.on("mousemove", () => {
         if (this.mouseInside) {
-          Game.setCursor("pointer");
+          Game.getInstance().setCursor("pointer");
         }
       });
 
       this.on("mouse_enter", () => {
-        Game.setCursor("pointer");
+        Game.getInstance().setCursor("pointer");
       });
 
       this.on("mouse_exit", () => {
-        Game.setCursor("default");
+        Game.getInstance().setCursor("default");
       });
     }
   }
@@ -89,7 +89,7 @@ export class Label extends Actor {
       text = this.oldText;
     }
 
-    Game.drawText(
+    Game.getInstance().drawText(
       {
         text: text,
         x: this.x,
@@ -102,7 +102,7 @@ export class Label extends Actor {
         lineWidth: this.lineWidth,
         applyCamera: this.cameraApplies,
         transparency: this.transparency,
-        maxWidth: this.maxWidth,
+        maxWidth: this.maxWidth
       },
       canvasContext
     );
@@ -113,17 +113,17 @@ export class Label extends Actor {
    */
   public async conformSize() {
     if (this.maxWidth) {
-      const [wrappedText, wrappedHeight, unwrappedWordHeight] =
-        await Game.getWrappedText(this.text, this.font, this.maxWidth);
+      const [wrappedText, wrappedHeight, unwrappedWordHeight] = await Game.getInstance().getWrappedText(
+        this.text,
+        this.font,
+        this.maxWidth
+      );
       this.wrappedText = wrappedText;
       this.width = this.maxWidth;
       this.height = wrappedHeight;
       this.unwrappedWordHeight = unwrappedWordHeight;
     } else {
-      const [textWidth, textHeight] = await Game.measureText(
-        this.text,
-        this.font
-      );
+      const [textWidth, textHeight] = await Game.getInstance().measureText(this.text, this.font);
       this.width = textWidth;
       this.height = textHeight;
     }

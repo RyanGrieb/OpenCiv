@@ -2,12 +2,13 @@ import { Game } from "../../Game";
 import { ServerEvents } from "../../Events";
 import { State } from "../State";
 import { GameMap } from "../../map/GameMap";
-import { Unit } from "../../Unit";
+import { Unit } from "../../unit/Unit";
 import { City } from "../../city/City";
 import { Job, gracefulShutdown, scheduleJob } from "node-schedule";
 
 import fs from "fs";
 import YAML from "yaml";
+import { UnitActions } from "../../unit/UnitActions";
 
 export class InGameState extends State {
   private turnTimeJob: Job;
@@ -22,16 +23,16 @@ export class InGameState extends State {
     this.turnTime = 0;
 
     // Load available buildings from config file
-    const buildingsYMLData = YAML.parse(
-      fs.readFileSync("./config/buildings.yml", "utf-8")
-    );
+    const buildingsYMLData = YAML.parse(fs.readFileSync("./config/buildings.yml", "utf-8"));
     //Convert civsData from YAML to JSON:
     this.cityBuildings = JSON.parse(JSON.stringify(buildingsYMLData.buildings));
 
     // Set loading screen for players
-    Game.getPlayers().forEach((player) => {
-      player.sendNetworkEvent({ event: "setScene", scene: "loading_scene" });
-    });
+    Game.getInstance()
+      .getPlayers()
+      .forEach((player) => {
+        player.sendNetworkEvent({ event: "setScene", scene: "loading_scene" });
+      });
 
     GameMap.init();
 
@@ -46,111 +47,86 @@ export class InGameState extends State {
           JSON.stringify({
             event: "messageBox",
             messageName: "gameInProgress",
-            message: "Connection Error: Game in progress.",
+            message: "Connection Error: Game in progress."
           })
         );
         websocket.close();
-      },
+      }
     });
 
     ServerEvents.on({
       eventName: "requestMap",
       parentObject: this,
       callback: (data, websocket) => {
-        const player = Game.getPlayerFromWebsocket(websocket);
+        const player = Game.getInstance().getPlayerFromWebsocket(websocket);
         GameMap.getInstance().sendMapChunksToPlayer(player);
-      },
+      }
     });
 
-    Game.getPlayers().forEach((player) => {
-      const badTileTypes = [
-        "ocean",
-        "shallow_ocean",
-        "freshwater",
-        "mountain",
-        "snow",
-        "snow_hill",
-        "tundra",
-        "tundra_hill",
-      ];
+    Game.getInstance()
+      .getPlayers()
+      .forEach((player) => {
+        const badTileTypes = [
+          "ocean",
+          "shallow_ocean",
+          "freshwater",
+          "mountain",
+          "snow",
+          "snow_hill",
+          "tundra",
+          "tundra_hill"
+        ];
 
-      const spawnTile = GameMap.getInstance().getRandomTileWith({
-        avoidTileTypes: badTileTypes,
-      });
+        const spawnTile = GameMap.getInstance().getRandomTileWith({
+          avoidTileTypes: badTileTypes
+        });
 
-      //FIXME: Make Unit have a createSettler() method?
-      spawnTile.addUnit(
-        new Unit({
-          name: "settler",
-          player: player,
-          tile: spawnTile,
-          actions: [
-            {
-              name: "settle",
-              icon: "SETTLE_ICON",
-              requirements: ["awayFromCity", "movement"],
-              desc: "Settle City",
-              onAction: (unit: Unit) => {
-                console.log("ACTION: Act on settle city.");
-
-                const tile = unit.getTile();
-                unit.delete();
-
-                const city = new City({ player: player, tile: tile });
-                tile.setCity(city);
-                player.getCities().push(city);
-
-                Game.getPlayers().forEach((gamePlayer) => {
-                  gamePlayer.sendNetworkEvent({
-                    event: "newCity",
-                    ...city.getJSON(),
-                  });
-                });
-
-                // Add palace to city if it's the first city
-                if (player.getCities().length < 2) {
-                  city.addBuilding("palace");
-                }
-              },
-            },
-          ],
-        })
-      );
-
-      //TODO: Re-choose spawn location if warrior can't spawn
-      for (const adjTile of spawnTile.getAdjacentTiles()) {
-        if (!adjTile || adjTile.containsTileTypes(badTileTypes)) continue;
-
-        adjTile.addUnit(
+        //FIXME: Make Unit have a createSettler() method?
+        spawnTile.addUnit(
           new Unit({
-            name: "warrior",
+            name: "settler",
             player: player,
-            tile: adjTile,
-            attackType: "melee",
-            actions: [],
+            tile: spawnTile,
+            actions: [UnitActions.settleCity()]
           })
         );
-        break;
-      }
 
-      player.onLoadedIn(() => {
-        player.zoomToLocation(spawnTile.getX(), spawnTile.getY(), 7);
+        //TODO: Re-choose spawn location if warrior can't spawn
+        for (const adjTile of spawnTile.getAdjacentTiles()) {
+          if (!adjTile || adjTile.containsTileTypes(badTileTypes)) continue;
 
-        let allLoaded = true;
-        // Trigger allPlayersLoaded event
-        Game.getPlayers().forEach((player) => {
-          if (!player.isLoadedIn()) {
-            allLoaded = false;
+          adjTile.addUnit(
+            new Unit({
+              name: "warrior",
+              player: player,
+              tile: adjTile,
+              attackType: "melee",
+              actions: []
+            })
+          );
+          break;
+        }
+
+        player.onLoadedIn(() => {
+          player.zoomToLocation(spawnTile.getX(), spawnTile.getY(), 7);
+
+          let allLoaded = true;
+          // Trigger allPlayersLoaded event
+          Game.getInstance()
+            .getPlayers()
+            .forEach((player) => {
+              if (!player.isLoadedIn()) {
+                allLoaded = false;
+              }
+            });
+
+          if (allLoaded) {
+            ServerEvents.call("allPlayersLoaded", {});
           }
         });
 
-        if (allLoaded) {
-          ServerEvents.call("allPlayersLoaded", {});
-        }
+        player.sendNetworkEvent({ event: "setScene", scene: "in_game" });
       });
-
-      player.sendNetworkEvent({ event: "setScene", scene: "in_game" });
-    });
 
     ServerEvents.on({
       eventName: "allPlayersLoaded",
@@ -159,36 +135,35 @@ export class InGameState extends State {
         // Increment the turn
         this.incrementTurn();
         this.beginTurnTimer();
-      },
+      }
     });
 
     ServerEvents.on({
       eventName: "nextTurnRequest",
       parentObject: this,
       callback: (data, websocket) => {
-        const player = Game.getPlayerFromWebsocket(websocket);
+        const player = Game.getInstance().getPlayerFromWebsocket(websocket);
         player.setRequestedNextTurn(data["value"]);
 
-        const allRequested = Array.from(Game.getPlayers().values()).every(
-          (player) => player.hasRequestedNextTurn()
+        const allRequested = Array.from(Game.getInstance().getPlayers().values()).every((player) =>
+          player.hasRequestedNextTurn()
         );
 
         if (allRequested) {
           this.incrementTurn();
-          Game.getPlayers().forEach((player) => {
-            player.setRequestedNextTurn(false);
-          });
+          Game.getInstance()
+            .getPlayers()
+            .forEach((player) => {
+              player.setRequestedNextTurn(false);
+            });
         }
-      },
+      }
     });
   }
 
   public getBuildingDataByName(name: string) {
     for (const building of this.cityBuildings) {
-      if (
-        (building.name as string).toLocaleLowerCase() ===
-        name.toLocaleLowerCase()
-      ) {
+      if ((building.name as string).toLocaleLowerCase() === name.toLocaleLowerCase()) {
         return building;
       }
     }
@@ -200,13 +175,15 @@ export class InGameState extends State {
   private beginTurnTimer() {
     this.turnTimeJob = scheduleJob("* * * * * *", () => {
       // Send turn time increment to player
-      Game.getPlayers().forEach((player) => {
-        player.sendNetworkEvent({
-          event: "turnTimeDecrement",
-          turn: this.currentTurn,
-          turnTime: this.turnTime,
+      Game.getInstance()
+        .getPlayers()
+        .forEach((player) => {
+          player.sendNetworkEvent({
+            event: "turnTimeDecrement",
+            turn: this.currentTurn,
+            turnTime: this.turnTime
+          });
         });
-      });
 
       //FIXME: WAIT for all players timers to be 0!
       if (this.turnTime <= 0) {
@@ -222,13 +199,15 @@ export class InGameState extends State {
     this.currentTurn++;
     this.turnTime = this.totalTurnTime;
 
-    Game.getPlayers().forEach((player) => {
-      player.sendNetworkEvent({
-        event: "newTurn",
-        turn: this.currentTurn,
-        turnTime: this.turnTime,
+    Game.getInstance()
+      .getPlayers()
+      .forEach((player) => {
+        player.sendNetworkEvent({
+          event: "newTurn",
+          turn: this.currentTurn,
+          turnTime: this.turnTime
+        });
       });
-    });
 
     ServerEvents.call("nextTurn", { turn: this.currentTurn });
   }

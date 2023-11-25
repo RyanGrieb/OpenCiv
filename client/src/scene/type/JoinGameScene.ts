@@ -36,20 +36,20 @@ export class JoinGameScene extends Scene {
     //this.addActor(serverList);
 
     const backgroundActor = new Actor({
-      image: Game.getImage(GameImage.POPUP_BOX),
-      x: Game.getWidth() / 2 - 600 / 2,
-      y: Game.getHeight() / 2 - 500 / 2,
+      image: Game.getInstance().getImage(GameImage.POPUP_BOX),
+      x: Game.getInstance().getWidth() / 2 - 600 / 2,
+      y: Game.getInstance().getHeight() / 2 - 500 / 2,
       width: 600,
-      height: 500,
+      height: 500
     });
 
     this.addActor(backgroundActor);
 
     this.serverTextBox = new TextBox({
-      x: Game.getWidth() / 2 - 400 / 2,
-      y: Game.getHeight() / 2 - 100,
+      x: Game.getInstance().getWidth() / 2 - 400 / 2,
+      y: Game.getInstance().getHeight() / 2 - 100,
       width: 400,
-      height: 50,
+      height: 50
     });
 
     this.serverTextBox.setSelected(true);
@@ -60,11 +60,11 @@ export class JoinGameScene extends Scene {
     const infoLabel = new Label({
       text: "Enter server code: (e.g. ED2FG)",
       font: "24px serif",
-      fontColor: "white",
+      fontColor: "white"
     });
     infoLabel.conformSize().then(() => {
       infoLabel.setPosition(
-        Game.getWidth() / 2 - infoLabel.getWidth() / 2,
+        Game.getInstance().getWidth() / 2 - infoLabel.getWidth() / 2,
         this.serverTextBox.getY() - 30
       );
       this.addActor(infoLabel);
@@ -73,8 +73,8 @@ export class JoinGameScene extends Scene {
     this.addActor(
       new Button({
         text: "Join",
-        x: Game.getWidth() / 2 - 242 / 2,
-        y: Game.getHeight() / 2 - 25,
+        x: Game.getInstance().getWidth() / 2 - 242 / 2,
+        y: Game.getInstance().getHeight() / 2 - 25,
         width: 242,
         height: 62,
         fontColor: "white",
@@ -82,39 +82,39 @@ export class JoinGameScene extends Scene {
           infoLabel.setText("Connecting...", true);
           infoLabel.conformSize().then(() => {
             infoLabel.setPosition(
-              Game.getWidth() / 2 - infoLabel.getWidth() / 2,
+              Game.getInstance().getWidth() / 2 - infoLabel.getWidth() / 2,
               this.serverTextBox.getY() - 30
             );
           });
 
           WebsocketClient.init(this.serverTextBox.getText());
-        },
+        }
       })
     );
 
     this.addActor(
       new Button({
         text: "Server List",
-        x: Game.getWidth() / 2 - 242 / 2 - 150,
-        y: Game.getHeight() / 2 + 150,
+        x: Game.getInstance().getWidth() / 2 - 242 / 2 - 150,
+        y: Game.getInstance().getHeight() / 2 + 150,
         width: 242,
         height: 62,
         fontColor: "white",
-        onClicked: () => {},
+        onClicked: () => {}
       })
     );
 
     this.addActor(
       new Button({
         text: "Back",
-        x: Game.getWidth() / 2 - 242 / 2 + 150,
-        y: Game.getHeight() / 2 + 150,
+        x: Game.getInstance().getWidth() / 2 - 242 / 2 + 150,
+        y: Game.getInstance().getHeight() / 2 + 150,
         width: 242,
         height: 62,
         fontColor: "white",
         onClicked: () => {
-          Game.setScene("main_menu");
-        },
+          Game.getInstance().setScene("main_menu");
+        }
       })
     );
 
@@ -125,11 +125,11 @@ export class JoinGameScene extends Scene {
         infoLabel.setText("Connection Failed.", true);
         infoLabel.conformSize().then(() => {
           infoLabel.setPosition(
-            Game.getWidth() / 2 - infoLabel.getWidth() / 2,
+            Game.getInstance().getWidth() / 2 - infoLabel.getWidth() / 2,
             this.serverTextBox.getY() - 30
           );
         });
-      },
+      }
     });
 
     NetworkEvents.on({
@@ -141,12 +141,12 @@ export class JoinGameScene extends Scene {
           infoLabel.setText("Connection Failed: Game in progress.");
           infoLabel.conformSize().then(() => {
             infoLabel.setPosition(
-              Game.getWidth() / 2 - infoLabel.getWidth() / 2,
+              Game.getInstance().getWidth() / 2 - infoLabel.getWidth() / 2,
               this.serverTextBox.getY() - 30
             );
           });
         }
-      },
+      }
     });
   }
 

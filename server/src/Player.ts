@@ -37,10 +37,10 @@ export class Player {
     this.wsConnection.on("close", (data) => {
       console.log(name + " quit");
       ServerEvents.call("playerQuit", {}, this.wsConnection);
-      Game.getPlayers().delete(this.name);
+      Game.getInstance().getPlayers().delete(this.name);
 
       // Send playerQuit data to other connected players
-      for (const player of Array.from(Game.getPlayers().values())) {
+      for (const player of Array.from(Game.getInstance().getPlayers().values())) {
         if (player === this) {
           continue;
         }
@@ -58,7 +58,7 @@ export class Player {
         this.loadedIn = true;
         this.loadedInCallback.call(undefined);
       },
-      globalEvent: true,
+      globalEvent: true
     });
 
     ServerEvents.on({
@@ -69,7 +69,7 @@ export class Player {
 
         this.resizeWindowCallback.call(undefined);
       },
-      globalEvent: true,
+      globalEvent: true
     });
   }
 
@@ -80,7 +80,7 @@ export class Player {
    * @param zoomAmount The zoom amount to apply.
    */
   public static allZoomOnto(x: number, y: number, zoomAmount: number) {
-    for (let player of Game.getPlayers().values()) {
+    for (let player of Game.getInstance().getPlayers().values()) {
       player.zoomToLocation(x, y, zoomAmount);
     }
   }
@@ -120,7 +120,7 @@ export class Player {
       event: "zoomToLocation",
       x: x,
       y: y,
-      zoomAmount: zoomAmount,
+      zoomAmount: zoomAmount
     });
   }
 
@@ -156,7 +156,7 @@ export class Player {
     return {
       name: this.name,
       civData: this.civilizationData,
-      requestedNextTurn: this.requestedNextTurn,
+      requestedNextTurn: this.requestedNextTurn
     };
   }
 

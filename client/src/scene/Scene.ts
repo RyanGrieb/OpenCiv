@@ -34,29 +34,27 @@ export abstract class Scene {
   public addLine(line: Line) {
     this.sceneObjects.push(line);
     this.sortSceneObjects();
-    Game.addLine(line);
+    Game.getInstance().addLine(line);
   }
 
   public removeLine(line: Line) {
     this.sceneObjects = this.sceneObjects.filter((element) => element !== line);
     this.sortSceneObjects();
-    Game.removeLine(line);
+    Game.getInstance().removeLine(line);
   }
 
   public addActor(actor: Actor) {
     this.sceneObjects.push(actor);
     this.sortSceneObjects();
-    Game.addActor(actor);
+    Game.getInstance().addActor(actor);
   }
 
   public removeActor(actor: Actor) {
     if (!actor) return;
 
-    this.sceneObjects = this.sceneObjects.filter(
-      (element) => element !== actor
-    );
+    this.sceneObjects = this.sceneObjects.filter((element) => element !== actor);
     this.sortSceneObjects();
-    Game.removeActor(actor);
+    Game.getInstance().removeActor(actor);
   }
 
   public gameLoop() {
@@ -65,7 +63,7 @@ export abstract class Scene {
     }
 
     this.sceneObjects.forEach((object: SceneObject) => {
-      object.draw(Game.getCanvasContext());
+      object.draw(Game.getInstance().getCanvasContext());
     });
   }
 
@@ -134,13 +132,10 @@ export abstract class Scene {
   public restoreCamera() {
     this.camera = Camera.fromCamera(this.oldCamera);
     // Shift the camera position to account for our new window size (We do this for alignment)
-    const wDiff = Game.getWidth() - Game.getOldWidth();
-    const hDiff = Game.getHeight() - Game.getOldHeight();
+    const wDiff = Game.getInstance().getWidth() - Game.getInstance().getOldWidth();
+    const hDiff = Game.getInstance().getHeight() - Game.getInstance().getOldHeight();
 
-    this.camera.setPosition(
-      this.camera.getX() + wDiff / 2,
-      this.camera.getY() + hDiff / 2
-    );
+    this.camera.setPosition(this.camera.getX() + wDiff / 2, this.camera.getY() + hDiff / 2);
   }
 
   public sortSceneObjects() {

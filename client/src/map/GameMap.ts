@@ -20,7 +20,7 @@ export class GameMap {
     [1, 0],
     [1, 1],
     [0, 1],
-    [-1, 0],
+    [-1, 0]
   ];
   private evenEdgeAxis = [
     [-1, -1],
@@ -28,7 +28,7 @@ export class GameMap {
     [1, 0],
     [0, 1],
     [-1, 1],
-    [-1, 0],
+    [-1, 0]
   ];
 
   private tiles: Tile[][];
@@ -66,8 +66,8 @@ export class GameMap {
         const city = this.getCityFromJSONData(data);
         city.getTile().setCity(city); // Assign the city variable inside the tile variable.
         // Add the city actor to the scene (borders, nametag)
-        Game.getCurrentScene().addActor(city);
-      },
+        Game.getInstance().getCurrentScene().addActor(city);
+      }
     });
   }
 
@@ -161,7 +161,7 @@ export class GameMap {
           return 0; // fscoreA and fscoreB are equal
         }
       },
-      initialValues: [startTile],
+      initialValues: [startTile]
     });
 
     //cameFrom.fill(undefined, 0, totalNodes);
@@ -178,25 +178,16 @@ export class GameMap {
       for (let neighborTile of currentTile.getAdjacentTiles()) {
         if (!neighborTile) continue;
 
-        let d = (current: Tile, neighbor: Tile) =>
-          unit.getTileWeight(current, neighbor);
+        let d = (current: Tile, neighbor: Tile) => unit.getTileWeight(current, neighbor);
 
-        let tentativeGScore =
-          gScore[currentTile.getGridX()][currentTile.getGridY()] +
-          d(currentTile, neighborTile);
+        let tentativeGScore = gScore[currentTile.getGridX()][currentTile.getGridY()] + d(currentTile, neighborTile);
         //console.log(neighborTile.getNodeIndex());
         //console.log(gScore[neighborTile.getNodeIndex()]);
 
-        if (
-          tentativeGScore <
-          gScore[neighborTile.getGridX()][neighborTile.getGridY()]
-        ) {
-          cameFrom[neighborTile.getGridX()][neighborTile.getGridY()] =
-            currentTile;
-          gScore[neighborTile.getGridX()][neighborTile.getGridY()] =
-            tentativeGScore;
-          fScore[neighborTile.getGridX()][neighborTile.getGridY()] =
-            tentativeGScore + h(neighborTile);
+        if (tentativeGScore < gScore[neighborTile.getGridX()][neighborTile.getGridY()]) {
+          cameFrom[neighborTile.getGridX()][neighborTile.getGridY()] = currentTile;
+          gScore[neighborTile.getGridX()][neighborTile.getGridY()] = tentativeGScore;
+          fScore[neighborTile.getGridX()][neighborTile.getGridY()] = tentativeGScore + h(neighborTile);
 
           //if (!QueueUtils.valuePresent(openSet, neighborTile)) {
           openSet.queue(neighborTile);
@@ -232,7 +223,7 @@ export class GameMap {
   }
 
   private requestMapFromServer() {
-    const scene = Game.getCurrentScene();
+    const scene = Game.getInstance().getCurrentScene();
     this.tiles = [];
     const baseLayerTiles = [];
     const riverActors = [];
@@ -254,7 +245,7 @@ export class GameMap {
             //this.tiles[x][y] = undefined;
           }
         }
-      },
+      }
     });
 
     NetworkEvents.on({
@@ -310,16 +301,14 @@ export class GameMap {
             y: yPos,
             gridX: gridX,
             gridY: gridY,
-            movementCost: movementCost,
+            movementCost: movementCost
           });
           this.tiles[gridX][gridY] = tile;
 
           baseLayerTiles.push(tile);
           if (tile.hasRiver()) {
             for (let numberedRiverSide of tile.getNumberedRiverSides()) {
-              riverActors.push(
-                new River({ tile: tile, side: numberedRiverSide })
-              );
+              riverActors.push(new River({ tile: tile, side: numberedRiverSide }));
             }
           }
           if (tileTypes.length > 1) {
@@ -331,7 +320,7 @@ export class GameMap {
               y: yPosRelative,
               gridX: gridX,
               gridY: gridY,
-              movementCost: movementCost,
+              movementCost: movementCost
             });
 
             topLayerTiles.push(topLayerTile);
@@ -361,7 +350,7 @@ export class GameMap {
           x: 0,
           y: 0,
           width: 0,
-          height: 0,
+          height: 0
         });
         mapActors.push(placeholderActor);
 
@@ -372,7 +361,7 @@ export class GameMap {
           actors: mapActors,
           spriteRegion: false,
           canvasWidth: canvasWidth,
-          canvasHeight: canvasHeight,
+          canvasHeight: canvasHeight
         });
 
         mapChunk.setPosition(chunkX, chunkY);
@@ -389,7 +378,7 @@ export class GameMap {
           const bottomLayerActors = [...baseLayerTiles, ...riverActors];
           const bottomLayerActor = Actor.mergeActors({
             actors: bottomLayerActors,
-            spriteRegion: false,
+            spriteRegion: false
           });
 
           scene.addActor(bottomLayerActor);
@@ -409,12 +398,9 @@ export class GameMap {
 
           // Now combine the base tile-type layer & the rest of the layers above..
           for (let topLayerTile of this.topLayerTileActorList) {
-            const baseLayerTile =
-              this.tiles[topLayerTile.getGridX()][topLayerTile.getGridY()];
+            const baseLayerTile = this.tiles[topLayerTile.getGridX()][topLayerTile.getGridY()];
 
-            baseLayerTile.setTileTypes(
-              baseLayerTile.getTileTypes().concat(topLayerTile.getTileTypes())
-            );
+            baseLayerTile.setTileTypes(baseLayerTile.getTileTypes().concat(topLayerTile.getTileTypes()));
           }
 
           // Now create any cities that already exist on the map
@@ -425,13 +411,13 @@ export class GameMap {
 
             WebsocketClient.sendMessage({
               event: "requestCityStats",
-              cityName: city.getName(),
+              cityName: city.getName()
             });
           }
 
-          Game.getCurrentScene().call("mapLoaded");
+          Game.getInstance().getCurrentScene().call("mapLoaded");
         }
-      },
+      }
     });
   }
 
@@ -441,9 +427,7 @@ export class GameMap {
     //1. Get outter tiles
     // Condition: At least 1 adj tile is NOT in tiles list.
     const outerTiles: Tile[] = tiles.filter((tile) => {
-      return !tile
-        .getAdjacentTiles()
-        .every((adjTile) => tiles.includes(adjTile));
+      return !tile.getAdjacentTiles().every((adjTile) => tiles.includes(adjTile));
     });
 
     //2. Apply outline to the outer tiles. We want to only apply outlines on the exterior
@@ -468,7 +452,7 @@ export class GameMap {
         thickness: 1,
         color: color,
         cityOutline: true,
-        z: z,
+        z: z
       });
     }
   }
@@ -484,13 +468,11 @@ export class GameMap {
     for (const outline of [...outlines]) {
       if (outline.cityOutline && !options.cityOutline) continue;
 
-      Game.getCurrentScene().removeLine(outline.line);
+      Game.getInstance().getCurrentScene().removeLine(outline.line);
       outlines.splice(outlines.indexOf(outline), 1); // Remove outline from list (NO CITY OUTLINES EVER!!! UNLESS SPECIFIED)
 
       // Reset any outlines effected by this outline
-      for (const [_, effectedOutlines] of outline
-        .getEffectedOutlines()
-        .entries()) {
+      for (const [_, effectedOutlines] of outline.getEffectedOutlines().entries()) {
         for (const effectedOutline of effectedOutlines) {
           effectedOutline.line.setZValue(2);
           effectedOutline.line.setToOriginalPositions();
@@ -513,7 +495,7 @@ export class GameMap {
       thickness: 1,
       color: color,
       cityOutline: false,
-      z: 3,
+      z: 3
     });
   }
 
@@ -540,7 +522,7 @@ export class GameMap {
         y1: tile.getVectors()[i].y,
         x2: tile.getVectors()[iNext].x,
         y2: tile.getVectors()[iNext].y,
-        z: options.z ?? 2,
+        z: options.z ?? 2
       });
 
       // Draw non-city outlines closer to the tile
@@ -580,7 +562,7 @@ export class GameMap {
     }
 
     for (const outline of tileOutlines) {
-      Game.getCurrentScene().addLine(outline.line);
+      Game.getInstance().getCurrentScene().addLine(outline.line);
     }
 
     // Update our tileOutlines map
@@ -603,7 +585,7 @@ export class GameMap {
       x1: shiftedTileVectors[0].x,
       y1: shiftedTileVectors[0].y,
       x2: shiftedTileVectors[1].x,
-      y2: shiftedTileVectors[1].y,
+      y2: shiftedTileVectors[1].y
     });
   }
 
@@ -636,7 +618,7 @@ export class GameMap {
             y: yPosRelative,
             gridX: tile.getGridX(),
             gridY: tile.getGridY(),
-            movementCost: tile.getMovementCost(),
+            movementCost: tile.getMovementCost()
           });
 
           this.topLayerTileActorList.push(topLayerTile); // Not needed, but for continuity.
@@ -654,12 +636,12 @@ export class GameMap {
             actors: chunkTileActors,
             spriteRegion: false,
             canvasWidth: canvasWidth,
-            canvasHeight: canvasHeight,
+            canvasHeight: canvasHeight
           });
           updatedMapChunk.setPosition(chunk.getX(), chunk.getY());
 
-          Game.getCurrentScene().addActor(updatedMapChunk);
-          Game.getCurrentScene().removeActor(chunk);
+          Game.getInstance().getCurrentScene().addActor(updatedMapChunk);
+          Game.getInstance().getCurrentScene().removeActor(chunk);
 
           // Update the chunk map
           this.topLayerMapChunks.delete(chunk);
@@ -685,20 +667,12 @@ export class GameMap {
           let edgeX = x + edgeAxis[i][0];
           let edgeY = y + edgeAxis[i][1];
 
-          if (
-            edgeX == -1 ||
-            edgeY == -1 ||
-            edgeX > this.mapWidth - 1 ||
-            edgeY > this.mapHeight - 1
-          ) {
+          if (edgeX == -1 || edgeY == -1 || edgeX > this.mapWidth - 1 || edgeY > this.mapHeight - 1) {
             this.tiles[x][y].setAdjacentTile(i, null);
             continue;
           }
 
-          this.tiles[x][y].setAdjacentTile(
-            i,
-            this.tiles[x + edgeAxis[i][0]][y + edgeAxis[i][1]]
-          );
+          this.tiles[x][y].setAdjacentTile(i, this.tiles[x + edgeAxis[i][0]][y + edgeAxis[i][1]]);
         }
       }
     }
@@ -714,15 +688,13 @@ export class GameMap {
     const cityName = data["cityName"];
     const territory: Tile[] = [];
     for (const territoryJSON of data["territory"]) {
-      territory.push(
-        this.tiles[territoryJSON["tileX"]][territoryJSON["tileY"]]
-      );
+      territory.push(this.tiles[territoryJSON["tileX"]][territoryJSON["tileY"]]);
     }
     const city = new City({
       tile: tile,
       territory: territory,
       player: player,
-      name: cityName,
+      name: cityName
     });
 
     return city;

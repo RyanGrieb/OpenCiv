@@ -44,10 +44,8 @@ export class City extends ActorGroup {
     this.stats = new Map<string, number>();
     this.statsPresent = false;
 
-    this.innerBorderColor =
-      this.player.getCivilizationData()["inside_border_color"];
-    this.outsideBorderColor =
-      this.player.getCivilizationData()["outside_border_color"];
+    this.innerBorderColor = this.player.getCivilizationData()["inside_border_color"];
+    this.outsideBorderColor = this.player.getCivilizationData()["outside_border_color"];
 
     this.territoryOverlays = [];
 
@@ -65,62 +63,52 @@ export class City extends ActorGroup {
       shadowBlur: 1,
       shadowColor: "black",
       lineWidth: 1,
-      z: 4,
+      z: 4
     });
 
-    if (
-      this.player == Game.getCurrentSceneAs<InGameScene>().getClientPlayer()
-    ) {
+    if (this.player == Game.getInstance().getCurrentSceneAs<InGameScene>().getClientPlayer()) {
       this.nameLabel.setOnClick(() => {
-        Game.getCurrentSceneAs<InGameScene>().toggleCityUI(this);
+        Game.getInstance().getCurrentSceneAs<InGameScene>().toggleCityUI(this);
       });
     }
 
     this.nameLabel.conformSize().then(() => {
       this.nameLabel.setPosition(
-        this.tile.getX() -
-          this.nameLabel.getWidth() / 2 +
-          this.tile.getWidth() / 2 +
-          7,
+        this.tile.getX() - this.nameLabel.getWidth() / 2 + this.tile.getWidth() / 2 + 7,
         this.tile.getY() - this.nameLabel.getHeight()
       );
-      Game.getCurrentScene().addActor(this.nameLabel);
+      Game.getInstance().getCurrentScene().addActor(this.nameLabel);
 
       this.civIcon = new Actor({
-        image: Game.getImage(GameImage.SPRITESHEET),
-        spriteRegion:
-          SpriteRegion[this.player.getCivilizationData()["icon_name"]],
+        image: Game.getInstance().getImage(GameImage.SPRITESHEET),
+        spriteRegion: SpriteRegion[this.player.getCivilizationData()["icon_name"]],
         x: this.nameLabel.getX() - 14,
         y: this.nameLabel.getY(),
         z: 4,
         width: 12,
-        height: 12,
+        height: 12
       });
       //this.addActor(this.civIcon);
 
-      Game.getCurrentScene().addActor(this.civIcon);
+      Game.getInstance().getCurrentScene().addActor(this.civIcon);
     });
 
     for (const tile of this.territory) {
       const territoryOverlay = new Actor({
-        image: Game.getImage(GameImage.SPRITESHEET),
+        image: Game.getInstance().getImage(GameImage.SPRITESHEET),
         spriteRegion: SpriteRegion.BLANK_TILE,
         x: tile.getX(),
         y: tile.getY(),
         width: 32,
         height: 32,
-        color: this.innerBorderColor,
+        color: this.innerBorderColor
       });
 
       this.addActor(territoryOverlay);
       this.territoryOverlays.push(territoryOverlay);
     }
 
-    GameMap.getInstance().drawBorder(
-      this.territory,
-      this.outsideBorderColor,
-      3
-    );
+    GameMap.getInstance().drawBorder(this.territory, this.outsideBorderColor, 3);
 
     NetworkEvents.on({
       eventName: "addBuilding",
@@ -128,7 +116,7 @@ export class City extends ActorGroup {
       callback: (data: any) => {
         const buildingData = data["building"];
         this.buildings.push(new Buidling(buildingData));
-      },
+      }
     });
 
     NetworkEvents.on({
@@ -143,7 +131,7 @@ export class City extends ActorGroup {
         }
 
         this.statsPresent = true;
-      },
+      }
     });
   }
 
@@ -157,7 +145,7 @@ export class City extends ActorGroup {
 
   public onDestroyed(): void {
     super.onDestroyed();
-    Game.getCurrentScene().removeActor(this.nameLabel);
+    Game.getInstance().getCurrentScene().removeActor(this.nameLabel);
   }
 
   public getTerritory() {

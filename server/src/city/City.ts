@@ -48,13 +48,13 @@ export class City {
       eventName: "requestCityStats",
       parentObject: this,
       callback: (data, websocket) => {
-        const player = Game.getPlayerFromWebsocket(websocket);
+        const player = Game.getInstance().getPlayerFromWebsocket(websocket);
         if (this.name != data["cityName"] || this.player != player) {
           return;
         }
 
         this.sendStatUpdate(player);
-      },
+      }
     });
   }
 
@@ -73,7 +73,7 @@ export class City {
       const tile = GameMap.getInstance().getTileWithHighestYeild({
         stats: [tileFocus],
         tiles: this.territory,
-        ignoreTiles: this.workedTiles,
+        ignoreTiles: this.workedTiles
       });
 
       this.workedTiles.push(tile);
@@ -86,8 +86,7 @@ export class City {
 
   public addBuilding(name: string) {
     // Get the building data from YML
-    const buildingData =
-      Game.getCurrentStateAs<InGameState>().getBuildingDataByName(name);
+    const buildingData = Game.getInstance().getCurrentStateAs<InGameState>().getBuildingDataByName(name);
 
     // Apply any effects to the building if any (faith, culture, bonuses, etc.)):
     //...
@@ -99,7 +98,7 @@ export class City {
     this.player.sendNetworkEvent({
       event: "addBuilding",
       cityName: this.name,
-      building: buildingData,
+      building: buildingData
     });
 
     this.updateWorkedTiles({ sendStatUpdate: true });
@@ -117,7 +116,7 @@ export class City {
     player.sendNetworkEvent({
       event: "updateCityStats",
       cityName: this.name,
-      cityStats: cityStats,
+      cityStats: cityStats
     });
   }
 
@@ -126,7 +125,7 @@ export class City {
     if (options.asArray) {
       const cityStats = [
         {
-          population: this.population,
+          population: this.population
         },
         { science: 0 },
         { gold: 0 },
@@ -135,7 +134,7 @@ export class City {
         { culture: 0 },
         { food: -(this.population * 2) },
         { morale: 0 }, //TODO: Implement morale
-        { foodSurplus: this.foodSurplus },
+        { foodSurplus: this.foodSurplus }
       ];
 
       // Add all buildings to existing stat-line dictionary
@@ -165,7 +164,7 @@ export class City {
       culture: 0,
       food: -(this.population * 2),
       morale: 0, //TODO: Implement morale
-      foodSurplus: this.foodSurplus,
+      foodSurplus: this.foodSurplus
     };
 
     // Feed citizens
@@ -213,7 +212,7 @@ export class City {
   public getJSON() {
     const territoryCoords = this.territory.map((tile) => ({
       tileX: tile.getX(),
-      tileY: tile.getY(),
+      tileY: tile.getY()
     }));
 
     return {
@@ -221,7 +220,7 @@ export class City {
       player: this.player.getName(),
       tileX: this.tile.getX(),
       tileY: this.tile.getY(),
-      territory: territoryCoords,
+      territory: territoryCoords
     };
   }
 }

@@ -33,29 +33,28 @@ export interface GameOptions {
 }
 
 export class Game {
-  private static canvas: HTMLCanvasElement;
-  private static canvasContext: CanvasRenderingContext2D;
-  private static scenes: Map<string, Scene>;
-  private static currentScene: Scene;
-  private static images = [];
-  private static countedFrames: number = 0;
-  private static lastTimeUpdate = Date.now();
-  private static fps: number = 0;
-  private static actors: Actor[] = [];
-  private static lines: Line[] = [];
-  private static measureQueue: string[];
-  private static mouseX: number;
-  private static mouseY: number;
-  private static runGameLoop: boolean;
-  private static wrappedTextCache: { [key: string]: [string, number, number] } =
-    {};
-  private static resizeTimer: NodeJS.Timeout;
-  private static oldWidth: number;
-  private static oldHeight: number;
+  private static gameInstance: Game;
 
-  private constructor() {}
+  private canvas: HTMLCanvasElement;
+  private canvasContext: CanvasRenderingContext2D;
+  private scenes: Map<string, Scene>;
+  private currentScene: Scene;
+  private images = [];
+  private countedFrames: number = 0;
+  private lastTimeUpdate = Date.now();
+  private fps: number = 0;
+  private actors: Actor[] = [];
+  private lines: Line[] = [];
+  private measureQueue: string[];
+  private mouseX: number;
+  private mouseY: number;
+  private runGameLoop: boolean;
+  private wrappedTextCache: { [key: string]: [string, number, number] } = {};
+  private resizeTimer: NodeJS.Timeout;
+  private oldWidth: number;
+  private oldHeight: number;
 
-  public static init(options: GameOptions, callback: () => void) {
+  private constructor(options: GameOptions, assetsLoadedCallback: () => void) {
     this.scenes = new Map<string, Scene>();
     //Initialize canvas
     this.canvas = document.getElementById("canvas") as HTMLCanvasElement;
@@ -74,7 +73,7 @@ export class Game {
       this.actors.forEach((actor) => {
         actor.call("mousemove", {
           x: event.clientX,
-          y: event.clientY,
+          y: event.clientY
         });
       });
 
@@ -82,7 +81,7 @@ export class Game {
         this.currentScene.call("mousemove", {
           x: event.clientX,
           y: event.clientY,
-          button: event.button,
+          button: event.button
         });
       }
 
@@ -95,7 +94,7 @@ export class Game {
         actor.call("mousedown", {
           x: event.clientX,
           y: event.clientY,
-          button: event.button,
+          button: event.button
         });
       });
 
@@ -103,7 +102,7 @@ export class Game {
         this.currentScene.call("mousedown", {
           x: event.clientX,
           y: event.clientY,
-          button: event.button,
+          button: event.button
         });
       }
     });
@@ -113,7 +112,7 @@ export class Game {
         actor.call("mouseup", {
           x: event.clientX,
           y: event.clientY,
-          button: event.button,
+          button: event.button
         });
       });
 
@@ -121,7 +120,7 @@ export class Game {
         this.currentScene.call("mouseup", {
           x: event.clientX,
           y: event.clientY,
-          button: event.button,
+          button: event.button
         });
       }
     });
@@ -134,7 +133,7 @@ export class Game {
       if (this.currentScene) {
         this.currentScene.call("mouseleave", {
           x: event.clientX,
-          y: event.clientY,
+          y: event.clientY
         });
       }
     });
@@ -148,7 +147,7 @@ export class Game {
         this.currentScene.call("wheel", {
           x: event.offsetX,
           y: event.offsetY,
-          deltaY: event.deltaY,
+          deltaY: event.deltaY
         });
       }
     });
@@ -186,12 +185,7 @@ export class Game {
           this.currentScene.redraw();
         }
         this.canvasContext.fillStyle = options.canvasColor ?? "white";
-        this.canvasContext.fillRect(
-          0,
-          0,
-          this.canvas.width,
-          this.canvas.height
-        );
+        this.canvasContext.fillRect(0, 0, this.canvas.width, this.canvas.height);
         this.canvasContext.font = "12px Times new Roman";
         this.canvasContext.imageSmoothingEnabled = false;
       }, 300);
@@ -210,7 +204,7 @@ export class Game {
       });
 
       // Call the callback loop, now we can progress with adding actors,scenes,ect.
-      callback();
+      assetsLoadedCallback();
     });
 
     // Initialize our global network events
@@ -220,7 +214,7 @@ export class Game {
       callback: (data) => {
         this.setScene(data["scene"]);
       },
-      globalEvent: true,
+      globalEvent: true
     });
     NetworkEvents.on({
       eventName: "messageBox",
@@ -230,11 +224,19 @@ export class Game {
         const message = data["message"];
         alert(message);
       },
-      globalEvent: true,
+      globalEvent: true
     });
   }
 
-  public static gameLoop() {
+  public static getInstance() {
+    return this.gameInstance;
+  }
+
+  public static createInstance(options: GameOptions, assetsLoadedCallback: () => void) {
+    this.gameInstance = new Game(options, assetsLoadedCallback);
+  }
+
+  public gameLoop() {
     if (!this.runGameLoop) return;
 
     this.canvasContext.fillRect(0, 0, this.canvas.width, this.canvas.height);
@@ -251,10 +253,10 @@ export class Game {
     this.drawText(
       {
         text: "FPS: " + this.fps,
-        x: Game.getWidth() - 40,
-        y: Game.getHeight() - 12,
+        x: this.getWidth() - 40,
+        y: this.getHeight() - 12,
         color: "white",
-        font: "12px sans",
+        font: "12px sans"
       },
       this.canvasContext
     );
@@ -265,7 +267,7 @@ export class Game {
     });
   }
 
-  public static loadAssetPromise(assetList): Promise<unknown> {
+  private loadAssetPromise(assetList): Promise<unknown> {
     let imagesLoaded: number = 0;
 
     const resultPromise = new Promise((resolve, reject) => {
@@ -287,12 +289,12 @@ export class Game {
     return resultPromise;
   }
 
-  public static addScene(sceneName: string, scene: Scene) {
+  public addScene(sceneName: string, scene: Scene) {
     this.scenes.set(sceneName, scene);
     scene.setName(sceneName);
   }
 
-  public static setScene(sceneName: string) {
+  public setScene(sceneName: string) {
     this.actors = [];
     this.wrappedTextCache = {};
 
@@ -306,32 +308,27 @@ export class Game {
     this.currentScene.onInitialize();
   }
 
-  public static addActor(actor: Actor) {
+  public addActor(actor: Actor) {
     this.actors.push(actor);
     actor.onCreated();
   }
 
-  public static addLine(line: Line) {
+  public addLine(line: Line) {
     this.lines.push(line);
   }
 
-  public static removeLine(line: Line) {
+  public removeLine(line: Line) {
     this.lines = this.lines.filter((element) => element !== line);
   }
 
-  public static removeActor(actor: Actor) {
+  public removeActor(actor: Actor) {
     this.actors = this.actors.filter((element) => element !== actor);
     actor.onDestroyed();
   }
 
-  public static drawImageFromActor(
-    actor: Actor,
-    context: CanvasRenderingContext2D
-  ) {
+  public drawImageFromActor(actor: Actor, context: CanvasRenderingContext2D) {
     if (!actor.getImage()) {
-      console.log(
-        "Warning: Attempted to draw empty actor: " + actor.getWidth()
-      );
+      console.log("Warning: Attempted to draw empty actor: " + actor.getWidth());
       return;
     }
 
@@ -340,26 +337,16 @@ export class Game {
     canvasContext.save();
 
     // Only apply camera to the Game's main canvas context.
-    if (
-      actor.isCameraApplied() &&
-      this.currentScene.getCamera() &&
-      canvasContext === this.canvasContext
-    ) {
+    if (actor.isCameraApplied() && this.currentScene.getCamera() && canvasContext === this.canvasContext) {
       const zoom = this.currentScene.getCamera().getZoomAmount();
       const cameraX = this.currentScene.getCamera().getX();
       const cameraY = this.currentScene.getCamera().getY();
       canvasContext.setTransform(zoom, 0, 0, zoom, cameraX, cameraY);
     }
 
-    canvasContext.translate(
-      actor.getRotationOriginX(),
-      actor.getRotationOriginY()
-    );
+    canvasContext.translate(actor.getRotationOriginX(), actor.getRotationOriginY());
     canvasContext.rotate(actor.getRotation());
-    canvasContext.translate(
-      -actor.getRotationOriginX(),
-      -actor.getRotationOriginY()
-    );
+    canvasContext.translate(-actor.getRotationOriginX(), -actor.getRotationOriginY());
 
     canvasContext.globalAlpha = actor.getTransparency();
 
@@ -380,13 +367,7 @@ export class Game {
         actor.getHeight()
       );
     } else {
-      canvasContext.drawImage(
-        actor.getImage(),
-        actor.getX(),
-        actor.getY(),
-        actor.getWidth(),
-        actor.getHeight()
-      );
+      canvasContext.drawImage(actor.getImage(), actor.getX(), actor.getY(), actor.getWidth(), actor.getHeight());
     }
 
     canvasContext.globalAlpha = 1;
@@ -394,7 +375,7 @@ export class Game {
     canvasContext.restore();
   }
 
-  public static async waitUntilMeasureQueueIsEmpty(): Promise<void> {
+  public async waitUntilMeasureQueueIsEmpty(): Promise<void> {
     return new Promise((resolve) => {
       const interval = setInterval(() => {
         if (this.measureQueue.length < 1) {
@@ -405,10 +386,7 @@ export class Game {
     });
   }
 
-  public static async measureText(
-    text: string,
-    font: string
-  ): Promise<[number, number]> {
+  public async measureText(text: string, font: string): Promise<[number, number]> {
     await this.waitUntilMeasureQueueIsEmpty(); // Wait for other measurements to complete, then continue..
     this.measureQueue.push(text);
     this.canvasContext.save();
@@ -417,8 +395,7 @@ export class Game {
     await document.fonts.ready; // Wait for the async function to complete, then measure text.s
 
     const metrics = this.canvasContext.measureText(text);
-    let height =
-      metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent;
+    let height = metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent;
     this.canvasContext.restore();
     //FIXME: This fails when we have a queue of the same text, support text & font simultaneously
     this.measureQueue = this.measureQueue.filter((element) => element !== text);
@@ -429,11 +406,7 @@ export class Game {
   /**
    * Returns a wrapped text string and height of the wrapped text, and stores the wrapped text in a cache.
    */
-  public static async getWrappedText(
-    text: string,
-    font: string,
-    maxWidth: number
-  ): Promise<[string, number, number]> {
+  public async getWrappedText(text: string, font: string, maxWidth: number): Promise<[string, number, number]> {
     let currentWidth = 0;
 
     // Check if we have the wrapped text in cache:
@@ -460,19 +433,12 @@ export class Game {
     }
 
     //Store wrapped text in cache
-    this.wrappedTextCache[text] = [
-      modifiedText,
-      wrappedHeight,
-      unwrappedWordHeight,
-    ];
+    this.wrappedTextCache[text] = [modifiedText, wrappedHeight, unwrappedWordHeight];
 
     return [modifiedText, wrappedHeight, unwrappedWordHeight];
   }
 
-  public static drawText(
-    textOptions: TextOptions,
-    canvasContext: CanvasRenderingContext2D
-  ) {
+  public drawText(textOptions: TextOptions, canvasContext: CanvasRenderingContext2D) {
     //FIXME: Use cache for meausring text..
 
     let text = textOptions.text;
@@ -484,11 +450,7 @@ export class Game {
 
     canvasContext.textBaseline = "top";
     // Only apply camera to the Game's main canvas context. (canvasContext === this.canvasContext)
-    if (
-      textOptions.applyCamera &&
-      this.currentScene.getCamera() &&
-      canvasContext === this.canvasContext
-    ) {
+    if (textOptions.applyCamera && this.currentScene.getCamera() && canvasContext === this.canvasContext) {
       const zoom = this.currentScene.getCamera().getZoomAmount();
       const cameraX = this.currentScene.getCamera().getX();
       const cameraY = this.currentScene.getCamera().getY();
@@ -507,11 +469,7 @@ export class Game {
     if (textOptions.lineWidth > 0) {
       if (text.includes("\n")) {
         for (const [index, line] of text.split("\n").entries()) {
-          canvasContext.strokeText(
-            line,
-            xPos,
-            yPos + textOptions.height * index
-          );
+          canvasContext.strokeText(line, xPos, yPos + textOptions.height * index);
         }
       } else {
         canvasContext.strokeText(text, xPos, yPos);
@@ -529,7 +487,7 @@ export class Game {
     canvasContext.restore();
   }
 
-  public static drawLine(line: Line, canvasContext: CanvasRenderingContext2D) {
+  public drawLine(line: Line, canvasContext: CanvasRenderingContext2D) {
     canvasContext.save();
 
     // Only apply camera to the Game's main canvas context.
@@ -558,14 +516,14 @@ export class Game {
     canvasContext.restore();
   }
 
-  public static drawRect({
+  public drawRect({
     x,
     y,
     width,
     height,
     color,
     canvasContext,
-    fill,
+    fill
   }: {
     x: number;
     y: number;
@@ -586,35 +544,35 @@ export class Game {
     canvasContext.restore();
   }
 
-  public static getImage(gameImage: GameImage) {
+  public getImage(gameImage: GameImage) {
     return this.images[gameImage];
   }
 
-  public static getHeight(): number {
+  public getHeight(): number {
     return this.canvas.height;
   }
 
-  public static getWidth(): number {
+  public getWidth(): number {
     return this.canvas.width;
   }
 
-  public static getOldHeight(): number {
+  public getOldHeight(): number {
     return this.oldHeight;
   }
 
-  public static getOldWidth(): number {
+  public getOldWidth(): number {
     return this.oldWidth;
   }
-  
-  public static getCanvasContext() {
+
+  public getCanvasContext() {
     return this.canvasContext;
   }
 
-  public static getCanvas() {
+  public getCanvas() {
     return this.canvas;
   }
 
-  public static getCurrentScene() {
+  public getCurrentScene() {
     return this.currentScene;
   }
 
@@ -622,29 +580,29 @@ export class Game {
    * Return the current scene & cast the class specified in the generic type.
    * @returns
    */
-  public static getCurrentSceneAs<T extends Scene>(): T {
+  public getCurrentSceneAs<T extends Scene>(): T {
     return this.currentScene as T;
   }
 
-  public static getMouseX() {
+  public getMouseX() {
     return this.mouseX;
   }
-  public static getMouseY() {
+  public getMouseY() {
     return this.mouseY;
   }
 
-  public static getRelativeMouseX() {
+  public getRelativeMouseX() {
     return this.mouseX - (this.currentScene.getCamera()?.getX() ?? 0);
   }
-  public static getRelativeMouseY() {
+  public getRelativeMouseY() {
     return this.mouseY - (this.currentScene.getCamera()?.getY() ?? 0);
   }
 
-  public static toggleGameLoop() {
+  public toggleGameLoop() {
     this.runGameLoop = !this.runGameLoop;
   }
 
-  public static setCursor(type: string) {
+  public setCursor(type: string) {
     this.canvas.style.cursor = type;
   }
 }

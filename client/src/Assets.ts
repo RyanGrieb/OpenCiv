@@ -13,7 +13,7 @@ export enum GameImage {
   SPRITESHEET,
   RIVER,
   POPUP_BOX,
-  DEBUG,
+  DEBUG
 }
 
 export enum SpriteRegion {
@@ -89,7 +89,7 @@ export enum SpriteRegion {
   FAITH_ICON = "2,13",
   TRADE_ICON = "5,14",
   SETTLE_ICON = "11,11",
-  BUILDING_PALACE = "5,18",
+  BUILDING_PALACE = "5,18"
 }
 
 export const assetList = [
@@ -102,5 +102,5 @@ export const assetList = [
   require("../assets/images/ui_popup_box.png"),
   require("../assets/images/debug.png"),
   require("../assets/images/font.png"),
-  require("../assets/images/logo.png"),
+  require("../assets/images/logo.png")
 ];

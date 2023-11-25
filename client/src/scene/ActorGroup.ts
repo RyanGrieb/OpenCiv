@@ -20,7 +20,7 @@ export class ActorGroup extends Actor {
       width: options.width,
       height: options.height,
       cameraApplies: options.cameraApplies,
-      z: options.z,
+      z: options.z
     });
 
     this.actors = [];

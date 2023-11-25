@@ -5,7 +5,7 @@ import { InGameState } from "./state/type/InGameState";
 import { LobbyState } from "./state/type/LobbyState";
 
 export class Server {
-  private static instance: Server = new Server();
+  private static serverInstance: Server;
 
   private port: number = 2000;
   private wss: WebSocketServer;
@@ -15,7 +15,11 @@ export class Server {
    * @returns Server singleton instance
    */
   public static getInstance(): Server {
-    return this.instance;
+    if (this.serverInstance == undefined) {
+      this.serverInstance = new Server();
+    }
+
+    return this.serverInstance;
   }
 
   /**
@@ -55,9 +59,9 @@ export class Server {
      * Set the game state to "lobby".
      */
     Game.init();
-    Game.addState("lobby", new LobbyState());
-    Game.addState("in_game", new InGameState());
-    Game.setState("lobby");
+    Game.getInstance().addState("lobby", new LobbyState());
+    Game.getInstance().addState("in_game", new InGameState());
+    Game.getInstance().setState("lobby");
   }
 
   /**

@@ -16,13 +16,13 @@ export class LobbyScene extends Scene {
     this.addActor(SceneBackground.generateRandomGrassland());
 
     const playerList = new ListBox({
-      x: Game.getWidth() / 2 - 600 / 2,
+      x: Game.getInstance().getWidth() / 2 - 600 / 2,
       y: 35,
       width: 600,
-      height: Game.getHeight() - 275,
+      height: Game.getInstance().getHeight() - 275,
       rowHeight: 50,
       textFont: "20px serif",
-      fontColor: "white",
+      fontColor: "white"
     });
 
     this.addActor(playerList);
@@ -30,7 +30,7 @@ export class LobbyScene extends Scene {
     this.addActor(
       new Button({
         text: "Choose Civilization",
-        x: Game.getWidth() / 2 - 242 / 2,
+        x: Game.getInstance().getWidth() / 2 - 242 / 2,
         y: playerList.getY() + playerList.getHeight() + 10,
         width: 242,
         height: 62,
@@ -45,7 +45,7 @@ export class LobbyScene extends Scene {
           if (!this.selectCivGroup || !this.hasActor(this.selectCivGroup)) {
             this.selectCivGroup = new SelectCivilizationGroup(
               playerList.getX() + playerList.getWidth() / 2 - 432 / 2,
-              Game.getHeight() / 2 - 440 / 2,
+              Game.getInstance().getHeight() / 2 - 440 / 2,
               432,
               440
             );
@@ -57,14 +57,14 @@ export class LobbyScene extends Scene {
 
         disableHoverWhen: () => {
           return this.hasActor(this.selectCivGroup);
-        },
+        }
       })
     );
 
     this.addActor(
       new Button({
         text: "Ready Up",
-        x: Game.getWidth() / 2 - 242 / 2,
+        x: Game.getInstance().getWidth() / 2 - 242 / 2,
         y: playerList.getY() + playerList.getHeight() + 75,
         width: 242,
         height: 62,
@@ -79,14 +79,14 @@ export class LobbyScene extends Scene {
 
         disableHoverWhen: () => {
           return this.hasActor(this.selectCivGroup);
-        },
+        }
       })
     );
 
     this.addActor(
       new Button({
         text: "Back",
-        x: Game.getWidth() / 2 - 242 / 2,
+        x: Game.getInstance().getWidth() / 2 - 242 / 2,
         y: playerList.getY() + playerList.getHeight() + 140,
         width: 242,
         height: 62,
@@ -96,13 +96,13 @@ export class LobbyScene extends Scene {
             return;
           }
 
-          Game.setScene("join_game");
+          Game.getInstance().setScene("join_game");
           //TODO: Disconnect player
         },
 
         disableHoverWhen: () => {
           return this.hasActor(this.selectCivGroup);
-        },
+        }
       })
     );
 
@@ -111,17 +111,17 @@ export class LobbyScene extends Scene {
     NetworkEvents.on({
       eventName: "playerJoin",
       parentObject: this,
-      callback: this.updatePlayerList,
+      callback: this.updatePlayerList
     });
     NetworkEvents.on({
       eventName: "playerQuit",
       parentObject: this,
-      callback: this.updatePlayerList,
+      callback: this.updatePlayerList
     });
     NetworkEvents.on({
       eventName: "playerLeave",
       parentObject: this,
-      callback: this.updatePlayerList,
+      callback: this.updatePlayerList
     });
 
     NetworkEvents.on({
@@ -140,17 +140,17 @@ export class LobbyScene extends Scene {
           }
 
           const currentRow = playerList.addRow({
-            text: playerName,
+            text: playerName
           });
 
           currentRow.addActor(
             new Actor({
-              image: Game.getImage(GameImage.SPRITESHEET),
+              image: Game.getInstance().getImage(GameImage.SPRITESHEET),
               spriteRegion: civIcon,
               x: currentRow.getX() + 8,
               y: currentRow.getY() - 32 / 2 + currentRow.getHeight() / 2,
               width: 32,
-              height: 32,
+              height: 32
             })
           );
 
@@ -158,12 +158,12 @@ export class LobbyScene extends Scene {
             // TODO: Indicate this row is the users player
             currentRow.addActor(
               new Actor({
-                image: Game.getImage(GameImage.SPRITESHEET),
+                image: Game.getInstance().getImage(GameImage.SPRITESHEET),
                 spriteRegion: SpriteRegion.STAR,
                 x: currentRow.getX() + currentRow.getWidth() - 32 - 8,
                 y: currentRow.getY() - 32 / 2 + currentRow.getHeight() / 2,
                 width: 32,
-                height: 32,
+                height: 32
               })
             );
           }
@@ -171,13 +171,11 @@ export class LobbyScene extends Scene {
           currentRow.conformLabelSize().then(() => {
             currentRow.setLabelPosition(
               currentRow.getX() + 48,
-              currentRow.getY() +
-                currentRow.getHeight() / 2 -
-                currentRow.getLabel().getHeight() / 2
+              currentRow.getY() + currentRow.getHeight() / 2 - currentRow.getLabel().getHeight() / 2
             );
           });
         }
-      },
+      }
     });
 
     NetworkEvents.on({
@@ -194,22 +192,17 @@ export class LobbyScene extends Scene {
               continue;
             }
 
-            rowActor.setSpriteRegion(
-              SpriteRegion[data["civData"]["icon_name"]]
-            );
+            rowActor.setSpriteRegion(SpriteRegion[data["civData"]["icon_name"]]);
           }
         }
-      },
+      }
     });
   }
 
   public onDestroyed(newScene: Scene) {
     const exitReceipt = super.onDestroyed(newScene);
     // Disconnect from the server if we go back, unless were going into the loading scene or reloading this scene.
-    if (
-      newScene.getName() !== "loading_scene" &&
-      newScene.getName() !== "lobby"
-    ) {
+    if (newScene.getName() !== "loading_scene" && newScene.getName() !== "lobby") {
       WebsocketClient.disconnect();
     }
 

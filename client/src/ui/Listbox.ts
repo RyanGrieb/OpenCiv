@@ -29,7 +29,7 @@ class Row extends ActorGroup {
       z: options.z,
       width: options.width,
       height: options.height,
-      cameraApplies: false,
+      cameraApplies: false
     });
 
     this.addActor(
@@ -38,7 +38,7 @@ class Row extends ActorGroup {
         y: this.y,
         width: this.width,
         height: this.height,
-        color: options.color,
+        color: options.color
       })
     );
 
@@ -47,7 +47,7 @@ class Row extends ActorGroup {
       fontColor: options.fontColor,
       font: options.font,
       x: options.textX ?? this.x,
-      y: options.textY ?? this.y,
+      y: options.textY ?? this.y
     });
 
     this.label = label;
@@ -113,7 +113,7 @@ export class ListBox extends ActorGroup {
         y: this.y,
         width: this.width,
         height: this.height,
-        color: "black",
+        color: "black"
       })
     );
   }
@@ -130,17 +130,13 @@ export class ListBox extends ActorGroup {
       color: this.rows.length % 2 == 0 ? "#9e9e9e" : " #bbbbbb",
       font: this.textFont,
       fontColor: this.fontColor,
-      text: name,
+      text: name
     });
 
     row.conformLabelSize().then(() => {
       row.setLabelPosition(
-        row.getLabel().getX() +
-          row.getWidth() / 2 -
-          row.getLabel().getWidth() / 2,
-        row.getLabel().getY() +
-          row.getHeight() / 2 -
-          row.getLabel().getHeight() / 2
+        row.getLabel().getX() + row.getWidth() / 2 - row.getLabel().getWidth() / 2,
+        row.getLabel().getY() + row.getHeight() / 2 - row.getLabel().getHeight() / 2
       );
     });
 
@@ -165,12 +161,11 @@ export class ListBox extends ActorGroup {
       text: options.text,
       width: this.width,
       height: options.rowHeight ?? this.rowHeight,
-      color:
-        options.color ?? this.rows.length % 2 == 0 ? "#9e9e9e" : " #bbbbbb",
+      color: options.color ?? this.rows.length % 2 == 0 ? "#9e9e9e" : " #bbbbbb",
       font: this.textFont,
       fontColor: this.fontColor,
       textX: options.textX,
-      textY: options.textY,
+      textY: options.textY
     });
 
     for (const actionIcon of options.actorIcons ?? []) {
@@ -182,9 +177,7 @@ export class ListBox extends ActorGroup {
       row.conformLabelSize().then(() => {
         row.setLabelPosition(
           row.getLabel().getX(),
-          row.getLabel().getY() +
-            row.getHeight() / 2 -
-            row.getLabel().getHeight() / 2
+          row.getLabel().getY() + row.getHeight() / 2 - row.getLabel().getHeight() / 2
         );
       });
     }

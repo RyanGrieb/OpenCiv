@@ -45,10 +45,7 @@ export class Actor implements SceneObject {
     this.height = actorOptions.height;
     this.rotation = actorOptions.rotation ?? 0;
     this.transparency = actorOptions.transparency ?? 1;
-    this.cameraApplies =
-      actorOptions.cameraApplies === undefined
-        ? true
-        : actorOptions.cameraApplies;
+    this.cameraApplies = actorOptions.cameraApplies === undefined ? true : actorOptions.cameraApplies;
 
     this.on("mousemove", (options) => {
       if (this.insideActor(options.x, options.y)) {
@@ -84,9 +81,7 @@ export class Actor implements SceneObject {
   public setColor(color: string) {
     this.color = color;
 
-    const canvas = document.getElementById(
-      "auxillary_canvas"
-    ) as HTMLCanvasElement;
+    const canvas = document.getElementById("auxillary_canvas") as HTMLCanvasElement;
     const context = canvas.getContext("2d");
 
     // Set the canvas dimensions to match the image dimensions.
@@ -101,7 +96,7 @@ export class Actor implements SceneObject {
       const spriteY = parseInt(this.getSpriteRegion().split(",")[1]) * 32;
 
       context.drawImage(
-        Game.getImage(GameImage.SPRITESHEET),
+        Game.getInstance().getImage(GameImage.SPRITESHEET),
         spriteX,
         spriteY,
         32,
@@ -141,17 +136,17 @@ export class Actor implements SceneObject {
 
   public draw(canvasContext: CanvasRenderingContext2D) {
     if (!this.image && this.color) {
-      Game.drawRect({
+      Game.getInstance().drawRect({
         x: this.x,
         y: this.y,
         width: this.width,
         height: this.height,
         color: this.color,
         fill: true,
-        canvasContext: canvasContext,
+        canvasContext: canvasContext
       });
     } else if (this.image) {
-      Game.drawImageFromActor(this, canvasContext);
+      Game.getInstance().drawImageFromActor(this, canvasContext);
     } else {
       console.log("Warning: Nothing for actor can be drawn:" + this);
     }
@@ -180,10 +175,10 @@ export class Actor implements SceneObject {
 
   public insideActor(x: number, y: number): boolean {
     //FIXME: The actor should have a scene parent object
-    if (this.cameraApplies && Game.getCurrentScene().getCamera()) {
-      const zoom = Game.getCurrentScene().getCamera().getZoomAmount();
-      const cameraX = Game.getCurrentScene().getCamera().getX();
-      const cameraY = Game.getCurrentScene().getCamera().getY();
+    if (this.cameraApplies && Game.getInstance().getCurrentScene().getCamera()) {
+      const zoom = Game.getInstance().getCurrentScene().getCamera().getZoomAmount();
+      const cameraX = Game.getInstance().getCurrentScene().getCamera().getX();
+      const cameraY = Game.getInstance().getCurrentScene().getCamera().getY();
 
       // Adjust the x and y coordinates relative to the camera
       x = (x - cameraX) / zoom;
@@ -200,7 +195,7 @@ export class Actor implements SceneObject {
 
   public setImage(image: GameImage) {
     //TODO: Support HTMLImageElement
-    this.image = Game.getImage(image);
+    this.image = Game.getInstance().getImage(image);
   }
 
   public setSpriteRegion(spriteRegion: SpriteRegion) {
@@ -273,9 +268,7 @@ export class Actor implements SceneObject {
   }): Actor {
     // Create dummy canvas to get pixel data of the actor sprite
 
-    let canvas = document.getElementById(
-      "auxillary_canvas"
-    ) as HTMLCanvasElement;
+    let canvas = document.getElementById("auxillary_canvas") as HTMLCanvasElement;
     let greatestXWidth = 0; // The width of the actor w/ the greatest x.
     let greatestYHeight = 0; // The height of the actor w/ the greatest y.
     let greatestX = 0;
@@ -313,7 +306,7 @@ export class Actor implements SceneObject {
       y: options.actors[0].getY(),
       z: greatestZ,
       width: canvas.width,
-      height: canvas.height,
+      height: canvas.height
     });
 
     return mergedActor;

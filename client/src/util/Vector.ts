@@ -29,10 +29,7 @@ export class Vector {
   }
 
   public static getCenterOfPolygon(vectors: Vector[]): Vector {
-    const centerPoint = vectors.reduce(
-      (acc, curr) => new Vector(acc.x + curr.x, acc.y + curr.y),
-      new Vector(0, 0)
-    );
+    const centerPoint = vectors.reduce((acc, curr) => new Vector(acc.x + curr.x, acc.y + curr.y), new Vector(0, 0));
     centerPoint.x /= vectors.length;
     centerPoint.y /= vectors.length;
 
@@ -48,9 +45,7 @@ export class Vector {
     let centerPoint = new Vector(centerX, centerY);
 
     const shiftedVectors = vectors.map((vector) => {
-      const distanceFromCenter = vector.distance(
-        new Vector(centerPoint.x, centerPoint.y)
-      );
+      const distanceFromCenter = vector.distance(new Vector(centerPoint.x, centerPoint.y));
       const shiftAmount = 1 - shiftDistance / distanceFromCenter;
       const shiftedVector = vector
         .clone()
@@ -73,11 +68,7 @@ export class Vector {
     return angleInDegrees;
   }
 
-  public static isInsidePolygon(
-    vectors: Vector[],
-    mouseVector: Vector,
-    mouseExtremeVector: Vector
-  ) {
+  public static isInsidePolygon(vectors: Vector[], mouseVector: Vector, mouseExtremeVector: Vector) {
     // Count intersections of the above line
     // with sides of polygon
     let count = 0;
@@ -88,14 +79,7 @@ export class Vector {
       // Check if the line segment from 'p' to
       // 'extreme' intersects with the line
       // segment from 'polygon[i]' to 'polygon[next]'
-      if (
-        this.doIntersect(
-          vectors[i],
-          vectors[next],
-          mouseVector,
-          mouseExtremeVector
-        )
-      ) {
+      if (this.doIntersect(vectors[i], vectors[next], mouseVector, mouseExtremeVector)) {
         // If the point 'p' is colinear with line
         // segment 'i-next', then check if it lies
         // on segment. If it lies, return true, otherwise false

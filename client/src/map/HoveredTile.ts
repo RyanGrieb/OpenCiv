@@ -15,7 +15,7 @@ export class HoveredTile extends Tile {
       tileTypes: ["hovered_tile"],
       width: 32,
       height: 32,
-      movementCost: 0,
+      movementCost: 0
     });
   }
 
@@ -23,16 +23,16 @@ export class HoveredTile extends Tile {
     this.representedTile = representedTile;
 
     if (!representedTile) {
-      Game.getCurrentScene().call("tileHovered", {
-        tile: undefined,
+      Game.getInstance().getCurrentScene().call("tileHovered", {
+        tile: undefined
       });
 
       this.setPosition(9999, 9999);
       return;
     }
 
-    Game.getCurrentScene().call("tileHovered", {
-      tile: representedTile,
+    Game.getInstance().getCurrentScene().call("tileHovered", {
+      tile: representedTile
     });
 
     this.setPosition(representedTile.getX(), representedTile.getY());

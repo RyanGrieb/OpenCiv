@@ -1,8 +1,16 @@
-import { ServerEvents } from "./Events";
-import { Game } from "./Game";
-import { Player } from "./Player";
-import { GameMap } from "./map/GameMap";
-import { Tile } from "./map/Tile";
+import { ServerEvents } from "../Events";
+import { Game } from "../Game";
+import { Player } from "../Player";
+import { GameMap } from "../map/GameMap";
+import { Tile } from "../map/Tile";
+
+export interface UnitAction {
+  name: string;
+  icon: string;
+  requirements: string[];
+  desc: string;
+  onAction: (unit: Unit) => void;
+}
 
 export interface UnitOptions {
   name: string;
@@ -10,13 +18,7 @@ export interface UnitOptions {
   player: Player;
   attackType?: string;
   defaultMoveDistance?: number;
-  actions: {
-    name: string;
-    icon: string;
-    requirements: string[];
-    desc: string;
-    onAction: (unit: Unit) => void;
-  }[];
+  actions: UnitAction[];
 }
 
 export class Unit {
@@ -55,23 +57,16 @@ export class Unit {
       eventName: "moveUnit",
       parentObject: this,
       callback: (data, websocket) => {
-        const targetTile =
-          GameMap.getInstance().getTiles()[data["targetX"]][data["targetY"]];
-        const player = Game.getPlayerFromWebsocket(websocket);
+        const targetTile = GameMap.getInstance().getTiles()[data["targetX"]][data["targetY"]];
+        const player = Game.getInstance().getPlayerFromWebsocket(websocket);
 
-        if (
-          this.id !== data["id"] ||
-          this.tile === targetTile ||
-          this.player != player
-        )
-          return;
+        if (this.id !== data["id"] || this.tile === targetTile || this.player != player) return;
 
         // Move the furthest we can possibly go, and queue the rest of tiles for next turn.
 
         //FIXME: Allow this function to use our existing queuedMovementTiles,
         // This should stop the path from being redrawn every turn.
-        const [arrivedTile, remainingTiles, remainingMovement] =
-          this.getMovementTowardsTargetTile(targetTile);
+        const [arrivedTile, remainingTiles, remainingMovement] = this.getMovementTowardsTargetTile(targetTile);
 
         if (!arrivedTile) return;
 
@@ -79,17 +74,16 @@ export class Unit {
           previousTile: this.tile,
           targetTile: arrivedTile,
           remainingTiles: remainingTiles,
-          remainingMovement: remainingMovement,
+          remainingMovement: remainingMovement
         });
-      },
+      }
     });
 
     ServerEvents.on({
       eventName: "unitAction",
       parentObject: this,
       callback: (data, websocket) => {
-        const unitTile =
-          GameMap.getInstance().getTiles()[data["unitX"]][data["unitY"]];
+        const unitTile = GameMap.getInstance().getTiles()[data["unitX"]][data["unitY"]];
 
         if (this.tile !== unitTile) return;
 
@@ -97,7 +91,7 @@ export class Unit {
         if (action) {
           action.onAction(this);
         }
-      },
+      }
     });
 
     ServerEvents.on({
@@ -109,7 +103,7 @@ export class Unit {
         if (this.queuedMovementTiles.length > 0) {
           this.moveWithMovementQueue();
         }
-      },
+      }
     });
   }
 
@@ -137,7 +131,7 @@ export class Unit {
       unitX: previousTile.getX(),
       unitY: previousTile.getY(),
       targetX: targetTile.getX(),
-      targetY: targetTile.getY(),
+      targetY: targetTile.getY()
     };
 
     // Store a list of queued tiles if we have remaining tiles
@@ -150,17 +144,21 @@ export class Unit {
     }
 
     // Send back packet, telling client server updated the unit location
-    Game.getPlayers().forEach((player) => {
-      player.sendNetworkEvent(dataPacket);
-    });
+    Game.getInstance()
+      .getPlayers()
+      .forEach((player) => {
+        player.sendNetworkEvent(dataPacket);
+      });
   }
 
   private moveWithMovementQueue() {
     const targetTile = this.getTargetQueuedTile();
     const existingPath = [this.tile, ...this.queuedMovementTiles];
 
-    const [arrivedTile, remainingTiles, remainingMovement] =
-      this.getMovementTowardsTargetTile(targetTile, existingPath);
+    const [arrivedTile, remainingTiles, remainingMovement] = this.getMovementTowardsTargetTile(
+      targetTile,
+      existingPath
+    );
 
     if (!arrivedTile) return;
 
@@ -168,14 +166,11 @@ export class Unit {
       previousTile: this.tile,
       targetTile: arrivedTile,
       remainingTiles,
-      remainingMovement: remainingMovement,
+      remainingMovement: remainingMovement
     });
   }
 
-  private getMovementTowardsTargetTile(
-    tile: Tile,
-    existingPath?: Tile[]
-  ): [Tile, Tile[], number] {
+  private getMovementTowardsTargetTile(tile: Tile, existingPath?: Tile[]): [Tile, Tile[], number] {
     const shortestPath =
       existingPath ??
       GameMap.getInstance().constructShortestPath(
@@ -194,8 +189,7 @@ export class Unit {
     // Traverse tile by tile, removing our movement incrementally.
     for (let i = 0; i < shortestPath.length; i++) {
       const currentTile = shortestPath[i];
-      const nextTile =
-        i + 1 >= shortestPath.length ? undefined : shortestPath[i + 1];
+      const nextTile = i + 1 >= shortestPath.length ? undefined : shortestPath[i + 1];
 
       if (!nextTile) continue;
 
@@ -212,9 +206,7 @@ export class Unit {
       traversedTiles.push(nextTile);
     }
 
-    const remainingTiles: Tile[] = shortestPath.filter(
-      (tile) => !traversedTiles.includes(tile)
-    );
+    const remainingTiles: Tile[] = shortestPath.filter((tile) => !traversedTiles.includes(tile));
 
     return [traversedTiles.pop(), remainingTiles, remainingMovement];
   }
@@ -223,14 +215,16 @@ export class Unit {
     this.tile.removeUnit(this);
     ServerEvents.removeCallbacksByParentObject(this);
 
-    Game.getPlayers().forEach((player) => {
-      player.sendNetworkEvent({
-        event: "removeUnit",
-        id: this.id,
-        unitX: this.tile.getX(),
-        unitY: this.tile.getY(),
+    Game.getInstance()
+      .getPlayers()
+      .forEach((player) => {
+        player.sendNetworkEvent({
+          event: "removeUnit",
+          id: this.id,
+          unitX: this.tile.getX(),
+          unitY: this.tile.getY()
+        });
       });
-    });
   }
 
   public getPlayer() {
@@ -244,7 +238,7 @@ export class Unit {
   public asJSON() {
     const queuedTilesJSON = this.queuedMovementTiles.map((tile) => ({
       x: tile.getX(),
-      y: tile.getY(),
+      y: tile.getY()
     }));
 
     return {
@@ -257,7 +251,7 @@ export class Unit {
       actions: this.getUnitActionsJSON(),
       queuedTiles: queuedTilesJSON,
       remainingMovement: this.availableMovement,
-      defaultMoveDistance: this.defaultMoveDistance,
+      defaultMoveDistance: this.defaultMoveDistance
     };
   }
 
@@ -272,15 +266,14 @@ export class Unit {
   }
 
   public getUnitActionsJSON() {
-    const actions: { name: string; requirements: string[]; desc: string }[] =
-      [];
+    const actions: { name: string; requirements: string[]; desc: string }[] = [];
 
     actions.push(
       ...this.actions.map(({ name, icon, requirements, desc }) => ({
         name,
         icon,
         requirements,
-        desc,
+        desc
       }))
     );
     return actions;

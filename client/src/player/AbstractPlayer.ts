@@ -11,7 +11,7 @@ export class AbstractPlayer {
   }
 
   public static getPlayerByName(name: string) {
-    const players = Game.getCurrentSceneAs<InGameScene>().getPlayers();
+    const players = Game.getInstance().getCurrentSceneAs<InGameScene>().getPlayers();
     for (const player of players) {
       if (player.getName() === name) {
         return player;

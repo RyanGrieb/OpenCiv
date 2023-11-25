@@ -16,9 +16,7 @@ export class LobbyState extends State {
     playerIndex = 1;
 
     // Load available civilizations from config file
-    const civYAMLData = YAML.parse(
-      fs.readFileSync("./config/civilizations.yml", "utf-8")
-    );
+    const civYAMLData = YAML.parse(fs.readFileSync("./config/civilizations.yml", "utf-8"));
     //Convert civsData from YAML to JSON:
     this.playableCivs = JSON.parse(JSON.stringify(civYAMLData.civilizations));
 
@@ -33,25 +31,25 @@ export class LobbyState extends State {
         console.log(playerName + " has joined the lobby");
 
         const newPlayer = new Player(playerName, websocket);
-        Game.getPlayers().set(playerName, newPlayer);
+        Game.getInstance().getPlayers().set(playerName, newPlayer);
 
         // Send playerJoin data to other connected players
-        for (const player of Array.from(Game.getPlayers().values())) {
+        for (const player of Array.from(Game.getInstance().getPlayers().values())) {
           player.sendNetworkEvent({
             event: "playerJoin",
-            playerName: playerName,
+            playerName: playerName
           });
         }
 
         newPlayer.sendNetworkEvent({ event: "setScene", scene: "lobby" });
-      },
+      }
     });
 
     ServerEvents.on({
       eventName: "availableCivs",
       parentObject: this,
       callback: (_, websocket) => {
-        const player = Game.getPlayerFromWebsocket(websocket);
+        const player = Game.getInstance().getPlayerFromWebsocket(websocket);
         const playableCivs = [];
 
         //Extract name and icon_name from playableCivs:
@@ -61,16 +59,16 @@ export class LobbyState extends State {
 
         player.sendNetworkEvent({
           event: "availableCivs",
-          civs: playableCivs,
+          civs: playableCivs
         });
-      },
+      }
     });
 
     ServerEvents.on({
       eventName: "civInfo",
       parentObject: this,
       callback: (data, websocket) => {
-        const player = Game.getPlayerFromWebsocket(websocket);
+        const player = Game.getInstance().getPlayerFromWebsocket(websocket);
 
         // Get civ from this.playerCivs JSON list:
         const civilization = this.getCivByName(data["name"]);
@@ -83,31 +81,33 @@ export class LobbyState extends State {
             start_bias_desc: civilization.start_bias_desc,
             unique_unit_descs: civilization.unique_unit_descs,
             unique_building_descs: civilization.unique_building_descs,
-            ability_descs: civilization.ability_descs,
+            ability_descs: civilization.ability_descs
           });
         }
-      },
+      }
     });
 
     ServerEvents.on({
       eventName: "selectCiv",
       parentObject: this,
       callback: (data, websocket) => {
-        const player = Game.getPlayerFromWebsocket(websocket);
+        const player = Game.getInstance().getPlayerFromWebsocket(websocket);
         //TODO: Check if this civ is already selected.
 
         const civilization = this.getCivByName(data["name"]);
         player.setCivilizationData(civilization);
 
-        Game.getPlayers().forEach((gamePlayer) => {
-          gamePlayer.sendNetworkEvent({
-            event: "selectCiv",
-            name: civilization.name,
-            playerName: player.getName(),
-            civData: civilization,
+        Game.getInstance()
+          .getPlayers()
+          .forEach((gamePlayer) => {
+            gamePlayer.sendNetworkEvent({
+              event: "selectCiv",
+              name: civilization.name,
+              playerName: player.getName(),
+              civData: civilization
+            });
           });
-        });
-      },
+      }
     });
   }
 
@@ -124,22 +124,26 @@ export class LobbyState extends State {
 
   public onDestroyed() {
     //Assign players w/o a civ a non-assigned random civilization:
-    Game.getPlayers().forEach((player) => {
-      if (!player.getCivilizationData()) {
-        player.setCivilizationData(this.getRandomNonAssignedCiv());
-      }
-    });
+    Game.getInstance()
+      .getPlayers()
+      .forEach((player) => {
+        if (!player.getCivilizationData()) {
+          player.setCivilizationData(this.getRandomNonAssignedCiv());
+        }
+      });
 
     return super.onDestroyed();
   }
 
   private getRandomNonAssignedCiv(): Record<string, any> {
     const assignedCivs = [];
-    Game.getPlayers().forEach((player) => {
-      if (player.getCivilizationData()) {
-        assignedCivs.push(player.getCivilizationData());
-      }
-    });
+    Game.getInstance()
+      .getPlayers()
+      .forEach((player) => {
+        if (player.getCivilizationData()) {
+          assignedCivs.push(player.getCivilizationData());
+        }
+      });
     const nonAssignedCivs = this.playableCivs.filter((civ) => {
       return !assignedCivs.includes(civ);
     });

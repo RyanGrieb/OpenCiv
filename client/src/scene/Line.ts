@@ -35,10 +35,7 @@ export class Line implements SceneObject {
     this.transparency = options.transparency ?? 1;
 
     this.originalPositions = [];
-    this.originalPositions.push(
-      new Vector(this.x1, this.y1),
-      new Vector(this.x2, this.y2)
-    );
+    this.originalPositions.push(new Vector(this.x1, this.y1), new Vector(this.x2, this.y2));
   }
 
   public increaseDistance(amount: number) {
@@ -57,12 +54,7 @@ export class Line implements SceneObject {
     this.y2 = this.y1 + unitVectorY * newDistance;
   }
 
-  public setPosition(options: {
-    x1: number;
-    y1: number;
-    x2: number;
-    y2: number;
-  }) {
+  public setPosition(options: { x1: number; y1: number; x2: number; y2: number }) {
     this.x1 = options.x1;
     this.y1 = options.y1;
     this.x2 = options.x2;
@@ -102,7 +94,7 @@ export class Line implements SceneObject {
   }
 
   public draw(canvasContext: CanvasRenderingContext2D) {
-    Game.drawLine(this, canvasContext);
+    Game.getInstance().drawLine(this, canvasContext);
   }
 
   public getColor(): string {

@@ -37,12 +37,7 @@ export class UnitAction {
   private requirements: string[]; // We assign these strings to client-side functions to check if there met.
   private icon: SpriteRegion;
 
-  public constructor(
-    actionName: string,
-    desc: string,
-    requirements: string[],
-    icon: SpriteRegion
-  ) {
+  public constructor(actionName: string, desc: string, requirements: string[], icon: SpriteRegion) {
     this.actionName = actionName;
     this.desc = desc;
     this.requirements = requirements;
@@ -122,20 +117,20 @@ export class Unit extends ActorGroup {
       y: tile.getCenterPosition()[1] - 28 / 2,
       z: 2,
       width: 28,
-      height: 28,
+      height: 28
     });
 
     this.tile = tile;
     this.name = unitJSON["name"];
 
     this.unitActor = new Actor({
-      image: Game.getImage(GameImage.SPRITESHEET),
+      image: Game.getInstance().getImage(GameImage.SPRITESHEET),
       spriteRegion: SpriteRegion[this.name.toUpperCase()],
       x: tile.getCenterPosition()[0] - 28 / 2,
       y: tile.getCenterPosition()[1] - 28 / 2,
       z: 2,
       width: 28,
-      height: 28,
+      height: 28
     });
 
     this.addActor(this.unitActor);
@@ -148,9 +143,7 @@ export class Unit extends ActorGroup {
 
     this.queuedMovementTiles = [];
     for (const jsonTile of unitJSON["queuedTiles"]) {
-      this.queuedMovementTiles.push(
-        GameMap.getInstance().getTiles()[jsonTile["x"]][jsonTile["y"]]
-      );
+      this.queuedMovementTiles.push(GameMap.getInstance().getTiles()[jsonTile["x"]][jsonTile["y"]]);
     }
 
     this.selectionActors = [];
@@ -158,12 +151,7 @@ export class Unit extends ActorGroup {
 
     for (const actionJSON of unitJSON["actions"]) {
       this.actions.push(
-        new UnitAction(
-          actionJSON.name,
-          actionJSON.desc,
-          actionJSON.requirements,
-          SpriteRegion[actionJSON.icon]
-        )
+        new UnitAction(actionJSON.name, actionJSON.desc, actionJSON.requirements, SpriteRegion[actionJSON.icon])
       );
     }
 
@@ -173,10 +161,8 @@ export class Unit extends ActorGroup {
       eventName: "moveUnit",
       parentObject: this,
       callback: (data) => {
-        const unitTile =
-          GameMap.getInstance().getTiles()[data["unitX"]][data["unitY"]];
-        const targetTile =
-          GameMap.getInstance().getTiles()[data["targetX"]][data["targetY"]];
+        const unitTile = GameMap.getInstance().getTiles()[data["unitX"]][data["unitY"]];
+        const targetTile = GameMap.getInstance().getTiles()[data["targetX"]][data["targetY"]];
 
         if (this.tile !== unitTile || this.id !== data["id"]) {
           return;
@@ -203,12 +189,11 @@ export class Unit extends ActorGroup {
           //console.log("Unit assigned a movement queue from server:");
 
           for (const tileJSON of data["queuedTiles"] as []) {
-            const tile =
-              GameMap.getInstance().getTiles()[tileJSON["x"]][tileJSON["y"]];
+            const tile = GameMap.getInstance().getTiles()[tileJSON["x"]][tileJSON["y"]];
             this.queuedMovementTiles.push(tile);
           }
         }
-      },
+      }
     });
 
     NetworkEvents.on({
@@ -216,15 +201,14 @@ export class Unit extends ActorGroup {
       parentObject: this,
       callback: (data) => {
         this.availableMovement = this.defaultMoveDistance;
-      },
+      }
     });
 
     NetworkEvents.on({
       eventName: "removeUnit",
       parentObject: this,
       callback: (data) => {
-        const unitTile =
-          GameMap.getInstance().getTiles()[data["unitX"]][data["unitY"]];
+        const unitTile = GameMap.getInstance().getTiles()[data["unitX"]][data["unitY"]];
 
         if (this.tile !== unitTile) {
           return;
@@ -233,8 +217,8 @@ export class Unit extends ActorGroup {
         //FIXME: Tell client player to stop drawing lines.
         this.unselect();
         this.tile.removeUnit(this);
-        Game.getCurrentScene().removeActor(this);
-      },
+        Game.getInstance().getCurrentScene().removeActor(this);
+      }
     });
   }
 
@@ -276,7 +260,7 @@ export class Unit extends ActorGroup {
   public unselect() {
     this.selected = false;
     this.removeSelectionActors();
-    Game.getCurrentScene().removeActor(this.unitDisplayInfo);
+    Game.getInstance().getCurrentScene().removeActor(this.unitDisplayInfo);
   }
 
   public select() {
@@ -285,7 +269,7 @@ export class Unit extends ActorGroup {
     this.addSelectionActors();
 
     this.unitDisplayInfo = new UnitDisplayInfo(this);
-    Game.getCurrentScene().addActor(this.unitDisplayInfo);
+    Game.getInstance().getCurrentScene().addActor(this.unitDisplayInfo);
   }
 
   public getQueuedMovementTiles() {
@@ -328,16 +312,10 @@ export class Unit extends ActorGroup {
    */
   public updatePosition(tile: Tile): void {
     // Ensure group-actor location is updated
-    super.setPosition(
-      tile.getCenterPosition()[0] - 28 / 2,
-      tile.getCenterPosition()[1] - 28 / 2
-    );
+    super.setPosition(tile.getCenterPosition()[0] - 28 / 2, tile.getCenterPosition()[1] - 28 / 2);
 
     // Update unit sub-actor location
-    this.unitActor.setPosition(
-      tile.getCenterPosition()[0] - 28 / 2,
-      tile.getCenterPosition()[1] - 28 / 2
-    );
+    this.unitActor.setPosition(tile.getCenterPosition()[0] - 28 / 2, tile.getCenterPosition()[1] - 28 / 2);
   }
 
   private removeSelectionActors() {
@@ -348,19 +326,19 @@ export class Unit extends ActorGroup {
 
     GameMap.getInstance().removeOutline({
       tile: this.tile,
-      cityOutline: false,
+      cityOutline: false
     });
   }
 
   private addSelectionActors() {
     this.selectionActors.push(
       new Actor({
-        image: Game.getImage(GameImage.SPRITESHEET),
+        image: Game.getInstance().getImage(GameImage.SPRITESHEET),
         spriteRegion: SpriteRegion.UNIT_SELECTION_TILE,
         x: this.getTile().getX(),
         y: this.getTile().getY(),
         width: 32,
-        height: 32,
+        height: 32
       })
     );
 

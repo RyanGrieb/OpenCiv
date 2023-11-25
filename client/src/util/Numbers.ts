@@ -3,11 +3,7 @@ export class Numbers {
     return Math.min(Math.max(num, min), max);
   }
 
-  public static addAndWrapAround(
-    num: number,
-    addend: number,
-    max: number
-  ): number {
+  public static addAndWrapAround(num: number, addend: number, max: number): number {
     // add the numbers
     let sum = num + addend;
 
