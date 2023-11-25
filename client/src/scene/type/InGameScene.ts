@@ -191,6 +191,14 @@ export class InGameScene extends Scene {
     });
   }
 
+  public onDestroyed() {
+    super.onDestroyed(this);
+    this.escMenu = undefined;
+    this.cityDisplayInfo = undefined;
+
+    return Scene.ExitReceipt;
+  }
+
   public focusOnTile(tile: Tile, zoomAmount: number) {
     const x = tile.getCenterPosition()[0];
     const y = tile.getCenterPosition()[1];
