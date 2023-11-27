@@ -5,6 +5,7 @@ import { MapResources } from "./MapResources";
 import { TileIndexer } from "./TileIndexer";
 import { Unit } from "../unit/Unit";
 import PriorityQueue from "ts-priority-queue";
+import { Numbers } from "../util/Numbers";
 
 enum MapSize {
   DUEL = "48x32",
@@ -182,13 +183,13 @@ export class GameMap {
     //Assign top 10% of tiles to have a 50% of becoming a hill tile
     const totalHills = tallestTiles.length * 0.1;
     for (let i = 0; i < totalHills; i++) {
-      if (Math.random() < 0.5) tallestTiles[i].replaceTileType("grass", "grass_hill");
+      if (Numbers.safeRandom() < 0.5) tallestTiles[i].replaceTileType("grass", "grass_hill");
     }
 
     // TODO: Spawn hills in patches?
     // For all other grass tiles, make it a 13% of becoming a hill tile.
     for (let i = 0; i < tallestTiles.length; i++) {
-      if (Math.random() < 0.13) tallestTiles[i].replaceTileType("grass", "grass_hill");
+      if (Numbers.safeRandom() < 0.13) tallestTiles[i].replaceTileType("grass", "grass_hill");
     }
 
     //Assign the top 5% of tiles to be mountains
@@ -230,7 +231,7 @@ export class GameMap {
         if (yPercent <= 0.1 || yPercent >= 0.9) {
           this.setTileBiome({ tile: currentTile, tileType: "snow" });
         } else if ((yPercent > 0.1 && yPercent < 0.15) || (yPercent > 0.85 && yPercent < 0.9)) {
-          if (Math.random() > 0.25) {
+          if (Numbers.safeRandom() > 0.25) {
             for (const adjTile of currentTile.getAdjacentTiles()) {
               if (!adjTile) continue;
               //FIXME: This can create single ocean/freshwater tiles.
@@ -382,7 +383,7 @@ export class GameMap {
     for (const tile of [...TileIndexer.getTilesByTileType("ocean")]) {
       for (const adjTile of tile.getAdjacentTiles()) {
         if (!adjTile) continue;
-        if (adjTile.containsTileType("shallow_ocean") && Math.random() > 0.75) {
+        if (adjTile.containsTileType("shallow_ocean") && Numbers.safeRandom() > 0.75) {
           tile.replaceTileType("ocean", "shallow_ocean");
         }
       }
@@ -749,7 +750,7 @@ export class GameMap {
 
   private setTilesBiome(tiles: Tile[], tileType: string, setChance: number) {
     for (const tile of tiles) {
-      if (!tile || Math.random() > setChance) continue;
+      if (!tile || Numbers.safeRandom() > setChance) continue;
       this.setTileBiome({ tile: tile, tileType: tileType });
     }
   }
@@ -846,7 +847,7 @@ export class GameMap {
         // Skip if we want to avoid resource tiles
         if (avoidResourceTiles && MapResources.isResourceTile(tile)) continue;
 
-        if (Math.random() <= options.setTileChance) {
+        if (Numbers.safeRandom() <= options.setTileChance) {
           this.setTileBiome({
             tile: tile,
             tileType: options.setTileType,

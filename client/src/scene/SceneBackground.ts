@@ -2,6 +2,7 @@ import { Actor } from "./Actor";
 import { Game } from "../Game";
 import { GameImage } from "../Assets";
 import { SpriteRegion } from "../Assets";
+import { Numbers } from "../util/Numbers";
 
 export class SceneBackground {
   public static generateOcean() {
@@ -44,7 +45,7 @@ export class SceneBackground {
         tileActors.push(
           new Actor({
             image: Game.getInstance().getImage(GameImage.SPRITESHEET),
-            spriteRegion: Math.random() < 0.1 ? SpriteRegion.GRASS_HILL : SpriteRegion.GRASS,
+            spriteRegion: Numbers.safeRandom() < 0.1 ? SpriteRegion.GRASS_HILL : SpriteRegion.GRASS,
             x: xPos,
             y: yPos,
             width: 32,
@@ -55,7 +56,7 @@ export class SceneBackground {
     }
 
     // Sparse background with a random unit
-    //const spriteRegionNum = Math.floor(Math.random() * 9); // Random sprite region b/w 0-2
+    //const spriteRegionNum = Math.floor(Numbers.safeRandom() * 9); // Random sprite region b/w 0-2
     for (let y = -1; y < (Game.getInstance().getHeight() + 24) / 24; y++) {
       for (let x = -1; x < (Game.getInstance().getWidth() + 32) / 32; x++) {
         let yPos = y * 24;
@@ -63,12 +64,12 @@ export class SceneBackground {
         if (y % 2 != 0) {
           xPos += 16;
         }
-        if (Math.random() > 0.02) continue;
+        if (Numbers.safeRandom() > 0.02) continue;
 
         tileActors.push(
           new Actor({
             image: Game.getInstance().getImage(GameImage.SPRITESHEET),
-            spriteRegion: Object.values(SpriteRegion)[Math.floor(Math.random() * 9)],
+            spriteRegion: Object.values(SpriteRegion)[Math.floor(Numbers.safeRandom() * 9)],
             x: xPos,
             y: yPos,
             width: 32,
