@@ -1,4 +1,5 @@
 # OpenCiv ![tile_city](https://github.com/rhin123/OpenCiv/blob/master/client/assets/archive/tile_city.png?raw=true)
+### Thank you all for 100 stars, I have not forgotten this project. Once I finish my school obligations I intend to ramp up development again.
 
 ![example workflow](https://github.com/rhin123/OpenCiv/actions/workflows/build.yml/badge.svg)
 [![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=RyanGrieb_OpenCiv&metric=ncloc)](https://sonarcloud.io/summary/new_code?id=RyanGrieb_OpenCiv)
