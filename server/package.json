@@ -4,7 +4,7 @@
   "description": "",
   "main": "Server.ts",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "node --expose-gc --max-old-space-size=8192 node_modules/.bin/jest",
     "start": "ts-node-dev --respawn --transpile-only src/Server.ts"
   },
   "keywords": [],
@@ -24,6 +24,9 @@
     "@types/node": "^18.16.18",
     "@types/ws": "^8.5.5",
     "@types/node-schedule": "2.1.0",
-    "typescript": "^4.9.5"
+    "typescript": "^4.9.5",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.1.1",
+    "@types/jest": "^29.5.12"
   }
 }
