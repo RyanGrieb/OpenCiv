@@ -204,8 +204,11 @@ export class Camera {
   }
 
   public zoomToLocation(x: number, y: number, zoomAmount: number) {
-    this.setPosition(-x + Game.getInstance().getWidth() / 2, -y + Game.getInstance().getHeight() / 2);
-    this.zoom(Game.getInstance().getWidth() / 2, Game.getInstance().getHeight() / 2, zoomAmount, false);
+    const game = Game.getInstance();
+    const width = game.getWidth() / game.getDPR()
+    const height = game.getHeight() / game.getDPR();
+    this.setPosition(-x + width / 2, -y + height / 2);
+    this.zoom(width / 2, height / 2, zoomAmount, false);
   }
 
   public addVel(x: number, y: number) {

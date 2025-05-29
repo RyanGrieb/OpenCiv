@@ -150,12 +150,12 @@ export class InGameScene extends Scene {
 
           this.tileInformationLabel.setText(
             "[" +
-              options.tile.getGridX() +
-              "," +
-              options.tile.getGridY() +
-              "] " +
-              tileTypes +
-              (options.tile.hasRiver() ? ", River" : "")
+            options.tile.getGridX() +
+            "," +
+            options.tile.getGridY() +
+            "] " +
+            tileTypes +
+            (options.tile.hasRiver() ? ", River" : "")
           );
         }
       });
@@ -315,7 +315,7 @@ export class InGameScene extends Scene {
         width: 242,
         height: 62,
         fontColor: "white",
-        onClicked: () => {}
+        onClicked: () => { }
       })
     );
 

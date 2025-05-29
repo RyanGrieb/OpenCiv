@@ -48,7 +48,12 @@ export class Actor implements SceneObject {
     this.cameraApplies = actorOptions.cameraApplies === undefined ? true : actorOptions.cameraApplies;
 
     this.on("mousemove", (options) => {
-      if (this.insideActor(options.x, options.y)) {
+
+      // If the camera is applied, use clientX and clientY for accurate mouse position (options.x & y has DPR scaling)
+      const x = this.cameraApplies ? options.clientX : options.x;
+      const y = this.cameraApplies ? options.clientY : options.y;
+
+      if (this.insideActor(x, y)) {
         if (!this.mouseInside) {
           this.call("mouse_enter");
           this.mouseInside = true;
@@ -62,7 +67,11 @@ export class Actor implements SceneObject {
     });
 
     this.on("mouseup", (options) => {
-      if (this.insideActor(options.x, options.y) && options.button === 0) {
+      // If the camera is applied, use clientX and clientY for accurate mouse position (options.x & y has DPR scaling)
+      const x = this.cameraApplies ? options.clientX : options.x;
+      const y = this.cameraApplies ? options.clientY : options.y;
+
+      if (this.insideActor(x, y) && options.button === 0) {
         //FIXME: Distinguish mouse_up & mouse_click_up better?
         this.call("clicked");
       }
@@ -152,8 +161,8 @@ export class Actor implements SceneObject {
     }
   }
 
-  public onCreated() {}
-  public onDestroyed() {}
+  public onCreated() { }
+  public onDestroyed() { }
 
   public call(eventName: string, options?) {
     if (this.storedEvents.has(eventName)) {

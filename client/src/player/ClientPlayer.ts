@@ -40,8 +40,8 @@ export class ClientPlayer extends AbstractPlayer {
     Game.getInstance()
       .getCurrentScene()
       .on("mousemove", (options) => {
-        const mouseX = options.x;
-        const mouseY = options.y;
+        const mouseX = options.clientX;
+        const mouseY = options.clientY;
 
         let oldHoveredTile = this.hoveredTile ? this.hoveredTile.getRepresentedTile() : undefined;
 
@@ -318,7 +318,7 @@ export class ClientPlayer extends AbstractPlayer {
       const adjBorderTiles = GameMap.getInstance().getAdjacentTiles(gridX, gridY);
       const clampedBorderTile =
         GameMap.getInstance().getTiles()[Numbers.clamp(gridX, 0, GameMap.getInstance().getWidth() - 1)][
-          Numbers.clamp(gridY, 0, GameMap.getInstance().getHeight() - 1)
+        Numbers.clamp(gridY, 0, GameMap.getInstance().getHeight() - 1)
         ];
       adjBorderTiles.push(clampedBorderTile); // Also push clamped tile.
 

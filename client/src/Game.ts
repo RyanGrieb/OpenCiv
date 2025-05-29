@@ -53,13 +53,33 @@ export class Game {
   private resizeTimer: NodeJS.Timeout;
   private oldWidth: number;
   private oldHeight: number;
+  private dpr: number;
+
+  private getWorldX(clientX: number): number {
+    const dpr = this.dpr || 1;
+    const zoom = this.currentScene.getCamera() == undefined ? 1 : this.currentScene.getCamera().getZoomAmount();
+    const cameraX = this.currentScene.getCamera() == undefined ? 0 : this.currentScene.getCamera().getX();
+    return (clientX * dpr)
+  }
+
+  private getWorldY(clientY: number): number {
+    const dpr = this.dpr || 1;
+    const zoom = this.currentScene.getCamera() == undefined ? 1 : this.currentScene.getCamera().getZoomAmount();
+    const cameraY = this.currentScene.getCamera() == undefined ? 0 : this.currentScene.getCamera().getY();
+    return (clientY * dpr)
+  }
+
 
   private constructor(options: GameOptions, assetsLoadedCallback: () => void) {
     this.scenes = new Map<string, Scene>();
     //Initialize canvas
     this.canvas = document.getElementById("canvas") as HTMLCanvasElement;
-    this.canvas.width = window.innerWidth;
-    this.canvas.height = window.innerHeight;
+    this.dpr = window.devicePixelRatio || 1;
+    this.canvas.width = window.innerWidth * this.dpr;
+    this.canvas.height = window.innerHeight * this.dpr;
+    this.canvas.style.width = window.innerWidth + "px";
+    this.canvas.style.height = window.innerHeight + "px";
+
     this.canvasContext = this.canvas.getContext("2d");
     this.canvasContext.fillStyle = options.canvasColor ?? "white";
     this.canvasContext.fillRect(0, 0, this.canvas.width, this.canvas.height);
@@ -68,19 +88,26 @@ export class Game {
     this.measureQueue = [];
     this.runGameLoop = true;
 
+
     //Initialize canvas listeners. TODO: Make this less redundant w/ a helper function
     this.canvas.addEventListener("mousemove", (event) => {
       this.actors.forEach((actor) => {
         actor.call("mousemove", {
-          x: event.clientX,
-          y: event.clientY
+          x: this.getWorldX(event.clientX),
+          y: this.getWorldY(event.clientY),
+          // We provide direct clientX & clientY for instances where we don't want to apply the DPR or camera transformations.
+          clientX: event.clientX,
+          clientY: event.clientY,
         });
       });
 
       if (this.currentScene) {
         this.currentScene.call("mousemove", {
-          x: event.clientX,
-          y: event.clientY,
+          x: this.getWorldX(event.clientX),
+          y: this.getWorldY(event.clientY),
+          // We provide direct clientX & clientY for instances where we don't want to apply the DPR or camera transformations.
+          clientX: event.clientX,
+          clientY: event.clientY,
           button: event.button
         });
       }
@@ -92,16 +119,22 @@ export class Game {
     this.canvas.addEventListener("mousedown", (event) => {
       this.actors.forEach((actor) => {
         actor.call("mousedown", {
-          x: event.clientX,
-          y: event.clientY,
+          x: this.getWorldX(event.clientX),
+          y: this.getWorldY(event.clientY),
+          // We provide direct clientX & clientY for instances where we don't want to apply the DPR or camera transformations.
+          clientX: event.clientX,
+          clientY: event.clientY,
           button: event.button
         });
       });
 
       if (this.currentScene) {
         this.currentScene.call("mousedown", {
-          x: event.clientX,
-          y: event.clientY,
+          x: this.getWorldX(event.clientX),
+          y: this.getWorldY(event.clientY),
+          // We provide direct clientX & clientY for instances where we don't want to apply the DPR or camera transformations.
+          clientX: event.clientX,
+          clientY: event.clientY,
           button: event.button
         });
       }
@@ -110,16 +143,22 @@ export class Game {
     this.canvas.addEventListener("mouseup", (event) => {
       this.actors.forEach((actor) => {
         actor.call("mouseup", {
-          x: event.clientX,
-          y: event.clientY,
+          x: this.getWorldX(event.clientX),
+          y: this.getWorldY(event.clientY),
+          // We provide direct clientX & clientY for instances where we don't want to apply the DPR or camera transformations.
+          clientX: event.clientX,
+          clientY: event.clientY,
           button: event.button
         });
       });
 
       if (this.currentScene) {
         this.currentScene.call("mouseup", {
-          x: event.clientX,
-          y: event.clientY,
+          x: this.getWorldX(event.clientX),
+          y: this.getWorldY(event.clientY),
+          // We provide direct clientX & clientY for instances where we don't want to apply the DPR or camera transformations.
+          clientX: event.clientX,
+          clientY: event.clientY,
           button: event.button
         });
       }
@@ -127,13 +166,13 @@ export class Game {
 
     this.canvas.addEventListener("mouseleave", (event) => {
       this.actors.forEach((actor) => {
-        actor.call("mouseleave", { x: event.clientX, y: event.clientY });
+        actor.call("mouseleave", { x: this.getWorldX(event.clientX), y: this.getWorldY(event.clientY) });
       });
 
       if (this.currentScene) {
         this.currentScene.call("mouseleave", {
-          x: event.clientX,
-          y: event.clientY
+          x: this.getWorldX(event.clientX),
+          y: this.getWorldY(event.clientY)
         });
       }
     });
@@ -179,8 +218,12 @@ export class Game {
       this.resizeTimer = setTimeout(() => {
         this.oldWidth = this.canvas.width;
         this.oldHeight = this.canvas.height;
-        this.canvas.width = window.innerWidth;
-        this.canvas.height = window.innerHeight;
+        this.dpr = window.devicePixelRatio || 1;
+        this.canvas.width = window.innerWidth * this.dpr;
+        this.canvas.height = window.innerHeight * this.dpr;
+        this.canvas.style.width = window.innerWidth + "px";
+        this.canvas.style.height = window.innerHeight + "px";
+
         if (this.currentScene) {
           this.currentScene.redraw();
         }
@@ -341,7 +384,12 @@ export class Game {
       const zoom = this.currentScene.getCamera().getZoomAmount();
       const cameraX = this.currentScene.getCamera().getX();
       const cameraY = this.currentScene.getCamera().getY();
-      canvasContext.setTransform(zoom, 0, 0, zoom, cameraX, cameraY);
+      const dpr = this.dpr || 1;
+      canvasContext.setTransform(
+        zoom * dpr, 0,
+        0, zoom * dpr,
+        cameraX * dpr, cameraY * dpr
+      );
     }
 
     canvasContext.translate(actor.getRotationOriginX(), actor.getRotationOriginY());
@@ -454,7 +502,12 @@ export class Game {
       const zoom = this.currentScene.getCamera().getZoomAmount();
       const cameraX = this.currentScene.getCamera().getX();
       const cameraY = this.currentScene.getCamera().getY();
-      canvasContext.setTransform(zoom, 0, 0, zoom, cameraX, cameraY);
+      const dpr = this.dpr || 1;
+      canvasContext.setTransform(
+        zoom * dpr, 0,
+        0, zoom * dpr,
+        cameraX * dpr, cameraY * dpr
+      );
     }
 
     canvasContext.globalAlpha = textOptions.transparency;
@@ -495,7 +548,12 @@ export class Game {
       const zoom = this.currentScene.getCamera().getZoomAmount();
       const cameraX = this.currentScene.getCamera().getX();
       const cameraY = this.currentScene.getCamera().getY();
-      canvasContext.setTransform(zoom, 0, 0, zoom, cameraX, cameraY);
+      const dpr = this.dpr || 1;
+      canvasContext.setTransform(
+        zoom * dpr, 0,
+        0, zoom * dpr,
+        cameraX * dpr, cameraY * dpr
+      );
     }
 
     const x1 = line.getX1();
@@ -604,5 +662,9 @@ export class Game {
 
   public setCursor(type: string) {
     this.canvas.style.cursor = type;
+  }
+
+  public getDPR(): number {
+    return this.dpr;
   }
 }

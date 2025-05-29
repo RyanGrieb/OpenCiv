@@ -7,7 +7,7 @@ import { SceneObject } from "./SceneObject";
 import { ActorGroup } from "./ActorGroup";
 
 export abstract class Scene {
-  protected static ExitReceipt = new (class {})();
+  protected static ExitReceipt = new (class { })();
 
   protected storedEvents: Map<string, Function[]>;
   protected firstLoad: boolean;
@@ -72,7 +72,7 @@ export abstract class Scene {
     this.onInitialize();
   }
 
-  public onInitialize() {}
+  public onInitialize() { }
 
   public onDestroyed(newScene: Scene): typeof Scene.ExitReceipt {
     this.sceneObjects.forEach((object) => {
