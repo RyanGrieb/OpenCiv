@@ -4,11 +4,11 @@
     "description": "",
     "scripts": {
         "dev": "npx parcel --no-cache index.html",
-        "build": "parcel build dist"
+        "build": "parcel build dist index.html"
     },
     "devDependencies": {
-        "@types/node": "^18.16.18",
-        "parcel": "2.9.0"
+        "@types/node": "^22.15.26",
+        "parcel": "^2.15.2"
     },
     "assetsPath": "assets",
     "dependencies": {

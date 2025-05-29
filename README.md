@@ -1,5 +1,5 @@
 # OpenCiv ![tile_city](https://github.com/rhin123/OpenCiv/blob/master/client/assets/archive/tile_city.png?raw=true)
-### Thank you all for 100 stars, I have not forgotten this project. Once I finish my school obligations I intend to ramp up development again.
+
 
 ![example workflow](https://github.com/rhin123/OpenCiv/actions/workflows/build.yml/badge.svg)
 [![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=RyanGrieb_OpenCiv&metric=ncloc)](https://sonarcloud.io/summary/new_code?id=RyanGrieb_OpenCiv)
@@ -15,12 +15,34 @@ The main objective of this project is to allow players who enjoy Civilization ga
 
 ## How do I build and run this?
 
-To run a local instance, type `docker compose up -d`. (Make sure to have docker installed!)
-To play, go to `localhost:1234` in your browser.
+1. Install either '[Docker](https://www.docker.com/)' or '[Node.js](https://nodejs.org/) with npm installed'.
+
+2. Clone the repo at:
+https://github.com/RyanGrieb/OpenCiv.git
+
+    #### 3. Using docker
+    Ensure Docker is installed, then run:
+    `docker compose up -d`
+
+    #### 4. Using your local machine
+    Install dependencies and start the application:
+    `npm run install-all`
+    `npm start`
+
+Once running, open your browser and go to http://localhost:1234 to play.
 
 ## How do I play this?
 
 Currently, the project is being rewritten so no playable version is available without building the project.
+
+## How do I run tests?
+1. From the root directory of the repository, run
+`npm run install-all`
+2. Navigate to the server directory
+`cd server`
+3. Execute the test command
+`npm run test`
+
 
 ## Keybinds
 

@@ -22,9 +22,9 @@ export interface TextOptions {
 }
 export interface GameOptions {
   /**
-   * List of NodeRequire[] objects
+   * List of string[] objects
    */
-  assetList: NodeRequire[];
+  assetList: string[];
 
   /**
    * Color of the canvas background
@@ -228,7 +228,7 @@ export class Game {
       }, 300);
     });
 
-    let promise = this.loadAssetPromise(options.assetList);
+    let promise = this.loadAssetsPromise(options.assetList);
 
     promise.then((res) => {
       console.log("All assets loaded...");
@@ -304,27 +304,43 @@ export class Game {
     });
   }
 
-  private loadAssetPromise(assetList): Promise<unknown> {
-    let imagesLoaded: number = 0;
+  private async loadAssetsPromise(assetList: string[]): Promise<void> {
+    console.log("Asset list:", JSON.stringify(assetList, null, 2));
 
-    const resultPromise = new Promise((resolve, reject) => {
-      for (let index in assetList) {
-        let image = new Image();
+    await Promise.all(assetList.map(url => {
+      return new Promise<void>((resolve, reject) => {
+        console.log("Starting load for:", url);
+
+        const image = new Image();
+
+        // Add crossOrigin to prevent CORS issues
+        image.crossOrigin = "Anonymous";
+
         image.onload = () => {
-          imagesLoaded++;
-          console.log("Loaded: " + assetList[index]);
-          if (imagesLoaded == assetList.length) {
-            // We loaded all images, resolve the promise
-            resolve(0);
-          }
+          console.log("✅ Successfully loaded:", url);
+          this.images.push(image);
+          resolve();
         };
-        image.src = assetList[index];
-        this.images.push(image);
-      }
-    });
 
-    return resultPromise;
+        image.onerror = (e) => {
+          console.error("❌ Load failed for:", url);
+          console.error("Error event:", e);
+          reject(`Failed to load ${url}`);
+        };
+
+        // Create absolute URL to ensure proper loading
+        try {
+          const absoluteUrl = new URL(url, window.location.href).href;
+          console.log("Loading absolute URL:", absoluteUrl);
+          image.src = absoluteUrl;
+        } catch (error) {
+          console.error("Invalid URL:", url, error);
+          reject(`Invalid URL: ${url}`);
+        }
+      });
+    }));
   }
+
 
   public addScene(sceneName: string, scene: Scene) {
     this.scenes.set(sceneName, scene);

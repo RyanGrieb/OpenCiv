@@ -1,17 +1,19 @@
 {
   "compilerOptions": {
-      "target": "ES2021",
-      "sourceMap": true,
-      "lib": [
-          "ES2021",
-          "dom"
-      ],
-      "noUnusedLocals": true,
-      "module": "commonjs"
+    "target": "es2022",
+    "sourceMap": true,
+    "lib": [
+      "es2022",
+      "dom"
+    ],
+    "noUnusedLocals": true,
+    "module": "es2022"
   },
   "typedocOptions": {
     "entryPointStrategy": "expand",
-    "entryPoints": ["src"],
+    "entryPoints": [
+      "src"
+    ],
     "out": "../documentation/client"
   }
 }

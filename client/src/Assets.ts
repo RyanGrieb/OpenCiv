@@ -1,3 +1,5 @@
+
+
 //TODO: Have different objects/functions for sounds,spritesheets,images.
 //TODO: Preload all images into textures
 //TODO: Handle spritesheet into textures
@@ -92,15 +94,16 @@ export enum SpriteRegion {
   BUILDING_PALACE = "5,18"
 }
 
+// assets.ts
 export const assetList = [
-  require("../assets/images/ui_button.png"),
-  require("../assets/images/ui_button_hovered.png"),
-  require("../assets/images/ui_icon_button.png"),
-  require("../assets/images/ui_icon_button_hovered.png"),
-  require("../assets/images/spritesheet.png"),
-  require("../assets/images/river.png"),
-  require("../assets/images/ui_popup_box.png"),
-  require("../assets/images/debug.png"),
-  require("../assets/images/font.png"),
-  require("../assets/images/logo.png")
+  new URL("../assets/images/ui_button.png", import.meta.url).href,
+  new URL("../assets/images/ui_button_hovered.png", import.meta.url).href,
+  new URL("../assets/images/ui_icon_button.png", import.meta.url).href,
+  new URL("../assets/images/ui_icon_button_hovered.png", import.meta.url).href,
+  new URL("../assets/images/spritesheet.png", import.meta.url).href,
+  new URL("../assets/images/river.png", import.meta.url).href,
+  new URL("../assets/images/ui_popup_box.png", import.meta.url).href,
+  new URL("../assets/images/debug.png", import.meta.url).href,
+  new URL("../assets/images/font.png", import.meta.url).href,
+  new URL("../assets/images/logo.png", import.meta.url).href
 ];
