@@ -56,17 +56,11 @@ export class Game {
   private dpr: number;
 
   private getWorldX(clientX: number): number {
-    const dpr = this.dpr || 1;
-    const zoom = this.currentScene.getCamera() == undefined ? 1 : this.currentScene.getCamera().getZoomAmount();
-    const cameraX = this.currentScene.getCamera() == undefined ? 0 : this.currentScene.getCamera().getX();
-    return (clientX * dpr)
+    return clientX * this.dpr;
   }
 
   private getWorldY(clientY: number): number {
-    const dpr = this.dpr || 1;
-    const zoom = this.currentScene.getCamera() == undefined ? 1 : this.currentScene.getCamera().getZoomAmount();
-    const cameraY = this.currentScene.getCamera() == undefined ? 0 : this.currentScene.getCamera().getY();
-    return (clientY * dpr)
+    return clientY * this.dpr;
   }
 
 
