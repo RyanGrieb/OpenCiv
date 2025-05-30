@@ -287,16 +287,25 @@ export class Game {
     // Call the gameloop for the current scene
     this.currentScene.gameLoop();
 
+    const fpsText = "FPS: " + this.fps;
+    this.canvasContext.save();
+    this.canvasContext.font = "12px sans";
+    const metrics = this.canvasContext.measureText(fpsText);
+    const textWidth = metrics.width;
+    const padding = 2;
+    const x = Math.max(this.getWidth() - textWidth - padding, padding);
+    const y = this.getHeight() - 12;
     this.drawText(
       {
-        text: "FPS: " + this.fps,
-        x: this.getWidth() - 40,
-        y: this.getHeight() - 12,
+        text: fpsText,
+        x,
+        y,
         color: "white",
         font: "12px sans"
       },
       this.canvasContext
     );
+    this.canvasContext.restore();
 
     this.countedFrames++;
     window.requestAnimationFrame(() => {
