@@ -12,8 +12,10 @@ canvas {
   height: 100%;
   margin: 0;
   image-rendering: crisp-edges;
-  image-rendering: -webkit-optimize-contrast; /* webkit */
-  image-rendering: -moz-crisp-edges; /* Firefox */
+  image-rendering: -webkit-optimize-contrast;
+  /* webkit */
+  image-rendering: -moz-crisp-edges;
+  /* Firefox */
 }
 
 p {

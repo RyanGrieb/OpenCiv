@@ -7,7 +7,8 @@
       "dom"
     ],
     "noUnusedLocals": true,
-    "module": "es2022"
+    "module": "NodeNext",
+    "moduleResolution": "nodenext"
   },
   "typedocOptions": {
     "entryPointStrategy": "expand",
