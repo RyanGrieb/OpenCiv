@@ -307,7 +307,7 @@ export class Game {
   private async loadAssetsPromise(assetList: string[]): Promise<void> {
     console.log("Asset list:", JSON.stringify(assetList, null, 2));
 
-    await Promise.all(assetList.map(url => {
+    await Promise.all(assetList.map((url, index) => {
       return new Promise<void>((resolve, reject) => {
         console.log("Starting load for:", url);
 
@@ -318,7 +318,7 @@ export class Game {
 
         image.onload = () => {
           console.log("✅ Successfully loaded:", url);
-          this.images.push(image);
+          this.images[index] = image;
           resolve();
         };
 
