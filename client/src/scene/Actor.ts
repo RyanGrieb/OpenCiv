@@ -17,6 +17,7 @@ export interface ActorOptions {
 }
 
 export class Actor implements SceneObject {
+  public debugMe: boolean = false; // For debugging purposes, set to true to log actor information
   protected color: string;
   protected image: HTMLImageElement;
   protected spriteRegion?: SpriteRegion; // Location of sprite on spritesheet
@@ -144,6 +145,63 @@ export class Actor implements SceneObject {
   }
 
   public draw(canvasContext: CanvasRenderingContext2D) {
+    const game = Game.getInstance();
+    const scene = game.getCurrentScene();
+    const camera = scene?.getCamera();
+
+    if (camera && this.cameraApplies && canvasContext === game.getCanvasContext()) {
+      // Draw a purple border representing the bounding box (for debugging)
+      if (this.debugMe) {
+        canvasContext.save();
+        canvasContext.strokeStyle = "purple";
+        canvasContext.lineWidth = 2;
+        // Transform world coordinates to screen coordinates
+        canvasContext.strokeRect(this.getScreenPixelX(), this.getScreenPixelY(), this.getScreenPixelWidth(), this.getScreenPixelHeight());
+        canvasContext.restore();
+      }
+
+      const gameCanvas = game.getCanvas();
+      const canvasWidth = gameCanvas.width;
+      const canvasHeight = gameCanvas.height;
+
+      const screenX = this.getScreenPixelX();
+      const screenY = this.getScreenPixelY();
+      const screenWidth = this.getScreenPixelWidth();
+      const screenHeight = this.getScreenPixelHeight();
+
+      // Cull if actor is completely outside the canvas
+      if (
+        screenX + screenWidth < 0 ||
+        screenY + screenHeight < 0 ||
+        screenX > canvasWidth ||
+        screenY > canvasHeight
+      ) {
+        if (this.debugMe) {
+          console.log("Actor culled (outside canvas):", {
+            screenX,
+            screenY,
+            screenWidth,
+            screenHeight,
+            canvasWidth,
+            canvasHeight,
+          });
+        }
+        return;
+      }
+
+      if (this.debugMe) {
+        console.log("Actor cull check variables:", {
+          screenX,
+          screenY,
+          screenWidth,
+          screenHeight,
+          canvasWidth,
+          canvasHeight,
+        });
+      }
+
+    }
+
     if (!this.image && this.color) {
       Game.getInstance().drawRect({
         x: this.x,
@@ -223,6 +281,54 @@ export class Actor implements SceneObject {
     return this.y;
   }
 
+  /**
+   * Returns the X coordinate of the actor on the screen (in device pixels), accounting for camera and zoom.
+   */
+  public getScreenPixelX(): number {
+    const game = Game.getInstance();
+    const scene = game.getCurrentScene();
+    const camera = scene?.getCamera();
+    const dpr = game.getDPR();
+    const zoom = camera.getZoomAmount();
+    return (this.x * zoom + camera.getX()) * dpr;
+  }
+
+  /**
+   * Returns the Y coordinate of the actor on the screen (in device pixels), accounting for camera and zoom.
+   */
+  public getScreenPixelY(): number {
+    const game = Game.getInstance();
+    const scene = game.getCurrentScene();
+    const camera = scene?.getCamera();
+    const dpr = game.getDPR();
+    const zoom = camera.getZoomAmount();
+    return (this.y * zoom + camera.getY()) * dpr;
+  }
+
+  /**
+   * Returns the width of the actor on the screen (in device pixels), accounting for camera and zoom.
+   */
+  public getScreenPixelWidth(): number {
+    const game = Game.getInstance();
+    const scene = game.getCurrentScene();
+    const camera = scene?.getCamera();
+    const dpr = game.getDPR();
+    const zoom = camera.getZoomAmount();
+    return this.width * zoom * dpr;
+  }
+
+  /**
+   * Returns the height of the actor on the screen (in device pixels), accounting for camera and zoom.
+   */
+  public getScreenPixelHeight(): number {
+    const game = Game.getInstance();
+    const scene = game.getCurrentScene();
+    const camera = scene?.getCamera();
+    const dpr = game.getDPR();
+    const zoom = camera.getZoomAmount();
+    return this.height * zoom * dpr;
+  }
+
   public getWidth(): number {
     return this.width;
   }
@@ -297,8 +403,8 @@ export class Actor implements SceneObject {
         greatestZ = actor.getZIndex();
       }
     });
-    canvas.width = options.canvasWidth || greatestX + greatestXWidth + 1000;
-    canvas.height = options.canvasHeight || greatestY + greatestYHeight + 1000;
+    canvas.width = options.canvasWidth || greatestX + greatestXWidth;
+    canvas.height = options.canvasHeight || greatestY + greatestYHeight;
 
     const ctx = canvas.getContext("2d");
 

@@ -354,7 +354,6 @@ export class GameMap {
         });
         mapActors.push(placeholderActor);
 
-        //TODO: Instead of a single map actor, we need to do this in chunks (4x4?). B/c it's going to be slow on map updates.
         const canvasWidth = 32 * 4 + 16;
         const canvasHeight = 25 * 4 + 7; // +7 For the last row of chunks.
         const mapChunk = Actor.mergeActors({
@@ -367,6 +366,7 @@ export class GameMap {
         mapChunk.setPosition(chunkX, chunkY);
         this.topLayerMapChunks.set(mapChunk, topLayerTiles);
 
+        // We are at the last chunk!
         if (lastChunk) {
           this.initAdjacentTiles();
 
@@ -380,6 +380,7 @@ export class GameMap {
             actors: bottomLayerActors,
             spriteRegion: false
           });
+          //bottomLayerActor.debugMe = true;
 
           scene.addActor(bottomLayerActor);
 
@@ -676,10 +677,6 @@ export class GameMap {
         }
       }
     }
-  }
-
-  public getTopLayerChunks() {
-    return this.topLayerMapChunks;
   }
 
   private getCityFromJSONData(data: JSON): City {
