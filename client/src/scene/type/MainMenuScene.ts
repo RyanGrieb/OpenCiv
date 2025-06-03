@@ -18,7 +18,7 @@ export class MainMenuScene extends Scene {
       shadowBlur: 20
     });
     titleLabel.conformSize().then(() => {
-      titleLabel.setPosition(Game.getInstance().getWidth() / 2 - titleLabel.getWidth() / 2, 135);
+      titleLabel.setPosition(Game.getInstance().getWidth() / 2 - titleLabel.getWidth() / 2, Game.getInstance().getHeight() / 3 - 75);
     });
 
     this.addActor(titleLabel);
@@ -35,37 +35,9 @@ export class MainMenuScene extends Scene {
 
     this.addActor(
       new Button({
-        text: "Singleplayer",
-        x: Game.getInstance().getWidth() / 2 - 242 / 2 - 250 / 2,
+        text: "Play",
+        x: Game.getInstance().getWidth() / 2 - 242 / 2,
         y: Game.getInstance().getHeight() / 3 + 68,
-        width: 242,
-        height: 62,
-        fontColor: "white",
-        onClicked: () => {
-          console.log("singleplayer scene");
-        }
-      })
-    );
-
-    this.addActor(
-      new Button({
-        text: "Host Game",
-        x: Game.getInstance().getWidth() / 2 - 242 / 2 + 250 / 2,
-        y: Game.getInstance().getHeight() / 3 + 68,
-        width: 242,
-        height: 62,
-        fontColor: "white",
-        onClicked: () => {
-          console.log("singleplayer scene");
-        }
-      })
-    );
-
-    this.addActor(
-      new Button({
-        text: "Join Game",
-        x: Game.getInstance().getWidth() / 2 - 242 / 2 + 250 / 2,
-        y: Game.getInstance().getHeight() / 3 + 136,
         width: 242,
         height: 62,
         fontColor: "white",
@@ -78,7 +50,7 @@ export class MainMenuScene extends Scene {
     this.addActor(
       new Button({
         text: "Options",
-        x: Game.getInstance().getWidth() / 2 - 242 / 2 - 250 / 2,
+        x: Game.getInstance().getWidth() / 2 - 242 / 2,
         y: Game.getInstance().getHeight() / 3 + 136,
         width: 242,
         height: 62,
