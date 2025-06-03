@@ -58,7 +58,7 @@ export class JoinGameScene extends Scene {
     this.addActor(this.serverTextBox);
 
     const infoLabel = new Label({
-      text: "Enter server code: (e.g. ED2FG)",
+      text: "Enter server IP:",
       font: "24px serif",
       fontColor: "white"
     });
@@ -100,7 +100,7 @@ export class JoinGameScene extends Scene {
         width: 242,
         height: 62,
         fontColor: "white",
-        onClicked: () => {}
+        onClicked: () => { }
       })
     );
 
