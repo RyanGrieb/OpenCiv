@@ -10,6 +10,8 @@ import { SceneBackground } from "../SceneBackground";
 
 export class JoinGameScene extends Scene {
   private serverTextBox: TextBox;
+  private isConnecting: boolean = false;
+
   public onInitialize(): void {
     super.onInitialize();
     this.addActor(SceneBackground.generateRandomGrassland());
@@ -70,27 +72,29 @@ export class JoinGameScene extends Scene {
       this.addActor(infoLabel);
     });
 
-    this.addActor(
-      new Button({
-        text: "Join",
-        x: Game.getInstance().getWidth() / 2 - 242 / 2,
-        y: Game.getInstance().getHeight() / 2 - 25,
-        width: 242,
-        height: 62,
-        fontColor: "white",
-        onClicked: () => {
-          infoLabel.setText("Connecting...", true);
-          infoLabel.conformSize().then(() => {
-            infoLabel.setPosition(
-              Game.getInstance().getWidth() / 2 - infoLabel.getWidth() / 2,
-              this.serverTextBox.getY() - 30
-            );
-          });
+    const joinButton = new Button({
+      text: "Join",
+      x: Game.getInstance().getWidth() / 2 - 242 / 2,
+      y: Game.getInstance().getHeight() / 2 - 25,
+      width: 242,
+      height: 62,
+      fontColor: "white",
+      onClicked: () => {
+        if (this.isConnecting) return; // Prevent multiple connection attempts
+        this.isConnecting = true;
+        infoLabel.setText("Connecting...", true);
+        infoLabel.conformSize().then(() => {
+          infoLabel.setPosition(
+            Game.getInstance().getWidth() / 2 - infoLabel.getWidth() / 2,
+            this.serverTextBox.getY() - 30
+          );
+        });
 
-          WebsocketClient.init(this.serverTextBox.getText());
-        }
-      })
-    );
+        WebsocketClient.init(this.serverTextBox.getText());
+      }
+    });
+
+    this.addActor(joinButton);
 
     this.addActor(
       new Button({
@@ -122,6 +126,7 @@ export class JoinGameScene extends Scene {
       eventName: "websocketError",
       parentObject: this,
       callback: (data) => {
+        this.isConnecting = false; // Allow connection retry after error
         infoLabel.setText("Connection Failed.", true);
         infoLabel.conformSize().then(() => {
           infoLabel.setPosition(
@@ -129,6 +134,14 @@ export class JoinGameScene extends Scene {
             this.serverTextBox.getY() - 30
           );
         });
+      }
+    });
+
+    NetworkEvents.on({
+      eventName: "connected",
+      parentObject: this,
+      callback: () => {
+        this.isConnecting = false;
       }
     });
 

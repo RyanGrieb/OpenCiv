@@ -9,6 +9,7 @@ export class Server {
 
   private port: number = 2000;
   private wss: WebSocketServer;
+  private connectedIPs: Set<string> = new Set();
 
   /**
    *
@@ -40,6 +41,25 @@ export class Server {
      * for optimization.
      */
     this.wss.on("connection", (websocket, request) => {
+      const ip = request.socket.remoteAddress;
+      console.log(`New connection from IP: ${ip}`);
+
+      // Check if the IP is already connected
+      if (ip && this.connectedIPs.has(ip)) {
+        websocket.close(4001, "Multiple connections from same IP are not allowed.");
+        console.log(`Connection from IP ${ip} rejected: Multiple connections not allowed.`);
+        return;
+      }
+
+      if (ip) {
+        this.connectedIPs.add(ip);
+      }
+
+      websocket.on("close", () => {
+        if (ip) this.connectedIPs.delete(ip);
+        console.log(`Connection closed from IP: ${ip}`);
+      });
+
       websocket.on("message", (data: string) => {
         console.log("Message: " + data);
         const jsonData = JSON.parse(data);
