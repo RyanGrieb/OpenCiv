@@ -56,8 +56,8 @@ export class Button extends ActorGroup {
     this.textWidth = -1;
     this.textHeight = -1;
     this.callbackFunction = options.onClicked;
-    this.mouseEnterCallbackFunction = options.onMouseEnter || function () {};
-    this.mouseExitCallbackFunction = options.onMouseExit || function () {};
+    this.mouseEnterCallbackFunction = options.onMouseEnter || function () { };
+    this.mouseExitCallbackFunction = options.onMouseExit || function () { };
     this.font = options.font ?? "24px serif";
     this.fontColor = options.fontColor ?? "black";
     this.buttonImage = options.buttonImage || GameImage.BUTTON;
@@ -135,12 +135,9 @@ export class Button extends ActorGroup {
     super.draw(canvasContext); //FIXME: Don't draw until we know textWidth & height.
 
     if (this.textWidth == -1 && this.textHeight == -1) {
-      Game.getInstance()
-        .measureText(this.text, this.font)
-        .then(([textWidth, textHeight]) => {
-          this.textWidth = textWidth;
-          this.textHeight = textHeight;
-        });
+      const { width: textWidth, height: textHeight } = Game.getInstance().measureText(this.text, this.font);
+      this.textWidth = textWidth;
+      this.textHeight = textHeight;
       return; // Don't render text before we know the height & width of the text
     }
 

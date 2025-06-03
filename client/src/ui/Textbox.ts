@@ -105,11 +105,8 @@ export class TextBox extends Actor {
 
   public draw(canvasContext: CanvasRenderingContext2D) {
     if (this.textHeight == -1) {
-      Game.getInstance()
-        .measureText("M", this.font)
-        .then(([width, height]) => {
-          this.textHeight = height;
-        });
+      const { height } = Game.getInstance().measureText("M", this.font);
+      this.textHeight = height;
     }
 
     Game.getInstance().drawRect({
@@ -167,11 +164,8 @@ export class TextBox extends Actor {
 
   public setText(text: string) {
     this.text = text;
-    Game.getInstance()
-      .measureText(this.text, this.font)
-      .then(([width, height]) => {
-        //this.textHeight = height;
-        this.blinkerX = this.x + 2 + width;
-      });
+    const { width } = Game.getInstance().measureText(this.text, this.font);
+    //this.textHeight = height;
+    this.blinkerX = this.x + 2 + width;
   }
 }

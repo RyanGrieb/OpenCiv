@@ -123,7 +123,7 @@ export class Label extends Actor {
       this.height = wrappedHeight;
       this.unwrappedWordHeight = unwrappedWordHeight;
     } else {
-      const [textWidth, textHeight] = await Game.getInstance().measureText(this.text, this.font);
+      const { width: textWidth, height: textHeight } = Game.getInstance().measureText(this.text, this.font);
       this.width = textWidth;
       this.height = textHeight;
     }

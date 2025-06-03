@@ -38,8 +38,7 @@ export class Tile {
 
     this.addTileType(tileType);
   }
-
-  public static getAllTileStats() {
+  public static getAllTileStats(): Record<string, any> {
     if (!Tile.allTileStats) {
       // Load available civilizations from config file
       const tileYAMLData = YAML.parse(fs.readFileSync("./config/tiles.yml", "utf-8"));

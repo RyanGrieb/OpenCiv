@@ -231,7 +231,7 @@ export class GameMap {
       callback: (data) => {
         console.log("Received tile yields from server.");
         console.log(data);
-        //TODO: Store yields in a map, so we can access them later.
+        Tile.setTileYields(data["yields"])
       }
     });
   }

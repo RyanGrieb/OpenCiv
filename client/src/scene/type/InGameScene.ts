@@ -1,4 +1,4 @@
-import { GameImage } from "../../Assets";
+import { GameImage, SpriteRegion } from "../../Assets";
 import { Game } from "../../Game";
 import { City } from "../../city/City";
 import { GameMap } from "../../map/GameMap";
@@ -20,6 +20,7 @@ export class InGameScene extends Scene {
   private players: AbstractPlayer[];
   private clientPlayer: ClientPlayer;
   private tileInformationLabel: Label;
+  private tileYieldActors: Actor[] = [];
   private statusBar: StatusBar;
   private cityDisplayInfo: CityDisplayInfo;
   private nextTurnButton: Button;
@@ -72,6 +73,8 @@ export class InGameScene extends Scene {
         text: "N/A",
         font: "16px serif",
         fontColor: "white",
+        shadowColor: "black",
+        lineWidth: 4,
         x: 0,
         y: 0,
         z: 5
@@ -131,9 +134,14 @@ export class InGameScene extends Scene {
       });
 
       this.on("tileHovered", (options) => {
-        if (!options.tile) {
-          this.tileInformationLabel.setText("");
-        } else {
+        // Remove previous yield icons
+        for (const actor of this.tileYieldActors) {
+          this.removeActor(actor);
+        }
+
+        this.tileYieldActors = [];
+
+        if (options.tile && !this.cityDisplayInfo) {
           let tileTypes: string = options.tile.getTileTypes().toString();
           tileTypes = tileTypes.replaceAll("_", " ");
           tileTypes = tileTypes.replaceAll(",", ", ");
@@ -148,15 +156,72 @@ export class InGameScene extends Scene {
 
           tileTypes = strArray.join("");
 
+          // Get tile yields
+          const yields = options.tile.getTileYield();
+
+          // Map stat keys to SpriteRegion
+          const statSpriteRegions: Record<string, SpriteRegion> = {
+            food: SpriteRegion.FOOD_ICON,
+            production: SpriteRegion.PRODUCTION_ICON,
+            gold: SpriteRegion.GOLD_ICON,
+            faith: SpriteRegion.FAITH_ICON,
+            morale: SpriteRegion.MORALE_ICON,
+            science: SpriteRegion.SCIENCE_ICON,
+            culture: SpriteRegion.CULTURE_ICON,
+          };
+
+          // Set the label text (without yields)
           this.tileInformationLabel.setText(
-            "[" +
-            options.tile.getGridX() +
-            "," +
-            options.tile.getGridY() +
-            "] " +
+            `[${options.tile.getGridX()},${options.tile.getGridY()}] ` +
             tileTypes +
             (options.tile.hasRiver() ? ", River" : "")
           );
+
+
+
+          this.tileInformationLabel.conformSize().then(() => {
+            // Positioning for icons (right after the label)
+            let iconX = this.tileInformationLabel.getX() + this.tileInformationLabel.getWidth();
+            const iconY = this.tileInformationLabel.getY() - 10;
+
+            if (yields) {
+              for (const [key, value] of Object.entries(yields)) {
+                if (typeof value === "number" && value > 0 && statSpriteRegions[key]) {
+                  // Create icon actor
+                  const iconActor = new Actor({
+                    image: Game.getInstance().getImage(GameImage.SPRITESHEET),
+                    spriteRegion: statSpriteRegions[key],
+                    x: iconX,
+                    y: iconY,
+                    width: 32,
+                    height: 32,
+                    z: 10,
+                    cameraApplies: false
+                  });
+                  this.addActor(iconActor);
+                  this.tileYieldActors.push(iconActor);
+
+                  // Create value label
+                  const valueLabel = new Label({
+                    text: value.toString(),
+                    font: "16px serif",
+                    fontColor: "white",
+                    shadowColor: "black",
+                    lineWidth: 4,
+                    x: iconX + iconActor.getWidth() - 6,
+                    y: this.tileInformationLabel.getY(),
+                    z: 10
+                  });
+                  this.addActor(valueLabel);
+                  this.tileYieldActors.push(valueLabel);
+
+                  // Move X for next icon
+                  iconX += 42;
+                }
+              }
+            }
+          });
+
         }
       });
       //DEBUG top layer chunks -
@@ -237,6 +302,10 @@ export class InGameScene extends Scene {
 
     this.removeActor(this.nextTurnButton);
     this.removeActor(this.tileInformationLabel);
+    this.tileInformationLabel.setText("");
+    this.tileYieldActors.forEach((actor) => {
+      this.removeActor(actor);
+    });
 
     this.addActor(this.closeCityDisplayButton);
   }

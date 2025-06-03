@@ -45,7 +45,6 @@ export class Game {
   private fps: number = 0;
   private actors: Actor[] = [];
   private lines: Line[] = [];
-  private measureQueue: string[];
   private mouseX: number;
   private mouseY: number;
   private runGameLoop: boolean;
@@ -66,7 +65,7 @@ export class Game {
 
   private constructor(options: GameOptions, assetsLoadedCallback: () => void) {
     this.scenes = new Map<string, Scene>();
-    //Initialize canvas
+    // Initialize canvas
     this.canvas = document.getElementById("canvas") as HTMLCanvasElement;
     this.dpr = window.devicePixelRatio || 1;
     this.canvas.width = window.innerWidth * this.dpr;
@@ -79,193 +78,193 @@ export class Game {
     this.canvasContext.fillRect(0, 0, this.canvas.width, this.canvas.height);
     this.canvasContext.font = "12px Times new Roman";
     this.canvasContext.imageSmoothingEnabled = false;
-    this.measureQueue = [];
     this.runGameLoop = true;
 
-
-    //Initialize canvas listeners. TODO: Make this less redundant w/ a helper function
-    this.canvas.addEventListener("mousemove", (event) => {
-      this.actors.forEach((actor) => {
-        actor.call("mousemove", {
-          x: this.getWorldX(event.clientX),
-          y: this.getWorldY(event.clientY),
-          // We provide direct clientX & clientY for instances where we don't want to apply the DPR or camera transformations.
-          clientX: event.clientX,
-          clientY: event.clientY,
+    // Wait for all fonts to be loaded before proceeding
+    document.fonts.ready.then(() => {
+      this.canvas.addEventListener("mousemove", (event) => {
+        this.actors.forEach((actor) => {
+          actor.call("mousemove", {
+            x: this.getWorldX(event.clientX),
+            y: this.getWorldY(event.clientY),
+            // We provide direct clientX & clientY for instances where we don't want to apply the DPR or camera transformations.
+            clientX: event.clientX,
+            clientY: event.clientY,
+          });
         });
-      });
-
-      if (this.currentScene) {
-        this.currentScene.call("mousemove", {
-          x: this.getWorldX(event.clientX),
-          y: this.getWorldY(event.clientY),
-          // We provide direct clientX & clientY for instances where we don't want to apply the DPR or camera transformations.
-          clientX: event.clientX,
-          clientY: event.clientY,
-          button: event.button
-        });
-      }
-
-      this.mouseX = event.clientX;
-      this.mouseY = event.clientY;
-    });
-
-    this.canvas.addEventListener("mousedown", (event) => {
-      this.actors.forEach((actor) => {
-        actor.call("mousedown", {
-          x: this.getWorldX(event.clientX),
-          y: this.getWorldY(event.clientY),
-          // We provide direct clientX & clientY for instances where we don't want to apply the DPR or camera transformations.
-          clientX: event.clientX,
-          clientY: event.clientY,
-          button: event.button
-        });
-      });
-
-      if (this.currentScene) {
-        this.currentScene.call("mousedown", {
-          x: this.getWorldX(event.clientX),
-          y: this.getWorldY(event.clientY),
-          // We provide direct clientX & clientY for instances where we don't want to apply the DPR or camera transformations.
-          clientX: event.clientX,
-          clientY: event.clientY,
-          button: event.button
-        });
-      }
-    });
-
-    this.canvas.addEventListener("mouseup", (event) => {
-      this.actors.forEach((actor) => {
-        actor.call("mouseup", {
-          x: this.getWorldX(event.clientX),
-          y: this.getWorldY(event.clientY),
-          // We provide direct clientX & clientY for instances where we don't want to apply the DPR or camera transformations.
-          clientX: event.clientX,
-          clientY: event.clientY,
-          button: event.button
-        });
-      });
-
-      if (this.currentScene) {
-        this.currentScene.call("mouseup", {
-          x: this.getWorldX(event.clientX),
-          y: this.getWorldY(event.clientY),
-          // We provide direct clientX & clientY for instances where we don't want to apply the DPR or camera transformations.
-          clientX: event.clientX,
-          clientY: event.clientY,
-          button: event.button
-        });
-      }
-    });
-
-    this.canvas.addEventListener("mouseleave", (event) => {
-      this.actors.forEach((actor) => {
-        actor.call("mouseleave", { x: this.getWorldX(event.clientX), y: this.getWorldY(event.clientY) });
-      });
-
-      if (this.currentScene) {
-        this.currentScene.call("mouseleave", {
-          x: this.getWorldX(event.clientX),
-          y: this.getWorldY(event.clientY)
-        });
-      }
-    });
-
-    this.canvas.addEventListener("wheel", (event) => {
-      this.actors.forEach((actor) => {
-        actor.call("wheel", { deltaY: event.deltaY });
-      });
-
-      if (this.currentScene) {
-        this.currentScene.call("wheel", {
-          x: event.offsetX,
-          y: event.offsetY,
-          deltaY: event.deltaY
-        });
-      }
-    });
-
-    document.body.addEventListener("keydown", (event) => {
-      this.actors.forEach((actor) => {
-        actor.call("keydown", { key: event.key });
-      });
-
-      if (this.currentScene) {
-        this.currentScene.call("keydown", { key: event.key });
-      }
-
-      if (event.key === 'Backspace') {
-        event.preventDefault();
-      }
-    });
-
-    document.body.addEventListener("keyup", (event) => {
-      this.actors.forEach((actor) => {
-        actor.call("keyup", { key: event.key });
-      });
-
-      if (this.currentScene) {
-        this.currentScene.call("keyup", { key: event.key });
-      }
-    });
-    document.addEventListener("contextmenu", (event) => event.preventDefault());
-
-    window.addEventListener("resize", () => {
-      clearTimeout(this.resizeTimer);
-
-      this.resizeTimer = setTimeout(() => {
-        this.oldWidth = this.canvas.width;
-        this.oldHeight = this.canvas.height;
-        this.dpr = window.devicePixelRatio || 1;
-        this.canvas.width = window.innerWidth * this.dpr;
-        this.canvas.height = window.innerHeight * this.dpr;
-        this.canvas.style.width = window.innerWidth + "px";
-        this.canvas.style.height = window.innerHeight + "px";
 
         if (this.currentScene) {
-          this.currentScene.redraw();
+          this.currentScene.call("mousemove", {
+            x: this.getWorldX(event.clientX),
+            y: this.getWorldY(event.clientY),
+            // We provide direct clientX & clientY for instances where we don't want to apply the DPR or camera transformations.
+            clientX: event.clientX,
+            clientY: event.clientY,
+            button: event.button
+          });
         }
-        this.canvasContext.fillStyle = options.canvasColor ?? "white";
-        this.canvasContext.fillRect(0, 0, this.canvas.width, this.canvas.height);
-        this.canvasContext.font = "12px Times new Roman";
-        this.canvasContext.imageSmoothingEnabled = false;
-      }, 300);
-    });
 
-    let promise = this.loadAssetsPromise(options.assetList);
-
-    promise.then((res) => {
-      console.log("All assets loaded...");
-
-      //Update HTML & show canvas
-      document.getElementById("loading_element").style.display = "none";
-      document.getElementById("canvas").removeAttribute("hidden");
-      window.requestAnimationFrame(() => {
-        this.gameLoop();
+        this.mouseX = event.clientX;
+        this.mouseY = event.clientY;
       });
 
-      // Call the callback loop, now we can progress with adding actors,scenes,ect.
-      assetsLoadedCallback();
-    });
+      this.canvas.addEventListener("mousedown", (event) => {
+        this.actors.forEach((actor) => {
+          actor.call("mousedown", {
+            x: this.getWorldX(event.clientX),
+            y: this.getWorldY(event.clientY),
+            // We provide direct clientX & clientY for instances where we don't want to apply the DPR or camera transformations.
+            clientX: event.clientX,
+            clientY: event.clientY,
+            button: event.button
+          });
+        });
 
-    // Initialize our global network events
-    NetworkEvents.on({
-      eventName: "setScene",
-      parentObject: this,
-      callback: (data) => {
-        this.setScene(data["scene"]);
-      },
-      globalEvent: true
-    });
-    NetworkEvents.on({
-      eventName: "messageBox",
-      parentObject: this,
-      callback: (data) => {
-        //{"event":"messageBox","messageName":"gameInProgress","message":"Error: Game in progress!"}
-        const message = data["message"];
-        alert(message);
-      },
-      globalEvent: true
+        if (this.currentScene) {
+          this.currentScene.call("mousedown", {
+            x: this.getWorldX(event.clientX),
+            y: this.getWorldY(event.clientY),
+            // We provide direct clientX & clientY for instances where we don't want to apply the DPR or camera transformations.
+            clientX: event.clientX,
+            clientY: event.clientY,
+            button: event.button
+          });
+        }
+      });
+
+      this.canvas.addEventListener("mouseup", (event) => {
+        this.actors.forEach((actor) => {
+          actor.call("mouseup", {
+            x: this.getWorldX(event.clientX),
+            y: this.getWorldY(event.clientY),
+            // We provide direct clientX & clientY for instances where we don't want to apply the DPR or camera transformations.
+            clientX: event.clientX,
+            clientY: event.clientY,
+            button: event.button
+          });
+        });
+
+        if (this.currentScene) {
+          this.currentScene.call("mouseup", {
+            x: this.getWorldX(event.clientX),
+            y: this.getWorldY(event.clientY),
+            // We provide direct clientX & clientY for instances where we don't want to apply the DPR or camera transformations.
+            clientX: event.clientX,
+            clientY: event.clientY,
+            button: event.button
+          });
+        }
+      });
+
+      this.canvas.addEventListener("mouseleave", (event) => {
+        this.actors.forEach((actor) => {
+          actor.call("mouseleave", { x: this.getWorldX(event.clientX), y: this.getWorldY(event.clientY) });
+        });
+
+        if (this.currentScene) {
+          this.currentScene.call("mouseleave", {
+            x: this.getWorldX(event.clientX),
+            y: this.getWorldY(event.clientY)
+          });
+        }
+      });
+
+      this.canvas.addEventListener("wheel", (event) => {
+        this.actors.forEach((actor) => {
+          actor.call("wheel", { deltaY: event.deltaY });
+        });
+
+        if (this.currentScene) {
+          this.currentScene.call("wheel", {
+            x: event.offsetX,
+            y: event.offsetY,
+            deltaY: event.deltaY
+          });
+        }
+      });
+
+      document.body.addEventListener("keydown", (event) => {
+        this.actors.forEach((actor) => {
+          actor.call("keydown", { key: event.key });
+        });
+
+        if (this.currentScene) {
+          this.currentScene.call("keydown", { key: event.key });
+        }
+
+        if (event.key === 'Backspace') {
+          event.preventDefault();
+        }
+      });
+
+      document.body.addEventListener("keyup", (event) => {
+        this.actors.forEach((actor) => {
+          actor.call("keyup", { key: event.key });
+        });
+
+        if (this.currentScene) {
+          this.currentScene.call("keyup", { key: event.key });
+        }
+      });
+      document.addEventListener("contextmenu", (event) => event.preventDefault());
+
+      window.addEventListener("resize", () => {
+        clearTimeout(this.resizeTimer);
+
+        this.resizeTimer = setTimeout(() => {
+          this.oldWidth = this.canvas.width;
+          this.oldHeight = this.canvas.height;
+          this.dpr = window.devicePixelRatio || 1;
+          this.canvas.width = window.innerWidth * this.dpr;
+          this.canvas.height = window.innerHeight * this.dpr;
+          this.canvas.style.width = window.innerWidth + "px";
+          this.canvas.style.height = window.innerHeight + "px";
+
+          if (this.currentScene) {
+            this.currentScene.redraw();
+          }
+          this.canvasContext.fillStyle = options.canvasColor ?? "white";
+          this.canvasContext.fillRect(0, 0, this.canvas.width, this.canvas.height);
+          this.canvasContext.font = "12px Times new Roman";
+          this.canvasContext.imageSmoothingEnabled = false;
+        }, 300);
+      });
+
+      let promise = this.loadAssetsPromise(options.assetList);
+
+      promise.then((res) => {
+        console.log("All assets loaded...");
+
+        //Update HTML & show canvas
+        document.getElementById("loading_element").style.display = "none";
+        document.getElementById("canvas").removeAttribute("hidden");
+        window.requestAnimationFrame(() => {
+          this.gameLoop();
+        });
+
+        // Call the callback loop, now we can progress with adding actors,scenes,ect.
+        assetsLoadedCallback();
+      });
+
+      // Initialize our global network events
+      NetworkEvents.on({
+        eventName: "setScene",
+        parentObject: this,
+        callback: (data) => {
+          this.setScene(data["scene"]);
+        },
+        globalEvent: true
+      });
+      NetworkEvents.on({
+        eventName: "messageBox",
+        parentObject: this,
+        callback: (data) => {
+          //{"event":"messageBox","messageName":"gameInProgress","message":"Error: Game in progress!"}
+          const message = data["message"];
+          alert(message);
+        },
+        globalEvent: true
+      });
     });
   }
 
@@ -446,32 +445,16 @@ export class Game {
     canvasContext.restore();
   }
 
-  public async waitUntilMeasureQueueIsEmpty(): Promise<void> {
-    return new Promise((resolve) => {
-      const interval = setInterval(() => {
-        if (this.measureQueue.length < 1) {
-          clearInterval(interval);
-          resolve();
-        }
-      }, 10);
-    });
-  }
-
-  public async measureText(text: string, font: string): Promise<[number, number]> {
-    await this.waitUntilMeasureQueueIsEmpty(); // Wait for other measurements to complete, then continue..
-    this.measureQueue.push(text);
+  public measureText(text: string, font: string): { width: number; height: number } {
     this.canvasContext.save();
+
     this.canvasContext.font = font || "24px serif";
-
-    await document.fonts.ready; // Wait for the async function to complete, then measure text.s
-
     const metrics = this.canvasContext.measureText(text);
     let height = metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent;
-    this.canvasContext.restore();
-    //FIXME: This fails when we have a queue of the same text, support text & font simultaneously
-    this.measureQueue = this.measureQueue.filter((element) => element !== text);
 
-    return [metrics.width, height];
+    this.canvasContext.restore();
+
+    return { width: metrics.width, height };
   }
 
   /**
@@ -485,14 +468,14 @@ export class Game {
       return this.wrappedTextCache[text];
     }
 
-    const [_, unwrappedWordHeight] = await this.measureText(text, font);
+    const { width: _, height: unwrappedWordHeight } = this.measureText(text, font);
 
     //Copy the string
     let modifiedText = text + "";
     let wrappedHeight = unwrappedWordHeight;
 
     for (const word of modifiedText.split(" ")) {
-      const [wordWidth, wordHeight] = await this.measureText(word + " ", font);
+      const { width: wordWidth, height: wordHeight } = this.measureText(word + " ", font);
 
       if (currentWidth + wordWidth > maxWidth) {
         modifiedText = modifiedText.replace(word, "\n" + word);

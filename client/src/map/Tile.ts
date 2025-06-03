@@ -25,6 +25,7 @@ export class Tile extends Actor {
   public static HEIGHT = 32;
 
   private static loadedTileImages = new Map<string, HTMLImageElement>();
+  private static allTileStats: JSON;
 
   private tileTypes: string[];
   private adjacentTiles: Tile[];
@@ -89,6 +90,14 @@ export class Tile extends Actor {
     return tile2.getMovementCost();
   }
 
+  public static setTileYields(data: JSON) {
+    Tile.allTileStats = data;
+  }
+
+  public static getTileYields() {
+    return Tile.allTileStats;
+  }
+
   public async loadImage() {
     const key = JSON.stringify(this.tileTypes);
 
@@ -113,6 +122,27 @@ export class Tile extends Actor {
         canvasContext: canvasContext,
       });
     });*/
+  }
+
+  public getTileYield() {
+    // Use the static getter to ensure we always have the latest tile stats
+    const allTileStats = Tile.getTileYields();
+    if (!allTileStats) return undefined;
+
+    const tileYield: { [key: string]: number } = {};
+    for (const tileType of this.tileTypes) {
+      // Accept both upper and lower case keys for tileTypes
+      const yieldData = allTileStats[tileType] || allTileStats[tileType.toUpperCase()] || allTileStats[tileType.toLowerCase()];
+      if (yieldData && yieldData.stats) {
+        for (const statObj of yieldData.stats) {
+          for (const [key, value] of Object.entries(statObj)) {
+            tileYield[key] = (tileYield[key] || 0) + (typeof value === "number" ? value : 0);
+          }
+        }
+      }
+    }
+    // Return undefined if no yield found, otherwise the yield object
+    return Object.keys(tileYield).length > 0 ? tileYield : undefined;
   }
 
   public setCity(city: City) {

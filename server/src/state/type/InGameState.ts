@@ -63,6 +63,15 @@ export class InGameState extends State {
       }
     });
 
+    ServerEvents.on({
+      eventName: "requestTileYields",
+      parentObject: this,
+      callback: (data, websocket) => {
+        const player = Game.getInstance().getPlayerFromWebsocket(websocket);
+        GameMap.getInstance().sendTileYieldsToPlayer(player);
+      }
+    });
+
     Game.getInstance()
       .getPlayers()
       .forEach((player) => {

@@ -666,6 +666,16 @@ export class GameMap {
     ];
     return values;
   }
+
+
+  public sendTileYieldsToPlayer(player: Player) {
+    // Send the full tile stats JSON from tiles.yml
+    player.sendNetworkEvent({
+      event: "tileYields",
+      yields: Tile.getAllTileStats()
+    });
+  }
+
   public sendMapChunksToPlayer(player: Player) {
     // Send the map-size to player
     player.sendNetworkEvent({

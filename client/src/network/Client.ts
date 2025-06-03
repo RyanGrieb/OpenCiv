@@ -20,7 +20,7 @@ export interface OnNetworkEventOptions {
 export class NetworkEvents {
   private static storedEvents: Map<string, CallbackData[]>;
 
-  private constructor() {}
+  private constructor() { }
 
   public static call(eventName: string, data: JSON) {
     if (this.storedEvents.has(eventName)) {
@@ -111,7 +111,7 @@ export class NetworkEvents {
 export class WebsocketClient {
   private static websocket: WebSocket;
 
-  private constructor() {}
+  private constructor() { }
   // TODO: Add network events here with string & function that has arguments.
   // e.g. setScreen & screenType arg.
 
@@ -124,6 +124,7 @@ export class WebsocketClient {
 
     this.websocket.addEventListener("open", (event) => {
       console.log("Connected to server");
+      NetworkEvents.call("connected", JSON.parse("{}"));
     });
 
     this.websocket.addEventListener("message", (event) => {
