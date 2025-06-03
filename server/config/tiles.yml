@@ -87,6 +87,10 @@ tiles:
     stats:
       - gold: 2
       - production: 1
+  GOLD:
+    name: Gold
+    stats:
+      - gold: 2
   IRON:
     name: Iron
     stats:
