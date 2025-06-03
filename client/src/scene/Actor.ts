@@ -384,27 +384,19 @@ export class Actor implements SceneObject {
     // Create dummy canvas to get pixel data of the actor sprite
 
     let canvas = document.getElementById("auxillary_canvas") as HTMLCanvasElement;
-    let greatestXWidth = 0; // The width of the actor w/ the greatest x.
-    let greatestYHeight = 0; // The height of the actor w/ the greatest y.
-    let greatestX = 0;
-    let greatestY = 0;
+    let maxRight = 0;
+    let maxBottom = 0;
     let greatestZ = 0;
 
     options.actors.forEach((actor: Actor) => {
-      if (actor.getX() > greatestX) {
-        greatestX = actor.getX();
-        greatestXWidth = actor.getWidth();
-      }
-      if (actor.getY() > greatestY) {
-        greatestY = actor.getY();
-        greatestYHeight = actor.getHeight();
-      }
-      if (actor.getZIndex() > greatestZ) {
-        greatestZ = actor.getZIndex();
-      }
+      const right = actor.getX() + actor.getWidth();
+      const bottom = actor.getY() + actor.getHeight();
+      if (right > maxRight) maxRight = right;
+      if (bottom > maxBottom) maxBottom = bottom;
+      if (actor.getZIndex() > greatestZ) greatestZ = actor.getZIndex();
     });
-    canvas.width = options.canvasWidth || greatestX + greatestXWidth;
-    canvas.height = options.canvasHeight || greatestY + greatestYHeight;
+    canvas.width = options.canvasWidth || maxRight;
+    canvas.height = options.canvasHeight || maxBottom;
 
     const ctx = canvas.getContext("2d");
 
