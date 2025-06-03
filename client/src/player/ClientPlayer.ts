@@ -164,7 +164,6 @@ export class ClientPlayer extends AbstractPlayer {
     Game.getInstance()
       .getCurrentScene()
       .on("toggleCityUI", (options) => {
-        console.log("Toggle city UI");
         if (this.selectedUnit) {
           this.unselectUnit();
         }

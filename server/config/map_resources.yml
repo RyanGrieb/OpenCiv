@@ -127,6 +127,25 @@ luxury_resources:
     min_temp: 0
     max_temp: 100
     spawn_on_additional_tile_types: true
+  - name: gold
+    spawn_tiles:
+      - grass
+      - grass_hill
+      - plains
+      - plains_hill
+      - tundra
+      - tundra_hill
+      - desert
+      - desert_hill
+      - snow
+      - snow_hill
+    path_length: 1
+    min_tiles_set: 1
+    max_tiles_set: 2
+    set_chance: 0.1
+    min_temp: 0
+    max_temp: 100
+    spawn_on_additional_tile_types: true
   - name: crab
     spawn_tiles:
       - freshwater

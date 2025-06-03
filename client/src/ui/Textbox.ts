@@ -12,7 +12,7 @@ export interface TextBoxOptions {
 export class TextBox extends Actor {
   private selected: boolean;
   private shouldBlink: boolean;
-  private blinkInterval: NodeJS.Timer;
+  private blinkInterval: NodeJS.Timeout;
   private text: string;
   private textHeight: number;
   private blinkerX: number;

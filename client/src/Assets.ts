@@ -56,6 +56,7 @@ export enum SpriteRegion {
   TURTLES = "18,7",
   HORSES = "6,6",
   COPPER = "4,5",
+  GOLD = "1,6",
   IRON = "8,6",
   COTTON = "6,5",
   CITRUS = "17,6",
@@ -93,6 +94,7 @@ export enum SpriteRegion {
   SETTLE_ICON = "11,11",
   BUILDING_PALACE = "5,18"
 }
+
 
 // assets.ts
 export const assetList = [

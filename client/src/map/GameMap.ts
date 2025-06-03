@@ -51,6 +51,7 @@ export class GameMap {
   public static init() {
     GameMap.instance = new GameMap();
     this.instance.requestMapFromServer();
+    this.instance.requestTileYieldsFromServer();
   }
 
   private constructor() {
@@ -220,6 +221,19 @@ export class GameMap {
     }
 
     return totalPath;
+  }
+
+  private requestTileYieldsFromServer() {
+    WebsocketClient.sendMessage({ event: "requestTileYields" });
+    NetworkEvents.on({
+      eventName: "tileYields",
+      parentObject: this,
+      callback: (data) => {
+        console.log("Received tile yields from server.");
+        console.log(data);
+        //TODO: Store yields in a map, so we can access them later.
+      }
+    });
   }
 
   private requestMapFromServer() {

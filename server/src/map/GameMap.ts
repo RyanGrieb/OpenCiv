@@ -58,7 +58,7 @@ export class GameMap {
     GameMap.instance = undefined;
   }
 
-  private constructor() {}
+  private constructor() { }
 
   private startGeneration() {
     // Assign map dimension values
