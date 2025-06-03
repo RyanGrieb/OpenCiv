@@ -208,8 +208,10 @@ export class InGameScene extends Scene {
   public toggleCityUI(city?: City) {
     if (!this.cityDisplayInfo && city) {
       this.openCityUI(city);
+      this.call("toggleCityUI", { opened: true, city: city });
     } else {
       this.closeCityUI();
+      this.call("toggleCityUI", { opened: false, city: city });
     }
   }
 

@@ -4,6 +4,7 @@ import { Tile } from "./Tile";
 //FIXME: Replace with colored tile?
 export class HoveredTile extends Tile {
   private representedTile: Tile;
+  private hidden: boolean = false;
 
   constructor(x: number, y: number) {
     super({
@@ -36,6 +37,18 @@ export class HoveredTile extends Tile {
     });
 
     this.setPosition(representedTile.getX(), representedTile.getY());
+  }
+
+  public draw(canvasContext: CanvasRenderingContext2D) {
+    if (this.hidden) {
+      return;
+    }
+
+    super.draw(canvasContext);
+  }
+
+  public setHidden(hidden: boolean) {
+    this.hidden = hidden;
   }
 
   public getRepresentedTile() {

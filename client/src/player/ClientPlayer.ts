@@ -163,9 +163,16 @@ export class ClientPlayer extends AbstractPlayer {
 
     Game.getInstance()
       .getCurrentScene()
-      .on("toggleCityUI", () => {
+      .on("toggleCityUI", (options) => {
+        console.log("Toggle city UI");
         if (this.selectedUnit) {
           this.unselectUnit();
+        }
+
+        if (options.opened) {
+          this.hoveredTile.setHidden(true);
+        } else {
+          this.hoveredTile.setHidden(false);
         }
       });
 
