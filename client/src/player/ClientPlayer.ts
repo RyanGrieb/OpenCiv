@@ -412,10 +412,10 @@ export class ClientPlayer extends AbstractPlayer {
         color: color,
         girth: 2,
         z: 3,
-        x1: tile1.getCenterPosition()[0],
-        y1: tile1.getCenterPosition()[1],
-        x2: tile2.getCenterPosition()[0],
-        y2: tile2.getCenterPosition()[1]
+        x1: tile1.getCenterPosition().x,
+        y1: tile1.getCenterPosition().y,
+        x2: tile2.getCenterPosition().x,
+        y2: tile2.getCenterPosition().y
       });
       this.movementLines.push(line);
       Game.getInstance().getCurrentScene().addLine(line);

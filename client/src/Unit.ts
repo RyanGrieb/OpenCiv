@@ -113,8 +113,8 @@ export class Unit extends ActorGroup {
 
   constructor(tile: Tile, unitJSON: JSON) {
     super({
-      x: tile.getCenterPosition()[0] - 28 / 2,
-      y: tile.getCenterPosition()[1] - 28 / 2,
+      x: tile.getCenterPosition().x - 28 / 2,
+      y: tile.getCenterPosition().y - 28 / 2,
       z: 2,
       width: 28,
       height: 28
@@ -126,8 +126,8 @@ export class Unit extends ActorGroup {
     this.unitActor = new Actor({
       image: Game.getInstance().getImage(GameImage.SPRITESHEET),
       spriteRegion: SpriteRegion[this.name.toUpperCase()],
-      x: tile.getCenterPosition()[0] - 28 / 2,
-      y: tile.getCenterPosition()[1] - 28 / 2,
+      x: tile.getCenterPosition().x - 28 / 2,
+      y: tile.getCenterPosition().y - 28 / 2,
       z: 2,
       width: 28,
       height: 28
@@ -312,10 +312,10 @@ export class Unit extends ActorGroup {
    */
   public updatePosition(tile: Tile): void {
     // Ensure group-actor location is updated
-    super.setPosition(tile.getCenterPosition()[0] - 28 / 2, tile.getCenterPosition()[1] - 28 / 2);
+    super.setPosition(tile.getCenterPosition().x - 28 / 2, tile.getCenterPosition().y - 28 / 2);
 
     // Update unit sub-actor location
-    this.unitActor.setPosition(tile.getCenterPosition()[0] - 28 / 2, tile.getCenterPosition()[1] - 28 / 2);
+    this.unitActor.setPosition(tile.getCenterPosition().x - 28 / 2, tile.getCenterPosition().y - 28 / 2);
   }
 
   private removeSelectionActors() {

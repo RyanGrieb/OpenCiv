@@ -108,7 +108,7 @@ export class InGameState extends State {
         }
 
         player.onLoadedIn(() => {
-          player.zoomToLocation(spawnTile.getX(), spawnTile.getY(), 7);
+          player.zoomToLocation(spawnTile.getX(), spawnTile.getY(), 3);
 
           let allLoaded = true;
           // Trigger allPlayersLoaded event

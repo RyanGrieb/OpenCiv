@@ -577,8 +577,8 @@ export class GameMap {
   private setLinePositionCloserToTile(line: Line, tile: Tile, amount: number) {
     // FIXME: This functions works, but the naming of shiftVectorsAwayFromCenter() is confusing.
     const shiftedTileVectors = Vector.shiftVectorsAwayFromCenter(
-      tile.getCenterPosition()[0],
-      tile.getCenterPosition()[1],
+      tile.getCenterPosition().x,
+      tile.getCenterPosition().y,
       line.getVectors(),
       amount
     );

@@ -223,13 +223,20 @@ export class Tile extends Actor {
     this.vectors.push(new Vector(this.x, this.y + 25)); // Bottom left
   }
 
-  public getCenterPosition(): [number, number] {
-    return [this.x + Tile.WIDTH / 2, this.y + Tile.HEIGHT / 2];
+  /**
+   * Returns the center position of the tile in local (actor) coordinates.
+   * Note: This uses this.x and this.y.
+   */
+  public getCenterPosition(): { x: number; y: number } {
+    return {
+      x: this.x + Tile.WIDTH / 2,
+      y: this.y + Tile.HEIGHT / 2
+    };
   }
 
   public getDistanceFrom(x1: number, y1: number) {
-    let x2 = this.getCenterPosition()[0];
-    let y2 = this.getCenterPosition()[1];
+    let x2 = this.getCenterPosition().x;
+    let y2 = this.getCenterPosition().y;
     return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
   }
 

@@ -199,8 +199,8 @@ export class InGameScene extends Scene {
   }
 
   public focusOnTile(tile: Tile, zoomAmount: number) {
-    const x = tile.getCenterPosition()[0];
-    const y = tile.getCenterPosition()[1];
+    const x = tile.getCenterPosition().x;
+    const y = tile.getCenterPosition().y;
 
     Game.getInstance().getCurrentScene().getCamera().zoomToLocation(x, y, zoomAmount);
   }
