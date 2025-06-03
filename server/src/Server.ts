@@ -10,6 +10,7 @@ export class Server {
   private port: number = 2000;
   private wss: WebSocketServer;
   private connectedIPs: Set<string> = new Set();
+  private allowDuplicateIPs: boolean = false;
 
   /**
    *
@@ -44,8 +45,8 @@ export class Server {
       const ip = request.socket.remoteAddress;
       console.log(`New connection from IP: ${ip}`);
 
-      // Check if the IP is already connected
-      if (ip && this.connectedIPs.has(ip)) {
+      // Only check for duplicate IPs if not allowed
+      if (!this.allowDuplicateIPs && ip && this.connectedIPs.has(ip)) {
         websocket.close(4001, "Multiple connections from same IP are not allowed.");
         console.log(`Connection from IP ${ip} rejected: Multiple connections not allowed.`);
         return;
@@ -92,6 +93,11 @@ export class Server {
     this.wss.close();
     process.exit(0);
   }
+
+  public setAllowDuplicateIPs(allow: boolean) {
+    this.allowDuplicateIPs = allow;
+  }
 }
 
+Server.getInstance().setAllowDuplicateIPs(true);
 Server.getInstance().start();
