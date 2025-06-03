@@ -193,6 +193,10 @@ export class Game {
       if (this.currentScene) {
         this.currentScene.call("keydown", { key: event.key });
       }
+
+      if (event.key === 'Backspace') {
+        event.preventDefault();
+      }
     });
 
     document.body.addEventListener("keyup", (event) => {
