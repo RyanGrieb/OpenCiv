@@ -29,10 +29,10 @@ export class LobbyScene extends Scene {
 
     this.addActor(
       new Button({
-        text: "Choose Civilization",
-        x: Game.getInstance().getWidth() / 2 - 242 / 2,
+        text: "Select Civilization",
+        x: Game.getInstance().getWidth() / 2 - 282 / 2,
         y: playerList.getY() + playerList.getHeight() + 10,
-        width: 242,
+        width: 282,
         height: 62,
         fontColor: "white",
         onClicked: () => {
@@ -64,9 +64,9 @@ export class LobbyScene extends Scene {
     this.addActor(
       new Button({
         text: "Ready Up",
-        x: Game.getInstance().getWidth() / 2 - 242 / 2,
+        x: Game.getInstance().getWidth() / 2 - 282 / 2,
         y: playerList.getY() + playerList.getHeight() + 75,
-        width: 242,
+        width: 282,
         height: 62,
         fontColor: "white",
         onClicked: () => {
@@ -86,9 +86,9 @@ export class LobbyScene extends Scene {
     this.addActor(
       new Button({
         text: "Back",
-        x: Game.getInstance().getWidth() / 2 - 242 / 2,
+        x: Game.getInstance().getWidth() / 2 - 282 / 2,
         y: playerList.getY() + playerList.getHeight() + 140,
-        width: 242,
+        width: 282,
         height: 62,
         fontColor: "white",
         onClicked: () => {
