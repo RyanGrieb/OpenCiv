@@ -5,7 +5,7 @@ import { InGameScene } from "../../scene/type/InGameScene";
 import { Unit } from "../../Unit";
 
 export function setupCitySettlementTest(game: Game) {
-    const runner = new TestRunner(game);
+    const runner = new TestRunner(game, "CitySettlement");
     let settlerUnit: Unit | undefined;
 
     runner.addStep({
@@ -166,7 +166,7 @@ export function setupCitySettlementTest(game: Game) {
     runner.addStep({
         name: "Check Food Output",
         action: async () => {
-            await new Promise(r => setTimeout(r, 4000)); // Wait for city to settle
+            await new Promise(r => setTimeout(r, 2000)); // Wait for city to settle
         },
         verification: async () => {
             console.log("[Test] Verification: Checking City Food via GameMap...");

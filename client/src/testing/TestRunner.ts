@@ -9,9 +9,11 @@ export interface TestStep {
 export class TestRunner {
     private steps: TestStep[] = [];
     private game: Game;
+    private scenarioName: string;
 
-    constructor(game: Game) {
+    constructor(game: Game, scenarioName: string) {
         this.game = game;
+        this.scenarioName = scenarioName;
     }
 
     public addStep(step: TestStep) {
@@ -19,7 +21,7 @@ export class TestRunner {
     }
 
     public async run() {
-        console.log("Starting Test Runner...");
+        console.log(`Starting Test Runner for Scenario: ${this.scenarioName}...`);
         const resultsProxy = document.createElement("div");
         resultsProxy.id = "test-results";
         resultsProxy.style.position = "absolute";
@@ -29,6 +31,13 @@ export class TestRunner {
         resultsProxy.style.color = "white";
         resultsProxy.style.padding = "10px";
         resultsProxy.style.fontFamily = "monospace";
+
+        const title = document.createElement("h3");
+        title.textContent = `Scenario: ${this.scenarioName}`;
+        title.style.margin = "0 0 10px 0";
+        title.style.borderBottom = "1px solid white";
+        resultsProxy.appendChild(title);
+
         document.body.appendChild(resultsProxy);
 
         const log = (msg: string, color: string = "white") => {

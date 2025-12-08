@@ -1,4 +1,5 @@
 import { assetList } from "./Assets";
+import { ScenarioRegistry } from "./testing/ScenarioRegistry";
 import { Game } from "./Game";
 import { InGameScene } from "./scene/type/InGameScene";
 import { JoinGameScene } from "./scene/type/JoinGameScene";
@@ -16,11 +17,18 @@ Game.createInstance({ assetList: assetList, canvasColor: "gray" }, () => {
 
   const urlParams = new URLSearchParams(window.location.search);
   if (urlParams.get("test") === "true") {
-    import("./testing/scenarios/CitySettlement.test").then(module => {
-      setTimeout(() => {
-        const runner = module.setupCitySettlementTest(Game.getInstance());
-        runner.run();
-      }, 1000);
-    });
+    const scenarioName = urlParams.get("scenario") || "CitySettlement";
+    const loader = ScenarioRegistry.get(scenarioName);
+
+    if (loader) {
+      loader().then(setup => {
+        setTimeout(() => {
+          const runner = setup(Game.getInstance());
+          runner.run();
+        }, 1000);
+      });
+    } else {
+      console.error(`Scenario '${scenarioName}' not found. Available: ${ScenarioRegistry.getAvailableScenarios().join(", ")}`);
+    }
   }
 });

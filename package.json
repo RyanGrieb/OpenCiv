@@ -4,6 +4,7 @@
     "description": "",
     "scripts": {
         "start": "concurrently \"npm start --prefix server\" \"npm run dev --prefix client\"",
+        "test:e2e": "npx ts-node scripts/run_tests.ts",
         "install-all": "npm install && concurrently \"npm install --prefix ./server\" \"npm install --prefix ./client\"",
         "generate-docs": "concurrently \"cd ./server && npx typedoc --name openciv/server\" \"cd ./client && npx typedoc --name openciv/client\"",
         "format": "npx prettier --write \"**/*.ts\""
@@ -12,6 +13,10 @@
         "concurrently": "^7.6.0"
     },
     "devDependencies": {
-        "typedoc": "^0.24.8"
+        "@types/node": "^24.10.2",
+        "kill-port": "^2.0.1",
+        "ts-node": "^10.9.2",
+        "typedoc": "^0.24.8",
+        "typescript": "^5.9.3"
     }
 }
