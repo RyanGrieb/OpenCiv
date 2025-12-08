@@ -1,5 +1,3 @@
-import { Game } from "../Game";
-
 export interface TestStep {
     name: string;
     action: () => Promise<void> | void;
@@ -8,11 +6,9 @@ export interface TestStep {
 
 export class TestRunner {
     private steps: TestStep[] = [];
-    private game: Game;
     private scenarioName: string;
 
-    constructor(game: Game, scenarioName: string) {
-        this.game = game;
+    constructor(scenarioName: string) {
         this.scenarioName = scenarioName;
     }
 
