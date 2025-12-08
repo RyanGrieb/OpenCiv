@@ -140,6 +140,9 @@ export class Unit extends ActorGroup {
     this.availableMovement = unitJSON["remainingMovement"];
     this.defaultMoveDistance = unitJSON["defaultMoveDistance"];
     this.player = AbstractPlayer.getPlayerByName(unitJSON["player"]);
+    if (this.player) {
+      this.player.addUnit(this);
+    }
 
     this.queuedMovementTiles = [];
     for (const jsonTile of unitJSON["queuedTiles"]) {
@@ -217,6 +220,9 @@ export class Unit extends ActorGroup {
         //FIXME: Tell client player to stop drawing lines.
         this.unselect();
         this.tile.removeUnit(this);
+        if (this.player) {
+          this.player.removeUnit(this);
+        }
         Game.getInstance().getCurrentScene().removeActor(this);
       }
     });

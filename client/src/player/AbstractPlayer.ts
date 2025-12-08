@@ -1,5 +1,7 @@
 import { Game } from "../Game";
 import { InGameScene } from "../scene/type/InGameScene";
+import { Unit } from "../Unit";
+import { City } from "../city/City";
 
 export class AbstractPlayer {
   private name: string;
@@ -31,5 +33,33 @@ export class AbstractPlayer {
 
   public getCivilizationData() {
     return this.civData;
+  }
+
+  protected units: Unit[] = [];
+
+  public addUnit(unit: Unit) {
+    this.units.push(unit);
+  }
+
+  public removeUnit(unit: Unit) {
+    this.units = this.units.filter((u) => u !== unit);
+  }
+
+  public getUnits() {
+    return this.units;
+  }
+
+  protected cities: City[] = [];
+
+  public addCity(city: City) {
+    this.cities.push(city);
+  }
+
+  public removeCity(city: City) {
+    this.cities = this.cities.filter((c) => c !== city);
+  }
+
+  public getCities() {
+    return this.cities;
   }
 }

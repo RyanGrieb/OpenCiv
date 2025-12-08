@@ -38,6 +38,7 @@ export class City extends ActorGroup {
     super({ x: 0, y: 0, z: 2, width: 0, height: 0 });
 
     this.player = options.player;
+    this.player.addCity(this);
     this.tile = options.tile;
     this.name = options.name;
     this.buildings = [];
@@ -144,6 +145,7 @@ export class City extends ActorGroup {
   }
 
   public onDestroyed(): void {
+    this.player.removeCity(this);
     super.onDestroyed();
     Game.getInstance().getCurrentScene().removeActor(this.nameLabel);
   }

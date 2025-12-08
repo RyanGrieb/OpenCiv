@@ -48,7 +48,10 @@ export class Unit {
     this.defaultMoveDistance = options.defaultMoveDistance || 2;
     this.availableMovement = this.defaultMoveDistance;
     this.actions = options.actions || [];
+    this.actions = options.actions || [];
     this.queuedMovementTiles = [];
+
+    this.player.addUnit(this);
 
     this.id = Unit.nextId;
     Unit.nextId += 1;
@@ -213,6 +216,7 @@ export class Unit {
 
   public delete() {
     this.tile.removeUnit(this);
+    this.player.removeUnit(this);
     ServerEvents.removeCallbacksByParentObject(this);
 
     Game.getInstance()
