@@ -2,6 +2,7 @@
     "name": "parent-package",
     "version": "1.0.0",
     "description": "",
+    "license": "MIT",
     "scripts": {
         "start": "concurrently \"npm start --prefix server\" \"npm run dev --prefix client\"",
         "test:e2e": "npx ts-node scripts/run_tests.ts",
