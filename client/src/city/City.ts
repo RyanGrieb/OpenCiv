@@ -14,6 +14,7 @@ export interface CityOptions {
   player: AbstractPlayer;
   tile: Tile;
   territory: Tile[];
+  workedTiles: Tile[];
   name: string;
 }
 
@@ -25,6 +26,7 @@ export class City extends ActorGroup {
   private tile: Tile;
   private territory: Tile[];
   private territoryOverlays: Actor[];
+  private workedTiles: Tile[];
   private name: string;
   private civIcon: Actor;
   private nameLabel: Label;
@@ -40,6 +42,7 @@ export class City extends ActorGroup {
     this.player = options.player;
     this.player.addCity(this);
     this.tile = options.tile;
+    this.tile.setCity(this);
     this.name = options.name;
     this.buildings = [];
     this.stats = new Map<string, number>();
@@ -50,8 +53,9 @@ export class City extends ActorGroup {
 
     this.territoryOverlays = [];
 
-    //FIXME: Have the server communicate what tiles are our territory.
     this.territory = options.territory;
+    this.workedTiles = options.workedTiles;
+    console.log(`[City ${this.name}] Initialized with ${this.workedTiles ? this.workedTiles.length : 'undefined'} worked tiles.`);
 
     this.nameLabel = new Label({
       text: this.name,
@@ -131,6 +135,16 @@ export class City extends ActorGroup {
           this.stats.set(statType, statValue);
         }
 
+        const workedTilesData = data["workedTiles"];
+        if (workedTilesData) {
+          const newWorkedTiles: Tile[] = [];
+          for (const tileData of workedTilesData) {
+            newWorkedTiles.push(GameMap.getInstance().getTiles()[tileData.x][tileData.y]);
+          }
+          this.workedTiles = newWorkedTiles;
+          console.log(`[City ${this.name}] Updated worked tiles: ${this.workedTiles.length}`);
+        }
+
         this.statsPresent = true;
       }
     });
@@ -168,5 +182,9 @@ export class City extends ActorGroup {
 
   public getBuildings() {
     return this.buildings;
+  }
+
+  public getWorkedTiles() {
+    return this.workedTiles;
   }
 }

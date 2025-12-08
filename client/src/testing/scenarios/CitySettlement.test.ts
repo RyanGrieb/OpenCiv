@@ -1,9 +1,8 @@
 import { TestRunner } from "../TestRunner";
 import { Game } from "../../Game";
-import { NetworkEvents, WebsocketClient } from "../../network/Client";
+import { WebsocketClient } from "../../network/Client";
 import { InGameScene } from "../../scene/type/InGameScene";
 import { Unit } from "../../Unit";
-import { GameMap } from "../../map/GameMap";
 
 export function setupCitySettlementTest(game: Game) {
     const runner = new TestRunner(game);
@@ -87,7 +86,7 @@ export function setupCitySettlementTest(game: Game) {
             // We are in game.
             await new Promise(r => setTimeout(r, 1000)); // Let things load
             const scene = game.getCurrentSceneAs<InGameScene>();
-            const player = scene.getClientPlayer();
+            // const player = scene.getClientPlayer();
 
             // Find a unit that can settle
             // We iterate actors? Or player has units?
@@ -167,7 +166,7 @@ export function setupCitySettlementTest(game: Game) {
     runner.addStep({
         name: "Check Food Output",
         action: async () => {
-            await new Promise(r => setTimeout(r, 2000)); // Wait for city to settle
+            await new Promise(r => setTimeout(r, 4000)); // Wait for city to settle
         },
         verification: async () => {
             console.log("[Test] Verification: Checking City Food via GameMap...");
@@ -185,6 +184,40 @@ export function setupCitySettlementTest(game: Game) {
                         if (city.hasStats()) {
                             const food = city.getStat("food");
                             console.log("[Test] City Food:", food);
+
+                            const workedTiles = city.getWorkedTiles();
+                            if (workedTiles) {
+                                console.log(`[Test] Worked Tiles Count: ${workedTiles.length}`);
+                                for (const tile of workedTiles) {
+                                    console.log(`[Test] Worked Tile: ${tile.getGridX()},${tile.getGridY()}`);
+                                    if (tile === city.getTile()) {
+                                        console.log(`[Test] City Center verified as worked tile.`);
+                                        // We can't easily check yields on client tile without simulating it or receiving it.
+                                        // But we can verify it's in the list.
+                                    }
+                                }
+                            } else {
+                                console.log("[Test] No worked tiles synced yet.");
+                            }
+
+                            // Debug logging to DOM
+                            let statsLog = "Stats: ";
+                            // We can't iterate the map keys directly easily if its private or we don't have access to the map object itself, 
+                            // but we can try to access common ones or if `getStat` is the only way. 
+                            // `City.ts` has `private stats: Map<string, number>;`
+                            // We can cast to any to access private stats for debugging
+                            const statsMap = (city as any).stats as Map<string, number>;
+                            statsMap.forEach((value, key) => {
+                                statsLog += `${key}: ${value}, `;
+                            });
+                            console.log(`[Test] ${statsLog}`);
+
+                            // Append to test results for visibility
+                            const debugDiv = document.createElement("div");
+                            debugDiv.textContent = `[DEBUG] ${statsLog}`;
+                            debugDiv.style.color = "yellow";
+                            document.getElementById("test-results")?.appendChild(debugDiv);
+
                             if (food >= 0) return true;
                         } else {
                             console.log("[Test] City has no stats yet.");

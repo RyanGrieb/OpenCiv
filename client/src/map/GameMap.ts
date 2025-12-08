@@ -315,7 +315,8 @@ export class GameMap {
             y: yPos,
             gridX: gridX,
             gridY: gridY,
-            movementCost: movementCost
+            movementCost: movementCost,
+            yields: tileJSON["yields"]
           });
           this.tiles[gridX][gridY] = tile;
 
@@ -334,7 +335,8 @@ export class GameMap {
               y: yPosRelative,
               gridX: gridX,
               gridY: gridY,
-              movementCost: movementCost
+              movementCost: movementCost,
+              yields: tileJSON["yields"]
             });
 
             topLayerTiles.push(topLayerTile);
@@ -701,9 +703,19 @@ export class GameMap {
     for (const territoryJSON of data["territory"]) {
       territory.push(this.tiles[territoryJSON["tileX"]][territoryJSON["tileY"]]);
     }
+
+    const workedTiles: Tile[] = [];
+    if (data["workedTiles"]) {
+      for (const workedTileJSON of data["workedTiles"]) {
+        workedTiles.push(this.tiles[workedTileJSON["x"]][workedTileJSON["y"]]);
+      }
+    }
+    console.log(`[GameMap] Creating city ${cityName} with ${workedTiles.length} worked tiles.`);
+
     const city = new City({
       tile: tile,
       territory: territory,
+      workedTiles: workedTiles,
       player: player,
       name: cityName
     });

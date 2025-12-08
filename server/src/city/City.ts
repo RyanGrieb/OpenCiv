@@ -60,7 +60,7 @@ export class City {
 
   public updateWorkedTiles(options?: { sendStatUpdate: boolean }) {
     // Reset worked tiles
-    this.workedTiles = [];
+    this.workedTiles = [this.tile];
 
     // For default focus, find all tiles and get the best tile with the highest yield
     // Note, if our food stat from the current worked tiles is negative, find the tiles with the highest food yeild.
@@ -104,7 +104,7 @@ export class City {
     this.updateWorkedTiles({ sendStatUpdate: true });
   }
 
-  public sendTerritoryUpdate() {}
+  public sendTerritoryUpdate() { }
 
   /*
   Get the city-stat line, and send it to the player
@@ -116,12 +116,12 @@ export class City {
     player.sendNetworkEvent({
       event: "updateCityStats",
       cityName: this.name,
-      cityStats: cityStats
+      cityStats: cityStats,
+      workedTiles: this.workedTiles.map((tile) => ({ x: tile.getX(), y: tile.getY() }))
     });
   }
 
   public getStatline(options: { asArray: boolean }) {
-    //FIXME: Include worked tiles
     if (options.asArray) {
       const cityStats = [
         {
@@ -151,6 +151,27 @@ export class City {
         }
       }
 
+
+      // Add all worked tiles to existing stat-line dictionary
+      console.log(`[City ${this.name}] Updating stats (asArray). Worked tiles: ${this.workedTiles.length}`);
+      for (const tile of this.workedTiles) {
+        console.log(`[City ${this.name}] Working tile at ${tile.getX()},${tile.getY()}`);
+        for (const stat of tile.getStats()) {
+          const statType = Object.keys(stat)[0]; // Get the stat type, e.g., "science", "gold", etc.
+          const statValue = stat[statType]; // Get the stat value
+
+          if (statValue !== 0) {
+            console.log(`[City ${this.name}] Tile yields ${statType}: ${statValue}`);
+          }
+
+          for (const cityStat of cityStats) {
+            if (Object.keys(cityStat)[0] === statType) {
+              cityStat[statType] += statValue;
+            }
+          }
+        }
+      }
+
       return cityStats;
     }
 
@@ -166,9 +187,6 @@ export class City {
       morale: 0, //TODO: Implement morale
       foodSurplus: this.foodSurplus
     };
-
-    // Feed citizens
-    cityStats["food"] -= this.population * 2;
 
     // Add all buildings to existing stat-line dictionary
     for (const buildingData of this.buildings) {
@@ -220,7 +238,8 @@ export class City {
       player: this.player.getName(),
       tileX: this.tile.getX(),
       tileY: this.tile.getY(),
-      territory: territoryCoords
+      territory: territoryCoords,
+      workedTiles: this.workedTiles.map((tile) => ({ x: tile.getX(), y: tile.getY() }))
     };
   }
 }

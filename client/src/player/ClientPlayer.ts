@@ -283,7 +283,7 @@ export class ClientPlayer extends AbstractPlayer {
   }
 
   private updateHoveredTile(mouseX: number, mouseY: number) {
-    if (!this.hoveredTile) return;
+    if (!this.hoveredTile || isNaN(mouseX) || isNaN(mouseY)) return;
 
     let zoom = Game.getInstance().getCurrentScene().getCamera().getZoomAmount();
 

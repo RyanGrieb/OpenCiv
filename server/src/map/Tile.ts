@@ -110,7 +110,8 @@ export class Tile {
       x: this.x,
       y: this.y,
       movementCost: this.getMovementCost(),
-      city: this.city ? this.city.getJSON() : null
+      city: this.city ? this.city.getJSON() : null,
+      yields: this.getStats()
     };
   }
 
@@ -742,13 +743,26 @@ export class Tile {
       { morale: 0 }
     ];
     for (const tileType of this.tileTypes) {
-      const tileTypeStats = Tile.getAllTileStats()[tileType];
-      if (!tileTypeStats) continue;
+      const tileTypeData = Tile.getAllTileStats()[tileType.toUpperCase()];
+      if (!tileTypeData || !tileTypeData.stats) continue;
 
+      for (const statData of tileTypeData.stats) {
+        const statName = Object.keys(statData)[0];
+        const statValue = statData[statName];
+
+        for (const stat of tileStats) {
+          if (Object.keys(stat)[0] === statName) {
+            stat[statName] += statValue;
+          }
+        }
+      }
+    }
+
+    // Apply City Center bonus (Min 2 Food)
+    if (this.city) {
       for (const stat of tileStats) {
-        const statName = Object.keys(stat)[0];
-        if (tileTypeStats[statName]) {
-          stat[statName] += tileTypeStats[statName];
+        if (stat["food"] !== undefined && stat["food"] < 2) {
+          stat["food"] = 2;
         }
       }
     }

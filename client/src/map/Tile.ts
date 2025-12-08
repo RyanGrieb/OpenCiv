@@ -18,6 +18,7 @@ export interface TileOptions {
   width?: number;
   height?: number;
   color?: string;
+  yields?: any[];
 }
 
 export class Tile extends Actor {
@@ -38,6 +39,7 @@ export class Tile extends Actor {
   private gridY: number;
 
   private city: City;
+  private yields: any[];
 
   constructor(options: TileOptions) {
     super({
@@ -54,6 +56,7 @@ export class Tile extends Actor {
     this.riverSides = options.riverSides ?? Array(6).fill(false);
     this.units = [];
     this.movementCost = options.movementCost;
+    this.yields = options.yields;
 
     this.gridX = options.gridX;
     this.gridY = options.gridY;
@@ -125,7 +128,18 @@ export class Tile extends Actor {
   }
 
   public getTileYield() {
-    // Use the static getter to ensure we always have the latest tile stats
+    if (this.yields) {
+      const tileYield: { [key: string]: number } = {};
+      for (const statObj of this.yields) {
+        for (const [key, value] of Object.entries(statObj)) {
+          tileYield[key] = (tileYield[key] || 0) + (typeof value === "number" ? value : 0);
+        }
+      }
+      return tileYield;
+    }
+
+    // Use the static getter to ensure we always have the latest tile stats (Fallback)
+    // FIXME: Remove this deprecated bullcrap
     const allTileStats = Tile.getTileYields();
     if (!allTileStats) return undefined;
 
