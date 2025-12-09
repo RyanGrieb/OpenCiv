@@ -66,6 +66,8 @@ export class Label extends Actor {
         if (this.mouseInside) {
           if (!Game.getInstance().getCurrentScene().hasSystemMenuOpen()) {
             Game.getInstance().setCursor("pointer");
+          } else {
+            Game.getInstance().setCursor("default");
           }
         }
       });

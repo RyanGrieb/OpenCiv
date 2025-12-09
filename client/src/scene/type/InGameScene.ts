@@ -356,6 +356,7 @@ export class InGameScene extends Scene {
 
     this.setUIState(true);
     this.systemMenuOpen = true;
+    Game.getInstance().setCursor("default");
 
     this.escMenu = new ActorGroup({
       x: Game.getInstance().getWidth() / 2 - 250 / 2,
@@ -386,8 +387,7 @@ export class InGameScene extends Scene {
         height: 50,
         fontColor: "white",
         onClicked: () => {
-          this.escMenu = undefined;
-          this.setUIState(false);
+          this.toggleEscMenu();
         }
       })
     );
