@@ -299,6 +299,8 @@ export class InGameScene extends Scene {
         this.removeActor(actor);
       });
       this.tileYieldActors = [];
+    } else {
+      this.systemMenuOpen = false;
     }
   }
 
@@ -321,6 +323,7 @@ export class InGameScene extends Scene {
     //Center camera on city
     this.focusOnTile(city.getTile(), 3);
     this.setUIState(true);
+    this.systemMenuOpen = false;
 
     this.activeGameplayUI = { close: () => this.toggleCityUI() };
 
@@ -346,13 +349,13 @@ export class InGameScene extends Scene {
     if (this.escMenu) {
       this.removeActor(this.escMenu);
       this.escMenu = undefined;
-      this.controlsLocked = false;
+      this.systemMenuOpen = false;
       this.setUIState(false);
       return;
     }
 
-    this.controlsLocked = true;
     this.setUIState(true);
+    this.systemMenuOpen = true;
 
     this.escMenu = new ActorGroup({
       x: Game.getInstance().getWidth() / 2 - 250 / 2,

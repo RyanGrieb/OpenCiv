@@ -11,7 +11,7 @@ export abstract class Scene {
 
   protected storedEvents: Map<string, Function[]>;
   protected firstLoad: boolean;
-  protected controlsLocked: boolean;
+  protected systemMenuOpen: boolean;
   private camera: Camera;
   private oldCamera: Camera;
   private sceneObjects: SceneObject[];
@@ -144,7 +144,7 @@ export abstract class Scene {
     });
   }
 
-  public hasControlsLocked() {
-    return this.controlsLocked;
+  public hasSystemMenuOpen() {
+    return this.systemMenuOpen;
   }
 }

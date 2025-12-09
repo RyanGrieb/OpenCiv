@@ -64,13 +64,16 @@ export class Label extends Actor {
       // Change cursor to pointer when mouse is over label
       this.on("mousemove", () => {
         if (this.mouseInside) {
-          Game.getInstance().setCursor("pointer");
+          if (!Game.getInstance().getCurrentScene().hasSystemMenuOpen()) {
+            Game.getInstance().setCursor("pointer");
+          }
         }
       });
 
-      this.on("mouse_enter", () => {
-        Game.getInstance().setCursor("pointer");
-      });
+      // Redundant:
+      //this.on("mouse_enter", () => {
+      //Game.getInstance().setCursor("pointer");
+      //});
 
       this.on("mouse_exit", () => {
         Game.getInstance().setCursor("default");
