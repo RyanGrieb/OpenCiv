@@ -42,7 +42,9 @@ export class JoinGameScene extends Scene {
       x: Game.getInstance().getWidth() / 2 - 600 / 2,
       y: Game.getInstance().getHeight() / 2 - 500 / 2,
       width: 600,
-      height: 500
+      height: 500,
+      cornerSize: 20,
+      nineSlice: true,
     });
 
     this.addActor(backgroundActor);

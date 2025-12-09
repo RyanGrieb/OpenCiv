@@ -122,7 +122,7 @@ export class CityDisplayInfo extends ActorGroup {
   private initializeStatsWindow() {
     const x = 0;
     const y = 21;
-    const width = 250;
+    const width = 260;
     const height = 300;
     this.addActor(
       new Actor({
@@ -142,14 +142,14 @@ export class CityDisplayInfo extends ActorGroup {
       fontColor: "white"
     });
     nameLabel.conformSize().then(() => {
-      nameLabel.setPosition(0 + 250 / 2 - nameLabel.getWidth() / 2, 30);
+      nameLabel.setPosition(0 + 260 / 2 - nameLabel.getWidth() / 2, 32);
       this.addActor(nameLabel);
     });
 
     const populationIcon = new Actor({
       image: Game.getInstance().getImage(GameImage.SPRITESHEET),
       spriteRegion: SpriteRegion.POPULATION_ICON,
-      x: 6,
+      x: 10,
       y: 52,
       width: 32,
       height: 32
@@ -181,7 +181,7 @@ export class CityDisplayInfo extends ActorGroup {
     const moraleIcon = new Actor({
       image: Game.getInstance().getImage(GameImage.SPRITESHEET),
       spriteRegion: SpriteRegion.MORALE_ICON,
-      x: 6,
+      x: 10,
       y: populationIcon.getY() + 32,
       width: 32,
       height: 32
@@ -213,7 +213,7 @@ export class CityDisplayInfo extends ActorGroup {
     const foodIcon = new Actor({
       image: Game.getInstance().getImage(GameImage.SPRITESHEET),
       spriteRegion: SpriteRegion.FOOD_ICON,
-      x: 6,
+      x: 10,
       y: moraleIcon.getY() + 32,
       width: 32,
       height: 32
@@ -245,7 +245,7 @@ export class CityDisplayInfo extends ActorGroup {
     const productionIcon = new Actor({
       image: Game.getInstance().getImage(GameImage.SPRITESHEET),
       spriteRegion: SpriteRegion.PRODUCTION_ICON,
-      x: 6,
+      x: 10,
       y: foodIcon.getY() + 32,
       width: 32,
       height: 32
@@ -277,7 +277,7 @@ export class CityDisplayInfo extends ActorGroup {
     const goldIcon = new Actor({
       image: Game.getInstance().getImage(GameImage.SPRITESHEET),
       spriteRegion: SpriteRegion.GOLD_ICON,
-      x: 6,
+      x: 10,
       y: productionIcon.getY() + 32,
       width: 32,
       height: 32
@@ -309,7 +309,7 @@ export class CityDisplayInfo extends ActorGroup {
     const scienceIcon = new Actor({
       image: Game.getInstance().getImage(GameImage.SPRITESHEET),
       spriteRegion: SpriteRegion.SCIENCE_ICON,
-      x: 6,
+      x: 10,
       y: goldIcon.getY() + 32,
       width: 32,
       height: 32
@@ -341,7 +341,7 @@ export class CityDisplayInfo extends ActorGroup {
     const cultureIcon = new Actor({
       image: Game.getInstance().getImage(GameImage.SPRITESHEET),
       spriteRegion: SpriteRegion.CULTURE_ICON,
-      x: 6,
+      x: 10,
       y: scienceIcon.getY() + 32,
       width: 32,
       height: 32

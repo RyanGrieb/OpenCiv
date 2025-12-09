@@ -332,9 +332,9 @@ export class InGameScene extends Scene {
     this.controlsLocked = true;
 
     this.escMenu = new ActorGroup({
-      x: Game.getInstance().getWidth() / 2 - 275 / 2,
-      y: Game.getInstance().getHeight() / 2 - 275 / 2,
-      width: 275,
+      x: Game.getInstance().getWidth() / 2 - 250 / 2,
+      y: Game.getInstance().getHeight() / 2 - 250 / 2,
+      width: 250,
       height: 275,
       cameraApplies: false
     });
@@ -345,17 +345,19 @@ export class InGameScene extends Scene {
         y: this.escMenu.getY(),
         width: this.escMenu.getWidth(),
         height: this.escMenu.getHeight(),
-        image: Game.getInstance().getImage(GameImage.POPUP_BOX)
+        image: Game.getInstance().getImage(GameImage.POPUP_BOX),
+        nineSlice: true,
+        cornerSize: 20
       })
     );
 
     this.escMenu.addActor(
       new Button({
-        text: "Return to Game",
-        x: this.escMenu.getX() + this.escMenu.getWidth() / 2 - 242 / 2,
-        y: this.escMenu.getY() + 14,
-        width: 242,
-        height: 62,
+        text: "Return",
+        x: this.escMenu.getX() + 23,
+        y: this.escMenu.getY() + 23,
+        width: 210,
+        height: 50,
         fontColor: "white",
         onClicked: () => {
           this.removeActor(this.escMenu);
@@ -367,10 +369,10 @@ export class InGameScene extends Scene {
     this.escMenu.addActor(
       new Button({
         text: "Settings",
-        x: this.escMenu.getX() + this.escMenu.getWidth() / 2 - 242 / 2,
-        y: this.escMenu.getY() + 76,
-        width: 242,
-        height: 62,
+        x: this.escMenu.getX() + 23,
+        y: this.escMenu.getY() + 83,
+        width: 210,
+        height: 50,
         fontColor: "white",
         onClicked: () => {
           console.log("Toggle settings menu");
@@ -381,10 +383,10 @@ export class InGameScene extends Scene {
     this.escMenu.addActor(
       new Button({
         text: "Save Game",
-        x: this.escMenu.getX() + this.escMenu.getWidth() / 2 - 242 / 2,
-        y: this.escMenu.getY() + 138,
-        width: 242,
-        height: 62,
+        x: this.escMenu.getX() + 23,
+        y: this.escMenu.getY() + 143,
+        width: 210,
+        height: 50,
         fontColor: "white",
         onClicked: () => { }
       })
@@ -392,11 +394,11 @@ export class InGameScene extends Scene {
 
     this.escMenu.addActor(
       new Button({
-        text: "Exit to Main Menu",
-        x: this.escMenu.getX() + this.escMenu.getWidth() / 2 - 242 / 2,
-        y: this.escMenu.getY() + 200,
-        width: 242,
-        height: 62,
+        text: "Main Menu",
+        x: this.escMenu.getX() + 23,
+        y: this.escMenu.getY() + 203,
+        width: 210,
+        height: 50,
         fontColor: "white",
         onClicked: () => {
           WebsocketClient.disconnect();

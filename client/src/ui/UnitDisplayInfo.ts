@@ -98,7 +98,7 @@ export class UnitDisplayInfo extends ActorGroup {
     this.movementLabel.conformSize().then(() => {
       this.movementLabel.setPosition(
         this.x + this.width / 2 - this.movementLabel.getWidth() / 2,
-        this.y + this.height - 20
+        this.y + this.height - 25
       );
     });
   }
@@ -116,7 +116,7 @@ export class UnitDisplayInfo extends ActorGroup {
         icon: action.getIcon(),
         iconWidth: 32,
         iconHeight: 32,
-        x: this.x + 5 + xOffset,
+        x: this.x + 16 + xOffset,
         y: this.y + 28,
         width: 50,
         height: 50,
