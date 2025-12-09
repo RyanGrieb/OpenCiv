@@ -391,6 +391,145 @@ export class Game {
     actor.onDestroyed();
   }
 
+  public drawNineSliceImage(actor: Actor, context: CanvasRenderingContext2D) {
+    const image = actor.getImage();
+    const x = actor.getX();
+    const y = actor.getY();
+    const width = actor.getWidth();
+    const height = actor.getHeight();
+    const cornerSize = actor.getCornerSize(); // Size of the corners (unscaled)
+
+    if (!image) return;
+
+    const originalSmoothing = context.imageSmoothingEnabled;
+    context.imageSmoothingEnabled = false;
+
+    // To prevent gaps (especially with SVGs), we can overlap slightly or ensure we are ceiling/flooring.
+    // However, exact math should work for integers. The issue might be transparency bleeding or anti-aliasing.
+    // Let's try to ensure we draw *exactly* what we need, but maybe with a tiny overlap if needed.
+    // Actually, looking at the previous user image, the blue bars were separated from red corners.
+    // That means the red corners were drawn (0,0,20,20) and blue bars were drawn at (20,0,...)
+    // If there is a white gap, maybe the browser is sub-pixel rendering.
+
+    // Let's force integer coordinates for destination, but that should be handled by canvas.
+    // Let's try adding +1 to width/height of the source/dest to ensuring overlap?
+    // No, that distorts.
+
+    // Wait, the user said "Blue bars DO NOT touch the red corners".
+    // Red corners are at x=0. Blue bars start at x=cornerSize.
+    // If they don't touch, then x+cornerSize > x_of_blue_bar? No.
+
+    // Let's try explicitly rounding all coordinates to avoid subpixel rendering issues.
+
+    // 1. Top-Left
+    context.drawImage(image, 0, 0, cornerSize, cornerSize, Math.floor(x), Math.floor(y), cornerSize, cornerSize);
+
+    // 2. Top-Center
+    context.drawImage(
+      image,
+      cornerSize,
+      0,
+      image.width - cornerSize * 2,
+      cornerSize,
+      Math.floor(x + cornerSize),
+      Math.floor(y),
+      Math.ceil(width - cornerSize * 2),
+      cornerSize
+    );
+
+    // 3. Top-Right
+    context.drawImage(
+      image,
+      image.width - cornerSize,
+      0,
+      cornerSize,
+      cornerSize,
+      Math.floor(x + width - cornerSize),
+      Math.floor(y),
+      cornerSize,
+      cornerSize
+    );
+
+    // 4. Middle-Left
+    context.drawImage(
+      image,
+      0,
+      cornerSize,
+      cornerSize,
+      image.height - cornerSize * 2,
+      Math.floor(x),
+      Math.floor(y + cornerSize),
+      cornerSize,
+      Math.ceil(height - cornerSize * 2)
+    );
+
+    // 5. Center
+    context.drawImage(
+      image,
+      cornerSize,
+      cornerSize,
+      image.width - cornerSize * 2,
+      image.height - cornerSize * 2,
+      Math.floor(x + cornerSize),
+      Math.floor(y + cornerSize),
+      Math.ceil(width - cornerSize * 2),
+      Math.ceil(height - cornerSize * 2)
+    );
+
+    // 6. Middle-Right
+    context.drawImage(
+      image,
+      image.width - cornerSize,
+      cornerSize,
+      cornerSize,
+      image.height - cornerSize * 2,
+      Math.floor(x + width - cornerSize),
+      Math.floor(y + cornerSize),
+      cornerSize,
+      Math.ceil(height - cornerSize * 2)
+    );
+
+    // 7. Bottom-Left
+    context.drawImage(
+      image,
+      0,
+      image.height - cornerSize,
+      cornerSize,
+      cornerSize,
+      Math.floor(x),
+      Math.floor(y + height - cornerSize),
+      cornerSize,
+      cornerSize
+    );
+
+    // 8. Bottom-Center
+    context.drawImage(
+      image,
+      cornerSize,
+      image.height - cornerSize,
+      image.width - cornerSize * 2,
+      cornerSize,
+      Math.floor(x + cornerSize),
+      Math.floor(y + height - cornerSize),
+      Math.ceil(width - cornerSize * 2),
+      cornerSize
+    );
+
+    // 9. Bottom-Right
+    context.drawImage(
+      image,
+      image.width - cornerSize,
+      image.height - cornerSize,
+      cornerSize,
+      cornerSize,
+      Math.floor(x + width - cornerSize),
+      Math.floor(y + height - cornerSize),
+      cornerSize,
+      cornerSize
+    );
+    context.imageSmoothingEnabled = originalSmoothing;
+  }
+
   public drawImageFromActor(actor: Actor, context: CanvasRenderingContext2D) {
     if (!actor.getImage()) {
       console.log("Warning: Attempted to draw empty actor: " + actor.getWidth());
@@ -436,6 +575,8 @@ export class Game {
         actor.getWidth(),
         actor.getHeight()
       );
+    } else if (actor.isNineSlice()) {
+      this.drawNineSliceImage(actor, canvasContext);
     } else {
       canvasContext.drawImage(actor.getImage(), actor.getX(), actor.getY(), actor.getWidth(), actor.getHeight());
     }

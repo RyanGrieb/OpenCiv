@@ -71,7 +71,9 @@ export class Button extends ActorGroup {
         x: this.x,
         y: this.y,
         width: this.width,
-        height: this.height
+        height: this.height,
+        nineSlice: true,
+        cornerSize: 8
       });
       this.addActor(this.buttonActor);
     }

@@ -14,6 +14,8 @@ export interface ActorOptions {
   rotation?: number;
   transparency?: number;
   cameraApplies?: boolean;
+  nineSlice?: boolean;
+  cornerSize?: number;
 }
 
 export class Actor implements SceneObject {
@@ -33,6 +35,8 @@ export class Actor implements SceneObject {
   protected mouseInside: boolean;
   protected cameraApplies: boolean;
   protected drawSpriteRegion: boolean; // Draw region from spritesheet
+  protected nineSlice: boolean;
+  protected cornerSize: number;
 
   constructor(actorOptions: ActorOptions) {
     this.storedEvents = new Map<string, Function[]>();
@@ -47,6 +51,8 @@ export class Actor implements SceneObject {
     this.rotation = actorOptions.rotation ?? 0;
     this.transparency = actorOptions.transparency ?? 1;
     this.cameraApplies = actorOptions.cameraApplies === undefined ? true : actorOptions.cameraApplies;
+    this.nineSlice = actorOptions.nineSlice ?? false;
+    this.cornerSize = actorOptions.cornerSize ?? 10;
 
     this.on("mousemove", (options) => {
 
@@ -442,5 +448,13 @@ export class Actor implements SceneObject {
 
   public setMouseInside(value: boolean) {
     this.mouseInside = value;
+  }
+
+  public isNineSlice(): boolean {
+    return this.nineSlice;
+  }
+
+  public getCornerSize(): number {
+    return this.cornerSize;
   }
 }

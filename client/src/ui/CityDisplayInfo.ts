@@ -129,8 +129,10 @@ export class CityDisplayInfo extends ActorGroup {
         image: Game.getInstance().getImage(GameImage.POPUP_BOX),
         x: x,
         y: y, // (Height of status-bar)
+        cornerSize: 20,
         width: width,
-        height: height
+        height: height,
+        nineSlice: true,
       })
     );
 

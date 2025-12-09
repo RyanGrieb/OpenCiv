@@ -1,0 +1,51 @@
+<svg width="100" height="20" viewBox="0 0 100 20" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Subtle pixel pattern for texture -->
+    <pattern id="buttonPattern" x="0" y="0" width="4" height="4" patternUnits="userSpaceOnUse">
+      <rect width="4" height="4" fill="#6a6a6a"/>
+      <rect x="0" y="0" width="1" height="1" fill="#7a7a7a"/>
+      <rect x="2" y="2" width="1" height="1" fill="#7a7a7a"/>
+    </pattern>
+  </defs>
+  
+  <!-- Button shadow/depth -->
+  <rect x="2" y="2" width="96" height="16" fill="#3a3a3a"/>
+  
+  <!-- Main button body -->
+  <rect x="0" y="0" width="96" height="16" fill="#6a6a6a"/>
+  
+  <!-- Top highlight (light edge) -->
+  <rect x="2" y="2" width="92" height="2" fill="#8a8a8a"/>
+  <rect x="2" y="2" width="2" height="12" fill="#8a8a8a"/>
+  
+  <!-- Bottom shadow (dark edge) -->
+  <rect x="2" y="14" width="92" height="2" fill="#4a4a4a"/>
+  <rect x="92" y="2" width="2" height="12" fill="#4a4a4a"/>
+  
+  <!-- Corner pixels for depth -->
+  <rect x="0" y="0" width="2" height="2" fill="#7a7a7a"/>
+  <rect x="94" y="0" width="2" height="2" fill="#5a5a5a"/>
+  <rect x="0" y="14" width="2" height="2" fill="#5a5a5a"/>
+  <rect x="94" y="14" width="2" height="2" fill="#3a3a3a"/>
+  
+  <!-- Left cap detail -->
+  <rect x="4" y="6" width="2" height="2" fill="#5a5a5a"/>
+  <rect x="6" y="5" width="2" height="1" fill="#5a5a5a"/>
+  <rect x="6" y="10" width="2" height="1" fill="#5a5a5a"/>
+  <rect x="4" y="8" width="2" height="2" fill="#5a5a5a"/>
+  
+  <!-- Right cap detail -->
+  <rect x="88" y="6" width="2" height="2" fill="#5a5a5a"/>
+  <rect x="86" y="5" width="2" height="1" fill="#5a5a5a"/>
+  <rect x="86" y="10" width="2" height="1" fill="#5a5a5a"/>
+  <rect x="88" y="8" width="2" height="2" fill="#5a5a5a"/>
+  
+  <!-- Subtle texture overlay -->
+  <rect x="4" y="4" width="88" height="8" fill="url(#buttonPattern)" opacity="0.1"/>
+  
+  <!-- Central divider lines (like your original) -->
+  <rect x="10" y="7" width="1" height="2" fill="#5a5a5a"/>
+  <rect x="12" y="7" width="1" height="2" fill="#5a5a5a"/>
+  <rect x="84" y="7" width="1" height="2" fill="#5a5a5a"/>
+  <rect x="86" y="7" width="1" height="2" fill="#5a5a5a"/>
+</svg>

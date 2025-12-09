@@ -1,0 +1,42 @@
+<svg width="200" height="150" viewBox="0 0 200 150" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Pixel art style dot pattern -->
+    <pattern id="pixelPattern" x="0" y="0" width="8" height="8" patternUnits="userSpaceOnUse">
+      <rect width="8" height="8" fill="#4a4a4a"/>
+      <rect x="0" y="0" width="2" height="2" fill="#5a5a5a"/>
+      <rect x="4" y="4" width="2" height="2" fill="#5a5a5a"/>
+    </pattern>
+  </defs>
+  
+  <!-- Outer shadow (pixelated) -->
+  <rect x="8" y="8" width="190" height="140" fill="#000000" opacity="0.3"/>
+  <rect x="7" y="7" width="190" height="140" fill="#000000" opacity="0.2"/>
+  
+  <!-- Main solid background -->
+  <rect x="5" y="5" width="190" height="140" fill="#3a3a3a"/>
+  
+  <!-- Pixel border - outer dark -->
+  <rect x="5" y="5" width="190" height="4" fill="#2a2a2a"/>
+  <rect x="5" y="5" width="4" height="140" fill="#2a2a2a"/>
+  <rect x="5" y="141" width="190" height="4" fill="#1a1a1a"/>
+  <rect x="191" y="5" width="4" height="140" fill="#1a1a1a"/>
+  
+  <!-- Pixel border - inner light highlight -->
+  <rect x="9" y="9" width="182" height="2" fill="#5a5a5a"/>
+  <rect x="9" y="9" width="2" height="132" fill="#5a5a5a"/>
+  
+  <!-- Corner pixels -->
+  <rect x="5" y="5" width="4" height="4" fill="#2a2a2a"/>
+  <rect x="191" y="5" width="4" height="4" fill="#1a1a1a"/>
+  <rect x="5" y="141" width="4" height="4" fill="#1a1a1a"/>
+  <rect x="191" y="141" width="4" height="4" fill="#0a0a0a"/>
+  
+  <!-- Decorative corner dots -->
+  <rect x="13" y="13" width="3" height="3" fill="#5a5a5a"/>
+  <rect x="184" y="13" width="3" height="3" fill="#4a4a4a"/>
+  <rect x="13" y="134" width="3" height="3" fill="#4a4a4a"/>
+  <rect x="184" y="134" width="3" height="3" fill="#3a3a3a"/>
+  
+  <!-- Subtle pixel noise pattern overlay -->
+  <rect x="9" y="11" width="182" height="130" fill="url(#pixelPattern)" opacity="0.15"/>
+</svg>

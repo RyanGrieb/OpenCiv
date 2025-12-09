@@ -98,13 +98,13 @@ export enum SpriteRegion {
 
 // assets.ts
 export const assetList = [
-  new URL("../assets/images/ui_button.png", import.meta.url).href,
-  new URL("../assets/images/ui_button_hovered.png", import.meta.url).href,
-  new URL("../assets/images/ui_icon_button.png", import.meta.url).href,
-  new URL("../assets/images/ui_icon_button_hovered.png", import.meta.url).href,
+  new URL("../assets/images/ui_button.svg", import.meta.url).href,
+  new URL("../assets/images/ui_button_hovered.svg", import.meta.url).href,
+  new URL("../assets/images/ui_icon_button.svg", import.meta.url).href,
+  new URL("../assets/images/ui_icon_button_hovered.svg", import.meta.url).href,
   new URL("../assets/images/spritesheet.png", import.meta.url).href,
   new URL("../assets/images/river.png", import.meta.url).href,
-  new URL("../assets/images/ui_popup_box.png", import.meta.url).href,
+  new URL("../assets/images/ui_popup_box.svg", import.meta.url).href,
   new URL("../assets/images/debug.png", import.meta.url).href,
   new URL("../assets/images/font.png", import.meta.url).href,
   new URL("../assets/images/logo.png", import.meta.url).href

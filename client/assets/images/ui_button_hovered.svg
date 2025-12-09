@@ -1,0 +1,54 @@
+<svg width="100" height="20" viewBox="0 0 100 20" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Brighter pixel pattern for hover state -->
+    <pattern id="buttonPatternHover" x="0" y="0" width="4" height="4" patternUnits="userSpaceOnUse">
+      <rect width="4" height="4" fill="#7a7a7a"/>
+      <rect x="0" y="0" width="1" height="1" fill="#8a8a8a"/>
+      <rect x="2" y="2" width="1" height="1" fill="#8a8a8a"/>
+    </pattern>
+  </defs>
+  
+  <!-- Button shadow/depth (slightly lighter) -->
+  <rect x="2" y="2" width="96" height="16" fill="#4a4a4a"/>
+  
+  <!-- Main button body (brighter on hover) -->
+  <rect x="0" y="0" width="96" height="16" fill="#7a7a7a"/>
+  
+  <!-- Top highlight (brighter light edge) -->
+  <rect x="2" y="2" width="92" height="2" fill="#9a9a9a"/>
+  <rect x="2" y="2" width="2" height="12" fill="#9a9a9a"/>
+  
+  <!-- Bottom shadow (lighter dark edge) -->
+  <rect x="2" y="14" width="92" height="2" fill="#5a5a5a"/>
+  <rect x="92" y="2" width="2" height="12" fill="#5a5a5a"/>
+  
+  <!-- Corner pixels for depth (brighter) -->
+  <rect x="0" y="0" width="2" height="2" fill="#8a8a8a"/>
+  <rect x="94" y="0" width="2" height="2" fill="#6a6a6a"/>
+  <rect x="0" y="14" width="2" height="2" fill="#6a6a6a"/>
+  <rect x="94" y="14" width="2" height="2" fill="#4a4a4a"/>
+  
+  <!-- Left cap detail (brighter) -->
+  <rect x="4" y="6" width="2" height="2" fill="#6a6a6a"/>
+  <rect x="6" y="5" width="2" height="1" fill="#6a6a6a"/>
+  <rect x="6" y="10" width="2" height="1" fill="#6a6a6a"/>
+  <rect x="4" y="8" width="2" height="2" fill="#6a6a6a"/>
+  
+  <!-- Right cap detail (brighter) -->
+  <rect x="88" y="6" width="2" height="2" fill="#6a6a6a"/>
+  <rect x="86" y="5" width="2" height="1" fill="#6a6a6a"/>
+  <rect x="86" y="10" width="2" height="1" fill="#6a6a6a"/>
+  <rect x="88" y="8" width="2" height="2" fill="#6a6a6a"/>
+  
+  <!-- Brighter texture overlay -->
+  <rect x="4" y="4" width="88" height="8" fill="url(#buttonPatternHover)" opacity="0.15"/>
+  
+  <!-- Central divider lines (brighter) -->
+  <rect x="10" y="7" width="1" height="2" fill="#6a6a6a"/>
+  <rect x="12" y="7" width="1" height="2" fill="#6a6a6a"/>
+  <rect x="84" y="7" width="1" height="2" fill="#6a6a6a"/>
+  <rect x="86" y="7" width="1" height="2" fill="#6a6a6a"/>
+  
+  <!-- Hover glow effect on top edge -->
+  <rect x="4" y="2" width="88" height="1" fill="#aaaaaa" opacity="0.5"/>
+</svg>

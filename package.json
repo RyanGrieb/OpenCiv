@@ -4,6 +4,7 @@
     "description": "",
     "license": "MIT",
     "scripts": {
+        "prestart": "npx kill-port 2000 1234",
         "start": "concurrently \"npm start --prefix server\" \"npm run dev --prefix client\"",
         "test:e2e": "npx ts-node scripts/run_tests.ts",
         "install-all": "npm install && concurrently \"npm install --prefix ./server\" \"npm install --prefix ./client\"",

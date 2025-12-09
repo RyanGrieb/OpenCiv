@@ -32,7 +32,9 @@ export class UnitDisplayInfo extends ActorGroup {
         x: this.x,
         y: this.y,
         width: this.width,
-        height: this.height
+        height: this.height,
+        nineSlice: true,
+        cornerSize: 20
       })
     );
 
@@ -114,7 +116,7 @@ export class UnitDisplayInfo extends ActorGroup {
         icon: action.getIcon(),
         iconWidth: 32,
         iconHeight: 32,
-        x: this.x + 8 + xOffset,
+        x: this.x + 5 + xOffset,
         y: this.y + 28,
         width: 50,
         height: 50,

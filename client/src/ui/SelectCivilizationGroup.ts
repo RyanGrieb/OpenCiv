@@ -28,7 +28,9 @@ export class SelectCivilizationGroup extends ActorGroup {
         x: this.x,
         y: this.y,
         width: this.width,
-        height: this.height
+        height: this.height,
+        nineSlice: true,
+        cornerSize: 20
       })
     );
 

@@ -1,0 +1,31 @@
+<svg width="32" height="32" viewBox="0 0 32 32" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Outer shadow -->
+  <rect x="2" y="2" width="28" height="28" fill="#3a3a3a"/>
+  
+  <!-- Main button background -->
+  <rect x="0" y="0" width="28" height="28" fill="#6a6a6a"/>
+  
+  <!-- Top/left highlight (beveled edge) -->
+  <rect x="2" y="2" width="24" height="2" fill="#8a8a8a"/>
+  <rect x="2" y="2" width="2" height="24" fill="#8a8a8a"/>
+  
+  <!-- Bottom/right shadow (beveled edge) -->
+  <rect x="2" y="26" width="24" height="2" fill="#4a4a4a"/>
+  <rect x="26" y="2" width="2" height="24" fill="#4a4a4a"/>
+  
+  <!-- Corner pixels -->
+  <rect x="0" y="0" width="2" height="2" fill="#7a7a7a"/>
+  <rect x="26" y="0" width="2" height="2" fill="#5a5a5a"/>
+  <rect x="0" y="26" width="2" height="2" fill="#5a5a5a"/>
+  <rect x="26" y="26" width="2" height="2" fill="#3a3a3a"/>
+  
+  <!-- Inner frame (subtle darker border) -->
+  <rect x="4" y="4" width="20" height="20" fill="#5a5a5a"/>
+  
+  <!-- Large clean content area - lighter gray -->
+  <rect x="5" y="5" width="18" height="18" fill="#6a6a6a"/>
+  
+  <!-- Very subtle inner shadow for depth -->
+  <rect x="5" y="5" width="18" height="1" fill="#5a5a5a" opacity="0.3"/>
+  <rect x="5" y="5" width="1" height="18" fill="#5a5a5a" opacity="0.3"/>
+</svg>
