@@ -26,6 +26,8 @@ export class InGameScene extends Scene {
   private nextTurnButton: Button;
   private closeCityDisplayButton: Button;
   private escMenu: ActorGroup;
+  private isUIOpen: boolean = false;
+  private activeGameplayUI: { close: () => void };
 
   public onInitialize(): void {
     this.players = [];
@@ -43,7 +45,11 @@ export class InGameScene extends Scene {
 
     this.on("keyup", (options) => {
       if (options.key === "Escape") {
-        this.toggleEscMenu();
+        if (this.activeGameplayUI) {
+          this.activeGameplayUI.close();
+        } else {
+          this.toggleEscMenu();
+        }
       }
     });
 
@@ -141,7 +147,7 @@ export class InGameScene extends Scene {
 
         this.tileYieldActors = [];
 
-        if (options.tile && !this.cityDisplayInfo) {
+        if (options.tile && !this.isUIOpen) {
           let tileTypes: string = options.tile.getTileTypes().toString();
           tileTypes = tileTypes.replaceAll("_", " ");
           tileTypes = tileTypes.replaceAll(",", ", ");
@@ -272,11 +278,27 @@ export class InGameScene extends Scene {
 
   public toggleCityUI(city?: City) {
     if (!this.cityDisplayInfo && city) {
+      if (this.isUIOpen) return;
       this.openCityUI(city);
       this.call("toggleCityUI", { opened: true, city: city });
     } else {
       this.closeCityUI();
+      // Only emit toggleCityUI closed if we are actually closing it (handled in closeCityUI usually, but here we coordinate)
       this.call("toggleCityUI", { opened: false, city: city });
+    }
+  }
+
+  private setUIState(isOpen: boolean) {
+    this.isUIOpen = isOpen;
+    this.getCamera().lock(isOpen);
+    this.call("uiStateChanged", { opened: isOpen });
+
+    if (isOpen) {
+      this.tileInformationLabel.setText("");
+      this.tileYieldActors.forEach((actor) => {
+        this.removeActor(actor);
+      });
+      this.tileYieldActors = [];
     }
   }
 
@@ -298,14 +320,12 @@ export class InGameScene extends Scene {
 
     //Center camera on city
     this.focusOnTile(city.getTile(), 3);
-    this.getCamera().lock(true);
+    this.setUIState(true);
+
+    this.activeGameplayUI = { close: () => this.toggleCityUI() };
 
     this.removeActor(this.nextTurnButton);
     this.removeActor(this.tileInformationLabel);
-    this.tileInformationLabel.setText("");
-    this.tileYieldActors.forEach((actor) => {
-      this.removeActor(actor);
-    });
 
     this.addActor(this.closeCityDisplayButton);
   }
@@ -313,7 +333,8 @@ export class InGameScene extends Scene {
   private closeCityUI() {
     this.removeActor(this.cityDisplayInfo);
     this.cityDisplayInfo = undefined;
-    this.getCamera().lock(false);
+    this.setUIState(false);
+    this.activeGameplayUI = undefined;
 
     this.addActor(this.nextTurnButton);
     this.addActor(this.tileInformationLabel);
@@ -326,10 +347,12 @@ export class InGameScene extends Scene {
       this.removeActor(this.escMenu);
       this.escMenu = undefined;
       this.controlsLocked = false;
+      this.setUIState(false);
       return;
     }
 
     this.controlsLocked = true;
+    this.setUIState(true);
 
     this.escMenu = new ActorGroup({
       x: Game.getInstance().getWidth() / 2 - 250 / 2,
@@ -360,8 +383,8 @@ export class InGameScene extends Scene {
         height: 50,
         fontColor: "white",
         onClicked: () => {
-          this.removeActor(this.escMenu);
           this.escMenu = undefined;
+          this.setUIState(false);
         }
       })
     );
