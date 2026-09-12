@@ -51,9 +51,9 @@ describe('GameMap', () => {
           return ["ocean", "freshwater", "shallow_ocean"].some(type => this.tileTypes.includes(type));
         },
         hasRiver: () => false,
-        getRiverSides: () => [],
+        getRiverSides: (): boolean[] => [],
         applyRiverSide: function () {},
-        getRiverSideIndexes: () => [],
+        getRiverSideIndexes: (): number[] => [],
         getDistanceFrom: function (otherTile: Tile) {
           const dx = this.getX() - otherTile.getX();
           const dy = this.getY() - otherTile.getY();
@@ -82,7 +82,7 @@ describe('GameMap', () => {
     }));
     (MapResources.isResourceTile as jest.Mock).mockImplementation((tile) => {
       const types = tile.getTileTypes();
-      return types.some((t) => t.includes('_resource'));
+      return types.some((t: string) => t.includes('_resource'));
     });
 
     // Mock TileIndexer
