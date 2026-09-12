@@ -39,7 +39,7 @@ export class Game {
   private canvasContext: CanvasRenderingContext2D;
   private scenes: Map<string, Scene>;
   private currentScene: Scene;
-  private images = [];
+  private images: HTMLImageElement[] = [];
   private countedFrames: number = 0;
   private lastTimeUpdate = Date.now();
   private fps: number = 0;

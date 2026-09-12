@@ -1,7 +1,7 @@
 export class Lists {
-  public static shiftList(nums, k) {
+  public static shiftList(nums: number[], k: number) {
     // reverse helper function
-    function reverse(arr, start, end) {
+    function reverse(arr: number[], start: number, end: number) {
       while (start < end) {
         [arr[start], arr[end]] = [arr[end], arr[start]];
         start++;
