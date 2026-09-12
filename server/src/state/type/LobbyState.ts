@@ -136,7 +136,7 @@ export class LobbyState extends State {
   }
 
   private getRandomNonAssignedCiv(): Record<string, any> {
-    const assignedCivs = [];
+    const assignedCivs: Record<string, any>[] = [];
     Game.getInstance()
       .getPlayers()
       .forEach((player) => {
