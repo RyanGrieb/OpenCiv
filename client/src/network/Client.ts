@@ -10,10 +10,10 @@ export class CallbackData {
   }
 }
 
-export interface OnNetworkEventOptions {
+export interface OnNetworkEventOptions<T = any> {
   eventName: string;
   parentObject: object;
-  callback: (data: JSON) => void;
+  callback: (data: T) => void;
   globalEvent?: boolean;
 }
 
@@ -22,7 +22,7 @@ export class NetworkEvents {
 
   private constructor() { }
 
-  public static call(eventName: string, data: JSON) {
+  public static call<T = any>(eventName: string, data: T) {
     if (this.storedEvents.has(eventName)) {
       //Call the stored callback function
       const callbackDataList = this.storedEvents.get(eventName);
@@ -40,7 +40,7 @@ export class NetworkEvents {
    * @param {(data: JSON) => void} options.callback - The callback function to be called when the event is received.
    * @param {boolean} [options.globalEvent=false] - Determine if we don't remove the event when the scene changes.
    */
-  public static on(options: OnNetworkEventOptions) {
+  public static on<T = any>(options: OnNetworkEventOptions<T>) {
     if (!this.storedEvents) {
       this.storedEvents = new Map<string, CallbackData[]>();
     }
