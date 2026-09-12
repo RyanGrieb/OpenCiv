@@ -18,7 +18,7 @@
         "@types/node": "^24.10.2",
         "kill-port": "^2.0.1",
         "ts-node": "^10.9.2",
-        "typedoc": "^0.24.8",
+        "typedoc": "^0.28.20",
         "typescript": "^5.9.3"
     }
 }
