@@ -1,10 +1,15 @@
-import { GameImage, SpriteRegion } from "../Assets";
+import { GameImage, resolveSpriteRegion } from "../Assets";
 import { Game } from "../Game";
 import { NetworkEvents, WebsocketClient } from "../network/Client";
+import { CivilizationData } from "../player/AbstractPlayer";
 import { Actor } from "../scene/Actor";
 import { ActorGroup } from "../scene/ActorGroup";
 import { Button } from "./Button";
 import { Label } from "./Label";
+
+interface AvailableCivsEvent {
+  civs: CivilizationData[];
+}
 
 export class SelectCivilizationGroup extends ActorGroup {
   private titleLabel: Label;
@@ -36,7 +41,7 @@ export class SelectCivilizationGroup extends ActorGroup {
 
     this.listAvailableCivs();
 
-    NetworkEvents.on({
+    NetworkEvents.on<AvailableCivsEvent>({
       eventName: "availableCivs",
       parentObject: this,
       callback: (data) => {
@@ -44,7 +49,7 @@ export class SelectCivilizationGroup extends ActorGroup {
         let yOffset = 1;
 
         // For each civ JSON object
-        for (const civJSON of data["civs"]) {
+        for (const civJSON of data.civs) {
           // Calculate the X and Y coordinates of the icon and add it
           let iconX = this.x + 68 * xOffsset + 14;
 
@@ -56,7 +61,7 @@ export class SelectCivilizationGroup extends ActorGroup {
           let iconY = this.y + 68 * yOffset;
 
           const selectCivButton = new Button({
-            icon: SpriteRegion[civJSON["icon_name"]],
+            icon: resolveSpriteRegion(civJSON.icon_name),
             iconOnly: true,
             x: iconX,
             y: iconY,
@@ -80,7 +85,7 @@ export class SelectCivilizationGroup extends ActorGroup {
       }
     });
 
-    NetworkEvents.on({
+    NetworkEvents.on<CivilizationData>({
       eventName: "civInfo",
       parentObject: this,
       callback: (data) => {
@@ -137,9 +142,9 @@ export class SelectCivilizationGroup extends ActorGroup {
     WebsocketClient.sendMessage({ event: "availableCivs" });
   }
 
-  public async displayCivInformation(data: JSON) {
+  public async displayCivInformation(data: CivilizationData) {
     // Rename title label:
-    this.titleLabel.setText(data["name"]);
+    this.titleLabel.setText(data.name);
     this.titleLabel.conformSize().then(() => {
       this.titleLabel.setPosition(this.x + this.width / 2 - this.titleLabel.getWidth() / 2, this.y + 12);
     });
@@ -152,7 +157,7 @@ export class SelectCivilizationGroup extends ActorGroup {
     // Display civ information:
     const civIcon = new Actor({
       image: Game.getInstance().getImage(GameImage.SPRITESHEET),
-      spriteRegion: SpriteRegion[data["icon_name"]],
+      spriteRegion: resolveSpriteRegion(data.icon_name),
       x: this.x + this.width / 2 - 32 / 2,
       y: this.y + 40,
       width: 32,
@@ -165,7 +170,7 @@ export class SelectCivilizationGroup extends ActorGroup {
 
     //Start-bias label:
     const startBiasLabel = new Label({
-      text: data["start_bias_desc"],
+      text: data.start_bias_desc,
       font: "20px serif",
       fontColor: "white",
       x: this.x + 12,
@@ -192,7 +197,7 @@ export class SelectCivilizationGroup extends ActorGroup {
     this.civInformationActors.push(uniqueUnitDescLabel);
     this.addActor(uniqueUnitDescLabel);
 
-    for (const uniqueUnitDesc of data["unique_unit_descs"]) {
+    for (const uniqueUnitDesc of data.unique_unit_descs) {
       const lastLabel = this.civInformationActors[this.civInformationActors.length - 1];
 
       const unitLabel = new Label({
@@ -227,7 +232,7 @@ export class SelectCivilizationGroup extends ActorGroup {
       this.civInformationActors.push(uniqueBuildingsDescLabel);
       this.addActor(uniqueBuildingsDescLabel);
 
-      for (const buildingDesc of data["unique_building_descs"] as []) {
+      for (const buildingDesc of data.unique_building_descs) {
         const lastLabel = this.civInformationActors[this.civInformationActors.length - 1];
 
         const abilityLabel = new Label({
@@ -262,7 +267,7 @@ export class SelectCivilizationGroup extends ActorGroup {
     this.civInformationActors.push(uniqueAbilityDescLabel);
     this.addActor(uniqueAbilityDescLabel);
 
-    for (const abilityDesc of data["ability_descs"]) {
+    for (const abilityDesc of data.ability_descs) {
       const lastLabel = this.civInformationActors[this.civInformationActors.length - 1];
 
       const abilityLabel = new Label({
@@ -292,7 +297,7 @@ export class SelectCivilizationGroup extends ActorGroup {
         // Select this civilization and close this window:
         // Fire event for lobby to handle this. Or network event..?
         //Game.getCurrentScene().removeActor(this);
-        WebsocketClient.sendMessage({ event: "selectCiv", name: data["name"] });
+        WebsocketClient.sendMessage({ event: "selectCiv", name: data.name });
       }
     });
 

@@ -1,12 +1,29 @@
-import { GameImage, SpriteRegion } from "../../Assets";
+import { GameImage, resolveSpriteRegion, SpriteRegion } from "../../Assets";
 import { Game } from "../../Game";
 import { NetworkEvents, WebsocketClient } from "../../network/Client";
+import { CivilizationData } from "../../player/AbstractPlayer";
 import { Button } from "../../ui/Button";
 import { ListBox } from "../../ui/Listbox";
 import { SelectCivilizationGroup } from "../../ui/SelectCivilizationGroup";
 import { Actor } from "../Actor";
 import { Scene } from "../Scene";
 import { SceneBackground } from "../SceneBackground";
+
+// In the lobby (before civ selection), a player may not have chosen a civilization yet.
+interface LobbyPlayerEntry {
+  name: string;
+  civData?: CivilizationData;
+}
+
+interface ConnectedPlayersEvent {
+  players: LobbyPlayerEntry[];
+  requestingName: string;
+}
+
+interface SelectCivEvent {
+  playerName: string;
+  civData: CivilizationData;
+}
 
 export class LobbyScene extends Scene {
   private selectCivGroup: SelectCivilizationGroup;
@@ -124,19 +141,19 @@ export class LobbyScene extends Scene {
       callback: this.updatePlayerList
     });
 
-    NetworkEvents.on({
+    NetworkEvents.on<ConnectedPlayersEvent>({
       eventName: "connectedPlayers",
       parentObject: this,
       callback: (data) => {
-        const players = data["players"];
-        const requestingName = data["requestingName"];
+        const players = data.players;
+        const requestingName = data.requestingName;
         playerList.clearRows();
 
         for (let i = 0; i < players.length; i++) {
-          const playerName = players[i]["name"];
+          const playerName = players[i].name;
           let civIcon = SpriteRegion.UNKNOWN_ICON;
-          if ("civData" in players[i]) {
-            civIcon = SpriteRegion[players[i]["civData"]["icon_name"]];
+          if (players[i].civData) {
+            civIcon = resolveSpriteRegion(players[i].civData.icon_name);
           }
 
           const currentRow = playerList.addRow({
@@ -178,12 +195,12 @@ export class LobbyScene extends Scene {
       }
     });
 
-    NetworkEvents.on({
+    NetworkEvents.on<SelectCivEvent>({
       eventName: "selectCiv",
       parentObject: this,
       callback: (data) => {
         for (const row of playerList.getRows()) {
-          if (row.getLabel().getText() !== data["playerName"]) {
+          if (row.getLabel().getText() !== data.playerName) {
             continue;
           }
 
@@ -192,7 +209,7 @@ export class LobbyScene extends Scene {
               continue;
             }
 
-            rowActor.setSpriteRegion(SpriteRegion[data["civData"]["icon_name"]]);
+            rowActor.setSpriteRegion(resolveSpriteRegion(data.civData.icon_name));
           }
         }
       }

@@ -5,6 +5,11 @@ import { Actor } from "../scene/Actor";
 import { ActorGroup } from "../scene/ActorGroup";
 import { Label } from "./Label";
 
+interface TurnTimeEvent {
+  turn: number;
+  turnTime: number;
+}
+
 export class StatusBar extends ActorGroup {
   private statusBarActor: Actor;
 
@@ -44,7 +49,7 @@ export class StatusBar extends ActorGroup {
     this.generateActors();
     // Wait until this async method is done
 
-    NetworkEvents.on({
+    NetworkEvents.on<TurnTimeEvent>({
       eventName: "newTurn",
       parentObject: this,
       callback: (data) => {
@@ -52,7 +57,7 @@ export class StatusBar extends ActorGroup {
       }
     });
 
-    NetworkEvents.on({
+    NetworkEvents.on<TurnTimeEvent>({
       eventName: "turnTimeDecrement",
       parentObject: this,
       callback: (data) => {
@@ -61,8 +66,8 @@ export class StatusBar extends ActorGroup {
     });
   }
 
-  private updateCurrentTurnLabel(data: JSON) {
-    const text = `Turns: ${data["turn"]} (${data["turnTime"]}s)`;
+  private updateCurrentTurnLabel(data: TurnTimeEvent) {
+    const text = `Turns: ${data.turn} (${data.turnTime}s)`;
 
     if (!this.currentTurnLabel) {
       this.currentTurnText = text;
