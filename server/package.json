@@ -4,7 +4,7 @@
   "description": "",
   "main": "Server.ts",
   "scripts": {
-    "test": "node --expose-gc --max-old-space-size=8192 node_modules/.bin/jest",
+    "test": "node --expose-gc --max-old-space-size=8192 node_modules/jest/bin/jest.js",
     "start": "ts-node-dev --respawn --transpile-only src/Server.ts",
     "start:test": "cross-env TEST_MODE=true ts-node-dev --respawn --transpile-only src/Server.ts"
   },
