@@ -56,6 +56,8 @@ describe('Unit', () => {
       getName: jest.fn().mockReturnValue('TestPlayer'),
       sendNetworkEvent: jest.fn(),
       getWebsocket: jest.fn().mockReturnValue({} as WebSocket),
+      addUnit: jest.fn(),
+      removeUnit: jest.fn(),
     } as unknown as jest.Mocked<Player>;
 
     // Mock GameMap.getInstance with minimal required properties
