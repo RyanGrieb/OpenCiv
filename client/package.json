@@ -4,7 +4,7 @@
     "description": "",
     "scripts": {
         "dev": "npx parcel --no-cache index.html",
-        "build": "parcel build dist index.html"
+        "build": "parcel build index.html --dist-dir dist"
     },
     "devDependencies": {
         "@types/node": "^22.15.26",
