@@ -13,7 +13,7 @@ export class MapResource {
   maxTemp: number;
   onAdditionalTileTypes: boolean;
 
-  constructor(resourceData: any) {
+  constructor(resourceData: MapResourceConfigData) {
     this.name = resourceData.name;
     this.spawnTiles = resourceData.spawn_tiles;
     this.pathLength = resourceData.path_length;
@@ -64,8 +64,27 @@ export class MapResource {
 
 import { Tile } from "./Tile";
 
+// Matches server/config/map_resources.yml
+interface MapResourceConfigData {
+  name: string;
+  spawn_tiles: string[];
+  path_length: number;
+  min_tiles_set: number;
+  max_tiles_set: number;
+  set_chance: number;
+  min_temp: number;
+  max_temp: number;
+  spawn_on_additional_tile_types?: boolean;
+}
+
+interface MapResourcesConfig {
+  bonus_resources: MapResourceConfigData[];
+  strategic_resources: MapResourceConfigData[];
+  luxury_resources: MapResourceConfigData[];
+}
+
 export class MapResources {
-  private static resourcesData;
+  private static resourcesData: MapResourcesConfig;
 
   public static async loadConfigurationFile() {
     const file = fs.readFileSync("./config/map_resources.yml", "utf-8");
@@ -103,9 +122,9 @@ export class MapResources {
     if (!this.resourcesData) this.loadConfigurationFile();
 
     const resourceTileTypes = [
-      ...this.resourcesData.bonus_resources.map((resource) => resource.name),
-      ...this.resourcesData.strategic_resources.map((resource) => resource.name),
-      ...this.resourcesData.luxury_resources.map((resource) => resource.name)
+      ...this.resourcesData.bonus_resources.map((resource: MapResourceConfigData) => resource.name),
+      ...this.resourcesData.strategic_resources.map((resource: MapResourceConfigData) => resource.name),
+      ...this.resourcesData.luxury_resources.map((resource: MapResourceConfigData) => resource.name)
     ];
     return tile.containsTileTypes(resourceTileTypes);
   }
