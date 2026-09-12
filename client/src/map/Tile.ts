@@ -1,10 +1,13 @@
-import { GameImage, SpriteRegion } from "../Assets";
+import { GameImage, resolveSpriteRegion } from "../Assets";
 import { Game } from "../Game";
 import { Unit } from "../Unit";
 import { City } from "../city/City";
 import { Actor } from "../scene/Actor";
 import { Vector } from "../util/Vector";
 import { GameMap } from "./GameMap";
+
+// Keyed by tile-type name (upper/lower-case variants both used); see Tile.getTileYield().
+export type TileYieldsData = Record<string, { stats: Record<string, number>[] }>;
 
 export interface TileOptions {
   tileTypes: string[];
@@ -26,7 +29,7 @@ export class Tile extends Actor {
   public static HEIGHT = 32;
 
   private static loadedTileImages = new Map<string, HTMLImageElement>();
-  private static allTileStats: JSON;
+  private static allTileStats: TileYieldsData;
 
   private tileTypes: string[];
   private adjacentTiles: Tile[];
@@ -93,7 +96,7 @@ export class Tile extends Actor {
     return tile2.getMovementCost();
   }
 
-  public static setTileYields(data: JSON) {
+  public static setTileYields(data: TileYieldsData) {
     Tile.allTileStats = data;
   }
 
@@ -224,7 +227,7 @@ export class Tile extends Actor {
     //Note: Tile sizes in spritesheet are always 32x32 regardless of anything else.
     for (let tileType of tileTypes) {
       const spritesheetImage = Game.getInstance().getImage(GameImage.SPRITESHEET);
-      const spriteRegion = SpriteRegion[tileType.toUpperCase()];
+      const spriteRegion = resolveSpriteRegion(tileType.toUpperCase());
       const spriteX = parseInt(spriteRegion.split(",")[0]) * 32;
       const spriteY = parseInt(spriteRegion.split(",")[1]) * 32;
       canvas.getContext("2d").drawImage(spritesheetImage, spriteX, spriteY, 32, 32, 0, 0, Tile.WIDTH, Tile.HEIGHT);

@@ -1,4 +1,4 @@
-import { GameImage, SpriteRegion } from "./Assets";
+import { GameImage, resolveSpriteRegion, SpriteRegion } from "./Assets";
 import { Game } from "./Game";
 import { GameMap } from "./map/GameMap";
 import { Tile } from "./map/Tile";
@@ -60,7 +60,7 @@ export class UnitAction {
     let allMet = true;
 
     for (const requirement of this.requirements) {
-      const requirementMethod = this[requirement] as Function;
+      const requirementMethod = (this as unknown as Record<string, Function>)[requirement];
 
       if (requirementMethod && !requirementMethod.call(this, unit)) {
         allMet = false;
@@ -83,17 +83,38 @@ export class UnitAction {
   }
 }
 
-export interface options {
+// Payload for constructing a Unit (server "createUnit"-style data, also embedded
+// per-tile in a "mapChunk" event's units list, which additionally carries tileX/tileY).
+export interface UnitCreationData {
   name: string;
   id: number;
   attackType: string;
-  tile: Tile;
-  actionsJSONList: {
+  remainingMovement: number;
+  defaultMoveDistance: number;
+  player: string;
+  queuedTiles: { x: number; y: number }[];
+  actions: {
     name: string;
     icon: string;
     requirements: string[];
     desc: string;
   }[];
+}
+
+export interface MoveUnitEvent {
+  id: number;
+  unitX: number;
+  unitY: number;
+  targetX: number;
+  targetY: number;
+  remainingMovement: number;
+  queuedTiles?: { x: number; y: number }[];
+}
+
+export interface RemoveUnitEvent {
+  id: number;
+  unitX: number;
+  unitY: number;
 }
 
 export class Unit extends ActorGroup {
@@ -111,7 +132,7 @@ export class Unit extends ActorGroup {
   private queuedMovementTiles: Tile[];
   private player: AbstractPlayer;
 
-  constructor(tile: Tile, unitJSON: JSON) {
+  constructor(tile: Tile, unitJSON: UnitCreationData) {
     super({
       x: tile.getCenterPosition().x - 28 / 2,
       y: tile.getCenterPosition().y - 28 / 2,
@@ -121,11 +142,11 @@ export class Unit extends ActorGroup {
     });
 
     this.tile = tile;
-    this.name = unitJSON["name"];
+    this.name = unitJSON.name;
 
     this.unitActor = new Actor({
       image: Game.getInstance().getImage(GameImage.SPRITESHEET),
-      spriteRegion: SpriteRegion[this.name.toUpperCase()],
+      spriteRegion: resolveSpriteRegion(this.name.toUpperCase()),
       x: tile.getCenterPosition().x - 28 / 2,
       y: tile.getCenterPosition().y - 28 / 2,
       z: 2,
@@ -135,39 +156,39 @@ export class Unit extends ActorGroup {
 
     this.addActor(this.unitActor);
 
-    this.id = unitJSON["id"];
-    this.attackType = unitJSON["attackType"];
-    this.availableMovement = unitJSON["remainingMovement"];
-    this.defaultMoveDistance = unitJSON["defaultMoveDistance"];
-    this.player = AbstractPlayer.getPlayerByName(unitJSON["player"]);
+    this.id = unitJSON.id;
+    this.attackType = unitJSON.attackType;
+    this.availableMovement = unitJSON.remainingMovement;
+    this.defaultMoveDistance = unitJSON.defaultMoveDistance;
+    this.player = AbstractPlayer.getPlayerByName(unitJSON.player);
     if (this.player) {
       this.player.addUnit(this);
     }
 
     this.queuedMovementTiles = [];
-    for (const jsonTile of unitJSON["queuedTiles"]) {
-      this.queuedMovementTiles.push(GameMap.getInstance().getTiles()[jsonTile["x"]][jsonTile["y"]]);
+    for (const jsonTile of unitJSON.queuedTiles) {
+      this.queuedMovementTiles.push(GameMap.getInstance().getTiles()[jsonTile.x][jsonTile.y]);
     }
 
     this.selectionActors = [];
     this.actions = [];
 
-    for (const actionJSON of unitJSON["actions"]) {
+    for (const actionJSON of unitJSON.actions) {
       this.actions.push(
-        new UnitAction(actionJSON.name, actionJSON.desc, actionJSON.requirements, SpriteRegion[actionJSON.icon])
+        new UnitAction(actionJSON.name, actionJSON.desc, actionJSON.requirements, resolveSpriteRegion(actionJSON.icon))
       );
     }
 
     console.log("new unit with id: " + this.id);
 
-    NetworkEvents.on({
+    NetworkEvents.on<MoveUnitEvent>({
       eventName: "moveUnit",
       parentObject: this,
       callback: (data) => {
-        const unitTile = GameMap.getInstance().getTiles()[data["unitX"]][data["unitY"]];
-        const targetTile = GameMap.getInstance().getTiles()[data["targetX"]][data["targetY"]];
+        const unitTile = GameMap.getInstance().getTiles()[data.unitX][data.unitY];
+        const targetTile = GameMap.getInstance().getTiles()[data.targetX][data.targetY];
 
-        if (this.tile !== unitTile || this.id !== data["id"]) {
+        if (this.tile !== unitTile || this.id !== data.id) {
           return;
         }
 
@@ -177,7 +198,7 @@ export class Unit extends ActorGroup {
         }
 
         this.queuedMovementTiles = [];
-        this.availableMovement = data["remainingMovement"];
+        this.availableMovement = data.remainingMovement;
         this.tile.removeUnit(this);
         this.tile = targetTile;
         targetTile.addUnit(this);
@@ -188,11 +209,11 @@ export class Unit extends ActorGroup {
         }
 
         // Assign queued tiles
-        if ("queuedTiles" in data) {
+        if (data.queuedTiles) {
           //console.log("Unit assigned a movement queue from server:");
 
-          for (const tileJSON of data["queuedTiles"] as []) {
-            const tile = GameMap.getInstance().getTiles()[tileJSON["x"]][tileJSON["y"]];
+          for (const tileJSON of data.queuedTiles) {
+            const tile = GameMap.getInstance().getTiles()[tileJSON.x][tileJSON.y];
             this.queuedMovementTiles.push(tile);
           }
         }
@@ -207,11 +228,11 @@ export class Unit extends ActorGroup {
       }
     });
 
-    NetworkEvents.on({
+    NetworkEvents.on<RemoveUnitEvent>({
       eventName: "removeUnit",
       parentObject: this,
       callback: (data) => {
-        const unitTile = GameMap.getInstance().getTiles()[data["unitX"]][data["unitY"]];
+        const unitTile = GameMap.getInstance().getTiles()[data.unitX][data.unitY];
 
         if (this.tile !== unitTile) {
           return;

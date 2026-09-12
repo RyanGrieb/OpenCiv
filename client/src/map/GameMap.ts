@@ -1,15 +1,55 @@
 import { Game } from "../Game";
-import { Unit } from "../Unit";
+import { Unit, UnitCreationData } from "../Unit";
 import { NetworkEvents, WebsocketClient } from "../network/Client";
 import { Actor } from "../scene/Actor";
 import { River } from "./River";
-import { Tile } from "./Tile";
+import { Tile, TileYieldsData } from "./Tile";
 import { Line } from "../scene/Line";
 import PriorityQueue from "ts-priority-queue";
 import { AbstractPlayer } from "../player/AbstractPlayer";
 import { City } from "../city/City";
 import { TileOutline } from "./TileOutline";
 import { Vector } from "../util/Vector";
+
+// width/height/x/y/movementCost arrive as strings and are run through parseInt() below.
+interface MapSizeEvent {
+  width: string;
+  height: string;
+}
+
+interface TileYieldsEvent {
+  yields: TileYieldsData;
+}
+
+// A unit embedded in a mapChunk's per-tile "units" list additionally carries its tile position.
+type ChunkUnitData = UnitCreationData & { tileX: number; tileY: number };
+
+interface TileData {
+  tileTypes: string[];
+  riverSides: boolean[];
+  units: ChunkUnitData[];
+  x: string;
+  y: string;
+  movementCost: string;
+  yields?: any[];
+  city?: CityData;
+}
+
+interface MapChunkEvent {
+  tiles: TileData[];
+  lastChunk: string; // Re-parsed via JSON.parse() below.
+  chunkX: number;
+  chunkY: number;
+}
+
+interface CityData {
+  tileX: number;
+  tileY: number;
+  player: string;
+  cityName: string;
+  territory: { tileX: number; tileY: number }[];
+  workedTiles?: { x: number; y: number }[];
+}
 
 export class GameMap {
   private static instance: GameMap;
@@ -34,8 +74,8 @@ export class GameMap {
   private tiles: Tile[][];
   private mapWidth: number;
   private mapHeight: number;
-  private previousGScore;
-  private previousFScore;
+  private previousGScore: number[][];
+  private previousFScore: number[][];
   private tileOutlines: Map<Tile, TileOutline[]>;
 
   private topLayerMapChunks: Map<Actor, Tile[]>;
@@ -60,7 +100,7 @@ export class GameMap {
     this.topLayerMapChunks = new Map<Actor, Tile[]>();
     this.tileOutlines = new Map<Tile, TileOutline[]>();
 
-    NetworkEvents.on({
+    NetworkEvents.on<CityData>({
       eventName: "newCity",
       parentObject: this,
       callback: (data) => {
@@ -225,13 +265,13 @@ export class GameMap {
 
   private requestTileYieldsFromServer() {
     WebsocketClient.sendMessage({ event: "requestTileYields" });
-    NetworkEvents.on({
+    NetworkEvents.on<TileYieldsEvent>({
       eventName: "tileYields",
       parentObject: this,
       callback: (data) => {
         console.log("Received tile yields from server.");
         console.log(data);
-        Tile.setTileYields(data["yields"])
+        Tile.setTileYields(data.yields)
       }
     });
   }
@@ -239,19 +279,19 @@ export class GameMap {
   private requestMapFromServer() {
     const scene = Game.getInstance().getCurrentScene();
     this.tiles = [];
-    const baseLayerTiles = [];
-    const riverActors = [];
-    const cityJSONS: JSON[] = [];
-    const unitJSONS: JSON[] = [];
+    const baseLayerTiles: Tile[] = [];
+    const riverActors: River[] = [];
+    const cityJSONS: CityData[] = [];
+    const unitJSONS: ChunkUnitData[] = [];
 
     WebsocketClient.sendMessage({ event: "requestMap" });
 
-    NetworkEvents.on({
+    NetworkEvents.on<MapSizeEvent>({
       eventName: "mapSize",
       parentObject: this,
       callback: (data) => {
-        this.mapWidth = parseInt(data["width"]);
-        this.mapHeight = parseInt(data["height"]);
+        this.mapWidth = parseInt(data.width);
+        this.mapHeight = parseInt(data.height);
 
         for (let x = 0; x < this.mapWidth; x++) {
           this.tiles[x] = [];
@@ -262,29 +302,29 @@ export class GameMap {
       }
     });
 
-    NetworkEvents.on({
+    NetworkEvents.on<MapChunkEvent>({
       eventName: "mapChunk",
       parentObject: this,
       callback: async (data) => {
-        const tileList = data["tiles"] as Array<JSON>;
-        const lastChunk = JSON.parse(data["lastChunk"]);
-        const chunkX = data["chunkX"] * 32;
-        const chunkY = data["chunkY"] * 25;
+        const tileList = data.tiles;
+        const lastChunk = JSON.parse(data.lastChunk);
+        const chunkX = data.chunkX * 32;
+        const chunkY = data.chunkY * 25;
 
-        const topLayerTiles = [];
+        const topLayerTiles: Tile[] = [];
 
         // X,Y values relative to a map chunk. (starts at 0.)
         let relativeX = 0;
         let relativeY = 0;
 
         for (const tileJSON of tileList) {
-          const tileTypes: string[] = tileJSON["tileTypes"];
-          const riverSides: boolean[] = tileJSON["riverSides"];
-          const jsonUnits = tileJSON["units"];
+          const tileTypes: string[] = tileJSON.tileTypes;
+          const riverSides: boolean[] = tileJSON.riverSides;
+          const jsonUnits = tileJSON.units;
 
-          const gridX = parseInt(tileJSON["x"]);
-          const gridY = parseInt(tileJSON["y"]);
-          const movementCost = parseInt(tileJSON["movementCost"]);
+          const gridX = parseInt(tileJSON.x);
+          const gridY = parseInt(tileJSON.y);
+          const movementCost = parseInt(tileJSON.movementCost);
 
           // For non-chunk tiles, that uses non-relative position. (Base-layer, river)
           let yPos = gridY * 25;
@@ -316,7 +356,7 @@ export class GameMap {
             gridX: gridX,
             gridY: gridY,
             movementCost: movementCost,
-            yields: tileJSON["yields"]
+            yields: tileJSON.yields
           });
           this.tiles[gridX][gridY] = tile;
 
@@ -336,7 +376,7 @@ export class GameMap {
               gridX: gridX,
               gridY: gridY,
               movementCost: movementCost,
-              yields: tileJSON["yields"]
+              yields: tileJSON.yields
             });
 
             topLayerTiles.push(topLayerTile);
@@ -344,8 +384,8 @@ export class GameMap {
 
             // Add new city if it already exists in the world
             if (topLayerTileTypes.includes("city")) {
-              const cityJSON = tileJSON["city"];
-              cityJSONS.push(cityJSON);
+              // topLayerTileTypes including "city" guarantees the server sent city data for this tile.
+              cityJSONS.push(tileJSON.city!);
             }
           }
 
@@ -359,7 +399,7 @@ export class GameMap {
           await tile.loadImage();
         }
 
-        const mapActors = [...topLayerTiles];
+        const mapActors: Actor[] = [...topLayerTiles];
         //Include empty actor for chunks with no top-layers.
         const placeholderActor = new Actor({
           color: "black",
@@ -407,7 +447,7 @@ export class GameMap {
 
           // Now create any units that already exist on the map
           for (const unitJSON of unitJSONS) {
-            const tile = this.tiles[unitJSON["tileX"]][unitJSON["tileY"]];
+            const tile = this.tiles[unitJSON.tileX][unitJSON.tileY];
             const unit = new Unit(tile, unitJSON);
             tile.addUnit(unit);
             scene.addActor(unit);
@@ -695,19 +735,19 @@ export class GameMap {
     }
   }
 
-  private getCityFromJSONData(data: JSON): City {
-    const tile = this.tiles[data["tileX"]][data["tileY"]];
-    const player = AbstractPlayer.getPlayerByName(data["player"]);
-    const cityName = data["cityName"];
+  private getCityFromJSONData(data: CityData): City {
+    const tile = this.tiles[data.tileX][data.tileY];
+    const player = AbstractPlayer.getPlayerByName(data.player);
+    const cityName = data.cityName;
     const territory: Tile[] = [];
-    for (const territoryJSON of data["territory"]) {
-      territory.push(this.tiles[territoryJSON["tileX"]][territoryJSON["tileY"]]);
+    for (const territoryJSON of data.territory) {
+      territory.push(this.tiles[territoryJSON.tileX][territoryJSON.tileY]);
     }
 
     const workedTiles: Tile[] = [];
-    if (data["workedTiles"]) {
-      for (const workedTileJSON of data["workedTiles"]) {
-        workedTiles.push(this.tiles[workedTileJSON["x"]][workedTileJSON["y"]]);
+    if (data.workedTiles) {
+      for (const workedTileJSON of data.workedTiles) {
+        workedTiles.push(this.tiles[workedTileJSON.x][workedTileJSON.y]);
       }
     }
     console.log(`[GameMap] Creating city ${cityName} with ${workedTiles.length} worked tiles.`);
