@@ -1,4 +1,4 @@
-import { GameImage, SpriteRegion } from "../Assets";
+import { GameImage, resolveSpriteRegion, SpriteRegion } from "../Assets";
 import { Game } from "../Game";
 import { GameMap } from "../map/GameMap";
 import { Tile } from "../map/Tile";
@@ -86,7 +86,7 @@ export class City extends ActorGroup {
 
       this.civIcon = new Actor({
         image: Game.getInstance().getImage(GameImage.SPRITESHEET),
-        spriteRegion: SpriteRegion[this.player.getCivilizationData()["icon_name"]],
+        spriteRegion: resolveSpriteRegion(this.player.getCivilizationData().icon_name),
         x: this.nameLabel.getX() - 14,
         y: this.nameLabel.getY(),
         z: 4,

@@ -3,13 +3,33 @@ import { InGameScene } from "../scene/type/InGameScene";
 import { Unit } from "../Unit";
 import { City } from "../city/City";
 
+// Matches server/config/civilizations.yml
+export interface CivilizationData {
+  name: string;
+  icon_name: string;
+  inside_border_color: string;
+  outside_border_color: string;
+  start_bias: string;
+  start_bias_desc: string;
+  unique_unit_descs: string[];
+  unique_building_descs?: string[];
+  ability_descs: string[];
+  cities: string[];
+}
+
+export interface PlayerData {
+  name: string;
+  civData: CivilizationData;
+  requestedNextTurn?: boolean;
+}
+
 export class AbstractPlayer {
   private name: string;
-  private civData: JSON;
+  private civData: CivilizationData;
 
-  constructor(playerJSON: JSON) {
-    this.civData = playerJSON["civData"];
-    this.name = playerJSON["name"];
+  constructor(playerJSON: PlayerData) {
+    this.civData = playerJSON.civData;
+    this.name = playerJSON.name;
   }
 
   public static getPlayerByName(name: string) {

@@ -8,7 +8,7 @@ import { Line } from "../scene/Line";
 import { InGameScene } from "../scene/type/InGameScene";
 import { Numbers } from "../util/Numbers";
 import { Vector } from "../util/Vector";
-import { AbstractPlayer } from "./AbstractPlayer";
+import { AbstractPlayer, PlayerData } from "./AbstractPlayer";
 
 /**
  * Currently client player handles selected units, the hovered tile, and movement lines from selecting a unit.
@@ -21,11 +21,11 @@ export class ClientPlayer extends AbstractPlayer {
   private rightMouseDrag: boolean;
   private requestedNextTurn: boolean;
 
-  constructor(playerJSON: JSON) {
+  constructor(playerJSON: PlayerData) {
     super(playerJSON);
 
     this.movementLines = [];
-    this.requestedNextTurn = playerJSON["requestedNextTurn"];
+    this.requestedNextTurn = playerJSON.requestedNextTurn;
 
     Game.getInstance()
       .getCurrentScene()
