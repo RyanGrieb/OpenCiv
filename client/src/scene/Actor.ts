@@ -228,7 +228,7 @@ export class Actor implements SceneObject {
   public onCreated() { }
   public onDestroyed() { }
 
-  public call(eventName: string, options?) {
+  public call<T = any>(eventName: string, options?: T) {
     if (this.storedEvents.has(eventName)) {
       //Call the stored callback function
       const functions = this.storedEvents.get(eventName);
@@ -238,7 +238,7 @@ export class Actor implements SceneObject {
     }
   }
 
-  public on(eventName: string, callback: (options) => void) {
+  public on<T = any>(eventName: string, callback: (options: T) => void) {
     //Get the list of stored callback functions or an empty list
     let functions: Function[] = this.storedEvents.get(eventName) ?? [];
     // Append the to functions
