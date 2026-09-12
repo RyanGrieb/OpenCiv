@@ -127,7 +127,16 @@ export class Unit {
     this.queuedMovementTiles = remainingTiles;
     this.availableMovement = remainingMovement;
 
-    const dataPacket = {
+    const dataPacket: {
+      event: string;
+      id: number;
+      remainingMovement: number;
+      unitX: number;
+      unitY: number;
+      targetX: number;
+      targetY: number;
+      queuedTiles?: { x: number; y: number }[];
+    } = {
       event: "moveUnit",
       id: this.id,
       remainingMovement: remainingMovement,
