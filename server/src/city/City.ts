@@ -2,8 +2,14 @@ import { ServerEvents } from "../Events";
 import { Game } from "../Game";
 import { Player } from "../Player";
 import { GameMap } from "../map/GameMap";
-import { Tile } from "../map/Tile";
+import { StatEntry, StatValues, Tile } from "../map/Tile";
 import { InGameState } from "../state/type/InGameState";
+
+export interface CityStats extends StatValues {
+  population: number;
+  foodSurplus: number;
+}
+type CityStatEntry = Partial<CityStats>;
 
 export interface CityOptions {
   tile: Tile;
@@ -121,9 +127,11 @@ export class City {
     });
   }
 
-  public getStatline(options: { asArray: boolean }) {
+  public getStatline(options: { asArray: true }): CityStatEntry[];
+  public getStatline(options: { asArray: false }): CityStats;
+  public getStatline(options: { asArray: boolean }): CityStatEntry[] | CityStats {
     if (options.asArray) {
-      const cityStats = [
+      const cityStats: CityStatEntry[] = [
         {
           population: this.population
         },
@@ -140,7 +148,7 @@ export class City {
       // Add all buildings to existing stat-line dictionary
       for (const buildingData of this.buildings) {
         for (const stat of buildingData.stats) {
-          const statType = Object.keys(stat)[0]; // Get the stat type, e.g., "science", "gold", etc.
+          const statType = Object.keys(stat)[0] as keyof CityStats; // Get the stat type, e.g., "science", "gold", etc.
           const statValue = stat[statType]; // Get the stat value
 
           for (const cityStat of cityStats) {
@@ -157,7 +165,7 @@ export class City {
       for (const tile of this.workedTiles) {
         console.log(`[City ${this.name}] Working tile at ${tile.getX()},${tile.getY()}`);
         for (const stat of tile.getStats()) {
-          const statType = Object.keys(stat)[0]; // Get the stat type, e.g., "science", "gold", etc.
+          const statType = Object.keys(stat)[0] as keyof StatValues; // Get the stat type, e.g., "science", "gold", etc.
           const statValue = stat[statType]; // Get the stat value
 
           if (statValue !== 0) {
@@ -176,7 +184,7 @@ export class City {
     }
 
     // If we're not returning an array, return a dictionary
-    const cityStats = {
+    const cityStats: CityStats = {
       population: this.population,
       science: 0,
       gold: 0,
@@ -191,7 +199,7 @@ export class City {
     // Add all buildings to existing stat-line dictionary
     for (const buildingData of this.buildings) {
       for (const stat of buildingData.stats) {
-        const statType = Object.keys(stat)[0]; // Get the stat type, e.g., "science", "gold", etc.
+        const statType = Object.keys(stat)[0] as keyof CityStats; // Get the stat type, e.g., "science", "gold", etc.
         const statValue = stat[statType]; // Get the stat value
 
         if (cityStats.hasOwnProperty(statType)) {
@@ -203,7 +211,7 @@ export class City {
     // Add all worked tiles to existing stat-line dictionary
     for (const tile of this.workedTiles) {
       for (const stat of tile.getStats()) {
-        const statType = Object.keys(stat)[0]; // Get the stat type, e.g., "science", "gold", etc.
+        const statType = Object.keys(stat)[0] as keyof StatValues; // Get the stat type, e.g., "science", "gold", etc.
         const statValue = stat[statType]; // Get the stat value
 
         if (cityStats.hasOwnProperty(statType)) {

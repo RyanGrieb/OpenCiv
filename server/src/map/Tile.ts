@@ -6,8 +6,21 @@ import { City } from "../city/City";
 import fs from "fs";
 import YAML from "yaml";
 
+// A tile/building stat-line is represented as an array of single-key partial objects
+// (e.g. [{ science: 0 }, { gold: 0 }, ...]) rather than one flat dictionary.
+export interface StatValues {
+  science: number;
+  gold: number;
+  production: number;
+  faith: number;
+  culture: number;
+  food: number;
+  morale: number;
+}
+export type StatEntry = Partial<StatValues>;
+
 export class Tile {
-  private static allTileStats;
+  private static allTileStats: Record<string, any>;
 
   //== Generation Values ==
   private generationHeight: number;
@@ -732,8 +745,8 @@ export class Tile {
     return tile2.getMovementCost();
   }
 
-  public getStats() {
-    const tileStats = [
+  public getStats(): StatEntry[] {
+    const tileStats: StatEntry[] = [
       { science: 0 },
       { gold: 0 },
       { production: 0 },
@@ -747,7 +760,7 @@ export class Tile {
       if (!tileTypeData || !tileTypeData.stats) continue;
 
       for (const statData of tileTypeData.stats) {
-        const statName = Object.keys(statData)[0];
+        const statName = Object.keys(statData)[0] as keyof StatValues;
         const statValue = statData[statName];
 
         for (const stat of tileStats) {
@@ -761,8 +774,8 @@ export class Tile {
     // Apply City Center bonus (Min 2 Food)
     if (this.city) {
       for (const stat of tileStats) {
-        if (stat["food"] !== undefined && stat["food"] < 2) {
-          stat["food"] = 2;
+        if (stat.food !== undefined && stat.food < 2) {
+          stat.food = 2;
         }
       }
     }
