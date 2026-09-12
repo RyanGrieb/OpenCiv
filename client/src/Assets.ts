@@ -95,6 +95,13 @@ export enum SpriteRegion {
   BUILDING_PALACE = "5,18"
 }
 
+// SpriteRegion is keyed by fixed member names, but several call sites look one up
+// by a dynamic string (e.g. a unit/tile/icon name from server data). This centralizes
+// that one inherently-dynamic lookup instead of scattering implicit-any casts.
+export function resolveSpriteRegion(key: string): SpriteRegion {
+  return (SpriteRegion as unknown as Record<string, SpriteRegion>)[key];
+}
+
 
 // assets.ts
 export const assetList = [
