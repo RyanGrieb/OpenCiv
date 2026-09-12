@@ -20,7 +20,7 @@ export class Game {
     ServerEvents.on({
       eventName: "setState",
       parentObject: this,
-      callback: (data: JSON) => {
+      callback: (data) => {
         this.setState(data["state"]);
       },
       globalEvent: true
@@ -30,7 +30,7 @@ export class Game {
     ServerEvents.on({
       eventName: "connectedPlayers",
       parentObject: this,
-      callback: (data: JSON, websocket) => {
+      callback: (data, websocket) => {
         // Get all player names and the name of the requesting player.
         const requestingPlayerName = this.getPlayerFromWebsocket(websocket)?.getName();
         // Send the names to the requesting player.
@@ -49,7 +49,7 @@ export class Game {
     ServerEvents.on({
       eventName: "playerQuit",
       parentObject: this,
-      callback: (data: JSON) => {
+      callback: (data) => {
         // If only one player is remaining, set the state to "lobby".
         if (this.players.size <= 1) {
           this.setState("lobby");
