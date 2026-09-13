@@ -227,7 +227,8 @@ export class Tile extends Actor {
     //Note: Tile sizes in spritesheet are always 32x32 regardless of anything else.
     for (let tileType of tileTypes) {
       const spritesheetImage = Game.getInstance().getImage(GameImage.SPRITESHEET);
-      const spriteRegion = resolveSpriteRegion(tileType.toUpperCase());
+      const spriteRegion = resolveSpriteRegion(`TILE_${tileType.toUpperCase()}`);
+      console.log(`Generating tile type ${tileType} with sprite region ${spriteRegion}`);
       const spriteX = parseInt(spriteRegion.split(",")[0]) * 32;
       const spriteY = parseInt(spriteRegion.split(",")[1]) * 32;
       canvas.getContext("2d").drawImage(spritesheetImage, spriteX, spriteY, 32, 32, 0, 0, Tile.WIDTH, Tile.HEIGHT);

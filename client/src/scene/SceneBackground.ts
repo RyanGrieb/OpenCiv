@@ -17,7 +17,7 @@ export class SceneBackground {
         tileActors.push(
           new Actor({
             image: Game.getInstance().getImage(GameImage.SPRITESHEET),
-            spriteRegion: SpriteRegion.OCEAN,
+            spriteRegion: SpriteRegion.TILE_OCEAN,
             x: xPos,
             y: yPos,
             width: 32,
@@ -45,7 +45,7 @@ export class SceneBackground {
         tileActors.push(
           new Actor({
             image: Game.getInstance().getImage(GameImage.SPRITESHEET),
-            spriteRegion: Numbers.safeRandom() < 0.1 ? SpriteRegion.GRASS_HILL : SpriteRegion.GRASS,
+            spriteRegion: Numbers.safeRandom() < 0.1 ? SpriteRegion.TILE_GRASS_HILL : SpriteRegion.TILE_GRASS,
             x: xPos,
             y: yPos,
             width: 32,

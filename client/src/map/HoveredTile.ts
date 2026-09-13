@@ -13,7 +13,7 @@ export class HoveredTile extends Tile {
       z: 2,
       gridX: 0, //Grid values don't matter.
       gridY: 0,
-      tileTypes: ["hovered_tile"],
+      tileTypes: ["hovered"],
       width: 32,
       height: 32,
       movementCost: 0
