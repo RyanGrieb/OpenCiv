@@ -130,6 +130,34 @@ export class City {
 
   public sendTerritoryUpdate() { }
 
+  /**
+   * Tells all players this city now exists, then applies whatever founding-time
+   * logic follows from that (e.g. granting a starting palace). Must broadcast
+   * "newCity" before applying any bonus that itself sends a network event (like
+   * addBuilding) - clients only start listening for a city's events once they've
+   * processed its "newCity" packet and constructed it locally.
+   */
+  public announceCreated() {
+    Game.getInstance()
+      .getPlayers()
+      .forEach((player) => {
+        player.sendNetworkEvent({
+          event: "newCity",
+          ...this.getJSON()
+        });
+      });
+
+    this.applyFoundingBonuses();
+  }
+
+  private applyFoundingBonuses() {
+    // The player's first city gets a starting palace.
+    //FIXME: Some civilizations can replace the palace with a unique building.
+    if (this.player.getCities().length < 2) {
+      this.addBuilding("palace");
+    }
+  }
+
   /*
   Get the city-stat line, and send it to the player
 */

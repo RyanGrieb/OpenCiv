@@ -1,4 +1,3 @@
-import { Game } from "../Game";
 import { City } from "../city/City";
 import { Unit, UnitAction } from "./Unit";
 
@@ -20,19 +19,7 @@ export class UnitActions {
         tile.setCity(city);
         player.getCities().push(city);
 
-        Game.getInstance()
-          .getPlayers()
-          .forEach((gamePlayer) => {
-            gamePlayer.sendNetworkEvent({
-              event: "newCity",
-              ...city.getJSON()
-            });
-          });
-
-        // Add palace to city if it's the first city
-        if (player.getCities().length < 2) {
-          city.addBuilding("palace");
-        }
+        city.announceCreated();
       }
     };
   }
