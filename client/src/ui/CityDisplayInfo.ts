@@ -11,15 +11,15 @@ import { ListBox } from "./Listbox";
 import { RadioButton } from "./RadioButton";
 
 const BUILDING_STAT_ICONS: Record<string, SpriteRegion> = {
-  science: SpriteRegion.SCIENCE_ICON,
-  gold: SpriteRegion.GOLD_ICON,
-  production: SpriteRegion.PRODUCTION_ICON,
-  faith: SpriteRegion.FAITH_ICON,
-  culture: SpriteRegion.CULTURE_ICON,
-  food: SpriteRegion.FOOD_ICON,
-  population: SpriteRegion.POPULATION_ICON,
-  morale: SpriteRegion.MORALE_ICON,
-  defense: SpriteRegion.DEFENSE_ICON
+  science: SpriteRegion.ICON_SCIENCE,
+  gold: SpriteRegion.ICON_GOLD,
+  production: SpriteRegion.ICON_PRODUCTION,
+  faith: SpriteRegion.ICON_FAITH,
+  culture: SpriteRegion.ICON_CULTURE,
+  food: SpriteRegion.ICON_FOOD,
+  population: SpriteRegion.ICON_POPULATION,
+  morale: SpriteRegion.ICON_MORALE,
+  defense: SpriteRegion.ICON_DEFENSE
 };
 
 export class CityDisplayInfo extends ActorGroup {
@@ -144,11 +144,11 @@ export class CityDisplayInfo extends ActorGroup {
     });
 
     const focuses = [
-      { name: "Food Focus", icon: SpriteRegion.FOOD_ICON },
-      { name: "Production Focus", icon: SpriteRegion.PRODUCTION_ICON },
-      { name: "Gold Focus", icon: SpriteRegion.GOLD_ICON },
-      { name: "Science Focus", icon: SpriteRegion.SCIENCE_ICON },
-      { name: "Culture Focus", icon: SpriteRegion.CULTURE_ICON }
+      { name: "Food Focus", icon: SpriteRegion.ICON_FOOD },
+      { name: "Production Focus", icon: SpriteRegion.ICON_PRODUCTION },
+      { name: "Gold Focus", icon: SpriteRegion.ICON_GOLD },
+      { name: "Science Focus", icon: SpriteRegion.ICON_SCIENCE },
+      { name: "Culture Focus", icon: SpriteRegion.ICON_CULTURE }
     ];
 
     for (const focus of focuses) {
@@ -237,7 +237,7 @@ export class CityDisplayInfo extends ActorGroup {
     for (const [stat, value] of Object.entries(statLine)) {
       if (value === 0) continue;
 
-      const icon = BUILDING_STAT_ICONS[stat] ?? SpriteRegion.UNKNOWN_ICON;
+      const icon = BUILDING_STAT_ICONS[stat] ?? SpriteRegion.ICON_UNKNOWN;
       const text = Strings.convertToStatUnit(value);
       const textWidth = Game.getInstance().measureText(text, font).width;
       const itemWidth = iconSize + textWidth;
@@ -312,7 +312,7 @@ export class CityDisplayInfo extends ActorGroup {
 
     const populationIcon = new Actor({
       image: Game.getInstance().getImage(GameImage.SPRITESHEET),
-      spriteRegion: SpriteRegion.POPULATION_ICON,
+      spriteRegion: SpriteRegion.ICON_POPULATION,
       x: 10,
       y: 52,
       width: 32,
@@ -344,7 +344,7 @@ export class CityDisplayInfo extends ActorGroup {
 
     const moraleIcon = new Actor({
       image: Game.getInstance().getImage(GameImage.SPRITESHEET),
-      spriteRegion: SpriteRegion.MORALE_ICON,
+      spriteRegion: SpriteRegion.ICON_MORALE,
       x: 10,
       y: populationIcon.getY() + 32,
       width: 32,
@@ -376,7 +376,7 @@ export class CityDisplayInfo extends ActorGroup {
 
     const foodIcon = new Actor({
       image: Game.getInstance().getImage(GameImage.SPRITESHEET),
-      spriteRegion: SpriteRegion.FOOD_ICON,
+      spriteRegion: SpriteRegion.ICON_FOOD,
       x: 10,
       y: moraleIcon.getY() + 32,
       width: 32,
@@ -408,7 +408,7 @@ export class CityDisplayInfo extends ActorGroup {
 
     const productionIcon = new Actor({
       image: Game.getInstance().getImage(GameImage.SPRITESHEET),
-      spriteRegion: SpriteRegion.PRODUCTION_ICON,
+      spriteRegion: SpriteRegion.ICON_PRODUCTION,
       x: 10,
       y: foodIcon.getY() + 32,
       width: 32,
@@ -440,7 +440,7 @@ export class CityDisplayInfo extends ActorGroup {
 
     const goldIcon = new Actor({
       image: Game.getInstance().getImage(GameImage.SPRITESHEET),
-      spriteRegion: SpriteRegion.GOLD_ICON,
+      spriteRegion: SpriteRegion.ICON_GOLD,
       x: 10,
       y: productionIcon.getY() + 32,
       width: 32,
@@ -472,7 +472,7 @@ export class CityDisplayInfo extends ActorGroup {
 
     const scienceIcon = new Actor({
       image: Game.getInstance().getImage(GameImage.SPRITESHEET),
-      spriteRegion: SpriteRegion.SCIENCE_ICON,
+      spriteRegion: SpriteRegion.ICON_SCIENCE,
       x: 10,
       y: goldIcon.getY() + 32,
       width: 32,
@@ -504,7 +504,7 @@ export class CityDisplayInfo extends ActorGroup {
 
     const cultureIcon = new Actor({
       image: Game.getInstance().getImage(GameImage.SPRITESHEET),
-      spriteRegion: SpriteRegion.CULTURE_ICON,
+      spriteRegion: SpriteRegion.ICON_CULTURE,
       x: 10,
       y: scienceIcon.getY() + 32,
       width: 32,
@@ -695,7 +695,7 @@ export class CityDisplayInfo extends ActorGroup {
             image: Game.getInstance().getImage(GameImage.SPRITESHEET),
             spriteRegion:
               resolveSpriteRegion(`${option.type.toUpperCase()}_${option.name.toUpperCase()}`) ??
-              SpriteRegion.UNKNOWN_ICON,
+              SpriteRegion.ICON_UNKNOWN,
             x: rowX + 8,
             y: rowY + rowHeight / 2 - 16,
             z: this.z,

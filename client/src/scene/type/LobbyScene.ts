@@ -151,7 +151,7 @@ export class LobbyScene extends Scene {
 
         for (let i = 0; i < players.length; i++) {
           const playerName = players[i].name;
-          let civIcon = SpriteRegion.UNKNOWN_ICON;
+          let civIcon = SpriteRegion.ICON_UNKNOWN;
           if (players[i].civData) {
             civIcon = resolveSpriteRegion(players[i].civData.icon_name);
           }
@@ -176,7 +176,7 @@ export class LobbyScene extends Scene {
             currentRow.addActor(
               new Actor({
                 image: Game.getInstance().getImage(GameImage.SPRITESHEET),
-                spriteRegion: SpriteRegion.STAR,
+                spriteRegion: SpriteRegion.ICON_STAR,
                 x: currentRow.getX() + currentRow.getWidth() - 32 - 8,
                 y: currentRow.getY() - 32 / 2 + currentRow.getHeight() / 2,
                 width: 32,
@@ -205,7 +205,7 @@ export class LobbyScene extends Scene {
           }
 
           for (const rowActor of row.getActors()) {
-            if (rowActor.getSpriteRegion() === SpriteRegion.STAR) {
+            if (rowActor.getSpriteRegion() === SpriteRegion.ICON_STAR) {
               continue;
             }
 

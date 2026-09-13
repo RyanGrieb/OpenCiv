@@ -59,7 +59,7 @@ export class SelectCivilizationGroup extends ActorGroup {
           }
 
           let iconY = this.y + 68 * yOffset;
-
+          console.log(civJSON.icon_name)
           const selectCivButton = new Button({
             icon: resolveSpriteRegion(civJSON.icon_name),
             iconOnly: true,

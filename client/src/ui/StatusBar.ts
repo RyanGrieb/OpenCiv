@@ -112,7 +112,7 @@ export class StatusBar extends ActorGroup {
 
     this.scienceIcon = new Actor({
       image: Game.getInstance().getImage(GameImage.SPRITESHEET),
-      spriteRegion: SpriteRegion.SCIENCE_ICON,
+      spriteRegion: SpriteRegion.ICON_SCIENCE,
       x: this.scienceDescLabel.getX() + this.scienceDescLabel.getWidth(),
       y: -6,
       width: 32,
@@ -142,7 +142,7 @@ export class StatusBar extends ActorGroup {
 
     this.cultureIcon = new Actor({
       image: Game.getInstance().getImage(GameImage.SPRITESHEET),
-      spriteRegion: SpriteRegion.CULTURE_ICON,
+      spriteRegion: SpriteRegion.ICON_CULTURE,
       x: this.cultureDescLabel.getX() + this.cultureDescLabel.getWidth(),
       y: -6,
       width: 32,
@@ -172,7 +172,7 @@ export class StatusBar extends ActorGroup {
 
     this.goldIcon = new Actor({
       image: Game.getInstance().getImage(GameImage.SPRITESHEET),
-      spriteRegion: SpriteRegion.GOLD_ICON,
+      spriteRegion: SpriteRegion.ICON_GOLD,
       x: this.goldDescLabel.getX() + this.goldDescLabel.getWidth(),
       y: -6,
       width: 32,
@@ -203,7 +203,7 @@ export class StatusBar extends ActorGroup {
 
     this.faithIcon = new Actor({
       image: Game.getInstance().getImage(GameImage.SPRITESHEET),
-      spriteRegion: SpriteRegion.FAITH_ICON,
+      spriteRegion: SpriteRegion.ICON_FAITH,
       x: this.faithDescLabel.getX() + this.faithDescLabel.getWidth(),
       y: -6,
       width: 32,
@@ -233,7 +233,7 @@ export class StatusBar extends ActorGroup {
 
     this.tradeIcon = new Actor({
       image: Game.getInstance().getImage(GameImage.SPRITESHEET),
-      spriteRegion: SpriteRegion.TRADE_ICON,
+      spriteRegion: SpriteRegion.ICON_TRADE,
       x: this.tradeDescLabel.getX() + this.tradeDescLabel.getWidth() + 10,
       y: 2,
       width: 16,

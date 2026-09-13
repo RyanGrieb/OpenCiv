@@ -116,13 +116,13 @@ export class InGameScene extends Scene {
 
           // Map stat keys to SpriteRegion
           const statSpriteRegions: Record<string, SpriteRegion> = {
-            food: SpriteRegion.FOOD_ICON,
-            production: SpriteRegion.PRODUCTION_ICON,
-            gold: SpriteRegion.GOLD_ICON,
-            faith: SpriteRegion.FAITH_ICON,
-            morale: SpriteRegion.MORALE_ICON,
-            science: SpriteRegion.SCIENCE_ICON,
-            culture: SpriteRegion.CULTURE_ICON,
+            food: SpriteRegion.ICON_FOOD,
+            production: SpriteRegion.ICON_PRODUCTION,
+            gold: SpriteRegion.ICON_GOLD,
+            faith: SpriteRegion.ICON_FAITH,
+            morale: SpriteRegion.ICON_MORALE,
+            science: SpriteRegion.ICON_SCIENCE,
+            culture: SpriteRegion.ICON_CULTURE,
           };
 
           // Set the label text (without yields)

@@ -1,6 +1,6 @@
 civilizations:
   - name: Rome
-    icon_name: ROME_ICON
+    icon_name: ICON_ROME
     inside_border_color: rgba(70,0,118,0.20 )
     outside_border_color: rgb(240,199,0)
     start_bias: none
@@ -22,7 +22,7 @@ civilizations:
       - Circei
       - Setia
   - name: Mongolia
-    icon_name: MONGOLIA_ICON
+    icon_name: ICON_MONGOLIA
     inside_border_color: rgba(81,0,9,0.25)
     outside_border_color: rgb(255,120,0)
     start_bias: plains
@@ -45,7 +45,7 @@ civilizations:
       - Otrar
       - Sanchu
   - name: Mamluks
-    icon_name: MAMLUKS_ICON
+    icon_name: ICON_MAMLUKS
     inside_border_color: rgba(255,252,3,0.25)
     outside_border_color: rgb(255,255,255)
     start_bias: desert
@@ -69,7 +69,7 @@ civilizations:
       - Aswan
       - Mosul
   - name: America
-    icon_name: AMERICA_ICON
+    icon_name: ICON_AMERICA
     inside_border_color: rgba(31,51,120,0.35)
     outside_border_color: rgb(255,255,255)
     start_bias: none
@@ -92,7 +92,7 @@ civilizations:
       - Los Angeles
       - Houston
   - name: Germany
-    icon_name: GERMANY_ICON
+    icon_name: ICON_GERMANY
     inside_border_color: rgba(179,178,184,0.35)
     outside_border_color: rgb(37,43,33)
     start_bias: none
@@ -119,7 +119,7 @@ civilizations:
   - name: England
     inside_border_color: rgba(109,2,0,0.30)
     outside_border_color: rgb(255,255,255)
-    icon_name: ENGLAND_ICON
+    icon_name: ICON_ENGLAND
     start_bias: shallow_ocean
     start_bias_desc: "Start bias for: Shallow Ocean"
     unique_unit_descs:
@@ -140,7 +140,7 @@ civilizations:
       - Oxford
       - Liverpool
   - name: Cuba
-    icon_name: CUBA_ICON
+    icon_name: ICON_CUBA
     inside_border_color: rgba(31,51,120,0.35)
     outside_border_color: blue
     start_bias: shallow_ocean
@@ -163,7 +163,7 @@ civilizations:
       - Pinar del Río
       - Matanzas
   - name: Canada
-    icon_name: CANADA_ICON
+    icon_name: ICON_CANADA
     inside_border_color: rgba(255,255,255,0.25)
     outside_border_color: red
     start_bias: tundra

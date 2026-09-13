@@ -5,7 +5,7 @@ export class UnitActions {
   public static settleCity(): UnitAction {
     return {
       name: "settle",
-      icon: "SETTLE_ICON",
+      icon: "ICON_SETTLE",
       requirements: ["awayFromCity", "movement"],
       desc: "Settle City",
       onAction: (unit: Unit) => {
