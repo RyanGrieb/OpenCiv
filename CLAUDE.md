@@ -97,6 +97,10 @@ Each project has a **type shim** at `src/types/ts-priority-queue.d.ts` (mirrors 
 
 - **Static methods go directly after the constructor**, before instance methods — the first methods a reader sees in a class. See `client/src/map/Tile.ts` (`gridDistance`, `riverCrosses`, `getWeight`, `setTileYields`, `getTileYields` all sit right after the constructor) or `server/src/city/City.ts` (`getBuildingDataByName`).
 
+## Commit messages
+
+Title format is `Category: Description` (e.g. `Client: Fix resize bugs...`, `Server: Restrict types to node+jest...`, `City:`, `UI:`). The category is the subsystem most affected, not necessarily which project (client/server) the diff touches — a change that spans both but is user-facing through the UI (e.g. a server-pushed stat the client displays) is titled `UI:`, not `Client:`/`Server:`. Check `git log` for current examples before writing a new one.
+
 ### Odd-but-harmless: `parent-package` self-dependency
 
 `client/package.json` and `server/package.json` both depend on `"parent-package": "file:.."` (the repo root). Nothing actually imports from it — it's inert. Don't try to "clean it up" without checking both lockfiles; removing it is a bigger change than it looks like for zero behavioral gain.
