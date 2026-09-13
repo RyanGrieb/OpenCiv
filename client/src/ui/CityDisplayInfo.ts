@@ -8,6 +8,18 @@ import { Label } from "./Label";
 import { ListBox } from "./Listbox";
 import { RadioButton } from "./RadioButton";
 
+const BUILDING_STAT_ICONS: Record<string, SpriteRegion> = {
+  science: SpriteRegion.SCIENCE_ICON,
+  gold: SpriteRegion.GOLD_ICON,
+  production: SpriteRegion.PRODUCTION_ICON,
+  faith: SpriteRegion.FAITH_ICON,
+  culture: SpriteRegion.CULTURE_ICON,
+  food: SpriteRegion.FOOD_ICON,
+  population: SpriteRegion.POPULATION_ICON,
+  morale: SpriteRegion.MORALE_ICON,
+  defense: SpriteRegion.DEFENSE_ICON
+};
+
 export class CityDisplayInfo extends ActorGroup {
   private city: City;
 
@@ -149,7 +161,89 @@ export class CityDisplayInfo extends ActorGroup {
     // Add buildings category for existing city buildings:
     listbox.addCategory("Buildings");
 
+    for (const building of this.city.getBuildings()) {
+      const rowX = listbox.getNextRowPosition().x;
+      const rowY = listbox.getNextRowPosition().y;
+
+      const rowHeight = 100; // Tall enough for the name on top and up to 2 lines of stat icons below
+
+      listbox.addRow({
+        category: "Buildings",
+        text: building.getName(),
+        textX: rowX + 48,
+        textY: rowY + 8,
+        rowHeight: rowHeight,
+        actorIcons: [
+          new Actor({
+            image: Game.getInstance().getImage(GameImage.SPRITESHEET),
+            spriteRegion: building.getSpriteRegion(),
+            x: rowX + 8,
+            y: rowY + rowHeight / 2 - 32 / 2,
+            z: this.z,
+            width: 32,
+            height: 32,
+            cameraApplies: false
+          }),
+          ...this.buildStatIconActors(building.getStatLine(), rowX + 48, rowY + 34, 275 - 48 - 10)
+        ]
+      });
+    }
+
     this.addActor(listbox);
+  }
+
+  // Builds icon+value actors for a building's stats, wrapping lines by measured width.
+  // Must return actors synchronously - ones added to a row after addRow() don't render.
+  private buildStatIconActors(statLine: Record<string, number>, startX: number, startY: number, maxWidth: number): Actor[] {
+    const actors: Actor[] = [];
+    const iconSize = 32;
+    const font = "20px serif";
+    const gapAfterItem = 8;
+    const lineHeight = iconSize;
+
+    let x = startX;
+    let y = startY;
+
+    for (const [stat, value] of Object.entries(statLine)) {
+      if (value === 0) continue;
+
+      const icon = BUILDING_STAT_ICONS[stat] ?? SpriteRegion.UNKNOWN_ICON;
+      const text = Strings.convertToStatUnit(value);
+      const textWidth = Game.getInstance().measureText(text, font).width;
+      const itemWidth = iconSize + textWidth;
+
+      // Wrap if it won't fit, unless the line's still empty
+      if (x !== startX && x + itemWidth > startX + maxWidth) {
+        x = startX;
+        y += lineHeight;
+      }
+
+      actors.push(
+        new Actor({
+          image: Game.getInstance().getImage(GameImage.SPRITESHEET),
+          spriteRegion: icon,
+          x: x,
+          y: y,
+          z: this.z,
+          width: iconSize,
+          height: iconSize,
+          cameraApplies: false
+        })
+      );
+      actors.push(
+        new Label({
+          text: text,
+          font: font,
+          fontColor: "white",
+          x: x + iconSize,
+          y: y + (16 / 2)
+        })
+      );
+
+      x += itemWidth + gapAfterItem;
+    }
+
+    return actors;
   }
 
   private getCitizenMgmtRadioButtons() {

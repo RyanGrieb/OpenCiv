@@ -16,6 +16,7 @@ interface RowOptions extends RectangleOptions {
   fontColor?: string;
   textX?: number;
   textY?: number;
+  maxWidth?: number;
 }
 
 class Row extends ActorGroup {
@@ -47,7 +48,8 @@ class Row extends ActorGroup {
       fontColor: options.fontColor,
       font: options.font,
       x: options.textX ?? this.x,
-      y: options.textY ?? this.y
+      y: options.textY ?? this.y,
+      maxWidth: options.maxWidth
     });
 
     this.label = label;
@@ -153,6 +155,7 @@ export class ListBox extends ActorGroup {
     textX?: number;
     textY?: number;
     centerTextY?: boolean;
+    maxWidth?: number;
   }) {
     const row = new Row({
       x: this.getNextRowPosition().x,
@@ -165,7 +168,8 @@ export class ListBox extends ActorGroup {
       font: this.textFont,
       fontColor: this.fontColor,
       textX: options.textX,
-      textY: options.textY
+      textY: options.textY,
+      maxWidth: options.maxWidth
     });
 
     for (const actionIcon of options.actorIcons ?? []) {

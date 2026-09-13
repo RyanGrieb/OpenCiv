@@ -91,8 +91,9 @@ export enum SpriteRegion {
   GOLD_ICON = "17,12",
   FAITH_ICON = "2,13",
   TRADE_ICON = "5,14",
+  DEFENSE_ICON = "10,14",
   SETTLE_ICON = "11,11",
-  BUILDING_PALACE = "5,18"
+  BUILDING_PALACE = "9,17"
 }
 
 // SpriteRegion is keyed by fixed member names, but several call sites look one up

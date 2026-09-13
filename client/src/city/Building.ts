@@ -8,7 +8,7 @@ export interface BuildingData {
 
 export class Buidling {
   private name: string;
-  private statLine: Record<string, any>;
+  private statLine: Record<string, number>;
   private spriteRegion: SpriteRegion;
 
   constructor(buildingData: BuildingData) {
