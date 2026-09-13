@@ -15,6 +15,7 @@
         "concurrently": "^7.6.0"
     },
     "devDependencies": {
+        "@types/kill-port": "^2.0.3",
         "@types/node": "^24.10.2",
         "kill-port": "^2.0.1",
         "ts-node": "^10.9.2",
