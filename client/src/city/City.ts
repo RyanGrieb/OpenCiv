@@ -18,6 +18,12 @@ export interface CityOptions {
   name: string;
 }
 
+export interface ProductionQueueItem {
+  type: "unit" | "building";
+  name: string;
+  cost: number;
+}
+
 /**
  * City class actor handles city name, healthbar, and other attributes. It's not a tile layer.
  */
@@ -35,6 +41,7 @@ export class City extends ActorGroup {
   private buildings: Buidling[];
   private stats: Map<string, number>;
   private statsPresent: boolean;
+  private productionQueue: ProductionQueueItem[] = [];
 
   constructor(options: CityOptions) {
     super({ x: 0, y: 0, z: 2, width: 0, height: 0 });
@@ -145,6 +152,7 @@ export class City extends ActorGroup {
           console.log(`[City ${this.name}] Updated worked tiles: ${this.workedTiles.length}`);
         }
 
+        this.productionQueue = data["productionQueue"] ?? [];
         this.statsPresent = true;
       }
     });
@@ -156,6 +164,10 @@ export class City extends ActorGroup {
 
   public getStat(stat: string): number {
     return this.stats.get(stat);
+  }
+
+  public getProductionQueue(): ProductionQueueItem[] {
+    return this.productionQueue;
   }
 
   public onDestroyed(): void {

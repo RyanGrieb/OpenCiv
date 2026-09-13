@@ -20,6 +20,7 @@ export enum GameImage {
 
 export enum SpriteRegion {
   WARRIOR = "0,1",
+  SCOUT = "15,0",
   ARCHER = "0,0",
   BUILDER = "1,0",
   CAMEL_ARCHER = "2,0",
@@ -93,7 +94,8 @@ export enum SpriteRegion {
   TRADE_ICON = "5,14",
   DEFENSE_ICON = "10,14",
   SETTLE_ICON = "11,11",
-  BUILDING_PALACE = "9,17"
+  BUILDING_PALACE = "9,17",
+  BUILDING_MONUMENT = "14,16",
 }
 
 // SpriteRegion is keyed by fixed member names, but several call sites look one up

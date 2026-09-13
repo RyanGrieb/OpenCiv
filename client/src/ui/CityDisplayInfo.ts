@@ -1,9 +1,11 @@
-import { GameImage, SpriteRegion } from "../Assets";
+import { GameImage, resolveSpriteRegion, SpriteRegion } from "../Assets";
 import { Game } from "../Game";
-import { City } from "../city/City";
+import { City, ProductionQueueItem } from "../city/City";
+import { NetworkEvents, WebsocketClient } from "../network/Client";
 import { Actor } from "../scene/Actor";
 import { ActorGroup } from "../scene/ActorGroup";
 import { Strings } from "../util/Strings";
+import { Button } from "./Button";
 import { Label } from "./Label";
 import { ListBox } from "./Listbox";
 import { RadioButton } from "./RadioButton";
@@ -26,6 +28,10 @@ export class CityDisplayInfo extends ActorGroup {
   private citizenMgmtRadioButtons: RadioButton[];
   private statLabels: Map<string, Label>;
   private workedTileOverlays: Actor[];
+  private statsWindow: ActorGroup;
+  private currentlyBuildingWindow: ActorGroup;
+  private chooseProductionListBox: ListBox;
+  private isChoosingProduction: boolean = false;
 
   constructor(city: City) {
     super({
@@ -45,6 +51,28 @@ export class CityDisplayInfo extends ActorGroup {
     this.initializeStatsWindow();
     this.initializeBuildingsWindow();
     this.initializeWorkedTileOverlays();
+    this.initializeCurrentlyBuildingWindow();
+
+    // Refreshes whenever the queue changes (e.g. after choosing production),
+    // City's own updateCityStats listener (registered when the city was created,
+    // so it always runs first) has already updated getProductionQueue() by now.
+    NetworkEvents.on({
+      eventName: "updateCityStats",
+      parentObject: this,
+      callback: (data: any) => {
+        if (data["cityName"] !== this.city.getName()) return;
+        this.refreshCurrentlyBuildingWindow();
+      }
+    });
+
+    NetworkEvents.on({
+      eventName: "updateProductionOptions",
+      parentObject: this,
+      callback: (data: any) => {
+        if (data["cityName"] !== this.city.getName()) return;
+        this.buildChooseProductionListBox(data["units"], data["buildings"]);
+      }
+    });
   }
 
   public onDestroyed(): void {
@@ -52,6 +80,8 @@ export class CityDisplayInfo extends ActorGroup {
       Game.getInstance().getCurrentScene().removeActor(overlay);
     }
     this.workedTileOverlays = [];
+
+    NetworkEvents.removeCallbacksByParentObject(this);
 
     super.onDestroyed();
   }
@@ -255,7 +285,10 @@ export class CityDisplayInfo extends ActorGroup {
     const y = 21;
     const width = 260;
     const height = 300;
-    this.addActor(
+
+    this.statsWindow = new ActorGroup({ x: 0, y: 0, z: this.z, width: 0, height: 0, cameraApplies: false });
+
+    this.statsWindow.addActor(
       new Actor({
         image: Game.getInstance().getImage(GameImage.POPUP_BOX),
         x: x,
@@ -274,7 +307,7 @@ export class CityDisplayInfo extends ActorGroup {
     });
     nameLabel.conformSize().then(() => {
       nameLabel.setPosition(0 + 260 / 2 - nameLabel.getWidth() / 2, 32);
-      this.addActor(nameLabel);
+      this.statsWindow.addActor(nameLabel);
     });
 
     const populationIcon = new Actor({
@@ -285,9 +318,9 @@ export class CityDisplayInfo extends ActorGroup {
       width: 32,
       height: 32
     });
-    this.addActor(populationIcon);
+    this.statsWindow.addActor(populationIcon);
 
-    this.addActor(
+    this.statsWindow.addActor(
       new Label({
         text: "Population:",
         font: "20px serif",
@@ -305,7 +338,7 @@ export class CityDisplayInfo extends ActorGroup {
     populationLabel.conformSize().then(() => {
       populationLabel.setPosition(width - populationLabel.getWidth() - 10, populationIcon.getY() + 8);
 
-      this.addActor(populationLabel);
+      this.statsWindow.addActor(populationLabel);
     });
     this.statLabels.set("population", populationLabel);
 
@@ -317,9 +350,9 @@ export class CityDisplayInfo extends ActorGroup {
       width: 32,
       height: 32
     });
-    this.addActor(moraleIcon);
+    this.statsWindow.addActor(moraleIcon);
 
-    this.addActor(
+    this.statsWindow.addActor(
       new Label({
         text: "Morale:",
         font: "20px serif",
@@ -337,7 +370,7 @@ export class CityDisplayInfo extends ActorGroup {
     moraleLabel.conformSize().then(() => {
       moraleLabel.setPosition(width - moraleLabel.getWidth() - 10, moraleIcon.getY() + 8);
 
-      this.addActor(moraleLabel);
+      this.statsWindow.addActor(moraleLabel);
     });
     this.statLabels.set("morale", moraleLabel);
 
@@ -349,9 +382,9 @@ export class CityDisplayInfo extends ActorGroup {
       width: 32,
       height: 32
     });
-    this.addActor(foodIcon);
+    this.statsWindow.addActor(foodIcon);
 
-    this.addActor(
+    this.statsWindow.addActor(
       new Label({
         text: "Food:",
         font: "20px serif",
@@ -369,7 +402,7 @@ export class CityDisplayInfo extends ActorGroup {
     foodLabel.conformSize().then(() => {
       foodLabel.setPosition(width - foodLabel.getWidth() - 10, foodIcon.getY() + 8);
 
-      this.addActor(foodLabel);
+      this.statsWindow.addActor(foodLabel);
     });
     this.statLabels.set("food", foodLabel);
 
@@ -381,9 +414,9 @@ export class CityDisplayInfo extends ActorGroup {
       width: 32,
       height: 32
     });
-    this.addActor(productionIcon);
+    this.statsWindow.addActor(productionIcon);
 
-    this.addActor(
+    this.statsWindow.addActor(
       new Label({
         text: "Production:",
         font: "20px serif",
@@ -401,7 +434,7 @@ export class CityDisplayInfo extends ActorGroup {
     productionLabel.conformSize().then(() => {
       productionLabel.setPosition(width - productionLabel.getWidth() - 10, productionIcon.getY() + 8);
 
-      this.addActor(productionLabel);
+      this.statsWindow.addActor(productionLabel);
     });
     this.statLabels.set("production", productionLabel);
 
@@ -413,9 +446,9 @@ export class CityDisplayInfo extends ActorGroup {
       width: 32,
       height: 32
     });
-    this.addActor(goldIcon);
+    this.statsWindow.addActor(goldIcon);
 
-    this.addActor(
+    this.statsWindow.addActor(
       new Label({
         text: "Gold:",
         font: "20px serif",
@@ -433,7 +466,7 @@ export class CityDisplayInfo extends ActorGroup {
     goldLabel.conformSize().then(() => {
       goldLabel.setPosition(width - goldLabel.getWidth() - 10, goldIcon.getY() + 8);
 
-      this.addActor(goldLabel);
+      this.statsWindow.addActor(goldLabel);
     });
     this.statLabels.set("gold", goldLabel);
 
@@ -445,9 +478,9 @@ export class CityDisplayInfo extends ActorGroup {
       width: 32,
       height: 32
     });
-    this.addActor(scienceIcon);
+    this.statsWindow.addActor(scienceIcon);
 
-    this.addActor(
+    this.statsWindow.addActor(
       new Label({
         text: "Science:",
         font: "20px serif",
@@ -465,7 +498,7 @@ export class CityDisplayInfo extends ActorGroup {
     scienceLabel.conformSize().then(() => {
       scienceLabel.setPosition(width - scienceLabel.getWidth() - 10, scienceIcon.getY() + 8);
 
-      this.addActor(scienceLabel);
+      this.statsWindow.addActor(scienceLabel);
     });
     this.statLabels.set("science", scienceLabel);
 
@@ -477,9 +510,9 @@ export class CityDisplayInfo extends ActorGroup {
       width: 32,
       height: 32
     });
-    this.addActor(cultureIcon);
+    this.statsWindow.addActor(cultureIcon);
 
-    this.addActor(
+    this.statsWindow.addActor(
       new Label({
         text: "Culture:",
         font: "20px serif",
@@ -497,8 +530,216 @@ export class CityDisplayInfo extends ActorGroup {
     cultureLabel.conformSize().then(() => {
       cultureLabel.setPosition(width - cultureLabel.getWidth() - 10, cultureIcon.getY() + 8);
 
-      this.addActor(cultureLabel);
+      this.statsWindow.addActor(cultureLabel);
     });
     this.statLabels.set("culture", cultureLabel);
+
+    this.addActor(this.statsWindow);
+  }
+
+  private refreshCurrentlyBuildingWindow() {
+    this.removeActor(this.currentlyBuildingWindow);
+    this.initializeCurrentlyBuildingWindow();
+  }
+
+  private initializeCurrentlyBuildingWindow() {
+    const x = 0;
+    const width = 260;
+    const height = 140;
+    const y = Game.getInstance().getHeight() - height;
+
+    this.currentlyBuildingWindow = new ActorGroup({ x: 0, y: 0, z: this.z, width: 0, height: 0, cameraApplies: false });
+
+    this.currentlyBuildingWindow.addActor(
+      new Actor({
+        image: Game.getInstance().getImage(GameImage.POPUP_BOX),
+        x: x,
+        y: y,
+        cornerSize: 20,
+        width: width,
+        height: height,
+        nineSlice: true
+      })
+    );
+
+    const queue = this.city.getProductionQueue();
+
+    if (queue.length === 0) {
+      const label = new Label({ text: "Nothing being produced", font: "16px serif", fontColor: "white" });
+      label.conformSize().then(() => {
+        label.setPosition(x + width / 2 - label.getWidth() / 2, y + 20);
+        this.currentlyBuildingWindow.addActor(label);
+      });
+    } else {
+      const current = queue[0];
+      // Guard against a zero/negative production rate - a real accumulated-progress
+      // system (and its own turns-remaining math) is a separate follow-up feature.
+      const productionRate = Math.max(1, this.city.getStat("production"));
+      const turnsLeft = Math.ceil(current.cost / productionRate);
+
+      this.currentlyBuildingWindow.addActor(
+        new Label({ text: current.name, font: "18px serif", fontColor: "white", x: x + 10, y: y + 10 })
+      );
+
+      this.currentlyBuildingWindow.addActor(
+        new Label({
+          text: `${turnsLeft} turn${turnsLeft === 1 ? "" : "s"} left`,
+          font: "14px serif",
+          fontColor: "white",
+          x: x + 10,
+          y: y + 34
+        })
+      );
+
+      // Placeholder track only - no accumulated-progress data exists yet to fill it.
+      this.currentlyBuildingWindow.addActor(
+        new Actor({
+          image: Game.getInstance().getImage(GameImage.SPRITESHEET),
+          spriteRegion: SpriteRegion.BLANK_TILE,
+          x: x + 10,
+          y: y + 56,
+          width: width - 20,
+          height: 16,
+          color: "rgba(0, 0, 0, 0.4)"
+        })
+      );
+
+      if (queue.length > 1) {
+        this.currentlyBuildingWindow.addActor(
+          new Label({
+            text: "Also queued: " + queue.slice(1).map((item) => item.name).join(", "),
+            font: "12px serif",
+            fontColor: "white",
+            x: x + 10,
+            y: y + 80
+          })
+        );
+      }
+    }
+
+    const buttonText = this.isChoosingProduction ? "Cancel" : queue.length === 0 ? "Choose Production" : "Add to Queue";
+    this.currentlyBuildingWindow.addActor(
+      new Button({
+        text: buttonText,
+        x: x + width / 2 - 100,
+        y: y + height - 36,
+        z: this.z,
+        width: 200,
+        height: 30,
+        fontColor: "white",
+        onClicked: () => {
+          this.toggleChooseProduction();
+        }
+      })
+    );
+
+    this.addActor(this.currentlyBuildingWindow);
+  }
+
+  private toggleChooseProduction() {
+    if (this.isChoosingProduction) {
+      this.closeChooseProduction();
+    } else {
+      this.openChooseProduction();
+    }
+  }
+
+  private openChooseProduction() {
+    this.isChoosingProduction = true;
+    this.removeActor(this.statsWindow);
+    this.statsWindow = undefined;
+    // Rebuild just for the button's new "Cancel" label - the queue itself hasn't changed.
+    this.refreshCurrentlyBuildingWindow();
+
+    WebsocketClient.sendMessage({ event: "requestProductionOptions", cityName: this.city.getName() });
+  }
+
+  private closeChooseProduction() {
+    this.isChoosingProduction = false;
+
+    if (this.chooseProductionListBox) {
+      this.removeActor(this.chooseProductionListBox);
+      this.chooseProductionListBox = undefined;
+    }
+
+    this.initializeStatsWindow();
+    this.refreshCurrentlyBuildingWindow();
+  }
+
+  private buildChooseProductionListBox(units: ProductionQueueItem[], buildings: ProductionQueueItem[]) {
+    if (this.chooseProductionListBox) {
+      this.removeActor(this.chooseProductionListBox);
+    }
+
+    const listbox = new ListBox({
+      x: 0,
+      y: 21,
+      width: 260,
+      height: 300,
+      textFont: "18px serif",
+      fontColor: "white"
+    });
+
+    const addOptionRow = (option: ProductionQueueItem) => {
+      const rowX = listbox.getNextRowPosition().x;
+      const rowY = listbox.getNextRowPosition().y;
+      const rowHeight = 50;
+
+      const row = listbox.addRow({
+        text: option.name,
+        textX: rowX + 48,
+        centerTextY: true,
+        rowHeight: rowHeight,
+        actorIcons: [
+          new Actor({
+            image: Game.getInstance().getImage(GameImage.SPRITESHEET),
+            // Units are keyed bare (WARRIOR, SCOUT); buildings use a BUILDING_ prefix
+            // (BUILDING_MONUMENT), matching Building.ts's asset_name convention.
+            spriteRegion:
+              resolveSpriteRegion(
+                option.type === "building" ? `BUILDING_${option.name.toUpperCase()}` : option.name.toUpperCase()
+              ) ?? SpriteRegion.UNKNOWN_ICON,
+            x: rowX + 8,
+            y: rowY + rowHeight / 2 - 16,
+            z: this.z,
+            width: 32,
+            height: 32,
+            cameraApplies: false
+          })
+        ]
+      });
+
+      row.on("clicked", () => {
+        WebsocketClient.sendMessage({
+          event: "addToProductionQueue",
+          cityName: this.city.getName(),
+          type: option.type,
+          name: option.name
+        });
+        this.closeChooseProduction();
+      });
+
+      row.on("mousemove", () => {
+        if (row.isMouseInside()) {
+          Game.getInstance().setCursor("pointer");
+        }
+      });
+      row.on("mouse_exit", () => {
+        Game.getInstance().setCursor("default");
+      });
+    };
+
+    listbox.addCategory("Units");
+    for (const unit of units) {
+      addOptionRow(unit);
+    }
+
+    listbox.addCategory("Buildings");
+    for (const building of buildings) {
+      addOptionRow(building);
+    }
+
+    this.chooseProductionListBox = listbox;
+    this.addActor(listbox);
   }
 }

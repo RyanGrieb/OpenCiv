@@ -1,3 +1,4 @@
+import { Game } from "../Game";
 import { Actor } from "../scene/Actor";
 import { ActorGroup } from "../scene/ActorGroup";
 import { Vector } from "../util/Vector";
@@ -83,6 +84,16 @@ class Row extends ActorGroup {
   public getLabel() {
     return this.label;
   }
+
+  public onDestroyed(): void {
+    super.onDestroyed();
+    // Mirrors Button.onDestroyed() - a row destroyed while hovered (e.g. clicking
+    // it tears down the whole ListBox) will never fire mouse_exit, so force the
+    // cursor back or it stays stuck on "pointer".
+    if (this.mouseInside) {
+      Game.getInstance().setCursor("default");
+    }
+  }
 }
 
 export interface ListBoxOptions {
@@ -102,7 +113,11 @@ export class ListBox extends ActorGroup {
   private fontColor: string;
 
   constructor(options: ListBoxOptions) {
-    super(options);
+    // ListBox is screen-fixed UI - must be false from construction, not left to
+    // whatever parent adds it later, or rows added via addRow()/addCategory() in
+    // between inherit the wrong (default-true) value and their click/hover
+    // detection ends up wrongly camera-transformed.
+    super({ ...options, cameraApplies: false });
 
     this.rowHeight = options.rowHeight ?? 32;
     this.textFont = options.textFont;

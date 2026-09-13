@@ -17,6 +17,19 @@ export interface CityOptions {
   player: Player;
 }
 
+export interface ProductionOption {
+  type: "unit" | "building";
+  name: string;
+  cost: number;
+}
+
+// Hardcoded until research/tech gates what's buildable.
+const PRODUCTION_OPTIONS: ProductionOption[] = [
+  { type: "unit", name: "Warrior", cost: 30 },
+  { type: "unit", name: "Scout", cost: 20 },
+  { type: "building", name: "Monument", cost: 60 }
+];
+
 export class City {
   private static cityBuildings: Record<string, any>[];
 
@@ -28,6 +41,7 @@ export class City {
   private foodSurplus: number;
   private territory: Tile[];
   private workedTiles: Tile[];
+  private productionQueue: ProductionOption[];
 
   /**
    * Creates a new City instance.
@@ -42,6 +56,7 @@ export class City {
     this.buildings = [];
     this.population = 1;
     this.foodSurplus = 0;
+    this.productionQueue = [];
 
     this.territory = [this.tile];
     for (const adjTile of this.tile.getAdjacentTiles()) {
@@ -62,6 +77,44 @@ export class City {
           return;
         }
 
+        this.sendStatUpdate(player);
+      }
+    });
+
+    ServerEvents.on({
+      eventName: "requestProductionOptions",
+      parentObject: this,
+      callback: (data, websocket) => {
+        const player = Game.getInstance().getPlayerFromWebsocket(websocket);
+        if (this.name != data["cityName"] || this.player != player) {
+          return;
+        }
+
+        player.sendNetworkEvent({
+          event: "updateProductionOptions",
+          cityName: this.name,
+          units: PRODUCTION_OPTIONS.filter((option) => option.type === "unit"),
+          buildings: PRODUCTION_OPTIONS.filter((option) => option.type === "building")
+        });
+      }
+    });
+
+    ServerEvents.on({
+      eventName: "addToProductionQueue",
+      parentObject: this,
+      callback: (data, websocket) => {
+        const player = Game.getInstance().getPlayerFromWebsocket(websocket);
+        if (this.name != data["cityName"] || this.player != player) {
+          return;
+        }
+
+        // Look up the real option server-side rather than trusting the client's cost.
+        const option = PRODUCTION_OPTIONS.find(
+          (option) => option.type === data["type"] && option.name === data["name"]
+        );
+        if (!option) return;
+
+        this.productionQueue.push(option);
         this.sendStatUpdate(player);
       }
     });
@@ -169,7 +222,8 @@ export class City {
       event: "updateCityStats",
       cityName: this.name,
       cityStats: cityStats,
-      workedTiles: this.workedTiles.map((tile) => ({ x: tile.getX(), y: tile.getY() }))
+      workedTiles: this.workedTiles.map((tile) => ({ x: tile.getX(), y: tile.getY() })),
+      productionQueue: this.productionQueue
     });
 
     player.sendTotalStatsUpdate();
