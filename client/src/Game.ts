@@ -49,7 +49,7 @@ export class Game {
   private mouseY: number;
   private runGameLoop: boolean;
   private wrappedTextCache: { [key: string]: [string, number, number] } = {};
-  private resizeTimer: NodeJS.Timeout;
+  private resizeTimer: number;
   private oldWidth: number;
   private oldHeight: number;
   private dpr: number;

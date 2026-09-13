@@ -12,6 +12,7 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
+    "types": [],
     "module": "es2022",
     "moduleResolution": "bundler"
   },
