@@ -1,9 +1,10 @@
+import fs from "fs";
+import YAML from "yaml";
 import { ServerEvents } from "../Events";
 import { Game } from "../Game";
 import { Player } from "../Player";
 import { GameMap } from "../map/GameMap";
 import { StatEntry, StatValues, Tile } from "../map/Tile";
-import { InGameState } from "../state/type/InGameState";
 
 export interface CityStats extends StatValues {
   population: number;
@@ -17,6 +18,8 @@ export interface CityOptions {
 }
 
 export class City {
+  private static cityBuildings: Record<string, any>[];
+
   private tile: Tile;
   private player: Player;
   private name: string;
@@ -64,6 +67,21 @@ export class City {
     });
   }
 
+  public static getBuildingDataByName(name: string): Record<string, any> {
+    if (!City.cityBuildings) {
+      const buildingsYMLData = YAML.parse(fs.readFileSync("./config/buildings.yml", "utf-8"));
+      City.cityBuildings = JSON.parse(JSON.stringify(buildingsYMLData.buildings));
+    }
+
+    for (const building of City.cityBuildings) {
+      if ((building.name as string).toLocaleLowerCase() === name.toLocaleLowerCase()) {
+        return building;
+      }
+    }
+
+    return undefined;
+  }
+
   public updateWorkedTiles(options?: { sendStatUpdate: boolean }) {
     // Reset worked tiles
     this.workedTiles = [this.tile];
@@ -92,7 +110,7 @@ export class City {
 
   public addBuilding(name: string) {
     // Get the building data from YML
-    const buildingData = Game.getInstance().getCurrentStateAs<InGameState>().getBuildingDataByName(name);
+    const buildingData = City.getBuildingDataByName(name);
 
     // Apply any effects to the building if any (faith, culture, bonuses, etc.)):
     //...

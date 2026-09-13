@@ -93,6 +93,10 @@ Each project has a **type shim** at `src/types/ts-priority-queue.d.ts` (mirrors 
 
 **The remap deliberately does not live in the real `tsconfig.json`.** Parcel also reads that file's `compilerOptions.paths` for its own bundling — adding the remap there makes Parcel try to bundle the type-only shim as if it were a runtime module, which hangs the build. So: plain `npx tsc --noEmit` (and VSCode) will still show that one `ts-priority-queue` diagnostic — that's expected and not a regression to "fix" by touching `node_modules` or the real tsconfig.
 
+## Coding style
+
+- **Static methods go directly after the constructor**, before instance methods — the first methods a reader sees in a class. See `client/src/map/Tile.ts` (`gridDistance`, `riverCrosses`, `getWeight`, `setTileYields`, `getTileYields` all sit right after the constructor) or `server/src/city/City.ts` (`getBuildingDataByName`).
+
 ### Odd-but-harmless: `parent-package` self-dependency
 
 `client/package.json` and `server/package.json` both depend on `"parent-package": "file:.."` (the repo root). Nothing actually imports from it — it's inert. Don't try to "clean it up" without checking both lockfiles; removing it is a bigger change than it looks like for zero behavioral gain.
