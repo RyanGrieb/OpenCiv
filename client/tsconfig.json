@@ -6,8 +6,12 @@
       "es2022",
       "dom"
     ],
+    "strict": false,
     "noUnusedLocals": true,
     "noImplicitAny": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
     "module": "es2022",
     "moduleResolution": "bundler"
   },
