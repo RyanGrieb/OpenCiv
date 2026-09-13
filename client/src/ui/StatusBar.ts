@@ -285,7 +285,9 @@ export class StatusBar extends ActorGroup {
 
     this.goldDescLabel.setPosition(this.cultureLabel.getX() + this.cultureLabel.getWidth() + 10, 3);
     this.goldIcon.setPosition(this.goldDescLabel.getX() + this.goldDescLabel.getWidth(), this.goldIcon.getY());
-    this.goldLabel.setText(Strings.convertToStatUnit(clientPlayer.getTotalStat("gold")));
+    const goldTotal = clientPlayer.getAccumulatedStat("gold");
+    const goldRate = Strings.convertToStatUnit(clientPlayer.getTotalStat("gold"));
+    this.goldLabel.setText(`${goldTotal} (${goldRate})`);
     await this.goldLabel.conformSize();
     this.goldLabel.setPosition(this.goldIcon.getX() + this.goldIcon.getWidth() - 6, 3);
 

@@ -14,6 +14,11 @@ export interface TotalStats {
   culture: number;
 }
 
+// Stats whose per-turn rate above gets banked into a running total each turn,
+// rather than just reflecting the current rate. Add a key here (e.g. "faith") to
+// make another stat accumulate - no other changes needed, client included.
+const ACCUMULATING_STATS: (keyof TotalStats)[] = ["gold"];
+
 /**
  * Represents a player in the game.
  */
@@ -32,6 +37,7 @@ export class Player {
   private civilizationData: Record<string, any>;
   private cities: City[];
   private units: Unit[];
+  private accumulatedStats: Map<string, number>;
 
   /**
    * Creates a new player object.
@@ -45,6 +51,7 @@ export class Player {
     this.requestedNextTurn = false;
     this.cities = [];
     this.units = [];
+    this.accumulatedStats = new Map();
 
     // Add event listener for when the player disconnects
     this.wsConnection.on("close", (data) => {
@@ -81,6 +88,17 @@ export class Player {
         if (this.wsConnection != websocket) return;
 
         this.resizeWindowCallback.call(undefined);
+      },
+      globalEvent: true
+    });
+
+    // "nextTurn" is a global broadcast (no websocket to filter by) fired once per
+    // turn increment - bank this turn's rate for each accumulating stat.
+    ServerEvents.on({
+      eventName: "nextTurn",
+      parentObject: this,
+      callback: () => {
+        this.accumulateTurnStats();
       },
       globalEvent: true
     });
@@ -232,10 +250,26 @@ export class Player {
     return totals;
   }
 
+  public getAccumulatedStats(): Record<string, number> {
+    return Object.fromEntries(this.accumulatedStats);
+  }
+
+  private accumulateTurnStats() {
+    const rates = this.getTotalStats();
+
+    for (const stat of ACCUMULATING_STATS) {
+      const current = this.accumulatedStats.get(stat) ?? 0;
+      this.accumulatedStats.set(stat, current + rates[stat]);
+    }
+
+    this.sendTotalStatsUpdate();
+  }
+
   public sendTotalStatsUpdate() {
     this.sendNetworkEvent({
       event: "updateTotalStats",
-      stats: this.getTotalStats()
+      stats: this.getTotalStats(),
+      accumulatedStats: this.getAccumulatedStats()
     });
   }
 

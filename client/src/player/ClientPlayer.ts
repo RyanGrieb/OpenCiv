@@ -21,6 +21,7 @@ export class ClientPlayer extends AbstractPlayer {
   private rightMouseDrag: boolean;
   private requestedNextTurn: boolean;
   private totalStats: Map<string, number> = new Map();
+  private accumulatedStats: Map<string, number> = new Map();
 
   constructor(playerJSON: PlayerData) {
     super(playerJSON);
@@ -193,6 +194,11 @@ export class ClientPlayer extends AbstractPlayer {
         for (const stat of Object.keys(stats)) {
           this.totalStats.set(stat, stats[stat]);
         }
+
+        const accumulatedStats = data["accumulatedStats"];
+        for (const stat of Object.keys(accumulatedStats)) {
+          this.accumulatedStats.set(stat, accumulatedStats[stat]);
+        }
       }
     });
 
@@ -209,6 +215,10 @@ export class ClientPlayer extends AbstractPlayer {
 
   public getTotalStat(stat: string): number {
     return this.totalStats.get(stat) ?? 0;
+  }
+
+  public getAccumulatedStat(stat: string): number {
+    return this.accumulatedStats.get(stat) ?? 0;
   }
 
   private onMouseRightClick() {

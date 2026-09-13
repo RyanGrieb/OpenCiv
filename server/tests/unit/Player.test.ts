@@ -9,6 +9,7 @@ jest.mock('../../src/Events');
 describe('Player', () => {
   let player: Player;
   let mockWebsocket: jest.Mocked<WebSocket>;
+  let onSpy: jest.SpyInstance;
 
   const makeMockCity = (stats: Partial<CityStats>): jest.Mocked<City> => {
     return {
@@ -27,6 +28,14 @@ describe('Player', () => {
     } as unknown as jest.Mocked<City>;
   };
 
+  // Player's constructor registers its listeners through the mocked ServerEvents.on,
+  // which never actually dispatches anything - this replays a named listener's
+  // callback directly, the way Unit.test.ts replays ServerEvents.call for moveUnit.
+  const triggerServerEvent = (eventName: string, data?: any, websocket?: WebSocket) => {
+    const registration = onSpy.mock.calls.find(([options]) => options.eventName === eventName);
+    registration[0].callback(data, websocket);
+  };
+
   beforeEach(() => {
     jest.clearAllMocks();
 
@@ -35,7 +44,7 @@ describe('Player', () => {
       send: jest.fn(),
     } as unknown as jest.Mocked<WebSocket>;
 
-    jest.spyOn(ServerEvents, 'on').mockImplementation(() => { });
+    onSpy = jest.spyOn(ServerEvents, 'on').mockImplementation(() => { });
 
     player = new Player('TestPlayer', mockWebsocket);
   });
@@ -79,6 +88,10 @@ describe('Player', () => {
     });
   });
 
+  it('starts with no accumulated stats banked', () => {
+    expect(player.getAccumulatedStats()).toEqual({});
+  });
+
   it('sends the computed totals to the player over the network', () => {
     player['cities'].push(makeMockCity({ science: 9, gold: 2, production: 0, faith: 0, culture: 3 }));
 
@@ -87,6 +100,37 @@ describe('Player', () => {
     expect(mockWebsocket.send).toHaveBeenCalledWith(JSON.stringify({
       event: 'updateTotalStats',
       stats: { science: 9, gold: 2, production: 0, faith: 0, culture: 3 },
+      accumulatedStats: {},
+    }));
+  });
+
+  it('banks the current per-turn rate of every accumulating stat on each turn', () => {
+    player['cities'].push(makeMockCity({ gold: 5 }));
+
+    triggerServerEvent('nextTurn');
+    expect(player.getAccumulatedStats()).toEqual({ gold: 5 });
+
+    triggerServerEvent('nextTurn');
+    expect(player.getAccumulatedStats()).toEqual({ gold: 10 });
+  });
+
+  it('does not bank stats that are not marked as accumulating', () => {
+    player['cities'].push(makeMockCity({ science: 5, faith: 5, culture: 5, production: 5 }));
+
+    triggerServerEvent('nextTurn');
+
+    expect(player.getAccumulatedStats()).toEqual({ gold: 0 });
+  });
+
+  it('sends an updated totals packet after banking stats for the turn', () => {
+    player['cities'].push(makeMockCity({ gold: 5 }));
+
+    triggerServerEvent('nextTurn');
+
+    expect(mockWebsocket.send).toHaveBeenCalledWith(JSON.stringify({
+      event: 'updateTotalStats',
+      stats: { science: 0, gold: 5, production: 0, faith: 0, culture: 0 },
+      accumulatedStats: { gold: 5 },
     }));
   });
 });
