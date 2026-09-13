@@ -3,6 +3,8 @@ import { Game } from "../Game";
 import { NetworkEvents } from "../network/Client";
 import { Actor } from "../scene/Actor";
 import { ActorGroup } from "../scene/ActorGroup";
+import { InGameScene } from "../scene/type/InGameScene";
+import { Strings } from "../util/Strings";
 import { Label } from "./Label";
 
 interface TurnTimeEvent {
@@ -62,6 +64,14 @@ export class StatusBar extends ActorGroup {
       parentObject: this,
       callback: (data) => {
         this.updateCurrentTurnLabel(data);
+      }
+    });
+
+    NetworkEvents.on({
+      eventName: "updateTotalStats",
+      parentObject: this,
+      callback: () => {
+        this.updateStatLabels();
       }
     });
   }
@@ -250,5 +260,43 @@ export class StatusBar extends ActorGroup {
     await this.currentTurnLabel.conformSize();
     this.currentTurnLabel.setPosition(Game.getInstance().getWidth() - this.currentTurnLabel.getWidth() - 1, 3);
     this.addActor(this.currentTurnLabel);
+
+    // Covers totals that already arrived (via the initial requestTotalStats) before
+    // these labels finished being built.
+    this.updateStatLabels();
+  }
+
+  // Re-flows every label after the changed one, since a wider/narrower number
+  // shifts everything to its right in this left-to-right layout.
+  private async updateStatLabels() {
+    if (!this.scienceLabel) return;
+
+    const clientPlayer = Game.getInstance().getCurrentSceneAs<InGameScene>().getClientPlayer();
+
+    this.scienceLabel.setText(Strings.convertToStatUnit(clientPlayer.getTotalStat("science")));
+    await this.scienceLabel.conformSize();
+    this.scienceLabel.setPosition(this.scienceIcon.getX() + this.scienceIcon.getWidth() - 6, 3);
+
+    this.cultureDescLabel.setPosition(this.scienceLabel.getX() + this.scienceLabel.getWidth() + 10, 3);
+    this.cultureIcon.setPosition(this.cultureDescLabel.getX() + this.cultureDescLabel.getWidth(), this.cultureIcon.getY());
+    this.cultureLabel.setText(Strings.convertToStatUnit(clientPlayer.getTotalStat("culture")));
+    await this.cultureLabel.conformSize();
+    this.cultureLabel.setPosition(this.cultureIcon.getX() + this.cultureIcon.getWidth() - 6, 3);
+
+    this.goldDescLabel.setPosition(this.cultureLabel.getX() + this.cultureLabel.getWidth() + 10, 3);
+    this.goldIcon.setPosition(this.goldDescLabel.getX() + this.goldDescLabel.getWidth(), this.goldIcon.getY());
+    this.goldLabel.setText(Strings.convertToStatUnit(clientPlayer.getTotalStat("gold")));
+    await this.goldLabel.conformSize();
+    this.goldLabel.setPosition(this.goldIcon.getX() + this.goldIcon.getWidth() - 6, 3);
+
+    this.faithDescLabel.setPosition(this.goldLabel.getX() + this.goldLabel.getWidth() + 10, 3);
+    this.faithIcon.setPosition(this.faithDescLabel.getX() + this.faithDescLabel.getWidth(), this.faithIcon.getY());
+    this.faithLabel.setText(Strings.convertToStatUnit(clientPlayer.getTotalStat("faith")));
+    await this.faithLabel.conformSize();
+    this.faithLabel.setPosition(this.faithIcon.getX() + this.faithIcon.getWidth() - 6, 3);
+
+    this.tradeDescLabel.setPosition(this.faithLabel.getX() + this.faithLabel.getWidth() + 10, 3);
+    this.tradeIcon.setPosition(this.tradeDescLabel.getX() + this.tradeDescLabel.getWidth() + 10, this.tradeIcon.getY());
+    this.tradeLabel.setPosition(this.tradeIcon.getX() + this.tradeIcon.getWidth() + 4, 3);
   }
 }

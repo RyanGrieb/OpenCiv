@@ -20,6 +20,7 @@ export class ClientPlayer extends AbstractPlayer {
   private movementLines: Line[];
   private rightMouseDrag: boolean;
   private requestedNextTurn: boolean;
+  private totalStats: Map<string, number> = new Map();
 
   constructor(playerJSON: PlayerData) {
     super(playerJSON);
@@ -183,6 +184,19 @@ export class ClientPlayer extends AbstractPlayer {
         this.clearMovementPath();
       }
     });
+
+    NetworkEvents.on({
+      eventName: "updateTotalStats",
+      parentObject: this,
+      callback: (data) => {
+        const stats = data["stats"];
+        for (const stat of Object.keys(stats)) {
+          this.totalStats.set(stat, stats[stat]);
+        }
+      }
+    });
+
+    WebsocketClient.sendMessage({ event: "requestTotalStats" });
   }
 
   public setRequestedNextTurn(value: boolean) {
@@ -191,6 +205,10 @@ export class ClientPlayer extends AbstractPlayer {
 
   public hasRequestedNextTurn() {
     return this.requestedNextTurn;
+  }
+
+  public getTotalStat(stat: string): number {
+    return this.totalStats.get(stat) ?? 0;
   }
 
   private onMouseRightClick() {

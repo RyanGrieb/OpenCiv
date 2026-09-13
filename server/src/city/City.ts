@@ -171,6 +171,8 @@ export class City {
       cityStats: cityStats,
       workedTiles: this.workedTiles.map((tile) => ({ x: tile.getX(), y: tile.getY() }))
     });
+
+    player.sendTotalStatsUpdate();
   }
 
   public getStatline(options: { asArray: true }): CityStatEntry[];

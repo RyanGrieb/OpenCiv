@@ -4,6 +4,16 @@ import { Game } from "./Game";
 import { City } from "./city/City";
 import { Unit } from "./unit/Unit";
 
+// Stats that pool across a player's whole empire, as opposed to city-specific
+// concepts like population/morale/food/defense which don't total meaningfully.
+export interface TotalStats {
+  science: number;
+  gold: number;
+  production: number;
+  faith: number;
+  culture: number;
+}
+
 /**
  * Represents a player in the game.
  */
@@ -71,6 +81,17 @@ export class Player {
         if (this.wsConnection != websocket) return;
 
         this.resizeWindowCallback.call(undefined);
+      },
+      globalEvent: true
+    });
+
+    ServerEvents.on({
+      eventName: "requestTotalStats",
+      parentObject: this,
+      callback: (data, websocket) => {
+        if (this.wsConnection != websocket) return;
+
+        this.sendTotalStatsUpdate();
       },
       globalEvent: true
     });
@@ -188,6 +209,34 @@ export class Player {
 
   public getCities() {
     return this.cities;
+  }
+
+  public getTotalStats(): TotalStats {
+    const totals: TotalStats = {
+      science: 0,
+      gold: 0,
+      production: 0,
+      faith: 0,
+      culture: 0
+    };
+
+    for (const city of this.cities) {
+      const cityStats = city.getStatline({ asArray: false });
+      totals.science += cityStats.science;
+      totals.gold += cityStats.gold;
+      totals.production += cityStats.production;
+      totals.faith += cityStats.faith;
+      totals.culture += cityStats.culture;
+    }
+
+    return totals;
+  }
+
+  public sendTotalStatsUpdate() {
+    this.sendNetworkEvent({
+      event: "updateTotalStats",
+      stats: this.getTotalStats()
+    });
   }
 
   public getUnits() {
