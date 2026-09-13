@@ -146,7 +146,7 @@ export class Unit extends ActorGroup {
 
     this.unitActor = new Actor({
       image: Game.getInstance().getImage(GameImage.SPRITESHEET),
-      spriteRegion: resolveSpriteRegion(this.name.toUpperCase()),
+      spriteRegion: resolveSpriteRegion(`UNIT_${this.name.toUpperCase()}`),
       x: tile.getCenterPosition().x - 28 / 2,
       y: tile.getCenterPosition().y - 28 / 2,
       z: 2,

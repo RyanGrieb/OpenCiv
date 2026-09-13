@@ -108,7 +108,7 @@ export class City extends ActorGroup {
     for (const tile of this.territory) {
       const territoryOverlay = new Actor({
         image: Game.getInstance().getImage(GameImage.SPRITESHEET),
-        spriteRegion: SpriteRegion.BLANK_TILE,
+        spriteRegion: SpriteRegion.TILE_BLANK,
         x: tile.getX(),
         y: tile.getY(),
         width: 32,

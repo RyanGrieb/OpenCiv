@@ -97,7 +97,7 @@ export class CityDisplayInfo extends ActorGroup {
 
       const overlay = new Actor({
         image: Game.getInstance().getImage(GameImage.SPRITESHEET),
-        spriteRegion: SpriteRegion.BLANK_TILE,
+        spriteRegion: SpriteRegion.TILE_BLANK,
         x: tile.getX(),
         y: tile.getY(),
         z: 2,
@@ -595,7 +595,7 @@ export class CityDisplayInfo extends ActorGroup {
       this.currentlyBuildingWindow.addActor(
         new Actor({
           image: Game.getInstance().getImage(GameImage.SPRITESHEET),
-          spriteRegion: SpriteRegion.BLANK_TILE,
+          spriteRegion: SpriteRegion.TILE_BLANK,
           x: x + 10,
           y: y + 56,
           width: width - 20,
@@ -693,12 +693,9 @@ export class CityDisplayInfo extends ActorGroup {
         actorIcons: [
           new Actor({
             image: Game.getInstance().getImage(GameImage.SPRITESHEET),
-            // Units are keyed bare (WARRIOR, SCOUT); buildings use a BUILDING_ prefix
-            // (BUILDING_MONUMENT), matching Building.ts's asset_name convention.
             spriteRegion:
-              resolveSpriteRegion(
-                option.type === "building" ? `BUILDING_${option.name.toUpperCase()}` : option.name.toUpperCase()
-              ) ?? SpriteRegion.UNKNOWN_ICON,
+              resolveSpriteRegion(`${option.type.toUpperCase()}_${option.name.toUpperCase()}`) ??
+              SpriteRegion.UNKNOWN_ICON,
             x: rowX + 8,
             y: rowY + rowHeight / 2 - 16,
             z: this.z,
