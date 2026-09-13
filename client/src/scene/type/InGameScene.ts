@@ -62,6 +62,14 @@ export class InGameScene extends Scene {
       callback: (data) => {
         for (let i = 0; i < data["players"].length; i++) {
           const playerJSON = data["players"][i];
+
+          // This event can fire more than once per session (e.g. a reconnect); skip
+          // players we're already tracking instead of replacing them, since other
+          // objects (e.g. City) hold onto the original player instance by reference.
+          if (this.players.some((player) => player.getName() === playerJSON["name"])) {
+            continue;
+          }
+
           if (playerJSON["name"] === data["requestingName"]) {
             this.clientPlayer = new ClientPlayer(playerJSON);
             this.players.push(this.clientPlayer);
