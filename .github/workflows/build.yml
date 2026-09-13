@@ -27,11 +27,11 @@ jobs:
     - name: Build Client
       run: |
         cd client
-        npx tsc
+        npx tsc -p tsconfig.typecheck.json
         cd ..
 
     - name: Build Server
       run: |
         cd server
-        npx tsc
+        npx tsc -p tsconfig.typecheck.json
         cd ..
