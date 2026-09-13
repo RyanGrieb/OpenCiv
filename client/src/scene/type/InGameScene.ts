@@ -16,6 +16,10 @@ import { ActorGroup } from "../ActorGroup";
 import { Camera } from "../Camera";
 import { Scene } from "../Scene";
 
+interface GameplayUIElement {
+  close(): void;
+}
+
 export class InGameScene extends Scene {
   private players: AbstractPlayer[];
   private clientPlayer: ClientPlayer;
@@ -26,8 +30,7 @@ export class InGameScene extends Scene {
   private nextTurnButton: Button;
   private closeCityDisplayButton: Button;
   private escMenu: ActorGroup;
-  private isUIOpen: boolean = false;
-  private activeGameplayUI: { close: () => void };
+  private openUIElement: GameplayUIElement;
 
   public onInitialize(): void {
     this.players = [];
@@ -45,8 +48,8 @@ export class InGameScene extends Scene {
 
     this.on("keyup", (options) => {
       if (options.key === "Escape") {
-        if (this.activeGameplayUI) {
-          this.activeGameplayUI.close();
+        if (this.openUIElement) {
+          this.closeOpenUIElement();
         } else {
           this.toggleEscMenu();
         }
@@ -83,69 +86,7 @@ export class InGameScene extends Scene {
     GameMap.init();
 
     this.on("mapLoaded", () => {
-      this.tileInformationLabel = new Label({
-        text: "N/A",
-        font: "16px serif",
-        fontColor: "white",
-        shadowColor: "black",
-        lineWidth: 4,
-        x: 0,
-        y: 0,
-        z: 5
-      });
-
-      this.tileInformationLabel.conformSize().then(() => {
-        this.tileInformationLabel.setPosition(
-          2,
-          Game.getInstance().getHeight() - this.tileInformationLabel.getHeight() - 6
-        );
-        this.addActor(this.tileInformationLabel);
-      });
-
-      this.statusBar = new StatusBar();
-      this.addActor(this.statusBar);
-
-      this.nextTurnButton = new Button({
-        text: this.clientPlayer.hasRequestedNextTurn() ? "Waiting..." : "Next Turn",
-        x: Game.getInstance().getWidth() / 2 - 150 / 2,
-        y: Game.getInstance().getHeight() - 44,
-        z: 6,
-        width: 150,
-        height: 42,
-        fontColor: "white",
-        onClicked: () => {
-          // Undo next turn request.
-          if (this.clientPlayer.hasRequestedNextTurn()) {
-            this.nextTurnButton.setText("Next Turn");
-            WebsocketClient.sendMessage({
-              event: "nextTurnRequest",
-              value: false
-            });
-            this.clientPlayer.setRequestedNextTurn(false);
-          } else {
-            WebsocketClient.sendMessage({
-              event: "nextTurnRequest",
-              value: true
-            });
-            this.nextTurnButton.setText("Waiting...");
-            this.clientPlayer.setRequestedNextTurn(true);
-          }
-        }
-      });
-      this.addActor(this.nextTurnButton);
-
-      this.closeCityDisplayButton = new Button({
-        text: "Return to Map",
-        x: Game.getInstance().getWidth() / 2 - 275 / 2,
-        y: Game.getInstance().getHeight() - 88,
-        z: 5,
-        width: 275,
-        height: 52,
-        fontColor: "white",
-        onClicked: () => {
-          this.toggleCityUI();
-        }
-      });
+      this.initializePersistentUI();
 
       this.on("tileHovered", (options) => {
         // Remove previous yield icons
@@ -155,7 +96,7 @@ export class InGameScene extends Scene {
 
         this.tileYieldActors = [];
 
-        if (options.tile && !this.isUIOpen) {
+        if (options.tile && !this.openUIElement) {
           let tileTypes: string = options.tile.getTileTypes().toString();
           tileTypes = tileTypes.replaceAll("_", " ");
           tileTypes = tileTypes.replaceAll(",", ", ");
@@ -273,8 +214,95 @@ export class InGameScene extends Scene {
     super.onDestroyed(this);
     this.escMenu = undefined;
     this.cityDisplayInfo = undefined;
+    this.openUIElement = undefined;
 
     return Scene.ExitReceipt;
+  }
+
+  // A window resize only needs the screen-anchored UI repositioned - the base
+  // Scene.redraw() destroys/reinitializes everything, which would tear down and
+  // re-fetch the whole map (losing city buildings, which never get resent on resync).
+  public redraw() {
+    this.closeOpenUIElement();
+
+    this.removeActor(this.tileInformationLabel);
+    this.removeActor(this.statusBar);
+    this.removeActor(this.nextTurnButton);
+    this.removeActor(this.closeCityDisplayButton);
+
+    this.initializePersistentUI();
+  }
+
+  private closeOpenUIElement() {
+    if (this.openUIElement) {
+      this.openUIElement.close();
+    }
+  }
+
+  private initializePersistentUI() {
+    this.tileInformationLabel = new Label({
+      text: "N/A",
+      font: "16px serif",
+      fontColor: "white",
+      shadowColor: "black",
+      lineWidth: 4,
+      x: 0,
+      y: 0,
+      z: 5
+    });
+
+    this.tileInformationLabel.conformSize().then(() => {
+      this.tileInformationLabel.setPosition(
+        2,
+        Game.getInstance().getHeight() - this.tileInformationLabel.getHeight() - 6
+      );
+      this.addActor(this.tileInformationLabel);
+    });
+
+    this.statusBar = new StatusBar();
+    this.addActor(this.statusBar);
+
+    this.nextTurnButton = new Button({
+      text: this.clientPlayer.hasRequestedNextTurn() ? "Waiting..." : "Next Turn",
+      x: Game.getInstance().getWidth() / 2 - 150 / 2,
+      y: Game.getInstance().getHeight() - 44,
+      z: 6,
+      width: 150,
+      height: 42,
+      fontColor: "white",
+      onClicked: () => {
+        // Undo next turn request.
+        if (this.clientPlayer.hasRequestedNextTurn()) {
+          this.nextTurnButton.setText("Next Turn");
+          WebsocketClient.sendMessage({
+            event: "nextTurnRequest",
+            value: false
+          });
+          this.clientPlayer.setRequestedNextTurn(false);
+        } else {
+          WebsocketClient.sendMessage({
+            event: "nextTurnRequest",
+            value: true
+          });
+          this.nextTurnButton.setText("Waiting...");
+          this.clientPlayer.setRequestedNextTurn(true);
+        }
+      }
+    });
+    this.addActor(this.nextTurnButton);
+
+    this.closeCityDisplayButton = new Button({
+      text: "Return to Map",
+      x: Game.getInstance().getWidth() / 2 - 275 / 2,
+      y: Game.getInstance().getHeight() - 88,
+      z: 5,
+      width: 275,
+      height: 52,
+      fontColor: "white",
+      onClicked: () => {
+        this.toggleCityUI();
+      }
+    });
   }
 
   public focusOnTile(tile: Tile, zoomAmount: number) {
@@ -286,7 +314,7 @@ export class InGameScene extends Scene {
 
   public toggleCityUI(city?: City) {
     if (!this.cityDisplayInfo && city) {
-      if (this.isUIOpen) return;
+      if (this.openUIElement) return;
       this.openCityUI(city);
       this.call("toggleCityUI", { opened: true, city: city });
     } else {
@@ -297,7 +325,6 @@ export class InGameScene extends Scene {
   }
 
   private setUIState(isOpen: boolean) {
-    this.isUIOpen = isOpen;
     this.getCamera().lock(isOpen);
     this.call("uiStateChanged", { opened: isOpen });
 
@@ -333,7 +360,7 @@ export class InGameScene extends Scene {
     this.setUIState(true);
     this.systemMenuOpen = false;
 
-    this.activeGameplayUI = { close: () => this.toggleCityUI() };
+    this.openUIElement = { close: () => this.toggleCityUI() };
 
     this.removeActor(this.nextTurnButton);
     this.removeActor(this.tileInformationLabel);
@@ -345,7 +372,7 @@ export class InGameScene extends Scene {
     this.removeActor(this.cityDisplayInfo);
     this.cityDisplayInfo = undefined;
     this.setUIState(false);
-    this.activeGameplayUI = undefined;
+    this.openUIElement = undefined;
 
     this.addActor(this.nextTurnButton);
     this.addActor(this.tileInformationLabel);
@@ -359,11 +386,13 @@ export class InGameScene extends Scene {
       this.escMenu = undefined;
       this.systemMenuOpen = false;
       this.setUIState(false);
+      this.openUIElement = undefined;
       return;
     }
 
     this.setUIState(true);
     this.systemMenuOpen = true;
+    this.openUIElement = { close: () => this.toggleEscMenu() };
     Game.getInstance().setCursor("default");
 
     this.escMenu = new ActorGroup({
