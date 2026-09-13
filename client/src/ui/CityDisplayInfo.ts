@@ -13,6 +13,7 @@ export class CityDisplayInfo extends ActorGroup {
 
   private citizenMgmtRadioButtons: RadioButton[];
   private statLabels: Map<string, Label>;
+  private workedTileOverlays: Actor[];
 
   constructor(city: City) {
     super({
@@ -27,9 +28,45 @@ export class CityDisplayInfo extends ActorGroup {
     this.city = city;
     this.citizenMgmtRadioButtons = [];
     this.statLabels = new Map<string, Label>();
+    this.workedTileOverlays = [];
 
     this.initializeStatsWindow();
     this.initializeBuildingsWindow();
+    this.initializeWorkedTileOverlays();
+  }
+
+  public onDestroyed(): void {
+    for (const overlay of this.workedTileOverlays) {
+      Game.getInstance().getCurrentScene().removeActor(overlay);
+    }
+    this.workedTileOverlays = [];
+
+    super.onDestroyed();
+  }
+
+  // Highlight each tile in the city's territory to show whether it's currently
+  // being worked by a citizen. Added directly to the scene (not as a child of
+  // this ActorGroup, which is screen-fixed) so the overlays pan with the map.
+  private initializeWorkedTileOverlays() {
+    const workedTiles = this.city.getWorkedTiles();
+
+    for (const tile of this.city.getTerritory()) {
+      const isWorked = workedTiles.includes(tile);
+
+      const overlay = new Actor({
+        image: Game.getInstance().getImage(GameImage.SPRITESHEET),
+        spriteRegion: SpriteRegion.BLANK_TILE,
+        x: tile.getX(),
+        y: tile.getY(),
+        z: 2,
+        width: 32,
+        height: 32,
+        color: isWorked ? "rgba(0, 220, 0, 0.35)" : "rgba(40, 40, 40, 0.35)"
+      });
+
+      Game.getInstance().getCurrentScene().addActor(overlay);
+      this.workedTileOverlays.push(overlay);
+    }
   }
 
   private initializeBuildingsWindow() {
