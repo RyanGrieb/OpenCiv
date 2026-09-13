@@ -61,8 +61,12 @@ Currently, the project is being rewritten so no playable version is available wi
 Contributors -
 [Will Pewitt](https://github.com/willpewitt)
 
-Artists -
-[lucasyoung988](https://www.fiverr.com/lucasyoung988?source=order_page_summary_seller_link)
-[brysia](https://www.fiverr.com/brysia?source=order_page_summary_seller_link)
-[pratamacam](https://www.fiverr.com/pratamacam?source=order_page_summary_seller_link)
-[CharlesGabriel](https://opengameart.org/content/10-basic-message-boxes)
+### Artists
+
+| Artist | Contribution |
+| --- | --- |
+| [lucasyoung988](https://www.fiverr.com/lucasyoung988?source=order_page_summary_seller_link) | Commissioned game art |
+| [brysia](https://www.fiverr.com/brysia?source=order_page_summary_seller_link) | Commissioned game art |
+| [pratamacam](https://www.fiverr.com/pratamacam?source=order_page_summary_seller_link) | Commissioned game art |
+| [CharlesGabriel](https://opengameart.org/content/10-basic-message-boxes) | Message boxes |
+| [BatzelChaos](https://www.pixilart.com/batzelchaos) | Shield icon |
