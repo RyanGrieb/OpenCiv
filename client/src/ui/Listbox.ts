@@ -1,3 +1,4 @@
+import { GameImage } from "../Assets";
 import { Game } from "../Game";
 import { Actor } from "../scene/Actor";
 import { ActorGroup } from "../scene/ActorGroup";
@@ -21,6 +22,10 @@ interface RowOptions extends RectangleOptions {
 }
 
 class Row extends ActorGroup {
+  // Translucent overlays (not flat grays) so the ListBox's POPUP_BOX texture shows through the stripes.
+  public static readonly stripeColorA = "rgba(0, 0, 0, 0.18)";
+  public static readonly stripeColorB = "rgba(0, 0, 0, 0.0)";
+
   private label: Label;
 
   // TODO: Support image
@@ -126,11 +131,13 @@ export class ListBox extends ActorGroup {
 
     this.addActor(
       new Actor({
+        image: Game.getInstance().getImage(GameImage.POPUP_BOX),
         x: this.x,
         y: this.y,
         width: this.width,
         height: this.height,
-        color: "black"
+        nineSlice: true,
+        cornerSize: 20
       })
     );
   }
@@ -144,7 +151,7 @@ export class ListBox extends ActorGroup {
       z: this.z,
       width: this.width,
       height: 25, //FIXME: Should be dependent on text height
-      color: this.rows.length % 2 == 0 ? "#9e9e9e" : " #bbbbbb",
+      color: this.rows.length % 2 == 0 ? Row.stripeColorA : Row.stripeColorB,
       font: this.textFont,
       fontColor: this.fontColor,
       text: name
@@ -179,7 +186,7 @@ export class ListBox extends ActorGroup {
       text: options.text,
       width: this.width,
       height: options.rowHeight ?? this.rowHeight,
-      color: options.color ?? this.rows.length % 2 == 0 ? "#9e9e9e" : " #bbbbbb",
+      color: options.color ?? (this.rows.length % 2 == 0 ? Row.stripeColorA : Row.stripeColorB),
       font: this.textFont,
       fontColor: this.fontColor,
       textX: options.textX,
