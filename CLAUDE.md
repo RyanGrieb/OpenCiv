@@ -36,6 +36,16 @@ CI typecheck (both projects) — **do not use plain `tsc` for this**, see "The `
 npx tsc -p tsconfig.typecheck.json --noEmit
 ```
 
+### Don't run `npm run build` to verify a change
+
+`tsc -p tsconfig.typecheck.json --noEmit` is the gate CI enforces and is what you should run after editing client code. A Parcel production build takes many minutes from a cold cache and reports nothing the typecheck didn't already catch — it is not a smoke test. Only run it when the bundler output itself is what's in question (a Parcel config/asset-resolution change).
+
+If you do run it and it exceeds the tool timeout, it gets backgrounded and **killing the task does not kill Parcel** — the npm wrapper dies and the `parcel build` child keeps running, holding an LMDB lock on `client/.parcel-cache`. Every later `rm -rf .parcel-cache` then fails with `Device or resource busy`, and retrying the build just adds another orphan. Recover by stopping the stray processes first:
+```bash
+# PowerShell - find and stop orphaned parcel/npm-build node processes
+Get-CimInstance Win32_Process -Filter "Name='node.exe'" | Where-Object { $_.CommandLine -like '*parcel*' }
+```
+
 Manual/E2E test flow (root):
 ```bash
 npm run test:e2e                                # or: npm run test:e2e -- --scenario=CitySettlement
@@ -96,6 +106,7 @@ Each project has a **type shim** at `src/types/ts-priority-queue.d.ts` (mirrors 
 ## Coding style
 
 - **Static methods go directly after the constructor**, before instance methods — the first methods a reader sees in a class. See `client/src/map/Tile.ts` (`gridDistance`, `riverCrosses`, `getWeight`, `setTileYields`, `getTileYields` all sit right after the constructor) or `server/src/city/City.ts` (`getBuildingDataByName`).
+- **Never import a bare function across files — call it qualified through its owner.** Shared helpers live as `public static` members on a class named after the module, so call sites read `Strings.capitalizeWords(name)` or `UITheme.centerTextY(height)`, never a loose `capitalizeWords(name)` imported by name. Write new shared helpers as statics on such a class (see `client/src/util/Strings.ts`, `client/src/ui/UITheme.ts`) rather than as exported standalone functions. Shared *constants* follow the same shape when they belong to one of these groupings (`UITheme.FONT`, `ButtonSize.LARGE`).
 
 ## Commit messages
 

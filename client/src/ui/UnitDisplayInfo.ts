@@ -7,6 +7,10 @@ import { ActorGroup } from "../scene/ActorGroup";
 import { Strings } from "../util/Strings";
 import { Button, ButtonSize } from "./Button";
 import { Label } from "./Label";
+import { UITheme } from "./UITheme";
+
+const WINDOW_WIDTH = 300;
+const WINDOW_HEIGHT = 170;
 
 export class UnitDisplayInfo extends ActorGroup {
   private unit: Unit;
@@ -15,10 +19,10 @@ export class UnitDisplayInfo extends ActorGroup {
 
   constructor(unit: Unit) {
     super({
-      x: Game.getInstance().getWidth() - 250,
-      y: Game.getInstance().getHeight() - 150,
-      width: 250,
-      height: 150,
+      x: Game.getInstance().getWidth() - WINDOW_WIDTH,
+      y: Game.getInstance().getHeight() - WINDOW_HEIGHT,
+      width: WINDOW_WIDTH,
+      height: WINDOW_HEIGHT,
       cameraApplies: false,
       z: 5
     });
@@ -42,7 +46,7 @@ export class UnitDisplayInfo extends ActorGroup {
       text: Strings.capitalizeWords(unit.getName()),
       x: this.x,
       y: this.y,
-      font: "18px serif",
+      font: UITheme.FONT,
       fontColor: "white"
     });
 
@@ -55,7 +59,7 @@ export class UnitDisplayInfo extends ActorGroup {
       text: `Movement: ${unit.getAvailableMovement()}/${unit.getDefaultMoveDistance()}`,
       x: this.x,
       y: this.y,
-      font: "18px serif",
+      font: UITheme.FONT,
       fontColor: "white"
     });
 
@@ -98,7 +102,7 @@ export class UnitDisplayInfo extends ActorGroup {
     this.movementLabel.conformSize().then(() => {
       this.movementLabel.setPosition(
         this.x + this.width / 2 - this.movementLabel.getWidth() / 2,
-        this.y + this.height - 25
+        this.y + this.height - 36
       );
     });
   }
@@ -114,10 +118,10 @@ export class UnitDisplayInfo extends ActorGroup {
         buttonImage: GameImage.ICON_BUTTON,
         buttonHoveredImage: GameImage.ICON_BUTTON_HOVERED,
         icon: action.getIcon(),
-        iconWidth: 32,
-        iconHeight: 32,
+        iconWidth: UITheme.ICON_SIZE,
+        iconHeight: UITheme.ICON_SIZE,
         x: this.x + 16 + xOffset,
-        y: this.y + 28,
+        y: this.y + 44,
         size: ButtonSize.ICON_LARGE,
         onClicked: () => {
           // Send action event to server

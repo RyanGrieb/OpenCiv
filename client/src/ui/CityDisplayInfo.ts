@@ -9,6 +9,18 @@ import { Button, ButtonSize } from "./Button";
 import { Label } from "./Label";
 import { ListBox } from "./Listbox";
 import { RadioButton } from "./RadioButton";
+import { UITheme } from "./UITheme";
+
+const STATS_WINDOW_WIDTH = 320;
+const STATS_WINDOW_HEIGHT = 340;
+const BUILDINGS_WINDOW_WIDTH = 340;
+const PRODUCTION_WINDOW_WIDTH = 360;
+const PRODUCTION_WINDOW_HEIGHT = 320;
+// Two wrapped lines of UITheme.FONT still fit inside a row of this height.
+const PRODUCTION_ROW_HEIGHT = 56;
+// Right-edge strip reserved for a row's cancel + reorder buttons (cancel sits at
+// -32, the arrows step left by 28 each), so row text wraps before it reaches them.
+const PRODUCTION_BUTTON_ZONE = 88;
 
 const BUILDING_STAT_ICONS: Record<string, SpriteRegion> = {
   science: SpriteRegion.ICON_SCIENCE,
@@ -112,20 +124,22 @@ export class CityDisplayInfo extends ActorGroup {
   }
 
   private initializeBuildingsWindow() {
+    const focusRowHeight = 64; // Tall enough for the ICON_LARGE radio button
+
     const listbox = new ListBox({
-      x: Game.getInstance().getWidth() - 275,
-      y: 21,
-      width: 275,
-      height: Game.getInstance().getHeight() - 21,
-      textFont: "20px serif",
+      x: Game.getInstance().getWidth() - BUILDINGS_WINDOW_WIDTH,
+      y: UITheme.STATUS_BAR_HEIGHT,
+      width: BUILDINGS_WINDOW_WIDTH,
+      height: Game.getInstance().getHeight() - UITheme.STATUS_BAR_HEIGHT,
+      textFont: UITheme.FONT,
       fontColor: "white"
     });
 
     listbox.addCategory("Citizen Management");
 
     const radioButton = new RadioButton({
-      x: listbox.getNextRowPosition().x - 8,
-      y: listbox.getNextRowPosition().y + 50 / 2 - ButtonSize.ICON_LARGE.height / 2,
+      x: listbox.getNextRowPosition().x + 4,
+      y: listbox.getNextRowPosition().y + focusRowHeight / 2 - ButtonSize.ICON_LARGE.height / 2,
       z: this.z,
       width: ButtonSize.ICON_LARGE.width,
       height: ButtonSize.ICON_LARGE.height,
@@ -137,9 +151,9 @@ export class CityDisplayInfo extends ActorGroup {
     listbox.addRow({
       category: "Citizen Management",
       text: "Default Focus",
-      textX: listbox.getNextRowPosition().x + 48,
+      textX: listbox.getNextRowPosition().x + 72,
       centerTextY: true,
-      rowHeight: 50,
+      rowHeight: focusRowHeight,
       actorIcons: [radioButton]
     });
 
@@ -153,8 +167,8 @@ export class CityDisplayInfo extends ActorGroup {
 
     for (const focus of focuses) {
       const radioButton = new RadioButton({
-        x: listbox.getNextRowPosition().x - 8,
-        y: listbox.getNextRowPosition().y + 50 / 2 - ButtonSize.ICON_LARGE.height / 2,
+        x: listbox.getNextRowPosition().x + 4,
+        y: listbox.getNextRowPosition().y + focusRowHeight / 2 - ButtonSize.ICON_LARGE.height / 2,
         z: this.z,
         width: ButtonSize.ICON_LARGE.width,
         height: ButtonSize.ICON_LARGE.height,
@@ -165,19 +179,19 @@ export class CityDisplayInfo extends ActorGroup {
       listbox.addRow({
         category: "Citizen Management",
         text: focus.name,
-        textX: listbox.getNextRowPosition().x + 68,
+        textX: listbox.getNextRowPosition().x + 120,
         centerTextY: true,
-        rowHeight: 50,
+        rowHeight: focusRowHeight,
         actorIcons: [
           radioButton,
           new Actor({
             image: Game.getInstance().getImage(GameImage.SPRITESHEET),
             spriteRegion: focus.icon,
-            x: listbox.getNextRowPosition().x + 38,
-            y: listbox.getNextRowPosition().y + 50 / 2 - 32 / 2,
+            x: listbox.getNextRowPosition().x + 72,
+            y: listbox.getNextRowPosition().y + focusRowHeight / 2 - UITheme.ICON_SIZE / 2,
             z: this.z,
-            width: 32,
-            height: 32,
+            width: UITheme.ICON_SIZE,
+            height: UITheme.ICON_SIZE,
             cameraApplies: false
           })
         ]
@@ -195,12 +209,13 @@ export class CityDisplayInfo extends ActorGroup {
       const rowX = listbox.getNextRowPosition().x;
       const rowY = listbox.getNextRowPosition().y;
 
-      const rowHeight = 100; // Tall enough for the name on top and up to 2 lines of stat icons below
+      const rowHeight = 124; // Tall enough for the name on top and up to 2 lines of stat icons below
+      const textX = rowX + 8 + UITheme.ICON_SIZE + 8;
 
       listbox.addRow({
         category: "Buildings",
         text: building.getName(),
-        textX: rowX + 48,
+        textX: textX,
         textY: rowY + 8,
         rowHeight: rowHeight,
         actorIcons: [
@@ -208,13 +223,18 @@ export class CityDisplayInfo extends ActorGroup {
             image: Game.getInstance().getImage(GameImage.SPRITESHEET),
             spriteRegion: building.getSpriteRegion(),
             x: rowX + 8,
-            y: rowY + rowHeight / 2 - 32 / 2,
+            y: rowY + rowHeight / 2 - UITheme.ICON_SIZE / 2,
             z: this.z,
-            width: 32,
-            height: 32,
+            width: UITheme.ICON_SIZE,
+            height: UITheme.ICON_SIZE,
             cameraApplies: false
           }),
-          ...this.buildStatIconActors(building.getStatLine(), rowX + 48, rowY + 34, 275 - 48 - 10)
+          ...this.buildStatIconActors(
+            building.getStatLine(),
+            textX,
+            rowY + 40,
+            BUILDINGS_WINDOW_WIDTH - (textX - rowX) - 10
+          )
         ]
       });
     }
@@ -226,8 +246,8 @@ export class CityDisplayInfo extends ActorGroup {
   // Must return actors synchronously - ones added to a row after addRow() don't render.
   private buildStatIconActors(statLine: Record<string, number>, startX: number, startY: number, maxWidth: number): Actor[] {
     const actors: Actor[] = [];
-    const iconSize = 32;
-    const font = "20px serif";
+    const iconSize = UITheme.ICON_SIZE;
+    const font = UITheme.FONT;
     const gapAfterItem = 8;
     const lineHeight = iconSize;
 
@@ -266,7 +286,7 @@ export class CityDisplayInfo extends ActorGroup {
           font: font,
           fontColor: "white",
           x: x + iconSize,
-          y: y + (16 / 2)
+          y: y + UITheme.centerTextY(iconSize)
         })
       );
 
@@ -282,9 +302,9 @@ export class CityDisplayInfo extends ActorGroup {
 
   private initializeStatsWindow() {
     const x = 0;
-    const y = 21;
-    const width = 260;
-    const height = 300;
+    const y = UITheme.STATUS_BAR_HEIGHT;
+    const width = STATS_WINDOW_WIDTH;
+    const height = STATS_WINDOW_HEIGHT;
 
     this.statsWindow = new ActorGroup({ x: 0, y: 0, z: this.z, width: 0, height: 0, cameraApplies: false });
 
@@ -292,247 +312,74 @@ export class CityDisplayInfo extends ActorGroup {
       new Actor({
         image: Game.getInstance().getImage(GameImage.POPUP_BOX),
         x: x,
-        y: y, // (Height of status-bar)
+        y: y,
         cornerSize: 20,
         width: width,
         height: height,
-        nineSlice: true,
+        nineSlice: true
       })
     );
 
     const nameLabel = new Label({
       text: this.city.getName(),
-      font: "20px serif",
+      font: UITheme.FONT,
       fontColor: "white"
     });
     nameLabel.conformSize().then(() => {
-      nameLabel.setPosition(0 + 260 / 2 - nameLabel.getWidth() / 2, 32);
+      nameLabel.setPosition(x + width / 2 - nameLabel.getWidth() / 2, y + 12);
       this.statsWindow.addActor(nameLabel);
     });
 
-    const populationIcon = new Actor({
-      image: Game.getInstance().getImage(GameImage.SPRITESHEET),
-      spriteRegion: SpriteRegion.ICON_POPULATION,
-      x: 10,
-      y: 52,
-      width: 32,
-      height: 32
+    // `absolute` stats are plain counts, the rest are per-turn rates.
+    const stats: { key: string; icon: SpriteRegion; text: string; color: string; absolute?: boolean }[] = [
+      { key: "population", icon: SpriteRegion.ICON_POPULATION, text: "Population:", color: "white", absolute: true },
+      { key: "morale", icon: SpriteRegion.ICON_MORALE, text: "Morale:", color: "orange", absolute: true },
+      { key: "food", icon: SpriteRegion.ICON_FOOD, text: "Food:", color: "lime" },
+      { key: "production", icon: SpriteRegion.ICON_PRODUCTION, text: "Production:", color: "rgb(220,162,29)" },
+      { key: "gold", icon: SpriteRegion.ICON_GOLD, text: "Gold:", color: "gold" },
+      { key: "science", icon: SpriteRegion.ICON_SCIENCE, text: "Science:", color: "aqua" },
+      { key: "culture", icon: SpriteRegion.ICON_CULTURE, text: "Culture:", color: "rgb(207, 159, 255)" }
+    ];
+
+    const firstRowY = y + 12 + UITheme.FONT_SIZE + 10;
+
+    stats.forEach((stat, index) => {
+      const iconY = firstRowY + index * UITheme.ICON_SIZE;
+      const textY = iconY + UITheme.centerTextY(UITheme.ICON_SIZE);
+
+      this.statsWindow.addActor(
+        new Actor({
+          image: Game.getInstance().getImage(GameImage.SPRITESHEET),
+          spriteRegion: stat.icon,
+          x: x + 10,
+          y: iconY,
+          width: UITheme.ICON_SIZE,
+          height: UITheme.ICON_SIZE
+        })
+      );
+
+      this.statsWindow.addActor(
+        new Label({
+          text: stat.text,
+          font: UITheme.FONT,
+          fontColor: stat.color,
+          x: x + 10 + UITheme.ICON_SIZE,
+          y: textY
+        })
+      );
+
+      const value = this.city.getStat(stat.key);
+      const valueLabel = new Label({
+        text: stat.absolute ? value.toString() : Strings.convertToStatUnit(value),
+        font: UITheme.FONT,
+        fontColor: "white"
+      });
+      valueLabel.conformSize().then(() => {
+        valueLabel.setPosition(x + width - valueLabel.getWidth() - 10, textY);
+        this.statsWindow.addActor(valueLabel);
+      });
+      this.statLabels.set(stat.key, valueLabel);
     });
-    this.statsWindow.addActor(populationIcon);
-
-    this.statsWindow.addActor(
-      new Label({
-        text: "Population:",
-        font: "20px serif",
-        fontColor: "white",
-        x: populationIcon.getX() + populationIcon.getWidth(),
-        y: populationIcon.getY() + 8
-      })
-    );
-
-    const populationLabel = new Label({
-      text: this.city.getStat("population").toString(),
-      font: "20px serif",
-      fontColor: "white"
-    });
-    populationLabel.conformSize().then(() => {
-      populationLabel.setPosition(width - populationLabel.getWidth() - 10, populationIcon.getY() + 8);
-
-      this.statsWindow.addActor(populationLabel);
-    });
-    this.statLabels.set("population", populationLabel);
-
-    const moraleIcon = new Actor({
-      image: Game.getInstance().getImage(GameImage.SPRITESHEET),
-      spriteRegion: SpriteRegion.ICON_MORALE,
-      x: 10,
-      y: populationIcon.getY() + 32,
-      width: 32,
-      height: 32
-    });
-    this.statsWindow.addActor(moraleIcon);
-
-    this.statsWindow.addActor(
-      new Label({
-        text: "Morale:",
-        font: "20px serif",
-        fontColor: "orange",
-        x: moraleIcon.getX() + moraleIcon.getWidth(),
-        y: moraleIcon.getY() + 8
-      })
-    );
-
-    const moraleLabel = new Label({
-      text: this.city.getStat("morale").toString(),
-      font: "20px serif",
-      fontColor: "white"
-    });
-    moraleLabel.conformSize().then(() => {
-      moraleLabel.setPosition(width - moraleLabel.getWidth() - 10, moraleIcon.getY() + 8);
-
-      this.statsWindow.addActor(moraleLabel);
-    });
-    this.statLabels.set("morale", moraleLabel);
-
-    const foodIcon = new Actor({
-      image: Game.getInstance().getImage(GameImage.SPRITESHEET),
-      spriteRegion: SpriteRegion.ICON_FOOD,
-      x: 10,
-      y: moraleIcon.getY() + 32,
-      width: 32,
-      height: 32
-    });
-    this.statsWindow.addActor(foodIcon);
-
-    this.statsWindow.addActor(
-      new Label({
-        text: "Food:",
-        font: "20px serif",
-        fontColor: "lime",
-        x: foodIcon.getX() + foodIcon.getWidth(),
-        y: foodIcon.getY() + 8
-      })
-    );
-
-    const foodLabel = new Label({
-      text: Strings.convertToStatUnit(this.city.getStat("food")),
-      font: "20px serif",
-      fontColor: "white"
-    });
-    foodLabel.conformSize().then(() => {
-      foodLabel.setPosition(width - foodLabel.getWidth() - 10, foodIcon.getY() + 8);
-
-      this.statsWindow.addActor(foodLabel);
-    });
-    this.statLabels.set("food", foodLabel);
-
-    const productionIcon = new Actor({
-      image: Game.getInstance().getImage(GameImage.SPRITESHEET),
-      spriteRegion: SpriteRegion.ICON_PRODUCTION,
-      x: 10,
-      y: foodIcon.getY() + 32,
-      width: 32,
-      height: 32
-    });
-    this.statsWindow.addActor(productionIcon);
-
-    this.statsWindow.addActor(
-      new Label({
-        text: "Production:",
-        font: "20px serif",
-        fontColor: "rgb(220,162,29)",
-        x: productionIcon.getX() + productionIcon.getWidth(),
-        y: productionIcon.getY() + 8
-      })
-    );
-
-    const productionLabel = new Label({
-      text: Strings.convertToStatUnit(this.city.getStat("production")),
-      font: "20px serif",
-      fontColor: "white"
-    });
-    productionLabel.conformSize().then(() => {
-      productionLabel.setPosition(width - productionLabel.getWidth() - 10, productionIcon.getY() + 8);
-
-      this.statsWindow.addActor(productionLabel);
-    });
-    this.statLabels.set("production", productionLabel);
-
-    const goldIcon = new Actor({
-      image: Game.getInstance().getImage(GameImage.SPRITESHEET),
-      spriteRegion: SpriteRegion.ICON_GOLD,
-      x: 10,
-      y: productionIcon.getY() + 32,
-      width: 32,
-      height: 32
-    });
-    this.statsWindow.addActor(goldIcon);
-
-    this.statsWindow.addActor(
-      new Label({
-        text: "Gold:",
-        font: "20px serif",
-        fontColor: "gold",
-        x: goldIcon.getX() + goldIcon.getWidth(),
-        y: goldIcon.getY() + 8
-      })
-    );
-
-    const goldLabel = new Label({
-      text: Strings.convertToStatUnit(this.city.getStat("gold")),
-      font: "20px serif",
-      fontColor: "white"
-    });
-    goldLabel.conformSize().then(() => {
-      goldLabel.setPosition(width - goldLabel.getWidth() - 10, goldIcon.getY() + 8);
-
-      this.statsWindow.addActor(goldLabel);
-    });
-    this.statLabels.set("gold", goldLabel);
-
-    const scienceIcon = new Actor({
-      image: Game.getInstance().getImage(GameImage.SPRITESHEET),
-      spriteRegion: SpriteRegion.ICON_SCIENCE,
-      x: 10,
-      y: goldIcon.getY() + 32,
-      width: 32,
-      height: 32
-    });
-    this.statsWindow.addActor(scienceIcon);
-
-    this.statsWindow.addActor(
-      new Label({
-        text: "Science:",
-        font: "20px serif",
-        fontColor: "aqua",
-        x: scienceIcon.getX() + scienceIcon.getWidth(),
-        y: scienceIcon.getY() + 8
-      })
-    );
-
-    const scienceLabel = new Label({
-      text: Strings.convertToStatUnit(this.city.getStat("science")),
-      font: "20px serif",
-      fontColor: "white"
-    });
-    scienceLabel.conformSize().then(() => {
-      scienceLabel.setPosition(width - scienceLabel.getWidth() - 10, scienceIcon.getY() + 8);
-
-      this.statsWindow.addActor(scienceLabel);
-    });
-    this.statLabels.set("science", scienceLabel);
-
-    const cultureIcon = new Actor({
-      image: Game.getInstance().getImage(GameImage.SPRITESHEET),
-      spriteRegion: SpriteRegion.ICON_CULTURE,
-      x: 10,
-      y: scienceIcon.getY() + 32,
-      width: 32,
-      height: 32
-    });
-    this.statsWindow.addActor(cultureIcon);
-
-    this.statsWindow.addActor(
-      new Label({
-        text: "Culture:",
-        font: "20px serif",
-        fontColor: "rgb(207, 159, 255)",
-        x: cultureIcon.getX() + cultureIcon.getWidth(),
-        y: cultureIcon.getY() + 8
-      })
-    );
-
-    const cultureLabel = new Label({
-      text: Strings.convertToStatUnit(this.city.getStat("culture")),
-      font: "20px serif",
-      fontColor: "white"
-    });
-    cultureLabel.conformSize().then(() => {
-      cultureLabel.setPosition(width - cultureLabel.getWidth() - 10, cultureIcon.getY() + 8);
-
-      this.statsWindow.addActor(cultureLabel);
-    });
-    this.statLabels.set("culture", cultureLabel);
 
     this.addActor(this.statsWindow);
   }
@@ -544,8 +391,8 @@ export class CityDisplayInfo extends ActorGroup {
 
   private initializeCurrentlyBuildingWindow() {
     const x = 0;
-    const width = 320;
-    const height = 320;
+    const width = PRODUCTION_WINDOW_WIDTH;
+    const height = PRODUCTION_WINDOW_HEIGHT;
     const y = Game.getInstance().getHeight() - height;
 
     this.currentlyBuildingWindow = new ActorGroup({ x: 0, y: 0, z: this.z, width: 0, height: 0, cameraApplies: false });
@@ -565,7 +412,7 @@ export class CityDisplayInfo extends ActorGroup {
     const queue = this.city.getProductionQueue();
 
     if (queue.length === 0) {
-      const label = new Label({ text: "Nothing being produced", font: "20px serif", fontColor: "white" });
+      const label = new Label({ text: "Nothing being produced", font: UITheme.FONT, fontColor: "white" });
       label.conformSize().then(() => {
         label.setPosition(x + width / 2 - label.getWidth() / 2, y + 20);
         this.currentlyBuildingWindow.addActor(label);
@@ -580,16 +427,16 @@ export class CityDisplayInfo extends ActorGroup {
         y: y,
         width: width,
         height: height - 68,
-        rowHeight: 50,
-        textFont: "20px serif",
+        rowHeight: PRODUCTION_ROW_HEIGHT,
+        textFont: UITheme.FONT,
         fontColor: "white"
       });
 
       queue.forEach((item, index) => {
         const rowX = listbox.getNextRowPosition().x;
         const rowY = listbox.getNextRowPosition().y;
-        const rowHeight = 50;
-        const iconY = rowY + rowHeight / 2 - 12;
+        const rowHeight = PRODUCTION_ROW_HEIGHT;
+        const iconY = rowY + rowHeight / 2 - ButtonSize.ICON_SMALL.height / 2;
 
         const turnsLeft = Math.ceil(item.cost / productionRate);
         const text = index === 0 ? `${item.name} (${turnsLeft} turn${turnsLeft === 1 ? "" : "s"})` : item.name;
@@ -599,10 +446,10 @@ export class CityDisplayInfo extends ActorGroup {
             image: Game.getInstance().getImage(GameImage.SPRITESHEET),
             spriteRegion: this.resolveProductionIcon(item),
             x: rowX + 8,
-            y: rowY + rowHeight / 2 - 16,
+            y: rowY + rowHeight / 2 - UITheme.ICON_SIZE / 2,
             z: this.z,
-            width: 32,
-            height: 32,
+            width: UITheme.ICON_SIZE,
+            height: UITheme.ICON_SIZE,
             cameraApplies: false
           })
         ];
@@ -670,9 +517,12 @@ export class CityDisplayInfo extends ActorGroup {
           upOrDownIconX -= 28;
         }
 
+        const textX = rowX + 8 + UITheme.ICON_SIZE + 8;
+
         listbox.addRow({
           text: text,
-          textX: rowX + 48,
+          textX: textX,
+          maxWidth: width - (textX - rowX) - PRODUCTION_BUTTON_ZONE - 8,
           centerTextY: true,
           rowHeight: rowHeight,
           actorIcons: actorIcons
@@ -743,21 +593,21 @@ export class CityDisplayInfo extends ActorGroup {
 
     const listbox = new ListBox({
       x: 0,
-      y: 21,
-      width: 260,
-      height: 300,
-      textFont: "20px serif",
+      y: UITheme.STATUS_BAR_HEIGHT,
+      width: STATS_WINDOW_WIDTH,
+      height: STATS_WINDOW_HEIGHT,
+      textFont: UITheme.FONT,
       fontColor: "white"
     });
 
     const addOptionRow = (option: ProductionQueueItem) => {
       const rowX = listbox.getNextRowPosition().x;
       const rowY = listbox.getNextRowPosition().y;
-      const rowHeight = 50;
+      const rowHeight = PRODUCTION_ROW_HEIGHT;
 
       const row = listbox.addRow({
         text: option.name,
-        textX: rowX + 48,
+        textX: rowX + 8 + UITheme.ICON_SIZE + 8,
         centerTextY: true,
         rowHeight: rowHeight,
         actorIcons: [
@@ -765,10 +615,10 @@ export class CityDisplayInfo extends ActorGroup {
             image: Game.getInstance().getImage(GameImage.SPRITESHEET),
             spriteRegion: this.resolveProductionIcon(option),
             x: rowX + 8,
-            y: rowY + rowHeight / 2 - 16,
+            y: rowY + rowHeight / 2 - UITheme.ICON_SIZE / 2,
             z: this.z,
-            width: 32,
-            height: 32,
+            width: UITheme.ICON_SIZE,
+            height: UITheme.ICON_SIZE,
             cameraApplies: false
           })
         ]

@@ -11,6 +11,7 @@ import { Button, ButtonSize } from "../../ui/Button";
 import { CityDisplayInfo } from "../../ui/CityDisplayInfo";
 import { Label } from "../../ui/Label";
 import { StatusBar } from "../../ui/StatusBar";
+import { UITheme } from "../../ui/UITheme";
 import { Actor } from "../Actor";
 import { ActorGroup } from "../ActorGroup";
 import { Camera } from "../Camera";
@@ -137,7 +138,7 @@ export class InGameScene extends Scene {
           this.tileInformationLabel.conformSize().then(() => {
             // Positioning for icons (right after the label)
             let iconX = this.tileInformationLabel.getX() + this.tileInformationLabel.getWidth();
-            const iconY = this.tileInformationLabel.getY() - 10;
+            const iconY = this.tileInformationLabel.getY() - UITheme.centerTextY(UITheme.ICON_SIZE);
 
             if (yields) {
               for (const [key, value] of Object.entries(yields)) {
@@ -148,8 +149,8 @@ export class InGameScene extends Scene {
                     spriteRegion: statSpriteRegions[key],
                     x: iconX,
                     y: iconY,
-                    width: 32,
-                    height: 32,
+                    width: UITheme.ICON_SIZE,
+                    height: UITheme.ICON_SIZE,
                     z: 10,
                     cameraApplies: false
                   });
@@ -159,11 +160,11 @@ export class InGameScene extends Scene {
                   // Create value label
                   const valueLabel = new Label({
                     text: value.toString(),
-                    font: "16px serif",
+                    font: UITheme.FONT,
                     fontColor: "white",
                     shadowColor: "black",
                     lineWidth: 4,
-                    x: iconX + iconActor.getWidth() - 6,
+                    x: iconX + iconActor.getWidth() - 8,
                     y: this.tileInformationLabel.getY(),
                     z: 10
                   });
@@ -171,7 +172,7 @@ export class InGameScene extends Scene {
                   this.tileYieldActors.push(valueLabel);
 
                   // Move X for next icon
-                  iconX += 42;
+                  iconX += UITheme.ICON_SIZE + 12;
                 }
               }
             }
@@ -242,7 +243,7 @@ export class InGameScene extends Scene {
   private initializePersistentUI() {
     this.tileInformationLabel = new Label({
       text: "N/A",
-      font: "16px serif",
+      font: UITheme.FONT,
       fontColor: "white",
       shadowColor: "black",
       lineWidth: 4,

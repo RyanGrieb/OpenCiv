@@ -6,6 +6,7 @@ import { ActorGroup } from "../scene/ActorGroup";
 import { InGameScene } from "../scene/type/InGameScene";
 import { Strings } from "../util/Strings";
 import { Label } from "./Label";
+import { UITheme } from "./UITheme";
 
 interface TurnTimeEvent {
   turn: number;
@@ -44,7 +45,7 @@ export class StatusBar extends ActorGroup {
       y: 0,
       z: 5,
       width: Game.getInstance().getWidth(),
-      height: 21,
+      height: UITheme.STATUS_BAR_HEIGHT,
       cameraApplies: false
     });
 
@@ -84,7 +85,7 @@ export class StatusBar extends ActorGroup {
     } else {
       this.currentTurnLabel.setText(text);
       this.currentTurnLabel.conformSize().then(() => {
-        this.currentTurnLabel.setPosition(Game.getInstance().getWidth() - this.currentTurnLabel.getWidth() - 1, 3);
+        this.currentTurnLabel.setPosition(Game.getInstance().getWidth() - this.currentTurnLabel.getWidth() - 1, 8);
       });
     }
   }
@@ -103,162 +104,162 @@ export class StatusBar extends ActorGroup {
     //Science Information
     this.scienceDescLabel = new Label({
       text: "Science:",
-      font: "16px serif",
+      font: UITheme.FONT,
       fontColor: "white"
     });
     await this.scienceDescLabel.conformSize();
-    this.scienceDescLabel.setPosition(this.x + 1, 3);
+    this.scienceDescLabel.setPosition(this.x + 1, 8);
     this.addActor(this.scienceDescLabel);
 
     this.scienceIcon = new Actor({
       image: Game.getInstance().getImage(GameImage.SPRITESHEET),
       spriteRegion: SpriteRegion.ICON_SCIENCE,
       x: this.scienceDescLabel.getX() + this.scienceDescLabel.getWidth(),
-      y: -6,
-      width: 32,
-      height: 32
+      y: 0,
+      width: UITheme.ICON_SIZE,
+      height: UITheme.ICON_SIZE
     });
 
     this.addActor(this.scienceIcon);
 
     this.scienceLabel = new Label({
       text: "+0",
-      font: "16px serif",
+      font: UITheme.FONT,
       fontColor: "white"
     });
     await this.scienceLabel.conformSize();
-    this.scienceLabel.setPosition(this.scienceIcon.getX() + this.scienceIcon.getWidth() - 6, 3);
+    this.scienceLabel.setPosition(this.scienceIcon.getX() + this.scienceIcon.getWidth() - 8, 8);
     this.addActor(this.scienceLabel);
 
     // Culture information
     this.cultureDescLabel = new Label({
       text: "Culture:",
-      font: "16px serif",
+      font: UITheme.FONT,
       fontColor: "white"
     });
     await this.cultureDescLabel.conformSize();
-    this.cultureDescLabel.setPosition(this.scienceLabel.getX() + this.scienceLabel.getWidth() + 10, 3);
+    this.cultureDescLabel.setPosition(this.scienceLabel.getX() + this.scienceLabel.getWidth() + 10, 8);
     this.addActor(this.cultureDescLabel);
 
     this.cultureIcon = new Actor({
       image: Game.getInstance().getImage(GameImage.SPRITESHEET),
       spriteRegion: SpriteRegion.ICON_CULTURE,
       x: this.cultureDescLabel.getX() + this.cultureDescLabel.getWidth(),
-      y: -6,
-      width: 32,
-      height: 32
+      y: 0,
+      width: UITheme.ICON_SIZE,
+      height: UITheme.ICON_SIZE
     });
 
     this.addActor(this.cultureIcon);
 
     this.cultureLabel = new Label({
       text: "+0",
-      font: "16px serif",
+      font: UITheme.FONT,
       fontColor: "white"
     });
     await this.cultureLabel.conformSize();
-    this.cultureLabel.setPosition(this.cultureIcon.getX() + this.cultureIcon.getWidth() - 6, 3);
+    this.cultureLabel.setPosition(this.cultureIcon.getX() + this.cultureIcon.getWidth() - 8, 8);
     this.addActor(this.cultureLabel);
 
     //Gold information
     this.goldDescLabel = new Label({
       text: "Gold:",
-      font: "16px serif",
+      font: UITheme.FONT,
       fontColor: "white"
     });
     await this.goldDescLabel.conformSize();
-    this.goldDescLabel.setPosition(this.cultureLabel.getX() + this.cultureLabel.getWidth() + 10, 3);
+    this.goldDescLabel.setPosition(this.cultureLabel.getX() + this.cultureLabel.getWidth() + 10, 8);
     this.addActor(this.goldDescLabel);
 
     this.goldIcon = new Actor({
       image: Game.getInstance().getImage(GameImage.SPRITESHEET),
       spriteRegion: SpriteRegion.ICON_GOLD,
       x: this.goldDescLabel.getX() + this.goldDescLabel.getWidth(),
-      y: -6,
-      width: 32,
-      height: 32
+      y: 0,
+      width: UITheme.ICON_SIZE,
+      height: UITheme.ICON_SIZE
     });
 
     this.addActor(this.goldIcon);
 
     this.goldLabel = new Label({
       text: "+0",
-      font: "16px serif",
+      font: UITheme.FONT,
       fontColor: "white"
     });
     await this.goldLabel.conformSize();
-    this.goldLabel.setPosition(this.goldIcon.getX() + this.goldIcon.getWidth() - 6, 3);
+    this.goldLabel.setPosition(this.goldIcon.getX() + this.goldIcon.getWidth() - 8, 8);
     this.addActor(this.goldLabel);
 
     //Faith information
 
     this.faithDescLabel = new Label({
       text: "Faith:",
-      font: "16px serif",
+      font: UITheme.FONT,
       fontColor: "white"
     });
     await this.faithDescLabel.conformSize();
-    this.faithDescLabel.setPosition(this.goldLabel.getX() + this.goldLabel.getWidth() + 10, 3);
+    this.faithDescLabel.setPosition(this.goldLabel.getX() + this.goldLabel.getWidth() + 10, 8);
     this.addActor(this.faithDescLabel);
 
     this.faithIcon = new Actor({
       image: Game.getInstance().getImage(GameImage.SPRITESHEET),
       spriteRegion: SpriteRegion.ICON_FAITH,
       x: this.faithDescLabel.getX() + this.faithDescLabel.getWidth(),
-      y: -6,
-      width: 32,
-      height: 32
+      y: 0,
+      width: UITheme.ICON_SIZE,
+      height: UITheme.ICON_SIZE
     });
 
     this.addActor(this.faithIcon);
 
     this.faithLabel = new Label({
       text: "+0",
-      font: "16px serif",
+      font: UITheme.FONT,
       fontColor: "white"
     });
     await this.faithLabel.conformSize();
-    this.faithLabel.setPosition(this.faithIcon.getX() + this.faithIcon.getWidth() - 6, 3);
+    this.faithLabel.setPosition(this.faithIcon.getX() + this.faithIcon.getWidth() - 8, 8);
     this.addActor(this.faithLabel);
 
     //Trade information
     this.tradeDescLabel = new Label({
       text: "Trade:",
-      font: "16px serif",
+      font: UITheme.FONT,
       fontColor: "white"
     });
     await this.tradeDescLabel.conformSize();
-    this.tradeDescLabel.setPosition(this.faithLabel.getX() + this.faithLabel.getWidth() + 10, 3);
+    this.tradeDescLabel.setPosition(this.faithLabel.getX() + this.faithLabel.getWidth() + 10, 8);
     this.addActor(this.tradeDescLabel);
 
     this.tradeIcon = new Actor({
       image: Game.getInstance().getImage(GameImage.SPRITESHEET),
       spriteRegion: SpriteRegion.ICON_TRADE,
-      x: this.tradeDescLabel.getX() + this.tradeDescLabel.getWidth() + 10,
-      y: 2,
-      width: 16,
-      height: 16
+      x: this.tradeDescLabel.getX() + this.tradeDescLabel.getWidth(),
+      y: 0,
+      width: UITheme.ICON_SIZE,
+      height: UITheme.ICON_SIZE
     });
 
     this.addActor(this.tradeIcon);
 
     this.tradeLabel = new Label({
       text: "0/0",
-      font: "16px serif",
+      font: UITheme.FONT,
       fontColor: "white"
     });
     await this.tradeLabel.conformSize();
-    this.tradeLabel.setPosition(this.tradeIcon.getX() + this.tradeIcon.getWidth() + 4, 3);
+    this.tradeLabel.setPosition(this.tradeIcon.getX() + this.tradeIcon.getWidth() - 8, 8);
     this.addActor(this.tradeLabel);
 
     // Current turn information
     this.currentTurnLabel = new Label({
       text: this.currentTurnText,
-      font: "16px serif",
+      font: UITheme.FONT,
       fontColor: "white"
     });
     await this.currentTurnLabel.conformSize();
-    this.currentTurnLabel.setPosition(Game.getInstance().getWidth() - this.currentTurnLabel.getWidth() - 1, 3);
+    this.currentTurnLabel.setPosition(Game.getInstance().getWidth() - this.currentTurnLabel.getWidth() - 1, 8);
     this.addActor(this.currentTurnLabel);
 
     // Covers totals that already arrived (via the initial requestTotalStats) before
@@ -275,30 +276,30 @@ export class StatusBar extends ActorGroup {
 
     this.scienceLabel.setText(Strings.convertToStatUnit(clientPlayer.getTotalStat("science")));
     await this.scienceLabel.conformSize();
-    this.scienceLabel.setPosition(this.scienceIcon.getX() + this.scienceIcon.getWidth() - 6, 3);
+    this.scienceLabel.setPosition(this.scienceIcon.getX() + this.scienceIcon.getWidth() - 8, 8);
 
-    this.cultureDescLabel.setPosition(this.scienceLabel.getX() + this.scienceLabel.getWidth() + 10, 3);
+    this.cultureDescLabel.setPosition(this.scienceLabel.getX() + this.scienceLabel.getWidth() + 10, 8);
     this.cultureIcon.setPosition(this.cultureDescLabel.getX() + this.cultureDescLabel.getWidth(), this.cultureIcon.getY());
     this.cultureLabel.setText(Strings.convertToStatUnit(clientPlayer.getTotalStat("culture")));
     await this.cultureLabel.conformSize();
-    this.cultureLabel.setPosition(this.cultureIcon.getX() + this.cultureIcon.getWidth() - 6, 3);
+    this.cultureLabel.setPosition(this.cultureIcon.getX() + this.cultureIcon.getWidth() - 8, 8);
 
-    this.goldDescLabel.setPosition(this.cultureLabel.getX() + this.cultureLabel.getWidth() + 10, 3);
+    this.goldDescLabel.setPosition(this.cultureLabel.getX() + this.cultureLabel.getWidth() + 10, 8);
     this.goldIcon.setPosition(this.goldDescLabel.getX() + this.goldDescLabel.getWidth(), this.goldIcon.getY());
     const goldTotal = clientPlayer.getAccumulatedStat("gold");
     const goldRate = Strings.convertToStatUnit(clientPlayer.getTotalStat("gold"));
     this.goldLabel.setText(`${goldTotal} (${goldRate})`);
     await this.goldLabel.conformSize();
-    this.goldLabel.setPosition(this.goldIcon.getX() + this.goldIcon.getWidth() - 6, 3);
+    this.goldLabel.setPosition(this.goldIcon.getX() + this.goldIcon.getWidth() - 8, 8);
 
-    this.faithDescLabel.setPosition(this.goldLabel.getX() + this.goldLabel.getWidth() + 10, 3);
+    this.faithDescLabel.setPosition(this.goldLabel.getX() + this.goldLabel.getWidth() + 10, 8);
     this.faithIcon.setPosition(this.faithDescLabel.getX() + this.faithDescLabel.getWidth(), this.faithIcon.getY());
     this.faithLabel.setText(Strings.convertToStatUnit(clientPlayer.getTotalStat("faith")));
     await this.faithLabel.conformSize();
-    this.faithLabel.setPosition(this.faithIcon.getX() + this.faithIcon.getWidth() - 6, 3);
+    this.faithLabel.setPosition(this.faithIcon.getX() + this.faithIcon.getWidth() - 8, 8);
 
-    this.tradeDescLabel.setPosition(this.faithLabel.getX() + this.faithLabel.getWidth() + 10, 3);
-    this.tradeIcon.setPosition(this.tradeDescLabel.getX() + this.tradeDescLabel.getWidth() + 10, this.tradeIcon.getY());
-    this.tradeLabel.setPosition(this.tradeIcon.getX() + this.tradeIcon.getWidth() + 4, 3);
+    this.tradeDescLabel.setPosition(this.faithLabel.getX() + this.faithLabel.getWidth() + 10, 8);
+    this.tradeIcon.setPosition(this.tradeDescLabel.getX() + this.tradeDescLabel.getWidth(), this.tradeIcon.getY());
+    this.tradeLabel.setPosition(this.tradeIcon.getX() + this.tradeIcon.getWidth() - 8, 8);
   }
 }
