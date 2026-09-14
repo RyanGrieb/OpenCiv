@@ -119,4 +119,88 @@ describe('City', () => {
       { type: 'building', name: 'Monument', cost: 60 },
     ]);
   });
+
+  describe('removeFromProductionQueue', () => {
+    const mockWebsocket = {} as WebSocket;
+
+    beforeEach(() => {
+      triggerServerEvent('addToProductionQueue', { cityName: 'TestCity', type: 'unit', name: 'Warrior' }, mockWebsocket);
+      triggerServerEvent('addToProductionQueue', { cityName: 'TestCity', type: 'unit', name: 'Scout' }, mockWebsocket);
+      mockPlayer.sendNetworkEvent.mockClear();
+    });
+
+    it('removes the item at the given index and re-sends city stats', () => {
+      triggerServerEvent('removeFromProductionQueue', { cityName: 'TestCity', index: 0 }, mockWebsocket);
+
+      expect(city['productionQueue']).toEqual([{ type: 'unit', name: 'Scout', cost: 20 }]);
+      expect(mockPlayer.sendNetworkEvent).toHaveBeenCalledWith(
+        expect.objectContaining({
+          event: 'updateCityStats',
+          productionQueue: [{ type: 'unit', name: 'Scout', cost: 20 }],
+        })
+      );
+    });
+
+    it('ignores an out-of-range index', () => {
+      triggerServerEvent('removeFromProductionQueue', { cityName: 'TestCity', index: 5 }, mockWebsocket);
+
+      expect(city['productionQueue']).toHaveLength(2);
+      expect(mockPlayer.sendNetworkEvent).not.toHaveBeenCalled();
+    });
+
+    it('ignores a request for a city it does not own', () => {
+      triggerServerEvent('removeFromProductionQueue', { cityName: 'SomeOtherCity', index: 0 }, mockWebsocket);
+
+      expect(city['productionQueue']).toHaveLength(2);
+      expect(mockPlayer.sendNetworkEvent).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('moveProductionQueueItem', () => {
+    const mockWebsocket = {} as WebSocket;
+
+    beforeEach(() => {
+      triggerServerEvent('addToProductionQueue', { cityName: 'TestCity', type: 'unit', name: 'Warrior' }, mockWebsocket);
+      triggerServerEvent('addToProductionQueue', { cityName: 'TestCity', type: 'unit', name: 'Scout' }, mockWebsocket);
+      mockPlayer.sendNetworkEvent.mockClear();
+    });
+
+    it('swaps an item with the previous one when moved up', () => {
+      triggerServerEvent('moveProductionQueueItem', { cityName: 'TestCity', index: 1, direction: 'up' }, mockWebsocket);
+
+      expect(city['productionQueue']).toEqual([
+        { type: 'unit', name: 'Scout', cost: 20 },
+        { type: 'unit', name: 'Warrior', cost: 30 },
+      ]);
+    });
+
+    it('swaps an item with the next one when moved down', () => {
+      triggerServerEvent('moveProductionQueueItem', { cityName: 'TestCity', index: 0, direction: 'down' }, mockWebsocket);
+
+      expect(city['productionQueue']).toEqual([
+        { type: 'unit', name: 'Scout', cost: 20 },
+        { type: 'unit', name: 'Warrior', cost: 30 },
+      ]);
+    });
+
+    it('ignores moving the first item up', () => {
+      triggerServerEvent('moveProductionQueueItem', { cityName: 'TestCity', index: 0, direction: 'up' }, mockWebsocket);
+
+      expect(city['productionQueue']).toEqual([
+        { type: 'unit', name: 'Warrior', cost: 30 },
+        { type: 'unit', name: 'Scout', cost: 20 },
+      ]);
+      expect(mockPlayer.sendNetworkEvent).not.toHaveBeenCalled();
+    });
+
+    it('ignores moving the last item down', () => {
+      triggerServerEvent('moveProductionQueueItem', { cityName: 'TestCity', index: 1, direction: 'down' }, mockWebsocket);
+
+      expect(city['productionQueue']).toEqual([
+        { type: 'unit', name: 'Warrior', cost: 30 },
+        { type: 'unit', name: 'Scout', cost: 20 },
+      ]);
+      expect(mockPlayer.sendNetworkEvent).not.toHaveBeenCalled();
+    });
+  });
 });

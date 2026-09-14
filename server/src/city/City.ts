@@ -118,6 +118,52 @@ export class City {
         this.sendStatUpdate(player);
       }
     });
+
+    ServerEvents.on({
+      eventName: "removeFromProductionQueue",
+      parentObject: this,
+      callback: (data, websocket) => {
+        const player = Game.getInstance().getPlayerFromWebsocket(websocket);
+        if (this.name != data["cityName"] || this.player != player) {
+          return;
+        }
+
+        const index = data["index"];
+        if (typeof index !== "number" || index < 0 || index >= this.productionQueue.length) return;
+
+        this.productionQueue.splice(index, 1);
+        this.sendStatUpdate(player);
+      }
+    });
+
+    ServerEvents.on({
+      eventName: "moveProductionQueueItem",
+      parentObject: this,
+      callback: (data, websocket) => {
+        const player = Game.getInstance().getPlayerFromWebsocket(websocket);
+        if (this.name != data["cityName"] || this.player != player) {
+          return;
+        }
+
+        const index = data["index"];
+        const targetIndex = data["direction"] === "up" ? index - 1 : index + 1;
+        if (
+          typeof index !== "number" ||
+          index < 0 ||
+          index >= this.productionQueue.length ||
+          targetIndex < 0 ||
+          targetIndex >= this.productionQueue.length
+        ) {
+          return;
+        }
+
+        [this.productionQueue[index], this.productionQueue[targetIndex]] = [
+          this.productionQueue[targetIndex],
+          this.productionQueue[index]
+        ];
+        this.sendStatUpdate(player);
+      }
+    });
   }
 
   public static getBuildingDataByName(name: string): Record<string, any> {

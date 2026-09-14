@@ -89,6 +89,9 @@ export enum SpriteRegion {
   ICON_TRADE = "5,14",
   ICON_DEFENSE = "10,14",
   ICON_SETTLE = "11,11",
+  ICON_UP_ARROW = "13,12",
+  ICON_DOWN_ARROW = "16,12",
+  ICON_CANCEL = "2,14",
   //Buildings
   BUILDING_PALACE = "9,17",
   BUILDING_MONUMENT = "14,16",

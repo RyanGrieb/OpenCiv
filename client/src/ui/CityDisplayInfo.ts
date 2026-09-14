@@ -544,8 +544,8 @@ export class CityDisplayInfo extends ActorGroup {
 
   private initializeCurrentlyBuildingWindow() {
     const x = 0;
-    const width = 260;
-    const height = 140;
+    const width = 320;
+    const height = 320;
     const y = Game.getInstance().getHeight() - height;
 
     this.currentlyBuildingWindow = new ActorGroup({ x: 0, y: 0, z: this.z, width: 0, height: 0, cameraApplies: false });
@@ -565,56 +565,124 @@ export class CityDisplayInfo extends ActorGroup {
     const queue = this.city.getProductionQueue();
 
     if (queue.length === 0) {
-      const label = new Label({ text: "Nothing being produced", font: "16px serif", fontColor: "white" });
+      const label = new Label({ text: "Nothing being produced", font: "20px serif", fontColor: "white" });
       label.conformSize().then(() => {
         label.setPosition(x + width / 2 - label.getWidth() / 2, y + 20);
         this.currentlyBuildingWindow.addActor(label);
       });
     } else {
-      const current = queue[0];
       // Guard against a zero/negative production rate - a real accumulated-progress
       // system (and its own turns-remaining math) is a separate follow-up feature.
       const productionRate = Math.max(1, this.city.getStat("production"));
-      const turnsLeft = Math.ceil(current.cost / productionRate);
 
-      this.currentlyBuildingWindow.addActor(
-        new Label({ text: current.name, font: "18px serif", fontColor: "white", x: x + 10, y: y + 10 })
-      );
+      const listbox = new ListBox({
+        x: x,
+        y: y + 5,
+        width: width,
+        height: height - 60,
+        rowHeight: 50,
+        textFont: "20px serif",
+        fontColor: "white"
+      });
 
-      this.currentlyBuildingWindow.addActor(
-        new Label({
-          text: `${turnsLeft} turn${turnsLeft === 1 ? "" : "s"} left`,
-          font: "14px serif",
-          fontColor: "white",
-          x: x + 10,
-          y: y + 34
-        })
-      );
+      queue.forEach((item, index) => {
+        const rowX = listbox.getNextRowPosition().x;
+        const rowY = listbox.getNextRowPosition().y;
+        const rowHeight = 50;
+        const iconY = rowY + rowHeight / 2 - 12;
 
-      // Placeholder track only - no accumulated-progress data exists yet to fill it.
-      this.currentlyBuildingWindow.addActor(
-        new Actor({
-          image: Game.getInstance().getImage(GameImage.SPRITESHEET),
-          spriteRegion: SpriteRegion.TILE_BLANK,
-          x: x + 10,
-          y: y + 56,
-          width: width - 20,
-          height: 16,
-          color: "rgba(0, 0, 0, 0.4)"
-        })
-      );
+        const turnsLeft = Math.ceil(item.cost / productionRate);
+        const text = index === 0 ? `${item.name} (${turnsLeft} turn${turnsLeft === 1 ? "" : "s"})` : item.name;
 
-      if (queue.length > 1) {
-        this.currentlyBuildingWindow.addActor(
-          new Label({
-            text: "Also queued: " + queue.slice(1).map((item) => item.name).join(", "),
-            font: "12px serif",
-            fontColor: "white",
-            x: x + 10,
-            y: y + 80
+        const actorIcons: Actor[] = [
+          new Actor({
+            image: Game.getInstance().getImage(GameImage.SPRITESHEET),
+            spriteRegion: this.resolveProductionIcon(item),
+            x: rowX + 8,
+            y: rowY + rowHeight / 2 - 16,
+            z: this.z,
+            width: 32,
+            height: 32,
+            cameraApplies: false
           })
-        );
-      }
+        ];
+
+        const cancelIcon = new Button({
+          icon: SpriteRegion.ICON_CANCEL,
+          iconOnly: true,
+          x: rowX + width - 32,
+          y: iconY,
+          z: this.z,
+          width: 24,
+          height: 24,
+          onClicked: () => {
+            WebsocketClient.sendMessage({
+              event: "removeFromProductionQueue",
+              cityName: this.city.getName(),
+              index: index
+            });
+          }
+        });
+        actorIcons.push(cancelIcon);
+
+        let upOrDownIconX = rowX + width - 60;
+
+        if (index > 0) {
+          const upIcon = new Button({
+            icon: SpriteRegion.ICON_UP_ARROW,
+            iconOnly: true,
+            x: upOrDownIconX,
+            y: iconY,
+            z: this.z,
+            width: 24,
+            height: 24,
+            onClicked: () => {
+              WebsocketClient.sendMessage({
+                event: "moveProductionQueueItem",
+                cityName: this.city.getName(),
+                index: index,
+                direction: "up"
+              });
+            }
+          });
+          actorIcons.push(upIcon);
+
+          upOrDownIconX -= 28; // Move the others icon to the right if the other icons are present
+        }
+
+        if (index < queue.length - 1) {
+          const downIcon = new Button({
+            icon: SpriteRegion.ICON_DOWN_ARROW,
+            iconOnly: true,
+            x: upOrDownIconX,
+            y: iconY,
+            z: this.z,
+            width: 24,
+            height: 24,
+            onClicked: () => {
+              WebsocketClient.sendMessage({
+                event: "moveProductionQueueItem",
+                cityName: this.city.getName(),
+                index: index,
+                direction: "down"
+              });
+            }
+          });
+          actorIcons.push(downIcon);
+
+          upOrDownIconX -= 28;
+        }
+
+        listbox.addRow({
+          text: text,
+          textX: rowX + 48,
+          centerTextY: true,
+          rowHeight: rowHeight,
+          actorIcons: actorIcons
+        });
+      });
+
+      this.currentlyBuildingWindow.addActor(listbox);
     }
 
     const buttonText = this.isChoosingProduction ? "Cancel" : queue.length === 0 ? "Choose Production" : "Add to Queue";
@@ -634,6 +702,12 @@ export class CityDisplayInfo extends ActorGroup {
     );
 
     this.addActor(this.currentlyBuildingWindow);
+  }
+
+  private resolveProductionIcon(option: ProductionQueueItem): SpriteRegion {
+    return (
+      resolveSpriteRegion(`${option.type.toUpperCase()}_${option.name.toUpperCase()}`) ?? SpriteRegion.ICON_UNKNOWN
+    );
   }
 
   private toggleChooseProduction() {
@@ -676,7 +750,7 @@ export class CityDisplayInfo extends ActorGroup {
       y: 21,
       width: 260,
       height: 300,
-      textFont: "18px serif",
+      textFont: "20px serif",
       fontColor: "white"
     });
 
@@ -693,9 +767,7 @@ export class CityDisplayInfo extends ActorGroup {
         actorIcons: [
           new Actor({
             image: Game.getInstance().getImage(GameImage.SPRITESHEET),
-            spriteRegion:
-              resolveSpriteRegion(`${option.type.toUpperCase()}_${option.name.toUpperCase()}`) ??
-              SpriteRegion.ICON_UNKNOWN,
+            spriteRegion: this.resolveProductionIcon(option),
             x: rowX + 8,
             y: rowY + rowHeight / 2 - 16,
             z: this.z,
