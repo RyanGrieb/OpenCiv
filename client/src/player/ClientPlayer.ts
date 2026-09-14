@@ -221,6 +221,29 @@ export class ClientPlayer extends AbstractPlayer {
     return this.accumulatedStats.get(stat) ?? 0;
   }
 
+  public unselectUnit(): Unit {
+    const unselectedUnit = this.selectedUnit;
+    if (this.selectedUnit) {
+      this.selectedUnit.unselect();
+
+      if (this.selectedUnit.hasMovementQueue()) {
+        GameMap.getInstance().removeOutline({
+          tile: this.selectedUnit.getTargetQueuedTile(),
+          cityOutline: false
+        });
+      }
+    }
+
+    this.selectedUnit = undefined;
+    this.clearMovementPath();
+    GameMap.getInstance().removeOutline({
+      tile: this.hoveredTile.getRepresentedTile(),
+      cityOutline: false
+    });
+    this.rightMouseDrag = false;
+    return unselectedUnit;
+  }
+
   private onMouseRightClick() {
     this.rightMouseDrag = true;
 
@@ -238,7 +261,10 @@ export class ClientPlayer extends AbstractPlayer {
       });
     }
 
-    this.drawTargetTileOutline(this.hoveredTile.getRepresentedTile(), isQueuedMovement);
+    // Remove target outline from the hovered tile if it exists
+    if (this.hoveredTile) {
+      this.drawTargetTileOutline(this.hoveredTile.getRepresentedTile(), isQueuedMovement);
+    }
   }
 
   private moveSelectedUnit(targetTile: Tile) {
@@ -291,23 +317,6 @@ export class ClientPlayer extends AbstractPlayer {
 
       this.drawTargetTileOutline(this.selectedUnit.getTargetQueuedTile(), isQueuedMovement);
     }
-  }
-
-  private unselectUnit(): Unit {
-    const unselectedUnit = this.selectedUnit;
-    if (this.selectedUnit) {
-      this.selectedUnit.unselect();
-
-      if (this.selectedUnit.hasMovementQueue()) {
-        GameMap.getInstance().removeOutline({
-          tile: this.selectedUnit.getTargetQueuedTile(),
-          cityOutline: false
-        });
-      }
-    }
-
-    this.selectedUnit = undefined;
-    return unselectedUnit;
   }
 
   private updateHoveredTile(mouseX: number, mouseY: number) {

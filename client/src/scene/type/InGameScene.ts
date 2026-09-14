@@ -315,6 +315,7 @@ export class InGameScene extends Scene {
   public toggleCityUI(city?: City) {
     if (!this.cityDisplayInfo && city) {
       if (this.openUIElement) return;
+      this.clientPlayer.unselectUnit();
       this.openCityUI(city);
       this.call("toggleCityUI", { opened: true, city: city });
     } else {
