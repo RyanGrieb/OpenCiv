@@ -577,7 +577,7 @@ export class CityDisplayInfo extends ActorGroup {
 
       const listbox = new ListBox({
         x: x,
-        y: y + 5,
+        y: y,
         width: width,
         height: height - 60,
         rowHeight: 50,
