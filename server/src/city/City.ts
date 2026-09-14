@@ -9,6 +9,7 @@ import { StatEntry, StatValues, Tile } from "../map/Tile";
 export interface CityStats extends StatValues {
   population: number;
   foodSurplus: number;
+  defense: number;
 }
 type CityStatEntry = Partial<CityStats>;
 
@@ -290,6 +291,7 @@ export class City {
         { culture: 0 },
         { food: -(this.population * 2) },
         { morale: 0 }, //TODO: Implement morale
+        { defense: 0 },
         { foodSurplus: this.foodSurplus }
       ];
 
@@ -341,7 +343,8 @@ export class City {
       culture: 0,
       food: -(this.population * 2),
       morale: 0, //TODO: Implement morale
-      foodSurplus: this.foodSurplus
+      foodSurplus: this.foodSurplus,
+      defense: 0
     };
 
     // Add all buildings to existing stat-line dictionary

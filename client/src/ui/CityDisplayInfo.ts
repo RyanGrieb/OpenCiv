@@ -338,13 +338,15 @@ export class CityDisplayInfo extends ActorGroup {
       { key: "production", icon: SpriteRegion.ICON_PRODUCTION, text: "Production:", color: "rgb(220,162,29)" },
       { key: "gold", icon: SpriteRegion.ICON_GOLD, text: "Gold:", color: "gold" },
       { key: "science", icon: SpriteRegion.ICON_SCIENCE, text: "Science:", color: "aqua" },
-      { key: "culture", icon: SpriteRegion.ICON_CULTURE, text: "Culture:", color: "rgb(207, 159, 255)" }
+      { key: "culture", icon: SpriteRegion.ICON_CULTURE, text: "Culture:", color: "rgb(207, 159, 255)" },
+      { key: "faith", icon: SpriteRegion.ICON_FAITH, text: "Faith:", color: "rgb(255, 255, 255)" },
+      { key: "defense", icon: SpriteRegion.ICON_DEFENSE, text: "Defense:", color: "rgb(255, 0, 0)" }
     ];
 
     const firstRowY = y + 12 + UITheme.FONT_SIZE + 10;
 
     stats.forEach((stat, index) => {
-      const iconY = firstRowY + index * UITheme.ICON_SIZE;
+      const iconY = firstRowY + index * (UITheme.ICON_SIZE - 12);
       const textY = iconY + UITheme.centerTextY(UITheme.ICON_SIZE);
 
       this.statsWindow.addActor(
