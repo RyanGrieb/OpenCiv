@@ -4,7 +4,7 @@ import { NetworkEvents, WebsocketClient } from "../network/Client";
 import { CivilizationData } from "../player/AbstractPlayer";
 import { Actor } from "../scene/Actor";
 import { ActorGroup } from "../scene/ActorGroup";
-import { Button } from "./Button";
+import { Button, ButtonSize } from "./Button";
 import { Label } from "./Label";
 
 interface AvailableCivsEvent {
@@ -65,8 +65,7 @@ export class SelectCivilizationGroup extends ActorGroup {
             iconOnly: true,
             x: iconX,
             y: iconY,
-            width: 64,
-            height: 64,
+            size: ButtonSize.ICON_LARGE,
             onClicked: () => {
               WebsocketClient.sendMessage({
                 event: "civInfo",
@@ -126,10 +125,9 @@ export class SelectCivilizationGroup extends ActorGroup {
 
     const closeButton = new Button({
       text: "Close",
-      x: this.x + this.width / 2 - 150 / 2,
+      x: this.x + this.width / 2 - ButtonSize.MEDIUM.width / 2,
       y: this.y + this.height - 60,
-      width: 150,
-      height: 50,
+      size: ButtonSize.MEDIUM,
       fontColor: "white",
       onClicked: () => {
         Game.getInstance().getCurrentScene().removeActor(this);
@@ -289,10 +287,9 @@ export class SelectCivilizationGroup extends ActorGroup {
     const selectButton = new Button({
       text: "Select",
       fontColor: "white",
-      x: this.x + this.width / 2 - 100 - 150 / 2,
+      x: this.x + this.width / 2 - 100 - ButtonSize.MEDIUM.width / 2,
       y: this.y + this.height - 60,
-      width: 150,
-      height: 50,
+      size: ButtonSize.MEDIUM,
       onClicked: () => {
         // Select this civilization and close this window:
         // Fire event for lobby to handle this. Or network event..?
@@ -308,10 +305,9 @@ export class SelectCivilizationGroup extends ActorGroup {
     const backButton = new Button({
       text: "Back",
       fontColor: "white",
-      x: this.x + this.width / 2 + 100 - 150 / 2,
+      x: this.x + this.width / 2 + 100 - ButtonSize.MEDIUM.width / 2,
       y: this.y + this.height - 60,
-      width: 150,
-      height: 50,
+      size: ButtonSize.MEDIUM,
       onClicked: () => {
         // Clear current civ information actors, restore select civ buttons:
         this.listAvailableCivs();

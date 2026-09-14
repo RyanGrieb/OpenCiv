@@ -5,7 +5,7 @@ import { NetworkEvents, WebsocketClient } from "../network/Client";
 import { Actor } from "../scene/Actor";
 import { ActorGroup } from "../scene/ActorGroup";
 import { Strings } from "../util/Strings";
-import { Button } from "./Button";
+import { Button, ButtonSize } from "./Button";
 import { Label } from "./Label";
 
 export class UnitDisplayInfo extends ActorGroup {
@@ -118,8 +118,7 @@ export class UnitDisplayInfo extends ActorGroup {
         iconHeight: 32,
         x: this.x + 16 + xOffset,
         y: this.y + 28,
-        width: 50,
-        height: 50,
+        size: ButtonSize.ICON_LARGE,
         onClicked: () => {
           // Send action event to server
           console.log(`Action: ${action.getName()} clicked`);
@@ -143,7 +142,7 @@ export class UnitDisplayInfo extends ActorGroup {
 
       this.addActor(button);
       newActionButtons.push(button);
-      xOffset += 38;
+      xOffset += 48;
     }
 
     for (const button of this.actionButtons) {

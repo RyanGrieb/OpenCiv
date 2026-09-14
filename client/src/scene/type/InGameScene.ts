@@ -7,7 +7,7 @@ import { NetworkEvents, WebsocketClient } from "../../network/Client";
 import { AbstractPlayer } from "../../player/AbstractPlayer";
 import { ClientPlayer } from "../../player/ClientPlayer";
 import { ExternalPlayer } from "../../player/ExternalPlayer";
-import { Button } from "../../ui/Button";
+import { Button, ButtonSize } from "../../ui/Button";
 import { CityDisplayInfo } from "../../ui/CityDisplayInfo";
 import { Label } from "../../ui/Label";
 import { StatusBar } from "../../ui/StatusBar";
@@ -264,11 +264,10 @@ export class InGameScene extends Scene {
 
     this.nextTurnButton = new Button({
       text: this.clientPlayer.hasRequestedNextTurn() ? "Waiting..." : "Next Turn",
-      x: Game.getInstance().getWidth() / 2 - 150 / 2,
-      y: Game.getInstance().getHeight() - 44,
+      x: Game.getInstance().getWidth() / 2 - ButtonSize.LARGE.width / 2,
+      y: Game.getInstance().getHeight() - ButtonSize.LARGE.height - 4,
       z: 6,
-      width: 150,
-      height: 42,
+      size: ButtonSize.LARGE,
       fontColor: "white",
       onClicked: () => {
         // Undo next turn request.
@@ -293,11 +292,10 @@ export class InGameScene extends Scene {
 
     this.closeCityDisplayButton = new Button({
       text: "Return to Map",
-      x: Game.getInstance().getWidth() / 2 - 275 / 2,
-      y: Game.getInstance().getHeight() - 88,
+      x: Game.getInstance().getWidth() / 2 - ButtonSize.LARGE.width / 2,
+      y: Game.getInstance().getHeight() - ButtonSize.LARGE.height - 4,
       z: 5,
-      width: 275,
-      height: 52,
+      size: ButtonSize.LARGE,
       fontColor: "white",
       onClicked: () => {
         this.toggleCityUI();
@@ -416,13 +414,14 @@ export class InGameScene extends Scene {
       })
     );
 
+    const escMenuButtonX = this.escMenu.getX() + this.escMenu.getWidth() / 2 - ButtonSize.MEDIUM.width / 2;
+
     this.escMenu.addActor(
       new Button({
         text: "Return",
-        x: this.escMenu.getX() + 23,
+        x: escMenuButtonX,
         y: this.escMenu.getY() + 23,
-        width: 210,
-        height: 50,
+        size: ButtonSize.MEDIUM,
         fontColor: "white",
         onClicked: () => {
           this.toggleEscMenu();
@@ -433,10 +432,9 @@ export class InGameScene extends Scene {
     this.escMenu.addActor(
       new Button({
         text: "Settings",
-        x: this.escMenu.getX() + 23,
+        x: escMenuButtonX,
         y: this.escMenu.getY() + 83,
-        width: 210,
-        height: 50,
+        size: ButtonSize.MEDIUM,
         fontColor: "white",
         onClicked: () => {
           console.log("Toggle settings menu");
@@ -447,10 +445,9 @@ export class InGameScene extends Scene {
     this.escMenu.addActor(
       new Button({
         text: "Save Game",
-        x: this.escMenu.getX() + 23,
+        x: escMenuButtonX,
         y: this.escMenu.getY() + 143,
-        width: 210,
-        height: 50,
+        size: ButtonSize.MEDIUM,
         fontColor: "white",
         onClicked: () => { }
       })
@@ -459,10 +456,9 @@ export class InGameScene extends Scene {
     this.escMenu.addActor(
       new Button({
         text: "Main Menu",
-        x: this.escMenu.getX() + 23,
+        x: escMenuButtonX,
         y: this.escMenu.getY() + 203,
-        width: 210,
-        height: 50,
+        size: ButtonSize.MEDIUM,
         fontColor: "white",
         onClicked: () => {
           WebsocketClient.disconnect();

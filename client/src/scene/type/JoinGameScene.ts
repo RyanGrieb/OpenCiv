@@ -1,7 +1,7 @@
 import { GameImage } from "../../Assets";
 import { Game } from "../../Game";
 import { NetworkEvents, WebsocketClient } from "../../network/Client";
-import { Button } from "../../ui/Button";
+import { Button, ButtonSize } from "../../ui/Button";
 import { Label } from "../../ui/Label";
 import { TextBox } from "../../ui/Textbox";
 import { Actor } from "../Actor";
@@ -74,12 +74,13 @@ export class JoinGameScene extends Scene {
       this.addActor(infoLabel);
     });
 
+    const buttonGap = 20;
+
     const joinButton = new Button({
       text: "Join",
-      x: Game.getInstance().getWidth() / 2 - 242 / 2,
+      x: Game.getInstance().getWidth() / 2 - ButtonSize.LARGE.width / 2,
       y: Game.getInstance().getHeight() / 2 - 25,
-      width: 242,
-      height: 62,
+      size: ButtonSize.LARGE,
       fontColor: "white",
       onClicked: () => {
         if (this.isConnecting) return; // Prevent multiple connection attempts
@@ -101,10 +102,9 @@ export class JoinGameScene extends Scene {
     this.addActor(
       new Button({
         text: "Server List",
-        x: Game.getInstance().getWidth() / 2 - 242 / 2 - 150,
+        x: Game.getInstance().getWidth() / 2 - ButtonSize.MEDIUM.width - buttonGap / 2,
         y: Game.getInstance().getHeight() / 2 + 150,
-        width: 242,
-        height: 62,
+        size: ButtonSize.MEDIUM,
         fontColor: "white",
         onClicked: () => { }
       })
@@ -113,10 +113,9 @@ export class JoinGameScene extends Scene {
     this.addActor(
       new Button({
         text: "Back",
-        x: Game.getInstance().getWidth() / 2 - 242 / 2 + 150,
+        x: Game.getInstance().getWidth() / 2 + buttonGap / 2,
         y: Game.getInstance().getHeight() / 2 + 150,
-        width: 242,
-        height: 62,
+        size: ButtonSize.MEDIUM,
         fontColor: "white",
         onClicked: () => {
           Game.getInstance().setScene("main_menu");

@@ -5,7 +5,7 @@ import { NetworkEvents, WebsocketClient } from "../network/Client";
 import { Actor } from "../scene/Actor";
 import { ActorGroup } from "../scene/ActorGroup";
 import { Strings } from "../util/Strings";
-import { Button } from "./Button";
+import { Button, ButtonSize } from "./Button";
 import { Label } from "./Label";
 import { ListBox } from "./Listbox";
 import { RadioButton } from "./RadioButton";
@@ -125,10 +125,10 @@ export class CityDisplayInfo extends ActorGroup {
 
     const radioButton = new RadioButton({
       x: listbox.getNextRowPosition().x - 8,
-      y: listbox.getNextRowPosition().y + 50 / 2 - 64 / 2,
+      y: listbox.getNextRowPosition().y + 50 / 2 - ButtonSize.ICON_LARGE.height / 2,
       z: this.z,
-      width: 64,
-      height: 64,
+      width: ButtonSize.ICON_LARGE.width,
+      height: ButtonSize.ICON_LARGE.height,
       getOtherRadioButtons: this.getCitizenMgmtRadioButtons.bind(this),
       selected: true
     });
@@ -154,10 +154,10 @@ export class CityDisplayInfo extends ActorGroup {
     for (const focus of focuses) {
       const radioButton = new RadioButton({
         x: listbox.getNextRowPosition().x - 8,
-        y: listbox.getNextRowPosition().y + 50 / 2 - 64 / 2,
+        y: listbox.getNextRowPosition().y + 50 / 2 - ButtonSize.ICON_LARGE.height / 2,
         z: this.z,
-        width: 64,
-        height: 64,
+        width: ButtonSize.ICON_LARGE.width,
+        height: ButtonSize.ICON_LARGE.height,
         getOtherRadioButtons: this.getCitizenMgmtRadioButtons.bind(this)
       });
       this.citizenMgmtRadioButtons.push(radioButton);
@@ -579,7 +579,7 @@ export class CityDisplayInfo extends ActorGroup {
         x: x,
         y: y,
         width: width,
-        height: height - 60,
+        height: height - 68,
         rowHeight: 50,
         textFont: "20px serif",
         fontColor: "white"
@@ -613,8 +613,7 @@ export class CityDisplayInfo extends ActorGroup {
           x: rowX + width - 32,
           y: iconY,
           z: this.z,
-          width: 24,
-          height: 24,
+          size: ButtonSize.ICON_SMALL,
           onClicked: () => {
             WebsocketClient.sendMessage({
               event: "removeFromProductionQueue",
@@ -634,8 +633,7 @@ export class CityDisplayInfo extends ActorGroup {
             x: upOrDownIconX,
             y: iconY,
             z: this.z,
-            width: 24,
-            height: 24,
+            size: ButtonSize.ICON_SMALL,
             onClicked: () => {
               WebsocketClient.sendMessage({
                 event: "moveProductionQueueItem",
@@ -657,8 +655,7 @@ export class CityDisplayInfo extends ActorGroup {
             x: upOrDownIconX,
             y: iconY,
             z: this.z,
-            width: 24,
-            height: 24,
+            size: ButtonSize.ICON_SMALL,
             onClicked: () => {
               WebsocketClient.sendMessage({
                 event: "moveProductionQueueItem",
@@ -689,11 +686,10 @@ export class CityDisplayInfo extends ActorGroup {
     this.currentlyBuildingWindow.addActor(
       new Button({
         text: buttonText,
-        x: x + width / 2 - 100,
-        y: y + height - 36,
+        x: x + width / 2 - ButtonSize.LARGE.width / 2,
+        y: y + height - ButtonSize.LARGE.height - 4,
         z: this.z,
-        width: 200,
-        height: 30,
+        size: ButtonSize.LARGE,
         fontColor: "white",
         onClicked: () => {
           this.toggleChooseProduction();

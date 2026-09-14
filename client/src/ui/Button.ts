@@ -5,6 +5,22 @@ import { ActorGroup } from "../scene/ActorGroup";
 
 //FIXME: Redundant argument options code?
 
+export interface ButtonSizeDefinition {
+  width: number;
+  height: number;
+}
+
+// Standard button sizes used across the UI. Prefer these over literal width/height
+// so buttons stay visually consistent between scenes, and reference e.g.
+// `ButtonSize.LARGE.width` directly when a call site needs the raw dimension.
+export const ButtonSize = {
+  LARGE: { width: 260, height: 60 }, // Primary actions on their own screen (Play, Ready Up, Select Civilization)
+  MEDIUM: { width: 180, height: 50 }, // Secondary actions (Back, Close, Select)
+  SMALL: { width: 150, height: 40 }, // Compact in-context controls (Next Turn, production toggle)
+  ICON_LARGE: { width: 64, height: 64 }, // Prominent icon-only buttons (civ portraits, radio avatars, unit actions)
+  ICON_SMALL: { width: 32, height: 32 } // Inline icon-only controls (queue reorder/cancel arrows)
+} as const satisfies Record<string, ButtonSizeDefinition>;
+
 export interface ButtonOptions {
   text?: string;
   icon?: SpriteRegion;
@@ -16,8 +32,11 @@ export interface ButtonOptions {
   x: number;
   y: number;
   z?: number;
-  width: number;
-  height: number;
+  // Preferred: pick a standard size, e.g. `size: ButtonSize.LARGE`. width/height still work
+  // directly and win over `size` when both are given.
+  size?: ButtonSizeDefinition;
+  width?: number;
+  height?: number;
   font?: string;
   fontColor?: string;
   onClicked: Function;
@@ -43,12 +62,19 @@ export class Button extends ActorGroup {
   private disableHoverWhen?: () => boolean;
 
   constructor(options: ButtonOptions) {
+    const width = options.width ?? options.size?.width;
+    const height = options.height ?? options.size?.height;
+
+    if (width === undefined || height === undefined) {
+      throw new Error("Button requires either a `size` or explicit `width`/`height`.");
+    }
+
     super({
       x: options.x,
       y: options.y,
       z: options.z,
-      width: options.width,
-      height: options.height,
+      width,
+      height,
       cameraApplies: false
     });
 

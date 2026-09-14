@@ -2,7 +2,7 @@ import { GameImage, resolveSpriteRegion, SpriteRegion } from "../../Assets";
 import { Game } from "../../Game";
 import { NetworkEvents, WebsocketClient } from "../../network/Client";
 import { CivilizationData } from "../../player/AbstractPlayer";
-import { Button } from "../../ui/Button";
+import { Button, ButtonSize } from "../../ui/Button";
 import { ListBox } from "../../ui/Listbox";
 import { SelectCivilizationGroup } from "../../ui/SelectCivilizationGroup";
 import { Actor } from "../Actor";
@@ -47,10 +47,9 @@ export class LobbyScene extends Scene {
     this.addActor(
       new Button({
         text: "Select Civilization",
-        x: Game.getInstance().getWidth() / 2 - 282 / 2,
+        x: Game.getInstance().getWidth() / 2 - ButtonSize.LARGE.width / 2,
         y: playerList.getY() + playerList.getHeight() + 10,
-        width: 282,
-        height: 62,
+        size: ButtonSize.LARGE,
         fontColor: "white",
         onClicked: () => {
           if (this.hasActor(this.selectCivGroup)) {
@@ -81,10 +80,9 @@ export class LobbyScene extends Scene {
     this.addActor(
       new Button({
         text: "Ready Up",
-        x: Game.getInstance().getWidth() / 2 - 282 / 2,
+        x: Game.getInstance().getWidth() / 2 - ButtonSize.LARGE.width / 2,
         y: playerList.getY() + playerList.getHeight() + 75,
-        width: 282,
-        height: 62,
+        size: ButtonSize.LARGE,
         fontColor: "white",
         onClicked: () => {
           if (this.hasActor(this.selectCivGroup)) {
@@ -103,10 +101,9 @@ export class LobbyScene extends Scene {
     this.addActor(
       new Button({
         text: "Back",
-        x: Game.getInstance().getWidth() / 2 - 282 / 2,
+        x: Game.getInstance().getWidth() / 2 - ButtonSize.LARGE.width / 2,
         y: playerList.getY() + playerList.getHeight() + 140,
-        width: 282,
-        height: 62,
+        size: ButtonSize.LARGE,
         fontColor: "white",
         onClicked: () => {
           if (this.hasActor(this.selectCivGroup)) {

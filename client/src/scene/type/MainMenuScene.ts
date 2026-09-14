@@ -1,6 +1,6 @@
 import { Scene } from "../Scene";
 import { Game } from "../../Game";
-import { Button } from "../../ui/Button";
+import { Button, ButtonSize } from "../../ui/Button";
 import { Label } from "../../ui/Label";
 import { SceneBackground } from "../SceneBackground";
 
@@ -36,10 +36,9 @@ export class MainMenuScene extends Scene {
     this.addActor(
       new Button({
         text: "Play",
-        x: Game.getInstance().getWidth() / 2 - 242 / 2,
+        x: Game.getInstance().getWidth() / 2 - ButtonSize.LARGE.width / 2,
         y: Game.getInstance().getHeight() / 3 + 68,
-        width: 242,
-        height: 62,
+        size: ButtonSize.LARGE,
         fontColor: "white",
         onClicked: () => {
           Game.getInstance().setScene("join_game");
@@ -50,10 +49,9 @@ export class MainMenuScene extends Scene {
     this.addActor(
       new Button({
         text: "Options",
-        x: Game.getInstance().getWidth() / 2 - 242 / 2,
+        x: Game.getInstance().getWidth() / 2 - ButtonSize.LARGE.width / 2,
         y: Game.getInstance().getHeight() / 3 + 136,
-        width: 242,
-        height: 62,
+        size: ButtonSize.LARGE,
         fontColor: "white",
         onClicked: () => {
           console.log("options scene");
