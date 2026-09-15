@@ -1,0 +1,4 @@
+units:
+  - name: Warrior
+    attack_type: melee
+  - name: Scout

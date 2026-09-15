@@ -9,4 +9,5 @@ buildings:
       - culture: 1
   - name: Monument
     asset_name: BUILDING_MONUMENT
-    stats: [] # TODO: balance - no stat bonuses yet
+    stats:
+      - culture: 2

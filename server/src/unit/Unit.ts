@@ -1,3 +1,5 @@
+import fs from "fs";
+import YAML from "yaml";
 import { ServerEvents } from "../Events";
 import { Game } from "../Game";
 import { Player } from "../Player";
@@ -21,7 +23,16 @@ export interface UnitOptions {
   actions: UnitAction[];
 }
 
+export interface UnitTypeData {
+  name: string;
+  attack_type?: string;
+  default_move_distance?: number;
+}
+
 export class Unit {
+  private static nextId = 0;
+  private static unitDataCache: Record<string, any>[];
+
   private name: string;
   private player: Player;
   private attackType: string;
@@ -30,7 +41,6 @@ export class Unit {
   private tile: Tile;
   private queuedMovementTiles: Tile[];
 
-  private static nextId = 0;
   private id: number; // Increment this every time a unit object is created
   private actions: {
     name: string;
@@ -108,6 +118,47 @@ export class Unit {
         }
       }
     });
+
+    // Self-announce, same as moveToTile/delete() below - so any unit created
+    // after the client's initial map fetch (e.g. one finished by production)
+    // still shows up. Harmless for units created before a client has loaded
+    // the map: NetworkEvents.call() only reaches listeners registered at the
+    // moment it fires, so this is simply unheard until GameMap registers its
+    // "createUnit" listener, and that listener dedupes by id regardless.
+    Game.getInstance()
+      .getPlayers()
+      .forEach((player) => {
+        player.sendNetworkEvent({ event: "createUnit", ...this.asJSON() });
+      });
+  }
+
+  public static createFromName(name: string, tile: Tile, player: Player): Unit | undefined {
+    const data = Unit.getUnitTypeDataByName(name);
+    if (!data) return undefined;
+
+    return new Unit({
+      name: data.name,
+      tile,
+      player,
+      attackType: data.attack_type,
+      defaultMoveDistance: data.default_move_distance,
+      actions: []
+    });
+  }
+
+  private static getUnitTypeDataByName(name: string): UnitTypeData | undefined {
+    if (!Unit.unitDataCache) {
+      const unitsYMLData = YAML.parse(fs.readFileSync("./config/units.yml", "utf-8"));
+      Unit.unitDataCache = JSON.parse(JSON.stringify(unitsYMLData.units));
+    }
+
+    for (const unit of Unit.unitDataCache) {
+      if ((unit.name as string).toLocaleLowerCase() === name.toLocaleLowerCase()) {
+        return unit as UnitTypeData;
+      }
+    }
+
+    return undefined;
   }
 
   public moveToTile(options: {

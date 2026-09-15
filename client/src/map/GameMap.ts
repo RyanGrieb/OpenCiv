@@ -21,13 +21,10 @@ interface TileYieldsEvent {
   yields: TileYieldsData;
 }
 
-// A unit embedded in a mapChunk's per-tile "units" list additionally carries its tile position.
-type ChunkUnitData = UnitCreationData & { tileX: number; tileY: number };
-
 interface TileData {
   tileTypes: string[];
   riverSides: boolean[];
-  units: ChunkUnitData[];
+  units: UnitCreationData[];
   x: string;
   y: string;
   movementCost: string;
@@ -81,6 +78,11 @@ export class GameMap {
   private topLayerMapChunks: Map<Actor, Tile[]>;
   private topLayerTileActorList: Tile[] = [];
 
+  // Shared between the mapChunk-embedded units and the live "createUnit"
+  // event so the same unit is never constructed twice, regardless of which
+  // path sees its id first.
+  private knownUnitIds: Set<number> = new Set();
+
   public static getInstance() {
     return this.instance;
   }
@@ -108,6 +110,24 @@ export class GameMap {
         city.getTile().setCity(city); // Assign the city variable inside the tile variable.
         // Add the city actor to the scene (borders, nametag)
         Game.getInstance().getCurrentScene().addActor(city);
+      }
+    });
+
+    // A unit created after the initial mapChunk fetch (e.g. one finished by
+    // production) has no other way to reach the client - dedupe by id
+    // against knownUnitIds since nothing guarantees this can't race a
+    // still-in-flight mapChunk response.
+    NetworkEvents.on<UnitCreationData>({
+      eventName: "createUnit",
+      parentObject: this,
+      callback: (data) => {
+        if (this.knownUnitIds.has(data.id)) return;
+        this.knownUnitIds.add(data.id);
+
+        const tile = this.tiles[data.tileX][data.tileY];
+        const unit = new Unit(tile, data);
+        tile.addUnit(unit);
+        Game.getInstance().getCurrentScene().addActor(unit);
       }
     });
   }
@@ -282,7 +302,7 @@ export class GameMap {
     const baseLayerTiles: Tile[] = [];
     const riverActors: River[] = [];
     const cityJSONS: CityData[] = [];
-    const unitJSONS: ChunkUnitData[] = [];
+    const unitJSONS: UnitCreationData[] = [];
 
     WebsocketClient.sendMessage({ event: "requestMap" });
 
@@ -447,6 +467,9 @@ export class GameMap {
 
           // Now create any units that already exist on the map
           for (const unitJSON of unitJSONS) {
+            if (this.knownUnitIds.has(unitJSON.id)) continue;
+            this.knownUnitIds.add(unitJSON.id);
+
             const tile = this.tiles[unitJSON.tileX][unitJSON.tileY];
             const unit = new Unit(tile, unitJSON);
             tile.addUnit(unit);

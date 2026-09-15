@@ -97,6 +97,9 @@ describe('Unit', () => {
       actions: [],
     };
     unit = new Unit(options);
+    // The constructor itself broadcasts createUnit - clear it so each test
+    // only sees calls triggered by the behavior it's exercising.
+    mockPlayer.sendNetworkEvent.mockClear();
   });
 
   it('initializes with correct properties', () => {
@@ -159,5 +162,42 @@ describe('Unit', () => {
       event: 'moveUnit',
       id: unit['id'],
     }));
+  });
+
+  it('broadcasts createUnit to all players on construction', () => {
+    const freshUnit = new Unit({
+      name: 'AnotherUnit',
+      tile: mockTile,
+      player: mockPlayer,
+      actions: [],
+    });
+
+    expect(mockPlayer.sendNetworkEvent).toHaveBeenCalledWith({
+      event: 'createUnit',
+      ...freshUnit.asJSON(),
+    });
+  });
+
+  describe('createFromName', () => {
+    // Exercises the real config/units.yml, same as Building.test.ts does for
+    // buildings.yml - nothing in this suite mocks fs/yaml for this path.
+    it('creates a Warrior with the configured attack type', () => {
+      const warrior = Unit.createFromName('Warrior', mockTile, mockPlayer);
+
+      expect(warrior).toBeDefined();
+      expect(warrior['name']).toBe('Warrior');
+      expect(warrior['attackType']).toBe('melee');
+    });
+
+    it('defaults a Scout to the unarmed attack type', () => {
+      const scout = Unit.createFromName('Scout', mockTile, mockPlayer);
+
+      expect(scout).toBeDefined();
+      expect(scout['attackType']).toBe('none');
+    });
+
+    it('returns undefined for an unrecognized unit name', () => {
+      expect(Unit.createFromName('Nonexistent', mockTile, mockPlayer)).toBeUndefined();
+    });
   });
 });

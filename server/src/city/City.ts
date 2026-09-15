@@ -3,6 +3,7 @@ import { Game } from "../Game";
 import { Player } from "../Player";
 import { GameMap } from "../map/GameMap";
 import { StatEntry, StatValues, Tile } from "../map/Tile";
+import { Unit } from "../unit/Unit";
 import { Building } from "./Building";
 
 export interface CityStats extends StatValues {
@@ -403,6 +404,13 @@ export class City {
     if (current.progress >= current.cost) {
       console.log(`[City ${this.name}] Finished producing ${current.name}`);
       this.productionQueue.shift();
+
+      if (current.type === "building") {
+        this.addBuilding(current.name);
+      } else {
+        const unit = Unit.createFromName(current.name, this.tile, this.player);
+        if (unit) this.tile.addUnit(unit);
+      }
     }
 
     this.sendStatUpdate(this.player);

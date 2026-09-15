@@ -4,12 +4,14 @@ import { GameMap } from '../../src/map/GameMap';
 import { Player } from '../../src/Player';
 import { Game } from '../../src/Game';
 import { ServerEvents } from '../../src/Events';
+import { Unit } from '../../src/unit/Unit';
 import { WebSocket } from 'ws';
 
 jest.mock('../../src/map/GameMap');
 jest.mock('../../src/Player');
 jest.mock('../../src/Game');
 jest.mock('../../src/Events');
+jest.mock('../../src/unit/Unit');
 
 describe('City', () => {
   let city: City;
@@ -34,6 +36,7 @@ describe('City', () => {
       getAdjacentTiles: jest.fn().mockReturnValue([]),
       getStats: jest.fn().mockReturnValue([]),
       setCity: jest.fn(),
+      addUnit: jest.fn(),
     } as unknown as jest.Mocked<Tile>;
 
     // With population 1, City.updateWorkedTiles works one tile beyond the city's
@@ -308,6 +311,43 @@ describe('City', () => {
       triggerServerEvent('nextTurn', { turn: 2 });
 
       expect(city['productionQueue']).toEqual([{ type: 'unit', name: 'Scout', cost: 20, progress: 0 }]);
+    });
+
+    it('constructs the unit via Unit.createFromName and adds it to the city tile on completion', () => {
+      const mockUnit = {} as Unit;
+      (Unit.createFromName as jest.Mock).mockReturnValue(mockUnit);
+      mockTile.getStats.mockReturnValue([{ production: 30 }]);
+
+      triggerServerEvent('nextTurn', { turn: 2 });
+
+      expect(Unit.createFromName).toHaveBeenCalledWith('Warrior', mockTile, mockPlayer);
+      expect(mockTile.addUnit).toHaveBeenCalledWith(mockUnit);
+    });
+
+    it('does not add a unit to the tile when Unit.createFromName finds no matching config', () => {
+      (Unit.createFromName as jest.Mock).mockReturnValue(undefined);
+      mockTile.getStats.mockReturnValue([{ production: 30 }]);
+
+      triggerServerEvent('nextTurn', { turn: 2 });
+
+      expect(mockTile.addUnit).not.toHaveBeenCalled();
+    });
+
+    it('adds a Building to the city and broadcasts addBuilding when a building item completes', () => {
+      triggerServerEvent('addToProductionQueue', { cityName: 'TestCity', type: 'building', name: 'Monument' }, mockWebsocket);
+      // Advance the Monument (2nd in queue) to the front by completing the Warrior first.
+      mockTile.getStats.mockReturnValue([{ production: 30 }]);
+      triggerServerEvent('nextTurn', { turn: 2 });
+      mockPlayer.sendNetworkEvent.mockClear();
+
+      mockTile.getStats.mockReturnValue([{ production: 60 }]);
+      triggerServerEvent('nextTurn', { turn: 3 });
+
+      expect(city['buildings']).toHaveLength(1);
+      expect(city['buildings'][0].getName()).toBe('Monument');
+      expect(mockPlayer.sendNetworkEvent).toHaveBeenCalledWith(
+        expect.objectContaining({ event: 'addBuilding', cityName: 'TestCity' })
+      );
     });
   });
 });

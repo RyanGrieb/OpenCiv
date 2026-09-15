@@ -82,7 +82,6 @@ export class InGameState extends State {
           avoidTileTypes: badTileTypes
         });
 
-        //FIXME: Make Unit have a createSettler() method?
         spawnTile.addUnit(
           new Unit({
             name: "settler",

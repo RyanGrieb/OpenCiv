@@ -84,10 +84,12 @@ export class UnitAction {
 }
 
 // Payload for constructing a Unit (server "createUnit"-style data, also embedded
-// per-tile in a "mapChunk" event's units list, which additionally carries tileX/tileY).
+// per-tile in a "mapChunk" event's units list).
 export interface UnitCreationData {
   name: string;
   id: number;
+  tileX: number;
+  tileY: number;
   attackType: string;
   remainingMovement: number;
   defaultMoveDistance: number;
