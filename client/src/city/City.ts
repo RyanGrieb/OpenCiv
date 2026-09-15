@@ -22,6 +22,9 @@ export interface ProductionQueueItem {
   type: "unit" | "building";
   name: string;
   cost: number;
+  // Accumulated production toward this item - only meaningful for the front
+  // (currently-producing) item, since the server only advances that one.
+  progress?: number;
 }
 
 /**

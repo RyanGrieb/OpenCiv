@@ -36,6 +36,15 @@ describe('City', () => {
       setCity: jest.fn(),
     } as unknown as jest.Mocked<Tile>;
 
+    // With population 1, City.updateWorkedTiles works one tile beyond the city's
+    // own tile via GameMap.getTileWithHighestYeild - kept distinct (zero stats)
+    // from mockTile so the base tile's stats aren't accidentally double-counted.
+    const mockWorkedTile = {
+      getX: jest.fn().mockReturnValue(1),
+      getY: jest.fn().mockReturnValue(0),
+      getStats: jest.fn().mockReturnValue([]),
+    } as unknown as jest.Mocked<Tile>;
+
     mockPlayer = {
       getNextAvailableCityName: jest.fn().mockReturnValue('TestCity'),
       sendNetworkEvent: jest.fn(),
@@ -44,7 +53,7 @@ describe('City', () => {
     } as unknown as jest.Mocked<Player>;
 
     jest.spyOn(GameMap, 'getInstance').mockReturnValue({
-      getTileWithHighestYeild: jest.fn().mockReturnValue(mockTile),
+      getTileWithHighestYeild: jest.fn().mockReturnValue(mockWorkedTile),
     } as any);
 
     jest.spyOn(Game, 'getInstance').mockReturnValue({
@@ -85,16 +94,16 @@ describe('City', () => {
     expect(mockPlayer.sendNetworkEvent).not.toHaveBeenCalled();
   });
 
-  it('appends a valid option to the production queue and re-sends city stats', () => {
+  it('appends a valid option to the production queue (with zero progress) and re-sends city stats', () => {
     const mockWebsocket = {} as WebSocket;
 
     triggerServerEvent('addToProductionQueue', { cityName: 'TestCity', type: 'unit', name: 'Warrior' }, mockWebsocket);
 
-    expect(city['productionQueue']).toEqual([{ type: 'unit', name: 'Warrior', cost: 30 }]);
+    expect(city['productionQueue']).toEqual([{ type: 'unit', name: 'Warrior', cost: 30, progress: 0 }]);
     expect(mockPlayer.sendNetworkEvent).toHaveBeenCalledWith(
       expect.objectContaining({
         event: 'updateCityStats',
-        productionQueue: [{ type: 'unit', name: 'Warrior', cost: 30 }],
+        productionQueue: [{ type: 'unit', name: 'Warrior', cost: 30, progress: 0 }],
       })
     );
   });
@@ -115,9 +124,20 @@ describe('City', () => {
     triggerServerEvent('addToProductionQueue', { cityName: 'TestCity', type: 'building', name: 'Monument' }, mockWebsocket);
 
     expect(city['productionQueue']).toEqual([
-      { type: 'unit', name: 'Scout', cost: 20 },
-      { type: 'building', name: 'Monument', cost: 60 },
+      { type: 'unit', name: 'Scout', cost: 20, progress: 0 },
+      { type: 'building', name: 'Monument', cost: 60, progress: 0 },
     ]);
+  });
+
+  it('gives each queued item its own progress rather than sharing the hardcoded option object', () => {
+    const mockWebsocket = {} as WebSocket;
+
+    triggerServerEvent('addToProductionQueue', { cityName: 'TestCity', type: 'unit', name: 'Warrior' }, mockWebsocket);
+    triggerServerEvent('addToProductionQueue', { cityName: 'TestCity', type: 'unit', name: 'Warrior' }, mockWebsocket);
+
+    city['productionQueue'][0].progress = 15;
+
+    expect(city['productionQueue'][1].progress).toBe(0);
   });
 
   describe('removeFromProductionQueue', () => {
@@ -132,11 +152,11 @@ describe('City', () => {
     it('removes the item at the given index and re-sends city stats', () => {
       triggerServerEvent('removeFromProductionQueue', { cityName: 'TestCity', index: 0 }, mockWebsocket);
 
-      expect(city['productionQueue']).toEqual([{ type: 'unit', name: 'Scout', cost: 20 }]);
+      expect(city['productionQueue']).toEqual([{ type: 'unit', name: 'Scout', cost: 20, progress: 0 }]);
       expect(mockPlayer.sendNetworkEvent).toHaveBeenCalledWith(
         expect.objectContaining({
           event: 'updateCityStats',
-          productionQueue: [{ type: 'unit', name: 'Scout', cost: 20 }],
+          productionQueue: [{ type: 'unit', name: 'Scout', cost: 20, progress: 0 }],
         })
       );
     });
@@ -169,8 +189,8 @@ describe('City', () => {
       triggerServerEvent('moveProductionQueueItem', { cityName: 'TestCity', index: 1, direction: 'up' }, mockWebsocket);
 
       expect(city['productionQueue']).toEqual([
-        { type: 'unit', name: 'Scout', cost: 20 },
-        { type: 'unit', name: 'Warrior', cost: 30 },
+        { type: 'unit', name: 'Scout', cost: 20, progress: 0 },
+        { type: 'unit', name: 'Warrior', cost: 30, progress: 0 },
       ]);
     });
 
@@ -178,8 +198,8 @@ describe('City', () => {
       triggerServerEvent('moveProductionQueueItem', { cityName: 'TestCity', index: 0, direction: 'down' }, mockWebsocket);
 
       expect(city['productionQueue']).toEqual([
-        { type: 'unit', name: 'Scout', cost: 20 },
-        { type: 'unit', name: 'Warrior', cost: 30 },
+        { type: 'unit', name: 'Scout', cost: 20, progress: 0 },
+        { type: 'unit', name: 'Warrior', cost: 30, progress: 0 },
       ]);
     });
 
@@ -187,8 +207,8 @@ describe('City', () => {
       triggerServerEvent('moveProductionQueueItem', { cityName: 'TestCity', index: 0, direction: 'up' }, mockWebsocket);
 
       expect(city['productionQueue']).toEqual([
-        { type: 'unit', name: 'Warrior', cost: 30 },
-        { type: 'unit', name: 'Scout', cost: 20 },
+        { type: 'unit', name: 'Warrior', cost: 30, progress: 0 },
+        { type: 'unit', name: 'Scout', cost: 20, progress: 0 },
       ]);
       expect(mockPlayer.sendNetworkEvent).not.toHaveBeenCalled();
     });
@@ -197,10 +217,97 @@ describe('City', () => {
       triggerServerEvent('moveProductionQueueItem', { cityName: 'TestCity', index: 1, direction: 'down' }, mockWebsocket);
 
       expect(city['productionQueue']).toEqual([
-        { type: 'unit', name: 'Warrior', cost: 30 },
-        { type: 'unit', name: 'Scout', cost: 20 },
+        { type: 'unit', name: 'Warrior', cost: 30, progress: 0 },
+        { type: 'unit', name: 'Scout', cost: 20, progress: 0 },
       ]);
       expect(mockPlayer.sendNetworkEvent).not.toHaveBeenCalled();
+    });
+
+    it('carries accumulated progress along with the item when reordered', () => {
+      // Give the front item (Warrior) some progress before reordering it.
+      city['productionQueue'][0].progress = 12;
+      mockPlayer.sendNetworkEvent.mockClear();
+
+      triggerServerEvent('moveProductionQueueItem', { cityName: 'TestCity', index: 0, direction: 'down' }, mockWebsocket);
+
+      expect(city['productionQueue']).toEqual([
+        { type: 'unit', name: 'Scout', cost: 20, progress: 0 },
+        { type: 'unit', name: 'Warrior', cost: 30, progress: 12 },
+      ]);
+    });
+  });
+
+  describe('production (nextTurn)', () => {
+    const mockWebsocket = {} as WebSocket;
+
+    beforeEach(() => {
+      triggerServerEvent('addToProductionQueue', { cityName: 'TestCity', type: 'unit', name: 'Warrior' }, mockWebsocket);
+      mockPlayer.sendNetworkEvent.mockClear();
+    });
+
+    it('does nothing when the queue is empty', () => {
+      triggerServerEvent('removeFromProductionQueue', { cityName: 'TestCity', index: 0 }, mockWebsocket);
+      mockPlayer.sendNetworkEvent.mockClear();
+
+      triggerServerEvent('nextTurn', { turn: 2 });
+
+      expect(mockPlayer.sendNetworkEvent).not.toHaveBeenCalled();
+    });
+
+    it("adds the city's production rate to the front item's progress and re-sends city stats", () => {
+      mockTile.getStats.mockReturnValue([{ production: 10 }]);
+
+      triggerServerEvent('nextTurn', { turn: 2 });
+
+      expect(city['productionQueue']).toEqual([{ type: 'unit', name: 'Warrior', cost: 30, progress: 10 }]);
+      expect(mockPlayer.sendNetworkEvent).toHaveBeenCalledWith(
+        expect.objectContaining({
+          event: 'updateCityStats',
+          productionQueue: [{ type: 'unit', name: 'Warrior', cost: 30, progress: 10 }],
+        })
+      );
+    });
+
+    it('only applies production to the front item, leaving the rest untouched', () => {
+      triggerServerEvent('addToProductionQueue', { cityName: 'TestCity', type: 'unit', name: 'Scout' }, mockWebsocket);
+      mockTile.getStats.mockReturnValue([{ production: 10 }]);
+
+      triggerServerEvent('nextTurn', { turn: 2 });
+
+      expect(city['productionQueue']).toEqual([
+        { type: 'unit', name: 'Warrior', cost: 30, progress: 10 },
+        { type: 'unit', name: 'Scout', cost: 20, progress: 0 },
+      ]);
+    });
+
+    it('accumulates progress across multiple turns', () => {
+      mockTile.getStats.mockReturnValue([{ production: 10 }]);
+
+      triggerServerEvent('nextTurn', { turn: 2 });
+      triggerServerEvent('nextTurn', { turn: 3 });
+
+      expect(city['productionQueue'][0].progress).toBe(20);
+    });
+
+    it('completes and dequeues the item once progress reaches its cost, logging the completion', () => {
+      const logSpy = jest.spyOn(console, 'log').mockImplementation(() => { });
+      mockTile.getStats.mockReturnValue([{ production: 30 }]);
+
+      triggerServerEvent('nextTurn', { turn: 2 });
+
+      expect(city['productionQueue']).toEqual([]);
+      expect(logSpy).toHaveBeenCalledWith(expect.stringContaining('Warrior'));
+
+      logSpy.mockRestore();
+    });
+
+    it('does not carry overflow progress into the next queued item on completion', () => {
+      triggerServerEvent('addToProductionQueue', { cityName: 'TestCity', type: 'unit', name: 'Scout' }, mockWebsocket);
+      mockTile.getStats.mockReturnValue([{ production: 40 }]); // 10 more than Warrior's cost
+
+      triggerServerEvent('nextTurn', { turn: 2 });
+
+      expect(city['productionQueue']).toEqual([{ type: 'unit', name: 'Scout', cost: 20, progress: 0 }]);
     });
   });
 });

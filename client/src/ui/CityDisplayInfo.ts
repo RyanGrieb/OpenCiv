@@ -420,8 +420,8 @@ export class CityDisplayInfo extends ActorGroup {
         this.currentlyBuildingWindow.addActor(label);
       });
     } else {
-      // Guard against a zero/negative production rate - a real accumulated-progress
-      // system (and its own turns-remaining math) is a separate follow-up feature.
+      // Guard against a zero/negative production rate to avoid a div-by-zero
+      // in the turns-remaining math below.
       const productionRate = Math.max(1, this.city.getStat("production"));
 
       const listbox = new ListBox({
@@ -440,8 +440,14 @@ export class CityDisplayInfo extends ActorGroup {
         const rowHeight = PRODUCTION_ROW_HEIGHT;
         const iconY = rowY + rowHeight / 2 - ButtonSize.ICON_SMALL.height / 2;
 
-        const turnsLeft = Math.ceil(item.cost / productionRate);
-        const text = index === 0 ? `${item.name} (${turnsLeft} turn${turnsLeft === 1 ? "" : "s"})` : item.name;
+        // Only the front item accumulates progress (the server only advances
+        // queue[0] each turn) - remaining items just show their name.
+        const progress = item.progress ?? 0;
+        const turnsLeft = Math.ceil(Math.max(0, item.cost - progress) / productionRate);
+        const text =
+          index === 0
+            ? `${item.name} — ${progress}/${item.cost} (${turnsLeft} turn${turnsLeft === 1 ? "" : "s"})`
+            : item.name;
 
         const actorIcons: Actor[] = [
           new Actor({

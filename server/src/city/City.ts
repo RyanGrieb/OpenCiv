@@ -22,6 +22,10 @@ export interface ProductionOption {
   type: "unit" | "building";
   name: string;
   cost: number;
+  // Only meaningful once queued - tracked here (rather than a parallel
+  // structure) so that reordering the queue (moveProductionQueueItem, which
+  // swaps whole entries) carries progress along with it automatically.
+  progress?: number;
 }
 
 // Hardcoded until research/tech gates what's buildable.
@@ -115,7 +119,7 @@ export class City {
         );
         if (!option) return;
 
-        this.productionQueue.push(option);
+        this.productionQueue.push({ ...option, progress: 0 });
         this.sendStatUpdate(player);
       }
     });
@@ -163,6 +167,14 @@ export class City {
           this.productionQueue[index]
         ];
         this.sendStatUpdate(player);
+      }
+    });
+
+    ServerEvents.on({
+      eventName: "nextTurn",
+      parentObject: this,
+      callback: () => {
+        this.applyProduction();
       }
     });
   }
@@ -248,14 +260,6 @@ export class City {
       });
 
     this.applyFoundingBonuses();
-  }
-
-  private applyFoundingBonuses() {
-    // The player's first city gets a starting palace.
-    //FIXME: Some civilizations can replace the palace with a unique building.
-    if (this.player.getCities().length < 2) {
-      this.addBuilding("palace");
-    }
   }
 
   /*
@@ -400,5 +404,28 @@ export class City {
       territory: territoryCoords,
       workedTiles: this.workedTiles.map((tile) => ({ x: tile.getX(), y: tile.getY() }))
     };
+  }
+
+  private applyFoundingBonuses() {
+    // The player's first city gets a starting palace.
+    //FIXME: Some civilizations can replace the palace with a unique building.
+    if (this.player.getCities().length < 2) {
+      this.addBuilding("palace");
+    }
+  }
+
+  private applyProduction() {
+    if (this.productionQueue.length === 0) return;
+
+    const current = this.productionQueue[0];
+    const productionRate = this.getStatline({ asArray: false }).production;
+    current.progress += productionRate;
+
+    if (current.progress >= current.cost) {
+      console.log(`[City ${this.name}] Finished producing ${current.name}`);
+      this.productionQueue.shift();
+    }
+
+    this.sendStatUpdate(this.player);
   }
 }
