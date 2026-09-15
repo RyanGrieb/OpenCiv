@@ -1,10 +1,9 @@
-import fs from "fs";
-import YAML from "yaml";
 import { ServerEvents } from "../Events";
 import { Game } from "../Game";
 import { Player } from "../Player";
 import { GameMap } from "../map/GameMap";
 import { StatEntry, StatValues, Tile } from "../map/Tile";
+import { Building } from "./Building";
 
 export interface CityStats extends StatValues {
   population: number;
@@ -36,12 +35,10 @@ const PRODUCTION_OPTIONS: ProductionOption[] = [
 ];
 
 export class City {
-  private static cityBuildings: Record<string, any>[];
-
   private tile: Tile;
   private player: Player;
   private name: string;
-  private buildings: Record<string, any>[];
+  private buildings: Building[];
   private population: number;
   private foodSurplus: number;
   private territory: Tile[];
@@ -179,21 +176,6 @@ export class City {
     });
   }
 
-  public static getBuildingDataByName(name: string): Record<string, any> {
-    if (!City.cityBuildings) {
-      const buildingsYMLData = YAML.parse(fs.readFileSync("./config/buildings.yml", "utf-8"));
-      City.cityBuildings = JSON.parse(JSON.stringify(buildingsYMLData.buildings));
-    }
-
-    for (const building of City.cityBuildings) {
-      if ((building.name as string).toLocaleLowerCase() === name.toLocaleLowerCase()) {
-        return building;
-      }
-    }
-
-    return undefined;
-  }
-
   public updateWorkedTiles(options?: { sendStatUpdate: boolean }) {
     // Reset worked tiles
     this.workedTiles = [this.tile];
@@ -221,20 +203,16 @@ export class City {
   }
 
   public addBuilding(name: string) {
-    // Get the building data from YML
-    const buildingData = City.getBuildingDataByName(name);
+    const building = Building.createFromName(name);
+    if (!building) return;
 
-    // Apply any effects to the building if any (faith, culture, bonuses, etc.)):
-    //...
+    this.buildings.push(building);
 
-    this.buildings.push(buildingData);
-
-    //FIXME: Just append building data to stateUpdate
     // Send new-building packet to player
     this.player.sendNetworkEvent({
       event: "addBuilding",
       cityName: this.name,
-      building: buildingData
+      building: building.toJSON()
     });
 
     this.updateWorkedTiles({ sendStatUpdate: true });
@@ -299,12 +277,9 @@ export class City {
         { foodSurplus: this.foodSurplus }
       ];
 
-      // Add all buildings to existing stat-line dictionary
-      for (const buildingData of this.buildings) {
-        for (const stat of buildingData.stats) {
-          const statType = Object.keys(stat)[0] as keyof CityStats; // Get the stat type, e.g., "science", "gold", etc.
-          const statValue = stat[statType]; // Get the stat value
-
+      // Add all buildings to existing stat-line dictionary (Note: We would apply bonuses to buildings here in the future)
+      for (const building of this.buildings) {
+        for (const [statType, statValue] of Object.entries(building.getStatLine()) as [keyof CityStats, number][]) {
           for (const cityStat of cityStats) {
             if (Object.keys(cityStat)[0] === statType) {
               cityStat[statType] += statValue;
@@ -352,11 +327,8 @@ export class City {
     };
 
     // Add all buildings to existing stat-line dictionary
-    for (const buildingData of this.buildings) {
-      for (const stat of buildingData.stats) {
-        const statType = Object.keys(stat)[0] as keyof CityStats; // Get the stat type, e.g., "science", "gold", etc.
-        const statValue = stat[statType]; // Get the stat value
-
+    for (const building of this.buildings) {
+      for (const [statType, statValue] of Object.entries(building.getStatLine()) as [keyof CityStats, number][]) {
         if (cityStats.hasOwnProperty(statType)) {
           cityStats[statType] += statValue;
         }

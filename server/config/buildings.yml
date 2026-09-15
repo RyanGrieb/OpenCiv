@@ -7,4 +7,6 @@ buildings:
       - gold: 2
       - defense: 2
       - culture: 1
-    
+  - name: Monument
+    asset_name: BUILDING_MONUMENT
+    stats: [] # TODO: balance - no stat bonuses yet
