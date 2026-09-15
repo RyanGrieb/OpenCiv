@@ -92,11 +92,18 @@ export class City {
           return;
         }
 
+        const buildingExists = (option: ProductionOption) =>
+          this.buildings.some((b) => b.getName() === option.name);
+        const buildingInQueue = (option: ProductionOption) =>
+          this.productionQueue.some((q) => q.name === option.name);
+
         player.sendNetworkEvent({
           event: "updateProductionOptions",
           cityName: this.name,
           units: PRODUCTION_OPTIONS.filter((option) => option.type === "unit"),
-          buildings: PRODUCTION_OPTIONS.filter((option) => option.type === "building")
+          buildings: PRODUCTION_OPTIONS.filter((option) => option.type === "building").filter(
+            (option) => !buildingExists(option)
+          ).filter((option) => !buildingInQueue(option))
         });
       }
     });
