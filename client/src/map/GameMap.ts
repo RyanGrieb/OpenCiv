@@ -613,14 +613,14 @@ export class GameMap {
     }
   }
 
-  public drawUnitSelectionOutline(tile: Tile, color: string) {
+  public drawUnitSelectionOutline(tile: Tile, color: string, z: number = 3) {
     GameMap.getInstance().setOutline({
       tile: tile,
       edges: [1, 1, 1, 1, 1, 1],
       thickness: 1,
       color: color,
       cityOutline: false,
-      z: 3
+      z: z
     });
   }
 

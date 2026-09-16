@@ -317,14 +317,17 @@ export class ClientPlayer extends AbstractPlayer {
   }
 
   private onClickedTileWithUnit(tile: Tile) {
-    const units = tile.getUnits();
+    const units = tile.getUnits().filter((unit) => unit.getPlayer() === this);
 
-    //TODO: Cycle through units on the tile
-    const unit = units[0];
-
-    // Don't allow selection of other player's units
-    if (unit.getPlayer() != this) {
+    if (units.length === 0) {
       return;
+    }
+
+    // Clicking a tile whose unit is already selected cycles to the next unit stacked on it.
+    let unit = units[0];
+    if (this.selectedUnit && this.selectedUnit.getTile() === tile) {
+      const currentIndex = units.indexOf(this.selectedUnit);
+      unit = units[(currentIndex + 1) % units.length];
     }
 
     // Clear previously defined movement paths.

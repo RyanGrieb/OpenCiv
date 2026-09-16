@@ -125,6 +125,11 @@ export interface ClearMovementQueueEvent {
 }
 
 export class Unit extends ActorGroup {
+  // Local child z-order (independent of the group's scene-level z): the sprite must
+  // always draw above the selection-tile graphic, never the reverse.
+  private static readonly UNIT_SPRITE_Z = 1;
+  private static readonly SELECTION_TILE_Z = 0;
+
   private name: string;
   private id: number;
   private tile: Tile;
@@ -139,6 +144,7 @@ export class Unit extends ActorGroup {
   private actions: UnitAction[];
   private queuedMovementTiles: Tile[];
   private player: AbstractPlayer;
+  private baseZ: number;
 
   constructor(tile: Tile, unitJSON: UnitCreationData) {
     super({
@@ -151,6 +157,7 @@ export class Unit extends ActorGroup {
 
     this.tile = tile;
     this.name = unitJSON.name;
+    this.baseZ = this.getZIndex();
 
     this.unitActor = new Actor({
       image: Game.getInstance().getImage(GameImage.SPRITESHEET),
@@ -163,6 +170,7 @@ export class Unit extends ActorGroup {
     });
 
     this.addActor(this.unitActor);
+    this.unitActor.setZValue(Unit.UNIT_SPRITE_Z);
 
     this.id = unitJSON.id;
     this.attackType = unitJSON.attackType;
@@ -291,6 +299,10 @@ export class Unit extends ActorGroup {
     this.selected = false;
     this.removeSelectionActors();
     Game.getInstance().getCurrentScene().removeActor(this.unitDisplayInfo);
+
+    // Drop back below any other units stacked on this tile.
+    this.setZValue(this.baseZ);
+    Game.getInstance().getCurrentScene().sortSceneObjects();
   }
 
   public select() {
@@ -300,6 +312,10 @@ export class Unit extends ActorGroup {
 
     this.unitDisplayInfo = new UnitDisplayInfo(this);
     Game.getInstance().getCurrentScene().addActor(this.unitDisplayInfo);
+
+    // Draw above any other units stacked on this tile.
+    this.setZValue(this.baseZ + 1);
+    Game.getInstance().getCurrentScene().sortSceneObjects();
   }
 
   public getQueuedMovementTiles() {
@@ -386,10 +402,21 @@ export class Unit extends ActorGroup {
       })
     );*/
 
-    GameMap.getInstance().drawUnitSelectionOutline(this.tile, "aqua");
+    // Keep the outline below the unit sprite, whether or not the unit is currently bumped to the front.
+    GameMap.getInstance().drawUnitSelectionOutline(this.tile, "aqua", this.baseZ - 1);
 
     for (const actor of this.selectionActors) {
       this.addActor(actor);
+      actor.setZValue(Unit.SELECTION_TILE_Z);
+    }
+  }
+
+  public draw(canvasContext: CanvasRenderingContext2D) {
+    // ActorGroup draws children in insertion order; sort so the selection tile
+    // never paints over the unit sprite regardless of add order.
+    const sortedActors = [...this.actors].sort((a, b) => a.getZIndex() - b.getZIndex());
+    for (const actor of sortedActors) {
+      actor.draw(canvasContext);
     }
   }
 
