@@ -60,6 +60,7 @@ export class City {
     this.population = 1;
     this.foodSurplus = 0;
     this.productionQueue = [];
+    this.workedTiles = [];
 
     this.territory = [this.tile];
     for (const adjTile of this.tile.getAdjacentTiles()) {
@@ -68,6 +69,11 @@ export class City {
       this.territory.push(adjTile);
     }
     this.sendTerritoryUpdate();
+
+    // Must happen before updateWorkedTiles() below (and after the fields above -
+    // setCity() broadcasts this tile, which serializes this city via getJSON()) so
+    // Tile.getStats() can apply the city-center food bonus once it computes yields.
+    this.tile.setCity(this);
 
     this.updateWorkedTiles({ sendStatUpdate: true });
 

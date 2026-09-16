@@ -16,7 +16,6 @@ export class UnitActions {
         unit.delete();
 
         const city = new City({ player: player, tile: tile });
-        tile.setCity(city);
         player.getCities().push(city);
 
         city.announceCreated();
@@ -24,5 +23,5 @@ export class UnitActions {
     };
   }
 
-  public createReligion() {}
+  public createReligion() { }
 }

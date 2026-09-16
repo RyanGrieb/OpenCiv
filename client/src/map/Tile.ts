@@ -168,6 +168,10 @@ export class Tile extends Actor {
     GameMap.getInstance().redrawMap([this]);
   }
 
+  public setYields(yields: any[]) {
+    this.yields = yields;
+  }
+
   public getCity() {
     return this.city;
   }

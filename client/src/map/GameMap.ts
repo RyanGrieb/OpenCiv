@@ -48,6 +48,10 @@ interface CityData {
   workedTiles?: { x: number; y: number }[];
 }
 
+interface TileUpdatedEvent {
+  tile: TileData;
+}
+
 export class GameMap {
   private static instance: GameMap;
 
@@ -110,6 +114,23 @@ export class GameMap {
         city.getTile().setCity(city); // Assign the city variable inside the tile variable.
         // Add the city actor to the scene (borders, nametag)
         Game.getInstance().getCurrentScene().addActor(city);
+      }
+    });
+
+    // Whenever a tile's yield-affecting state changes server-side (settling a city,
+    // and eventually tile improvements too), the server resends that tile's JSON so
+    // the hover tooltip doesn't keep showing whatever was in the initial mapChunk
+    // snapshot - see GameMap.broadcastTileUpdate() on the server.
+    NetworkEvents.on<TileUpdatedEvent>({
+      eventName: "tileUpdated",
+      parentObject: this,
+      callback: (data) => {
+        const gridX = parseInt(data.tile.x);
+        const gridY = parseInt(data.tile.y);
+        const tile = this.tiles[gridX]?.[gridY];
+        if (!tile) return;
+
+        tile.setYields(data.tile.yields);
       }
     });
 

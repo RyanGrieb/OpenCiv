@@ -65,6 +65,7 @@ export class Tile {
   public setCity(city: City) {
     this.addTileType("city");
     this.city = city;
+    GameMap.getInstance().broadcastTileUpdate(this);
   }
 
   public getCity(): City {

@@ -1,3 +1,4 @@
+import { Game } from "../Game";
 import { Player } from "../Player";
 import { Tile } from "./Tile";
 import random from "random";
@@ -674,6 +675,22 @@ export class GameMap {
       event: "tileYields",
       yields: Tile.getAllTileStats()
     });
+  }
+
+  // Broadcasts a tile's current JSON (yields included) to every player. Clients only
+  // get a tile's yields once, in the initial mapChunk snapshot, so anything that
+  // changes what a tile produces after that (settling a city, improving a resource,
+  // building a farm/mine, etc.) must call this or the client keeps showing stale
+  // numbers on hover - see Tile.setCity() for the current caller.
+  public broadcastTileUpdate(tile: Tile) {
+    Game.getInstance()
+      .getPlayers()
+      .forEach((player) => {
+        player.sendNetworkEvent({
+          event: "tileUpdated",
+          tile: tile.getTileJSON()
+        });
+      });
   }
 
   public sendMapChunksToPlayer(player: Player) {
