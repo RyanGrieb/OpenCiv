@@ -28,11 +28,47 @@ export class Server {
    * Start the OpenCiv server
    */
   public start() {
-    /**
-     * Create a new instance of WebSocketServer using the defined port.
-     */
+    this.listen();
+  }
+
+  /**
+   * Stop the OpenCiv server
+   */
+  public stop() {
+    console.log("Stopping server...");
+    this.wss.close();
+    process.exit(0);
+  }
+
+  public setAllowDuplicateIPs(allow: boolean) {
+    this.allowDuplicateIPs = allow;
+  }
+
+  /**
+   * Bind the WebSocketServer, retrying on EADDRINUSE.
+   * ts-node-dev force-kills the previous process on restart, so the OS can take
+   * a moment to release the port before this one can bind it.
+   */
+  private listen(retriesLeft: number = 10) {
     this.wss = new WebSocketServer({ port: this.port });
 
+    this.wss.once("listening", () => this.onListening());
+
+    this.wss.once("error", (err: NodeJS.ErrnoException) => {
+      if (err.code === "EADDRINUSE" && retriesLeft > 0) {
+        console.log(`Port ${this.port} still in use, retrying... (${retriesLeft} attempts left)`);
+        setTimeout(() => this.listen(retriesLeft - 1), 300);
+        return;
+      }
+
+      throw err;
+    });
+  }
+
+  /**
+   * Called once the WebSocketServer has successfully bound to the port.
+   */
+  private onListening() {
     /**
      * Listen for connection events on the WebSocketServer instance.
      * When a connection is established, listen for message events.
@@ -83,19 +119,6 @@ export class Server {
     Game.getInstance().addState("lobby", new LobbyState());
     Game.getInstance().addState("in_game", new InGameState());
     Game.getInstance().setState("lobby");
-  }
-
-  /**
-   * Stop the OpenCiv server
-   */
-  public stop() {
-    console.log("Stopping server...");
-    this.wss.close();
-    process.exit(0);
-  }
-
-  public setAllowDuplicateIPs(allow: boolean) {
-    this.allowDuplicateIPs = allow;
   }
 }
 
