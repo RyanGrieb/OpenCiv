@@ -80,8 +80,16 @@ export class Tile {
   }
 
   // Only utility units (builder, priest, prophet, etc.) can be shared a tile with - anything else blocks it.
-  public hasBlockingUnit(movingUnit?: Unit): boolean {
-    return this.units.some((unit) => unit !== movingUnit && !unit.isUtility());
+  public hasBlockingUnit(movingUnit: Unit): boolean {
+    const otherUnits = this.units.filter((unit) => unit !== movingUnit);
+
+    // A unit from another civilization always blocks - there's no combat system yet to resolve this differently.
+    if (otherUnits.some((unit) => unit.getPlayer() !== movingUnit.getPlayer())) {
+      return true;
+    }
+
+    // Same-type ally units can't stack (utility+utility, or non-utility+non-utility); mixed types can.
+    return otherUnits.some((unit) => unit.isUtility() === movingUnit.isUtility());
   }
 
   public getRiverSides() {

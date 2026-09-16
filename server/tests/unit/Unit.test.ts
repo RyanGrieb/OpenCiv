@@ -242,11 +242,11 @@ describe('Unit', () => {
       expect(warrior['attackType']).toBe('melee');
     });
 
-    it('defaults a Scout to the unarmed attack type', () => {
-      const scout = Unit.createFromName('Scout', mockTile, mockPlayer);
+    it('defaults a Settler to the unarmed attack type', () => {
+      const settler = Unit.createFromName('Settler', mockTile, mockPlayer);
 
-      expect(scout).toBeDefined();
-      expect(scout['attackType']).toBe('none');
+      expect(settler).toBeDefined();
+      expect(settler['attackType']).toBe('none');
     });
 
     it('returns undefined for an unrecognized unit name', () => {
