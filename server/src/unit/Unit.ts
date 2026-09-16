@@ -79,15 +79,16 @@ export class Unit {
 
         if (this.id !== data["id"] || this.tile === targetTile || this.player != player) return;
 
-        console.log(`Unit wants to move from (${this.tile.getX()}, ${this.tile.getY()}) to (${targetTile.getX()}, ${targetTile.getY()})`);
-
         // Move the furthest we can possibly go, and queue the rest of tiles for next turn.
 
         //FIXME: Allow this function to use our existing queuedMovementTiles,
         // This should stop the path from being redrawn every turn.
         const [arrivedTile, remainingTiles, remainingMovement] = this.getMovementTowardsTargetTile(targetTile);
 
-        if (!arrivedTile || arrivedTile === this.tile) return;
+        // No movement left this turn and nothing left to queue either (blocked immediately, or no
+        // path at all) - reject outright. If remainingTiles is non-empty though, this still queues
+        // the rest of the path for next turn even though we can't take a single step of it now.
+        if (!arrivedTile || (arrivedTile === this.tile && remainingTiles.length === 0)) return;
 
         this.moveToTile({
           previousTile: this.tile,

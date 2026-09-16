@@ -23,6 +23,10 @@ describe('Unit', () => {
     mapWidth: number;
     mapHeight: number;
   };
+  // The real "moveUnit" callback registered by `unit`'s constructor, captured from the
+  // ServerEvents.on mock below - lets tests exercise the actual handler logic directly,
+  // since ServerEvents.call is mocked separately to a synthetic simulation (see below).
+  let moveUnitCallback: (data: Record<string, any>, websocket: WebSocket) => void;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -89,7 +93,11 @@ describe('Unit', () => {
         });
       }
     });
-    jest.spyOn(ServerEvents, 'on').mockImplementation(() => {});
+    jest.spyOn(ServerEvents, 'on').mockImplementation((options: any) => {
+      if (options.eventName === 'moveUnit') {
+        moveUnitCallback = options.callback;
+      }
+    });
 
     // Initialize Unit
     const options: UnitOptions = {
@@ -255,6 +263,46 @@ describe('Unit', () => {
       const [arrivedTile] = unit['getMovementTowardsTargetTile'](targetTile);
 
       expect(arrivedTile).toBe(targetTile);
+    });
+  });
+
+  describe('moveUnit event handler', () => {
+    const mockWebsocket = {} as WebSocket;
+
+    it('queues the rest of the path when movement is already exhausted this turn', () => {
+      unit['availableMovement'] = 0;
+      mockGameMap.constructShortestPath.mockReturnValue([mockTile, targetTile]);
+
+      moveUnitCallback({ id: unit['id'], targetX: 1, targetY: 1 }, mockWebsocket);
+
+      expect(unit['queuedMovementTiles']).toEqual([targetTile]);
+      expect(mockPlayer.sendNetworkEvent).toHaveBeenCalledWith(expect.objectContaining({
+        event: 'moveUnit',
+        queuedTiles: [{ x: 1, y: 1 }],
+      }));
+    });
+
+    it('rejects a move that is blocked immediately, without queuing or broadcasting', () => {
+      // Movement is available (the constructor default) - blocking is only ever checked while
+      // there's movement left to spend, since with 0 movement we can't step there regardless
+      // and would just defer the real blocking check to next turn's resumption.
+      mockGameMap.constructShortestPath.mockReturnValue([mockTile, targetTile]);
+      (targetTile.hasBlockingUnit as jest.Mock).mockReturnValue(true);
+
+      moveUnitCallback({ id: unit['id'], targetX: 1, targetY: 1 }, mockWebsocket);
+
+      expect(unit['queuedMovementTiles']).toEqual([]);
+      expect(mockPlayer.sendNetworkEvent).not.toHaveBeenCalled();
+    });
+
+    it('rejects a move with no path at all, without queuing or broadcasting', () => {
+      unit['availableMovement'] = 0;
+      mockGameMap.constructShortestPath.mockReturnValue([]);
+
+      moveUnitCallback({ id: unit['id'], targetX: 1, targetY: 1 }, mockWebsocket);
+
+      expect(unit['queuedMovementTiles']).toEqual([]);
+      expect(mockPlayer.sendNetworkEvent).not.toHaveBeenCalled();
     });
   });
 
