@@ -229,26 +229,6 @@ export class Unit extends ActorGroup {
         this.availableMovement = this.defaultMoveDistance;
       }
     });
-
-    NetworkEvents.on<RemoveUnitEvent>({
-      eventName: "removeUnit",
-      parentObject: this,
-      callback: (data) => {
-        const unitTile = GameMap.getInstance().getTiles()[data.unitX][data.unitY];
-
-        if (this.tile !== unitTile) {
-          return;
-        }
-
-        //FIXME: Tell client player to stop drawing lines.
-        this.unselect();
-        this.tile.removeUnit(this);
-        if (this.player) {
-          this.player.removeUnit(this);
-        }
-        Game.getInstance().getCurrentScene().removeActor(this);
-      }
-    });
   }
 
   public getTileWeight(current: Tile, neighbor: Tile) {

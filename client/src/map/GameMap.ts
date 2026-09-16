@@ -1,5 +1,5 @@
 import { Game } from "../Game";
-import { Unit, UnitCreationData } from "../Unit";
+import { RemoveUnitEvent, Unit, UnitCreationData } from "../Unit";
 import { NetworkEvents, WebsocketClient } from "../network/Client";
 import { Actor } from "../scene/Actor";
 import { River } from "./River";
@@ -128,6 +128,23 @@ export class GameMap {
         const unit = new Unit(tile, data);
         tile.addUnit(unit);
         Game.getInstance().getCurrentScene().addActor(unit);
+      }
+    });
+
+    NetworkEvents.on<RemoveUnitEvent>({
+      eventName: "removeUnit",
+      parentObject: this,
+      callback: (data) => {
+        const unitTile = GameMap.getInstance().getTiles()[data.unitX][data.unitY];
+        const unit = unitTile.getUnitByID(data.id);
+
+        //FIXME: Tell client player to stop drawing lines.
+        unit.unselect();
+        unitTile.removeUnit(unit);
+        if (unit.getPlayer()) {
+          unit.getPlayer().removeUnit(unit);
+        }
+        Game.getInstance().getCurrentScene().removeActor(unit);
       }
     });
   }
