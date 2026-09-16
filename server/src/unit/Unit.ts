@@ -20,13 +20,15 @@ export interface UnitOptions {
   player: Player;
   attackType?: string;
   defaultMoveDistance?: number;
+  isUtility?: boolean;
   actions: UnitAction[];
 }
 
-export interface UnitTypeData {
+export interface UnitYMLTypeData {
   name: string;
   attack_type?: string;
   default_move_distance?: number;
+  is_utility?: boolean;
 }
 
 export class Unit {
@@ -38,6 +40,7 @@ export class Unit {
   private attackType: string;
   private defaultMoveDistance: number;
   private availableMovement: number;
+  private utility: boolean;
   private tile: Tile;
   private queuedMovementTiles: Tile[];
 
@@ -57,6 +60,7 @@ export class Unit {
     this.attackType = options.attackType || "none";
     this.defaultMoveDistance = options.defaultMoveDistance || 2;
     this.availableMovement = this.defaultMoveDistance;
+    this.utility = options.isUtility || false;
     this.actions = options.actions || [];
     this.actions = options.actions || [];
     this.queuedMovementTiles = [];
@@ -81,7 +85,7 @@ export class Unit {
         // This should stop the path from being redrawn every turn.
         const [arrivedTile, remainingTiles, remainingMovement] = this.getMovementTowardsTargetTile(targetTile);
 
-        if (!arrivedTile) return;
+        if (!arrivedTile || arrivedTile === this.tile) return;
 
         this.moveToTile({
           previousTile: this.tile,
@@ -133,7 +137,7 @@ export class Unit {
   }
 
   public static createFromName(name: string, tile: Tile, player: Player): Unit | undefined {
-    const data = Unit.getUnitTypeDataByName(name);
+    const data = Unit.getUnitYMLTypeDataByName(name);
     if (!data) return undefined;
 
     return new Unit({
@@ -142,11 +146,12 @@ export class Unit {
       player,
       attackType: data.attack_type,
       defaultMoveDistance: data.default_move_distance,
+      isUtility: data.is_utility,
       actions: []
     });
   }
 
-  private static getUnitTypeDataByName(name: string): UnitTypeData | undefined {
+  private static getUnitYMLTypeDataByName(name: string): UnitYMLTypeData | undefined {
     if (!Unit.unitDataCache) {
       const unitsYMLData = YAML.parse(fs.readFileSync("./config/units.yml", "utf-8"));
       Unit.unitDataCache = JSON.parse(JSON.stringify(unitsYMLData.units));
@@ -154,7 +159,7 @@ export class Unit {
 
     for (const unit of Unit.unitDataCache) {
       if ((unit.name as string).toLocaleLowerCase() === name.toLocaleLowerCase()) {
-        return unit as UnitTypeData;
+        return unit as UnitYMLTypeData;
       }
     }
 
@@ -223,7 +228,7 @@ export class Unit {
       existingPath
     );
 
-    if (!arrivedTile) return;
+    if (!arrivedTile || arrivedTile === this.tile) return;
 
     this.moveToTile({
       previousTile: this.tile,
@@ -257,6 +262,10 @@ export class Unit {
       if (!nextTile) continue;
 
       if (remainingMovement <= 0) {
+        break;
+      }
+
+      if (nextTile.hasBlockingUnit(this)) {
         break;
       }
 
@@ -299,6 +308,10 @@ export class Unit {
     return this.tile;
   }
 
+  public isUtility() {
+    return this.utility;
+  }
+
   public asJSON() {
     const queuedTilesJSON = this.queuedMovementTiles.map((tile) => ({
       x: tile.getX(),
@@ -311,6 +324,7 @@ export class Unit {
       tileY: this.tile.getY(),
       player: this.player.getName(),
       attackType: this.attackType,
+      isUtility: this.utility,
       id: this.id,
       actions: this.getUnitActionsJSON(),
       queuedTiles: queuedTilesJSON,
@@ -350,6 +364,10 @@ export class Unit {
     }
 
     if (!neighbor) return current.getMovementCost();
+
+    if (neighbor.hasBlockingUnit(this)) {
+      return 9999;
+    }
 
     return Tile.getWeight(current, neighbor);
   }

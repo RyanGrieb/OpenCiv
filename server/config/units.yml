@@ -2,3 +2,6 @@ units:
   - name: Warrior
     attack_type: melee
   - name: Scout
+    attack_type: melee
+  - name: Settler
+    is_utility: true

@@ -87,6 +87,7 @@ export class InGameState extends State {
             name: "settler",
             player: player,
             tile: spawnTile,
+            isUtility: true,
             actions: [UnitActions.settleCity()]
           })
         );

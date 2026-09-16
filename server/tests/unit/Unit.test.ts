@@ -37,6 +37,7 @@ describe('Unit', () => {
       isWater: jest.fn().mockReturnValue(false),
       getAdjacentTiles: jest.fn().mockReturnValue([]),
       getRiverSides: jest.fn().mockReturnValue(new Array(6).fill(false)),
+      hasBlockingUnit: jest.fn().mockReturnValue(false),
     } as unknown as jest.Mocked<Tile>;
 
     // Mock target tile at (1, 1)
@@ -49,6 +50,7 @@ describe('Unit', () => {
       isWater: jest.fn().mockReturnValue(false),
       getAdjacentTiles: jest.fn().mockReturnValue([]),
       getRiverSides: jest.fn().mockReturnValue(new Array(6).fill(false)),
+      hasBlockingUnit: jest.fn().mockReturnValue(false),
     } as unknown as jest.Mocked<Tile>;
 
     // Mock player
@@ -175,6 +177,57 @@ describe('Unit', () => {
     expect(mockPlayer.sendNetworkEvent).toHaveBeenCalledWith({
       event: 'createUnit',
       ...freshUnit.asJSON(),
+    });
+  });
+
+  describe('unit stacking', () => {
+    it('defaults to a non-utility unit', () => {
+      expect(unit.isUtility()).toBe(false);
+    });
+
+    it('respects the isUtility option', () => {
+      const builder = new Unit({
+        name: 'Builder',
+        tile: mockTile,
+        player: mockPlayer,
+        isUtility: true,
+        actions: [],
+      });
+
+      expect(builder.isUtility()).toBe(true);
+    });
+
+    it('treats a neighbor blocked by a non-utility unit as impassably costly', () => {
+      (targetTile.hasBlockingUnit as jest.Mock).mockReturnValue(true);
+
+      expect(unit.getTileWeight(mockTile, targetTile)).toBe(9999);
+      expect(targetTile.hasBlockingUnit).toHaveBeenCalledWith(unit);
+    });
+
+    it('does not cost extra when the neighbor has no blocking unit', () => {
+      (targetTile.hasBlockingUnit as jest.Mock).mockReturnValue(false);
+
+      expect(unit.getTileWeight(mockTile, targetTile)).toBe(1);
+    });
+
+    it('stops one tile short of a tile blocked by a non-utility unit', () => {
+      mockGameMap.constructShortestPath.mockReturnValue([mockTile, targetTile]);
+      (targetTile.hasBlockingUnit as jest.Mock).mockReturnValue(true);
+
+      const [arrivedTile, remainingTiles] = unit['getMovementTowardsTargetTile'](targetTile);
+
+      expect(arrivedTile).toBe(mockTile);
+      expect(remainingTiles).toContain(targetTile);
+      expect(targetTile.addUnit).not.toHaveBeenCalled();
+    });
+
+    it('allows moving onto a tile whose only occupant is a utility unit', () => {
+      mockGameMap.constructShortestPath.mockReturnValue([mockTile, targetTile]);
+      (targetTile.hasBlockingUnit as jest.Mock).mockReturnValue(false);
+
+      const [arrivedTile] = unit['getMovementTowardsTargetTile'](targetTile);
+
+      expect(arrivedTile).toBe(targetTile);
     });
   });
 

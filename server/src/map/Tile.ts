@@ -79,6 +79,11 @@ export class Tile {
     this.units = this.units.filter((existingUnit) => existingUnit !== unit);
   }
 
+  // Only utility units (builder, priest, prophet, etc.) can be shared a tile with - anything else blocks it.
+  public hasBlockingUnit(movingUnit?: Unit): boolean {
+    return this.units.some((unit) => unit !== movingUnit && !unit.isUtility());
+  }
+
   public getRiverSides() {
     return this.riverSides;
   }
