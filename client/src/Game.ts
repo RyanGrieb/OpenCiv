@@ -53,6 +53,7 @@ export class Game {
   private oldWidth: number;
   private oldHeight: number;
   private dpr: number;
+  private canvasColor: string;
 
   private getWorldX(clientX: number): number {
     return clientX * this.dpr;
@@ -62,22 +63,48 @@ export class Game {
     return clientY * this.dpr;
   }
 
-
-  private constructor(options: GameOptions, assetsLoadedCallback: () => void) {
-    this.scenes = new Map<string, Scene>();
-    // Initialize canvas
-    this.canvas = document.getElementById("canvas") as HTMLCanvasElement;
+  // Resizes the canvas to match the current viewport/DPR; called from resize, ResizeObserver, and DPR-change listeners.
+  private updateCanvasSize = () => {
+    this.oldWidth = this.canvas.width;
+    this.oldHeight = this.canvas.height;
     this.dpr = window.devicePixelRatio || 1;
     this.canvas.width = window.innerWidth * this.dpr;
     this.canvas.height = window.innerHeight * this.dpr;
     this.canvas.style.width = window.innerWidth + "px";
     this.canvas.style.height = window.innerHeight + "px";
 
-    this.canvasContext = this.canvas.getContext("2d");
-    this.canvasContext.fillStyle = options.canvasColor ?? "white";
+    if (this.currentScene) {
+      this.currentScene.redraw();
+    }
+    this.canvasContext.fillStyle = this.canvasColor;
     this.canvasContext.fillRect(0, 0, this.canvas.width, this.canvas.height);
     this.canvasContext.font = "12px Times new Roman";
     this.canvasContext.imageSmoothingEnabled = false;
+  };
+
+  // Re-arms itself for the new DPR after each change, since a matchMedia query fires once.
+  private watchDevicePixelRatio = () => {
+    window
+      .matchMedia(`(resolution: ${window.devicePixelRatio}dppx)`)
+      .addEventListener(
+        "change",
+        () => {
+          this.updateCanvasSize();
+          this.watchDevicePixelRatio();
+        },
+        { once: true }
+      );
+  };
+
+
+  private constructor(options: GameOptions, assetsLoadedCallback: () => void) {
+    this.scenes = new Map<string, Scene>();
+    this.canvasColor = options.canvasColor ?? "white";
+
+    // Initialize canvas
+    this.canvas = document.getElementById("canvas") as HTMLCanvasElement;
+    this.canvasContext = this.canvas.getContext("2d");
+    this.updateCanvasSize();
     this.runGameLoop = true;
 
     // Wait for all fonts to be loaded before proceeding
@@ -170,6 +197,11 @@ export class Game {
       });
 
       this.canvas.addEventListener("wheel", (event) => {
+        // Trackpad pinch / ctrl+scroll sets ctrlKey; block the browser's native page zoom so it doesn't desync the canvas from the viewport.
+        if (event.ctrlKey) {
+          event.preventDefault();
+        }
+
         this.actors.forEach((actor) => {
           actor.call("wheel", { deltaY: event.deltaY });
         });
@@ -181,7 +213,7 @@ export class Game {
             deltaY: event.deltaY
           });
         }
-      });
+      }, { passive: false });
 
       document.body.addEventListener("keydown", (event) => {
         this.actors.forEach((actor) => {
@@ -208,27 +240,18 @@ export class Game {
       });
       document.addEventListener("contextmenu", (event) => event.preventDefault());
 
-      window.addEventListener("resize", () => {
+      const debouncedResize = () => {
         clearTimeout(this.resizeTimer);
+        this.resizeTimer = setTimeout(this.updateCanvasSize, 300);
+      };
 
-        this.resizeTimer = setTimeout(() => {
-          this.oldWidth = this.canvas.width;
-          this.oldHeight = this.canvas.height;
-          this.dpr = window.devicePixelRatio || 1;
-          this.canvas.width = window.innerWidth * this.dpr;
-          this.canvas.height = window.innerHeight * this.dpr;
-          this.canvas.style.width = window.innerWidth + "px";
-          this.canvas.style.height = window.innerHeight + "px";
+      window.addEventListener("resize", debouncedResize);
 
-          if (this.currentScene) {
-            this.currentScene.redraw();
-          }
-          this.canvasContext.fillStyle = options.canvasColor ?? "white";
-          this.canvasContext.fillRect(0, 0, this.canvas.width, this.canvas.height);
-          this.canvasContext.font = "12px Times new Roman";
-          this.canvasContext.imageSmoothingEnabled = false;
-        }, 300);
-      });
+      // Fallback for layout size changes that don't fire a window "resize" event.
+      new ResizeObserver(debouncedResize).observe(document.documentElement);
+
+      // Catches DPR changes (e.g. dragging the window to a monitor with a different scale) that don't fire "resize" at all.
+      this.watchDevicePixelRatio();
 
       let promise = this.loadAssetsPromise(options.assetList);
 
