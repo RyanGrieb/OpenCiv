@@ -210,15 +210,42 @@ describe('Unit', () => {
       expect(unit.getTileWeight(mockTile, targetTile)).toBe(1);
     });
 
-    it('stops one tile short of a tile blocked by a non-utility unit', () => {
+    it('stops short of a tile blocked by a non-utility unit without queuing it', () => {
       mockGameMap.constructShortestPath.mockReturnValue([mockTile, targetTile]);
       (targetTile.hasBlockingUnit as jest.Mock).mockReturnValue(true);
 
       const [arrivedTile, remainingTiles] = unit['getMovementTowardsTargetTile'](targetTile);
 
       expect(arrivedTile).toBe(mockTile);
-      expect(remainingTiles).toContain(targetTile);
+      // Queuing the blocked tile would stall the unit against it every turn, then walk it in
+      // the moment the blocker leaves.
+      expect(remainingTiles).toEqual([]);
       expect(targetTile.addUnit).not.toHaveBeenCalled();
+    });
+
+    it('drops a queued path it can no longer advance along', () => {
+      unit['queuedMovementTiles'] = [targetTile];
+      (targetTile.hasBlockingUnit as jest.Mock).mockReturnValue(true);
+
+      unit['moveWithMovementQueue']();
+
+      expect(unit['queuedMovementTiles']).toEqual([]);
+      expect(unit['tile']).toBe(mockTile);
+      expect(targetTile.addUnit).not.toHaveBeenCalled();
+      expect(mockPlayer.sendNetworkEvent).toHaveBeenCalledWith({
+        event: 'clearMovementQueue',
+        id: unit['id'],
+      });
+    });
+
+    it('still advances a queued path that is not blocked', () => {
+      unit['queuedMovementTiles'] = [targetTile];
+      (targetTile.hasBlockingUnit as jest.Mock).mockReturnValue(false);
+
+      unit['moveWithMovementQueue']();
+
+      expect(unit['tile']).toBe(targetTile);
+      expect(targetTile.addUnit).toHaveBeenCalledWith(unit);
     });
 
     it('allows moving onto a tile whose only occupant is a utility unit', () => {

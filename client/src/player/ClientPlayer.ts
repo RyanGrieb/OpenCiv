@@ -17,6 +17,7 @@ import { AbstractPlayer, PlayerData } from "./AbstractPlayer";
 export class ClientPlayer extends AbstractPlayer {
   private selectedUnit: Unit;
   private hoveredTile: HoveredTile;
+  private outlinedTile: Tile;
   private movementLines: Line[];
   private rightMouseDrag: boolean;
   private requestedNextTurn: boolean;
@@ -53,13 +54,15 @@ export class ClientPlayer extends AbstractPlayer {
           return;
         }
 
-        // Remove target-outline from previous hovered tile.
-        if (oldHoveredTile !== this.selectedUnit.getTile()) {
+        // Remove the previous drag-preview outline, wherever it actually landed
+        // (may not be oldHoveredTile itself, if that hop was blocked).
+        if (this.outlinedTile && this.outlinedTile !== this.selectedUnit.getTile()) {
           GameMap.getInstance().removeOutline({
-            tile: oldHoveredTile,
+            tile: this.outlinedTile,
             cityOutline: false
           });
         }
+        this.outlinedTile = undefined;
 
         if (!this.hoveredTile.getRepresentedTile()) {
           this.clearMovementPath();
@@ -67,14 +70,15 @@ export class ClientPlayer extends AbstractPlayer {
         }
 
         // Draw movement lines to new target tile
-        const isQueuedMovement = this.drawMovementPath(
+        const { isQueuedMovement, targetTile } = this.drawMovementPath(
           this.selectedUnit.getTile(),
           this.hoveredTile.getRepresentedTile()
         );
 
-        //Draw outline of final target tile
+        // Draw outline on the tile the path actually reaches, not necessarily the hovered one.
         if (this.movementLines.length > 0) {
-          this.drawTargetTileOutline(this.hoveredTile.getRepresentedTile(), isQueuedMovement);
+          this.drawTargetTileOutline(targetTile, isQueuedMovement);
+          this.outlinedTile = targetTile;
         }
       });
 
@@ -133,10 +137,13 @@ export class ClientPlayer extends AbstractPlayer {
           this.selectedUnit = undefined;
           this.clearMovementPath();
 
-          GameMap.getInstance().removeOutline({
-            tile: this.hoveredTile.getRepresentedTile(),
-            cityOutline: false
-          });
+          if (this.outlinedTile) {
+            GameMap.getInstance().removeOutline({
+              tile: this.outlinedTile,
+              cityOutline: false
+            });
+            this.outlinedTile = undefined;
+          }
         }
       }
     });
@@ -236,10 +243,15 @@ export class ClientPlayer extends AbstractPlayer {
 
     this.selectedUnit = undefined;
     this.clearMovementPath();
-    GameMap.getInstance().removeOutline({
-      tile: this.hoveredTile.getRepresentedTile(),
-      cityOutline: false
-    });
+
+    if (this.outlinedTile) {
+      GameMap.getInstance().removeOutline({
+        tile: this.outlinedTile,
+        cityOutline: false
+      });
+      this.outlinedTile = undefined;
+    }
+
     this.rightMouseDrag = false;
     return unselectedUnit;
   }
@@ -251,7 +263,10 @@ export class ClientPlayer extends AbstractPlayer {
       return;
     }
 
-    const isQueuedMovement = this.drawMovementPath(this.selectedUnit.getTile(), this.hoveredTile.getRepresentedTile());
+    const { isQueuedMovement, targetTile } = this.drawMovementPath(
+      this.selectedUnit.getTile(),
+      this.hoveredTile.getRepresentedTile()
+    );
 
     // Remove queued target outline if it exists
     if (this.selectedUnit.hasMovementQueue()) {
@@ -261,9 +276,10 @@ export class ClientPlayer extends AbstractPlayer {
       });
     }
 
-    // Remove target outline from the hovered tile if it exists
-    if (this.hoveredTile) {
-      this.drawTargetTileOutline(this.hoveredTile.getRepresentedTile(), isQueuedMovement);
+    // Draw outline on the tile the path actually reaches (may be blocked short of the hovered tile).
+    if (this.movementLines.length > 0) {
+      this.drawTargetTileOutline(targetTile, isQueuedMovement);
+      this.outlinedTile = targetTile;
     }
   }
 
@@ -285,11 +301,14 @@ export class ClientPlayer extends AbstractPlayer {
       targetY: targetTile.getGridY()
     });
 
-    // Remove target tile outline
-    GameMap.getInstance().removeOutline({
-      tile: targetTile,
-      cityOutline: false
-    });
+    // Remove the drag-preview outline, wherever it actually landed.
+    if (this.outlinedTile) {
+      GameMap.getInstance().removeOutline({
+        tile: this.outlinedTile,
+        cityOutline: false
+      });
+      this.outlinedTile = undefined;
+    }
 
     // Unselect unit before moving
     this.selectedUnit.unselect();
@@ -321,7 +340,7 @@ export class ClientPlayer extends AbstractPlayer {
     this.selectedUnit = unit;
 
     if (this.selectedUnit.hasMovementQueue()) {
-      const isQueuedMovement = this.drawMovementPathFromTiles([unit.getTile(), ...unit.getQueuedMovementTiles()]);
+      const { isQueuedMovement } = this.drawMovementPathFromTiles([unit.getTile(), ...unit.getQueuedMovementTiles()]);
 
       this.drawTargetTileOutline(this.selectedUnit.getTargetQueuedTile(), isQueuedMovement);
     }
@@ -424,7 +443,7 @@ export class ClientPlayer extends AbstractPlayer {
     this.movementLines = [];
   }
 
-  private drawMovementPath(startTile: Tile, goalTile: Tile): boolean {
+  private drawMovementPath(startTile: Tile, goalTile: Tile): { isQueuedMovement: boolean; targetTile: Tile | undefined } {
     if (this.movementLines.length > 0) {
       this.clearMovementPath();
     }
@@ -439,11 +458,11 @@ export class ClientPlayer extends AbstractPlayer {
     return this.drawMovementPathFromTiles(pathTiles);
   }
 
-  private drawMovementPathFromTiles(pathTiles: Tile[]): boolean {
-    if (pathTiles.length < 1) return false;
+  private drawMovementPathFromTiles(pathTiles: Tile[]): { isQueuedMovement: boolean; targetTile: Tile | undefined } {
+    if (pathTiles.length < 1) return { isQueuedMovement: false, targetTile: undefined };
 
     let availableMovement = this.selectedUnit.getAvailableMovement();
-    let queuedPath = false;
+    let isQueuedMovement = false;
 
     for (let i = 0; i < pathTiles.length - 1; i++) {
       const tile1 = pathTiles[i];
@@ -454,7 +473,7 @@ export class ClientPlayer extends AbstractPlayer {
 
       if (availableMovement <= 0) {
         color = "rgba(154, 158, 153, 1)";
-        queuedPath = true;
+        isQueuedMovement = true;
       }
 
       availableMovement -= tileCost;
@@ -472,7 +491,7 @@ export class ClientPlayer extends AbstractPlayer {
       Game.getInstance().getCurrentScene().addLine(line);
     }
 
-    return queuedPath;
+    return { isQueuedMovement, targetTile: pathTiles[pathTiles.length - 1] };
   }
 
   private drawTargetTileOutline(tile: Tile, queuedPath: boolean) {

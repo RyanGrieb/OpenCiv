@@ -79,6 +79,8 @@ export class Unit {
 
         if (this.id !== data["id"] || this.tile === targetTile || this.player != player) return;
 
+        console.log(`Unit wants to move from (${this.tile.getX()}, ${this.tile.getY()}) to (${targetTile.getX()}, ${targetTile.getY()})`);
+
         // Move the furthest we can possibly go, and queue the rest of tiles for next turn.
 
         //FIXME: Allow this function to use our existing queuedMovementTiles,
@@ -228,7 +230,12 @@ export class Unit {
       existingPath
     );
 
-    if (!arrivedTile || arrivedTile === this.tile) return;
+    // Couldn't advance at all - something is parked in the way, so drop the queue rather than
+    // retrying it every turn and eventually walking into the blocker's tile once it leaves.
+    if (!arrivedTile || arrivedTile === this.tile) {
+      this.clearMovementQueue();
+      return;
+    }
 
     this.moveToTile({
       previousTile: this.tile,
@@ -236,6 +243,18 @@ export class Unit {
       remainingTiles,
       remainingMovement: remainingMovement
     });
+  }
+
+  private clearMovementQueue() {
+    if (this.queuedMovementTiles.length < 1) return;
+
+    this.queuedMovementTiles = [];
+
+    Game.getInstance()
+      .getPlayers()
+      .forEach((player) => {
+        player.sendNetworkEvent({ event: "clearMovementQueue", id: this.id });
+      });
   }
 
   private getMovementTowardsTargetTile(tile: Tile, existingPath?: Tile[]): [Tile, Tile[], number] {
@@ -253,6 +272,7 @@ export class Unit {
 
     const traversedTiles: Tile[] = [this.tile];
     let remainingMovement = this.availableMovement;
+    let blocked = false;
 
     // Traverse tile by tile, removing our movement incrementally.
     for (let i = 0; i < shortestPath.length; i++) {
@@ -266,6 +286,7 @@ export class Unit {
       }
 
       if (nextTile.hasBlockingUnit(this)) {
+        blocked = true;
         break;
       }
 
@@ -278,7 +299,9 @@ export class Unit {
       traversedTiles.push(nextTile);
     }
 
-    const remainingTiles: Tile[] = shortestPath.filter((tile) => !traversedTiles.includes(tile));
+    // Queuing tiles we're blocked from entering just stalls the unit against the blocker every
+    // turn, then walks it into the tile the moment that unit leaves. Drop the rest of the path.
+    const remainingTiles: Tile[] = blocked ? [] : shortestPath.filter((tile) => !traversedTiles.includes(tile));
 
     return [traversedTiles.pop(), remainingTiles, remainingMovement];
   }

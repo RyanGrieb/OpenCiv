@@ -120,6 +120,10 @@ export interface RemoveUnitEvent {
   unitY: number;
 }
 
+export interface ClearMovementQueueEvent {
+  id: number;
+}
+
 export class Unit extends ActorGroup {
   private name: string;
   private id: number;
@@ -222,6 +226,16 @@ export class Unit extends ActorGroup {
             this.queuedMovementTiles.push(tile);
           }
         }
+      }
+    });
+
+    NetworkEvents.on<ClearMovementQueueEvent>({
+      eventName: "clearMovementQueue",
+      parentObject: this,
+      callback: (data) => {
+        if (this.id !== data.id) return;
+
+        this.queuedMovementTiles = [];
       }
     });
 
