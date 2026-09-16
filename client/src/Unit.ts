@@ -91,6 +91,7 @@ export interface UnitCreationData {
   tileX: number;
   tileY: number;
   attackType: string;
+  isUtility: boolean;
   remainingMovement: number;
   defaultMoveDistance: number;
   player: string;
@@ -124,6 +125,7 @@ export class Unit extends ActorGroup {
   private id: number;
   private tile: Tile;
   private attackType: string;
+  private utility: boolean;
   private unitActor: Actor;
   private selectionActors: Actor[];
   private selected: boolean;
@@ -160,6 +162,7 @@ export class Unit extends ActorGroup {
 
     this.id = unitJSON.id;
     this.attackType = unitJSON.attackType;
+    this.utility = unitJSON.isUtility;
     this.availableMovement = unitJSON.remainingMovement;
     this.defaultMoveDistance = unitJSON.defaultMoveDistance;
     this.player = AbstractPlayer.getPlayerByName(unitJSON.player);
@@ -239,6 +242,10 @@ export class Unit extends ActorGroup {
 
     if (!neighbor) return current.getMovementCost();
 
+    if (neighbor.hasBlockingUnit(this)) {
+      return 9999;
+    }
+
     return Tile.getWeight(current, neighbor);
   }
 
@@ -305,6 +312,10 @@ export class Unit extends ActorGroup {
 
   public getAttackType(): string {
     return this.attackType;
+  }
+
+  public isUtility(): boolean {
+    return this.utility;
   }
 
   public getTile(): Tile {

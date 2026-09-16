@@ -268,6 +268,14 @@ export class ClientPlayer extends AbstractPlayer {
   }
 
   private moveSelectedUnit(targetTile: Tile) {
+    const pathTiles = GameMap.getInstance().constructShortestPath(this.selectedUnit, this.selectedUnit.getTile(), targetTile);
+
+    // No reachable step towards targetTile (e.g. it's fully blocked) - the server would silently
+    // no-op this anyway, so don't bother sending it or unselecting the unit over a wasted click.
+    if (pathTiles.length < 2) {
+      return;
+    }
+
     WebsocketClient.sendMessage({
       event: "moveUnit",
       unitX: this.selectedUnit.getTile().getGridX(),

@@ -297,6 +297,14 @@ export class GameMap {
       return [];
     }
 
+    // Truncate the preview right before a blocked tile - the goal tile's own occupancy isn't
+    // reflected in movementCost above (that would treat the unit's own tile as self-blocking),
+    // so it has to be checked separately here.
+    const firstBlockedIndex = totalPath.findIndex((tile, index) => index > 0 && tile.hasBlockingUnit(unit));
+    if (firstBlockedIndex !== -1) {
+      return totalPath.slice(0, firstBlockedIndex);
+    }
+
     return totalPath;
   }
 

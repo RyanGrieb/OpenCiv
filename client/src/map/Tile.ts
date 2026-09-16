@@ -184,6 +184,19 @@ export class Tile extends Actor {
     this.units.push(unit);
   }
 
+  // Mirrors server/src/map/Tile.ts's hasBlockingUnit() - keep both in sync.
+  public hasBlockingUnit(movingUnit: Unit): boolean {
+    const otherUnits = this.units.filter((unit) => unit !== movingUnit);
+
+    // A unit from another civilization always blocks - there's no combat system yet to resolve this differently.
+    if (otherUnits.some((unit) => unit.getPlayer() !== movingUnit.getPlayer())) {
+      return true;
+    }
+
+    // Same-type ally units can't stack (utility+utility, or non-utility+non-utility); mixed types can.
+    return otherUnits.some((unit) => unit.isUtility() === movingUnit.isUtility());
+  }
+
   public hasRiver(): boolean {
     return this.riverSides.some((side) => side);
   }

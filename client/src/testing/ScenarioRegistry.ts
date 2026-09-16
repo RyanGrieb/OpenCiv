@@ -26,3 +26,8 @@ ScenarioRegistry.register("CitySettlement", async () => {
     const module = await import("./scenarios/CitySettlement.test");
     return module.setupCitySettlementTest;
 });
+
+ScenarioRegistry.register("UnitStacking", async () => {
+    const module = await import("./scenarios/UnitStacking.test");
+    return module.setupUnitStackingTest;
+});
