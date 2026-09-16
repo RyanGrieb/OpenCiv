@@ -164,7 +164,10 @@ export class Tile extends Actor {
 
   public setCity(city: City) {
     this.city = city;
-    this.tileTypes.push("city");
+    // Avoid duplicating the "city" type during reconnect sync.
+    if (!this.tileTypes.includes("city")) {
+      this.tileTypes.push("city");
+    }
     GameMap.getInstance().redrawMap([this]);
   }
 
