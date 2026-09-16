@@ -79,7 +79,8 @@ export class InGameState extends State {
         ];
 
         const spawnTile = GameMap.getInstance().getRandomTileWith({
-          avoidTileTypes: badTileTypes
+          avoidTileTypes: badTileTypes,
+          avoidMapEdge: 4
         });
 
         spawnTile.addUnit(

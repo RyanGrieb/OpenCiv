@@ -914,6 +914,7 @@ export class GameMap {
    * @param options.tempRange - (Optional) A tuple of two numbers that specify the temperature range for the generated Tile object. If not provided, the default temperature range is [0, 100].
    * @param options.onAdditionalTileTypes - (Optional) A boolean value that indicates if we allow the random tile to contain more than 1 tile type. (E.g. a forest). Default value = FALSE
    * @param options.avoidResourceTiles - (Optional) A boolean value that indicates if we allow the random tile to be an existing resource tile(E.g. coal, horses, fish, ect.). Default value = FALSE
+   * @param options.avoidMapEdge - (Optional) Rejects tiles within this many tiles of the map border.
    * @returns A Tile object that meets the specified criteria, or undefined if no such Tile is found.
    */
 
@@ -925,6 +926,7 @@ export class GameMap {
     onAdditionalTileTypes?: boolean;
     avoidResourceTiles?: boolean;
     avoidTileTypes?: string[];
+    avoidMapEdge?: number;
   }): Tile | undefined {
     let originTile = undefined;
     let iterations = 0;
@@ -947,6 +949,9 @@ export class GameMap {
       // Ensure we are avoiding any tile types we don't want
       if (options.avoidTileTypes && randomTile.containsTileTypes(options.avoidTileTypes)) continue;
 
+      // Ensure we are avoiding the map border, if requested
+      if (options.avoidMapEdge !== undefined && this.isTileNearMapEdge(randomTile, options.avoidMapEdge)) continue;
+
       // Ensure at least one tile type is in this randomTile.
       if (options.tileTypes && !randomTile.containsTileTypes(options.tileTypes)) continue;
 
@@ -963,6 +968,13 @@ export class GameMap {
     }
 
     return originTile;
+  }
+
+  private isTileNearMapEdge(tile: Tile, buffer: number): boolean {
+    const x = tile.getX();
+    const y = tile.getY();
+
+    return x < buffer || y < buffer || x >= this.mapWidth - buffer || y >= this.mapHeight - buffer;
   }
 
   public removeTopRiverSideCache() {
