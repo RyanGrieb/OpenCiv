@@ -93,6 +93,7 @@ export interface UnitCreationData {
   tileY: number;
   attackType: string;
   isUtility: boolean;
+  ignoresTerrainCost: boolean;
   remainingMovement: number;
   defaultMoveDistance: number;
   player: string;
@@ -136,6 +137,7 @@ export class Unit extends ActorGroup {
   private tile: Tile;
   private attackType: string;
   private utility: boolean;
+  private terrainCostIgnored: boolean;
   private unitActor: Actor;
   private selectionActors: Actor[];
   private selected: boolean;
@@ -176,6 +178,7 @@ export class Unit extends ActorGroup {
     this.id = unitJSON.id;
     this.attackType = unitJSON.attackType;
     this.utility = unitJSON.isUtility;
+    this.terrainCostIgnored = unitJSON.ignoresTerrainCost;
     this.availableMovement = unitJSON.remainingMovement;
     this.defaultMoveDistance = unitJSON.defaultMoveDistance;
     this.player = AbstractPlayer.getPlayerByName(unitJSON.player);
@@ -269,7 +272,7 @@ export class Unit extends ActorGroup {
       return 9999;
     }
 
-    return Tile.getWeight(current, neighbor);
+    return Tile.getWeight(current, neighbor, this);
   }
 
   public reduceMovement(amount: number) {
@@ -347,6 +350,10 @@ export class Unit extends ActorGroup {
 
   public isUtility(): boolean {
     return this.utility;
+  }
+
+  public ignoresTerrainCost(): boolean {
+    return this.terrainCostIgnored;
   }
 
   public getTile(): Tile {

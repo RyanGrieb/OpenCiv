@@ -219,6 +219,25 @@ describe('Unit', () => {
       expect(unit.getTileWeight(mockTile, targetTile)).toBe(1);
     });
 
+    it('still pays full terrain cost by default', () => {
+      (targetTile.getMovementCost as jest.Mock).mockReturnValue(2);
+
+      expect(unit.getTileWeight(mockTile, targetTile)).toBe(2);
+    });
+
+    it('flattens terrain cost to 1 for a unit that ignores terrain', () => {
+      const scout = new Unit({
+        name: 'Scout',
+        tile: mockTile,
+        player: mockPlayer,
+        ignoresTerrainCost: true,
+        actions: [],
+      });
+      (targetTile.getMovementCost as jest.Mock).mockReturnValue(2);
+
+      expect(scout.getTileWeight(mockTile, targetTile)).toBe(1);
+    });
+
     it('stops short of a tile blocked by a non-utility unit without queuing it', () => {
       mockGameMap.constructShortestPath.mockReturnValue([mockTile, targetTile]);
       (targetTile.hasBlockingUnit as jest.Mock).mockReturnValue(true);
@@ -328,6 +347,14 @@ describe('Unit', () => {
     it('returns undefined for an unrecognized unit name', () => {
       expect(Unit.createFromName('Nonexistent', mockTile, mockPlayer)).toBeUndefined();
     });
+
+    it('gives a Scout 3 movement and terrain-ignoring movement', () => {
+      const scout = Unit.createFromName('Scout', mockTile, mockPlayer);
+
+      expect(scout).toBeDefined();
+      expect(scout['defaultMoveDistance']).toBe(3);
+      expect(scout.ignoresTerrainCost()).toBe(true);
+    });
   });
 
   describe('getAllUnitData', () => {
@@ -348,6 +375,13 @@ describe('Unit', () => {
       const settler = Unit.getAllUnitData().find((unit) => unit.name === 'Settler');
 
       expect(settler.cost).toBeUndefined();
+    });
+
+    it('exposes the Scout movement overrides', () => {
+      const scout = Unit.getAllUnitData().find((unit) => unit.name === 'Scout');
+
+      expect(scout.default_move_distance).toBe(3);
+      expect(scout.ignores_terrain_cost).toBe(true);
     });
 
     it('has every required_tech reference a technology that actually exists in techs.yml', () => {

@@ -13,8 +13,12 @@ describe('Tile', () => {
     playerB = {} as Player;
   });
 
-  const fakeUnit = (isUtility: boolean, player: Player) =>
-    ({ isUtility: () => isUtility, getPlayer: () => player } as unknown as Unit);
+  const fakeUnit = (isUtility: boolean, player: Player, ignoresTerrainCost = false) =>
+    ({
+      isUtility: () => isUtility,
+      getPlayer: () => player,
+      ignoresTerrainCost: () => ignoresTerrainCost,
+    } as unknown as Unit);
 
   it('has no blocking unit when the tile is empty', () => {
     const mover = fakeUnit(false, playerA);
@@ -51,5 +55,46 @@ describe('Tile', () => {
     tile.addUnit(fakeUnit(true, playerB));
 
     expect(tile.hasBlockingUnit(fakeUnit(false, playerA))).toBe(true);
+  });
+
+  describe('getWeight', () => {
+    let hill: Tile;
+    let riverNeighbor: Tile;
+
+    beforeEach(() => {
+      hill = new Tile('hill', 1, 0);
+
+      riverNeighbor = new Tile('grassland', 0, 1);
+      // Wire tile <-> riverNeighbor as adjacent, with a river on the connecting side.
+      tile['adjacentTiles'][0] = riverNeighbor;
+      tile['riverSides'][0] = true;
+    });
+
+    it('costs the plain terrain movement cost by default', () => {
+      expect(Tile.getWeight(tile, hill)).toBe(2);
+    });
+
+    it('floors river crossings to at least 2 by default', () => {
+      expect(Tile.getWeight(tile, riverNeighbor)).toBe(2);
+    });
+
+    it('flattens hill cost to 1 for a unit that ignores terrain', () => {
+      const scout = fakeUnit(false, playerA, true);
+
+      expect(Tile.getWeight(tile, hill, scout)).toBe(1);
+    });
+
+    it('flattens river-crossing cost to 1 for a unit that ignores terrain', () => {
+      const scout = fakeUnit(false, playerA, true);
+
+      expect(Tile.getWeight(tile, riverNeighbor, scout)).toBe(1);
+    });
+
+    it('still treats mountains as impassable for a unit that ignores terrain', () => {
+      const mountain = new Tile('mountain', 1, 1);
+      const scout = fakeUnit(false, playerA, true);
+
+      expect(Tile.getWeight(tile, mountain, scout)).toBe(9999);
+    });
   });
 });

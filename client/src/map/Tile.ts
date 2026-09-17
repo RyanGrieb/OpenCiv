@@ -89,7 +89,13 @@ export class Tile extends Actor {
     return false;
   }
 
-  public static getWeight(tile1: Tile, tile2: Tile): number {
+  public static getWeight(tile1: Tile, tile2: Tile, unit?: Unit): number {
+    if (unit?.ignoresTerrainCost()) {
+      // Still respect impassable terrain (e.g. mountains) - only flatten the
+      // hill/forest/jungle penalty and the river-crossing floor to 1.
+      return tile2.getMovementCost() >= 9999 ? 9999 : 1;
+    }
+
     if (Tile.riverCrosses(tile1, tile2)) {
       return Math.max(2, tile2.getMovementCost());
     }

@@ -20,6 +20,7 @@ export interface UnitOptions {
   attackType?: string;
   defaultMoveDistance?: number;
   isUtility?: boolean;
+  ignoresTerrainCost?: boolean;
   actions: UnitAction[];
 }
 
@@ -28,6 +29,7 @@ export interface UnitYMLTypeData {
   attack_type?: string;
   default_move_distance?: number;
   is_utility?: boolean;
+  ignores_terrain_cost?: boolean;
   // Absent for units never offered through a city's production queue (e.g. the
   // Settler, which is only ever granted directly at game start).
   cost?: number;
@@ -43,6 +45,7 @@ export class Unit {
   private defaultMoveDistance: number;
   private availableMovement: number;
   private utility: boolean;
+  private terrainCostIgnored: boolean;
   private tile: Tile;
   private queuedMovementTiles: Tile[];
 
@@ -63,6 +66,7 @@ export class Unit {
     this.defaultMoveDistance = options.defaultMoveDistance || 2;
     this.availableMovement = this.defaultMoveDistance;
     this.utility = options.isUtility || false;
+    this.terrainCostIgnored = options.ignoresTerrainCost || false;
     this.actions = options.actions || [];
     this.actions = options.actions || [];
     this.queuedMovementTiles = [];
@@ -152,6 +156,7 @@ export class Unit {
       attackType: data.attack_type,
       defaultMoveDistance: data.default_move_distance,
       isUtility: data.is_utility,
+      ignoresTerrainCost: data.ignores_terrain_cost,
       actions: []
     });
   }
@@ -337,6 +342,10 @@ export class Unit {
     return this.utility;
   }
 
+  public ignoresTerrainCost() {
+    return this.terrainCostIgnored;
+  }
+
   public asJSON() {
     const queuedTilesJSON = this.queuedMovementTiles.map((tile) => ({
       x: tile.getX(),
@@ -350,6 +359,7 @@ export class Unit {
       player: this.player.getName(),
       attackType: this.attackType,
       isUtility: this.utility,
+      ignoresTerrainCost: this.terrainCostIgnored,
       id: this.id,
       actions: this.getUnitActionsJSON(),
       queuedTiles: queuedTilesJSON,
@@ -394,7 +404,7 @@ export class Unit {
       return 9999;
     }
 
-    return Tile.getWeight(current, neighbor);
+    return Tile.getWeight(current, neighbor, this);
   }
 
   public getTargetQueuedTile() {

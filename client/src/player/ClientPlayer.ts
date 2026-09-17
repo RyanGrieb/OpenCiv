@@ -497,7 +497,7 @@ export class ClientPlayer extends AbstractPlayer {
     for (let i = 0; i < pathTiles.length - 1; i++) {
       const tile1 = pathTiles[i];
       const tile2 = pathTiles[i + 1];
-      const tileCost = Tile.getWeight(tile1, tile2);
+      const tileCost = Tile.getWeight(tile1, tile2, this.selectedUnit);
 
       let color = "rgba(7, 250, 214, 1)";
 
