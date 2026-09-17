@@ -117,6 +117,8 @@ Each project has a **type shim** at `src/types/ts-priority-queue.d.ts` (mirrors 
 
 ## Commit messages
 
+**Never run `git commit` unless the user explicitly asks for a commit in that message.** Finishing an implementation, fixing a bug, or the user saying "proceed"/"looks good" is not a request to commit — leave changes staged/unstaged in the working tree and say what's ready, then wait to be told to commit.
+
 Title format is `Category: Description` (e.g. `Client: Fix resize bugs...`, `Server: Restrict types to node+jest...`, `City:`, `UI:`). The category is the subsystem most affected, not necessarily which project (client/server) the diff touches — a change that spans both but is user-facing through the UI (e.g. a server-pushed stat the client displays) is titled `UI:`, not `Client:`/`Server:`. Check `git log` for current examples before writing a new one.
 
 ### Odd-but-harmless: `parent-package` self-dependency
