@@ -14,7 +14,7 @@ export class JoinGameScene extends Scene {
 
   public onInitialize(): void {
     super.onInitialize();
-    this.addActor(SceneBackground.generateRandomGrassland());
+    this.addActor(SceneBackground.generatePanningGrassland());
 
     /* const serverList = new ListBox({
       x: Game.getWidth() / 2 - 800 / 2,

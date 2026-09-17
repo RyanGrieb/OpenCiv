@@ -7,7 +7,7 @@ import { SceneBackground } from "../SceneBackground";
 export class MainMenuScene extends Scene {
   public onInitialize(): void {
     super.onInitialize();
-    this.addActor(SceneBackground.generateRandomGrassland());
+    this.addActor(SceneBackground.generatePanningGrassland());
 
     const titleLabel = new Label({
       text: "Open Civilization",

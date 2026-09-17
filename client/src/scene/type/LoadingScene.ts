@@ -6,7 +6,7 @@ import { SceneBackground } from "../SceneBackground";
 export class LoadingScene extends Scene {
   public onInitialize(): void {
     super.onInitialize();
-    this.addActor(SceneBackground.generateRandomGrassland());
+    this.addActor(SceneBackground.generatePanningGrassland());
 
     const loadingLabel = new Label({
       text: "Loading Map...",
