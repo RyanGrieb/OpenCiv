@@ -15,8 +15,9 @@ export class SelectCivilizationGroup extends ActorGroup {
   private titleLabel: Label;
   private selectCivActors: Actor[];
   private civInformationActors: Actor[];
+  private onClose: () => void;
 
-  constructor(x: number, y: number, width: number, height: number) {
+  constructor(x: number, y: number, width: number, height: number, onClose: () => void) {
     super({
       x: x,
       y: y,
@@ -24,6 +25,7 @@ export class SelectCivilizationGroup extends ActorGroup {
       height: height
     });
 
+    this.onClose = onClose;
     this.selectCivActors = [];
     this.civInformationActors = [];
 
@@ -96,7 +98,7 @@ export class SelectCivilizationGroup extends ActorGroup {
       eventName: "selectCiv",
       parentObject: this,
       callback: () => {
-        Game.getInstance().getCurrentScene().removeActor(this);
+        this.onClose();
       }
     });
   }
@@ -130,7 +132,7 @@ export class SelectCivilizationGroup extends ActorGroup {
       size: ButtonSize.MEDIUM,
       fontColor: "white",
       onClicked: () => {
-        Game.getInstance().getCurrentScene().removeActor(this);
+        this.onClose();
       }
     });
 

@@ -4,8 +4,10 @@ import { NetworkEvents, WebsocketClient } from "../../network/Client";
 import { CivilizationData } from "../../player/AbstractPlayer";
 import { Button, ButtonSize } from "../../ui/Button";
 import { ListBox } from "../../ui/Listbox";
+import { PlaceholderDialogGroup } from "../../ui/PlaceholderDialogGroup";
 import { SelectCivilizationGroup } from "../../ui/SelectCivilizationGroup";
 import { Actor } from "../Actor";
+import { ActorGroup } from "../ActorGroup";
 import { Scene } from "../Scene";
 import { SceneBackground } from "../SceneBackground";
 
@@ -26,99 +28,41 @@ interface SelectCivEvent {
 }
 
 export class LobbyScene extends Scene {
-  private selectCivGroup: SelectCivilizationGroup;
+  private static readonly BOX_WIDTH = 480;
+  private static readonly PANEL_GAP = 40;
+  private static readonly PLAYER_ROW_HEIGHT = 50;
+  private static readonly BUTTON_ICON_PADDING = 24;
+
+  private playerList: ListBox;
+  private rightPanelX: number;
+  private rightPanelY: number;
+  private rightPanelHeight: number;
+  private rightPanelContent: ActorGroup;
 
   public onInitialize(): void {
     super.onInitialize();
-    this.addActor(SceneBackground.generateRandomGrassland());
+    this.addActor(SceneBackground.generatePanningGrassland());
 
-    const playerList = new ListBox({
-      x: Game.getInstance().getWidth() / 2 - 600 / 2,
+    const contentWidth = LobbyScene.BOX_WIDTH + LobbyScene.PANEL_GAP + LobbyScene.BOX_WIDTH;
+    const contentX = Game.getInstance().getWidth() / 2 - contentWidth / 2;
+    const contentHeight = Game.getInstance().getHeight() - 275;
+
+    this.playerList = new ListBox({
+      x: contentX,
       y: 35,
-      width: 600,
-      height: Game.getInstance().getHeight() - 275,
-      rowHeight: 50,
+      width: LobbyScene.BOX_WIDTH,
+      height: contentHeight,
+      rowHeight: LobbyScene.PLAYER_ROW_HEIGHT,
       textFont: "20px serif",
       fontColor: "white"
     });
+    this.addActor(this.playerList);
 
-    this.addActor(playerList);
+    this.rightPanelX = contentX + LobbyScene.BOX_WIDTH + LobbyScene.PANEL_GAP;
+    this.rightPanelY = 35;
+    this.rightPanelHeight = contentHeight;
 
-    this.addActor(
-      new Button({
-        text: "Select Civilization",
-        x: Game.getInstance().getWidth() / 2 - ButtonSize.LARGE.width / 2,
-        y: playerList.getY() + playerList.getHeight() + 10,
-        size: ButtonSize.LARGE,
-        fontColor: "white",
-        onClicked: () => {
-          if (this.hasActor(this.selectCivGroup)) {
-            return;
-          }
-
-          console.log("Choose civilization");
-
-          if (!this.selectCivGroup || !this.hasActor(this.selectCivGroup)) {
-            this.selectCivGroup = new SelectCivilizationGroup(
-              playerList.getX() + playerList.getWidth() / 2 - 432 / 2,
-              Game.getInstance().getHeight() / 2 - 440 / 2,
-              432,
-              440
-            );
-            this.addActor(this.selectCivGroup);
-          } else {
-            this.removeActor(this.selectCivGroup);
-          }
-        },
-
-        disableHoverWhen: () => {
-          return this.hasActor(this.selectCivGroup);
-        }
-      })
-    );
-
-    this.addActor(
-      new Button({
-        text: "Ready Up",
-        x: Game.getInstance().getWidth() / 2 - ButtonSize.LARGE.width / 2,
-        y: playerList.getY() + playerList.getHeight() + 75,
-        size: ButtonSize.LARGE,
-        fontColor: "white",
-        onClicked: () => {
-          if (this.hasActor(this.selectCivGroup)) {
-            return;
-          }
-          // TODO: Change text of this button & prevent repeated clicks.
-          WebsocketClient.sendMessage({ event: "setState", state: "in_game" });
-        },
-
-        disableHoverWhen: () => {
-          return this.hasActor(this.selectCivGroup);
-        }
-      })
-    );
-
-    this.addActor(
-      new Button({
-        text: "Back",
-        x: Game.getInstance().getWidth() / 2 - ButtonSize.LARGE.width / 2,
-        y: playerList.getY() + playerList.getHeight() + 140,
-        size: ButtonSize.LARGE,
-        fontColor: "white",
-        onClicked: () => {
-          if (this.hasActor(this.selectCivGroup)) {
-            return;
-          }
-
-          Game.getInstance().setScene("join_game");
-          //TODO: Disconnect player
-        },
-
-        disableHoverWhen: () => {
-          return this.hasActor(this.selectCivGroup);
-        }
-      })
-    );
+    this.showButtonPanel();
 
     this.updatePlayerList();
 
@@ -144,7 +88,7 @@ export class LobbyScene extends Scene {
       callback: (data) => {
         const players = data.players;
         const requestingName = data.requestingName;
-        playerList.clearRows();
+        this.playerList.clearRows();
 
         for (let i = 0; i < players.length; i++) {
           const playerName = players[i].name;
@@ -153,7 +97,7 @@ export class LobbyScene extends Scene {
             civIcon = resolveSpriteRegion(players[i].civData.icon_name);
           }
 
-          const currentRow = playerList.addRow({
+          const currentRow = this.playerList.addRow({
             text: playerName
           });
 
@@ -189,6 +133,17 @@ export class LobbyScene extends Scene {
             );
           });
         }
+
+        // Pad out the rest of the box with empty slot rows so the list still reads as
+        // a player list (rather than a mostly-blank box) when few players have joined.
+        const visibleRowCount = Math.floor(this.playerList.getHeight() / LobbyScene.PLAYER_ROW_HEIGHT);
+        for (let i = players.length; i < visibleRowCount; i++) {
+          this.playerList.addRow({
+            text: "Empty Slot",
+            textX: this.playerList.getX() + 48,
+            centerTextY: true
+          });
+        }
       }
     });
 
@@ -196,7 +151,7 @@ export class LobbyScene extends Scene {
       eventName: "selectCiv",
       parentObject: this,
       callback: (data) => {
-        for (const row of playerList.getRows()) {
+        for (const row of this.playerList.getRows()) {
           if (row.getLabel().getText() !== data.playerName) {
             continue;
           }
@@ -225,5 +180,107 @@ export class LobbyScene extends Scene {
 
   private updatePlayerList() {
     WebsocketClient.sendMessage({ event: "connectedPlayers" });
+  }
+
+  private showButtonPanel(): void {
+    this.removeActor(this.rightPanelContent);
+
+    const panel = new ActorGroup({
+      x: this.rightPanelX,
+      y: this.rightPanelY,
+      width: LobbyScene.BOX_WIDTH,
+      height: this.rightPanelHeight
+    });
+
+    panel.addActor(
+      new Actor({
+        image: Game.getInstance().getImage(GameImage.POPUP_BOX),
+        x: this.rightPanelX,
+        y: this.rightPanelY,
+        width: LobbyScene.BOX_WIDTH,
+        height: this.rightPanelHeight,
+        nineSlice: true,
+        cornerSize: 20
+      })
+    );
+
+    const buttonDefs: { text: string; icon?: SpriteRegion; onClicked: () => void }[] = [
+      {
+        text: "Choose Civilization",
+        icon: SpriteRegion.ICON_UNKNOWN,
+        onClicked: () => this.showDialog(this.createSelectCivilizationDialog())
+      },
+      {
+        text: "Game Options",
+        icon: SpriteRegion.ICON_PRODUCTION,
+        onClicked: () => this.showDialog(this.createPlaceholderDialog("Game Options"))
+      },
+      {
+        text: "Scenarios",
+        icon: SpriteRegion.ICON_SETTLE,
+        onClicked: () => this.showDialog(this.createPlaceholderDialog("Scenarios"))
+      },
+      {
+        text: "Ready Up",
+        // TODO: Change text of this button & prevent repeated clicks.
+        onClicked: () => WebsocketClient.sendMessage({ event: "setState", state: "in_game" })
+      },
+      {
+        text: "Back",
+        //TODO: Disconnect player
+        onClicked: () => Game.getInstance().setScene("join_game")
+      }
+    ];
+
+    const buttonSpacing = 75;
+    const buttonX = this.rightPanelX + LobbyScene.BOX_WIDTH / 2 - ButtonSize.LARGE.width / 2;
+    const buttonIconX = buttonX + LobbyScene.BUTTON_ICON_PADDING;
+    const stackHeight = (buttonDefs.length - 1) * buttonSpacing + ButtonSize.LARGE.height;
+    const stackStartY = this.rightPanelY + this.rightPanelHeight / 2 - stackHeight / 2;
+
+    buttonDefs.forEach((buttonDef, index) => {
+      panel.addActor(
+        new Button({
+          text: buttonDef.text,
+          icon: buttonDef.icon,
+          iconX: buttonDef.icon ? buttonIconX : undefined,
+          x: buttonX,
+          y: stackStartY + index * buttonSpacing,
+          size: ButtonSize.LARGE,
+          fontColor: "white",
+          onClicked: buttonDef.onClicked
+        })
+      );
+    });
+
+    this.rightPanelContent = panel;
+    this.addActor(panel);
+  }
+
+  private showDialog(dialog: ActorGroup): void {
+    this.removeActor(this.rightPanelContent);
+    this.rightPanelContent = dialog;
+    this.addActor(dialog);
+  }
+
+  private createSelectCivilizationDialog(): SelectCivilizationGroup {
+    return new SelectCivilizationGroup(
+      this.rightPanelX,
+      this.rightPanelY,
+      LobbyScene.BOX_WIDTH,
+      this.rightPanelHeight,
+      () => this.showButtonPanel()
+    );
+  }
+
+  private createPlaceholderDialog(title: string): PlaceholderDialogGroup {
+    return new PlaceholderDialogGroup({
+      title,
+      x: this.rightPanelX,
+      y: this.rightPanelY,
+      width: LobbyScene.BOX_WIDTH,
+      height: this.rightPanelHeight,
+      onClose: () => this.showButtonPanel()
+    });
   }
 }

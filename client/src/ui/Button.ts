@@ -14,7 +14,7 @@ export interface ButtonSizeDefinition {
 // so buttons stay visually consistent between scenes, and reference e.g.
 // `ButtonSize.LARGE.width` directly when a call site needs the raw dimension.
 export const ButtonSize = {
-  LARGE: { width: 260, height: 60 }, // Primary actions on their own screen (Play, Ready Up, Select Civilization)
+  LARGE: { width: 260, height: 60 }, // Primary actions on their own screen (Play, Ready Up, Choose Civilization)
   MEDIUM: { width: 180, height: 50 }, // Secondary actions (Back, Close, Select)
   SMALL: { width: 150, height: 40 }, // Compact in-context controls (Next Turn, production toggle)
   ICON_LARGE: { width: 64, height: 64 }, // Prominent icon-only buttons (civ portraits, radio avatars, unit actions)
@@ -25,6 +25,12 @@ export interface ButtonOptions {
   text?: string;
   icon?: SpriteRegion;
   iconOnly?: boolean;
+  // Where the icon sits relative to the text when both are present. Ignored when iconOnly. Defaults to "left".
+  iconPosition?: "left" | "right";
+  // Pins the icon to this absolute x instead of centering the icon+text group by the
+  // button's own text width - lets a column of buttons with differing text lengths
+  // keep their icons aligned with each other. Ignored when iconOnly.
+  iconX?: number;
   iconWidth?: number;
   iconHeight?: number;
   buttonImage?: GameImage;
@@ -46,10 +52,15 @@ export interface ButtonOptions {
 }
 
 export class Button extends ActorGroup {
+  private static readonly ICON_TEXT_SPACING = 8;
+  private static readonly ICON_TEXT_SIZE = 32;
+
   private buttonImage: GameImage;
   private buttonHoveredImage: GameImage;
   private text: string;
   private icon: SpriteRegion;
+  private iconPosition: "left" | "right";
+  private iconX?: number;
   private callbackFunction: Function;
   private mouseEnterCallbackFunction: Function;
   private mouseExitCallbackFunction: Function;
@@ -58,6 +69,7 @@ export class Button extends ActorGroup {
   private textWidth: number;
   private textHeight: number;
   private buttonActor: Actor;
+  private iconActor: Actor;
   private iconOnly: boolean;
   private disableHoverWhen?: () => boolean;
 
@@ -79,6 +91,8 @@ export class Button extends ActorGroup {
     });
 
     this.icon = options.icon;
+    this.iconPosition = options.iconPosition ?? "left";
+    this.iconX = options.iconX;
     this.textWidth = -1;
     this.textHeight = -1;
     this.callbackFunction = options.onClicked;
@@ -105,18 +119,17 @@ export class Button extends ActorGroup {
     }
 
     if (this.icon) {
-      const iconWidth = options.iconWidth || this.width;
-      const iconHeight = options.iconHeight || this.height;
-      this.addActor(
-        new Actor({
-          image: Game.getInstance().getImage(GameImage.SPRITESHEET),
-          spriteRegion: this.icon,
-          x: this.x + this.width / 2 - iconWidth / 2,
-          y: this.y + this.height / 2 - iconHeight / 2,
-          width: iconWidth,
-          height: iconHeight
-        })
-      );
+      const iconWidth = options.iconWidth || (this.iconOnly ? this.width : Button.ICON_TEXT_SIZE);
+      const iconHeight = options.iconHeight || (this.iconOnly ? this.height : Button.ICON_TEXT_SIZE);
+      this.iconActor = new Actor({
+        image: Game.getInstance().getImage(GameImage.SPRITESHEET),
+        spriteRegion: this.icon,
+        x: this.x + this.width / 2 - iconWidth / 2,
+        y: this.y + this.height / 2 - iconHeight / 2,
+        width: iconWidth,
+        height: iconHeight
+      });
+      this.addActor(this.iconActor);
     }
 
     this.on("mousemove", (options) => {
@@ -169,22 +182,46 @@ export class Button extends ActorGroup {
       return; // Don't render text before we know the height & width of the text
     }
 
-    //TODO: Allow user to change where the text is drawn...
+    let textX = this.x + this.width / 2 - this.textWidth / 2;
+    const textY = this.y + this.height / 2 - this.textHeight / 2;
+
+    if (this.icon && this.text && !this.iconOnly && this.iconActor) {
+      const iconWidth = this.iconActor.getWidth();
+      const iconY = this.y + this.height / 2 - this.iconActor.getHeight() / 2;
+
+      if (this.iconX !== undefined) {
+        if (this.iconPosition === "left") {
+          this.iconActor.setPosition(this.iconX, iconY);
+          textX = this.iconX + iconWidth + Button.ICON_TEXT_SPACING;
+        } else {
+          this.iconActor.setPosition(this.iconX, iconY);
+          textX = this.iconX - Button.ICON_TEXT_SPACING - this.textWidth;
+        }
+      } else {
+        const groupWidth = iconWidth + Button.ICON_TEXT_SPACING + this.textWidth;
+        const groupX = this.x + this.width / 2 - groupWidth / 2;
+
+        if (this.iconPosition === "left") {
+          this.iconActor.setPosition(groupX, iconY);
+          textX = groupX + iconWidth + Button.ICON_TEXT_SPACING;
+        } else {
+          textX = groupX;
+          this.iconActor.setPosition(groupX + this.textWidth + Button.ICON_TEXT_SPACING, iconY);
+        }
+      }
+    }
+
     if (this.text) {
       Game.getInstance().drawText(
         {
           text: this.text,
-          x: this.x + this.width / 2 - this.textWidth / 2,
-          y: this.y + this.height / 2 - this.textHeight / 2,
+          x: textX,
+          y: textY,
           color: this.fontColor,
           font: this.font
         },
         canvasContext
       );
-    }
-
-    if (this.icon) {
-      //Game.drawImageFromActor()
     }
   }
 
