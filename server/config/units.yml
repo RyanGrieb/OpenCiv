@@ -1,7 +1,69 @@
 units:
   - name: Warrior
     attack_type: melee
+    cost: 30
   - name: Scout
     attack_type: melee
+    cost: 20
   - name: Settler
     is_utility: true
+  - name: Archer
+    attack_type: ranged
+    cost: 40
+    required_tech: Archery
+  - name: Builder
+    is_utility: true
+    cost: 50
+  - name: Caravan
+    is_utility: true
+    cost: 75
+    required_tech: Animal Husbandry
+  - name: Cargo Ship
+    is_utility: true
+    cost: 100
+    required_tech: Sailing
+  - name: Work Boat
+    is_utility: true
+    cost: 30
+    required_tech: Sailing
+  - name: Galley
+    attack_type: naval
+    cost: 45
+    required_tech: Sailing
+  - name: Spearman
+    attack_type: melee
+    cost: 56
+    required_tech: Bronze Working
+  - name: Chariot Archer
+    attack_type: ranged
+    cost: 56
+    required_tech: The Wheel
+  - name: Horseman
+    attack_type: melee
+    cost: 75
+    default_move_distance: 3
+    required_tech: Horseback Riding
+  - name: Swordsman
+    attack_type: melee
+    cost: 75
+    required_tech: Iron Working
+  - name: Legion
+    attack_type: melee
+    cost: 75
+    required_tech: Iron Working
+  - name: Composite Bowman
+    attack_type: ranged
+    cost: 75
+    required_tech: Construction
+  - name: Catapult
+    attack_type: siege
+    cost: 75
+    required_tech: Mathematics
+  - name: Pikeman
+    attack_type: melee
+    cost: 90
+    required_tech: Civil Service
+  - name: Crossbowman
+    attack_type: ranged
+    cost: 120
+    required_tech: Machinery

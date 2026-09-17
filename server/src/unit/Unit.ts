@@ -29,11 +29,15 @@ export interface UnitYMLTypeData {
   attack_type?: string;
   default_move_distance?: number;
   is_utility?: boolean;
+  // Absent for units never offered through a city's production queue (e.g. the
+  // Settler, which is only ever granted directly at game start).
+  cost?: number;
+  required_tech?: string;
 }
 
 export class Unit {
   private static nextId = 0;
-  private static unitDataCache: Record<string, any>[];
+  private static unitDataCache: UnitYMLTypeData[];
 
   private name: string;
   private player: Player;
@@ -154,19 +158,23 @@ export class Unit {
     });
   }
 
+  // Every unit type the config knows about, including ones with no `cost` -
+  // callers building a production catalog must filter those out themselves.
+  public static getAllUnitData(): UnitYMLTypeData[] {
+    return Unit.loadUnitData();
+  }
+
   private static getUnitYMLTypeDataByName(name: string): UnitYMLTypeData | undefined {
+    return Unit.loadUnitData().find((unit) => unit.name.toLocaleLowerCase() === name.toLocaleLowerCase());
+  }
+
+  private static loadUnitData(): UnitYMLTypeData[] {
     if (!Unit.unitDataCache) {
       const unitsYMLData = YAML.parse(fs.readFileSync("./config/units.yml", "utf-8"));
       Unit.unitDataCache = JSON.parse(JSON.stringify(unitsYMLData.units));
     }
 
-    for (const unit of Unit.unitDataCache) {
-      if ((unit.name as string).toLocaleLowerCase() === name.toLocaleLowerCase()) {
-        return unit as UnitYMLTypeData;
-      }
-    }
-
-    return undefined;
+    return Unit.unitDataCache;
   }
 
   public moveToTile(options: {

@@ -9,5 +9,189 @@ buildings:
       - culture: 1
   - name: Monument
     asset_name: BUILDING_MONUMENT
+    cost: 60
     stats:
       - culture: 2
+  - name: Amphitheater
+    asset_name: BUILDING_AMPHITHEATER
+    cost: 100
+    required_tech: Drama and Poetry
+    stats:
+      - culture: 3
+  - name: Aqueduct
+    asset_name: BUILDING_AQUEDUCT
+    cost: 100
+    required_tech: Engineering
+    stats: []
+  - name: Bazaar
+    asset_name: BUILDING_BAZAAR
+    cost: 100
+    required_tech: Currency
+    stats:
+      - gold: 2
+      - science: 2
+  - name: Chapel
+    asset_name: BUILDING_CHAPEL
+    cost: 40
+    required_tech: Pottery
+    stats:
+      - faith: 1
+  - name: Circus
+    asset_name: BUILDING_CIRCUS
+    cost: 80
+    required_tech: Trapping
+    stats:
+      - morale: 10
+  - name: Colosseum
+    asset_name: BUILDING_COLOSSEUM
+    cost: 100
+    required_tech: Construction
+    stats:
+      - morale: 10
+  - name: Colossus
+    asset_name: BUILDING_COLOSSUS
+    cost: 185
+    required_tech: Iron Working
+    is_wonder: true
+    stats:
+      - culture: 1
+      - gold: 5
+  - name: Forge
+    asset_name: BUILDING_FORGE
+    cost: 120
+    required_tech: Metal Casting
+    stats:
+      - culture: 1
+  - name: Garden
+    asset_name: BUILDING_GARDEN
+    cost: 120
+    required_tech: Theology
+    stats:
+      - food: 1
+  - name: Granary
+    asset_name: BUILDING_GRANARY
+    cost: 40
+    required_tech: Pottery
+    stats:
+      - food: 2
+  - name: Great Library
+    asset_name: BUILDING_GREAT_LIBRARY
+    cost: 185
+    required_tech: Writing
+    is_wonder: true
+    stats:
+      - science: 3
+      - culture: 1
+  - name: Great Pyramids
+    asset_name: BUILDING_GREAT_PYRAMIDS
+    cost: 185
+    required_tech: Masonry
+    is_wonder: true
+    stats:
+      - culture: 1
+  - name: Hanging Gardens
+    asset_name: BUILDING_HANGING_GARDENS
+    cost: 250
+    required_tech: Mathematics
+    is_wonder: true
+    stats:
+      - food: 10
+      - culture: 1
+  - name: Library
+    asset_name: BUILDING_LIBRARY
+    cost: 75
+    required_tech: Writing
+    stats:
+      - science: 2
+  - name: Lighthouse
+    asset_name: BUILDING_LIGHTHOUSE
+    cost: 75
+    required_tech: Optics
+    stats:
+      - food: 1
+  - name: Machu Picchu
+    asset_name: BUILDING_MACHU_PICCHU
+    cost: 300
+    required_tech: Guilds
+    is_wonder: true
+    stats:
+      - culture: 1
+      - gold: 5
+  - name: Market
+    asset_name: BUILDING_MARKET
+    cost: 100
+    required_tech: Currency
+    stats:
+      - gold: 2
+  - name: Mint
+    asset_name: BUILDING_MINT
+    cost: 100
+    required_tech: Currency
+    stats: []
+  - name: National College
+    asset_name: BUILDING_NATIONAL_COLLEGE
+    cost: 135
+    required_tech: Philosophy
+    stats:
+      - science: 3
+      - culture: 1
+  - name: Shrine
+    asset_name: BUILDING_SHRINE
+    cost: 65
+    required_tech: Pottery
+    stats:
+      - culture: 1
+  - name: Stables
+    asset_name: BUILDING_STABLES
+    cost: 100
+    required_tech: Horseback Riding
+    stats: []
+  - name: Statue Of Ares
+    asset_name: BUILDING_STATUE_OF_ARES
+    cost: 185
+    required_tech: Bronze Working
+    is_wonder: true
+    stats:
+      - culture: 1
+  - name: Stonehenge
+    asset_name: BUILDING_STONEHENGE
+    cost: 185
+    required_tech: Calendar
+    is_wonder: true
+    stats:
+      - faith: 5
+  - name: Stoneworks
+    asset_name: BUILDING_STONEWORKS
+    cost: 75
+    required_tech: Calendar
+    stats:
+      - production: 1
+      - morale: 5
+  - name: Terracotta Army
+    asset_name: BUILDING_TERRACOTTA_ARMY
+    cost: 200
+    required_tech: Construction
+    is_wonder: true
+    stats:
+      - culture: 1
+  - name: Walls
+    asset_name: BUILDING_WALL
+    cost: 75
+    required_tech: Masonry
+    # Java applies this as +5 combat strength/max health directly rather than a
+    # StatLine entry - mapped onto our generic `defense` stat, the closest analog.
+    stats:
+      - defense: 5
+  - name: Water Mill
+    asset_name: BUILDING_WATERMILL
+    cost: 75
+    required_tech: The Wheel
+    stats:
+      - food: 2
+      - production: 1
+  - name: Workshop
+    asset_name: BUILDING_WORKSHOP
+    cost: 120
+    required_tech: Metal Casting
+    stats:
+      - production: 2

@@ -6,20 +6,28 @@ export interface BuildingData {
   asset_name: string;
   stats: Record<string, number>[];
   is_wonder?: boolean;
+  // Absent for buildings never offered through a city's production queue (e.g.
+  // Palace, which is only ever granted directly by applyFoundingBonuses()).
+  cost?: number;
+  required_tech?: string;
 }
 
 export class Building {
-  private static buildingDataCache: Record<string, any>[];
+  private static buildingDataCache: BuildingData[];
 
   private name: string;
   private assetName: string;
   private statLine: Record<string, number>;
   private isWonder: boolean;
+  private cost?: number;
+  private requiredTech?: string;
 
   constructor(data: BuildingData) {
     this.name = data.name;
     this.assetName = data.asset_name;
     this.isWonder = data.is_wonder ?? false;
+    this.cost = data.cost;
+    this.requiredTech = data.required_tech;
 
     this.statLine = {};
     for (const stat of data.stats) {
@@ -33,19 +41,23 @@ export class Building {
     return data ? new Building(data) : undefined;
   }
 
-  private static getBuildingDataByName(name: string): BuildingData | undefined {
+  // Every building the config knows about, including ones with no `cost` -
+  // callers building a production catalog must filter those out themselves.
+  public static getAllBuildings(): Building[] {
+    return Building.loadBuildingData().map((data) => new Building(data));
+  }
+
+  private static loadBuildingData(): BuildingData[] {
     if (!Building.buildingDataCache) {
       const buildingsYMLData = YAML.parse(fs.readFileSync("./config/buildings.yml", "utf-8"));
       Building.buildingDataCache = JSON.parse(JSON.stringify(buildingsYMLData.buildings));
     }
 
-    for (const building of Building.buildingDataCache) {
-      if ((building.name as string).toLocaleLowerCase() === name.toLocaleLowerCase()) {
-        return building as BuildingData;
-      }
-    }
+    return Building.buildingDataCache;
+  }
 
-    return undefined;
+  private static getBuildingDataByName(name: string): BuildingData | undefined {
+    return Building.loadBuildingData().find((building) => building.name.toLocaleLowerCase() === name.toLocaleLowerCase());
   }
 
   public getName() {
@@ -58,6 +70,14 @@ export class Building {
 
   public isWonderBuilding(): boolean {
     return this.isWonder;
+  }
+
+  public getCost(): number | undefined {
+    return this.cost;
+  }
+
+  public getRequiredTech(): string | undefined {
+    return this.requiredTech;
   }
 
   // Reconstructs the {name, asset_name, stats} wire shape the client's own

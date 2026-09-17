@@ -380,6 +380,10 @@ export class Actor implements SceneObject {
     return this.transparency;
   }
 
+  public setTransparency(transparency: number): void {
+    this.transparency = transparency;
+  }
+
   public static mergeActors(options: {
     actors: Actor[];
     spriteRegion: boolean;

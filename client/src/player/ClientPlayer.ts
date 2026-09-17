@@ -10,6 +10,12 @@ import { Numbers } from "../util/Numbers";
 import { Vector } from "../util/Vector";
 import { AbstractPlayer, PlayerData } from "./AbstractPlayer";
 
+export interface CurrentResearch {
+  techName: string;
+  progress: number;
+  cost: number;
+}
+
 /**
  * Currently client player handles selected units, the hovered tile, and movement lines from selecting a unit.
  * ClientPlayer will handle in the future: Ranged Attacks
@@ -23,6 +29,8 @@ export class ClientPlayer extends AbstractPlayer {
   private requestedNextTurn: boolean;
   private totalStats: Map<string, number> = new Map();
   private accumulatedStats: Map<string, number> = new Map();
+  private currentResearch: CurrentResearch | null = null;
+  private researchedTechs: Set<string> = new Set();
 
   constructor(playerJSON: PlayerData) {
     super(playerJSON);
@@ -209,7 +217,17 @@ export class ClientPlayer extends AbstractPlayer {
       }
     });
 
+    NetworkEvents.on({
+      eventName: "updateResearch",
+      parentObject: this,
+      callback: (data) => {
+        this.currentResearch = data["currentResearch"];
+        this.researchedTechs = new Set(data["researchedTechs"]);
+      }
+    });
+
     WebsocketClient.sendMessage({ event: "requestTotalStats" });
+    WebsocketClient.sendMessage({ event: "requestResearch" });
   }
 
   public setRequestedNextTurn(value: boolean) {
@@ -226,6 +244,14 @@ export class ClientPlayer extends AbstractPlayer {
 
   public getAccumulatedStat(stat: string): number {
     return this.accumulatedStats.get(stat) ?? 0;
+  }
+
+  public getCurrentResearch(): CurrentResearch | null {
+    return this.currentResearch;
+  }
+
+  public hasResearchedTech(techName: string): boolean {
+    return this.researchedTechs.has(techName);
   }
 
   public unselectUnit(): Unit {

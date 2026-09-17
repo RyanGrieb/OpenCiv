@@ -28,13 +28,6 @@ export interface ProductionOption {
   progress?: number;
 }
 
-// Hardcoded until research/tech gates what's buildable.
-const PRODUCTION_OPTIONS: ProductionOption[] = [
-  { type: "unit", name: "Warrior", cost: 30 },
-  { type: "unit", name: "Scout", cost: 20 },
-  { type: "building", name: "Monument", cost: 60 }
-];
-
 export class City {
   private tile: Tile;
   private player: Player;
@@ -99,18 +92,12 @@ export class City {
           return;
         }
 
-        const buildingExists = (option: ProductionOption) =>
-          this.buildings.some((b) => b.getName() === option.name);
-        const buildingInQueue = (option: ProductionOption) =>
-          this.productionQueue.some((q) => q.name === option.name);
-
+        const { units, buildings } = this.getProductionOptions();
         player.sendNetworkEvent({
           event: "updateProductionOptions",
           cityName: this.name,
-          units: PRODUCTION_OPTIONS.filter((option) => option.type === "unit"),
-          buildings: PRODUCTION_OPTIONS.filter((option) => option.type === "building").filter(
-            (option) => !buildingExists(option)
-          ).filter((option) => !buildingInQueue(option))
+          units,
+          buildings
         });
       }
     });
@@ -124,8 +111,11 @@ export class City {
           return;
         }
 
-        // Look up the real option server-side rather than trusting the client's cost.
-        const option = PRODUCTION_OPTIONS.find(
+        // Look up the real option server-side rather than trusting the client's cost -
+        // this also re-checks tech-gating, so a stale/forged request can't queue
+        // something the player hasn't researched.
+        const { units, buildings } = this.getProductionOptions();
+        const option = [...units, ...buildings].find(
           (option) => option.type === data["type"] && option.name === data["name"]
         );
         if (!option) return;
@@ -398,6 +388,32 @@ export class City {
     if (this.player.getCities().length < 2) {
       this.addBuilding("palace");
     }
+  }
+
+  // Units/buildings with no `cost` (e.g. Settler, Palace) are never offered here -
+  // they're granted directly elsewhere rather than queued. required_tech, when
+  // present, gates an option until the player has researched it.
+  private getProductionOptions(): { units: ProductionOption[]; buildings: ProductionOption[] } {
+    const isUnlocked = (requiredTech?: string) => !requiredTech || this.player.hasResearchedTech(requiredTech);
+
+    const units: ProductionOption[] = Unit.getAllUnitData()
+      .filter((unit) => typeof unit.cost === "number" && isUnlocked(unit.required_tech))
+      .map((unit) => ({ type: "unit", name: unit.name, cost: unit.cost }));
+
+    const buildingExists = (name: string) => this.buildings.some((b) => b.getName() === name);
+    const buildingInQueue = (name: string) => this.productionQueue.some((q) => q.name === name);
+
+    const buildings: ProductionOption[] = Building.getAllBuildings()
+      .filter(
+        (building) =>
+          typeof building.getCost() === "number" &&
+          isUnlocked(building.getRequiredTech()) &&
+          !buildingExists(building.getName()) &&
+          !buildingInQueue(building.getName())
+      )
+      .map((building) => ({ type: "building", name: building.getName(), cost: building.getCost() }));
+
+    return { units, buildings };
   }
 
   private applyProduction() {

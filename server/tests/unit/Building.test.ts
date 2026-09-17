@@ -1,4 +1,5 @@
 import { Building } from '../../src/city/Building';
+import { Technology } from '../../src/research/Technology';
 
 // Deliberately not mocking fs/yaml - exercises the real config/buildings.yml,
 // same as City.ts's original getBuildingDataByName did (never covered by
@@ -56,5 +57,45 @@ describe('Building', () => {
 
     expect(roundTripped.getStatLine()).toEqual(original.getStatLine());
     expect(roundTripped.getName()).toBe(original.getName());
+  });
+
+  describe('getAllBuildings', () => {
+    it('includes every building the config knows about', () => {
+      const names = Building.getAllBuildings().map((building) => building.getName());
+
+      expect(names).toEqual(expect.arrayContaining(['Palace', 'Monument', 'Granary', 'Great Library', 'Walls']));
+    });
+
+    it('exposes cost and required_tech for a tech-gated building', () => {
+      const granary = Building.getAllBuildings().find((building) => building.getName() === 'Granary');
+
+      expect(granary.getCost()).toBe(40);
+      expect(granary.getRequiredTech()).toBe('Pottery');
+    });
+
+    it('leaves cost and required_tech undefined for a building never offered through production', () => {
+      const palace = Building.getAllBuildings().find((building) => building.getName() === 'Palace');
+
+      expect(palace.getCost()).toBeUndefined();
+      expect(palace.getRequiredTech()).toBeUndefined();
+    });
+
+    it('flags wonders', () => {
+      const buildings = Building.getAllBuildings();
+
+      expect(buildings.find((b) => b.getName() === 'Great Library').isWonderBuilding()).toBe(true);
+      expect(buildings.find((b) => b.getName() === 'Granary').isWonderBuilding()).toBe(false);
+    });
+
+    it('has every required_tech reference a technology that actually exists in techs.yml', () => {
+      const techNames = new Set(Technology.getAllTechnologies().map((tech) => tech.getName()));
+
+      for (const building of Building.getAllBuildings()) {
+        const requiredTech = building.getRequiredTech();
+        if (requiredTech) {
+          expect(techNames.has(requiredTech)).toBe(true);
+        }
+      }
+    });
   });
 });

@@ -4,6 +4,7 @@ import { Tile } from '../../src/map/Tile';
 import { Player } from '../../src/Player';
 import { ServerEvents } from '../../src/Events';
 import { Game } from '../../src/Game';
+import { Technology } from '../../src/research/Technology';
 import { WebSocket } from 'ws';
 
 // Mock external dependencies
@@ -326,6 +327,37 @@ describe('Unit', () => {
 
     it('returns undefined for an unrecognized unit name', () => {
       expect(Unit.createFromName('Nonexistent', mockTile, mockPlayer)).toBeUndefined();
+    });
+  });
+
+  describe('getAllUnitData', () => {
+    it('includes every unit the config knows about', () => {
+      const names = Unit.getAllUnitData().map((unit) => unit.name);
+
+      expect(names).toEqual(expect.arrayContaining(['Warrior', 'Settler', 'Archer', 'Crossbowman']));
+    });
+
+    it('exposes cost and required_tech for a tech-gated unit', () => {
+      const caravan = Unit.getAllUnitData().find((unit) => unit.name === 'Caravan');
+
+      expect(caravan.cost).toBe(75);
+      expect(caravan.required_tech).toBe('Animal Husbandry');
+    });
+
+    it('leaves cost undefined for a unit never offered through production', () => {
+      const settler = Unit.getAllUnitData().find((unit) => unit.name === 'Settler');
+
+      expect(settler.cost).toBeUndefined();
+    });
+
+    it('has every required_tech reference a technology that actually exists in techs.yml', () => {
+      const techNames = new Set(Technology.getAllTechnologies().map((tech) => tech.getName()));
+
+      for (const unit of Unit.getAllUnitData()) {
+        if (unit.required_tech) {
+          expect(techNames.has(unit.required_tech)).toBe(true);
+        }
+      }
     });
   });
 });

@@ -1,0 +1,222 @@
+technologies:
+  # slot is the tech's horizontal column (0-9) within its row - a fixed 10-slot
+  # grid, matching Civ5's tech-web layout, where unused slots stay visually
+  # empty rather than techs packing together. row (0 = bottom) is hand-placed
+  # too, not derived from prerequisite depth - real Civ5 doesn't pack every
+  # tech into the shallowest row its prerequisites allow. Values marked
+  # "placeholder" below have no real Civ5 layout reference yet.
+  - name: Pottery
+    asset_name: TECH_POTTERY
+    cost: 35
+    prerequisites: []
+    row: 0
+    slot: 1
+    description: Enables long-term storage of food and materials.
+  - name: Animal Husbandry
+    asset_name: ICON_EMPTY_PASTURE
+    cost: 35
+    prerequisites: []
+    row: 0
+    slot: 4
+    description: Unlocks pastures and an additional trade route.
+  - name: Archery
+    asset_name: UNIT_ARCHER
+    cost: 35
+    prerequisites: []
+    row: 0
+    slot: 6
+    description: Grants access to the Archer unit.
+  - name: Mining
+    asset_name: TECH_MINING
+    cost: 35
+    prerequisites: []
+    row: 0
+    slot: 8
+    description: Allows mining mineral resources and clearing forests.
+  - name: Sailing
+    asset_name: TECH_SAILING
+    cost: 55
+    prerequisites: [Pottery]
+    row: 1
+    slot: 0
+    description: Develops the means to traverse the seas, one of civilization's great early achievements.
+  - name: Calendar
+    asset_name: TECH_CALENDAR
+    cost: 55
+    prerequisites: [Pottery]
+    row: 1
+    slot: 1
+    description: Allows prediction of seasonal change, essential for advanced agriculture.
+  - name: Writing
+    asset_name: TECH_WRITING
+    cost: 55
+    prerequisites: [Pottery]
+    row: 1
+    slot: 2
+    description: Enables recording information on durable materials, preserving knowledge across generations.
+  - name: Trapping
+    asset_name: TECH_TRAPPING
+    cost: 55
+    prerequisites: [Animal Husbandry]
+    row: 1
+    slot: 4
+    description: Enables hunting of animals that cannot be domesticated in human-controlled environments.
+  - name: The Wheel
+    asset_name: TECH_THE_WHEEL
+    cost: 55
+    prerequisites: [Animal Husbandry, Archery]
+    row: 1
+    slot: 6
+    description: A key technology that transforms how people move around and transport goods.
+  - name: Masonry
+    asset_name: TECH_MASONRY
+    cost: 55
+    prerequisites: [Mining]
+    row: 1
+    slot: 8
+    description: The art of building with stone, enabling massive stone structures and fortifications.
+  - name: Bronze Working
+    asset_name: TECH_BRONZE_WORKING
+    cost: 55
+    prerequisites: [Mining]
+    row: 1
+    slot: 9
+    description: The first metal-working technology, providing sturdy tools and early bronze weapons.
+  - name: Optics
+    asset_name: TECH_OPTICS
+    cost: 105
+    prerequisites: [Sailing]
+    row: 2
+    slot: 0
+    description: Develops tools for seeing farther, enabling key advances in seafaring.
+  - name: Horseback Riding
+    asset_name: TECH_HORSEBACK_RIDING
+    cost: 105
+    prerequisites: [The Wheel]
+    row: 2
+    slot: 4
+    description: Enables large animals once used for food or labor to be ridden for transportation.
+  - name: Mathematics
+    asset_name: TECH_MATHEMATICS
+    cost: 105
+    prerequisites: [The Wheel]
+    row: 2
+    slot: 6
+    description: The foundational science for exploring and understanding the physical world.
+  - name: Construction
+    asset_name: TECH_CONSTRUCTION
+    cost: 105
+    prerequisites: [Masonry]
+    row: 2
+    slot: 8
+    description: Represents further advances in building and combining materials.
+  - name: Philosophy
+    asset_name: TECH_PHILOSOPHY
+    cost: 105
+    prerequisites: [Calendar, Writing]
+    row: 3
+    slot: 1
+    description: The first abstract science, advancing civilization's intellectual and reasoning power.
+  - name: Drama and Poetry
+    asset_name: TECH_DRAMA_AND_POETRY
+    cost: 105
+    prerequisites: [Writing]
+    row: 3
+    slot: 2
+    description: Unlocks the Amphitheater and early cultural works.
+  - name: Currency
+    asset_name: TECH_CURRENCY
+    cost: 175
+    prerequisites: [Mathematics]
+    row: 3
+    slot: 6
+    description: Establishes a single consolidated trading system based on one standard material.
+  - name: Engineering
+    asset_name: TECH_ENGINEERING
+    cost: 175
+    prerequisites: [Mathematics, Construction]
+    row: 3
+    slot: 7
+    description: Builds on mathematics to design complex structures and machines before actually building them.
+  - name: Iron Working
+    asset_name: TECH_IRON_WORKING
+    cost: 105
+    prerequisites: [Bronze Working]
+    row: 3
+    slot: 9
+    description: The discovery of iron, a metal stronger than bronze, lays the groundwork for advanced metallurgy.
+  - name: Theology
+    asset_name: TECH_THEOLOGY
+    cost: 175
+    prerequisites: [Drama and Poetry, Philosophy]
+    row: 4
+    slot: 1
+    description: The scientific study of spirituality, turning religion into a subject of research.
+  - name: Civil Service
+    asset_name: TECH_CIVIL_SERVICE
+    cost: 175
+    prerequisites: [Philosophy, Trapping]
+    row: 4
+    slot: 4
+    description: Creates the first true state organization, improving food production.
+  # Machinery removed from Guilds' prerequisites - real Civ5 apparently doesn't
+  # gate it there (see the row conflict this resolved: Guilds sits in row 4,
+  # Machinery in row 5, so Machinery can't be one of its prerequisites).
+  - name: Guilds
+    asset_name: TECH_GUILDS
+    cost: 175
+    prerequisites: [Currency]
+    row: 4
+    slot: 6
+    description: The first worker unions, letting tradespeople organize and better control their trades.
+  - name: Metal Casting
+    asset_name: TECH_METAL_CASTING
+    cost: 175
+    prerequisites: [Iron Working]
+    row: 4
+    slot: 8
+    description: Introduces molds for casting metal into complex shapes, advancing metallurgy further.
+  # placeholder costs for this row and everything above it - no real Civ5 cost
+  # reference yet, just kept in the same range as their neighbors.
+  - name: Compass
+    asset_name: TECH_COMPASS
+    cost: 275
+    prerequisites: [Optics]
+    row: 5
+    slot: 0
+    description: Enables more reliable navigation, extending a ship's vision range at sea.
+  - name: Education
+    asset_name: TECH_EDUCATION
+    cost: 275
+    prerequisites: [Theology, Civil Service]
+    row: 5
+    slot: 2
+    description: Establishes formal schooling, greatly increasing the pursuit of knowledge.
+  - name: Chivalry
+    asset_name: TECH_CHIVALRY
+    cost: 275
+    prerequisites: [Civil Service, Horseback Riding, Currency]
+    row: 5
+    slot: 5
+    description: The code of conduct for knights, unlocking powerful mounted warriors.
+  - name: Machinery
+    asset_name: TECH_MACHINERY
+    cost: 275
+    prerequisites: [Engineering]
+    row: 5
+    slot: 7
+    description: Builds on metalworking and science to create devices with multiple moving parts working together.
+  - name: Physics
+    asset_name: TECH_PHYSICS
+    cost: 275
+    prerequisites: [Engineering, Metal Casting]
+    row: 5
+    slot: 8
+    description: Develops the scientific study of motion and matter, advancing military engineering.
+  - name: Steel
+    asset_name: TECH_STEEL
+    cost: 275
+    prerequisites: [Metal Casting]
+    row: 5
+    slot: 9
+    description: A stronger, more refined form of iron, enabling more resilient weapons and armor.

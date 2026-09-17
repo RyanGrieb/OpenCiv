@@ -10,6 +10,8 @@ import { ExternalPlayer } from "../../player/ExternalPlayer";
 import { Button, ButtonSize } from "../../ui/Button";
 import { CityDisplayInfo } from "../../ui/CityDisplayInfo";
 import { Label } from "../../ui/Label";
+import { ResearchDisplayInfo } from "../../ui/ResearchDisplayInfo";
+import { ResearchTreeWindow } from "../../ui/ResearchTreeWindow";
 import { StatusBar } from "../../ui/StatusBar";
 import { UITheme } from "../../ui/UITheme";
 import { Actor } from "../Actor";
@@ -27,6 +29,8 @@ export class InGameScene extends Scene {
   private tileInformationLabel: Label;
   private tileYieldActors: Actor[] = [];
   private statusBar: StatusBar;
+  private researchDisplayInfo: ResearchDisplayInfo;
+  private researchTreeWindow: ResearchTreeWindow;
   private cityDisplayInfo: CityDisplayInfo;
   private nextTurnButton: Button;
   private closeCityDisplayButton: Button;
@@ -215,6 +219,7 @@ export class InGameScene extends Scene {
     super.onDestroyed(this);
     this.escMenu = undefined;
     this.cityDisplayInfo = undefined;
+    this.researchTreeWindow = undefined;
     this.openUIElement = undefined;
 
     return Scene.ExitReceipt;
@@ -228,6 +233,7 @@ export class InGameScene extends Scene {
 
     this.removeActor(this.tileInformationLabel);
     this.removeActor(this.statusBar);
+    this.removeActor(this.researchDisplayInfo);
     this.removeActor(this.nextTurnButton);
     this.removeActor(this.closeCityDisplayButton);
 
@@ -262,6 +268,9 @@ export class InGameScene extends Scene {
 
     this.statusBar = new StatusBar();
     this.addActor(this.statusBar);
+
+    this.researchDisplayInfo = new ResearchDisplayInfo();
+    this.addActor(this.researchDisplayInfo);
 
     this.nextTurnButton = new Button({
       text: this.clientPlayer.hasRequestedNextTurn() ? "Waiting..." : "Next Turn",
@@ -324,6 +333,15 @@ export class InGameScene extends Scene {
     }
   }
 
+  public toggleResearchUI() {
+    if (!this.researchTreeWindow) {
+      if (this.openUIElement) return;
+      this.openResearchUI();
+    } else {
+      this.closeResearchUI();
+    }
+  }
+
   private setUIState(isOpen: boolean) {
     this.getCamera().lock(isOpen);
     this.call("uiStateChanged", { opened: isOpen });
@@ -364,6 +382,7 @@ export class InGameScene extends Scene {
 
     this.removeActor(this.nextTurnButton);
     this.removeActor(this.tileInformationLabel);
+    this.removeActor(this.researchDisplayInfo);
 
     this.addActor(this.closeCityDisplayButton);
   }
@@ -376,8 +395,33 @@ export class InGameScene extends Scene {
 
     this.addActor(this.nextTurnButton);
     this.addActor(this.tileInformationLabel);
+    this.addActor(this.researchDisplayInfo);
 
     this.removeActor(this.closeCityDisplayButton);
+  }
+
+  private openResearchUI() {
+    this.researchTreeWindow = new ResearchTreeWindow();
+    this.addActor(this.researchTreeWindow);
+
+    this.setUIState(true);
+    this.systemMenuOpen = false;
+    this.openUIElement = { close: () => this.toggleResearchUI() };
+
+    this.removeActor(this.nextTurnButton);
+    this.removeActor(this.tileInformationLabel);
+    this.removeActor(this.researchDisplayInfo);
+  }
+
+  private closeResearchUI() {
+    this.removeActor(this.researchTreeWindow);
+    this.researchTreeWindow = undefined;
+    this.setUIState(false);
+    this.openUIElement = undefined;
+
+    this.addActor(this.nextTurnButton);
+    this.addActor(this.tileInformationLabel);
+    this.addActor(this.researchDisplayInfo);
   }
 
   private toggleEscMenu() {

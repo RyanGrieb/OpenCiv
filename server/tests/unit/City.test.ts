@@ -53,7 +53,15 @@ describe('City', () => {
       sendNetworkEvent: jest.fn(),
       sendTotalStatsUpdate: jest.fn(),
       getCities: jest.fn().mockReturnValue([]),
+      hasResearchedTech: jest.fn().mockReturnValue(false),
     } as unknown as jest.Mocked<Player>;
+
+    (Unit.getAllUnitData as jest.Mock).mockReturnValue([
+      { name: 'Warrior', attack_type: 'melee', cost: 30 },
+      { name: 'Scout', attack_type: 'melee', cost: 20 },
+      { name: 'Settler', is_utility: true },
+      { name: 'Archer', attack_type: 'ranged', cost: 40, required_tech: 'Archery' },
+    ]);
 
     jest.spyOn(GameMap, 'getInstance').mockReturnValue({
       getTileWithHighestYeild: jest.fn().mockReturnValue(mockWorkedTile),
@@ -71,7 +79,7 @@ describe('City', () => {
     mockPlayer.sendNetworkEvent.mockClear();
   });
 
-  it('replies to a production-options request with the hardcoded units/buildings split', () => {
+  it('replies to a production-options request with the units/buildings that have no research gate', () => {
     const mockWebsocket = {} as WebSocket;
 
     triggerServerEvent('requestProductionOptions', { cityName: 'TestCity' }, mockWebsocket);
@@ -87,6 +95,28 @@ describe('City', () => {
         { type: 'building', name: 'Monument', cost: 60 },
       ],
     });
+  });
+
+  it('excludes a unit gated by an unresearched technology', () => {
+    const mockWebsocket = {} as WebSocket;
+
+    triggerServerEvent('requestProductionOptions', { cityName: 'TestCity' }, mockWebsocket);
+
+    const { units } = (mockPlayer.sendNetworkEvent as jest.Mock).mock.calls[0][0];
+    expect(units.find((option: { name: string }) => option.name === 'Archer')).toBeUndefined();
+  });
+
+  it('includes a tech-gated unit once its required technology is researched', () => {
+    const mockWebsocket = {} as WebSocket;
+    mockPlayer.hasResearchedTech.mockImplementation((tech: string) => tech === 'Archery');
+
+    triggerServerEvent('requestProductionOptions', { cityName: 'TestCity' }, mockWebsocket);
+
+    expect(mockPlayer.sendNetworkEvent).toHaveBeenCalledWith(
+      expect.objectContaining({
+        units: expect.arrayContaining([{ type: 'unit', name: 'Archer', cost: 40 }]),
+      })
+    );
   });
 
   it('ignores a production-options request for a city it does not own', () => {

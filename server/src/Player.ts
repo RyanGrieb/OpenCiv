@@ -2,6 +2,7 @@ import { WebSocket } from "ws";
 import { ServerEvents } from "./Events";
 import { Game } from "./Game";
 import { City } from "./city/City";
+import { Technology } from "./research/Technology";
 import { Unit } from "./unit/Unit";
 
 // Stats that pool across a player's whole empire, as opposed to city-specific
@@ -18,6 +19,12 @@ export interface TotalStats {
 // rather than just reflecting the current rate. Add a key here (e.g. "faith") to
 // make another stat accumulate - no other changes needed, client included.
 const ACCUMULATING_STATS: (keyof TotalStats)[] = ["gold"];
+
+export interface CurrentResearch {
+  techName: string;
+  progress: number;
+  cost: number;
+}
 
 /**
  * Represents a player in the game.
@@ -38,6 +45,8 @@ export class Player {
   private cities: City[];
   private units: Unit[];
   private accumulatedStats: Map<string, number>;
+  private currentResearch: CurrentResearch | null;
+  private researchedTechs: Set<string>;
 
   /**
    * Creates a new player object.
@@ -52,6 +61,8 @@ export class Player {
     this.cities = [];
     this.units = [];
     this.accumulatedStats = new Map();
+    this.currentResearch = null;
+    this.researchedTechs = new Set();
 
     // Add event listener for when the player disconnects
     this.wsConnection.on("close", (data) => {
@@ -99,6 +110,7 @@ export class Player {
       parentObject: this,
       callback: () => {
         this.accumulateTurnStats();
+        this.accumulateResearch();
       },
       globalEvent: true
     });
@@ -110,6 +122,51 @@ export class Player {
         if (this.wsConnection != websocket) return;
 
         this.sendTotalStatsUpdate();
+      },
+      globalEvent: true
+    });
+
+    ServerEvents.on({
+      eventName: "requestResearch",
+      parentObject: this,
+      callback: (data, websocket) => {
+        if (this.wsConnection != websocket) return;
+
+        this.sendResearchUpdate();
+      },
+      globalEvent: true
+    });
+
+    ServerEvents.on({
+      eventName: "requestAvailableTechs",
+      parentObject: this,
+      callback: (data, websocket) => {
+        if (this.wsConnection != websocket) return;
+
+        this.sendAvailableTechs();
+      },
+      globalEvent: true
+    });
+
+    ServerEvents.on({
+      eventName: "chooseResearch",
+      parentObject: this,
+      callback: (data, websocket) => {
+        if (this.wsConnection != websocket) return;
+
+        this.chooseResearch(data["techName"]);
+      },
+      globalEvent: true
+    });
+
+    ServerEvents.on({
+      eventName: "cancelResearch",
+      parentObject: this,
+      callback: (data, websocket) => {
+        if (this.wsConnection != websocket) return;
+
+        this.currentResearch = null;
+        this.sendResearchUpdate();
       },
       globalEvent: true
     });
@@ -254,6 +311,10 @@ export class Player {
     return Object.fromEntries(this.accumulatedStats);
   }
 
+  public hasResearchedTech(techName: string): boolean {
+    return this.researchedTechs.has(techName);
+  }
+
   private accumulateTurnStats() {
     const rates = this.getTotalStats();
 
@@ -270,6 +331,51 @@ export class Player {
       event: "updateTotalStats",
       stats: this.getTotalStats(),
       accumulatedStats: this.getAccumulatedStats()
+    });
+  }
+
+  public getCurrentResearch(): CurrentResearch | null {
+    return this.currentResearch;
+  }
+
+  public sendResearchUpdate() {
+    this.sendNetworkEvent({
+      event: "updateResearch",
+      currentResearch: this.currentResearch,
+      researchedTechs: Array.from(this.researchedTechs)
+    });
+  }
+
+  private chooseResearch(techName: string) {
+    const tech = Technology.createFromName(techName);
+    if (!tech || this.researchedTechs.has(tech.getName())) return;
+
+    const missingPrerequisite = tech.getPrerequisites().some((prereq) => !this.researchedTechs.has(prereq));
+    if (missingPrerequisite) return;
+
+    this.currentResearch = { techName: tech.getName(), progress: 0, cost: tech.getCost() };
+    this.sendResearchUpdate();
+  }
+
+  // Mirrors accumulateTurnStats: banks this turn's science against whatever is
+  // currently being researched, completing it once the cost is met.
+  private accumulateResearch() {
+    if (!this.currentResearch) return;
+
+    this.currentResearch.progress += this.getTotalStats().science;
+
+    if (this.currentResearch.progress >= this.currentResearch.cost) {
+      this.researchedTechs.add(this.currentResearch.techName);
+      this.currentResearch = null;
+    }
+
+    this.sendResearchUpdate();
+  }
+
+  public sendAvailableTechs() {
+    this.sendNetworkEvent({
+      event: "updateAvailableTechs",
+      technologies: Technology.getAllTechnologies().map((tech) => tech.toJSON())
     });
   }
 
