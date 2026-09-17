@@ -22,6 +22,7 @@ const ACCUMULATING_STATS: (keyof TotalStats)[] = ["gold"];
 
 export interface CurrentResearch {
   techName: string;
+  assetName: string;
   progress: number;
   cost: number;
 }
@@ -353,7 +354,7 @@ export class Player {
     const missingPrerequisite = tech.getPrerequisites().some((prereq) => !this.researchedTechs.has(prereq));
     if (missingPrerequisite) return;
 
-    this.currentResearch = { techName: tech.getName(), progress: 0, cost: tech.getCost() };
+    this.currentResearch = { techName: tech.getName(), assetName: tech.getAssetName(), progress: 0, cost: tech.getCost() };
     this.sendResearchUpdate();
   }
 

@@ -45,7 +45,7 @@ describe('Technology', () => {
 
     expect(technology.toJSON()).toEqual({
       name: 'Pottery',
-      asset_name: 'TECH_POTTERY',
+      asset_name: 'BUILDING_GRANARY',
       cost: 35,
       prerequisites: [],
       description: 'Enables long-term storage of food and materials.',

@@ -12,6 +12,7 @@ import { AbstractPlayer, PlayerData } from "./AbstractPlayer";
 
 export interface CurrentResearch {
   techName: string;
+  assetName: string;
   progress: number;
   cost: number;
 }

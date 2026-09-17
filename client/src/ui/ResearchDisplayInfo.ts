@@ -1,4 +1,4 @@
-import { GameImage, SpriteRegion } from "../Assets";
+import { GameImage, SpriteRegion, resolveSpriteRegion } from "../Assets";
 import { Game } from "../Game";
 import { NetworkEvents } from "../network/Client";
 import { CurrentResearch } from "../player/ClientPlayer";
@@ -13,9 +13,7 @@ const WIDTH = 260;
 const HEIGHT = 130;
 const PADDING = 10;
 
-// Top-left "currently researching" popup. Mirrors CityDisplayInfo's
-// POPUP_BOX layout. There's no tech tree yet, so `currentResearch` is always
-// null for now - this just renders the two states the feature needs once one exists.
+// Top-left "currently researching" popup. Mirrors CityDisplayInfo's POPUP_BOX layout.
 export class ResearchDisplayInfo extends ActorGroup {
   private statusLabel: Label;
   private techIcon: Actor;
@@ -77,7 +75,6 @@ export class ResearchDisplayInfo extends ActorGroup {
     });
     this.addActor(openResearchButton);
 
-    // ICON_UNKNOWN stands in for a dedicated question-mark asset the user will add later.
     this.techIcon = new Actor({
       image: Game.getInstance().getImage(GameImage.SPRITESHEET),
       spriteRegion: SpriteRegion.ICON_UNKNOWN,
@@ -108,6 +105,7 @@ export class ResearchDisplayInfo extends ActorGroup {
 
     this.statusLabel.setText(this.getStatusText(research, clientPlayer.getTotalStat("science")));
     this.nameLabel.setText(research ? research.techName : "???");
+    this.techIcon.setSpriteRegion(research ? resolveSpriteRegion(research.assetName) ?? SpriteRegion.ICON_UNKNOWN : SpriteRegion.ICON_UNKNOWN);
   }
 
   private getStatusText(research: CurrentResearch | null, scienceRate: number): string {
