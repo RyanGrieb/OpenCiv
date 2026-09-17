@@ -43,6 +43,14 @@ Currently, the project is being rewritten so no playable version is available wi
 3. Execute the test command
 `npm run test`
 
+## Development workflows
+
+- **Typecheck before pushing** — `cd client` or `cd server`, then `npx tsc -p tsconfig.typecheck.json --noEmit`. This is the same check CI runs.
+- **Format the repo** — `npm run format` (Prettier, run from the root).
+- **Add or edit a sprite** — drop a `.png` under `client/assets/sprites/<category>/<NAME>.png`, then run `npm run generate-sprites` from the root and commit the regenerated `client/src/generated/SpriteManifest.ts`.
+- **Generate API docs** — `npm run generate-docs` (Typedoc for both projects, output in `documentation/`).
+
+See `CLAUDE.md` for more on the project's architecture and conventions.
 
 ## Keybinds
 
