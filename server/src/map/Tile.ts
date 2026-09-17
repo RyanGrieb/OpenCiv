@@ -3,8 +3,7 @@ import { GameMap } from "./GameMap";
 import { TileIndexer } from "./TileIndexer";
 import { Unit } from "../unit/Unit";
 import { City } from "../city/City";
-import fs from "fs";
-import YAML from "yaml";
+import { ConfigLoader } from "../util/ConfigLoader";
 
 // A tile/building stat-line is represented as an array of single-key partial objects
 // (e.g. [{ science: 0 }, { gold: 0 }, ...]) rather than one flat dictionary.
@@ -20,8 +19,6 @@ export interface StatValues {
 export type StatEntry = Partial<StatValues>;
 
 export class Tile {
-  private static allTileStats: Record<string, any>;
-
   //== Generation Values ==
   private generationHeight: number;
   private generationTemp: number;
@@ -52,14 +49,7 @@ export class Tile {
     this.addTileType(tileType);
   }
   public static getAllTileStats(): Record<string, any> {
-    if (!Tile.allTileStats) {
-      // Load available civilizations from config file
-      const tileYAMLData = YAML.parse(fs.readFileSync("./config/tiles.yml", "utf-8"));
-      //Convert civsData from YAML to JSON:
-      Tile.allTileStats = JSON.parse(JSON.stringify(tileYAMLData.tiles));
-    }
-
-    return Tile.allTileStats;
+    return ConfigLoader.load<{ tiles: Record<string, any> }>("./config/tiles.yml").tiles;
   }
 
   public setCity(city: City) {

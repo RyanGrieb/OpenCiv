@@ -1,5 +1,4 @@
-import fs from "fs";
-import YAML from "yaml";
+import { ConfigLoader } from "../util/ConfigLoader";
 
 export interface BuildingData {
   name: string;
@@ -13,8 +12,6 @@ export interface BuildingData {
 }
 
 export class Building {
-  private static buildingDataCache: BuildingData[];
-
   private name: string;
   private assetName: string;
   private statLine: Record<string, number>;
@@ -48,12 +45,7 @@ export class Building {
   }
 
   private static loadBuildingData(): BuildingData[] {
-    if (!Building.buildingDataCache) {
-      const buildingsYMLData = YAML.parse(fs.readFileSync("./config/buildings.yml", "utf-8"));
-      Building.buildingDataCache = JSON.parse(JSON.stringify(buildingsYMLData.buildings));
-    }
-
-    return Building.buildingDataCache;
+    return ConfigLoader.load<{ buildings: BuildingData[] }>("./config/buildings.yml").buildings;
   }
 
   private static getBuildingDataByName(name: string): BuildingData | undefined {

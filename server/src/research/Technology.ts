@@ -1,5 +1,4 @@
-import fs from "fs";
-import YAML from "yaml";
+import { ConfigLoader } from "../util/ConfigLoader";
 
 export interface TechnologyData {
   name: string;
@@ -19,8 +18,6 @@ export interface TechnologyData {
 }
 
 export class Technology {
-  private static technologyDataCache: TechnologyData[];
-
   private name: string;
   private assetName: string;
   private cost: number;
@@ -49,12 +46,7 @@ export class Technology {
   }
 
   private static loadTechnologyData(): TechnologyData[] {
-    if (!Technology.technologyDataCache) {
-      const technologiesYMLData = YAML.parse(fs.readFileSync("./config/techs.yml", "utf-8"));
-      Technology.technologyDataCache = JSON.parse(JSON.stringify(technologiesYMLData.technologies));
-    }
-
-    return Technology.technologyDataCache;
+    return ConfigLoader.load<{ technologies: TechnologyData[] }>("./config/techs.yml").technologies;
   }
 
   private static getTechnologyDataByName(name: string): TechnologyData | undefined {

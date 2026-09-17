@@ -1,6 +1,5 @@
-import fs from "fs";
 import random from "random";
-import YAML from "yaml";
+import { ConfigLoader } from "../util/ConfigLoader";
 
 export class MapResource {
   name: string;
@@ -84,29 +83,20 @@ interface MapResourcesConfig {
 }
 
 export class MapResources {
-  private static resourcesData: MapResourcesConfig;
-
-  public static async loadConfigurationFile() {
-    const file = fs.readFileSync("./config/map_resources.yml", "utf-8");
-    this.resourcesData = YAML.parse(file);
-  }
-
   public static getRandomMapResource(options: { mapResourceType: string }): MapResource {
-    if (!this.resourcesData) this.loadConfigurationFile();
-
+    const resourcesData = MapResources.loadResourcesData();
     let resourceData = undefined;
 
     switch (options.mapResourceType) {
       case "bonus":
-        resourceData = this.resourcesData.bonus_resources[random.int(0, this.resourcesData.bonus_resources.length - 1)];
+        resourceData = resourcesData.bonus_resources[random.int(0, resourcesData.bonus_resources.length - 1)];
         break;
       case "strategic":
         resourceData =
-          this.resourcesData.strategic_resources[random.int(0, this.resourcesData.strategic_resources.length - 1)];
+          resourcesData.strategic_resources[random.int(0, resourcesData.strategic_resources.length - 1)];
         break;
       case "luxury":
-        resourceData =
-          this.resourcesData.luxury_resources[random.int(0, this.resourcesData.luxury_resources.length - 1)];
+        resourceData = resourcesData.luxury_resources[random.int(0, resourcesData.luxury_resources.length - 1)];
         break;
     }
 
@@ -119,13 +109,16 @@ export class MapResources {
    * @returns
    */
   public static isResourceTile(tile: Tile): boolean {
-    if (!this.resourcesData) this.loadConfigurationFile();
-
+    const resourcesData = MapResources.loadResourcesData();
     const resourceTileTypes = [
-      ...this.resourcesData.bonus_resources.map((resource: MapResourceConfigData) => resource.name),
-      ...this.resourcesData.strategic_resources.map((resource: MapResourceConfigData) => resource.name),
-      ...this.resourcesData.luxury_resources.map((resource: MapResourceConfigData) => resource.name)
+      ...resourcesData.bonus_resources.map((resource: MapResourceConfigData) => resource.name),
+      ...resourcesData.strategic_resources.map((resource: MapResourceConfigData) => resource.name),
+      ...resourcesData.luxury_resources.map((resource: MapResourceConfigData) => resource.name)
     ];
     return tile.containsTileTypes(resourceTileTypes);
+  }
+
+  private static loadResourcesData(): MapResourcesConfig {
+    return ConfigLoader.load<MapResourcesConfig>("./config/map_resources.yml");
   }
 }

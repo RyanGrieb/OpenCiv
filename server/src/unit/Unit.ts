@@ -1,10 +1,9 @@
-import fs from "fs";
-import YAML from "yaml";
 import { ServerEvents } from "../Events";
 import { Game } from "../Game";
 import { Player } from "../Player";
 import { GameMap } from "../map/GameMap";
 import { Tile } from "../map/Tile";
+import { ConfigLoader } from "../util/ConfigLoader";
 
 export interface UnitAction {
   name: string;
@@ -37,7 +36,6 @@ export interface UnitYMLTypeData {
 
 export class Unit {
   private static nextId = 0;
-  private static unitDataCache: UnitYMLTypeData[];
 
   private name: string;
   private player: Player;
@@ -169,12 +167,7 @@ export class Unit {
   }
 
   private static loadUnitData(): UnitYMLTypeData[] {
-    if (!Unit.unitDataCache) {
-      const unitsYMLData = YAML.parse(fs.readFileSync("./config/units.yml", "utf-8"));
-      Unit.unitDataCache = JSON.parse(JSON.stringify(unitsYMLData.units));
-    }
-
-    return Unit.unitDataCache;
+    return ConfigLoader.load<{ units: UnitYMLTypeData[] }>("./config/units.yml").units;
   }
 
   public moveToTile(options: {

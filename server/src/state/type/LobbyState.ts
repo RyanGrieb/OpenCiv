@@ -2,9 +2,8 @@ import { Game } from "../../Game";
 import { ServerEvents } from "../../Events";
 import { Player } from "../../Player";
 import { State } from "../State";
-import fs from "fs";
 import random from "random";
-import YAML from "yaml";
+import { ConfigLoader } from "../../util/ConfigLoader";
 
 let playerIndex = 1;
 
@@ -16,9 +15,9 @@ export class LobbyState extends State {
     playerIndex = 1;
 
     // Load available civilizations from config file
-    const civYAMLData = YAML.parse(fs.readFileSync("./config/civilizations.yml", "utf-8"));
-    //Convert civsData from YAML to JSON:
-    this.playableCivs = JSON.parse(JSON.stringify(civYAMLData.civilizations));
+    this.playableCivs = ConfigLoader.load<{ civilizations: Record<string, any>[] }>(
+      "./config/civilizations.yml"
+    ).civilizations;
 
     ServerEvents.on({
       eventName: "connection",
