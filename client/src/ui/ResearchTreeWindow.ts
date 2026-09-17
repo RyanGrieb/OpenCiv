@@ -248,7 +248,9 @@ export class ResearchTreeWindow extends ActorGroup {
 
     // Explicit order, not super.draw()'s actor-insertion order: background first
     // (it's opaque and would otherwise paint over the lines), then connector
-    // lines, then everything else on top (tiles/buttons/detail popup).
+    // lines, then everything else, then the detail popup last so it always
+    // stays on top - a zoom rebuild re-adds tile actors after detailWindow in
+    // this.actors, which would otherwise draw them over it.
     this.windowBackground.draw(canvasContext);
 
     // Drawn with raw canvas calls (not the Line/Game.drawLine primitive used for
@@ -257,8 +259,12 @@ export class ResearchTreeWindow extends ActorGroup {
     this.drawConnectorLines(canvasContext);
 
     for (const actor of this.actors) {
-      if (actor === this.windowBackground) continue;
+      if (actor === this.windowBackground || actor === this.detailWindow) continue;
       actor.draw(canvasContext);
+    }
+
+    if (this.detailWindow) {
+      this.detailWindow.draw(canvasContext);
     }
 
     canvasContext.restore();
@@ -438,7 +444,7 @@ export class ResearchTreeWindow extends ActorGroup {
     background.on("mouse_enter", () => Game.getInstance().setCursor("pointer"));
     background.on("mouse_exit", () => Game.getInstance().setCursor("default"));
     background.on("clicked", () => {
-      if (this.isDragging) return; // A drag ending over a tile shouldn't also open it.
+      if (this.isDragging || this.detailWindow) return; // A drag ending over a tile shouldn't also open it, and a tile behind the open detail popup shouldn't be clickable through it.
       this.openTechDetail(tech);
     });
     this.addActor(background);
