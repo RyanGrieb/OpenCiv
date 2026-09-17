@@ -1,5 +1,13 @@
 import { ConfigLoader } from "../util/ConfigLoader";
 
+// A row range labeled for the research tree's visual section dividers/labels
+// (e.g. "Ancient Era" spanning rows 0-1) - hand-placed in techs.yml, same as
+// each tech's own row/slot.
+export interface EraData {
+  name: string;
+  rows: number[];
+}
+
 export interface TechnologyData {
   name: string;
   asset_name: string;
@@ -43,6 +51,10 @@ export class Technology {
 
   public static getAllTechnologies(): Technology[] {
     return Technology.loadTechnologyData().map((data) => new Technology(data));
+  }
+
+  public static getAllEras(): EraData[] {
+    return ConfigLoader.load<{ eras: EraData[] }>("./config/techs.yml").eras;
   }
 
   private static loadTechnologyData(): TechnologyData[] {

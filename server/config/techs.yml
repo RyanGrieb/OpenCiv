@@ -1,3 +1,12 @@
+# Which rows belong to which era, for the research tree's visual section
+# labels/dividers - hand-placed the same way row/slot are, not derived.
+eras:
+  - name: Ancient Era
+    rows: [0, 1]
+  - name: Classical Era
+    rows: [2, 3]
+  - name: Medieval Era
+    rows: [4, 5]
 technologies:
   # slot is the tech's horizontal column (0-9) within its row - a fixed 10-slot
   # grid, matching Civ5's tech-web layout, where unused slots stay visually
@@ -92,7 +101,7 @@ technologies:
   - name: Horseback Riding
     asset_name: TECH_HORSEBACK_RIDING
     cost: 105
-    prerequisites: [The Wheel]
+    prerequisites: [The Wheel, Trapping]
     row: 2
     slot: 4
     description: Enables large animals once used for food or labor to be ridden for transportation.
@@ -106,7 +115,7 @@ technologies:
   - name: Construction
     asset_name: TECH_CONSTRUCTION
     cost: 105
-    prerequisites: [Masonry]
+    prerequisites: [Masonry, The Wheel]
     row: 2
     slot: 8
     description: Represents further advances in building and combining materials.
@@ -155,7 +164,7 @@ technologies:
   - name: Civil Service
     asset_name: TECH_CIVIL_SERVICE
     cost: 175
-    prerequisites: [Philosophy, Trapping]
+    prerequisites: [Drama and Poetry, Horseback Riding, Currency]
     row: 4
     slot: 4
     description: Creates the first true state organization, improving food production.
@@ -172,7 +181,7 @@ technologies:
   - name: Metal Casting
     asset_name: TECH_METAL_CASTING
     cost: 175
-    prerequisites: [Iron Working]
+    prerequisites: [Engineering, Iron Working]
     row: 4
     slot: 8
     description: Introduces molds for casting metal into complex shapes, advancing metallurgy further.
@@ -181,7 +190,7 @@ technologies:
   - name: Compass
     asset_name: TECH_COMPASS
     cost: 275
-    prerequisites: [Optics]
+    prerequisites: [Optics, Theology]
     row: 5
     slot: 0
     description: Enables more reliable navigation, extending a ship's vision range at sea.
@@ -195,21 +204,21 @@ technologies:
   - name: Chivalry
     asset_name: TECH_CHIVALRY
     cost: 275
-    prerequisites: [Civil Service, Horseback Riding, Currency]
+    prerequisites: [Civil Service, Guilds]
     row: 5
     slot: 5
     description: The code of conduct for knights, unlocking powerful mounted warriors.
   - name: Machinery
     asset_name: TECH_MACHINERY
     cost: 275
-    prerequisites: [Engineering]
+    prerequisites: [Engineering, Guilds]
     row: 5
     slot: 7
     description: Builds on metalworking and science to create devices with multiple moving parts working together.
   - name: Physics
     asset_name: TECH_PHYSICS
     cost: 275
-    prerequisites: [Engineering, Metal Casting]
+    prerequisites: [Metal Casting]
     row: 5
     slot: 8
     description: Develops the scientific study of motion and matter, advancing military engineering.

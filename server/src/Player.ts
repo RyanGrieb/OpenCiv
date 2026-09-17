@@ -375,7 +375,8 @@ export class Player {
   public sendAvailableTechs() {
     this.sendNetworkEvent({
       event: "updateAvailableTechs",
-      technologies: Technology.getAllTechnologies().map((tech) => tech.toJSON())
+      technologies: Technology.getAllTechnologies().map((tech) => tech.toJSON()),
+      eras: Technology.getAllEras()
     });
   }
 

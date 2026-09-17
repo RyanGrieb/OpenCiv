@@ -24,6 +24,7 @@ const PAN_EDGE_MARGIN = 60; // Content can't be dragged past this far off either
 const CONNECTOR_MET_COLOR = "lime";
 const CONNECTOR_UNMET_COLOR = "#666";
 const CONNECTOR_WIDTH = 2;
+const ERA_LABEL_MARGIN = 16; // Gap between the grid's edge and an era label outside it.
 
 interface TechData {
   name: string;
@@ -33,6 +34,11 @@ interface TechData {
   description: string;
   slot: number;
   row: number;
+}
+
+interface EraData {
+  name: string;
+  rows: number[];
 }
 
 interface TechTile {
@@ -58,6 +64,7 @@ export class ResearchTreeWindow extends ActorGroup {
   private detailWindow: TechDetailWindow;
   private tiles: TechTile[] = [];
   private tilesByName: Map<string, TechTile> = new Map();
+  private eraLabels: Label[] = [];
 
   private isMouseDown = false;
   private isDragging = false;
@@ -123,6 +130,9 @@ export class ResearchTreeWindow extends ActorGroup {
           actor.setPosition(actor.getX() + dx, actor.getY() + dy);
         }
       }
+      for (const label of this.eraLabels) {
+        label.setPosition(label.getX() + dx, label.getY() + dy);
+      }
 
       if (Math.abs(options.x - this.dragStartX) + Math.abs(options.y - this.dragStartY) > DRAG_THRESHOLD) {
         this.isDragging = true;
@@ -141,7 +151,7 @@ export class ResearchTreeWindow extends ActorGroup {
       eventName: "updateAvailableTechs",
       parentObject: this,
       callback: (data) => {
-        this.buildTree(data["technologies"]);
+        this.buildTree(data["technologies"], data["eras"]);
       }
     });
 
@@ -223,7 +233,7 @@ export class ResearchTreeWindow extends ActorGroup {
     canvasContext.restore();
   }
 
-  private async buildTree(technologies: TechData[]) {
+  private async buildTree(technologies: TechData[], eras: EraData[]) {
     const textMaxWidth = TILE_WIDTH - TILE_PADDING * 2 - TILE_ICON_SIZE - 8;
 
     // Every tile shares one height (the tallest wrapped name across all techs),
@@ -250,7 +260,40 @@ export class ResearchTreeWindow extends ActorGroup {
       this.tiles.push(this.createTechTile(tech, tileX, tileY, tileHeight, textMaxWidth));
     }
 
+    this.buildEraMarkers(eras, bottomRowY, tileHeight, gridStartX, gridWidth);
     this.refreshLockState();
+  }
+
+  // A label for each era on the left and right edges of the grid (outside the
+  // tile columns entirely), vertically centered across that era's row span -
+  // no line runs through the tree itself, so nothing competes with the
+  // prerequisite connector lines already drawn there.
+  private async buildEraMarkers(eras: EraData[], bottomRowY: number, tileHeight: number, gridStartX: number, gridWidth: number) {
+    const rowTopY = (row: number) => bottomRowY - row * (tileHeight + ROW_GAP);
+    const rowBottomY = (row: number) => rowTopY(row) + tileHeight;
+
+    for (const era of eras) {
+      const minRow = Math.min(...era.rows);
+      const maxRow = Math.max(...era.rows);
+      const centerY = (rowTopY(maxRow) + rowBottomY(minRow)) / 2 - UITheme.FONT_SIZE / 2;
+
+      const rightLabel = new Label({
+        text: era.name,
+        font: UITheme.FONT,
+        fontColor: "white",
+        x: gridStartX + gridWidth + ERA_LABEL_MARGIN,
+        y: centerY
+      });
+      this.addActor(rightLabel);
+      this.eraLabels.push(rightLabel);
+
+      // Right-aligned against the grid's left edge, so it needs its own width first.
+      const leftLabel = new Label({ text: era.name, font: UITheme.FONT, fontColor: "white", y: centerY });
+      await leftLabel.conformSize();
+      leftLabel.setPosition(gridStartX - ERA_LABEL_MARGIN - leftLabel.getWidth(), centerY);
+      this.addActor(leftLabel);
+      this.eraLabels.push(leftLabel);
+    }
   }
 
   private createTechTile(tech: TechData, tileX: number, tileY: number, tileHeight: number, textMaxWidth: number): TechTile {
