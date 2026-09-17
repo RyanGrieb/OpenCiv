@@ -7,6 +7,7 @@ import { AbstractPlayer } from "./player/AbstractPlayer";
 import { Actor } from "./scene/Actor";
 import { ActorGroup } from "./scene/ActorGroup";
 import { UnitDisplayInfo } from "./ui/UnitDisplayInfo";
+import { Strings } from "./util/Strings";
 
 export class UnitActionManager {
   private static instance: UnitActionManager;
@@ -161,7 +162,7 @@ export class Unit extends ActorGroup {
 
     this.unitActor = new Actor({
       image: Game.getInstance().getImage(GameImage.SPRITESHEET),
-      spriteRegion: resolveSpriteRegion(`UNIT_${this.name.toUpperCase()}`),
+      spriteRegion: resolveSpriteRegion(`UNIT_${Strings.toConstantCase(this.name)}`),
       x: tile.getCenterPosition().x - 28 / 2,
       y: tile.getCenterPosition().y - 28 / 2,
       z: 2,
