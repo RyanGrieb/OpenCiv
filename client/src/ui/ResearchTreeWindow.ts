@@ -5,26 +5,30 @@ import { ClientPlayer } from "../player/ClientPlayer";
 import { Actor } from "../scene/Actor";
 import { ActorGroup } from "../scene/ActorGroup";
 import { InGameScene } from "../scene/type/InGameScene";
+import { Numbers } from "../util/Numbers";
 import { Button, ButtonSize } from "./Button";
 import { Label } from "./Label";
 import { TechDetailWindow } from "./TechDetailWindow";
 import { UITheme } from "./UITheme";
 
 const WINDOW_PADDING = 16;
-const TILE_PADDING = 8;
-const TILE_ICON_SIZE = 32; // Matches old_java's TechnologyLeaf icon size.
-const TILE_WIDTH = 220;
-const TILE_GAP = 16; // Horizontal gap between tiles in the same row.
-const ROW_GAP = 44; // Vertical gap between tiers.
+// Base (100% zoom) tile geometry - actual layout scales these by zoomLevel.
+const BASE_TILE_PADDING = 8;
+const BASE_TILE_ICON_SIZE = 32; // Matches old_java's TechnologyLeaf icon size.
+const BASE_TILE_WIDTH = 220;
+const BASE_TILE_GAP = 16; // Horizontal gap between tiles in the same row.
+const BASE_ROW_GAP = 44; // Vertical gap between tiers.
+const BASE_ERA_LABEL_MARGIN = 16; // Gap between the grid's edge and an era label outside it.
 const SLOT_COUNT = 10; // Fixed columns per row, matching Civ5's tech-web layout - a tech's `slot` (0-9) is its column, not its order among that tier's techs.
-const SLOT_WIDTH = TILE_WIDTH + TILE_GAP;
+const MIN_ZOOM = 0.6;
+const MAX_ZOOM = 1.6;
+const ZOOM_STEP = 0.1;
 const LOCKED_TRANSPARENCY = 0.4;
 const DRAG_THRESHOLD = 4; // Raw mouse movement (px) before a press counts as a drag, not a click.
 const PAN_EDGE_MARGIN = 60; // Content can't be dragged past this far off either edge.
 const CONNECTOR_MET_COLOR = "lime";
 const CONNECTOR_UNMET_COLOR = "#666";
 const CONNECTOR_WIDTH = 2;
-const ERA_LABEL_MARGIN = 16; // Gap between the grid's edge and an era label outside it.
 
 interface TechData {
   name: string;
@@ -47,6 +51,19 @@ interface TechTile {
   actors: Actor[]; // Everything belonging to this tile - shifted together when panning.
 }
 
+// Every size that scales with zoomLevel, computed once per (re)build and threaded
+// through instead of each method reading zoomLevel/BASE_* constants itself.
+interface TreeLayout {
+  tileWidth: number;
+  tileGap: number;
+  rowGap: number;
+  iconSize: number;
+  tilePadding: number;
+  slotWidth: number;
+  eraLabelMargin: number;
+  font: string;
+}
+
 // Full-screen research tree, opened from ResearchDisplayInfo's button. Each tech
 // carries its own row (0 = bottom) and slot (0-9, its column in a fixed 10-wide
 // grid) from techs.yml, matching Civ5's hand-placed tech-web layout rather than
@@ -58,7 +75,11 @@ interface TechTile {
 //
 // The tree can be wider/taller than the window (25+ techs, several rows deep),
 // so content is drag-panned and clipped to the window bounds rather than shrunk
-// to fit - keeps tiles a fixed readable size regardless of tech count.
+// to fit - keeps tiles a fixed readable size regardless of tech count. The mouse
+// wheel adjusts zoomLevel, which rebuilds the whole tree at the new scale rather
+// than applying a canvas transform - keeps click hit-testing (checked against
+// each tile's actual stored bounds) correct for free, with no separate transform
+// bookkeeping needed for input.
 export class ResearchTreeWindow extends ActorGroup {
   private windowBackground: Actor;
   private detailWindow: TechDetailWindow;
@@ -72,6 +93,22 @@ export class ResearchTreeWindow extends ActorGroup {
   private dragStartY = 0;
   private lastMouseX = 0;
   private lastMouseY = 0;
+  private hoverX = 0;
+  private hoverY = 0;
+
+  // Accumulated drag pan, applied on top of the (re)computed grid every build -
+  // tracked explicitly (rather than left as implicit actor-position drift) so a
+  // zoom change can read and adjust it to keep the point under the cursor fixed.
+  private panX = 0;
+  private panY = 0;
+  private zoomLevel = 1;
+  // Cached so a zoom change can rebuild the tree without a round trip to the server.
+  private lastTechnologies: TechData[] = [];
+  private lastEras: EraData[] = [];
+  // Bumped on every (re)build; a build only applies its results if it's still the
+  // most recent one requested, so rapid-fire wheel events can't race each other
+  // and leave stale tiles added after a newer rebuild already cleared the tree.
+  private buildRequestId = 0;
 
   constructor() {
     super({
@@ -119,11 +156,16 @@ export class ResearchTreeWindow extends ActorGroup {
     });
 
     this.on("mousemove", (options: { x: number; y: number }) => {
+      this.hoverX = options.x;
+      this.hoverY = options.y;
+
       if (!this.isMouseDown) return;
 
       const { dx, dy } = this.clampPanDelta(options.x - this.lastMouseX, options.y - this.lastMouseY);
       this.lastMouseX = options.x;
       this.lastMouseY = options.y;
+      this.panX += dx;
+      this.panY += dy;
 
       for (const tile of this.tiles) {
         for (const actor of tile.actors) {
@@ -147,11 +189,35 @@ export class ResearchTreeWindow extends ActorGroup {
       this.isMouseDown = false;
     });
 
+    // Rebuilds the whole tree at the new scale rather than transforming the canvas
+    // (which would desync click hit-testing, since it's checked against each
+    // tile's stored, unscaled bounds) - simpler, and hit-testing stays correct for
+    // free since the tiles' actual geometry reflects the current zoom.
+    this.on("wheel", (options: { deltaY: number }) => {
+      const nextZoom = Numbers.clamp(this.zoomLevel + (options.deltaY < 0 ? ZOOM_STEP : -ZOOM_STEP), MIN_ZOOM, MAX_ZOOM);
+      if (nextZoom === this.zoomLevel) return;
+
+      // Standard "zoom around a point" adjustment: the grid itself already scales
+      // around (pivotX, pivotY) - see buildTree/buildEraMarkers - so shrinking pan
+      // toward the cursor by the same ratio keeps whatever point is under the
+      // cursor visually fixed instead of the view re-centering on every tick.
+      const ratio = nextZoom / this.zoomLevel;
+      const pivotX = this.x + this.width / 2;
+      const pivotY = this.y + this.height - WINDOW_PADDING;
+      this.panX = this.panX * ratio + (this.hoverX - pivotX) * (1 - ratio);
+      this.panY = this.panY * ratio + (this.hoverY - pivotY) * (1 - ratio);
+
+      this.zoomLevel = nextZoom;
+      this.rebuildTree();
+    });
+
     NetworkEvents.on({
       eventName: "updateAvailableTechs",
       parentObject: this,
       callback: (data) => {
-        this.buildTree(data["technologies"], data["eras"]);
+        this.lastTechnologies = data["technologies"];
+        this.lastEras = data["eras"];
+        this.rebuildTree();
       }
     });
 
@@ -233,34 +299,78 @@ export class ResearchTreeWindow extends ActorGroup {
     canvasContext.restore();
   }
 
-  private async buildTree(technologies: TechData[], eras: EraData[]) {
-    const textMaxWidth = TILE_WIDTH - TILE_PADDING * 2 - TILE_ICON_SIZE - 8;
+  // Tears down and rebuilds every tile/label at the current zoomLevel, using
+  // whatever tech/era data was last received - used both for the initial build
+  // and every zoom change, so the two never drift into different code paths.
+  private rebuildTree() {
+    this.clearTree();
+    this.buildTree();
+  }
+
+  private clearTree() {
+    for (const tile of this.tiles) {
+      for (const actor of tile.actors) {
+        this.removeActor(actor);
+      }
+    }
+    this.tiles = [];
+    this.tilesByName = new Map();
+
+    for (const label of this.eraLabels) {
+      this.removeActor(label);
+    }
+    this.eraLabels = [];
+  }
+
+  private async buildTree() {
+    if (this.lastTechnologies.length === 0) return;
+
+    const requestId = ++this.buildRequestId;
+    const layout: TreeLayout = {
+      tileWidth: BASE_TILE_WIDTH * this.zoomLevel,
+      tileGap: BASE_TILE_GAP * this.zoomLevel,
+      rowGap: BASE_ROW_GAP * this.zoomLevel,
+      iconSize: BASE_TILE_ICON_SIZE * this.zoomLevel,
+      tilePadding: BASE_TILE_PADDING * this.zoomLevel,
+      slotWidth: (BASE_TILE_WIDTH + BASE_TILE_GAP) * this.zoomLevel,
+      eraLabelMargin: BASE_ERA_LABEL_MARGIN * this.zoomLevel,
+      font: `${Math.round(UITheme.FONT_SIZE * this.zoomLevel)}px serif`
+    };
+    const textMaxWidth = layout.tileWidth - layout.tilePadding * 2 - layout.iconSize - 8 * this.zoomLevel;
 
     // Every tile shares one height (the tallest wrapped name across all techs),
     // so tiles line up in a clean grid instead of each being sized to its own content.
     const nameWraps = await Promise.all(
-      technologies.map((tech) => Game.getInstance().getWrappedText(tech.name, UITheme.FONT, textMaxWidth))
+      this.lastTechnologies.map((tech) => Game.getInstance().getWrappedText(tech.name, layout.font, textMaxWidth))
     );
-    const nameSlotHeight = Math.max(...nameWraps.map(([, height]) => height));
-    const tileHeight = TILE_PADDING * 2 + Math.max(TILE_ICON_SIZE, nameSlotHeight);
+    // A newer rebuild (another zoom tick, or fresh data) started while this one was
+    // awaiting text measurement - drop these results rather than adding tiles on
+    // top of (or instead of) whatever that newer build already produced.
+    if (requestId !== this.buildRequestId) return;
 
-    const bottomRowY = this.y + this.height - WINDOW_PADDING - tileHeight;
+    const nameSlotHeight = Math.max(...nameWraps.map(([, height]) => height));
+    const tileHeight = layout.tilePadding * 2 + Math.max(layout.iconSize, nameSlotHeight);
+
+    // panX/panY (drag accumulation, adjusted on each zoom to keep the point under
+    // the cursor fixed - see the wheel handler) folded in here, once, so every
+    // downstream position - tiles and era markers alike - inherits it for free.
+    const bottomRowY = this.y + this.height - WINDOW_PADDING - tileHeight + this.panY;
     // One shared grid origin (not per-row) so a given slot lands at the same X in
     // every row - that's what makes the connector lines read as a real tech web
     // instead of a loose scatter, and what leaves unused slots as visible gaps.
-    const gridWidth = SLOT_COUNT * TILE_WIDTH + (SLOT_COUNT - 1) * TILE_GAP;
-    const gridStartX = this.x + this.width / 2 - gridWidth / 2;
+    const gridWidth = SLOT_COUNT * layout.tileWidth + (SLOT_COUNT - 1) * layout.tileGap;
+    const gridStartX = this.x + this.width / 2 - gridWidth / 2 + this.panX;
 
     // row/slot are both hand-authored data (techs.yml), not derived from
     // prerequisite depth - Civ5's actual layout doesn't pack every tech into the
     // shallowest row its prerequisites allow.
-    for (const tech of technologies) {
-      const tileY = bottomRowY - tech.row * (tileHeight + ROW_GAP);
-      const tileX = gridStartX + tech.slot * SLOT_WIDTH;
-      this.tiles.push(this.createTechTile(tech, tileX, tileY, tileHeight, textMaxWidth));
+    for (const tech of this.lastTechnologies) {
+      const tileY = bottomRowY - tech.row * (tileHeight + layout.rowGap);
+      const tileX = gridStartX + tech.slot * layout.slotWidth;
+      this.tiles.push(this.createTechTile(tech, tileX, tileY, tileHeight, textMaxWidth, layout, requestId));
     }
 
-    this.buildEraMarkers(eras, bottomRowY, tileHeight, gridStartX, gridWidth);
+    this.buildEraMarkers(this.lastEras, bottomRowY, tileHeight, gridStartX, gridWidth, layout, requestId);
     this.refreshLockState();
   }
 
@@ -268,8 +378,16 @@ export class ResearchTreeWindow extends ActorGroup {
   // tile columns entirely), vertically centered across that era's row span -
   // no line runs through the tree itself, so nothing competes with the
   // prerequisite connector lines already drawn there.
-  private async buildEraMarkers(eras: EraData[], bottomRowY: number, tileHeight: number, gridStartX: number, gridWidth: number) {
-    const rowTopY = (row: number) => bottomRowY - row * (tileHeight + ROW_GAP);
+  private async buildEraMarkers(
+    eras: EraData[],
+    bottomRowY: number,
+    tileHeight: number,
+    gridStartX: number,
+    gridWidth: number,
+    layout: TreeLayout,
+    requestId: number
+  ) {
+    const rowTopY = (row: number) => bottomRowY - row * (tileHeight + layout.rowGap);
     const rowBottomY = (row: number) => rowTopY(row) + tileHeight;
 
     for (const era of eras) {
@@ -279,31 +397,40 @@ export class ResearchTreeWindow extends ActorGroup {
 
       const rightLabel = new Label({
         text: era.name,
-        font: UITheme.FONT,
+        font: layout.font,
         fontColor: "white",
-        x: gridStartX + gridWidth + ERA_LABEL_MARGIN,
+        x: gridStartX + gridWidth + layout.eraLabelMargin,
         y: centerY
       });
       this.addActor(rightLabel);
       this.eraLabels.push(rightLabel);
 
       // Right-aligned against the grid's left edge, so it needs its own width first.
-      const leftLabel = new Label({ text: era.name, font: UITheme.FONT, fontColor: "white", y: centerY });
+      const leftLabel = new Label({ text: era.name, font: layout.font, fontColor: "white", y: centerY });
       await leftLabel.conformSize();
-      leftLabel.setPosition(gridStartX - ERA_LABEL_MARGIN - leftLabel.getWidth(), centerY);
+      if (requestId !== this.buildRequestId) return; // Superseded mid-measurement - see buildTree.
+      leftLabel.setPosition(gridStartX - layout.eraLabelMargin - leftLabel.getWidth(), centerY);
       this.addActor(leftLabel);
       this.eraLabels.push(leftLabel);
     }
   }
 
-  private createTechTile(tech: TechData, tileX: number, tileY: number, tileHeight: number, textMaxWidth: number): TechTile {
+  private createTechTile(
+    tech: TechData,
+    tileX: number,
+    tileY: number,
+    tileHeight: number,
+    textMaxWidth: number,
+    layout: TreeLayout,
+    requestId: number
+  ): TechTile {
     const iconRegion = resolveSpriteRegion(tech.asset_name) ?? SpriteRegion.ICON_UNKNOWN;
 
     const background = new Actor({
       image: Game.getInstance().getImage(GameImage.POPUP_BOX),
       x: tileX,
       y: tileY,
-      width: TILE_WIDTH,
+      width: layout.tileWidth,
       height: tileHeight,
       nineSlice: true,
       cornerSize: 10
@@ -316,27 +443,30 @@ export class ResearchTreeWindow extends ActorGroup {
     });
     this.addActor(background);
 
-    const iconX = tileX + TILE_PADDING;
-    const iconY = tileY + tileHeight / 2 - TILE_ICON_SIZE / 2;
+    const iconX = tileX + layout.tilePadding;
+    const iconY = tileY + tileHeight / 2 - layout.iconSize / 2;
     const icon = new Actor({
       image: Game.getInstance().getImage(GameImage.SPRITESHEET),
       spriteRegion: iconRegion,
       x: iconX,
       y: iconY,
-      width: TILE_ICON_SIZE,
-      height: TILE_ICON_SIZE
+      width: layout.iconSize,
+      height: layout.iconSize
     });
     this.addActor(icon);
 
     const nameLabel = new Label({
       text: tech.name,
-      font: UITheme.FONT,
+      font: layout.font,
       fontColor: "white",
       maxWidth: textMaxWidth,
-      x: iconX + TILE_ICON_SIZE + 8,
-      y: tileY + TILE_PADDING
+      x: iconX + layout.iconSize + 8 * this.zoomLevel,
+      y: tileY + layout.tilePadding
     });
-    nameLabel.conformSize().then(() => this.addActor(nameLabel));
+    nameLabel.conformSize().then(() => {
+      if (requestId !== this.buildRequestId) return; // Superseded mid-measurement - see buildTree.
+      this.addActor(nameLabel);
+    });
 
     const tile: TechTile = { tech, background, actors: [background, icon, nameLabel] };
     this.tilesByName.set(tech.name, tile);

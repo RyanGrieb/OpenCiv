@@ -627,9 +627,12 @@ export class Game {
   public async getWrappedText(text: string, font: string, maxWidth: number): Promise<[string, number, number]> {
     let currentWidth = 0;
 
-    // Check if we have the wrapped text in cache:
-    if (this.wrappedTextCache[text]) {
-      return this.wrappedTextCache[text];
+    // Cache key includes font/maxWidth, not just text - the same string wraps
+    // differently at a different font size or box width (e.g. a zoomed-in panel).
+    const cacheKey = `${text}|${font}|${maxWidth}`;
+
+    if (this.wrappedTextCache[cacheKey]) {
+      return this.wrappedTextCache[cacheKey];
     }
 
     const { width: _, height: unwrappedWordHeight } = this.measureText(text, font);
@@ -651,7 +654,7 @@ export class Game {
     }
 
     //Store wrapped text in cache
-    this.wrappedTextCache[text] = [modifiedText, wrappedHeight, unwrappedWordHeight];
+    this.wrappedTextCache[cacheKey] = [modifiedText, wrappedHeight, unwrappedWordHeight];
 
     return [modifiedText, wrappedHeight, unwrappedWordHeight];
   }
