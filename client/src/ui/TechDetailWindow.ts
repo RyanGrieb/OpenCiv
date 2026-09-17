@@ -128,6 +128,12 @@ export class TechDetailWindow extends ActorGroup {
       parentObject: this,
       callback: () => this.refresh()
     });
+
+    NetworkEvents.on({
+      eventName: "updateTotalStats",
+      parentObject: this,
+      callback: () => this.refresh()
+    });
   }
 
   // Re-evaluated on every updateResearch push, so a tech completing (or another

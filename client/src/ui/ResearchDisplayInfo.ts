@@ -34,6 +34,14 @@ export class ResearchDisplayInfo extends ActorGroup {
         this.refresh();
       }
     });
+
+    NetworkEvents.on({
+      eventName: "updateTotalStats",
+      parentObject: this,
+      callback: () => {
+        this.refresh();
+      }
+    });
   }
 
   private generateActors() {
