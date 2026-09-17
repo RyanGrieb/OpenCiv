@@ -278,13 +278,18 @@ describe('City', () => {
       mockPlayer.sendNetworkEvent.mockClear();
     });
 
-    it('does nothing when the queue is empty', () => {
+    it('produces nothing when the queue is empty, but still reports the turn\'s stats', () => {
       triggerServerEvent('removeFromProductionQueue', { cityName: 'TestCity', index: 0 }, mockWebsocket);
       mockPlayer.sendNetworkEvent.mockClear();
 
       triggerServerEvent('nextTurn', { turn: 2 });
 
-      expect(mockPlayer.sendNetworkEvent).not.toHaveBeenCalled();
+      // The food bank advances every turn whether or not anything is being produced,
+      // so the client still needs the stat update.
+      expect(city['productionQueue']).toEqual([]);
+      expect(mockPlayer.sendNetworkEvent).toHaveBeenCalledWith(
+        expect.objectContaining({ event: 'updateCityStats', productionQueue: [] })
+      );
     });
 
     it("adds the city's production rate to the front item's progress and re-sends city stats", () => {
@@ -452,6 +457,87 @@ describe('City', () => {
 
       expect(city['workedTiles']).toContain(foodTile);
       expect(city.getStatline({ asArray: false }).food).toBeLessThan(0);
+    });
+  });
+
+  describe('growth (nextTurn)', () => {
+    // Net food per turn is the city tile's yield minus 2-per-citizen upkeep, so giving
+    // the city tile a food yield is the simplest way to drive a chosen surplus/deficit.
+    const setNetFoodPerTurn = (tileFood: number) => {
+      mockTile.getStats.mockReturnValue([{ food: tileFood }]);
+    };
+
+    it('banks the net food surplus each turn without growing below the threshold', () => {
+      setNetFoodPerTurn(5);
+
+      triggerServerEvent('nextTurn', { turn: 2 });
+      triggerServerEvent('nextTurn', { turn: 3 });
+
+      expect(city['foodSurplus']).toBe(6);
+      expect(city['population']).toBe(1);
+    });
+
+    it('grows the population once the banked food covers the growth cost', () => {
+      setNetFoodPerTurn(5);
+      city['foodSurplus'] = 20; // 20 + 3 this turn clears the size-1 cost of 23
+
+      triggerServerEvent('nextTurn', { turn: 2 });
+
+      expect(city['population']).toBe(2);
+      expect(city['foodSurplus']).toBe(0);
+    });
+
+    it('carries leftover food into the next citizen rather than resetting the bank', () => {
+      setNetFoodPerTurn(5);
+      city['foodSurplus'] = 25; // 25 + 3 clears the cost of 23 with 5 to spare
+
+      triggerServerEvent('nextTurn', { turn: 2 });
+
+      expect(city['population']).toBe(2);
+      expect(city['foodSurplus']).toBe(5);
+    });
+
+    it('raises the growth cost as the city gets bigger', () => {
+      expect(city.getFoodRequiredToGrow()).toBe(City.GROWTH_FOOD_BASE + City.GROWTH_FOOD_PER_POP);
+
+      city['population'] = 4;
+
+      expect(city.getFoodRequiredToGrow()).toBe(City.GROWTH_FOOD_BASE + City.GROWTH_FOOD_PER_POP * 4);
+    });
+
+    it('starves a citizen off and empties the bank when food runs negative', () => {
+      setNetFoodPerTurn(0); // -2 per citizen, with nothing coming in
+      city['population'] = 2;
+
+      triggerServerEvent('nextTurn', { turn: 2 });
+
+      expect(city['population']).toBe(1);
+      expect(city['foodSurplus']).toBe(0);
+    });
+
+    it('holds a size-1 city at one citizen instead of starving it out of existence', () => {
+      setNetFoodPerTurn(0);
+
+      triggerServerEvent('nextTurn', { turn: 2 });
+
+      expect(city['population']).toBe(1);
+      expect(city['foodSurplus']).toBe(0);
+    });
+
+    it('reports the banked food and growth cost to the client', () => {
+      setNetFoodPerTurn(5);
+
+      triggerServerEvent('nextTurn', { turn: 2 });
+
+      const statline = city.getStatline({ asArray: false });
+      expect(statline.foodSurplus).toBe(3);
+      expect(statline.foodRequiredToGrow).toBe(23);
+      expect(mockPlayer.sendNetworkEvent).toHaveBeenCalledWith(
+        expect.objectContaining({
+          event: 'updateCityStats',
+          cityStats: expect.arrayContaining([{ foodSurplus: 3 }, { foodRequiredToGrow: 23 }]),
+        })
+      );
     });
   });
 });

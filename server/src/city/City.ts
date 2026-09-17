@@ -9,6 +9,7 @@ import { Building } from "./Building";
 export interface CityStats extends StatValues {
   population: number;
   foodSurplus: number;
+  foodRequiredToGrow: number;
   defense: number;
 }
 type CityStatEntry = Partial<CityStats>;
@@ -33,6 +34,11 @@ export class City {
   // is covered, so cities trend toward growth instead of merely breaking even. Adjust to
   // tune how aggressively default-focus cities prioritize growth over other yields.
   public static readonly DEFAULT_FOCUS_GROWTH_TARGET = 1;
+
+  // Food a city must bank to add a citizen, as BASE + PER_POP * population - the cost
+  // climbs with size so large cities grow slower. Adjust to tune the growth curve.
+  public static readonly GROWTH_FOOD_BASE = 15;
+  public static readonly GROWTH_FOOD_PER_POP = 8;
 
   private tile: Tile;
   private player: Player;
@@ -180,7 +186,11 @@ export class City {
       eventName: "nextTurn",
       parentObject: this,
       callback: () => {
+        // Growth first, so a citizen gained this turn is already working a tile when
+        // production is applied below.
+        this.applyGrowth();
         this.applyProduction();
+        this.sendStatUpdate(this.player);
       }
     });
   }
@@ -314,7 +324,8 @@ export class City {
         { food: -(this.population * 2) },
         { morale: 0 }, //TODO: Implement morale
         { defense: 0 },
-        { foodSurplus: this.foodSurplus }
+        { foodSurplus: this.foodSurplus },
+        { foodRequiredToGrow: this.getFoodRequiredToGrow() }
       ];
 
       // Add all buildings to existing stat-line dictionary (Note: We would apply bonuses to buildings here in the future)
@@ -363,6 +374,7 @@ export class City {
       food: -(this.population * 2),
       morale: 0, //TODO: Implement morale
       foodSurplus: this.foodSurplus,
+      foodRequiredToGrow: this.getFoodRequiredToGrow(),
       defense: 0
     };
 
@@ -388,6 +400,10 @@ export class City {
     }
 
     return cityStats;
+  }
+
+  public getFoodRequiredToGrow(): number {
+    return City.GROWTH_FOOD_BASE + City.GROWTH_FOOD_PER_POP * this.population;
   }
 
   public getTile(): Tile {
@@ -452,6 +468,34 @@ export class City {
     return { units, buildings };
   }
 
+  // Banks this turn's net food, then grows the city once the bank covers the growth
+  // cost, or starves a citizen off if the bank runs dry. Growth keeps the leftover food
+  // rather than resetting the bank, so a big surplus carries into the next citizen.
+  private applyGrowth() {
+    this.foodSurplus += this.getStatline({ asArray: false }).food;
+
+    if (this.foodSurplus < 0) {
+      // A size-1 city can't shrink any further - it just sits empty-banked until its
+      // food recovers.
+      if (this.population > 1) {
+        this.population--;
+        console.log(`[City ${this.name}] Starved down to population ${this.population}`);
+        this.updateWorkedTiles({ sendStatUpdate: false });
+      }
+
+      this.foodSurplus = 0;
+      return;
+    }
+
+    const requiredFood = this.getFoodRequiredToGrow();
+    if (this.foodSurplus >= requiredFood) {
+      this.foodSurplus -= requiredFood;
+      this.population++;
+      console.log(`[City ${this.name}] Grew to population ${this.population}`);
+      this.updateWorkedTiles({ sendStatUpdate: false });
+    }
+  }
+
   private applyProduction() {
     if (this.productionQueue.length === 0) return;
 
@@ -470,7 +514,5 @@ export class City {
         if (unit) this.tile.addUnit(unit);
       }
     }
-
-    this.sendStatUpdate(this.player);
   }
 }

@@ -12,7 +12,11 @@ import { RadioButton } from "./RadioButton";
 import { UITheme } from "./UITheme";
 
 const STATS_WINDOW_WIDTH = 320;
-const STATS_WINDOW_HEIGHT = 340;
+const STATS_WINDOW_HEIGHT = 390;
+// Vertical space the growth readout (one text line plus its bar) claims underneath the
+// Population row - every stat row below it shifts down by this much.
+const GROWTH_ROW_HEIGHT = 56;
+const GROWTH_BAR_HEIGHT = 12;
 const BUILDINGS_WINDOW_WIDTH = 340;
 const PRODUCTION_WINDOW_WIDTH = 360;
 const PRODUCTION_WINDOW_HEIGHT = 320;
@@ -73,6 +77,8 @@ export class CityDisplayInfo extends ActorGroup {
       parentObject: this,
       callback: (data: any) => {
         if (data["cityName"] !== this.city.getName()) return;
+        this.refreshStatsWindow();
+        this.refreshWorkedTileOverlays();
         this.refreshCurrentlyBuildingWindow();
       }
     });
@@ -346,7 +352,9 @@ export class CityDisplayInfo extends ActorGroup {
     const firstRowY = y + 12 + UITheme.FONT_SIZE + 10;
 
     stats.forEach((stat, index) => {
-      const iconY = firstRowY + index * (UITheme.ICON_SIZE - 12);
+      // Everything below Population sits under the growth readout drawn after this loop.
+      const growthOffset = index === 0 ? 0 : GROWTH_ROW_HEIGHT;
+      const iconY = firstRowY + index * (UITheme.ICON_SIZE - 12) + growthOffset;
       const textY = iconY + UITheme.centerTextY(UITheme.ICON_SIZE);
 
       this.statsWindow.addActor(
@@ -383,7 +391,80 @@ export class CityDisplayInfo extends ActorGroup {
       this.statLabels.set(stat.key, valueLabel);
     });
 
+    // Rows are spaced tighter than their icons are tall, so the extra offset drops the
+    // readout clear of the Population icon overhanging from above.
+    this.addGrowthReadout(x, firstRowY + (UITheme.ICON_SIZE - 12) + 8, width);
+
     this.addActor(this.statsWindow);
+  }
+
+  // Banked-food progress toward the next citizen, drawn just below the Population row.
+  // A shrinking city (negative food) shows how long it has before a citizen starves off.
+  private addGrowthReadout(x: number, y: number, width: number) {
+    const banked = this.city.getStat("foodSurplus");
+    const required = this.city.getStat("foodRequiredToGrow");
+    const netFood = this.city.getStat("food");
+
+    let text: string;
+    let barColor: string;
+
+    if (netFood > 0) {
+      const turns = Math.ceil((required - banked) / netFood);
+      text = `Growth: ${banked}/${required} (${turns} turn${turns === 1 ? "" : "s"})`;
+      barColor = "rgb(0, 200, 0)";
+    } else if (netFood < 0) {
+      // The bank drains by netFood each turn and a citizen is lost once it goes negative -
+      // except at size 1, which the server holds rather than wiping the city out.
+      const turns = Math.floor(banked / -netFood) + 1;
+      text =
+        this.city.getStat("population") > 1
+          ? `Starving! ${turns} turn${turns === 1 ? "" : "s"} left`
+          : "Starving! (no growth)";
+      barColor = "rgb(200, 0, 0)";
+    } else {
+      text = `Growth: ${banked}/${required} (stagnant)`;
+      barColor = "rgb(140, 140, 140)";
+    }
+
+    this.statsWindow.addActor(
+      new Label({
+        text: text,
+        font: UITheme.FONT,
+        fontColor: netFood < 0 ? "rgb(255, 120, 120)" : "white",
+        x: x + 10,
+        y: y
+      })
+    );
+
+    const barY = y + UITheme.FONT_SIZE + 6;
+    const barWidth = width - 20;
+
+    this.statsWindow.addActor(
+      new Actor({ x: x + 10, y: barY, width: barWidth, height: GROWTH_BAR_HEIGHT, color: "rgb(40, 40, 40)" })
+    );
+
+    const progress = Math.min(1, banked / required);
+    if (progress > 0) {
+      this.statsWindow.addActor(
+        new Actor({ x: x + 10, y: barY, width: barWidth * progress, height: GROWTH_BAR_HEIGHT, color: barColor })
+      );
+    }
+  }
+
+  private refreshStatsWindow() {
+    this.removeActor(this.statsWindow);
+    this.statLabels.clear();
+    this.initializeStatsWindow();
+  }
+
+  // Growing or starving reassigns citizens, so the highlights have to be rebuilt.
+  private refreshWorkedTileOverlays() {
+    for (const overlay of this.workedTileOverlays) {
+      Game.getInstance().getCurrentScene().removeActor(overlay);
+    }
+    this.workedTileOverlays = [];
+
+    this.initializeWorkedTileOverlays();
   }
 
   private refreshCurrentlyBuildingWindow() {
