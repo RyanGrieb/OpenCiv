@@ -380,4 +380,78 @@ describe('City', () => {
       );
     });
   });
+
+  describe('updateWorkedTiles', () => {
+    // Mirrors City's real Tile.getTotalStatValue so the fake GameMap below can rank
+    // tiles the same way the real one does, without pulling in the real Tile/GameMap.
+    const totalStatValue = (tile: any, stats: string[]) => {
+      let total = 0;
+      for (const stat of tile.getStats()) {
+        const statName = Object.keys(stat)[0];
+        if (stats.includes('default') || stats.includes(statName)) {
+          total += stat[statName];
+        }
+      }
+      return total;
+    };
+
+    const makeTile = (x: number, y: number, stats: Record<string, number>) =>
+      ({
+        getX: jest.fn().mockReturnValue(x),
+        getY: jest.fn().mockReturnValue(y),
+        getStats: jest.fn().mockReturnValue(Object.entries(stats).map(([key, value]) => ({ [key]: value }))),
+      }) as unknown as jest.Mocked<Tile>;
+
+    const wireHighestYeild = (tiles: any[]) => {
+      (GameMap.getInstance as jest.Mock).mockReturnValue({
+        getTileWithHighestYeild: jest.fn(({ stats, ignoreTiles }) => {
+          const candidates = tiles.filter((tile) => !ignoreTiles.includes(tile));
+          if (candidates.length === 0) return undefined;
+
+          return candidates.reduce((best, tile) =>
+            totalStatValue(tile, stats) > totalStatValue(best, stats) ? tile : best
+          );
+        }),
+      });
+    };
+
+    it("prioritizes a food tile over a higher-yield production tile when food hasn't reached the default growth target", () => {
+      const foodTile = makeTile(1, 0, { food: 2 });
+      const productionTile = makeTile(0, 1, { production: 5 });
+      mockTile.getAdjacentTiles.mockReturnValue([foodTile, productionTile]);
+      wireHighestYeild([foodTile, productionTile]);
+
+      city = new City({ tile: mockTile, player: mockPlayer });
+
+      expect(city['workedTiles']).toContain(foodTile);
+      expect(city['workedTiles']).not.toContain(productionTile);
+    });
+
+    it('chases the best overall yield with remaining population once the growth target is met', () => {
+      const foodTile = makeTile(1, 0, { food: 5 });
+      const productionTile = makeTile(0, 1, { production: 3 });
+      mockTile.getAdjacentTiles.mockReturnValue([foodTile, productionTile]);
+      wireHighestYeild([foodTile, productionTile]);
+
+      city = new City({ tile: mockTile, player: mockPlayer });
+      city['population'] = 2;
+      city.updateWorkedTiles({ sendStatUpdate: false });
+
+      expect(city['workedTiles']).toEqual(expect.arrayContaining([foodTile, productionTile]));
+    });
+
+    it('still assigns an available positive-food tile even when the city ends up starving anyway', () => {
+      const foodTile = makeTile(1, 0, { food: 1 });
+      const desertTile = makeTile(0, 1, {});
+      mockTile.getAdjacentTiles.mockReturnValue([foodTile, desertTile]);
+      wireHighestYeild([foodTile, desertTile]);
+
+      city = new City({ tile: mockTile, player: mockPlayer });
+      city['population'] = 2;
+      city.updateWorkedTiles({ sendStatUpdate: false });
+
+      expect(city['workedTiles']).toContain(foodTile);
+      expect(city.getStatline({ asArray: false }).food).toBeLessThan(0);
+    });
+  });
 });

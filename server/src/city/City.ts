@@ -29,6 +29,11 @@ export interface ProductionOption {
 }
 
 export class City {
+  // Minimum food surplus the "default" tile focus tries to bank once population upkeep
+  // is covered, so cities trend toward growth instead of merely breaking even. Adjust to
+  // tune how aggressively default-focus cities prioritize growth over other yields.
+  public static readonly DEFAULT_FOCUS_GROWTH_TARGET = 1;
+
   private tile: Tile;
   private player: Player;
   private name: string;
@@ -184,21 +189,52 @@ export class City {
     // Reset worked tiles
     this.workedTiles = [this.tile];
 
-    // For default focus, find all tiles and get the best tile with the highest yield
-    // Note, if our food stat from the current worked tiles is negative, find the tiles with the highest food yeild.
-    // If our food stat is positive, find the tiles with the highest total yeild.
-    for (let i = 0; i < this.population; i++) {
-      const statline = this.getStatline({ asArray: false });
-      //TODO: Change default with whatever value the player has set for the city.
-      const tileFocus = statline["food"] < 0 ? "food" : "default";
-      // Get a tile with the highest food yeild
+    //TODO: Change default with whatever value the player has set for the city.
+    const tileFocus = "default";
+    const foodFloor = tileFocus === "default" ? City.DEFAULT_FOCUS_GROWTH_TARGET : 0;
+
+    let assigned = 0;
+
+    // Phase 1: regardless of focus, cover the food floor first so a city never starves
+    // (or, under default focus, fails to grow) chasing a better non-food tile when a food
+    // tile was available instead.
+    let currentFood = this.getStatline({ asArray: false }).food;
+    while (assigned < this.population && currentFood < foodFloor) {
+      const tile = GameMap.getInstance().getTileWithHighestYeild({
+        stats: ["food"],
+        tiles: this.territory,
+        ignoreTiles: this.workedTiles
+      });
+
+      if (!tile) break;
+
+      this.workedTiles.push(tile);
+      assigned++;
+
+      const updatedFood = this.getStatline({ asArray: false }).food;
+      if (updatedFood <= currentFood) {
+        // This tile didn't actually improve food (none of the remaining tiles do) -
+        // undo it and let phase 2 use the citizen on the best overall yield instead.
+        this.workedTiles.pop();
+        assigned--;
+        break;
+      }
+
+      currentFood = updatedFood;
+    }
+
+    // Phase 2: whatever population remains chases the best overall yield.
+    while (assigned < this.population) {
       const tile = GameMap.getInstance().getTileWithHighestYeild({
         stats: [tileFocus],
         tiles: this.territory,
         ignoreTiles: this.workedTiles
       });
 
+      if (!tile) break;
+
       this.workedTiles.push(tile);
+      assigned++;
     }
 
     if (options.sendStatUpdate) {

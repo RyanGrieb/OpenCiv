@@ -1131,6 +1131,7 @@ export class GameMap {
 
     for (const tile of options.tiles) {
       if (options.ignoreTiles.includes(tile)) continue;
+      if (!tile.isWorkable()) continue;
 
       let value = tile.getTotalStatValue(options.stats);
 

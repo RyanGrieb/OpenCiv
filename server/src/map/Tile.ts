@@ -794,6 +794,21 @@ export class Tile {
   }
 
   public getTotalStatValue(stats: string[]): number {
-    return 0;
+    let total = 0;
+
+    for (const stat of this.getStats()) {
+      const statName = Object.keys(stat)[0] as keyof StatValues;
+
+      if (stats.includes("default") || stats.includes(statName)) {
+        total += stat[statName];
+      }
+    }
+
+    return total;
+  }
+
+  // Mountains have no base yields and can never be assigned as a worked tile.
+  public isWorkable(): boolean {
+    return !this.tileTypes.some((type) => type.includes("mountain"));
   }
 }
