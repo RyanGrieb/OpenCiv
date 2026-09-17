@@ -55,6 +55,30 @@ export class ActorGroup extends Actor {
         }
       }
     });
+
+    // Game.ts only ever dispatches these three directly to its own top-level actor
+    // list, so a group nested inside another group (e.g. a ListBox added to some
+    // window's ActorGroup rather than straight to the Scene) would otherwise never
+    // see them - unlike mousemove/mouseup above, there's no position-based bookkeeping
+    // to do here, so these just rebroadcast the raw event to every descendant and let
+    // each actor's own handler decide what to do with it.
+    this.on("mousedown", (options) => {
+      for (const actor of this.getActors()) {
+        actor.call("mousedown", options);
+      }
+    });
+
+    this.on("mouseleave", (options) => {
+      for (const actor of this.getActors()) {
+        actor.call("mouseleave", options);
+      }
+    });
+
+    this.on("wheel", (options) => {
+      for (const actor of this.getActors()) {
+        actor.call("wheel", options);
+      }
+    });
   }
 
   /**
