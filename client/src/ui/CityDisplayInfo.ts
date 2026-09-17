@@ -8,6 +8,7 @@ import { Strings } from "../util/Strings";
 import { Button, ButtonSize } from "./Button";
 import { Label } from "./Label";
 import { ListBox } from "./Listbox";
+import { LoadingBar } from "./LoadingBar";
 import { RadioButton } from "./RadioButton";
 import { UITheme } from "./UITheme";
 
@@ -436,19 +437,16 @@ export class CityDisplayInfo extends ActorGroup {
       })
     );
 
-    const barY = y + UITheme.FONT_SIZE + 6;
-    const barWidth = width - 20;
-
     this.statsWindow.addActor(
-      new Actor({ x: x + 10, y: barY, width: barWidth, height: GROWTH_BAR_HEIGHT, color: "rgb(40, 40, 40)" })
+      new LoadingBar({
+        x: x + 10,
+        y: y + UITheme.FONT_SIZE + 6,
+        width: width - 20,
+        height: GROWTH_BAR_HEIGHT,
+        progress: banked / required,
+        fillColor: barColor
+      })
     );
-
-    const progress = Math.min(1, banked / required);
-    if (progress > 0) {
-      this.statsWindow.addActor(
-        new Actor({ x: x + 10, y: barY, width: barWidth * progress, height: GROWTH_BAR_HEIGHT, color: barColor })
-      );
-    }
   }
 
   private refreshStatsWindow() {
