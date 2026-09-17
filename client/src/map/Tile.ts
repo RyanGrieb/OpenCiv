@@ -5,6 +5,7 @@ import { City } from "../city/City";
 import { Actor } from "../scene/Actor";
 import { Vector } from "../util/Vector";
 import { GameMap } from "./GameMap";
+import { SpriteAtlas } from "../SpriteAtlas";
 
 // Keyed by tile-type name (upper/lower-case variants both used); see Tile.getTileYield().
 export type TileYieldsData = Record<string, { stats: Record<string, number>[] }>;
@@ -244,13 +245,11 @@ export class Tile extends Actor {
     canvas.getContext("2d").fillStyle = "rgba(0,0,0,0)";
     canvas.getContext("2d").fillRect(0, 0, canvas.width, canvas.height);
 
-    //Note: Tile sizes in spritesheet are always 32x32 regardless of anything else.
     for (let tileType of tileTypes) {
       const spritesheetImage = Game.getInstance().getImage(GameImage.SPRITESHEET);
       const spriteRegion = resolveSpriteRegion(`TILE_${tileType.toUpperCase()}`);
-      const spriteX = parseInt(spriteRegion.split(",")[0]) * 32;
-      const spriteY = parseInt(spriteRegion.split(",")[1]) * 32;
-      canvas.getContext("2d").drawImage(spritesheetImage, spriteX, spriteY, 32, 32, 0, 0, Tile.WIDTH, Tile.HEIGHT);
+      const region = SpriteAtlas.getInstance().getRegion(spriteRegion);
+      canvas.getContext("2d").drawImage(spritesheetImage, region.x, region.y, region.w, region.h, 0, 0, Tile.WIDTH, Tile.HEIGHT);
     }
 
     //canvas.getContext("2d").globalCompositeOperation = "saturation";

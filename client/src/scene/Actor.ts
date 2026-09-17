@@ -1,6 +1,7 @@
 import { SpriteRegion, GameImage } from "../Assets";
 import { Game } from "../Game";
 import { SceneObject } from "./SceneObject";
+import { SpriteAtlas } from "../SpriteAtlas";
 
 export interface ActorOptions {
   color?: string;
@@ -108,15 +109,14 @@ export class Actor implements SceneObject {
     //TODO: Handle non-sprite region actors
     if (this.spriteRegion) {
       // Draw the image on the canvas.
-      const spriteX = parseInt(this.getSpriteRegion().split(",")[0]) * 32;
-      const spriteY = parseInt(this.getSpriteRegion().split(",")[1]) * 32;
+      const region = SpriteAtlas.getInstance().getRegion(this.getSpriteRegion());
 
       context.drawImage(
         Game.getInstance().getImage(GameImage.SPRITESHEET),
-        spriteX,
-        spriteY,
-        32,
-        32,
+        region.x,
+        region.y,
+        region.w,
+        region.h,
         0,
         0,
         this.getWidth(),

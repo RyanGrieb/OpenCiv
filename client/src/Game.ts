@@ -3,6 +3,7 @@ import { Scene } from "./scene/Scene";
 import { GameImage } from "./Assets";
 import { NetworkEvents } from "./network/Client";
 import { Line } from "./scene/Line";
+import { SpriteAtlas } from "./SpriteAtlas";
 
 export interface TextOptions {
   text: string;
@@ -374,6 +375,12 @@ export class Game {
         }
       });
     }));
+
+    // Replaces the raw spritesheet.png load above with the runtime-packed atlas -
+    // GameImage.SPRITESHEET keeps working for every existing call site, it's just
+    // backed by SpriteAtlas now instead of the fixed 32x32 grid image.
+    const atlas = await SpriteAtlas.load();
+    this.images[GameImage.SPRITESHEET] = atlas.getImage();
   }
 
 
@@ -583,16 +590,14 @@ export class Game {
     canvasContext.globalAlpha = actor.getTransparency();
 
     if (actor.canDrawSpriteRegion()) {
-      const spriteX = parseInt(actor.getSpriteRegion().split(",")[0]) * 32;
-      const spriteY = parseInt(actor.getSpriteRegion().split(",")[1]) * 32;
+      const region = SpriteAtlas.getInstance().getRegion(actor.getSpriteRegion());
 
       canvasContext.drawImage(
         actor.getImage(),
-        //TODO: Calculate sprite position
-        spriteX,
-        spriteY,
-        32,
-        32,
+        region.x,
+        region.y,
+        region.w,
+        region.h,
         actor.getX(),
         actor.getY(),
         actor.getWidth(),
