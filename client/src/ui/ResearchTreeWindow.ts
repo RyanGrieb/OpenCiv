@@ -82,6 +82,7 @@ interface TreeLayout {
 // bookkeeping needed for input.
 export class ResearchTreeWindow extends ActorGroup {
   private windowBackground: Actor;
+  private closeButton: Button;
   private detailWindow: TechDetailWindow;
   private tiles: TechTile[] = [];
   private tilesByName: Map<string, TechTile> = new Map();
@@ -131,18 +132,17 @@ export class ResearchTreeWindow extends ActorGroup {
     });
     this.addActor(this.windowBackground);
 
-    this.addActor(
-      new Button({
-        icon: SpriteRegion.ICON_CANCEL,
-        iconOnly: true,
-        size: ButtonSize.ICON_SMALL,
-        x: this.x + this.width - WINDOW_PADDING - ButtonSize.ICON_SMALL.width,
-        y: this.y + WINDOW_PADDING,
-        onClicked: () => {
-          Game.getInstance().getCurrentSceneAs<InGameScene>().toggleResearchUI();
-        }
-      })
-    );
+    this.closeButton = new Button({
+      icon: SpriteRegion.ICON_CANCEL,
+      iconOnly: true,
+      size: ButtonSize.ICON_SMALL,
+      x: this.x + this.width - WINDOW_PADDING - ButtonSize.ICON_SMALL.width,
+      y: this.y + WINDOW_PADDING,
+      onClicked: () => {
+        Game.getInstance().getCurrentSceneAs<InGameScene>().toggleResearchUI();
+      }
+    });
+    this.addActor(this.closeButton);
 
     this.on("mousedown", (options: { x: number; y: number; button: number }) => {
       if (options.button !== 0 || !this.insideActor(options.x, options.y)) return;
@@ -248,9 +248,11 @@ export class ResearchTreeWindow extends ActorGroup {
 
     // Explicit order, not super.draw()'s actor-insertion order: background first
     // (it's opaque and would otherwise paint over the lines), then connector
-    // lines, then everything else, then the detail popup last so it always
-    // stays on top - a zoom rebuild re-adds tile actors after detailWindow in
-    // this.actors, which would otherwise draw them over it.
+    // lines, then tiles, then the window chrome (close button) and finally the
+    // detail popup on top of everything. A zoom rebuild re-adds tile actors to
+    // the end of this.actors, after both closeButton and detailWindow (which
+    // that rebuild never touches), so without this explicit order the tiles
+    // would end up painted over both.
     this.windowBackground.draw(canvasContext);
 
     // Drawn with raw canvas calls (not the Line/Game.drawLine primitive used for
@@ -259,9 +261,11 @@ export class ResearchTreeWindow extends ActorGroup {
     this.drawConnectorLines(canvasContext);
 
     for (const actor of this.actors) {
-      if (actor === this.windowBackground || actor === this.detailWindow) continue;
+      if (actor === this.windowBackground || actor === this.closeButton || actor === this.detailWindow) continue;
       actor.draw(canvasContext);
     }
+
+    this.closeButton.draw(canvasContext);
 
     if (this.detailWindow) {
       this.detailWindow.draw(canvasContext);
@@ -441,7 +445,10 @@ export class ResearchTreeWindow extends ActorGroup {
       nineSlice: true,
       cornerSize: 10
     });
-    background.on("mouse_enter", () => Game.getInstance().setCursor("pointer"));
+    background.on("mouse_enter", () => {
+      if (this.detailWindow) return; // Tiles aren't clickable while the detail popup is open - see the "clicked" guard below.
+      Game.getInstance().setCursor("pointer");
+    });
     background.on("mouse_exit", () => Game.getInstance().setCursor("default"));
     background.on("clicked", () => {
       if (this.isDragging || this.detailWindow) return; // A drag ending over a tile shouldn't also open it, and a tile behind the open detail popup shouldn't be clickable through it.
