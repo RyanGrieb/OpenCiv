@@ -139,13 +139,15 @@ export class TechDetailWindow extends ActorGroup {
     const isResearched = clientPlayer.hasResearchedTech(this.tech.name);
     const isCurrent = currentResearch?.techName === this.tech.name;
     const missingPrerequisites = this.tech.prerequisites.filter((prereq) => !clientPlayer.hasResearchedTech(prereq));
-    const rate = Math.max(clientPlayer.getTotalStat("science"), 1);
+    const rate = clientPlayer.getTotalStat("science");
 
     let statusText: string;
     if (isResearched) {
       statusText = "Researched";
     } else if (missingPrerequisites.length > 0) {
       statusText = `Requires: ${missingPrerequisites.join(", ")}`;
+    } else if (rate <= 0) {
+      statusText = "Never (0 Science)";
     } else if (isCurrent) {
       const turnsRemaining = Math.max(1, Math.ceil((currentResearch.cost - currentResearch.progress) / rate));
       statusText = `${turnsRemaining} Turns Remaining`;

@@ -113,9 +113,12 @@ export class ResearchDisplayInfo extends ActorGroup {
       return "Researching: Nothing";
     }
 
-    const rate = Math.max(scienceRate, 1);
-    const turnsRemaining = Math.max(1, Math.ceil((research.cost - research.progress) / rate));
-    const totalTurns = Math.max(1, Math.ceil(research.cost / rate));
+    if (scienceRate <= 0) {
+      return "Researching: Never (0 Science)";
+    }
+
+    const turnsRemaining = Math.max(1, Math.ceil((research.cost - research.progress) / scienceRate));
+    const totalTurns = Math.max(1, Math.ceil(research.cost / scienceRate));
     return `Researching: ${turnsRemaining}/${totalTurns} Turns`;
   }
 }
