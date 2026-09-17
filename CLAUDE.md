@@ -55,6 +55,7 @@ This starts the server in `TEST_MODE=true` and the client dev server, then **pri
 Other:
 ```bash
 npm run generate-docs   # typedoc for both projects -> documentation/
+npm run generate-sprites # regenerate client/src/generated/SpriteManifest.ts after touching client/assets/sprites/
 npm run format           # prettier --write across the repo
 docker compose up -d     # alternative to npm start; builds server/client Dockerfiles independently
 ```
@@ -84,6 +85,12 @@ Every message is `{ event: string, ...fields }`, dispatched by `event` name — 
 ### Client: scene-based engine
 
 `client/src/Game.ts` is a parallel singleton holding the current `Scene` (`client/src/scene/Scene.ts`), with `Actor`/`ActorGroup` (`client/src/scene/Actor.ts`, `ActorGroup.ts`) as the renderable-object base classes. Scenes (`main_menu`, `join_game`, `lobby`, `in_game`, `loading_scene`) are registered in `client/src/Index.ts` and switched via `Game.setScene()`. `Scene`/`Actor` both have their own generic local `on/call` pub/sub (separate from `NetworkEvents`) for DOM-ish events like `mousemove`/`uiStateChanged`.
+
+### Sprite assets
+
+Every sprite is its own file under `client/assets/sprites/<category>/<NAME>.png` — `<NAME>` must exactly match the `SpriteRegion` value it's for in `client/src/Assets.ts` (e.g. `tiles/TILE_GRASS.png` for `SpriteRegion.TILE_GRASS`); which category folder it sits in is just organization and has no effect on lookup. After adding, removing, or renaming a sprite file, run `npm run generate-sprites` and commit the regenerated `client/src/generated/SpriteManifest.ts` — Parcel needs the static `new URL(...)` calls in that generated file to bundle each sprite, so it can't be built dynamically at runtime.
+
+At startup, `client/src/SpriteAtlas.ts` packs every sprite in the manifest into one canvas (replacing the old fixed-grid `spritesheet.png` approach). In production the packed result is cached in IndexedDB, keyed by a hash of the manifest; in dev, caching is skipped entirely since Parcel serves sprite URLs unhashed, so an edited sprite's pixels wouldn't otherwise bust the cache. Editing a sprite in place sometimes isn't picked up by Parcel's dev-server watcher (seen with saves from MS Paint) — if a change to a `.png` doesn't show up after a browser refresh, restart `npm run dev`.
 
 ### Config-driven game data
 
