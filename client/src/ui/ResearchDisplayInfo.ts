@@ -7,15 +7,18 @@ import { ActorGroup } from "../scene/ActorGroup";
 import { InGameScene } from "../scene/type/InGameScene";
 import { Button, ButtonSize } from "./Button";
 import { Label } from "./Label";
+import { LoadingBar } from "./LoadingBar";
 import { UITheme } from "./UITheme";
 
 const WIDTH = 260;
 const HEIGHT = 130;
 const PADDING = 10;
+const PROGRESS_BAR_HEIGHT = 10;
 
 // Top-left "currently researching" popup. Mirrors CityDisplayInfo's POPUP_BOX layout.
 export class ResearchDisplayInfo extends ActorGroup {
   private statusLabel: Label;
+  private progressBar: LoadingBar;
   private techIcon: Actor;
   private nameLabel: Label;
 
@@ -66,6 +69,14 @@ export class ResearchDisplayInfo extends ActorGroup {
     });
     this.addActor(this.statusLabel);
 
+    this.progressBar = new LoadingBar({
+      x: this.x + PADDING,
+      y: this.statusLabel.getY() + UITheme.FONT_SIZE + 6,
+      width: this.width - PADDING * 2,
+      height: PROGRESS_BAR_HEIGHT
+    });
+    this.addActor(this.progressBar);
+
     // Actual button (ICON_BUTTON frame + hover state), matching the unit action
     // buttons in UnitDisplayInfo - not a bare icon-only control.
     const openResearchButton = new Button({
@@ -112,6 +123,7 @@ export class ResearchDisplayInfo extends ActorGroup {
     const research = clientPlayer.getCurrentResearch();
 
     this.statusLabel.setText(this.getStatusText(research, clientPlayer.getTotalStat("science")));
+    this.progressBar.setProgress(research ? research.progress / research.cost : 0);
     this.nameLabel.setText(research ? research.techName : "???");
     this.techIcon.setSpriteRegion(research ? resolveSpriteRegion(research.assetName) ?? SpriteRegion.ICON_UNKNOWN : SpriteRegion.ICON_UNKNOWN);
   }
@@ -122,11 +134,10 @@ export class ResearchDisplayInfo extends ActorGroup {
     }
 
     if (scienceRate <= 0) {
-      return "Researching: Never (0 Science)";
+      return "Researching: Infinity turns left";
     }
 
     const turnsRemaining = Math.max(1, Math.ceil((research.cost - research.progress) / scienceRate));
-    const totalTurns = Math.max(1, Math.ceil(research.cost / scienceRate));
-    return `Researching: ${turnsRemaining}/${totalTurns} Turns`;
+    return `Researching: ${turnsRemaining} turn${turnsRemaining === 1 ? "" : "s"} left`;
   }
 }
