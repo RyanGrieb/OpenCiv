@@ -3,6 +3,7 @@ import { Game } from "../../Game";
 import { NetworkEvents, WebsocketClient } from "../../network/Client";
 import { CivilizationData } from "../../player/AbstractPlayer";
 import { Button, ButtonSize } from "../../ui/Button";
+import { GameOptionsGroup } from "../../ui/GameOptionsGroup";
 import { ListBox } from "../../ui/Listbox";
 import { PlaceholderDialogGroup } from "../../ui/PlaceholderDialogGroup";
 import { SelectCivilizationGroup } from "../../ui/SelectCivilizationGroup";
@@ -213,7 +214,7 @@ export class LobbyScene extends Scene {
       {
         text: "Game Options",
         icon: SpriteRegion.ICON_PRODUCTION,
-        onClicked: () => this.showDialog(this.createPlaceholderDialog("Game Options"))
+        onClicked: () => this.showDialog(this.createGameOptionsDialog())
       },
       {
         text: "Scenarios",
@@ -271,6 +272,16 @@ export class LobbyScene extends Scene {
       this.rightPanelHeight,
       () => this.showButtonPanel()
     );
+  }
+
+  private createGameOptionsDialog(): GameOptionsGroup {
+    return new GameOptionsGroup({
+      x: this.rightPanelX,
+      y: this.rightPanelY,
+      width: LobbyScene.BOX_WIDTH,
+      height: this.rightPanelHeight,
+      onClose: () => this.showButtonPanel()
+    });
   }
 
   private createPlaceholderDialog(title: string): PlaceholderDialogGroup {
