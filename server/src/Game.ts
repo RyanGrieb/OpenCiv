@@ -2,6 +2,8 @@ import { Player } from "./Player";
 import { State } from "./state/State";
 import { WebSocket } from "ws";
 import { ServerEvents } from "./Events";
+import { DefaultGameOptions, GameOptionDefinitions, GameOptions } from "./GameOptions";
+import { Numbers } from "./util/Numbers";
 
 /**
  * Game class is responsible for managing the state of the game, and players.
@@ -12,9 +14,11 @@ export class Game {
   private currentState: State;
   private states: Map<string, State>;
   private players: Map<string, Player>;
+  private gameOptions: GameOptions;
 
-  private constructor() {
+  private constructor(optionOverrides: Partial<GameOptions>) {
     this.states = new Map<string, State>();
+    this.gameOptions = { ...DefaultGameOptions, ...optionOverrides };
 
     // Set up the listener for the "setState" event. Changes the game-state.
     ServerEvents.on({
@@ -57,6 +61,49 @@ export class Game {
       },
       globalEvent: true
     });
+
+    // Set up the listener for the "gameOptions" event. Returns the available options (definition + current
+    // value for each) to the requesting player - the client renders its UI from this alone, it never
+    // hardcodes which options exist.
+    ServerEvents.on({
+      eventName: "gameOptions",
+      parentObject: this,
+      callback: (data, websocket) => {
+        this.getPlayerFromWebsocket(websocket)?.sendNetworkEvent({
+          event: "gameOptions",
+          options: this.getGameOptionsPayload()
+        });
+      },
+      globalEvent: true
+    });
+
+    // Set up the listener for the "setGameOption" event. Updates a game option and broadcasts the new
+    // options to every connected player - persists on this singleton (rather than the current State) so
+    // it survives the lobby -> in_game state transition.
+    ServerEvents.on({
+      eventName: "setGameOption",
+      parentObject: this,
+      callback: (data) => {
+        const option = data["option"] as keyof GameOptions;
+        const definition = GameOptionDefinitions.find((def) => def.key === option);
+        let value = data["value"];
+
+        if (definition?.type === "number") {
+          value = Numbers.clamp(value, definition.min, definition.max);
+        }
+
+        this.setGameOption(option, value);
+
+        if (definition?.type === "number") {
+          definition.onChange?.(this.gameOptions, value);
+        }
+
+        this.getPlayers().forEach((player) => {
+          player.sendNetworkEvent({ event: "gameOptions", options: this.getGameOptionsPayload() });
+        });
+      },
+      globalEvent: true
+    });
   }
 
   public static getInstance() {
@@ -65,9 +112,10 @@ export class Game {
 
   /**
    * Initializes the game by setting up server event listeners for various events.
+   * @param optionOverrides - Game options set from the server's startup arguments, applied over the defaults.
    */
-  public static init() {
-    this.gameInstance = new Game();
+  public static init(optionOverrides: Partial<GameOptions> = {}) {
+    this.gameInstance = new Game(optionOverrides);
   }
 
   /**
@@ -125,6 +173,17 @@ export class Game {
     return this.currentState as T;
   }
 
+  public getGameOptions(): GameOptions {
+    return this.gameOptions;
+  }
+
+  // A plain `this.gameOptions[key] = value` doesn't typecheck once GameOptions has fields of
+  // different types - TS can't prove `value`'s type matches whichever field `key` (typed as the
+  // whole keyof union) happens to pick at runtime. Binding K per-call via a generic sidesteps that.
+  private setGameOption<K extends keyof GameOptions>(key: K, value: GameOptions[K]) {
+    this.gameOptions[key] = value;
+  }
+
   private getPlayerJSONS() {
     const playerJSONS = [];
 
@@ -133,5 +192,12 @@ export class Game {
     }
 
     return playerJSONS;
+  }
+
+  private getGameOptionsPayload() {
+    return GameOptionDefinitions.filter((definition) => !definition.hidden).map((definition) => ({
+      ...definition,
+      value: this.gameOptions[definition.key]
+    }));
   }
 }

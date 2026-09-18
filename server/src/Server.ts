@@ -1,6 +1,8 @@
 import { WebSocketServer } from "ws";
 import { ServerEvents } from "./Events";
 import { Game } from "./Game";
+import { GameOptions } from "./GameOptions";
+import { ServerArgs } from "./ServerArgs";
 import { InGameState } from "./state/type/InGameState";
 import { LobbyState } from "./state/type/LobbyState";
 
@@ -11,6 +13,7 @@ export class Server {
   private wss: WebSocketServer;
   private connectedIPs: Set<string> = new Set();
   private allowDuplicateIPs: boolean = false;
+  private gameOptionOverrides: Partial<GameOptions> = {};
 
   /**
    *
@@ -42,6 +45,13 @@ export class Server {
 
   public setAllowDuplicateIPs(allow: boolean) {
     this.allowDuplicateIPs = allow;
+  }
+
+  /**
+   * Game options applied on top of the defaults when the game initializes.
+   */
+  public setGameOptionOverrides(overrides: Partial<GameOptions>) {
+    this.gameOptionOverrides = overrides;
   }
 
   /**
@@ -115,12 +125,18 @@ export class Server {
      * Add the "lobby" and "in_game" states to the game using instances of LobbyState and InGameState classes.
      * Set the game state to "lobby".
      */
-    Game.init();
+    Game.init(this.gameOptionOverrides);
     Game.getInstance().addState("lobby", new LobbyState());
     Game.getInstance().addState("in_game", new InGameState());
     Game.getInstance().setState("lobby");
   }
 }
 
+if (ServerArgs.helpRequested()) {
+  console.log(ServerArgs.usage());
+  process.exit(0);
+}
+
 Server.getInstance().setAllowDuplicateIPs(true);
+Server.getInstance().setGameOptionOverrides(ServerArgs.parseGameOptions());
 Server.getInstance().start();

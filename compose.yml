@@ -4,6 +4,9 @@ services:
       context: server
     ports:
       - "2000:2000"
+    environment:
+      # Game option overrides, e.g. GAME_OPTIONS="allowBarbarians=false,numCityStates=0" docker compose up -d
+      GAME_OPTIONS: ${GAME_OPTIONS:-}
     networks:
       - backnet
     healthcheck:
