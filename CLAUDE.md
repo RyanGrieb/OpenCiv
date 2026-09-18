@@ -25,26 +25,45 @@ npx tsc --noEmit                                # typecheck (matches what VSCode
 Server (`cd server`):
 ```bash
 npm start                                       # ts-node-dev, respawns on change
+npm start -- --help                             # list the game options that can be set at launch
+npm start -- --no-allowBarbarians --numCityStates=0   # start with game option overrides
 npm test                                        # full Jest suite
 npx jest tests/unit/Unit.test.ts                # single test file
 npx jest -t "test name"                         # single test by name
 npx tsc --noEmit                                # typecheck
 ```
 
-CI typecheck (both projects) — **do not use plain `tsc` for this**, see "The `tsconfig.typecheck.json` split" below:
+CI typecheck — **do not use plain `tsc` for this**, see "The `tsconfig.typecheck.json` split" below. There is no root `tsconfig.typecheck.json`: each project has its own, so this is the one command that does *not* run from the repo root. Run it once per project, the way `.github/workflows/build.yml` does:
 ```bash
-npx tsc -p tsconfig.typecheck.json --noEmit
+cd client && npx tsc -p tsconfig.typecheck.json --noEmit
+cd server && npx tsc -p tsconfig.typecheck.json --noEmit   # from the repo root again
 ```
+Pass `--noEmit` when running it by hand. Neither project's config sets it, so CI's bare `tsc -p tsconfig.typecheck.json` emits JS — fine in a throwaway checkout, litter in yours.
 
 ### Don't run `npm run build` to verify a change
 
-`tsc -p tsconfig.typecheck.json --noEmit` is the gate CI enforces and is what you should run after editing client code. A Parcel production build takes many minutes from a cold cache and reports nothing the typecheck didn't already catch — it is not a smoke test. Only run it when the bundler output itself is what's in question (a Parcel config/asset-resolution change).
+`npx tsc -p tsconfig.typecheck.json --noEmit`, run from `client/`, is the gate CI enforces and is what you should run after editing client code. A Parcel production build takes many minutes from a cold cache and reports nothing the typecheck didn't already catch — it is not a smoke test. Only run it when the bundler output itself is what's in question (a Parcel config/asset-resolution change).
 
 If you do run it and it exceeds the tool timeout, it gets backgrounded and **killing the task does not kill Parcel** — the npm wrapper dies and the `parcel build` child keeps running, holding an LMDB lock on `client/.parcel-cache`. Every later `rm -rf .parcel-cache` then fails with `Device or resource busy`, and retrying the build just adds another orphan. Recover by stopping the stray processes first:
 ```bash
-# PowerShell - find and stop orphaned parcel/npm-build node processes
-Get-CimInstance Win32_Process -Filter "Name='node.exe'" | Where-Object { $_.CommandLine -like '*parcel*' }
+node scripts/kill_dev_processes.js   # stops orphaned parcel/ts-node-dev processes
 ```
+
+### The dev server must not watch `client/dist` — keep `--watch-ignore dist`
+
+Parcel's watcher ignores only `.git`, `.hg` and the cache dir (`getWatcherOptions` in `@parcel/core/lib/RequestTracker.js`) — **not** the dist dir. `client/dist` sits inside the watched project root, so Parcel sees its own output as source changes and re-enters packaging, which rewrites `dist`, which fires more events. With ~148 emitted files this self-loop wins the race often: measured **8 of 15** cold starts hung forever, versus **0 of 15** with `--watch-ignore dist` in the client's `dev` script. Don't remove that flag.
+
+A hung start looks like this — note `dist` is already fully written and the build still never finishes:
+```
+Building...
+Bundling...
+Packaging & Optimizing...     <- repeats forever, no "✨ Built in"
+```
+A few `Packaging & Optimizing...` lines in one healthy build are normal: Parcel's progress reporter has no TTY under `concurrently`, so each progress update prints its own line instead of overwriting.
+
+Don't add `--no-cache` to the dev script. It doesn't stop Parcel writing the cache, it only stops it *reading* it, so every start pays a full cold rebuild (~1.2s vs ~100ms warm) and the cache still grows.
+
+Orphaned dev servers are a separate problem: killing the npm/npx wrapper leaves the real `parcel` child alive, and freeing the port doesn't help because the orphan no longer holds one. `npm start`'s `prestart` runs `scripts/kill_dev_processes.js`, which kills the processes themselves.
 
 Manual/E2E test flow (root):
 ```bash
@@ -91,6 +110,12 @@ Every message is `{ event: string, ...fields }`, dispatched by `event` name — 
 Every sprite is its own file under `client/assets/sprites/<category>/<NAME>.png` — `<NAME>` must exactly match the `SpriteRegion` value it's for in `client/src/Assets.ts` (e.g. `tiles/TILE_GRASS.png` for `SpriteRegion.TILE_GRASS`); which category folder it sits in is just organization and has no effect on lookup. After adding, removing, or renaming a sprite file, run `npm run generate-sprites` and commit the regenerated `client/src/generated/SpriteManifest.ts` — Parcel needs the static `new URL(...)` calls in that generated file to bundle each sprite, so it can't be built dynamically at runtime.
 
 At startup, `client/src/SpriteAtlas.ts` packs every sprite in the manifest into one canvas (replacing the old fixed-grid `spritesheet.png` approach). In production the packed result is cached in IndexedDB, keyed by a hash of the manifest; in dev, caching is skipped entirely since Parcel serves sprite URLs unhashed, so an edited sprite's pixels wouldn't otherwise bust the cache. Editing a sprite in place sometimes isn't picked up by Parcel's dev-server watcher (seen with saves from MS Paint) — if a change to a `.png` doesn't show up after a browser refresh, restart `npm run dev`.
+
+### Game options at launch
+
+`server/src/GameOptions.ts` owns the game's tunable options (defaults in `DefaultGameOptions`, plus `GameOptionDefinitions` describing which ones the client's UI renders). `server/src/ServerArgs.ts` parses overrides from argv and the `GAME_OPTIONS` env var and `Server.ts` hands them to `Game.init()`, which applies them over the defaults — the client can still change them afterwards in the lobby.
+
+The parser derives its key list and each value's type from `DefaultGameOptions`, so **a new field on `GameOptions` is settable from the command line with no change to `ServerArgs`**. Options missing from `GameOptionDefinitions` (not exposed in the UI) are still settable this way; numbers get clamped to a definition's `min`/`max` when one exists.
 
 ### Config-driven game data
 

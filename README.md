@@ -46,6 +46,7 @@ Currently, the project is being rewritten so no playable version is available wi
 ## Development workflows
 
 - **Typecheck before pushing** — `cd client` or `cd server`, then `npx tsc -p tsconfig.typecheck.json --noEmit`. This is the same check CI runs.
+- **Start the server with game options** — from `server/`, `npm start -- --no-allowBarbarians --numCityStates=0` sets game options at launch instead of toggling them in the client's UI. `npm start -- --help` lists every option with its default and range. The same overrides can be passed as `GAME_OPTIONS="allowBarbarians=false,numCityStates=0"` when argv is awkward (root `npm start`, `docker compose up`).
 - **Format the repo** — `npm run format` (Prettier, run from the root).
 - **Add or edit a sprite** — drop a `.png` under `client/assets/sprites/<category>/<NAME>.png`, then run `npm run generate-sprites` from the root and commit the regenerated `client/src/generated/SpriteManifest.ts`.
 - **Generate API docs** — `npm run generate-docs` (Typedoc for both projects, output in `documentation/`).
