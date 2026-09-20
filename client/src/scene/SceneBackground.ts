@@ -126,7 +126,7 @@ export class SceneBackground {
         tileActors.push(
           new Actor({
             image: Game.getInstance().getImage(GameImage.SPRITESHEET),
-            spriteRegion: Object.values(SpriteRegion)[Math.floor(Numbers.safeRandom() * 9)],
+            spriteRegion: SpriteRegion.UNIT_WARRIOR + Math.floor(Numbers.safeRandom() * 9),
             x: xPos,
             y: yPos,
             width: 32,

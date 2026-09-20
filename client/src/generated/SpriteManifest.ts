@@ -40,6 +40,7 @@ export const SPRITE_MANIFEST: SpriteManifestEntry[] = [
   { name: "DEBUG1", url: new URL("../../assets/sprites/misc/DEBUG1.png", import.meta.url).href },
   { name: "DEBUG2", url: new URL("../../assets/sprites/misc/DEBUG2.png", import.meta.url).href },
   { name: "DEBUG3", url: new URL("../../assets/sprites/misc/DEBUG3.png", import.meta.url).href },
+  { name: "ICON_ACCEPT", url: new URL("../../assets/sprites/icons/ICON_ACCEPT.png", import.meta.url).href },
   { name: "ICON_AMERICA", url: new URL("../../assets/sprites/icons/ICON_AMERICA.png", import.meta.url).href },
   { name: "ICON_CANADA", url: new URL("../../assets/sprites/icons/ICON_CANADA.png", import.meta.url).href },
   { name: "ICON_CANCEL", url: new URL("../../assets/sprites/icons/ICON_CANCEL.png", import.meta.url).href },

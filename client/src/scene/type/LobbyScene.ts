@@ -223,6 +223,7 @@ export class LobbyScene extends Scene {
       },
       {
         text: "Ready Up",
+        icon: SpriteRegion.ICON_ACCEPT,
         // TODO: Change text of this button & prevent repeated clicks.
         onClicked: () => WebsocketClient.sendMessage({ event: "setState", state: "in_game" })
       },

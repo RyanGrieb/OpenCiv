@@ -1,3 +1,4 @@
+import { SpriteRegion } from "./Assets";
 import { SPRITE_MANIFEST } from "./generated/SpriteManifest";
 
 export interface SpriteAtlasRegion {
@@ -182,7 +183,7 @@ export class SpriteAtlas {
     return this.image;
   }
 
-  public getRegion(name: string): SpriteAtlasRegion | undefined {
-    return this.regions[name];
+  public getRegion(region: SpriteRegion): SpriteAtlasRegion | undefined {
+    return this.regions[SpriteRegion[region]];
   }
 }
