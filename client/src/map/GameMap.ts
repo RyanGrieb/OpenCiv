@@ -143,9 +143,12 @@ export class GameMap {
       parentObject: this,
       callback: (data) => {
         if (this.knownUnitIds.has(data.id)) return;
-        this.knownUnitIds.add(data.id);
 
-        const tile = this.tiles[data.tileX][data.tileY];
+        // Map not built yet: the mapChunk snapshot will include this unit.
+        const tile = this.tiles[data.tileX]?.[data.tileY];
+        if (!tile) return;
+
+        this.knownUnitIds.add(data.id);
         const unit = new Unit(tile, data);
         tile.addUnit(unit);
         Game.getInstance().getCurrentScene().addActor(unit);
