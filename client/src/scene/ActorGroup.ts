@@ -102,9 +102,22 @@ export class ActorGroup extends Actor {
     }
   }
 
+  // Applies to actors already in the group (including nested groups); actors added later
+  // inherit it too, unless the group is left at the default of 1.
+  public setTransparency(transparency: number): void {
+    super.setTransparency(transparency);
+
+    for (const actor of this.actors) {
+      actor.setTransparency(transparency);
+    }
+  }
+
   public addActor(actor: Actor) {
     actor.setCameraApplies(this.cameraApplies);
     actor.setZValue(this.z);
+    if (this.transparency !== 1) {
+      actor.setTransparency(this.transparency);
+    }
     this.actors.push(actor);
   }
 

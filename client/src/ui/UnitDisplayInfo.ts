@@ -1,3 +1,4 @@
+import { ClientSettings } from "../ClientSettings";
 import { GameImage } from "../Assets";
 import { Game } from "../Game";
 import { Unit } from "../Unit";
@@ -29,6 +30,7 @@ export class UnitDisplayInfo extends ActorGroup {
 
     this.unit = unit;
     this.actionButtons = [];
+    this.setTransparency(ClientSettings.get("HUD_TRANSPARENCY"));
 
     this.addActor(
       new Actor({
