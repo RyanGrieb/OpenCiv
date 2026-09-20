@@ -2,7 +2,7 @@ import { Player } from "./Player";
 import { State } from "./state/State";
 import { WebSocket } from "ws";
 import { ServerEvents } from "./Events";
-import { DefaultGameOptions, GameOptionDefinitions, GameOptions } from "./GameOptions";
+import { DefaultGameOptions, GameOptionDefinitions, GameOptions, MapSizes } from "./GameOptions";
 import { Numbers } from "./util/Numbers";
 
 /**
@@ -19,6 +19,15 @@ export class Game {
   private constructor(optionOverrides: Partial<GameOptions>) {
     this.states = new Map<string, State>();
     this.gameOptions = { ...DefaultGameOptions, ...optionOverrides };
+
+    // Startup overrides skip the slider's onChange cascade, so reconcile the size options by hand:
+    // a mapSize preset supplies the dimensions, then explicit dimensions win over it.
+    if (optionOverrides.mapSize !== undefined) {
+      MapSizes.applyPreset(this.gameOptions, optionOverrides.mapSize);
+    }
+    this.gameOptions.mapWidth = optionOverrides.mapWidth ?? this.gameOptions.mapWidth;
+    this.gameOptions.mapHeight = optionOverrides.mapHeight ?? this.gameOptions.mapHeight;
+    MapSizes.syncPreset(this.gameOptions);
 
     // Set up the listener for the "setState" event. Changes the game-state.
     ServerEvents.on({
@@ -195,7 +204,7 @@ export class Game {
   }
 
   private getGameOptionsPayload() {
-    return GameOptionDefinitions.filter((definition) => !definition.hidden).map((definition) => ({
+    return GameOptionDefinitions.map((definition) => ({
       ...definition,
       value: this.gameOptions[definition.key]
     }));

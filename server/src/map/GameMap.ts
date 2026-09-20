@@ -7,15 +7,7 @@ import { TileIndexer } from "./TileIndexer";
 import { Unit } from "../unit/Unit";
 import PriorityQueue from "ts-priority-queue";
 import { Numbers } from "../util/Numbers";
-
-enum MapSize {
-  DUEL = "48x32",
-  TINY = "56x36",
-  SMALL = "68x44",
-  STANDARD = "80x52",
-  LARGE = "104x64",
-  HUGE = "128x80"
-}
+import { MAP_CHUNK_SIZE, MIN_MAP_DIMENSION } from "../GameOptions";
 
 export class GameMap {
   private static instance: GameMap;
@@ -59,13 +51,17 @@ export class GameMap {
     GameMap.instance = undefined;
   }
 
+  private static snapToChunks(requested: number) {
+    return Math.max(MIN_MAP_DIMENSION, Math.round(requested / MAP_CHUNK_SIZE) * MAP_CHUNK_SIZE);
+  }
+
   private constructor() { }
 
   private startGeneration() {
     // Assign map dimension values
-    const mapDimensions = this.getDimensionValues(MapSize.DUEL);
-    this.mapWidth = mapDimensions[0];
-    this.mapHeight = mapDimensions[1];
+    const options = Game.getInstance().getGameOptions();
+    this.mapWidth = GameMap.snapToChunks(options.mapWidth);
+    this.mapHeight = GameMap.snapToChunks(options.mapHeight);
     this.mapArea = this.mapWidth * this.mapHeight;
     this.riverSideHistory = [];
 
@@ -660,7 +656,7 @@ export class GameMap {
     return nextTileCandidates;
   }
 
-  public getDimensionValues(mapSize: MapSize) {
+  public getDimensionValues(mapSize: string) {
     const values = [
       parseInt(mapSize.substring(0, mapSize.indexOf("x"))),
       parseInt(mapSize.substring(mapSize.indexOf("x") + 1))
@@ -707,13 +703,13 @@ export class GameMap {
       tiles: Tile.getAllTileStats()
     });
 
-    for (let x = 0; x < this.mapWidth; x += 4) {
-      for (let y = 0; y < this.mapHeight; y += 4) {
+    for (let x = 0; x < this.mapWidth; x += MAP_CHUNK_SIZE) {
+      for (let y = 0; y < this.mapHeight; y += MAP_CHUNK_SIZE) {
         const chunkTiles = [];
         const chunkCities = [];
 
-        for (let chunkX = 0; chunkX < 4; chunkX++) {
-          for (let chunkY = 0; chunkY < 4; chunkY++) {
+        for (let chunkX = 0; chunkX < MAP_CHUNK_SIZE; chunkX++) {
+          for (let chunkY = 0; chunkY < MAP_CHUNK_SIZE; chunkY++) {
             const tile = this.tiles[x + chunkX][y + chunkY];
             if (tile.getCity()) {
               chunkCities.push(tile.getCity());
@@ -723,7 +719,7 @@ export class GameMap {
         }
 
         let lastChunk = false;
-        if (x === this.mapWidth - 4 && y === this.mapHeight - 4) {
+        if (x === this.mapWidth - MAP_CHUNK_SIZE && y === this.mapHeight - MAP_CHUNK_SIZE) {
           lastChunk = true;
         }
         player.sendNetworkEvent({

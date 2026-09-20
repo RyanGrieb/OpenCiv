@@ -15,6 +15,7 @@ interface BooleanGameOptionData {
   key: string;
   label: string;
   type: "boolean";
+  hidden?: boolean;
   value: boolean;
 }
 
@@ -22,6 +23,7 @@ interface NumberGameOptionData {
   key: string;
   label: string;
   type: "number";
+  hidden?: boolean;
   min: number;
   max: number;
   step: number;
@@ -52,6 +54,11 @@ export class GameOptionsGroup extends ActorGroup {
   private static readonly SLIDER_VALUE_WIDTH = 90;
 
   private optionActors: Actor[];
+  private optionDefs: GameOptionData[] = [];
+  private showAdvanced: boolean = false;
+  private footerActors: Actor[] = [];
+  private titleLabel: Label;
+  private onClose: () => void;
 
   constructor(options: GameOptionsGroupOptions) {
     super({
@@ -75,33 +82,25 @@ export class GameOptionsGroup extends ActorGroup {
       })
     );
 
-    const titleLabel = new Label({
+    this.titleLabel = new Label({
       text: "Game Options",
       font: "20px serif",
       fontColor: "white"
     });
-    this.addActor(titleLabel);
-    titleLabel.conformSize().then(() => {
-      titleLabel.setPosition(this.x + this.width / 2 - titleLabel.getWidth() / 2, this.y + 12);
-    });
+    this.addActor(this.titleLabel);
 
-    this.addActor(
-      new Button({
-        text: "Back",
-        x: this.x + this.width / 2 - ButtonSize.MEDIUM.width / 2,
-        y: this.y + this.height - 60,
-        size: ButtonSize.MEDIUM,
-        fontColor: "white",
-        onClicked: () => options.onClose()
-      })
-    );
+    this.onClose = options.onClose;
+    this.renderPage();
 
     WebsocketClient.sendMessage({ event: "gameOptions" });
 
     NetworkEvents.on<GameOptionsEvent>({
       eventName: "gameOptions",
       parentObject: this,
-      callback: (data) => this.renderOptions(data.options)
+      callback: (data) => {
+        this.optionDefs = data.options;
+        this.renderOptions();
+      }
     });
   }
 
@@ -110,7 +109,61 @@ export class GameOptionsGroup extends ActorGroup {
     NetworkEvents.removeCallbacksByParentObject(this);
   }
 
-  private renderOptions(optionDefs: GameOptionData[]) {
+  // Swaps the title and footer buttons between the main page and the advanced (hidden options) page.
+  private renderPage() {
+    this.titleLabel.setText(this.showAdvanced ? "Advanced Options" : "Game Options");
+    this.titleLabel.conformSize().then(() => {
+      this.titleLabel.setPosition(this.x + this.width / 2 - this.titleLabel.getWidth() / 2, this.y + 12);
+    });
+
+    for (const actor of this.footerActors) {
+      this.removeActor(actor);
+    }
+    this.footerActors = [];
+
+    const buttonGap = 20;
+    const buttonY = this.y + this.height - 60;
+    const buttonsX = this.x + this.width / 2 - ButtonSize.MEDIUM.width - buttonGap / 2;
+    const backButton = new Button({
+      text: "Back",
+      x: this.showAdvanced ? this.x + this.width / 2 - ButtonSize.MEDIUM.width / 2 : buttonsX + ButtonSize.MEDIUM.width + buttonGap,
+      y: buttonY,
+      size: ButtonSize.MEDIUM,
+      fontColor: "white",
+      onClicked: () => {
+        if (this.showAdvanced) {
+          this.showAdvanced = false;
+          this.renderPage();
+        } else {
+          this.onClose();
+        }
+      }
+    });
+
+    if (this.showAdvanced) {
+      this.footerActors.push(backButton);
+    } else {
+      this.footerActors.push(
+        new Button({
+          text: "Advanced",
+          x: buttonsX,
+          y: buttonY,
+          size: ButtonSize.MEDIUM,
+          fontColor: "white",
+          onClicked: () => {
+            this.showAdvanced = true;
+            this.renderPage();
+          }
+        }),
+        backButton
+      );
+    }
+
+    this.footerActors.forEach((actor) => this.addActor(actor));
+    this.renderOptions();
+  }
+
+  private renderOptions() {
     for (const actor of this.optionActors) {
       this.removeActor(actor);
     }
@@ -118,9 +171,10 @@ export class GameOptionsGroup extends ActorGroup {
 
     // Grouped by type (all checkboxes, then all sliders, ...) regardless of the order the
     // server lists them in, so the two control kinds never interleave row to row.
+    const visibleDefs = this.optionDefs.filter((def) => !!def.hidden === this.showAdvanced);
     const orderedDefs = [
-      ...optionDefs.filter((def) => def.type === "boolean"),
-      ...optionDefs.filter((def) => def.type === "number")
+      ...visibleDefs.filter((def) => def.type === "boolean"),
+      ...visibleDefs.filter((def) => def.type === "number")
     ];
 
     orderedDefs.forEach((optionDef, index) => {
