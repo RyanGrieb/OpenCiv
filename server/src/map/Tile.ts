@@ -712,8 +712,8 @@ export class Tile {
   }
 
   public getDistanceFrom(tile: Tile) {
-    const dx = this.x + 0.5 - (tile.x + 0.5);
-    const dy = this.y + 0.5 - (tile.y + 0.5);
+    const dx = GameMap.shortestXDistance(this.x, tile.x);
+    const dy = this.y - tile.y;
     return Math.sqrt(dx ** 2 + dy ** 2);
   }
 
@@ -738,7 +738,8 @@ export class Tile {
 
   //TODO: Function works but naming is confusing, we don't use grid variables in server.
   public static gridDistance(tile1: Tile, tile2: Tile) {
-    return Math.sqrt(Math.pow(tile2.getX() - tile1.getX(), 2) + Math.pow(tile2.getY() - tile1.getY(), 2));
+    const dx = GameMap.shortestXDistance(tile1.getX(), tile2.getX());
+    return Math.sqrt(Math.pow(dx, 2) + Math.pow(tile2.getY() - tile1.getY(), 2));
   }
 
   public static getWeight(tile1: Tile, tile2: Tile, unit?: Unit): number {

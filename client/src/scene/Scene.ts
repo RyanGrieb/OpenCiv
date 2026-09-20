@@ -5,9 +5,10 @@ import { Camera } from "./Camera";
 import { Line } from "./Line";
 import { SceneObject } from "./SceneObject";
 import { ActorGroup } from "./ActorGroup";
+import { MapWrap } from "../map/MapWrap";
 
 export abstract class Scene {
-  protected static ExitReceipt = new (class { })();
+  protected static ExitReceipt = new (class {})();
 
   protected storedEvents: Map<string, Function[]>;
   protected firstLoad: boolean;
@@ -68,9 +69,24 @@ export abstract class Scene {
       this.camera.updateOffset();
     }
 
+    const game = Game.getInstance();
+    const canvasContext = game.getCanvasContext();
+    // One entry ([0]) unless the map wraps, in which case the world repeats to fill the viewport.
+    const worldOffsets = MapWrap.getDrawOffsets();
+
     this.sceneObjects.forEach((object: SceneObject) => {
-      if (this.worldHidden && Scene.isWorldObject(object)) return;
-      object.draw(Game.getInstance().getCanvasContext());
+      if (!Scene.isWorldObject(object)) {
+        object.draw(canvasContext);
+        return;
+      }
+
+      if (this.worldHidden) return;
+
+      for (const offsetX of worldOffsets) {
+        game.setWorldDrawOffsetX(offsetX);
+        object.draw(canvasContext);
+      }
+      game.setWorldDrawOffsetX(0);
     });
   }
 
@@ -84,7 +100,7 @@ export abstract class Scene {
     this.onInitialize();
   }
 
-  public onInitialize() { }
+  public onInitialize() {}
 
   public onDestroyed(newScene: Scene): typeof Scene.ExitReceipt {
     this.sceneObjects.forEach((object) => {

@@ -1,6 +1,8 @@
 export interface GameOptions {
   allowBarbarians: boolean;
   numCityStates: number;
+  // Makes the east and west map edges adjacent, so the world is a cylinder rather than a rectangle.
+  wrapMap: boolean;
   mapSize: number;
   // Exact map dimensions in tiles, snapped to a multiple of MAP_CHUNK_SIZE by GameMap. Choosing a
   // mapSize preset fills these in; editing them by hand flips mapSize to MapSizes.CUSTOM. Hidden -
@@ -49,6 +51,7 @@ export class MapSizes {
 export const DefaultGameOptions: GameOptions = {
   allowBarbarians: true,
   numCityStates: MAP_SIZE_CITY_STATE_COUNTS[3],
+  wrapMap: true,
   mapSize: 3,
   mapWidth: MapSizes.DIMENSIONS[3][0],
   mapHeight: MapSizes.DIMENSIONS[3][1]
@@ -88,6 +91,7 @@ export type GameOptionDefinition = BooleanGameOptionDefinition | NumberGameOptio
 export const GameOptionDefinitions: GameOptionDefinition[] = [
   { key: "allowBarbarians", label: "Allow Barbarians", type: "boolean" },
   { key: "numCityStates", label: "Number of City-States", type: "number", min: 0, max: 12, step: 1 },
+  { key: "wrapMap", label: "Wrap Map East-West", type: "boolean" },
   {
     key: "mapSize",
     label: "Map Size",

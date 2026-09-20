@@ -10,11 +10,14 @@ import { AbstractPlayer } from "../player/AbstractPlayer";
 import { City } from "../city/City";
 import { TileOutline } from "./TileOutline";
 import { Vector } from "../util/Vector";
+import { MapWrap } from "./MapWrap";
 
 // width/height/x/y/movementCost arrive as strings and are run through parseInt() below.
 interface MapSizeEvent {
   width: string;
   height: string;
+  // Whether the server made the east and west edges adjacent - see GameOptions.wrapMap.
+  wrap?: boolean;
 }
 
 interface TileYieldsEvent {
@@ -96,6 +99,8 @@ export class GameMap {
    */
   public static init() {
     GameMap.instance = new GameMap();
+    // No wrapping until this game's mapSize says otherwise, so the last game's can't carry over.
+    MapWrap.init(0, 0, false);
     this.instance.requestMapFromServer();
     this.instance.requestTileYieldsFromServer();
   }
@@ -198,19 +203,14 @@ export class GameMap {
     else edgeAxis = this.oddEdgeAxis;
 
     for (let i = 0; i < edgeAxis.length; i++) {
-      let edgeX = gridX + edgeAxis[i][0];
+      // Only x wraps - the north and south edges stay the poles.
+      let edgeX = MapWrap.wrapGridX(gridX + edgeAxis[i][0]);
       let edgeY = gridY + edgeAxis[i][1];
 
-      if (
-        edgeX == -1 ||
-        edgeY == -1 ||
-        edgeX > this.mapWidth - 1 ||
-        edgeY > this.mapHeight - 1 ||
-        gridX + edgeAxis[i][0] < 0
-      ) {
+      if (edgeX < 0 || edgeY == -1 || edgeX > this.mapWidth - 1 || edgeY > this.mapHeight - 1) {
         continue;
       }
-      adjTiles.push(this.tiles[gridX + edgeAxis[i][0]][gridY + edgeAxis[i][1]]);
+      adjTiles.push(this.tiles[edgeX][edgeY]);
     }
 
     return adjTiles;
@@ -339,7 +339,7 @@ export class GameMap {
       callback: (data) => {
         console.log("Received tile yields from server.");
         console.log(data);
-        Tile.setTileYields(data.yields)
+        Tile.setTileYields(data.yields);
       }
     });
   }
@@ -360,6 +360,8 @@ export class GameMap {
       callback: (data) => {
         this.mapWidth = parseInt(data.width);
         this.mapHeight = parseInt(data.height);
+
+        MapWrap.init(this.mapWidth, Tile.WIDTH, data.wrap ?? false);
 
         for (let x = 0; x < this.mapWidth; x++) {
           this.tiles[x] = [];
@@ -792,7 +794,8 @@ export class GameMap {
         else edgeAxis = this.oddEdgeAxis;
 
         for (let i = 0; i < edgeAxis.length; i++) {
-          let edgeX = x + edgeAxis[i][0];
+          // Only x wraps - the north and south edges stay the poles.
+          let edgeX = MapWrap.wrapGridX(x + edgeAxis[i][0]);
           let edgeY = y + edgeAxis[i][1];
 
           if (edgeX == -1 || edgeY == -1 || edgeX > this.mapWidth - 1 || edgeY > this.mapHeight - 1) {
@@ -800,7 +803,7 @@ export class GameMap {
             continue;
           }
 
-          this.tiles[x][y].setAdjacentTile(i, this.tiles[x + edgeAxis[i][0]][y + edgeAxis[i][1]]);
+          this.tiles[x][y].setAdjacentTile(i, this.tiles[edgeX][edgeY]);
         }
       }
     }

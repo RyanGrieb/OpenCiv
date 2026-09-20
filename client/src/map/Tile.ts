@@ -5,6 +5,7 @@ import { City } from "../city/City";
 import { Actor } from "../scene/Actor";
 import { Vector } from "../util/Vector";
 import { GameMap } from "./GameMap";
+import { MapWrap } from "./MapWrap";
 import { SpriteAtlas } from "../SpriteAtlas";
 
 // Keyed by tile-type name (upper/lower-case variants both used); see Tile.getTileYield().
@@ -69,9 +70,10 @@ export class Tile extends Actor {
   }
 
   public static gridDistance(tile1: Tile, tile2: Tile) {
-    return Math.sqrt(
-      Math.pow(tile2.getGridX() - tile1.getGridX(), 2) + Math.pow(tile2.getGridY() - tile1.getGridY(), 2)
-    );
+    // The short way round, or the A* heuristic overestimates and paths near the seam go non-optimal.
+    const dx = MapWrap.shortestGridDeltaX(tile2.getGridX() - tile1.getGridX());
+
+    return Math.sqrt(Math.pow(dx, 2) + Math.pow(tile2.getGridY() - tile1.getGridY(), 2));
   }
 
   public static riverCrosses(tile1: Tile, tile2: Tile) {
@@ -156,7 +158,8 @@ export class Tile extends Actor {
     const tileYield: { [key: string]: number } = {};
     for (const tileType of this.tileTypes) {
       // Accept both upper and lower case keys for tileTypes
-      const yieldData = allTileStats[tileType] || allTileStats[tileType.toUpperCase()] || allTileStats[tileType.toLowerCase()];
+      const yieldData =
+        allTileStats[tileType] || allTileStats[tileType.toUpperCase()] || allTileStats[tileType.toLowerCase()];
       if (yieldData && yieldData.stats) {
         for (const statObj of yieldData.stats) {
           for (const [key, value] of Object.entries(statObj)) {
@@ -255,7 +258,9 @@ export class Tile extends Actor {
       const spritesheetImage = Game.getInstance().getImage(GameImage.SPRITESHEET);
       const spriteRegion = resolveSpriteRegion(`TILE_${tileType.toUpperCase()}`);
       const region = SpriteAtlas.getInstance().getRegion(spriteRegion);
-      canvas.getContext("2d").drawImage(spritesheetImage, region.x, region.y, region.w, region.h, 0, 0, Tile.WIDTH, Tile.HEIGHT);
+      canvas
+        .getContext("2d")
+        .drawImage(spritesheetImage, region.x, region.y, region.w, region.h, 0, 0, Tile.WIDTH, Tile.HEIGHT);
     }
 
     //canvas.getContext("2d").globalCompositeOperation = "saturation";

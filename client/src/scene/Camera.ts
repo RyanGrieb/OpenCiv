@@ -1,4 +1,5 @@
 import { Game } from "../Game";
+import { MapWrap } from "../map/MapWrap";
 
 export interface CameraOptions {
   wasd_controls: boolean;
@@ -46,7 +47,6 @@ export class Camera {
   private lerp(a: number, b: number, t: number): number {
     return a + (b - a) * t;
   }
-
 
   constructor(options: CameraOptions) {
     this.keysHeld = [];
@@ -235,8 +235,8 @@ export class Camera {
     // Set the new zoom target
     this.targetZoomAmount = zoomAmount;
 
-    // Calculate the new camera position so that (x, y) is centered after zoom
-    this.targetX = -x * zoomAmount + width / 2;
+    // Centered after zoom, aiming at the nearest copy so a wrapped map doesn't pan the long way.
+    this.targetX = MapWrap.nearestCameraX(-x * zoomAmount + width / 2, this.x, zoomAmount);
     this.targetY = -y * zoomAmount + height / 2;
   }
 
@@ -276,12 +276,28 @@ export class Camera {
     }
 
     // Easing factor (0.1 = slow, 1 = instant)
-    const easing = 0.40;
+    const easing = 0.4;
     this.x = this.lerp(this.x, this.targetX, easing);
     this.y = this.lerp(this.y, this.targetY, easing);
 
     // Lerp zoomAmount for smooth zoom
-    this.zoomAmount = this.lerp(this.zoomAmount, this.targetZoomAmount, easing);
+    this.zoomAmount = MapWrap.snapZoom(this.lerp(this.zoomAmount, this.targetZoomAmount, easing));
+
+    this.wrapAroundWorld();
+  }
+
+  // Keeps the camera in the first copy of a wrapped world; the lerp target and drag anchor move
+  // with it, each converting at its own zoom.
+  private wrapAroundWorld() {
+    const copies = MapWrap.cameraWrapCopies(this.x, this.zoomAmount);
+    if (!copies) return;
+
+    const worldWidth = MapWrap.getWorldWidth();
+    const targetDelta = copies * worldWidth * this.targetZoomAmount;
+
+    this.x += copies * worldWidth * this.zoomAmount;
+    this.targetX += targetDelta;
+    this.lastMouseX -= targetDelta; // Feeds targetX on the next drag frame.
   }
 
   /**
@@ -289,7 +305,7 @@ export class Camera {
    * Updates the camera's target position to maintain the zoom focus at the given point,
    * and sets the target zoom amount. This function is intended to be called when the user
    * performs a zoom action (e.g., mouse wheel or pinch gesture) at a specific location.
-   * 
+   *
    * @param atX - The x-coordinate around which to zoom.
    * @param atY - The y-coordinate around which to zoom.
    * @param amount - The zoom factor to apply (e.g., 1.1 to zoom in, 0.9 to zoom out).

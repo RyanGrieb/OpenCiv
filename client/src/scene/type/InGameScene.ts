@@ -9,6 +9,7 @@ import { ClientPlayer } from "../../player/ClientPlayer";
 import { ExternalPlayer } from "../../player/ExternalPlayer";
 import { Button, ButtonSize } from "../../ui/Button";
 import { CityDisplayInfo } from "../../ui/CityDisplayInfo";
+import { ClientSettingsGroup } from "../../ui/ClientSettingsGroup";
 import { Label } from "../../ui/Label";
 import { ResearchDisplayInfo } from "../../ui/ResearchDisplayInfo";
 import { ResearchTreeWindow } from "../../ui/ResearchTreeWindow";
@@ -24,6 +25,9 @@ interface GameplayUIElement {
 }
 
 export class InGameScene extends Scene {
+  private static readonly SETTINGS_WIDTH = 460;
+  private static readonly SETTINGS_HEIGHT = 300;
+
   private players: AbstractPlayer[];
   private clientPlayer: ClientPlayer;
   private tileInformationLabel: Label;
@@ -35,6 +39,7 @@ export class InGameScene extends Scene {
   private nextTurnButton: Button;
   private closeCityDisplayButton: Button;
   private escMenu: ActorGroup;
+  private settingsGroup: ClientSettingsGroup;
   private openUIElement: GameplayUIElement;
 
   public onInitialize(): void {
@@ -127,17 +132,15 @@ export class InGameScene extends Scene {
             faith: SpriteRegion.ICON_FAITH,
             morale: SpriteRegion.ICON_MORALE,
             science: SpriteRegion.ICON_SCIENCE,
-            culture: SpriteRegion.ICON_CULTURE,
+            culture: SpriteRegion.ICON_CULTURE
           };
 
           // Set the label text (without yields)
           this.tileInformationLabel.setText(
             `[${options.tile.getGridX()},${options.tile.getGridY()}] ` +
-            tileTypes +
-            (options.tile.hasRiver() ? ", River" : "")
+              tileTypes +
+              (options.tile.hasRiver() ? ", River" : "")
           );
-
-
 
           this.tileInformationLabel.conformSize().then(() => {
             // Positioning for icons (right after the label)
@@ -181,7 +184,6 @@ export class InGameScene extends Scene {
               }
             }
           });
-
         }
       });
       //DEBUG top layer chunks -
@@ -218,6 +220,7 @@ export class InGameScene extends Scene {
   public onDestroyed() {
     super.onDestroyed(this);
     this.escMenu = undefined;
+    this.settingsGroup = undefined;
     this.cityDisplayInfo = undefined;
     this.researchTreeWindow = undefined;
     this.openUIElement = undefined;
@@ -426,8 +429,38 @@ export class InGameScene extends Scene {
     this.addActor(this.researchDisplayInfo);
   }
 
+  // The esc menu leaves the scene meanwhile: clicks aren't occluded by z-order, so its "Main Menu"
+  // button would also fire through this window's "Back".
+  private toggleSettings() {
+    if (this.settingsGroup) {
+      this.removeActor(this.settingsGroup);
+      this.settingsGroup = undefined;
+      this.addActor(this.escMenu);
+      this.openUIElement = { close: () => this.toggleEscMenu() };
+      return;
+    }
+
+    this.removeActor(this.escMenu);
+
+    this.settingsGroup = new ClientSettingsGroup({
+      x: Game.getInstance().getWidth() / 2 - InGameScene.SETTINGS_WIDTH / 2,
+      y: Game.getInstance().getHeight() / 2 - InGameScene.SETTINGS_HEIGHT / 2,
+      width: InGameScene.SETTINGS_WIDTH,
+      height: InGameScene.SETTINGS_HEIGHT,
+      onClose: () => this.toggleSettings()
+    });
+
+    this.addActor(this.settingsGroup);
+    this.openUIElement = { close: () => this.toggleSettings() };
+  }
+
   private toggleEscMenu() {
     if (this.escMenu) {
+      if (this.settingsGroup) {
+        this.removeActor(this.settingsGroup);
+        this.settingsGroup = undefined;
+      }
+
       this.removeActor(this.escMenu);
       this.escMenu = undefined;
       this.systemMenuOpen = false;
@@ -484,7 +517,7 @@ export class InGameScene extends Scene {
         size: ButtonSize.MEDIUM,
         fontColor: "white",
         onClicked: () => {
-          console.log("Toggle settings menu");
+          this.toggleSettings();
         }
       })
     );
@@ -496,7 +529,7 @@ export class InGameScene extends Scene {
         y: this.escMenu.getY() + 143,
         size: ButtonSize.MEDIUM,
         fontColor: "white",
-        onClicked: () => { }
+        onClicked: () => {}
       })
     );
 

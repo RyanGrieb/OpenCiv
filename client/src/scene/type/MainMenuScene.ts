@@ -1,12 +1,21 @@
 import { Scene } from "../Scene";
 import { Game } from "../../Game";
 import { Button, ButtonSize } from "../../ui/Button";
+import { ClientSettingsGroup } from "../../ui/ClientSettingsGroup";
 import { Label } from "../../ui/Label";
 import { SceneBackground } from "../SceneBackground";
 
 export class MainMenuScene extends Scene {
+  private static readonly SETTINGS_WIDTH = 460;
+  private static readonly SETTINGS_HEIGHT = 300;
+
+  private menuButtons: Button[];
+  private settingsGroup: ClientSettingsGroup;
+
   public onInitialize(): void {
     super.onInitialize();
+    this.settingsGroup = undefined;
+    this.menuButtons = [];
     this.addActor(SceneBackground.generatePanningGrassland());
 
     const titleLabel = new Label({
@@ -18,7 +27,10 @@ export class MainMenuScene extends Scene {
       shadowBlur: 20
     });
     titleLabel.conformSize().then(() => {
-      titleLabel.setPosition(Game.getInstance().getWidth() / 2 - titleLabel.getWidth() / 2, Game.getInstance().getHeight() / 3 - 75);
+      titleLabel.setPosition(
+        Game.getInstance().getWidth() / 2 - titleLabel.getWidth() / 2,
+        Game.getInstance().getHeight() / 3 - 75
+      );
     });
 
     this.addActor(titleLabel);
@@ -33,7 +45,7 @@ export class MainMenuScene extends Scene {
 
     this.addActor(backgroundActor);*/
 
-    this.addActor(
+    this.menuButtons.push(
       new Button({
         text: "Play",
         x: Game.getInstance().getWidth() / 2 - ButtonSize.LARGE.width / 2,
@@ -43,10 +55,7 @@ export class MainMenuScene extends Scene {
         onClicked: () => {
           Game.getInstance().setScene("join_game");
         }
-      })
-    );
-
-    this.addActor(
+      }),
       new Button({
         text: "Options",
         x: Game.getInstance().getWidth() / 2 - ButtonSize.LARGE.width / 2,
@@ -54,9 +63,34 @@ export class MainMenuScene extends Scene {
         size: ButtonSize.LARGE,
         fontColor: "white",
         onClicked: () => {
-          console.log("options scene");
+          this.toggleSettings();
         }
       })
     );
+
+    this.menuButtons.forEach((button) => this.addActor(button));
+  }
+
+  // The menu buttons leave the scene meanwhile: clicks aren't occluded by z-order, so one sitting
+  // under the window would still take them.
+  private toggleSettings() {
+    if (this.settingsGroup) {
+      this.removeActor(this.settingsGroup);
+      this.settingsGroup = undefined;
+      this.menuButtons.forEach((button) => this.addActor(button));
+      return;
+    }
+
+    this.menuButtons.forEach((button) => this.removeActor(button));
+
+    this.settingsGroup = new ClientSettingsGroup({
+      x: Game.getInstance().getWidth() / 2 - MainMenuScene.SETTINGS_WIDTH / 2,
+      y: Game.getInstance().getHeight() / 2 - MainMenuScene.SETTINGS_HEIGHT / 2,
+      width: MainMenuScene.SETTINGS_WIDTH,
+      height: MainMenuScene.SETTINGS_HEIGHT,
+      onClose: () => this.toggleSettings()
+    });
+
+    this.addActor(this.settingsGroup);
   }
 }

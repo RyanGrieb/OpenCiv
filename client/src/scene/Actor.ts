@@ -2,6 +2,7 @@ import { SpriteRegion, GameImage } from "../Assets";
 import { Game } from "../Game";
 import { SceneObject } from "./SceneObject";
 import { SpriteAtlas } from "../SpriteAtlas";
+import { MapWrap } from "../map/MapWrap";
 
 export interface ActorOptions {
   color?: string;
@@ -56,7 +57,6 @@ export class Actor implements SceneObject {
     this.cornerSize = actorOptions.cornerSize ?? 10;
 
     this.on("mousemove", (options) => {
-
       // If the camera is applied, use clientX and clientY for accurate mouse position (options.x & y has DPR scaling)
       const x = this.cameraApplies ? options.clientX : options.x;
       const y = this.cameraApplies ? options.clientY : options.y;
@@ -162,7 +162,12 @@ export class Actor implements SceneObject {
         canvasContext.strokeStyle = "purple";
         canvasContext.lineWidth = 2;
         // Transform world coordinates to screen coordinates
-        canvasContext.strokeRect(this.getScreenPixelX(), this.getScreenPixelY(), this.getScreenPixelWidth(), this.getScreenPixelHeight());
+        canvasContext.strokeRect(
+          this.getScreenPixelX(),
+          this.getScreenPixelY(),
+          this.getScreenPixelWidth(),
+          this.getScreenPixelHeight()
+        );
         canvasContext.restore();
       }
 
@@ -176,12 +181,7 @@ export class Actor implements SceneObject {
       const screenHeight = this.getScreenPixelHeight();
 
       // Cull if actor is completely outside the canvas
-      if (
-        screenX + screenWidth < 0 ||
-        screenY + screenHeight < 0 ||
-        screenX > canvasWidth ||
-        screenY > canvasHeight
-      ) {
+      if (screenX + screenWidth < 0 || screenY + screenHeight < 0 || screenX > canvasWidth || screenY > canvasHeight) {
         if (this.debugMe) {
           console.log("Actor culled (outside canvas):", {
             screenX,
@@ -189,7 +189,7 @@ export class Actor implements SceneObject {
             screenWidth,
             screenHeight,
             canvasWidth,
-            canvasHeight,
+            canvasHeight
           });
         }
         return;
@@ -202,10 +202,9 @@ export class Actor implements SceneObject {
           screenWidth,
           screenHeight,
           canvasWidth,
-          canvasHeight,
+          canvasHeight
         });
       }
-
     }
 
     if (!this.image && this.color) {
@@ -225,8 +224,8 @@ export class Actor implements SceneObject {
     }
   }
 
-  public onCreated() { }
-  public onDestroyed() { }
+  public onCreated() {}
+  public onDestroyed() {}
 
   public call<T = any>(eventName: string, options?: T) {
     if (this.storedEvents.has(eventName)) {
@@ -248,17 +247,21 @@ export class Actor implements SceneObject {
 
   public insideActor(x: number, y: number): boolean {
     //FIXME: The actor should have a scene parent object
-    if (this.cameraApplies && Game.getInstance().getCurrentScene().getCamera()) {
-      const zoom = Game.getInstance().getCurrentScene().getCamera().getZoomAmount();
-      const cameraX = Game.getInstance().getCurrentScene().getCamera().getX();
-      const cameraY = Game.getInstance().getCurrentScene().getCamera().getY();
+    const camera = Game.getInstance().getCurrentScene().getCamera();
+    let localX = x - this.x;
+
+    if (this.cameraApplies && camera) {
+      const zoom = camera.getZoomAmount();
 
       // Adjust the x and y coordinates relative to the camera
-      x = (x - cameraX) / zoom;
-      y = (y - cameraY) / zoom;
+      x = (x - camera.getX()) / zoom;
+      y = (y - camera.getY()) / zoom;
+
+      // A wrapped world repeats this actor every world-width across, so test the nearest copy.
+      localX = MapWrap.wrapWorldX(x - this.x);
     }
 
-    if (x >= this.x && x <= this.x + this.width) {
+    if (localX >= 0 && localX <= this.width) {
       if (y >= this.y && y <= this.y + this.height) {
         return true;
       }
@@ -296,7 +299,8 @@ export class Actor implements SceneObject {
     const camera = scene?.getCamera();
     const dpr = game.getDPR();
     const zoom = camera.getZoomAmount();
-    return (this.x * zoom + camera.getX()) * dpr;
+    // Includes the wrap offset so each repeated copy culls against the viewport on its own.
+    return ((this.x + game.getWorldDrawOffsetX()) * zoom + camera.getX()) * dpr;
   }
 
   /**

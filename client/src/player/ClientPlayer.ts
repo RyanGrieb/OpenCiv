@@ -2,6 +2,7 @@ import { Game } from "../Game";
 import { Unit } from "../Unit";
 import { GameMap } from "../map/GameMap";
 import { HoveredTile } from "../map/HoveredTile";
+import { MapWrap } from "../map/MapWrap";
 import { Tile } from "../map/Tile";
 import { NetworkEvents, WebsocketClient } from "../network/Client";
 import { Line } from "../scene/Line";
@@ -311,7 +312,11 @@ export class ClientPlayer extends AbstractPlayer {
   }
 
   private moveSelectedUnit(targetTile: Tile) {
-    const pathTiles = GameMap.getInstance().constructShortestPath(this.selectedUnit, this.selectedUnit.getTile(), targetTile);
+    const pathTiles = GameMap.getInstance().constructShortestPath(
+      this.selectedUnit,
+      this.selectedUnit.getTile(),
+      targetTile
+    );
 
     // No reachable step towards targetTile (e.g. it's fully blocked) - the server would silently
     // no-op this anyway, so don't bother sending it or unselecting the unit over a wasted click.
@@ -390,6 +395,9 @@ export class ClientPlayer extends AbstractPlayer {
     mouseX /= zoom;
     mouseY /= zoom;
 
+    // The pointer can sit on any repeated copy; fold it onto the one the tiles were built at.
+    mouseX = MapWrap.wrapWorldX(mouseX);
+
     let mouseVector = new Vector(mouseX, mouseY);
     let mouseExtremeVector = new Vector(mouseX + 1000, mouseY);
 
@@ -412,13 +420,13 @@ export class ClientPlayer extends AbstractPlayer {
       gridY < 0 ||
       // We also check for mouse values that could indicate were out of bounds...
       mouseY < 6 ||
-      mouseX < 15 ||
-      mouseX > GameMap.getInstance().getWidth() * 32
+      // A wrapped map has no ragged east/west edge - those columns are ordinary tiles.
+      (!MapWrap.isWrapped() && (mouseX < 15 || mouseX > GameMap.getInstance().getWidth() * 32))
     ) {
       const adjBorderTiles = GameMap.getInstance().getAdjacentTiles(gridX, gridY);
       const clampedBorderTile =
         GameMap.getInstance().getTiles()[Numbers.clamp(gridX, 0, GameMap.getInstance().getWidth() - 1)][
-        Numbers.clamp(gridY, 0, GameMap.getInstance().getHeight() - 1)
+          Numbers.clamp(gridY, 0, GameMap.getInstance().getHeight() - 1)
         ];
       adjBorderTiles.push(clampedBorderTile); // Also push clamped tile.
 
@@ -473,7 +481,10 @@ export class ClientPlayer extends AbstractPlayer {
     this.movementLines = [];
   }
 
-  private drawMovementPath(startTile: Tile, goalTile: Tile): { isQueuedMovement: boolean; targetTile: Tile | undefined } {
+  private drawMovementPath(
+    startTile: Tile,
+    goalTile: Tile
+  ): { isQueuedMovement: boolean; targetTile: Tile | undefined } {
     if (this.movementLines.length > 0) {
       this.clearMovementPath();
     }
@@ -508,14 +519,18 @@ export class ClientPlayer extends AbstractPlayer {
 
       availableMovement -= tileCost;
 
+      const start = tile1.getCenterPosition();
+      const end = tile2.getCenterPosition();
+
       const line = new Line({
         color: color,
         girth: 2,
         z: 3,
-        x1: tile1.getCenterPosition().x,
-        y1: tile1.getCenterPosition().y,
-        x2: tile2.getCenterPosition().x,
-        y2: tile2.getCenterPosition().y
+        x1: start.x,
+        y1: start.y,
+        // A step over the seam is one tile, not a map's width; the copies show the far end.
+        x2: start.x + MapWrap.shortestDeltaX(start.x, end.x),
+        y2: end.y
       });
       this.movementLines.push(line);
       Game.getInstance().getCurrentScene().addLine(line);

@@ -55,6 +55,8 @@ export class Game {
   private oldHeight: number;
   private dpr: number;
   private canvasColor: string;
+  // World-x shift for camera-space drawing; 0 outside Scene's wrapped-map repeat loop.
+  private worldDrawOffsetX: number = 0;
 
   private getWorldX(clientX: number): number {
     return clientX * this.dpr;
@@ -85,18 +87,15 @@ export class Game {
 
   // Re-arms itself for the new DPR after each change, since a matchMedia query fires once.
   private watchDevicePixelRatio = () => {
-    window
-      .matchMedia(`(resolution: ${window.devicePixelRatio}dppx)`)
-      .addEventListener(
-        "change",
-        () => {
-          this.updateCanvasSize();
-          this.watchDevicePixelRatio();
-        },
-        { once: true }
-      );
+    window.matchMedia(`(resolution: ${window.devicePixelRatio}dppx)`).addEventListener(
+      "change",
+      () => {
+        this.updateCanvasSize();
+        this.watchDevicePixelRatio();
+      },
+      { once: true }
+    );
   };
-
 
   private constructor(options: GameOptions, assetsLoadedCallback: () => void) {
     this.scenes = new Map<string, Scene>();
@@ -117,7 +116,7 @@ export class Game {
             y: this.getWorldY(event.clientY),
             // We provide direct clientX & clientY for instances where we don't want to apply the DPR or camera transformations.
             clientX: event.clientX,
-            clientY: event.clientY,
+            clientY: event.clientY
           });
         });
 
@@ -197,24 +196,28 @@ export class Game {
         }
       });
 
-      this.canvas.addEventListener("wheel", (event) => {
-        // Trackpad pinch / ctrl+scroll sets ctrlKey; block the browser's native page zoom so it doesn't desync the canvas from the viewport.
-        if (event.ctrlKey) {
-          event.preventDefault();
-        }
+      this.canvas.addEventListener(
+        "wheel",
+        (event) => {
+          // Trackpad pinch / ctrl+scroll sets ctrlKey; block the browser's native page zoom so it doesn't desync the canvas from the viewport.
+          if (event.ctrlKey) {
+            event.preventDefault();
+          }
 
-        this.actors.forEach((actor) => {
-          actor.call("wheel", { deltaY: event.deltaY });
-        });
-
-        if (this.currentScene) {
-          this.currentScene.call("wheel", {
-            x: event.offsetX,
-            y: event.offsetY,
-            deltaY: event.deltaY
+          this.actors.forEach((actor) => {
+            actor.call("wheel", { deltaY: event.deltaY });
           });
-        }
-      }, { passive: false });
+
+          if (this.currentScene) {
+            this.currentScene.call("wheel", {
+              x: event.offsetX,
+              y: event.offsetY,
+              deltaY: event.deltaY
+            });
+          }
+        },
+        { passive: false }
+      );
 
       document.body.addEventListener("keydown", (event) => {
         this.actors.forEach((actor) => {
@@ -225,7 +228,7 @@ export class Game {
           this.currentScene.call("keydown", { key: event.key });
         }
 
-        if (event.key === 'Backspace') {
+        if (event.key === "Backspace") {
           event.preventDefault();
         }
       });
@@ -343,38 +346,40 @@ export class Game {
   private async loadAssetsPromise(assetList: string[]): Promise<void> {
     console.log("Asset list:", JSON.stringify(assetList, null, 2));
 
-    await Promise.all(assetList.map((url, index) => {
-      return new Promise<void>((resolve, reject) => {
-        console.log("Starting load for:", url);
+    await Promise.all(
+      assetList.map((url, index) => {
+        return new Promise<void>((resolve, reject) => {
+          console.log("Starting load for:", url);
 
-        const image = new Image();
+          const image = new Image();
 
-        // Add crossOrigin to prevent CORS issues
-        image.crossOrigin = "Anonymous";
+          // Add crossOrigin to prevent CORS issues
+          image.crossOrigin = "Anonymous";
 
-        image.onload = () => {
-          console.log("✅ Successfully loaded:", url);
-          this.images[index] = image;
-          resolve();
-        };
+          image.onload = () => {
+            console.log("✅ Successfully loaded:", url);
+            this.images[index] = image;
+            resolve();
+          };
 
-        image.onerror = (e) => {
-          console.error("❌ Load failed for:", url);
-          console.error("Error event:", e);
-          reject(`Failed to load ${url}`);
-        };
+          image.onerror = (e) => {
+            console.error("❌ Load failed for:", url);
+            console.error("Error event:", e);
+            reject(`Failed to load ${url}`);
+          };
 
-        // Create absolute URL to ensure proper loading
-        try {
-          const absoluteUrl = new URL(url, window.location.href).href;
-          console.log("Loading absolute URL:", absoluteUrl);
-          image.src = absoluteUrl;
-        } catch (error) {
-          console.error("Invalid URL:", url, error);
-          reject(`Invalid URL: ${url}`);
-        }
-      });
-    }));
+          // Create absolute URL to ensure proper loading
+          try {
+            const absoluteUrl = new URL(url, window.location.href).href;
+            console.log("Loading absolute URL:", absoluteUrl);
+            image.src = absoluteUrl;
+          } catch (error) {
+            console.error("Invalid URL:", url, error);
+            reject(`Invalid URL: ${url}`);
+          }
+        });
+      })
+    );
 
     // Replaces the raw spritesheet.png load above with the runtime-packed atlas -
     // GameImage.SPRITESHEET keeps working for every existing call site, it's just
@@ -382,7 +387,6 @@ export class Game {
     const atlas = await SpriteAtlas.load();
     this.images[GameImage.SPRITESHEET] = atlas.getImage();
   }
-
 
   public addScene(sceneName: string, scene: Scene) {
     this.scenes.set(sceneName, scene);
@@ -560,6 +564,19 @@ export class Game {
     context.imageSmoothingEnabled = originalSmoothing;
   }
 
+  // World space for the current camera, plus the shift that repeats a wrapped map across its seam.
+  private applyCameraTransform(canvasContext: CanvasRenderingContext2D) {
+    const camera = this.currentScene.getCamera();
+    const zoom = camera.getZoomAmount();
+    const dpr = this.dpr || 1;
+
+    // Whole device pixels, or each copy's edge antialiases against the background as a seam.
+    const translateX = Math.round((camera.getX() + this.worldDrawOffsetX * zoom) * dpr);
+    const translateY = Math.round(camera.getY() * dpr);
+
+    canvasContext.setTransform(zoom * dpr, 0, 0, zoom * dpr, translateX, translateY);
+  }
+
   public drawImageFromActor(actor: Actor, context: CanvasRenderingContext2D) {
     if (!actor.getImage()) {
       console.log("Warning: Attempted to draw empty actor: " + actor.getWidth());
@@ -572,15 +589,7 @@ export class Game {
 
     // Only apply camera to the Game's main canvas context.
     if (actor.isCameraApplied() && this.currentScene.getCamera() && canvasContext === this.canvasContext) {
-      const zoom = this.currentScene.getCamera().getZoomAmount();
-      const cameraX = this.currentScene.getCamera().getX();
-      const cameraY = this.currentScene.getCamera().getY();
-      const dpr = this.dpr || 1;
-      canvasContext.setTransform(
-        zoom * dpr, 0,
-        0, zoom * dpr,
-        cameraX * dpr, cameraY * dpr
-      );
+      this.applyCameraTransform(canvasContext);
     }
 
     canvasContext.translate(actor.getRotationOriginX(), actor.getRotationOriginY());
@@ -677,15 +686,7 @@ export class Game {
     canvasContext.textBaseline = "top";
     // Only apply camera to the Game's main canvas context. (canvasContext === this.canvasContext)
     if (textOptions.applyCamera && this.currentScene.getCamera() && canvasContext === this.canvasContext) {
-      const zoom = this.currentScene.getCamera().getZoomAmount();
-      const cameraX = this.currentScene.getCamera().getX();
-      const cameraY = this.currentScene.getCamera().getY();
-      const dpr = this.dpr || 1;
-      canvasContext.setTransform(
-        zoom * dpr, 0,
-        0, zoom * dpr,
-        cameraX * dpr, cameraY * dpr
-      );
+      this.applyCameraTransform(canvasContext);
     }
 
     canvasContext.globalAlpha = textOptions.transparency;
@@ -723,15 +724,7 @@ export class Game {
 
     // Only apply camera to the Game's main canvas context.
     if (this.currentScene.getCamera() && canvasContext === this.canvasContext) {
-      const zoom = this.currentScene.getCamera().getZoomAmount();
-      const cameraX = this.currentScene.getCamera().getX();
-      const cameraY = this.currentScene.getCamera().getY();
-      const dpr = this.dpr || 1;
-      canvasContext.setTransform(
-        zoom * dpr, 0,
-        0, zoom * dpr,
-        cameraX * dpr, cameraY * dpr
-      );
+      this.applyCameraTransform(canvasContext);
     }
 
     const x1 = line.getX1();
@@ -844,5 +837,13 @@ export class Game {
 
   public getDPR(): number {
     return this.dpr;
+  }
+
+  public setWorldDrawOffsetX(offsetX: number) {
+    this.worldDrawOffsetX = offsetX;
+  }
+
+  public getWorldDrawOffsetX(): number {
+    return this.worldDrawOffsetX;
   }
 }

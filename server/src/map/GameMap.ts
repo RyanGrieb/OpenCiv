@@ -29,6 +29,10 @@ export class GameMap {
     [-1, 0]
   ];
 
+  // Static so Tile can reach the helpers below without a live map (the tests mock getInstance()).
+  private static horizontalWrap = false;
+  private static wrapWidth = 0;
+
   private tiles: Tile[][];
   private mapWidth: number;
   private mapHeight: number;
@@ -37,6 +41,25 @@ export class GameMap {
 
   public static getInstance() {
     return this.instance;
+  }
+
+  public static wrapsHorizontally() {
+    return GameMap.horizontalWrap;
+  }
+
+  // Brings an x coordinate back inside the map; returns it untouched when wrapping is off.
+  public static wrapX(x: number) {
+    if (!GameMap.horizontalWrap) return x;
+
+    return ((x % GameMap.wrapWidth) + GameMap.wrapWidth) % GameMap.wrapWidth;
+  }
+
+  // Signed x distance, the shorter way round; otherwise tiles either side of the seam read as a map apart.
+  public static shortestXDistance(x1: number, x2: number) {
+    const delta = x2 - x1;
+    if (!GameMap.horizontalWrap) return delta;
+
+    return delta - Math.round(delta / GameMap.wrapWidth) * GameMap.wrapWidth;
   }
 
   /**
@@ -49,13 +72,15 @@ export class GameMap {
 
   public static destroyInstance() {
     GameMap.instance = undefined;
+    GameMap.horizontalWrap = false;
+    GameMap.wrapWidth = 0;
   }
 
   private static snapToChunks(requested: number) {
     return Math.max(MIN_MAP_DIMENSION, Math.round(requested / MAP_CHUNK_SIZE) * MAP_CHUNK_SIZE);
   }
 
-  private constructor() { }
+  private constructor() {}
 
   private startGeneration() {
     // Assign map dimension values
@@ -64,6 +89,9 @@ export class GameMap {
     this.mapHeight = GameMap.snapToChunks(options.mapHeight);
     this.mapArea = this.mapWidth * this.mapHeight;
     this.riverSideHistory = [];
+
+    GameMap.horizontalWrap = options.wrapMap;
+    GameMap.wrapWidth = this.mapWidth;
 
     // Initialize all tiles as ocean tiles
     this.tiles = [];
@@ -664,7 +692,6 @@ export class GameMap {
     return values;
   }
 
-
   public sendTileYieldsToPlayer(player: Player) {
     // Send the full tile stats JSON from tiles.yml
     player.sendNetworkEvent({
@@ -694,7 +721,8 @@ export class GameMap {
     player.sendNetworkEvent({
       event: "mapSize",
       width: this.mapWidth,
-      height: this.mapHeight
+      height: this.mapHeight,
+      wrap: GameMap.wrapsHorizontally()
     });
 
     //Send tile stats to player
@@ -757,7 +785,8 @@ export class GameMap {
         else edgeAxis = GameMap.oddEdgeAxis;
 
         for (let i = 0; i < edgeAxis.length; i++) {
-          let edgeX = x + edgeAxis[i][0];
+          // Only x wraps - the north and south edges stay the poles.
+          let edgeX = GameMap.wrapX(x + edgeAxis[i][0]);
           let edgeY = y + edgeAxis[i][1];
 
           if (edgeX == -1 || edgeY == -1 || edgeX > this.mapWidth - 1 || edgeY > this.mapHeight - 1) {
@@ -765,7 +794,7 @@ export class GameMap {
             continue;
           }
 
-          this.tiles[x][y].setAdjacentTile(i, this.tiles[x + edgeAxis[i][0]][y + edgeAxis[i][1]]);
+          this.tiles[x][y].setAdjacentTile(i, this.tiles[edgeX][edgeY]);
         }
       }
     }
