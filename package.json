@@ -4,13 +4,13 @@
     "description": "",
     "license": "MIT",
     "scripts": {
-        "prestart": "node scripts/kill_dev_processes.js && npx kill-port 2000 1234",
+        "prestart": "npx kill-port 2000 1234",
         "start": "concurrently \"npm start --prefix server\" \"npm run dev --prefix client\"",
         "test:e2e": "npx ts-node scripts/run_tests.ts",
         "generate-sprites": "npx ts-node scripts/generate_sprite_manifest.ts",
         "install-all": "npm install && concurrently \"npm install --prefix ./server\" \"npm install --prefix ./client\"",
         "generate-docs": "concurrently \"cd ./server && npx typedoc --name openciv/server\" \"cd ./client && npx typedoc --name openciv/client\"",
-        "format": "npx prettier --write \"**/*.ts\""
+        "format": "npx prettier --write \"**/*.{ts,mts}\""
     },
     "dependencies": {
         "concurrently": "^7.6.0"

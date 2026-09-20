@@ -1,6 +1,4 @@
 **/node_modules/
 **/dist/
 **/.vscode/
-**/.parcel-cache/
-**/client/.cache
 **/documentation/

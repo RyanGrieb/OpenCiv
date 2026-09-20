@@ -36,11 +36,11 @@ export class SpriteAtlas {
   }
 
   public static async load(): Promise<SpriteAtlas> {
-    // In dev, Parcel serves each sprite at a stable URL regardless of its
+    // In dev, Vite serves each sprite at a stable URL regardless of its
     // content, so editing a sprite's pixels wouldn't change the manifest hash
     // and the cache would keep serving the pre-edit atlas. Only production
-    // (where Parcel content-hashes output filenames) benefits from caching.
-    const useCache = process.env.NODE_ENV === "production";
+    // (where Vite content-hashes output filenames) benefits from caching.
+    const useCache = import.meta.env.PROD;
 
     const hash = SpriteAtlas.computeManifestHash();
     const cached = useCache ? await SpriteAtlas.readCache(hash) : undefined;
@@ -61,7 +61,7 @@ export class SpriteAtlas {
 
   private static computeManifestHash(): string {
     // FNV-1a over the sorted "name:url" pairs. Changes whenever a sprite is
-    // added, removed, or renamed, and (in production, where Parcel content-hashes
+    // added, removed, or renamed, and (in production, where Vite content-hashes
     // output filenames) whenever a sprite's pixels change.
     // Explicit ordinal compare (not localeCompare) - this hash must come out identical on
     // every machine, and locale-aware collation isn't guaranteed consistent across them.

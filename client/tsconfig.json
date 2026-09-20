@@ -12,10 +12,23 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "types": [],
+    "types": [
+      "vite/client"
+    ],
     "module": "es2022",
-    "moduleResolution": "bundler"
+    "moduleResolution": "bundler",
+    "paths": {
+      "ts-priority-queue": [
+        "./src/types/ts-priority-queue.d.ts"
+      ]
+    }
   },
+  // Only the browser sources. vite.config.mts imports Vite's Node API, which would
+  // otherwise pull NodeJS ambient globals in and make setTimeout return Timeout
+  // instead of number. Vite type-checks and transpiles its own config on load.
+  "include": [
+    "src"
+  ],
   "typedocOptions": {
     "entryPointStrategy": "expand",
     "entryPoints": [

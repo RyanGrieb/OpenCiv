@@ -17,9 +17,9 @@ npm start                 # boots server (ws://localhost:2000) and client dev se
 
 Client (`cd client`):
 ```bash
-npm run dev                                    # Parcel dev server with HMR
-npm run build                                  # Parcel production build -> client/dist
-npx tsc --noEmit                                # typecheck (matches what VSCode/Parcel see)
+npm run dev                                    # Vite dev server with HMR (http://localhost:1234)
+npm run build                                  # Vite production build -> client/dist
+npx tsc --noEmit                                # typecheck (matches what VSCode and CI see)
 ```
 
 Server (`cd server`):
@@ -33,37 +33,16 @@ npx jest -t "test name"                         # single test by name
 npx tsc --noEmit                                # typecheck
 ```
 
-CI typecheck — **do not use plain `tsc` for this**, see "The `tsconfig.typecheck.json` split" below. There is no root `tsconfig.typecheck.json`: each project has its own, so this is the one command that does *not* run from the repo root. Run it once per project, the way `.github/workflows/build.yml` does:
+CI typecheck — each project is typechecked on its own, the way `.github/workflows/build.yml` does. The client uses its plain `tsconfig.json`; the server still has a `tsconfig.typecheck.json` (see "The server's `tsconfig.typecheck.json`" below):
 ```bash
-cd client && npx tsc -p tsconfig.typecheck.json --noEmit
+cd client && npx tsc --noEmit
 cd server && npx tsc -p tsconfig.typecheck.json --noEmit   # from the repo root again
 ```
-Pass `--noEmit` when running it by hand. Neither project's config sets it, so CI's bare `tsc -p tsconfig.typecheck.json` emits JS — fine in a throwaway checkout, litter in yours.
+Pass `--noEmit` when running the server's by hand — its config doesn't set it, so a bare `tsc -p tsconfig.typecheck.json` emits JS.
 
-### Don't run `npm run build` to verify a change
+### Verifying a client change
 
-`npx tsc -p tsconfig.typecheck.json --noEmit`, run from `client/`, is the gate CI enforces and is what you should run after editing client code. A Parcel production build takes many minutes from a cold cache and reports nothing the typecheck didn't already catch — it is not a smoke test. Only run it when the bundler output itself is what's in question (a Parcel config/asset-resolution change).
-
-If you do run it and it exceeds the tool timeout, it gets backgrounded and **killing the task does not kill Parcel** — the npm wrapper dies and the `parcel build` child keeps running, holding an LMDB lock on `client/.parcel-cache`. Every later `rm -rf .parcel-cache` then fails with `Device or resource busy`, and retrying the build just adds another orphan. Recover by stopping the stray processes first:
-```bash
-node scripts/kill_dev_processes.js   # stops orphaned parcel/ts-node-dev processes
-```
-
-### The dev server must not watch `client/dist` — keep `--watch-ignore dist`
-
-Parcel's watcher ignores only `.git`, `.hg` and the cache dir (`getWatcherOptions` in `@parcel/core/lib/RequestTracker.js`) — **not** the dist dir. `client/dist` sits inside the watched project root, so Parcel sees its own output as source changes and re-enters packaging, which rewrites `dist`, which fires more events. With ~148 emitted files this self-loop wins the race often: measured **8 of 15** cold starts hung forever, versus **0 of 15** with `--watch-ignore dist` in the client's `dev` script. Don't remove that flag.
-
-A hung start looks like this — note `dist` is already fully written and the build still never finishes:
-```
-Building...
-Bundling...
-Packaging & Optimizing...     <- repeats forever, no "✨ Built in"
-```
-A few `Packaging & Optimizing...` lines in one healthy build are normal: Parcel's progress reporter has no TTY under `concurrently`, so each progress update prints its own line instead of overwriting.
-
-Don't add `--no-cache` to the dev script. It doesn't stop Parcel writing the cache, it only stops it *reading* it, so every start pays a full cold rebuild (~1.2s vs ~100ms warm) and the cache still grows.
-
-Orphaned dev servers are a separate problem: killing the npm/npx wrapper leaves the real `parcel` child alive, and freeing the port doesn't help because the orphan no longer holds one. `npm start`'s `prestart` runs `scripts/kill_dev_processes.js`, which kills the processes themselves.
+`npx tsc --noEmit`, run from `client/`, is the gate CI enforces and is what you should run after editing client code. `npm run build` is a Vite/Rolldown build that finishes in well under a second, so running it is cheap if you actually want to check bundler output (an asset-resolution or `vite.config.mts` change) — but it still reports nothing the typecheck didn't already catch, so it isn't a smoke test either.
 
 Manual/E2E test flow (root):
 ```bash
@@ -107,9 +86,11 @@ Every message is `{ event: string, ...fields }`, dispatched by `event` name — 
 
 ### Sprite assets
 
-Every sprite is its own file under `client/assets/sprites/<category>/<NAME>.png` — `<NAME>` must exactly match the `SpriteRegion` value it's for in `client/src/Assets.ts` (e.g. `tiles/TILE_GRASS.png` for `SpriteRegion.TILE_GRASS`); which category folder it sits in is just organization and has no effect on lookup. After adding, removing, or renaming a sprite file, run `npm run generate-sprites` and commit the regenerated `client/src/generated/SpriteManifest.ts` — Parcel needs the static `new URL(...)` calls in that generated file to bundle each sprite, so it can't be built dynamically at runtime.
+Every sprite is its own file under `client/assets/sprites/<category>/<NAME>.png` — `<NAME>` must exactly match the `SpriteRegion` value it's for in `client/src/Assets.ts` (e.g. `tiles/TILE_GRASS.png` for `SpriteRegion.TILE_GRASS`); which category folder it sits in is just organization and has no effect on lookup. After adding, removing, or renaming a sprite file, run `npm run generate-sprites` and commit the regenerated `client/src/generated/SpriteManifest.ts` — Vite needs the static `new URL(..., import.meta.url)` calls in that generated file to resolve each sprite, so it can't be built dynamically at runtime.
 
-At startup, `client/src/SpriteAtlas.ts` packs every sprite in the manifest into one canvas (replacing the old fixed-grid `spritesheet.png` approach). In production the packed result is cached in IndexedDB, keyed by a hash of the manifest; in dev, caching is skipped entirely since Parcel serves sprite URLs unhashed, so an edited sprite's pixels wouldn't otherwise bust the cache. Editing a sprite in place sometimes isn't picked up by Parcel's dev-server watcher (seen with saves from MS Paint) — if a change to a `.png` doesn't show up after a browser refresh, restart `npm run dev`.
+At startup, `client/src/SpriteAtlas.ts` packs every sprite in the manifest into one canvas (replacing the old fixed-grid `spritesheet.png` approach). In production the packed result is cached in IndexedDB, keyed by a hash of the manifest; in dev, caching is skipped entirely (via `import.meta.env.PROD`) since Vite serves sprite URLs unhashed, so an edited sprite's pixels wouldn't otherwise bust the cache. Editing a sprite in place sometimes isn't picked up by the dev-server watcher (seen with saves from MS Paint) — if a change to a `.png` doesn't show up after a browser refresh, restart `npm run dev`.
+
+`vite.config.mts` sets `assetsInlineLimit: 0` so every sprite stays a real file. Vite would otherwise inline small assets as `data:` URIs, which bloats the bundle and defeats the content-hashed filenames the manifest hash relies on to notice a changed sprite.
 
 ### Game options at launch
 
@@ -127,13 +108,21 @@ Server-side static game data lives in `server/config/*.yml` (`civilizations.yml`
 2. **Client**: a custom in-browser scenario runner (`client/src/testing/ScenarioRegistry.ts` + `TestRunner.ts`, scenarios under `client/src/testing/scenarios/*.test.ts`), triggered by loading the app with `?test=true&scenario=<Name>` — there is no headless/CI path for this today.
 3. **Root `test:e2e`**: orchestration only — boots both dev servers in test mode and hands you the URL for #2. It's a human-in-the-loop workflow, not an automated test command.
 
-### The `tsconfig.typecheck.json` split
+### The server's `tsconfig.typecheck.json`
 
-Both `client/tsconfig.json` and `server/tsconfig.json` have `noImplicitAny: true`. A dependency, `ts-priority-queue`, ships parallel `.ts`/`.d.ts` files, and TypeScript resolves imports of it to the untyped `.ts` source instead of the package's own `.d.ts` — this trips one unavoidable `noImplicitAny` diagnostic on third-party code in both projects under plain `tsc`.
+Both `client/tsconfig.json` and `server/tsconfig.json` have `noImplicitAny: true`. A dependency, `ts-priority-queue`, ships parallel `.ts`/`.d.ts` files, and TypeScript resolves imports of it to the untyped `.ts` source instead of the package's own `.d.ts` — this trips one `noImplicitAny` diagnostic on third-party code in both projects.
 
-Each project has a **type shim** at `src/types/ts-priority-queue.d.ts` (mirrors the package's real `.d.ts`) and a **`tsconfig.typecheck.json`** that extends the real config and adds a `paths` remap to that shim. CI (`.github/workflows/build.yml`) runs `tsc -p tsconfig.typecheck.json`, which is clean.
+Each project has a **type shim** at `src/types/ts-priority-queue.d.ts` mirroring the package's real `.d.ts`, remapped onto the `ts-priority-queue` specifier via `compilerOptions.paths`.
 
-**The remap deliberately does not live in the real `tsconfig.json`.** Parcel also reads that file's `compilerOptions.paths` for its own bundling — adding the remap there makes Parcel try to bundle the type-only shim as if it were a runtime module, which hangs the build. So: plain `npx tsc --noEmit` (and VSCode) will still show that one `ts-priority-queue` diagnostic — that's expected and not a regression to "fix" by touching `node_modules` or the real tsconfig.
+On the **client** that remap lives in the real `tsconfig.json`, so plain `npx tsc --noEmit` and VSCode are both clean. This is safe because Vite doesn't read tsconfig `paths` — it resolves the package normally (`main: index.js`) at runtime, and never sees the declaration-only shim. (Under Parcel it wasn't safe: Parcel *did* read `paths` and tried to bundle the shim as runtime code, which is why the client used to carry a separate `tsconfig.typecheck.json`.)
+
+The **server** still has a `tsconfig.typecheck.json` that extends its real config and adds the remap, which is what CI runs. Nothing bundles the server, so this could likely be collapsed the same way — it just hasn't been.
+
+### `client/tsconfig.json` only includes `src`
+
+`vite.config.mts` imports Vite's Node API. With no `include`, `tsc` pulls the config file into the same program as the browser sources, which drags in NodeJS ambient globals and makes `setTimeout` resolve to the Node overload returning `Timeout` instead of `number` — three errors in `Game.ts` and `Textbox.ts`. `"include": ["src"]` keeps the browser program browser-only; Vite type-checks and transpiles its own config when it loads it.
+
+`"types": ["vite/client"]` is what declares `import.meta.env`. It does not pull in Node's globals.
 
 ## Coding style
 

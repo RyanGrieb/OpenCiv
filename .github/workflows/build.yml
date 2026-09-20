@@ -13,7 +13,7 @@ jobs:
     - name: Setup Node.js
       uses: actions/setup-node@v3
       with:
-        node-version: 18
+        node-version: 22
 
     - name: Install Dependencies
       run: |
@@ -27,7 +27,7 @@ jobs:
     - name: Build Client
       run: |
         cd client
-        npx tsc -p tsconfig.typecheck.json
+        npx tsc --noEmit
         cd ..
 
     - name: Build Server

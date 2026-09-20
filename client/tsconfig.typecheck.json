@@ -1,8 +1,0 @@
-{
-  "extends": "./tsconfig.json",
-  "compilerOptions": {
-    "paths": {
-      "ts-priority-queue": ["./src/types/ts-priority-queue.d.ts"]
-    }
-  }
-}

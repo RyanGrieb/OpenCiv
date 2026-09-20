@@ -6,7 +6,7 @@ import * as path from "path";
 // developer's own organization and don't affect lookup). Each file's name
 // (minus .png) must match a SpriteRegion value in client/src/Assets.ts exactly.
 // Run `npm run generate-sprites` after adding, removing, or renaming a sprite
-// file, and commit the result - Parcel needs the static `new URL(...)` calls in
+// file, and commit the result - Vite needs the static `new URL(...)` calls in
 // that file to bundle each sprite, so the manifest can't be built dynamically
 // at runtime.
 

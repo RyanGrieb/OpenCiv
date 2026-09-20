@@ -3,12 +3,12 @@
     "version": "1.0.0",
     "description": "",
     "scripts": {
-        "dev": "npx parcel index.html --watch-ignore dist",
-        "build": "parcel build index.html --dist-dir dist"
+        "dev": "vite",
+        "build": "vite build"
     },
     "devDependencies": {
         "@types/node": "^22.15.26",
-        "parcel": "^2.15.2"
+        "vite": "^8.3.0"
     },
     "assetsPath": "assets",
     "dependencies": {
