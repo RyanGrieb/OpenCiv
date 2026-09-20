@@ -63,8 +63,10 @@ export class SpriteAtlas {
     // FNV-1a over the sorted "name:url" pairs. Changes whenever a sprite is
     // added, removed, or renamed, and (in production, where Parcel content-hashes
     // output filenames) whenever a sprite's pixels change.
+    // Explicit ordinal compare (not localeCompare) - this hash must come out identical on
+    // every machine, and locale-aware collation isn't guaranteed consistent across them.
     const input = SPRITE_MANIFEST.map((e) => `${e.name}:${e.url}`)
-      .sort()
+      .sort((a, b) => (a < b ? -1 : a > b ? 1 : 0))
       .join("\n");
 
     let hash = 0x811c9dc5;
