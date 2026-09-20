@@ -17,10 +17,16 @@ export abstract class Scene {
   private sceneObjects: SceneObject[];
   private name: string;
 
+  private worldHidden = false;
+
   constructor() {
     this.storedEvents = new Map<string, Function[]>();
     this.sceneObjects = [];
     this.firstLoad = true;
+  }
+
+  private static isWorldObject(object: SceneObject): boolean {
+    return object instanceof Line || (object instanceof Actor && object.isCameraApplied());
   }
 
   public setName(name: string) {
@@ -63,8 +69,14 @@ export abstract class Scene {
     }
 
     this.sceneObjects.forEach((object: SceneObject) => {
+      if (this.worldHidden && Scene.isWorldObject(object)) return;
       object.draw(Game.getInstance().getCanvasContext());
     });
+  }
+
+  // Skips drawing camera-space objects (the map) while a full-screen opaque window covers them.
+  public setWorldHidden(hidden: boolean) {
+    this.worldHidden = hidden;
   }
 
   public redraw() {
@@ -88,6 +100,7 @@ export abstract class Scene {
     }
 
     this.camera = undefined;
+    this.worldHidden = false;
     this.sceneObjects = [];
     this.storedEvents.clear();
     NetworkEvents.clear();

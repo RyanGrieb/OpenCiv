@@ -47,8 +47,8 @@ interface EraData {
 
 interface TechTile {
   tech: TechData;
-  background: Actor;
-  actors: Actor[]; // Everything belonging to this tile - shifted together when panning.
+  background: Actor; // Hit-testing/position only - never drawn; its transparency doubles as the tile's locked-state alpha.
+  bitmap?: HTMLCanvasElement; // The tile's background, icon and name pre-rendered once per build; undefined until its label is measured.
 }
 
 // Every size that scales with zoomLevel, computed once per (re)build and threaded
@@ -168,9 +168,7 @@ export class ResearchTreeWindow extends ActorGroup {
       this.panY += dy;
 
       for (const tile of this.tiles) {
-        for (const actor of tile.actors) {
-          actor.setPosition(actor.getX() + dx, actor.getY() + dy);
-        }
+        tile.background.setPosition(tile.background.getX() + dx, tile.background.getY() + dy);
       }
       for (const label of this.eraLabels) {
         label.setPosition(label.getX() + dx, label.getY() + dy);
@@ -249,20 +247,17 @@ export class ResearchTreeWindow extends ActorGroup {
     // Explicit order, not super.draw()'s actor-insertion order: background first
     // (it's opaque and would otherwise paint over the lines), then connector
     // lines, then tiles, then the window chrome (close button) and finally the
-    // detail popup on top of everything. A zoom rebuild re-adds tile actors to
-    // the end of this.actors, after both closeButton and detailWindow (which
-    // that rebuild never touches), so without this explicit order the tiles
-    // would end up painted over both.
+    // detail popup on top of everything.
     this.windowBackground.draw(canvasContext);
 
     // Drawn with raw canvas calls (not the Line/Game.drawLine primitive used for
     // map movement paths) - that path always applies the scene's camera
     // transform, which this screen-space, non-camera window must not get.
     this.drawConnectorLines(canvasContext);
+    this.drawTiles(canvasContext);
 
-    for (const actor of this.actors) {
-      if (actor === this.windowBackground || actor === this.closeButton || actor === this.detailWindow) continue;
-      actor.draw(canvasContext);
+    for (const label of this.eraLabels) {
+      label.draw(canvasContext);
     }
 
     this.closeButton.draw(canvasContext);
@@ -285,6 +280,10 @@ export class ResearchTreeWindow extends ActorGroup {
     canvasContext.save();
     canvasContext.lineWidth = CONNECTOR_WIDTH;
 
+    // One path per color, stroked once, instead of a stroke per edge.
+    const metPath = new Path2D();
+    const unmetPath = new Path2D();
+
     for (const tile of this.tiles) {
       const toX = tile.background.getX() + tile.background.getWidth() / 2;
       const toY = tile.background.getY() + tile.background.getHeight();
@@ -293,20 +292,40 @@ export class ResearchTreeWindow extends ActorGroup {
         const prereqTile = this.tilesByName.get(prereqName);
         if (!prereqTile) continue;
 
-        const fromX = prereqTile.background.getX() + prereqTile.background.getWidth() / 2;
-        const fromY = prereqTile.background.getY();
-
-        canvasContext.strokeStyle = clientPlayer.hasResearchedTech(prereqName)
-          ? CONNECTOR_MET_COLOR
-          : CONNECTOR_UNMET_COLOR;
-        canvasContext.beginPath();
-        canvasContext.moveTo(fromX, fromY);
-        canvasContext.lineTo(toX, toY);
-        canvasContext.stroke();
+        const path = clientPlayer.hasResearchedTech(prereqName) ? metPath : unmetPath;
+        path.moveTo(prereqTile.background.getX() + prereqTile.background.getWidth() / 2, prereqTile.background.getY());
+        path.lineTo(toX, toY);
       }
     }
 
+    canvasContext.strokeStyle = CONNECTOR_UNMET_COLOR;
+    canvasContext.stroke(unmetPath);
+    canvasContext.strokeStyle = CONNECTOR_MET_COLOR;
+    canvasContext.stroke(metPath);
+
     canvasContext.restore();
+  }
+
+  // Blits each tile's pre-rendered bitmap - skipping any wholly outside the window -
+  // instead of redrawing its nine-slice, icon and text every frame.
+  private drawTiles(canvasContext: CanvasRenderingContext2D) {
+    const left = this.x;
+    const right = this.x + this.width;
+    const top = this.y;
+    const bottom = this.y + this.height;
+
+    for (const tile of this.tiles) {
+      if (!tile.bitmap) continue;
+
+      const x = Math.round(tile.background.getX());
+      const y = Math.round(tile.background.getY());
+      if (x + tile.bitmap.width < left || x > right || y + tile.bitmap.height < top || y > bottom) continue;
+
+      canvasContext.globalAlpha = tile.background.getTransparency();
+      canvasContext.drawImage(tile.bitmap, x, y);
+    }
+
+    canvasContext.globalAlpha = 1;
   }
 
   // Tears down and rebuilds every tile/label at the current zoomLevel, using
@@ -319,9 +338,7 @@ export class ResearchTreeWindow extends ActorGroup {
 
   private clearTree() {
     for (const tile of this.tiles) {
-      for (const actor of tile.actors) {
-        this.removeActor(actor);
-      }
+      this.removeActor(tile.background);
     }
     this.tiles = [];
     this.tilesByName = new Map();
@@ -437,13 +454,11 @@ export class ResearchTreeWindow extends ActorGroup {
     const iconRegion = resolveSpriteRegion(tech.asset_name) ?? SpriteRegion.ICON_UNKNOWN;
 
     const background = new Actor({
-      image: Game.getInstance().getImage(GameImage.POPUP_BOX),
       x: tileX,
       y: tileY,
       width: layout.tileWidth,
       height: tileHeight,
-      nineSlice: true,
-      cornerSize: 10
+      cameraApplies: false
     });
     background.on("mouse_enter", () => {
       if (this.detailWindow) return; // Tiles aren't clickable while the detail popup is open - see the "clicked" guard below.
@@ -456,17 +471,13 @@ export class ResearchTreeWindow extends ActorGroup {
     });
     this.addActor(background);
 
-    const iconX = tileX + layout.tilePadding;
-    const iconY = tileY + tileHeight / 2 - layout.iconSize / 2;
-    const icon = new Actor({
-      image: Game.getInstance().getImage(GameImage.SPRITESHEET),
-      spriteRegion: iconRegion,
-      x: iconX,
-      y: iconY,
-      width: layout.iconSize,
-      height: layout.iconSize
-    });
-    this.addActor(icon);
+    const tile: TechTile = { tech, background };
+    this.tilesByName.set(tech.name, tile);
+
+    // Laid out at the bitmap's own origin rather than the tile's on-screen position.
+    const bitmapWidth = Math.ceil(layout.tileWidth);
+    const bitmapHeight = Math.ceil(tileHeight);
+    const iconX = layout.tilePadding;
 
     const nameLabel = new Label({
       text: tech.name,
@@ -474,15 +485,41 @@ export class ResearchTreeWindow extends ActorGroup {
       fontColor: "white",
       maxWidth: textMaxWidth,
       x: iconX + layout.iconSize + 8 * this.zoomLevel,
-      y: tileY + layout.tilePadding
+      y: layout.tilePadding
     });
     nameLabel.conformSize().then(() => {
       if (requestId !== this.buildRequestId) return; // Superseded mid-measurement - see buildTree.
-      this.addActor(nameLabel);
+
+      const bitmap = document.createElement("canvas");
+      bitmap.width = bitmapWidth;
+      bitmap.height = bitmapHeight;
+      const bitmapContext = bitmap.getContext("2d");
+
+      new Actor({
+        image: Game.getInstance().getImage(GameImage.POPUP_BOX),
+        x: 0,
+        y: 0,
+        width: bitmapWidth,
+        height: bitmapHeight,
+        nineSlice: true,
+        cornerSize: 10,
+        cameraApplies: false
+      }).draw(bitmapContext);
+
+      new Actor({
+        image: Game.getInstance().getImage(GameImage.SPRITESHEET),
+        spriteRegion: iconRegion,
+        x: iconX,
+        y: bitmapHeight / 2 - layout.iconSize / 2,
+        width: layout.iconSize,
+        height: layout.iconSize,
+        cameraApplies: false
+      }).draw(bitmapContext);
+
+      nameLabel.draw(bitmapContext);
+      tile.bitmap = bitmap;
     });
 
-    const tile: TechTile = { tech, background, actors: [background, icon, nameLabel] };
-    this.tilesByName.set(tech.name, tile);
     return tile;
   }
 
@@ -494,11 +531,7 @@ export class ResearchTreeWindow extends ActorGroup {
 
     for (const tile of this.tiles) {
       const locked = tile.tech.prerequisites.some((prereq) => !clientPlayer.hasResearchedTech(prereq));
-      const transparency = locked ? LOCKED_TRANSPARENCY : 1;
-
-      for (const actor of tile.actors) {
-        actor.setTransparency(transparency);
-      }
+      tile.background.setTransparency(locked ? LOCKED_TRANSPARENCY : 1);
     }
   }
 

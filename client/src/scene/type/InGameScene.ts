@@ -403,6 +403,7 @@ export class InGameScene extends Scene {
   private openResearchUI() {
     this.researchTreeWindow = new ResearchTreeWindow();
     this.addActor(this.researchTreeWindow);
+    this.setWorldHidden(true);
 
     this.setUIState(true);
     this.systemMenuOpen = false;
@@ -416,6 +417,7 @@ export class InGameScene extends Scene {
   private closeResearchUI() {
     this.removeActor(this.researchTreeWindow);
     this.researchTreeWindow = undefined;
+    this.setWorldHidden(false);
     this.setUIState(false);
     this.openUIElement = undefined;
 
