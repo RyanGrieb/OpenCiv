@@ -14,7 +14,8 @@ export interface ButtonSizeDefinition {
 // so buttons stay visually consistent between scenes, and reference e.g.
 // `ButtonSize.LARGE.width` directly when a call site needs the raw dimension.
 export const ButtonSize = {
-  LARGE: { width: 260, height: 60 }, // Primary actions on their own screen (Play, Ready Up, Choose Civilization)
+  XLARGE: { width: 320, height: 60 }, // Primary actions with an icon and a long label (lobby menu)
+  LARGE: { width: 260, height: 60 }, // Primary actions on their own screen (Play, Next Turn)
   MEDIUM: { width: 180, height: 50 }, // Secondary actions (Back, Close, Select)
   SMALL: { width: 150, height: 40 }, // Compact in-context controls (Next Turn, production toggle)
   ICON_LARGE: { width: 64, height: 64 }, // Prominent icon-only buttons (civ portraits, radio avatars, unit actions)

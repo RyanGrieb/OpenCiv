@@ -235,9 +235,9 @@ export class LobbyScene extends Scene {
     ];
 
     const buttonSpacing = 75;
-    const buttonX = this.rightPanelX + LobbyScene.BOX_WIDTH / 2 - ButtonSize.LARGE.width / 2;
+    const buttonX = this.rightPanelX + LobbyScene.BOX_WIDTH / 2 - ButtonSize.XLARGE.width / 2;
     const buttonIconX = buttonX + LobbyScene.BUTTON_ICON_PADDING;
-    const stackHeight = (buttonDefs.length - 1) * buttonSpacing + ButtonSize.LARGE.height;
+    const stackHeight = (buttonDefs.length - 1) * buttonSpacing + ButtonSize.XLARGE.height;
     const stackStartY = this.rightPanelY + this.rightPanelHeight / 2 - stackHeight / 2;
 
     buttonDefs.forEach((buttonDef, index) => {
@@ -248,7 +248,7 @@ export class LobbyScene extends Scene {
           iconX: buttonDef.icon ? buttonIconX : undefined,
           x: buttonX,
           y: stackStartY + index * buttonSpacing,
-          size: ButtonSize.LARGE,
+          size: ButtonSize.XLARGE,
           fontColor: "white",
           onClicked: buttonDef.onClicked
         })
