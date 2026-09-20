@@ -190,13 +190,8 @@ export class Button extends ActorGroup {
       const iconY = this.y + this.height / 2 - this.iconActor.getHeight() / 2;
 
       if (this.iconX !== undefined) {
-        if (this.iconPosition === "left") {
-          this.iconActor.setPosition(this.iconX, iconY);
-          textX = this.iconX + iconWidth + Button.ICON_TEXT_SPACING;
-        } else {
-          this.iconActor.setPosition(this.iconX, iconY);
-          textX = this.iconX - Button.ICON_TEXT_SPACING - this.textWidth;
-        }
+        // Icon is pinned; the text stays centered in the button.
+        this.iconActor.setPosition(this.iconX, iconY);
       } else {
         const groupWidth = iconWidth + Button.ICON_TEXT_SPACING + this.textWidth;
         const groupX = this.x + this.width / 2 - groupWidth / 2;
