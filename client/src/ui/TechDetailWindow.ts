@@ -186,6 +186,10 @@ export class TechDetailWindow extends ActorGroup {
           WebsocketClient.sendMessage({ event: "chooseResearch", techName: this.tech.name });
         }
         this.onClose();
+
+        if (!isCurrent) {
+          Game.getInstance().getCurrentSceneAs<InGameScene>().toggleResearchUI();
+        }
       }
     });
     this.addActor(this.actionButton);
