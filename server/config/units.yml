@@ -6,6 +6,7 @@ units:
     attack_type: melee
     cost: 20
     default_move_distance: 3
+    sight_range: 3
     ignores_terrain_cost: true
   - name: Settler
     is_utility: true

@@ -45,6 +45,9 @@ export class Tile extends Actor {
 
   private city: City;
   private yields: any[];
+  // Whether this player currently sees this tile, vs. only remembering it from earlier - see
+  // PlayerVisibility on the server. Defaults true: a Tile is only ever constructed once discovered.
+  private visible: boolean = true;
 
   constructor(options: TileOptions) {
     super({
@@ -183,6 +186,14 @@ export class Tile extends Actor {
 
   public setYields(yields: any[]) {
     this.yields = yields;
+  }
+
+  public setVisible(visible: boolean) {
+    this.visible = visible;
+  }
+
+  public isVisible(): boolean {
+    return this.visible;
   }
 
   public getCity() {

@@ -1,3 +1,4 @@
+import { GameImage, SpriteRegion } from "../Assets";
 import { Game } from "../Game";
 import { RemoveUnitEvent, Unit, UnitCreationData } from "../Unit";
 import { NetworkEvents, WebsocketClient } from "../network/Client";
@@ -33,13 +34,21 @@ interface TileData {
   movementCost: string;
   yields?: any[];
   city?: CityData;
+  // Whether the sending player currently sees this tile, vs. only remembering it from earlier -
+  // see PlayerVisibility on the server. Absent only means "yes" (pre-fog callers, tests).
+  visible?: boolean;
 }
 
+// A tile's coordinates are always sent as chunk-grouped batches - the initial map sync and every
+// later reveal both arrive shaped this way. See GameMap.sendTileChunk() on the server.
 interface MapChunkEvent {
   tiles: TileData[];
-  lastChunk: string; // Re-parsed via JSON.parse() below.
   chunkX: number;
   chunkY: number;
+}
+
+interface FogTilesEvent {
+  tiles: { x: number; y: number }[];
 }
 
 interface CityData {
@@ -57,6 +66,13 @@ interface TileUpdatedEvent {
 
 export class GameMap {
   private static instance: GameMap;
+
+  // Tiles are streamed in from the server in square batches this many tiles across - must match
+  // the server's MAP_CHUNK_SIZE (server/src/GameOptions.ts). No shared package to import it from.
+  private static readonly CHUNK_SIZE = 4;
+  private static readonly CHUNK_PIXEL_WIDTH = 32 * GameMap.CHUNK_SIZE + 16;
+  private static readonly CHUNK_PIXEL_HEIGHT = 25 * GameMap.CHUNK_SIZE + 7;
+  private static readonly FOG_TINT_COLOR = "rgba(20, 20, 20, 0.55)";
 
   private oddEdgeAxis = [
     [0, -1],
@@ -82,13 +98,31 @@ export class GameMap {
   private previousFScore: number[][];
   private tileOutlines: Map<Tile, TileOutline[]>;
 
-  private topLayerMapChunks: Map<Actor, Tile[]>;
-  private topLayerTileActorList: Tile[] = [];
+  // Merged per-chunk actors currently in the scene, keyed by "chunkGridX,chunkGridY" - replaced
+  // wholesale by rebuildChunkVisuals() whenever anything in that chunk changes (a tile is
+  // discovered, or one already known flips visible/fogged).
+  private baseLayerChunks: Map<string, Actor> = new Map();
+  private topLayerChunks: Map<string, Actor> = new Map();
+
+  // Every chunk-visual rebuild goes through this queue rather than running concurrently - they all
+  // share the same offscreen canvas (see Tile.generateImageFromTileTypes / Actor.mergeActors), and
+  // fog reveals can now trigger many of these in quick succession during ordinary play, not just
+  // once at map load.
+  private renderQueue: Promise<void> = Promise.resolve();
+
+  // Chunk packets ingested since the last "mapSyncComplete" - awaited there so "mapLoaded" only
+  // fires once every tile, unit and city from the initial sync actually exists.
+  private pendingChunkIngestions: Promise<void>[] = [];
 
   // Shared between the mapChunk-embedded units and the live "createUnit"
   // event so the same unit is never constructed twice, regardless of which
   // path sees its id first.
   private knownUnitIds: Set<number> = new Set();
+
+  // Cities this client knows about, keyed "tileX,tileY" of the city's center tile. A city arrives
+  // again with every territory tile revealed, so it's built once and then kept up to date - see
+  // syncCity().
+  private knownCities: Map<string, City> = new Map();
 
   public static getInstance() {
     return this.instance;
@@ -108,17 +142,13 @@ export class GameMap {
   private constructor() {
     this.previousGScore = undefined;
     this.previousFScore = undefined;
-    this.topLayerMapChunks = new Map<Actor, Tile[]>();
     this.tileOutlines = new Map<Tile, TileOutline[]>();
 
     NetworkEvents.on<CityData>({
       eventName: "newCity",
       parentObject: this,
       callback: (data) => {
-        const city = this.getCityFromJSONData(data);
-        city.getTile().setCity(city); // Assign the city variable inside the tile variable.
-        // Add the city actor to the scene (borders, nametag)
-        Game.getInstance().getCurrentScene().addActor(city);
+        this.syncCity(data);
       }
     });
 
@@ -164,18 +194,29 @@ export class GameMap {
       eventName: "removeUnit",
       parentObject: this,
       callback: (data) => {
-        const unitTile = GameMap.getInstance().getTiles()[data.unitX][data.unitY];
-        const unit = unitTile.getUnitByID(data.id);
+        const unitTile = GameMap.getInstance().getTiles()[data.unitX]?.[data.unitY];
+        const unit = unitTile?.getUnitByID(data.id);
+        if (!unit) return;
 
         //FIXME: Tell client player to stop drawing lines.
         unit.unselect();
         unitTile.removeUnit(unit);
-        if (unit.getPlayer()) {
-          unit.getPlayer().removeUnit(unit);
-        }
-        Game.getInstance().getCurrentScene().removeActor(unit);
+        this.forgetUnit(unit);
       }
     });
+  }
+
+  // Common teardown for a unit this client no longer tracks - a genuine removal (death, upgrade)
+  // or a fog reveal taking it back. Drops it from bookkeeping and the scene, and unregisters its
+  // NetworkEvents listeners so a stale instance can't react if the same unit id resurfaces later
+  // under a freshly-constructed Unit.
+  private forgetUnit(unit: Unit) {
+    this.knownUnitIds.delete(unit.getID());
+    if (unit.getPlayer()) {
+      unit.getPlayer().removeUnit(unit);
+    }
+    NetworkEvents.removeCallbacksByParentObject(unit);
+    Game.getInstance().getCurrentScene().removeActor(unit);
   }
 
   public getTiles() {
@@ -183,11 +224,11 @@ export class GameMap {
   }
 
   public getWidth() {
-    return this.tiles.length;
+    return this.mapWidth;
   }
 
   public getHeight() {
-    return this.tiles[0].length;
+    return this.mapHeight;
   }
 
   /**
@@ -277,6 +318,8 @@ export class GameMap {
         return this.reconstructPath(unit, cameFrom, currentTile);
       }
 
+      // Unknown tiles (undiscovered - never linked as an adjacent tile in the first place, see
+      // linkTileAdjacency()) simply never appear here, so a path can never be routed through fog.
       for (let neighborTile of currentTile.getAdjacentTiles()) {
         if (!neighborTile) continue;
 
@@ -345,12 +388,7 @@ export class GameMap {
   }
 
   private requestMapFromServer() {
-    const scene = Game.getInstance().getCurrentScene();
     this.tiles = [];
-    const baseLayerTiles: Tile[] = [];
-    const riverActors: River[] = [];
-    const cityJSONS: CityData[] = [];
-    const unitJSONS: UnitCreationData[] = [];
 
     WebsocketClient.sendMessage({ event: "requestMap" });
 
@@ -363,192 +401,370 @@ export class GameMap {
 
         MapWrap.init(this.mapWidth, Tile.WIDTH, data.wrap ?? false);
 
+        this.tiles = [];
         for (let x = 0; x < this.mapWidth; x++) {
           this.tiles[x] = [];
-          for (let y = 0; y < this.mapHeight; y++) {
-            //this.tiles[x][y] = undefined;
-          }
         }
       }
     });
 
+    // A chunk packet only ever carries tiles the sending player has discovered - which tiles those
+    // are, and whether each is currently visible or only remembered, is entirely up to fog of war
+    // (see PlayerVisibility on the server). This same event covers both the initial map sync and
+    // any later reveal, so this is the one place tiles enter the client's map.
     NetworkEvents.on<MapChunkEvent>({
       eventName: "mapChunk",
       parentObject: this,
-      callback: async (data) => {
-        const tileList = data.tiles;
-        const lastChunk = JSON.parse(data.lastChunk);
-        const chunkX = data.chunkX * 32;
-        const chunkY = data.chunkY * 25;
-
-        const topLayerTiles: Tile[] = [];
-
-        // X,Y values relative to a map chunk. (starts at 0.)
-        let relativeX = 0;
-        let relativeY = 0;
-
-        for (const tileJSON of tileList) {
-          const tileTypes: string[] = tileJSON.tileTypes;
-          const riverSides: boolean[] = tileJSON.riverSides;
-          const jsonUnits = tileJSON.units;
-
-          const gridX = parseInt(tileJSON.x);
-          const gridY = parseInt(tileJSON.y);
-          const movementCost = parseInt(tileJSON.movementCost);
-
-          // For non-chunk tiles, that uses non-relative position. (Base-layer, river)
-          let yPos = gridY * 25;
-          let xPos = gridX * 32;
-          if (gridY % 2 != 0) {
-            xPos += 16;
-          }
-
-          //For chunk tiles, that uses relative position to canvas (top-layer)
-          let yPosRelative = relativeY * 25;
-          let xPosRelative = relativeX * 32;
-          if (relativeY % 2 != 0) {
-            xPosRelative += 16;
-          }
-
-          // Increment our relative x,y values each tile.
-          relativeY += 1;
-
-          if (relativeY > 3) {
-            relativeY = 0;
-            relativeX++;
-          }
-
-          const tile = new Tile({
-            tileTypes: [tileTypes[0]], // Only assign the base tile type, for now....
-            riverSides: riverSides,
-            x: xPos,
-            y: yPos,
-            gridX: gridX,
-            gridY: gridY,
-            movementCost: movementCost,
-            yields: tileJSON.yields
-          });
-          this.tiles[gridX][gridY] = tile;
-
-          baseLayerTiles.push(tile);
-          if (tile.hasRiver()) {
-            for (let numberedRiverSide of tile.getNumberedRiverSides()) {
-              riverActors.push(new River({ tile: tile, side: numberedRiverSide }));
-            }
-          }
-          if (tileTypes.length > 1) {
-            const topLayerTileTypes = [...tileTypes];
-            topLayerTileTypes.shift();
-            const topLayerTile = new Tile({
-              tileTypes: topLayerTileTypes,
-              x: xPosRelative,
-              y: yPosRelative,
-              gridX: gridX,
-              gridY: gridY,
-              movementCost: movementCost,
-              yields: tileJSON.yields
-            });
-
-            topLayerTiles.push(topLayerTile);
-            this.topLayerTileActorList.push(topLayerTile);
-
-            // Add new city if it already exists in the world
-            if (topLayerTileTypes.includes("city")) {
-              // topLayerTileTypes including "city" guarantees the server sent city data for this tile.
-              cityJSONS.push(tileJSON.city!);
-            }
-          }
-
-          for (const jsonUnit of jsonUnits) {
-            unitJSONS.push(jsonUnit);
-          }
-        }
-
-        // Create top-layer tile chunk
-        for (let tile of topLayerTiles) {
-          await tile.loadImage();
-        }
-
-        const mapActors: Actor[] = [...topLayerTiles];
-        //Include empty actor for chunks with no top-layers.
-        const placeholderActor = new Actor({
-          color: "black",
-          x: 0,
-          y: 0,
-          width: 0,
-          height: 0
-        });
-        mapActors.push(placeholderActor);
-
-        const canvasWidth = 32 * 4 + 16;
-        const canvasHeight = 25 * 4 + 7; // +7 For the last row of chunks.
-        const mapChunk = Actor.mergeActors({
-          actors: mapActors,
-          spriteRegion: false,
-          canvasWidth: canvasWidth,
-          canvasHeight: canvasHeight
-        });
-
-        mapChunk.setPosition(chunkX, chunkY);
-        this.topLayerMapChunks.set(mapChunk, topLayerTiles);
-
-        // We are at the last chunk!
-        if (lastChunk) {
-          this.initAdjacentTiles();
-
-          // Add base-layer & river tile actors
-          for (let tile of baseLayerTiles) {
-            await tile.loadImage();
-          }
-
-          const bottomLayerActors = [...baseLayerTiles, ...riverActors];
-          const bottomLayerActor = Actor.mergeActors({
-            actors: bottomLayerActors,
-            spriteRegion: false
-          });
-          //bottomLayerActor.debugMe = true;
-
-          scene.addActor(bottomLayerActor);
-
-          // Add the top-layer chunks
-          this.topLayerMapChunks.forEach((_, chunkActor) => {
-            scene.addActor(chunkActor);
-          });
-
-          // Now create any units that already exist on the map
-          for (const unitJSON of unitJSONS) {
-            if (this.knownUnitIds.has(unitJSON.id)) continue;
-            this.knownUnitIds.add(unitJSON.id);
-
-            const tile = this.tiles[unitJSON.tileX][unitJSON.tileY];
-            const unit = new Unit(tile, unitJSON);
-            tile.addUnit(unit);
-            scene.addActor(unit);
-          }
-
-          // Now combine the base tile-type layer & the rest of the layers above..
-          for (let topLayerTile of this.topLayerTileActorList) {
-            const baseLayerTile = this.tiles[topLayerTile.getGridX()][topLayerTile.getGridY()];
-
-            baseLayerTile.setTileTypes(baseLayerTile.getTileTypes().concat(topLayerTile.getTileTypes()));
-          }
-
-          // Now create any cities that already exist on the map
-          for (const cityJSON of cityJSONS) {
-            const city = this.getCityFromJSONData(cityJSON);
-            city.getTile().setCity(city);
-            scene.addActor(city);
-
-            WebsocketClient.sendMessage({
-              event: "requestCityStats",
-              cityName: city.getName()
-            });
-          }
-
-          Game.getInstance().getCurrentScene().call("mapLoaded");
-        }
+      callback: (data) => {
+        this.pendingChunkIngestions.push(
+          this.enqueueRender(() => this.ingestChunkTiles(data.chunkX, data.chunkY, data.tiles))
+        );
       }
     });
+
+    // Marks the end of the initial map sync - its own event rather than a flag on the last chunk,
+    // since a player can legitimately start the game having discovered too few tiles to fill even
+    // one chunk. Waits for every chunk ingested so far (tiles, units, cities all included) before
+    // declaring the map loaded.
+    NetworkEvents.on({
+      eventName: "mapSyncComplete",
+      parentObject: this,
+      callback: async () => {
+        await Promise.all(this.pendingChunkIngestions);
+        this.pendingChunkIngestions = [];
+        Game.getInstance().getCurrentScene().call("mapLoaded");
+      }
+    });
+
+    // A tile this player had discovered fell out of sight. Its terrain is still remembered (the
+    // client simply keeps showing it, dimmed), but anything that was standing on it is forgotten -
+    // never this player's own units, since their own sight always covers a tile they occupy.
+    NetworkEvents.on<FogTilesEvent>({
+      eventName: "fogTiles",
+      parentObject: this,
+      callback: (data) => {
+        this.enqueueRender(async () => {
+          const affectedChunks = new Set<string>();
+
+          for (const coord of data.tiles) {
+            const tile = this.tiles[coord.x]?.[coord.y];
+            if (!tile) continue;
+
+            tile.setVisible(false);
+
+            for (const unit of [...tile.getUnits()]) {
+              tile.removeUnit(unit);
+              this.forgetUnit(unit);
+            }
+
+            affectedChunks.add(this.chunkKeyFor(coord.x, coord.y));
+          }
+
+          for (const key of affectedChunks) {
+            await this.rebuildChunkVisuals(...GameMap.parseChunkKey(key));
+          }
+        });
+      }
+    });
+  }
+
+  /**
+   * Folds a batch of discovered tiles into the client's map: creates any tile the client doesn't
+   * already know about (linking it into the adjacency graph as it goes), updates the rest in
+   * place, then rebuilds that chunk's visuals and spawns whatever units/cities the batch revealed.
+   */
+  private async ingestChunkTiles(chunkGridX: number, chunkGridY: number, tileList: TileData[]) {
+    const scene = Game.getInstance().getCurrentScene();
+    const pendingUnits: { tile: Tile; unitJSON: UnitCreationData }[] = [];
+    const pendingCities: CityData[] = [];
+
+    for (const tileJSON of tileList) {
+      const gridX = parseInt(tileJSON.x);
+      const gridY = parseInt(tileJSON.y);
+      const tileTypes = tileJSON.tileTypes;
+      const movementCost = parseInt(tileJSON.movementCost);
+      const visible = tileJSON.visible ?? true;
+
+      let tile = this.tiles[gridX]?.[gridY];
+
+      if (!tile) {
+        let yPos = gridY * 25;
+        let xPos = gridX * 32;
+        if (gridY % 2 != 0) {
+          xPos += 16;
+        }
+
+        tile = new Tile({
+          tileTypes: tileTypes,
+          riverSides: tileJSON.riverSides,
+          x: xPos,
+          y: yPos,
+          gridX: gridX,
+          gridY: gridY,
+          movementCost: movementCost,
+          yields: tileJSON.yields
+        });
+
+        this.tiles[gridX][gridY] = tile;
+        this.linkTileAdjacency(tile);
+      } else {
+        tile.setTileTypes(tileTypes);
+        tile.setYields(tileJSON.yields);
+      }
+
+      tile.setVisible(visible);
+
+      // Any tile within a city's territory carries that city's data (see server Tile.getTileJSON),
+      // not just its center - a "city" tileType only ever appears on the center tile itself.
+      if (tileJSON.city) {
+        pendingCities.push(tileJSON.city);
+      }
+
+      for (const unitJSON of tileJSON.units) {
+        pendingUnits.push({ tile, unitJSON });
+      }
+    }
+
+    await this.rebuildChunkVisuals(chunkGridX, chunkGridY);
+
+    for (const cityJSON of pendingCities) {
+      this.syncCity(cityJSON);
+    }
+
+    for (const { tile, unitJSON } of pendingUnits) {
+      if (this.knownUnitIds.has(unitJSON.id)) continue;
+      this.knownUnitIds.add(unitJSON.id);
+
+      const unit = new Unit(tile, unitJSON);
+      tile.addUnit(unit);
+      scene.addActor(unit);
+    }
+  }
+
+  /**
+   * Folds a city's data into the client, from "newCity" or from any tile in its territory carrying
+   * it. A city is built the first time it's heard of - with only as much of its territory as this
+   * player has discovered, and without its center tile if that hasn't been scouted yet. Called
+   * again for every later reveal, which is what grows the borders a tile at a time and eventually
+   * attaches the center.
+   */
+  private syncCity(cityJSON: CityData) {
+    const key = `${cityJSON.tileX},${cityJSON.tileY}`;
+    const centerTile = this.tiles[cityJSON.tileX]?.[cityJSON.tileY];
+    const territory = this.getKnownTiles(cityJSON.territory.map((coord) => [coord.tileX, coord.tileY]));
+
+    const existingCity = this.knownCities.get(key);
+    if (existingCity) {
+      existingCity.setTerritory(territory);
+      existingCity.setCenterTile(centerTile);
+      return;
+    }
+
+    // Nothing to draw yet - no center tile and no discovered territory. Can't happen today (a
+    // city only ever reaches this client attached to a tile it just discovered), but it would
+    // leave an invisible, nameless city actor lying around.
+    if (!centerTile && territory.length < 1) return;
+
+    const city = this.getCityFromJSONData(cityJSON, centerTile, territory);
+    this.knownCities.set(key, city);
+    Game.getInstance().getCurrentScene().addActor(city);
+
+    WebsocketClient.sendMessage({ event: "requestCityStats", cityName: city.getName() });
+  }
+
+  // Whichever of the given coordinates this client has actually discovered.
+  private getKnownTiles(coords: [number, number][]): Tile[] {
+    const tiles: Tile[] = [];
+    for (const [x, y] of coords) {
+      const tile = this.tiles[x]?.[y];
+      if (tile) tiles.push(tile);
+    }
+    return tiles;
+  }
+
+  /**
+   * Links a freshly-created tile to whichever of its 6 neighbors already exist, and fixes up those
+   * neighbors' own adjacency arrays to point back at it. A neighbor that hasn't been discovered yet
+   * is simply left unlinked - not "null", since it may well exist once revealed later, at which
+   * point ITS creation performs the same bidirectional fixup pointing back at this tile.
+   */
+  private linkTileAdjacency(tile: Tile) {
+    const gridX = tile.getGridX();
+    const gridY = tile.getGridY();
+    const edgeAxis = gridY % 2 == 0 ? this.evenEdgeAxis : this.oddEdgeAxis;
+
+    for (let i = 0; i < edgeAxis.length; i++) {
+      // Only x wraps - the north and south edges stay the poles.
+      const edgeX = MapWrap.wrapGridX(gridX + edgeAxis[i][0]);
+      const edgeY = gridY + edgeAxis[i][1];
+
+      if (edgeX < 0 || edgeY < 0 || edgeX > this.mapWidth - 1 || edgeY > this.mapHeight - 1) {
+        tile.setAdjacentTile(i, null);
+        continue;
+      }
+
+      // Undiscovered neighbors are still filled in as null rather than left as a hole: callers
+      // walk all 6 edges expecting an entry for each (GameMap.drawBorder's every() would otherwise
+      // skip the holes and mistake a partly-fogged border tile for an interior one, losing its
+      // outline). The bidirectional fixup below replaces this null once the neighbor arrives.
+      const neighbor = this.tiles[edgeX]?.[edgeY] ?? null;
+
+      tile.setAdjacentTile(i, neighbor);
+      if (neighbor) neighbor.setAdjacentTile(GameMap.oppositeEdgeIndex(i), tile);
+    }
+  }
+
+  // The hex edge directly across from a given one - true regardless of row parity, since edges
+  // (unlike the offset-coordinate axis deltas above) are a parity-independent property of the
+  // hexagon. Mirrors the river-side "oppositeSides" table on the server's Tile.setRiverSide().
+  private static oppositeEdgeIndex(index: number): number {
+    return (index + 3) % 6;
+  }
+
+  /**
+   * Rebuilds one chunk's merged base (terrain + rivers) and top (resources/city/fog tint) actors
+   * from scratch, from whatever this client currently knows about that chunk's 16 cells. Called
+   * whenever a tile in the chunk is newly discovered or changes visibility - safe to call
+   * repeatedly since it always derives the result fresh rather than patching the previous one.
+   */
+  private async rebuildChunkVisuals(chunkGridX: number, chunkGridY: number) {
+    const scene = Game.getInstance().getCurrentScene();
+    const chunkKey = this.chunkKeyFor(chunkGridX, chunkGridY);
+
+    const baseRenderTiles: Tile[] = [];
+    const riverActors: River[] = [];
+    const topRenderActors: Actor[] = [];
+
+    for (let dx = 0; dx < GameMap.CHUNK_SIZE; dx++) {
+      for (let dy = 0; dy < GameMap.CHUNK_SIZE; dy++) {
+        const gridX = chunkGridX + dx;
+        const gridY = chunkGridY + dy;
+        if (gridX >= this.mapWidth || gridY >= this.mapHeight) continue;
+
+        const tile = this.tiles[gridX]?.[gridY];
+        if (!tile) continue; // Undiscovered - nothing drawn, so the background shows through.
+
+        let xPosRelative = dx * 32;
+        const yPosRelative = dy * 25;
+        if (dy % 2 != 0) {
+          xPosRelative += 16;
+        }
+
+        const tileTypes = tile.getTileTypes();
+
+        // Rendering-only tiles, positioned relative to this chunk's own small canvas rather than
+        // the tile's real world position - mirrors how Actor.mergeActors draws each input actor at
+        // its own (x,y) onto the shared offscreen canvas, then the merged result is repositioned
+        // as a whole via setPosition() below.
+        const baseRenderTile = new Tile({
+          tileTypes: [tileTypes[0]],
+          riverSides: tile.getRiverSides(),
+          x: xPosRelative,
+          y: yPosRelative,
+          gridX: gridX,
+          gridY: gridY,
+          movementCost: tile.getMovementCost()
+        });
+        await baseRenderTile.loadImage();
+        baseRenderTiles.push(baseRenderTile);
+
+        if (baseRenderTile.hasRiver()) {
+          for (const side of baseRenderTile.getNumberedRiverSides()) {
+            riverActors.push(new River({ tile: baseRenderTile, side: side }));
+          }
+        }
+
+        if (tileTypes.length > 1) {
+          const topRenderTile = new Tile({
+            tileTypes: tileTypes.slice(1),
+            x: xPosRelative,
+            y: yPosRelative,
+            gridX: gridX,
+            gridY: gridY,
+            movementCost: tile.getMovementCost()
+          });
+          await topRenderTile.loadImage();
+          topRenderActors.push(topRenderTile);
+        }
+
+        // Discovered but not currently visible - keep showing the remembered terrain underneath,
+        // dimmed. Tacked onto the top layer (drawn above base terrain) so it applies whether or not
+        // this cell has any actual top-layer content of its own.
+        //
+        // Reuses the hovered-tile sprite purely for its hex silhouette: Actor's constructor runs
+        // this through setColor(), which composites a solid fill onto that sprite with
+        // globalCompositeOperation "source-in" - the same trick City uses (TILE_BLANK) to tint
+        // territory overlays - so the tint is masked to the hex, anti-aliased edges included,
+        // instead of covering the tile's square bounding box.
+        if (!tile.isVisible()) {
+          topRenderActors.push(
+            new Actor({
+              image: Game.getInstance().getImage(GameImage.SPRITESHEET),
+              spriteRegion: SpriteRegion.TILE_HOVERED,
+              color: GameMap.FOG_TINT_COLOR,
+              x: xPosRelative,
+              y: yPosRelative,
+              width: Tile.WIDTH,
+              height: Tile.HEIGHT
+            })
+          );
+        }
+      }
+    }
+
+    const previousBase = this.baseLayerChunks.get(chunkKey);
+    if (previousBase) scene.removeActor(previousBase);
+
+    if (baseRenderTiles.length > 0) {
+      const bottomLayerActor = Actor.mergeActors({
+        actors: [...baseRenderTiles, ...riverActors],
+        spriteRegion: false,
+        canvasWidth: GameMap.CHUNK_PIXEL_WIDTH,
+        canvasHeight: GameMap.CHUNK_PIXEL_HEIGHT
+      });
+      bottomLayerActor.setPosition(chunkGridX * 32, chunkGridY * 25);
+      scene.addActor(bottomLayerActor);
+      this.baseLayerChunks.set(chunkKey, bottomLayerActor);
+    } else {
+      this.baseLayerChunks.delete(chunkKey);
+    }
+
+    const previousTop = this.topLayerChunks.get(chunkKey);
+    if (previousTop) scene.removeActor(previousTop);
+
+    if (topRenderActors.length > 0) {
+      const topLayerMerged = Actor.mergeActors({
+        actors: topRenderActors,
+        spriteRegion: false,
+        canvasWidth: GameMap.CHUNK_PIXEL_WIDTH,
+        canvasHeight: GameMap.CHUNK_PIXEL_HEIGHT
+      });
+      topLayerMerged.setPosition(chunkGridX * 32, chunkGridY * 25);
+      scene.addActor(topLayerMerged);
+      this.topLayerChunks.set(chunkKey, topLayerMerged);
+    } else {
+      this.topLayerChunks.delete(chunkKey);
+    }
+  }
+
+  // Serializes chunk-visual work through one queue: these all share the same offscreen canvas
+  // (Actor.mergeActors, Tile.generateImageFromTileTypes), so two rebuilds racing on it would
+  // corrupt each other's output. A failed render is swallowed so it can't wedge the queue.
+  private enqueueRender(task: () => Promise<void>): Promise<void> {
+    const result = this.renderQueue.then(task);
+    this.renderQueue = result.catch(() => {});
+    return result;
+  }
+
+  private chunkKeyFor(gridX: number, gridY: number): string {
+    const chunkGridX = Math.floor(gridX / GameMap.CHUNK_SIZE) * GameMap.CHUNK_SIZE;
+    const chunkGridY = Math.floor(gridY / GameMap.CHUNK_SIZE) * GameMap.CHUNK_SIZE;
+    return `${chunkGridX},${chunkGridY}`;
+  }
+
+  private static parseChunkKey(key: string): [number, number] {
+    const [chunkGridX, chunkGridY] = key.split(",").map(Number);
+    return [chunkGridX, chunkGridY];
   }
 
   public drawBorder(tiles: Tile[], color: string, z?: number) {
@@ -727,113 +943,35 @@ export class GameMap {
     return false;
   }
 
-  public async redrawMap(modifiedTiles: Tile[]) {
+  // Rebuilds the chunk visuals of whichever chunks the given tiles belong to. Kept as the public
+  // entry point Tile.setCity() already calls; reimplemented on top of rebuildChunkVisuals() now
+  // that the base/top layers are chunked instead of one map-spanning canvas.
+  public redrawMap(modifiedTiles: Tile[]): Promise<void> {
+    const chunkKeys = new Set<string>();
     for (const tile of modifiedTiles) {
-      this.topLayerMapChunks.forEach(async (topLayerTiles, chunk) => {
-        // Check if tile is contained in the topLayerTiles
-        // Use getX(), getY() for the chunkActor & tile
-
-        if (
-          tile.getX() >= chunk.getX() &&
-          tile.getX() + tile.getWidth() <= chunk.getX() + chunk.getWidth() &&
-          tile.getY() >= chunk.getY() &&
-          tile.getY() + tile.getHeight() <= chunk.getY() + chunk.getHeight()
-        ) {
-          //Game.getCurrentScene().removeActor(chunk);
-          const xPosRelative = tile.getX() - chunk.getX();
-          const yPosRelative = tile.getY() - chunk.getY();
-          const topLayerTile = new Tile({
-            tileTypes: tile.getTileTypes().slice(1),
-            x: xPosRelative,
-            y: yPosRelative,
-            gridX: tile.getGridX(),
-            gridY: tile.getGridY(),
-            movementCost: tile.getMovementCost()
-          });
-
-          this.topLayerTileActorList.push(topLayerTile); // Not needed, but for continuity.
-          const chunkTileActors = [...topLayerTiles, topLayerTile];
-
-          // Create top-layer tile chunk
-          for (let tile of chunkTileActors) {
-            await tile.loadImage();
-          }
-
-          //TODO: Instead of a single map actor, we need to do this in chunks (4x4?). B/c it's going to be slow on map updates.
-          const canvasWidth = 32 * 4 + 16;
-          const canvasHeight = 25 * 4 + 7; // +7 For the last row of chunks.
-          const updatedMapChunk = Actor.mergeActors({
-            actors: chunkTileActors,
-            spriteRegion: false,
-            canvasWidth: canvasWidth,
-            canvasHeight: canvasHeight
-          });
-          updatedMapChunk.setPosition(chunk.getX(), chunk.getY());
-
-          Game.getInstance().getCurrentScene().addActor(updatedMapChunk);
-          Game.getInstance().getCurrentScene().removeActor(chunk);
-
-          // Update the chunk map
-          this.topLayerMapChunks.delete(chunk);
-          this.topLayerMapChunks.set(updatedMapChunk, chunkTileActors);
-        }
-      });
+      chunkKeys.add(this.chunkKeyFor(tile.getGridX(), tile.getGridY()));
     }
-  }
 
-  /**
-   * Iterate through every tile & assign it's adjacent neighboring tiles through: setAdjacentTile()
-   */
-  private initAdjacentTiles() {
-    for (let x = 0; x < this.mapWidth; x++) {
-      for (let y = 0; y < this.mapHeight; y++) {
-        // Set the 6 edges of the hexagon.
-
-        let edgeAxis: number[][];
-        if (y % 2 == 0) edgeAxis = this.evenEdgeAxis;
-        else edgeAxis = this.oddEdgeAxis;
-
-        for (let i = 0; i < edgeAxis.length; i++) {
-          // Only x wraps - the north and south edges stay the poles.
-          let edgeX = MapWrap.wrapGridX(x + edgeAxis[i][0]);
-          let edgeY = y + edgeAxis[i][1];
-
-          if (edgeX == -1 || edgeY == -1 || edgeX > this.mapWidth - 1 || edgeY > this.mapHeight - 1) {
-            this.tiles[x][y].setAdjacentTile(i, null);
-            continue;
-          }
-
-          this.tiles[x][y].setAdjacentTile(i, this.tiles[edgeX][edgeY]);
-        }
+    return this.enqueueRender(async () => {
+      for (const key of chunkKeys) {
+        await this.rebuildChunkVisuals(...GameMap.parseChunkKey(key));
       }
-    }
+    });
   }
 
-  private getCityFromJSONData(data: CityData): City {
-    const tile = this.tiles[data.tileX][data.tileY];
+  private getCityFromJSONData(data: CityData, centerTile: Tile, territory: Tile[]): City {
     const player = AbstractPlayer.getPlayerByName(data.player);
     const cityName = data.cityName;
-    const territory: Tile[] = [];
-    for (const territoryJSON of data.territory) {
-      territory.push(this.tiles[territoryJSON.tileX][territoryJSON.tileY]);
-    }
 
-    const workedTiles: Tile[] = [];
-    if (data.workedTiles) {
-      for (const workedTileJSON of data.workedTiles) {
-        workedTiles.push(this.tiles[workedTileJSON.x][workedTileJSON.y]);
-      }
-    }
+    const workedTiles = this.getKnownTiles((data.workedTiles ?? []).map((coord) => [coord.x, coord.y]));
     console.log(`[GameMap] Creating city ${cityName} with ${workedTiles.length} worked tiles.`);
 
-    const city = new City({
-      tile: tile,
+    return new City({
+      tile: centerTile,
       territory: territory,
       workedTiles: workedTiles,
       player: player,
       name: cityName
     });
-
-    return city;
   }
 }

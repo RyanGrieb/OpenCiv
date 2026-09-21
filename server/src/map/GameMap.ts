@@ -33,6 +33,10 @@ export class GameMap {
   private static horizontalWrap = false;
   private static wrapWidth = 0;
 
+  // How far a sightline is shifted off dead centre to resolve which side of a tile seam it runs
+  // along - see hasLineOfSight(). Small enough never to reach past the tile it starts in.
+  private static readonly SIGHTLINE_NUDGE = 1e-6;
+
   private tiles: Tile[][];
   private mapWidth: number;
   private mapHeight: number;
@@ -109,6 +113,130 @@ export class GameMap {
 
   public getTiles() {
     return this.tiles;
+  }
+
+  /**
+   * Every tile within `range` steps of the given tile, the origin included. Walks adjacency rather
+   * than comparing coordinates, so the map edges and east-west wrapping are handled by the same
+   * links the rest of the game paths over - see PlayerVisibility.
+   */
+  public getTilesInRange(tile: Tile, range: number): Tile[] {
+    const tilesInRange = new Set<Tile>([tile]);
+    let frontier = [tile];
+
+    for (let step = 0; step < range; step++) {
+      const nextFrontier: Tile[] = [];
+
+      for (const frontierTile of frontier) {
+        for (const adjTile of frontierTile.getAdjacentTiles()) {
+          if (!adjTile || tilesInRange.has(adjTile)) continue;
+
+          tilesInRange.add(adjTile);
+          nextFrontier.push(adjTile);
+        }
+      }
+
+      frontier = nextFrontier;
+    }
+
+    return Array.from(tilesInRange);
+  }
+
+  /**
+   * Whether `from` has an unobstructed line of sight to `to`. A tile is always visible to anything
+   * directly touching it; past that, terrain blocks the view whenever it stands higher than the
+   * ground the viewer is on - so a hill hides what's behind it from the flats, but not from
+   * another hill, and a mountain hides it from both. Woods count a step taller than the ground
+   * they grow on (see Tile.getSightElevation() / getSightBlockingHeight()).
+   *
+   * Sight is traced as a straight hex line via cube-coordinate interpolation. Where that line runs
+   * along the seam between two tiles - which is every step of an even-length diagonal - both of
+   * those tiles are candidates, and sight is only blocked when BOTH obstruct. That's what lets you
+   * see diagonally past a lone mountain instead of it hiding a whole wedge of the map behind it.
+   */
+  public hasLineOfSight(from: Tile, to: Tile): boolean {
+    if (from === to) return true;
+
+    // Unwrap `to`'s x toward `from` first, so a sightline across the map seam interpolates
+    // through real space instead of the long way around.
+    const toX = from.getX() + GameMap.shortestXDistance(from.getX(), to.getX());
+
+    const a = GameMap.toCube(from.getX(), from.getY());
+    const b = GameMap.toCube(toX, to.getY());
+
+    const distance = Math.max(Math.abs(a.x - b.x), Math.abs(a.y - b.y), Math.abs(a.z - b.z));
+    if (distance <= 1) return true;
+
+    const viewerElevation = from.getSightElevation();
+
+    for (let step = 1; step < distance; step++) {
+      const t = step / distance;
+      const candidates = [GameMap.SIGHTLINE_NUDGE, -GameMap.SIGHTLINE_NUDGE].map((nudge) =>
+        this.tileAlongSightline(a, b, t, nudge)
+      );
+
+      // A candidate that's off the map isn't an obstruction, so it can't be what blocks the view.
+      if (candidates.every((tile) => tile && tile.getSightBlockingHeight() > viewerElevation)) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  // One step along the sightline, nudged off the exact centre so a line running down the seam
+  // between two tiles resolves to one side of it. Opposite nudges give the pair of tiles the
+  // sightline threads between; where it passes squarely through a tile, both agree on it.
+  private tileAlongSightline(
+    a: { x: number; y: number; z: number },
+    b: { x: number; y: number; z: number },
+    t: number,
+    nudge: number
+  ): Tile {
+    const rounded = GameMap.cubeRound({
+      x: a.x + (b.x - a.x) * t + nudge,
+      y: a.y + (b.y - a.y) * t + nudge,
+      z: a.z + (b.z - a.z) * t - 2 * nudge
+    });
+
+    const [gridX, gridY] = GameMap.cubeToGrid(rounded);
+    return this.tiles[GameMap.wrapX(gridX)]?.[gridY];
+  }
+
+  // Offset (odd-r: odd rows shoved right, matching oddEdgeAxis/evenEdgeAxis above) grid
+  // coordinates to cube coordinates, and back - see https://www.redblobgames.com/grids/hexagons/.
+  // Cube coordinates are what make a straight hex "line" (hasLineOfSight above) a simple lerp.
+  private static toCube(gridX: number, gridY: number): { x: number; y: number; z: number } {
+    const x = gridX - (gridY - (gridY & 1)) / 2;
+    const z = gridY;
+    return { x, y: -x - z, z };
+  }
+
+  private static cubeToGrid(cube: { x: number; y: number; z: number }): [number, number] {
+    const gridY = cube.z;
+    return [cube.x + (gridY - (gridY & 1)) / 2, gridY];
+  }
+
+  // Rounds a fractional (lerped) cube coordinate to its containing hex, correcting whichever axis
+  // drifted furthest from an integer so x+y+z stays exactly 0.
+  private static cubeRound(cube: { x: number; y: number; z: number }) {
+    let rx = Math.round(cube.x);
+    let ry = Math.round(cube.y);
+    let rz = Math.round(cube.z);
+
+    const xDiff = Math.abs(rx - cube.x);
+    const yDiff = Math.abs(ry - cube.y);
+    const zDiff = Math.abs(rz - cube.z);
+
+    if (xDiff > yDiff && xDiff > zDiff) {
+      rx = -ry - rz;
+    } else if (yDiff > zDiff) {
+      ry = -rx - rz;
+    } else {
+      rz = -rx - ry;
+    }
+
+    return { x: rx, y: ry, z: rz };
   }
 
   public generateTerrain() {
@@ -700,22 +828,32 @@ export class GameMap {
     });
   }
 
-  // Broadcasts a tile's current JSON (yields included) to every player. Clients only
-  // get a tile's yields once, in the initial mapChunk snapshot, so anything that
-  // changes what a tile produces after that (settling a city, improving a resource,
-  // building a farm/mine, etc.) must call this or the client keeps showing stale
-  // numbers on hover - see Tile.setCity() for the current caller.
+  // Sends a tile's current JSON (yields included) to every player who can currently see it. Clients
+  // only get a tile's contents when it's sent to them, so anything that changes what a tile
+  // produces (settling a city, improving a resource, building a farm/mine, etc.) must call this or
+  // the client keeps showing stale numbers on hover - see Tile.setCity() for the current caller.
+  //
+  // Players who have discovered the tile but can't see it right now are deliberately skipped: their
+  // client keeps whatever it last saw, and catches up when the tile comes back into sight.
   public broadcastTileUpdate(tile: Tile) {
     Game.getInstance()
       .getPlayers()
       .forEach((player) => {
+        if (!player.getVisibility().isVisible(tile)) return;
+
         player.sendNetworkEvent({
           event: "tileUpdated",
-          tile: tile.getTileJSON()
+          tile: tile.getTileJSON({ visible: true })
         });
       });
   }
 
+  /**
+   * Sends the player everything they've discovered so far, chunk by chunk, followed by a
+   * "mapSyncComplete" marker. Chunks the player has seen nothing of are skipped entirely, and a
+   * partially-explored chunk only carries its discovered tiles - the client fills the rest in as
+   * they're revealed.
+   */
   public sendMapChunksToPlayer(player: Player) {
     // Send the map-size to player
     player.sendNetworkEvent({
@@ -731,34 +869,74 @@ export class GameMap {
       tiles: Tile.getAllTileStats()
     });
 
+    const visibility = player.getVisibility();
+
     for (let x = 0; x < this.mapWidth; x += MAP_CHUNK_SIZE) {
       for (let y = 0; y < this.mapHeight; y += MAP_CHUNK_SIZE) {
-        const chunkTiles = [];
-        const chunkCities = [];
+        const chunkTiles: Tile[] = [];
 
         for (let chunkX = 0; chunkX < MAP_CHUNK_SIZE; chunkX++) {
           for (let chunkY = 0; chunkY < MAP_CHUNK_SIZE; chunkY++) {
             const tile = this.tiles[x + chunkX][y + chunkY];
-            if (tile.getCity()) {
-              chunkCities.push(tile.getCity());
+
+            if (visibility.hasDiscovered(tile)) {
+              chunkTiles.push(tile);
             }
-            chunkTiles.push(tile.getTileJSON());
           }
         }
 
-        let lastChunk = false;
-        if (x === this.mapWidth - MAP_CHUNK_SIZE && y === this.mapHeight - MAP_CHUNK_SIZE) {
-          lastChunk = true;
-        }
-        player.sendNetworkEvent({
-          event: "mapChunk",
-          chunkX: x,
-          chunkY: y,
-          tiles: chunkTiles,
-          lastChunk: lastChunk
-        });
+        if (chunkTiles.length < 1) continue;
+
+        this.sendTileChunk(player, x, y, chunkTiles);
       }
     }
+
+    // Its own event rather than a flag on the last chunk: a player can start a game with too few
+    // discovered tiles to fill a chunk, and the client still has to know the sync finished.
+    player.sendNetworkEvent({ event: "mapSyncComplete" });
+  }
+
+  /**
+   * Pushes specific tiles to a player mid-game, grouped into the same chunk packets the initial
+   * sync uses. This is how newly-discovered terrain (and anything standing on it) reaches a client
+   * once their units move - see PlayerVisibility.update().
+   */
+  public sendTilesToPlayer(player: Player, tiles: Tile[]) {
+    const tilesByChunk = new Map<string, Tile[]>();
+
+    for (const tile of tiles) {
+      const chunkX = Math.floor(tile.getX() / MAP_CHUNK_SIZE) * MAP_CHUNK_SIZE;
+      const chunkY = Math.floor(tile.getY() / MAP_CHUNK_SIZE) * MAP_CHUNK_SIZE;
+      const key = `${chunkX},${chunkY}`;
+
+      if (!tilesByChunk.has(key)) {
+        tilesByChunk.set(key, []);
+      }
+
+      tilesByChunk.get(key).push(tile);
+    }
+
+    for (const [key, chunkTiles] of tilesByChunk.entries()) {
+      const [chunkX, chunkY] = key.split(",").map((value) => parseInt(value));
+
+      this.sendTileChunk(player, chunkX, chunkY, chunkTiles);
+    }
+  }
+
+  private sendTileChunk(player: Player, chunkX: number, chunkY: number, tiles: Tile[]) {
+    const visibility = player.getVisibility();
+
+    player.sendNetworkEvent({
+      event: "mapChunk",
+      chunkX: chunkX,
+      chunkY: chunkY,
+      tiles: tiles.map((tile) =>
+        tile.getTileJSON({
+          visible: visibility.isVisible(tile),
+          observer: player
+        })
+      )
+    });
   }
 
   private getTotalGeographyLandMass() {

@@ -72,6 +72,12 @@ export class City {
 
       this.territory.push(adjTile);
     }
+    // So a tile reports this city (see Tile.getTileJSON()) whether it's the center or any of the
+    // surrounding tiles - a player who's only scouted the edge of this territory still learns of
+    // the city and its borders, without needing to have seen the center tile itself.
+    for (const territoryTile of this.territory) {
+      territoryTile.setCityTerritoryOf(this);
+    }
     this.sendTerritoryUpdate();
 
     // Must happen before updateWorkedTiles() below (and after the fields above -
@@ -278,12 +284,20 @@ export class City {
    * processed its "newCity" packet and constructed it locally.
    */
   public announceCreated() {
+    // Founding a city is a new source of sight, so refresh the owner's fog first - otherwise the
+    // "newCity" packet below can outrun the tiles the city reveals.
+    this.player.getVisibility().update();
+
     Game.getInstance()
       .getPlayers()
       .forEach((player) => {
+        // Another civ only learns of this city if they can see where it was founded. Otherwise they
+        // meet it when they first scout the tile, which carries the city in its tile data.
+        if (!player.getVisibility().isVisible(this.tile)) return;
+
         player.sendNetworkEvent({
           event: "newCity",
-          ...this.getJSON()
+          ...this.getJSON({ observer: player })
         });
       });
 
@@ -418,8 +432,15 @@ export class City {
     return this.name;
   }
 
-  public getJSON() {
-    const territoryCoords = this.territory.map((tile) => ({
+  // An observer is only told about the parts of this city's territory they've actually discovered -
+  // their client has no tile to hang the border on otherwise.
+  public getJSON(options?: { observer?: Player }) {
+    const ownCity = !options?.observer || options.observer === this.player;
+    const visibleTerritory = options?.observer
+      ? this.territory.filter((tile) => options.observer.getVisibility().hasDiscovered(tile))
+      : this.territory;
+
+    const territoryCoords = visibleTerritory.map((tile) => ({
       tileX: tile.getX(),
       tileY: tile.getY()
     }));
@@ -430,7 +451,8 @@ export class City {
       tileX: this.tile.getX(),
       tileY: this.tile.getY(),
       territory: territoryCoords,
-      workedTiles: this.workedTiles.map((tile) => ({ x: tile.getX(), y: tile.getY() }))
+      // Which tiles a city works is its owner's business.
+      workedTiles: ownCity ? this.workedTiles.map((tile) => ({ x: tile.getX(), y: tile.getY() })) : []
     };
   }
 

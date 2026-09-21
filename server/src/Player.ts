@@ -2,6 +2,7 @@ import { WebSocket } from "ws";
 import { ServerEvents } from "./Events";
 import { Game } from "./Game";
 import { City } from "./city/City";
+import { PlayerVisibility } from "./map/PlayerVisibility";
 import { Technology } from "./research/Technology";
 import { Unit } from "./unit/Unit";
 
@@ -48,6 +49,7 @@ export class Player {
   private accumulatedStats: Map<string, number>;
   private currentResearch: CurrentResearch | null;
   private researchedTechs: Set<string>;
+  private visibility: PlayerVisibility;
 
   /**
    * Creates a new player object.
@@ -64,6 +66,7 @@ export class Player {
     this.accumulatedStats = new Map();
     this.currentResearch = null;
     this.researchedTechs = new Set();
+    this.visibility = new PlayerVisibility(this);
 
     // Add event listener for when the player disconnects
     this.wsConnection.on("close", (data) => {
@@ -379,6 +382,11 @@ export class Player {
       technologies: Technology.getAllTechnologies().map((tech) => tech.toJSON()),
       eras: Technology.getAllEras()
     });
+  }
+
+  /** This player's fog of war - what they've discovered, and what they can see right now. */
+  public getVisibility() {
+    return this.visibility;
   }
 
   public getUnits() {

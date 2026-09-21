@@ -36,6 +36,7 @@ describe('City', () => {
       getAdjacentTiles: jest.fn().mockReturnValue([]),
       getStats: jest.fn().mockReturnValue([]),
       setCity: jest.fn(),
+      setCityTerritoryOf: jest.fn(),
       addUnit: jest.fn(),
     } as unknown as jest.Mocked<Tile>;
 
@@ -405,6 +406,7 @@ describe('City', () => {
         getX: jest.fn().mockReturnValue(x),
         getY: jest.fn().mockReturnValue(y),
         getStats: jest.fn().mockReturnValue(Object.entries(stats).map(([key, value]) => ({ [key]: value }))),
+        setCityTerritoryOf: jest.fn(),
       }) as unknown as jest.Mocked<Tile>;
 
     const wireHighestYeild = (tiles: any[]) => {

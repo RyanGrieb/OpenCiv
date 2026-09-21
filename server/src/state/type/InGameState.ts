@@ -202,6 +202,14 @@ export class InGameState extends State {
       });
 
     ServerEvents.call("nextTurn", { turn: this.currentTurn });
+
+    // Queued movement resolves inside the event above, so this catches up any sight change it
+    // caused, and converges anything else that shifted sight without announcing it.
+    Game.getInstance()
+      .getPlayers()
+      .forEach((player) => {
+        player.getVisibility().update();
+      });
   }
   public onDestroyed() {
     if (this.turnTimeJob) {

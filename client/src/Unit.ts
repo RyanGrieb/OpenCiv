@@ -188,7 +188,10 @@ export class Unit extends ActorGroup {
 
     this.queuedMovementTiles = [];
     for (const jsonTile of unitJSON.queuedTiles) {
-      this.queuedMovementTiles.push(GameMap.getInstance().getTiles()[jsonTile.x][jsonTile.y]);
+      // Only ever populated for the owner's own units (see server Unit.asJSON), and a unit can
+      // only ever be queued through tiles its owner has already discovered - guarded anyway.
+      const tile = GameMap.getInstance().getTiles()[jsonTile.x]?.[jsonTile.y];
+      if (tile) this.queuedMovementTiles.push(tile);
     }
 
     this.selectionActors = [];

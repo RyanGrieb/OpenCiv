@@ -447,7 +447,8 @@ export class ClientPlayer extends AbstractPlayer {
       // Get rough estimate of where the nearest tile to the mouse is. (Accurate enough to just check it's adjacent tiles)
       estimatedTile = GameMap.getInstance().getTiles()[gridX][gridY];
       if (!estimatedTile) {
-        console.log("on border of map?");
+        // Undiscovered (fogged) tile, or genuinely on the border of the map - either way there's
+        // nothing to hover.
         return;
       }
 

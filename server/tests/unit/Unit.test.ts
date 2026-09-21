@@ -58,13 +58,19 @@ describe('Unit', () => {
       hasBlockingUnit: jest.fn().mockReturnValue(false),
     } as unknown as jest.Mocked<Tile>;
 
-    // Mock player
+    // Mock player. getVisibility() stands in for the player's fog of war: sight of everything,
+    // and an update() that does nothing, so unit packets aren't filtered out from under the tests.
     mockPlayer = {
       getName: jest.fn().mockReturnValue('TestPlayer'),
       sendNetworkEvent: jest.fn(),
       getWebsocket: jest.fn().mockReturnValue({} as WebSocket),
       addUnit: jest.fn(),
       removeUnit: jest.fn(),
+      getVisibility: jest.fn().mockReturnValue({
+        isVisible: jest.fn().mockReturnValue(true),
+        hasDiscovered: jest.fn().mockReturnValue(true),
+        update: jest.fn(),
+      }),
     } as unknown as jest.Mocked<Player>;
 
     // Mock GameMap.getInstance with minimal required properties
@@ -175,7 +181,7 @@ describe('Unit', () => {
     }));
   });
 
-  it('broadcasts createUnit to all players on construction', () => {
+  it('announces createUnit to players who can see the tile on construction', () => {
     const freshUnit = new Unit({
       name: 'AnotherUnit',
       tile: mockTile,
@@ -185,8 +191,39 @@ describe('Unit', () => {
 
     expect(mockPlayer.sendNetworkEvent).toHaveBeenCalledWith({
       event: 'createUnit',
-      ...freshUnit.asJSON(),
+      ...freshUnit.asJSON({ observer: mockPlayer }),
     });
+  });
+
+  it('withholds createUnit from players who cannot see the tile', () => {
+    const blindPlayer = {
+      getName: jest.fn().mockReturnValue('BlindPlayer'),
+      sendNetworkEvent: jest.fn(),
+      getVisibility: jest.fn().mockReturnValue({
+        isVisible: jest.fn().mockReturnValue(false),
+        hasDiscovered: jest.fn().mockReturnValue(false),
+        update: jest.fn(),
+      }),
+    } as unknown as jest.Mocked<Player>;
+
+    jest.spyOn(Game, 'getInstance').mockReturnValue({
+      getPlayers: jest.fn().mockReturnValue(
+        new Map([
+          [mockPlayer.getName(), mockPlayer],
+          [blindPlayer.getName(), blindPlayer],
+        ])
+      ),
+      getPlayerFromWebsocket: jest.fn().mockReturnValue(mockPlayer),
+    } as any);
+
+    new Unit({
+      name: 'HiddenUnit',
+      tile: mockTile,
+      player: mockPlayer,
+      actions: [],
+    });
+
+    expect(blindPlayer.sendNetworkEvent).not.toHaveBeenCalled();
   });
 
   describe('unit stacking', () => {

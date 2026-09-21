@@ -3,6 +3,7 @@ import { Game } from "../Game";
 import { Player } from "../Player";
 import { GameMap } from "../map/GameMap";
 import { Tile } from "../map/Tile";
+import { PlayerVisibility } from "../map/PlayerVisibility";
 import { ConfigLoader } from "../util/ConfigLoader";
 
 export interface UnitAction {
@@ -19,6 +20,7 @@ export interface UnitOptions {
   player: Player;
   attackType?: string;
   defaultMoveDistance?: number;
+  sightRange?: number;
   isUtility?: boolean;
   ignoresTerrainCost?: boolean;
   actions: UnitAction[];
@@ -28,6 +30,9 @@ export interface UnitYMLTypeData {
   name: string;
   attack_type?: string;
   default_move_distance?: number;
+  // How far this unit reveals the map for its owner, in tiles. Defaults to
+  // PlayerVisibility.DEFAULT_UNIT_SIGHT_RANGE when the config leaves it out.
+  sight_range?: number;
   is_utility?: boolean;
   ignores_terrain_cost?: boolean;
   // Absent for units never offered through a city's production queue (e.g. the
@@ -44,6 +49,7 @@ export class Unit {
   private attackType: string;
   private defaultMoveDistance: number;
   private availableMovement: number;
+  private sightRange: number;
   private utility: boolean;
   private terrainCostIgnored: boolean;
   private tile: Tile;
@@ -65,6 +71,7 @@ export class Unit {
     this.attackType = options.attackType || "none";
     this.defaultMoveDistance = options.defaultMoveDistance || 2;
     this.availableMovement = this.defaultMoveDistance;
+    this.sightRange = options.sightRange ?? PlayerVisibility.DEFAULT_UNIT_SIGHT_RANGE;
     this.utility = options.isUtility || false;
     this.terrainCostIgnored = options.ignoresTerrainCost || false;
     this.actions = options.actions || [];
@@ -138,11 +145,13 @@ export class Unit {
     // the map: NetworkEvents.call() only reaches listeners registered at the
     // moment it fires, so this is simply unheard until GameMap registers its
     // "createUnit" listener, and that listener dedupes by id regardless.
-    Game.getInstance()
-      .getPlayers()
-      .forEach((player) => {
-        player.sendNetworkEvent({ event: "createUnit", ...this.asJSON() });
-      });
+    //
+    // Only players who can see where it appeared hear about it; everyone else meets it when it
+    // walks into their sight (see moveToTile).
+    this.sendToObservers(this.tile, (player) => ({ event: "createUnit", ...this.asJSON({ observer: player }) }));
+
+    // This unit is a new source of sight for its owner - whatever it stands on is now revealed.
+    this.player.getVisibility().update();
   }
 
   public static createFromName(name: string, tile: Tile, player: Player): Unit | undefined {
@@ -155,6 +164,7 @@ export class Unit {
       player,
       attackType: data.attack_type,
       defaultMoveDistance: data.default_move_distance,
+      sightRange: data.sight_range,
       isUtility: data.is_utility,
       ignoresTerrainCost: data.ignores_terrain_cost,
       actions: []
@@ -185,6 +195,14 @@ export class Unit {
     const targetTile = options.targetTile;
     const remainingTiles = options.remainingTiles;
     const remainingMovement = options.remainingMovement;
+
+    // Taken before the move, since moving the unit can change what its owner can see.
+    const sightOfOrigin = new Map<Player, boolean>();
+    Game.getInstance()
+      .getPlayers()
+      .forEach((player) => {
+        sightOfOrigin.set(player, player.getVisibility().isVisible(previousTile));
+      });
 
     this.tile.removeUnit(this);
     targetTile.addUnit(this);
@@ -220,11 +238,37 @@ export class Unit {
       dataPacket["queuedTiles"] = remainingTilesJSON;
     }
 
-    // Send back packet, telling client server updated the unit location
+    // Moving is itself a change of sight, so refresh the owner's fog before telling anyone where
+    // this unit went - that way the tiles it just revealed are already on their client.
+    this.player.getVisibility().update();
+
+    // What each of the other players gets depends on which ends of the move they could see:
+    // both ends is an ordinary move, only the destination means the unit walked out of the fog,
+    // and only the origin means it walked into it.
     Game.getInstance()
       .getPlayers()
       .forEach((player) => {
-        player.sendNetworkEvent(dataPacket);
+        if (player === this.player) {
+          player.sendNetworkEvent(dataPacket);
+          return;
+        }
+
+        const sawOrigin = sightOfOrigin.get(player);
+        const seesTarget = player.getVisibility().isVisible(targetTile);
+
+        if (sawOrigin && seesTarget) {
+          // Another player has no business knowing where this unit is headed next.
+          player.sendNetworkEvent({ ...dataPacket, queuedTiles: undefined });
+        } else if (seesTarget) {
+          player.sendNetworkEvent({ event: "createUnit", ...this.asJSON({ observer: player }) });
+        } else if (sawOrigin) {
+          player.sendNetworkEvent({
+            event: "removeUnit",
+            id: this.id,
+            unitX: previousTile.getX(),
+            unitY: previousTile.getY()
+          });
+        }
       });
   }
 
@@ -257,11 +301,8 @@ export class Unit {
 
     this.queuedMovementTiles = [];
 
-    Game.getInstance()
-      .getPlayers()
-      .forEach((player) => {
-        player.sendNetworkEvent({ event: "clearMovementQueue", id: this.id });
-      });
+    // Only the owner tracks a movement queue - it's their unit's intent, not public information.
+    this.player.sendNetworkEvent({ event: "clearMovementQueue", id: this.id });
   }
 
   private getMovementTowardsTargetTile(tile: Tile, existingPath?: Tile[]): [Tile, Tile[], number] {
@@ -318,16 +359,15 @@ export class Unit {
     this.player.removeUnit(this);
     ServerEvents.removeCallbacksByParentObject(this);
 
-    Game.getInstance()
-      .getPlayers()
-      .forEach((player) => {
-        player.sendNetworkEvent({
-          event: "removeUnit",
-          id: this.id,
-          unitX: this.tile.getX(),
-          unitY: this.tile.getY()
-        });
-      });
+    this.sendToObservers(this.tile, () => ({
+      event: "removeUnit",
+      id: this.id,
+      unitX: this.tile.getX(),
+      unitY: this.tile.getY()
+    }));
+
+    // The unit was a source of sight - whatever only it could see falls back into fog.
+    this.player.getVisibility().update();
   }
 
   public getPlayer() {
@@ -342,15 +382,25 @@ export class Unit {
     return this.utility;
   }
 
+  public getSightRange() {
+    return this.sightRange;
+  }
+
   public ignoresTerrainCost() {
     return this.terrainCostIgnored;
   }
 
-  public asJSON() {
-    const queuedTilesJSON = this.queuedMovementTiles.map((tile) => ({
-      x: tile.getX(),
-      y: tile.getY()
-    }));
+  // Anyone other than the owner gets a redacted unit: no movement queue (that would give away
+  // where it's headed) and no actions (those only ever drive the owner's own UI).
+  public asJSON(options?: { observer?: Player }) {
+    const ownUnit = !options?.observer || options.observer === this.player;
+
+    const queuedTilesJSON = ownUnit
+      ? this.queuedMovementTiles.map((tile) => ({
+          x: tile.getX(),
+          y: tile.getY()
+        }))
+      : [];
 
     return {
       name: this.name,
@@ -361,7 +411,7 @@ export class Unit {
       isUtility: this.utility,
       ignoresTerrainCost: this.terrainCostIgnored,
       id: this.id,
-      actions: this.getUnitActionsJSON(),
+      actions: ownUnit ? this.getUnitActionsJSON() : [],
       queuedTiles: queuedTilesJSON,
       remainingMovement: this.availableMovement,
       defaultMoveDistance: this.defaultMoveDistance
@@ -411,5 +461,17 @@ export class Unit {
     if (this.queuedMovementTiles.length < 1) return undefined;
 
     return this.queuedMovementTiles[this.queuedMovementTiles.length - 1];
+  }
+
+  // Sends a packet only to the players who can currently see the given tile. The builder takes the
+  // receiving player so packets carrying unit JSON can redact it per observer.
+  private sendToObservers(tile: Tile, packetFor: (player: Player) => Record<string, any>) {
+    Game.getInstance()
+      .getPlayers()
+      .forEach((player) => {
+        if (!player.getVisibility().isVisible(tile)) return;
+
+        player.sendNetworkEvent(packetFor(player));
+      });
   }
 }

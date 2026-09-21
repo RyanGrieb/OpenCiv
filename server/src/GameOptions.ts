@@ -9,6 +9,9 @@ export interface GameOptions {
   // only shown in the client's advanced options.
   mapWidth: number;
   mapHeight: number;
+  // Turns fog of war off: every player sees the whole map and every unit on it. Meant for
+  // debugging and for the client scenario tests, which predate fog and assume a full map.
+  revealMap: boolean;
 }
 
 // Maps are streamed to clients in square chunks of this many tiles, so each dimension must divide evenly.
@@ -54,7 +57,8 @@ export const DefaultGameOptions: GameOptions = {
   wrapMap: true,
   mapSize: 3,
   mapWidth: MapSizes.DIMENSIONS[3][0],
-  mapHeight: MapSizes.DIMENSIONS[3][1]
+  mapHeight: MapSizes.DIMENSIONS[3][1],
+  revealMap: false
 };
 
 interface BaseGameOptionDefinition {
@@ -126,5 +130,6 @@ export const GameOptionDefinitions: GameOptionDefinition[] = [
     step: MAP_CHUNK_SIZE,
     hidden: true,
     onChange: (options) => MapSizes.syncPreset(options)
-  }
+  },
+  { key: "revealMap", label: "Reveal Entire Map", type: "boolean", hidden: true }
 ];

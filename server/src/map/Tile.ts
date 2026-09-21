@@ -3,6 +3,7 @@ import { GameMap } from "./GameMap";
 import { TileIndexer } from "./TileIndexer";
 import { Unit } from "../unit/Unit";
 import { City } from "../city/City";
+import { Player } from "../Player";
 import { ConfigLoader } from "../util/ConfigLoader";
 
 // A tile/building stat-line is represented as an array of single-key partial objects
@@ -19,6 +20,12 @@ export interface StatValues {
 export type StatEntry = Partial<StatValues>;
 
 export class Tile {
+  // Sight elevation tiers - how high a tile sits for line-of-sight purposes. See
+  // getSightElevation() / getSightBlockingHeight() and GameMap.hasLineOfSight().
+  public static readonly ELEVATION_FLAT = 0;
+  public static readonly ELEVATION_HILL = 1;
+  public static readonly ELEVATION_MOUNTAIN = 2;
+
   //== Generation Values ==
   private generationHeight: number;
   private generationTemp: number;
@@ -32,6 +39,13 @@ export class Tile {
   private y: number;
 
   private city: City;
+  // Which city's territory this tile falls within - set on every tile of a city's territory,
+  // including its center (which also has `city` set above). Distinct from `city`: that field means
+  // "the city sits ON this exact tile" (drives the city-center tileType/food bonus below), while
+  // this means "this tile belongs to that city" for any of its surrounding tiles too. Tile JSON
+  // reports this rather than `city`, so a player who's only discovered part of a foreign city's
+  // territory still learns of the city and its borders, without having scouted its exact center.
+  private cityTerritoryOf: City;
 
   constructor(tileType: string, x: number, y: number) {
     this.generationHeight = 0;
@@ -60,6 +74,14 @@ export class Tile {
 
   public getCity(): City {
     return this.city;
+  }
+
+  public setCityTerritoryOf(city: City) {
+    this.cityTerritoryOf = city;
+  }
+
+  public getCityTerritoryOf(): City {
+    return this.cityTerritoryOf;
   }
 
   public addUnit(unit: Unit) {
@@ -119,24 +141,30 @@ export class Tile {
     return tilesEffected;
   }
 
-  public getTileJSON() {
+  // `visible` is the observing player's fog state for this tile. A tile they've discovered but
+  // can't currently see still reports its terrain and city (their client remembers those), but
+  // never what's standing on it.
+  public getTileJSON(options?: { visible?: boolean; observer?: Player }) {
+    const visible = options?.visible ?? true;
+
     return {
       tileTypes: this.tileTypes,
       riverSides: this.riverSides,
-      units: this.getUnitsJSON(),
+      units: visible ? this.getUnitsJSON(options?.observer) : [],
       x: this.x,
       y: this.y,
       movementCost: this.getMovementCost(),
-      city: this.city ? this.city.getJSON() : null,
-      yields: this.getStats()
+      city: this.cityTerritoryOf ? this.cityTerritoryOf.getJSON({ observer: options?.observer }) : null,
+      yields: this.getStats(),
+      visible: visible
     };
   }
 
-  public getUnitsJSON() {
+  public getUnitsJSON(observer?: Player) {
     const unitJSON = [];
 
     for (const unit of this.units) {
-      unitJSON.push(unit.asJSON());
+      unitJSON.push(unit.asJSON({ observer: observer }));
     }
 
     return unitJSON;
@@ -709,6 +737,32 @@ export class Tile {
 
   public isWater(): boolean {
     return this.containsTileTypes(["ocean", "shallow_ocean", "freshwater"]);
+  }
+
+  /**
+   * How high something standing on this tile sits, in Civ 5's sight tiers - flat ground and water
+   * at 0, hills at 1, mountains at 2. Forest and jungle deliberately don't count: standing among
+   * the trees doesn't let you see any further, it only hides you from others (see
+   * getSightBlockingHeight). Same substring convention as getMovementCost(), since tile type
+   * strings are biome-prefixed (e.g. "grass_hill").
+   */
+  public getSightElevation(): number {
+    if (this.tileTypes.some((type) => type.includes("mountain"))) return Tile.ELEVATION_MOUNTAIN;
+    if (this.tileTypes.some((type) => type.includes("hill"))) return Tile.ELEVATION_HILL;
+
+    return Tile.ELEVATION_FLAT;
+  }
+
+  /**
+   * How high this tile blocks sight - its own elevation, plus a step for anything growing on it.
+   * Forest and jungle hide what's behind them the way a hill does, so woods on a hill block as
+   * high as a mountain. See GameMap.hasLineOfSight(), which blocks a view whenever this exceeds
+   * the elevation the viewer is standing at.
+   */
+  public getSightBlockingHeight(): number {
+    const canopy = this.tileTypes.some((type) => type.includes("forest") || type.includes("jungle"));
+
+    return this.getSightElevation() + (canopy ? 1 : 0);
   }
 
   public getDistanceFrom(tile: Tile) {
