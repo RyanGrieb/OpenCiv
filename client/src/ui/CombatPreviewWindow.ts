@@ -1,54 +1,47 @@
 import { ClientSettings } from "../ClientSettings";
-import { GameImage } from "../Assets";
+import { GameImage, resolveSpriteRegion } from "../Assets";
 import { Game } from "../Game";
+import { Unit } from "../Unit";
 import { Actor } from "../scene/Actor";
 import { ActorGroup } from "../scene/ActorGroup";
 import { Strings } from "../util/Strings";
 import { Label } from "./Label";
 import { UITheme } from "./UITheme";
 
-// Mirrors server/src/unit/Combat.ts's CombatModifier.
-export interface CombatModifier {
-  label: string;
-  value: number;
-}
-
-// Server "combatPreview" payload, from Unit.getMeleePreview(). A fight against civilians only carries
-// the target and outcome ("Capture" or "Destroy"); everything else is there when something defends.
+// Server "combatPreview" payload, from Unit.getMeleePreview(). Only sent when something on the target
+// tile can fight back - civilians are captured without a preview.
 export interface CombatPreviewEvent {
   attackerId: number;
+  defenderId: number;
   targetX: number;
   targetY: number;
-  defenderName: string;
-  outcome: string;
-  attackerHealth?: number;
-  defenderHealth?: number;
-  attackerStrength?: number;
-  defenderStrength?: number;
-  attackerModifiers?: CombatModifier[];
-  defenderModifiers?: CombatModifier[];
-  attackerDamage?: { min: number; max: number };
-  defenderDamage?: { min: number; max: number };
+  attackerHealth: number;
+  defenderHealth: number;
+  attackerDamage: { min: number; expected: number; max: number };
+  defenderDamage: { min: number; expected: number; max: number };
 }
 
 const WINDOW_WIDTH = 330;
-const LINE_HEIGHT = 28;
-const PADDING = 12;
+const WINDOW_HEIGHT = 150;
+const PADDING = 10;
+const ICON_SIZE = 24;
+const BAR_WIDTH = 120;
+const BAR_HEIGHT = 24;
+const BAR_FONT = "18px serif";
 // Matches UnitDisplayInfo's WINDOW_HEIGHT - this window stacks right on top of it.
 const UNIT_INFO_HEIGHT = 170;
 
-// Civ 5's pre-attack readout: shown while aiming a melee unit at an enemy, so the player knows what
-// the attack will cost before committing to it. Sits on top of the selected unit's UnitDisplayInfo.
+/**
+ * Mirrors old_java's UnitCombatWindow: "Combat Preview", then each side's civ icon, name and a health
+ * bar showing where its health should end up after the attack (the average roll), with "Vs." between.
+ */
 export class CombatPreviewWindow extends ActorGroup {
-  constructor(attackerName: string, preview: CombatPreviewEvent) {
-    const lines = CombatPreviewWindow.describe(attackerName, preview);
-    const height = PADDING * 2 + LINE_HEIGHT * lines.length;
-
+  constructor(attacker: Unit, defender: Unit, preview: CombatPreviewEvent) {
     super({
       x: Game.getInstance().getWidth() - WINDOW_WIDTH,
-      y: Game.getInstance().getHeight() - UNIT_INFO_HEIGHT - height - 8,
+      y: Game.getInstance().getHeight() - UNIT_INFO_HEIGHT - WINDOW_HEIGHT - 8,
       width: WINDOW_WIDTH,
-      height,
+      height: WINDOW_HEIGHT,
       cameraApplies: false,
       z: 5
     });
@@ -66,51 +59,57 @@ export class CombatPreviewWindow extends ActorGroup {
       })
     );
 
-    lines.forEach((line, index) => {
-      const label = new Label({ text: line.text, font: UITheme.FONT, fontColor: line.color ?? "white" });
-      label.conformSize().then(() => {
-        const x = line.centered ? this.x + (this.width - label.getWidth()) / 2 : this.x + PADDING;
-        label.setPosition(x, this.y + PADDING + LINE_HEIGHT * index);
-        this.addActor(label);
-      });
+    this.addCenteredLabel("Combat Preview", this.y + PADDING);
+    this.addCombatant(attacker, preview.attackerHealth - preview.attackerDamage.expected, this.y + PADDING + 36);
+    this.addLabel("Vs.", this.x + PADDING + ICON_SIZE + 24, this.y + PADDING + 66);
+    this.addCombatant(defender, preview.defenderHealth - preview.defenderDamage.expected, this.y + PADDING + 98);
+  }
+
+  private addCombatant(unit: Unit, healthAfter: number, y: number) {
+    const iconRegion = resolveSpriteRegion(unit.getPlayer()?.getCivilizationData()?.icon_name);
+    if (iconRegion !== undefined) {
+      this.addActor(
+        new Actor({
+          image: Game.getInstance().getImage(GameImage.SPRITESHEET),
+          spriteRegion: iconRegion,
+          x: this.x + PADDING,
+          y,
+          width: ICON_SIZE,
+          height: ICON_SIZE
+        })
+      );
+    }
+
+    this.addLabel(Strings.capitalizeWords(unit.getName()), this.x + PADDING + ICON_SIZE + 8, y);
+
+    // Red behind, green over it for the health that's left - old_java's Healthbar.
+    const barX = this.x + this.width - PADDING - BAR_WIDTH;
+    const fraction = Math.max(0, Math.min(Unit.MAX_HEALTH, healthAfter)) / Unit.MAX_HEALTH;
+    this.addActor(new Actor({ color: "red", x: barX, y, width: BAR_WIDTH, height: BAR_HEIGHT }));
+    if (fraction > 0) {
+      this.addActor(new Actor({ color: "limegreen", x: barX, y, width: BAR_WIDTH * fraction, height: BAR_HEIGHT }));
+    }
+
+    const percent = new Label({ text: `${Math.round(fraction * 100)}%`, font: BAR_FONT, fontColor: "white" });
+    percent.conformSize().then(() => {
+      percent.setPosition(barX + (BAR_WIDTH - percent.getWidth()) / 2, y + (BAR_HEIGHT - percent.getHeight()) / 2);
+      this.addActor(percent);
     });
   }
 
-  private static describe(attackerName: string, preview: CombatPreviewEvent) {
-    const lines: { text: string; color?: string; centered?: boolean }[] = [
-      {
-        text: `${Strings.capitalizeWords(attackerName)} vs ${Strings.capitalizeWords(preview.defenderName)}`,
-        centered: true
-      }
-    ];
-
-    if (preview.attackerStrength !== undefined) {
-      const strength = (value: number) => (Math.round(value * 10) / 10).toString();
-      const modifier = (m: CombatModifier) => `${m.label} ${m.value > 0 ? "+" : ""}${Math.round(m.value * 100)}%`;
-      const afterHit = (health: number, damage: { min: number; max: number }) => {
-        const low = Math.max(0, health - damage.max);
-        const high = Math.max(0, health - damage.min);
-        return low === high ? `${low}` : `${low}-${high}`;
-      };
-
-      lines.push({ text: `Strength: ${strength(preview.attackerStrength)} vs ${strength(preview.defenderStrength)}` });
-      preview.attackerModifiers.forEach((m) => lines.push({ text: `  Ours: ${modifier(m)}`, color: "#d0d0d0" }));
-      preview.defenderModifiers.forEach((m) => lines.push({ text: `  Theirs: ${modifier(m)}`, color: "#d0d0d0" }));
-      lines.push({
-        text: `Our HP: ${preview.attackerHealth} -> ${afterHit(preview.attackerHealth, preview.attackerDamage)}`
-      });
-      lines.push({
-        text: `Their HP: ${preview.defenderHealth} -> ${afterHit(preview.defenderHealth, preview.defenderDamage)}`
-      });
-    }
-
-    lines.push({ text: preview.outcome, color: CombatPreviewWindow.outcomeColor(preview.outcome), centered: true });
-    return lines;
+  private addLabel(text: string, x: number, y: number) {
+    const label = new Label({ text, font: UITheme.FONT, fontColor: "white" });
+    label.conformSize().then(() => {
+      label.setPosition(x, y);
+      this.addActor(label);
+    });
   }
 
-  private static outcomeColor(outcome: string): string {
-    if (outcome.includes("Victory") || outcome === "Capture" || outcome === "Destroy") return "lime";
-    if (outcome.includes("Defeat")) return "#ff5a4a";
-    return "yellow";
+  private addCenteredLabel(text: string, y: number) {
+    const label = new Label({ text, font: UITheme.FONT, fontColor: "white" });
+    label.conformSize().then(() => {
+      label.setPosition(this.x + (this.width - label.getWidth()) / 2, y);
+      this.addActor(label);
+    });
   }
 }

@@ -531,21 +531,15 @@ export class Unit {
   public getMeleePreview(targetTile: Tile) {
     if (!this.canMeleeAttack(targetTile)) return undefined;
 
-    const enemies = targetTile.getUnits().filter((unit) => unit.getPlayer() !== this.player);
-    const defender = enemies.find((unit) => unit.canFight());
-    const target = { attackerId: this.id, targetX: targetTile.getX(), targetY: targetTile.getY() };
+    // Like old_java's UnitCombatWindow, there's nothing to preview when nothing can fight back.
+    const defender = targetTile.getUnits().find((unit) => unit.getPlayer() !== this.player && unit.canFight());
+    if (!defender) return undefined;
 
-    if (!defender) {
-      const captures = enemies.filter((unit) => Unit.getUnitYMLTypeDataByName(unit.name)?.captured_as);
-      return {
-        ...target,
-        defenderName: enemies[0].name,
-        outcome: captures.length > 0 ? "Capture" : "Destroy"
-      };
-    }
+    const target = { attackerId: this.id, targetX: targetTile.getX(), targetY: targetTile.getY() };
 
     return {
       ...target,
+      defenderId: defender.id,
       defenderName: defender.name,
       attackerHealth: this.health,
       defenderHealth: defender.health,

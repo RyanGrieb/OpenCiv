@@ -185,10 +185,10 @@ describe('Unit.meleeAttack', () => {
     expect(captive.asJSON().remainingMovement).toBe(0);
   });
 
-  it('previews a capture, and a fight with its strengths, modifiers and verdict', () => {
+  it('previews a fight with its strengths, modifiers and verdict, but not a capture', () => {
     const attacker = makeUnit(originTile, attackerPlayer);
     makeUnit(targetTile, defenderPlayer, { strength: 0, utility: true, name: 'settler' });
-    expect(attacker.getMeleePreview(targetTile)).toMatchObject({ outcome: 'Capture', defenderName: 'settler' });
+    expect(attacker.getMeleePreview(targetTile)).toBeUndefined();
 
     const hillTile = new Tile('grass_hill', 2, 0);
     originTile.setAdjacentTile(1, hillTile);
@@ -198,6 +198,8 @@ describe('Unit.meleeAttack', () => {
       attackerStrength: 8,
       defenderStrength: 10,
       defenderModifiers: [{ label: 'Hill', value: 0.25 }],
+      attackerDamage: { expected: 34 },
+      defenderDamage: { expected: 26 },
       outcome: 'Minor Defeat'
     });
   });

@@ -172,8 +172,11 @@ export class ClientPlayer extends AbstractPlayer {
         if (!this.selectedUnit || this.selectedUnit.getID() !== data.attackerId) return;
         if (!target || target.getGridX() !== data.targetX || target.getGridY() !== data.targetY) return;
 
+        const defender = target.getUnits().find((unit) => unit.getID() === data.defenderId);
+        if (!defender) return;
+
         this.hideCombatPreview();
-        this.combatPreviewWindow = new CombatPreviewWindow(this.selectedUnit.getName(), data);
+        this.combatPreviewWindow = new CombatPreviewWindow(this.selectedUnit, defender, data);
         Game.getInstance().getCurrentScene().addActor(this.combatPreviewWindow);
       }
     });

@@ -17,9 +17,9 @@ export interface CombatPrediction {
   defenderStrength: number;
   attackerModifiers: CombatModifier[];
   defenderModifiers: CombatModifier[];
-  // Damage each side takes, for the worst and best roll.
-  attackerDamage: { min: number; max: number };
-  defenderDamage: { min: number; max: number };
+  // Damage each side takes, for the worst, average and best roll.
+  attackerDamage: { min: number; expected: number; max: number };
+  defenderDamage: { min: number; expected: number; max: number };
   outcome: string;
 }
 
@@ -136,8 +136,8 @@ export class Combat {
       defenderStrength,
       attackerModifiers,
       defenderModifiers,
-      attackerDamage: { min: damageTo("attacker", 0), max: damageTo("attacker", 1) },
-      defenderDamage: { min: damageTo("defender", 0), max: damageTo("defender", 1) },
+      attackerDamage: { min: damageTo("attacker", 0), expected: averageTaken, max: damageTo("attacker", 1) },
+      defenderDamage: { min: damageTo("defender", 0), expected: averageDealt, max: damageTo("defender", 1) },
       outcome
     };
   }

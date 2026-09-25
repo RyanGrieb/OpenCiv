@@ -134,13 +134,12 @@ export function setupMeleeCombatTest(game: Game) {
     });
 
     runner.addStep({
-        name: "Aiming at the Settler draws a red line and previews a capture",
+        name: "Aiming at the Settler draws a red line, with no preview since it can't fight back",
         action: async () => {
             aimAt(warrior, enemySettler.getTile());
-            await utils.waitUntil(() => !!previewWindow(), 5000, "Combat preview to appear");
-            await utils.delay(1500); // Long enough for whoever's watching to read it
+            await utils.delay(1500);
         },
-        verification: () => hasRedLine() && previewWindow() !== undefined
+        verification: () => hasRedLine() && previewWindow() === undefined
     });
 
     runner.addStep({
