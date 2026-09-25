@@ -7,12 +7,29 @@ import { City } from "../../city/City";
 import { Job, gracefulShutdown, scheduleJob } from "node-schedule";
 
 import { UnitActions } from "../../unit/UnitActions";
+import { Tile } from "../../map/Tile";
 
 export class InGameState extends State {
   private turnTimeJob: Job;
   private currentTurn: number;
   private totalTurnTime: number;
   private turnTime: number;
+
+  // An open spawn tile two steps from `origin` - close enough that the players' starting units are
+  // within a move of each other, without touching the other player's units.
+  private static findSpawnTwoTilesFrom(origin: Tile, badTileTypes: string[]): Tile | undefined {
+    const neighbors = origin.getAdjacentTiles().filter(Boolean);
+    const isOpen = (tile: Tile) => tile && !tile.containsTileTypes(badTileTypes) && tile.getUnits().length === 0;
+
+    for (const neighbor of neighbors) {
+      for (const candidate of neighbor.getAdjacentTiles()) {
+        if (!isOpen(candidate) || candidate === origin || neighbors.includes(candidate)) continue;
+        if (candidate.getAdjacentTiles().some((tile) => isOpen(tile) && !neighbors.includes(tile))) return candidate;
+      }
+    }
+
+    return undefined;
+  }
 
   public onInitialize() {
     this.totalTurnTime = 60; //TODO: Allow modification
@@ -64,24 +81,33 @@ export class InGameState extends State {
       }
     });
 
+    const badTileTypes = [
+      "ocean",
+      "shallow_ocean",
+      "freshwater",
+      "mountain",
+      "snow",
+      "snow_hill",
+      "tundra",
+      "tundra_hill"
+    ];
+    let firstSpawnTile: Tile | undefined;
+
     Game.getInstance()
       .getPlayers()
       .forEach((player) => {
-        const badTileTypes = [
-          "ocean",
-          "shallow_ocean",
-          "freshwater",
-          "mountain",
-          "snow",
-          "snow_hill",
-          "tundra",
-          "tundra_hill"
-        ];
+        const nearbySpawn =
+          firstSpawnTile && Game.getInstance().getGameOptions().spawnPlayersTogether
+            ? InGameState.findSpawnTwoTilesFrom(firstSpawnTile, badTileTypes)
+            : undefined;
 
-        const spawnTile = GameMap.getInstance().getRandomTileWith({
-          avoidTileTypes: badTileTypes,
-          avoidMapEdge: 4
-        });
+        const spawnTile =
+          nearbySpawn ??
+          GameMap.getInstance().getRandomTileWith({
+            avoidTileTypes: badTileTypes,
+            avoidMapEdge: 4
+          });
+        firstSpawnTile ??= spawnTile;
 
         spawnTile.addUnit(
           new Unit({
@@ -95,7 +121,7 @@ export class InGameState extends State {
 
         //TODO: Re-choose spawn location if warrior can't spawn
         for (const adjTile of spawnTile.getAdjacentTiles()) {
-          if (!adjTile || adjTile.containsTileTypes(badTileTypes)) continue;
+          if (!adjTile || adjTile.containsTileTypes(badTileTypes) || adjTile.getUnits().length > 0) continue;
 
           // From units.yml, so the starting warrior gets the same combat strength as a built one.
           adjTile.addUnit(Unit.createFromName("Warrior", adjTile, player));

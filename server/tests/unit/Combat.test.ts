@@ -102,9 +102,9 @@ describe('Unit.meleeAttack', () => {
       getVisibility: () => ({ isVisible: () => true, update: jest.fn() })
     }) as unknown as Player;
 
-  const makeUnit = (tile: Tile, player: Player, options: { strength?: number; utility?: boolean } = {}) => {
+  const makeUnit = (tile: Tile, player: Player, options: { strength?: number; utility?: boolean; name?: string } = {}) => {
     const unit = new Unit({
-      name: 'TestUnit',
+      name: options.name ?? 'TestUnit',
       tile,
       player,
       attackType: 'melee',
@@ -169,6 +169,37 @@ describe('Unit.meleeAttack', () => {
 
     expect(originTile.getUnits()).toEqual([]);
     expect(attackerPlayer.removeUnit).toHaveBeenCalledWith(attacker);
+  });
+
+  it('captures a lone Settler as a Builder that cannot move until next turn', () => {
+    const attacker = makeUnit(originTile, attackerPlayer);
+    const settler = makeUnit(targetTile, defenderPlayer, { strength: 0, utility: true, name: 'settler' });
+
+    attacker.meleeAttack(targetTile);
+
+    const captive = targetTile.getUnits().find((unit) => unit !== attacker);
+    expect(defenderPlayer.removeUnit).toHaveBeenCalledWith(settler);
+    expect(attacker.getTile()).toBe(targetTile);
+    expect(captive.getPlayer()).toBe(attackerPlayer);
+    expect(captive.asJSON().name).toBe('Builder');
+    expect(captive.asJSON().remainingMovement).toBe(0);
+  });
+
+  it('previews a capture, and a fight with its strengths, modifiers and verdict', () => {
+    const attacker = makeUnit(originTile, attackerPlayer);
+    makeUnit(targetTile, defenderPlayer, { strength: 0, utility: true, name: 'settler' });
+    expect(attacker.getMeleePreview(targetTile)).toMatchObject({ outcome: 'Capture', defenderName: 'settler' });
+
+    const hillTile = new Tile('grass_hill', 2, 0);
+    originTile.setAdjacentTile(1, hillTile);
+    makeUnit(hillTile, defenderPlayer, { strength: 8 });
+
+    expect(attacker.getMeleePreview(hillTile)).toMatchObject({
+      attackerStrength: 8,
+      defenderStrength: 10,
+      defenderModifiers: [{ label: 'Hill', value: 0.25 }],
+      outcome: 'Minor Defeat'
+    });
   });
 
   it('overruns a tile holding only civilians without a fight', () => {

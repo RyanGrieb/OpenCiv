@@ -6,6 +6,7 @@ import { Tile } from "../map/Tile";
 import { PlayerVisibility } from "../map/PlayerVisibility";
 import { ConfigLoader } from "../util/ConfigLoader";
 import { Combat } from "./Combat";
+import { UnitActions } from "./UnitActions";
 
 export interface UnitAction {
   name: string;
@@ -25,6 +26,8 @@ export interface UnitOptions {
   sightRange?: number;
   isUtility?: boolean;
   ignoresTerrainCost?: boolean;
+  // Movement to start with, when not a full turn's worth (e.g. a unit that was just captured).
+  availableMovement?: number;
   actions: UnitAction[];
 }
 
@@ -33,6 +36,8 @@ export interface UnitYMLTypeData {
   attack_type?: string;
   // Civ 5 melee Combat Strength. Absent (0) for civilians, which can't attack or defend.
   combat_strength?: number;
+  // The unit type a civilian turns into when an enemy captures it. Absent means it's destroyed instead.
+  captured_as?: string;
   default_move_distance?: number;
   // How far this unit reveals the map for its owner, in tiles. Defaults to
   // PlayerVisibility.DEFAULT_UNIT_SIGHT_RANGE when the config leaves it out.
@@ -81,7 +86,7 @@ export class Unit {
     this.health = Combat.MAX_HEALTH;
     this.actedThisTurn = false;
     this.defaultMoveDistance = options.defaultMoveDistance || 2;
-    this.availableMovement = this.defaultMoveDistance;
+    this.availableMovement = options.availableMovement ?? this.defaultMoveDistance;
     this.sightRange = options.sightRange ?? PlayerVisibility.DEFAULT_UNIT_SIGHT_RANGE;
     this.utility = options.isUtility || false;
     this.terrainCostIgnored = options.ignoresTerrainCost || false;
@@ -137,6 +142,22 @@ export class Unit {
       }
     });
 
+    // Answers the attack screen a player sees while aiming at an enemy - only to the unit's owner.
+    ServerEvents.on({
+      eventName: "requestCombatPreview",
+      parentObject: this,
+      callback: (data, websocket) => {
+        const player = Game.getInstance().getPlayerFromWebsocket(websocket);
+        if (this.id !== data["id"] || this.player !== player) return;
+
+        const targetTile = GameMap.getInstance().getTiles()[data["targetX"]]?.[data["targetY"]];
+        if (!targetTile) return;
+
+        const preview = this.getMeleePreview(targetTile);
+        if (preview) player.sendNetworkEvent({ event: "combatPreview", ...preview });
+      }
+    });
+
     ServerEvents.on({
       eventName: "unitAction",
       parentObject: this,
@@ -181,7 +202,12 @@ export class Unit {
     this.player.getVisibility().update();
   }
 
-  public static createFromName(name: string, tile: Tile, player: Player): Unit | undefined {
+  public static createFromName(
+    name: string,
+    tile: Tile,
+    player: Player,
+    options?: { availableMovement?: number }
+  ): Unit | undefined {
     const data = Unit.getUnitYMLTypeDataByName(name);
     if (!data) return undefined;
 
@@ -195,7 +221,8 @@ export class Unit {
       sightRange: data.sight_range,
       isUtility: data.is_utility,
       ignoresTerrainCost: data.ignores_terrain_cost,
-      actions: []
+      availableMovement: options?.availableMovement,
+      actions: data.name === "Settler" ? [UnitActions.settleCity()] : []
     });
   }
 
@@ -465,8 +492,7 @@ export class Unit {
 
       defender.delete();
     } else {
-      // Nothing here could fight back. Civ 5 would capture civilians; until capturing exists
-      // they're destroyed instead.
+      // Nothing here could fight back - the civilians are captured or destroyed below.
       this.player.sendNetworkEvent({
         event: "unitCombat",
         attackerId: this.id,
@@ -477,11 +503,15 @@ export class Unit {
 
     const survivors = targetTile.getUnits().filter((unit) => unit.getPlayer() !== this.player);
     if (survivors.some((unit) => unit.canFight())) return true;
-    survivors.forEach((unit) => unit.delete());
 
     // Cities can't be attacked or captured yet, so a melee kill doesn't carry a unit into one.
     const city = targetTile.getCityTerritoryOf();
     if (targetTile.getCity() && city && city.getPlayer() !== this.player) return true;
+
+    const capturedTypes = survivors
+      .map((unit) => Unit.getUnitYMLTypeDataByName(unit.name)?.captured_as)
+      .filter((capturedAs) => capturedAs !== undefined);
+    survivors.forEach((unit) => unit.delete());
 
     this.moveToTile({
       previousTile: originTile,
@@ -490,7 +520,44 @@ export class Unit {
       remainingMovement: 0
     });
 
+    // Civ 5 captives change hands where they stood, and can't move until the next turn.
+    for (const capturedAs of capturedTypes) {
+      targetTile.addUnit(Unit.createFromName(capturedAs, targetTile, this.player, { availableMovement: 0 }));
+    }
+
     return true;
+  }
+
+  public getMeleePreview(targetTile: Tile) {
+    if (!this.canMeleeAttack(targetTile)) return undefined;
+
+    const enemies = targetTile.getUnits().filter((unit) => unit.getPlayer() !== this.player);
+    const defender = enemies.find((unit) => unit.canFight());
+    const target = { attackerId: this.id, targetX: targetTile.getX(), targetY: targetTile.getY() };
+
+    if (!defender) {
+      const captures = enemies.filter((unit) => Unit.getUnitYMLTypeDataByName(unit.name)?.captured_as);
+      return {
+        ...target,
+        defenderName: enemies[0].name,
+        outcome: captures.length > 0 ? "Capture" : "Destroy"
+      };
+    }
+
+    return {
+      ...target,
+      defenderName: defender.name,
+      attackerHealth: this.health,
+      defenderHealth: defender.health,
+      ...Combat.predictMelee({
+        attackerBaseStrength: this.combatStrength,
+        attackerHealth: this.health,
+        defenderBaseStrength: defender.combatStrength,
+        defenderHealth: defender.health,
+        fromTile: this.tile,
+        targetTile
+      })
+    };
   }
 
   public canMeleeAttack(targetTile: Tile): boolean {

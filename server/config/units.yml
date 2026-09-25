@@ -1,5 +1,7 @@
 # combat_strength is Civ 5's melee Combat Strength: what the unit attacks with in melee and
 # defends with against any attack. Units without it (civilians) can't fight at all.
+# captured_as is what a civilian becomes when an enemy melee unit takes its tile (Civ 5 turns a
+# captured Settler into a Worker, which is our Builder). Civilians without it are destroyed instead.
 units:
   - name: Warrior
     combat_strength: 8
@@ -14,6 +16,7 @@ units:
     ignores_terrain_cost: true
   - name: Settler
     is_utility: true
+    captured_as: Builder
   - name: Archer
     combat_strength: 5
     attack_type: ranged
@@ -21,6 +24,7 @@ units:
     required_tech: Archery
   - name: Builder
     is_utility: true
+    captured_as: Builder
     cost: 50
   - name: Caravan
     is_utility: true

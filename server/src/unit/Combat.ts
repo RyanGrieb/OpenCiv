@@ -6,6 +6,23 @@ export interface CombatResult {
   defenderHealth: number;
 }
 
+export interface CombatModifier {
+  label: string;
+  // A fraction: 0.25 is +25%, -0.2 is -20%.
+  value: number;
+}
+
+export interface CombatPrediction {
+  attackerStrength: number;
+  defenderStrength: number;
+  attackerModifiers: CombatModifier[];
+  defenderModifiers: CombatModifier[];
+  // Damage each side takes, for the worst and best roll.
+  attackerDamage: { min: number; max: number };
+  defenderDamage: { min: number; max: number };
+  outcome: string;
+}
+
 /**
  * Civ 5's combat math, kept free of any Unit/network state so it can be tested on its own. See
  * Unit.meleeAttack() for how a fight is actually carried out.
@@ -37,25 +54,92 @@ export class Combat {
    * convention as Tile.getMovementCost(), since tile types are biome-prefixed (e.g. "grass_hill").
    */
   public static getTerrainDefenseModifier(tile: Tile): number {
-    const tileTypes = tile.getTileTypes();
-    let modifier = 0;
+    return Combat.sumModifiers(Combat.getDefenseModifiers(tile));
+  }
 
-    if (tileTypes.some((type) => type.includes("hill"))) modifier += Combat.HILL_DEFENSE_BONUS;
-    if (tileTypes.some((type) => type.includes("forest") || type.includes("jungle"))) {
-      modifier += Combat.COVER_DEFENSE_BONUS;
+  public static getDefenseModifiers(tile: Tile): CombatModifier[] {
+    const tileTypes = tile.getTileTypes();
+    const modifiers: CombatModifier[] = [];
+
+    if (tileTypes.some((type) => type.includes("hill"))) {
+      modifiers.push({ label: "Hill", value: Combat.HILL_DEFENSE_BONUS });
+    }
+    if (tileTypes.some((type) => type.includes("forest"))) {
+      modifiers.push({ label: "Forest", value: Combat.COVER_DEFENSE_BONUS });
+    } else if (tileTypes.some((type) => type.includes("jungle"))) {
+      modifiers.push({ label: "Jungle", value: Combat.COVER_DEFENSE_BONUS });
     }
 
-    return modifier;
+    return modifiers;
+  }
+
+  public static getAttackModifiers(fromTile: Tile, targetTile: Tile): CombatModifier[] {
+    if (!Tile.riverCrosses(fromTile, targetTile)) return [];
+
+    return [{ label: "Across river", value: -Combat.RIVER_CROSSING_ATTACK_PENALTY }];
   }
 
   public static getAttackStrength(baseStrength: number, fromTile: Tile, targetTile: Tile): number {
-    const penalty = Tile.riverCrosses(fromTile, targetTile) ? Combat.RIVER_CROSSING_ATTACK_PENALTY : 0;
-
-    return baseStrength * (1 - penalty);
+    return baseStrength * (1 + Combat.sumModifiers(Combat.getAttackModifiers(fromTile, targetTile)));
   }
 
   public static getDefenseStrength(baseStrength: number, tile: Tile): number {
     return baseStrength * (1 + Combat.getTerrainDefenseModifier(tile));
+  }
+
+  /**
+   * What the attack screen shows before a melee attack: both strengths with what went into them, the
+   * damage range each side can take, and a Civ 5 style verdict from the average roll.
+   */
+  public static predictMelee(options: {
+    attackerBaseStrength: number;
+    attackerHealth: number;
+    defenderBaseStrength: number;
+    defenderHealth: number;
+    fromTile: Tile;
+    targetTile: Tile;
+  }): CombatPrediction {
+    const attackerModifiers = Combat.getAttackModifiers(options.fromTile, options.targetTile);
+    const defenderModifiers = Combat.getDefenseModifiers(options.targetTile);
+    const attackerStrength = options.attackerBaseStrength * (1 + Combat.sumModifiers(attackerModifiers));
+    const defenderStrength = options.defenderBaseStrength * (1 + Combat.sumModifiers(defenderModifiers));
+
+    const damageTo = (side: "attacker" | "defender", roll: number) =>
+      side === "defender"
+        ? Combat.getDamage({
+            strength: attackerStrength,
+            opponentStrength: defenderStrength,
+            health: options.attackerHealth,
+            roll
+          })
+        : Combat.getDamage({
+            strength: defenderStrength,
+            opponentStrength: attackerStrength,
+            health: options.defenderHealth,
+            roll
+          });
+
+    const averageDealt = damageTo("defender", 0.5);
+    const averageTaken = damageTo("attacker", 0.5);
+
+    let outcome: string;
+    if (averageDealt >= options.defenderHealth) outcome = "Decisive Victory";
+    else if (averageTaken >= options.attackerHealth) outcome = "Decisive Defeat";
+    else if (averageDealt >= averageTaken * 1.5) outcome = "Major Victory";
+    else if (averageTaken >= averageDealt * 1.5) outcome = "Major Defeat";
+    else if (averageDealt > averageTaken) outcome = "Minor Victory";
+    else if (averageTaken > averageDealt) outcome = "Minor Defeat";
+    else outcome = "Stalemate";
+
+    return {
+      attackerStrength,
+      defenderStrength,
+      attackerModifiers,
+      defenderModifiers,
+      attackerDamage: { min: damageTo("attacker", 0), max: damageTo("attacker", 1) },
+      defenderDamage: { min: damageTo("defender", 0), max: damageTo("defender", 1) },
+      outcome
+    };
   }
 
   /**
@@ -118,5 +202,9 @@ export class Combat {
     if (defenderHealth === 0 && attackerHealth === 0) attackerHealth = 1;
 
     return { attackerHealth, defenderHealth };
+  }
+
+  private static sumModifiers(modifiers: CombatModifier[]): number {
+    return modifiers.reduce((total, modifier) => total + modifier.value, 0);
   }
 }

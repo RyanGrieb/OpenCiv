@@ -10,6 +10,7 @@ import { InGameScene } from "../scene/type/InGameScene";
 import { Numbers } from "../util/Numbers";
 import { Vector } from "../util/Vector";
 import { AbstractPlayer, PlayerData } from "./AbstractPlayer";
+import { CombatPreviewEvent, CombatPreviewWindow } from "../ui/CombatPreviewWindow";
 
 export interface CurrentResearch {
   techName: string;
@@ -27,6 +28,8 @@ export class ClientPlayer extends AbstractPlayer {
   private hoveredTile: HoveredTile;
   private outlinedTile: Tile;
   private movementLines: Line[];
+  private attackTarget: Tile | undefined;
+  private combatPreviewWindow: CombatPreviewWindow | undefined;
   private rightMouseDrag: boolean;
   private requestedNextTurn: boolean;
   private totalStats: Map<string, number> = new Map();
@@ -157,6 +160,21 @@ export class ClientPlayer extends AbstractPlayer {
             this.outlinedTile = undefined;
           }
         }
+      }
+    });
+
+    // The server's answer to previewAttack()'s request - dropped if the player has aimed elsewhere since.
+    NetworkEvents.on<CombatPreviewEvent>({
+      eventName: "combatPreview",
+      parentObject: this,
+      callback: (data) => {
+        const target = this.attackTarget;
+        if (!this.selectedUnit || this.selectedUnit.getID() !== data.attackerId) return;
+        if (!target || target.getGridX() !== data.targetX || target.getGridY() !== data.targetY) return;
+
+        this.hideCombatPreview();
+        this.combatPreviewWindow = new CombatPreviewWindow(this.selectedUnit.getName(), data);
+        Game.getInstance().getCurrentScene().addActor(this.combatPreviewWindow);
       }
     });
 
@@ -323,14 +341,44 @@ export class ClientPlayer extends AbstractPlayer {
     }
   }
 
-  // Right-dragging onto an enemy the selected unit can hit shows a red target instead of a path.
+  // Right-dragging onto an enemy the selected unit can hit shows a red line and target instead of a
+  // path, and asks the server what the fight would look like (see the "combatPreview" listener).
   private previewAttack(tile: Tile): boolean {
     if (!this.selectedUnit.canMeleeAttack(tile)) return false;
 
     this.clearMovementPath();
     GameMap.getInstance().drawUnitSelectionOutline(tile, "red");
     this.outlinedTile = tile;
+
+    const start = this.selectedUnit.getTile().getCenterPosition();
+    const end = tile.getCenterPosition();
+    const line = new Line({
+      color: "red",
+      girth: 2,
+      z: 3,
+      x1: start.x,
+      y1: start.y,
+      x2: start.x + MapWrap.shortestDeltaX(start.x, end.x),
+      y2: end.y
+    });
+    this.movementLines.push(line);
+    Game.getInstance().getCurrentScene().addLine(line);
+
+    this.attackTarget = tile;
+    WebsocketClient.sendMessage({
+      event: "requestCombatPreview",
+      id: this.selectedUnit.getID(),
+      targetX: tile.getGridX(),
+      targetY: tile.getGridY()
+    });
     return true;
+  }
+
+  private hideCombatPreview() {
+    if (!this.combatPreviewWindow) return;
+
+    Game.getInstance().getCurrentScene().removeActor(this.combatPreviewWindow);
+    this.combatPreviewWindow = undefined;
   }
 
   private attackWithSelectedUnit(targetTile: Tile) {
@@ -517,6 +565,10 @@ export class ClientPlayer extends AbstractPlayer {
       Game.getInstance().getCurrentScene().removeLine(line);
     }
     this.movementLines = [];
+
+    // The attack line is one of the movement lines, so its preview goes with it.
+    this.attackTarget = undefined;
+    this.hideCombatPreview();
   }
 
   private drawMovementPath(

@@ -9,7 +9,8 @@ import { TestUtils } from "../TestUtils";
 
 // Plays melee combat out against a live server. A second player joins from this same page over a bare
 // websocket and does nothing but end turns and, near the end, strike back - so everything happens in
-// front of whoever is watching, from Player1's side. The map is revealed so the enemy can be found.
+// front of whoever is watching, from Player1's side. The map is revealed and both players start a couple
+// of tiles apart, so the fight starts right away.
 export function setupMeleeCombatTest(game: Game) {
     const runner = new TestRunner("MeleeCombat");
     const utils = new TestUtils(game);
@@ -41,11 +42,29 @@ export function setupMeleeCombatTest(game: Game) {
         await utils.delay(600);
     };
 
+    const clientPlayer = () => utils.getClientPlayer() as unknown as Record<string, any>;
+    const previewWindow = () => clientPlayer()["combatPreviewWindow"];
+    const hasRedLine = () => clientPlayer()["movementLines"].some((line: { getColor(): string }) => line.getColor() === "red");
+
+    // Left-clicks the unit's tile, cycling past anything else of ours stacked there (like a captive).
+    const select = (unit: Unit) => {
+        for (let click = 0; click < 4 && clientPlayer()["selectedUnit"] !== unit; click++) {
+            clientPlayer()["onClickedTileWithUnit"](unit.getTile());
+        }
+        if (clientPlayer()["selectedUnit"] !== unit) throw new Error(`Couldn't select ${unit.getName()}`);
+    };
+
+    // What a right-click drag onto the target does before the button is released.
+    const aimAt = (attacker: Unit, target: Tile) => {
+        watch(attacker);
+        select(attacker);
+        clientPlayer()["previewAttack"](target);
+    };
+
     // The same path a player takes: select the unit, then right-click release on the target.
     const attackThroughUI = (attacker: Unit, target: Tile) => {
-        const clientPlayer = utils.getClientPlayer();
-        clientPlayer["onClickedTileWithUnit"](attacker.getTile());
-        clientPlayer["moveSelectedUnit"](target);
+        select(attacker);
+        clientPlayer()["moveSelectedUnit"](target);
     };
 
     const enemyAttack = (attacker: Unit, target: Tile) => {
@@ -71,6 +90,7 @@ export function setupMeleeCombatTest(game: Game) {
             await utils.delay(500);
 
             WebsocketClient.sendMessage({ event: "setGameOption", option: "revealMap", value: true });
+            WebsocketClient.sendMessage({ event: "setGameOption", option: "spawnPlayersTogether", value: true });
             WebsocketClient.sendMessage({ event: "setState", state: "in_game" });
             await utils.waitUntil(() => game.getCurrentScene().getName() === "in_game", 15000, "Scene to become in_game");
         },
@@ -130,15 +150,35 @@ export function setupMeleeCombatTest(game: Game) {
     });
 
     runner.addStep({
-        name: "Attacking a lone civilian destroys it and moves in, spending all movement",
+        name: "Aiming at the Settler draws a red line and previews a capture",
+        action: async () => {
+            aimAt(warrior, enemySettler.getTile());
+            await utils.waitUntil(() => !!previewWindow(), 5000, "Combat preview to appear");
+            await utils.delay(1500); // Long enough for whoever's watching to read it
+        },
+        verification: () => hasRedLine() && previewWindow() !== undefined
+    });
+
+    runner.addStep({
+        name: "Attacking a lone Settler captures it as a Builder and moves in, spending all movement",
         action: async () => {
             overrunTile = enemySettler.getTile();
             attackThroughUI(warrior, overrunTile);
-            await utils.waitUntil(() => !isAlive(enemySettler), 5000, "Settler to be removed");
-            await utils.delay(300);
+            await utils.waitUntil(() => !isAlive(enemySettler), 5000, "Settler to change hands");
+            await utils.delay(500);
             watch(warrior);
         },
-        verification: () => warrior.getTile() === overrunTile && warrior.getAvailableMovement() === 0 && warrior.getHealth() === 100
+        verification: () => {
+            const captive = overrunTile.getUnits().find((unit) => unit.isUtility());
+            return (
+                !previewWindow() &&
+                warrior.getTile() === overrunTile &&
+                warrior.getAvailableMovement() === 0 &&
+                captive?.getName() === "Builder" &&
+                captive.getPlayer() === utils.getClientPlayer() &&
+                captive.getAvailableMovement() === 0
+            );
+        }
     });
 
     runner.addStep({
@@ -160,9 +200,19 @@ export function setupMeleeCombatTest(game: Game) {
     });
 
     runner.addStep({
-        name: "Next turn, attacking the enemy Warrior damages both sides",
+        name: "Next turn, aiming at the enemy Warrior previews the fight",
         action: async () => {
             await endTurn();
+            aimAt(warrior, enemyWarriorTile);
+            await utils.waitUntil(() => !!previewWindow(), 5000, "Combat preview to appear");
+            await utils.delay(1500); // Long enough for whoever's watching to read it
+        },
+        verification: () => hasRedLine() && previewWindow() !== undefined
+    });
+
+    runner.addStep({
+        name: "Attacking the enemy Warrior damages both sides",
+        action: async () => {
             attackThroughUI(warrior, enemyWarriorTile);
             await utils.waitUntil(() => warrior.getHealth() < 100 && enemyWarrior.getHealth() < 100, 5000, "Both Warriors to take damage");
             utils.log(`After the attack: ours ${warrior.getHealth()} HP, theirs ${enemyWarrior.getHealth()} HP`, "yellow");

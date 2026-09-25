@@ -12,6 +12,9 @@ export interface GameOptions {
   // Turns fog of war off: every player sees the whole map and every unit on it. Meant for
   // debugging and for the client scenario tests, which predate fog and assume a full map.
   revealMap: boolean;
+  // Starts every player's settler two tiles from the first player's, so their units begin within a
+  // step of each other. Meant for the client scenario tests (see MeleeCombat), not real games.
+  spawnPlayersTogether: boolean;
 }
 
 // Maps are streamed to clients in square chunks of this many tiles, so each dimension must divide evenly.
@@ -58,7 +61,8 @@ export const DefaultGameOptions: GameOptions = {
   mapSize: 3,
   mapWidth: MapSizes.DIMENSIONS[3][0],
   mapHeight: MapSizes.DIMENSIONS[3][1],
-  revealMap: false
+  revealMap: false,
+  spawnPlayersTogether: false
 };
 
 interface BaseGameOptionDefinition {
@@ -131,5 +135,6 @@ export const GameOptionDefinitions: GameOptionDefinition[] = [
     hidden: true,
     onChange: (options) => MapSizes.syncPreset(options)
   },
-  { key: "revealMap", label: "Reveal Entire Map", type: "boolean", hidden: true }
+  { key: "revealMap", label: "Reveal Entire Map", type: "boolean", hidden: true },
+  { key: "spawnPlayersTogether", label: "Spawn Players Together", type: "boolean", hidden: true }
 ];
