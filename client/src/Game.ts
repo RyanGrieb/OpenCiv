@@ -773,7 +773,8 @@ export class Game {
     canvasContext.restore();
   }
 
-  // A filled pie slice in world coordinates. Angles are in radians, clockwise from 3 o'clock.
+  // A filled pie slice, in world coordinates unless cameraApplies is false (HUD elements).
+  // Angles are in radians, clockwise from 3 o'clock.
   public drawCircleSector(options: {
     x: number;
     y: number;
@@ -782,11 +783,12 @@ export class Game {
     endAngle: number;
     color: string;
     canvasContext: CanvasRenderingContext2D;
+    cameraApplies?: boolean;
   }) {
     const canvasContext = options.canvasContext;
 
     canvasContext.save();
-    if (this.currentScene.getCamera() && canvasContext === this.canvasContext) {
+    if (options.cameraApplies !== false && this.currentScene.getCamera() && canvasContext === this.canvasContext) {
       this.applyCameraTransform(canvasContext);
     }
 
