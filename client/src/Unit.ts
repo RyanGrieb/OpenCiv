@@ -271,7 +271,14 @@ export class Unit extends ActorGroup {
 
     if (!neighbor) return current.getMovementCost();
 
-    if (neighbor.hasBlockingUnit(this)) {
+    // Pathing may route through same-type allies; whether the goal itself is free is checked by the caller.
+    if (neighbor.hasImpassableUnit(this)) {
+      return 9999;
+    }
+
+    // Mirrors the server: entering a same-type ally's tile with our whole turn's movement would still
+    // leave us stopped on it, so we could never get past it. Route around instead.
+    if (neighbor.hasBlockingUnit(this) && Tile.getWeight(current, neighbor, this) >= this.getDefaultMoveDistance()) {
       return 9999;
     }
 

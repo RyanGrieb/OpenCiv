@@ -525,16 +525,37 @@ export class City {
     const productionRate = this.getStatline({ asArray: false }).production;
     current.progress += productionRate;
 
-    if (current.progress >= current.cost) {
+    if (current.progress < current.cost) return;
+
+    if (current.type === "building") {
       console.log(`[City ${this.name}] Finished producing ${current.name}`);
       this.productionQueue.shift();
-
-      if (current.type === "building") {
-        this.addBuilding(current.name);
-      } else {
-        const unit = Unit.createFromName(current.name, this.tile, this.player);
-        if (unit) this.tile.addUnit(unit);
-      }
+      this.addBuilding(current.name);
+      return;
     }
+
+    // Every tile around the city already holds a unit of this type: the finished unit waits at the
+    // front of the queue, and appears once one of them moves off.
+    const spawnTile = this.getUnitSpawnTile(current.name);
+    if (!spawnTile) return;
+
+    console.log(`[City ${this.name}] Finished producing ${current.name}`);
+    this.productionQueue.shift();
+
+    const unit = Unit.createFromName(current.name, spawnTile, this.player);
+    if (unit) spawnTile.addUnit(unit);
+  }
+
+  // The city's own tile if the new unit can stack there, else the first free neighbor it could walk on.
+  private getUnitSpawnTile(unitName: string): Tile | undefined {
+    const unitData = Unit.getAllUnitData().find((data) => data.name.toLowerCase() === unitName.toLowerCase());
+    const isUtility = unitData?.is_utility ?? false;
+
+    const candidates = [
+      this.tile,
+      ...this.tile.getAdjacentTiles().filter((tile) => tile && !tile.isWater() && tile.getMovementCost() < 9999)
+    ];
+
+    return candidates.find((tile) => tile.canPlaceUnit(this.player, isUtility));
   }
 }

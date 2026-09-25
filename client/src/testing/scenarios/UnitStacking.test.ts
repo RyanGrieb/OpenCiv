@@ -64,6 +64,17 @@ export function setupUnitStackingTest(game: Game) {
     });
 
     runner.addStep({
+        name: "Same-type allies can be passed through, enemies cannot",
+        action: () => { },
+        verification: () => {
+            const fakeAllyWarrior = { isUtility: () => false, getPlayer: () => warrior.getPlayer() } as unknown as Unit;
+            const fakeEnemyUnit = { isUtility: () => true, getPlayer: () => ({} as any) } as unknown as Unit;
+
+            return !warrior.getTile().hasImpassableUnit(fakeAllyWarrior) && settler.getTile().hasImpassableUnit(fakeEnemyUnit);
+        }
+    });
+
+    runner.addStep({
         name: "Warrior actually moves onto the Settler's tile",
         action: () => {
             WebsocketClient.sendMessage({

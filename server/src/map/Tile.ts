@@ -92,17 +92,21 @@ export class Tile {
     this.units = this.units.filter((existingUnit) => existingUnit !== unit);
   }
 
-  // Only utility units (builder, priest, prophet, etc.) can be shared a tile with - anything else blocks it.
+  // Whether a unit can end its move here. A tile holds at most one military and one utility (civilian)
+  // unit, so a same-type ally blocks - but can still be passed through, see hasImpassableUnit().
   public hasBlockingUnit(movingUnit: Unit): boolean {
-    const otherUnits = this.units.filter((unit) => unit !== movingUnit);
+    return this.hasStackingConflict(movingUnit.getPlayer(), movingUnit.isUtility(), movingUnit);
+  }
 
-    // A unit from another civilization always blocks - there's no combat system yet to resolve this differently.
-    if (otherUnits.some((unit) => unit.getPlayer() !== movingUnit.getPlayer())) {
-      return true;
-    }
+  // Whether a unit can't even pass through here on the way somewhere else. Only other civilizations'
+  // units do that - there's no combat system yet to resolve moving into one any other way.
+  public hasImpassableUnit(movingUnit: Unit): boolean {
+    return this.units.some((unit) => unit !== movingUnit && unit.getPlayer() !== movingUnit.getPlayer());
+  }
 
-    // Same-type ally units can't stack (utility+utility, or non-utility+non-utility); mixed types can.
-    return otherUnits.some((unit) => unit.isUtility() === movingUnit.isUtility());
+  // Whether a new unit of this type could be placed here, e.g. one just finished by production.
+  public canPlaceUnit(player: Player, isUtility: boolean): boolean {
+    return !this.hasStackingConflict(player, isUtility);
   }
 
   public getRiverSides() {
@@ -865,5 +869,17 @@ export class Tile {
   // Mountains have no base yields and can never be assigned as a worked tile.
   public isWorkable(): boolean {
     return !this.tileTypes.some((type) => type.includes("mountain"));
+  }
+
+  private hasStackingConflict(player: Player, isUtility: boolean, ignoredUnit?: Unit): boolean {
+    const otherUnits = this.units.filter((unit) => unit !== ignoredUnit);
+
+    // A unit from another civilization always blocks.
+    if (otherUnits.some((unit) => unit.getPlayer() !== player)) {
+      return true;
+    }
+
+    // Same-type ally units can't stack (utility+utility, or non-utility+non-utility); mixed types can.
+    return otherUnits.some((unit) => unit.isUtility() === isUtility);
   }
 }

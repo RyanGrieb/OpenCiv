@@ -213,16 +213,25 @@ export class Tile extends Actor {
   }
 
   // Mirrors server/src/map/Tile.ts's hasBlockingUnit() - keep both in sync.
+  // Whether a unit can end its move here. A tile holds at most one military and one utility (civilian)
+  // unit, so a same-type ally blocks - but can still be passed through, see hasImpassableUnit().
   public hasBlockingUnit(movingUnit: Unit): boolean {
     const otherUnits = this.units.filter((unit) => unit !== movingUnit);
 
-    // A unit from another civilization always blocks - there's no combat system yet to resolve this differently.
+    // A unit from another civilization always blocks.
     if (otherUnits.some((unit) => unit.getPlayer() !== movingUnit.getPlayer())) {
       return true;
     }
 
     // Same-type ally units can't stack (utility+utility, or non-utility+non-utility); mixed types can.
     return otherUnits.some((unit) => unit.isUtility() === movingUnit.isUtility());
+  }
+
+  // Mirrors server/src/map/Tile.ts's hasImpassableUnit() - keep both in sync.
+  // Whether a unit can't even pass through here on the way somewhere else. Only other civilizations'
+  // units do that - there's no combat system yet to resolve moving into one any other way.
+  public hasImpassableUnit(movingUnit: Unit): boolean {
+    return this.units.some((unit) => unit !== movingUnit && unit.getPlayer() !== movingUnit.getPlayer());
   }
 
   public hasRiver(): boolean {

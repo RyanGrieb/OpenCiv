@@ -366,8 +366,14 @@ export class GameMap {
 
     // A blocked tile can't be entered, and blocked routes are no longer queued, so the goal is
     // simply unreachable. Occupancy isn't reflected in movementCost above (that would treat the
-    // unit's own tile as self-blocking), so it has to be checked separately here.
-    if (totalPath.some((tile, index) => index > 0 && tile.hasBlockingUnit(unit))) {
+    // unit's own tile as self-blocking), so it has to be checked separately here: tiles along the
+    // way only need to be passable (same-type allies can be walked through), the goal must be free.
+    const goalIndex = totalPath.length - 1;
+    const blocked = totalPath.some((tile, index) => {
+      if (index === 0) return false;
+      return index === goalIndex ? tile.hasBlockingUnit(unit) : tile.hasImpassableUnit(unit);
+    });
+    if (blocked) {
       return [];
     }
 

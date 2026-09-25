@@ -31,3 +31,8 @@ ScenarioRegistry.register("UnitStacking", async () => {
     const module = await import("./scenarios/UnitStacking.test");
     return module.setupUnitStackingTest;
 });
+
+ScenarioRegistry.register("UnitStackingProduction", async () => {
+    const module = await import("./scenarios/UnitStackingProduction.test");
+    return module.setupUnitStackingProductionTest;
+});

@@ -57,6 +57,22 @@ describe('Tile', () => {
     expect(tile.hasBlockingUnit(fakeUnit(false, playerA))).toBe(true);
   });
 
+  it('lets a same-type ally be passed through, but not an enemy', () => {
+    tile.addUnit(fakeUnit(false, playerA));
+    expect(tile.hasImpassableUnit(fakeUnit(false, playerA))).toBe(false);
+
+    tile.addUnit(fakeUnit(true, playerB));
+    expect(tile.hasImpassableUnit(fakeUnit(false, playerA))).toBe(true);
+  });
+
+  it('only places a new unit where it could stack', () => {
+    tile.addUnit(fakeUnit(false, playerA));
+
+    expect(tile.canPlaceUnit(playerA, false)).toBe(false);
+    expect(tile.canPlaceUnit(playerA, true)).toBe(true);
+    expect(tile.canPlaceUnit(playerB, true)).toBe(false);
+  });
+
   describe('getWeight', () => {
     let hill: Tile;
     let riverNeighbor: Tile;

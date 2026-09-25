@@ -319,6 +319,8 @@ export class Unit {
     // }
 
     const traversedTiles: Tile[] = [this.tile];
+    // Movement left upon arriving at each tile in traversedTiles, index for index.
+    const movementAtTile: number[] = [this.availableMovement];
     let remainingMovement = this.availableMovement;
     let blocked = false;
 
@@ -333,7 +335,10 @@ export class Unit {
         break;
       }
 
-      if (nextTile.hasBlockingUnit(this)) {
+      // Same-type ally units can be walked through, just not stopped on - so only the destination
+      // has to be free to stop on, while tiles along the way only need to be passable.
+      const isDestination = i + 1 === shortestPath.length - 1;
+      if (isDestination ? nextTile.hasBlockingUnit(this) : nextTile.hasImpassableUnit(this)) {
         blocked = true;
         break;
       }
@@ -345,13 +350,28 @@ export class Unit {
 
       remainingMovement = Math.max(remainingMovement - movementCost, 0);
       traversedTiles.push(nextTile);
+      movementAtTile.push(remainingMovement);
+    }
+
+    // Running out of movement while passing through an ally isn't allowed to leave us stacked on it,
+    // so stop at the last tile along the way that we can actually end the move on.
+    let arrivedIndex = traversedTiles.length - 1;
+    while (arrivedIndex > 0 && traversedTiles[arrivedIndex].hasBlockingUnit(this)) {
+      arrivedIndex--;
+    }
+    const stoppedTiles = traversedTiles.slice(0, arrivedIndex + 1);
+
+    // Starting from a full turn's movement and still unable to leave our own tile (a chain of allies
+    // too long to cross in one turn) means this route would stall forever - treat it as blocked.
+    if (arrivedIndex === 0 && traversedTiles.length > 1 && this.availableMovement >= this.defaultMoveDistance) {
+      blocked = true;
     }
 
     // Queuing tiles we're blocked from entering just stalls the unit against the blocker every
     // turn, then walks it into the tile the moment that unit leaves. Drop the rest of the path.
-    const remainingTiles: Tile[] = blocked ? [] : shortestPath.filter((tile) => !traversedTiles.includes(tile));
+    const remainingTiles: Tile[] = blocked ? [] : shortestPath.filter((tile) => !stoppedTiles.includes(tile));
 
-    return [traversedTiles.pop(), remainingTiles, remainingMovement];
+    return [traversedTiles[arrivedIndex], remainingTiles, movementAtTile[arrivedIndex]];
   }
 
   public delete() {
@@ -450,7 +470,14 @@ export class Unit {
 
     if (!neighbor) return current.getMovementCost();
 
-    if (neighbor.hasBlockingUnit(this)) {
+    // Pathing may route through same-type allies; whether the goal itself is free is checked by the caller.
+    if (neighbor.hasImpassableUnit(this)) {
+      return 9999;
+    }
+
+    // Entering a same-type ally's tile with our whole turn's movement would still leave us stopped on
+    // it, which isn't allowed - so we could never get past it. Route around instead.
+    if (neighbor.hasBlockingUnit(this) && Tile.getWeight(current, neighbor, this) >= this.defaultMoveDistance) {
       return 9999;
     }
 

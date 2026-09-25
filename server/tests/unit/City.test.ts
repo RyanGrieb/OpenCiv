@@ -38,6 +38,7 @@ describe('City', () => {
       setCity: jest.fn(),
       setCityTerritoryOf: jest.fn(),
       addUnit: jest.fn(),
+      canPlaceUnit: jest.fn().mockReturnValue(true),
     } as unknown as jest.Mocked<Tile>;
 
     // With population 1, City.updateWorkedTiles works one tile beyond the city's
@@ -358,6 +359,57 @@ describe('City', () => {
 
       expect(Unit.createFromName).toHaveBeenCalledWith('Warrior', mockTile, mockPlayer);
       expect(mockTile.addUnit).toHaveBeenCalledWith(mockUnit);
+    });
+
+    describe('when the city tile already holds a unit of that type', () => {
+      const neighborTile = (options: { water?: boolean; movementCost?: number; free?: boolean }) =>
+        ({
+          isWater: jest.fn().mockReturnValue(options.water ?? false),
+          getMovementCost: jest.fn().mockReturnValue(options.movementCost ?? 1),
+          canPlaceUnit: jest.fn().mockReturnValue(options.free ?? true),
+          addUnit: jest.fn(),
+        } as unknown as jest.Mocked<Tile>);
+
+      beforeEach(() => {
+        mockTile.canPlaceUnit.mockReturnValue(false);
+        mockTile.getStats.mockReturnValue([{ production: 30 }]);
+        (Unit.createFromName as jest.Mock).mockReturnValue({} as Unit);
+      });
+
+      it('places the new unit on the first free land neighbor instead', () => {
+        const water = neighborTile({ water: true });
+        const mountain = neighborTile({ movementCost: 9999 });
+        const occupied = neighborTile({ free: false });
+        const free = neighborTile({});
+        mockTile.getAdjacentTiles.mockReturnValue([undefined, water, mountain, occupied, free, undefined]);
+
+        triggerServerEvent('nextTurn', { turn: 2 });
+
+        expect(mockTile.canPlaceUnit).toHaveBeenCalledWith(mockPlayer, false);
+        expect(Unit.createFromName).toHaveBeenCalledWith('Warrior', free, mockPlayer);
+        expect(free.addUnit).toHaveBeenCalled();
+        expect(mockTile.addUnit).not.toHaveBeenCalled();
+        expect(city['productionQueue']).toEqual([]);
+      });
+
+      it('holds the finished unit at the front of the queue when no neighbor is free', () => {
+        mockTile.getAdjacentTiles.mockReturnValue([neighborTile({ free: false })]);
+
+        triggerServerEvent('nextTurn', { turn: 2 });
+
+        expect(Unit.createFromName).not.toHaveBeenCalled();
+        expect(city['productionQueue']).toEqual([{ type: 'unit', name: 'Warrior', cost: 30, progress: 30 }]);
+      });
+
+      it('checks stacking by the unit type being produced', () => {
+        triggerServerEvent('removeFromProductionQueue', { cityName: 'TestCity', index: 0 }, mockWebsocket);
+        city['productionQueue'].push({ type: 'unit', name: 'Settler', cost: 30, progress: 0 });
+        mockTile.canPlaceUnit.mockImplementation((_player, isUtility) => isUtility);
+
+        triggerServerEvent('nextTurn', { turn: 2 });
+
+        expect(Unit.createFromName).toHaveBeenCalledWith('Settler', mockTile, mockPlayer);
+      });
     });
 
     it('does not add a unit to the tile when Unit.createFromName finds no matching config', () => {
