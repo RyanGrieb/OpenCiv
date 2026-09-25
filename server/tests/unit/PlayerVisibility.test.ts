@@ -266,6 +266,7 @@ describe('PlayerVisibility', () => {
       sendNetworkEvent: jest.fn(),
       getUnits: jest.fn().mockReturnValue([mockUnit]),
       getCities: jest.fn().mockReturnValue([]),
+      hasClient: jest.fn().mockReturnValue(true),
     } as unknown as jest.Mocked<Player>;
 
     sendTilesToPlayer = jest.fn();
@@ -365,6 +366,15 @@ describe('PlayerVisibility', () => {
     visibility.update();
 
     expect(visibility.isVisible(cityTile)).toBe(true);
+  });
+
+  it('does no work for a player with no client, like the barbarians', () => {
+    mockPlayer.hasClient.mockReturnValue(false);
+
+    visibility.update();
+
+    expect(visibility.hasDiscovered(homeTile)).toBe(false);
+    expect(sendTilesToPlayer).not.toHaveBeenCalled();
   });
 
   it('treats every tile as visible when the map is revealed', () => {

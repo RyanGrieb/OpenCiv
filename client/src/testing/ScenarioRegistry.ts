@@ -51,3 +51,8 @@ ScenarioRegistry.register("TechDetailWindow", async () => {
     const module = await import("./scenarios/TechDetailWindow.test");
     return module.setupTechDetailWindowTest;
 });
+
+ScenarioRegistry.register("BarbarianCamps", async () => {
+    const module = await import("./scenarios/BarbarianCamps.test");
+    return module.setupBarbarianCampsTest;
+});

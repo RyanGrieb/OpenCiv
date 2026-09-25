@@ -25,7 +25,9 @@ export class TestUtils {
         throw new Error(`Timeout waiting for: ${message}`);
     }
 
-    public async ensureInGame() {
+    // Game options to set in the lobby before starting. Barbarians are off unless a scenario asks for
+    // them: they wander up to cities and take the tiles the older scenarios expect to be free.
+    public async ensureInGame(gameOptions: Record<string, boolean | number> = { allowBarbarians: false }) {
         if (this.game.getCurrentScene().getName() !== "in_game") {
             if (this.game.getCurrentScene().getName() === "main_menu") {
                 WebsocketClient.init("localhost");
@@ -33,6 +35,9 @@ export class TestUtils {
             }
 
             if (this.game.getCurrentScene().getName() === "lobby") {
+                for (const [option, value] of Object.entries(gameOptions)) {
+                    WebsocketClient.sendMessage({ event: "setGameOption", option, value });
+                }
                 WebsocketClient.sendMessage({ event: "setState", state: "in_game" });
                 await this.delay(1000);
             }
@@ -99,6 +104,8 @@ export class TestUtils {
 
         WebsocketClient.sendMessage({ event: "setGameOption", option: "revealMap", value: true });
         WebsocketClient.sendMessage({ event: "setGameOption", option: "spawnPlayersTogether", value: true });
+        // Barbarian units would count as a second enemy, and wander into the fight.
+        WebsocketClient.sendMessage({ event: "setGameOption", option: "allowBarbarians", value: false });
         WebsocketClient.sendMessage({ event: "setState", state: "in_game" });
         await this.waitUntil(() => this.game.getCurrentScene().getName() === "in_game", 15000, "Scene to become in_game");
 

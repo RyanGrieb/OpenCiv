@@ -7,6 +7,7 @@ import { City } from "../../city/City";
 import { Job, gracefulShutdown, scheduleJob } from "node-schedule";
 
 import { Tile } from "../../map/Tile";
+import { Barbarians } from "../../barbarian/Barbarians";
 
 export class InGameState extends State {
   private turnTimeJob: Job;
@@ -146,6 +147,13 @@ export class InGameState extends State {
         player.sendNetworkEvent({ event: "setScene", scene: "in_game" });
       });
 
+    // After every civ has its starting units, so the first camps keep their distance from them.
+    // Clients only ask for the players list (barbarians included) once they get the scene change
+    // above, and that can't be handled before this finishes.
+    if (Game.getInstance().getGameOptions().allowBarbarians) {
+      Barbarians.init();
+    }
+
     ServerEvents.on({
       eventName: "allPlayersLoaded",
       parentObject: this,
@@ -219,6 +227,9 @@ export class InGameState extends State {
 
     ServerEvents.call("nextTurn", { turn: this.currentTurn });
 
+    // Once every unit's movement is back to full from the event above.
+    Barbarians.getInstance()?.playTurn();
+
     // Queued movement resolves inside the event above, so this catches up any sight change it
     // caused, and converges anything else that shifted sight without announcing it.
     Game.getInstance()
@@ -231,6 +242,7 @@ export class InGameState extends State {
     if (this.turnTimeJob) {
       gracefulShutdown();
     }
+    Barbarians.destroyInstance();
     GameMap.destroyInstance();
     return super.onDestroyed();
   }

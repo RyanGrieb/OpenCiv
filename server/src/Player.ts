@@ -34,8 +34,8 @@ export interface CurrentResearch {
 export class Player {
   /** The name of the player. */
   private name: string;
-  /** The WebSocket connection of the player. */
-  private wsConnection: WebSocket;
+  /** The WebSocket connection of the player. Absent for a player the server runs itself, like the barbarians. */
+  private wsConnection?: WebSocket;
   /** Whether the player has loaded into the game. */
   private loadedIn: boolean;
   /** The callback to execute when the player has loaded into the game. */
@@ -54,9 +54,9 @@ export class Player {
   /**
    * Creates a new player object.
    * @param name The name of the player.
-   * @param wsConnection The WebSocket connection of the player.
+   * @param wsConnection The WebSocket connection of the player, or none for a player the server runs itself.
    */
-  constructor(name: string, wsConnection: WebSocket) {
+  constructor(name: string, wsConnection?: WebSocket) {
     this.name = name;
     this.wsConnection = wsConnection;
     this.loadedIn = false;
@@ -69,7 +69,7 @@ export class Player {
     this.visibility = new PlayerVisibility(this);
 
     // Add event listener for when the player disconnects
-    this.wsConnection.on("close", (data) => {
+    this.wsConnection?.on("close", (data) => {
       console.log(name + " quit");
       ServerEvents.call("playerQuit", {}, this.wsConnection);
       Game.getInstance().getPlayers().delete(this.name);
@@ -232,7 +232,12 @@ export class Player {
    * @param event The network event to send.
    */
   public sendNetworkEvent(event: Record<string, any>) {
-    this.wsConnection.send(JSON.stringify(event));
+    this.wsConnection?.send(JSON.stringify(event));
+  }
+
+  /** Whether a person is playing this player, rather than the server (e.g. the barbarians). */
+  public hasClient(): boolean {
+    return this.wsConnection !== undefined;
   }
 
   /**
@@ -313,6 +318,12 @@ export class Player {
 
   public getAccumulatedStats(): Record<string, number> {
     return Object.fromEntries(this.accumulatedStats);
+  }
+
+  // A one-off lump into a banked stat, e.g. the gold for clearing a barbarian camp.
+  public addToAccumulatedStat(stat: keyof TotalStats, amount: number) {
+    this.accumulatedStats.set(stat, (this.accumulatedStats.get(stat) ?? 0) + amount);
+    this.sendTotalStatsUpdate();
   }
 
   public hasResearchedTech(techName: string): boolean {

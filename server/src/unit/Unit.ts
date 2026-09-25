@@ -335,6 +335,31 @@ export class Unit {
           });
         }
       });
+
+    // For whatever reacts to a unit arriving somewhere, e.g. a barbarian camp being cleared.
+    ServerEvents.call("unitMoved", { unit: this, tile: targetTile });
+  }
+
+  /**
+   * Moves as far along the shortest path to `targetTile` as this turn's movement allows. Unlike a
+   * player's move order nothing is queued for later turns - this is for units the server moves
+   * itself (the barbarians), which pick a new destination every turn anyway.
+   * @returns Whether the unit moved at all.
+   */
+  public stepTowards(targetTile: Tile): boolean {
+    if (targetTile === this.tile || this.availableMovement <= 0) return false;
+
+    const [arrivedTile, , remainingMovement] = this.getMovementTowardsTargetTile(targetTile);
+    if (!arrivedTile || arrivedTile === this.tile) return false;
+
+    this.moveToTile({
+      previousTile: this.tile,
+      targetTile: arrivedTile,
+      remainingTiles: [],
+      remainingMovement: remainingMovement
+    });
+
+    return true;
   }
 
   // Only tells the owner - fortifying drives their UI (the action button and the icon over the unit).

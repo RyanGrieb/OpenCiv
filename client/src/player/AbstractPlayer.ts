@@ -15,6 +15,8 @@ export interface CivilizationData {
   unique_building_descs?: string[];
   ability_descs: string[];
   cities: string[];
+  // Only set on the barbarians (server/config/barbarians.yml), which no one plays.
+  barbarian?: boolean;
 }
 
 export interface PlayerData {
@@ -53,6 +55,10 @@ export class AbstractPlayer {
 
   public getCivilizationData() {
     return this.civData;
+  }
+
+  public isBarbarian(): boolean {
+    return this.civData?.barbarian === true;
   }
 
   protected units: Unit[] = [];

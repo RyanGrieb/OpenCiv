@@ -4,6 +4,7 @@ import { WebSocket } from "ws";
 import { ServerEvents } from "./Events";
 import { DefaultGameOptions, GameOptionDefinitions, GameOptions, MapSizes } from "./GameOptions";
 import { Numbers } from "./util/Numbers";
+import { Barbarians } from "./barbarian/Barbarians";
 
 /**
  * Game class is responsible for managing the state of the game, and players.
@@ -51,7 +52,9 @@ export class Game {
           JSON.stringify({
             event: "connectedPlayers",
             players: this.getPlayerJSONS(),
-            requestingName: requestingPlayerName
+            requestingName: requestingPlayerName,
+            // Not a connected player, but its units still need an owner on the client.
+            barbarians: Barbarians.getInstance()?.getPlayer().toJSON()
           })
         );
       },

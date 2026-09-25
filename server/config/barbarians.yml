@@ -1,0 +1,45 @@
+# Barbarian camps and the units they spawn. Only used while the allowBarbarians game option is on.
+
+# Sent to clients like a civilization, so barbarian units have an owner to look up.
+civ:
+  name: Barbarians
+  icon_name: ICON_BARBARIAN
+  inside_border_color: rgba(120,0,0,0.25)
+  outside_border_color: rgb(40,40,40)
+  cities: []
+  barbarian: true
+
+camps:
+  # The most camps the map holds at once: one per this many land tiles.
+  land_tiles_per_camp: 100
+  # Share of that maximum placed before the first turn. The rest appear over time.
+  initial_share: 0.35
+  # Chance each turn that a new camp appears somewhere, while below the maximum.
+  new_camp_chance: 0.35
+  # Camps only appear this many tiles or more away from any player's unit or city...
+  min_distance_from_players: 6
+  # ...and from each other.
+  min_distance_between_camps: 5
+  # Gold a player gets for walking a military unit into an undefended camp, destroying it.
+  clear_reward_gold: 25
+
+spawning:
+  # Turns between a camp sending out a new unit, picked at random in this range each time.
+  turns_between_spawns: [6, 10]
+  # A camp stops spawning while this many of its units are out roaming.
+  max_roaming_units_per_camp: 2
+  # Roaming units head for any player's unit or city within this many tiles, else wander.
+  aggro_range: 6
+
+# Barbarians send the strongest unit whose tech at least half of the players know.
+# Order from weakest to strongest; a unit without required_tech is always available.
+units:
+  - name: Warrior
+  - name: Archer
+    required_tech: Archery
+  - name: Spearman
+    required_tech: Bronze Working
+  - name: Horseman
+    required_tech: Horseback Riding
+  - name: Swordsman
+    required_tech: Iron Working

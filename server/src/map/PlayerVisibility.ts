@@ -60,6 +60,9 @@ export class PlayerVisibility {
     // Everything was already sent with the initial map, and nothing ever fogs.
     if (PlayerVisibility.mapRevealed()) return;
 
+    // Nobody to tell - a player the server runs itself (the barbarians) has no fog to keep up.
+    if (!this.player.hasClient()) return;
+
     const previouslyVisible = this.visible;
     this.visible = this.computeVisibleTiles();
 

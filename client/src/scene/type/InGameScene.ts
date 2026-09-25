@@ -90,6 +90,12 @@ export class InGameScene extends Scene {
             this.players.push(new ExternalPlayer(playerJSON));
           }
         }
+
+        // Run by the server rather than connected, so it comes separately from the players list.
+        const barbarians = data["barbarians"];
+        if (barbarians && !this.players.some((player) => player.getName() === barbarians["name"])) {
+          this.players.push(new ExternalPlayer(barbarians));
+        }
       }
     });
 
