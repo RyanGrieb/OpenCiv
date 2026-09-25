@@ -76,23 +76,7 @@ export function setupMeleeCombatTest(game: Game) {
     runner.addStep({
         name: "Start a revealed-map game against a second player",
         action: async () => {
-            WebsocketClient.init("localhost");
-            await utils.waitUntil(() => game.getCurrentScene().getName() === "lobby", 5000, "Scene to become lobby");
-
-            enemySocket = new WebSocket(`ws://localhost:${import.meta.env.VITE_SERVER_PORT}/`);
-            enemySocket.addEventListener("message", (message) => {
-                const data = JSON.parse(message.data);
-                if (data.event === "setScene" && data.scene === "in_game") {
-                    enemySocket.send(JSON.stringify({ event: "loadedIn" }));
-                }
-            });
-            await utils.waitUntil(() => enemySocket.readyState === WebSocket.OPEN, 5000, "Second player to connect");
-            await utils.delay(500);
-
-            WebsocketClient.sendMessage({ event: "setGameOption", option: "revealMap", value: true });
-            WebsocketClient.sendMessage({ event: "setGameOption", option: "spawnPlayersTogether", value: true });
-            WebsocketClient.sendMessage({ event: "setState", state: "in_game" });
-            await utils.waitUntil(() => game.getCurrentScene().getName() === "in_game", 15000, "Scene to become in_game");
+            enemySocket = await utils.startGameWithSecondPlayer({ autoEndTurns: false });
         },
         verification: () => game.getCurrentScene().getName() === "in_game"
     });

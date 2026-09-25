@@ -74,6 +74,37 @@ export class TestUtils {
         return foundUnit;
     }
 
+    /**
+     * Joins as Player1, brings in a second player over a bare websocket from this same page, and starts
+     * a revealed-map game with both players' settlers two tiles apart. The second player only loads in;
+     * with `autoEndTurns` it also asks for every next turn straight away, so the turn moves on as soon
+     * as Player1 ends theirs. Returns its socket so a scenario can act for it.
+     */
+    public async startGameWithSecondPlayer(options: { autoEndTurns: boolean }): Promise<WebSocket> {
+        WebsocketClient.init("localhost");
+        await this.waitUntil(() => this.game.getCurrentScene().getName() === "lobby", 5000, "Scene to become lobby");
+
+        const enemySocket = new WebSocket(`ws://localhost:${import.meta.env.VITE_SERVER_PORT}/`);
+        const endTurn = () => enemySocket.send(JSON.stringify({ event: "nextTurnRequest", value: true }));
+        enemySocket.addEventListener("message", (message) => {
+            const data = JSON.parse(message.data);
+            if (data.event === "setScene" && data.scene === "in_game") {
+                enemySocket.send(JSON.stringify({ event: "loadedIn" }));
+                if (options.autoEndTurns) endTurn();
+            }
+            if (data.event === "newTurn" && options.autoEndTurns) endTurn();
+        });
+        await this.waitUntil(() => enemySocket.readyState === WebSocket.OPEN, 5000, "Second player to connect");
+        await this.delay(500);
+
+        WebsocketClient.sendMessage({ event: "setGameOption", option: "revealMap", value: true });
+        WebsocketClient.sendMessage({ event: "setGameOption", option: "spawnPlayersTogether", value: true });
+        WebsocketClient.sendMessage({ event: "setState", state: "in_game" });
+        await this.waitUntil(() => this.game.getCurrentScene().getName() === "in_game", 15000, "Scene to become in_game");
+
+        return enemySocket;
+    }
+
     public log(message: string, color: string = "white") {
         const debugDiv = document.createElement("div");
         debugDiv.textContent = message;

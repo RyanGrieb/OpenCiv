@@ -41,3 +41,8 @@ ScenarioRegistry.register("MeleeCombat", async () => {
     const module = await import("./scenarios/MeleeCombat.test");
     return module.setupMeleeCombatTest;
 });
+
+ScenarioRegistry.register("CombatSandbox", async () => {
+    const module = await import("./scenarios/CombatSandbox.test");
+    return module.setupCombatSandboxTest;
+});
