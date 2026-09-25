@@ -773,6 +773,33 @@ export class Game {
     canvasContext.restore();
   }
 
+  // A filled pie slice in world coordinates. Angles are in radians, clockwise from 3 o'clock.
+  public drawCircleSector(options: {
+    x: number;
+    y: number;
+    radius: number;
+    startAngle: number;
+    endAngle: number;
+    color: string;
+    canvasContext: CanvasRenderingContext2D;
+  }) {
+    const canvasContext = options.canvasContext;
+
+    canvasContext.save();
+    if (this.currentScene.getCamera() && canvasContext === this.canvasContext) {
+      this.applyCameraTransform(canvasContext);
+    }
+
+    canvasContext.fillStyle = options.color;
+    canvasContext.beginPath();
+    canvasContext.moveTo(options.x, options.y);
+    canvasContext.arc(options.x, options.y, options.radius, options.startAngle, options.endAngle);
+    canvasContext.closePath();
+    canvasContext.fill();
+
+    canvasContext.restore();
+  }
+
   public getImage(gameImage: GameImage) {
     return this.images[gameImage];
   }

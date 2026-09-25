@@ -79,6 +79,8 @@ export class ClientPlayer extends AbstractPlayer {
           return;
         }
 
+        if (this.previewAttack(this.hoveredTile.getRepresentedTile())) return;
+
         // Draw movement lines to new target tile
         const { isQueuedMovement, targetTile } = this.drawMovementPath(
           this.selectedUnit.getTile(),
@@ -291,6 +293,16 @@ export class ClientPlayer extends AbstractPlayer {
       return;
     }
 
+    if (this.previewAttack(this.hoveredTile.getRepresentedTile())) {
+      if (this.selectedUnit.hasMovementQueue()) {
+        GameMap.getInstance().removeOutline({
+          tile: this.selectedUnit.getTargetQueuedTile(),
+          cityOutline: false
+        });
+      }
+      return;
+    }
+
     const { isQueuedMovement, targetTile } = this.drawMovementPath(
       this.selectedUnit.getTile(),
       this.hoveredTile.getRepresentedTile()
@@ -311,7 +323,32 @@ export class ClientPlayer extends AbstractPlayer {
     }
   }
 
+  // Right-dragging onto an enemy the selected unit can hit shows a red target instead of a path.
+  private previewAttack(tile: Tile): boolean {
+    if (!this.selectedUnit.canMeleeAttack(tile)) return false;
+
+    this.clearMovementPath();
+    GameMap.getInstance().drawUnitSelectionOutline(tile, "red");
+    this.outlinedTile = tile;
+    return true;
+  }
+
+  private attackWithSelectedUnit(targetTile: Tile) {
+    WebsocketClient.sendMessage({
+      event: "attackUnit",
+      id: this.selectedUnit.getID(),
+      targetX: targetTile.getGridX(),
+      targetY: targetTile.getGridY()
+    });
+  }
+
   private moveSelectedUnit(targetTile: Tile) {
+    if (this.selectedUnit.canMeleeAttack(targetTile)) {
+      this.attackWithSelectedUnit(targetTile);
+      this.unselectUnit();
+      return;
+    }
+
     const pathTiles = GameMap.getInstance().constructShortestPath(
       this.selectedUnit,
       this.selectedUnit.getTile(),

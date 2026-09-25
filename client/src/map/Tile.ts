@@ -229,7 +229,7 @@ export class Tile extends Actor {
 
   // Mirrors server/src/map/Tile.ts's hasImpassableUnit() - keep both in sync.
   // Whether a unit can't even pass through here on the way somewhere else. Only other civilizations'
-  // units do that - there's no combat system yet to resolve moving into one any other way.
+  // units do that - getting past one means attacking it (Unit.canMeleeAttack).
   public hasImpassableUnit(movingUnit: Unit): boolean {
     return this.units.some((unit) => unit !== movingUnit && unit.getPlayer() !== movingUnit.getPlayer());
   }

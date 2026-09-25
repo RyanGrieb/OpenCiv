@@ -1,0 +1,212 @@
+import { TestRunner } from "../TestRunner";
+import { Game } from "../../Game";
+import { WebsocketClient } from "../../network/Client";
+import { Unit } from "../../Unit";
+import { Tile } from "../../map/Tile";
+import { GameMap } from "../../map/GameMap";
+import { InGameScene } from "../../scene/type/InGameScene";
+import { TestUtils } from "../TestUtils";
+
+// Plays melee combat out against a live server. A second player joins from this same page over a bare
+// websocket and does nothing but end turns and, near the end, strike back - so everything happens in
+// front of whoever is watching, from Player1's side. The map is revealed so the enemy can be found.
+export function setupMeleeCombatTest(game: Game) {
+    const runner = new TestRunner("MeleeCombat");
+    const utils = new TestUtils(game);
+    let enemySocket: WebSocket | undefined;
+    let warrior: Unit | undefined;
+    let enemyWarrior: Unit | undefined;
+    let enemySettler: Unit | undefined;
+    let enemyWarriorTile: Tile | undefined;
+    let overrunTile: Tile | undefined;
+    let healthBefore = { ours: 0, theirs: 0 };
+    let expected: { survivor: Unit; tile: Tile } | undefined;
+
+    const scene = () => game.getCurrentSceneAs<InGameScene>();
+    const allUnits = () => {
+        const units: Unit[] = [];
+        for (const column of GameMap.getInstance().getTiles()) {
+            for (const tile of column ?? []) units.push(...(tile?.getUnits() ?? []));
+        }
+        return units;
+    };
+    const isAlive = (unit: Unit) => allUnits().includes(unit);
+    const isAdjacent = (a: Tile, b: Tile) => a.getAdjacentTiles().includes(b);
+    const watch = (unit: Unit) => scene().focusOnTile(unit.getTile(), 3);
+
+    // Both players have to ask for the next turn before it comes.
+    const endTurn = async () => {
+        WebsocketClient.sendMessage({ event: "nextTurnRequest", value: true });
+        enemySocket.send(JSON.stringify({ event: "nextTurnRequest", value: true }));
+        await utils.delay(600);
+    };
+
+    // The same path a player takes: select the unit, then right-click release on the target.
+    const attackThroughUI = (attacker: Unit, target: Tile) => {
+        const clientPlayer = utils.getClientPlayer();
+        clientPlayer["onClickedTileWithUnit"](attacker.getTile());
+        clientPlayer["moveSelectedUnit"](target);
+    };
+
+    const enemyAttack = (attacker: Unit, target: Tile) => {
+        enemySocket.send(
+            JSON.stringify({ event: "attackUnit", id: attacker.getID(), targetX: target.getGridX(), targetY: target.getGridY() })
+        );
+    };
+
+    runner.addStep({
+        name: "Start a revealed-map game against a second player",
+        action: async () => {
+            WebsocketClient.init("localhost");
+            await utils.waitUntil(() => game.getCurrentScene().getName() === "lobby", 5000, "Scene to become lobby");
+
+            enemySocket = new WebSocket(`ws://localhost:${import.meta.env.VITE_SERVER_PORT}/`);
+            enemySocket.addEventListener("message", (message) => {
+                const data = JSON.parse(message.data);
+                if (data.event === "setScene" && data.scene === "in_game") {
+                    enemySocket.send(JSON.stringify({ event: "loadedIn" }));
+                }
+            });
+            await utils.waitUntil(() => enemySocket.readyState === WebSocket.OPEN, 5000, "Second player to connect");
+            await utils.delay(500);
+
+            WebsocketClient.sendMessage({ event: "setGameOption", option: "revealMap", value: true });
+            WebsocketClient.sendMessage({ event: "setState", state: "in_game" });
+            await utils.waitUntil(() => game.getCurrentScene().getName() === "in_game", 15000, "Scene to become in_game");
+        },
+        verification: () => game.getCurrentScene().getName() === "in_game"
+    });
+
+    runner.addStep({
+        name: "Find our Warrior and the enemy's Warrior and Settler",
+        action: async () => {
+            await utils.waitUntil(
+                () => {
+                    const me = utils.getClientPlayer();
+                    warrior = me.getUnits().find((unit) => unit.canFight());
+                    const enemies = allUnits().filter((unit) => unit.getPlayer() !== me);
+                    enemyWarrior = enemies.find((unit) => unit.canFight());
+                    enemySettler = enemies.find((unit) => unit.isUtility());
+                    return !!(warrior && enemyWarrior && enemySettler);
+                },
+                10000,
+                "Both players' starting units to appear"
+            );
+            enemyWarriorTile = enemyWarrior.getTile();
+            watch(warrior);
+        },
+        verification: () => warrior.getCombatStrength() === 8 && warrior.getHealth() === 100 && enemyWarrior.getCombatStrength() === 8
+    });
+
+    runner.addStep({
+        name: "March next to the enemy Settler",
+        action: async () => {
+            for (let turn = 0; turn < 40 && !isAdjacent(warrior.getTile(), enemySettler.getTile()); turn++) {
+                let best: Tile[] | undefined;
+                for (const tile of enemySettler.getTile().getAdjacentTiles()) {
+                    if (!tile || tile.isWater() || tile.getUnits().length > 0) continue;
+                    const path = GameMap.getInstance().constructShortestPath(warrior, warrior.getTile(), tile);
+                    if (path.length > 1 && (!best || path.length < best.length)) best = path;
+                }
+                if (!best) throw new Error("No open tile next to the enemy Settler can be reached");
+
+                const target = best[best.length - 1];
+                WebsocketClient.sendMessage({
+                    event: "moveUnit",
+                    unitX: warrior.getTile().getGridX(),
+                    unitY: warrior.getTile().getGridY(),
+                    id: warrior.getID(),
+                    targetX: target.getGridX(),
+                    targetY: target.getGridY()
+                });
+                await utils.delay(300);
+                watch(warrior);
+                await endTurn();
+            }
+            // Start the attack with a full turn's movement.
+            await endTurn();
+        },
+        verification: () => isAdjacent(warrior.getTile(), enemySettler.getTile())
+    });
+
+    runner.addStep({
+        name: "Attacking a lone civilian destroys it and moves in, spending all movement",
+        action: async () => {
+            overrunTile = enemySettler.getTile();
+            attackThroughUI(warrior, overrunTile);
+            await utils.waitUntil(() => !isAlive(enemySettler), 5000, "Settler to be removed");
+            await utils.delay(300);
+            watch(warrior);
+        },
+        verification: () => warrior.getTile() === overrunTile && warrior.getAvailableMovement() === 0 && warrior.getHealth() === 100
+    });
+
+    runner.addStep({
+        name: "A second attack in the same turn is refused, even when sent straight to the server",
+        action: async () => {
+            WebsocketClient.sendMessage({
+                event: "attackUnit",
+                id: warrior.getID(),
+                targetX: enemyWarriorTile.getGridX(),
+                targetY: enemyWarriorTile.getGridY()
+            });
+            await utils.delay(800);
+        },
+        verification: () =>
+            isAdjacent(warrior.getTile(), enemyWarriorTile) &&
+            !warrior.canMeleeAttack(enemyWarriorTile) &&
+            warrior.getHealth() === 100 &&
+            enemyWarrior.getHealth() === 100
+    });
+
+    runner.addStep({
+        name: "Next turn, attacking the enemy Warrior damages both sides",
+        action: async () => {
+            await endTurn();
+            attackThroughUI(warrior, enemyWarriorTile);
+            await utils.waitUntil(() => warrior.getHealth() < 100 && enemyWarrior.getHealth() < 100, 5000, "Both Warriors to take damage");
+            utils.log(`After the attack: ours ${warrior.getHealth()} HP, theirs ${enemyWarrior.getHealth()} HP`, "yellow");
+            healthBefore = { ours: warrior.getHealth(), theirs: enemyWarrior.getHealth() };
+        },
+        verification: () => warrior.getTile() === overrunTile && enemyWarrior.getTile() === enemyWarriorTile && warrior.getAvailableMovement() === 0
+    });
+
+    runner.addStep({
+        name: "A unit that sat out the turn heals 10 HP; one that attacked doesn't",
+        action: async () => {
+            await endTurn();
+            await utils.delay(400);
+            utils.log(`After the turn: ours ${warrior.getHealth()} HP, theirs ${enemyWarrior.getHealth()} HP`, "yellow");
+        },
+        verification: () => enemyWarrior.getHealth() === Math.min(100, healthBefore.theirs + 10) && warrior.getHealth() === healthBefore.ours
+    });
+
+    runner.addStep({
+        name: "Fight to the death: a winning attacker advances, a winning defender holds",
+        action: async () => {
+            // Trades blows until someone falls, then records which tile the survivor should be on.
+            const strike = async (attacker: Unit, defender: Unit, send: () => void) => {
+                const attackerTile = attacker.getTile();
+                const defenderTile = defender.getTile();
+                send();
+                await utils.delay(700);
+                if (!isAlive(defender)) expected = { survivor: attacker, tile: defenderTile };
+                else if (!isAlive(attacker)) expected = { survivor: defender, tile: defenderTile };
+                else if (attacker.getTile() !== attackerTile) throw new Error("Attacker moved without a kill");
+            };
+
+            for (let turn = 0; turn < 15 && !expected; turn++) {
+                await strike(warrior, enemyWarrior, () => attackThroughUI(warrior, enemyWarrior.getTile()));
+                if (!expected) await strike(enemyWarrior, warrior, () => enemyAttack(enemyWarrior, warrior.getTile()));
+
+                const hp = (unit: Unit) => (isAlive(unit) ? `${unit.getHealth()} HP` : "dead");
+                utils.log(`Round ${turn + 1}: ours ${hp(warrior)}, theirs ${hp(enemyWarrior)}`, "yellow");
+                if (!expected) await endTurn();
+            }
+            if (expected) watch(expected.survivor);
+        },
+        verification: () => !!expected && isAlive(expected.survivor) && expected.survivor.getTile() === expected.tile
+    });
+
+    return runner;
+}

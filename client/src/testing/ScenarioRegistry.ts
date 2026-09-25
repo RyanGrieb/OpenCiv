@@ -36,3 +36,8 @@ ScenarioRegistry.register("UnitStackingProduction", async () => {
     const module = await import("./scenarios/UnitStackingProduction.test");
     return module.setupUnitStackingProductionTest;
 });
+
+ScenarioRegistry.register("MeleeCombat", async () => {
+    const module = await import("./scenarios/MeleeCombat.test");
+    return module.setupMeleeCombatTest;
+});

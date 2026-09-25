@@ -16,6 +16,7 @@ const WINDOW_HEIGHT = 170;
 export class UnitDisplayInfo extends ActorGroup {
   private unit: Unit;
   private movementLabel: Label;
+  private combatLabel: Label;
   private actionButtons: Button[];
 
   constructor(unit: Unit) {
@@ -68,6 +69,19 @@ export class UnitDisplayInfo extends ActorGroup {
     this.updateMovementLabel({ updateText: false });
     this.addActor(this.movementLabel);
 
+    if (unit.canFight()) {
+      this.combatLabel = new Label({
+        text: this.getCombatText(),
+        x: this.x,
+        y: this.y,
+        font: UITheme.FONT,
+        fontColor: "white"
+      });
+
+      this.updateCombatLabel();
+      this.addActor(this.combatLabel);
+    }
+
     this.updateActionButtons();
 
     NetworkEvents.on({
@@ -88,6 +102,19 @@ export class UnitDisplayInfo extends ActorGroup {
         this.refreshDisplayInfo();
       }
     });
+
+    for (const eventName of ["unitCombat", "unitHealth"]) {
+      NetworkEvents.on({
+        eventName,
+        parentObject: this,
+        callback: (data) => {
+          const ids = [data["id"], data["attackerId"], data["defenderId"]];
+          if (!ids.includes(this.unit.getID())) return;
+
+          this.refreshDisplayInfo();
+        }
+      });
+    }
   }
 
   // Clear our networks events associated with this object
@@ -105,6 +132,20 @@ export class UnitDisplayInfo extends ActorGroup {
       this.movementLabel.setPosition(
         this.x + this.width / 2 - this.movementLabel.getWidth() / 2,
         this.y + this.height - 36
+      );
+    });
+  }
+
+  private getCombatText() {
+    return `Strength: ${this.unit.getCombatStrength()}   HP: ${this.unit.getHealth()}/${Unit.MAX_HEALTH}`;
+  }
+
+  private updateCombatLabel() {
+    this.combatLabel.setText(this.getCombatText());
+    this.combatLabel.conformSize().then(() => {
+      this.combatLabel.setPosition(
+        this.x + this.width / 2 - this.combatLabel.getWidth() / 2,
+        this.y + this.height - 60
       );
     });
   }
@@ -160,6 +201,7 @@ export class UnitDisplayInfo extends ActorGroup {
 
   private refreshDisplayInfo() {
     this.updateMovementLabel({ updateText: true });
+    if (this.combatLabel) this.updateCombatLabel();
     this.updateActionButtons();
   }
 }

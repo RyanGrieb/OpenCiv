@@ -97,15 +97,8 @@ export class InGameState extends State {
         for (const adjTile of spawnTile.getAdjacentTiles()) {
           if (!adjTile || adjTile.containsTileTypes(badTileTypes)) continue;
 
-          adjTile.addUnit(
-            new Unit({
-              name: "warrior",
-              player: player,
-              tile: adjTile,
-              attackType: "melee",
-              actions: []
-            })
-          );
+          // From units.yml, so the starting warrior gets the same combat strength as a built one.
+          adjTile.addUnit(Unit.createFromName("Warrior", adjTile, player));
           break;
         }
 

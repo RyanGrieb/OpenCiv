@@ -92,6 +92,8 @@ export interface UnitCreationData {
   tileX: number;
   tileY: number;
   attackType: string;
+  combatStrength: number;
+  health: number;
   isUtility: boolean;
   ignoresTerrainCost: boolean;
   remainingMovement: number;
@@ -126,19 +128,44 @@ export interface ClearMovementQueueEvent {
   id: number;
 }
 
+// A melee attack. The defender fields are absent when the attacker overran a tile of civilians.
+export interface UnitCombatEvent {
+  attackerId: number;
+  attackerHealth: number;
+  attackerRemainingMovement: number;
+  defenderId?: number;
+  defenderHealth?: number;
+}
+
+export interface UnitHealthEvent {
+  id: number;
+  health: number;
+}
+
 export class Unit extends ActorGroup {
   // Local child z-order (independent of the group's scene-level z): the sprite must
   // always draw above the selection-tile graphic, never the reverse.
   private static readonly UNIT_SPRITE_Z = 1;
   private static readonly SELECTION_TILE_Z = 0;
 
+  // Mirrors server/src/unit/Combat.ts's MAX_HEALTH.
+  public static readonly MAX_HEALTH = 100;
+  // The owner's civ icon sits at the top of the unit, over a health "bubble": a disc that's green for
+  // the health the unit has left and red for what it's lost, like old_java's UnitHealthBubble.
+  private static readonly CIV_ICON_SIZE = 8;
+  private static readonly HEALTH_BUBBLE_RADIUS = 5;
+
   private name: string;
   private id: number;
   private tile: Tile;
   private attackType: string;
+  private combatStrength: number;
+  private health: number;
   private utility: boolean;
   private terrainCostIgnored: boolean;
   private unitActor: Actor;
+  // Drawn by hand in draw() rather than as a child, so it lands on top of the health bubble.
+  private civIcon: Actor | undefined;
   private selectionActors: Actor[];
   private selected: boolean;
   private defaultMoveDistance: number;
@@ -177,6 +204,8 @@ export class Unit extends ActorGroup {
 
     this.id = unitJSON.id;
     this.attackType = unitJSON.attackType;
+    this.combatStrength = unitJSON.combatStrength;
+    this.health = unitJSON.health;
     this.utility = unitJSON.isUtility;
     this.terrainCostIgnored = unitJSON.ignoresTerrainCost;
     this.availableMovement = unitJSON.remainingMovement;
@@ -184,6 +213,19 @@ export class Unit extends ActorGroup {
     this.player = AbstractPlayer.getPlayerByName(unitJSON.player);
     if (this.player) {
       this.player.addUnit(this);
+
+      const iconRegion = resolveSpriteRegion(this.player.getCivilizationData()?.icon_name);
+      if (iconRegion !== undefined) {
+        const { x, y } = this.getCivIconPosition();
+        this.civIcon = new Actor({
+          image: Game.getInstance().getImage(GameImage.SPRITESHEET),
+          spriteRegion: iconRegion,
+          x,
+          y,
+          width: Unit.CIV_ICON_SIZE,
+          height: Unit.CIV_ICON_SIZE
+        });
+      }
     }
 
     this.queuedMovementTiles = [];
@@ -254,6 +296,28 @@ export class Unit extends ActorGroup {
       }
     });
 
+    NetworkEvents.on<UnitCombatEvent>({
+      eventName: "unitCombat",
+      parentObject: this,
+      callback: (data) => {
+        if (this.id === data.attackerId) {
+          this.health = data.attackerHealth;
+          this.availableMovement = data.attackerRemainingMovement;
+          this.queuedMovementTiles = [];
+        } else if (this.id === data.defenderId) {
+          this.health = data.defenderHealth;
+        }
+      }
+    });
+
+    NetworkEvents.on<UnitHealthEvent>({
+      eventName: "unitHealth",
+      parentObject: this,
+      callback: (data) => {
+        if (this.id === data.id) this.health = data.health;
+      }
+    });
+
     NetworkEvents.on({
       eventName: "newTurn",
       parentObject: this,
@@ -261,6 +325,28 @@ export class Unit extends ActorGroup {
         this.availableMovement = this.defaultMoveDistance;
       }
     });
+  }
+
+  // Mirrors server/src/unit/Unit.ts's canMeleeAttack() - keep both in sync. Every other
+  // civilization counts as an enemy, since there's no diplomacy yet.
+  public canMeleeAttack(targetTile: Tile): boolean {
+    if (this.attackType !== "melee" || !this.canFight() || this.availableMovement <= 0) return false;
+    if (this.tile.isWater() || targetTile.isWater()) return false;
+    if (!this.tile.getAdjacentTiles().includes(targetTile)) return false;
+
+    return targetTile.getUnits().some((unit) => unit.getPlayer() !== this.player);
+  }
+
+  public canFight(): boolean {
+    return !this.utility && this.combatStrength > 0;
+  }
+
+  public getCombatStrength(): number {
+    return this.combatStrength;
+  }
+
+  public getHealth(): number {
+    return this.health;
   }
 
   public getTileWeight(current: Tile, neighbor: Tile) {
@@ -384,6 +470,9 @@ export class Unit extends ActorGroup {
 
     // Update unit sub-actor location
     this.unitActor.setPosition(tile.getCenterPosition().x - 28 / 2, tile.getCenterPosition().y - 28 / 2);
+
+    const iconPosition = this.getCivIconPosition();
+    this.civIcon?.setPosition(iconPosition.x, iconPosition.y);
   }
 
   private removeSelectionActors() {
@@ -436,6 +525,31 @@ export class Unit extends ActorGroup {
     for (const actor of sortedActors) {
       actor.draw(canvasContext);
     }
+
+    this.drawHealthBubble(canvasContext);
+    this.civIcon?.draw(canvasContext);
+  }
+
+  private drawHealthBubble(canvasContext: CanvasRenderingContext2D) {
+    const { x, y } = this.getCivIconPosition();
+    const centerX = x + Unit.CIV_ICON_SIZE / 2;
+    const centerY = y + Unit.CIV_ICON_SIZE / 2;
+    const top = -Math.PI / 2;
+    const healthAngle = (Math.max(0, this.health) / Unit.MAX_HEALTH) * Math.PI * 2;
+
+    const sector = { x: centerX, y: centerY, radius: Unit.HEALTH_BUBBLE_RADIUS, canvasContext };
+    Game.getInstance().drawCircleSector({ ...sector, startAngle: 0, endAngle: Math.PI * 2, color: "red" });
+    if (healthAngle > 0) {
+      Game.getInstance().drawCircleSector({ ...sector, startAngle: top, endAngle: top + healthAngle, color: "lime" });
+    }
+  }
+
+  private getCivIconPosition() {
+    // Centered over the sprite, with the bubble's bottom edge resting on the sprite's top.
+    return {
+      x: this.getX() + (this.getWidth() - Unit.CIV_ICON_SIZE) / 2,
+      y: this.getY() - Unit.HEALTH_BUBBLE_RADIUS - Unit.CIV_ICON_SIZE / 2
+    };
   }
 
   public getPlayer() {

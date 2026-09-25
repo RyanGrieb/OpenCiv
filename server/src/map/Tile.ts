@@ -92,6 +92,10 @@ export class Tile {
     this.units = this.units.filter((existingUnit) => existingUnit !== unit);
   }
 
+  public getUnits(): Unit[] {
+    return this.units;
+  }
+
   // Whether a unit can end its move here. A tile holds at most one military and one utility (civilian)
   // unit, so a same-type ally blocks - but can still be passed through, see hasImpassableUnit().
   public hasBlockingUnit(movingUnit: Unit): boolean {
@@ -99,7 +103,7 @@ export class Tile {
   }
 
   // Whether a unit can't even pass through here on the way somewhere else. Only other civilizations'
-  // units do that - there's no combat system yet to resolve moving into one any other way.
+  // units do that - getting past one means attacking it (Unit.meleeAttack).
   public hasImpassableUnit(movingUnit: Unit): boolean {
     return this.units.some((unit) => unit !== movingUnit && unit.getPlayer() !== movingUnit.getPlayer());
   }
