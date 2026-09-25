@@ -1,5 +1,5 @@
 import concurrently from "concurrently";
-import { execSync } from "child_process";
+import { execFileSync, execSync } from "child_process";
 import * as crypto from "crypto";
 import * as fs from "fs";
 import * as path from "path";
@@ -27,14 +27,18 @@ const WORKTREES = path.resolve(ROOT, "..", "OpenCiv-branches");
 const INSTALL_STAMP = ".try-install-hash";
 
 class TryBranch {
-  public static git(args: string, cwd = ROOT): string {
-    return execSync(`git ${args}`, { cwd, encoding: "utf8", stdio: ["ignore", "pipe", "inherit"] }).trim();
+  // Runs git directly rather than through a shell, so a branch name or path is always one argument and never shell.
+  public static git(args: string[], cwd = ROOT): string {
+    return execFileSync("git", args, { cwd, encoding: "utf8", stdio: ["ignore", "pipe", "inherit"] }).trim();
   }
 
   public static recentBranches(): string[] {
-    const refs = this.git(
-      `for-each-ref --sort=-committerdate --format="%(refname:short)|%(committerdate:relative)" refs/remotes/origin/claude`
-    );
+    const refs = this.git([
+      "for-each-ref",
+      "--sort=-committerdate",
+      "--format=%(refname:short)|%(committerdate:relative)",
+      "refs/remotes/origin/claude"
+    ]);
     return refs ? refs.split("\n") : [];
   }
 
@@ -57,7 +61,7 @@ class TryBranch {
   }
 
   public static async approve(branch: string, remoteCommit: string, worktree: string): Promise<void> {
-    const tried = fs.existsSync(worktree) ? this.git("rev-parse HEAD", worktree) : undefined;
+    const tried = fs.existsSync(worktree) ? this.git(["rev-parse", "HEAD"], worktree) : undefined;
     if (!tried) {
       console.error(`${branch} hasn't been tried yet. Run "npm run try -- ${branch}" first.`);
       process.exit(1);
@@ -67,7 +71,7 @@ class TryBranch {
       process.exit(1);
     }
 
-    const commits = this.git(`log --oneline origin/master..${tried}`) || "(none, master already has them)";
+    const commits = this.git(["log", "--oneline", `origin/master..${tried}`]) || "(none, master already has them)";
     console.log(`\nCommits going onto master:\n${commits}\n`);
     if (!(await this.confirm(`Fast-forward master to ${branch} and delete the branch? [y/N] `))) {
       console.log("Nothing changed.");
@@ -75,7 +79,7 @@ class TryBranch {
     }
 
     try {
-      execSync(`git push --atomic origin ${tried}:refs/heads/master :refs/heads/${branch}`, {
+      execFileSync("git", ["push", "--atomic", "origin", `${tried}:refs/heads/master`, `:refs/heads/${branch}`], {
         cwd: ROOT,
         stdio: "inherit"
       });
@@ -85,13 +89,16 @@ class TryBranch {
     }
 
     try {
-      this.git(`worktree remove --force "${worktree}"`);
+      this.git(["worktree", "remove", "--force", worktree]);
     } catch {
       console.warn(`Couldn't remove ${worktree} (is it still running?). "npm run try -- --clean" will get it later.`);
     }
     try {
-      if (this.git("branch --show-current") === "master") this.git("merge --ff-only --quiet origin/master");
-      else this.git("fetch --quiet origin master:master");
+      if (this.git(["branch", "--show-current"]) === "master") {
+        this.git(["merge", "--ff-only", "--quiet", "origin/master"]);
+      } else {
+        this.git(["fetch", "--quiet", "origin", "master:master"]);
+      }
     } catch {
       console.warn("Couldn't fast-forward your local master; pull it yourself.");
     }
@@ -117,15 +124,15 @@ class TryBranch {
     if (fs.existsSync(WORKTREES)) {
       for (const name of fs.readdirSync(WORKTREES)) {
         console.log(`Removing ${name}`);
-        TryBranch.git(`worktree remove --force "${path.join(WORKTREES, name)}"`);
+        TryBranch.git(["worktree", "remove", "--force", path.join(WORKTREES, name)]);
       }
     }
-    TryBranch.git("worktree prune");
+    TryBranch.git(["worktree", "prune"]);
     return;
   }
 
   console.log("Fetching from origin...");
-  TryBranch.git("fetch origin --prune --quiet");
+  TryBranch.git(["fetch", "origin", "--prune", "--quiet"]);
 
   if (flags.includes("--list")) {
     for (const line of TryBranch.recentBranches()) {
@@ -147,7 +154,7 @@ class TryBranch {
 
   let commit: string;
   try {
-    commit = TryBranch.git(`rev-parse --verify --quiet origin/${branch}`);
+    commit = TryBranch.git(["rev-parse", "--verify", "--quiet", `origin/${branch}`]);
   } catch {
     console.error(`No branch origin/${branch}. Run "npm run try -- --list" to see recent ones.`);
     process.exit(1);
@@ -160,26 +167,26 @@ class TryBranch {
   }
 
   if (fs.existsSync(worktree)) {
-    TryBranch.git(`checkout --quiet --detach ${commit}`, worktree);
+    TryBranch.git(["checkout", "--quiet", "--detach", commit], worktree);
   } else {
     fs.mkdirSync(WORKTREES, { recursive: true });
-    TryBranch.git(`worktree add --quiet --detach "${worktree}" ${commit}`);
+    TryBranch.git(["worktree", "add", "--quiet", "--detach", worktree, commit]);
   }
-  console.log(`\n${branch} @ ${TryBranch.git(`log -1 "--format=%h %s"`, worktree)}`);
+  console.log(`\n${branch} @ ${TryBranch.git(["log", "-1", "--format=%h %s"], worktree)}`);
   console.log(`Worktree: ${worktree}\n`);
 
   TryBranch.installIfChanged(path.join(worktree, "server"));
   TryBranch.installIfChanged(path.join(worktree, "client"));
 
   const ports = await TryBranch.freePorts();
-  const env = DevPorts.env(ports);
+  const env = { ...DevPorts.env(ports), ...DevPorts.gameOptionsEnv(serverArgs) };
   console.log(`\nServer: ws://localhost:${ports.server}`);
   console.log(`Client: http://localhost:${ports.client}\n`);
 
   const { result } = concurrently(
     [
       {
-        command: `npm start -- ${serverArgs.map((arg) => JSON.stringify(arg)).join(" ")}`,
+        command: "npm start",
         name: `server:${ports.server}`,
         cwd: path.join(worktree, "server"),
         env

@@ -35,15 +35,14 @@ const ROOT = path.resolve(__dirname, "..");
         process.exit(1);
     }
 
-    const env = DevPorts.env(ports);
-    const serverArgs = rest.map((arg) => JSON.stringify(arg)).join(" ");
+    const env = { ...DevPorts.env(ports), ...DevPorts.gameOptionsEnv(rest) };
 
     console.log(`Server: ws://localhost:${ports.server}`);
     console.log(`Client: http://localhost:${ports.client}\n`);
 
     const { result } = concurrently(
         [
-            { command: `npm start -- ${serverArgs}`, name: `server:${ports.server}`, cwd: path.join(ROOT, "server"), env },
+            { command: "npm start", name: `server:${ports.server}`, cwd: path.join(ROOT, "server"), env },
             { command: "npm run dev", name: `client:${ports.client}`, cwd: path.join(ROOT, "client"), env }
         ],
         { killOthers: ["failure"] }

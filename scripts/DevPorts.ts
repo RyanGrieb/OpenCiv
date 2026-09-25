@@ -54,6 +54,35 @@ export class DevPorts {
     }
 
     /**
+     * Turns leftover launcher arguments into a GAME_OPTIONS env var ("--numCityStates 0 --no-allowBarbarians"
+     * becomes "numCityStates=0,no-allowBarbarians"), pairing a bare flag with the next argument the way the
+     * server's own argv parser does. Handing options to the server through its env, rather than splicing them
+     * into the shell command that starts it, means an argument can never run as shell. A GAME_OPTIONS that's
+     * already set comes first, so the arguments win on conflict.
+     */
+    public static gameOptionsEnv(
+        args: string[],
+        existing: string | undefined = process.env.GAME_OPTIONS
+    ): Record<string, string> {
+        const entries: string[] = existing ? [existing] : [];
+
+        for (let i = 0; i < args.length; i++) {
+            if (!args[i].startsWith("--")) continue;
+
+            const arg = args[i].substring(2);
+            const next = args[i + 1];
+            if (!arg.includes("=") && next !== undefined && !next.startsWith("--")) {
+                entries.push(`${arg}=${next}`);
+                i++;
+            } else {
+                entries.push(arg);
+            }
+        }
+
+        return entries.length > 0 ? { GAME_OPTIONS: entries.join(",") } : {};
+    }
+
+    /**
      * Resolves true if nothing is listening on the port. Binds the same way the server and Vite do
      * (all interfaces), so a port another pair is already using reports as taken.
      */
