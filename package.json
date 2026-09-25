@@ -6,6 +6,7 @@
     "scripts": {
         "prestart": "npx kill-port 2000 1234",
         "start": "concurrently \"npm start --prefix server\" \"npm run dev --prefix client\"",
+        "start:ports": "npx ts-node scripts/start_ports.ts",
         "test:e2e": "npx ts-node scripts/run_tests.ts",
         "generate-sprites": "npx ts-node scripts/generate_sprite_manifest.ts",
         "install-all": "npm install && concurrently \"npm install --prefix ./server\" \"npm install --prefix ./client\"",

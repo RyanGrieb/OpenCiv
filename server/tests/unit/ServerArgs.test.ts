@@ -64,6 +64,24 @@ describe("ServerArgs", () => {
     expect(parse(argv)).toEqual(DefaultGameOptions);
   });
 
+  it("reads the port from --port or SERVER_PORT, with argv taking precedence", () => {
+    expect(ServerArgs.parsePort([], {})).toBe(ServerArgs.DEFAULT_PORT);
+    expect(ServerArgs.parsePort([], { SERVER_PORT: "2100" })).toBe(2100);
+    expect(ServerArgs.parsePort(["--port=2200"], { SERVER_PORT: "2100" })).toBe(2200);
+    expect(ServerArgs.parsePort(["--port", "2300"], {})).toBe(2300);
+  });
+
+  it("falls back to the default port for an invalid value", () => {
+    expect(ServerArgs.parsePort(["--port=abc"], {})).toBe(ServerArgs.DEFAULT_PORT);
+    expect(ServerArgs.parsePort(["--port=70000"], {})).toBe(ServerArgs.DEFAULT_PORT);
+  });
+
+  it("doesn't treat --port as a game option", () => {
+    expect(parse(["--port=2100", "--numCityStates=3"])).toEqual({ numCityStates: 3 });
+    expect(parse(["--port", "2100"])).toEqual({});
+    expect(console.warn).not.toHaveBeenCalled();
+  });
+
   it("detects --help", () => {
     expect(ServerArgs.helpRequested(["--help"])).toBe(true);
     expect(ServerArgs.helpRequested(["-h"])).toBe(true);

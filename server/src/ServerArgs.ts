@@ -20,6 +20,12 @@ export class ServerArgs {
   // `npm start` at the repo root, which runs the server through concurrently).
   private static readonly ENV_VAR = "GAME_OPTIONS";
 
+  // The port isn't a game option, but it's read the same way so several servers can run side by side
+  // (`npm start -- --port=2100`, or SERVER_PORT=2100 from the root launcher / docker compose).
+  public static readonly DEFAULT_PORT = 2000;
+  private static readonly PORT_ENV_VAR = "SERVER_PORT";
+  private static readonly PORT_ARG = "port";
+
   public static helpRequested(argv: string[] = process.argv.slice(2)): boolean {
     return argv.some((arg) => arg === "--help" || arg === "-h");
   }
@@ -48,8 +54,34 @@ export class ServerArgs {
     return overrides;
   }
 
+  /**
+   * Reads the port to listen on from the SERVER_PORT env var, then --port (argv wins).
+   * Falls back to DEFAULT_PORT, with a warning if the given value isn't a valid port.
+   */
+  public static parsePort(argv: string[] = process.argv.slice(2), env: NodeJS.ProcessEnv = process.env): number {
+    const argvPort = this.argvPairs(argv, true).find(([key]) => this.isPortKey(key));
+    const rawPort = argvPort !== undefined ? argvPort[1] : env[this.PORT_ENV_VAR];
+
+    if (rawPort === undefined || rawPort.trim() === "") return this.DEFAULT_PORT;
+
+    const port = Number(rawPort);
+    if (!Number.isInteger(port) || port < 1 || port > 65535) {
+      console.warn(`Ignoring port "${rawPort}": not a valid port, using ${this.DEFAULT_PORT}`);
+      return this.DEFAULT_PORT;
+    }
+
+    return port;
+  }
+
   public static usage(): string {
-    const lines = ["Usage: npm start -- [options]", "", "Game options:"];
+    const lines = [
+      "Usage: npm start -- [options]",
+      "",
+      "Server options:",
+      `  --${this.PORT_ARG}=<number>`.padEnd(38) + `default: ${this.DEFAULT_PORT} (or the ${this.PORT_ENV_VAR} env var)`,
+      "",
+      "Game options:"
+    ];
 
     for (const key of this.optionKeys()) {
       const definition = GameOptionDefinitions.find((def) => def.key === key);
@@ -68,6 +100,7 @@ export class ServerArgs {
       "",
       "Examples:",
       "  npm start -- --no-allowBarbarians --numCityStates=0",
+      "  npm start -- --port=2100",
       "  npm start -- --allow-barbarians=false"
     );
 
@@ -78,7 +111,8 @@ export class ServerArgs {
     return Object.keys(DefaultGameOptions) as GameOptionKey[];
   }
 
-  private static argvPairs(argv: string[]): [string, string | undefined][] {
+  // --port is parsed by parsePort, so it's left out of the game option pairs unless asked for.
+  private static argvPairs(argv: string[], includePort: boolean = false): [string, string | undefined][] {
     const pairs: [string, string | undefined][] = [];
 
     for (let i = 0; i < argv.length; i++) {
@@ -103,7 +137,7 @@ export class ServerArgs {
       }
     }
 
-    return pairs;
+    return includePort ? pairs : pairs.filter(([key]) => !this.isPortKey(key));
   }
 
   private static envPairs(env: NodeJS.ProcessEnv): [string, string | undefined][] {
@@ -179,6 +213,10 @@ export class ServerArgs {
     if (this.FALSE_VALUES.includes(value)) return false;
 
     return undefined;
+  }
+
+  private static isPortKey(key: string): boolean {
+    return this.normalize(key) === this.PORT_ARG;
   }
 
   private static normalize(key: string): string {

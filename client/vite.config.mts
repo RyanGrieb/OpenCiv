@@ -1,16 +1,25 @@
 import { defineConfig } from "vite";
 
+// Both default to what the root `npm start` uses. Set them (the root `npm run start:ports`
+// launcher does) to run several client/server pairs side by side.
+const clientPort = Number(process.env.CLIENT_PORT || 1234);
+const serverPort = Number(process.env.SERVER_PORT || 2000);
+
 export default defineConfig({
+  // The port the client's websocket connects to when the join screen's address has none.
+  define: {
+    "import.meta.env.VITE_SERVER_PORT": JSON.stringify(String(serverPort))
+  },
   server: {
-    // The server, the root prestart's kill-port, the Dockerfile's EXPOSE and the
-    // e2e runner's printed URL all assume 1234.
-    port: 1234,
+    // The root prestart's kill-port, the Dockerfile's EXPOSE and compose.yml assume
+    // the default 1234.
+    port: clientPort,
     strictPort: true,
     // Bind all interfaces so the client Dockerfile's published port reaches it.
     host: true
   },
   preview: {
-    port: 1234,
+    port: clientPort,
     strictPort: true
   },
   build: {

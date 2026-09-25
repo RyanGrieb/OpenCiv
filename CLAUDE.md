@@ -13,7 +13,10 @@ Run all of these from the repo root unless noted.
 ```bash
 npm run install-all      # npm install at root, client/, and server/ (all three are separate node_modules)
 npm start                 # boots server (ws://localhost:2000) and client dev server (http://localhost:1234) together
+npm run start:ports -- --server-port=2100 --client-port=1240   # a pair on other ports, client wired to its own server
 ```
+
+`start:ports` lets several pairs run side by side (one per branch being tested). Unlike `npm start` it won't kill whatever holds its ports, it refuses to start instead; extra arguments go to the server as game options. Underneath, the server reads `SERVER_PORT` (or `--port`) and the client's `vite.config.mts` reads `CLIENT_PORT` and `SERVER_PORT`, baking the latter in as the websocket port. The join screen also accepts an explicit `host:port`. `npm run test:e2e` takes the same two flags.
 
 Client (`cd client`):
 ```bash

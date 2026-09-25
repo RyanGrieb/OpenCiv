@@ -115,8 +115,15 @@ export class WebsocketClient {
   // TODO: Add network events here with string & function that has arguments.
   // e.g. setScreen & screenType arg.
 
+  /**
+   * @param serverAddress A host, optionally with a port ("localhost:2100"). Without one, the port the
+   * client was built for is used (SERVER_PORT when the dev server started, 2000 by default).
+   */
   public static init(serverAddress: string) {
-    this.websocket = new WebSocket("ws://" + serverAddress + ":2000/");
+    const hasPort = /:\d+$/.test(serverAddress.trim());
+    const address = hasPort ? serverAddress.trim() : serverAddress.trim() + ":" + import.meta.env.VITE_SERVER_PORT;
+
+    this.websocket = new WebSocket("ws://" + address + "/");
 
     this.websocket.onerror = (event) => {
       NetworkEvents.call("websocketError", JSON.parse("{}"));

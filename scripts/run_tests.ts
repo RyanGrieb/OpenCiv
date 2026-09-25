@@ -1,10 +1,11 @@
 import { spawn } from 'child_process';
 import * as path from 'path';
 import kill from 'kill-port';
+import { DevPorts } from './DevPorts';
 
 
-// Parse args
-const args = process.argv.slice(2);
+// Parse args (--server-port / --client-port pick the pair's ports, defaulting to 2000 / 1234)
+const { ports, rest: args } = DevPorts.parse(process.argv.slice(2));
 const scenarioArg = args.find(a => a.startsWith('--scenario='));
 const scenario = scenarioArg ? scenarioArg.split('=')[1] : null;
 
@@ -22,17 +23,18 @@ const CLIENT_DIR = path.join(ROOT, 'client');
 
     console.log("Cleaning up old processes...");
     try {
-        await kill(2000, 'tcp');
-        await kill(1234, 'tcp');
+        await kill(ports.server, 'tcp');
+        await kill(ports.client, 'tcp');
     } catch (e) {
         console.log("Cleanup warning:", e.message);
     }
 
     console.log("Starting Server in Test Mode...");
-    const server = spawn(npmCmd, ['run', 'start:test'], { cwd: SERVER_DIR, stdio: 'inherit', shell: true });
+    const env = { ...process.env, ...DevPorts.env(ports) };
+    const server = spawn(npmCmd, ['run', 'start:test'], { cwd: SERVER_DIR, stdio: 'inherit', shell: true, env });
 
     console.log("Starting Client...");
-    const client = spawn(npmCmd, ['run', 'dev'], { cwd: CLIENT_DIR, stdio: 'inherit', shell: true });
+    const client = spawn(npmCmd, ['run', 'dev'], { cwd: CLIENT_DIR, stdio: 'inherit', shell: true, env });
 
     const cleanup = () => {
         console.log("Cleaning up...");
@@ -55,7 +57,7 @@ const CLIENT_DIR = path.join(ROOT, 'client');
 
     // Wait a bit then print instructions/open browser
     setTimeout(() => {
-        const url = `http://localhost:1234?test=true${scenario ? `&scenario=${scenario}` : ''}`;
+        const url = `http://localhost:${ports.client}?test=true${scenario ? `&scenario=${scenario}` : ''}`;
         console.log(`\n------------------------------------------------------------`);
         console.log(`Tests are running!`);
         console.log(`Open your browser to: ${url}`);

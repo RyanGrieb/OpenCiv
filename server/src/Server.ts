@@ -9,7 +9,7 @@ import { LobbyState } from "./state/type/LobbyState";
 export class Server {
   private static serverInstance: Server;
 
-  private port: number = 2000;
+  private port: number = ServerArgs.DEFAULT_PORT;
   private wss: WebSocketServer;
   private connectedIPs: Set<string> = new Set();
   private allowDuplicateIPs: boolean = false;
@@ -41,6 +41,10 @@ export class Server {
     console.log("Stopping server...");
     this.wss.close();
     process.exit(0);
+  }
+
+  public setPort(port: number) {
+    this.port = port;
   }
 
   public setAllowDuplicateIPs(allow: boolean) {
@@ -137,6 +141,7 @@ if (ServerArgs.helpRequested()) {
   process.exit(0);
 }
 
+Server.getInstance().setPort(ServerArgs.parsePort());
 Server.getInstance().setAllowDuplicateIPs(true);
 Server.getInstance().setGameOptionOverrides(ServerArgs.parseGameOptions());
 Server.getInstance().start();
