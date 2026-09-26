@@ -77,6 +77,8 @@ export class City extends ActorGroup {
       eventName: "addBuilding",
       parentObject: this,
       callback: (data: any) => {
+        if (data["cityName"] !== this.name) return;
+
         const buildingData = data["building"];
         this.buildings.push(new Buidling(buildingData));
       }
@@ -86,6 +88,9 @@ export class City extends ActorGroup {
       eventName: "updateCityStats",
       parentObject: this,
       callback: (data: any) => {
+        // Every owned city hears every city's update.
+        if (data["cityName"] !== this.name) return;
+
         const stats = data["cityStats"];
         for (const stat of stats) {
           const statType = Object.keys(stat)[0]; // Get the stat type, e.g., "science", "gold", etc.

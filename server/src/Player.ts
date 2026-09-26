@@ -3,6 +3,7 @@ import { ServerEvents } from "./Events";
 import { Game } from "./Game";
 import { City } from "./city/City";
 import { PlayerVisibility } from "./map/PlayerVisibility";
+import { PlayerNotifications } from "./notification/PlayerNotifications";
 import { Technology } from "./research/Technology";
 import { Unit } from "./unit/Unit";
 
@@ -50,6 +51,7 @@ export class Player {
   private currentResearch: CurrentResearch | null;
   private researchedTechs: Set<string>;
   private visibility: PlayerVisibility;
+  private notifications: PlayerNotifications;
 
   /**
    * Creates a new player object.
@@ -67,6 +69,7 @@ export class Player {
     this.currentResearch = null;
     this.researchedTechs = new Set();
     this.visibility = new PlayerVisibility(this);
+    this.notifications = new PlayerNotifications(this);
 
     // Add event listener for when the player disconnects
     this.wsConnection?.on("close", (data) => {
@@ -386,6 +389,7 @@ export class Player {
 
     if (this.currentResearch.progress >= this.currentResearch.cost) {
       this.researchedTechs.add(this.currentResearch.techName);
+      this.notifications.addMessage(this.currentResearch.assetName, `You have discovered ${this.currentResearch.techName}.`);
       this.currentResearch = null;
       // A new tech can unlock improvements for this player's Builders.
       this.units.forEach((unit) => unit.sendActionsToOwner());
@@ -400,6 +404,10 @@ export class Player {
       technologies: Technology.getAllTechnologies().map((tech) => tech.toJSON()),
       eras: Technology.getAllEras()
     });
+  }
+
+  public getNotifications() {
+    return this.notifications;
   }
 
   /** This player's fog of war - what they've discovered, and what they can see right now. */

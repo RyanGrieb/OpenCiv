@@ -703,6 +703,18 @@ export class Unit {
     this.player.sendNetworkEvent({ event: "unitActions", id: this.id, actions: this.getUnitActionsJSON() });
   }
 
+  public getId() {
+    return this.id;
+  }
+
+  public getAvailableMovement() {
+    return this.availableMovement;
+  }
+
+  public hasMovementQueue() {
+    return this.queuedMovementTiles.length > 0;
+  }
+
   public isFortified() {
     return this.fortified;
   }

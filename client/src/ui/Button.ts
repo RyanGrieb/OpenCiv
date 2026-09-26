@@ -229,6 +229,15 @@ export class Button extends ActorGroup {
   }
 
   public setText(text: string) {
+    if (text === this.text) return;
+
     this.text = text;
+    // Re-measured on the next draw, so the new text stays centered.
+    this.textWidth = -1;
+    this.textHeight = -1;
+  }
+
+  public getText(): string {
+    return this.text;
   }
 }

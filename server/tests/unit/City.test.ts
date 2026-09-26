@@ -16,6 +16,7 @@ jest.mock('../../src/unit/Unit');
 describe('City', () => {
   let city: City;
   let mockPlayer: jest.Mocked<Player>;
+  let mockNotifications: { addMessage: jest.Mock };
   let mockTile: jest.Mocked<Tile>;
   let onSpy: jest.SpyInstance;
 
@@ -50,12 +51,15 @@ describe('City', () => {
       getStats: jest.fn().mockReturnValue([]),
     } as unknown as jest.Mocked<Tile>;
 
+    mockNotifications = { addMessage: jest.fn() };
+
     mockPlayer = {
       getNextAvailableCityName: jest.fn().mockReturnValue('TestCity'),
       sendNetworkEvent: jest.fn(),
       sendTotalStatsUpdate: jest.fn(),
       getCities: jest.fn().mockReturnValue([]),
       hasResearchedTech: jest.fn().mockReturnValue(false),
+      getNotifications: jest.fn().mockReturnValue(mockNotifications),
     } as unknown as jest.Mocked<Player>;
 
     (Unit.getAllUnitData as jest.Mock).mockReturnValue([
@@ -337,6 +341,7 @@ describe('City', () => {
 
       expect(city['productionQueue']).toEqual([]);
       expect(logSpy).toHaveBeenCalledWith(expect.stringContaining('Warrior'));
+      expect(mockNotifications.addMessage).toHaveBeenCalledWith('ICON_PRODUCTION', 'TestCity has finished Warrior.');
 
       logSpy.mockRestore();
     });

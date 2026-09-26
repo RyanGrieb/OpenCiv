@@ -9,6 +9,7 @@ import { Job, gracefulShutdown, scheduleJob } from "node-schedule";
 import { Tile } from "../../map/Tile";
 import { Barbarians } from "../../barbarian/Barbarians";
 import { Player } from "../../Player";
+import { PlayerNotifications } from "../../notification/PlayerNotifications";
 
 export class InGameState extends State {
   private turnTimeJob: Job;
@@ -241,6 +242,11 @@ export class InGameState extends State {
         });
       });
 
+    // Last turn's messages are cleared before this turn's processing adds new ones.
+    Game.getInstance()
+      .getPlayers()
+      .forEach((player) => player.getNotifications().startTurn(this.currentTurn));
+
     ServerEvents.call("nextTurn", { turn: this.currentTurn });
 
     // Once every unit's movement is back to full from the event above.
@@ -253,6 +259,8 @@ export class InGameState extends State {
       .forEach((player) => {
         player.getVisibility().update();
       });
+
+    PlayerNotifications.refreshAll();
   }
   public onDestroyed() {
     if (this.turnTimeJob) {

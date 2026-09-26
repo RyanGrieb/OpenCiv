@@ -116,9 +116,7 @@ export class ClientPlayer extends AbstractPlayer {
 
         //left-click
         if (options.button === 0) {
-          if (clickedTile && clickedTile.getUnits().length > 0) {
-            this.onClickedTileWithUnit(clickedTile);
-          }
+          this.onLeftClickTile(clickedTile, options.x, options.y);
         }
 
         //right-click
@@ -307,6 +305,36 @@ export class ClientPlayer extends AbstractPlayer {
     return unselectedUnit;
   }
 
+  /** Selects the unit, replacing whatever was selected, and shows its queued path if it has one. */
+  public selectUnit(unit: Unit) {
+    this.unselectUnit();
+
+    unit.select();
+    this.selectedUnit = unit;
+
+    if (this.selectedUnit.hasMovementQueue()) {
+      const { isQueuedMovement } = this.drawMovementPathFromTiles([unit.getTile(), ...unit.getQueuedMovementTiles()]);
+
+      this.drawTargetTileOutline(this.selectedUnit.getTargetQueuedTile(), isQueuedMovement);
+    }
+  }
+
+  private onLeftClickTile(clickedTile: Tile | undefined, x: number, y: number) {
+    // The click was meant for a notification, not the map beneath it.
+    if (Game.getInstance().getCurrentSceneAs<InGameScene>().isOverNotifications(x, y)) return;
+
+    if (clickedTile && clickedTile.getUnits().some((unit) => unit.getPlayer() === this)) {
+      this.onClickedTileWithUnit(clickedTile);
+      return;
+    }
+
+    // Left-clicking elsewhere with a unit selected is the classic first attempt at moving it. The
+    // server decides whether it's early enough in the game to show the right-click tip.
+    if (this.selectedUnit) {
+      WebsocketClient.sendMessage({ event: "requestMoveUnitTip" });
+    }
+  }
+
   private onMouseRightClick() {
     this.rightMouseDrag = true;
 
@@ -450,23 +478,13 @@ export class ClientPlayer extends AbstractPlayer {
       unit = units[(currentIndex + 1) % units.length];
     }
 
-    // Clear previously defined movement paths.
-    this.clearMovementPath();
-
-    const unselectedUnit = this.unselectUnit();
-
-    if (unselectedUnit === unit) {
+    // Clicking the selected unit again (with nothing else stacked on its tile) unselects it.
+    if (this.selectedUnit === unit) {
+      this.unselectUnit();
       return;
     }
 
-    unit.select();
-    this.selectedUnit = unit;
-
-    if (this.selectedUnit.hasMovementQueue()) {
-      const { isQueuedMovement } = this.drawMovementPathFromTiles([unit.getTile(), ...unit.getQueuedMovementTiles()]);
-
-      this.drawTargetTileOutline(this.selectedUnit.getTargetQueuedTile(), isQueuedMovement);
-    }
+    this.selectUnit(unit);
   }
 
   private updateHoveredTile(mouseX: number, mouseY: number) {

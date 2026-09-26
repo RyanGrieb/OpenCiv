@@ -66,3 +66,8 @@ ScenarioRegistry.register("BuilderSandbox", async () => {
     const module = await import("./scenarios/BuilderSandbox.test");
     return module.setupBuilderSandboxTest;
 });
+
+ScenarioRegistry.register("Notifications", async () => {
+    const module = await import("./scenarios/Notifications.test");
+    return module.setupNotificationsTest;
+});

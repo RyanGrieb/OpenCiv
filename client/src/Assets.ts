@@ -148,6 +148,9 @@ export enum SpriteRegion {
   ICON_CHOP,
   ICON_HAMMER,
   ICON_GEAR,
+  ICON_MOVE,
+  ICON_QUESTION,
+  ICON_GOTO_LEFT,
   //Buildings
   BUILDING_PALACE,
   BUILDING_MONUMENT,

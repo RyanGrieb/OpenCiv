@@ -5,6 +5,7 @@ import { GameOptions } from "./GameOptions";
 import { ServerArgs } from "./ServerArgs";
 import { InGameState } from "./state/type/InGameState";
 import { LobbyState } from "./state/type/LobbyState";
+import { PlayerNotifications } from "./notification/PlayerNotifications";
 
 export class Server {
   private static serverInstance: Server;
@@ -115,6 +116,7 @@ export class Server {
         console.log("Message: " + data);
         const jsonData = JSON.parse(data);
         ServerEvents.call(jsonData["event"], jsonData, websocket);
+        PlayerNotifications.refreshAll();
       });
       ServerEvents.call("connection", {}, websocket);
     });

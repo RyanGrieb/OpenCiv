@@ -428,6 +428,10 @@ export class City {
     return this.player;
   }
 
+  public getProductionQueue(): ProductionOption[] {
+    return this.productionQueue;
+  }
+
   public getName() {
     return this.name;
   }
@@ -531,6 +535,7 @@ export class City {
       console.log(`[City ${this.name}] Finished producing ${current.name}`);
       this.productionQueue.shift();
       this.addBuilding(current.name);
+      this.announceFinished(current.name);
       return;
     }
 
@@ -544,6 +549,11 @@ export class City {
 
     const unit = Unit.createFromName(current.name, spawnTile, this.player);
     if (unit) spawnTile.addUnit(unit);
+    this.announceFinished(current.name);
+  }
+
+  private announceFinished(itemName: string) {
+    this.player.getNotifications().addMessage("ICON_PRODUCTION", `${this.name} has finished ${itemName}.`);
   }
 
   // The city's own tile if the new unit can stack there, else the first free neighbor it could walk on.

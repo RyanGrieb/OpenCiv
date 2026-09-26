@@ -4,6 +4,7 @@ import { City } from "../../city/City";
 import { GameMap } from "../../map/GameMap";
 import { Tile } from "../../map/Tile";
 import { NetworkEvents, WebsocketClient } from "../../network/Client";
+import { Notifications } from "../../notification/Notifications";
 import { AbstractPlayer } from "../../player/AbstractPlayer";
 import { ClientPlayer } from "../../player/ClientPlayer";
 import { ExternalPlayer } from "../../player/ExternalPlayer";
@@ -11,6 +12,7 @@ import { Button, ButtonSize } from "../../ui/Button";
 import { CityDisplayInfo } from "../../ui/CityDisplayInfo";
 import { ClientSettingsGroup } from "../../ui/ClientSettingsGroup";
 import { Label } from "../../ui/Label";
+import { NotificationPanel } from "../../ui/NotificationPanel";
 import { ResearchDisplayInfo } from "../../ui/ResearchDisplayInfo";
 import { ResearchTreeWindow } from "../../ui/ResearchTreeWindow";
 import { StatusBar } from "../../ui/StatusBar";
@@ -34,6 +36,8 @@ export class InGameScene extends Scene {
   private tileYieldActors: Actor[] = [];
   private statusBar: StatusBar;
   private researchDisplayInfo: ResearchDisplayInfo;
+  private notifications: Notifications;
+  private notificationPanel: NotificationPanel;
   private researchTreeWindow: ResearchTreeWindow;
   private cityDisplayInfo: CityDisplayInfo;
   private nextTurnButton: Button;
@@ -102,6 +106,8 @@ export class InGameScene extends Scene {
     GameMap.init();
 
     this.on("mapLoaded", () => {
+      this.notifications = new Notifications(this.clientPlayer);
+      this.notifications.onChange(() => this.refreshNextTurnButton());
       this.initializePersistentUI();
 
       this.on("tileHovered", (options) => {
@@ -216,8 +222,8 @@ export class InGameScene extends Scene {
         eventName: "newTurn",
         parentObject: this,
         callback: (data) => {
-          this.nextTurnButton.setText("Next Turn");
           this.clientPlayer.setRequestedNextTurn(false);
+          this.refreshNextTurnButton();
         }
       });
     });
@@ -230,6 +236,8 @@ export class InGameScene extends Scene {
     this.cityDisplayInfo = undefined;
     this.researchTreeWindow = undefined;
     this.openUIElement = undefined;
+    this.notifications = undefined;
+    this.notificationPanel = undefined;
 
     return Scene.ExitReceipt;
   }
@@ -243,6 +251,7 @@ export class InGameScene extends Scene {
     this.removeActor(this.tileInformationLabel);
     this.removeActor(this.statusBar);
     this.removeActor(this.researchDisplayInfo);
+    this.removeActor(this.notificationPanel);
     this.removeActor(this.nextTurnButton);
     this.removeActor(this.closeCityDisplayButton);
 
@@ -281,31 +290,17 @@ export class InGameScene extends Scene {
     this.researchDisplayInfo = new ResearchDisplayInfo();
     this.addActor(this.researchDisplayInfo);
 
+    this.notificationPanel = new NotificationPanel(this.notifications);
+    this.addActor(this.notificationPanel);
+
     this.nextTurnButton = new Button({
-      text: this.clientPlayer.hasRequestedNextTurn() ? "Waiting..." : "Next Turn",
+      text: this.getNextTurnButtonText(),
       x: Game.getInstance().getWidth() / 2 - ButtonSize.LARGE.width / 2,
       y: Game.getInstance().getHeight() - ButtonSize.LARGE.height - 4,
       z: 6,
       size: ButtonSize.LARGE,
       fontColor: "white",
-      onClicked: () => {
-        // Undo next turn request.
-        if (this.clientPlayer.hasRequestedNextTurn()) {
-          this.nextTurnButton.setText("Next Turn");
-          WebsocketClient.sendMessage({
-            event: "nextTurnRequest",
-            value: false
-          });
-          this.clientPlayer.setRequestedNextTurn(false);
-        } else {
-          WebsocketClient.sendMessage({
-            event: "nextTurnRequest",
-            value: true
-          });
-          this.nextTurnButton.setText("Waiting...");
-          this.clientPlayer.setRequestedNextTurn(true);
-        }
-      }
+      onClicked: () => this.onNextTurnClicked()
     });
     this.addActor(this.nextTurnButton);
 
@@ -320,6 +315,42 @@ export class InGameScene extends Scene {
         this.toggleCityUI();
       }
     });
+  }
+
+  private onNextTurnClicked() {
+    // Undo next turn request.
+    if (this.clientPlayer.hasRequestedNextTurn()) {
+      this.setRequestedNextTurn(false);
+      return;
+    }
+
+    // Like Civ 5, the button takes the player to what still needs a decision instead of ending the turn.
+    const turnBlocker = this.notifications.getTurnBlocker();
+    if (turnBlocker) {
+      this.notifications.act(turnBlocker);
+      return;
+    }
+
+    this.setRequestedNextTurn(true);
+  }
+
+  private setRequestedNextTurn(requested: boolean) {
+    WebsocketClient.sendMessage({
+      event: "nextTurnRequest",
+      value: requested
+    });
+    this.clientPlayer.setRequestedNextTurn(requested);
+    this.refreshNextTurnButton();
+  }
+
+  private refreshNextTurnButton() {
+    this.nextTurnButton?.setText(this.getNextTurnButtonText());
+  }
+
+  private getNextTurnButtonText(): string {
+    if (this.clientPlayer.hasRequestedNextTurn()) return "Waiting...";
+
+    return this.notifications.getTurnBlocker()?.turnBlockingLabel ?? "Next Turn";
   }
 
   public focusOnTile(tile: Tile, zoomAmount: number) {
@@ -340,6 +371,18 @@ export class InGameScene extends Scene {
       // Only emit toggleCityUI closed if we are actually closing it (handled in closeCityUI usually, but here we coordinate)
       this.call("toggleCityUI", { opened: false, city: city });
     }
+  }
+
+  public getNotifications(): Notifications {
+    return this.notifications;
+  }
+
+  public isOverNotifications(x: number, y: number): boolean {
+    return this.notificationPanel?.isOverRow(x, y) ?? false;
+  }
+
+  public getNextTurnButton(): Button {
+    return this.nextTurnButton;
   }
 
   public getResearchTreeWindow(): ResearchTreeWindow | undefined {
@@ -396,6 +439,7 @@ export class InGameScene extends Scene {
     this.removeActor(this.nextTurnButton);
     this.removeActor(this.tileInformationLabel);
     this.removeActor(this.researchDisplayInfo);
+    this.removeActor(this.notificationPanel);
 
     this.addActor(this.closeCityDisplayButton);
   }
@@ -409,6 +453,7 @@ export class InGameScene extends Scene {
     this.addActor(this.nextTurnButton);
     this.addActor(this.tileInformationLabel);
     this.addActor(this.researchDisplayInfo);
+    this.addActor(this.notificationPanel);
 
     this.removeActor(this.closeCityDisplayButton);
   }
@@ -425,6 +470,7 @@ export class InGameScene extends Scene {
     this.removeActor(this.nextTurnButton);
     this.removeActor(this.tileInformationLabel);
     this.removeActor(this.researchDisplayInfo);
+    this.removeActor(this.notificationPanel);
   }
 
   private closeResearchUI() {
@@ -437,6 +483,7 @@ export class InGameScene extends Scene {
     this.addActor(this.nextTurnButton);
     this.addActor(this.tileInformationLabel);
     this.addActor(this.researchDisplayInfo);
+    this.addActor(this.notificationPanel);
   }
 
   // The esc menu leaves the scene meanwhile: clicks aren't occluded by z-order, so its "Main Menu"
