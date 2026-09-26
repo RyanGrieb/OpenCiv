@@ -1,13 +1,13 @@
-import { ClientSettings } from "../ClientSettings";
-import { GameImage, SpriteRegion, resolveSpriteRegion } from "../Assets";
-import { Game } from "../Game";
-import { Unit } from "../Unit";
-import { Actor } from "../scene/Actor";
-import { ActorGroup } from "../scene/ActorGroup";
-import { Strings } from "../util/Strings";
-import { Label } from "./Label";
+import { ClientSettings } from "../../ClientSettings";
+import { GameImage, SpriteRegion, resolveSpriteRegion } from "../../Assets";
+import { Game } from "../../Game";
+import { Unit } from "../../Unit";
+import { Actor } from "../../scene/Actor";
+import { ActorGroup } from "../../scene/ActorGroup";
+import { Strings } from "../../util/Strings";
+import { Label } from "../components/Label";
 import { UnitDisplayInfo } from "./UnitDisplayInfo";
-import { UITheme } from "./UITheme";
+import { UITheme } from "../UITheme";
 
 // Server "combatPreview" payload, from Unit.getMeleePreview(). Only sent when something on the target
 // tile can fight back - civilians are captured without a preview.

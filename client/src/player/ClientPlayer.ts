@@ -10,7 +10,7 @@ import { InGameScene } from "../scene/type/InGameScene";
 import { Numbers } from "../util/Numbers";
 import { Vector } from "../util/Vector";
 import { AbstractPlayer, PlayerData } from "./AbstractPlayer";
-import { CombatPreviewEvent, CombatPreviewWindow } from "../ui/CombatPreviewWindow";
+import { CombatPreviewEvent, CombatPreviewWindow } from "../ui/hud/CombatPreviewWindow";
 
 export interface CurrentResearch {
   techName: string;

@@ -1,11 +1,11 @@
-import { GameImage, resolveSpriteRegion } from "../Assets";
-import { Game } from "../Game";
-import { NetworkEvents, WebsocketClient } from "../network/Client";
-import { CivilizationData } from "../player/AbstractPlayer";
-import { Actor } from "../scene/Actor";
-import { ActorGroup } from "../scene/ActorGroup";
-import { Button, ButtonSize } from "./Button";
-import { Label } from "./Label";
+import { GameImage, resolveSpriteRegion } from "../../Assets";
+import { Game } from "../../Game";
+import { NetworkEvents, WebsocketClient } from "../../network/Client";
+import { CivilizationData } from "../../player/AbstractPlayer";
+import { Actor } from "../../scene/Actor";
+import { ActorGroup } from "../../scene/ActorGroup";
+import { Button, ButtonSize } from "../components/Button";
+import { Label } from "../components/Label";
 
 interface AvailableCivsEvent {
   civs: CivilizationData[];

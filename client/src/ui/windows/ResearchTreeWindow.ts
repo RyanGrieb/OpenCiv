@@ -1,15 +1,15 @@
-import { GameImage, resolveSpriteRegion, SpriteRegion } from "../Assets";
-import { Game } from "../Game";
-import { NetworkEvents, WebsocketClient } from "../network/Client";
-import { ClientPlayer } from "../player/ClientPlayer";
-import { Actor } from "../scene/Actor";
-import { ActorGroup } from "../scene/ActorGroup";
-import { InGameScene } from "../scene/type/InGameScene";
-import { Numbers } from "../util/Numbers";
-import { Button, ButtonSize } from "./Button";
-import { Label } from "./Label";
+import { GameImage, resolveSpriteRegion, SpriteRegion } from "../../Assets";
+import { Game } from "../../Game";
+import { NetworkEvents, WebsocketClient } from "../../network/Client";
+import { ClientPlayer } from "../../player/ClientPlayer";
+import { Actor } from "../../scene/Actor";
+import { ActorGroup } from "../../scene/ActorGroup";
+import { InGameScene } from "../../scene/type/InGameScene";
+import { Numbers } from "../../util/Numbers";
+import { Button, ButtonSize } from "../components/Button";
+import { Label } from "../components/Label";
 import { TechDetailData, TechDetailWindow } from "./TechDetailWindow";
-import { UITheme } from "./UITheme";
+import { UITheme } from "../UITheme";
 
 const WINDOW_PADDING = 16;
 // Base (100% zoom) tile geometry - actual layout scales these by zoomLevel.

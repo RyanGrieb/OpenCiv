@@ -3,7 +3,7 @@ import { Game } from "../../Game";
 import { WebsocketClient } from "../../network/Client";
 import { City } from "../../city/City";
 import { Tile } from "../../map/Tile";
-import { Label } from "../../ui/Label";
+import { Label } from "../../ui/components/Label";
 import { ActorGroup } from "../../scene/ActorGroup";
 import { TestUtils } from "../TestUtils";
 

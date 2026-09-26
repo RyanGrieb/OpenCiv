@@ -1,8 +1,8 @@
 import { Scene } from "../Scene";
 import { Game } from "../../Game";
-import { Button, ButtonSize } from "../../ui/Button";
-import { ClientSettingsGroup } from "../../ui/ClientSettingsGroup";
-import { Label } from "../../ui/Label";
+import { Button, ButtonSize } from "../../ui/components/Button";
+import { ClientSettingsGroup } from "../../ui/menus/ClientSettingsGroup";
+import { Label } from "../../ui/components/Label";
 import { SceneBackground } from "../SceneBackground";
 
 export class MainMenuScene extends Scene {

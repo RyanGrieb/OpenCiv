@@ -6,8 +6,8 @@ import { NetworkEvents } from "./network/Client";
 import { AbstractPlayer } from "./player/AbstractPlayer";
 import { Actor } from "./scene/Actor";
 import { ActorGroup } from "./scene/ActorGroup";
-import { UnitDisplayInfo } from "./ui/UnitDisplayInfo";
-import { FloatingText } from "./ui/FloatingText";
+import { UnitDisplayInfo } from "./ui/hud/UnitDisplayInfo";
+import { FloatingText } from "./ui/components/FloatingText";
 import { Strings } from "./util/Strings";
 
 export class UnitActionManager {

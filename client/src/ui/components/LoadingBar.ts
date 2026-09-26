@@ -1,5 +1,5 @@
-import { Actor } from "../scene/Actor";
-import { ActorGroup } from "../scene/ActorGroup";
+import { Actor } from "../../scene/Actor";
+import { ActorGroup } from "../../scene/ActorGroup";
 
 export interface LoadingBarOptions {
   x: number;

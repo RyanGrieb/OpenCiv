@@ -1,9 +1,9 @@
-import { GameImage } from "../Assets";
-import { Game } from "../Game";
-import { Actor } from "../scene/Actor";
-import { ActorGroup } from "../scene/ActorGroup";
-import { Numbers } from "../util/Numbers";
-import { Vector } from "../util/Vector";
+import { GameImage } from "../../Assets";
+import { Game } from "../../Game";
+import { Actor } from "../../scene/Actor";
+import { ActorGroup } from "../../scene/ActorGroup";
+import { Numbers } from "../../util/Numbers";
+import { Vector } from "../../util/Vector";
 import { Label } from "./Label";
 import { RectangleOptions } from "./Rectangle";
 

@@ -7,7 +7,7 @@ import { AbstractPlayer } from "../player/AbstractPlayer";
 import { Actor } from "../scene/Actor";
 import { ActorGroup } from "../scene/ActorGroup";
 import { InGameScene } from "../scene/type/InGameScene";
-import { Label } from "../ui/Label";
+import { Label } from "../ui/components/Label";
 import { Buidling } from "./Building";
 
 export interface CityOptions {

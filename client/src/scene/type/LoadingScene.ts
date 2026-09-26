@@ -1,5 +1,5 @@
 import { Game } from "../../Game";
-import { Label } from "../../ui/Label";
+import { Label } from "../../ui/components/Label";
 import { Scene } from "../Scene";
 import { SceneBackground } from "../SceneBackground";
 

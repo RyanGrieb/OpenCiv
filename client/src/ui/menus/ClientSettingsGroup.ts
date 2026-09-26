@@ -1,11 +1,11 @@
-import { GameImage } from "../Assets";
-import { ClientSettings } from "../ClientSettings";
-import { Game } from "../Game";
-import { Actor } from "../scene/Actor";
-import { ActorGroup } from "../scene/ActorGroup";
-import { Button, ButtonSize } from "./Button";
-import { Label } from "./Label";
-import { SlideBar } from "./SlideBar";
+import { GameImage } from "../../Assets";
+import { ClientSettings } from "../../ClientSettings";
+import { Game } from "../../Game";
+import { Actor } from "../../scene/Actor";
+import { ActorGroup } from "../../scene/ActorGroup";
+import { Button, ButtonSize } from "../components/Button";
+import { Label } from "../components/Label";
+import { SlideBar } from "../components/SlideBar";
 
 interface SettingRow {
   key: "HUD_TRANSPARENCY";

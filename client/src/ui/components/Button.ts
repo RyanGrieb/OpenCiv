@@ -1,7 +1,7 @@
-import { Actor } from "../scene/Actor";
-import { Game } from "../Game";
-import { GameImage, SpriteRegion } from "../Assets";
-import { ActorGroup } from "../scene/ActorGroup";
+import { Actor } from "../../scene/Actor";
+import { Game } from "../../Game";
+import { GameImage, SpriteRegion } from "../../Assets";
+import { ActorGroup } from "../../scene/ActorGroup";
 
 //FIXME: Redundant argument options code?
 

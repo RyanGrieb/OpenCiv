@@ -1,12 +1,12 @@
-import { GameImage } from "../Assets";
-import { Game } from "../Game";
-import { NetworkEvents, WebsocketClient } from "../network/Client";
-import { Actor } from "../scene/Actor";
-import { ActorGroup } from "../scene/ActorGroup";
-import { Button, ButtonSize } from "./Button";
-import { Checkbox } from "./Checkbox";
-import { Label } from "./Label";
-import { SlideBar } from "./SlideBar";
+import { GameImage } from "../../Assets";
+import { Game } from "../../Game";
+import { NetworkEvents, WebsocketClient } from "../../network/Client";
+import { Actor } from "../../scene/Actor";
+import { ActorGroup } from "../../scene/ActorGroup";
+import { Button, ButtonSize } from "../components/Button";
+import { Checkbox } from "../components/Checkbox";
+import { Label } from "../components/Label";
+import { SlideBar } from "../components/SlideBar";
 
 // Mirrors server/src/GameOptions.ts's GameOptionDefinition union - the server is the sole
 // source of truth for which options exist, their labels, and their current values, so this

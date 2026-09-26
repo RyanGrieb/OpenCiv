@@ -1,15 +1,15 @@
-import { ClientSettings } from "../ClientSettings";
-import { GameImage, SpriteRegion, resolveSpriteRegion } from "../Assets";
-import { Game } from "../Game";
-import { NetworkEvents } from "../network/Client";
-import { CurrentResearch } from "../player/ClientPlayer";
-import { Actor } from "../scene/Actor";
-import { ActorGroup } from "../scene/ActorGroup";
-import { InGameScene } from "../scene/type/InGameScene";
-import { Button, ButtonSize } from "./Button";
-import { Label } from "./Label";
-import { LoadingBar } from "./LoadingBar";
-import { UITheme } from "./UITheme";
+import { ClientSettings } from "../../ClientSettings";
+import { GameImage, SpriteRegion, resolveSpriteRegion } from "../../Assets";
+import { Game } from "../../Game";
+import { NetworkEvents } from "../../network/Client";
+import { CurrentResearch } from "../../player/ClientPlayer";
+import { Actor } from "../../scene/Actor";
+import { ActorGroup } from "../../scene/ActorGroup";
+import { InGameScene } from "../../scene/type/InGameScene";
+import { Button, ButtonSize } from "../components/Button";
+import { Label } from "../components/Label";
+import { LoadingBar } from "../components/LoadingBar";
+import { UITheme } from "../UITheme";
 
 const WIDTH = 320;
 const HEIGHT = 146;

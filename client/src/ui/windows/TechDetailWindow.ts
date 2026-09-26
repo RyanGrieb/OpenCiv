@@ -1,12 +1,12 @@
-import { GameImage, resolveSpriteRegion, SpriteRegion } from "../Assets";
-import { Game } from "../Game";
-import { NetworkEvents, WebsocketClient } from "../network/Client";
-import { Actor } from "../scene/Actor";
-import { ActorGroup } from "../scene/ActorGroup";
-import { InGameScene } from "../scene/type/InGameScene";
-import { Button, ButtonSize } from "./Button";
-import { Label } from "./Label";
-import { UITheme } from "./UITheme";
+import { GameImage, resolveSpriteRegion, SpriteRegion } from "../../Assets";
+import { Game } from "../../Game";
+import { NetworkEvents, WebsocketClient } from "../../network/Client";
+import { Actor } from "../../scene/Actor";
+import { ActorGroup } from "../../scene/ActorGroup";
+import { InGameScene } from "../../scene/type/InGameScene";
+import { Button, ButtonSize } from "../components/Button";
+import { Label } from "../components/Label";
+import { UITheme } from "../UITheme";
 
 const WINDOW_WIDTH = 440;
 const PADDING = 16;

@@ -1,8 +1,8 @@
 import { TestRunner } from "../TestRunner";
 import { Game } from "../../Game";
-import { Label } from "../../ui/Label";
-import { ResearchTreeWindow } from "../../ui/ResearchTreeWindow";
-import { TechDetailWindow } from "../../ui/TechDetailWindow";
+import { Label } from "../../ui/components/Label";
+import { ResearchTreeWindow } from "../../ui/windows/ResearchTreeWindow";
+import { TechDetailWindow } from "../../ui/windows/TechDetailWindow";
 import { TestUtils } from "../TestUtils";
 
 // Opens the research tree and checks the wiki-style tech window: cost, Requires, Leads to, Enables

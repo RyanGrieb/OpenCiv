@@ -1,14 +1,14 @@
-import { ClientSettings } from "../ClientSettings";
-import { GameImage, SpriteRegion } from "../Assets";
-import { Game } from "../Game";
-import { Unit } from "../Unit";
-import { NetworkEvents, WebsocketClient } from "../network/Client";
-import { Actor } from "../scene/Actor";
-import { ActorGroup } from "../scene/ActorGroup";
-import { Strings } from "../util/Strings";
-import { Button, ButtonSize } from "./Button";
-import { Label } from "./Label";
-import { UITheme } from "./UITheme";
+import { ClientSettings } from "../../ClientSettings";
+import { GameImage, SpriteRegion } from "../../Assets";
+import { Game } from "../../Game";
+import { Unit } from "../../Unit";
+import { NetworkEvents, WebsocketClient } from "../../network/Client";
+import { Actor } from "../../scene/Actor";
+import { ActorGroup } from "../../scene/ActorGroup";
+import { Strings } from "../../util/Strings";
+import { Button, ButtonSize } from "../components/Button";
+import { Label } from "../components/Label";
+import { UITheme } from "../UITheme";
 
 const WINDOW_WIDTH = 300;
 // Offsets from the window's top. Action buttons take 44-108, wrapping into more rows of 4 when a

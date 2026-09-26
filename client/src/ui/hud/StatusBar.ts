@@ -1,12 +1,12 @@
-import { GameImage, SpriteRegion } from "../Assets";
-import { Game } from "../Game";
-import { NetworkEvents } from "../network/Client";
-import { Actor } from "../scene/Actor";
-import { ActorGroup } from "../scene/ActorGroup";
-import { InGameScene } from "../scene/type/InGameScene";
-import { Strings } from "../util/Strings";
-import { Label } from "./Label";
-import { UITheme } from "./UITheme";
+import { GameImage, SpriteRegion } from "../../Assets";
+import { Game } from "../../Game";
+import { NetworkEvents } from "../../network/Client";
+import { Actor } from "../../scene/Actor";
+import { ActorGroup } from "../../scene/ActorGroup";
+import { InGameScene } from "../../scene/type/InGameScene";
+import { Strings } from "../../util/Strings";
+import { Label } from "../components/Label";
+import { UITheme } from "../UITheme";
 
 interface TurnTimeEvent {
   turn: number;

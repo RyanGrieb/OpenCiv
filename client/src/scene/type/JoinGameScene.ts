@@ -1,9 +1,9 @@
 import { GameImage } from "../../Assets";
 import { Game } from "../../Game";
 import { NetworkEvents, WebsocketClient } from "../../network/Client";
-import { Button, ButtonSize } from "../../ui/Button";
-import { Label } from "../../ui/Label";
-import { TextBox } from "../../ui/Textbox";
+import { Button, ButtonSize } from "../../ui/components/Button";
+import { Label } from "../../ui/components/Label";
+import { TextBox } from "../../ui/components/Textbox";
 import { Actor } from "../Actor";
 import { Scene } from "../Scene";
 import { SceneBackground } from "../SceneBackground";

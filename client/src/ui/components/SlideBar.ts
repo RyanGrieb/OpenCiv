@@ -1,6 +1,6 @@
-import { Game } from "../Game";
-import { Actor } from "../scene/Actor";
-import { Numbers } from "../util/Numbers";
+import { Game } from "../../Game";
+import { Actor } from "../../scene/Actor";
+import { Numbers } from "../../util/Numbers";
 
 export interface SlideBarOptions {
   x: number;

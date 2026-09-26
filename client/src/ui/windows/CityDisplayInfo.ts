@@ -1,16 +1,16 @@
-import { GameImage, resolveSpriteRegion, SpriteRegion } from "../Assets";
-import { Game } from "../Game";
-import { City, ProductionQueueItem } from "../city/City";
-import { NetworkEvents, WebsocketClient } from "../network/Client";
-import { Actor } from "../scene/Actor";
-import { ActorGroup } from "../scene/ActorGroup";
-import { Strings } from "../util/Strings";
-import { Button, ButtonSize } from "./Button";
-import { Label } from "./Label";
-import { ListBox } from "./Listbox";
-import { LoadingBar } from "./LoadingBar";
-import { RadioButton } from "./RadioButton";
-import { UITheme } from "./UITheme";
+import { GameImage, resolveSpriteRegion, SpriteRegion } from "../../Assets";
+import { Game } from "../../Game";
+import { City, ProductionQueueItem } from "../../city/City";
+import { NetworkEvents, WebsocketClient } from "../../network/Client";
+import { Actor } from "../../scene/Actor";
+import { ActorGroup } from "../../scene/ActorGroup";
+import { Strings } from "../../util/Strings";
+import { Button, ButtonSize } from "../components/Button";
+import { Label } from "../components/Label";
+import { ListBox } from "../components/Listbox";
+import { LoadingBar } from "../components/LoadingBar";
+import { RadioButton } from "../components/RadioButton";
+import { UITheme } from "../UITheme";
 
 const STATS_WINDOW_WIDTH = 320;
 // Vertical space a progress readout (one text line plus its bar) claims. The growth and border

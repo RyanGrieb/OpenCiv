@@ -1,9 +1,9 @@
-import { GameImage } from "../Assets";
-import { Game } from "../Game";
-import { Actor } from "../scene/Actor";
-import { ActorGroup } from "../scene/ActorGroup";
-import { Button, ButtonSize } from "./Button";
-import { Label } from "./Label";
+import { GameImage } from "../../Assets";
+import { Game } from "../../Game";
+import { Actor } from "../../scene/Actor";
+import { ActorGroup } from "../../scene/ActorGroup";
+import { Button, ButtonSize } from "../components/Button";
+import { Label } from "../components/Label";
 
 export interface PlaceholderDialogGroupOptions {
   title: string;

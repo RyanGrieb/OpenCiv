@@ -1,12 +1,12 @@
-import { ClientSettings } from "../ClientSettings";
-import { GameImage, SpriteRegion, resolveSpriteRegion } from "../Assets";
-import { Game } from "../Game";
-import { NotificationData, Notifications } from "../notification/Notifications";
-import { Actor } from "../scene/Actor";
-import { ActorGroup } from "../scene/ActorGroup";
-import { Button } from "./Button";
-import { Label } from "./Label";
-import { UITheme } from "./UITheme";
+import { ClientSettings } from "../../ClientSettings";
+import { GameImage, SpriteRegion, resolveSpriteRegion } from "../../Assets";
+import { Game } from "../../Game";
+import { NotificationData, Notifications } from "../../notification/Notifications";
+import { Actor } from "../../scene/Actor";
+import { ActorGroup } from "../../scene/ActorGroup";
+import { Button } from "../components/Button";
+import { Label } from "../components/Label";
+import { UITheme } from "../UITheme";
 import { UnitDisplayInfo } from "./UnitDisplayInfo";
 
 const BOX_WIDTH = 320;

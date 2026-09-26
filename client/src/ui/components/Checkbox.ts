@@ -1,6 +1,6 @@
-import { GameImage, SpriteRegion } from "../Assets";
-import { Game } from "../Game";
-import { Actor } from "../scene/Actor";
+import { GameImage, SpriteRegion } from "../../Assets";
+import { Game } from "../../Game";
+import { Actor } from "../../scene/Actor";
 
 export interface CheckboxOptions {
   x: number;

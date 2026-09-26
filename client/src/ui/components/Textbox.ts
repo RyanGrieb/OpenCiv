@@ -1,5 +1,5 @@
-import { Actor } from "../scene/Actor";
-import { Game } from "../Game";
+import { Actor } from "../../scene/Actor";
+import { Game } from "../../Game";
 
 export interface TextBoxOptions {
   x: number;
