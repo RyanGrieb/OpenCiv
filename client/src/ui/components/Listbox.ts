@@ -270,7 +270,8 @@ export class ListBox extends ActorGroup {
     this.stopDraggingScrollbar();
   }
 
-  public addCategory(name: string) {
+  // Height defaults to 25, which only suits small fonts; pass a taller one for UITheme.FONT.
+  public addCategory(name: string, height = 25) {
     // Add row with category name & hide/view option button on left side.
 
     const row = new Row({
@@ -278,7 +279,7 @@ export class ListBox extends ActorGroup {
       y: this.getNextRowPosition().y,
       z: this.z,
       width: this.width,
-      height: 25, //FIXME: Should be dependent on text height
+      height: height, //FIXME: Should be dependent on text height
       color: this.rows.length % 2 == 0 ? Row.stripeColorA : Row.stripeColorB,
       font: this.textFont,
       fontColor: this.fontColor,

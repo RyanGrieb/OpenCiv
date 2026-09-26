@@ -5,7 +5,6 @@ import { CivilizationData } from "../../player/AbstractPlayer";
 import { Button, ButtonSize } from "../../ui/components/Button";
 import { GameOptionsGroup } from "../../ui/menus/GameOptionsGroup";
 import { ListBox } from "../../ui/components/Listbox";
-import { PlaceholderDialogGroup } from "../../ui/menus/PlaceholderDialogGroup";
 import { SelectCivilizationGroup } from "../../ui/menus/SelectCivilizationGroup";
 import { Actor } from "../Actor";
 import { ActorGroup } from "../ActorGroup";
@@ -217,11 +216,6 @@ export class LobbyScene extends Scene {
         onClicked: () => this.showDialog(this.createGameOptionsDialog())
       },
       {
-        text: "Scenarios",
-        icon: SpriteRegion.ICON_SETTLE,
-        onClicked: () => this.showDialog(this.createPlaceholderDialog("Scenarios"))
-      },
-      {
         text: "Ready Up",
         icon: SpriteRegion.ICON_ACCEPT,
         // TODO: Change text of this button & prevent repeated clicks.
@@ -277,17 +271,6 @@ export class LobbyScene extends Scene {
 
   private createGameOptionsDialog(): GameOptionsGroup {
     return new GameOptionsGroup({
-      x: this.rightPanelX,
-      y: this.rightPanelY,
-      width: LobbyScene.BOX_WIDTH,
-      height: this.rightPanelHeight,
-      onClose: () => this.showButtonPanel()
-    });
-  }
-
-  private createPlaceholderDialog(title: string): PlaceholderDialogGroup {
-    return new PlaceholderDialogGroup({
-      title,
       x: this.rightPanelX,
       y: this.rightPanelY,
       width: LobbyScene.BOX_WIDTH,

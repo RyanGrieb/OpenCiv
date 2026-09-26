@@ -2,24 +2,28 @@ import { Scene } from "../Scene";
 import { Game } from "../../Game";
 import { Button, ButtonSize } from "../../ui/components/Button";
 import { ClientSettingsGroup } from "../../ui/menus/ClientSettingsGroup";
+import { ScenarioListGroup } from "../../ui/menus/ScenarioListGroup";
 import { Label } from "../../ui/components/Label";
 import { SceneBackground } from "../SceneBackground";
 import { Actor } from "../Actor";
 import { GameImage, SpriteRegion } from "../../Assets";
+import { ActorGroup } from "../ActorGroup";
 
 export class MainMenuScene extends Scene {
   private static readonly SETTINGS_WIDTH = 460;
   private static readonly SETTINGS_HEIGHT = 300;
+  private static readonly SCENARIOS_WIDTH = 460;
+  private static readonly SCENARIOS_HEIGHT = 560;
   private static readonly TITLE_ICON_SIZE = 96;
   private static readonly TITLE_ICON_GAP = 16;
 
-  private menuButtons: Button[];
-  private settingsGroup: ClientSettingsGroup;
+  private menuActors: Actor[];
+  private openWindow: ActorGroup;
 
   public onInitialize(): void {
     super.onInitialize();
-    this.settingsGroup = undefined;
-    this.menuButtons = [];
+    this.openWindow = undefined;
+    this.menuActors = [];
     this.addActor(SceneBackground.generatePanningGrassland());
 
     const titleLabel = new Label({
@@ -49,8 +53,7 @@ export class MainMenuScene extends Scene {
       );
     });
 
-    this.addActor(titleLabel);
-    this.addActor(titleIcon);
+    this.menuActors.push(titleLabel, titleIcon);
 
     /*const backgroundActor = new Actor({
       color: "rgba(0, 0, 0, 0.5)",
@@ -62,7 +65,7 @@ export class MainMenuScene extends Scene {
 
     this.addActor(backgroundActor);*/
 
-    this.menuButtons.push(
+    this.menuActors.push(
       new Button({
         text: "Play",
         x: Game.getInstance().getWidth() / 2 - ButtonSize.LARGE.width / 2,
@@ -74,40 +77,63 @@ export class MainMenuScene extends Scene {
         }
       }),
       new Button({
-        text: "Options",
+        text: "Scenarios",
         x: Game.getInstance().getWidth() / 2 - ButtonSize.LARGE.width / 2,
         y: Game.getInstance().getHeight() / 3 + 136,
         size: ButtonSize.LARGE,
         fontColor: "white",
         onClicked: () => {
-          this.toggleSettings();
+          this.showWindow(this.createScenarioList());
+        }
+      }),
+      new Button({
+        text: "Options",
+        x: Game.getInstance().getWidth() / 2 - ButtonSize.LARGE.width / 2,
+        y: Game.getInstance().getHeight() / 3 + 204,
+        size: ButtonSize.LARGE,
+        fontColor: "white",
+        onClicked: () => {
+          this.showWindow(this.createSettings());
         }
       })
     );
 
-    this.menuButtons.forEach((button) => this.addActor(button));
+    this.menuActors.forEach((actor) => this.addActor(actor));
   }
 
-  // The menu buttons leave the scene meanwhile: clicks aren't occluded by z-order, so one sitting
-  // under the window would still take them.
-  private toggleSettings() {
-    if (this.settingsGroup) {
-      this.removeActor(this.settingsGroup);
-      this.settingsGroup = undefined;
-      this.menuButtons.forEach((button) => this.addActor(button));
-      return;
-    }
+  // The title and menu buttons leave the scene meanwhile: clicks aren't occluded by z-order, so a
+  // button sitting under the window would still take them, and the taller scenario list covers the title.
+  private showWindow(group: ActorGroup) {
+    this.menuActors.forEach((actor) => this.removeActor(actor));
+    this.openWindow = group;
+    this.addActor(group);
+  }
 
-    this.menuButtons.forEach((button) => this.removeActor(button));
+  private closeWindow() {
+    if (!this.openWindow) return;
 
-    this.settingsGroup = new ClientSettingsGroup({
+    this.removeActor(this.openWindow);
+    this.openWindow = undefined;
+    this.menuActors.forEach((actor) => this.addActor(actor));
+  }
+
+  private createSettings(): ClientSettingsGroup {
+    return new ClientSettingsGroup({
       x: Game.getInstance().getWidth() / 2 - MainMenuScene.SETTINGS_WIDTH / 2,
       y: Game.getInstance().getHeight() / 2 - MainMenuScene.SETTINGS_HEIGHT / 2,
       width: MainMenuScene.SETTINGS_WIDTH,
       height: MainMenuScene.SETTINGS_HEIGHT,
-      onClose: () => this.toggleSettings()
+      onClose: () => this.closeWindow()
     });
+  }
 
-    this.addActor(this.settingsGroup);
+  private createScenarioList(): ScenarioListGroup {
+    return new ScenarioListGroup({
+      x: Game.getInstance().getWidth() / 2 - MainMenuScene.SCENARIOS_WIDTH / 2,
+      y: Game.getInstance().getHeight() / 2 - MainMenuScene.SCENARIOS_HEIGHT / 2,
+      width: MainMenuScene.SCENARIOS_WIDTH,
+      height: MainMenuScene.SCENARIOS_HEIGHT,
+      onClose: () => this.closeWindow()
+    });
   }
 }
