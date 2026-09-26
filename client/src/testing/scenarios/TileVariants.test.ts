@@ -6,19 +6,31 @@ import { GameMap } from "../../map/GameMap";
 import { Tile } from "../../map/Tile";
 import { TestUtils } from "../TestUtils";
 
-// Grass, plains, tundra, desert and mountain each draw with one of three sprites, picked from the
-// tile's coordinates. Reveals the whole map, checks every sprite turns up, that the pick is stable
-// and leaves the tile's type alone, then centers on a varied patch to look at.
+// Grass, plains, tundra, desert, mountain and the three waters each draw with one of several
+// sprites, picked from the tile's coordinates. Reveals the whole map, checks every sprite turns up,
+// that the pick is stable and leaves the tile's type alone, then centers on a varied patch.
 export function setupTileVariantsTest(game: Game) {
   const runner = new TestRunner("TileVariants");
   const utils = new TestUtils(game);
-  const terrains = ["grass", "plains", "tundra", "desert", "mountain"];
-  const spritesFor = (terrain: string) => [terrain, `${terrain}_2`, `${terrain}_3`];
+  const terrains = ["grass", "plains", "tundra", "desert", "mountain", "ocean", "shallow_ocean", "freshwater"];
+  // Mirrors Tile.TILE_VARIANT_COUNTS: grass has four variants, the rest two.
+  const spritesFor = (terrain: string) => [
+    terrain,
+    `${terrain}_2`,
+    `${terrain}_3`,
+    ...(terrain === "grass" ? ["grass_4", "grass_5"] : [])
+  ];
   // How many tiles draw with each sprite, keyed by its tile type ("grass_2").
   const spriteCounts = new Map<string, number>();
   let tiles: Tile[] = [];
 
-  const allTiles = () => GameMap.getInstance().getTiles().flat().filter((tile) => !!tile);
+  const terrainCount = (terrain: string) =>
+    spritesFor(terrain).reduce((sum, sprite) => sum + (spriteCounts.get(sprite) ?? 0), 0);
+  const allTiles = () =>
+    GameMap.getInstance()
+      .getTiles()
+      .flat()
+      .filter((tile) => !!tile);
   const baseType = (tile: Tile) => tile.getTileTypes()[0];
   const drawnAs = (tile: Tile) => Tile.getVariantTileType(baseType(tile), tile.getGridX(), tile.getGridY());
 
@@ -34,20 +46,25 @@ export function setupTileVariantsTest(game: Game) {
         spriteCounts.set(sprite, (spriteCounts.get(sprite) ?? 0) + 1);
       }
       for (const terrain of terrains) {
-        utils.log(`${terrain}: ${spritesFor(terrain).map((sprite) => spriteCounts.get(sprite) ?? 0).join(" / ")}`);
+        utils.log(
+          `${terrain}: ${spritesFor(terrain)
+            .map((sprite) => spriteCounts.get(sprite) ?? 0)
+            .join(" / ")}`
+        );
       }
     },
     verification: () => tiles.length > 500
   });
 
   runner.addStep({
-    name: "Every terrain shows all three of its sprites, and each one is in the sprite atlas",
+    name: "Every common terrain shows all of its sprites, and each one is in the sprite atlas",
     action: async () => {},
     verification: () =>
       terrains.every((terrain) =>
         spritesFor(terrain).every(
           (sprite) =>
-            (spriteCounts.get(sprite) ?? 0) > 0 &&
+            // A terrain with only a few tiles (lakes can be rare) may miss a sprite by chance.
+            (terrainCount(terrain) < 20 || (spriteCounts.get(sprite) ?? 0) > 0) &&
             !!SpriteAtlas.getInstance().getRegion(resolveSpriteRegion(`TILE_${sprite.toUpperCase()}`))
         )
       )
@@ -79,7 +96,7 @@ export function setupTileVariantsTest(game: Game) {
         new Set([tile, ...tile.getAdjacentTiles()].filter((adjTile) => !!adjTile).map(drawnAs)).size;
       const best = tiles.reduce((a, b) => (distinctAround(b) > distinctAround(a) ? b : a));
       utils.getInGameScene().focusOnTile(best, 2);
-      utils.log("Pan around: each terrain mixes its plain sprite with two variants.", "yellow");
+      utils.log("Pan around: each terrain mixes its plain sprite with its variants.", "yellow");
 
       const results = document.getElementById("test-results");
       if (results) results.style.pointerEvents = "none";

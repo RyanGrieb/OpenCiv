@@ -39,11 +39,14 @@ export class Tile extends Actor {
   // How many look-only variant sprites (TILE_<TYPE>_2, _3, ...) each base terrain has on top of its
   // plain one - see getVariantTileType().
   private static readonly TILE_VARIANT_COUNTS: Record<string, number> = {
-    grass: 2,
+    grass: 4,
     plains: 2,
     tundra: 2,
     desert: 2,
-    mountain: 2
+    mountain: 2,
+    ocean: 2,
+    shallow_ocean: 2,
+    freshwater: 2
   };
 
   private static loadedTileImages = new Map<string, HTMLImageElement>();
