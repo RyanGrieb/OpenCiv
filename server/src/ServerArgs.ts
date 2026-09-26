@@ -177,6 +177,11 @@ export class ServerArgs {
       return;
     }
 
+    if (typeof DefaultGameOptions[key] === "string") {
+      this.setOverride(overrides, key, (rawValue ?? "").trim() as GameOptions[typeof key]);
+      return;
+    }
+
     const value = Number(rawValue);
 
     if (rawValue === undefined || rawValue.trim() === "" || isNaN(value)) {

@@ -206,13 +206,13 @@ export class GameMap {
   // Offset (odd-r: odd rows shoved right, matching oddEdgeAxis/evenEdgeAxis above) grid
   // coordinates to cube coordinates, and back - see https://www.redblobgames.com/grids/hexagons/.
   // Cube coordinates are what make a straight hex "line" (hasLineOfSight above) a simple lerp.
-  private static toCube(gridX: number, gridY: number): { x: number; y: number; z: number } {
+  public static toCube(gridX: number, gridY: number): { x: number; y: number; z: number } {
     const x = gridX - (gridY - (gridY & 1)) / 2;
     const z = gridY;
     return { x, y: -x - z, z };
   }
 
-  private static cubeToGrid(cube: { x: number; y: number; z: number }): [number, number] {
+  public static cubeToGrid(cube: { x: number; y: number; z: number }): [number, number] {
     const gridY = cube.z;
     return [cube.x + (gridY - (gridY & 1)) / 2, gridY];
   }

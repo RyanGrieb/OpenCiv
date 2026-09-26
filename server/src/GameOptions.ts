@@ -24,6 +24,9 @@ export interface GameOptions {
   // The health every city is founded with, out of its 200. Lower it to try capturing a city without
   // first spending turns wearing it down (see the CityCombat scenario).
   cityStartingHealth: number;
+  // Name of a hand-drawn patch of map in config/map_presets.yml, stamped around the first player's
+  // spawn so a scenario gets the same terrain every run (see MapPresets). Empty for a normal map.
+  mapPreset: string;
 }
 
 // Maps are streamed to clients in square chunks of this many tiles, so each dimension must divide evenly.
@@ -75,7 +78,8 @@ export const DefaultGameOptions: GameOptions = {
   startWithAllTechs: false,
   startWithBuilder: false,
   startWithArcher: false,
-  cityStartingHealth: 200
+  cityStartingHealth: 200,
+  mapPreset: ""
 };
 
 interface BaseGameOptionDefinition {

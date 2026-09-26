@@ -1,0 +1,62 @@
+# Hand-drawn patches of map for scenarios, chosen with the mapPreset game option (the client scenario
+# sends it from the lobby; `npm start -- --mapPreset=<name>` works too). The patch is stamped over the
+# generated map around the first player's spawn, so the rest of the world stays random.
+#
+#   legend - one letter per hex, mapped to its tile types in order: terrain, then any feature or resource.
+#   units  - extra starting units for the first player, placed on every hex with that letter.
+#   rows   - the patch as it lies on the hex grid. One space between hexes, and every other row starts
+#            with a space because it sits half a hex to the right. "S" is where the Settler starts.
+presets:
+  coastal_resources:
+    description: A coastal city with one of each sea resource in its first ring, and a Work Boat beside each.
+    legend:
+      "g": [grass]
+      "~": [shallow_ocean]
+      "O": [ocean]
+      "f": [shallow_ocean, fish]
+      "c": [shallow_ocean, crab]
+      "w": [shallow_ocean, whales]
+      "t": [shallow_ocean, turtles]
+      "e": [shallow_ocean, pearls]
+      "S": [grass]
+      "B": [shallow_ocean]
+    units:
+      "B": Work Boat
+    rows:
+      - "O O ~ ~ ~ ~ ~ O O"
+      - " ~ ~ B f c B ~ O O"
+      - "g g g g S w B ~ O"
+      - " g g g t e B ~ ~ O"
+      - "g g g B ~ ~ ~ O O"
+      - " g g ~ ~ ~ ~ O O O"
+
+  aquatic_sandbox:
+    description: A coastal city with sea resources in its first two rings, a few Work Boats, and a Galley that can't leave the coast.
+    legend:
+      "g": [grass]
+      "p": [plains]
+      "h": [grass_hill]
+      "F": [grass, forest]
+      "~": [shallow_ocean]
+      "O": [ocean]
+      "f": [shallow_ocean, fish]
+      "c": [shallow_ocean, crab]
+      "w": [shallow_ocean, whales]
+      "t": [shallow_ocean, turtles]
+      "e": [shallow_ocean, pearls]
+      "S": [grass]
+      "B": [shallow_ocean]
+      "G": [shallow_ocean]
+    units:
+      "B": Work Boat
+      "G": Galley
+    rows:
+      - "O O O ~ ~ ~ ~ ~ O O O"
+      - " O ~ ~ B ~ ~ ~ ~ ~ O O"
+      - "O ~ ~ ~ t ~ e B ~ ~ O"
+      - " ~ ~ ~ ~ f c ~ ~ G ~ O"
+      - "g g p g g S w B ~ ~ O"
+      - " g h g g g g ~ ~ ~ O O"
+      - "g F g g h g g ~ ~ O O"
+      - " g g F g g g ~ ~ O O O"
+      - "g g F g g ~ ~ O O O O"

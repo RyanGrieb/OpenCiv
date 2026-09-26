@@ -25,6 +25,11 @@ describe("ServerArgs", () => {
     });
   });
 
+  it("takes string options as given", () => {
+    expect(parse(["--mapPreset=coastal_resources"])).toEqual({ mapPreset: "coastal_resources" });
+    expect(parse(["--map-preset", "coastal_resources"])).toEqual({ mapPreset: "coastal_resources" });
+  });
+
   it("parses space-separated values", () => {
     expect(parse(["--numCityStates", "5"])).toEqual({ numCityStates: 5 });
   });

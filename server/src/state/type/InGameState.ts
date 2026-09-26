@@ -7,6 +7,7 @@ import { City } from "../../city/City";
 import { Job, gracefulShutdown, scheduleJob } from "node-schedule";
 
 import { Tile } from "../../map/Tile";
+import { MapPresets } from "../../map/MapPresets";
 import { Barbarians } from "../../barbarian/Barbarians";
 import { Player } from "../../Player";
 import { PlayerNotifications } from "../../notification/PlayerNotifications";
@@ -30,8 +31,9 @@ export class InGameState extends State {
   ];
 
   // Anywhere suitable on the map - or, with the spawnPlayersTogether option, two tiles from the first
-  // player's settler, falling back to anywhere if nothing that close is open.
-  private static chooseSpawnTile(firstSpawnTile: Tile | undefined): Tile {
+  // player's settler, falling back to anywhere if nothing that close is open. `edgeBuffer` keeps the
+  // spawn that many tiles in from the map's edges.
+  private static chooseSpawnTile(firstSpawnTile: Tile | undefined, edgeBuffer = 4): Tile {
     const spawnTogether = firstSpawnTile && Game.getInstance().getGameOptions().spawnPlayersTogether;
     const nearbyTile = spawnTogether ? InGameState.findSpawnTwoTilesFrom(firstSpawnTile) : undefined;
 
@@ -39,9 +41,25 @@ export class InGameState extends State {
       nearbyTile ??
       GameMap.getInstance().getRandomTileWith({
         avoidTileTypes: InGameState.SPAWN_AVOID_TILE_TYPES,
-        avoidMapEdge: 4
+        avoidMapEdge: edgeBuffer
       })
     );
+  }
+
+  // The mapPreset game option: picks the first player's spawn far enough in from the edges for the
+  // preset's patch, stamps the patch around it, and gives the player the preset's extra units.
+  private static spawnOnMapPreset(player: Player, presetName: string): Tile {
+    const preset = MapPresets.get(presetName);
+    const spawnTile = InGameState.chooseSpawnTile(undefined, Math.max(4, preset.radius + 1));
+
+    const stamped = MapPresets.stamp(preset, GameMap.getInstance().getTiles(), spawnTile);
+    console.log(`Stamped map preset "${preset.name}" around ${spawnTile.getX()},${spawnTile.getY()}`);
+
+    for (const { tile, cell } of stamped) {
+      if (cell.unit) tile.addUnit(Unit.createFromName(cell.unit, tile, player));
+    }
+
+    return spawnTile;
   }
 
   private static isOpenSpawnTile(tile: Tile | undefined): boolean {
@@ -138,7 +156,11 @@ export class InGameState extends State {
     Game.getInstance()
       .getPlayers()
       .forEach((player) => {
-        const spawnTile = InGameState.chooseSpawnTile(firstSpawnTile);
+        const mapPreset = Game.getInstance().getGameOptions().mapPreset;
+        const spawnTile =
+          !firstSpawnTile && mapPreset
+            ? InGameState.spawnOnMapPreset(player, mapPreset)
+            : InGameState.chooseSpawnTile(firstSpawnTile);
         firstSpawnTile ??= spawnTile;
 
         // From units.yml, so starting units match built ones (combat strength, the Settler's action).
