@@ -1255,7 +1255,7 @@ export class GameMap {
     if (!startTile || !goalTile) return [];
 
     // The unit could walk up to an occupied goal but never end its move on it.
-    if (goalTile !== startTile && goalTile.hasBlockingUnit(unit)) return [];
+    if (goalTile !== startTile && goalTile.isBlockedFor(unit)) return [];
 
     //TODO: Maybe we get the distance of the last path & apply it to h? Since it's just going to be a single tile off from the previous.
     let h = (n: Tile) => Math.floor(Tile.gridDistance(n, goalTile));

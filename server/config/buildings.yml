@@ -178,8 +178,8 @@ buildings:
     asset_name: BUILDING_WALL
     cost: 75
     required_tech: Masonry
-    # Java applies this as +5 combat strength/max health directly rather than a
-    # StatLine entry - mapped onto our generic `defense` stat, the closest analog.
+    # A city's `defense` stat adds to its combat strength (see City.getBaseStrength()).
+    city_health: 50
     stats:
       - defense: 5
   - name: Water Mill

@@ -21,6 +21,9 @@ export interface GameOptions {
   startWithBuilder: boolean;
   // An Archer beside every player's Settler, for trying out ranged combat (see the RangedCombat scenario).
   startWithArcher: boolean;
+  // The health every city is founded with, out of its 200. Lower it to try capturing a city without
+  // first spending turns wearing it down (see the CityCombat scenario).
+  cityStartingHealth: number;
 }
 
 // Maps are streamed to clients in square chunks of this many tiles, so each dimension must divide evenly.
@@ -71,7 +74,8 @@ export const DefaultGameOptions: GameOptions = {
   spawnPlayersTogether: false,
   startWithAllTechs: false,
   startWithBuilder: false,
-  startWithArcher: false
+  startWithArcher: false,
+  cityStartingHealth: 200
 };
 
 interface BaseGameOptionDefinition {
@@ -148,5 +152,14 @@ export const GameOptionDefinitions: GameOptionDefinition[] = [
   { key: "spawnPlayersTogether", label: "Spawn Players Together", type: "boolean", hidden: true },
   { key: "startWithAllTechs", label: "Start With All Techs", type: "boolean", hidden: true },
   { key: "startWithBuilder", label: "Start With a Builder", type: "boolean", hidden: true },
-  { key: "startWithArcher", label: "Start With an Archer", type: "boolean", hidden: true }
+  { key: "startWithArcher", label: "Start With an Archer", type: "boolean", hidden: true },
+  {
+    key: "cityStartingHealth",
+    label: "City Starting Health",
+    type: "number",
+    min: 1,
+    max: 200,
+    step: 1,
+    hidden: true
+  }
 ];

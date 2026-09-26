@@ -298,6 +298,10 @@ export class Player {
     return this.cities;
   }
 
+  public removeCity(city: City) {
+    this.cities = this.cities.filter((existingCity) => existingCity !== city);
+  }
+
   public getTotalStats(): TotalStats {
     const totals: TotalStats = {
       science: 0,

@@ -3,9 +3,11 @@ import { Game } from "../Game";
 import { Player } from "../Player";
 import { GameMap } from "../map/GameMap";
 import { StatEntry, StatValues, Tile } from "../map/Tile";
+import { Combat, CombatModifier } from "../unit/Combat";
 import { Unit } from "../unit/Unit";
 import { BorderGrowth } from "./BorderGrowth";
 import { Building } from "./Building";
+import { CityCombat } from "./CityCombat";
 
 export interface CityStats extends StatValues {
   population: number;
@@ -59,6 +61,11 @@ export class City {
   private territory: Tile[];
   private workedTiles: Tile[];
   private productionQueue: ProductionOption[];
+  private health: number;
+  // A city shoots at most once a turn, and not at all on the turn it changes hands.
+  private strikeSpent: boolean;
+  // What each player was last told about this city's health, strength and strike (see refreshCombatStatus()).
+  private sentCombatStatus: Map<Player, string>;
 
   /**
    * Creates a new City instance.
@@ -77,6 +84,9 @@ export class City {
     this.tilesAcquired = 0;
     this.productionQueue = [];
     this.workedTiles = [];
+    this.health = Math.min(CityCombat.BASE_MAX_HEALTH, Game.getInstance().getGameOptions().cityStartingHealth);
+    this.strikeSpent = false;
+    this.sentCombatStatus = new Map();
 
     // A new city claims the ring around it, except tiles another city already owns.
     this.territory = [this.tile];
@@ -200,10 +210,49 @@ export class City {
       }
     });
 
+    // The owner pressed the city's strike button: tell them which tiles it can reach.
+    ServerEvents.on({
+      eventName: "requestCityStrikeTargets",
+      parentObject: this,
+      callback: (data, websocket) => {
+        const player = Game.getInstance().getPlayerFromWebsocket(websocket);
+        if (this.name !== data["cityName"] || this.player !== player) return;
+
+        this.sendStrikeTargets();
+      }
+    });
+
+    ServerEvents.on({
+      eventName: "requestCityStrikePreview",
+      parentObject: this,
+      callback: (data, websocket) => {
+        const player = Game.getInstance().getPlayerFromWebsocket(websocket);
+        if (this.name !== data["cityName"] || this.player !== player) return;
+
+        const targetTile = GameMap.getInstance().getTiles()[data["targetX"]]?.[data["targetY"]];
+        const preview = targetTile ? this.getStrikePreview(targetTile) : undefined;
+        if (preview) player.sendNetworkEvent({ event: "combatPreview", ...preview });
+      }
+    });
+
+    ServerEvents.on({
+      eventName: "cityStrike",
+      parentObject: this,
+      callback: (data, websocket) => {
+        const player = Game.getInstance().getPlayerFromWebsocket(websocket);
+        if (this.name !== data["cityName"] || this.player !== player) return;
+
+        const targetTile = GameMap.getInstance().getTiles()[data["targetX"]]?.[data["targetY"]];
+        if (targetTile) this.strike(targetTile);
+      }
+    });
+
     ServerEvents.on({
       eventName: "nextTurn",
       parentObject: this,
       callback: () => {
+        this.strikeSpent = false;
+        this.heal();
         // Growth first, so a citizen gained this turn is already working a tile when
         // production is applied below.
         this.applyGrowth();
@@ -212,6 +261,26 @@ export class City {
         this.sendStatUpdate(this.player);
       }
     });
+  }
+
+  /**
+   * Resends each city's health, strength and whether it can strike, to whoever should know and only
+   * when it changed. Called after every client message and every turn, like PlayerNotifications -
+   * between them, those cover everything that moves these numbers (a fight, a garrison walking in,
+   * a citizen born, Walls finished, an enemy stepping into range).
+   */
+  public static refreshAllCombatStatus() {
+    Game.getInstance()
+      .getPlayers()
+      .forEach((player) => player.getCities().forEach((city) => city.refreshCombatStatus()));
+  }
+
+  // A civilization that lost its capital gets a new Palace in its first remaining city.
+  private static relocatePalace(player: Player) {
+    const cities = player.getCities();
+    if (cities.length < 1 || cities.some((city) => city.hasBuilding("Palace"))) return;
+
+    cities[0].addBuilding("Palace");
   }
 
   public updateWorkedTiles(options?: { sendStatUpdate: boolean }) {
@@ -451,6 +520,184 @@ export class City {
     return cityStats;
   }
 
+  public getHealth(): number {
+    return this.health;
+  }
+
+  public getMaxHealth(): number {
+    return this.buildings.reduce((total, building) => total + building.getCityHealth(), CityCombat.BASE_MAX_HEALTH);
+  }
+
+  public setHealth(health: number) {
+    this.health = Math.max(0, Math.min(this.getMaxHealth(), health));
+  }
+
+  /** Strength before the percentage modifiers in getDefenseModifiers(). */
+  public getBaseStrength(): number {
+    const buildingDefense = this.getStatline({ asArray: false }).defense;
+    const garrisonStrength = this.getGarrison()?.getCombatStrength() ?? 0;
+
+    return (
+      CityCombat.BASE_STRENGTH +
+      this.population * CityCombat.STRENGTH_PER_POPULATION +
+      buildingDefense +
+      garrisonStrength * CityCombat.GARRISON_STRENGTH_SHARE
+    );
+  }
+
+  // In place of the terrain bonuses a unit would get: a city on a hill is harder to take.
+  public getDefenseModifiers(): CombatModifier[] {
+    if (!this.tile.getTileTypes().some((type) => type.includes("hill"))) return [];
+
+    return [{ label: "Hill", value: CityCombat.HILL_STRENGTH_BONUS }];
+  }
+
+  /** What the city defends and shoots with. */
+  public getCombatStrength(): number {
+    const modifierTotal = this.getDefenseModifiers().reduce((total, modifier) => total + modifier.value, 0);
+    return this.getBaseStrength() * (1 + modifierTotal);
+  }
+
+  // The owner's military unit standing in the city, if any.
+  public getGarrison(): Unit | undefined {
+    return this.tile.getUnits().find((unit) => unit.getPlayer() === this.player && unit.canFight());
+  }
+
+  // Every tile within reach of the city's strike. Cities fire indirectly, so there's no line of sight check.
+  public getStrikeRangeTiles(): Tile[] {
+    return GameMap.getInstance()
+      .getTilesInRange(this.tile, CityCombat.STRIKE_RANGE)
+      .filter((tile) => tile !== this.tile);
+  }
+
+  // Like a ranged unit, a city only shoots enemies that can fight back, and only ones its owner can see.
+  public canStrikeAt(tile: Tile): boolean {
+    if (this.strikeSpent || !this.getStrikeTarget(tile)) return false;
+    if (!this.player.getVisibility().isVisible(tile)) return false;
+
+    return this.getStrikeRangeTiles().includes(tile);
+  }
+
+  public canStrike(): boolean {
+    if (this.strikeSpent) return false;
+
+    return this.getStrikeRangeTiles().some((tile) => this.canStrikeAt(tile));
+  }
+
+  /**
+   * The city's ranged strike: the target takes damage from the city's strength against its own
+   * (terrain included), and nothing comes back. A kill removes the target. Returns whether it fired.
+   */
+  public strike(targetTile: Tile): boolean {
+    if (!this.canStrikeAt(targetTile)) return false;
+
+    const defender = this.getStrikeTarget(targetTile);
+    this.strikeSpent = true;
+
+    const result = Combat.resolveRanged({
+      attackerStrength: this.getCombatStrength(),
+      attackerHealth: Combat.MAX_HEALTH,
+      defenderStrength: Combat.getDefenseStrength(defender.getCombatStrength(), targetTile),
+      defenderHealth: defender.getHealth()
+    });
+    defender.setHealth(result.defenderHealth);
+
+    const combatPacket = {
+      event: "unitCombat",
+      attackerCity: this.name,
+      defenderId: defender.getId(),
+      defenderHealth: defender.getHealth(),
+      ranged: true
+    };
+    Game.getInstance()
+      .getPlayers()
+      .forEach((player) => {
+        const visibility = player.getVisibility();
+        if (!visibility.isVisible(this.tile) && !visibility.isVisible(targetTile)) return;
+
+        player.sendNetworkEvent(combatPacket);
+      });
+
+    if (defender.getHealth() <= 0) defender.delete();
+    return true;
+  }
+
+  public getStrikePreview(targetTile: Tile) {
+    if (!this.canStrikeAt(targetTile)) return undefined;
+
+    const defender = this.getStrikeTarget(targetTile);
+
+    return {
+      attackerCity: this.name,
+      targetX: targetTile.getX(),
+      targetY: targetTile.getY(),
+      ranged: true,
+      defenderId: defender.getId(),
+      defenderName: defender.getName(),
+      attackerHealth: this.health,
+      attackerMaxHealth: this.getMaxHealth(),
+      defenderHealth: defender.getHealth(),
+      ...Combat.predictRanged({
+        attackerRangedStrength: this.getCombatStrength(),
+        attackerHealth: Combat.MAX_HEALTH,
+        defenderBaseStrength: defender.getCombatStrength(),
+        defenderHealth: defender.getHealth(),
+        targetTile
+      })
+    };
+  }
+
+  // The tiles the owner's client tints while aiming the strike.
+  public sendStrikeTargets() {
+    this.player.sendNetworkEvent({
+      event: "cityStrikeTargets",
+      cityName: this.name,
+      tiles: this.getStrikeRangeTiles().map((tile) => ({ x: tile.getX(), y: tile.getY() }))
+    });
+  }
+
+  /**
+   * Hands the city to the civilization whose melee unit took it, as in Civ 5: it loses half its
+   * citizens, its Palace and whatever it was building, and can't strike until next turn. It keeps its
+   * name, its other buildings and its damage. The previous owner's Palace moves to another of their
+   * cities, if they have one.
+   */
+  public captureBy(newOwner: Player) {
+    const previousOwner = this.player;
+
+    previousOwner.removeCity(this);
+    newOwner.getCities().push(this);
+    this.player = newOwner;
+
+    this.population = Math.max(1, Math.floor(this.population * (1 - CityCombat.CAPTURE_POPULATION_LOSS)));
+    this.foodSurplus = 0;
+    this.productionQueue = [];
+    this.strikeSpent = true;
+    this.buildings = this.buildings.filter((building) => building.getName() !== "Palace");
+    this.setHealth(this.health);
+    this.updateWorkedTiles({ sendStatUpdate: false });
+
+    City.relocatePalace(previousOwner);
+
+    previousOwner.getVisibility().update();
+    newOwner.getVisibility().update();
+    this.sendCaptured();
+    // The new owner's client only knows of buildings finished while it owned the city.
+    this.buildings.forEach((building) =>
+      newOwner.sendNetworkEvent({ event: "addBuilding", cityName: this.name, building: building.toJSON() })
+    );
+    this.sendStatUpdate(newOwner);
+    previousOwner.sendTotalStatsUpdate();
+
+    // The borders changing hands changes what either side's Builders can build there.
+    [previousOwner, newOwner].forEach((player) => player.getUnits().forEach((unit) => unit.sendActionsToOwner()));
+
+    previousOwner
+      .getNotifications()
+      .addMessage("ICON_DEFENSE", `${this.name} has been captured by ${newOwner.getName()}!`);
+    newOwner.getNotifications().addMessage("ICON_ACCEPT", `You have captured ${this.name}!`);
+  }
+
   public getFoodRequiredToGrow(): number {
     return City.GROWTH_FOOD_BASE + City.GROWTH_FOOD_PER_POP * this.population;
   }
@@ -506,9 +753,63 @@ export class City {
       tileX: this.tile.getX(),
       tileY: this.tile.getY(),
       territory: territoryCoords,
+      health: this.health,
+      maxHealth: this.getMaxHealth(),
+      strength: this.getCombatStrength(),
       // Which tiles a city works is its owner's business.
       workedTiles: ownCity ? this.workedTiles.map((tile) => ({ x: tile.getX(), y: tile.getY() })) : []
     };
+  }
+
+  private hasBuilding(name: string): boolean {
+    return this.buildings.some((building) => building.getName() === name);
+  }
+
+  private getStrikeTarget(tile: Tile): Unit | undefined {
+    return tile.getUnits().find((unit) => unit.getPlayer() !== this.player && unit.canFight());
+  }
+
+  private heal() {
+    if (this.health >= this.getMaxHealth()) return;
+
+    this.setHealth(this.health + CityCombat.HEAL_PER_TURN);
+  }
+
+  // Health and strength go to everyone who can see the city (its banner shows them); whether it can
+  // strike only goes to the owner.
+  private refreshCombatStatus() {
+    Game.getInstance()
+      .getPlayers()
+      .forEach((player) => {
+        if (!player.getVisibility().isVisible(this.tile)) return;
+
+        const status = {
+          event: "cityCombatStatus",
+          cityName: this.name,
+          health: this.health,
+          maxHealth: this.getMaxHealth(),
+          strength: this.getCombatStrength(),
+          canStrike: player === this.player && this.canStrike()
+        };
+        const json = JSON.stringify(status);
+        if (this.sentCombatStatus.get(player) === json) return;
+
+        this.sentCombatStatus.set(player, json);
+        player.sendNetworkEvent(status);
+      });
+  }
+
+  // Everyone who knows of any of this city's territory redraws it in its new owner's colors.
+  private sendCaptured() {
+    this.sentCombatStatus.clear();
+
+    Game.getInstance()
+      .getPlayers()
+      .forEach((player) => {
+        if (!this.territory.some((tile) => player.getVisibility().hasDiscovered(tile))) return;
+
+        player.sendNetworkEvent({ event: "cityCaptured", ...this.getJSON({ observer: player }) });
+      });
   }
 
   private applyFoundingBonuses() {
@@ -529,7 +830,7 @@ export class City {
       .filter((unit) => typeof unit.cost === "number" && isUnlocked(unit.required_tech))
       .map((unit) => ({ type: "unit", name: unit.name, cost: unit.cost }));
 
-    const buildingExists = (name: string) => this.buildings.some((b) => b.getName() === name);
+    const buildingExists = (name: string) => this.hasBuilding(name);
     const buildingInQueue = (name: string) => this.productionQueue.some((q) => q.name === name);
 
     const buildings: ProductionOption[] = Building.getAllBuildings()

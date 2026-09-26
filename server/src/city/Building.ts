@@ -9,6 +9,8 @@ export interface BuildingData {
   // Palace, which is only ever granted directly by applyFoundingBonuses()).
   cost?: number;
   required_tech?: string;
+  // Extra hit points the building gives its city, e.g. Walls.
+  city_health?: number;
 }
 
 export class Building {
@@ -18,6 +20,7 @@ export class Building {
   private isWonder: boolean;
   private cost?: number;
   private requiredTech?: string;
+  private cityHealth: number;
 
   constructor(data: BuildingData) {
     this.name = data.name;
@@ -25,6 +28,7 @@ export class Building {
     this.isWonder = data.is_wonder ?? false;
     this.cost = data.cost;
     this.requiredTech = data.required_tech;
+    this.cityHealth = data.city_health ?? 0;
 
     this.statLine = {};
     for (const stat of data.stats) {
@@ -74,6 +78,10 @@ export class Building {
 
   public getRequiredTech(): string | undefined {
     return this.requiredTech;
+  }
+
+  public getCityHealth(): number {
+    return this.cityHealth;
   }
 
   // Reconstructs the {name, asset_name, stats} wire shape the client's own

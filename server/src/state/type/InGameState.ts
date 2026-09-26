@@ -268,6 +268,7 @@ export class InGameState extends State {
       });
 
     PlayerNotifications.refreshAll();
+    City.refreshAllCombatStatus();
   }
   public onDestroyed() {
     if (this.turnTimeJob) {

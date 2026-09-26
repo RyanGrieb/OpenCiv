@@ -13,7 +13,8 @@ export enum NotificationPriority {
 
 // What the client does when the notification is clicked: open the research tree, open a city
 // needing production, select a unit needing orders, or dismiss a one-off message.
-export type NotificationType = "research" | "production" | "unitOrders" | "message";
+// A "cityStrike" click starts aiming a city that has an enemy in range.
+export type NotificationType = "research" | "production" | "unitOrders" | "cityStrike" | "message";
 
 export interface NotificationData {
   id: string;
@@ -25,7 +26,7 @@ export interface NotificationData {
   // Set when the player must deal with this before ending the turn. The client's Next Turn button
   // shows this label and acts on the notification instead.
   turnBlockingLabel?: string;
-  // What a click cycles through, for "production" and "unitOrders".
+  // What a click cycles through, for "production", "cityStrike" and "unitOrders".
   cityNames?: string[];
   unitIds?: number[];
 }
@@ -173,7 +174,12 @@ export class PlayerNotifications {
 
   /** Every active notification, highest priority first. */
   public getNotifications(): NotificationData[] {
-    const derived = [this.getResearchNotification(), this.getProductionNotification(), this.getUnitOrdersNotification()];
+    const derived = [
+      this.getResearchNotification(),
+      this.getProductionNotification(),
+      this.getCityStrikeNotification(),
+      this.getUnitOrdersNotification()
+    ];
     const notifications = [...derived.filter((notification) => notification), ...this.messages.map((message) => message.data)];
 
     // Stable sort: equal priorities keep the order they were added in.
@@ -207,6 +213,21 @@ export class PlayerNotifications {
       priority: NotificationPriority.MEDIUM,
       turnBlockingLabel: "Choose Production",
       cityNames: idleCities.map((city) => city.getName())
+    };
+  }
+
+  // Civ 5's "your city can attack" reminder, while a city has an enemy in range and hasn't fired this turn.
+  private getCityStrikeNotification(): NotificationData | undefined {
+    const readyCities = this.player.getCities().filter((city) => city.canStrike());
+    if (readyCities.length < 1) return undefined;
+
+    return {
+      id: "cityStrike",
+      type: "cityStrike",
+      icon: "ICON_TARGET",
+      text: "A city can attack an enemy unit.",
+      priority: NotificationPriority.MEDIUM,
+      cityNames: readyCities.map((city) => city.getName())
     };
   }
 

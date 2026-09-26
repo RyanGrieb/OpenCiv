@@ -23,46 +23,46 @@ describe('Tile', () => {
   it('has no blocking unit when the tile is empty', () => {
     const mover = fakeUnit(false, playerA);
 
-    expect(tile.hasBlockingUnit(mover)).toBe(false);
+    expect(tile.isBlockedFor(mover)).toBe(false);
   });
 
   it('excludes the moving unit itself from the blocking check', () => {
     const mover = fakeUnit(false, playerA);
     tile.addUnit(mover);
 
-    expect(tile.hasBlockingUnit(mover)).toBe(false);
+    expect(tile.isBlockedFor(mover)).toBe(false);
   });
 
   it('blocks a same-type ally unit (two non-utility units)', () => {
     tile.addUnit(fakeUnit(false, playerA));
 
-    expect(tile.hasBlockingUnit(fakeUnit(false, playerA))).toBe(true);
+    expect(tile.isBlockedFor(fakeUnit(false, playerA))).toBe(true);
   });
 
   it('blocks a same-type ally unit (two utility units)', () => {
     tile.addUnit(fakeUnit(true, playerA));
 
-    expect(tile.hasBlockingUnit(fakeUnit(true, playerA))).toBe(true);
+    expect(tile.isBlockedFor(fakeUnit(true, playerA))).toBe(true);
   });
 
   it('allows a different-type ally unit to share the tile', () => {
     tile.addUnit(fakeUnit(true, playerA));
 
-    expect(tile.hasBlockingUnit(fakeUnit(false, playerA))).toBe(false);
+    expect(tile.isBlockedFor(fakeUnit(false, playerA))).toBe(false);
   });
 
   it('blocks any enemy unit regardless of utility type', () => {
     tile.addUnit(fakeUnit(true, playerB));
 
-    expect(tile.hasBlockingUnit(fakeUnit(false, playerA))).toBe(true);
+    expect(tile.isBlockedFor(fakeUnit(false, playerA))).toBe(true);
   });
 
   it('lets a same-type ally be passed through, but not an enemy', () => {
     tile.addUnit(fakeUnit(false, playerA));
-    expect(tile.hasImpassableUnit(fakeUnit(false, playerA))).toBe(false);
+    expect(tile.isImpassableFor(fakeUnit(false, playerA))).toBe(false);
 
     tile.addUnit(fakeUnit(true, playerB));
-    expect(tile.hasImpassableUnit(fakeUnit(false, playerA))).toBe(true);
+    expect(tile.isImpassableFor(fakeUnit(false, playerA))).toBe(true);
   });
 
   it('only places a new unit where it could stack', () => {

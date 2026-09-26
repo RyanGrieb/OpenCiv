@@ -1,3 +1,4 @@
+import { City } from "../city/City";
 import { ServerEvents } from "../Events";
 import { Game } from "../Game";
 import { Player } from "../Player";
@@ -535,7 +536,7 @@ export class Unit {
       // Same-type ally units can be walked through, just not stopped on - so only the destination
       // has to be free to stop on, while tiles along the way only need to be passable.
       const isDestination = i + 1 === shortestPath.length - 1;
-      if (isDestination ? nextTile.hasBlockingUnit(this) : nextTile.hasImpassableUnit(this)) {
+      if (isDestination ? nextTile.isBlockedFor(this) : nextTile.isImpassableFor(this)) {
         blocked = true;
         break;
       }
@@ -553,7 +554,7 @@ export class Unit {
     // Running out of movement while passing through an ally isn't allowed to leave us stacked on it,
     // so stop at the last tile along the way that we can actually end the move on.
     let arrivedIndex = traversedTiles.length - 1;
-    while (arrivedIndex > 0 && traversedTiles[arrivedIndex].hasBlockingUnit(this)) {
+    while (arrivedIndex > 0 && traversedTiles[arrivedIndex].isBlockedFor(this)) {
       arrivedIndex--;
     }
     const stoppedTiles = traversedTiles.slice(0, arrivedIndex + 1);
@@ -572,19 +573,23 @@ export class Unit {
   }
 
   // Civ 5 melee: both sides trade damage, and if the defender dies the attacker advances onto its
-  // tile. Every other civilization counts as an enemy, since there's no diplomacy yet. Returns
-  // whether an attack actually happened.
+  // tile. An enemy city is fought instead of whatever stands in it (see meleeAttackCity()). Every
+  // other civilization counts as an enemy, since there's no diplomacy yet. Returns whether an attack
+  // actually happened.
   public meleeAttack(targetTile: Tile): boolean {
     if (!this.canMeleeAttack(targetTile)) return false;
+
+    this.spendAttack();
+
+    const city = this.getEnemyCity(targetTile);
+    if (city) {
+      this.meleeAttackCity(city);
+      return true;
+    }
 
     const originTile = this.tile;
     const enemies = targetTile.getUnits().filter((unit) => unit.getPlayer() !== this.player);
     const defender = enemies.find((unit) => unit.canFight());
-
-    this.availableMovement = 0;
-    this.actedThisTurn = true;
-    this.setFortified(false);
-    this.clearMovementQueue();
 
     if (defender) {
       const result = Combat.resolveMelee({
@@ -621,32 +626,15 @@ export class Unit {
     const survivors = targetTile.getUnits().filter((unit) => unit.getPlayer() !== this.player);
     if (survivors.some((unit) => unit.canFight())) return true;
 
-    // Cities can't be attacked or captured yet, so a melee kill doesn't carry a unit into one.
-    const city = targetTile.getCityTerritoryOf();
-    if (targetTile.getCity() && city && city.getPlayer() !== this.player) return true;
-
-    const capturedTypes = survivors
-      .map((unit) => Unit.getUnitYMLTypeDataByName(unit.name)?.captured_as)
-      .filter((capturedAs) => capturedAs !== undefined);
-    survivors.forEach((unit) => unit.delete());
-
-    this.moveToTile({
-      previousTile: originTile,
-      targetTile: targetTile,
-      remainingTiles: [],
-      remainingMovement: 0
-    });
-
-    // Civ 5 captives change hands where they stood, and can't move until the next turn.
-    for (const capturedAs of capturedTypes) {
-      targetTile.addUnit(Unit.createFromName(capturedAs, targetTile, this.player, { availableMovement: 0 }));
-    }
-
+    this.overrunTile(originTile, targetTile);
     return true;
   }
 
   public getMeleePreview(targetTile: Tile) {
     if (!this.canMeleeAttack(targetTile)) return undefined;
+
+    const city = this.getEnemyCity(targetTile);
+    if (city) return this.getMeleeCityPreview(city);
 
     // Like old_java's UnitCombatWindow, there's nothing to preview when nothing can fight back.
     const defender = targetTile.getUnits().find((unit) => unit.getPlayer() !== this.player && unit.canFight());
@@ -679,13 +667,15 @@ export class Unit {
   public rangedAttack(targetTile: Tile): boolean {
     if (!this.canRangedAttack(targetTile)) return false;
 
+    this.spendAttack();
+
+    const city = this.getEnemyCity(targetTile);
+    if (city) {
+      this.rangedAttackCity(city);
+      return true;
+    }
+
     const defender = this.getRangedDefender(targetTile);
-
-    this.availableMovement = 0;
-    this.actedThisTurn = true;
-    this.setFortified(false);
-    this.clearMovementQueue();
-
     const result = Combat.resolveRanged({
       attackerStrength: this.rangedStrength,
       attackerHealth: this.health,
@@ -702,6 +692,9 @@ export class Unit {
 
   public getRangedPreview(targetTile: Tile) {
     if (!this.canRangedAttack(targetTile)) return undefined;
+
+    const city = this.getEnemyCity(targetTile);
+    if (city) return this.getRangedCityPreview(city);
 
     const defender = this.getRangedDefender(targetTile);
 
@@ -724,11 +717,12 @@ export class Unit {
     };
   }
 
-  // Needs movement left, a visible enemy that can fight back (Civ 5 won't let ranged units shoot lone
-  // civilians - those are captured by melee units), and a tile within range and line of sight.
+  // Needs movement left, a visible enemy city or an enemy that can fight back (Civ 5 won't let ranged
+  // units shoot lone civilians - those are captured by melee units), and a tile within range and line
+  // of sight.
   public canRangedAttack(targetTile: Tile): boolean {
     if (!this.isRanged() || !this.canFight() || this.availableMovement <= 0) return false;
-    if (!this.getRangedDefender(targetTile)) return false;
+    if (!this.getEnemyCity(targetTile) && !this.getRangedDefender(targetTile)) return false;
     if (!this.player.getVisibility().isVisible(targetTile)) return false;
 
     return this.getRangedTargetTiles().includes(targetTile);
@@ -765,6 +759,7 @@ export class Unit {
     if (this.tile.isWater() || targetTile.isWater()) return false;
     if (!this.tile.getAdjacentTiles().includes(targetTile)) return false;
 
+    if (this.getEnemyCity(targetTile)) return true;
     return targetTile.getUnits().some((unit) => unit.getPlayer() !== this.player);
   }
 
@@ -827,6 +822,15 @@ export class Unit {
 
   public getHealth() {
     return this.health;
+  }
+
+  // For damage dealt by something other than a unit, e.g. a city's strike. Doesn't tell any client.
+  public setHealth(health: number) {
+    this.health = Math.max(0, Math.min(Combat.MAX_HEALTH, health));
+  }
+
+  public getName() {
+    return this.name;
   }
 
   public getCombatStrength() {
@@ -932,13 +936,13 @@ export class Unit {
     if (!neighbor) return current.getMovementCost();
 
     // Pathing may route through same-type allies; whether the goal itself is free is checked by the caller.
-    if (neighbor.hasImpassableUnit(this)) {
+    if (neighbor.isImpassableFor(this)) {
       return 9999;
     }
 
     // Entering a same-type ally's tile with our whole turn's movement would still leave us stopped on
     // it, which isn't allowed - so we could never get past it. Route around instead.
-    if (neighbor.hasBlockingUnit(this) && Tile.getWeight(current, neighbor, this) >= this.defaultMoveDistance) {
+    if (neighbor.isBlockedFor(this) && Tile.getWeight(current, neighbor, this) >= this.defaultMoveDistance) {
       return 9999;
     }
 
@@ -949,6 +953,150 @@ export class Unit {
     if (this.queuedMovementTiles.length < 1) return undefined;
 
     return this.queuedMovementTiles[this.queuedMovementTiles.length - 1];
+  }
+
+  // Attacking uses up the rest of the turn, and breaks off whatever the unit was doing.
+  private spendAttack() {
+    this.availableMovement = 0;
+    this.actedThisTurn = true;
+    this.setFortified(false);
+    this.clearMovementQueue();
+  }
+
+  private getEnemyCity(tile: Tile): City | undefined {
+    const city = tile.getCity();
+    return city && city.getPlayer() !== this.player ? city : undefined;
+  }
+
+  // Civ 5 melee against a city: the city fights back with its own strength, and if it's brought to
+  // 0 HP the attacker (should it survive) marches in and captures it.
+  private meleeAttackCity(city: City) {
+    const originTile = this.tile;
+    const targetTile = city.getTile();
+
+    const result = Combat.resolveMelee({
+      attackerStrength: Combat.getAttackStrength(this.combatStrength, originTile, targetTile),
+      attackerHealth: this.health,
+      defenderStrength: city.getCombatStrength(),
+      defenderHealth: city.getHealth(),
+      defenderIsCity: true
+    });
+    this.health = result.attackerHealth;
+    city.setHealth(result.defenderHealth);
+
+    this.broadcastCityCombat(originTile, city, { ranged: false });
+
+    if (this.health <= 0) {
+      this.delete();
+      return;
+    }
+    if (city.getHealth() > 0) return;
+
+    // Whatever was left inside is destroyed or captured along with the city.
+    city.captureBy(this.player);
+    this.overrunTile(originTile, targetTile);
+  }
+
+  // Ranged units can batter a city down, but never below 1 HP - only a melee unit can take it.
+  private rangedAttackCity(city: City) {
+    const result = Combat.resolveRanged({
+      attackerStrength: this.rangedStrength,
+      attackerHealth: this.health,
+      defenderStrength: city.getCombatStrength(),
+      defenderHealth: city.getHealth(),
+      minDefenderHealth: 1
+    });
+    city.setHealth(result.defenderHealth);
+
+    this.broadcastCityCombat(this.tile, city, { ranged: true });
+  }
+
+  private getMeleeCityPreview(city: City) {
+    return {
+      attackerId: this.id,
+      targetX: city.getTile().getX(),
+      targetY: city.getTile().getY(),
+      defenderCity: city.getName(),
+      attackerHealth: this.health,
+      defenderHealth: city.getHealth(),
+      defenderMaxHealth: city.getMaxHealth(),
+      ...Combat.predictMelee({
+        attackerBaseStrength: this.combatStrength,
+        attackerHealth: this.health,
+        defenderBaseStrength: city.getBaseStrength(),
+        defenderHealth: city.getHealth(),
+        fromTile: this.tile,
+        targetTile: city.getTile(),
+        defenderModifiers: city.getDefenseModifiers(),
+        defenderIsCity: true
+      })
+    };
+  }
+
+  private getRangedCityPreview(city: City) {
+    return {
+      attackerId: this.id,
+      targetX: city.getTile().getX(),
+      targetY: city.getTile().getY(),
+      ranged: true,
+      defenderCity: city.getName(),
+      attackerHealth: this.health,
+      defenderHealth: city.getHealth(),
+      defenderMaxHealth: city.getMaxHealth(),
+      ...Combat.predictRanged({
+        attackerRangedStrength: this.rangedStrength,
+        attackerHealth: this.health,
+        defenderBaseStrength: city.getBaseStrength(),
+        defenderHealth: city.getHealth(),
+        targetTile: city.getTile(),
+        defenderModifiers: city.getDefenseModifiers(),
+        minDefenderHealth: 1
+      })
+    };
+  }
+
+  // The melee attacker moves onto a tile nothing can defend any more. Enemy units left there are
+  // destroyed, except civilians that Civ 5 captures: they change hands where they stood, and can't
+  // move until the next turn.
+  private overrunTile(originTile: Tile, targetTile: Tile) {
+    const survivors = targetTile.getUnits().filter((unit) => unit.getPlayer() !== this.player);
+    const capturedTypes = survivors
+      .map((unit) => Unit.getUnitYMLTypeDataByName(unit.name)?.captured_as)
+      .filter((capturedAs) => capturedAs !== undefined);
+    survivors.forEach((unit) => unit.delete());
+
+    this.moveToTile({
+      previousTile: originTile,
+      targetTile: targetTile,
+      remainingTiles: [],
+      remainingMovement: 0
+    });
+
+    for (const capturedAs of capturedTypes) {
+      targetTile.addUnit(Unit.createFromName(capturedAs, targetTile, this.player, { availableMovement: 0 }));
+    }
+  }
+
+  // Like broadcastCombat(), for a fight with a city: the city's side is its name and new health.
+  private broadcastCityCombat(originTile: Tile, city: City, options: { ranged: boolean }) {
+    const combatPacket = {
+      event: "unitCombat",
+      attackerId: this.id,
+      attackerHealth: this.health,
+      attackerRemainingMovement: this.availableMovement,
+      defenderCity: city.getName(),
+      defenderCityHealth: city.getHealth(),
+      ranged: options.ranged
+    };
+
+    Game.getInstance()
+      .getPlayers()
+      .forEach((player) => {
+        const visibility = player.getVisibility();
+        if (!visibility.isVisible(originTile) && !visibility.isVisible(city.getTile())) return;
+
+        player.sendNetworkEvent(combatPacket);
+      });
   }
 
   private getRangedDefender(targetTile: Tile): Unit | undefined {

@@ -91,7 +91,7 @@ export class Barbarians {
   }
 
   private static canStandOn(unit: Unit, tile: Tile): boolean {
-    return !tile.isWater() && tile.getMovementCost() < 9999 && !tile.hasBlockingUnit(unit);
+    return !tile.isWater() && tile.getMovementCost() < 9999 && !tile.isBlockedFor(unit);
   }
 
   public getPlayer() {

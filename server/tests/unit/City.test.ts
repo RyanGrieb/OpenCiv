@@ -5,6 +5,7 @@ import { Player } from '../../src/Player';
 import { Game } from '../../src/Game';
 import { ServerEvents } from '../../src/Events';
 import { Unit } from '../../src/unit/Unit';
+import { Combat } from '../../src/unit/Combat';
 import { WebSocket } from 'ws';
 
 jest.mock('../../src/map/GameMap');
@@ -43,6 +44,8 @@ describe('City', () => {
       getResource: jest.fn(),
       addUnit: jest.fn(),
       canPlaceUnit: jest.fn().mockReturnValue(true),
+      getTileTypes: jest.fn().mockReturnValue(['grass', 'city']),
+      getUnits: jest.fn().mockReturnValue([]),
     } as unknown as jest.Mocked<Tile>;
 
     // With population 1, City.updateWorkedTiles works one tile beyond the city's
@@ -63,6 +66,7 @@ describe('City', () => {
       getCities: jest.fn().mockReturnValue([]),
       hasResearchedTech: jest.fn().mockReturnValue(false),
       getNotifications: jest.fn().mockReturnValue(mockNotifications),
+      removeCity: jest.fn(),
     } as unknown as jest.Mocked<Player>;
 
     (Unit.getAllUnitData as jest.Mock).mockReturnValue([
@@ -78,6 +82,7 @@ describe('City', () => {
 
     jest.spyOn(Game, 'getInstance').mockReturnValue({
       getPlayerFromWebsocket: jest.fn().mockReturnValue(mockPlayer),
+      getGameOptions: jest.fn().mockReturnValue({ cityStartingHealth: 200 }),
     } as any);
 
     onSpy = jest.spyOn(ServerEvents, 'on').mockImplementation(() => { });
@@ -637,6 +642,7 @@ describe('City', () => {
       (Game.getInstance as jest.Mock).mockReturnValue({
         getPlayerFromWebsocket: jest.fn().mockReturnValue(mockPlayer),
         getPlayers: jest.fn().mockReturnValue([mockPlayer]),
+        getGameOptions: jest.fn().mockReturnValue({ cityStartingHealth: 200 }),
       });
     });
 
@@ -723,6 +729,143 @@ describe('City', () => {
           cityStats: expect.arrayContaining([{ cultureStored: 3 }, { cultureRequiredToExpand: 20 }]),
         })
       );
+    });
+  });
+  describe('combat', () => {
+    const enemyPlayer = { getName: () => 'Enemy' } as unknown as Player;
+    const visibility = { isVisible: jest.fn().mockReturnValue(true), update: jest.fn() };
+    let targetTile: jest.Mocked<Tile>;
+    let enemyUnit: jest.Mocked<Unit>;
+
+    beforeEach(() => {
+      (mockPlayer as any).getVisibility = jest.fn().mockReturnValue(visibility);
+      (enemyPlayer as any).getVisibility = jest.fn().mockReturnValue(visibility);
+      (enemyPlayer as any).sendNetworkEvent = jest.fn();
+      visibility.isVisible.mockReturnValue(true);
+
+      enemyUnit = {
+        getPlayer: jest.fn().mockReturnValue(enemyPlayer),
+        canFight: jest.fn().mockReturnValue(true),
+        getCombatStrength: jest.fn().mockReturnValue(8),
+        getHealth: jest.fn().mockReturnValue(100),
+        setHealth: jest.fn(),
+        getId: jest.fn().mockReturnValue(7),
+        getName: jest.fn().mockReturnValue('Warrior'),
+        delete: jest.fn(),
+      } as unknown as jest.Mocked<Unit>;
+      targetTile = {
+        getX: jest.fn().mockReturnValue(2),
+        getY: jest.fn().mockReturnValue(0),
+        getUnits: jest.fn().mockReturnValue([enemyUnit]),
+        getTileTypes: jest.fn().mockReturnValue(['grass']),
+      } as unknown as jest.Mocked<Tile>;
+
+      (GameMap.getInstance as jest.Mock).mockReturnValue({
+        getTileWithHighestYeild: jest.fn().mockReturnValue(undefined),
+        getTilesInRange: jest.fn().mockReturnValue([mockTile, targetTile]),
+        getTiles: jest.fn().mockReturnValue({ 2: { 0: targetTile } }),
+        broadcastTileUpdate: jest.fn(),
+      });
+      (Game.getInstance as jest.Mock).mockReturnValue({
+        getPlayerFromWebsocket: jest.fn().mockReturnValue(mockPlayer),
+        getPlayers: jest.fn().mockReturnValue(new Map([['Me', mockPlayer], ['Enemy', enemyPlayer]])),
+        getGameOptions: jest.fn().mockReturnValue({ cityStartingHealth: 200 }),
+      });
+    });
+
+    it('starts at 200 HP with strength 8 plus 0.4 per citizen', () => {
+      expect(city.getHealth()).toBe(200);
+      expect(city.getMaxHealth()).toBe(200);
+      expect(city.getCombatStrength()).toBeCloseTo(8.4);
+    });
+
+    it('adds building defense, a fifth of the garrison, and 25% on a hill', () => {
+      const garrison = { getPlayer: () => mockPlayer, canFight: () => true, getCombatStrength: () => 10 };
+      mockTile.getUnits.mockReturnValue([garrison as unknown as Unit]);
+      city.addBuilding('Walls');
+
+      expect(city.getMaxHealth()).toBe(250);
+      expect(city.getBaseStrength()).toBeCloseTo(8 + 0.4 + 5 + 2);
+
+      mockTile.getTileTypes.mockReturnValue(['grass_hill', 'city']);
+      expect(city.getCombatStrength()).toBeCloseTo((8 + 0.4 + 5 + 2) * 1.25);
+    });
+
+    it('is founded with the cityStartingHealth game option', () => {
+      (Game.getInstance().getGameOptions as jest.Mock).mockReturnValue({ cityStartingHealth: 30 });
+
+      expect(new City({ tile: mockTile, player: mockPlayer }).getHealth()).toBe(30);
+    });
+
+    it('heals 20 HP a turn, up to its maximum', () => {
+      city.setHealth(150);
+      triggerServerEvent('nextTurn', { turn: 2 });
+      expect(city.getHealth()).toBe(170);
+
+      city.setHealth(195);
+      triggerServerEvent('nextTurn', { turn: 3 });
+      expect(city.getHealth()).toBe(200);
+    });
+
+    it('strikes a visible enemy in range once a turn, taking no damage', () => {
+      jest.spyOn(Combat, 'resolveRanged').mockReturnValue({ attackerHealth: 100, defenderHealth: 75 });
+
+      expect(city.canStrike()).toBe(true);
+      triggerServerEvent('cityStrike', { cityName: 'TestCity', targetX: 2, targetY: 0 }, {} as WebSocket);
+
+      expect(enemyUnit.setHealth).toHaveBeenCalledWith(75);
+      expect(city.getHealth()).toBe(200);
+      expect(enemyPlayer.sendNetworkEvent).toHaveBeenCalledWith(
+        expect.objectContaining({ event: 'unitCombat', attackerCity: 'TestCity', defenderId: 7, ranged: true })
+      );
+      expect(city.canStrike()).toBe(false);
+      expect(city.strike(targetTile)).toBe(false);
+
+      triggerServerEvent('nextTurn', { turn: 2 });
+      expect(city.canStrike()).toBe(true);
+    });
+
+    it("won't strike civilians, or enemies its owner can't see", () => {
+      enemyUnit.canFight.mockReturnValue(false);
+      expect(city.canStrikeAt(targetTile)).toBe(false);
+
+      enemyUnit.canFight.mockReturnValue(true);
+      visibility.isVisible.mockReturnValue(false);
+      expect(city.canStrikeAt(targetTile)).toBe(false);
+    });
+
+    it('changes hands when captured: half the citizens, no Palace, nothing in production, no strike this turn', () => {
+      (enemyPlayer as any).getCities = jest.fn().mockReturnValue([]);
+      (enemyPlayer as any).getUnits = jest.fn().mockReturnValue([]);
+      (enemyPlayer as any).getNotifications = jest.fn().mockReturnValue({ addMessage: jest.fn() });
+      (enemyPlayer as any).sendTotalStatsUpdate = jest.fn();
+      (mockPlayer as any).getUnits = jest.fn().mockReturnValue([]);
+      (visibility as any).hasDiscovered = jest.fn().mockReturnValue(true);
+      city.addBuilding('Palace');
+      city['population'] = 5;
+      city['productionQueue'] = [{ type: 'unit', name: 'Warrior', cost: 30, progress: 10 }];
+
+      city.captureBy(enemyPlayer);
+
+      expect(city.getPlayer()).toBe(enemyPlayer);
+      expect(mockPlayer.removeCity).toHaveBeenCalledWith(city);
+      expect(city['population']).toBe(2);
+      expect(city['buildings'].map((building) => building.getName())).not.toContain('Palace');
+      expect(city.getProductionQueue()).toEqual([]);
+      expect(city.canStrike()).toBe(false);
+      expect(mockPlayer.sendNetworkEvent).toHaveBeenCalledWith(
+        expect.objectContaining({ event: 'cityCaptured', cityName: 'TestCity', player: 'Enemy' })
+      );
+      expect(mockNotifications.addMessage).toHaveBeenCalledWith('ICON_DEFENSE', 'TestCity has been captured by Enemy!');
+    });
+
+    it("moves the loser's Palace to its next city", () => {
+      const otherCity = { hasBuilding: jest.fn().mockReturnValue(false), addBuilding: jest.fn() };
+      (mockPlayer.getCities as jest.Mock).mockReturnValue([otherCity]);
+
+      City['relocatePalace'](mockPlayer);
+
+      expect(otherCity.addBuilding).toHaveBeenCalledWith('Palace');
     });
   });
 });

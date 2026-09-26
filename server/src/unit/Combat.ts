@@ -101,9 +101,12 @@ export class Combat {
     defenderHealth: number;
     fromTile: Tile;
     targetTile: Tile;
+    // A city defends with its own modifiers (see City.getDefenseModifiers()) instead of the tile's.
+    defenderModifiers?: CombatModifier[];
+    defenderIsCity?: boolean;
   }): CombatPrediction {
     const attackerModifiers = Combat.getAttackModifiers(options.fromTile, options.targetTile);
-    const defenderModifiers = Combat.getDefenseModifiers(options.targetTile);
+    const defenderModifiers = options.defenderModifiers ?? Combat.getDefenseModifiers(options.targetTile);
     const attackerStrength = options.attackerBaseStrength * (1 + Combat.sumModifiers(attackerModifiers));
     const defenderStrength = options.defenderBaseStrength * (1 + Combat.sumModifiers(defenderModifiers));
 
@@ -118,7 +121,7 @@ export class Combat {
         : Combat.getDamage({
             strength: defenderStrength,
             opponentStrength: attackerStrength,
-            health: options.defenderHealth,
+            health: options.defenderIsCity ? Combat.MAX_HEALTH : options.defenderHealth,
             roll
           });
 
@@ -147,18 +150,25 @@ export class Combat {
     defenderBaseStrength: number;
     defenderHealth: number;
     targetTile: Tile;
+    defenderModifiers?: CombatModifier[];
+    // The least health the shot can leave the defender on - a city can't be shot below 1 HP.
+    minDefenderHealth?: number;
   }): CombatPrediction {
-    const defenderModifiers = Combat.getDefenseModifiers(options.targetTile);
+    const defenderModifiers = options.defenderModifiers ?? Combat.getDefenseModifiers(options.targetTile);
     const attackerStrength = options.attackerRangedStrength;
     const defenderStrength = options.defenderBaseStrength * (1 + Combat.sumModifiers(defenderModifiers));
+    const maxDamage = options.defenderHealth - (options.minDefenderHealth ?? 0);
 
     const damageAt = (roll: number) =>
-      Combat.getDamage({
-        strength: attackerStrength,
-        opponentStrength: defenderStrength,
-        health: options.attackerHealth,
-        roll
-      });
+      Math.min(
+        maxDamage,
+        Combat.getDamage({
+          strength: attackerStrength,
+          opponentStrength: defenderStrength,
+          health: options.attackerHealth,
+          roll
+        })
+      );
     const averageDealt = damageAt(0.5);
 
     return {
@@ -211,6 +221,8 @@ export class Combat {
     defenderHealth: number;
     attackerRoll?: number;
     defenderRoll?: number;
+    // A city's hits aren't weakened by its wounds, and its health isn't on the units' 100 HP scale.
+    defenderIsCity?: boolean;
   }): CombatResult {
     const damageToDefender = Combat.getDamage({
       strength: options.attackerStrength,
@@ -221,7 +233,7 @@ export class Combat {
     const damageToAttacker = Combat.getDamage({
       strength: options.defenderStrength,
       opponentStrength: options.attackerStrength,
-      health: options.defenderHealth,
+      health: options.defenderIsCity ? Combat.MAX_HEALTH : options.defenderHealth,
       roll: options.defenderRoll
     });
 
@@ -236,12 +248,14 @@ export class Combat {
 
   /**
    * A ranged attack: only the defender takes damage. Strengths are final (terrain already applied).
+   * `minDefenderHealth` is the least health it can leave the defender on (1 for a city).
    */
   public static resolveRanged(options: {
     attackerStrength: number;
     attackerHealth: number;
     defenderStrength: number;
     defenderHealth: number;
+    minDefenderHealth?: number;
     roll?: number;
   }): CombatResult {
     const damageToDefender = Combat.getDamage({
@@ -253,7 +267,7 @@ export class Combat {
 
     return {
       attackerHealth: options.attackerHealth,
-      defenderHealth: Math.max(0, options.defenderHealth - damageToDefender)
+      defenderHealth: Math.max(options.minDefenderHealth ?? 0, options.defenderHealth - damageToDefender)
     };
   }
 

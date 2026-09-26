@@ -42,8 +42,8 @@ describe('Unit', () => {
       isWater: jest.fn().mockReturnValue(false),
       getAdjacentTiles: jest.fn().mockReturnValue([]),
       getRiverSides: jest.fn().mockReturnValue(new Array(6).fill(false)),
-      hasBlockingUnit: jest.fn().mockReturnValue(false),
-      hasImpassableUnit: jest.fn().mockReturnValue(false),
+      isBlockedFor: jest.fn().mockReturnValue(false),
+      isImpassableFor: jest.fn().mockReturnValue(false),
       hasRoad: jest.fn().mockReturnValue(false),
     } as unknown as jest.Mocked<Tile>;
 
@@ -57,8 +57,8 @@ describe('Unit', () => {
       isWater: jest.fn().mockReturnValue(false),
       getAdjacentTiles: jest.fn().mockReturnValue([]),
       getRiverSides: jest.fn().mockReturnValue(new Array(6).fill(false)),
-      hasBlockingUnit: jest.fn().mockReturnValue(false),
-      hasImpassableUnit: jest.fn().mockReturnValue(false),
+      isBlockedFor: jest.fn().mockReturnValue(false),
+      isImpassableFor: jest.fn().mockReturnValue(false),
       hasRoad: jest.fn().mockReturnValue(false),
     } as unknown as jest.Mocked<Tile>;
 
@@ -248,21 +248,21 @@ describe('Unit', () => {
     });
 
     it('treats a neighbor holding an enemy unit as impassably costly', () => {
-      (targetTile.hasImpassableUnit as jest.Mock).mockReturnValue(true);
+      (targetTile.isImpassableFor as jest.Mock).mockReturnValue(true);
 
       expect(unit.getTileWeight(mockTile, targetTile)).toBe(9999);
-      expect(targetTile.hasImpassableUnit).toHaveBeenCalledWith(unit);
+      expect(targetTile.isImpassableFor).toHaveBeenCalledWith(unit);
     });
 
     it('does not cost extra to path through a same-type ally', () => {
-      (targetTile.hasBlockingUnit as jest.Mock).mockReturnValue(true);
-      (targetTile.hasImpassableUnit as jest.Mock).mockReturnValue(false);
+      (targetTile.isBlockedFor as jest.Mock).mockReturnValue(true);
+      (targetTile.isImpassableFor as jest.Mock).mockReturnValue(false);
 
       expect(unit.getTileWeight(mockTile, targetTile)).toBe(1);
     });
 
     it("won't path through a same-type ally that takes a whole turn to enter", () => {
-      (targetTile.hasBlockingUnit as jest.Mock).mockReturnValue(true);
+      (targetTile.isBlockedFor as jest.Mock).mockReturnValue(true);
       (targetTile.getMovementCost as jest.Mock).mockReturnValue(2);
 
       expect(unit.getTileWeight(mockTile, targetTile)).toBe(9999);
@@ -289,7 +289,7 @@ describe('Unit', () => {
 
     it('stops short of a tile blocked by a non-utility unit without queuing it', () => {
       mockGameMap.constructShortestPath.mockReturnValue([mockTile, targetTile]);
-      (targetTile.hasBlockingUnit as jest.Mock).mockReturnValue(true);
+      (targetTile.isBlockedFor as jest.Mock).mockReturnValue(true);
 
       const [arrivedTile, remainingTiles] = unit['getMovementTowardsTargetTile'](targetTile);
 
@@ -302,7 +302,7 @@ describe('Unit', () => {
 
     it('drops a queued path it can no longer advance along', () => {
       unit['queuedMovementTiles'] = [targetTile];
-      (targetTile.hasBlockingUnit as jest.Mock).mockReturnValue(true);
+      (targetTile.isBlockedFor as jest.Mock).mockReturnValue(true);
 
       unit['moveWithMovementQueue']();
 
@@ -317,7 +317,7 @@ describe('Unit', () => {
 
     it('still advances a queued path that is not blocked', () => {
       unit['queuedMovementTiles'] = [targetTile];
-      (targetTile.hasBlockingUnit as jest.Mock).mockReturnValue(false);
+      (targetTile.isBlockedFor as jest.Mock).mockReturnValue(false);
 
       unit['moveWithMovementQueue']();
 
@@ -335,8 +335,8 @@ describe('Unit', () => {
           getX: jest.fn().mockReturnValue(2),
           getY: jest.fn().mockReturnValue(2),
           addUnit: jest.fn(),
-          hasBlockingUnit: jest.fn().mockReturnValue(true),
-          hasImpassableUnit: jest.fn().mockReturnValue(false),
+          isBlockedFor: jest.fn().mockReturnValue(true),
+          isImpassableFor: jest.fn().mockReturnValue(false),
         } as unknown as jest.Mocked<Tile>;
         mockGameMap.constructShortestPath.mockReturnValue([mockTile, allyTile, targetTile]);
       });
@@ -371,7 +371,7 @@ describe('Unit', () => {
       });
 
       it('is still blocked by an enemy along the way', () => {
-        (allyTile.hasImpassableUnit as jest.Mock).mockReturnValue(true);
+        (allyTile.isImpassableFor as jest.Mock).mockReturnValue(true);
 
         const [arrivedTile, remainingTiles] = unit['getMovementTowardsTargetTile'](targetTile);
 
@@ -382,7 +382,7 @@ describe('Unit', () => {
 
     it('allows moving onto a tile whose only occupant is a utility unit', () => {
       mockGameMap.constructShortestPath.mockReturnValue([mockTile, targetTile]);
-      (targetTile.hasBlockingUnit as jest.Mock).mockReturnValue(false);
+      (targetTile.isBlockedFor as jest.Mock).mockReturnValue(false);
 
       const [arrivedTile] = unit['getMovementTowardsTargetTile'](targetTile);
 
@@ -411,7 +411,7 @@ describe('Unit', () => {
       // there's movement left to spend, since with 0 movement we can't step there regardless
       // and would just defer the real blocking check to next turn's resumption.
       mockGameMap.constructShortestPath.mockReturnValue([mockTile, targetTile]);
-      (targetTile.hasBlockingUnit as jest.Mock).mockReturnValue(true);
+      (targetTile.isBlockedFor as jest.Mock).mockReturnValue(true);
 
       moveUnitCallback({ id: unit['id'], targetX: 1, targetY: 1 }, mockWebsocket);
 

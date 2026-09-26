@@ -23,9 +23,10 @@ describe('PlayerNotifications', () => {
     getBuildingImprovement: () => options.building,
   });
 
-  const makeCity = (name: string, queueLength: number) => ({
+  const makeCity = (name: string, queueLength: number, canStrike = false) => ({
     getName: () => name,
     getProductionQueue: () => new Array(queueLength).fill({}),
+    canStrike: () => canStrike,
   });
 
   const triggerServerEvent = (eventName: string, data?: any) => {
@@ -101,6 +102,13 @@ describe('PlayerNotifications', () => {
     const priorities = notifications.getNotifications().map((notification) => notification.priority);
     expect(ids().slice(0, 2)).toEqual(['research', 'production']);
     expect(priorities).toEqual([...priorities].sort((a, b) => b - a));
+  });
+
+  it('lists the cities that can strike an enemy', () => {
+    cities.push(makeCity('Rome', 1, true), makeCity('Antium', 1), makeCity('Cumae', 1, true));
+
+    const cityStrike = notifications.getNotifications().find((notification) => notification.id === 'cityStrike');
+    expect(cityStrike).toMatchObject({ type: 'cityStrike', icon: 'ICON_TARGET', cityNames: ['Rome', 'Cumae'] });
   });
 
   it('keeps a message until it is dismissed or the next turn starts', () => {
