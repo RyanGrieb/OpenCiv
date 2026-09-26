@@ -215,7 +215,8 @@ export class Actor implements SceneObject {
         height: this.height,
         color: this.color,
         fill: true,
-        canvasContext: canvasContext
+        canvasContext: canvasContext,
+        transparency: this.transparency
       });
     } else if (this.image) {
       Game.getInstance().drawImageFromActor(this, canvasContext);

@@ -752,7 +752,8 @@ export class Game {
     height,
     color,
     canvasContext,
-    fill
+    fill,
+    transparency
   }: {
     x: number;
     y: number;
@@ -761,8 +762,10 @@ export class Game {
     color: string;
     canvasContext: CanvasRenderingContext2D;
     fill: boolean;
+    transparency?: number;
   }) {
     canvasContext.save();
+    canvasContext.globalAlpha = transparency ?? 1;
     if (fill) {
       canvasContext.fillStyle = color;
       canvasContext.fillRect(x, y, width, height);
