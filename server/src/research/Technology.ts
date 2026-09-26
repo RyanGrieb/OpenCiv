@@ -79,7 +79,8 @@ export class Technology {
     return ConfigLoader.load<{ eras: EraData[] }>("./config/techs.yml").eras;
   }
 
-  public static getUnlocks(techName: string): TechnologyUnlocks {
+  // civName leaves out units that civ can't build (another civ's unique units, and the ones its own replace).
+  public static getUnlocks(techName: string, civName?: string): TechnologyUnlocks {
     const buildings = Building.getAllBuildings().filter((building) => building.getRequiredTech() === techName);
     const toUnlock = (building: Building): UnlockData => ({
       name: building.getName(),
@@ -88,7 +89,7 @@ export class Technology {
 
     return {
       units: Unit.getAllUnitData()
-        .filter((unit) => unit.required_tech === techName)
+        .filter((unit) => unit.required_tech === techName && Unit.isAvailableToCiv(unit, civName))
         .map((unit) => ({ name: unit.name, asset_name: `UNIT_${unit.name.toUpperCase().replace(/ /g, "_")}` })),
       buildings: buildings.filter((building) => !building.isWonderBuilding()).map(toUnlock),
       wonders: buildings.filter((building) => building.isWonderBuilding()).map(toUnlock),
@@ -138,7 +139,7 @@ export class Technology {
     return this.row;
   }
 
-  public toJSON() {
+  public toJSON(civName?: string) {
     return {
       name: this.name,
       asset_name: this.assetName,
@@ -146,7 +147,7 @@ export class Technology {
       prerequisites: this.prerequisites,
       description: this.description,
       notes: this.notes,
-      unlocks: Technology.getUnlocks(this.name),
+      unlocks: Technology.getUnlocks(this.name, civName),
       slot: this.slot,
       row: this.row
     };

@@ -2,6 +2,7 @@ import { Building } from '../../src/city/Building';
 import { Improvement } from '../../src/map/Improvement';
 import { Technology } from '../../src/research/Technology';
 import { Unit } from '../../src/unit/Unit';
+import { ConfigLoader } from '../../src/util/ConfigLoader';
 
 // Deliberately not mocking fs/yaml - exercises the real config/techs.yml,
 // same approach as Building.test.ts.
@@ -83,6 +84,31 @@ describe('Technology', () => {
     expect(construction.improvements.map((improvement) => improvement.name)).toEqual(['Lumber Mill']);
   });
 
+  it('lists a unique unit only for its own civ, in place of the unit it replaces', () => {
+    const ironWorkingUnits = (civName?: string) =>
+      Technology.getUnlocks('Iron Working', civName).units.map((unit) => unit.name);
+
+    expect(ironWorkingUnits('Rome')).toEqual(['Legion']);
+    expect(ironWorkingUnits('Germany')).toEqual(['Swordsman']);
+    expect(ironWorkingUnits()).toEqual(['Swordsman']);
+  });
+
+  it('points every obsolete_tech, unique_to and replaces at a tech, civ and unit that exist', () => {
+    const techNames = new Set(Technology.getAllTechnologies().map((tech) => tech.getName()));
+    const unitNames = new Set(Unit.getAllUnitData().map((unit) => unit.name));
+    const civNames = new Set(
+      ConfigLoader.load<{ civilizations: { name: string }[] }>('./config/civilizations.yml').civilizations.map(
+        (civ) => civ.name
+      )
+    );
+
+    for (const unit of Unit.getAllUnitData()) {
+      if (unit.obsolete_tech) expect(techNames).toContain(unit.obsolete_tech);
+      if (unit.unique_to) expect(civNames).toContain(unit.unique_to);
+      if (unit.replaces) expect(unitNames).toContain(unit.replaces);
+    }
+  });
+
   it('only gates units, buildings and improvements behind technologies that exist', () => {
     const unlocked = Technology.getAllTechnologies().flatMap((tech) => {
       const unlocks = Technology.getUnlocks(tech.getName());
@@ -91,7 +117,10 @@ describe('Technology', () => {
 
     // Every gated entry must land under some tech - a typo'd required_tech would silently vanish from the window.
     const requiredTechs = [
-      ...Unit.getAllUnitData().map((unit) => unit.required_tech),
+      // A unique unit only shows for its own civ, which this list isn't asked for.
+      ...Unit.getAllUnitData()
+        .filter((unit) => !unit.unique_to)
+        .map((unit) => unit.required_tech),
       ...Building.getAllBuildings().map((building) => building.getRequiredTech()),
       // Clearing forest or jungle isn't an improvement, so the window leaves those out.
       ...Improvement.getAllImprovementData()

@@ -5,6 +5,8 @@
 # combat_strength is still what it defends with, and it can't melee attack.
 # captured_as is what a civilian becomes when an enemy melee unit takes its tile (Civ 5 turns a
 # captured Settler into a Worker, which is our Builder). Civilians without it are destroyed instead.
+# unique_to makes a unit one civilization's unique unit, built by that civ in place of the unit named
+# in replaces and by nobody else.
 # domain: sea marks a ship: it only moves on water (and into its owner's coastal cities), and only
 # coastal cities can build it. coast_only keeps a ship off deep ocean, like Civ 5's Trireme.
 # obsolete_tech is Civ 5's ObsoleteTech: once it's researched, cities stop offering the unit and drop it
@@ -85,6 +87,8 @@ units:
     cost: 75
     required_tech: Iron Working
   - name: Legion
+    unique_to: Rome
+    replaces: Swordsman
     combat_strength: 17
     attack_type: melee
     cost: 75
