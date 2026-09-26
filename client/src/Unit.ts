@@ -83,6 +83,14 @@ export class UnitAction {
   protected awayFromCity(unit: Unit) {
     return true;
   }
+
+  protected wounded(unit: Unit) {
+    return unit.getHealth() < Unit.MAX_HEALTH;
+  }
+
+  protected notFortified(unit: Unit) {
+    return !unit.isFortified();
+  }
 }
 
 // Payload for constructing a Unit (server "createUnit"-style data, also embedded
@@ -95,6 +103,7 @@ export interface UnitCreationData {
   attackType: string;
   combatStrength: number;
   health: number;
+  fortified: boolean;
   isUtility: boolean;
   ignoresTerrainCost: boolean;
   remainingMovement: number;
@@ -162,11 +171,14 @@ export class Unit extends ActorGroup {
   private attackType: string;
   private combatStrength: number;
   private health: number;
+  private fortified: boolean;
   private utility: boolean;
   private terrainCostIgnored: boolean;
   private unitActor: Actor;
   // Drawn by hand in draw() rather than as a child, so it lands on top of the health bubble.
   private civIcon: Actor | undefined;
+  // Shown beside the health bubble while fortified until healed, drawn the same way as civIcon.
+  private fortifyIcon: Actor;
   private selectionActors: Actor[];
   private selected: boolean;
   private defaultMoveDistance: number;
@@ -207,6 +219,7 @@ export class Unit extends ActorGroup {
     this.attackType = unitJSON.attackType;
     this.combatStrength = unitJSON.combatStrength;
     this.health = unitJSON.health;
+    this.fortified = unitJSON.fortified ?? false;
     this.utility = unitJSON.isUtility;
     this.terrainCostIgnored = unitJSON.ignoresTerrainCost;
     this.availableMovement = unitJSON.remainingMovement;
@@ -228,6 +241,14 @@ export class Unit extends ActorGroup {
         });
       }
     }
+
+    this.fortifyIcon = new Actor({
+      image: Game.getInstance().getImage(GameImage.SPRITESHEET),
+      spriteRegion: SpriteRegion.ICON_FORTIFY_HEAL,
+      ...this.getFortifyIconPosition(),
+      width: Unit.CIV_ICON_SIZE,
+      height: Unit.CIV_ICON_SIZE
+    });
 
     this.queuedMovementTiles = [];
     for (const jsonTile of unitJSON.queuedTiles) {
@@ -313,6 +334,14 @@ export class Unit extends ActorGroup {
       }
     });
 
+    NetworkEvents.on<{ id: number; fortified: boolean }>({
+      eventName: "unitFortified",
+      parentObject: this,
+      callback: (data) => {
+        if (this.id === data.id) this.fortified = data.fortified;
+      }
+    });
+
     NetworkEvents.on<UnitHealthEvent>({
       eventName: "unitHealth",
       parentObject: this,
@@ -350,6 +379,10 @@ export class Unit extends ActorGroup {
 
   public getHealth(): number {
     return this.health;
+  }
+
+  public isFortified(): boolean {
+    return this.fortified;
   }
 
   public getTileWeight(current: Tile, neighbor: Tile) {
@@ -476,6 +509,8 @@ export class Unit extends ActorGroup {
 
     const iconPosition = this.getCivIconPosition();
     this.civIcon?.setPosition(iconPosition.x, iconPosition.y);
+    const fortifyPosition = this.getFortifyIconPosition();
+    this.fortifyIcon.setPosition(fortifyPosition.x, fortifyPosition.y);
   }
 
   private removeSelectionActors() {
@@ -531,6 +566,7 @@ export class Unit extends ActorGroup {
 
     this.drawHealthBubble(canvasContext);
     this.civIcon?.draw(canvasContext);
+    if (this.fortified) this.fortifyIcon.draw(canvasContext);
   }
 
   private drawHealthBubble(canvasContext: CanvasRenderingContext2D) {
@@ -559,6 +595,12 @@ export class Unit extends ActorGroup {
       fromY: y + Unit.CIV_ICON_SIZE / 2 + Unit.HEALTH_BUBBLE_RADIUS + 2,
       toY: y - Unit.HEALTH_BUBBLE_RADIUS - 10
     }).show();
+  }
+
+  // Just right of the health bubble.
+  private getFortifyIconPosition() {
+    const { x, y } = this.getCivIconPosition();
+    return { x: x + Unit.CIV_ICON_SIZE / 2 + Unit.HEALTH_BUBBLE_RADIUS + 1, y };
   }
 
   private getCivIconPosition() {

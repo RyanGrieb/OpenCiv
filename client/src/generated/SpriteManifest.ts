@@ -53,6 +53,7 @@ export const SPRITE_MANIFEST: SpriteManifestEntry[] = [
   { name: "ICON_ENGLAND", url: new URL("../../assets/sprites/icons/ICON_ENGLAND.png", import.meta.url).href },
   { name: "ICON_FAITH", url: new URL("../../assets/sprites/icons/ICON_FAITH.png", import.meta.url).href },
   { name: "ICON_FOOD", url: new URL("../../assets/sprites/icons/ICON_FOOD.png", import.meta.url).href },
+  { name: "ICON_FORTIFY_HEAL", url: new URL("../../assets/sprites/icons/ICON_FORTIFY_HEAL.png", import.meta.url).href },
   { name: "ICON_GERMANY", url: new URL("../../assets/sprites/icons/ICON_GERMANY.png", import.meta.url).href },
   { name: "ICON_GOLD", url: new URL("../../assets/sprites/icons/ICON_GOLD.png", import.meta.url).href },
   { name: "ICON_MAMLUKS", url: new URL("../../assets/sprites/icons/ICON_MAMLUKS.png", import.meta.url).href },

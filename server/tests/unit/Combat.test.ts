@@ -3,6 +3,7 @@ import { Unit } from "../../src/unit/Unit";
 import { Tile } from "../../src/map/Tile";
 import { Player } from "../../src/Player";
 import { Game } from "../../src/Game";
+import { ServerEvents } from "../../src/Events";
 
 jest.mock("../../src/Events");
 jest.mock("../../src/Game");
@@ -279,6 +280,59 @@ describe("Unit.meleeAttack", () => {
     unit["health"] = 50;
     unit["heal"]();
     expect(unit.getHealth()).toBe(75);
+  });
+
+  describe("Fortify Until Healed", () => {
+    // Runs the unit's own "nextTurn" listener, as the server does at the start of each turn.
+    const nextTurn = (unit: Unit) => {
+      const call = (ServerEvents.on as jest.Mock).mock.calls.find(
+        ([options]) => options.eventName === "nextTurn" && options.parentObject === unit
+      );
+      call[0].callback({});
+    };
+
+    it("is refused at full health", () => {
+      const unit = makeUnit(originTile, attackerPlayer);
+      unit.fortifyUntilHealed();
+      expect(unit.isFortified()).toBe(false);
+    });
+
+    it("heals each turn and wakes up at full health", () => {
+      const unit = makeUnit(originTile, attackerPlayer);
+      unit["health"] = 75;
+      unit.fortifyUntilHealed();
+      expect(unit.isFortified()).toBe(true);
+      expect(attackerPlayer.sendNetworkEvent).toHaveBeenCalledWith({
+        event: "unitFortified",
+        id: unit["id"],
+        fortified: true
+      });
+
+      nextTurn(unit);
+      expect(unit.getHealth()).toBe(85);
+      expect(unit.isFortified()).toBe(true);
+
+      nextTurn(unit);
+      nextTurn(unit);
+      expect(unit.getHealth()).toBe(100);
+      expect(unit.isFortified()).toBe(false);
+    });
+
+    it("wakes up when it attacks", () => {
+      const unit = makeUnit(originTile, attackerPlayer);
+      makeUnit(targetTile, defenderPlayer);
+      unit["health"] = 90;
+      unit.fortifyUntilHealed();
+
+      unit.meleeAttack(targetTile);
+      expect(unit.isFortified()).toBe(false);
+    });
+
+    it("is offered to units that can fight, and not to Settlers", () => {
+      const names = (unit: Unit) => unit.getUnitActionsJSON().map((action) => action.name);
+      expect(names(Unit.createFromName("Warrior", originTile, attackerPlayer))).toEqual(["fortify_until_healed"]);
+      expect(names(Unit.createFromName("Settler", originTile, attackerPlayer))).toEqual(["settle"]);
+    });
   });
 
   it("reads combat strength from units.yml", () => {

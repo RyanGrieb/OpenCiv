@@ -215,6 +215,33 @@ export function setupMeleeCombatTest(game: Game) {
     });
 
     runner.addStep({
+        name: "Fortify Until Healed shows for our wounded Warrior, which then heals and stays fortified",
+        action: async () => {
+            const action = warrior.getActions().find((candidate) => candidate.getName() === "fortify_until_healed");
+            if (!action?.requirementsMet(warrior)) throw new Error("No usable Fortify Until Healed action");
+
+            // What the action button in the unit info sends.
+            select(warrior);
+            WebsocketClient.sendMessage({
+                event: "unitAction",
+                unitX: warrior.getTile().getGridX(),
+                unitY: warrior.getTile().getGridY(),
+                id: warrior.getID(),
+                actionName: action.getName()
+            });
+            await utils.waitUntil(() => warrior.isFortified(), 5000, "Warrior to fortify");
+            healthBefore.ours = warrior.getHealth();
+            await endTurn();
+            await utils.delay(400);
+            utils.log(`Fortified: ours ${healthBefore.ours} -> ${warrior.getHealth()} HP`, "yellow");
+        },
+        verification: () =>
+            warrior.isFortified() &&
+            warrior.getHealth() === Math.min(100, healthBefore.ours + 10) &&
+            !warrior.getActions().some((action) => action.getName() === "fortify_until_healed" && action.requirementsMet(warrior))
+    });
+
+    runner.addStep({
         name: "Fight to the death: a winning attacker advances, a winning defender holds",
         action: async () => {
             // Trades blows until someone falls, then records which tile the survivor should be on.
@@ -238,7 +265,9 @@ export function setupMeleeCombatTest(game: Game) {
             }
             if (expected) watch(expected.survivor);
         },
-        verification: () => !!expected && isAlive(expected.survivor) && expected.survivor.getTile() === expected.tile
+        // Attacking wakes a fortified unit.
+        verification: () =>
+            !!expected && isAlive(expected.survivor) && expected.survivor.getTile() === expected.tile && !expected.survivor.isFortified()
     });
 
     return runner;

@@ -104,7 +104,7 @@ export class UnitDisplayInfo extends ActorGroup {
       }
     });
 
-    for (const eventName of ["unitCombat", "unitHealth"]) {
+    for (const eventName of ["unitCombat", "unitHealth", "unitFortified"]) {
       NetworkEvents.on({
         eventName,
         parentObject: this,

@@ -60,6 +60,8 @@ export class Unit {
   private health: number;
   // Moved or fought since the turn began - a unit that did neither heals at the next turn.
   private actedThisTurn: boolean;
+  // Set by the "Fortify Until Healed" action; cleared by moving, attacking, or reaching full health.
+  private fortified: boolean;
   private defaultMoveDistance: number;
   private availableMovement: number;
   private sightRange: number;
@@ -85,6 +87,7 @@ export class Unit {
     this.combatStrength = options.combatStrength ?? 0;
     this.health = Combat.MAX_HEALTH;
     this.actedThisTurn = false;
+    this.fortified = false;
     this.defaultMoveDistance = options.defaultMoveDistance || 2;
     this.availableMovement = options.availableMovement ?? this.defaultMoveDistance;
     this.sightRange = options.sightRange ?? PlayerVisibility.DEFAULT_UNIT_SIGHT_RANGE;
@@ -179,6 +182,7 @@ export class Unit {
       callback: (data) => {
         if (!this.actedThisTurn) this.heal();
         this.actedThisTurn = false;
+        if (this.fortified && this.health >= Combat.MAX_HEALTH) this.setFortified(false);
         this.availableMovement = this.defaultMoveDistance;
 
         if (this.queuedMovementTiles.length > 0) {
@@ -222,7 +226,7 @@ export class Unit {
       isUtility: data.is_utility,
       ignoresTerrainCost: data.ignores_terrain_cost,
       availableMovement: options?.availableMovement,
-      actions: data.name === "Settler" ? [UnitActions.settleCity()] : []
+      actions: UnitActions.forUnitType(data)
     });
   }
 
@@ -265,6 +269,7 @@ export class Unit {
     this.queuedMovementTiles = remainingTiles;
     this.availableMovement = remainingMovement;
     this.actedThisTurn = true;
+    this.setFortified(false);
 
     const dataPacket: {
       event: string;
@@ -326,6 +331,14 @@ export class Unit {
           });
         }
       });
+  }
+
+  // Only tells the owner - fortifying drives their UI (the action button and the icon over the unit).
+  private setFortified(fortified: boolean) {
+    if (this.fortified === fortified) return;
+
+    this.fortified = fortified;
+    this.player.sendNetworkEvent({ event: "unitFortified", id: this.id, fortified });
   }
 
   private heal() {
@@ -453,6 +466,7 @@ export class Unit {
 
     this.availableMovement = 0;
     this.actedThisTurn = true;
+    this.setFortified(false);
     this.clearMovementQueue();
 
     if (defender) {
@@ -565,6 +579,19 @@ export class Unit {
     return targetTile.getUnits().some((unit) => unit.getPlayer() !== this.player);
   }
 
+  // Civ 5's "Fortify Until Healed": the unit stays put, healing each turn it doesn't move or attack, until
+  // it's back to full health or given another order.
+  public fortifyUntilHealed() {
+    if (!this.canFight() || this.health >= Combat.MAX_HEALTH) return;
+
+    this.clearMovementQueue();
+    this.setFortified(true);
+  }
+
+  public isFortified() {
+    return this.fortified;
+  }
+
   public canFight() {
     return !this.utility && this.combatStrength > 0;
   }
@@ -633,6 +660,7 @@ export class Unit {
       attackType: this.attackType,
       combatStrength: this.combatStrength,
       health: this.health,
+      fortified: ownUnit && this.fortified,
       isUtility: this.utility,
       ignoresTerrainCost: this.terrainCostIgnored,
       id: this.id,
