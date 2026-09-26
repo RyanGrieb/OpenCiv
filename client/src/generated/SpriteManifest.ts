@@ -153,7 +153,6 @@ export const SPRITE_MANIFEST: SpriteManifestEntry[] = [
   { name: "TILE_PEARLS", url: new URL("../../assets/sprites/tiles/TILE_PEARLS.png", import.meta.url).href },
   { name: "TILE_PLAINS", url: new URL("../../assets/sprites/tiles/TILE_PLAINS.png", import.meta.url).href },
   { name: "TILE_PLAINS_2", url: new URL("../../assets/sprites/tiles/TILE_PLAINS_2.png", import.meta.url).href },
-  { name: "TILE_PLAINS_3", url: new URL("../../assets/sprites/tiles/TILE_PLAINS_3.png", import.meta.url).href },
   { name: "TILE_PLAINS_HILL", url: new URL("../../assets/sprites/tiles/TILE_PLAINS_HILL.png", import.meta.url).href },
   { name: "TILE_SHALLOW_OCEAN", url: new URL("../../assets/sprites/tiles/TILE_SHALLOW_OCEAN.png", import.meta.url).href },
   { name: "TILE_SHALLOW_OCEAN_2", url: new URL("../../assets/sprites/tiles/TILE_SHALLOW_OCEAN_2.png", import.meta.url).href },

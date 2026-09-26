@@ -13,12 +13,11 @@ export function setupTileVariantsTest(game: Game) {
   const runner = new TestRunner("TileVariants");
   const utils = new TestUtils(game);
   const terrains = ["grass", "plains", "tundra", "desert", "mountain", "ocean", "shallow_ocean", "freshwater"];
-  // Mirrors Tile.TILE_VARIANT_COUNTS: grass has four variants, the rest two.
+  // Mirrors Tile.TILE_VARIANT_COUNTS: grass has four variants, plains one, the rest two.
+  const variantCounts: Record<string, number> = { grass: 4, plains: 1 };
   const spritesFor = (terrain: string) => [
     terrain,
-    `${terrain}_2`,
-    `${terrain}_3`,
-    ...(terrain === "grass" ? ["grass_4", "grass_5"] : [])
+    ...Array.from({ length: variantCounts[terrain] ?? 2 }, (_, index) => `${terrain}_${index + 2}`)
   ];
   // How many tiles draw with each sprite, keyed by its tile type ("grass_2").
   const spriteCounts = new Map<string, number>();

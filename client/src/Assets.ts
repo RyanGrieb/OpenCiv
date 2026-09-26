@@ -62,7 +62,6 @@ export enum SpriteRegion {
   TILE_GRASS_4,
   TILE_GRASS_5,
   TILE_PLAINS_2,
-  TILE_PLAINS_3,
   TILE_TUNDRA_2,
   TILE_TUNDRA_3,
   TILE_DESERT_2,

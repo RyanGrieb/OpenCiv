@@ -40,7 +40,8 @@ export class Tile extends Actor {
   // plain one - see getVariantTileType().
   private static readonly TILE_VARIANT_COUNTS: Record<string, number> = {
     grass: 4,
-    plains: 2,
+    // Plains' tufted variant became the wheat resource's sprite, so plains keeps only its dry one.
+    plains: 1,
     tundra: 2,
     desert: 2,
     mountain: 2,
