@@ -71,6 +71,13 @@ export function setupRangedCombatTest(game: Game) {
         await utils.waitUntil(() => aiming().isAiming(), 5000, "Aiming to start");
     };
 
+    // A real key press, the way the browser delivers it.
+    const pressB = async () => {
+        document.body.dispatchEvent(new KeyboardEvent("keydown", { key: "b" }));
+        document.body.dispatchEvent(new KeyboardEvent("keyup", { key: "b" }));
+        await utils.delay(800);
+    };
+
     const hover = (tile: Tile) => {
         clientPlayer()["hoveredTile"].setRepresentedTile(tile);
         clientPlayer()["updateAimedTarget"]();
@@ -230,18 +237,28 @@ export function setupRangedCombatTest(game: Game) {
     });
 
     runner.addStep({
-        name: "Next turn, a right-click away from any target stops aiming without moving the Archer",
+        name: "Next turn, the B hotkey starts aiming, and a right-click away from any target stops it without moving the Archer",
         action: async () => {
             await endTurn();
             await select(archer);
-            await pressRangedAttack();
-            await utils.delay(800);
+            await pressB();
+            if (!aiming().isAiming()) throw new Error("Pressing B didn't start aiming");
             // The Archer's own tile is never a target.
             clientPlayer()["onMouseRightRelease"](archer.getTile());
             await utils.delay(800);
         },
         verification: () =>
             !aiming().isAiming() && aiming()["overlays"].length === 0 && archer.getTile() === archerTile && archer.getAvailableMovement() > 0
+    });
+
+    runner.addStep({
+        name: "B does nothing with a melee unit selected",
+        action: async () => {
+            const warrior = utils.getClientPlayer().getUnits().find((unit) => unit.getName() === "Warrior");
+            clientPlayer().selectUnit(warrior);
+            await pressB();
+        },
+        verification: () => !aiming().isAiming() && aiming()["overlays"].length === 0
     });
 
     runner.addStep({

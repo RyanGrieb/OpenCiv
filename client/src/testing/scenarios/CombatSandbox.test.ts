@@ -36,7 +36,7 @@ export function setupCombatSandboxTest(game: Game) {
 
             utils.log("Your turn. Select your Warrior, then right-click and drag onto an", "yellow");
             utils.log("enemy next to it to see the combat preview. Release to attack.", "yellow");
-            utils.log("Your Archer shoots up to 2 tiles: press its Ranged Attack button, hover", "yellow");
+            utils.log("Your Archer shoots up to 2 tiles: press B (or its Ranged Attack button), hover", "yellow");
             utils.log("a red enemy to preview, left-click to fire (right-click cancels).", "yellow");
 
             // Let clicks through to the map wherever this log sits.

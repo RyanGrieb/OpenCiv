@@ -106,6 +106,12 @@ export class ClientPlayer extends AbstractPlayer {
 
     Game.getInstance()
       .getCurrentScene()
+      .on("keydown", (options) => {
+        if (options.key === "b" || options.key === "B") this.startRangedAttack();
+      });
+
+    Game.getInstance()
+      .getCurrentScene()
       .on("mousedown", (options) => {
         if (options.button === 2) {
           this.onMouseRightClick();
@@ -396,6 +402,23 @@ export class ClientPlayer extends AbstractPlayer {
       this.drawTargetTileOutline(targetTile, isQueuedMovement);
       this.outlinedTile = targetTile;
     }
+  }
+
+  // The B hotkey, as in Civ 5: the same as pressing the selected ranged unit's Ranged Attack button.
+  private startRangedAttack() {
+    if (!this.selectedUnit?.isRanged() || this.rangedAiming.isAiming()) return;
+    if (Game.getInstance().getCurrentScene().getCamera().isLocked()) return;
+
+    const action = this.selectedUnit.getActions().find((candidate) => candidate.getName() === "ranged_attack");
+    if (!action?.requirementsMet(this.selectedUnit)) return;
+
+    WebsocketClient.sendMessage({
+      event: "unitAction",
+      unitX: this.selectedUnit.getTile().getGridX(),
+      unitY: this.selectedUnit.getTile().getGridY(),
+      id: this.selectedUnit.getID(),
+      actionName: action.getName()
+    });
   }
 
   // Releasing a right-click moves the selected unit there, or attacks what's there. While aiming a

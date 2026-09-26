@@ -19,7 +19,7 @@ export class UnitActions {
       name: "ranged_attack",
       icon: "ICON_TARGET",
       requirements: ["movement"],
-      desc: "Ranged Attack",
+      desc: "Ranged Attack (B)",
       onAction: (unit: Unit) => unit.sendRangedTargets({ aiming: true })
     };
   }
