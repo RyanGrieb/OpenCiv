@@ -77,6 +77,11 @@ ScenarioRegistry.register("Notifications", async () => {
     return module.setupNotificationsTest;
 });
 
+ScenarioRegistry.register("AllTechsResearched", async () => {
+    const module = await import("./scenarios/AllTechsResearched.test");
+    return module.setupAllTechsResearchedTest;
+});
+
 ScenarioRegistry.register("BorderExpansion", async () => {
     const module = await import("./scenarios/BorderExpansion.test");
     return module.setupBorderExpansionTest;

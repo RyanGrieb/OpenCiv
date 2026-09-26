@@ -13,6 +13,7 @@ describe('PlayerNotifications', () => {
   let cities: any[];
   let units: any[];
   let currentResearch: any;
+  let techsLeft: boolean;
 
   const makeUnit = (id: number, options: { movement?: number; queued?: boolean; fortified?: boolean; building?: string } = {}) => ({
     getId: () => id,
@@ -39,6 +40,7 @@ describe('PlayerNotifications', () => {
     cities = [];
     units = [];
     currentResearch = null;
+    techsLeft = true;
     mockWebsocket = {} as WebSocket;
 
     onSpy = jest.spyOn(ServerEvents, 'on').mockImplementation(() => { });
@@ -47,6 +49,7 @@ describe('PlayerNotifications', () => {
       getCities: jest.fn(() => cities),
       getUnits: jest.fn(() => units),
       getCurrentResearch: jest.fn(() => currentResearch),
+      hasTechsLeftToResearch: jest.fn(() => techsLeft),
       getWebsocket: jest.fn(() => mockWebsocket),
       sendNetworkEvent: jest.fn(),
     } as unknown as jest.Mocked<Player>;
@@ -63,6 +66,12 @@ describe('PlayerNotifications', () => {
     expect(ids()).toEqual(['research']);
 
     currentResearch = { techName: 'Pottery' };
+    expect(ids()).toEqual([]);
+  });
+
+  it('does not ask for research once every tech is researched', () => {
+    cities.push(makeCity('Rome', 1));
+    techsLeft = false;
     expect(ids()).toEqual([]);
   });
 

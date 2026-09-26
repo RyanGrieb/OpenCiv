@@ -183,6 +183,7 @@ export class PlayerNotifications {
   private getResearchNotification(): NotificationData | undefined {
     // Science only comes from cities, so there's nothing to research until the first is founded.
     if (this.player.getCities().length < 1 || this.player.getCurrentResearch()) return undefined;
+    if (!this.player.hasTechsLeftToResearch()) return undefined;
 
     return {
       id: "research",

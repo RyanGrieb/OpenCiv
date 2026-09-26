@@ -333,6 +333,11 @@ export class Player {
     return this.researchedTechs.has(techName);
   }
 
+  // False once every tech is researched, so there's nothing left to choose.
+  public hasTechsLeftToResearch(): boolean {
+    return Technology.getAllTechnologies().some((tech) => !this.researchedTechs.has(tech.getName()));
+  }
+
   // For the startWithAllTechs game option. Sent to the client once it asks for its research.
   public researchAllTechs() {
     Technology.getAllTechnologies().forEach((tech) => this.researchedTechs.add(tech.getName()));
