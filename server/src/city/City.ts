@@ -874,6 +874,7 @@ export class City {
           typeof unit.cost === "number" &&
           isUnlocked(unit.required_tech) &&
           !this.isObsoleteUnit(unit.name) &&
+          Unit.isAvailableToCiv(unit, this.player.getCivilizationName()) &&
           canLaunch(unit)
       )
       .map((unit) => ({ type: "unit", name: unit.name, cost: unit.cost }));

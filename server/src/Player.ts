@@ -275,6 +275,11 @@ export class Player {
     return this.civilizationData;
   }
 
+  // Undefined until the player picks (or is assigned) a civ in the lobby.
+  public getCivilizationName(): string | undefined {
+    return this.civilizationData?.["name"];
+  }
+
   /**
    * Checks for exsting city names, and returns the next available city name.
    */
@@ -412,7 +417,7 @@ export class Player {
   public sendAvailableTechs() {
     this.sendNetworkEvent({
       event: "updateAvailableTechs",
-      technologies: Technology.getAllTechnologies().map((tech) => tech.toJSON()),
+      technologies: Technology.getAllTechnologies().map((tech) => tech.toJSON(this.getCivilizationName())),
       eras: Technology.getAllEras()
     });
   }

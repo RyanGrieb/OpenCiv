@@ -69,6 +69,9 @@ export interface UnitYMLTypeData {
   required_tech?: string;
   // Once researched, cities stop offering this unit (see units.yml).
   obsolete_tech?: string;
+  // A civilization's unique unit: only that civ builds it, in place of the unit it replaces.
+  unique_to?: string;
+  replaces?: string;
 }
 
 export class Unit {
@@ -283,6 +286,14 @@ export class Unit {
   // callers building a production catalog must filter those out themselves.
   public static getAllUnitData(): UnitYMLTypeData[] {
     return Unit.loadUnitData();
+  }
+
+  // Whether a civ can build this unit: another civ's unique unit is off limits, and so is any unit the
+  // civ's own unique unit replaces (Rome builds the Legion, never the Swordsman).
+  public static isAvailableToCiv(unit: UnitYMLTypeData, civName: string | undefined): boolean {
+    if (unit.unique_to) return unit.unique_to === civName;
+
+    return !Unit.loadUnitData().some((other) => other.unique_to === civName && other.replaces === unit.name);
   }
 
   // Roads cost a third of a move, so movement is kept in exact thirds - otherwise floating point

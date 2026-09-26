@@ -67,7 +67,13 @@ describe('City', () => {
       hasResearchedTech: jest.fn().mockReturnValue(false),
       getNotifications: jest.fn().mockReturnValue(mockNotifications),
       removeCity: jest.fn(),
+      getCivilizationName: jest.fn().mockReturnValue('Germany'),
     } as unknown as jest.Mocked<Player>;
+
+    // Mirrors the real rule for the fake Legion below: Rome's alone, and it stands in for the Swordsman.
+    (Unit.isAvailableToCiv as jest.Mock).mockImplementation((unit: { name: string }, civName: string) =>
+      civName === 'Rome' ? unit.name !== 'Swordsman' : unit.name !== 'Legion'
+    );
 
     (Unit.getAllUnitData as jest.Mock).mockReturnValue([
       { name: 'Warrior', attack_type: 'melee', cost: 30, obsolete_tech: 'Iron Working' },
@@ -131,6 +137,38 @@ describe('City', () => {
         units: expect.arrayContaining([{ type: 'unit', name: 'Archer', cost: 40 }]),
       })
     );
+  });
+
+  describe('unique units', () => {
+    const mockWebsocket = {} as WebSocket;
+    const offeredUnits = () => {
+      triggerServerEvent('requestProductionOptions', { cityName: 'TestCity' }, mockWebsocket);
+      const { units } = (mockPlayer.sendNetworkEvent as jest.Mock).mock.calls[0][0];
+      return units.map((option: { name: string }) => option.name);
+    };
+
+    beforeEach(() => {
+      (Unit.getAllUnitData as jest.Mock).mockReturnValue([
+        { name: 'Swordsman', attack_type: 'melee', cost: 75 },
+        { name: 'Legion', attack_type: 'melee', cost: 75, unique_to: 'Rome', replaces: 'Swordsman' },
+      ]);
+    });
+
+    it('offers other civs the regular unit and not the unique one', () => {
+      expect(offeredUnits()).toEqual(['Swordsman']);
+    });
+
+    it("offers the unique unit to its own civ in place of the unit it replaces", () => {
+      mockPlayer.getCivilizationName.mockReturnValue('Rome');
+
+      expect(offeredUnits()).toEqual(['Legion']);
+    });
+
+    it("refuses to queue another civ's unique unit", () => {
+      triggerServerEvent('addToProductionQueue', { cityName: 'TestCity', type: 'unit', name: 'Legion' }, mockWebsocket);
+
+      expect(city.getProductionQueue()).toEqual([]);
+    });
   });
 
   describe('obsolete units', () => {
