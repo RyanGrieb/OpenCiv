@@ -70,7 +70,7 @@ describe('City', () => {
     } as unknown as jest.Mocked<Player>;
 
     (Unit.getAllUnitData as jest.Mock).mockReturnValue([
-      { name: 'Warrior', attack_type: 'melee', cost: 30 },
+      { name: 'Warrior', attack_type: 'melee', cost: 30, obsolete_tech: 'Iron Working' },
       { name: 'Scout', attack_type: 'melee', cost: 20 },
       { name: 'Settler', is_utility: true },
       { name: 'Archer', attack_type: 'ranged', cost: 40, required_tech: 'Archery' },
@@ -133,6 +133,52 @@ describe('City', () => {
     );
   });
 
+  describe('obsolete units', () => {
+    const mockWebsocket = {} as WebSocket;
+    const queuedNames = () => city.getProductionQueue().map((item) => item.name);
+
+    it('stops offering a unit once its obsolete tech is researched', () => {
+      mockPlayer.hasResearchedTech.mockImplementation((tech: string) => tech === 'Iron Working');
+
+      triggerServerEvent('requestProductionOptions', { cityName: 'TestCity' }, mockWebsocket);
+
+      const { units } = (mockPlayer.sendNetworkEvent as jest.Mock).mock.calls[0][0];
+      expect(units.map((option: { name: string }) => option.name)).toEqual(['Scout']);
+    });
+
+    it('refuses to queue an obsolete unit', () => {
+      mockPlayer.hasResearchedTech.mockImplementation((tech: string) => tech === 'Iron Working');
+
+      triggerServerEvent('addToProductionQueue', { cityName: 'TestCity', type: 'unit', name: 'Warrior' }, mockWebsocket);
+
+      expect(city.getProductionQueue()).toEqual([]);
+    });
+
+    it('drops queued units that became obsolete, keeping the rest in order', () => {
+      triggerServerEvent('addToProductionQueue', { cityName: 'TestCity', type: 'unit', name: 'Warrior' }, mockWebsocket);
+      triggerServerEvent('addToProductionQueue', { cityName: 'TestCity', type: 'unit', name: 'Scout' }, mockWebsocket);
+      triggerServerEvent('addToProductionQueue', { cityName: 'TestCity', type: 'unit', name: 'Warrior' }, mockWebsocket);
+      mockPlayer.sendNetworkEvent.mockClear();
+      mockPlayer.hasResearchedTech.mockImplementation((tech: string) => tech === 'Iron Working');
+
+      city.removeObsoleteUnitsFromQueue();
+
+      expect(queuedNames()).toEqual(['Scout']);
+      expect(mockNotifications.addMessage).toHaveBeenCalledWith('ICON_PRODUCTION', 'TestCity can no longer build Warrior.');
+      expect(mockPlayer.sendNetworkEvent).toHaveBeenCalledWith(expect.objectContaining({ event: 'updateCityStats' }));
+    });
+
+    it('leaves the queue alone when nothing became obsolete', () => {
+      triggerServerEvent('addToProductionQueue', { cityName: 'TestCity', type: 'unit', name: 'Warrior' }, mockWebsocket);
+      mockPlayer.sendNetworkEvent.mockClear();
+
+      city.removeObsoleteUnitsFromQueue();
+
+      expect(queuedNames()).toEqual(['Warrior']);
+      expect(mockPlayer.sendNetworkEvent).not.toHaveBeenCalled();
+    });
+  });
+
   describe('ships', () => {
     const shipOptions = () => {
       triggerServerEvent('requestProductionOptions', { cityName: 'TestCity' }, {} as WebSocket);
@@ -141,7 +187,7 @@ describe('City', () => {
 
     beforeEach(() => {
       (Unit.getAllUnitData as jest.Mock).mockReturnValue([
-        { name: 'Warrior', attack_type: 'melee', cost: 30 },
+        { name: 'Warrior', attack_type: 'melee', cost: 30, obsolete_tech: 'Iron Working' },
         { name: 'Work Boat', is_utility: true, domain: 'sea', cost: 30 },
       ]);
     });

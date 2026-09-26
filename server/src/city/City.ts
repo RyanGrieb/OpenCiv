@@ -717,6 +717,21 @@ export class City {
     newOwner.getNotifications().addMessage("ICON_ACCEPT", `You have captured ${this.name}!`);
   }
 
+  /**
+   * Drops queued units the player's latest tech made obsolete, like Civ 5 does. Called once a tech is
+   * researched; any progress on a dropped unit is lost.
+   */
+  public removeObsoleteUnitsFromQueue() {
+    const obsolete = this.productionQueue.filter((item) => item.type === "unit" && this.isObsoleteUnit(item.name));
+    if (obsolete.length === 0) return;
+
+    this.productionQueue = this.productionQueue.filter((item) => !obsolete.includes(item));
+    obsolete.forEach((item) =>
+      this.player.getNotifications().addMessage("ICON_PRODUCTION", `${this.name} can no longer build ${item.name}.`)
+    );
+    this.sendStatUpdate(this.player);
+  }
+
   public getFoodRequiredToGrow(): number {
     return City.GROWTH_FOOD_BASE + City.GROWTH_FOOD_PER_POP * this.population;
   }
@@ -845,7 +860,8 @@ export class City {
 
   // Units/buildings with no `cost` (e.g. Settler, Palace) are never offered here -
   // they're granted directly elsewhere rather than queued. required_tech, when
-  // present, gates an option until the player has researched it.
+  // present, gates an option until the player has researched it; obsolete_tech hides a unit again
+  // once its replacement's tech is in.
   private getProductionOptions(): { units: ProductionOption[]; buildings: ProductionOption[] } {
     const isUnlocked = (requiredTech?: string) => !requiredTech || this.player.hasResearchedTech(requiredTech);
 
@@ -853,7 +869,13 @@ export class City {
     const canLaunch = (unit: UnitYMLTypeData) => unit.domain !== "sea" || this.isCoastal();
 
     const units: ProductionOption[] = Unit.getAllUnitData()
-      .filter((unit) => typeof unit.cost === "number" && isUnlocked(unit.required_tech) && canLaunch(unit))
+      .filter(
+        (unit) =>
+          typeof unit.cost === "number" &&
+          isUnlocked(unit.required_tech) &&
+          !this.isObsoleteUnit(unit.name) &&
+          canLaunch(unit)
+      )
       .map((unit) => ({ type: "unit", name: unit.name, cost: unit.cost }));
 
     const buildingExists = (name: string) => this.hasBuilding(name);
@@ -870,6 +892,11 @@ export class City {
       .map((building) => ({ type: "building", name: building.getName(), cost: building.getCost() }));
 
     return { units, buildings };
+  }
+
+  private isObsoleteUnit(unitName: string): boolean {
+    const obsoleteTech = Unit.getAllUnitData().find((unit) => unit.name === unitName)?.obsolete_tech;
+    return obsoleteTech !== undefined && this.player.hasResearchedTech(obsoleteTech);
   }
 
   // Banks this turn's net food, then grows the city once the bank covers the growth

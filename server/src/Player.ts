@@ -402,6 +402,8 @@ export class Player {
       this.currentResearch = null;
       // A new tech can unlock improvements for this player's Builders.
       this.units.forEach((unit) => unit.sendActionsToOwner());
+      // ...and make units their cities had queued obsolete.
+      this.cities.forEach((city) => city.removeObsoleteUnitsFromQueue());
     }
 
     this.sendResearchUpdate();

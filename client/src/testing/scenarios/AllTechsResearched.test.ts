@@ -45,7 +45,7 @@ export function setupAllTechsResearchedTest(game: Game) {
         name: "Queueing production brings back Next Turn",
         action: async () => {
             const city = utils.getClientPlayer().getCities()[0];
-            WebsocketClient.sendMessage({ event: "addToProductionQueue", cityName: city.getName(), type: "unit", name: "Warrior" });
+            WebsocketClient.sendMessage({ event: "addToProductionQueue", cityName: city.getName(), type: "unit", name: "Scout" });
             await utils.waitUntil(() => find("production") === undefined, 3000, "Production notification to go away");
         },
         verification: () => !find("research") && nextTurnText() === "Next Turn"
