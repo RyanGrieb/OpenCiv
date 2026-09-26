@@ -887,6 +887,7 @@ export class City {
         (building) =>
           typeof building.getCost() === "number" &&
           isUnlocked(building.getRequiredTech()) &&
+          Building.isAvailableToCiv(building, this.player.getCivilizationName()) &&
           !buildingExists(building.getName()) &&
           !buildingInQueue(building.getName())
       )

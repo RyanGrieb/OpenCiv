@@ -1,3 +1,5 @@
+# unique_to makes a building one civilization's unique building, built by that civ in place of the
+# building named in replaces and by nobody else.
 buildings:
   - name: Palace
     asset_name: BUILDING_PALACE
@@ -25,6 +27,9 @@ buildings:
     stats: []
   - name: Bazaar
     asset_name: BUILDING_BAZAAR
+    # Arabia's unique Market in Civ 5. Arabia isn't in the game yet, so nobody can build it.
+    unique_to: Arabia
+    replaces: Market
     cost: 100
     required_tech: Currency
     stats:

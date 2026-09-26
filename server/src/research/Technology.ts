@@ -79,9 +79,12 @@ export class Technology {
     return ConfigLoader.load<{ eras: EraData[] }>("./config/techs.yml").eras;
   }
 
-  // civName leaves out units that civ can't build (another civ's unique units, and the ones its own replace).
+  // civName leaves out what that civ can't build (other civs' unique units and buildings, and the ones its
+  // own uniques replace).
   public static getUnlocks(techName: string, civName?: string): TechnologyUnlocks {
-    const buildings = Building.getAllBuildings().filter((building) => building.getRequiredTech() === techName);
+    const buildings = Building.getAllBuildings().filter(
+      (building) => building.getRequiredTech() === techName && Building.isAvailableToCiv(building, civName)
+    );
     const toUnlock = (building: Building): UnlockData => ({
       name: building.getName(),
       asset_name: building.getAssetName()
