@@ -24,6 +24,8 @@ export class FogOfWarLayer extends Actor {
   private static readonly TILE_STRIDE_Y = 25;
   private static readonly TILE_CENTER_OFFSET = 16;
   private static readonly WORLD_PIXELS_PER_CELL = 4;
+  // A mask cell that lies beyond the map's outermost tiles.
+  private static readonly OFF_MAP = -1;
   // Repeated box blur passes approximate a gaussian, about 5 world pixels wide either way.
   private static readonly BLUR_RADIUS = 1;
   private static readonly BLUR_PASSES = 2;
@@ -176,7 +178,8 @@ export class FogOfWarLayer extends Actor {
     this.dirty.maxY = Math.max(this.dirty.maxY, gridY);
   }
 
-  // For every mask cell, the tile whose center is nearest - which, on this grid, is the hex it's in.
+  // For every mask cell, the tile whose center is nearest - which, on this grid, is the hex it's in -
+  // or OFF_MAP where that would be a tile past the map's edge.
   private mapCellsToTiles(): Int32Array {
     const cellTiles = new Int32Array(this.cellsWide * this.cellsHigh);
 
@@ -193,14 +196,15 @@ export class FogOfWarLayer extends Actor {
     return cellTiles;
   }
 
-  // Checks the nearest tile in the nearest row and the rows either side of it.
+  // Checks the nearest tile in the nearest row and the rows either side of it. Rows and (on a map
+  // that doesn't wrap) columns past the edge count too, so the jagged strip beyond the outer tiles
+  // comes out OFF_MAP rather than as part of them.
   private nearestTileIndex(worldX: number, worldY: number, nearestRow: number): number {
-    let bestIndex = 0;
+    let bestIndex = FogOfWarLayer.OFF_MAP;
     let bestDistance = Infinity;
 
-    for (let row = nearestRow - 1; row <= nearestRow + 1; row++) {
-      const gridY = Math.min(Math.max(row, 0), this.gridHeight - 1);
-      const rowOffset = gridY % 2 !== 0 ? FogOfWarLayer.TILE_STRIDE_X / 2 : 0;
+    for (let gridY = nearestRow - 1; gridY <= nearestRow + 1; gridY++) {
+      const rowOffset = Math.abs(gridY) % 2 !== 0 ? FogOfWarLayer.TILE_STRIDE_X / 2 : 0;
       const column = Math.round((worldX - FogOfWarLayer.TILE_CENTER_OFFSET - rowOffset) / FogOfWarLayer.TILE_STRIDE_X);
 
       const centerX = column * FogOfWarLayer.TILE_STRIDE_X + rowOffset + FogOfWarLayer.TILE_CENTER_OFFSET;
@@ -209,10 +213,17 @@ export class FogOfWarLayer extends Actor {
       if (distance >= bestDistance) continue;
 
       bestDistance = distance;
-      bestIndex = this.wrapColumn(column) + gridY * this.gridWidth;
+      bestIndex = this.isOnMap(column, gridY)
+        ? this.wrapColumn(column) + gridY * this.gridWidth
+        : FogOfWarLayer.OFF_MAP;
     }
 
     return bestIndex;
+  }
+
+  private isOnMap(column: number, gridY: number): boolean {
+    if (gridY < 0 || gridY >= this.gridHeight) return false;
+    return this.wrapped || (column >= 0 && column < this.gridWidth);
   }
 
   private wrapColumn(column: number): number {
@@ -257,9 +268,8 @@ export class FogOfWarLayer extends Actor {
     const fogged = new Float32Array(width * height);
     const unexplored = new Float32Array(width * height);
     for (let y = 0; y < height; y++) {
-      const cellY = Math.min(Math.max(readTop + y, 0), this.cellsHigh - 1);
       for (let x = 0; x < width; x++) {
-        const state = this.tileStates[this.cellTiles[this.wrapCellX(readLeft + x) + cellY * this.cellsWide]];
+        const state = this.stateOfCell(readLeft + x, readTop + y);
         fogged[x + y * width] = state === FogOfWarLayer.FOGGED ? 1 : 0;
         unexplored[x + y * width] = state === FogOfWarLayer.UNEXPLORED ? 1 : 0;
       }
@@ -282,6 +292,15 @@ export class FogOfWarLayer extends Actor {
     const putLeft = inBounds ? writeLeft : 0;
     const putWidth = inBounds ? writeRight - writeLeft : this.cellsWide;
     this.context.putImageData(this.pixels, 0, 0, putLeft, writeTop, putWidth, writeBottom - writeTop);
+  }
+
+  // Past the map's edge reads as unexplored, so the outermost tiles fade out like any unexplored border.
+  private stateOfCell(cellX: number, cellY: number): number {
+    if (cellY < 0 || cellY >= this.cellsHigh) return FogOfWarLayer.UNEXPLORED;
+    if (!this.wrapped && (cellX < 0 || cellX >= this.cellsWide)) return FogOfWarLayer.UNEXPLORED;
+
+    const tileIndex = this.cellTiles[this.wrapCellX(cellX) + cellY * this.cellsWide];
+    return tileIndex === FogOfWarLayer.OFF_MAP ? FogOfWarLayer.UNEXPLORED : this.tileStates[tileIndex];
   }
 
   // Mixes the blurred fogged/unexplored amounts into colors (premultiplied, then back out for ImageData).

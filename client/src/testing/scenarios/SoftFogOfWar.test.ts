@@ -10,6 +10,7 @@ import { TestUtils } from "../TestUtils";
 // Fog of war fades between unexplored, remembered and visible tiles instead of stopping at hard hex
 // edges. Starts a normal fogged game, samples the fog overlay across the edge of sight, then walks a
 // unit away so some tiles fall back into fog, and checks those read as dimmed rather than hidden.
+// Last, checks the map's own top and bottom edges fade out the same way.
 export function setupSoftFogOfWarTest(game: Game) {
   const runner = new TestRunner("SoftFogOfWar");
   const utils = new TestUtils(game);
@@ -164,6 +165,38 @@ export function setupSoftFogOfWarTest(game: Game) {
         `Remembered tile ${foggedTile.getGridX()},${foggedTile.getGridY()}: opacity ${(alpha / 255).toFixed(2)}, red ${red}`
       );
       return alpha / 255 > 0.2 && alpha / 255 < 0.75 && red < 100;
+    }
+  });
+
+  runner.addStep({
+    name: "The map's top and bottom edges fade out too: outer tiles slightly veiled, the jagged strip past them covered",
+    action: async () => {},
+    verification: () => {
+      // A small stand-alone map (10 x 6, not wrapped) with every tile in sight, so only the edge veils it.
+      const edgeTest = new FogOfWarLayer(10, 6, false);
+      for (let x = 0; x < 10; x++) {
+        for (let y = 0; y < 6; y++) edgeTest.setTileState(x, y, FogOfWarLayer.VISIBLE);
+      }
+      const alpha = (x: number, y: number) => edgeTest.getPixelAt(x, y)[3] / 255;
+      const middle = centerOf(4, 3);
+      const topTile = centerOf(4, 0);
+      const bottomTile = centerOf(4, 5);
+      // The notches between two outer hexes, where only background lay before.
+      const topNotch = alpha(5 * 32, 2);
+      const bottomNotch = alpha(4 * 32 + 16, 5 * 25 + 30);
+      utils.log(
+        `Opacity: middle ${alpha(middle.x, middle.y).toFixed(2)}, top tile ${alpha(topTile.x, topTile.y).toFixed(2)}, ` +
+          `top notch ${topNotch.toFixed(2)}, bottom tile ${alpha(bottomTile.x, bottomTile.y).toFixed(2)}, ` +
+          `bottom notch ${bottomNotch.toFixed(2)}`
+      );
+      const veiled = (value: number) => value > 0.05 && value < 0.7;
+      return (
+        alpha(middle.x, middle.y) < 0.05 &&
+        veiled(alpha(topTile.x, topTile.y)) &&
+        veiled(alpha(bottomTile.x, bottomTile.y)) &&
+        topNotch > 0.9 &&
+        bottomNotch > 0.9
+      );
     }
   });
 
