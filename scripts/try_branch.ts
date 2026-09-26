@@ -105,6 +105,47 @@ class TryBranch {
     console.log(`\nmaster is at ${tried.slice(0, 8)} and ${branch} is deleted.`);
   }
 
+  // Deletes everything in WORKTREES. A folder git no longer tracks as a worktree (left behind when an earlier
+  // removal was interrupted, or a file in it was locked) is deleted directly, and one failure doesn't stop the rest.
+  public static clean(): void {
+    this.git(["worktree", "prune"]);
+    if (!fs.existsSync(WORKTREES)) return;
+
+    const registered = this.registeredWorktrees();
+    let failed = 0;
+    for (const name of fs.readdirSync(WORKTREES)) {
+      const dir = path.join(WORKTREES, name);
+      console.log(`Removing ${name}`);
+      try {
+        if (registered.has(this.normalizePath(dir))) {
+          this.git(["worktree", "remove", "--force", dir]);
+        }
+        fs.rmSync(dir, { recursive: true, force: true, maxRetries: 3 });
+      } catch (error) {
+        failed++;
+        console.warn(`  Couldn't remove ${dir} (is it still running?): ${(error as Error).message.split("\n")[0]}`);
+      }
+    }
+    this.git(["worktree", "prune"]);
+    if (failed > 0) {
+      console.warn(`\n${failed} folder(s) left behind. Stop anything running from them and run --clean again.`);
+      process.exitCode = 1;
+    }
+  }
+
+  public static registeredWorktrees(): Set<string> {
+    const lines = this.git(["worktree", "list", "--porcelain"]).split("\n");
+    return new Set(
+      lines.filter((line) => line.startsWith("worktree ")).map((line) => this.normalizePath(line.slice(9)))
+    );
+  }
+
+  // Git prints Windows paths with forward slashes, and Windows paths are case-insensitive.
+  public static normalizePath(p: string): string {
+    const resolved = path.resolve(p);
+    return process.platform === "win32" ? resolved.toLowerCase() : resolved;
+  }
+
   public static async freePorts(): Promise<{ server: number; client: number }> {
     for (let offset = 0; offset < 100; offset++) {
       const ports = { server: 2100 + offset, client: 1240 + offset };
@@ -121,13 +162,7 @@ class TryBranch {
   const serverArgs = argv.filter((arg) => arg.startsWith("--") && !flags.includes(arg));
 
   if (flags.includes("--clean")) {
-    if (fs.existsSync(WORKTREES)) {
-      for (const name of fs.readdirSync(WORKTREES)) {
-        console.log(`Removing ${name}`);
-        TryBranch.git(["worktree", "remove", "--force", path.join(WORKTREES, name)]);
-      }
-    }
-    TryBranch.git(["worktree", "prune"]);
+    TryBranch.clean();
     return;
   }
 
