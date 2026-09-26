@@ -6,7 +6,6 @@ import { Unit } from "../../unit/Unit";
 import { City } from "../../city/City";
 import { Job, gracefulShutdown, scheduleJob } from "node-schedule";
 
-import { UnitActions } from "../../unit/UnitActions";
 import { Tile } from "../../map/Tile";
 
 export class InGameState extends State {
@@ -15,20 +14,50 @@ export class InGameState extends State {
   private totalTurnTime: number;
   private turnTime: number;
 
+  // Where no player's starting units may be placed.
+  private static readonly SPAWN_AVOID_TILE_TYPES = [
+    "ocean",
+    "shallow_ocean",
+    "freshwater",
+    "mountain",
+    "snow",
+    "snow_hill",
+    "tundra",
+    "tundra_hill"
+  ];
+
+  // Anywhere suitable on the map - or, with the spawnPlayersTogether option, two tiles from the first
+  // player's settler, falling back to anywhere if nothing that close is open.
+  private static chooseSpawnTile(firstSpawnTile: Tile | undefined): Tile {
+    const spawnTogether = firstSpawnTile && Game.getInstance().getGameOptions().spawnPlayersTogether;
+    const nearbyTile = spawnTogether ? InGameState.findSpawnTwoTilesFrom(firstSpawnTile) : undefined;
+
+    return (
+      nearbyTile ??
+      GameMap.getInstance().getRandomTileWith({
+        avoidTileTypes: InGameState.SPAWN_AVOID_TILE_TYPES,
+        avoidMapEdge: 4
+      })
+    );
+  }
+
+  private static isOpenSpawnTile(tile: Tile | undefined): boolean {
+    return !!tile && !tile.containsTileTypes(InGameState.SPAWN_AVOID_TILE_TYPES) && tile.getUnits().length === 0;
+  }
+
   // An open spawn tile two steps from `origin` - close enough that the players' starting units are
   // within a move of each other, without touching the other player's units.
-  private static findSpawnTwoTilesFrom(origin: Tile, badTileTypes: string[]): Tile | undefined {
+  private static findSpawnTwoTilesFrom(origin: Tile): Tile | undefined {
     const neighbors = origin.getAdjacentTiles().filter(Boolean);
-    const isOpen = (tile: Tile) => tile && !tile.containsTileTypes(badTileTypes) && tile.getUnits().length === 0;
 
-    for (const neighbor of neighbors) {
-      for (const candidate of neighbor.getAdjacentTiles()) {
-        if (!isOpen(candidate) || candidate === origin || neighbors.includes(candidate)) continue;
-        if (candidate.getAdjacentTiles().some((tile) => isOpen(tile) && !neighbors.includes(tile))) return candidate;
-      }
-    }
+    // Tiles two steps out, keeping one with an open tile beside it (on the far side) for its warrior.
+    const twoStepsOut = neighbors
+      .flatMap((neighbor) => neighbor.getAdjacentTiles())
+      .filter((tile) => InGameState.isOpenSpawnTile(tile) && tile !== origin && !neighbors.includes(tile));
 
-    return undefined;
+    return twoStepsOut.find((candidate) =>
+      candidate.getAdjacentTiles().some((tile) => InGameState.isOpenSpawnTile(tile) && !neighbors.includes(tile))
+    );
   }
 
   public onInitialize() {
@@ -81,52 +110,20 @@ export class InGameState extends State {
       }
     });
 
-    const badTileTypes = [
-      "ocean",
-      "shallow_ocean",
-      "freshwater",
-      "mountain",
-      "snow",
-      "snow_hill",
-      "tundra",
-      "tundra_hill"
-    ];
     let firstSpawnTile: Tile | undefined;
 
     Game.getInstance()
       .getPlayers()
       .forEach((player) => {
-        const nearbySpawn =
-          firstSpawnTile && Game.getInstance().getGameOptions().spawnPlayersTogether
-            ? InGameState.findSpawnTwoTilesFrom(firstSpawnTile, badTileTypes)
-            : undefined;
-
-        const spawnTile =
-          nearbySpawn ??
-          GameMap.getInstance().getRandomTileWith({
-            avoidTileTypes: badTileTypes,
-            avoidMapEdge: 4
-          });
+        const spawnTile = InGameState.chooseSpawnTile(firstSpawnTile);
         firstSpawnTile ??= spawnTile;
 
-        spawnTile.addUnit(
-          new Unit({
-            name: "settler",
-            player: player,
-            tile: spawnTile,
-            isUtility: true,
-            actions: [UnitActions.settleCity()]
-          })
-        );
+        // From units.yml, so starting units match built ones (combat strength, the Settler's action).
+        spawnTile.addUnit(Unit.createFromName("Settler", spawnTile, player));
 
         //TODO: Re-choose spawn location if warrior can't spawn
-        for (const adjTile of spawnTile.getAdjacentTiles()) {
-          if (!adjTile || adjTile.containsTileTypes(badTileTypes) || adjTile.getUnits().length > 0) continue;
-
-          // From units.yml, so the starting warrior gets the same combat strength as a built one.
-          adjTile.addUnit(Unit.createFromName("Warrior", adjTile, player));
-          break;
-        }
+        const warriorTile = spawnTile.getAdjacentTiles().find(InGameState.isOpenSpawnTile);
+        warriorTile?.addUnit(Unit.createFromName("Warrior", warriorTile, player));
 
         player.onLoadedIn(() => {
           player.zoomToLocation(spawnTile.getX(), spawnTile.getY(), 3);
