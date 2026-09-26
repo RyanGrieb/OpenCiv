@@ -7,6 +7,7 @@ import { AbstractPlayer } from "./player/AbstractPlayer";
 import { Actor } from "./scene/Actor";
 import { ActorGroup } from "./scene/ActorGroup";
 import { UnitDisplayInfo } from "./ui/UnitDisplayInfo";
+import { FloatingText } from "./ui/FloatingText";
 import { Strings } from "./util/Strings";
 
 export class UnitActionManager {
@@ -301,10 +302,12 @@ export class Unit extends ActorGroup {
       parentObject: this,
       callback: (data) => {
         if (this.id === data.attackerId) {
+          this.showDamage(this.health - data.attackerHealth);
           this.health = data.attackerHealth;
           this.availableMovement = data.attackerRemainingMovement;
           this.queuedMovementTiles = [];
         } else if (this.id === data.defenderId) {
+          this.showDamage(this.health - data.defenderHealth);
           this.health = data.defenderHealth;
         }
       }
@@ -542,6 +545,20 @@ export class Unit extends ActorGroup {
     if (healthAngle > 0) {
       Game.getInstance().drawCircleSector({ ...sector, startAngle: top, endAngle: top + healthAngle, color: "lime" });
     }
+  }
+
+  // "-12" rising from just under the civ icon to above it, then fading, as in Civ 5.
+  private showDamage(damage: number) {
+    if (damage <= 0) return;
+
+    const { x, y } = this.getCivIconPosition();
+    new FloatingText({
+      text: `-${damage}`,
+      color: "red",
+      centerX: x + Unit.CIV_ICON_SIZE / 2,
+      fromY: y + Unit.CIV_ICON_SIZE / 2 + Unit.HEALTH_BUBBLE_RADIUS + 2,
+      toY: y - Unit.HEALTH_BUBBLE_RADIUS - 10
+    }).show();
   }
 
   private getCivIconPosition() {
