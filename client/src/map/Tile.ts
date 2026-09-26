@@ -32,7 +32,7 @@ export class Tile extends Actor {
   // Mirrors server/src/map/Tile.ts's ROAD_MOVEMENT_COST.
   public static readonly ROAD_MOVEMENT_COST = 1 / 3;
   // Tile types drawn some other way than their own sprite - roads connect to their neighbors (see
-  // GameMap.createRoadActors).
+  // Road.createActors).
   private static readonly UNSPRITED_TILE_TYPES = ["road"];
 
   private static loadedTileImages = new Map<string, HTMLImageElement>();

@@ -11,7 +11,11 @@ import { Label } from "./Label";
 import { UITheme } from "./UITheme";
 
 const WINDOW_WIDTH = 300;
-// Offsets from the window's top. Action buttons take 44-108.
+// Offsets from the window's top. Action buttons take 44-108, wrapping into more rows of 4 when a
+// unit (a Builder) has more; each extra row pushes everything below it down by ACTION_SPACING.
+const ACTION_Y = 44;
+const ACTION_SPACING = 68;
+const ACTIONS_PER_ROW = 4;
 const MOVEMENT_Y = 114;
 const STRENGTH_Y = 142;
 const HEALTH_BAR_Y = 176;
@@ -136,7 +140,7 @@ export class UnitDisplayInfo extends ActorGroup {
     }
 
     this.movementLabel.conformSize().then(() => {
-      this.movementLabel.setPosition(this.x + TEXT_X, this.y + MOVEMENT_Y);
+      this.movementLabel.setPosition(this.x + TEXT_X, this.y + MOVEMENT_Y + this.getExtraActionRowsHeight());
     });
   }
 
@@ -152,7 +156,7 @@ export class UnitDisplayInfo extends ActorGroup {
     this.buildLabel.setText(building ? `Building ${building}: ${turnsLeft} ${turnsLeft === 1 ? "turn" : "turns"}` : "");
 
     this.buildLabel.conformSize().then(() => {
-      this.buildLabel.setPosition(this.x + TEXT_X, this.y + STRENGTH_Y);
+      this.buildLabel.setPosition(this.x + TEXT_X, this.y + STRENGTH_Y + this.getExtraActionRowsHeight());
     });
   }
 
@@ -172,7 +176,7 @@ export class UnitDisplayInfo extends ActorGroup {
     const xpLabel = new Label({ text: "XP 0/10", font: UITheme.FONT, fontColor: "white" });
 
     Promise.all([strengthLabel.conformSize(), healthLabel.conformSize(), xpLabel.conformSize()]).then(() => {
-      const strengthY = this.y + STRENGTH_Y;
+      const strengthY = this.y + STRENGTH_Y + this.getExtraActionRowsHeight();
       strengthLabel.setPosition(this.x + TEXT_X, strengthY);
       const healthFraction = Math.max(0, Math.min(Unit.MAX_HEALTH, this.unit.getHealth())) / Unit.MAX_HEALTH;
 
@@ -199,7 +203,7 @@ export class UnitDisplayInfo extends ActorGroup {
   // A bar across the window, filled from the left to `fraction`, with a label centered on it.
   private createBar(barY: number, backColor: string, fillColor: string, fraction: number, label: Label) {
     const x = this.x + BAR_MARGIN;
-    const y = this.y + barY;
+    const y = this.y + barY + this.getExtraActionRowsHeight();
     const width = this.width - BAR_MARGIN * 2;
 
     const actors = [new Actor({ color: backColor, x, y, width, height: BAR_HEIGHT })];
@@ -210,21 +214,26 @@ export class UnitDisplayInfo extends ActorGroup {
     return actors;
   }
 
+  private getShownActions() {
+    return this.unit.getActions().filter((action) => action.requirementsMet(this.unit));
+  }
+
+  private getExtraActionRowsHeight() {
+    const rows = Math.max(1, Math.ceil(this.getShownActions().length / ACTIONS_PER_ROW));
+    return (rows - 1) * ACTION_SPACING;
+  }
+
   private updateActionButtons() {
-    let xOffset = 0;
-
     const newActionButtons = [];
-    for (const action of this.unit.getActions()) {
-      if (!action.requirementsMet(this.unit)) continue;
-
+    for (const [index, action] of this.getShownActions().entries()) {
       const button = new Button({
         buttonImage: GameImage.ICON_BUTTON,
         buttonHoveredImage: GameImage.ICON_BUTTON_HOVERED,
         icon: action.getIcon(),
         iconWidth: UITheme.ICON_SIZE,
         iconHeight: UITheme.ICON_SIZE,
-        x: this.x + 16 + xOffset,
-        y: this.y + 44,
+        x: this.x + TEXT_X + (index % ACTIONS_PER_ROW) * ACTION_SPACING,
+        y: this.y + ACTION_Y + Math.floor(index / ACTIONS_PER_ROW) * ACTION_SPACING,
         size: ButtonSize.ICON_LARGE,
         onClicked: () => {
           // Send action event to server
@@ -249,7 +258,6 @@ export class UnitDisplayInfo extends ActorGroup {
 
       this.addActor(button);
       newActionButtons.push(button);
-      xOffset += 48;
     }
 
     for (const button of this.actionButtons) {

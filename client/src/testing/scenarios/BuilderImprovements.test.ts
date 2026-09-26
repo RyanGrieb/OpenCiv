@@ -8,8 +8,9 @@ import { InGameScene } from "../../scene/type/InGameScene";
 import { TestUtils } from "../TestUtils";
 
 // Plays a Builder's work out against a live server, on a revealed map with every tech researched
-// (the startWithAllTechs and startWithBuilder game options): it farms a patch of grassland, lays a
-// road on it and the tile beside it, then clears a forest. Build buttons are pressed through the
+// (the startWithAllTechs and startWithBuilder game options): it settles a city, farms a tile inside
+// its borders, lays a road on it and the tile beside it, then clears a forest (which, like roads, is
+// allowed outside borders too). Build buttons are pressed through the
 // unit info window the way a player would.
 export function setupBuilderImprovementsTest(game: Game) {
     const runner = new TestRunner("BuilderImprovements");
@@ -23,6 +24,7 @@ export function setupBuilderImprovementsTest(game: Game) {
     const clientPlayer = () => utils.getClientPlayer() as unknown as Record<string, any>;
     const scene = () => game.getCurrentSceneAs<InGameScene>();
     const allTiles = () => GameMap.getInstance().getTiles().flatMap((column) => (column ?? []).filter(Boolean));
+    const FARMLAND = ["grass", "plains", "desert", "tundra", "grass_hill", "plains_hill", "desert_hill", "tundra_hill"];
     const isBareLand = (tile: Tile, base: string[]) =>
         tile.getTileTypes().length === 1 && base.includes(tile.getTileTypes()[0]) && tile.getUnits().length === 0;
 
@@ -82,7 +84,7 @@ export function setupBuilderImprovementsTest(game: Game) {
             .sort((a, b) => a.path.length - b.path.length)[0]?.tile;
 
     runner.addStep({
-        name: "Start a revealed-map game with every tech and a Builder",
+        name: "Start with every tech and a Builder, which can't farm outside any borders",
         action: async () => {
             WebsocketClient.init("localhost");
             await utils.waitUntil(() => game.getCurrentScene().getName() === "lobby", 5000, "Scene to become lobby");
@@ -101,26 +103,46 @@ export function setupBuilderImprovementsTest(game: Game) {
                 "The Builder to appear"
             );
         },
-        verification: () => builder.getActions().some((action) => action.getName() === "build_farm")
+        // No city yet, so no borders - and a Farm has to go inside them.
+        verification: () => {
+            const farm = builder.getActions().find((action) => action.getName() === "build_farm");
+            return !!farm && !farm.requirementsMet(builder);
+        }
     });
 
     runner.addStep({
-        name: "Walk to open grassland, where a Farm, Trading Post and Road are offered",
+        name: "Settle a city, then walk to farmland inside its borders",
         action: async () => {
+            const settler = await utils.findUnitWithAction("settle");
+            WebsocketClient.sendMessage({
+                event: "unitAction",
+                unitX: settler.getTile().getGridX(),
+                unitY: settler.getTile().getGridY(),
+                id: settler.getID(),
+                actionName: "settle"
+            });
+            await utils.waitUntil(() => utils.getClientPlayer().getCities().length > 0, 5000, "City to be founded");
+
+            const territory = utils.getClientPlayer().getCities()[0].getTerritory();
             farmTile = nearest(
                 (tile) =>
-                    isBareLand(tile, ["grass"]) &&
-                    tile.getAdjacentTiles().some((neighbor) => neighbor && isBareLand(neighbor, ["grass", "plains"]))
+                    territory.includes(tile) &&
+                    isBareLand(tile, FARMLAND) &&
+                    tile.getAdjacentTiles().some((neighbor) => neighbor && isBareLand(neighbor, FARMLAND))
             );
-            if (!farmTile) throw new Error("No open grassland in reach");
+            if (!farmTile) throw new Error("No open farmland inside the city's borders");
 
             await walkTo(farmTile);
             select(builder);
             foodBefore = farmTile.getTileYield()?.food ?? 0;
         },
-        verification: () =>
-            JSON.stringify(shownActions().map((action) => action.getName())) ===
-            JSON.stringify(["build_farm", "build_trading_post", "build_road"])
+        // The window lays its buttons out a full button apart, so none overlap.
+        verification: () => {
+            const shown = shownActions().map((action) => action.getName());
+            const xs = actionButtons().map((button) => button.getX());
+            const apart = xs.every((x, index) => index === 0 || x - xs[index - 1] >= 64);
+            return shown.includes("build_farm") && shown.includes("build_road") && apart;
+        }
     });
 
     runner.addStep({
@@ -150,7 +172,7 @@ export function setupBuilderImprovementsTest(game: Game) {
             await pressBuild("build_road");
             await endTurnsUntil(() => farmTile.getTileTypes().includes("road"), 5, "First road to finish");
 
-            roadTile = farmTile.getAdjacentTiles().find((tile) => tile && isBareLand(tile, ["grass", "plains"]));
+            roadTile = farmTile.getAdjacentTiles().find((tile) => tile && isBareLand(tile, FARMLAND));
             await walkTo(roadTile);
             await pressBuild("build_road");
             await endTurnsUntil(() => roadTile.getTileTypes().includes("road"), 5, "Second road to finish");
@@ -179,7 +201,7 @@ export function setupBuilderImprovementsTest(game: Game) {
     });
 
     runner.addStep({
-        name: "Clear a forest (4 turns), which then offers a Farm",
+        name: "Clear the nearest forest (4 turns), even outside the borders",
         action: async () => {
             forestTile = nearest(
                 (tile) => JSON.stringify(tile.getTileTypes()) === JSON.stringify(["grass", "forest"]) && tile.getUnits().length === 0
@@ -191,7 +213,9 @@ export function setupBuilderImprovementsTest(game: Game) {
             await endTurnsUntil(() => !forestTile.getTileTypes().includes("forest"), 6, "Forest to be cleared");
             select(builder);
         },
-        verification: () => shownActions().some((action) => action.getName() === "build_farm")
+        verification: () =>
+            !forestTile.getTileTypes().includes("forest") &&
+            !shownActions().some((action) => action.getName() === "build_remove_forest")
     });
 
     return runner;

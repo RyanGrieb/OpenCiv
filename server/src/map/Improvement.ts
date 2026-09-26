@@ -20,6 +20,7 @@ export interface ImprovementData {
   requires_feature?: string;
   route?: boolean;
   removes_feature?: string;
+  outside_borders?: boolean;
 }
 
 // The tile improvements (and forest/jungle clearing) a Builder can work on, from
@@ -47,6 +48,7 @@ export class Improvement {
     if (improvement.required_tech && !player.hasResearchedTech(improvement.required_tech)) return false;
     if (tile.isWater() || tile.getCity() || !tile.isWorkable()) return false;
     if (tile.containsTileType(Barbarians.CAMP_TILE_TYPE)) return false;
+    if (!Improvement.territoryAllows(improvement, tile, player)) return false;
 
     if (improvement.removes_feature) {
       return tile.containsTileType(improvement.removes_feature) && !tile.getImprovement();
@@ -89,6 +91,14 @@ export class Improvement {
 
     const allowed = [...(improvement.features ?? []), improvement.requires_feature];
     return Improvement.FEATURES.every((feature) => !tile.containsTileType(feature) || allowed.includes(feature));
+  }
+
+  // Improvements go in the Builder's own territory; roads and clearing may also go on unowned land.
+  private static territoryAllows(improvement: ImprovementData, tile: Tile, player: Player): boolean {
+    const owner = tile.getCityTerritoryOf()?.getPlayer();
+    if (owner) return owner === player;
+
+    return !!improvement.outside_borders;
   }
 
   private static terrainAllows(improvement: ImprovementData, tile: Tile): boolean {

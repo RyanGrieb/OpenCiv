@@ -39,7 +39,8 @@ export function setupBuilderSandboxTest(game: Game) {
             );
             game.getCurrentSceneAs<InGameScene>().focusOnTile(builder.getTile(), 3);
 
-            utils.log("Select your Builder to see what it can build on its tile. Hover a", "yellow");
+            utils.log("Settle your city first: improvements only go inside your borders, though", "yellow");
+            utils.log("roads and clearing trees work anywhere. Select the Builder and hover a", "yellow");
             utils.log("button for its name and build time; the Builder works at each turn's end.", "yellow");
 
             // Let clicks through to the map wherever this log sits.

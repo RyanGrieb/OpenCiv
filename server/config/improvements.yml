@@ -12,6 +12,8 @@
 #   requires_feature - the feature the tile must have (a Lumber Mill needs forest).
 #   route         - roads stack with the tile's improvement rather than being it.
 #   removes_feature - a clearing job: takes the feature off the tile instead of building anything.
+#   outside_borders - may also be built on land no civilization owns. Everything else has to be in
+#                   the Builder's own territory, and nothing can go in another civilization's.
 # asset_name is what the tech window shows; icon is the Builder's action button.
 improvements:
   - name: Farm
@@ -76,13 +78,14 @@ improvements:
     resources:
       stone: stone_quarry
   - name: Road
-    asset_name: ICON_ROAD
-    icon: ICON_ROAD
+    asset_name: ROAD_VERTICAL_RIGHT
+    icon: ROAD_VERTICAL_RIGHT
     required_tech: The Wheel
     build_turns: 3
     tile_type: road
     features: [forest, jungle]
     route: true
+    outside_borders: true
   - name: Lumber Mill
     asset_name: TILE_LUMBER_MILL
     icon: ICON_GEAR
@@ -97,8 +100,10 @@ improvements:
     required_tech: Mining
     build_turns: 4
     removes_feature: forest
+    outside_borders: true
   - name: Remove Jungle
     icon: ICON_CHOP
     required_tech: Bronze Working
     build_turns: 7
     removes_feature: jungle
+    outside_borders: true

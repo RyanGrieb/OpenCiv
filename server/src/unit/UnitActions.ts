@@ -28,6 +28,8 @@ export class UnitActions {
         player.getCities().push(city);
 
         city.announceCreated();
+        // The new borders change what this player's Builders can build.
+        player.getUnits().forEach((playerUnit) => playerUnit.sendActionsToOwner());
       }
     };
   }

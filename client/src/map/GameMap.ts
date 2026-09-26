@@ -1,9 +1,10 @@
-import { GameImage, resolveSpriteRegion, SpriteRegion } from "../Assets";
+import { GameImage, SpriteRegion } from "../Assets";
 import { Game } from "../Game";
 import { RemoveUnitEvent, Unit, UnitCreationData } from "../Unit";
 import { NetworkEvents, WebsocketClient } from "../network/Client";
 import { Actor } from "../scene/Actor";
 import { River } from "./River";
+import { Road } from "./Road";
 import { Tile, TileYieldsData } from "./Tile";
 import { Line } from "../scene/Line";
 import PriorityQueue from "ts-priority-queue";
@@ -137,30 +138,6 @@ export class GameMap {
     MapWrap.init(0, 0, false);
     this.instance.requestMapFromServer();
     this.instance.requestTileYieldsFromServer();
-  }
-
-  // A road tile draws a hub at its center and a spoke toward each adjacent road, so neighboring
-  // spokes meet at the shared edge. Adjacent index i lies across the tile's side i, the same
-  // numbering rivers use.
-  private static createRoadActors(tile: Tile, x: number, y: number): Actor[] {
-    if (!tile.getTileTypes().includes("road")) return [];
-
-    const regions = [SpriteRegion.TILE_ROAD];
-    tile.getAdjacentTiles().forEach((neighbor, side) => {
-      if (neighbor?.hasRoad()) regions.push(resolveSpriteRegion(`TILE_ROAD_${side}`));
-    });
-
-    return regions.map(
-      (spriteRegion) =>
-        new Actor({
-          image: Game.getInstance().getImage(GameImage.SPRITESHEET),
-          spriteRegion,
-          x,
-          y,
-          width: Tile.WIDTH,
-          height: Tile.HEIGHT
-        })
-    );
   }
 
   private constructor() {
@@ -722,7 +699,7 @@ export class GameMap {
           topRenderActors.push(topRenderTile);
         }
 
-        topRenderActors.push(...GameMap.createRoadActors(tile, xPosRelative, yPosRelative));
+        topRenderActors.push(...Road.createActors(tile, xPosRelative, yPosRelative));
 
         // Discovered but not currently visible - keep showing the remembered terrain underneath,
         // dimmed. Tacked onto the top layer (drawn above base terrain) so it applies whether or not

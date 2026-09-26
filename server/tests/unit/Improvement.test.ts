@@ -2,6 +2,7 @@ import { Improvement, ImprovementData } from '../../src/map/Improvement';
 import { Tile } from '../../src/map/Tile';
 import { Unit } from '../../src/unit/Unit';
 import { Player } from '../../src/Player';
+import { City } from '../../src/city/City';
 
 describe('Improvement', () => {
   const player = (techs: string[] = []) =>
@@ -14,10 +15,14 @@ describe('Improvement', () => {
     return tile;
   };
   const improvement = (name: string) => Improvement.getImprovementData(name) as ImprovementData;
-  const buildable = (tile: Tile, builder = allTechs) =>
-    Improvement.getBuildableImprovementData()
+  // The tile sits in `owner`'s territory - the Builder's own unless said otherwise, and nobody's for null.
+  const buildable = (tile: Tile, builder = allTechs, owner: Player | null = builder) => {
+    tile.setCityTerritoryOf((owner ? { getPlayer: () => owner } : undefined) as unknown as City);
+
+    return Improvement.getBuildableImprovementData()
       .filter((data) => Improvement.canBuild(data, tile, builder))
       .map((data) => data.name);
+  };
 
   it('offers a farm, trading post and road on open grassland', () => {
     expect(buildable(tileOf('grass'))).toEqual(['Farm', 'Trading Post', 'Road']);
@@ -40,6 +45,15 @@ describe('Improvement', () => {
     expect(buildable(tileOf('grass', 'forest'))).toEqual(['Trading Post', 'Road', 'Lumber Mill', 'Remove Forest']);
     expect(buildable(tileOf('grass', 'citrus', 'jungle'))).toEqual(['Plantation', 'Road', 'Remove Jungle']);
     expect(buildable(tileOf('grass', 'jungle'))).toEqual(['Trading Post', 'Road', 'Remove Jungle']);
+  });
+
+  it('only builds roads and clears trees outside any borders', () => {
+    expect(buildable(tileOf('grass'), allTechs, null)).toEqual(['Road']);
+    expect(buildable(tileOf('grass', 'forest'), allTechs, null)).toEqual(['Road', 'Remove Forest']);
+  });
+
+  it("builds nothing in another civilization's territory", () => {
+    expect(buildable(tileOf('grass', 'forest'), allTechs, player())).toEqual([]);
   });
 
   it('builds nothing on water or mountains', () => {
