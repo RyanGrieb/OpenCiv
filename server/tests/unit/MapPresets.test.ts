@@ -3,8 +3,22 @@ import { Tile } from "../../src/map/Tile";
 
 // A plain rectangle of grass with GameMap's odd-r adjacency (odd rows sit half a hex to the right).
 const buildGrid = (width: number, height: number): Tile[][] => {
-  const evenEdgeAxis = [[-1, -1], [0, -1], [1, 0], [0, 1], [-1, 1], [-1, 0]];
-  const oddEdgeAxis = [[0, -1], [1, -1], [1, 0], [1, 1], [0, 1], [-1, 0]];
+  const evenEdgeAxis = [
+    [-1, -1],
+    [0, -1],
+    [1, 0],
+    [0, 1],
+    [-1, 1],
+    [-1, 0]
+  ];
+  const oddEdgeAxis = [
+    [0, -1],
+    [1, -1],
+    [1, 0],
+    [1, 1],
+    [0, 1],
+    [-1, 0]
+  ];
 
   const tiles: Tile[][] = [];
   for (let x = 0; x < width; x++) {

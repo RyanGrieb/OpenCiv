@@ -105,6 +105,47 @@ describe('Improvement', () => {
     expect(tile.getBuildProgress('Farm')).toBe(0);
   });
 
+  describe('Fishing Boats', () => {
+    const sailor = player(['Sailing']);
+    const seaBuildable = (tile: Tile, builder = sailor, owner: Player | null = builder) => {
+      tile.setCityTerritoryOf((owner ? { getPlayer: () => owner } : undefined) as unknown as City);
+
+      return Improvement.getBuildableImprovementData('sea')
+        .filter((data) => Improvement.canBuild(data, tile, builder))
+        .map((data) => data.name);
+    };
+
+    it('go on every sea resource in your own waters once you have Sailing', () => {
+      for (const resource of ['fish', 'crab', 'whales', 'turtles', 'pearls']) {
+        expect(seaBuildable(tileOf('shallow_ocean', resource))).toEqual(['Fishing Boats']);
+      }
+      expect(seaBuildable(tileOf('shallow_ocean', 'fish'), player())).toEqual([]);
+    });
+
+    it('need a resource, your own borders, and no Fishing Boats there already', () => {
+      expect(seaBuildable(tileOf('shallow_ocean'))).toEqual([]);
+      expect(seaBuildable(tileOf('shallow_ocean', 'fish'), sailor, null)).toEqual([]);
+      expect(seaBuildable(tileOf('shallow_ocean', 'fish'), sailor, player())).toEqual([]);
+
+      const improved = tileOf('shallow_ocean', 'fish');
+      Improvement.complete(improvement('Fishing Boats'), improved);
+      expect(seaBuildable(improved)).toEqual([]);
+    });
+
+    it('turn the resource into its improved tile', () => {
+      const tile = tileOf('shallow_ocean', 'pearls');
+      Improvement.complete(improvement('Fishing Boats'), tile);
+
+      expect(tile.getTileTypes()).toEqual(['shallow_ocean', 'improved_pearls']);
+      expect(tile.getImprovement()).toBe('Fishing Boats');
+    });
+
+    it("aren't offered to a Builder, and a Work Boat gets nothing else", () => {
+      expect(buildable(tileOf('shallow_ocean', 'fish'), player(['Sailing']))).toEqual([]);
+      expect(Improvement.getBuildableImprovementData('sea').map((data) => data.name)).toEqual(['Fishing Boats']);
+    });
+  });
+
   describe('roads', () => {
     it('cost a third of a move between two road tiles, ignoring terrain', () => {
       const from = tileOf('grass', 'road');

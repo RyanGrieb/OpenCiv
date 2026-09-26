@@ -2,6 +2,7 @@ import { Barbarians } from "../barbarian/Barbarians";
 import { Player } from "../Player";
 import { ConfigLoader } from "../util/ConfigLoader";
 import { Tile } from "./Tile";
+import type { UnitDomain } from "../unit/Unit";
 
 // One entry of config/improvements.yml - see the comment at the top of that file for what each
 // field means.
@@ -21,10 +22,14 @@ export interface ImprovementData {
   route?: boolean;
   removes_feature?: string;
   outside_borders?: boolean;
+  // "sea" for a Work Boat's improvements, built on water. Absent means a Builder's, on land.
+  domain?: UnitDomain;
+  // Finished the moment it's ordered, using up the unit that builds it (Civ 5's Fishing Boats).
+  consumes_unit?: boolean;
 }
 
-// The tile improvements (and forest/jungle clearing) a Builder can work on, from
-// config/improvements.yml.
+// The tile improvements (and forest/jungle clearing) a Builder can work on, and the Fishing Boats a
+// Work Boat can lay down, from config/improvements.yml.
 export class Improvement {
   // Trees and undergrowth that sit on top of a tile's terrain.
   public static readonly FEATURES = ["forest", "jungle"];
@@ -33,19 +38,24 @@ export class Improvement {
     return ConfigLoader.load<{ improvements: ImprovementData[] }>("./config/improvements.yml").improvements;
   }
 
-  // Everything a Builder is able to work on, whether or not it can be built anywhere right now.
-  public static getBuildableImprovementData(): ImprovementData[] {
-    return Improvement.getAllImprovementData().filter((improvement) => improvement.build_turns > 0);
+  // Everything a land or sea worker is able to build, whether or not it can go anywhere right now.
+  public static getBuildableImprovementData(domain: UnitDomain = "land"): ImprovementData[] {
+    return Improvement.getAllImprovementData().filter(
+      (improvement) => Improvement.isBuildable(improvement) && (improvement.domain ?? "land") === domain
+    );
   }
 
   public static getImprovementData(name: string): ImprovementData | undefined {
-    return Improvement.getBuildableImprovementData().find((improvement) => improvement.name === name);
+    return Improvement.getAllImprovementData().find(
+      (improvement) => improvement.name === name && Improvement.isBuildable(improvement)
+    );
   }
 
   // Whether this player's Builder could start (or keep) working on the improvement on this tile.
   public static canBuild(improvement: ImprovementData, tile: Tile, player: Player): boolean {
-    if (!(improvement.build_turns > 0)) return false;
+    if (!Improvement.isBuildable(improvement)) return false;
     if (improvement.required_tech && !player.hasResearchedTech(improvement.required_tech)) return false;
+    if (improvement.domain === "sea") return Improvement.canBuildAtSea(improvement, tile, player);
     if (tile.isWater() || tile.getCity() || !tile.isWorkable()) return false;
     if (tile.containsTileType(Barbarians.CAMP_TILE_TYPE)) return false;
     if (!Improvement.territoryAllows(improvement, tile, player)) return false;
@@ -82,6 +92,19 @@ export class Improvement {
     else tile.addTileType(improvement.tile_type);
 
     tile.setImprovement(improvement.name);
+  }
+
+  private static isBuildable(improvement: ImprovementData): boolean {
+    return improvement.build_turns > 0 || !!improvement.consumes_unit;
+  }
+
+  // A sea improvement goes on an unimproved water resource it lists, inside the player's own borders.
+  private static canBuildAtSea(improvement: ImprovementData, tile: Tile, player: Player): boolean {
+    if (!tile.isWater() || tile.getImprovement()) return false;
+    if (!Improvement.territoryAllows(improvement, tile, player)) return false;
+
+    const resource = tile.getResource();
+    return !!resource && improvement.resources?.[resource] !== undefined;
   }
 
   // Every feature on the tile has to be one the improvement can sit among, and a required one has

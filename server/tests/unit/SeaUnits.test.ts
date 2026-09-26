@@ -101,8 +101,41 @@ describe("Sea units", () => {
     expect(map.constructShortestPath(boat, tiles[3], tiles[4])).toEqual([tiles[3], tiles[4]]);
   });
 
+  it("builds Fishing Boats on the spot with a Work Boat, using the boat up", () => {
+    const sailor = {
+      ...player,
+      removeUnit: jest.fn(),
+      hasResearchedTech: (tech: string) => tech === "Sailing"
+    } as unknown as Player;
+    const [fish] = buildRow([["shallow_ocean", "fish"], ["grass"]]);
+    const updateWorkedTiles = jest.fn();
+    fish.setCityTerritoryOf({ getPlayer: () => sailor, updateWorkedTiles } as unknown as City);
+    const broadcastTileUpdate = jest.fn();
+    jest.spyOn(GameMap, "getInstance").mockReturnValue({ broadcastTileUpdate } as unknown as GameMap);
+
+    const boat = Unit.createFromName("Work Boat", fish, sailor);
+    fish.addUnit(boat);
+    const action = boat.getActionByName("build_fishing_boats");
+    expect(action.desc).toBe("Build Fishing Boats");
+    expect(action.isAvailable(boat)).toBe(true);
+
+    action.onAction(boat);
+
+    expect(fish.getTileTypes()).toEqual(["shallow_ocean", "improved_fish"]);
+    expect(fish.getUnits()).toEqual([]);
+    expect(sailor.removeUnit).toHaveBeenCalledWith(boat);
+    expect(broadcastTileUpdate).toHaveBeenCalledWith(fish);
+    expect(updateWorkedTiles).toHaveBeenCalled();
+  });
+
   it("counts a land tile as coastal only when it touches the sea, not a lake", () => {
-    const [lakeShore, lake, , coast, sea] = buildRow([["grass"], ["freshwater"], ["grass"], ["grass"], ["shallow_ocean"]]);
+    const [lakeShore, lake, , coast, sea] = buildRow([
+      ["grass"],
+      ["freshwater"],
+      ["grass"],
+      ["grass"],
+      ["shallow_ocean"]
+    ]);
 
     expect(coast.isCoastal()).toBe(true);
     expect(lakeShore.isCoastal()).toBe(false);

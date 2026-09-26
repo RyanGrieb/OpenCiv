@@ -7,7 +7,10 @@ export class UnitActions {
   // The actions every unit of this type starts with.
   public static forUnitType(data: UnitYMLTypeData): UnitAction[] {
     if (data.name === "Settler") return [UnitActions.settleCity()];
-    if (data.name === "Builder") return Improvement.getBuildableImprovementData().map(UnitActions.buildImprovement);
+    if (data.name === "Builder")
+      return Improvement.getBuildableImprovementData("land").map(UnitActions.buildImprovement);
+    if (data.name === "Work Boat")
+      return Improvement.getBuildableImprovementData("sea").map(UnitActions.buildImprovement);
     if (data.ranged_strength > 0) return [UnitActions.rangedAttack(), UnitActions.fortifyUntilHealed()];
     if (data.combat_strength > 0) return [UnitActions.fortifyUntilHealed()];
     return [];
@@ -61,17 +64,19 @@ export class UnitActions {
     };
   }
 
-  // One per improvement - the client only shows the ones isAvailable allows on the Builder's tile.
+  // One per improvement - the client only shows the ones isAvailable allows on the unit's tile.
   public static buildImprovement(improvement: ImprovementData): UnitAction {
     const verb = improvement.removes_feature ? "" : "Build ";
+    const duration = improvement.consumes_unit ? "" : ` (${improvement.build_turns} turns)`;
 
     return {
       name: `build_${improvement.name.toLowerCase().replace(/ /g, "_")}`,
       icon: improvement.icon ?? "ICON_UNKNOWN",
       requirements: ["movement", "notBuilding"],
-      desc: `${verb}${improvement.name} (${improvement.build_turns} turns)`,
+      desc: `${verb}${improvement.name}${duration}`,
       isAvailable: (unit: Unit) => Improvement.canBuild(improvement, unit.getTile(), unit.getPlayer()),
-      onAction: (unit: Unit) => unit.startBuilding(improvement.name)
+      onAction: (unit: Unit) =>
+        improvement.consumes_unit ? unit.buildAndDisband(improvement.name) : unit.startBuilding(improvement.name)
     };
   }
 

@@ -3,7 +3,7 @@ import { ServerEvents } from "../Events";
 import { Game } from "../Game";
 import { Player } from "../Player";
 import { GameMap } from "../map/GameMap";
-import { Improvement } from "../map/Improvement";
+import { Improvement, ImprovementData } from "../map/Improvement";
 import { Tile } from "../map/Tile";
 import { PlayerVisibility } from "../map/PlayerVisibility";
 import { ConfigLoader } from "../util/ConfigLoader";
@@ -469,10 +469,14 @@ export class Unit {
       return;
     }
 
-    Improvement.complete(improvement, this.tile);
     this.tile.clearBuildProgress(improvement.name);
     this.setBuildingImprovement(undefined);
+    this.finishImprovement(improvement);
     this.sendActionsToOwner();
+  }
+
+  private finishImprovement(improvement: ImprovementData) {
+    Improvement.complete(improvement, this.tile);
 
     GameMap.getInstance().broadcastTileUpdate(this.tile);
     // A worked tile's yields just changed - let its city re-pick which tiles to work.
@@ -809,6 +813,16 @@ export class Unit {
     // Starting work uses up the rest of the turn's movement, so the owner's unit info shows 0.
     this.sendBuildStatus({ remainingMovement: 0 });
     this.sendActionsToOwner();
+  }
+
+  // A Work Boat lays down Fishing Boats on the spot, and is used up doing it.
+  public buildAndDisband(improvementName: string) {
+    const improvement = Improvement.getImprovementData(improvementName);
+    if (!improvement || this.availableMovement <= 0) return;
+    if (!Improvement.canBuild(improvement, this.tile, this.player)) return;
+
+    this.finishImprovement(improvement);
+    this.delete();
   }
 
   public getBuildingImprovement() {

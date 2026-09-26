@@ -143,6 +143,15 @@ tiles:
     stats:
       - food: 2
       - gold: 1
+  PEARLS:
+    name: Pearls
+    stats:
+      - gold: 2
+  IMPROVED_PEARLS:
+    name: Improved Pearls
+    stats:
+      - food: 1
+      - gold: 2
   CITRUS:
     name: Citrus
     stats:

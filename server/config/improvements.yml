@@ -1,7 +1,7 @@
 # Tile improvements a Builder can construct, plus the forest/jungle clearing it can do. The tech
 # detail window also reads required_tech from here to list improvements under a tech's "Enables".
 #
-# build_turns is Civ 5's standard-speed Worker time. Entries without it (Fishing Boats and Fort)
+# build_turns is Civ 5's standard-speed Worker time. Entries without it or consumes_unit (Fort)
 # aren't buildable yet. Where to build is decided by these fields (see Improvement.canBuild):
 #   resources     - resource tile type -> what it becomes once improved (cattle -> improved_cattle).
 #                   On a resource tile, only an improvement listing that resource can be built.
@@ -12,6 +12,9 @@
 #   requires_feature - the feature the tile must have (a Lumber Mill needs forest).
 #   route         - roads stack with the tile's improvement rather than being it.
 #   removes_feature - a clearing job: takes the feature off the tile instead of building anything.
+#   domain        - sea for improvements a Work Boat builds on water resources. Absent means a
+#                   Builder's, on land.
+#   consumes_unit - built the moment it's ordered, using up the unit (Civ 5's Fishing Boats).
 #   outside_borders - may also be built on land no civilization owns. Everything else has to be in
 #                   the Builder's own territory, and nothing can go in another civilization's.
 # asset_name is what the tech window shows; icon is the Builder's action button.
@@ -45,7 +48,16 @@ improvements:
       gold: gold_mine
   - name: Fishing Boats
     asset_name: TILE_IMPROVED_FISH
+    icon: TILE_IMPROVED_FISH
     required_tech: Sailing
+    domain: sea
+    consumes_unit: true
+    resources:
+      fish: improved_fish
+      crab: improved_crab
+      whales: improved_whales
+      turtles: improved_turtles
+      pearls: improved_pearls
   - name: Plantation
     asset_name: TILE_CITRUS_PLANTATION
     icon: TILE_CITRUS_PLANTATION
