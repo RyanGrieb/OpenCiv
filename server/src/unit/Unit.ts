@@ -67,6 +67,8 @@ export interface UnitYMLTypeData {
   // Settler, which is only ever granted directly at game start).
   cost?: number;
   required_tech?: string;
+  // Once researched, cities stop offering this unit (see units.yml).
+  obsolete_tech?: string;
 }
 
 export class Unit {

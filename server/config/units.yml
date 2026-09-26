@@ -7,11 +7,16 @@
 # captured Settler into a Worker, which is our Builder). Civilians without it are destroyed instead.
 # domain: sea marks a ship: it only moves on water (and into its owner's coastal cities), and only
 # coastal cities can build it. coast_only keeps a ship off deep ocean, like Civ 5's Trireme.
+# obsolete_tech is Civ 5's ObsoleteTech: once it's researched, cities stop offering the unit and drop it
+# from their production queues (units already on the map stay). Each is the tech that unlocks the unit it
+# upgrades to. Still to add once their replacements exist: Horseman and Chariot Archer (Chivalry, Knight),
+# Swordsman and Legion (Steel, Longswordsman), Catapult (Physics, Trebuchet), Galley (Compass, Galleass).
 units:
   - name: Warrior
     combat_strength: 8
     attack_type: melee
     cost: 30
+    obsolete_tech: Iron Working
   - name: Scout
     combat_strength: 5
     attack_type: melee
@@ -29,6 +34,7 @@ units:
     attack_type: ranged
     cost: 40
     required_tech: Archery
+    obsolete_tech: Construction
   - name: Builder
     is_utility: true
     captured_as: Builder
@@ -59,6 +65,7 @@ units:
     attack_type: melee
     cost: 56
     required_tech: Bronze Working
+    obsolete_tech: Civil Service
   - name: Chariot Archer
     combat_strength: 6
     ranged_strength: 10
@@ -89,6 +96,7 @@ units:
     attack_type: ranged
     cost: 75
     required_tech: Construction
+    obsolete_tech: Machinery
   - name: Catapult
     combat_strength: 7
     ranged_strength: 8

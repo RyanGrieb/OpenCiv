@@ -129,6 +129,11 @@ ScenarioRegistry.register("AllTechsResearched", ScenarioCategory.RESEARCH, async
     return module.setupAllTechsResearchedTest;
 });
 
+ScenarioRegistry.register("ObsoleteUnits", ScenarioCategory.RESEARCH, async () => {
+    const module = await import("./scenarios/ObsoleteUnits.test");
+    return module.setupObsoleteUnitsTest;
+});
+
 ScenarioRegistry.register("BorderExpansion", ScenarioCategory.CITIES, async () => {
     const module = await import("./scenarios/BorderExpansion.test");
     return module.setupBorderExpansionTest;
