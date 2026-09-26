@@ -36,6 +36,15 @@ export class Tile extends Actor {
   // Tile types drawn some other way than their own sprite - roads connect to their neighbors (see
   // Road.createActors).
   private static readonly UNSPRITED_TILE_TYPES = ["road"];
+  // How many look-only variant sprites (TILE_<TYPE>_2, _3, ...) each base terrain has on top of its
+  // plain one - see getVariantTileType().
+  private static readonly TILE_VARIANT_COUNTS: Record<string, number> = {
+    grass: 2,
+    plains: 2,
+    tundra: 2,
+    desert: 2,
+    mountain: 2
+  };
 
   private static loadedTileImages = new Map<string, HTMLImageElement>();
   private static allTileStats: TileYieldsData;
@@ -104,6 +113,31 @@ export class Tile extends Actor {
   // Mirrors server/src/map/Tile.ts's roadConnects() - keep both in sync.
   public static roadConnects(tile1: Tile, tile2: Tile): boolean {
     return tile1.hasRoad() && tile2.hasRoad();
+  }
+
+  /**
+   * The tile type whose sprite draws this base terrain at (gridX, gridY): either the terrain itself
+   * or one of its look-only variants ("grass_2" -> TILE_GRASS_2). Picked from a hash of the
+   * coordinates, so it's the same on every reload and for every player, with no server involvement.
+   * The plain sprite keeps half the tiles, so the variants read as accents.
+   */
+  public static getVariantTileType(tileType: string, gridX: number, gridY: number): string {
+    const variantCount = Tile.TILE_VARIANT_COUNTS[tileType];
+    if (!variantCount) return tileType;
+
+    const roll = Tile.hashCoordinates(gridX, gridY) % (variantCount * 2);
+    if (roll < variantCount) return tileType;
+
+    // Variants are numbered from 2, the plain sprite being the first.
+    return `${tileType}_${roll - variantCount + 2}`;
+  }
+
+  // A well-mixed, non-negative integer from a pair of grid coordinates (a small integer hash), so
+  // neighboring tiles don't fall into visible stripes or checkerboards.
+  private static hashCoordinates(x: number, y: number): number {
+    let hash = Math.imul(x, 374761393) + Math.imul(y, 668265263);
+    hash = Math.imul(hash ^ (hash >>> 13), 1274126177);
+    return (hash ^ (hash >>> 16)) >>> 0;
   }
 
   public static getWeight(tile1: Tile, tile2: Tile, unit?: Unit): number {

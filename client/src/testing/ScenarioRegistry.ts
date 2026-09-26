@@ -11,6 +11,7 @@ export enum ScenarioCategory {
     UNITS = "Units",
     COMBAT = "Combat",
     NAVAL = "Naval",
+    MAP = "Map",
     RESEARCH = "Research",
     INTERFACE = "Interface"
 }
@@ -141,4 +142,9 @@ ScenarioRegistry.register("AquaticResources", ScenarioCategory.NAVAL, async () =
 ScenarioRegistry.register("AquaticSandbox", ScenarioCategory.NAVAL, async () => {
     const module = await import("./scenarios/AquaticSandbox.test");
     return module.setupAquaticSandboxTest;
+});
+
+ScenarioRegistry.register("TileVariants", ScenarioCategory.MAP, async () => {
+    const module = await import("./scenarios/TileVariants.test");
+    return module.setupTileVariantsTest;
 });

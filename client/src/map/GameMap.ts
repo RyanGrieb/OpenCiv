@@ -696,7 +696,7 @@ export class GameMap {
         // its own (x,y) onto the shared offscreen canvas, then the merged result is repositioned
         // as a whole via setPosition() below.
         const baseRenderTile = new Tile({
-          tileTypes: [tileTypes[0]],
+          tileTypes: [Tile.getVariantTileType(tileTypes[0], gridX, gridY)],
           riverSides: tile.getRiverSides(),
           x: xPosRelative,
           y: yPosRelative,
