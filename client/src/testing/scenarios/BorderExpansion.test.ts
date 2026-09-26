@@ -9,12 +9,15 @@ import { TestUtils } from "../TestUtils";
 
 // Settles a city with the city screen open and ends turns until its borders grow twice. The
 // Palace's 1 culture a turn buys the first tile for 20 culture and the second for 32 (Civ 5's
-// 20 + (10 * tilesAcquired) ^ 1.1), and each new tile has to touch the territory it grew from.
+// 20 + (10 * tilesAcquired) ^ 1.1). Each new tile has to be the one the city screen marked as next,
+// and touch the territory it grew from.
 export function setupBorderExpansionTest(game: Game) {
     const runner = new TestRunner("BorderExpansion");
     const utils = new TestUtils(game);
     let city: City | undefined;
     let territoryBefore: Tile[] = [];
+    // The tile the city screen marked as next before each growth.
+    let markedTile: Tile | undefined;
 
     const endTurnsUntil = async (condition: () => boolean, maxTurns: number, message: string) => {
         for (let turn = 0; turn < maxTurns; turn++) {
@@ -25,13 +28,13 @@ export function setupBorderExpansionTest(game: Game) {
         if (!condition()) throw new Error(`Not reached within ${maxTurns} turns: ${message}`);
     };
 
-    // The "Borders: x/y" line in the open city screen's stats window.
+    // The "Expansion: x/y" line in the open city screen's stats window.
     const borderReadout = (): string | undefined => {
         const cityScreen = utils.getInGameScene()["cityDisplayInfo"];
         const statsWindow: ActorGroup | undefined = cityScreen?.["statsWindow"];
         const label = statsWindow
             ?.getActors()
-            .find((actor) => actor instanceof Label && actor.getText().startsWith("Borders:")) as Label | undefined;
+            .find((actor) => actor instanceof Label && actor.getText().startsWith("Expansion:")) as Label | undefined;
         return label?.getText();
     };
 
@@ -40,6 +43,9 @@ export function setupBorderExpansionTest(game: Game) {
 
     const growOnce = async (maxTurns: number) => {
         territoryBefore = [...city.getTerritory()];
+        markedTile = city.getNextBorderTile();
+        utils.getInGameScene().focusOnTile(markedTile, 3);
+        utils.log(`Marked as next: ${markedTile.getGridX()},${markedTile.getGridY()}`);
         await endTurnsUntil(() => city.getTerritory().length > territoryBefore.length, maxTurns, "Borders to grow");
         await utils.delay(500);
         utils.getInGameScene().focusOnTile(newTiles()[0], 3);
@@ -69,17 +75,18 @@ export function setupBorderExpansionTest(game: Game) {
         verification: () =>
             city.getTerritory().length === 7 &&
             city.getStat("cultureRequiredToExpand") === 20 &&
-            borderReadout().startsWith("Borders: 0/20")
+            borderReadout().startsWith("Expansion: 0/20")
     });
 
     runner.addStep({
-        name: "End turns until the borders grow by one tile touching the old territory",
+        name: "End turns until the borders grow into the marked tile",
         action: async () => {
             await growOnce(25);
             utils.log(`Readout: ${borderReadout()}`);
         },
         verification: () =>
             newTiles().length === 1 &&
+            newTiles()[0] === markedTile &&
             touchesOldTerritory(newTiles()[0]) &&
             city.getStat("cultureRequiredToExpand") === 32 &&
             borderReadout().includes("/32")
@@ -93,6 +100,7 @@ export function setupBorderExpansionTest(game: Game) {
         },
         verification: () =>
             newTiles().length === 1 &&
+            newTiles()[0] === markedTile &&
             touchesOldTerritory(newTiles()[0]) &&
             city.getStat("cultureRequiredToExpand") === 46 &&
             borderReadout().includes("/46")

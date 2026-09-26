@@ -38,6 +38,8 @@ export class City extends ActorGroup {
   private territory: Tile[];
   private territoryOverlays: Actor[];
   private workedTiles: Tile[];
+  // The tile the server will grow this city's borders into next, if any is left to claim.
+  private nextBorderTile: Tile | undefined;
   private name: string;
   private civIcon: Actor;
   private nameLabel: Label;
@@ -109,6 +111,8 @@ export class City extends ActorGroup {
         }
 
         this.productionQueue = data["productionQueue"] ?? [];
+        const nextBorderTile = data["nextBorderTile"];
+        this.nextBorderTile = nextBorderTile ? GameMap.getInstance().getTiles()[nextBorderTile.x]?.[nextBorderTile.y] : undefined;
         this.statsPresent = true;
       }
     });
@@ -187,6 +191,10 @@ export class City extends ActorGroup {
 
   public getTerritory() {
     return this.territory;
+  }
+
+  public getNextBorderTile(): Tile | undefined {
+    return this.nextBorderTile;
   }
 
   public getPlayer() {

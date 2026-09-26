@@ -31,13 +31,16 @@ describe('City', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
+    let centerOwner: City | undefined;
     mockTile = {
       getX: jest.fn().mockReturnValue(0),
       getY: jest.fn().mockReturnValue(0),
       getAdjacentTiles: jest.fn().mockReturnValue([]),
       getStats: jest.fn().mockReturnValue([]),
       setCity: jest.fn(),
-      setCityTerritoryOf: jest.fn(),
+      setCityTerritoryOf: jest.fn((city: City) => (centerOwner = city)),
+      getCityTerritoryOf: jest.fn(() => centerOwner),
+      getResource: jest.fn(),
       addUnit: jest.fn(),
       canPlaceUnit: jest.fn().mockReturnValue(true),
     } as unknown as jest.Mocked<Tile>;
@@ -373,6 +376,9 @@ describe('City', () => {
           getMovementCost: jest.fn().mockReturnValue(options.movementCost ?? 1),
           canPlaceUnit: jest.fn().mockReturnValue(options.free ?? true),
           addUnit: jest.fn(),
+          // Another city's land, so border growth never looks past it.
+          getCityTerritoryOf: jest.fn().mockReturnValue({}),
+          getAdjacentTiles: jest.fn().mockReturnValue([]),
         } as unknown as jest.Mocked<Tile>);
 
       beforeEach(() => {
@@ -458,15 +464,17 @@ describe('City', () => {
       return total;
     };
 
-    const makeTile = (x: number, y: number, stats: Record<string, number>) =>
-      ({
+    const makeTile = (x: number, y: number, stats: Record<string, number>) => {
+      let owner: City | undefined;
+      return {
         getX: jest.fn().mockReturnValue(x),
         getY: jest.fn().mockReturnValue(y),
         getStats: jest.fn().mockReturnValue(Object.entries(stats).map(([key, value]) => ({ [key]: value }))),
         getAdjacentTiles: jest.fn().mockReturnValue([]),
-        getCityTerritoryOf: jest.fn(),
-        setCityTerritoryOf: jest.fn(),
-      }) as unknown as jest.Mocked<Tile>;
+        getCityTerritoryOf: jest.fn(() => owner),
+        setCityTerritoryOf: jest.fn((city: City) => (owner = city)),
+      } as unknown as jest.Mocked<Tile>;
+    };
 
     const wireHighestYeild = (tiles: any[]) => {
       (GameMap.getInstance as jest.Mock).mockReturnValue({
@@ -688,6 +696,20 @@ describe('City', () => {
       city = new City({ tile: mockTile, player: mockPlayer });
 
       expect(city.getTerritory()).toEqual([mockTile, candidate]);
+    });
+
+    it('tells the owner which tile it will grow into next, and then claims that tile', () => {
+      setCulturePerTurn(10);
+
+      triggerServerEvent('nextTurn', { turn: 2 });
+
+      expect(mockPlayer.sendNetworkEvent).toHaveBeenCalledWith(
+        expect.objectContaining({ event: 'updateCityStats', nextBorderTile: { x: 1, y: 1 } })
+      );
+
+      triggerServerEvent('nextTurn', { turn: 3 });
+
+      expect(city.getTerritory()).toContain(candidate);
     });
 
     it('reports the banked culture and expansion cost to the client', () => {

@@ -53,6 +53,9 @@ export class City {
   // (which sets the cost of the next one - see BorderGrowth.getCultureCost()).
   private cultureStored: number;
   private tilesAcquired: number;
+  // The tile the borders grow into next. Picked ahead of time, as in Civ 5, so the city screen can
+  // show it and a random tie-break doesn't change the answer from turn to turn.
+  private nextBorderTile: Tile | undefined;
   private territory: Tile[];
   private workedTiles: Tile[];
   private productionQueue: ProductionOption[];
@@ -335,6 +338,7 @@ export class City {
 */
   public sendStatUpdate(player: Player) {
     const cityStats = this.getStatline({ asArray: true });
+    const nextBorderTile = this.getNextBorderTile();
 
     //FIXME: Append building data to stateUpdate
     player.sendNetworkEvent({
@@ -342,7 +346,8 @@ export class City {
       cityName: this.name,
       cityStats: cityStats,
       workedTiles: this.workedTiles.map((tile) => ({ x: tile.getX(), y: tile.getY() })),
-      productionQueue: this.productionQueue
+      productionQueue: this.productionQueue,
+      nextBorderTile: nextBorderTile ? { x: nextBorderTile.getX(), y: nextBorderTile.getY() } : null
     });
 
     player.sendTotalStatsUpdate();
@@ -462,6 +467,14 @@ export class City {
     return this.territory;
   }
 
+  // Picks a new target once the current one is gone, e.g. claimed by this city or a neighbor.
+  public getNextBorderTile(): Tile | undefined {
+    if (!this.nextBorderTile || this.nextBorderTile.getCityTerritoryOf()) {
+      this.nextBorderTile = BorderGrowth.chooseNextTile(this.tile, this.territory);
+    }
+    return this.nextBorderTile;
+  }
+
   public getPlayer(): Player {
     return this.player;
   }
@@ -569,7 +582,7 @@ export class City {
     const cost = this.getCultureRequiredToExpand();
     if (this.cultureStored < cost) return;
 
-    const tile = BorderGrowth.chooseNextTile(this.tile, this.territory);
+    const tile = this.getNextBorderTile();
     if (!tile) return;
 
     this.cultureStored -= cost;

@@ -128,6 +128,41 @@ export class CityDisplayInfo extends ActorGroup {
       Game.getInstance().getCurrentScene().addActor(overlay);
       this.workedTileOverlays.push(overlay);
     }
+
+    this.addNextBorderTileMarker();
+  }
+
+  // Tints the tile the borders grow into next in the culture color, with a culture icon on it.
+  private addNextBorderTileMarker() {
+    const tile = this.city.getNextBorderTile();
+    if (!tile) return;
+
+    const markers = [
+      new Actor({
+        image: Game.getInstance().getImage(GameImage.SPRITESHEET),
+        spriteRegion: SpriteRegion.TILE_BLANK,
+        x: tile.getX(),
+        y: tile.getY(),
+        z: 2,
+        width: 32,
+        height: 32,
+        color: "rgba(207, 159, 255, 0.55)"
+      }),
+      new Actor({
+        image: Game.getInstance().getImage(GameImage.SPRITESHEET),
+        spriteRegion: SpriteRegion.ICON_CULTURE,
+        x: tile.getX() + 8,
+        y: tile.getY() + 8,
+        z: 3,
+        width: 16,
+        height: 16
+      })
+    ];
+
+    for (const marker of markers) {
+      Game.getInstance().getCurrentScene().addActor(marker);
+      this.workedTileOverlays.push(marker);
+    }
   }
 
   private initializeBuildingsWindow() {
@@ -446,10 +481,10 @@ export class CityDisplayInfo extends ActorGroup {
     const required = this.city.getStat("cultureRequiredToExpand");
     const culture = this.city.getStat("culture");
 
-    let text = `Borders: ${banked}/${required} (no culture)`;
+    let text = `Expansion: ${banked}/${required} (no culture)`;
     if (culture > 0) {
       const turns = Math.max(1, Math.ceil((required - banked) / culture));
-      text = `Borders: ${banked}/${required} (${turns} turn${turns === 1 ? "" : "s"})`;
+      text = `Expansion: ${banked}/${required} (${turns} turn${turns === 1 ? "" : "s"})`;
     }
 
     this.addProgressReadout({
