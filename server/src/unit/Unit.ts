@@ -331,8 +331,9 @@ export class Unit {
   private heal() {
     if (this.health >= Combat.MAX_HEALTH) return;
 
-    const territoryOwner = this.tile.getCityTerritoryOf()?.getPlayer();
-    const amount = territoryOwner === this.player ? Combat.HEAL_IN_FRIENDLY_TERRITORY : Combat.HEAL_ELSEWHERE;
+    let amount = Combat.HEAL_ELSEWHERE;
+    if (this.tile.getCity()?.getPlayer() === this.player) amount = Combat.HEAL_IN_OWN_CITY;
+    else if (this.tile.getCityTerritoryOf()?.getPlayer() === this.player) amount = Combat.HEAL_IN_FRIENDLY_TERRITORY;
     this.health = Math.min(Combat.MAX_HEALTH, this.health + amount);
 
     this.sendToObservers(this.tile, () => ({ event: "unitHealth", id: this.id, health: this.health }));

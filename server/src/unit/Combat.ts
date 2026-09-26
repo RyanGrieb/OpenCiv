@@ -45,7 +45,9 @@ export class Combat {
   // Attacking across a river, from the attacker's side.
   public static readonly RIVER_CROSSING_ATTACK_PENALTY = 0.2;
 
-  // Health regained at the start of a turn by a unit that neither moved nor fought the turn before.
+  // Health regained at the start of a turn by a unit that neither moved nor attacked the turn before
+  // (being attacked doesn't count). No fortify needed - in Civ 5, fortify just skips turns for you.
+  public static readonly HEAL_IN_OWN_CITY = 25;
   public static readonly HEAL_IN_FRIENDLY_TERRITORY = 20;
   public static readonly HEAL_ELSEWHERE = 10;
 
