@@ -153,6 +153,15 @@ export class GameMap {
       }
     });
 
+    // A city's borders grew (see server City.sendTerritoryUpdate()).
+    NetworkEvents.on<CityData>({
+      eventName: "cityTerritoryUpdated",
+      parentObject: this,
+      callback: (data) => {
+        this.syncCity(data);
+      }
+    });
+
     // Whenever a tile's yield-affecting state changes server-side (settling a city,
     // and eventually tile improvements too), the server resends that tile's JSON so
     // the hover tooltip doesn't keep showing whatever was in the initial mapChunk

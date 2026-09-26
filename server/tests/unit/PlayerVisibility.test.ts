@@ -360,12 +360,26 @@ describe('PlayerVisibility', () => {
 
   it('includes what a city can see', () => {
     const cityTile = mockTile(9, 9);
-    mockPlayer.getCities.mockReturnValue([{ getTile: () => cityTile } as any]);
+    mockPlayer.getCities.mockReturnValue([{ getTile: () => cityTile, getTerritory: (): Tile[] => [] } as any]);
     sightedTiles = [cityTile];
 
     visibility.update();
 
     expect(visibility.isVisible(cityTile)).toBe(true);
+  });
+
+  it("sees all of a city's territory and one tile past it, however far its borders have grown", () => {
+    const cityTile = mockTile(9, 9);
+    const farBorder = mockTile(13, 9);
+    const pastBorder = mockTile(14, 9);
+    link(farBorder, pastBorder);
+    mockPlayer.getCities.mockReturnValue([{ getTile: () => cityTile, getTerritory: () => [cityTile, farBorder] } as any]);
+    sightedTiles = [cityTile];
+
+    visibility.update();
+
+    expect(visibility.isVisible(farBorder)).toBe(true);
+    expect(visibility.isVisible(pastBorder)).toBe(true);
   });
 
   it('does no work for a player with no client, like the barbarians', () => {

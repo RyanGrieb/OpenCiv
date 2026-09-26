@@ -118,6 +118,12 @@ export class PlayerVisibility {
           visibleTiles.add(tile);
         }
       }
+
+      // As in Civ 5, owned land sees itself and one tile past it, so grown borders widen the view.
+      for (const tile of city.getTerritory()) {
+        visibleTiles.add(tile);
+        tile.getAdjacentTiles().forEach((adjTile) => adjTile && visibleTiles.add(adjTile));
+      }
     }
 
     return visibleTiles;

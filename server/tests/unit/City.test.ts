@@ -463,6 +463,8 @@ describe('City', () => {
         getX: jest.fn().mockReturnValue(x),
         getY: jest.fn().mockReturnValue(y),
         getStats: jest.fn().mockReturnValue(Object.entries(stats).map(([key, value]) => ({ [key]: value }))),
+        getAdjacentTiles: jest.fn().mockReturnValue([]),
+        getCityTerritoryOf: jest.fn(),
         setCityTerritoryOf: jest.fn(),
       }) as unknown as jest.Mocked<Tile>;
 
@@ -595,6 +597,108 @@ describe('City', () => {
         expect.objectContaining({
           event: 'updateCityStats',
           cityStats: expect.arrayContaining([{ foodSurplus: 3 }, { foodRequiredToGrow: 23 }]),
+        })
+      );
+    });
+  });
+
+  describe('border growth (nextTurn)', () => {
+    let candidate: jest.Mocked<Tile>;
+    let mockVisibility: { update: jest.Mock; hasDiscovered: jest.Mock };
+
+    // An unowned plain tile beside the city center, the only one culture can claim.
+    beforeEach(() => {
+      candidate = {
+        getX: jest.fn().mockReturnValue(1),
+        getY: jest.fn().mockReturnValue(1),
+        getAdjacentTiles: jest.fn().mockReturnValue([mockTile]),
+        getCityTerritoryOf: jest.fn().mockReturnValue(undefined),
+        setCityTerritoryOf: jest.fn(),
+        getResource: jest.fn().mockReturnValue(undefined),
+        hasRiver: jest.fn().mockReturnValue(false),
+        isWater: jest.fn().mockReturnValue(false),
+        getTotalStatValue: jest.fn().mockReturnValue(2),
+        getStats: jest.fn().mockReturnValue([]),
+      } as unknown as jest.Mocked<Tile>;
+      mockTile.getAdjacentTiles.mockReturnValue([candidate]);
+      (mockTile as any).getCityTerritoryOf = jest.fn().mockReturnValue(city);
+
+      mockVisibility = { update: jest.fn(), hasDiscovered: jest.fn().mockReturnValue(true) };
+      (mockPlayer as any).getVisibility = jest.fn().mockReturnValue(mockVisibility);
+      (mockPlayer as any).getName = jest.fn().mockReturnValue("TestPlayer");
+      (Game.getInstance as jest.Mock).mockReturnValue({
+        getPlayerFromWebsocket: jest.fn().mockReturnValue(mockPlayer),
+        getPlayers: jest.fn().mockReturnValue([mockPlayer]),
+      });
+    });
+
+    const setCulturePerTurn = (culture: number) => {
+      mockTile.getStats.mockReturnValue([{ food: 2 }, { culture }]);
+    };
+
+    it('banks culture without growing while it is short of the first tile cost of 20', () => {
+      setCulturePerTurn(19);
+
+      triggerServerEvent('nextTurn', { turn: 2 });
+
+      expect(city['cultureStored']).toBe(19);
+      expect(city.getTerritory()).not.toContain(candidate);
+    });
+
+    it('claims a tile once the banked culture covers its cost, and raises the next cost', () => {
+      setCulturePerTurn(25);
+
+      triggerServerEvent('nextTurn', { turn: 2 });
+
+      expect(city.getTerritory()).toContain(candidate);
+      expect(candidate.setCityTerritoryOf).toHaveBeenCalledWith(city);
+      expect(city['cultureStored']).toBe(5);
+      expect(city.getCultureRequiredToExpand()).toBe(32);
+      expect(mockVisibility.update).toHaveBeenCalled();
+    });
+
+    it('tells players who know the city where its borders now run', () => {
+      setCulturePerTurn(20);
+
+      triggerServerEvent('nextTurn', { turn: 2 });
+
+      expect(mockPlayer.sendNetworkEvent).toHaveBeenCalledWith(
+        expect.objectContaining({
+          event: 'cityTerritoryUpdated',
+          cityName: 'TestCity',
+          territory: expect.arrayContaining([{ tileX: 1, tileY: 1 }]),
+        })
+      );
+    });
+
+    it('keeps banking when there is nothing left to claim', () => {
+      candidate.getCityTerritoryOf.mockReturnValue({} as City);
+      setCulturePerTurn(20);
+
+      triggerServerEvent('nextTurn', { turn: 2 });
+
+      expect(city['cultureStored']).toBe(20);
+      expect(city.getCultureRequiredToExpand()).toBe(20);
+    });
+
+    it('does not claim a founding tile another city already owns', () => {
+      const owned = { ...candidate, getCityTerritoryOf: jest.fn().mockReturnValue({} as City) } as unknown as Tile;
+      mockTile.getAdjacentTiles.mockReturnValue([owned, candidate]);
+
+      city = new City({ tile: mockTile, player: mockPlayer });
+
+      expect(city.getTerritory()).toEqual([mockTile, candidate]);
+    });
+
+    it('reports the banked culture and expansion cost to the client', () => {
+      setCulturePerTurn(3);
+
+      triggerServerEvent('nextTurn', { turn: 2 });
+
+      expect(mockPlayer.sendNetworkEvent).toHaveBeenCalledWith(
+        expect.objectContaining({
+          event: 'updateCityStats',
+          cityStats: expect.arrayContaining([{ cultureStored: 3 }, { cultureRequiredToExpand: 20 }]),
         })
       );
     });

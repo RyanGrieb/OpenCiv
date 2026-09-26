@@ -13,11 +13,12 @@ import { RadioButton } from "./RadioButton";
 import { UITheme } from "./UITheme";
 
 const STATS_WINDOW_WIDTH = 320;
-const STATS_WINDOW_HEIGHT = 390;
-// Vertical space the growth readout (one text line plus its bar) claims underneath the
-// Population row - every stat row below it shifts down by this much.
-const GROWTH_ROW_HEIGHT = 56;
-const GROWTH_BAR_HEIGHT = 12;
+// Vertical space a progress readout (one text line plus its bar) claims underneath its stat row -
+// the growth readout under Population, and the border readout under Culture. Every stat row below
+// one shifts down by this much.
+const READOUT_ROW_HEIGHT = 56;
+const READOUT_BAR_HEIGHT = 12;
+const STATS_WINDOW_HEIGHT = 390 + READOUT_ROW_HEIGHT;
 const BUILDINGS_WINDOW_WIDTH = 340;
 const PRODUCTION_WINDOW_WIDTH = 360;
 const PRODUCTION_WINDOW_HEIGHT = 320;
@@ -351,11 +352,15 @@ export class CityDisplayInfo extends ActorGroup {
     ];
 
     const firstRowY = y + 12 + UITheme.FONT_SIZE + 10;
+    const rowSpacing = UITheme.ICON_SIZE - 12;
+    const cultureIndex = stats.findIndex((stat) => stat.key === "culture");
+    // Rows below Population sit under the growth readout, and rows below Culture under the border
+    // readout too - both are drawn after this loop.
+    const readoutOffset = (index: number) =>
+      (index > 0 ? READOUT_ROW_HEIGHT : 0) + (index > cultureIndex ? READOUT_ROW_HEIGHT : 0);
 
     stats.forEach((stat, index) => {
-      // Everything below Population sits under the growth readout drawn after this loop.
-      const growthOffset = index === 0 ? 0 : GROWTH_ROW_HEIGHT;
-      const iconY = firstRowY + index * (UITheme.ICON_SIZE - 12) + growthOffset;
+      const iconY = firstRowY + index * rowSpacing + readoutOffset(index);
       const textY = iconY + UITheme.centerTextY(UITheme.ICON_SIZE);
 
       this.statsWindow.addActor(
@@ -392,9 +397,10 @@ export class CityDisplayInfo extends ActorGroup {
       this.statLabels.set(stat.key, valueLabel);
     });
 
-    // Rows are spaced tighter than their icons are tall, so the extra offset drops the
-    // readout clear of the Population icon overhanging from above.
-    this.addGrowthReadout(x, firstRowY + (UITheme.ICON_SIZE - 12) + 8, width);
+    // Rows are spaced tighter than their icons are tall, so the extra offset drops each
+    // readout clear of the icon overhanging from the row above it.
+    this.addGrowthReadout(x, firstRowY + rowSpacing + 8, width);
+    this.addBorderReadout(x, firstRowY + (cultureIndex + 1) * rowSpacing + readoutOffset(cultureIndex) + 8, width);
 
     this.addActor(this.statsWindow);
   }
@@ -427,24 +433,67 @@ export class CityDisplayInfo extends ActorGroup {
       barColor = "rgb(140, 140, 140)";
     }
 
+    this.addProgressReadout({
+      x,
+      y,
+      width,
+      text,
+      textColor: netFood < 0 ? "rgb(255, 120, 120)" : "white",
+      progress: banked / required,
+      barColor
+    });
+  }
+
+  // Banked culture toward the city's next border tile, drawn just below the Culture row.
+  private addBorderReadout(x: number, y: number, width: number) {
+    const banked = this.city.getStat("cultureStored");
+    const required = this.city.getStat("cultureRequiredToExpand");
+    const culture = this.city.getStat("culture");
+
+    let text = `Borders: ${banked}/${required} (no culture)`;
+    if (culture > 0) {
+      const turns = Math.max(1, Math.ceil((required - banked) / culture));
+      text = `Borders: ${banked}/${required} (${turns} turn${turns === 1 ? "" : "s"})`;
+    }
+
+    this.addProgressReadout({
+      x,
+      y,
+      width,
+      text,
+      textColor: "white",
+      progress: banked / required,
+      barColor: "rgb(207, 159, 255)"
+    });
+  }
+
+  private addProgressReadout(options: {
+    x: number;
+    y: number;
+    width: number;
+    text: string;
+    textColor: string;
+    progress: number;
+    barColor: string;
+  }) {
     this.statsWindow.addActor(
       new Label({
-        text: text,
+        text: options.text,
         font: UITheme.FONT,
-        fontColor: netFood < 0 ? "rgb(255, 120, 120)" : "white",
-        x: x + 10,
-        y: y
+        fontColor: options.textColor,
+        x: options.x + 10,
+        y: options.y
       })
     );
 
     this.statsWindow.addActor(
       new LoadingBar({
-        x: x + 10,
-        y: y + UITheme.FONT_SIZE + 6,
-        width: width - 20,
-        height: GROWTH_BAR_HEIGHT,
-        progress: banked / required,
-        fillColor: barColor
+        x: options.x + 10,
+        y: options.y + UITheme.FONT_SIZE + 6,
+        width: options.width - 20,
+        height: READOUT_BAR_HEIGHT,
+        progress: Math.min(1, options.progress),
+        fillColor: options.barColor
       })
     );
   }

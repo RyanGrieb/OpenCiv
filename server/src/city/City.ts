@@ -4,12 +4,15 @@ import { Player } from "../Player";
 import { GameMap } from "../map/GameMap";
 import { StatEntry, StatValues, Tile } from "../map/Tile";
 import { Unit } from "../unit/Unit";
+import { BorderGrowth } from "./BorderGrowth";
 import { Building } from "./Building";
 
 export interface CityStats extends StatValues {
   population: number;
   foodSurplus: number;
   foodRequiredToGrow: number;
+  cultureStored: number;
+  cultureRequiredToExpand: number;
   defense: number;
 }
 type CityStatEntry = Partial<CityStats>;
@@ -46,6 +49,10 @@ export class City {
   private buildings: Building[];
   private population: number;
   private foodSurplus: number;
+  // Culture banked toward the next border tile, and how many tiles culture has claimed so far
+  // (which sets the cost of the next one - see BorderGrowth.getCultureCost()).
+  private cultureStored: number;
+  private tilesAcquired: number;
   private territory: Tile[];
   private workedTiles: Tile[];
   private productionQueue: ProductionOption[];
@@ -63,12 +70,15 @@ export class City {
     this.buildings = [];
     this.population = 1;
     this.foodSurplus = 0;
+    this.cultureStored = 0;
+    this.tilesAcquired = 0;
     this.productionQueue = [];
     this.workedTiles = [];
 
+    // A new city claims the ring around it, except tiles another city already owns.
     this.territory = [this.tile];
     for (const adjTile of this.tile.getAdjacentTiles()) {
-      if (!adjTile) continue;
+      if (!adjTile || adjTile.getCityTerritoryOf()) continue;
 
       this.territory.push(adjTile);
     }
@@ -78,7 +88,6 @@ export class City {
     for (const territoryTile of this.territory) {
       territoryTile.setCityTerritoryOf(this);
     }
-    this.sendTerritoryUpdate();
 
     // Must happen before updateWorkedTiles() below (and after the fields above -
     // setCity() broadcasts this tile, which serializes this city via getJSON()) so
@@ -195,6 +204,7 @@ export class City {
         // Growth first, so a citizen gained this turn is already working a tile when
         // production is applied below.
         this.applyGrowth();
+        this.applyBorderGrowth();
         this.applyProduction();
         this.sendStatUpdate(this.player);
       }
@@ -218,7 +228,7 @@ export class City {
     while (assigned < this.population && currentFood < foodFloor) {
       const tile = GameMap.getInstance().getTileWithHighestYeild({
         stats: ["food"],
-        tiles: this.territory,
+        tiles: this.getWorkableTiles(),
         ignoreTiles: this.workedTiles
       });
 
@@ -243,7 +253,7 @@ export class City {
     while (assigned < this.population) {
       const tile = GameMap.getInstance().getTileWithHighestYeild({
         stats: [tileFocus],
-        tiles: this.territory,
+        tiles: this.getWorkableTiles(),
         ignoreTiles: this.workedTiles
       });
 
@@ -274,7 +284,23 @@ export class City {
     this.updateWorkedTiles({ sendStatUpdate: true });
   }
 
-  public sendTerritoryUpdate() { }
+  /**
+   * Tells every player who has discovered any of this city's territory where its borders now run.
+   * The owner always qualifies. Everyone else only hears about the tiles they've discovered, which
+   * getJSON() filters for them.
+   */
+  public sendTerritoryUpdate() {
+    Game.getInstance()
+      .getPlayers()
+      .forEach((player) => {
+        if (!this.territory.some((tile) => player.getVisibility().hasDiscovered(tile))) return;
+
+        player.sendNetworkEvent({
+          event: "cityTerritoryUpdated",
+          ...this.getJSON({ observer: player })
+        });
+      });
+  }
 
   /**
    * Tells all players this city now exists, then applies whatever founding-time
@@ -339,7 +365,9 @@ export class City {
         { morale: 0 }, //TODO: Implement morale
         { defense: 0 },
         { foodSurplus: this.foodSurplus },
-        { foodRequiredToGrow: this.getFoodRequiredToGrow() }
+        { foodRequiredToGrow: this.getFoodRequiredToGrow() },
+        { cultureStored: this.cultureStored },
+        { cultureRequiredToExpand: this.getCultureRequiredToExpand() }
       ];
 
       // Add all buildings to existing stat-line dictionary (Note: We would apply bonuses to buildings here in the future)
@@ -389,6 +417,8 @@ export class City {
       morale: 0, //TODO: Implement morale
       foodSurplus: this.foodSurplus,
       foodRequiredToGrow: this.getFoodRequiredToGrow(),
+      cultureStored: this.cultureStored,
+      cultureRequiredToExpand: this.getCultureRequiredToExpand(),
       defense: 0
     };
 
@@ -420,8 +450,16 @@ export class City {
     return City.GROWTH_FOOD_BASE + City.GROWTH_FOOD_PER_POP * this.population;
   }
 
+  public getCultureRequiredToExpand(): number {
+    return BorderGrowth.getCultureCost(this.tilesAcquired);
+  }
+
   public getTile(): Tile {
     return this.tile;
+  }
+
+  public getTerritory(): Tile[] {
+    return this.territory;
   }
 
   public getPlayer(): Player {
@@ -520,6 +558,40 @@ export class City {
       console.log(`[City ${this.name}] Grew to population ${this.population}`);
       this.updateWorkedTiles({ sendStatUpdate: false });
     }
+  }
+
+  // Banks this turn's culture, and claims a new tile once the bank covers the next one's cost. As in
+  // Civ 5 that's at most one tile a turn, and the leftover culture carries over. A city with nothing
+  // left to claim keeps banking.
+  private applyBorderGrowth() {
+    this.cultureStored += this.getStatline({ asArray: false }).culture;
+
+    const cost = this.getCultureRequiredToExpand();
+    if (this.cultureStored < cost) return;
+
+    const tile = BorderGrowth.chooseNextTile(this.tile, this.territory);
+    if (!tile) return;
+
+    this.cultureStored -= cost;
+    this.tilesAcquired++;
+    this.claimTile(tile);
+  }
+
+  private claimTile(tile: Tile) {
+    this.territory.push(tile);
+    tile.setCityTerritoryOf(this);
+    console.log(`[City ${this.name}] Borders grew to ${tile.getX()},${tile.getY()}`);
+
+    // Owned land is in sight, so the owner's client gets the new tile before the border update needs it.
+    this.player.getVisibility().update();
+    this.sendTerritoryUpdate();
+    this.updateWorkedTiles({ sendStatUpdate: false });
+  }
+
+  // The part of the territory citizens can work: borders reach 5 rings out, citizens only 3.
+  private getWorkableTiles(): Tile[] {
+    const rings = BorderGrowth.getRingDistances(this.tile, BorderGrowth.MAX_WORK_DISTANCE);
+    return this.territory.filter((tile) => rings.has(tile));
   }
 
   private applyProduction() {
