@@ -1,4 +1,3 @@
-import { GameImage, SpriteRegion } from "../Assets";
 import { Game } from "../Game";
 import { RemoveUnitEvent, Unit, UnitCreationData } from "../Unit";
 import { NetworkEvents, WebsocketClient } from "../network/Client";
@@ -13,6 +12,7 @@ import { City } from "../city/City";
 import { TileOutline } from "./TileOutline";
 import { Vector } from "../util/Vector";
 import { MapWrap } from "./MapWrap";
+import { FogOfWarLayer } from "./FogOfWarLayer";
 
 // width/height/x/y/movementCost arrive as strings and are run through parseInt() below.
 interface MapSizeEvent {
@@ -76,7 +76,6 @@ export class GameMap {
   private static readonly CHUNK_SIZE = 4;
   private static readonly CHUNK_PIXEL_WIDTH = 32 * GameMap.CHUNK_SIZE + 16;
   private static readonly CHUNK_PIXEL_HEIGHT = 25 * GameMap.CHUNK_SIZE + 7;
-  private static readonly FOG_TINT_COLOR = "rgba(20, 20, 20, 0.55)";
 
   private oddEdgeAxis = [
     [0, -1],
@@ -107,6 +106,9 @@ export class GameMap {
   // discovered, or one already known flips visible/fogged).
   private baseLayerChunks: Map<string, Actor> = new Map();
   private topLayerChunks: Map<string, Actor> = new Map();
+
+  // The soft-edged fog over the whole map - created once the map's size is known.
+  private fogOfWar: FogOfWarLayer;
 
   // Every chunk-visual rebuild goes through this queue rather than running concurrently - they all
   // share the same offscreen canvas (see Tile.generateImageFromTileTypes / Actor.mergeActors), and
@@ -251,6 +253,10 @@ export class GameMap {
 
   public getTiles() {
     return this.tiles;
+  }
+
+  public getFogOfWar(): FogOfWarLayer {
+    return this.fogOfWar;
   }
 
   public getWidth() {
@@ -440,6 +446,11 @@ export class GameMap {
 
         MapWrap.init(this.mapWidth, Tile.WIDTH, data.wrap ?? false);
 
+        const scene = Game.getInstance().getCurrentScene();
+        scene.removeActor(this.fogOfWar);
+        this.fogOfWar = new FogOfWarLayer(this.mapWidth, this.mapHeight, MapWrap.isWrapped());
+        scene.addActor(this.fogOfWar);
+
         this.tiles = [];
         for (let x = 0; x < this.mapWidth; x++) {
           this.tiles[x] = [];
@@ -482,25 +493,19 @@ export class GameMap {
       eventName: "fogTiles",
       parentObject: this,
       callback: (data) => {
+        // Only the fog layer changes: the chunk art underneath is the same remembered terrain.
         this.enqueueRender(async () => {
-          const affectedChunks = new Set<string>();
-
           for (const coord of data.tiles) {
             const tile = this.tiles[coord.x]?.[coord.y];
             if (!tile) continue;
 
             tile.setVisible(false);
+            this.fogOfWar?.setTileState(coord.x, coord.y, FogOfWarLayer.FOGGED);
 
             for (const unit of [...tile.getUnits()]) {
               tile.removeUnit(unit);
               this.forgetUnit(unit);
             }
-
-            affectedChunks.add(this.chunkKeyFor(coord.x, coord.y));
-          }
-
-          for (const key of affectedChunks) {
-            await this.rebuildChunkVisuals(...GameMap.parseChunkKey(key));
           }
         });
       }
@@ -552,6 +557,7 @@ export class GameMap {
       }
 
       tile.setVisible(visible);
+      this.fogOfWar?.setTileState(gridX, gridY, visible ? FogOfWarLayer.VISIBLE : FogOfWarLayer.FOGGED);
 
       // Any tile within a city's territory carries that city's data (see server Tile.getTileJSON),
       // not just its center - a "city" tileType only ever appears on the center tile itself.
@@ -661,7 +667,7 @@ export class GameMap {
   }
 
   /**
-   * Rebuilds one chunk's merged base (terrain + rivers) and top (resources/city/fog tint) actors
+   * Rebuilds one chunk's merged base (terrain + rivers) and top (resources/city/improvements) actors
    * from scratch, from whatever this client currently knows about that chunk's 16 cells. Called
    * whenever a tile in the chunk is newly discovered or changes visibility - safe to call
    * repeatedly since it always derives the result fresh rather than patching the previous one.
@@ -722,29 +728,6 @@ export class GameMap {
           ...Road.createActors(tile, xPosRelative, yPosRelative),
           ...(await this.createOverlayTile(tile, overRoad, xPosRelative, yPosRelative))
         );
-
-        // Discovered but not currently visible - keep showing the remembered terrain underneath,
-        // dimmed. Tacked onto the top layer (drawn above base terrain) so it applies whether or not
-        // this cell has any actual top-layer content of its own.
-        //
-        // Reuses the hovered-tile sprite purely for its hex silhouette: Actor's constructor runs
-        // this through setColor(), which composites a solid fill onto that sprite with
-        // globalCompositeOperation "source-in" - the same trick City uses (TILE_BLANK) to tint
-        // territory overlays - so the tint is masked to the hex, anti-aliased edges included,
-        // instead of covering the tile's square bounding box.
-        if (!tile.isVisible()) {
-          topRenderActors.push(
-            new Actor({
-              image: Game.getInstance().getImage(GameImage.SPRITESHEET),
-              spriteRegion: SpriteRegion.TILE_HOVERED,
-              color: GameMap.FOG_TINT_COLOR,
-              x: xPosRelative,
-              y: yPosRelative,
-              width: Tile.WIDTH,
-              height: Tile.HEIGHT
-            })
-          );
-        }
       }
     }
 
@@ -759,6 +742,8 @@ export class GameMap {
         canvasHeight: GameMap.CHUNK_PIXEL_HEIGHT
       });
       bottomLayerActor.setPosition(chunkGridX * 32, chunkGridY * 25);
+      // Explicit so the fog layer (z 1) reliably sorts above the map: an undefined z doesn't compare.
+      bottomLayerActor.setZValue(0);
       scene.addActor(bottomLayerActor);
       this.baseLayerChunks.set(chunkKey, bottomLayerActor);
     } else {
@@ -776,6 +761,7 @@ export class GameMap {
         canvasHeight: GameMap.CHUNK_PIXEL_HEIGHT
       });
       topLayerMerged.setPosition(chunkGridX * 32, chunkGridY * 25);
+      topLayerMerged.setZValue(0);
       scene.addActor(topLayerMerged);
       this.topLayerChunks.set(chunkKey, topLayerMerged);
     } else {

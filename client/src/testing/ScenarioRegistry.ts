@@ -163,3 +163,8 @@ ScenarioRegistry.register("NaturalWonders", ScenarioCategory.MAP, async () => {
     const module = await import("./scenarios/NaturalWonders.test");
     return module.setupNaturalWondersTest;
 });
+
+ScenarioRegistry.register("SoftFogOfWar", ScenarioCategory.MAP, async () => {
+    const module = await import("./scenarios/SoftFogOfWar.test");
+    return module.setupSoftFogOfWarTest;
+});

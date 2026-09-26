@@ -565,7 +565,7 @@ export class Game {
   }
 
   // World space for the current camera, plus the shift that repeats a wrapped map across its seam.
-  private applyCameraTransform(canvasContext: CanvasRenderingContext2D) {
+  public applyCameraTransform(canvasContext: CanvasRenderingContext2D) {
     const camera = this.currentScene.getCamera();
     const zoom = camera.getZoomAmount();
     const dpr = this.dpr || 1;
