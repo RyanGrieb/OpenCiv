@@ -10,6 +10,7 @@ import { ClientPlayer } from "../../player/ClientPlayer";
 import { ExternalPlayer } from "../../player/ExternalPlayer";
 import { Button, ButtonSize } from "../../ui/components/Button";
 import { CityDisplayInfo } from "../../ui/windows/city/CityDisplayInfo";
+import { ClientSettings } from "../../ClientSettings";
 import { ClientSettingsGroup } from "../../ui/menus/ClientSettingsGroup";
 import { Label } from "../../ui/components/Label";
 import { NotificationPanel } from "../../ui/hud/NotificationPanel";
@@ -300,6 +301,7 @@ export class InGameScene extends Scene {
       z: 5,
       onClicked: () => this.toggleDiplomacyUI()
     });
+    this.diplomacyButton.setTransparency(ClientSettings.get("HUD_TRANSPARENCY"));
     this.addActor(this.diplomacyButton);
 
     this.notificationPanel = new NotificationPanel(this.notifications);
@@ -314,6 +316,7 @@ export class InGameScene extends Scene {
       fontColor: "white",
       onClicked: () => this.onNextTurnClicked()
     });
+    this.nextTurnButton.setTransparency(ClientSettings.get("HUD_TRANSPARENCY"));
     this.addActor(this.nextTurnButton);
 
     this.closeCityDisplayButton = new Button({
