@@ -175,7 +175,7 @@ buildings:
     stats:
       - culture: 1
   - name: Walls
-    asset_name: BUILDING_WALL
+    asset_name: BUILDING_WALLS
     cost: 75
     required_tech: Masonry
     # A city's `defense` stat adds to its combat strength (see City.getBaseStrength()).
@@ -183,7 +183,7 @@ buildings:
     stats:
       - defense: 5
   - name: Water Mill
-    asset_name: BUILDING_WATERMILL
+    asset_name: BUILDING_WATER_MILL
     cost: 75
     required_tech: The Wheel
     stats:

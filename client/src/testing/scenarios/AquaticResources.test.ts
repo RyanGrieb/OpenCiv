@@ -174,7 +174,7 @@ export function setupAquaticResourcesTest(game: Game) {
   }
 
   runner.addStep({
-    name: "The city's production list shows each ship's own sprite, not a question mark",
+    name: "The city's production list shows each ship's own sprite, and Walls' and Water Mill's, not a question mark",
     action: async () => {
       scene().toggleCityUI(city());
       await utils.waitUntil(() => !!cityScreen(), 3000, "City screen to open");
@@ -184,12 +184,24 @@ export function setupAquaticResourcesTest(game: Game) {
       await utils.delay(2000);
     },
     verification: () => {
-      const icon = (name: string) => cityScreen()["resolveProductionIcon"]({ type: "unit", name, cost: 0 });
-      const shown = [icon("Work Boat"), icon("Galley"), icon("Cargo Ship")];
+      const icon = (type: string, name: string) => cityScreen()["resolveProductionIcon"]({ type, name, cost: 0 });
+      const shown = [
+        icon("unit", "Work Boat"),
+        icon("unit", "Galley"),
+        icon("unit", "Cargo Ship"),
+        icon("building", "Walls"),
+        icon("building", "Water Mill")
+      ];
       scene().toggleCityUI();
       return (
         JSON.stringify(shown) ===
-        JSON.stringify([SpriteRegion.UNIT_WORK_BOAT, SpriteRegion.UNIT_GALLEY, SpriteRegion.UNIT_CARGO_SHIP])
+        JSON.stringify([
+          SpriteRegion.UNIT_WORK_BOAT,
+          SpriteRegion.UNIT_GALLEY,
+          SpriteRegion.UNIT_CARGO_SHIP,
+          SpriteRegion.BUILDING_WALLS,
+          SpriteRegion.BUILDING_WATER_MILL
+        ])
       );
     }
   });

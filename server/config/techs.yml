@@ -91,7 +91,7 @@ technologies:
     slot: 6
     description: A key technology that transforms how people move around and transport goods.
   - name: Masonry
-    asset_name: BUILDING_WALL
+    asset_name: BUILDING_WALLS
     cost: 55
     prerequisites: [Mining]
     row: 1
@@ -160,7 +160,7 @@ technologies:
     slot: 6
     description: Establishes a single consolidated trading system based on one standard material.
   - name: Engineering
-    asset_name: BUILDING_WATERMILL
+    asset_name: BUILDING_WATER_MILL
     cost: 175
     prerequisites: [Mathematics, Construction]
     row: 3
