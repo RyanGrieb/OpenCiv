@@ -171,3 +171,25 @@ tiles:
     stats:
       - gold: 2
       - production: 1
+  GOLD_MINE:
+    name: Gold Mine
+    stats:
+      - gold: 2
+      - production: 1
+  # Improvements built on tiles without a resource - these add to the tile's own yields.
+  FARM:
+    name: Farm
+    stats:
+      - food: 1
+  MINE:
+    name: Mine
+    stats:
+      - production: 1
+  TRADING_POST:
+    name: Trading Post
+    stats:
+      - gold: 1
+  LUMBER_MILL:
+    name: Lumber Mill
+    stats:
+      - production: 1

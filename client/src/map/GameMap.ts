@@ -1,4 +1,4 @@
-import { GameImage, SpriteRegion } from "../Assets";
+import { GameImage, resolveSpriteRegion, SpriteRegion } from "../Assets";
 import { Game } from "../Game";
 import { RemoveUnitEvent, Unit, UnitCreationData } from "../Unit";
 import { NetworkEvents, WebsocketClient } from "../network/Client";
@@ -139,6 +139,30 @@ export class GameMap {
     this.instance.requestTileYieldsFromServer();
   }
 
+  // A road tile draws a hub at its center and a spoke toward each adjacent road, so neighboring
+  // spokes meet at the shared edge. Adjacent index i lies across the tile's side i, the same
+  // numbering rivers use.
+  private static createRoadActors(tile: Tile, x: number, y: number): Actor[] {
+    if (!tile.getTileTypes().includes("road")) return [];
+
+    const regions = [SpriteRegion.TILE_ROAD];
+    tile.getAdjacentTiles().forEach((neighbor, side) => {
+      if (neighbor?.hasRoad()) regions.push(resolveSpriteRegion(`TILE_ROAD_${side}`));
+    });
+
+    return regions.map(
+      (spriteRegion) =>
+        new Actor({
+          image: Game.getInstance().getImage(GameImage.SPRITESHEET),
+          spriteRegion,
+          x,
+          y,
+          width: Tile.WIDTH,
+          height: Tile.HEIGHT
+        })
+    );
+  }
+
   private constructor() {
     this.previousGScore = undefined;
     this.previousFScore = undefined;
@@ -166,6 +190,11 @@ export class GameMap {
         if (!tile) return;
 
         tile.setYields(data.tile.yields);
+
+        // A finished improvement changes what's drawn - and a road also changes its neighbors' spokes.
+        if (JSON.stringify(tile.getTileTypes()) === JSON.stringify(data.tile.tileTypes)) return;
+        tile.setTileTypes(data.tile.tileTypes);
+        this.redrawMap([tile, ...tile.getAdjacentTiles().filter(Boolean)]);
       }
     });
 
@@ -692,6 +721,8 @@ export class GameMap {
           await topRenderTile.loadImage();
           topRenderActors.push(topRenderTile);
         }
+
+        topRenderActors.push(...GameMap.createRoadActors(tile, xPosRelative, yPosRelative));
 
         // Discovered but not currently visible - keep showing the remembered terrain underneath,
         // dimmed. Tacked onto the top layer (drawn above base terrain) so it applies whether or not

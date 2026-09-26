@@ -44,6 +44,7 @@ describe('Unit', () => {
       getRiverSides: jest.fn().mockReturnValue(new Array(6).fill(false)),
       hasBlockingUnit: jest.fn().mockReturnValue(false),
       hasImpassableUnit: jest.fn().mockReturnValue(false),
+      hasRoad: jest.fn().mockReturnValue(false),
     } as unknown as jest.Mocked<Tile>;
 
     // Mock target tile at (1, 1)
@@ -58,6 +59,7 @@ describe('Unit', () => {
       getRiverSides: jest.fn().mockReturnValue(new Array(6).fill(false)),
       hasBlockingUnit: jest.fn().mockReturnValue(false),
       hasImpassableUnit: jest.fn().mockReturnValue(false),
+      hasRoad: jest.fn().mockReturnValue(false),
     } as unknown as jest.Mocked<Tile>;
 
     // Mock player. getVisibility() stands in for the player's fog of war: sight of everything,

@@ -1,32 +1,104 @@
-# Tile improvements a Builder can construct. Nothing builds these yet - for now the
-# tech detail window reads required_tech to list them under a tech's "Enables".
-# asset_name is left out where no sprite exists yet; the client shows its
-# unknown-icon placeholder for those.
+# Tile improvements a Builder can construct, plus the forest/jungle clearing it can do. The tech
+# detail window also reads required_tech from here to list improvements under a tech's "Enables".
+#
+# build_turns is Civ 5's standard-speed Worker time. Entries without it (Fishing Boats and Fort)
+# aren't buildable yet. Where to build is decided by these fields (see Improvement.canBuild):
+#   resources     - resource tile type -> what it becomes once improved (cattle -> improved_cattle).
+#                   On a resource tile, only an improvement listing that resource can be built.
+#   tile_type     - added to a tile with no resource. Its yields live in tiles.yml.
+#   terrain       - base tile types tile_type may go on. Absent means any land.
+#   features      - forest/jungle the improvement may be built among. A tile with any other
+#                   feature has to be cleared first.
+#   requires_feature - the feature the tile must have (a Lumber Mill needs forest).
+#   route         - roads stack with the tile's improvement rather than being it.
+#   removes_feature - a clearing job: takes the feature off the tile instead of building anything.
+# asset_name is what the tech window shows; icon is the Builder's action button.
 improvements:
   - name: Farm
     # Civ5 gates this behind Agriculture, which techs.yml doesn't model.
+    asset_name: TILE_FARM
+    icon: ICON_FARM
+    build_turns: 7
+    tile_type: farm
+    terrain: [grass, plains, desert, tundra, floodplains, grass_hill, plains_hill, desert_hill, tundra_hill]
   - name: Pasture
     asset_name: ICON_EMPTY_PASTURE
+    icon: ICON_EMPTY_PASTURE
     required_tech: Animal Husbandry
+    build_turns: 7
+    resources:
+      horses: improved_horses
+      cattle: improved_cattle
+      sheep: improved_sheep
   - name: Mine
     asset_name: TILE_COPPER_MINE
+    icon: ICON_MINE
     required_tech: Mining
+    build_turns: 7
+    tile_type: mine
+    terrain: [grass_hill, plains_hill, desert_hill, tundra_hill, snow_hill]
+    resources:
+      copper: copper_mine
+      iron: iron_mine
+      gold: gold_mine
   - name: Fishing Boats
     asset_name: TILE_IMPROVED_FISH
     required_tech: Sailing
   - name: Plantation
     asset_name: TILE_CITRUS_PLANTATION
+    icon: TILE_CITRUS_PLANTATION
     required_tech: Calendar
+    build_turns: 5
+    features: [forest, jungle]
+    resources:
+      citrus: citrus_plantation
+      cotton: cotton_plantation
+      olives: olive_plantation
   - name: Camp
+    # Civ 5 camps go on Deer, Furs and Ivory, none of which the map generates yet.
     required_tech: Trapping
+    build_turns: 6
+    features: [forest, jungle]
+    resources: {}
   - name: Trading Post
-    required_tech: Trapping
+    # Guilds as in Brave New World (vanilla Civ 5 had it at Trapping). Keeps the forest or jungle.
+    asset_name: TILE_TRADING_POST
+    icon: TILE_TRADING_POST
+    required_tech: Guilds
+    build_turns: 8
+    tile_type: trading_post
+    features: [forest, jungle]
   - name: Quarry
     asset_name: TILE_STONE_QUARRY
+    icon: ICON_HAMMER
     required_tech: Masonry
+    build_turns: 7
+    resources:
+      stone: stone_quarry
   - name: Road
+    asset_name: ICON_ROAD
+    icon: ICON_ROAD
     required_tech: The Wheel
+    build_turns: 3
+    tile_type: road
+    features: [forest, jungle]
+    route: true
   - name: Lumber Mill
+    asset_name: TILE_LUMBER_MILL
+    icon: ICON_GEAR
     required_tech: Construction
+    build_turns: 10
+    tile_type: lumber_mill
+    requires_feature: forest
   - name: Fort
     required_tech: Engineering
+  - name: Remove Forest
+    icon: ICON_CHOP
+    required_tech: Mining
+    build_turns: 4
+    removes_feature: forest
+  - name: Remove Jungle
+    icon: ICON_CHOP
+    required_tech: Bronze Working
+    build_turns: 7
+    removes_feature: jungle

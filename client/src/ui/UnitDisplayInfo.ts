@@ -27,6 +27,8 @@ export class UnitDisplayInfo extends ActorGroup {
 
   private unit: Unit;
   private movementLabel: Label;
+  // "Building Farm: 3 turns" while a Builder works - it has no combat rows, so it takes their place.
+  private buildLabel: Label;
   // Strength, health bar and XP bar - rebuilt whenever strength or health changes.
   private combatActors: Actor[] = [];
   private actionButtons: Button[];
@@ -71,7 +73,7 @@ export class UnitDisplayInfo extends ActorGroup {
     });
 
     this.movementLabel = new Label({
-      text: `Movement: ${unit.getAvailableMovement()}/${unit.getDefaultMoveDistance()}`,
+      text: this.getMovementText(),
       x: this.x,
       y: this.y,
       font: UITheme.FONT,
@@ -81,7 +83,11 @@ export class UnitDisplayInfo extends ActorGroup {
     this.updateMovementLabel({ updateText: false });
     this.addActor(this.movementLabel);
 
+    this.buildLabel = new Label({ text: "", x: this.x, y: this.y, font: UITheme.FONT, fontColor: "white" });
+    this.addActor(this.buildLabel);
+
     if (unit.canFight()) this.updateCombatRows();
+    this.updateBuildLabel();
 
     this.updateActionButtons();
 
@@ -104,7 +110,7 @@ export class UnitDisplayInfo extends ActorGroup {
       }
     });
 
-    for (const eventName of ["unitCombat", "unitHealth", "unitFortified"]) {
+    for (const eventName of ["unitCombat", "unitHealth", "unitFortified", "unitActions", "unitBuildStatus"]) {
       NetworkEvents.on({
         eventName,
         parentObject: this,
@@ -126,11 +132,27 @@ export class UnitDisplayInfo extends ActorGroup {
 
   private updateMovementLabel(options: { updateText: boolean }) {
     if (options.updateText) {
-      this.movementLabel.setText(`Movement: ${this.unit.getAvailableMovement()}/${this.unit.getDefaultMoveDistance()}`);
+      this.movementLabel.setText(this.getMovementText());
     }
 
     this.movementLabel.conformSize().then(() => {
       this.movementLabel.setPosition(this.x + TEXT_X, this.y + MOVEMENT_Y);
+    });
+  }
+
+  // Road moves leave thirds of a move behind, shown to two decimals (e.g. "1.67/2").
+  private getMovementText() {
+    const movement = Math.round(this.unit.getAvailableMovement() * 100) / 100;
+    return `Movement: ${movement}/${this.unit.getDefaultMoveDistance()}`;
+  }
+
+  private updateBuildLabel() {
+    const building = this.unit.getBuildingImprovement();
+    const turnsLeft = this.unit.getBuildTurnsLeft();
+    this.buildLabel.setText(building ? `Building ${building}: ${turnsLeft} ${turnsLeft === 1 ? "turn" : "turns"}` : "");
+
+    this.buildLabel.conformSize().then(() => {
+      this.buildLabel.setPosition(this.x + TEXT_X, this.y + STRENGTH_Y);
     });
   }
 
@@ -240,6 +262,7 @@ export class UnitDisplayInfo extends ActorGroup {
   private refreshDisplayInfo() {
     this.updateMovementLabel({ updateText: true });
     if (this.unit.canFight()) this.updateCombatRows();
+    this.updateBuildLabel();
     this.updateActionButtons();
   }
 }

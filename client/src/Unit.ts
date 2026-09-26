@@ -38,12 +38,26 @@ export class UnitAction {
   private desc: string;
   private requirements: string[]; // We assign these strings to client-side functions to check if there met.
   private icon: SpriteRegion;
+  // The server's say on whether the action can be taken where the unit stands (e.g. whether a Builder
+  // can put a Farm on its tile) - things the client can't check for itself.
+  private available: boolean;
 
-  public constructor(actionName: string, desc: string, requirements: string[], icon: SpriteRegion) {
+  public constructor(actionName: string, desc: string, requirements: string[], icon: SpriteRegion, available = true) {
     this.actionName = actionName;
     this.desc = desc;
     this.requirements = requirements;
     this.icon = icon;
+    this.available = available;
+  }
+
+  public static fromJSON(actionJSON: UnitActionData): UnitAction {
+    return new UnitAction(
+      actionJSON.name,
+      actionJSON.desc,
+      actionJSON.requirements,
+      resolveSpriteRegion(actionJSON.icon) ?? SpriteRegion.ICON_UNKNOWN,
+      actionJSON.available ?? true
+    );
   }
 
   public getName() {
@@ -59,6 +73,8 @@ export class UnitAction {
   }
 
   public requirementsMet(unit: Unit): boolean {
+    if (!this.available) return false;
+
     let allMet = true;
 
     for (const requirement of this.requirements) {
@@ -91,6 +107,25 @@ export class UnitAction {
   protected notFortified(unit: Unit) {
     return !unit.isFortified();
   }
+
+  protected notBuilding(unit: Unit) {
+    return !unit.getBuildingImprovement();
+  }
+}
+
+export interface UnitActionData {
+  name: string;
+  icon: string;
+  requirements: string[];
+  desc: string;
+  available?: boolean;
+}
+
+// What a Builder is working on - both fields are absent when it isn't building anything.
+export interface UnitBuildStatus {
+  building?: string;
+  buildingIcon?: string;
+  turnsLeft?: number;
 }
 
 // Payload for constructing a Unit (server "createUnit"-style data, also embedded
@@ -110,12 +145,11 @@ export interface UnitCreationData {
   defaultMoveDistance: number;
   player: string;
   queuedTiles: { x: number; y: number }[];
-  actions: {
-    name: string;
-    icon: string;
-    requirements: string[];
-    desc: string;
-  }[];
+  actions: UnitActionData[];
+  // Only on the owner's own units (see server Unit.asJSON).
+  building?: string;
+  buildingIcon?: string;
+  turnsLeft?: number;
 }
 
 export interface MoveUnitEvent {
@@ -188,6 +222,9 @@ export class Unit extends ActorGroup {
   private queuedMovementTiles: Tile[];
   private player: AbstractPlayer;
   private baseZ: number;
+  private buildStatus: UnitBuildStatus;
+  // The improvement being built, shown beside the health bubble like fortifyIcon.
+  private buildIcon: Actor | undefined;
 
   constructor(tile: Tile, unitJSON: UnitCreationData) {
     super({
@@ -261,11 +298,8 @@ export class Unit extends ActorGroup {
     this.selectionActors = [];
     this.actions = [];
 
-    for (const actionJSON of unitJSON.actions) {
-      this.actions.push(
-        new UnitAction(actionJSON.name, actionJSON.desc, actionJSON.requirements, resolveSpriteRegion(actionJSON.icon))
-      );
-    }
+    this.actions = unitJSON.actions.map((actionJSON) => UnitAction.fromJSON(actionJSON));
+    this.setBuildStatus(unitJSON);
 
     console.log("new unit with id: " + this.id);
 
@@ -342,6 +376,25 @@ export class Unit extends ActorGroup {
       }
     });
 
+    NetworkEvents.on<{ id: number; actions: UnitActionData[] }>({
+      eventName: "unitActions",
+      parentObject: this,
+      callback: (data) => {
+        if (this.id === data.id) this.actions = data.actions.map((actionJSON) => UnitAction.fromJSON(actionJSON));
+      }
+    });
+
+    NetworkEvents.on<UnitBuildStatus & { id: number; remainingMovement?: number }>({
+      eventName: "unitBuildStatus",
+      parentObject: this,
+      callback: (data) => {
+        if (this.id !== data.id) return;
+
+        this.setBuildStatus(data);
+        if (data.remainingMovement !== undefined) this.availableMovement = data.remainingMovement;
+      }
+    });
+
     NetworkEvents.on<UnitHealthEvent>({
       eventName: "unitHealth",
       parentObject: this,
@@ -357,6 +410,12 @@ export class Unit extends ActorGroup {
         this.availableMovement = this.defaultMoveDistance;
       }
     });
+  }
+
+  // Mirrors server/src/unit/Unit.ts's spendMovement() - keep both in sync. Roads cost a third of a
+  // move, so movement is kept in exact thirds rather than drifting with floating point.
+  public static spendMovement(movement: number, cost: number): number {
+    return Math.max(0, Math.round((movement - cost) * 3) / 3);
   }
 
   // Mirrors server/src/unit/Unit.ts's canMeleeAttack() - keep both in sync. Every other
@@ -383,6 +442,14 @@ export class Unit extends ActorGroup {
 
   public isFortified(): boolean {
     return this.fortified;
+  }
+
+  public getBuildingImprovement(): string | undefined {
+    return this.buildStatus.building;
+  }
+
+  public getBuildTurnsLeft(): number | undefined {
+    return this.buildStatus.turnsLeft;
   }
 
   public getTileWeight(current: Tile, neighbor: Tile) {
@@ -511,6 +578,7 @@ export class Unit extends ActorGroup {
     this.civIcon?.setPosition(iconPosition.x, iconPosition.y);
     const fortifyPosition = this.getFortifyIconPosition();
     this.fortifyIcon.setPosition(fortifyPosition.x, fortifyPosition.y);
+    this.buildIcon?.setPosition(fortifyPosition.x, fortifyPosition.y);
   }
 
   private removeSelectionActors() {
@@ -567,6 +635,22 @@ export class Unit extends ActorGroup {
     this.drawHealthBubble(canvasContext);
     this.civIcon?.draw(canvasContext);
     if (this.fortified) this.fortifyIcon.draw(canvasContext);
+    this.buildIcon?.draw(canvasContext);
+  }
+
+  private setBuildStatus(status: UnitBuildStatus) {
+    this.buildStatus = { building: status.building, buildingIcon: status.buildingIcon, turnsLeft: status.turnsLeft };
+
+    const iconRegion = status.buildingIcon ? resolveSpriteRegion(status.buildingIcon) : undefined;
+    this.buildIcon = iconRegion
+      ? new Actor({
+          image: Game.getInstance().getImage(GameImage.SPRITESHEET),
+          spriteRegion: iconRegion,
+          ...this.getFortifyIconPosition(),
+          width: Unit.CIV_ICON_SIZE,
+          height: Unit.CIV_ICON_SIZE
+        })
+      : undefined;
   }
 
   private drawHealthBubble(canvasContext: CanvasRenderingContext2D) {

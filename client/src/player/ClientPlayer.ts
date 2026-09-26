@@ -610,7 +610,7 @@ export class ClientPlayer extends AbstractPlayer {
         isQueuedMovement = true;
       }
 
-      availableMovement -= tileCost;
+      availableMovement = Unit.spendMovement(availableMovement, tileCost);
 
       const start = tile1.getCenterPosition();
       const end = tile2.getCenterPosition();

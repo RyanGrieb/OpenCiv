@@ -2,6 +2,7 @@ import { ServerEvents } from "../Events";
 import { Game } from "../Game";
 import { Player } from "../Player";
 import { GameMap } from "../map/GameMap";
+import { Improvement } from "../map/Improvement";
 import { Tile } from "../map/Tile";
 import { PlayerVisibility } from "../map/PlayerVisibility";
 import { ConfigLoader } from "../util/ConfigLoader";
@@ -13,6 +14,9 @@ export interface UnitAction {
   icon: string;
   requirements: string[];
   desc: string;
+  // Whether the server allows the action where the unit stands right now. The client checks the
+  // simpler requirements above itself, but this one depends on game state it doesn't have.
+  isAvailable?: (unit: Unit) => boolean;
   onAction: (unit: Unit) => void;
 }
 
@@ -71,15 +75,11 @@ export class Unit {
   private terrainCostIgnored: boolean;
   private tile: Tile;
   private queuedMovementTiles: Tile[];
+  // The improvement a Builder is working on where it stands. Moving away stops the work.
+  private buildingImprovement: string | undefined;
 
   private id: number; // Increment this every time a unit object is created
-  private actions: {
-    name: string;
-    icon: string;
-    requirements: string[];
-    desc: string;
-    onAction: (unit: Unit) => void;
-  }[];
+  private actions: UnitAction[];
 
   constructor(options: UnitOptions) {
     this.name = options.name;
@@ -96,7 +96,6 @@ export class Unit {
     this.sightRange = options.sightRange ?? PlayerVisibility.DEFAULT_UNIT_SIGHT_RANGE;
     this.utility = options.isUtility || false;
     this.terrainCostIgnored = options.ignoresTerrainCost || false;
-    this.actions = options.actions || [];
     this.actions = options.actions || [];
     this.queuedMovementTiles = [];
 
@@ -169,13 +168,14 @@ export class Unit {
       parentObject: this,
       callback: (data, websocket) => {
         const unitTile = GameMap.getInstance().getTiles()[data["unitX"]][data["unitY"]];
+        const player = Game.getInstance().getPlayerFromWebsocket(websocket);
 
-        if (this.tile !== unitTile) return;
+        if (this.tile !== unitTile || this.id !== data["id"] || this.player !== player) return;
 
         const action = this.getActionByName(data["actionName"]);
-        if (action) {
-          action.onAction(this);
-        }
+        if (!action || action.isAvailable?.(this) === false) return;
+
+        action.onAction(this);
       }
     });
 
@@ -183,6 +183,7 @@ export class Unit {
       eventName: "nextTurn",
       parentObject: this,
       callback: (data) => {
+        this.workOnImprovement();
         if (this.fortified && this.fortifiedForATurn && !this.actedThisTurn) this.heal();
         this.fortifiedForATurn = this.fortified;
         this.actedThisTurn = false;
@@ -240,6 +241,12 @@ export class Unit {
     return Unit.loadUnitData();
   }
 
+  // Roads cost a third of a move, so movement is kept in exact thirds - otherwise floating point
+  // leaves a sliver after three road steps and the unit could keep going.
+  public static spendMovement(movement: number, cost: number): number {
+    return Math.max(0, Math.round((movement - cost) * 3) / 3);
+  }
+
   private static getUnitYMLTypeDataByName(name: string): UnitYMLTypeData | undefined {
     return Unit.loadUnitData().find((unit) => unit.name.toLocaleLowerCase() === name.toLocaleLowerCase());
   }
@@ -274,6 +281,7 @@ export class Unit {
     this.availableMovement = remainingMovement;
     this.actedThisTurn = true;
     this.setFortified(false);
+    this.setBuildingImprovement(undefined);
 
     const dataPacket: {
       event: string;
@@ -302,6 +310,9 @@ export class Unit {
       }
       dataPacket["queuedTiles"] = remainingTilesJSON;
     }
+
+    // What a Builder can build depends on the tile it's standing on.
+    this.sendActionsToOwner();
 
     // Moving is itself a change of sight, so refresh the owner's fog before telling anyone where
     // this unit went - that way the tiles it just revealed are already on their client.
@@ -369,6 +380,56 @@ export class Unit {
     this.fortified = fortified;
     this.fortifiedForATurn = false;
     this.player.sendNetworkEvent({ event: "unitFortified", id: this.id, fortified });
+  }
+
+  // Sends turnsLeft along with the name so the owner's unit info can count it down.
+  private setBuildingImprovement(improvementName: string | undefined) {
+    if (this.buildingImprovement === improvementName) return;
+
+    this.buildingImprovement = improvementName;
+    this.sendBuildStatus();
+  }
+
+  private sendBuildStatus(extra?: { remainingMovement: number }) {
+    this.player.sendNetworkEvent({ event: "unitBuildStatus", id: this.id, ...this.getBuildStatusJSON(), ...extra });
+  }
+
+  private getBuildStatusJSON() {
+    const improvement = Improvement.getImprovementData(this.buildingImprovement);
+    if (!improvement) return { building: undefined, buildingIcon: undefined, turnsLeft: undefined };
+
+    return {
+      building: improvement.name,
+      buildingIcon: improvement.icon,
+      turnsLeft: improvement.build_turns - this.tile.getBuildProgress(improvement.name)
+    };
+  }
+
+  private workOnImprovement() {
+    const improvement = Improvement.getImprovementData(this.buildingImprovement);
+    if (!improvement) return;
+
+    // Someone else may have changed the tile since (e.g. settled a city on it).
+    if (!Improvement.canBuild(improvement, this.tile, this.player)) {
+      this.setBuildingImprovement(undefined);
+      this.sendActionsToOwner();
+      return;
+    }
+
+    const turnsWorked = this.tile.addBuildProgress(improvement.name);
+    if (turnsWorked < improvement.build_turns) {
+      this.sendBuildStatus();
+      return;
+    }
+
+    Improvement.complete(improvement, this.tile);
+    this.tile.clearBuildProgress(improvement.name);
+    this.setBuildingImprovement(undefined);
+    this.sendActionsToOwner();
+
+    GameMap.getInstance().broadcastTileUpdate(this.tile);
+    // A worked tile's yields just changed - let its city re-pick which tiles to work.
+    this.tile.getCityTerritoryOf()?.updateWorkedTiles({ sendStatUpdate: true });
   }
 
   private heal() {
@@ -458,7 +519,7 @@ export class Unit {
       //  `From (${currentTile.getX()}, ${currentTile.getY()}) to (${nextTile.getX()}, ${nextTile.getY()}) - cost: ${movementCost}`
       //);
 
-      remainingMovement = Math.max(remainingMovement - movementCost, 0);
+      remainingMovement = Unit.spendMovement(remainingMovement, movementCost);
       traversedTiles.push(nextTile);
       movementAtTile.push(remainingMovement);
     }
@@ -618,6 +679,30 @@ export class Unit {
     this.setFortified(true);
   }
 
+  // A Builder starts on an improvement: it stays put and puts a turn into it at every turn's end.
+  public startBuilding(improvementName: string) {
+    const improvement = Improvement.getImprovementData(improvementName);
+    if (!improvement || this.availableMovement <= 0) return;
+    if (!Improvement.canBuild(improvement, this.tile, this.player)) return;
+
+    this.clearMovementQueue();
+    this.availableMovement = 0;
+    this.actedThisTurn = true;
+    this.buildingImprovement = improvement.name;
+    // Starting work uses up the rest of the turn's movement, so the owner's unit info shows 0.
+    this.sendBuildStatus({ remainingMovement: 0 });
+    this.sendActionsToOwner();
+  }
+
+  public getBuildingImprovement() {
+    return this.buildingImprovement;
+  }
+
+  // Only the owner hears about this - it drives their action buttons and unit info window.
+  public sendActionsToOwner() {
+    this.player.sendNetworkEvent({ event: "unitActions", id: this.id, actions: this.getUnitActionsJSON() });
+  }
+
   public isFortified() {
     return this.fortified;
   }
@@ -691,6 +776,7 @@ export class Unit {
       combatStrength: this.combatStrength,
       health: this.health,
       fortified: ownUnit && this.fortified,
+      ...(ownUnit ? this.getBuildStatusJSON() : {}),
       isUtility: this.utility,
       ignoresTerrainCost: this.terrainCostIgnored,
       id: this.id,
@@ -712,17 +798,13 @@ export class Unit {
   }
 
   public getUnitActionsJSON() {
-    const actions: { name: string; requirements: string[]; desc: string }[] = [];
-
-    actions.push(
-      ...this.actions.map(({ name, icon, requirements, desc }) => ({
-        name,
-        icon,
-        requirements,
-        desc
-      }))
-    );
-    return actions;
+    return this.actions.map(({ name, icon, requirements, desc, isAvailable }) => ({
+      name,
+      icon,
+      requirements,
+      desc,
+      available: isAvailable?.(this) ?? true
+    }));
   }
 
   public getTileWeight(current: Tile, neighbor: Tile) {

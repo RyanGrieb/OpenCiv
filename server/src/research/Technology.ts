@@ -93,7 +93,7 @@ export class Technology {
       buildings: buildings.filter((building) => !building.isWonderBuilding()).map(toUnlock),
       wonders: buildings.filter((building) => building.isWonderBuilding()).map(toUnlock),
       improvements: Improvement.getAllImprovementData()
-        .filter((improvement) => improvement.required_tech === techName)
+        .filter((improvement) => improvement.required_tech === techName && !improvement.removes_feature)
         .map((improvement) => ({ name: improvement.name, asset_name: improvement.asset_name }))
     };
   }

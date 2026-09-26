@@ -56,3 +56,13 @@ ScenarioRegistry.register("BarbarianCamps", async () => {
     const module = await import("./scenarios/BarbarianCamps.test");
     return module.setupBarbarianCampsTest;
 });
+
+ScenarioRegistry.register("BuilderImprovements", async () => {
+    const module = await import("./scenarios/BuilderImprovements.test");
+    return module.setupBuilderImprovementsTest;
+});
+
+ScenarioRegistry.register("BuilderSandbox", async () => {
+    const module = await import("./scenarios/BuilderSandbox.test");
+    return module.setupBuilderSandboxTest;
+});

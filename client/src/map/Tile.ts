@@ -29,6 +29,11 @@ export interface TileOptions {
 export class Tile extends Actor {
   public static WIDTH = 32;
   public static HEIGHT = 32;
+  // Mirrors server/src/map/Tile.ts's ROAD_MOVEMENT_COST.
+  public static readonly ROAD_MOVEMENT_COST = 1 / 3;
+  // Tile types drawn some other way than their own sprite - roads connect to their neighbors (see
+  // GameMap.createRoadActors).
+  private static readonly UNSPRITED_TILE_TYPES = ["road"];
 
   private static loadedTileImages = new Map<string, HTMLImageElement>();
   private static allTileStats: TileYieldsData;
@@ -94,7 +99,14 @@ export class Tile extends Actor {
     return false;
   }
 
+  // Mirrors server/src/map/Tile.ts's roadConnects() - keep both in sync.
+  public static roadConnects(tile1: Tile, tile2: Tile): boolean {
+    return tile1.hasRoad() && tile2.hasRoad();
+  }
+
   public static getWeight(tile1: Tile, tile2: Tile, unit?: Unit): number {
+    if (Tile.roadConnects(tile1, tile2)) return Tile.ROAD_MOVEMENT_COST;
+
     if (unit?.ignoresTerrainCost()) {
       // Still respect impassable terrain (e.g. mountains) - only flatten the
       // hill/forest/jungle penalty and the river-crossing floor to 1.
@@ -200,6 +212,11 @@ export class Tile extends Actor {
     return this.city;
   }
 
+  // A city counts as a road, as in Civ 5.
+  public hasRoad(): boolean {
+    return this.tileTypes.includes("road") || this.tileTypes.includes("city");
+  }
+
   public samePosition(tile: Tile) {
     return this.gridX === tile.getGridX() && this.gridY === tile.getGridY();
   }
@@ -275,6 +292,8 @@ export class Tile extends Actor {
     canvas.getContext("2d").fillRect(0, 0, canvas.width, canvas.height);
 
     for (let tileType of tileTypes) {
+      if (Tile.UNSPRITED_TILE_TYPES.includes(tileType)) continue;
+
       const spritesheetImage = Game.getInstance().getImage(GameImage.SPRITESHEET);
       const spriteRegion = resolveSpriteRegion(`TILE_${tileType.toUpperCase()}`);
       const region = SpriteAtlas.getInstance().getRegion(spriteRegion);

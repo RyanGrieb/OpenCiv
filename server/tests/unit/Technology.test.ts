@@ -93,7 +93,10 @@ describe('Technology', () => {
     const requiredTechs = [
       ...Unit.getAllUnitData().map((unit) => unit.required_tech),
       ...Building.getAllBuildings().map((building) => building.getRequiredTech()),
-      ...Improvement.getAllImprovementData().map((improvement) => improvement.required_tech),
+      // Clearing forest or jungle isn't an improvement, so the window leaves those out.
+      ...Improvement.getAllImprovementData()
+        .filter((improvement) => !improvement.removes_feature)
+        .map((improvement) => improvement.required_tech),
     ];
     const gatedCount = requiredTechs.filter((tech) => tech).length;
     expect(unlocked).toHaveLength(gatedCount);

@@ -15,6 +15,10 @@ export interface GameOptions {
   // Starts every player's settler two tiles from the first player's, so their units begin within a
   // step of each other. Meant for the client scenario tests (see MeleeCombat), not real games.
   spawnPlayersTogether: boolean;
+  // Every player starts with the whole tech tree researched, and a Builder beside their Settler.
+  // Meant for trying out tech-gated features like Builder improvements (see the Builder scenarios).
+  startWithAllTechs: boolean;
+  startWithBuilder: boolean;
 }
 
 // Maps are streamed to clients in square chunks of this many tiles, so each dimension must divide evenly.
@@ -62,7 +66,9 @@ export const DefaultGameOptions: GameOptions = {
   mapWidth: MapSizes.DIMENSIONS[3][0],
   mapHeight: MapSizes.DIMENSIONS[3][1],
   revealMap: false,
-  spawnPlayersTogether: false
+  spawnPlayersTogether: false,
+  startWithAllTechs: false,
+  startWithBuilder: false
 };
 
 interface BaseGameOptionDefinition {
@@ -136,5 +142,7 @@ export const GameOptionDefinitions: GameOptionDefinition[] = [
     onChange: (options) => MapSizes.syncPreset(options)
   },
   { key: "revealMap", label: "Reveal Entire Map", type: "boolean", hidden: true },
-  { key: "spawnPlayersTogether", label: "Spawn Players Together", type: "boolean", hidden: true }
+  { key: "spawnPlayersTogether", label: "Spawn Players Together", type: "boolean", hidden: true },
+  { key: "startWithAllTechs", label: "Start With All Techs", type: "boolean", hidden: true },
+  { key: "startWithBuilder", label: "Start With a Builder", type: "boolean", hidden: true }
 ];

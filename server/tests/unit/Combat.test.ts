@@ -100,6 +100,7 @@ describe("Unit.meleeAttack", () => {
       addUnit: jest.fn(),
       removeUnit: jest.fn(),
       sendNetworkEvent: jest.fn(),
+      hasResearchedTech: () => false,
       getVisibility: () => ({ isVisible: () => true, update: jest.fn() })
     }) as unknown as Player;
 

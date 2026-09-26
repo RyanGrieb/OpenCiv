@@ -330,6 +330,11 @@ export class Player {
     return this.researchedTechs.has(techName);
   }
 
+  // For the startWithAllTechs game option. Sent to the client once it asks for its research.
+  public researchAllTechs() {
+    Technology.getAllTechnologies().forEach((tech) => this.researchedTechs.add(tech.getName()));
+  }
+
   private accumulateTurnStats() {
     const rates = this.getTotalStats();
 
@@ -382,6 +387,8 @@ export class Player {
     if (this.currentResearch.progress >= this.currentResearch.cost) {
       this.researchedTechs.add(this.currentResearch.techName);
       this.currentResearch = null;
+      // A new tech can unlock improvements for this player's Builders.
+      this.units.forEach((unit) => unit.sendActionsToOwner());
     }
 
     this.sendResearchUpdate();

@@ -8,6 +8,7 @@ import { Job, gracefulShutdown, scheduleJob } from "node-schedule";
 
 import { Tile } from "../../map/Tile";
 import { Barbarians } from "../../barbarian/Barbarians";
+import { Player } from "../../Player";
 
 export class InGameState extends State {
   private turnTimeJob: Job;
@@ -59,6 +60,19 @@ export class InGameState extends State {
     return twoStepsOut.find((candidate) =>
       candidate.getAdjacentTiles().some((tile) => InGameState.isOpenSpawnTile(tile) && !neighbors.includes(tile))
     );
+  }
+
+  // The startWithAllTechs / startWithBuilder game options, for trying out Builder improvements.
+  private static applyDebugStart(player: Player, spawnTile: Tile) {
+    const options = Game.getInstance().getGameOptions();
+    if (options.startWithAllTechs) player.researchAllTechs();
+    if (!options.startWithBuilder) return;
+
+    // Any land beside the Settler will do - a civilian can share a tile with the Warrior.
+    const builderTile = spawnTile
+      .getAdjacentTiles()
+      .find((tile) => tile && !tile.isWater() && tile.isWorkable() && tile.canPlaceUnit(player, true));
+    builderTile?.addUnit(Unit.createFromName("Builder", builderTile, player));
   }
 
   public onInitialize() {
@@ -125,6 +139,8 @@ export class InGameState extends State {
         //TODO: Re-choose spawn location if warrior can't spawn
         const warriorTile = spawnTile.getAdjacentTiles().find(InGameState.isOpenSpawnTile);
         warriorTile?.addUnit(Unit.createFromName("Warrior", warriorTile, player));
+
+        InGameState.applyDebugStart(player, spawnTile);
 
         player.onLoadedIn(() => {
           player.zoomToLocation(spawnTile.getX(), spawnTile.getY(), 3);

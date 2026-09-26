@@ -109,13 +109,17 @@ export class MapResources {
    * @returns
    */
   public static isResourceTile(tile: Tile): boolean {
+    return tile.containsTileTypes(MapResources.getResourceTileTypes());
+  }
+
+  // The tile type of every resource the map can generate, e.g. "cattle" or "iron".
+  public static getResourceTileTypes(): string[] {
     const resourcesData = MapResources.loadResourcesData();
-    const resourceTileTypes = [
+    return [
       ...resourcesData.bonus_resources.map((resource: MapResourceConfigData) => resource.name),
       ...resourcesData.strategic_resources.map((resource: MapResourceConfigData) => resource.name),
       ...resourcesData.luxury_resources.map((resource: MapResourceConfigData) => resource.name)
     ];
-    return tile.containsTileTypes(resourceTileTypes);
   }
 
   private static loadResourcesData(): MapResourcesConfig {

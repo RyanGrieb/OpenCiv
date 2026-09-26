@@ -5,6 +5,7 @@ import { Unit } from "../unit/Unit";
 import { City } from "../city/City";
 import { Player } from "../Player";
 import { ConfigLoader } from "../util/ConfigLoader";
+import { MapResources } from "./MapResources";
 
 // A tile/building stat-line is represented as an array of single-key partial objects
 // (e.g. [{ science: 0 }, { gold: 0 }, ...]) rather than one flat dictionary.
@@ -25,6 +26,8 @@ export class Tile {
   public static readonly ELEVATION_FLAT = 0;
   public static readonly ELEVATION_HILL = 1;
   public static readonly ELEVATION_MOUNTAIN = 2;
+  // Civ 5: moving along a road from one road tile to the next costs a third of a move.
+  public static readonly ROAD_MOVEMENT_COST = 1 / 3;
 
   //== Generation Values ==
   private generationHeight: number;
@@ -46,6 +49,11 @@ export class Tile {
   // reports this rather than `city`, so a player who's only discovered part of a foreign city's
   // territory still learns of the city and its borders, without having scouted its exact center.
   private cityTerritoryOf: City;
+  // The improvement built here (e.g. "Farm"), not counting a road, which sits alongside it.
+  private improvement: string | undefined;
+  // Turns Builders have put into each improvement on this tile so far. Kept when a Builder walks
+  // off, so another one can pick the work up where it was left, as in Civ 5.
+  private buildProgress: Map<string, number>;
 
   constructor(tileType: string, x: number, y: number) {
     this.generationHeight = 0;
@@ -56,6 +64,7 @@ export class Tile {
     this.adjacentTiles = [];
     this.riverSides = new Array(6).fill(false);
     this.units = [];
+    this.buildProgress = new Map();
 
     this.x = x;
     this.y = y;
@@ -64,6 +73,45 @@ export class Tile {
   }
   public static getAllTileStats(): Record<string, any> {
     return ConfigLoader.load<{ tiles: Record<string, any> }>("./config/tiles.yml").tiles;
+  }
+
+  // Mirrored by the client's Tile.roadConnects() - keep both in sync.
+  public static roadConnects(tile1: Tile, tile2: Tile): boolean {
+    return tile1.hasRoad() && tile2.hasRoad();
+  }
+
+  public getImprovement(): string | undefined {
+    return this.improvement;
+  }
+
+  public setImprovement(improvement: string) {
+    this.improvement = improvement;
+  }
+
+  // Adds a turn of work on the improvement and returns how many turns it has had in total.
+  public addBuildProgress(improvement: string): number {
+    const turns = (this.buildProgress.get(improvement) ?? 0) + 1;
+    this.buildProgress.set(improvement, turns);
+    return turns;
+  }
+
+  public getBuildProgress(improvement: string): number {
+    return this.buildProgress.get(improvement) ?? 0;
+  }
+
+  public clearBuildProgress(improvement: string) {
+    this.buildProgress.delete(improvement);
+  }
+
+  // A city counts as a road, as in Civ 5.
+  public hasRoad(): boolean {
+    return this.containsTileType("road") || !!this.city;
+  }
+
+  // The unimproved resource on this tile, if any (e.g. "cattle", but not "improved_cattle").
+  public getResource(): string | undefined {
+    const resources = MapResources.getResourceTileTypes();
+    return this.tileTypes.find((type) => resources.includes(type));
   }
 
   public setCity(city: City) {
@@ -164,6 +212,7 @@ export class Tile {
       movementCost: this.getMovementCost(),
       city: this.cityTerritoryOf ? this.cityTerritoryOf.getJSON({ observer: options?.observer }) : null,
       yields: this.getStats(),
+      improvement: this.improvement,
       visible: visible
     };
   }
@@ -805,6 +854,8 @@ export class Tile {
   }
 
   public static getWeight(tile1: Tile, tile2: Tile, unit?: Unit): number {
+    if (Tile.roadConnects(tile1, tile2)) return Tile.ROAD_MOVEMENT_COST;
+
     if (unit?.ignoresTerrainCost()) {
       // Still respect impassable terrain (e.g. mountains) - only flatten the
       // hill/forest/jungle penalty and the river-crossing floor to 1.

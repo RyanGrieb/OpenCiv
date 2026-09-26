@@ -1,10 +1,12 @@
 import { City } from "../city/City";
+import { Improvement, ImprovementData } from "../map/Improvement";
 import { Unit, UnitAction, UnitYMLTypeData } from "./Unit";
 
 export class UnitActions {
   // The actions every unit of this type starts with.
   public static forUnitType(data: UnitYMLTypeData): UnitAction[] {
     if (data.name === "Settler") return [UnitActions.settleCity()];
+    if (data.name === "Builder") return Improvement.getBuildableImprovementData().map(UnitActions.buildImprovement);
     if (data.combat_strength > 0) return [UnitActions.fortifyUntilHealed()];
     return [];
   }
@@ -37,6 +39,20 @@ export class UnitActions {
       requirements: ["wounded", "notFortified"],
       desc: "Fortify Until Healed",
       onAction: (unit: Unit) => unit.fortifyUntilHealed()
+    };
+  }
+
+  // One per improvement - the client only shows the ones isAvailable allows on the Builder's tile.
+  public static buildImprovement(improvement: ImprovementData): UnitAction {
+    const verb = improvement.removes_feature ? "" : "Build ";
+
+    return {
+      name: `build_${improvement.name.toLowerCase().replace(/ /g, "_")}`,
+      icon: improvement.icon ?? "ICON_UNKNOWN",
+      requirements: ["movement", "notBuilding"],
+      desc: `${verb}${improvement.name} (${improvement.build_turns} turns)`,
+      isAvailable: (unit: Unit) => Improvement.canBuild(improvement, unit.getTile(), unit.getPlayer()),
+      onAction: (unit: Unit) => unit.startBuilding(improvement.name)
     };
   }
 
