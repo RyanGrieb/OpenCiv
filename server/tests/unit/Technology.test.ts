@@ -93,6 +93,16 @@ describe('Technology', () => {
     expect(ironWorkingUnits()).toEqual(['Swordsman']);
   });
 
+  it("leaves the Bazaar (Arabia's unique Market) out of Currency, since nobody plays Arabia", () => {
+    const currencyBuildings = (civName?: string) =>
+      Technology.getUnlocks('Currency', civName).buildings.map((building) => building.name);
+
+    expect(currencyBuildings()).toContain('Market');
+    expect(currencyBuildings('Rome')).not.toContain('Bazaar');
+    expect(currencyBuildings('Arabia')).toContain('Bazaar');
+    expect(currencyBuildings('Arabia')).not.toContain('Market');
+  });
+
   it('points every obsolete_tech, unique_to and replaces at a tech, civ and unit that exist', () => {
     const techNames = new Set(Technology.getAllTechnologies().map((tech) => tech.getName()));
     const unitNames = new Set(Unit.getAllUnitData().map((unit) => unit.name));
@@ -121,7 +131,9 @@ describe('Technology', () => {
       ...Unit.getAllUnitData()
         .filter((unit) => !unit.unique_to)
         .map((unit) => unit.required_tech),
-      ...Building.getAllBuildings().map((building) => building.getRequiredTech()),
+      ...Building.getAllBuildings()
+        .filter((building) => Building.isAvailableToCiv(building, undefined))
+        .map((building) => building.getRequiredTech()),
       // Clearing forest or jungle isn't an improvement, so the window leaves those out.
       ...Improvement.getAllImprovementData()
         .filter((improvement) => !improvement.removes_feature)

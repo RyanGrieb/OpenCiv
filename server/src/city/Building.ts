@@ -11,6 +11,9 @@ export interface BuildingData {
   required_tech?: string;
   // Extra hit points the building gives its city, e.g. Walls.
   city_health?: number;
+  // A civilization's unique building: only that civ builds it, in place of the building it replaces.
+  unique_to?: string;
+  replaces?: string;
 }
 
 export class Building {
@@ -21,6 +24,8 @@ export class Building {
   private cost?: number;
   private requiredTech?: string;
   private cityHealth: number;
+  private uniqueTo?: string;
+  private replaces?: string;
 
   constructor(data: BuildingData) {
     this.name = data.name;
@@ -29,6 +34,8 @@ export class Building {
     this.cost = data.cost;
     this.requiredTech = data.required_tech;
     this.cityHealth = data.city_health ?? 0;
+    this.uniqueTo = data.unique_to;
+    this.replaces = data.replaces;
 
     this.statLine = {};
     for (const stat of data.stats) {
@@ -46,6 +53,14 @@ export class Building {
   // callers building a production catalog must filter those out themselves.
   public static getAllBuildings(): Building[] {
     return Building.loadBuildingData().map((data) => new Building(data));
+  }
+
+  // Whether a civ can build this building: another civ's unique building is off limits, and so is any
+  // building the civ's own unique building replaces. Mirrors Unit.isAvailableToCiv.
+  public static isAvailableToCiv(building: Building, civName: string | undefined): boolean {
+    if (building.uniqueTo) return building.uniqueTo === civName;
+
+    return !Building.loadBuildingData().some((other) => other.unique_to === civName && other.replaces === building.name);
   }
 
   private static loadBuildingData(): BuildingData[] {

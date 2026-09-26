@@ -164,6 +164,17 @@ describe('City', () => {
       expect(offeredUnits()).toEqual(['Legion']);
     });
 
+    it("offers the Market but not Arabia's Bazaar once Currency is researched", () => {
+      mockPlayer.hasResearchedTech.mockImplementation((tech: string) => tech === 'Currency');
+
+      triggerServerEvent('requestProductionOptions', { cityName: 'TestCity' }, mockWebsocket);
+
+      const { buildings } = (mockPlayer.sendNetworkEvent as jest.Mock).mock.calls[0][0];
+      const names = buildings.map((option: { name: string }) => option.name);
+      expect(names).toContain('Market');
+      expect(names).not.toContain('Bazaar');
+    });
+
     it("refuses to queue another civ's unique unit", () => {
       triggerServerEvent('addToProductionQueue', { cityName: 'TestCity', type: 'unit', name: 'Legion' }, mockWebsocket);
 
