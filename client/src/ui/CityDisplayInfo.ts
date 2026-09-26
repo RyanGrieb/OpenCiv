@@ -13,9 +13,8 @@ import { RadioButton } from "./RadioButton";
 import { UITheme } from "./UITheme";
 
 const STATS_WINDOW_WIDTH = 320;
-// Vertical space a progress readout (one text line plus its bar) claims underneath its stat row -
-// the growth readout under Population, and the border readout under Culture. Every stat row below
-// one shifts down by this much.
+// Vertical space a progress readout (one text line plus its bar) claims. The growth and border
+// readouts stack under the Population row, and every stat row below shifts down by both.
 const READOUT_ROW_HEIGHT = 56;
 const READOUT_BAR_HEIGHT = 12;
 const STATS_WINDOW_HEIGHT = 390 + READOUT_ROW_HEIGHT;
@@ -353,14 +352,11 @@ export class CityDisplayInfo extends ActorGroup {
 
     const firstRowY = y + 12 + UITheme.FONT_SIZE + 10;
     const rowSpacing = UITheme.ICON_SIZE - 12;
-    const cultureIndex = stats.findIndex((stat) => stat.key === "culture");
-    // Rows below Population sit under the growth readout, and rows below Culture under the border
-    // readout too - both are drawn after this loop.
-    const readoutOffset = (index: number) =>
-      (index > 0 ? READOUT_ROW_HEIGHT : 0) + (index > cultureIndex ? READOUT_ROW_HEIGHT : 0);
 
     stats.forEach((stat, index) => {
-      const iconY = firstRowY + index * rowSpacing + readoutOffset(index);
+      // Everything below Population sits under the growth and border readouts drawn after this loop.
+      const readoutOffset = index === 0 ? 0 : 2 * READOUT_ROW_HEIGHT;
+      const iconY = firstRowY + index * rowSpacing + readoutOffset;
       const textY = iconY + UITheme.centerTextY(UITheme.ICON_SIZE);
 
       this.statsWindow.addActor(
@@ -400,7 +396,7 @@ export class CityDisplayInfo extends ActorGroup {
     // Rows are spaced tighter than their icons are tall, so the extra offset drops each
     // readout clear of the icon overhanging from the row above it.
     this.addGrowthReadout(x, firstRowY + rowSpacing + 8, width);
-    this.addBorderReadout(x, firstRowY + (cultureIndex + 1) * rowSpacing + readoutOffset(cultureIndex) + 8, width);
+    this.addBorderReadout(x, firstRowY + rowSpacing + 8 + READOUT_ROW_HEIGHT, width);
 
     this.addActor(this.statsWindow);
   }
@@ -444,7 +440,7 @@ export class CityDisplayInfo extends ActorGroup {
     });
   }
 
-  // Banked culture toward the city's next border tile, drawn just below the Culture row.
+  // Banked culture toward the city's next border tile, drawn just below the growth readout.
   private addBorderReadout(x: number, y: number, width: number) {
     const banked = this.city.getStat("cultureStored");
     const required = this.city.getStat("cultureRequiredToExpand");
