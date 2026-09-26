@@ -44,6 +44,7 @@ export const SPRITE_MANIFEST: SpriteManifestEntry[] = [
   { name: "ICON_AMERICA", url: new URL("../../assets/sprites/icons/ICON_AMERICA.png", import.meta.url).href },
   { name: "ICON_CANADA", url: new URL("../../assets/sprites/icons/ICON_CANADA.png", import.meta.url).href },
   { name: "ICON_CANCEL", url: new URL("../../assets/sprites/icons/ICON_CANCEL.png", import.meta.url).href },
+  { name: "ICON_COMBAT", url: new URL("../../assets/sprites/icons/ICON_COMBAT.png", import.meta.url).href },
   { name: "ICON_CUBA", url: new URL("../../assets/sprites/icons/ICON_CUBA.png", import.meta.url).href },
   { name: "ICON_CULTURE", url: new URL("../../assets/sprites/icons/ICON_CULTURE.png", import.meta.url).href },
   { name: "ICON_DEFENSE", url: new URL("../../assets/sprites/icons/ICON_DEFENSE.png", import.meta.url).href },
