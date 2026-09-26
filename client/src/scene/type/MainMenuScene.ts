@@ -4,10 +4,14 @@ import { Button, ButtonSize } from "../../ui/components/Button";
 import { ClientSettingsGroup } from "../../ui/menus/ClientSettingsGroup";
 import { Label } from "../../ui/components/Label";
 import { SceneBackground } from "../SceneBackground";
+import { Actor } from "../Actor";
+import { GameImage, SpriteRegion } from "../../Assets";
 
 export class MainMenuScene extends Scene {
   private static readonly SETTINGS_WIDTH = 460;
   private static readonly SETTINGS_HEIGHT = 300;
+  private static readonly TITLE_ICON_SIZE = 96;
+  private static readonly TITLE_ICON_GAP = 16;
 
   private menuButtons: Button[];
   private settingsGroup: ClientSettingsGroup;
@@ -19,21 +23,34 @@ export class MainMenuScene extends Scene {
     this.addActor(SceneBackground.generatePanningGrassland());
 
     const titleLabel = new Label({
-      text: "Open Civilization",
+      text: "OpenCiv",
       font: "bold 97px arial",
       fontColor: "white",
       shadowColor: "black",
       lineWidth: 4,
       shadowBlur: 20
     });
+    const titleIcon = new Actor({
+      image: Game.getInstance().getImage(GameImage.SPRITESHEET),
+      spriteRegion: SpriteRegion.TILE_CITY,
+      x: 0,
+      y: 0,
+      width: MainMenuScene.TITLE_ICON_SIZE,
+      height: MainMenuScene.TITLE_ICON_SIZE
+    });
     titleLabel.conformSize().then(() => {
-      titleLabel.setPosition(
-        Game.getInstance().getWidth() / 2 - titleLabel.getWidth() / 2,
-        Game.getInstance().getHeight() / 3 - 75
+      const titleWidth = titleLabel.getWidth() + MainMenuScene.TITLE_ICON_GAP + MainMenuScene.TITLE_ICON_SIZE;
+      const titleX = Game.getInstance().getWidth() / 2 - titleWidth / 2;
+      const titleY = Game.getInstance().getHeight() / 3 - 75;
+      titleLabel.setPosition(titleX, titleY);
+      titleIcon.setPosition(
+        titleX + titleLabel.getWidth() + MainMenuScene.TITLE_ICON_GAP,
+        titleY + titleLabel.getHeight() / 2 - MainMenuScene.TITLE_ICON_SIZE / 2
       );
     });
 
     this.addActor(titleLabel);
+    this.addActor(titleIcon);
 
     /*const backgroundActor = new Actor({
       color: "rgba(0, 0, 0, 0.5)",
