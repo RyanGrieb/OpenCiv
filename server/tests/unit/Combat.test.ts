@@ -291,6 +291,14 @@ describe("Unit.meleeAttack", () => {
       call[0].callback({});
     };
 
+    it("is the only way a unit heals", () => {
+      const unit = makeUnit(originTile, attackerPlayer);
+      unit["health"] = 50;
+
+      nextTurn(unit);
+      expect(unit.getHealth()).toBe(50);
+    });
+
     it("is refused at full health", () => {
       const unit = makeUnit(originTile, attackerPlayer);
       unit.fortifyUntilHealed();

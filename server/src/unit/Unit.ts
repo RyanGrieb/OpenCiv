@@ -58,7 +58,7 @@ export class Unit {
   private attackType: string;
   private combatStrength: number;
   private health: number;
-  // Moved or fought since the turn began - a unit that did neither heals at the next turn.
+  // Moved or fought since the turn began - a fortified unit that did neither heals at the next turn.
   private actedThisTurn: boolean;
   // Set by the "Fortify Until Healed" action; cleared by moving, attacking, or reaching full health.
   private fortified: boolean;
@@ -180,7 +180,7 @@ export class Unit {
       eventName: "nextTurn",
       parentObject: this,
       callback: (data) => {
-        if (!this.actedThisTurn) this.heal();
+        if (this.fortified && !this.actedThisTurn) this.heal();
         this.actedThisTurn = false;
         if (this.fortified && this.health >= Combat.MAX_HEALTH) this.setFortified(false);
         this.availableMovement = this.defaultMoveDistance;
@@ -579,8 +579,8 @@ export class Unit {
     return targetTile.getUnits().some((unit) => unit.getPlayer() !== this.player);
   }
 
-  // Civ 5's "Fortify Until Healed": the unit stays put, healing each turn it doesn't move or attack, until
-  // it's back to full health or given another order.
+  // "Fortify Until Healed" - the only way a unit heals. It stays put, healing each turn it doesn't move
+  // or attack, until it's back to full health or given another order.
   public fortifyUntilHealed() {
     if (!this.canFight() || this.health >= Combat.MAX_HEALTH) return;
 

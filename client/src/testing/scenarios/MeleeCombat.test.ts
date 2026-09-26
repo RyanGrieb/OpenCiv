@@ -205,13 +205,13 @@ export function setupMeleeCombatTest(game: Game) {
     });
 
     runner.addStep({
-        name: "A unit that sat out the turn heals 10 HP; one that attacked doesn't",
+        name: "Neither Warrior heals without fortifying, even the one that sat out the turn",
         action: async () => {
             await endTurn();
             await utils.delay(400);
             utils.log(`After the turn: ours ${warrior.getHealth()} HP, theirs ${enemyWarrior.getHealth()} HP`, "yellow");
         },
-        verification: () => enemyWarrior.getHealth() === Math.min(100, healthBefore.theirs + 10) && warrior.getHealth() === healthBefore.ours
+        verification: () => enemyWarrior.getHealth() === healthBefore.theirs && warrior.getHealth() === healthBefore.ours
     });
 
     runner.addStep({
