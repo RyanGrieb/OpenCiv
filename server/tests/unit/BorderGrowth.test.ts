@@ -44,27 +44,54 @@ describe('BorderGrowth', () => {
     expect(BorderGrowth.chooseNextTile(center, [center, ring1])).toBe(near);
   });
 
-  it('pulls a resource tile ahead of a plain one in the same ring', () => {
+  // A center with one ring-1 neighbor per tile given, each on its own edge.
+  const ringOf = (...tiles: Tile[]) => {
     const center = new Tile('grass', 0, 0);
-    const plain = new Tile('grass', 1, 0);
-    const cattle = new Tile('grass', 2, 0);
-    cattle.addTileType('cattle');
-    link(center, 0, plain);
-    link(center, 1, cattle);
+    tiles.forEach((tile, edge) => link(center, edge, tile));
     ownBy([center], {} as City);
+    return center;
+  };
 
-    expect(BorderGrowth.chooseNextTile(center, [center])).toBe(cattle);
+  const withResource = (resource: string, base = 'grass') => {
+    const tile = new Tile(base, 1, 1);
+    tile.addTileType(resource);
+    return tile;
+  };
+
+  it("claims tiles in the wiki's order: luxury, strategic, bonus, next to a resource, then river or lake", () => {
+    const lake = new Tile('freshwater', 1, 0);
+    const nextToResource = new Tile('grass', 2, 0);
+    // Owned by a neighbor, so it pulls nextToResource forward without being claimable itself.
+    const neighborsCattle = withResource('cattle');
+    neighborsCattle.setCityTerritoryOf({} as City);
+    link(nextToResource, 1, neighborsCattle);
+    const bonus = withResource('cattle');
+    const strategic = withResource('iron');
+    const luxury = withResource('cotton');
+    const order = [luxury, strategic, bonus, nextToResource, lake, new Tile('grass', 3, 0)];
+    const territory = [ringOf(...[...order].reverse())];
+
+    const claimed: Tile[] = [];
+    for (const _ of order) {
+      const next = BorderGrowth.chooseNextTile(territory[0], territory);
+      next.setCityTerritoryOf({} as City);
+      territory.push(next);
+      claimed.push(next);
+    }
+
+    expect(claimed.map((tile) => order.indexOf(tile))).toEqual([0, 1, 2, 3, 4, 5]);
   });
 
-  it('prefers land over ocean when nothing else sets them apart', () => {
-    const center = new Tile('grass', 0, 0);
-    const land = new Tile('desert', 1, 0);
-    const ocean = new Tile('ocean', 2, 0);
-    link(center, 0, land);
-    link(center, 1, ocean);
-    ownBy([center], {} as City);
+  it('reaches a ring further out for a resource, but not two rings', () => {
+    const [center, plain, farCotton] = [new Tile('grass', 0, 0), new Tile('grass', 1, 0), withResource('cotton')];
+    link(center, 0, plain);
+    link(plain, 0, farCotton);
+    ownBy([center, plain], {} as City);
+    const [ring2Plain, ring3Cotton] = [new Tile('grass', 5, 5), withResource('cotton')];
+    link(plain, 1, ring2Plain);
 
-    expect(BorderGrowth.chooseNextTile(center, [center])).toBe(land);
+    expect(BorderGrowth.getInfluenceCost(farCotton, 2)).toBeLessThan(BorderGrowth.getInfluenceCost(ring2Plain, 1));
+    expect(BorderGrowth.getInfluenceCost(ring3Cotton, 4)).toBeGreaterThan(BorderGrowth.getInfluenceCost(ring2Plain, 1));
   });
 
   it("never takes a tile another city owns", () => {

@@ -616,12 +616,12 @@ describe('City', () => {
         setCityTerritoryOf: jest.fn(),
         getResource: jest.fn().mockReturnValue(undefined),
         hasRiver: jest.fn().mockReturnValue(false),
-        isWater: jest.fn().mockReturnValue(false),
-        getTotalStatValue: jest.fn().mockReturnValue(2),
+        containsTileType: jest.fn().mockReturnValue(false),
         getStats: jest.fn().mockReturnValue([]),
       } as unknown as jest.Mocked<Tile>;
       mockTile.getAdjacentTiles.mockReturnValue([candidate]);
       (mockTile as any).getCityTerritoryOf = jest.fn().mockReturnValue(city);
+      (mockTile as any).getResource = jest.fn().mockReturnValue(undefined);
 
       mockVisibility = { update: jest.fn(), hasDiscovered: jest.fn().mockReturnValue(true) };
       (mockPlayer as any).getVisibility = jest.fn().mockReturnValue(mockVisibility);

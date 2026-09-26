@@ -122,6 +122,17 @@ export class MapResources {
     ];
   }
 
+  // Which of map_resources.yml's lists a resource tile type (e.g. "cotton") comes from.
+  public static getResourceCategory(resource: string): "bonus" | "strategic" | "luxury" | undefined {
+    const resourcesData = MapResources.loadResourcesData();
+    const inList = (list: MapResourceConfigData[]) => list.some((data) => data.name === resource);
+
+    if (inList(resourcesData.luxury_resources)) return "luxury";
+    if (inList(resourcesData.strategic_resources)) return "strategic";
+    if (inList(resourcesData.bonus_resources)) return "bonus";
+    return undefined;
+  }
+
   private static loadResourcesData(): MapResourcesConfig {
     return ConfigLoader.load<MapResourcesConfig>("./config/map_resources.yml");
   }

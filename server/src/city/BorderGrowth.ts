@@ -1,8 +1,10 @@
+import { MapResources } from "../map/MapResources";
 import { Tile } from "../map/Tile";
 
 /**
  * Civ 5's culture border growth: how much culture a city needs to claim its next tile, and which
- * tile it claims. Each value mirrors the Civ 5 GlobalDefines entry named beside it.
+ * tile it claims. The culture and distance values mirror the Civ 5 GlobalDefines entries named
+ * beside them; the tile priorities follow the Civ 5 wiki's Territory page.
  */
 export class BorderGrowth {
   // Culture for the next tile is FIRST_TILE_COST + (LATER_TILE_MULTIPLIER * tilesAcquired) ^ LATER_TILE_EXPONENT,
@@ -16,13 +18,17 @@ export class BorderGrowth {
   public static readonly MAX_ACQUIRE_DISTANCE = 5;
   public static readonly MAX_WORK_DISTANCE = 3;
 
-  // Plot influence costs: the city claims the candidate with the lowest total, so nearer tiles come
-  // first, and resources, rivers and high yields pull a tile forward (PLOT_INFLUENCE_*_COST).
+  // Influence costs: the city claims the candidate with the lowest total. Each ring out adds
+  // DISTANCE_COST, so borders fill in evenly around the city. A tile's most important feature pulls
+  // it forward, in the wiki's order: a luxury, strategic or bonus resource, then bordering a
+  // resource, then a river or lake. Features don't stack, so that order holds within a ring, and a
+  // resource is worth reaching more than a ring further out for.
   public static readonly INFLUENCE_DISTANCE_COST = 100;
-  public static readonly INFLUENCE_RESOURCE_COST = -105;
-  public static readonly INFLUENCE_RIVER_COST = -15;
-  public static readonly INFLUENCE_WATER_COST = 25;
-  public static readonly INFLUENCE_YIELD_POINT_COST = -1;
+  public static readonly INFLUENCE_LUXURY_COST = -250;
+  public static readonly INFLUENCE_STRATEGIC_COST = -200;
+  public static readonly INFLUENCE_BONUS_COST = -150;
+  public static readonly INFLUENCE_NEXT_TO_RESOURCE_COST = -75;
+  public static readonly INFLUENCE_RIVER_OR_LAKE_COST = -50;
 
   public static getCultureCost(tilesAcquired: number): number {
     const laterTileCost = Math.pow(BorderGrowth.LATER_TILE_MULTIPLIER * tilesAcquired, BorderGrowth.LATER_TILE_EXPONENT);
@@ -69,13 +75,7 @@ export class BorderGrowth {
   }
 
   public static getInfluenceCost(tile: Tile, distance: number): number {
-    let cost = distance * BorderGrowth.INFLUENCE_DISTANCE_COST;
-
-    if (tile.getResource()) cost += BorderGrowth.INFLUENCE_RESOURCE_COST;
-    if (tile.hasRiver()) cost += BorderGrowth.INFLUENCE_RIVER_COST;
-    if (tile.isWater()) cost += BorderGrowth.INFLUENCE_WATER_COST;
-
-    return cost + tile.getTotalStatValue(["default"]) * BorderGrowth.INFLUENCE_YIELD_POINT_COST;
+    return distance * BorderGrowth.INFLUENCE_DISTANCE_COST + BorderGrowth.getFeatureCost(tile);
   }
 
   private static getCandidates(centerTile: Tile, territory: Tile[]): { tile: Tile; cost: number }[] {
@@ -90,5 +90,23 @@ export class BorderGrowth {
     }
 
     return candidates;
+  }
+
+  // The cost of the most important feature on or around the tile, or 0 when it has none.
+  private static getFeatureCost(tile: Tile): number {
+    const resource = tile.getResource();
+    if (resource) {
+      const category = MapResources.getResourceCategory(resource);
+      if (category === "luxury") return BorderGrowth.INFLUENCE_LUXURY_COST;
+      if (category === "strategic") return BorderGrowth.INFLUENCE_STRATEGIC_COST;
+      return BorderGrowth.INFLUENCE_BONUS_COST;
+    }
+
+    if (tile.getAdjacentTiles().some((adjTile) => adjTile?.getResource())) {
+      return BorderGrowth.INFLUENCE_NEXT_TO_RESOURCE_COST;
+    }
+
+    if (tile.hasRiver() || tile.containsTileType("freshwater")) return BorderGrowth.INFLUENCE_RIVER_OR_LAKE_COST;
+    return 0;
   }
 }
