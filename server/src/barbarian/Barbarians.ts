@@ -2,6 +2,7 @@ import random from "random";
 import { ServerEvents } from "../Events";
 import { Game } from "../Game";
 import { Player } from "../Player";
+import { AncientRuins } from "../map/AncientRuins";
 import { GameMap } from "../map/GameMap";
 import { PlayerVisibility } from "../map/PlayerVisibility";
 import { Tile } from "../map/Tile";
@@ -171,7 +172,7 @@ export class Barbarians {
     this.camps.push(camp);
 
     // Camps appear in the fog, so normally nobody is watching - but with the map revealed everyone is.
-    if (announce) this.resendTileToObservers(tile);
+    if (announce) GameMap.getInstance().resendTileToObservers(tile);
 
     camp.defender = this.createUnit(tile);
     console.log(`[Barbarians] Camp placed at (${tile.getX()}, ${tile.getY()})`);
@@ -187,7 +188,8 @@ export class Barbarians {
     const config = Barbarians.getConfig().camps;
 
     if (tile.isWater() || tile.getMovementCost() >= 9999) return false;
-    if (tile.containsTileType(Barbarians.CAMP_TILE_TYPE) || tile.getCity() || tile.getCityTerritoryOf()) return false;
+    if (tile.containsTileType(Barbarians.CAMP_TILE_TYPE) || tile.containsTileType(AncientRuins.TILE_TYPE)) return false;
+    if (tile.getCity() || tile.getCityTerritoryOf()) return false;
     if (tile.getUnits().length > 0) return false;
 
     // Somewhere for the camp's units to step out onto.
@@ -327,19 +329,6 @@ export class Barbarians {
   private removeCamp(camp: BarbarianCamp) {
     this.camps = this.camps.filter((existingCamp) => existingCamp !== camp);
     camp.tile.removeTileType(Barbarians.CAMP_TILE_TYPE);
-    this.resendTileToObservers(camp.tile);
-  }
-
-  // Resending a tile is how a client picks up a change to its tile types - see GameMap.sendTilesToPlayer().
-  private resendTileToObservers(tile: Tile) {
-    const gameMap = GameMap.getInstance();
-
-    Game.getInstance()
-      .getPlayers()
-      .forEach((player) => {
-        if (player.getVisibility().isVisible(tile)) {
-          gameMap.sendTilesToPlayer(player, [tile]);
-        }
-      });
+    GameMap.getInstance().resendTileToObservers(camp.tile);
   }
 }

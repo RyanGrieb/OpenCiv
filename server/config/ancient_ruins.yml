@@ -1,0 +1,11 @@
+# Ancient ruins scattered over the land at game start. The first civilization unit to step onto one
+# explores it and the ruins disappear. For now every ruin gives gold, Civ 5's most common reward.
+
+# One ruin per this many land tiles (about 30 on a standard map).
+land_tiles_per_ruin: 90
+# Ruins keep at least this many tiles away from every starting unit, so nobody pops one on turn 1...
+min_distance_from_players: 4
+# ...and from each other, so they spread out instead of clumping.
+min_distance_between_ruins: 4
+# Gold for exploring a ruin.
+gold_reward: 75

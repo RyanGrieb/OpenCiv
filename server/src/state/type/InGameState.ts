@@ -8,6 +8,7 @@ import { Job, gracefulShutdown, scheduleJob } from "node-schedule";
 
 import { Tile } from "../../map/Tile";
 import { MapPresets } from "../../map/MapPresets";
+import { AncientRuins } from "../../map/AncientRuins";
 import { Barbarians } from "../../barbarian/Barbarians";
 import { Player } from "../../Player";
 import { PlayerNotifications } from "../../notification/PlayerNotifications";
@@ -27,7 +28,9 @@ export class InGameState extends State {
     "snow",
     "snow_hill",
     "tundra",
-    "tundra_hill"
+    "tundra_hill",
+    // A preset's ruins are there to be walked into, not started on.
+    "ancient_ruins"
   ];
 
   // Anywhere suitable on the map - or, with the spawnPlayersTogether option, two tiles from the first
@@ -193,9 +196,12 @@ export class InGameState extends State {
         player.sendNetworkEvent({ event: "setScene", scene: "in_game" });
       });
 
-    // After every civ has its starting units, so the first camps keep their distance from them.
-    // Clients only ask for the players list (barbarians included) once they get the scene change
-    // above, and that can't be handled before this finishes.
+    // After every civ has its starting units, so the ruins and first camps keep their distance from
+    // them. Ruins go first so camps can avoid them. Clients only ask for the map and the players list
+    // (barbarians included) once they get the scene change above, and that can't be handled before
+    // this finishes.
+    AncientRuins.init();
+
     if (Game.getInstance().getGameOptions().allowBarbarians) {
       Barbarians.init();
     }
@@ -297,6 +303,7 @@ export class InGameState extends State {
       gracefulShutdown();
     }
     Barbarians.destroyInstance();
+    AncientRuins.destroyInstance();
     GameMap.destroyInstance();
     return super.onDestroyed();
   }

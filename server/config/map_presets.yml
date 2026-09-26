@@ -60,3 +60,16 @@ presets:
       - "g F g g h g g ~ ~ O O"
       - " g g F g g g ~ ~ O O O"
       - "g g F g g ~ ~ O O O O"
+
+  ancient_ruins:
+    description: Open grassland with ancient ruins beside the Settler and a second one a couple of tiles away.
+    legend:
+      "g": [grass]
+      "S": [grass]
+      "R": [grass, ancient_ruins]
+    rows:
+      - "g g g R g g"
+      - " g g g g g g"
+      - "g g R S g g"
+      - " g g g g g g"
+      - "g g g g g g"
