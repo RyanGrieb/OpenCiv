@@ -28,6 +28,22 @@ export class Tile {
   public static readonly ELEVATION_FLAT = 0;
   public static readonly ELEVATION_HILL = 1;
   public static readonly ELEVATION_MOUNTAIN = 2;
+  // Trees and undergrowth that grow on a tile's terrain and replace its yields (see getStats()).
+  public static readonly FEATURES = ["forest", "jungle"];
+  // The land a feature can grow on, whose own yields the feature replaces.
+  public static readonly BASE_TERRAIN = [
+    "grass",
+    "plains",
+    "tundra",
+    "desert",
+    "snow",
+    "floodplains",
+    "grass_hill",
+    "plains_hill",
+    "tundra_hill",
+    "desert_hill",
+    "snow_hill"
+  ];
   // Civ 5: moving along a road from one road tile to the next costs a third of a move.
   public static readonly ROAD_MOVEMENT_COST = 1 / 3;
 
@@ -906,11 +922,7 @@ export class Tile {
       { food: 0 },
       { morale: 0 }
     ];
-    // A natural wonder's yields replace the terrain's under it, as in Civ 5.
-    const wonder = NaturalWonders.getWonderOn(this);
-    const yieldingTileTypes = wonder ? [wonder.tile_type] : this.tileTypes;
-
-    for (const tileType of yieldingTileTypes) {
+    for (const tileType of this.getYieldingTileTypes()) {
       const tileTypeData = Tile.getAllTileStats()[tileType.toUpperCase()];
       if (!tileTypeData || !tileTypeData.stats) continue;
 
@@ -955,6 +967,21 @@ export class Tile {
   // Mountains have no base yields and can never be assigned as a worked tile.
   public isWorkable(): boolean {
     return !this.tileTypes.some((type) => type.includes("mountain"));
+  }
+
+  /**
+   * The tile types whose yields add up to this tile's. As in Civ 5, a natural wonder's yields
+   * replace everything under it, and forest or jungle replaces its terrain's yields (hills
+   * included), while resources and improvements still add on top.
+   */
+  private getYieldingTileTypes(): string[] {
+    const wonder = NaturalWonders.getWonderOn(this);
+    if (wonder) return [wonder.tile_type];
+
+    const hasFeature = this.tileTypes.some((type) => Tile.FEATURES.includes(type));
+    if (!hasFeature) return this.tileTypes;
+
+    return this.tileTypes.filter((type) => !Tile.BASE_TERRAIN.includes(type));
   }
 
   private hasStackingConflict(player: Player, isUtility: boolean, ignoredUnit?: Unit): boolean {

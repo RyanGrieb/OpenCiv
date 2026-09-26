@@ -26,14 +26,17 @@ tiles:
     name: Freshwater
     stats:
       - food: 2
+      - gold: 1
   SHALLOW_OCEAN:
     name: Shallow Ocean
     stats:
       - food: 1
+      - gold: 1
   OCEAN:
     name: Ocean
     stats:
       - food: 1
+      - gold: 1
   GRASS_HILL:
     name: Grass Hill
     stats:
@@ -54,6 +57,17 @@ tiles:
     name: Snow Hill
     stats:
       - production: 2
+  # Features. As in Civ 5, these replace the yields of the terrain (or hill) under them rather
+  # than adding to it (see Tile.getStats()).
+  FOREST:
+    name: Forest
+    stats:
+      - food: 1
+      - production: 1
+  JUNGLE:
+    name: Jungle
+    stats:
+      - food: 2
   HORSES:
     name: Horses
     stats:
@@ -65,19 +79,21 @@ tiles:
   CATTLE:
     name: Cattle
     stats:
-      - production: 1
+      - food: 1
   IMPROVED_CATTLE:
     name: Improved Cattle
     stats:
-      - production: 2
+      - food: 1
+      - production: 1
   SHEEP:
     name: Sheep
     stats:
-      - production: 1
+      - food: 1
   IMPROVED_SHEEP:
     name: Improved Sheep
     stats:
-      - production: 2
+      - food: 1
+      - production: 1
   COPPER:
     name: Copper
     stats:
@@ -118,11 +134,11 @@ tiles:
   FISH:
     name: Fish
     stats:
-      - food: 1
+      - food: 2
   IMPROVED_FISH:
     name: Improved Fish
     stats:
-      - food: 2
+      - food: 3
   CRAB:
     name: Crab
     stats:

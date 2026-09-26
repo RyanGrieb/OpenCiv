@@ -31,9 +31,6 @@ export interface ImprovementData {
 // The tile improvements (and forest/jungle clearing) a Builder can work on, and the Fishing Boats a
 // Work Boat can lay down, from config/improvements.yml.
 export class Improvement {
-  // Trees and undergrowth that sit on top of a tile's terrain.
-  public static readonly FEATURES = ["forest", "jungle"];
-
   public static getAllImprovementData(): ImprovementData[] {
     return ConfigLoader.load<{ improvements: ImprovementData[] }>("./config/improvements.yml").improvements;
   }
@@ -113,7 +110,7 @@ export class Improvement {
     if (improvement.requires_feature && !tile.containsTileType(improvement.requires_feature)) return false;
 
     const allowed = [...(improvement.features ?? []), improvement.requires_feature];
-    return Improvement.FEATURES.every((feature) => !tile.containsTileType(feature) || allowed.includes(feature));
+    return Tile.FEATURES.every((feature) => !tile.containsTileType(feature) || allowed.includes(feature));
   }
 
   // Improvements go in the Builder's own territory; roads and clearing may also go on unowned land.

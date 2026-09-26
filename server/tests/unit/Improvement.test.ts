@@ -67,7 +67,8 @@ describe('Improvement', () => {
 
     expect(tile.getTileTypes()).toEqual(['grass', 'improved_cattle']);
     expect(tile.getImprovement()).toBe('Pasture');
-    expect(tile.getTotalStatValue(['production'])).toBe(2);
+    expect(tile.getTotalStatValue(['food'])).toBe(3);
+    expect(tile.getTotalStatValue(['production'])).toBe(1);
   });
 
   it('farms wheat on plains and flood plains, turning it into improved wheat', () => {
