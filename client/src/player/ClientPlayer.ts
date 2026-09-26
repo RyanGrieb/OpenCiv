@@ -11,6 +11,7 @@ import { Numbers } from "../util/Numbers";
 import { Vector } from "../util/Vector";
 import { AbstractPlayer, PlayerData } from "./AbstractPlayer";
 import { CombatPreviewEvent, CombatPreviewWindow } from "../ui/hud/CombatPreviewWindow";
+import { RangedAiming, RangedTargetsEvent } from "./RangedAiming";
 
 export interface CurrentResearch {
   techName: string;
@@ -20,8 +21,9 @@ export interface CurrentResearch {
 }
 
 /**
- * Currently client player handles selected units, the hovered tile, and movement lines from selecting a unit.
- * ClientPlayer will handle in the future: Ranged Attacks
+ * Currently client player handles selected units, the hovered tile, movement lines from selecting a unit,
+ * and aiming attacks - melee by right-dragging onto an adjacent enemy, ranged the same way from further
+ * off or through the Ranged Attack action (see RangedAiming).
  */
 export class ClientPlayer extends AbstractPlayer {
   private selectedUnit: Unit;
@@ -30,6 +32,7 @@ export class ClientPlayer extends AbstractPlayer {
   private movementLines: Line[];
   private attackTarget: Tile | undefined;
   private combatPreviewWindow: CombatPreviewWindow | undefined;
+  private rangedAiming = new RangedAiming();
   private rightMouseDrag: boolean;
   private requestedNextTurn: boolean;
   private totalStats: Map<string, number> = new Map();
@@ -63,7 +66,9 @@ export class ClientPlayer extends AbstractPlayer {
 
         this.updateHoveredTile(mouseX, mouseY);
 
-        if (!this.selectedUnit || oldHoveredTile === this.hoveredTile.getRepresentedTile() || !this.rightMouseDrag) {
+        if (!this.selectedUnit || oldHoveredTile === this.hoveredTile.getRepresentedTile()) return;
+        if (!this.rightMouseDrag) {
+          this.updateAimedTarget();
           return;
         }
 
@@ -83,6 +88,8 @@ export class ClientPlayer extends AbstractPlayer {
         }
 
         if (this.previewAttack(this.hoveredTile.getRepresentedTile())) return;
+        // Aiming, a right-click only fires - it never moves the unit.
+        if (this.rangedAiming.isAiming()) return;
 
         // Draw movement lines to new target tile
         const { isQueuedMovement, targetTile } = this.drawMovementPath(
@@ -121,10 +128,7 @@ export class ClientPlayer extends AbstractPlayer {
 
         //right-click
         if (options.button === 2) {
-          this.rightMouseDrag = false;
-          if (clickedTile && this.selectedUnit) {
-            this.moveSelectedUnit(clickedTile);
-          }
+          this.onMouseRightRelease(clickedTile);
         }
       });
 
@@ -148,6 +152,7 @@ export class ClientPlayer extends AbstractPlayer {
 
         if (this.selectedUnit.getID() === data["id"]) {
           this.selectedUnit = undefined;
+          this.rangedAiming.clear();
           this.clearMovementPath();
 
           if (this.outlinedTile) {
@@ -158,6 +163,15 @@ export class ClientPlayer extends AbstractPlayer {
             this.outlinedTile = undefined;
           }
         }
+      }
+    });
+
+    NetworkEvents.on<RangedTargetsEvent>({
+      eventName: "rangedTargets",
+      parentObject: this,
+      callback: (data) => {
+        this.rangedAiming.setTargets(data);
+        this.updateAimedTarget();
       }
     });
 
@@ -188,6 +202,8 @@ export class ClientPlayer extends AbstractPlayer {
         }
 
         this.clearMovementPath();
+        // What it can shoot at depends on where it stands.
+        this.rangedAiming.request(this.selectedUnit);
 
         if ("queuedTiles" in data) {
           const movementPath: Tile[] = [this.selectedUnit.getTile()];
@@ -291,6 +307,7 @@ export class ClientPlayer extends AbstractPlayer {
     }
 
     this.selectedUnit = undefined;
+    this.rangedAiming.clear();
     this.clearMovementPath();
 
     if (this.outlinedTile) {
@@ -311,6 +328,7 @@ export class ClientPlayer extends AbstractPlayer {
 
     unit.select();
     this.selectedUnit = unit;
+    this.rangedAiming.request(unit);
 
     if (this.selectedUnit.hasMovementQueue()) {
       const { isQueuedMovement } = this.drawMovementPathFromTiles([unit.getTile(), ...unit.getQueuedMovementTiles()]);
@@ -323,6 +341,13 @@ export class ClientPlayer extends AbstractPlayer {
     // The click was meant for a notification, not the map beneath it.
     if (Game.getInstance().getCurrentSceneAs<InGameScene>().isOverNotifications(x, y)) return;
 
+    // Aiming with Ranged Attack, a left-click on a target fires, as in old_java.
+    if (this.rangedAiming.isAiming() && this.canAttack(clickedTile)) {
+      this.attackWithSelectedUnit(clickedTile);
+      this.unselectUnit();
+      return;
+    }
+
     if (clickedTile && clickedTile.getUnits().some((unit) => unit.getPlayer() === this)) {
       this.onClickedTileWithUnit(clickedTile);
       return;
@@ -330,7 +355,7 @@ export class ClientPlayer extends AbstractPlayer {
 
     // Left-clicking elsewhere with a unit selected is the classic first attempt at moving it. The
     // server decides whether it's early enough in the game to show the right-click tip.
-    if (this.selectedUnit) {
+    if (this.selectedUnit && !this.rangedAiming.isAiming()) {
       WebsocketClient.sendMessage({ event: "requestMoveUnitTip" });
     }
   }
@@ -351,6 +376,7 @@ export class ClientPlayer extends AbstractPlayer {
       }
       return;
     }
+    if (this.rangedAiming.isAiming()) return;
 
     const { isQueuedMovement, targetTile } = this.drawMovementPath(
       this.selectedUnit.getTile(),
@@ -372,10 +398,52 @@ export class ClientPlayer extends AbstractPlayer {
     }
   }
 
+  // Releasing a right-click moves the selected unit there, or attacks what's there. While aiming a
+  // ranged attack, a right-click anywhere that isn't a target stops aiming instead (old_java's Untarget).
+  private onMouseRightRelease(clickedTile: Tile | undefined) {
+    this.rightMouseDrag = false;
+    if (!clickedTile || !this.selectedUnit) return;
+
+    if (this.rangedAiming.isAiming() && !this.canAttack(clickedTile)) {
+      this.rangedAiming.stopAiming();
+      this.clearMovementPath();
+      this.removeOutlinedTile();
+      return;
+    }
+
+    this.moveSelectedUnit(clickedTile);
+  }
+
+  // While aiming a ranged attack, just hovering a target previews the shot - no drag needed.
+  private updateAimedTarget() {
+    if (!this.rangedAiming.isAiming()) return;
+
+    this.clearMovementPath();
+    this.removeOutlinedTile();
+
+    const tile = this.hoveredTile?.getRepresentedTile();
+    if (tile) this.previewAttack(tile);
+  }
+
+  private removeOutlinedTile() {
+    if (!this.outlinedTile) return;
+
+    GameMap.getInstance().removeOutline({ tile: this.outlinedTile, cityOutline: false });
+    this.outlinedTile = undefined;
+  }
+
+  // Melee units hit adjacent enemies; ranged units, anything the server listed in range and sight.
+  private canAttack(tile: Tile | undefined): boolean {
+    if (!this.selectedUnit || !tile) return false;
+    if (this.selectedUnit.isRanged()) return this.rangedAiming.canShoot(tile);
+
+    return this.selectedUnit.canMeleeAttack(tile);
+  }
+
   // Right-dragging onto an enemy the selected unit can hit shows a red line and target instead of a
   // path, and asks the server what the fight would look like (see the "combatPreview" listener).
   private previewAttack(tile: Tile): boolean {
-    if (!this.selectedUnit.canMeleeAttack(tile)) return false;
+    if (!this.canAttack(tile)) return false;
 
     this.clearMovementPath();
     GameMap.getInstance().drawUnitSelectionOutline(tile, "red");
@@ -422,7 +490,7 @@ export class ClientPlayer extends AbstractPlayer {
   }
 
   private moveSelectedUnit(targetTile: Tile) {
-    if (this.selectedUnit.canMeleeAttack(targetTile)) {
+    if (this.canAttack(targetTile)) {
       this.attackWithSelectedUnit(targetTile);
       this.unselectUnit();
       return;

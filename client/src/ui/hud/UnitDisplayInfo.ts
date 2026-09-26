@@ -24,6 +24,9 @@ const TEXT_X = 16;
 const BAR_MARGIN = 14;
 const BAR_HEIGHT = 26;
 const COMBAT_ICON_SIZE = 24;
+const COMBAT_ICON_GAP = 4;
+// Between one strength's icon and the next strength's label.
+const STRENGTH_SPACING = 10;
 
 export class UnitDisplayInfo extends ActorGroup {
   // CombatPreviewWindow stacks on top of this window.
@@ -163,36 +166,28 @@ export class UnitDisplayInfo extends ActorGroup {
     });
   }
 
-  // "Strength: 8" with the crossed swords after it, then old_java's health bar (red under green) across
-  // the window with e.g. "HP 63/100" on it, and an XP bar under that. XP isn't tracked yet, so it's empty.
+  // "Strength: 8" with the crossed swords after it (and for a ranged unit, "Ranged: 7" with a target),
+  // then old_java's health bar (red under green) across the window with e.g. "HP 63/100" on it, and an
+  // XP bar under that. XP isn't tracked yet, so it's empty.
   private updateCombatRows() {
-    const strengthLabel = new Label({
-      text: `Strength: ${this.unit.getCombatStrength()}`,
-      font: UITheme.FONT,
-      fontColor: "white"
-    });
-    const healthLabel = new Label({
-      text: `HP ${this.unit.getHealth()}/${Unit.MAX_HEALTH}`,
-      font: UITheme.FONT,
-      fontColor: "white"
-    });
-    const xpLabel = new Label({ text: "XP 0/10", font: UITheme.FONT, fontColor: "white" });
+    const strengths: { label: Label; icon: SpriteRegion }[] = [
+      { label: this.createLabel(`Strength: ${this.unit.getCombatStrength()}`), icon: SpriteRegion.ICON_COMBAT }
+    ];
+    if (this.unit.isRanged()) {
+      strengths.push({
+        label: this.createLabel(`Ranged: ${this.unit.getRangedStrength()}`),
+        icon: SpriteRegion.ICON_TARGET
+      });
+    }
+    const healthLabel = this.createLabel(`HP ${this.unit.getHealth()}/${Unit.MAX_HEALTH}`);
+    const xpLabel = this.createLabel("XP 0/10");
 
-    Promise.all([strengthLabel.conformSize(), healthLabel.conformSize(), xpLabel.conformSize()]).then(() => {
-      const strengthY = this.y + STRENGTH_Y + this.getExtraActionRowsHeight();
-      strengthLabel.setPosition(this.x + TEXT_X, strengthY);
+    const labels = [...strengths.map(({ label }) => label), healthLabel, xpLabel];
+    Promise.all(labels.map((label) => label.conformSize())).then(() => {
       const healthFraction = Math.max(0, Math.min(Unit.MAX_HEALTH, this.unit.getHealth())) / Unit.MAX_HEALTH;
 
       const actors: Actor[] = [
-        strengthLabel,
-        new Actor({
-          image: Game.getInstance().getImage(GameImage.SPRITESHEET),
-          spriteRegion: SpriteRegion.ICON_COMBAT,
-          x: this.x + TEXT_X + strengthLabel.getWidth() + 6,
-          y: strengthY + (strengthLabel.getHeight() - COMBAT_ICON_SIZE) / 2,
-          width: COMBAT_ICON_SIZE,
-          height: COMBAT_ICON_SIZE
-        }),
+        ...this.createStrengthRow(strengths),
         ...this.createBar(HEALTH_BAR_Y, "red", "limegreen", healthFraction, healthLabel),
         ...this.createBar(XP_BAR_Y, "rgb(50, 40, 70)", "mediumpurple", 0, xpLabel)
       ];
@@ -201,6 +196,36 @@ export class UnitDisplayInfo extends ActorGroup {
       for (const actor of actors) this.addActor(actor);
       this.combatActors = actors;
     });
+  }
+
+  // Each strength's label followed by its icon, left to right along the strength row.
+  private createStrengthRow(strengths: { label: Label; icon: SpriteRegion }[]) {
+    const y = this.y + STRENGTH_Y + this.getExtraActionRowsHeight();
+    const actors: Actor[] = [];
+    let x = this.x + TEXT_X;
+
+    for (const { label, icon } of strengths) {
+      label.setPosition(x, y);
+      x += label.getWidth() + COMBAT_ICON_GAP;
+      actors.push(
+        label,
+        new Actor({
+          image: Game.getInstance().getImage(GameImage.SPRITESHEET),
+          spriteRegion: icon,
+          x,
+          y: y + (label.getHeight() - COMBAT_ICON_SIZE) / 2,
+          width: COMBAT_ICON_SIZE,
+          height: COMBAT_ICON_SIZE
+        })
+      );
+      x += COMBAT_ICON_SIZE + STRENGTH_SPACING;
+    }
+
+    return actors;
+  }
+
+  private createLabel(text: string) {
+    return new Label({ text, font: UITheme.FONT, fontColor: "white" });
   }
 
   // A bar across the window, filled from the left to `fraction`, with a label centered on it.

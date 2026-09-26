@@ -9,10 +9,12 @@ import { Label } from "../components/Label";
 import { UnitDisplayInfo } from "./UnitDisplayInfo";
 import { UITheme } from "../UITheme";
 
-// Server "combatPreview" payload, from Unit.getMeleePreview(). Only sent when something on the target
-// tile can fight back - civilians are captured without a preview.
+// Server "combatPreview" payload, from Unit.getMeleePreview() or getRangedPreview(). Only sent when
+// something on the target tile can fight back - civilians are captured without a preview.
 export interface CombatPreviewEvent {
   attackerId: number;
+  // A ranged attack, where the attacker takes no damage.
+  ranged?: boolean;
   defenderId: number;
   targetX: number;
   targetY: number;
@@ -75,7 +77,8 @@ export class CombatPreviewWindow extends ActorGroup {
       })
     );
 
-    this.addCenteredLabel("Combat Preview", this.x + this.width / 2, this.y + 8, UITheme.FONT);
+    const title = preview.ranged ? "Ranged Attack" : "Combat Preview";
+    this.addCenteredLabel(title, this.x + this.width / 2, this.y + 8, UITheme.FONT);
 
     const rowCenterY = this.y + 62;
     const sideWidth = UNIT_SIZE + 6 + RING_RADIUS * 2;

@@ -137,6 +137,9 @@ export interface UnitCreationData {
   tileY: number;
   attackType: string;
   combatStrength: number;
+  // Both 0 unless this is a ranged unit.
+  rangedStrength: number;
+  range: number;
   health: number;
   fortified: boolean;
   isUtility: boolean;
@@ -172,13 +175,14 @@ export interface ClearMovementQueueEvent {
   id: number;
 }
 
-// A melee attack. The defender fields are absent when the attacker overran a tile of civilians.
+// A melee or ranged attack. The defender fields are absent when a melee attacker overran a tile of civilians.
 export interface UnitCombatEvent {
   attackerId: number;
   attackerHealth: number;
   attackerRemainingMovement: number;
   defenderId?: number;
   defenderHealth?: number;
+  ranged?: boolean;
 }
 
 export interface UnitHealthEvent {
@@ -204,6 +208,8 @@ export class Unit extends ActorGroup {
   private tile: Tile;
   private attackType: string;
   private combatStrength: number;
+  private rangedStrength: number;
+  private range: number;
   private health: number;
   private fortified: boolean;
   private utility: boolean;
@@ -255,6 +261,8 @@ export class Unit extends ActorGroup {
     this.id = unitJSON.id;
     this.attackType = unitJSON.attackType;
     this.combatStrength = unitJSON.combatStrength;
+    this.rangedStrength = unitJSON.rangedStrength ?? 0;
+    this.range = unitJSON.range ?? 0;
     this.health = unitJSON.health;
     this.fortified = unitJSON.fortified ?? false;
     this.utility = unitJSON.isUtility;
@@ -426,6 +434,18 @@ export class Unit extends ActorGroup {
     if (!this.tile.getAdjacentTiles().includes(targetTile)) return false;
 
     return targetTile.getUnits().some((unit) => unit.getPlayer() !== this.player);
+  }
+
+  public isRanged(): boolean {
+    return this.rangedStrength > 0;
+  }
+
+  public getRangedStrength(): number {
+    return this.rangedStrength;
+  }
+
+  public getRange(): number {
+    return this.range;
   }
 
   public canFight(): boolean {

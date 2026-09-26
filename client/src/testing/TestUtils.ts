@@ -85,7 +85,11 @@ export class TestUtils {
      * with `autoEndTurns` it also asks for every next turn straight away, so the turn moves on as soon
      * as Player1 ends theirs. Returns its socket so a scenario can act for it.
      */
-    public async startGameWithSecondPlayer(options: { autoEndTurns: boolean }): Promise<WebSocket> {
+    public async startGameWithSecondPlayer(options: {
+        autoEndTurns: boolean;
+        // Extra game options on top of the ones below, e.g. { startWithArcher: true }.
+        gameOptions?: Record<string, boolean>;
+    }): Promise<WebSocket> {
         WebsocketClient.init("localhost");
         await this.waitUntil(() => this.game.getCurrentScene().getName() === "lobby", 5000, "Scene to become lobby");
 
@@ -106,6 +110,11 @@ export class TestUtils {
         WebsocketClient.sendMessage({ event: "setGameOption", option: "spawnPlayersTogether", value: true });
         // Barbarian units would count as a second enemy, and wander into the fight.
         WebsocketClient.sendMessage({ event: "setGameOption", option: "allowBarbarians", value: false });
+        // Options stick on the server between games, so an earlier scenario's Archer is switched back off.
+        const gameOptions = { startWithArcher: false, ...options.gameOptions };
+        for (const [option, value] of Object.entries(gameOptions)) {
+            WebsocketClient.sendMessage({ event: "setGameOption", option, value });
+        }
         WebsocketClient.sendMessage({ event: "setState", state: "in_game" });
         await this.waitUntil(() => this.game.getCurrentScene().getName() === "in_game", 15000, "Scene to become in_game");
 

@@ -74,6 +74,7 @@ export const SPRITE_MANIFEST: SpriteManifestEntry[] = [
   { name: "ICON_SCIENCE", url: new URL("../../assets/sprites/icons/ICON_SCIENCE.png", import.meta.url).href },
   { name: "ICON_SETTLE", url: new URL("../../assets/sprites/icons/ICON_SETTLE.png", import.meta.url).href },
   { name: "ICON_STAR", url: new URL("../../assets/sprites/icons/ICON_STAR.png", import.meta.url).href },
+  { name: "ICON_TARGET", url: new URL("../../assets/sprites/icons/ICON_TARGET.png", import.meta.url).href },
   { name: "ICON_TRADE", url: new URL("../../assets/sprites/icons/ICON_TRADE.png", import.meta.url).href },
   { name: "ICON_UNKNOWN", url: new URL("../../assets/sprites/icons/ICON_UNKNOWN.png", import.meta.url).href },
   { name: "ICON_UP_ARROW", url: new URL("../../assets/sprites/icons/ICON_UP_ARROW.png", import.meta.url).href },
