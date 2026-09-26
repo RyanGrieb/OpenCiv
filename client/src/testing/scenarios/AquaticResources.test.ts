@@ -1,4 +1,5 @@
 import { TestRunner } from "../TestRunner";
+import { SpriteRegion } from "../../Assets";
 import { Game } from "../../Game";
 import { NetworkEvents, WebsocketClient } from "../../network/Client";
 import { Unit } from "../../Unit";
@@ -26,6 +27,7 @@ export function setupAquaticResourcesTest(game: Game) {
       .getUnits()
       .filter((unit) => unit.getName() === "Work Boat");
   const city = () => utils.getClientPlayer().getCities()[0];
+  const cityScreen = () => scene()["cityDisplayInfo"] as Record<string, any> | undefined;
   const resourceTile = (resource: string) =>
     settlerTile.getAdjacentTiles().find((tile) => tile?.getTileTypes().includes(resource));
 
@@ -170,6 +172,27 @@ export function setupAquaticResourcesTest(game: Game) {
         target.getUnits().length === 0
     });
   }
+
+  runner.addStep({
+    name: "The city's production list shows each ship's own sprite, not a question mark",
+    action: async () => {
+      scene().toggleCityUI(city());
+      await utils.waitUntil(() => !!cityScreen(), 3000, "City screen to open");
+      cityScreen()["openChooseProduction"]();
+      await utils.waitUntil(() => !!cityScreen()["chooseProductionListBox"], 3000, "Production list to show");
+      // Long enough to see the list before it closes.
+      await utils.delay(2000);
+    },
+    verification: () => {
+      const icon = (name: string) => cityScreen()["resolveProductionIcon"]({ type: "unit", name, cost: 0 });
+      const shown = [icon("Work Boat"), icon("Galley"), icon("Cargo Ship")];
+      scene().toggleCityUI();
+      return (
+        JSON.stringify(shown) ===
+        JSON.stringify([SpriteRegion.UNIT_WORK_BOAT, SpriteRegion.UNIT_GALLEY, SpriteRegion.UNIT_CARGO_SHIP])
+      );
+    }
+  });
 
   runner.addStep({
     name: "Build another Work Boat: it launches in the city or on the water beside it",

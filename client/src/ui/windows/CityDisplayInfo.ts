@@ -717,10 +717,10 @@ export class CityDisplayInfo extends ActorGroup {
     this.addActor(this.currentlyBuildingWindow);
   }
 
+  // e.g. UNIT_WORK_BOAT for the Work Boat - names with spaces need them as underscores.
   private resolveProductionIcon(option: ProductionQueueItem): SpriteRegion {
-    return (
-      resolveSpriteRegion(`${option.type.toUpperCase()}_${option.name.toUpperCase()}`) ?? SpriteRegion.ICON_UNKNOWN
-    );
+    const region = `${Strings.toConstantCase(option.type)}_${Strings.toConstantCase(option.name)}`;
+    return resolveSpriteRegion(region) ?? SpriteRegion.ICON_UNKNOWN;
   }
 
   private toggleChooseProduction() {
