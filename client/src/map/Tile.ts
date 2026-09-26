@@ -382,4 +382,13 @@ export class Tile extends Actor {
     const waterTileTypes = ["ocean", "shallow_ocean", "freshwater"];
     return this.tileTypes.some((type) => waterTileTypes.includes(type));
   }
+
+  // Mirrors server/src/map/Tile.ts's isCoastal() - keep both in sync.
+  public isCoastal(): boolean {
+    if (this.isWater()) return false;
+
+    return this.getAdjacentTiles().some(
+      (tile) => tile && (tile.tileTypes.includes("ocean") || tile.tileTypes.includes("shallow_ocean"))
+    );
+  }
 }

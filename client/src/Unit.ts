@@ -144,6 +144,8 @@ export interface UnitCreationData {
   fortified: boolean;
   isUtility: boolean;
   ignoresTerrainCost: boolean;
+  domain: "land" | "sea";
+  coastOnly: boolean;
   remainingMovement: number;
   defaultMoveDistance: number;
   player: string;
@@ -215,6 +217,8 @@ export class Unit extends ActorGroup {
   private fortified: boolean;
   private utility: boolean;
   private terrainCostIgnored: boolean;
+  private domain: "land" | "sea";
+  private coastOnly: boolean;
   private unitActor: Actor;
   // Drawn by hand in draw() rather than as a child, so it lands on top of the health bubble.
   private civIcon: Actor | undefined;
@@ -268,6 +272,8 @@ export class Unit extends ActorGroup {
     this.fortified = unitJSON.fortified ?? false;
     this.utility = unitJSON.isUtility;
     this.terrainCostIgnored = unitJSON.ignoresTerrainCost;
+    this.domain = unitJSON.domain ?? "land";
+    this.coastOnly = unitJSON.coastOnly ?? false;
     this.availableMovement = unitJSON.remainingMovement;
     this.defaultMoveDistance = unitJSON.defaultMoveDistance;
     this.player = AbstractPlayer.getPlayerByName(unitJSON.player);
@@ -476,12 +482,8 @@ export class Unit extends ActorGroup {
   }
 
   public getTileWeight(current: Tile, neighbor: Tile) {
-    //FIXME: Unit's should have land OR sea variable to distinguish
-    if (current.isWater()) {
-      return 9999;
-    }
-
     if (!neighbor) return current.getMovementCost();
+    if (!this.canEnter(neighbor)) return 9999;
 
     // Pathing may route through same-type allies; whether the goal itself is free is checked by the caller.
     if (neighbor.isImpassableFor(this)) {
@@ -493,6 +495,9 @@ export class Unit extends ActorGroup {
     if (neighbor.isBlockedFor(this) && Tile.getWeight(current, neighbor, this) >= this.getDefaultMoveDistance()) {
       return 9999;
     }
+
+    // Mirrors the server: open water costs a move a tile.
+    if (this.domain === "sea") return 1;
 
     return Tile.getWeight(current, neighbor, this);
   }
@@ -581,6 +586,20 @@ export class Unit extends ActorGroup {
 
   public ignoresTerrainCost(): boolean {
     return this.terrainCostIgnored;
+  }
+
+  public getDomain(): "land" | "sea" {
+    return this.domain;
+  }
+
+  // Mirrors server/src/unit/Unit.ts's canEnter() - keep both in sync.
+  public canEnter(tile: Tile): boolean {
+    if (this.domain === "land") return !tile.isWater();
+
+    const city = tile.getCity();
+    if (city) return city.getPlayer() === this.player && tile.isCoastal();
+
+    return tile.isWater() && !(this.coastOnly && tile.getTileTypes().includes("ocean"));
   }
 
   public getTile(): Tile {

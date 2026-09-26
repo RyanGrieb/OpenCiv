@@ -4,7 +4,7 @@ import { Player } from "../Player";
 import { GameMap } from "../map/GameMap";
 import { StatEntry, StatValues, Tile } from "../map/Tile";
 import { Combat, CombatModifier } from "../unit/Combat";
-import { Unit } from "../unit/Unit";
+import { Unit, UnitYMLTypeData } from "../unit/Unit";
 import { BorderGrowth } from "./BorderGrowth";
 import { Building } from "./Building";
 import { CityCombat } from "./CityCombat";
@@ -741,6 +741,10 @@ export class City {
     return this.nextBorderTile;
   }
 
+  public isCoastal(): boolean {
+    return this.tile.isCoastal();
+  }
+
   public getPlayer(): Player {
     return this.player;
   }
@@ -845,8 +849,11 @@ export class City {
   private getProductionOptions(): { units: ProductionOption[]; buildings: ProductionOption[] } {
     const isUnlocked = (requiredTech?: string) => !requiredTech || this.player.hasResearchedTech(requiredTech);
 
+    // Ships need a coast to be launched from.
+    const canLaunch = (unit: UnitYMLTypeData) => unit.domain !== "sea" || this.isCoastal();
+
     const units: ProductionOption[] = Unit.getAllUnitData()
-      .filter((unit) => typeof unit.cost === "number" && isUnlocked(unit.required_tech))
+      .filter((unit) => typeof unit.cost === "number" && isUnlocked(unit.required_tech) && canLaunch(unit))
       .map((unit) => ({ type: "unit", name: unit.name, cost: unit.cost }));
 
     const buildingExists = (name: string) => this.hasBuilding(name);
@@ -963,15 +970,17 @@ export class City {
     this.player.getNotifications().addMessage("ICON_PRODUCTION", `${this.name} has finished ${itemName}.`);
   }
 
-  // The city's own tile if the new unit can stack there, else the first free neighbor it could walk on.
+  // The city's own tile if the new unit can stack there, else the first free neighbor it could move
+  // onto: land for land units, water for ships.
   private getUnitSpawnTile(unitName: string): Tile | undefined {
     const unitData = Unit.getAllUnitData().find((data) => data.name.toLowerCase() === unitName.toLowerCase());
     const isUtility = unitData?.is_utility ?? false;
 
-    const candidates = [
-      this.tile,
-      ...this.tile.getAdjacentTiles().filter((tile) => tile && !tile.isWater() && tile.getMovementCost() < 9999)
-    ];
+    const canStandOn = (tile: Tile) => {
+      if (unitData?.domain === "sea") return Unit.canSailOnto(tile, unitData.coast_only ?? false);
+      return !tile.isWater() && tile.getMovementCost() < 9999;
+    };
+    const candidates = [this.tile, ...this.tile.getAdjacentTiles().filter((tile) => tile && canStandOn(tile))];
 
     return candidates.find((tile) => tile.canPlaceUnit(this.player, isUtility));
   }

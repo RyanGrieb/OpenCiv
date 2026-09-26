@@ -394,6 +394,9 @@ export class GameMap {
       return [];
     }
 
+    // Mirrors the server: A* still finds an expensive "path" across water for a land unit, or land for a ship.
+    if (totalPath.slice(1).some((tile) => !unit.canEnter(tile))) return [];
+
     // A blocked tile can't be entered, and blocked routes are no longer queued, so the goal is
     // simply unreachable. Occupancy isn't reflected in movementCost above (that would treat the
     // unit's own tile as self-blocking), so it has to be checked separately here: tiles along the

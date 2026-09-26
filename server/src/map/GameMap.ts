@@ -1370,6 +1370,9 @@ export class GameMap {
       return [];
     }
 
+    // A* still finds a "path" across water for a land unit (or land for a ship), just an expensive one.
+    if (totalPath.slice(1).some((tile) => !unit.canEnter(tile))) return [];
+
     return totalPath;
   }
 }

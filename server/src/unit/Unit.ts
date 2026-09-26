@@ -33,10 +33,15 @@ export interface UnitOptions {
   sightRange?: number;
   isUtility?: boolean;
   ignoresTerrainCost?: boolean;
+  domain?: UnitDomain;
+  coastOnly?: boolean;
   // Movement to start with, when not a full turn's worth (e.g. a unit that was just captured).
   availableMovement?: number;
   actions: UnitAction[];
 }
+
+// Where a unit can go: land units walk, sea units sail.
+export type UnitDomain = "land" | "sea";
 
 export interface UnitYMLTypeData {
   name: string;
@@ -54,6 +59,10 @@ export interface UnitYMLTypeData {
   sight_range?: number;
   is_utility?: boolean;
   ignores_terrain_cost?: boolean;
+  // "sea" for ships, which only move on water and into their owner's coastal cities. Absent means land.
+  domain?: UnitDomain;
+  // A sea unit that can't enter deep ocean, like Civ 5's Trireme.
+  coast_only?: boolean;
   // Absent for units never offered through a city's production queue (e.g. the
   // Settler, which is only ever granted directly at game start).
   cost?: number;
@@ -82,6 +91,8 @@ export class Unit {
   private sightRange: number;
   private utility: boolean;
   private terrainCostIgnored: boolean;
+  private domain: UnitDomain;
+  private coastOnly: boolean;
   private tile: Tile;
   private queuedMovementTiles: Tile[];
   // The improvement a Builder is working on where it stands. Moving away stops the work.
@@ -107,6 +118,8 @@ export class Unit {
     this.sightRange = options.sightRange ?? PlayerVisibility.DEFAULT_UNIT_SIGHT_RANGE;
     this.utility = options.isUtility || false;
     this.terrainCostIgnored = options.ignoresTerrainCost || false;
+    this.domain = options.domain ?? "land";
+    this.coastOnly = options.coastOnly ?? false;
     this.actions = options.actions || [];
     this.queuedMovementTiles = [];
 
@@ -257,6 +270,8 @@ export class Unit {
       sightRange: data.sight_range,
       isUtility: data.is_utility,
       ignoresTerrainCost: data.ignores_terrain_cost,
+      domain: data.domain,
+      coastOnly: data.coast_only,
       availableMovement: options?.availableMovement,
       actions: UnitActions.forUnitType(data)
     });
@@ -272,6 +287,11 @@ export class Unit {
   // leaves a sliver after three road steps and the unit could keep going.
   public static spendMovement(movement: number, cost: number): number {
     return Math.max(0, Math.round((movement - cost) * 3) / 3);
+  }
+
+  // Open water a ship can move onto. Coast-only ships (see coast_only in units.yml) keep off deep ocean.
+  public static canSailOnto(tile: Tile, coastOnly: boolean): boolean {
+    return tile.isWater() && !(coastOnly && tile.containsTileType("ocean"));
   }
 
   private static getUnitYMLTypeDataByName(name: string): UnitYMLTypeData | undefined {
@@ -873,6 +893,21 @@ export class Unit {
     return this.terrainCostIgnored;
   }
 
+  public getDomain(): UnitDomain {
+    return this.domain;
+  }
+
+  // Whether this unit could ever stand on the tile, whatever is on it. Land units stay off water;
+  // sea units stay on it, apart from their owner's coastal cities. Mirrored by the client's Unit.canEnter().
+  public canEnter(tile: Tile): boolean {
+    if (this.domain === "land") return !tile.isWater();
+
+    const city = tile.getCity();
+    if (city) return city.getPlayer() === this.player && tile.isCoastal();
+
+    return Unit.canSailOnto(tile, this.coastOnly);
+  }
+
   // Anyone other than the owner gets a redacted unit: no movement queue (that would give away
   // where it's headed) and no actions (those only ever drive the owner's own UI).
   public asJSON(options?: { observer?: Player }) {
@@ -899,6 +934,8 @@ export class Unit {
       ...(ownUnit ? this.getBuildStatusJSON() : {}),
       isUtility: this.utility,
       ignoresTerrainCost: this.terrainCostIgnored,
+      domain: this.domain,
+      coastOnly: this.coastOnly,
       id: this.id,
       actions: ownUnit ? this.getUnitActionsJSON() : [],
       queuedTiles: queuedTilesJSON,
@@ -928,12 +965,8 @@ export class Unit {
   }
 
   public getTileWeight(current: Tile, neighbor: Tile) {
-    //FIXME: Unit's should have land OR sea variable to distinguish
-    if (current.isWater()) {
-      return 9999;
-    }
-
     if (!neighbor) return current.getMovementCost();
+    if (!this.canEnter(neighbor)) return 9999;
 
     // Pathing may route through same-type allies; whether the goal itself is free is checked by the caller.
     if (neighbor.isImpassableFor(this)) {
@@ -945,6 +978,9 @@ export class Unit {
     if (neighbor.isBlockedFor(this) && Tile.getWeight(current, neighbor, this) >= this.defaultMoveDistance) {
       return 9999;
     }
+
+    // Open water costs a move a tile - hills, forests and rivers are for land units.
+    if (this.domain === "sea") return 1;
 
     return Tile.getWeight(current, neighbor, this);
   }

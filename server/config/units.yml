@@ -5,6 +5,8 @@
 # combat_strength is still what it defends with, and it can't melee attack.
 # captured_as is what a civilian becomes when an enemy melee unit takes its tile (Civ 5 turns a
 # captured Settler into a Worker, which is our Builder). Civilians without it are destroyed instead.
+# domain: sea marks a ship: it only moves on water (and into its owner's coastal cities), and only
+# coastal cities can build it. coast_only keeps a ship off deep ocean, like Civ 5's Trireme.
 units:
   - name: Warrior
     combat_strength: 8
@@ -37,15 +39,19 @@ units:
     required_tech: Animal Husbandry
   - name: Cargo Ship
     is_utility: true
+    domain: sea
     cost: 100
     required_tech: Sailing
   - name: Work Boat
     is_utility: true
+    domain: sea
     cost: 30
     required_tech: Sailing
   - name: Galley
     combat_strength: 10
     attack_type: naval
+    domain: sea
+    coast_only: true
     cost: 45
     required_tech: Sailing
   - name: Spearman

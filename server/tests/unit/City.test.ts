@@ -133,6 +133,46 @@ describe('City', () => {
     );
   });
 
+  describe('ships', () => {
+    const shipOptions = () => {
+      triggerServerEvent('requestProductionOptions', { cityName: 'TestCity' }, {} as WebSocket);
+      return (mockPlayer.sendNetworkEvent as jest.Mock).mock.calls[0][0].units.map((option: { name: string }) => option.name);
+    };
+
+    beforeEach(() => {
+      (Unit.getAllUnitData as jest.Mock).mockReturnValue([
+        { name: 'Warrior', attack_type: 'melee', cost: 30 },
+        { name: 'Work Boat', is_utility: true, domain: 'sea', cost: 30 },
+      ]);
+    });
+
+    it('are only offered in a coastal city', () => {
+      (mockTile as any).isCoastal = jest.fn().mockReturnValue(false);
+      expect(shipOptions()).toEqual(['Warrior']);
+
+      mockPlayer.sendNetworkEvent.mockClear();
+      (mockTile as any).isCoastal = jest.fn().mockReturnValue(true);
+      expect(shipOptions()).toEqual(['Warrior', 'Work Boat']);
+    });
+
+    it('are launched onto water beside the city when the city tile is taken', () => {
+      const land = { isWater: () => false, getMovementCost: () => 1, canPlaceUnit: () => true, addUnit: jest.fn(), getCityTerritoryOf: () => ({}), getAdjacentTiles: (): Tile[] => [] };
+      const water = { ...land, isWater: () => true, addUnit: jest.fn() };
+      mockTile.getAdjacentTiles.mockReturnValue([land, water] as unknown as Tile[]);
+      mockTile.canPlaceUnit.mockReturnValue(false);
+      mockTile.getStats.mockReturnValue([{ production: 30 }]);
+      (Unit.canSailOnto as jest.Mock).mockImplementation((tile: Tile) => tile.isWater());
+      (Unit.createFromName as jest.Mock).mockReturnValue({} as Unit);
+      city['productionQueue'].push({ type: 'unit', name: 'Work Boat', cost: 30, progress: 0 });
+
+      triggerServerEvent('nextTurn', { turn: 2 });
+
+      expect(Unit.createFromName).toHaveBeenCalledWith('Work Boat', water, mockPlayer);
+      expect(water.addUnit).toHaveBeenCalled();
+      expect(land.addUnit).not.toHaveBeenCalled();
+    });
+  });
+
   it('ignores a production-options request for a city it does not own', () => {
     const mockWebsocket = {} as WebSocket;
 

@@ -801,6 +801,14 @@ export class Tile {
     return this.containsTileTypes(["ocean", "shallow_ocean", "freshwater"]);
   }
 
+  // Land beside the sea, where a city can build ships and let them in. A lake doesn't count, since
+  // nothing built there could sail anywhere. Mirrored by the client's Tile.isCoastal().
+  public isCoastal(): boolean {
+    if (this.isWater()) return false;
+
+    return this.adjacentTiles.some((tile) => tile?.containsTileTypes(["ocean", "shallow_ocean"]));
+  }
+
   /**
    * How high something standing on this tile sits, in Civ 5's sight tiers - flat ground and water
    * at 0, hills at 1, mountains at 2. Forest and jungle deliberately don't count: standing among
