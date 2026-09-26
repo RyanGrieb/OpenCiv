@@ -16,6 +16,9 @@ export class Game {
   private states: Map<string, State>;
   private players: Map<string, Player>;
   private gameOptions: GameOptions;
+  // The map preset the server was started with. A preset a scenario picks in the lobby only lasts
+  // one game, so the next scenario run against this server doesn't inherit its map.
+  private startupMapPreset: string;
 
   private constructor(optionOverrides: Partial<GameOptions>) {
     this.states = new Map<string, State>();
@@ -29,6 +32,7 @@ export class Game {
     this.gameOptions.mapWidth = optionOverrides.mapWidth ?? this.gameOptions.mapWidth;
     this.gameOptions.mapHeight = optionOverrides.mapHeight ?? this.gameOptions.mapHeight;
     MapSizes.syncPreset(this.gameOptions);
+    this.startupMapPreset = this.gameOptions.mapPreset;
 
     // Set up the listener for the "setState" event. Changes the game-state.
     ServerEvents.on({
@@ -148,6 +152,7 @@ export class Game {
 
     if (this.currentState != null) {
       this.currentState.onDestroyed();
+      if (stateName === "lobby") this.gameOptions.mapPreset = this.startupMapPreset;
     }
 
     this.currentState = newState;

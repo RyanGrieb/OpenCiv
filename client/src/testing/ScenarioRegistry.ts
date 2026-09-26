@@ -96,3 +96,13 @@ ScenarioRegistry.register("BorderExpansion", async () => {
     const module = await import("./scenarios/BorderExpansion.test");
     return module.setupBorderExpansionTest;
 });
+
+ScenarioRegistry.register("AquaticResources", async () => {
+    const module = await import("./scenarios/AquaticResources.test");
+    return module.setupAquaticResourcesTest;
+});
+
+ScenarioRegistry.register("AquaticSandbox", async () => {
+    const module = await import("./scenarios/AquaticSandbox.test");
+    return module.setupAquaticSandboxTest;
+});
