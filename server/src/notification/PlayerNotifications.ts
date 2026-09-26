@@ -13,8 +13,9 @@ export enum NotificationPriority {
 
 // What the client does when the notification is clicked: open the research tree, open a city
 // needing production, select a unit needing orders, or dismiss a one-off message.
-// A "cityStrike" click starts aiming a city that has an enemy in range.
-export type NotificationType = "research" | "production" | "unitOrders" | "cityStrike" | "message";
+// A "cityStrike" click starts aiming a city that has an enemy in range, and a "diplomacy" click
+// opens the diplomacy window.
+export type NotificationType = "research" | "production" | "unitOrders" | "cityStrike" | "diplomacy" | "message";
 
 export interface NotificationData {
   id: string;
@@ -180,6 +181,7 @@ export class PlayerNotifications {
       this.getResearchNotification(),
       this.getProductionNotification(),
       this.getCityStrikeNotification(),
+      this.getPeaceOfferNotification(),
       this.getUnitOrdersNotification()
     ];
     const notifications = [...derived.filter((notification) => notification), ...this.messages.map((message) => message.data)];
@@ -230,6 +232,23 @@ export class PlayerNotifications {
       text: "A city can attack an enemy unit.",
       priority: NotificationPriority.MEDIUM,
       cityNames: readyCities.map((city) => city.getName())
+    };
+  }
+
+  // Stays up until the offer is answered in the diplomacy window, rather than going with the turn.
+  private getPeaceOfferNotification(): NotificationData | undefined {
+    const offers = this.player
+      .getDiplomacy()
+      .toJSON()
+      .filter((relation) => relation.peaceOfferedToUs);
+    if (offers.length < 1) return undefined;
+
+    return {
+      id: "peaceOffer",
+      type: "diplomacy",
+      icon: "ICON_DIPLOMACY",
+      text: `${offers.map((relation) => relation.civName).join(", ")} ${offers.length > 1 ? "offer" : "offers"} you peace.`,
+      priority: NotificationPriority.HIGH
     };
   }
 

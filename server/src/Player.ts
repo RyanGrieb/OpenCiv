@@ -2,6 +2,7 @@ import { WebSocket } from "ws";
 import { ServerEvents } from "./Events";
 import { Game } from "./Game";
 import { City } from "./city/City";
+import { PlayerDiplomacy } from "./diplomacy/PlayerDiplomacy";
 import { PlayerVisibility } from "./map/PlayerVisibility";
 import { PlayerNotifications } from "./notification/PlayerNotifications";
 import { Technology } from "./research/Technology";
@@ -52,6 +53,7 @@ export class Player {
   private researchedTechs: Set<string>;
   private visibility: PlayerVisibility;
   private notifications: PlayerNotifications;
+  private diplomacy: PlayerDiplomacy;
 
   /**
    * Creates a new player object.
@@ -70,6 +72,7 @@ export class Player {
     this.researchedTechs = new Set();
     this.visibility = new PlayerVisibility(this);
     this.notifications = new PlayerNotifications(this);
+    this.diplomacy = new PlayerDiplomacy(this);
 
     // Add event listener for when the player disconnects
     this.wsConnection?.on("close", (data) => {
@@ -118,6 +121,7 @@ export class Player {
       callback: () => {
         this.accumulateTurnStats();
         this.accumulateResearch();
+        this.diplomacy.passTurn();
       },
       globalEvent: true
     });
@@ -280,6 +284,16 @@ export class Player {
     return this.civilizationData?.["name"];
   }
 
+  // A SpriteRegion key on the client, e.g. ICON_ROME.
+  public getCivIconName(): string {
+    return this.civilizationData?.["icon_name"] ?? "ICON_UNKNOWN";
+  }
+
+  // Only set on the barbarians (config/barbarians.yml), which the server plays itself.
+  public isBarbarian(): boolean {
+    return this.civilizationData?.["barbarian"] === true;
+  }
+
   /**
    * Checks for exsting city names, and returns the next available city name.
    */
@@ -424,6 +438,11 @@ export class Player {
 
   public getNotifications() {
     return this.notifications;
+  }
+
+  /** Who this player has met, and who they're at war with. */
+  public getDiplomacy() {
+    return this.diplomacy;
   }
 
   /** This player's fog of war - what they've discovered, and what they can see right now. */

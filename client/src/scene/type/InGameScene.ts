@@ -15,6 +15,8 @@ import { Label } from "../../ui/components/Label";
 import { NotificationPanel } from "../../ui/hud/NotificationPanel";
 import { ResearchDisplayInfo } from "../../ui/hud/ResearchDisplayInfo";
 import { ResearchTreeWindow } from "../../ui/windows/ResearchTreeWindow";
+import { DiplomacyWindow } from "../../ui/windows/DiplomacyWindow";
+import { DeclareWarWindow } from "../../ui/windows/DeclareWarWindow";
 import { StatusBar } from "../../ui/hud/StatusBar";
 import { UITheme } from "../../ui/UITheme";
 import { Actor } from "../Actor";
@@ -39,6 +41,9 @@ export class InGameScene extends Scene {
   private notifications: Notifications;
   private notificationPanel: NotificationPanel;
   private researchTreeWindow: ResearchTreeWindow;
+  private diplomacyButton: Button;
+  private diplomacyWindow: DiplomacyWindow;
+  private declareWarWindow: DeclareWarWindow;
   private cityDisplayInfo: CityDisplayInfo;
   private nextTurnButton: Button;
   private closeCityDisplayButton: Button;
@@ -242,6 +247,7 @@ export class InGameScene extends Scene {
     this.removeActor(this.tileInformationLabel);
     this.removeActor(this.statusBar);
     this.removeActor(this.researchDisplayInfo);
+    this.removeActor(this.diplomacyButton);
     this.removeActor(this.notificationPanel);
     this.removeActor(this.nextTurnButton);
     this.removeActor(this.closeCityDisplayButton);
@@ -280,6 +286,21 @@ export class InGameScene extends Scene {
 
     this.researchDisplayInfo = new ResearchDisplayInfo();
     this.addActor(this.researchDisplayInfo);
+
+    // Under the research box, like old_java's diplomacy button beside the chat and religion ones.
+    this.diplomacyButton = new Button({
+      buttonImage: GameImage.ICON_BUTTON,
+      buttonHoveredImage: GameImage.ICON_BUTTON_HOVERED,
+      icon: SpriteRegion.ICON_DIPLOMACY,
+      iconWidth: UITheme.ICON_SIZE,
+      iconHeight: UITheme.ICON_SIZE,
+      size: ButtonSize.ICON_LARGE,
+      x: this.researchDisplayInfo.getX(),
+      y: this.researchDisplayInfo.getY() + this.researchDisplayInfo.getHeight() + 10,
+      z: 5,
+      onClicked: () => this.toggleDiplomacyUI()
+    });
+    this.addActor(this.diplomacyButton);
 
     this.notificationPanel = new NotificationPanel(this.notifications);
     this.addActor(this.notificationPanel);
@@ -389,6 +410,65 @@ export class InGameScene extends Scene {
     }
   }
 
+  public getDiplomacyWindow(): DiplomacyWindow | undefined {
+    return this.diplomacyWindow;
+  }
+
+  public getDeclareWarWindow(): DeclareWarWindow | undefined {
+    return this.declareWarWindow;
+  }
+
+  public toggleDiplomacyUI() {
+    if (this.diplomacyWindow) {
+      this.closeDiplomacyUI();
+      return;
+    }
+    if (this.openUIElement) return;
+
+    this.diplomacyWindow = this.createDiplomacyWindow();
+    this.addActor(this.diplomacyWindow);
+    this.setUIState(true);
+    this.openUIElement = { close: () => this.closeDiplomacyUI() };
+  }
+
+  /**
+   * Asks whether to declare war on `target`. Opened from the diplomacy window, it takes that window's
+   * place until answered - clicks aren't occluded by z-order, so its buttons would otherwise still
+   * fire underneath - then a fresh one comes back (removing an actor destroys it), and Escape with it.
+   */
+  public openDeclareWarPrompt(target: AbstractPlayer) {
+    if (this.declareWarWindow) return;
+
+    const underneath = this.openUIElement;
+    if (!underneath) this.setUIState(true);
+    if (this.diplomacyWindow) this.removeActor(this.diplomacyWindow);
+
+    const close = () => {
+      this.removeActor(this.declareWarWindow);
+      this.declareWarWindow = undefined;
+      this.openUIElement = underneath;
+      if (this.diplomacyWindow) this.addActor((this.diplomacyWindow = this.createDiplomacyWindow()));
+      if (!underneath) this.setUIState(false);
+    };
+
+    this.declareWarWindow = new DeclareWarWindow({ attacker: this.clientPlayer, target, onClose: close });
+    this.addActor(this.declareWarWindow);
+    this.openUIElement = { close };
+  }
+
+  private createDiplomacyWindow(): DiplomacyWindow {
+    return new DiplomacyWindow({ onClose: () => this.closeDiplomacyUI() });
+  }
+
+  private closeDiplomacyUI() {
+    if (this.declareWarWindow) this.openUIElement.close();
+
+    this.removeActor(this.diplomacyWindow);
+    this.diplomacyWindow = undefined;
+    this.setUIState(false);
+    this.openUIElement = undefined;
+  }
+
   private setUIState(isOpen: boolean) {
     this.getCamera().lock(isOpen);
     this.call("uiStateChanged", { opened: isOpen });
@@ -430,6 +510,7 @@ export class InGameScene extends Scene {
     this.removeActor(this.nextTurnButton);
     this.removeActor(this.tileInformationLabel);
     this.removeActor(this.researchDisplayInfo);
+    this.removeActor(this.diplomacyButton);
     this.removeActor(this.notificationPanel);
 
     this.addActor(this.closeCityDisplayButton);
@@ -444,6 +525,7 @@ export class InGameScene extends Scene {
     this.addActor(this.nextTurnButton);
     this.addActor(this.tileInformationLabel);
     this.addActor(this.researchDisplayInfo);
+    this.addActor(this.diplomacyButton);
     this.addActor(this.notificationPanel);
 
     this.removeActor(this.closeCityDisplayButton);
@@ -461,6 +543,7 @@ export class InGameScene extends Scene {
     this.removeActor(this.nextTurnButton);
     this.removeActor(this.tileInformationLabel);
     this.removeActor(this.researchDisplayInfo);
+    this.removeActor(this.diplomacyButton);
     this.removeActor(this.notificationPanel);
   }
 
@@ -474,6 +557,7 @@ export class InGameScene extends Scene {
     this.addActor(this.nextTurnButton);
     this.addActor(this.tileInformationLabel);
     this.addActor(this.researchDisplayInfo);
+    this.addActor(this.diplomacyButton);
     this.addActor(this.notificationPanel);
   }
 

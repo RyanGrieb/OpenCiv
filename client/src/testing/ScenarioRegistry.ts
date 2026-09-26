@@ -10,6 +10,7 @@ export enum ScenarioCategory {
     CITIES = "Cities",
     UNITS = "Units",
     COMBAT = "Combat",
+    DIPLOMACY = "Diplomacy",
     NAVAL = "Naval",
     MAP = "Map",
     RESEARCH = "Research",
@@ -167,4 +168,9 @@ ScenarioRegistry.register("NaturalWonders", ScenarioCategory.MAP, async () => {
 ScenarioRegistry.register("SoftFogOfWar", ScenarioCategory.MAP, async () => {
     const module = await import("./scenarios/SoftFogOfWar.test");
     return module.setupSoftFogOfWarTest;
+});
+
+ScenarioRegistry.register("Diplomacy", ScenarioCategory.DIPLOMACY, async () => {
+    const module = await import("./scenarios/Diplomacy.test");
+    return module.setupDiplomacyTest;
 });

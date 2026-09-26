@@ -13,6 +13,7 @@ import { NaturalWonders } from "../../map/NaturalWonders";
 import { Barbarians } from "../../barbarian/Barbarians";
 import { Player } from "../../Player";
 import { PlayerNotifications } from "../../notification/PlayerNotifications";
+import { PlayerDiplomacy } from "../../diplomacy/PlayerDiplomacy";
 
 export class InGameState extends State {
   private turnTimeJob: Job;
@@ -204,6 +205,10 @@ export class InGameState extends State {
 
         player.sendNetworkEvent({ event: "setScene", scene: "in_game" });
       });
+
+    if (Game.getInstance().getGameOptions().startAtWar) {
+      PlayerDiplomacy.declareWarAmongAll(Array.from(Game.getInstance().getPlayers().values()));
+    }
 
     // After every civ has its starting units, so the ruins and first camps keep their distance from
     // them. Ruins go first so camps can avoid them. Clients only ask for the map and the players list

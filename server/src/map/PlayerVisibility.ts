@@ -50,7 +50,7 @@ export class PlayerVisibility {
   }
 
   /**
-   * Recomputes sight from scratch, then tells the client only what changed: tile data for
+   * Recomputes sight from scratch, meets any civilization now in sight, then tells the client only what changed: tile data for
    * everything newly in sight (which is how another civ's units arrive), and a "fogTiles" packet
    * for tiles that fell back into fog.
    *
@@ -58,14 +58,18 @@ export class PlayerVisibility {
    * deleted, or a city founded.
    */
   public update() {
-    // Everything was already sent with the initial map, and nothing ever fogs.
-    if (PlayerVisibility.mapRevealed()) return;
-
     // Nobody to tell - a player the server runs itself (the barbarians) has no fog to keep up.
     if (!this.player.hasClient()) return;
 
+    // Meeting another civilization goes by what's actually in sight, even with the map revealed.
+    const inSight = this.computeVisibleTiles();
+    this.player.getDiplomacy().meetPlayersOn(inSight);
+
+    // Everything was already sent with the initial map, and nothing ever fogs.
+    if (PlayerVisibility.mapRevealed()) return;
+
     const previouslyVisible = this.visible;
-    this.visible = this.computeVisibleTiles();
+    this.visible = inSight;
 
     const revealed: Tile[] = [];
     for (const tile of this.visible) {

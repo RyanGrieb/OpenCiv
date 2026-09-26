@@ -268,6 +268,7 @@ describe('PlayerVisibility', () => {
       getUnits: jest.fn().mockReturnValue([mockUnit]),
       getCities: jest.fn().mockReturnValue([]),
       hasClient: jest.fn().mockReturnValue(true),
+      getDiplomacy: () => ({ meetPlayersOn: jest.fn() }),
     } as unknown as jest.Mocked<Player>;
 
     sendTilesToPlayer = jest.fn();

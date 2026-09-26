@@ -4,6 +4,7 @@ import { GameMap } from "./map/GameMap";
 import { Tile } from "./map/Tile";
 import { NetworkEvents } from "./network/Client";
 import { AbstractPlayer } from "./player/AbstractPlayer";
+import { Diplomacy } from "./player/Diplomacy";
 import { Actor } from "./scene/Actor";
 import { ActorGroup } from "./scene/ActorGroup";
 import { UnitDisplayInfo } from "./ui/hud/UnitDisplayInfo";
@@ -433,16 +434,19 @@ export class Unit extends ActorGroup {
     return Math.max(0, Math.round((movement - cost) * 3) / 3);
   }
 
-  // Mirrors server/src/unit/Unit.ts's canMeleeAttack() - keep both in sync. Every other
-  // civilization counts as an enemy, since there's no diplomacy yet.
-  public canMeleeAttack(targetTile: Tile): boolean {
+  // Mirrors server/src/unit/Unit.ts's canMeleeAttack() - keep both in sync. Only civilizations at
+  // war are enemies (see Diplomacy). `ignoreDiplomacy` asks whether the attack would be possible if
+  // they were, for the Declare War prompt.
+  public canMeleeAttack(targetTile: Tile, options?: { ignoreDiplomacy: boolean }): boolean {
     if (this.attackType !== "melee" || !this.canFight() || this.availableMovement <= 0) return false;
     if (this.tile.isWater() || targetTile.isWater()) return false;
     if (!this.tile.getAdjacentTiles().includes(targetTile)) return false;
 
+    const isTarget = (player: AbstractPlayer) =>
+      options?.ignoreDiplomacy ? player !== this.player : Diplomacy.areAtWar(this.player, player);
     const city = targetTile.getCity();
-    if (city && city.getPlayer() !== this.player) return true;
-    return targetTile.getUnits().some((unit) => unit.getPlayer() !== this.player);
+    if (city && isTarget(city.getPlayer())) return true;
+    return targetTile.getUnits().some((unit) => isTarget(unit.getPlayer()));
   }
 
   public isRanged(): boolean {

@@ -8,6 +8,7 @@ import { Unit, UnitYMLTypeData } from "../unit/Unit";
 import { BorderGrowth } from "./BorderGrowth";
 import { Building } from "./Building";
 import { CityCombat } from "./CityCombat";
+import { PlayerDiplomacy } from "../diplomacy/PlayerDiplomacy";
 
 export interface CityStats extends StatValues {
   population: number;
@@ -112,6 +113,7 @@ export class City {
     this.tile.setCity(this);
 
     this.updateWorkedTiles({ sendStatUpdate: true });
+    PlayerDiplomacy.expelTrespassers(this.territory);
 
     ServerEvents.on({
       eventName: "requestCityStats",
@@ -701,6 +703,8 @@ export class City {
     previousOwner.getVisibility().update();
     newOwner.getVisibility().update();
     this.sendCaptured();
+    // Anyone at peace with the new owner has no business inside these borders any more.
+    PlayerDiplomacy.expelTrespassers(this.territory);
     // The new owner's client only knows of buildings finished while it owned the city.
     this.buildings.forEach((building) =>
       newOwner.sendNetworkEvent({ event: "addBuilding", cityName: this.name, building: building.toJSON() })
@@ -804,7 +808,7 @@ export class City {
   }
 
   private getStrikeTarget(tile: Tile): Unit | undefined {
-    return tile.getUnits().find((unit) => unit.getPlayer() !== this.player && unit.canFight());
+    return tile.getUnits().find((unit) => PlayerDiplomacy.areAtWar(this.player, unit.getPlayer()) && unit.canFight());
   }
 
   private heal() {
@@ -957,6 +961,7 @@ export class City {
     this.updateWorkedTiles({ sendStatUpdate: false });
     // A Settler standing here, of any civilization, may no longer be able to settle.
     tile.getUnits().forEach((unit) => unit.sendActionsToOwner());
+    PlayerDiplomacy.expelTrespassers([tile]);
   }
 
   // The part of the territory citizens can work: borders reach 5 rings out, citizens only 3.

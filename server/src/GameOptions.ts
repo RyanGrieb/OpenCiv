@@ -27,6 +27,9 @@ export interface GameOptions {
   // Name of a hand-drawn patch of map in config/map_presets.yml, stamped around the first player's
   // spawn so a scenario gets the same terrain every run (see MapPresets). Empty for a normal map.
   mapPreset: string;
+  // Every civilization starts out having met and being at war with every other, as it was before
+  // diplomacy existed. For the combat scenarios; real games start at peace (see PlayerDiplomacy).
+  startAtWar: boolean;
 }
 
 // Maps are streamed to clients in square chunks of this many tiles, so each dimension must divide evenly.
@@ -79,7 +82,8 @@ export const DefaultGameOptions: GameOptions = {
   startWithBuilder: false,
   startWithArcher: false,
   cityStartingHealth: 200,
-  mapPreset: ""
+  mapPreset: "",
+  startAtWar: false
 };
 
 interface BaseGameOptionDefinition {

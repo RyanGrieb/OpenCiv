@@ -5,6 +5,8 @@ import { GameMap } from "../map/GameMap";
 import { Tile } from "../map/Tile";
 import { WebsocketClient } from "../network/Client";
 import { Actor } from "../scene/Actor";
+import { AbstractPlayer } from "./AbstractPlayer";
+import { Diplomacy } from "./Diplomacy";
 
 // Server "rangedTargets" payload, from server Unit.sendRangedTargets().
 export interface RangedTargetsEvent {
@@ -71,13 +73,17 @@ export class RangedAiming {
   }
 
   // Mirrors server Unit.canRangedAttack(), with the range and line of sight taken from the server's list.
-  public canShoot(tile: Tile | undefined): boolean {
+  // `ignoreDiplomacy` asks whether the shot would be possible if at war, for the Declare War prompt.
+  public canShoot(tile: Tile | undefined, options?: { ignoreDiplomacy: boolean }): boolean {
     if (!tile || !this.unit || this.unit.getAvailableMovement() <= 0) return false;
     if (!this.targetTiles.includes(tile)) return false;
 
+    const shooter = this.unit.getPlayer();
+    const isTarget = (player: AbstractPlayer) =>
+      options?.ignoreDiplomacy ? player !== shooter : Diplomacy.areAtWar(player, shooter);
     const city = tile.getCity();
-    if (city && city.getPlayer() !== this.unit.getPlayer()) return true;
-    return tile.getUnits().some((unit) => unit.getPlayer() !== this.unit.getPlayer() && unit.canFight());
+    if (city && isTarget(city.getPlayer())) return true;
+    return tile.getUnits().some((unit) => isTarget(unit.getPlayer()) && unit.canFight());
   }
 
   public isAiming(): boolean {

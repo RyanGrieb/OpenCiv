@@ -212,9 +212,11 @@ export class City extends ActorGroup {
 
     for (const tile of this.territory) {
       GameMap.getInstance().removeOutline({ tile: tile, cityOutline: true });
+      if (tile.getTerritoryCity() === this) tile.setTerritoryCity(undefined);
     }
 
     this.territory = territory;
+    this.territory.forEach((tile) => tile.setTerritoryCity(this));
 
     for (const tile of this.territory) {
       const territoryOverlay = new Actor({
@@ -261,6 +263,7 @@ export class City extends ActorGroup {
     NetworkEvents.removeCallbacksByParentObject(this);
     for (const tile of this.territory) {
       GameMap.getInstance().removeOutline({ tile, cityOutline: true });
+      if (tile.getTerritoryCity() === this) tile.setTerritoryCity(undefined);
     }
     Game.getInstance().getCurrentScene().removeActor(this);
   }

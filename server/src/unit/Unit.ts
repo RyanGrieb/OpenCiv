@@ -6,6 +6,7 @@ import { GameMap } from "../map/GameMap";
 import { Improvement, ImprovementData } from "../map/Improvement";
 import { Tile } from "../map/Tile";
 import { PlayerVisibility } from "../map/PlayerVisibility";
+import { PlayerDiplomacy } from "../diplomacy/PlayerDiplomacy";
 import { ConfigLoader } from "../util/ConfigLoader";
 import { Combat } from "./Combat";
 import { UnitActions } from "./UnitActions";
@@ -610,9 +611,8 @@ export class Unit {
   }
 
   // Civ 5 melee: both sides trade damage, and if the defender dies the attacker advances onto its
-  // tile. An enemy city is fought instead of whatever stands in it (see meleeAttackCity()). Every
-  // other civilization counts as an enemy, since there's no diplomacy yet. Returns whether an attack
-  // actually happened.
+  // tile. An enemy city is fought instead of whatever stands in it (see meleeAttackCity()). Only
+  // civilizations at war are enemies (see PlayerDiplomacy). Returns whether an attack actually happened.
   public meleeAttack(targetTile: Tile): boolean {
     if (!this.canMeleeAttack(targetTile)) return false;
 
@@ -625,7 +625,7 @@ export class Unit {
     }
 
     const originTile = this.tile;
-    const enemies = targetTile.getUnits().filter((unit) => unit.getPlayer() !== this.player);
+    const enemies = targetTile.getUnits().filter((unit) => this.isEnemy(unit.getPlayer()));
     const defender = enemies.find((unit) => unit.canFight());
 
     if (defender) {
@@ -660,7 +660,7 @@ export class Unit {
       });
     }
 
-    const survivors = targetTile.getUnits().filter((unit) => unit.getPlayer() !== this.player);
+    const survivors = targetTile.getUnits().filter((unit) => this.isEnemy(unit.getPlayer()));
     if (survivors.some((unit) => unit.canFight())) return true;
 
     this.overrunTile(originTile, targetTile);
@@ -674,7 +674,7 @@ export class Unit {
     if (city) return this.getMeleeCityPreview(city);
 
     // Like old_java's UnitCombatWindow, there's nothing to preview when nothing can fight back.
-    const defender = targetTile.getUnits().find((unit) => unit.getPlayer() !== this.player && unit.canFight());
+    const defender = targetTile.getUnits().find((unit) => this.isEnemy(unit.getPlayer()) && unit.canFight());
     if (!defender) return undefined;
 
     const target = { attackerId: this.id, targetX: targetTile.getX(), targetY: targetTile.getY() };
@@ -797,7 +797,7 @@ export class Unit {
     if (!this.tile.getAdjacentTiles().includes(targetTile)) return false;
 
     if (this.getEnemyCity(targetTile)) return true;
-    return targetTile.getUnits().some((unit) => unit.getPlayer() !== this.player);
+    return targetTile.getUnits().some((unit) => this.isEnemy(unit.getPlayer()));
   }
 
   public isRanged() {
@@ -1028,7 +1028,11 @@ export class Unit {
 
   private getEnemyCity(tile: Tile): City | undefined {
     const city = tile.getCity();
-    return city && city.getPlayer() !== this.player ? city : undefined;
+    return city && this.isEnemy(city.getPlayer()) ? city : undefined;
+  }
+
+  private isEnemy(player: Player): boolean {
+    return PlayerDiplomacy.areAtWar(this.player, player);
   }
 
   // Civ 5 melee against a city: the city fights back with its own strength, and if it's brought to
@@ -1122,7 +1126,7 @@ export class Unit {
   // destroyed, except civilians that Civ 5 captures: they change hands where they stood, and can't
   // move until the next turn.
   private overrunTile(originTile: Tile, targetTile: Tile) {
-    const survivors = targetTile.getUnits().filter((unit) => unit.getPlayer() !== this.player);
+    const survivors = targetTile.getUnits().filter((unit) => this.isEnemy(unit.getPlayer()));
     const capturedTypes = survivors
       .map((unit) => Unit.getUnitYMLTypeDataByName(unit.name)?.captured_as)
       .filter((capturedAs) => capturedAs !== undefined);
@@ -1163,7 +1167,7 @@ export class Unit {
   }
 
   private getRangedDefender(targetTile: Tile): Unit | undefined {
-    return targetTile.getUnits().find((unit) => unit.getPlayer() !== this.player && unit.canFight());
+    return targetTile.getUnits().find((unit) => this.isEnemy(unit.getPlayer()) && unit.canFight());
   }
 
   // Tells everyone who can see either end of a fight how it went. `ranged` lets clients show only the

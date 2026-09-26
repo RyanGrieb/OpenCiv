@@ -14,6 +14,7 @@ describe('PlayerNotifications', () => {
   let units: any[];
   let currentResearch: any;
   let techsLeft: boolean;
+  let relations: any[];
 
   const makeUnit = (id: number, options: { movement?: number; queued?: boolean; fortified?: boolean; building?: string } = {}) => ({
     getId: () => id,
@@ -42,6 +43,7 @@ describe('PlayerNotifications', () => {
     units = [];
     currentResearch = null;
     techsLeft = true;
+    relations = [];
     mockWebsocket = {} as WebSocket;
 
     onSpy = jest.spyOn(ServerEvents, 'on').mockImplementation(() => { });
@@ -53,6 +55,7 @@ describe('PlayerNotifications', () => {
       hasTechsLeftToResearch: jest.fn(() => techsLeft),
       getWebsocket: jest.fn(() => mockWebsocket),
       sendNetworkEvent: jest.fn(),
+      getDiplomacy: jest.fn(() => ({ toJSON: () => relations })),
     } as unknown as jest.Mocked<Player>;
 
     notifications = new PlayerNotifications(mockPlayer);
@@ -84,6 +87,22 @@ describe('PlayerNotifications', () => {
     expect(production.id).toBe('production');
     expect(production.cityNames).toEqual(['Rome', 'Cumae']);
     expect(production.turnBlockingLabel).toBe('Choose Production');
+  });
+
+  it('keeps a peace offer up until it is answered, naming who offered', () => {
+    relations = [
+      { civName: 'Mongolia', peaceOfferedToUs: true },
+      { civName: 'England', peaceOfferedToUs: false },
+    ];
+
+    const offer = notifications.getNotifications().find((notification) => notification.id === 'peaceOffer');
+    expect(offer).toMatchObject({ type: 'diplomacy', text: 'Mongolia offers you peace.', priority: NotificationPriority.HIGH });
+
+    notifications.startTurn(2);
+    expect(ids()).toContain('peaceOffer');
+
+    relations = [];
+    expect(ids()).not.toContain('peaceOffer');
   });
 
   it('lists only units that can still move and have no orders', () => {

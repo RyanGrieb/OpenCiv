@@ -68,6 +68,8 @@ describe('City', () => {
       getNotifications: jest.fn().mockReturnValue(mockNotifications),
       removeCity: jest.fn(),
       getCivilizationName: jest.fn().mockReturnValue('Germany'),
+      isBarbarian: () => false,
+      getDiplomacy: () => ({ isAtWarWith: () => true }),
     } as unknown as jest.Mocked<Player>;
 
     // Mirrors the real rule for the fake Legion below: Rome's alone, and it stands in for the Swordsman.
@@ -613,6 +615,7 @@ describe('City', () => {
         getAdjacentTiles: jest.fn().mockReturnValue([]),
         getCityTerritoryOf: jest.fn(() => owner),
         setCityTerritoryOf: jest.fn((city: City) => (owner = city)),
+        getUnits: jest.fn().mockReturnValue([]),
       } as unknown as jest.Mocked<Tile>;
     };
 
@@ -868,7 +871,7 @@ describe('City', () => {
     });
   });
   describe('combat', () => {
-    const enemyPlayer = { getName: () => 'Enemy' } as unknown as Player;
+    const enemyPlayer = { getName: () => 'Enemy', isBarbarian: () => false } as unknown as Player;
     const visibility = { isVisible: jest.fn().mockReturnValue(true), update: jest.fn() };
     let targetTile: jest.Mocked<Tile>;
     let enemyUnit: jest.Mocked<Unit>;

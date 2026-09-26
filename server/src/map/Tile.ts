@@ -5,6 +5,7 @@ import { Unit } from "../unit/Unit";
 import { City } from "../city/City";
 import { Player } from "../Player";
 import { ConfigLoader } from "../util/ConfigLoader";
+import { PlayerDiplomacy } from "../diplomacy/PlayerDiplomacy";
 import { MapResources } from "./MapResources";
 import { NaturalWonders } from "./NaturalWonders";
 
@@ -155,11 +156,21 @@ export class Tile {
   }
 
   // Whether a unit can't even pass through here on the way somewhere else: another civilization's
-  // units or city are in the way. Getting past them means attacking (Unit.meleeAttack).
+  // units or city are in the way (getting past them means attacking, see Unit.meleeAttack), or the
+  // tile is inside the borders of a civilization the unit's owner is at peace with.
   public isImpassableFor(movingUnit: Unit): boolean {
     if (this.city && this.city.getPlayer() !== movingUnit.getPlayer()) return true;
+    if (this.isClosedBorderFor(movingUnit.getPlayer())) return true;
 
     return this.units.some((unit) => unit !== movingUnit && unit.getPlayer() !== movingUnit.getPlayer());
+  }
+
+  // Civ 5 without Open Borders: only the owner and those at war with them may enter a civilization's land.
+  public isClosedBorderFor(player: Player): boolean {
+    const owner = this.cityTerritoryOf?.getPlayer();
+    if (!owner || owner === player) return false;
+
+    return !PlayerDiplomacy.areAtWar(owner, player);
   }
 
   // Whether a new unit of this type could be placed here, e.g. one just finished by production.

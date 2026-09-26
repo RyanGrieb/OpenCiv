@@ -26,7 +26,10 @@ describe("Units attacking a city", () => {
       removeUnit: jest.fn(),
       sendNetworkEvent: jest.fn(),
       hasResearchedTech: () => false,
-      getVisibility: () => ({ isVisible: () => true, update: jest.fn() })
+      getVisibility: () => ({ isVisible: () => true, update: jest.fn() }),
+      // Every other civilization is an enemy, as in a startAtWar game.
+      isBarbarian: () => false,
+      getDiplomacy: () => ({ isAtWarWith: () => true })
     }) as unknown as Player;
 
   const makeUnit = (name: string, tile: Tile, player: Player) => {

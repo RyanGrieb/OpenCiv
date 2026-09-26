@@ -8,6 +8,8 @@ import { GameMap } from "./GameMap";
 import { MapWrap } from "./MapWrap";
 import { SpriteAtlas } from "../SpriteAtlas";
 import { Strings } from "../util/Strings";
+import { AbstractPlayer } from "../player/AbstractPlayer";
+import { Diplomacy } from "../player/Diplomacy";
 
 // Keyed by tile-type name (upper/lower-case variants both used); see Tile.getTileYield().
 export type TileYieldsData = Record<string, { name?: string; stats: Record<string, number>[] }>;
@@ -65,6 +67,7 @@ export class Tile extends Actor {
   private gridY: number;
 
   private city: City;
+  private territoryCity: City | undefined;
   private yields: any[];
   // Whether this player currently sees this tile, vs. only remembering it from earlier - see
   // PlayerVisibility on the server. Defaults true: a Tile is only ever constructed once discovered.
@@ -294,11 +297,31 @@ export class Tile extends Actor {
 
   // Mirrors server/src/map/Tile.ts's isImpassableFor() - keep both in sync.
   // Whether a unit can't even pass through here on the way somewhere else: another civilization's
-  // units or city are in the way. Getting past them means attacking (Unit.canMeleeAttack).
+  // units or city are in the way (getting past them means attacking, see Unit.canMeleeAttack), or the
+  // tile is inside the borders of a civilization the unit's owner is at peace with.
   public isImpassableFor(movingUnit: Unit): boolean {
     if (this.city && this.city.getPlayer() !== movingUnit.getPlayer()) return true;
+    if (this.isClosedBorderFor(movingUnit.getPlayer())) return true;
 
     return this.units.some((unit) => unit !== movingUnit && unit.getPlayer() !== movingUnit.getPlayer());
+  }
+
+  // Mirrors server/src/map/Tile.ts's isClosedBorderFor() - keep both in sync. Civ 5 without Open
+  // Borders: only the owner and those at war with them may enter a civilization's land.
+  public isClosedBorderFor(player: AbstractPlayer): boolean {
+    const owner = this.territoryCity?.getPlayer();
+    if (!owner || owner === player) return false;
+
+    return !Diplomacy.areAtWar(owner, player);
+  }
+
+  // The city whose borders take in this tile, as far as this player has discovered - see City.setTerritory().
+  public setTerritoryCity(city: City | undefined) {
+    this.territoryCity = city;
+  }
+
+  public getTerritoryCity(): City | undefined {
+    return this.territoryCity;
   }
 
   public hasRiver(): boolean {

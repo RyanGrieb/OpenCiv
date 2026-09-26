@@ -113,7 +113,8 @@ export class TestUtils {
         // Barbarian units would count as a second enemy, and wander into the fight.
         WebsocketClient.sendMessage({ event: "setGameOption", option: "allowBarbarians", value: false });
         // Options stick on the server between games, so an earlier scenario's Archer and damaged cities are undone.
-        const gameOptions = { startWithArcher: false, cityStartingHealth: 200, ...options.gameOptions };
+        // The two civilizations start at war, so combat scenarios can fight straight away (Diplomacy turns it off).
+        const gameOptions = { startWithArcher: false, cityStartingHealth: 200, startAtWar: true, ...options.gameOptions };
         for (const [option, value] of Object.entries(gameOptions)) {
             WebsocketClient.sendMessage({ event: "setGameOption", option, value });
         }

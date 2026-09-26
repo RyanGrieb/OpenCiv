@@ -14,6 +14,7 @@ import { CombatPreviewEvent, CombatPreviewWindow, CombatSide } from "../ui/hud/C
 import { RangedAiming, RangedTargetsEvent } from "./RangedAiming";
 import { City } from "../city/City";
 import { CityStrikeAiming } from "../city/CityStrikeAiming";
+import { Diplomacy, Relation } from "./Diplomacy";
 
 export interface CurrentResearch {
   techName: string;
@@ -42,6 +43,8 @@ export class ClientPlayer extends AbstractPlayer {
   private accumulatedStats: Map<string, number> = new Map();
   private currentResearch: CurrentResearch | null = null;
   private researchedTechs: Set<string> = new Set();
+  // Every civilization this player has met, by player name.
+  private relations: Map<string, Relation> = new Map();
 
   constructor(playerJSON: PlayerData) {
     super(playerJSON);
@@ -283,8 +286,26 @@ export class ClientPlayer extends AbstractPlayer {
       }
     });
 
+    NetworkEvents.on<{ players: Relation[] }>({
+      eventName: "diplomacyUpdate",
+      parentObject: this,
+      callback: (data) => {
+        this.relations = new Map(data.players.map((relation) => [relation.name, relation]));
+      }
+    });
+
     WebsocketClient.sendMessage({ event: "requestTotalStats" });
     WebsocketClient.sendMessage({ event: "requestResearch" });
+    WebsocketClient.sendMessage({ event: "requestDiplomacy" });
+  }
+
+  /** How this player stands with `other`, or undefined if they haven't met. */
+  public getRelation(other: AbstractPlayer): Relation | undefined {
+    return this.relations.get(other.getName());
+  }
+
+  public getRelations(): Relation[] {
+    return Array.from(this.relations.values());
   }
 
   public setRequestedNextTurn(value: boolean) {
@@ -506,6 +527,18 @@ export class ClientPlayer extends AbstractPlayer {
     return this.selectedUnit.canMeleeAttack(tile);
   }
 
+  // The owner of what's on `tile`, if the selected unit could attack it but for being at peace with them.
+  private getPeacefulTarget(tile: Tile): AbstractPlayer | undefined {
+    const unit = this.selectedUnit;
+    const owner = tile.getCity()?.getPlayer() ?? tile.getUnits()[0]?.getPlayer();
+    if (!unit || !owner || !Diplomacy.isAtPeaceWith(owner)) return undefined;
+
+    const inReach = unit.isRanged()
+      ? this.rangedAiming.canShoot(tile, { ignoreDiplomacy: true })
+      : unit.canMeleeAttack(tile, { ignoreDiplomacy: true });
+    return inReach ? owner : undefined;
+  }
+
   // Right-dragging onto an enemy the selected unit can hit shows a red line and target instead of a
   // path, and asks the server what the fight would look like (see the "combatPreview" listener).
   private previewAttack(tile: Tile): boolean {
@@ -570,6 +603,14 @@ export class ClientPlayer extends AbstractPlayer {
     if (this.canAttack(targetTile)) {
       this.attackWithSelectedUnit(targetTile);
       this.unselectUnit();
+      return;
+    }
+
+    // Like Civ 5 and old_java, trying to attack a civilization we're at peace with asks to declare war first.
+    const peacefulTarget = this.getPeacefulTarget(targetTile);
+    if (peacefulTarget) {
+      this.unselectUnit();
+      Game.getInstance().getCurrentSceneAs<InGameScene>().openDeclareWarPrompt(peacefulTarget);
       return;
     }
 

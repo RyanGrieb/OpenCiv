@@ -8,6 +8,7 @@ import { Actor } from "../scene/Actor";
 import { Line } from "../scene/Line";
 import { CombatPreviewEvent, CombatPreviewWindow } from "../ui/hud/CombatPreviewWindow";
 import { City } from "./City";
+import { Diplomacy } from "../player/Diplomacy";
 
 // Server "cityStrikeTargets" payload, from server City.sendStrikeTargets(): every tile the city can reach.
 export interface CityStrikeTargetsEvent {
@@ -57,7 +58,9 @@ export class CityStrikeAiming {
   public canStrike(tile: Tile | undefined): boolean {
     if (!tile || !this.city?.canStrike() || !this.rangeTiles.includes(tile)) return false;
 
-    return tile.getUnits().some((unit) => unit.getPlayer() !== this.city.getPlayer() && unit.canFight());
+    return tile
+      .getUnits()
+      .some((unit) => Diplomacy.areAtWar(unit.getPlayer(), this.city.getPlayer()) && unit.canFight());
   }
 
   // Called as the pointer moves onto a new tile: a red line and preview for a target, nothing otherwise.

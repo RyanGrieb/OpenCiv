@@ -6,7 +6,7 @@ import { InGameScene } from "../scene/type/InGameScene";
 // Mirrors server/src/notification/PlayerNotifications.ts's NotificationData - keep both in sync.
 export interface NotificationData {
   id: string;
-  type: "research" | "production" | "unitOrders" | "cityStrike" | "message";
+  type: "research" | "production" | "unitOrders" | "cityStrike" | "diplomacy" | "message";
   icon: string;
   text: string;
   priority: number;
@@ -77,6 +77,9 @@ export class Notifications {
         return;
       case "cityStrike":
         this.aimNextCity(notification, scene);
+        return;
+      case "diplomacy":
+        if (!scene.getDiplomacyWindow()) scene.toggleDiplomacyUI();
         return;
       case "message":
         WebsocketClient.sendMessage({ event: "dismissNotification", id: notification.id });
