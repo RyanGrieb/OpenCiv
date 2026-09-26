@@ -22,7 +22,8 @@ export class ChooseProductionList extends ListBox {
       x: 0,
       y: UITheme.STATUS_BAR_HEIGHT,
       width: CityScreen.STATS_WINDOW_WIDTH,
-      height: CityScreen.STATS_WINDOW_HEIGHT,
+      // Fills the space down to the top of the production queue window.
+      height: Game.getInstance().getHeight() - UITheme.STATUS_BAR_HEIGHT - CityScreen.PRODUCTION_WINDOW_HEIGHT,
       textFont: UITheme.FONT,
       fontColor: "white"
     });
