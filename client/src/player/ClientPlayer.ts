@@ -106,8 +106,9 @@ export class ClientPlayer extends AbstractPlayer {
 
     Game.getInstance()
       .getCurrentScene()
-      .on("keydown", (options) => {
-        if (options.key === "b" || options.key === "B") this.startRangedAttack();
+      // On release, so holding B down doesn't flicker aiming on and off with key repeat.
+      .on("keyup", (options) => {
+        if (options.key === "b" || options.key === "B") this.toggleRangedAttack();
       });
 
     Game.getInstance()
@@ -343,9 +344,35 @@ export class ClientPlayer extends AbstractPlayer {
     }
   }
 
+  /**
+   * What the selected ranged unit's Ranged Attack button and the B hotkey do: start aiming, or stop if
+   * already aiming. Starting asks the server, whose answer (the tiles in range) turns aiming on.
+   */
+  public toggleRangedAttack() {
+    if (!this.selectedUnit?.isRanged()) return;
+    if (this.rangedAiming.isAiming()) {
+      this.stopAiming();
+      return;
+    }
+    if (Game.getInstance().getCurrentScene().getCamera().isLocked()) return;
+
+    const action = this.selectedUnit.getActions().find((candidate) => candidate.getName() === "ranged_attack");
+    if (!action?.requirementsMet(this.selectedUnit)) return;
+
+    WebsocketClient.sendMessage({
+      event: "unitAction",
+      unitX: this.selectedUnit.getTile().getGridX(),
+      unitY: this.selectedUnit.getTile().getGridY(),
+      id: this.selectedUnit.getID(),
+      actionName: action.getName()
+    });
+  }
+
   private onLeftClickTile(clickedTile: Tile | undefined, x: number, y: number) {
     // The click was meant for a notification, not the map beneath it.
     if (Game.getInstance().getCurrentSceneAs<InGameScene>().isOverNotifications(x, y)) return;
+    // Nor was a click on the unit info's buttons (Ranged Attack could otherwise fire at a tile under it).
+    if (this.selectedUnit?.isOverDisplayInfo(x, y)) return;
 
     // Aiming with Ranged Attack, a left-click on a target fires, as in old_java.
     if (this.rangedAiming.isAiming() && this.canAttack(clickedTile)) {
@@ -404,23 +431,6 @@ export class ClientPlayer extends AbstractPlayer {
     }
   }
 
-  // The B hotkey, as in Civ 5: the same as pressing the selected ranged unit's Ranged Attack button.
-  private startRangedAttack() {
-    if (!this.selectedUnit?.isRanged() || this.rangedAiming.isAiming()) return;
-    if (Game.getInstance().getCurrentScene().getCamera().isLocked()) return;
-
-    const action = this.selectedUnit.getActions().find((candidate) => candidate.getName() === "ranged_attack");
-    if (!action?.requirementsMet(this.selectedUnit)) return;
-
-    WebsocketClient.sendMessage({
-      event: "unitAction",
-      unitX: this.selectedUnit.getTile().getGridX(),
-      unitY: this.selectedUnit.getTile().getGridY(),
-      id: this.selectedUnit.getID(),
-      actionName: action.getName()
-    });
-  }
-
   // Releasing a right-click moves the selected unit there, or attacks what's there. While aiming a
   // ranged attack, a right-click anywhere that isn't a target stops aiming instead (old_java's Untarget).
   private onMouseRightRelease(clickedTile: Tile | undefined) {
@@ -428,13 +438,17 @@ export class ClientPlayer extends AbstractPlayer {
     if (!clickedTile || !this.selectedUnit) return;
 
     if (this.rangedAiming.isAiming() && !this.canAttack(clickedTile)) {
-      this.rangedAiming.stopAiming();
-      this.clearMovementPath();
-      this.removeOutlinedTile();
+      this.stopAiming();
       return;
     }
 
     this.moveSelectedUnit(clickedTile);
+  }
+
+  private stopAiming() {
+    this.rangedAiming.stopAiming();
+    this.clearMovementPath();
+    this.removeOutlinedTile();
   }
 
   // While aiming a ranged attack, just hovering a target previews the shot - no drag needed.

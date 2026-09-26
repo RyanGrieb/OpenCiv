@@ -541,6 +541,11 @@ export class Unit extends ActorGroup {
     Game.getInstance().getCurrentScene().sortSceneObjects();
   }
 
+  // Whether a click at (x, y) landed on this unit's info window, shown while it's selected.
+  public isOverDisplayInfo(x: number, y: number): boolean {
+    return this.selected && (this.unitDisplayInfo?.insideActor(x, y) ?? false);
+  }
+
   public getQueuedMovementTiles() {
     return this.queuedMovementTiles;
   }

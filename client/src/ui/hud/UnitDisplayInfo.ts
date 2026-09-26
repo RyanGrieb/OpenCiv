@@ -9,6 +9,7 @@ import { Strings } from "../../util/Strings";
 import { Button, ButtonSize } from "../components/Button";
 import { Label } from "../components/Label";
 import { UITheme } from "../UITheme";
+import { InGameScene } from "../../scene/type/InGameScene";
 
 const WINDOW_WIDTH = 300;
 // Offsets from the window's top. Action buttons take 44-108, wrapping into more rows of 4 when a
@@ -264,9 +265,15 @@ export class UnitDisplayInfo extends ActorGroup {
         y: this.y + ACTION_Y + Math.floor(index / ACTIONS_PER_ROW) * ACTION_SPACING,
         size: ButtonSize.ICON_LARGE,
         onClicked: () => {
-          // Send action event to server
           console.log(`Action: ${action.getName()} clicked`);
 
+          // Ranged Attack toggles aiming, which the client tracks - pressing it while aiming stops.
+          if (action.getName() === "ranged_attack") {
+            Game.getInstance().getCurrentSceneAs<InGameScene>().getClientPlayer().toggleRangedAttack();
+            return;
+          }
+
+          // Send action event to server
           WebsocketClient.sendMessage({
             event: "unitAction",
             unitX: this.unit.getTile().getGridX(),

@@ -59,16 +59,10 @@ export function setupRangedCombatTest(game: Game) {
         throw new Error("No ranged targets from the server");
     };
 
-    // What the Ranged Attack button in the unit info sends.
+    // What the Ranged Attack button in the unit info does.
     const pressRangedAttack = async () => {
-        WebsocketClient.sendMessage({
-            event: "unitAction",
-            unitX: archer.getTile().getGridX(),
-            unitY: archer.getTile().getGridY(),
-            id: archer.getID(),
-            actionName: "ranged_attack"
-        });
-        await utils.waitUntil(() => aiming().isAiming(), 5000, "Aiming to start");
+        clientPlayer().toggleRangedAttack();
+        await utils.delay(800);
     };
 
     // A real key press, the way the browser delivers it.
@@ -174,6 +168,7 @@ export function setupRangedCombatTest(game: Game) {
         action: async () => {
             watch(archer);
             await pressRangedAttack();
+            await utils.waitUntil(() => aiming().isAiming(), 5000, "Aiming to start");
             await utils.delay(1500);
         },
         verification: () =>
@@ -237,12 +232,24 @@ export function setupRangedCombatTest(game: Game) {
     });
 
     runner.addStep({
-        name: "Next turn, the B hotkey starts aiming, and a right-click away from any target stops it without moving the Archer",
+        name: "Next turn, the button and B both toggle aiming, and a right-click away from any target stops it without moving the Archer",
         action: async () => {
             await endTurn();
             await select(archer);
+            const expectAiming = (expected: boolean, what: string) => {
+                if (aiming().isAiming() !== expected) throw new Error(`${what} didn't turn aiming ${expected ? "on" : "off"}`);
+                if (!expected && aiming()["overlays"].length > 0) throw new Error(`${what} left the red tint behind`);
+            };
+            await pressRangedAttack();
+            expectAiming(true, "The Ranged Attack button");
+            await pressRangedAttack();
+            expectAiming(false, "Pressing the Ranged Attack button again");
             await pressB();
-            if (!aiming().isAiming()) throw new Error("Pressing B didn't start aiming");
+            expectAiming(true, "B");
+            await pressB();
+            expectAiming(false, "Pressing B again");
+            await pressB();
+            expectAiming(true, "B");
             // The Archer's own tile is never a target.
             clientPlayer()["onMouseRightRelease"](archer.getTile());
             await utils.delay(800);
