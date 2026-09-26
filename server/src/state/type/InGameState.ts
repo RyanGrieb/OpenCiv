@@ -63,17 +63,24 @@ export class InGameState extends State {
     );
   }
 
-  // The startWithAllTechs / startWithBuilder game options, for trying out Builder improvements.
+  // The startWithAllTechs / startWithBuilder / startWithArcher game options, for trying out Builder
+  // improvements and ranged combat.
   private static applyDebugStart(player: Player, spawnTile: Tile) {
     const options = Game.getInstance().getGameOptions();
     if (options.startWithAllTechs) player.researchAllTechs();
-    if (!options.startWithBuilder) return;
+    if (options.startWithBuilder) InGameState.addUnitBeside(spawnTile, "Builder", player, true);
+    if (options.startWithArcher) InGameState.addUnitBeside(spawnTile, "Archer", player, false);
+  }
 
-    // Any land beside the Settler will do - a civilian can share a tile with the Warrior.
-    const builderTile = spawnTile
+  // Any land beside the Settler will do - a civilian can share a tile with the Warrior, a military unit can't.
+  private static addUnitBeside(spawnTile: Tile, unitName: string, player: Player, isUtility: boolean) {
+    const tile = spawnTile
       .getAdjacentTiles()
-      .find((tile) => tile && !tile.isWater() && tile.isWorkable() && tile.canPlaceUnit(player, true));
-    builderTile?.addUnit(Unit.createFromName("Builder", builderTile, player));
+      .find(
+        (candidate) =>
+          candidate && !candidate.isWater() && candidate.isWorkable() && candidate.canPlaceUnit(player, isUtility)
+      );
+    tile?.addUnit(Unit.createFromName(unitName, tile, player));
   }
 
   public onInitialize() {

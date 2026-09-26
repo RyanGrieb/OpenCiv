@@ -1,5 +1,8 @@
 # combat_strength is Civ 5's melee Combat Strength: what the unit attacks with in melee and
 # defends with against any attack. Units without it (civilians) can't fight at all.
+# ranged_strength and range make a unit ranged (Civ 5's Ranged Combat Strength and Range): it shoots
+# at enemies up to `range` tiles away that it has line of sight to, and takes no damage doing so.
+# combat_strength is still what it defends with, and it can't melee attack.
 # captured_as is what a civilian becomes when an enemy melee unit takes its tile (Civ 5 turns a
 # captured Settler into a Worker, which is our Builder). Civilians without it are destroyed instead.
 units:
@@ -19,6 +22,8 @@ units:
     captured_as: Builder
   - name: Archer
     combat_strength: 5
+    ranged_strength: 7
+    range: 2
     attack_type: ranged
     cost: 40
     required_tech: Archery
@@ -50,6 +55,8 @@ units:
     required_tech: Bronze Working
   - name: Chariot Archer
     combat_strength: 6
+    ranged_strength: 10
+    range: 2
     attack_type: ranged
     cost: 56
     required_tech: The Wheel
@@ -71,11 +78,15 @@ units:
     required_tech: Iron Working
   - name: Composite Bowman
     combat_strength: 7
+    ranged_strength: 11
+    range: 2
     attack_type: ranged
     cost: 75
     required_tech: Construction
   - name: Catapult
     combat_strength: 7
+    ranged_strength: 8
+    range: 2
     attack_type: siege
     cost: 75
     required_tech: Mathematics
@@ -86,6 +97,8 @@ units:
     required_tech: Civil Service
   - name: Crossbowman
     combat_strength: 13
+    ranged_strength: 18
+    range: 2
     attack_type: ranged
     cost: 120
     required_tech: Machinery

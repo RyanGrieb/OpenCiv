@@ -26,6 +26,8 @@ export interface UnitOptions {
   player: Player;
   attackType?: string;
   combatStrength?: number;
+  rangedStrength?: number;
+  range?: number;
   defaultMoveDistance?: number;
   sightRange?: number;
   isUtility?: boolean;
@@ -40,6 +42,9 @@ export interface UnitYMLTypeData {
   attack_type?: string;
   // Civ 5 melee Combat Strength. Absent (0) for civilians, which can't attack or defend.
   combat_strength?: number;
+  // Civ 5 Ranged Combat Strength and Range. Set only on ranged units, which shoot instead of melee.
+  ranged_strength?: number;
+  range?: number;
   // The unit type a civilian turns into when an enemy captures it. Absent means it's destroyed instead.
   captured_as?: string;
   default_move_distance?: number;
@@ -61,6 +66,9 @@ export class Unit {
   private player: Player;
   private attackType: string;
   private combatStrength: number;
+  // 0 for anything that isn't a ranged unit.
+  private rangedStrength: number;
+  private range: number;
   private health: number;
   // Moved or fought since the turn began - a fortified unit that did neither heals at the next turn.
   private actedThisTurn: boolean;
@@ -87,6 +95,8 @@ export class Unit {
     this.tile = options.tile;
     this.attackType = options.attackType || "none";
     this.combatStrength = options.combatStrength ?? 0;
+    this.rangedStrength = options.rangedStrength ?? 0;
+    this.range = options.range ?? 0;
     this.health = Combat.MAX_HEALTH;
     this.actedThisTurn = false;
     this.fortified = false;
@@ -143,7 +153,8 @@ export class Unit {
         const targetTile = GameMap.getInstance().getTiles()[data["targetX"]]?.[data["targetY"]];
         if (!targetTile) return;
 
-        this.meleeAttack(targetTile);
+        if (this.isRanged()) this.rangedAttack(targetTile);
+        else this.meleeAttack(targetTile);
       }
     });
 
@@ -158,8 +169,21 @@ export class Unit {
         const targetTile = GameMap.getInstance().getTiles()[data["targetX"]]?.[data["targetY"]];
         if (!targetTile) return;
 
-        const preview = this.getMeleePreview(targetTile);
+        const preview = this.isRanged() ? this.getRangedPreview(targetTile) : this.getMeleePreview(targetTile);
         if (preview) player.sendNetworkEvent({ event: "combatPreview", ...preview });
+      }
+    });
+
+    // The owner's client asks which tiles a selected ranged unit can shoot at, to know what a right-click
+    // on an enemy means - the range and line of sight are only worked out here.
+    ServerEvents.on({
+      eventName: "requestRangedTargets",
+      parentObject: this,
+      callback: (data, websocket) => {
+        const player = Game.getInstance().getPlayerFromWebsocket(websocket);
+        if (this.id !== data["id"] || this.player !== player) return;
+
+        this.sendRangedTargets({ aiming: false });
       }
     });
 
@@ -226,6 +250,8 @@ export class Unit {
       player,
       attackType: data.attack_type,
       combatStrength: data.combat_strength,
+      rangedStrength: data.ranged_strength,
+      range: data.range,
       defaultMoveDistance: data.default_move_distance,
       sightRange: data.sight_range,
       isUtility: data.is_utility,
@@ -571,22 +597,7 @@ export class Unit {
       this.health = result.attackerHealth;
       defender.health = result.defenderHealth;
 
-      const combatPacket = {
-        event: "unitCombat",
-        attackerId: this.id,
-        attackerHealth: this.health,
-        attackerRemainingMovement: this.availableMovement,
-        defenderId: defender.id,
-        defenderHealth: defender.health
-      };
-      Game.getInstance()
-        .getPlayers()
-        .forEach((player) => {
-          const visibility = player.getVisibility();
-          if (!visibility.isVisible(originTile) && !visibility.isVisible(targetTile)) return;
-
-          player.sendNetworkEvent(combatPacket);
-        });
+      this.broadcastCombat(originTile, defender);
 
       if (this.health <= 0) {
         this.delete();
@@ -660,6 +671,93 @@ export class Unit {
     };
   }
 
+  /**
+   * Civ 5 ranged attack: the target takes damage from the attacker's ranged strength against its own
+   * (terrain included), the attacker takes none and stays put, and the rest of its turn is spent. A
+   * kill just removes the target - nothing advances onto the tile. Returns whether it fired.
+   */
+  public rangedAttack(targetTile: Tile): boolean {
+    if (!this.canRangedAttack(targetTile)) return false;
+
+    const defender = this.getRangedDefender(targetTile);
+
+    this.availableMovement = 0;
+    this.actedThisTurn = true;
+    this.setFortified(false);
+    this.clearMovementQueue();
+
+    const result = Combat.resolveRanged({
+      attackerStrength: this.rangedStrength,
+      attackerHealth: this.health,
+      defenderStrength: Combat.getDefenseStrength(defender.combatStrength, targetTile),
+      defenderHealth: defender.health
+    });
+    defender.health = result.defenderHealth;
+
+    this.broadcastCombat(this.tile, defender, { ranged: true });
+    if (defender.health <= 0) defender.delete();
+
+    return true;
+  }
+
+  public getRangedPreview(targetTile: Tile) {
+    if (!this.canRangedAttack(targetTile)) return undefined;
+
+    const defender = this.getRangedDefender(targetTile);
+
+    return {
+      attackerId: this.id,
+      targetX: targetTile.getX(),
+      targetY: targetTile.getY(),
+      ranged: true,
+      defenderId: defender.id,
+      defenderName: defender.name,
+      attackerHealth: this.health,
+      defenderHealth: defender.health,
+      ...Combat.predictRanged({
+        attackerRangedStrength: this.rangedStrength,
+        attackerHealth: this.health,
+        defenderBaseStrength: defender.combatStrength,
+        defenderHealth: defender.health,
+        targetTile
+      })
+    };
+  }
+
+  // Needs movement left, a visible enemy that can fight back (Civ 5 won't let ranged units shoot lone
+  // civilians - those are captured by melee units), and a tile within range and line of sight.
+  public canRangedAttack(targetTile: Tile): boolean {
+    if (!this.isRanged() || !this.canFight() || this.availableMovement <= 0) return false;
+    if (!this.getRangedDefender(targetTile)) return false;
+    if (!this.player.getVisibility().isVisible(targetTile)) return false;
+
+    return this.getRangedTargetTiles().includes(targetTile);
+  }
+
+  /**
+   * Every tile this unit could shoot into from where it stands: within its range, and in its line of
+   * sight - the same sightlines it sees by, so hills, mountains and woods block shots from lower ground.
+   */
+  public getRangedTargetTiles(): Tile[] {
+    if (!this.isRanged()) return [];
+
+    const map = GameMap.getInstance();
+    return map
+      .getTilesInRange(this.tile, this.range)
+      .filter((tile) => tile !== this.tile && map.hasLineOfSight(this.tile, tile));
+  }
+
+  // Tells the owner which tiles this unit can shoot into. `aiming` is set when the player pressed the
+  // Ranged Attack action, which has their client highlight the tiles and fire on a left-click.
+  public sendRangedTargets(options: { aiming: boolean }) {
+    this.player.sendNetworkEvent({
+      event: "rangedTargets",
+      id: this.id,
+      aiming: options.aiming,
+      tiles: this.getRangedTargetTiles().map((tile) => ({ x: tile.getX(), y: tile.getY() }))
+    });
+  }
+
   public canMeleeAttack(targetTile: Tile): boolean {
     if (this.attackType !== "melee" || !this.canFight() || this.availableMovement <= 0) return false;
 
@@ -668,6 +766,10 @@ export class Unit {
     if (!this.tile.getAdjacentTiles().includes(targetTile)) return false;
 
     return targetTile.getUnits().some((unit) => unit.getPlayer() !== this.player);
+  }
+
+  public isRanged() {
+    return this.rangedStrength > 0;
   }
 
   // "Fortify Until Healed" - the only way a unit heals. It stays put, healing each turn it doesn't move
@@ -786,6 +888,8 @@ export class Unit {
       player: this.player.getName(),
       attackType: this.attackType,
       combatStrength: this.combatStrength,
+      rangedStrength: this.rangedStrength,
+      range: this.range,
       health: this.health,
       fortified: ownUnit && this.fortified,
       ...(ownUnit ? this.getBuildStatusJSON() : {}),
@@ -845,6 +949,33 @@ export class Unit {
     if (this.queuedMovementTiles.length < 1) return undefined;
 
     return this.queuedMovementTiles[this.queuedMovementTiles.length - 1];
+  }
+
+  private getRangedDefender(targetTile: Tile): Unit | undefined {
+    return targetTile.getUnits().find((unit) => unit.getPlayer() !== this.player && unit.canFight());
+  }
+
+  // Tells everyone who can see either end of a fight how it went. `ranged` lets clients show only the
+  // defender taking damage.
+  private broadcastCombat(originTile: Tile, defender: Unit, options?: { ranged: boolean }) {
+    const combatPacket = {
+      event: "unitCombat",
+      attackerId: this.id,
+      attackerHealth: this.health,
+      attackerRemainingMovement: this.availableMovement,
+      defenderId: defender.id,
+      defenderHealth: defender.health,
+      ranged: options?.ranged ?? false
+    };
+
+    Game.getInstance()
+      .getPlayers()
+      .forEach((player) => {
+        const visibility = player.getVisibility();
+        if (!visibility.isVisible(originTile) && !visibility.isVisible(defender.tile)) return;
+
+        player.sendNetworkEvent(combatPacket);
+      });
   }
 
   // Sends a packet only to the players who can currently see the given tile. The builder takes the

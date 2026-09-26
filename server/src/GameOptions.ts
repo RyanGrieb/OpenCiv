@@ -19,6 +19,8 @@ export interface GameOptions {
   // Meant for trying out tech-gated features like Builder improvements (see the Builder scenarios).
   startWithAllTechs: boolean;
   startWithBuilder: boolean;
+  // An Archer beside every player's Settler, for trying out ranged combat (see the RangedCombat scenario).
+  startWithArcher: boolean;
 }
 
 // Maps are streamed to clients in square chunks of this many tiles, so each dimension must divide evenly.
@@ -68,7 +70,8 @@ export const DefaultGameOptions: GameOptions = {
   revealMap: false,
   spawnPlayersTogether: false,
   startWithAllTechs: false,
-  startWithBuilder: false
+  startWithBuilder: false,
+  startWithArcher: false
 };
 
 interface BaseGameOptionDefinition {
@@ -144,5 +147,6 @@ export const GameOptionDefinitions: GameOptionDefinition[] = [
   { key: "revealMap", label: "Reveal Entire Map", type: "boolean", hidden: true },
   { key: "spawnPlayersTogether", label: "Spawn Players Together", type: "boolean", hidden: true },
   { key: "startWithAllTechs", label: "Start With All Techs", type: "boolean", hidden: true },
-  { key: "startWithBuilder", label: "Start With a Builder", type: "boolean", hidden: true }
+  { key: "startWithBuilder", label: "Start With a Builder", type: "boolean", hidden: true },
+  { key: "startWithArcher", label: "Start With an Archer", type: "boolean", hidden: true }
 ];

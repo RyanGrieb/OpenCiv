@@ -7,8 +7,21 @@ export class UnitActions {
   public static forUnitType(data: UnitYMLTypeData): UnitAction[] {
     if (data.name === "Settler") return [UnitActions.settleCity()];
     if (data.name === "Builder") return Improvement.getBuildableImprovementData().map(UnitActions.buildImprovement);
+    if (data.ranged_strength > 0) return [UnitActions.rangedAttack(), UnitActions.fortifyUntilHealed()];
     if (data.combat_strength > 0) return [UnitActions.fortifyUntilHealed()];
     return [];
+  }
+
+  // old_java's Target action: the server answers with the tiles in range, and the owner's client
+  // highlights them until the player left-clicks an enemy to shoot it (or right-clicks to stop aiming).
+  public static rangedAttack(): UnitAction {
+    return {
+      name: "ranged_attack",
+      icon: "ICON_TARGET",
+      requirements: ["movement"],
+      desc: "Ranged Attack",
+      onAction: (unit: Unit) => unit.sendRangedTargets({ aiming: true })
+    };
   }
 
   public static settleCity(): UnitAction {

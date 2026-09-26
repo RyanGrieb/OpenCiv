@@ -25,7 +25,7 @@ export interface CombatPrediction {
 
 /**
  * Civ 5's combat math, kept free of any Unit/network state so it can be tested on its own. See
- * Unit.meleeAttack() for how a fight is actually carried out.
+ * Unit.meleeAttack() and Unit.rangedAttack() for how a fight is actually carried out.
  */
 export class Combat {
   public static readonly MAX_HEALTH = 100;
@@ -125,15 +125,6 @@ export class Combat {
     const averageDealt = damageTo("defender", 0.5);
     const averageTaken = damageTo("attacker", 0.5);
 
-    let outcome: string;
-    if (averageDealt >= options.defenderHealth) outcome = "Decisive Victory";
-    else if (averageTaken >= options.attackerHealth) outcome = "Decisive Defeat";
-    else if (averageDealt >= averageTaken * 1.5) outcome = "Major Victory";
-    else if (averageTaken >= averageDealt * 1.5) outcome = "Major Defeat";
-    else if (averageDealt > averageTaken) outcome = "Minor Victory";
-    else if (averageTaken > averageDealt) outcome = "Minor Defeat";
-    else outcome = "Stalemate";
-
     return {
       attackerStrength,
       defenderStrength,
@@ -141,7 +132,43 @@ export class Combat {
       defenderModifiers,
       attackerDamage: { min: damageTo("attacker", 0), expected: averageTaken, max: damageTo("attacker", 1) },
       defenderDamage: { min: damageTo("defender", 0), expected: averageDealt, max: damageTo("defender", 1) },
-      outcome
+      outcome: Combat.getOutcome({ averageDealt, averageTaken, ...options })
+    };
+  }
+
+  /**
+   * The attack screen for a ranged attack. Like melee, except the attacker uses its ranged strength,
+   * never takes damage back, and isn't penalized for shooting across a river (Civ 5 only applies that
+   * to melee).
+   */
+  public static predictRanged(options: {
+    attackerRangedStrength: number;
+    attackerHealth: number;
+    defenderBaseStrength: number;
+    defenderHealth: number;
+    targetTile: Tile;
+  }): CombatPrediction {
+    const defenderModifiers = Combat.getDefenseModifiers(options.targetTile);
+    const attackerStrength = options.attackerRangedStrength;
+    const defenderStrength = options.defenderBaseStrength * (1 + Combat.sumModifiers(defenderModifiers));
+
+    const damageAt = (roll: number) =>
+      Combat.getDamage({
+        strength: attackerStrength,
+        opponentStrength: defenderStrength,
+        health: options.attackerHealth,
+        roll
+      });
+    const averageDealt = damageAt(0.5);
+
+    return {
+      attackerStrength,
+      defenderStrength,
+      attackerModifiers: [],
+      defenderModifiers,
+      attackerDamage: { min: 0, expected: 0, max: 0 },
+      defenderDamage: { min: damageAt(0), expected: averageDealt, max: damageAt(1) },
+      outcome: Combat.getOutcome({ averageDealt, averageTaken: 0, ...options })
     };
   }
 
@@ -205,6 +232,47 @@ export class Combat {
     if (defenderHealth === 0 && attackerHealth === 0) attackerHealth = 1;
 
     return { attackerHealth, defenderHealth };
+  }
+
+  /**
+   * A ranged attack: only the defender takes damage. Strengths are final (terrain already applied).
+   */
+  public static resolveRanged(options: {
+    attackerStrength: number;
+    attackerHealth: number;
+    defenderStrength: number;
+    defenderHealth: number;
+    roll?: number;
+  }): CombatResult {
+    const damageToDefender = Combat.getDamage({
+      strength: options.attackerStrength,
+      opponentStrength: options.defenderStrength,
+      health: options.attackerHealth,
+      roll: options.roll
+    });
+
+    return {
+      attackerHealth: options.attackerHealth,
+      defenderHealth: Math.max(0, options.defenderHealth - damageToDefender)
+    };
+  }
+
+  // Civ 5's verdict on the attack screen, from the average roll.
+  private static getOutcome(options: {
+    averageDealt: number;
+    averageTaken: number;
+    attackerHealth: number;
+    defenderHealth: number;
+  }): string {
+    const { averageDealt, averageTaken } = options;
+
+    if (averageDealt >= options.defenderHealth) return "Decisive Victory";
+    if (averageTaken >= options.attackerHealth) return "Decisive Defeat";
+    if (averageDealt >= averageTaken * 1.5) return "Major Victory";
+    if (averageTaken >= averageDealt * 1.5) return "Major Defeat";
+    if (averageDealt > averageTaken) return "Minor Victory";
+    if (averageTaken > averageDealt) return "Minor Defeat";
+    return "Stalemate";
   }
 
   private static sumModifiers(modifiers: CombatModifier[]): number {

@@ -4,6 +4,7 @@ import { Tile } from "../../src/map/Tile";
 import { Player } from "../../src/Player";
 import { Game } from "../../src/Game";
 import { ServerEvents } from "../../src/Events";
+import { GameMap } from "../../src/map/GameMap";
 
 jest.mock("../../src/Events");
 jest.mock("../../src/Game");
@@ -58,6 +59,32 @@ describe("Combat", () => {
       });
 
       expect(result).toEqual({ attackerHealth: 1, defenderHealth: 0 });
+    });
+  });
+
+  describe("resolveRanged", () => {
+    it("damages only the defender", () => {
+      const result = Combat.resolveRanged({
+        attackerStrength: 10,
+        attackerHealth: 100,
+        defenderStrength: 10,
+        defenderHealth: 100,
+        roll: 1
+      });
+
+      expect(result).toEqual({ attackerHealth: 100, defenderHealth: 64 });
+    });
+
+    it("can kill, bottoming out at 0", () => {
+      const result = Combat.resolveRanged({
+        attackerStrength: 10,
+        attackerHealth: 100,
+        defenderStrength: 10,
+        defenderHealth: 10,
+        roll: 0
+      });
+
+      expect(result.defenderHealth).toBe(0);
     });
   });
 
@@ -351,5 +378,163 @@ describe("Unit.meleeAttack", () => {
   it("reads combat strength from units.yml", () => {
     expect(Unit.createFromName("Warrior", originTile, attackerPlayer).getCombatStrength()).toBe(8);
     expect(Unit.createFromName("Settler", originTile, attackerPlayer).canFight()).toBe(false);
+  });
+});
+
+describe("Unit.rangedAttack", () => {
+  let attackerPlayer: Player;
+  let defenderPlayer: Player;
+  // A row of tiles, x = 0..4. The archer stands on x = 0, so x = 1 and 2 are in range and x = 3 isn't.
+  let row: Tile[];
+  // Tiles the fake map says the archer can't see.
+  let hidden: Set<Tile>;
+
+  const fakePlayer = (name: string) =>
+    ({
+      getName: () => name,
+      addUnit: jest.fn(),
+      removeUnit: jest.fn(),
+      sendNetworkEvent: jest.fn(),
+      hasResearchedTech: () => false,
+      getVisibility: () => ({ isVisible: () => true, update: jest.fn() })
+    }) as unknown as Player;
+
+  const makeArcher = (tile: Tile, player: Player) => {
+    const unit = Unit.createFromName("Archer", tile, player);
+    tile.addUnit(unit);
+    return unit;
+  };
+
+  const makeWarrior = (tile: Tile, player: Player) => {
+    const unit = Unit.createFromName("Warrior", tile, player);
+    tile.addUnit(unit);
+    return unit;
+  };
+
+  beforeEach(() => {
+    jest.restoreAllMocks();
+
+    attackerPlayer = fakePlayer("Attacker");
+    defenderPlayer = fakePlayer("Defender");
+
+    jest.spyOn(Game, "getInstance").mockReturnValue({
+      getPlayers: () =>
+        new Map([
+          ["Attacker", attackerPlayer],
+          ["Defender", defenderPlayer]
+        ])
+    } as any);
+
+    row = [0, 1, 2, 3, 4].map((x) => new Tile("grass", x, 0));
+    hidden = new Set();
+    jest.spyOn(GameMap, "getInstance").mockReturnValue({
+      getTilesInRange: (tile: Tile, range: number) =>
+        row.filter((other) => Math.abs(other.getX() - tile.getX()) <= range),
+      hasLineOfSight: (from: Tile, to: Tile) => !hidden.has(to)
+    } as any);
+  });
+
+  it("reads ranged strength and range from units.yml, and offers Ranged Attack", () => {
+    const archer = makeArcher(row[0], attackerPlayer);
+
+    expect(archer.asJSON()).toMatchObject({ combatStrength: 5, rangedStrength: 7, range: 2 });
+    expect(archer.getUnitActionsJSON().map((action) => action.name)).toEqual(["ranged_attack", "fortify_until_healed"]);
+    expect(makeWarrior(row[4], attackerPlayer).isRanged()).toBe(false);
+  });
+
+  it("damages the target two tiles away without taking damage or moving, and spends the turn", () => {
+    const archer = makeArcher(row[0], attackerPlayer);
+    const warrior = makeWarrior(row[2], defenderPlayer);
+    jest.spyOn(Combat, "resolveRanged").mockReturnValue({ attackerHealth: 100, defenderHealth: 70 });
+
+    expect(archer.rangedAttack(row[2])).toBe(true);
+
+    expect(warrior.getHealth()).toBe(70);
+    expect(archer.getHealth()).toBe(100);
+    expect(archer.getTile()).toBe(row[0]);
+    expect(archer.getAvailableMovement()).toBe(0);
+    expect(defenderPlayer.sendNetworkEvent).toHaveBeenCalledWith(
+      expect.objectContaining({ event: "unitCombat", ranged: true, attackerHealth: 100, defenderHealth: 70 })
+    );
+
+    // Out of movement now.
+    expect(archer.rangedAttack(row[2])).toBe(false);
+  });
+
+  it("removes a target it kills, without advancing", () => {
+    const archer = makeArcher(row[0], attackerPlayer);
+    const warrior = makeWarrior(row[1], defenderPlayer);
+    jest.spyOn(Combat, "resolveRanged").mockReturnValue({ attackerHealth: 100, defenderHealth: 0 });
+
+    archer.rangedAttack(row[1]);
+
+    expect(row[1].getUnits()).toEqual([]);
+    expect(defenderPlayer.removeUnit).toHaveBeenCalledWith(warrior);
+    expect(archer.getTile()).toBe(row[0]);
+  });
+
+  it("refuses targets out of range, out of sight, friendly, or holding only civilians", () => {
+    const archer = makeArcher(row[0], attackerPlayer);
+
+    makeWarrior(row[3], defenderPlayer);
+    expect(archer.canRangedAttack(row[3])).toBe(false);
+
+    const settler = Unit.createFromName("Settler", row[1], defenderPlayer);
+    row[1].addUnit(settler);
+    expect(archer.canRangedAttack(row[1])).toBe(false);
+
+    makeWarrior(row[2], attackerPlayer);
+    expect(archer.canRangedAttack(row[2])).toBe(false);
+
+    makeWarrior(row[1], defenderPlayer);
+    expect(archer.canRangedAttack(row[1])).toBe(true);
+    hidden.add(row[1]);
+    expect(archer.canRangedAttack(row[1])).toBe(false);
+  });
+
+  it("lists the tiles in range and sight as its targets", () => {
+    const archer = makeArcher(row[0], attackerPlayer);
+    hidden.add(row[2]);
+
+    expect(archer.getRangedTargetTiles()).toEqual([row[1]]);
+
+    archer.sendRangedTargets({ aiming: true });
+    expect(attackerPlayer.sendNetworkEvent).toHaveBeenCalledWith({
+      event: "rangedTargets",
+      id: archer.getId(),
+      aiming: true,
+      tiles: [{ x: 1, y: 0 }]
+    });
+  });
+
+  it("previews the shot: no damage back, terrain still defends, no river penalty", () => {
+    const archer = makeArcher(row[0], attackerPlayer);
+    makeWarrior(row[2], defenderPlayer);
+
+    expect(archer.getRangedPreview(row[2])).toMatchObject({
+      ranged: true,
+      attackerStrength: 7,
+      defenderStrength: 8,
+      attackerModifiers: [],
+      attackerDamage: { min: 0, expected: 0, max: 0 },
+      defenderDamage: { min: 22, expected: 27, max: 33 },
+      outcome: "Major Victory"
+    });
+
+    const hill = new Tile("grass_hill", 1, 0);
+    row[1] = hill;
+    makeWarrior(hill, defenderPlayer);
+    expect(archer.getRangedPreview(hill)).toMatchObject({
+      defenderStrength: 10,
+      defenderModifiers: [{ label: "Hill", value: 0.25 }]
+    });
+  });
+
+  it("melee attacks go through meleeAttack, never the ranged path", () => {
+    const archer = makeArcher(row[0], attackerPlayer);
+    row[0].setAdjacentTile(0, row[1]);
+    makeWarrior(row[1], defenderPlayer);
+
+    expect(archer.canMeleeAttack(row[1])).toBe(false);
   });
 });
