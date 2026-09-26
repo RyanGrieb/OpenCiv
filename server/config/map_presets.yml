@@ -23,11 +23,11 @@ presets:
     units:
       "B": Work Boat
     rows:
-      - "O O ~ ~ ~ ~ ~ O O"
-      - " ~ ~ B f c B ~ O O"
+      - "O O ~ ~ ~ B ~ O O"
+      - " ~ ~ B f c ~ ~ O O"
       - "g g g g S w B ~ O"
-      - " g g g t e B ~ ~ O"
-      - "g g g B ~ ~ ~ O O"
+      - " g g g t e ~ ~ ~ O"
+      - "g g g B ~ B ~ O O"
       - " g g ~ ~ ~ ~ O O O"
 
   aquatic_sandbox:

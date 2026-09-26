@@ -65,16 +65,17 @@ describe("MapPresets", () => {
     expect(neighborTypes).toContainEqual(["grass"]);
   });
 
-  it("returns each Work Boat's tile, one beside every sea resource", () => {
+  it("returns each Work Boat's tile, one beside every sea resource and no other", () => {
     const tiles = buildGrid(20, 16);
     const stamped = MapPresets.stamp(MapPresets.get("coastal_resources"), tiles, tiles[9][7]);
 
     const boatTiles = stamped.filter(({ cell }) => cell.unit === "Work Boat").map(({ tile }) => tile);
     expect(boatTiles).toHaveLength(SEA_RESOURCES.length);
-    for (const resource of SEA_RESOURCES) {
-      const resourceTile = stamped.find(({ tile }) => tile.containsTileType(resource)).tile;
-      expect(boatTiles.some((boat) => boat.getAdjacentTiles().includes(resourceTile))).toBe(true);
-    }
+    // One resource per boat, so the AquaticResources scenario can't send a boat to the wrong one.
+    const resourcesBeside = (boat: Tile) =>
+      boat.getAdjacentTiles().flatMap((tile) => SEA_RESOURCES.filter((resource) => tile?.containsTileType(resource)));
+    expect(boatTiles.map(resourcesBeside).map((resources) => resources.length)).toEqual([1, 1, 1, 1, 1]);
+    expect(boatTiles.flatMap(resourcesBeside).sort()).toEqual([...SEA_RESOURCES].sort());
   });
 
   it("leaves tiles outside the patch alone", () => {
