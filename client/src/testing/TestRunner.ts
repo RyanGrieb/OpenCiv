@@ -29,9 +29,16 @@ export class TestRunner {
         resultsProxy.style.fontFamily = "monospace";
 
         const title = document.createElement("h3");
-        title.textContent = `Scenario: ${this.scenarioName}`;
+        title.style.display = "flex";
+        title.style.alignItems = "center";
+        title.style.gap = "10px";
         title.style.margin = "0 0 10px 0";
         title.style.borderBottom = "1px solid white";
+        const titleText = document.createElement("span");
+        titleText.textContent = `Scenario: ${this.scenarioName}`;
+        titleText.style.flex = "1";
+        title.appendChild(titleText);
+        title.appendChild(this.createCloseButton(resultsProxy));
         resultsProxy.appendChild(title);
 
         document.body.appendChild(resultsProxy);
@@ -67,5 +74,20 @@ export class TestRunner {
             log(`TEST FAILED: ${e}`, "red");
             console.error(e);
         }
+    }
+
+    // A span rather than a <button>, which styles.css draws as the game's large framed button.
+    // Closing only hides the window; the scenario keeps running and logging to the console.
+    private createCloseButton(resultsWindow: HTMLElement): HTMLSpanElement {
+        const button = document.createElement("span");
+        button.id = "test-results-close";
+        button.textContent = "\u00d7";
+        button.title = "Close";
+        button.style.color = "white";
+        button.style.fontSize = "24px";
+        button.style.lineHeight = "1";
+        button.style.cursor = "pointer";
+        button.addEventListener("click", () => resultsWindow.remove());
+        return button;
     }
 }
