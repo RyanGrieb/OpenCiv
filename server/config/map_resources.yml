@@ -20,6 +20,18 @@ bonus_resources:
     set_chance: 0.05
     min_temp: 0
     max_temp: 90
+  # Civ 5 wheat grows on plains and flood plains. Flood plains only appear after rivers are laid,
+  # which is after resources, so generated maps put it on plains; presets can use floodplains.
+  - name: wheat
+    spawn_tiles:
+      - plains
+      - floodplains
+    path_length: 1
+    min_tiles_set: 1
+    max_tiles_set: 3
+    set_chance: 0.05
+    min_temp: 20
+    max_temp: 90
   - name: fish
     spawn_tiles:
       - freshwater

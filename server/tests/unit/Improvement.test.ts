@@ -70,6 +70,21 @@ describe('Improvement', () => {
     expect(tile.getTotalStatValue(['production'])).toBe(2);
   });
 
+  it('farms wheat on plains and flood plains, turning it into improved wheat', () => {
+    expect(buildable(tileOf('plains', 'wheat'), player())).toEqual(['Farm']);
+    expect(buildable(tileOf('floodplains', 'wheat'))).toEqual(['Farm', 'Road']);
+
+    const tile = tileOf('plains', 'wheat');
+    expect(tile.getTotalStatValue(['food'])).toBe(2);
+    Improvement.complete(improvement('Farm'), tile);
+
+    expect(tile.getTileTypes()).toEqual(['plains', 'improved_wheat']);
+    expect(tile.getImprovement()).toBe('Farm');
+    expect(tile.getTotalStatValue(['food'])).toBe(3);
+    expect(tile.getTotalStatValue(['production'])).toBe(1);
+    expect(buildable(tile)).toEqual(['Road']);
+  });
+
   it("adds a farm's food and stops another improvement going on top", () => {
     const tile = tileOf('grass');
     Improvement.complete(improvement('Farm'), tile);

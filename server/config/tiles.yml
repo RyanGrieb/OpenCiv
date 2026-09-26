@@ -107,6 +107,14 @@ tiles:
     name: Stone Quarry
     stats:
       - production: 2
+  WHEAT:
+    name: Wheat
+    stats:
+      - food: 1
+  IMPROVED_WHEAT:
+    name: Improved Wheat
+    stats:
+      - food: 2
   FISH:
     name: Fish
     stats:

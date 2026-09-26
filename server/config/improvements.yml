@@ -26,6 +26,8 @@ improvements:
     build_turns: 7
     tile_type: farm
     terrain: [grass, plains, desert, tundra, floodplains, grass_hill, plains_hill, desert_hill, tundra_hill]
+    resources:
+      wheat: improved_wheat
   - name: Pasture
     asset_name: ICON_EMPTY_PASTURE
     icon: ICON_EMPTY_PASTURE
