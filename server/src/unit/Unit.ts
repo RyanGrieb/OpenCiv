@@ -62,6 +62,8 @@ export class Unit {
   private actedThisTurn: boolean;
   // Set by the "Fortify Until Healed" action; cleared by moving, attacking, or reaching full health.
   private fortified: boolean;
+  // Healing only kicks in once the unit has spent a whole turn fortified, so false on the turn it fortifies.
+  private fortifiedForATurn: boolean;
   private defaultMoveDistance: number;
   private availableMovement: number;
   private sightRange: number;
@@ -88,6 +90,7 @@ export class Unit {
     this.health = Combat.MAX_HEALTH;
     this.actedThisTurn = false;
     this.fortified = false;
+    this.fortifiedForATurn = false;
     this.defaultMoveDistance = options.defaultMoveDistance || 2;
     this.availableMovement = options.availableMovement ?? this.defaultMoveDistance;
     this.sightRange = options.sightRange ?? PlayerVisibility.DEFAULT_UNIT_SIGHT_RANGE;
@@ -180,7 +183,8 @@ export class Unit {
       eventName: "nextTurn",
       parentObject: this,
       callback: (data) => {
-        if (this.fortified && !this.actedThisTurn) this.heal();
+        if (this.fortified && this.fortifiedForATurn && !this.actedThisTurn) this.heal();
+        this.fortifiedForATurn = this.fortified;
         this.actedThisTurn = false;
         if (this.fortified && this.health >= Combat.MAX_HEALTH) this.setFortified(false);
         this.availableMovement = this.defaultMoveDistance;
@@ -338,6 +342,7 @@ export class Unit {
     if (this.fortified === fortified) return;
 
     this.fortified = fortified;
+    this.fortifiedForATurn = false;
     this.player.sendNetworkEvent({ event: "unitFortified", id: this.id, fortified });
   }
 

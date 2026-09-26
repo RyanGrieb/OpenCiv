@@ -316,6 +316,10 @@ describe("Unit.meleeAttack", () => {
         fortified: true
       });
 
+      // The turn it fortified doesn't count.
+      nextTurn(unit);
+      expect(unit.getHealth()).toBe(75);
+
       nextTurn(unit);
       expect(unit.getHealth()).toBe(85);
       expect(unit.isFortified()).toBe(true);

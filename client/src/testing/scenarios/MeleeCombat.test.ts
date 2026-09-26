@@ -215,7 +215,7 @@ export function setupMeleeCombatTest(game: Game) {
     });
 
     runner.addStep({
-        name: "Fortify Until Healed shows for our wounded Warrior, which then heals and stays fortified",
+        name: "Fortify Until Healed shows for our wounded Warrior, which heals from the second turn on and stays fortified",
         action: async () => {
             const action = warrior.getActions().find((candidate) => candidate.getName() === "fortify_until_healed");
             if (!action?.requirementsMet(warrior)) throw new Error("No usable Fortify Until Healed action");
@@ -231,6 +231,10 @@ export function setupMeleeCombatTest(game: Game) {
             });
             await utils.waitUntil(() => warrior.isFortified(), 5000, "Warrior to fortify");
             healthBefore.ours = warrior.getHealth();
+            await endTurn();
+            await utils.delay(400);
+            // The turn it fortified on doesn't count.
+            if (warrior.getHealth() !== healthBefore.ours) throw new Error("Healed on the turn it fortified");
             await endTurn();
             await utils.delay(400);
             utils.log(`Fortified: ours ${healthBefore.ours} -> ${warrior.getHealth()} HP`, "yellow");
