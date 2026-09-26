@@ -12,7 +12,7 @@ import { UITheme } from "../UITheme";
 
 const WINDOW_WIDTH = 720;
 const PADDING = 16;
-const ROW_HEIGHT = 72;
+const ROW_HEIGHT = 104;
 const CIV_ICON_SIZE = 48;
 const BUTTON_GAP = 8;
 const TITLE_FONT = `bold ${UITheme.FONT_SIZE}px serif`;
@@ -80,13 +80,19 @@ export class DiplomacyWindow extends ActorGroup {
     if (relation.atWar && relation.peaceOfferedToUs) return { text: "At war - they offer peace", color: WAR_COLOR };
     if (relation.atWar && relation.peaceOfferedByUs) return { text: "At war - peace offered", color: WAR_COLOR };
     if (relation.atWar && relation.turnsUntilPeace > 0) {
-      return { text: `At war - peace in ${relation.turnsUntilPeace} turns`, color: WAR_COLOR };
+      return { text: `At war - can offer peace in ${relation.turnsUntilPeace} turns`, color: WAR_COLOR };
     }
     if (relation.atWar) return { text: "At war", color: WAR_COLOR };
     if (relation.treatyTurnsLeft > 0)
       return { text: `Peace treaty - ${relation.treatyTurnsLeft} turns`, color: PEACE_COLOR };
 
     return { text: "At peace", color: PEACE_COLOR };
+  }
+
+  private static getWarsText(relation: Relation): string {
+    if (relation.atWarWith.length < 1) return "At war with no one";
+
+    return `At war with: ${relation.atWarWith.join(", ")}`;
   }
 
   private static send(event: string, relation: Relation) {
@@ -223,8 +229,19 @@ export class DiplomacyWindow extends ActorGroup {
     const status = DiplomacyWindow.getStatus(relation);
     const statusLabel = new Label({ text: status.text, font: UITheme.FONT, fontColor: status.color });
     await statusLabel.conformSize();
-    statusLabel.setPosition(textX, rowY + ROW_HEIGHT - statusLabel.getHeight() - 8);
+    statusLabel.setPosition(textX, name.getY() + name.getHeight() + 6);
     actors.push(statusLabel);
+
+    // Who else they're fighting, so the player can see every war they know of. "?" is a civilization
+    // they haven't met - the server decides what this player may know.
+    const warsLabel = new Label({
+      text: DiplomacyWindow.getWarsText(relation),
+      font: UITheme.FONT,
+      fontColor: "lightgray"
+    });
+    await warsLabel.conformSize();
+    warsLabel.setPosition(textX, statusLabel.getY() + statusLabel.getHeight() + 6);
+    actors.push(warsLabel);
 
     const buttons: Button[] = [];
     let buttonX = x + WINDOW_WIDTH - PADDING;

@@ -107,6 +107,21 @@ describe("PlayerDiplomacy", () => {
     expect(messages(england)).toContain("Rome has declared war on Mongolia!");
   });
 
+  it("lists who each met civilization is at war with, with a ? for anyone not met yet", () => {
+    rome.getDiplomacy().meet(mongolia);
+    mongolia.getDiplomacy().meet(england);
+    mongolia.getDiplomacy().declareWar(england);
+    const mongoliaSeenByRome = () => rome.getDiplomacy().toJSON().find((relation) => relation.name === "Player2");
+
+    expect(mongoliaSeenByRome().atWarWith).toEqual(["?"]);
+
+    rome.getDiplomacy().meet(england);
+    expect(mongoliaSeenByRome().atWarWith).toEqual(["England"]);
+
+    rome.getDiplomacy().declareWar(mongolia);
+    expect(mongoliaSeenByRome().atWarWith).toEqual(["England", "You"]);
+  });
+
   it(`won't take an offer of peace until the war has run ${PlayerDiplomacy.MIN_WAR_TURNS} turns`, () => {
     rome.getDiplomacy().meet(mongolia);
     rome.getDiplomacy().declareWar(mongolia);

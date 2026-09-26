@@ -16,6 +16,9 @@ export interface RelationJSON {
   treatyTurnsLeft: number;
   peaceOfferedToUs: boolean;
   peaceOfferedByUs: boolean;
+  // Everyone this civilization is at war with, as this player knows them: "You", a civ's name, or
+  // "?" for a civilization this player hasn't met. The barbarians aren't listed.
+  atWarWith: string[];
 }
 
 /**
@@ -151,8 +154,7 @@ export class PlayerDiplomacy {
       `${PlayerDiplomacy.civName(this.player)} has declared war on ${PlayerDiplomacy.civName(other)}!`
     );
 
-    this.sendUpdate();
-    other.getDiplomacy().sendUpdate();
+    PlayerDiplomacy.sendUpdateToAll();
   }
 
   /**
@@ -214,8 +216,16 @@ export class PlayerDiplomacy {
       turnsUntilPeace: this.getTurnsUntilPeace(other),
       treatyTurnsLeft: this.treaties.get(other) ?? 0,
       peaceOfferedToUs: this.peaceOffers.has(other),
-      peaceOfferedByUs: other.getDiplomacy().peaceOffers.has(this.player)
+      peaceOfferedByUs: other.getDiplomacy().peaceOffers.has(this.player),
+      atWarWith: Array.from(other.getDiplomacy().wars.keys()).map((enemy) => this.describe(enemy))
     }));
+  }
+
+  // A war or a peace shows in the diplomacy window of everyone who has met either side.
+  private static sendUpdateToAll() {
+    Game.getInstance()
+      .getPlayers()
+      .forEach((player) => player.getDiplomacy().sendUpdate());
   }
 
   // Every player in a game has a civ by the time they can meet anyone; the name is a fallback.
@@ -309,8 +319,7 @@ export class PlayerDiplomacy {
     PlayerDiplomacy.expelFromLandsOf(this.player);
     PlayerDiplomacy.expelFromLandsOf(other);
 
-    this.sendUpdate();
-    other.getDiplomacy().sendUpdate();
+    PlayerDiplomacy.sendUpdateToAll();
   }
 
   // Everyone else who knows both sides hears about a war or a peace between them.
@@ -323,6 +332,13 @@ export class PlayerDiplomacy {
 
         player.getNotifications().addMessage(icon, text);
       });
+  }
+
+  // How this player refers to another in their diplomacy window.
+  private describe(other: Player): string {
+    if (other === this.player) return "You";
+
+    return this.met.has(other) ? PlayerDiplomacy.civName(other) : "?";
   }
 
   private getTurnsUntilPeace(other: Player): number {

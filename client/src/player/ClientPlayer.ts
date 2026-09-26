@@ -426,6 +426,7 @@ export class ClientPlayer extends AbstractPlayer {
       this.unselectUnit();
       return;
     }
+    if (this.rangedAiming.isAiming() && this.promptWarOver(clickedTile)) return;
 
     if (clickedTile && clickedTile.getUnits().some((unit) => unit.getPlayer() === this)) {
       this.onClickedTileWithUnit(clickedTile);
@@ -487,6 +488,7 @@ export class ClientPlayer extends AbstractPlayer {
     }
     if (!clickedTile || !this.selectedUnit) return;
 
+    if (this.rangedAiming.isAiming() && this.promptWarOver(clickedTile)) return;
     if (this.rangedAiming.isAiming() && !this.canAttack(clickedTile)) {
       this.stopAiming();
       return;
@@ -537,6 +539,17 @@ export class ClientPlayer extends AbstractPlayer {
       ? this.rangedAiming.canShoot(tile, { ignoreDiplomacy: true })
       : unit.canMeleeAttack(tile, { ignoreDiplomacy: true });
     return inReach ? owner : undefined;
+  }
+
+  // Like Civ 5 and old_java, trying to attack a civilization we're at peace with - in melee or with a
+  // ranged shot - asks to declare war first. Returns whether it asked.
+  private promptWarOver(tile: Tile | undefined): boolean {
+    const peacefulTarget = tile ? this.getPeacefulTarget(tile) : undefined;
+    if (!peacefulTarget) return false;
+
+    this.unselectUnit();
+    Game.getInstance().getCurrentSceneAs<InGameScene>().openDeclareWarPrompt(peacefulTarget);
+    return true;
   }
 
   // Right-dragging onto an enemy the selected unit can hit shows a red line and target instead of a
@@ -606,13 +619,7 @@ export class ClientPlayer extends AbstractPlayer {
       return;
     }
 
-    // Like Civ 5 and old_java, trying to attack a civilization we're at peace with asks to declare war first.
-    const peacefulTarget = this.getPeacefulTarget(targetTile);
-    if (peacefulTarget) {
-      this.unselectUnit();
-      Game.getInstance().getCurrentSceneAs<InGameScene>().openDeclareWarPrompt(peacefulTarget);
-      return;
-    }
+    if (this.promptWarOver(targetTile)) return;
 
     const pathTiles = GameMap.getInstance().constructShortestPath(
       this.selectedUnit,

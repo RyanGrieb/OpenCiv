@@ -651,18 +651,20 @@ export class Game {
 
     const { width: _, height: unwrappedWordHeight } = this.measureText(text, font);
 
-    //Copy the string
-    let modifiedText = text + "";
+    // Rebuilt word by word, so a line break lands before the word that overflowed - not before an
+    // earlier copy of the same word, as a search-and-replace would.
+    let modifiedText = "";
     let wrappedHeight = unwrappedWordHeight;
 
-    for (const word of modifiedText.split(" ")) {
+    for (const word of text.split(" ")) {
       const { width: wordWidth, height: wordHeight } = this.measureText(word + " ", font);
 
-      if (currentWidth + wordWidth > maxWidth) {
-        modifiedText = modifiedText.replace(word, "\n" + word);
+      if (currentWidth > 0 && currentWidth + wordWidth > maxWidth) {
+        modifiedText += "\n" + word;
         currentWidth = wordWidth;
         wrappedHeight += wordHeight;
       } else {
+        modifiedText += (currentWidth > 0 ? " " : "") + word;
         currentWidth += wordWidth;
       }
     }

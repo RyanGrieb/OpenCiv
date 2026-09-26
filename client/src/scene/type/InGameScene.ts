@@ -287,7 +287,7 @@ export class InGameScene extends Scene {
     this.researchDisplayInfo = new ResearchDisplayInfo();
     this.addActor(this.researchDisplayInfo);
 
-    // Under the research box, like old_java's diplomacy button beside the chat and religion ones.
+    // Bottom left, above the tile info, where old_java kept it beside the chat and religion buttons.
     this.diplomacyButton = new Button({
       buttonImage: GameImage.ICON_BUTTON,
       buttonHoveredImage: GameImage.ICON_BUTTON_HOVERED,
@@ -295,8 +295,8 @@ export class InGameScene extends Scene {
       iconWidth: UITheme.ICON_SIZE,
       iconHeight: UITheme.ICON_SIZE,
       size: ButtonSize.ICON_LARGE,
-      x: this.researchDisplayInfo.getX(),
-      y: this.researchDisplayInfo.getY() + this.researchDisplayInfo.getHeight() + 10,
+      x: 10,
+      y: Game.getInstance().getHeight() - ButtonSize.ICON_LARGE.height - 44,
       z: 5,
       onClicked: () => this.toggleDiplomacyUI()
     });

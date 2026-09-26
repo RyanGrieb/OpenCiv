@@ -15,6 +15,8 @@ export interface Relation {
   treatyTurnsLeft: number;
   peaceOfferedToUs: boolean;
   peaceOfferedByUs: boolean;
+  // Everyone this civilization is at war with: "You", a civ's name, or "?" for one we haven't met.
+  atWarWith: string[];
 }
 
 export class Diplomacy {

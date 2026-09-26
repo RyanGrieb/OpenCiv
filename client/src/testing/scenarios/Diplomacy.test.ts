@@ -8,6 +8,7 @@ import { GameMap } from "../../map/GameMap";
 import { InGameScene } from "../../scene/type/InGameScene";
 import { NotificationData } from "../../notification/Notifications";
 import { Relation } from "../../player/Diplomacy";
+import { RangedAiming } from "../../player/RangedAiming";
 import { TestUtils } from "../TestUtils";
 
 // Plays Civ 5 war and peace out against a live server, from Player1's side. A second player joins
@@ -20,6 +21,7 @@ export function setupDiplomacyTest(game: Game) {
   let enemySocket: WebSocket | undefined;
   const enemyNotifications: string[] = [];
   let warrior: Unit | undefined;
+  let archer: Unit | undefined;
   let enemyWarrior: Unit | undefined;
   let enemyCity: City | undefined;
   let enemyHealthBefore = 0;
@@ -36,6 +38,7 @@ export function setupDiplomacyTest(game: Game) {
   const relation = (): Relation | undefined => me().getRelations()[0];
   const notifications = (): NotificationData[] => scene().getNotifications().getAll();
   const clientPlayer = () => me() as unknown as Record<string, any>;
+  const aiming = () => clientPlayer()["rangedAiming"] as RangedAiming;
   const watch = (tile: Tile) => scene().focusOnTile(tile, 3);
   const window = () => scene().getDiplomacyWindow();
   const rowButtons = () => window()?.getRowButtons(relation().name) ?? [];
@@ -61,7 +64,10 @@ export function setupDiplomacyTest(game: Game) {
   runner.addStep({
     name: "Start a revealed-map game with a second player, two tiles apart and not at war",
     action: async () => {
-      enemySocket = await utils.startGameWithSecondPlayer({ autoEndTurns: false, gameOptions: { startAtWar: false } });
+      enemySocket = await utils.startGameWithSecondPlayer({
+        autoEndTurns: false,
+        gameOptions: { startAtWar: false, startWithArcher: true }
+      });
       enemySocket.addEventListener("message", (message) => {
         const data = JSON.parse(message.data);
         if (data.event === "notifications") {
@@ -77,8 +83,11 @@ export function setupDiplomacyTest(game: Game) {
         .getUnits()
         .find((unit) => unit.getName() === "Warrior");
       enemyWarrior = allUnits().find((unit) => unit.getPlayer() !== me() && unit.getName() === "Warrior");
+      archer = me()
+        .getUnits()
+        .find((unit) => unit.getName() === "Archer");
     },
-    verification: () => game.getCurrentScene().getName() === "in_game" && !!warrior && !!enemyWarrior
+    verification: () => game.getCurrentScene().getName() === "in_game" && !!warrior && !!enemyWarrior && !!archer
   });
 
   runner.addStep({
@@ -111,6 +120,31 @@ export function setupDiplomacyTest(game: Game) {
       clientPlayer()["moveSelectedUnit"](enemyWarrior.getTile());
       await utils.waitUntil(() => !!scene().getDeclareWarWindow()?.isBuilt(), 5000, "The Declare War prompt");
       await utils.delay(2000); // Long enough to read it
+      if (scene().getDeclareWarWindow().getTarget() !== enemyWarrior.getPlayer())
+        throw new Error("Prompt names the wrong civ");
+      scene()["openUIElement"].close();
+      await utils.delay(500);
+    },
+    verification: () => !scene().getDeclareWarWindow() && relation().atWar === false && enemyWarrior.getHealth() === 100
+  });
+
+  runner.addStep({
+    name: "Aiming our Archer's Ranged Attack at them asks us to declare war too; Cancel keeps the peace",
+    action: async () => {
+      await walkTo(archer, () => utils.tilesAround(enemyWarrior.getTile(), 1, 2));
+      watch(archer.getTile());
+      clientPlayer().selectUnit(archer);
+      await utils.waitUntil(
+        () => aiming().getTargetTiles().includes(enemyWarrior.getTile()),
+        5000,
+        "Their Warrior to be in the Archer's range"
+      );
+      clientPlayer().toggleRangedAttack();
+      await utils.waitUntil(() => aiming().isAiming(), 5000, "Aiming to start");
+      await utils.delay(1000);
+      clientPlayer()["onLeftClickTile"](enemyWarrior.getTile(), -1, -1);
+      await utils.waitUntil(() => !!scene().getDeclareWarWindow()?.isBuilt(), 5000, "The Declare War prompt");
+      await utils.delay(2000);
       if (scene().getDeclareWarWindow().getTarget() !== enemyWarrior.getPlayer())
         throw new Error("Prompt names the wrong civ");
       scene()["openUIElement"].close();
@@ -182,7 +216,8 @@ export function setupDiplomacyTest(game: Game) {
     },
     verification: () =>
       relation().turnsUntilPeace === 10 &&
-      window().getTexts().includes("At war - peace in 10 turns") &&
+      window().getTexts().includes("At war - can offer peace in 10 turns") &&
+      window().getTexts().includes("At war with: You") &&
       rowButtons().length === 0 &&
       enemyNotifications.some((text) => text.endsWith("has declared war on you!")) &&
       notifications().some((notification) => notification.text === `You have declared war on ${relation().civName}!`)
