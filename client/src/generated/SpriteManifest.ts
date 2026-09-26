@@ -96,6 +96,7 @@ export const SPRITE_MANIFEST: SpriteManifestEntry[] = [
   { name: "ROAD_VERTICAL_CORNERTOP", url: new URL("../../assets/sprites/roads/ROAD_VERTICAL_CORNERTOP.png", import.meta.url).href },
   { name: "ROAD_VERTICAL_LEFT", url: new URL("../../assets/sprites/roads/ROAD_VERTICAL_LEFT.png", import.meta.url).href },
   { name: "ROAD_VERTICAL_RIGHT", url: new URL("../../assets/sprites/roads/ROAD_VERTICAL_RIGHT.png", import.meta.url).href },
+  { name: "TILE_ANCIENT_RUINS", url: new URL("../../assets/sprites/tiles/TILE_ANCIENT_RUINS.png", import.meta.url).href },
   { name: "TILE_BARBARIAN_CAMP", url: new URL("../../assets/sprites/tiles/TILE_BARBARIAN_CAMP.png", import.meta.url).href },
   { name: "TILE_BLANK", url: new URL("../../assets/sprites/tiles/TILE_BLANK.png", import.meta.url).href },
   { name: "TILE_CATTLE", url: new URL("../../assets/sprites/tiles/TILE_CATTLE.png", import.meta.url).href },

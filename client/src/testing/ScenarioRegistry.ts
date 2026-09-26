@@ -99,6 +99,11 @@ ScenarioRegistry.register("CombatSandbox", ScenarioCategory.COMBAT, async () => 
     return module.setupCombatSandboxTest;
 });
 
+ScenarioRegistry.register("AncientRuins", ScenarioCategory.MAP, async () => {
+    const module = await import("./scenarios/AncientRuins.test");
+    return module.setupAncientRuinsTest;
+});
+
 ScenarioRegistry.register("TechDetailWindow", ScenarioCategory.RESEARCH, async () => {
     const module = await import("./scenarios/TechDetailWindow.test");
     return module.setupTechDetailWindowTest;

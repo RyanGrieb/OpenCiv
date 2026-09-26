@@ -897,6 +897,20 @@ export class GameMap {
   }
 
   /**
+   * Resends a tile to every player who can currently see it. This is how a client picks up a
+   * change to its tile types, e.g. a barbarian camp or ancient ruins disappearing.
+   */
+  public resendTileToObservers(tile: Tile) {
+    Game.getInstance()
+      .getPlayers()
+      .forEach((player) => {
+        if (player.getVisibility().isVisible(tile)) {
+          this.sendTilesToPlayer(player, [tile]);
+        }
+      });
+  }
+
+  /**
    * Pushes specific tiles to a player mid-game, grouped into the same chunk packets the initial
    * sync uses. This is how newly-discovered terrain (and anything standing on it) reaches a client
    * once their units move - see PlayerVisibility.update().
