@@ -148,3 +148,8 @@ ScenarioRegistry.register("TileVariants", ScenarioCategory.MAP, async () => {
     const module = await import("./scenarios/TileVariants.test");
     return module.setupTileVariantsTest;
 });
+
+ScenarioRegistry.register("SoftFogOfWar", ScenarioCategory.MAP, async () => {
+    const module = await import("./scenarios/SoftFogOfWar.test");
+    return module.setupSoftFogOfWarTest;
+});
