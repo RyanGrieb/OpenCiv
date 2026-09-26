@@ -210,3 +210,39 @@ tiles:
     name: Lumber Mill
     stats:
       - production: 1
+  # Natural wonders (see natural_wonders.yml). A wonder's yields replace its terrain's.
+  MT_FUJI:
+    name: Mt. Fuji
+    stats:
+      - faith: 3
+      - culture: 2
+  MT_KILIMANJARO:
+    name: Mt. Kilimanjaro
+    stats:
+      - food: 3
+      - culture: 2
+  CERRO_DE_POTOSI:
+    name: Cerro de Potosi
+    stats:
+      - gold: 10
+  GRAND_MESA:
+    name: Grand Mesa
+    stats:
+      - production: 2
+      - gold: 3
+  BARRINGER_CRATER:
+    name: Barringer Crater
+    stats:
+      - gold: 2
+      - science: 3
+  GREAT_BARRIER_REEF:
+    name: Great Barrier Reef
+    stats:
+      - food: 2
+      - production: 1
+      - gold: 1
+      - science: 2
+  KRAKATOA:
+    name: Krakatoa
+    stats:
+      - science: 5

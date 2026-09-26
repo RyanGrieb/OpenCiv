@@ -1,0 +1,37 @@
+# Civ 5's natural wonders: one-of-a-kind landmarks the map generator scatters around the world, a
+# random handful per game (see NaturalWonders.getCountForMapArea). Each sits on top of its tile's
+# terrain as its own tile type, and its yields (in tiles.yml under the same key) replace the
+# terrain's, as they do in Civ 5.
+#
+#   tile_type   - the tile type added on top of the terrain; also its tiles.yml key and sprite name.
+#   spawn_tiles - bare terrain (no feature or resource) it may be placed on.
+#   impassable  - no unit can enter the tile. A city can still work it.
+natural_wonders:
+  - name: Mt. Fuji
+    tile_type: mt_fuji
+    spawn_tiles: [grass, plains]
+    impassable: true
+  - name: Mt. Kilimanjaro
+    tile_type: mt_kilimanjaro
+    spawn_tiles: [grass, plains]
+    impassable: true
+  - name: Cerro de Potosi
+    tile_type: cerro_de_potosi
+    spawn_tiles: [plains, desert]
+    impassable: true
+  - name: Grand Mesa
+    tile_type: grand_mesa
+    spawn_tiles: [desert, plains]
+    impassable: true
+  - name: Barringer Crater
+    tile_type: barringer_crater
+    spawn_tiles: [desert, tundra]
+    impassable: true
+  - name: Great Barrier Reef
+    tile_type: great_barrier_reef
+    spawn_tiles: [shallow_ocean]
+    impassable: true
+  - name: Krakatoa
+    tile_type: krakatoa
+    spawn_tiles: [shallow_ocean]
+    impassable: true

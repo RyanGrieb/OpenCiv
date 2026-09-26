@@ -9,6 +9,7 @@ import { Job, gracefulShutdown, scheduleJob } from "node-schedule";
 import { Tile } from "../../map/Tile";
 import { MapPresets } from "../../map/MapPresets";
 import { AncientRuins } from "../../map/AncientRuins";
+import { NaturalWonders } from "../../map/NaturalWonders";
 import { Barbarians } from "../../barbarian/Barbarians";
 import { Player } from "../../Player";
 import { PlayerNotifications } from "../../notification/PlayerNotifications";
@@ -33,6 +34,11 @@ export class InGameState extends State {
     "ancient_ruins"
   ];
 
+  // Natural wonders come from config, so they're added to the list above when it's asked for.
+  private static getSpawnAvoidTileTypes(): string[] {
+    return [...InGameState.SPAWN_AVOID_TILE_TYPES, ...NaturalWonders.getTileTypes()];
+  }
+
   // Anywhere suitable on the map - or, with the spawnPlayersTogether option, two tiles from the first
   // player's settler, falling back to anywhere if nothing that close is open. `edgeBuffer` keeps the
   // spawn that many tiles in from the map's edges.
@@ -43,7 +49,7 @@ export class InGameState extends State {
     return (
       nearbyTile ??
       GameMap.getInstance().getRandomTileWith({
-        avoidTileTypes: InGameState.SPAWN_AVOID_TILE_TYPES,
+        avoidTileTypes: InGameState.getSpawnAvoidTileTypes(),
         avoidMapEdge: edgeBuffer
       })
     );
@@ -66,7 +72,7 @@ export class InGameState extends State {
   }
 
   private static isOpenSpawnTile(tile: Tile | undefined): boolean {
-    return !!tile && !tile.containsTileTypes(InGameState.SPAWN_AVOID_TILE_TYPES) && tile.getUnits().length === 0;
+    return !!tile && !tile.containsTileTypes(InGameState.getSpawnAvoidTileTypes()) && tile.getUnits().length === 0;
   }
 
   // An open spawn tile two steps from `origin` - close enough that the players' starting units are
@@ -99,7 +105,10 @@ export class InGameState extends State {
       .getAdjacentTiles()
       .find(
         (candidate) =>
-          candidate && !candidate.isWater() && candidate.isWorkable() && candidate.canPlaceUnit(player, isUtility)
+          candidate &&
+          !candidate.isWater() &&
+          candidate.getMovementCost() < 9999 &&
+          candidate.canPlaceUnit(player, isUtility)
       );
     tile?.addUnit(Unit.createFromName(unitName, tile, player));
   }

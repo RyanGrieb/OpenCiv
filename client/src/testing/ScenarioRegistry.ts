@@ -158,3 +158,8 @@ ScenarioRegistry.register("TileVariants", ScenarioCategory.MAP, async () => {
     const module = await import("./scenarios/TileVariants.test");
     return module.setupTileVariantsTest;
 });
+
+ScenarioRegistry.register("NaturalWonders", ScenarioCategory.MAP, async () => {
+    const module = await import("./scenarios/NaturalWonders.test");
+    return module.setupNaturalWondersTest;
+});

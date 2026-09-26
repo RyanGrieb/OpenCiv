@@ -133,11 +133,13 @@ export class PlayerNotifications {
 
   /**
    * Called before a new turn is processed, so messages from the old turn are gone before the new
-   * turn's (a tech discovered, a unit finished) are added.
+   * turn's (a tech discovered, a unit finished) are added. Messages from before the first turn (a
+   * natural wonder in sight of the starting units) carry over into it, or they'd never be seen.
    */
   public startTurn(turn: number) {
+    const gameStarting = this.currentTurn === 0;
     this.currentTurn = turn;
-    this.messages = [];
+    if (!gameStarting) this.messages = [];
   }
 
   public addMessage(icon: string, text: string, options?: MessageOptions) {

@@ -119,19 +119,10 @@ export class InGameScene extends Scene {
         this.tileYieldActors = [];
 
         if (options.tile && !this.openUIElement) {
-          let tileTypes: string = options.tile.getTileTypes().toString();
-          tileTypes = tileTypes.replaceAll("_", " ");
-          tileTypes = tileTypes.replaceAll(",", ", ");
-          let strArray = tileTypes.split("");
-          strArray[0] = strArray[0].toUpperCase();
-
-          for (let i = 1; i < tileTypes.length; i++) {
-            if (tileTypes[i - 1] === " ") {
-              strArray[i] = tileTypes[i].toUpperCase();
-            }
-          }
-
-          tileTypes = strArray.join("");
+          const tileTypes = options.tile
+            .getTileTypes()
+            .map((tileType: string) => Tile.getTileTypeName(tileType))
+            .join(", ");
 
           // Get tile yields
           const yields = options.tile.getTileYield();

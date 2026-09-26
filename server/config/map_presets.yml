@@ -73,3 +73,26 @@ presets:
       - "g g R S g g"
       - " g g g g g g"
       - "g g g g g g"
+
+  natural_wonders:
+    description: Every natural wonder within sight of the Settler, so each one is discovered on the first turn.
+    legend:
+      "g": [grass]
+      "p": [plains]
+      "d": [desert]
+      "~": [shallow_ocean]
+      "O": [ocean]
+      "F": [grass, mt_fuji]
+      "K": [plains, mt_kilimanjaro]
+      "P": [plains, cerro_de_potosi]
+      "M": [desert, grand_mesa]
+      "C": [desert, barringer_crater]
+      "R": [shallow_ocean, great_barrier_reef]
+      "V": [shallow_ocean, krakatoa]
+      "S": [grass]
+    rows:
+      - "g g d d d ~ ~ O"
+      - " g g F M C ~ ~ O"
+      - "p g K g S R ~ O"
+      - " g g P g g V ~ O"
+      - "g g g p ~ ~ ~ O"

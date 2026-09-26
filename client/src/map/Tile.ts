@@ -7,9 +7,10 @@ import { Vector } from "../util/Vector";
 import { GameMap } from "./GameMap";
 import { MapWrap } from "./MapWrap";
 import { SpriteAtlas } from "../SpriteAtlas";
+import { Strings } from "../util/Strings";
 
 // Keyed by tile-type name (upper/lower-case variants both used); see Tile.getTileYield().
-export type TileYieldsData = Record<string, { stats: Record<string, number>[] }>;
+export type TileYieldsData = Record<string, { name?: string; stats: Record<string, number>[] }>;
 
 export interface TileOptions {
   tileTypes: string[];
@@ -166,6 +167,11 @@ export class Tile extends Actor {
 
   public static getTileYields() {
     return Tile.allTileStats;
+  }
+
+  // The name tiles.yml gives a tile type ("mt_fuji" -> "Mt. Fuji"), or the type itself in title case.
+  public static getTileTypeName(tileType: string): string {
+    return Tile.allTileStats?.[tileType.toUpperCase()]?.name ?? Strings.capitalizeWords(tileType.replaceAll("_", " "));
   }
 
   public async loadImage() {

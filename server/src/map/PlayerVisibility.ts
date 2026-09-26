@@ -1,6 +1,7 @@
 import { Game } from "../Game";
 import { Player } from "../Player";
 import { GameMap } from "./GameMap";
+import { NaturalWonders } from "./NaturalWonders";
 import { Tile } from "./Tile";
 
 /**
@@ -68,6 +69,7 @@ export class PlayerVisibility {
 
     const revealed: Tile[] = [];
     for (const tile of this.visible) {
+      if (!this.discovered.has(tile)) this.onDiscovered(tile);
       this.discovered.add(tile);
 
       if (!previouslyVisible.has(tile)) {
@@ -94,6 +96,16 @@ export class PlayerVisibility {
         tiles: fogged.map((tile) => ({ x: tile.getX(), y: tile.getY() }))
       });
     }
+  }
+
+  // Seeing a natural wonder for the first time is worth telling the player about, as in Civ 5.
+  private onDiscovered(tile: Tile) {
+    const wonder = NaturalWonders.getWonderOn(tile);
+    if (!wonder) return;
+
+    this.player
+      .getNotifications()
+      .addMessage(`TILE_${wonder.tile_type.toUpperCase()}`, `Natural wonder found: ${wonder.name}`);
   }
 
   private computeVisibleTiles(): Set<Tile> {

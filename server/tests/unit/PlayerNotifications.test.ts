@@ -112,12 +112,24 @@ describe('PlayerNotifications', () => {
   });
 
   it('keeps a message until it is dismissed or the next turn starts', () => {
+    notifications.startTurn(1);
     notifications.addMessage('ICON_PRODUCTION', 'Rome has finished Warrior.');
     notifications.addMessage('ICON_PRODUCTION', 'Rome has finished Monument.');
     const [first, second] = notifications.getNotifications();
 
     triggerServerEvent('dismissNotification', { id: first.id });
     expect(ids()).toEqual([second.id]);
+
+    notifications.startTurn(2);
+    expect(ids()).toEqual([]);
+  });
+
+  it('carries messages from before the game starts into the first turn', () => {
+    notifications.addMessage('TILE_MT_FUJI', 'Natural wonder found: Mt. Fuji');
+    const [discovery] = notifications.getNotifications();
+
+    notifications.startTurn(1);
+    expect(ids()).toEqual([discovery.id]);
 
     notifications.startTurn(2);
     expect(ids()).toEqual([]);

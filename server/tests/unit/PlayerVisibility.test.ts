@@ -18,6 +18,7 @@ const mockTile = (x: number, y: number) => {
     adjacent: [] as Tile[],
     getAdjacentTiles: () => tile.adjacent,
     getCityTerritoryOf: (): Tile | undefined => undefined,
+    containsTileType: () => false,
   };
 
   return tile as unknown as Tile & { adjacent: Tile[] };

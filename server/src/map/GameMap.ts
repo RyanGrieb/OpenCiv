@@ -3,6 +3,7 @@ import { Player } from "../Player";
 import { Tile } from "./Tile";
 import random from "random";
 import { MapResources } from "./MapResources";
+import { NaturalWonders } from "./NaturalWonders";
 import { TileIndexer } from "./TileIndexer";
 import { Unit } from "../unit/Unit";
 import PriorityQueue from "ts-priority-queue";
@@ -761,6 +762,9 @@ export class GameMap {
 
     // == Apply floodplains for desert tiles w/ river tiles
     console.log("Done generating floodplains!");
+
+    // == Place natural wonders, last so nothing else lands on top of one
+    NaturalWonders.generate(this.tiles, NaturalWonders.getCountForMapArea(this.mapArea));
   }
 
   public getNextPotentialRiverTiles(currentTile: Tile, lastTraversedTile: Tile, originTile: Tile) {

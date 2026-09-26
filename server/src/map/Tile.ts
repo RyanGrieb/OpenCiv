@@ -6,6 +6,7 @@ import { City } from "../city/City";
 import { Player } from "../Player";
 import { ConfigLoader } from "../util/ConfigLoader";
 import { MapResources } from "./MapResources";
+import { NaturalWonders } from "./NaturalWonders";
 
 // A tile/building stat-line is represented as an array of single-key partial objects
 // (e.g. [{ science: 0 }, { gold: 0 }, ...]) rather than one flat dictionary.
@@ -235,6 +236,8 @@ export class Tile {
   public getMovementCost(): number {
     const tileTypesWithIncreasedCost = ["hill", "forest", "jungle"];
     const tileTypesWithInfiniteCost = ["mountain"];
+
+    if (NaturalWonders.getWonderOn(this)?.impassable) return 9999;
 
     let cost = 1;
 
@@ -892,7 +895,11 @@ export class Tile {
       { food: 0 },
       { morale: 0 }
     ];
-    for (const tileType of this.tileTypes) {
+    // A natural wonder's yields replace the terrain's under it, as in Civ 5.
+    const wonder = NaturalWonders.getWonderOn(this);
+    const yieldingTileTypes = wonder ? [wonder.tile_type] : this.tileTypes;
+
+    for (const tileType of yieldingTileTypes) {
       const tileTypeData = Tile.getAllTileStats()[tileType.toUpperCase()];
       if (!tileTypeData || !tileTypeData.stats) continue;
 
