@@ -1,5 +1,5 @@
 import { ClientSettings } from "../ClientSettings";
-import { GameImage } from "../Assets";
+import { GameImage, SpriteRegion } from "../Assets";
 import { Game } from "../Game";
 import { Unit } from "../Unit";
 import { NetworkEvents, WebsocketClient } from "../network/Client";
@@ -12,11 +12,15 @@ import { UITheme } from "./UITheme";
 
 const WINDOW_WIDTH = 300;
 const WINDOW_HEIGHT = 170;
+const COMBAT_ICON_SIZE = 24;
+const HEALTH_BAR_WIDTH = 150;
+const HEALTH_BAR_HEIGHT = 26;
 
 export class UnitDisplayInfo extends ActorGroup {
   private unit: Unit;
   private movementLabel: Label;
-  private combatLabel: Label;
+  // Crossed swords, strength and health bar - rebuilt whenever strength or health changes.
+  private combatActors: Actor[] = [];
   private actionButtons: Button[];
 
   constructor(unit: Unit) {
@@ -69,18 +73,7 @@ export class UnitDisplayInfo extends ActorGroup {
     this.updateMovementLabel({ updateText: false });
     this.addActor(this.movementLabel);
 
-    if (unit.canFight()) {
-      this.combatLabel = new Label({
-        text: this.getCombatText(),
-        x: this.x,
-        y: this.y,
-        font: UITheme.FONT,
-        fontColor: "white"
-      });
-
-      this.updateCombatLabel();
-      this.addActor(this.combatLabel);
-    }
+    if (unit.canFight()) this.updateCombatRow();
 
     this.updateActionButtons();
 
@@ -136,17 +129,60 @@ export class UnitDisplayInfo extends ActorGroup {
     });
   }
 
-  private getCombatText() {
-    return `Strength: ${this.unit.getCombatStrength()}   HP: ${this.unit.getHealth()}/${Unit.MAX_HEALTH}`;
-  }
+  // Crossed swords and strength, then old_java's health bar (red under green) with e.g. "63/100" on it.
+  private updateCombatRow() {
+    const y = this.y + this.height - 66;
+    const strengthLabel = new Label({
+      text: `${this.unit.getCombatStrength()}`,
+      font: UITheme.FONT,
+      fontColor: "white"
+    });
+    const healthLabel = new Label({
+      text: `${this.unit.getHealth()}/${Unit.MAX_HEALTH}`,
+      font: UITheme.FONT,
+      fontColor: "white"
+    });
 
-  private updateCombatLabel() {
-    this.combatLabel.setText(this.getCombatText());
-    this.combatLabel.conformSize().then(() => {
-      this.combatLabel.setPosition(
-        this.x + this.width / 2 - this.combatLabel.getWidth() / 2,
-        this.y + this.height - 60
+    Promise.all([strengthLabel.conformSize(), healthLabel.conformSize()]).then(() => {
+      const rowWidth = COMBAT_ICON_SIZE + 6 + strengthLabel.getWidth() + 16 + HEALTH_BAR_WIDTH;
+      const iconX = this.x + (this.width - rowWidth) / 2;
+      const barX = iconX + rowWidth - HEALTH_BAR_WIDTH;
+      const healthFraction = Math.max(0, Math.min(Unit.MAX_HEALTH, this.unit.getHealth())) / Unit.MAX_HEALTH;
+
+      strengthLabel.setPosition(iconX + COMBAT_ICON_SIZE + 6, y + (HEALTH_BAR_HEIGHT - strengthLabel.getHeight()) / 2);
+      healthLabel.setPosition(
+        barX + (HEALTH_BAR_WIDTH - healthLabel.getWidth()) / 2,
+        y + (HEALTH_BAR_HEIGHT - healthLabel.getHeight()) / 2
       );
+
+      const actors = [
+        new Actor({
+          image: Game.getInstance().getImage(GameImage.SPRITESHEET),
+          spriteRegion: SpriteRegion.ICON_COMBAT,
+          x: iconX,
+          y: y + (HEALTH_BAR_HEIGHT - COMBAT_ICON_SIZE) / 2,
+          width: COMBAT_ICON_SIZE,
+          height: COMBAT_ICON_SIZE
+        }),
+        strengthLabel,
+        new Actor({ color: "red", x: barX, y, width: HEALTH_BAR_WIDTH, height: HEALTH_BAR_HEIGHT })
+      ];
+      if (healthFraction > 0) {
+        actors.push(
+          new Actor({
+            color: "limegreen",
+            x: barX,
+            y,
+            width: HEALTH_BAR_WIDTH * healthFraction,
+            height: HEALTH_BAR_HEIGHT
+          })
+        );
+      }
+      actors.push(healthLabel);
+
+      for (const actor of this.combatActors) this.removeActor(actor);
+      for (const actor of actors) this.addActor(actor);
+      this.combatActors = actors;
     });
   }
 
@@ -201,7 +237,7 @@ export class UnitDisplayInfo extends ActorGroup {
 
   private refreshDisplayInfo() {
     this.updateMovementLabel({ updateText: true });
-    if (this.combatLabel) this.updateCombatLabel();
+    if (this.unit.canFight()) this.updateCombatRow();
     this.updateActionButtons();
   }
 }

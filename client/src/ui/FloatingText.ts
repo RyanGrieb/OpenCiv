@@ -17,7 +17,7 @@ export class FloatingText extends Label {
   constructor(options: { text: string; color: string; centerX: number; fromY: number; toY: number }) {
     super({
       text: options.text,
-      font: "bold 10px sans-serif",
+      font: "bold 8px sans-serif",
       fontColor: options.color,
       lineWidth: 2,
       cameraApplies: true,
