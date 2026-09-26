@@ -228,7 +228,10 @@ describe('Barbarians', () => {
 
     it('leaves the camp defender where it is', () => {
       const camp = barbarians().placeCamp();
-      placeUnit('Warrior', camp.tile.getAdjacentTiles()[0].getAdjacentTiles()[0], human);
+      // Two steps out, skipping the null neighbors of a camp near the map's edge.
+      const nextToCamp = camp.tile.getAdjacentTiles().find(Boolean);
+      const twoStepsOut = nextToCamp.getAdjacentTiles().find((tile) => tile && tile !== camp.tile);
+      placeUnit('Warrior', twoStepsOut, human);
 
       barbarians().playTurn();
 
