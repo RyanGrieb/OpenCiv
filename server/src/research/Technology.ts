@@ -1,3 +1,6 @@
+import { Building } from "../city/Building";
+import { Improvement } from "../map/Improvement";
+import { Unit } from "../unit/Unit";
 import { ConfigLoader } from "../util/ConfigLoader";
 
 // A row range labeled for the research tree's visual section dividers/labels
@@ -14,6 +17,8 @@ export interface TechnologyData {
   cost: number;
   prerequisites: string[];
   description: string;
+  // The Civ5 wiki's "Notes" bullets - reference text, not enforced by the server.
+  notes?: string[];
   // Horizontal position (0-9) within its row in the research tree, matching
   // Civ5's tech-web layout - a fixed 10-slot grid per row, some slots deliberately
   // left empty, rather than techs packed tightly together.
@@ -25,12 +30,28 @@ export interface TechnologyData {
   row: number;
 }
 
+export interface UnlockData {
+  name: string;
+  asset_name?: string;
+}
+
+// What researching a tech makes available, gathered from every config that names
+// the tech as its required_tech - so the tech detail window can't drift from what
+// the production queue actually allows.
+export interface TechnologyUnlocks {
+  units: UnlockData[];
+  buildings: UnlockData[];
+  wonders: UnlockData[];
+  improvements: UnlockData[];
+}
+
 export class Technology {
   private name: string;
   private assetName: string;
   private cost: number;
   private prerequisites: string[];
   private description: string;
+  private notes: string[];
   private slot: number;
   private row: number;
 
@@ -40,6 +61,7 @@ export class Technology {
     this.cost = data.cost;
     this.prerequisites = data.prerequisites ?? [];
     this.description = data.description;
+    this.notes = data.notes ?? [];
     this.slot = data.slot;
     this.row = data.row;
   }
@@ -55,6 +77,25 @@ export class Technology {
 
   public static getAllEras(): EraData[] {
     return ConfigLoader.load<{ eras: EraData[] }>("./config/techs.yml").eras;
+  }
+
+  public static getUnlocks(techName: string): TechnologyUnlocks {
+    const buildings = Building.getAllBuildings().filter((building) => building.getRequiredTech() === techName);
+    const toUnlock = (building: Building): UnlockData => ({
+      name: building.getName(),
+      asset_name: building.getAssetName()
+    });
+
+    return {
+      units: Unit.getAllUnitData()
+        .filter((unit) => unit.required_tech === techName)
+        .map((unit) => ({ name: unit.name, asset_name: `UNIT_${unit.name.toUpperCase().replace(/ /g, "_")}` })),
+      buildings: buildings.filter((building) => !building.isWonderBuilding()).map(toUnlock),
+      wonders: buildings.filter((building) => building.isWonderBuilding()).map(toUnlock),
+      improvements: Improvement.getAllImprovementData()
+        .filter((improvement) => improvement.required_tech === techName)
+        .map((improvement) => ({ name: improvement.name, asset_name: improvement.asset_name }))
+    };
   }
 
   private static loadTechnologyData(): TechnologyData[] {
@@ -85,6 +126,10 @@ export class Technology {
     return this.description;
   }
 
+  public getNotes() {
+    return this.notes;
+  }
+
   public getSlot() {
     return this.slot;
   }
@@ -100,6 +145,8 @@ export class Technology {
       cost: this.cost,
       prerequisites: this.prerequisites,
       description: this.description,
+      notes: this.notes,
+      unlocks: Technology.getUnlocks(this.name),
       slot: this.slot,
       row: this.row
     };

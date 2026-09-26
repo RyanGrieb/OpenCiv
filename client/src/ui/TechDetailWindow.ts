@@ -8,35 +8,71 @@ import { Button, ButtonSize } from "./Button";
 import { Label } from "./Label";
 import { UITheme } from "./UITheme";
 
-const WINDOW_WIDTH = 320;
+const WINDOW_WIDTH = 440;
 const PADDING = 16;
-const ICON_SIZE = 48;
+const TECH_ICON_SIZE = 56;
+const ITEM_ICON_SIZE = 28;
+const ITEM_COLUMNS = 2;
+const ITEM_ROW_GAP = 6;
+const SECTION_GAP = 14;
+const TITLE_FONT = `bold ${UITheme.FONT_SIZE}px serif`;
+const SECTION_FONT = "bold 20px serif";
+const GROUP_FONT = "italic 17px serif";
+const BODY_FONT = "17px serif";
+const SECTION_COLOR = "#f0c860";
+const SECTION_RULE_COLOR = "rgba(240, 200, 96, 0.5)";
+const FOOTER_RULE_COLOR = "rgba(255, 255, 255, 0.3)";
+const LINK_COLOR = "#9fd3ff";
 
-interface TechData {
+export interface UnlockData {
+  name: string;
+  asset_name?: string;
+}
+
+export interface TechDetailData {
   name: string;
   asset_name: string;
   cost: number;
   prerequisites: string[];
   description: string;
+  notes: string[];
+  unlocks: {
+    units: UnlockData[];
+    buildings: UnlockData[];
+    wonders: UnlockData[];
+    improvements: UnlockData[];
+  };
 }
 
-// Detail popup opened by clicking a tech tile in ResearchTreeWindow. Mirrors
-// old_java's PickResearchWindow: title, icon, description, a turns/status line,
-// and a Research/Cancel action alongside a close button.
+// Detail popup opened by clicking a tech tile in ResearchTreeWindow. Laid out
+// like the Civ5 wiki's tech sidebar - cost, Requires, Leads to, Enables (units,
+// buildings, wonders, improvements) and Notes - above old_java PickResearchWindow's
+// turns/status line and Research/Cancel action. Requires/Leads to entries are
+// links that open that tech's own window in place of this one.
 export class TechDetailWindow extends ActorGroup {
-  private tech: TechData;
+  private tech: TechDetailData;
+  private allTechs: TechDetailData[];
   private onClose: () => void;
+  private onOpenTech: (techName: string) => void;
 
   private statusLabel: Label;
   private actionButton: Button;
   private statusY: number;
   private actionY: number;
+  private built = false;
 
-  constructor(tech: TechData, onClose: () => void) {
+  constructor(options: {
+    tech: TechDetailData;
+    allTechs: TechDetailData[];
+    onClose: () => void;
+    onOpenTech: (techName: string) => void;
+  }) {
     super({ x: 0, y: 0, z: 7, width: WINDOW_WIDTH, height: 0, cameraApplies: false });
 
-    this.tech = tech;
-    this.onClose = onClose;
+    this.tech = options.tech;
+    this.allTechs = options.allTechs;
+    this.onClose = options.onClose;
+    this.onOpenTech = options.onOpenTech;
 
     this.build();
   }
@@ -46,22 +82,159 @@ export class TechDetailWindow extends ActorGroup {
     NetworkEvents.removeCallbacksByParentObject(this);
   }
 
-  private async build() {
-    const textMaxWidth = WINDOW_WIDTH - PADDING * 2;
-    const [, descHeight] = await Game.getInstance().getWrappedText(this.tech.description, UITheme.FONT, textMaxWidth);
+  // build() measures text asynchronously, so the window fills in a moment after it's created.
+  public isBuilt(): boolean {
+    return this.built;
+  }
 
-    const titleY = PADDING;
-    const iconY = titleY + UITheme.FONT_SIZE + 10;
-    const descY = iconY + ICON_SIZE + 12;
-    // getWrappedText's height estimate is a per-word sum, not a per-line one, so it can
-    // undercount slightly versus how drawText actually spaces wrapped lines - pad a bit
-    // so a 2-3 line description never runs into the status text below it.
-    this.statusY = descY + descHeight + UITheme.FONT_SIZE * 0.5 + 12;
-    this.actionY = this.statusY + UITheme.FONT_SIZE + 16;
+  public getTech(): TechDetailData {
+    return this.tech;
+  }
+
+  // Every Label in the window, for the scenario test to check what's shown.
+  public getTexts(): string[] {
+    return this.getActors()
+      .filter((actor): actor is Label => actor instanceof Label)
+      .map((label) => label.getText());
+  }
+
+  // Everything is measured and positioned relative to the window's origin first,
+  // since the window's height (and so its centered on-screen position) is only
+  // known once every section has been laid out. place() then shifts it all.
+  private async build() {
+    const contentWidth = WINDOW_WIDTH - PADDING * 2;
+    const placed: { actor: Actor; x: number; y: number }[] = [];
+    const place = (actor: Actor, x: number, y: number) => placed.push({ actor, x, y });
+
+    const measure = async (label: Label) => {
+      await label.conformSize();
+      return label;
+    };
+
+    // Header: icon on the left, name and cost beside it.
+    place(this.createIcon(this.tech.asset_name, TECH_ICON_SIZE), PADDING, PADDING);
+    const textX = PADDING + TECH_ICON_SIZE + 12;
+    const title = await measure(new Label({ text: this.tech.name, font: TITLE_FONT, fontColor: "white" }));
+    place(title, textX, PADDING + 2);
+
+    const costY = PADDING + TECH_ICON_SIZE - 22;
+    const costLabel = await measure(new Label({ text: `Cost ${this.tech.cost}`, font: BODY_FONT, fontColor: "white" }));
+    place(costLabel, textX, costY + 2);
+    place(this.createIcon("ICON_SCIENCE", 20), textX + costLabel.getWidth() + 6, costY);
+
+    let y = PADDING + TECH_ICON_SIZE + 10;
+
+    if (this.tech.description) {
+      const description = await measure(
+        new Label({ text: this.tech.description, font: GROUP_FONT, fontColor: "lightgray", maxWidth: contentWidth })
+      );
+      place(description, PADDING, y);
+      // Wrapped lines draw a little taller than getWrappedText's per-word height estimate.
+      y += description.getHeight() + 8;
+    }
+
+    const techItem = (name: string): UnlockData => ({
+      name,
+      asset_name: this.allTechs.find((tech) => tech.name === name)?.asset_name
+    });
+    const leadsTo = this.allTechs
+      .filter((tech) => tech.prerequisites.includes(this.tech.name))
+      .map((tech) => tech.name);
+
+    const addSectionHeader = async (text: string) => {
+      y += SECTION_GAP;
+      const header = await measure(new Label({ text, font: SECTION_FONT, fontColor: SECTION_COLOR }));
+      place(header, PADDING, y);
+      y += header.getHeight() + 2;
+      place(
+        new Actor({ color: SECTION_RULE_COLOR, x: 0, y: 0, width: contentWidth, height: 1, cameraApplies: false }),
+        PADDING,
+        y
+      );
+      y += 6;
+    };
+
+    const addItems = async (items: UnlockData[], isTechLink: boolean) => {
+      const columnWidth = contentWidth / ITEM_COLUMNS;
+      for (let i = 0; i < items.length; i++) {
+        const itemX = PADDING + (i % ITEM_COLUMNS) * columnWidth;
+        const itemY = y + Math.floor(i / ITEM_COLUMNS) * (ITEM_ICON_SIZE + ITEM_ROW_GAP);
+        place(this.createIcon(items[i].asset_name, ITEM_ICON_SIZE), itemX, itemY);
+
+        const name = items[i].name;
+        const label = await measure(
+          new Label({
+            text: name,
+            font: BODY_FONT,
+            fontColor: isTechLink ? LINK_COLOR : "white",
+            onClick: isTechLink ? () => this.onOpenTech(name) : undefined
+          })
+        );
+        place(label, itemX + ITEM_ICON_SIZE + 6, itemY + (ITEM_ICON_SIZE - label.getHeight()) / 2);
+      }
+      y += Math.ceil(items.length / ITEM_COLUMNS) * (ITEM_ICON_SIZE + ITEM_ROW_GAP);
+    };
+
+    const addPlainText = async (text: string, x: number, maxWidth: number) => {
+      const label = await measure(new Label({ text, font: BODY_FONT, fontColor: "lightgray", maxWidth }));
+      place(label, x, y);
+      // getWrappedText's height is a per-word sum rather than a per-line one, so it can undercount wrapped lines a little.
+      y += label.getHeight() + 4;
+    };
+
+    await addSectionHeader("Requires");
+    if (this.tech.prerequisites.length > 0) {
+      await addItems(this.tech.prerequisites.map(techItem), true);
+    } else {
+      await addPlainText("None", PADDING, contentWidth);
+    }
+
+    if (leadsTo.length > 0) {
+      await addSectionHeader("Leads to");
+      await addItems(leadsTo.map(techItem), true);
+    }
+
+    const enableGroups: [string, UnlockData[]][] = [
+      ["Units", this.tech.unlocks?.units ?? []],
+      ["Buildings", this.tech.unlocks?.buildings ?? []],
+      ["Wonders", this.tech.unlocks?.wonders ?? []],
+      ["Improvements", this.tech.unlocks?.improvements ?? []]
+    ];
+    const nonEmptyGroups = enableGroups.filter(([, items]) => items.length > 0);
+    if (nonEmptyGroups.length > 0) {
+      await addSectionHeader("Enables");
+      for (const [groupName, items] of nonEmptyGroups) {
+        const groupLabel = await measure(new Label({ text: groupName, font: GROUP_FONT, fontColor: "lightgray" }));
+        place(groupLabel, PADDING, y);
+        y += groupLabel.getHeight() + 4;
+        await addItems(items, false);
+      }
+    }
+
+    if (this.tech.notes?.length > 0) {
+      await addSectionHeader("Notes");
+      for (const note of this.tech.notes) {
+        const bullet = await measure(new Label({ text: "•", font: BODY_FONT, fontColor: "lightgray" }));
+        place(bullet, PADDING + 4, y);
+        await addPlainText(note, PADDING + 20, contentWidth - 20);
+      }
+    }
+
+    y += SECTION_GAP;
+    place(
+      new Actor({ color: FOOTER_RULE_COLOR, x: 0, y: 0, width: contentWidth, height: 1, cameraApplies: false }),
+      PADDING,
+      y
+    );
+    this.statusY = y + 10;
+    this.actionY = this.statusY + UITheme.FONT_SIZE + 12;
     const height = this.actionY + ButtonSize.MEDIUM.height + PADDING;
 
     this.setSize(WINDOW_WIDTH, height);
-    this.setPosition(Game.getInstance().getWidth() / 2 - this.width / 2, Game.getInstance().getHeight() / 2 - height / 2);
+    this.setPosition(
+      Game.getInstance().getWidth() / 2 - this.width / 2,
+      Math.max(UITheme.STATUS_BAR_HEIGHT, Game.getInstance().getHeight() / 2 - height / 2)
+    );
 
     this.addActor(
       new Actor({
@@ -75,6 +248,11 @@ export class TechDetailWindow extends ActorGroup {
       })
     );
 
+    for (const { actor, x, y } of placed) {
+      actor.setPosition(this.x + x, this.y + y);
+      this.addActor(actor);
+    }
+
     this.addActor(
       new Button({
         icon: SpriteRegion.ICON_CANCEL,
@@ -86,42 +264,11 @@ export class TechDetailWindow extends ActorGroup {
       })
     );
 
-    const titleLabel = new Label({
-      text: `Research ${this.tech.name}`,
-      font: UITheme.FONT,
-      fontColor: "white"
-    });
-    titleLabel.conformSize().then(() => {
-      titleLabel.setPosition(this.x + this.width / 2 - titleLabel.getWidth() / 2, this.y + titleY);
-      this.addActor(titleLabel);
-    });
-
-    const iconRegion = resolveSpriteRegion(this.tech.asset_name) ?? SpriteRegion.ICON_UNKNOWN;
-    this.addActor(
-      new Actor({
-        image: Game.getInstance().getImage(GameImage.SPRITESHEET),
-        spriteRegion: iconRegion,
-        x: this.x + this.width / 2 - ICON_SIZE / 2,
-        y: this.y + iconY,
-        width: ICON_SIZE,
-        height: ICON_SIZE
-      })
-    );
-
-    const descLabel = new Label({
-      text: this.tech.description,
-      font: UITheme.FONT,
-      fontColor: "lightgray",
-      maxWidth: textMaxWidth,
-      x: this.x + PADDING,
-      y: this.y + descY
-    });
-    descLabel.conformSize().then(() => this.addActor(descLabel));
-
     this.statusLabel = new Label({ text: "", font: UITheme.FONT, fontColor: "white" });
     this.addActor(this.statusLabel);
 
     this.refresh();
+    this.built = true;
 
     NetworkEvents.on({
       eventName: "updateResearch",
@@ -133,6 +280,18 @@ export class TechDetailWindow extends ActorGroup {
       eventName: "updateTotalStats",
       parentObject: this,
       callback: () => this.refresh()
+    });
+  }
+
+  private createIcon(assetName: string | undefined, size: number): Actor {
+    return new Actor({
+      image: Game.getInstance().getImage(GameImage.SPRITESHEET),
+      spriteRegion: (assetName && resolveSpriteRegion(assetName)) || SpriteRegion.ICON_UNKNOWN,
+      x: 0,
+      y: 0,
+      width: size,
+      height: size,
+      cameraApplies: false
     });
   }
 

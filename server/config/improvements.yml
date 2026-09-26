@@ -1,0 +1,32 @@
+# Tile improvements a Builder can construct. Nothing builds these yet - for now the
+# tech detail window reads required_tech to list them under a tech's "Enables".
+# asset_name is left out where no sprite exists yet; the client shows its
+# unknown-icon placeholder for those.
+improvements:
+  - name: Farm
+    # Civ5 gates this behind Agriculture, which techs.yml doesn't model.
+  - name: Pasture
+    asset_name: ICON_EMPTY_PASTURE
+    required_tech: Animal Husbandry
+  - name: Mine
+    asset_name: TILE_COPPER_MINE
+    required_tech: Mining
+  - name: Fishing Boats
+    asset_name: TILE_IMPROVED_FISH
+    required_tech: Sailing
+  - name: Plantation
+    asset_name: TILE_CITRUS_PLANTATION
+    required_tech: Calendar
+  - name: Camp
+    required_tech: Trapping
+  - name: Trading Post
+    required_tech: Trapping
+  - name: Quarry
+    asset_name: TILE_STONE_QUARRY
+    required_tech: Masonry
+  - name: Road
+    required_tech: The Wheel
+  - name: Lumber Mill
+    required_tech: Construction
+  - name: Fort
+    required_tech: Engineering

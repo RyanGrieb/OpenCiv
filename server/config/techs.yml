@@ -14,6 +14,12 @@ technologies:
   # too, not derived from prerequisite depth - real Civ5 doesn't pack every
   # tech into the shallowest row its prerequisites allow. Values marked
   # "placeholder" below have no real Civ5 layout reference yet.
+  #
+  # notes are the Civ5 wiki's "Notes" bullets, shown in the tech detail window.
+  # They're reference text for the real game's effect, not something the server
+  # enforces - most (revealing a resource, clearing terrain) aren't modeled yet.
+  # What a tech unlocks is not listed here: units.yml, buildings.yml and
+  # improvements.yml each name their own required_tech.
   - name: Pottery
     asset_name: BUILDING_GRANARY
     cost: 35
@@ -28,6 +34,9 @@ technologies:
     row: 0
     slot: 4
     description: Unlocks pastures and an additional trade route.
+    notes:
+      - Reveals Horses
+      - Allows an additional trade route
   - name: Archery
     asset_name: UNIT_ARCHER
     cost: 35
@@ -42,6 +51,8 @@ technologies:
     row: 0
     slot: 8
     description: Allows mining mineral resources and clearing forests.
+    notes:
+      - Can remove Forests
   - name: Sailing
     asset_name: UNIT_WORK_BOAT
     cost: 55
@@ -63,6 +74,8 @@ technologies:
     row: 1
     slot: 2
     description: Enables recording information on durable materials, preserving knowledge across generations.
+    notes:
+      - Allows exchanging embassies
   - name: Trapping
     asset_name: BUILDING_CIRCUS
     cost: 55
@@ -84,6 +97,8 @@ technologies:
     row: 1
     slot: 8
     description: The art of building with stone, enabling massive stone structures and fortifications.
+    notes:
+      - Can remove Marshes
   - name: Bronze Working
     asset_name: UNIT_SPEARMAN
     cost: 55
@@ -91,6 +106,8 @@ technologies:
     row: 1
     slot: 9
     description: The first metal-working technology, providing sturdy tools and early bronze weapons.
+    notes:
+      - Can remove Jungles
   - name: Optics
     asset_name: BUILDING_LIGHTHOUSE
     cost: 105
@@ -98,6 +115,8 @@ technologies:
     row: 2
     slot: 0
     description: Develops tools for seeing farther, enabling key advances in seafaring.
+    notes:
+      - Allows land units to embark
   - name: Horseback Riding
     asset_name: UNIT_HORSEMAN
     cost: 105
@@ -154,6 +173,8 @@ technologies:
     row: 3
     slot: 9
     description: The discovery of iron, a metal stronger than bronze, lays the groundwork for advanced metallurgy.
+    notes:
+      - Reveals Iron
   - name: Theology
     asset_name: ICON_FAITH
     cost: 175
@@ -168,6 +189,8 @@ technologies:
     row: 4
     slot: 4
     description: Creates the first true state organization, improving food production.
+    notes:
+      - +1 Food from Farms next to fresh water
   # Machinery removed from Guilds' prerequisites - real Civ5 apparently doesn't
   # gate it there (see the row conflict this resolved: Guilds sits in row 4,
   # Machinery in row 5, so Machinery can't be one of its prerequisites).

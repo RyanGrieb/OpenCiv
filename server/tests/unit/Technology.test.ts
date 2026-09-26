@@ -1,4 +1,7 @@
+import { Building } from '../../src/city/Building';
+import { Improvement } from '../../src/map/Improvement';
 import { Technology } from '../../src/research/Technology';
+import { Unit } from '../../src/unit/Unit';
 
 // Deliberately not mocking fs/yaml - exercises the real config/techs.yml,
 // same approach as Building.test.ts.
@@ -49,9 +52,51 @@ describe('Technology', () => {
       cost: 35,
       prerequisites: [],
       description: 'Enables long-term storage of food and materials.',
+      notes: [],
+      unlocks: {
+        units: [],
+        buildings: [
+          { name: 'Chapel', asset_name: 'BUILDING_CHAPEL' },
+          { name: 'Granary', asset_name: 'BUILDING_GRANARY' },
+          { name: 'Shrine', asset_name: 'BUILDING_SHRINE' },
+        ],
+        wonders: [],
+        improvements: [],
+      },
       slot: 1,
       row: 0,
     });
+  });
+
+  it('lists what a tech unlocks from the unit, building and improvement configs', () => {
+    expect(Technology.getUnlocks('Animal Husbandry')).toEqual({
+      units: [{ name: 'Caravan', asset_name: 'UNIT_CARAVAN' }],
+      buildings: [],
+      wonders: [],
+      improvements: [{ name: 'Pasture', asset_name: 'ICON_EMPTY_PASTURE' }],
+    });
+
+    const construction = Technology.getUnlocks('Construction');
+    expect(construction.units.map((unit) => unit.name)).toEqual(['Composite Bowman']);
+    expect(construction.buildings.map((building) => building.name)).toEqual(['Colosseum']);
+    expect(construction.wonders.map((wonder) => wonder.name)).toEqual(['Terracotta Army']);
+    expect(construction.improvements.map((improvement) => improvement.name)).toEqual(['Lumber Mill']);
+  });
+
+  it('only gates units, buildings and improvements behind technologies that exist', () => {
+    const unlocked = Technology.getAllTechnologies().flatMap((tech) => {
+      const unlocks = Technology.getUnlocks(tech.getName());
+      return [...unlocks.units, ...unlocks.buildings, ...unlocks.wonders, ...unlocks.improvements];
+    });
+
+    // Every gated entry must land under some tech - a typo'd required_tech would silently vanish from the window.
+    const requiredTechs = [
+      ...Unit.getAllUnitData().map((unit) => unit.required_tech),
+      ...Building.getAllBuildings().map((building) => building.getRequiredTech()),
+      ...Improvement.getAllImprovementData().map((improvement) => improvement.required_tech),
+    ];
+    const gatedCount = requiredTechs.filter((tech) => tech).length;
+    expect(unlocked).toHaveLength(gatedCount);
   });
 
   it('gives every technology a slot within the 10-column grid, unique within its own row', () => {

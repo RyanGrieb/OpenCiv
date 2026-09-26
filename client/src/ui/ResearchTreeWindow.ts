@@ -8,7 +8,7 @@ import { InGameScene } from "../scene/type/InGameScene";
 import { Numbers } from "../util/Numbers";
 import { Button, ButtonSize } from "./Button";
 import { Label } from "./Label";
-import { TechDetailWindow } from "./TechDetailWindow";
+import { TechDetailData, TechDetailWindow } from "./TechDetailWindow";
 import { UITheme } from "./UITheme";
 
 const WINDOW_PADDING = 16;
@@ -30,12 +30,7 @@ const CONNECTOR_MET_COLOR = "lime";
 const CONNECTOR_UNMET_COLOR = "#666";
 const CONNECTOR_WIDTH = 2;
 
-interface TechData {
-  name: string;
-  asset_name: string;
-  cost: number;
-  prerequisites: string[];
-  description: string;
+interface TechData extends TechDetailData {
   slot: number;
   row: number;
 }
@@ -570,15 +565,30 @@ export class ResearchTreeWindow extends ActorGroup {
     return Math.min(Math.max(delta, min), max);
   }
 
+  public getDetailWindow(): TechDetailWindow | undefined {
+    return this.detailWindow;
+  }
+
+  public openTechDetailByName(techName: string): boolean {
+    const tech = this.lastTechnologies.find((candidate) => candidate.name === techName);
+    if (tech) this.openTechDetail(tech);
+    return tech !== undefined;
+  }
+
   private openTechDetail(tech: TechData) {
     if (this.detailWindow) {
       this.removeActor(this.detailWindow);
       this.detailWindow = undefined;
     }
 
-    this.detailWindow = new TechDetailWindow(tech, () => {
-      this.removeActor(this.detailWindow);
-      this.detailWindow = undefined;
+    this.detailWindow = new TechDetailWindow({
+      tech,
+      allTechs: this.lastTechnologies,
+      onClose: () => {
+        this.removeActor(this.detailWindow);
+        this.detailWindow = undefined;
+      },
+      onOpenTech: (techName) => this.openTechDetailByName(techName)
     });
     this.addActor(this.detailWindow);
   }

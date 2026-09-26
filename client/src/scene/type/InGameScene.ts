@@ -336,6 +336,10 @@ export class InGameScene extends Scene {
     }
   }
 
+  public getResearchTreeWindow(): ResearchTreeWindow | undefined {
+    return this.researchTreeWindow;
+  }
+
   public toggleResearchUI() {
     if (!this.researchTreeWindow) {
       if (this.openUIElement) return;

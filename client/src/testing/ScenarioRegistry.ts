@@ -46,3 +46,8 @@ ScenarioRegistry.register("CombatSandbox", async () => {
     const module = await import("./scenarios/CombatSandbox.test");
     return module.setupCombatSandboxTest;
 });
+
+ScenarioRegistry.register("TechDetailWindow", async () => {
+    const module = await import("./scenarios/TechDetailWindow.test");
+    return module.setupTechDetailWindowTest;
+});

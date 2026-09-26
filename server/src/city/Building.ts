@@ -56,6 +56,10 @@ export class Building {
     return this.name;
   }
 
+  public getAssetName() {
+    return this.assetName;
+  }
+
   public getStatLine(): Record<string, number> {
     return this.statLine;
   }
