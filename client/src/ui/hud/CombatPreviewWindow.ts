@@ -2,6 +2,8 @@ import { ClientSettings } from "../../ClientSettings";
 import { GameImage, SpriteRegion, resolveSpriteRegion } from "../../Assets";
 import { Game } from "../../Game";
 import { Unit } from "../../Unit";
+import { City } from "../../city/City";
+import { AbstractPlayer } from "../../player/AbstractPlayer";
 import { Actor } from "../../scene/Actor";
 import { ActorGroup } from "../../scene/ActorGroup";
 import { Strings } from "../../util/Strings";
@@ -9,13 +11,18 @@ import { Label } from "../components/Label";
 import { UnitDisplayInfo } from "./UnitDisplayInfo";
 import { UITheme } from "../UITheme";
 
-// Server "combatPreview" payload, from Unit.getMeleePreview() or getRangedPreview(). Only sent when
-// something on the target tile can fight back - civilians are captured without a preview.
+// Server "combatPreview" payload, from Unit.getMeleePreview()/getRangedPreview() or City.getStrikePreview().
+// Only sent when something on the target tile can fight back - civilians are captured without a preview.
+// Each side is a unit (its id) or a city (its name, with its own maximum health).
 export interface CombatPreviewEvent {
-  attackerId: number;
+  attackerId?: number;
+  attackerCity?: string;
+  attackerMaxHealth?: number;
   // A ranged attack, where the attacker takes no damage.
   ranged?: boolean;
-  defenderId: number;
+  defenderId?: number;
+  defenderCity?: string;
+  defenderMaxHealth?: number;
   targetX: number;
   targetY: number;
   attackerHealth: number;
@@ -27,10 +34,18 @@ export interface CombatPreviewEvent {
   outcome: string;
 }
 
+// One side of the fight, as the window draws it.
+export interface CombatSide {
+  spriteRegion: SpriteRegion;
+  player: AbstractPlayer;
+  maxHealth: number;
+}
+
 interface HealthRing {
   centerX: number;
   centerY: number;
   health: number;
+  maxHealth: number;
   damage: { min: number; max: number };
 }
 
@@ -54,7 +69,7 @@ export class CombatPreviewWindow extends ActorGroup {
   private rings: HealthRing[] = [];
   private civIcons: Actor[] = [];
 
-  constructor(attacker: Unit, defender: Unit, preview: CombatPreviewEvent) {
+  constructor(attacker: CombatSide, defender: CombatSide, preview: CombatPreviewEvent) {
     super({
       x: Game.getInstance().getWidth() - WINDOW_WIDTH,
       y: Game.getInstance().getHeight() - UnitDisplayInfo.HEIGHT - WINDOW_HEIGHT - 8,
@@ -77,8 +92,7 @@ export class CombatPreviewWindow extends ActorGroup {
       })
     );
 
-    const title = preview.ranged ? "Ranged Attack" : "Combat Preview";
-    this.addCenteredLabel(title, this.x + this.width / 2, this.y + 8, UITheme.FONT);
+    this.addCenteredLabel(CombatPreviewWindow.getTitle(preview), this.x + this.width / 2, this.y + 8, UITheme.FONT);
 
     const rowCenterY = this.y + 62;
     const sideWidth = UNIT_SIZE + 6 + RING_RADIUS * 2;
@@ -88,15 +102,33 @@ export class CombatPreviewWindow extends ActorGroup {
     const rightX = rightCenterX - sideWidth / 2;
 
     // Attacker: unit, then its ring. Defender mirrored: ring, then unit.
-    this.addUnitSprite(attacker, leftX, rowCenterY);
+    this.addSideSprite(attacker, leftX, rowCenterY);
     this.addRing(attacker, leftX + sideWidth - RING_RADIUS, rowCenterY, preview.attackerHealth, preview.attackerDamage);
     this.addSideLabels(leftCenterX, rowCenterY, preview.attackerHealth, preview.attackerDamage);
 
     this.addRing(defender, rightX + RING_RADIUS, rowCenterY, preview.defenderHealth, preview.defenderDamage);
-    this.addUnitSprite(defender, rightX + sideWidth - UNIT_SIZE, rowCenterY);
+    this.addSideSprite(defender, rightX + sideWidth - UNIT_SIZE, rowCenterY);
     this.addSideLabels(rightCenterX, rowCenterY, preview.defenderHealth, preview.defenderDamage);
 
     this.addOutcome(preview.outcome, this.x + this.width / 2, rowCenterY);
+  }
+
+  public static unitSide(unit: Unit): CombatSide {
+    return {
+      spriteRegion: resolveSpriteRegion(`UNIT_${Strings.toConstantCase(unit.getName())}`),
+      player: unit.getPlayer(),
+      maxHealth: Unit.MAX_HEALTH
+    };
+  }
+
+  public static citySide(city: City): CombatSide {
+    return { spriteRegion: SpriteRegion.TILE_CITY, player: city.getPlayer(), maxHealth: city.getMaxHealth() };
+  }
+
+  private static getTitle(preview: CombatPreviewEvent): string {
+    if (preview.attackerCity) return "City Attack";
+    if (preview.ranged) return "Ranged Attack";
+    return "Combat Preview";
   }
 
   public draw(canvasContext: CanvasRenderingContext2D) {
@@ -115,11 +147,11 @@ export class CombatPreviewWindow extends ActorGroup {
     }
   }
 
-  private addUnitSprite(unit: Unit, x: number, centerY: number) {
+  private addSideSprite(side: CombatSide, x: number, centerY: number) {
     this.addActor(
       new Actor({
         image: Game.getInstance().getImage(GameImage.SPRITESHEET),
-        spriteRegion: resolveSpriteRegion(`UNIT_${Strings.toConstantCase(unit.getName())}`),
+        spriteRegion: side.spriteRegion,
         x,
         y: centerY - UNIT_SIZE / 2,
         width: UNIT_SIZE,
@@ -128,10 +160,16 @@ export class CombatPreviewWindow extends ActorGroup {
     );
   }
 
-  private addRing(unit: Unit, centerX: number, centerY: number, health: number, damage: { min: number; max: number }) {
-    this.rings.push({ centerX, centerY, health, damage });
+  private addRing(
+    side: CombatSide,
+    centerX: number,
+    centerY: number,
+    health: number,
+    damage: { min: number; max: number }
+  ) {
+    this.rings.push({ centerX, centerY, health, maxHealth: side.maxHealth, damage });
 
-    const iconRegion = resolveSpriteRegion(unit.getPlayer()?.getCivilizationData()?.icon_name);
+    const iconRegion = resolveSpriteRegion(side.player?.getCivilizationData()?.icon_name);
     if (iconRegion === undefined) return;
 
     const civIcon = new Actor({
@@ -190,7 +228,7 @@ export class CombatPreviewWindow extends ActorGroup {
     const game = Game.getInstance();
     const top = -Math.PI / 2;
     const toAngle = (health: number) =>
-      (Math.max(0, Math.min(Unit.MAX_HEALTH, health)) / Unit.MAX_HEALTH) * Math.PI * 2;
+      (Math.max(0, Math.min(ring.maxHealth, health)) / ring.maxHealth) * Math.PI * 2;
     const sector = {
       x: ring.centerX,
       y: ring.centerY,

@@ -10,8 +10,10 @@ import { InGameScene } from "../scene/type/InGameScene";
 import { Numbers } from "../util/Numbers";
 import { Vector } from "../util/Vector";
 import { AbstractPlayer, PlayerData } from "./AbstractPlayer";
-import { CombatPreviewEvent, CombatPreviewWindow } from "../ui/hud/CombatPreviewWindow";
+import { CombatPreviewEvent, CombatPreviewWindow, CombatSide } from "../ui/hud/CombatPreviewWindow";
 import { RangedAiming, RangedTargetsEvent } from "./RangedAiming";
+import { City } from "../city/City";
+import { CityStrikeAiming } from "../city/CityStrikeAiming";
 
 export interface CurrentResearch {
   techName: string;
@@ -33,6 +35,7 @@ export class ClientPlayer extends AbstractPlayer {
   private attackTarget: Tile | undefined;
   private combatPreviewWindow: CombatPreviewWindow | undefined;
   private rangedAiming = new RangedAiming();
+  private cityStrikeAiming = new CityStrikeAiming();
   private rightMouseDrag: boolean;
   private requestedNextTurn: boolean;
   private totalStats: Map<string, number> = new Map();
@@ -66,7 +69,12 @@ export class ClientPlayer extends AbstractPlayer {
 
         this.updateHoveredTile(mouseX, mouseY);
 
-        if (!this.selectedUnit || oldHoveredTile === this.hoveredTile.getRepresentedTile()) return;
+        if (oldHoveredTile === this.hoveredTile.getRepresentedTile()) return;
+        if (this.cityStrikeAiming.isAiming()) {
+          this.cityStrikeAiming.aimAt(this.hoveredTile.getRepresentedTile());
+          return;
+        }
+        if (!this.selectedUnit) return;
         if (!this.rightMouseDrag) {
           this.updateAimedTarget();
           return;
@@ -191,11 +199,12 @@ export class ClientPlayer extends AbstractPlayer {
         if (!this.selectedUnit || this.selectedUnit.getID() !== data.attackerId) return;
         if (!target || target.getGridX() !== data.targetX || target.getGridY() !== data.targetY) return;
 
-        const defender = target.getUnits().find((unit) => unit.getID() === data.defenderId);
+        const defender = this.getPreviewDefender(target, data);
         if (!defender) return;
 
         this.hideCombatPreview();
-        this.combatPreviewWindow = new CombatPreviewWindow(this.selectedUnit, defender, data);
+        const attacker = CombatPreviewWindow.unitSide(this.selectedUnit);
+        this.combatPreviewWindow = new CombatPreviewWindow(attacker, defender, data);
         Game.getInstance().getCurrentScene().addActor(this.combatPreviewWindow);
       }
     });
@@ -230,6 +239,7 @@ export class ClientPlayer extends AbstractPlayer {
         if (this.selectedUnit && options.opened) {
           this.unselectUnit();
         }
+        if (options.opened) this.cityStrikeAiming.stop();
 
         if (options.opened) {
           this.hoveredTile.setHidden(true);
@@ -243,6 +253,7 @@ export class ClientPlayer extends AbstractPlayer {
       parentObject: this,
       callback: (data) => {
         this.unselectUnit();
+        this.cityStrikeAiming.stop();
         this.clearMovementPath();
       }
     });
@@ -332,6 +343,7 @@ export class ClientPlayer extends AbstractPlayer {
   /** Selects the unit, replacing whatever was selected, and shows its queued path if it has one. */
   public selectUnit(unit: Unit) {
     this.unselectUnit();
+    this.cityStrikeAiming.stop();
 
     unit.select();
     this.selectedUnit = unit;
@@ -368,11 +380,24 @@ export class ClientPlayer extends AbstractPlayer {
     });
   }
 
+  /** Starts aiming the city's ranged strike, from its banner or the "A city can attack" notification. */
+  public startCityStrike(city: City) {
+    this.unselectUnit();
+    this.cityStrikeAiming.start(city);
+  }
+
   private onLeftClickTile(clickedTile: Tile | undefined, x: number, y: number) {
     // The click was meant for a notification, not the map beneath it.
     if (Game.getInstance().getCurrentSceneAs<InGameScene>().isOverNotifications(x, y)) return;
     // Nor was a click on the unit info's buttons (Ranged Attack could otherwise fire at a tile under it).
     if (this.selectedUnit?.isOverDisplayInfo(x, y)) return;
+
+    // Aiming a city's strike, a left-click on a target fires. Anything else waits for a target or a
+    // right-click to stop - this same click may be the one on the banner that started aiming.
+    if (this.cityStrikeAiming.isAiming()) {
+      if (this.cityStrikeAiming.canStrike(clickedTile)) this.cityStrikeAiming.fire(clickedTile);
+      return;
+    }
 
     // Aiming with Ranged Attack, a left-click on a target fires, as in old_java.
     if (this.rangedAiming.isAiming() && this.canAttack(clickedTile)) {
@@ -435,6 +460,10 @@ export class ClientPlayer extends AbstractPlayer {
   // ranged attack, a right-click anywhere that isn't a target stops aiming instead (old_java's Untarget).
   private onMouseRightRelease(clickedTile: Tile | undefined) {
     this.rightMouseDrag = false;
+    if (this.cityStrikeAiming.isAiming()) {
+      this.cityStrikeAiming.stop();
+      return;
+    }
     if (!clickedTile || !this.selectedUnit) return;
 
     if (this.rangedAiming.isAiming() && !this.canAttack(clickedTile)) {
@@ -508,6 +537,17 @@ export class ClientPlayer extends AbstractPlayer {
       targetY: tile.getGridY()
     });
     return true;
+  }
+
+  // What the preview window shows on the defending side: the unit it names, or the city it names.
+  private getPreviewDefender(target: Tile, data: CombatPreviewEvent): CombatSide | undefined {
+    if (data.defenderCity) {
+      const city = target.getCity();
+      return city?.getName() === data.defenderCity ? CombatPreviewWindow.citySide(city) : undefined;
+    }
+
+    const defender = target.getUnits().find((unit) => unit.getID() === data.defenderId);
+    return defender ? CombatPreviewWindow.unitSide(defender) : undefined;
   }
 
   private hideCombatPreview() {

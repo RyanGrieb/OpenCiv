@@ -231,10 +231,12 @@ export class Tile extends Actor {
     this.units.push(unit);
   }
 
-  // Mirrors server/src/map/Tile.ts's hasBlockingUnit() - keep both in sync.
-  // Whether a unit can end its move here. A tile holds at most one military and one utility (civilian)
-  // unit, so a same-type ally blocks - but can still be passed through, see hasImpassableUnit().
-  public hasBlockingUnit(movingUnit: Unit): boolean {
+  // Mirrors server/src/map/Tile.ts's isBlockedFor() - keep both in sync.
+  // Whether a unit can't end its move here. A tile holds at most one military and one utility (civilian)
+  // unit, so a same-type ally blocks - but can still be passed through, see isImpassableFor().
+  public isBlockedFor(movingUnit: Unit): boolean {
+    if (this.isImpassableFor(movingUnit)) return true;
+
     const otherUnits = this.units.filter((unit) => unit !== movingUnit);
 
     // A unit from another civilization always blocks.
@@ -246,10 +248,12 @@ export class Tile extends Actor {
     return otherUnits.some((unit) => unit.isUtility() === movingUnit.isUtility());
   }
 
-  // Mirrors server/src/map/Tile.ts's hasImpassableUnit() - keep both in sync.
-  // Whether a unit can't even pass through here on the way somewhere else. Only other civilizations'
-  // units do that - getting past one means attacking it (Unit.canMeleeAttack).
-  public hasImpassableUnit(movingUnit: Unit): boolean {
+  // Mirrors server/src/map/Tile.ts's isImpassableFor() - keep both in sync.
+  // Whether a unit can't even pass through here on the way somewhere else: another civilization's
+  // units or city are in the way. Getting past them means attacking (Unit.canMeleeAttack).
+  public isImpassableFor(movingUnit: Unit): boolean {
+    if (this.city && this.city.getPlayer() !== movingUnit.getPlayer()) return true;
+
     return this.units.some((unit) => unit !== movingUnit && unit.getPlayer() !== movingUnit.getPlayer());
   }
 

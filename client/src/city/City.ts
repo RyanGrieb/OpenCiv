@@ -7,6 +7,7 @@ import { AbstractPlayer } from "../player/AbstractPlayer";
 import { Actor } from "../scene/Actor";
 import { ActorGroup } from "../scene/ActorGroup";
 import { InGameScene } from "../scene/type/InGameScene";
+import { FloatingText } from "../ui/components/FloatingText";
 import { Label } from "../ui/components/Label";
 import { Buidling } from "./Building";
 
@@ -18,6 +19,25 @@ export interface CityOptions {
   territory: Tile[];
   workedTiles: Tile[];
   name: string;
+  health: number;
+  maxHealth: number;
+  strength: number;
+}
+
+// Server "cityCombatStatus" payload, from server City.refreshCombatStatus().
+export interface CityCombatStatusEvent {
+  cityName: string;
+  health: number;
+  maxHealth: number;
+  strength: number;
+  // Only ever true for the owner: the city has an enemy in range and hasn't fired this turn.
+  canStrike: boolean;
+}
+
+// The fields of a "unitCombat" event that concern a city: it was attacked, or it fired.
+interface CityCombatEvent {
+  defenderCity?: string;
+  defenderCityHealth?: number;
 }
 
 export interface ProductionQueueItem {
@@ -33,6 +53,10 @@ export interface ProductionQueueItem {
  * City class actor handles city name, healthbar, and other attributes. It's not a tile layer.
  */
 export class City extends ActorGroup {
+  private static readonly HEALTH_BAR_WIDTH = 28;
+  private static readonly HEALTH_BAR_HEIGHT = 3;
+  private static readonly BANNER_ICON_SIZE = 12;
+
   private player: AbstractPlayer;
   private tile: Tile;
   private territory: Tile[];
@@ -43,6 +67,14 @@ export class City extends ActorGroup {
   private name: string;
   private civIcon: Actor;
   private nameLabel: Label;
+  // Left of the civ icon on the banner, as in Civ 5.
+  private strengthLabel: Label;
+  // Right of the name, shown on the owner's city while it can strike. Clicking it starts aiming.
+  private strikeIcon: Actor;
+  private health: number;
+  private maxHealth: number;
+  private strength: number;
+  private strikeReady: boolean;
   private innerBorderColor: string;
   private outsideBorderColor: string;
   private buildings: Buidling[];
@@ -59,6 +91,10 @@ export class City extends ActorGroup {
     this.buildings = [];
     this.stats = new Map<string, number>();
     this.statsPresent = false;
+    this.health = options.health;
+    this.maxHealth = options.maxHealth;
+    this.strength = options.strength;
+    this.strikeReady = false;
 
     this.innerBorderColor = this.player.getCivilizationData()["inside_border_color"];
     this.outsideBorderColor = this.player.getCivilizationData()["outside_border_color"];
@@ -116,6 +152,35 @@ export class City extends ActorGroup {
         this.statsPresent = true;
       }
     });
+
+    NetworkEvents.on<CityCombatStatusEvent>({
+      eventName: "cityCombatStatus",
+      parentObject: this,
+      callback: (data) => {
+        if (data.cityName !== this.name) return;
+
+        this.health = data.health;
+        this.maxHealth = data.maxHealth;
+        this.setStrength(data.strength);
+        this.setStrikeReady(data.canStrike);
+      }
+    });
+
+    NetworkEvents.on<CityCombatEvent>({
+      eventName: "unitCombat",
+      parentObject: this,
+      callback: (data) => {
+        if (data.defenderCity !== this.name) return;
+
+        this.showDamage(this.health - data.defenderCityHealth);
+        this.health = data.defenderCityHealth;
+      }
+    });
+  }
+
+  public draw(canvasContext: CanvasRenderingContext2D) {
+    super.draw(canvasContext);
+    this.drawHealthBar(canvasContext);
   }
 
   /**
@@ -186,7 +251,36 @@ export class City extends ActorGroup {
   public onDestroyed(): void {
     this.player.removeCity(this);
     super.onDestroyed();
-    Game.getInstance().getCurrentScene().removeActor(this.nameLabel);
+    const scene = Game.getInstance().getCurrentScene();
+    [this.nameLabel, this.civIcon, this.strengthLabel, this.strikeIcon].forEach((actor) => scene.removeActor(actor));
+  }
+
+  /**
+   * Takes the city off the map for good, borders included - when it changes hands, GameMap builds it
+   * again for its new owner.
+   */
+  public remove() {
+    NetworkEvents.removeCallbacksByParentObject(this);
+    for (const tile of this.territory) {
+      GameMap.getInstance().removeOutline({ tile, cityOutline: true });
+    }
+    Game.getInstance().getCurrentScene().removeActor(this);
+  }
+
+  public getHealth() {
+    return this.health;
+  }
+
+  public getMaxHealth() {
+    return this.maxHealth;
+  }
+
+  public getStrength() {
+    return this.strength;
+  }
+
+  public canStrike() {
+    return this.strikeReady;
   }
 
   public getTerritory() {
@@ -259,6 +353,95 @@ export class City extends ActorGroup {
       //this.addActor(this.civIcon);
 
       Game.getInstance().getCurrentScene().addActor(this.civIcon);
+      this.createStrengthLabel();
+      this.createStrikeIcon();
     });
+  }
+
+  private createStrengthLabel() {
+    this.strengthLabel = new Label({
+      text: `${Math.round(this.strength)}`,
+      cameraApplies: true,
+      font: "12px serif",
+      fontColor: "white",
+      shadowBlur: 1,
+      shadowColor: "black",
+      lineWidth: 1,
+      z: 4
+    });
+    this.positionStrengthLabel();
+  }
+
+  private positionStrengthLabel() {
+    this.strengthLabel.conformSize().then(() => {
+      this.strengthLabel.setPosition(this.civIcon.getX() - this.strengthLabel.getWidth() - 2, this.nameLabel.getY());
+      Game.getInstance().getCurrentScene().addActor(this.strengthLabel);
+    });
+  }
+
+  private setStrength(strength: number) {
+    const changed = Math.round(strength) !== Math.round(this.strength);
+    this.strength = strength;
+    if (!changed || !this.strengthLabel) return;
+
+    this.strengthLabel.setText(`${Math.round(strength)}`);
+    this.positionStrengthLabel();
+  }
+
+  private createStrikeIcon() {
+    this.strikeIcon = new Actor({
+      image: Game.getInstance().getImage(GameImage.SPRITESHEET),
+      spriteRegion: SpriteRegion.ICON_TARGET,
+      x: this.nameLabel.getX() + this.nameLabel.getWidth() + 2,
+      y: this.nameLabel.getY(),
+      z: 4,
+      width: City.BANNER_ICON_SIZE,
+      height: City.BANNER_ICON_SIZE,
+      cameraApplies: true
+    });
+    this.strikeIcon.on("clicked", () => {
+      if (!this.strikeReady) return;
+
+      Game.getInstance().getCurrentSceneAs<InGameScene>().getClientPlayer().startCityStrike(this);
+    });
+    if (this.strikeReady) Game.getInstance().getCurrentScene().addActor(this.strikeIcon);
+  }
+
+  private setStrikeReady(ready: boolean) {
+    if (this.strikeReady === ready) return;
+
+    this.strikeReady = ready;
+    if (!this.strikeIcon) return;
+
+    const scene = Game.getInstance().getCurrentScene();
+    if (ready) scene.addActor(this.strikeIcon);
+    else scene.removeActor(this.strikeIcon);
+  }
+
+  // Only once damaged, as in Civ 5: green for health left, red for what's lost, between banner and city.
+  private drawHealthBar(canvasContext: CanvasRenderingContext2D) {
+    if (!this.tile || this.health >= this.maxHealth) return;
+
+    const x = this.tile.getX() + (this.tile.getWidth() - City.HEALTH_BAR_WIDTH) / 2;
+    const y = this.tile.getY() - 1;
+    const healthWidth = (Math.max(0, this.health) / this.maxHealth) * City.HEALTH_BAR_WIDTH;
+    const bar = { y, height: City.HEALTH_BAR_HEIGHT, canvasContext, fill: true, cameraApplies: true };
+
+    Game.getInstance().drawRect({ ...bar, x, width: City.HEALTH_BAR_WIDTH, color: "red" });
+    Game.getInstance().drawRect({ ...bar, x, width: healthWidth, color: "lime" });
+  }
+
+  // "-24" rising from the city, like the damage over a unit.
+  private showDamage(damage: number) {
+    if (!this.tile || damage <= 0) return;
+
+    const centerX = this.tile.getX() + this.tile.getWidth() / 2;
+    new FloatingText({
+      text: `-${damage}`,
+      color: "red",
+      centerX,
+      fromY: this.tile.getY() + 4,
+      toY: this.tile.getY() - 16
+    }).show();
   }
 }

@@ -39,7 +39,7 @@ export function setupUnitStackingTest(game: Game) {
         name: "Utility and non-utility ally units can share a tile",
         action: () => { },
         verification: () => {
-            return !settler.getTile().hasBlockingUnit(warrior) && !warrior.getTile().hasBlockingUnit(settler);
+            return !settler.getTile().isBlockedFor(warrior) && !warrior.getTile().isBlockedFor(settler);
         }
     });
 
@@ -50,7 +50,7 @@ export function setupUnitStackingTest(game: Game) {
             const fakeAllyWarrior = { isUtility: () => false, getPlayer: () => warrior.getPlayer() } as unknown as Unit;
             const fakeAllySettler = { isUtility: () => true, getPlayer: () => settler.getPlayer() } as unknown as Unit;
 
-            return warrior.getTile().hasBlockingUnit(fakeAllyWarrior) && settler.getTile().hasBlockingUnit(fakeAllySettler);
+            return warrior.getTile().isBlockedFor(fakeAllyWarrior) && settler.getTile().isBlockedFor(fakeAllySettler);
         }
     });
 
@@ -59,7 +59,7 @@ export function setupUnitStackingTest(game: Game) {
         action: () => { },
         verification: () => {
             const fakeEnemyUnit = { isUtility: () => true, getPlayer: () => ({} as any) } as unknown as Unit;
-            return settler.getTile().hasBlockingUnit(fakeEnemyUnit);
+            return settler.getTile().isBlockedFor(fakeEnemyUnit);
         }
     });
 
@@ -70,7 +70,7 @@ export function setupUnitStackingTest(game: Game) {
             const fakeAllyWarrior = { isUtility: () => false, getPlayer: () => warrior.getPlayer() } as unknown as Unit;
             const fakeEnemyUnit = { isUtility: () => true, getPlayer: () => ({} as any) } as unknown as Unit;
 
-            return !warrior.getTile().hasImpassableUnit(fakeAllyWarrior) && settler.getTile().hasImpassableUnit(fakeEnemyUnit);
+            return !warrior.getTile().isImpassableFor(fakeAllyWarrior) && settler.getTile().isImpassableFor(fakeEnemyUnit);
         }
     });
 

@@ -6,7 +6,7 @@ import { InGameScene } from "../scene/type/InGameScene";
 // Mirrors server/src/notification/PlayerNotifications.ts's NotificationData - keep both in sync.
 export interface NotificationData {
   id: string;
-  type: "research" | "production" | "unitOrders" | "message";
+  type: "research" | "production" | "unitOrders" | "cityStrike" | "message";
   icon: string;
   text: string;
   priority: number;
@@ -75,6 +75,9 @@ export class Notifications {
       case "unitOrders":
         this.selectNextUnit(notification, scene);
         return;
+      case "cityStrike":
+        this.aimNextCity(notification, scene);
+        return;
       case "message":
         WebsocketClient.sendMessage({ event: "dismissNotification", id: notification.id });
         return;
@@ -87,6 +90,15 @@ export class Notifications {
     if (!city) return;
 
     scene.toggleCityUI(city);
+  }
+
+  private aimNextCity(notification: NotificationData, scene: InGameScene) {
+    const cityName = this.nextTarget(notification, notification.cityNames);
+    const city = this.player.getCities().find((city) => city.getName() === cityName);
+    if (!city?.getTile()) return;
+
+    scene.focusOnTile(city.getTile(), scene.getCamera().getZoomAmount());
+    this.player.startCityStrike(city);
   }
 
   private selectNextUnit(notification: NotificationData, scene: InGameScene) {

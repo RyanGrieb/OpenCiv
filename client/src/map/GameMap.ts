@@ -59,6 +59,9 @@ interface CityData {
   cityName: string;
   territory: { tileX: number; tileY: number }[];
   workedTiles?: { x: number; y: number }[];
+  health: number;
+  maxHealth: number;
+  strength: number;
 }
 
 interface TileUpdatedEvent {
@@ -158,6 +161,18 @@ export class GameMap {
       eventName: "cityTerritoryUpdated",
       parentObject: this,
       callback: (data) => {
+        this.syncCity(data);
+      }
+    });
+
+    // A melee unit took the city (see server City.captureBy()): it's rebuilt in its new owner's colors.
+    NetworkEvents.on<CityData>({
+      eventName: "cityCaptured",
+      parentObject: this,
+      callback: (data) => {
+        const key = `${data.tileX},${data.tileY}`;
+        this.knownCities.get(key)?.remove();
+        this.knownCities.delete(key);
         this.syncCity(data);
       }
     });
@@ -386,7 +401,7 @@ export class GameMap {
     const goalIndex = totalPath.length - 1;
     const blocked = totalPath.some((tile, index) => {
       if (index === 0) return false;
-      return index === goalIndex ? tile.hasBlockingUnit(unit) : tile.hasImpassableUnit(unit);
+      return index === goalIndex ? tile.isBlockedFor(unit) : tile.isImpassableFor(unit);
     });
     if (blocked) {
       return [];
@@ -1005,7 +1020,10 @@ export class GameMap {
       territory: territory,
       workedTiles: workedTiles,
       player: player,
-      name: cityName
+      name: cityName,
+      health: data.health,
+      maxHealth: data.maxHealth,
+      strength: data.strength
     });
   }
 }

@@ -753,7 +753,8 @@ export class Game {
     color,
     canvasContext,
     fill,
-    transparency
+    transparency,
+    cameraApplies
   }: {
     x: number;
     y: number;
@@ -763,8 +764,13 @@ export class Game {
     canvasContext: CanvasRenderingContext2D;
     fill: boolean;
     transparency?: number;
+    // In world coordinates, like drawCircleSector(). Off by default: most rectangles are HUD.
+    cameraApplies?: boolean;
   }) {
     canvasContext.save();
+    if (cameraApplies && this.currentScene.getCamera() && canvasContext === this.canvasContext) {
+      this.applyCameraTransform(canvasContext);
+    }
     canvasContext.globalAlpha = transparency ?? 1;
     if (fill) {
       canvasContext.fillStyle = color;

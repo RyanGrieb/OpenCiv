@@ -175,11 +175,12 @@ export interface ClearMovementQueueEvent {
   id: number;
 }
 
-// A melee or ranged attack. The defender fields are absent when a melee attacker overran a tile of civilians.
+// A melee or ranged attack. The defender fields are absent when a melee attacker overran a tile of civilians,
+// or when the defender was a city (see City's own listener). The attacker fields are absent when a city fired.
 export interface UnitCombatEvent {
-  attackerId: number;
-  attackerHealth: number;
-  attackerRemainingMovement: number;
+  attackerId?: number;
+  attackerHealth?: number;
+  attackerRemainingMovement?: number;
   defenderId?: number;
   defenderHealth?: number;
   ranged?: boolean;
@@ -433,6 +434,8 @@ export class Unit extends ActorGroup {
     if (this.tile.isWater() || targetTile.isWater()) return false;
     if (!this.tile.getAdjacentTiles().includes(targetTile)) return false;
 
+    const city = targetTile.getCity();
+    if (city && city.getPlayer() !== this.player) return true;
     return targetTile.getUnits().some((unit) => unit.getPlayer() !== this.player);
   }
 
@@ -481,13 +484,13 @@ export class Unit extends ActorGroup {
     if (!neighbor) return current.getMovementCost();
 
     // Pathing may route through same-type allies; whether the goal itself is free is checked by the caller.
-    if (neighbor.hasImpassableUnit(this)) {
+    if (neighbor.isImpassableFor(this)) {
       return 9999;
     }
 
     // Mirrors the server: entering a same-type ally's tile with our whole turn's movement would still
     // leave us stopped on it, so we could never get past it. Route around instead.
-    if (neighbor.hasBlockingUnit(this) && Tile.getWeight(current, neighbor, this) >= this.getDefaultMoveDistance()) {
+    if (neighbor.isBlockedFor(this) && Tile.getWeight(current, neighbor, this) >= this.getDefaultMoveDistance()) {
       return 9999;
     }
 
