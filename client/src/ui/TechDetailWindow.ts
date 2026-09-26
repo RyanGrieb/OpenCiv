@@ -310,7 +310,7 @@ export class TechDetailWindow extends ActorGroup {
     if (isResearched) {
       statusText = "Researched";
     } else if (missingPrerequisites.length > 0) {
-      statusText = `Requires: ${missingPrerequisites.join(", ")}`;
+      statusText = "Research the required techs first";
     } else if (rate <= 0) {
       statusText = "Never (0 Science)";
     } else if (isCurrent) {
