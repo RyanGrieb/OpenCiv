@@ -11,24 +11,32 @@ import { Label } from "./Label";
 import { UITheme } from "./UITheme";
 
 const WINDOW_WIDTH = 300;
-const WINDOW_HEIGHT = 170;
+// Offsets from the window's top. Action buttons take 44-108.
+const MOVEMENT_Y = 114;
+const STRENGTH_Y = 142;
+const HEALTH_BAR_Y = 176;
+const XP_BAR_Y = 208;
+const TEXT_X = 16;
+const BAR_MARGIN = 14;
+const BAR_HEIGHT = 26;
 const COMBAT_ICON_SIZE = 24;
-const HEALTH_BAR_WIDTH = 150;
-const HEALTH_BAR_HEIGHT = 26;
 
 export class UnitDisplayInfo extends ActorGroup {
+  // CombatPreviewWindow stacks on top of this window.
+  public static readonly HEIGHT = 246;
+
   private unit: Unit;
   private movementLabel: Label;
-  // Crossed swords, strength and health bar - rebuilt whenever strength or health changes.
+  // Strength, health bar and XP bar - rebuilt whenever strength or health changes.
   private combatActors: Actor[] = [];
   private actionButtons: Button[];
 
   constructor(unit: Unit) {
     super({
       x: Game.getInstance().getWidth() - WINDOW_WIDTH,
-      y: Game.getInstance().getHeight() - WINDOW_HEIGHT,
+      y: Game.getInstance().getHeight() - UnitDisplayInfo.HEIGHT,
       width: WINDOW_WIDTH,
-      height: WINDOW_HEIGHT,
+      height: UnitDisplayInfo.HEIGHT,
       cameraApplies: false,
       z: 5
     });
@@ -73,7 +81,7 @@ export class UnitDisplayInfo extends ActorGroup {
     this.updateMovementLabel({ updateText: false });
     this.addActor(this.movementLabel);
 
-    if (unit.canFight()) this.updateCombatRow();
+    if (unit.canFight()) this.updateCombatRows();
 
     this.updateActionButtons();
 
@@ -122,68 +130,62 @@ export class UnitDisplayInfo extends ActorGroup {
     }
 
     this.movementLabel.conformSize().then(() => {
-      this.movementLabel.setPosition(
-        this.x + this.width / 2 - this.movementLabel.getWidth() / 2,
-        this.y + this.height - 36
-      );
+      this.movementLabel.setPosition(this.x + TEXT_X, this.y + MOVEMENT_Y);
     });
   }
 
-  // Crossed swords and strength, then old_java's health bar (red under green) with e.g. "63/100" on it.
-  private updateCombatRow() {
-    const y = this.y + this.height - 66;
+  // "Strength: 8" with the crossed swords after it, then old_java's health bar (red under green) across
+  // the window with e.g. "HP 63/100" on it, and an XP bar under that. XP isn't tracked yet, so it's empty.
+  private updateCombatRows() {
     const strengthLabel = new Label({
-      text: `${this.unit.getCombatStrength()}`,
+      text: `Strength: ${this.unit.getCombatStrength()}`,
       font: UITheme.FONT,
       fontColor: "white"
     });
     const healthLabel = new Label({
-      text: `${this.unit.getHealth()}/${Unit.MAX_HEALTH}`,
+      text: `HP ${this.unit.getHealth()}/${Unit.MAX_HEALTH}`,
       font: UITheme.FONT,
       fontColor: "white"
     });
+    const xpLabel = new Label({ text: "XP 0/10", font: UITheme.FONT, fontColor: "white" });
 
-    Promise.all([strengthLabel.conformSize(), healthLabel.conformSize()]).then(() => {
-      const rowWidth = COMBAT_ICON_SIZE + 6 + strengthLabel.getWidth() + 16 + HEALTH_BAR_WIDTH;
-      const iconX = this.x + (this.width - rowWidth) / 2;
-      const barX = iconX + rowWidth - HEALTH_BAR_WIDTH;
+    Promise.all([strengthLabel.conformSize(), healthLabel.conformSize(), xpLabel.conformSize()]).then(() => {
+      const strengthY = this.y + STRENGTH_Y;
+      strengthLabel.setPosition(this.x + TEXT_X, strengthY);
       const healthFraction = Math.max(0, Math.min(Unit.MAX_HEALTH, this.unit.getHealth())) / Unit.MAX_HEALTH;
 
-      strengthLabel.setPosition(iconX + COMBAT_ICON_SIZE + 6, y + (HEALTH_BAR_HEIGHT - strengthLabel.getHeight()) / 2);
-      healthLabel.setPosition(
-        barX + (HEALTH_BAR_WIDTH - healthLabel.getWidth()) / 2,
-        y + (HEALTH_BAR_HEIGHT - healthLabel.getHeight()) / 2
-      );
-
-      const actors = [
+      const actors: Actor[] = [
+        strengthLabel,
         new Actor({
           image: Game.getInstance().getImage(GameImage.SPRITESHEET),
           spriteRegion: SpriteRegion.ICON_COMBAT,
-          x: iconX,
-          y: y + (HEALTH_BAR_HEIGHT - COMBAT_ICON_SIZE) / 2,
+          x: this.x + TEXT_X + strengthLabel.getWidth() + 6,
+          y: strengthY + (strengthLabel.getHeight() - COMBAT_ICON_SIZE) / 2,
           width: COMBAT_ICON_SIZE,
           height: COMBAT_ICON_SIZE
         }),
-        strengthLabel,
-        new Actor({ color: "red", x: barX, y, width: HEALTH_BAR_WIDTH, height: HEALTH_BAR_HEIGHT })
+        ...this.createBar(HEALTH_BAR_Y, "red", "limegreen", healthFraction, healthLabel),
+        ...this.createBar(XP_BAR_Y, "rgb(50, 40, 70)", "mediumpurple", 0, xpLabel)
       ];
-      if (healthFraction > 0) {
-        actors.push(
-          new Actor({
-            color: "limegreen",
-            x: barX,
-            y,
-            width: HEALTH_BAR_WIDTH * healthFraction,
-            height: HEALTH_BAR_HEIGHT
-          })
-        );
-      }
-      actors.push(healthLabel);
 
       for (const actor of this.combatActors) this.removeActor(actor);
       for (const actor of actors) this.addActor(actor);
       this.combatActors = actors;
     });
+  }
+
+  // A bar across the window, filled from the left to `fraction`, with a label centered on it.
+  private createBar(barY: number, backColor: string, fillColor: string, fraction: number, label: Label) {
+    const x = this.x + BAR_MARGIN;
+    const y = this.y + barY;
+    const width = this.width - BAR_MARGIN * 2;
+
+    const actors = [new Actor({ color: backColor, x, y, width, height: BAR_HEIGHT })];
+    if (fraction > 0) actors.push(new Actor({ color: fillColor, x, y, width: width * fraction, height: BAR_HEIGHT }));
+
+    label.setPosition(x + (width - label.getWidth()) / 2, y + (BAR_HEIGHT - label.getHeight()) / 2);
+    actors.push(label);
+    return actors;
   }
 
   private updateActionButtons() {
@@ -237,7 +239,7 @@ export class UnitDisplayInfo extends ActorGroup {
 
   private refreshDisplayInfo() {
     this.updateMovementLabel({ updateText: true });
-    if (this.unit.canFight()) this.updateCombatRow();
+    if (this.unit.canFight()) this.updateCombatRows();
     this.updateActionButtons();
   }
 }

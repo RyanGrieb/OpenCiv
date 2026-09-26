@@ -6,6 +6,7 @@ import { Actor } from "../scene/Actor";
 import { ActorGroup } from "../scene/ActorGroup";
 import { Strings } from "../util/Strings";
 import { Label } from "./Label";
+import { UnitDisplayInfo } from "./UnitDisplayInfo";
 import { UITheme } from "./UITheme";
 
 // Server "combatPreview" payload, from Unit.getMeleePreview(). Only sent when something on the target
@@ -41,8 +42,6 @@ const UNIT_SIZE = 44;
 const CIV_ICON_SIZE = 26;
 const RING_RADIUS = 20;
 const OUTCOME_ICON_SIZE = 36;
-// Matches UnitDisplayInfo's WINDOW_HEIGHT - this window stacks right on top of it.
-const UNIT_INFO_HEIGHT = 170;
 
 /**
  * Attacker on the left, defender on the right, the likely outcome between them. Each side's civ icon
@@ -56,7 +55,7 @@ export class CombatPreviewWindow extends ActorGroup {
   constructor(attacker: Unit, defender: Unit, preview: CombatPreviewEvent) {
     super({
       x: Game.getInstance().getWidth() - WINDOW_WIDTH,
-      y: Game.getInstance().getHeight() - UNIT_INFO_HEIGHT - WINDOW_HEIGHT - 8,
+      y: Game.getInstance().getHeight() - UnitDisplayInfo.HEIGHT - WINDOW_HEIGHT - 8,
       width: WINDOW_WIDTH,
       height: WINDOW_HEIGHT,
       cameraApplies: false,
