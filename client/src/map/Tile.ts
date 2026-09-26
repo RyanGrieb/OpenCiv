@@ -31,6 +31,8 @@ export class Tile extends Actor {
   public static HEIGHT = 32;
   // Mirrors server/src/map/Tile.ts's ROAD_MOVEMENT_COST.
   public static readonly ROAD_MOVEMENT_COST = 1 / 3;
+  // Improvements that cover the ground, so a road through the tile is drawn on top of them.
+  public static readonly UNDER_ROAD_TILE_TYPES = ["farm"];
   // Tile types drawn some other way than their own sprite - roads connect to their neighbors (see
   // Road.createActors).
   private static readonly UNSPRITED_TILE_TYPES = ["road"];

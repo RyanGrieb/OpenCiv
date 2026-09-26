@@ -686,20 +686,15 @@ export class GameMap {
           }
         }
 
-        if (tileTypes.length > 1) {
-          const topRenderTile = new Tile({
-            tileTypes: tileTypes.slice(1),
-            x: xPosRelative,
-            y: yPosRelative,
-            gridX: gridX,
-            gridY: gridY,
-            movementCost: tile.getMovementCost()
-          });
-          await topRenderTile.loadImage();
-          topRenderActors.push(topRenderTile);
-        }
-
-        topRenderActors.push(...Road.createActors(tile, xPosRelative, yPosRelative));
+        // A road runs over a farm's fields but under trees, resources and their improvements, as on old_java.
+        const overlayTypes = tileTypes.slice(1);
+        const underRoad = overlayTypes.filter((type) => Tile.UNDER_ROAD_TILE_TYPES.includes(type));
+        const overRoad = overlayTypes.filter((type) => !Tile.UNDER_ROAD_TILE_TYPES.includes(type));
+        topRenderActors.push(
+          ...(await this.createOverlayTile(tile, underRoad, xPosRelative, yPosRelative)),
+          ...Road.createActors(tile, xPosRelative, yPosRelative),
+          ...(await this.createOverlayTile(tile, overRoad, xPosRelative, yPosRelative))
+        );
 
         // Discovered but not currently visible - keep showing the remembered terrain underneath,
         // dimmed. Tacked onto the top layer (drawn above base terrain) so it applies whether or not
@@ -759,6 +754,22 @@ export class GameMap {
     } else {
       this.topLayerChunks.delete(chunkKey);
     }
+  }
+
+  // The given tile types of a tile drawn as one image at (x, y) on a chunk's canvas - none if empty.
+  private async createOverlayTile(tile: Tile, tileTypes: string[], x: number, y: number): Promise<Tile[]> {
+    if (tileTypes.length === 0) return [];
+
+    const overlay = new Tile({
+      tileTypes,
+      x,
+      y,
+      gridX: tile.getGridX(),
+      gridY: tile.getGridY(),
+      movementCost: tile.getMovementCost()
+    });
+    await overlay.loadImage();
+    return [overlay];
   }
 
   // Serializes chunk-visual work through one queue: these all share the same offscreen canvas

@@ -30,7 +30,11 @@ export class UnitDisplayInfo extends ActorGroup {
   public static readonly HEIGHT = 246;
 
   private unit: Unit;
+  // Shows the hovered action's description in place of the movement line.
   private movementLabel: Label;
+  // Which action button the mouse is over. Moving straight from one button to the next fires the new
+  // button's enter before the old one's exit, so the exit only clears this if it's still its own.
+  private hoveredActionName: string | undefined;
   // "Building Farm: 3 turns" while a Builder works - it has no combat rows, so it takes their place.
   private buildLabel: Label;
   // Strength, health bar and XP bar - rebuilt whenever strength or health changes.
@@ -84,7 +88,7 @@ export class UnitDisplayInfo extends ActorGroup {
       fontColor: "white"
     });
 
-    this.updateMovementLabel({ updateText: false });
+    this.updateMovementLabel();
     this.addActor(this.movementLabel);
 
     this.buildLabel = new Label({ text: "", x: this.x, y: this.y, font: UITheme.FONT, fontColor: "white" });
@@ -134,10 +138,9 @@ export class UnitDisplayInfo extends ActorGroup {
     NetworkEvents.removeCallbacksByParentObject(this);
   }
 
-  private updateMovementLabel(options: { updateText: boolean }) {
-    if (options.updateText) {
-      this.movementLabel.setText(this.getMovementText());
-    }
+  private updateMovementLabel() {
+    const hoveredAction = this.getShownActions().find((action) => action.getName() === this.hoveredActionName);
+    this.movementLabel.setText(hoveredAction ? hoveredAction.getDesc() : this.getMovementText());
 
     this.movementLabel.conformSize().then(() => {
       this.movementLabel.setPosition(this.x + TEXT_X, this.y + MOVEMENT_Y + this.getExtraActionRowsHeight());
@@ -248,11 +251,12 @@ export class UnitDisplayInfo extends ActorGroup {
           });
         },
         onMouseEnter: () => {
-          this.movementLabel.setText(action.getDesc());
-          this.updateMovementLabel({ updateText: false });
+          this.hoveredActionName = action.getName();
+          this.updateMovementLabel();
         },
         onMouseExit: () => {
-          this.updateMovementLabel({ updateText: true });
+          if (this.hoveredActionName === action.getName()) this.hoveredActionName = undefined;
+          this.updateMovementLabel();
         }
       });
 
@@ -268,7 +272,7 @@ export class UnitDisplayInfo extends ActorGroup {
   }
 
   private refreshDisplayInfo() {
-    this.updateMovementLabel({ updateText: true });
+    this.updateMovementLabel();
     if (this.unit.canFight()) this.updateCombatRows();
     this.updateBuildLabel();
     this.updateActionButtons();
