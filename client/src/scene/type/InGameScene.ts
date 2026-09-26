@@ -9,7 +9,7 @@ import { AbstractPlayer } from "../../player/AbstractPlayer";
 import { ClientPlayer } from "../../player/ClientPlayer";
 import { ExternalPlayer } from "../../player/ExternalPlayer";
 import { Button, ButtonSize } from "../../ui/components/Button";
-import { CityDisplayInfo } from "../../ui/windows/CityDisplayInfo";
+import { CityDisplayInfo } from "../../ui/windows/city/CityDisplayInfo";
 import { ClientSettingsGroup } from "../../ui/menus/ClientSettingsGroup";
 import { Label } from "../../ui/components/Label";
 import { NotificationPanel } from "../../ui/hud/NotificationPanel";

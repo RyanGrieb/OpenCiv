@@ -6,6 +6,7 @@ import { Unit } from "../../Unit";
 import { Tile } from "../../map/Tile";
 import { GameMap } from "../../map/GameMap";
 import { InGameScene } from "../../scene/type/InGameScene";
+import { CityScreen } from "../../ui/windows/city/CityScreen";
 import { TestUtils } from "../TestUtils";
 
 // Starts on the coastal_resources map preset (server/config/map_presets.yml): a coastal spot with
@@ -179,12 +180,13 @@ export function setupAquaticResourcesTest(game: Game) {
       scene().toggleCityUI(city());
       await utils.waitUntil(() => !!cityScreen(), 3000, "City screen to open");
       cityScreen()["openChooseProduction"]();
-      await utils.waitUntil(() => !!cityScreen()["chooseProductionListBox"], 3000, "Production list to show");
+      await utils.waitUntil(() => !!cityScreen()["chooseProductionList"], 3000, "Production list to show");
       // Long enough to see the list before it closes.
       await utils.delay(2000);
     },
     verification: () => {
-      const icon = (type: string, name: string) => cityScreen()["resolveProductionIcon"]({ type, name, cost: 0 });
+      const icon = (type: "unit" | "building", name: string) =>
+        CityScreen.resolveProductionIcon({ type, name, cost: 0 });
       const shown = [icon("unit", "Work Boat"), icon("unit", "Galley"), icon("unit", "Cargo Ship")];
       scene().toggleCityUI();
       return (
