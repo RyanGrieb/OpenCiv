@@ -94,10 +94,13 @@ npm run try                          # newest claude/* branch
 npm run try -- claude/some-thread    # a specific branch
 npm run try -- --list                # recent claude/* branches, newest first
 npm run try -- --no-allowBarbarians  # extra arguments go to the server as game options
-npm run try -- --clean               # delete every test copy
+npm run try -- --stop                # stop every branch still running
+npm run try -- --clean               # stop them and delete every test copy
 ```
 
-It fetches the branch into its own git worktree under `../OpenCiv-branches/`, so your own checkout and any uncommitted work stay untouched. It runs `npm install` only when a lockfile changed, starts the server and client on the first free ports from 2100/1240 upward, and opens the browser. Trying the same branch again moves its worktree to the latest push. You can have several branches running at once.
+It fetches the branch into its own git worktree under `../OpenCiv-branches/`, so your own checkout and any uncommitted work stay untouched. It runs `npm install` only when a lockfile changed, starts the server and client on the first free ports from 2100/1240 upward, and opens the browser. Trying the same branch again stops the copy that's already running and moves its worktree to the latest push. You can have several different branches running at once.
+
+Ctrl+C or closing the terminal stops that branch's server and client. They're found by their worktree path rather than as child processes, because on Windows Ctrl+C can take out the npm layers in between first and leave the real server and client orphaned. If anything still gets left behind, `--stop` or `--clean` finds it the same way.
 
 ### Approve or deny
 

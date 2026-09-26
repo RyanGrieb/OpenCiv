@@ -5,6 +5,7 @@ import * as fs from "fs";
 import * as path from "path";
 import * as readline from "readline/promises";
 import { DevPorts } from "./DevPorts";
+import { WorktreeProcesses } from "./WorktreeProcesses";
 
 // Fetches a branch into its own git worktree, installs what changed, and starts it on free ports,
 // leaving your own checkout untouched:
@@ -12,7 +13,8 @@ import { DevPorts } from "./DevPorts";
 //   npm run try                          # the most recently pushed claude/* branch
 //   npm run try -- claude/some-thread    # a specific branch (the "origin/" prefix is optional)
 //   npm run try -- --list                # recent claude/* branches, newest first
-//   npm run try -- --clean               # delete every worktree this made
+//   npm run try -- --stop                # stop every branch that's still running
+//   npm run try -- --clean               # stop them and delete every worktree this made
 //   npm run approve                      # fast-forward master to the tried branch, then delete it
 //
 // Approve pushes the exact commit you tried (the branch's worktree), and refuses if the branch has
@@ -21,6 +23,9 @@ import { DevPorts } from "./DevPorts";
 // Worktrees live in ../OpenCiv-branches/ and are reused, so a second try of the same branch just
 // moves it to the latest push and skips npm install unless a lockfile changed. Any other arguments
 // go to the server as game options, like with start:ports.
+//
+// A branch's server and client are stopped when you press Ctrl+C or close the terminal, and before the same branch
+// is tried again. Anything that still escapes is found by its worktree path, which --stop and --clean look for.
 
 const ROOT = path.resolve(__dirname, "..");
 const WORKTREES = path.resolve(ROOT, "..", "OpenCiv-branches");
@@ -88,6 +93,7 @@ class TryBranch {
       process.exit(1);
     }
 
+    this.stop(worktree);
     try {
       this.git(["worktree", "remove", "--force", worktree]);
     } catch {
@@ -110,6 +116,7 @@ class TryBranch {
   public static clean(): void {
     this.git(["worktree", "prune"]);
     if (!fs.existsSync(WORKTREES)) return;
+    this.stop(WORKTREES);
 
     const registered = this.registeredWorktrees();
     let failed = 0;
@@ -131,6 +138,12 @@ class TryBranch {
       console.warn(`\n${failed} folder(s) left behind. Stop anything running from them and run --clean again.`);
       process.exitCode = 1;
     }
+  }
+
+  // Stops whatever is running from inside dir: one branch's worktree, or WORKTREES for all of them.
+  public static stop(dir: string): void {
+    const stopped = WorktreeProcesses.stop(dir);
+    if (stopped > 0) console.log(`Stopped ${stopped} process(es) running from ${path.relative(ROOT, dir)}`);
   }
 
   public static registeredWorktrees(): Set<string> {
@@ -157,9 +170,14 @@ class TryBranch {
 
 (async () => {
   const argv = process.argv.slice(2);
-  const flags: string[] = argv.filter((arg) => ["--list", "--clean", "--approve"].includes(arg));
+  const flags: string[] = argv.filter((arg) => ["--list", "--stop", "--clean", "--approve"].includes(arg));
   const positional = argv.filter((arg) => !arg.startsWith("--"));
   const serverArgs = argv.filter((arg) => arg.startsWith("--") && !flags.includes(arg));
+
+  if (flags.includes("--stop")) {
+    TryBranch.stop(WORKTREES);
+    return;
+  }
 
   if (flags.includes("--clean")) {
     TryBranch.clean();
@@ -202,6 +220,7 @@ class TryBranch {
   }
 
   if (fs.existsSync(worktree)) {
+    TryBranch.stop(worktree);
     TryBranch.git(["checkout", "--quiet", "--detach", commit], worktree);
   } else {
     fs.mkdirSync(WORKTREES, { recursive: true });
@@ -230,6 +249,14 @@ class TryBranch {
     ],
     { killOthers: ["failure"] }
   );
+
+  // concurrently's own cleanup kills each command's process tree by parent PID, which misses processes whose parent
+  // already exited (see WorktreeProcesses), so sweep the worktree too. This runs on Ctrl+C, on closing the terminal
+  // (SIGHUP) and when either command fails.
+  process.on("exit", () => TryBranch.stop(worktree));
+  for (const signal of ["SIGINT", "SIGTERM", "SIGHUP"] as const) {
+    process.on(signal, () => process.exit(0));
+  }
 
   result.catch(() => process.exit(1));
 })();
