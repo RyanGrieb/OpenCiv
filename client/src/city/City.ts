@@ -67,8 +67,6 @@ export class City extends ActorGroup {
   private name: string;
   private civIcon: Actor;
   private nameLabel: Label;
-  // Left of the civ icon on the banner, as in Civ 5.
-  private strengthLabel: Label;
   // Right of the name, shown on the owner's city while it can strike. Clicking it starts aiming.
   private strikeIcon: Actor;
   private health: number;
@@ -161,7 +159,7 @@ export class City extends ActorGroup {
 
         this.health = data.health;
         this.maxHealth = data.maxHealth;
-        this.setStrength(data.strength);
+        this.strength = data.strength;
         this.setStrikeReady(data.canStrike);
       }
     });
@@ -252,7 +250,7 @@ export class City extends ActorGroup {
     this.player.removeCity(this);
     super.onDestroyed();
     const scene = Game.getInstance().getCurrentScene();
-    [this.nameLabel, this.civIcon, this.strengthLabel, this.strikeIcon].forEach((actor) => scene.removeActor(actor));
+    [this.nameLabel, this.civIcon, this.strikeIcon].forEach((actor) => scene.removeActor(actor));
   }
 
   /**
@@ -353,39 +351,8 @@ export class City extends ActorGroup {
       //this.addActor(this.civIcon);
 
       Game.getInstance().getCurrentScene().addActor(this.civIcon);
-      this.createStrengthLabel();
       this.createStrikeIcon();
     });
-  }
-
-  private createStrengthLabel() {
-    this.strengthLabel = new Label({
-      text: `${Math.round(this.strength)}`,
-      cameraApplies: true,
-      font: "12px serif",
-      fontColor: "white",
-      shadowBlur: 1,
-      shadowColor: "black",
-      lineWidth: 1,
-      z: 4
-    });
-    this.positionStrengthLabel();
-  }
-
-  private positionStrengthLabel() {
-    this.strengthLabel.conformSize().then(() => {
-      this.strengthLabel.setPosition(this.civIcon.getX() - this.strengthLabel.getWidth() - 2, this.nameLabel.getY());
-      Game.getInstance().getCurrentScene().addActor(this.strengthLabel);
-    });
-  }
-
-  private setStrength(strength: number) {
-    const changed = Math.round(strength) !== Math.round(this.strength);
-    this.strength = strength;
-    if (!changed || !this.strengthLabel) return;
-
-    this.strengthLabel.setText(`${Math.round(strength)}`);
-    this.positionStrengthLabel();
   }
 
   private createStrikeIcon() {
