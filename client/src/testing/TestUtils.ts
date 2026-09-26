@@ -1,5 +1,7 @@
 import { Game } from "../Game";
 import { WebsocketClient } from "../network/Client";
+import { GameMap } from "../map/GameMap";
+import { Tile } from "../map/Tile";
 import { InGameScene } from "../scene/type/InGameScene";
 import { Unit } from "../Unit";
 
@@ -119,6 +121,70 @@ export class TestUtils {
         await this.waitUntil(() => this.game.getCurrentScene().getName() === "in_game", 15000, "Scene to become in_game");
 
         return enemySocket;
+    }
+
+    // Every tile from `minDistance` to `maxDistance` steps from `target`, walking tile adjacency.
+    public tilesAround(target: Tile, minDistance: number, maxDistance: number): Tile[] {
+        const seen = new Set<Tile>([target]);
+        const found: Tile[] = [];
+        let frontier = [target];
+        for (let distance = 1; distance <= maxDistance; distance++) {
+            const next: Tile[] = [];
+            for (const tile of frontier) {
+                for (const neighbor of tile.getAdjacentTiles()) {
+                    if (!neighbor || seen.has(neighbor)) continue;
+                    seen.add(neighbor);
+                    next.push(neighbor);
+                    if (distance >= minDistance) found.push(neighbor);
+                }
+            }
+            frontier = next;
+        }
+        return found;
+    }
+
+    // Of `candidates`, the open land tile that `unit` can reach soonest.
+    public nearestFreeTile(unit: Unit, candidates: Tile[]): Tile | undefined {
+        let best: { tile: Tile; length: number } | undefined;
+        for (const tile of candidates) {
+            if (!tile || tile.isWater() || tile.getMovementCost() >= 9999 || tile.getCity()) continue;
+            if (tile.getUnits().some((other) => other !== unit)) continue;
+            if (tile === unit.getTile()) return tile;
+
+            const path = GameMap.getInstance().constructShortestPath(unit, unit.getTile(), tile);
+            if (path.length > 1 && (!best || path.length < best.length)) best = { tile, length: path.length };
+        }
+        return best?.tile;
+    }
+
+    // Walks a unit onto the nearest open tile of `candidates`, calling `endTurn` until it gets there with
+    // movement to spare. `send` gives the move order, as us or as a second player.
+    public async walkTo(
+        unit: Unit,
+        candidates: () => Tile[],
+        send: (data: Record<string, unknown>) => void,
+        endTurn: () => Promise<void>
+    ) {
+        for (let turn = 0; turn < 8; turn++) {
+            const destination = this.nearestFreeTile(unit, candidates());
+            if (!destination) throw new Error(`No open tile for the ${unit.getName()} to walk to`);
+            if (unit.getTile() === destination && unit.getAvailableMovement() > 0) return;
+
+            if (unit.getTile() !== destination) {
+                send({
+                    event: "moveUnit",
+                    unitX: unit.getTile().getGridX(),
+                    unitY: unit.getTile().getGridY(),
+                    id: unit.getID(),
+                    targetX: destination.getGridX(),
+                    targetY: destination.getGridY()
+                });
+            }
+            await this.delay(500);
+            if (unit.getTile() === destination && unit.getAvailableMovement() > 0) return;
+            await endTurn();
+        }
+        throw new Error(`The ${unit.getName()} couldn't get into position`);
     }
 
     public log(message: string, color: string = "white") {

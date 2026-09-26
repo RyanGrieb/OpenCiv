@@ -52,6 +52,11 @@ ScenarioRegistry.register("CityCombat", async () => {
     return module.setupCityCombatTest;
 });
 
+ScenarioRegistry.register("CitySpacing", async () => {
+    const module = await import("./scenarios/CitySpacing.test");
+    return module.setupCitySpacingTest;
+});
+
 ScenarioRegistry.register("CombatSandbox", async () => {
     const module = await import("./scenarios/CombatSandbox.test");
     return module.setupCombatSandboxTest;

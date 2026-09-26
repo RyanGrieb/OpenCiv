@@ -45,6 +45,10 @@ export class City {
   public static readonly GROWTH_FOOD_BASE = 15;
   public static readonly GROWTH_FOOD_PER_POP = 8;
 
+  // Civ 5's MIN_CITY_RANGE: no city may be founded within this many tiles of another, so there are
+  // always at least two tiles between cities.
+  public static readonly MIN_CITY_RANGE = 2;
+
   private tile: Tile;
   private player: Player;
   private name: string;
@@ -261,6 +265,21 @@ export class City {
         this.sendStatUpdate(this.player);
       }
     });
+  }
+
+  /**
+   * Whether a Settler may found a city here, by Civ 5's rules: on land, not inside another
+   * civilization's borders, and more than MIN_CITY_RANGE tiles from every other city.
+   */
+  public static canFoundAt(tile: Tile, player: Player): boolean {
+    if (tile.isWater() || tile.getCity()) return false;
+
+    const owner = tile.getCityTerritoryOf()?.getPlayer();
+    if (owner && owner !== player) return false;
+
+    return !GameMap.getInstance()
+      .getTilesInRange(tile, City.MIN_CITY_RANGE)
+      .some((nearbyTile) => nearbyTile.getCity());
   }
 
   /**
@@ -900,6 +919,8 @@ export class City {
     this.player.getVisibility().update();
     this.sendTerritoryUpdate();
     this.updateWorkedTiles({ sendStatUpdate: false });
+    // A Settler standing here, of any civilization, may no longer be able to settle.
+    tile.getUnits().forEach((unit) => unit.sendActionsToOwner());
   }
 
   // The part of the territory citizens can work: borders reach 5 rings out, citizens only 3.

@@ -10,8 +10,8 @@ import { CombatPreviewEvent } from "../../ui/hud/CombatPreviewWindow";
 import { NotificationData } from "../../notification/Notifications";
 import { TestUtils } from "../TestUtils";
 
-// Plays city combat out against a live server, from Player1's side. Both players found a city two
-// tiles apart, with a Warrior and an Archer each; the second player joins over a bare websocket and
+// Plays city combat out against a live server, from Player1's side. Both players found a city three
+// tiles apart (the closest Civ 5 allows), with a Warrior and an Archer each; the second player joins over a bare websocket and
 // only does what a step tells it to. Cities are founded at 1 HP (the cityStartingHealth game option),
 // so taking one doesn't need a dozen turns of wearing it down first.
 export function setupCityCombatTest(game: Game) {
@@ -69,61 +69,16 @@ export function setupCityCombatTest(game: Game) {
             actionName: "settle"
         });
 
-    const moveOrder = (unit: Unit, target: Tile) => ({
-        event: "moveUnit",
-        unitX: unit.getTile().getGridX(),
-        unitY: unit.getTile().getGridY(),
-        id: unit.getID(),
-        targetX: target.getGridX(),
-        targetY: target.getGridY()
-    });
-
     // A new city's strength, 8 + 0.4 for its citizen + 2 from the Palace, is 25% more on a hill.
     const expectedStrength = (city: City) => {
         const onHill = city.getTile().getTileTypes().some((type: string) => type.includes("hill"));
         return 10.4 * (onHill ? 1.25 : 1);
     };
 
-    // Every tile one or two steps from `target`, which is how far a city can shoot.
-    const tilesWithinTwo = (target: Tile): Tile[] => {
-        const tiles = new Set<Tile>();
-        for (const neighbor of target.getAdjacentTiles()) {
-            if (!neighbor) continue;
-            tiles.add(neighbor);
-            for (const tile of neighbor.getAdjacentTiles()) if (tile && tile !== target) tiles.add(tile);
-        }
-        return [...tiles];
-    };
-
-    // Of `candidates`, the open land tile that `unit` can reach soonest.
-    const nearestFreeTile = (unit: Unit, candidates: Tile[]): Tile | undefined => {
-        let best: { tile: Tile; length: number } | undefined;
-        for (const tile of candidates) {
-            if (!tile || tile.isWater() || tile.getMovementCost() >= 9999 || tile.getCity()) continue;
-            if (tile.getUnits().some((other) => other !== unit)) continue;
-            if (tile === unit.getTile()) return tile;
-
-            const path = GameMap.getInstance().constructShortestPath(unit, unit.getTile(), tile);
-            if (path.length > 1 && (!best || path.length < best.length)) best = { tile, length: path.length };
-        }
-        return best?.tile;
-    };
-
-    // Walks a unit onto the nearest open tile of `candidates`, ending turns until it gets there with movement
-    // to spare. `send` is who gives the order: us, or the second player.
-    const walkTo = async (unit: Unit, candidates: () => Tile[], send: (data: Record<string, unknown>) => void) => {
-        for (let turn = 0; turn < 8; turn++) {
-            const destination = nearestFreeTile(unit, candidates());
-            if (!destination) throw new Error(`No open tile for the ${unit.getName()} to walk to`);
-            if (unit.getTile() === destination && unit.getAvailableMovement() > 0) return;
-
-            if (unit.getTile() !== destination) send(moveOrder(unit, destination));
-            await utils.delay(500);
-            if (unit.getTile() === destination && unit.getAvailableMovement() > 0) return;
-            await endTurn();
-        }
-        throw new Error(`The ${unit.getName()} couldn't get into position`);
-    };
+    const tilesWithinTwo = (target: Tile) => utils.tilesAround(target, 1, 2);
+    const nearestFreeTile = (unit: Unit, candidates: Tile[]) => utils.nearestFreeTile(unit, candidates);
+    const walkTo = (unit: Unit, candidates: () => Tile[], send: (data: Record<string, unknown>) => void) =>
+        utils.walkTo(unit, candidates, send, endTurn);
     const sendAsUs = (data: Record<string, unknown>) => WebsocketClient.sendMessage(data);
 
     runner.addStep({
@@ -153,6 +108,22 @@ export function setupCityCombatTest(game: Game) {
 
     // Everyone gets into position before the cities are founded, so the enemy city is still at 1 HP
     // when we attack it - cities heal 20 HP a turn.
+    // The Settlers spawn two tiles apart, one closer than a city may be founded to another.
+    runner.addStep({
+        name: "Our Settler walks three tiles from the enemy Settler, the closest a city may be founded to another",
+        action: async () => {
+            const mySettler = allUnits().find((unit) => unit.getName() === "Settler" && unit.getPlayer() === me());
+            const enemySettler = allUnits().find((unit) => unit.getName() === "Settler" && unit.getPlayer() !== me());
+            await walkTo(mySettler, () => utils.tilesAround(enemySettler.getTile(), 3, 3), sendAsUs);
+        },
+        verification: () => {
+            const settlers = allUnits().filter((unit) => unit.getName() === "Settler");
+            const enemySettler = settlers.find((unit) => unit.getPlayer() !== me());
+            const mySettler = settlers.find((unit) => unit.getPlayer() === me());
+            return utils.tilesAround(enemySettler.getTile(), 3, 3).includes(mySettler.getTile());
+        }
+    });
+
     runner.addStep({
         name: "Before founding: the enemy Warrior walks within 2 tiles of our Settler, ours up to the enemy Settler",
         action: async () => {

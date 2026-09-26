@@ -23,6 +23,7 @@ describe('Unit', () => {
     constructShortestPath: jest.Mock<ReturnType<GameMap['constructShortestPath']>>;
     mapWidth: number;
     mapHeight: number;
+    getTilesInRange: jest.Mock<ReturnType<GameMap['getTilesInRange']>>;
   };
   // The real "moveUnit" callback registered by `unit`'s constructor, captured from the
   // ServerEvents.on mock below - lets tests exercise the actual handler logic directly,
@@ -45,6 +46,8 @@ describe('Unit', () => {
       isBlockedFor: jest.fn().mockReturnValue(false),
       isImpassableFor: jest.fn().mockReturnValue(false),
       hasRoad: jest.fn().mockReturnValue(false),
+      getCity: jest.fn().mockReturnValue(undefined),
+      getCityTerritoryOf: jest.fn().mockReturnValue(undefined),
     } as unknown as jest.Mocked<Tile>;
 
     // Mock target tile at (1, 1)
@@ -60,6 +63,8 @@ describe('Unit', () => {
       isBlockedFor: jest.fn().mockReturnValue(false),
       isImpassableFor: jest.fn().mockReturnValue(false),
       hasRoad: jest.fn().mockReturnValue(false),
+      getCity: jest.fn().mockReturnValue(undefined),
+      getCityTerritoryOf: jest.fn().mockReturnValue(undefined),
     } as unknown as jest.Mocked<Tile>;
 
     // Mock player. getVisibility() stands in for the player's fog of war: sight of everything,
@@ -83,6 +88,7 @@ describe('Unit', () => {
       constructShortestPath: jest.fn().mockReturnValue([mockTile, targetTile]),
       mapWidth: 2,
       mapHeight: 2,
+      getTilesInRange: jest.fn((tile: Tile) => [tile]) as jest.Mock<Tile[]>,
     };
     jest.spyOn(GameMap, 'getInstance').mockReturnValue(mockGameMap as any);
 

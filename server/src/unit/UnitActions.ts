@@ -1,4 +1,5 @@
 import { City } from "../city/City";
+import { Game } from "../Game";
 import { Improvement, ImprovementData } from "../map/Improvement";
 import { Unit, UnitAction, UnitYMLTypeData } from "./Unit";
 
@@ -30,6 +31,7 @@ export class UnitActions {
       icon: "ICON_SETTLE",
       requirements: ["awayFromCity", "movement"],
       desc: "Settle City",
+      isAvailable: (unit: Unit) => City.canFoundAt(unit.getTile(), unit.getPlayer()),
       onAction: (unit: Unit) => {
         console.log("ACTION: Act on settle city.");
 
@@ -41,8 +43,10 @@ export class UnitActions {
         player.getCities().push(city);
 
         city.announceCreated();
-        // The new borders change what this player's Builders can build.
-        player.getUnits().forEach((playerUnit) => playerUnit.sendActionsToOwner());
+        // The new borders change what Builders can build, and where every civilization's Settlers can settle.
+        Game.getInstance()
+          .getPlayers()
+          .forEach((everyPlayer) => everyPlayer.getUnits().forEach((playerUnit) => playerUnit.sendActionsToOwner()));
       }
     };
   }

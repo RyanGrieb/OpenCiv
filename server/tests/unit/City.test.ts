@@ -631,6 +631,7 @@ describe('City', () => {
         hasRiver: jest.fn().mockReturnValue(false),
         containsTileType: jest.fn().mockReturnValue(false),
         getStats: jest.fn().mockReturnValue([]),
+        getUnits: jest.fn().mockReturnValue([]),
       } as unknown as jest.Mocked<Tile>;
       mockTile.getAdjacentTiles.mockReturnValue([candidate]);
       (mockTile as any).getCityTerritoryOf = jest.fn().mockReturnValue(city);

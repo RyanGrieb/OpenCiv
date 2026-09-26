@@ -167,6 +167,8 @@ describe("Unit.meleeAttack", () => {
     targetTile = new Tile("grass", 1, 0);
     originTile.setAdjacentTile(0, targetTile);
     targetTile.setAdjacentTile(3, originTile);
+    // No city nearby, so a Settler here can settle.
+    jest.spyOn(GameMap, "getInstance").mockReturnValue({ getTilesInRange: (tile: Tile) => [tile] } as any);
   });
 
   it("trades damage and spends the attacker when the defender survives", () => {
