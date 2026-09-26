@@ -30,6 +30,7 @@ export const SPRITE_MANIFEST: SpriteManifestEntry[] = [
   { name: "BUILDING_NATIONAL_COLLEGE", url: new URL("../../assets/sprites/buildings/BUILDING_NATIONAL_COLLEGE.png", import.meta.url).href },
   { name: "BUILDING_PALACE", url: new URL("../../assets/sprites/buildings/BUILDING_PALACE.png", import.meta.url).href },
   { name: "BUILDING_SHRINE", url: new URL("../../assets/sprites/buildings/BUILDING_SHRINE.png", import.meta.url).href },
+  { name: "BUILDING_STABLES", url: new URL("../../assets/sprites/buildings/BUILDING_STABLES.png", import.meta.url).href },
   { name: "BUILDING_STATUE_OF_ARES", url: new URL("../../assets/sprites/buildings/BUILDING_STATUE_OF_ARES.png", import.meta.url).href },
   { name: "BUILDING_STONEHENGE", url: new URL("../../assets/sprites/buildings/BUILDING_STONEHENGE.png", import.meta.url).href },
   { name: "BUILDING_STONEWORKS", url: new URL("../../assets/sprites/buildings/BUILDING_STONEWORKS.png", import.meta.url).href },
