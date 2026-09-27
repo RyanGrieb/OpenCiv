@@ -53,6 +53,11 @@ export class Tile extends Actor {
     ocean: 2,
     shallow_ocean: 2,
     freshwater: 2,
+    grass_hill: 2,
+    plains_hill: 2,
+    desert_hill: 2,
+    tundra_hill: 2,
+    snow_hill: 2,
     // Features, drawn over the terrain - see getVariantFeatureType().
     forest: 2,
     jungle: 2
