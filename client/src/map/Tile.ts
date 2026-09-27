@@ -50,8 +50,16 @@ export class Tile extends Actor {
     mountain: 2,
     ocean: 2,
     shallow_ocean: 2,
-    freshwater: 2
+    freshwater: 2,
+    // Features, drawn over the terrain - see getVariantFeatureType().
+    forest: 2,
+    jungle: 2
   };
+  // Forests on these terrains always wear autumn colors, in one of two looks.
+  private static readonly AUTUMN_FOREST_TERRAINS = ["tundra", "tundra_hill"];
+  private static readonly AUTUMN_FOREST_TYPES = ["forest_autumn", "forest_autumn_2"];
+  // Offsets the coordinates a feature's look is hashed from, so it doesn't follow the terrain's.
+  private static readonly FEATURE_HASH_OFFSET = 7919;
 
   private static loadedTileImages = new Map<string, HTMLImageElement>();
   private static allTileStats: TileYieldsData;
@@ -130,10 +138,28 @@ export class Tile extends Actor {
    * The plain sprite keeps half the tiles, so the variants read as accents.
    */
   public static getVariantTileType(tileType: string, gridX: number, gridY: number): string {
+    return Tile.pickVariant(tileType, Tile.hashCoordinates(gridX, gridY));
+  }
+
+  /**
+   * The tile type whose sprite draws an overlay (forest, jungle) standing on the given terrain at
+   * (gridX, gridY): like getVariantTileType(), but forests on tundra always take one of the autumn
+   * looks. Types without variants (resources, improvements) come back unchanged.
+   */
+  public static getVariantFeatureType(featureType: string, terrainType: string, gridX: number, gridY: number): string {
+    const hash = Tile.hashCoordinates(gridX + Tile.FEATURE_HASH_OFFSET, gridY);
+    if (featureType === "forest" && Tile.AUTUMN_FOREST_TERRAINS.includes(terrainType)) {
+      return Tile.AUTUMN_FOREST_TYPES[hash % Tile.AUTUMN_FOREST_TYPES.length];
+    }
+    return Tile.pickVariant(featureType, hash);
+  }
+
+  // One of tileType's sprites for a coordinate hash: the plain one for half the hashes, else a variant.
+  private static pickVariant(tileType: string, hash: number): string {
     const variantCount = Tile.TILE_VARIANT_COUNTS[tileType];
     if (!variantCount) return tileType;
 
-    const roll = Tile.hashCoordinates(gridX, gridY) % (variantCount * 2);
+    const roll = hash % (variantCount * 2);
     if (roll < variantCount) return tileType;
 
     // Variants are numbered from 2, the plain sprite being the first.

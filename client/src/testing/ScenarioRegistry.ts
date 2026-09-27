@@ -161,6 +161,11 @@ ScenarioRegistry.register("TileVariants", ScenarioCategory.MAP, async () => {
     return module.setupTileVariantsTest;
 });
 
+ScenarioRegistry.register("ForestVariety", ScenarioCategory.MAP, async () => {
+    const module = await import("./scenarios/ForestVariety.test");
+    return module.setupForestVarietyTest;
+});
+
 ScenarioRegistry.register("NaturalWonders", ScenarioCategory.MAP, async () => {
     const module = await import("./scenarios/NaturalWonders.test");
     return module.setupNaturalWondersTest;

@@ -764,7 +764,9 @@ export class GameMap {
         }
 
         // A road runs over a farm's fields but under trees, resources and their improvements, as on old_java.
-        const overlayTypes = tileTypes.slice(1);
+        const overlayTypes = tileTypes
+          .slice(1)
+          .map((type) => Tile.getVariantFeatureType(type, tileTypes[0], gridX, gridY));
         const underRoad = overlayTypes.filter((type) => Tile.UNDER_ROAD_TILE_TYPES.includes(type));
         const overRoad = overlayTypes.filter((type) => !Tile.UNDER_ROAD_TILE_TYPES.includes(type));
         topRenderActors.push(

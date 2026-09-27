@@ -96,3 +96,20 @@ presets:
       - "p g K g S R ~ O"
       - " g g P g g V ~ O"
       - "g g g p ~ ~ ~ O"
+
+  forests:
+    description: Woods of every look around the Settler - temperate forest, jungle, and autumn-colored tundra forest.
+    legend:
+      "g": [grass]
+      "G": [grass, forest]
+      "P": [plains, forest]
+      "J": [grass, jungle]
+      "T": [tundra, forest]
+      "H": [tundra_hill, forest]
+      "S": [grass]
+    rows:
+      - "G G P J J J T T H"
+      - " G G P J J g T H T"
+      - "G P G J S J T T H"
+      - " G G P J J g T H T"
+      - "G G P J J J T T H"
