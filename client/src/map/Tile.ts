@@ -27,6 +27,8 @@ export interface TileOptions {
   height?: number;
   color?: string;
   yields?: any[];
+  // Draws the sprites flipped left-right - see isOverlayMirrored().
+  mirrored?: boolean;
 }
 
 export class Tile extends Actor {
@@ -60,6 +62,8 @@ export class Tile extends Actor {
   private static readonly AUTUMN_FOREST_TYPES = ["forest_autumn", "forest_autumn_2"];
   // Offsets the coordinates a feature's look is hashed from, so it doesn't follow the terrain's.
   private static readonly FEATURE_HASH_OFFSET = 7919;
+  // Offsets the coordinates a tile's mirroring is hashed from, so it doesn't follow its look.
+  private static readonly MIRROR_HASH_OFFSET = 104729;
 
   private static loadedTileImages = new Map<string, HTMLImageElement>();
   private static allTileStats: TileYieldsData;
@@ -77,6 +81,7 @@ export class Tile extends Actor {
   private city: City;
   private territoryCity: City | undefined;
   private yields: any[];
+  private mirrored: boolean;
   // Whether this player currently sees this tile, vs. only remembering it from earlier - see
   // PlayerVisibility on the server. Defaults true: a Tile is only ever constructed once discovered.
   private visible: boolean = true;
@@ -97,6 +102,7 @@ export class Tile extends Actor {
     this.units = [];
     this.movementCost = options.movementCost;
     this.yields = options.yields;
+    this.mirrored = options.mirrored ?? false;
 
     this.gridX = options.gridX;
     this.gridY = options.gridY;
@@ -154,6 +160,16 @@ export class Tile extends Actor {
     return Tile.pickVariant(featureType, hash);
   }
 
+  /**
+   * Whether the overlays (forests, resources, improvements) standing on (gridX, gridY) are drawn
+   * flipped left-right, which doubles their looks without new art. Half the tiles are, picked from
+   * a hash of the coordinates like getVariantTileType(). Never flipped upside down, and the terrain
+   * underneath is left alone: its hex outline isn't quite symmetric, so a flip would open seams.
+   */
+  public static isOverlayMirrored(gridX: number, gridY: number): boolean {
+    return Tile.hashCoordinates(gridX + Tile.MIRROR_HASH_OFFSET, gridY) % 2 === 1;
+  }
+
   // One of tileType's sprites for a coordinate hash: the plain one for half the hashes, else a variant.
   private static pickVariant(tileType: string, hash: number): string {
     const variantCount = Tile.TILE_VARIANT_COUNTS[tileType];
@@ -204,12 +220,12 @@ export class Tile extends Actor {
   }
 
   public async loadImage() {
-    const key = JSON.stringify(this.tileTypes);
+    const key = JSON.stringify([this.tileTypes, this.mirrored]);
 
     if (Tile.loadedTileImages.has(key)) {
       this.image = Tile.loadedTileImages.get(key);
     } else {
-      this.image = await Tile.generateImageFromTileTypes(this.tileTypes);
+      this.image = await Tile.generateImageFromTileTypes(this.tileTypes, this.mirrored);
       Tile.loadedTileImages.set(key, this.image);
     }
   }
@@ -382,13 +398,15 @@ export class Tile extends Actor {
     return this.gridY;
   }
 
-  public static async generateImageFromTileTypes(tileTypes: string[]): Promise<HTMLImageElement> {
+  public static async generateImageFromTileTypes(tileTypes: string[], mirrored = false): Promise<HTMLImageElement> {
     let canvas = document.getElementById("auxillary_canvas") as HTMLCanvasElement;
 
     canvas.width = Tile.WIDTH;
     canvas.height = Tile.HEIGHT;
     canvas.getContext("2d").fillStyle = "rgba(0,0,0,0)";
     canvas.getContext("2d").fillRect(0, 0, canvas.width, canvas.height);
+    // Resizing the canvas above already reset any flip left over from the previous image.
+    if (mirrored) canvas.getContext("2d").setTransform(-1, 0, 0, 1, Tile.WIDTH, 0);
 
     for (let tileType of tileTypes) {
       if (Tile.UNSPRITED_TILE_TYPES.includes(tileType)) continue;

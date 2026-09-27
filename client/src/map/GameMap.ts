@@ -830,7 +830,8 @@ export class GameMap {
       y,
       gridX: tile.getGridX(),
       gridY: tile.getGridY(),
-      movementCost: tile.getMovementCost()
+      movementCost: tile.getMovementCost(),
+      mirrored: Tile.isOverlayMirrored(tile.getGridX(), tile.getGridY())
     });
     await overlay.loadImage();
     return [overlay];
