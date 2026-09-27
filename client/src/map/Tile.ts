@@ -53,20 +53,32 @@ export class Tile extends Actor {
     ocean: 2,
     shallow_ocean: 2,
     freshwater: 2,
-    grass_hill: 2,
-    plains_hill: 2,
-    desert_hill: 2,
-    tundra_hill: 2,
-    snow_hill: 2,
     // Features, drawn over the terrain - see getVariantFeatureType().
     forest: 2,
-    jungle: 2
+    jungle: 2,
+    // A hill's mounds, drawn over its flat terrain - see getHillOverlayType().
+    hills_grass: 2,
+    hills_plains: 2,
+    hills_desert: 2,
+    hills_tundra: 2,
+    hills_snow: 2
+  };
+  // Hills stay one tile type ("grass_hill") everywhere in the game, but are drawn as their flat
+  // terrain with a hills overlay on the map's top layer, like a forest.
+  private static readonly HILL_FLAT_TERRAINS: Record<string, string> = {
+    grass_hill: "grass",
+    plains_hill: "plains",
+    desert_hill: "desert",
+    tundra_hill: "tundra",
+    snow_hill: "snow"
   };
   // Forests on these terrains always wear autumn colors, in one of two looks.
   private static readonly AUTUMN_FOREST_TERRAINS = ["tundra", "tundra_hill"];
   private static readonly AUTUMN_FOREST_TYPES = ["forest_autumn", "forest_autumn_2"];
   // Offsets the coordinates a feature's look is hashed from, so it doesn't follow the terrain's.
   private static readonly FEATURE_HASH_OFFSET = 7919;
+  // Offsets the coordinates a hill's look is hashed from, so it doesn't follow the terrain's or a forest's.
+  private static readonly HILL_HASH_OFFSET = 15485;
   // Offsets the coordinates a tile's mirroring is hashed from, so it doesn't follow its look.
   private static readonly MIRROR_HASH_OFFSET = 104729;
 
@@ -144,12 +156,25 @@ export class Tile extends Actor {
 
   /**
    * The tile type whose sprite draws this base terrain at (gridX, gridY): either the terrain itself
-   * or one of its look-only variants ("grass_2" -> TILE_GRASS_2). Picked from a hash of the
+   * or one of its look-only variants ("grass_2" -> TILE_GRASS_2). A hill draws as its flat terrain
+   * here, with its mounds added on the top layer - see getHillOverlayType(). Picked from a hash of the
    * coordinates, so it's the same on every reload and for every player, with no server involvement.
    * The plain sprite keeps half the tiles, so the variants read as accents.
    */
   public static getVariantTileType(tileType: string, gridX: number, gridY: number): string {
-    return Tile.pickVariant(tileType, Tile.hashCoordinates(gridX, gridY));
+    const drawnType = Tile.HILL_FLAT_TERRAINS[tileType] ?? tileType;
+    return Tile.pickVariant(drawnType, Tile.hashCoordinates(gridX, gridY));
+  }
+
+  /**
+   * The tile type whose sprite draws a hill's mounds over its flat terrain at (gridX, gridY)
+   * ("grass_hill" -> "hills_grass", or a look-only variant like "hills_grass_2"), or undefined if the
+   * terrain isn't a hill. Only the drawing splits the hill in two; the tile keeps its one type.
+   */
+  public static getHillOverlayType(terrainType: string, gridX: number, gridY: number): string | undefined {
+    const flatTerrain = Tile.HILL_FLAT_TERRAINS[terrainType];
+    if (!flatTerrain) return undefined;
+    return Tile.pickVariant(`hills_${flatTerrain}`, Tile.hashCoordinates(gridX + Tile.HILL_HASH_OFFSET, gridY));
   }
 
   /**

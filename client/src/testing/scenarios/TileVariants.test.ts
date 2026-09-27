@@ -6,27 +6,13 @@ import { GameMap } from "../../map/GameMap";
 import { Tile } from "../../map/Tile";
 import { TestUtils } from "../TestUtils";
 
-// Grass, plains, tundra, desert, mountain, the three waters and the five hills each draw with one of several
+// Grass, plains, tundra, desert, mountain and the three waters each draw with one of several
 // sprites, picked from the tile's coordinates. Reveals the whole map, checks every sprite turns up,
 // that the pick is stable and leaves the tile's type alone, then centers on a varied patch.
 export function setupTileVariantsTest(game: Game) {
   const runner = new TestRunner("TileVariants");
   const utils = new TestUtils(game);
-  const terrains = [
-    "grass",
-    "plains",
-    "tundra",
-    "desert",
-    "mountain",
-    "ocean",
-    "shallow_ocean",
-    "freshwater",
-    "grass_hill",
-    "plains_hill",
-    "desert_hill",
-    "tundra_hill",
-    "snow_hill"
-  ];
+  const terrains = ["grass", "plains", "tundra", "desert", "mountain", "ocean", "shallow_ocean", "freshwater"];
   // Mirrors Tile.TILE_VARIANT_COUNTS: grass has four variants, plains one, the rest two.
   const variantCounts: Record<string, number> = { grass: 4, plains: 1 };
   const spritesFor = (terrain: string) => [

@@ -773,6 +773,7 @@ export class GameMap {
         const underRoad = overlayTypes.filter((type) => Tile.UNDER_ROAD_TILE_TYPES.includes(type));
         const overRoad = overlayTypes.filter((type) => !Tile.UNDER_ROAD_TILE_TYPES.includes(type));
         topRenderActors.push(
+          ...(await this.createHillOverlay(tile, xPosRelative, yPosRelative)),
           ...(await this.createOverlayTile(tile, underRoad, xPosRelative, yPosRelative)),
           ...Road.createActors(tile, xPosRelative, yPosRelative),
           ...(await this.createOverlayTile(tile, overRoad, xPosRelative, yPosRelative))
@@ -832,6 +833,24 @@ export class GameMap {
       gridY: tile.getGridY(),
       movementCost: tile.getMovementCost(),
       mirrored: Tile.isOverlayMirrored(tile.getGridX(), tile.getGridY())
+    });
+    await overlay.loadImage();
+    return [overlay];
+  }
+
+  // A hill's mounds at (x, y) on a chunk's canvas, under everything else on the tile - none if it
+  // isn't a hill. Never mirrored, so the mounds stay lit from the left like the rest of the map.
+  private async createHillOverlay(tile: Tile, x: number, y: number): Promise<Tile[]> {
+    const hillType = Tile.getHillOverlayType(tile.getTileTypes()[0], tile.getGridX(), tile.getGridY());
+    if (!hillType) return [];
+
+    const overlay = new Tile({
+      tileTypes: [hillType],
+      x,
+      y,
+      gridX: tile.getGridX(),
+      gridY: tile.getGridY(),
+      movementCost: tile.getMovementCost()
     });
     await overlay.loadImage();
     return [overlay];
