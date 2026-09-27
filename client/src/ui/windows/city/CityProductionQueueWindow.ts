@@ -11,9 +11,12 @@ import { UITheme } from "../../UITheme";
 import { CityScreen } from "./CityScreen";
 
 // Bottom-left window: the city's production queue, with cancel and reorder buttons on each row,
-// and a button that opens (or cancels) the choose-production list.
+// a button that opens (or cancels) the choose-production list, and one that buys what's being
+// produced with gold.
 export class CityProductionQueueWindow extends ActorGroup {
   private static readonly X = 0;
+  private static readonly BUTTON_GAP = 8;
+  private static readonly BUY_BUTTON_WIDTH = 136;
   private static readonly WIDTH = CityScreen.PRODUCTION_WINDOW_WIDTH;
   private static readonly HEIGHT = CityScreen.PRODUCTION_WINDOW_HEIGHT;
   private static readonly ROW_HEIGHT = CityScreen.PRODUCTION_ROW_HEIGHT;
@@ -37,7 +40,7 @@ export class CityProductionQueueWindow extends ActorGroup {
       this.addQueueList();
     }
 
-    this.addChooseProductionButton(options.isChoosingProduction, options.onToggleChooseProduction);
+    this.addBottomButtons(options.isChoosingProduction, options.onToggleChooseProduction);
   }
 
   private addBackground() {
@@ -175,20 +178,51 @@ export class CityProductionQueueWindow extends ActorGroup {
     });
   }
 
-  private addChooseProductionButton(isChoosingProduction: boolean, onClicked: () => void) {
-    let text = this.queue.length === 0 ? "Choose Production" : "Add to Queue";
-    if (isChoosingProduction) text = "Cancel";
+  // The choose-production button, centered - or, while the front item can be bought, shifted left
+  // to make room for its buy button.
+  private addBottomButtons(isChoosingProduction: boolean, onToggleChooseProduction: () => void) {
+    const current = this.queue[0];
+    const canBuy = current?.goldCost !== undefined;
+    const gap = CityProductionQueueWindow.BUTTON_GAP;
+    const chooseWidth = canBuy
+      ? CityProductionQueueWindow.WIDTH - CityProductionQueueWindow.BUY_BUTTON_WIDTH - gap * 3
+      : ButtonSize.LARGE.width;
+    const chooseX = canBuy
+      ? CityProductionQueueWindow.X + gap
+      : CityProductionQueueWindow.X + CityProductionQueueWindow.WIDTH / 2 - chooseWidth / 2;
+    const bottomY = this.windowY + CityProductionQueueWindow.HEIGHT - ButtonSize.LARGE.height - 4;
 
     this.addActor(
       new Button({
-        text: text,
-        x: CityProductionQueueWindow.X + CityProductionQueueWindow.WIDTH / 2 - ButtonSize.LARGE.width / 2,
-        y: this.windowY + CityProductionQueueWindow.HEIGHT - ButtonSize.LARGE.height - 4,
+        text: this.getChooseProductionText(isChoosingProduction),
+        x: chooseX,
+        y: bottomY,
         z: CityScreen.Z,
-        size: ButtonSize.LARGE,
+        width: chooseWidth,
+        height: ButtonSize.LARGE.height,
         fontColor: "white",
-        onClicked: onClicked
+        onClicked: onToggleChooseProduction
       })
     );
+
+    if (!canBuy) return;
+
+    this.addActor(
+      CityScreen.createBuyButton({
+        item: current,
+        label: "Buy",
+        x: chooseX + chooseWidth + gap,
+        y: bottomY + ButtonSize.LARGE.height / 2 - CityScreen.BUY_BUTTON_HEIGHT / 2,
+        width: CityProductionQueueWindow.BUY_BUTTON_WIDTH,
+        onBuy: () =>
+          WebsocketClient.sendMessage({ event: "purchaseQueueItem", cityName: this.city.getName(), index: 0 })
+      })
+    );
+  }
+
+  private getChooseProductionText(isChoosingProduction: boolean): string {
+    if (isChoosingProduction) return "Cancel";
+
+    return this.queue.length === 0 ? "Choose Production" : "Add to Queue";
   }
 }

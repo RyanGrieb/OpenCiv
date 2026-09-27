@@ -9,6 +9,7 @@ import { BorderGrowth } from "./BorderGrowth";
 import { Building } from "./Building";
 import { CityCombat } from "./CityCombat";
 import { PlayerDiplomacy } from "../diplomacy/PlayerDiplomacy";
+import { GoldPurchase } from "../economy/GoldPurchase";
 
 export interface CityStats extends StatValues {
   population: number;
@@ -33,6 +34,8 @@ export interface ProductionOption {
   // structure) so that reordering the queue (moveProductionQueueItem, which
   // swaps whole entries) carries progress along with it automatically.
   progress?: number;
+  // What buying it outright costs, on the copies sent to the client. Absent when it can't be bought.
+  goldCost?: number;
 }
 
 export class City {
@@ -141,8 +144,8 @@ export class City {
         player.sendNetworkEvent({
           event: "updateProductionOptions",
           cityName: this.name,
-          units,
-          buildings
+          units: units.map((option) => this.withPurchaseCost(option)),
+          buildings: buildings.map((option) => this.withPurchaseCost(option))
         });
       }
     });
@@ -212,6 +215,41 @@ export class City {
           this.productionQueue[targetIndex],
           this.productionQueue[index]
         ];
+        this.sendStatUpdate(player);
+      }
+    });
+
+    // Buying something from the choose-production list, without queueing it first.
+    ServerEvents.on({
+      eventName: "purchaseProductionOption",
+      parentObject: this,
+      callback: (data, websocket) => {
+        const player = Game.getInstance().getPlayerFromWebsocket(websocket);
+        if (this.name !== data["cityName"] || this.player !== player) return;
+
+        // Looked up server-side, like addToProductionQueue, so it's something the city can build.
+        const { units, buildings } = this.getProductionOptions();
+        const option = [...units, ...buildings].find(
+          (candidate) => candidate.type === data["type"] && candidate.name === data["name"]
+        );
+        if (!option || !this.purchase(option)) return;
+
+        this.sendStatUpdate(player);
+      }
+    });
+
+    // Buying a queued item, which only pays for the production it still needs.
+    ServerEvents.on({
+      eventName: "purchaseQueueItem",
+      parentObject: this,
+      callback: (data, websocket) => {
+        const player = Game.getInstance().getPlayerFromWebsocket(websocket);
+        if (this.name !== data["cityName"] || this.player !== player) return;
+
+        const item = this.productionQueue[data["index"]];
+        if (!item || !this.purchase(item)) return;
+
+        this.productionQueue.splice(this.productionQueue.indexOf(item), 1);
         this.sendStatUpdate(player);
       }
     });
@@ -436,7 +474,7 @@ export class City {
       cityName: this.name,
       cityStats: cityStats,
       workedTiles: this.workedTiles.map((tile) => ({ x: tile.getX(), y: tile.getY() })),
-      productionQueue: this.productionQueue,
+      productionQueue: this.productionQueue.map((item) => this.withPurchaseCost(item)),
       nextBorderTile: nextBorderTile ? { x: nextBorderTile.getX(), y: nextBorderTile.getY() } : null
     });
 
@@ -854,6 +892,11 @@ export class City {
       });
   }
 
+  // Gold the owner pays every turn for this city's buildings.
+  public getBuildingMaintenance(): number {
+    return this.buildings.reduce((total, building) => total + building.getMaintenance(), 0);
+  }
+
   private applyFoundingBonuses() {
     // The player's first city gets a starting palace.
     //FIXME: Some civilizations can replace the palace with a unique building.
@@ -995,9 +1038,48 @@ export class City {
     console.log(`[City ${this.name}] Finished producing ${current.name}`);
     this.productionQueue.shift();
 
-    const unit = Unit.createFromName(current.name, spawnTile, this.player);
-    if (unit) spawnTile.addUnit(unit);
+    this.spawnUnit(current.name, spawnTile);
     this.announceFinished(current.name);
+  }
+
+  // Undefined for what gold can't buy: wonders, as in Civ 5.
+  private getPurchaseCost(item: ProductionOption): number | undefined {
+    if (item.type === "building" && Building.createFromName(item.name)?.isWonderBuilding()) return undefined;
+
+    return GoldPurchase.getCost(item.type, item.cost - (item.progress ?? 0));
+  }
+
+  private withPurchaseCost(item: ProductionOption): ProductionOption {
+    return { ...item, goldCost: this.getPurchaseCost(item) };
+  }
+
+  /**
+   * Buys `item` with the owner's gold and finishes it now. False if it can't be bought: a wonder, too
+   * little gold, or a unit with nowhere around the city to appear. As in Civ 5, a bought unit can't
+   * move until next turn.
+   */
+  private purchase(item: ProductionOption): boolean {
+    const goldCost = this.getPurchaseCost(item);
+    const treasury = this.player.getTreasury();
+    if (goldCost === undefined || !treasury.canAfford(goldCost)) return false;
+
+    if (item.type === "building") {
+      treasury.spend(goldCost);
+      this.addBuilding(item.name);
+      return true;
+    }
+
+    const spawnTile = this.getUnitSpawnTile(item.name);
+    if (!spawnTile) return false;
+
+    treasury.spend(goldCost);
+    this.spawnUnit(item.name, spawnTile, { availableMovement: 0 });
+    return true;
+  }
+
+  private spawnUnit(unitName: string, tile: Tile, options?: { availableMovement?: number }) {
+    const unit = Unit.createFromName(unitName, tile, this.player, options);
+    if (unit) tile.addUnit(unit);
   }
 
   private announceFinished(itemName: string) {

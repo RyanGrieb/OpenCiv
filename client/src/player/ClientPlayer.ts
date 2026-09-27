@@ -15,6 +15,7 @@ import { RangedAiming, RangedTargetsEvent } from "./RangedAiming";
 import { City } from "../city/City";
 import { CityStrikeAiming } from "../city/CityStrikeAiming";
 import { Diplomacy, Relation } from "./Diplomacy";
+import { GoldBreakdown } from "../ui/hud/GoldTooltip";
 
 export interface CurrentResearch {
   techName: string;
@@ -41,6 +42,7 @@ export class ClientPlayer extends AbstractPlayer {
   private requestedNextTurn: boolean;
   private totalStats: Map<string, number> = new Map();
   private accumulatedStats: Map<string, number> = new Map();
+  private goldBreakdown: GoldBreakdown = { income: [], expenses: [], net: 0 };
   private currentResearch: CurrentResearch | null = null;
   private researchedTechs: Set<string> = new Set();
   // Every civilization this player has met, by player name.
@@ -274,6 +276,8 @@ export class ClientPlayer extends AbstractPlayer {
         for (const stat of Object.keys(accumulatedStats)) {
           this.accumulatedStats.set(stat, accumulatedStats[stat]);
         }
+
+        this.goldBreakdown = data["goldBreakdown"] ?? this.goldBreakdown;
       }
     });
 
@@ -322,6 +326,11 @@ export class ClientPlayer extends AbstractPlayer {
 
   public getAccumulatedStat(stat: string): number {
     return this.accumulatedStats.get(stat) ?? 0;
+  }
+
+  /** Where this player's gold comes from and goes each turn, as the server last reported it. */
+  public getGoldBreakdown(): GoldBreakdown {
+    return this.goldBreakdown;
   }
 
   public getCurrentResearch(): CurrentResearch | null {

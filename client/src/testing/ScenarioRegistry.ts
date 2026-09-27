@@ -9,6 +9,7 @@ type ScenarioLoader = () => Promise<ScenarioSetup>;
 export enum ScenarioCategory {
     CITIES = "Cities",
     UNITS = "Units",
+    ECONOMY = "Economy",
     COMBAT = "Combat",
     DIPLOMACY = "Diplomacy",
     NAVAL = "Naval",
@@ -173,4 +174,9 @@ ScenarioRegistry.register("SoftFogOfWar", ScenarioCategory.MAP, async () => {
 ScenarioRegistry.register("Diplomacy", ScenarioCategory.DIPLOMACY, async () => {
     const module = await import("./scenarios/Diplomacy.test");
     return module.setupDiplomacyTest;
+});
+
+ScenarioRegistry.register("GoldSpending", ScenarioCategory.ECONOMY, async () => {
+    const module = await import("./scenarios/GoldSpending.test");
+    return module.setupGoldSpendingTest;
 });

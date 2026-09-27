@@ -18,6 +18,7 @@ describe('City', () => {
   let city: City;
   let mockPlayer: jest.Mocked<Player>;
   let mockNotifications: { addMessage: jest.Mock };
+  let mockTreasury: { canAfford: jest.Mock; spend: jest.Mock };
   let mockTile: jest.Mocked<Tile>;
   let onSpy: jest.SpyInstance;
 
@@ -58,6 +59,7 @@ describe('City', () => {
     } as unknown as jest.Mocked<Tile>;
 
     mockNotifications = { addMessage: jest.fn() };
+    mockTreasury = { canAfford: jest.fn().mockReturnValue(true), spend: jest.fn() };
 
     mockPlayer = {
       getNextAvailableCityName: jest.fn().mockReturnValue('TestCity'),
@@ -70,6 +72,7 @@ describe('City', () => {
       getCivilizationName: jest.fn().mockReturnValue('Germany'),
       isBarbarian: () => false,
       getDiplomacy: () => ({ isAtWarWith: () => true }),
+      getTreasury: () => mockTreasury,
     } as unknown as jest.Mocked<Player>;
 
     // Mirrors the real rule for the fake Legion below: Rome's alone, and it stands in for the Swordsman.
@@ -110,11 +113,11 @@ describe('City', () => {
       event: 'updateProductionOptions',
       cityName: 'TestCity',
       units: [
-        { type: 'unit', name: 'Warrior', cost: 30 },
-        { type: 'unit', name: 'Scout', cost: 20 },
+        { type: 'unit', name: 'Warrior', cost: 30, goldCost: 190 },
+        { type: 'unit', name: 'Scout', cost: 20, goldCost: 140 },
       ],
       buildings: [
-        { type: 'building', name: 'Monument', cost: 60 },
+        { type: 'building', name: 'Monument', cost: 60, goldCost: 270 },
       ],
     });
   });
@@ -136,7 +139,7 @@ describe('City', () => {
 
     expect(mockPlayer.sendNetworkEvent).toHaveBeenCalledWith(
       expect.objectContaining({
-        units: expect.arrayContaining([{ type: 'unit', name: 'Archer', cost: 40 }]),
+        units: expect.arrayContaining([{ type: 'unit', name: 'Archer', cost: 40, goldCost: 240 }]),
       })
     );
   });
@@ -264,7 +267,7 @@ describe('City', () => {
 
       triggerServerEvent('nextTurn', { turn: 2 });
 
-      expect(Unit.createFromName).toHaveBeenCalledWith('Work Boat', water, mockPlayer);
+      expect(Unit.createFromName).toHaveBeenCalledWith('Work Boat', water, mockPlayer, undefined);
       expect(water.addUnit).toHaveBeenCalled();
       expect(land.addUnit).not.toHaveBeenCalled();
     });
@@ -287,7 +290,7 @@ describe('City', () => {
     expect(mockPlayer.sendNetworkEvent).toHaveBeenCalledWith(
       expect.objectContaining({
         event: 'updateCityStats',
-        productionQueue: [{ type: 'unit', name: 'Warrior', cost: 30, progress: 0 }],
+        productionQueue: [{ type: 'unit', name: 'Warrior', cost: 30, progress: 0, goldCost: 190 }],
       })
     );
   });
@@ -340,7 +343,7 @@ describe('City', () => {
       expect(mockPlayer.sendNetworkEvent).toHaveBeenCalledWith(
         expect.objectContaining({
           event: 'updateCityStats',
-          productionQueue: [{ type: 'unit', name: 'Scout', cost: 20, progress: 0 }],
+          productionQueue: [{ type: 'unit', name: 'Scout', cost: 20, progress: 0, goldCost: 140 }],
         })
       );
     });
@@ -452,7 +455,7 @@ describe('City', () => {
       expect(mockPlayer.sendNetworkEvent).toHaveBeenCalledWith(
         expect.objectContaining({
           event: 'updateCityStats',
-          productionQueue: [{ type: 'unit', name: 'Warrior', cost: 30, progress: 10 }],
+          productionQueue: [{ type: 'unit', name: 'Warrior', cost: 30, progress: 10, goldCost: 140 }],
         })
       );
     });
@@ -507,7 +510,7 @@ describe('City', () => {
 
       triggerServerEvent('nextTurn', { turn: 2 });
 
-      expect(Unit.createFromName).toHaveBeenCalledWith('Warrior', mockTile, mockPlayer);
+      expect(Unit.createFromName).toHaveBeenCalledWith('Warrior', mockTile, mockPlayer, undefined);
       expect(mockTile.addUnit).toHaveBeenCalledWith(mockUnit);
     });
 
@@ -539,7 +542,7 @@ describe('City', () => {
         triggerServerEvent('nextTurn', { turn: 2 });
 
         expect(mockTile.canPlaceUnit).toHaveBeenCalledWith(mockPlayer, false);
-        expect(Unit.createFromName).toHaveBeenCalledWith('Warrior', free, mockPlayer);
+        expect(Unit.createFromName).toHaveBeenCalledWith('Warrior', free, mockPlayer, undefined);
         expect(free.addUnit).toHaveBeenCalled();
         expect(mockTile.addUnit).not.toHaveBeenCalled();
         expect(city['productionQueue']).toEqual([]);
@@ -561,7 +564,7 @@ describe('City', () => {
 
         triggerServerEvent('nextTurn', { turn: 2 });
 
-        expect(Unit.createFromName).toHaveBeenCalledWith('Settler', mockTile, mockPlayer);
+        expect(Unit.createFromName).toHaveBeenCalledWith('Settler', mockTile, mockPlayer, undefined);
       });
     });
 
@@ -1005,6 +1008,73 @@ describe('City', () => {
       City['relocatePalace'](mockPlayer);
 
       expect(otherCity.addBuilding).toHaveBeenCalledWith('Palace');
+    });
+  });
+
+  describe('buying production with gold', () => {
+    const mockWebsocket = {} as WebSocket;
+
+    it('buys a building from the production list and adds it to the city', () => {
+      triggerServerEvent('purchaseProductionOption', { cityName: 'TestCity', type: 'building', name: 'Monument' }, mockWebsocket);
+
+      expect(mockTreasury.spend).toHaveBeenCalledWith(270);
+      expect(city.getBuildingMaintenance()).toBe(1);
+      expect(mockPlayer.sendNetworkEvent).toHaveBeenCalledWith(expect.objectContaining({ event: 'addBuilding', cityName: 'TestCity' }));
+    });
+
+    it('spawns a bought unit with no movement left this turn', () => {
+      const mockUnit = {} as Unit;
+      (Unit.createFromName as jest.Mock).mockReturnValue(mockUnit);
+
+      triggerServerEvent('purchaseProductionOption', { cityName: 'TestCity', type: 'unit', name: 'Warrior' }, mockWebsocket);
+
+      expect(mockTreasury.spend).toHaveBeenCalledWith(190);
+      expect(Unit.createFromName).toHaveBeenCalledWith('Warrior', mockTile, mockPlayer, { availableMovement: 0 });
+      expect(mockTile.addUnit).toHaveBeenCalledWith(mockUnit);
+    });
+
+    it('buys nothing the player cannot afford', () => {
+      mockTreasury.canAfford.mockReturnValue(false);
+
+      triggerServerEvent('purchaseProductionOption', { cityName: 'TestCity', type: 'building', name: 'Monument' }, mockWebsocket);
+
+      expect(mockTreasury.spend).not.toHaveBeenCalled();
+      expect(city.getBuildingMaintenance()).toBe(0);
+    });
+
+    it('ignores an option the city cannot build', () => {
+      triggerServerEvent('purchaseProductionOption', { cityName: 'TestCity', type: 'unit', name: 'Archer' }, mockWebsocket);
+
+      expect(mockTreasury.spend).not.toHaveBeenCalled();
+    });
+
+    it('charges a queued item only for the production it still needs, then removes it from the queue', () => {
+      triggerServerEvent('addToProductionQueue', { cityName: 'TestCity', type: 'unit', name: 'Warrior' }, mockWebsocket);
+      city['productionQueue'][0].progress = 10;
+
+      triggerServerEvent('purchaseQueueItem', { cityName: 'TestCity', index: 0 }, mockWebsocket);
+
+      expect(mockTreasury.spend).toHaveBeenCalledWith(140);
+      expect(city['productionQueue']).toEqual([]);
+    });
+
+    it('keeps a queued unit (and the gold) when there is nowhere for it to appear', () => {
+      mockTile.canPlaceUnit.mockReturnValue(false);
+      triggerServerEvent('addToProductionQueue', { cityName: 'TestCity', type: 'unit', name: 'Warrior' }, mockWebsocket);
+
+      triggerServerEvent('purchaseQueueItem', { cityName: 'TestCity', index: 0 }, mockWebsocket);
+
+      expect(mockTreasury.spend).not.toHaveBeenCalled();
+      expect(city['productionQueue']).toHaveLength(1);
+    });
+
+    it('never sells wonders', () => {
+      city['productionQueue'].push({ type: 'building', name: 'Great Library', cost: 185, progress: 0 });
+
+      triggerServerEvent('purchaseQueueItem', { cityName: 'TestCity', index: 0 }, mockWebsocket);
+
+      expect(mockTreasury.spend).not.toHaveBeenCalled();
+      expect(city['productionQueue']).toHaveLength(1);
     });
   });
 });

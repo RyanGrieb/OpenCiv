@@ -30,6 +30,8 @@ export interface GameOptions {
   // Every civilization starts out having met and being at war with every other, as it was before
   // diplomacy existed. For the combat scenarios; real games start at peace (see PlayerDiplomacy).
   startAtWar: boolean;
+  // Gold every player starts with, for trying out buying production (see the GoldSpending scenario).
+  startingGold: number;
 }
 
 // Maps are streamed to clients in square chunks of this many tiles, so each dimension must divide evenly.
@@ -83,7 +85,8 @@ export const DefaultGameOptions: GameOptions = {
   startWithArcher: false,
   cityStartingHealth: 200,
   mapPreset: "",
-  startAtWar: false
+  startAtWar: false,
+  startingGold: 0
 };
 
 interface BaseGameOptionDefinition {
@@ -169,5 +172,6 @@ export const GameOptionDefinitions: GameOptionDefinition[] = [
     max: 200,
     step: 1,
     hidden: true
-  }
+  },
+  { key: "startingGold", label: "Starting Gold", type: "number", min: 0, max: 10000, step: 10, hidden: true }
 ];

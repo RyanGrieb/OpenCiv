@@ -7,6 +7,7 @@ import { InGameScene } from "../../scene/type/InGameScene";
 import { Strings } from "../../util/Strings";
 import { Label } from "../components/Label";
 import { UITheme } from "../UITheme";
+import { GoldTooltip } from "./GoldTooltip";
 
 interface TurnTimeEvent {
   turn: number;
@@ -38,6 +39,11 @@ export class StatusBar extends ActorGroup {
   private tradeDescLabel: Label;
   private tradeIcon: Actor;
   private tradeLabel: Label;
+
+  private goldHovered = false;
+  private goldTooltip: GoldTooltip | undefined;
+  // Tooltips are built async - only the newest build may be shown.
+  private goldTooltipBuild = 0;
 
   constructor() {
     super({
@@ -73,8 +79,58 @@ export class StatusBar extends ActorGroup {
       parentObject: this,
       callback: () => {
         this.updateStatLabels();
+        if (this.goldHovered) this.showGoldTooltip();
       }
     });
+
+    this.on("mousemove", (options) => this.setGoldHovered(this.isOverGold(options.x, options.y)));
+    this.on("mouseleave", () => this.setGoldHovered(false));
+  }
+
+  public onDestroyed(): void {
+    super.onDestroyed();
+    this.setGoldHovered(false);
+  }
+
+  // Anywhere on "Gold:", its icon or its numbers.
+  private isOverGold(x: number, y: number): boolean {
+    if (!this.goldLabel) return false;
+
+    const left = this.goldDescLabel.getX();
+    const right = this.goldLabel.getX() + this.goldLabel.getWidth();
+    return x >= left && x <= right && y >= this.y && y <= this.y + this.height;
+  }
+
+  private setGoldHovered(hovered: boolean) {
+    if (hovered === this.goldHovered) return;
+
+    this.goldHovered = hovered;
+    if (hovered) this.showGoldTooltip();
+    else this.hideGoldTooltip();
+  }
+
+  // Builds the tooltip from the latest breakdown, then swaps it in for any tooltip already showing.
+  private async showGoldTooltip() {
+    const build = ++this.goldTooltipBuild;
+    const breakdown = Game.getInstance().getCurrentSceneAs<InGameScene>().getClientPlayer().getGoldBreakdown();
+    const tooltip = await GoldTooltip.create(this.goldDescLabel.getX(), this.y + this.height, breakdown);
+    if (build !== this.goldTooltipBuild || !this.goldHovered) return;
+
+    this.removeGoldTooltip();
+    this.goldTooltip = tooltip;
+    Game.getInstance().getCurrentScene().addActor(tooltip);
+  }
+
+  private hideGoldTooltip() {
+    this.goldTooltipBuild++;
+    this.removeGoldTooltip();
+  }
+
+  private removeGoldTooltip() {
+    if (!this.goldTooltip) return;
+
+    Game.getInstance().getCurrentScene().removeActor(this.goldTooltip);
+    this.goldTooltip = undefined;
   }
 
   private updateCurrentTurnLabel(data: TurnTimeEvent) {

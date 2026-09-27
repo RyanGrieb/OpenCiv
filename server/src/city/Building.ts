@@ -8,6 +8,8 @@ export interface BuildingData {
   // Absent for buildings never offered through a city's production queue (e.g.
   // Palace, which is only ever granted directly by applyFoundingBonuses()).
   cost?: number;
+  // Gold paid every turn while the city has the building. Absent means none.
+  maintenance?: number;
   required_tech?: string;
   // Extra hit points the building gives its city, e.g. Walls.
   city_health?: number;
@@ -22,6 +24,7 @@ export class Building {
   private statLine: Record<string, number>;
   private isWonder: boolean;
   private cost?: number;
+  private maintenance: number;
   private requiredTech?: string;
   private cityHealth: number;
   private uniqueTo?: string;
@@ -32,6 +35,7 @@ export class Building {
     this.assetName = data.asset_name;
     this.isWonder = data.is_wonder ?? false;
     this.cost = data.cost;
+    this.maintenance = data.maintenance ?? 0;
     this.requiredTech = data.required_tech;
     this.cityHealth = data.city_health ?? 0;
     this.uniqueTo = data.unique_to;
@@ -89,6 +93,10 @@ export class Building {
 
   public getCost(): number | undefined {
     return this.cost;
+  }
+
+  public getMaintenance(): number {
+    return this.maintenance;
   }
 
   public getRequiredTech(): string | undefined {

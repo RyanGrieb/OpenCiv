@@ -91,13 +91,14 @@ export class InGameState extends State {
     );
   }
 
-  // The startWithAllTechs / startWithBuilder / startWithArcher game options, for trying out Builder
-  // improvements and ranged combat.
+  // The startWithAllTechs / startWithBuilder / startWithArcher / startingGold game options, for trying
+  // out Builder improvements, ranged combat and buying production.
   private static applyDebugStart(player: Player, spawnTile: Tile) {
     const options = Game.getInstance().getGameOptions();
     if (options.startWithAllTechs) player.researchAllTechs();
     if (options.startWithBuilder) InGameState.addUnitBeside(spawnTile, "Builder", player, true);
     if (options.startWithArcher) InGameState.addUnitBeside(spawnTile, "Archer", player, false);
+    if (options.startingGold > 0) player.addToAccumulatedStat("gold", options.startingGold);
   }
 
   // Any land beside the Settler will do - a civilian can share a tile with the Warrior, a military unit can't.
@@ -297,6 +298,11 @@ export class InGameState extends State {
       .forEach((player) => player.getNotifications().startTurn(this.currentTurn));
 
     ServerEvents.call("nextTurn", { turn: this.currentTurn });
+
+    // After the event above, so a unit disbanded for debt isn't still being walked through it.
+    Game.getInstance()
+      .getPlayers()
+      .forEach((player) => player.getTreasury().settleDebt());
 
     // Once every unit's movement is back to full from the event above.
     Barbarians.getInstance()?.playTurn();

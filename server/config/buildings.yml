@@ -1,5 +1,7 @@
 # unique_to makes a building one civilization's unique building, built by that civ in place of the
 # building named in replaces and by nobody else.
+# maintenance is Civ 5's GoldMaintenance: gold the owner pays for the building every turn. Wonders and the
+# Palace have none.
 buildings:
   - name: Palace
     asset_name: BUILDING_PALACE
@@ -12,17 +14,20 @@ buildings:
   - name: Monument
     asset_name: BUILDING_MONUMENT
     cost: 60
+    maintenance: 1
     stats:
       - culture: 2
   - name: Amphitheater
     asset_name: BUILDING_AMPHITHEATER
     cost: 100
+    maintenance: 1
     required_tech: Drama and Poetry
     stats:
       - culture: 3
   - name: Aqueduct
     asset_name: BUILDING_AQUEDUCT
     cost: 100
+    maintenance: 1
     required_tech: Engineering
     stats: []
   - name: Bazaar
@@ -38,18 +43,21 @@ buildings:
   - name: Chapel
     asset_name: BUILDING_CHAPEL
     cost: 40
+    maintenance: 1
     required_tech: Pottery
     stats:
       - faith: 1
   - name: Circus
     asset_name: BUILDING_CIRCUS
     cost: 80
+    maintenance: 1
     required_tech: Trapping
     stats:
       - morale: 10
   - name: Colosseum
     asset_name: BUILDING_COLOSSEUM
     cost: 100
+    maintenance: 1
     required_tech: Construction
     stats:
       - morale: 10
@@ -64,18 +72,21 @@ buildings:
   - name: Forge
     asset_name: BUILDING_FORGE
     cost: 120
+    maintenance: 1
     required_tech: Metal Casting
     stats:
       - culture: 1
   - name: Garden
     asset_name: BUILDING_GARDEN
     cost: 120
+    maintenance: 1
     required_tech: Theology
     stats:
       - food: 1
   - name: Granary
     asset_name: BUILDING_GRANARY
     cost: 40
+    maintenance: 1
     required_tech: Pottery
     stats:
       - food: 2
@@ -105,12 +116,14 @@ buildings:
   - name: Library
     asset_name: BUILDING_LIBRARY
     cost: 75
+    maintenance: 1
     required_tech: Writing
     stats:
       - science: 2
   - name: Lighthouse
     asset_name: BUILDING_LIGHTHOUSE
     cost: 75
+    maintenance: 1
     required_tech: Optics
     stats:
       - food: 1
@@ -143,12 +156,14 @@ buildings:
   - name: Shrine
     asset_name: BUILDING_SHRINE
     cost: 65
+    maintenance: 1
     required_tech: Pottery
     stats:
       - culture: 1
   - name: Stables
     asset_name: BUILDING_STABLES
     cost: 100
+    maintenance: 1
     required_tech: Horseback Riding
     stats: []
   - name: Statue Of Ares
@@ -168,6 +183,7 @@ buildings:
   - name: Stoneworks
     asset_name: BUILDING_STONEWORKS
     cost: 75
+    maintenance: 1
     required_tech: Calendar
     stats:
       - production: 1
@@ -182,6 +198,7 @@ buildings:
   - name: Walls
     asset_name: BUILDING_WALLS
     cost: 75
+    maintenance: 1
     required_tech: Masonry
     # A city's `defense` stat adds to its combat strength (see City.getBaseStrength()).
     city_health: 50
@@ -190,6 +207,7 @@ buildings:
   - name: Water Mill
     asset_name: BUILDING_WATER_MILL
     cost: 75
+    maintenance: 2
     required_tech: The Wheel
     stats:
       - food: 2
@@ -197,6 +215,7 @@ buildings:
   - name: Workshop
     asset_name: BUILDING_WORKSHOP
     cost: 120
+    maintenance: 2
     required_tech: Metal Casting
     stats:
       - production: 2

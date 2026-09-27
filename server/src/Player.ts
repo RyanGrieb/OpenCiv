@@ -3,6 +3,7 @@ import { ServerEvents } from "./Events";
 import { Game } from "./Game";
 import { City } from "./city/City";
 import { PlayerDiplomacy } from "./diplomacy/PlayerDiplomacy";
+import { PlayerTreasury } from "./economy/PlayerTreasury";
 import { PlayerVisibility } from "./map/PlayerVisibility";
 import { PlayerNotifications } from "./notification/PlayerNotifications";
 import { Technology } from "./research/Technology";
@@ -54,6 +55,7 @@ export class Player {
   private visibility: PlayerVisibility;
   private notifications: PlayerNotifications;
   private diplomacy: PlayerDiplomacy;
+  private treasury: PlayerTreasury;
 
   /**
    * Creates a new player object.
@@ -73,6 +75,7 @@ export class Player {
     this.visibility = new PlayerVisibility(this);
     this.notifications = new PlayerNotifications(this);
     this.diplomacy = new PlayerDiplomacy(this);
+    this.treasury = new PlayerTreasury(this);
 
     // Add event listener for when the player disconnects
     this.wsConnection?.on("close", (data) => {
@@ -339,6 +342,8 @@ export class Player {
       totals.culture += cityStats.culture;
     }
 
+    totals.gold -= this.treasury.getUpkeep();
+
     return totals;
   }
 
@@ -381,7 +386,8 @@ export class Player {
     this.sendNetworkEvent({
       event: "updateTotalStats",
       stats: this.getTotalStats(),
-      accumulatedStats: this.getAccumulatedStats()
+      accumulatedStats: this.getAccumulatedStats(),
+      goldBreakdown: this.treasury.getBreakdown()
     });
   }
 
@@ -438,6 +444,11 @@ export class Player {
 
   public getNotifications() {
     return this.notifications;
+  }
+
+  /** Where this player's gold comes from and goes, and what it can afford. */
+  public getTreasury() {
+    return this.treasury;
   }
 
   /** Who this player has met, and who they're at war with. */

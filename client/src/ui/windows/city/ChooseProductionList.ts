@@ -4,11 +4,15 @@ import { City, ProductionQueueItem } from "../../../city/City";
 import { WebsocketClient } from "../../../network/Client";
 import { Actor } from "../../../scene/Actor";
 import { ListBox } from "../../components/Listbox";
+import { Button } from "../../components/Button";
 import { UITheme } from "../../UITheme";
 import { CityScreen } from "./CityScreen";
 
 // Takes the stats window's place while the player picks something to add to the production queue.
+// Clicking a row queues it; the gold price on its right buys it outright instead.
 export class ChooseProductionList extends ListBox {
+  private static readonly BUY_BUTTON_WIDTH = 100;
+
   private city: City;
   private onChosen: () => void;
 
@@ -46,13 +50,17 @@ export class ChooseProductionList extends ListBox {
     const rowX = this.getNextRowPosition().x;
     const rowY = this.getNextRowPosition().y;
     const rowHeight = CityScreen.PRODUCTION_ROW_HEIGHT;
+    const textX = rowX + 8 + UITheme.ICON_SIZE + 8;
+    const buyButton = this.createBuyButton(option, rowX, rowY);
 
     const row = this.addRow({
       text: option.name,
-      textX: rowX + 8 + UITheme.ICON_SIZE + 8,
+      textX: textX,
+      maxWidth: CityScreen.STATS_WINDOW_WIDTH - (textX - rowX) - ChooseProductionList.BUY_BUTTON_WIDTH - 16,
       centerTextY: true,
       rowHeight: rowHeight,
       actorIcons: [
+        ...(buyButton ? [buyButton] : []),
         new Actor({
           image: Game.getInstance().getImage(GameImage.SPRITESHEET),
           spriteRegion: CityScreen.resolveProductionIcon(option),
@@ -67,6 +75,9 @@ export class ChooseProductionList extends ListBox {
     });
 
     row.on("clicked", () => {
+      // The buy button sits on the row, so its clicks reach the row too.
+      if (buyButton?.isMouseInside()) return;
+
       WebsocketClient.sendMessage({
         event: "addToProductionQueue",
         cityName: this.city.getName(),
@@ -83,6 +94,26 @@ export class ChooseProductionList extends ListBox {
     });
     row.on("mouse_exit", () => {
       Game.getInstance().setCursor("default");
+    });
+  }
+
+  private createBuyButton(option: ProductionQueueItem, rowX: number, rowY: number): Button | undefined {
+    if (option.goldCost === undefined) return undefined;
+
+    return CityScreen.createBuyButton({
+      item: option,
+      x: rowX + CityScreen.STATS_WINDOW_WIDTH - ChooseProductionList.BUY_BUTTON_WIDTH - 8,
+      y: rowY + CityScreen.PRODUCTION_ROW_HEIGHT / 2 - CityScreen.BUY_BUTTON_HEIGHT / 2,
+      width: ChooseProductionList.BUY_BUTTON_WIDTH,
+      onBuy: () => {
+        WebsocketClient.sendMessage({
+          event: "purchaseProductionOption",
+          cityName: this.city.getName(),
+          type: option.type,
+          name: option.name
+        });
+        this.onChosen();
+      }
     });
   }
 }

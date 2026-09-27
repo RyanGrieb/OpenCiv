@@ -47,6 +47,8 @@ export interface ProductionQueueItem {
   // Accumulated production toward this item - only meaningful for the front
   // (currently-producing) item, since the server only advances that one.
   progress?: number;
+  // What buying it outright with gold costs right now. Absent for what can't be bought (wonders).
+  goldCost?: number;
 }
 
 /**
