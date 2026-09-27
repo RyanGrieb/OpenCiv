@@ -839,7 +839,7 @@ export class GameMap {
   }
 
   // A hill's mounds at (x, y) on a chunk's canvas, under everything else on the tile - none if it
-  // isn't a hill. Never mirrored, so the mounds stay lit from the left like the rest of the map.
+  // isn't a hill. Mirrored along with the tile's other overlays.
   private async createHillOverlay(tile: Tile, x: number, y: number): Promise<Tile[]> {
     const hillType = Tile.getHillOverlayType(tile.getTileTypes()[0], tile.getGridX(), tile.getGridY());
     if (!hillType) return [];
@@ -850,7 +850,8 @@ export class GameMap {
       y,
       gridX: tile.getGridX(),
       gridY: tile.getGridY(),
-      movementCost: tile.getMovementCost()
+      movementCost: tile.getMovementCost(),
+      mirrored: Tile.isOverlayMirrored(tile.getGridX(), tile.getGridY())
     });
     await overlay.loadImage();
     return [overlay];

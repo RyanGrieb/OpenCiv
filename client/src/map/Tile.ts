@@ -191,7 +191,7 @@ export class Tile extends Actor {
   }
 
   /**
-   * Whether the overlays (forests, resources, improvements) standing on (gridX, gridY) are drawn
+   * Whether the overlays (hills, forests, resources, improvements) standing on (gridX, gridY) are drawn
    * flipped left-right, which doubles their looks without new art. Half the tiles are, picked from
    * a hash of the coordinates like getVariantTileType(). Never flipped upside down, and the terrain
    * underneath is left alone: its hex outline isn't quite symmetric, so a flip would open seams.
