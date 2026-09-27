@@ -77,6 +77,8 @@ export class GameMap {
   private static readonly CHUNK_SIZE = 4;
   private static readonly CHUNK_PIXEL_WIDTH = 32 * GameMap.CHUNK_SIZE + 16;
   private static readonly CHUNK_PIXEL_HEIGHT = 25 * GameMap.CHUNK_SIZE + 7;
+  // Between the terrain chunks (z 0) and the fog of war (z 1) - see rebuildChunkVisuals().
+  private static readonly TOP_LAYER_Z = 0.5;
 
   private oddEdgeAxis = [
     [0, -1],
@@ -722,8 +724,9 @@ export class GameMap {
     const coastActors: Actor[] = [];
     const topRenderActors: Actor[] = [];
 
-    for (let dx = 0; dx < GameMap.CHUNK_SIZE; dx++) {
-      for (let dy = 0; dy < GameMap.CHUNK_SIZE; dy++) {
+    // Row by row, so a tile's trees are drawn over those of the row behind it.
+    for (let dy = 0; dy < GameMap.CHUNK_SIZE; dy++) {
+      for (let dx = 0; dx < GameMap.CHUNK_SIZE; dx++) {
         const gridX = chunkGridX + dx;
         const gridY = chunkGridY + dy;
         if (gridX >= this.mapWidth || gridY >= this.mapHeight) continue;
@@ -807,7 +810,9 @@ export class GameMap {
         canvasHeight: GameMap.CHUNK_PIXEL_HEIGHT
       });
       topLayerMerged.setPosition(chunkGridX * 32, chunkGridY * 25);
-      topLayerMerged.setZValue(0);
+      // Above every terrain chunk, so trees poking past their hex into the chunk above aren't covered
+      // by its terrain, and lower rows above higher ones. Always under the fog layer (z 1).
+      topLayerMerged.setZValue(GameMap.TOP_LAYER_Z + chunkGridY / (this.mapHeight * 4));
       scene.addActor(topLayerMerged);
       this.topLayerChunks.set(chunkKey, topLayerMerged);
     } else {
