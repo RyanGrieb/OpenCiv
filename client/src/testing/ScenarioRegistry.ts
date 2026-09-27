@@ -181,6 +181,11 @@ ScenarioRegistry.register("CoastlineBlending", ScenarioCategory.MAP, async () =>
     return module.setupCoastlineBlendingTest;
 });
 
+ScenarioRegistry.register("TerrainBlending", ScenarioCategory.MAP, async () => {
+    const module = await import("./scenarios/TerrainBlending.test");
+    return module.setupTerrainBlendingTest;
+});
+
 ScenarioRegistry.register("Diplomacy", ScenarioCategory.DIPLOMACY, async () => {
     const module = await import("./scenarios/Diplomacy.test");
     return module.setupDiplomacyTest;

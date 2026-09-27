@@ -1,4 +1,5 @@
 import { Actor } from "../scene/Actor";
+import { HexPixels } from "./HexPixels";
 import { Tile } from "./Tile";
 
 // A color in RGB 0-255.
@@ -16,20 +17,6 @@ type Rgb = [number, number, number];
  * to sit with the rest of the pixel art.
  */
 export class Coastline {
-  // The hex's corners in a tile's own pixels; side i runs from corner i to corner i + 1, and faces
-  // getAdjacentTiles()[i] (the numbering rivers and roads use).
-  private static readonly CORNERS: [number, number][] = [
-    [0, 7],
-    [16, 0],
-    [32, 7],
-    [32, 25],
-    [16, 32],
-    [0, 25]
-  ];
-  // Rows of a tile's sprite above this (and from TILE_BOTTOM_ROW down) are the hex's pointed top
-  // and bottom, which narrow by 2 pixels a row - the same stepped outline the terrain sprites use.
-  private static readonly TILE_TOP_ROWS = 7;
-  private static readonly TILE_BOTTOM_ROW = 25;
   // World pixels between the noise's lattice points: how quickly a shore's width wanders.
   private static readonly NOISE_SCALE = 5;
 
@@ -116,12 +103,12 @@ export class Coastline {
 
     for (let py = 0; py < Tile.HEIGHT; py++) {
       for (let px = 0; px < Tile.WIDTH; px++) {
-        if (!Coastline.insideHex(px, py)) continue;
+        if (!HexPixels.insideHex(px, py)) continue;
 
-        const distance = Coastline.distanceToSides(px + 0.5, py + 0.5, sides);
+        const distance = HexPixels.distanceToSides(px + 0.5, py + 0.5, sides);
         const worldX = tile.getX() + px;
         const worldY = tile.getY() + py;
-        const noise = Coastline.noise(worldX, worldY);
+        const noise = HexPixels.noise(worldX, worldY, Coastline.NOISE_SCALE);
         // Every other pixel in world space, so dithering lines up across tiles.
         const dither = (worldX + worldY) % 2 === 0;
         const [color, alpha] = tile.isWater()
@@ -170,60 +157,5 @@ export class Coastline {
     const fade = 1 - distance / shallowsWidth;
     const alpha = Math.ceil(fade * 4) * 0.08;
     return [Coastline.SHALLOWS, dither ? alpha : alpha * 0.6];
-  }
-
-  // Whether a pixel of a tile's 32x32 sprite belongs to its hex, rather than a neighbor's.
-  private static insideHex(px: number, py: number): boolean {
-    let halfWidth = Tile.WIDTH / 2;
-    if (py < Coastline.TILE_TOP_ROWS) halfWidth = 2 * (py + 1);
-    if (py >= Coastline.TILE_BOTTOM_ROW) halfWidth = 2 * (Tile.HEIGHT - py);
-
-    return Math.abs(px + 0.5 - Tile.WIDTH / 2) < halfWidth;
-  }
-
-  // How far a point is from the nearest of the given sides, in pixels.
-  private static distanceToSides(x: number, y: number, sides: number[]): number {
-    return Math.min(
-      ...sides.map((side) => {
-        const [x1, y1] = Coastline.CORNERS[side];
-        const [x2, y2] = Coastline.CORNERS[(side + 1) % 6];
-        return Coastline.distanceToSegment(x, y, x1, y1, x2, y2);
-      })
-    );
-  }
-
-  private static distanceToSegment(x: number, y: number, x1: number, y1: number, x2: number, y2: number): number {
-    const dx = x2 - x1;
-    const dy = y2 - y1;
-    const t = Math.max(0, Math.min(1, ((x - x1) * dx + (y - y1) * dy) / (dx * dx + dy * dy)));
-    return Math.hypot(x - (x1 + t * dx), y - (y1 + t * dy));
-  }
-
-  // Smooth value noise in [0, 1) at a world pixel, the same whichever tile asks for it.
-  private static noise(worldX: number, worldY: number): number {
-    const x = worldX / Coastline.NOISE_SCALE;
-    const y = worldY / Coastline.NOISE_SCALE;
-    const x0 = Math.floor(x);
-    const y0 = Math.floor(y);
-    const sx = Coastline.smoothstep(x - x0);
-    const sy = Coastline.smoothstep(y - y0);
-
-    const top = Coastline.lerp(Coastline.latticeValue(x0, y0), Coastline.latticeValue(x0 + 1, y0), sx);
-    const bottom = Coastline.lerp(Coastline.latticeValue(x0, y0 + 1), Coastline.latticeValue(x0 + 1, y0 + 1), sx);
-    return Coastline.lerp(top, bottom, sy);
-  }
-
-  private static latticeValue(x: number, y: number): number {
-    let hash = Math.imul(x, 374761393) + Math.imul(y, 668265263);
-    hash = Math.imul(hash ^ (hash >>> 13), 1274126177);
-    return ((hash ^ (hash >>> 16)) >>> 0) / 4294967296;
-  }
-
-  private static smoothstep(t: number): number {
-    return t * t * (3 - 2 * t);
-  }
-
-  private static lerp(a: number, b: number, t: number): number {
-    return a + (b - a) * t;
   }
 }

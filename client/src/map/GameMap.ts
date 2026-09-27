@@ -14,6 +14,7 @@ import { Vector } from "../util/Vector";
 import { MapWrap } from "./MapWrap";
 import { FogOfWarLayer } from "./FogOfWarLayer";
 import { Coastline } from "./Coastline";
+import { TerrainBlend } from "./TerrainBlend";
 
 // width/height/x/y/movementCost arrive as strings and are run through parseInt() below.
 interface MapSizeEvent {
@@ -123,11 +124,11 @@ export class GameMap {
   // fires once every tile, unit and city from the initial sync actually exists.
   private pendingChunkIngestions: Promise<void>[] = [];
 
-  // Chunks whose shores changed because a tile across the coast from them was discovered in
-  // another chunk - redrawn together by scheduleShoreRedraw(), so a burst of reveals (the initial
+  // Chunks whose shores or terrain blends changed because a tile across from them was discovered in
+  // another chunk - redrawn together by scheduleEdgeRedraw(), so a burst of reveals (the initial
   // sync) redraws each chunk once rather than once per neighboring chunk that arrives.
-  private shoreDirtyChunks: Set<string> = new Set();
-  private shoreRedrawScheduled = false;
+  private edgeDirtyChunks: Set<string> = new Set();
+  private edgeRedrawScheduled = false;
 
   // Shared between the mapChunk-embedded units and the live "createUnit"
   // event so the same unit is never constructed twice, regardless of which
@@ -264,7 +265,7 @@ export class GameMap {
     return this.tiles;
   }
 
-  // The merged terrain, shore and river art of the chunk holding a tile, if any of it is known.
+  // The merged terrain, terrain blend, shore and river art of the chunk holding a tile, if any of it is known.
   public getBaseLayerChunkAt(gridX: number, gridY: number): Actor | undefined {
     return this.baseLayerChunks.get(this.chunkKeyFor(gridX, gridY));
   }
@@ -565,7 +566,7 @@ export class GameMap {
 
         this.tiles[gridX][gridY] = tile;
         this.linkTileAdjacency(tile);
-        this.markNeighborShoresDirty(tile);
+        this.markNeighborEdgesDirty(tile);
       } else {
         tile.setTileTypes(tileTypes);
         tile.setYields(tileJSON.yields);
@@ -586,8 +587,8 @@ export class GameMap {
     }
 
     await this.rebuildChunkVisuals(chunkGridX, chunkGridY);
-    this.shoreDirtyChunks.delete(this.chunkKeyFor(chunkGridX, chunkGridY));
-    this.scheduleShoreRedraw();
+    this.edgeDirtyChunks.delete(this.chunkKeyFor(chunkGridX, chunkGridY));
+    this.scheduleEdgeRedraw();
 
     for (const cityJSON of pendingCities) {
       this.syncCity(cityJSON);
@@ -634,25 +635,27 @@ export class GameMap {
     WebsocketClient.sendMessage({ event: "requestCityStats", cityName: city.getName() });
   }
 
-  // A newly discovered tile gives any known neighbor across the coast from it a new shore side.
-  private markNeighborShoresDirty(tile: Tile) {
+  // A newly discovered tile gives any known neighbor across the coast from it a new shore side, and
+  // any neighbor of a different kind of land a new blended side.
+  private markNeighborEdgesDirty(tile: Tile) {
     for (const neighbor of tile.getAdjacentTiles()) {
-      if (!neighbor || !Coastline.affects(tile, neighbor)) continue;
-      this.shoreDirtyChunks.add(this.chunkKeyFor(neighbor.getGridX(), neighbor.getGridY()));
+      if (!neighbor) continue;
+      if (!Coastline.affects(tile, neighbor) && !TerrainBlend.affects(tile, neighbor)) continue;
+      this.edgeDirtyChunks.add(this.chunkKeyFor(neighbor.getGridX(), neighbor.getGridY()));
     }
   }
 
-  // Queues one redraw of every chunk marked by markNeighborShoresDirty(), behind the chunks already
+  // Queues one redraw of every chunk marked by markNeighborEdgesDirty(), behind the chunks already
   // waiting to be ingested. Tracked like an ingestion so "mapLoaded" waits for the shores too.
-  private scheduleShoreRedraw() {
-    if (this.shoreRedrawScheduled || this.shoreDirtyChunks.size === 0) return;
-    this.shoreRedrawScheduled = true;
+  private scheduleEdgeRedraw() {
+    if (this.edgeRedrawScheduled || this.edgeDirtyChunks.size === 0) return;
+    this.edgeRedrawScheduled = true;
 
     this.pendingChunkIngestions.push(
       this.enqueueRender(async () => {
-        this.shoreRedrawScheduled = false;
-        const chunkKeys = [...this.shoreDirtyChunks];
-        this.shoreDirtyChunks.clear();
+        this.edgeRedrawScheduled = false;
+        const chunkKeys = [...this.edgeDirtyChunks];
+        this.edgeDirtyChunks.clear();
         for (const key of chunkKeys) {
           await this.rebuildChunkVisuals(...GameMap.parseChunkKey(key));
         }
@@ -710,7 +713,7 @@ export class GameMap {
   }
 
   /**
-   * Rebuilds one chunk's merged base (terrain, shores and rivers) and top (resources/city/improvements) actors
+   * Rebuilds one chunk's merged base (terrain, terrain blends, shores and rivers) and top (resources/city/improvements) actors
    * from scratch, from whatever this client currently knows about that chunk's 16 cells. Called
    * whenever a tile in the chunk is newly discovered or changes visibility - safe to call
    * repeatedly since it always derives the result fresh rather than patching the previous one.
@@ -721,6 +724,7 @@ export class GameMap {
 
     const baseRenderTiles: Tile[] = [];
     const riverActors: River[] = [];
+    const blendTiles: { tile: Tile; x: number; y: number }[] = [];
     const coastActors: Actor[] = [];
     const topRenderActors: Actor[] = [];
 
@@ -758,6 +762,7 @@ export class GameMap {
         await baseRenderTile.loadImage();
         baseRenderTiles.push(baseRenderTile);
 
+        blendTiles.push({ tile, x: xPosRelative, y: yPosRelative });
         coastActors.push(...(await Coastline.createActors(tile, xPosRelative, yPosRelative)));
 
         if (baseRenderTile.hasRiver()) {
@@ -785,8 +790,13 @@ export class GameMap {
     if (previousBase) scene.removeActor(previousBase);
 
     if (baseRenderTiles.length > 0) {
+      const blendActor = await TerrainBlend.createChunkActor(
+        blendTiles,
+        GameMap.CHUNK_PIXEL_WIDTH,
+        GameMap.CHUNK_PIXEL_HEIGHT
+      );
       const bottomLayerActor = Actor.mergeActors({
-        actors: [...baseRenderTiles, ...coastActors, ...riverActors],
+        actors: [...baseRenderTiles, ...(blendActor ? [blendActor] : []), ...coastActors, ...riverActors],
         spriteRegion: false,
         canvasWidth: GameMap.CHUNK_PIXEL_WIDTH,
         canvasHeight: GameMap.CHUNK_PIXEL_HEIGHT

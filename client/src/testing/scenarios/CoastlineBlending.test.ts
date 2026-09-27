@@ -12,7 +12,7 @@ export function setupCoastlineBlendingTest(game: Game) {
   const runner = new TestRunner("CoastlineBlending");
   const utils = new TestUtils(game);
   const map = () => GameMap.getInstance();
-  // The hex's corners in a tile's own pixels; side i runs from corner i to i + 1 (as Coastline.CORNERS).
+  // The hex's corners in a tile's own pixels; side i runs from corner i to i + 1 (as HexPixels.CORNERS).
   const corners = [
     [0, 7],
     [16, 0],
