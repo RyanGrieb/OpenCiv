@@ -8,7 +8,7 @@ import { HexPixels } from "../../map/HexPixels";
 import { Tile } from "../../map/Tile";
 import { TestUtils } from "../TestUtils";
 
-// Where two different kinds of land meet (plains beside grassland, say), their pixels fray into
+// Where two different kinds of land meet (plains beside grassland, say), their grounds fade into
 // each other across a wobbly line instead of a hard hex edge. Starts on the terrain_mix map preset
 // (patches of grassland, plains, desert, tundra and snow with a few hills and a mountain around the
 // Settler) with the whole map revealed, then compares the drawn map against each tile's own sprite:
@@ -196,7 +196,7 @@ export function setupTerrainBlendingTest(game: Game) {
     name: "Center on the patchwork around the Settler",
     action: async () => {
       utils.getInGameScene().focusOnTile(settlerTile!, 3);
-      utils.log("Grassland, plains, desert, tundra and snow now fray into each other at their borders.", "yellow");
+      utils.log("Grassland, plains, desert, tundra and snow now fade into each other at their borders.", "yellow");
 
       const results = document.getElementById("test-results");
       if (results) results.style.pointerEvents = "none";

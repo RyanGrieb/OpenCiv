@@ -7,15 +7,17 @@ import { Tile } from "./Tile";
 
 /**
  * Softens the hard hex border where two different kinds of land meet, such as plains beside
- * grassland. Along each such side, a tile's pixels are dithered over to its neighbor's ground,
- * so the two terrains fray into each other across a wobbly line instead of meeting at a straight
- * hex edge. Only the look: the tiles' types and yields are untouched.
+ * grassland. Along each such side, the neighbor's ground is laid over the tile's own, see-through,
+ * fading out with distance from the side, so the two terrains melt into each other across a wobbly
+ * line instead of meeting at a straight hex edge. Only the look: the tiles' types and yields are
+ * untouched.
  *
- * Both tiles of a pair draw their half of the same transition: whether a pixel shows one terrain or
- * the other is decided from its distance to the shared side plus noise and a dither pattern taken in
- * world coordinates, so the two halves line up exactly and a border runs on smoothly from one tile
- * into the next. The borrowed pixels are the neighbor's own sprite mirrored across the side, so its
- * texture carries straight on over the edge. Hard pixels, no antialiasing, like the rest of the art.
+ * Both tiles of a pair draw their half of the same transition: how opaque the other terrain is at a
+ * pixel comes from its distance to the shared side, moved by noise taken in world coordinates, so the
+ * two halves meet at the same mix and a border runs on smoothly from one tile into the next. The
+ * borrowed pixels are the neighbor's own sprite mirrored across the side, so its texture carries
+ * straight on over the edge. The opacity steps in a few levels rather than smoothly, to sit with the
+ * pixel art.
  *
  * A hill blends as the flat ground under its mounds, which are drawn on the map's top layer and so
  * stay whole. Mountains, water and natural wonders are left alone (the shore between land and water
@@ -37,23 +39,17 @@ export class TerrainBlend {
     "snow_hill"
   ];
   private static readonly HILL_SUFFIX = "_hill";
-  private static readonly ALL_SIDES = [0, 1, 2, 3, 4, 5];
 
-  // How far the border between the two terrains wanders either side of the hex side, in pixels.
+  // How far the middle of the fade wanders either side of the hex side, in pixels.
   private static readonly WOBBLE = 2.5;
-  // How wide the dithered band is where the two terrains' pixels mix.
-  private static readonly DITHER_WIDTH = 4;
+  // How wide the fade is from one terrain to the other, in pixels, centered on the wobbling border.
+  private static readonly FADE_WIDTH = 9;
+  // How many steps of opacity the fade uses.
+  private static readonly FADE_STEPS = 8;
   // World pixels between the noise's lattice points: how quickly the border wanders.
   private static readonly NOISE_SCALE = 6;
   // Keeps this noise from lining up with the shore's, which uses the same lattice.
   private static readonly NOISE_SEED = 7331;
-  // A 4x4 ordered dither, laid over the world so it lines up across tiles.
-  private static readonly BAYER = [
-    [0, 8, 2, 10],
-    [12, 4, 14, 6],
-    [3, 11, 1, 9],
-    [15, 7, 13, 5]
-  ];
 
   private static readonly tilePixels = new Map<string, ImageData>();
   private static readonly spritePixels = new Map<string, ImageData>();
@@ -77,7 +73,7 @@ export class TerrainBlend {
     for (const { tile, x, y } of tiles) {
       const tilePixels = TerrainBlend.getTilePixels(tile);
       if (!tilePixels) continue;
-      TerrainBlend.copyOpaquePixels(tilePixels, chunkPixels, x, y);
+      TerrainBlend.copyDrawnPixels(tilePixels, chunkPixels, x, y);
       blended = true;
     }
     if (!blended) return undefined;
@@ -132,20 +128,23 @@ export class TerrainBlend {
       for (let px = 0; px < Tile.WIDTH; px++) {
         if (!HexPixels.insideHex(px, py)) continue;
 
-        // Each pixel belongs to its nearest side, so a side facing the same ground stays clean up to its corners.
-        const side = TerrainBlend.nearestSide(px + 0.5, py + 0.5);
-        if (!sides.includes(side) || !TerrainBlend.showsNeighbor(tile, side, px, py)) continue;
+        const side = TerrainBlend.nearestSide(px + 0.5, py + 0.5, sides);
+        const opacity = TerrainBlend.neighborOpacity(tile, side, px, py);
+        if (opacity <= 0) continue;
 
         const color = TerrainBlend.neighborPixel(tile, side, px, py);
-        if (color) pixels.data.set(color, (py * Tile.WIDTH + px) * 4);
+        if (!color) continue;
+        const index = (py * Tile.WIDTH + px) * 4;
+        pixels.data.set(color, index);
+        pixels.data[index + 3] = Math.round(opacity * 255);
       }
     }
     return pixels;
   }
 
-  // Copies a tile's opaque pixels onto the chunk's at (x, y), leaving what its neighbors drew in the
+  // Copies the pixels a tile drew onto the chunk's at (x, y), leaving what its neighbors drew in the
   // corners of its square untouched.
-  private static copyOpaquePixels(source: ImageData, target: ImageData, x: number, y: number) {
+  private static copyDrawnPixels(source: ImageData, target: ImageData, x: number, y: number) {
     for (let py = 0; py < source.height; py++) {
       for (let px = 0; px < source.width; px++) {
         const sourceIndex = (py * source.width + px) * 4;
@@ -171,32 +170,32 @@ export class TerrainBlend {
     return image;
   }
 
-  private static nearestSide(x: number, y: number): number {
-    return TerrainBlend.ALL_SIDES.reduce((nearest, side) =>
+  // Near a corner between two blended sides, a pixel takes the ground of the nearer one.
+  private static nearestSide(x: number, y: number, sides: number[]): number {
+    return sides.reduce((nearest, side) =>
       HexPixels.distanceToSide(x, y, side) < HexPixels.distanceToSide(x, y, nearest) ? side : nearest
     );
   }
 
   /**
-   * Whether a pixel of the tile shows the neighbor's ground rather than its own. The border between
-   * the two sits at the hex side, pushed back and forth by the noise and dither of that world pixel.
-   * Both tiles of a pair measure the same border from opposite sides, so each world pixel lands on
-   * one side of it.
+   * How opaque the neighbor's ground is over one of the tile's pixels, from 0 to 1. The middle of the
+   * fade sits at the hex side, pushed back and forth by the noise at that world pixel; there each
+   * terrain shows at half. Both tiles of a pair measure the same fade from opposite sides, so their
+   * mixes meet at the side: where one tile shows its neighbor at 30%, the other shows it at 70%.
    */
-  private static showsNeighbor(tile: Tile, side: number, px: number, py: number): boolean {
+  private static neighborOpacity(tile: Tile, side: number, px: number, py: number): number {
     const neighbor = tile.getAdjacentTiles()[side];
     const worldX = tile.getX() + px;
     const worldY = tile.getY() + py;
 
     const noise = HexPixels.noise(worldX, worldY, TerrainBlend.NOISE_SCALE, TerrainBlend.NOISE_SEED);
-    const dither = (TerrainBlend.BAYER[TerrainBlend.mod(worldY, 4)][TerrainBlend.mod(worldX, 4)] + 0.5) / 16;
-    const offset = TerrainBlend.WOBBLE * (noise * 2 - 1) + TerrainBlend.DITHER_WIDTH * (dither - 0.5);
-    const distance = HexPixels.distanceToSide(px + 0.5, py + 0.5, side);
-
-    // Which way the offset pushes the border is agreed on by both tiles: toward the ground that
-    // sorts later.
+    // Which way the noise pushes the border is agreed on by both tiles: toward the ground that sorts later.
     const direction = TerrainBlend.getGround(tile) < TerrainBlend.getGround(neighbor) ? 1 : -1;
-    return distance + direction * offset < 0;
+    const pastBorder =
+      HexPixels.distanceToSide(px + 0.5, py + 0.5, side) + direction * TerrainBlend.WOBBLE * (noise * 2 - 1);
+
+    const opacity = Math.max(0, Math.min(1, 0.5 - pastBorder / TerrainBlend.FADE_WIDTH));
+    return Math.round(opacity * TerrainBlend.FADE_STEPS) / TerrainBlend.FADE_STEPS;
   }
 
   // The neighbor's ground at the point mirrored across the side, or straight across where the
@@ -238,10 +237,5 @@ export class TerrainBlend {
     const pixels = context.getImageData(0, 0, Tile.WIDTH, Tile.HEIGHT);
     TerrainBlend.spritePixels.set(tileType, pixels);
     return pixels;
-  }
-
-  // A remainder that stays positive for negative world coordinates too.
-  private static mod(value: number, divisor: number): number {
-    return ((value % divisor) + divisor) % divisor;
   }
 }
