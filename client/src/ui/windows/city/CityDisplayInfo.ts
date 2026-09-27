@@ -2,7 +2,7 @@ import { Game } from "../../../Game";
 import { City, ProductionQueueItem } from "../../../city/City";
 import { NetworkEvents, WebsocketClient } from "../../../network/Client";
 import { ActorGroup } from "../../../scene/ActorGroup";
-import { ChooseProductionList } from "./ChooseProductionList";
+import { ChooseProductionList, ProductionListMode } from "./ChooseProductionList";
 import { CityBuildingsWindow } from "./CityBuildingsWindow";
 import { CityProductionQueueWindow } from "./CityProductionQueueWindow";
 import { CityScreen } from "./CityScreen";
@@ -17,7 +17,8 @@ export class CityDisplayInfo extends ActorGroup {
   private statsWindow: CityStatsWindow;
   private productionQueueWindow: CityProductionQueueWindow;
   private chooseProductionList: ChooseProductionList;
-  private isChoosingProduction: boolean = false;
+  // Which list is open in the stats window's place, if any.
+  private listMode: ProductionListMode | undefined;
 
   constructor(city: City) {
     super({
@@ -54,7 +55,16 @@ export class CityDisplayInfo extends ActorGroup {
       eventName: "updateProductionOptions",
       parentObject: this,
       callback: (data: any) => {
-        if (data["cityName"] !== this.city.getName()) return;
+        if (data["cityName"] !== this.city.getName() || this.listMode !== "produce") return;
+        this.showChooseProductionList(data["units"], data["buildings"]);
+      }
+    });
+
+    NetworkEvents.on({
+      eventName: "updatePurchaseOptions",
+      parentObject: this,
+      callback: (data: any) => {
+        if (data["cityName"] !== this.city.getName() || this.listMode !== "purchase") return;
         this.showChooseProductionList(data["units"], data["buildings"]);
       }
     });
@@ -83,32 +93,36 @@ export class CityDisplayInfo extends ActorGroup {
     this.removeActor(this.productionQueueWindow);
     this.productionQueueWindow = new CityProductionQueueWindow({
       city: this.city,
-      isChoosingProduction: this.isChoosingProduction,
-      onToggleChooseProduction: () => this.toggleChooseProduction()
+      listMode: this.listMode,
+      onToggleList: (mode) => this.toggleList(mode)
     });
     this.addActor(this.productionQueueWindow);
   }
 
-  private toggleChooseProduction() {
-    if (this.isChoosingProduction) {
-      this.closeChooseProduction();
+  // Opens that list, or closes it if it's the one open. The other list's button switches lists.
+  private toggleList(mode: ProductionListMode) {
+    if (this.listMode === mode) {
+      this.closeList();
     } else {
-      this.openChooseProduction();
+      this.openList(mode);
     }
   }
 
-  // The options list arrives from the server as updateProductionOptions.
-  private openChooseProduction() {
-    this.isChoosingProduction = true;
+  // The options arrive from the server as updateProductionOptions or updatePurchaseOptions.
+  private openList(mode: ProductionListMode) {
+    this.listMode = mode;
+    this.removeActor(this.chooseProductionList);
+    this.chooseProductionList = undefined;
     this.hideStatsWindow();
-    // Rebuild just for the button's new "Cancel" label - the queue itself hasn't changed.
+    // Rebuild just for the buttons' new "Cancel" label - the queue itself hasn't changed.
     this.showProductionQueueWindow();
 
-    WebsocketClient.sendMessage({ event: "requestProductionOptions", cityName: this.city.getName() });
+    const event = mode === "produce" ? "requestProductionOptions" : "requestPurchaseOptions";
+    WebsocketClient.sendMessage({ event, cityName: this.city.getName() });
   }
 
-  private closeChooseProduction() {
-    this.isChoosingProduction = false;
+  private closeList() {
+    this.listMode = undefined;
 
     this.removeActor(this.chooseProductionList);
     this.chooseProductionList = undefined;
@@ -121,9 +135,10 @@ export class CityDisplayInfo extends ActorGroup {
     this.removeActor(this.chooseProductionList);
     this.chooseProductionList = new ChooseProductionList({
       city: this.city,
+      mode: this.listMode,
       units: units,
       buildings: buildings,
-      onChosen: () => this.closeChooseProduction()
+      onChosen: () => this.closeList()
     });
     this.addActor(this.chooseProductionList);
   }

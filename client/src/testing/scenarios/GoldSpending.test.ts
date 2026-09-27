@@ -2,9 +2,7 @@ import { TestRunner } from "../TestRunner";
 import { Game } from "../../Game";
 import { WebsocketClient } from "../../network/Client";
 import { City } from "../../city/City";
-import { Actor } from "../../scene/Actor";
-import { ActorGroup } from "../../scene/ActorGroup";
-import { Button } from "../../ui/components/Button";
+import { ChooseProductionList, ProductionListMode } from "../../ui/windows/city/ChooseProductionList";
 import { GoldEntry } from "../../ui/hud/GoldTooltip";
 import { TestUtils } from "../TestUtils";
 
@@ -32,11 +30,15 @@ export function setupGoldSpendingTest(game: Game) {
         me().getGoldBreakdown().expenses.find((entry) => entry.source.startsWith(source));
     const scene = () => utils.getInGameScene() as unknown as Record<string, any>;
     const statusBar = () => scene()["statusBar"] as Record<string, any>;
-    const allActors = (group: ActorGroup): Actor[] => group.getActors();
-    const buyButtons = (): Button[] => {
-        const cityScreen = scene()["cityDisplayInfo"] as ActorGroup | undefined;
-        if (!cityScreen) return [];
-        return allActors(cityScreen).filter((actor): actor is Button => actor instanceof Button && /\d$/.test(actor.getText()));
+    const cityScreen = () => scene()["cityDisplayInfo"] as Record<string, any>;
+    const openList = (): ChooseProductionList | undefined => cityScreen()?.["chooseProductionList"];
+    // The text of each item row in the open list (not its "Units"/"Buildings" headings), when it's the list for `mode`.
+    const listRows = (mode: ProductionListMode): string[] => {
+        const list = openList();
+        if (list?.getMode() !== mode) return [];
+        return ((list as unknown as Record<string, any>)["rows"] as any[])
+            .map((row) => row.getLabel().getText() as string)
+            .filter((text) => text !== "Units" && text !== "Buildings");
     };
 
     const spendAndWait = async (send: () => void, price: number, message: string) => {
@@ -74,7 +76,7 @@ export function setupGoldSpendingTest(game: Game) {
     });
 
     runner.addStep({
-        name: `Buy a Monument from the production list for ${MONUMENT_PRICE} gold: it's built at once and costs 1 gold a turn`,
+        name: `Buy a Monument from the purchase list for ${MONUMENT_PRICE} gold: it's built at once and costs 1 gold a turn`,
         action: async () => {
             await spendAndWait(
                 () => WebsocketClient.sendMessage({ event: "purchaseProductionOption", cityName: city.getName(), type: "building", name: "Monument" }),
@@ -87,12 +89,12 @@ export function setupGoldSpendingTest(game: Game) {
     });
 
     runner.addStep({
-        name: `Queue a Warrior and buy it from the queue for ${WARRIOR_PRICE} gold: it appears at once and leaves the queue`,
+        name: `Queue a Warrior, then buy it from the purchase list for ${WARRIOR_PRICE} gold: it appears at once and leaves the queue`,
         action: async () => {
             WebsocketClient.sendMessage({ event: "addToProductionQueue", cityName: city.getName(), type: "unit", name: "Warrior" });
             await utils.waitUntil(() => city.getProductionQueue()[0]?.goldCost === WARRIOR_PRICE, 5000, "Warrior to be queued with its price");
             await spendAndWait(
-                () => WebsocketClient.sendMessage({ event: "purchaseQueueItem", cityName: city.getName(), index: 0 }),
+                () => WebsocketClient.sendMessage({ event: "purchaseProductionOption", cityName: city.getName(), type: "unit", name: "Warrior" }),
                 WARRIOR_PRICE,
                 "Warrior to be paid for"
             );
@@ -168,19 +170,25 @@ export function setupGoldSpendingTest(game: Game) {
     });
 
     runner.addStep({
-        name: "The city screen shows gold prices beside what can be bought",
+        name: "Choose Production lists the turns each item would take",
         action: async () => {
             statusBar()["setGoldHovered"](false);
-            WebsocketClient.sendMessage({ event: "addToProductionQueue", cityName: city.getName(), type: "unit", name: "Warrior" });
-            await utils.waitUntil(() => city.getProductionQueue().length > 0, 5000, "Warrior to be queued");
             utils.getInGameScene().toggleCityUI(city);
-            await utils.waitUntil(() => buyButtons().some((button) => button.getText().startsWith("Buy ")), 5000, "Buy button to appear");
-            // Open the production list, to see its prices too.
-            (scene()["cityDisplayInfo"] as Record<string, any>)["openChooseProduction"]();
-            await utils.waitUntil(() => buyButtons().length > 1, 5000, "Production list prices to appear");
+            await utils.waitUntil(() => !!cityScreen(), 5000, "City screen to open");
+            cityScreen()["toggleList"]("produce");
+            await utils.waitUntil(() => listRows("produce").length > 0, 5000, "Production list to appear");
+        },
+        verification: () => listRows("produce").every((text) => /\(\d+\u00a0turns?\)$/.test(text))
+    });
+
+    runner.addStep({
+        name: "Purchase switches to a list of what gold can buy, which a click buys",
+        action: async () => {
+            cityScreen()["toggleList"]("purchase");
+            await utils.waitUntil(() => listRows("purchase").length > 0, 5000, "Purchase list to appear");
             statusBar()["setGoldHovered"](true);
         },
-        verification: () => buyButtons().length > 1
+        verification: () => listRows("purchase").includes("Scout")
     });
 
     return runner;

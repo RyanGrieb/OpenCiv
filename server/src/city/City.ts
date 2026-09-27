@@ -34,8 +34,10 @@ export interface ProductionOption {
   // structure) so that reordering the queue (moveProductionQueueItem, which
   // swaps whole entries) carries progress along with it automatically.
   progress?: number;
-  // What buying it outright costs, on the copies sent to the client. Absent when it can't be bought.
+  // On the copies sent to the client (see toClientOption): what buying it outright costs, absent when it
+  // can't be bought, and how many turns the city's production would take to finish it.
   goldCost?: number;
+  turns?: number;
 }
 
 export class City {
@@ -144,8 +146,8 @@ export class City {
         player.sendNetworkEvent({
           event: "updateProductionOptions",
           cityName: this.name,
-          units: units.map((option) => this.withPurchaseCost(option)),
-          buildings: buildings.map((option) => this.withPurchaseCost(option))
+          units: units.map((option) => this.toClientOption(option)),
+          buildings: buildings.map((option) => this.toClientOption(option))
         });
       }
     });
@@ -219,7 +221,19 @@ export class City {
       }
     });
 
-    // Buying something from the choose-production list, without queueing it first.
+    ServerEvents.on({
+      eventName: "requestPurchaseOptions",
+      parentObject: this,
+      callback: (data, websocket) => {
+        const player = Game.getInstance().getPlayerFromWebsocket(websocket);
+        if (this.name !== data["cityName"] || this.player !== player) return;
+
+        player.sendNetworkEvent({ event: "updatePurchaseOptions", cityName: this.name, ...this.getPurchaseOptions() });
+      }
+    });
+
+    // Buying something from the purchase list. If it's queued, the queued entry is what gets bought (at
+    // the price of the production it still needs), and it leaves the queue.
     ServerEvents.on({
       eventName: "purchaseProductionOption",
       parentObject: this,
@@ -228,28 +242,16 @@ export class City {
         if (this.name !== data["cityName"] || this.player !== player) return;
 
         // Looked up server-side, like addToProductionQueue, so it's something the city can build.
-        const { units, buildings } = this.getProductionOptions();
+        const { units, buildings } = this.getProductionOptions({ includeQueuedBuildings: true });
         const option = [...units, ...buildings].find(
           (candidate) => candidate.type === data["type"] && candidate.name === data["name"]
         );
-        if (!option || !this.purchase(option)) return;
+        if (!option) return;
 
-        this.sendStatUpdate(player);
-      }
-    });
+        const queued = this.findQueuedEntry(option);
+        if (!this.purchase(queued ?? option)) return;
 
-    // Buying a queued item, which only pays for the production it still needs.
-    ServerEvents.on({
-      eventName: "purchaseQueueItem",
-      parentObject: this,
-      callback: (data, websocket) => {
-        const player = Game.getInstance().getPlayerFromWebsocket(websocket);
-        if (this.name !== data["cityName"] || this.player !== player) return;
-
-        const item = this.productionQueue[data["index"]];
-        if (!item || !this.purchase(item)) return;
-
-        this.productionQueue.splice(this.productionQueue.indexOf(item), 1);
+        if (queued) this.productionQueue.splice(this.productionQueue.indexOf(queued), 1);
         this.sendStatUpdate(player);
       }
     });
@@ -474,7 +476,7 @@ export class City {
       cityName: this.name,
       cityStats: cityStats,
       workedTiles: this.workedTiles.map((tile) => ({ x: tile.getX(), y: tile.getY() })),
-      productionQueue: this.productionQueue.map((item) => this.withPurchaseCost(item)),
+      productionQueue: this.productionQueue.map((item) => this.toClientOption(item)),
       nextBorderTile: nextBorderTile ? { x: nextBorderTile.getX(), y: nextBorderTile.getY() } : null
     });
 
@@ -909,7 +911,9 @@ export class City {
   // they're granted directly elsewhere rather than queued. required_tech, when
   // present, gates an option until the player has researched it; obsolete_tech hides a unit again
   // once its replacement's tech is in.
-  private getProductionOptions(): { units: ProductionOption[]; buildings: ProductionOption[] } {
+  private getProductionOptions(
+    options = { includeQueuedBuildings: false }
+  ): { units: ProductionOption[]; buildings: ProductionOption[] } {
     const isUnlocked = (requiredTech?: string) => !requiredTech || this.player.hasResearchedTech(requiredTech);
 
     // Ships need a coast to be launched from.
@@ -936,7 +940,7 @@ export class City {
           isUnlocked(building.getRequiredTech()) &&
           Building.isAvailableToCiv(building, this.player.getCivilizationName()) &&
           !buildingExists(building.getName()) &&
-          !buildingInQueue(building.getName())
+          (options.includeQueuedBuildings || !buildingInQueue(building.getName()))
       )
       .map((building) => ({ type: "building", name: building.getName(), cost: building.getCost() }));
 
@@ -1042,6 +1046,23 @@ export class City {
     this.announceFinished(current.name);
   }
 
+  // What gold can buy here: anything the city could build except wonders, including what's already
+  // queued, priced by the production it still needs.
+  private getPurchaseOptions(): { units: ProductionOption[]; buildings: ProductionOption[] } {
+    const { units, buildings } = this.getProductionOptions({ includeQueuedBuildings: true });
+    const priced = (option: ProductionOption) => this.toClientOption(this.findQueuedEntry(option) ?? option);
+    const buyable = (option: ProductionOption) => option.goldCost !== undefined;
+
+    return { units: units.map(priced).filter(buyable), buildings: buildings.map(priced).filter(buyable) };
+  }
+
+  // The queued entry for this item that's furthest along, if it's queued at all.
+  private findQueuedEntry(option: ProductionOption): ProductionOption | undefined {
+    return this.productionQueue
+      .filter((entry) => entry.type === option.type && entry.name === option.name)
+      .sort((a, b) => (b.progress ?? 0) - (a.progress ?? 0))[0];
+  }
+
   // Undefined for what gold can't buy: wonders, as in Civ 5.
   private getPurchaseCost(item: ProductionOption): number | undefined {
     if (item.type === "building" && Building.createFromName(item.name)?.isWonderBuilding()) return undefined;
@@ -1049,8 +1070,14 @@ export class City {
     return GoldPurchase.getCost(item.type, item.cost - (item.progress ?? 0));
   }
 
-  private withPurchaseCost(item: ProductionOption): ProductionOption {
-    return { ...item, goldCost: this.getPurchaseCost(item) };
+  private toClientOption(item: ProductionOption): ProductionOption {
+    return { ...item, goldCost: this.getPurchaseCost(item), turns: this.getTurnsToProduce(item) };
+  }
+
+  // At the city's current production rate, counting at least 1 production a turn.
+  private getTurnsToProduce(item: ProductionOption): number {
+    const productionRate = Math.max(1, this.getStatline({ asArray: false }).production);
+    return Math.ceil(Math.max(0, item.cost - (item.progress ?? 0)) / productionRate);
   }
 
   /**

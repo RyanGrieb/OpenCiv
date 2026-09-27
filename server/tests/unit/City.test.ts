@@ -113,11 +113,11 @@ describe('City', () => {
       event: 'updateProductionOptions',
       cityName: 'TestCity',
       units: [
-        { type: 'unit', name: 'Warrior', cost: 30, goldCost: 190 },
-        { type: 'unit', name: 'Scout', cost: 20, goldCost: 140 },
+        { type: 'unit', name: 'Warrior', cost: 30, goldCost: 190, turns: 30 },
+        { type: 'unit', name: 'Scout', cost: 20, goldCost: 140, turns: 20 },
       ],
       buildings: [
-        { type: 'building', name: 'Monument', cost: 60, goldCost: 270 },
+        { type: 'building', name: 'Monument', cost: 60, goldCost: 270, turns: 60 },
       ],
     });
   });
@@ -139,7 +139,7 @@ describe('City', () => {
 
     expect(mockPlayer.sendNetworkEvent).toHaveBeenCalledWith(
       expect.objectContaining({
-        units: expect.arrayContaining([{ type: 'unit', name: 'Archer', cost: 40, goldCost: 240 }]),
+        units: expect.arrayContaining([{ type: 'unit', name: 'Archer', cost: 40, goldCost: 240, turns: 40 }]),
       })
     );
   });
@@ -290,7 +290,7 @@ describe('City', () => {
     expect(mockPlayer.sendNetworkEvent).toHaveBeenCalledWith(
       expect.objectContaining({
         event: 'updateCityStats',
-        productionQueue: [{ type: 'unit', name: 'Warrior', cost: 30, progress: 0, goldCost: 190 }],
+        productionQueue: [{ type: 'unit', name: 'Warrior', cost: 30, progress: 0, goldCost: 190, turns: 30 }],
       })
     );
   });
@@ -343,7 +343,7 @@ describe('City', () => {
       expect(mockPlayer.sendNetworkEvent).toHaveBeenCalledWith(
         expect.objectContaining({
           event: 'updateCityStats',
-          productionQueue: [{ type: 'unit', name: 'Scout', cost: 20, progress: 0, goldCost: 140 }],
+          productionQueue: [{ type: 'unit', name: 'Scout', cost: 20, progress: 0, goldCost: 140, turns: 20 }],
         })
       );
     });
@@ -455,7 +455,7 @@ describe('City', () => {
       expect(mockPlayer.sendNetworkEvent).toHaveBeenCalledWith(
         expect.objectContaining({
           event: 'updateCityStats',
-          productionQueue: [{ type: 'unit', name: 'Warrior', cost: 30, progress: 10, goldCost: 140 }],
+          productionQueue: [{ type: 'unit', name: 'Warrior', cost: 30, progress: 10, goldCost: 140, turns: 2 }],
         })
       );
     });
@@ -1052,29 +1052,59 @@ describe('City', () => {
       triggerServerEvent('addToProductionQueue', { cityName: 'TestCity', type: 'unit', name: 'Warrior' }, mockWebsocket);
       city['productionQueue'][0].progress = 10;
 
-      triggerServerEvent('purchaseQueueItem', { cityName: 'TestCity', index: 0 }, mockWebsocket);
+      triggerServerEvent('purchaseProductionOption', { cityName: 'TestCity', type: 'unit', name: 'Warrior' }, mockWebsocket);
 
       expect(mockTreasury.spend).toHaveBeenCalledWith(140);
       expect(city['productionQueue']).toEqual([]);
+    });
+
+    it('buys a queued building, taking it off the queue', () => {
+      triggerServerEvent('addToProductionQueue', { cityName: 'TestCity', type: 'building', name: 'Monument' }, mockWebsocket);
+
+      triggerServerEvent('purchaseProductionOption', { cityName: 'TestCity', type: 'building', name: 'Monument' }, mockWebsocket);
+
+      expect(mockTreasury.spend).toHaveBeenCalledWith(270);
+      expect(city['productionQueue']).toEqual([]);
+      expect(city.getBuildingMaintenance()).toBe(1);
     });
 
     it('keeps a queued unit (and the gold) when there is nowhere for it to appear', () => {
       mockTile.canPlaceUnit.mockReturnValue(false);
       triggerServerEvent('addToProductionQueue', { cityName: 'TestCity', type: 'unit', name: 'Warrior' }, mockWebsocket);
 
-      triggerServerEvent('purchaseQueueItem', { cityName: 'TestCity', index: 0 }, mockWebsocket);
+      triggerServerEvent('purchaseProductionOption', { cityName: 'TestCity', type: 'unit', name: 'Warrior' }, mockWebsocket);
 
       expect(mockTreasury.spend).not.toHaveBeenCalled();
       expect(city['productionQueue']).toHaveLength(1);
     });
 
+    it('lists what gold can buy, priced by what queued items still need', () => {
+      triggerServerEvent('addToProductionQueue', { cityName: 'TestCity', type: 'unit', name: 'Warrior' }, mockWebsocket);
+      triggerServerEvent('addToProductionQueue', { cityName: 'TestCity', type: 'building', name: 'Monument' }, mockWebsocket);
+      city['productionQueue'][0].progress = 10;
+      mockPlayer.sendNetworkEvent.mockClear();
+
+      triggerServerEvent('requestPurchaseOptions', { cityName: 'TestCity' }, mockWebsocket);
+
+      const { event, units, buildings } = (mockPlayer.sendNetworkEvent as jest.Mock).mock.calls[0][0];
+      const price = (options: { name: string; goldCost: number }[], name: string) =>
+        options.find((option) => option.name === name)?.goldCost;
+      expect(event).toBe('updatePurchaseOptions');
+      expect(price(units, 'Warrior')).toBe(140);
+      expect(price(units, 'Scout')).toBe(140);
+      expect(price(buildings, 'Monument')).toBe(270);
+    });
+
     it('never sells wonders', () => {
-      city['productionQueue'].push({ type: 'building', name: 'Great Library', cost: 185, progress: 0 });
+      mockPlayer.hasResearchedTech.mockReturnValue(true);
 
-      triggerServerEvent('purchaseQueueItem', { cityName: 'TestCity', index: 0 }, mockWebsocket);
+      triggerServerEvent('requestPurchaseOptions', { cityName: 'TestCity' }, mockWebsocket);
+      triggerServerEvent('purchaseProductionOption', { cityName: 'TestCity', type: 'building', name: 'Great Library' }, mockWebsocket);
 
+      const { buildings } = (mockPlayer.sendNetworkEvent as jest.Mock).mock.calls[0][0];
+      expect(buildings.some((option: { name: string }) => option.name === 'Great Library')).toBe(false);
+      expect(buildings.some((option: { name: string }) => option.name === 'Library')).toBe(true);
       expect(mockTreasury.spend).not.toHaveBeenCalled();
-      expect(city['productionQueue']).toHaveLength(1);
     });
   });
 });

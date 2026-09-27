@@ -49,6 +49,8 @@ export interface ProductionQueueItem {
   progress?: number;
   // What buying it outright with gold costs right now. Absent for what can't be bought (wonders).
   goldCost?: number;
+  // Turns the city's production would take to finish it, as the server works it out.
+  turns?: number;
 }
 
 /**

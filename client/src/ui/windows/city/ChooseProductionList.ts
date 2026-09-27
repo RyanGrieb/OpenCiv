@@ -1,23 +1,33 @@
-import { GameImage } from "../../../Assets";
+import { GameImage, SpriteRegion } from "../../../Assets";
 import { Game } from "../../../Game";
 import { City, ProductionQueueItem } from "../../../city/City";
 import { WebsocketClient } from "../../../network/Client";
 import { Actor } from "../../../scene/Actor";
+import { InGameScene } from "../../../scene/type/InGameScene";
+import { Label } from "../../components/Label";
 import { ListBox } from "../../components/Listbox";
-import { Button } from "../../components/Button";
 import { UITheme } from "../../UITheme";
 import { CityScreen } from "./CityScreen";
 
-// Takes the stats window's place while the player picks something to add to the production queue.
-// Clicking a row queues it; the gold price on its right buys it outright instead.
+// "produce" lists what the city can queue, with the turns each would take; "purchase" lists what gold
+// can buy, with each price.
+export type ProductionListMode = "produce" | "purchase";
+
+// Takes the stats window's place while the player picks something to produce or buy. Clicking a row
+// queues it or, in the purchase list, buys it.
 export class ChooseProductionList extends ListBox {
-  private static readonly BUY_BUTTON_WIDTH = 100;
+  // As wide as the queue window below it, which is wider than the stats window this replaces.
+  private static readonly WIDTH = CityScreen.PRODUCTION_WINDOW_WIDTH;
+  // Right-edge strip for a purchase row's price and gold icon.
+  private static readonly PRICE_ZONE = 110;
 
   private city: City;
+  private mode: ProductionListMode;
   private onChosen: () => void;
 
   constructor(options: {
     city: City;
+    mode: ProductionListMode;
     units: ProductionQueueItem[];
     buildings: ProductionQueueItem[];
     onChosen: () => void;
@@ -25,7 +35,7 @@ export class ChooseProductionList extends ListBox {
     super({
       x: 0,
       y: UITheme.STATUS_BAR_HEIGHT,
-      width: CityScreen.STATS_WINDOW_WIDTH,
+      width: ChooseProductionList.WIDTH,
       // Fills the space down to the top of the production queue window.
       height: Game.getInstance().getHeight() - UITheme.STATUS_BAR_HEIGHT - CityScreen.PRODUCTION_WINDOW_HEIGHT,
       textFont: UITheme.FONT,
@@ -33,6 +43,7 @@ export class ChooseProductionList extends ListBox {
     });
 
     this.city = options.city;
+    this.mode = options.mode;
     this.onChosen = options.onChosen;
 
     this.addCategory("Units");
@@ -46,21 +57,30 @@ export class ChooseProductionList extends ListBox {
     }
   }
 
+  // "Warrior (10 turns)". A no-break space keeps "(10 turns)" together when a long name wraps.
+  private static getProduceText(option: ProductionQueueItem): string {
+    return `${option.name} (${CityScreen.turnsText(option.turns).replace(" ", " ")})`;
+  }
+
+  public getMode(): ProductionListMode {
+    return this.mode;
+  }
+
   private addOptionRow(option: ProductionQueueItem) {
     const rowX = this.getNextRowPosition().x;
     const rowY = this.getNextRowPosition().y;
     const rowHeight = CityScreen.PRODUCTION_ROW_HEIGHT;
     const textX = rowX + 8 + UITheme.ICON_SIZE + 8;
-    const buyButton = this.createBuyButton(option, rowX, rowY);
+    const purchasing = this.mode === "purchase";
+    const affordable = !purchasing || this.getGold() >= option.goldCost;
 
     const row = this.addRow({
-      text: option.name,
+      text: purchasing ? option.name : ChooseProductionList.getProduceText(option),
       textX: textX,
-      maxWidth: CityScreen.STATS_WINDOW_WIDTH - (textX - rowX) - ChooseProductionList.BUY_BUTTON_WIDTH - 16,
+      maxWidth: ChooseProductionList.WIDTH - (textX - rowX) - (purchasing ? ChooseProductionList.PRICE_ZONE : 8),
       centerTextY: true,
       rowHeight: rowHeight,
       actorIcons: [
-        ...(buyButton ? [buyButton] : []),
         new Actor({
           image: Game.getInstance().getImage(GameImage.SPRITESHEET),
           spriteRegion: CityScreen.resolveProductionIcon(option),
@@ -70,16 +90,16 @@ export class ChooseProductionList extends ListBox {
           width: UITheme.ICON_SIZE,
           height: UITheme.ICON_SIZE,
           cameraApplies: false
-        })
+        }),
+        ...(purchasing ? this.createPrice(option, rowX, rowY, affordable) : [])
       ]
     });
 
     row.on("clicked", () => {
-      // The buy button sits on the row, so its clicks reach the row too.
-      if (buyButton?.isMouseInside()) return;
+      if (!affordable) return;
 
       WebsocketClient.sendMessage({
-        event: "addToProductionQueue",
+        event: purchasing ? "purchaseProductionOption" : "addToProductionQueue",
         cityName: this.city.getName(),
         type: option.type,
         name: option.name
@@ -88,7 +108,7 @@ export class ChooseProductionList extends ListBox {
     });
 
     row.on("mousemove", () => {
-      if (row.isMouseInside()) {
+      if (row.isMouseInside() && affordable) {
         Game.getInstance().setCursor("pointer");
       }
     });
@@ -97,23 +117,35 @@ export class ChooseProductionList extends ListBox {
     });
   }
 
-  private createBuyButton(option: ProductionQueueItem, rowX: number, rowY: number): Button | undefined {
-    if (option.goldCost === undefined) return undefined;
+  // The price and a gold icon at the row's right edge, the price greyed out while it's unaffordable.
+  private createPrice(option: ProductionQueueItem, rowX: number, rowY: number, affordable: boolean): Actor[] {
+    const rowCenterY = rowY + CityScreen.PRODUCTION_ROW_HEIGHT / 2;
+    const iconX = rowX + ChooseProductionList.WIDTH - UITheme.ICON_SIZE - 8;
+    const text = `${option.goldCost}`;
+    const { width: textWidth, height: textHeight } = Game.getInstance().measureText(text, UITheme.FONT);
 
-    return CityScreen.createBuyButton({
-      item: option,
-      x: rowX + CityScreen.STATS_WINDOW_WIDTH - ChooseProductionList.BUY_BUTTON_WIDTH - 8,
-      y: rowY + CityScreen.PRODUCTION_ROW_HEIGHT / 2 - CityScreen.BUY_BUTTON_HEIGHT / 2,
-      width: ChooseProductionList.BUY_BUTTON_WIDTH,
-      onBuy: () => {
-        WebsocketClient.sendMessage({
-          event: "purchaseProductionOption",
-          cityName: this.city.getName(),
-          type: option.type,
-          name: option.name
-        });
-        this.onChosen();
-      }
-    });
+    return [
+      new Label({
+        text,
+        x: iconX - textWidth,
+        y: rowCenterY - textHeight / 2,
+        font: UITheme.FONT,
+        fontColor: affordable ? "white" : "gray"
+      }),
+      new Actor({
+        image: Game.getInstance().getImage(GameImage.SPRITESHEET),
+        spriteRegion: SpriteRegion.ICON_GOLD,
+        x: iconX,
+        y: rowCenterY - UITheme.ICON_SIZE / 2,
+        z: CityScreen.Z,
+        width: UITheme.ICON_SIZE,
+        height: UITheme.ICON_SIZE,
+        cameraApplies: false
+      })
+    ];
+  }
+
+  private getGold(): number {
+    return Game.getInstance().getCurrentSceneAs<InGameScene>().getClientPlayer().getAccumulatedStat("gold");
   }
 }
