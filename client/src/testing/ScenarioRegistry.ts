@@ -171,6 +171,11 @@ ScenarioRegistry.register("SoftFogOfWar", ScenarioCategory.MAP, async () => {
     return module.setupSoftFogOfWarTest;
 });
 
+ScenarioRegistry.register("CoastlineBlending", ScenarioCategory.MAP, async () => {
+    const module = await import("./scenarios/CoastlineBlending.test");
+    return module.setupCoastlineBlendingTest;
+});
+
 ScenarioRegistry.register("Diplomacy", ScenarioCategory.DIPLOMACY, async () => {
     const module = await import("./scenarios/Diplomacy.test");
     return module.setupDiplomacyTest;
