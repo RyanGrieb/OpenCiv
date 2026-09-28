@@ -20,8 +20,8 @@ import { Tile } from "./Tile";
  * pixel art.
  *
  * A hill blends as the flat ground under its mounds, which are drawn on the map's top layer and so
- * stay whole. Water blends with water the same way, ocean with shallow ocean. Mountains and natural
- * wonders are left alone, and so is the shore between land and water, which is Coastline's.
+ * stay whole. Water blends with water the same way, ocean with shallow ocean. Natural wonders are left
+ * alone, and so is the shore between land and water, which is Coastline's.
  */
 export class TerrainBlend {
   // Terrains that blend. A hill blends as the ground it stands on ("plains_hill" as "plains").
@@ -37,6 +37,7 @@ export class TerrainBlend {
     "desert_hill",
     "tundra_hill",
     "snow_hill",
+    "mountain",
     "ocean",
     "shallow_ocean",
     "freshwater"

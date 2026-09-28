@@ -18,7 +18,7 @@ export function setupTerrainBlendingTest(game: Game) {
   const runner = new TestRunner("TerrainBlending");
   const utils = new TestUtils(game);
   const map = () => GameMap.getInstance();
-  const BLENDING_TERRAINS = ["grass", "plains", "desert", "tundra", "snow", "floodplains"];
+  const BLENDING_TERRAINS = ["grass", "plains", "desert", "tundra", "snow", "floodplains", "mountain"];
   // How close to a side a pixel has to be to count as along it.
   const ALONG_SIDE = 4;
   const chunkPixels = new Map<string, CanvasRenderingContext2D>();
@@ -196,14 +196,12 @@ export function setupTerrainBlendingTest(game: Game) {
   });
 
   runner.addStep({
-    name: "Tiles among their own kind, and mountains, are drawn untouched",
+    name: "Tiles among their own kind are drawn untouched",
     action: async () => {
       failures = [];
       const untouched = allTiles()
         .filter(isPlain)
-        .filter(
-          (tile) => terrain(tile) === "mountain" || tile.getAdjacentTiles().every((adj) => ground(adj) === ground(tile))
-        )
+        .filter((tile) => tile.getAdjacentTiles().every((adj) => ground(adj) === ground(tile)))
         .slice(0, 80);
       for (const tile of untouched) {
         const changed = changedPixels(tile);
