@@ -12,8 +12,8 @@ import { TestUtils } from "../TestUtils";
 // each other across a wobbly line instead of a hard hex edge. Starts on the terrain_mix map preset
 // (patches of grassland, plains, desert, tundra and snow with a few hills and a mountain around the
 // Settler) with the whole map revealed, then compares the drawn map against each tile's own sprite:
-// every border between two kinds of land is blended (a hill's as its flat ground), and tiles among
-// their own kind are drawn untouched.
+// every border between two kinds of land is blended (a hill's as its flat ground), so is every
+// border between ocean and shallow ocean out at sea, and tiles among their own kind are drawn untouched.
 export function setupTerrainBlendingTest(game: Game) {
   const runner = new TestRunner("TerrainBlending");
   const utils = new TestUtils(game);
@@ -44,6 +44,9 @@ export function setupTerrainBlendingTest(game: Game) {
   const describe = (tile: Tile) => `(${tile.getGridX()},${tile.getGridY()}) ${terrain(tile)}`;
   // Rivers and shores draw over the terrain too, so tiles near either are left out of the comparisons.
   const hasRiver = (tile: Tile) => tile.getRiverSides().some((river) => river);
+  // Water away from the coast, whose shore would draw over it.
+  const isOpenWater = (tile: Tile) =>
+    ["ocean", "shallow_ocean"].includes(terrain(tile)) && tile.getAdjacentTiles().every((adj) => adj?.isWater());
   const isPlain = (tile: Tile) =>
     !hasRiver(tile) && tile.getAdjacentTiles().every((adj) => adj && !adj.isWater() && !hasRiver(adj));
 
@@ -167,6 +170,26 @@ export function setupTerrainBlendingTest(game: Game) {
         failures.push(`${describe(tile)} side ${side} next to ${terrain(neighbor)}: unblended`);
       }
       utils.log(`${pairs.length} borders checked, ${bothWays} of them mixed on both sides`);
+      failures.slice(0, 5).forEach((failure) => utils.log(failure, "red"));
+    },
+    verification: () => failures.length === 0
+  });
+
+  runner.addStep({
+    name: "Along every border between ocean and shallow ocean, the two waters mix",
+    action: async () => {
+      failures = [];
+      const pairs: Border[] = [];
+      for (const tile of allTiles().filter(isOpenWater)) {
+        tile.getAdjacentTiles().forEach((neighbor, side) => {
+          if (isOpenWater(neighbor) && terrain(tile) < terrain(neighbor)) pairs.push({ tile, neighbor, side });
+        });
+      }
+      for (const { tile, neighbor, side } of pairs) {
+        if (changedPixels(tile, side) + changedPixels(neighbor, (side + 3) % 6) > 0) continue;
+        failures.push(`${describe(tile)} side ${side} next to ${terrain(neighbor)}: unblended`);
+      }
+      utils.log(`${pairs.length} borders between ocean and shallow ocean checked`);
       failures.slice(0, 5).forEach((failure) => utils.log(failure, "red"));
     },
     verification: () => failures.length === 0
