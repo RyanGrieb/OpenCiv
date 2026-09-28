@@ -8,6 +8,7 @@ import { ConfigLoader } from "../util/ConfigLoader";
 import { PlayerDiplomacy } from "../diplomacy/PlayerDiplomacy";
 import { MapResources } from "./MapResources";
 import { NaturalWonders } from "./NaturalWonders";
+import { TechEffects } from "../research/TechEffects";
 
 // A tile/building stat-line is represented as an array of single-key partial objects
 // (e.g. [{ science: 0 }, { gold: 0 }, ...]) rather than one flat dictionary.
@@ -46,6 +47,8 @@ export class Tile {
   ];
   // Civ 5: moving along a road from one road tile to the next costs a third of a move.
   public static readonly ROAD_MOVEMENT_COST = 1 / 3;
+  // As in Civ 5, roads only bridge rivers once their owner has Engineering.
+  public static readonly BRIDGE_TECH = "Engineering";
 
   //== Generation Values ==
   private generationHeight: number;
@@ -233,18 +236,21 @@ export class Tile {
   // `visible` is the observing player's fog state for this tile. A tile they've discovered but
   // can't currently see still reports its terrain and city (their client remembers those), but
   // never what's standing on it.
+  //
+  // A resource the observer hasn't the tech to see yet (Horses, Iron) is left out entirely.
   public getTileJSON(options?: { visible?: boolean; observer?: Player }) {
     const visible = options?.visible ?? true;
+    const observer = options?.observer;
 
     return {
-      tileTypes: this.tileTypes,
+      tileTypes: this.tileTypes.filter((type) => !TechEffects.isResourceHidden(type, observer)),
       riverSides: this.riverSides,
       units: visible ? this.getUnitsJSON(options?.observer) : [],
       x: this.x,
       y: this.y,
       movementCost: this.getMovementCost(),
       city: this.cityTerritoryOf ? this.cityTerritoryOf.getJSON({ observer: options?.observer }) : null,
-      yields: this.getStats(),
+      yields: this.getStats(observer ?? this.getOwner()),
       improvement: this.improvement,
       visible: visible
     };
@@ -831,6 +837,13 @@ export class Tile {
     return this.containsTileTypes(["ocean", "shallow_ocean", "freshwater"]);
   }
 
+  // Civ 5's fresh water: a river along the tile, or a lake beside it.
+  public hasFreshWater(): boolean {
+    if (this.hasRiver()) return true;
+
+    return this.adjacentTiles.some((tile) => tile?.containsTileType("freshwater"));
+  }
+
   // Land beside the sea, where a city can build ships and let them in. A lake doesn't count, since
   // nothing built there could sail anywhere. Mirrored by the client's Tile.isCoastal().
   public isCoastal(): boolean {
@@ -896,8 +909,17 @@ export class Tile {
     return Math.sqrt(Math.pow(dx, 2) + Math.pow(tile2.getY() - tile1.getY(), 2));
   }
 
+  // Whether a road between the two tiles speeds the step up: it has to reach both, and a river between
+  // them needs a bridge. Mirrored by the client's Tile.roadCarriesAcross() - keep both in sync.
+  public static roadCarriesAcross(tile1: Tile, tile2: Tile, player?: Player): boolean {
+    if (!Tile.roadConnects(tile1, tile2)) return false;
+    if (!Tile.riverCrosses(tile1, tile2)) return true;
+
+    return player?.hasResearchedTech(Tile.BRIDGE_TECH) ?? false;
+  }
+
   public static getWeight(tile1: Tile, tile2: Tile, unit?: Unit): number {
-    if (Tile.roadConnects(tile1, tile2)) return Tile.ROAD_MOVEMENT_COST;
+    if (Tile.roadCarriesAcross(tile1, tile2, unit?.getPlayer())) return Tile.ROAD_MOVEMENT_COST;
 
     if (unit?.ignoresTerrainCost()) {
       // Still respect impassable terrain (e.g. mountains) - only flatten the
@@ -912,7 +934,9 @@ export class Tile {
     return tile2.getMovementCost();
   }
 
-  public getStats(): StatEntry[] {
+  // player is whose techs to go by: resources they can't see yet yield nothing, and their techs'
+  // tile bonuses apply. Defaults to the tile's owner.
+  public getStats(player: Player | undefined = this.getOwner()): StatEntry[] {
     const tileStats: StatEntry[] = [
       { science: 0 },
       { gold: 0 },
@@ -922,11 +946,12 @@ export class Tile {
       { food: 0 },
       { morale: 0 }
     ];
-    for (const tileType of this.getYieldingTileTypes()) {
-      const tileTypeData = Tile.getAllTileStats()[tileType.toUpperCase()];
-      if (!tileTypeData || !tileTypeData.stats) continue;
+    const yieldingTypes = this.getYieldingTileTypes().filter((type) => !TechEffects.isResourceHidden(type, player));
+    const statLines = yieldingTypes.map((type) => Tile.getAllTileStats()[type.toUpperCase()]?.stats ?? []);
+    statLines.push(TechEffects.getTileBonuses(this, player));
 
-      for (const statData of tileTypeData.stats) {
+    for (const statLine of statLines) {
+      for (const statData of statLine) {
         const statName = Object.keys(statData)[0] as keyof StatValues;
         const statValue = statData[statName];
 
@@ -948,6 +973,11 @@ export class Tile {
     }
 
     return tileStats;
+  }
+
+  // The player whose city's territory this tile is in.
+  public getOwner(): Player | undefined {
+    return this.cityTerritoryOf?.getPlayer();
   }
 
   public getTotalStatValue(stats: string[]): number {

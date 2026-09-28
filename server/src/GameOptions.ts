@@ -32,6 +32,9 @@ export interface GameOptions {
   startAtWar: boolean;
   // Gold every player starts with, for trying out buying production (see the GoldSpending scenario).
   startingGold: number;
+  // Every tech's cost as a percentage of its techs.yml cost, like Civ 5's game speeds (Quick is 67).
+  // Scenarios set it to 1 so a tech is researched the turn after it's chosen (see TechEffects).
+  techCostPercent: number;
 }
 
 // Maps are streamed to clients in square chunks of this many tiles, so each dimension must divide evenly.
@@ -86,7 +89,8 @@ export const DefaultGameOptions: GameOptions = {
   cityStartingHealth: 200,
   mapPreset: "",
   startAtWar: false,
-  startingGold: 0
+  startingGold: 0,
+  techCostPercent: 100
 };
 
 interface BaseGameOptionDefinition {
@@ -173,5 +177,6 @@ export const GameOptionDefinitions: GameOptionDefinition[] = [
     step: 1,
     hidden: true
   },
-  { key: "startingGold", label: "Starting Gold", type: "number", min: 0, max: 10000, step: 10, hidden: true }
+  { key: "startingGold", label: "Starting Gold", type: "number", min: 0, max: 10000, step: 10, hidden: true },
+  { key: "techCostPercent", label: "Tech Cost %", type: "number", min: 1, max: 300, step: 1, hidden: true }
 ];

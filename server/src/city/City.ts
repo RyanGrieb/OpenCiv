@@ -932,6 +932,10 @@ export class City {
 
     const buildingExists = (name: string) => this.hasBuilding(name);
     const buildingInQueue = (name: string) => this.productionQueue.some((q) => q.name === name);
+    // A building can need a coast, or another building in the city first.
+    const siteAllows = (building: Building) =>
+      (!building.isCoastal() || this.isCoastal()) &&
+      (!building.getRequiredBuilding() || buildingExists(building.getRequiredBuilding()));
 
     const buildings: ProductionOption[] = Building.getAllBuildings()
       .filter(
@@ -939,6 +943,7 @@ export class City {
           typeof building.getCost() === "number" &&
           isUnlocked(building.getRequiredTech()) &&
           Building.isAvailableToCiv(building, this.player.getCivilizationName()) &&
+          siteAllows(building) &&
           !buildingExists(building.getName()) &&
           (options.includeQueuedBuildings || !buildingInQueue(building.getName()))
       )

@@ -847,7 +847,7 @@ export class GameMap {
 
         player.sendNetworkEvent({
           event: "tileUpdated",
-          tile: tile.getTileJSON({ visible: true })
+          tile: tile.getTileJSON({ visible: true, observer: player })
         });
       });
   }

@@ -16,6 +16,10 @@ export interface BuildingData {
   // A civilization's unique building: only that civ builds it, in place of the building it replaces.
   unique_to?: string;
   replaces?: string;
+  // Only a city beside the sea can build it (Lighthouse, Harbor).
+  coastal?: boolean;
+  // A building the city needs first, as Civ 5's Temple needs a Shrine.
+  requires_building?: string;
 }
 
 export class Building {
@@ -29,6 +33,8 @@ export class Building {
   private cityHealth: number;
   private uniqueTo?: string;
   private replaces?: string;
+  private coastal: boolean;
+  private requiredBuilding?: string;
 
   constructor(data: BuildingData) {
     this.name = data.name;
@@ -40,6 +46,8 @@ export class Building {
     this.cityHealth = data.city_health ?? 0;
     this.uniqueTo = data.unique_to;
     this.replaces = data.replaces;
+    this.coastal = data.coastal ?? false;
+    this.requiredBuilding = data.requires_building;
 
     this.statLine = {};
     for (const stat of data.stats) {
@@ -105,6 +113,14 @@ export class Building {
 
   public getCityHealth(): number {
     return this.cityHealth;
+  }
+
+  public isCoastal(): boolean {
+    return this.coastal;
+  }
+
+  public getRequiredBuilding(): string | undefined {
+    return this.requiredBuilding;
   }
 
   // Reconstructs the {name, asset_name, stats} wire shape the client's own

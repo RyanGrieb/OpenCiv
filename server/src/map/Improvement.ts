@@ -1,5 +1,6 @@
 import { Barbarians } from "../barbarian/Barbarians";
 import { Player } from "../Player";
+import { TechEffects } from "../research/TechEffects";
 import { ConfigLoader } from "../util/ConfigLoader";
 import { Tile } from "./Tile";
 import type { UnitDomain } from "../unit/Unit";
@@ -65,14 +66,16 @@ export class Improvement {
 
     if (tile.getImprovement() || !Improvement.featuresAllow(improvement, tile)) return false;
 
-    const resource = tile.getResource();
+    const resource = Improvement.getVisibleResource(tile, player);
     if (resource) return improvement.resources?.[resource] !== undefined;
 
     return Improvement.terrainAllows(improvement, tile);
   }
 
   // Finishes the improvement on the tile. The caller is responsible for telling players about it.
-  public static complete(improvement: ImprovementData, tile: Tile) {
+  // builder is whose Builder did the work: a resource they can't see yet stays as it is, under the
+  // improvement, as in Civ 5 (a Mine dug before Iron Working turns out to sit on Iron later).
+  public static complete(improvement: ImprovementData, tile: Tile, builder?: Player) {
     if (improvement.removes_feature) {
       tile.removeTileType(improvement.removes_feature);
       return;
@@ -83,12 +86,20 @@ export class Improvement {
       return;
     }
 
-    const resource = tile.getResource();
+    const resource = Improvement.getVisibleResource(tile, builder);
     const improvedResource = resource ? improvement.resources?.[resource] : undefined;
     if (improvedResource) tile.replaceTileType(resource, improvedResource);
     else tile.addTileType(improvement.tile_type);
 
     tile.setImprovement(improvement.name);
+  }
+
+  // The tile's resource, unless the player hasn't the tech to see it yet - then the tile is plain land to them.
+  private static getVisibleResource(tile: Tile, player?: Player): string | undefined {
+    const resource = tile.getResource();
+    if (!resource || TechEffects.isResourceHidden(resource, player)) return undefined;
+
+    return resource;
   }
 
   private static isBuildable(improvement: ImprovementData): boolean {

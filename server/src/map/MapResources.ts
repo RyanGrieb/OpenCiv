@@ -74,6 +74,8 @@ interface MapResourceConfigData {
   min_temp: number;
   max_temp: number;
   spawn_on_additional_tile_types?: boolean;
+  // The tech a player needs before they can see this resource (Horses, Iron).
+  reveal_tech?: string;
 }
 
 interface MapResourcesConfig {
@@ -131,6 +133,17 @@ export class MapResources {
     if (inList(resourcesData.strategic_resources)) return "strategic";
     if (inList(resourcesData.bonus_resources)) return "bonus";
     return undefined;
+  }
+
+  // The tech that reveals a resource tile type, or undefined for one everybody sees from the start.
+  public static getRevealTech(resource: string): string | undefined {
+    const resourcesData = MapResources.loadResourcesData();
+    const allResources = [
+      ...resourcesData.bonus_resources,
+      ...resourcesData.strategic_resources,
+      ...resourcesData.luxury_resources
+    ];
+    return allResources.find((data) => data.name === resource)?.reveal_tech;
   }
 
   private static loadResourcesData(): MapResourcesConfig {

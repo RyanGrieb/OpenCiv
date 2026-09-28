@@ -61,6 +61,11 @@ export class AbstractPlayer {
     return this.civData?.barbarian === true;
   }
 
+  // The server only tells a client about its own research, so another player's techs read as unknown.
+  public hasResearchedTech(_techName: string): boolean {
+    return false;
+  }
+
   protected units: Unit[] = [];
 
   public addUnit(unit: Unit) {

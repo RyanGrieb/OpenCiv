@@ -135,3 +135,20 @@ presets:
       - "t t t g g p d d d"
       - " t t t t n n n d d"
       - "n n t t t n n n n"
+
+  tech_effects:
+    description: Horses and Iron beside the Settler (hidden until their techs), and two Farms, one beside a lake, for Civil Service's fresh-water bonus.
+    legend:
+      "g": [grass]
+      "l": [freshwater]
+      "m": [grass, farm]
+      "d": [plains, farm]
+      "P": [plains, horses]
+      "h": [grass_hill, iron]
+      "S": [grass]
+    rows:
+      - "g g g g g g g"
+      - " g l m g g g g"
+      - "g g g S P h g"
+      - " g g g d g g g"
+      - "g g g g g g g"

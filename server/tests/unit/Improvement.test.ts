@@ -7,7 +7,7 @@ import { City } from '../../src/city/City';
 describe('Improvement', () => {
   const player = (techs: string[] = []) =>
     ({ hasResearchedTech: (tech: string) => techs.includes(tech) }) as unknown as Player;
-  const allTechs = player(['Animal Husbandry', 'Mining', 'Calendar', 'Trapping', 'Masonry', 'The Wheel', 'Construction', 'Bronze Working', 'Guilds']);
+  const allTechs = player(['Animal Husbandry', 'Mining', 'Calendar', 'Trapping', 'Masonry', 'The Wheel', 'Construction', 'Bronze Working', 'Iron Working', 'Guilds']);
 
   const tileOf = (...tileTypes: string[]) => {
     const tile = new Tile(tileTypes[0], 0, 0);
@@ -39,6 +39,17 @@ describe('Improvement', () => {
   it("only offers a resource's own improvement on a resource tile", () => {
     expect(buildable(tileOf('grass', 'cattle'))).toEqual(['Pasture', 'Road']);
     expect(buildable(tileOf('plains_hill', 'iron'))).toEqual(['Mine', 'Road']);
+  });
+
+  it("treats a resource the Builder's civilization hasn't revealed yet as plain land", () => {
+    const withoutIronWorking = player(['Mining']);
+    const tile = tileOf('plains_hill', 'iron');
+
+    expect(buildable(tile, withoutIronWorking)).toEqual(buildable(tileOf('plains_hill'), withoutIronWorking));
+
+    // The Mine goes on top, and the Iron under it shows up once Iron Working is in.
+    Improvement.complete(improvement('Mine'), tile, withoutIronWorking);
+    expect(tile.getTileTypes()).toEqual(['plains_hill', 'iron', 'mine']);
   });
 
   it('needs forest cleared before a farm, but builds a trading post, lumber mill or plantation among the trees', () => {

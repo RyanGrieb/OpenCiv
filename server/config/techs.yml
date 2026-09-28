@@ -15,11 +15,13 @@ technologies:
   # tech into the shallowest row its prerequisites allow. Values marked
   # "placeholder" below have no real Civ5 layout reference yet.
   #
-  # notes are the Civ5 wiki's "Notes" bullets, shown in the tech detail window.
-  # They're reference text for the real game's effect, not something the server
-  # enforces - most (revealing a resource, clearing terrain) aren't modeled yet.
-  # What a tech unlocks is not listed here: units.yml, buildings.yml and
-  # improvements.yml each name their own required_tech.
+  # notes are the Civ5 wiki's "Notes" bullets (Brave New World), shown in the
+  # tech detail window. What a tech unlocks is not listed here: units.yml,
+  # buildings.yml and improvements.yml each name their own required_tech, and
+  # map_resources.yml names the tech that reveals a resource (reveal_tech).
+  # tile_bonuses are yields a tech adds to its owner's tiles of a type
+  # (fresh_water: only on a river or beside a lake). The few notes nothing
+  # enforces yet say so in the tech's own comment.
   - name: Pottery
     asset_name: BUILDING_GRANARY
     cost: 35
@@ -34,6 +36,7 @@ technologies:
     row: 0
     slot: 4
     description: Unlocks pastures and an additional trade route.
+    # The extra trade route isn't enforced: trade routes have no cap yet.
     notes:
       - Reveals Horses
       - Allows an additional trade route
@@ -74,6 +77,7 @@ technologies:
     row: 1
     slot: 2
     description: Enables recording information on durable materials, preserving knowledge across generations.
+    # Not enforced: there are no embassies yet.
     notes:
       - Allows exchanging embassies
   - name: Trapping
@@ -97,6 +101,7 @@ technologies:
     row: 1
     slot: 8
     description: The art of building with stone, enabling massive stone structures and fortifications.
+    # Not enforced: the map has no marshes.
     notes:
       - Can remove Marshes
   - name: Bronze Working
@@ -115,6 +120,7 @@ technologies:
     row: 2
     slot: 0
     description: Develops tools for seeing farther, enabling key advances in seafaring.
+    # Not enforced: land units can't embark yet.
     notes:
       - Allows land units to embark
   - name: Horseback Riding
@@ -139,7 +145,7 @@ technologies:
     slot: 8
     description: Represents further advances in building and combining materials.
   - name: Philosophy
-    asset_name: ICON_CULTURE
+    asset_name: BUILDING_TEMPLE
     cost: 105
     prerequisites: [Calendar, Writing]
     row: 3
@@ -166,6 +172,9 @@ technologies:
     row: 3
     slot: 7
     description: Builds on mathematics to design complex structures and machines before actually building them.
+    # Enforced by Tile.BRIDGE_TECH.
+    notes:
+      - Roads cross rivers
   - name: Iron Working
     asset_name: UNIT_SWORDSMAN
     cost: 105
@@ -191,6 +200,11 @@ technologies:
     description: Creates the first true state organization, improving food production.
     notes:
       - +1 Food from Farms next to fresh water
+    tile_bonuses:
+      - tile_type: farm
+        fresh_water: true
+        stats:
+          - food: 1
   # Machinery removed from Guilds' prerequisites - real Civ5 apparently doesn't
   # gate it there (see the row conflict this resolved: Guilds sits in row 4,
   # Machinery in row 5, so Machinery can't be one of its prerequisites).
@@ -211,21 +225,21 @@ technologies:
   # placeholder costs for this row and everything above it - no real Civ5 cost
   # reference yet, just kept in the same range as their neighbors.
   - name: Compass
-    asset_name: UNIT_CARGO_SHIP
+    asset_name: UNIT_GALLEASS
     cost: 275
     prerequisites: [Optics, Theology]
     row: 5
     slot: 0
     description: Enables more reliable navigation, extending a ship's vision range at sea.
   - name: Education
-    asset_name: BUILDING_NATIONAL_COLLEGE
+    asset_name: BUILDING_UNIVERSITY
     cost: 275
     prerequisites: [Theology, Civil Service]
     row: 5
     slot: 2
     description: Establishes formal schooling, greatly increasing the pursuit of knowledge.
   - name: Chivalry
-    asset_name: BUILDING_STATUE_OF_ARES
+    asset_name: UNIT_KNIGHT
     cost: 275
     prerequisites: [Civil Service, Guilds]
     row: 5
@@ -239,14 +253,14 @@ technologies:
     slot: 7
     description: Builds on metalworking and science to create devices with multiple moving parts working together.
   - name: Physics
-    asset_name: UNIT_COMPOSITE_BOWMAN
+    asset_name: UNIT_TREBUCHET
     cost: 275
     prerequisites: [Metal Casting]
     row: 5
     slot: 8
     description: Develops the scientific study of motion and matter, advancing military engineering.
   - name: Steel
-    asset_name: BUILDING_WORKSHOP
+    asset_name: UNIT_LONGSWORDSMAN
     cost: 275
     prerequisites: [Metal Casting]
     row: 5

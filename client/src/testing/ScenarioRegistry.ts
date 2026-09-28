@@ -141,6 +141,11 @@ ScenarioRegistry.register("ObsoleteUnits", ScenarioCategory.RESEARCH, async () =
     return module.setupObsoleteUnitsTest;
 });
 
+ScenarioRegistry.register("TechEffects", ScenarioCategory.RESEARCH, async () => {
+    const module = await import("./scenarios/TechEffects.test");
+    return module.setupTechEffectsTest;
+});
+
 ScenarioRegistry.register("BorderExpansion", ScenarioCategory.CITIES, async () => {
     const module = await import("./scenarios/BorderExpansion.test");
     return module.setupBorderExpansionTest;

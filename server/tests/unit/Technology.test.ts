@@ -103,6 +103,33 @@ describe('Technology', () => {
     expect(currencyBuildings('Arabia')).not.toContain('Market');
   });
 
+  it.each([
+    ['Bronze Working', ['Spearman'], ['Colossus', 'Statue of Zeus']],
+    ['Philosophy', [], ['National College', 'Temple']],
+    ['Compass', ['Galleass'], ['Harbor']],
+    ['Education', [], ['University']],
+    ['Chivalry', ['Knight'], ['Castle']],
+    ['Physics', ['Trebuchet'], []],
+    ['Steel', ['Longswordsman'], []]
+  ])('unlocks what %s unlocks in Brave New World', (tech, units, buildings) => {
+    const unlocks = Technology.getUnlocks(tech);
+    const names = (list: { name: string }[]) => list.map((entry) => entry.name).sort();
+
+    expect(names(unlocks.units)).toEqual(units);
+    expect(names([...unlocks.buildings, ...unlocks.wonders])).toEqual(buildings);
+  });
+
+  it.each([
+    ['Galley', 'Compass'],
+    ['Horseman', 'Chivalry'],
+    ['Chariot Archer', 'Chivalry'],
+    ['Catapult', 'Physics'],
+    ['Swordsman', 'Steel'],
+    ['Legion', 'Steel']
+  ])('makes the %s obsolete with %s, the tech of its upgrade', (unit, tech) => {
+    expect(Unit.getAllUnitData().find((data) => data.name === unit)?.obsolete_tech).toBe(tech);
+  });
+
   it('points every obsolete_tech, unique_to and replaces at a tech, civ and unit that exist', () => {
     const techNames = new Set(Technology.getAllTechnologies().map((tech) => tech.getName()));
     const unitNames = new Set(Unit.getAllUnitData().map((unit) => unit.name));

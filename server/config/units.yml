@@ -11,8 +11,7 @@
 # coastal cities can build it. coast_only keeps a ship off deep ocean, like Civ 5's Trireme.
 # obsolete_tech is Civ 5's ObsoleteTech: once it's researched, cities stop offering the unit and drop it
 # from their production queues (units already on the map stay). Each is the tech that unlocks the unit it
-# upgrades to. Still to add once their replacements exist: Horseman and Chariot Archer (Chivalry, Knight),
-# Swordsman and Legion (Steel, Longswordsman), Catapult (Physics, Trebuchet), Galley (Compass, Galleass).
+# upgrades to.
 units:
   - name: Warrior
     combat_strength: 8
@@ -62,6 +61,7 @@ units:
     coast_only: true
     cost: 45
     required_tech: Sailing
+    obsolete_tech: Compass
   - name: Spearman
     combat_strength: 11
     attack_type: melee
@@ -75,17 +75,20 @@ units:
     attack_type: ranged
     cost: 56
     required_tech: The Wheel
+    obsolete_tech: Chivalry
   - name: Horseman
     combat_strength: 12
     attack_type: melee
     cost: 75
     default_move_distance: 3
     required_tech: Horseback Riding
+    obsolete_tech: Chivalry
   - name: Swordsman
     combat_strength: 14
     attack_type: melee
     cost: 75
     required_tech: Iron Working
+    obsolete_tech: Steel
   - name: Legion
     unique_to: Rome
     replaces: Swordsman
@@ -93,6 +96,7 @@ units:
     attack_type: melee
     cost: 75
     required_tech: Iron Working
+    obsolete_tech: Steel
   - name: Composite Bowman
     combat_strength: 7
     ranged_strength: 11
@@ -108,6 +112,7 @@ units:
     attack_type: siege
     cost: 75
     required_tech: Mathematics
+    obsolete_tech: Physics
   - name: Pikeman
     combat_strength: 16
     attack_type: melee
@@ -120,3 +125,31 @@ units:
     attack_type: ranged
     cost: 120
     required_tech: Machinery
+  - name: Galleass
+    combat_strength: 16
+    ranged_strength: 17
+    range: 2
+    attack_type: naval
+    domain: sea
+    coast_only: true
+    cost: 100
+    default_move_distance: 3
+    required_tech: Compass
+  - name: Knight
+    combat_strength: 20
+    attack_type: melee
+    cost: 120
+    default_move_distance: 4
+    required_tech: Chivalry
+  - name: Trebuchet
+    combat_strength: 12
+    ranged_strength: 14
+    range: 2
+    attack_type: siege
+    cost: 120
+    required_tech: Physics
+  - name: Longswordsman
+    combat_strength: 21
+    attack_type: melee
+    cost: 120
+    required_tech: Steel

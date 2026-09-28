@@ -4,8 +4,10 @@ import { Game } from "./Game";
 import { City } from "./city/City";
 import { PlayerDiplomacy } from "./diplomacy/PlayerDiplomacy";
 import { PlayerTreasury } from "./economy/PlayerTreasury";
+import { GameMap } from "./map/GameMap";
 import { PlayerVisibility } from "./map/PlayerVisibility";
 import { PlayerNotifications } from "./notification/PlayerNotifications";
+import { TechEffects } from "./research/TechEffects";
 import { Technology } from "./research/Technology";
 import { Unit } from "./unit/Unit";
 
@@ -410,7 +412,9 @@ export class Player {
     const missingPrerequisite = tech.getPrerequisites().some((prereq) => !this.researchedTechs.has(prereq));
     if (missingPrerequisite) return;
 
-    this.currentResearch = { techName: tech.getName(), assetName: tech.getAssetName(), progress: 0, cost: tech.getCost() };
+    const costPercent = Game.getInstance().getGameOptions().techCostPercent;
+    const cost = Math.max(1, Math.round((tech.getCost() * costPercent) / 100));
+    this.currentResearch = { techName: tech.getName(), assetName: tech.getAssetName(), progress: 0, cost };
     this.sendResearchUpdate();
   }
 
@@ -424,14 +428,28 @@ export class Player {
     if (this.currentResearch.progress >= this.currentResearch.cost) {
       this.researchedTechs.add(this.currentResearch.techName);
       this.notifications.addMessage(this.currentResearch.assetName, `You have discovered ${this.currentResearch.techName}.`);
-      this.currentResearch = null;
       // A new tech can unlock improvements for this player's Builders.
       this.units.forEach((unit) => unit.sendActionsToOwner());
       // ...and make units their cities had queued obsolete.
       this.cities.forEach((city) => city.removeObsoleteUnitsFromQueue());
+      this.sendTilesChangedByTech(this.currentResearch.techName);
+      this.currentResearch = null;
     }
 
     this.sendResearchUpdate();
+  }
+
+  // Resends the tiles a new tech changes for this player - resources it reveals, tiles it boosts - and
+  // updates their cities' yields to match.
+  private sendTilesChangedByTech(techName: string) {
+    const changedTiles = GameMap.getInstance()
+      .getTiles()
+      .flat()
+      .filter((tile) => this.visibility.hasDiscovered(tile) && TechEffects.changesTile(techName, tile));
+    if (changedTiles.length < 1) return;
+
+    GameMap.getInstance().sendTilesToPlayer(this, changedTiles);
+    this.cities.forEach((city) => city.updateWorkedTiles({ sendStatUpdate: true }));
   }
 
   public sendAvailableTechs() {

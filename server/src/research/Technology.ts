@@ -1,5 +1,6 @@
 import { Building } from "../city/Building";
 import { Improvement } from "../map/Improvement";
+import type { StatEntry } from "../map/Tile";
 import { Unit } from "../unit/Unit";
 import { ConfigLoader } from "../util/ConfigLoader";
 
@@ -11,14 +12,25 @@ export interface EraData {
   rows: number[];
 }
 
+// A lasting yield bonus a tech gives some of its owner's tiles, e.g. Civil Service's +1 Food on Farms
+// next to fresh water.
+export interface TileBonusData {
+  // The tile type that gets the bonus, e.g. "farm".
+  tile_type: string;
+  // Only tiles on a river or next to a lake.
+  fresh_water?: boolean;
+  stats: StatEntry[];
+}
+
 export interface TechnologyData {
   name: string;
   asset_name: string;
   cost: number;
   prerequisites: string[];
   description: string;
-  // The Civ5 wiki's "Notes" bullets - reference text, not enforced by the server.
+  // The Civ5 wiki's "Notes" bullets, shown in the tech detail window.
   notes?: string[];
+  tile_bonuses?: TileBonusData[];
   // Horizontal position (0-9) within its row in the research tree, matching
   // Civ5's tech-web layout - a fixed 10-slot grid per row, some slots deliberately
   // left empty, rather than techs packed tightly together.
@@ -73,6 +85,13 @@ export class Technology {
 
   public static getAllTechnologies(): Technology[] {
     return Technology.loadTechnologyData().map((data) => new Technology(data));
+  }
+
+  // Every tile bonus in the tree, with the tech that grants it.
+  public static getAllTileBonuses(): { techName: string; bonus: TileBonusData }[] {
+    return Technology.loadTechnologyData().flatMap((tech) =>
+      (tech.tile_bonuses ?? []).map((bonus) => ({ techName: tech.name, bonus }))
+    );
   }
 
   public static getAllEras(): EraData[] {

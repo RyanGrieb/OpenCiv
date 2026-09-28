@@ -47,6 +47,7 @@ describe('City', () => {
       canPlaceUnit: jest.fn().mockReturnValue(true),
       getTileTypes: jest.fn().mockReturnValue(['grass', 'city']),
       getUnits: jest.fn().mockReturnValue([]),
+      isCoastal: jest.fn().mockReturnValue(false),
     } as unknown as jest.Mocked<Tile>;
 
     // With population 1, City.updateWorkedTiles works one tile beyond the city's
@@ -230,6 +231,33 @@ describe('City', () => {
 
       expect(queuedNames()).toEqual(['Warrior']);
       expect(mockPlayer.sendNetworkEvent).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('building prerequisites', () => {
+    const buildingOptions = () => {
+      mockPlayer.sendNetworkEvent.mockClear();
+      triggerServerEvent('requestProductionOptions', { cityName: 'TestCity' }, {} as WebSocket);
+      return (mockPlayer.sendNetworkEvent as jest.Mock).mock.calls[0][0].buildings.map((option: { name: string }) => option.name);
+    };
+
+    beforeEach(() => mockPlayer.hasResearchedTech.mockReturnValue(true));
+
+    it('offers a Temple only once the city has a Shrine', () => {
+      expect(buildingOptions()).not.toContain('Temple');
+
+      city.addBuilding('Shrine');
+
+      expect(buildingOptions()).toContain('Temple');
+    });
+
+    it('offers a Lighthouse and Harbor only in a coastal city', () => {
+      expect(buildingOptions()).not.toEqual(expect.arrayContaining(['Lighthouse']));
+      expect(buildingOptions()).not.toContain('Harbor');
+
+      (mockTile as any).isCoastal = jest.fn().mockReturnValue(true);
+
+      expect(buildingOptions()).toEqual(expect.arrayContaining(['Lighthouse', 'Harbor']));
     });
   });
 

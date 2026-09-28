@@ -36,6 +36,8 @@ export class Tile extends Actor {
   public static HEIGHT = 32;
   // Mirrors server/src/map/Tile.ts's ROAD_MOVEMENT_COST.
   public static readonly ROAD_MOVEMENT_COST = 1 / 3;
+  // As in Civ 5, roads only bridge rivers once their owner has Engineering.
+  public static readonly BRIDGE_TECH = "Engineering";
   // Improvements that cover the ground, so a road through the tile is drawn on top of them.
   public static readonly UNDER_ROAD_TILE_TYPES = ["farm"];
   // Tile types drawn some other way than their own sprite - roads connect to their neighbors (see
@@ -220,8 +222,17 @@ export class Tile extends Actor {
     return (hash ^ (hash >>> 16)) >>> 0;
   }
 
+  // Whether a road between the two tiles speeds the step up: it has to reach both, and a river between
+  // them needs a bridge. Mirrored by the server's Tile.roadCarriesAcross() - keep both in sync.
+  public static roadCarriesAcross(tile1: Tile, tile2: Tile, player?: AbstractPlayer): boolean {
+    if (!Tile.roadConnects(tile1, tile2)) return false;
+    if (!Tile.riverCrosses(tile1, tile2)) return true;
+
+    return player?.hasResearchedTech(Tile.BRIDGE_TECH) ?? false;
+  }
+
   public static getWeight(tile1: Tile, tile2: Tile, unit?: Unit): number {
-    if (Tile.roadConnects(tile1, tile2)) return Tile.ROAD_MOVEMENT_COST;
+    if (Tile.roadCarriesAcross(tile1, tile2, unit?.getPlayer())) return Tile.ROAD_MOVEMENT_COST;
 
     if (unit?.ignoresTerrainCost()) {
       // Still respect impassable terrain (e.g. mountains) - only flatten the

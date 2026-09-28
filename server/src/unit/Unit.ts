@@ -490,7 +490,7 @@ export class Unit {
   }
 
   private finishImprovement(improvement: ImprovementData) {
-    Improvement.complete(improvement, this.tile);
+    Improvement.complete(improvement, this.tile, this.player);
 
     GameMap.getInstance().broadcastTileUpdate(this.tile);
     // A worked tile's yields just changed - let its city re-pick which tiles to work.

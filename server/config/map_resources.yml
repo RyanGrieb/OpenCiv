@@ -60,8 +60,11 @@ bonus_resources:
     set_chance: 0.1
     min_temp: 0
     max_temp: 100
+# reveal_tech hides a resource from a player until they research it, as Civ 5 does with its strategic
+# resources: the tile looks and yields like plain terrain to them, and nothing can be built on it.
 strategic_resources:
   - name: horses
+    reveal_tech: Animal Husbandry
     spawn_tiles:
       - grass
       - grass_hill
@@ -76,6 +79,7 @@ strategic_resources:
     min_temp: 0
     max_temp: 90
   - name: iron
+    reveal_tech: Iron Working
     spawn_tiles:
       - grass
       - grass_hill

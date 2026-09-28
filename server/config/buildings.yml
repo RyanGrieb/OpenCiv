@@ -2,6 +2,9 @@
 # building named in replaces and by nobody else.
 # maintenance is Civ 5's GoldMaintenance: gold the owner pays for the building every turn. Wonders and the
 # Palace have none.
+# coastal: only a city beside the sea can build it. requires_building: the city must have that one first.
+# Buildings only give flat yields for now, so where Civ 5's effect is a percentage or per-tile bonus
+# (University's +33% Science, Harbor's +1 Production on sea tiles) the stats are a flat stand-in.
 buildings:
   - name: Palace
     asset_name: BUILDING_PALACE
@@ -47,6 +50,14 @@ buildings:
     required_tech: Pottery
     stats:
       - faith: 1
+  - name: Castle
+    asset_name: BUILDING_CASTLE
+    cost: 160
+    required_tech: Chivalry
+    requires_building: Walls
+    city_health: 25
+    stats:
+      - defense: 7
   - name: Circus
     asset_name: BUILDING_CIRCUS
     cost: 80
@@ -64,7 +75,7 @@ buildings:
   - name: Colossus
     asset_name: BUILDING_COLOSSUS
     cost: 185
-    required_tech: Iron Working
+    required_tech: Bronze Working
     is_wonder: true
     stats:
       - culture: 1
@@ -113,6 +124,14 @@ buildings:
     stats:
       - food: 10
       - culture: 1
+  - name: Harbor
+    asset_name: BUILDING_HARBOR
+    cost: 80
+    maintenance: 2
+    required_tech: Compass
+    coastal: true
+    stats:
+      - production: 2
   - name: Library
     asset_name: BUILDING_LIBRARY
     cost: 75
@@ -125,6 +144,7 @@ buildings:
     cost: 75
     maintenance: 1
     required_tech: Optics
+    coastal: true
     stats:
       - food: 1
   - name: Machu Picchu
@@ -166,8 +186,8 @@ buildings:
     maintenance: 1
     required_tech: Horseback Riding
     stats: []
-  - name: Statue Of Ares
-    asset_name: BUILDING_STATUE_OF_ARES
+  - name: Statue of Zeus
+    asset_name: BUILDING_STATUE_OF_ZEUS
     cost: 185
     required_tech: Bronze Working
     is_wonder: true
@@ -188,6 +208,14 @@ buildings:
     stats:
       - production: 1
       - morale: 5
+  - name: Temple
+    asset_name: BUILDING_TEMPLE
+    cost: 100
+    maintenance: 2
+    required_tech: Philosophy
+    requires_building: Shrine
+    stats:
+      - faith: 2
   - name: Terracotta Army
     asset_name: BUILDING_TERRACOTTA_ARMY
     cost: 200
@@ -195,6 +223,14 @@ buildings:
     is_wonder: true
     stats:
       - culture: 1
+  - name: University
+    asset_name: BUILDING_UNIVERSITY
+    cost: 160
+    maintenance: 3
+    required_tech: Education
+    requires_building: Library
+    stats:
+      - science: 3
   - name: Walls
     asset_name: BUILDING_WALLS
     cost: 75

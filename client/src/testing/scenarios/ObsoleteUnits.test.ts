@@ -9,8 +9,8 @@ import { TestUtils } from "../TestUtils";
 export function setupObsoleteUnitsTest(game: Game) {
     const runner = new TestRunner("ObsoleteUnits");
     const utils = new TestUtils(game);
-    const obsolete = ["Warrior", "Archer", "Spearman", "Composite Bowman"];
-    const replacements = ["Swordsman", "Crossbowman", "Pikeman"];
+    const obsolete = ["Warrior", "Archer", "Spearman", "Composite Bowman", "Horseman", "Chariot Archer", "Swordsman", "Catapult"];
+    const replacements = ["Longswordsman", "Crossbowman", "Pikeman", "Knight", "Trebuchet"];
     let city: City | undefined;
     let offered: string[] = [];
 
@@ -51,14 +51,14 @@ export function setupObsoleteUnitsTest(game: Game) {
     });
 
     runner.addStep({
-        name: "The server refuses to queue an obsolete Warrior",
+        name: "The server refuses to queue an obsolete Warrior, but queues a Longswordsman",
         action: async () => {
             WebsocketClient.sendMessage({ event: "addToProductionQueue", cityName: city.getName(), type: "unit", name: "Warrior" });
-            WebsocketClient.sendMessage({ event: "addToProductionQueue", cityName: city.getName(), type: "unit", name: "Swordsman" });
-            await utils.waitUntil(() => city.getProductionQueue().length > 0, 3000, "The Swordsman to be queued");
+            WebsocketClient.sendMessage({ event: "addToProductionQueue", cityName: city.getName(), type: "unit", name: "Longswordsman" });
+            await utils.waitUntil(() => city.getProductionQueue().length > 0, 3000, "The Longswordsman to be queued");
             await utils.delay(500);
         },
-        verification: () => city.getProductionQueue().map((item) => item.name).join(",") === "Swordsman"
+        verification: () => city.getProductionQueue().map((item) => item.name).join(",") === "Longswordsman"
     });
 
     runner.addStep({
