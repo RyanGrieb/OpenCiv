@@ -29,7 +29,11 @@ export class BuildingTooltip extends Tooltip {
     bonuses.forEach((text) => lines.push({ text, color: BuildingTooltip.BONUS_COLOR, indent: true }));
 
     if (building.maintenance) {
-      lines.push({ text: `-${building.maintenance} Gold per turn upkeep`, color: BuildingTooltip.UPKEEP_COLOR, indent: true });
+      lines.push({
+        text: `-${building.maintenance} Gold per turn upkeep`,
+        color: BuildingTooltip.UPKEEP_COLOR,
+        indent: true
+      });
     }
     return lines;
   }

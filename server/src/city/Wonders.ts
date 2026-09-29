@@ -51,7 +51,9 @@ export class Wonders {
 
     for (const player of Wonders.getPlayers()) {
       if (player === builder.getPlayer()) continue;
-      player.getNotifications().addMessage("ICON_CULTURE", `${name} has been completed by ${builder.getPlayer().getName()}.`);
+      player
+        .getNotifications()
+        .addMessage("ICON_CULTURE", `${name} has been completed by ${builder.getPlayer().getName()}.`);
     }
   }
 
