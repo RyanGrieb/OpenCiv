@@ -38,6 +38,9 @@ export interface GameOptions {
   // Every unit's and building's production cost as a percentage of its config cost, the same way. The
   // Wonders scenario sets it to 1 so a wonder is finished the turn after it's queued.
   productionCostPercent: number;
+  // Happiness every player starts with before cities and citizens eat into it. Civ 5 sets it by
+  // difficulty (9 on Prince); the Happiness scenario lowers it to reach unhappiness quickly.
+  baseHappiness: number;
 }
 
 // Maps are streamed to clients in square chunks of this many tiles, so each dimension must divide evenly.
@@ -94,7 +97,8 @@ export const DefaultGameOptions: GameOptions = {
   startAtWar: false,
   startingGold: 0,
   techCostPercent: 100,
-  productionCostPercent: 100
+  productionCostPercent: 100,
+  baseHappiness: 9
 };
 
 interface BaseGameOptionDefinition {
@@ -191,5 +195,6 @@ export const GameOptionDefinitions: GameOptionDefinition[] = [
     max: 300,
     step: 1,
     hidden: true
-  }
+  },
+  { key: "baseHappiness", label: "Base Happiness", type: "number", min: -50, max: 50, step: 1, hidden: true }
 ];

@@ -139,7 +139,7 @@ export class InGameScene extends Scene {
             production: SpriteRegion.ICON_PRODUCTION,
             gold: SpriteRegion.ICON_GOLD,
             faith: SpriteRegion.ICON_FAITH,
-            morale: SpriteRegion.ICON_MORALE,
+            happiness: SpriteRegion.ICON_MORALE,
             science: SpriteRegion.ICON_SCIENCE,
             culture: SpriteRegion.ICON_CULTURE
           };

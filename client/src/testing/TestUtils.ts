@@ -29,7 +29,7 @@ export class TestUtils {
 
     // Game options to set in the lobby before starting. Barbarians are off unless a scenario asks for
     // them: they wander up to cities and take the tiles the older scenarios expect to be free.
-    public async ensureInGame(gameOptions: Record<string, boolean | number> = { allowBarbarians: false }) {
+    public async ensureInGame(gameOptions: Record<string, boolean | number | string> = { allowBarbarians: false }) {
         if (this.game.getCurrentScene().getName() !== "in_game") {
             if (this.game.getCurrentScene().getName() === "main_menu") {
                 WebsocketClient.init("localhost");
@@ -38,7 +38,7 @@ export class TestUtils {
 
             if (this.game.getCurrentScene().getName() === "lobby") {
                 // Options stick on the server between games, so one scenario's gold or cheap costs aren't handed to the next.
-                const resets = { startingGold: 0, techCostPercent: 100, productionCostPercent: 100 };
+                const resets = { startingGold: 0, techCostPercent: 100, productionCostPercent: 100, baseHappiness: 9 };
                 for (const [option, value] of Object.entries({ ...resets, ...gameOptions })) {
                     WebsocketClient.sendMessage({ event: "setGameOption", option, value });
                 }

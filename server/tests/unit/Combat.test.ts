@@ -129,6 +129,7 @@ describe("Unit.meleeAttack", () => {
       sendNetworkEvent: jest.fn(),
       hasResearchedTech: () => false,
       getVisibility: () => ({ isVisible: () => true, update: jest.fn() }),
+      getHappiness: () => ({ applyToFoodSurplus: (food: number) => food, canTrain: () => true, getCombatModifiers: (): unknown[] => [] }),
       // Every other civilization is an enemy, as in a startAtWar game.
       isBarbarian: () => false,
       getDiplomacy: () => ({ isAtWarWith: () => true })
@@ -402,6 +403,7 @@ describe("Unit.rangedAttack", () => {
       sendNetworkEvent: jest.fn(),
       hasResearchedTech: () => false,
       getVisibility: () => ({ isVisible: () => true, update: jest.fn() }),
+      getHappiness: () => ({ applyToFoodSurplus: (food: number) => food, canTrain: () => true, getCombatModifiers: (): unknown[] => [] }),
       // Every other civilization is an enemy, as in a startAtWar game.
       isBarbarian: () => false,
       getDiplomacy: () => ({ isAtWarWith: () => true })

@@ -144,6 +144,10 @@ export class Label extends Actor {
     this.text = text;
   }
 
+  public setFontColor(fontColor: string) {
+    this.fontColor = fontColor;
+  }
+
   public getText(): string {
     return this.text;
   }

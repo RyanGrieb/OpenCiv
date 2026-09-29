@@ -27,7 +27,7 @@ interface ProgressReadout {
 
 const STAT_ROWS: StatRow[] = [
   { key: "population", icon: SpriteRegion.ICON_POPULATION, text: "Population:", color: "white", absolute: true },
-  { key: "morale", icon: SpriteRegion.ICON_MORALE, text: "Morale:", color: "orange", absolute: true },
+  { key: "happiness", icon: SpriteRegion.ICON_MORALE, text: "Happiness:", color: "orange", absolute: true },
   { key: "food", icon: SpriteRegion.ICON_FOOD, text: "Food:", color: "lime" },
   { key: "production", icon: SpriteRegion.ICON_PRODUCTION, text: "Production:", color: "rgb(220,162,29)" },
   { key: "gold", icon: SpriteRegion.ICON_GOLD, text: "Gold:", color: "gold" },

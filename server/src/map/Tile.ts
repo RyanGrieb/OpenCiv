@@ -19,7 +19,7 @@ export interface StatValues {
   faith: number;
   culture: number;
   food: number;
-  morale: number;
+  happiness: number;
 }
 export type StatEntry = Partial<StatValues>;
 
@@ -944,7 +944,7 @@ export class Tile {
       { faith: 0 },
       { culture: 0 },
       { food: 0 },
-      { morale: 0 }
+      { happiness: 0 }
     ];
     const yieldingTypes = this.getYieldingTileTypes().filter((type) => !TechEffects.isResourceHidden(type, player));
     const statLines = yieldingTypes.map((type) => Tile.getAllTileStats()[type.toUpperCase()]?.stats ?? []);

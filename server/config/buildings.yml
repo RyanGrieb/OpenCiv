@@ -6,9 +6,9 @@
 # every other city building it loses it from its queue. national_wonder marks a national wonder: one
 # per civilization. Civ 5 has a national wonder need its building in every city; here it needs it in
 # the city building the wonder (requires_building).
-# Most wonder effects in Civ 5 lean on systems the game doesn't have yet (happiness, great people,
-# policies, religion), so a wonder's stats are a flat stand-in; the comment above each says what the
-# real one does.
+# Most wonder effects in Civ 5 lean on systems the game doesn't have yet (great people, policies,
+# religion), so a wonder's stats are a flat stand-in; the comment above each says what the real one does.
+# happiness adds to the owner's empire-wide happiness (see PlayerHappiness), wherever the building stands.
 # coastal: only a city beside the sea can build it. requires_building: the city must have that one first.
 # Buildings only give flat yields for now, so where Civ 5's effect is a percentage or per-tile bonus
 # (University's +33% Science, Harbor's +1 Production on sea tiles) the stats are a flat stand-in.
@@ -64,14 +64,14 @@ buildings:
     maintenance: 1
     required_tech: Trapping
     stats:
-      - morale: 10
+      - happiness: 2
   - name: Colosseum
     asset_name: BUILDING_COLOSSEUM
     cost: 100
     maintenance: 1
     required_tech: Construction
     stats:
-      - morale: 10
+      - happiness: 3
   - name: Colossus
     asset_name: BUILDING_COLOSSUS
     cost: 185
@@ -209,7 +209,7 @@ buildings:
     required_tech: Calendar
     stats:
       - production: 1
-      - morale: 5
+      - happiness: 1
   - name: Temple
     asset_name: BUILDING_TEMPLE
     cost: 100
@@ -348,13 +348,13 @@ buildings:
       - faith: 3
       - culture: 1
   - name: Chichen Itza
-    # Golden Ages last 50% longer, +4 Happiness.
+    # +4 Happiness. Golden Ages last 50% longer.
     asset_name: BUILDING_CHICHEN_ITZA
     cost: 300
     required_tech: Civil Service
     is_wonder: true
     stats:
-      - morale: 10
+      - happiness: 4
       - culture: 1
   - name: Angkor Wat
     # Tiles cost 25% less Culture and Gold to acquire in all cities.
@@ -375,13 +375,14 @@ buildings:
       - defense: 8
       - culture: 1
   - name: Alhambra
-    # A free Castle in the city, and the Drill I promotion for units trained there.
+    # A free Castle in the city, and the Drill I promotion for units trained there. The defense stands in
+    # for the Castle.
     asset_name: BUILDING_ALHAMBRA
     cost: 400
     required_tech: Chivalry
     is_wonder: true
     stats:
-      - morale: 10
+      - defense: 7
       - culture: 3
   - name: Notre Dame
     # +10 Happiness.
@@ -390,7 +391,7 @@ buildings:
     required_tech: Physics
     is_wonder: true
     stats:
-      - morale: 15
+      - happiness: 10
       - culture: 1
 
   # National wonders.
@@ -411,7 +412,7 @@ buildings:
     national_wonder: true
     requires_building: Colosseum
     stats:
-      - morale: 10
+      - happiness: 5
   - name: Grand Temple
     # Doubles the city's religious pressure, +8 Faith.
     asset_name: BUILDING_GRAND_TEMPLE

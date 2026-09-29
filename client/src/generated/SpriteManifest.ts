@@ -101,6 +101,7 @@ export const SPRITE_MANIFEST: SpriteManifestEntry[] = [
   { name: "ICON_STAR", url: new URL("../../assets/sprites/icons/ICON_STAR.png", import.meta.url).href },
   { name: "ICON_TARGET", url: new URL("../../assets/sprites/icons/ICON_TARGET.png", import.meta.url).href },
   { name: "ICON_TRADE", url: new URL("../../assets/sprites/icons/ICON_TRADE.png", import.meta.url).href },
+  { name: "ICON_UNHAPPY", url: new URL("../../assets/sprites/icons/ICON_UNHAPPY.png", import.meta.url).href },
   { name: "ICON_UNKNOWN", url: new URL("../../assets/sprites/icons/ICON_UNKNOWN.png", import.meta.url).href },
   { name: "ICON_UP_ARROW", url: new URL("../../assets/sprites/icons/ICON_UP_ARROW.png", import.meta.url).href },
   { name: "RADIO_BUTTON_SELECTED", url: new URL("../../assets/sprites/misc/RADIO_BUTTON_SELECTED.png", import.meta.url).href },

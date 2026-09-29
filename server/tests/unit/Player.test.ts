@@ -3,6 +3,8 @@ import { City, CityStats } from '../../src/city/City';
 import { ServerEvents } from '../../src/Events';
 import { WebSocket } from 'ws';
 import { PlayerTreasury } from '../../src/economy/PlayerTreasury';
+import { Game } from '../../src/Game';
+import { DefaultGameOptions } from '../../src/GameOptions';
 
 jest.mock('../../src/city/City');
 jest.mock('../../src/Events');
@@ -23,11 +25,14 @@ describe('Player', () => {
         faith: 0,
         culture: 0,
         food: 0,
-        morale: 0,
+        happiness: 0,
         foodSurplus: 0,
         ...stats,
       }),
       getBuildingMaintenance: jest.fn().mockReturnValue(options.maintenance ?? 0),
+      getTerritory: jest.fn().mockReturnValue([]),
+      getPopulation: jest.fn().mockReturnValue(stats.population ?? 0),
+      getBuildingHappiness: jest.fn().mockReturnValue(0),
     } as unknown as jest.Mocked<City>;
   };
 
@@ -48,6 +53,7 @@ describe('Player', () => {
     } as unknown as jest.Mocked<WebSocket>;
 
     onSpy = jest.spyOn(ServerEvents, 'on').mockImplementation(() => { });
+    jest.spyOn(Game, 'getInstance').mockReturnValue({ getGameOptions: () => DefaultGameOptions } as unknown as Game);
 
     player = new Player('TestPlayer', mockWebsocket);
   });
@@ -69,7 +75,7 @@ describe('Player', () => {
 
   it('ignores city-specific stats that should not pool empire-wide', () => {
     player['cities'].push(
-      makeMockCity({ science: 1, gold: 1, production: 1, faith: 1, culture: 1, population: 10, morale: 5, food: 8, foodSurplus: 2 })
+      makeMockCity({ science: 1, gold: 1, production: 1, faith: 1, culture: 1, population: 10, happiness: 5, food: 8, foodSurplus: 2 })
     );
 
     expect(player.getTotalStats()).toEqual({
@@ -105,6 +111,7 @@ describe('Player', () => {
       stats: { science: 9, gold: 2, production: 0, faith: 0, culture: 3 },
       accumulatedStats: {},
       goldBreakdown: { income: [{ source: 'TestCity', amount: 2 }], expenses: [], net: 2 },
+      happinessBreakdown: { sources: [{ source: 'Base', amount: 9 }], unhappiness: [{ source: '1 city', amount: 3 }], net: 6, status: 'content', effects: [] },
     }));
   });
 
@@ -136,6 +143,7 @@ describe('Player', () => {
       stats: { science: 0, gold: 5, production: 0, faith: 0, culture: 0 },
       accumulatedStats: { gold: 5 },
       goldBreakdown: { income: [{ source: 'TestCity', amount: 5 }], expenses: [], net: 5 },
+      happinessBreakdown: { sources: [{ source: 'Base', amount: 9 }], unhappiness: [{ source: '1 city', amount: 3 }], net: 6, status: 'content', effects: [] },
     }));
   });
 

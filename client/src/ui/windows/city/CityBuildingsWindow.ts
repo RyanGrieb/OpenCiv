@@ -19,7 +19,7 @@ const BUILDING_STAT_ICONS: Record<string, SpriteRegion> = {
   culture: SpriteRegion.ICON_CULTURE,
   food: SpriteRegion.ICON_FOOD,
   population: SpriteRegion.ICON_POPULATION,
-  morale: SpriteRegion.ICON_MORALE,
+  happiness: SpriteRegion.ICON_MORALE,
   defense: SpriteRegion.ICON_DEFENSE
 };
 

@@ -16,6 +16,7 @@ import { City } from "../city/City";
 import { CityStrikeAiming } from "../city/CityStrikeAiming";
 import { Diplomacy, Relation } from "./Diplomacy";
 import { GoldBreakdown } from "../ui/hud/GoldTooltip";
+import { HappinessBreakdown } from "../ui/hud/HappinessTooltip";
 
 export interface CurrentResearch {
   techName: string;
@@ -43,6 +44,13 @@ export class ClientPlayer extends AbstractPlayer {
   private totalStats: Map<string, number> = new Map();
   private accumulatedStats: Map<string, number> = new Map();
   private goldBreakdown: GoldBreakdown = { income: [], expenses: [], net: 0 };
+  private happinessBreakdown: HappinessBreakdown = {
+    sources: [],
+    unhappiness: [],
+    net: 0,
+    status: "content",
+    effects: []
+  };
   private currentResearch: CurrentResearch | null = null;
   private researchedTechs: Set<string> = new Set();
   // Every civilization this player has met, by player name.
@@ -278,6 +286,7 @@ export class ClientPlayer extends AbstractPlayer {
         }
 
         this.goldBreakdown = data["goldBreakdown"] ?? this.goldBreakdown;
+        this.happinessBreakdown = data["happinessBreakdown"] ?? this.happinessBreakdown;
       }
     });
 
@@ -331,6 +340,11 @@ export class ClientPlayer extends AbstractPlayer {
   /** Where this player's gold comes from and goes each turn, as the server last reported it. */
   public getGoldBreakdown(): GoldBreakdown {
     return this.goldBreakdown;
+  }
+
+  /** The empire's happiness, where it comes from, and what unhappiness is costing, as the server last reported it. */
+  public getHappinessBreakdown(): HappinessBreakdown {
+    return this.happinessBreakdown;
   }
 
   public getCurrentResearch(): CurrentResearch | null {

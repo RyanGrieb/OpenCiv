@@ -49,6 +49,15 @@ export class Improvement {
     );
   }
 
+  // The resource an improvement was built on, read back from the tile it left (copper_mine -> copper).
+  public static getImprovedResource(tile: Tile): string | undefined {
+    for (const improvement of Improvement.getAllImprovementData()) {
+      const entry = Object.entries(improvement.resources ?? {}).find(([, improved]) => tile.containsTileType(improved));
+      if (entry) return entry[0];
+    }
+    return undefined;
+  }
+
   // Whether this player's Builder could start (or keep) working on the improvement on this tile.
   public static canBuild(improvement: ImprovementData, tile: Tile, player: Player): boolean {
     if (!Improvement.isBuildable(improvement)) return false;

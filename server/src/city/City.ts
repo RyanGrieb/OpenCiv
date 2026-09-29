@@ -513,7 +513,7 @@ export class City {
         { faith: 0 },
         { culture: 0 },
         { food: -(this.population * 2) },
-        { morale: 0 }, //TODO: Implement morale
+        { happiness: 0 },
         { defense: 0 },
         { foodSurplus: this.foodSurplus },
         { foodRequiredToGrow: this.getFoodRequiredToGrow() },
@@ -531,7 +531,6 @@ export class City {
           }
         }
       }
-
 
       // Add all worked tiles to existing stat-line dictionary
       console.log(`[City ${this.name}] Updating stats (asArray). Worked tiles: ${this.workedTiles.length}`);
@@ -553,6 +552,9 @@ export class City {
         }
       }
 
+      const foodStat = cityStats.find((cityStat) => cityStat.food !== undefined);
+      foodStat.food = this.player.getHappiness().applyToFoodSurplus(foodStat.food);
+
       return cityStats;
     }
 
@@ -565,7 +567,7 @@ export class City {
       faith: 0,
       culture: 0,
       food: -(this.population * 2),
-      morale: 0, //TODO: Implement morale
+      happiness: 0,
       foodSurplus: this.foodSurplus,
       foodRequiredToGrow: this.getFoodRequiredToGrow(),
       cultureStored: this.cultureStored,
@@ -593,6 +595,10 @@ export class City {
         }
       }
     }
+
+    // Unhappiness slows growth. Applied to the stat itself, so the city screen shows the food that's
+    // really banked each turn.
+    cityStats.food = this.player.getHappiness().applyToFoodSurplus(cityStats.food);
 
     return cityStats;
   }
@@ -939,6 +945,15 @@ export class City {
       });
   }
 
+  // Happiness this city's buildings and wonders add to the owner's empire-wide total.
+  public getBuildingHappiness(): number {
+    return this.buildings.reduce((total, building) => total + (building.getStatLine()["happiness"] ?? 0), 0);
+  }
+
+  public getPopulation(): number {
+    return this.population;
+  }
+
   // Gold the owner pays every turn for this city's buildings.
   public getBuildingMaintenance(): number {
     return this.buildings.reduce((total, building) => total + building.getMaintenance(), 0);
@@ -969,7 +984,8 @@ export class City {
           isUnlocked(unit.required_tech) &&
           !this.isObsoleteUnit(unit.name) &&
           Unit.isAvailableToCiv(unit, this.player.getCivilizationName()) &&
-          canLaunch(unit)
+          canLaunch(unit) &&
+          this.player.getHappiness().canTrain(unit.name)
       )
       .map((unit) => ({ type: "unit", name: unit.name, cost: this.scaleCost(unit.cost) }));
 
@@ -1095,6 +1111,9 @@ export class City {
       if (Building.createFromName(current.name)?.isWonderBuilding()) Wonders.onGreatWonderBuilt(current.name, this);
       return;
     }
+
+    // A very unhappy empire can't train Settlers: one already finished waits at the front of the queue.
+    if (!this.player.getHappiness().canTrain(current.name)) return;
 
     // Every tile around the city already holds a unit of this type: the finished unit waits at the
     // front of the queue, and appears once one of them moves off.

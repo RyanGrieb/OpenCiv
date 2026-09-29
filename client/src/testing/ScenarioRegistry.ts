@@ -205,3 +205,8 @@ ScenarioRegistry.register("GoldSpending", ScenarioCategory.ECONOMY, async () => 
     const module = await import("./scenarios/GoldSpending.test");
     return module.setupGoldSpendingTest;
 });
+
+ScenarioRegistry.register("Happiness", ScenarioCategory.ECONOMY, async () => {
+    const module = await import("./scenarios/Happiness.test");
+    return module.setupHappinessTest;
+});

@@ -3,7 +3,7 @@ import { Game } from "../../Game";
 import { WebsocketClient } from "../../network/Client";
 import { City } from "../../city/City";
 import { ChooseProductionList, ProductionListMode } from "../../ui/windows/city/ChooseProductionList";
-import { GoldEntry } from "../../ui/hud/GoldTooltip";
+import { GoldEntry, GoldTooltip } from "../../ui/hud/GoldTooltip";
 import { TestUtils } from "../TestUtils";
 
 const STARTING_GOLD = 1000;
@@ -163,16 +163,16 @@ export function setupGoldSpendingTest(game: Game) {
     runner.addStep({
         name: "Hovering the status bar's gold shows the breakdown",
         action: async () => {
-            statusBar()["setGoldHovered"](true);
-            await utils.waitUntil(() => !!statusBar()["goldTooltip"], 5000, "Gold tooltip to appear");
+            statusBar()["setHoveredStat"]("gold");
+            await utils.waitUntil(() => statusBar()["tooltip"] instanceof GoldTooltip, 5000, "Gold tooltip to appear");
         },
-        verification: () => !!statusBar()["goldTooltip"]
+        verification: () => statusBar()["tooltip"] instanceof GoldTooltip
     });
 
     runner.addStep({
         name: "Choose Production lists the turns each item would take",
         action: async () => {
-            statusBar()["setGoldHovered"](false);
+            statusBar()["setHoveredStat"](undefined);
             utils.getInGameScene().toggleCityUI(city);
             await utils.waitUntil(() => !!cityScreen(), 5000, "City screen to open");
             cityScreen()["toggleList"]("produce");
@@ -186,7 +186,7 @@ export function setupGoldSpendingTest(game: Game) {
         action: async () => {
             cityScreen()["toggleList"]("purchase");
             await utils.waitUntil(() => listRows("purchase").length > 0, 5000, "Purchase list to appear");
-            statusBar()["setGoldHovered"](true);
+            statusBar()["setHoveredStat"]("gold");
         },
         verification: () => listRows("purchase").includes("Scout")
     });

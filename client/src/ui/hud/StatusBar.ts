@@ -6,15 +6,26 @@ import { ActorGroup } from "../../scene/ActorGroup";
 import { InGameScene } from "../../scene/type/InGameScene";
 import { Strings } from "../../util/Strings";
 import { Label } from "../components/Label";
+import { Tooltip } from "../components/Tooltip";
 import { UITheme } from "../UITheme";
 import { GoldTooltip } from "./GoldTooltip";
+import { HappinessStatus, HappinessTooltip } from "./HappinessTooltip";
 
 interface TurnTimeEvent {
   turn: number;
   turnTime: number;
 }
 
+// The stats that drop down a breakdown while the mouse is over them.
+type HoverStat = "gold" | "happiness";
+
 export class StatusBar extends ActorGroup {
+  private static readonly HAPPINESS_COLORS: Record<HappinessStatus, string> = {
+    content: "white",
+    unhappy: "#f0c850",
+    veryUnhappy: "#ff8a80"
+  };
+
   private statusBarActor: Actor;
 
   private currentTurnText: string; //when currentTurnLabel may not be initalized yet
@@ -32,6 +43,10 @@ export class StatusBar extends ActorGroup {
   private goldIcon: Actor;
   private goldLabel: Label;
 
+  private happinessDescLabel: Label;
+  private happinessIcon: Actor;
+  private happinessLabel: Label;
+
   private faithDescLabel: Label;
   private faithIcon: Actor;
   private faithLabel: Label;
@@ -40,10 +55,10 @@ export class StatusBar extends ActorGroup {
   private tradeIcon: Actor;
   private tradeLabel: Label;
 
-  private goldHovered = false;
-  private goldTooltip: GoldTooltip | undefined;
+  private hoveredStat: HoverStat | undefined;
+  private tooltip: Tooltip | undefined;
   // Tooltips are built async - only the newest build may be shown.
-  private goldTooltipBuild = 0;
+  private tooltipBuild = 0;
 
   constructor() {
     super({
@@ -79,58 +94,68 @@ export class StatusBar extends ActorGroup {
       parentObject: this,
       callback: () => {
         this.updateStatLabels();
-        if (this.goldHovered) this.showGoldTooltip();
+        if (this.hoveredStat) this.showTooltip();
       }
     });
 
-    this.on("mousemove", (options) => this.setGoldHovered(this.isOverGold(options.x, options.y)));
-    this.on("mouseleave", () => this.setGoldHovered(false));
+    this.on("mousemove", (options) => this.setHoveredStat(this.getStatAt(options.x, options.y)));
+    this.on("mouseleave", () => this.setHoveredStat(undefined));
   }
 
   public onDestroyed(): void {
     super.onDestroyed();
-    this.setGoldHovered(false);
+    this.setHoveredStat(undefined);
   }
 
-  // Anywhere on "Gold:", its icon or its numbers.
-  private isOverGold(x: number, y: number): boolean {
-    if (!this.goldLabel) return false;
+  // Anywhere on a stat's name, its icon or its numbers.
+  private getStatAt(x: number, y: number): HoverStat | undefined {
+    if (!this.happinessLabel || y < this.y || y > this.y + this.height) return undefined;
 
-    const left = this.goldDescLabel.getX();
-    const right = this.goldLabel.getX() + this.goldLabel.getWidth();
-    return x >= left && x <= right && y >= this.y && y <= this.y + this.height;
+    const isOver = (descLabel: Label, valueLabel: Label) =>
+      x >= descLabel.getX() && x <= valueLabel.getX() + valueLabel.getWidth();
+    if (isOver(this.goldDescLabel, this.goldLabel)) return "gold";
+    if (isOver(this.happinessDescLabel, this.happinessLabel)) return "happiness";
+    return undefined;
   }
 
-  private setGoldHovered(hovered: boolean) {
-    if (hovered === this.goldHovered) return;
+  private setHoveredStat(stat: HoverStat | undefined) {
+    if (stat === this.hoveredStat) return;
 
-    this.goldHovered = hovered;
-    if (hovered) this.showGoldTooltip();
-    else this.hideGoldTooltip();
+    this.hoveredStat = stat;
+    if (stat) this.showTooltip();
+    else this.hideTooltip();
   }
 
-  // Builds the tooltip from the latest breakdown, then swaps it in for any tooltip already showing.
-  private async showGoldTooltip() {
-    const build = ++this.goldTooltipBuild;
-    const breakdown = Game.getInstance().getCurrentSceneAs<InGameScene>().getClientPlayer().getGoldBreakdown();
-    const tooltip = await GoldTooltip.create(this.goldDescLabel.getX(), this.y + this.height, breakdown);
-    if (build !== this.goldTooltipBuild || !this.goldHovered) return;
+  // Builds the hovered stat's tooltip from its latest breakdown, then swaps it in for any tooltip already showing.
+  private async showTooltip() {
+    const build = ++this.tooltipBuild;
+    const stat = this.hoveredStat;
+    const tooltip = await this.createTooltip(stat);
+    if (build !== this.tooltipBuild || stat !== this.hoveredStat) return;
 
-    this.removeGoldTooltip();
-    this.goldTooltip = tooltip;
+    this.removeTooltip();
+    this.tooltip = tooltip;
     Game.getInstance().getCurrentScene().addActor(tooltip);
   }
 
-  private hideGoldTooltip() {
-    this.goldTooltipBuild++;
-    this.removeGoldTooltip();
+  private createTooltip(stat: HoverStat): Promise<Tooltip> {
+    const clientPlayer = Game.getInstance().getCurrentSceneAs<InGameScene>().getClientPlayer();
+    const y = this.y + this.height;
+
+    if (stat === "gold") return GoldTooltip.create(this.goldDescLabel.getX(), y, clientPlayer.getGoldBreakdown());
+    return HappinessTooltip.create(this.happinessDescLabel.getX(), y, clientPlayer.getHappinessBreakdown());
   }
 
-  private removeGoldTooltip() {
-    if (!this.goldTooltip) return;
+  private hideTooltip() {
+    this.tooltipBuild++;
+    this.removeTooltip();
+  }
 
-    Game.getInstance().getCurrentScene().removeActor(this.goldTooltip);
-    this.goldTooltip = undefined;
+  private removeTooltip() {
+    if (!this.tooltip) return;
+
+    Game.getInstance().getCurrentScene().removeActor(this.tooltip);
+    this.tooltip = undefined;
   }
 
   private updateCurrentTurnLabel(data: TurnTimeEvent) {
@@ -247,6 +272,36 @@ export class StatusBar extends ActorGroup {
     this.goldLabel.setPosition(this.goldIcon.getX() + this.goldIcon.getWidth() - 8, 8);
     this.addActor(this.goldLabel);
 
+    // Happiness information
+    this.happinessDescLabel = new Label({
+      text: "Happiness:",
+      font: UITheme.FONT,
+      fontColor: "white"
+    });
+    await this.happinessDescLabel.conformSize();
+    this.happinessDescLabel.setPosition(this.goldLabel.getX() + this.goldLabel.getWidth() + 10, 8);
+    this.addActor(this.happinessDescLabel);
+
+    this.happinessIcon = new Actor({
+      image: Game.getInstance().getImage(GameImage.SPRITESHEET),
+      spriteRegion: SpriteRegion.ICON_MORALE,
+      x: this.happinessDescLabel.getX() + this.happinessDescLabel.getWidth(),
+      y: 0,
+      width: UITheme.ICON_SIZE,
+      height: UITheme.ICON_SIZE
+    });
+
+    this.addActor(this.happinessIcon);
+
+    this.happinessLabel = new Label({
+      text: "+0",
+      font: UITheme.FONT,
+      fontColor: "white"
+    });
+    await this.happinessLabel.conformSize();
+    this.happinessLabel.setPosition(this.happinessIcon.getX() + this.happinessIcon.getWidth() - 8, 8);
+    this.addActor(this.happinessLabel);
+
     //Faith information
 
     this.faithDescLabel = new Label({
@@ -255,7 +310,7 @@ export class StatusBar extends ActorGroup {
       fontColor: "white"
     });
     await this.faithDescLabel.conformSize();
-    this.faithDescLabel.setPosition(this.goldLabel.getX() + this.goldLabel.getWidth() + 10, 8);
+    this.faithDescLabel.setPosition(this.happinessLabel.getX() + this.happinessLabel.getWidth() + 10, 8);
     this.addActor(this.faithDescLabel);
 
     this.faithIcon = new Actor({
@@ -335,7 +390,10 @@ export class StatusBar extends ActorGroup {
     this.scienceLabel.setPosition(this.scienceIcon.getX() + this.scienceIcon.getWidth() - 8, 8);
 
     this.cultureDescLabel.setPosition(this.scienceLabel.getX() + this.scienceLabel.getWidth() + 10, 8);
-    this.cultureIcon.setPosition(this.cultureDescLabel.getX() + this.cultureDescLabel.getWidth(), this.cultureIcon.getY());
+    this.cultureIcon.setPosition(
+      this.cultureDescLabel.getX() + this.cultureDescLabel.getWidth(),
+      this.cultureIcon.getY()
+    );
     this.cultureLabel.setText(Strings.convertToStatUnit(clientPlayer.getTotalStat("culture")));
     await this.cultureLabel.conformSize();
     this.cultureLabel.setPosition(this.cultureIcon.getX() + this.cultureIcon.getWidth() - 8, 8);
@@ -348,7 +406,19 @@ export class StatusBar extends ActorGroup {
     await this.goldLabel.conformSize();
     this.goldLabel.setPosition(this.goldIcon.getX() + this.goldIcon.getWidth() - 8, 8);
 
-    this.faithDescLabel.setPosition(this.goldLabel.getX() + this.goldLabel.getWidth() + 10, 8);
+    this.happinessDescLabel.setPosition(this.goldLabel.getX() + this.goldLabel.getWidth() + 10, 8);
+    this.happinessIcon.setPosition(
+      this.happinessDescLabel.getX() + this.happinessDescLabel.getWidth(),
+      this.happinessIcon.getY()
+    );
+    const happiness = clientPlayer.getHappinessBreakdown();
+    this.happinessIcon.setSpriteRegion(happiness.net < 0 ? SpriteRegion.ICON_UNHAPPY : SpriteRegion.ICON_MORALE);
+    this.happinessLabel.setFontColor(StatusBar.HAPPINESS_COLORS[happiness.status]);
+    this.happinessLabel.setText(Strings.convertToStatUnit(happiness.net));
+    await this.happinessLabel.conformSize();
+    this.happinessLabel.setPosition(this.happinessIcon.getX() + this.happinessIcon.getWidth() - 8, 8);
+
+    this.faithDescLabel.setPosition(this.happinessLabel.getX() + this.happinessLabel.getWidth() + 10, 8);
     this.faithIcon.setPosition(this.faithDescLabel.getX() + this.faithDescLabel.getWidth(), this.faithIcon.getY());
     this.faithLabel.setText(Strings.convertToStatUnit(clientPlayer.getTotalStat("faith")));
     await this.faithLabel.conformSize();

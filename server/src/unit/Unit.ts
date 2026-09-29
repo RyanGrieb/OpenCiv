@@ -714,7 +714,7 @@ export class Unit {
 
     const defender = this.getRangedDefender(targetTile);
     const result = Combat.resolveRanged({
-      attackerStrength: this.rangedStrength,
+      attackerStrength: Combat.getRangedAttackStrength(this.rangedStrength, this.tile),
       attackerHealth: this.health,
       defenderStrength: Combat.getDefenseStrength(defender.combatStrength, targetTile),
       defenderHealth: defender.health
@@ -747,6 +747,7 @@ export class Unit {
       ...Combat.predictRanged({
         attackerRangedStrength: this.rangedStrength,
         attackerHealth: this.health,
+        fromTile: this.tile,
         defenderBaseStrength: defender.combatStrength,
         defenderHealth: defender.health,
         targetTile
@@ -1067,7 +1068,7 @@ export class Unit {
   // Ranged units can batter a city down, but never below 1 HP - only a melee unit can take it.
   private rangedAttackCity(city: City) {
     const result = Combat.resolveRanged({
-      attackerStrength: this.rangedStrength,
+      attackerStrength: Combat.getRangedAttackStrength(this.rangedStrength, this.tile),
       attackerHealth: this.health,
       defenderStrength: city.getCombatStrength(),
       defenderHealth: city.getHealth(),
@@ -1113,6 +1114,7 @@ export class Unit {
       ...Combat.predictRanged({
         attackerRangedStrength: this.rangedStrength,
         attackerHealth: this.health,
+        fromTile: this.tile,
         defenderBaseStrength: city.getBaseStrength(),
         defenderHealth: city.getHealth(),
         targetTile: city.getTile(),

@@ -4,6 +4,7 @@ import { Game } from "./Game";
 import { City } from "./city/City";
 import { PlayerDiplomacy } from "./diplomacy/PlayerDiplomacy";
 import { PlayerTreasury } from "./economy/PlayerTreasury";
+import { PlayerHappiness } from "./happiness/PlayerHappiness";
 import { GameMap } from "./map/GameMap";
 import { PlayerVisibility } from "./map/PlayerVisibility";
 import { PlayerNotifications } from "./notification/PlayerNotifications";
@@ -12,7 +13,7 @@ import { Technology } from "./research/Technology";
 import { Unit } from "./unit/Unit";
 
 // Stats that pool across a player's whole empire, as opposed to city-specific
-// concepts like population/morale/food/defense which don't total meaningfully.
+// concepts like population/food/defense which don't total meaningfully.
 export interface TotalStats {
   science: number;
   gold: number;
@@ -58,6 +59,7 @@ export class Player {
   private notifications: PlayerNotifications;
   private diplomacy: PlayerDiplomacy;
   private treasury: PlayerTreasury;
+  private happiness: PlayerHappiness;
 
   /**
    * Creates a new player object.
@@ -78,6 +80,7 @@ export class Player {
     this.notifications = new PlayerNotifications(this);
     this.diplomacy = new PlayerDiplomacy(this);
     this.treasury = new PlayerTreasury(this);
+    this.happiness = new PlayerHappiness(this);
 
     // Add event listener for when the player disconnects
     this.wsConnection?.on("close", (data) => {
@@ -385,12 +388,18 @@ export class Player {
   }
 
   public sendTotalStatsUpdate() {
+    const statusChanged = this.happiness.announceStatusChange();
+
     this.sendNetworkEvent({
       event: "updateTotalStats",
       stats: this.getTotalStats(),
       accumulatedStats: this.getAccumulatedStats(),
-      goldBreakdown: this.treasury.getBreakdown()
+      goldBreakdown: this.treasury.getBreakdown(),
+      happinessBreakdown: this.happiness.getBreakdown()
     });
+
+    // Every city's growth depends on the status, so each one's food needs resending.
+    if (statusChanged) this.cities.forEach((city) => city.sendStatUpdate(this));
   }
 
   public getCurrentResearch(): CurrentResearch | null {
@@ -427,7 +436,10 @@ export class Player {
 
     if (this.currentResearch.progress >= this.currentResearch.cost) {
       this.researchedTechs.add(this.currentResearch.techName);
-      this.notifications.addMessage(this.currentResearch.assetName, `You have discovered ${this.currentResearch.techName}.`);
+      this.notifications.addMessage(
+        this.currentResearch.assetName,
+        `You have discovered ${this.currentResearch.techName}.`
+      );
       // A new tech can unlock improvements for this player's Builders.
       this.units.forEach((unit) => unit.sendActionsToOwner());
       // ...and make units their cities had queued obsolete.
@@ -467,6 +479,11 @@ export class Player {
   /** Where this player's gold comes from and goes, and what it can afford. */
   public getTreasury() {
     return this.treasury;
+  }
+
+  /** The empire-wide happiness, and what unhappiness costs this player. */
+  public getHappiness() {
+    return this.happiness;
   }
 
   /** Who this player has met, and who they're at war with. */

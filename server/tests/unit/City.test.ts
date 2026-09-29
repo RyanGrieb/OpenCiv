@@ -74,6 +74,7 @@ describe('City', () => {
       isBarbarian: () => false,
       getDiplomacy: () => ({ isAtWarWith: () => true }),
       getTreasury: () => mockTreasury,
+      getHappiness: () => ({ applyToFoodSurplus: (food: number) => food, canTrain: () => true, getCombatModifiers: (): unknown[] => [] }),
     } as unknown as jest.Mocked<Player>;
 
     // Mirrors the real rule for the fake Legion below: Rome's alone, and it stands in for the Swordsman.
@@ -1035,6 +1036,7 @@ describe('City', () => {
       (mockPlayer as any).getVisibility = jest.fn().mockReturnValue(visibility);
       (enemyPlayer as any).getVisibility = jest.fn().mockReturnValue(visibility);
       (enemyPlayer as any).sendNetworkEvent = jest.fn();
+      (enemyPlayer as any).getHappiness = mockPlayer.getHappiness;
       visibility.isVisible.mockReturnValue(true);
 
       enemyUnit = {

@@ -57,10 +57,15 @@ export class Combat {
    * convention as Tile.getMovementCost(), since tile types are biome-prefixed (e.g. "grass_hill").
    */
   public static getTerrainDefenseModifier(tile: Tile): number {
-    return Combat.sumModifiers(Combat.getDefenseModifiers(tile));
+    return Combat.sumModifiers(Combat.getTerrainDefenseModifiers(tile));
   }
 
+  // The tile's terrain, plus what the defender's owner brings (see getOwnerModifiers()).
   public static getDefenseModifiers(tile: Tile): CombatModifier[] {
+    return [...Combat.getTerrainDefenseModifiers(tile), ...Combat.getOwnerModifiers(tile)];
+  }
+
+  public static getTerrainDefenseModifiers(tile: Tile): CombatModifier[] {
     const tileTypes = tile.getTileTypes();
     const modifiers: CombatModifier[] = [];
 
@@ -77,17 +82,27 @@ export class Combat {
   }
 
   public static getAttackModifiers(fromTile: Tile, targetTile: Tile): CombatModifier[] {
-    if (!Tile.riverCrosses(fromTile, targetTile)) return [];
+    const modifiers = Combat.getOwnerModifiers(fromTile);
+    if (!Tile.riverCrosses(fromTile, targetTile)) return modifiers;
 
-    return [{ label: "Across river", value: -Combat.RIVER_CROSSING_ATTACK_PENALTY }];
+    return [{ label: "Across river", value: -Combat.RIVER_CROSSING_ATTACK_PENALTY }, ...modifiers];
+  }
+
+  // A ranged attacker isn't hurt by rivers, only by its owner's state (see getOwnerModifiers()).
+  public static getRangedAttackModifiers(fromTile: Tile): CombatModifier[] {
+    return Combat.getOwnerModifiers(fromTile);
   }
 
   public static getAttackStrength(baseStrength: number, fromTile: Tile, targetTile: Tile): number {
     return baseStrength * (1 + Combat.sumModifiers(Combat.getAttackModifiers(fromTile, targetTile)));
   }
 
+  public static getRangedAttackStrength(rangedStrength: number, fromTile: Tile): number {
+    return rangedStrength * (1 + Combat.sumModifiers(Combat.getRangedAttackModifiers(fromTile)));
+  }
+
   public static getDefenseStrength(baseStrength: number, tile: Tile): number {
-    return baseStrength * (1 + Combat.getTerrainDefenseModifier(tile));
+    return baseStrength * (1 + Combat.sumModifiers(Combat.getDefenseModifiers(tile)));
   }
 
   /**
@@ -149,13 +164,16 @@ export class Combat {
     attackerHealth: number;
     defenderBaseStrength: number;
     defenderHealth: number;
+    // Where the attacker shoots from, for its owner's modifiers. Absent for a city's strike.
+    fromTile?: Tile;
     targetTile: Tile;
     defenderModifiers?: CombatModifier[];
     // The least health the shot can leave the defender on - a city can't be shot below 1 HP.
     minDefenderHealth?: number;
   }): CombatPrediction {
     const defenderModifiers = options.defenderModifiers ?? Combat.getDefenseModifiers(options.targetTile);
-    const attackerStrength = options.attackerRangedStrength;
+    const attackerModifiers = options.fromTile ? Combat.getRangedAttackModifiers(options.fromTile) : [];
+    const attackerStrength = options.attackerRangedStrength * (1 + Combat.sumModifiers(attackerModifiers));
     const defenderStrength = options.defenderBaseStrength * (1 + Combat.sumModifiers(defenderModifiers));
     const maxDamage = options.defenderHealth - (options.minDefenderHealth ?? 0);
 
@@ -174,7 +192,7 @@ export class Combat {
     return {
       attackerStrength,
       defenderStrength,
-      attackerModifiers: [],
+      attackerModifiers,
       defenderModifiers,
       attackerDamage: { min: 0, expected: 0, max: 0 },
       defenderDamage: { min: damageAt(0), expected: averageDealt, max: damageAt(1) },
@@ -287,6 +305,13 @@ export class Combat {
     if (averageDealt > averageTaken) return "Minor Victory";
     if (averageTaken > averageDealt) return "Minor Defeat";
     return "Stalemate";
+  }
+
+  // What the owner of the unit fighting from this tile brings to the fight: a very unhappy empire's
+  // units fight worse (see PlayerHappiness).
+  private static getOwnerModifiers(tile: Tile): CombatModifier[] {
+    const fighter = tile.getUnits().find((unit) => unit.canFight());
+    return fighter?.getPlayer().getHappiness().getCombatModifiers() ?? [];
   }
 
   private static sumModifiers(modifiers: CombatModifier[]): number {
