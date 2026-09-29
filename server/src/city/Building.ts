@@ -133,9 +133,9 @@ export class Building {
   }
 
   // Reconstructs the {name, asset_name, stats} wire shape the client's own
-  // Buidling class expects - the network contract doesn't change. is_wonder
-  // and national_wonder are only included when true, so an ordinary building's
-  // payload is byte-identical to what City.ts sent before this class existed.
+  // Buidling class expects - the network contract doesn't change. The optional
+  // fields (the wonder flags, maintenance, city_health) are only included when
+  // set, so an ordinary building's payload stays as small as it was.
   public toJSON(): BuildingData {
     const data: BuildingData = {
       name: this.name,
@@ -143,12 +143,10 @@ export class Building {
       stats: Object.entries(this.statLine).map(([statType, statValue]) => ({ [statType]: statValue }))
     };
 
-    if (this.isWonder) {
-      data.is_wonder = true;
-    }
-    if (this.nationalWonder) {
-      data.national_wonder = true;
-    }
+    if (this.isWonder) data.is_wonder = true;
+    if (this.nationalWonder) data.national_wonder = true;
+    if (this.maintenance > 0) data.maintenance = this.maintenance;
+    if (this.cityHealth > 0) data.city_health = this.cityHealth;
 
     return data;
   }

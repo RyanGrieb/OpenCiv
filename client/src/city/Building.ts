@@ -7,6 +7,9 @@ export interface BuildingData {
   // Only sent when true. A great wonder is one per world, a national wonder one per civilization.
   is_wonder?: boolean;
   national_wonder?: boolean;
+  // Gold a turn, and extra city hit points (Walls). Only sent when there are any.
+  maintenance?: number;
+  city_health?: number;
 }
 
 // Which section of the city's buildings window a building is listed in.

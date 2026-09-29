@@ -119,7 +119,11 @@ describe('City', () => {
         { type: 'unit', name: 'Scout', cost: 20, goldCost: 140, turns: 20 },
       ],
       buildings: [
-        { type: 'building', name: 'Monument', cost: 60, goldCost: 270, turns: 60 },
+        {
+          type: 'building', name: 'Monument', cost: 60, goldCost: 270, turns: 60,
+          // What it gives, for the client's tooltip.
+          building: { name: 'Monument', asset_name: 'BUILDING_MONUMENT', stats: [{ culture: 2 }], maintenance: 1 },
+        },
       ],
       nationalWonders: [],
       wonders: [],

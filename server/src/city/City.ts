@@ -6,7 +6,7 @@ import { StatEntry, StatValues, Tile } from "../map/Tile";
 import { Combat, CombatModifier } from "../unit/Combat";
 import { Unit, UnitYMLTypeData } from "../unit/Unit";
 import { BorderGrowth } from "./BorderGrowth";
-import { Building } from "./Building";
+import { Building, BuildingData } from "./Building";
 import { BuildingCategory, Wonders } from "./Wonders";
 import { CityCombat } from "./CityCombat";
 import { PlayerDiplomacy } from "../diplomacy/PlayerDiplomacy";
@@ -47,6 +47,8 @@ export interface ProductionOption {
   // can't be bought, and how many turns the city's production would take to finish it.
   goldCost?: number;
   turns?: number;
+  // On the copies in the production and purchase lists: the building's stats, for the client's tooltip.
+  building?: BuildingData;
 }
 
 export class City {
@@ -152,7 +154,7 @@ export class City {
         }
 
         const options = this.getProductionOptions();
-        const toClient = (list: ProductionOption[]) => list.map((option) => this.toClientOption(option));
+        const toClient = (list: ProductionOption[]) => list.map((option) => this.toListOption(option));
         player.sendNetworkEvent({
           event: "updateProductionOptions",
           cityName: this.name,
@@ -1110,7 +1112,7 @@ export class City {
   // queued, priced by the production it still needs.
   private getPurchaseOptions(): { units: ProductionOption[]; buildings: ProductionOption[] } {
     const { units, buildings } = this.getProductionOptions({ includeQueuedBuildings: true });
-    const priced = (option: ProductionOption) => this.toClientOption(this.findQueuedEntry(option) ?? option);
+    const priced = (option: ProductionOption) => this.toListOption(this.findQueuedEntry(option) ?? option);
     const buyable = (option: ProductionOption) => option.goldCost !== undefined;
 
     return { units: units.map(priced).filter(buyable), buildings: buildings.map(priced).filter(buyable) };
@@ -1133,6 +1135,12 @@ export class City {
 
   private toClientOption(item: ProductionOption): ProductionOption {
     return { ...item, goldCost: this.getPurchaseCost(item), turns: this.getTurnsToProduce(item) };
+  }
+
+  // A row of the production or purchase list: a building also carries what it gives, for its tooltip.
+  private toListOption(item: ProductionOption): ProductionOption {
+    const building = item.type === "building" ? Building.createFromName(item.name) : undefined;
+    return { ...this.toClientOption(item), ...(building ? { building: building.toJSON() } : {}) };
   }
 
   // At the city's current production rate, counting at least 1 production a turn.

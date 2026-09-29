@@ -51,6 +51,13 @@ describe('Building', () => {
     });
   });
 
+  it('sends upkeep, city health and the wonder flags only when a building has them, for the tooltip', () => {
+    expect(Building.createFromName('Walls').toJSON()).toMatchObject({ maintenance: 1, city_health: 50 });
+    expect(Building.createFromName('Oracle').toJSON()).toMatchObject({ is_wonder: true });
+    expect(Building.createFromName('National College').toJSON()).toMatchObject({ national_wonder: true });
+    expect(Building.createFromName('Oracle').toJSON()).not.toHaveProperty('maintenance');
+  });
+
   it('reconstructs an equivalent Building from its own toJSON output', () => {
     const original = Building.createFromName('Palace');
     const roundTripped = new Building(original.toJSON());

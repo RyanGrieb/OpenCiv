@@ -4,6 +4,7 @@ import { WebsocketClient } from "../../network/Client";
 import { City } from "../../city/City";
 import { ChooseProductionList, ProductionListMode } from "../../ui/windows/city/ChooseProductionList";
 import { CityBuildingsWindow } from "../../ui/windows/city/CityBuildingsWindow";
+import { Label } from "../../ui/components/Label";
 import { TestUtils } from "../TestUtils";
 
 const SECTIONS = ["Units", "Buildings", "National Wonders", "Great Wonders", "Citizen Management"];
@@ -12,7 +13,7 @@ const SECTIONS = ["Units", "Buildings", "National Wonders", "Great Wonders", "Ci
 // and each can only be built once: a great wonder once in the world, a national wonder once per
 // civilization. Starts with every tech and production costs at 1% (the productionCostPercent game
 // option), so anything queued is finished the next turn. Ends with the city screen open on its
-// Great Wonders, to look over by eye.
+// Great Wonders and Notre Dame's tooltip showing, to look over by eye.
 export function setupWondersTest(game: Game) {
     const runner = new TestRunner("Wonders");
     const utils = new TestUtils(game);
@@ -43,6 +44,21 @@ export function setupWondersTest(game: Game) {
     const buildingsWindow = (): CityBuildingsWindow | undefined =>
         (cityScreen()?.["actors"] as object[] | undefined)?.find((actor) => actor instanceof CityBuildingsWindow) as CityBuildingsWindow;
     const buildingSections = () => sectionsOf(rowTexts(buildingsWindow()));
+    // Scrolls the open list to the row for `name`, then moves the real mouse over it.
+    const hoverListRow = async (name: string) => {
+        const list = openList() as unknown as Record<string, any>;
+        const findRow = () => (list["rows"] as any[]).find((row) => row.getLabel().getText().replace(/\s*\(\d+\u00a0turns?\)$/, "") === name);
+        list["setScrollOffset"](list["scrollOffset"] + findRow().getY() - list["y"] - 100);
+        await utils.delay(200);
+        const row = findRow();
+        const canvas = document.getElementById("canvas");
+        canvas.dispatchEvent(new MouseEvent("mousemove", { clientX: row.getX() + 60, clientY: row.getY() + row.getHeight() / 2 }));
+        await utils.waitUntil(() => tooltipLines()[0] === name, 5000, `${name}'s tooltip to appear`);
+    };
+    const tooltipLines = (): string[] => {
+        const tooltip = (openList() as unknown as Record<string, any>)?.["tooltip"];
+        return tooltip ? tooltip.getActors().filter((actor: object) => actor instanceof Label).map((label: Label) => label.getText()) : [];
+    };
     const hasBuilding = (name: string) => city.getBuildings().some((building) => building.getName() === name);
 
     const openCityList = async (mode: ProductionListMode) => {
@@ -102,6 +118,27 @@ export function setupWondersTest(game: Game) {
     });
 
     runner.addStep({
+        name: "Hovering a building shows what it gives and its upkeep",
+        action: async () => {
+            await hoverListRow("Walls");
+            utils.log(JSON.stringify(tooltipLines()), "yellow");
+        },
+        verification: () =>
+            JSON.stringify(tooltipLines()) === JSON.stringify(["Walls", "+5 Defense", "+50 City Health", "-1 Gold per turn upkeep"])
+    });
+
+    runner.addStep({
+        name: "Hovering a great wonder says it's one in the world",
+        action: async () => {
+            await hoverListRow("Temple of Artemis");
+            utils.log(JSON.stringify(tooltipLines()), "yellow");
+        },
+        verification: () =>
+            JSON.stringify(tooltipLines()) ===
+            JSON.stringify(["Temple of Artemis", "Great Wonder: only one in the world", "+3 Food", "+1 Culture"])
+    });
+
+    runner.addStep({
         name: "Once the city has a Library, the National College shows under National Wonders",
         action: async () => {
             await buildNow("Library");
@@ -156,6 +193,12 @@ export function setupWondersTest(game: Game) {
                 ["Oracle", "Temple of Artemis", "Great Library"].every((name) => sections["Great Wonders"]?.includes(name))
             );
         }
+    });
+
+    runner.addStep({
+        name: "Leave Notre Dame's tooltip showing, to look at",
+        action: async () => hoverListRow("Notre Dame"),
+        verification: () => tooltipLines().includes("+15 Morale")
     });
 
     return runner;

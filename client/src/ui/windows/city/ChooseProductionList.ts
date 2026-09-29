@@ -7,6 +7,7 @@ import { InGameScene } from "../../../scene/type/InGameScene";
 import { Label } from "../../components/Label";
 import { ListBox } from "../../components/Listbox";
 import { UITheme } from "../../UITheme";
+import { BuildingTooltip } from "./BuildingTooltip";
 import { CityScreen } from "./CityScreen";
 
 // "produce" lists what the city can queue, with the turns each would take; "purchase" lists what gold
@@ -24,6 +25,11 @@ export class ChooseProductionList extends ListBox {
   private city: City;
   private mode: ProductionListMode;
   private onChosen: () => void;
+  // The building under the mouse, and its tooltip once built. tooltipBuild drops a tooltip that finishes
+  // building after the mouse has already moved on.
+  private hoveredOption: ProductionQueueItem | undefined;
+  private tooltip: BuildingTooltip | undefined;
+  private tooltipBuild = 0;
 
   constructor(options: {
     city: City;
@@ -60,6 +66,11 @@ export class ChooseProductionList extends ListBox {
 
   public getMode(): ProductionListMode {
     return this.mode;
+  }
+
+  public onDestroyed(): void {
+    this.hideTooltip();
+    super.onDestroyed();
   }
 
   private addSection(name: string, sectionOptions: ProductionQueueItem[]) {
@@ -111,13 +122,40 @@ export class ChooseProductionList extends ListBox {
     });
 
     row.on("mousemove", () => {
-      if (row.isMouseInside() && affordable) {
-        Game.getInstance().setCursor("pointer");
-      }
+      if (!row.isMouseInside()) return;
+
+      if (affordable) Game.getInstance().setCursor("pointer");
+      if (option.building && this.hoveredOption !== option) this.showTooltip(option, row.getY());
     });
     row.on("mouse_exit", () => {
       Game.getInstance().setCursor("default");
+      if (this.hoveredOption === option) this.hideTooltip();
     });
+  }
+
+  // Beside the list, level with the row.
+  private async showTooltip(option: ProductionQueueItem, rowY: number) {
+    this.hoveredOption = option;
+    const build = ++this.tooltipBuild;
+    const tooltip = await BuildingTooltip.create(this.x + this.width + 8, rowY, option.building);
+    if (build !== this.tooltipBuild) return;
+
+    this.removeTooltip();
+    this.tooltip = tooltip;
+    Game.getInstance().getCurrentScene().addActor(tooltip);
+  }
+
+  private hideTooltip() {
+    this.hoveredOption = undefined;
+    this.tooltipBuild++;
+    this.removeTooltip();
+  }
+
+  private removeTooltip() {
+    if (!this.tooltip) return;
+
+    Game.getInstance().getCurrentScene().removeActor(this.tooltip);
+    this.tooltip = undefined;
   }
 
   // The price and a gold icon at the row's right edge, the price greyed out while it's unaffordable.

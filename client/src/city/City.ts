@@ -9,7 +9,7 @@ import { ActorGroup } from "../scene/ActorGroup";
 import { InGameScene } from "../scene/type/InGameScene";
 import { FloatingText } from "../ui/components/FloatingText";
 import { Label } from "../ui/components/Label";
-import { Buidling } from "./Building";
+import { Buidling, BuildingData } from "./Building";
 
 export interface CityOptions {
   player: AbstractPlayer;
@@ -51,6 +51,8 @@ export interface ProductionQueueItem {
   goldCost?: number;
   // Turns the city's production would take to finish it, as the server works it out.
   turns?: number;
+  // In the production and purchase lists, what a building gives: shown in its tooltip.
+  building?: BuildingData;
 }
 
 // What the server offers in updateProductionOptions and updatePurchaseOptions. The purchase list never
