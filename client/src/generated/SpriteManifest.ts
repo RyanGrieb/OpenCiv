@@ -12,7 +12,6 @@ export const SPRITE_MANIFEST: SpriteManifestEntry[] = [
   { name: "BUILDING_AQUEDUCT", url: new URL("../../assets/sprites/buildings/BUILDING_AQUEDUCT.png", import.meta.url).href },
   { name: "BUILDING_BAZAAR", url: new URL("../../assets/sprites/buildings/BUILDING_BAZAAR.png", import.meta.url).href },
   { name: "BUILDING_CASTLE", url: new URL("../../assets/sprites/buildings/BUILDING_CASTLE.png", import.meta.url).href },
-  { name: "BUILDING_CHAPEL", url: new URL("../../assets/sprites/buildings/BUILDING_CHAPEL.png", import.meta.url).href },
   { name: "BUILDING_CIRCUS", url: new URL("../../assets/sprites/buildings/BUILDING_CIRCUS.png", import.meta.url).href },
   { name: "BUILDING_COLOSSEUM", url: new URL("../../assets/sprites/buildings/BUILDING_COLOSSEUM.png", import.meta.url).href },
   { name: "BUILDING_COLOSSUS", url: new URL("../../assets/sprites/buildings/BUILDING_COLOSSUS.png", import.meta.url).href },

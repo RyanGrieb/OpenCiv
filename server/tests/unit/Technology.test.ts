@@ -57,7 +57,6 @@ describe('Technology', () => {
       unlocks: {
         units: [],
         buildings: [
-          { name: 'Chapel', asset_name: 'BUILDING_CHAPEL' },
           { name: 'Granary', asset_name: 'BUILDING_GRANARY' },
           { name: 'Shrine', asset_name: 'BUILDING_SHRINE' },
         ],

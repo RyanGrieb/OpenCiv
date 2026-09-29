@@ -43,13 +43,6 @@ buildings:
     stats:
       - gold: 2
       - science: 2
-  - name: Chapel
-    asset_name: BUILDING_CHAPEL
-    cost: 40
-    maintenance: 1
-    required_tech: Pottery
-    stats:
-      - faith: 1
   - name: Castle
     asset_name: BUILDING_CASTLE
     cost: 160
