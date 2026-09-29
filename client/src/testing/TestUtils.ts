@@ -37,8 +37,9 @@ export class TestUtils {
             }
 
             if (this.game.getCurrentScene().getName() === "lobby") {
-                // Options stick on the server between games, so GoldSpending's gold isn't handed to the next scenario.
-                for (const [option, value] of Object.entries({ startingGold: 0, ...gameOptions })) {
+                // Options stick on the server between games, so one scenario's gold or cheap costs aren't handed to the next.
+                const resets = { startingGold: 0, techCostPercent: 100, productionCostPercent: 100 };
+                for (const [option, value] of Object.entries({ ...resets, ...gameOptions })) {
                     WebsocketClient.sendMessage({ event: "setGameOption", option, value });
                 }
                 WebsocketClient.sendMessage({ event: "setState", state: "in_game" });

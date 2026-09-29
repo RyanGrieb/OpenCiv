@@ -35,6 +35,9 @@ export interface GameOptions {
   // Every tech's cost as a percentage of its techs.yml cost, like Civ 5's game speeds (Quick is 67).
   // Scenarios set it to 1 so a tech is researched the turn after it's chosen (see TechEffects).
   techCostPercent: number;
+  // Every unit's and building's production cost as a percentage of its config cost, the same way. The
+  // Wonders scenario sets it to 1 so a wonder is finished the turn after it's queued.
+  productionCostPercent: number;
 }
 
 // Maps are streamed to clients in square chunks of this many tiles, so each dimension must divide evenly.
@@ -90,7 +93,8 @@ export const DefaultGameOptions: GameOptions = {
   mapPreset: "",
   startAtWar: false,
   startingGold: 0,
-  techCostPercent: 100
+  techCostPercent: 100,
+  productionCostPercent: 100
 };
 
 interface BaseGameOptionDefinition {
@@ -178,5 +182,14 @@ export const GameOptionDefinitions: GameOptionDefinition[] = [
     hidden: true
   },
   { key: "startingGold", label: "Starting Gold", type: "number", min: 0, max: 10000, step: 10, hidden: true },
-  { key: "techCostPercent", label: "Tech Cost %", type: "number", min: 1, max: 300, step: 1, hidden: true }
+  { key: "techCostPercent", label: "Tech Cost %", type: "number", min: 1, max: 300, step: 1, hidden: true },
+  {
+    key: "productionCostPercent",
+    label: "Production Cost %",
+    type: "number",
+    min: 1,
+    max: 300,
+    step: 1,
+    hidden: true
+  }
 ];

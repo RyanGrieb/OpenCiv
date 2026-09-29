@@ -7,6 +7,7 @@ import { Combat, CombatModifier } from "../unit/Combat";
 import { Unit, UnitYMLTypeData } from "../unit/Unit";
 import { BorderGrowth } from "./BorderGrowth";
 import { Building } from "./Building";
+import { BuildingCategory, Wonders } from "./Wonders";
 import { CityCombat } from "./CityCombat";
 import { PlayerDiplomacy } from "../diplomacy/PlayerDiplomacy";
 import { GoldPurchase } from "../economy/GoldPurchase";
@@ -24,6 +25,14 @@ type CityStatEntry = Partial<CityStats>;
 export interface CityOptions {
   tile: Tile;
   player: Player;
+}
+
+// What a city can produce, in the sections of the production list.
+export interface ProductionOptions {
+  units: ProductionOption[];
+  buildings: ProductionOption[];
+  nationalWonders: ProductionOption[];
+  wonders: ProductionOption[];
 }
 
 export interface ProductionOption {
@@ -142,12 +151,15 @@ export class City {
           return;
         }
 
-        const { units, buildings } = this.getProductionOptions();
+        const options = this.getProductionOptions();
+        const toClient = (list: ProductionOption[]) => list.map((option) => this.toClientOption(option));
         player.sendNetworkEvent({
           event: "updateProductionOptions",
           cityName: this.name,
-          units: units.map((option) => this.toClientOption(option)),
-          buildings: buildings.map((option) => this.toClientOption(option))
+          units: toClient(options.units),
+          buildings: toClient(options.buildings),
+          nationalWonders: toClient(options.nationalWonders),
+          wonders: toClient(options.wonders)
         });
       }
     });
@@ -164,8 +176,7 @@ export class City {
         // Look up the real option server-side rather than trusting the client's cost -
         // this also re-checks tech-gating, so a stale/forged request can't queue
         // something the player hasn't researched.
-        const { units, buildings } = this.getProductionOptions();
-        const option = [...units, ...buildings].find(
+        const option = City.allOptions(this.getProductionOptions()).find(
           (option) => option.type === data["type"] && option.name === data["name"]
         );
         if (!option) return;
@@ -242,8 +253,7 @@ export class City {
         if (this.name !== data["cityName"] || this.player !== player) return;
 
         // Looked up server-side, like addToProductionQueue, so it's something the city can build.
-        const { units, buildings } = this.getProductionOptions({ includeQueuedBuildings: true });
-        const option = [...units, ...buildings].find(
+        const option = City.allOptions(this.getProductionOptions({ includeQueuedBuildings: true })).find(
           (candidate) => candidate.type === data["type"] && candidate.name === data["name"]
         );
         if (!option) return;
@@ -334,6 +344,10 @@ export class City {
     Game.getInstance()
       .getPlayers()
       .forEach((player) => player.getCities().forEach((city) => city.refreshCombatStatus()));
+  }
+
+  private static allOptions(options: ProductionOptions): ProductionOption[] {
+    return [...options.units, ...options.buildings, ...options.nationalWonders, ...options.wonders];
   }
 
   // A civilization that lost its capital gets a new Palace in its first remaining city.
@@ -734,7 +748,10 @@ export class City {
     this.foodSurplus = 0;
     this.productionQueue = [];
     this.strikeSpent = true;
-    this.buildings = this.buildings.filter((building) => building.getName() !== "Palace");
+    // As in Civ 5, the Palace and national wonders don't survive a capture.
+    this.buildings = this.buildings.filter(
+      (building) => building.getName() !== "Palace" && !building.isNationalWonder()
+    );
     this.setHealth(this.health);
     this.updateWorkedTiles({ sendStatUpdate: false });
 
@@ -812,6 +829,36 @@ export class City {
     return this.productionQueue;
   }
 
+  public hasBuilding(name: string): boolean {
+    return this.buildings.some((building) => building.getName() === name);
+  }
+
+  public hasQueued(name: string): boolean {
+    return this.productionQueue.some((item) => item.name === name);
+  }
+
+  /**
+   * Another city finished the great wonder `name` first: it leaves this city's queue, and the production
+   * put into it comes back as gold, as in Civ 5.
+   */
+  public loseWonderToAnotherCity(name: string, builder: City) {
+    const lost = this.productionQueue.filter((item) => item.type === "building" && item.name === name);
+    if (lost.length === 0) return;
+
+    this.productionQueue = this.productionQueue.filter((item) => !lost.includes(item));
+    const refund = Math.floor(lost.reduce((total, item) => total + (item.progress ?? 0), 0));
+    this.player.addToAccumulatedStat("gold", refund);
+
+    this.player
+      .getNotifications()
+      .addMessage(
+        "ICON_PRODUCTION",
+        `${builder.getName()} finished ${name} first. ${this.name} gets ${refund} gold for its work.`
+      );
+    this.sendStatUpdate(this.player);
+    this.player.sendTotalStatsUpdate();
+  }
+
   public getName() {
     return this.name;
   }
@@ -841,10 +888,6 @@ export class City {
       // Which tiles a city works is its owner's business.
       workedTiles: ownCity ? this.workedTiles.map((tile) => ({ x: tile.getX(), y: tile.getY() })) : []
     };
-  }
-
-  private hasBuilding(name: string): boolean {
-    return this.buildings.some((building) => building.getName() === name);
   }
 
   private getStrikeTarget(tile: Tile): Unit | undefined {
@@ -911,9 +954,7 @@ export class City {
   // they're granted directly elsewhere rather than queued. required_tech, when
   // present, gates an option until the player has researched it; obsolete_tech hides a unit again
   // once its replacement's tech is in.
-  private getProductionOptions(
-    options = { includeQueuedBuildings: false }
-  ): { units: ProductionOption[]; buildings: ProductionOption[] } {
+  private getProductionOptions(options = { includeQueuedBuildings: false }): ProductionOptions {
     const isUnlocked = (requiredTech?: string) => !requiredTech || this.player.hasResearchedTech(requiredTech);
 
     // Ships need a coast to be launched from.
@@ -928,28 +969,41 @@ export class City {
           Unit.isAvailableToCiv(unit, this.player.getCivilizationName()) &&
           canLaunch(unit)
       )
-      .map((unit) => ({ type: "unit", name: unit.name, cost: unit.cost }));
+      .map((unit) => ({ type: "unit", name: unit.name, cost: this.scaleCost(unit.cost) }));
 
-    const buildingExists = (name: string) => this.hasBuilding(name);
-    const buildingInQueue = (name: string) => this.productionQueue.some((q) => q.name === name);
     // A building can need a coast, or another building in the city first.
     const siteAllows = (building: Building) =>
       (!building.isCoastal() || this.isCoastal()) &&
-      (!building.getRequiredBuilding() || buildingExists(building.getRequiredBuilding()));
+      (!building.getRequiredBuilding() || this.hasBuilding(building.getRequiredBuilding()));
 
-    const buildings: ProductionOption[] = Building.getAllBuildings()
-      .filter(
-        (building) =>
-          typeof building.getCost() === "number" &&
-          isUnlocked(building.getRequiredTech()) &&
-          Building.isAvailableToCiv(building, this.player.getCivilizationName()) &&
-          siteAllows(building) &&
-          !buildingExists(building.getName()) &&
-          (options.includeQueuedBuildings || !buildingInQueue(building.getName()))
-      )
-      .map((building) => ({ type: "building", name: building.getName(), cost: building.getCost() }));
+    const available = Building.getAllBuildings().filter(
+      (building) =>
+        typeof building.getCost() === "number" &&
+        isUnlocked(building.getRequiredTech()) &&
+        Building.isAvailableToCiv(building, this.player.getCivilizationName()) &&
+        siteAllows(building) &&
+        !this.hasBuilding(building.getName()) &&
+        (options.includeQueuedBuildings || !this.hasQueued(building.getName())) &&
+        Wonders.canStart(building, this)
+    );
 
-    return { units, buildings };
+    const inCategory = (category: BuildingCategory): ProductionOption[] =>
+      available
+        .filter((building) => Wonders.getCategory(building) === category)
+        .map((building) => ({ type: "building", name: building.getName(), cost: this.scaleCost(building.getCost()) }));
+
+    return {
+      units,
+      buildings: inCategory("buildings"),
+      nationalWonders: inCategory("nationalWonders"),
+      wonders: inCategory("wonders")
+    };
+  }
+
+  // The productionCostPercent game option, which scenarios lower to finish things quickly.
+  private scaleCost(cost: number): number {
+    const costPercent = Game.getInstance().getGameOptions().productionCostPercent ?? 100;
+    return Math.max(1, Math.round((cost * costPercent) / 100));
   }
 
   private isObsoleteUnit(unitName: string): boolean {
@@ -1036,6 +1090,7 @@ export class City {
       this.productionQueue.shift();
       this.addBuilding(current.name);
       this.announceFinished(current.name);
+      if (Building.createFromName(current.name)?.isWonderBuilding()) Wonders.onGreatWonderBuilt(current.name, this);
       return;
     }
 
@@ -1068,9 +1123,10 @@ export class City {
       .sort((a, b) => (b.progress ?? 0) - (a.progress ?? 0))[0];
   }
 
-  // Undefined for what gold can't buy: wonders, as in Civ 5.
+  // Undefined for what gold can't buy: great and national wonders, as in Civ 5.
   private getPurchaseCost(item: ProductionOption): number | undefined {
-    if (item.type === "building" && Building.createFromName(item.name)?.isWonderBuilding()) return undefined;
+    const building = item.type === "building" ? Building.createFromName(item.name) : undefined;
+    if (building && Wonders.isWonder(building)) return undefined;
 
     return GoldPurchase.getCost(item.type, item.cost - (item.progress ?? 0));
   }

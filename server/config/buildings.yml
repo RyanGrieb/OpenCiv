@@ -2,6 +2,13 @@
 # building named in replaces and by nobody else.
 # maintenance is Civ 5's GoldMaintenance: gold the owner pays for the building every turn. Wonders and the
 # Palace have none.
+# is_wonder marks a great (world) wonder: one city in the whole world can have it, and once it's built
+# every other city building it loses it from its queue. national_wonder marks a national wonder: one
+# per civilization. Civ 5 has a national wonder need its building in every city; here it needs it in
+# the city building the wonder (requires_building).
+# Most wonder effects in Civ 5 lean on systems the game doesn't have yet (happiness, great people,
+# policies, religion), so a wonder's stats are a flat stand-in; the comment above each says what the
+# real one does.
 # coastal: only a city beside the sea can build it. requires_building: the city must have that one first.
 # Buildings only give flat yields for now, so where Civ 5's effect is a percentage or per-tile bonus
 # (University's +33% Science, Harbor's +1 Production on sea tiles) the stats are a flat stand-in.
@@ -163,6 +170,8 @@ buildings:
     asset_name: BUILDING_NATIONAL_COLLEGE
     cost: 135
     required_tech: Philosophy
+    national_wonder: true
+    requires_building: Library
     stats:
       - science: 3
       - culture: 1
@@ -248,3 +257,185 @@ buildings:
     required_tech: Metal Casting
     stats:
       - production: 2
+
+  # Great wonders from Brave New World's Ancient to Medieval eras.
+  - name: Temple of Artemis
+    # +10% Food in all cities, +1 Culture.
+    asset_name: BUILDING_TEMPLE_OF_ARTEMIS
+    cost: 185
+    required_tech: Archery
+    is_wonder: true
+    stats:
+      - food: 3
+      - culture: 1
+  - name: Great Lighthouse
+    # +1 Movement and +1 Sight for naval units.
+    asset_name: BUILDING_GREAT_LIGHTHOUSE
+    cost: 185
+    required_tech: Optics
+    is_wonder: true
+    coastal: true
+    stats:
+      - gold: 2
+      - culture: 1
+  - name: Mausoleum of Halicarnassus
+    # +2 Gold whenever a Great Person is expended, +1 Culture on Stone and Marble.
+    asset_name: BUILDING_MAUSOLEUM_OF_HALICARNASSUS
+    cost: 185
+    required_tech: Masonry
+    is_wonder: true
+    stats:
+      - gold: 3
+      - culture: 1
+  - name: Oracle
+    # A free Social Policy.
+    asset_name: BUILDING_ORACLE
+    cost: 250
+    required_tech: Philosophy
+    is_wonder: true
+    stats:
+      - culture: 4
+  - name: Parthenon
+    # A free Great Work of Art.
+    asset_name: BUILDING_PARTHENON
+    cost: 250
+    required_tech: Drama and Poetry
+    is_wonder: true
+    stats:
+      - culture: 4
+  - name: Petra
+    # +1 Food and +1 Production on the city's Desert tiles.
+    asset_name: BUILDING_PETRA
+    cost: 250
+    required_tech: Currency
+    is_wonder: true
+    stats:
+      - food: 2
+      - production: 2
+  - name: Great Wall
+    # Enemy land units spend all their movement on entering your territory.
+    asset_name: BUILDING_GREAT_WALL
+    cost: 250
+    required_tech: Engineering
+    is_wonder: true
+    stats:
+      - defense: 5
+      - culture: 1
+  - name: Hagia Sophia
+    # A free Great Prophet.
+    asset_name: BUILDING_HAGIA_SOPHIA
+    cost: 300
+    required_tech: Theology
+    is_wonder: true
+    stats:
+      - faith: 4
+      - culture: 1
+  - name: Borobudur
+    # Three free Missionaries.
+    asset_name: BUILDING_BOROBUDUR
+    cost: 300
+    required_tech: Theology
+    is_wonder: true
+    stats:
+      - faith: 5
+  - name: Great Mosque of Djenne
+    # Missionaries spread religion three times instead of twice.
+    asset_name: BUILDING_GREAT_MOSQUE_OF_DJENNE
+    cost: 300
+    required_tech: Theology
+    is_wonder: true
+    stats:
+      - faith: 3
+      - culture: 1
+  - name: Chichen Itza
+    # Golden Ages last 50% longer, +4 Happiness.
+    asset_name: BUILDING_CHICHEN_ITZA
+    cost: 300
+    required_tech: Civil Service
+    is_wonder: true
+    stats:
+      - morale: 10
+      - culture: 1
+  - name: Angkor Wat
+    # Tiles cost 25% less Culture and Gold to acquire in all cities.
+    asset_name: BUILDING_ANGKOR_WAT
+    cost: 400
+    required_tech: Education
+    is_wonder: true
+    stats:
+      - culture: 5
+  - name: Himeji Castle
+    # +15% Combat Strength for units fighting in friendly territory.
+    asset_name: BUILDING_HIMEJI_CASTLE
+    cost: 400
+    required_tech: Chivalry
+    is_wonder: true
+    city_health: 25
+    stats:
+      - defense: 8
+      - culture: 1
+  - name: Alhambra
+    # A free Castle in the city, and the Drill I promotion for units trained there.
+    asset_name: BUILDING_ALHAMBRA
+    cost: 400
+    required_tech: Chivalry
+    is_wonder: true
+    stats:
+      - morale: 10
+      - culture: 3
+  - name: Notre Dame
+    # +10 Happiness.
+    asset_name: BUILDING_NOTRE_DAME
+    cost: 400
+    required_tech: Physics
+    is_wonder: true
+    stats:
+      - morale: 15
+      - culture: 1
+
+  # National wonders.
+  - name: National Epic
+    # +25% Great People generation in the city.
+    asset_name: BUILDING_NATIONAL_EPIC
+    cost: 125
+    required_tech: Drama and Poetry
+    national_wonder: true
+    requires_building: Monument
+    stats:
+      - culture: 2
+  - name: Circus Maximus
+    # +5 Happiness.
+    asset_name: BUILDING_CIRCUS_MAXIMUS
+    cost: 125
+    required_tech: Horseback Riding
+    national_wonder: true
+    requires_building: Colosseum
+    stats:
+      - morale: 10
+  - name: Grand Temple
+    # Doubles the city's religious pressure, +8 Faith.
+    asset_name: BUILDING_GRAND_TEMPLE
+    cost: 125
+    required_tech: Theology
+    national_wonder: true
+    requires_building: Temple
+    stats:
+      - faith: 8
+  - name: Oxford University
+    # A free Technology, +3 Science.
+    asset_name: BUILDING_OXFORD_UNIVERSITY
+    cost: 125
+    required_tech: Education
+    national_wonder: true
+    requires_building: University
+    stats:
+      - science: 5
+  - name: Ironworks
+    # +10 Production.
+    asset_name: BUILDING_IRONWORKS
+    cost: 125
+    required_tech: Machinery
+    national_wonder: true
+    requires_building: Workshop
+    stats:
+      - production: 10

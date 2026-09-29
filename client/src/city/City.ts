@@ -53,6 +53,15 @@ export interface ProductionQueueItem {
   turns?: number;
 }
 
+// What the server offers in updateProductionOptions and updatePurchaseOptions. The purchase list never
+// has wonders, since gold can't buy them, so it leaves those sections out.
+export interface ProductionOptions {
+  units: ProductionQueueItem[];
+  buildings: ProductionQueueItem[];
+  nationalWonders?: ProductionQueueItem[];
+  wonders?: ProductionQueueItem[];
+}
+
 /**
  * City class actor handles city name, healthbar, and other attributes. It's not a tile layer.
  */

@@ -4,7 +4,10 @@ export interface BuildingData {
   name: string;
   asset_name: string;
   stats: Record<string, number>[];
+  // A great (world) wonder: one city in the whole world can have it.
   is_wonder?: boolean;
+  // A national wonder: one city per civilization can have it.
+  national_wonder?: boolean;
   // Absent for buildings never offered through a city's production queue (e.g.
   // Palace, which is only ever granted directly by applyFoundingBonuses()).
   cost?: number;
@@ -27,6 +30,7 @@ export class Building {
   private assetName: string;
   private statLine: Record<string, number>;
   private isWonder: boolean;
+  private nationalWonder: boolean;
   private cost?: number;
   private maintenance: number;
   private requiredTech?: string;
@@ -40,6 +44,7 @@ export class Building {
     this.name = data.name;
     this.assetName = data.asset_name;
     this.isWonder = data.is_wonder ?? false;
+    this.nationalWonder = data.national_wonder ?? false;
     this.cost = data.cost;
     this.maintenance = data.maintenance ?? 0;
     this.requiredTech = data.required_tech;
@@ -99,6 +104,10 @@ export class Building {
     return this.isWonder;
   }
 
+  public isNationalWonder(): boolean {
+    return this.nationalWonder;
+  }
+
   public getCost(): number | undefined {
     return this.cost;
   }
@@ -125,8 +134,8 @@ export class Building {
 
   // Reconstructs the {name, asset_name, stats} wire shape the client's own
   // Buidling class expects - the network contract doesn't change. is_wonder
-  // is only included when true, so an ordinary building's payload is
-  // byte-identical to what City.ts sent before this class existed.
+  // and national_wonder are only included when true, so an ordinary building's
+  // payload is byte-identical to what City.ts sent before this class existed.
   public toJSON(): BuildingData {
     const data: BuildingData = {
       name: this.name,
@@ -136,6 +145,9 @@ export class Building {
 
     if (this.isWonder) {
       data.is_wonder = true;
+    }
+    if (this.nationalWonder) {
+      data.national_wonder = true;
     }
 
     return data;

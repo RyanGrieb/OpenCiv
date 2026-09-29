@@ -103,12 +103,20 @@ describe('Technology', () => {
   });
 
   it.each([
+    ['Archery', ['Archer'], ['Temple of Artemis']],
+    ['Masonry', [], ['Great Pyramids', 'Mausoleum of Halicarnassus', 'Walls']],
     ['Bronze Working', ['Spearman'], ['Colossus', 'Statue of Zeus']],
-    ['Philosophy', [], ['National College', 'Temple']],
+    ['Optics', [], ['Great Lighthouse', 'Lighthouse']],
+    ['Philosophy', [], ['National College', 'Oracle', 'Temple']],
+    ['Drama and Poetry', [], ['Amphitheater', 'National Epic', 'Parthenon']],
+    ['Currency', [], ['Market', 'Mint', 'Petra']],
+    ['Theology', [], ['Borobudur', 'Garden', 'Grand Temple', 'Great Mosque of Djenne', 'Hagia Sophia']],
+    ['Civil Service', ['Pikeman'], ['Chichen Itza']],
     ['Compass', ['Galleass'], ['Harbor']],
-    ['Education', [], ['University']],
-    ['Chivalry', ['Knight'], ['Castle']],
-    ['Physics', ['Trebuchet'], []],
+    ['Education', [], ['Angkor Wat', 'Oxford University', 'University']],
+    ['Chivalry', ['Knight'], ['Alhambra', 'Castle', 'Himeji Castle']],
+    ['Machinery', ['Crossbowman'], ['Ironworks']],
+    ['Physics', ['Trebuchet'], ['Notre Dame']],
     ['Steel', ['Longswordsman'], []]
   ])('unlocks what %s unlocks in Brave New World', (tech, units, buildings) => {
     const unlocks = Technology.getUnlocks(tech);

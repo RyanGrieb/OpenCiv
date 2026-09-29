@@ -1,6 +1,6 @@
 import { GameImage, SpriteRegion } from "../../../Assets";
 import { Game } from "../../../Game";
-import { City, ProductionQueueItem } from "../../../city/City";
+import { City, ProductionOptions, ProductionQueueItem } from "../../../city/City";
 import { WebsocketClient } from "../../../network/Client";
 import { Actor } from "../../../scene/Actor";
 import { InGameScene } from "../../../scene/type/InGameScene";
@@ -28,8 +28,7 @@ export class ChooseProductionList extends ListBox {
   constructor(options: {
     city: City;
     mode: ProductionListMode;
-    units: ProductionQueueItem[];
-    buildings: ProductionQueueItem[];
+    productionOptions: ProductionOptions;
     onChosen: () => void;
   }) {
     super({
@@ -46,15 +45,12 @@ export class ChooseProductionList extends ListBox {
     this.mode = options.mode;
     this.onChosen = options.onChosen;
 
-    this.addCategory("Units");
-    for (const unit of options.units) {
-      this.addOptionRow(unit);
-    }
-
-    this.addCategory("Buildings");
-    for (const building of options.buildings) {
-      this.addOptionRow(building);
-    }
+    // Units and Buildings always show, even empty; the wonder sections only when there's one to build.
+    const { units, buildings, nationalWonders = [], wonders = [] } = options.productionOptions;
+    this.addSection("Units", units);
+    this.addSection("Buildings", buildings);
+    if (nationalWonders.length > 0) this.addSection("National Wonders", nationalWonders);
+    if (wonders.length > 0) this.addSection("Great Wonders", wonders);
   }
 
   // "Warrior (10 turns)". A no-break space keeps "(10 turns)" together when a long name wraps.
@@ -64,6 +60,13 @@ export class ChooseProductionList extends ListBox {
 
   public getMode(): ProductionListMode {
     return this.mode;
+  }
+
+  private addSection(name: string, sectionOptions: ProductionQueueItem[]) {
+    this.addCategory(name);
+    for (const option of sectionOptions) {
+      this.addOptionRow(option);
+    }
   }
 
   private addOptionRow(option: ProductionQueueItem) {

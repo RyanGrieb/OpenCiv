@@ -146,6 +146,11 @@ ScenarioRegistry.register("TechEffects", ScenarioCategory.RESEARCH, async () => 
     return module.setupTechEffectsTest;
 });
 
+ScenarioRegistry.register("Wonders", ScenarioCategory.CITIES, async () => {
+    const module = await import("./scenarios/Wonders.test");
+    return module.setupWondersTest;
+});
+
 ScenarioRegistry.register("BorderExpansion", ScenarioCategory.CITIES, async () => {
     const module = await import("./scenarios/BorderExpansion.test");
     return module.setupBorderExpansionTest;

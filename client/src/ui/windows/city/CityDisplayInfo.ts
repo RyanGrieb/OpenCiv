@@ -1,5 +1,5 @@
 import { Game } from "../../../Game";
-import { City, ProductionQueueItem } from "../../../city/City";
+import { City, ProductionOptions } from "../../../city/City";
 import { NetworkEvents, WebsocketClient } from "../../../network/Client";
 import { ActorGroup } from "../../../scene/ActorGroup";
 import { ChooseProductionList, ProductionListMode } from "./ChooseProductionList";
@@ -56,7 +56,7 @@ export class CityDisplayInfo extends ActorGroup {
       parentObject: this,
       callback: (data: any) => {
         if (data["cityName"] !== this.city.getName() || this.listMode !== "produce") return;
-        this.showChooseProductionList(data["units"], data["buildings"]);
+        this.showChooseProductionList(data);
       }
     });
 
@@ -65,7 +65,7 @@ export class CityDisplayInfo extends ActorGroup {
       parentObject: this,
       callback: (data: any) => {
         if (data["cityName"] !== this.city.getName() || this.listMode !== "purchase") return;
-        this.showChooseProductionList(data["units"], data["buildings"]);
+        this.showChooseProductionList(data);
       }
     });
   }
@@ -131,13 +131,12 @@ export class CityDisplayInfo extends ActorGroup {
     this.showProductionQueueWindow();
   }
 
-  private showChooseProductionList(units: ProductionQueueItem[], buildings: ProductionQueueItem[]) {
+  private showChooseProductionList(options: ProductionOptions) {
     this.removeActor(this.chooseProductionList);
     this.chooseProductionList = new ChooseProductionList({
       city: this.city,
       mode: this.listMode,
-      units: units,
-      buildings: buildings,
+      productionOptions: options,
       onChosen: () => this.closeList()
     });
     this.addActor(this.chooseProductionList);

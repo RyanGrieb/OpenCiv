@@ -95,6 +95,7 @@ describe('City', () => {
     jest.spyOn(Game, 'getInstance').mockReturnValue({
       getPlayerFromWebsocket: jest.fn().mockReturnValue(mockPlayer),
       getGameOptions: jest.fn().mockReturnValue({ cityStartingHealth: 200 }),
+      getPlayers: jest.fn().mockReturnValue(new Map([['TestPlayer', mockPlayer]])),
     } as any);
 
     onSpy = jest.spyOn(ServerEvents, 'on').mockImplementation(() => { });
@@ -120,6 +121,8 @@ describe('City', () => {
       buildings: [
         { type: 'building', name: 'Monument', cost: 60, goldCost: 270, turns: 60 },
       ],
+      nationalWonders: [],
+      wonders: [],
     });
   });
 
@@ -258,6 +261,123 @@ describe('City', () => {
       (mockTile as any).isCoastal = jest.fn().mockReturnValue(true);
 
       expect(buildingOptions()).toEqual(expect.arrayContaining(['Lighthouse', 'Harbor']));
+    });
+  });
+
+  describe('wonders', () => {
+    const options = () => {
+      mockPlayer.sendNetworkEvent.mockClear();
+      triggerServerEvent('requestProductionOptions', { cityName: 'TestCity' }, {} as WebSocket);
+      const event = (mockPlayer.sendNetworkEvent as jest.Mock).mock.calls[0][0];
+      const names = (list: { name: string }[]) => list.map((option) => option.name);
+      return { buildings: names(event.buildings), nationalWonders: names(event.nationalWonders), wonders: names(event.wonders) };
+    };
+    // Another city somewhere in the world, as much of one as the wonder rules look at.
+    const otherCity = (built: string[] = [], queued: string[] = []) => ({
+      hasBuilding: (name: string) => built.includes(name),
+      hasQueued: (name: string) => queued.includes(name),
+      loseWonderToAnotherCity: jest.fn(),
+    });
+    const addPlayer = (name: string, cities: object[]) => {
+      const player = { getCities: () => cities, getNotifications: () => ({ addMessage: jest.fn() }) };
+      Game.getInstance().getPlayers().set(name, player as unknown as Player);
+      return player;
+    };
+
+    beforeEach(() => {
+      mockPlayer.hasResearchedTech.mockReturnValue(true);
+      (mockPlayer as any).getName = () => 'Germany';
+      (mockPlayer as any).addToAccumulatedStat = jest.fn();
+    });
+
+    it('lists great wonders and national wonders in their own sections', () => {
+      city.addBuilding('Library');
+
+      const { buildings, nationalWonders, wonders } = options();
+
+      expect(wonders).toEqual(expect.arrayContaining(['Great Library', 'Oracle', 'Temple of Artemis']));
+      expect(nationalWonders).toEqual(['National College']);
+      expect(buildings).toContain('University');
+      expect(buildings).not.toEqual(expect.arrayContaining(['Great Library']));
+      expect(buildings).not.toContain('National College');
+    });
+
+    it('offers a national wonder only once the city has its building', () => {
+      expect(options().nationalWonders).not.toContain('National College');
+
+      city.addBuilding('Library');
+
+      expect(options().nationalWonders).toContain('National College');
+    });
+
+    it('stops offering a great wonder once any city in the world has built it', () => {
+      addPlayer('Rome', [otherCity(['Oracle'])]);
+
+      expect(options().wonders).not.toContain('Oracle');
+      expect(options().wonders).toContain('Great Library');
+    });
+
+    it("still offers a great wonder another civilization is only building", () => {
+      addPlayer('Rome', [otherCity([], ['Oracle'])]);
+
+      expect(options().wonders).toContain('Oracle');
+    });
+
+    it("builds a wonder in only one of the player's cities at a time", () => {
+      city.addBuilding('Library');
+      mockPlayer.getCities.mockReturnValue([city, otherCity([], ['Oracle', 'National College'])] as unknown as City[]);
+
+      expect(options().wonders).not.toContain('Oracle');
+      expect(options().nationalWonders).not.toContain('National College');
+    });
+
+    it('allows one of each national wonder per civilization', () => {
+      city.addBuilding('Library');
+      mockPlayer.getCities.mockReturnValue([city, otherCity(['National College'])] as unknown as City[]);
+
+      expect(options().nationalWonders).not.toContain('National College');
+    });
+
+    it('never sells a national wonder for gold', () => {
+      city.addBuilding('Library');
+      mockPlayer.sendNetworkEvent.mockClear();
+
+      triggerServerEvent('requestPurchaseOptions', { cityName: 'TestCity' }, {} as WebSocket);
+
+      const { buildings } = (mockPlayer.sendNetworkEvent as jest.Mock).mock.calls[0][0];
+      expect(buildings.map((option: { name: string }) => option.name)).not.toContain('National College');
+    });
+
+    it('takes a finished great wonder out of every other city and tells every civilization', () => {
+      const rivalCity = otherCity([], ['Oracle']);
+      const rome = addPlayer('Rome', [rivalCity]);
+      const romeMessages = { addMessage: jest.fn() };
+      rome.getNotifications = () => romeMessages;
+      mockPlayer.getCities.mockReturnValue([city] as unknown as City[]);
+      mockTile.getStats.mockReturnValue([{ production: 500 }]);
+
+      triggerServerEvent('addToProductionQueue', { cityName: 'TestCity', type: 'building', name: 'Oracle' }, {} as WebSocket);
+      triggerServerEvent('nextTurn', { turn: 2 });
+
+      expect(city.hasBuilding('Oracle')).toBe(true);
+      expect(rivalCity.loseWonderToAnotherCity).toHaveBeenCalledWith('Oracle', city);
+      expect(romeMessages.addMessage).toHaveBeenCalledWith('ICON_CULTURE', 'Oracle has been completed by Germany.');
+    });
+
+    it('refunds the production put into a wonder another city finished first, as gold', () => {
+      mockTile.getStats.mockReturnValue([{ production: 40 }]);
+      triggerServerEvent('addToProductionQueue', { cityName: 'TestCity', type: 'building', name: 'Oracle' }, {} as WebSocket);
+      triggerServerEvent('addToProductionQueue', { cityName: 'TestCity', type: 'building', name: 'Monument' }, {} as WebSocket);
+      triggerServerEvent('nextTurn', { turn: 2 });
+
+      city.loseWonderToAnotherCity('Oracle', { getName: () => 'Rome' } as unknown as City);
+
+      expect(city.getProductionQueue().map((item) => item.name)).toEqual(['Monument']);
+      expect(mockPlayer.addToAccumulatedStat).toHaveBeenCalledWith('gold', 40);
+      expect(mockNotifications.addMessage).toHaveBeenCalledWith(
+        'ICON_PRODUCTION',
+        'Rome finished Oracle first. TestCity gets 40 gold for its work.'
+      );
     });
   });
 

@@ -38,7 +38,7 @@ export function setupGoldSpendingTest(game: Game) {
         if (list?.getMode() !== mode) return [];
         return ((list as unknown as Record<string, any>)["rows"] as any[])
             .map((row) => row.getLabel().getText() as string)
-            .filter((text) => text !== "Units" && text !== "Buildings");
+            .filter((text) => !["Units", "Buildings", "National Wonders", "Great Wonders"].includes(text));
     };
 
     const spendAndWait = async (send: () => void, price: number, message: string) => {

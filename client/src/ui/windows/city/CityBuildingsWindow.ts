@@ -1,6 +1,7 @@
 import { GameImage, SpriteRegion } from "../../../Assets";
 import { Game } from "../../../Game";
 import { City } from "../../../city/City";
+import { BuildingCategory, Buidling } from "../../../city/Building";
 import { Actor } from "../../../scene/Actor";
 import { Strings } from "../../../util/Strings";
 import { ButtonSize } from "../../components/Button";
@@ -52,8 +53,10 @@ export class CityBuildingsWindow extends ListBox {
     this.citizenMgmtRadioButtons = [];
 
     this.addCitizenManagementRows();
-    // TODO: Great people progress and wonders categories.
-    this.addBuildingRows();
+    // TODO: Great people progress category.
+    this.addBuildingRows("Buildings");
+    this.addBuildingRows("National Wonders");
+    this.addBuildingRows("Great Wonders");
   }
 
   private addCitizenManagementRows() {
@@ -110,40 +113,48 @@ export class CityBuildingsWindow extends ListBox {
     return radioButton;
   }
 
-  private addBuildingRows() {
-    this.addCategory("Buildings");
+  // The city's buildings in that category. Buildings always shows; the wonder sections only once the
+  // city has one.
+  private addBuildingRows(category: BuildingCategory) {
+    const buildings = this.city.getBuildings().filter((building) => building.getCategory() === category);
+    if (category !== "Buildings" && buildings.length === 0) return;
 
-    for (const building of this.city.getBuildings()) {
-      const rowX = this.getNextRowPosition().x;
-      const rowY = this.getNextRowPosition().y;
-      const textX = rowX + 8 + UITheme.ICON_SIZE + 8;
-
-      this.addRow({
-        category: "Buildings",
-        text: building.getName(),
-        textX: textX,
-        textY: rowY + 8,
-        rowHeight: BUILDING_ROW_HEIGHT,
-        actorIcons: [
-          new Actor({
-            image: Game.getInstance().getImage(GameImage.SPRITESHEET),
-            spriteRegion: building.getSpriteRegion(),
-            x: rowX + 8,
-            y: rowY + BUILDING_ROW_HEIGHT / 2 - UITheme.ICON_SIZE / 2,
-            z: CityScreen.Z,
-            width: UITheme.ICON_SIZE,
-            height: UITheme.ICON_SIZE,
-            cameraApplies: false
-          }),
-          ...this.buildStatIconActors(
-            building.getStatLine(),
-            textX,
-            rowY + 40,
-            CityScreen.BUILDINGS_WINDOW_WIDTH - (textX - rowX) - 10
-          )
-        ]
-      });
+    this.addCategory(category);
+    for (const building of buildings) {
+      this.addBuildingRow(category, building);
     }
+  }
+
+  private addBuildingRow(category: BuildingCategory, building: Buidling) {
+    const rowX = this.getNextRowPosition().x;
+    const rowY = this.getNextRowPosition().y;
+    const textX = rowX + 8 + UITheme.ICON_SIZE + 8;
+
+    this.addRow({
+      category,
+      text: building.getName(),
+      textX: textX,
+      textY: rowY + 8,
+      rowHeight: BUILDING_ROW_HEIGHT,
+      actorIcons: [
+        new Actor({
+          image: Game.getInstance().getImage(GameImage.SPRITESHEET),
+          spriteRegion: building.getSpriteRegion(),
+          x: rowX + 8,
+          y: rowY + BUILDING_ROW_HEIGHT / 2 - UITheme.ICON_SIZE / 2,
+          z: CityScreen.Z,
+          width: UITheme.ICON_SIZE,
+          height: UITheme.ICON_SIZE,
+          cameraApplies: false
+        }),
+        ...this.buildStatIconActors(
+          building.getStatLine(),
+          textX,
+          rowY + 40,
+          CityScreen.BUILDINGS_WINDOW_WIDTH - (textX - rowX) - 10
+        )
+      ]
+    });
   }
 
   // Builds icon+value actors for a building's stats, wrapping lines by measured width.
