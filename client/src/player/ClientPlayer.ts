@@ -706,19 +706,16 @@ export class ClientPlayer extends AbstractPlayer {
   private updateHoveredTile(mouseX: number, mouseY: number) {
     if (!this.hoveredTile || isNaN(mouseX) || isNaN(mouseY)) return;
 
-    let zoom = Game.getInstance().getCurrentScene().getCamera().getZoomAmount();
-
-    let camX = -Game.getInstance().getCurrentScene().getCamera().getX();
-    let camY = -Game.getInstance().getCurrentScene().getCamera().getY();
-
-    // Adjust mouse position base on where the camera is located
-    mouseX += camX;
-    mouseY += camY;
-    mouseX /= zoom;
-    mouseY /= zoom;
+    // Where on the map the pointer is, through the flat map's camera or the globe's.
+    const world = Game.getInstance().getCurrentScene().getCamera().screenToWorld(mouseX, mouseY);
+    if (!world) {
+      this.hoveredTile.setRepresentedTile(undefined);
+      return;
+    }
 
     // The pointer can sit on any repeated copy; fold it onto the one the tiles were built at.
-    mouseX = MapWrap.wrapWorldX(mouseX);
+    mouseX = MapWrap.wrapWorldX(world[0]);
+    mouseY = world[1];
 
     let mouseVector = new Vector(mouseX, mouseY);
     let mouseExtremeVector = new Vector(mouseX + 1000, mouseY);

@@ -7,7 +7,8 @@ import { PlanetTile } from "./PlanetTerrain";
  * Turns a HexSphere and its tiles into two meshes - one draw call each, however many tiles:
  * the terrain, each tile a fan of triangles with its hex sprite stretched over it, and the overlays
  * (hills, forests, mountains, resources), each a flat 32x32 quad lying on its tile like the 2D map
- * draws them, so a mountain's peak still pokes over the tile above it.
+ * draws them, so a mountain's peak still pokes over the tile above it. Tiles given as null are left
+ * out (the game's globe draws the map itself and only the polar caps this way).
  */
 export class PlanetMesh {
   // The terrain sprites' hex corners in sprite pixels, counter-clockwise from the bottom corner
@@ -31,7 +32,7 @@ export class PlanetMesh {
   private readonly materials: THREE.Material[] = [];
   private readonly geometries: THREE.BufferGeometry[] = [];
 
-  constructor(sphere: HexSphere, tiles: PlanetTile[], radius: number, tint?: THREE.ColorRepresentation) {
+  constructor(sphere: HexSphere, tiles: (PlanetTile | null)[], radius: number, tint?: THREE.ColorRepresentation) {
     const atlas = PlanetAtlas.getInstance();
     const rotations = new Float32Array(sphere.tileCount);
     const terrain = this.buildTerrain(sphere, tiles, radius, rotations, atlas);
@@ -186,13 +187,19 @@ export class PlanetMesh {
   // Fills `rotations` with how far each tile is turned from north-up, which its overlays follow.
   private buildTerrain(
     sphere: HexSphere,
-    tiles: PlanetTile[],
+    tiles: (PlanetTile | null)[],
     radius: number,
     rotations: Float32Array,
     atlas: PlanetAtlas
   ) {
-    const cornerTotal = sphere.cornerStart[sphere.tileCount];
-    const vertexCount = sphere.tileCount + cornerTotal;
+    let cornerTotal = 0;
+    let tileTotal = 0;
+    for (let t = 0; t < sphere.tileCount; t++) {
+      if (!tiles[t]) continue;
+      cornerTotal += sphere.cornerStart[t + 1] - sphere.cornerStart[t];
+      tileTotal++;
+    }
+    const vertexCount = tileTotal + cornerTotal;
     const positions = new Float32Array(vertexCount * 3);
     const normals = new Float32Array(vertexCount * 3);
     const uvs = new Float32Array(vertexCount * 2);
@@ -203,6 +210,7 @@ export class PlanetMesh {
     let vertex = 0;
     let index = 0;
     for (let t = 0; t < sphere.tileCount; t++) {
+      if (!tiles[t]) continue;
       const cx = sphere.centers[t * 3];
       const cy = sphere.centers[t * 3 + 1];
       const cz = sphere.centers[t * 3 + 2];
@@ -265,13 +273,13 @@ export class PlanetMesh {
 
   private buildOverlays(
     sphere: HexSphere,
-    tiles: PlanetTile[],
+    tiles: (PlanetTile | null)[],
     radius: number,
     rotations: Float32Array,
     atlas: PlanetAtlas
   ) {
     let quadCount = 0;
-    for (const tile of tiles) quadCount += tile.overlays.length;
+    for (const tile of tiles) quadCount += tile?.overlays.length ?? 0;
     const positions = new Float32Array(quadCount * 4 * 3);
     const normals = new Float32Array(quadCount * 4 * 3);
     const uvs = new Float32Array(quadCount * 4 * 2);
@@ -287,7 +295,7 @@ export class PlanetMesh {
     let quad = 0;
     for (let t = 0; t < sphere.tileCount; t++) {
       const tile = tiles[t];
-      if (tile.overlays.length === 0) continue;
+      if (!tile || tile.overlays.length === 0) continue;
 
       const cx = sphere.centers[t * 3];
       const cy = sphere.centers[t * 3 + 1];

@@ -226,6 +226,11 @@ ScenarioRegistry.register("SettlerProduction", ScenarioCategory.CITIES, async ()
     return module.setupSettlerProductionTest;
 });
 
+ScenarioRegistry.register("GlobeMap", ScenarioCategory.MAP, async () => {
+    const module = await import("./scenarios/GlobeMap.test");
+    return module.setupGlobeMapTest;
+});
+
 ScenarioRegistry.register("HexPlanet", ScenarioCategory.MAP, async () => {
     const module = await import("./scenarios/HexPlanet.test");
     return module.setupHexPlanetTest;

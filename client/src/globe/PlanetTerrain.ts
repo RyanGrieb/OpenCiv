@@ -176,7 +176,7 @@ export class PlanetTerrain {
   }
 
   // One of a sprite's looks: the plain one for half the tiles, else one of its numbered variants.
-  private static variant(name: string, hash: number): SpriteRegion {
+  public static variant(name: string, hash: number): SpriteRegion {
     // Variants are numbered from 2, the plain sprite being the first - as Tile.pickVariant() does.
     let variantCount = 0;
     while (PlanetTerrain.region(`${name}_${variantCount + 2}`) !== undefined) variantCount++;

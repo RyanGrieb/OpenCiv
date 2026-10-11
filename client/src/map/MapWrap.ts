@@ -33,12 +33,14 @@ export class MapWrap {
     const camera = game.getCurrentScene()?.getCamera();
     if (!camera) return MapWrap.NO_OFFSETS;
 
-    const zoom = camera.getZoomAmount();
+    // The game canvas's view, or the globe's - whichever the map is drawn into.
+    const view = camera.getWorldView();
+    const zoom = view.zoom;
     if (!(zoom > 0)) return MapWrap.NO_OFFSETS;
 
     const width = MapWrap.worldWidth;
-    const viewLeft = -camera.getX() / zoom;
-    const viewRight = (game.getWidth() / game.getDPR() - camera.getX()) / zoom;
+    const viewLeft = -view.x / zoom;
+    const viewRight = (view.context.canvas.width / view.pixelRatio - view.x) / zoom;
 
     const first = Math.floor(viewLeft / width);
     const last = Math.floor(viewRight / width);

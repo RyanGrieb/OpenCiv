@@ -71,8 +71,13 @@ export abstract class Scene {
 
     const game = Game.getInstance();
     const canvasContext = game.getCanvasContext();
-    // One entry ([0]) unless the map wraps, in which case the world repeats to fill the viewport.
-    const worldOffsets = MapWrap.getDrawOffsets();
+    // Each canvas the map is drawn into - the game canvas, unless the map is a globe (see
+    // Camera.getWorldViews()) - with where on it the world repeats: one entry ([0]) unless the map
+    // wraps, in which case the world repeats to fill the view.
+    const passes = (this.camera?.getWorldViews() ?? [undefined]).map((view, index) => {
+      this.camera?.useWorldView(index);
+      return { context: view?.context ?? canvasContext, offsets: MapWrap.getDrawOffsets() };
+    });
 
     this.sceneObjects.forEach((object: SceneObject) => {
       if (!Scene.isWorldObject(object)) {
@@ -82,12 +87,17 @@ export abstract class Scene {
 
       if (this.worldHidden) return;
 
-      for (const offsetX of worldOffsets) {
-        game.setWorldDrawOffsetX(offsetX);
-        object.draw(canvasContext);
-      }
+      passes.forEach((pass, index) => {
+        this.camera?.useWorldView(index);
+        for (const offsetX of pass.offsets) {
+          game.setWorldDrawOffsetX(offsetX);
+          object.draw(pass.context);
+        }
+      });
       game.setWorldDrawOffsetX(0);
     });
+
+    this.camera?.presentWorld(!this.worldHidden);
   }
 
   // Skips drawing camera-space objects (the map) while a full-screen opaque window covers them.

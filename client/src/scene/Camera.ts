@@ -8,6 +8,19 @@ export interface CameraOptions {
   initial_position?: [number, number];
 }
 
+/**
+ * Where a scene's camera-space objects (the map and everything on it) are drawn, and where on it: a
+ * world point lands at canvas pixel (world * zoom + x) * pixelRatio, on each axis. The game canvas
+ * for the flat map; the globe's own canvas when the map is a globe (see GlobeCamera).
+ */
+export interface WorldView {
+  context: CanvasRenderingContext2D;
+  x: number;
+  y: number;
+  zoom: number;
+  pixelRatio: number;
+}
+
 export class Camera {
   //TODO: Implement zoom: https://stackoverflow.com/questions/5189968/zoom-canvas-to-mouse-cursor/5526721#5526721
 
@@ -30,6 +43,7 @@ export class Camera {
   private wasdControls: boolean;
   private mouseControls: boolean;
   private arrowControls: boolean;
+  private readonly worldView: WorldView = { context: undefined, x: 0, y: 0, zoom: 1, pixelRatio: 1 };
 
   public static fromCamera(camera: Camera) {
     const newCamera = new Camera({
@@ -68,7 +82,7 @@ export class Camera {
     this.locked = false;
 
     const scene = Game.getInstance().getCurrentScene();
-    scene.on("keydown", (options) => {
+    this.onSceneInput("keydown", (options) => {
       if (this.keysHeld.includes(options.key) || this.locked) {
         return;
       }
@@ -114,46 +128,47 @@ export class Camera {
       }
     });
 
+    // Not only while this is the scene's camera: a key pressed before switching to the other camera
+    // still has to undo its pan when it's let go. Keys it never saw go down are left alone.
     scene.on("keyup", (options) => {
-      if (this.wasdControls) {
-        this.keysHeld = this.keysHeld.filter((element) => element !== options.key); // Remove key from held lits
+      if (!this.keysHeld.includes(options.key)) return;
+      this.keysHeld = this.keysHeld.filter((element) => element !== options.key); // Remove key from held lits
 
+      if (this.wasdControls) {
         if (options.key == "a" || options.key == "A") {
-          scene.getCamera().addVel(-5, 0);
+          this.addVel(-5, 0);
         }
         if (options.key == "d" || options.key == "D") {
-          scene.getCamera().addVel(5, 0);
+          this.addVel(5, 0);
         }
 
         if (options.key == "w" || options.key == "W") {
-          scene.getCamera().addVel(0, -5);
+          this.addVel(0, -5);
         }
         if (options.key == "s" || options.key == "S") {
-          scene.getCamera().addVel(0, 5);
+          this.addVel(0, 5);
         }
       }
 
       if (this.arrowControls) {
-        this.keysHeld = this.keysHeld.filter((element) => element !== options.key); // Remove key from held lits
-
         if (options.key == "ArrowLeft") {
-          scene.getCamera().addVel(-5, 0);
+          this.addVel(-5, 0);
         }
         if (options.key == "ArrowRight") {
-          scene.getCamera().addVel(5, 0);
+          this.addVel(5, 0);
         }
 
         if (options.key == "ArrowUp") {
-          scene.getCamera().addVel(0, -5);
+          this.addVel(0, -5);
         }
         if (options.key == "ArrowDown") {
-          scene.getCamera().addVel(0, 5);
+          this.addVel(0, 5);
         }
       }
     });
 
     if (options.mouse_controls) {
-      scene.on("mousedown", (options) => {
+      this.onSceneInput("mousedown", (options) => {
         if (options.button !== 0 || this.locked) {
           return;
         }
@@ -163,19 +178,19 @@ export class Camera {
         this.mouseHeld = true;
       });
 
-      scene.on("mousemove", (options) => {
+      this.onSceneInput("mousemove", (options) => {
         if (this.mouseHeld) {
           scene.getCamera().setTargetPosition(options.x - this.lastMouseX, options.y - this.lastMouseY);
         }
       });
 
-      scene.on("mouseup", (options) => {
+      this.onSceneInput("mouseup", (options) => {
         this.lastMouseX = options.x - scene.getCamera().getX();
         this.lastMouseY = options.y - scene.getCamera().getY();
         this.mouseHeld = false;
       });
 
-      scene.on("wheel", (options) => {
+      this.onSceneInput("wheel", (options) => {
         if (this.locked) {
           return;
         }
@@ -191,7 +206,7 @@ export class Camera {
         this.lastMouseY = options.y - scene.getCamera().getY();
       });
 
-      scene.on("mouseleave", (options) => {
+      this.onSceneInput("mouseleave", (options) => {
         this.lastMouseX = options.x - scene.getCamera().getX();
         this.lastMouseY = options.y - scene.getCamera().getY();
         this.mouseHeld = false;
@@ -336,5 +351,74 @@ export class Camera {
 
   public isLocked() {
     return this.locked;
+  }
+
+  /** The world point the camera is headed to center on. */
+  public getTargetLocation(): [number, number] {
+    const game = Game.getInstance();
+    return [
+      (game.getWidth() / game.getDPR() / 2 - this.targetX) / this.targetZoomAmount,
+      (game.getHeight() / game.getDPR() / 2 - this.targetY) / this.targetZoomAmount
+    ];
+  }
+
+  public getTargetZoomAmount() {
+    return this.targetZoomAmount;
+  }
+
+  /** zoomToLocation() without the glide. */
+  public jumpToLocation(x: number, y: number, zoomAmount: number) {
+    this.zoomToLocation(x, y, zoomAmount);
+    this.x = this.targetX;
+    this.y = this.targetY;
+    this.zoomAmount = this.targetZoomAmount;
+  }
+
+  /**
+   * Every canvas the map is drawn into this frame: the game canvas, for the flat map. A globe draws
+   * it into two of its own (see GlobeView), so the scene draws it once for each, making each one
+   * getWorldView()'s answer in turn with useWorldView().
+   */
+  public getWorldViews(): WorldView[] {
+    return [this.getWorldView()];
+  }
+
+  public useWorldView(index: number) {}
+
+  /** Where this frame's map is drawn, and how (see WorldView): straight onto the game canvas. */
+  public getWorldView(): WorldView {
+    const game = Game.getInstance();
+    const view = this.worldView;
+    view.context = game.getCanvasContext();
+    view.x = this.x;
+    view.y = this.y;
+    view.zoom = this.zoomAmount;
+    view.pixelRatio = game.getDPR();
+    return view;
+  }
+
+  /** The world point under a point on screen (in CSS pixels), or undefined where there's none (beside the globe). */
+  public screenToWorld(screenX: number, screenY: number): [number, number] | undefined {
+    return [(screenX - this.x) / this.zoomAmount, (screenY - this.y) / this.zoomAmount];
+  }
+
+  /**
+   * Whether the map is drawn somewhere other than the game canvas (onto the globe). The game canvas
+   * is then cleared to see-through each frame rather than filled, so the map behind it shows.
+   */
+  public rendersWorldOffscreen() {
+    return false;
+  }
+
+  /** Called once the scene has drawn this frame's map; `visible` is false while a window covers it all. */
+  public presentWorld(visible: boolean) {}
+
+  // Listens for a scene input event while this is the scene's camera: InGameScene keeps one for the
+  // flat map and one for the globe, and only the one in use moves.
+  protected onSceneInput<T = any>(eventName: string, callback: (options: T) => void) {
+    const scene = Game.getInstance().getCurrentScene();
+    scene.on<T>(eventName, (options) => {
+      if (scene.getCamera() === this) callback(options);
+    });
   }
 }

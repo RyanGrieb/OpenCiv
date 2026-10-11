@@ -1,7 +1,9 @@
 import { GameImage, SpriteRegion } from "../../Assets";
 import { Game } from "../../Game";
 import { City } from "../../city/City";
+import type { GlobeCamera } from "../../globe/GlobeCamera";
 import { GameMap, MapLoadProgressEvent } from "../../map/GameMap";
+import { MapWrap } from "../../map/MapWrap";
 import { Tile } from "../../map/Tile";
 import { NetworkEvents, WebsocketClient } from "../../network/Client";
 import { Notifications } from "../../notification/Notifications";
@@ -54,6 +56,14 @@ export class InGameScene extends Scene {
   private openUIElement: GameplayUIElement;
   // Covers the map until every tile from the initial sync is drawn - undefined once it has been.
   private loadingScreen: LoadingScreen;
+  // The flat map's camera, and the globe's once the map has been shown as one (see setGlobeView()).
+  private flatCamera: Camera;
+  private globeCamera: GlobeCamera;
+
+  // Loaded as ?test=true&scenario=<name> (see Index.ts).
+  private static isScenarioRun() {
+    return new URLSearchParams(window.location.search).get("test") === "true";
+  }
 
   public onInitialize(): void {
     this.players = [];
@@ -68,6 +78,7 @@ export class InGameScene extends Scene {
     } else {
       this.restoreCamera();
     }
+    this.flatCamera = this.getCamera();
 
     // Carries on from the loading scene's screen until the map is drawn, with the map itself hidden
     // so its half-built chunks never show.
@@ -86,6 +97,9 @@ export class InGameScene extends Scene {
         } else {
           this.toggleEscMenu();
         }
+      }
+      if ((options.key === "g" || options.key === "G") && !this.getCamera().isLocked()) {
+        this.setGlobeView(!this.isGlobeView());
       }
     });
 
@@ -131,6 +145,8 @@ export class InGameScene extends Scene {
       loadingScreen.finish("Entering the world...", () => this.removeActor(loadingScreen));
       LoadingScreen.discardBackground();
       this.setWorldHidden(false);
+      // Games are played on the globe. Scenarios point at tiles on the flat map, so they keep it unless they switch.
+      if (!InGameScene.isScenarioRun()) this.setGlobeView(true);
 
       this.notifications = new Notifications(this.clientPlayer);
       this.notifications.onChange(() => this.refreshNextTurnButton());
@@ -247,6 +263,10 @@ export class InGameScene extends Scene {
   }
 
   public onDestroyed() {
+    // The scene keeps its camera for when it's next shown (see restoreCamera()), which is the flat one.
+    if (this.isGlobeView()) this.setCamera(this.flatCamera);
+    this.globeCamera?.dispose();
+    this.globeCamera = undefined;
     super.onDestroyed(this);
     this.escMenu = undefined;
     this.settingsGroup = undefined;
@@ -397,6 +417,38 @@ export class InGameScene extends Scene {
     if (this.clientPlayer.hasRequestedNextTurn()) return "Waiting...";
 
     return this.notifications.getTurnBlocker()?.turnBlockingLabel ?? "Next Turn";
+  }
+
+  /**
+   * Shows the map as a globe, or flat (G switches), looking at the same place. Only a map that wraps
+   * east-west closes into a globe. The globe's code loads the first time, so the switch may come a
+   * moment after the call - awaiting it waits for that.
+   */
+  public async setGlobeView(globe: boolean) {
+    if (globe === this.isGlobeView() || (globe && !MapWrap.isWrapped())) return;
+
+    if (globe && !this.globeCamera) {
+      const { GlobeCamera } = await import("../../globe/GlobeCamera");
+      // The game was left, or the globe made, while it loaded.
+      if (this.getCamera() !== this.flatCamera || this.globeCamera) return;
+      this.globeCamera = new GlobeCamera(GameMap.getInstance().getWidth(), GameMap.getInstance().getHeight());
+    }
+
+    const from = this.getCamera();
+    const to = globe ? this.globeCamera : this.flatCamera;
+    const [x, y] = from.getTargetLocation();
+    // Zoomed out to the solar system, the flat map comes back at its usual zoom rather than a speck.
+    const zoomAmount = globe ? from.getTargetZoomAmount() : Math.max(1, from.getTargetZoomAmount());
+    to.jumpToLocation(x, y, zoomAmount);
+    to.lock(from.isLocked());
+    this.globeCamera.setVisible(globe);
+    // The globe's polar caps meet the map's top and bottom rows, where the flat map has clouds.
+    GameMap.getInstance().getFogOfWar()?.setEdgesClouded(!globe);
+    this.setCamera(to);
+  }
+
+  public isGlobeView() {
+    return !!this.globeCamera && this.getCamera() === this.globeCamera;
   }
 
   public focusOnTile(tile: Tile, zoomAmount: number) {

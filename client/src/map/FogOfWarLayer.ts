@@ -69,6 +69,8 @@ export class FogOfWarLayer extends Actor {
   private readonly cloudContext: CanvasRenderingContext2D;
   private readonly cloudPixels: ImageData;
   private cloudReach: Uint8Array | undefined;
+  // Whether past the map's edges reads as unexplored, so clouds cover its outline (see setEdgesClouded()).
+  private edgesClouded = true;
   // Tile-grid bounds of everything changed since the last rebuild, or null when up to date.
   private dirty: { minX: number; minY: number; maxX: number; maxY: number } | null = null;
 
@@ -165,6 +167,19 @@ export class FogOfWarLayer extends Actor {
     return this.tileStates[gridX + gridY * this.gridWidth];
   }
 
+  /**
+   * Whether clouds cover the map's edges, as on the flat map, where nothing but background lies past
+   * them. The globe turns them off: its polar caps meet the top and bottom rows, which then look like
+   * any other, with past them taking the state of the tile they border.
+   */
+  public setEdgesClouded(clouded: boolean) {
+    if (this.edgesClouded === clouded) return;
+
+    this.edgesClouded = clouded;
+    this.markDirty(0, 0);
+    this.markDirty(this.gridWidth - 1, this.gridHeight - 1);
+  }
+
   /** The overlay's color at a world position, as RGBA 0-255: the clouds laid over the remembered-tile tint. */
   public getPixelAt(worldX: number, worldY: number): number[] {
     if (this.dirty) this.rebuild();
@@ -190,7 +205,7 @@ export class FogOfWarLayer extends Actor {
 
   public draw(canvasContext: CanvasRenderingContext2D) {
     const game = Game.getInstance();
-    if (canvasContext !== game.getCanvasContext()) return;
+    if (!game.isWorldContext(canvasContext)) return;
 
     if (this.dirty) this.rebuild();
 
@@ -351,13 +366,30 @@ export class FogOfWarLayer extends Actor {
     );
   }
 
-  // Past the map's edge reads as unexplored, so the outermost tiles fade out like any unexplored border.
+  // Past the map's edge reads as unexplored, so the outermost tiles fade out like any unexplored
+  // border - unless the edges aren't clouded, when it reads as the tile it borders.
   private stateOfCell(cellX: number, cellY: number): number {
+    if (!this.edgesClouded) return this.tileStates[this.borderingTileIndex(cellX, cellY)];
     if (cellY < 0 || cellY >= this.cellsHigh) return FogOfWarLayer.UNEXPLORED;
     if (!this.wrapped && (cellX < 0 || cellX >= this.cellsWide)) return FogOfWarLayer.UNEXPLORED;
 
     const tileIndex = this.cellTiles[this.wrapCellX(cellX) + cellY * this.cellsWide];
     return tileIndex === FogOfWarLayer.OFF_MAP ? FogOfWarLayer.UNEXPLORED : this.tileStates[tileIndex];
+  }
+
+  // The tile a cell is in, or past the map's edge, the nearest one along it.
+  private borderingTileIndex(cellX: number, cellY: number): number {
+    const inside = cellY >= 0 && cellY < this.cellsHigh && (this.wrapped || (cellX >= 0 && cellX < this.cellsWide));
+    const tileIndex = inside ? this.cellTiles[this.wrapCellX(cellX) + cellY * this.cellsWide] : FogOfWarLayer.OFF_MAP;
+    if (tileIndex !== FogOfWarLayer.OFF_MAP) return tileIndex;
+
+    const worldX = (cellX + 0.5) * FogOfWarLayer.WORLD_PIXELS_PER_CELL;
+    const worldY = (cellY + 0.5) * FogOfWarLayer.WORLD_PIXELS_PER_CELL;
+    const nearestRow = Math.round((worldY - FogOfWarLayer.TILE_CENTER_OFFSET) / FogOfWarLayer.TILE_STRIDE_Y);
+    const row = Math.min(Math.max(nearestRow, 0), this.gridHeight - 1);
+    const rowOffset = row % 2 !== 0 ? FogOfWarLayer.TILE_STRIDE_X / 2 : 0;
+    const column = Math.round((worldX - FogOfWarLayer.TILE_CENTER_OFFSET - rowOffset) / FogOfWarLayer.TILE_STRIDE_X);
+    return this.wrapColumn(column) + row * this.gridWidth;
   }
 
   // The remembered-tile tint from the blurred fogged amounts. The clouds cover it where they overlap.

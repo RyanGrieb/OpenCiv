@@ -155,7 +155,7 @@ export class Actor implements SceneObject {
     const scene = game.getCurrentScene();
     const camera = scene?.getCamera();
 
-    if (camera && this.cameraApplies && canvasContext === game.getCanvasContext()) {
+    if (camera && this.cameraApplies && canvasContext === camera.getWorldView().context) {
       // Draw a purple border representing the bounding box (for debugging)
       if (this.debugMe) {
         canvasContext.save();
@@ -171,9 +171,8 @@ export class Actor implements SceneObject {
         canvasContext.restore();
       }
 
-      const gameCanvas = game.getCanvas();
-      const canvasWidth = gameCanvas.width;
-      const canvasHeight = gameCanvas.height;
+      const canvasWidth = canvasContext.canvas.width;
+      const canvasHeight = canvasContext.canvas.height;
 
       const screenX = this.getScreenPixelX();
       const screenY = this.getScreenPixelY();
@@ -252,11 +251,9 @@ export class Actor implements SceneObject {
     let localX = x - this.x;
 
     if (this.cameraApplies && camera) {
-      const zoom = camera.getZoomAmount();
-
-      // Adjust the x and y coordinates relative to the camera
-      x = (x - camera.getX()) / zoom;
-      y = (y - camera.getY()) / zoom;
+      const world = camera.screenToWorld(x, y);
+      if (!world) return false;
+      [x, y] = world;
 
       // A wrapped world repeats this actor every world-width across, so test the nearest copy.
       localX = MapWrap.wrapWorldX(x - this.x);
@@ -292,52 +289,41 @@ export class Actor implements SceneObject {
   }
 
   /**
-   * Returns the X coordinate of the actor on the screen (in device pixels), accounting for camera and zoom.
+   * Returns the X coordinate of the actor in device pixels on the canvas the map is drawn into (the
+   * screen, or the globe's canvas), accounting for camera and zoom.
    */
   public getScreenPixelX(): number {
     const game = Game.getInstance();
-    const scene = game.getCurrentScene();
-    const camera = scene?.getCamera();
-    const dpr = game.getDPR();
-    const zoom = camera.getZoomAmount();
+    const view = game.getCurrentScene().getCamera().getWorldView();
     // Includes the wrap offset so each repeated copy culls against the viewport on its own.
-    return ((this.x + game.getWorldDrawOffsetX()) * zoom + camera.getX()) * dpr;
+    return ((this.x + game.getWorldDrawOffsetX()) * view.zoom + view.x) * view.pixelRatio;
   }
 
   /**
-   * Returns the Y coordinate of the actor on the screen (in device pixels), accounting for camera and zoom.
+   * Returns the Y coordinate of the actor in device pixels on the canvas the map is drawn into,
+   * accounting for camera and zoom.
    */
   public getScreenPixelY(): number {
-    const game = Game.getInstance();
-    const scene = game.getCurrentScene();
-    const camera = scene?.getCamera();
-    const dpr = game.getDPR();
-    const zoom = camera.getZoomAmount();
-    return (this.y * zoom + camera.getY()) * dpr;
+    const view = Game.getInstance().getCurrentScene().getCamera().getWorldView();
+    return (this.y * view.zoom + view.y) * view.pixelRatio;
   }
 
   /**
-   * Returns the width of the actor on the screen (in device pixels), accounting for camera and zoom.
+   * Returns the width of the actor in device pixels on the canvas the map is drawn into, accounting
+   * for camera and zoom.
    */
   public getScreenPixelWidth(): number {
-    const game = Game.getInstance();
-    const scene = game.getCurrentScene();
-    const camera = scene?.getCamera();
-    const dpr = game.getDPR();
-    const zoom = camera.getZoomAmount();
-    return this.width * zoom * dpr;
+    const view = Game.getInstance().getCurrentScene().getCamera().getWorldView();
+    return this.width * view.zoom * view.pixelRatio;
   }
 
   /**
-   * Returns the height of the actor on the screen (in device pixels), accounting for camera and zoom.
+   * Returns the height of the actor in device pixels on the canvas the map is drawn into, accounting
+   * for camera and zoom.
    */
   public getScreenPixelHeight(): number {
-    const game = Game.getInstance();
-    const scene = game.getCurrentScene();
-    const camera = scene?.getCamera();
-    const dpr = game.getDPR();
-    const zoom = camera.getZoomAmount();
-    return this.height * zoom * dpr;
+    const view = Game.getInstance().getCurrentScene().getCamera().getWorldView();
+    return this.height * view.zoom * view.pixelRatio;
   }
 
   public getWidth(): number {

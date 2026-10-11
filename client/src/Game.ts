@@ -306,7 +306,12 @@ export class Game {
   public gameLoop() {
     if (!this.runGameLoop) return;
 
-    this.canvasContext.fillRect(0, 0, this.canvas.width, this.canvas.height);
+    // A globe is drawn on its own canvas behind this one, which has to be see-through to show it.
+    if (this.currentScene.getCamera()?.rendersWorldOffscreen()) {
+      this.canvasContext.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    } else {
+      this.canvasContext.fillRect(0, 0, this.canvas.width, this.canvas.height);
+    }
 
     if (Date.now() - this.lastTimeUpdate >= 1000) {
       this.fps = this.countedFrames;
@@ -566,15 +571,21 @@ export class Game {
 
   // World space for the current camera, plus the shift that repeats a wrapped map across its seam.
   public applyCameraTransform(canvasContext: CanvasRenderingContext2D) {
-    const camera = this.currentScene.getCamera();
-    const zoom = camera.getZoomAmount();
-    const dpr = this.dpr || 1;
+    const view = this.currentScene.getCamera().getWorldView();
+    const zoom = view.zoom;
+    const pixelRatio = view.pixelRatio || 1;
 
     // Whole device pixels, or each copy's edge antialiases against the background as a seam.
-    const translateX = Math.round((camera.getX() + this.worldDrawOffsetX * zoom) * dpr);
-    const translateY = Math.round(camera.getY() * dpr);
+    const translateX = Math.round((view.x + this.worldDrawOffsetX * zoom) * pixelRatio);
+    const translateY = Math.round(view.y * pixelRatio);
 
-    canvasContext.setTransform(zoom * dpr, 0, 0, zoom * dpr, translateX, translateY);
+    canvasContext.setTransform(zoom * pixelRatio, 0, 0, zoom * pixelRatio, translateX, translateY);
+  }
+
+  // Whether drawing onto this context goes through the camera: it's the one the map is drawn into.
+  public isWorldContext(canvasContext: CanvasRenderingContext2D) {
+    const camera = this.currentScene.getCamera();
+    return !!camera && canvasContext === camera.getWorldView().context;
   }
 
   public drawImageFromActor(actor: Actor, context: CanvasRenderingContext2D) {
@@ -587,8 +598,8 @@ export class Game {
 
     canvasContext.save();
 
-    // Only apply camera to the Game's main canvas context.
-    if (actor.isCameraApplied() && this.currentScene.getCamera() && canvasContext === this.canvasContext) {
+    // Only apply camera where the map is drawn.
+    if (actor.isCameraApplied() && this.isWorldContext(canvasContext)) {
       this.applyCameraTransform(canvasContext);
     }
 
@@ -686,8 +697,8 @@ export class Game {
     canvasContext.save();
 
     canvasContext.textBaseline = "top";
-    // Only apply camera to the Game's main canvas context. (canvasContext === this.canvasContext)
-    if (textOptions.applyCamera && this.currentScene.getCamera() && canvasContext === this.canvasContext) {
+    // Only apply camera where the map is drawn.
+    if (textOptions.applyCamera && this.isWorldContext(canvasContext)) {
       this.applyCameraTransform(canvasContext);
     }
 
@@ -724,8 +735,8 @@ export class Game {
   public drawLine(line: Line, canvasContext: CanvasRenderingContext2D) {
     canvasContext.save();
 
-    // Only apply camera to the Game's main canvas context.
-    if (this.currentScene.getCamera() && canvasContext === this.canvasContext) {
+    // Only apply camera where the map is drawn.
+    if (this.isWorldContext(canvasContext)) {
       this.applyCameraTransform(canvasContext);
     }
 
@@ -770,7 +781,7 @@ export class Game {
     cameraApplies?: boolean;
   }) {
     canvasContext.save();
-    if (cameraApplies && this.currentScene.getCamera() && canvasContext === this.canvasContext) {
+    if (cameraApplies && this.isWorldContext(canvasContext)) {
       this.applyCameraTransform(canvasContext);
     }
     canvasContext.globalAlpha = transparency ?? 1;
@@ -799,7 +810,7 @@ export class Game {
     const canvasContext = options.canvasContext;
 
     canvasContext.save();
-    if (options.cameraApplies !== false && this.currentScene.getCamera() && canvasContext === this.canvasContext) {
+    if (options.cameraApplies !== false && this.isWorldContext(canvasContext)) {
       this.applyCameraTransform(canvasContext);
     }
 

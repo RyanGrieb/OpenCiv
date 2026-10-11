@@ -54,7 +54,7 @@ export class HexSphere {
     [9, 8, 1]
   ];
   // Band rows per tile around the capsule, which takes the band to about 70 degrees north and south -
-  // the 6n-tile-wide band that matches the game's 80-wide maps is then 52 rows tall, like its Standard map.
+  // an 84-tile-wide band, the game's Standard map, is then 56 rows tall, like the map.
   private static readonly CAPSULE_BAND_HEIGHT = 0.654;
 
   public readonly tileCount: number;
@@ -71,7 +71,13 @@ export class HexSphere {
   public readonly columns?: Int32Array;
   public readonly rowLengths?: number[];
 
-  constructor(centers: Float32Array, triangles: Int32Array, rows?: Int32Array, columns?: Int32Array, rowLengths?: number[]) {
+  constructor(
+    centers: Float32Array,
+    triangles: Int32Array,
+    rows?: Int32Array,
+    columns?: Int32Array,
+    rowLengths?: number[]
+  ) {
     this.tileCount = centers.length / 3;
     this.centers = centers;
     this.rows = rows;
@@ -105,6 +111,19 @@ export class HexSphere {
     }
   }
 
+  /**
+   * Mercator latitude between two of a polarCapsule()'s band rows: one row every sqrt(3)/2 tile
+   * widths keeps every hex regular.
+   */
+  public static capsuleRowStep(bandWidth: number) {
+    return ((2 * Math.PI) / bandWidth) * (Math.sqrt(3) / 2);
+  }
+
+  /** Mercator latitude of a polarCapsule()'s first band row; the last is as far south. */
+  public static capsuleEdgeMercator(bandWidth: number, bandRows: number) {
+    return ((bandRows - 1) * HexSphere.capsuleRowStep(bandWidth)) / 2;
+  }
+
   /** 10 * subdivisions^2 + 2 tiles, the pentagons spread evenly. */
   public static icosahedral(subdivisions: number): HexSphere {
     const centers = new Float32Array((10 * subdivisions * subdivisions + 2) * 3);
@@ -114,15 +133,14 @@ export class HexSphere {
   /**
    * Six pentagons around each pole, with a 6 * capSide tile wide band between the caps. Rows run
    * from the north pole (a single hexagon) through cap rings of 6, 12, ... tiles, then the band's
-   * equal rows, then the south cap's shrinking rings.
+   * equal rows, then the south cap's shrinking rings. The band is `bandRows` rows tall, by default
+   * as tall as keeps the caps' tiles the size of the band's; the caps stretch to meet any other height.
    */
-  public static polarCapsule(capSide: number): HexSphere {
+  public static polarCapsule(capSide: number, bandRows = Math.round(HexSphere.CAPSULE_BAND_HEIGHT * 6 * capSide) + 1) {
     const n = capSide;
     const width = 6 * n;
-    // One band row every sqrt(3)/2 tile widths in Mercator latitude keeps every hex regular.
-    const rowStep = ((2 * Math.PI) / width) * (Math.sqrt(3) / 2);
-    const bandRows = Math.round(HexSphere.CAPSULE_BAND_HEIGHT * width) + 1;
-    const edgeMercator = ((bandRows - 1) * rowStep) / 2;
+    const rowStep = HexSphere.capsuleRowStep(width);
+    const edgeMercator = HexSphere.capsuleEdgeMercator(width, bandRows);
     const capColatitude = Math.PI - 2 * Math.atan(Math.exp(edgeMercator));
     // The south cap turns with the band's last row, half a tile over on odd rows.
     const southShift = (bandRows - 1) % 2;
@@ -137,7 +155,11 @@ export class HexSphere {
       layout.push({ count: width, shift: row % 2, latitude: 2 * Math.atan(Math.exp(mercator)) - Math.PI / 2 });
     }
     for (let ring = n - 1; ring >= 0; ring--) {
-      layout.push({ count: Math.max(1, 6 * ring), shift: southShift, latitude: (ring / n) * capColatitude - Math.PI / 2 });
+      layout.push({
+        count: Math.max(1, 6 * ring),
+        shift: southShift,
+        latitude: (ring / n) * capColatitude - Math.PI / 2
+      });
     }
 
     const rowStart: number[] = [];
@@ -171,7 +193,13 @@ export class HexSphere {
       const outer = southern ? y : y + 1;
       HexSphere.zipRows(layout[inner], rowStart[inner], layout[outer], rowStart[outer], width, triangles);
     }
-    return new HexSphere(centers, Int32Array.from(triangles), rows, columns, layout.map((row) => row.count));
+    return new HexSphere(
+      centers,
+      Int32Array.from(triangles),
+      rows,
+      columns,
+      layout.map((row) => row.count)
+    );
   }
 
   // The icosahedron's triangle grid, as 3 tile indices per triangle, writing each grid vertex into
@@ -282,7 +310,8 @@ export class HexSphere {
 
     // Exact comparison of the turns (x / count + shift / (2 * width)) of an inner and an outer tile.
     const innerFirst = (i: number, j: number) =>
-      (2 * width * i + inner.shift * inner.count) * outer.count <= (2 * width * j + outer.shift * outer.count) * inner.count;
+      (2 * width * i + inner.shift * inner.count) * outer.count <=
+      (2 * width * j + outer.shift * outer.count) * inner.count;
     let i = 0;
     let j = 0;
     for (let step = 0; step < inner.count + outer.count; step++) {
