@@ -264,21 +264,21 @@ export class GameMap {
   }
 
   // Every step of generating the terrain, in order, with what the loading screen calls it and roughly
-  // how long it takes next to the others (filling lakes walks every ocean tile's whole body of water).
+  // how long it takes next to the others.
   public getTerrainSteps(): { text: string; weight: number; run: () => void }[] {
     return [
-      { text: "Raising the continents", weight: 1, run: () => this.generateLandmasses() },
+      { text: "Raising the continents", weight: 5, run: () => this.generateLandmasses() },
       { text: "Filling in lone ocean tiles", weight: 1, run: () => this.fillLoneOceanTiles() },
       { text: "Raising hills and mountains", weight: 1, run: () => this.generateHillsAndMountains() },
       { text: "Setting the climate", weight: 1, run: () => this.generateClimate() },
       { text: "Growing plains, deserts and jungles", weight: 1, run: () => this.generateWarmBiomes() },
       { text: "Planting forests", weight: 1, run: () => this.generateForests() },
-      { text: "Filling lakes", weight: 8, run: () => this.generateFreshwater() },
+      { text: "Filling lakes", weight: 1, run: () => this.generateFreshwater() },
       { text: "Shaping the coasts", weight: 1, run: () => this.generateShallowOcean() },
       { text: "Placing resources", weight: 2, run: () => this.generateResources() },
-      { text: "Carving rivers", weight: 3, run: () => this.generateRivers() },
+      { text: "Carving rivers", weight: 2, run: () => this.generateRivers() },
       { text: "Flooding desert rivers", weight: 1, run: () => this.generateFloodplains() },
-      { text: "Placing natural wonders", weight: 1, run: () => this.placeNaturalWonders() }
+      { text: "Placing natural wonders", weight: 2, run: () => this.placeNaturalWonders() }
     ];
   }
 
@@ -741,30 +741,29 @@ export class GameMap {
     // == Generate freshwater tiles.
     console.log("Generating freshwater tiles...");
 
+    // Flood-fills each body of ocean once: one that never reaches the map's edge is a lake.
+    const checked = new Set<Tile>();
     for (const tile of [...TileIndexer.getTilesByTileType("ocean")]) {
+      if (checked.has(tile)) continue;
+
       let freshwater = true; // False if one of the adj tile is undefined (map edge)
-      let traverseQueue: Tile[] = [];
-      let traversedTiles: Tile[] = [];
+      const bodyOfWater: Tile[] = [tile];
+      checked.add(tile);
 
-      traverseQueue.push(tile);
-      while (traverseQueue.length > 0) {
-        let currentTile: Tile = traverseQueue.shift();
-        traversedTiles.push(currentTile);
-
-        for (const adjTile of currentTile.getAdjacentTiles()) {
+      for (let index = 0; index < bodyOfWater.length; index++) {
+        for (const adjTile of bodyOfWater[index].getAdjacentTiles()) {
           if (!adjTile) {
             freshwater = false;
-          } else if (adjTile.containsTileType("ocean")) {
-            if (!traversedTiles.includes(adjTile) && !traverseQueue.includes(adjTile)) {
-              traverseQueue.push(adjTile);
-            }
+          } else if (adjTile.containsTileType("ocean") && !checked.has(adjTile)) {
+            checked.add(adjTile);
+            bodyOfWater.push(adjTile);
           }
         }
       }
 
       if (freshwater) {
-        for (let tile of traversedTiles) {
-          tile.replaceTileType("ocean", "freshwater");
+        for (const lakeTile of bodyOfWater) {
+          lakeTile.replaceTileType("ocean", "freshwater");
         }
       }
     }

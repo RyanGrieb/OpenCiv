@@ -125,8 +125,10 @@ export class InGameScene extends Scene {
     GameMap.init();
 
     this.on("mapLoaded", () => {
-      this.removeActor(this.loadingScreen);
+      // Fills the bar and fades out over the map, rather than vanishing the moment it's drawn.
+      const loadingScreen = this.loadingScreen;
       this.loadingScreen = undefined;
+      loadingScreen.finish("Entering the world...", () => this.removeActor(loadingScreen));
       LoadingScreen.discardBackground();
       this.setWorldHidden(false);
 

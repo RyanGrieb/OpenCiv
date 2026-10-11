@@ -26,20 +26,35 @@ export class LoadingScreen extends ActorGroup {
   private static readonly BAR_HEIGHT = 20;
   private static readonly LABEL_GAP = 12;
   private static readonly FONT = "bold 24px arial";
+  // How quickly the bar catches up to the progress it's been given: it closes this share of the gap
+  // per 100ms, so a big jump glides rather than snaps - and never slower than MIN_SPEED (bar widths a
+  // second), so the last stretch doesn't crawl.
+  private static readonly GLIDE_PER_100MS = 0.35;
+  private static readonly MIN_SPEED = 0.8;
+  private static readonly FADE_MS = 400;
 
   // Kept from one scene to the next, so the terrain doesn't jump when the in-game scene takes over.
   private static background: Actor;
   private static backgroundWidth: number;
   private static backgroundHeight: number;
+  // Where the last screen's bar had got to, so the next one carries on from there rather than jumping.
+  private static shownProgress = 0;
 
   private label: Label;
   private bar: LoadingBar;
+  // The progress the bar is gliding towards; the bar itself shows where it has got to.
+  private targetProgress: number;
+  private lastFrameMs: number;
+  // Set by finish(): called once the bar has filled and the screen has faded out.
+  private onFinished: () => void;
+  private fadeStartMs: number;
 
   constructor(text: string, progress: number) {
     const width = Game.getInstance().getWidth();
     const height = Game.getInstance().getHeight();
     super({ x: 0, y: 0, width, height, cameraApplies: false, z: LoadingScreen.Z });
 
+    const continuing = LoadingScreen.background !== undefined;
     this.addActor(LoadingScreen.getBackground());
 
     this.bar = new LoadingBar({
@@ -47,7 +62,7 @@ export class LoadingScreen extends ActorGroup {
       y: height / 2,
       width: LoadingScreen.BAR_WIDTH,
       height: LoadingScreen.BAR_HEIGHT,
-      progress
+      progress: continuing ? Math.min(progress, LoadingScreen.shownProgress) : progress
     });
     this.addActor(this.bar);
 
@@ -61,11 +76,15 @@ export class LoadingScreen extends ActorGroup {
     });
     this.addActor(this.label);
     this.centerLabel();
+
+    this.targetProgress = progress;
+    this.lastFrameMs = Date.now();
   }
 
   // Forgets the background, so the next load starts on fresh terrain.
   public static discardBackground() {
     LoadingScreen.background = undefined;
+    LoadingScreen.shownProgress = 0;
   }
 
   private static getBackground(): Actor {
@@ -88,7 +107,7 @@ export class LoadingScreen extends ActorGroup {
    * @param progress How far through the whole load, from 0 to 1.
    */
   public setStatus(text: string, progress: number) {
-    this.bar.setProgress(progress);
+    this.targetProgress = Math.max(this.targetProgress, progress);
     if (text === this.label.getText()) return;
 
     this.label.setText(text);
@@ -100,7 +119,46 @@ export class LoadingScreen extends ActorGroup {
   }
 
   public getProgress(): number {
-    return this.bar.getProgress();
+    return this.targetProgress;
+  }
+
+  /**
+   * Lets the bar fill up the rest of the way, then fades the screen out to show what's under it.
+   * @param onFinished Called once it has faded away, to remove it.
+   */
+  public finish(text: string, onFinished: () => void) {
+    this.setStatus(text, 1);
+    this.onFinished = onFinished;
+  }
+
+  public draw(canvasContext: CanvasRenderingContext2D) {
+    this.advance();
+    super.draw(canvasContext);
+  }
+
+  private advance() {
+    const now = Date.now();
+    const elapsedMs = now - this.lastFrameMs;
+    this.lastFrameMs = now;
+
+    const gap = this.targetProgress - this.bar.getProgress();
+    const glide = gap * (1 - Math.pow(1 - LoadingScreen.GLIDE_PER_100MS, elapsedMs / 100));
+    const step = Math.max(glide, (LoadingScreen.MIN_SPEED * elapsedMs) / 1000);
+    this.bar.setProgress(this.bar.getProgress() + Math.min(gap, step));
+    if (!this.onFinished) LoadingScreen.shownProgress = this.bar.getProgress();
+
+    if (!this.onFinished || this.bar.getProgress() < 1) return;
+
+    this.fadeStartMs ??= now;
+    const fade = (now - this.fadeStartMs) / LoadingScreen.FADE_MS;
+    if (fade < 1) {
+      this.setTransparency(1 - fade);
+      return;
+    }
+
+    const onFinished = this.onFinished;
+    this.onFinished = undefined;
+    onFinished();
   }
 
   private centerLabel() {

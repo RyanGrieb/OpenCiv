@@ -94,13 +94,7 @@ export class AncientRuins {
    * @returns The tile, or undefined if there's nowhere left to put any.
    */
   public placeRuins(): Tile | undefined {
-    const candidates: Tile[] = [];
-    for (const column of GameMap.getInstance().getTiles()) {
-      for (const tile of column) {
-        if (this.canPlaceRuins(tile)) candidates.push(tile);
-      }
-    }
-
+    const candidates = this.findRuinSites();
     if (candidates.length < 1) return undefined;
 
     const tile = candidates[random.int(0, candidates.length - 1)];
@@ -109,12 +103,34 @@ export class AncientRuins {
     return tile;
   }
 
+  // Every tile canPlaceRuins() allows ruins on.
+  private findRuinSites(): Tile[] {
+    const sites: Tile[] = [];
+    for (const column of GameMap.getInstance().getTiles()) {
+      for (const tile of column) {
+        if (this.canPlaceRuins(tile)) sites.push(tile);
+      }
+    }
+    return sites;
+  }
+
   // Before the first turn, so the ruins reach clients with the rest of the map.
   private placeInitialRuins() {
     const count = this.getRuinCount();
+    const spacing = AncientRuins.getConfig().min_distance_between_ruins - 1;
 
+    // Checks every tile once rather than once per ruin: a new ruin only rules out the sites too close
+    // to it, so those are all that need dropping before picking the next one.
+    let sites = this.findRuinSites();
     let placed = 0;
-    while (placed < count && this.placeRuins()) placed++;
+    while (placed < count && sites.length > 0) {
+      const tile = sites[random.int(0, sites.length - 1)];
+      tile.addTileType(AncientRuins.TILE_TYPE);
+      placed++;
+
+      const tooClose = new Set(GameMap.getInstance().getTilesInRange(tile, spacing));
+      sites = sites.filter((site) => !tooClose.has(site));
+    }
 
     console.log(`[AncientRuins] Placed ${placed} ruins`);
   }

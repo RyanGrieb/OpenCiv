@@ -156,28 +156,10 @@ export class Barbarians {
    * @returns The new camp, or undefined if there's nowhere left to put one.
    */
   public placeCamp(announce = true): BarbarianCamp | undefined {
-    const candidates: Tile[] = [];
-    for (const column of GameMap.getInstance().getTiles()) {
-      for (const tile of column) {
-        if (this.canPlaceCamp(tile)) candidates.push(tile);
-      }
-    }
-
+    const candidates = this.findCampSites();
     if (candidates.length < 1) return undefined;
 
-    const tile = candidates[random.int(0, candidates.length - 1)];
-    tile.addTileType(Barbarians.CAMP_TILE_TYPE);
-
-    const camp: BarbarianCamp = { tile, roamingUnits: [], turnsUntilSpawn: Barbarians.rollSpawnDelay() };
-    this.camps.push(camp);
-
-    // Camps appear in the fog, so normally nobody is watching - but with the map revealed everyone is.
-    if (announce) GameMap.getInstance().resendTileToObservers(tile);
-
-    camp.defender = this.createUnit(tile);
-    console.log(`[Barbarians] Camp placed at (${tile.getX()}, ${tile.getY()})`);
-
-    return camp;
+    return this.placeCampOn(candidates[random.int(0, candidates.length - 1)], announce);
   }
 
   /**
@@ -237,11 +219,45 @@ export class Barbarians {
 
   // A camp goes out at game start for every other slot, the rest turn up over the game.
   private placeInitialCamps() {
-    const initialCamps = Math.max(1, Math.round(this.getMaxCamps() * Barbarians.getConfig().camps.initial_share));
+    const config = Barbarians.getConfig().camps;
+    const initialCamps = Math.max(1, Math.round(this.getMaxCamps() * config.initial_share));
 
-    for (let i = 0; i < initialCamps; i++) {
-      if (!this.placeCamp(false)) break;
+    // Checks every tile once rather than once per camp: a new camp only rules out the sites too close
+    // to it (its own defender is a barbarian, which other camps don't keep their distance from).
+    let sites = this.findCampSites();
+    for (let i = 0; i < initialCamps && sites.length > 0; i++) {
+      const camp = this.placeCampOn(sites[random.int(0, sites.length - 1)], false);
+
+      const tooClose = new Set(GameMap.getInstance().getTilesInRange(camp.tile, config.min_distance_between_camps - 1));
+      sites = sites.filter((site) => !tooClose.has(site));
     }
+  }
+
+  // Builds a camp and its defender on a tile canPlaceCamp() allows.
+  private placeCampOn(tile: Tile, announce: boolean): BarbarianCamp {
+    tile.addTileType(Barbarians.CAMP_TILE_TYPE);
+
+    const camp: BarbarianCamp = { tile, roamingUnits: [], turnsUntilSpawn: Barbarians.rollSpawnDelay() };
+    this.camps.push(camp);
+
+    // Camps appear in the fog, so normally nobody is watching - but with the map revealed everyone is.
+    if (announce) GameMap.getInstance().resendTileToObservers(tile);
+
+    camp.defender = this.createUnit(tile);
+    console.log(`[Barbarians] Camp placed at (${tile.getX()}, ${tile.getY()})`);
+
+    return camp;
+  }
+
+  // Every tile canPlaceCamp() allows a camp on.
+  private findCampSites(): Tile[] {
+    const sites: Tile[] = [];
+    for (const column of GameMap.getInstance().getTiles()) {
+      for (const tile of column) {
+        if (this.canPlaceCamp(tile)) sites.push(tile);
+      }
+    }
+    return sites;
   }
 
   // Forgets units that no longer exist (killed, once combat can do that).

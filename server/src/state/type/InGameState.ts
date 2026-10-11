@@ -25,10 +25,10 @@ export class InGameState extends State {
 
   // Where no player's starting units may be placed.
   // Where each step of building the world starts on the server's share of the loading bar (0 to 1).
-  // Generating the map, placing the ancient ruins and placing the barbarian camps take about as long.
-  private static readonly PLACING_CIVS = 0.4;
-  private static readonly PLACING_RUINS = 0.45;
-  private static readonly PLACING_CAMPS = 0.75;
+  // Generating the map takes most of it.
+  private static readonly PLACING_CIVS = 0.8;
+  private static readonly PLACING_RUINS = 0.85;
+  private static readonly PLACING_CAMPS = 0.9;
   private static readonly SPAWN_AVOID_TILE_TYPES = [
     "ocean",
     "shallow_ocean",
