@@ -36,7 +36,7 @@ export class NaturalWonders {
 
   // Civ 5 places 2 wonders on a Duel map up to 7 on a Huge one; this lands close to that for our map sizes.
   public static getCountForMapArea(mapArea: number): number {
-    return Math.min(NaturalWonders.getAll().length, Math.max(1, Math.round(Math.sqrt(mapArea) / 13)));
+    return Math.min(NaturalWonders.getAll().length, Math.max(1, Math.round(Math.sqrt(mapArea) / 15)));
   }
 
   /**

@@ -1,3 +1,4 @@
+import { GLOBE_WIDTH_STEP, MapSizes } from "../../src/GameOptions";
 import { GameMap } from "../../src/map/GameMap";
 import { Tile } from "../../src/map/Tile";
 
@@ -136,6 +137,19 @@ describe("Map wrapping", () => {
           const neighbours = gameMap["tiles"][x][y].getAdjacentTiles().filter((tile) => tile !== null);
           expect(neighbours).toHaveLength(6);
         }
+      }
+    });
+  });
+
+  describe("globe widths", () => {
+    it("snaps a wrapping map's width to a multiple of GLOBE_WIDTH_STEP, and a flat one's to a chunk", () => {
+      expect(GameMap["snapToChunks"](80, GLOBE_WIDTH_STEP)).toBe(84);
+      expect(GameMap["snapToChunks"](80)).toBe(80);
+    });
+
+    it("gives every map size preset a width the globe closes around", () => {
+      for (const [width] of MapSizes.DIMENSIONS) {
+        expect(width % GLOBE_WIDTH_STEP).toBe(0);
       }
     });
   });

@@ -8,7 +8,7 @@ import { TileIndexer } from "./TileIndexer";
 import { Unit } from "../unit/Unit";
 import PriorityQueue from "ts-priority-queue";
 import { Numbers } from "../util/Numbers";
-import { MAP_CHUNK_SIZE, MIN_MAP_DIMENSION } from "../GameOptions";
+import { GLOBE_WIDTH_STEP, MAP_CHUNK_SIZE, MIN_MAP_DIMENSION } from "../GameOptions";
 
 export class GameMap {
   private static instance: GameMap;
@@ -100,8 +100,8 @@ export class GameMap {
     GameMap.wrapWidth = 0;
   }
 
-  private static snapToChunks(requested: number) {
-    return Math.max(MIN_MAP_DIMENSION, Math.round(requested / MAP_CHUNK_SIZE) * MAP_CHUNK_SIZE);
+  private static snapToChunks(requested: number, step = MAP_CHUNK_SIZE) {
+    return Math.max(MIN_MAP_DIMENSION, Math.round(requested / step) * step);
   }
 
   private constructor() {}
@@ -114,7 +114,7 @@ export class GameMap {
   private createOceanMap() {
     // Assign map dimension values
     const options = Game.getInstance().getGameOptions();
-    this.mapWidth = GameMap.snapToChunks(options.mapWidth);
+    this.mapWidth = GameMap.snapToChunks(options.mapWidth, options.wrapMap ? GLOBE_WIDTH_STEP : MAP_CHUNK_SIZE);
     this.mapHeight = GameMap.snapToChunks(options.mapHeight);
     this.mapArea = this.mapWidth * this.mapHeight;
     this.riverSideHistory = [];

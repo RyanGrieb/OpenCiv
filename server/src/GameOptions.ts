@@ -4,7 +4,8 @@ export interface GameOptions {
   // Makes the east and west map edges adjacent, so the world is a cylinder rather than a rectangle.
   wrapMap: boolean;
   mapSize: number;
-  // Exact map dimensions in tiles, snapped to a multiple of MAP_CHUNK_SIZE by GameMap. Choosing a
+  // Exact map dimensions in tiles, snapped to a multiple of MAP_CHUNK_SIZE by GameMap (the width of
+  // a wrapping map to a multiple of GLOBE_WIDTH_STEP). Choosing a
   // mapSize preset fills these in; editing them by hand flips mapSize to MapSizes.CUSTOM. Hidden -
   // only shown in the client's advanced options.
   mapWidth: number;
@@ -46,6 +47,10 @@ export interface GameOptions {
 // Maps are streamed to clients in square chunks of this many tiles, so each dimension must divide evenly.
 export const MAP_CHUNK_SIZE = 4;
 
+// A wrapping map closes into a globe with six pentagons ringing each pole (the client's
+// HexSphere.polarCapsule()), so its width must also be a multiple of 6.
+export const GLOBE_WIDTH_STEP = 12;
+
 // Terrain generation places land masses at least 10 tiles in from each edge.
 export const MIN_MAP_DIMENSION = 24;
 
@@ -54,13 +59,16 @@ const MAP_SIZE_CITY_STATE_COUNTS = [2, 3, 4, 6, 9, 12];
 
 export class MapSizes {
   // Index-aligned with mapSize's valueLabels below; the index past the last preset means "Custom".
+  // Widths are multiples of GLOBE_WIDTH_STEP. Heights are two thirds of the width, which takes
+  // the map to about 70 degrees north and south on the globe, where the polar caps' tiles come out
+  // the same size as the map's own.
   public static readonly DIMENSIONS: [number, number][] = [
     [48, 32],
-    [56, 36],
-    [68, 44],
-    [80, 52],
-    [104, 64],
-    [128, 80]
+    [60, 40],
+    [72, 48],
+    [84, 56],
+    [108, 72],
+    [132, 88]
   ];
   public static readonly CUSTOM = MapSizes.DIMENSIONS.length;
 
@@ -156,8 +164,8 @@ export const GameOptionDefinitions: GameOptionDefinition[] = [
     label: "Map Width (Tiles)",
     type: "number",
     min: MIN_MAP_DIMENSION,
-    max: 512,
-    step: MAP_CHUNK_SIZE,
+    max: 504,
+    step: GLOBE_WIDTH_STEP,
     hidden: true,
     onChange: (options) => MapSizes.syncPreset(options)
   },
