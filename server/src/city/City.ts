@@ -7,6 +7,7 @@ import { Combat, CombatModifier } from "../unit/Combat";
 import { Unit, UnitYMLTypeData } from "../unit/Unit";
 import { BorderGrowth } from "./BorderGrowth";
 import { Building, BuildingData } from "./Building";
+import { BuildingEffects } from "./BuildingEffects";
 import { BuildingCategory, Wonders } from "./Wonders";
 import { CityCombat } from "./CityCombat";
 import { PlayerDiplomacy } from "../diplomacy/PlayerDiplomacy";
@@ -68,6 +69,26 @@ export class City {
 
   // Civ 5 won't let a city train a Settler until it has this many citizens.
   public static readonly SETTLER_MIN_POPULATION = 2;
+
+  // How far from the city a unit it gets for free may appear, when the tiles around it are taken.
+  public static readonly FREE_UNIT_RANGE = 3;
+
+  // The order of the stat line sent to the client (see getStatline()).
+  private static readonly STAT_ORDER: (keyof CityStats)[] = [
+    "population",
+    "science",
+    "gold",
+    "production",
+    "faith",
+    "culture",
+    "food",
+    "happiness",
+    "defense",
+    "foodSurplus",
+    "foodRequiredToGrow",
+    "cultureStored",
+    "cultureRequiredToExpand"
+  ];
 
   private tile: Tile;
   private player: Player;
@@ -433,7 +454,19 @@ export class City {
       building: building.toJSON()
     });
 
+    BuildingEffects.onBuilt(this, building);
     this.updateWorkedTiles({ sendStatUpdate: true });
+  }
+
+  /**
+   * A unit the city gets for free, e.g. from a wonder. It appears in or around the city, a little
+   * further out if those tiles are taken, and not at all if there's no room within FREE_UNIT_RANGE.
+   */
+  public grantFreeUnit(unitName: string) {
+    const spawnTile = this.getUnitSpawnTile(unitName, City.FREE_UNIT_RANGE);
+    if (!spawnTile) return;
+
+    this.spawnUnit(unitName, spawnTile);
   }
 
   /**
@@ -505,112 +538,10 @@ export class City {
   public getStatline(options: { asArray: true }): CityStatEntry[];
   public getStatline(options: { asArray: false }): CityStats;
   public getStatline(options: { asArray: boolean }): CityStatEntry[] | CityStats {
-    if (options.asArray) {
-      const cityStats: CityStatEntry[] = [
-        {
-          population: this.population
-        },
-        { science: 0 },
-        { gold: 0 },
-        { production: 0 },
-        { faith: 0 },
-        { culture: 0 },
-        { food: -(this.population * 2) },
-        { happiness: 0 },
-        { defense: 0 },
-        { foodSurplus: this.foodSurplus },
-        { foodRequiredToGrow: this.getFoodRequiredToGrow() },
-        { cultureStored: this.cultureStored },
-        { cultureRequiredToExpand: this.getCultureRequiredToExpand() }
-      ];
+    const cityStats = this.computeStats();
+    if (!options.asArray) return cityStats;
 
-      // Add all buildings to existing stat-line dictionary (Note: We would apply bonuses to buildings here in the future)
-      for (const building of this.buildings) {
-        for (const [statType, statValue] of Object.entries(building.getStatLine()) as [keyof CityStats, number][]) {
-          for (const cityStat of cityStats) {
-            if (Object.keys(cityStat)[0] === statType) {
-              cityStat[statType] += statValue;
-            }
-          }
-        }
-      }
-
-      // Add all worked tiles to existing stat-line dictionary
-      console.log(`[City ${this.name}] Updating stats (asArray). Worked tiles: ${this.workedTiles.length}`);
-      for (const tile of this.workedTiles) {
-        console.log(`[City ${this.name}] Working tile at ${tile.getX()},${tile.getY()}`);
-        for (const stat of tile.getStats()) {
-          const statType = Object.keys(stat)[0] as keyof StatValues; // Get the stat type, e.g., "science", "gold", etc.
-          const statValue = stat[statType]; // Get the stat value
-
-          if (statValue !== 0) {
-            console.log(`[City ${this.name}] Tile yields ${statType}: ${statValue}`);
-          }
-
-          for (const cityStat of cityStats) {
-            if (Object.keys(cityStat)[0] === statType) {
-              cityStat[statType] += statValue;
-            }
-          }
-        }
-      }
-
-      const foodStat = cityStats.find((cityStat) => cityStat.food !== undefined);
-      const productionStat = cityStats.find((cityStat) => cityStat.production !== undefined);
-      foodStat.food = this.player.getHappiness().applyToFoodSurplus(foodStat.food);
-      const settlerFood = this.getFoodForSettler(foodStat.food);
-      foodStat.food -= settlerFood;
-      productionStat.production += settlerFood;
-
-      return cityStats;
-    }
-
-    // If we're not returning an array, return a dictionary
-    const cityStats: CityStats = {
-      population: this.population,
-      science: 0,
-      gold: 0,
-      production: 0,
-      faith: 0,
-      culture: 0,
-      food: -(this.population * 2),
-      happiness: 0,
-      foodSurplus: this.foodSurplus,
-      foodRequiredToGrow: this.getFoodRequiredToGrow(),
-      cultureStored: this.cultureStored,
-      cultureRequiredToExpand: this.getCultureRequiredToExpand(),
-      defense: 0
-    };
-
-    // Add all buildings to existing stat-line dictionary
-    for (const building of this.buildings) {
-      for (const [statType, statValue] of Object.entries(building.getStatLine()) as [keyof CityStats, number][]) {
-        if (cityStats.hasOwnProperty(statType)) {
-          cityStats[statType] += statValue;
-        }
-      }
-    }
-
-    // Add all worked tiles to existing stat-line dictionary
-    for (const tile of this.workedTiles) {
-      for (const stat of tile.getStats()) {
-        const statType = Object.keys(stat)[0] as keyof StatValues; // Get the stat type, e.g., "science", "gold", etc.
-        const statValue = stat[statType]; // Get the stat value
-
-        if (cityStats.hasOwnProperty(statType)) {
-          cityStats[statType] += statValue;
-        }
-      }
-    }
-
-    // Unhappiness slows growth. Applied to the stat itself, so the city screen shows the food that's
-    // really banked each turn.
-    cityStats.food = this.player.getHappiness().applyToFoodSurplus(cityStats.food);
-    const settlerFood = this.getFoodForSettler(cityStats.food);
-    cityStats.food -= settlerFood;
-    cityStats.production += settlerFood;
-
-    return cityStats;
+    return City.STAT_ORDER.map((stat) => ({ [stat]: cityStats[stat] }));
   }
 
   public getHealth(): number {
@@ -816,7 +747,7 @@ export class City {
   }
 
   public getCultureRequiredToExpand(): number {
-    return BorderGrowth.getCultureCost(this.tilesAcquired);
+    return BuildingEffects.getBorderCost(BorderGrowth.getCultureCost(this.tilesAcquired), this.player);
   }
 
   public getTile(): Tile {
@@ -845,6 +776,10 @@ export class City {
 
   public getProductionQueue(): ProductionOption[] {
     return this.productionQueue;
+  }
+
+  public getBuildings(): Building[] {
+    return this.buildings;
   }
 
   public hasBuilding(name: string): boolean {
@@ -906,6 +841,48 @@ export class City {
       // Which tiles a city works is its owner's business.
       workedTiles: ownCity ? this.workedTiles.map((tile) => ({ x: tile.getX(), y: tile.getY() })) : []
     };
+  }
+
+  // What the city yields each turn: its buildings and worked tiles, then its buildings' effects, then
+  // what unhappiness and training a Settler take out of its food.
+  private computeStats(): CityStats {
+    const cityStats: CityStats = {
+      population: this.population,
+      science: 0,
+      gold: 0,
+      production: 0,
+      faith: 0,
+      culture: 0,
+      food: -(this.population * 2),
+      happiness: 0,
+      foodSurplus: this.foodSurplus,
+      foodRequiredToGrow: this.getFoodRequiredToGrow(),
+      cultureStored: this.cultureStored,
+      cultureRequiredToExpand: this.getCultureRequiredToExpand(),
+      defense: 0
+    };
+
+    const statLines: StatEntry[] = [
+      ...this.buildings.flatMap((building) =>
+        Object.entries(building.getStatLine()).map(([stat, value]) => ({ [stat]: value }) as StatEntry)
+      ),
+      ...this.workedTiles.flatMap((tile) => tile.getStats())
+    ];
+    for (const stat of statLines) {
+      const statType = Object.keys(stat)[0] as keyof CityStats;
+      if (cityStats.hasOwnProperty(statType)) cityStats[statType] += (stat as CityStatEntry)[statType];
+    }
+
+    BuildingEffects.applyToCityStats(this, cityStats);
+
+    // Unhappiness slows growth. Applied to the stat itself, so the city screen shows the food that's
+    // really banked each turn.
+    cityStats.food = this.player.getHappiness().applyToFoodSurplus(cityStats.food);
+    const settlerFood = this.getFoodForSettler(cityStats.food);
+    cityStats.food -= settlerFood;
+    cityStats.production += settlerFood;
+
+    return cityStats;
   }
 
   private getStrikeTarget(tile: Tile): Unit | undefined {
@@ -999,9 +976,10 @@ export class City {
       )
       .map((unit) => ({ type: "unit", name: unit.name, cost: this.scaleCost(unit.cost) }));
 
-    // A building can need a coast, or another building in the city first.
+    // A building can need a coast, a river, or another building in the city first.
     const siteAllows = (building: Building) =>
       (!building.isCoastal() || this.isCoastal()) &&
+      (!building.needsRiver() || this.tile.hasRiver()) &&
       (!building.getRequiredBuilding() || this.hasBuilding(building.getRequiredBuilding()));
 
     const available = Building.getAllBuildings().filter(
@@ -1075,7 +1053,8 @@ export class City {
 
     const requiredFood = this.getFoodRequiredToGrow();
     if (this.foodSurplus >= requiredFood) {
-      this.foodSurplus -= requiredFood;
+      // An Aqueduct keeps part of the food the city just spent on growing.
+      this.foodSurplus -= Math.round((requiredFood * (100 - BuildingEffects.getFoodKeptPercent(this))) / 100);
       this.population++;
       console.log(`[City ${this.name}] Grew to population ${this.population}`);
       this.updateWorkedTiles({ sendStatUpdate: false });
@@ -1107,6 +1086,8 @@ export class City {
     // Owned land is in sight, so the owner's client gets the new tile before the border update needs it.
     this.player.getVisibility().update();
     this.sendTerritoryUpdate();
+    // The city's buildings may boost the new tile (a Lighthouse on a sea tile), so its owner needs its new yields.
+    if (BuildingEffects.getTileBonuses(tile).length > 0) GameMap.getInstance().sendTilesToPlayer(this.player, [tile]);
     this.updateWorkedTiles({ sendStatUpdate: false });
     // A Settler standing here, of any civilization, may no longer be able to settle.
     tile.getUnits().forEach((unit) => unit.sendActionsToOwner());
@@ -1123,8 +1104,7 @@ export class City {
     if (this.productionQueue.length === 0) return;
 
     const current = this.productionQueue[0];
-    const productionRate = this.getStatline({ asArray: false }).production;
-    current.progress += productionRate;
+    current.progress += this.getProductionToward(current);
 
     if (current.progress < current.cost) return;
 
@@ -1190,7 +1170,7 @@ export class City {
 
   // At the city's current production rate, counting at least 1 production a turn.
   private getTurnsToProduce(item: ProductionOption): number {
-    const productionRate = Math.max(1, this.getStatline({ asArray: false }).production);
+    const productionRate = Math.max(1, this.getProductionToward(item));
     return Math.ceil(Math.max(0, item.cost - (item.progress ?? 0)) / productionRate);
   }
 
@@ -1218,6 +1198,16 @@ export class City {
     return true;
   }
 
+  // The city's production put toward `item` each turn: some buildings speed up some units (Stables, Forge).
+  private getProductionToward(item: ProductionOption): number {
+    const production = this.getStatline({ asArray: false }).production;
+    if (item.type !== "unit" || production <= 0) return production;
+
+    const unit = Unit.getAllUnitData().find((data) => data.name === item.name);
+    const percent = BuildingEffects.getUnitProductionPercent(this, unit);
+    return Math.floor((production * (100 + percent)) / 100);
+  }
+
   private spawnUnit(unitName: string, tile: Tile, options?: { availableMovement?: number }) {
     const unit = Unit.createFromName(unitName, tile, this.player, options);
     if (unit) tile.addUnit(unit);
@@ -1227,9 +1217,9 @@ export class City {
     this.player.getNotifications().addMessage("ICON_PRODUCTION", `${this.name} has finished ${itemName}.`);
   }
 
-  // The city's own tile if the new unit can stack there, else the first free neighbor it could move
-  // onto: land for land units, water for ships.
-  private getUnitSpawnTile(unitName: string): Tile | undefined {
+  // The city's own tile if the new unit can stack there, else the first free tile within `range` it
+  // could move onto, nearest first: land for land units, water for ships.
+  private getUnitSpawnTile(unitName: string, range = 1): Tile | undefined {
     const unitData = Unit.getAllUnitData().find((data) => data.name.toLowerCase() === unitName.toLowerCase());
     const isUtility = unitData?.is_utility ?? false;
 
@@ -1237,8 +1227,14 @@ export class City {
       if (unitData?.domain === "sea") return Unit.canSailOnto(tile, unitData.coast_only ?? false);
       return !tile.isWater() && tile.getMovementCost() < 9999;
     };
-    const candidates = [this.tile, ...this.tile.getAdjacentTiles().filter((tile) => tile && canStandOn(tile))];
+    const nearby = range > 1 ? this.getTilesNearestFirst(range) : this.tile.getAdjacentTiles();
+    const candidates = [this.tile, ...nearby.filter((tile) => tile && tile !== this.tile && canStandOn(tile))];
 
     return candidates.find((tile) => tile.canPlaceUnit(this.player, isUtility));
+  }
+
+  // Every tile within `range` of the city, ring by ring outward (the order getRingDistances finds them in).
+  private getTilesNearestFirst(range: number): Tile[] {
+    return Array.from(BorderGrowth.getRingDistances(this.tile, range).keys());
   }
 }

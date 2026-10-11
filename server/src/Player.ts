@@ -60,6 +60,8 @@ export class Player {
   private diplomacy: PlayerDiplomacy;
   private treasury: PlayerTreasury;
   private happiness: PlayerHappiness;
+  // Free techs (from a wonder) banked while nothing was being researched: the next tech chosen is free.
+  private freeTechs: number;
 
   /**
    * Creates a new player object.
@@ -81,6 +83,7 @@ export class Player {
     this.diplomacy = new PlayerDiplomacy(this);
     this.treasury = new PlayerTreasury(this);
     this.happiness = new PlayerHappiness(this);
+    this.freeTechs = 0;
 
     // Add event listener for when the player disconnects
     this.wsConnection?.on("close", (data) => {
@@ -414,6 +417,27 @@ export class Player {
     });
   }
 
+  /**
+   * A free tech, e.g. from the Great Library. Civ 5 lets the player pick it: here it finishes whatever
+   * is being researched, or, with nothing chosen, the next tech the player chooses.
+   */
+  public grantFreeTech(source: string) {
+    if (this.currentResearch) {
+      this.notifications.addMessage("ICON_SCIENCE", `${source} gives you ${this.currentResearch.techName} for free.`);
+      this.completeResearch();
+      return;
+    }
+
+    if (!this.hasTechsLeftToResearch()) return;
+
+    this.freeTechs++;
+    this.notifications.addMessage("ICON_SCIENCE", `${source} gives you a free tech: the next one you choose is free.`);
+  }
+
+  public getFreeTechs(): number {
+    return this.freeTechs;
+  }
+
   private chooseResearch(techName: string) {
     const tech = Technology.createFromName(techName);
     if (!tech || this.researchedTechs.has(tech.getName())) return;
@@ -424,6 +448,13 @@ export class Player {
     const costPercent = Game.getInstance().getGameOptions().techCostPercent;
     const cost = Math.max(1, Math.round((tech.getCost() * costPercent) / 100));
     this.currentResearch = { techName: tech.getName(), assetName: tech.getAssetName(), progress: 0, cost };
+
+    if (this.freeTechs > 0) {
+      this.freeTechs--;
+      this.completeResearch();
+      return;
+    }
+
     this.sendResearchUpdate();
   }
 
@@ -435,19 +466,24 @@ export class Player {
     this.currentResearch.progress += this.getTotalStats().science;
 
     if (this.currentResearch.progress >= this.currentResearch.cost) {
-      this.researchedTechs.add(this.currentResearch.techName);
-      this.notifications.addMessage(
-        this.currentResearch.assetName,
-        `You have discovered ${this.currentResearch.techName}.`
-      );
-      // A new tech can unlock improvements for this player's Builders.
-      this.units.forEach((unit) => unit.sendActionsToOwner());
-      // ...and make units their cities had queued obsolete.
-      this.cities.forEach((city) => city.removeObsoleteUnitsFromQueue());
-      this.sendTilesChangedByTech(this.currentResearch.techName);
-      this.currentResearch = null;
+      this.completeResearch();
+      return;
     }
 
+    this.sendResearchUpdate();
+  }
+
+  // Finishes the tech being researched, whether the science is in or it came free.
+  private completeResearch() {
+    const { techName, assetName } = this.currentResearch;
+    this.researchedTechs.add(techName);
+    this.currentResearch = null;
+    this.notifications.addMessage(assetName, `You have discovered ${techName}.`);
+    // A new tech can unlock improvements for this player's Builders.
+    this.units.forEach((unit) => unit.sendActionsToOwner());
+    // ...and make units their cities had queued obsolete.
+    this.cities.forEach((city) => city.removeObsoleteUnitsFromQueue());
+    this.sendTilesChangedByTech(techName);
     this.sendResearchUpdate();
   }
 

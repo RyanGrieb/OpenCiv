@@ -26,6 +26,7 @@ describe("Units attacking a city", () => {
       removeUnit: jest.fn(),
       sendNetworkEvent: jest.fn(),
       hasResearchedTech: () => false,
+      getCities: (): unknown[] => [],
       getVisibility: () => ({ isVisible: () => true, update: jest.fn() }),
       getHappiness: () => ({ applyToFoodSurplus: (food: number) => food, canTrain: () => true, getCombatModifiers: (): unknown[] => [] }),
       // Every other civilization is an enemy, as in a startAtWar game.

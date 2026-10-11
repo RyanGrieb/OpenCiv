@@ -4,6 +4,7 @@ import { GameMap } from "../../src/map/GameMap";
 import { Game } from "../../src/Game";
 import { Player } from "../../src/Player";
 import { City } from "../../src/city/City";
+import { Building } from "../../src/city/Building";
 import { ServerEvents } from "../../src/Events";
 
 jest.mock("../../src/Game");
@@ -33,6 +34,7 @@ const mapOf = (tiles: Tile[]): GameMap => {
 describe("Sea units", () => {
   const player = {
     addUnit: jest.fn(),
+    getCities: (): City[] => [],
     getVisibility: () => ({ update: jest.fn(), isVisible: () => true })
   } as unknown as Player;
   const rival = { ...player } as unknown as Player;
@@ -141,5 +143,19 @@ describe("Sea units", () => {
     expect(lakeShore.isCoastal()).toBe(false);
     expect(sea.isCoastal()).toBe(false);
     expect(lake.isCoastal()).toBe(false);
+  });
+
+  it("gives ships an extra move and tile of sight once their owner has the Great Lighthouse", () => {
+    const [shallow] = buildRow([["shallow_ocean"]]);
+    const builder = {
+      ...player,
+      getCities: () => [{ getBuildings: () => [Building.createFromName("Great Lighthouse")] }] as unknown as City[]
+    } as unknown as Player;
+    const plain = Unit.createFromName("Galley", shallow, player);
+    const boosted = Unit.createFromName("Galley", shallow, builder);
+
+    expect(boosted.getMaxMovement()).toBe(plain.getMaxMovement() + 1);
+    expect(boosted.getAvailableMovement()).toBe(plain.getAvailableMovement() + 1);
+    expect(boosted.getSightRange()).toBe(plain.getSightRange() + 1);
   });
 });

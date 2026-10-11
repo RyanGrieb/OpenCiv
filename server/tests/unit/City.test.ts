@@ -48,6 +48,7 @@ describe('City', () => {
       getTileTypes: jest.fn().mockReturnValue(['grass', 'city']),
       getUnits: jest.fn().mockReturnValue([]),
       isCoastal: jest.fn().mockReturnValue(false),
+      hasRiver: jest.fn().mockReturnValue(false),
     } as unknown as jest.Mocked<Tile>;
 
     // With population 1, City.updateWorkedTiles works one tile beyond the city's
@@ -281,6 +282,7 @@ describe('City', () => {
     const otherCity = (built: string[] = [], queued: string[] = []) => ({
       hasBuilding: (name: string) => built.includes(name),
       hasQueued: (name: string) => queued.includes(name),
+      getBuildings: (): unknown[] => [],
       loseWonderToAnotherCity: jest.fn(),
     });
     const addPlayer = (name: string, cities: object[]) => {
@@ -1128,6 +1130,7 @@ describe('City', () => {
         getY: jest.fn().mockReturnValue(0),
         getUnits: jest.fn().mockReturnValue([enemyUnit]),
         getTileTypes: jest.fn().mockReturnValue(['grass']),
+        getCityTerritoryOf: jest.fn(),
       } as unknown as jest.Mocked<Tile>;
 
       (GameMap.getInstance as jest.Mock).mockReturnValue({
@@ -1333,6 +1336,117 @@ describe('City', () => {
       expect(buildings.some((option: { name: string }) => option.name === 'Great Library')).toBe(false);
       expect(buildings.some((option: { name: string }) => option.name === 'Library')).toBe(true);
       expect(mockTreasury.spend).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('building effects', () => {
+    const mockWebsocket = {} as WebSocket;
+    const sendTilesToPlayer = jest.fn();
+
+    beforeEach(() => {
+      // Pop 1 works only the city tile here, whose yields each test sets.
+      jest.spyOn(GameMap, 'getInstance').mockReturnValue({
+        getTileWithHighestYeild: jest.fn().mockReturnValue(undefined),
+        sendTilesToPlayer,
+      } as any);
+      mockPlayer.getCities.mockReturnValue([city]);
+      (mockPlayer as any).grantFreeTech = jest.fn();
+    });
+
+    it("scales the city's yields by its buildings' percentages", () => {
+      mockTile.getStats.mockReturnValue([{ gold: 8 }, { production: 20 }]);
+      city.addBuilding('Market');
+      city.addBuilding('Workshop');
+
+      // (8 + 1) * 1.25 and (20 + 2) * 1.1, rounded down
+      expect(city.getStatline({ asArray: false }).gold).toBe(11);
+      expect(city.getStatline({ asArray: false }).production).toBe(24);
+    });
+
+    it('gives a Library +1 Science per 2 citizens', () => {
+      city['population'] = 4;
+      city.addBuilding('Library');
+
+      expect(city.getStatline({ asArray: false }).science).toBe(2);
+    });
+
+    it('keeps 40% of the food spent on growing with an Aqueduct', () => {
+      city.addBuilding('Aqueduct');
+      mockTile.getStats.mockReturnValue([{ food: 5 }]);
+      city['foodSurplus'] = 20; // 20 + 3 this turn clears the size-1 cost of 23
+
+      triggerServerEvent('nextTurn', { turn: 2 });
+
+      expect(city['population']).toBe(2);
+      expect(city['foodSurplus']).toBe(9); // 40% of 23
+    });
+
+    it('puts 15% more production into mounted units with Stables', () => {
+      (Unit.getAllUnitData as jest.Mock).mockReturnValue([{ name: 'Horseman', combat_strength: 12, cost: 75 }]);
+      city.addBuilding('Stables');
+      mockTile.getStats.mockReturnValue([{ production: 20 }]);
+      city['productionQueue'] = [{ type: 'unit', name: 'Horseman', cost: 75, progress: 0 }];
+
+      triggerServerEvent('nextTurn', { turn: 2 });
+
+      expect(city['productionQueue'][0].progress).toBe(23);
+    });
+
+    it('makes the next border tile cheaper with Angkor Wat', () => {
+      expect(city.getCultureRequiredToExpand()).toBe(20);
+
+      city.addBuilding('Angkor Wat');
+
+      expect(city.getCultureRequiredToExpand()).toBe(15);
+    });
+
+    it('grants a free tech for the Great Library', () => {
+      city.addBuilding('Great Library');
+
+      expect((mockPlayer as any).grantFreeTech).toHaveBeenCalledWith('Great Library');
+    });
+
+    it('spawns two free Builders for the Great Pyramids', () => {
+      city.addBuilding('Great Pyramids');
+
+      const builders = (Unit.createFromName as jest.Mock).mock.calls.filter(([name]) => name === 'Builder');
+      expect(builders).toHaveLength(2);
+    });
+
+    it('gives the Alhambra city a free Castle', () => {
+      city.addBuilding('Alhambra');
+
+      expect(city.hasBuilding('Castle')).toBe(true);
+    });
+
+    it("resends the city's tiles when a building boosts some of them", () => {
+      city.addBuilding('Lighthouse');
+
+      expect(sendTilesToPlayer).toHaveBeenCalledWith(mockPlayer, city.getTerritory());
+    });
+
+    it('offers a Water Mill only in a city on a river', () => {
+      mockPlayer.hasResearchedTech.mockReturnValue(true);
+      const offersWaterMill = () => {
+        mockPlayer.sendNetworkEvent.mockClear();
+        triggerServerEvent('requestProductionOptions', { cityName: 'TestCity' }, mockWebsocket);
+        const { buildings } = (mockPlayer.sendNetworkEvent as jest.Mock).mock.calls[0][0];
+        return buildings.some((option: { name: string }) => option.name === 'Water Mill');
+      };
+
+      expect(offersWaterMill()).toBe(false);
+
+      (mockTile as any).hasRiver.mockReturnValue(true);
+      expect(offersWaterMill()).toBe(true);
+    });
+
+    it('sends what the effects do with each building in the production list', () => {
+      mockPlayer.hasResearchedTech.mockReturnValue(true);
+      triggerServerEvent('requestProductionOptions', { cityName: 'TestCity' }, mockWebsocket);
+
+      const { buildings } = (mockPlayer.sendNetworkEvent as jest.Mock).mock.calls[0][0];
+      const market = buildings.find((option: { name: string }) => option.name === 'Market');
+      expect(market.building.effect_lines).toEqual(['+25% Gold']);
     });
   });
 });

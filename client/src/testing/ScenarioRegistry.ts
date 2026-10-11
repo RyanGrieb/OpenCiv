@@ -151,6 +151,11 @@ ScenarioRegistry.register("Wonders", ScenarioCategory.CITIES, async () => {
     return module.setupWondersTest;
 });
 
+ScenarioRegistry.register("BuildingEffects", ScenarioCategory.CITIES, async () => {
+    const module = await import("./scenarios/BuildingEffects.test");
+    return module.setupBuildingEffectsTest;
+});
+
 ScenarioRegistry.register("BorderExpansion", ScenarioCategory.CITIES, async () => {
     const module = await import("./scenarios/BorderExpansion.test");
     return module.setupBorderExpansionTest;

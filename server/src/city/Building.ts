@@ -1,4 +1,6 @@
 import { ConfigLoader } from "../util/ConfigLoader";
+import type { BuildingEffectsData } from "./BuildingEffects";
+import { BuildingEffectText } from "./BuildingEffectText";
 
 export interface BuildingData {
   name: string;
@@ -23,6 +25,14 @@ export interface BuildingData {
   coastal?: boolean;
   // A building the city needs first, as Civ 5's Temple needs a Shrine.
   requires_building?: string;
+  // The city must sit on a river (Water Mill).
+  requires_river?: boolean;
+  // Civ 5's effects beyond flat yields (see BuildingEffects).
+  effects?: BuildingEffectsData;
+  // Real effects that need systems the game doesn't have yet. Shown in the tooltip, nothing applies them.
+  not_yet?: string[];
+  // Only on the copies sent to the client: what the effects above do, in words, for the tooltip.
+  effect_lines?: string[];
 }
 
 export class Building {
@@ -39,6 +49,9 @@ export class Building {
   private replaces?: string;
   private coastal: boolean;
   private requiredBuilding?: string;
+  private requiresRiver: boolean;
+  private effects: BuildingEffectsData;
+  private notYet: string[];
 
   constructor(data: BuildingData) {
     this.name = data.name;
@@ -53,6 +66,9 @@ export class Building {
     this.replaces = data.replaces;
     this.coastal = data.coastal ?? false;
     this.requiredBuilding = data.requires_building;
+    this.requiresRiver = data.requires_river ?? false;
+    this.effects = data.effects ?? {};
+    this.notYet = data.not_yet ?? [];
 
     this.statLine = {};
     for (const stat of data.stats) {
@@ -132,10 +148,18 @@ export class Building {
     return this.requiredBuilding;
   }
 
+  public needsRiver(): boolean {
+    return this.requiresRiver;
+  }
+
+  public getEffects(): BuildingEffectsData {
+    return this.effects;
+  }
+
   // Reconstructs the {name, asset_name, stats} wire shape the client's own
   // Buidling class expects - the network contract doesn't change. The optional
-  // fields (the wonder flags, maintenance, city_health) are only included when
-  // set, so an ordinary building's payload stays as small as it was.
+  // fields (the wonder flags, maintenance, city_health, effects in words) are only
+  // included when set, so an ordinary building's payload stays as small as it was.
   public toJSON(): BuildingData {
     const data: BuildingData = {
       name: this.name,
@@ -147,6 +171,9 @@ export class Building {
     if (this.nationalWonder) data.national_wonder = true;
     if (this.maintenance > 0) data.maintenance = this.maintenance;
     if (this.cityHealth > 0) data.city_health = this.cityHealth;
+    const effectLines = BuildingEffectText.describe(this.effects);
+    if (effectLines.length > 0) data.effect_lines = effectLines;
+    if (this.notYet.length > 0) data.not_yet = this.notYet;
 
     return data;
   }

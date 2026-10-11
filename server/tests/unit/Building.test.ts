@@ -19,7 +19,7 @@ describe('Building', () => {
     expect(building.getStatLine()).toEqual({
       science: 3,
       production: 3,
-      gold: 2,
+      gold: 3,
       defense: 2,
       culture: 1,
     });
@@ -44,7 +44,7 @@ describe('Building', () => {
       stats: [
         { science: 3 },
         { production: 3 },
-        { gold: 2 },
+        { gold: 3 },
         { defense: 2 },
         { culture: 1 },
       ],

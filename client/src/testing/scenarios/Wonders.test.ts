@@ -135,7 +135,7 @@ export function setupWondersTest(game: Game) {
         },
         verification: () =>
             JSON.stringify(tooltipLines()) ===
-            JSON.stringify(["Temple of Artemis", "Great Wonder: only one in the world", "+3 Food", "+1 Culture"])
+            JSON.stringify(["Temple of Artemis", "Great Wonder: only one in the world", "+1 Culture", "+10% Food in all cities"])
     });
 
     runner.addStep({
@@ -198,7 +198,7 @@ export function setupWondersTest(game: Game) {
     runner.addStep({
         name: "Leave Notre Dame's tooltip showing, to look at",
         action: async () => hoverListRow("Notre Dame"),
-        verification: () => tooltipLines().includes("+15 Morale")
+        verification: () => tooltipLines().includes("+10 Happiness")
     });
 
     return runner;

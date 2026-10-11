@@ -10,6 +10,10 @@ export interface BuildingData {
   // Gold a turn, and extra city hit points (Walls). Only sent when there are any.
   maintenance?: number;
   city_health?: number;
+  // What the building's effects beyond flat stats do, in words, e.g. "+25% Gold". Only sent when there are any.
+  effect_lines?: string[];
+  // Real Civ 5 effects the game can't apply yet, e.g. "A free Social Policy".
+  not_yet?: string[];
 }
 
 // Which section of the city's buildings window a building is listed in.

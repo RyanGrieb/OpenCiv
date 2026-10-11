@@ -1,4 +1,5 @@
 import { City } from "../city/City";
+import { BuildingEffects } from "../city/BuildingEffects";
 import { ServerEvents } from "../Events";
 import { Game } from "../Game";
 import { Player } from "../Player";
@@ -119,12 +120,13 @@ export class Unit {
     this.fortified = false;
     this.fortifiedForATurn = false;
     this.defaultMoveDistance = options.defaultMoveDistance || 2;
-    this.availableMovement = options.availableMovement ?? this.defaultMoveDistance;
     this.sightRange = options.sightRange ?? PlayerVisibility.DEFAULT_UNIT_SIGHT_RANGE;
     this.utility = options.isUtility || false;
     this.terrainCostIgnored = options.ignoresTerrainCost || false;
     this.domain = options.domain ?? "land";
     this.coastOnly = options.coastOnly ?? false;
+    // After the domain: a ship's full movement depends on its owner's wonders.
+    this.availableMovement = options.availableMovement ?? this.getMaxMovement();
     this.actions = options.actions || [];
     this.queuedMovementTiles = [];
 
@@ -231,7 +233,7 @@ export class Unit {
         this.fortifiedForATurn = this.fortified;
         this.actedThisTurn = false;
         if (this.fortified && this.health >= Combat.MAX_HEALTH) this.setFortified(false);
-        this.availableMovement = this.defaultMoveDistance;
+        this.availableMovement = this.getMaxMovement();
 
         if (this.queuedMovementTiles.length > 0) {
           this.moveWithMovementQueue();
@@ -461,7 +463,7 @@ export class Unit {
     return {
       building: improvement.name,
       buildingIcon: improvement.icon,
-      turnsLeft: improvement.build_turns - this.tile.getBuildProgress(improvement.name)
+      turnsLeft: this.getBuildTurns(improvement) - this.tile.getBuildProgress(improvement.name)
     };
   }
 
@@ -477,7 +479,7 @@ export class Unit {
     }
 
     const turnsWorked = this.tile.addBuildProgress(improvement.name);
-    if (turnsWorked < improvement.build_turns) {
+    if (turnsWorked < this.getBuildTurns(improvement)) {
       this.sendBuildStatus();
       return;
     }
@@ -494,6 +496,11 @@ export class Unit {
     GameMap.getInstance().broadcastTileUpdate(this.tile);
     // A worked tile's yields just changed - let its city re-pick which tiles to work.
     this.tile.getCityTerritoryOf()?.updateWorkedTiles({ sendStatUpdate: true });
+  }
+
+  // The owner's Great Pyramids speed their Builders up.
+  private getBuildTurns(improvement: ImprovementData): number {
+    return BuildingEffects.getBuildTurns(improvement.build_turns, this.player);
   }
 
   private heal() {
@@ -598,7 +605,7 @@ export class Unit {
 
     // Starting from a full turn's movement and still unable to leave our own tile (a chain of allies
     // too long to cross in one turn) means this route would stall forever - treat it as blocked.
-    if (arrivedIndex === 0 && traversedTiles.length > 1 && this.availableMovement >= this.defaultMoveDistance) {
+    if (arrivedIndex === 0 && traversedTiles.length > 1 && this.availableMovement >= this.getMaxMovement()) {
       blocked = true;
     }
 
@@ -912,8 +919,23 @@ export class Unit {
     return this.utility;
   }
 
+  // The owner's Great Lighthouse lets ships see further.
   public getSightRange() {
-    return this.sightRange;
+    if (this.domain !== "sea") return this.sightRange;
+    return this.sightRange + BuildingEffects.getNavalSightBonus(this.player);
+  }
+
+  // A full turn's movement. The owner's Great Lighthouse gives ships an extra move.
+  public getMaxMovement(): number {
+    if (this.domain !== "sea") return this.defaultMoveDistance;
+    return this.defaultMoveDistance + BuildingEffects.getNavalMovementBonus(this.player);
+  }
+
+  // Once the owner's buildings change how far the unit moves or sees: its owner hears its new full
+  // movement, and its new sight is applied. The extra move itself starts next turn.
+  public refreshMovementAndSight() {
+    this.player.sendNetworkEvent({ event: "unitMaxMovement", id: this.id, defaultMoveDistance: this.getMaxMovement() });
+    this.player.getVisibility().update();
   }
 
   public ignoresTerrainCost() {
@@ -967,7 +989,7 @@ export class Unit {
       actions: ownUnit ? this.getUnitActionsJSON() : [],
       queuedTiles: queuedTilesJSON,
       remainingMovement: this.availableMovement,
-      defaultMoveDistance: this.defaultMoveDistance
+      defaultMoveDistance: this.getMaxMovement()
     };
   }
 
@@ -1002,14 +1024,14 @@ export class Unit {
 
     // Entering a same-type ally's tile with our whole turn's movement would still leave us stopped on
     // it, which isn't allowed - so we could never get past it. Route around instead.
-    if (neighbor.isBlockedFor(this) && Tile.getWeight(current, neighbor, this) >= this.defaultMoveDistance) {
+    if (neighbor.isBlockedFor(this) && Tile.getWeight(current, neighbor, this) >= this.getMaxMovement()) {
       return 9999;
     }
 
     // Open water costs a move a tile - hills, forests and rivers are for land units.
     if (this.domain === "sea") return 1;
 
-    return Tile.getWeight(current, neighbor, this);
+    return Tile.getWeight(current, neighbor, this) + BuildingEffects.getEnemyMovementCost(neighbor, this);
   }
 
   public getTargetQueuedTile() {
@@ -1067,7 +1089,7 @@ export class Unit {
   // Ranged units can batter a city down, but never below 1 HP - only a melee unit can take it.
   private rangedAttackCity(city: City) {
     const result = Combat.resolveRanged({
-      attackerStrength: Combat.getRangedAttackStrength(this.rangedStrength, this.tile),
+      attackerStrength: Combat.getRangedAttackStrength(this.rangedStrength, this.tile, city.getTile()),
       attackerHealth: this.health,
       defenderStrength: city.getCombatStrength(),
       defenderHealth: city.getHealth(),

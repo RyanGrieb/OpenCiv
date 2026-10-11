@@ -5,6 +5,8 @@ import { WebSocket } from 'ws';
 import { PlayerTreasury } from '../../src/economy/PlayerTreasury';
 import { Game } from '../../src/Game';
 import { DefaultGameOptions } from '../../src/GameOptions';
+import { GameMap } from '../../src/map/GameMap';
+import { Tile } from '../../src/map/Tile';
 
 jest.mock('../../src/city/City');
 jest.mock('../../src/Events');
@@ -145,6 +147,40 @@ describe('Player', () => {
       goldBreakdown: { income: [{ source: 'TestCity', amount: 5 }], expenses: [], net: 5 },
       happinessBreakdown: { sources: [{ source: 'Base', amount: 9 }], unhappiness: [{ source: '1 city', amount: 3 }], net: 6, status: 'content', effects: [] },
     }));
+  });
+
+  describe('free techs', () => {
+    const choose = (techName: string) => triggerServerEvent('chooseResearch', { techName }, mockWebsocket);
+
+    // Finishing a tech resends the tiles it changes; an empty map has none.
+    beforeEach(() => {
+      jest.spyOn(GameMap, 'getInstance').mockReturnValue({ getTiles: (): Tile[][] => [] } as unknown as GameMap);
+    });
+
+    it('finishes the tech being researched right away', () => {
+      choose('Pottery');
+
+      player.grantFreeTech('Great Library');
+
+      expect(player.hasResearchedTech('Pottery')).toBe(true);
+      expect(player.getCurrentResearch()).toBeNull();
+      expect(player.getFreeTechs()).toBe(0);
+    });
+
+    it('with nothing being researched, makes the next tech chosen free', () => {
+      player.grantFreeTech('Great Library');
+      expect(player.getFreeTechs()).toBe(1);
+
+      choose('Pottery');
+
+      expect(player.hasResearchedTech('Pottery')).toBe(true);
+      expect(player.getCurrentResearch()).toBeNull();
+      expect(player.getFreeTechs()).toBe(0);
+
+      choose('Mining');
+      expect(player.hasResearchedTech('Mining')).toBe(false);
+      expect(player.getCurrentResearch().techName).toBe('Mining');
+    });
   });
 
   describe('gold upkeep', () => {

@@ -1,5 +1,6 @@
 import random from "random";
 import { Tile } from "../map/Tile";
+import { BuildingEffects } from "../city/BuildingEffects";
 
 export interface CombatResult {
   attackerHealth: number;
@@ -82,23 +83,23 @@ export class Combat {
   }
 
   public static getAttackModifiers(fromTile: Tile, targetTile: Tile): CombatModifier[] {
-    const modifiers = Combat.getOwnerModifiers(fromTile);
+    const modifiers = [...Combat.getOwnerModifiers(fromTile), ...Combat.getCityAttackModifiers(fromTile, targetTile)];
     if (!Tile.riverCrosses(fromTile, targetTile)) return modifiers;
 
     return [{ label: "Across river", value: -Combat.RIVER_CROSSING_ATTACK_PENALTY }, ...modifiers];
   }
 
   // A ranged attacker isn't hurt by rivers, only by its owner's state (see getOwnerModifiers()).
-  public static getRangedAttackModifiers(fromTile: Tile): CombatModifier[] {
-    return Combat.getOwnerModifiers(fromTile);
+  public static getRangedAttackModifiers(fromTile: Tile, targetTile?: Tile): CombatModifier[] {
+    return [...Combat.getOwnerModifiers(fromTile), ...Combat.getCityAttackModifiers(fromTile, targetTile)];
   }
 
   public static getAttackStrength(baseStrength: number, fromTile: Tile, targetTile: Tile): number {
     return baseStrength * (1 + Combat.sumModifiers(Combat.getAttackModifiers(fromTile, targetTile)));
   }
 
-  public static getRangedAttackStrength(rangedStrength: number, fromTile: Tile): number {
-    return rangedStrength * (1 + Combat.sumModifiers(Combat.getRangedAttackModifiers(fromTile)));
+  public static getRangedAttackStrength(rangedStrength: number, fromTile: Tile, targetTile?: Tile): number {
+    return rangedStrength * (1 + Combat.sumModifiers(Combat.getRangedAttackModifiers(fromTile, targetTile)));
   }
 
   public static getDefenseStrength(baseStrength: number, tile: Tile): number {
@@ -172,7 +173,9 @@ export class Combat {
     minDefenderHealth?: number;
   }): CombatPrediction {
     const defenderModifiers = options.defenderModifiers ?? Combat.getDefenseModifiers(options.targetTile);
-    const attackerModifiers = options.fromTile ? Combat.getRangedAttackModifiers(options.fromTile) : [];
+    const attackerModifiers = options.fromTile
+      ? Combat.getRangedAttackModifiers(options.fromTile, options.targetTile)
+      : [];
     const attackerStrength = options.attackerRangedStrength * (1 + Combat.sumModifiers(attackerModifiers));
     const defenderStrength = options.defenderBaseStrength * (1 + Combat.sumModifiers(defenderModifiers));
     const maxDamage = options.defenderHealth - (options.minDefenderHealth ?? 0);
@@ -308,10 +311,24 @@ export class Combat {
   }
 
   // What the owner of the unit fighting from this tile brings to the fight: a very unhappy empire's
-  // units fight worse (see PlayerHappiness).
+  // units fight worse (see PlayerHappiness), and Himeji Castle's fight better in their own borders.
   private static getOwnerModifiers(tile: Tile): CombatModifier[] {
     const fighter = tile.getUnits().find((unit) => unit.canFight());
-    return fighter?.getPlayer().getHappiness().getCombatModifiers() ?? [];
+    if (!fighter) return [];
+
+    const player = fighter.getPlayer();
+    return [
+      ...player.getHappiness().getCombatModifiers(),
+      ...BuildingEffects.getTerritoryCombatModifiers(player, tile)
+    ];
+  }
+
+  // The Statue of Zeus's bonus, when the unit fighting from fromTile attacks a city.
+  private static getCityAttackModifiers(fromTile: Tile, targetTile?: Tile): CombatModifier[] {
+    if (!targetTile?.getCity()) return [];
+
+    const fighter = fromTile.getUnits().find((unit) => unit.canFight());
+    return fighter ? BuildingEffects.getCityAttackModifiers(fighter.getPlayer()) : [];
   }
 
   private static sumModifiers(modifiers: CombatModifier[]): number {

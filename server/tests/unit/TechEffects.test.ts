@@ -15,7 +15,7 @@ describe('TechEffects', () => {
     return tile;
   };
   const ownedBy = (tile: Tile, owner: Player) => {
-    tile.setCityTerritoryOf({ getPlayer: () => owner } as unknown as City);
+    tile.setCityTerritoryOf({ getPlayer: () => owner, getBuildings: (): unknown[] => [] } as unknown as City);
     return tile;
   };
   const yieldsOf = (tile: Tile, viewer?: Player) => {

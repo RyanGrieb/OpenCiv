@@ -4,12 +4,14 @@ import { Tooltip, TooltipLine } from "../../components/Tooltip";
 
 /**
  * Shown beside a building or wonder in the production and purchase lists while the mouse is over it:
- * what the city gets once it's built, and what it costs to keep up. The server sends the numbers.
+ * what the city gets once it's built, and what it costs to keep up. The server sends the numbers and
+ * the words for its effects, including the ones the game doesn't have the systems for yet.
  */
 export class BuildingTooltip extends Tooltip {
   private static readonly BONUS_COLOR = "#8ee07a";
   private static readonly UPKEEP_COLOR = "#ff8a80";
   private static readonly WONDER_COLOR = "#f0c850";
+  private static readonly NOT_YET_COLOR = "gray";
 
   /** Builds the tooltip with its top-left corner at (x, y). */
   public static async create(x: number, y: number, building: BuildingData): Promise<BuildingTooltip> {
@@ -24,7 +26,7 @@ export class BuildingTooltip extends Tooltip {
     const kind = BuildingTooltip.getWonderText(building);
     if (kind) lines.push({ text: kind, color: BuildingTooltip.WONDER_COLOR });
 
-    const bonuses = BuildingTooltip.getBonuses(building);
+    const bonuses = [...BuildingTooltip.getBonuses(building), ...(building.effect_lines ?? [])];
     if (bonuses.length === 0) lines.push({ text: "No bonuses", color: "gray", indent: true });
     bonuses.forEach((text) => lines.push({ text, color: BuildingTooltip.BONUS_COLOR, indent: true }));
 
@@ -35,6 +37,11 @@ export class BuildingTooltip extends Tooltip {
         indent: true
       });
     }
+
+    const notYet = building.not_yet ?? [];
+    if (notYet.length > 0) lines.push({ text: "Not in the game yet:", color: BuildingTooltip.NOT_YET_COLOR });
+    notYet.forEach((text) => lines.push({ text, color: BuildingTooltip.NOT_YET_COLOR, indent: true }));
+
     return lines;
   }
 

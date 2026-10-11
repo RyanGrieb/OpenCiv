@@ -9,6 +9,7 @@ import { PlayerDiplomacy } from "../diplomacy/PlayerDiplomacy";
 import { MapResources } from "./MapResources";
 import { NaturalWonders } from "./NaturalWonders";
 import { TechEffects } from "../research/TechEffects";
+import { BuildingEffects } from "../city/BuildingEffects";
 
 // A tile/building stat-line is represented as an array of single-key partial objects
 // (e.g. [{ science: 0 }, { gold: 0 }, ...]) rather than one flat dictionary.
@@ -935,7 +936,8 @@ export class Tile {
   }
 
   // player is whose techs to go by: resources they can't see yet yield nothing, and their techs'
-  // tile bonuses apply. Defaults to the tile's owner.
+  // tile bonuses apply. Defaults to the tile's owner. The buildings of the city whose territory it is
+  // add theirs too (a Lighthouse's +1 Food on sea tiles).
   public getStats(player: Player | undefined = this.getOwner()): StatEntry[] {
     const tileStats: StatEntry[] = [
       { science: 0 },
@@ -949,6 +951,7 @@ export class Tile {
     const yieldingTypes = this.getYieldingTileTypes().filter((type) => !TechEffects.isResourceHidden(type, player));
     const statLines = yieldingTypes.map((type) => Tile.getAllTileStats()[type.toUpperCase()]?.stats ?? []);
     statLines.push(TechEffects.getTileBonuses(this, player));
+    statLines.push(BuildingEffects.getTileBonuses(this));
 
     for (const statLine of statLines) {
       for (const statData of statLine) {

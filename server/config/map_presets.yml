@@ -172,3 +172,22 @@ presets:
       - "g p g S T g g"
       - " g g g g g F g"
       - "g h g g p g g"
+
+  building_effects:
+    description: A coastal city with Desert and Jungle beside it and a Work Boat, to watch buildings boost tiles and ships.
+    legend:
+      "g": [grass]
+      "~": [shallow_ocean]
+      "O": [ocean]
+      "d": [desert]
+      "j": [grass, jungle]
+      "S": [grass]
+      "B": [shallow_ocean]
+    units:
+      "B": Work Boat
+    rows:
+      - "O O ~ ~ ~ ~ O O O"
+      - " ~ ~ ~ ~ B ~ ~ O O"
+      - "g g d d S ~ ~ ~ O"
+      - " g g j j ~ ~ ~ ~ O"
+      - "g g g g g ~ ~ O O"

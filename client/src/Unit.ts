@@ -408,6 +408,15 @@ export class Unit extends ActorGroup {
       }
     });
 
+    // The owner's buildings changed how far the unit moves in a turn (the Great Lighthouse for ships).
+    NetworkEvents.on<{ id: number; defaultMoveDistance: number }>({
+      eventName: "unitMaxMovement",
+      parentObject: this,
+      callback: (data) => {
+        if (this.id === data.id) this.defaultMoveDistance = data.defaultMoveDistance;
+      }
+    });
+
     NetworkEvents.on<UnitBuildStatus & { id: number; remainingMovement?: number }>({
       eventName: "unitBuildStatus",
       parentObject: this,
