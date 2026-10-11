@@ -11,6 +11,15 @@ import { LoadingBar } from "./LoadingBar";
  * in-game scene shows it over the map until every tile is drawn, so the two look like one screen.
  */
 export class LoadingScreen extends ActorGroup {
+  // Where each stage of loading a game starts on the bar. The server generating the world fills the
+  // first half (it reports its own progress, 0 to 1, scaled into it); the client then waits for the
+  // map, receives it, draws its chunks and blends their shores and terrain edges.
+  public static readonly SERVER_SHARE = 0.5;
+  public static readonly WAITING_FOR_MAP = 0.5;
+  public static readonly RECEIVING_MAP = 0.55;
+  public static readonly DRAWING_MAP = 0.6;
+  public static readonly BLENDING_MAP = 0.85;
+
   // Above the map, its fog and every HUD element.
   private static readonly Z = 1000;
   private static readonly BAR_WIDTH = 400;

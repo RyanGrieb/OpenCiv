@@ -20,8 +20,15 @@ export class InGameState extends State {
   private currentTurn: number;
   private totalTurnTime: number;
   private turnTime: number;
+  // Set once the game ends, so a world still loading stops instead of spawning into a finished game.
+  private destroyed: boolean;
 
   // Where no player's starting units may be placed.
+  // Where each step of building the world starts on the server's share of the loading bar (0 to 1).
+  // Generating the map, placing the ancient ruins and placing the barbarian camps take about as long.
+  private static readonly PLACING_CIVS = 0.4;
+  private static readonly PLACING_RUINS = 0.45;
+  private static readonly PLACING_CAMPS = 0.75;
   private static readonly SPAWN_AVOID_TILE_TYPES = [
     "ocean",
     "shallow_ocean",
@@ -119,6 +126,7 @@ export class InGameState extends State {
     this.totalTurnTime = 60; //TODO: Allow modification
     this.currentTurn = 0;
     this.turnTime = 0;
+    this.destroyed = false;
 
     // Set loading screen for players
     Game.getInstance()
@@ -127,9 +135,6 @@ export class InGameState extends State {
         player.sendNetworkEvent({ event: "setScene", scene: "loading_scene" });
       });
 
-    GameMap.init();
-
-    console.log("InGame state initialized");
     //TODO: Instead of an error message, make the player a spectator
     ServerEvents.on({
       eventName: "connection",
@@ -165,6 +170,78 @@ export class InGameState extends State {
       }
     });
 
+    ServerEvents.on({
+      eventName: "allPlayersLoaded",
+      parentObject: this,
+      callback: () => {
+        // Increment the turn
+        this.incrementTurn();
+        this.beginTurnTimer();
+      }
+    });
+
+    ServerEvents.on({
+      eventName: "nextTurnRequest",
+      parentObject: this,
+      callback: (data, websocket) => {
+        const player = Game.getInstance().getPlayerFromWebsocket(websocket);
+        player.setRequestedNextTurn(data["value"]);
+
+        const allRequested = Array.from(Game.getInstance().getPlayers().values()).every((player) =>
+          player.hasRequestedNextTurn()
+        );
+
+        if (allRequested) {
+          this.incrementTurn();
+          Game.getInstance()
+            .getPlayers()
+            .forEach((player) => {
+              player.setRequestedNextTurn(false);
+            });
+        }
+      }
+    });
+
+    this.loadWorld().catch((error) => console.error("Failed to load the world:", error));
+  }
+
+  /**
+   * Generates the map and places every civilization, ruin and barbarian camp on it, telling the
+   * players' loading screens about each step, then moves the players into the game. Hands the event
+   * loop back between steps so each update reaches the players while the next one runs.
+   */
+  private async loadWorld() {
+    await GameMap.initInSteps((text, progress) => this.reportLoadingStep(text, progress * InGameState.PLACING_CIVS));
+    if (this.destroyed) return;
+
+    await this.reportLoadingStep("Placing civilizations", InGameState.PLACING_CIVS);
+    if (this.destroyed) return;
+    this.spawnPlayers();
+
+    // After every civ has its starting units, so the ruins and first camps keep their distance from
+    // them. Ruins go first so camps can avoid them.
+    await this.reportLoadingStep("Placing ancient ruins", InGameState.PLACING_RUINS);
+    if (this.destroyed) return;
+    AncientRuins.init();
+
+    if (Game.getInstance().getGameOptions().allowBarbarians) {
+      await this.reportLoadingStep("Placing barbarian camps", InGameState.PLACING_CAMPS);
+      if (this.destroyed) return;
+      Barbarians.init();
+    }
+
+    // Clients ask for the map and the players list (barbarians included) once they get this.
+    Game.getInstance()
+      .getPlayers()
+      .forEach((player) => player.sendNetworkEvent({ event: "setScene", scene: "in_game" }));
+
+    if (Game.getInstance().getGameOptions().startAtWar) {
+      PlayerDiplomacy.declareWarAmongAll(Array.from(Game.getInstance().getPlayers().values()));
+    }
+  }
+
+  // Gives every player a Settler and a Warrior on their spawn, and zooms them to it once they've loaded in.
+  private spawnPlayers() {
     let firstSpawnTile: Tile | undefined;
 
     Game.getInstance()
@@ -203,55 +280,15 @@ export class InGameState extends State {
             ServerEvents.call("allPlayersLoaded", {});
           }
         });
-
-        player.sendNetworkEvent({ event: "setScene", scene: "in_game" });
       });
+  }
 
-    if (Game.getInstance().getGameOptions().startAtWar) {
-      PlayerDiplomacy.declareWarAmongAll(Array.from(Game.getInstance().getPlayers().values()));
-    }
-
-    // After every civ has its starting units, so the ruins and first camps keep their distance from
-    // them. Ruins go first so camps can avoid them. Clients only ask for the map and the players list
-    // (barbarians included) once they get the scene change above, and that can't be handled before
-    // this finishes.
-    AncientRuins.init();
-
-    if (Game.getInstance().getGameOptions().allowBarbarians) {
-      Barbarians.init();
-    }
-
-    ServerEvents.on({
-      eventName: "allPlayersLoaded",
-      parentObject: this,
-      callback: () => {
-        // Increment the turn
-        this.incrementTurn();
-        this.beginTurnTimer();
-      }
-    });
-
-    ServerEvents.on({
-      eventName: "nextTurnRequest",
-      parentObject: this,
-      callback: (data, websocket) => {
-        const player = Game.getInstance().getPlayerFromWebsocket(websocket);
-        player.setRequestedNextTurn(data["value"]);
-
-        const allRequested = Array.from(Game.getInstance().getPlayers().values()).every((player) =>
-          player.hasRequestedNextTurn()
-        );
-
-        if (allRequested) {
-          this.incrementTurn();
-          Game.getInstance()
-            .getPlayers()
-            .forEach((player) => {
-              player.setRequestedNextTurn(false);
-            });
-        }
-      }
-    });
+  // Tells every player's loading screen what the server is building, and lets the message go out.
+  private async reportLoadingStep(text: string, progress: number) {
+    Game.getInstance()
+      .getPlayers()
+      .forEach((player) => player.sendNetworkEvent({ event: "loadingProgress", text: `${text}...`, progress }));
+    await new Promise((resolve) => setImmediate(resolve));
   }
 
   // Decrease trunTime by -1 every 1 second
@@ -319,6 +356,7 @@ export class InGameState extends State {
     City.refreshAllCombatStatus();
   }
   public onDestroyed() {
+    this.destroyed = true;
     if (this.turnTimeJob) {
       gracefulShutdown();
     }

@@ -75,6 +75,25 @@ export class GameMap {
     GameMap.instance.startGeneration(); // We don't call from inside constructor to reference instance on creation.
   }
 
+  /**
+   * Like init(), but awaits `beforeStep` ahead of each step of generating the terrain, so the game
+   * can tell the players' loading screens what is being built and hand the event loop back to send it.
+   * @param beforeStep Gets the step's name and how far through generating the map it is, from 0 to 1.
+   */
+  public static async initInSteps(beforeStep: (text: string, progress: number) => Promise<void>) {
+    GameMap.instance = new GameMap();
+    GameMap.instance.createOceanMap();
+
+    const steps = GameMap.instance.getTerrainSteps();
+    const totalWeight = steps.reduce((total, step) => total + step.weight, 0);
+    let weightDone = 0;
+    for (const step of steps) {
+      await beforeStep(step.text, weightDone / totalWeight);
+      step.run();
+      weightDone += step.weight;
+    }
+  }
+
   public static destroyInstance() {
     GameMap.instance = undefined;
     GameMap.horizontalWrap = false;
@@ -88,6 +107,11 @@ export class GameMap {
   private constructor() {}
 
   private startGeneration() {
+    this.createOceanMap();
+    this.generateTerrain();
+  }
+
+  private createOceanMap() {
     // Assign map dimension values
     const options = Game.getInstance().getGameOptions();
     this.mapWidth = GameMap.snapToChunks(options.mapWidth);
@@ -109,7 +133,6 @@ export class GameMap {
 
     // After creating all tile objects, assign their respective adjacent tiles
     this.initAdjacentTiles();
-    this.generateTerrain();
   }
 
   public getTiles() {
@@ -240,6 +263,25 @@ export class GameMap {
     return { x: rx, y: ry, z: rz };
   }
 
+  // Every step of generating the terrain, in order, with what the loading screen calls it and roughly
+  // how long it takes next to the others (filling lakes walks every ocean tile's whole body of water).
+  public getTerrainSteps(): { text: string; weight: number; run: () => void }[] {
+    return [
+      { text: "Raising the continents", weight: 1, run: () => this.generateLandmasses() },
+      { text: "Filling in lone ocean tiles", weight: 1, run: () => this.fillLoneOceanTiles() },
+      { text: "Raising hills and mountains", weight: 1, run: () => this.generateHillsAndMountains() },
+      { text: "Setting the climate", weight: 1, run: () => this.generateClimate() },
+      { text: "Growing plains, deserts and jungles", weight: 1, run: () => this.generateWarmBiomes() },
+      { text: "Planting forests", weight: 1, run: () => this.generateForests() },
+      { text: "Filling lakes", weight: 8, run: () => this.generateFreshwater() },
+      { text: "Shaping the coasts", weight: 1, run: () => this.generateShallowOcean() },
+      { text: "Placing resources", weight: 2, run: () => this.generateResources() },
+      { text: "Carving rivers", weight: 3, run: () => this.generateRivers() },
+      { text: "Flooding desert rivers", weight: 1, run: () => this.generateFloodplains() },
+      { text: "Placing natural wonders", weight: 1, run: () => this.placeNaturalWonders() }
+    ];
+  }
+
   public generateTerrain() {
     /**
      * Map generation:
@@ -256,515 +298,9 @@ export class GameMap {
      * 7. First, we focus on hot & cold factors. We generate a random gradient, where there are higher chances of cold tiles at the top and bottom parts of the map & vice. versa for hot tiles.
      *
      */
-
-    // == Generate grass circles ==
-    const LAND_MASS_PARAM = 6;
-    const landMassSize = ((this.mapWidth * this.mapHeight) / 12.5) * (LAND_MASS_PARAM + 2);
-    const maxPathLength = 140;
-    const maxLandmassIterations = 10000;
-    let landmassIterations = 0;
-
-    while (this.getTotalGeographyLandMass() < landMassSize) {
-      landmassIterations++;
-      let rndX = random.int(10, this.mapWidth - 11);
-      let rndY = random.int(10, this.mapHeight - 11);
-      const currentPathLength = random.int(40, maxPathLength);
-
-      // Draw a bunch of broken circles in a random direction until currentPathLength limit is reached.
-      this.generateTilePath({
-        tile: this.tiles[rndX][rndY],
-        pathLength: currentPathLength,
-        setTileType: "grass",
-        followTileTypes: ["ocean"],
-        setTileChance: 0.5,
-        overrideWater: true
-      });
-
-      if (landmassIterations >= maxLandmassIterations) break;
+    for (const step of this.getTerrainSteps()) {
+      step.run();
     }
-    // == Generate grass circles ==
-
-    // == Clear isolated single ocean tiles
-    for (let x = 0; x < this.mapWidth; x++) {
-      for (let y = 0; y < this.mapHeight; y++) {
-        const tile = this.tiles[x][y];
-
-        if (tile.containsTileType("ocean")) {
-          let surroundedByLand = true;
-          for (const adjTile of tile.getAdjacentTiles()) {
-            if (!adjTile) continue;
-
-            if (adjTile.containsTileType("ocean")) {
-              surroundedByLand = false;
-            }
-          }
-
-          if (surroundedByLand) {
-            tile.replaceTileType("ocean", "grass");
-          }
-        }
-      }
-    }
-    // == Clear isolated single ocean tiles
-
-    // == Generate hills & mountains
-    const tallestTiles: Tile[] = [];
-
-    console.log("Generating tallest tiles...");
-    for (let x = 0; x < this.mapWidth; x++) {
-      for (let y = 0; y < this.mapHeight; y++) {
-        // Insert into tallestTiles while maintaining a sorted order
-        const currentTile = this.tiles[x][y];
-
-        if (currentTile.containsTileType("ocean")) continue;
-
-        let low = 0;
-        let high = tallestTiles.length;
-
-        while (low < high) {
-          var mid = (low + high) >>> 1; // Same as: (low + high) / 2
-          if (tallestTiles[mid].getGenerationHeight() > currentTile.getGenerationHeight()) low = mid + 1;
-          else high = mid;
-        }
-        const insertionIndex = low;
-
-        tallestTiles.splice(insertionIndex, 0, currentTile);
-      }
-    }
-
-    console.log("Done generating tallest tiles - " + tallestTiles.length);
-
-    //Assign top 10% of tiles to have a 50% of becoming a hill tile
-    const totalHills = tallestTiles.length * 0.1;
-    for (let i = 0; i < totalHills; i++) {
-      if (Numbers.safeRandom() < 0.5) tallestTiles[i].replaceTileType("grass", "grass_hill");
-    }
-
-    // TODO: Spawn hills in patches?
-    // For all other grass tiles, make it a 13% of becoming a hill tile.
-    for (let i = 0; i < tallestTiles.length; i++) {
-      if (Numbers.safeRandom() < 0.13) tallestTiles[i].replaceTileType("grass", "grass_hill");
-    }
-
-    //Assign the top 5% of tiles to be mountains
-    const totalMountains = tallestTiles.length * 0.05;
-    for (let i = 0; i < totalMountains; i++) {
-      tallestTiles[i].replaceTileType("grass", "mountain");
-    }
-    // == Generate hills & mountains
-
-    // == Generate biomes (deserts,jungle,plains,tundra,snow)
-    console.log("Setting tile temperatures...");
-    for (let y = 0; y < this.mapHeight; y++) {
-      const yPercent = y / this.mapHeight;
-      for (let x = 0; x < this.mapWidth; x++) {
-        const tile = this.tiles[x][y];
-
-        if (tile.containsTileType("ocean")) continue;
-
-        if (yPercent <= 0.1 || yPercent >= 0.9) {
-          tile.setGenerationTemp(random.int(0, 31)); //TODO: Higher temp on y-values closer to midpoint.
-        } else if ((yPercent > 0.1 && yPercent < 0.3) || (yPercent > 0.7 && yPercent < 0.9)) {
-          tile.setGenerationTemp(random.int(32, 60));
-        } else {
-          tile.setGenerationTemp(random.int(60, 100));
-        }
-      }
-    }
-    console.log("Done setting tile temperatures!");
-
-    // Generate snow & tundra tiles base on y-axis (not temp...)
-    console.log("Generating snow & tundra tiles...");
-    for (let x = 0; x < this.mapWidth; x++) {
-      for (let y = 0; y < this.mapHeight; y++) {
-        const yPercent = y / this.mapHeight;
-        const currentTile = this.tiles[x][y];
-
-        if (currentTile.containsTileType("ocean")) continue;
-
-        if (yPercent <= 0.1 || yPercent >= 0.9) {
-          this.setTileBiome({ tile: currentTile, tileType: "snow" });
-        } else if ((yPercent > 0.1 && yPercent < 0.15) || (yPercent > 0.85 && yPercent < 0.9)) {
-          if (Numbers.safeRandom() > 0.25) {
-            for (const adjTile of currentTile.getAdjacentTiles()) {
-              if (!adjTile) continue;
-              //FIXME: This can create single ocean/freshwater tiles.
-              this.setTilesBiome(adjTile.getAdjacentTiles(), "tundra", 0.1);
-            }
-          }
-          this.setTileBiome({ tile: currentTile, tileType: "tundra" });
-        } else {
-        }
-      }
-    }
-    console.log("Done generating snow & tundra tiles!");
-
-    // Generate plains & deserts based on temp. Create a small path...
-
-    // For plains, pick origin tile w/ temp b/w 60,80 & create a small path
-    const numberOfPlainsBiomes = Math.ceil(this.mapArea * 0.002403846); // 10 For a standard map...
-    console.log("Generating plains biomes... - " + numberOfPlainsBiomes);
-    for (let i = 0; i < numberOfPlainsBiomes; i++) {
-      const originTile = this.getRandomTileWith({
-        tileTypes: ["grass"],
-        tempRange: [60, 80]
-      });
-      if (!originTile) continue;
-      this.generateTilePath({
-        tile: originTile,
-        pathLength: 15,
-        setTileType: "plains",
-        followTileTypes: ["grass"],
-        setTileChance: 0.95,
-        overrideWater: false
-      });
-    }
-    console.log("Done generating plains biomes!");
-
-    // For desert, pick origin tile w/ temp b/w 95,100 & create a small path
-    const numberOfDesertBiomes = Math.ceil(this.mapArea * 0.000721154); // 3 for a standard map...
-    console.log("Generating desert biomes... - " + numberOfDesertBiomes);
-    for (let i = 0; i < numberOfDesertBiomes; i++) {
-      const originTile = this.getRandomTileWith({
-        tileTypes: ["grass"],
-        tempRange: [95, 100]
-      });
-      if (!originTile) continue;
-      // Now we have random origin, create path
-      this.generateTilePath({
-        tile: originTile,
-        pathLength: 15,
-        setTileType: "desert",
-        followTileTypes: ["grass", "grass_hill"],
-        setTileChance: 0.95,
-        overrideWater: false
-      });
-    }
-    console.log("Done generating desert biomes!");
-
-    // For Jungle, pick temp b/w 60, 80 & wetness (todo: figure that out..)
-    const numberOfJungleBiomes = Math.ceil(this.mapArea * 0.000721154); // 3 for a standard map...
-    console.log("Generating jungle biomes... - " + numberOfJungleBiomes);
-    for (let i = 0; i < numberOfJungleBiomes; i++) {
-      const originTile = this.getRandomTileWith({
-        tileTypes: ["grass"],
-        tempRange: [60, 75]
-      });
-      if (!originTile) continue;
-      // Now we have random origin, create path
-      this.generateTilePath({
-        tile: originTile,
-        pathLength: 15,
-        setTileType: "jungle",
-        followTileTypes: ["grass", "grass_hill"],
-        setTileChance: 0.5,
-        overrideWater: false,
-        setFollowTileTypeOnly: true,
-        clearExistingTileTypes: false
-      });
-    }
-    console.log("Done generating jungle tiles!");
-
-    // FIXME: getRandomTileWith ["grass"] includes tiles w/ jungle already on top. Think of way to specify that we don't want this.
-
-    const numberOfForestBiomes = Math.ceil(this.mapArea * 0.024038462); // 50 for a standard map...
-    console.log("Generating forest biomes... - " + numberOfForestBiomes);
-    for (let i = 0; i < numberOfForestBiomes; i++) {
-      const originTile = this.getRandomTileWith({
-        tileTypes: ["grass"],
-        tempRange: [32, 90]
-      });
-      if (!originTile) continue;
-      // Now we have random origin, create path
-      this.generateTilePath({
-        tile: originTile,
-        pathLength: 5,
-        setTileType: "forest",
-        followTileTypes: ["grass", "grass_hill", "plains", "plains_hill", "tundra", "tundra_hill"],
-        setTileChance: 0.1,
-        overrideWater: false,
-        setFollowTileTypeOnly: true,
-        clearExistingTileTypes: false
-      });
-    }
-    console.log("Done generating forest tiles!");
-
-    // == Generate freshwater tiles.
-    console.log("Generating freshwater tiles...");
-
-    for (const tile of [...TileIndexer.getTilesByTileType("ocean")]) {
-      let freshwater = true; // False if one of the adj tile is undefined (map edge)
-      let traverseQueue: Tile[] = [];
-      let traversedTiles: Tile[] = [];
-
-      traverseQueue.push(tile);
-      while (traverseQueue.length > 0) {
-        let currentTile: Tile = traverseQueue.shift();
-        traversedTiles.push(currentTile);
-
-        for (const adjTile of currentTile.getAdjacentTiles()) {
-          if (!adjTile) {
-            freshwater = false;
-          } else if (adjTile.containsTileType("ocean")) {
-            if (!traversedTiles.includes(adjTile) && !traverseQueue.includes(adjTile)) {
-              traverseQueue.push(adjTile);
-            }
-          }
-        }
-      }
-
-      if (freshwater) {
-        for (let tile of traversedTiles) {
-          tile.replaceTileType("ocean", "freshwater");
-        }
-      }
-    }
-    console.log("Done generating freshwater tiles!");
-    // == Generate freshwater tiles
-
-    // == Generate shallow ocean tiles
-    console.log("Generating shallow ocean tiles...");
-    for (const tile of [...TileIndexer.getTilesByTileType("ocean")]) {
-      //tile.addTileType("debug2");
-      for (const adjTile of tile.getAdjacentTiles()) {
-        if (!adjTile) continue;
-        if (!adjTile.containsTileTypes(["ocean", "shallow_ocean"])) {
-          tile.replaceTileType("ocean", "shallow_ocean");
-        }
-      }
-    }
-
-    for (const tile of [...TileIndexer.getTilesByTileType("ocean")]) {
-      for (const adjTile of tile.getAdjacentTiles()) {
-        if (!adjTile) continue;
-        if (adjTile.containsTileType("shallow_ocean") && Numbers.safeRandom() > 0.75) {
-          tile.replaceTileType("ocean", "shallow_ocean");
-        }
-      }
-    }
-
-    console.log("Done generating shallow ocean tiles!");
-    // == Generate shallow ocean tiles
-
-    // == Generate strategic, bonus and luxury resources
-    console.log("Generating resources...");
-    const numberOfResources = Math.ceil(this.mapArea * 0.04); // 75 for tiny map..
-    for (let i = 0; i < numberOfResources * 3; i++) {
-      let mapResourceType = "N/A";
-      if (i < numberOfResources) {
-        mapResourceType = "bonus";
-      } else if (i > numberOfResources && i < numberOfResources * 1.5) {
-        mapResourceType = "strategic";
-      } else {
-        mapResourceType = "luxury";
-      }
-      const mapResource = MapResources.getRandomMapResource({
-        mapResourceType: mapResourceType
-      });
-
-      const originTile = this.getRandomTileWith({
-        tileTypes: mapResource.getSpawnTiles(),
-        onAdditionalTileTypes: mapResource.spawnOnAdditionalTileTypes(),
-        avoidResourceTiles: true,
-        tempRange: [mapResource.getMinTemp(), mapResource.getMaxTemp()]
-      });
-
-      if (!originTile) {
-        console.log("no origin tile found");
-        continue;
-      }
-
-      console.log("Generate resource: " + mapResource.name);
-      // Now we have random origin, create path
-      this.generateTilePath({
-        tile: originTile,
-        pathLength: mapResource.pathLength,
-        setTileType: mapResource.name,
-        followTileTypes: mapResource.getSpawnTiles(),
-        setTileChance: mapResource.getSetChance(),
-        minTilesSet: mapResource.getMinTilesSet(),
-        maxTilesSet: mapResource.getMaxTilesSet(),
-        overrideWater: mapResource.getSpawnTiles().includes("ocean") ? true : false,
-        setFollowTileTypeOnly: true,
-        clearExistingTileTypes: false,
-        insertIndex: 1, // Puts the resource behind trees, jungle
-        onAdditionalTileTypes: mapResource.onAdditionalTileTypes,
-        avoidResourceTiles: true
-      });
-    }
-    console.log("Done generating resources!");
-    // == Generate strategic, bonus and luxury resources
-
-    // == Generate rivers
-    console.log("Generating rivers...");
-    //const riverAmount = 25; //FIXME: The higher number the higher chance of infinite loop.
-    const riverAmount = this.mapArea * 0.015;
-    rivenGenLoop: for (let riverIndex = 0; riverIndex < riverAmount; riverIndex++) {
-      //console.log("riverGenLoop");
-      let originTile: Tile = undefined;
-      findRiverOriginLoop: while (!originTile) {
-        originTile = this.getRandomTileWith({
-          tileTypes: ["grass_hill", "plains_hill", "desert_hill", "tundra_hill", "snow_hill", "mountain"]
-        });
-
-        // If we couldn't find a random tile, just give up.
-        if (!originTile) continue;
-
-        for (const adjTile of originTile.getAdjacentTiles()) {
-          if (!adjTile) continue;
-
-          if (adjTile.containsTileType("river_candidate") || adjTile.isWater()) {
-            originTile = undefined;
-            continue findRiverOriginLoop;
-          }
-        }
-
-        if (originTile.hasRiver()) {
-          originTile = undefined;
-          continue;
-        }
-      }
-
-      // originTile.addTileType("debug3");
-      originTile.addTileType("river_candidate");
-
-      const currentRiverTiles: Tile[] = [originTile];
-
-      let currentTile = originTile;
-      let lastTraversedTile = undefined;
-      let riverLength = 1;
-
-      riverPathLoop: while (true) {
-        const nextTileCandidates: Tile[] = this.getNextPotentialRiverTiles(currentTile, lastTraversedTile, originTile);
-
-        lastTraversedTile = currentTile;
-
-        if (nextTileCandidates.length < 1) {
-          currentTile = undefined;
-          break riverPathLoop;
-        }
-
-        // Traverse to the next tile from nextTileCandidates[]
-        currentTile = nextTileCandidates[random.int(0, nextTileCandidates.length - 1)];
-
-        if (!currentTile) {
-          riverIndex--;
-          break riverPathLoop;
-        }
-
-        //currentTile.addTileType("debug2");
-        currentTile.addTileType("river_candidate");
-
-        currentRiverTiles.push(currentTile);
-        riverLength++;
-
-        // If the next tile already has a river, we can end this river, and attempt to connect later on.
-        if (currentTile.hasRiver()) break riverPathLoop;
-
-        // If the next tile has an adjacent river, we can end this river, and attempt to flow into that body of water.
-        if (currentTile.isWater()) break riverPathLoop;
-
-        if (riverLength >= 50) break riverPathLoop;
-      }
-
-      for (let i = 0; i < currentRiverTiles.length; i++) {
-        const tile = currentRiverTiles[i];
-        tile.removeTileType("river_candidate");
-      }
-
-      //FIXME: This causes infinite loop on smaller maps...
-      if (currentRiverTiles.length < 10) {
-        riverIndex--;
-        continue;
-      }
-
-      this.cacheSetRiverSides();
-      let appliedRiverSides = 0;
-
-      for (let i = 0; i < currentRiverTiles.length; i++) {
-        const tile = currentRiverTiles[i];
-        //tile.removeTileType("river_candidate");
-
-        let prevTile: Tile = undefined;
-        let nextTile: Tile = undefined;
-
-        if (i < currentRiverTiles.length - 1) nextTile = currentRiverTiles[i + 1]; // Include the next tile we are traversing
-
-        if (i > 0) prevTile = currentRiverTiles[i - 1]; // Ensure we are including the previous tile such that we can connect to it through our method.
-
-        if (!tile.containsTileType("debug3")) {
-          //tile.addTileType("debug2");
-        }
-        /*console.log(
-          "Generating river for tile: [" +
-            tile.getX() +
-            "," +
-            tile.getY() +
-            "] on river index: " +
-            riverIndex
-        );*/
-        tile.applyRiverSide({
-          originTile: i == 0,
-          previousTile: prevTile,
-          nextTile: nextTile
-        });
-        appliedRiverSides++;
-      }
-
-      //TODO: Try to attach to water tiles at the end of our river, and try to attach to other existing rivers if possible.
-
-      // Determine if we created a tile w/ more than 4 river-sides, remove this river if we did that.
-      let tooManyRiverSides = false;
-      for (let i = 0; i < currentRiverTiles.length; i++) {
-        const tile = currentRiverTiles[i];
-        if (tile.getRiverSideIndexes({ value: true }).length > 3) tooManyRiverSides = true;
-      }
-
-      if (tooManyRiverSides || appliedRiverSides < 3) {
-        /*console.log(
-          "Failed to generate tile, starting at: " +
-            currentRiverTiles[0].getX() +
-            "," +
-            currentRiverTiles[0].getY() +
-            " - " +
-            tooManyRiverSides +
-            " || " +
-            appliedRiverSides
-        );*/
-        //console.log(tooManyRiverSides + "," + tooManyRiverSides);
-
-        for (let i = 0; i < currentRiverTiles.length; i++) {
-          const tile = currentRiverTiles[i];
-          tile.removeTileType("debug3");
-          tile.removeTileType("debug2");
-        }
-      }
-
-      if (tooManyRiverSides || appliedRiverSides < 3) {
-        riverIndex--;
-        //console.log("Oh no!");
-        //currentRiverTiles[0].addTileType("debug1");
-        this.restoreCachedRiverSides(); //FIXME: This fails to delete river-sides adj to border sometimes
-      }
-      this.removeTopRiverSideCache();
-    }
-    console.log("Done generating rivers!");
-    // == Generate rivers
-
-    // == Apply floodplains for desert tiles w/ river tiles.
-    console.log("Generating floodplains...");
-    const desertTiles = TileIndexer.getTilesByTileType("desert");
-    for (const tile of desertTiles) {
-      if (tile.hasRiver()) {
-        tile.replaceTileType("desert", "floodplains");
-      }
-    }
-
-    // == Apply floodplains for desert tiles w/ river tiles
-    console.log("Done generating floodplains!");
-
-    // == Place natural wonders, last so nothing else lands on top of one
-    NaturalWonders.generate(this.tiles, NaturalWonders.getCountForMapArea(this.mapArea));
   }
 
   public getNextPotentialRiverTiles(currentTile: Tile, lastTraversedTile: Tile, originTile: Tile) {
@@ -955,6 +491,539 @@ export class GameMap {
         })
       )
     });
+  }
+
+  private generateLandmasses() {
+    // == Generate grass circles ==
+    const LAND_MASS_PARAM = 6;
+    const landMassSize = ((this.mapWidth * this.mapHeight) / 12.5) * (LAND_MASS_PARAM + 2);
+    const maxPathLength = 140;
+    const maxLandmassIterations = 10000;
+    let landmassIterations = 0;
+
+    while (this.getTotalGeographyLandMass() < landMassSize) {
+      landmassIterations++;
+      let rndX = random.int(10, this.mapWidth - 11);
+      let rndY = random.int(10, this.mapHeight - 11);
+      const currentPathLength = random.int(40, maxPathLength);
+
+      // Draw a bunch of broken circles in a random direction until currentPathLength limit is reached.
+      this.generateTilePath({
+        tile: this.tiles[rndX][rndY],
+        pathLength: currentPathLength,
+        setTileType: "grass",
+        followTileTypes: ["ocean"],
+        setTileChance: 0.5,
+        overrideWater: true
+      });
+
+      if (landmassIterations >= maxLandmassIterations) break;
+    }
+    // == Generate grass circles ==
+  }
+
+  private fillLoneOceanTiles() {
+    // == Clear isolated single ocean tiles
+    for (let x = 0; x < this.mapWidth; x++) {
+      for (let y = 0; y < this.mapHeight; y++) {
+        const tile = this.tiles[x][y];
+
+        if (tile.containsTileType("ocean")) {
+          let surroundedByLand = true;
+          for (const adjTile of tile.getAdjacentTiles()) {
+            if (!adjTile) continue;
+
+            if (adjTile.containsTileType("ocean")) {
+              surroundedByLand = false;
+            }
+          }
+
+          if (surroundedByLand) {
+            tile.replaceTileType("ocean", "grass");
+          }
+        }
+      }
+    }
+    // == Clear isolated single ocean tiles
+  }
+
+  private generateHillsAndMountains() {
+    // == Generate hills & mountains
+    const tallestTiles: Tile[] = [];
+
+    console.log("Generating tallest tiles...");
+    for (let x = 0; x < this.mapWidth; x++) {
+      for (let y = 0; y < this.mapHeight; y++) {
+        // Insert into tallestTiles while maintaining a sorted order
+        const currentTile = this.tiles[x][y];
+
+        if (currentTile.containsTileType("ocean")) continue;
+
+        let low = 0;
+        let high = tallestTiles.length;
+
+        while (low < high) {
+          var mid = (low + high) >>> 1; // Same as: (low + high) / 2
+          if (tallestTiles[mid].getGenerationHeight() > currentTile.getGenerationHeight()) low = mid + 1;
+          else high = mid;
+        }
+        const insertionIndex = low;
+
+        tallestTiles.splice(insertionIndex, 0, currentTile);
+      }
+    }
+
+    console.log("Done generating tallest tiles - " + tallestTiles.length);
+
+    //Assign top 10% of tiles to have a 50% of becoming a hill tile
+    const totalHills = tallestTiles.length * 0.1;
+    for (let i = 0; i < totalHills; i++) {
+      if (Numbers.safeRandom() < 0.5) tallestTiles[i].replaceTileType("grass", "grass_hill");
+    }
+
+    // TODO: Spawn hills in patches?
+    // For all other grass tiles, make it a 13% of becoming a hill tile.
+    for (let i = 0; i < tallestTiles.length; i++) {
+      if (Numbers.safeRandom() < 0.13) tallestTiles[i].replaceTileType("grass", "grass_hill");
+    }
+
+    //Assign the top 5% of tiles to be mountains
+    const totalMountains = tallestTiles.length * 0.05;
+    for (let i = 0; i < totalMountains; i++) {
+      tallestTiles[i].replaceTileType("grass", "mountain");
+    }
+    // == Generate hills & mountains
+  }
+
+  private generateClimate() {
+    // == Generate biomes (deserts,jungle,plains,tundra,snow)
+    console.log("Setting tile temperatures...");
+    for (let y = 0; y < this.mapHeight; y++) {
+      const yPercent = y / this.mapHeight;
+      for (let x = 0; x < this.mapWidth; x++) {
+        const tile = this.tiles[x][y];
+
+        if (tile.containsTileType("ocean")) continue;
+
+        if (yPercent <= 0.1 || yPercent >= 0.9) {
+          tile.setGenerationTemp(random.int(0, 31)); //TODO: Higher temp on y-values closer to midpoint.
+        } else if ((yPercent > 0.1 && yPercent < 0.3) || (yPercent > 0.7 && yPercent < 0.9)) {
+          tile.setGenerationTemp(random.int(32, 60));
+        } else {
+          tile.setGenerationTemp(random.int(60, 100));
+        }
+      }
+    }
+    console.log("Done setting tile temperatures!");
+
+    // Generate snow & tundra tiles base on y-axis (not temp...)
+    console.log("Generating snow & tundra tiles...");
+    for (let x = 0; x < this.mapWidth; x++) {
+      for (let y = 0; y < this.mapHeight; y++) {
+        const yPercent = y / this.mapHeight;
+        const currentTile = this.tiles[x][y];
+
+        if (currentTile.containsTileType("ocean")) continue;
+
+        if (yPercent <= 0.1 || yPercent >= 0.9) {
+          this.setTileBiome({ tile: currentTile, tileType: "snow" });
+        } else if ((yPercent > 0.1 && yPercent < 0.15) || (yPercent > 0.85 && yPercent < 0.9)) {
+          if (Numbers.safeRandom() > 0.25) {
+            for (const adjTile of currentTile.getAdjacentTiles()) {
+              if (!adjTile) continue;
+              //FIXME: This can create single ocean/freshwater tiles.
+              this.setTilesBiome(adjTile.getAdjacentTiles(), "tundra", 0.1);
+            }
+          }
+          this.setTileBiome({ tile: currentTile, tileType: "tundra" });
+        } else {
+        }
+      }
+    }
+    console.log("Done generating snow & tundra tiles!");
+  }
+
+  private generateWarmBiomes() {
+    // Generate plains & deserts based on temp. Create a small path...
+
+    // For plains, pick origin tile w/ temp b/w 60,80 & create a small path
+    const numberOfPlainsBiomes = Math.ceil(this.mapArea * 0.002403846); // 10 For a standard map...
+    console.log("Generating plains biomes... - " + numberOfPlainsBiomes);
+    for (let i = 0; i < numberOfPlainsBiomes; i++) {
+      const originTile = this.getRandomTileWith({
+        tileTypes: ["grass"],
+        tempRange: [60, 80]
+      });
+      if (!originTile) continue;
+      this.generateTilePath({
+        tile: originTile,
+        pathLength: 15,
+        setTileType: "plains",
+        followTileTypes: ["grass"],
+        setTileChance: 0.95,
+        overrideWater: false
+      });
+    }
+    console.log("Done generating plains biomes!");
+
+    // For desert, pick origin tile w/ temp b/w 95,100 & create a small path
+    const numberOfDesertBiomes = Math.ceil(this.mapArea * 0.000721154); // 3 for a standard map...
+    console.log("Generating desert biomes... - " + numberOfDesertBiomes);
+    for (let i = 0; i < numberOfDesertBiomes; i++) {
+      const originTile = this.getRandomTileWith({
+        tileTypes: ["grass"],
+        tempRange: [95, 100]
+      });
+      if (!originTile) continue;
+      // Now we have random origin, create path
+      this.generateTilePath({
+        tile: originTile,
+        pathLength: 15,
+        setTileType: "desert",
+        followTileTypes: ["grass", "grass_hill"],
+        setTileChance: 0.95,
+        overrideWater: false
+      });
+    }
+    console.log("Done generating desert biomes!");
+
+    // For Jungle, pick temp b/w 60, 80 & wetness (todo: figure that out..)
+    const numberOfJungleBiomes = Math.ceil(this.mapArea * 0.000721154); // 3 for a standard map...
+    console.log("Generating jungle biomes... - " + numberOfJungleBiomes);
+    for (let i = 0; i < numberOfJungleBiomes; i++) {
+      const originTile = this.getRandomTileWith({
+        tileTypes: ["grass"],
+        tempRange: [60, 75]
+      });
+      if (!originTile) continue;
+      // Now we have random origin, create path
+      this.generateTilePath({
+        tile: originTile,
+        pathLength: 15,
+        setTileType: "jungle",
+        followTileTypes: ["grass", "grass_hill"],
+        setTileChance: 0.5,
+        overrideWater: false,
+        setFollowTileTypeOnly: true,
+        clearExistingTileTypes: false
+      });
+    }
+    console.log("Done generating jungle tiles!");
+  }
+
+  private generateForests() {
+    // FIXME: getRandomTileWith ["grass"] includes tiles w/ jungle already on top. Think of way to specify that we don't want this.
+
+    const numberOfForestBiomes = Math.ceil(this.mapArea * 0.024038462); // 50 for a standard map...
+    console.log("Generating forest biomes... - " + numberOfForestBiomes);
+    for (let i = 0; i < numberOfForestBiomes; i++) {
+      const originTile = this.getRandomTileWith({
+        tileTypes: ["grass"],
+        tempRange: [32, 90]
+      });
+      if (!originTile) continue;
+      // Now we have random origin, create path
+      this.generateTilePath({
+        tile: originTile,
+        pathLength: 5,
+        setTileType: "forest",
+        followTileTypes: ["grass", "grass_hill", "plains", "plains_hill", "tundra", "tundra_hill"],
+        setTileChance: 0.1,
+        overrideWater: false,
+        setFollowTileTypeOnly: true,
+        clearExistingTileTypes: false
+      });
+    }
+    console.log("Done generating forest tiles!");
+  }
+
+  private generateFreshwater() {
+    // == Generate freshwater tiles.
+    console.log("Generating freshwater tiles...");
+
+    for (const tile of [...TileIndexer.getTilesByTileType("ocean")]) {
+      let freshwater = true; // False if one of the adj tile is undefined (map edge)
+      let traverseQueue: Tile[] = [];
+      let traversedTiles: Tile[] = [];
+
+      traverseQueue.push(tile);
+      while (traverseQueue.length > 0) {
+        let currentTile: Tile = traverseQueue.shift();
+        traversedTiles.push(currentTile);
+
+        for (const adjTile of currentTile.getAdjacentTiles()) {
+          if (!adjTile) {
+            freshwater = false;
+          } else if (adjTile.containsTileType("ocean")) {
+            if (!traversedTiles.includes(adjTile) && !traverseQueue.includes(adjTile)) {
+              traverseQueue.push(adjTile);
+            }
+          }
+        }
+      }
+
+      if (freshwater) {
+        for (let tile of traversedTiles) {
+          tile.replaceTileType("ocean", "freshwater");
+        }
+      }
+    }
+    console.log("Done generating freshwater tiles!");
+    // == Generate freshwater tiles
+  }
+
+  private generateShallowOcean() {
+    // == Generate shallow ocean tiles
+    console.log("Generating shallow ocean tiles...");
+    for (const tile of [...TileIndexer.getTilesByTileType("ocean")]) {
+      //tile.addTileType("debug2");
+      for (const adjTile of tile.getAdjacentTiles()) {
+        if (!adjTile) continue;
+        if (!adjTile.containsTileTypes(["ocean", "shallow_ocean"])) {
+          tile.replaceTileType("ocean", "shallow_ocean");
+        }
+      }
+    }
+
+    for (const tile of [...TileIndexer.getTilesByTileType("ocean")]) {
+      for (const adjTile of tile.getAdjacentTiles()) {
+        if (!adjTile) continue;
+        if (adjTile.containsTileType("shallow_ocean") && Numbers.safeRandom() > 0.75) {
+          tile.replaceTileType("ocean", "shallow_ocean");
+        }
+      }
+    }
+
+    console.log("Done generating shallow ocean tiles!");
+    // == Generate shallow ocean tiles
+  }
+
+  private generateResources() {
+    // == Generate strategic, bonus and luxury resources
+    console.log("Generating resources...");
+    const numberOfResources = Math.ceil(this.mapArea * 0.04); // 75 for tiny map..
+    for (let i = 0; i < numberOfResources * 3; i++) {
+      let mapResourceType = "N/A";
+      if (i < numberOfResources) {
+        mapResourceType = "bonus";
+      } else if (i > numberOfResources && i < numberOfResources * 1.5) {
+        mapResourceType = "strategic";
+      } else {
+        mapResourceType = "luxury";
+      }
+      const mapResource = MapResources.getRandomMapResource({
+        mapResourceType: mapResourceType
+      });
+
+      const originTile = this.getRandomTileWith({
+        tileTypes: mapResource.getSpawnTiles(),
+        onAdditionalTileTypes: mapResource.spawnOnAdditionalTileTypes(),
+        avoidResourceTiles: true,
+        tempRange: [mapResource.getMinTemp(), mapResource.getMaxTemp()]
+      });
+
+      if (!originTile) {
+        console.log("no origin tile found");
+        continue;
+      }
+
+      console.log("Generate resource: " + mapResource.name);
+      // Now we have random origin, create path
+      this.generateTilePath({
+        tile: originTile,
+        pathLength: mapResource.pathLength,
+        setTileType: mapResource.name,
+        followTileTypes: mapResource.getSpawnTiles(),
+        setTileChance: mapResource.getSetChance(),
+        minTilesSet: mapResource.getMinTilesSet(),
+        maxTilesSet: mapResource.getMaxTilesSet(),
+        overrideWater: mapResource.getSpawnTiles().includes("ocean") ? true : false,
+        setFollowTileTypeOnly: true,
+        clearExistingTileTypes: false,
+        insertIndex: 1, // Puts the resource behind trees, jungle
+        onAdditionalTileTypes: mapResource.onAdditionalTileTypes,
+        avoidResourceTiles: true
+      });
+    }
+    console.log("Done generating resources!");
+    // == Generate strategic, bonus and luxury resources
+  }
+
+  private generateRivers() {
+    // == Generate rivers
+    console.log("Generating rivers...");
+    //const riverAmount = 25; //FIXME: The higher number the higher chance of infinite loop.
+    const riverAmount = this.mapArea * 0.015;
+    rivenGenLoop: for (let riverIndex = 0; riverIndex < riverAmount; riverIndex++) {
+      //console.log("riverGenLoop");
+      let originTile: Tile = undefined;
+      findRiverOriginLoop: while (!originTile) {
+        originTile = this.getRandomTileWith({
+          tileTypes: ["grass_hill", "plains_hill", "desert_hill", "tundra_hill", "snow_hill", "mountain"]
+        });
+
+        // If we couldn't find a random tile, just give up.
+        if (!originTile) continue;
+
+        for (const adjTile of originTile.getAdjacentTiles()) {
+          if (!adjTile) continue;
+
+          if (adjTile.containsTileType("river_candidate") || adjTile.isWater()) {
+            originTile = undefined;
+            continue findRiverOriginLoop;
+          }
+        }
+
+        if (originTile.hasRiver()) {
+          originTile = undefined;
+          continue;
+        }
+      }
+
+      // originTile.addTileType("debug3");
+      originTile.addTileType("river_candidate");
+
+      const currentRiverTiles: Tile[] = [originTile];
+
+      let currentTile = originTile;
+      let lastTraversedTile = undefined;
+      let riverLength = 1;
+
+      riverPathLoop: while (true) {
+        const nextTileCandidates: Tile[] = this.getNextPotentialRiverTiles(currentTile, lastTraversedTile, originTile);
+
+        lastTraversedTile = currentTile;
+
+        if (nextTileCandidates.length < 1) {
+          currentTile = undefined;
+          break riverPathLoop;
+        }
+
+        // Traverse to the next tile from nextTileCandidates[]
+        currentTile = nextTileCandidates[random.int(0, nextTileCandidates.length - 1)];
+
+        if (!currentTile) {
+          riverIndex--;
+          break riverPathLoop;
+        }
+
+        //currentTile.addTileType("debug2");
+        currentTile.addTileType("river_candidate");
+
+        currentRiverTiles.push(currentTile);
+        riverLength++;
+
+        // If the next tile already has a river, we can end this river, and attempt to connect later on.
+        if (currentTile.hasRiver()) break riverPathLoop;
+
+        // If the next tile has an adjacent river, we can end this river, and attempt to flow into that body of water.
+        if (currentTile.isWater()) break riverPathLoop;
+
+        if (riverLength >= 50) break riverPathLoop;
+      }
+
+      for (let i = 0; i < currentRiverTiles.length; i++) {
+        const tile = currentRiverTiles[i];
+        tile.removeTileType("river_candidate");
+      }
+
+      //FIXME: This causes infinite loop on smaller maps...
+      if (currentRiverTiles.length < 10) {
+        riverIndex--;
+        continue;
+      }
+
+      this.cacheSetRiverSides();
+      let appliedRiverSides = 0;
+
+      for (let i = 0; i < currentRiverTiles.length; i++) {
+        const tile = currentRiverTiles[i];
+        //tile.removeTileType("river_candidate");
+
+        let prevTile: Tile = undefined;
+        let nextTile: Tile = undefined;
+
+        if (i < currentRiverTiles.length - 1) nextTile = currentRiverTiles[i + 1]; // Include the next tile we are traversing
+
+        if (i > 0) prevTile = currentRiverTiles[i - 1]; // Ensure we are including the previous tile such that we can connect to it through our method.
+
+        if (!tile.containsTileType("debug3")) {
+          //tile.addTileType("debug2");
+        }
+        /*console.log(
+          "Generating river for tile: [" +
+            tile.getX() +
+            "," +
+            tile.getY() +
+            "] on river index: " +
+            riverIndex
+        );*/
+        tile.applyRiverSide({
+          originTile: i == 0,
+          previousTile: prevTile,
+          nextTile: nextTile
+        });
+        appliedRiverSides++;
+      }
+
+      //TODO: Try to attach to water tiles at the end of our river, and try to attach to other existing rivers if possible.
+
+      // Determine if we created a tile w/ more than 4 river-sides, remove this river if we did that.
+      let tooManyRiverSides = false;
+      for (let i = 0; i < currentRiverTiles.length; i++) {
+        const tile = currentRiverTiles[i];
+        if (tile.getRiverSideIndexes({ value: true }).length > 3) tooManyRiverSides = true;
+      }
+
+      if (tooManyRiverSides || appliedRiverSides < 3) {
+        /*console.log(
+          "Failed to generate tile, starting at: " +
+            currentRiverTiles[0].getX() +
+            "," +
+            currentRiverTiles[0].getY() +
+            " - " +
+            tooManyRiverSides +
+            " || " +
+            appliedRiverSides
+        );*/
+        //console.log(tooManyRiverSides + "," + tooManyRiverSides);
+
+        for (let i = 0; i < currentRiverTiles.length; i++) {
+          const tile = currentRiverTiles[i];
+          tile.removeTileType("debug3");
+          tile.removeTileType("debug2");
+        }
+      }
+
+      if (tooManyRiverSides || appliedRiverSides < 3) {
+        riverIndex--;
+        //console.log("Oh no!");
+        //currentRiverTiles[0].addTileType("debug1");
+        this.restoreCachedRiverSides(); //FIXME: This fails to delete river-sides adj to border sometimes
+      }
+      this.removeTopRiverSideCache();
+    }
+    console.log("Done generating rivers!");
+    // == Generate rivers
+  }
+
+  private generateFloodplains() {
+    // == Apply floodplains for desert tiles w/ river tiles.
+    console.log("Generating floodplains...");
+    const desertTiles = TileIndexer.getTilesByTileType("desert");
+    for (const tile of desertTiles) {
+      if (tile.hasRiver()) {
+        tile.replaceTileType("desert", "floodplains");
+      }
+    }
+
+    // == Apply floodplains for desert tiles w/ river tiles
+    console.log("Done generating floodplains!");
+  }
+
+  private placeNaturalWonders() {
+    // == Place natural wonders, last so nothing else lands on top of one
+    NaturalWonders.generate(this.tiles, NaturalWonders.getCountForMapArea(this.mapArea));
   }
 
   private getTotalGeographyLandMass() {

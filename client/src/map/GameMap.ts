@@ -1,4 +1,5 @@
 import { Game } from "../Game";
+import { LoadingScreen } from "../ui/components/LoadingScreen";
 import { RemoveUnitEvent, Unit, UnitCreationData } from "../Unit";
 import { NetworkEvents, WebsocketClient } from "../network/Client";
 import { Actor } from "../scene/Actor";
@@ -87,11 +88,6 @@ export class GameMap {
   private static readonly CHUNK_PIXEL_HEIGHT = 25 * GameMap.CHUNK_SIZE + 7;
   // Between the terrain chunks (z 0) and the fog of war (z 1) - see rebuildChunkVisuals().
   private static readonly TOP_LAYER_Z = 0.5;
-  // Where each step of the initial map load starts on the loading bar. Drawing the chunks takes
-  // most of it; blending their shores and terrain edges once every neighbor is known takes the rest.
-  private static readonly LOAD_PROGRESS_RECEIVING = 0.05;
-  private static readonly LOAD_PROGRESS_DRAWING = 0.1;
-  private static readonly LOAD_PROGRESS_BLENDING = 0.7;
 
   private oddEdgeAxis = [
     [0, -1],
@@ -490,7 +486,7 @@ export class GameMap {
           this.tiles[x] = [];
         }
 
-        this.reportLoadProgress("Receiving the map...", GameMap.LOAD_PROGRESS_RECEIVING);
+        this.reportLoadProgress("Receiving the map...", LoadingScreen.RECEIVING_MAP);
       }
     });
 
@@ -700,17 +696,17 @@ export class GameMap {
     if (!this.loadingMap) return;
 
     this.chunksDrawn++;
-    const share = GameMap.LOAD_PROGRESS_BLENDING - GameMap.LOAD_PROGRESS_DRAWING;
+    const share = LoadingScreen.BLENDING_MAP - LoadingScreen.DRAWING_MAP;
     this.reportLoadProgress(
       `Drawing the map (${this.chunksDrawn}/${this.chunksReceived})...`,
-      GameMap.LOAD_PROGRESS_DRAWING + (share * this.chunksDrawn) / this.chunksReceived
+      LoadingScreen.DRAWING_MAP + (share * this.chunksDrawn) / this.chunksReceived
     );
   }
 
   private reportBlendProgress(chunksBlended: number, chunkCount: number) {
     this.reportLoadProgress(
       `Blending coastlines and terrain (${chunksBlended}/${chunkCount})...`,
-      GameMap.LOAD_PROGRESS_BLENDING + ((1 - GameMap.LOAD_PROGRESS_BLENDING) * chunksBlended) / chunkCount
+      LoadingScreen.BLENDING_MAP + ((1 - LoadingScreen.BLENDING_MAP) * chunksBlended) / chunkCount
     );
   }
 

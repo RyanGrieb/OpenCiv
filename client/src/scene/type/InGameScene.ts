@@ -71,7 +71,7 @@ export class InGameScene extends Scene {
 
     // Carries on from the loading scene's screen until the map is drawn, with the map itself hidden
     // so its half-built chunks never show.
-    this.loadingScreen = new LoadingScreen("Waiting for the map...", 0);
+    this.loadingScreen = new LoadingScreen("Waiting for the map...", LoadingScreen.WAITING_FOR_MAP);
     this.addActor(this.loadingScreen);
     this.setWorldHidden(true);
     this.on<MapLoadProgressEvent>("mapLoadProgress", (options) => {
