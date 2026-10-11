@@ -663,12 +663,15 @@ export class GameMap {
     WebsocketClient.sendMessage({ event: "requestCityStats", cityName: city.getName() });
   }
 
-  // A newly discovered tile gives any known neighbor across the coast from it a new shore side, and
-  // any neighbor of a different kind of land a new blended side.
+  // A newly discovered tile gives any known neighbor across the coast from it a new shore side, any
+  // neighbor of a different kind of land a new blended side, and can change how a neighbor's rivers
+  // end or flow into it.
   private markNeighborEdgesDirty(tile: Tile) {
     for (const neighbor of tile.getAdjacentTiles()) {
       if (!neighbor) continue;
-      if (!Coastline.affects(tile, neighbor) && !TerrainBlend.affects(tile, neighbor)) continue;
+      const affected =
+        Coastline.affects(tile, neighbor) || TerrainBlend.affects(tile, neighbor) || River.affects(tile, neighbor);
+      if (!affected) continue;
       this.edgeDirtyChunks.add(this.chunkKeyFor(neighbor.getGridX(), neighbor.getGridY()));
     }
   }
