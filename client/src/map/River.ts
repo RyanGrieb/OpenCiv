@@ -11,7 +11,9 @@ export interface RiverOptions {
 
 export class River extends Actor {
   constructor(options: RiverOptions) {
-    const vectorOffset = -1.75; // Shift all vectors away from the center by 1.5 pixels.. (Causes our rivers to reside between tiles)
+    const height = 6;
+    // Shift the tile's corners outward by half the river's height so the band straddles the edge between tiles.
+    const vectorOffset = -height / 2;
     let side = options.side;
     let otherVectorSide = side + 1;
 
@@ -47,7 +49,7 @@ export class River extends Actor {
       y: y,
       image: Game.getInstance().getImage(GameImage.RIVER),
       width: distance,
-      height: 5
+      height: height
     });
 
     this.setRotation(rotation * (Math.PI / 180));
