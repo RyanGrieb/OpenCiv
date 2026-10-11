@@ -26,10 +26,13 @@ export class River {
   private static readonly MEANDER = 1.5;
   // World pixels between the noise's lattice points: how quickly the stream winds and changes width.
   private static readonly NOISE_SCALE = 7;
-  // Keep the meander, the width and the glints from wandering in step with each other or the shores.
+  // Keep the meander, the width and the ripples from wandering in step with each other or the shores.
   private static readonly MEANDER_SEED = 4211;
   private static readonly WIDTH_SEED = 9067;
-  private static readonly GLINT_SEED = 2753;
+  private static readonly RIPPLE_SEED = 2753;
+  // World pixels between the ripples' lattice points, and how far they shade the water either way.
+  private static readonly RIPPLE_SCALE = 4;
+  private static readonly RIPPLE_STRENGTH = 0.25;
   // How far back from its source a river reaches its full width, in pixels.
   private static readonly SOURCE_LENGTH = 14;
   // How much wider a river is where it meets water, and from how far back it starts to widen.
@@ -40,10 +43,10 @@ export class River {
   // How far into the water the river spreads out past its mouth's width, washing over the foam.
   private static readonly OUTFLOW_SPREAD = 5;
 
-  // The lake sprites' own water, with a lighter tone of it and their glints down the stream's middle.
+  // The lake sprites' own water at the banks, shading smoothly into their lighter mid tone down the
+  // stream's middle.
   private static readonly WATER: Rgb = [69, 121, 149];
-  private static readonly MIDDLE: Rgb = [85, 155, 202];
-  private static readonly GLINT: Rgb = [114, 208, 246];
+  private static readonly MIDDLE: Rgb = [78, 138, 168];
 
   private static readonly images = new Map<string, HTMLImageElement>();
   private static canvas: HTMLCanvasElement;
@@ -238,18 +241,23 @@ export class River {
     return nearest;
   }
 
-  // A pixel `distance` from the middle of the stream, as streamDistance() measures it: lighter water with the
-  // odd glint down the middle, lake water either side, and dithered banks fading into the land.
+  // A pixel `distance` from the middle of the stream, as streamDistance() measures it: water that
+  // shades smoothly from a lighter middle out to the banks, gently rippled, then dithered banks fading
+  // into the land.
   private static streamPixel(distance: number, x: number, y: number, dither: boolean): [Rgb, number] {
     const halfWidth = 1.6 + HexPixels.noise(x, y, River.NOISE_SCALE, River.WIDTH_SEED) * 0.8;
 
-    if (distance < 0.8) {
-      const glint = HexPixels.noise(x, y, 3, River.GLINT_SEED) > 0.62;
-      return [glint ? River.GLINT : River.MIDDLE, 1];
+    if (distance < halfWidth) {
+      const ripple = (HexPixels.noise(x, y, River.RIPPLE_SCALE, River.RIPPLE_SEED) * 2 - 1) * River.RIPPLE_STRENGTH;
+      const shade = Math.max(0, Math.min(1, 1 - distance / halfWidth + ripple));
+      return [River.mix(River.WATER, River.MIDDLE, shade), 1];
     }
-    if (distance < halfWidth) return [River.WATER, 1];
     if (distance < halfWidth + 0.8) return [River.WATER, dither ? 0.6 : 0.4];
     if (distance < halfWidth + 1.6) return [River.WATER, dither ? 0.2 : 0];
     return [River.WATER, 0];
+  }
+
+  private static mix(from: Rgb, to: Rgb, amount: number): Rgb {
+    return from.map((channel, i) => Math.round(channel + (to[i] - channel) * amount)) as Rgb;
   }
 }
