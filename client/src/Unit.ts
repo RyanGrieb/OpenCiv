@@ -199,6 +199,9 @@ export class Unit extends ActorGroup {
   // always draw above the selection-tile graphic, never the reverse.
   private static readonly UNIT_SPRITE_Z = 1;
   private static readonly SELECTION_TILE_Z = 0;
+  // The health bubble, civ icon and status icons sit above everything else on the map (city borders,
+  // the hovered tile, movement path lines at z 3), but below city banners (z 4) and the HUD.
+  private static readonly BADGE_Z = 3.5;
 
   // Mirrors server/src/unit/Combat.ts's MAX_HEALTH.
   public static readonly MAX_HEALTH = 100;
@@ -221,6 +224,9 @@ export class Unit extends ActorGroup {
   private domain: "land" | "sea";
   private coastOnly: boolean;
   private unitActor: Actor;
+  // Draws the health bubble and the icons around it at BADGE_Z, as its own scene object, since the
+  // unit itself sits at a z-level the map's overlays draw over.
+  private badges: UnitBadges;
   // Drawn by hand in draw() rather than as a child, so it lands on top of the health bubble.
   private civIcon: Actor | undefined;
   // Shown beside the health bubble while fortified until healed, drawn the same way as civIcon.
@@ -310,6 +316,8 @@ export class Unit extends ActorGroup {
       const tile = GameMap.getInstance().getTiles()[jsonTile.x]?.[jsonTile.y];
       if (tile) this.queuedMovementTiles.push(tile);
     }
+
+    this.badges = new UnitBadges(this, Unit.BADGE_Z);
 
     this.selectionActors = [];
     this.actions = [];
@@ -537,6 +545,7 @@ export class Unit extends ActorGroup {
 
     // Drop back below any other units stacked on this tile.
     this.setZValue(this.baseZ);
+    this.badges.setZValue(Unit.BADGE_Z);
     Game.getInstance().getCurrentScene().sortSceneObjects();
   }
 
@@ -550,6 +559,7 @@ export class Unit extends ActorGroup {
 
     // Draw above any other units stacked on this tile.
     this.setZValue(this.baseZ + 1);
+    this.badges.setZValue(Unit.BADGE_Z + 0.1);
     Game.getInstance().getCurrentScene().sortSceneObjects();
   }
 
@@ -682,7 +692,19 @@ export class Unit extends ActorGroup {
     for (const actor of sortedActors) {
       actor.draw(canvasContext);
     }
+  }
 
+  public onCreated() {
+    super.onCreated();
+    Game.getInstance().getCurrentScene().addActor(this.badges);
+  }
+
+  public onDestroyed() {
+    super.onDestroyed();
+    Game.getInstance().getCurrentScene().removeActor(this.badges);
+  }
+
+  public drawBadges(canvasContext: CanvasRenderingContext2D) {
     this.drawHealthBubble(canvasContext);
     this.civIcon?.draw(canvasContext);
     if (this.fortified) this.fortifyIcon.draw(canvasContext);
@@ -748,5 +770,20 @@ export class Unit extends ActorGroup {
 
   public getPlayer() {
     return this.player;
+  }
+}
+
+// The scene object a Unit's badges are drawn through, so they get a z-level of their own.
+class UnitBadges extends Actor {
+  private unit: Unit;
+
+  constructor(unit: Unit, z: number) {
+    // Zero-sized so it never catches the mouse; the unit itself handles that.
+    super({ x: 0, y: 0, z, width: 0, height: 0 });
+    this.unit = unit;
+  }
+
+  public draw(canvasContext: CanvasRenderingContext2D) {
+    this.unit.drawBadges(canvasContext);
   }
 }
