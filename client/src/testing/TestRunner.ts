@@ -1,3 +1,5 @@
+import { RealMouseGuard } from "./RealMouseGuard";
+
 export interface TestStep {
     name: string;
     action: () => Promise<void> | void;
@@ -51,6 +53,9 @@ export class TestRunner {
             console.log(`[TEST] ${msg}`);
         };
 
+        // Scenarios hover things themselves; the real cursor moving over the game mustn't undo that.
+        RealMouseGuard.hold();
+
         try {
             for (const step of this.steps) {
                 log(`Running: ${step.name}...`);
@@ -74,6 +79,8 @@ export class TestRunner {
             log(`TEST FAILED: ${e}`, "red");
             console.error(e);
         }
+
+        RealMouseGuard.releaseOnNextClick();
     }
 
     // A span rather than a <button>, which styles.css draws as the game's large framed button.
