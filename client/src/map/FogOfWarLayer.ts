@@ -1,7 +1,6 @@
-import { GameImage, SpriteRegion } from "../Assets";
 import { Game } from "../Game";
 import { Actor } from "../scene/Actor";
-import { SpriteAtlas } from "../SpriteAtlas";
+import { CloudCover } from "./CloudCover";
 
 /**
  * Fog of war drawn as one soft overlay over the whole map, instead of a hard-edged hex tint per
@@ -11,10 +10,10 @@ import { SpriteAtlas } from "../SpriteAtlas";
  * The overlay is a low-resolution mask, one cell per few world pixels, where each cell takes the
  * state of the tile it falls in. The mask is blurred so the states bleed into each other across
  * tile edges. Remembered tiles get a dark tint: the mask stretched over the map with image
- * smoothing on. Unexplored tiles are covered by clouds: the FOG_CLOUDS texture repeated over the
- * map at one texel per world pixel, its opacity taken from the blurred mask, so the clouds thin out
- * toward known tiles. Brighter cloud tops reach further out than the dim haze between them, which
- * makes the edge billow rather than fade evenly. The cloud cover is fully opaque by the known map's
+ * smoothing on. Unexplored tiles are covered by clouds (see CloudCover), one pixel per world pixel,
+ * their opacity taken from the blurred mask, so the clouds thin out toward known tiles. Brighter
+ * cloud tops reach further out than the dim haze between them, which makes the edge billow rather
+ * than fade evenly. The cloud cover is fully opaque by the known map's
  * hex outline, so its jagged edge never shows.
  *
  * Changes only redo the part of the mask around the tiles that changed, the next time it's drawn,
@@ -45,16 +44,12 @@ export class FogOfWarLayer extends Actor {
   private static readonly FOGGED_COLOR = [20, 20, 20, 0.55];
   // How covered a pixel must be before a cloud top shows there, how much later the haze between the
   // tops shows, and how much more cover each takes to go opaque. Tops + lag + fade stays at most 1,
-  // so a fully covered pixel is opaque whatever the texel.
+  // so a fully covered pixel is opaque however bright it is.
   private static readonly CLOUD_TOPS_FROM = 0.35;
   private static readonly CLOUD_HAZE_LAG = 0.25;
-  private static readonly CLOUD_FADE = 0.25;
+  private static readonly CLOUD_FADE = 0.2;
   // Cloud opacity snaps to this many steps, so the fade reads as pixel art rather than a gradient.
   private static readonly CLOUD_ALPHA_STEPS = 4;
-
-  // The cloud texture's pixels, and per texel how early it shows as the cover thins out (0-1).
-  private static cloudTexture: ImageData;
-  private static cloudReach: Float32Array;
 
   private readonly gridWidth: number;
   private readonly gridHeight: number;
@@ -68,10 +63,12 @@ export class FogOfWarLayer extends Actor {
   private readonly canvas: HTMLCanvasElement;
   private readonly context: CanvasRenderingContext2D;
   private readonly pixels: ImageData;
-  // The cloud cover, one pixel per world pixel.
+  // The cloud cover, one pixel per world pixel, and per pixel how early it shows as the cover thins
+  // out (0-255). Painted on the first rebuild, once the sprite atlas is surely loaded.
   private readonly cloudCanvas: HTMLCanvasElement;
   private readonly cloudContext: CanvasRenderingContext2D;
   private readonly cloudPixels: ImageData;
+  private cloudReach: Uint8Array | undefined;
   // Tile-grid bounds of everything changed since the last rebuild, or null when up to date.
   private dirty: { minX: number; minY: number; maxX: number; maxY: number } | null = null;
 
@@ -154,30 +151,6 @@ export class FogOfWarLayer extends Actor {
         values[start + i * step] = highest;
       }
     }
-  }
-
-  // Reads FOG_CLOUDS out of the sprite atlas once. Bright texels (cloud tops) reach furthest.
-  private static loadCloudTexture() {
-    if (FogOfWarLayer.cloudTexture) return;
-
-    const region = SpriteAtlas.getInstance().getRegion(SpriteRegion.FOG_CLOUDS);
-    const canvas = document.createElement("canvas");
-    canvas.width = region.w;
-    canvas.height = region.h;
-    const context = canvas.getContext("2d", { willReadFrequently: true });
-    const spritesheet = Game.getInstance().getImage(GameImage.SPRITESHEET);
-    context.drawImage(spritesheet, region.x, region.y, region.w, region.h, 0, 0, region.w, region.h);
-    const texture = context.getImageData(0, 0, region.w, region.h);
-
-    const brightness = new Float32Array(region.w * region.h);
-    for (let i = 0; i < brightness.length; i++) {
-      brightness[i] = texture.data[i * 4] + texture.data[i * 4 + 1] + texture.data[i * 4 + 2];
-    }
-    const darkest = brightness.reduce((low, value) => Math.min(low, value), Infinity);
-    const brightest = brightness.reduce((high, value) => Math.max(high, value), 0);
-
-    FogOfWarLayer.cloudTexture = texture;
-    FogOfWarLayer.cloudReach = brightness.map((value) => (value - darkest) / Math.max(1, brightest - darkest));
   }
 
   public setTileState(gridX: number, gridY: number, state: number) {
@@ -416,7 +389,7 @@ export class FogOfWarLayer extends Actor {
   /**
    * The cloud cover for the written cells, per world pixel. The blurred unexplored amount, sampled
    * between cell centers, sets how covered a pixel is. Cloud tops show from CLOUD_TOPS_FROM and the
-   * haze between them only later, so every texel is opaque once the pixel is fully covered.
+   * haze between them only later, so every pixel is opaque once the pixel is fully covered.
    */
   private writeClouds(
     unexplored: Float32Array,
@@ -426,9 +399,8 @@ export class FogOfWarLayer extends Actor {
     writeTop: number,
     writeBottom: number
   ) {
-    FogOfWarLayer.loadCloudTexture();
-    const texture = FogOfWarLayer.cloudTexture;
-    const reachOf = FogOfWarLayer.cloudReach;
+    this.cloudReach ??= new CloudCover(this.cloudPixels, this.wrapped).getReach();
+    const reachOf = this.cloudReach;
     const perCell = FogOfWarLayer.WORLD_PIXELS_PER_CELL;
     const steps = FogOfWarLayer.CLOUD_ALPHA_STEPS;
     const margin = FogOfWarLayer.BLUR_REACH;
@@ -439,7 +411,6 @@ export class FogOfWarLayer extends Actor {
       const regionY = (pixelY + 0.5) / perCell - 0.5 - writeTop + margin;
       const top = Math.floor(regionY);
       const down = regionY - top;
-      const textureRow = (pixelY % texture.height) * texture.width;
 
       for (let pixelX = writeLeft * perCell; pixelX < writeRight * perCell; pixelX++) {
         const regionX = (pixelX + 0.5) / perCell - 0.5 - writeLeft + margin;
@@ -450,16 +421,10 @@ export class FogOfWarLayer extends Actor {
           (unexplored[corner] * (1 - across) + unexplored[corner + 1] * across) * (1 - down) +
           (unexplored[corner + width] * (1 - across) + unexplored[corner + width + 1] * across) * down;
 
-        const wrappedX = this.wrapPixelX(pixelX);
-        const texel = textureRow + (wrappedX % texture.width);
-        const start = FogOfWarLayer.CLOUD_TOPS_FROM + FogOfWarLayer.CLOUD_HAZE_LAG * (1 - reachOf[texel]);
+        const pixel = this.wrapPixelX(pixelX) + pixelY * this.width;
+        const start = FogOfWarLayer.CLOUD_TOPS_FROM + FogOfWarLayer.CLOUD_HAZE_LAG * (1 - reachOf[pixel] / 255);
         const opacity = Math.min(1, Math.max(0, (covered - start) / FogOfWarLayer.CLOUD_FADE));
-        const target = (wrappedX + pixelY * this.width) * 4;
-
-        data[target] = texture.data[texel * 4];
-        data[target + 1] = texture.data[texel * 4 + 1];
-        data[target + 2] = texture.data[texel * 4 + 2];
-        data[target + 3] = (Math.round(opacity * steps) / steps) * 255;
+        data[pixel * 4 + 3] = (Math.round(opacity * steps) / steps) * 255;
       }
     }
   }

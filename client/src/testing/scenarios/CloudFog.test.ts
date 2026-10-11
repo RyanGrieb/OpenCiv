@@ -24,7 +24,7 @@ export function setupCloudFogTest(game: Game) {
       .flat()
       .filter((tile) => !!tile);
 
-  let cloudRow: number[][] = [];
+  let cloudPatch: number[][] = [];
   let edgeTile: Tile | undefined;
   let edgeSamples: number[] = [];
 
@@ -39,7 +39,7 @@ export function setupCloudFogTest(game: Game) {
   });
 
   runner.addStep({
-    name: "Deep in the unexplored map, clouds cover everything, drawn in several light shades rather than one gray",
+    name: "Deep in the unexplored map, clouds and haze cover everything, in many shades rather than one gray",
     action: async () => {
       // A row of tiles nobody has seen, three tiles either side of the sample.
       const isUnexploredRun = (gridX: number, gridY: number) => {
@@ -59,17 +59,22 @@ export function setupCloudFogTest(game: Game) {
       }
       if (!start) throw new Error("No unexplored stretch of map found");
 
-      cloudRow = [];
-      for (let x = 0; x < 64; x++) cloudRow.push(fog().getPixelAt(start.x - 32 + x, start.y));
-      const shades = new Set(cloudRow.map(([red, green, blue]) => `${red},${green},${blue}`));
-      utils.log(`${shades.size} shades across 64 cloud pixels, lightest red ${Math.max(...cloudRow.map((p) => p[0]))}`);
+      // A patch a few tiles across, every other pixel: big enough to take in clouds and the haze between them.
+      cloudPatch = [];
+      for (let y = -48; y < 48; y += 2) {
+        for (let x = -96; x < 96; x += 2) cloudPatch.push(fog().getPixelAt(start.x + x, start.y + y));
+      }
+      const shades = new Set(cloudPatch.map(([red, green, blue]) => `${red},${green},${blue}`));
+      utils.log(
+        `${shades.size} shades across ${cloudPatch.length} cloud pixels, lightest red ${Math.max(...cloudPatch.map((p) => p[0]))}`
+      );
     },
     verification: () => {
-      const shades = new Set(cloudRow.map(([red, green, blue]) => `${red},${green},${blue}`));
-      const opaque = cloudRow.every((pixel) => pixel[3] === 255);
+      const shades = new Set(cloudPatch.map(([red, green, blue]) => `${red},${green},${blue}`));
+      const opaque = cloudPatch.every((pixel) => pixel[3] === 255);
       // The old flat fog was RGB 128 everywhere; clouds have tops well lighter than that.
-      const hasLightTops = cloudRow.some(([red]) => red > 200);
-      return opaque && shades.size >= 3 && hasLightTops;
+      const hasLightTops = cloudPatch.some(([red]) => red > 200);
+      return opaque && shades.size >= 6 && hasLightTops;
     }
   });
 
