@@ -1,7 +1,7 @@
 import { GameImage, SpriteRegion } from "../../Assets";
 import { Game } from "../../Game";
 import { City } from "../../city/City";
-import { GameMap } from "../../map/GameMap";
+import { GameMap, MapLoadProgressEvent } from "../../map/GameMap";
 import { Tile } from "../../map/Tile";
 import { NetworkEvents, WebsocketClient } from "../../network/Client";
 import { Notifications } from "../../notification/Notifications";
@@ -13,6 +13,7 @@ import { CityDisplayInfo } from "../../ui/windows/city/CityDisplayInfo";
 import { ClientSettings } from "../../ClientSettings";
 import { ClientSettingsGroup } from "../../ui/menus/ClientSettingsGroup";
 import { Label } from "../../ui/components/Label";
+import { LoadingScreen } from "../../ui/components/LoadingScreen";
 import { NotificationPanel } from "../../ui/hud/NotificationPanel";
 import { ResearchDisplayInfo } from "../../ui/hud/ResearchDisplayInfo";
 import { ResearchTreeWindow } from "../../ui/windows/ResearchTreeWindow";
@@ -51,6 +52,8 @@ export class InGameScene extends Scene {
   private escMenu: ActorGroup;
   private settingsGroup: ClientSettingsGroup;
   private openUIElement: GameplayUIElement;
+  // Covers the map until every tile from the initial sync is drawn - undefined once it has been.
+  private loadingScreen: LoadingScreen;
 
   public onInitialize(): void {
     this.players = [];
@@ -66,7 +69,17 @@ export class InGameScene extends Scene {
       this.restoreCamera();
     }
 
+    // Carries on from the loading scene's screen until the map is drawn, with the map itself hidden
+    // so its half-built chunks never show.
+    this.loadingScreen = new LoadingScreen("Waiting for the map...", 0);
+    this.addActor(this.loadingScreen);
+    this.setWorldHidden(true);
+    this.on<MapLoadProgressEvent>("mapLoadProgress", (options) => {
+      this.loadingScreen?.setStatus(options.text, options.progress);
+    });
+
     this.on("keyup", (options) => {
+      if (this.loadingScreen) return;
       if (options.key === "Escape") {
         if (this.openUIElement) {
           this.closeOpenUIElement();
@@ -112,6 +125,11 @@ export class InGameScene extends Scene {
     GameMap.init();
 
     this.on("mapLoaded", () => {
+      this.removeActor(this.loadingScreen);
+      this.loadingScreen = undefined;
+      LoadingScreen.discardBackground();
+      this.setWorldHidden(false);
+
       this.notifications = new Notifications(this.clientPlayer);
       this.notifications.onChange(() => this.refreshNextTurnButton());
       this.initializePersistentUI();
@@ -235,6 +253,7 @@ export class InGameScene extends Scene {
     this.openUIElement = undefined;
     this.notifications = undefined;
     this.notificationPanel = undefined;
+    this.loadingScreen = undefined;
 
     return Scene.ExitReceipt;
   }
@@ -243,6 +262,16 @@ export class InGameScene extends Scene {
   // Scene.redraw() destroys/reinitializes everything, which would tear down and
   // re-fetch the whole map (losing city buildings, which never get resent on resync).
   public redraw() {
+    // The persistent UI only goes up once the map is loaded - until then there's only the loading screen.
+    if (this.loadingScreen) {
+      const text = this.loadingScreen.getText();
+      const progress = this.loadingScreen.getProgress();
+      this.removeActor(this.loadingScreen);
+      this.loadingScreen = new LoadingScreen(text, progress);
+      this.addActor(this.loadingScreen);
+      return;
+    }
+
     this.closeOpenUIElement();
 
     this.removeActor(this.tileInformationLabel);

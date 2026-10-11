@@ -1,29 +1,11 @@
-import { Game } from "../../Game";
-import { Label } from "../../ui/components/Label";
+import { LoadingScreen } from "../../ui/components/LoadingScreen";
 import { Scene } from "../Scene";
-import { SceneBackground } from "../SceneBackground";
 
+// Shown while the server builds the world. The in-game scene carries the same loading screen on
+// until the map is drawn (see InGameScene).
 export class LoadingScene extends Scene {
   public onInitialize(): void {
     super.onInitialize();
-    this.addActor(SceneBackground.generatePanningGrassland());
-
-    const loadingLabel = new Label({
-      text: "Loading Map...",
-      font: "bold 22px arial",
-      fontColor: "white",
-      shadowColor: "black",
-      lineWidth: 4,
-      shadowBlur: 20
-    });
-
-    loadingLabel.conformSize().then(() => {
-      loadingLabel.setPosition(
-        Game.getInstance().getWidth() / 2 - loadingLabel.getWidth() / 2,
-        Game.getInstance().getHeight() / 2 - loadingLabel.getHeight() / 2
-      );
-    });
-
-    this.addActor(loadingLabel);
+    this.addActor(new LoadingScreen("Generating the world...", 0));
   }
 }

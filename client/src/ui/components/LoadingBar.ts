@@ -60,6 +60,10 @@ export class LoadingBar extends ActorGroup {
     this.fillActor.setSize(this.width * this.progress, this.height);
   }
 
+  public getProgress(): number {
+    return this.progress;
+  }
+
   public setFillColor(color: string) {
     this.fillColor = color;
     this.fillActor.setColor(color);

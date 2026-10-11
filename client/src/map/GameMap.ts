@@ -70,6 +70,13 @@ interface TileUpdatedEvent {
   tile: TileData;
 }
 
+// What the loading screen shows while the initial map sync is being drawn (see InGameScene).
+export interface MapLoadProgressEvent {
+  text: string;
+  // How far through the whole load, from 0 to 1.
+  progress: number;
+}
+
 export class GameMap {
   private static instance: GameMap;
 
@@ -80,6 +87,11 @@ export class GameMap {
   private static readonly CHUNK_PIXEL_HEIGHT = 25 * GameMap.CHUNK_SIZE + 7;
   // Between the terrain chunks (z 0) and the fog of war (z 1) - see rebuildChunkVisuals().
   private static readonly TOP_LAYER_Z = 0.5;
+  // Where each step of the initial map load starts on the loading bar. Drawing the chunks takes
+  // most of it; blending their shores and terrain edges once every neighbor is known takes the rest.
+  private static readonly LOAD_PROGRESS_RECEIVING = 0.05;
+  private static readonly LOAD_PROGRESS_DRAWING = 0.1;
+  private static readonly LOAD_PROGRESS_BLENDING = 0.7;
 
   private oddEdgeAxis = [
     [0, -1],
@@ -139,6 +151,12 @@ export class GameMap {
   // again with every territory tile revealed, so it's built once and then kept up to date - see
   // syncCity().
   private knownCities: Map<string, City> = new Map();
+
+  // True from the map request until "mapLoaded" - only that first sync reports to the loading screen,
+  // not the reveals that go through the same ingestion during play.
+  private loadingMap = false;
+  private chunksReceived = 0;
+  private chunksDrawn = 0;
 
   public static getInstance() {
     return this.instance;
@@ -449,6 +467,7 @@ export class GameMap {
 
   private requestMapFromServer() {
     this.tiles = [];
+    this.loadingMap = true;
 
     WebsocketClient.sendMessage({ event: "requestMap" });
 
@@ -470,6 +489,8 @@ export class GameMap {
         for (let x = 0; x < this.mapWidth; x++) {
           this.tiles[x] = [];
         }
+
+        this.reportLoadProgress("Receiving the map...", GameMap.LOAD_PROGRESS_RECEIVING);
       }
     });
 
@@ -481,8 +502,12 @@ export class GameMap {
       eventName: "mapChunk",
       parentObject: this,
       callback: (data) => {
+        if (this.loadingMap) this.chunksReceived++;
         this.pendingChunkIngestions.push(
-          this.enqueueRender(() => this.ingestChunkTiles(data.chunkX, data.chunkY, data.tiles))
+          this.enqueueRender(async () => {
+            await this.ingestChunkTiles(data.chunkX, data.chunkY, data.tiles);
+            this.onInitialChunkDrawn();
+          })
         );
       }
     });
@@ -495,8 +520,15 @@ export class GameMap {
       eventName: "mapSyncComplete",
       parentObject: this,
       callback: async () => {
-        await Promise.all(this.pendingChunkIngestions);
-        this.pendingChunkIngestions = [];
+        // Drawing a chunk can queue a shore/blend redraw of its neighbors after this was called, so
+        // keep waiting until nothing new was queued while the last batch ran.
+        while (this.pendingChunkIngestions.length > 0) {
+          const pending = this.pendingChunkIngestions;
+          this.pendingChunkIngestions = [];
+          await Promise.all(pending);
+        }
+        this.reportLoadProgress("Done", 1);
+        this.loadingMap = false;
         Game.getInstance().getCurrentScene().call("mapLoaded");
       }
     });
@@ -656,11 +688,35 @@ export class GameMap {
         this.edgeRedrawScheduled = false;
         const chunkKeys = [...this.edgeDirtyChunks];
         this.edgeDirtyChunks.clear();
-        for (const key of chunkKeys) {
+        for (const [index, key] of chunkKeys.entries()) {
+          this.reportBlendProgress(index, chunkKeys.length);
           await this.rebuildChunkVisuals(...GameMap.parseChunkKey(key));
         }
       })
     );
+  }
+
+  private onInitialChunkDrawn() {
+    if (!this.loadingMap) return;
+
+    this.chunksDrawn++;
+    const share = GameMap.LOAD_PROGRESS_BLENDING - GameMap.LOAD_PROGRESS_DRAWING;
+    this.reportLoadProgress(
+      `Drawing the map (${this.chunksDrawn}/${this.chunksReceived})...`,
+      GameMap.LOAD_PROGRESS_DRAWING + (share * this.chunksDrawn) / this.chunksReceived
+    );
+  }
+
+  private reportBlendProgress(chunksBlended: number, chunkCount: number) {
+    this.reportLoadProgress(
+      `Blending coastlines and terrain (${chunksBlended}/${chunkCount})...`,
+      GameMap.LOAD_PROGRESS_BLENDING + ((1 - GameMap.LOAD_PROGRESS_BLENDING) * chunksBlended) / chunkCount
+    );
+  }
+
+  private reportLoadProgress(text: string, progress: number) {
+    if (!this.loadingMap) return;
+    Game.getInstance().getCurrentScene().call<MapLoadProgressEvent>("mapLoadProgress", { text, progress });
   }
 
   // Whichever of the given coordinates this client has actually discovered.
