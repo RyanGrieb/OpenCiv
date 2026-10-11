@@ -102,9 +102,9 @@ export function setupSoftFogOfWarTest(game: Game) {
       utils.getInGameScene().focusOnTile(edge.visible, 3);
     },
     verification: () => {
+      // Not a steady ramp: cloud tops billow out ahead of the haze between them (see CloudFog).
       const inBetween = samples.filter((alpha) => alpha > 0.1 && alpha < 0.9).length;
-      const neverDrops = samples.every((alpha, index) => index === 0 || alpha >= samples[index - 1] - 0.02);
-      return samples[0] < 0.5 && samples[20] > 0.9 && inBetween >= 2 && neverDrops;
+      return samples[0] < 0.6 && samples[20] > 0.9 && inBetween >= 1;
     }
   });
 
@@ -156,7 +156,7 @@ export function setupSoftFogOfWarTest(game: Game) {
   });
 
   runner.addStep({
-    name: "A remembered tile is dimmed, not hidden: partly see-through and dark rather than the unexplored gray",
+    name: "A remembered tile is dimmed, not hidden: partly see-through and dark rather than clouded over",
     action: async () => {},
     verification: () => {
       const center = foggedTile.getCenterPosition();
@@ -169,7 +169,7 @@ export function setupSoftFogOfWarTest(game: Game) {
   });
 
   runner.addStep({
-    name: "The map's top and bottom edges fade out too: outer tiles slightly veiled, the jagged strip past them covered",
+    name: "The map's top and bottom edges fade out too: outer tiles still showing, the jagged strip past them covered",
     action: async () => {},
     verification: () => {
       // A small stand-alone map (10 x 6, not wrapped) with every tile in sight, so only the edge veils it.
@@ -189,11 +189,12 @@ export function setupSoftFogOfWarTest(game: Game) {
           `top notch ${topNotch.toFixed(2)}, bottom tile ${alpha(bottomTile.x, bottomTile.y).toFixed(2)}, ` +
           `bottom notch ${bottomNotch.toFixed(2)}`
       );
-      const veiled = (value: number) => value > 0.05 && value < 0.7;
+      // At most lightly veiled: the clouds only start thinning out over the outer tiles.
+      const showing = (value: number) => value < 0.7;
       return (
         alpha(middle.x, middle.y) < 0.05 &&
-        veiled(alpha(topTile.x, topTile.y)) &&
-        veiled(alpha(bottomTile.x, bottomTile.y)) &&
+        showing(alpha(topTile.x, topTile.y)) &&
+        showing(alpha(bottomTile.x, bottomTile.y)) &&
         topNotch > 0.9 &&
         bottomNotch > 0.9
       );

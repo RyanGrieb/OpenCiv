@@ -186,6 +186,11 @@ ScenarioRegistry.register("SoftFogOfWar", ScenarioCategory.MAP, async () => {
     return module.setupSoftFogOfWarTest;
 });
 
+ScenarioRegistry.register("CloudFog", ScenarioCategory.MAP, async () => {
+    const module = await import("./scenarios/CloudFog.test");
+    return module.setupCloudFogTest;
+});
+
 ScenarioRegistry.register("CoastlineBlending", ScenarioCategory.MAP, async () => {
     const module = await import("./scenarios/CoastlineBlending.test");
     return module.setupCoastlineBlendingTest;

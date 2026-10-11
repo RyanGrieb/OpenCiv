@@ -275,6 +275,7 @@ export enum SpriteRegion {
   RADIO_BUTTON_UNSELECTED,
   RADIO_BUTTON_SELECTED,
   UNIT_SELECTION_CIRCLE,
+  FOG_CLOUDS,
 }
 
 // SpriteRegion is keyed by fixed member names, but several call sites look one up
