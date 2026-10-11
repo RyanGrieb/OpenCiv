@@ -10,8 +10,9 @@ import { TestUtils } from "../TestUtils";
 const SETTLER_COST = 106;
 const COST_PERCENT = 20;
 
-// Trains a Settler in a city and founds a second city with it, against a live server. As in Civ 5 the
-// city stops growing while it trains the Settler, and its spare food goes into production instead.
+// Trains a Settler in a city and founds a second city with it, against a live server. As in Civ 5 a city
+// can't train one until it reaches size 2, and it stops growing while it trains the Settler, its spare
+// food going into production instead.
 // Production costs are cut to 20% (the productionCostPercent game option) so the Settler is quick.
 export function setupSettlerProductionTest(game: Game) {
     const runner = new TestRunner("SettlerProduction");
@@ -37,6 +38,12 @@ export function setupSettlerProductionTest(game: Game) {
         if (!condition()) throw new Error(`Not reached within ${maxTurns} turns: ${message}`);
     };
 
+    const fetchUnitOptions = async () => {
+        unitNames = [];
+        WebsocketClient.sendMessage({ event: "requestProductionOptions", cityName: city.getName() });
+        await utils.waitUntil(() => unitNames.length > 0, 5000, "Production options to arrive");
+    };
+
     const settle = (settler: Unit) =>
         WebsocketClient.sendMessage({
             event: "unitAction",
@@ -47,7 +54,7 @@ export function setupSettlerProductionTest(game: Game) {
         });
 
     runner.addStep({
-        name: "Settle: the new city offers a Settler in its production list",
+        name: "Settle: a size-1 city doesn't offer a Settler yet",
         action: async () => {
             await utils.ensureInGame({ allowBarbarians: false, revealMap: true, productionCostPercent: COST_PERCENT });
             await utils.waitUntil(() => settlers().length > 0, 90000, "The starting Settler to appear");
@@ -66,8 +73,16 @@ export function setupSettlerProductionTest(game: Game) {
                     settlerCost = data["units"].find((unit: { name: string }) => unit.name === "Settler")?.cost ?? 0;
                 }
             });
-            WebsocketClient.sendMessage({ event: "requestProductionOptions", cityName: city.getName() });
-            await utils.waitUntil(() => unitNames.length > 0, 5000, "Production options to arrive");
+            await fetchUnitOptions();
+        },
+        verification: () => city.getStat("population") === 1 && unitNames.length > 0 && !unitNames.includes("Settler")
+    });
+
+    runner.addStep({
+        name: "End turns until the city grows to size 2: now it offers a Settler",
+        action: async () => {
+            await endTurnsUntil(() => city.getStat("population") >= 2, 25, "City to reach size 2");
+            await fetchUnitOptions();
         },
         verification: () => unitNames.includes("Settler") && settlerCost === Math.round((SETTLER_COST * COST_PERCENT) / 100)
     });

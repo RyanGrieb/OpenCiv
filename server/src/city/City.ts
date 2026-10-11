@@ -66,6 +66,9 @@ export class City {
   // always at least two tiles between cities.
   public static readonly MIN_CITY_RANGE = 2;
 
+  // Civ 5 won't let a city train a Settler until it has this many citizens.
+  public static readonly SETTLER_MIN_POPULATION = 2;
+
   private tile: Tile;
   private player: Player;
   private name: string;
@@ -992,7 +995,7 @@ export class City {
           !this.isObsoleteUnit(unit.name) &&
           Unit.isAvailableToCiv(unit, this.player.getCivilizationName()) &&
           canLaunch(unit) &&
-          this.player.getHappiness().canTrain(unit.name)
+          this.canTrain(unit.name)
       )
       .map((unit) => ({ type: "unit", name: unit.name, cost: this.scaleCost(unit.cost) }));
 
@@ -1036,11 +1039,18 @@ export class City {
     return obsoleteTech !== undefined && this.player.hasResearchedTech(obsoleteTech);
   }
 
+  // A Settler needs a city of SETTLER_MIN_POPULATION and an empire that isn't very unhappy.
+  private canTrain(unitName: string): boolean {
+    if (unitName === "Settler" && this.population < City.SETTLER_MIN_POPULATION) return false;
+    return this.player.getHappiness().canTrain(unitName);
+  }
+
   // Civ 5 stops a city growing while it trains a Settler, and puts its spare food into production instead.
   // A food shortfall still starves the city.
   private getFoodForSettler(food: number): number {
     const current = this.productionQueue[0];
-    const trainingSettler = current?.type === "unit" && current.name === "Settler";
+    // One held back because the city can't train it yet leaves the food to grow the city.
+    const trainingSettler = current?.type === "unit" && current.name === "Settler" && this.canTrain(current.name);
     return trainingSettler ? Math.max(0, food) : 0;
   }
 
@@ -1127,8 +1137,9 @@ export class City {
       return;
     }
 
-    // A very unhappy empire can't train Settlers: one already finished waits at the front of the queue.
-    if (!this.player.getHappiness().canTrain(current.name)) return;
+    // A Settler finished while the city can't train one (too small, or the empire very unhappy) waits
+    // at the front of the queue.
+    if (!this.canTrain(current.name)) return;
 
     // Every tile around the city already holds a unit of this type: the finished unit waits at the
     // front of the queue, and appears once one of them moves off.
