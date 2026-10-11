@@ -24,9 +24,11 @@ export class Buidling {
   private statLine: Record<string, number>;
   private spriteRegion: SpriteRegion;
   private category: BuildingCategory;
+  private effectLines: string[];
 
   constructor(buildingData: BuildingData) {
     this.name = buildingData.name;
+    this.effectLines = buildingData.effect_lines ?? [];
     this.spriteRegion = resolveSpriteRegion(buildingData.asset_name);
     this.category = Buidling.categoryOf(buildingData);
     this.statLine = {};
@@ -54,6 +56,11 @@ export class Buidling {
 
   public getName() {
     return this.name;
+  }
+
+  // What its effects beyond flat stats do, in words, e.g. "+25% Gold".
+  public getEffectLines(): string[] {
+    return this.effectLines;
   }
 
   public getCategory(): BuildingCategory {

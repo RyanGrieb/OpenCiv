@@ -44,6 +44,12 @@ export function setupWondersTest(game: Game) {
     const buildingsWindow = (): CityBuildingsWindow | undefined =>
         (cityScreen()?.["actors"] as object[] | undefined)?.find((actor) => actor instanceof CityBuildingsWindow) as CityBuildingsWindow;
     const buildingSections = () => sectionsOf(rowTexts(buildingsWindow()));
+    // The text under a building's name in the city's buildings: its effect lines (and any stat values).
+    const buildingRowEffects = (name: string): string[] => {
+        const rows = ((buildingsWindow() as unknown as Record<string, any>)?.["rows"] ?? []) as any[];
+        const row = rows.find((candidate) => candidate.getLabel().getText() === name);
+        return (row?.getActors() ?? []).filter((actor: object) => actor instanceof Label).map((label: Label) => label.getText());
+    };
     // Scrolls the open list to the row for `name`, then opens its tooltip as hovering it would. Not with a
     // made-up mouse event: on a scaled display its position can miss the row.
     const hoverListRow = async (name: string) => {
@@ -192,6 +198,15 @@ export function setupWondersTest(game: Game) {
                 ["Oracle", "Temple of Artemis", "Great Library"].every((name) => sections["Great Wonders"]?.includes(name))
             );
         }
+    });
+
+    runner.addStep({
+        name: "The city's buildings show what each one's effects do under its stats, national wonders included",
+        action: async () => utils.log(JSON.stringify(["National College", "Temple of Artemis", "Great Library"].map(buildingRowEffects)), "yellow"),
+        verification: () =>
+            buildingRowEffects("National College").includes("+50% Science") &&
+            buildingRowEffects("Temple of Artemis").includes("+10% Food in all cities") &&
+            buildingRowEffects("Great Library").includes("A free Technology")
     });
 
     runner.addStep({

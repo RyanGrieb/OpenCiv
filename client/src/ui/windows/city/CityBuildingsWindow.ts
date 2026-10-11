@@ -33,6 +33,9 @@ const CITIZEN_FOCUSES = [
 
 const FOCUS_ROW_HEIGHT = 64; // Tall enough for the ICON_LARGE radio button
 const BUILDING_ROW_HEIGHT = 124; // Tall enough for the name on top and up to 2 lines of stat icons below
+const BUILDING_DETAILS_TOP = 40; // Where the stat icons and effect lines start, below the name
+const EFFECT_LINE_HEIGHT = 28;
+const EFFECT_COLOR = "#8ee07a"; // The building tooltip's bonus green
 
 // Right-side list: the citizen focus radio buttons and the buildings the city has built.
 export class CityBuildingsWindow extends ListBox {
@@ -57,6 +60,23 @@ export class CityBuildingsWindow extends ListBox {
     this.addBuildingRows("Buildings");
     this.addBuildingRows("National Wonders");
     this.addBuildingRows("Great Wonders");
+  }
+
+  // "Enemy land units spend 1 extra Movement per tile in your territory" -> lines that each fit maxWidth.
+  private static wrapToWidth(text: string, font: string, maxWidth: number): string[] {
+    const lines: string[] = [];
+    let line = "";
+    for (const word of text.split(" ")) {
+      const candidate = line ? `${line} ${word}` : word;
+      if (line && Game.getInstance().measureText(candidate, font).width > maxWidth) {
+        lines.push(line);
+        line = word;
+      } else {
+        line = candidate;
+      }
+    }
+    if (line) lines.push(line);
+    return lines;
   }
 
   private addCitizenManagementRows() {
@@ -125,46 +145,64 @@ export class CityBuildingsWindow extends ListBox {
     }
   }
 
+  // The name, then the stat icons, then what its effects do (Market's "+25% Gold"), each line wrapped.
   private addBuildingRow(category: BuildingCategory, building: Buidling) {
     const rowX = this.getNextRowPosition().x;
     const rowY = this.getNextRowPosition().y;
     const textX = rowX + 8 + UITheme.ICON_SIZE + 8;
+    const detailsWidth = CityScreen.BUILDINGS_WINDOW_WIDTH - (textX - rowX) - 10;
+
+    const stats = this.buildStatIconActors(building.getStatLine(), textX, rowY + BUILDING_DETAILS_TOP, detailsWidth);
+    const effects = this.buildEffectLabels(building.getEffectLines(), textX, stats.bottomY, detailsWidth);
+    const rowHeight = Math.max(BUILDING_ROW_HEIGHT, effects.bottomY - rowY + 8);
 
     this.addRow({
       category,
       text: building.getName(),
       textX: textX,
       textY: rowY + 8,
-      rowHeight: BUILDING_ROW_HEIGHT,
+      rowHeight,
       actorIcons: [
         new Actor({
           image: Game.getInstance().getImage(GameImage.SPRITESHEET),
           spriteRegion: building.getSpriteRegion(),
           x: rowX + 8,
-          y: rowY + BUILDING_ROW_HEIGHT / 2 - UITheme.ICON_SIZE / 2,
+          y: rowY + rowHeight / 2 - UITheme.ICON_SIZE / 2,
           z: CityScreen.Z,
           width: UITheme.ICON_SIZE,
           height: UITheme.ICON_SIZE,
           cameraApplies: false
         }),
-        ...this.buildStatIconActors(
-          building.getStatLine(),
-          textX,
-          rowY + 40,
-          CityScreen.BUILDINGS_WINDOW_WIDTH - (textX - rowX) - 10
-        )
+        ...stats.actors,
+        ...effects.actors
       ]
     });
   }
 
-  // Builds icon+value actors for a building's stats, wrapping lines by measured width.
-  // Must return actors synchronously - ones added to a row after addRow() don't render.
+  // One label per wrapped line, measured now since a row's actors must exist when it's added.
+  private buildEffectLabels(lines: string[], startX: number, startY: number, maxWidth: number) {
+    const wrapped = lines.flatMap((line) => CityBuildingsWindow.wrapToWidth(line, UITheme.FONT, maxWidth));
+    const actors = wrapped.map(
+      (text, index) =>
+        new Label({
+          text,
+          font: UITheme.FONT,
+          fontColor: EFFECT_COLOR,
+          x: startX,
+          y: startY + index * EFFECT_LINE_HEIGHT + UITheme.centerTextY(EFFECT_LINE_HEIGHT)
+        })
+    );
+    return { actors, bottomY: startY + wrapped.length * EFFECT_LINE_HEIGHT };
+  }
+
+  // Builds icon+value actors for a building's stats, wrapping lines by measured width, and where they
+  // end. Must return actors synchronously - ones added to a row after addRow() don't render.
   private buildStatIconActors(
     statLine: Record<string, number>,
     startX: number,
     startY: number,
     maxWidth: number
-  ): Actor[] {
+  ): { actors: Actor[]; bottomY: number } {
     const actors: Actor[] = [];
     const iconSize = UITheme.ICON_SIZE;
     const font = UITheme.FONT;
@@ -213,6 +251,6 @@ export class CityBuildingsWindow extends ListBox {
       x += itemWidth + gapAfterItem;
     }
 
-    return actors;
+    return { actors, bottomY: actors.length > 0 ? y + lineHeight : startY };
   }
 }
