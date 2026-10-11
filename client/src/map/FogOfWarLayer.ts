@@ -38,7 +38,7 @@ export class FogOfWarLayer extends Actor {
   // Unexplored spreads this many cells over its known neighbors before blurring, so the clouds are
   // already opaque by the known map's hex outline - nothing but background lies past it, so any
   // see-through cloud there would leave the jagged outline showing through.
-  private static readonly UNEXPLORED_SPREAD = 2;
+  private static readonly UNEXPLORED_SPREAD = 1;
   private static readonly BLUR_REACH =
     FogOfWarLayer.BLUR_RADIUS * FogOfWarLayer.BLUR_PASSES + FogOfWarLayer.UNEXPLORED_SPREAD;
   // RGB 0-255 plus alpha 0-1, matching the old per-tile tint.
@@ -46,9 +46,9 @@ export class FogOfWarLayer extends Actor {
   // How covered a pixel must be before a cloud top shows there, how much later the haze between the
   // tops shows, and how much more cover each takes to go opaque. Tops + lag + fade stays at most 1,
   // so a fully covered pixel is opaque whatever the texel.
-  private static readonly CLOUD_TOPS_FROM = 0.2;
-  private static readonly CLOUD_HAZE_LAG = 0.35;
-  private static readonly CLOUD_FADE = 0.45;
+  private static readonly CLOUD_TOPS_FROM = 0.35;
+  private static readonly CLOUD_HAZE_LAG = 0.25;
+  private static readonly CLOUD_FADE = 0.25;
   // Cloud opacity snaps to this many steps, so the fade reads as pixel art rather than a gradient.
   private static readonly CLOUD_ALPHA_STEPS = 4;
 
