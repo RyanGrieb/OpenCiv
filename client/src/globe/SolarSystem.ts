@@ -118,7 +118,7 @@ export class SolarSystem {
     around?: THREE.Object3D,
     tint?: THREE.ColorRepresentation
   ) {
-    const sphere = new HexSphere(subdivisions);
+    const sphere = HexSphere.icosahedral(subdivisions);
     const mesh = new PlanetMesh(sphere, PlanetTerrain.generate(sphere, kind, subdivisions * 7919), radius, tint);
     this.group.add(mesh.group);
     this.bodies.push({ object: mesh.group, orbitRadius, speed, angle, around });

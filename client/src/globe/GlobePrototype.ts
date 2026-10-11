@@ -5,9 +5,11 @@ import { PlanetMesh } from "./PlanetMesh";
 import { PlanetTerrain, PlanetTile } from "./PlanetTerrain";
 import { SolarSystem } from "./SolarSystem";
 
+type PlanetLayout = "poles" | "even";
+
 interface PlanetSize {
   label: string;
-  subdivisions: number;
+  build: () => HexSphere;
 }
 
 interface BuildTimes {
@@ -23,14 +25,30 @@ interface BuildTimes {
  * feels to move around, and performs.
  */
 export class GlobePrototype {
-  // 4,002 and 10,242 tiles match the game's Standard (80x52) and largest (128x80) maps.
-  private static readonly SIZES: PlanetSize[] = [
-    { label: "4k tiles (Standard map)", subdivisions: 20 },
-    { label: "10k (largest map)", subdivisions: 32 },
-    { label: "41k", subdivisions: 64 },
-    { label: "100k", subdivisions: 100 },
-    { label: "256k", subdivisions: 160 }
-  ];
+  // The first two sizes of each layout match the game's Standard (80x52) and largest (128x80) maps:
+  // in tile count for the even spread, in band width and height for six pentagons per pole.
+  private static readonly LAYOUTS: Record<PlanetLayout, { name: string; sizes: PlanetSize[] }> = {
+    poles: {
+      name: "Pentagons: 6 per pole",
+      sizes: [
+        { label: "5k (78x52 band, Standard map)", build: () => HexSphere.polarCapsule(13) },
+        { label: "13k (126x83 band, largest map)", build: () => HexSphere.polarCapsule(21) },
+        { label: "40k", build: () => HexSphere.polarCapsule(37) },
+        { label: "100k", build: () => HexSphere.polarCapsule(58) },
+        { label: "256k", build: () => HexSphere.polarCapsule(93) }
+      ]
+    },
+    even: {
+      name: "Pentagons: spread evenly",
+      sizes: [
+        { label: "4k tiles (Standard map)", build: () => HexSphere.icosahedral(20) },
+        { label: "10k (largest map)", build: () => HexSphere.icosahedral(32) },
+        { label: "41k", build: () => HexSphere.icosahedral(64) },
+        { label: "100k", build: () => HexSphere.icosahedral(100) },
+        { label: "256k", build: () => HexSphere.icosahedral(160) }
+      ]
+    }
+  };
   private static readonly FOV = 45;
   private static readonly MAX_ALTITUDE = 260;
   // Below this many times its closest zoom, the camera tilts toward the horizon, like Civ's camera.
@@ -53,6 +71,8 @@ export class GlobePrototype {
   private tiles: PlanetTile[] = [];
   private planetMesh: PlanetMesh;
   private buildTimes: BuildTimes;
+  private layout: PlanetLayout = "poles";
+  private sizeIndex = 0;
 
   // The camera looks at the surface point at this longitude/latitude, from `altitude` above it.
   private longitude = 0.4;
@@ -152,14 +172,14 @@ export class GlobePrototype {
   }
 
   private buildPlanet(sizeIndex: number) {
+    this.sizeIndex = sizeIndex;
     if (this.planetMesh) {
       this.home.remove(this.planetMesh.group);
       this.planetMesh.dispose();
     }
 
-    const subdivisions = GlobePrototype.SIZES[sizeIndex].subdivisions;
     let start = performance.now();
-    this.sphere = new HexSphere(subdivisions);
+    this.sphere = GlobePrototype.LAYOUTS[this.layout].sizes[sizeIndex].build();
     const geometry = performance.now() - start;
     start = performance.now();
     this.tiles = PlanetTerrain.generate(this.sphere, "earth", 1234);
@@ -172,20 +192,36 @@ export class GlobePrototype {
 
     this.hoveredTile = -1;
     this.hoverOutline.visible = false;
+    this.hoverText.textContent = "";
     this.buildPentagonOutlines();
+    this.nextPentagon = 0;
     this.altitude = Math.max(this.altitude, this.minAltitude());
+    const sizes = GlobePrototype.LAYOUTS[this.layout].sizes;
     for (const button of Array.from(this.hud.querySelectorAll<HTMLDivElement>("[data-size]"))) {
-      button.style.background = Number(button.dataset.size) === sizeIndex ? "#3d6fb6" : "#2a2f3a";
+      const index = Number(button.dataset.size);
+      button.textContent = sizes[index].label;
+      button.style.background = index === sizeIndex ? "#3d6fb6" : "#2a2f3a";
     }
   }
 
-  // Close enough to see about 10 tiles across, near the 2D map's closest zoom.
-  private minAltitude() {
-    return 14 * this.tileRadius();
+  private switchLayout(button: HTMLDivElement) {
+    this.layout = this.layout === "poles" ? "even" : "poles";
+    button.textContent = GlobePrototype.LAYOUTS[this.layout].name;
+    this.buildPlanet(this.sizeIndex);
   }
 
-  // A tile's center-to-corner distance, in planet radii (a hexagon's area is 2.6 r^2).
+  // Close enough to see about 10 tiles across, near the 2D map's closest zoom. Where rows go all the
+  // way around, tiles shrink toward the poles, so the camera may come closer there.
+  private minAltitude() {
+    const shrink = this.sphere.rowLengths ? Math.max(0.3, Math.cos(this.latitude)) : 1;
+    return 14 * this.tileRadius() * shrink;
+  }
+
+  // A tile's center-to-corner distance, in planet radii: the equator's tiles (a hexagon's corners are
+  // its width / sqrt(3) out) when rows go all the way around, else the average (a hexagon's area is 2.6 r^2).
   private tileRadius() {
+    const rowLengths = this.sphere.rowLengths;
+    if (rowLengths) return (2 * Math.PI) / Math.max(...rowLengths) / Math.sqrt(3);
     return Math.sqrt((4 * Math.PI) / this.sphere.tileCount / 2.6);
   }
 
@@ -215,6 +251,7 @@ export class GlobePrototype {
   }
 
   private updateCamera() {
+    this.altitude = Math.max(this.altitude, this.minAltitude());
     const surface = GlobePrototype.unitVector(this.longitude, this.latitude);
     const north = new THREE.Vector3(0, 1, 0).sub(surface.clone().multiplyScalar(surface.y)).normalize();
     const anchor = surface.clone().add(this.home.position);
@@ -271,7 +308,11 @@ export class GlobePrototype {
     this.hoverOutline.geometry.getAttribute("position").needsUpdate = true;
     const info = this.tiles[tile];
     const sprites = [info.base, ...info.overlays].map((region) => SpriteRegion[region]).join(" + ");
-    this.hoverText.textContent = `Tile ${tile}: ${info.label} (${count} neighbors${count === 5 ? ", a pentagon" : ""}) - ${sprites}`;
+    const rows = this.sphere.rows;
+    const coordinates = rows
+      ? ` at x ${this.sphere.columns[tile]}, y ${rows[tile]} (row of ${this.sphere.rowLengths[rows[tile]]})`
+      : "";
+    this.hoverText.textContent = `Tile ${tile}${coordinates}: ${info.label}, ${count} neighbors${count === 5 ? " (a pentagon)" : ""} - ${sprites}`;
   }
 
   // Writes a tile's corners (just above the ground) into `attribute` from `offset`; returns how many.
@@ -298,7 +339,7 @@ export class GlobePrototype {
       (child as THREE.LineLoop).geometry.dispose();
     }
     const material = new THREE.LineBasicMaterial({ color: 0xff3040 });
-    for (let tile = 0; tile < 12; tile++) {
+    for (const tile of this.sphere.pentagons) {
       const attribute = new THREE.BufferAttribute(new Float32Array(5 * 3), 3);
       this.writeOutline(tile, attribute, 0);
       const outline = new THREE.LineLoop(new THREE.BufferGeometry().setAttribute("position", attribute), material);
@@ -307,16 +348,15 @@ export class GlobePrototype {
     }
   }
 
-  // HexSphere creates the icosahedron's 12 corners - the pentagons - first.
   private flyToNextPentagon() {
-    const tile = this.nextPentagon;
-    this.nextPentagon = (this.nextPentagon + 1) % 12;
+    const tile = this.sphere.pentagons[this.nextPentagon];
+    this.nextPentagon = (this.nextPentagon + 1) % this.sphere.pentagons.length;
     const x = this.sphere.centers[tile * 3];
     const y = this.sphere.centers[tile * 3 + 1];
     const z = this.sphere.centers[tile * 3 + 2];
     this.latitude = Math.asin(y);
     this.longitude = Math.atan2(x, z);
-    this.altitude = this.minAltitude() * 2;
+    this.altitude = this.minAltitude() * 1.5;
     this.pentagonOutlines.visible = true;
   }
 
@@ -386,7 +426,13 @@ export class GlobePrototype {
 
     const sizes = document.createElement("div");
     sizes.style.margin = "6px 0";
-    GlobePrototype.SIZES.forEach((size, index) => {
+    const layoutButton = GlobePrototype.createButton(GlobePrototype.LAYOUTS[this.layout].name, () =>
+      this.switchLayout(layoutButton)
+    );
+    layoutButton.style.background = "#5a3d8a";
+    sizes.appendChild(layoutButton);
+    sizes.appendChild(document.createElement("br"));
+    GlobePrototype.LAYOUTS[this.layout].sizes.forEach((size, index) => {
       const button = GlobePrototype.createButton(size.label, () => this.buildPlanet(index));
       button.dataset.size = String(index);
       sizes.appendChild(button);

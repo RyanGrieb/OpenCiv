@@ -1,11 +1,16 @@
 /**
- * A Goldberg polyhedron: the hex-tiled sphere hexasphere.js builds. An icosahedron's faces are
- * split into a triangle grid `subdivisions` cells along each edge and pushed out onto the unit
- * sphere; every grid vertex then becomes a tile, whose corners are the centers of the triangles
- * around it. That gives 10 * subdivisions^2 + 2 tiles, all hexagons except the 12 sitting on the
- * icosahedron's corners, which are pentagons.
+ * A sphere tiled with hexagons and exactly 12 pentagons (Euler's formula allows no other count),
+ * in one of two layouts:
+ * - icosahedral(): the Goldberg polyhedron hexasphere.js builds - an icosahedron's faces split into
+ *   a triangle grid and pushed out onto the sphere. Tiles are all about the same size, and the 12
+ *   pentagons sit on the icosahedron's corners, spread evenly over the globe.
+ * - polarCapsule(): six pentagons ringing each pole, the way a carbon nanotube is capped. Between the
+ *   two caps is a seamless east-west wrapping band of equal rows - the game's flat map wrapped around
+ *   the globe - whose hexes keep their shape by shrinking toward the poles, as on a Mercator map.
  *
- * Everything is kept in flat typed arrays (a few hundred thousand tiles stay cheap to build).
+ * Either way the triangle grid's vertices become the tiles, whose corners are the centers of the
+ * triangles around them. Everything is kept in flat typed arrays (a few hundred thousand tiles stay
+ * cheap to build).
  * Tile t's corners are tileCorners[cornerStart[t] .. cornerStart[t + 1]), counter-clockwise seen
  * from outside the sphere, and neighbors[i] is the tile across the side from corner i to corner i + 1.
  */
@@ -48,8 +53,10 @@ export class HexSphere {
     [8, 6, 7],
     [9, 8, 1]
   ];
+  // Band rows per tile around the capsule, which takes the band to about 70 degrees north and south -
+  // the 6n-tile-wide band that matches the game's 80-wide maps is then 52 rows tall, like its Standard map.
+  private static readonly CAPSULE_BAND_HEIGHT = 0.654;
 
-  public readonly subdivisions: number;
   public readonly tileCount: number;
   /** Unit-length tile centers, xyz per tile. */
   public readonly centers: Float32Array;
@@ -58,14 +65,19 @@ export class HexSphere {
   public readonly cornerStart: Int32Array;
   public readonly tileCorners: Int32Array;
   public readonly neighbors: Int32Array;
+  public readonly pentagons: number[] = [];
+  /** polarCapsule() only: each tile's row counted from the north pole (0), and its place along that row. */
+  public readonly rows?: Int32Array;
+  public readonly columns?: Int32Array;
+  public readonly rowLengths?: number[];
 
-  constructor(subdivisions: number) {
-    this.subdivisions = subdivisions;
-    const n = subdivisions;
-    this.tileCount = 10 * n * n + 2;
-    this.centers = new Float32Array(this.tileCount * 3);
+  constructor(centers: Float32Array, triangles: Int32Array, rows?: Int32Array, columns?: Int32Array, rowLengths?: number[]) {
+    this.tileCount = centers.length / 3;
+    this.centers = centers;
+    this.rows = rows;
+    this.columns = columns;
+    this.rowLengths = rowLengths;
 
-    const triangles = this.buildTriangles(n);
     const triangleCount = triangles.length / 3;
     this.corners = new Float32Array(triangleCount * 3);
     for (let tri = 0; tri < triangleCount; tri++) {
@@ -89,44 +101,89 @@ export class HexSphere {
 
     for (let t = 0; t < this.tileCount; t++) {
       this.orderCorners(t, triangles);
+      if (this.isPentagon(t)) this.pentagons.push(t);
     }
   }
 
-  public isPentagon(tile: number): boolean {
-    return this.cornerStart[tile + 1] - this.cornerStart[tile] === 5;
+  /** 10 * subdivisions^2 + 2 tiles, the pentagons spread evenly. */
+  public static icosahedral(subdivisions: number): HexSphere {
+    const centers = new Float32Array((10 * subdivisions * subdivisions + 2) * 3);
+    return new HexSphere(centers, HexSphere.buildIcosahedralGrid(subdivisions, centers));
   }
 
   /**
-   * The tile whose center is nearest the given unit vector, found by walking downhill from
-   * `startTile` - a handful of steps when the start is close, as it is for a moving mouse.
+   * Six pentagons around each pole, with a 6 * capSide tile wide band between the caps. Rows run
+   * from the north pole (a single hexagon) through cap rings of 6, 12, ... tiles, then the band's
+   * equal rows, then the south cap's shrinking rings.
    */
-  public findTile(x: number, y: number, z: number, startTile = 0): number {
-    let tile = startTile;
-    let best = this.dotCenter(tile, x, y, z);
-    for (;;) {
-      let next = tile;
-      for (let i = this.cornerStart[tile]; i < this.cornerStart[tile + 1]; i++) {
-        const neighbor = this.neighbors[i];
-        const dot = this.dotCenter(neighbor, x, y, z);
-        if (dot > best) {
-          best = dot;
-          next = neighbor;
-        }
-      }
-      if (next === tile) return tile;
-      tile = next;
+  public static polarCapsule(capSide: number): HexSphere {
+    const n = capSide;
+    const width = 6 * n;
+    // One band row every sqrt(3)/2 tile widths in Mercator latitude keeps every hex regular.
+    const rowStep = ((2 * Math.PI) / width) * (Math.sqrt(3) / 2);
+    const bandRows = Math.round(HexSphere.CAPSULE_BAND_HEIGHT * width) + 1;
+    const edgeMercator = ((bandRows - 1) * rowStep) / 2;
+    const capColatitude = Math.PI - 2 * Math.atan(Math.exp(edgeMercator));
+    // The south cap turns with the band's last row, half a tile over on odd rows.
+    const southShift = (bandRows - 1) % 2;
+
+    // Per row: its tile count, its turn in half band tiles, and its latitude.
+    const layout: { count: number; shift: number; latitude: number }[] = [];
+    for (let ring = 0; ring < n; ring++) {
+      layout.push({ count: Math.max(1, 6 * ring), shift: 0, latitude: Math.PI / 2 - (ring / n) * capColatitude });
     }
+    for (let row = 0; row < bandRows; row++) {
+      const mercator = edgeMercator - row * rowStep;
+      layout.push({ count: width, shift: row % 2, latitude: 2 * Math.atan(Math.exp(mercator)) - Math.PI / 2 });
+    }
+    for (let ring = n - 1; ring >= 0; ring--) {
+      layout.push({ count: Math.max(1, 6 * ring), shift: southShift, latitude: (ring / n) * capColatitude - Math.PI / 2 });
+    }
+
+    const rowStart: number[] = [];
+    let tileCount = 0;
+    for (const row of layout) {
+      rowStart.push(tileCount);
+      tileCount += row.count;
+    }
+    const centers = new Float32Array(tileCount * 3);
+    const rows = new Int32Array(tileCount);
+    const columns = new Int32Array(tileCount);
+    layout.forEach((row, y) => {
+      for (let x = 0; x < row.count; x++) {
+        const tile = rowStart[y] + x;
+        const longitude = 2 * Math.PI * (x / row.count + row.shift / (2 * width));
+        centers[tile * 3] = Math.cos(row.latitude) * Math.sin(longitude);
+        centers[tile * 3 + 1] = Math.sin(row.latitude);
+        centers[tile * 3 + 2] = Math.cos(row.latitude) * Math.cos(longitude);
+        rows[tile] = y;
+        columns[tile] = x;
+      }
+    });
+
+    // Neighboring rows are zipped together in order around the globe. Where the pole-side row
+    // reaches a corner at the same spot (a cap's six corners), it steps first, which gives the cap
+    // the hex grid's own triangles and leaves the six band tiles at those corners as the pentagons.
+    const triangles: number[] = [];
+    for (let y = 0; y + 1 < layout.length; y++) {
+      const southern = y >= n + bandRows - 1;
+      const inner = southern ? y + 1 : y;
+      const outer = southern ? y : y + 1;
+      HexSphere.zipRows(layout[inner], rowStart[inner], layout[outer], rowStart[outer], width, triangles);
+    }
+    return new HexSphere(centers, Int32Array.from(triangles), rows, columns, layout.map((row) => row.count));
   }
 
-  // The triangle grid, as 3 tile indices per triangle. Grid vertices on an icosahedron corner or
-  // edge are shared with the neighboring faces, so each is created exactly once.
-  private buildTriangles(n: number): Int32Array {
+  // The icosahedron's triangle grid, as 3 tile indices per triangle, writing each grid vertex into
+  // `centers`. Vertices on an icosahedron corner or edge are shared with the neighboring faces, so
+  // each is created exactly once; the 12 corners come first.
+  private static buildIcosahedralGrid(n: number, centers: Float32Array): Int32Array {
     let nextVertex = 0;
     const addVertex = (x: number, y: number, z: number) => {
       const length = Math.hypot(x, y, z);
-      this.centers[nextVertex * 3] = x / length;
-      this.centers[nextVertex * 3 + 1] = y / length;
-      this.centers[nextVertex * 3 + 2] = z / length;
+      centers[nextVertex * 3] = x / length;
+      centers[nextVertex * 3 + 1] = y / length;
+      centers[nextVertex * 3 + 2] = z / length;
       return nextVertex++;
     };
     const lerp = (a: number[], b: number[], t: number) => [
@@ -204,6 +261,67 @@ export class HexSphere {
       }
     }
     return triangles;
+  }
+
+  // Triangulates the strip between two neighboring rows: the next triangle always reaches for
+  // whichever row's next tile comes sooner going around the globe; ties go to the inner row.
+  private static zipRows(
+    inner: { count: number; shift: number },
+    innerStart: number,
+    outer: { count: number; shift: number },
+    outerStart: number,
+    width: number,
+    triangles: number[]
+  ) {
+    if (inner.count === 1) {
+      for (let j = 0; j < outer.count; j++) {
+        triangles.push(innerStart, outerStart + j, outerStart + ((j + 1) % outer.count));
+      }
+      return;
+    }
+
+    // Exact comparison of the turns (x / count + shift / (2 * width)) of an inner and an outer tile.
+    const innerFirst = (i: number, j: number) =>
+      (2 * width * i + inner.shift * inner.count) * outer.count <= (2 * width * j + outer.shift * outer.count) * inner.count;
+    let i = 0;
+    let j = 0;
+    for (let step = 0; step < inner.count + outer.count; step++) {
+      const a = innerStart + (i % inner.count);
+      const b = outerStart + (j % outer.count);
+      if (innerFirst(i + 1, j + 1)) {
+        triangles.push(a, b, innerStart + ((i + 1) % inner.count));
+        i++;
+      } else {
+        triangles.push(a, b, outerStart + ((j + 1) % outer.count));
+        j++;
+      }
+    }
+  }
+
+  public isPentagon(tile: number): boolean {
+    return this.cornerStart[tile + 1] - this.cornerStart[tile] === 5;
+  }
+
+  /**
+   * The tile whose center is nearest the given unit vector, found by walking downhill from
+   * `startTile` - a handful of steps when the start is close, as it is for a moving mouse.
+   */
+  public findTile(x: number, y: number, z: number, startTile = 0): number {
+    let tile = startTile;
+    let best = this.dotCenter(tile, x, y, z);
+    for (;;) {
+      let next = tile;
+      for (let i = this.cornerStart[tile]; i < this.cornerStart[tile + 1]; i++) {
+        const neighbor = this.neighbors[i];
+        const dot = this.dotCenter(neighbor, x, y, z);
+        if (dot > best) {
+          best = dot;
+          next = neighbor;
+        }
+      }
+      if (next === tile) return tile;
+      tile = next;
+    }
   }
 
   private writeTriangleCenter(triangles: Int32Array, tri: number) {
