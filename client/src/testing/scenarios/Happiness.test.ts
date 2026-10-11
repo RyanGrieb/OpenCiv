@@ -1,7 +1,7 @@
 import { TestRunner } from "../TestRunner";
 import { SpriteRegion } from "../../Assets";
 import { Game } from "../../Game";
-import { WebsocketClient } from "../../network/Client";
+import { NetworkEvents, WebsocketClient } from "../../network/Client";
 import { Unit } from "../../Unit";
 import { City } from "../../city/City";
 import { HappinessTooltip } from "../../ui/hud/HappinessTooltip";
@@ -24,6 +24,7 @@ export function setupHappinessTest(game: Game) {
     const runner = new TestRunner("Happiness");
     const utils = new TestUtils(game);
     let city: City | undefined;
+    let unitOptions: string[] = [];
 
     const me = () => utils.getClientPlayer();
     const clientPlayer = () => me() as unknown as Record<string, any>;
@@ -38,6 +39,13 @@ export function setupHappinessTest(game: Game) {
         happiness().net ===
         happiness().sources.reduce((total, entry) => total + entry.amount, 0) -
             happiness().unhappiness.reduce((total, entry) => total + entry.amount, 0);
+
+    // Asks the server what the city can train right now.
+    const fetchUnitOptions = async () => {
+        unitOptions = [];
+        WebsocketClient.sendMessage({ event: "requestProductionOptions", cityName: city.getName() });
+        await utils.waitUntil(() => unitOptions.length > 0, 5000, "Production options to arrive");
+    };
 
     const select = (unit: Unit) => {
         for (let click = 0; click < 4 && clientPlayer()["selectedUnit"] !== unit; click++) {
@@ -77,7 +85,7 @@ export function setupHappinessTest(game: Game) {
     });
 
     runner.addStep({
-        name: `Settle: -${CITY_UNHAPPINESS} for the city and -${CITIZEN_UNHAPPINESS} for its citizen make the empire very unhappy, and the city stops growing`,
+        name: `Settle: -${CITY_UNHAPPINESS} for the city and -${CITIZEN_UNHAPPINESS} for its citizen make the empire very unhappy: the city stops growing and can't train Settlers`,
         action: async () => {
             const settler = await utils.findUnitWithAction("settle");
             utils.getInGameScene().focusOnTile(settler.getTile(), 4);
@@ -91,26 +99,36 @@ export function setupHappinessTest(game: Game) {
             await utils.waitUntil(() => me().getCities().length > 0, 5000, "City to be founded");
             city = me().getCities()[0];
             await utils.waitUntil(() => city.hasStats() && happiness().status === "veryUnhappy", 5000, "Very unhappy");
+
+            NetworkEvents.on({
+                eventName: "updateProductionOptions",
+                parentObject: runner,
+                callback: (data: any) => (unitOptions = data["units"].map((unit: { name: string }) => unit.name))
+            });
+            await fetchUnitOptions();
         },
         verification: () =>
             happiness().net === BASE_HAPPINESS - CITY_UNHAPPINESS - CITIZEN_UNHAPPINESS &&
             happiness().effects.includes("Cities stop growing") &&
             city.getStat("food") <= 0 &&
+            !unitOptions.includes("Settler") &&
             statusBarShows(`${happiness().net}`, SpriteRegion.ICON_UNHAPPY) &&
             addsUp()
     });
 
     runner.addStep({
-        name: `Buy a Colosseum: +${COLOSSEUM_HAPPINESS} lifts the empire to unhappy, where growth is only slowed`,
+        name: `Buy a Colosseum: +${COLOSSEUM_HAPPINESS} lifts the empire to unhappy: growth is only slowed, and Settlers can be trained again`,
         action: async () => {
             const before = happiness().net;
             WebsocketClient.sendMessage({ event: "purchaseProductionOption", cityName: city.getName(), type: "building", name: "Colosseum" });
             await utils.waitUntil(() => happiness().net === before + COLOSSEUM_HAPPINESS, 5000, "Colosseum's happiness");
+            await fetchUnitOptions();
         },
         verification: () =>
             happiness().status === "unhappy" &&
             source(`Buildings in ${city.getName()}`)[0]?.amount === COLOSSEUM_HAPPINESS &&
             JSON.stringify(happiness().effects) === JSON.stringify(["City growth -75%"]) &&
+            unitOptions.includes("Settler") &&
             addsUp()
     });
 

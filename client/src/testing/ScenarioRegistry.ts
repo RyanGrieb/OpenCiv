@@ -210,3 +210,8 @@ ScenarioRegistry.register("Happiness", ScenarioCategory.ECONOMY, async () => {
     const module = await import("./scenarios/Happiness.test");
     return module.setupHappinessTest;
 });
+
+ScenarioRegistry.register("SettlerProduction", ScenarioCategory.CITIES, async () => {
+    const module = await import("./scenarios/SettlerProduction.test");
+    return module.setupSettlerProductionTest;
+});

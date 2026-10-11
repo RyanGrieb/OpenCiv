@@ -553,7 +553,11 @@ export class City {
       }
 
       const foodStat = cityStats.find((cityStat) => cityStat.food !== undefined);
+      const productionStat = cityStats.find((cityStat) => cityStat.production !== undefined);
       foodStat.food = this.player.getHappiness().applyToFoodSurplus(foodStat.food);
+      const settlerFood = this.getFoodForSettler(foodStat.food);
+      foodStat.food -= settlerFood;
+      productionStat.production += settlerFood;
 
       return cityStats;
     }
@@ -599,6 +603,9 @@ export class City {
     // Unhappiness slows growth. Applied to the stat itself, so the city screen shows the food that's
     // really banked each turn.
     cityStats.food = this.player.getHappiness().applyToFoodSurplus(cityStats.food);
+    const settlerFood = this.getFoodForSettler(cityStats.food);
+    cityStats.food -= settlerFood;
+    cityStats.production += settlerFood;
 
     return cityStats;
   }
@@ -967,7 +974,7 @@ export class City {
     }
   }
 
-  // Units/buildings with no `cost` (e.g. Settler, Palace) are never offered here -
+  // Units/buildings with no `cost` (e.g. Palace) are never offered here -
   // they're granted directly elsewhere rather than queued. required_tech, when
   // present, gates an option until the player has researched it; obsolete_tech hides a unit again
   // once its replacement's tech is in.
@@ -1027,6 +1034,14 @@ export class City {
   private isObsoleteUnit(unitName: string): boolean {
     const obsoleteTech = Unit.getAllUnitData().find((unit) => unit.name === unitName)?.obsolete_tech;
     return obsoleteTech !== undefined && this.player.hasResearchedTech(obsoleteTech);
+  }
+
+  // Civ 5 stops a city growing while it trains a Settler, and puts its spare food into production instead.
+  // A food shortfall still starves the city.
+  private getFoodForSettler(food: number): number {
+    const current = this.productionQueue[0];
+    const trainingSettler = current?.type === "unit" && current.name === "Settler";
+    return trainingSettler ? Math.max(0, food) : 0;
   }
 
   // Banks this turn's net food, then grows the city once the bank covers the growth

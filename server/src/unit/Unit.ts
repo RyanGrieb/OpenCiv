@@ -64,8 +64,7 @@ export interface UnitYMLTypeData {
   domain?: UnitDomain;
   // A sea unit that can't enter deep ocean, like Civ 5's Trireme.
   coast_only?: boolean;
-  // Absent for units never offered through a city's production queue (e.g. the
-  // Settler, which is only ever granted directly at game start).
+  // Absent for units never offered through a city's production queue.
   cost?: number;
   required_tech?: string;
   // Once researched, cities stop offering this unit (see units.yml).

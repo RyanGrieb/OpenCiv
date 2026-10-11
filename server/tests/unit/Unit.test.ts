@@ -481,10 +481,10 @@ describe('Unit', () => {
       expect(caravan.required_tech).toBe('Animal Husbandry');
     });
 
-    it('leaves cost undefined for a unit never offered through production', () => {
+    it("gives the Settler Civ 5's production cost", () => {
       const settler = Unit.getAllUnitData().find((unit) => unit.name === 'Settler');
 
-      expect(settler.cost).toBeUndefined();
+      expect(settler.cost).toBe(106);
     });
 
     it('exposes the Scout movement overrides', () => {

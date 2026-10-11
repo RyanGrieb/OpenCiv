@@ -85,7 +85,7 @@ describe('City', () => {
     (Unit.getAllUnitData as jest.Mock).mockReturnValue([
       { name: 'Warrior', attack_type: 'melee', cost: 30, obsolete_tech: 'Iron Working' },
       { name: 'Scout', attack_type: 'melee', cost: 20 },
-      { name: 'Settler', is_utility: true },
+      { name: 'Settler', is_utility: true, cost: 106 },
       { name: 'Archer', attack_type: 'ranged', cost: 40, required_tech: 'Archery' },
     ]);
 
@@ -118,6 +118,7 @@ describe('City', () => {
       units: [
         { type: 'unit', name: 'Warrior', cost: 30, goldCost: 190, turns: 30 },
         { type: 'unit', name: 'Scout', cost: 20, goldCost: 140, turns: 20 },
+        { type: 'unit', name: 'Settler', cost: 106, goldCost: 500, turns: 106 },
       ],
       buildings: [
         {
@@ -206,7 +207,7 @@ describe('City', () => {
       triggerServerEvent('requestProductionOptions', { cityName: 'TestCity' }, mockWebsocket);
 
       const { units } = (mockPlayer.sendNetworkEvent as jest.Mock).mock.calls[0][0];
-      expect(units.map((option: { name: string }) => option.name)).toEqual(['Scout']);
+      expect(units.map((option: { name: string }) => option.name)).toEqual(['Scout', 'Settler']);
     });
 
     it('refuses to queue an obsolete unit', () => {
@@ -871,6 +872,45 @@ describe('City', () => {
       city['population'] = 4;
 
       expect(city.getFoodRequiredToGrow()).toBe(City.GROWTH_FOOD_BASE + City.GROWTH_FOOD_PER_POP * 4);
+    });
+
+    it("stops growing while training a Settler, putting its spare food into production instead", () => {
+      setNetFoodPerTurn(5);
+      city['productionQueue'].push({ type: 'unit', name: 'Settler', cost: 106, progress: 0 });
+      const productionBefore = city.getStatline({ asArray: false }).production;
+      city['productionQueue'] = [];
+      const withoutSettler = city.getStatline({ asArray: false }).production;
+      city['productionQueue'].push({ type: 'unit', name: 'Settler', cost: 106, progress: 0 });
+
+      expect(city.getStatline({ asArray: false }).food).toBe(0);
+      expect(productionBefore).toBe(withoutSettler + 3);
+
+      triggerServerEvent('nextTurn', { turn: 2 });
+
+      expect(city['foodSurplus']).toBe(0);
+      expect(city['productionQueue'][0].progress).toBe(productionBefore);
+    });
+
+    it('still starves while training a Settler', () => {
+      setNetFoodPerTurn(0);
+      city['population'] = 2;
+      city['productionQueue'].push({ type: 'unit', name: 'Settler', cost: 106, progress: 0 });
+
+      triggerServerEvent('nextTurn', { turn: 2 });
+
+      expect(city['population']).toBe(1);
+    });
+
+    it("doesn't offer a Settler while the empire can't train one", () => {
+      (mockPlayer as any).getHappiness = () => ({
+        applyToFoodSurplus: (food: number) => food,
+        canTrain: (name: string) => name !== 'Settler',
+      });
+
+      triggerServerEvent('requestProductionOptions', { cityName: 'TestCity' }, {} as WebSocket);
+
+      const { units } = (mockPlayer.sendNetworkEvent as jest.Mock).mock.calls[0][0];
+      expect(units.map((option: { name: string }) => option.name)).not.toContain('Settler');
     });
 
     it('starves a citizen off and empties the bank when food runs negative', () => {

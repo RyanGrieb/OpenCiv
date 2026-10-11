@@ -12,6 +12,7 @@
 # obsolete_tech is Civ 5's ObsoleteTech: once it's researched, cities stop offering the unit and drop it
 # from their production queues (units already on the map stay). Each is the tech that unlocks the unit it
 # upgrades to.
+# A city training a Settler stops growing: its spare food goes into production instead, as in Civ 5.
 units:
   - name: Warrior
     combat_strength: 8
@@ -27,6 +28,7 @@ units:
     ignores_terrain_cost: true
   - name: Settler
     is_utility: true
+    cost: 106
     captured_as: Builder
   - name: Archer
     combat_strength: 5
