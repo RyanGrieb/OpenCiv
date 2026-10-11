@@ -225,3 +225,8 @@ ScenarioRegistry.register("SettlerProduction", ScenarioCategory.CITIES, async ()
     const module = await import("./scenarios/SettlerProduction.test");
     return module.setupSettlerProductionTest;
 });
+
+ScenarioRegistry.register("HexPlanet", ScenarioCategory.MAP, async () => {
+    const module = await import("./scenarios/HexPlanet.test");
+    return module.setupHexPlanetTest;
+});

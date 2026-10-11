@@ -8,11 +8,13 @@
     },
     "devDependencies": {
         "@types/node": "^22.15.26",
+        "@types/three": "^0.186.0",
         "vite": "^8.3.0"
     },
     "assetsPath": "assets",
     "dependencies": {
         "parent-package": "file:..",
+        "three": "^0.186.1",
         "ts-priority-queue": "^0.1.1"
     }
 }
