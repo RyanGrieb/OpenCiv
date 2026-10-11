@@ -11,7 +11,6 @@ export enum GameImage {
   ICON_BUTTON,
   ICON_BUTTON_HOVERED,
   SPRITESHEET,
-  RIVER,
   POPUP_BOX,
   DEBUG
 }
@@ -314,7 +313,6 @@ export const assetList = [
   new URL("../assets/images/ui_button.svg", import.meta.url).href,
   new URL("../assets/images/ui_button_hovered.svg", import.meta.url).href,
   new URL("../assets/images/spritesheet.png", import.meta.url).href,
-  new URL("../assets/images/river.png", import.meta.url).href,
   new URL("../assets/images/ui_popup_box.svg", import.meta.url).href,
   new URL("../assets/images/debug.png", import.meta.url).href,
   new URL("../assets/images/font.png", import.meta.url).href,

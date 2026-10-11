@@ -775,7 +775,7 @@ export class GameMap {
     const chunkKey = this.chunkKeyFor(chunkGridX, chunkGridY);
 
     const baseRenderTiles: Tile[] = [];
-    const riverActors: River[] = [];
+    const riverActors: Actor[] = [];
     const blendTiles: { tile: Tile; x: number; y: number }[] = [];
     const coastActors: Actor[] = [];
     const topRenderActors: Actor[] = [];
@@ -817,11 +817,7 @@ export class GameMap {
         blendTiles.push({ tile, x: xPosRelative, y: yPosRelative });
         coastActors.push(...(await Coastline.createActors(tile, xPosRelative, yPosRelative)));
 
-        if (baseRenderTile.hasRiver()) {
-          for (const side of baseRenderTile.getNumberedRiverSides()) {
-            riverActors.push(new River({ tile: baseRenderTile, side: side }));
-          }
-        }
+        riverActors.push(...(await River.createActors(tile, xPosRelative, yPosRelative)));
 
         // A road runs over a farm's fields but under trees, resources and their improvements, as on old_java.
         const overlayTypes = tileTypes
