@@ -9,6 +9,7 @@ import { ConfigLoader } from "../util/ConfigLoader";
 // each tech's own row/slot.
 export interface EraData {
   name: string;
+  id: string;
   rows: number[];
 }
 
@@ -96,6 +97,22 @@ export class Technology {
 
   public static getAllEras(): EraData[] {
     return ConfigLoader.load<{ eras: EraData[] }>("./config/techs.yml").eras;
+  }
+
+  /**
+   * The era a player with these techs is in: the latest one any of them belongs to, as in Civ 5.
+   * The first era until anything is researched.
+   */
+  public static getEraOf(techNames: Iterable<string>): EraData {
+    const eras = Technology.getAllEras();
+    const researched = new Set(techNames);
+    const rows = new Set(
+      Technology.getAllTechnologies()
+        .filter((tech) => researched.has(tech.getName()))
+        .map((tech) => tech.getRow())
+    );
+    const reached = eras.filter((era) => era.rows.some((row) => rows.has(row)));
+    return reached[reached.length - 1] ?? eras[0];
   }
 
   // civName leaves out what that civ can't build (other civs' unique units and buildings, and the ones its

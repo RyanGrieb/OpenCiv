@@ -9,7 +9,7 @@ import { GameMap } from "./map/GameMap";
 import { PlayerVisibility } from "./map/PlayerVisibility";
 import { PlayerNotifications } from "./notification/PlayerNotifications";
 import { TechEffects } from "./research/TechEffects";
-import { Technology } from "./research/Technology";
+import { EraData, Technology } from "./research/Technology";
 import { Unit } from "./unit/Unit";
 
 // Stats that pool across a player's whole empire, as opposed to city-specific
@@ -365,6 +365,11 @@ export class Player {
     this.sendTotalStatsUpdate();
   }
 
+  // The latest era any of this player's techs belongs to (see Technology.getEraOf()).
+  public getEra(): EraData {
+    return Technology.getEraOf(this.researchedTechs);
+  }
+
   public hasResearchedTech(techName: string): boolean {
     return this.researchedTechs.has(techName);
   }
@@ -476,6 +481,7 @@ export class Player {
   // Finishes the tech being researched, whether the science is in or it came free.
   private completeResearch() {
     const { techName, assetName } = this.currentResearch;
+    const previousEra = this.getEra();
     this.researchedTechs.add(techName);
     this.currentResearch = null;
     this.notifications.addMessage(assetName, `You have discovered ${techName}.`);
@@ -484,7 +490,15 @@ export class Player {
     // ...and make units their cities had queued obsolete.
     this.cities.forEach((city) => city.removeObsoleteUnitsFromQueue());
     this.sendTilesChangedByTech(techName);
+    if (this.getEra().id !== previousEra.id) this.onEnteredEra();
     this.sendResearchUpdate();
+  }
+
+  // A new era rebuilds this player's cities in its style, as in Civ 5.
+  private onEnteredEra() {
+    const era = this.getEra();
+    this.notifications.addMessage(`TILE_CITY_${era.id.toUpperCase()}_1`, `You have entered the ${era.name}.`);
+    this.cities.forEach((city) => city.sendEraUpdate());
   }
 
   // Resends the tiles a new tech changes for this player - resources it reveals, tiles it boosts - and

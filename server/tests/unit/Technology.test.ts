@@ -206,4 +206,23 @@ describe('Technology', () => {
       }
     }
   });
+
+  describe('getEraOf', () => {
+    it('is the first era before anything is researched', () => {
+      expect(Technology.getEraOf([]).id).toBe('ancient');
+    });
+
+    it('is the latest era any researched tech belongs to', () => {
+      const firstClassical = Technology.getAllTechnologies().find((tech) => tech.getRow() === 2);
+      const firstMedieval = Technology.getAllTechnologies().find((tech) => tech.getRow() === 4);
+
+      expect(Technology.getEraOf(['Pottery']).id).toBe('ancient');
+      expect(Technology.getEraOf(['Pottery', firstClassical.getName()]).id).toBe('classical');
+      expect(Technology.getEraOf([firstMedieval.getName(), 'Pottery']).id).toBe('medieval');
+    });
+
+    it('gives every era an id', () => {
+      expect(Technology.getAllEras().map((era) => era.id)).toEqual(['ancient', 'classical', 'medieval']);
+    });
+  });
 });

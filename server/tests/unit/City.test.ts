@@ -72,6 +72,7 @@ describe('City', () => {
       getNotifications: jest.fn().mockReturnValue(mockNotifications),
       removeCity: jest.fn(),
       getCivilizationName: jest.fn().mockReturnValue('Germany'),
+      getEra: () => ({ name: 'Ancient Era', id: 'ancient', rows: [0, 1] }),
       isBarbarian: () => false,
       getDiplomacy: () => ({ isAtWarWith: () => true }),
       getTreasury: () => mockTreasury,
@@ -1103,7 +1104,11 @@ describe('City', () => {
     });
   });
   describe('combat', () => {
-    const enemyPlayer = { getName: () => 'Enemy', isBarbarian: () => false } as unknown as Player;
+    const enemyPlayer = {
+      getName: () => 'Enemy',
+      isBarbarian: () => false,
+      getEra: () => ({ name: 'Classical Era', id: 'classical', rows: [2, 3] }),
+    } as unknown as Player;
     const visibility = { isVisible: jest.fn().mockReturnValue(true), update: jest.fn() };
     let targetTile: jest.Mocked<Tile>;
     let enemyUnit: jest.Mocked<Unit>;
@@ -1207,7 +1212,7 @@ describe('City', () => {
       expect(city.canStrikeAt(targetTile)).toBe(false);
     });
 
-    it('changes hands when captured: half the citizens, no Palace, nothing in production, no strike this turn', () => {
+    it('changes hands when captured: half the citizens, no Palace, nothing in production, no strike this turn, its new owner\'s era', () => {
       (enemyPlayer as any).getCities = jest.fn().mockReturnValue([]);
       (enemyPlayer as any).getUnits = jest.fn().mockReturnValue([]);
       (enemyPlayer as any).getNotifications = jest.fn().mockReturnValue({ addMessage: jest.fn() });
@@ -1227,7 +1232,7 @@ describe('City', () => {
       expect(city.getProductionQueue()).toEqual([]);
       expect(city.canStrike()).toBe(false);
       expect(mockPlayer.sendNetworkEvent).toHaveBeenCalledWith(
-        expect.objectContaining({ event: 'cityCaptured', cityName: 'TestCity', player: 'Enemy' })
+        expect.objectContaining({ event: 'cityCaptured', cityName: 'TestCity', player: 'Enemy', era: 'classical' })
       );
       expect(mockNotifications.addMessage).toHaveBeenCalledWith('ICON_DEFENSE', 'TestCity has been captured by Enemy!');
     });

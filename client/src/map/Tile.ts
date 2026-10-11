@@ -96,6 +96,8 @@ export class Tile extends Actor {
   private static readonly FEATURE_HASH_OFFSET = 7919;
   // Offsets the coordinates a hill's look is hashed from, so it doesn't follow the terrain's or a forest's.
   private static readonly HILL_HASH_OFFSET = 15485;
+  // How many looks a city has in each era: TILE_CITY_<ERA>_1 to _3.
+  private static readonly CITY_VARIANT_COUNT = 3;
   // Offsets the coordinates a tile's mirroring is hashed from, so it doesn't follow its look.
   private static readonly MIRROR_HASH_OFFSET = 104729;
 
@@ -205,6 +207,15 @@ export class Tile extends Actor {
       return Tile.AUTUMN_FOREST_TYPES[hash % Tile.AUTUMN_FOREST_TYPES.length];
     }
     return Tile.pickVariant(featureType, hash);
+  }
+
+  /**
+   * The tile type whose sprite draws a city of the given era (an era id from the server, like
+   * "classical") at (gridX, gridY): one of that era's looks, picked from a hash of the coordinates
+   * so a city keeps its look until its owner enters a new era.
+   */
+  public static getCityType(era: string, gridX: number, gridY: number): string {
+    return `city_${era}_${(Tile.hashCoordinates(gridX, gridY) % Tile.CITY_VARIANT_COUNT) + 1}`;
   }
 
   /**

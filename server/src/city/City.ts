@@ -515,6 +515,26 @@ export class City {
     this.applyFoundingBonuses();
   }
 
+  /**
+   * Tells everyone who can see this city that its owner entered a new era, so it's redrawn in that
+   * era's style. Anyone else catches up when the city's tile next comes into view, since its tile data
+   * carries the city.
+   */
+  public sendEraUpdate() {
+    Game.getInstance()
+      .getPlayers()
+      .forEach((player) => {
+        if (!player.getVisibility().isVisible(this.tile)) return;
+
+        player.sendNetworkEvent({
+          event: "cityEraChanged",
+          tileX: this.tile.getX(),
+          tileY: this.tile.getY(),
+          era: this.player.getEra().id
+        });
+      });
+  }
+
   /*
   Get the city-stat line, and send it to the player
 */
@@ -838,6 +858,8 @@ export class City {
       health: this.health,
       maxHealth: this.getMaxHealth(),
       strength: this.getCombatStrength(),
+      // The owner's era, which picks the look the city is drawn with.
+      era: this.player.getEra().id,
       // Which tiles a city works is its owner's business.
       workedTiles: ownCity ? this.workedTiles.map((tile) => ({ x: tile.getX(), y: tile.getY() })) : []
     };

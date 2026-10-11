@@ -122,7 +122,7 @@ export class CombatPreviewWindow extends ActorGroup {
   }
 
   public static citySide(city: City): CombatSide {
-    return { spriteRegion: SpriteRegion.TILE_CITY, player: city.getPlayer(), maxHealth: city.getMaxHealth() };
+    return { spriteRegion: city.getSpriteRegion(), player: city.getPlayer(), maxHealth: city.getMaxHealth() };
   }
 
   private static getTitle(preview: CombatPreviewEvent): string {

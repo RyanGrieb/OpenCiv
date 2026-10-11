@@ -23,6 +23,8 @@ export interface CityOptions {
   health: number;
   maxHealth: number;
   strength: number;
+  // The owner's era id from the server ("ancient", "classical", ...), which picks the city's look.
+  era: string;
 }
 
 // Server "cityCombatStatus" payload, from server City.refreshCombatStatus().
@@ -69,6 +71,8 @@ export interface ProductionOptions {
  * City class actor handles city name, healthbar, and other attributes. It's not a tile layer.
  */
 export class City extends ActorGroup {
+  // What a city looks like until the server says otherwise.
+  public static readonly DEFAULT_ERA = "ancient";
   private static readonly HEALTH_BAR_WIDTH = 28;
   private static readonly HEALTH_BAR_HEIGHT = 3;
   private static readonly BANNER_ICON_SIZE = 12;
@@ -93,6 +97,7 @@ export class City extends ActorGroup {
   private maxHealth: number;
   private strength: number;
   private strikeReady: boolean;
+  private era: string;
   private innerBorderColor: string;
   private outsideBorderColor: string;
   private buildings: Buidling[];
@@ -113,6 +118,8 @@ export class City extends ActorGroup {
     this.maxHealth = options.maxHealth;
     this.strength = options.strength;
     this.strikeReady = false;
+    // Before the center tile is attached below, which draws the city in this era's style.
+    this.era = options.era ?? City.DEFAULT_ERA;
 
     this.innerBorderColor = this.player.getCivilizationData()["inside_border_color"];
     this.outsideBorderColor = this.player.getCivilizationData()["outside_border_color"];
@@ -306,6 +313,24 @@ export class City extends ActorGroup {
       if (tile.getTerritoryCity() === this) tile.setTerritoryCity(undefined);
     }
     Game.getInstance().getCurrentScene().removeActor(this);
+  }
+
+  /** Redraws the city in another era's style when its owner enters one. */
+  public setEra(era: string) {
+    if (!era || era === this.era) return;
+
+    this.era = era;
+    if (this.tile) GameMap.getInstance().redrawMap([this.tile]);
+  }
+
+  public getEra() {
+    return this.era;
+  }
+
+  // The sprite the city is drawn with on the map, for showing it elsewhere (the combat preview).
+  public getSpriteRegion(): SpriteRegion {
+    const tileType = Tile.getCityType(this.era, this.tile?.getGridX() ?? 0, this.tile?.getGridY() ?? 0);
+    return resolveSpriteRegion(`TILE_${tileType.toUpperCase()}`);
   }
 
   public getHealth() {

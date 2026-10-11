@@ -122,7 +122,16 @@ export enum SpriteRegion {
   TILE_CITRUS,
   TILE_OLIVES,
   TILE_STONE,
-  TILE_CITY,
+  // A city's looks per era - see Tile.getCityType().
+  TILE_CITY_ANCIENT_1,
+  TILE_CITY_ANCIENT_2,
+  TILE_CITY_ANCIENT_3,
+  TILE_CITY_CLASSICAL_1,
+  TILE_CITY_CLASSICAL_2,
+  TILE_CITY_CLASSICAL_3,
+  TILE_CITY_MEDIEVAL_1,
+  TILE_CITY_MEDIEVAL_2,
+  TILE_CITY_MEDIEVAL_3,
   TILE_BARBARIAN_CAMP,
   TILE_ANCIENT_RUINS,
   // Natural wonders - see server config/natural_wonders.yml.

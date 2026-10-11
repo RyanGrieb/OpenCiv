@@ -1,11 +1,15 @@
 # Which rows belong to which era, for the research tree's visual section
 # labels/dividers - hand-placed the same way row/slot are, not derived.
 eras:
+  # id names the era to clients, e.g. which look a city is drawn with (TILE_CITY_<ID>_<N>).
   - name: Ancient Era
+    id: ancient
     rows: [0, 1]
   - name: Classical Era
+    id: classical
     rows: [2, 3]
   - name: Medieval Era
+    id: medieval
     rows: [4, 5]
 technologies:
   # slot is the tech's horizontal column (0-9) within its row - a fixed 10-slot

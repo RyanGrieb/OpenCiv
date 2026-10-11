@@ -87,6 +87,15 @@ interface CityData {
   health: number;
   maxHealth: number;
   strength: number;
+  // The owner's era id ("ancient", "classical", ...), which picks the city's look.
+  era: string;
+}
+
+// Server "cityEraChanged": the city's owner entered a new era.
+interface CityEraChangedEvent {
+  tileX: number;
+  tileY: number;
+  era: string;
 }
 
 interface TileUpdatedEvent {
@@ -223,6 +232,15 @@ export class GameMap {
       parentObject: this,
       callback: (data) => {
         this.syncCity(data);
+      }
+    });
+
+    // The city's owner entered a new era, so it's drawn in that era's style (see server City.sendEraUpdate()).
+    NetworkEvents.on<CityEraChangedEvent>({
+      eventName: "cityEraChanged",
+      parentObject: this,
+      callback: (data) => {
+        this.knownCities.get(`${data.tileX},${data.tileY}`)?.setEra(data.era);
       }
     });
 
@@ -715,6 +733,7 @@ export class GameMap {
 
     const existingCity = this.knownCities.get(key);
     if (existingCity) {
+      existingCity.setEra(cityJSON.era);
       existingCity.setTerritory(territory);
       existingCity.setCenterTile(centerTile);
       return;
@@ -899,7 +918,11 @@ export class GameMap {
         // old_java - ores and their mines lie on the ground over it, but don't stand up on the globe.
         const overlayTypes = tileTypes
           .slice(1)
-          .map((type) => Tile.getVariantFeatureType(type, tileTypes[0], gridX, gridY));
+          .map((type) =>
+            type === "city"
+              ? Tile.getCityType(tile.getCity()?.getEra() ?? City.DEFAULT_ERA, gridX, gridY)
+              : Tile.getVariantFeatureType(type, tileTypes[0], gridX, gridY)
+          );
         const underRoad = overlayTypes.filter((type) => Tile.UNDER_ROAD_TILE_TYPES.includes(type));
         const flat = overlayTypes.filter((type) => Tile.FLAT_TILE_TYPES.includes(type));
         const overRoad = overlayTypes.filter((type) => !underRoad.includes(type) && !flat.includes(type));
@@ -1269,7 +1292,8 @@ export class GameMap {
       name: cityName,
       health: data.health,
       maxHealth: data.maxHealth,
-      strength: data.strength
+      strength: data.strength,
+      era: data.era
     });
   }
 }

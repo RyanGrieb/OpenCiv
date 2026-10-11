@@ -36,7 +36,7 @@ export class MainMenuScene extends Scene {
     });
     const titleIcon = new Actor({
       image: Game.getInstance().getImage(GameImage.SPRITESHEET),
-      spriteRegion: SpriteRegion.TILE_CITY,
+      spriteRegion: SpriteRegion.TILE_CITY_MEDIEVAL_1,
       x: 0,
       y: 0,
       width: MainMenuScene.TITLE_ICON_SIZE,
