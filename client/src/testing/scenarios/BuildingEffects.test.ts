@@ -78,7 +78,7 @@ export function setupBuildingEffectsTest(game: Game) {
           .map((label: Label) => label.getText())
       : [];
   };
-  // Opens the city's production list, scrolls it to the row for `name`, and moves the real mouse over it.
+  // Opens the city's production list, scrolls it to the row for `name`, and opens its tooltip as hovering it would.
   const hoverListRow = async (name: string) => {
     if (cityScreen()) utils.getInGameScene().toggleCityUI(city);
     utils.getInGameScene().toggleCityUI(city);
@@ -99,11 +99,8 @@ export function setupBuildingEffectsTest(game: Game) {
     const findRow = () => (list["rows"] as any[]).find((row) => rowName(row) === name);
     list["setScrollOffset"](list["scrollOffset"] + findRow().getY() - list["y"] - 100);
     await utils.delay(200);
-    const row = findRow();
-    const canvas = document.getElementById("canvas");
-    canvas.dispatchEvent(
-      new MouseEvent("mousemove", { clientX: row.getX() + 60, clientY: row.getY() + row.getHeight() / 2 })
-    );
+    // Not with a made-up mouse event: on a scaled display its position can miss the row.
+    openList().showTooltipFor(name);
     await utils.waitUntil(() => tooltipLines()[0] === name, 5000, `${name}'s tooltip to appear`);
     utils.log(JSON.stringify(tooltipLines()), "yellow");
   };

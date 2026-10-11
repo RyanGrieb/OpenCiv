@@ -44,15 +44,14 @@ export function setupWondersTest(game: Game) {
     const buildingsWindow = (): CityBuildingsWindow | undefined =>
         (cityScreen()?.["actors"] as object[] | undefined)?.find((actor) => actor instanceof CityBuildingsWindow) as CityBuildingsWindow;
     const buildingSections = () => sectionsOf(rowTexts(buildingsWindow()));
-    // Scrolls the open list to the row for `name`, then moves the real mouse over it.
+    // Scrolls the open list to the row for `name`, then opens its tooltip as hovering it would. Not with a
+    // made-up mouse event: on a scaled display its position can miss the row.
     const hoverListRow = async (name: string) => {
         const list = openList() as unknown as Record<string, any>;
         const findRow = () => (list["rows"] as any[]).find((row) => row.getLabel().getText().replace(/\s*\(\d+\u00a0turns?\)$/, "") === name);
         list["setScrollOffset"](list["scrollOffset"] + findRow().getY() - list["y"] - 100);
         await utils.delay(200);
-        const row = findRow();
-        const canvas = document.getElementById("canvas");
-        canvas.dispatchEvent(new MouseEvent("mousemove", { clientX: row.getX() + 60, clientY: row.getY() + row.getHeight() / 2 }));
+        openList().showTooltipFor(name);
         await utils.waitUntil(() => tooltipLines()[0] === name, 5000, `${name}'s tooltip to appear`);
     };
     const tooltipLines = (): string[] => {

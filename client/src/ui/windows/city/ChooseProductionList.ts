@@ -30,6 +30,8 @@ export class ChooseProductionList extends ListBox {
   private hoveredOption: ProductionQueueItem | undefined;
   private tooltip: BuildingTooltip | undefined;
   private tooltipBuild = 0;
+  // Each building's row, by name, so its tooltip can be opened without the mouse (see showTooltipFor()).
+  private buildingRows = new Map<string, { option: ProductionQueueItem; row: { getY(): number } }>();
 
   constructor(options: {
     city: City;
@@ -66,6 +68,18 @@ export class ChooseProductionList extends ListBox {
 
   public getMode(): ProductionListMode {
     return this.mode;
+  }
+
+  /**
+   * Opens the tooltip of the building or wonder named `name`, as hovering its row would. For scenarios,
+   * whose made-up mouse events can miss the row on a scaled display. Returns whether it has a row.
+   */
+  public showTooltipFor(name: string): boolean {
+    const entry = this.buildingRows.get(name);
+    if (!entry) return false;
+
+    this.showTooltip(entry.option, entry.row.getY());
+    return true;
   }
 
   public onDestroyed(): void {
@@ -120,6 +134,8 @@ export class ChooseProductionList extends ListBox {
       });
       this.onChosen();
     });
+
+    if (option.building) this.buildingRows.set(option.name, { option, row });
 
     row.on("mousemove", () => {
       if (!row.isMouseInside()) return;
