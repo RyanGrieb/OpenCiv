@@ -140,17 +140,27 @@ export function setupGlobeDepthTest(game: Game) {
       );
       await lookAt(cityTile);
     },
-    // Each piece takes on the fog's color and thickness at its foot, and thick clouds hide it.
+    // Some of what was in sight is fogged now (how many of the map's sprites stand there depends on
+    // the map), and each piece takes on the fog's color and thickness at its foot, hidden by thick clouds.
     verification: () => {
       const fog = GameMap.getInstance().getFogOfWar();
+      const thicknessAt = (x: number, y: number) => fog.getPixelAt(x, y)[3] / 255;
+      const fogged = GameMap.getInstance()
+        .getTiles()
+        .flat()
+        .filter((tile) => tile)
+        .some((tile) => {
+          const thickness = thicknessAt(tile.getCenterPosition().x, tile.getCenterPosition().y);
+          return thickness > 0 && thickness <= 0.75;
+        });
       const pieces = sprites()["mapBillboards"] as { footX: number; footY: number; tint: number[] }[];
       const tinted = pieces.every(({ footX, footY, tint }) => {
-        const thickness = fog.getPixelAt(footX, footY - 1)[3] / 255;
+        const thickness = thicknessAt(footX, footY - 1);
         return thickness > 0.75 ? tint[3] < 0 : Math.abs(tint[3] - thickness) < 0.01;
       });
       const shaded = pieces.filter(({ tint }) => tint[3] > 0).length;
       utils.log(`${shaded} of ${pieces.length} pieces of the map's sprites in the fog of war`, "yellow");
-      return tinted && shaded > 0;
+      return fogged && tinted;
     }
   });
 

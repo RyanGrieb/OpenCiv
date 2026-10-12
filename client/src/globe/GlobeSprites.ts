@@ -88,10 +88,12 @@ class BillboardBatch {
 }
 
 /**
- * What stands up off the ground on the globe, drawn as billboards: pictures that face the camera,
- * standing on the point of the ground they belong to. Looking straight down they lie flat, just as
- * the flat map draws them; as the camera tilts toward the horizon they stand up, keeping their
- * height instead of flattening into the ground.
+ * What stands up off the ground on the globe, drawn as billboards: pictures standing on the point of
+ * the ground they belong to (their foot), always upright on screen and facing it, as the flat map
+ * draws them. Looking straight down they look just as they do there; toward the horizon the ground
+ * foreshortens while they keep their height, so they stand up off it. Each is as far from the camera
+ * as its foot all over, so the ground never cuts into one, and one standing nearer covers one behind
+ * it, as lower rows cover higher ones on the flat map.
  *
  * The map's standing sprites (trees, mountain peaks, resources, cities) are cut into pieces (see
  * StandingPieces), each standing on its own foot, tinted by the fog of war there. Units, labels,
@@ -103,9 +105,6 @@ export class GlobeSprites {
   // How the billboards are lit, matching the band's MeshLambertMaterial under GlobeView's lights.
   private static readonly AMBIENT = 1.1;
   private static readonly DIRECT = 1.9;
-  // How much a billboard leans toward the map's north, beside standing up from the ground - all
-  // there is to go on looking straight down, where it lies flat like the flat map's sprite.
-  private static readonly NORTH_LEAN = 0.35;
   // Fog of war more opaque than this over a sprite's foot means clouds, which hide it.
   private static readonly CLOUD_HIDES = 0.75;
   // Labels and badges are drawn into their atlas at the screen's resolution, up to this many atlas
@@ -113,6 +112,13 @@ export class GlobeSprites {
   private static readonly MAX_DETAIL = 4;
   // Pixels added around each label or badge's rectangle, for text outlines and shadows.
   private static readonly MARGIN = 2;
+  // How far billboards are brought toward the camera for the depth test alone, in world pixels.
+  // Looking straight down, the ground bulges toward the camera in the middle of the screen, nearer
+  // than the foot of a sprite standing just below it, and would cover it; little enough that what
+  // stands just past the horizon stays hidden. Units come further forward, so that as on the flat
+  // map they show in front of their tile's trees, but not of the next row's.
+  private static readonly DEPTH_LIFT = 16;
+  private static readonly UNIT_DEPTH_LIFT = 32;
   // Units, labels and badges are only drawn into their atlas while their foot is in view: no further
   // past the horizon than this (the cosine of the angle past it), and within this much of the screen
   // past its edges (in halves of the screen), as what stands on a point just out of view reaches into it.
@@ -129,6 +135,7 @@ export class GlobeSprites {
     uniform float worldPixel;
     uniform vec3 lightDirection;
     uniform float lit;
+    uniform float depthLift;
     varying vec2 vAtlas;
     varying vec4 vTint;
     varying float vLight;
@@ -137,15 +144,16 @@ export class GlobeSprites {
       vec3 normal = normalize(mat3(modelMatrix) * anchor);
       vec3 foot = (modelMatrix * vec4(anchor, 1.0)).xyz;
       vec3 toCamera = normalize(cameraPosition - foot);
-      vec3 north = vec3(0.0, 1.0, 0.0);
-      vec3 up = normal - toCamera * dot(normal, toCamera);
-      up = normalize(up + (north - toCamera * dot(north, toCamera)) * NORTH_LEAN);
-      vec3 right = normalize(cross(up, toCamera));
 
+      // In the camera's space, so it's square to the screen, upright, and as far away as its foot.
       float pixel = worldPixel * sqrt(max(0.0, 1.0 - anchor.y * anchor.y));
       vec2 local = rect.xy + position.xy * rect.zw;
-      vec3 world = foot + (right * local.x - up * local.y) * pixel;
-      gl_Position = projectionMatrix * viewMatrix * vec4(world, 1.0);
+      vec4 corner = viewMatrix * vec4(foot, 1.0);
+      corner.xy += vec2(local.x, -local.y) * pixel;
+      gl_Position = projectionMatrix * corner;
+      // Nearer the camera for the depth test alone - see DEPTH_LIFT.
+      vec4 nearer = projectionMatrix * vec4(corner.xy, corner.z + depthLift * pixel, 1.0);
+      gl_Position.z = nearer.z / nearer.w * gl_Position.w;
       // Hidden by clouds; or past the horizon, where a label drawn over everything would show through the planet.
       if (tint.a < 0.0 || (lit < 0.5 && dot(normal, toCamera) < 0.0)) gl_Position = vec4(0.0, 0.0, 2.0, 1.0);
 
@@ -205,9 +213,11 @@ export class GlobeSprites {
     this.pieces = new StandingPieces(maxTextureSize);
     this.labels = new AtlasCanvas(1024, 256, maxTextureSize);
 
-    const cutout = this.createMaterial(true);
-    const blended = this.createMaterial(false);
-    this.materials = [cutout, cutout.clone(), blended];
+    this.materials = [
+      this.createMaterial(true, GlobeSprites.DEPTH_LIFT),
+      this.createMaterial(true, GlobeSprites.UNIT_DEPTH_LIFT),
+      this.createMaterial(false, 0)
+    ];
     this.mapSprites = new BillboardBatch(this.materials[0]);
     this.units = new BillboardBatch(this.materials[1]);
     this.overlay = new BillboardBatch(this.materials[2]);
@@ -319,20 +329,20 @@ export class GlobeSprites {
     this.labels.dispose();
   }
 
-  private createMaterial(cutout: boolean) {
+  private createMaterial(cutout: boolean, depthLift: number) {
     return new THREE.ShaderMaterial({
       uniforms: {
         atlas: { value: null as THREE.Texture },
         atlasSize: { value: new THREE.Vector2(1, 1) },
         worldPixel: { value: (2 * Math.PI) / this.projection.worldWidth },
         lightDirection: { value: this.lightDirection },
-        lit: { value: cutout ? 1 : 0 }
+        lit: { value: cutout ? 1 : 0 },
+        depthLift: { value: depthLift }
       },
       defines: {
         ...(cutout ? { CUTOUT: "" } : {}),
         AMBIENT: GlobeSprites.AMBIENT.toFixed(3),
-        DIRECT: GlobeSprites.DIRECT.toFixed(3),
-        NORTH_LEAN: GlobeSprites.NORTH_LEAN.toFixed(3)
+        DIRECT: GlobeSprites.DIRECT.toFixed(3)
       },
       vertexShader: GlobeSprites.VERTEX_SHADER,
       fragmentShader: GlobeSprites.FRAGMENT_SHADER,
@@ -554,13 +564,9 @@ export class GlobeSprites {
   // placed as the vertex shader places them.
   private screenCorners(billboard: Billboard, camera: THREE.Camera): [number, number][] {
     const anchor = new THREE.Vector3(...GlobeSprites.footOnSphere(this.projection, billboard));
-    const normal = anchor.clone().transformDirection(this.planet.matrixWorld);
     const foot = anchor.clone().applyMatrix4(this.planet.matrixWorld);
-    const toCamera = camera.position.clone().sub(foot).normalize();
-    const north = new THREE.Vector3(0, 1, 0);
-    const up = normal.clone().addScaledVector(toCamera, -normal.dot(toCamera));
-    up.addScaledVector(north.addScaledVector(toCamera, -north.dot(toCamera)), GlobeSprites.NORTH_LEAN).normalize();
-    const right = up.clone().cross(toCamera).normalize();
+    const right = new THREE.Vector3().setFromMatrixColumn(camera.matrixWorld, 0);
+    const up = new THREE.Vector3().setFromMatrixColumn(camera.matrixWorld, 1);
     const pixel = ((2 * Math.PI) / this.projection.worldWidth) * Math.sqrt(Math.max(0, 1 - anchor.y * anchor.y));
 
     return [
