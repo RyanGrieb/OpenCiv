@@ -18,6 +18,12 @@ canvas {
   /* Firefox */
 }
 
+/* Positioned like the globe's canvas, which sits just before it (see GlobeView), so the globe shows
+   through it. Behind it with a negative z-index instead, the page's own background could cover it. */
+#canvas {
+  position: relative;
+}
+
 p {
   color: white;
 }

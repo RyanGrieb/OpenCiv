@@ -138,8 +138,9 @@ export function setupGlobeMapTest(game: Game) {
       await utils.delay(500);
     },
     verification: () => {
+      // Zoom 1, give or take the flat map snapping it to whole device pixels (MapWrap.snapZoom()).
       const camera = scene().getCamera();
-      return !scene().isGlobeView() && globeCanvas()?.style.display === "none" && camera.getZoomAmount() >= 1;
+      return !scene().isGlobeView() && globeCanvas()?.style.display === "none" && camera.getZoomAmount() >= 0.99;
     }
   });
 

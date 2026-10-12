@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import { Game } from "../Game";
 import { WorldView } from "../scene/Camera";
 import { GlobeCaps } from "./GlobeCaps";
 import { GlobeMapLayer } from "./GlobeMapLayer";
@@ -137,9 +138,11 @@ export class GlobeView {
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     const canvas = this.renderer.domElement;
     canvas.id = "globe-canvas";
-    // Behind the game canvas, which draws the UI over the globe and takes the mouse.
-    Object.assign(canvas.style, { position: "fixed", left: "0", top: "0", zIndex: "-1", pointerEvents: "none" });
-    document.body.appendChild(canvas);
+    // Behind the game canvas, which draws the UI over the globe and takes the mouse: both are
+    // positioned, so the one first in the page is drawn first, over the page's background.
+    Object.assign(canvas.style, { position: "fixed", left: "0", top: "0", pointerEvents: "none" });
+    const gameCanvas = Game.getInstance().getCanvas();
+    gameCanvas.parentElement.insertBefore(canvas, gameCanvas);
 
     this.camera = new THREE.PerspectiveCamera(GlobeView.FOV, 1, 0.001, 6000);
     this.scene.background = new THREE.Color(GlobeView.SPACE_COLOR);
