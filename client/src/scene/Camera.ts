@@ -1,5 +1,7 @@
 import { Game } from "../Game";
 import { MapWrap } from "../map/MapWrap";
+import { Actor } from "./Actor";
+import { SceneObject } from "./SceneObject";
 
 export interface CameraOptions {
   wasd_controls: boolean;
@@ -9,9 +11,9 @@ export interface CameraOptions {
 }
 
 /**
- * Where a scene's camera-space objects (the map and everything on it) are drawn, and where on it: a
- * world point lands at canvas pixel (world * zoom + x) * pixelRatio, on each axis. The game canvas
- * for the flat map; the globe's own canvas when the map is a globe (see GlobeCamera).
+ * Where a scene's camera-space objects (the map and everything on it) are being drawn, and where on
+ * it: a world point lands at canvas pixel (world * zoom + x) * pixelRatio, on each axis. The game
+ * canvas for the flat map; whichever of its own canvases the globe is drawing into (see GlobeView).
  */
 export interface WorldView {
   context: CanvasRenderingContext2D;
@@ -374,18 +376,7 @@ export class Camera {
     this.zoomAmount = this.targetZoomAmount;
   }
 
-  /**
-   * Every canvas the map is drawn into this frame: the game canvas, for the flat map. A globe draws
-   * it into two of its own (see GlobeView), so the scene draws it once for each, making each one
-   * getWorldView()'s answer in turn with useWorldView().
-   */
-  public getWorldViews(): WorldView[] {
-    return [this.getWorldView()];
-  }
-
-  public useWorldView(index: number) {}
-
-  /** Where this frame's map is drawn, and how (see WorldView): straight onto the game canvas. */
+  /** Where the map is being drawn, and how (see WorldView): straight onto the game canvas. */
   public getWorldView(): WorldView {
     const game = Game.getInstance();
     const view = this.worldView;
@@ -403,12 +394,26 @@ export class Camera {
   }
 
   /**
+   * screenToWorld() for testing whether the mouse is over an actor: on the globe, an actor that
+   * stands up off the ground isn't where the ground under the mouse is (see Standing).
+   */
+  public screenToWorldFor(actor: Actor, screenX: number, screenY: number): [number, number] | undefined {
+    return this.screenToWorld(screenX, screenY);
+  }
+
+  /**
    * Whether the map is drawn somewhere other than the game canvas (onto the globe). The game canvas
    * is then cleared to see-through each frame rather than filled, so the map behind it shows.
    */
   public rendersWorldOffscreen() {
     return false;
   }
+
+  /**
+   * Draws this frame's map, when rendersWorldOffscreen(): the scene's camera-space objects, in the
+   * order they're drawn. The flat map's camera never does - the scene draws those onto the game canvas.
+   */
+  public drawWorld(objects: SceneObject[]) {}
 
   /** Called once the scene has drawn this frame's map; `visible` is false while a window covers it all. */
   public presentWorld(visible: boolean) {}

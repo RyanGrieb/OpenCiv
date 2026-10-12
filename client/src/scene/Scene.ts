@@ -71,13 +71,14 @@ export abstract class Scene {
 
     const game = Game.getInstance();
     const canvasContext = game.getCanvasContext();
-    // Each canvas the map is drawn into - the game canvas, unless the map is a globe (see
-    // Camera.getWorldViews()) - with where on it the world repeats: one entry ([0]) unless the map
-    // wraps, in which case the world repeats to fill the view.
-    const passes = (this.camera?.getWorldViews() ?? [undefined]).map((view, index) => {
-      this.camera?.useWorldView(index);
-      return { context: view?.context ?? canvasContext, offsets: MapWrap.getDrawOffsets() };
-    });
+    // A globe draws the map itself, on its own canvas behind this one.
+    const worldOffscreen = !!this.camera?.rendersWorldOffscreen();
+    if (worldOffscreen && !this.worldHidden) {
+      this.camera.drawWorld(this.sceneObjects.filter((object) => Scene.isWorldObject(object)));
+    }
+    // Where the world repeats across the game canvas: once ([0]) unless the map wraps, in which case
+    // it repeats to fill the view.
+    const offsets = worldOffscreen ? [] : MapWrap.getDrawOffsets();
 
     this.sceneObjects.forEach((object: SceneObject) => {
       if (!Scene.isWorldObject(object)) {
@@ -85,15 +86,12 @@ export abstract class Scene {
         return;
       }
 
-      if (this.worldHidden) return;
+      if (this.worldHidden || worldOffscreen) return;
 
-      passes.forEach((pass, index) => {
-        this.camera?.useWorldView(index);
-        for (const offsetX of pass.offsets) {
-          game.setWorldDrawOffsetX(offsetX);
-          object.draw(pass.context);
-        }
-      });
+      for (const offsetX of offsets) {
+        game.setWorldDrawOffsetX(offsetX);
+        object.draw(canvasContext);
+      }
       game.setWorldDrawOffsetX(0);
     });
 

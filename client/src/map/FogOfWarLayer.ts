@@ -74,6 +74,8 @@ export class FogOfWarLayer extends Actor {
   private cloudReach: Uint8Array | undefined;
   // Whether past the map's edges reads as unexplored, so clouds cover its outline (see setEdgesClouded()).
   private edgesClouded = true;
+  // Counted up with every change to how the overlay looks - see getVersion().
+  private version = 0;
   // Tile-grid bounds of everything changed since the last rebuild, or null when up to date.
   private dirty: { minX: number; minY: number; maxX: number; maxY: number } | null = null;
 
@@ -187,6 +189,11 @@ export class FogOfWarLayer extends Actor {
     this.markDirty(this.gridWidth - 1, this.gridHeight - 1);
   }
 
+  /** Goes up whenever the overlay would draw differently, so a copy of it (the globe's) knows to redraw. */
+  public getVersion() {
+    return this.version;
+  }
+
   /** The overlay's color at a world position, as RGBA 0-255: the clouds laid over the remembered-tile tint. */
   public getPixelAt(worldX: number, worldY: number): number[] {
     if (this.dirty) this.rebuild();
@@ -214,6 +221,7 @@ export class FogOfWarLayer extends Actor {
   }
 
   private markDirty(gridX: number, gridY: number) {
+    this.version++;
     if (!this.dirty) {
       this.dirty = { minX: gridX, minY: gridY, maxX: gridX, maxY: gridY };
       return;

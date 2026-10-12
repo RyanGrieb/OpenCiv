@@ -231,6 +231,11 @@ ScenarioRegistry.register("GlobeMap", ScenarioCategory.MAP, async () => {
     return module.setupGlobeMapTest;
 });
 
+ScenarioRegistry.register("GlobeDepth", ScenarioCategory.MAP, async () => {
+    const module = await import("./scenarios/GlobeDepth.test");
+    return module.setupGlobeDepthTest;
+});
+
 ScenarioRegistry.register("HexPlanet", ScenarioCategory.MAP, async () => {
     const module = await import("./scenarios/HexPlanet.test");
     return module.setupHexPlanetTest;

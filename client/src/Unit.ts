@@ -7,6 +7,7 @@ import { AbstractPlayer } from "./player/AbstractPlayer";
 import { Diplomacy } from "./player/Diplomacy";
 import { Actor } from "./scene/Actor";
 import { ActorGroup } from "./scene/ActorGroup";
+import { Standing } from "./scene/Standing";
 import { UnitDisplayInfo } from "./ui/hud/UnitDisplayInfo";
 import { FloatingText } from "./ui/components/FloatingText";
 import { Strings } from "./util/Strings";
@@ -318,6 +319,16 @@ export class Unit extends ActorGroup {
     }
 
     this.badges = new UnitBadges(this, Unit.BADGE_Z);
+    // On the globe the unit stands on its tile, its badges hanging over it, and pointing at either means its tile.
+    Standing.set(this, {
+      anchor: () => this.getStandingPoint(),
+      pickPoint: () => [this.tile.getCenterPosition().x, this.tile.getCenterPosition().y]
+    });
+    Standing.set(this.badges, {
+      anchor: () => this.getStandingPoint(),
+      bounds: () => this.getBadgeBounds(),
+      overlay: true
+    });
 
     this.selectionActors = [];
     this.actions = [];
@@ -713,6 +724,11 @@ export class Unit extends ActorGroup {
     Game.getInstance().getCurrentScene().removeActor(this.badges);
   }
 
+  // What the badges show, besides where - see UnitBadges.getDrawState().
+  public getBadgeState() {
+    return [this.health, this.fortified, this.civIcon?.getSpriteRegion(), this.buildIcon?.getSpriteRegion()].join("|");
+  }
+
   public drawBadges(canvasContext: CanvasRenderingContext2D) {
     this.drawHealthBubble(canvasContext);
     this.civIcon?.draw(canvasContext);
@@ -757,10 +773,26 @@ export class Unit extends ActorGroup {
     new FloatingText({
       text: `-${damage}`,
       color: "red",
+      standsOn: () => this.getStandingPoint(),
       centerX: x + Unit.CIV_ICON_SIZE / 2,
       fromY: y + Unit.CIV_ICON_SIZE / 2 + Unit.HEALTH_BUBBLE_RADIUS + 2,
       toY: y - Unit.HEALTH_BUBBLE_RADIUS - 10
     }).show();
+  }
+
+  // The bottom middle of the sprite: where the unit stands, on the globe.
+  private getStandingPoint(): [number, number] {
+    return [this.getX() + this.getWidth() / 2, this.getY() + this.getHeight()];
+  }
+
+  // Around the health bubble and the icons beside it, with a pixel to spare.
+  private getBadgeBounds(): [number, number, number, number] {
+    const { x, y } = this.getCivIconPosition();
+    const centerX = x + Unit.CIV_ICON_SIZE / 2;
+    const centerY = y + Unit.CIV_ICON_SIZE / 2;
+    const reach = Unit.HEALTH_BUBBLE_RADIUS + 1;
+    const right = this.getFortifyIconPosition().x + Unit.CIV_ICON_SIZE + 1;
+    return [centerX - reach, centerY - reach, right, centerY + reach];
   }
 
   // Just right of the health bubble.
@@ -794,5 +826,9 @@ class UnitBadges extends Actor {
 
   public draw(canvasContext: CanvasRenderingContext2D) {
     this.unit.drawBadges(canvasContext);
+  }
+
+  public getDrawState() {
+    return this.unit.getBadgeState();
   }
 }

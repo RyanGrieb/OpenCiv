@@ -1,4 +1,5 @@
 import { Game } from "../../Game";
+import { Standing } from "../../scene/Standing";
 import { Label } from "./Label";
 
 /**
@@ -14,7 +15,18 @@ export class FloatingText extends Label {
   private toY: number;
   private startTime: number;
 
-  constructor(options: { text: string; color: string; centerX: number; fromY: number; toY: number }) {
+  /**
+   * `standsOn` is the ground point the text belongs to on the globe, where it rises over what it's
+   * about (a unit, a city) rather than from the ground where it starts; that point, if left out.
+   */
+  constructor(options: {
+    text: string;
+    color: string;
+    centerX: number;
+    fromY: number;
+    toY: number;
+    standsOn?: () => [number, number];
+  }) {
     super({
       text: options.text,
       font: "bold 8px sans-serif",
@@ -27,6 +39,10 @@ export class FloatingText extends Label {
     this.centerX = options.centerX;
     this.fromY = options.fromY;
     this.toY = options.toY;
+    Standing.set(this, {
+      anchor: options.standsOn ?? (() => [this.centerX, this.fromY]),
+      overlay: true
+    });
   }
 
   /**

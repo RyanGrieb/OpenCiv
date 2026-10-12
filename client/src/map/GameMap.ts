@@ -16,6 +16,20 @@ import { MapWrap } from "./MapWrap";
 import { FogOfWarLayer } from "./FogOfWarLayer";
 import { Coastline } from "./Coastline";
 import { TerrainBlend } from "./TerrainBlend";
+import { MountainPeaks } from "./MountainPeaks";
+import { SceneObject } from "../scene/SceneObject";
+
+/**
+ * A tile's art that stands up off the ground on the globe (trees, mountain peaks, resources, cities),
+ * or a patch of ground painted under it there: an image drawn at a world point, the tile's sprite corner.
+ */
+export interface StandingSprite {
+  image: CanvasImageSource;
+  x: number;
+  y: number;
+  gridX: number;
+  gridY: number;
+}
 
 // width/height/x/y/movementCost arrive as strings and are run through parseInt() below.
 interface MapSizeEvent {
@@ -86,8 +100,14 @@ export class GameMap {
   private static readonly CHUNK_SIZE = 4;
   private static readonly CHUNK_PIXEL_WIDTH = 32 * GameMap.CHUNK_SIZE + 16;
   private static readonly CHUNK_PIXEL_HEIGHT = 25 * GameMap.CHUNK_SIZE + 7;
-  // Between the terrain chunks (z 0) and the fog of war (z 1) - see rebuildChunkVisuals().
-  private static readonly TOP_LAYER_Z = 0.5;
+  // Between the terrain chunks (z 0) and the fog of war (z 1): first what lies on the ground (hills,
+  // farms, roads), then what stands up off it (trees, resources, improvements) - see rebuildChunkVisuals().
+  private static readonly GROUND_LAYER_Z = 0.5;
+  private static readonly STANDING_LAYER_Z = 0.625;
+  // Each later chunk row of a layer sorts above the one before, within this much z.
+  private static readonly LAYER_ROWS_Z = 0.125;
+  // The terrain whose sprite is peaks painted on rock, which stand up on the globe - see MountainPeaks.
+  private static readonly MOUNTAIN_TYPE = "mountain";
 
   private oddEdgeAxis = [
     [0, -1],
@@ -117,7 +137,14 @@ export class GameMap {
   // wholesale by rebuildChunkVisuals() whenever anything in that chunk changes (a tile is
   // discovered, or one already known flips visible/fogged).
   private baseLayerChunks: Map<string, Actor> = new Map();
-  private topLayerChunks: Map<string, Actor> = new Map();
+  private groundLayerChunks: Map<string, Actor> = new Map();
+  private standingLayerChunks: Map<string, Actor> = new Map();
+  // Per chunk, what of its tiles stands up on the globe, and the ground painted under mountains' peaks
+  // there - see getStandingSprites(). Counted up whenever either changes.
+  private standingSprites: Map<string, StandingSprite[]> = new Map();
+  private peakGround: Map<string, StandingSprite[]> = new Map();
+  private standingVersion = 0;
+  private chunkLayers = new WeakMap<SceneObject, "terrain" | "standing">();
 
   // The soft-edged fog over the whole map - created once the map's size is known.
   private fogOfWar: FogOfWarLayer;
@@ -286,6 +313,34 @@ export class GameMap {
 
   public getFogOfWar(): FogOfWarLayer {
     return this.fogOfWar;
+  }
+
+  /**
+   * What of the known tiles stands up off the ground when the map is a globe: their trees, resources,
+   * improvements and cities, which the flat map draws as its standing layer, and mountains' peaks,
+   * which it paints as part of their terrain.
+   */
+  public getStandingSprites(): StandingSprite[] {
+    return [...this.standingSprites.values()].flat();
+  }
+
+  /** Bare ground for the globe to paint over mountains' peaks in their terrain, as those stand up there. */
+  public getPeakGround(): StandingSprite[] {
+    return [...this.peakGround.values()].flat();
+  }
+
+  /** Goes up whenever getStandingSprites() or getPeakGround() would answer differently. */
+  public getStandingVersion() {
+    return this.standingVersion;
+  }
+
+  /**
+   * Which of the map's own layers a scene object is: "terrain" for what's painted on the ground
+   * (terrain, shores, rivers, hills, farms, roads), "standing" for what stands up off it, which a
+   * globe draws from getStandingSprites() instead. Undefined for anything else, the fog included.
+   */
+  public getLayerOf(object: SceneObject): "terrain" | "standing" | undefined {
+    return this.chunkLayers.get(object);
   }
 
   public getWidth() {
@@ -768,20 +823,23 @@ export class GameMap {
   }
 
   /**
-   * Rebuilds one chunk's merged base (terrain, terrain blends, shores and rivers) and top (resources/city/improvements) actors
-   * from scratch, from whatever this client currently knows about that chunk's 16 cells. Called
-   * whenever a tile in the chunk is newly discovered or changes visibility - safe to call
+   * Rebuilds one chunk's merged layers from scratch, from whatever this client currently knows about
+   * that chunk's 16 cells: its base (terrain, terrain blends, shores and rivers), what lies on the
+   * ground (hills, farms, roads) and what stands up off it (trees, resources, improvements, cities).
+   * Called whenever a tile in the chunk is newly discovered or changes visibility - safe to call
    * repeatedly since it always derives the result fresh rather than patching the previous one.
    */
   private async rebuildChunkVisuals(chunkGridX: number, chunkGridY: number) {
-    const scene = Game.getInstance().getCurrentScene();
     const chunkKey = this.chunkKeyFor(chunkGridX, chunkGridY);
 
     const baseRenderTiles: Tile[] = [];
     const riverActors: Actor[] = [];
     const blendTiles: { tile: Tile; x: number; y: number }[] = [];
     const coastActors: Actor[] = [];
-    const topRenderActors: Actor[] = [];
+    const groundActors: Actor[] = [];
+    const standingActors: Tile[] = [];
+    const standingSprites: StandingSprite[] = [];
+    const peakGround: StandingSprite[] = [];
 
     // Row by row, so a tile's trees are drawn over those of the row behind it.
     for (let dy = 0; dy < GameMap.CHUNK_SIZE; dy++) {
@@ -800,13 +858,14 @@ export class GameMap {
         }
 
         const tileTypes = tile.getTileTypes();
+        const terrainType = Tile.getVariantTileType(tileTypes[0], gridX, gridY);
 
         // Rendering-only tiles, positioned relative to this chunk's own small canvas rather than
         // the tile's real world position - mirrors how Actor.mergeActors draws each input actor at
         // its own (x,y) onto the shared offscreen canvas, then the merged result is repositioned
         // as a whole via setPosition() below.
         const baseRenderTile = new Tile({
-          tileTypes: [Tile.getVariantTileType(tileTypes[0], gridX, gridY)],
+          tileTypes: [terrainType],
           riverSides: tile.getRiverSides(),
           x: xPosRelative,
           y: yPosRelative,
@@ -828,58 +887,97 @@ export class GameMap {
           .map((type) => Tile.getVariantFeatureType(type, tileTypes[0], gridX, gridY));
         const underRoad = overlayTypes.filter((type) => Tile.UNDER_ROAD_TILE_TYPES.includes(type));
         const overRoad = overlayTypes.filter((type) => !Tile.UNDER_ROAD_TILE_TYPES.includes(type));
-        topRenderActors.push(
+        groundActors.push(
           ...(await this.createHillOverlay(tile, xPosRelative, yPosRelative)),
           ...(await this.createOverlayTile(tile, underRoad, xPosRelative, yPosRelative)),
-          ...Road.createActors(tile, xPosRelative, yPosRelative),
-          ...(await this.createOverlayTile(tile, overRoad, xPosRelative, yPosRelative))
+          ...Road.createActors(tile, xPosRelative, yPosRelative)
         );
+
+        // What's in the water (fish, crabs, reefs) lies in it rather than standing up.
+        const overlay = await this.createOverlayTile(tile, overRoad, xPosRelative, yPosRelative);
+        const place = { x: tile.getX(), y: tile.getY(), gridX, gridY };
+        if (tile.isWater()) {
+          groundActors.push(...overlay);
+        } else {
+          standingActors.push(...overlay);
+          standingSprites.push(...overlay.map((sprite) => ({ image: sprite.getImage(), ...place })));
+        }
+
+        if (tileTypes[0] === GameMap.MOUNTAIN_TYPE) {
+          const parts = MountainPeaks.split(terrainType);
+          standingSprites.push({ image: parts.peaks, ...place });
+          peakGround.push({ image: parts.ground, ...place });
+        }
       }
     }
 
-    const previousBase = this.baseLayerChunks.get(chunkKey);
-    if (previousBase) scene.removeActor(previousBase);
+    this.replaceChunkLayer(this.baseLayerChunks, chunkKey, chunkGridX, chunkGridY, 0, [
+      ...baseRenderTiles,
+      ...(baseRenderTiles.length > 0 ? await this.createBlendActors(blendTiles) : []),
+      ...coastActors,
+      ...riverActors
+    ]);
+    // Above every terrain chunk, so trees poking past their hex into the chunk above aren't covered
+    // by its terrain, and lower rows above higher ones. Always under the fog layer (z 1).
+    const rowZ = (chunkGridY / this.mapHeight) * GameMap.LAYER_ROWS_Z;
+    this.replaceChunkLayer(
+      this.groundLayerChunks,
+      chunkKey,
+      chunkGridX,
+      chunkGridY,
+      GameMap.GROUND_LAYER_Z + rowZ,
+      groundActors
+    );
+    this.replaceChunkLayer(
+      this.standingLayerChunks,
+      chunkKey,
+      chunkGridX,
+      chunkGridY,
+      GameMap.STANDING_LAYER_Z + rowZ,
+      standingActors
+    );
 
-    if (baseRenderTiles.length > 0) {
-      const blendActor = await TerrainBlend.createChunkActor(
-        blendTiles,
-        GameMap.CHUNK_PIXEL_WIDTH,
-        GameMap.CHUNK_PIXEL_HEIGHT
-      );
-      const bottomLayerActor = Actor.mergeActors({
-        actors: [...baseRenderTiles, ...(blendActor ? [blendActor] : []), ...coastActors, ...riverActors],
-        spriteRegion: false,
-        canvasWidth: GameMap.CHUNK_PIXEL_WIDTH,
-        canvasHeight: GameMap.CHUNK_PIXEL_HEIGHT
-      });
-      bottomLayerActor.setPosition(chunkGridX * 32, chunkGridY * 25);
-      // Explicit so the fog layer (z 1) reliably sorts above the map: an undefined z doesn't compare.
-      bottomLayerActor.setZValue(0);
-      scene.addActor(bottomLayerActor);
-      this.baseLayerChunks.set(chunkKey, bottomLayerActor);
-    } else {
-      this.baseLayerChunks.delete(chunkKey);
-    }
+    this.standingSprites.set(chunkKey, standingSprites);
+    this.peakGround.set(chunkKey, peakGround);
+    this.standingVersion++;
+  }
 
-    const previousTop = this.topLayerChunks.get(chunkKey);
-    if (previousTop) scene.removeActor(previousTop);
+  private async createBlendActors(blendTiles: { tile: Tile; x: number; y: number }[]): Promise<Actor[]> {
+    const blendActor = await TerrainBlend.createChunkActor(
+      blendTiles,
+      GameMap.CHUNK_PIXEL_WIDTH,
+      GameMap.CHUNK_PIXEL_HEIGHT
+    );
+    return blendActor ? [blendActor] : [];
+  }
 
-    if (topRenderActors.length > 0) {
-      const topLayerMerged = Actor.mergeActors({
-        actors: topRenderActors,
-        spriteRegion: false,
-        canvasWidth: GameMap.CHUNK_PIXEL_WIDTH,
-        canvasHeight: GameMap.CHUNK_PIXEL_HEIGHT
-      });
-      topLayerMerged.setPosition(chunkGridX * 32, chunkGridY * 25);
-      // Above every terrain chunk, so trees poking past their hex into the chunk above aren't covered
-      // by its terrain, and lower rows above higher ones. Always under the fog layer (z 1).
-      topLayerMerged.setZValue(GameMap.TOP_LAYER_Z + chunkGridY / (this.mapHeight * 4));
-      scene.addActor(topLayerMerged);
-      this.topLayerChunks.set(chunkKey, topLayerMerged);
-    } else {
-      this.topLayerChunks.delete(chunkKey);
-    }
+  // Swaps a chunk's merged actor in one of the layers for one of the given actors, or none if there are none.
+  private replaceChunkLayer(
+    layer: Map<string, Actor>,
+    chunkKey: string,
+    chunkGridX: number,
+    chunkGridY: number,
+    z: number,
+    actors: Actor[]
+  ) {
+    const scene = Game.getInstance().getCurrentScene();
+    const previous = layer.get(chunkKey);
+    if (previous) scene.removeActor(previous);
+    layer.delete(chunkKey);
+    if (actors.length === 0) return;
+
+    const merged = Actor.mergeActors({
+      actors,
+      spriteRegion: false,
+      canvasWidth: GameMap.CHUNK_PIXEL_WIDTH,
+      canvasHeight: GameMap.CHUNK_PIXEL_HEIGHT
+    });
+    merged.setPosition(chunkGridX * 32, chunkGridY * 25);
+    // Explicit so the fog layer (z 1) reliably sorts above the map: an undefined z doesn't compare.
+    merged.setZValue(z);
+    scene.addActor(merged);
+    layer.set(chunkKey, merged);
+    this.chunkLayers.set(merged, layer === this.standingLayerChunks ? "standing" : "terrain");
   }
 
   // The given tile types of a tile drawn as one image at (x, y) on a chunk's canvas - none if empty.

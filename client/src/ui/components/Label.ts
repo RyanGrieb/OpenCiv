@@ -136,6 +136,10 @@ export class Label extends Actor {
     this.oldText = undefined;
   }
 
+  public getDrawState() {
+    return [this.oldText ?? this.wrappedText ?? this.text, this.font, this.fontColor, this.lineWidth].join("|");
+  }
+
   public setText(text: string, waitForConformSize: boolean = false) {
     if (waitForConformSize) {
       this.oldText = this.text;

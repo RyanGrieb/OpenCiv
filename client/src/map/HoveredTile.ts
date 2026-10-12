@@ -47,6 +47,10 @@ export class HoveredTile extends Tile {
     super.draw(canvasContext);
   }
 
+  public getDrawState() {
+    return this.hidden ? 1 : 0;
+  }
+
   public setHidden(hidden: boolean) {
     this.hidden = hidden;
   }

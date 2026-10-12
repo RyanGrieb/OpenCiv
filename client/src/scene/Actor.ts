@@ -251,7 +251,7 @@ export class Actor implements SceneObject {
     let localX = x - this.x;
 
     if (this.cameraApplies && camera) {
-      const world = camera.screenToWorld(x, y);
+      const world = camera.screenToWorldFor(this, x, y);
       if (!world) return false;
       [x, y] = world;
 

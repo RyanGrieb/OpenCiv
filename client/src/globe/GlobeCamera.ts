@@ -1,5 +1,8 @@
 import { Game } from "../Game";
+import { Actor } from "../scene/Actor";
 import { Camera, WorldView } from "../scene/Camera";
+import { SceneObject } from "../scene/SceneObject";
+import { Standing } from "../scene/Standing";
 import { GlobeView } from "./GlobeView";
 
 /**
@@ -113,14 +116,6 @@ export class GlobeCamera extends Camera {
     this.pickedAt = [NaN, NaN];
   }
 
-  public getWorldViews(): WorldView[] {
-    return this.globe.getWorldViews();
-  }
-
-  public useWorldView(index: number) {
-    this.globe.useWorldView(index);
-  }
-
   public getWorldView(): WorldView {
     return this.globe.getWorldView();
   }
@@ -133,8 +128,17 @@ export class GlobeCamera extends Camera {
     return this.picked;
   }
 
+  public screenToWorldFor(actor: Actor, screenX: number, screenY: number): [number, number] | undefined {
+    if (!Standing.get(actor)) return this.screenToWorld(screenX, screenY);
+    return this.globe.screenToWorldFor(actor, screenX, screenY);
+  }
+
   public rendersWorldOffscreen() {
     return true;
+  }
+
+  public drawWorld(objects: SceneObject[]) {
+    this.globe.drawWorld(objects, this.getZoomAmount());
   }
 
   public presentWorld(visible: boolean) {
