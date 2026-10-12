@@ -105,9 +105,10 @@ class BillboardBatch {
  * Where the camera looks straight down at the ground they stand upright, just as the flat map draws
  * them; toward the planet's edge they lean out with the ground, until there they stand straight out
  * of it (see STAND_UPRIGHT). Below the middle of the planet on screen they lean out the same way, still
- * standing up, until near the edge they turn over to stand straight out of it there too - upside down
- * at its bottom (see TURN_OVER). Turning over only there, where the ground is turned side on, one hangs
- * out past the edge rather than over the tile below its own. Those with their feet in view are drawn
+ * standing up, until right at the edge they turn over to stand straight out of it there too - upside
+ * down at its bottom (see TURN_OVER). Turning over only there, where the ground is turned side on, one
+ * hangs out past the edge rather than over the tile below its own, and none short of it stands half
+ * turned over. Those with their feet in view are drawn
  * in front of the whole planet, so the ground never cuts into one, and one standing nearer covers one
  * behind it.
  *
@@ -139,8 +140,8 @@ export class GlobeSprites {
   // its ground is turned this far toward side on (the cosine of its angle from the camera); from there
   // to the edge it turns over, to stand straight out of the planet like one above its middle. Turning
   // from upright to upside down, one straight below the middle has to swing round somewhere: this
-  // keeps that out at the edge.
-  private static readonly TURN_OVER = 0.5;
+  // keeps that to the last sliver of ground before the edge.
+  private static readonly TURN_OVER = 0.2;
   // For the depth test alone, billboards with their feet in view are brought in front of all of the
   // planet's ground, in the order of their feet: between these fractions of the nearest it can be.
   // Nothing standing on the side of a round planet in view is behind its ground, except where a
