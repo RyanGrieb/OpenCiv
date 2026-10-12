@@ -131,20 +131,26 @@ export class GlobeSprites {
   // Pixels added around each label or badge's rectangle, for text outlines and shadows.
   private static readonly MARGIN = 2;
   // How a billboard leans: the ground's normal pointing out across the screen leans it out, and the
-  // normal pointing at the camera stands it upright as on the flat map, weighted by this. At 1, one
-  // to the side of the planet's middle leans as far as its ground is turned from the camera: upright
-  // seen from straight above, 45 degrees where its ground is turned 45 degrees, flat out at the edge.
+  // normal pointing at the camera stands it upright as on the flat map, weighted by this - and by how
+  // squarely its ground faces the camera, to the power UPRIGHT_FADE. Upright seen from straight above,
+  // flat out at the edge.
   private static readonly STAND_UPRIGHT = 1;
+  // Above 1, standing upright gives way to leaning out the faster as the ground turns from the camera,
+  // so that one near the middle of the planet still stands upright while one nearing its edge has spun
+  // round nearly as far as its ground has.
+  private static readonly UPRIGHT_FADE = 3;
   // Leaning out, a billboard straight below the planet's middle on screen would turn over, from upright
-  // to upside down, halfway to the edge - one there has to swing round somewhere. So there it's stood up
-  // harder, to stand until its ground is turned this many degrees from the camera: out by the edge.
+  // to upside down, well short of the edge - one there has to swing round somewhere. So there it's stood
+  // up harder, to stand until its ground is turned this many degrees from the camera: out by the edge.
   private static readonly TURN_OVER_BELOW = 70;
   // How much harder than STAND_UPRIGHT, for TURN_OVER_BELOW.
   private static readonly STAND_UPRIGHT_BELOW =
-    Math.tan((GlobeSprites.TURN_OVER_BELOW * Math.PI) / 180) - GlobeSprites.STAND_UPRIGHT;
+    Math.sin(THREE.MathUtils.degToRad(GlobeSprites.TURN_OVER_BELOW)) /
+      Math.cos(THREE.MathUtils.degToRad(GlobeSprites.TURN_OVER_BELOW)) ** GlobeSprites.UPRIGHT_FADE -
+    GlobeSprites.STAND_UPRIGHT;
   // How narrowly about straight down that help is given: it falls off to either side as the cosine of
-  // the angle from straight down to this power, so that billboards off to the side lean out gradually.
-  private static readonly TURN_OVER_NARROW = 8;
+  // the angle from straight down to this power, so that billboards off to the side spin round freely.
+  private static readonly TURN_OVER_NARROW = 24;
   // For the depth test alone, billboards with their feet in view are brought in front of all of the
   // planet's ground, in the order of their feet: between these fractions of the nearest it can be.
   // Nothing standing on the side of a round planet in view is behind its ground, except where a
@@ -179,14 +185,15 @@ export class GlobeSprites {
     varying vec4 vTint;
     varying float vLight;
 
-    // Which way is up on screen for a billboard - see STAND_UPRIGHT, TURN_OVER_BELOW and GlobeSprites.standingUp().
+    // Which way is up on screen for a billboard - see STAND_UPRIGHT and the constants after it, and
+    // GlobeSprites.standingUp().
     vec2 standingUp(vec3 footView, vec3 normalView, float facing) {
       // Where the ground's normal points on screen: away from the planet's middle.
       vec2 outward = normalView.xy * -footView.z + footView.xy * normalView.z;
       outward = dot(outward, outward) > 0.0 ? normalize(outward) : vec2(0.0, 1.0);
       float across = sqrt(max(0.0, 1.0 - facing * facing));
       float upright = STAND_UPRIGHT + STAND_UPRIGHT_BELOW * pow(max(-outward.y, 0.0), TURN_OVER_NARROW);
-      vec2 up = vec2(across * outward.x, across * outward.y + upright * max(facing, 0.0));
+      vec2 up = vec2(across * outward.x, across * outward.y + upright * pow(max(facing, 0.0), UPRIGHT_FADE));
       return dot(up, up) > 1e-12 ? normalize(up) : outward;
     }
 
@@ -306,7 +313,10 @@ export class GlobeSprites {
     const upright =
       GlobeSprites.STAND_UPRIGHT +
       GlobeSprites.STAND_UPRIGHT_BELOW * Math.max(-outward.y, 0) ** GlobeSprites.TURN_OVER_NARROW;
-    const up = new THREE.Vector2(across * outward.x, across * outward.y + upright * Math.max(facing, 0));
+    const up = new THREE.Vector2(
+      across * outward.x,
+      across * outward.y + upright * Math.max(facing, 0) ** GlobeSprites.UPRIGHT_FADE
+    );
     return up.lengthSq() > 1e-12 ? up.normalize() : outward;
   }
 
@@ -430,6 +440,7 @@ export class GlobeSprites {
         AMBIENT: GlobeSprites.AMBIENT.toFixed(3),
         DIRECT: GlobeSprites.DIRECT.toFixed(3),
         STAND_UPRIGHT: GlobeSprites.STAND_UPRIGHT.toFixed(3),
+        UPRIGHT_FADE: GlobeSprites.UPRIGHT_FADE.toFixed(3),
         STAND_UPRIGHT_BELOW: GlobeSprites.STAND_UPRIGHT_BELOW.toFixed(3),
         TURN_OVER_NARROW: GlobeSprites.TURN_OVER_NARROW.toFixed(3),
         IN_FRONT_FROM: GlobeSprites.IN_FRONT_FROM.toFixed(3),
