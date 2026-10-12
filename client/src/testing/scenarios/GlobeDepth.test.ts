@@ -4,15 +4,18 @@ import { WebsocketClient } from "../../network/Client";
 import { GameMap } from "../../map/GameMap";
 import { Tile } from "../../map/Tile";
 import { Unit } from "../../Unit";
+import { GlobeProjection } from "../../globe/GlobeProjection";
 import { TestUtils } from "../TestUtils";
 
 // The globe with depth: what stands up off the map - trees, mountains' peaks, resources, cities,
 // units and their badges, city banners - stands up off the globe too, rather than lying flat on it,
 // so the world keeps its height toward the horizon and around the planet's edge. Starts an unexplored
 // game on the Medium map, founds a city, and looks at it on the globe from close up, tilted toward
-// the horizon: checks that the map's sprites and the city's banner stand, that the mouse finds the
-// warrior and the banner where they stand, that the fog of war shades what stands in it, and that a
-// still view doesn't draw the map over again. Ends there to look around: drag, scroll, G for flat.
+// the horizon: checks that the map's sprites and the city's banner stand, that toward the planet's
+// edge the warrior stands straight out of the ground yet never hangs upside down below its middle,
+// that the mouse finds the warrior and the banner where they stand, that the fog of war shades what
+// stands in it, and that a still view doesn't draw the map over again. Ends there to look around:
+// drag, scroll, G for flat.
 export function setupGlobeDepthTest(game: Game) {
   const runner = new TestRunner("GlobeDepth");
   const utils = new TestUtils(game);
@@ -38,10 +41,47 @@ export function setupGlobeDepthTest(game: Game) {
     scene().getCamera().jumpToLocation(tile.getCenterPosition().x, tile.getCenterPosition().y, 8);
     await utils.delay(1500);
   };
+  // Looks straight down at the whole planet over the point `angle` radians from the warrior to its
+  // west or north - putting the warrior toward the planet's east edge, or below its middle. Not past
+  // the north pole, where the camera stops.
+  const lookFromThe = async (way: "west" | "north", angle: number) => {
+    const center = warrior.getTile().getCenterPosition();
+    const [longitude, latitude] = globe().projection.toSphere(center.x, center.y);
+    if (way === "north") angle = Math.min(angle, 1.3 - latitude);
+    const toward =
+      way === "west"
+        ? [-Math.cos(longitude), 0, Math.sin(longitude)]
+        : [-Math.sin(latitude) * Math.sin(longitude), Math.cos(latitude), -Math.sin(latitude) * Math.cos(longitude)];
+    const point = GlobeProjection.unitVector(longitude, latitude).map(
+      (value, axis) => value * Math.cos(angle) + toward[axis] * Math.sin(angle)
+    );
+    const pointLatitude = Math.asin(point[1]);
+    const [x, y] = globe().projection.toWorld(Math.atan2(point[0], point[2]), pointLatitude);
+    // As far out wherever it looks from as the flat map's zoom of 0.9 is at the equator.
+    scene()
+      .getCamera()
+      .jumpToLocation(x, y, 0.9 * Math.cos(pointLatitude));
+    await utils.delay(1500);
+  };
+  // How the warrior stands on screen, from the bottom of its picture to the top, and the way from the
+  // middle of the screen out to its feet - the way out from the planet's middle, looking straight down.
+  const warriorStanding = () => {
+    const top = globe().screenPointOf(warrior, 0.5, 0);
+    const bottom = globe().screenPointOf(warrior, 0.5, 1);
+    if (!top || !bottom) return undefined;
+    return {
+      up: [top[0] - bottom[0], top[1] - bottom[1]],
+      out: [bottom[0] - window.innerWidth / 2, bottom[1] - window.innerHeight / 2]
+    };
+  };
+  const degreesBetween = ([ax, ay]: number[], [bx, by]: number[]) =>
+    (Math.acos((ax * bx + ay * by) / Math.hypot(ax, ay) / Math.hypot(bx, by)) * 180) / Math.PI;
   let settler: Unit;
   let warrior: Unit;
   let cityTile: Tile;
   let warriorHead: number[] | undefined;
+  let atEdge: { up: number[]; out: number[] } | undefined;
+  let belowMiddle: { up: number[]; out: number[] } | undefined;
   let uploadsBefore: number[] = [];
 
   runner.addStep({
@@ -82,6 +122,32 @@ export function setupGlobeDepthTest(game: Game) {
       utils.log(`${sprites()["mapBillboards"].length} pieces of the map's sprites stand on the globe`, "yellow");
     },
     verification: () => sprites()["mapBillboards"].length > 0 && standing(nameLabel()) && standing(warrior)
+  });
+
+  runner.addStep({
+    name: "Near the planet's edge the warrior stands straight out of the ground; below its middle it still stands up",
+    action: async () => {
+      await lookFromThe("west", 1.15);
+      atEdge = warriorStanding();
+      await lookFromThe("north", 0.9);
+      belowMiddle = warriorStanding();
+      if (atEdge && belowMiddle) {
+        utils.log(
+          `At the edge it leans ${Math.round(degreesBetween(atEdge.up, [0, -1]))} degrees from upright; ` +
+            `below the middle, ${Math.round(degreesBetween(belowMiddle.up, [0, -1]))}`,
+          "yellow"
+        );
+      }
+      await lookAt(cityTile);
+    },
+    // At the edge, out from the planet's middle (upward, should the edge be below it); below the
+    // middle, head over feet.
+    verification: () =>
+      !!atEdge &&
+      degreesBetween(atEdge.up, [atEdge.out[0], -Math.abs(atEdge.out[1])]) < 20 &&
+      !!belowMiddle &&
+      belowMiddle.out[1] > 0 &&
+      belowMiddle.up[1] < 0
   });
 
   runner.addStep({
@@ -167,13 +233,20 @@ export function setupGlobeDepthTest(game: Game) {
   runner.addStep({
     name: "Holding still, the globe draws nothing over again",
     action: async () => {
-      // Once the warrior's walk and what it uncovered have finished drawing.
+      // Once the warrior's walk and what it uncovered have finished drawing: the map's chunks redrawn
+      // around the tiles it found (queued one after another, see GameMap.enqueueRender()), then the
+      // globe's pictures of them, unchanged for a while.
+      const map = GameMap.getInstance() as unknown as Record<string, Promise<void>>;
+      for (let queue = map["renderQueue"]; ; queue = map["renderQueue"]) {
+        await queue;
+        if (map["renderQueue"] === queue) break;
+      }
       let last = "";
+      let changedAt = Date.now();
       await utils.waitUntil(
         () => {
-          const settled = uploads().join() === last;
-          last = uploads().join();
-          return settled;
+          if (uploads().join() !== last) [last, changedAt] = [uploads().join(), Date.now()];
+          return Date.now() - changedAt >= 1500;
         },
         30000,
         "The map to settle"
