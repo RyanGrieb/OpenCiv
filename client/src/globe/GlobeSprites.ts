@@ -104,10 +104,12 @@ class BillboardBatch {
  * the ground they belong to (their foot), facing the screen and as far from it as their foot all over.
  * Where the camera looks straight down at the ground they stand upright, just as the flat map draws
  * them; toward the planet's edge they lean out with the ground, until there they stand straight out
- * of it (see STAND_UPRIGHT). Below the middle of the planet on screen they lean out the same way but
- * never hang down: pointing straight out all the way round the edge, they'd have to spin round the
- * middle of the planet to get there. Those with their feet in view are drawn in front of the whole
- * planet, so the ground never cuts into one, and one standing nearer covers one behind it.
+ * of it (see STAND_UPRIGHT). Below the middle of the planet on screen they lean out the same way, still
+ * standing up, until near the edge they turn over to stand straight out of it there too - upside down
+ * at its bottom (see TURN_OVER). Turning over only there, where the ground is turned side on, one hangs
+ * out past the edge rather than over the tile below its own. Those with their feet in view are drawn
+ * in front of the whole planet, so the ground never cuts into one, and one standing nearer covers one
+ * behind it.
  *
  * The map's standing sprites (trees, mountains' peaks, hills' mounds, resources, cities) are cut into
  * pieces (see StandingPieces), each standing on its own foot, tinted by the fog of war there. Where a
@@ -133,6 +135,12 @@ export class GlobeSprites {
   // to the side of the planet's middle leans as far as its ground is turned from the camera: upright
   // seen from straight above, 45 degrees where its ground is turned 45 degrees, flat out at the edge.
   private static readonly STAND_UPRIGHT = 1;
+  // Below the planet's middle on screen a billboard leans out as though in a mirror, standing up, until
+  // its ground is turned this far toward side on (the cosine of its angle from the camera); from there
+  // to the edge it turns over, to stand straight out of the planet like one above its middle. Turning
+  // from upright to upside down, one straight below the middle has to swing round somewhere: this
+  // keeps that out at the edge.
+  private static readonly TURN_OVER = 0.5;
   // For the depth test alone, billboards with their feet in view are brought in front of all of the
   // planet's ground, in the order of their feet: between these fractions of the nearest it can be.
   // Nothing standing on the side of a round planet in view is behind its ground, except where a
@@ -167,13 +175,16 @@ export class GlobeSprites {
     varying vec4 vTint;
     varying float vLight;
 
-    // Which way is up on screen for a billboard - see STAND_UPRIGHT and GlobeSprites.standingUp().
+    // Which way is up on screen for a billboard - see STAND_UPRIGHT, TURN_OVER and GlobeSprites.standingUp().
     vec2 standingUp(vec3 footView, vec3 normalView, float facing) {
       // Where the ground's normal points on screen: away from the planet's middle.
       vec2 outward = normalView.xy * -footView.z + footView.xy * normalView.z;
       outward = dot(outward, outward) > 0.0 ? normalize(outward) : vec2(0.0, 1.0);
       float across = sqrt(max(0.0, 1.0 - facing * facing));
-      return normalize(vec2(across * outward.x, across * abs(outward.y) + STAND_UPRIGHT * max(facing, 0.0)));
+      float turned = 1.0 - smoothstep(0.0, TURN_OVER, facing);
+      float upward = mix(abs(outward.y), outward.y, turned);
+      vec2 up = vec2(across * outward.x, across * upward + STAND_UPRIGHT * max(facing, 0.0));
+      return dot(up, up) > 1e-12 ? normalize(up) : outward;
     }
 
     void main() {
@@ -289,10 +300,13 @@ export class GlobeSprites {
     if (outward.lengthSq() > 0) outward.normalize();
     else outward.set(0, 1);
     const across = Math.sqrt(Math.max(0, 1 - facing * facing));
-    return new THREE.Vector2(
+    const turned = 1 - THREE.MathUtils.smoothstep(facing, 0, GlobeSprites.TURN_OVER);
+    const upward = THREE.MathUtils.lerp(Math.abs(outward.y), outward.y, turned);
+    const up = new THREE.Vector2(
       across * outward.x,
-      across * Math.abs(outward.y) + GlobeSprites.STAND_UPRIGHT * Math.max(facing, 0)
-    ).normalize();
+      across * upward + GlobeSprites.STAND_UPRIGHT * Math.max(facing, 0)
+    );
+    return up.lengthSq() > 1e-12 ? up.normalize() : outward;
   }
 
   // Its rectangle in the world, as given or the actor's own, with a margin - undefined if it has no size.
@@ -415,6 +429,7 @@ export class GlobeSprites {
         AMBIENT: GlobeSprites.AMBIENT.toFixed(3),
         DIRECT: GlobeSprites.DIRECT.toFixed(3),
         STAND_UPRIGHT: GlobeSprites.STAND_UPRIGHT.toFixed(3),
+        TURN_OVER: GlobeSprites.TURN_OVER.toFixed(3),
         IN_FRONT_FROM: GlobeSprites.IN_FRONT_FROM.toFixed(3),
         IN_FRONT_TO: GlobeSprites.IN_FRONT_TO.toFixed(3)
       },

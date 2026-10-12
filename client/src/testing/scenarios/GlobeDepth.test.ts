@@ -12,7 +12,7 @@ import { TestUtils } from "../TestUtils";
 // so the world keeps its height toward the horizon and around the planet's edge. Starts an unexplored
 // game on the Medium map, founds a city, and looks at it on the globe from close up, tilted toward
 // the horizon: checks that the map's sprites and the city's banner stand, that toward the planet's
-// edge the warrior stands straight out of the ground yet never hangs upside down below its middle,
+// edge the warrior stands straight out of the ground yet below its middle, short of the edge, stands up,
 // that the mouse finds the warrior and the banner where they stand, that the fog of war shades what
 // stands in it, and that a still view doesn't draw the map over again. Ends there to look around:
 // drag, scroll, G for flat.
@@ -125,7 +125,7 @@ export function setupGlobeDepthTest(game: Game) {
   });
 
   runner.addStep({
-    name: "Near the planet's edge the warrior stands straight out of the ground; below its middle it still stands up",
+    name: "Near the planet's edge the warrior stands straight out of the ground; below its middle, short of it, it stands up",
     action: async () => {
       await lookFromThe("west", 1.15);
       atEdge = warriorStanding();
@@ -140,11 +140,11 @@ export function setupGlobeDepthTest(game: Game) {
       }
       await lookAt(cityTile);
     },
-    // At the edge, out from the planet's middle (upward, should the edge be below it); below the
+    // At the edge, out from the planet's middle (downward, should the edge be below it); below the
     // middle, head over feet.
     verification: () =>
       !!atEdge &&
-      degreesBetween(atEdge.up, [atEdge.out[0], -Math.abs(atEdge.out[1])]) < 20 &&
+      degreesBetween(atEdge.up, atEdge.out) < 20 &&
       !!belowMiddle &&
       belowMiddle.out[1] > 0 &&
       belowMiddle.up[1] < 0
