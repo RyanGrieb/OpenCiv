@@ -18,6 +18,7 @@ export class FloatingText extends Label {
   /**
    * `standsOn` is the ground point the text belongs to on the globe, where it rises over what it's
    * about (a unit, a city) rather than from the ground where it starts; that point, if left out.
+   * `turnsOn` is what it's about's turn point there (see StandingOptions.turnPoint), so the two turn together.
    */
   constructor(options: {
     text: string;
@@ -26,6 +27,7 @@ export class FloatingText extends Label {
     fromY: number;
     toY: number;
     standsOn?: () => [number, number];
+    turnsOn?: () => [number, number];
   }) {
     super({
       text: options.text,
@@ -41,6 +43,7 @@ export class FloatingText extends Label {
     this.toY = options.toY;
     Standing.set(this, {
       anchor: options.standsOn ?? (() => [this.centerX, this.fromY]),
+      turnPoint: options.turnsOn,
       overlay: true
     });
   }

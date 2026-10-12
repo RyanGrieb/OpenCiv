@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import { GameMap } from "../map/GameMap";
+import { Tile } from "../map/Tile";
 import { Actor } from "../scene/Actor";
 import { WorldView } from "../scene/Camera";
 import { SceneObject } from "../scene/SceneObject";
@@ -18,6 +19,12 @@ import { StandingPiece, StandingPieces } from "./StandingPieces";
 interface Billboard {
   footX: number;
   footY: number;
+  // Where what it's part of stands, which decides whether it stands upright or straight out of the
+  // ground (see GlobeSprites.OUTLINE_REACH): the middle of its tile for the map's sprites, so that all
+  // the pieces of everything on a tile turn together, and for what stands on a tile (see
+  // StandingOptions.turnPoint); its foot for anything else.
+  turnX: number;
+  turnY: number;
   // For a skirt (see GlobeSprites.addSkirts()), how far above its foot the pixels it hangs from stop,
   // in world pixels; 0 for anything else.
   skirt: number;
@@ -60,6 +67,7 @@ class BillboardBatch {
     geometry.setIndex([0, 2, 1, 1, 2, 3]);
     geometry.setAttribute("anchor", new THREE.InstancedBufferAttribute(new Float32Array(capacity * 3), 3));
     geometry.setAttribute("depthAnchor", new THREE.InstancedBufferAttribute(new Float32Array(capacity * 3), 3));
+    geometry.setAttribute("turnAnchor", new THREE.InstancedBufferAttribute(new Float32Array(capacity * 3), 3));
     geometry.setAttribute("skirt", new THREE.InstancedBufferAttribute(new Float32Array(capacity), 1));
     geometry.setAttribute("rect", new THREE.InstancedBufferAttribute(new Float32Array(capacity * 4), 4));
     geometry.setAttribute("atlasRect", new THREE.InstancedBufferAttribute(new Float32Array(capacity * 4), 4));
@@ -78,6 +86,7 @@ class BillboardBatch {
     const geometry = this.mesh.geometry;
     const anchors = geometry.getAttribute("anchor") as THREE.InstancedBufferAttribute;
     const depthAnchors = geometry.getAttribute("depthAnchor") as THREE.InstancedBufferAttribute;
+    const turnAnchors = geometry.getAttribute("turnAnchor") as THREE.InstancedBufferAttribute;
     const skirts = geometry.getAttribute("skirt") as THREE.InstancedBufferAttribute;
     const rects = geometry.getAttribute("rect") as THREE.InstancedBufferAttribute;
     const atlasRects = geometry.getAttribute("atlasRect") as THREE.InstancedBufferAttribute;
@@ -85,12 +94,15 @@ class BillboardBatch {
     billboards.forEach((billboard, index) => {
       anchors.setXYZ(index, ...GlobeSprites.footOnSphere(projection, billboard));
       depthAnchors.setXYZ(index, ...GlobeSprites.footOnSphere(projection, billboard, billboard.depthBack));
+      turnAnchors.setXYZ(index, ...GlobeSprites.turnOnSphere(projection, billboard));
       skirts.setX(index, billboard.skirt);
       rects.setXYZW(index, billboard.left, billboard.top, billboard.width, billboard.height);
       atlasRects.setXYZW(index, billboard.atlasX, billboard.atlasY, billboard.atlasWidth, billboard.atlasHeight);
       tints.setXYZW(index, ...billboard.tint);
     });
-    for (const attribute of [anchors, depthAnchors, skirts, rects, atlasRects, tints]) attribute.needsUpdate = true;
+    for (const attribute of [anchors, depthAnchors, turnAnchors, skirts, rects, atlasRects, tints]) {
+      attribute.needsUpdate = true;
+    }
     geometry.instanceCount = billboards.length;
   }
 
@@ -105,10 +117,11 @@ class BillboardBatch {
  * On the planet's face they stand upright, just as the flat map draws them: a 2.5D overlay, as a globe's
  * map markers are drawn. Only those on its outline, which would stick out past its edge, stand straight
  * out of the ground instead, as something real would seen side on there: sideways at the planet's
- * sides, upside down at its bottom (see OUTLINE_REACH). Nothing can stand upright in the middle and
- * straight out all round the edge without turning over somewhere in between, so this keeps the turn
- * to the outline, out of the way. Those with their feet in view are drawn in front of the whole planet,
- * so the ground never cuts into one, and one standing nearer covers one behind it.
+ * sides, upside down at its bottom (see OUTLINE_REACH). Each does one or the other, never in between,
+ * and everything on a tile does the same. Nothing can stand upright in the middle and straight out all
+ * round the edge without turning over somewhere in between, so this keeps the turn to the outline, out
+ * of the way. Those with their feet in view are drawn in front of the whole planet, so the ground never
+ * cuts into one, and one standing nearer covers one behind it.
  *
  * The map's standing sprites (trees, mountains' peaks, hills' mounds, resources, cities) are cut into
  * pieces (see StandingPieces), each standing on its own foot, tinted by the fog of war there. Where a
@@ -129,10 +142,10 @@ export class GlobeSprites {
   private static readonly MAX_DETAIL = 4;
   // Pixels added around each label or badge's rectangle, for text outlines and shadows.
   private static readonly MARGIN = 2;
-  // A billboard whose foot is within this many world pixels of the planet's outline on screen - about
-  // a tile's height, so one that would stick out past the edge - turns from upright to standing
-  // straight out of the ground, the more the nearer its foot is to the outline.
-  private static readonly OUTLINE_REACH = 32;
+  // A billboard stands straight out of the ground, rather than upright, where it stands (see
+  // Billboard.turnX) within this many world pixels of the planet's outline on screen: half a tile's
+  // height, so that at least half of one standing out there sticks out past the edge.
+  private static readonly OUTLINE_REACH = 16;
   // For the depth test alone, billboards with their feet in view are brought in front of all of the
   // planet's ground, in the order of their feet: between these fractions of the nearest it can be.
   // Nothing standing on the side of a round planet in view is behind its ground, except where one on
@@ -154,6 +167,7 @@ export class GlobeSprites {
     #include <common>
     attribute vec3 anchor;
     attribute vec3 depthAnchor;
+    attribute vec3 turnAnchor;
     attribute float skirt;
     attribute vec4 rect;
     attribute vec4 atlasRect;
@@ -167,18 +181,25 @@ export class GlobeSprites {
     varying vec4 vTint;
     varying float vLight;
 
-    // Which way is up on screen for a billboard, where a world pixel at its foot spans pixel radians -
-    // see OUTLINE_REACH, and GlobeSprites.standingUp().
-    vec2 standingUp(vec3 footView, vec3 normalView, float facing, float pixel) {
+    // Whether what stands at a point on the unit sphere stands straight out of the ground rather than
+    // upright: whether it's within OUTLINE_REACH world pixels of the planet's outline on screen - see
+    // GlobeSprites.onOutline().
+    bool onOutline(vec3 point) {
+      vec3 normal = normalize(mat3(modelMatrix) * point);
+      float facingUs = max(dot(normal, normalize(cameraPosition - (modelMatrix * vec4(point, 1.0)).xyz)), 0.0);
+      // How far out across the planet's disc it is: 1 on its outline, and past it.
+      float across = sqrt(1.0 - facingUs * facingUs);
+      return across >= 1.0 - OUTLINE_REACH * worldPixel * sqrt(max(0.0, 1.0 - point.y * point.y));
+    }
+
+    // Which way is up on screen for a billboard: upright, or straight out of the ground at its foot when
+    // it's on the planet's outline - see GlobeSprites.standingUp().
+    vec2 standingUp(vec3 footView, vec3 normalView, bool outline) {
+      if (!outline) return vec2(0.0, 1.0);
+
       // Where the ground's normal points on screen: away from the planet's middle.
       vec2 outward = normalView.xy * -footView.z + footView.xy * normalView.z;
-      outward = dot(outward, outward) > 0.0 ? normalize(outward) : vec2(0.0, 1.0);
-      // How far out across the planet's disc the foot is: 1 on its outline, and past it.
-      float facingUs = max(facing, 0.0);
-      float across = sqrt(1.0 - facingUs * facingUs);
-      float onOutline = smoothstep(1.0 - OUTLINE_REACH * pixel, 1.0, across);
-      vec2 up = mix(vec2(0.0, 1.0), outward, onOutline);
-      return dot(up, up) > 1e-12 ? normalize(up) : outward;
+      return dot(outward, outward) > 0.0 ? normalize(outward) : vec2(0.0, 1.0);
     }
 
     void main() {
@@ -189,7 +210,7 @@ export class GlobeSprites {
 
       // In the camera's space, so it's square to the screen and as far away as its foot.
       vec4 corner = viewMatrix * vec4(foot, 1.0);
-      vec2 up = standingUp(corner.xyz, mat3(viewMatrix) * normal, facing, pixel);
+      vec2 up = standingUp(corner.xyz, mat3(viewMatrix) * normal, onOutline(turnAnchor));
       vec2 local = (rect.xy + position.xy * rect.zw) * pixel;
       // A skirt reaches down from what it hangs from to the ground under that, seen side on as that is.
       if (skirt > 0.0) local.y = -skirt * mix(1.0, clamp(facing, 0.0, 1.0), position.y) * pixel;
@@ -283,23 +304,24 @@ export class GlobeSprites {
     return GlobeProjection.unitVector(longitude, latitude);
   }
 
-  // Which way is up on screen for a billboard, as the vertex shader works it out from its foot and
-  // the ground's normal there in the camera's space, how squarely its ground faces the camera, and
-  // the radians a world pixel spans at its foot.
-  private static standingUp(footView: THREE.Vector3, normalView: THREE.Vector3, facing: number, pixel: number) {
+  /** Where a billboard stands as a point on the unit sphere, which decides how it stands (see Billboard.turnX). */
+  public static turnOnSphere(projection: GlobeProjection, billboard: Billboard): [number, number, number] {
+    const [longitude, latitude] = projection.toSphere(billboard.turnX, billboard.turnY);
+    return GlobeProjection.unitVector(longitude, latitude);
+  }
+
+  // Which way is up on screen for a billboard, as the vertex shader works it out from its foot and the
+  // ground's normal there in the camera's space: upright, or straight out of the ground when it's on
+  // the planet's outline (see onOutline()).
+  private static standingUp(footView: THREE.Vector3, normalView: THREE.Vector3, outline: boolean) {
+    if (!outline) return new THREE.Vector2(0, 1);
+
     // Where the ground's normal points on screen: away from the planet's middle.
     const outward = new THREE.Vector2(
       normalView.x * -footView.z + footView.x * normalView.z,
       normalView.y * -footView.z + footView.y * normalView.z
     );
-    if (outward.lengthSq() > 0) outward.normalize();
-    else outward.set(0, 1);
-    // How far out across the planet's disc the foot is: 1 on its outline, and past it.
-    const facingUs = Math.max(facing, 0);
-    const across = Math.sqrt(1 - facingUs * facingUs);
-    const onOutline = THREE.MathUtils.smoothstep(across, 1 - GlobeSprites.OUTLINE_REACH * pixel, 1);
-    const up = new THREE.Vector2(0, 1).lerp(outward, onOutline);
-    return up.lengthSq() > 1e-12 ? up.normalize() : outward;
+    return outward.lengthSq() > 0 ? outward.normalize() : outward.set(0, 1);
   }
 
   // Its rectangle in the world, as given or the actor's own, with a margin - undefined if it has no size.
@@ -469,6 +491,8 @@ export class GlobeSprites {
         const billboard: Billboard = {
           footX: sprite.x + piece.left + piece.width / 2,
           footY: sprite.y + piece.top + piece.height,
+          turnX: sprite.x + Tile.WIDTH / 2,
+          turnY: sprite.y + Tile.HEIGHT / 2,
           skirt: 0,
           depthBack: sprite.grounded ? piece.height : 0,
           left: -piece.width / 2,
@@ -534,7 +558,13 @@ export class GlobeSprites {
   ) {
     const scale = Math.max(1, Math.min(GlobeSprites.MAX_DETAIL, Math.ceil(detail)));
     const print = new Fingerprint().add(scale);
-    const found: { object: SceneObject; options: StandingOptions; foot: [number, number]; bounds: number[] }[] = [];
+    const found: {
+      object: SceneObject;
+      options: StandingOptions;
+      foot: [number, number];
+      turn: [number, number];
+      bounds: number[];
+    }[] = [];
 
     for (const object of objects) {
       const options = Standing.get(object);
@@ -544,7 +574,7 @@ export class GlobeSprites {
       const foot = options.anchor();
       if (!this.inView(foot, camera)) continue;
 
-      found.push({ object, options, foot, bounds });
+      found.push({ object, options, foot, turn: options.turnPoint?.() ?? foot, bounds });
       // Relative to where it stands, so one only moving about doesn't need drawing again.
       print.addObject(object, foot[0], foot[1]);
       bounds.forEach((edge, index) => print.add(edge - foot[index % 2]));
@@ -556,7 +586,7 @@ export class GlobeSprites {
     }
 
     this.standing = [];
-    found.forEach(({ object, options, foot, bounds }, index) => {
+    found.forEach(({ object, options, foot, turn, bounds }, index) => {
       const corner = this.labelCorners[index];
       if (!corner) return;
 
@@ -564,6 +594,8 @@ export class GlobeSprites {
       const billboard: Billboard = {
         footX: foot[0],
         footY: foot[1],
+        turnX: turn[0],
+        turnY: turn[1],
         skirt: 0,
         depthBack: 0,
         left: left - foot[0],
@@ -688,11 +720,11 @@ export class GlobeSprites {
     const anchor = new THREE.Vector3(...GlobeSprites.footOnSphere(this.projection, billboard));
     const foot = anchor.clone().applyMatrix4(this.planet.matrixWorld);
     const normal = anchor.clone().transformDirection(this.planet.matrixWorld);
-    const facing = normal.dot(camera.position.clone().sub(foot).normalize());
     const footView = foot.clone().applyMatrix4(camera.matrixWorldInverse);
     const normalView = normal.clone().transformDirection(camera.matrixWorldInverse);
-    const pixel = ((2 * Math.PI) / this.projection.worldWidth) * Math.sqrt(Math.max(0, 1 - anchor.y * anchor.y));
-    const up = GlobeSprites.standingUp(footView, normalView, facing, pixel);
+    const pixel = this.pixelAt(anchor);
+    const turnAnchor = new THREE.Vector3(...GlobeSprites.turnOnSphere(this.projection, billboard));
+    const up = GlobeSprites.standingUp(footView, normalView, this.onOutline(turnAnchor, camera));
 
     return [
       [0, 0],
@@ -705,5 +737,21 @@ export class GlobeSprites {
       point.applyMatrix4(camera.projectionMatrix);
       return [((point.x + 1) / 2) * this.screenWidth, ((1 - point.y) / 2) * this.screenHeight];
     });
+  }
+
+  // Whether what stands at a point on the unit sphere is on the planet's outline on screen this frame,
+  // within OUTLINE_REACH world pixels of it, as the vertex shader's onOutline() judges it.
+  private onOutline(point: THREE.Vector3, camera: THREE.Camera) {
+    const normal = point.clone().transformDirection(this.planet.matrixWorld);
+    const toCamera = camera.position.clone().sub(point.clone().applyMatrix4(this.planet.matrixWorld)).normalize();
+    const facingUs = Math.max(normal.dot(toCamera), 0);
+    // How far out across the planet's disc it is: 1 on its outline, and past it.
+    const across = Math.sqrt(1 - facingUs * facingUs);
+    return across >= 1 - GlobeSprites.OUTLINE_REACH * this.pixelAt(point);
+  }
+
+  // The radians a world pixel spans at a point on the unit sphere, as the vertex shader works it out.
+  private pixelAt(point: THREE.Vector3) {
+    return ((2 * Math.PI) / this.projection.worldWidth) * Math.sqrt(Math.max(0, 1 - point.y * point.y));
   }
 }

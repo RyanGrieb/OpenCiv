@@ -322,10 +322,12 @@ export class Unit extends ActorGroup {
     // On the globe the unit stands on its tile, its badges hanging over it, and pointing at either means its tile.
     Standing.set(this, {
       anchor: () => this.getStandingPoint(),
+      turnPoint: () => this.getTurnPoint(),
       pickPoint: () => [this.tile.getCenterPosition().x, this.tile.getCenterPosition().y]
     });
     Standing.set(this.badges, {
       anchor: () => this.getStandingPoint(),
+      turnPoint: () => this.getTurnPoint(),
       bounds: () => this.getBadgeBounds(),
       overlay: true
     });
@@ -774,6 +776,7 @@ export class Unit extends ActorGroup {
       text: `-${damage}`,
       color: "red",
       standsOn: () => this.getStandingPoint(),
+      turnsOn: () => this.getTurnPoint(),
       centerX: x + Unit.CIV_ICON_SIZE / 2,
       fromY: y + Unit.CIV_ICON_SIZE / 2 + Unit.HEALTH_BUBBLE_RADIUS + 2,
       toY: y - Unit.HEALTH_BUBBLE_RADIUS - 10
@@ -783,6 +786,12 @@ export class Unit extends ActorGroup {
   // The bottom middle of the sprite: where the unit stands, on the globe.
   private getStandingPoint(): [number, number] {
     return [this.getX() + this.getWidth() / 2, this.getY() + this.getHeight()];
+  }
+
+  // The middle of the sprite, which is its tile's middle while it isn't moving: where it turns with the
+  // map's sprites on its tile near the globe's outline (see StandingOptions.turnPoint).
+  private getTurnPoint(): [number, number] {
+    return [this.getX() + this.getWidth() / 2, this.getY() + this.getHeight() / 2];
   }
 
   // Around the health bubble and the icons beside it, with a pixel to spare.

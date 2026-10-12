@@ -121,7 +121,9 @@ export class City extends ActorGroup {
     this.territory = [];
 
     this.workedTiles = options.workedTiles;
-    console.log(`[City ${this.name}] Initialized with ${this.workedTiles ? this.workedTiles.length : 'undefined'} worked tiles.`);
+    console.log(
+      `[City ${this.name}] Initialized with ${this.workedTiles ? this.workedTiles.length : "undefined"} worked tiles.`
+    );
 
     this.setTerritory(options.territory);
 
@@ -166,7 +168,9 @@ export class City extends ActorGroup {
 
         this.productionQueue = data["productionQueue"] ?? [];
         const nextBorderTile = data["nextBorderTile"];
-        this.nextBorderTile = nextBorderTile ? GameMap.getInstance().getTiles()[nextBorderTile.x]?.[nextBorderTile.y] : undefined;
+        this.nextBorderTile = nextBorderTile
+          ? GameMap.getInstance().getTiles()[nextBorderTile.x]?.[nextBorderTile.y]
+          : undefined;
         this.statsPresent = true;
       }
     });
@@ -223,6 +227,7 @@ export class City extends ActorGroup {
     this.healthBar = new CityHealthBar(this, this.getZIndex());
     Standing.set(this.healthBar, {
       anchor: () => this.getStandingPoint(),
+      turnPoint: () => this.getTurnPoint(),
       bounds: () => this.getHealthBarBounds(),
       overlay: true
     });
@@ -376,7 +381,11 @@ export class City extends ActorGroup {
         this.tile.getY() - this.nameLabel.getHeight()
       );
       // On the globe the banner stands over the city, always in front of the map.
-      Standing.set(this.nameLabel, { anchor: () => this.getStandingPoint(), overlay: true });
+      Standing.set(this.nameLabel, {
+        anchor: () => this.getStandingPoint(),
+        turnPoint: () => this.getTurnPoint(),
+        overlay: true
+      });
       Game.getInstance().getCurrentScene().addActor(this.nameLabel);
 
       this.civIcon = new Actor({
@@ -389,7 +398,11 @@ export class City extends ActorGroup {
         height: 12
       });
       //this.addActor(this.civIcon);
-      Standing.set(this.civIcon, { anchor: () => this.getStandingPoint(), overlay: true });
+      Standing.set(this.civIcon, {
+        anchor: () => this.getStandingPoint(),
+        turnPoint: () => this.getTurnPoint(),
+        overlay: true
+      });
 
       Game.getInstance().getCurrentScene().addActor(this.civIcon);
       this.createStrikeIcon();
@@ -407,7 +420,11 @@ export class City extends ActorGroup {
       height: City.BANNER_ICON_SIZE,
       cameraApplies: true
     });
-    Standing.set(this.strikeIcon, { anchor: () => this.getStandingPoint(), overlay: true });
+    Standing.set(this.strikeIcon, {
+      anchor: () => this.getStandingPoint(),
+      turnPoint: () => this.getTurnPoint(),
+      overlay: true
+    });
     this.strikeIcon.on("clicked", () => {
       if (!this.strikeReady) return;
 
@@ -433,6 +450,13 @@ export class City extends ActorGroup {
     return [center.x, center.y + City.STANDING_BELOW_CENTER];
   }
 
+  // The middle of its tile: where its banner and the like turn with the map's sprites there near the
+  // globe's outline (see StandingOptions.turnPoint).
+  private getTurnPoint(): [number, number] {
+    const center = this.tile.getCenterPosition();
+    return [center.x, center.y];
+  }
+
   private getHealthBarBounds(): [number, number, number, number] {
     const x = this.tile.getX() + (this.tile.getWidth() - City.HEALTH_BAR_WIDTH) / 2;
     const y = this.tile.getY() - 1;
@@ -448,6 +472,7 @@ export class City extends ActorGroup {
       text: `-${damage}`,
       color: "red",
       standsOn: () => this.getStandingPoint(),
+      turnsOn: () => this.getTurnPoint(),
       centerX,
       fromY: this.tile.getY() + 4,
       toY: this.tile.getY() - 16

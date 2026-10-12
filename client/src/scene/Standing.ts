@@ -7,6 +7,11 @@ export interface StandingOptions {
   bounds?: () => [number, number, number, number];
   /** Drawn over everything, like a label, rather than among the map's sprites, where it can be hidden behind them. */
   overlay?: boolean;
+  /**
+   * The world point that decides whether, near the planet's outline, it stands upright or straight out of
+   * the ground: its tile's middle, so that it turns with the map's sprites there. Its anchor if left out.
+   */
+  turnPoint?: () => [number, number];
   /** The world point the mouse means when it's over this - a unit's tile, say. Only units need one. */
   pickPoint?: () => [number, number];
 }
