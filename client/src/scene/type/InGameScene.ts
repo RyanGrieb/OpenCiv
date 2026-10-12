@@ -33,7 +33,7 @@ interface GameplayUIElement {
 }
 
 export class InGameScene extends Scene {
-  private static readonly SETTINGS_WIDTH = 460;
+  private static readonly SETTINGS_WIDTH = 540;
   private static readonly SETTINGS_HEIGHT = 300;
 
   private players: AbstractPlayer[];

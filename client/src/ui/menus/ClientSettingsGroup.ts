@@ -8,7 +8,7 @@ import { Label } from "../components/Label";
 import { SlideBar } from "../components/SlideBar";
 
 interface SettingRow {
-  key: "HUD_TRANSPARENCY";
+  key: "HUD_TRANSPARENCY" | "GLOBE_EDGE_SPRITE_WIDTH";
   label: string;
   min: number;
   max: number;
@@ -33,7 +33,8 @@ export class ClientSettingsGroup extends ActorGroup {
   private static readonly SLIDER_VALUE_WIDTH = 90;
 
   private static readonly ROWS: SettingRow[] = [
-    { key: "HUD_TRANSPARENCY", label: "HUD Transparency", min: 0, max: 1, step: 0.05 }
+    { key: "HUD_TRANSPARENCY", label: "HUD Transparency", min: 0, max: 1, step: 0.05 },
+    { key: "GLOBE_EDGE_SPRITE_WIDTH", label: "Globe Edge Sprite Width", min: 0.3, max: 1, step: 0.05 }
   ];
 
   constructor(options: ClientSettingsGroupOptions) {

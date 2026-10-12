@@ -4,17 +4,20 @@ const STORAGE_KEY = "openciv.settings";
 
 // Each setting's name is its key and its default is its value.
 const DEFAULT_SETTINGS = {
-  HUD_TRANSPARENCY: 0.75 // Opacity of the corner HUD windows (research, unit info).
+  HUD_TRANSPARENCY: 0.75, // Opacity of the corner HUD windows (research, unit info).
+  GLOBE_EDGE_SPRITE_WIDTH: 0.7 // The least of their width the globe's sprites narrow to near its edge (1: never).
 };
 
 type Settings = typeof DEFAULT_SETTINGS;
 
 // Inclusive [min, max] for numeric settings that have one.
 const NUMBER_RANGES: Partial<Record<keyof Settings, [number, number]>> = {
-  HUD_TRANSPARENCY: [0, 1]
+  HUD_TRANSPARENCY: [0, 1],
+  GLOBE_EDGE_SPRITE_WIDTH: [0.3, 1]
 };
 
-// Client-only preferences, persisted in localStorage. Read when a window is built, so a change applies to the next one opened.
+// Client-only preferences, persisted in localStorage. Windows read them when built, so a change applies to the next one
+// opened; the globe reads its own every frame.
 export class ClientSettings {
   private static settings: Settings;
 
