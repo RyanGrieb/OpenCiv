@@ -31,6 +31,8 @@ interface ViewBounds {
 export class GlobeView {
   public static readonly FOV = 45;
   private static readonly MAX_TEXTURE_SIZE = 4096;
+  // Device pixels per CSS pixel from which the screen is sharp enough to draw the globe unsmoothed.
+  private static readonly SHARP_SCREEN = 1.5;
   // Rays cast along each side of the screen to find what's in view.
   private static readonly EDGE_SAMPLES = 12;
   // World pixels drawn past what's in view, as the screen's edge bulges a little between the rays.
@@ -50,11 +52,11 @@ export class GlobeView {
     uniform sampler2D overviewMap;
     uniform vec2 overviewOrigin;
     uniform float overviewScale;
-    uniform float overviewSize;
+    uniform vec2 overviewSize;
     uniform sampler2D detailMap;
     uniform vec2 detailOrigin;
     uniform float detailScale;
-    uniform float detailSize;
+    uniform vec2 detailSize;
     uniform float detailShown;
     uniform float worldWidth;
     uniform float edgeMercator;
@@ -62,8 +64,8 @@ export class GlobeView {
     uniform vec3 backdropColor;
     varying vec3 vGlobePoint;
 
-    vec2 mapLayerUv(vec2 world, vec2 origin, float scale, float size) {
-      float middle = origin.x + 0.5 * size / scale;
+    vec2 mapLayerUv(vec2 world, vec2 origin, float scale, vec2 size) {
+      float middle = origin.x + 0.5 * size.x / scale;
       world.x -= worldWidth * floor((world.x - middle) / worldWidth + 0.5);
       return (world - origin) * scale / size;
     }
@@ -106,11 +108,11 @@ export class GlobeView {
     overviewMap: { value: null as THREE.Texture },
     overviewOrigin: { value: this.overview.origin },
     overviewScale: { value: 1 },
-    overviewSize: { value: 1 },
+    overviewSize: { value: new THREE.Vector2(1, 1) },
     detailMap: { value: null as THREE.Texture },
     detailOrigin: { value: this.detail.origin },
     detailScale: { value: 1 },
-    detailSize: { value: 1 },
+    detailSize: { value: new THREE.Vector2(1, 1) },
     detailShown: { value: 0 },
     worldWidth: { value: 1 },
     edgeMercator: { value: 0 },
@@ -134,7 +136,8 @@ export class GlobeView {
     this.bandUniforms.edgeMercator.value = this.projection.edgeMercator;
     this.bandUniforms.rowStep.value = this.projection.rowStep;
 
-    this.renderer = new THREE.WebGLRenderer({ antialias: true });
+    // Smoothing the planet's edge is worth its cost only on screens with big pixels.
+    this.renderer = new THREE.WebGLRenderer({ antialias: window.devicePixelRatio < GlobeView.SHARP_SCREEN });
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     const canvas = this.renderer.domElement;
     canvas.id = "globe-canvas";
@@ -266,17 +269,15 @@ export class GlobeView {
     this.camera.aspect = width / height;
     this.camera.updateProjectionMatrix();
 
-    const size = Math.min(
-      GlobeView.MAX_TEXTURE_SIZE,
-      this.renderer.capabilities.maxTextureSize,
-      Math.ceil(Math.max(width, height) * this.renderer.getPixelRatio())
-    );
-    this.overview.setSize(size);
-    this.detail.setSize(size);
+    const largest = Math.min(GlobeView.MAX_TEXTURE_SIZE, this.renderer.capabilities.maxTextureSize);
+    const canvasWidth = Math.min(largest, Math.ceil(width * this.renderer.getPixelRatio()));
+    const canvasHeight = Math.min(largest, Math.ceil(height * this.renderer.getPixelRatio()));
+    this.overview.setSize(canvasWidth, canvasHeight);
+    this.detail.setSize(canvasWidth, canvasHeight);
     this.bandUniforms.overviewMap.value = this.overview.texture;
-    this.bandUniforms.overviewSize.value = size;
+    this.bandUniforms.overviewSize.value.set(canvasWidth, canvasHeight);
     this.bandUniforms.detailMap.value = this.detail.texture;
-    this.bandUniforms.detailSize.value = size;
+    this.bandUniforms.detailSize.value.set(canvasWidth, canvasHeight);
   }
 
   // The sphere between the map's top row's highest point and its bottom row's lowest. Its shape
@@ -349,7 +350,7 @@ export class GlobeView {
   // Centers a canvas on what's in view - kept over the map where it has room to spare.
   private place(layer: GlobeMapLayer, bounds: ViewBounds, scale: number) {
     const margin = GlobeView.REGION_MARGIN;
-    const span = layer.getSize() / scale;
+    const span = layer.getHeight() / scale;
     const highest = span / 2 - margin;
     const lowest = this.projection.worldHeight + margin - span / 2;
     const middleY = (bounds.top + bounds.bottom) / 2;

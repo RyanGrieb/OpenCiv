@@ -3,8 +3,8 @@ import { WorldView } from "../scene/Camera";
 
 /**
  * A canvas the game draws part of its map into each frame, at some scale, for the globe to use as a
- * texture (see GlobeView). It's square, and it covers the world pixels from `origin` on, `scale`
- * canvas pixels to each.
+ * texture (see GlobeView). It's the shape of the screen, and it covers the world pixels from
+ * `origin` on, `scale` canvas pixels to each.
  */
 export class GlobeMapLayer {
   // The canvas's scale snaps down to a quarter of a doubling, so panning at one zoom keeps drawing
@@ -19,17 +19,21 @@ export class GlobeMapLayer {
   public texture: THREE.CanvasTexture;
   private canvas: HTMLCanvasElement;
 
-  public getSize() {
+  public getWidth() {
     return this.canvas?.width ?? 0;
   }
 
-  public setSize(size: number) {
-    if (this.canvas?.width === size) return;
+  public getHeight() {
+    return this.canvas?.height ?? 0;
+  }
+
+  public setSize(width: number, height: number) {
+    if (this.canvas?.width === width && this.canvas.height === height) return;
 
     this.texture?.dispose();
     this.canvas = document.createElement("canvas");
-    this.canvas.width = size;
-    this.canvas.height = size;
+    this.canvas.width = width;
+    this.canvas.height = height;
     const context = this.canvas.getContext("2d");
     context.imageSmoothingEnabled = false;
     this.view.context = context;
@@ -47,8 +51,7 @@ export class GlobeMapLayer {
    * `wanted` (the most screen pixels one covers), or fewer if that won't fit.
    */
   public scaleFor(width: number, height: number, wanted: number) {
-    const size = this.getSize();
-    const fitted = Math.min(wanted, size / width, size / height, GlobeMapLayer.MAX_SCALE);
+    const fitted = Math.min(wanted, this.getWidth() / width, this.getHeight() / height, GlobeMapLayer.MAX_SCALE);
     const steps = GlobeMapLayer.SCALE_STEPS_PER_DOUBLING;
     return 2 ** (Math.floor(Math.log2(fitted) * steps) / steps);
   }
@@ -58,9 +61,10 @@ export class GlobeMapLayer {
    * draws the map the same, and clears it for this frame's drawing.
    */
   public cover(middleX: number, middleY: number, scale: number) {
-    const span = this.getSize() / scale;
+    const left = middleX - this.getWidth() / scale / 2;
+    const top = middleY - this.getHeight() / scale / 2;
     this.scale = scale;
-    this.origin.set(Math.floor((middleX - span / 2) * scale) / scale, Math.floor((middleY - span / 2) * scale) / scale);
+    this.origin.set(Math.floor(left * scale) / scale, Math.floor(top * scale) / scale);
     this.view.x = -this.origin.x * scale;
     this.view.y = -this.origin.y * scale;
     this.view.zoom = scale;

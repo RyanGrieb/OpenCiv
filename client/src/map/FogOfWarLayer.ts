@@ -7,14 +7,16 @@ import { CloudCover } from "./CloudCover";
  * tile. Only the look: which tiles are unexplored, remembered or in sight is still the server's
  * call (see PlayerVisibility there) - GameMap just reports each tile's state here.
  *
- * The overlay is a low-resolution mask, one cell per few world pixels, where each cell takes the
- * state of the tile it falls in. The mask is blurred so the states bleed into each other across
- * tile edges. Remembered tiles get a dark tint: the mask stretched over the map with image
- * smoothing on. Unexplored tiles are covered by clouds (see CloudCover), one pixel per world pixel,
- * their opacity taken from the blurred mask, so the clouds thin out toward known tiles. Brighter
- * cloud tops reach further out than the dim haze between them, which makes the edge billow rather
- * than fade evenly. The cloud cover is fully opaque by the known map's
- * hex outline, so its jagged edge never shows.
+ * The overlay starts as a low-resolution mask, one cell per few world pixels, where each cell takes
+ * the state of the tile it falls in. The mask is blurred so the states bleed into each other across
+ * tile edges, then laid out one pixel per world pixel. Remembered tiles get a dark tint that fades
+ * out smoothly. Unexplored tiles are covered by clouds (see CloudCover), their opacity taken from the
+ * blurred mask, so the clouds thin out toward known tiles. Brighter cloud tops reach further out than
+ * the dim haze between them, which makes the edge billow rather than fade evenly. The cloud cover is
+ * fully opaque by the known map's hex outline, so its jagged edge never shows.
+ *
+ * Tint and clouds are one canvas, drawn at the map's own scale like its tiles - once a frame, and
+ * not at all once nothing is hidden.
  *
  * Changes only redo the part of the mask around the tiles that changed, the next time it's drawn,
  * so a reveal costs about the same on any map size and a burst of them costs one rebuild.
@@ -60,14 +62,15 @@ export class FogOfWarLayer extends Actor {
   private readonly tileStates: Uint8Array;
   // Per mask cell: index into tileStates of the tile it sits in. Geometry never changes, so worked out once.
   private readonly cellTiles: Int32Array;
-  private readonly canvas: HTMLCanvasElement;
-  private readonly context: CanvasRenderingContext2D;
-  private readonly pixels: ImageData;
-  // The cloud cover, one pixel per world pixel, and per pixel how early it shows as the cover thins
-  // out (0-255). Painted on the first rebuild, once the sprite atlas is surely loaded.
-  private readonly cloudCanvas: HTMLCanvasElement;
-  private readonly cloudContext: CanvasRenderingContext2D;
-  private readonly cloudPixels: ImageData;
+  // Tiles not in sight: unexplored or remembered.
+  private hiddenTiles: number;
+  // The overlay, one pixel per world pixel.
+  private readonly overlayCanvas: HTMLCanvasElement;
+  private readonly overlayContext: CanvasRenderingContext2D;
+  private readonly overlayPixels: ImageData;
+  // The clouds' own colors (RGB per pixel) and per pixel how early it shows as the cover thins out
+  // (0-255). Painted on the first rebuild, once the sprite atlas is surely loaded.
+  private cloudColors: Uint8Array | undefined;
   private cloudReach: Uint8Array | undefined;
   // Whether past the map's edges reads as unexplored, so clouds cover its outline (see setEdgesClouded()).
   private edgesClouded = true;
@@ -95,19 +98,14 @@ export class FogOfWarLayer extends Actor {
     this.cellsWide = cellsWide;
     this.cellsHigh = cellsHigh;
     this.tileStates = new Uint8Array(gridWidth * gridHeight);
+    this.hiddenTiles = this.tileStates.length;
     this.cellTiles = this.mapCellsToTiles();
 
-    this.canvas = document.createElement("canvas");
-    this.canvas.width = cellsWide;
-    this.canvas.height = cellsHigh;
-    this.context = this.canvas.getContext("2d");
-    this.pixels = this.context.createImageData(cellsWide, cellsHigh);
-
-    this.cloudCanvas = document.createElement("canvas");
-    this.cloudCanvas.width = this.width;
-    this.cloudCanvas.height = this.height;
-    this.cloudContext = this.cloudCanvas.getContext("2d");
-    this.cloudPixels = this.cloudContext.createImageData(this.width, this.height);
+    this.overlayCanvas = document.createElement("canvas");
+    this.overlayCanvas.width = this.width;
+    this.overlayCanvas.height = this.height;
+    this.overlayContext = this.overlayCanvas.getContext("2d");
+    this.overlayPixels = this.overlayContext.createImageData(this.width, this.height);
 
     this.markDirty(0, 0);
     this.markDirty(gridWidth - 1, gridHeight - 1);
@@ -155,10 +153,19 @@ export class FogOfWarLayer extends Actor {
     }
   }
 
+  // The blurred amount at a pixel between four cell centers: `corner` is the top left one's index.
+  private static sampleBetween(values: Float32Array, corner: number, width: number, across: number, down: number) {
+    const top = values[corner] * (1 - across) + values[corner + 1] * across;
+    const bottom = values[corner + width] * (1 - across) + values[corner + width + 1] * across;
+    return top * (1 - down) + bottom * down;
+  }
+
   public setTileState(gridX: number, gridY: number, state: number) {
     const index = gridX + gridY * this.gridWidth;
     if (this.tileStates[index] === state) return;
 
+    if (this.tileStates[index] === FogOfWarLayer.VISIBLE) this.hiddenTiles++;
+    if (state === FogOfWarLayer.VISIBLE) this.hiddenTiles--;
     this.tileStates[index] = state;
     this.markDirty(gridX, gridY);
   }
@@ -184,40 +191,25 @@ export class FogOfWarLayer extends Actor {
   public getPixelAt(worldX: number, worldY: number): number[] {
     if (this.dirty) this.rebuild();
 
-    const cellX = this.wrapCellX(Math.floor(worldX / FogOfWarLayer.WORLD_PIXELS_PER_CELL));
-    const cellY = Math.min(Math.max(Math.floor(worldY / FogOfWarLayer.WORLD_PIXELS_PER_CELL), 0), this.cellsHigh - 1);
-    const tintIndex = (cellX + cellY * this.cellsWide) * 4;
-    const tint = this.pixels.data.slice(tintIndex, tintIndex + 4);
-
     const pixelX = this.wrapPixelX(Math.floor(worldX));
     const pixelY = Math.min(Math.max(Math.floor(worldY), 0), this.height - 1);
-    const cloudIndex = (pixelX + pixelY * this.width) * 4;
-    const cloud = this.cloudPixels.data.slice(cloudIndex, cloudIndex + 4);
-
-    const cloudAlpha = cloud[3] / 255;
-    const tintAlpha = (tint[3] / 255) * (1 - cloudAlpha);
-    const alpha = cloudAlpha + tintAlpha;
-    if (alpha <= 0) return [0, 0, 0, 0];
-
-    const mix = (channel: number) => (cloud[channel] * cloudAlpha + tint[channel] * tintAlpha) / alpha;
-    return [mix(0), mix(1), mix(2), alpha * 255];
+    const index = (pixelX + pixelY * this.width) * 4;
+    return Array.from(this.overlayPixels.data.slice(index, index + 4));
   }
 
   public draw(canvasContext: CanvasRenderingContext2D) {
     const game = Game.getInstance();
     if (!game.isWorldContext(canvasContext)) return;
+    // Every tile in sight leaves nothing to draw, unless clouds cover the map's edges.
+    if (this.hiddenTiles === 0 && !this.edgesClouded) return;
 
     if (this.dirty) this.rebuild();
 
     canvasContext.save();
     game.applyCameraTransform(canvasContext);
-    // The mask is a handful of pixels per tile - smoothing is what turns it into a gradient.
-    canvasContext.imageSmoothingEnabled = true;
-    canvasContext.imageSmoothingQuality = "high";
-    canvasContext.drawImage(this.canvas, this.x, this.y, this.width, this.height);
-    // The clouds are pixel art at the map's own scale, so they stay crisp like the tiles under them.
+    // Pixel art at the map's own scale, so it stays crisp like the tiles under it.
     canvasContext.imageSmoothingEnabled = false;
-    canvasContext.drawImage(this.cloudCanvas, this.x, this.y, this.width, this.height);
+    canvasContext.drawImage(this.overlayCanvas, this.x, this.y, this.width, this.height);
     canvasContext.restore();
   }
 
@@ -345,18 +337,15 @@ export class FogOfWarLayer extends Actor {
       }
     }
 
-    this.writePixels(fogged, width, writeLeft, writeRight, writeTop, writeBottom);
-    this.writeClouds(unexplored, width, writeLeft, writeRight, writeTop, writeBottom);
+    this.writeOverlay(unexplored, fogged, width, writeLeft, writeRight, writeTop, writeBottom);
 
     // The written columns may run off either edge of a wrapped map; put the whole band back then.
     const inBounds = writeLeft >= 0 && writeRight <= this.cellsWide;
     const putLeft = inBounds ? writeLeft : 0;
     const putWidth = inBounds ? writeRight - writeLeft : this.cellsWide;
-    this.context.putImageData(this.pixels, 0, 0, putLeft, writeTop, putWidth, writeBottom - writeTop);
-
     const perCell = FogOfWarLayer.WORLD_PIXELS_PER_CELL;
-    this.cloudContext.putImageData(
-      this.cloudPixels,
+    this.overlayContext.putImageData(
+      this.overlayPixels,
       0,
       0,
       putLeft * perCell,
@@ -392,8 +381,14 @@ export class FogOfWarLayer extends Actor {
     return this.wrapColumn(column) + row * this.gridWidth;
   }
 
-  // The remembered-tile tint from the blurred fogged amounts. The clouds cover it where they overlap.
-  private writePixels(
+  /**
+   * The overlay for the written cells, per world pixel: the clouds over the remembered-tile tint. The
+   * blurred amounts, sampled between cell centers, set how covered and how fogged a pixel is. Cloud
+   * tops show from CLOUD_TOPS_FROM and the haze between them only later, so every pixel is opaque once
+   * the pixel is fully covered.
+   */
+  private writeOverlay(
+    unexplored: Float32Array,
     fogged: Float32Array,
     width: number,
     writeLeft: number,
@@ -401,42 +396,14 @@ export class FogOfWarLayer extends Actor {
     writeTop: number,
     writeBottom: number
   ) {
-    const reach = FogOfWarLayer.BLUR_REACH;
-    const [fogR, fogG, fogB, fogA] = FogOfWarLayer.FOGGED_COLOR;
-    const data = this.pixels.data;
-
-    for (let cellY = writeTop; cellY < writeBottom; cellY++) {
-      const y = cellY - writeTop + reach;
-      for (let cellX = writeLeft; cellX < writeRight; cellX++) {
-        const source = cellX - writeLeft + reach + y * width;
-        const target = (this.wrapCellX(cellX) + cellY * this.cellsWide) * 4;
-        data[target] = fogR;
-        data[target + 1] = fogG;
-        data[target + 2] = fogB;
-        data[target + 3] = fogged[source] * fogA * 255;
-      }
-    }
-  }
-
-  /**
-   * The cloud cover for the written cells, per world pixel. The blurred unexplored amount, sampled
-   * between cell centers, sets how covered a pixel is. Cloud tops show from CLOUD_TOPS_FROM and the
-   * haze between them only later, so every pixel is opaque once the pixel is fully covered.
-   */
-  private writeClouds(
-    unexplored: Float32Array,
-    width: number,
-    writeLeft: number,
-    writeRight: number,
-    writeTop: number,
-    writeBottom: number
-  ) {
-    this.cloudReach ??= new CloudCover(this.cloudPixels, this.wrapped).getReach();
+    this.paintClouds();
+    const colors = this.cloudColors;
     const reachOf = this.cloudReach;
+    const [fogR, fogG, fogB, fogA] = FogOfWarLayer.FOGGED_COLOR;
     const perCell = FogOfWarLayer.WORLD_PIXELS_PER_CELL;
     const steps = FogOfWarLayer.CLOUD_ALPHA_STEPS;
     const margin = FogOfWarLayer.BLUR_REACH;
-    const data = this.cloudPixels.data;
+    const data = this.overlayPixels.data;
 
     for (let pixelY = writeTop * perCell; pixelY < writeBottom * perCell; pixelY++) {
       // Position in the blurred region's cells, measured from cell centers.
@@ -449,15 +416,40 @@ export class FogOfWarLayer extends Actor {
         const left = Math.floor(regionX);
         const across = regionX - left;
         const corner = left + top * width;
-        const covered =
-          (unexplored[corner] * (1 - across) + unexplored[corner + 1] * across) * (1 - down) +
-          (unexplored[corner + width] * (1 - across) + unexplored[corner + width + 1] * across) * down;
+        const covered = FogOfWarLayer.sampleBetween(unexplored, corner, width, across, down);
 
         const pixel = this.wrapPixelX(pixelX) + pixelY * this.width;
         const start = FogOfWarLayer.CLOUD_TOPS_FROM + FogOfWarLayer.CLOUD_HAZE_LAG * (1 - reachOf[pixel] / 255);
         const opacity = Math.min(1, Math.max(0, (covered - start) / FogOfWarLayer.CLOUD_FADE));
-        data[pixel * 4 + 3] = (Math.round(opacity * steps) / steps) * 255;
+        const cloudAlpha = Math.round(opacity * steps) / steps;
+        const tintAlpha = FogOfWarLayer.sampleBetween(fogged, corner, width, across, down) * fogA * (1 - cloudAlpha);
+        const alpha = cloudAlpha + tintAlpha;
+
+        const target = pixel * 4;
+        data[target + 3] = alpha * 255;
+        if (alpha <= 0) continue;
+
+        const art = pixel * 3;
+        data[target] = (colors[art] * cloudAlpha + fogR * tintAlpha) / alpha;
+        data[target + 1] = (colors[art + 1] * cloudAlpha + fogG * tintAlpha) / alpha;
+        data[target + 2] = (colors[art + 2] * cloudAlpha + fogB * tintAlpha) / alpha;
       }
     }
+  }
+
+  // Paints the clouds the first time they're needed, keeping their colors apart from the overlay's,
+  // which mix in the tint.
+  private paintClouds() {
+    if (this.cloudColors) return;
+
+    this.cloudReach = new CloudCover(this.overlayPixels, this.wrapped).getReach();
+    const data = this.overlayPixels.data;
+    const colors = new Uint8Array((data.length / 4) * 3);
+    for (let pixel = 0, art = 0; pixel < data.length; pixel += 4, art += 3) {
+      colors[art] = data[pixel];
+      colors[art + 1] = data[pixel + 1];
+      colors[art + 2] = data[pixel + 2];
+    }
+    this.cloudColors = colors;
   }
 }
