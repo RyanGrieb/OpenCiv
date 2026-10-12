@@ -65,15 +65,25 @@ export function setupGlobeDepthTest(game: Game) {
       .jumpToLocation(x, y, 0.9 * Math.cos(pointLatitude));
     await utils.delay(1500);
   };
-  // How the warrior stands on screen, from the bottom of its picture to the top, and the way from the
-  // middle of the screen out to its feet - the way out from the planet's middle, looking straight down.
+  // Where the planet's middle is on screen: what stands straight out of the ground points away from it,
+  // however the camera tilts (it does in a short window, or toward the sun in a tall one).
+  const planetMiddle = () => {
+    const middle = new THREE.Vector3()
+      .setFromMatrixPosition((globe()["planet"] as THREE.Object3D).matrixWorld)
+      .project(globe()["camera"] as THREE.Camera);
+    return [((middle.x + 1) / 2) * sprites()["screenWidth"], ((1 - middle.y) / 2) * sprites()["screenHeight"]];
+  };
+  // How the warrior stands on screen, from the bottom of its picture to the top, and the way out from
+  // the planet's middle to its feet.
   const warriorStanding = () => {
     const top = globe().screenPointOf(warrior, 0.5, 0);
     const bottom = globe().screenPointOf(warrior, 0.5, 1);
     if (!top || !bottom) return undefined;
+
+    const middle = planetMiddle();
     return {
       up: [top[0] - bottom[0], top[1] - bottom[1]],
-      out: [bottom[0] - window.innerWidth / 2, bottom[1] - window.innerHeight / 2]
+      out: [bottom[0] - middle[0], bottom[1] - middle[1]]
     };
   };
   // The tile each of the map's billboards comes from, worked out from the map as the globe cuts its
@@ -87,12 +97,13 @@ export function setupGlobeDepthTest(game: Game) {
         )
       );
   // How the map's sprites, the warrior and the city's banner stand on screen where their feet are in
-  // view, skirts aside: how many upright, how many straight out from the planet's middle (looking
-  // straight down at it), how many in between, and on how many tiles they don't all do the same. One
+  // view, skirts aside: how many upright, how many straight out from the planet's middle, how many in
+  // between, and on how many tiles they don't all do the same. One
   // near the top of the planet's outline can be both, and counts as neither.
   const spritesStanding = () => {
     const camera = globe()["camera"] as THREE.Camera;
     const planet = globe()["planet"] as THREE.Object3D;
+    const middle = planetMiddle();
     const counts = { upright: 0, out: 0, between: 0, mixedTiles: 0, tilesKnown: false };
     const tileOf = mapBillboardTiles();
     const mapBillboards = sprites()["mapBillboards"] as Record<string, number>[];
@@ -122,7 +133,7 @@ export function setupGlobeDepthTest(game: Game) {
       const foot = [0, 1].map(
         (axis) => topLeft[axis] + across * (topRight[axis] - topLeft[axis]) + down * (bottomLeft[axis] - topLeft[axis])
       );
-      const out = [foot[0] - window.innerWidth / 2, foot[1] - window.innerHeight / 2];
+      const out = [foot[0] - middle[0], foot[1] - middle[1]];
       const upright = degreesBetween(up, [0, -1]) < 1;
       const straightOut = degreesBetween(up, out) < 2;
       if (!upright && !straightOut) counts.between++;
@@ -199,8 +210,8 @@ export function setupGlobeDepthTest(game: Game) {
       onOutline = warriorStanding();
       // Turning the planet a little at a time, so that the outline passes over the tiles around the city.
       outlineView = { upright: 0, out: 0, between: 0, mixedTiles: 0, tilesKnown: true };
-      for (let angle = 0.9; angle <= 1.35; angle += 0.05) {
-        await lookFromThe("west", angle);
+      for (let step = 0; step <= 9; step++) {
+        await lookFromThe("west", 0.9 + step * 0.05);
         const view = spritesStanding();
         outlineView.upright += view.upright;
         outlineView.out += view.out;
