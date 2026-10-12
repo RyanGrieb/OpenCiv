@@ -124,9 +124,10 @@ class BillboardBatch {
  * sides, upside down at its bottom (see OUTLINE_REACH). Each does one or the other, never in between,
  * and everything on a tile does the same. Nothing can stand upright in the middle and straight out all
  * round the edge without turning over somewhere in between, so this keeps the turn to the outline, out
- * of the way. Upright ones narrow a little where the ground tilts away toward the edge, so they don't
- * crowd together there (see narrowest). Those with their feet in view are drawn in front of the whole
- * planet, so the ground never cuts into one, and one standing nearer covers one behind it.
+ * of the way. Upright map sprites and units narrow where the ground tilts away toward the edge, so
+ * they don't crowd together there; labels and badges keep their width (see narrowest). Those with their
+ * feet in view are drawn in front of the whole planet, so the ground never cuts into one, and one
+ * standing nearer covers one behind it.
  *
  * The map's standing sprites (trees, mountains' peaks, hills' mounds, resources, cities) are cut into
  * pieces (see StandingPieces), each standing on its own foot, tinted by the fog of war there. Where a
