@@ -17,11 +17,13 @@ import { FogOfWarLayer } from "./FogOfWarLayer";
 import { Coastline } from "./Coastline";
 import { TerrainBlend } from "./TerrainBlend";
 import { MountainPeaks } from "./MountainPeaks";
+import { HillMounds } from "./HillMounds";
 import { SceneObject } from "../scene/SceneObject";
 
 /**
- * A tile's art that stands up off the ground on the globe (trees, mountain peaks, resources, cities),
- * or a patch of ground painted under it there: an image drawn at a world point, the tile's sprite corner.
+ * A tile's art that stands up off the ground on the globe (trees, mountain peaks, hills' mounds,
+ * resources, cities), or a patch of ground painted under it there: an image drawn at a world point,
+ * the tile's sprite corner.
  */
 export interface StandingSprite {
   image: CanvasImageSource;
@@ -29,6 +31,10 @@ export interface StandingSprite {
   y: number;
   gridX: number;
   gridY: number;
+  // Whether it rests on the ground all over, like a mountain's peaks or a hill's mounds, rather than
+  // standing on a point of it like a tree: on the globe, what of it stops short of its bottom then
+  // reaches on down to the ground toward the planet's edge, and what stands on it shows in front of it.
+  grounded?: boolean;
 }
 
 // width/height/x/y/movementCost arrive as strings and are run through parseInt() below.
@@ -101,7 +107,7 @@ export class GameMap {
   private static readonly CHUNK_PIXEL_WIDTH = 32 * GameMap.CHUNK_SIZE + 16;
   private static readonly CHUNK_PIXEL_HEIGHT = 25 * GameMap.CHUNK_SIZE + 7;
   // Between the terrain chunks (z 0) and the fog of war (z 1): first what lies on the ground (hills,
-  // farms, roads), then what stands up off it (trees, resources, improvements) - see rebuildChunkVisuals().
+  // farms, roads, ores), then what stands up off it (trees, resources, improvements) - see rebuildChunkVisuals().
   private static readonly GROUND_LAYER_Z = 0.5;
   private static readonly STANDING_LAYER_Z = 0.625;
   // Each later chunk row of a layer sorts above the one before, within this much z.
@@ -139,10 +145,10 @@ export class GameMap {
   private baseLayerChunks: Map<string, Actor> = new Map();
   private groundLayerChunks: Map<string, Actor> = new Map();
   private standingLayerChunks: Map<string, Actor> = new Map();
-  // Per chunk, what of its tiles stands up on the globe, and the ground painted under mountains' peaks
-  // there - see getStandingSprites(). Counted up whenever either changes.
+  // Per chunk, what of its tiles stands up on the globe, and the ground painted under what of it the
+  // terrain paints - see getStandingSprites(). Counted up whenever either changes.
   private standingSprites: Map<string, StandingSprite[]> = new Map();
-  private peakGround: Map<string, StandingSprite[]> = new Map();
+  private bareGround: Map<string, StandingSprite[]> = new Map();
   private standingVersion = 0;
   private chunkLayers = new WeakMap<SceneObject, "terrain" | "standing">();
 
@@ -317,19 +323,22 @@ export class GameMap {
 
   /**
    * What of the known tiles stands up off the ground when the map is a globe: their trees, resources,
-   * improvements and cities, which the flat map draws as its standing layer, and mountains' peaks,
-   * which it paints as part of their terrain.
+   * improvements and cities, which the flat map draws as its standing layer, and mountains' peaks and
+   * hills' mounds, which it paints on the ground. Ores and the like lie flat (see Tile.FLAT_TILE_TYPES).
    */
   public getStandingSprites(): StandingSprite[] {
     return [...this.standingSprites.values()].flat();
   }
 
-  /** Bare ground for the globe to paint over mountains' peaks in their terrain, as those stand up there. */
-  public getPeakGround(): StandingSprite[] {
-    return [...this.peakGround.values()].flat();
+  /**
+   * Bare ground for the globe to paint over mountains' peaks and hills' mounds where the terrain
+   * paints them, as those stand up there.
+   */
+  public getBareGround(): StandingSprite[] {
+    return [...this.bareGround.values()].flat();
   }
 
-  /** Goes up whenever getStandingSprites() or getPeakGround() would answer differently. */
+  /** Goes up whenever getStandingSprites() or getBareGround() would answer differently. */
   public getStandingVersion() {
     return this.standingVersion;
   }
@@ -825,7 +834,7 @@ export class GameMap {
   /**
    * Rebuilds one chunk's merged layers from scratch, from whatever this client currently knows about
    * that chunk's 16 cells: its base (terrain, terrain blends, shores and rivers), what lies on the
-   * ground (hills, farms, roads) and what stands up off it (trees, resources, improvements, cities).
+   * ground (hills, farms, roads, ores) and what stands up off it (trees, resources, improvements, cities).
    * Called whenever a tile in the chunk is newly discovered or changes visibility - safe to call
    * repeatedly since it always derives the result fresh rather than patching the previous one.
    */
@@ -839,7 +848,7 @@ export class GameMap {
     const groundActors: Actor[] = [];
     const standingActors: Tile[] = [];
     const standingSprites: StandingSprite[] = [];
-    const peakGround: StandingSprite[] = [];
+    const bareGround: StandingSprite[] = [];
 
     // Row by row, so a tile's trees are drawn over those of the row behind it.
     for (let dy = 0; dy < GameMap.CHUNK_SIZE; dy++) {
@@ -881,17 +890,22 @@ export class GameMap {
 
         riverActors.push(...(await River.createActors(tile, xPosRelative, yPosRelative)));
 
-        // A road runs over a farm's fields but under trees, resources and their improvements, as on old_java.
+        // A road runs over a farm's fields but under trees, resources and their improvements, as on
+        // old_java - ores and their mines lie on the ground over it, but don't stand up on the globe.
         const overlayTypes = tileTypes
           .slice(1)
           .map((type) => Tile.getVariantFeatureType(type, tileTypes[0], gridX, gridY));
         const underRoad = overlayTypes.filter((type) => Tile.UNDER_ROAD_TILE_TYPES.includes(type));
-        const overRoad = overlayTypes.filter((type) => !Tile.UNDER_ROAD_TILE_TYPES.includes(type));
-        groundActors.push(
-          ...(await this.createHillOverlay(tile, xPosRelative, yPosRelative)),
+        const flat = overlayTypes.filter((type) => Tile.FLAT_TILE_TYPES.includes(type));
+        const overRoad = overlayTypes.filter((type) => !underRoad.includes(type) && !flat.includes(type));
+        const hill = await this.createHillOverlay(tile, xPosRelative, yPosRelative);
+        const lying = [
+          ...hill,
           ...(await this.createOverlayTile(tile, underRoad, xPosRelative, yPosRelative)),
-          ...Road.createActors(tile, xPosRelative, yPosRelative)
-        );
+          ...Road.createActors(tile, xPosRelative, yPosRelative),
+          ...(await this.createOverlayTile(tile, flat, xPosRelative, yPosRelative))
+        ];
+        groundActors.push(...lying);
 
         // What's in the water (fish, crabs, reefs) lies in it rather than standing up.
         const overlay = await this.createOverlayTile(tile, overRoad, xPosRelative, yPosRelative);
@@ -905,8 +919,16 @@ export class GameMap {
 
         if (tileTypes[0] === GameMap.MOUNTAIN_TYPE) {
           const parts = MountainPeaks.split(terrainType);
-          standingSprites.push({ image: parts.peaks, ...place });
-          peakGround.push({ image: parts.ground, ...place });
+          standingSprites.push({ image: parts.peaks, ...place, grounded: true });
+          bareGround.push({ image: parts.ground, ...place });
+        }
+
+        if (hill.length > 0) {
+          const drawn = lying.map((actor) => (actor instanceof Tile ? actor.getTileTypes() : actor.getSpriteRegion()));
+          const key = JSON.stringify([terrainType, Tile.isOverlayMirrored(gridX, gridY), drawn]);
+          const parts = HillMounds.split(key, lying, baseRenderTile.getImage(), xPosRelative, yPosRelative);
+          standingSprites.push({ image: parts.mounds, ...place, grounded: true });
+          bareGround.push({ image: parts.ground, ...place });
         }
       }
     }
@@ -938,7 +960,7 @@ export class GameMap {
     );
 
     this.standingSprites.set(chunkKey, standingSprites);
-    this.peakGround.set(chunkKey, peakGround);
+    this.bareGround.set(chunkKey, bareGround);
     this.standingVersion++;
   }
 

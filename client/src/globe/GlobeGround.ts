@@ -103,7 +103,7 @@ export class GlobeGround {
       this.terrain.redraw(terrainPrint.value(), () => {
         useView(this.terrain.view);
         this.drawAcrossSeam(terrain);
-        this.paintPeakGround();
+        this.paintBareGround();
         if (fog) this.drawAcrossSeam([fog]);
       });
     }
@@ -138,12 +138,12 @@ export class GlobeGround {
     game.setWorldDrawOffsetX(0);
   }
 
-  // Covers mountains' painted peaks with bare rock, as they stand up off it on the globe.
-  private paintPeakGround() {
+  // Covers mountains' painted peaks and hills' mounds with bare ground, as they stand up off it on the globe.
+  private paintBareGround() {
     const context = this.terrain.view.context;
     const worldWidth = this.projection.worldWidth;
     context.setTransform(this.scale, 0, 0, this.scale, 0, 0);
-    for (const patch of GameMap.getInstance().getPeakGround()) {
+    for (const patch of GameMap.getInstance().getBareGround()) {
       for (const offsetX of [-worldWidth, 0, worldWidth]) {
         context.drawImage(patch.image, patch.x + offsetX, patch.y);
       }

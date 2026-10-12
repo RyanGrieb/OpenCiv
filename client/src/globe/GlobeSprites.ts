@@ -8,7 +8,7 @@ import { AtlasCanvas } from "./AtlasCanvas";
 import { Fingerprint } from "./Fingerprint";
 import { GlobeProjection } from "./GlobeProjection";
 import { PixelArtSampling } from "./PixelArtSampling";
-import { StandingPieces } from "./StandingPieces";
+import { StandingPiece, StandingPieces } from "./StandingPieces";
 
 /**
  * Something standing up on the globe: the point on the ground it stands on (its foot), its rectangle
@@ -18,6 +18,12 @@ import { StandingPieces } from "./StandingPieces";
 interface Billboard {
   footX: number;
   footY: number;
+  // For a skirt (see GlobeSprites.addSkirts()), how far above its foot the pixels it hangs from stop,
+  // in world pixels; 0 for anything else.
+  skirt: number;
+  // How far behind its foot it counts as standing for the depth test, in world pixels: mountains' peaks
+  // and hills' mounds stand at their back, so whatever stands on them shows in front. 0 for anything else.
+  depthBack: number;
   left: number;
   top: number;
   width: number;
@@ -53,6 +59,8 @@ class BillboardBatch {
     geometry.setAttribute("position", new THREE.Float32BufferAttribute([0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 1, 0], 3));
     geometry.setIndex([0, 2, 1, 1, 2, 3]);
     geometry.setAttribute("anchor", new THREE.InstancedBufferAttribute(new Float32Array(capacity * 3), 3));
+    geometry.setAttribute("depthAnchor", new THREE.InstancedBufferAttribute(new Float32Array(capacity * 3), 3));
+    geometry.setAttribute("skirt", new THREE.InstancedBufferAttribute(new Float32Array(capacity), 1));
     geometry.setAttribute("rect", new THREE.InstancedBufferAttribute(new Float32Array(capacity * 4), 4));
     geometry.setAttribute("atlasRect", new THREE.InstancedBufferAttribute(new Float32Array(capacity * 4), 4));
     geometry.setAttribute("tint", new THREE.InstancedBufferAttribute(new Float32Array(capacity * 4), 4));
@@ -69,16 +77,20 @@ class BillboardBatch {
 
     const geometry = this.mesh.geometry;
     const anchors = geometry.getAttribute("anchor") as THREE.InstancedBufferAttribute;
+    const depthAnchors = geometry.getAttribute("depthAnchor") as THREE.InstancedBufferAttribute;
+    const skirts = geometry.getAttribute("skirt") as THREE.InstancedBufferAttribute;
     const rects = geometry.getAttribute("rect") as THREE.InstancedBufferAttribute;
     const atlasRects = geometry.getAttribute("atlasRect") as THREE.InstancedBufferAttribute;
     const tints = geometry.getAttribute("tint") as THREE.InstancedBufferAttribute;
     billboards.forEach((billboard, index) => {
       anchors.setXYZ(index, ...GlobeSprites.footOnSphere(projection, billboard));
+      depthAnchors.setXYZ(index, ...GlobeSprites.footOnSphere(projection, billboard, billboard.depthBack));
+      skirts.setX(index, billboard.skirt);
       rects.setXYZW(index, billboard.left, billboard.top, billboard.width, billboard.height);
       atlasRects.setXYZW(index, billboard.atlasX, billboard.atlasY, billboard.atlasWidth, billboard.atlasHeight);
       tints.setXYZW(index, ...billboard.tint);
     });
-    for (const attribute of [anchors, rects, atlasRects, tints]) attribute.needsUpdate = true;
+    for (const attribute of [anchors, depthAnchors, skirts, rects, atlasRects, tints]) attribute.needsUpdate = true;
     geometry.instanceCount = billboards.length;
   }
 
@@ -97,8 +109,10 @@ class BillboardBatch {
  * middle of the planet to get there. Those with their feet in view are drawn in front of the whole
  * planet, so the ground never cuts into one, and one standing nearer covers one behind it.
  *
- * The map's standing sprites (trees, mountain peaks, resources, cities) are cut into pieces (see
- * StandingPieces), each standing on its own foot, tinted by the fog of war there. Units, labels,
+ * The map's standing sprites (trees, mountains' peaks, hills' mounds, resources, cities) are cut into
+ * pieces (see StandingPieces), each standing on its own foot, tinted by the fog of war there. Where a
+ * mountain's peaks or a hill's mounds stop short of their foot, skirts reach on down from them to the
+ * ground toward the planet's edge (see addSkirts()), so that none floats over it there. Units, labels,
  * badges and the like (see Standing) are drawn each into their own patch of a second atlas by the
  * game's usual drawing code - again only when they change. Units stand among the map's sprites;
  * labels and badges are drawn over everything, as on the flat map.
@@ -139,6 +153,8 @@ export class GlobeSprites {
   private static readonly VERTEX_SHADER = `
     #include <common>
     attribute vec3 anchor;
+    attribute vec3 depthAnchor;
+    attribute float skirt;
     attribute vec4 rect;
     attribute vec4 atlasRect;
     attribute vec4 tint;
@@ -170,7 +186,9 @@ export class GlobeSprites {
       vec2 up = standingUp(corner.xyz, mat3(viewMatrix) * normal, facing);
       float pixel = worldPixel * sqrt(max(0.0, 1.0 - anchor.y * anchor.y));
       vec2 local = (rect.xy + position.xy * rect.zw) * pixel;
-      float depth = -corner.z;
+      // A skirt reaches down from what it hangs from to the ground under that, seen side on as that is.
+      if (skirt > 0.0) local.y = -skirt * mix(1.0, clamp(facing, 0.0, 1.0), position.y) * pixel;
+      float depth = -(viewMatrix * modelMatrix * vec4(depthAnchor, 1.0)).z;
       corner.xy += vec2(up.y, -up.x) * local.x - up * local.y;
       gl_Position = projectionMatrix * corner;
       // For the depth test alone, one with its foot in view comes in front of the planet - see IN_FRONT_FROM.
@@ -254,9 +272,9 @@ export class GlobeSprites {
     planet.add(this.mapSprites.mesh, this.units.mesh, this.overlay.mesh);
   }
 
-  /** A billboard's foot as a point on the unit sphere. */
-  public static footOnSphere(projection: GlobeProjection, billboard: Billboard): [number, number, number] {
-    const [longitude, latitude] = projection.toSphere(billboard.footX, billboard.footY);
+  /** A billboard's foot as a point on the unit sphere, or the point `back` world pixels up the map from it. */
+  public static footOnSphere(projection: GlobeProjection, billboard: Billboard, back = 0): [number, number, number] {
+    const [longitude, latitude] = projection.toSphere(billboard.footX, billboard.footY - back);
     return GlobeProjection.unitVector(longitude, latitude);
   }
 
@@ -437,13 +455,15 @@ export class GlobeSprites {
     let loading = false;
     this.mapBillboards = [];
     for (const sprite of map.getStandingSprites()) {
-      const pieces = this.pieces.piecesOf(sprite.image);
-      if (pieces.length === 0) loading = true;
+      const pieces = this.pieces.piecesOf(sprite.image, sprite.grounded);
+      if (!pieces) loading = true;
 
-      for (const piece of pieces) {
-        this.mapBillboards.push({
+      for (const piece of pieces ?? []) {
+        const billboard: Billboard = {
           footX: sprite.x + piece.left + piece.width / 2,
           footY: sprite.y + piece.top + piece.height,
+          skirt: 0,
+          depthBack: sprite.grounded ? piece.height : 0,
           left: -piece.width / 2,
           top: -piece.height,
           width: piece.width,
@@ -453,11 +473,38 @@ export class GlobeSprites {
           atlasWidth: piece.width,
           atlasHeight: piece.height,
           tint: [0, 0, 0, 0]
-        });
+        };
+        if (sprite.grounded) this.addSkirts(billboard, piece);
+        this.mapBillboards.push(billboard);
       }
     }
     // A sprite still loading has nothing to cut yet - try again next frame.
     this.builtVersion = loading ? -1 : map.getStandingVersion();
+  }
+
+  // Under a piece of something resting on the ground all along its bottom, like a mountain's peaks,
+  // skirts: one under each strip of its columns that stops above its bottom row with nothing under it
+  // (see StandingPiece.bottoms), that strip's lowest row of pixels drawn on down to where the ground
+  // under it is. Seen from straight above that's where it stops, so they don't show; toward the
+  // planet's edge, where that ground comes round to under its foot, they reach right down to it,
+  // so that no peak at the back of a mountain hangs over the ground. Drawn before the piece, which
+  // covers them where they hang down behind it.
+  private addSkirts(billboard: Billboard, piece: StandingPiece) {
+    for (const [from, to, above] of piece.bottoms) {
+      this.mapBillboards.push({
+        ...billboard,
+        skirt: above,
+        left: billboard.left + from,
+        top: 0,
+        width: to - from,
+        height: 0,
+        atlasX: piece.atlasX + from,
+        // The middle of the strip's lowest row of pixels, over and over.
+        atlasY: piece.atlasY + piece.height - above - 0.5,
+        atlasWidth: to - from,
+        atlasHeight: 0
+      });
+    }
   }
 
   // Each sprite takes on the fog of war's color where it stands; clouds hide it.
@@ -510,6 +557,8 @@ export class GlobeSprites {
       const billboard: Billboard = {
         footX: foot[0],
         footY: foot[1],
+        skirt: 0,
+        depthBack: 0,
         left: left - foot[0],
         top: top - foot[1],
         width: right - left,

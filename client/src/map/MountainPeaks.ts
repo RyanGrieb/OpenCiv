@@ -1,6 +1,7 @@
 import { GameImage, resolveSpriteRegion } from "../Assets";
 import { Game } from "../Game";
 import { SpriteAtlas } from "../SpriteAtlas";
+import { PixelGroups } from "../util/PixelGroups";
 import { HexPixels } from "./HexPixels";
 import { Tile } from "./Tile";
 
@@ -140,29 +141,7 @@ export class MountainPeaks {
 
   // Clears the peak pixels in groups (touching on any side or corner) too small to be a peak.
   private static dropSpecks(peak: Uint8Array) {
-    const size = Tile.WIDTH;
-    const seen = new Uint8Array(peak.length);
-
-    for (let start = 0; start < peak.length; start++) {
-      if (!peak[start] || seen[start]) continue;
-
-      const group = [start];
-      seen[start] = 1;
-      for (let i = 0; i < group.length; i++) {
-        const x = group[i] % size;
-        const y = Math.floor(group[i] / size);
-        for (let dy = -1; dy <= 1; dy++) {
-          for (let dx = -1; dx <= 1; dx++) {
-            const nx = x + dx;
-            const ny = y + dy;
-            const next = nx + ny * size;
-            if (nx < 0 || ny < 0 || nx >= size || ny >= size || !peak[next] || seen[next]) continue;
-            seen[next] = 1;
-            group.push(next);
-          }
-        }
-      }
-
+    for (const group of PixelGroups.find(peak, Tile.WIDTH, Tile.HEIGHT)) {
       if (group.length < MountainPeaks.MIN_PEAK_PIXELS) group.forEach((index) => (peak[index] = 0));
     }
   }

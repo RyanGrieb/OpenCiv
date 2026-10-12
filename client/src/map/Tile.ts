@@ -40,6 +40,21 @@ export class Tile extends Actor {
   public static readonly BRIDGE_TECH = "Engineering";
   // Improvements that cover the ground, so a road through the tile is drawn on top of them.
   public static readonly UNDER_ROAD_TILE_TYPES = ["farm"];
+  // Resources and improvements drawn as seen from above, lying on the ground over a road, which on
+  // the globe lie flat on it rather than stand up off it like trees (see GameMap.getStandingSprites()):
+  // ores, the mines and quarry dug into them, and a crater.
+  public static readonly FLAT_TILE_TYPES = [
+    "iron",
+    "copper",
+    "gold",
+    "stone",
+    "mine",
+    "iron_mine",
+    "copper_mine",
+    "gold_mine",
+    "stone_quarry",
+    "barringer_crater"
+  ];
   // Tile types drawn some other way than their own sprite - roads connect to their neighbors (see
   // Road.createActors).
   private static readonly UNSPRITED_TILE_TYPES = ["road"];

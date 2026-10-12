@@ -1,3 +1,4 @@
+import { PixelGroups } from "../util/PixelGroups";
 import { AtlasCanvas } from "./AtlasCanvas";
 
 /** One of the things painted on a standing sprite, cut out of it. All in pixels. */
@@ -10,6 +11,12 @@ export interface StandingPiece {
   /** Where its top left corner is in its sprite. */
   left: number;
   top: number;
+  /**
+   * Where its pixels stop with nothing under them, above its bottom row: in strips of the columns
+   * that stop on the same row, each [its first column, the column after its last, how far that row
+   * is above its bottom row].
+   */
+  bottoms: [number, number, number][];
 }
 
 /**
@@ -32,36 +39,38 @@ export class StandingPieces {
     this.scratch = document.createElement("canvas").getContext("2d", { willReadFrequently: true });
   }
 
-  // The pixels touching one another, on a side or a corner, from a starting pixel: their indices.
-  private static floodFrom(opaque: Uint8Array, width: number, height: number, start: number): number[] {
-    const group = [start];
-    opaque[start] = 0;
-    for (let i = 0; i < group.length; i++) {
-      const x = group[i] % width;
-      const y = Math.floor(group[i] / width);
-      for (let dy = -1; dy <= 1; dy++) {
-        for (let dx = -1; dx <= 1; dx++) {
-          const nx = x + dx;
-          const ny = y + dy;
-          if (nx < 0 || ny < 0 || nx >= width || ny >= height || !opaque[nx + ny * width]) continue;
-          opaque[nx + ny * width] = 0;
-          group.push(nx + ny * width);
-        }
+  // A piece's pixels' bottoms off its bottom row (see StandingPiece.bottoms), from where it's solid.
+  private static findBottoms(solid: Uint8Array, width: number, height: number): [number, number, number][] {
+    const bottoms: [number, number, number][] = [];
+    for (let y = 0; y < height - 1; y++) {
+      let from = -1;
+      for (let x = 0; x <= width; x++) {
+        const stops = x < width && solid[x + y * width] && !solid[x + (y + 1) * width];
+        if (stops && from < 0) from = x;
+        if (stops || from < 0) continue;
+
+        bottoms.push([from, x, height - 1 - y]);
+        from = -1;
       }
     }
-    return group;
+    return bottoms;
   }
 
-  /** A sprite's pieces, cutting it first if it hasn't been. Empty while an image is still loading. */
-  public piecesOf(image: CanvasImageSource): StandingPiece[] {
+  /**
+   * A sprite's pieces, cutting it first if it hasn't been. Undefined while an image is still loading.
+   * One of something resting on the ground all over (see StandingSprite.grounded) is cut into what
+   * touches on a side, so that a hill's mound behind another, touching it only at a corner, stands on
+   * its own foot behind it rather than on top of it.
+   */
+  public piecesOf(image: CanvasImageSource, grounded = false): StandingPiece[] | undefined {
     const cached = this.pieces.get(image);
     if (cached) return cached;
 
     const width = (image as HTMLImageElement).naturalWidth || (image as HTMLCanvasElement).width;
     const height = (image as HTMLImageElement).naturalHeight || (image as HTMLCanvasElement).height;
-    if (!width || !height) return [];
+    if (!width || !height) return undefined;
 
-    const pieces = this.cut(image, width, height);
+    const pieces = this.cut(image, width, height, grounded);
     this.pieces.set(image, pieces);
     this.changed = true;
     return pieces;
@@ -78,7 +87,7 @@ export class StandingPieces {
     this.atlas.dispose();
   }
 
-  private cut(image: CanvasImageSource, width: number, height: number): StandingPiece[] {
+  private cut(image: CanvasImageSource, width: number, height: number, grounded: boolean): StandingPiece[] {
     const canvas = this.scratch.canvas;
     canvas.width = width;
     canvas.height = height;
@@ -91,10 +100,8 @@ export class StandingPieces {
     }
 
     const pieces: StandingPiece[] = [];
-    for (let start = 0; start < opaque.length; start++) {
-      if (!opaque[start]) continue;
-
-      const piece = this.pack(pixels, StandingPieces.floodFrom(opaque, width, height, start));
+    for (const group of PixelGroups.find(opaque, width, height, !grounded)) {
+      const piece = this.pack(pixels, group);
       if (piece) pieces.push(piece);
     }
     return pieces;
@@ -113,12 +120,15 @@ export class StandingPieces {
     if (!corner) return undefined;
 
     const piece = this.atlas.context.createImageData(width, height);
+    const solid = new Uint8Array(width * height);
     for (const index of group) {
       const x = (index % pixels.width) - left;
       const y = Math.floor(index / pixels.width) - top;
       piece.data.set(pixels.data.subarray(index * 4, index * 4 + 4), (x + y * width) * 4);
+      solid[x + y * width] = 1;
     }
     this.atlas.context.putImageData(piece, corner[0], corner[1]);
-    return { atlasX: corner[0], atlasY: corner[1], width, height, left, top };
+    const bottoms = StandingPieces.findBottoms(solid, width, height);
+    return { atlasX: corner[0], atlasY: corner[1], width, height, left, top, bottoms };
   }
 }
