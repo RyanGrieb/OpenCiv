@@ -102,12 +102,13 @@ class BillboardBatch {
 /**
  * What stands up off the ground on the globe, drawn as billboards: pictures standing on the point of
  * the ground they belong to (their foot), facing the screen and as far from it as their foot all over.
- * Over most of the planet they stand upright, just as the flat map draws them, and only close to its
- * edge lean out with the ground, until at the edge they stand straight out of it (see LEAN_OUT_LATE and
- * EDGE_FACING). Below the planet's middle on screen, toward its bottom edge, they hang upside down
- * instead, out of the ground as at the edge there (see TURN_OVER): each one either stands or hangs,
- * turning over sharply from one to the other. Those with their feet in view are drawn in front of the
- * whole planet, so the ground never cuts into one, and one standing nearer covers one behind it.
+ * On the planet's face they stand upright, just as the flat map draws them: a 2.5D overlay, as a globe's
+ * map markers are drawn. Only those on its outline, which would stick out past its edge, stand straight
+ * out of the ground instead, as something real would seen side on there: sideways at the planet's
+ * sides, upside down at its bottom (see OUTLINE_REACH). Nothing can stand upright in the middle and
+ * straight out all round the edge without turning over somewhere in between, so this keeps the turn
+ * to the outline, out of the way. Those with their feet in view are drawn in front of the whole planet,
+ * so the ground never cuts into one, and one standing nearer covers one behind it.
  *
  * The map's standing sprites (trees, mountains' peaks, hills' mounds, resources, cities) are cut into
  * pieces (see StandingPieces), each standing on its own foot, tinted by the fog of war there. Where a
@@ -128,26 +129,14 @@ export class GlobeSprites {
   private static readonly MAX_DETAIL = 4;
   // Pixels added around each label or badge's rectangle, for text outlines and shadows.
   private static readonly MARGIN = 2;
-  // Over most of the planet a billboard stands upright, as on the flat map. Below the planet's middle
-  // on screen, toward its bottom edge, it hangs upside down instead, out of the ground as at the edge
-  // there: wherever the ground's normal points down the screen more than STAND_UPRIGHT times as much as
-  // it points at the camera. Straight below the middle that's beyond where the ground has turned this
-  // many degrees from the camera; off to the side it's further out, until by the planet's sides none hangs.
-  private static readonly TURN_OVER = 34;
-  private static readonly STAND_UPRIGHT = Math.tan(THREE.MathUtils.degToRad(GlobeSprites.TURN_OVER));
-  // How softly a billboard turns over between standing and hanging: the smaller, the more sharply.
-  private static readonly TURN_OVER_SOFTNESS = 0.05;
-  // Toward the planet's edge a billboard leans out with the ground, as the sine of the ground's turn
-  // from the camera to this power: hardly at all until close to the edge.
-  private static readonly LEAN_OUT_LATE = 8;
-  // Ground facing the camera less squarely than this is close to the planet's edge, where a billboard
-  // gives up standing or hanging for turning with the ground, until at the edge it stands straight out
-  // of it.
-  private static readonly EDGE_FACING = 0.3;
+  // A billboard whose foot is within this many world pixels of the planet's outline on screen - about
+  // a tile's height, so one that would stick out past the edge - turns from upright to standing
+  // straight out of the ground, the more the nearer its foot is to the outline.
+  private static readonly OUTLINE_REACH = 32;
   // For the depth test alone, billboards with their feet in view are brought in front of all of the
   // planet's ground, in the order of their feet: between these fractions of the nearest it can be.
-  // Nothing standing on the side of a round planet in view is behind its ground, except where a
-  // billboard hangs back over it (below the planet's middle); past the horizon one keeps its foot's
+  // Nothing standing on the side of a round planet in view is behind its ground, except where one on
+  // the outline hangs back over it (below the planet's middle); past the horizon one keeps its foot's
   // distance, so the planet hides what of it is behind.
   private static readonly IN_FRONT_FROM = 0.9;
   private static readonly IN_FRONT_TO = 0.98;
@@ -178,18 +167,17 @@ export class GlobeSprites {
     varying vec4 vTint;
     varying float vLight;
 
-    // Which way is up on screen for a billboard - see TURN_OVER and the constants after it, and
-    // GlobeSprites.standingUp().
-    vec2 standingUp(vec3 footView, vec3 normalView, float facing) {
+    // Which way is up on screen for a billboard, where a world pixel at its foot spans pixel radians -
+    // see OUTLINE_REACH, and GlobeSprites.standingUp().
+    vec2 standingUp(vec3 footView, vec3 normalView, float facing, float pixel) {
       // Where the ground's normal points on screen: away from the planet's middle.
       vec2 outward = normalView.xy * -footView.z + footView.xy * normalView.z;
       outward = dot(outward, outward) > 0.0 ? normalize(outward) : vec2(0.0, 1.0);
-      float across = sqrt(max(0.0, 1.0 - facing * facing));
-      // Above 0 to stand, below to hang - all one or the other, but close to the edge.
-      float stand = across * outward.y + STAND_UPRIGHT * max(facing, 0.0);
-      float committed = stand / (abs(stand) + TURN_OVER_SOFTNESS);
-      float upward = mix(stand, committed, smoothstep(0.0, EDGE_FACING, facing));
-      vec2 up = vec2(pow(across, LEAN_OUT_LATE) * outward.x, upward);
+      // How far out across the planet's disc the foot is: 1 on its outline, and past it.
+      float facingUs = max(facing, 0.0);
+      float across = sqrt(1.0 - facingUs * facingUs);
+      float onOutline = smoothstep(1.0 - OUTLINE_REACH * pixel, 1.0, across);
+      vec2 up = mix(vec2(0.0, 1.0), outward, onOutline);
       return dot(up, up) > 1e-12 ? normalize(up) : outward;
     }
 
@@ -197,11 +185,11 @@ export class GlobeSprites {
       vec3 normal = normalize(mat3(modelMatrix) * anchor);
       vec3 foot = (modelMatrix * vec4(anchor, 1.0)).xyz;
       float facing = dot(normal, normalize(cameraPosition - foot));
+      float pixel = worldPixel * sqrt(max(0.0, 1.0 - anchor.y * anchor.y));
 
       // In the camera's space, so it's square to the screen and as far away as its foot.
       vec4 corner = viewMatrix * vec4(foot, 1.0);
-      vec2 up = standingUp(corner.xyz, mat3(viewMatrix) * normal, facing);
-      float pixel = worldPixel * sqrt(max(0.0, 1.0 - anchor.y * anchor.y));
+      vec2 up = standingUp(corner.xyz, mat3(viewMatrix) * normal, facing, pixel);
       vec2 local = (rect.xy + position.xy * rect.zw) * pixel;
       // A skirt reaches down from what it hangs from to the ground under that, seen side on as that is.
       if (skirt > 0.0) local.y = -skirt * mix(1.0, clamp(facing, 0.0, 1.0), position.y) * pixel;
@@ -296,8 +284,9 @@ export class GlobeSprites {
   }
 
   // Which way is up on screen for a billboard, as the vertex shader works it out from its foot and
-  // the ground's normal there in the camera's space, and how squarely its ground faces the camera.
-  private static standingUp(footView: THREE.Vector3, normalView: THREE.Vector3, facing: number) {
+  // the ground's normal there in the camera's space, how squarely its ground faces the camera, and
+  // the radians a world pixel spans at its foot.
+  private static standingUp(footView: THREE.Vector3, normalView: THREE.Vector3, facing: number, pixel: number) {
     // Where the ground's normal points on screen: away from the planet's middle.
     const outward = new THREE.Vector2(
       normalView.x * -footView.z + footView.x * normalView.z,
@@ -305,16 +294,11 @@ export class GlobeSprites {
     );
     if (outward.lengthSq() > 0) outward.normalize();
     else outward.set(0, 1);
-    const across = Math.sqrt(Math.max(0, 1 - facing * facing));
-    // Above 0 to stand, below to hang - all one or the other, but close to the edge.
-    const stand = across * outward.y + GlobeSprites.STAND_UPRIGHT * Math.max(facing, 0);
-    const committed = stand / (Math.abs(stand) + GlobeSprites.TURN_OVER_SOFTNESS);
-    const upward = THREE.MathUtils.lerp(
-      stand,
-      committed,
-      THREE.MathUtils.smoothstep(facing, 0, GlobeSprites.EDGE_FACING)
-    );
-    const up = new THREE.Vector2(across ** GlobeSprites.LEAN_OUT_LATE * outward.x, upward);
+    // How far out across the planet's disc the foot is: 1 on its outline, and past it.
+    const facingUs = Math.max(facing, 0);
+    const across = Math.sqrt(1 - facingUs * facingUs);
+    const onOutline = THREE.MathUtils.smoothstep(across, 1 - GlobeSprites.OUTLINE_REACH * pixel, 1);
+    const up = new THREE.Vector2(0, 1).lerp(outward, onOutline);
     return up.lengthSq() > 1e-12 ? up.normalize() : outward;
   }
 
@@ -437,10 +421,7 @@ export class GlobeSprites {
         ...(cutout ? { CUTOUT: "" } : {}),
         AMBIENT: GlobeSprites.AMBIENT.toFixed(3),
         DIRECT: GlobeSprites.DIRECT.toFixed(3),
-        STAND_UPRIGHT: GlobeSprites.STAND_UPRIGHT.toFixed(3),
-        TURN_OVER_SOFTNESS: GlobeSprites.TURN_OVER_SOFTNESS.toFixed(3),
-        LEAN_OUT_LATE: GlobeSprites.LEAN_OUT_LATE.toFixed(3),
-        EDGE_FACING: GlobeSprites.EDGE_FACING.toFixed(3),
+        OUTLINE_REACH: GlobeSprites.OUTLINE_REACH.toFixed(3),
         IN_FRONT_FROM: GlobeSprites.IN_FRONT_FROM.toFixed(3),
         IN_FRONT_TO: GlobeSprites.IN_FRONT_TO.toFixed(3)
       },
@@ -710,8 +691,8 @@ export class GlobeSprites {
     const facing = normal.dot(camera.position.clone().sub(foot).normalize());
     const footView = foot.clone().applyMatrix4(camera.matrixWorldInverse);
     const normalView = normal.clone().transformDirection(camera.matrixWorldInverse);
-    const up = GlobeSprites.standingUp(footView, normalView, facing);
     const pixel = ((2 * Math.PI) / this.projection.worldWidth) * Math.sqrt(Math.max(0, 1 - anchor.y * anchor.y));
+    const up = GlobeSprites.standingUp(footView, normalView, facing, pixel);
 
     return [
       [0, 0],

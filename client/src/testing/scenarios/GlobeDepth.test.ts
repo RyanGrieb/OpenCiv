@@ -11,11 +11,11 @@ import { TestUtils } from "../TestUtils";
 // units and their badges, city banners - stands up off the globe too, rather than lying flat on it,
 // so the world keeps its height toward the horizon and around the planet's edge. Starts an unexplored
 // game on the Medium map, founds a city, and looks at it on the globe from close up, tilted toward
-// the horizon: checks that the map's sprites and the city's banner stand, that just below the
-// planet's middle the warrior stands upright, further down hangs upside down and near the edge leans
-// out with the ground, that the mouse finds the warrior and the banner where they stand, that the fog
-// of war shades what stands in it, and that a still view doesn't draw the map over again. Ends there
-// to look around: drag, scroll, G for flat.
+// the horizon: checks that the map's sprites and the city's banner stand, that on the planet's face
+// the warrior stands upright, even well below its middle, while on its outline it stands straight out
+// of the ground, that the mouse finds the warrior and the banner where they stand, that the fog of war
+// shades what stands in it, and that a still view doesn't draw the map over again. Ends there to look
+// around: drag, scroll, G for flat.
 export function setupGlobeDepthTest(game: Game) {
   const runner = new TestRunner("GlobeDepth");
   const utils = new TestUtils(game);
@@ -81,8 +81,8 @@ export function setupGlobeDepthTest(game: Game) {
   let cityTile: Tile;
   let warriorHead: number[] | undefined;
   let belowMiddle: { up: number[]; out: number[] } | undefined;
-  let furtherDown: { up: number[]; out: number[] } | undefined;
-  let atEdge: { up: number[]; out: number[] } | undefined;
+  let wellBelow: { up: number[]; out: number[] } | undefined;
+  let onOutline: { up: number[]; out: number[] } | undefined;
   let uploadsBefore: number[] = [];
 
   runner.addStep({
@@ -126,36 +126,34 @@ export function setupGlobeDepthTest(game: Game) {
   });
 
   runner.addStep({
-    name: "Just below the planet's middle the warrior stands upright, further down it hangs upside down, and near the edge it leans out",
+    name: "On the planet's face the warrior stands upright, even well below its middle; on its outline it stands straight out of the ground",
     action: async () => {
       await lookFromThe("north", 0.25);
       belowMiddle = warriorStanding();
-      await lookFromThe("north", 0.9);
-      furtherDown = warriorStanding();
+      await lookFromThe("north", 0.7);
+      wellBelow = warriorStanding();
       await lookFromThe("west", 1.15);
-      atEdge = warriorStanding();
-      if (belowMiddle && furtherDown && atEdge) {
+      onOutline = warriorStanding();
+      if (belowMiddle && wellBelow && onOutline) {
         utils.log(
           `From upright it leans ${Math.round(degreesBetween(belowMiddle.up, [0, -1]))} degrees just below ` +
-            `the middle, ${Math.round(degreesBetween(furtherDown.up, [0, -1]))} further down and ` +
-            `${Math.round(degreesBetween(atEdge.up, [0, -1]))} near the edge`,
+            `the middle, ${Math.round(degreesBetween(wellBelow.up, [0, -1]))} well below it and ` +
+            `${Math.round(degreesBetween(onOutline.up, [0, -1]))} on the outline`,
           "yellow"
         );
       }
       await lookAt(cityTile);
     },
-    // Below the middle, head over feet and then feet over head; near the edge, leaning off upright
-    // toward it.
+    // Below the middle, head over feet; on the outline, out from the planet's middle.
     verification: () =>
       !!belowMiddle &&
       belowMiddle.out[1] > 0 &&
-      degreesBetween(belowMiddle.up, [0, -1]) < 15 &&
-      !!furtherDown &&
-      furtherDown.out[1] > 0 &&
-      degreesBetween(furtherDown.up, [0, 1]) < 30 &&
-      !!atEdge &&
-      atEdge.up[0] * atEdge.out[0] + atEdge.up[1] * atEdge.out[1] > 0 &&
-      degreesBetween(atEdge.up, [0, -1]) > 20
+      degreesBetween(belowMiddle.up, [0, -1]) < 10 &&
+      !!wellBelow &&
+      wellBelow.out[1] > 0 &&
+      degreesBetween(wellBelow.up, [0, -1]) < 10 &&
+      !!onOutline &&
+      degreesBetween(onOutline.up, onOutline.out) < 20
   });
 
   runner.addStep({
