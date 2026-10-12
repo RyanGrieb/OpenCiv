@@ -11,11 +11,11 @@ import { TestUtils } from "../TestUtils";
 // units and their badges, city banners - stands up off the globe too, rather than lying flat on it,
 // so the world keeps its height toward the horizon and around the planet's edge. Starts an unexplored
 // game on the Medium map, founds a city, and looks at it on the globe from close up, tilted toward
-// the horizon: checks that the map's sprites and the city's banner stand, that toward the planet's
-// edge the warrior stands straight out of the ground yet below its middle, short of the edge, stands up,
-// that the mouse finds the warrior and the banner where they stand, that the fog of war shades what
-// stands in it, and that a still view doesn't draw the map over again. Ends there to look around:
-// drag, scroll, G for flat.
+// the horizon: checks that the map's sprites and the city's banner stand, that just below the
+// planet's middle the warrior stands upright, further down hangs upside down and near the edge leans
+// out with the ground, that the mouse finds the warrior and the banner where they stand, that the fog
+// of war shades what stands in it, and that a still view doesn't draw the map over again. Ends there
+// to look around: drag, scroll, G for flat.
 export function setupGlobeDepthTest(game: Game) {
   const runner = new TestRunner("GlobeDepth");
   const utils = new TestUtils(game);
@@ -80,8 +80,9 @@ export function setupGlobeDepthTest(game: Game) {
   let warrior: Unit;
   let cityTile: Tile;
   let warriorHead: number[] | undefined;
-  let atEdge: { up: number[]; out: number[] } | undefined;
   let belowMiddle: { up: number[]; out: number[] } | undefined;
+  let furtherDown: { up: number[]; out: number[] } | undefined;
+  let atEdge: { up: number[]; out: number[] } | undefined;
   let uploadsBefore: number[] = [];
 
   runner.addStep({
@@ -125,29 +126,36 @@ export function setupGlobeDepthTest(game: Game) {
   });
 
   runner.addStep({
-    name: "Near the planet's edge the warrior stands straight out of the ground; below its middle, short of it, it stands up",
+    name: "Just below the planet's middle the warrior stands upright, further down it hangs upside down, and near the edge it leans out",
     action: async () => {
+      await lookFromThe("north", 0.25);
+      belowMiddle = warriorStanding();
+      await lookFromThe("north", 0.9);
+      furtherDown = warriorStanding();
       await lookFromThe("west", 1.15);
       atEdge = warriorStanding();
-      await lookFromThe("north", 0.9);
-      belowMiddle = warriorStanding();
-      if (atEdge && belowMiddle) {
+      if (belowMiddle && furtherDown && atEdge) {
         utils.log(
-          `At the edge it leans ${Math.round(degreesBetween(atEdge.up, [0, -1]))} degrees from upright; ` +
-            `below the middle, ${Math.round(degreesBetween(belowMiddle.up, [0, -1]))}`,
+          `From upright it leans ${Math.round(degreesBetween(belowMiddle.up, [0, -1]))} degrees just below ` +
+            `the middle, ${Math.round(degreesBetween(furtherDown.up, [0, -1]))} further down and ` +
+            `${Math.round(degreesBetween(atEdge.up, [0, -1]))} near the edge`,
           "yellow"
         );
       }
       await lookAt(cityTile);
     },
-    // At the edge, out from the planet's middle (downward, should the edge be below it); below the
-    // middle, head over feet.
+    // Below the middle, head over feet and then feet over head; near the edge, leaning off upright
+    // toward it.
     verification: () =>
-      !!atEdge &&
-      degreesBetween(atEdge.up, atEdge.out) < 20 &&
       !!belowMiddle &&
       belowMiddle.out[1] > 0 &&
-      belowMiddle.up[1] < 0
+      degreesBetween(belowMiddle.up, [0, -1]) < 15 &&
+      !!furtherDown &&
+      furtherDown.out[1] > 0 &&
+      degreesBetween(furtherDown.up, [0, 1]) < 30 &&
+      !!atEdge &&
+      atEdge.up[0] * atEdge.out[0] + atEdge.up[1] * atEdge.out[1] > 0 &&
+      degreesBetween(atEdge.up, [0, -1]) > 20
   });
 
   runner.addStep({

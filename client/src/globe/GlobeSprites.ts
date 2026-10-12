@@ -102,14 +102,12 @@ class BillboardBatch {
 /**
  * What stands up off the ground on the globe, drawn as billboards: pictures standing on the point of
  * the ground they belong to (their foot), facing the screen and as far from it as their foot all over.
- * Where the camera looks straight down at the ground they stand upright, just as the flat map draws
- * them; toward the planet's edge they lean out with the ground, until there they stand straight out
- * of it (see STAND_UPRIGHT). Below the middle of the planet on screen they lean out the same way, and
- * down toward the edge, to stand straight out of it there too - upside down at its bottom. Straight
- * below the middle they're held upright until close to the edge (see TURN_OVER_BELOW), so that one
- * there turns over only where its ground is turned side on, hanging out past the edge rather than over
- * the tile below its own. Those with their feet in view are drawn in front of the whole planet, so the
- * ground never cuts into one, and one standing nearer covers one behind it.
+ * Over most of the planet they stand upright, just as the flat map draws them, and only close to its
+ * edge lean out with the ground, until at the edge they stand straight out of it (see LEAN_OUT_LATE and
+ * EDGE_FACING). Below the planet's middle on screen, toward its bottom edge, they hang upside down
+ * instead, out of the ground as at the edge there (see TURN_OVER): each one either stands or hangs,
+ * turning over sharply from one to the other. Those with their feet in view are drawn in front of the
+ * whole planet, so the ground never cuts into one, and one standing nearer covers one behind it.
  *
  * The map's standing sprites (trees, mountains' peaks, hills' mounds, resources, cities) are cut into
  * pieces (see StandingPieces), each standing on its own foot, tinted by the fog of war there. Where a
@@ -130,31 +128,26 @@ export class GlobeSprites {
   private static readonly MAX_DETAIL = 4;
   // Pixels added around each label or badge's rectangle, for text outlines and shadows.
   private static readonly MARGIN = 2;
-  // How a billboard leans: the ground's normal pointing out across the screen leans it out, and the
-  // normal pointing at the camera stands it upright as on the flat map, weighted by this - and by how
-  // squarely its ground faces the camera, to the power UPRIGHT_FADE. Upright seen from straight above,
-  // flat out at the edge.
-  private static readonly STAND_UPRIGHT = 1;
-  // Above 1, standing upright gives way to leaning out the faster as the ground turns from the camera,
-  // so that one near the middle of the planet still stands upright while one nearing its edge has spun
-  // round nearly as far as its ground has.
-  private static readonly UPRIGHT_FADE = 3;
-  // Leaning out, a billboard straight below the planet's middle on screen would turn over, from upright
-  // to upside down, well short of the edge - one there has to swing round somewhere. So there it's stood
-  // up harder, to stand until its ground is turned this many degrees from the camera: out by the edge.
-  private static readonly TURN_OVER_BELOW = 70;
-  // How much harder than STAND_UPRIGHT, for TURN_OVER_BELOW.
-  private static readonly STAND_UPRIGHT_BELOW =
-    Math.sin(THREE.MathUtils.degToRad(GlobeSprites.TURN_OVER_BELOW)) /
-      Math.cos(THREE.MathUtils.degToRad(GlobeSprites.TURN_OVER_BELOW)) ** GlobeSprites.UPRIGHT_FADE -
-    GlobeSprites.STAND_UPRIGHT;
-  // How narrowly about straight down that help is given: it falls off to either side as the cosine of
-  // the angle from straight down to this power, so that billboards off to the side spin round freely.
-  private static readonly TURN_OVER_NARROW = 24;
+  // Over most of the planet a billboard stands upright, as on the flat map. Below the planet's middle
+  // on screen, toward its bottom edge, it hangs upside down instead, out of the ground as at the edge
+  // there: wherever the ground's normal points down the screen more than STAND_UPRIGHT times as much as
+  // it points at the camera. Straight below the middle that's beyond where the ground has turned this
+  // many degrees from the camera; off to the side it's further out, until by the planet's sides none hangs.
+  private static readonly TURN_OVER = 34;
+  private static readonly STAND_UPRIGHT = Math.tan(THREE.MathUtils.degToRad(GlobeSprites.TURN_OVER));
+  // How softly a billboard turns over between standing and hanging: the smaller, the more sharply.
+  private static readonly TURN_OVER_SOFTNESS = 0.05;
+  // Toward the planet's edge a billboard leans out with the ground, as the sine of the ground's turn
+  // from the camera to this power: hardly at all until close to the edge.
+  private static readonly LEAN_OUT_LATE = 8;
+  // Ground facing the camera less squarely than this is close to the planet's edge, where a billboard
+  // gives up standing or hanging for turning with the ground, until at the edge it stands straight out
+  // of it.
+  private static readonly EDGE_FACING = 0.3;
   // For the depth test alone, billboards with their feet in view are brought in front of all of the
   // planet's ground, in the order of their feet: between these fractions of the nearest it can be.
   // Nothing standing on the side of a round planet in view is behind its ground, except where a
-  // billboard leans back over it (below the planet's middle); past the horizon one keeps its foot's
+  // billboard hangs back over it (below the planet's middle); past the horizon one keeps its foot's
   // distance, so the planet hides what of it is behind.
   private static readonly IN_FRONT_FROM = 0.9;
   private static readonly IN_FRONT_TO = 0.98;
@@ -185,15 +178,18 @@ export class GlobeSprites {
     varying vec4 vTint;
     varying float vLight;
 
-    // Which way is up on screen for a billboard - see STAND_UPRIGHT and the constants after it, and
+    // Which way is up on screen for a billboard - see TURN_OVER and the constants after it, and
     // GlobeSprites.standingUp().
     vec2 standingUp(vec3 footView, vec3 normalView, float facing) {
       // Where the ground's normal points on screen: away from the planet's middle.
       vec2 outward = normalView.xy * -footView.z + footView.xy * normalView.z;
       outward = dot(outward, outward) > 0.0 ? normalize(outward) : vec2(0.0, 1.0);
       float across = sqrt(max(0.0, 1.0 - facing * facing));
-      float upright = STAND_UPRIGHT + STAND_UPRIGHT_BELOW * pow(max(-outward.y, 0.0), TURN_OVER_NARROW);
-      vec2 up = vec2(across * outward.x, across * outward.y + upright * pow(max(facing, 0.0), UPRIGHT_FADE));
+      // Above 0 to stand, below to hang - all one or the other, but close to the edge.
+      float stand = across * outward.y + STAND_UPRIGHT * max(facing, 0.0);
+      float committed = stand / (abs(stand) + TURN_OVER_SOFTNESS);
+      float upward = mix(stand, committed, smoothstep(0.0, EDGE_FACING, facing));
+      vec2 up = vec2(pow(across, LEAN_OUT_LATE) * outward.x, upward);
       return dot(up, up) > 1e-12 ? normalize(up) : outward;
     }
 
@@ -310,13 +306,15 @@ export class GlobeSprites {
     if (outward.lengthSq() > 0) outward.normalize();
     else outward.set(0, 1);
     const across = Math.sqrt(Math.max(0, 1 - facing * facing));
-    const upright =
-      GlobeSprites.STAND_UPRIGHT +
-      GlobeSprites.STAND_UPRIGHT_BELOW * Math.max(-outward.y, 0) ** GlobeSprites.TURN_OVER_NARROW;
-    const up = new THREE.Vector2(
-      across * outward.x,
-      across * outward.y + upright * Math.max(facing, 0) ** GlobeSprites.UPRIGHT_FADE
+    // Above 0 to stand, below to hang - all one or the other, but close to the edge.
+    const stand = across * outward.y + GlobeSprites.STAND_UPRIGHT * Math.max(facing, 0);
+    const committed = stand / (Math.abs(stand) + GlobeSprites.TURN_OVER_SOFTNESS);
+    const upward = THREE.MathUtils.lerp(
+      stand,
+      committed,
+      THREE.MathUtils.smoothstep(facing, 0, GlobeSprites.EDGE_FACING)
     );
+    const up = new THREE.Vector2(across ** GlobeSprites.LEAN_OUT_LATE * outward.x, upward);
     return up.lengthSq() > 1e-12 ? up.normalize() : outward;
   }
 
@@ -440,9 +438,9 @@ export class GlobeSprites {
         AMBIENT: GlobeSprites.AMBIENT.toFixed(3),
         DIRECT: GlobeSprites.DIRECT.toFixed(3),
         STAND_UPRIGHT: GlobeSprites.STAND_UPRIGHT.toFixed(3),
-        UPRIGHT_FADE: GlobeSprites.UPRIGHT_FADE.toFixed(3),
-        STAND_UPRIGHT_BELOW: GlobeSprites.STAND_UPRIGHT_BELOW.toFixed(3),
-        TURN_OVER_NARROW: GlobeSprites.TURN_OVER_NARROW.toFixed(3),
+        TURN_OVER_SOFTNESS: GlobeSprites.TURN_OVER_SOFTNESS.toFixed(3),
+        LEAN_OUT_LATE: GlobeSprites.LEAN_OUT_LATE.toFixed(3),
+        EDGE_FACING: GlobeSprites.EDGE_FACING.toFixed(3),
         IN_FRONT_FROM: GlobeSprites.IN_FRONT_FROM.toFixed(3),
         IN_FRONT_TO: GlobeSprites.IN_FRONT_TO.toFixed(3)
       },
