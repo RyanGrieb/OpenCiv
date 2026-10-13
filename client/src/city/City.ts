@@ -227,7 +227,7 @@ export class City extends ActorGroup {
     this.healthBar = new CityHealthBar(this, this.getZIndex());
     Standing.set(this.healthBar, {
       anchor: () => this.getStandingPoint(),
-      turnPoint: () => this.getTurnPoint(),
+      tileMiddle: () => this.getTileMiddle(),
       bounds: () => this.getHealthBarBounds(),
       overlay: true
     });
@@ -383,7 +383,7 @@ export class City extends ActorGroup {
       // On the globe the banner stands over the city, always in front of the map.
       Standing.set(this.nameLabel, {
         anchor: () => this.getStandingPoint(),
-        turnPoint: () => this.getTurnPoint(),
+        tileMiddle: () => this.getTileMiddle(),
         overlay: true
       });
       Game.getInstance().getCurrentScene().addActor(this.nameLabel);
@@ -400,7 +400,7 @@ export class City extends ActorGroup {
       //this.addActor(this.civIcon);
       Standing.set(this.civIcon, {
         anchor: () => this.getStandingPoint(),
-        turnPoint: () => this.getTurnPoint(),
+        tileMiddle: () => this.getTileMiddle(),
         overlay: true
       });
 
@@ -422,7 +422,7 @@ export class City extends ActorGroup {
     });
     Standing.set(this.strikeIcon, {
       anchor: () => this.getStandingPoint(),
-      turnPoint: () => this.getTurnPoint(),
+      tileMiddle: () => this.getTileMiddle(),
       overlay: true
     });
     this.strikeIcon.on("clicked", () => {
@@ -450,9 +450,9 @@ export class City extends ActorGroup {
     return [center.x, center.y + City.STANDING_BELOW_CENTER];
   }
 
-  // The middle of its tile: where its banner and the like turn with the map's sprites there near the
-  // globe's outline (see StandingOptions.turnPoint).
-  private getTurnPoint(): [number, number] {
+  // The middle of its tile: what its banner and the like are drawn around on the globe (see
+  // StandingOptions.tileMiddle).
+  private getTileMiddle(): [number, number] {
     const center = this.tile.getCenterPosition();
     return [center.x, center.y];
   }
@@ -472,7 +472,7 @@ export class City extends ActorGroup {
       text: `-${damage}`,
       color: "red",
       standsOn: () => this.getStandingPoint(),
-      turnsOn: () => this.getTurnPoint(),
+      tileMiddle: () => this.getTileMiddle(),
       centerX,
       fromY: this.tile.getY() + 4,
       toY: this.tile.getY() - 16

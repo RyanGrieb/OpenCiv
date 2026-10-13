@@ -15,7 +15,8 @@ import { TestUtils } from "../TestUtils";
 // the horizon: checks that the map's sprites and the city's banner stand, that on the planet's face
 // the warrior stands upright, even well below its middle, while on its outline it stands straight out
 // of the ground, that as the outline passes over the city everything does one or the other, never in
-// between, a tile at a time (the warrior and the city's banner with their tiles), that the mouse finds
+// between, a tile at a time (the warrior and the city's banner with their tiles), that however the
+// ground turns or tilts away on screen the warrior stands centered on its tile, that the mouse finds
 // the warrior and the banner where they stand, that the fog of war shades what stands in it, and that
 // a still view doesn't draw the map over again. Ends there to look around: drag, scroll, G for flat.
 export function setupGlobeDepthTest(game: Game) {
@@ -72,6 +73,21 @@ export function setupGlobeDepthTest(game: Game) {
       .setFromMatrixPosition((globe()["planet"] as THREE.Object3D).matrixWorld)
       .project(globe()["camera"] as THREE.Camera);
     return [((middle.x + 1) / 2) * sprites()["screenWidth"], ((1 - middle.y) / 2) * sprites()["screenHeight"]];
+  };
+  // Where a world point is on screen, as it lies on the ground.
+  const onScreen = ([worldX, worldY]: number[]) => {
+    const [longitude, latitude] = globe().projection.toSphere(worldX, worldY);
+    const point = new THREE.Vector3(...GlobeProjection.unitVector(longitude, latitude))
+      .applyMatrix4((globe()["planet"] as THREE.Object3D).matrixWorld)
+      .project(globe()["camera"] as THREE.Camera);
+    return [((point.x + 1) / 2) * sprites()["screenWidth"], ((1 - point.y) / 2) * sprites()["screenHeight"]];
+  };
+  // How far the middle of the warrior's picture is from its tile's middle on screen, in pixels.
+  const warriorOffItsTile = () => {
+    const picture = globe().screenPointOf(warrior, 0.5, 0.5);
+    const center = warrior.getTile().getCenterPosition();
+    const middle = onScreen([center.x, center.y]);
+    return picture ? Math.hypot(picture[0] - middle[0], picture[1] - middle[1]) : Infinity;
   };
   // How the warrior stands on screen, from the bottom of its picture to the top, and the way out from
   // the planet's middle to its feet.
@@ -157,6 +173,7 @@ export function setupGlobeDepthTest(game: Game) {
   let wellBelow: { up: number[]; out: number[] } | undefined;
   let onOutline: { up: number[]; out: number[] } | undefined;
   let outlineView: ReturnType<typeof spritesStanding> | undefined;
+  let offItsTile: number[] = [];
   let uploadsBefore: number[] = [];
 
   runner.addStep({
@@ -254,6 +271,26 @@ export function setupGlobeDepthTest(game: Game) {
       outlineView.out > 0 &&
       outlineView.between === 0 &&
       outlineView.mixedTiles === 0
+  });
+
+  runner.addStep({
+    name: "However the ground turns or tilts away on screen, the warrior stands centered on its tile",
+    action: async () => {
+      // Close up and tilted toward the horizon; below the planet's middle; toward its east edge.
+      await lookAt(warrior.getTile());
+      offItsTile = [warriorOffItsTile()];
+      await lookFromThe("north", 0.7);
+      offItsTile.push(warriorOffItsTile());
+      await lookFromThe("west", 0.8);
+      offItsTile.push(warriorOffItsTile());
+      utils.log(
+        `The middle of the warrior's picture is ${offItsTile.map((off) => off.toFixed(1)).join(", ")} ` +
+          `pixels from its tile's middle`,
+        "yellow"
+      );
+      await lookAt(cityTile);
+    },
+    verification: () => offItsTile.length === 3 && offItsTile.every((off) => off < 1)
   });
 
   runner.addStep({
