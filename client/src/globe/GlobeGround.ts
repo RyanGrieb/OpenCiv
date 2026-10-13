@@ -2,6 +2,7 @@ import * as THREE from "three";
 import { Game } from "../Game";
 import { GameMap } from "../map/GameMap";
 import { WorldView } from "../scene/Camera";
+import { Line } from "../scene/Line";
 import { SceneObject } from "../scene/SceneObject";
 import { Standing } from "../scene/Standing";
 import { Fingerprint } from "./Fingerprint";
@@ -56,9 +57,10 @@ class GroundLayer {
 /**
  * The map's ground as the globe shows it: the whole world on two canvases, a canvas pixel to each
  * world pixel (fewer if that won't fit in a texture) - the terrain with the fog of war over it, and
- * what's drawn over that (borders, territory, the hovered tile, paths). Each is drawn again only when
- * what's on it changes, so most frames leave the GPU's copies of both alone. What stands up off the
- * ground - trees, units, labels - isn't on either: GlobeSprites draws those.
+ * what's drawn over that (territory, the hovered tile). Each is drawn again only when what's on it
+ * changes, so most frames leave the GPU's copies of both alone. What stands up off the ground - trees,
+ * units, labels - isn't on either: GlobeSprites draws those. Nor are lines - borders, outlines, paths -
+ * which a pixel to a world pixel would blur: GlobeLines draws those.
  */
 export class GlobeGround {
   public readonly terrain: GroundLayer;
@@ -95,7 +97,9 @@ export class GlobeGround {
     const map = GameMap.getInstance();
     const fog = map.getFogOfWar();
     const terrain = objects.filter((object) => map.getLayerOf(object) === "terrain");
-    const overlay = objects.filter((object) => object !== fog && !map.getLayerOf(object) && !Standing.get(object));
+    const overlay = objects.filter(
+      (object) => object !== fog && !map.getLayerOf(object) && !Standing.get(object) && !(object instanceof Line)
+    );
 
     const terrainPrint = new Fingerprint().add(map.getStandingVersion()).add(fog?.getVersion() ?? -1);
     terrain.forEach((object) => terrainPrint.addObject(object));

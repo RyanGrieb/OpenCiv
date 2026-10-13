@@ -1,9 +1,11 @@
 import * as THREE from "three";
 import { Game } from "../Game";
 import { WorldView } from "../scene/Camera";
+import { Line } from "../scene/Line";
 import { SceneObject } from "../scene/SceneObject";
 import { GlobeCaps } from "./GlobeCaps";
 import { GlobeGround } from "./GlobeGround";
+import { GlobeLines } from "./GlobeLines";
 import { GlobeProjection } from "./GlobeProjection";
 import { GlobeSprites } from "./GlobeSprites";
 import { PixelArtSampling } from "./PixelArtSampling";
@@ -13,10 +15,11 @@ import { SolarSystem } from "./SolarSystem";
 /**
  * The game's map wrapped around a globe, inside the solar system, drawn with three.js on a canvas
  * behind the game's (whose UI stays on top). The map isn't rebuilt in 3D: the game draws it with
- * its usual drawing code, just not onto the screen. What lies on the ground - terrain, fog, borders
+ * its usual drawing code, just not onto the screen. What lies on the ground - terrain, fog, territory
  * and the like - goes onto two canvases the size of the whole world (see GlobeGround), which the band
- * between the polar caps samples through GlobeProjection as its texture; what stands up off it -
- * trees, mountains' peaks, cities, units, labels - stands up off the globe as billboards (see
+ * between the polar caps samples through GlobeProjection as its texture, but for its lines - borders,
+ * outlines, paths - which lie on it as strips, sharp however close (see GlobeLines); what stands up
+ * off it - trees, mountains' peaks, cities, units, labels - stands up off the globe as billboards (see
  * GlobeSprites). Both are drawn again only when what's on them changes, so a frame of the globe
  * mostly costs the GPU drawing the planet, not the game drawing the map.
  */
@@ -88,6 +91,7 @@ export class GlobeView {
   private readonly bandGeometry: THREE.BufferGeometry;
   private readonly bandMaterial: THREE.MeshLambertMaterial;
   private readonly ground: GlobeGround;
+  private readonly lines: GlobeLines;
   private readonly sprites: GlobeSprites;
   private readonly bandUniforms = {
     terrainMap: { value: null as THREE.Texture },
@@ -150,6 +154,8 @@ export class GlobeView {
     this.bandUniforms.overlayMap.value = this.ground.overlay.texture;
     this.bandUniforms.groundSize.value.set(...this.ground.getSize());
     this.bandUniforms.groundScale.value = this.ground.getScale();
+    this.lines = new GlobeLines(this.projection);
+    this.planet.add(this.lines.mesh);
     this.sprites = new GlobeSprites(this.projection, this.planet, maxTextureSize);
 
     this.fitToScreen();
@@ -219,6 +225,7 @@ export class GlobeView {
   public drawWorld(objects: SceneObject[], zoom: number) {
     const useView = (view: WorldView) => (this.worldView = view);
     this.ground.update(objects, useView);
+    this.lines.update(objects.filter((object): object is Line => object instanceof Line));
     this.sprites.update(objects, zoom * this.renderer.getPixelRatio(), this.camera, useView);
     this.worldView = this.ground.terrain.view;
   }
@@ -261,6 +268,7 @@ export class GlobeView {
     this.bandGeometry.dispose();
     this.bandMaterial.dispose();
     this.ground.dispose();
+    this.lines.dispose();
     this.sprites.dispose();
     this.renderer.dispose();
     this.renderer.forceContextLoss();
