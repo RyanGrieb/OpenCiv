@@ -40,4 +40,13 @@ export class PixelGroups {
     }
     return groups;
   }
+
+  /** The pixels touching one of a picture's pixels, on a side or at a corner, by their indices. */
+  public static around(index: number, width: number, height: number): number[] {
+    const x = index % width;
+    const y = Math.floor(index / width);
+    return PixelGroups.AROUND.filter(([dx, dy]) => x + dx >= 0 && y + dy >= 0 && x + dx < width && y + dy < height).map(
+      ([dx, dy]) => x + dx + (y + dy) * width
+    );
+  }
 }

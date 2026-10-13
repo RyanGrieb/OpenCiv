@@ -22,12 +22,22 @@ export interface StandingPiece {
 /**
  * Standing sprites (see GameMap.getStandingSprites()) cut into the separate things painted on them -
  * each tree of a forest, each peak of a mountain - so that on the globe each stands up from its own
- * foot, rather than a whole tile's worth standing up as one flat card. The pieces are packed into one
- * atlas for the GPU; each sprite is cut once, however many tiles show it.
+ * foot, rather than a whole tile's worth standing up as one flat card. Things painted apart are cut
+ * apart; things painted touching (a dense forest's trees) are told apart by their opacity (see
+ * MARKED). The pieces are packed into one atlas for the GPU; each sprite is cut once, however many
+ * tiles show it.
  */
 export class StandingPieces {
   // Pixels at least this opaque are part of a piece - the rest are dropped where it stands up.
   private static readonly OPAQUE = 128;
+  // Pixels at least this opaque, but not fully, mark the things painted touching one another as
+  // separate: each thing's pixels share an opacity of its own (255, 254, 253 or 252, say, so that
+  // things touching differ), which doesn't show, and only pixels of the same opacity make up a piece.
+  // Fainter pixels go with the fully opaque ones.
+  private static readonly MARKED = 250;
+  // Fewer pixels than this, cut off on their own by their marks, go with what they touch - see
+  // foldSpecks().
+  private static readonly SPECK = 4;
 
   public readonly atlas: AtlasCanvas;
   private readonly pieces = new WeakMap<CanvasImageSource, StandingPiece[]>();
@@ -54,6 +64,29 @@ export class StandingPieces {
       }
     }
     return bottoms;
+  }
+
+  // Hands each group of fewer than SPECK pixels to the group it touches most, if it touches one: a stray
+  // pixel or two of one mark among another's - where one thing is painted over another - stands with
+  // them, rather than up from a foot of its own.
+  private static foldSpecks(groups: number[][], width: number, height: number): number[][] {
+    const groupAt = new Int32Array(width * height).fill(-1);
+    groups.forEach((group, number) => group.forEach((index) => (groupAt[index] = number)));
+    groups.forEach((group, number) => {
+      if (group.length >= StandingPieces.SPECK) return;
+
+      const touching = new Map<number, number>();
+      for (const other of group.flatMap((index) => PixelGroups.around(index, width, height).map((at) => groupAt[at]))) {
+        if (other >= 0 && other !== number) touching.set(other, (touching.get(other) ?? 0) + 1);
+      }
+      if (!touching.size) return;
+
+      const [into] = [...touching].reduce((most, each) => (each[1] > most[1] ? each : most));
+      groups[into].push(...group);
+      group.forEach((index) => (groupAt[index] = into));
+      groups[number] = [];
+    });
+    return groups.filter((group) => group.length > 0);
   }
 
   /**
@@ -94,13 +127,24 @@ export class StandingPieces {
     this.scratch.drawImage(image, 0, 0);
     const pixels = this.scratch.getImageData(0, 0, width, height);
 
-    const opaque = new Uint8Array(width * height);
-    for (let index = 0; index < opaque.length; index++) {
-      opaque[index] = pixels.data[index * 4 + 3] >= StandingPieces.OPAQUE ? 1 : 0;
+    // Each pixel's mark (see MARKED), or 0 where it's too faint to stand.
+    const marks = new Uint8Array(width * height);
+    for (let index = 0; index < marks.length; index++) {
+      const alpha = pixels.data[index * 4 + 3];
+      marks[index] = alpha < StandingPieces.OPAQUE ? 0 : alpha >= StandingPieces.MARKED ? alpha : 255;
     }
 
+    const groups: number[][] = [];
+    for (const mark of new Set(marks)) {
+      if (mark === 0) continue;
+      const mask = marks.map((each) => (each === mark ? 1 : 0));
+      groups.push(...PixelGroups.find(mask, width, height, !grounded));
+    }
+    // In the order of their first pixels, as though found all together.
+    groups.sort((a, b) => a[0] - b[0]);
+
     const pieces: StandingPiece[] = [];
-    for (const group of PixelGroups.find(opaque, width, height, !grounded)) {
+    for (const group of StandingPieces.foldSpecks(groups, width, height)) {
       const piece = this.pack(pixels, group);
       if (piece) pieces.push(piece);
     }
