@@ -789,7 +789,7 @@ export class Unit extends ActorGroup {
   }
 
   // The middle of the sprite, which is its tile's middle while it isn't moving: what the unit and its
-  // badges are drawn around on the globe (see StandingOptions.tileMiddle).
+  // badges stand off on the globe (see StandingOptions.tileMiddle).
   private getTileMiddle(): [number, number] {
     return [this.getX() + this.getWidth() / 2, this.getY() + this.getHeight() / 2];
   }

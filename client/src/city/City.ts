@@ -450,7 +450,7 @@ export class City extends ActorGroup {
     return [center.x, center.y + City.STANDING_BELOW_CENTER];
   }
 
-  // The middle of its tile: what its banner and the like are drawn around on the globe (see
+  // The middle of its tile: what its banner and the like stand off on the globe (see
   // StandingOptions.tileMiddle).
   private getTileMiddle(): [number, number] {
     const center = this.tile.getCenterPosition();

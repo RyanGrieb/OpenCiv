@@ -8,10 +8,11 @@ export interface StandingOptions {
   /** Drawn over everything, like a label, rather than among the map's sprites, where it can be hidden behind them. */
   overlay?: boolean;
   /**
-   * The middle of the tile it stands on. On the globe, standing upright, it's drawn around that point
-   * just as the flat map draws it there, so that it stays on its tile however the ground turns or tilts
-   * away on screen; and near the planet's outline it stands upright or straight out of the ground with
-   * the map's sprites on that tile. Its anchor if left out.
+   * The middle of the tile it stands on. On the globe, standing upright, its foot is set off from that
+   * point as the ground there is squeezed on screen, but with down kept straight down, so that it stays
+   * on its tile, right over it, however the ground turns or tilts away (see GlobeSprites); and near the
+   * planet's outline it stands upright or straight out of the ground with the map's sprites on that
+   * tile. Its anchor if left out.
    */
   tileMiddle?: () => [number, number];
   /** The world point the mouse means when it's over this - a unit's tile, say. Only units need one. */

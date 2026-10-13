@@ -16,7 +16,7 @@ import { TestUtils } from "../TestUtils";
 // the warrior stands upright, even well below its middle, while on its outline it stands straight out
 // of the ground, that as the outline passes over the city everything does one or the other, never in
 // between, a tile at a time (the warrior and the city's banner with their tiles), that however the
-// ground turns or tilts away on screen the warrior stands centered on its tile, that the mouse finds
+// ground turns or tilts away on screen the warrior's feet stay on its tile, that the mouse finds
 // the warrior and the banner where they stand, that the fog of war shades what stands in it, and that
 // a still view doesn't draw the map over again. Ends there to look around: drag, scroll, G for flat.
 export function setupGlobeDepthTest(game: Game) {
@@ -45,16 +45,21 @@ export function setupGlobeDepthTest(game: Game) {
     await utils.delay(1500);
   };
   // Looks straight down at the whole planet over the point `angle` radians from the warrior to its
-  // west or north - putting the warrior toward the planet's east edge, or below its middle. Not past
-  // the north pole, where the camera stops.
-  const lookFromThe = async (way: "west" | "north", angle: number) => {
+  // west, north or north-west - putting the warrior toward the planet's east edge, below its middle,
+  // or down to its right, where the ground both turns and tilts away aslant. Not past the north pole,
+  // where the camera stops.
+  const lookFromThe = async (way: "west" | "north" | "northwest", angle: number) => {
     const center = warrior.getTile().getCenterPosition();
     const [longitude, latitude] = globe().projection.toSphere(center.x, center.y);
-    if (way === "north") angle = Math.min(angle, 1.3 - latitude);
+    const west = [-Math.cos(longitude), 0, Math.sin(longitude)];
+    const north = [
+      -Math.sin(latitude) * Math.sin(longitude),
+      Math.cos(latitude),
+      -Math.sin(latitude) * Math.cos(longitude)
+    ];
+    if (way !== "west") angle = Math.min(angle, (1.3 - latitude) * (way === "north" ? 1 : Math.SQRT2));
     const toward =
-      way === "west"
-        ? [-Math.cos(longitude), 0, Math.sin(longitude)]
-        : [-Math.sin(latitude) * Math.sin(longitude), Math.cos(latitude), -Math.sin(latitude) * Math.cos(longitude)];
+      way === "west" ? west : way === "north" ? north : west.map((value, axis) => (value + north[axis]) / Math.SQRT2);
     const point = GlobeProjection.unitVector(longitude, latitude).map(
       (value, axis) => value * Math.cos(angle) + toward[axis] * Math.sin(angle)
     );
@@ -82,12 +87,34 @@ export function setupGlobeDepthTest(game: Game) {
       .project(globe()["camera"] as THREE.Camera);
     return [((point.x + 1) / 2) * sprites()["screenWidth"], ((1 - point.y) / 2) * sprites()["screenHeight"]];
   };
-  // How far the middle of the warrior's picture is from its tile's middle on screen, in pixels.
-  const warriorOffItsTile = () => {
-    const picture = globe().screenPointOf(warrior, 0.5, 0.5);
+  // Where the warrior's feet are on screen against its tile: how far inside the tile's hex (negative
+  // outside it), and how far to the side of its middle, both as parts of how far the tile's bottom
+  // corner is from its middle.
+  const warriorFeet = () => {
+    const feet = globe().screenPointOf(warrior, 0.5, 1);
     const center = warrior.getTile().getCenterPosition();
     const middle = onScreen([center.x, center.y]);
-    return picture ? Math.hypot(picture[0] - middle[0], picture[1] - middle[1]) : Infinity;
+    const corners = [
+      [0, -16],
+      [16, -9],
+      [16, 9],
+      [0, 16],
+      [-16, 9],
+      [-16, -9]
+    ].map(([x, y]) => onScreen([center.x + x, center.y + y]));
+    if (!feet) return { inside: -Infinity, aside: Infinity };
+
+    // The hex's corners run clockwise on screen, so what's inside is right of each side.
+    const inside = Math.min(
+      ...corners.map(([fromX, fromY], index) => {
+        const [toX, toY] = corners[(index + 1) % corners.length];
+        return (
+          ((toX - fromX) * (feet[1] - fromY) - (toY - fromY) * (feet[0] - fromX)) / Math.hypot(toX - fromX, toY - fromY)
+        );
+      })
+    );
+    const size = Math.hypot(corners[3][0] - middle[0], corners[3][1] - middle[1]);
+    return { inside: inside / size, aside: Math.abs(feet[0] - middle[0]) / size };
   };
   // How the warrior stands on screen, from the bottom of its picture to the top, and the way out from
   // the planet's middle to its feet.
@@ -173,7 +200,7 @@ export function setupGlobeDepthTest(game: Game) {
   let wellBelow: { up: number[]; out: number[] } | undefined;
   let onOutline: { up: number[]; out: number[] } | undefined;
   let outlineView: ReturnType<typeof spritesStanding> | undefined;
-  let offItsTile: number[] = [];
+  let feetOnTile: ReturnType<typeof warriorFeet>[] = [];
   let uploadsBefore: number[] = [];
 
   runner.addStep({
@@ -274,23 +301,31 @@ export function setupGlobeDepthTest(game: Game) {
   });
 
   runner.addStep({
-    name: "However the ground turns or tilts away on screen, the warrior stands centered on its tile",
+    name: "However the ground turns or tilts away on screen, the warrior's feet stay on its tile, below its middle",
     action: async () => {
-      // Close up and tilted toward the horizon; below the planet's middle; toward its east edge.
+      // Close up and tilted toward the horizon; below the planet's middle; toward its east edge; down to
+      // its right.
       await lookAt(warrior.getTile());
-      offItsTile = [warriorOffItsTile()];
+      feetOnTile = [warriorFeet()];
       await lookFromThe("north", 0.7);
-      offItsTile.push(warriorOffItsTile());
+      feetOnTile.push(warriorFeet());
       await lookFromThe("west", 0.8);
-      offItsTile.push(warriorOffItsTile());
+      feetOnTile.push(warriorFeet());
+      await lookFromThe("northwest", 1);
+      feetOnTile.push(warriorFeet());
+      const percents = (key: "inside" | "aside") =>
+        feetOnTile.map((feet) => `${Math.round(feet[key] * 100)}%`).join(", ");
       utils.log(
-        `The middle of the warrior's picture is ${offItsTile.map((off) => off.toFixed(1)).join(", ")} ` +
-          `pixels from its tile's middle`,
+        `The warrior's feet are ${percents("inside")} of the way from its tile's edge toward its middle, ` +
+          `and ${percents("aside")} of the way to its side`,
         "yellow"
       );
       await lookAt(cityTile);
     },
-    verification: () => offItsTile.length === 3 && offItsTile.every((off) => off < 1)
+    // Its feet are just inside the bottom corner of its tile on the flat map, so near its edge here -
+    // give or take, as the ground turns, its corners' reach past its sides, and the ground curving away
+    // from how it looks at the tile's middle.
+    verification: () => feetOnTile.length === 4 && feetOnTile.every((feet) => feet.inside > -0.1 && feet.aside < 0.05)
   });
 
   runner.addStep({
