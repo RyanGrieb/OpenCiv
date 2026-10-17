@@ -585,6 +585,7 @@ export class GameMap {
           const pending = this.pendingChunkIngestions;
           this.pendingChunkIngestions = [];
           await Promise.all(pending);
+          if (this.pendingChunkIngestions.length === 0) this.scheduleEdgeRedraw();
         }
         this.reportLoadProgress("Done", 1);
         this.loadingMap = false;
@@ -679,7 +680,9 @@ export class GameMap {
 
     await this.rebuildChunkVisuals(chunkGridX, chunkGridY);
     this.edgeDirtyChunks.delete(this.chunkKeyFor(chunkGridX, chunkGridY));
-    this.scheduleEdgeRedraw();
+    // While the map first loads, every chunk's edges are redrawn in one pass once all of them are in
+    // (see "mapSyncComplete"), rather than in a run of small passes between chunks arriving.
+    if (!this.loadingMap) this.scheduleEdgeRedraw();
 
     for (const cityJSON of pendingCities) {
       this.syncCity(cityJSON);
