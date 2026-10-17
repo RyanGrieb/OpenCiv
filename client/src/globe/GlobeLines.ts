@@ -2,6 +2,7 @@ import * as THREE from "three";
 import { Line } from "../scene/Line";
 import { Fingerprint } from "./Fingerprint";
 import { GlobeProjection } from "./GlobeProjection";
+import { OverStanding } from "./OverStanding";
 
 /**
  * The map's lines - city borders, tile outlines, movement paths - drawn on the globe as thin strips
@@ -9,7 +10,8 @@ import { GlobeProjection } from "./GlobeProjection";
  * GlobeGround). Those have a pixel to each world pixel, so a line a world pixel or two wide took up a
  * pixel or two of them and came out soft and blocky close up, where the flat map draws it sharp at any
  * zoom. As strips, lines are drawn at the screen's own resolution, as wide on the ground as the flat
- * map draws them, their edges smoothed over a pixel and their ends rounded off. Lit like the ground.
+ * map draws them, their edges smoothed over a pixel and their ends rounded off. Lit like the ground,
+ * and drawn over what stands up off it, as the flat map draws them over its trees (see OverStanding).
  */
 export class GlobeLines {
   // How far out from the planet's middle they lie, in its radii: on the ground, but not under it.
@@ -27,15 +29,13 @@ export class GlobeLines {
 
   constructor(projection: GlobeProjection) {
     this.projection = projection;
-    const material = new THREE.MeshLambertMaterial({
-      vertexColors: true,
-      transparent: true,
-      depthWrite: false
-    });
+    const material = new THREE.MeshLambertMaterial({ vertexColors: true });
+    OverStanding.setUp(material);
     // Each strip's pixels fade out over the last pixel to its edges (where `across` reaches 1 either
     // side), half covered right at them, as a canvas smooths a line's edges; one narrower than a
     // pixel fades as much as it's narrower.
     material.onBeforeCompile = (shader) => {
+      OverStanding.patch(shader);
       shader.vertexShader = shader.vertexShader
         .replace("#include <common>", "#include <common>\nattribute float across;\nvarying float vAcross;")
         .replace("#include <begin_vertex>", "#include <begin_vertex>\nvAcross = across;");
@@ -50,6 +50,8 @@ export class GlobeLines {
     };
     this.mesh = new THREE.Mesh(new THREE.BufferGeometry(), material);
     this.mesh.frustumCulled = false;
+    // Over the hovered tile (see GlobeDecals), as their z puts them on the flat map.
+    this.mesh.renderOrder = OverStanding.RENDER_ORDER + 1;
   }
 
   /** Brings the strips up to date with the map's lines, rebuilding them only when those changed. */

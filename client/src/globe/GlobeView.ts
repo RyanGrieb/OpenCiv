@@ -1,11 +1,13 @@
 import * as THREE from "three";
 import { Game } from "../Game";
+import { HoveredTile } from "../map/HoveredTile";
 import { WorldView } from "../scene/Camera";
 import { Line } from "../scene/Line";
 import { SceneObject } from "../scene/SceneObject";
 import { GlobeCaps } from "./GlobeCaps";
 import { GlobeGround } from "./GlobeGround";
 import { GlobeLines } from "./GlobeLines";
+import { GlobeDecals } from "./GlobeDecals";
 import { GlobeProjection } from "./GlobeProjection";
 import { GlobeSprites } from "./GlobeSprites";
 import { PixelArtSampling } from "./PixelArtSampling";
@@ -90,6 +92,7 @@ export class GlobeView {
   private readonly bandMaterial: THREE.MeshLambertMaterial;
   private readonly ground: GlobeGround;
   private readonly lines: GlobeLines;
+  private readonly decals: GlobeDecals;
   private readonly sprites: GlobeSprites;
   private readonly bandUniforms = {
     groundMap: { value: null as THREE.Texture },
@@ -154,6 +157,8 @@ export class GlobeView {
     canvas.addEventListener("webglcontextrestored", () => this.ground.redrawAll());
     this.lines = new GlobeLines(this.projection);
     this.planet.add(this.lines.mesh);
+    this.decals = new GlobeDecals(this.projection);
+    this.planet.add(this.decals.group);
     this.sprites = new GlobeSprites(this.projection, this.planet, maxTextureSize);
 
     this.fitToScreen();
@@ -222,7 +227,13 @@ export class GlobeView {
    */
   public drawWorld(objects: SceneObject[], zoom: number) {
     const useView = (view: WorldView) => (this.worldView = view);
-    this.ground.update(objects, useView);
+    // The hovered tile lies over what stands on the ground, as on the flat map, so it isn't painted into it.
+    const hovered = objects.filter((object): object is HoveredTile => object instanceof HoveredTile);
+    this.ground.update(
+      objects.filter((object) => !(object instanceof HoveredTile)),
+      useView
+    );
+    this.decals.update(hovered, useView);
     this.lines.update(objects.filter((object): object is Line => object instanceof Line));
     this.sprites.update(objects, zoom * this.renderer.getPixelRatio(), this.camera, useView);
     this.worldView = this.ground.view;
@@ -267,6 +278,7 @@ export class GlobeView {
     this.bandMaterial.dispose();
     this.ground.dispose();
     this.lines.dispose();
+    this.decals.dispose();
     this.sprites.dispose();
     this.renderer.dispose();
     this.renderer.forceContextLoss();
