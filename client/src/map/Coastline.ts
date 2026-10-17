@@ -44,8 +44,7 @@ export class Coastline {
   private static readonly FOAM: Rgb = [236, 244, 250];
   private static readonly SHALLOWS: Rgb = [124, 184, 222];
 
-  private static readonly images = new Map<string, HTMLImageElement>();
-  private static canvas: HTMLCanvasElement;
+  private static readonly images = new Map<string, HTMLCanvasElement>();
 
   /**
    * The shore drawn over a tile at (x, y) on a chunk's canvas, or none if no known neighbor across
@@ -58,7 +57,7 @@ export class Coastline {
 
     return [
       new Actor({
-        image: await Coastline.getImage(tile, sides),
+        image: Coastline.getImage(tile, sides),
         x,
         y,
         width: Tile.WIDTH,
@@ -83,19 +82,18 @@ export class Coastline {
 
   // Cached per tile and set of sides: a chunk is rebuilt whenever anything in it changes, while a
   // shore only changes when a neighbor across it is discovered.
-  private static async getImage(tile: Tile, sides: number[]): Promise<HTMLImageElement> {
+  private static getImage(tile: Tile, sides: number[]): HTMLCanvasElement {
     const key = `${tile.getGridX()},${tile.getGridY()}:${sides.join("")}:${tile.getTileTypes()[0]}`;
     const cached = Coastline.images.get(key);
     if (cached) return cached;
 
-    const image = await Coastline.drawImage(tile, sides);
+    const image = Coastline.drawImage(tile, sides);
     Coastline.images.set(key, image);
     return image;
   }
 
-  private static async drawImage(tile: Tile, sides: number[]): Promise<HTMLImageElement> {
-    Coastline.canvas ??= document.createElement("canvas");
-    const canvas = Coastline.canvas;
+  private static drawImage(tile: Tile, sides: number[]): HTMLCanvasElement {
+    const canvas = document.createElement("canvas");
     canvas.width = Tile.WIDTH;
     canvas.height = Tile.HEIGHT;
     const context = canvas.getContext("2d");
@@ -122,10 +120,7 @@ export class Coastline {
     }
 
     context.putImageData(pixels, 0, 0);
-    const image = new Image(Tile.WIDTH, Tile.HEIGHT);
-    image.src = canvas.toDataURL();
-    await new Promise((resolve) => (image.onload = resolve));
-    return image;
+    return canvas;
   }
 
   // A land pixel `distance` from the water: wet sand at the waterline, then dry sand, then a

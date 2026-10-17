@@ -69,7 +69,7 @@ export class Fingerprint {
     this.add(actor.getX() - originX).add(actor.getY() - originY);
     this.add(actor.getWidth()).add(actor.getHeight());
     this.add(actor.getTransparency()).add(actor.getRotation());
-    this.add(Fingerprint.idOf(image)).add(image && !(image as HTMLImageElement).complete ? 0 : 1);
+    this.add(Fingerprint.idOf(image)).add(image instanceof HTMLImageElement && !image.complete ? 0 : 1);
     this.addText(String(actor.getSpriteRegion() ?? ""));
     this.addText(actor.getColor());
   }

@@ -57,7 +57,6 @@ export class TerrainBlend {
 
   private static readonly tilePixels = new Map<string, ImageData>();
   private static readonly spritePixels = new Map<string, ImageData>();
-  private static canvas: HTMLCanvasElement;
 
   /**
    * The borrowed pixels drawn over a chunk's tiles, each given with its position on the chunk's
@@ -82,7 +81,7 @@ export class TerrainBlend {
     }
     if (!blended) return undefined;
 
-    return new Actor({ image: await TerrainBlend.toImage(chunkPixels), x: 0, y: 0, width, height });
+    return new Actor({ image: TerrainBlend.toImage(chunkPixels), x: 0, y: 0, width, height });
   }
 
   // Whether a newly discovered tile changes the blend drawn on this neighbor of it.
@@ -162,17 +161,12 @@ export class TerrainBlend {
     }
   }
 
-  private static async toImage(pixels: ImageData): Promise<HTMLImageElement> {
-    TerrainBlend.canvas ??= document.createElement("canvas");
-    const canvas = TerrainBlend.canvas;
+  private static toImage(pixels: ImageData): HTMLCanvasElement {
+    const canvas = document.createElement("canvas");
     canvas.width = pixels.width;
     canvas.height = pixels.height;
     canvas.getContext("2d").putImageData(pixels, 0, 0);
-
-    const image = new Image(pixels.width, pixels.height);
-    image.src = canvas.toDataURL();
-    await new Promise((resolve) => (image.onload = resolve));
-    return image;
+    return canvas;
   }
 
   // Near a corner between two blended sides, a pixel takes the ground of the nearer one.

@@ -4,9 +4,13 @@ import { SceneObject } from "./SceneObject";
 import { SpriteAtlas } from "../SpriteAtlas";
 import { MapWrap } from "../map/MapWrap";
 
+// What an actor draws: a loaded image, or a canvas drawn in code (tile art, merged chunks). A canvas is
+// used as is rather than re-encoded into an image, which costs a PNG round trip per picture.
+export type ActorImage = HTMLImageElement | HTMLCanvasElement;
+
 export interface ActorOptions {
   color?: string;
-  image?: HTMLImageElement;
+  image?: ActorImage;
   spriteRegion?: SpriteRegion; // Select a portion of the provided image
   x: number;
   y: number;
@@ -23,7 +27,7 @@ export interface ActorOptions {
 export class Actor implements SceneObject {
   public debugMe: boolean = false; // For debugging purposes, set to true to log actor information
   protected color: string;
-  protected image: HTMLImageElement;
+  protected image: ActorImage;
   protected spriteRegion?: SpriteRegion; // Location of sprite on spritesheet
 
   protected x: number;
@@ -98,13 +102,11 @@ export class Actor implements SceneObject {
   public setColor(color: string) {
     this.color = color;
 
-    const canvas = document.getElementById("auxillary_canvas") as HTMLCanvasElement;
+    // Its own canvas, which becomes the actor's image.
+    const canvas = document.createElement("canvas");
     const context = canvas.getContext("2d");
-
-    // Set the canvas dimensions to match the image dimensions.
     canvas.width = this.width;
     canvas.height = this.height;
-    context.clearRect(0, 0, canvas.width, canvas.height);
 
     //TODO: Handle non-sprite region actors
     if (this.spriteRegion) {
@@ -130,13 +132,8 @@ export class Actor implements SceneObject {
     context.fillStyle = this.color;
     context.fillRect(0, 0, canvas.width, canvas.height);
 
-    // Replace the original image source with the modified canvas image.
-    const dataURL = canvas.toDataURL();
-    const image = new Image();
-    image.width = canvas.width;
-    image.height = canvas.height;
-    image.src = dataURL;
-    this.image = image;
+    // Replace the original image source with the modified canvas.
+    this.image = canvas;
 
     this.drawSpriteRegion = false; // Since we are not referencing the sprite region directly anymore.
     context.globalCompositeOperation = "source-out";
@@ -276,7 +273,7 @@ export class Actor implements SceneObject {
     this.spriteRegion = spriteRegion;
   }
 
-  public getImage(): HTMLImageElement {
+  public getImage(): ActorImage {
     return this.image;
   }
 
@@ -382,9 +379,8 @@ export class Actor implements SceneObject {
     canvasWidth?: number;
     canvasHeight?: number;
   }): Actor {
-    // Create dummy canvas to get pixel data of the actor sprite
-
-    let canvas = document.getElementById("auxillary_canvas") as HTMLCanvasElement;
+    // The merged picture is this canvas itself.
+    const canvas = document.createElement("canvas");
     let maxRight = 0;
     let maxBottom = 0;
     let greatestZ = 0;
@@ -405,11 +401,8 @@ export class Actor implements SceneObject {
       actor.draw(ctx);
     });
 
-    let image = new Image();
-    image.src = canvas.toDataURL();
-
     let mergedActor: Actor = new Actor({
-      image: image,
+      image: canvas,
       x: options.actors[0].getX(),
       y: options.actors[0].getY(),
       z: greatestZ,

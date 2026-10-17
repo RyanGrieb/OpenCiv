@@ -48,8 +48,7 @@ export class River {
   private static readonly WATER: Rgb = [69, 121, 149];
   private static readonly MIDDLE: Rgb = [78, 138, 168];
 
-  private static readonly images = new Map<string, HTMLImageElement>();
-  private static canvas: HTMLCanvasElement;
+  private static readonly images = new Map<string, HTMLCanvasElement>();
 
   /**
    * The rivers drawn over a tile at (x, y) on a chunk's canvas: those along its sides, or on water,
@@ -63,7 +62,7 @@ export class River {
 
     return [
       new Actor({
-        image: await River.getImage(tile, key),
+        image: River.getImage(tile, key),
         x,
         y,
         width: Tile.WIDTH,
@@ -98,18 +97,17 @@ export class River {
 
   // Cached per tile and what its rivers depend on: a chunk is rebuilt whenever anything in it
   // changes, while a tile's rivers only change when a neighbor is discovered.
-  private static async getImage(tile: Tile, key: string): Promise<HTMLImageElement> {
+  private static getImage(tile: Tile, key: string): HTMLCanvasElement {
     const cached = River.images.get(key);
     if (cached) return cached;
 
-    const image = await River.drawImage(tile);
+    const image = River.drawImage(tile);
     River.images.set(key, image);
     return image;
   }
 
-  private static async drawImage(tile: Tile): Promise<HTMLImageElement> {
-    River.canvas ??= document.createElement("canvas");
-    const canvas = River.canvas;
+  private static drawImage(tile: Tile): HTMLCanvasElement {
+    const canvas = document.createElement("canvas");
     canvas.width = Tile.WIDTH;
     canvas.height = Tile.HEIGHT;
     const context = canvas.getContext("2d");
@@ -139,10 +137,7 @@ export class River {
     }
 
     context.putImageData(pixels, 0, 0);
-    const image = new Image(Tile.WIDTH, Tile.HEIGHT);
-    image.src = canvas.toDataURL();
-    await new Promise((resolve) => (image.onload = resolve));
-    return image;
+    return canvas;
   }
 
   /**

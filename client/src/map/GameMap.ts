@@ -155,10 +155,9 @@ export class GameMap {
   // The soft-edged fog over the whole map - created once the map's size is known.
   private fogOfWar: FogOfWarLayer;
 
-  // Every chunk-visual rebuild goes through this queue rather than running concurrently - they all
-  // share the same offscreen canvas (see Tile.generateImageFromTileTypes / Actor.mergeActors), and
-  // fog reveals can now trigger many of these in quick succession during ordinary play, not just
-  // once at map load.
+  // Every chunk-visual rebuild goes through this queue rather than running concurrently, so a chunk's
+  // rebuilds land in the order they were asked for - fog reveals can trigger many of these in quick
+  // succession during ordinary play, not just once at map load.
   private renderQueue: Promise<void> = Promise.resolve();
 
   // Chunk packets ingested since the last "mapSyncComplete" - awaited there so "mapLoaded" only
@@ -871,7 +870,7 @@ export class GameMap {
 
         // Rendering-only tiles, positioned relative to this chunk's own small canvas rather than
         // the tile's real world position - mirrors how Actor.mergeActors draws each input actor at
-        // its own (x,y) onto the shared offscreen canvas, then the merged result is repositioned
+        // its own (x,y) onto its canvas, then the merged result is repositioned
         // as a whole via setPosition() below.
         const baseRenderTile = new Tile({
           tileTypes: [terrainType],
@@ -1038,9 +1037,8 @@ export class GameMap {
     return [overlay];
   }
 
-  // Serializes chunk-visual work through one queue: these all share the same offscreen canvas
-  // (Actor.mergeActors, Tile.generateImageFromTileTypes), so two rebuilds racing on it would
-  // corrupt each other's output. A failed render is swallowed so it can't wedge the queue.
+  // Serializes chunk-visual work through one queue, so two rebuilds of a chunk can't finish out of
+  // order and leave the older one showing. A failed render is swallowed so it can't wedge the queue.
   private enqueueRender(task: () => Promise<void>): Promise<void> {
     const result = this.renderQueue.then(task);
     this.renderQueue = result.catch(() => {});

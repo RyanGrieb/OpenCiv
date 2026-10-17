@@ -99,7 +99,7 @@ export class Tile extends Actor {
   // Offsets the coordinates a tile's mirroring is hashed from, so it doesn't follow its look.
   private static readonly MIRROR_HASH_OFFSET = 104729;
 
-  private static loadedTileImages = new Map<string, HTMLImageElement>();
+  private static loadedTileImages = new Map<string, HTMLCanvasElement>();
   private static allTileStats: TileYieldsData;
 
   private tileTypes: string[];
@@ -281,7 +281,7 @@ export class Tile extends Actor {
     if (Tile.loadedTileImages.has(key)) {
       this.image = Tile.loadedTileImages.get(key);
     } else {
-      this.image = await Tile.generateImageFromTileTypes(this.tileTypes, this.mirrored);
+      this.image = Tile.generateImageFromTileTypes(this.tileTypes, this.mirrored);
       Tile.loadedTileImages.set(key, this.image);
     }
   }
@@ -454,15 +454,14 @@ export class Tile extends Actor {
     return this.gridY;
   }
 
-  public static async generateImageFromTileTypes(tileTypes: string[], mirrored = false): Promise<HTMLImageElement> {
-    let canvas = document.getElementById("auxillary_canvas") as HTMLCanvasElement;
-
+  public static generateImageFromTileTypes(tileTypes: string[], mirrored = false): HTMLCanvasElement {
+    const canvas = document.createElement("canvas");
     canvas.width = Tile.WIDTH;
     canvas.height = Tile.HEIGHT;
-    canvas.getContext("2d").fillStyle = "rgba(0,0,0,0)";
-    canvas.getContext("2d").fillRect(0, 0, canvas.width, canvas.height);
-    // Resizing the canvas above already reset any flip left over from the previous image.
-    if (mirrored) canvas.getContext("2d").setTransform(-1, 0, 0, 1, Tile.WIDTH, 0);
+    // Kept in memory rather than on the GPU: hill mounds and the globe's standing sprites read these
+    // pixels back, which from a GPU canvas means waiting on a slow readback each time.
+    const context = canvas.getContext("2d", { willReadFrequently: true });
+    if (mirrored) context.setTransform(-1, 0, 0, 1, Tile.WIDTH, 0);
 
     for (let tileType of tileTypes) {
       if (Tile.UNSPRITED_TILE_TYPES.includes(tileType)) continue;
@@ -470,24 +469,10 @@ export class Tile extends Actor {
       const spritesheetImage = Game.getInstance().getImage(GameImage.SPRITESHEET);
       const spriteRegion = resolveSpriteRegion(`TILE_${tileType.toUpperCase()}`);
       const region = SpriteAtlas.getInstance().getRegion(spriteRegion);
-      canvas
-        .getContext("2d")
-        .drawImage(spritesheetImage, region.x, region.y, region.w, region.h, 0, 0, Tile.WIDTH, Tile.HEIGHT);
+      context.drawImage(spritesheetImage, region.x, region.y, region.w, region.h, 0, 0, Tile.WIDTH, Tile.HEIGHT);
     }
 
-    //canvas.getContext("2d").globalCompositeOperation = "saturation";
-    //canvas.getContext("2d").fillStyle = "hsl(35,35%,35%)";
-    //canvas.getContext("2d").fillRect(0, 0, canvas.width, canvas.height);
-
-    let image = new Image();
-    image.src = canvas.toDataURL();
-    image.width = Tile.WIDTH;
-    image.height = Tile.HEIGHT;
-
-    await new Promise((resolve) => {
-      image.onload = () => resolve(image);
-    });
-    return image;
+    return canvas;
   }
 
   public getAdjacentTiles() {
