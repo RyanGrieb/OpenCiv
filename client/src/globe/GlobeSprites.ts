@@ -159,8 +159,9 @@ class BillboardBatch {
  * real would seen side on there: sideways at the planet's sides, upside down at its bottom (see
  * OUTLINE_REACH). Each does one or the other, never in between, and everything on a tile does the same.
  * There a picture of what's on its whole tile - a unit, a city, a mountain - turns about its tile's
- * middle, its foot set off from that as standing upright and turned along with the picture: turned
- * about its own foot at the tile's bottom, it would swing off the tile. But each of the pieces a
+ * middle, its foot set off from that as the ground looks seen side on (see footFromMiddle()), so along
+ * the edge but neither out over it nor sunk below it: turned about its own foot at the tile's bottom,
+ * it would swing off the tile. But each of the pieces a
  * forest's trees or a field's plants are cut into stands out of the ground at its own foot (see
  * Billboard.ownFoot): turned together about the middle, those at the back of the tile would stack up
  * out past the edge.
@@ -261,9 +262,9 @@ export class GlobeSprites {
     }
 
     // Where a foot stands from its tile's middle, at a point on the unit sphere (at, in the camera's
-    // space), on screen (x right, y down, in the camera's space at the point's distance): set off as the
-    // ground there looks, turned so that down stays down - see GlobeSprites.footFromMiddle().
-    vec2 footFromMiddle(vec3 point, vec3 at, vec2 fromMiddle, float pixel) {
+    // space), across and down what it stands in, which stands up the way up points on screen: set off
+    // as the ground there looks, turned so that down stays down - see GlobeSprites.footFromMiddle().
+    vec2 footFromMiddle(vec3 point, vec3 at, vec2 fromMiddle, float pixel, vec2 up) {
       vec3 east = normalize(vec3(point.z, 0.0, -point.x));
       mat3 toView = mat3(viewMatrix) * mat3(modelMatrix);
       vec3 eastView = toView * east;
@@ -274,8 +275,13 @@ export class GlobeSprites {
       vec2 northOnScreen = northView.xy - at.xy * northView.z / at.z;
       vec2 alongX = vec2(eastOnScreen.x, -eastOnScreen.y) * pixel;
       vec2 alongY = vec2(-northOnScreen.x, northOnScreen.y) * pixel * ROW_STRETCH;
-      // How far the ground reaches across the screen, how far it slants down across it, and how far it
-      // reaches straight down from the point.
+      // Across and down what it stands in, from right and down on screen.
+      vec2 acrossIt = vec2(up.y, up.x);
+      vec2 downIt = vec2(-up.x, up.y);
+      alongX = vec2(dot(alongX, acrossIt), dot(alongX, downIt));
+      alongY = vec2(dot(alongY, acrossIt), dot(alongY, downIt));
+      // How far the ground reaches across, how far it slants down across, and how far it reaches
+      // straight down from the point.
       float across = length(vec2(alongX.x, alongY.x));
       if (across <= 0.0) return vec2(0.0);
       float slant = dot(vec2(alongX.x, alongY.x), vec2(alongX.y, alongY.y)) / across;
@@ -305,7 +311,7 @@ export class GlobeSprites {
       #endif
       // A skirt reaches down from what it hangs from to the ground under that, seen side on as that is.
       if (skirt > 0.0) local.y = -skirt * mix(1.0, clamp(facing, 0.0, 1.0), position.y) * pixel;
-      if (fromItsMiddle) local += footFromMiddle(middleAnchor, corner.xyz, fromMiddle, pixel);
+      if (fromItsMiddle) local += footFromMiddle(middleAnchor, corner.xyz, fromMiddle, pixel, up);
       float depth = -(viewMatrix * modelMatrix * vec4(depthAnchor, 1.0)).z;
       corner.xy += vec2(up.y, -up.x) * local.x - up * local.y;
       gl_Position = projectionMatrix * corner;
@@ -839,7 +845,8 @@ export class GlobeSprites {
           anchor,
           footView,
           [billboard.footX - billboard.middleX, billboard.footY - billboard.middleY],
-          camera
+          camera,
+          up
         )
       : [0, 0];
 
@@ -858,8 +865,9 @@ export class GlobeSprites {
 
   /**
    * Where a foot stands from its tile's middle, a point on the unit sphere (`at` in the camera's space),
-   * on screen this frame (x right, y down, in the camera's space at the point's distance), `fromMiddle`
-   * world pixels off it on the flat map. The ground there looks turned and squeezed on screen - turned around the poles, where the map
+   * this frame, `fromMiddle` world pixels off it on the flat map: across and down what it stands in, in
+   * the camera's space at the point's distance, standing up the way `up` points on screen (x right, y
+   * up) - upright, or straight out of the ground on the outline. The ground there looks turned and squeezed on screen - turned around the poles, where the map
    * runs every which way, and squeezed where it tilts away. Set off as the ground looks, a foot near its
    * tile's bottom would swing round its middle with the map, and a picture standing on it, covering its
    * tile, would swing off; set off as on the flat map, it would land on the tile below, where the ground
@@ -867,13 +875,17 @@ export class GlobeSprites {
    * below the middle on the flat map is straight below it on screen, as far down as the ground there
    * reaches, so it stays on its tile without swinging round it, and the picture stands right over the
    * tile. (That's the ground's look times a turn, which leaves a lower triangular matrix: the Cholesky
-   * factor of the look times its transpose.) As the vertex shader's footFromMiddle() works it out.
+   * factor of the look times its transpose.) On the outline down is in toward the ground, which is seen
+   * side on there, so a foot is set off along the outline and hardly in or out at all: anything standing
+   * there, wherever on its tile its foot is, stands on the ground at the edge rather than hovering over
+   * it or sunk below it. As the vertex shader's footFromMiddle() works it out.
    */
   private footFromMiddle(
     point: THREE.Vector3,
     at: THREE.Vector3,
     [fromX, fromY]: number[],
-    camera: THREE.Camera
+    camera: THREE.Camera,
+    up: THREE.Vector2
   ): [number, number] {
     const east = new THREE.Vector3(point.z, 0, -point.x).normalize();
     const north = point.clone().cross(east);
@@ -884,10 +896,13 @@ export class GlobeSprites {
       return [view.x - (at.x * view.z) / at.z, view.y - (at.y * view.z) / at.z];
     });
     const pixel = this.pixelAt(point);
-    const alongX = [eastOnScreen[0] * pixel, -eastOnScreen[1] * pixel];
-    const alongY = [-northOnScreen[0] * pixel * this.rowStretch(), northOnScreen[1] * pixel * this.rowStretch()];
-    // How far the ground reaches across the screen, how far it slants down across it, and how far it
-    // reaches straight down from the point.
+    // Across and down what it stands in, from right and down on screen.
+    const [alongX, alongY] = [
+      [eastOnScreen[0] * pixel, -eastOnScreen[1] * pixel],
+      [-northOnScreen[0] * pixel * this.rowStretch(), northOnScreen[1] * pixel * this.rowStretch()]
+    ].map(([x, y]) => [up.y * x + up.x * y, -up.x * x + up.y * y]);
+    // How far the ground reaches across, how far it slants down across, and how far it reaches straight
+    // down from the point.
     const across = Math.hypot(alongX[0], alongY[0]);
     if (across <= 0) return [0, 0];
     const slant = (alongX[0] * alongX[1] + alongY[0] * alongY[1]) / across;
