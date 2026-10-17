@@ -31,6 +31,11 @@ interface Billboard {
   // with the map - see GlobeSprites.footFromMiddle(). Everything but what rests on the ground all along
   // its bottom (mountains' peaks, hills' mounds), which stands on the ground painted under it.
   unturned: boolean;
+  // One of several pieces cut out of its tile's sprite, like a tree of a forest: on the outline it stands
+  // straight out of the ground at its own foot, where it is among the rest. Anything else - a unit, a
+  // city, ruins, a mountain - is a picture of what's on its whole tile, which turns there about its
+  // tile's middle (see GlobeSprites).
+  ownFoot: boolean;
   // For a skirt (see GlobeSprites.addSkirts()), how far above its foot the pixels it hangs from stop,
   // in world pixels; 0 for anything else.
   skirt: number;
@@ -79,6 +84,7 @@ class BillboardBatch {
     geometry.setAttribute("middleAnchor", new THREE.InstancedBufferAttribute(new Float32Array(capacity * 3), 3));
     geometry.setAttribute("fromMiddle", new THREE.InstancedBufferAttribute(new Float32Array(capacity * 2), 2));
     geometry.setAttribute("unturned", new THREE.InstancedBufferAttribute(new Float32Array(capacity), 1));
+    geometry.setAttribute("ownFoot", new THREE.InstancedBufferAttribute(new Float32Array(capacity), 1));
     geometry.setAttribute("skirt", new THREE.InstancedBufferAttribute(new Float32Array(capacity), 1));
     geometry.setAttribute("rect", new THREE.InstancedBufferAttribute(new Float32Array(capacity * 4), 4));
     geometry.setAttribute("atlasRect", new THREE.InstancedBufferAttribute(new Float32Array(capacity * 4), 4));
@@ -100,6 +106,7 @@ class BillboardBatch {
     const middleAnchors = geometry.getAttribute("middleAnchor") as THREE.InstancedBufferAttribute;
     const fromMiddles = geometry.getAttribute("fromMiddle") as THREE.InstancedBufferAttribute;
     const unturned = geometry.getAttribute("unturned") as THREE.InstancedBufferAttribute;
+    const ownFeet = geometry.getAttribute("ownFoot") as THREE.InstancedBufferAttribute;
     const skirts = geometry.getAttribute("skirt") as THREE.InstancedBufferAttribute;
     const rects = geometry.getAttribute("rect") as THREE.InstancedBufferAttribute;
     const atlasRects = geometry.getAttribute("atlasRect") as THREE.InstancedBufferAttribute;
@@ -110,12 +117,24 @@ class BillboardBatch {
       middleAnchors.setXYZ(index, ...GlobeSprites.middleOnSphere(projection, billboard));
       fromMiddles.setXY(index, billboard.footX - billboard.middleX, billboard.footY - billboard.middleY);
       unturned.setX(index, billboard.unturned ? 1 : 0);
+      ownFeet.setX(index, billboard.ownFoot ? 1 : 0);
       skirts.setX(index, billboard.skirt);
       rects.setXYZW(index, billboard.left, billboard.top, billboard.width, billboard.height);
       atlasRects.setXYZW(index, billboard.atlasX, billboard.atlasY, billboard.atlasWidth, billboard.atlasHeight);
       tints.setXYZW(index, ...billboard.tint);
     });
-    const attributes = [anchors, depthAnchors, middleAnchors, fromMiddles, unturned, skirts, rects, atlasRects, tints];
+    const attributes = [
+      anchors,
+      depthAnchors,
+      middleAnchors,
+      fromMiddles,
+      unturned,
+      ownFeet,
+      skirts,
+      rects,
+      atlasRects,
+      tints
+    ];
     for (const attribute of attributes) {
       attribute.needsUpdate = true;
     }
@@ -139,9 +158,12 @@ class BillboardBatch {
  * outline, which would stick out past its edge, stand straight out of the ground instead, as something
  * real would seen side on there: sideways at the planet's sides, upside down at its bottom (see
  * OUTLINE_REACH). Each does one or the other, never in between, and everything on a tile does the same.
- * There everything turns about its tile's middle, its foot set off from that as standing upright and
- * turned along with the picture: turned about its own foot, a picture covering its tile - a unit, a
- * city, a mountain - would swing off the tile, with its foot at the tile's bottom.
+ * There a picture of what's on its whole tile - a unit, a city, a mountain - turns about its tile's
+ * middle, its foot set off from that as standing upright and turned along with the picture: turned
+ * about its own foot at the tile's bottom, it would swing off the tile. But each of the pieces a
+ * forest's trees or a field's plants are cut into stands out of the ground at its own foot (see
+ * Billboard.ownFoot): turned together about the middle, those at the back of the tile would stack up
+ * out past the edge.
  * Nothing can stand upright in the middle and straight out all round the edge without turning over
  * somewhere in between, so this keeps the turn to the outline, out of the way. Upright map sprites and
  * units narrow where the ground tilts away toward the edge, so they don't crowd together there; labels
@@ -197,6 +219,7 @@ export class GlobeSprites {
     attribute vec3 middleAnchor;
     attribute vec2 fromMiddle;
     attribute float unturned;
+    attribute float ownFoot;
     attribute float skirt;
     attribute vec4 rect;
     attribute vec4 atlasRect;
@@ -263,8 +286,8 @@ export class GlobeSprites {
     void main() {
       bool outline = onOutline(middleAnchor);
       // Its foot set off from its tile's middle as it is standing upright - see Billboard.unturned - and on
-      // the outline, where everything stands so, turned with it straight out of the ground there.
-      bool fromItsMiddle = outline || unturned > 0.5;
+      // the outline, turned with it straight out of the ground there, but for a piece on its own foot.
+      bool fromItsMiddle = outline ? ownFoot < 0.5 : unturned > 0.5;
       vec3 standsOn = fromItsMiddle ? middleAnchor : anchor;
       vec3 normal = normalize(mat3(modelMatrix) * standsOn);
       vec3 foot = (modelMatrix * vec4(standsOn, 1.0)).xyz;
@@ -568,6 +591,7 @@ export class GlobeSprites {
           middleX: sprite.x + Tile.WIDTH / 2,
           middleY: sprite.y + Tile.HEIGHT / 2,
           unturned: !sprite.grounded,
+          ownFoot: !sprite.grounded && pieces.length > 1,
           overlay: false,
           skirt: 0,
           depthBack: sprite.grounded ? piece.height : 0,
@@ -673,6 +697,7 @@ export class GlobeSprites {
         middleX: middle[0],
         middleY: middle[1],
         unturned: !!options.tileMiddle,
+        ownFoot: false,
         overlay: !!options.overlay,
         skirt: 0,
         depthBack: 0,
@@ -797,7 +822,7 @@ export class GlobeSprites {
   private screenCorners(billboard: Billboard, camera: THREE.Camera): [number, number][] {
     const middleAnchor = new THREE.Vector3(...GlobeSprites.middleOnSphere(this.projection, billboard));
     const outline = this.onOutline(middleAnchor, camera);
-    const fromItsMiddle = outline || billboard.unturned;
+    const fromItsMiddle = outline ? !billboard.ownFoot : billboard.unturned;
     const anchor = fromItsMiddle
       ? middleAnchor
       : new THREE.Vector3(...GlobeSprites.footOnSphere(this.projection, billboard));
