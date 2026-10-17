@@ -1169,7 +1169,7 @@ describe('City', () => {
       expect(city.getCombatStrength()).toBeCloseTo((8 + 0.4 + 5 + 2) * 1.25);
     });
 
-    it('is drawn without walls until it builds them, then with the strongest it has', () => {
+    it('is drawn without walls until it builds them, then with the strongest its owner has the tech for', () => {
       expect(city.getWalls()).toBeNull();
 
       city.addBuilding('Walls');
@@ -1178,11 +1178,21 @@ describe('City', () => {
         expect.objectContaining({ event: 'cityAppearanceChanged', era: 'ancient', walls: 'walls' })
       );
 
+      // A Castle only shows once its owner knows Chivalry (the Medieval Era): before, it still looks like Walls.
       city.addBuilding('Castle');
+      expect(city.getWalls()).toBe('walls');
+
+      mockPlayer.hasResearchedTech.mockImplementation((tech: string) => tech === 'Chivalry');
+      city.sendAppearanceUpdate();
       expect(city.getWalls()).toBe('castle');
       expect(enemyPlayer.sendNetworkEvent).toHaveBeenLastCalledWith(
         expect.objectContaining({ event: 'cityAppearanceChanged', walls: 'castle' })
       );
+    });
+
+    it('knows Chivalry is the tech that shows a Castle', () => {
+      expect(City.changesWallLook('Chivalry')).toBe(true);
+      expect(City.changesWallLook('Pottery')).toBe(false);
     });
 
     it('is founded with the cityStartingHealth game option', () => {

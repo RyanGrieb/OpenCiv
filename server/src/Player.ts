@@ -491,6 +491,7 @@ export class Player {
     this.cities.forEach((city) => city.removeObsoleteUnitsFromQueue());
     this.sendTilesChangedByTech(techName);
     if (this.getEra().id !== previousEra.id) this.onEnteredEra();
+    else if (City.changesWallLook(techName)) this.cities.forEach((city) => city.sendAppearanceUpdate());
     this.sendResearchUpdate();
   }
 

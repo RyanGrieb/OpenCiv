@@ -72,8 +72,8 @@ export class City {
 
   // How far from the city a unit it gets for free may appear, when the tiles around it are taken.
   public static readonly FREE_UNIT_RANGE = 3;
-  // The buildings that ring a city with walls, strongest first: the strongest one built decides how
-  // its walls are drawn (see getWalls()).
+  // The buildings that ring a city with walls, strongest first: the strongest one built whose tech its
+  // owner knows decides how its walls are drawn (see getWalls()).
   private static readonly WALL_BUILDINGS = ["Castle", "Walls"];
 
   // The order of the stat line sent to the client (see getStatline()).
@@ -346,6 +346,11 @@ export class City {
         this.sendStatUpdate(this.player);
       }
     });
+  }
+
+  /** Whether learning the tech can change how some city's walls look (see getWalls()). */
+  public static changesWallLook(techName: string): boolean {
+    return City.WALL_BUILDINGS.some((name) => Building.createFromName(name)?.getRequiredTech() === techName);
   }
 
   /**
@@ -811,10 +816,20 @@ export class City {
     return this.buildings.some((building) => building.getName() === name);
   }
 
-  /** Which walls the city is drawn with ("walls", "castle"), or null when it has built none. */
+  /**
+   * Which walls the city is drawn with ("walls", "castle"), or null when it has built none. A wall
+   * building only shows once its owner knows its tech, so a Castle taken by a civ without Chivalry
+   * still looks like plain Walls rather than out of its era.
+   */
   public getWalls(): string | null {
-    const strongest = City.WALL_BUILDINGS.find((name) => this.hasBuilding(name));
-    return strongest ? strongest.toLowerCase() : null;
+    const built = City.WALL_BUILDINGS.filter((name) => this.hasBuilding(name));
+    if (built.length < 1) return null;
+
+    const ownersEra = built.find((name) => {
+      const tech = Building.createFromName(name)?.getRequiredTech();
+      return !tech || this.player.hasResearchedTech(tech);
+    });
+    return (ownersEra ?? built[built.length - 1]).toLowerCase();
   }
 
   public hasQueued(name: string): boolean {
