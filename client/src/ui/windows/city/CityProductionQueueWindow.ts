@@ -177,18 +177,19 @@ export class CityProductionQueueWindow extends ActorGroup {
     });
   }
 
-  // "Produce" (or "Add to Queue") with "Purchase" to its right, each with its icon on the left.
-  // Whichever list is open reads "Cancel" instead, without an icon.
+  // "Produce" (or "Add to Queue") with "Purchase" to its right. Produce and Purchase carry their icon on
+  // the left; Add to Queue and Cancel have none.
   private addBottomButtons(listMode: ProductionListMode | undefined, onToggleList: (mode: ProductionListMode) => void) {
     const gap = CityProductionQueueWindow.BUTTON_GAP;
     const buttonWidth = (CityProductionQueueWindow.WIDTH - gap * 3) / 2;
     const chooseX = CityProductionQueueWindow.X + gap;
     const y = this.windowY + CityProductionQueueWindow.HEIGHT - ButtonSize.LARGE.height - 4;
+    const chooseText = this.getChooseProductionText(listMode);
 
     this.addActor(
       this.createBottomButton(
-        this.getChooseProductionText(listMode),
-        listMode === "produce" ? undefined : SpriteRegion.ICON_PRODUCTION,
+        chooseText,
+        chooseText === "Produce" ? SpriteRegion.ICON_PRODUCTION : undefined,
         chooseX,
         y,
         buttonWidth,
