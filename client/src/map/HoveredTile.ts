@@ -1,4 +1,5 @@
 import { Game } from "../Game";
+import { Marking } from "../scene/Marking";
 import { Tile } from "./Tile";
 
 //FIXME: Replace with colored tile?
@@ -18,6 +19,7 @@ export class HoveredTile extends Tile {
       height: 32,
       movementCost: 0
     });
+    Marking.mark(this);
   }
 
   public setRepresentedTile(representedTile: Tile) {

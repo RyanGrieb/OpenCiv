@@ -3,6 +3,7 @@ import { Game } from "../../../Game";
 import { City } from "../../../city/City";
 import { Tile } from "../../../map/Tile";
 import { Actor } from "../../../scene/Actor";
+import { Marking } from "../../../scene/Marking";
 
 // Highlights each tile in the city's territory to show whether a citizen works it, and marks the
 // tile the borders grow into next. The overlays are added straight to the scene (not to the
@@ -74,6 +75,7 @@ export class CityTileOverlays {
   }
 
   private addOverlay(overlay: Actor) {
+    Marking.mark(overlay);
     Game.getInstance().getCurrentScene().addActor(overlay);
     this.overlays.push(overlay);
   }

@@ -14,7 +14,7 @@ interface Decal {
 }
 
 /**
- * Actors that lie on the ground over what stands up off it - the hovered tile - as the flat map draws
+ * Actors that lie on the ground over what stands up off it (see Marking), as the flat map draws
  * them over its trees, mountains and units, rather than painted into the ground under those (see
  * GlobeGround). Each is drawn by the game's own drawing code onto a canvas of its own, again only when
  * it changes, and laid on the globe as a picture bending with the ground. Lit like the ground, and
@@ -52,7 +52,9 @@ export class GlobeDecals {
       const print = new Fingerprint().addObject(actor).value();
       if (print === decal.print) continue;
 
-      decal.print = print;
+      // One whose image is still loading is drawn again next frame, until it's in.
+      const loading = (actor.getImage() as HTMLImageElement | undefined)?.complete === false;
+      decal.print = loading ? undefined : print;
       this.redraw(actor, decal, useView);
     }
   }

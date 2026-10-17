@@ -1,8 +1,9 @@
 import * as THREE from "three";
 import { Game } from "../Game";
-import { HoveredTile } from "../map/HoveredTile";
+import { Actor } from "../scene/Actor";
 import { WorldView } from "../scene/Camera";
 import { Line } from "../scene/Line";
+import { Marking } from "../scene/Marking";
 import { SceneObject } from "../scene/SceneObject";
 import { GlobeCaps } from "./GlobeCaps";
 import { GlobeGround } from "./GlobeGround";
@@ -227,13 +228,16 @@ export class GlobeView {
    */
   public drawWorld(objects: SceneObject[], zoom: number) {
     const useView = (view: WorldView) => (this.worldView = view);
-    // The hovered tile lies over what stands on the ground, as on the flat map, so it isn't painted into it.
-    const hovered = objects.filter((object): object is HoveredTile => object instanceof HoveredTile);
+    // What marks the ground for the player lies over what stands on it, as on the flat map, so it isn't
+    // painted into the ground.
     this.ground.update(
-      objects.filter((object) => !(object instanceof HoveredTile)),
+      objects.filter((object) => !Marking.is(object)),
       useView
     );
-    this.decals.update(hovered, useView);
+    this.decals.update(
+      objects.filter((object): object is Actor => object instanceof Actor && Marking.is(object)),
+      useView
+    );
     this.lines.update(objects.filter((object): object is Line => object instanceof Line));
     this.sprites.update(objects, zoom * this.renderer.getPixelRatio(), this.camera, useView);
     this.worldView = this.ground.view;
