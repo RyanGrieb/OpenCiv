@@ -85,4 +85,5 @@ Contributors: [Will Pewitt](https://github.com/willpewitt)
 
 ## License
 
-See [LICENSE](LICENSE).
+- **Source Code**: [MIT License](LICENSE)
+- **Artwork & Assets (`client/assets/`)**: [CC BY 4.0](LICENSE#assets--artwork)
