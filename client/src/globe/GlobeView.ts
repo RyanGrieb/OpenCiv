@@ -16,15 +16,16 @@ import { SolarSystem } from "./SolarSystem";
  * The game's map wrapped around a globe, inside the solar system, drawn with three.js on a canvas
  * behind the game's (whose UI stays on top). The map isn't rebuilt in 3D: the game draws it with
  * its usual drawing code, just not onto the screen. What lies on the ground - terrain, fog, territory
- * and the like - goes onto two canvases the size of the whole world (see GlobeGround), which the band
- * between the polar caps samples through GlobeProjection as its texture, but for its lines - borders,
+ * and the like - goes into a texture of the whole world, a texel to each world pixel (see GlobeGround),
+ * which the band between the polar caps samples through GlobeProjection, but for its lines - borders,
  * outlines, paths - which lie on it as strips, sharp however close (see GlobeLines); what stands up
  * off it - trees, mountains' peaks, cities, units, labels - stands up off the globe as billboards (see
- * GlobeSprites). Both are drawn again only when what's on them changes, so a frame of the globe
+ * GlobeSprites). Each is drawn again only where what's on it changes, so a frame of the globe
  * mostly costs the GPU drawing the planet, not the game drawing the map.
  */
 export class GlobeView {
   public static readonly FOV = 45;
+  // The biggest texture the sprites' atlases grow to (the ground's takes what the GPU allows).
   private static readonly MAX_TEXTURE_SIZE = 4096;
   private static readonly MAX_ANISOTROPY = 4;
   // Device pixels per CSS pixel from which the screen is sharp enough to draw the globe unsmoothed.
@@ -32,15 +33,14 @@ export class GlobeView {
   // The headlight's direction, toward it from what it lights, in the camera's space (three.js lights
   // a DirectionalLight's surfaces toward its position from its target).
   private static readonly HEADLIGHT = new THREE.Vector3(0.4, 0.6, 2).normalize();
-  // Shows where the map's canvases are empty: past its top and bottom rows' points, under the caps.
+  // Shows where the map's texture is empty: past its top and bottom rows' points, under the caps.
   private static readonly BACKDROP_COLOR = 0xdde4e8;
   private static readonly SPACE_COLOR = 0x03040a;
 
   // Fragment shader additions for the band: the ground's uniforms, the band point's position, and
   // the pixel-art sampler.
   private static readonly BAND_FRAGMENT_HEADER = `
-    uniform sampler2D terrainMap;
-    uniform sampler2D overlayMap;
+    uniform sampler2D groundMap;
     uniform vec2 groundSize;
     uniform float groundScale;
     uniform float worldWidth;
@@ -50,17 +50,17 @@ export class GlobeView {
     varying vec3 vGlobePoint;
     ${PixelArtSampling.GLSL}
 
-    // How far a point on the ground's canvases moves to the next pixel on screen - taken the short
-    // way round, as the canvases wrap around the globe and x jumps back to 0 where they meet.
+    // How far a point on the ground's texture moves to the next pixel on screen - taken the short
+    // way round, as the texture wraps around the globe and x jumps back to 0 where it meets itself.
     vec2 groundStep(vec2 step) {
       step.x -= groundSize.x * floor(step.x / groundSize.x + 0.5);
       return step;
     }
   `;
-  // GlobeProjection.toWorld() per pixel, then that world point on the ground's canvases, the
-  // overlay over the terrain (both with premultiplied alpha). Inside the map nothing is see-through
-  // (clouds cover the unexplored part); the edges of its top and bottom rows' tiles are partly
-  // covered, and anything at least half covered counts as covered, so they keep a crisp edge.
+  // GlobeProjection.toWorld() per pixel, then that world point on the ground's texture (with
+  // premultiplied alpha). Inside the map nothing is see-through (clouds cover the unexplored part);
+  // the edges of its top and bottom rows' tiles are partly covered, and anything at least half
+  // covered counts as covered, so they keep a crisp edge.
   private static readonly BAND_MAP_FRAGMENT = `
     vec3 globePoint = normalize(vGlobePoint);
     float longitude = atan(globePoint.x, globePoint.z);
@@ -73,9 +73,7 @@ export class GlobeView {
     vec2 groundTexel = vec2(world.x / worldWidth * groundSize.x, world.y * groundScale);
     vec2 stepX = groundStep(dFdx(groundTexel));
     vec2 stepY = groundStep(dFdy(groundTexel));
-    vec4 terrain = samplePixelArt(terrainMap, groundSize, groundTexel, stepX, stepY);
-    vec4 overlay = samplePixelArt(overlayMap, groundSize, groundTexel, stepX, stepY);
-    vec4 ground = overlay + terrain * (1.0 - overlay.a);
+    vec4 ground = samplePixelArt(groundMap, groundSize, groundTexel, stepX, stepY);
     vec3 mapColor = ground.rgb / max(ground.a, 1e-4);
     diffuseColor.rgb *= mix(backdropColor, mapColor, clamp(ground.a * 2.0, 0.0, 1.0));
   `;
@@ -94,8 +92,7 @@ export class GlobeView {
   private readonly lines: GlobeLines;
   private readonly sprites: GlobeSprites;
   private readonly bandUniforms = {
-    terrainMap: { value: null as THREE.Texture },
-    overlayMap: { value: null as THREE.Texture },
+    groundMap: { value: null as THREE.Texture },
     groundSize: { value: new THREE.Vector2(1, 1) },
     groundScale: { value: 1 },
     worldWidth: { value: 1 },
@@ -148,12 +145,13 @@ export class GlobeView {
 
     const maxTextureSize = Math.min(GlobeView.MAX_TEXTURE_SIZE, this.renderer.capabilities.maxTextureSize);
     const anisotropy = Math.min(GlobeView.MAX_ANISOTROPY, this.renderer.capabilities.getMaxAnisotropy());
-    this.ground = new GlobeGround(this.projection, maxTextureSize, anisotropy);
-    this.worldView = this.ground.terrain.view;
-    this.bandUniforms.terrainMap.value = this.ground.terrain.texture;
-    this.bandUniforms.overlayMap.value = this.ground.overlay.texture;
+    this.ground = new GlobeGround(this.projection, this.renderer, anisotropy);
+    this.worldView = this.ground.view;
+    this.bandUniforms.groundMap.value = this.ground.texture;
     this.bandUniforms.groundSize.value.set(...this.ground.getSize());
     this.bandUniforms.groundScale.value = this.ground.getScale();
+    // The GPU forgets the ground's texture along with its context, so it's drawn again once that's back.
+    canvas.addEventListener("webglcontextrestored", () => this.ground.redrawAll());
     this.lines = new GlobeLines(this.projection);
     this.planet.add(this.lines.mesh);
     this.sprites = new GlobeSprites(this.projection, this.planet, maxTextureSize);
@@ -227,7 +225,7 @@ export class GlobeView {
     this.ground.update(objects, useView);
     this.lines.update(objects.filter((object): object is Line => object instanceof Line));
     this.sprites.update(objects, zoom * this.renderer.getPixelRatio(), this.camera, useView);
-    this.worldView = this.ground.terrain.view;
+    this.worldView = this.ground.view;
   }
 
   public render() {
@@ -305,7 +303,7 @@ export class GlobeView {
     );
   }
 
-  // Lit like the caps (and the prototype's planets), its color from the ground's canvases. Pushed back
+  // Lit like the caps (and the prototype's planets), its color from the ground's texture. Pushed back
   // a little, so the caps win where they cover the gaps between the map's pointed top and bottom tiles.
   private createBandMaterial() {
     const material = new THREE.MeshLambertMaterial({

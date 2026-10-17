@@ -52,6 +52,8 @@ export class FogOfWarLayer extends Actor {
   private static readonly CLOUD_FADE = 0.2;
   // Cloud opacity snaps to this many steps, so the fade reads as pixel art rather than a gradient.
   private static readonly CLOUD_ALPHA_STEPS = 4;
+  // How many repainted areas are kept apart for takeRepaintedAreas() before they're merged into one.
+  private static readonly REPAINTED_AREAS = 32;
 
   private readonly gridWidth: number;
   private readonly gridHeight: number;
@@ -78,6 +80,10 @@ export class FogOfWarLayer extends Actor {
   private version = 0;
   // Tile-grid bounds of everything changed since the last rebuild, or null when up to date.
   private dirty: { minX: number; minY: number; maxX: number; maxY: number } | null = null;
+  // World areas the overlay was repainted in since takeRepaintedAreas() last asked.
+  private repainted: { x: number; y: number; width: number; height: number }[] = [];
+  // What drawArea() copies the overlay's pixels onto, to draw them from; made when first needed.
+  private areaContext: CanvasRenderingContext2D | undefined;
 
   constructor(gridWidth: number, gridHeight: number, wrapped: boolean) {
     const worldWidth = gridWidth * FogOfWarLayer.TILE_STRIDE_X + (wrapped ? 0 : FogOfWarLayer.TILE_CENTER_OFFSET);
@@ -204,6 +210,41 @@ export class FogOfWarLayer extends Actor {
     return Array.from(this.overlayPixels.data.slice(index, index + 4));
   }
 
+  /**
+   * The world areas the overlay looks different in since this was last asked - for a copy of it (the
+   * globe's) that redraws only what changed.
+   */
+  public takeRepaintedAreas() {
+    if (this.dirty) this.rebuild();
+
+    const areas = this.repainted;
+    this.repainted = [];
+    return areas;
+  }
+
+  /**
+   * Draws the overlay over a world area, where the context's transform puts world pixels, from its
+   * pixels rather than its canvas - which may be held by the GPU, and a canvas that isn't would then
+   * have to fetch the whole of it back to draw a small part of it.
+   */
+  public drawArea(context: CanvasRenderingContext2D, x: number, y: number, width: number, height: number) {
+    if (this.hiddenTiles === 0 && !this.edgesClouded) return;
+    if (this.dirty) this.rebuild();
+
+    const left = Math.max(0, Math.floor(x));
+    const top = Math.max(0, Math.floor(y));
+    const right = Math.min(this.width, Math.ceil(x + width));
+    const bottom = Math.min(this.height, Math.ceil(y + height));
+    if (right <= left || bottom <= top) return;
+
+    const area = this.areaCanvasFor(right - left, bottom - top);
+    area.putImageData(this.overlayPixels, -left, -top, left, top, right - left, bottom - top);
+    context.save();
+    context.imageSmoothingEnabled = false;
+    context.drawImage(area.canvas, 0, 0, right - left, bottom - top, left, top, right - left, bottom - top);
+    context.restore();
+  }
+
   public draw(canvasContext: CanvasRenderingContext2D) {
     const game = Game.getInstance();
     if (!game.isWorldContext(canvasContext)) return;
@@ -218,6 +259,18 @@ export class FogOfWarLayer extends Actor {
     canvasContext.imageSmoothingEnabled = false;
     canvasContext.drawImage(this.overlayCanvas, this.x, this.y, this.width, this.height);
     canvasContext.restore();
+  }
+
+  // A canvas at least this big for drawArea(), kept in memory (not on the GPU) as it's only drawn onto others there.
+  private areaCanvasFor(width: number, height: number): CanvasRenderingContext2D {
+    const canvas = this.areaContext?.canvas;
+    if (canvas && canvas.width >= width && canvas.height >= height) return this.areaContext;
+
+    const larger = document.createElement("canvas");
+    larger.width = Math.max(width, canvas?.width ?? 0);
+    larger.height = Math.max(height, canvas?.height ?? 0);
+    this.areaContext = larger.getContext("2d", { willReadFrequently: true });
+    return this.areaContext;
   }
 
   private markDirty(gridX: number, gridY: number) {
@@ -352,15 +405,34 @@ export class FogOfWarLayer extends Actor {
     const putLeft = inBounds ? writeLeft : 0;
     const putWidth = inBounds ? writeRight - writeLeft : this.cellsWide;
     const perCell = FogOfWarLayer.WORLD_PIXELS_PER_CELL;
+    const repainted = {
+      x: putLeft * perCell,
+      y: writeTop * perCell,
+      width: putWidth * perCell,
+      height: (writeBottom - writeTop) * perCell
+    };
     this.overlayContext.putImageData(
       this.overlayPixels,
       0,
       0,
-      putLeft * perCell,
-      writeTop * perCell,
-      putWidth * perCell,
-      (writeBottom - writeTop) * perCell
+      repainted.x,
+      repainted.y,
+      repainted.width,
+      repainted.height
     );
+    this.noteRepainted(repainted);
+  }
+
+  // Keeps an area for takeRepaintedAreas(); past REPAINTED_AREAS of them, merged into one around them all.
+  private noteRepainted(area: { x: number; y: number; width: number; height: number }) {
+    this.repainted.push(area);
+    if (this.repainted.length <= FogOfWarLayer.REPAINTED_AREAS) return;
+
+    const left = Math.min(...this.repainted.map((each) => each.x));
+    const top = Math.min(...this.repainted.map((each) => each.y));
+    const right = Math.max(...this.repainted.map((each) => each.x + each.width));
+    const bottom = Math.max(...this.repainted.map((each) => each.y + each.height));
+    this.repainted = [{ x: left, y: top, width: right - left, height: bottom - top }];
   }
 
   // Past the map's edge reads as unexplored, so the outermost tiles fade out like any unexplored

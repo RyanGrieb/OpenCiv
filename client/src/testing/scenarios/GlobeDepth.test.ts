@@ -34,8 +34,7 @@ export function setupGlobeDepthTest(game: Game) {
   const nameLabel = () => (cityTile?.getCity() as unknown as Record<string, any>)?.["nameLabel"];
   // How often each of the globe's pictures has been handed to the GPU.
   const uploads = () => [
-    globe()["ground"].terrain.texture.version,
-    globe()["ground"].overlay.texture.version,
+    globe()["ground"].patchesCopied,
     sprites()["labels"].texture.version,
     sprites()["pieces"].atlas.texture.version
   ];
@@ -433,7 +432,7 @@ export function setupGlobeDepthTest(game: Game) {
       await utils.delay(3000);
     },
     verification: () => {
-      const names = ["terrain", "ground overlay", "units and labels", "map sprites"];
+      const names = ["ground", "units and labels", "map sprites"];
       const redrawn = names.filter((name, index) => uploads()[index] !== uploadsBefore[index]);
       if (redrawn.length > 0) utils.log(`Drawn again: ${redrawn.join(", ")}`, "yellow");
       return redrawn.length === 0;
