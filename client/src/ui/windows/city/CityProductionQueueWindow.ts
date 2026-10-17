@@ -16,7 +16,6 @@ import { CityScreen } from "./CityScreen";
 export class CityProductionQueueWindow extends ActorGroup {
   private static readonly X = 0;
   private static readonly BUTTON_GAP = 8;
-  private static readonly PURCHASE_BUTTON_WIDTH = 160;
   private static readonly WIDTH = CityScreen.PRODUCTION_WINDOW_WIDTH;
   private static readonly HEIGHT = CityScreen.PRODUCTION_WINDOW_HEIGHT;
   private static readonly ROW_HEIGHT = CityScreen.PRODUCTION_ROW_HEIGHT;
@@ -182,8 +181,7 @@ export class CityProductionQueueWindow extends ActorGroup {
   // Whichever list is open reads "Cancel" instead, without an icon.
   private addBottomButtons(listMode: ProductionListMode | undefined, onToggleList: (mode: ProductionListMode) => void) {
     const gap = CityProductionQueueWindow.BUTTON_GAP;
-    const purchaseWidth = CityProductionQueueWindow.PURCHASE_BUTTON_WIDTH;
-    const chooseWidth = CityProductionQueueWindow.WIDTH - purchaseWidth - gap * 3;
+    const buttonWidth = (CityProductionQueueWindow.WIDTH - gap * 3) / 2;
     const chooseX = CityProductionQueueWindow.X + gap;
     const y = this.windowY + CityProductionQueueWindow.HEIGHT - ButtonSize.LARGE.height - 4;
 
@@ -193,7 +191,7 @@ export class CityProductionQueueWindow extends ActorGroup {
         listMode === "produce" ? undefined : SpriteRegion.ICON_PRODUCTION,
         chooseX,
         y,
-        chooseWidth,
+        buttonWidth,
         () => onToggleList("produce")
       )
     );
@@ -201,9 +199,9 @@ export class CityProductionQueueWindow extends ActorGroup {
       this.createBottomButton(
         listMode === "purchase" ? "Cancel" : "Purchase",
         listMode === "purchase" ? undefined : SpriteRegion.ICON_GOLD,
-        chooseX + chooseWidth + gap,
+        chooseX + buttonWidth + gap,
         y,
-        purchaseWidth,
+        buttonWidth,
         () => onToggleList("purchase")
       )
     );
