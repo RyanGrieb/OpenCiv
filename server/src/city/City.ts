@@ -72,6 +72,9 @@ export class City {
 
   // How far from the city a unit it gets for free may appear, when the tiles around it are taken.
   public static readonly FREE_UNIT_RANGE = 3;
+  // The buildings that ring a city with walls, strongest first: the strongest one built decides how
+  // its walls are drawn (see getWalls()).
+  private static readonly WALL_BUILDINGS = ["Castle", "Walls"];
 
   // The order of the stat line sent to the client (see getStatline()).
   private static readonly STAT_ORDER: (keyof CityStats)[] = [
@@ -456,6 +459,7 @@ export class City {
 
     BuildingEffects.onBuilt(this, building);
     this.updateWorkedTiles({ sendStatUpdate: true });
+    if (City.WALL_BUILDINGS.includes(name)) this.sendAppearanceUpdate();
   }
 
   /**
@@ -516,21 +520,22 @@ export class City {
   }
 
   /**
-   * Tells everyone who can see this city that its owner entered a new era, so it's redrawn in that
-   * era's style. Anyone else catches up when the city's tile next comes into view, since its tile data
-   * carries the city.
+   * Tells everyone who can see this city how it now looks - its owner entered a new era, or it built
+   * walls - so it's redrawn. Anyone else catches up when the city's tile next comes into view, since
+   * its tile data carries the city.
    */
-  public sendEraUpdate() {
+  public sendAppearanceUpdate() {
     Game.getInstance()
       .getPlayers()
       .forEach((player) => {
         if (!player.getVisibility().isVisible(this.tile)) return;
 
         player.sendNetworkEvent({
-          event: "cityEraChanged",
+          event: "cityAppearanceChanged",
           tileX: this.tile.getX(),
           tileY: this.tile.getY(),
-          era: this.player.getEra().id
+          era: this.player.getEra().id,
+          walls: this.getWalls()
         });
       });
   }
@@ -806,6 +811,12 @@ export class City {
     return this.buildings.some((building) => building.getName() === name);
   }
 
+  /** Which walls the city is drawn with ("walls", "castle"), or null when it has built none. */
+  public getWalls(): string | null {
+    const strongest = City.WALL_BUILDINGS.find((name) => this.hasBuilding(name));
+    return strongest ? strongest.toLowerCase() : null;
+  }
+
   public hasQueued(name: string): boolean {
     return this.productionQueue.some((item) => item.name === name);
   }
@@ -860,6 +871,8 @@ export class City {
       strength: this.getCombatStrength(),
       // The owner's era, which picks the look the city is drawn with.
       era: this.player.getEra().id,
+      // Drawn round the city once it builds them.
+      walls: this.getWalls(),
       // Which tiles a city works is its owner's business.
       workedTiles: ownCity ? this.workedTiles.map((tile) => ({ x: tile.getX(), y: tile.getY() })) : []
     };

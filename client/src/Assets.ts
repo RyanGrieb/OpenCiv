@@ -132,6 +132,11 @@ export enum SpriteRegion {
   TILE_CITY_MEDIEVAL_1,
   TILE_CITY_MEDIEVAL_2,
   TILE_CITY_MEDIEVAL_3,
+  // The ring a city's walls draw round it, in halves behind and in front of its buildings.
+  TILE_CITY_WALLS_BACK,
+  TILE_CITY_WALLS_FRONT,
+  TILE_CITY_CASTLE_BACK,
+  TILE_CITY_CASTLE_FRONT,
   TILE_BARBARIAN_CAMP,
   TILE_ANCIENT_RUINS,
   // Natural wonders - see server config/natural_wonders.yml.

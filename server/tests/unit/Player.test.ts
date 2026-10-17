@@ -193,14 +193,14 @@ describe('Player', () => {
     });
 
     it('announces a new era and has every city redrawn in its style', () => {
-      const city = { ...makeMockCity({}), sendEraUpdate: jest.fn() };
+      const city = { ...makeMockCity({}), sendAppearanceUpdate: jest.fn() };
       player['cities'].push(city as unknown as City);
       player.researchAllTechs();
       const addMessage = jest.spyOn(player.getNotifications(), 'addMessage');
 
       player['onEnteredEra']();
 
-      expect(city.sendEraUpdate).toHaveBeenCalled();
+      expect(city.sendAppearanceUpdate).toHaveBeenCalled();
       expect(addMessage).toHaveBeenCalledWith('TILE_CITY_MEDIEVAL_1', 'You have entered the Medieval Era.');
     });
   });

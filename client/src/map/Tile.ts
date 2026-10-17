@@ -210,6 +210,16 @@ export class Tile extends Actor {
   }
 
   /**
+   * The tile types a city at (gridX, gridY) is drawn with, in order: the back half of its walls (if it
+   * has any, e.g. "walls" or "castle"), the city itself (see getCityType()), then the front half of
+   * its walls over the buildings.
+   */
+  public static getCityTypes(era: string, walls: string | null, gridX: number, gridY: number): string[] {
+    const city = Tile.getCityType(era, gridX, gridY);
+    return walls ? [`city_${walls}_back`, city, `city_${walls}_front`] : [city];
+  }
+
+  /**
    * The tile type whose sprite draws a city of the given era (an era id from the server, like
    * "classical") at (gridX, gridY): one of that era's looks, picked from a hash of the coordinates
    * so a city keeps its look until its owner enters a new era.

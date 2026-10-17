@@ -1169,6 +1169,22 @@ describe('City', () => {
       expect(city.getCombatStrength()).toBeCloseTo((8 + 0.4 + 5 + 2) * 1.25);
     });
 
+    it('is drawn without walls until it builds them, then with the strongest it has', () => {
+      expect(city.getWalls()).toBeNull();
+
+      city.addBuilding('Walls');
+      expect(city.getWalls()).toBe('walls');
+      expect(enemyPlayer.sendNetworkEvent).toHaveBeenCalledWith(
+        expect.objectContaining({ event: 'cityAppearanceChanged', era: 'ancient', walls: 'walls' })
+      );
+
+      city.addBuilding('Castle');
+      expect(city.getWalls()).toBe('castle');
+      expect(enemyPlayer.sendNetworkEvent).toHaveBeenLastCalledWith(
+        expect.objectContaining({ event: 'cityAppearanceChanged', walls: 'castle' })
+      );
+    });
+
     it('is founded with the cityStartingHealth game option', () => {
       (Game.getInstance().getGameOptions as jest.Mock).mockReturnValue({ cityStartingHealth: 30 });
 
@@ -1419,6 +1435,7 @@ describe('City', () => {
     });
 
     it('gives the Alhambra city a free Castle', () => {
+      (mockPlayer as any).getVisibility = () => ({ isVisible: () => true });
       city.addBuilding('Alhambra');
 
       expect(city.hasBuilding('Castle')).toBe(true);

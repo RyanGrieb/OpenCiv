@@ -25,6 +25,8 @@ export interface CityOptions {
   strength: number;
   // The owner's era id from the server ("ancient", "classical", ...), which picks the city's look.
   era: string;
+  // The strongest walls the city has built ("walls", "castle"), or null - drawn round it.
+  walls: string | null;
 }
 
 // Server "cityCombatStatus" payload, from server City.refreshCombatStatus().
@@ -98,6 +100,7 @@ export class City extends ActorGroup {
   private strength: number;
   private strikeReady: boolean;
   private era: string;
+  private walls: string | null;
   private innerBorderColor: string;
   private outsideBorderColor: string;
   private buildings: Buidling[];
@@ -120,6 +123,7 @@ export class City extends ActorGroup {
     this.strikeReady = false;
     // Before the center tile is attached below, which draws the city in this era's style.
     this.era = options.era ?? City.DEFAULT_ERA;
+    this.walls = options.walls ?? null;
 
     this.innerBorderColor = this.player.getCivilizationData()["inside_border_color"];
     this.outsideBorderColor = this.player.getCivilizationData()["outside_border_color"];
@@ -315,16 +319,22 @@ export class City extends ActorGroup {
     Game.getInstance().getCurrentScene().removeActor(this);
   }
 
-  /** Redraws the city in another era's style when its owner enters one. */
-  public setEra(era: string) {
-    if (!era || era === this.era) return;
+  /** Redraws the city when its owner enters a new era or it builds walls. */
+  public setAppearance(era: string, walls: string | null) {
+    walls = walls ?? null;
+    if (!era || (era === this.era && walls === this.walls)) return;
 
     this.era = era;
+    this.walls = walls;
     if (this.tile) GameMap.getInstance().redrawMap([this.tile]);
   }
 
   public getEra() {
     return this.era;
+  }
+
+  public getWalls() {
+    return this.walls;
   }
 
   // The sprite the city is drawn with on the map, for showing it elsewhere (the combat preview).

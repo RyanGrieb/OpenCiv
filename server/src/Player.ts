@@ -498,7 +498,7 @@ export class Player {
   private onEnteredEra() {
     const era = this.getEra();
     this.notifications.addMessage(`TILE_CITY_${era.id.toUpperCase()}_1`, `You have entered the ${era.name}.`);
-    this.cities.forEach((city) => city.sendEraUpdate());
+    this.cities.forEach((city) => city.sendAppearanceUpdate());
   }
 
   // Resends the tiles a new tech changes for this player - resources it reveals, tiles it boosts - and

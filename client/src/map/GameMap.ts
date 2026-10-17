@@ -89,13 +89,16 @@ interface CityData {
   strength: number;
   // The owner's era id ("ancient", "classical", ...), which picks the city's look.
   era: string;
+  // The strongest walls the city has built ("walls", "castle"), or null.
+  walls: string | null;
 }
 
-// Server "cityEraChanged": the city's owner entered a new era.
-interface CityEraChangedEvent {
+// Server "cityAppearanceChanged": the city's owner entered a new era, or it built walls.
+interface CityAppearanceChangedEvent {
   tileX: number;
   tileY: number;
   era: string;
+  walls: string | null;
 }
 
 interface TileUpdatedEvent {
@@ -235,12 +238,12 @@ export class GameMap {
       }
     });
 
-    // The city's owner entered a new era, so it's drawn in that era's style (see server City.sendEraUpdate()).
-    NetworkEvents.on<CityEraChangedEvent>({
-      eventName: "cityEraChanged",
+    // The city's owner entered a new era or it built walls, so it's redrawn (see server City.sendAppearanceUpdate()).
+    NetworkEvents.on<CityAppearanceChangedEvent>({
+      eventName: "cityAppearanceChanged",
       parentObject: this,
       callback: (data) => {
-        this.knownCities.get(`${data.tileX},${data.tileY}`)?.setEra(data.era);
+        this.knownCities.get(`${data.tileX},${data.tileY}`)?.setAppearance(data.era, data.walls);
       }
     });
 
@@ -733,7 +736,7 @@ export class GameMap {
 
     const existingCity = this.knownCities.get(key);
     if (existingCity) {
-      existingCity.setEra(cityJSON.era);
+      existingCity.setAppearance(cityJSON.era, cityJSON.walls);
       existingCity.setTerritory(territory);
       existingCity.setCenterTile(centerTile);
       return;
@@ -916,12 +919,13 @@ export class GameMap {
 
         // A road runs over a farm's fields but under trees, resources and their improvements, as on
         // old_java - ores and their mines lie on the ground over it, but don't stand up on the globe.
+        const city = tile.getCity();
         const overlayTypes = tileTypes
           .slice(1)
-          .map((type) =>
+          .flatMap((type) =>
             type === "city"
-              ? Tile.getCityType(tile.getCity()?.getEra() ?? City.DEFAULT_ERA, gridX, gridY)
-              : Tile.getVariantFeatureType(type, tileTypes[0], gridX, gridY)
+              ? Tile.getCityTypes(city?.getEra() ?? City.DEFAULT_ERA, city?.getWalls() ?? null, gridX, gridY)
+              : [Tile.getVariantFeatureType(type, tileTypes[0], gridX, gridY)]
           );
         const underRoad = overlayTypes.filter((type) => Tile.UNDER_ROAD_TILE_TYPES.includes(type));
         const flat = overlayTypes.filter((type) => Tile.FLAT_TILE_TYPES.includes(type));
@@ -1293,7 +1297,8 @@ export class GameMap {
       health: data.health,
       maxHealth: data.maxHealth,
       strength: data.strength,
-      era: data.era
+      era: data.era,
+      walls: data.walls
     });
   }
 }
