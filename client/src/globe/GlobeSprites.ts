@@ -139,6 +139,9 @@ class BillboardBatch {
  * outline, which would stick out past its edge, stand straight out of the ground instead, as something
  * real would seen side on there: sideways at the planet's sides, upside down at its bottom (see
  * OUTLINE_REACH). Each does one or the other, never in between, and everything on a tile does the same.
+ * There everything turns about its tile's middle, its foot set off from that as standing upright and
+ * turned along with the picture: turned about its own foot, a picture covering its tile - a unit, a
+ * city, a mountain - would swing off the tile, with its foot at the tile's bottom.
  * Nothing can stand upright in the middle and straight out all round the edge without turning over
  * somewhere in between, so this keeps the turn to the outline, out of the way. Upright map sprites and
  * units narrow where the ground tilts away toward the edge, so they don't crowd together there; labels
@@ -259,8 +262,9 @@ export class GlobeSprites {
 
     void main() {
       bool outline = onOutline(middleAnchor);
-      // Upright, its foot set off from its tile's middle with down kept down - see Billboard.unturned.
-      bool fromItsMiddle = !outline && unturned > 0.5;
+      // Its foot set off from its tile's middle as it is standing upright - see Billboard.unturned - and on
+      // the outline, where everything stands so, turned with it straight out of the ground there.
+      bool fromItsMiddle = outline || unturned > 0.5;
       vec3 standsOn = fromItsMiddle ? middleAnchor : anchor;
       vec3 normal = normalize(mat3(modelMatrix) * standsOn);
       vec3 foot = (modelMatrix * vec4(standsOn, 1.0)).xyz;
@@ -276,9 +280,9 @@ export class GlobeSprites {
       #ifdef NARROWS
         if (!outline) local.x *= narrowing(outward, facing);
       #endif
-      if (fromItsMiddle) local += footFromMiddle(middleAnchor, corner.xyz, fromMiddle, pixel);
       // A skirt reaches down from what it hangs from to the ground under that, seen side on as that is.
       if (skirt > 0.0) local.y = -skirt * mix(1.0, clamp(facing, 0.0, 1.0), position.y) * pixel;
+      if (fromItsMiddle) local += footFromMiddle(middleAnchor, corner.xyz, fromMiddle, pixel);
       float depth = -(viewMatrix * modelMatrix * vec4(depthAnchor, 1.0)).z;
       corner.xy += vec2(up.y, -up.x) * local.x - up * local.y;
       gl_Position = projectionMatrix * corner;
@@ -793,7 +797,7 @@ export class GlobeSprites {
   private screenCorners(billboard: Billboard, camera: THREE.Camera): [number, number][] {
     const middleAnchor = new THREE.Vector3(...GlobeSprites.middleOnSphere(this.projection, billboard));
     const outline = this.onOutline(middleAnchor, camera);
-    const fromItsMiddle = !outline && billboard.unturned;
+    const fromItsMiddle = outline || billboard.unturned;
     const anchor = fromItsMiddle
       ? middleAnchor
       : new THREE.Vector3(...GlobeSprites.footOnSphere(this.projection, billboard));
