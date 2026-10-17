@@ -63,15 +63,21 @@ interface StandingObject {
   billboard: Billboard;
 }
 
-// Billboards drawn from one atlas with one material, as the instances of one mesh.
+// Billboards drawn from one atlas, as the instances of two meshes with one geometry: one drawing them
+// upright, one straight out of the ground (see GlobeSprites.OUTLINE_BLEND), each fading out as the other
+// fades in.
 class BillboardBatch {
-  public readonly mesh: THREE.Mesh<THREE.InstancedBufferGeometry, THREE.ShaderMaterial>;
+  public readonly meshes: THREE.Mesh<THREE.InstancedBufferGeometry, THREE.ShaderMaterial>[];
   private capacity = 0;
 
-  constructor(material: THREE.ShaderMaterial) {
-    this.mesh = new THREE.Mesh(BillboardBatch.createGeometry(0), material);
-    // Each instance places itself in the shader, so the mesh's own bounds mean nothing.
-    this.mesh.frustumCulled = false;
+  constructor(upright: THREE.ShaderMaterial, outline: THREE.ShaderMaterial) {
+    const geometry = BillboardBatch.createGeometry(0);
+    this.meshes = [upright, outline].map((material) => {
+      const mesh = new THREE.Mesh(geometry, material);
+      // Each instance places itself in the shader, so the mesh's own bounds mean nothing.
+      mesh.frustumCulled = false;
+      return mesh;
+    });
   }
 
   // A unit square (x right, y down), one instance per billboard, with room for `capacity` of them.
@@ -96,11 +102,12 @@ class BillboardBatch {
   public set(billboards: Billboard[], projection: GlobeProjection) {
     if (billboards.length > this.capacity) {
       this.capacity = Math.max(64, 2 ** Math.ceil(Math.log2(billboards.length)));
-      this.mesh.geometry.dispose();
-      this.mesh.geometry = BillboardBatch.createGeometry(this.capacity);
+      this.meshes[0].geometry.dispose();
+      const created = BillboardBatch.createGeometry(this.capacity);
+      this.meshes.forEach((mesh) => (mesh.geometry = created));
     }
 
-    const geometry = this.mesh.geometry;
+    const geometry = this.meshes[0].geometry;
     const anchors = geometry.getAttribute("anchor") as THREE.InstancedBufferAttribute;
     const depthAnchors = geometry.getAttribute("depthAnchor") as THREE.InstancedBufferAttribute;
     const middleAnchors = geometry.getAttribute("middleAnchor") as THREE.InstancedBufferAttribute;
@@ -142,7 +149,7 @@ class BillboardBatch {
   }
 
   public dispose() {
-    this.mesh.geometry.dispose();
+    this.meshes[0].geometry.dispose();
   }
 }
 
@@ -157,7 +164,8 @@ class BillboardBatch {
  * stays on its tile, and the picture right over it, without swinging round it. Only those on its
  * outline, which would stick out past its edge, stand straight out of the ground instead, as something
  * real would seen side on there: sideways at the planet's sides, upside down at its bottom (see
- * OUTLINE_REACH). Each does one or the other, never in between, and everything on a tile does the same.
+ * OUTLINE_REACH). Each does one or the other, and everything on a tile does the same: but a tile crossing
+ * between them fades from one to the other rather than snapping (see OUTLINE_BLEND).
  * There a picture of what's on its whole tile - a unit, a city, a mountain - turns about its tile's
  * middle, its foot set off from that as the ground looks seen side on (see footFromMiddle()), so along
  * the edge but neither out over it nor sunk below it: turned about its own foot at the tile's bottom,
@@ -196,6 +204,10 @@ export class GlobeSprites {
   // (see Billboard.middleX) is within this many world pixels of the planet's outline on screen: half a
   // tile's height, so that at least half of one standing out there sticks out past the edge.
   private static readonly OUTLINE_REACH = 16;
+  // A tile crossing that distance doesn't snap from one to the other: within this many world pixels of
+  // it, each way, it's drawn both upright and straight out, one fading out as the other fades in (in
+  // dither for the map's sprites, which write depth, in opacity for labels).
+  private static readonly OUTLINE_BLEND = 5;
   // For the depth test alone, billboards with their feet in view are brought in front of all of the
   // planet's ground, in the order of their feet: between these fractions of the nearest it can be.
   // Nothing standing on the side of a round planet in view is behind its ground, except where one on
@@ -234,16 +246,19 @@ export class GlobeSprites {
     varying vec2 vAtlas;
     varying vec4 vTint;
     varying float vLight;
+    varying float vFade;
 
-    // Whether what stands at a point on the unit sphere stands straight out of the ground rather than
-    // upright: whether it's within OUTLINE_REACH world pixels of the planet's outline on screen - see
+    // How far what stands at a point on the unit sphere stands straight out of the ground rather than
+    // upright, 0 to 1: 1 within OUTLINE_REACH world pixels of the planet's outline on screen and 0 beyond
+    // OUTLINE_BLEND more of them from it, and in between a smooth turn from one to the other - see
     // GlobeSprites.onOutline().
-    bool onOutline(vec3 point) {
+    float outlineAmount(vec3 point) {
       vec3 normal = normalize(mat3(modelMatrix) * point);
       float facingUs = max(dot(normal, normalize(cameraPosition - (modelMatrix * vec4(point, 1.0)).xyz)), 0.0);
       // How far out across the planet's disc it is: 1 on its outline, and past it.
       float across = sqrt(1.0 - facingUs * facingUs);
-      return across >= 1.0 - OUTLINE_REACH * worldPixel * sqrt(max(0.0, 1.0 - point.y * point.y));
+      float pixel = worldPixel * sqrt(max(0.0, 1.0 - point.y * point.y));
+      return smoothstep(1.0 - (OUTLINE_REACH + OUTLINE_BLEND) * pixel, 1.0 - (OUTLINE_REACH - OUTLINE_BLEND) * pixel, across);
     }
 
     // Which way is out from the planet's middle on screen at a foot, from it and the ground's normal there
@@ -290,7 +305,10 @@ export class GlobeSprites {
     }
 
     void main() {
-      bool outline = onOutline(middleAnchor);
+      // Drawn in one pose by each of two meshes, each fading out as the other fades in.
+      bool outline = OUTLINE_POSE == 1;
+      float outlineWeight = outlineAmount(middleAnchor);
+      vFade = outline ? outlineWeight : 1.0 - outlineWeight;
       // Its foot set off from its tile's middle as it is standing upright - see Billboard.unturned - and on
       // the outline, turned with it straight out of the ground there, but for a piece on its own foot.
       bool fromItsMiddle = outline ? ownFoot < 0.5 : unturned > 0.5;
@@ -323,7 +341,7 @@ export class GlobeSprites {
       vec4 placed = projectionMatrix * vec4(corner.xy, -depth, 1.0);
       gl_Position.z = placed.z / placed.w * gl_Position.w;
       // Hidden by clouds; or past the horizon, where a label drawn over everything would show through the planet.
-      if (tint.a < 0.0 || (lit < 0.5 && facing < 0.0)) gl_Position = vec4(0.0, 0.0, 2.0, 1.0);
+      if (tint.a < 0.0 || vFade <= 0.0 || (lit < 0.5 && facing < 0.0)) gl_Position = vec4(0.0, 0.0, 2.0, 1.0);
 
       vAtlas = atlasRect.xy + position.xy * atlasRect.zw;
       vTint = tint;
@@ -338,13 +356,25 @@ export class GlobeSprites {
     varying vec2 vAtlas;
     varying vec4 vTint;
     varying float vLight;
+    varying float vFade;
     ${PixelArtSampling.GLSL}
+
+    // An ordered 4x4 dither threshold, 0 to 1, for the pixel on screen.
+    float dither(vec2 pixel) {
+      vec2 fine = mod(floor(pixel), 2.0);
+      vec2 coarse = mod(floor(pixel / 2.0), 2.0);
+      return (4.0 * mod(2.0 * fine.x + 3.0 * fine.y, 4.0) + mod(2.0 * coarse.x + 3.0 * coarse.y, 4.0) + 0.5) / 16.0;
+    }
 
     void main() {
       vec4 color = samplePixelArt(atlas, atlasSize, vAtlas, dFdx(vAtlas), dFdy(vAtlas));
       #ifdef CUTOUT
         if (color.a < 0.5) discard;
         color.a = 1.0;
+        // Fading between poses with the depth test on: dropping pixels, rather than blending them.
+        if (vFade < 1.0 && vFade <= dither(gl_FragCoord.xy)) discard;
+      #else
+        color.a *= vFade;
       #endif
       color.rgb = mix(color.rgb, pow(vTint.rgb, vec3(2.2)), max(vTint.a, 0.0)) * vLight;
       gl_FragColor = color;
@@ -368,7 +398,7 @@ export class GlobeSprites {
   private readonly mapSprites: BillboardBatch;
   private readonly units: BillboardBatch;
   private readonly overlay: BillboardBatch;
-  private readonly materials: THREE.ShaderMaterial[];
+  private readonly materials: THREE.ShaderMaterial[][];
   // The map's sprites as last built, and what of the map and its fog of war they were built from.
   private mapBillboards: Billboard[] = [];
   private builtVersion = -1;
@@ -389,16 +419,20 @@ export class GlobeSprites {
     this.pieces = new StandingPieces(maxTextureSize);
     this.labels = new AtlasCanvas(1024, 256, maxTextureSize);
 
+    // Each batch's materials: upright, then straight out of the ground.
     this.materials = [
-      this.createMaterial(true, 0),
-      this.createMaterial(true, GlobeSprites.UNIT_DEPTH_LIFT),
-      this.createMaterial(false, 0)
+      [this.createMaterial(true, 0, false), this.createMaterial(true, 0, true)],
+      [
+        this.createMaterial(true, GlobeSprites.UNIT_DEPTH_LIFT, false),
+        this.createMaterial(true, GlobeSprites.UNIT_DEPTH_LIFT, true)
+      ],
+      [this.createMaterial(false, 0, false), this.createMaterial(false, 0, true)]
     ];
-    this.mapSprites = new BillboardBatch(this.materials[0]);
-    this.units = new BillboardBatch(this.materials[1]);
-    this.overlay = new BillboardBatch(this.materials[2]);
-    this.overlay.mesh.renderOrder = GlobeSprites.OVERLAY_RENDER_ORDER;
-    planet.add(this.mapSprites.mesh, this.units.mesh, this.overlay.mesh);
+    this.mapSprites = new BillboardBatch(...(this.materials[0] as [THREE.ShaderMaterial, THREE.ShaderMaterial]));
+    this.units = new BillboardBatch(...(this.materials[1] as [THREE.ShaderMaterial, THREE.ShaderMaterial]));
+    this.overlay = new BillboardBatch(...(this.materials[2] as [THREE.ShaderMaterial, THREE.ShaderMaterial]));
+    this.overlay.meshes.forEach((mesh) => (mesh.renderOrder = GlobeSprites.OVERLAY_RENDER_ORDER));
+    planet.add(...this.mapSprites.meshes, ...this.units.meshes, ...this.overlay.meshes);
   }
 
   /** A billboard's foot as a point on the unit sphere, or the point `back` world pixels up the map from it. */
@@ -520,15 +554,15 @@ export class GlobeSprites {
 
   public dispose() {
     for (const batch of [this.mapSprites, this.units, this.overlay]) {
-      batch.mesh.removeFromParent();
+      batch.meshes.forEach((mesh) => mesh.removeFromParent());
       batch.dispose();
     }
-    this.materials.forEach((material) => material.dispose());
+    this.materials.flat().forEach((material) => material.dispose());
     this.pieces.dispose();
     this.labels.dispose();
   }
 
-  private createMaterial(cutout: boolean, depthLift: number) {
+  private createMaterial(cutout: boolean, depthLift: number, outlinePose: boolean) {
     return new THREE.ShaderMaterial({
       uniforms: {
         atlas: { value: null as THREE.Texture },
@@ -546,6 +580,8 @@ export class GlobeSprites {
         AMBIENT: GlobeSprites.AMBIENT.toFixed(3),
         DIRECT: GlobeSprites.DIRECT.toFixed(3),
         OUTLINE_REACH: GlobeSprites.OUTLINE_REACH.toFixed(3),
+        OUTLINE_BLEND: GlobeSprites.OUTLINE_BLEND.toFixed(3),
+        OUTLINE_POSE: outlinePose ? "1" : "0",
         ROW_STRETCH: this.rowStretch().toFixed(6),
         IN_FRONT_FROM: GlobeSprites.IN_FRONT_FROM.toFixed(3),
         IN_FRONT_TO: GlobeSprites.IN_FRONT_TO.toFixed(3)
@@ -795,9 +831,11 @@ export class GlobeSprites {
     return overlay.map(({ billboard }) => billboard);
   }
 
-  private useAtlas(material: THREE.ShaderMaterial, atlas: AtlasCanvas) {
-    material.uniforms.atlas.value = atlas.texture;
-    material.uniforms.atlasSize.value.set(...atlas.getSize());
+  private useAtlas(materials: THREE.ShaderMaterial[], atlas: AtlasCanvas) {
+    for (const material of materials) {
+      material.uniforms.atlas.value = atlas.texture;
+      material.uniforms.atlasSize.value.set(...atlas.getSize());
+    }
   }
 
   private footInWorld(billboard: Billboard) {
@@ -917,7 +955,7 @@ export class GlobeSprites {
   }
 
   // Whether what stands at a point on the unit sphere is on the planet's outline on screen this frame,
-  // within OUTLINE_REACH world pixels of it, as the vertex shader's onOutline() judges it.
+  // within OUTLINE_REACH world pixels of it, as the vertex shader's outlineAmount() judges it, past halfway.
   private onOutline(point: THREE.Vector3, camera: THREE.Camera) {
     const normal = point.clone().transformDirection(this.planet.matrixWorld);
     const toCamera = camera.position.clone().sub(point.clone().applyMatrix4(this.planet.matrixWorld)).normalize();
