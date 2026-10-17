@@ -36,6 +36,13 @@ interface Billboard {
   // city, ruins, a mountain - is a picture of what's on its whole tile, which turns there about its
   // tile's middle (see GlobeSprites).
   ownFoot: boolean;
+  // Which pose it has committed to: 1 straight out of the ground, 0 upright, or -1 before it has been
+  // decided - see GlobeSprites.updatePoses() - and when, in seconds on the sprites' clock, it started
+  // fading to it from the other (long ago if it hasn't).
+  pose: number;
+  poseSince: number;
+  // Its tile's middle as a point on the unit sphere, once found.
+  middleUnit?: [number, number, number];
   // For a skirt (see GlobeSprites.addSkirts()), how far above its foot the pixels it hangs from stop,
   // in world pixels; 0 for anything else.
   skirt: number;
@@ -64,7 +71,7 @@ interface StandingObject {
 }
 
 // Billboards drawn from one atlas, as the instances of two meshes with one geometry: one drawing them
-// upright, one straight out of the ground (see GlobeSprites.OUTLINE_BLEND), each fading out as the other
+// upright, one straight out of the ground (see GlobeSprites.POSE_FADE), each fading out as the other
 // fades in.
 class BillboardBatch {
   public readonly meshes: THREE.Mesh<THREE.InstancedBufferGeometry, THREE.ShaderMaterial>[];
@@ -92,6 +99,8 @@ class BillboardBatch {
     geometry.setAttribute("unturned", new THREE.InstancedBufferAttribute(new Float32Array(capacity), 1));
     geometry.setAttribute("ownFoot", new THREE.InstancedBufferAttribute(new Float32Array(capacity), 1));
     geometry.setAttribute("skirt", new THREE.InstancedBufferAttribute(new Float32Array(capacity), 1));
+    geometry.setAttribute("pose", new THREE.InstancedBufferAttribute(new Float32Array(capacity), 1));
+    geometry.setAttribute("poseSince", new THREE.InstancedBufferAttribute(new Float32Array(capacity), 1));
     geometry.setAttribute("rect", new THREE.InstancedBufferAttribute(new Float32Array(capacity * 4), 4));
     geometry.setAttribute("atlasRect", new THREE.InstancedBufferAttribute(new Float32Array(capacity * 4), 4));
     geometry.setAttribute("tint", new THREE.InstancedBufferAttribute(new Float32Array(capacity * 4), 4));
@@ -115,6 +124,8 @@ class BillboardBatch {
     const unturned = geometry.getAttribute("unturned") as THREE.InstancedBufferAttribute;
     const ownFeet = geometry.getAttribute("ownFoot") as THREE.InstancedBufferAttribute;
     const skirts = geometry.getAttribute("skirt") as THREE.InstancedBufferAttribute;
+    const poses = geometry.getAttribute("pose") as THREE.InstancedBufferAttribute;
+    const posesSince = geometry.getAttribute("poseSince") as THREE.InstancedBufferAttribute;
     const rects = geometry.getAttribute("rect") as THREE.InstancedBufferAttribute;
     const atlasRects = geometry.getAttribute("atlasRect") as THREE.InstancedBufferAttribute;
     const tints = geometry.getAttribute("tint") as THREE.InstancedBufferAttribute;
@@ -126,6 +137,8 @@ class BillboardBatch {
       unturned.setX(index, billboard.unturned ? 1 : 0);
       ownFeet.setX(index, billboard.ownFoot ? 1 : 0);
       skirts.setX(index, billboard.skirt);
+      poses.setX(index, billboard.pose);
+      posesSince.setX(index, billboard.poseSince);
       rects.setXYZW(index, billboard.left, billboard.top, billboard.width, billboard.height);
       atlasRects.setXYZW(index, billboard.atlasX, billboard.atlasY, billboard.atlasWidth, billboard.atlasHeight);
       tints.setXYZW(index, ...billboard.tint);
@@ -138,6 +151,8 @@ class BillboardBatch {
       unturned,
       ownFeet,
       skirts,
+      poses,
+      posesSince,
       rects,
       atlasRects,
       tints
@@ -146,6 +161,19 @@ class BillboardBatch {
       attribute.needsUpdate = true;
     }
     geometry.instanceCount = billboards.length;
+  }
+
+  // Writes only each billboard's pose, when only that changed.
+  public setPoses(billboards: Billboard[]) {
+    const geometry = this.meshes[0].geometry;
+    const poses = geometry.getAttribute("pose") as THREE.InstancedBufferAttribute;
+    const posesSince = geometry.getAttribute("poseSince") as THREE.InstancedBufferAttribute;
+    billboards.forEach((billboard, index) => {
+      poses.setX(index, billboard.pose);
+      posesSince.setX(index, billboard.poseSince);
+    });
+    poses.needsUpdate = true;
+    posesSince.needsUpdate = true;
   }
 
   public dispose() {
@@ -165,7 +193,7 @@ class BillboardBatch {
  * outline, which would stick out past its edge, stand straight out of the ground instead, as something
  * real would seen side on there: sideways at the planet's sides, upside down at its bottom (see
  * OUTLINE_REACH). Each does one or the other, and everything on a tile does the same: but a tile crossing
- * between them fades from one to the other rather than snapping (see OUTLINE_BLEND).
+ * between them fades from one to the other rather than snapping (see POSE_FADE).
  * There a picture of what's on its whole tile - a unit, a city, a mountain - turns about its tile's
  * middle, its foot set off from that as the ground looks seen side on (see footFromMiddle()), so along
  * the edge but neither out over it nor sunk below it: turned about its own foot at the tile's bottom,
@@ -204,10 +232,13 @@ export class GlobeSprites {
   // (see Billboard.middleX) is within this many world pixels of the planet's outline on screen: half a
   // tile's height, so that at least half of one standing out there sticks out past the edge.
   private static readonly OUTLINE_REACH = 16;
-  // A tile crossing that distance doesn't snap from one to the other: within this many world pixels of
-  // it, each way, it's drawn both upright and straight out, one fading out as the other fades in (in
-  // dither for the map's sprites, which write depth, in opacity for labels).
-  private static readonly OUTLINE_BLEND = 5;
+  // Once straight out, a billboard stays so until its tile is this many world pixels further in, so one
+  // right at the line doesn't flicker between the two.
+  private static readonly OUTLINE_HOLD = 2;
+  // A billboard doesn't snap from one pose to the other: it commits to the new one and, for this many
+  // seconds, fades it in as the old one fades out (in dither for the map's sprites, which write depth,
+  // in opacity for labels) - never held half way between.
+  private static readonly POSE_FADE = 0.18;
   // For the depth test alone, billboards with their feet in view are brought in front of all of the
   // planet's ground, in the order of their feet: between these fractions of the nearest it can be.
   // Nothing standing on the side of a round planet in view is behind its ground, except where one on
@@ -234,6 +265,8 @@ export class GlobeSprites {
     attribute float unturned;
     attribute float ownFoot;
     attribute float skirt;
+    attribute float pose;
+    attribute float poseSince;
     attribute vec4 rect;
     attribute vec4 atlasRect;
     attribute vec4 tint;
@@ -243,23 +276,11 @@ export class GlobeSprites {
     uniform float depthLift;
     uniform vec2 groundDepths;
     uniform float narrowest;
+    uniform float now;
     varying vec2 vAtlas;
     varying vec4 vTint;
     varying float vLight;
     varying float vFade;
-
-    // How far what stands at a point on the unit sphere stands straight out of the ground rather than
-    // upright, 0 to 1: 1 within OUTLINE_REACH world pixels of the planet's outline on screen and 0 beyond
-    // OUTLINE_BLEND more of them from it, and in between a smooth turn from one to the other - see
-    // GlobeSprites.onOutline().
-    float outlineAmount(vec3 point) {
-      vec3 normal = normalize(mat3(modelMatrix) * point);
-      float facingUs = max(dot(normal, normalize(cameraPosition - (modelMatrix * vec4(point, 1.0)).xyz)), 0.0);
-      // How far out across the planet's disc it is: 1 on its outline, and past it.
-      float across = sqrt(1.0 - facingUs * facingUs);
-      float pixel = worldPixel * sqrt(max(0.0, 1.0 - point.y * point.y));
-      return smoothstep(1.0 - (OUTLINE_REACH + OUTLINE_BLEND) * pixel, 1.0 - (OUTLINE_REACH - OUTLINE_BLEND) * pixel, across);
-    }
 
     // Which way is out from the planet's middle on screen at a foot, from it and the ground's normal there
     // in the camera's space: where that normal points on screen - see GlobeSprites.outwardAt().
@@ -305,10 +326,10 @@ export class GlobeSprites {
     }
 
     void main() {
-      // Drawn in one pose by each of two meshes, each fading out as the other fades in.
+      // Drawn in one pose by each of two meshes: the one it has committed to fades in, the other out.
       bool outline = OUTLINE_POSE == 1;
-      float outlineWeight = outlineAmount(middleAnchor);
-      vFade = outline ? outlineWeight : 1.0 - outlineWeight;
+      float faded = clamp((now - poseSince) / POSE_FADE, 0.0, 1.0);
+      vFade = (pose > 0.5) == outline ? faded : 1.0 - faded;
       // Its foot set off from its tile's middle as it is standing upright - see Billboard.unturned - and on
       // the outline, turned with it straight out of the ground there, but for a piece on its own foot.
       bool fromItsMiddle = outline ? ownFoot < 0.5 : unturned > 0.5;
@@ -395,6 +416,12 @@ export class GlobeSprites {
   // The nearest the planet's ground in view can be to the camera along its line of sight, and the
   // furthest - see IN_FRONT_FROM.
   private readonly groundDepths = new THREE.Vector2(0, 1);
+  // Seconds since the sprites were made, for fading between poses, and the camera in the planet's own space.
+  private readonly now = { value: 0 };
+  private readonly startedAt = performance.now();
+  private readonly cameraInPlanet = new THREE.Vector3();
+  // Each standing object's pose, kept from frame to frame as its billboard is made anew every frame.
+  private readonly standingPoses = new WeakMap<SceneObject, { pose: number; poseSince: number }>();
   private readonly mapSprites: BillboardBatch;
   private readonly units: BillboardBatch;
   private readonly overlay: BillboardBatch;
@@ -480,8 +507,10 @@ export class GlobeSprites {
     useView: (view: WorldView) => void
   ) {
     this.narrowest.value = ClientSettings.get("GLOBE_EDGE_SPRITE_WIDTH");
+    this.now.value = (performance.now() - this.startedAt) / 1000;
     this.updateGroundDepths(camera);
     this.updateMapSprites();
+    this.updatePoses(this.mapBillboards, camera) && this.mapSprites.setPoses(this.mapBillboards);
     this.updateStandingObjects(objects, detail, camera, useView);
   }
 
@@ -572,7 +601,8 @@ export class GlobeSprites {
         lit: { value: cutout ? 1 : 0 },
         depthLift: { value: depthLift },
         groundDepths: { value: this.groundDepths },
-        narrowest: this.narrowest
+        narrowest: this.narrowest,
+        now: this.now
       },
       defines: {
         // Labels and badges, drawn over everything, keep their width - see narrowest.
@@ -580,7 +610,7 @@ export class GlobeSprites {
         AMBIENT: GlobeSprites.AMBIENT.toFixed(3),
         DIRECT: GlobeSprites.DIRECT.toFixed(3),
         OUTLINE_REACH: GlobeSprites.OUTLINE_REACH.toFixed(3),
-        OUTLINE_BLEND: GlobeSprites.OUTLINE_BLEND.toFixed(3),
+        POSE_FADE: GlobeSprites.POSE_FADE.toFixed(3),
         OUTLINE_POSE: outlinePose ? "1" : "0",
         ROW_STRETCH: this.rowStretch().toFixed(6),
         IN_FRONT_FROM: GlobeSprites.IN_FRONT_FROM.toFixed(3),
@@ -635,6 +665,8 @@ export class GlobeSprites {
           unturned: !sprite.grounded,
           ownFoot: !sprite.grounded && pieces.length > 1,
           overlay: false,
+          pose: -1,
+          poseSince: 0,
           skirt: 0,
           depthBack: sprite.grounded ? piece.height : 0,
           left: -piece.width / 2,
@@ -751,8 +783,14 @@ export class GlobeSprites {
         atlasY: corner[1],
         atlasWidth: (right - left) * this.labelScale,
         atlasHeight: (bottom - top) * this.labelScale,
-        tint: [0, 0, 0, 0]
+        tint: [0, 0, 0, 0],
+        pose: -1,
+        poseSince: 0
       };
+      const kept = this.standingPoses.get(object);
+      if (kept) Object.assign(billboard, kept);
+      this.updatePoses([billboard], camera);
+      this.standingPoses.set(object, { pose: billboard.pose, poseSince: billboard.poseSince });
       this.standing.push({ object, options, billboard });
     });
 
@@ -865,7 +903,7 @@ export class GlobeSprites {
   // placed as the vertex shader places them.
   private screenCorners(billboard: Billboard, camera: THREE.Camera): [number, number][] {
     const middleAnchor = new THREE.Vector3(...GlobeSprites.middleOnSphere(this.projection, billboard));
-    const outline = this.onOutline(middleAnchor, camera);
+    const outline = billboard.pose === 1;
     const fromItsMiddle = outline ? !billboard.ownFoot : billboard.unturned;
     const anchor = fromItsMiddle
       ? middleAnchor
@@ -954,15 +992,32 @@ export class GlobeSprites {
     return (this.projection.rowStep * this.projection.worldWidth) / (GlobeProjection.TILE_STRIDE_Y * 2 * Math.PI);
   }
 
-  // Whether what stands at a point on the unit sphere is on the planet's outline on screen this frame,
-  // within OUTLINE_REACH world pixels of it, as the vertex shader's outlineAmount() judges it, past halfway.
-  private onOutline(point: THREE.Vector3, camera: THREE.Camera) {
-    const normal = point.clone().transformDirection(this.planet.matrixWorld);
-    const toCamera = camera.position.clone().sub(point.clone().applyMatrix4(this.planet.matrixWorld)).normalize();
-    const facingUs = Math.max(normal.dot(toCamera), 0);
-    // How far out across the planet's disc it is: 1 on its outline, and past it.
-    const across = Math.sqrt(1 - facingUs * facingUs);
-    return across >= 1 - GlobeSprites.OUTLINE_REACH * this.pixelAt(point);
+  // Commits each billboard to its pose this frame: straight out of the ground where the middle of its
+  // tile is within OUTLINE_REACH world pixels of the planet's outline on screen, upright elsewhere. One
+  // that changes starts fading to its new pose, from where it had got to in fading to the old one. A
+  // billboard not yet decided takes its pose at once. Whether any changed.
+  private updatePoses(billboards: Billboard[], camera: THREE.Camera) {
+    const now = this.now.value;
+    const cameraSquared = this.planet.worldToLocal(this.cameraInPlanet.copy(camera.position)).lengthSq();
+    let changed = false;
+    for (const billboard of billboards) {
+      const middle = (billboard.middleUnit ??= GlobeSprites.middleOnSphere(this.projection, billboard));
+      const along =
+        middle[0] * this.cameraInPlanet.x + middle[1] * this.cameraInPlanet.y + middle[2] * this.cameraInPlanet.z;
+      const facing = Math.max((along - 1) / Math.sqrt(Math.max(cameraSquared - 2 * along + 1, 1e-12)), 0);
+      // How far out across the planet's disc it is: 1 on its outline, and past it.
+      const across = Math.sqrt(1 - facing * facing);
+      const reach = GlobeSprites.OUTLINE_REACH + (billboard.pose === 1 ? GlobeSprites.OUTLINE_HOLD : 0);
+      const pose = across >= 1 - reach * this.pixelAtY(middle[1]) ? 1 : 0;
+      if (pose === billboard.pose) continue;
+
+      const fadedIn =
+        billboard.pose < 0 ? 1 : Math.min(Math.max((now - billboard.poseSince) / GlobeSprites.POSE_FADE, 0), 1);
+      billboard.poseSince = billboard.pose < 0 ? -1000 : now - (1 - fadedIn) * GlobeSprites.POSE_FADE;
+      billboard.pose = pose;
+      changed = true;
+    }
+    return changed;
   }
 
   // How much narrower an upright billboard is drawn this frame, as the vertex shader's narrowing() works it out.
@@ -974,6 +1029,11 @@ export class GlobeSprites {
 
   // The radians a world pixel spans at a point on the unit sphere, as the vertex shader works it out.
   private pixelAt(point: THREE.Vector3) {
-    return ((2 * Math.PI) / this.projection.worldWidth) * Math.sqrt(Math.max(0, 1 - point.y * point.y));
+    return this.pixelAtY(point.y);
+  }
+
+  // The same from the point's height alone.
+  private pixelAtY(y: number) {
+    return ((2 * Math.PI) / this.projection.worldWidth) * Math.sqrt(Math.max(0, 1 - y * y));
   }
 }
