@@ -27,7 +27,8 @@ export class GlobeLines {
   private readonly colors = new Map<string, number[]>();
   private drawn: number | undefined;
 
-  constructor(projection: GlobeProjection) {
+  /** `renderOrder` places the strips among what else is drawn over the ground - see OverStanding. */
+  constructor(projection: GlobeProjection, renderOrder: number) {
     this.projection = projection;
     const material = new THREE.MeshLambertMaterial({ vertexColors: true });
     OverStanding.setUp(material);
@@ -50,8 +51,7 @@ export class GlobeLines {
     };
     this.mesh = new THREE.Mesh(new THREE.BufferGeometry(), material);
     this.mesh.frustumCulled = false;
-    // Over the hovered tile (see GlobeDecals), as their z puts them on the flat map.
-    this.mesh.renderOrder = OverStanding.RENDER_ORDER + 1;
+    this.mesh.renderOrder = renderOrder;
   }
 
   /** Brings the strips up to date with the map's lines, rebuilding them only when those changed. */

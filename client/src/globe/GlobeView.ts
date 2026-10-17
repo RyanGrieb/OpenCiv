@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import { Game } from "../Game";
+import { Unit } from "../Unit";
 import { Actor } from "../scene/Actor";
 import { WorldView } from "../scene/Camera";
 import { Line } from "../scene/Line";
@@ -11,6 +12,7 @@ import { GlobeLines } from "./GlobeLines";
 import { GlobeDecals } from "./GlobeDecals";
 import { GlobeProjection } from "./GlobeProjection";
 import { GlobeSprites } from "./GlobeSprites";
+import { OverStanding } from "./OverStanding";
 import { PixelArtSampling } from "./PixelArtSampling";
 import { PlanetMesh } from "./PlanetMesh";
 import { SolarSystem } from "./SolarSystem";
@@ -93,6 +95,8 @@ export class GlobeView {
   private readonly bandMaterial: THREE.MeshLambertMaterial;
   private readonly ground: GlobeGround;
   private readonly lines: GlobeLines;
+  // Lines the flat map draws under its units (by their z), drawn under units here too.
+  private readonly linesUnderUnits: GlobeLines;
   private readonly decals: GlobeDecals;
   private readonly sprites: GlobeSprites;
   private readonly bandUniforms = {
@@ -156,8 +160,10 @@ export class GlobeView {
     this.bandUniforms.groundScale.value = this.ground.getScale();
     // The GPU forgets the ground's texture along with its context, so it's drawn again once that's back.
     canvas.addEventListener("webglcontextrestored", () => this.ground.redrawAll());
-    this.lines = new GlobeLines(this.projection);
-    this.planet.add(this.lines.mesh);
+    // Over the hovered tile (see GlobeDecals), as their z puts them on the flat map.
+    this.lines = new GlobeLines(this.projection, OverStanding.RENDER_ORDER + 1);
+    this.linesUnderUnits = new GlobeLines(this.projection, OverStanding.UNDER_UNITS_RENDER_ORDER);
+    this.planet.add(this.lines.mesh, this.linesUnderUnits.mesh);
     this.decals = new GlobeDecals(this.projection);
     this.planet.add(this.decals.group);
     this.sprites = new GlobeSprites(this.projection, this.planet, maxTextureSize);
@@ -238,7 +244,9 @@ export class GlobeView {
       objects.filter((object): object is Actor => object instanceof Actor && Marking.is(object)),
       useView
     );
-    this.lines.update(objects.filter((object): object is Line => object instanceof Line));
+    const lines = objects.filter((object): object is Line => object instanceof Line);
+    this.lines.update(lines.filter((line) => line.getZIndex() >= Unit.MAP_Z));
+    this.linesUnderUnits.update(lines.filter((line) => line.getZIndex() < Unit.MAP_Z));
     this.sprites.update(objects, zoom * this.renderer.getPixelRatio(), this.camera, useView);
     this.worldView = this.ground.view;
   }
@@ -282,6 +290,7 @@ export class GlobeView {
     this.bandMaterial.dispose();
     this.ground.dispose();
     this.lines.dispose();
+    this.linesUnderUnits.dispose();
     this.decals.dispose();
     this.sprites.dispose();
     this.renderer.dispose();

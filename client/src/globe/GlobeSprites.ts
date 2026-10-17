@@ -9,6 +9,7 @@ import { Standing, StandingOptions } from "../scene/Standing";
 import { AtlasCanvas } from "./AtlasCanvas";
 import { Fingerprint } from "./Fingerprint";
 import { GlobeProjection } from "./GlobeProjection";
+import { OverStanding } from "./OverStanding";
 import { PixelArtSampling } from "./PixelArtSampling";
 import { StandingPiece, StandingPieces } from "./StandingPieces";
 
@@ -459,6 +460,14 @@ export class GlobeSprites {
     this.units = new BillboardBatch(...(this.materials[1] as [THREE.ShaderMaterial, THREE.ShaderMaterial]));
     this.overlay = new BillboardBatch(...(this.materials[2] as [THREE.ShaderMaterial, THREE.ShaderMaterial]));
     this.overlay.meshes.forEach((mesh) => (mesh.renderOrder = GlobeSprites.OVERLAY_RENDER_ORDER));
+    // Units are drawn over what the flat map draws under them (see OverStanding.UNDER_UNITS_RENDER_ORDER).
+    // That's drawn with what's see-through, after everything solid, so units are counted see-through
+    // too, to come after it: their pixels are whole, so this changes nothing of how they look, and they
+    // still test depth against the map's sprites, drawn before them.
+    this.units.meshes.forEach((mesh) => {
+      mesh.material.transparent = true;
+      mesh.renderOrder = OverStanding.UNITS_RENDER_ORDER;
+    });
     planet.add(...this.mapSprites.meshes, ...this.units.meshes, ...this.overlay.meshes);
   }
 
