@@ -25,8 +25,8 @@ interface Billboard {
   // GlobeSprites.OUTLINE_REACH).
   middleX: number;
   middleY: number;
-  // Off the outline, its foot is set off from middleX/middleY as the ground there looks on screen, but
-  // turned so that what's straight below the middle on the flat map is straight down it from there: as
+  // Standing upright, its foot is set off from middleX/middleY as the ground there looks on screen, but
+  // turned so that what's straight below the middle on the flat map is straight below it on screen: as
   // much nearer the middle as the ground is squeezed, so it stays on its tile, but not swung round it
   // with the map - see GlobeSprites.footFromMiddle(). Everything but what rests on the ground all along
   // its bottom (mountains' peaks, hills' mounds), which stands on the ground painted under it.
@@ -135,15 +135,14 @@ class BillboardBatch {
  * or squeeze, so a picture covering its tile, like a city's, standing up from its real foot near the
  * bottom of the tile would swing off it as the ground turns. So its foot is set off from its tile's
  * middle as the ground there is squeezed, but with down kept straight down (see Billboard.unturned): it
- * stays on its tile, and the picture right over it, without swinging round it. Toward the planet's
- * edge, where the ground turns away, they lean out with it, so that they're flush with the planet's
- * sides (see upAt()). Those on its outline, which would stick out past its edge, stand straight out of
- * the ground, as something real would seen side on there: sideways at the planet's sides, upside down
- * at its bottom (see OUTLINE_REACH); everything on a tile does so together. Nothing can stand upright
- * in the middle and straight out all round the edge without turning over somewhere in between, so
- * toward the bottom they only lean sideways, keeping the turn over to the outline, out of the way.
- * Map sprites and units narrow where the ground tilts away toward the edge, so they don't crowd
- * together there; labels and badges keep their width (see narrowest). Those with their feet in view are drawn in front of the
+ * stays on its tile, and the picture right over it, without swinging round it. Only those on its
+ * outline, which would stick out past its edge, stand straight out of the ground instead, as something
+ * real would seen side on there: sideways at the planet's sides, upside down at its bottom (see
+ * OUTLINE_REACH). Each does one or the other, never in between, and everything on a tile does the same.
+ * Nothing can stand upright in the middle and straight out all round the edge without turning over
+ * somewhere in between, so this keeps the turn to the outline, out of the way. Upright map sprites and
+ * units narrow where the ground tilts away toward the edge, so they don't crowd together there; labels
+ * and badges keep their width (see narrowest). Those with their feet in view are drawn in front of the
  * whole planet, so the ground never cuts into one, and one standing nearer covers one behind it.
  *
  * The map's standing sprites (trees, mountains' peaks, hills' mounds, resources, cities) are cut into
@@ -171,10 +170,6 @@ export class GlobeSprites {
   // (see Billboard.middleX) is within this many world pixels of the planet's outline on screen: half a
   // tile's height, so that at least half of one standing out there sticks out past the edge.
   private static readonly OUTLINE_REACH = 16;
-  // How much a billboard off the outline keeps upright as the ground under it turns away (see upAt()):
-  // the more, the more upright across the planet's face, leaning out only toward its edge. It's flush
-  // with the planet's sides where it meets the outline however much.
-  private static readonly UPRIGHT = 5;
   // For the depth test alone, billboards with their feet in view are brought in front of all of the
   // planet's ground, in the order of their feet: between these fractions of the nearest it can be.
   // Nothing standing on the side of a round planet in view is behind its ground, except where one on
@@ -231,31 +226,18 @@ export class GlobeSprites {
       return dot(outward, outward) > 0.0 ? normalize(outward) : vec2(0.0, 1.0);
     }
 
-    // Which way is up on screen for what stands at a foot off the planet's outline: leaning out from
-    // upright as the ground there turns away from the camera, flush where it meets the outline - see
-    // GlobeSprites.upAt().
-    vec2 upAt(vec2 outward, float facing, float pixel) {
-      float edge = 1.0 - OUTLINE_REACH * pixel;
-      float facingAtOutline = sqrt(max(0.0, 1.0 - edge * edge));
-      float faces = clamp((facing - facingAtOutline) / max(1.0 - facingAtOutline, 1e-6), 0.0, 1.0);
-      vec2 lean = outward * sqrt(1.0 - faces * faces);
-      return normalize(vec2(lean.x, abs(lean.y) + UPRIGHT * faces));
-    }
-
-    // How much narrower the ground at a foot looks across a billboard standing up there than it is, from
-    // how squarely it faces the camera and the way out from the planet's middle there: squeezed toward the
-    // middle as it tilts away, but not along the edge - see GlobeSprites.narrowest, and GlobeSprites.narrowing().
-    float narrowing(vec2 outward, float facing, vec2 up) {
-      vec2 sideways = vec2(up.y, -up.x);
-      vec2 across = sideways + (clamp(facing, 0.0, 1.0) - 1.0) * dot(sideways, outward) * outward;
+    // How much narrower the ground at a foot looks across the screen than it is, from how squarely it
+    // faces the camera and the way out from the planet's middle there: squeezed toward the middle as it
+    // tilts away, but not along the edge - see GlobeSprites.narrowest, and GlobeSprites.narrowing().
+    float narrowing(vec2 outward, float facing) {
+      vec2 across = vec2(1.0, 0.0) + (clamp(facing, 0.0, 1.0) - 1.0) * outward.x * outward;
       return max(narrowest, length(across));
     }
 
     // Where a foot stands from its tile's middle, at a point on the unit sphere (at, in the camera's
-    // space), across and down a billboard standing up there (in the camera's space at the point's
-    // distance): set off as the ground there looks, turned so that down stays down the billboard - see
-    // GlobeSprites.footFromMiddle().
-    vec2 footFromMiddle(vec3 point, vec3 at, vec2 fromMiddle, float pixel, vec2 up) {
+    // space), on screen (x right, y down, in the camera's space at the point's distance): set off as the
+    // ground there looks, turned so that down stays down - see GlobeSprites.footFromMiddle().
+    vec2 footFromMiddle(vec3 point, vec3 at, vec2 fromMiddle, float pixel) {
       vec3 east = normalize(vec3(point.z, 0.0, -point.x));
       mat3 toView = mat3(viewMatrix) * mat3(modelMatrix);
       vec3 eastView = toView * east;
@@ -266,10 +248,6 @@ export class GlobeSprites {
       vec2 northOnScreen = northView.xy - at.xy * northView.z / at.z;
       vec2 alongX = vec2(eastOnScreen.x, -eastOnScreen.y) * pixel;
       vec2 alongY = vec2(-northOnScreen.x, northOnScreen.y) * pixel * ROW_STRETCH;
-      // Across and down the billboard, rather than the screen (x right, y down).
-      mat2 toBillboard = mat2(up.y, -up.x, up.x, up.y);
-      alongX = toBillboard * alongX;
-      alongY = toBillboard * alongY;
       // How far the ground reaches across the screen, how far it slants down across it, and how far it
       // reaches straight down from the point.
       float across = length(vec2(alongX.x, alongY.x));
@@ -292,13 +270,13 @@ export class GlobeSprites {
       // In the camera's space, so it's square to the screen and as far away as its foot.
       vec4 corner = viewMatrix * vec4(foot, 1.0);
       vec2 outward = outwardAt(corner.xyz, mat3(viewMatrix) * normal);
-      // Leaning out as the ground turns away, or on the planet's outline straight out of the ground.
-      vec2 up = outline ? outward : upAt(outward, facing, pixel);
+      // Upright, or on the planet's outline straight out of the ground.
+      vec2 up = outline ? outward : vec2(0.0, 1.0);
       vec2 local = (rect.xy + position.xy * rect.zw) * pixel;
       #ifdef NARROWS
-        if (!outline) local.x *= narrowing(outward, facing, up);
+        if (!outline) local.x *= narrowing(outward, facing);
       #endif
-      if (fromItsMiddle) local += footFromMiddle(middleAnchor, corner.xyz, fromMiddle, pixel, up);
+      if (fromItsMiddle) local += footFromMiddle(middleAnchor, corner.xyz, fromMiddle, pixel);
       // A skirt reaches down from what it hangs from to the ground under that, seen side on as that is.
       if (skirt > 0.0) local.y = -skirt * mix(1.0, clamp(facing, 0.0, 1.0), position.y) * pixel;
       float depth = -(viewMatrix * modelMatrix * vec4(depthAnchor, 1.0)).z;
@@ -346,7 +324,7 @@ export class GlobeSprites {
   private readonly pieces: StandingPieces;
   private readonly labels: AtlasCanvas;
   private readonly lightDirection = new THREE.Vector3(0, 0, 1);
-  // Off the outline, a billboard narrows (toward its foot) as much as the ground under it looks
+  // Standing upright, a billboard narrows (toward its foot) as much as the ground under it looks
   // narrower across the screen, tilting away toward the planet's edge - so that there, where the ground
   // is squeezed thin, the map's sprites don't pile up into a wall - but to no less than this much of its
   // width, so each still reads as what it is (a client setting). Labels and badges keep their width.
@@ -410,23 +388,6 @@ export class GlobeSprites {
       normalView.y * -footView.z + footView.y * normalView.z
     );
     return outward.lengthSq() > 0 ? outward.normalize() : outward.set(0, 1);
-  }
-
-  /**
-   * Which way is up on screen for what stands at a foot off the planet's outline, from the way out from
-   * the planet's middle there, how squarely the ground faces the camera and the radians a world pixel
-   * spans there, as the vertex shader's upAt() works it out. It leans out from upright as the ground
-   * turns away: upright where the ground faces the camera, and flush with the planet's sides where it
-   * meets the outline (see OUTLINE_REACH), so it's already standing straight out of the ground there.
-   * Toward the planet's bottom it leans only sideways, never over toward upside down: what stands there
-   * turns over only on the outline.
-   */
-  private static upAt(outward: THREE.Vector2, facing: number, pixel: number) {
-    const edge = 1 - GlobeSprites.OUTLINE_REACH * pixel;
-    const facingAtOutline = Math.sqrt(Math.max(0, 1 - edge * edge));
-    const faces = THREE.MathUtils.clamp((facing - facingAtOutline) / Math.max(1 - facingAtOutline, 1e-6), 0, 1);
-    const lean = outward.clone().multiplyScalar(Math.sqrt(1 - faces * faces));
-    return new THREE.Vector2(lean.x, Math.abs(lean.y) + GlobeSprites.UPRIGHT * faces).normalize();
   }
 
   // Its rectangle in the world, as given or the actor's own, with a margin - undefined if it has no size.
@@ -552,7 +513,6 @@ export class GlobeSprites {
         AMBIENT: GlobeSprites.AMBIENT.toFixed(3),
         DIRECT: GlobeSprites.DIRECT.toFixed(3),
         OUTLINE_REACH: GlobeSprites.OUTLINE_REACH.toFixed(3),
-        UPRIGHT: GlobeSprites.UPRIGHT.toFixed(3),
         ROW_STRETCH: this.rowStretch().toFixed(6),
         IN_FRONT_FROM: GlobeSprites.IN_FRONT_FROM.toFixed(3),
         IN_FRONT_TO: GlobeSprites.IN_FRONT_TO.toFixed(3)
@@ -843,15 +803,14 @@ export class GlobeSprites {
     const footView = foot.clone().applyMatrix4(camera.matrixWorldInverse);
     const outward = GlobeSprites.outwardAt(footView, normal.clone().transformDirection(camera.matrixWorldInverse));
     const pixel = this.pixelAt(anchor);
-    const up = outline ? outward : GlobeSprites.upAt(outward, facing, pixel);
-    const narrowing = outline || billboard.overlay ? 1 : this.narrowing(outward, facing, up);
+    const up = outline ? outward : new THREE.Vector2(0, 1);
+    const narrowing = outline || billboard.overlay ? 1 : this.narrowing(outward, facing);
     const [footX, footY] = fromItsMiddle
       ? this.footFromMiddle(
           anchor,
           footView,
           [billboard.footX - billboard.middleX, billboard.footY - billboard.middleY],
-          camera,
-          up
+          camera
         )
       : [0, 0];
 
@@ -870,13 +829,13 @@ export class GlobeSprites {
 
   /**
    * Where a foot stands from its tile's middle, a point on the unit sphere (`at` in the camera's space),
-   * this frame, across and down a billboard standing there with `up` its way up on screen (in the
-   * camera's space at the point's distance), `fromMiddle` world pixels off it on the flat map. The ground there looks turned and squeezed on screen - turned around the poles, where the map
+   * on screen this frame (x right, y down, in the camera's space at the point's distance), `fromMiddle`
+   * world pixels off it on the flat map. The ground there looks turned and squeezed on screen - turned around the poles, where the map
    * runs every which way, and squeezed where it tilts away. Set off as the ground looks, a foot near its
    * tile's bottom would swing round its middle with the map, and a picture standing on it, covering its
    * tile, would swing off; set off as on the flat map, it would land on the tile below, where the ground
    * is squeezed. So it's set off as the ground looks, turned so that down stays down: a foot straight
-   * below the middle on the flat map is straight down the billboard from it, as far down as the ground there
+   * below the middle on the flat map is straight below it on screen, as far down as the ground there
    * reaches, so it stays on its tile without swinging round it, and the picture stands right over the
    * tile. (That's the ground's look times a turn, which leaves a lower triangular matrix: the Cholesky
    * factor of the look times its transpose.) As the vertex shader's footFromMiddle() works it out.
@@ -885,8 +844,7 @@ export class GlobeSprites {
     point: THREE.Vector3,
     at: THREE.Vector3,
     [fromX, fromY]: number[],
-    camera: THREE.Camera,
-    up: THREE.Vector2
+    camera: THREE.Camera
   ): [number, number] {
     const east = new THREE.Vector3(point.z, 0, -point.x).normalize();
     const north = point.clone().cross(east);
@@ -897,13 +855,8 @@ export class GlobeSprites {
       return [view.x - (at.x * view.z) / at.z, view.y - (at.y * view.z) / at.z];
     });
     const pixel = this.pixelAt(point);
-    // Across and down the billboard, rather than the screen (x right, y down).
-    const toBillboard = ([x, y]: number[]) => [up.y * x + up.x * y, -up.x * x + up.y * y];
-    const alongX = toBillboard([eastOnScreen[0] * pixel, -eastOnScreen[1] * pixel]);
-    const alongY = toBillboard([
-      -northOnScreen[0] * pixel * this.rowStretch(),
-      northOnScreen[1] * pixel * this.rowStretch()
-    ]);
+    const alongX = [eastOnScreen[0] * pixel, -eastOnScreen[1] * pixel];
+    const alongY = [-northOnScreen[0] * pixel * this.rowStretch(), northOnScreen[1] * pixel * this.rowStretch()];
     // How far the ground reaches across the screen, how far it slants down across it, and how far it
     // reaches straight down from the point.
     const across = Math.hypot(alongX[0], alongY[0]);
@@ -930,12 +883,10 @@ export class GlobeSprites {
     return across >= 1 - GlobeSprites.OUTLINE_REACH * this.pixelAt(point);
   }
 
-  // How much narrower a billboard standing off the outline is drawn this frame, as the vertex shader's
-  // narrowing() works it out.
-  private narrowing(outward: THREE.Vector2, facing: number, up: THREE.Vector2) {
+  // How much narrower an upright billboard is drawn this frame, as the vertex shader's narrowing() works it out.
+  private narrowing(outward: THREE.Vector2, facing: number) {
     const squeeze = THREE.MathUtils.clamp(facing, 0, 1) - 1;
-    const sideways = new THREE.Vector2(up.y, -up.x);
-    const across = sideways.clone().addScaledVector(outward, squeeze * sideways.dot(outward));
+    const across = new THREE.Vector2(1, 0).addScaledVector(outward, squeeze * outward.x);
     return Math.max(this.narrowest.value, across.length());
   }
 

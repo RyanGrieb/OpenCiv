@@ -14,9 +14,8 @@ import { TestUtils } from "../TestUtils";
 // game on the Medium map, founds a city, and looks at it on the globe from close up, tilted toward
 // the horizon: checks that the map's sprites and the city's banner stand, that on the planet's face
 // the warrior stands upright, even well below its middle, while on its outline it stands straight out
-// of the ground, that as the outline passes over the city everything leans out from upright toward
-// straight out, never the other way, and turns straight out a tile at a time (the warrior and the
-// city's banner with their tiles), that however the
+// of the ground, that as the outline passes over the city everything does one or the other, never in
+// between, a tile at a time (the warrior and the city's banner with their tiles), that however the
 // ground turns or tilts away on screen the warrior's feet stay on its tile, that the mouse finds
 // the warrior and the banner where they stand, that the fog of war shades what stands in it, and that
 // a still view doesn't draw the map over again. Ends there to look around: drag, scroll, G for flat.
@@ -88,11 +87,10 @@ export function setupGlobeDepthTest(game: Game) {
     return [((point.x + 1) / 2) * sprites()["screenWidth"], ((1 - point.y) / 2) * sprites()["screenHeight"]];
   };
   // Where the warrior's feet are on screen against its tile: how far inside the tile's hex (negative
-  // outside it), and how far to the side of its middle across the warrior's picture (which leans out
-  // toward the planet's edge), both as parts of how far the tile's bottom corner is from its middle.
+  // outside it), and how far to the side of its middle, both as parts of how far the tile's bottom
+  // corner is from its middle.
   const warriorFeet = () => {
     const feet = globe().screenPointOf(warrior, 0.5, 1);
-    const head = globe().screenPointOf(warrior, 0.5, 0);
     const center = warrior.getTile().getCenterPosition();
     const middle = onScreen([center.x, center.y]);
     const corners = [
@@ -103,7 +101,7 @@ export function setupGlobeDepthTest(game: Game) {
       [-16, 9],
       [-16, -9]
     ].map(([x, y]) => onScreen([center.x + x, center.y + y]));
-    if (!feet || !head) return { inside: -Infinity, aside: Infinity };
+    if (!feet) return { inside: -Infinity, aside: Infinity };
 
     // The hex's corners run clockwise on screen, so what's inside is right of each side.
     const inside = Math.min(
@@ -115,9 +113,7 @@ export function setupGlobeDepthTest(game: Game) {
       })
     );
     const size = Math.hypot(corners[3][0] - middle[0], corners[3][1] - middle[1]);
-    const [upX, upY] = [head[0] - feet[0], head[1] - feet[1]];
-    const aside = Math.abs((feet[0] - middle[0]) * upY - (feet[1] - middle[1]) * upX) / Math.hypot(upX, upY);
-    return { inside: inside / size, aside: aside / size };
+    return { inside: inside / size, aside: Math.abs(feet[0] - middle[0]) / size };
   };
   // How the warrior stands on screen, from the bottom of its picture to the top, and the way out from
   // the planet's middle to its feet.
@@ -143,15 +139,14 @@ export function setupGlobeDepthTest(game: Game) {
         )
       );
   // How the map's sprites, the warrior and the city's banner stand on screen where their feet are in
-  // view, skirts aside: how many upright, how many straight out from the planet's middle, how many
-  // leaning out in between, how many leaning any other way, and on how many tiles some stand straight
-  // out while others are well short of it. One near the top of the planet's outline can be both
-  // upright and straight out, and counts as neither.
+  // view, skirts aside: how many upright, how many straight out from the planet's middle, how many in
+  // between, and on how many tiles they don't all do the same. One
+  // near the top of the planet's outline can be both, and counts as neither.
   const spritesStanding = () => {
     const camera = globe()["camera"] as THREE.Camera;
     const planet = globe()["planet"] as THREE.Object3D;
     const middle = planetMiddle();
-    const counts = { upright: 0, out: 0, between: 0, wrongWay: 0, mixedTiles: 0, tilesKnown: false };
+    const counts = { upright: 0, out: 0, between: 0, mixedTiles: 0, tilesKnown: false };
     const tileOf = mapBillboardTiles();
     const mapBillboards = sprites()["mapBillboards"] as Record<string, number>[];
     counts.tilesKnown = tileOf.length === mapBillboards.length;
@@ -181,20 +176,15 @@ export function setupGlobeDepthTest(game: Game) {
         (axis) => topLeft[axis] + across * (topRight[axis] - topLeft[axis]) + down * (bottomLeft[axis] - topLeft[axis])
       );
       const out = [foot[0] - middle[0], foot[1] - middle[1]];
-      const fromUpright = degreesBetween(up, [0, -1]);
-      const fromOut = degreesBetween(up, out);
-      const upright = fromUpright < 1;
-      const straightOut = fromOut < 2;
-      tiles.set(tile, (tiles.get(tile) ?? new Set()).add(straightOut ? "out" : fromOut > 10 ? "short" : "near"));
-      if (upright && straightOut) continue;
+      const upright = degreesBetween(up, [0, -1]) < 1;
+      const straightOut = degreesBetween(up, out) < 2;
+      if (!upright && !straightOut) counts.between++;
+      if (upright === straightOut) continue;
 
-      if (upright) counts.upright++;
-      else if (straightOut) counts.out++;
-      // Leaning out, it's on the way from upright to straight out.
-      else if (fromUpright + fromOut < degreesBetween(out, [0, -1]) + 2) counts.between++;
-      else counts.wrongWay++;
+      counts[upright ? "upright" : "out"]++;
+      tiles.set(tile, (tiles.get(tile) ?? new Set()).add(upright ? "upright" : "out"));
     }
-    counts.mixedTiles = [...tiles.values()].filter((ways) => ways.has("out") && ways.has("short")).length;
+    counts.mixedTiles = [...tiles.values()].filter((ways) => ways.size > 1).length;
     return counts;
   };
   // Clamped, as rounding can take the cosine of two lines pointing the same way just past 1.
@@ -253,7 +243,7 @@ export function setupGlobeDepthTest(game: Game) {
   });
 
   runner.addStep({
-    name: "On the planet's face the warrior stands upright, even well below its middle; on its outline it stands straight out of the ground, and as the outline passes over the city, everything leans out toward straight out, never the other way, and turns straight out a tile at a time",
+    name: "On the planet's face the warrior stands upright, even well below its middle; on its outline it stands straight out of the ground, and as the outline passes over the city, everything stands one way or the other, a tile at a time",
     action: async () => {
       await lookFromThe("north", 0.25);
       belowMiddle = warriorStanding();
@@ -262,14 +252,13 @@ export function setupGlobeDepthTest(game: Game) {
       await lookFromThe("west", 1.15);
       onOutline = warriorStanding();
       // Turning the planet a little at a time, so that the outline passes over the tiles around the city.
-      outlineView = { upright: 0, out: 0, between: 0, wrongWay: 0, mixedTiles: 0, tilesKnown: true };
+      outlineView = { upright: 0, out: 0, between: 0, mixedTiles: 0, tilesKnown: true };
       for (let step = 0; step <= 9; step++) {
         await lookFromThe("west", 0.9 + step * 0.05);
         const view = spritesStanding();
         outlineView.upright += view.upright;
         outlineView.out += view.out;
         outlineView.between += view.between;
-        outlineView.wrongWay += view.wrongWay;
         outlineView.mixedTiles += view.mixedTiles;
         outlineView.tilesKnown &&= view.tilesKnown;
       }
@@ -282,19 +271,17 @@ export function setupGlobeDepthTest(game: Game) {
         );
       }
       if (outlineView) {
-        const { upright, out, between, wrongWay, mixedTiles } = outlineView;
+        const { upright, out, between, mixedTiles } = outlineView;
         utils.log(
-          `Over those views, ${upright} sprites stood upright, ${out} straight out, ${between} leaning out in ` +
-            `between and ${wrongWay} some other way; ${mixedTiles} times a tile had some straight out and ` +
-            `some well short of it`,
+          `Over those views, ${upright} sprites stood upright, ${out} straight out and ${between} in between; ` +
+            `${mixedTiles} times a tile had some of each`,
           "yellow"
         );
       }
       await lookAt(cityTile);
     },
-    // Below the middle, head over feet; on the outline, out from the planet's middle. Every sprite on
-    // its way from one to the other, and all of a tile's, the warrior and the city's banner among them,
-    // straight out together.
+    // Below the middle, head over feet; on the outline, out from the planet's middle. Every sprite one
+    // way or the other, and all of a tile's, the warrior and the city's banner among them, the same way.
     verification: () =>
       !!belowMiddle &&
       belowMiddle.out[1] > 0 &&
@@ -306,14 +293,14 @@ export function setupGlobeDepthTest(game: Game) {
       degreesBetween(onOutline.up, onOutline.out) < 2 &&
       !!outlineView &&
       outlineView.tilesKnown &&
+      outlineView.upright > 0 &&
       outlineView.out > 0 &&
-      outlineView.between > 0 &&
-      outlineView.wrongWay === 0 &&
+      outlineView.between === 0 &&
       outlineView.mixedTiles === 0
   });
 
   runner.addStep({
-    name: "However the ground turns or tilts away on screen, the warrior's feet stay on its tile, straight down the warrior from its middle",
+    name: "However the ground turns or tilts away on screen, the warrior's feet stay on its tile, below its middle",
     action: async () => {
       // Close up and tilted toward the horizon; below the planet's middle; toward its east edge; down to
       // its right.
