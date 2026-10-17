@@ -16,7 +16,7 @@ import { CityScreen } from "./CityScreen";
 export class CityProductionQueueWindow extends ActorGroup {
   private static readonly X = 0;
   private static readonly BUTTON_GAP = 8;
-  private static readonly PURCHASE_BUTTON_WIDTH = 136;
+  private static readonly PURCHASE_BUTTON_WIDTH = 160;
   private static readonly WIDTH = CityScreen.PRODUCTION_WINDOW_WIDTH;
   private static readonly HEIGHT = CityScreen.PRODUCTION_WINDOW_HEIGHT;
   private static readonly ROW_HEIGHT = CityScreen.PRODUCTION_ROW_HEIGHT;
@@ -178,8 +178,8 @@ export class CityProductionQueueWindow extends ActorGroup {
     });
   }
 
-  // "Choose Production" (or "Add to Queue") with "Purchase" to its right. Whichever list is open reads
-  // "Cancel" instead.
+  // "Produce" (or "Add to Queue") with "Purchase" to its right, each with its icon on the left.
+  // Whichever list is open reads "Cancel" instead, without an icon.
   private addBottomButtons(listMode: ProductionListMode | undefined, onToggleList: (mode: ProductionListMode) => void) {
     const gap = CityProductionQueueWindow.BUTTON_GAP;
     const purchaseWidth = CityProductionQueueWindow.PURCHASE_BUTTON_WIDTH;
@@ -188,13 +188,19 @@ export class CityProductionQueueWindow extends ActorGroup {
     const y = this.windowY + CityProductionQueueWindow.HEIGHT - ButtonSize.LARGE.height - 4;
 
     this.addActor(
-      this.createBottomButton(this.getChooseProductionText(listMode), chooseX, y, chooseWidth, () =>
-        onToggleList("produce")
+      this.createBottomButton(
+        this.getChooseProductionText(listMode),
+        listMode === "produce" ? undefined : SpriteRegion.ICON_PRODUCTION,
+        chooseX,
+        y,
+        chooseWidth,
+        () => onToggleList("produce")
       )
     );
     this.addActor(
       this.createBottomButton(
         listMode === "purchase" ? "Cancel" : "Purchase",
+        listMode === "purchase" ? undefined : SpriteRegion.ICON_GOLD,
         chooseX + chooseWidth + gap,
         y,
         purchaseWidth,
@@ -203,9 +209,17 @@ export class CityProductionQueueWindow extends ActorGroup {
     );
   }
 
-  private createBottomButton(text: string, x: number, y: number, width: number, onClicked: () => void): Button {
+  private createBottomButton(
+    text: string,
+    icon: SpriteRegion | undefined,
+    x: number,
+    y: number,
+    width: number,
+    onClicked: () => void
+  ): Button {
     return new Button({
       text,
+      icon,
       x,
       y,
       z: CityScreen.Z,
@@ -219,6 +233,6 @@ export class CityProductionQueueWindow extends ActorGroup {
   private getChooseProductionText(listMode: ProductionListMode | undefined): string {
     if (listMode === "produce") return "Cancel";
 
-    return this.queue.length === 0 ? "Choose Production" : "Add to Queue";
+    return this.queue.length === 0 ? "Produce" : "Add to Queue";
   }
 }
