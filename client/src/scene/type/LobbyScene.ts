@@ -31,7 +31,6 @@ export class LobbyScene extends Scene {
   private static readonly BOX_WIDTH = 480;
   private static readonly PANEL_GAP = 40;
   private static readonly PLAYER_ROW_HEIGHT = 50;
-  private static readonly BUTTON_ICON_PADDING = 24;
 
   private playerList: ListBox;
   private rightPanelX: number;
@@ -230,7 +229,6 @@ export class LobbyScene extends Scene {
 
     const buttonSpacing = 75;
     const buttonX = this.rightPanelX + LobbyScene.BOX_WIDTH / 2 - ButtonSize.XLARGE.width / 2;
-    const buttonIconX = buttonX + LobbyScene.BUTTON_ICON_PADDING;
     const stackHeight = (buttonDefs.length - 1) * buttonSpacing + ButtonSize.XLARGE.height;
     const stackStartY = this.rightPanelY + this.rightPanelHeight / 2 - stackHeight / 2;
 
@@ -239,7 +237,6 @@ export class LobbyScene extends Scene {
         new Button({
           text: buttonDef.text,
           icon: buttonDef.icon,
-          iconX: buttonDef.icon ? buttonIconX : undefined,
           x: buttonX,
           y: stackStartY + index * buttonSpacing,
           size: ButtonSize.XLARGE,

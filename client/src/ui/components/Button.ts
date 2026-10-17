@@ -26,12 +26,6 @@ export interface ButtonOptions {
   text?: string;
   icon?: SpriteRegion;
   iconOnly?: boolean;
-  // Where the icon sits relative to the text when both are present. Ignored when iconOnly. Defaults to "left".
-  iconPosition?: "left" | "right";
-  // Pins the icon to this absolute x instead of centering the icon+text group by the
-  // button's own text width - lets a column of buttons with differing text lengths
-  // keep their icons aligned with each other. Ignored when iconOnly.
-  iconX?: number;
   iconWidth?: number;
   iconHeight?: number;
   buttonImage?: GameImage;
@@ -53,15 +47,14 @@ export interface ButtonOptions {
 }
 
 export class Button extends ActorGroup {
-  private static readonly ICON_TEXT_SPACING = 8;
+  // Gap between a text button's left edge and its icon; the text stays centered in the button.
+  private static readonly ICON_PADDING = 24;
   private static readonly ICON_TEXT_SIZE = 32;
 
   private buttonImage: GameImage;
   private buttonHoveredImage: GameImage;
   private text: string;
   private icon: SpriteRegion;
-  private iconPosition: "left" | "right";
-  private iconX?: number;
   private callbackFunction: Function;
   private mouseEnterCallbackFunction: Function;
   private mouseExitCallbackFunction: Function;
@@ -92,8 +85,6 @@ export class Button extends ActorGroup {
     });
 
     this.icon = options.icon;
-    this.iconPosition = options.iconPosition ?? "left";
-    this.iconX = options.iconX;
     this.textWidth = -1;
     this.textHeight = -1;
     this.callbackFunction = options.onClicked;
@@ -183,28 +174,13 @@ export class Button extends ActorGroup {
       return; // Don't render text before we know the height & width of the text
     }
 
-    let textX = this.x + this.width / 2 - this.textWidth / 2;
+    const textX = this.x + this.width / 2 - this.textWidth / 2;
     const textY = this.y + this.height / 2 - this.textHeight / 2;
 
     if (this.icon && this.text && !this.iconOnly && this.iconActor) {
-      const iconWidth = this.iconActor.getWidth();
       const iconY = this.y + this.height / 2 - this.iconActor.getHeight() / 2;
 
-      if (this.iconX !== undefined) {
-        // Icon is pinned; the text stays centered in the button.
-        this.iconActor.setPosition(this.iconX, iconY);
-      } else {
-        const groupWidth = iconWidth + Button.ICON_TEXT_SPACING + this.textWidth;
-        const groupX = this.x + this.width / 2 - groupWidth / 2;
-
-        if (this.iconPosition === "left") {
-          this.iconActor.setPosition(groupX, iconY);
-          textX = groupX + iconWidth + Button.ICON_TEXT_SPACING;
-        } else {
-          textX = groupX;
-          this.iconActor.setPosition(groupX + this.textWidth + Button.ICON_TEXT_SPACING, iconY);
-        }
-      }
+      this.iconActor.setPosition(this.x + Button.ICON_PADDING, iconY);
     }
 
     if (this.text) {
