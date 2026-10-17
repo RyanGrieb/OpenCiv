@@ -43,6 +43,8 @@ interface MapSizeEvent {
   height: string;
   // Whether the server made the east and west edges adjacent - see GameOptions.wrapMap.
   wrap?: boolean;
+  // How many chunks the initial map sync is about to send.
+  chunkCount: number;
 }
 
 interface TileYieldsEvent {
@@ -183,7 +185,8 @@ export class GameMap {
   // True from the map request until "mapLoaded" - only that first sync reports to the loading screen,
   // not the reveals that go through the same ingestion during play.
   private loadingMap = false;
-  private chunksReceived = 0;
+  // The chunks the initial sync sends (from "mapSize") and how many of them are drawn so far.
+  private chunkCount = 0;
   private chunksDrawn = 0;
 
   public static getInstance() {
@@ -536,6 +539,7 @@ export class GameMap {
       callback: (data) => {
         this.mapWidth = parseInt(data.width);
         this.mapHeight = parseInt(data.height);
+        this.chunkCount = data.chunkCount;
 
         MapWrap.init(this.mapWidth, Tile.WIDTH, data.wrap ?? false);
 
@@ -561,7 +565,6 @@ export class GameMap {
       eventName: "mapChunk",
       parentObject: this,
       callback: (data) => {
-        if (this.loadingMap) this.chunksReceived++;
         this.pendingChunkIngestions.push(
           this.enqueueRender(async () => {
             await this.ingestChunkTiles(data.chunkX, data.chunkY, data.tiles);
@@ -767,8 +770,8 @@ export class GameMap {
     this.chunksDrawn++;
     const share = LoadingScreen.BLENDING_MAP - LoadingScreen.DRAWING_MAP;
     this.reportLoadProgress(
-      `Drawing the map (${this.chunksDrawn}/${this.chunksReceived})...`,
-      LoadingScreen.DRAWING_MAP + (share * this.chunksDrawn) / this.chunksReceived
+      `Drawing the map (${this.chunksDrawn}/${this.chunkCount})...`,
+      LoadingScreen.DRAWING_MAP + (share * this.chunksDrawn) / this.chunkCount
     );
   }
 

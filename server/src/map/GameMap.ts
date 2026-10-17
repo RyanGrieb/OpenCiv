@@ -395,21 +395,8 @@ export class GameMap {
    * they're revealed.
    */
   public sendMapChunksToPlayer(player: Player) {
-    // Send the map-size to player
-    player.sendNetworkEvent({
-      event: "mapSize",
-      width: this.mapWidth,
-      height: this.mapHeight,
-      wrap: GameMap.wrapsHorizontally()
-    });
-
-    //Send tile stats to player
-    player.sendNetworkEvent({
-      event: "tileStats",
-      tiles: Tile.getAllTileStats()
-    });
-
     const visibility = player.getVisibility();
+    const chunks: { x: number; y: number; tiles: Tile[] }[] = [];
 
     for (let x = 0; x < this.mapWidth; x += MAP_CHUNK_SIZE) {
       for (let y = 0; y < this.mapHeight; y += MAP_CHUNK_SIZE) {
@@ -427,8 +414,27 @@ export class GameMap {
 
         if (chunkTiles.length < 1) continue;
 
-        this.sendTileChunk(player, x, y, chunkTiles);
+        chunks.push({ x, y, tiles: chunkTiles });
       }
+    }
+
+    // Send the map-size to player, with how many chunks follow so the loading screen can count them.
+    player.sendNetworkEvent({
+      event: "mapSize",
+      width: this.mapWidth,
+      height: this.mapHeight,
+      wrap: GameMap.wrapsHorizontally(),
+      chunkCount: chunks.length
+    });
+
+    //Send tile stats to player
+    player.sendNetworkEvent({
+      event: "tileStats",
+      tiles: Tile.getAllTileStats()
+    });
+
+    for (const chunk of chunks) {
+      this.sendTileChunk(player, chunk.x, chunk.y, chunk.tiles);
     }
 
     // Its own event rather than a flag on the last chunk: a player can start a game with too few
