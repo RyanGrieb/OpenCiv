@@ -10,6 +10,7 @@
         "try": "ts-node scripts/try_branch.ts",
         "approve": "ts-node scripts/try_branch.ts --approve",
         "test:e2e": "npx ts-node scripts/run_tests.ts",
+        "test:scenarios": "ts-node scripts/run_scenarios.ts",
         "generate-sprites": "npx ts-node scripts/generate_sprite_manifest.ts",
         "install-all": "npm install && concurrently \"npm install --prefix ./server\" \"npm install --prefix ./client\"",
         "generate-docs": "concurrently \"cd ./server && npx typedoc --name openciv/server\" \"cd ./client && npx typedoc --name openciv/client\"",
@@ -22,6 +23,7 @@
         "@types/kill-port": "^2.0.3",
         "@types/node": "^24.10.2",
         "kill-port": "^2.0.1",
+        "playwright": "^1.56.1",
         "ts-node": "^10.9.2",
         "typedoc": "^0.28.20",
         "typescript": "^5.9.3"
