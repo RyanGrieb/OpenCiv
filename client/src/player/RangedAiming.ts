@@ -5,6 +5,7 @@ import { GameMap } from "../map/GameMap";
 import { Tile } from "../map/Tile";
 import { WebsocketClient } from "../network/Client";
 import { Actor } from "../scene/Actor";
+import { Marking } from "../scene/Marking";
 import { AbstractPlayer } from "./AbstractPlayer";
 import { Diplomacy } from "./Diplomacy";
 
@@ -48,6 +49,7 @@ export class RangedAiming {
         height: 32,
         color: isTarget(tile) ? RangedAiming.TARGET_TINT : RangedAiming.TILE_TINT
       });
+      Marking.markUnderUnits(overlay);
       Game.getInstance().getCurrentScene().addActor(overlay);
       return overlay;
     });

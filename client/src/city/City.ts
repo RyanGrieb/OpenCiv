@@ -6,6 +6,7 @@ import { NetworkEvents } from "../network/Client";
 import { AbstractPlayer } from "../player/AbstractPlayer";
 import { Actor } from "../scene/Actor";
 import { ActorGroup } from "../scene/ActorGroup";
+import { Marking } from "../scene/Marking";
 import { Standing } from "../scene/Standing";
 import { InGameScene } from "../scene/type/InGameScene";
 import { FloatingText } from "../ui/components/FloatingText";
@@ -256,10 +257,7 @@ export class City extends ActorGroup {
       return;
     }
 
-    for (const overlay of this.territoryOverlays) {
-      this.removeActor(overlay);
-    }
-    this.territoryOverlays = [];
+    this.removeTerritoryOverlays();
 
     for (const tile of this.territory) {
       GameMap.getInstance().removeOutline({ tile: tile, cityOutline: true });
@@ -275,12 +273,16 @@ export class City extends ActorGroup {
         spriteRegion: SpriteRegion.TILE_BLANK,
         x: tile.getX(),
         y: tile.getY(),
+        // Over the fog of war (1), under units (2).
+        z: 1.5,
         width: 32,
         height: 32,
         color: this.innerBorderColor
       });
-
-      this.addActor(territoryOverlay);
+      // Its own actor in the scene, not one of the city's: on the globe it lies over the trees and the
+      // like standing on the tile, as on the flat map, rather than painted into the ground under them.
+      Marking.markUnderUnits(territoryOverlay);
+      Game.getInstance().getCurrentScene().addActor(territoryOverlay);
       this.territoryOverlays.push(territoryOverlay);
     }
 
@@ -304,6 +306,7 @@ export class City extends ActorGroup {
     super.onDestroyed();
     const scene = Game.getInstance().getCurrentScene();
     [this.nameLabel, this.civIcon, this.strikeIcon, this.healthBar].forEach((actor) => scene.removeActor(actor));
+    this.removeTerritoryOverlays();
   }
 
   /**
@@ -316,6 +319,7 @@ export class City extends ActorGroup {
       GameMap.getInstance().removeOutline({ tile, cityOutline: true });
       if (tile.getTerritoryCity() === this) tile.setTerritoryCity(undefined);
     }
+    this.removeTerritoryOverlays();
     Game.getInstance().getCurrentScene().removeActor(this);
   }
 
@@ -385,6 +389,12 @@ export class City extends ActorGroup {
 
   public getWorkedTiles() {
     return this.workedTiles;
+  }
+
+  private removeTerritoryOverlays() {
+    const scene = Game.getInstance().getCurrentScene();
+    this.territoryOverlays.forEach((overlay) => scene.removeActor(overlay));
+    this.territoryOverlays = [];
   }
 
   // The city's name and civ icon, positioned off its center tile - so this only runs once that
@@ -515,8 +525,8 @@ export class City extends ActorGroup {
   }
 }
 
-// The scene object a City's health bar is drawn through: the city itself (with its territory) lies on
-// the ground, and the bar stands up over it on the globe.
+// The scene object a City's health bar is drawn through: the city's territory lies on the ground, and
+// the bar stands up over it on the globe.
 class CityHealthBar extends Actor {
   private city: City;
 

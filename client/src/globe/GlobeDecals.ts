@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import { Actor } from "../scene/Actor";
 import { WorldView } from "../scene/Camera";
+import { Marking } from "../scene/Marking";
 import { Fingerprint } from "./Fingerprint";
 import { GlobeProjection } from "./GlobeProjection";
 import { OverStanding } from "./OverStanding";
@@ -41,8 +42,9 @@ export class GlobeDecals {
    * code finds its canvas as the one the map is being drawn into.
    */
   public update(actors: Actor[], useView: (view: WorldView) => void) {
+    const current = new Set(actors);
     for (const [actor, decal] of this.decals) {
-      if (actors.includes(actor)) continue;
+      if (current.has(actor)) continue;
 
       this.disposeDecal(decal);
       this.decals.delete(actor);
@@ -75,7 +77,9 @@ export class GlobeDecals {
     material.onBeforeCompile = (shader) => OverStanding.patch(shader);
     const mesh = new THREE.Mesh(new THREE.BufferGeometry(), material);
     mesh.frustumCulled = false;
-    mesh.renderOrder = OverStanding.RENDER_ORDER;
+    mesh.renderOrder = Marking.isUnderUnits(actor)
+      ? OverStanding.MARKING_UNDER_UNITS_RENDER_ORDER
+      : OverStanding.RENDER_ORDER;
     this.group.add(mesh);
     const decal: Decal = { mesh, context, texture, print: undefined };
     this.decals.set(actor, decal);

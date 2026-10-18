@@ -8,13 +8,23 @@ import { SceneObject } from "./SceneObject";
  * nothing.
  */
 export class Marking {
-  private static readonly marked = new WeakSet<SceneObject>();
+  // Each marked object, and whether it goes under units, as the flat map draws a city's territory and
+  // the ranged attack tiles, rather than over them.
+  private static readonly marked = new WeakMap<SceneObject, boolean>();
 
   public static mark(object: SceneObject) {
-    Marking.marked.add(object);
+    Marking.marked.set(object, false);
+  }
+
+  public static markUnderUnits(object: SceneObject) {
+    Marking.marked.set(object, true);
   }
 
   public static is(object: SceneObject): boolean {
     return Marking.marked.has(object);
+  }
+
+  public static isUnderUnits(object: SceneObject): boolean {
+    return Marking.marked.get(object) === true;
   }
 }

@@ -8,11 +8,14 @@ import * as THREE from "three";
  */
 export class OverStanding {
   // After the map's sprites and units, before labels and badges (see GlobeSprites.OVERLAY_RENDER_ORDER).
-  public static readonly RENDER_ORDER = 5;
-  // What the flat map draws under units, though over its trees - the selected unit's outline: after the
-  // map's sprites, but before units, which are drawn after it (see GlobeSprites) so as to stand on it.
-  public static readonly UNDER_UNITS_RENDER_ORDER = 3;
-  public static readonly UNITS_RENDER_ORDER = 4;
+  public static readonly RENDER_ORDER = 6;
+  // What the flat map draws under units, though over its trees - a city's territory, the tiles a ranged
+  // unit can shoot into (see Marking.markUnderUnits), then the selected unit's outline over those:
+  // after the map's sprites, but before units, which are drawn after them (see GlobeSprites) so as to
+  // stand on them.
+  public static readonly MARKING_UNDER_UNITS_RENDER_ORDER = 3;
+  public static readonly UNDER_UNITS_RENDER_ORDER = 4;
+  public static readonly UNITS_RENDER_ORDER = 5;
 
   /** Sets a material up to be drawn over what stands; its shader also needs patch(). */
   public static setUp(material: THREE.Material) {
