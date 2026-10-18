@@ -139,11 +139,11 @@ tiles:
   FISH:
     name: Fish
     stats:
-      - food: 2
+      - food: 1
   IMPROVED_FISH:
     name: Improved Fish
     stats:
-      - food: 3
+      - food: 2
   CRAB:
     name: Crab
     stats:
