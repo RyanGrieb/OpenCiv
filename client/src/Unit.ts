@@ -126,6 +126,8 @@ export interface UnitActionData {
 // What a Builder is working on - both fields are absent when it isn't building anything.
 export interface UnitBuildStatus {
   building?: string;
+  // The window's progress text from the server, e.g. "Building Farm" or "Removing Marsh".
+  buildingStatus?: string;
   buildingIcon?: string;
   turnsLeft?: number;
 }
@@ -155,6 +157,7 @@ export interface UnitCreationData {
   actions: UnitActionData[];
   // Only on the owner's own units (see server Unit.asJSON).
   building?: string;
+  buildingStatus?: string;
   buildingIcon?: string;
   turnsLeft?: number;
 }
@@ -515,6 +518,10 @@ export class Unit extends ActorGroup {
     return this.buildStatus.building;
   }
 
+  public getBuildStatusText(): string | undefined {
+    return this.buildStatus.buildingStatus;
+  }
+
   public getBuildTurnsLeft(): number | undefined {
     return this.buildStatus.turnsLeft;
   }
@@ -743,7 +750,12 @@ export class Unit extends ActorGroup {
   }
 
   private setBuildStatus(status: UnitBuildStatus) {
-    this.buildStatus = { building: status.building, buildingIcon: status.buildingIcon, turnsLeft: status.turnsLeft };
+    this.buildStatus = {
+      building: status.building,
+      buildingStatus: status.buildingStatus,
+      buildingIcon: status.buildingIcon,
+      turnsLeft: status.turnsLeft
+    };
 
     const iconRegion = status.buildingIcon ? resolveSpriteRegion(status.buildingIcon) : undefined;
     this.buildIcon = iconRegion

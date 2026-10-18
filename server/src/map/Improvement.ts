@@ -27,6 +27,8 @@ export interface ImprovementData {
   domain?: UnitDomain;
   // Finished the moment it's ordered, using up the unit that builds it (Civ 5's Fishing Boats).
   consumes_unit?: boolean;
+  // The unit window's progress text, e.g. "Removing Marsh". Absent means "Building <name>".
+  status?: string;
 }
 
 // The tile improvements (and forest/jungle clearing) a Builder can work on, and the Fishing Boats a

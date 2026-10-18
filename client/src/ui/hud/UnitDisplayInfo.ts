@@ -158,9 +158,9 @@ export class UnitDisplayInfo extends ActorGroup {
   }
 
   private updateBuildLabel() {
-    const building = this.unit.getBuildingImprovement();
+    const status = this.unit.getBuildStatusText();
     const turnsLeft = this.unit.getBuildTurnsLeft();
-    this.buildLabel.setText(building ? `Building ${building}: ${turnsLeft} ${turnsLeft === 1 ? "turn" : "turns"}` : "");
+    this.buildLabel.setText(status ? `${status}: ${turnsLeft} ${turnsLeft === 1 ? "turn" : "turns"}` : "");
 
     this.buildLabel.conformSize().then(() => {
       this.buildLabel.setPosition(this.x + TEXT_X, this.y + STRENGTH_Y + this.getExtraActionRowsHeight());

@@ -463,10 +463,12 @@ export class Unit {
 
   private getBuildStatusJSON() {
     const improvement = Improvement.getImprovementData(this.buildingImprovement);
-    if (!improvement) return { building: undefined, buildingIcon: undefined, turnsLeft: undefined };
+    if (!improvement)
+      return { building: undefined, buildingStatus: undefined, buildingIcon: undefined, turnsLeft: undefined };
 
     return {
       building: improvement.name,
+      buildingStatus: improvement.status ?? `Building ${improvement.name}`,
       buildingIcon: improvement.icon,
       turnsLeft: this.getBuildTurns(improvement) - this.tile.getBuildProgress(improvement.name)
     };

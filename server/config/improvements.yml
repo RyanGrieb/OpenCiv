@@ -17,6 +17,8 @@
 #   consumes_unit - built the moment it's ordered, using up the unit (Civ 5's Fishing Boats).
 #   outside_borders - may also be built on land no civilization owns. Everything else has to be in
 #                   the Builder's own territory, and nothing can go in another civilization's.
+#   status        - what the unit window says while the job is underway ("Removing Marsh").
+#                   Absent means "Building <name>".
 # asset_name is what the tech window shows; icon is the Builder's action button.
 improvements:
   - name: Farm
@@ -116,18 +118,21 @@ improvements:
   - name: Fort
     required_tech: Engineering
   - name: Remove Forest
+    status: Removing Forest
     icon: ICON_CHOP
     required_tech: Mining
     build_turns: 4
     removes_feature: forest
     outside_borders: true
   - name: Remove Jungle
+    status: Removing Jungle
     icon: ICON_CHOP
     required_tech: Bronze Working
     build_turns: 7
     removes_feature: jungle
     outside_borders: true
   - name: Remove Marsh
+    status: Removing Marsh
     icon: ICON_CHOP
     required_tech: Masonry
     build_turns: 6

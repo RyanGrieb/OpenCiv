@@ -149,6 +149,12 @@ describe('Improvement', () => {
     expect(buildable(tile)).toContain('Farm');
   });
 
+  it('describes every removal job as Removing, not Building', () => {
+    for (const data of Improvement.getAllImprovementData().filter((data) => data.removes_feature)) {
+      expect(data.status).toMatch(/^Removing /);
+    }
+  });
+
   it('keeps build progress per improvement until cleared', () => {
     const tile = tileOf('grass');
     tile.addBuildProgress('Farm');
