@@ -43,9 +43,9 @@ export class UnitDisplayInfo extends ActorGroup {
   private unit: Unit;
   // Shows the hovered action's description in place of the movement line, wrapped within the window.
   private movementLabel: Label;
-  // While a hovered action's description wraps onto more lines, the combat rows (or a Builder's build
-  // status) under it step aside.
-  private combatRowsHidden = false;
+  // While a hovered action's description wraps onto more lines, the strength row (or a Builder's build
+  // status) under it steps aside. The HP and XP bars stay.
+  private strengthRowHidden = false;
   // Which action button the mouse is over. Moving straight from one button to the next fires the new
   // button's enter before the old one's exit, so the exit only clears this if it's still its own.
   private hoveredActionName: string | undefined;
@@ -53,6 +53,8 @@ export class UnitDisplayInfo extends ActorGroup {
   private buildLabel: Label;
   // Strength, health bar and XP bar - rebuilt whenever strength or health changes.
   private combatActors: Actor[] = [];
+  // The part of combatActors on the strength row, right under the movement line.
+  private strengthActors: Actor[] = [];
   private actionButtons: Button[];
   // Open while the player picks a promotion (see the Promote action).
   private promotionWindow: PromotionWindow | undefined;
@@ -198,15 +200,15 @@ export class UnitDisplayInfo extends ActorGroup {
 
     this.movementLabel.conformSize().then(() => {
       this.movementLabel.setPosition(this.x + TEXT_X, this.y + MOVEMENT_Y + this.getExtraActionRowsHeight());
-      this.setCombatRowsHidden(this.movementLabel.isWrapped());
+      this.setStrengthRowHidden(this.movementLabel.isWrapped());
     });
   }
 
-  private setCombatRowsHidden(hidden: boolean) {
-    if (this.combatRowsHidden === hidden) return;
+  private setStrengthRowHidden(hidden: boolean) {
+    if (this.strengthRowHidden === hidden) return;
 
-    this.combatRowsHidden = hidden;
-    for (const actor of [...this.combatActors, this.buildLabel]) {
+    this.strengthRowHidden = hidden;
+    for (const actor of [...this.strengthActors, this.buildLabel]) {
       if (hidden) this.removeActor(actor);
       else this.addActor(actor);
     }
@@ -249,8 +251,9 @@ export class UnitDisplayInfo extends ActorGroup {
     Promise.all(labels.map((label) => label.conformSize())).then(() => {
       const healthFraction = Math.max(0, Math.min(Unit.MAX_HEALTH, this.unit.getHealth())) / Unit.MAX_HEALTH;
 
+      const strengthActors = this.createStrengthRow(strengths);
       const actors: Actor[] = [
-        ...this.createStrengthRow(strengths),
+        ...strengthActors,
         ...this.createBar(HEALTH_BAR_Y, "red", "limegreen", healthFraction, healthLabel),
         ...this.createBar(
           XP_BAR_Y,
@@ -262,11 +265,12 @@ export class UnitDisplayInfo extends ActorGroup {
         ...this.createPromotionIcons()
       ];
 
-      if (!this.combatRowsHidden) {
-        for (const actor of this.combatActors) this.removeActor(actor);
-        for (const actor of actors) this.addActor(actor);
+      for (const actor of this.combatActors) this.removeActor(actor);
+      for (const actor of actors) {
+        if (!this.strengthRowHidden || !strengthActors.includes(actor)) this.addActor(actor);
       }
       this.combatActors = actors;
+      this.strengthActors = strengthActors;
     });
   }
 
