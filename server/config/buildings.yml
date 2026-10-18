@@ -195,6 +195,15 @@ buildings:
     stats:
       - culture: 1
       - gold: 5
+  - name: Artists' Guild
+    asset_name: BUILDING_ARTISTS_GUILD
+    cost: 100
+    maintenance: 1
+    required_tech: Guilds
+    not_yet:
+      - Slot for a Great Artist specialist
+    stats:
+      - culture: 1
   - name: Market
     asset_name: BUILDING_MARKET
     cost: 100
@@ -489,6 +498,16 @@ buildings:
       - +25% Great People generation in the city
     stats:
       - culture: 2
+  - name: East India Company
+    asset_name: BUILDING_EAST_INDIA_COMPANY
+    cost: 150
+    required_tech: Guilds
+    national_wonder: true
+    requires_building: Market
+    not_yet:
+      - Extra gold from luxury resources
+    stats:
+      - gold: 4
   - name: Circus Maximus
     asset_name: BUILDING_CIRCUS_MAXIMUS
     cost: 125

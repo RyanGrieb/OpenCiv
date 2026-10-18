@@ -234,6 +234,9 @@ technologies:
     row: 4
     slot: 6
     description: The first worker unions, letting tradespeople organize and better control their trades.
+    # Not enforced: there is no production-to-gold conversion yet.
+    notes:
+      - Allows cities to convert Production into Gold
   - name: Metal Casting
     asset_name: BUILDING_FORGE
     cost: 175
@@ -257,6 +260,10 @@ technologies:
     row: 5
     slot: 2
     description: Establishes formal schooling, greatly increasing the pursuit of knowledge.
+    # Not enforced: there is no production-to-science conversion or research agreements yet.
+    notes:
+      - Allows cities to convert Production into Science
+      - Allows Research agreements
   - name: Chivalry
     asset_name: UNIT_KNIGHT
     cost: 275
