@@ -11,6 +11,7 @@ import { Fingerprint } from "./Fingerprint";
 import { GlobeProjection } from "./GlobeProjection";
 import { OverStanding } from "./OverStanding";
 import { PixelArtSampling } from "./PixelArtSampling";
+import { SphereOcclusion } from "./SphereOcclusion";
 import { StandingPiece, StandingPieces } from "./StandingPieces";
 
 /**
@@ -111,8 +112,9 @@ class BillboardBatch {
     return geometry;
   }
 
-  public set(billboards: Billboard[], projection: GlobeProjection) {
-    if (!this.changes(billboards)) return;
+  // Whether anything changed.
+  public set(billboards: Billboard[], projection: GlobeProjection): boolean {
+    if (!this.changes(billboards)) return false;
 
     if (billboards.length > this.capacity) {
       this.capacity = Math.max(64, 2 ** Math.ceil(Math.log2(billboards.length)));
@@ -166,6 +168,7 @@ class BillboardBatch {
       attribute.needsUpdate = true;
     }
     geometry.instanceCount = billboards.length;
+    return true;
   }
 
   // Writes only each billboard's pose, when only that changed.
@@ -198,6 +201,87 @@ class BillboardBatch {
     const same = now.length === this.written.length && now.every((value, index) => value === this.written[index]);
     this.written = now;
     return !same;
+  }
+}
+
+// The map's sprites in one square of the map (see GlobeSprites.SQUARE), drawn only while some of the
+// square may be in view - on screen, and not wholly round the back of the planet - and in each pose
+// only while one of its sprites stands that way or is fading to or from it. A turning globe so draws
+// the sprites on the side of it in view, in the poses they're in, rather than all of the map's twice.
+class MapSquare {
+  private static readonly PLANET = new THREE.Sphere(new THREE.Vector3(), 1);
+
+  public billboards: Billboard[] = [];
+  private readonly batch: BillboardBatch;
+  // Around all its billboards can cover, in the planet's space.
+  private readonly bounds = new THREE.Sphere();
+  private anyUpright = true;
+  private anyOutline = true;
+  private fadesUntil = 0;
+
+  constructor(materials: THREE.ShaderMaterial[], planet: THREE.Object3D) {
+    this.batch = new BillboardBatch(materials[0], materials[1]);
+    this.batch.meshes.forEach((mesh) => (mesh.frustumCulled = true));
+    planet.add(...this.batch.meshes);
+  }
+
+  // How far from its foot a billboard can draw, in world pixels, however it stands and turns: its
+  // rectangle's furthest corner, its skirt, and its foot's way from its tile's middle, twice over.
+  private static reachOf(billboard: Billboard) {
+    const across = Math.max(Math.abs(billboard.left), Math.abs(billboard.left + billboard.width));
+    const down = Math.max(Math.abs(billboard.top), Math.abs(billboard.top + billboard.height));
+    const fromMiddle = Math.hypot(billboard.footX - billboard.middleX, billboard.footY - billboard.middleY);
+    return across + down + billboard.skirt + 2 * fromMiddle;
+  }
+
+  public set(billboards: Billboard[], projection: GlobeProjection) {
+    this.billboards = billboards;
+    if (this.batch.set(billboards, projection)) this.measure(projection);
+    // Three.js culls each mesh off screen by its geometry's bounds, and the geometry may be new.
+    this.batch.meshes.forEach((mesh) => (mesh.geometry.boundingSphere = this.bounds));
+    this.notePoses();
+  }
+
+  public setPoses() {
+    this.batch.setPoses(this.billboards);
+    this.notePoses();
+  }
+
+  /** Shows each pose's mesh or not, for the camera there in the planet's space, at `now` on the sprites' clock. */
+  public show(cameraInPlanet: THREE.Vector3, now: number) {
+    const inFront = !SphereOcclusion.hides(MapSquare.PLANET, cameraInPlanet, this.bounds);
+    const fading = now < this.fadesUntil;
+    this.batch.meshes[0].visible = inFront && (this.anyUpright || fading);
+    this.batch.meshes[1].visible = inFront && (this.anyOutline || fading);
+  }
+
+  public dispose() {
+    this.batch.meshes.forEach((mesh) => mesh.removeFromParent());
+    this.batch.dispose();
+  }
+
+  private measure(projection: GlobeProjection) {
+    const middles = this.billboards.map((billboard) => GlobeSprites.middleOnSphere(projection, billboard));
+    const center = this.bounds.center.set(0, 0, 0);
+    middles.forEach(([x, y, z]) => center.add(new THREE.Vector3(x, y, z)));
+    center.normalize();
+    // A world pixel spans no more of the planet than at its equator.
+    const worldPixel = (2 * Math.PI) / projection.worldWidth;
+    let radius = 0;
+    this.billboards.forEach((billboard, index) => {
+      const foot = new THREE.Vector3(...GlobeSprites.footOnSphere(projection, billboard));
+      const middle = new THREE.Vector3(...middles[index]);
+      const reach = MapSquare.reachOf(billboard) * worldPixel;
+      radius = Math.max(radius, foot.distanceTo(center) + reach, middle.distanceTo(center) + reach);
+    });
+    this.bounds.radius = radius;
+  }
+
+  // Which poses its sprites stand in, and when the last fade between them ends.
+  private notePoses() {
+    this.anyUpright = this.billboards.some((billboard) => billboard.pose !== 1);
+    this.anyOutline = this.billboards.some((billboard) => billboard.pose === 1);
+    this.fadesUntil = Math.max(0, ...this.billboards.map((billboard) => billboard.poseSince + GlobeSprites.POSE_FADE));
   }
 }
 
@@ -258,7 +342,7 @@ export class GlobeSprites {
   // A billboard doesn't snap from one pose to the other: it commits to the new one and, for this many
   // seconds, fades it in as the old one fades out (in dither for the map's sprites, which write depth,
   // in opacity for labels) - never held half way between.
-  private static readonly POSE_FADE = 0.18;
+  public static readonly POSE_FADE = 0.18;
   // For the depth test alone, billboards with their feet in view are brought in front of all of the
   // planet's ground, in the order of their feet: between these fractions of the nearest it can be.
   // Nothing standing on the side of a round planet in view is behind its ground, except where one on
@@ -275,6 +359,9 @@ export class GlobeSprites {
   private static readonly PAST_HORIZON = -0.1;
   private static readonly PAST_SCREEN = 1.5;
   private static readonly OVERLAY_RENDER_ORDER = 10;
+  // The side of the squares the map's sprites are drawn in (see MapSquare), in world pixels: about
+  // eight tiles across and ten down.
+  private static readonly SQUARE = 256;
 
   private static readonly VERTEX_SHADER = `
     #include <common>
@@ -442,7 +529,8 @@ export class GlobeSprites {
   private readonly cameraInPlanet = new THREE.Vector3();
   // Each standing object's pose, kept from frame to frame as its billboard is made anew every frame.
   private readonly standingPoses = new WeakMap<SceneObject, { pose: number; poseSince: number }>();
-  private readonly mapSprites: BillboardBatch;
+  // The map's sprites, by the square of the map they're in.
+  private readonly mapSquares = new Map<string, MapSquare>();
   private readonly units: BillboardBatch;
   private readonly overlay: BillboardBatch;
   private readonly materials: THREE.ShaderMaterial[][];
@@ -481,7 +569,6 @@ export class GlobeSprites {
       ],
       [this.createMaterial(false, 0, false), this.createMaterial(false, 0, true)]
     ];
-    this.mapSprites = new BillboardBatch(...(this.materials[0] as [THREE.ShaderMaterial, THREE.ShaderMaterial]));
     this.units = new BillboardBatch(...(this.materials[1] as [THREE.ShaderMaterial, THREE.ShaderMaterial]));
     this.overlay = new BillboardBatch(...(this.materials[2] as [THREE.ShaderMaterial, THREE.ShaderMaterial]));
     this.overlay.meshes.forEach((mesh) => (mesh.renderOrder = GlobeSprites.OVERLAY_RENDER_ORDER));
@@ -493,7 +580,7 @@ export class GlobeSprites {
       mesh.material.transparent = true;
       mesh.renderOrder = OverStanding.UNITS_RENDER_ORDER;
     });
-    planet.add(...this.mapSprites.meshes, ...this.units.meshes, ...this.overlay.meshes);
+    planet.add(...this.units.meshes, ...this.overlay.meshes);
   }
 
   /** A billboard's foot as a point on the unit sphere, or the point `back` world pixels up the map from it. */
@@ -545,6 +632,9 @@ export class GlobeSprites {
     this.updateGroundDepths(camera);
     this.updateMapSprites();
     this.updateMapPoses(camera);
+    for (const square of this.mapSquares.values()) {
+      square.show(this.cameraInPlanet, this.now.value);
+    }
     this.updateStandingObjects(objects, detail, camera, useView);
   }
 
@@ -621,10 +711,11 @@ export class GlobeSprites {
   }
 
   public dispose() {
-    for (const batch of [this.mapSprites, this.units, this.overlay]) {
+    for (const batch of [this.units, this.overlay]) {
       batch.meshes.forEach((mesh) => mesh.removeFromParent());
       batch.dispose();
     }
+    this.mapSquares.forEach((square) => square.dispose());
     this.materials.flat().forEach((material) => material.dispose());
     this.pieces.dispose();
     this.labels.dispose();
@@ -682,7 +773,9 @@ export class GlobeSprites {
 
     this.posedFrom.copy(from);
     this.posedBillboards = this.mapBillboards;
-    if (this.updatePoses(this.mapBillboards, camera)) this.mapSprites.setPoses(this.mapBillboards);
+    for (const square of this.mapSquares.values()) {
+      if (this.updatePoses(square.billboards, camera)) square.setPoses();
+    }
   }
 
   private updateMapSprites() {
@@ -693,9 +786,36 @@ export class GlobeSprites {
 
     this.tintMapSprites();
     this.tintedVersion = fogVersion;
-    this.mapSprites.set(this.mapBillboards, this.projection);
+    this.setMapSquares();
     this.pieces.upload();
     this.useAtlas(this.materials[0], this.pieces.atlas);
+  }
+
+  // Hands each square of the map its sprites, in the order they were built (a tile's trees over those
+  // of the row behind it), dropping squares left with none.
+  private setMapSquares() {
+    const side = GlobeSprites.SQUARE;
+    const inSquares = new Map<string, Billboard[]>();
+    for (const billboard of this.mapBillboards) {
+      const key = `${Math.floor(billboard.middleX / side)},${Math.floor(billboard.middleY / side)}`;
+      const inSquare = inSquares.get(key) ?? [];
+      inSquare.push(billboard);
+      inSquares.set(key, inSquare);
+    }
+    for (const [key, square] of this.mapSquares) {
+      if (inSquares.has(key)) continue;
+
+      square.dispose();
+      this.mapSquares.delete(key);
+    }
+    for (const [key, billboards] of inSquares) {
+      let square = this.mapSquares.get(key);
+      if (!square) {
+        square = new MapSquare(this.materials[0], this.planet);
+        this.mapSquares.set(key, square);
+      }
+      square.set(billboards, this.projection);
+    }
   }
 
   private buildMapSprites() {

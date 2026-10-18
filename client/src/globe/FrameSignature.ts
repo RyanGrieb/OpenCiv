@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import { Fingerprint } from "./Fingerprint";
+import { SphereOcclusion } from "./SphereOcclusion";
 
 /**
  * Everything a three.js scene would draw from a camera, as a list of numbers - the camera, and each
@@ -14,8 +15,6 @@ export class FrameSignature {
   private readonly frustum = new THREE.Frustum();
   private readonly viewProjection = new THREE.Matrix4();
   private readonly bounds = new THREE.Sphere();
-  private readonly toBounds = new THREE.Vector3();
-  private readonly toOccluder = new THREE.Vector3();
   private occluder: THREE.Sphere | undefined;
   private readonly ignoredUniforms: Set<string>;
   private values: number[] = [];
@@ -85,17 +84,8 @@ export class FrameSignature {
     if (!this.frustum.intersectsObject(object)) return false;
     if (!this.occluder || !object.geometry.boundingSphere) return true;
 
-    // Hidden when further off than the occluder and inside the cone it hides from the camera.
     const bounds = this.bounds.copy(object.geometry.boundingSphere).applyMatrix4(object.matrixWorld);
-    const toBounds = this.toBounds.subVectors(bounds.center, camera.position);
-    const toOccluder = this.toOccluder.subVectors(this.occluder.center, camera.position);
-    const [boundsDistance, occluderDistance] = [toBounds.length(), toOccluder.length()];
-    if (occluderDistance <= this.occluder.radius || boundsDistance - bounds.radius <= occluderDistance) return true;
-
-    const apart = toBounds.angleTo(toOccluder);
-    const boundsReach = Math.asin(Math.min(1, bounds.radius / boundsDistance));
-    const occluderReach = Math.asin(this.occluder.radius / occluderDistance);
-    return apart + boundsReach >= occluderReach;
+    return !SphereOcclusion.hides(this.occluder, camera.position, bounds);
   }
 
   private addMaterial(material: THREE.Material) {
