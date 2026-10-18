@@ -15,6 +15,8 @@ export interface SectionListSection {
   // Sections without a title have no header and can't be closed.
   title?: string;
   rows: SectionListRow[];
+  // Overrides the list's startCollapsed for this section.
+  startCollapsed?: boolean;
 }
 
 export interface SectionListOptions {
@@ -133,7 +135,7 @@ export class SectionList extends ActorGroup {
   private isCollapsed(section: SectionListSection): boolean {
     if (!section.title) return false;
 
-    return this.collapsed.get(section.title) ?? this.startCollapsed;
+    return this.collapsed.get(section.title) ?? section.startCollapsed ?? this.startCollapsed;
   }
 
   private toggleSection(section: SectionListSection) {

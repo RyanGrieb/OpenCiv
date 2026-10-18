@@ -118,7 +118,7 @@ interface BaseGameOptionDefinition {
   label: string;
   // Only listed in the client's Game Options UI once the player opens its advanced options.
   hidden?: boolean;
-  // Heading the advanced options list this option under, as a section the player can open and close.
+  // Heading the client's Game Options UI lists this option under, as a section the player can open and close.
   category?: string;
 }
 
@@ -147,9 +147,7 @@ export type GameOptionDefinition = BooleanGameOptionDefinition | NumberGameOptio
 // values), so adding a new option only needs an entry here plus a field on GameOptions,
 // never a client-side change.
 export const GameOptionDefinitions: GameOptionDefinition[] = [
-  { key: "allowBarbarians", label: "Allow Barbarians", type: "boolean" },
-  { key: "numCityStates", label: "Number of City-States", type: "number", min: 0, max: 12, step: 1 },
-  { key: "wrapMap", label: "Wrap Map East-West", type: "boolean" },
+  { key: "wrapMap", label: "Wrap Map East-West", type: "boolean", category: "Map" },
   {
     key: "mapSize",
     label: "Map Size",
@@ -158,12 +156,23 @@ export const GameOptionDefinitions: GameOptionDefinition[] = [
     max: MapSizes.CUSTOM,
     step: 1,
     valueLabels: ["Duel", "Tiny", "Small", "Medium", "Large", "Huge", "Custom"],
+    category: "Map",
     onChange: (options, value) => {
       if (value === MapSizes.CUSTOM) return;
 
       MapSizes.applyPreset(options, value);
       options.numCityStates = MAP_SIZE_CITY_STATE_COUNTS[value];
     }
+  },
+  { key: "allowBarbarians", label: "Allow Barbarians", type: "boolean", category: "Opponents" },
+  {
+    key: "numCityStates",
+    label: "Number of City-States",
+    type: "number",
+    min: 0,
+    max: 12,
+    step: 1,
+    category: "Opponents"
   },
   {
     key: "mapWidth",

@@ -57,8 +57,10 @@ export class GameOptionsGroup extends ActorGroup {
   private static readonly SLIDER_VALUE_WIDTH = 90;
   // Space kept clear at the bottom for the footer buttons.
   private static readonly FOOTER_HEIGHT = 70;
-  // Options the server gives no category are listed under this one on the advanced page.
+  // Options the server gives no category are listed under this one.
   private static readonly DEFAULT_CATEGORY = "General";
+  // The only category that starts open; the rest start closed.
+  private static readonly OPEN_CATEGORY = "Map";
 
   private optionList: SectionList;
   private optionDefs: GameOptionData[] = [];
@@ -168,7 +170,7 @@ export class GameOptionsGroup extends ActorGroup {
 
     this.footerActors.forEach((actor) => this.addActor(actor));
 
-    // A fresh list per page, so each page opens scrolled to the top with its categories closed.
+    // A fresh list per page, so each page opens scrolled to the top with its categories reset.
     if (this.optionList) {
       this.removeActor(this.optionList);
     }
@@ -176,8 +178,7 @@ export class GameOptionsGroup extends ActorGroup {
       x: this.x + 12,
       y: this.y + GameOptionsGroup.ROWS_START_Y,
       width: this.width - 24,
-      height: this.height - GameOptionsGroup.ROWS_START_Y - GameOptionsGroup.FOOTER_HEIGHT,
-      startCollapsed: true
+      height: this.height - GameOptionsGroup.ROWS_START_Y - GameOptionsGroup.FOOTER_HEIGHT
     });
     this.addActor(this.optionList);
     this.renderOptions();
@@ -185,15 +186,11 @@ export class GameOptionsGroup extends ActorGroup {
 
   private renderOptions() {
     const visibleDefs = this.optionDefs.filter((def) => !!def.hidden === this.showAdvanced);
-    if (!this.showAdvanced) {
-      this.optionList.setSections([{ rows: this.createOptionRows(visibleDefs) }]);
-      return;
-    }
-
     // Categories in the order the server first lists them.
     const categories = [...new Set(visibleDefs.map((def) => def.category ?? GameOptionsGroup.DEFAULT_CATEGORY))];
     const sections: SectionListSection[] = categories.map((category) => ({
       title: category,
+      startCollapsed: category !== GameOptionsGroup.OPEN_CATEGORY,
       rows: this.createOptionRows(
         visibleDefs.filter((def) => (def.category ?? GameOptionsGroup.DEFAULT_CATEGORY) === category)
       )
