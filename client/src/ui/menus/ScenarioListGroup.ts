@@ -96,7 +96,8 @@ export class ScenarioListGroup extends ActorGroup {
       width: this.width - ScenarioListGroup.LIST_SIDE_MARGIN * 2,
       height: this.height - ScenarioListGroup.LIST_TOP - ScenarioListGroup.LIST_BOTTOM_MARGIN,
       headerHeight: ScenarioListGroup.ROW_HEIGHT,
-      font: UITheme.FONT
+      font: UITheme.FONT,
+      startCollapsed: true
     });
 
     const sections: SectionListSection[] = [];
