@@ -11,7 +11,7 @@ import { ActorGroup } from "../ActorGroup";
 
 export class MainMenuScene extends Scene {
   private static readonly SETTINGS_WIDTH = 540;
-  private static readonly SETTINGS_HEIGHT = 300;
+  private static readonly SETTINGS_HEIGHT = 370;
   private static readonly SCENARIOS_WIDTH = 460;
   private static readonly SCENARIOS_HEIGHT = 560;
   private static readonly TITLE_ICON_SIZE = 96;

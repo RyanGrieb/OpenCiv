@@ -160,6 +160,14 @@ describe('Unit', () => {
     });
   });
 
+  it('skips its turn until it moves', () => {
+    unit.skipTurn();
+    expect(unit.isSkippingTurn()).toBe(true);
+
+    unit.moveToTile({ previousTile: mockTile, targetTile: targetTile, remainingTiles: [], remainingMovement: 1 });
+    expect(unit.isSkippingTurn()).toBe(false);
+  });
+
   it('calculates movement towards target tile', () => {
     mockGameMap.constructShortestPath.mockReturnValue([mockTile, targetTile]);
 

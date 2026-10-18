@@ -47,6 +47,8 @@ export function setupAllTechsResearchedTest(game: Game) {
             const city = utils.getClientPlayer().getCities()[0];
             WebsocketClient.sendMessage({ event: "addToProductionQueue", cityName: city.getName(), type: "unit", name: "Scout" });
             await utils.waitUntil(() => find("production") === undefined, 3000, "Production notification to go away");
+            // The Warrior hasn't moved, so it would hold up the turn with Move Unit.
+            await utils.skipIdleUnits();
         },
         verification: () => !find("research") && nextTurnText() === "Next Turn"
     });

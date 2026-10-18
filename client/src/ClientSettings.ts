@@ -5,7 +5,8 @@ const STORAGE_KEY = "openciv.settings";
 // Each setting's name is its key and its default is its value.
 const DEFAULT_SETTINGS = {
   HUD_TRANSPARENCY: 0.75, // Opacity of the corner HUD windows (research, unit info).
-  GLOBE_EDGE_SPRITE_WIDTH: 0.7 // The least of their width the globe's sprites narrow to near its edge (1: never).
+  GLOBE_EDGE_SPRITE_WIDTH: 0.7, // The least of their width the globe's sprites narrow to near its edge (1: never).
+  MOVE_UNIT_BUTTON: true // Units needing orders turn Next Turn into Move Unit, which selects them instead of ending the turn.
 };
 
 type Settings = typeof DEFAULT_SETTINGS;
@@ -46,7 +47,7 @@ export class ClientSettings {
   private static load(): Settings {
     if (ClientSettings.settings) return ClientSettings.settings;
 
-    const settings = { ...DEFAULT_SETTINGS };
+    const settings: Record<keyof Settings, unknown> = { ...DEFAULT_SETTINGS };
     try {
       const stored = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? "{}");
       for (const key of Object.keys(DEFAULT_SETTINGS) as (keyof Settings)[]) {
@@ -56,8 +57,8 @@ export class ClientSettings {
       // Storage unavailable or corrupt - fall back to defaults.
     }
 
-    ClientSettings.settings = settings;
-    return settings;
+    ClientSettings.settings = settings as Settings;
+    return ClientSettings.settings;
   }
 
   private static save() {

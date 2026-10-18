@@ -6,14 +6,18 @@ import { Unit, UnitAction, UnitYMLTypeData } from "./Unit";
 export class UnitActions {
   // The actions every unit of this type starts with.
   public static forUnitType(data: UnitYMLTypeData): UnitAction[] {
-    if (data.name === "Settler") return [UnitActions.settleCity()];
-    if (data.name === "Builder")
-      return Improvement.getBuildableImprovementData("land").map(UnitActions.buildImprovement);
-    if (data.name === "Work Boat")
-      return Improvement.getBuildableImprovementData("sea").map(UnitActions.buildImprovement);
-    if (data.ranged_strength > 0) return [UnitActions.rangedAttack(), UnitActions.fortifyUntilHealed()];
-    if (data.combat_strength > 0) return [UnitActions.fortifyUntilHealed()];
-    return [];
+    return [...UnitActions.typeActions(data), UnitActions.skipTurn()];
+  }
+
+  // Civ 5's Skip Turn: every unit can be left where it is for a turn, so it stops holding up the next turn.
+  public static skipTurn(): UnitAction {
+    return {
+      name: "skip_turn",
+      icon: "ICON_SKIP_TURN",
+      requirements: ["movement"],
+      desc: "Skip Turn",
+      onAction: (unit: Unit) => unit.skipTurn()
+    };
   }
 
   // old_java's Target action: the server answers with the tiles in range, and the owner's client
@@ -78,6 +82,18 @@ export class UnitActions {
       onAction: (unit: Unit) =>
         improvement.consumes_unit ? unit.buildAndDisband(improvement.name) : unit.startBuilding(improvement.name)
     };
+  }
+
+  // What this kind of unit can do besides skipping a turn.
+  private static typeActions(data: UnitYMLTypeData): UnitAction[] {
+    if (data.name === "Settler") return [UnitActions.settleCity()];
+    if (data.name === "Builder")
+      return Improvement.getBuildableImprovementData("land").map(UnitActions.buildImprovement);
+    if (data.name === "Work Boat")
+      return Improvement.getBuildableImprovementData("sea").map(UnitActions.buildImprovement);
+    if (data.ranged_strength > 0) return [UnitActions.rangedAttack(), UnitActions.fortifyUntilHealed()];
+    if (data.combat_strength > 0) return [UnitActions.fortifyUntilHealed()];
+    return [];
   }
 
   public createReligion() {}
