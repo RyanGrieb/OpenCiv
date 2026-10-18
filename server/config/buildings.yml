@@ -71,6 +71,22 @@ buildings:
     city_health: 25
     stats:
       - defense: 7
+  - name: Arsenal
+    asset_name: BUILDING_ARSENAL
+    cost: 300
+    required_tech: Railroad
+    requires_building: Castle
+    city_health: 25
+    stats:
+      - defense: 9
+  - name: Military Base
+    asset_name: BUILDING_MILITARY_BASE
+    cost: 450
+    required_tech: Electronics
+    requires_building: Arsenal
+    city_health: 25
+    stats:
+      - defense: 12
   - name: Circus
     asset_name: BUILDING_CIRCUS
     cost: 80

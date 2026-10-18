@@ -1195,8 +1195,25 @@ describe('City', () => {
       );
     });
 
+    it('stacks the HP and strength of Walls, Castle, Arsenal and Military Base, drawn as the strongest', () => {
+      mockPlayer.hasResearchedTech.mockReturnValue(true);
+      const baseStrength = city.getBaseStrength();
+
+      city.addBuilding('Walls');
+      city.addBuilding('Castle');
+      city.addBuilding('Arsenal');
+      expect(city.getWalls()).toBe('arsenal');
+
+      city.addBuilding('Military Base');
+      expect(city.getWalls()).toBe('military_base');
+      expect(city.getMaxHealth()).toBe(200 + 50 + 25 + 25 + 25);
+      expect(city.getBaseStrength()).toBeCloseTo(baseStrength + 5 + 7 + 9 + 12);
+    });
+
     it('knows Chivalry is the tech that shows a Castle', () => {
       expect(City.changesWallLook('Chivalry')).toBe(true);
+      expect(City.changesWallLook('Railroad')).toBe(true);
+      expect(City.changesWallLook('Electronics')).toBe(true);
       expect(City.changesWallLook('Pottery')).toBe(false);
     });
 

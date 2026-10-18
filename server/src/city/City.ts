@@ -75,7 +75,7 @@ export class City {
   public static readonly FREE_UNIT_RANGE = 3;
   // The buildings that ring a city with walls, strongest first: the strongest one built whose tech its
   // owner knows decides how its walls are drawn (see getWalls()).
-  private static readonly WALL_BUILDINGS = ["Castle", "Walls"];
+  private static readonly WALL_BUILDINGS = ["Military Base", "Arsenal", "Castle", "Walls"];
 
   // The order of the stat line sent to the client (see getStatline()).
   private static readonly STAT_ORDER: (keyof CityStats)[] = [
@@ -824,7 +824,7 @@ export class City {
   }
 
   /**
-   * Which walls the city is drawn with ("walls", "castle"), or null when it has built none. A wall
+   * Which walls the city is drawn with ("walls", "castle", "arsenal", "military_base"), or null when it has built none. A wall
    * building only shows once its owner knows its tech, so a Castle taken by a civ without Chivalry
    * still looks like plain Walls rather than out of its era.
    */
@@ -836,7 +836,7 @@ export class City {
       const tech = Building.createFromName(name)?.getRequiredTech();
       return !tech || this.player.hasResearchedTech(tech);
     });
-    return (ownersEra ?? built[built.length - 1]).toLowerCase();
+    return (ownersEra ?? built[built.length - 1]).toLowerCase().replace(/ /g, "_");
   }
 
   public hasQueued(name: string): boolean {
