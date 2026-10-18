@@ -68,6 +68,11 @@ tiles:
     name: Jungle
     stats:
       - food: 2
+  # Civ 5's -1 Food on grassland, the only terrain marsh grows on.
+  MARSH:
+    name: Marsh
+    stats:
+      - food: 1
   HORSES:
     name: Horses
     stats:

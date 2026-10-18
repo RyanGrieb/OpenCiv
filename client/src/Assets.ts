@@ -108,6 +108,7 @@ export enum SpriteRegion {
   TILE_SNOW,
   TILE_SNOW_HILL,
   TILE_JUNGLE,
+  TILE_MARSH,
   TILE_FOREST,
   // Look-only variants of forest and jungle - see Tile.getVariantFeatureType().
   TILE_FOREST_2,

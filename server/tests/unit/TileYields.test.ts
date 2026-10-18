@@ -43,6 +43,15 @@ describe("Tile yields", () => {
     expect(yieldsOf(terrain, "jungle")).toEqual({ food: 2 });
   });
 
+  it("marsh takes grassland down to 1 food and costs 2 moves to enter", () => {
+    expect(yieldsOf("grass", "marsh")).toEqual({ food: 1 });
+    expect(yieldsOf("grass", "marsh", "truffles")).toEqual({ food: 1, gold: 2 });
+    expect(new Tile("grass", 0, 0).getMovementCost()).toBe(1);
+    const marsh = new Tile("grass", 0, 0);
+    marsh.addTileType("marsh");
+    expect(marsh.getMovementCost()).toBe(2);
+  });
+
   it("adds a resource on top of the feature that replaced the terrain", () => {
     expect(yieldsOf("grass", "forest", "iron")).toEqual({ food: 1, production: 2 });
   });

@@ -273,6 +273,7 @@ export class GameMap {
       { text: "Setting the climate", weight: 1, run: () => this.generateClimate() },
       { text: "Growing plains, deserts and jungles", weight: 1, run: () => this.generateWarmBiomes() },
       { text: "Planting forests", weight: 1, run: () => this.generateForests() },
+      { text: "Spreading marshes", weight: 1, run: () => this.generateMarshes() },
       { text: "Filling lakes", weight: 1, run: () => this.generateFreshwater() },
       { text: "Shaping the coasts", weight: 1, run: () => this.generateShallowOcean() },
       { text: "Placing resources", weight: 2, run: () => this.generateResources() },
@@ -741,6 +742,26 @@ export class GameMap {
       });
     }
     console.log("Done generating forest tiles!");
+  }
+
+  // Small patches of marsh on open, temperate grassland, the only terrain Civ 5 grows it on.
+  private generateMarshes() {
+    const numberOfMarshes = Math.ceil(this.mapArea * 0.003); // 13 for a standard map...
+    for (let i = 0; i < numberOfMarshes; i++) {
+      const originTile = this.getRandomTileWith({ tileTypes: ["grass"], tempRange: [40, 85] });
+      if (!originTile) continue;
+
+      this.generateTilePath({
+        tile: originTile,
+        pathLength: 3,
+        setTileType: "marsh",
+        followTileTypes: ["grass"],
+        setTileChance: 0.4,
+        overrideWater: false,
+        setFollowTileTypeOnly: true,
+        clearExistingTileTypes: false
+      });
+    }
   }
 
   private generateFreshwater() {

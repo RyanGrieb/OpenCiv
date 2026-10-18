@@ -30,8 +30,8 @@ export class Tile {
   public static readonly ELEVATION_FLAT = 0;
   public static readonly ELEVATION_HILL = 1;
   public static readonly ELEVATION_MOUNTAIN = 2;
-  // Trees and undergrowth that grow on a tile's terrain and replace its yields (see getStats()).
-  public static readonly FEATURES = ["forest", "jungle"];
+  // Trees, undergrowth and marsh that grow on a tile's terrain and replace its yields (see getStats()).
+  public static readonly FEATURES = ["forest", "jungle", "marsh"];
   // The land a feature can grow on, whose own yields the feature replaces.
   public static readonly BASE_TERRAIN = [
     "grass",
@@ -268,7 +268,7 @@ export class Tile {
   }
 
   public getMovementCost(): number {
-    const tileTypesWithIncreasedCost = ["hill", "forest", "jungle"];
+    const tileTypesWithIncreasedCost = ["hill", "forest", "jungle", "marsh"];
     const tileTypesWithInfiniteCost = ["mountain"];
 
     if (NaturalWonders.getWonderOn(this)?.impassable) return 9999;

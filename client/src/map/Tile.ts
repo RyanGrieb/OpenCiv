@@ -38,8 +38,8 @@ export class Tile extends Actor {
   public static readonly ROAD_MOVEMENT_COST = 1 / 3;
   // As in Civ 5, roads only bridge rivers once their owner has Engineering.
   public static readonly BRIDGE_TECH = "Engineering";
-  // Improvements that cover the ground, so a road through the tile is drawn on top of them.
-  public static readonly UNDER_ROAD_TILE_TYPES = ["farm"];
+  // Improvements and features that cover the ground, so a road through the tile is drawn on top of them.
+  public static readonly UNDER_ROAD_TILE_TYPES = ["farm", "marsh"];
   // Resources and improvements drawn as seen from above, lying on the ground over a road, which on
   // the globe lie flat on it rather than stand up off it like trees (see GameMap.getStandingSprites()):
   // ores, the mines and quarry dug into them, and a crater.
@@ -55,7 +55,7 @@ export class Tile extends Actor {
     "stone_quarry",
     "barringer_crater"
   ];
-  // Camp animals (and truffles) and their camps. They can be found in a forest or jungle, so they're
+  // Camp animals (and truffles) and their camps. They can be found in a forest, jungle or marsh, so they're
   // drawn after its trees rather than hidden under them, each on its own so that on the globe they
   // stand up from their own feet, not as part of a tree.
   public static readonly OVER_FEATURE_TILE_TYPES = [

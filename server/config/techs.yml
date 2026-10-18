@@ -120,7 +120,6 @@ technologies:
     row: 1
     slot: 8
     description: The art of building with stone, enabling massive stone structures and fortifications.
-    # Not enforced: the map has no marshes.
     notes:
       - Can remove Marshes
   - name: Bronze Working

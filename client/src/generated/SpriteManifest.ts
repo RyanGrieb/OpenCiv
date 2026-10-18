@@ -268,6 +268,7 @@ export const SPRITE_MANIFEST: SpriteManifestEntry[] = [
   { name: "TILE_JUNGLE_3", url: new URL("../../assets/sprites/tiles/TILE_JUNGLE_3.png", import.meta.url).href },
   { name: "TILE_KRAKATOA", url: new URL("../../assets/sprites/tiles/TILE_KRAKATOA.png", import.meta.url).href },
   { name: "TILE_LUMBER_MILL", url: new URL("../../assets/sprites/tiles/TILE_LUMBER_MILL.png", import.meta.url).href },
+  { name: "TILE_MARSH", url: new URL("../../assets/sprites/tiles/TILE_MARSH.png", import.meta.url).href },
   { name: "TILE_MINE", url: new URL("../../assets/sprites/tiles/TILE_MINE.png", import.meta.url).href },
   { name: "TILE_MOUNTAIN", url: new URL("../../assets/sprites/tiles/TILE_MOUNTAIN.png", import.meta.url).href },
   { name: "TILE_MOUNTAIN_2", url: new URL("../../assets/sprites/tiles/TILE_MOUNTAIN_2.png", import.meta.url).href },

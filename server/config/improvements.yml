@@ -75,7 +75,7 @@ improvements:
     icon: TILE_FURS_CAMP
     required_tech: Trapping
     build_turns: 6
-    features: [forest, jungle]
+    features: [forest, jungle, marsh]
     resources:
       deer: deer_camp
       bison: bison_camp
@@ -103,7 +103,7 @@ improvements:
     required_tech: The Wheel
     build_turns: 3
     tile_type: road
-    features: [forest, jungle]
+    features: [forest, jungle, marsh]
     route: true
     outside_borders: true
   - name: Lumber Mill
@@ -126,4 +126,10 @@ improvements:
     required_tech: Bronze Working
     build_turns: 7
     removes_feature: jungle
+    outside_borders: true
+  - name: Remove Marsh
+    icon: ICON_CHOP
+    required_tech: Masonry
+    build_turns: 6
+    removes_feature: marsh
     outside_borders: true

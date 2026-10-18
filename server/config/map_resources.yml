@@ -251,11 +251,11 @@ luxury_resources:
     min_temp: 0
     max_temp: 50
     spawn_on_additional_tile_types: true
-  # Civ 5 also puts Truffles in marshes, which the map doesn't have yet.
   - name: truffles
     spawn_tiles:
       - forest
       - jungle
+      - marsh
     path_length: 1
     min_tiles_set: 1
     max_tiles_set: 2

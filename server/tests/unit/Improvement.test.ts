@@ -82,6 +82,17 @@ describe('Improvement', () => {
     expect(tile.getTotalStatValue(['production'])).toBe(1);
   });
 
+  it('needs a marsh drained before anything but a road or a Camp on Truffles, once Masonry is in', () => {
+    expect(buildable(tileOf('grass', 'marsh'))).toEqual(['Road', 'Remove Marsh']);
+    expect(buildable(tileOf('grass', 'marsh'), player(['Masonry']))).toEqual(['Remove Marsh']);
+    expect(buildable(tileOf('grass', 'truffles', 'marsh'), player(['Trapping']))).toEqual(['Camp']);
+
+    const tile = tileOf('grass', 'marsh');
+    Improvement.complete(improvement('Remove Marsh'), tile);
+    expect(tile.getTileTypes()).toEqual(['grass']);
+    expect(buildable(tile)).toContain('Farm');
+  });
+
   it('builds a Camp on Deer, Bison, Ivory, Furs and Truffles once Trapping is in, keeping the trees', () => {
     expect(buildable(tileOf('grass', 'deer', 'forest'))).toEqual(['Camp', 'Road', 'Remove Forest']);
     expect(buildable(tileOf('grass', 'truffles', 'jungle'))).toEqual(['Camp', 'Road', 'Remove Jungle']);
