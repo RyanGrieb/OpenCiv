@@ -10,7 +10,7 @@ import { TestUtils } from "../TestUtils";
 
 // Where two different kinds of land meet (plains beside grassland, say), their grounds fade into
 // each other across a wobbly line instead of a hard hex edge. Starts on the terrain_mix map preset
-// (patches of grassland, plains, desert, tundra and snow with a few hills and a mountain around the
+// (patches of grassland, marsh, plains, desert, tundra and snow with a few hills and a mountain around the
 // Settler) with the whole map revealed, then compares the drawn map against each tile's own sprite:
 // every border between two kinds of land is blended (a hill's as its flat ground), so is every
 // border between ocean and shallow ocean out at sea, and tiles among their own kind are drawn untouched.
@@ -18,7 +18,7 @@ export function setupTerrainBlendingTest(game: Game) {
   const runner = new TestRunner("TerrainBlending");
   const utils = new TestUtils(game);
   const map = () => GameMap.getInstance();
-  const BLENDING_TERRAINS = ["grass", "plains", "desert", "tundra", "snow", "floodplains", "mountain"];
+  const BLENDING_TERRAINS = ["grass", "plains", "desert", "tundra", "snow", "floodplains", "marsh", "mountain"];
   // How close to a side a pixel has to be to count as along it.
   const ALONG_SIDE = 4;
   const chunkPixels = new Map<string, CanvasRenderingContext2D>();
@@ -38,7 +38,8 @@ export function setupTerrainBlendingTest(game: Game) {
       .getTiles()
       .flat()
       .filter((tile) => !!tile);
-  const terrain = (tile: Tile) => tile.getTileTypes()[0];
+  // A marsh is drawn, and blends, as ground of its own (see Tile.getGroundType()).
+  const terrain = (tile: Tile) => Tile.getGroundType(tile.getTileTypes());
   const ground = (tile: Tile) => terrain(tile).replace("_hill", "");
   const blends = (tile: Tile) => BLENDING_TERRAINS.includes(ground(tile));
   const describe = (tile: Tile) => `(${tile.getGridX()},${tile.getGridY()}) ${terrain(tile)}`;

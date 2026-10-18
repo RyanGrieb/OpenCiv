@@ -38,8 +38,11 @@ export class Tile extends Actor {
   public static readonly ROAD_MOVEMENT_COST = 1 / 3;
   // As in Civ 5, roads only bridge rivers once their owner has Engineering.
   public static readonly BRIDGE_TECH = "Engineering";
-  // Improvements and features that cover the ground, so a road through the tile is drawn on top of them.
-  public static readonly UNDER_ROAD_TILE_TYPES = ["farm", "marsh"];
+  // Improvements that cover the ground, so a road through the tile is drawn on top of them.
+  public static readonly UNDER_ROAD_TILE_TYPES = ["farm"];
+  // Features drawn as the tile's ground in place of its terrain, rather than over it, so they blend with
+  // the terrain around them like one (see TerrainBlend): a marsh replaces the grassland it grows on.
+  public static readonly GROUND_FEATURES = ["marsh"];
   // Resources and improvements drawn as seen from above, lying on the ground over a road, which on
   // the globe lie flat on it rather than stand up off it like trees (see GameMap.getStandingSprites()):
   // ores, the mines and quarry dug into them, and a crater.
@@ -211,6 +214,11 @@ export class Tile extends Actor {
     const flatTerrain = Tile.HILL_FLAT_TERRAINS[terrainType];
     if (!flatTerrain) return undefined;
     return Tile.pickVariant(`hills_${flatTerrain}`, Tile.hashCoordinates(gridX + Tile.HILL_HASH_OFFSET, gridY));
+  }
+
+  // The ground a tile with these types is drawn with: its terrain, or a ground feature growing on it.
+  public static getGroundType(tileTypes: string[]): string {
+    return tileTypes.find((type) => Tile.GROUND_FEATURES.includes(type)) ?? tileTypes[0];
   }
 
   /**

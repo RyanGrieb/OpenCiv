@@ -900,7 +900,7 @@ export class GameMap {
         }
 
         const tileTypes = tile.getTileTypes();
-        const terrainType = Tile.getVariantTileType(tileTypes[0], gridX, gridY);
+        const terrainType = Tile.getVariantTileType(Tile.getGroundType(tileTypes), gridX, gridY);
 
         // Rendering-only tiles, positioned relative to this chunk's own small canvas rather than
         // the tile's real world position - mirrors how Actor.mergeActors draws each input actor at
@@ -928,6 +928,7 @@ export class GameMap {
         const city = tile.getCity();
         const overlayTypes = tileTypes
           .slice(1)
+          .filter((type) => !Tile.GROUND_FEATURES.includes(type))
           .flatMap((type) =>
             type === "city"
               ? Tile.getCityTypes(city?.getEra() ?? City.DEFAULT_ERA, city?.getWalls() ?? null, gridX, gridY)

@@ -19,6 +19,7 @@ import { Tile } from "./Tile";
  * straight on over the edge. The opacity steps in a few levels rather than smoothly, to sit with the
  * pixel art.
  *
+ * A marsh blends as ground of its own, drawn in place of its grassland (see Tile.GROUND_FEATURES).
  * A hill blends as the flat ground under its mounds, which are drawn on the map's top layer and so
  * stay whole. Water blends with water the same way, ocean with shallow ocean. Natural wonders are left
  * alone, and so is the shore between land and water, which is Coastline's.
@@ -32,6 +33,7 @@ export class TerrainBlend {
     "tundra",
     "snow",
     "floodplains",
+    "marsh",
     "grass_hill",
     "plains_hill",
     "desert_hill",
@@ -94,7 +96,7 @@ export class TerrainBlend {
 
   // The ground a tile blends as, or undefined if it doesn't blend.
   private static getGround(tile: Tile): string | undefined {
-    const terrain = tile.getTileTypes()[0];
+    const terrain = Tile.getGroundType(tile.getTileTypes());
     if (!TerrainBlend.BLENDING_TERRAINS.includes(terrain)) return undefined;
     return terrain.replace(TerrainBlend.HILL_SUFFIX, "");
   }
@@ -115,8 +117,8 @@ export class TerrainBlend {
     const sides = TerrainBlend.getBlendingSides(tile);
     if (sides.length === 0) return undefined;
 
-    const neighbors = sides.map((side) => `${side}${tile.getAdjacentTiles()[side].getTileTypes()[0]}`);
-    const key = `${tile.getGridX()},${tile.getGridY()}:${tile.getTileTypes()[0]}:${neighbors.join(",")}`;
+    const neighbors = sides.map((side) => `${side}${Tile.getGroundType(tile.getAdjacentTiles()[side].getTileTypes())}`);
+    const key = `${tile.getGridX()},${tile.getGridY()}:${Tile.getGroundType(tile.getTileTypes())}:${neighbors.join(",")}`;
     let pixels = TerrainBlend.tilePixels.get(key);
     if (!pixels) {
       pixels = TerrainBlend.drawTilePixels(tile, sides);
@@ -203,7 +205,7 @@ export class TerrainBlend {
     const neighbor = tile.getAdjacentTiles()[side];
     // A hill's base sprite is its flat ground's, the same one drawn under its mounds.
     const sprite = TerrainBlend.getSpritePixels(
-      Tile.getVariantTileType(neighbor.getTileTypes()[0], neighbor.getGridX(), neighbor.getGridY())
+      Tile.getVariantTileType(Tile.getGroundType(neighbor.getTileTypes()), neighbor.getGridX(), neighbor.getGridY())
     );
     const [offsetX, offsetY] = HexPixels.NEIGHBOR_OFFSETS[side];
     const [mirroredX, mirroredY] = HexPixels.reflectAcrossSide(px + 0.5, py + 0.5, side);
