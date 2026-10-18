@@ -117,7 +117,7 @@ export class Tile extends Actor {
   // How many looks a city has in each era: TILE_CITY_<ERA>_1 to _3.
   private static readonly CITY_VARIANT_COUNT = 3;
   // The era later ones are drawn as until they get their own city sprites.
-  private static readonly LAST_DRAWN_CITY_ERA = "medieval";
+  private static readonly LAST_DRAWN_CITY_ERA = "information";
   // Offsets the coordinates a tile's mirroring is hashed from, so it doesn't follow its look.
   private static readonly MIRROR_HASH_OFFSET = 104729;
 

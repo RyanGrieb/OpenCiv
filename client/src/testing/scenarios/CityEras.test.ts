@@ -59,8 +59,8 @@ export function setupCityErasTest(game: Game) {
     name: "Every era's three looks are in the sprite atlas",
     action: async () => {},
     verification: () =>
-      ["ancient", "classical", "medieval"].every((era) =>
-        [1, 2, 3].every((variant) => inAtlas(`city_${era}_${variant}`))
+      ["ancient", "classical", "medieval", "renaissance", "industrial", "modern", "atomic", "information"].every(
+        (era) => [1, 2, 3].every((variant) => inAtlas(`city_${era}_${variant}`))
       )
   });
 
