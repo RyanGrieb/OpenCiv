@@ -16,10 +16,9 @@ const WINDOW_PADDING = 16;
 const BASE_TILE_PADDING = 8;
 const BASE_TILE_ICON_SIZE = 32; // Matches old_java's TechnologyLeaf icon size.
 const BASE_TILE_WIDTH = 220;
-const BASE_TILE_GAP = 16; // Horizontal gap between tiles in the same row.
-const BASE_ROW_GAP = 44; // Vertical gap between tiers.
-const BASE_ERA_LABEL_MARGIN = 16; // Gap between the grid's edge and an era label outside it.
-const SLOT_COUNT = 10; // Fixed columns per row, matching Civ5's tech-web layout - a tech's `slot` (0-9) is its column, not its order among that tier's techs.
+const BASE_SLOT_GAP = 12; // Vertical gap between tiles in the same column.
+const BASE_COLUMN_GAP = 48; // Horizontal gap between columns, where the connector lines bend.
+const BASE_ERA_LABEL_MARGIN = 8; // Space above and below the era labels over the columns.
 const MIN_ZOOM = 0.6;
 const MAX_ZOOM = 1.6;
 const ZOOM_STEP = 0.1;
@@ -50,25 +49,25 @@ interface TechTile {
 // through instead of each method reading zoomLevel/BASE_* constants itself.
 interface TreeLayout {
   tileWidth: number;
-  tileGap: number;
-  rowGap: number;
+  columnGap: number;
+  slotGap: number;
   iconSize: number;
   tilePadding: number;
-  slotWidth: number;
   eraLabelMargin: number;
   font: string;
 }
 
-// Full-screen research tree, opened from ResearchDisplayInfo's button. Each tech
-// carries its own row (0 = bottom) and slot (0-9, its column in a fixed 10-wide
-// grid) from techs.yml, matching Civ5's hand-placed tech-web layout rather than
-// a position derived from prerequisite depth - two techs can be equally deep in
-// the prerequisite graph and still sit in different rows, and a row can have
+// Full-screen research tree, opened from ResearchDisplayInfo's button. Laid out like
+// Civ5's: the first techs on the left and later ones to the right. Each tech carries
+// its own row (its column here, 0 = leftmost) and slot (0-9, top to bottom) from
+// techs.yml, matching Civ5's hand-placed tech-web layout rather than a position
+// derived from prerequisite depth - two techs can be equally deep in the
+// prerequisite graph and still sit in different columns, and a column can have
 // deliberately empty slots. Each tile mirrors old_java's compact TechnologyLeaf
 // (icon + name only); clicking one opens a TechDetailWindow with the full
 // description and Research/Cancel action.
 //
-// The tree can be wider/taller than the window (25+ techs, several rows deep),
+// The tree can be wider/taller than the window (80 techs, 17 columns wide),
 // so content is drag-panned and clipped to the window bounds rather than shrunk
 // to fit - keeps tiles a fixed readable size regardless of tech count. The mouse
 // wheel adjusts zoomLevel, which rebuilds the whole tree at the new scale rather
@@ -187,16 +186,20 @@ export class ResearchTreeWindow extends ActorGroup {
     // tile's stored, unscaled bounds) - simpler, and hit-testing stays correct for
     // free since the tiles' actual geometry reflects the current zoom.
     this.on("wheel", (options: { deltaY: number }) => {
-      const nextZoom = Numbers.clamp(this.zoomLevel + (options.deltaY < 0 ? ZOOM_STEP : -ZOOM_STEP), MIN_ZOOM, MAX_ZOOM);
+      const nextZoom = Numbers.clamp(
+        this.zoomLevel + (options.deltaY < 0 ? ZOOM_STEP : -ZOOM_STEP),
+        MIN_ZOOM,
+        MAX_ZOOM
+      );
       if (nextZoom === this.zoomLevel) return;
 
-      // Standard "zoom around a point" adjustment: the grid itself already scales
-      // around (pivotX, pivotY) - see buildTree/buildEraMarkers - so shrinking pan
+      // Standard "zoom around a point" adjustment: the tree itself already scales
+      // around its top-left origin (pivotX, pivotY) - see buildTree - so shrinking pan
       // toward the cursor by the same ratio keeps whatever point is under the
-      // cursor visually fixed instead of the view re-centering on every tick.
+      // cursor visually fixed instead of the view jumping on every tick.
       const ratio = nextZoom / this.zoomLevel;
-      const pivotX = this.x + this.width / 2;
-      const pivotY = this.y + this.height - WINDOW_PADDING;
+      const pivotX = this.x + WINDOW_PADDING;
+      const pivotY = this.y + WINDOW_PADDING;
       this.panX = this.panX * ratio + (this.hoverX - pivotX) * (1 - ratio);
       this.panY = this.panY * ratio + (this.hoverY - pivotY) * (1 - ratio);
 
@@ -279,16 +282,25 @@ export class ResearchTreeWindow extends ActorGroup {
     const metPath = new Path2D();
     const unmetPath = new Path2D();
 
+    // Like Civ5's, each line leaves the prerequisite's right edge, bends in the gap just
+    // before the tech's column, and enters the tech's left edge.
+    const bendInset = (BASE_COLUMN_GAP * this.zoomLevel) / 2;
+
     for (const tile of this.tiles) {
-      const toX = tile.background.getX() + tile.background.getWidth() / 2;
-      const toY = tile.background.getY() + tile.background.getHeight();
+      const toX = tile.background.getX();
+      const toY = tile.background.getY() + tile.background.getHeight() / 2;
+      const bendX = toX - bendInset;
 
       for (const prereqName of tile.tech.prerequisites) {
         const prereqTile = this.tilesByName.get(prereqName);
         if (!prereqTile) continue;
 
+        const fromX = prereqTile.background.getX() + prereqTile.background.getWidth();
+        const fromY = prereqTile.background.getY() + prereqTile.background.getHeight() / 2;
         const path = clientPlayer.hasResearchedTech(prereqName) ? metPath : unmetPath;
-        path.moveTo(prereqTile.background.getX() + prereqTile.background.getWidth() / 2, prereqTile.background.getY());
+        path.moveTo(fromX, fromY);
+        path.lineTo(bendX, fromY);
+        path.lineTo(bendX, toY);
         path.lineTo(toX, toY);
       }
     }
@@ -350,11 +362,10 @@ export class ResearchTreeWindow extends ActorGroup {
     const requestId = ++this.buildRequestId;
     const layout: TreeLayout = {
       tileWidth: BASE_TILE_WIDTH * this.zoomLevel,
-      tileGap: BASE_TILE_GAP * this.zoomLevel,
-      rowGap: BASE_ROW_GAP * this.zoomLevel,
+      columnGap: BASE_COLUMN_GAP * this.zoomLevel,
+      slotGap: BASE_SLOT_GAP * this.zoomLevel,
       iconSize: BASE_TILE_ICON_SIZE * this.zoomLevel,
       tilePadding: BASE_TILE_PADDING * this.zoomLevel,
-      slotWidth: (BASE_TILE_WIDTH + BASE_TILE_GAP) * this.zoomLevel,
       eraLabelMargin: BASE_ERA_LABEL_MARGIN * this.zoomLevel,
       font: `${Math.round(UITheme.FONT_SIZE * this.zoomLevel)}px serif`
     };
@@ -375,65 +386,54 @@ export class ResearchTreeWindow extends ActorGroup {
 
     // panX/panY (drag accumulation, adjusted on each zoom to keep the point under
     // the cursor fixed - see the wheel handler) folded in here, once, so every
-    // downstream position - tiles and era markers alike - inherits it for free.
-    const bottomRowY = this.y + this.height - WINDOW_PADDING - tileHeight + this.panY;
-    // One shared grid origin (not per-row) so a given slot lands at the same X in
-    // every row - that's what makes the connector lines read as a real tech web
-    // instead of a loose scatter, and what leaves unused slots as visible gaps.
-    const gridWidth = SLOT_COUNT * layout.tileWidth + (SLOT_COUNT - 1) * layout.tileGap;
-    const gridStartX = this.x + this.width / 2 - gridWidth / 2 + this.panX;
+    // downstream position - tiles and era labels alike - inherits it for free.
+    // Everything scales from the top-left origin; the era labels sit in a band above
+    // the columns.
+    const originX = this.x + WINDOW_PADDING + this.panX;
+    const originY = this.y + WINDOW_PADDING + this.panY;
+    const eraBandHeight = UITheme.FONT_SIZE * this.zoomLevel + layout.eraLabelMargin * 2;
+    const columnX = (row: number) => originX + row * (layout.tileWidth + layout.columnGap);
+    const gridTopY = originY + eraBandHeight;
 
     // row/slot are both hand-authored data (techs.yml), not derived from
     // prerequisite depth - Civ5's actual layout doesn't pack every tech into the
-    // shallowest row its prerequisites allow.
+    // shallowest column its prerequisites allow. One shared grid means a given slot
+    // lands at the same height in every column, leaving unused slots as visible gaps.
     for (const tech of this.lastTechnologies) {
-      const tileY = bottomRowY - tech.row * (tileHeight + layout.rowGap);
-      const tileX = gridStartX + tech.slot * layout.slotWidth;
+      const tileX = columnX(tech.row);
+      const tileY = gridTopY + tech.slot * (tileHeight + layout.slotGap);
       this.tiles.push(this.createTechTile(tech, tileX, tileY, tileHeight, textMaxWidth, layout, requestId));
     }
 
-    this.buildEraMarkers(this.lastEras, bottomRowY, tileHeight, gridStartX, gridWidth, layout, requestId);
+    this.buildEraMarkers(this.lastEras, columnX, originY, layout, requestId);
     this.refreshLockState();
   }
 
-  // A label for each era on the left and right edges of the grid (outside the
-  // tile columns entirely), vertically centered across that era's row span -
-  // no line runs through the tree itself, so nothing competes with the
-  // prerequisite connector lines already drawn there.
+  // A label for each era above the tree, centered over that era's columns as in Civ5,
+  // so nothing runs through the tree to compete with the connector lines.
   private async buildEraMarkers(
     eras: EraData[],
-    bottomRowY: number,
-    tileHeight: number,
-    gridStartX: number,
-    gridWidth: number,
+    columnX: (row: number) => number,
+    originY: number,
     layout: TreeLayout,
     requestId: number
   ) {
-    const rowTopY = (row: number) => bottomRowY - row * (tileHeight + layout.rowGap);
-    const rowBottomY = (row: number) => rowTopY(row) + tileHeight;
-
     for (const era of eras) {
-      const minRow = Math.min(...era.rows);
-      const maxRow = Math.max(...era.rows);
-      const centerY = (rowTopY(maxRow) + rowBottomY(minRow)) / 2 - UITheme.FONT_SIZE / 2;
+      const left = columnX(Math.min(...era.rows));
+      const right = columnX(Math.max(...era.rows)) + layout.tileWidth;
 
-      const rightLabel = new Label({
+      // Centered, so it needs its own width first.
+      const label = new Label({
         text: era.name,
         font: layout.font,
         fontColor: "white",
-        x: gridStartX + gridWidth + layout.eraLabelMargin,
-        y: centerY
+        y: originY + layout.eraLabelMargin
       });
-      this.addActor(rightLabel);
-      this.eraLabels.push(rightLabel);
-
-      // Right-aligned against the grid's left edge, so it needs its own width first.
-      const leftLabel = new Label({ text: era.name, font: layout.font, fontColor: "white", y: centerY });
-      await leftLabel.conformSize();
+      await label.conformSize();
       if (requestId !== this.buildRequestId) return; // Superseded mid-measurement - see buildTree.
-      leftLabel.setPosition(gridStartX - layout.eraLabelMargin - leftLabel.getWidth(), centerY);
-      this.addActor(leftLabel);
-      this.eraLabels.push(leftLabel);
+      label.setPosition((left + right) / 2 - label.getWidth() / 2, originY + layout.eraLabelMargin);
+      this.addActor(label);
+      this.eraLabels.push(label);
     }
   }
 
