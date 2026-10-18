@@ -12,6 +12,7 @@ import { WorktreeProcesses } from "./WorktreeProcesses";
 //
 //   npm run try                          # the most recently pushed claude/* branch
 //   npm run try -- claude/some-thread    # a specific branch (the "origin/" prefix is optional)
+//   npm run try -- claude/some-thread --scenario=CombatSandbox   # open the browser straight into a test scenario
 //   npm run try -- --list                # recent claude/* branches, newest first
 //   npm run try -- --stop                # stop every branch that's still running
 //   npm run try -- --clean               # stop them and delete every worktree this made
@@ -166,10 +167,27 @@ class TryBranch {
     }
     throw new Error("No free port pair found between 2100/1240 and 2199/1339");
   }
+
+  // Pulls --scenario=<Name> or --scenario <Name> out of argv. The name ends up in a shell command, so it's held
+  // to the characters a scenario's registered name uses.
+  public static takeScenario(argv: string[]): string | undefined {
+    const index = argv.findIndex((arg) => arg === "--scenario" || arg.startsWith("--scenario="));
+    if (index === -1) return undefined;
+
+    const [, inlineValue] = argv[index].split("=", 2);
+    const name = inlineValue ?? argv[index + 1];
+    argv.splice(index, inlineValue === undefined ? 2 : 1);
+    if (!name || !/^\w+$/.test(name)) {
+      console.error(`--scenario needs a scenario name like CombatSandbox, got "${name ?? ""}"`);
+      process.exit(1);
+    }
+    return name;
+  }
 }
 
 (async () => {
   const argv = process.argv.slice(2);
+  const scenario = TryBranch.takeScenario(argv);
   const flags: string[] = argv.filter((arg) => ["--list", "--stop", "--clean", "--approve"].includes(arg));
   const positional = argv.filter((arg) => !arg.startsWith("--"));
   const serverArgs = argv.filter((arg) => arg.startsWith("--") && !flags.includes(arg));
@@ -235,7 +253,8 @@ class TryBranch {
   const ports = await TryBranch.freePorts();
   const env = { ...DevPorts.env(ports), ...DevPorts.gameOptionsEnv(serverArgs) };
   console.log(`\nServer: ws://localhost:${ports.server}`);
-  console.log(`Client: http://localhost:${ports.client}\n`);
+  const openPath = scenario ? `/?test=true&scenario=${scenario}` : "/";
+  console.log(`Client: http://localhost:${ports.client}${openPath}\n`);
 
   const { result } = concurrently(
     [
@@ -245,7 +264,7 @@ class TryBranch {
         cwd: path.join(worktree, "server"),
         env
       },
-      { command: "npm run dev -- --open", name: `client:${ports.client}`, cwd: path.join(worktree, "client"), env }
+      { command: `npm run dev -- --open "${openPath}"`, name: `client:${ports.client}`, cwd: path.join(worktree, "client"), env }
     ],
     { killOthers: ["failure"] }
   );
