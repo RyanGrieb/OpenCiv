@@ -127,7 +127,9 @@ export class ResearchDisplayInfo extends ActorGroup {
     this.nameLabel.setText(research ? research.techName : "Researching: Nothing");
     this.progressBar.setProgress(research ? research.progress / research.cost : 0);
     this.turnsLabel.setText(research ? this.getTurnsLeftText(research, clientPlayer.getTotalStat("science")) : "???");
-    this.techIcon.setSpriteRegion(research ? resolveSpriteRegion(research.assetName) ?? SpriteRegion.ICON_UNKNOWN : SpriteRegion.ICON_UNKNOWN);
+    this.techIcon.setSpriteRegion(
+      research ? (resolveSpriteRegion(research.assetName) ?? SpriteRegion.ICON_UNKNOWN) : SpriteRegion.ICON_UNKNOWN
+    );
   }
 
   private getTurnsLeftText(research: CurrentResearch, scienceRate: number): string {

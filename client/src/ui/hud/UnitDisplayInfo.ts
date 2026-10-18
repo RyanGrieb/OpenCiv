@@ -237,7 +237,13 @@ export class UnitDisplayInfo extends ActorGroup {
       const actors: Actor[] = [
         ...this.createStrengthRow(strengths),
         ...this.createBar(HEALTH_BAR_Y, "red", "limegreen", healthFraction, healthLabel),
-        ...this.createBar(XP_BAR_Y, "rgb(50, 40, 70)", "mediumpurple", Math.min(1, experience / experienceNeeded), xpLabel),
+        ...this.createBar(
+          XP_BAR_Y,
+          "rgb(50, 40, 70)",
+          "mediumpurple",
+          Math.min(1, experience / experienceNeeded),
+          xpLabel
+        ),
         ...this.createPromotionIcons()
       ];
 

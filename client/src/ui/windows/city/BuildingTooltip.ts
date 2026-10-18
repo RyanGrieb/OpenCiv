@@ -21,13 +21,14 @@ export class BuildingTooltip extends Tooltip {
   }
 
   private static getLines(building: BuildingData): TooltipLine[] {
-    const lines: TooltipLine[] = [{ text: building.name, color: "white" }];
+    const lines: TooltipLine[] = [{ text: building.name, color: "white", yields: Tooltip.getYields(building.stats) }];
 
     const kind = BuildingTooltip.getWonderText(building);
     if (kind) lines.push({ text: kind, color: BuildingTooltip.WONDER_COLOR });
 
     const bonuses = [...BuildingTooltip.getBonuses(building), ...(building.effect_lines ?? [])];
-    if (bonuses.length === 0) lines.push({ text: "No bonuses", color: "gray", indent: true });
+    if (bonuses.length === 0 && lines[0].yields.length === 0)
+      lines.push({ text: "No bonuses", color: "gray", indent: true });
     bonuses.forEach((text) => lines.push({ text, color: BuildingTooltip.BONUS_COLOR, indent: true }));
 
     if (building.maintenance) {
@@ -51,11 +52,11 @@ export class BuildingTooltip extends Tooltip {
     return undefined;
   }
 
-  // "+3 Food", "+5 Defense", "+25 City Health"
+  // The stats with no yield icon, in words: "+5 Defense", "+25 City Health".
   private static getBonuses(building: BuildingData): string[] {
     const bonuses = building.stats
       .flatMap((stat) => Object.entries(stat))
-      .filter(([, value]) => value !== 0)
+      .filter(([stat, value]) => value !== 0 && !Tooltip.isYieldStat(stat))
       .map(([stat, value]) => `${Strings.convertToStatUnit(value)} ${Strings.capitalizeWords(stat)}`);
 
     if (building.city_health) bonuses.push(`+${building.city_health} City Health`);

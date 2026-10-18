@@ -1,7 +1,5 @@
-import { SpriteRegion } from "../../Assets";
 import { Tile } from "../../map/Tile";
-import { Strings } from "../../util/Strings";
-import { Tooltip, TooltipLine, TooltipYield } from "../components/Tooltip";
+import { Tooltip, TooltipLine } from "../components/Tooltip";
 
 // One thing adding to a tile's yields, e.g. { source: "Wheat", stats: [{ food: 1 }] }.
 export interface TileYieldSource {
@@ -26,17 +24,6 @@ export interface TileInfo {
 export class TileTooltip extends Tooltip {
   private static readonly SOURCE_COLOR = "#8ee07a";
   private static readonly CITY_COLOR = "#f0c850";
-  // In the order the tooltip lists them.
-  private static readonly STAT_ICONS: Record<string, SpriteRegion> = {
-    food: SpriteRegion.ICON_FOOD,
-    production: SpriteRegion.ICON_PRODUCTION,
-    gold: SpriteRegion.ICON_GOLD,
-    science: SpriteRegion.ICON_SCIENCE,
-    culture: SpriteRegion.ICON_CULTURE,
-    faith: SpriteRegion.ICON_FAITH,
-    happiness: SpriteRegion.ICON_MORALE
-  };
-
   /** Builds the tooltip with its top-left corner at (x, y). */
   public static async create(x: number, y: number, tile: Tile, info: TileInfo): Promise<TileTooltip> {
     const tooltip = new TileTooltip(x, y);
@@ -59,24 +46,11 @@ export class TileTooltip extends Tooltip {
       lines.push({
         text: source.source,
         color: TileTooltip.SOURCE_COLOR,
-        yields: TileTooltip.getYields(source.stats)
+        yields: Tooltip.getYields(source.stats)
       })
     );
 
-    if (info.sources.length > 0)
-      lines.push({ text: "Total", color: "white", yields: TileTooltip.getYields(info.yields) });
+    if (info.sources.length > 0) lines.push({ text: "Total", color: "white", yields: Tooltip.getYields(info.yields) });
     return lines;
-  }
-
-  // "+2" with the food icon, for each stat that isn't zero.
-  private static getYields(stats: Record<string, number>[]): TooltipYield[] {
-    const totals: Record<string, number> = {};
-    stats
-      .flatMap((stat) => Object.entries(stat))
-      .forEach(([name, value]) => (totals[name] = (totals[name] ?? 0) + value));
-
-    return Object.keys(TileTooltip.STAT_ICONS)
-      .filter((name) => (totals[name] ?? 0) !== 0)
-      .map((name) => ({ text: Strings.convertToStatUnit(totals[name]), icon: TileTooltip.STAT_ICONS[name] }));
   }
 }

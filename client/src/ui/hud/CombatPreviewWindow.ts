@@ -227,8 +227,7 @@ export class CombatPreviewWindow extends ActorGroup {
   private drawRing(ring: HealthRing, canvasContext: CanvasRenderingContext2D) {
     const game = Game.getInstance();
     const top = -Math.PI / 2;
-    const toAngle = (health: number) =>
-      (Math.max(0, Math.min(ring.maxHealth, health)) / ring.maxHealth) * Math.PI * 2;
+    const toAngle = (health: number) => (Math.max(0, Math.min(ring.maxHealth, health)) / ring.maxHealth) * Math.PI * 2;
     const sector = {
       x: ring.centerX,
       y: ring.centerY,

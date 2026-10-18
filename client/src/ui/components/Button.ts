@@ -88,8 +88,8 @@ export class Button extends ActorGroup {
     this.textWidth = -1;
     this.textHeight = -1;
     this.callbackFunction = options.onClicked;
-    this.mouseEnterCallbackFunction = options.onMouseEnter || function () { };
-    this.mouseExitCallbackFunction = options.onMouseExit || function () { };
+    this.mouseEnterCallbackFunction = options.onMouseEnter || function () {};
+    this.mouseExitCallbackFunction = options.onMouseExit || function () {};
     this.font = options.font ?? "24px serif";
     this.fontColor = options.fontColor ?? "black";
     this.buttonImage = options.buttonImage || GameImage.BUTTON;

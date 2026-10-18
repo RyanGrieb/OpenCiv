@@ -5,6 +5,7 @@ import { Actor } from "../../scene/Actor";
 import { ActorGroup } from "../../scene/ActorGroup";
 import { Label } from "./Label";
 import { UITheme } from "../UITheme";
+import { Strings } from "../../util/Strings";
 
 // A number drawn with its stat icon after a line's text, e.g. "+2" and the food icon.
 export interface TooltipYield {
@@ -35,9 +36,36 @@ export class Tooltip extends ActorGroup {
   // Lines carrying icons get more room between them.
   private static readonly YIELD_LINE_GAP = 10;
 
+  // The stats drawn as icons, in the order tooltips list them.
+  private static readonly STAT_ICONS: Record<string, SpriteRegion> = {
+    food: SpriteRegion.ICON_FOOD,
+    production: SpriteRegion.ICON_PRODUCTION,
+    gold: SpriteRegion.ICON_GOLD,
+    science: SpriteRegion.ICON_SCIENCE,
+    culture: SpriteRegion.ICON_CULTURE,
+    faith: SpriteRegion.ICON_FAITH,
+    happiness: SpriteRegion.ICON_MORALE
+  };
+
   protected constructor(x: number, y: number, z = 10) {
     super({ x, y, z, width: 0, height: 0, cameraApplies: false });
     this.setTransparency(ClientSettings.get("HUD_TRANSPARENCY"));
+  }
+
+  public static isYieldStat(stat: string): boolean {
+    return stat in Tooltip.STAT_ICONS;
+  }
+
+  /** "+2" with the food icon, for each yield stat that isn't zero. Other stats are left out. */
+  public static getYields(stats: Record<string, number>[]): TooltipYield[] {
+    const totals: Record<string, number> = {};
+    stats
+      .flatMap((stat) => Object.entries(stat))
+      .forEach(([name, value]) => (totals[name] = (totals[name] ?? 0) + value));
+
+    return Object.keys(Tooltip.STAT_ICONS)
+      .filter((name) => (totals[name] ?? 0) !== 0)
+      .map((name) => ({ text: Strings.convertToStatUnit(totals[name]), icon: Tooltip.STAT_ICONS[name] }));
   }
 
   /**
