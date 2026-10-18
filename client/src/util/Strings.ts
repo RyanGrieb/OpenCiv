@@ -3,9 +3,9 @@ export class Strings {
     return input.replace(/\b\w/g, (match) => match.toUpperCase());
   }
 
-  // "Composite Bowman" -> "COMPOSITE_BOWMAN", matching our SCREAMING_SNAKE_CASE asset keys.
+  // "Anti-Tank Gun" -> "ANTI_TANK_GUN", matching our SCREAMING_SNAKE_CASE asset keys.
   public static toConstantCase(input: string): string {
-    return input.toUpperCase().replace(/ /g, "_");
+    return input.toUpperCase().replace(/[^A-Z0-9]+/g, "_");
   }
 
   /**
