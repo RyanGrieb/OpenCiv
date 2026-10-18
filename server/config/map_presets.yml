@@ -173,6 +173,31 @@ presets:
       - " g g g g g F g"
       - "g h g g p g g"
 
+  trapping:
+    description: Deer, Bison, Ivory, Furs and Truffles (in a marsh) around the Settler, each with a Builder on it, to build Camps.
+    legend:
+      "g": [grass]
+      "p": [plains]
+      "M": [grass, marsh]
+      "D": [tundra, deer, forest]
+      "B": [plains, bison]
+      "I": [plains, ivory]
+      "F": [tundra, furs]
+      "T": [grass, truffles, marsh]
+      "S": [grass]
+    units:
+      "D": Builder
+      "B": Builder
+      "I": Builder
+      "F": Builder
+      "T": Builder
+    rows:
+      - "g g p g g g g"
+      - " g g D B g M g"
+      - "g g F S I g g"
+      - " g g T M g g g"
+      - "g M g g p g g"
+
   building_effects:
     description: A coastal city with Desert and Jungle beside it and a Work Boat, to watch buildings boost tiles and ships.
     legend:
