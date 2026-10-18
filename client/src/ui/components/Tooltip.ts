@@ -29,7 +29,11 @@ export class Tooltip extends ActorGroup {
   private static readonly LINE_GAP = 4;
   // The status bar's size, so a yield looks the same here as up there.
   private static readonly YIELD_ICON_SIZE = UITheme.ICON_SIZE;
-  private static readonly YIELD_GAP = 12;
+  // Before a line's first yield, then between yields: the icons' empty edges already add some space.
+  private static readonly TEXT_YIELD_GAP = 12;
+  private static readonly YIELD_GAP = 2;
+  // Lines carrying icons get more room between them.
+  private static readonly YIELD_LINE_GAP = 10;
 
   protected constructor(x: number, y: number, z = 10) {
     super({ x, y, z, width: 0, height: 0, cameraApplies: false });
@@ -57,14 +61,19 @@ export class Tooltip extends ActorGroup {
     const indentOf = (index: number) => (lines[index].indent ? Tooltip.INDENT : 0);
     const yieldsWidthOf = (index: number) =>
       yieldLabels[index].reduce(
-        (total, label) => total + Tooltip.YIELD_GAP + label.getWidth() + Tooltip.YIELD_ICON_SIZE,
+        (total, label, yieldIndex) =>
+          total +
+          (yieldIndex === 0 ? Tooltip.TEXT_YIELD_GAP : Tooltip.YIELD_GAP) +
+          label.getWidth() +
+          Tooltip.YIELD_ICON_SIZE,
         0
       );
+    const lineGap = lines.some((line) => (line.yields ?? []).length > 0) ? Tooltip.YIELD_LINE_GAP : Tooltip.LINE_GAP;
     const textWidth = Math.max(
       0,
       ...labels.map((label, index) => indentOf(index) + label.getWidth() + yieldsWidthOf(index))
     );
-    const textHeight = labels.reduce((total, label) => total + label.getHeight() + Tooltip.LINE_GAP, -Tooltip.LINE_GAP);
+    const textHeight = labels.reduce((total, label) => total + label.getHeight() + lineGap, -lineGap);
     this.width = textWidth + padding * 2;
     this.height = textHeight + padding * 2;
     if (corner === "bottomRight") {
@@ -79,7 +88,7 @@ export class Tooltip extends ActorGroup {
     labels.forEach((label, index) => {
       label.setPosition(this.x + padding + indentOf(index), lineY);
       icons.push(...this.placeYields(lines[index].yields ?? [], yieldLabels[index], label));
-      lineY += label.getHeight() + Tooltip.LINE_GAP;
+      lineY += label.getHeight() + lineGap;
     });
 
     this.addActor(
@@ -105,7 +114,7 @@ export class Tooltip extends ActorGroup {
     const iconY = lineLabel.getY() - UITheme.centerTextY(Tooltip.YIELD_ICON_SIZE);
 
     return yields.map((entry, index) => {
-      x += Tooltip.YIELD_GAP;
+      x += index === 0 ? Tooltip.TEXT_YIELD_GAP : Tooltip.YIELD_GAP;
       valueLabels[index].setPosition(x, lineLabel.getY());
       x += valueLabels[index].getWidth();
 
