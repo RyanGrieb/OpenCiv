@@ -466,32 +466,45 @@ technologies:
           - food: 1
   - name: Biology
     asset_name: BUILDING_HOSPITAL
-    cost: 1090
+    cost: 1530
     prerequisites: [Archaeology, Scientific Theory]
     row: 9
     slot: 2
     description: The study of living things, the root of modern medicine.
+    # Not enforced: the map has no Oil, and trade routes have no cap yet.
+    notes:
+      - Reveals Oil
+      - Allows an additional trade route
   - name: Electricity
     asset_name: BUILDING_STOCK_EXCHANGE
-    cost: 1235
-    prerequisites: [Scientific Theory, Metallurgy]
+    cost: 1530
+    prerequisites: [Scientific Theory]
     row: 9
     slot: 4
     description: Harnesses electric current for light, power and trade.
+    # Not enforced: the map has no Aluminum.
+    notes:
+      - Reveals Aluminum
   - name: Steam Power
     asset_name: UNIT_IRONCLAD
-    cost: 1090
-    prerequisites: [Industrialization, Scientific Theory]
+    cost: 1530
+    prerequisites: [Scientific Theory, Industrialization, Rifling]
     row: 9
     slot: 5
     description: Steam engines drive ships and machines without wind or muscle.
+    # Not enforced: land units can't embark yet.
+    notes:
+      - Faster embarked movement
   - name: Dynamite
     asset_name: UNIT_ARTILLERY
-    cost: 1235
+    cost: 1530
     prerequisites: [Fertilizer, Rifling, Military Science]
     row: 9
     slot: 8
     description: A stable explosive for mining, demolition and war.
+    # Not enforced: wonders don't go obsolete yet.
+    notes:
+      - Obsoletes the Great Wall
   - name: Refrigeration
     asset_name: BUILDING_SUPERMARKET
     cost: 1430
@@ -509,14 +522,14 @@ technologies:
   - name: Railroad
     asset_name: BUILDING_ARSENAL
     cost: 1235
-    prerequisites: [Steam Power]
+    prerequisites: [Steam Power, Dynamite]
     row: 10
     slot: 5
     description: Steam locomotives move goods and armies across continents.
   - name: Replaceable Parts
     asset_name: UNIT_INFANTRY
     cost: 1235
-    prerequisites: [Dynamite, Industrialization]
+    prerequisites: [Electricity, Steam Power]
     row: 10
     slot: 7
     description: Interchangeable parts make weapons easy to mass produce and repair.

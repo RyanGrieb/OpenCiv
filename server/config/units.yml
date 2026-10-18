@@ -235,7 +235,7 @@ units:
     cost: 240
     default_move_distance: 4
     required_tech: Steam Power
-    obsolete_tech: Electricity
+    obsolete_tech: Combustion
   - name: Artillery
     combat_strength: 16
     ranged_strength: 32
@@ -252,7 +252,7 @@ units:
     domain: sea
     cost: 300
     default_move_distance: 6
-    required_tech: Electricity
+    required_tech: Combustion
     obsolete_tech: Robotics
   - name: Infantry
     combat_strength: 50
