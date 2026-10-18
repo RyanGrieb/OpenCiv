@@ -398,22 +398,29 @@ technologies:
           - production: 1
   - name: Archaeology
     asset_name: BUILDING_MUSEUM
-    cost: 845
-    prerequisites: [Architecture, Navigation]
+    cost: 1040
+    prerequisites: [Navigation, Architecture]
     row: 8
     slot: 1
     description: Digs up the past and puts it on display.
+    # Not enforced: there are no archaeological sites yet.
+    notes:
+      - Reveals archaeological sites
+      - Allows constructing archaeological digs
   - name: Industrialization
     asset_name: BUILDING_FACTORY
-    cost: 925
-    prerequisites: [Economics, Navigation]
+    cost: 1040
+    prerequisites: [Economics]
     row: 8
     slot: 5
     description: Machines and factories replace the workshop.
+    # Not enforced: the map has no Coal.
+    notes:
+      - Reveals Coal
   - name: Military Science
     asset_name: UNIT_CAVALRY
-    cost: 845
-    prerequisites: [Economics, Chemistry]
+    cost: 1040
+    prerequisites: [Metallurgy, Chemistry]
     row: 8
     slot: 8
     description: Turns warfare into an organized discipline.
@@ -481,7 +488,7 @@ technologies:
   - name: Dynamite
     asset_name: UNIT_ARTILLERY
     cost: 1235
-    prerequisites: [Fertilizer, Rifling]
+    prerequisites: [Fertilizer, Rifling, Military Science]
     row: 9
     slot: 8
     description: A stable explosive for mining, demolition and war.

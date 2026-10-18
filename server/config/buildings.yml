@@ -685,7 +685,7 @@ buildings:
   - name: Big Ben
     asset_name: BUILDING_BIG_BEN
     cost: 500
-    required_tech: Economics
+    required_tech: Industrialization
     is_wonder: true
     not_yet:
       - Halves the gold cost of purchasing buildings

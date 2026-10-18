@@ -128,6 +128,7 @@ units:
     attack_type: ranged
     cost: 120
     required_tech: Machinery
+    obsolete_tech: Industrialization
   - name: Galleass
     combat_strength: 16
     ranged_strength: 17
@@ -214,6 +215,13 @@ units:
     default_move_distance: 4
     required_tech: Military Science
     obsolete_tech: Combustion
+  - name: Gatling Gun
+    combat_strength: 30
+    ranged_strength: 40
+    range: 2
+    attack_type: ranged
+    cost: 225
+    required_tech: Industrialization
   - name: Rifleman
     combat_strength: 34
     attack_type: melee
