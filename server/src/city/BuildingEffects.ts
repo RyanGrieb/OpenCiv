@@ -1,7 +1,7 @@
 import { PlayerDiplomacy } from "../diplomacy/PlayerDiplomacy";
 import { GameMap } from "../map/GameMap";
 import { Improvement } from "../map/Improvement";
-import type { StatEntry, Tile } from "../map/Tile";
+import type { StatEntry, Tile, YieldSource } from "../map/Tile";
 import type { Player } from "../Player";
 import { TechEffects } from "../research/TechEffects";
 import type { CombatModifier } from "../unit/Combat";
@@ -95,14 +95,22 @@ export class BuildingEffects {
 
   // The extra yields the buildings of the city whose territory this is give the tile.
   public static getTileBonuses(tile: Tile): StatEntry[] {
+    return BuildingEffects.getTileBonusSources(tile).flatMap((source) => source.stats);
+  }
+
+  // The same bonuses, each under the name of the building that gives it.
+  public static getTileBonusSources(tile: Tile): YieldSource[] {
     const city = tile.getCityTerritoryOf();
     if (!city) return [];
 
-    return city
-      .getBuildings()
-      .flatMap((building) => building.getEffects().tile_yields ?? [])
-      .filter((effect) => BuildingEffects.tileMatches(effect, tile, city.getPlayer()))
-      .flatMap((effect) => Object.entries(effect.stats).map(([stat, value]) => ({ [stat]: value }) as StatEntry));
+    return city.getBuildings().flatMap((building) =>
+      (building.getEffects().tile_yields ?? [])
+        .filter((effect) => BuildingEffects.tileMatches(effect, tile, city.getPlayer()))
+        .map((effect) => ({
+          source: building.getName(),
+          stats: Object.entries(effect.stats).map(([stat, value]) => ({ [stat]: value }) as StatEntry)
+        }))
+    );
   }
 
   /**

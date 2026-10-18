@@ -95,3 +95,16 @@ describe("Tile yields", () => {
     expect(yieldsOf(...tileTypes)).toEqual(expected);
   });
 });
+
+describe("Tile yield sources", () => {
+  it("names what each yield comes from, leaving out what adds nothing", () => {
+    const tile = new Tile("grass", 0, 0);
+    tile.addTileType("forest");
+    tile.addTileType("iron");
+
+    expect(tile.getYieldSources()).toEqual([
+      { source: "Forest", stats: [{ food: 1 }, { production: 1 }] },
+      { source: "Iron", stats: [{ production: 1 }] }
+    ]);
+  });
+});

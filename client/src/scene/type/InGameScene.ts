@@ -22,6 +22,7 @@ import { ResearchTreeWindow } from "../../ui/windows/ResearchTreeWindow";
 import { DiplomacyWindow } from "../../ui/windows/DiplomacyWindow";
 import { DeclareWarWindow } from "../../ui/windows/DeclareWarWindow";
 import { StatusBar } from "../../ui/hud/StatusBar";
+import { TileInspector } from "../../ui/hud/TileInspector";
 import { UITheme } from "../../ui/UITheme";
 import { Actor } from "../Actor";
 import { ActorGroup } from "../ActorGroup";
@@ -44,6 +45,7 @@ export class InGameScene extends Scene {
   private researchDisplayInfo: ResearchDisplayInfo;
   private notifications: Notifications;
   private notificationPanel: NotificationPanel;
+  private tileInspector: TileInspector;
   private researchTreeWindow: ResearchTreeWindow;
   private diplomacyButton: Button;
   private diplomacyWindow: DiplomacyWindow;
@@ -151,6 +153,7 @@ export class InGameScene extends Scene {
       this.notifications = new Notifications(this.clientPlayer);
       this.notifications.onChange(() => this.refreshNextTurnButton());
       this.initializePersistentUI();
+      this.tileInspector = new TileInspector(this);
 
       this.on("tileHovered", (options) => {
         // Remove previous yield icons
@@ -572,6 +575,10 @@ export class InGameScene extends Scene {
 
   public getPlayers() {
     return this.players;
+  }
+
+  public getTileInspector() {
+    return this.tileInspector;
   }
 
   public getClientPlayer() {

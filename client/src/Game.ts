@@ -142,6 +142,8 @@ export class Game {
       });
 
       this.canvas.addEventListener("mousedown", (event) => {
+        // A middle click opens the tile tooltip, not the browser's autoscroll.
+        if (event.button === 1) event.preventDefault();
         this.actors.forEach((actor) => {
           actor.call("mousedown", {
             x: this.getWorldX(event.clientX),

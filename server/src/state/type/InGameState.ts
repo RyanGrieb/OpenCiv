@@ -173,6 +173,28 @@ export class InGameState extends State {
       }
     });
 
+    // The tile tooltip (middle click): what the tile yields and where each yield comes from.
+    ServerEvents.on({
+      eventName: "requestTileInfo",
+      parentObject: this,
+      callback: (data, websocket) => {
+        const player = Game.getInstance().getPlayerFromWebsocket(websocket);
+        const tile = GameMap.getInstance().getTiles()[data["x"]]?.[data["y"]];
+        if (!tile || !player.getVisibility().hasDiscovered(tile)) return;
+
+        const city = tile.getCityTerritoryOf();
+        player.sendNetworkEvent({
+          event: "tileInfo",
+          x: tile.getX(),
+          y: tile.getY(),
+          sources: tile.getYieldSources(player),
+          yields: tile.getStats(player),
+          cityName: city?.getName(),
+          worked: city?.getWorkedTiles().includes(tile) ?? false
+        });
+      }
+    });
+
     ServerEvents.on({
       eventName: "allPlayersLoaded",
       parentObject: this,

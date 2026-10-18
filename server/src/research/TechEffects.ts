@@ -1,5 +1,5 @@
 import { MapResources } from "../map/MapResources";
-import type { StatEntry, Tile } from "../map/Tile";
+import type { Tile, YieldSource } from "../map/Tile";
 import type { Player } from "../Player";
 import { Technology, TileBonusData } from "./Technology";
 
@@ -17,13 +17,13 @@ export class TechEffects {
     return !player.hasResearchedTech(revealTech);
   }
 
-  // The extra yields the player's techs give this tile.
-  public static getTileBonuses(tile: Tile, player?: Player): StatEntry[] {
+  // The extra yields the player's techs give this tile, each under the tech's name.
+  public static getTileBonusSources(tile: Tile, player?: Player): YieldSource[] {
     if (!player) return [];
 
     return Technology.getAllTileBonuses()
       .filter(({ techName, bonus }) => player.hasResearchedTech(techName) && TechEffects.bonusApplies(bonus, tile))
-      .flatMap(({ bonus }) => bonus.stats);
+      .map(({ techName, bonus }) => ({ source: techName, stats: bonus.stats }));
   }
 
   // Whether researching the tech changes how this tile looks or what it yields.

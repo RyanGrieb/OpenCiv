@@ -24,6 +24,12 @@ export interface StatValues {
 }
 export type StatEntry = Partial<StatValues>;
 
+// One thing adding to a tile's yields and what it adds, e.g. { source: "Wheat", stats: [{ food: 1 }] }.
+export interface YieldSource {
+  source: string;
+  stats: StatEntry[];
+}
+
 export class Tile {
   // Sight elevation tiers - how high a tile sits for line-of-sight purposes. See
   // getSightElevation() / getSightBlockingHeight() and GameMap.hasLineOfSight().
@@ -948,34 +954,35 @@ export class Tile {
       { food: 0 },
       { happiness: 0 }
     ];
-    const yieldingTypes = this.getYieldingTileTypes().filter((type) => !TechEffects.isResourceHidden(type, player));
-    const statLines = yieldingTypes.map((type) => Tile.getAllTileStats()[type.toUpperCase()]?.stats ?? []);
-    statLines.push(TechEffects.getTileBonuses(this, player));
-    statLines.push(BuildingEffects.getTileBonuses(this));
 
-    for (const statLine of statLines) {
-      for (const statData of statLine) {
-        const statName = Object.keys(statData)[0] as keyof StatValues;
-        const statValue = statData[statName];
-
-        for (const stat of tileStats) {
-          if (Object.keys(stat)[0] === statName) {
-            stat[statName] += statValue;
-          }
-        }
-      }
-    }
-
-    // Apply City Center bonus (Min 2 Food)
-    if (this.city) {
-      for (const stat of tileStats) {
-        if (stat.food !== undefined && stat.food < 2) {
-          stat.food = 2;
-        }
-      }
+    for (const statData of this.getYieldSources(player).flatMap((source) => source.stats)) {
+      const statName = Object.keys(statData)[0] as keyof StatValues;
+      const stat = tileStats.find((entry) => Object.keys(entry)[0] === statName);
+      if (stat) stat[statName] += statData[statName];
     }
 
     return tileStats;
+  }
+
+  /**
+   * Everything that adds to the tile's yields, in the order they apply: its terrain, feature,
+   * resource and improvement, then tech and building bonuses, then the city center's food floor.
+   * getStats() adds these up, so what the tile tooltip lists is always what the tile yields.
+   */
+  public getYieldSources(player: Player | undefined = this.getOwner()): YieldSource[] {
+    const yieldingTypes = this.getYieldingTileTypes().filter((type) => !TechEffects.isResourceHidden(type, player));
+    const sources: YieldSource[] = yieldingTypes.map((type) => {
+      const data = Tile.getAllTileStats()[type.toUpperCase()];
+      return { source: data?.name ?? type, stats: data?.stats ?? [] };
+    });
+    sources.push(...TechEffects.getTileBonusSources(this, player));
+    sources.push(...BuildingEffects.getTileBonusSources(this));
+
+    // As in Civ 5, a city center always makes at least 2 Food.
+    const food = sources.flatMap((source) => source.stats).reduce((total, stat) => total + (stat.food ?? 0), 0);
+    if (this.city && food < 2) sources.push({ source: "City center", stats: [{ food: 2 - food }] });
+
+    return sources.filter((source) => source.stats.some((stat) => Object.values(stat)[0] !== 0));
   }
 
   // The player whose city's territory this tile is in.

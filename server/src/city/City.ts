@@ -575,6 +575,11 @@ export class City {
     return City.STAT_ORDER.map((stat) => ({ [stat]: cityStats[stat] }));
   }
 
+  // The city center, then the tiles its citizens work.
+  public getWorkedTiles(): Tile[] {
+    return this.workedTiles;
+  }
+
   public getHealth(): number {
     return this.health;
   }
