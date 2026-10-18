@@ -177,7 +177,7 @@ describe('TechEffects', () => {
     // plants, railroads, and Future Tech's repeating research.
     const waitingOnSystems = [
       'Railroad', 'Ballistics', 'The Internet', 'Future Tech', 'Particle Physics',
-      'Satellites', 'Stealth', 'Advanced Ballistics', 'Nanotechnology', 'Nuclear Fusion', 'Radar'
+      'Satellites', 'Stealth', 'Advanced Ballistics', 'Radar'
     ];
 
     for (const tech of Technology.getAllTechnologies()) {

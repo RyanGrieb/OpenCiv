@@ -25,10 +25,7 @@ eras:
     rows: [12, 13]
   - name: Information Era
     id: information
-    rows: [14, 15]
-  - name: Future Era
-    id: future
-    rows: [16]
+    rows: [14, 15, 16]
 technologies:
   # slot is the tech's horizontal column (0-9) within its row - a fixed 10-slot
   # grid, matching Civ5's tech-web layout, where unused slots stay visually
@@ -632,11 +629,14 @@ technologies:
     description: Liquid-fueled rockets that reach beyond the atmosphere.
   - name: Globalization
     asset_name: BUILDING_UNITED_NATIONS
-    cost: 2175
+    cost: 5720
     prerequisites: [Telecommunications]
     row: 15
     slot: 1
     description: Trade, travel and communication knit the world into one market.
+    # Not enforced: there is no World Congress yet.
+    notes:
+      - Gives an additional World Congress delegate for each Diplomat in a foreign capital
   - name: Robotics
     asset_name: UNIT_MISSILE_CRUISER
     cost: 5005
@@ -646,7 +646,7 @@ technologies:
     description: Programmable machines that do work too dull or dangerous for people.
   - name: Particle Physics
     asset_name: BUILDING_SPACESHIP_FACTORY
-    cost: 2175
+    cost: 5720
     prerequisites: [Telecommunications, Mobile Tactics, Advanced Ballistics]
     row: 15
     slot: 2
@@ -663,8 +663,8 @@ technologies:
       - Automatically explores the entire map
   - name: Stealth
     asset_name: UNIT_STEALTH_BOMBER
-    cost: 2175
-    prerequisites: [Robotics, Lasers]
+    cost: 5720
+    prerequisites: [Lasers, Robotics]
     row: 15
     slot: 7
     description: Shapes and coats aircraft so radar can barely see them.
@@ -677,14 +677,14 @@ technologies:
     description: Guides rockets over thousands of miles to a chosen target.
   - name: Nanotechnology
     asset_name: ICON_UNKNOWN
-    cost: 2145
+    cost: 5720
     prerequisites: [Robotics]
     row: 15
     slot: 6
     description: Builds machines and materials one atom at a time.
   - name: Nuclear Fusion
     asset_name: UNIT_GIANT_DEATH_ROBOT
-    cost: 2340
+    cost: 5720
     prerequisites: [Advanced Ballistics, Satellites, Robotics]
     row: 15
     slot: 5
@@ -720,15 +720,21 @@ technologies:
     description: Fast, flexible forces that strike where the enemy is weakest.
   - name: The Internet
     asset_name: ICON_UNKNOWN
-    cost: 2340
+    cost: 5720
     prerequisites: [Telecommunications]
     row: 15
     slot: 0
     description: Links computers around the world into one network.
+    # Not enforced: there is no tourism yet.
+    notes:
+      - Doubles the Tourism of all your cities
   - name: Future Tech
     asset_name: ICON_UNKNOWN
-    cost: 2600
-    prerequisites: [Nuclear Fusion, Nanotechnology]
+    cost: 6175
+    prerequisites: [Nanotechnology, Nuclear Fusion, Stealth, Particle Physics, Globalization, The Internet]
     row: 16
     slot: 4
     description: Research beyond today's science.
+    # Not enforced: research can't repeat and there is no score yet.
+    notes:
+      - Increases score each time it is researched

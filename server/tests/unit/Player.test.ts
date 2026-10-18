@@ -189,7 +189,7 @@ describe('Player', () => {
 
       player.researchAllTechs();
 
-      expect(player.getEra().id).toBe('future');
+      expect(player.getEra().id).toBe('information');
     });
 
     it('announces a new era and has every city redrawn in its style', () => {
@@ -201,7 +201,7 @@ describe('Player', () => {
       player['onEnteredEra']();
 
       expect(city.sendAppearanceUpdate).toHaveBeenCalled();
-      expect(addMessage).toHaveBeenCalledWith('TILE_CITY_FUTURE_1', 'You have entered the Future Era.');
+      expect(addMessage).toHaveBeenCalledWith('TILE_CITY_INFORMATION_1', 'You have entered the Information Era.');
     });
   });
 

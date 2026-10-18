@@ -155,7 +155,9 @@ describe('Technology', () => {
     ['Robotics', ['Missile Cruiser'], []],
     ['Globalization', [], ['United Nations']],
     ['Ecology', [], ['Sydney Opera House']],
-    ['Nuclear Fission', ['Bazooka'], []]
+    ['Nuclear Fission', ['Bazooka'], []],
+    ['Nuclear Fusion', ['Giant Death Robot'], []],
+    ['Nanotechnology', ['XCOM Squad'], []]
   ])('unlocks what %s unlocks in Brave New World', (tech, units, buildings) => {
     const unlocks = Technology.getUnlocks(tech);
     const names = (list: { name: string }[]) => list.map((entry) => entry.name).sort();
@@ -271,7 +273,7 @@ describe('Technology', () => {
 
     it('gives every era an id', () => {
       expect(Technology.getAllEras().map((era) => era.id)).toEqual([
-        'ancient', 'classical', 'medieval', 'renaissance', 'industrial', 'modern', 'atomic', 'information', 'future'
+        'ancient', 'classical', 'medieval', 'renaissance', 'industrial', 'modern', 'atomic', 'information'
       ]);
     });
 
@@ -281,6 +283,7 @@ describe('Technology', () => {
       expect(Technology.getEraOf(['Pottery', 'Flight']).id).toBe('modern');
       expect(Technology.getEraOf(['Pottery', 'Computers']).id).toBe('atomic');
       expect(Technology.getEraOf(['Pottery', 'Robotics']).id).toBe('information');
+      expect(Technology.getEraOf(['Pottery', 'Future Tech']).id).toBe('information');
     });
 
     it('puts every tech in some era', () => {

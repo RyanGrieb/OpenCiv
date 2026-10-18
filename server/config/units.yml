@@ -344,3 +344,15 @@ units:
     cost: 400
     default_move_distance: 6
     required_tech: Robotics
+  - name: Giant Death Robot
+    combat_strength: 150
+    attack_type: melee
+    cost: 1000
+    default_move_distance: 3
+    required_tech: Nuclear Fusion
+  - name: XCOM Squad
+    combat_strength: 120
+    attack_type: melee
+    cost: 750
+    default_move_distance: 3
+    required_tech: Nanotechnology
