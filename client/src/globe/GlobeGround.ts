@@ -177,6 +177,11 @@ export class GlobeGround {
     return this.scale;
   }
 
+  /** How many patches have been copied into the texture so far: it changed when this did. */
+  public getPatchesCopied() {
+    return this.patchesCopied;
+  }
+
   /** The texture's size, in texels. */
   public getSize(): [number, number] {
     return [this.texelsWide, this.texelsHigh];

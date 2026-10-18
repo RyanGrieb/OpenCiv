@@ -77,6 +77,8 @@ interface StandingObject {
 class BillboardBatch {
   public readonly meshes: THREE.Mesh<THREE.InstancedBufferGeometry, THREE.ShaderMaterial>[];
   private capacity = 0;
+  // What the billboards were when last written, so the same again isn't handed to the GPU.
+  private written: number[] = [];
 
   constructor(upright: THREE.ShaderMaterial, outline: THREE.ShaderMaterial) {
     const geometry = BillboardBatch.createGeometry(0);
@@ -110,6 +112,8 @@ class BillboardBatch {
   }
 
   public set(billboards: Billboard[], projection: GlobeProjection) {
+    if (!this.changes(billboards)) return;
+
     if (billboards.length > this.capacity) {
       this.capacity = Math.max(64, 2 ** Math.ceil(Math.log2(billboards.length)));
       this.meshes[0].geometry.dispose();
@@ -166,6 +170,7 @@ class BillboardBatch {
 
   // Writes only each billboard's pose, when only that changed.
   public setPoses(billboards: Billboard[]) {
+    this.written.length = 0;
     const geometry = this.meshes[0].geometry;
     const poses = geometry.getAttribute("pose") as THREE.InstancedBufferAttribute;
     const posesSince = geometry.getAttribute("poseSince") as THREE.InstancedBufferAttribute;
@@ -179,6 +184,20 @@ class BillboardBatch {
 
   public dispose() {
     this.meshes[0].geometry.dispose();
+  }
+
+  // Whether the billboards differ from those last written, noting them if so.
+  private changes(billboards: Billboard[]) {
+    const now: number[] = [];
+    for (const billboard of billboards) {
+      now.push(billboard.footX, billboard.footY, billboard.middleX, billboard.middleY, billboard.depthBack);
+      now.push(billboard.unturned ? 1 : 0, billboard.ownFoot ? 1 : 0, billboard.skirt);
+      now.push(billboard.pose, billboard.poseSince, billboard.left, billboard.top, billboard.width, billboard.height);
+      now.push(billboard.atlasX, billboard.atlasY, billboard.atlasWidth, billboard.atlasHeight, ...billboard.tint);
+    }
+    const same = now.length === this.written.length && now.every((value, index) => value === this.written[index]);
+    this.written = now;
+    return !same;
   }
 }
 
@@ -438,6 +457,12 @@ export class GlobeSprites {
   // Atlas pixels to a world pixel in the label atlas, fewer than asked for if it filled up.
   private labelScale = 1;
   private standing: StandingObject[] = [];
+  // Where the camera was in the planet's space, and which billboards, when the map's sprites last
+  // took their poses: they take the same again until one of those changes.
+  private readonly posedFrom = new THREE.Vector3(NaN, NaN, NaN);
+  private posedBillboards: Billboard[] | undefined;
+  // When the last of the fades between poses under way ends, in `now`'s seconds.
+  private fadesUntil = 0;
   private screenWidth = 1;
   private screenHeight = 1;
 
@@ -519,8 +544,13 @@ export class GlobeSprites {
     this.now.value = (performance.now() - this.startedAt) / 1000;
     this.updateGroundDepths(camera);
     this.updateMapSprites();
-    this.updatePoses(this.mapBillboards, camera) && this.mapSprites.setPoses(this.mapBillboards);
+    this.updateMapPoses(camera);
     this.updateStandingObjects(objects, detail, camera, useView);
+  }
+
+  /** Whether a billboard is fading between poses, so each frame draws differently until it's done. */
+  public isFading() {
+    return this.now.value < this.fadesUntil;
   }
 
   /** The screen's size in CSS pixels, which the mouse's position is given in. */
@@ -642,6 +672,17 @@ export class GlobeSprites {
     const halfHeight = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
     const corner = Math.hypot(halfHeight, halfHeight * camera.aspect);
     this.groundDepths.set((distance - 1) / Math.hypot(1, corner), distance + 1);
+  }
+
+  // The map's sprites' poses, worked out again only once the camera has moved about the planet or
+  // the sprites were built again.
+  private updateMapPoses(camera: THREE.Camera) {
+    const from = this.planet.worldToLocal(this.cameraInPlanet.copy(camera.position));
+    if (from.equals(this.posedFrom) && this.posedBillboards === this.mapBillboards) return;
+
+    this.posedFrom.copy(from);
+    this.posedBillboards = this.mapBillboards;
+    if (this.updatePoses(this.mapBillboards, camera)) this.mapSprites.setPoses(this.mapBillboards);
   }
 
   private updateMapSprites() {
@@ -1024,6 +1065,7 @@ export class GlobeSprites {
         billboard.pose < 0 ? 1 : Math.min(Math.max((now - billboard.poseSince) / GlobeSprites.POSE_FADE, 0), 1);
       billboard.poseSince = billboard.pose < 0 ? -1000 : now - (1 - fadedIn) * GlobeSprites.POSE_FADE;
       billboard.pose = pose;
+      this.fadesUntil = Math.max(this.fadesUntil, billboard.poseSince + GlobeSprites.POSE_FADE);
       changed = true;
     }
     return changed;

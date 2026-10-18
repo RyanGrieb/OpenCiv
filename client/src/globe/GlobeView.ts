@@ -6,6 +6,7 @@ import { WorldView } from "../scene/Camera";
 import { Line } from "../scene/Line";
 import { Marking } from "../scene/Marking";
 import { SceneObject } from "../scene/SceneObject";
+import { FrameSignature } from "./FrameSignature";
 import { GlobeCaps } from "./GlobeCaps";
 import { GlobeGround } from "./GlobeGround";
 import { GlobeLines } from "./GlobeLines";
@@ -111,6 +112,7 @@ export class GlobeView {
   private readonly raycaster = new THREE.Raycaster();
   private readonly pointer = new THREE.Vector2();
   private readonly lightDirection = new THREE.Vector3();
+  private readonly signature: FrameSignature;
 
   private worldView: WorldView;
   private screenWidth = 0;
@@ -147,6 +149,8 @@ export class GlobeView {
     this.planet.position.set(SolarSystem.HOME_ORBIT, 0, 0);
     this.scene.add(this.planet);
     this.planetSphere = new THREE.Sphere(this.planet.position.clone(), 1);
+    // The sprites' clock only moves their fades on, which GlobeSprites.isFading() tells of.
+    this.signature = new FrameSignature(["now"], this.planetSphere);
     this.solarSystem = new SolarSystem(this.planet);
     this.scene.add(this.solarSystem.group);
     this.scene.updateMatrixWorld();
@@ -159,7 +163,10 @@ export class GlobeView {
     this.bandUniforms.groundSize.value.set(...this.ground.getSize());
     this.bandUniforms.groundScale.value = this.ground.getScale();
     // The GPU forgets the ground's texture along with its context, so it's drawn again once that's back.
-    canvas.addEventListener("webglcontextrestored", () => this.ground.redrawAll());
+    canvas.addEventListener("webglcontextrestored", () => {
+      this.ground.redrawAll();
+      this.signature.forget();
+    });
     // Over the hovered tile (see GlobeDecals), as their z puts them on the flat map.
     this.lines = new GlobeLines(this.projection, OverStanding.RENDER_ORDER + 1);
     this.linesUnderUnits = new GlobeLines(this.projection, OverStanding.UNDER_UNITS_RENDER_ORDER);
@@ -251,7 +258,15 @@ export class GlobeView {
     this.worldView = this.ground.view;
   }
 
+  /**
+   * Draws the frame - unless it would come out just as the last one did, as when nothing moves, which
+   * leaves the canvas showing that one and the GPU free.
+   */
   public render() {
+    const extra = [this.ground.getPatchesCopied(), this.renderer.getPixelRatio(), this.screenWidth, this.screenHeight];
+    const changed = this.signature.changed(this.scene, this.camera, extra);
+    if (!changed && !this.sprites.isFading()) return;
+
     this.renderer.render(this.scene, this.camera);
   }
 
@@ -281,7 +296,12 @@ export class GlobeView {
   }
 
   public setVisible(visible: boolean) {
-    this.renderer.domElement.style.display = visible ? "" : "none";
+    const display = visible ? "" : "none";
+    if (this.renderer.domElement.style.display === display) return;
+
+    this.renderer.domElement.style.display = display;
+    // What was drawn stays on the canvas while it's hidden, but draw it again anyway once it's shown.
+    if (visible) this.signature.forget();
   }
 
   public dispose() {
