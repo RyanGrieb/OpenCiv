@@ -5,7 +5,7 @@ import { ActorGroup } from "../../scene/ActorGroup";
 import { ScenarioRegistry } from "../../testing/ScenarioRegistry";
 import { Button, ButtonSize } from "../components/Button";
 import { Label } from "../components/Label";
-import { ListBox } from "../components/Listbox";
+import { SectionList, SectionListRow, SectionListSection } from "../components/SectionList";
 import { UITheme } from "../UITheme";
 
 export interface ScenarioListGroupOptions {
@@ -16,7 +16,27 @@ export interface ScenarioListGroupOptions {
   onClose: () => void;
 }
 
-// Main menu window listing every registered test scenario by category; clicking one launches it.
+// A clickable scenario line that lights up under the cursor.
+class ScenarioRow extends Actor {
+  private static readonly COLOR = "rgba(0, 0, 0, 0)";
+  private static readonly HOVER_COLOR = "rgba(255, 255, 255, 0.1)";
+
+  constructor(x: number, y: number, width: number, height: number, onClicked: () => void) {
+    super({ x, y, width, height, color: ScenarioRow.COLOR, cameraApplies: false });
+
+    this.on("mouse_enter", () => {
+      this.color = ScenarioRow.HOVER_COLOR;
+      Game.getInstance().setCursor("pointer");
+    });
+    this.on("mouse_exit", () => {
+      this.color = ScenarioRow.COLOR;
+      Game.getInstance().setCursor("default");
+    });
+    this.on("clicked", onClicked);
+  }
+}
+
+// Main menu window listing every registered test scenario in a collapsible section per category; clicking one launches it.
 export class ScenarioListGroup extends ActorGroup {
   private static readonly TITLE_Y = 12;
   private static readonly LIST_TOP = 56;
@@ -69,42 +89,43 @@ export class ScenarioListGroup extends ActorGroup {
     );
   }
 
-  private createScenarioList(): ListBox {
-    const listbox = new ListBox({
+  private createScenarioList(): SectionList {
+    const list = new SectionList({
       x: this.x + ScenarioListGroup.LIST_SIDE_MARGIN,
       y: this.y + ScenarioListGroup.LIST_TOP,
       width: this.width - ScenarioListGroup.LIST_SIDE_MARGIN * 2,
       height: this.height - ScenarioListGroup.LIST_TOP - ScenarioListGroup.LIST_BOTTOM_MARGIN,
-      rowHeight: ScenarioListGroup.ROW_HEIGHT,
-      textFont: UITheme.FONT,
-      fontColor: "white"
+      headerHeight: ScenarioListGroup.ROW_HEIGHT,
+      font: UITheme.FONT
     });
 
+    const sections: SectionListSection[] = [];
     for (const [category, names] of ScenarioRegistry.getScenariosByCategory()) {
-      listbox.addCategory(category, ScenarioListGroup.ROW_HEIGHT);
-      for (const name of names) {
-        this.addScenarioRow(listbox, name);
-      }
+      sections.push({ title: category, rows: names.map((name) => this.createScenarioRow(name)) });
     }
+    list.setSections(sections);
 
-    return listbox;
+    return list;
   }
 
-  private addScenarioRow(listbox: ListBox, name: string) {
-    const row = listbox.addRow({
-      text: name,
-      textX: listbox.getX() + ScenarioListGroup.ROW_TEXT_INDENT,
-      centerTextY: true
-    });
+  private createScenarioRow(name: string): SectionListRow {
+    return {
+      height: ScenarioListGroup.ROW_HEIGHT,
+      create: (x, y, width) => {
+        const row = new ScenarioRow(x, y, width, ScenarioListGroup.ROW_HEIGHT, () => ScenarioRegistry.launch(name));
 
-    row.on("clicked", () => ScenarioRegistry.launch(name));
-    row.on("mousemove", () => {
-      if (row.isMouseInside()) {
-        Game.getInstance().setCursor("pointer");
+        const label = new Label({
+          text: name,
+          font: UITheme.FONT,
+          fontColor: "white",
+          x: x + ScenarioListGroup.ROW_TEXT_INDENT
+        });
+        label.conformSize().then(() => {
+          label.setPosition(label.getX(), y + ScenarioListGroup.ROW_HEIGHT / 2 - label.getHeight() / 2);
+        });
+
+        return [row, label];
       }
-    });
-    row.on("mouse_exit", () => {
-      Game.getInstance().setCursor("default");
-    });
+    };
   }
 }
