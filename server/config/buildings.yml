@@ -525,3 +525,275 @@ buildings:
     requires_building: Workshop
     stats:
       - production: 10
+
+  # Renaissance Era onward, with the stats and effects the game can model. Effects that need great people,
+  # great works, trade routes, power, spaceships or the like are listed in not_yet.
+  - name: Observatory
+    asset_name: BUILDING_OBSERVATORY
+    cost: 120
+    maintenance: 2
+    required_tech: Astronomy
+    not_yet:
+      - Must be built in a city next to a Mountain
+    effects:
+      yield_percent: { science: 50 }
+    stats: []
+  - name: Opera House
+    asset_name: BUILDING_OPERA_HOUSE
+    cost: 150
+    maintenance: 2
+    required_tech: Acoustics
+    requires_building: Amphitheater
+    not_yet:
+      - A slot for a Great Work of Music
+    stats:
+      - culture: 3
+  - name: Bank
+    asset_name: BUILDING_BANK
+    cost: 200
+    maintenance: 2
+    required_tech: Banking
+    requires_building: Market
+    effects:
+      yield_percent: { gold: 25 }
+    stats: []
+  - name: Seaport
+    asset_name: BUILDING_SEAPORT
+    cost: 120
+    maintenance: 2
+    required_tech: Navigation
+    coastal: true
+    requires_building: Harbor
+    effects:
+      tile_yields:
+        - terrain: sea
+          stats: { production: 1 }
+    stats: []
+  - name: Windmill
+    asset_name: BUILDING_WINDMILL
+    cost: 120
+    maintenance: 2
+    required_tech: Economics
+    effects:
+      yield_percent: { production: 10 }
+    stats:
+      - production: 2
+  - name: Public School
+    asset_name: BUILDING_PUBLIC_SCHOOL
+    cost: 200
+    maintenance: 3
+    required_tech: Scientific Theory
+    requires_building: University
+    effects:
+      yield_percent: { science: 50 }
+    stats: []
+  - name: Museum
+    asset_name: BUILDING_MUSEUM
+    cost: 200
+    maintenance: 3
+    required_tech: Archaeology
+    requires_building: Opera House
+    not_yet:
+      - Two slots for Great Works of Art or Artifacts
+    stats:
+      - culture: 4
+  - name: Factory
+    asset_name: BUILDING_FACTORY
+    cost: 200
+    maintenance: 3
+    required_tech: Industrialization
+    requires_building: Workshop
+    effects:
+      yield_percent: { production: 25 }
+    stats: []
+  - name: Hospital
+    asset_name: BUILDING_HOSPITAL
+    cost: 200
+    maintenance: 2
+    required_tech: Biology
+    effects:
+      food_kept_percent: 25
+    stats:
+      - food: 2
+  - name: Stock Exchange
+    asset_name: BUILDING_STOCK_EXCHANGE
+    cost: 300
+    maintenance: 3
+    required_tech: Electricity
+    requires_building: Bank
+    effects:
+      yield_percent: { gold: 33 }
+    stats: []
+  - name: Broadcast Tower
+    asset_name: BUILDING_BROADCAST_TOWER
+    cost: 300
+    maintenance: 3
+    required_tech: Radio
+    requires_building: Museum
+    effects:
+      yield_percent: { culture: 33 }
+    stats: []
+  - name: Stadium
+    asset_name: BUILDING_STADIUM
+    cost: 300
+    maintenance: 3
+    required_tech: Electronics
+    requires_building: Colosseum
+    stats:
+      - happiness: 4
+
+  # Great wonders from the Renaissance Era onward.
+  - name: Forbidden Palace
+    asset_name: BUILDING_FORBIDDEN_PALACE
+    cost: 400
+    required_tech: Banking
+    is_wonder: true
+    not_yet:
+      - Reduces unhappiness from the number of cities
+    stats:
+      - happiness: 6
+      - culture: 1
+  - name: Sistine Chapel
+    asset_name: BUILDING_SISTINE_CHAPEL
+    cost: 400
+    required_tech: Acoustics
+    is_wonder: true
+    effects:
+      empire_yield_percent: { culture: 15 }
+    stats:
+      - culture: 3
+  - name: Taj Mahal
+    asset_name: BUILDING_TAJ_MAHAL
+    cost: 400
+    required_tech: Printing Press
+    is_wonder: true
+    not_yet:
+      - Begins a Golden Age
+    stats:
+      - culture: 3
+      - happiness: 3
+  - name: Leaning Tower of Pisa
+    asset_name: BUILDING_LEANING_TOWER_OF_PISA
+    cost: 400
+    required_tech: Architecture
+    is_wonder: true
+    not_yet:
+      - +25% Great People generation
+    stats:
+      - culture: 2
+      - science: 3
+  - name: Big Ben
+    asset_name: BUILDING_BIG_BEN
+    cost: 500
+    required_tech: Economics
+    is_wonder: true
+    not_yet:
+      - Halves the gold cost of purchasing buildings
+    stats:
+      - gold: 6
+      - culture: 1
+  - name: Louvre
+    asset_name: BUILDING_LOUVRE
+    cost: 500
+    required_tech: Archaeology
+    is_wonder: true
+    not_yet:
+      - Two slots for Great Works of Art
+    stats:
+      - culture: 6
+  - name: Hermitage
+    asset_name: BUILDING_HERMITAGE
+    cost: 500
+    required_tech: Archaeology
+    is_wonder: true
+    not_yet:
+      - Three slots for Great Works of Art
+    stats:
+      - culture: 5
+  - name: Brandenburg Gate
+    asset_name: BUILDING_BRANDENBURG_GATE
+    cost: 500
+    required_tech: Military Science
+    is_wonder: true
+    not_yet:
+      - A free Great General
+    stats:
+      - culture: 3
+  - name: Cristo Redentor
+    asset_name: BUILDING_CRISTO_REDENTOR
+    cost: 600
+    required_tech: Telegraph
+    is_wonder: true
+    not_yet:
+      - Culture needed for new policies is reduced
+    stats:
+      - culture: 4
+      - faith: 4
+  - name: Statue of Liberty
+    asset_name: BUILDING_STATUE_OF_LIBERTY
+    cost: 600
+    required_tech: Replaceable Parts
+    is_wonder: true
+    not_yet:
+      - A free Great Engineer
+    stats:
+      - culture: 3
+      - happiness: 4
+  - name: Eiffel Tower
+    asset_name: BUILDING_EIFFEL_TOWER
+    cost: 600
+    required_tech: Radio
+    is_wonder: true
+    not_yet:
+      - +1 Tourism per Culture in every city
+    stats:
+      - culture: 5
+      - happiness: 4
+  - name: Pentagon
+    asset_name: BUILDING_PENTAGON
+    cost: 800
+    required_tech: Radar
+    is_wonder: true
+    not_yet:
+      - Cheaper unit upgrades
+    stats:
+      - culture: 3
+  - name: Manhattan Project
+    asset_name: BUILDING_MANHATTAN_PROJECT
+    cost: 800
+    required_tech: Atomic Theory
+    is_wonder: true
+    not_yet:
+      - Lets every civilization build Nuclear Missiles
+    stats:
+      - culture: 3
+  - name: Apollo Program
+    asset_name: BUILDING_APOLLO_PROGRAM
+    cost: 1000
+    required_tech: Rocketry
+    is_wonder: true
+    not_yet:
+      - Lets every civilization build spaceship parts
+    stats:
+      - culture: 3
+      - science: 5
+  - name: Sydney Opera House
+    asset_name: BUILDING_SYDNEY_OPERA_HOUSE
+    cost: 1000
+    required_tech: Globalization
+    is_wonder: true
+    not_yet:
+      - A free Social Policy
+    stats:
+      - culture: 6
+      - happiness: 4
+  - name: United Nations
+    asset_name: BUILDING_UNITED_NATIONS
+    cost: 1000
+    required_tech: Globalization
+    is_wonder: true
+    not_yet:
+      - Diplomatic victory by World Congress vote
+    stats:
+      - gold: 6
+      - culture: 3

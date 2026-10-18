@@ -120,6 +120,7 @@ units:
     attack_type: melee
     cost: 90
     required_tech: Civil Service
+    obsolete_tech: Gunpowder
   - name: Crossbowman
     combat_strength: 13
     ranged_strength: 18
@@ -137,12 +138,14 @@ units:
     cost: 100
     default_move_distance: 3
     required_tech: Compass
+    obsolete_tech: Navigation
   - name: Knight
     combat_strength: 20
     attack_type: melee
     cost: 120
     default_move_distance: 4
     required_tech: Chivalry
+    obsolete_tech: Metallurgy
   - name: Trebuchet
     combat_strength: 12
     ranged_strength: 14
@@ -150,8 +153,170 @@ units:
     attack_type: siege
     cost: 120
     required_tech: Physics
+    obsolete_tech: Chemistry
   - name: Longswordsman
     combat_strength: 21
     attack_type: melee
     cost: 120
     required_tech: Steel
+    obsolete_tech: Gunpowder
+  # Renaissance Era onward. Air units, nuclear weapons and spaceship parts need systems the game doesn't have
+  # yet, so they aren't here. Stats follow Civ 5's but are rounded; costs are Civ 5's standard-speed production.
+  - name: Caravel
+    combat_strength: 20
+    attack_type: naval
+    domain: sea
+    cost: 120
+    default_move_distance: 4
+    required_tech: Astronomy
+  - name: Musketman
+    combat_strength: 24
+    attack_type: melee
+    cost: 120
+    required_tech: Gunpowder
+    obsolete_tech: Rifling
+  - name: Frigate
+    combat_strength: 25
+    ranged_strength: 28
+    range: 2
+    attack_type: naval
+    domain: sea
+    cost: 185
+    default_move_distance: 4
+    required_tech: Navigation
+    obsolete_tech: Steam Power
+  - name: Privateer
+    combat_strength: 30
+    attack_type: naval
+    domain: sea
+    cost: 120
+    default_move_distance: 5
+    required_tech: Navigation
+  - name: Cannon
+    combat_strength: 14
+    ranged_strength: 26
+    range: 2
+    attack_type: siege
+    cost: 185
+    required_tech: Chemistry
+    obsolete_tech: Dynamite
+  - name: Lancer
+    combat_strength: 25
+    attack_type: melee
+    cost: 150
+    default_move_distance: 4
+    required_tech: Metallurgy
+    obsolete_tech: Replaceable Parts
+  - name: Cavalry
+    combat_strength: 34
+    attack_type: melee
+    cost: 180
+    default_move_distance: 4
+    required_tech: Military Science
+    obsolete_tech: Combustion
+  - name: Rifleman
+    combat_strength: 34
+    attack_type: melee
+    cost: 200
+    required_tech: Rifling
+    obsolete_tech: Replaceable Parts
+  - name: Ironclad
+    combat_strength: 45
+    attack_type: naval
+    domain: sea
+    cost: 240
+    default_move_distance: 4
+    required_tech: Steam Power
+    obsolete_tech: Electricity
+  - name: Artillery
+    combat_strength: 16
+    ranged_strength: 32
+    range: 3
+    attack_type: siege
+    cost: 240
+    required_tech: Dynamite
+    obsolete_tech: Rocketry
+  - name: Destroyer
+    combat_strength: 60
+    ranged_strength: 55
+    range: 2
+    attack_type: naval
+    domain: sea
+    cost: 300
+    default_move_distance: 6
+    required_tech: Electricity
+    obsolete_tech: Robotics
+  - name: Infantry
+    combat_strength: 50
+    attack_type: melee
+    cost: 300
+    required_tech: Replaceable Parts
+    obsolete_tech: Electronics
+  - name: Anti-Tank Gun
+    combat_strength: 32
+    attack_type: melee
+    cost: 250
+    required_tech: Replaceable Parts
+  - name: Submarine
+    combat_strength: 40
+    ranged_strength: 65
+    range: 3
+    attack_type: naval
+    domain: sea
+    cost: 300
+    default_move_distance: 5
+    required_tech: Refrigeration
+    obsolete_tech: Computers
+  - name: Battleship
+    combat_strength: 80
+    ranged_strength: 90
+    range: 3
+    attack_type: naval
+    domain: sea
+    cost: 520
+    default_move_distance: 5
+    required_tech: Telegraph
+  - name: Tank
+    combat_strength: 60
+    attack_type: melee
+    cost: 350
+    default_move_distance: 5
+    required_tech: Combustion
+    obsolete_tech: Lasers
+  - name: Mechanized Infantry
+    combat_strength: 80
+    attack_type: melee
+    cost: 450
+    default_move_distance: 4
+    required_tech: Electronics
+  - name: Rocket Artillery
+    combat_strength: 28
+    ranged_strength: 76
+    range: 3
+    attack_type: siege
+    cost: 550
+    required_tech: Rocketry
+  - name: Nuclear Submarine
+    combat_strength: 60
+    ranged_strength: 85
+    range: 3
+    attack_type: naval
+    domain: sea
+    cost: 450
+    default_move_distance: 6
+    required_tech: Computers
+  - name: Modern Armor
+    combat_strength: 80
+    attack_type: melee
+    cost: 450
+    default_move_distance: 5
+    required_tech: Lasers
+  - name: Missile Cruiser
+    combat_strength: 70
+    ranged_strength: 85
+    range: 3
+    attack_type: naval
+    domain: sea
+    cost: 400
+    default_move_distance: 6
+    required_tech: Robotics
