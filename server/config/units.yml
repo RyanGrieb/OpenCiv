@@ -280,7 +280,7 @@ units:
     cost: 300
     default_move_distance: 5
     required_tech: Refrigeration
-    obsolete_tech: Robotics
+    obsolete_tech: Telecommunications
   - name: Battleship
     combat_strength: 80
     ranged_strength: 90
@@ -302,7 +302,7 @@ units:
     attack_type: melee
     cost: 450
     default_move_distance: 4
-    required_tech: Electronics
+    required_tech: Mobile Tactics
   - name: Marine
     combat_strength: 50
     attack_type: melee
@@ -328,7 +328,7 @@ units:
     domain: sea
     cost: 450
     default_move_distance: 6
-    required_tech: Robotics
+    required_tech: Telecommunications
   - name: Modern Armor
     combat_strength: 80
     attack_type: melee

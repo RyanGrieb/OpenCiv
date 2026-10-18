@@ -828,3 +828,13 @@ buildings:
     stats:
       - culture: 3
       - science: 5
+  - name: CN Tower
+    asset_name: BUILDING_CN_TOWER
+    cost: 1000
+    required_tech: Telecommunications
+    is_wonder: true
+    not_yet:
+      - Its Civ 5 effect
+    stats:
+      - culture: 3
+      - happiness: 4

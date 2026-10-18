@@ -176,7 +176,7 @@ describe('TechEffects', () => {
     // These unlock only what the game has no systems for yet: air units, nuclear weapons, spaceship parts, power
     // plants, railroads, and Future Tech's repeating research.
     const waitingOnSystems = [
-      'Railroad', 'Ballistics', 'Telecommunications', 'Mobile Tactics', 'The Internet', 'Future Tech', 'Particle Physics',
+      'Railroad', 'Ballistics', 'The Internet', 'Future Tech', 'Particle Physics',
       'Satellites', 'Stealth', 'Advanced Ballistics', 'Nanotechnology', 'Nuclear Fusion', 'Radar'
     ];
 

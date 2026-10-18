@@ -618,7 +618,7 @@ technologies:
     description: Machines that calculate faster than any person.
   - name: Lasers
     asset_name: UNIT_MODERN_ARMOR
-    cost: 1950
+    cost: 5005
     prerequisites: [Computers]
     row: 14
     slot: 7
@@ -639,35 +639,38 @@ technologies:
     description: Trade, travel and communication knit the world into one market.
   - name: Robotics
     asset_name: UNIT_MISSILE_CRUISER
-    cost: 2175
-    prerequisites: [Rocketry, Computers]
+    cost: 5005
+    prerequisites: [Computers, Rocketry]
     row: 14
     slot: 6
     description: Programmable machines that do work too dull or dangerous for people.
   - name: Particle Physics
     asset_name: BUILDING_SPACESHIP_FACTORY
     cost: 2175
-    prerequisites: [Lasers, Computers]
+    prerequisites: [Telecommunications, Mobile Tactics, Advanced Ballistics]
     row: 15
     slot: 2
     description: Probes the smallest pieces of matter with giant machines.
   - name: Satellites
     asset_name: BUILDING_APOLLO_PROGRAM
-    cost: 2175
+    cost: 5005
     prerequisites: [Rocketry]
     row: 14
     slot: 5
     description: Machines in orbit that watch, listen and relay from above.
+    # Not enforced: researching it doesn't explore the map yet.
+    notes:
+      - Automatically explores the entire map
   - name: Stealth
     asset_name: UNIT_STEALTH_BOMBER
     cost: 2175
-    prerequisites: [Lasers]
+    prerequisites: [Robotics, Lasers]
     row: 15
     slot: 7
     description: Shapes and coats aircraft so radar can barely see them.
   - name: Advanced Ballistics
     asset_name: UNIT_NUCLEAR_MISSILE
-    cost: 2175
+    cost: 5005
     prerequisites: [Rocketry, Nuclear Fission]
     row: 14
     slot: 4
@@ -675,14 +678,14 @@ technologies:
   - name: Nanotechnology
     asset_name: ICON_UNKNOWN
     cost: 2145
-    prerequisites: [Robotics, Lasers]
+    prerequisites: [Robotics]
     row: 15
     slot: 6
     description: Builds machines and materials one atom at a time.
   - name: Nuclear Fusion
     asset_name: UNIT_GIANT_DEATH_ROBOT
     cost: 2340
-    prerequisites: [Nuclear Fission, Lasers]
+    prerequisites: [Advanced Ballistics, Satellites, Robotics]
     row: 15
     slot: 5
     description: Joins atoms together to release the energy that powers the stars.
@@ -703,14 +706,14 @@ technologies:
     description: Tanks, infantry and aircraft fight as a single force.
   - name: Telecommunications
     asset_name: ICON_UNKNOWN
-    cost: 2175
+    cost: 5005
     prerequisites: [Ecology]
     row: 14
     slot: 1
     description: Carries voice, video and data across the whole world.
   - name: Mobile Tactics
     asset_name: ICON_UNKNOWN
-    cost: 2175
+    cost: 5005
     prerequisites: [Ecology, Nuclear Fission]
     row: 14
     slot: 2
