@@ -469,7 +469,7 @@ technologies:
     cost: 1530
     prerequisites: [Archaeology, Scientific Theory]
     row: 9
-    slot: 2
+    slot: 1
     description: The study of living things, the root of modern medicine.
     # Not enforced: the map has no Oil, and trade routes have no cap yet.
     notes:
@@ -480,7 +480,7 @@ technologies:
     cost: 1530
     prerequisites: [Scientific Theory]
     row: 9
-    slot: 4
+    slot: 2
     description: Harnesses electric current for light, power and trade.
     # Not enforced: the map has no Aluminum.
     notes:
