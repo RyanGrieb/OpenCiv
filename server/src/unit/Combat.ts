@@ -61,9 +61,10 @@ export class Combat {
     return Combat.sumModifiers(Combat.getTerrainDefenseModifiers(tile));
   }
 
-  // The tile's terrain, plus what the defender's owner brings (see getOwnerModifiers()).
-  public static getDefenseModifiers(tile: Tile): CombatModifier[] {
-    return [...Combat.getTerrainDefenseModifiers(tile), ...Combat.getOwnerModifiers(tile)];
+  // The tile's terrain, plus what the defender's owner brings (see getOwnerModifiers()) and `extra`, the
+  // defender's own (its promotions).
+  public static getDefenseModifiers(tile: Tile, extra: CombatModifier[] = []): CombatModifier[] {
+    return [...Combat.getTerrainDefenseModifiers(tile), ...Combat.getOwnerModifiers(tile), ...extra];
   }
 
   public static getTerrainDefenseModifiers(tile: Tile): CombatModifier[] {
@@ -82,28 +83,51 @@ export class Combat {
     return modifiers;
   }
 
-  public static getAttackModifiers(fromTile: Tile, targetTile: Tile): CombatModifier[] {
-    const modifiers = [...Combat.getOwnerModifiers(fromTile), ...Combat.getCityAttackModifiers(fromTile, targetTile)];
-    if (!Tile.riverCrosses(fromTile, targetTile)) return modifiers;
+  // `attacker` is what the attacking unit brings itself: its promotions, and whether one lets it ignore rivers.
+  public static getAttackModifiers(
+    fromTile: Tile,
+    targetTile: Tile,
+    attacker?: { extra?: CombatModifier[]; ignoresRivers?: boolean }
+  ): CombatModifier[] {
+    const modifiers = [
+      ...Combat.getOwnerModifiers(fromTile),
+      ...Combat.getCityAttackModifiers(fromTile, targetTile),
+      ...(attacker?.extra ?? [])
+    ];
+    if (attacker?.ignoresRivers || !Tile.riverCrosses(fromTile, targetTile)) return modifiers;
 
     return [{ label: "Across river", value: -Combat.RIVER_CROSSING_ATTACK_PENALTY }, ...modifiers];
   }
 
   // A ranged attacker isn't hurt by rivers, only by its owner's state (see getOwnerModifiers()).
-  public static getRangedAttackModifiers(fromTile: Tile, targetTile?: Tile): CombatModifier[] {
-    return [...Combat.getOwnerModifiers(fromTile), ...Combat.getCityAttackModifiers(fromTile, targetTile)];
+  public static getRangedAttackModifiers(
+    fromTile: Tile,
+    targetTile?: Tile,
+    extra: CombatModifier[] = []
+  ): CombatModifier[] {
+    return [...Combat.getOwnerModifiers(fromTile), ...Combat.getCityAttackModifiers(fromTile, targetTile), ...extra];
   }
 
-  public static getAttackStrength(baseStrength: number, fromTile: Tile, targetTile: Tile): number {
-    return baseStrength * (1 + Combat.sumModifiers(Combat.getAttackModifiers(fromTile, targetTile)));
+  public static getAttackStrength(
+    baseStrength: number,
+    fromTile: Tile,
+    targetTile: Tile,
+    attacker?: { extra?: CombatModifier[]; ignoresRivers?: boolean }
+  ): number {
+    return baseStrength * (1 + Combat.sumModifiers(Combat.getAttackModifiers(fromTile, targetTile, attacker)));
   }
 
-  public static getRangedAttackStrength(rangedStrength: number, fromTile: Tile, targetTile?: Tile): number {
-    return rangedStrength * (1 + Combat.sumModifiers(Combat.getRangedAttackModifiers(fromTile, targetTile)));
+  public static getRangedAttackStrength(
+    rangedStrength: number,
+    fromTile: Tile,
+    targetTile?: Tile,
+    extra: CombatModifier[] = []
+  ): number {
+    return rangedStrength * (1 + Combat.sumModifiers(Combat.getRangedAttackModifiers(fromTile, targetTile, extra)));
   }
 
-  public static getDefenseStrength(baseStrength: number, tile: Tile): number {
-    return baseStrength * (1 + Combat.sumModifiers(Combat.getDefenseModifiers(tile)));
+  public static getDefenseStrength(baseStrength: number, tile: Tile, extra: CombatModifier[] = []): number {
+    return baseStrength * (1 + Combat.sumModifiers(Combat.getDefenseModifiers(tile, extra)));
   }
 
   /**
@@ -117,12 +141,17 @@ export class Combat {
     defenderHealth: number;
     fromTile: Tile;
     targetTile: Tile;
+    // What the attacking unit brings itself (see getAttackModifiers()).
+    attacker?: { extra?: CombatModifier[]; ignoresRivers?: boolean };
     // A city defends with its own modifiers (see City.getDefenseModifiers()) instead of the tile's.
     defenderModifiers?: CombatModifier[];
+    // The defending unit's own modifiers (its promotions), on top of the tile's.
+    defenderExtraModifiers?: CombatModifier[];
     defenderIsCity?: boolean;
   }): CombatPrediction {
-    const attackerModifiers = Combat.getAttackModifiers(options.fromTile, options.targetTile);
-    const defenderModifiers = options.defenderModifiers ?? Combat.getDefenseModifiers(options.targetTile);
+    const attackerModifiers = Combat.getAttackModifiers(options.fromTile, options.targetTile, options.attacker);
+    const defenderModifiers =
+      options.defenderModifiers ?? Combat.getDefenseModifiers(options.targetTile, options.defenderExtraModifiers);
     const attackerStrength = options.attackerBaseStrength * (1 + Combat.sumModifiers(attackerModifiers));
     const defenderStrength = options.defenderBaseStrength * (1 + Combat.sumModifiers(defenderModifiers));
 
@@ -168,13 +197,17 @@ export class Combat {
     // Where the attacker shoots from, for its owner's modifiers. Absent for a city's strike.
     fromTile?: Tile;
     targetTile: Tile;
+    // The attacking unit's own modifiers (its promotions).
+    attackerExtraModifiers?: CombatModifier[];
     defenderModifiers?: CombatModifier[];
+    defenderExtraModifiers?: CombatModifier[];
     // The least health the shot can leave the defender on - a city can't be shot below 1 HP.
     minDefenderHealth?: number;
   }): CombatPrediction {
-    const defenderModifiers = options.defenderModifiers ?? Combat.getDefenseModifiers(options.targetTile);
+    const defenderModifiers =
+      options.defenderModifiers ?? Combat.getDefenseModifiers(options.targetTile, options.defenderExtraModifiers);
     const attackerModifiers = options.fromTile
-      ? Combat.getRangedAttackModifiers(options.fromTile, options.targetTile)
+      ? Combat.getRangedAttackModifiers(options.fromTile, options.targetTile, options.attackerExtraModifiers)
       : [];
     const attackerStrength = options.attackerRangedStrength * (1 + Combat.sumModifiers(attackerModifiers));
     const defenderStrength = options.defenderBaseStrength * (1 + Combat.sumModifiers(defenderModifiers));

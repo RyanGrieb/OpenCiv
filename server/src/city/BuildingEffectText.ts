@@ -41,6 +41,15 @@ export class BuildingEffectText {
     if (effects.border_cost_percent) {
       lines.push(`Borders grow with ${Math.abs(effects.border_cost_percent)}% less Culture in all cities`);
     }
+    if (effects.trained_unit_experience) {
+      const units = effects.trained_unit_experience.land_only ? "land units" : "units";
+      lines.push(`+${effects.trained_unit_experience.amount} XP for ${units} trained here`);
+    }
+    if (effects.trained_unit_promotions) {
+      const units = effects.trained_unit_promotions.land_only ? "land units" : "units";
+      const promotions = BuildingEffectText.joinWords(effects.trained_unit_promotions.promotions);
+      lines.push(`The ${promotions} promotion for ${units} trained here`);
+    }
     if (effects.enemy_movement_cost) {
       lines.push(`Enemy land units spend ${effects.enemy_movement_cost} extra Movement per tile in your territory`);
     }

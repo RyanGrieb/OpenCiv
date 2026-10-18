@@ -33,8 +33,8 @@ buildings:
     cost: 75
     maintenance: 1
     required_tech: Bronze Working
-    not_yet:
-      - +15 XP for land units built here
+    effects:
+      trained_unit_experience: { amount: 15, land_only: true }
     stats: []
   - name: Amphitheater
     asset_name: BUILDING_AMPHITHEATER
@@ -482,8 +482,7 @@ buildings:
     effects:
       free_building: Castle
       yield_percent: { culture: 20 }
-    not_yet:
-      - The Drill I promotion for land units trained in the city
+      trained_unit_promotions: { promotions: [Drill I], land_only: true }
     stats:
       - culture: 1
   - name: Notre Dame
@@ -753,6 +752,8 @@ buildings:
     cost: 500
     required_tech: Military Science
     is_wonder: true
+    effects:
+      trained_unit_experience: { amount: 15 }
     not_yet:
       - A free Great General
     stats:

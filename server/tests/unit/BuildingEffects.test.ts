@@ -259,7 +259,8 @@ describe("BuildingEffects", () => {
       ["Great Pyramids", ["2 free Builders", "Builders work 25% faster"]],
       ["Statue of Zeus", ["A free Spearman", "+15% Combat Strength for units attacking cities"]],
       ["Great Library", ["A free Technology"]],
-      ["Alhambra", ["+20% Culture", "A free Castle in the city"]],
+      ["Alhambra", ["+20% Culture", "A free Castle in the city", "The Drill I promotion for land units trained here"]],
+      ["Barracks", ["+15 XP for land units trained here"]],
       ["Angkor Wat", ["Borders grow with 25% less Culture in all cities"]],
       ["Monument", []]
     ])("describes %s", (name, lines) => {

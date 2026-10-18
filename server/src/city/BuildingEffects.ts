@@ -30,6 +30,12 @@ export interface UnitProductionEffect {
   land_military?: boolean;
 }
 
+// Experience or promotions for units trained in the city, e.g. the Barracks' 15 XP.
+export interface TrainedUnitEffect {
+  // Only land units, rather than every unit that can fight.
+  land_only?: boolean;
+}
+
 /**
  * Civ 5's building and wonder effects beyond flat yields, as buildings.yml's `effects` gives them. Each
  * applies only in the building's own city unless its name says otherwise ("empire", or something about
@@ -67,6 +73,10 @@ export interface BuildingEffectsData {
   border_cost_percent?: number;
   // Extra movement an enemy land unit spends on each tile of the owner's territory.
   enemy_movement_cost?: number;
+  // Experience units trained in the city start with (Barracks).
+  trained_unit_experience?: TrainedUnitEffect & { amount: number };
+  // Promotions units trained in the city start with (Alhambra's Drill I).
+  trained_unit_promotions?: TrainedUnitEffect & { promotions: string[] };
 }
 
 type NumberEffect =
@@ -188,6 +198,26 @@ export class BuildingEffects {
 
     if (effects.tile_yields) GameMap.getInstance().sendTilesToPlayer(player, city.getTerritory());
     if (effects.naval_movement || effects.naval_sight) BuildingEffects.refreshShips(player);
+  }
+
+  // A unit `city` just trained or bought starts with the experience and promotions its buildings give.
+  public static applyToTrainedUnit(city: City, unit: Unit) {
+    if (!unit.canFight()) return;
+
+    const matches = (effect: TrainedUnitEffect) => !effect.land_only || unit.getDomain() === "land";
+    const effects = city.getBuildings().map((building) => building.getEffects());
+
+    effects
+      .map((effect) => effect.trained_unit_promotions)
+      .filter((effect) => effect && matches(effect))
+      .flatMap((effect) => effect.promotions)
+      .forEach((promotion) => unit.grantPromotion(promotion));
+
+    const experience = effects
+      .map((effect) => effect.trained_unit_experience)
+      .filter((effect) => effect && matches(effect))
+      .reduce((total, effect) => total + effect.amount, 0);
+    if (experience > 0) unit.gainExperience(experience);
   }
 
   private static tileMatches(effect: TileYieldEffect, tile: Tile, owner: Player): boolean {

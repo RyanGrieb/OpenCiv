@@ -376,7 +376,7 @@ describe("Unit.meleeAttack", () => {
 
     it("is offered to units that can fight, and not to Settlers", () => {
       const names = (unit: Unit) => unit.getUnitActionsJSON().map((action) => action.name);
-      expect(names(Unit.createFromName("Warrior", originTile, attackerPlayer))).toEqual(["fortify_until_healed", "skip_turn"]);
+      expect(names(Unit.createFromName("Warrior", originTile, attackerPlayer))).toEqual(["promote", "fortify_until_healed", "skip_turn"]);
       expect(names(Unit.createFromName("Settler", originTile, attackerPlayer))).toEqual(["settle", "skip_turn"]);
     });
   });
@@ -448,7 +448,7 @@ describe("Unit.rangedAttack", () => {
     const archer = makeArcher(row[0], attackerPlayer);
 
     expect(archer.asJSON()).toMatchObject({ combatStrength: 5, rangedStrength: 7, range: 2 });
-    expect(archer.getUnitActionsJSON().map((action) => action.name)).toEqual(["ranged_attack", "fortify_until_healed", "skip_turn"]);
+    expect(archer.getUnitActionsJSON().map((action) => action.name)).toEqual(["promote", "ranged_attack", "fortify_until_healed", "skip_turn"]);
     expect(makeWarrior(row[4], attackerPlayer).isRanged()).toBe(false);
   });
 

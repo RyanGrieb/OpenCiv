@@ -5,6 +5,7 @@ import { GameMap } from "../map/GameMap";
 import { StatEntry, StatValues, Tile } from "../map/Tile";
 import { Combat, CombatModifier } from "../unit/Combat";
 import { Unit, UnitYMLTypeData } from "../unit/Unit";
+import { UnitPromotions } from "../unit/UnitPromotions";
 import { BorderGrowth } from "./BorderGrowth";
 import { Building, BuildingData } from "./Building";
 import { BuildingEffects } from "./BuildingEffects";
@@ -651,10 +652,15 @@ export class City {
     const result = Combat.resolveRanged({
       attackerStrength: this.getCombatStrength(),
       attackerHealth: Combat.MAX_HEALTH,
-      defenderStrength: Combat.getDefenseStrength(defender.getCombatStrength(), targetTile),
+      defenderStrength: Combat.getDefenseStrength(
+        defender.getCombatStrength(),
+        targetTile,
+        defender.getDefensePromotionModifiers({ ranged: true })
+      ),
       defenderHealth: defender.getHealth()
     });
     defender.setHealth(result.defenderHealth);
+    defender.gainExperience(UnitPromotions.RANGED_DEFENSE_XP, this.player);
 
     const combatPacket = {
       event: "unitCombat",
@@ -696,6 +702,7 @@ export class City {
         attackerHealth: Combat.MAX_HEALTH,
         defenderBaseStrength: defender.getCombatStrength(),
         defenderHealth: defender.getHealth(),
+        defenderExtraModifiers: defender.getDefensePromotionModifiers({ ranged: true }),
         targetTile
       })
     };
@@ -1260,7 +1267,11 @@ export class City {
 
   private spawnUnit(unitName: string, tile: Tile, options?: { availableMovement?: number }) {
     const unit = Unit.createFromName(unitName, tile, this.player, options);
-    if (unit) tile.addUnit(unit);
+    if (!unit) return;
+
+    tile.addUnit(unit);
+    // Experience and promotions from the Barracks, Alhambra and the like.
+    BuildingEffects.applyToTrainedUnit(this, unit);
   }
 
   private announceFinished(itemName: string) {

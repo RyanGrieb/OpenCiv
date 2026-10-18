@@ -9,8 +9,9 @@ import { Tile } from "../map/Tile";
 import { PlayerVisibility } from "../map/PlayerVisibility";
 import { PlayerDiplomacy } from "../diplomacy/PlayerDiplomacy";
 import { ConfigLoader } from "../util/ConfigLoader";
-import { Combat } from "./Combat";
+import { Combat, CombatModifier } from "./Combat";
 import { UnitActions } from "./UnitActions";
+import { UnitPromotions } from "./UnitPromotions";
 
 export interface UnitAction {
   name: string;
@@ -37,6 +38,9 @@ export interface UnitOptions {
   ignoresTerrainCost?: boolean;
   domain?: UnitDomain;
   coastOnly?: boolean;
+  // Civ 5's unit combat class (see units.yml), which picks the promotions it can earn.
+  unitClass?: string;
+  freePromotions?: string[];
   // Movement to start with, when not a full turn's worth (e.g. a unit that was just captured).
   availableMovement?: number;
   actions: UnitAction[];
@@ -73,6 +77,9 @@ export interface UnitYMLTypeData {
   // A civilization's unique unit: only that civ builds it, in place of the unit it replaces.
   unique_to?: string;
   replaces?: string;
+  // Civ 5's unit combat class, and promotions every unit of the type starts with (see units.yml).
+  unit_class?: string;
+  free_promotions?: string[];
 }
 
 export class Unit {
@@ -105,6 +112,11 @@ export class Unit {
   private queuedMovementTiles: Tile[];
   // The improvement a Builder is working on where it stands. Moving away stops the work.
   private buildingImprovement: string | undefined;
+  private unitClass: string | undefined;
+  // Experience, level and promotions.
+  private promotions: UnitPromotions;
+  // Attacks made this turn. Only promotions like Blitz allow more than one.
+  private attacksMade: number;
 
   private id: number; // Increment this every time a unit object is created
   private actions: UnitAction[];
@@ -128,7 +140,11 @@ export class Unit {
     this.terrainCostIgnored = options.ignoresTerrainCost || false;
     this.domain = options.domain ?? "land";
     this.coastOnly = options.coastOnly ?? false;
-    // After the domain: a ship's full movement depends on its owner's wonders.
+    this.unitClass = options.unitClass;
+    this.promotions = new UnitPromotions(options.unitClass);
+    (options.freePromotions ?? []).forEach((name) => this.promotions.grant(name));
+    this.attacksMade = 0;
+    // After the domain and promotions: a ship's full movement depends on its owner's wonders.
     this.availableMovement = options.availableMovement ?? this.getMaxMovement();
     this.actions = options.actions || [];
     this.queuedMovementTiles = [];
@@ -212,6 +228,17 @@ export class Unit {
     });
 
     ServerEvents.on({
+      eventName: "promoteUnit",
+      parentObject: this,
+      callback: (data, websocket) => {
+        const player = Game.getInstance().getPlayerFromWebsocket(websocket);
+        if (this.id !== data["id"] || this.player !== player) return;
+
+        this.promote(data["promotion"]);
+      }
+    });
+
+    ServerEvents.on({
       eventName: "unitAction",
       parentObject: this,
       callback: (data, websocket) => {
@@ -232,9 +259,10 @@ export class Unit {
       parentObject: this,
       callback: (data) => {
         this.workOnImprovement();
-        if (this.fortified && this.fortifiedForATurn && !this.actedThisTurn) this.heal();
+        if (this.healsThisTurn()) this.heal();
         this.fortifiedForATurn = this.fortified;
         this.actedThisTurn = false;
+        this.attacksMade = 0;
         this.skippingTurn = false;
         if (this.fortified && this.health >= Combat.MAX_HEALTH) this.setFortified(false);
         this.availableMovement = this.getMaxMovement();
@@ -283,6 +311,8 @@ export class Unit {
       ignoresTerrainCost: data.ignores_terrain_cost,
       domain: data.domain,
       coastOnly: data.coast_only,
+      unitClass: data.unit_class,
+      freePromotions: data.free_promotions,
       availableMovement: options?.availableMovement,
       actions: UnitActions.forUnitType(data)
     });
@@ -510,15 +540,37 @@ export class Unit {
     return BuildingEffects.getBuildTurns(improvement.build_turns, this.player);
   }
 
+  // Fortified until healed for a whole turn without acting, or with a promotion that heals every turn (March).
+  private healsThisTurn(): boolean {
+    if (this.promotions.hasEffect("heal_every_turn")) return true;
+    return this.fortified && this.fortifiedForATurn && !this.actedThisTurn;
+  }
+
   private heal() {
     if (this.health >= Combat.MAX_HEALTH) return;
 
-    let amount = Combat.HEAL_ELSEWHERE;
+    let amount = Combat.HEAL_ELSEWHERE + this.promotions.sum("heal_outside_friendly");
     if (this.tile.getCity()?.getPlayer() === this.player) amount = Combat.HEAL_IN_OWN_CITY;
     else if (this.tile.getCityTerritoryOf()?.getPlayer() === this.player) amount = Combat.HEAL_IN_FRIENDLY_TERRITORY;
-    this.health = Math.min(Combat.MAX_HEALTH, this.health + amount);
 
+    this.setHealthAndAnnounce(this.health + amount + this.getMedicBonus());
+  }
+
+  // The best Medic among the owner's units here and next door, this one included. Medics don't add up.
+  private getMedicBonus(): number {
+    const nearbyUnits = [this.tile, ...this.tile.getAdjacentTiles()]
+      .filter((tile) => tile)
+      .flatMap((tile) => tile.getUnits())
+      .filter((unit) => unit.player === this.player);
+
+    return Math.max(0, ...nearbyUnits.map((unit) => unit.promotions.sum("heal_adjacent")));
+  }
+
+  private setHealthAndAnnounce(health: number) {
+    this.setHealth(health);
     this.sendToObservers(this.tile, () => ({ event: "unitHealth", id: this.id, health: this.health }));
+    // Heal Instantly is only on offer while wounded.
+    if (this.promotions.canPromote()) this.sendPromotionsToOwner();
   }
 
   private moveWithMovementQueue() {
@@ -641,11 +693,26 @@ export class Unit {
     const enemies = targetTile.getUnits().filter((unit) => this.isEnemy(unit.getPlayer()));
     const defender = enemies.find((unit) => unit.canFight());
 
+    // A Survivalism III Scout slips away, leaving the attacker's blow to land on nothing.
+    if (defender?.withdrawFrom(originTile)) {
+      this.sendAttackerCombat();
+      return true;
+    }
+
     if (defender) {
       const result = Combat.resolveMelee({
-        attackerStrength: Combat.getAttackStrength(this.combatStrength, originTile, targetTile),
+        attackerStrength: Combat.getAttackStrength(
+          this.combatStrength,
+          originTile,
+          targetTile,
+          this.getMeleeAttacker(targetTile, defender)
+        ),
         attackerHealth: this.health,
-        defenderStrength: Combat.getDefenseStrength(defender.combatStrength, targetTile),
+        defenderStrength: Combat.getDefenseStrength(
+          defender.combatStrength,
+          targetTile,
+          defender.getDefensePromotionModifiers({ ranged: false, attacker: this })
+        ),
         defenderHealth: defender.health
       });
 
@@ -653,6 +720,8 @@ export class Unit {
       defender.health = result.defenderHealth;
 
       this.broadcastCombat(originTile, defender);
+      this.gainExperience(UnitPromotions.MELEE_ATTACK_XP, defender.player);
+      defender.gainExperience(UnitPromotions.MELEE_DEFENSE_XP, this.player);
 
       if (this.health <= 0) {
         this.delete();
@@ -665,12 +734,7 @@ export class Unit {
       defender.delete();
     } else {
       // Nothing here could fight back - the civilians are captured or destroyed below.
-      this.player.sendNetworkEvent({
-        event: "unitCombat",
-        attackerId: this.id,
-        attackerHealth: this.health,
-        attackerRemainingMovement: this.availableMovement
-      });
+      this.sendAttackerCombat();
     }
 
     const survivors = targetTile.getUnits().filter((unit) => this.isEnemy(unit.getPlayer()));
@@ -704,7 +768,9 @@ export class Unit {
         defenderBaseStrength: defender.combatStrength,
         defenderHealth: defender.health,
         fromTile: this.tile,
-        targetTile
+        targetTile,
+        attacker: this.getMeleeAttacker(targetTile, defender),
+        defenderExtraModifiers: defender.getDefensePromotionModifiers({ ranged: false, attacker: this })
       })
     };
   }
@@ -727,14 +793,25 @@ export class Unit {
 
     const defender = this.getRangedDefender(targetTile);
     const result = Combat.resolveRanged({
-      attackerStrength: Combat.getRangedAttackStrength(this.rangedStrength, this.tile),
+      attackerStrength: Combat.getRangedAttackStrength(
+        this.rangedStrength,
+        this.tile,
+        targetTile,
+        this.getAttackPromotionModifiers(targetTile, { ranged: true, defender })
+      ),
       attackerHealth: this.health,
-      defenderStrength: Combat.getDefenseStrength(defender.combatStrength, targetTile),
+      defenderStrength: Combat.getDefenseStrength(
+        defender.combatStrength,
+        targetTile,
+        defender.getDefensePromotionModifiers({ ranged: true, attacker: this })
+      ),
       defenderHealth: defender.health
     });
     defender.health = result.defenderHealth;
 
     this.broadcastCombat(this.tile, defender, { ranged: true });
+    this.gainExperience(UnitPromotions.RANGED_ATTACK_XP, defender.player);
+    defender.gainExperience(UnitPromotions.RANGED_DEFENSE_XP, this.player);
     if (defender.health <= 0) defender.delete();
 
     return true;
@@ -761,8 +838,10 @@ export class Unit {
         attackerRangedStrength: this.rangedStrength,
         attackerHealth: this.health,
         fromTile: this.tile,
+        attackerExtraModifiers: this.getAttackPromotionModifiers(targetTile, { ranged: true, defender }),
         defenderBaseStrength: defender.combatStrength,
         defenderHealth: defender.health,
+        defenderExtraModifiers: defender.getDefensePromotionModifiers({ ranged: true, attacker: this }),
         targetTile
       })
     };
@@ -782,14 +861,23 @@ export class Unit {
   /**
    * Every tile this unit could shoot into from where it stands: within its range, and in its line of
    * sight - the same sightlines it sees by, so hills, mountains and woods block shots from lower ground.
+   * Indirect Fire also lets it shoot at anything else its owner can see.
    */
   public getRangedTargetTiles(): Tile[] {
     if (!this.isRanged()) return [];
 
     const map = GameMap.getInstance();
-    return map
-      .getTilesInRange(this.tile, this.range)
-      .filter((tile) => tile !== this.tile && map.hasLineOfSight(this.tile, tile));
+    const indirectFire = this.promotions.hasEffect("indirect_fire");
+    const inSight = (tile: Tile) =>
+      map.hasLineOfSight(this.tile, tile) || (indirectFire && this.player.getVisibility().isVisible(tile));
+
+    return map.getTilesInRange(this.tile, this.getRange()).filter((tile) => tile !== this.tile && inSight(tile));
+  }
+
+  // Its base range plus its promotions' (Range).
+  public getRange(): number {
+    if (!this.isRanged()) return 0;
+    return this.range + this.promotions.sum("range");
   }
 
   // Tells the owner which tiles this unit can shoot into. `aiming` is set when the player pressed the
@@ -909,6 +997,68 @@ export class Unit {
     return this.combatStrength;
   }
 
+  public isWounded(): boolean {
+    return this.health < Combat.MAX_HEALTH;
+  }
+
+  public getUnitClass(): string | undefined {
+    return this.unitClass;
+  }
+
+  public getPromotions(): UnitPromotions {
+    return this.promotions;
+  }
+
+  public canPromote(): boolean {
+    return this.canFight() && this.promotions.canPromote();
+  }
+
+  /**
+   * Experience from a fight against `opponent`'s unit or city (or from a building). Only units that can
+   * fight learn anything, and fights with barbarians stop teaching at UnitPromotions.BARBARIAN_XP_CAP.
+   * The owner hears about it, and is told once a promotion becomes available.
+   */
+  public gainExperience(amount: number, opponent?: Player) {
+    if (!this.canFight() || this.health <= 0) return;
+
+    const promotionReady = this.promotions.addExperience(amount, { fromBarbarian: opponent?.isBarbarian() });
+    this.sendPromotionsToOwner();
+    if (!promotionReady) return;
+
+    this.sendActionsToOwner();
+    this.player.getNotifications().addMessage("ICON_PROMOTE", `Your ${this.name} has earned a promotion.`);
+  }
+
+  // A promotion handed out rather than earned, e.g. the Alhambra's Drill I.
+  public grantPromotion(name: string) {
+    if (!this.canFight() || this.promotions.has(name)) return;
+
+    this.promotions.grant(name);
+    this.onPromotionsChanged({ movement: 0 });
+  }
+
+  // The player picked one of the promotions on offer (see UnitPromotions.getChoices()).
+  public promote(name: string) {
+    if (!this.canFight()) return;
+
+    const promotion = this.promotions.choose(name, { wounded: this.isWounded() });
+    if (!promotion) return;
+
+    const healing = promotion.effects?.heal_instantly ?? 0;
+    if (healing > 0) this.setHealthAndAnnounce(this.health + healing);
+    this.onPromotionsChanged({ movement: promotion.effects?.movement ?? 0 });
+  }
+
+  // What the unit's own promotions add to its defense in this fight. `attacker` is absent for a city's strike.
+  public getDefensePromotionModifiers(options: { ranged: boolean; attacker?: Unit }): CombatModifier[] {
+    return this.promotions.getCombatModifiers({
+      attacking: false,
+      ranged: options.ranged,
+      tile: this.tile,
+      opponent: options.attacker
+    });
+  }
+
   public delete() {
     this.tile.removeUnit(this);
     this.player.removeUnit(this);
@@ -937,16 +1087,19 @@ export class Unit {
     return this.utility;
   }
 
-  // The owner's Great Lighthouse lets ships see further.
+  // The owner's Great Lighthouse lets ships see further, and promotions (Scouting, Sentry) let anything.
   public getSightRange() {
-    if (this.domain !== "sea") return this.sightRange;
-    return this.sightRange + BuildingEffects.getNavalSightBonus(this.player);
+    const sight = this.sightRange + this.promotions.sum("sight");
+    if (this.domain !== "sea") return sight;
+    return sight + BuildingEffects.getNavalSightBonus(this.player);
   }
 
-  // A full turn's movement. The owner's Great Lighthouse gives ships an extra move.
+  // A full turn's movement. The owner's Great Lighthouse gives ships an extra move, and promotions
+  // (Mobility) give anything one.
   public getMaxMovement(): number {
-    if (this.domain !== "sea") return this.defaultMoveDistance;
-    return this.defaultMoveDistance + BuildingEffects.getNavalMovementBonus(this.player);
+    const movement = this.defaultMoveDistance + this.promotions.sum("movement");
+    if (this.domain !== "sea") return movement;
+    return movement + BuildingEffects.getNavalMovementBonus(this.player);
   }
 
   // Once the owner's buildings change how far the unit moves or sees: its owner hears its new full
@@ -995,8 +1148,10 @@ export class Unit {
       attackType: this.attackType,
       combatStrength: this.combatStrength,
       rangedStrength: this.rangedStrength,
-      range: this.range,
+      range: this.getRange(),
       health: this.health,
+      ...this.promotions.toJSON({ wounded: this.isWounded(), owner: ownUnit }),
+      woodsman: this.promotions.hasEffect("woodsman"),
       fortified: ownUnit && this.fortified,
       ...(ownUnit ? this.getBuildStatusJSON() : {}),
       isUtility: this.utility,
@@ -1049,7 +1204,7 @@ export class Unit {
     // Open water costs a move a tile - hills, forests and rivers are for land units.
     if (this.domain === "sea") return 1;
 
-    return Tile.getWeight(current, neighbor, this) + BuildingEffects.getEnemyMovementCost(neighbor, this);
+    return this.getTerrainWeight(current, neighbor) + BuildingEffects.getEnemyMovementCost(neighbor, this);
   }
 
   public getTargetQueuedTile() {
@@ -1058,9 +1213,101 @@ export class Unit {
     return this.queuedMovementTiles[this.queuedMovementTiles.length - 1];
   }
 
-  // Attacking uses up the rest of the turn, and breaks off whatever the unit was doing.
+  // Woodsman halves what forest and jungle cost (a forest tile takes 1 move instead of 2). Mirrored by
+  // the client's Unit.getTileWeight().
+  private getTerrainWeight(current: Tile, neighbor: Tile): number {
+    const weight = Tile.getWeight(current, neighbor, this);
+    if (weight <= 1 || weight >= 9999 || !this.promotions.hasEffect("woodsman")) return weight;
+
+    const woods = neighbor.getTileTypes().some((type) => type.includes("forest") || type.includes("jungle"));
+    return woods ? Math.ceil(weight / 2) : weight;
+  }
+
+  // What the unit's own promotions add to an attack on targetTile (where `defender` stands, if it's a unit).
+  private getAttackPromotionModifiers(targetTile: Tile, options: { ranged: boolean; defender?: Unit }) {
+    return this.promotions.getCombatModifiers({
+      attacking: true,
+      ranged: options.ranged,
+      tile: targetTile,
+      opponent: options.defender
+    });
+  }
+
+  // What this unit brings to a melee attack itself (see Combat.getAttackModifiers()).
+  private getMeleeAttacker(targetTile: Tile, defender?: Unit) {
+    return {
+      extra: this.getAttackPromotionModifiers(targetTile, { ranged: false, defender }),
+      ignoresRivers: this.promotions.hasEffect("amphibious")
+    };
+  }
+
+  // After promotions change: the owner's client learns them, and any new movement, sight or range
+  // takes effect. `movement` is the extra movement the new promotion gives, which is usable right away.
+  private onPromotionsChanged(options: { movement: number }) {
+    if (options.movement > 0 && this.availableMovement > 0) this.availableMovement += options.movement;
+    this.sendPromotionsToOwner();
+    this.sendActionsToOwner();
+    this.refreshMovementAndSight();
+  }
+
+  private sendPromotionsToOwner() {
+    this.player.sendNetworkEvent({
+      event: "unitPromotions",
+      id: this.id,
+      ...this.promotions.toJSON({ wounded: this.isWounded(), owner: true }),
+      range: this.getRange(),
+      woodsman: this.promotions.hasEffect("woodsman"),
+      remainingMovement: this.availableMovement
+    });
+  }
+
+  /**
+   * Survivalism III: steps off to a free tile next to it that isn't next to the attacker, if there is
+   * one. Returns whether it got away.
+   */
+  private withdrawFrom(attackerTile: Tile): boolean {
+    if (!this.promotions.hasEffect("withdraw")) return false;
+
+    const nearAttacker = [attackerTile, ...attackerTile.getAdjacentTiles()];
+    const escape = this.tile
+      .getAdjacentTiles()
+      .find(
+        (tile) =>
+          tile &&
+          !nearAttacker.includes(tile) &&
+          this.canEnter(tile) &&
+          tile.getMovementCost() < 9999 &&
+          !tile.isBlockedFor(this)
+      );
+    if (!escape) return false;
+
+    this.moveToTile({
+      previousTile: this.tile,
+      targetTile: escape,
+      remainingTiles: [],
+      remainingMovement: this.availableMovement
+    });
+    return true;
+  }
+
+  // Tells the attacker's owner how an attack that hit no unit left it, e.g. one that captured civilians.
+  private sendAttackerCombat() {
+    this.player.sendNetworkEvent({
+      event: "unitCombat",
+      attackerId: this.id,
+      attackerHealth: this.health,
+      attackerRemainingMovement: this.availableMovement
+    });
+  }
+
+  /**
+   * Attacking breaks off whatever the unit was doing, and uses up the rest of the turn - unless a
+   * promotion (Blitz, Logistics) leaves it another attack, in which case it costs a single move.
+   */
   private spendAttack() {
-    this.availableMovement = 0;
+    this.attacksMade += 1;
+    const attacksLeft = 1 + this.promotions.sum("extra_attacks") - this.attacksMade;
+    this.availableMovement = attacksLeft > 0 ? Unit.spendMovement(this.availableMovement, 1) : 0;
     this.actedThisTurn = true;
     this.setFortified(false);
     this.clearMovementQueue();
@@ -1082,7 +1329,12 @@ export class Unit {
     const targetTile = city.getTile();
 
     const result = Combat.resolveMelee({
-      attackerStrength: Combat.getAttackStrength(this.combatStrength, originTile, targetTile),
+      attackerStrength: Combat.getAttackStrength(
+        this.combatStrength,
+        originTile,
+        targetTile,
+        this.getMeleeAttacker(targetTile)
+      ),
       attackerHealth: this.health,
       defenderStrength: city.getCombatStrength(),
       defenderHealth: city.getHealth(),
@@ -1092,6 +1344,7 @@ export class Unit {
     city.setHealth(result.defenderHealth);
 
     this.broadcastCityCombat(originTile, city, { ranged: false });
+    this.gainExperience(UnitPromotions.MELEE_ATTACK_XP, city.getPlayer());
 
     if (this.health <= 0) {
       this.delete();
@@ -1107,7 +1360,12 @@ export class Unit {
   // Ranged units can batter a city down, but never below 1 HP - only a melee unit can take it.
   private rangedAttackCity(city: City) {
     const result = Combat.resolveRanged({
-      attackerStrength: Combat.getRangedAttackStrength(this.rangedStrength, this.tile, city.getTile()),
+      attackerStrength: Combat.getRangedAttackStrength(
+        this.rangedStrength,
+        this.tile,
+        city.getTile(),
+        this.getAttackPromotionModifiers(city.getTile(), { ranged: true })
+      ),
       attackerHealth: this.health,
       defenderStrength: city.getCombatStrength(),
       defenderHealth: city.getHealth(),
@@ -1116,6 +1374,7 @@ export class Unit {
     city.setHealth(result.defenderHealth);
 
     this.broadcastCityCombat(this.tile, city, { ranged: true });
+    this.gainExperience(UnitPromotions.RANGED_ATTACK_XP, city.getPlayer());
   }
 
   private getMeleeCityPreview(city: City) {
@@ -1134,6 +1393,7 @@ export class Unit {
         defenderHealth: city.getHealth(),
         fromTile: this.tile,
         targetTile: city.getTile(),
+        attacker: this.getMeleeAttacker(city.getTile()),
         defenderModifiers: city.getDefenseModifiers(),
         defenderIsCity: true
       })
@@ -1154,6 +1414,7 @@ export class Unit {
         attackerRangedStrength: this.rangedStrength,
         attackerHealth: this.health,
         fromTile: this.tile,
+        attackerExtraModifiers: this.getAttackPromotionModifiers(city.getTile(), { ranged: true }),
         defenderBaseStrength: city.getBaseStrength(),
         defenderHealth: city.getHealth(),
         targetTile: city.getTile(),
@@ -1177,7 +1438,8 @@ export class Unit {
       previousTile: originTile,
       targetTile: targetTile,
       remainingTiles: [],
-      remainingMovement: 0
+      // Nothing left after an attack, unless a promotion (Blitz) leaves the unit another.
+      remainingMovement: this.availableMovement
     });
 
     for (const capturedAs of capturedTypes) {

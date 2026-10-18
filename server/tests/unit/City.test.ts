@@ -6,6 +6,7 @@ import { Game } from '../../src/Game';
 import { ServerEvents } from '../../src/Events';
 import { Unit } from '../../src/unit/Unit';
 import { Combat } from '../../src/unit/Combat';
+import { BuildingEffects } from '../../src/city/BuildingEffects';
 import { WebSocket } from 'ws';
 
 jest.mock('../../src/map/GameMap');
@@ -32,6 +33,8 @@ describe('City', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    // Units are mocks here, so there's nothing for the Barracks and friends to train.
+    jest.spyOn(BuildingEffects, 'applyToTrainedUnit').mockImplementation(() => {});
 
     let centerOwner: City | undefined;
     mockTile = {
@@ -1129,6 +1132,8 @@ describe('City', () => {
         getId: jest.fn().mockReturnValue(7),
         getName: jest.fn().mockReturnValue('Warrior'),
         delete: jest.fn(),
+        getDefensePromotionModifiers: jest.fn().mockReturnValue([]),
+        gainExperience: jest.fn(),
       } as unknown as jest.Mocked<Unit>;
       targetTile = {
         getX: jest.fn().mockReturnValue(2),

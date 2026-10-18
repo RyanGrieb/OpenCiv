@@ -20,6 +20,19 @@ export class UnitActions {
     };
   }
 
+  // Shown once the unit has earned a promotion. The owner's client opens the list of promotions on offer,
+  // and sends the pick back as "promoteUnit" (see Unit.promote()).
+  public static promote(): UnitAction {
+    return {
+      name: "promote",
+      icon: "ICON_PROMOTE",
+      requirements: [],
+      desc: "Promote",
+      isAvailable: (unit: Unit) => unit.canPromote(),
+      onAction: () => {}
+    };
+  }
+
   // old_java's Target action: the server answers with the tiles in range, and the owner's client
   // highlights them until the player left-clicks an enemy to shoot it (or right-clicks to stop aiming).
   public static rangedAttack(): UnitAction {
@@ -91,8 +104,9 @@ export class UnitActions {
       return Improvement.getBuildableImprovementData("land").map(UnitActions.buildImprovement);
     if (data.name === "Work Boat")
       return Improvement.getBuildableImprovementData("sea").map(UnitActions.buildImprovement);
-    if (data.ranged_strength > 0) return [UnitActions.rangedAttack(), UnitActions.fortifyUntilHealed()];
-    if (data.combat_strength > 0) return [UnitActions.fortifyUntilHealed()];
+    if (data.ranged_strength > 0)
+      return [UnitActions.promote(), UnitActions.rangedAttack(), UnitActions.fortifyUntilHealed()];
+    if (data.combat_strength > 0) return [UnitActions.promote(), UnitActions.fortifyUntilHealed()];
     return [];
   }
 

@@ -12,16 +12,21 @@
 # obsolete_tech is Civ 5's ObsoleteTech: once it's researched, cities stop offering the unit and drop it
 # from their production queues (units already on the map stay). Each is the tech that unlocks the unit it
 # upgrades to.
+# unit_class is Civ 5's unit combat class, which picks the promotions a unit can earn (see promotions.yml):
+# recon, melee, gunpowder, mounted, armor, ranged, siege, naval_melee, naval_ranged or submarine.
+# free_promotions are promotions every unit of the type starts with, like Civ 5's Lancer and Artillery.
 # A city training a Settler stops growing: its spare food goes into production instead, as in Civ 5.
 units:
   - name: Warrior
     combat_strength: 8
     attack_type: melee
+    unit_class: melee
     cost: 30
     obsolete_tech: Iron Working
   - name: Scout
     combat_strength: 5
     attack_type: melee
+    unit_class: recon
     cost: 20
     default_move_distance: 3
     sight_range: 3
@@ -35,6 +40,7 @@ units:
     ranged_strength: 7
     range: 2
     attack_type: ranged
+    unit_class: ranged
     cost: 40
     required_tech: Archery
     obsolete_tech: Construction
@@ -59,6 +65,7 @@ units:
   - name: Trireme
     combat_strength: 10
     attack_type: naval
+    unit_class: naval_melee
     domain: sea
     coast_only: true
     cost: 45
@@ -67,6 +74,7 @@ units:
   - name: Spearman
     combat_strength: 11
     attack_type: melee
+    unit_class: melee
     cost: 56
     required_tech: Bronze Working
     obsolete_tech: Civil Service
@@ -75,12 +83,14 @@ units:
     ranged_strength: 10
     range: 2
     attack_type: ranged
+    unit_class: ranged
     cost: 56
     required_tech: The Wheel
     obsolete_tech: Chivalry
   - name: Horseman
     combat_strength: 12
     attack_type: melee
+    unit_class: mounted
     cost: 75
     default_move_distance: 3
     required_tech: Horseback Riding
@@ -88,6 +98,7 @@ units:
   - name: Swordsman
     combat_strength: 14
     attack_type: melee
+    unit_class: melee
     cost: 75
     required_tech: Iron Working
     obsolete_tech: Steel
@@ -96,6 +107,7 @@ units:
     replaces: Swordsman
     combat_strength: 17
     attack_type: melee
+    unit_class: melee
     cost: 75
     required_tech: Iron Working
     obsolete_tech: Steel
@@ -104,6 +116,7 @@ units:
     ranged_strength: 11
     range: 2
     attack_type: ranged
+    unit_class: ranged
     cost: 75
     required_tech: Construction
     obsolete_tech: Machinery
@@ -112,12 +125,14 @@ units:
     ranged_strength: 8
     range: 2
     attack_type: siege
+    unit_class: siege
     cost: 75
     required_tech: Mathematics
     obsolete_tech: Physics
   - name: Pikeman
     combat_strength: 16
     attack_type: melee
+    unit_class: melee
     cost: 90
     required_tech: Civil Service
     obsolete_tech: Gunpowder
@@ -126,6 +141,7 @@ units:
     ranged_strength: 18
     range: 2
     attack_type: ranged
+    unit_class: ranged
     cost: 120
     required_tech: Machinery
     obsolete_tech: Industrialization
@@ -134,6 +150,7 @@ units:
     ranged_strength: 17
     range: 2
     attack_type: naval
+    unit_class: naval_ranged
     domain: sea
     coast_only: true
     cost: 100
@@ -143,6 +160,7 @@ units:
   - name: Knight
     combat_strength: 20
     attack_type: melee
+    unit_class: mounted
     cost: 120
     default_move_distance: 4
     required_tech: Chivalry
@@ -152,12 +170,14 @@ units:
     ranged_strength: 14
     range: 2
     attack_type: siege
+    unit_class: siege
     cost: 120
     required_tech: Physics
     obsolete_tech: Chemistry
   - name: Longswordsman
     combat_strength: 21
     attack_type: melee
+    unit_class: melee
     cost: 120
     required_tech: Steel
     obsolete_tech: Gunpowder
@@ -166,6 +186,7 @@ units:
   - name: Caravel
     combat_strength: 20
     attack_type: naval
+    unit_class: naval_melee
     domain: sea
     cost: 120
     default_move_distance: 4
@@ -173,6 +194,7 @@ units:
   - name: Musketman
     combat_strength: 24
     attack_type: melee
+    unit_class: gunpowder
     cost: 120
     required_tech: Gunpowder
     obsolete_tech: Rifling
@@ -181,6 +203,7 @@ units:
     ranged_strength: 28
     range: 2
     attack_type: naval
+    unit_class: naval_ranged
     domain: sea
     cost: 185
     default_move_distance: 4
@@ -189,6 +212,7 @@ units:
   - name: Privateer
     combat_strength: 30
     attack_type: naval
+    unit_class: naval_melee
     domain: sea
     cost: 120
     default_move_distance: 5
@@ -198,12 +222,15 @@ units:
     ranged_strength: 26
     range: 2
     attack_type: siege
+    unit_class: siege
     cost: 185
     required_tech: Chemistry
     obsolete_tech: Dynamite
   - name: Lancer
     combat_strength: 25
     attack_type: melee
+    unit_class: mounted
+    free_promotions: [Formation I]
     cost: 150
     default_move_distance: 4
     required_tech: Metallurgy
@@ -211,6 +238,7 @@ units:
   - name: Cavalry
     combat_strength: 34
     attack_type: melee
+    unit_class: mounted
     cost: 180
     default_move_distance: 4
     required_tech: Military Science
@@ -220,17 +248,20 @@ units:
     ranged_strength: 40
     range: 2
     attack_type: ranged
+    unit_class: ranged
     cost: 225
     required_tech: Industrialization
   - name: Rifleman
     combat_strength: 34
     attack_type: melee
+    unit_class: gunpowder
     cost: 200
     required_tech: Rifling
     obsolete_tech: Replaceable Parts
   - name: Ironclad
     combat_strength: 45
     attack_type: naval
+    unit_class: naval_melee
     domain: sea
     cost: 240
     default_move_distance: 4
@@ -241,6 +272,8 @@ units:
     ranged_strength: 32
     range: 3
     attack_type: siege
+    unit_class: siege
+    free_promotions: [Indirect Fire]
     cost: 240
     required_tech: Dynamite
     obsolete_tech: Rocketry
@@ -249,6 +282,7 @@ units:
     ranged_strength: 55
     range: 2
     attack_type: naval
+    unit_class: naval_ranged
     domain: sea
     cost: 300
     default_move_distance: 6
@@ -257,18 +291,21 @@ units:
   - name: Great War Infantry
     combat_strength: 36
     attack_type: melee
+    unit_class: gunpowder
     cost: 250
     required_tech: Replaceable Parts
     obsolete_tech: Plastics
   - name: Infantry
     combat_strength: 50
     attack_type: melee
+    unit_class: gunpowder
     cost: 300
     required_tech: Plastics
     obsolete_tech: Electronics
   - name: Anti-Tank Gun
     combat_strength: 32
     attack_type: melee
+    unit_class: gunpowder
     cost: 250
     required_tech: Combined Arms
   - name: Submarine
@@ -276,6 +313,7 @@ units:
     ranged_strength: 65
     range: 3
     attack_type: naval
+    unit_class: submarine
     domain: sea
     cost: 300
     default_move_distance: 5
@@ -286,6 +324,7 @@ units:
     ranged_strength: 90
     range: 3
     attack_type: naval
+    unit_class: naval_ranged
     domain: sea
     cost: 520
     default_move_distance: 5
@@ -293,6 +332,7 @@ units:
   - name: Tank
     combat_strength: 60
     attack_type: melee
+    unit_class: armor
     cost: 350
     default_move_distance: 5
     required_tech: Combined Arms
@@ -300,17 +340,20 @@ units:
   - name: Mechanized Infantry
     combat_strength: 80
     attack_type: melee
+    unit_class: gunpowder
     cost: 450
     default_move_distance: 4
     required_tech: Mobile Tactics
   - name: Marine
     combat_strength: 50
     attack_type: melee
+    unit_class: gunpowder
     cost: 300
     required_tech: Penicillin
   - name: Bazooka
     combat_strength: 50
     attack_type: melee
+    unit_class: gunpowder
     cost: 375
     required_tech: Nuclear Fission
   - name: Rocket Artillery
@@ -318,6 +361,7 @@ units:
     ranged_strength: 76
     range: 3
     attack_type: siege
+    unit_class: siege
     cost: 550
     required_tech: Rocketry
   - name: Nuclear Submarine
@@ -325,6 +369,7 @@ units:
     ranged_strength: 85
     range: 3
     attack_type: naval
+    unit_class: submarine
     domain: sea
     cost: 450
     default_move_distance: 6
@@ -332,6 +377,7 @@ units:
   - name: Modern Armor
     combat_strength: 80
     attack_type: melee
+    unit_class: armor
     cost: 450
     default_move_distance: 5
     required_tech: Lasers
@@ -340,6 +386,7 @@ units:
     ranged_strength: 85
     range: 3
     attack_type: naval
+    unit_class: naval_ranged
     domain: sea
     cost: 400
     default_move_distance: 6
@@ -347,12 +394,14 @@ units:
   - name: Giant Death Robot
     combat_strength: 150
     attack_type: melee
+    unit_class: armor
     cost: 1000
     default_move_distance: 3
     required_tech: Nuclear Fusion
   - name: XCOM Squad
     combat_strength: 120
     attack_type: melee
+    unit_class: gunpowder
     cost: 750
     default_move_distance: 3
     required_tech: Nanotechnology

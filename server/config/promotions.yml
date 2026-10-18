@@ -1,0 +1,425 @@
+# Civ 5 (Brave New World) promotions, which units earn with experience (see server/src/unit/UnitPromotions.ts).
+#
+# classes: the unit classes (units.yml's unit_class) that can take it. fighter, bomber, helicopter and carrier
+#   are listed for Civ 5's air units, helicopters and carriers, which aren't in the game yet.
+# requires: promotions the unit must already have one of. Absent means none. requires_by_class replaces
+#   that list for the classes it names (Civ 5's helicopters take Ambush I with no prerequisite).
+# display_name: what the player sees, when two promotions share a name (the land and air Range).
+# description: the tooltip text.
+# not_yet: what the promotion does that needs systems the game doesn't have yet (air units, raiding gold).
+# Each promotion's icon is PROMOTION_ plus its name in capitals, e.g. PROMOTION_SHOCK_I.
+#
+# effects (percentages are Combat Strength):
+#   open_terrain_percent / rough_terrain_percent: fighting over a tile without / with hills, forest or jungle
+#     (the defender's tile, whichever side the unit is on). Rough is Civ 5's hills, forest and jungle.
+#   ranged_open_percent / ranged_rough_percent: the same, only for this unit's ranged attacks.
+#   vs_classes: { classes, percent } against units of those classes, attacking or defending.
+#   vs_wounded_percent, vs_city_percent, vs_fortified_percent, vs_land_percent, vs_naval_percent: when attacking.
+#   naval_melee_percent: melee attacks against ships. attack_percent / defense_percent: every attack / defense.
+#   ranged_defense_percent: defending against ranged attacks and city strikes.
+#   extra_attacks, movement, sight, range: added to the unit's own.
+#   heal_every_turn: heals at every turn's start even if it moved or fought, fortified or not.
+#   heal_adjacent: extra healing for this unit and every friendly unit next to it (the best Medic counts).
+#   heal_outside_friendly: extra healing outside its owner's borders.
+#   woodsman: forest and jungle cost half the movement. amphibious: no penalty for attacking across a river.
+#   indirect_fire: may shoot at anything its owner can see in range, line of sight or not.
+#   withdraw: steps back from a melee attack when there's a free tile away from the attacker.
+#   heal_instantly: heals this much and uses up the promotion it was picked as.
+promotions:
+  # Melee, gunpowder, mounted and armor.
+  - name: Shock I
+    classes: [melee, gunpowder, mounted, armor]
+    description: +15% Combat Strength when fighting in open terrain (no Hills, Forest or Jungle)
+    effects: { open_terrain_percent: 15 }
+  - name: Shock II
+    classes: [melee, gunpowder, mounted, armor]
+    requires: [Shock I]
+    description: +15% Combat Strength when fighting in open terrain (no Hills, Forest or Jungle)
+    effects: { open_terrain_percent: 15 }
+  - name: Shock III
+    classes: [melee, gunpowder, mounted, armor]
+    requires: [Shock II]
+    description: +15% Combat Strength when fighting in open terrain (no Hills, Forest or Jungle)
+    effects: { open_terrain_percent: 15 }
+  - name: Drill I
+    classes: [melee, gunpowder, mounted, armor]
+    description: +15% Combat Strength when fighting in rough terrain (Hills, Forest or Jungle)
+    effects: { rough_terrain_percent: 15 }
+  - name: Drill II
+    classes: [melee, gunpowder, mounted, armor]
+    requires: [Drill I]
+    description: +15% Combat Strength when fighting in rough terrain (Hills, Forest or Jungle)
+    effects: { rough_terrain_percent: 15 }
+  - name: Drill III
+    classes: [melee, gunpowder, mounted, armor]
+    requires: [Drill II]
+    description: +15% Combat Strength when fighting in rough terrain (Hills, Forest or Jungle)
+    effects: { rough_terrain_percent: 15 }
+  - name: Formation I
+    classes: [melee, gunpowder, mounted]
+    requires: [Shock II, Drill II]
+    description: +33% Combat Strength against mounted units
+    effects: { vs_classes: { classes: [mounted], percent: 33 } }
+  - name: Formation II
+    classes: [melee, gunpowder, mounted]
+    requires: [Formation I]
+    description: +33% Combat Strength against mounted units
+    effects: { vs_classes: { classes: [mounted], percent: 33 } }
+  - name: Amphibious
+    classes: [melee, gunpowder]
+    requires: [Shock I, Drill I]
+    description: No combat penalty for attacking across a river or from the sea
+    effects: { amphibious: true }
+  - name: Siege
+    classes: [melee, gunpowder]
+    requires: [Shock II, Drill II]
+    description: +50% Combat Strength against cities
+    effects: { vs_city_percent: 50 }
+  - name: Charge
+    classes: [mounted]
+    requires: [Shock II, Drill II]
+    description: +33% Combat Strength against wounded units
+    effects: { vs_wounded_percent: 33 }
+  - name: Blitz
+    classes: [melee, gunpowder, mounted, armor]
+    requires: [Shock III, Drill III]
+    description: 1 additional attack per turn
+    effects: { extra_attacks: 1 }
+  - name: Woodsman
+    classes: [melee, gunpowder]
+    requires: [Shock III, Drill III]
+    description: Double movement through Forest and Jungle
+    effects: { woodsman: true }
+  - name: Ambush I
+    classes: [gunpowder, fighter, bomber, helicopter]
+    requires: [Shock II, Drill II, Interception I, Dogfighting I, Siege I, Bombardment I]
+    requires_by_class: { helicopter: [] }
+    description: +25% Combat Strength against armored units
+    effects: { vs_classes: { classes: [armor], percent: 25 } }
+  - name: Ambush II
+    classes: [gunpowder, fighter, bomber, helicopter]
+    requires: [Ambush I]
+    description: +25% Combat Strength against armored units
+    effects: { vs_classes: { classes: [armor], percent: 25 } }
+  - name: Medic
+    classes: [melee, gunpowder, mounted, recon]
+    requires: [Shock I, Drill I, Scouting II, Survivalism II]
+    description: This unit and every unit next to it heal 5 extra HP per turn
+    effects: { heal_adjacent: 5 }
+  - name: Medic II
+    classes: [melee, gunpowder, mounted, recon]
+    requires: [Medic]
+    description: This unit and every unit next to it heal 5 more HP per turn, and this unit heals 5 extra HP outside friendly territory
+    effects: { heal_adjacent: 5, heal_outside_friendly: 5 }
+  - name: March
+    classes: [melee, gunpowder, mounted, ranged, siege]
+    requires: [Shock III, Drill III, Accuracy II, Barrage II]
+    description: Heals every turn, even after moving or fighting
+    effects: { heal_every_turn: true }
+  - name: Repair
+    classes: [armor, helicopter]
+    requires: [Shock III, Drill III, Ambush II, Mobility II]
+    description: Heals every turn, even after moving or fighting
+    effects: { heal_every_turn: true }
+  - name: Cover I
+    classes: [melee, gunpowder, ranged, siege]
+    description: +25% defense against ranged attacks
+    effects: { ranged_defense_percent: 25 }
+  - name: Cover II
+    classes: [melee, gunpowder, ranged, siege]
+    requires: [Cover I]
+    description: +25% defense against ranged attacks
+    effects: { ranged_defense_percent: 25 }
+
+  # Ranged and siege.
+  - name: Accuracy I
+    classes: [ranged, siege]
+    description: +15% Ranged Combat Strength against units in open terrain (no Hills, Forest or Jungle)
+    effects: { ranged_open_percent: 15 }
+  - name: Accuracy II
+    classes: [ranged, siege]
+    requires: [Accuracy I]
+    description: +15% Ranged Combat Strength against units in open terrain (no Hills, Forest or Jungle)
+    effects: { ranged_open_percent: 15 }
+  - name: Accuracy III
+    classes: [ranged, siege]
+    requires: [Accuracy II]
+    description: +15% Ranged Combat Strength against units in open terrain (no Hills, Forest or Jungle)
+    effects: { ranged_open_percent: 15 }
+  - name: Barrage I
+    classes: [ranged, siege]
+    description: +15% Ranged Combat Strength against units in rough terrain (Hills, Forest or Jungle)
+    effects: { ranged_rough_percent: 15 }
+  - name: Barrage II
+    classes: [ranged, siege]
+    requires: [Barrage I]
+    description: +15% Ranged Combat Strength against units in rough terrain (Hills, Forest or Jungle)
+    effects: { ranged_rough_percent: 15 }
+  - name: Barrage III
+    classes: [ranged, siege]
+    requires: [Barrage II]
+    description: +15% Ranged Combat Strength against units in rough terrain (Hills, Forest or Jungle)
+    effects: { ranged_rough_percent: 15 }
+  - name: Volley
+    classes: [ranged]
+    requires: [Accuracy I, Barrage I]
+    description: +50% Combat Strength against fortified units and cities
+    effects: { vs_fortified_percent: 50, vs_city_percent: 50 }
+  - name: Range
+    classes: [ranged, siege, naval_ranged]
+    requires: [Accuracy III, Barrage III, Targeting II, Bombardment II]
+    description: +1 Range
+    effects: { range: 1 }
+  - name: Indirect Fire
+    classes: [ranged, siege, naval_ranged]
+    requires: [Accuracy III, Barrage III, Targeting II, Bombardment II]
+    description: Ranged attacks may be made over obstacles, at anything your units can see
+    effects: { indirect_fire: true }
+  - name: Logistics
+    classes: [ranged, naval_ranged, naval_melee, submarine, fighter, bomber, helicopter]
+    requires:
+      [Accuracy III, Barrage III, Targeting III, Bombardment III, Coastal Raider III, Boarding Party III,
+       Wolfpack III, Siege III, Ambush II, Mobility II]
+    description: 1 additional attack per turn
+    effects: { extra_attacks: 1 }
+
+  # Recon.
+  - name: Scouting I
+    classes: [recon]
+    description: +1 Sight
+    effects: { sight: 1 }
+  - name: Scouting II
+    classes: [recon]
+    requires: [Scouting I]
+    description: +1 Sight
+    effects: { sight: 1 }
+  - name: Scouting III
+    classes: [recon]
+    requires: [Scouting II]
+    description: +1 Movement
+    effects: { movement: 1 }
+  - name: Survivalism I
+    classes: [recon]
+    description: +5 HP healed per turn outside friendly territory, and +25% defense
+    effects: { heal_outside_friendly: 5, defense_percent: 25 }
+  - name: Survivalism II
+    classes: [recon]
+    requires: [Survivalism I]
+    description: +5 HP healed per turn outside friendly territory, and +25% defense
+    effects: { heal_outside_friendly: 5, defense_percent: 25 }
+  - name: Survivalism III
+    classes: [recon]
+    requires: [Survivalism II]
+    description: Heals every turn even after moving or fighting, and withdraws from melee attacks
+    effects: { heal_every_turn: true, withdraw: true }
+  - name: Sentry
+    classes: [mounted, naval_melee, naval_ranged, recon]
+    requires: [Shock I, Drill I, Targeting I, Bombardment I, Coastal Raider I, Boarding Party I]
+    requires_by_class: { recon: [Scouting I] }
+    description: +1 Sight
+    effects: { sight: 1 }
+  - name: Mobility
+    classes: [mounted, naval_ranged, naval_melee, helicopter]
+    requires: [Shock III, Drill III, Targeting I, Bombardment I, Coastal Raider I, Boarding Party I]
+    requires_by_class: { helicopter: [] }
+    description: +1 Movement
+    effects: { movement: 1 }
+  - name: Mobility II
+    classes: [helicopter]
+    requires: [Mobility]
+    description: +1 Movement
+    effects: { movement: 1 }
+
+  # Naval.
+  - name: Targeting I
+    classes: [naval_ranged, fighter, bomber]
+    requires_by_class: { fighter: [Interception I, Dogfighting I], bomber: [Siege I, Bombardment I] }
+    description: +15% Combat Strength against naval units
+    effects: { vs_naval_percent: 15 }
+  - name: Targeting II
+    classes: [naval_ranged, fighter, bomber]
+    requires: [Targeting I]
+    description: +15% Combat Strength against naval units
+    effects: { vs_naval_percent: 15 }
+  - name: Targeting III
+    classes: [naval_ranged]
+    requires: [Targeting II]
+    description: +15% Combat Strength against naval units
+    effects: { vs_naval_percent: 15 }
+  - name: Bombardment I
+    classes: [naval_ranged, bomber]
+    description: +33% Combat Strength against land units
+    effects: { vs_land_percent: 33 }
+  - name: Bombardment II
+    classes: [naval_ranged, bomber]
+    requires: [Bombardment I]
+    description: +33% Combat Strength against land units
+    effects: { vs_land_percent: 33 }
+  - name: Bombardment III
+    classes: [naval_ranged, bomber]
+    requires: [Bombardment II]
+    description: +34% Combat Strength against land units
+    effects: { vs_land_percent: 34 }
+  - name: Boarding Party I
+    classes: [naval_melee]
+    description: +15% Combat Strength in melee attacks against naval units
+    effects: { naval_melee_percent: 15 }
+  - name: Boarding Party II
+    classes: [naval_melee]
+    requires: [Boarding Party I]
+    description: +15% Combat Strength in melee attacks against naval units
+    effects: { naval_melee_percent: 15 }
+  - name: Boarding Party III
+    classes: [naval_melee]
+    requires: [Boarding Party II]
+    description: +15% Combat Strength in melee attacks against naval units
+    effects: { naval_melee_percent: 15 }
+  - name: Coastal Raider I
+    classes: [naval_melee]
+    description: +20% Combat Strength when attacking cities
+    effects: { vs_city_percent: 20 }
+    not_yet: [Steals Gold equal to 33% of the damage dealt to a city]
+  - name: Coastal Raider II
+    classes: [naval_melee]
+    requires: [Coastal Raider I]
+    description: +20% Combat Strength when attacking cities
+    effects: { vs_city_percent: 20 }
+    not_yet: [Steals Gold equal to 33% of the damage dealt to a city]
+  - name: Coastal Raider III
+    classes: [naval_melee]
+    requires: [Coastal Raider II]
+    description: +20% Combat Strength when attacking cities
+    effects: { vs_city_percent: 20 }
+    not_yet: [Steals Gold equal to 34% of the damage dealt to a city]
+  - name: Wolfpack I
+    classes: [submarine]
+    description: +25% Combat Strength when attacking
+    effects: { attack_percent: 25 }
+  - name: Wolfpack II
+    classes: [submarine]
+    requires: [Wolfpack I]
+    description: +25% Combat Strength when attacking
+    effects: { attack_percent: 25 }
+  - name: Wolfpack III
+    classes: [submarine]
+    requires: [Wolfpack II]
+    description: +25% Combat Strength when attacking
+    effects: { attack_percent: 25 }
+  - name: Supply
+    classes: [naval_ranged, naval_melee, submarine, carrier]
+    requires:
+      [Targeting II, Bombardment II, Coastal Raider II, Boarding Party II, Wolfpack II, Flight Deck II,
+       Armor Plating II]
+    description: Heals 15 HP per turn outside friendly territory
+    effects: { heal_outside_friendly: 5 }
+
+  # Aircraft carriers.
+  - name: Armor Plating I
+    classes: [carrier]
+    description: +25% defense
+    effects: { defense_percent: 25 }
+  - name: Armor Plating II
+    classes: [carrier]
+    requires: [Armor Plating I]
+    description: +25% defense
+    effects: { defense_percent: 25 }
+  - name: Armor Plating III
+    classes: [carrier]
+    requires: [Armor Plating II]
+    description: +25% defense
+    effects: { defense_percent: 25 }
+  - name: Flight Deck I
+    classes: [carrier]
+    description: Can carry 1 extra air unit
+    not_yet: [Carrying air units]
+  - name: Flight Deck II
+    classes: [carrier]
+    requires: [Flight Deck I]
+    description: Can carry 1 extra air unit
+    not_yet: [Carrying air units]
+  - name: Flight Deck III
+    classes: [carrier]
+    requires: [Flight Deck II]
+    description: Can carry 1 extra air unit
+    not_yet: [Carrying air units]
+
+  # Air units.
+  - name: Interception I
+    classes: [fighter]
+    description: +33% Combat Strength when intercepting enemy aircraft
+    not_yet: [Interception]
+  - name: Interception II
+    classes: [fighter]
+    requires: [Interception I]
+    description: +33% Combat Strength when intercepting enemy aircraft
+    not_yet: [Interception]
+  - name: Interception III
+    classes: [fighter]
+    requires: [Interception II]
+    description: +34% Combat Strength when intercepting enemy aircraft
+    not_yet: [Interception]
+  - name: Dogfighting I
+    classes: [fighter]
+    description: +33% Combat Strength when performing an Air Sweep
+    not_yet: [Air Sweeps]
+  - name: Dogfighting II
+    classes: [fighter]
+    requires: [Dogfighting I]
+    description: +33% Combat Strength when performing an Air Sweep
+    not_yet: [Air Sweeps]
+  - name: Dogfighting III
+    classes: [fighter]
+    requires: [Dogfighting II]
+    description: +34% Combat Strength when performing an Air Sweep
+    not_yet: [Air Sweeps]
+  - name: Siege I
+    classes: [bomber]
+    description: +33% Combat Strength against cities
+    effects: { vs_city_percent: 33 }
+  - name: Siege II
+    classes: [bomber]
+    requires: [Siege I]
+    description: +33% Combat Strength against cities
+    effects: { vs_city_percent: 33 }
+  - name: Siege III
+    classes: [bomber]
+    requires: [Siege II]
+    description: +34% Combat Strength against cities
+    effects: { vs_city_percent: 34 }
+  - name: Air Targeting I
+    classes: [fighter, bomber]
+    requires: [Interception I, Dogfighting I, Siege I, Bombardment I]
+    description: +33% Combat Strength against naval units
+    effects: { vs_naval_percent: 33 }
+  - name: Air Targeting II
+    classes: [fighter, bomber]
+    requires: [Air Targeting I]
+    description: +33% Combat Strength against naval units
+    effects: { vs_naval_percent: 33 }
+  - name: Air Repair
+    classes: [fighter, bomber]
+    requires: [Interception II, Dogfighting II, Siege II, Bombardment II]
+    description: Heals every turn, even after an action
+    effects: { heal_every_turn: true }
+  - name: Range (Air)
+    display_name: Range
+    classes: [fighter, bomber]
+    requires: [Interception I, Dogfighting I, Siege I, Bombardment I]
+    description: +2 operational range
+    not_yet: [Operational range]
+  - name: Evasion
+    classes: [bomber]
+    requires: [Siege II, Bombardment II]
+    description: Takes 50% less damage from interception
+    not_yet: [Interception]
+  - name: Sortie
+    classes: [fighter]
+    requires: [Interception II, Dogfighting II]
+    description: 1 extra interception per turn
+    not_yet: [Interception]
+
+  # Every damaged unit.
+  - name: Heal Instantly
+    classes: [any]
+    description: Heals 50 HP, using up this promotion
+    effects: { heal_instantly: 50 }
