@@ -833,7 +833,7 @@ export class GlobeSprites {
           middleX: sprite.x + Tile.WIDTH / 2,
           middleY: sprite.y + Tile.HEIGHT / 2,
           unturned: !sprite.grounded,
-          ownFoot: !sprite.grounded && pieces.length > 1,
+          ownFoot: !sprite.grounded && (sprite.ownFoot ?? pieces.length > 1),
           overlay: false,
           pose: -1,
           poseSince: 0,

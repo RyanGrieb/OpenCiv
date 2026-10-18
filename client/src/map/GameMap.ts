@@ -32,6 +32,8 @@ export interface StandingSprite {
   y: number;
   gridX: number;
   gridY: number;
+  // Whether separate pieces stand on their own feet at the planet's outline.
+  ownFoot?: boolean;
   // Whether it rests on the ground all over, like a mountain's peaks or a hill's mounds, rather than
   // standing on a point of it like a tree: on the globe, what of it stops short of its bottom then
   // reaches on down to the ground toward the planet's edge, and what stands on it shows in front of it.
@@ -957,7 +959,15 @@ export class GameMap {
           groundActors.push(...overlay);
         } else {
           standingActors.push(...overlay);
-          standingSprites.push(...overlay.map((sprite) => ({ image: sprite.getImage(), ...place })));
+          standingSprites.push(
+            ...overlay.map((sprite) => ({
+              image: sprite.getImage(),
+              ...place,
+              ownFoot: Tile.SHARED_FOOT_STANDING_TILE_TYPES.some((type) => sprite.getTileTypes().includes(type))
+                ? false
+                : undefined
+            }))
+          );
         }
 
         if (tileTypes[0] === GameMap.MOUNTAIN_TYPE) {

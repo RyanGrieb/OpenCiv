@@ -73,6 +73,9 @@ export class Tile extends Actor {
     "furs_camp",
     "truffles_camp"
   ];
+  // Standing sprites with separately marked pieces that stay positioned relative to their tile on
+  // the globe, rather than each piece standing on its own foot at the planet's outline.
+  public static readonly SHARED_FOOT_STANDING_TILE_TYPES = ["barbarian_camp"];
   // Tile types drawn some other way than their own sprite - roads connect to their neighbors (see
   // Road.createActors).
   private static readonly UNSPRITED_TILE_TYPES = ["road"];
@@ -255,9 +258,14 @@ export class Tile extends Actor {
   }
 
   // Whether a tile type is drawn in an image of its own, apart from the tile's other overlays: a city's
-  // layers (see isCityLayer()) and the camp resources drawn over trees (see OVER_FEATURE_TILE_TYPES).
+  // layers (see isCityLayer()), camp resources drawn over trees (see OVER_FEATURE_TILE_TYPES), and
+  // sprites whose pieces keep their positions relative to one another on the globe.
   public static isDrawnAlone(tileType: string): boolean {
-    return Tile.isCityLayer(tileType) || Tile.OVER_FEATURE_TILE_TYPES.includes(tileType);
+    return (
+      Tile.isCityLayer(tileType) ||
+      Tile.OVER_FEATURE_TILE_TYPES.includes(tileType) ||
+      Tile.SHARED_FOOT_STANDING_TILE_TYPES.includes(tileType)
+    );
   }
 
   /**
