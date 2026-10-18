@@ -4,6 +4,7 @@ import { GameMap } from "../map/GameMap";
 import { Tile } from "../map/Tile";
 import { InGameScene } from "../scene/type/InGameScene";
 import { Unit } from "../Unit";
+import { TestRunner } from "./TestRunner";
 
 export class TestUtils {
     // Options stick on the server between games, so every scenario-only option goes back to its
@@ -235,10 +236,7 @@ export class TestUtils {
     }
 
     public log(message: string, color: string = "white") {
-        const debugDiv = document.createElement("div");
-        debugDiv.textContent = message;
-        debugDiv.style.color = color;
-        document.getElementById("test-results")?.appendChild(debugDiv);
+        TestRunner.log(message, color);
         // Also on the console, so the headless runner (npm run test:scenarios) can show it when a step fails.
         console.log(`[TEST] ${message}`);
     }

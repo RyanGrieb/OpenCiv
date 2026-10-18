@@ -7,11 +7,32 @@ export interface TestStep {
 }
 
 export class TestRunner {
+    // The scenario window's log stops growing past this share of the screen and scrolls instead.
+    private static readonly LOG_MAX_HEIGHT = "40vh";
+    // How close to the bottom (in px) counts as following the log, so new lines keep it scrolled down.
+    private static readonly FOLLOW_SLACK = 24;
+
     private steps: TestStep[] = [];
     private scenarioName: string;
 
     constructor(scenarioName: string) {
         this.scenarioName = scenarioName;
+    }
+
+    /**
+     * Adds a line to the scenario window's log, like a console: it scrolls down to the new line, unless
+     * the player has scrolled up to read something, in which case it stays where they are.
+     */
+    public static log(message: string, color: string = "white") {
+        const logBody = document.getElementById("test-results-log");
+        if (!logBody) return;
+
+        const following = logBody.scrollHeight - logBody.scrollTop - logBody.clientHeight <= TestRunner.FOLLOW_SLACK;
+        const line = document.createElement("div");
+        line.textContent = message;
+        line.style.color = color;
+        logBody.appendChild(line);
+        if (following) logBody.scrollTop = logBody.scrollHeight;
     }
 
     public addStep(step: TestStep) {
@@ -42,14 +63,12 @@ export class TestRunner {
         title.appendChild(titleText);
         title.appendChild(this.createCloseButton(resultsProxy));
         resultsProxy.appendChild(title);
+        resultsProxy.appendChild(this.createLogBody());
 
         document.body.appendChild(resultsProxy);
 
         const log = (msg: string, color: string = "white") => {
-            const line = document.createElement("div");
-            line.textContent = msg;
-            line.style.color = color;
-            resultsProxy.appendChild(line);
+            TestRunner.log(msg, color);
             console.log(`[TEST] ${msg}`);
         };
 
@@ -81,6 +100,17 @@ export class TestRunner {
         }
 
         RealMouseGuard.releaseOnNextClick();
+    }
+
+    // Where the log lines go. Sandbox scenarios turn off pointer events on the whole window so clicks
+    // reach the map under it; the log turns them back on for itself so its scrollbar still works.
+    private createLogBody(): HTMLDivElement {
+        const logBody = document.createElement("div");
+        logBody.id = "test-results-log";
+        logBody.style.maxHeight = TestRunner.LOG_MAX_HEIGHT;
+        logBody.style.overflowY = "auto";
+        logBody.style.pointerEvents = "auto";
+        return logBody;
     }
 
     // A span rather than a <button>, which styles.css draws as the game's large framed button.
