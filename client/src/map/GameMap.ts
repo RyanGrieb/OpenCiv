@@ -940,7 +940,7 @@ export class GameMap {
         groundActors.push(...lying);
 
         // What's in the water (fish, crabs, reefs) lies in it rather than standing up.
-        const overlay = await this.createOverlayTile(tile, overRoad, xPosRelative, yPosRelative);
+        const overlay = await this.createStandingOverlays(tile, overRoad, xPosRelative, yPosRelative);
         const place = { x: tile.getX(), y: tile.getY(), gridX, gridY };
         if (tile.isWater()) {
           groundActors.push(...overlay);
@@ -1049,6 +1049,20 @@ export class GameMap {
     });
     await overlay.loadImage();
     return [overlay];
+  }
+
+  // Overlays standing on a tile at (x, y): a city's walls and buildings each as their own (see
+  // Tile.isCityLayer()), the rest together, in the order given so they're drawn the same.
+  private async createStandingOverlays(tile: Tile, tileTypes: string[], x: number, y: number): Promise<Tile[]> {
+    const groups: string[][] = [];
+    for (const type of tileTypes) {
+      const last = groups[groups.length - 1];
+      if (last && !Tile.isCityLayer(type) && !Tile.isCityLayer(last[0])) last.push(type);
+      else groups.push([type]);
+    }
+    const overlays: Tile[] = [];
+    for (const group of groups) overlays.push(...(await this.createOverlayTile(tile, group, x, y)));
+    return overlays;
   }
 
   // A hill's mounds at (x, y) on a chunk's canvas, under everything else on the tile - none if it
