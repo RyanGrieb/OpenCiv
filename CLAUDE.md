@@ -18,6 +18,11 @@ npm run start:ports -- --server-port=2100 --client-port=1240   # a pair on other
 
 `npm run try [-- <branch>]` / `npm run approve` (see `DEVELOPMENT.md`) are how the user tests and merges `claude/*` branches from worktrees in `../OpenCiv-branches/`; `approve` fast-forwards master and deletes the branch, so a thread doesn't need to.
 
+`try` runs each branch on the first free pair from 2100/1240 upward, so the user's client is on 1240 (or 1241+ if another branch is running), **never 1234**. To hand the user a scenario, don't give a `localhost` URL; give the try command with `--scenario`, which opens the browser straight into it on whichever port it picked:
+```bash
+npm run try -- claude/<branch> --scenario=<Name>
+```
+
 `start:ports` lets several pairs run side by side (one per branch being tested). Unlike `npm start` it won't kill whatever holds its ports, it refuses to start instead; extra arguments go to the server as game options. Underneath, the server reads `SERVER_PORT` (or `--port`) and the client's `vite.config.mts` reads `CLIENT_PORT` and `SERVER_PORT`, baking the latter in as the websocket port. The join screen also accepts an explicit `host:port`. `npm run test:e2e` takes the same two flags.
 
 Client (`cd client`):
