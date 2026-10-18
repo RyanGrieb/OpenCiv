@@ -77,12 +77,12 @@ describe("Sea units", () => {
     expect(boat.canEnter(inland)).toBe(false);
   });
 
-  it("keeps a coast-only Galley off deep ocean", () => {
+  it("keeps a coast-only Trireme off deep ocean", () => {
     const [shallow, ocean] = buildRow([["shallow_ocean"], ["ocean"]]);
-    const galley = Unit.createFromName("Galley", shallow, player);
+    const trireme = Unit.createFromName("Trireme", shallow, player);
 
-    expect(galley.canEnter(ocean)).toBe(false);
-    expect(galley.getTileWeight(shallow, ocean)).toBe(9999);
+    expect(trireme.canEnter(ocean)).toBe(false);
+    expect(trireme.getTileWeight(shallow, ocean)).toBe(9999);
   });
 
   it("keeps land units off water, even a Scout that ignores terrain cost", () => {
@@ -151,8 +151,8 @@ describe("Sea units", () => {
       ...player,
       getCities: () => [{ getBuildings: () => [Building.createFromName("Great Lighthouse")] }] as unknown as City[]
     } as unknown as Player;
-    const plain = Unit.createFromName("Galley", shallow, player);
-    const boosted = Unit.createFromName("Galley", shallow, builder);
+    const plain = Unit.createFromName("Trireme", shallow, player);
+    const boosted = Unit.createFromName("Trireme", shallow, builder);
 
     expect(boosted.getMaxMovement()).toBe(plain.getMaxMovement() + 1);
     expect(boosted.getAvailableMovement()).toBe(plain.getAvailableMovement() + 1);

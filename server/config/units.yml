@@ -56,7 +56,7 @@ units:
     domain: sea
     cost: 30
     required_tech: Sailing
-  - name: Galley
+  - name: Trireme
     combat_strength: 10
     attack_type: naval
     domain: sea

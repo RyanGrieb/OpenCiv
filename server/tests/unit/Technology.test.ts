@@ -167,7 +167,7 @@ describe('Technology', () => {
   });
 
   it.each([
-    ['Galley', 'Compass'],
+    ['Trireme', 'Compass'],
     ['Horseman', 'Chivalry'],
     ['Chariot Archer', 'Chivalry'],
     ['Catapult', 'Physics'],

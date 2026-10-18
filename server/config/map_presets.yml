@@ -31,7 +31,7 @@ presets:
       - " g g ~ ~ ~ ~ O O O"
 
   aquatic_sandbox:
-    description: A coastal city with sea resources in its first two rings, a few Work Boats, and a Galley that can't leave the coast.
+    description: A coastal city with sea resources in its first two rings, a few Work Boats, and a Trireme that can't leave the coast.
     legend:
       "g": [grass]
       "p": [plains]
@@ -49,7 +49,7 @@ presets:
       "G": [shallow_ocean]
     units:
       "B": Work Boat
-      "G": Galley
+      "G": Trireme
     rows:
       - "O O O ~ ~ ~ ~ ~ O O O"
       - " O ~ ~ B ~ ~ ~ ~ ~ O O"

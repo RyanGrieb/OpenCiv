@@ -187,11 +187,11 @@ export function setupAquaticResourcesTest(game: Game) {
     verification: () => {
       const icon = (type: "unit" | "building", name: string) =>
         CityScreen.resolveProductionIcon({ type, name, cost: 0 });
-      const shown = [icon("unit", "Work Boat"), icon("unit", "Galley"), icon("unit", "Cargo Ship")];
+      const shown = [icon("unit", "Work Boat"), icon("unit", "Trireme"), icon("unit", "Cargo Ship")];
       scene().toggleCityUI();
       return (
         JSON.stringify(shown) ===
-        JSON.stringify([SpriteRegion.UNIT_WORK_BOAT, SpriteRegion.UNIT_GALLEY, SpriteRegion.UNIT_CARGO_SHIP])
+        JSON.stringify([SpriteRegion.UNIT_WORK_BOAT, SpriteRegion.UNIT_TRIREME, SpriteRegion.UNIT_CARGO_SHIP])
       );
     }
   });

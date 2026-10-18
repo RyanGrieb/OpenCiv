@@ -155,7 +155,7 @@ describe("BuildingEffects", () => {
   describe("units", () => {
     const horseman = { name: "Horseman", combat_strength: 12 };
     const warrior = { name: "Warrior", combat_strength: 8 };
-    const galley = { name: "Galley", combat_strength: 7, domain: "sea" as const };
+    const trireme = { name: "Trireme", combat_strength: 7, domain: "sea" as const };
     const settler = { name: "Settler" };
 
     it("speeds up mounted units in a city with Stables, and land military units with a Forge", () => {
@@ -165,7 +165,7 @@ describe("BuildingEffects", () => {
       expect(BuildingEffects.getUnitProductionPercent(stables, horseman)).toBe(15);
       expect(BuildingEffects.getUnitProductionPercent(stables, warrior)).toBe(0);
       expect(BuildingEffects.getUnitProductionPercent(forge, warrior)).toBe(15);
-      expect(BuildingEffects.getUnitProductionPercent(forge, galley)).toBe(0);
+      expect(BuildingEffects.getUnitProductionPercent(forge, trireme)).toBe(0);
       expect(BuildingEffects.getUnitProductionPercent(forge, settler)).toBe(0);
     });
 
