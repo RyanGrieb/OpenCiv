@@ -356,6 +356,15 @@ technologies:
     row: 7
     slot: 5
     description: The groundwork for the modern money system.
+    notes:
+      - +1 Gold from Camps on Ivory and Furs
+    tile_bonuses:
+      - tile_type: ivory_camp
+        stats:
+          - gold: 1
+      - tile_type: furs_camp
+        stats:
+          - gold: 1
   - name: Chemistry
     asset_name: UNIT_CANNON
     cost: 750

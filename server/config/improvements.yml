@@ -71,11 +71,17 @@ improvements:
       cotton: cotton_plantation
       olives: olive_plantation
   - name: Camp
-    # Civ 5 camps go on Deer, Furs and Ivory, none of which the map generates yet.
+    asset_name: TILE_FURS_CAMP
+    icon: TILE_FURS_CAMP
     required_tech: Trapping
     build_turns: 6
     features: [forest, jungle]
-    resources: {}
+    resources:
+      deer: deer_camp
+      bison: bison_camp
+      ivory: ivory_camp
+      furs: furs_camp
+      truffles: truffles_camp
   - name: Trading Post
     # Guilds as in Brave New World (vanilla Civ 5 had it at Trapping). Keeps the forest or jungle.
     asset_name: TILE_TRADING_POST

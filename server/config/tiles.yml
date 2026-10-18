@@ -204,6 +204,48 @@ tiles:
     stats:
       - gold: 2
       - production: 1
+  DEER:
+    name: Deer
+    stats:
+      - food: 1
+  DEER_CAMP:
+    name: Deer Camp
+    stats:
+      - food: 1
+      - production: 1
+  BISON:
+    name: Bison
+    stats:
+      - food: 1
+  BISON_CAMP:
+    name: Bison Camp
+    stats:
+      - food: 1
+      - production: 1
+  IVORY:
+    name: Ivory
+    stats:
+      - gold: 2
+  IVORY_CAMP:
+    name: Ivory Camp
+    stats:
+      - gold: 3
+  FURS:
+    name: Furs
+    stats:
+      - gold: 2
+  FURS_CAMP:
+    name: Furs Camp
+    stats:
+      - gold: 3
+  TRUFFLES:
+    name: Truffles
+    stats:
+      - gold: 2
+  TRUFFLES_CAMP:
+    name: Truffles Camp
+    stats:
+      - gold: 3
   GOLD_MINE:
     name: Gold Mine
     stats:

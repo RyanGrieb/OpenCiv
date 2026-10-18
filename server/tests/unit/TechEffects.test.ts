@@ -137,6 +137,15 @@ describe('TechEffects', () => {
     }
   });
 
+  it("adds Economics' gold to camps on Ivory and Furs, but not Truffles", () => {
+    for (const type of ['ivory_camp', 'furs_camp']) {
+      const tile = tileOf('plains', type);
+      expect(yieldsOf(tile, player('Economics')).gold).toBe(yieldsOf(tile, player()).gold + 1);
+    }
+    const truffles = tileOf('grass', 'jungle', 'truffles_camp');
+    expect(yieldsOf(truffles, player('Economics'))).toEqual(yieldsOf(truffles, player()));
+  });
+
   it("adds Scientific Theory's production to lumber mills", () => {
     const mill = tileOf('grass', 'forest', 'lumber_mill');
     const without = yieldsOf(mill, player()).production ?? 0;

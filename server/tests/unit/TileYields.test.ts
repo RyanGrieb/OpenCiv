@@ -70,6 +70,16 @@ describe("Tile yields", () => {
     [["shallow_ocean", "fish"], { food: 3, gold: 1 }],
     [["shallow_ocean", "improved_fish"], { food: 4, gold: 1 }],
     [["plains", "wheat"], { food: 2, production: 1 }],
+    [["tundra", "deer"], { food: 2 }],
+    [["grass", "forest", "deer_camp"], { food: 2, production: 2 }],
+    [["plains", "bison"], { food: 2, production: 1 }],
+    [["plains", "bison_camp"], { food: 2, production: 2 }],
+    [["plains", "ivory"], { food: 1, production: 1, gold: 2 }],
+    [["plains", "ivory_camp"], { food: 1, production: 1, gold: 3 }],
+    [["tundra", "furs"], { food: 1, gold: 2 }],
+    [["tundra", "forest", "furs_camp"], { food: 1, production: 1, gold: 3 }],
+    [["grass", "jungle", "truffles"], { food: 2, gold: 2 }],
+    [["grass", "jungle", "truffles_camp"], { food: 2, gold: 3 }],
     [["grass", "farm"], { food: 3 }],
     [["grass_hill", "mine"], { production: 3 }]
   ])("%o yields %o", (tileTypes, expected) => {

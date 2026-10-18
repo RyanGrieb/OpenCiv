@@ -84,6 +84,13 @@ describe('PlayerHappiness', () => {
     ]);
   });
 
+  it('counts camped Ivory, Furs and Truffles as luxuries, but not Deer or Bison', () => {
+    const territory = ['ivory_camp', 'furs_camp', 'truffles_camp', 'deer_camp', 'bison_camp'].map((type) => tileWith(type));
+    cities.push(makeCity({ population: 0, territory }));
+
+    expect(happiness.getLuxuries()).toEqual(['furs', 'ivory', 'truffles']);
+  });
+
   it('counts a luxury under a city without an improvement, as Civ 5 connects it', () => {
     const center = tileWith('olives');
     jest.spyOn(center, 'getCity').mockReturnValue(makeCity());

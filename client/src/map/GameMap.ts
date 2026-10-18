@@ -935,7 +935,11 @@ export class GameMap {
           );
         const underRoad = overlayTypes.filter((type) => Tile.UNDER_ROAD_TILE_TYPES.includes(type));
         const flat = overlayTypes.filter((type) => Tile.FLAT_TILE_TYPES.includes(type));
-        const overRoad = overlayTypes.filter((type) => !underRoad.includes(type) && !flat.includes(type));
+        const standing = overlayTypes.filter((type) => !underRoad.includes(type) && !flat.includes(type));
+        const overRoad = [
+          ...standing.filter((type) => !Tile.OVER_FEATURE_TILE_TYPES.includes(type)),
+          ...standing.filter((type) => Tile.OVER_FEATURE_TILE_TYPES.includes(type))
+        ];
         const hill = await this.createHillOverlay(tile, xPosRelative, yPosRelative);
         const lying = [
           ...hill,
@@ -1059,13 +1063,13 @@ export class GameMap {
     return [overlay];
   }
 
-  // Overlays standing on a tile at (x, y): a city's walls and buildings each as their own (see
-  // Tile.isCityLayer()), the rest together, in the order given so they're drawn the same.
+  // Overlays standing on a tile at (x, y): a city's walls and buildings, and camp resources, each as
+  // their own (see Tile.isDrawnAlone()), the rest together, in the order given so they're drawn the same.
   private async createStandingOverlays(tile: Tile, tileTypes: string[], x: number, y: number): Promise<Tile[]> {
     const groups: string[][] = [];
     for (const type of tileTypes) {
       const last = groups[groups.length - 1];
-      if (last && !Tile.isCityLayer(type) && !Tile.isCityLayer(last[0])) last.push(type);
+      if (last && !Tile.isDrawnAlone(type) && !Tile.isDrawnAlone(last[0])) last.push(type);
       else groups.push([type]);
     }
     const overlays: Tile[] = [];

@@ -55,6 +55,21 @@ export class Tile extends Actor {
     "stone_quarry",
     "barringer_crater"
   ];
+  // Camp animals (and truffles) and their camps. They can be found in a forest or jungle, so they're
+  // drawn after its trees rather than hidden under them, each on its own so that on the globe they
+  // stand up from their own feet, not as part of a tree.
+  public static readonly OVER_FEATURE_TILE_TYPES = [
+    "deer",
+    "bison",
+    "ivory",
+    "furs",
+    "truffles",
+    "deer_camp",
+    "bison_camp",
+    "ivory_camp",
+    "furs_camp",
+    "truffles_camp"
+  ];
   // Tile types drawn some other way than their own sprite - roads connect to their neighbors (see
   // Road.createActors).
   private static readonly UNSPRITED_TILE_TYPES = ["road"];
@@ -229,6 +244,12 @@ export class Tile extends Actor {
    */
   public static isCityLayer(tileType: string): boolean {
     return tileType.startsWith("city_");
+  }
+
+  // Whether a tile type is drawn in an image of its own, apart from the tile's other overlays: a city's
+  // layers (see isCityLayer()) and the camp resources drawn over trees (see OVER_FEATURE_TILE_TYPES).
+  public static isDrawnAlone(tileType: string): boolean {
+    return Tile.isCityLayer(tileType) || Tile.OVER_FEATURE_TILE_TYPES.includes(tileType);
   }
 
   /**

@@ -60,6 +60,28 @@ bonus_resources:
     set_chance: 0.1
     min_temp: 0
     max_temp: 100
+  # Camp animals. Deer roam forest and tundra, so they also go under the trees.
+  - name: deer
+    spawn_tiles:
+      - forest
+      - tundra
+    path_length: 1
+    min_tiles_set: 1
+    max_tiles_set: 2
+    set_chance: 0.05
+    min_temp: 0
+    max_temp: 70
+    spawn_on_additional_tile_types: true
+  - name: bison
+    spawn_tiles:
+      - grass
+      - plains
+    path_length: 1
+    min_tiles_set: 1
+    max_tiles_set: 3
+    set_chance: 0.05
+    min_temp: 30
+    max_temp: 80
 # reveal_tech hides a resource from a player until they research it, as Civ 5 does with its strategic
 # resources: the tile looks and yields like plain terrain to them, and nothing can be built on it.
 strategic_resources:
@@ -209,3 +231,35 @@ luxury_resources:
     set_chance: 0.05
     min_temp: 60
     max_temp: 90
+  - name: ivory
+    spawn_tiles:
+      - plains
+    path_length: 1
+    min_tiles_set: 1
+    max_tiles_set: 2
+    set_chance: 0.05
+    min_temp: 60
+    max_temp: 100
+  - name: furs
+    spawn_tiles:
+      - forest
+      - tundra
+    path_length: 1
+    min_tiles_set: 1
+    max_tiles_set: 2
+    set_chance: 0.05
+    min_temp: 0
+    max_temp: 50
+    spawn_on_additional_tile_types: true
+  # Civ 5 also puts Truffles in marshes, which the map doesn't have yet.
+  - name: truffles
+    spawn_tiles:
+      - forest
+      - jungle
+    path_length: 1
+    min_tiles_set: 1
+    max_tiles_set: 2
+    set_chance: 0.05
+    min_temp: 30
+    max_temp: 100
+    spawn_on_additional_tile_types: true

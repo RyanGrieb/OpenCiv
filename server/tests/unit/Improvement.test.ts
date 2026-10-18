@@ -82,6 +82,22 @@ describe('Improvement', () => {
     expect(tile.getTotalStatValue(['production'])).toBe(1);
   });
 
+  it('builds a Camp on Deer, Bison, Ivory, Furs and Truffles once Trapping is in, keeping the trees', () => {
+    expect(buildable(tileOf('grass', 'deer', 'forest'))).toEqual(['Camp', 'Road', 'Remove Forest']);
+    expect(buildable(tileOf('grass', 'truffles', 'jungle'))).toEqual(['Camp', 'Road', 'Remove Jungle']);
+    expect(buildable(tileOf('plains', 'bison'), player(['Animal Husbandry']))).toEqual([]);
+
+    for (const resource of ['deer', 'bison', 'ivory', 'furs', 'truffles']) {
+      const tile = tileOf('plains', resource);
+      expect(buildable(tile)).toEqual(['Camp', 'Road']);
+
+      Improvement.complete(improvement('Camp'), tile);
+      expect(tile.getTileTypes()).toEqual(['plains', `${resource}_camp`]);
+      expect(tile.getImprovement()).toBe('Camp');
+      expect(Improvement.getImprovedResource(tile)).toBe(resource);
+    }
+  });
+
   it('farms wheat on plains and flood plains, turning it into improved wheat', () => {
     expect(buildable(tileOf('plains', 'wheat'), player())).toEqual(['Farm']);
     expect(buildable(tileOf('floodplains', 'wheat'))).toEqual(['Farm', 'Road']);
