@@ -9,8 +9,9 @@ import { TestUtils } from "../TestUtils";
 export function setupObsoleteUnitsTest(game: Game) {
     const runner = new TestRunner("ObsoleteUnits");
     const utils = new TestUtils(game);
-    const obsolete = ["Warrior", "Archer", "Spearman", "Composite Bowman", "Horseman", "Chariot Archer", "Swordsman", "Catapult"];
-    const replacements = ["Longswordsman", "Crossbowman", "Pikeman", "Knight", "Trebuchet"];
+    // Every era's line is upgraded by the Information era, so only its units are left.
+    const obsolete = ["Warrior", "Archer", "Spearman", "Horseman", "Swordsman", "Catapult", "Longswordsman", "Crossbowman", "Pikeman", "Knight", "Trebuchet"];
+    const replacements = ["Mechanized Infantry", "Bazooka", "Rocket Artillery", "Modern Armor"];
     let city: City | undefined;
     let offered: string[] = [];
 
@@ -51,14 +52,14 @@ export function setupObsoleteUnitsTest(game: Game) {
     });
 
     runner.addStep({
-        name: "The server refuses to queue an obsolete Warrior, but queues a Longswordsman",
+        name: "The server refuses to queue an obsolete Warrior, but queues a Mechanized Infantry",
         action: async () => {
             WebsocketClient.sendMessage({ event: "addToProductionQueue", cityName: city.getName(), type: "unit", name: "Warrior" });
-            WebsocketClient.sendMessage({ event: "addToProductionQueue", cityName: city.getName(), type: "unit", name: "Longswordsman" });
-            await utils.waitUntil(() => city.getProductionQueue().length > 0, 3000, "The Longswordsman to be queued");
+            WebsocketClient.sendMessage({ event: "addToProductionQueue", cityName: city.getName(), type: "unit", name: "Mechanized Infantry" });
+            await utils.waitUntil(() => city.getProductionQueue().length > 0, 3000, "The Mechanized Infantry to be queued");
             await utils.delay(500);
         },
-        verification: () => city.getProductionQueue().map((item) => item.name).join(",") === "Longswordsman"
+        verification: () => city.getProductionQueue().map((item) => item.name).join(",") === "Mechanized Infantry"
     });
 
     runner.addStep({

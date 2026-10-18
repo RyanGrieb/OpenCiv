@@ -151,7 +151,7 @@ class ScenarioRun {
         await context.close();
 
         if (!result.passed) {
-            result.detail = [result.detail, ...lastLines.slice(-5).map((line) => `    ${line}`)].join("\n");
+            result.detail = [result.detail, ...lastLines.slice(-8).map((line) => `    ${line}`)].join("\n");
         }
         return result;
     }

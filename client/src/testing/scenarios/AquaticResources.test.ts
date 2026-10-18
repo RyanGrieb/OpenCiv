@@ -179,7 +179,7 @@ export function setupAquaticResourcesTest(game: Game) {
     action: async () => {
       scene().toggleCityUI(city());
       await utils.waitUntil(() => !!cityScreen(), 3000, "City screen to open");
-      cityScreen()["openChooseProduction"]();
+      cityScreen()["openList"]("produce");
       await utils.waitUntil(() => !!cityScreen()["chooseProductionList"], 3000, "Production list to show");
       // Long enough to see the list before it closes.
       await utils.delay(2000);

@@ -6,6 +6,23 @@ import { InGameScene } from "../scene/type/InGameScene";
 import { Unit } from "../Unit";
 
 export class TestUtils {
+    // Options stick on the server between games, so every scenario-only option goes back to its
+    // default before a game starts, and one scenario's all-techs start or cheap costs aren't handed to the next.
+    private static readonly OPTION_RESETS: Record<string, boolean | number> = {
+        revealMap: false,
+        spawnPlayersTogether: false,
+        startWithAllTechs: false,
+        startWithBuilder: false,
+        startWithArcher: false,
+        cityStartingHealth: 200,
+        startAtWar: false,
+        startingGold: 0,
+        startingExperience: 0,
+        techCostPercent: 100,
+        productionCostPercent: 100,
+        baseHappiness: 9
+    };
+
     private game: Game;
 
     constructor(game: Game) {
@@ -37,9 +54,7 @@ export class TestUtils {
             }
 
             if (this.game.getCurrentScene().getName() === "lobby") {
-                // Options stick on the server between games, so one scenario's gold or cheap costs aren't handed to the next.
-                const resets = { startingGold: 0, techCostPercent: 100, productionCostPercent: 100, baseHappiness: 9 };
-                for (const [option, value] of Object.entries({ ...resets, ...gameOptions })) {
+                for (const [option, value] of Object.entries({ ...TestUtils.OPTION_RESETS, ...gameOptions })) {
                     WebsocketClient.sendMessage({ event: "setGameOption", option, value });
                 }
                 WebsocketClient.sendMessage({ event: "setState", state: "in_game" });
@@ -48,6 +63,13 @@ export class TestUtils {
 
             await this.waitUntil(() => this.game.getCurrentScene().getName() === "in_game", 10000, "Scene to become in_game");
         }
+
+        await this.waitForMap();
+    }
+
+    // The scene switches before the map arrives; notifications (and the rest of the HUD) only exist once it's loaded.
+    public async waitForMap() {
+        await this.waitUntil(() => this.getInGameScene().getNotifications() !== undefined, 60000, "The map to load");
     }
 
     public getInGameScene(): InGameScene {
@@ -128,18 +150,22 @@ export class TestUtils {
         await this.waitUntil(() => enemySocket.readyState === WebSocket.OPEN, 5000, "Second player to connect");
         await this.delay(500);
 
-        WebsocketClient.sendMessage({ event: "setGameOption", option: "revealMap", value: true });
-        WebsocketClient.sendMessage({ event: "setGameOption", option: "spawnPlayersTogether", value: true });
         // Barbarian units would count as a second enemy, and wander into the fight.
-        WebsocketClient.sendMessage({ event: "setGameOption", option: "allowBarbarians", value: false });
-        // Options stick on the server between games, so an earlier scenario's Archer and damaged cities are undone.
         // The two civilizations start at war, so combat scenarios can fight straight away (Diplomacy turns it off).
-        const gameOptions = { startWithArcher: false, cityStartingHealth: 200, startAtWar: true, startingGold: 0, startingExperience: 0, ...options.gameOptions };
+        const gameOptions = {
+            ...TestUtils.OPTION_RESETS,
+            revealMap: true,
+            spawnPlayersTogether: true,
+            allowBarbarians: false,
+            startAtWar: true,
+            ...options.gameOptions
+        };
         for (const [option, value] of Object.entries(gameOptions)) {
             WebsocketClient.sendMessage({ event: "setGameOption", option, value });
         }
         WebsocketClient.sendMessage({ event: "setState", state: "in_game" });
         await this.waitUntil(() => this.game.getCurrentScene().getName() === "in_game", 15000, "Scene to become in_game");
+        await this.waitForMap();
 
         return enemySocket;
     }
@@ -213,5 +239,7 @@ export class TestUtils {
         debugDiv.textContent = message;
         debugDiv.style.color = color;
         document.getElementById("test-results")?.appendChild(debugDiv);
+        // Also on the console, so the headless runner (npm run test:scenarios) can show it when a step fails.
+        console.log(`[TEST] ${message}`);
     }
 }
