@@ -26,6 +26,9 @@ eras:
   - name: Information Era
     id: information
     rows: [14, 15]
+  - name: Future Era
+    id: future
+    rows: [16]
 technologies:
   # slot is the tech's horizontal column (0-9) within its row - a fixed 10-slot
   # grid, matching Civ5's tech-web layout, where unused slots stay visually
@@ -510,14 +513,14 @@ technologies:
     cost: 2015
     prerequisites: [Biology, Electricity]
     row: 10
-    slot: 0
+    slot: 1
     description: Keeps food fresh for weeks, letting cities grow larger.
   - name: Railroad
     asset_name: BUILDING_ARSENAL
     cost: 1235
     prerequisites: [Steam Power, Dynamite]
     row: 10
-    slot: 5
+    slot: 7
     description: Steam locomotives move goods and armies across continents.
   - name: Replaceable Parts
     asset_name: UNIT_INFANTRY
@@ -529,37 +532,37 @@ technologies:
   - name: Combustion
     asset_name: UNIT_TANK
     cost: 1430
-    prerequisites: [Dynamite, Steam Power]
-    row: 10
-    slot: 9
+    prerequisites: [Replaceable Parts, Dynamite]
+    row: 11
+    slot: 7
     description: Engines that burn fuel inside the cylinder power the next generation of vehicles.
   - name: Penicillin
     asset_name: BUILDING_MEDICAL_LAB
     cost: 1690
-    prerequisites: [Refrigeration, Biology]
-    row: 11
-    slot: 0
+    prerequisites: [Refrigeration]
+    row: 12
+    slot: 1
     description: Antibiotics cure infections that once killed millions.
   - name: Plastics
     asset_name: BUILDING_HYDRO_PLANT
     cost: 1690
-    prerequisites: [Refrigeration]
+    prerequisites: [Radio, Replaceable Parts]
     row: 11
-    slot: 1
+    slot: 2
     description: Cheap, moldable materials made from oil.
   - name: Electronics
     asset_name: BUILDING_STADIUM
     cost: 1690
     prerequisites: [Replaceable Parts, Flight]
     row: 11
-    slot: 3
+    slot: 4
     description: Controls electric current with tubes and circuits.
   - name: Radio
     asset_name: BUILDING_BROADCAST_TOWER
     cost: 2015
     prerequisites: [Electricity]
     row: 10
-    slot: 1
+    slot: 2
     description: Carries voices and music through the air.
     # Not enforced: there is no World Congress yet.
     notes:
@@ -569,69 +572,62 @@ technologies:
     cost: 2015
     prerequisites: [Steam Power]
     row: 10
-    slot: 4
+    slot: 5
     description: Powered flight, the end of distance as a barrier.
   - name: Ecology
     asset_name: BUILDING_SOLAR_PLANT
     cost: 1950
     prerequisites: [Penicillin, Plastics]
-    row: 12
-    slot: 0
+    row: 13
+    slot: 1
     description: Studies how living things and their surroundings depend on each other.
   - name: Atomic Theory
     asset_name: BUILDING_MANHATTAN_PROJECT
     cost: 1690
     prerequisites: [Electronics]
     row: 12
-    slot: 2
+    slot: 3
     description: Shows that matter is built of atoms with enormous energy inside.
-  - name: Mass Media
-    asset_name: BUILDING_BROADCAST_TOWER
-    cost: 1690
-    prerequisites: [Radio]
-    row: 12
-    slot: 4
-    description: Newspapers, film and broadcasts reach whole nations at once.
   - name: Radar
     asset_name: BUILDING_PENTAGON
     cost: 1690
     prerequisites: [Radio, Flight]
     row: 12
-    slot: 7
+    slot: 5
     description: Bounces radio waves off distant objects to see them in the dark.
   - name: Nuclear Fission
     asset_name: BUILDING_NUCLEAR_PLANT
     cost: 1950
     prerequisites: [Atomic Theory]
     row: 13
-    slot: 2
+    slot: 3
     description: Splits the atom, releasing power for plants and weapons alike.
   - name: Computers
     asset_name: UNIT_NUCLEAR_SUBMARINE
     cost: 1950
-    prerequisites: [Mass Media, Electronics]
+    prerequisites: [Combined Arms]
     row: 13
-    slot: 4
+    slot: 7
     description: Machines that calculate faster than any person.
   - name: Lasers
     asset_name: UNIT_MODERN_ARMOR
     cost: 1950
     prerequisites: [Atomic Theory, Radar]
-    row: 13
-    slot: 6
+    row: 14
+    slot: 7
     description: Focused light for cutting, measuring and aiming.
   - name: Rocketry
     asset_name: BUILDING_APOLLO_PROGRAM
     cost: 1950
     prerequisites: [Radar]
     row: 13
-    slot: 8
+    slot: 5
     description: Liquid-fueled rockets that reach beyond the atmosphere.
   - name: Globalization
     asset_name: BUILDING_UNITED_NATIONS
     cost: 2175
-    prerequisites: [Computers]
-    row: 14
+    prerequisites: [Telecommunications]
+    row: 15
     slot: 1
     description: Trade, travel and communication knit the world into one market.
   - name: Robotics
@@ -639,47 +635,90 @@ technologies:
     cost: 2175
     prerequisites: [Computers]
     row: 14
-    slot: 3
+    slot: 6
     description: Programmable machines that do work too dull or dangerous for people.
   - name: Particle Physics
     asset_name: BUILDING_SPACESHIP_FACTORY
     cost: 2175
     prerequisites: [Lasers, Computers]
-    row: 14
-    slot: 5
+    row: 15
+    slot: 2
     description: Probes the smallest pieces of matter with giant machines.
   - name: Satellites
     asset_name: BUILDING_APOLLO_PROGRAM
     cost: 2175
     prerequisites: [Rocketry, Computers]
     row: 14
-    slot: 7
+    slot: 5
     description: Machines in orbit that watch, listen and relay from above.
   - name: Stealth
     asset_name: UNIT_STEALTH_BOMBER
     cost: 2175
     prerequisites: [Lasers]
-    row: 14
-    slot: 9
+    row: 15
+    slot: 7
     description: Shapes and coats aircraft so radar can barely see them.
   - name: Advanced Ballistics
     asset_name: UNIT_NUCLEAR_MISSILE
     cost: 2175
     prerequisites: [Rocketry, Nuclear Fission]
-    row: 15
-    slot: 0
+    row: 14
+    slot: 4
     description: Guides rockets over thousands of miles to a chosen target.
   - name: Nanotechnology
     asset_name: ICON_UNKNOWN
     cost: 2145
-    prerequisites: [Robotics, Particle Physics]
+    prerequisites: [Robotics, Lasers]
     row: 15
-    slot: 3
+    slot: 6
     description: Builds machines and materials one atom at a time.
   - name: Nuclear Fusion
     asset_name: UNIT_GIANT_DEATH_ROBOT
     cost: 2340
-    prerequisites: [Particle Physics]
+    prerequisites: [Nuclear Fission, Lasers]
     row: 15
-    slot: 6
+    slot: 5
     description: Joins atoms together to release the energy that powers the stars.
+  # Placeholder prerequisites and costs (the later eras' techs are checked one by one against Civ 5).
+  - name: Ballistics
+    asset_name: ICON_UNKNOWN
+    cost: 2015
+    prerequisites: [Flight]
+    row: 11
+    slot: 5
+    description: Studies the flight of projectiles, improving the aim of guns and shells.
+  - name: Combined Arms
+    asset_name: ICON_UNKNOWN
+    cost: 2015
+    prerequisites: [Combustion]
+    row: 12
+    slot: 7
+    description: Tanks, infantry and aircraft fight as a single force.
+  - name: Telecommunications
+    asset_name: ICON_UNKNOWN
+    cost: 2175
+    prerequisites: [Computers]
+    row: 14
+    slot: 1
+    description: Carries voice, video and data across the whole world.
+  - name: Mobile Tactics
+    asset_name: ICON_UNKNOWN
+    cost: 2175
+    prerequisites: [Combined Arms]
+    row: 14
+    slot: 2
+    description: Fast, flexible forces that strike where the enemy is weakest.
+  - name: The Internet
+    asset_name: ICON_UNKNOWN
+    cost: 2340
+    prerequisites: [Telecommunications]
+    row: 15
+    slot: 0
+    description: Links computers around the world into one network.
+  - name: Future Tech
+    asset_name: ICON_UNKNOWN
+    cost: 2600
+    prerequisites: [Nuclear Fusion, Nanotechnology]
+    row: 16
+    slot: 4
+    description: Research beyond today's science.

@@ -22,7 +22,7 @@ describe('Technology', () => {
   it('loads every technology, including tech-gated ones with prerequisites', () => {
     const technologies = Technology.getAllTechnologies();
 
-    expect(technologies).toHaveLength(75);
+    expect(technologies).toHaveLength(80);
 
     // Matches Civ5's actual root set - everything else requires "Agriculture"
     // (a free starting tech this config doesn't model), so these four are the
@@ -266,7 +266,7 @@ describe('Technology', () => {
 
     it('gives every era an id', () => {
       expect(Technology.getAllEras().map((era) => era.id)).toEqual([
-        'ancient', 'classical', 'medieval', 'renaissance', 'industrial', 'modern', 'atomic', 'information'
+        'ancient', 'classical', 'medieval', 'renaissance', 'industrial', 'modern', 'atomic', 'information', 'future'
       ]);
     });
 
