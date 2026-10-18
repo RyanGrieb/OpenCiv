@@ -34,6 +34,7 @@ export interface GameOptions {
 }
 
 export class Game {
+  private static readonly NINE_SLICE_CACHE_SIZE = 64;
   private static gameInstance: Game;
 
   private canvas: HTMLCanvasElement;
@@ -50,6 +51,11 @@ export class Game {
   private mouseY: number;
   private runGameLoop: boolean;
   private wrappedTextCache: { [key: string]: [string, number, number] } = {};
+  // Nine-sliced pictures as drawn, by image, size and where they fall between device pixels (see
+  // drawNineSliceImage()), so a frame copies each panel and button in one go rather than in nine.
+  private nineSliceCache = new Map<string, HTMLCanvasElement>();
+  private nineSliceImageIds = new WeakMap<object, number>();
+  private nextNineSliceImageId = 1;
   private resizeTimer: number;
   private oldWidth: number;
   private oldHeight: number;
@@ -430,7 +436,63 @@ export class Game {
     actor.onDestroyed();
   }
 
+  /**
+   * Draws an actor's image nine-sliced: its corners kept, its edges and middle stretched to the
+   * actor's size. A loaded image drawn without turning is drawn once onto a canvas of its own, at the
+   * same place between device pixels, and copied from there after: pixel for pixel the same.
+   */
   public drawNineSliceImage(actor: Actor, context: CanvasRenderingContext2D) {
+    const image = actor.getImage();
+    const transform = context.getTransform();
+    const cacheable =
+      image instanceof HTMLImageElement && image.complete && transform.b === 0 && transform.c === 0 && transform.a > 0;
+    if (!cacheable || transform.d <= 0) {
+      this.drawNineSlices(actor, context);
+      return;
+    }
+
+    // Where the slices' top left lands in device pixels: a whole number of them, plus a part of one.
+    const left = transform.a * Math.floor(actor.getX()) + transform.e;
+    const top = transform.d * Math.floor(actor.getY()) + transform.f;
+    const [deviceX, deviceY] = [Math.floor(left), Math.floor(top)];
+    let id = this.nineSliceImageIds.get(image);
+    if (id === undefined) {
+      id = this.nextNineSliceImageId++;
+      this.nineSliceImageIds.set(image, id);
+    }
+    const key = [
+      id,
+      actor.getCornerSize(),
+      actor.getX() - Math.floor(actor.getX()),
+      actor.getY() - Math.floor(actor.getY()),
+      actor.getWidth(),
+      actor.getHeight(),
+      transform.a,
+      transform.d,
+      left - deviceX,
+      top - deviceY
+    ].join(",");
+
+    let drawn = this.nineSliceCache.get(key);
+    if (!drawn) {
+      drawn = document.createElement("canvas");
+      drawn.width = Math.ceil(transform.a * (actor.getWidth() + 2)) + 1;
+      drawn.height = Math.ceil(transform.d * (actor.getHeight() + 2)) + 1;
+      const drawnContext = drawn.getContext("2d");
+      drawnContext.setTransform(transform.a, 0, 0, transform.d, transform.e - deviceX, transform.f - deviceY);
+      this.drawNineSlices(actor, drawnContext);
+      // Sizes come and go as windows open and close; a few dozen cover what's on screen at once.
+      if (this.nineSliceCache.size >= Game.NINE_SLICE_CACHE_SIZE) this.nineSliceCache.clear();
+      this.nineSliceCache.set(key, drawn);
+    }
+
+    context.save();
+    context.setTransform(1, 0, 0, 1, 0, 0);
+    context.drawImage(drawn, deviceX, deviceY);
+    context.restore();
+  }
+
+  private drawNineSlices(actor: Actor, context: CanvasRenderingContext2D) {
     const image = actor.getImage();
     const x = actor.getX();
     const y = actor.getY();
