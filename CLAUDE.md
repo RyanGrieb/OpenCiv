@@ -115,8 +115,12 @@ Server-side static game data lives in `server/config/*.yml` (`civilizations.yml`
 ### Testing is three different things
 
 1. **Server**: real Jest unit tests in `server/tests/unit/`, run headlessly, mocks classes like `GameMap`/`Player`.
-2. **Client**: a custom in-browser scenario runner (`client/src/testing/ScenarioRegistry.ts` + `TestRunner.ts`, scenarios under `client/src/testing/scenarios/*.test.ts`), triggered by loading the app with `?test=true&scenario=<Name>` — there is no headless/CI path for this today.
+2. **Client**: a custom in-browser scenario runner (`client/src/testing/ScenarioRegistry.ts` + `TestRunner.ts`, scenarios under `client/src/testing/scenarios/*.test.ts`), triggered by loading the app with `?test=true&scenario=<Name>`. `npm run test:scenarios` runs them headless in Chromium (`--scenario=A,B`, `--shard=i/n`, `--retries=1`) and exits non-zero on a failure.
 3. **Root `test:e2e`**: orchestration only — boots both dev servers in test mode and hands you the URL for #2. It's a human-in-the-loop workflow, not an automated test command.
+
+The **Tests** workflow (`.github/workflows/tests.yml`) runs the server Jest suite and every scenario, in 8 shards, on each push. **Don't wait for it or check its result** before handing a branch over or fast-forwarding it into master: the user watches it on GitHub and will say if a scenario broke. Test your own change the usual way (typecheck, the server tests and scenarios it touches) and move on.
+
+Scenarios run one after another against the same server, and game options stick on it between games, so `TestUtils.OPTION_RESETS` puts every scenario-only option back to its default before a game starts. Add a new scenario-only `GameOptions` field there too.
 
 ### The server's `tsconfig.typecheck.json`
 
