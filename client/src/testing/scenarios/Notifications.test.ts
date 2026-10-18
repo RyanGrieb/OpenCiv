@@ -7,9 +7,9 @@ import { Tile } from "../../map/Tile";
 import { TestUtils } from "../TestUtils";
 
 // Walks through the top-right notifications the server sends: units needing orders, the right-click
-// tip, research and production after settling (which also take over the Next Turn button), and a
+// tip, research, production and idle units (which all take over the Next Turn button), and a
 // "finished" message that goes away when clicked. Ends on a live game to look over by eye: the
-// Warrior still needs orders, so its notification stays up.
+// units need orders again, so their notification stays up.
 export function setupNotificationsTest(game: Game) {
     const runner = new TestRunner("Notifications");
     const utils = new TestUtils(game);
@@ -39,7 +39,7 @@ export function setupNotificationsTest(game: Game) {
         verification: () => {
             const unitIds = find("unitOrders").unitIds;
             const ownIds = utils.getClientPlayer().getUnits().map((unit) => unit.getID());
-            return unitIds.length === ownIds.length && unitIds.every((id) => ownIds.includes(id)) && !find("research") && !find("production") && nextTurnText() === "Next Turn";
+            return unitIds.length === ownIds.length && unitIds.every((id) => ownIds.includes(id)) && !find("research") && !find("production") && nextTurnText() === "Move Unit";
         }
     });
 
@@ -141,10 +141,25 @@ export function setupNotificationsTest(game: Game) {
     });
 
     runner.addStep({
-        name: "Queueing a Warrior clears production; Next Turn is back",
+        name: "Queueing a Warrior clears production; Move Unit if a unit is idle, else Next Turn",
         action: async () => {
             WebsocketClient.sendMessage({ event: "addToProductionQueue", cityName: city.getName(), type: "unit", name: "Warrior" });
             await utils.waitUntil(() => find("production") === undefined, 3000, "Production notification to go away");
+        },
+        verification: () => nextTurnText() === (find("unitOrders") ? "Move Unit" : "Next Turn")
+    });
+
+    runner.addStep({
+        name: "Move Unit selects an idle unit; skipping its turn brings back Next Turn",
+        action: async () => {
+            if (!find("unitOrders")) return;
+
+            utils.getClientPlayer().unselectUnit();
+            utils.getInGameScene().getNextTurnButton().call("clicked");
+            const selected = utils.getClientPlayer().getUnits().find((unit) => unit.isSelected());
+            if (!selected || !find("unitOrders").unitIds.includes(selected.getID())) throw new Error("Move Unit didn't select an idle unit");
+
+            await utils.skipIdleUnits();
         },
         verification: () => nextTurnText() === "Next Turn"
     });

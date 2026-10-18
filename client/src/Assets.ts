@@ -225,6 +225,7 @@ export enum SpriteRegion {
   ICON_MOVE,
   ICON_QUESTION,
   ICON_GOTO_LEFT,
+  ICON_SKIP_TURN,
   //Buildings
   BUILDING_PALACE,
   BUILDING_MONUMENT,

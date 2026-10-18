@@ -1,3 +1,4 @@
+import { ClientSettings } from "../ClientSettings";
 import { Game } from "../Game";
 import { NetworkEvents, WebsocketClient } from "../network/Client";
 import { ClientPlayer } from "../player/ClientPlayer";
@@ -49,9 +50,15 @@ export class Notifications {
     return this.notifications;
   }
 
-  /** The first notification the player has to deal with before ending their turn, if any. */
+  /**
+   * The first notification the player has to deal with before ending their turn, if any. Units
+   * needing orders only hold up the turn while the Move Unit setting is on.
+   */
   public getTurnBlocker(): NotificationData | undefined {
-    return this.notifications.find((notification) => notification.turnBlockingLabel);
+    const moveUnitButton = ClientSettings.get("MOVE_UNIT_BUTTON");
+    return this.notifications.find(
+      (notification) => notification.turnBlockingLabel && (moveUnitButton || notification.type !== "unitOrders")
+    );
   }
 
   public onChange(listener: () => void) {

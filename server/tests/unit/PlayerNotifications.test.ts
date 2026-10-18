@@ -16,11 +16,12 @@ describe('PlayerNotifications', () => {
   let techsLeft: boolean;
   let relations: any[];
 
-  const makeUnit = (id: number, options: { movement?: number; queued?: boolean; fortified?: boolean; building?: string } = {}) => ({
+  const makeUnit = (id: number, options: { movement?: number; queued?: boolean; fortified?: boolean; skipping?: boolean; building?: string } = {}) => ({
     getId: () => id,
     getAvailableMovement: () => options.movement ?? 2,
     hasMovementQueue: () => options.queued ?? false,
     isFortified: () => options.fortified ?? false,
+    isSkippingTurn: () => options.skipping ?? false,
     getBuildingImprovement: () => options.building,
   });
 
@@ -106,11 +107,11 @@ describe('PlayerNotifications', () => {
   });
 
   it('lists only units that can still move and have no orders', () => {
-    units.push(makeUnit(1), makeUnit(2, { movement: 0 }), makeUnit(3, { queued: true }), makeUnit(4, { fortified: true }), makeUnit(5), makeUnit(6, { building: 'Farm' }));
+    units.push(makeUnit(1), makeUnit(2, { movement: 0 }), makeUnit(3, { queued: true }), makeUnit(4, { fortified: true }), makeUnit(5), makeUnit(6, { building: 'Farm' }), makeUnit(7, { skipping: true }));
 
     const [unitOrders] = notifications.getNotifications();
     expect(unitOrders.unitIds).toEqual([1, 5]);
-    expect(unitOrders.turnBlockingLabel).toBeUndefined();
+    expect(unitOrders.turnBlockingLabel).toBe('Move Unit');
   });
 
   it('orders notifications by priority, research first', () => {

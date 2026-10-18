@@ -92,6 +92,8 @@ export class Unit {
   private fortified: boolean;
   // Healing only kicks in once the unit has spent a whole turn fortified, so false on the turn it fortifies.
   private fortifiedForATurn: boolean;
+  // Set by the "Skip Turn" action: the unit stays put, so it no longer needs orders until the next turn or it moves.
+  private skippingTurn: boolean;
   private defaultMoveDistance: number;
   private availableMovement: number;
   private sightRange: number;
@@ -119,6 +121,7 @@ export class Unit {
     this.actedThisTurn = false;
     this.fortified = false;
     this.fortifiedForATurn = false;
+    this.skippingTurn = false;
     this.defaultMoveDistance = options.defaultMoveDistance || 2;
     this.sightRange = options.sightRange ?? PlayerVisibility.DEFAULT_UNIT_SIGHT_RANGE;
     this.utility = options.isUtility || false;
@@ -232,6 +235,7 @@ export class Unit {
         if (this.fortified && this.fortifiedForATurn && !this.actedThisTurn) this.heal();
         this.fortifiedForATurn = this.fortified;
         this.actedThisTurn = false;
+        this.skippingTurn = false;
         if (this.fortified && this.health >= Combat.MAX_HEALTH) this.setFortified(false);
         this.availableMovement = this.getMaxMovement();
 
@@ -342,6 +346,7 @@ export class Unit {
     this.queuedMovementTiles = remainingTiles;
     this.availableMovement = remainingMovement;
     this.actedThisTurn = true;
+    this.skippingTurn = false;
     this.setFortified(false);
     this.setBuildingImprovement(undefined);
 
@@ -820,6 +825,13 @@ export class Unit {
     this.setFortified(true);
   }
 
+  public skipTurn() {
+    if (this.availableMovement <= 0) return;
+
+    this.clearMovementQueue();
+    this.skippingTurn = true;
+  }
+
   // A Builder starts on an improvement: it stays put and puts a turn into it at every turn's end.
   public startBuilding(improvementName: string) {
     const improvement = Improvement.getImprovementData(improvementName);
@@ -864,6 +876,10 @@ export class Unit {
 
   public hasMovementQueue() {
     return this.queuedMovementTiles.length > 0;
+  }
+
+  public isSkippingTurn() {
+    return this.skippingTurn;
   }
 
   public isFortified() {

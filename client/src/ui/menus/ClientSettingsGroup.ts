@@ -4,15 +4,21 @@ import { Game } from "../../Game";
 import { Actor } from "../../scene/Actor";
 import { ActorGroup } from "../../scene/ActorGroup";
 import { Button, ButtonSize } from "../components/Button";
+import { Checkbox } from "../components/Checkbox";
 import { Label } from "../components/Label";
 import { SlideBar } from "../components/SlideBar";
 
-interface SettingRow {
+interface NumberSettingRow {
   key: "HUD_TRANSPARENCY" | "GLOBE_EDGE_SPRITE_WIDTH";
   label: string;
   min: number;
   max: number;
   step: number;
+}
+
+interface BooleanSettingRow {
+  key: "MOVE_UNIT_BUTTON";
+  label: string;
 }
 
 export interface ClientSettingsGroupOptions {
@@ -32,9 +38,12 @@ export class ClientSettingsGroup extends ActorGroup {
   private static readonly SLIDER_HEIGHT = 24;
   private static readonly SLIDER_VALUE_WIDTH = 90;
 
-  private static readonly ROWS: SettingRow[] = [
+  private static readonly NUMBER_ROWS: NumberSettingRow[] = [
     { key: "HUD_TRANSPARENCY", label: "HUD Transparency", min: 0, max: 1, step: 0.05 },
     { key: "GLOBE_EDGE_SPRITE_WIDTH", label: "Globe Edge Sprite Width", min: 0.3, max: 1, step: 0.05 }
+  ];
+  private static readonly BOOLEAN_ROWS: BooleanSettingRow[] = [
+    { key: "MOVE_UNIT_BUTTON", label: "Move Unit Before Next Turn" }
   ];
 
   constructor(options: ClientSettingsGroupOptions) {
@@ -68,9 +77,11 @@ export class ClientSettingsGroup extends ActorGroup {
       titleLabel.setPosition(this.x + this.width / 2 - titleLabel.getWidth() / 2, this.y + 12);
     });
 
-    ClientSettingsGroup.ROWS.forEach((row, index) => {
-      this.renderNumberRow(row, this.y + ClientSettingsGroup.ROWS_START_Y + index * ClientSettingsGroup.ROW_HEIGHT);
-    });
+    const rowY = (index: number) => this.y + ClientSettingsGroup.ROWS_START_Y + index * ClientSettingsGroup.ROW_HEIGHT;
+    ClientSettingsGroup.NUMBER_ROWS.forEach((row, index) => this.renderNumberRow(row, rowY(index)));
+    ClientSettingsGroup.BOOLEAN_ROWS.forEach((row, index) =>
+      this.renderBooleanRow(row, rowY(ClientSettingsGroup.NUMBER_ROWS.length + index))
+    );
 
     this.addActor(
       new Button({
@@ -89,7 +100,7 @@ export class ClientSettingsGroup extends ActorGroup {
     return `${Math.round(value * 100)}%`;
   }
 
-  private renderNumberRow(row: SettingRow, rowY: number) {
+  private renderNumberRow(row: NumberSettingRow, rowY: number) {
     const valueLabelX = this.x + 20 + ClientSettingsGroup.SLIDER_WIDTH + 12;
     const value = ClientSettings.get(row.key);
 
@@ -123,6 +134,21 @@ export class ClientSettingsGroup extends ActorGroup {
     );
 
     this.addSettingLabel(row.label, valueLabelX + ClientSettingsGroup.SLIDER_VALUE_WIDTH, rowY);
+  }
+
+  private renderBooleanRow(row: BooleanSettingRow, rowY: number) {
+    this.addActor(
+      new Checkbox({
+        x: this.x + 20,
+        y: rowY,
+        width: ClientSettingsGroup.CONTROL_SIZE,
+        height: ClientSettingsGroup.CONTROL_SIZE,
+        checked: ClientSettings.get(row.key),
+        onToggled: (checked) => ClientSettings.set(row.key, checked)
+      })
+    );
+
+    this.addSettingLabel(row.label, this.x + 20 + ClientSettingsGroup.CONTROL_SIZE + 12, rowY);
   }
 
   private addSettingLabel(text: string, x: number, rowY: number) {

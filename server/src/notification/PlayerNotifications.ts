@@ -125,11 +125,11 @@ export class PlayerNotifications {
       .forEach((player) => player.getNotifications().queueRefresh());
   }
 
-  // A unit heading somewhere, fortified, or working an improvement already has its orders.
+  // A unit heading somewhere, fortified, skipping its turn, or working an improvement already has its orders.
   private static needsOrders(unit: Unit): boolean {
     if (unit.getAvailableMovement() <= 0) return false;
 
-    return !unit.hasMovementQueue() && !unit.isFortified() && !unit.getBuildingImprovement();
+    return !unit.hasMovementQueue() && !unit.isFortified() && !unit.isSkippingTurn() && !unit.getBuildingImprovement();
   }
 
   /**
@@ -262,6 +262,9 @@ export class PlayerNotifications {
       icon: "ICON_MOVE",
       text: "You can move a unit.",
       priority: NotificationPriority.LOW,
+      // Like Civ 5's "Unit Needs Orders": the button selects each idle unit in turn, until each has
+      // moved or been told to stay (Skip Turn, fortify, build).
+      turnBlockingLabel: "Move Unit",
       unitIds: idleUnits.map((unit) => unit.getId())
     };
   }

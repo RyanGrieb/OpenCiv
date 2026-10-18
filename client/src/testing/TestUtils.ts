@@ -83,6 +83,24 @@ export class TestUtils {
         return foundUnit;
     }
 
+    /** Gives every unit still needing orders a Skip Turn, so the turn button is back to Next Turn. */
+    public async skipIdleUnits() {
+        const unitOrders = () => this.getInGameScene().getNotifications().getAll().find((notification) => notification.type === "unitOrders");
+        for (const unitId of unitOrders()?.unitIds ?? []) {
+            const unit = this.getClientPlayer().getUnits().find((candidate) => candidate.getID() === unitId);
+            if (!unit) continue;
+
+            WebsocketClient.sendMessage({
+                event: "unitAction",
+                unitX: unit.getTile().getGridX(),
+                unitY: unit.getTile().getGridY(),
+                id: unit.getID(),
+                actionName: "skip_turn"
+            });
+        }
+        await this.waitUntil(() => unitOrders() === undefined, 3000, "Units needing orders to skip their turn");
+    }
+
     /**
      * Joins as Player1, brings in a second player over a bare websocket from this same page, and starts
      * a revealed-map game with both players' settlers two tiles apart. The second player only loads in;

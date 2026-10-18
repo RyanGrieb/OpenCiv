@@ -34,7 +34,7 @@ interface GameplayUIElement {
 
 export class InGameScene extends Scene {
   private static readonly SETTINGS_WIDTH = 540;
-  private static readonly SETTINGS_HEIGHT = 300;
+  private static readonly SETTINGS_HEIGHT = 370;
 
   private players: AbstractPlayer[];
   private clientPlayer: ClientPlayer;
@@ -653,6 +653,8 @@ export class InGameScene extends Scene {
     if (this.settingsGroup) {
       this.removeActor(this.settingsGroup);
       this.settingsGroup = undefined;
+      // The Move Unit setting may have changed what the button says.
+      this.refreshNextTurnButton();
       this.addActor(this.escMenu);
       this.openUIElement = { close: () => this.toggleEscMenu() };
       return;
