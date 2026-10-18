@@ -1,6 +1,7 @@
 import { GameImage } from "../../Assets";
 import { Game } from "../../Game";
 import { NetworkEvents, WebsocketClient } from "../../network/Client";
+import { Numbers } from "../../util/Numbers";
 import { Actor } from "../../scene/Actor";
 import { ActorGroup } from "../../scene/ActorGroup";
 import { Button, ButtonSize } from "../components/Button";
@@ -37,6 +38,13 @@ interface GameOptionsEvent {
   options: GameOptionData[];
 }
 
+interface ScrollRect {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
 export interface GameOptionsGroupOptions {
   x: number;
   y: number;
@@ -52,6 +60,13 @@ export class GameOptionsGroup extends ActorGroup {
   private static readonly SLIDER_WIDTH = 160;
   private static readonly SLIDER_HEIGHT = 24;
   private static readonly SLIDER_VALUE_WIDTH = 90;
+  // Space kept clear at the bottom for the footer buttons.
+  private static readonly FOOTER_HEIGHT = 70;
+  private static readonly SCROLLBAR_WIDTH = 12;
+  private static readonly SCROLLBAR_MARGIN = 8;
+  private static readonly MIN_THUMB_HEIGHT = 30;
+  private static readonly TRACK_COLOR = "rgba(0, 0, 0, 0.25)";
+  private static readonly THUMB_COLOR = "rgba(255, 255, 255, 0.6)";
 
   private optionActors: Actor[];
   private optionDefs: GameOptionData[] = [];
@@ -59,6 +74,18 @@ export class GameOptionsGroup extends ActorGroup {
   private footerActors: Actor[] = [];
   private titleLabel: Label;
   private onClose: () => void;
+  // Scrolls a whole row at a time: only rows that fully fit are created, so a row
+  // past the window's edge is never drawn or clickable and nothing needs clipping.
+  private firstVisibleRow = 0;
+  private rowCount = 0;
+  private isDraggingScrollbar = false;
+  private dragStartMouseY = 0;
+  private dragStartRow = 0;
+  // "wheel" events carry no cursor position, so the last one seen gates wheel scrolling.
+  private lastMouseX = 0;
+  private lastMouseY = 0;
+  // Bound once so the same reference reaches both addEventListener and removeEventListener.
+  private readonly onWindowMouseUp = () => this.stopDraggingScrollbar();
 
   constructor(options: GameOptionsGroupOptions) {
     super({
@@ -102,11 +129,44 @@ export class GameOptionsGroup extends ActorGroup {
         this.renderOptions();
       }
     });
+
+    this.on("mousemove", (moveOptions: { x: number; y: number }) => {
+      this.lastMouseX = moveOptions.x;
+      this.lastMouseY = moveOptions.y;
+
+      if (this.isDraggingScrollbar) {
+        this.dragScrollbarTo(moveOptions.y);
+      }
+    });
+
+    this.on("mousedown", (downOptions: { x: number; y: number; button: number }) => this.onMouseDown(downOptions));
+
+    this.on("wheel", (wheelOptions: { deltaY: number }) => {
+      if (!this.insideActor(this.lastMouseX, this.lastMouseY)) return;
+
+      this.scrollToRow(this.firstVisibleRow + Math.sign(wheelOptions.deltaY));
+    });
+  }
+
+  private static pointInRect(x: number, y: number, rect: ScrollRect): boolean {
+    return x >= rect.x && x <= rect.x + rect.width && y >= rect.y && y <= rect.y + rect.height;
   }
 
   public onDestroyed(): void {
     super.onDestroyed();
     NetworkEvents.removeCallbacksByParentObject(this);
+    this.stopDraggingScrollbar();
+  }
+
+  public draw(canvasContext: CanvasRenderingContext2D) {
+    super.draw(canvasContext);
+
+    const track = this.getScrollTrackBounds();
+    const thumb = this.getScrollThumbBounds();
+    if (!track || !thumb) return;
+
+    Game.getInstance().drawRect({ ...track, color: GameOptionsGroup.TRACK_COLOR, fill: true, canvasContext });
+    Game.getInstance().drawRect({ ...thumb, color: GameOptionsGroup.THUMB_COLOR, fill: true, canvasContext });
   }
 
   // Swaps the title and footer buttons between the main page and the advanced (hidden options) page.
@@ -126,13 +186,16 @@ export class GameOptionsGroup extends ActorGroup {
     const buttonsX = this.x + this.width / 2 - ButtonSize.MEDIUM.width - buttonGap / 2;
     const backButton = new Button({
       text: "Back",
-      x: this.showAdvanced ? this.x + this.width / 2 - ButtonSize.MEDIUM.width / 2 : buttonsX + ButtonSize.MEDIUM.width + buttonGap,
+      x: this.showAdvanced
+        ? this.x + this.width / 2 - ButtonSize.MEDIUM.width / 2
+        : buttonsX + ButtonSize.MEDIUM.width + buttonGap,
       y: buttonY,
       size: ButtonSize.MEDIUM,
       fontColor: "white",
       onClicked: () => {
         if (this.showAdvanced) {
           this.showAdvanced = false;
+          this.firstVisibleRow = 0;
           this.renderPage();
         } else {
           this.onClose();
@@ -152,6 +215,7 @@ export class GameOptionsGroup extends ActorGroup {
           fontColor: "white",
           onClicked: () => {
             this.showAdvanced = true;
+            this.firstVisibleRow = 0;
             this.renderPage();
           }
         }),
@@ -177,7 +241,11 @@ export class GameOptionsGroup extends ActorGroup {
       ...visibleDefs.filter((def) => def.type === "number")
     ];
 
-    orderedDefs.forEach((optionDef, index) => {
+    this.rowCount = orderedDefs.length;
+    this.firstVisibleRow = Numbers.clamp(this.firstVisibleRow, 0, this.getMaxFirstRow());
+
+    const visibleRows = orderedDefs.slice(this.firstVisibleRow, this.firstVisibleRow + this.getVisibleRowCount());
+    visibleRows.forEach((optionDef, index) => {
       const rowY = this.y + GameOptionsGroup.ROWS_START_Y + index * GameOptionsGroup.ROW_HEIGHT;
 
       if (optionDef.type === "boolean") {
@@ -186,6 +254,90 @@ export class GameOptionsGroup extends ActorGroup {
         this.renderNumberRow(optionDef, rowY);
       }
     });
+  }
+
+  private getVisibleRowCount(): number {
+    const rowsAreaHeight = this.height - GameOptionsGroup.ROWS_START_Y - GameOptionsGroup.FOOTER_HEIGHT;
+    return Math.max(1, Math.floor(rowsAreaHeight / GameOptionsGroup.ROW_HEIGHT));
+  }
+
+  private getMaxFirstRow(): number {
+    return Math.max(0, this.rowCount - this.getVisibleRowCount());
+  }
+
+  private scrollToRow(row: number) {
+    const clamped = Numbers.clamp(Math.round(row), 0, this.getMaxFirstRow());
+    if (clamped === this.firstVisibleRow) return;
+
+    this.firstVisibleRow = clamped;
+    this.renderOptions();
+  }
+
+  // undefined when every row fits, so callers can treat it as "is there a scrollbar at all".
+  private getScrollTrackBounds(): ScrollRect | undefined {
+    if (this.getMaxFirstRow() <= 0) return undefined;
+
+    return {
+      x: this.x + this.width - GameOptionsGroup.SCROLLBAR_WIDTH - GameOptionsGroup.SCROLLBAR_MARGIN,
+      y: this.y + GameOptionsGroup.ROWS_START_Y,
+      width: GameOptionsGroup.SCROLLBAR_WIDTH,
+      height: this.getVisibleRowCount() * GameOptionsGroup.ROW_HEIGHT
+    };
+  }
+
+  private getScrollThumbBounds(): ScrollRect | undefined {
+    const track = this.getScrollTrackBounds();
+    if (!track) return undefined;
+
+    const thumbHeight = Math.max(
+      GameOptionsGroup.MIN_THUMB_HEIGHT,
+      track.height * (this.getVisibleRowCount() / this.rowCount)
+    );
+    const thumbY = track.y + (this.firstVisibleRow / this.getMaxFirstRow()) * (track.height - thumbHeight);
+
+    return { x: track.x, y: thumbY, width: track.width, height: thumbHeight };
+  }
+
+  private onMouseDown(downOptions: { x: number; y: number; button: number }) {
+    if (downOptions.button !== 0) return;
+
+    const track = this.getScrollTrackBounds();
+    const thumb = this.getScrollThumbBounds();
+    if (!track || !thumb) return;
+
+    if (GameOptionsGroup.pointInRect(downOptions.x, downOptions.y, thumb)) {
+      this.isDraggingScrollbar = true;
+      this.dragStartMouseY = downOptions.y;
+      this.dragStartRow = this.firstVisibleRow;
+      // A raw mouseup is never relayed to nested actors, so listen on window for the drag's end.
+      window.addEventListener("mouseup", this.onWindowMouseUp);
+      return;
+    }
+
+    if (!GameOptionsGroup.pointInRect(downOptions.x, downOptions.y, track)) return;
+
+    // Clicked the empty track above/below the thumb - page toward the click.
+    const direction = downOptions.y < thumb.y ? -1 : 1;
+    this.scrollToRow(this.firstVisibleRow + direction * this.getVisibleRowCount());
+  }
+
+  private dragScrollbarTo(mouseY: number) {
+    const track = this.getScrollTrackBounds();
+    const thumb = this.getScrollThumbBounds();
+    if (!track || !thumb) return;
+
+    const draggableRange = track.height - thumb.height;
+    if (draggableRange <= 0) return;
+
+    const deltaRows = ((mouseY - this.dragStartMouseY) / draggableRange) * this.getMaxFirstRow();
+    this.scrollToRow(this.dragStartRow + deltaRows);
+  }
+
+  private stopDraggingScrollbar() {
+    if (!this.isDraggingScrollbar) return;
+
+    this.isDraggingScrollbar = false;
+    window.removeEventListener("mouseup", this.onWindowMouseUp);
   }
 
   private renderBooleanRow(optionDef: BooleanGameOptionData, rowY: number) {
