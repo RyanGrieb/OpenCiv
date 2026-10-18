@@ -54,12 +54,11 @@ export class TileTooltip extends Tooltip {
       lines.push({ text: `${info.cityName}'s territory, ${worked}`, color: TileTooltip.CITY_COLOR });
     }
 
-    if (info.sources.length === 0) lines.push({ text: "No yields", color: "gray", indent: true });
+    if (info.sources.length === 0) lines.push({ text: "No yields", color: "gray" });
     info.sources.forEach((source) =>
       lines.push({
         text: source.source,
         color: TileTooltip.SOURCE_COLOR,
-        indent: true,
         yields: TileTooltip.getYields(source.stats)
       })
     );

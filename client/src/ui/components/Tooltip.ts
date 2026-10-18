@@ -27,8 +27,8 @@ export class Tooltip extends ActorGroup {
   private static readonly PADDING = 12;
   private static readonly INDENT = 20;
   private static readonly LINE_GAP = 4;
-  // Stat icons fill the middle of their 32x32 sprite, so this draws them about the size of the text.
-  private static readonly YIELD_ICON_SIZE = 32;
+  // The status bar's size, so a yield looks the same here as up there.
+  private static readonly YIELD_ICON_SIZE = UITheme.ICON_SIZE;
   private static readonly YIELD_GAP = 12;
 
   protected constructor(x: number, y: number, z = 10) {
@@ -64,7 +64,13 @@ export class Tooltip extends ActorGroup {
       0,
       ...labels.map((label, index) => indentOf(index) + label.getWidth() + yieldsWidthOf(index))
     );
-    const textHeight = labels.reduce((total, label) => total + label.getHeight() + Tooltip.LINE_GAP, -Tooltip.LINE_GAP);
+    // A line with yields is as tall as their icons, so icons on neighbouring lines don't overlap.
+    const heightOf = (index: number) =>
+      Math.max(labels[index].getHeight(), yieldLabels[index].length > 0 ? Tooltip.YIELD_ICON_SIZE : 0);
+    const textHeight = labels.reduce(
+      (total, _, index) => total + heightOf(index) + Tooltip.LINE_GAP,
+      -Tooltip.LINE_GAP
+    );
     this.width = textWidth + padding * 2;
     this.height = textHeight + padding * 2;
     if (corner === "bottomRight") {
@@ -77,9 +83,9 @@ export class Tooltip extends ActorGroup {
     const icons: Actor[] = [];
     let lineY = this.y + padding;
     labels.forEach((label, index) => {
-      label.setPosition(this.x + padding + indentOf(index), lineY);
+      label.setPosition(this.x + padding + indentOf(index), lineY + (heightOf(index) - label.getHeight()) / 2);
       icons.push(...this.placeYields(lines[index].yields ?? [], yieldLabels[index], label));
-      lineY += label.getHeight() + Tooltip.LINE_GAP;
+      lineY += heightOf(index) + Tooltip.LINE_GAP;
     });
 
     this.addActor(
