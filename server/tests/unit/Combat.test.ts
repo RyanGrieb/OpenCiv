@@ -128,6 +128,7 @@ describe("Unit.meleeAttack", () => {
       removeUnit: jest.fn(),
       sendNetworkEvent: jest.fn(),
       hasResearchedTech: () => false,
+      getCivilizationName: (): string | undefined => undefined,
       getVisibility: () => ({ isVisible: () => true, update: jest.fn() }),
       getHappiness: () => ({ applyToFoodSurplus: (food: number) => food, canTrain: () => true, getCombatModifiers: (): unknown[] => [] }),
       // Every other civilization is an enemy, as in a startAtWar game.
@@ -376,7 +377,7 @@ describe("Unit.meleeAttack", () => {
 
     it("is offered to units that can fight, and not to Settlers", () => {
       const names = (unit: Unit) => unit.getUnitActionsJSON().map((action) => action.name);
-      expect(names(Unit.createFromName("Warrior", originTile, attackerPlayer))).toEqual(["promote", "fortify_until_healed", "skip_turn"]);
+      expect(names(Unit.createFromName("Warrior", originTile, attackerPlayer))).toEqual(["promote", "fortify_until_healed", "upgrade", "skip_turn"]);
       expect(names(Unit.createFromName("Settler", originTile, attackerPlayer))).toEqual(["settle", "skip_turn"]);
     });
   });
@@ -402,6 +403,7 @@ describe("Unit.rangedAttack", () => {
       removeUnit: jest.fn(),
       sendNetworkEvent: jest.fn(),
       hasResearchedTech: () => false,
+      getCivilizationName: (): string | undefined => undefined,
       getVisibility: () => ({ isVisible: () => true, update: jest.fn() }),
       getHappiness: () => ({ applyToFoodSurplus: (food: number) => food, canTrain: () => true, getCombatModifiers: (): unknown[] => [] }),
       // Every other civilization is an enemy, as in a startAtWar game.
@@ -448,7 +450,7 @@ describe("Unit.rangedAttack", () => {
     const archer = makeArcher(row[0], attackerPlayer);
 
     expect(archer.asJSON()).toMatchObject({ combatStrength: 5, rangedStrength: 7, range: 2 });
-    expect(archer.getUnitActionsJSON().map((action) => action.name)).toEqual(["promote", "ranged_attack", "fortify_until_healed", "skip_turn"]);
+    expect(archer.getUnitActionsJSON().map((action) => action.name)).toEqual(["promote", "ranged_attack", "fortify_until_healed", "upgrade", "skip_turn"]);
     expect(makeWarrior(row[4], attackerPlayer).isRanged()).toBe(false);
   });
 

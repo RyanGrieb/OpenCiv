@@ -4,6 +4,7 @@ import { State } from "../State";
 import { GameMap } from "../../map/GameMap";
 import { Unit } from "../../unit/Unit";
 import { City } from "../../city/City";
+import { UnitUpgrades } from "../../unit/UnitUpgrades";
 import { Job, gracefulShutdown, scheduleJob } from "node-schedule";
 
 import { Tile } from "../../map/Tile";
@@ -379,6 +380,7 @@ export class InGameState extends State {
 
     PlayerNotifications.refreshAll();
     City.refreshAllCombatStatus();
+    UnitUpgrades.refreshAll();
   }
   public onDestroyed() {
     this.destroyed = true;

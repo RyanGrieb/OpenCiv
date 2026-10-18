@@ -195,6 +195,19 @@ export class ClientPlayer extends AbstractPlayer {
       }
     });
 
+    // An upgrade replaces the unit with a new one (the removeUnit above dropped the selection), so the
+    // new unit is selected in its place, the way the player left it.
+    NetworkEvents.on({
+      eventName: "unitUpgraded",
+      parentObject: this,
+      callback: (data) => {
+        if (this.selectedUnit) return;
+
+        const unit = this.getUnits().find((ownUnit) => ownUnit.getID() === data["id"]);
+        if (unit) this.selectUnit(unit);
+      }
+    });
+
     NetworkEvents.on<RangedTargetsEvent>({
       eventName: "rangedTargets",
       parentObject: this,

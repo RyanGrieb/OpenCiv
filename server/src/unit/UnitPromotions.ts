@@ -187,6 +187,15 @@ export class UnitPromotions {
     return promotion;
   }
 
+  // The same experience, level and promotions on a unit of another class, for a unit that's been upgraded.
+  public carryOverTo(unitClass: string | undefined): UnitPromotions {
+    const carried = new UnitPromotions(unitClass);
+    carried.experience = this.experience;
+    carried.level = this.level;
+    carried.promotions = [...this.promotions];
+    return carried;
+  }
+
   // A promotion given rather than earned (a Lancer's Formation I, the Alhambra's Drill I): no level is spent.
   public grant(name: string) {
     if (this.has(name) || !UnitPromotions.getPromotionData(name)) return;

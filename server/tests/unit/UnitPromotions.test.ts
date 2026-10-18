@@ -123,6 +123,7 @@ describe("Unit experience and promotions", () => {
       removeUnit: jest.fn(),
       sendNetworkEvent: jest.fn(),
       hasResearchedTech: () => false,
+      getCivilizationName: (): string | undefined => undefined,
       getVisibility: () => ({ isVisible: () => true, update: jest.fn() }),
       getHappiness: () => ({ getCombatModifiers: (): unknown[] => [] }),
       getNotifications: () => ({ addMessage: jest.fn() }),

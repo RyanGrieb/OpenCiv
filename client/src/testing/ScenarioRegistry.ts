@@ -106,6 +106,11 @@ ScenarioRegistry.register("Promotions", ScenarioCategory.COMBAT, async () => {
   return module.setupPromotionsTest;
 });
 
+ScenarioRegistry.register("UnitUpgrades", ScenarioCategory.UNITS, async () => {
+    const module = await import("./scenarios/UnitUpgrades.test");
+    return module.setupUnitUpgradesTest;
+});
+
 ScenarioRegistry.register("AncientRuins", ScenarioCategory.MAP, async () => {
   const module = await import("./scenarios/AncientRuins.test");
   return module.setupAncientRuinsTest;

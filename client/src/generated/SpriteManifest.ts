@@ -164,6 +164,7 @@ export const SPRITE_MANIFEST: SpriteManifestEntry[] = [
   { name: "ICON_UNHAPPY", url: new URL("../../assets/sprites/icons/ICON_UNHAPPY.png", import.meta.url).href },
   { name: "ICON_UNKNOWN", url: new URL("../../assets/sprites/icons/ICON_UNKNOWN.png", import.meta.url).href },
   { name: "ICON_UP_ARROW", url: new URL("../../assets/sprites/icons/ICON_UP_ARROW.png", import.meta.url).href },
+  { name: "ICON_UPGRADE", url: new URL("../../assets/sprites/icons/ICON_UPGRADE.png", import.meta.url).href },
   { name: "PROMOTION_ACCURACY_I", url: new URL("../../assets/sprites/promotions/PROMOTION_ACCURACY_I.png", import.meta.url).href },
   { name: "PROMOTION_ACCURACY_II", url: new URL("../../assets/sprites/promotions/PROMOTION_ACCURACY_II.png", import.meta.url).href },
   { name: "PROMOTION_ACCURACY_III", url: new URL("../../assets/sprites/promotions/PROMOTION_ACCURACY_III.png", import.meta.url).href },

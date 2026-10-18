@@ -6,6 +6,7 @@ import { ServerArgs } from "./ServerArgs";
 import { InGameState } from "./state/type/InGameState";
 import { LobbyState } from "./state/type/LobbyState";
 import { City } from "./city/City";
+import { UnitUpgrades } from "./unit/UnitUpgrades";
 import { PlayerNotifications } from "./notification/PlayerNotifications";
 
 export class Server {
@@ -119,6 +120,7 @@ export class Server {
         ServerEvents.call(jsonData["event"], jsonData, websocket);
         PlayerNotifications.refreshAll();
         City.refreshAllCombatStatus();
+        UnitUpgrades.refreshAll();
       });
       ServerEvents.call("connection", {}, websocket);
     });

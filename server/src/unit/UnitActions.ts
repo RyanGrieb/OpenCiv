@@ -2,11 +2,13 @@ import { City } from "../city/City";
 import { Game } from "../Game";
 import { Improvement, ImprovementData } from "../map/Improvement";
 import { Unit, UnitAction, UnitYMLTypeData } from "./Unit";
+import { UnitUpgrades } from "./UnitUpgrades";
 
 export class UnitActions {
   // The actions every unit of this type starts with.
   public static forUnitType(data: UnitYMLTypeData): UnitAction[] {
-    return [...UnitActions.typeActions(data), UnitActions.skipTurn()];
+    const upgrade = data.upgrades_to ? [UnitActions.upgrade()] : [];
+    return [...UnitActions.typeActions(data), ...upgrade, UnitActions.skipTurn()];
   }
 
   // Civ 5's Skip Turn: every unit can be left where it is for a turn, so it stops holding up the next turn.
@@ -30,6 +32,24 @@ export class UnitActions {
       desc: "Promote",
       isAvailable: (unit: Unit) => unit.canPromote(),
       onAction: () => {}
+    };
+  }
+
+  // Civ 5's Upgrade, offered once the owner has the tech for the unit's upgrade (see UnitUpgrades). The
+  // button names the new unit and its price, and only works in the owner's territory with gold to pay.
+  public static upgrade(): UnitAction {
+    return {
+      name: "upgrade",
+      icon: "ICON_UPGRADE",
+      requirements: ["movement"],
+      desc: "Upgrade",
+      getDesc: (unit: Unit) => {
+        const target = UnitUpgrades.getResearchedTarget(unit);
+        if (!target) return "Upgrade";
+        return `Upgrade to ${target.name} (${UnitUpgrades.getCost(unit.getName(), target)} gold)`;
+      },
+      isAvailable: (unit: Unit) => UnitUpgrades.canUpgrade(unit),
+      onAction: (unit: Unit) => unit.upgrade()
     };
   }
 

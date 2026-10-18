@@ -285,6 +285,7 @@ export enum SpriteRegion {
   ICON_GOTO_LEFT,
   ICON_SKIP_TURN,
   ICON_PROMOTE,
+  ICON_UPGRADE,
   // Promotion badges (client/assets/sprites/promotions), named after the promotion.
   PROMOTION_ACCURACY_I,
   PROMOTION_ACCURACY_II,

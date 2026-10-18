@@ -217,3 +217,36 @@ presets:
       - "g g d d S ~ ~ ~ O"
       - " g g j j ~ ~ ~ ~ O"
       - "g g g g g ~ ~ O O"
+
+  unit_upgrades:
+    description: Two Settlers three tiles apart, with the first unit of every upgrade line inside where their cities' borders will be - six land units around the first Settler (the starting Warrior takes the free hex) and three ships beside the coastal second one.
+    legend:
+      "g": [grass]
+      "~": [shallow_ocean]
+      "O": [ocean]
+      "S": [grass]
+      "T": [grass]
+      "A": [grass]
+      "H": [grass]
+      "C": [grass]
+      "P": [grass]
+      "K": [grass]
+      "R": [shallow_ocean]
+      "V": [shallow_ocean]
+      "U": [shallow_ocean]
+    units:
+      "T": Settler
+      "A": Archer
+      "H": Horseman
+      "C": Catapult
+      "P": Spearman
+      "K": Chariot Archer
+      "R": Trireme
+      "V": Caravel
+      "U": Submarine
+    rows:
+      - "g g g g g ~ ~ O O"
+      - " g A H g g V ~ O O"
+      - "g C S P g T R ~ O"
+      - " g K g g g U ~ O O"
+      - "g g g g g ~ ~ O O"

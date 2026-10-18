@@ -12,12 +12,15 @@ import { ConfigLoader } from "../util/ConfigLoader";
 import { Combat, CombatModifier } from "./Combat";
 import { UnitActions } from "./UnitActions";
 import { UnitPromotions } from "./UnitPromotions";
+import { UnitUpgrades } from "./UnitUpgrades";
 
 export interface UnitAction {
   name: string;
   icon: string;
   requirements: string[];
   desc: string;
+  // Replaces desc when the text depends on the unit, e.g. the new unit and price on Upgrade.
+  getDesc?: (unit: Unit) => string;
   // Whether the server allows the action where the unit stands right now. The client checks the
   // simpler requirements above itself, but this one depends on game state it doesn't have.
   isAvailable?: (unit: Unit) => boolean;
@@ -43,6 +46,9 @@ export interface UnitOptions {
   freePromotions?: string[];
   // Movement to start with, when not a full turn's worth (e.g. a unit that was just captured).
   availableMovement?: number;
+  // What an upgraded unit keeps from the unit it was.
+  health?: number;
+  promotions?: UnitPromotions;
   actions: UnitAction[];
 }
 
@@ -74,6 +80,8 @@ export interface UnitYMLTypeData {
   required_tech?: string;
   // Once researched, cities stop offering this unit (see units.yml).
   obsolete_tech?: string;
+  // The unit this one can be upgraded into (see UnitUpgrades).
+  upgrades_to?: string;
   // A civilization's unique unit: only that civ builds it, in place of the unit it replaces.
   unique_to?: string;
   replaces?: string;
@@ -117,6 +125,8 @@ export class Unit {
   private promotions: UnitPromotions;
   // Attacks made this turn. Only promotions like Blitz allow more than one.
   private attacksMade: number;
+  // Whether the Upgrade button the owner was last sent could be pressed, so it's resent once that changes.
+  private upgradeSentAvailable: boolean;
 
   private id: number; // Increment this every time a unit object is created
   private actions: UnitAction[];
@@ -129,7 +139,7 @@ export class Unit {
     this.combatStrength = options.combatStrength ?? 0;
     this.rangedStrength = options.rangedStrength ?? 0;
     this.range = options.range ?? 0;
-    this.health = Combat.MAX_HEALTH;
+    this.health = options.health ?? Combat.MAX_HEALTH;
     this.actedThisTurn = false;
     this.fortified = false;
     this.fortifiedForATurn = false;
@@ -141,9 +151,10 @@ export class Unit {
     this.domain = options.domain ?? "land";
     this.coastOnly = options.coastOnly ?? false;
     this.unitClass = options.unitClass;
-    this.promotions = new UnitPromotions(options.unitClass);
+    this.promotions = options.promotions?.carryOverTo(options.unitClass) ?? new UnitPromotions(options.unitClass);
     (options.freePromotions ?? []).forEach((name) => this.promotions.grant(name));
     this.attacksMade = 0;
+    this.upgradeSentAvailable = false;
     // After the domain and promotions: a ship's full movement depends on its owner's wonders.
     this.availableMovement = options.availableMovement ?? this.getMaxMovement();
     this.actions = options.actions || [];
@@ -292,7 +303,7 @@ export class Unit {
     name: string,
     tile: Tile,
     player: Player,
-    options?: { availableMovement?: number }
+    options?: { availableMovement?: number; health?: number; promotions?: UnitPromotions }
   ): Unit | undefined {
     const data = Unit.getUnitYMLTypeDataByName(name);
     if (!data) return undefined;
@@ -314,6 +325,8 @@ export class Unit {
       unitClass: data.unit_class,
       freePromotions: data.free_promotions,
       availableMovement: options?.availableMovement,
+      health: options?.health,
+      promotions: options?.promotions,
       actions: UnitActions.forUnitType(data)
     });
   }
@@ -951,8 +964,36 @@ export class Unit {
     return this.buildingImprovement;
   }
 
+  /**
+   * Replaces this unit with the unit it upgrades into, for gold (see UnitUpgrades). The new unit keeps
+   * this one's health, experience and promotions, and can't move again until next turn.
+   */
+  public upgrade() {
+    const target = UnitUpgrades.getResearchedTarget(this);
+    if (!target || !UnitUpgrades.canUpgrade(this)) return;
+
+    this.player.getTreasury().spend(UnitUpgrades.getCost(this.name, target));
+    const upgraded = Unit.createFromName(target.name, this.tile, this.player, {
+      availableMovement: 0,
+      health: this.health,
+      promotions: this.promotions
+    });
+    if (!upgraded) return;
+
+    this.delete();
+    this.tile.addUnit(upgraded);
+    this.player.sendNetworkEvent({ event: "unitUpgraded", previousId: this.id, id: upgraded.getId() });
+  }
+
+  // Resends the owner's action buttons once whether the unit can upgrade has changed, e.g. with their gold.
+  public refreshUpgradeAction() {
+    if (!this.getActionByName("upgrade")) return;
+    if (UnitUpgrades.canUpgrade(this) !== this.upgradeSentAvailable) this.sendActionsToOwner();
+  }
+
   // Only the owner hears about this - it drives their action buttons and unit info window.
   public sendActionsToOwner() {
+    this.upgradeSentAvailable = UnitUpgrades.canUpgrade(this);
     this.player.sendNetworkEvent({ event: "unitActions", id: this.id, actions: this.getUnitActionsJSON() });
   }
 
@@ -1177,11 +1218,11 @@ export class Unit {
   }
 
   public getUnitActionsJSON() {
-    return this.actions.map(({ name, icon, requirements, desc, isAvailable }) => ({
+    return this.actions.map(({ name, icon, requirements, desc, getDesc, isAvailable }) => ({
       name,
       icon,
       requirements,
-      desc,
+      desc: getDesc?.(this) ?? desc,
       available: isAvailable?.(this) ?? true
     }));
   }

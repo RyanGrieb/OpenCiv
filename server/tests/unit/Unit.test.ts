@@ -75,6 +75,8 @@ describe('Unit', () => {
       getWebsocket: jest.fn().mockReturnValue({} as WebSocket),
       addUnit: jest.fn(),
       removeUnit: jest.fn(),
+      hasResearchedTech: jest.fn().mockReturnValue(false),
+      getCivilizationName: jest.fn(),
       getVisibility: jest.fn().mockReturnValue({
         isVisible: jest.fn().mockReturnValue(true),
         hasDiscovered: jest.fn().mockReturnValue(true),
