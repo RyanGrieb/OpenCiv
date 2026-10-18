@@ -152,6 +152,11 @@ export class Label extends Actor {
     this.fontColor = fontColor;
   }
 
+  // Whether conformSize() broke the text onto more than one line to fit maxWidth.
+  public isWrapped(): boolean {
+    return !!this.wrappedText?.includes("\n");
+  }
+
   public getText(): string {
     return this.text;
   }

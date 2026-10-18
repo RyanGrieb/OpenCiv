@@ -41,8 +41,11 @@ export class UnitDisplayInfo extends ActorGroup {
   public static readonly HEIGHT = 278;
 
   private unit: Unit;
-  // Shows the hovered action's description in place of the movement line.
+  // Shows the hovered action's description in place of the movement line, wrapped within the window.
   private movementLabel: Label;
+  // While a hovered action's description wraps onto more lines, the combat rows (or a Builder's build
+  // status) under it step aside.
+  private combatRowsHidden = false;
   // Which action button the mouse is over. Moving straight from one button to the next fires the new
   // button's enter before the old one's exit, so the exit only clears this if it's still its own.
   private hoveredActionName: string | undefined;
@@ -98,7 +101,8 @@ export class UnitDisplayInfo extends ActorGroup {
       x: this.x,
       y: this.y,
       font: UITheme.FONT,
-      fontColor: "white"
+      fontColor: "white",
+      maxWidth: WINDOW_WIDTH - TEXT_X * 2
     });
 
     this.updateMovementLabel();
@@ -194,7 +198,18 @@ export class UnitDisplayInfo extends ActorGroup {
 
     this.movementLabel.conformSize().then(() => {
       this.movementLabel.setPosition(this.x + TEXT_X, this.y + MOVEMENT_Y + this.getExtraActionRowsHeight());
+      this.setCombatRowsHidden(this.movementLabel.isWrapped());
     });
+  }
+
+  private setCombatRowsHidden(hidden: boolean) {
+    if (this.combatRowsHidden === hidden) return;
+
+    this.combatRowsHidden = hidden;
+    for (const actor of [...this.combatActors, this.buildLabel]) {
+      if (hidden) this.removeActor(actor);
+      else this.addActor(actor);
+    }
   }
 
   // Road moves leave thirds of a move behind, shown to two decimals (e.g. "1.67/2").
@@ -247,8 +262,10 @@ export class UnitDisplayInfo extends ActorGroup {
         ...this.createPromotionIcons()
       ];
 
-      for (const actor of this.combatActors) this.removeActor(actor);
-      for (const actor of actors) this.addActor(actor);
+      if (!this.combatRowsHidden) {
+        for (const actor of this.combatActors) this.removeActor(actor);
+        for (const actor of actors) this.addActor(actor);
+      }
       this.combatActors = actors;
     });
   }
