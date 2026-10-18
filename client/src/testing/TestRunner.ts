@@ -85,6 +85,8 @@ export class TestRunner {
 
     // A span rather than a <button>, which styles.css draws as the game's large framed button.
     // Closing only hides the window; the scenario keeps running and logging to the console.
+    // Sandbox scenarios turn off pointer events on the whole window so clicks reach the map under it;
+    // the button turns them back on for itself so it can still be clicked.
     private createCloseButton(resultsWindow: HTMLElement): HTMLSpanElement {
         const button = document.createElement("span");
         button.id = "test-results-close";
@@ -94,6 +96,7 @@ export class TestRunner {
         button.style.fontSize = "24px";
         button.style.lineHeight = "1";
         button.style.cursor = "pointer";
+        button.style.pointerEvents = "auto";
         button.addEventListener("click", () => resultsWindow.remove());
         return button;
     }
