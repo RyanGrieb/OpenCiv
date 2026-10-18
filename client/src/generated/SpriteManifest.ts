@@ -282,6 +282,7 @@ export const SPRITE_MANIFEST: SpriteManifestEntry[] = [
   { name: "UNIT_KNIGHT", url: new URL("../../assets/sprites/units/UNIT_KNIGHT.png", import.meta.url).href },
   { name: "UNIT_LEGION", url: new URL("../../assets/sprites/units/UNIT_LEGION.png", import.meta.url).href },
   { name: "UNIT_LONGSWORDSMAN", url: new URL("../../assets/sprites/units/UNIT_LONGSWORDSMAN.png", import.meta.url).href },
+  { name: "UNIT_MUSKETMAN", url: new URL("../../assets/sprites/units/UNIT_MUSKETMAN.png", import.meta.url).href },
   { name: "UNIT_PIKEMAN", url: new URL("../../assets/sprites/units/UNIT_PIKEMAN.png", import.meta.url).href },
   { name: "UNIT_ROMAN_LEGION", url: new URL("../../assets/sprites/units/UNIT_ROMAN_LEGION.png", import.meta.url).href },
   { name: "UNIT_SCOUT", url: new URL("../../assets/sprites/units/UNIT_SCOUT.png", import.meta.url).href },
