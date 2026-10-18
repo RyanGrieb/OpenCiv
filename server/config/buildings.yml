@@ -642,6 +642,17 @@ buildings:
     stats:
       - happiness: 4
 
+  - name: Medical Lab
+    asset_name: BUILDING_MEDICAL_LAB
+    cost: 300
+    maintenance: 3
+    required_tech: Penicillin
+    requires_building: Hospital
+    not_yet:
+      - Its Civ 5 effect
+    stats:
+      - food: 3
+
   # Great wonders from the Renaissance Era onward.
   - name: Forbidden Palace
     asset_name: BUILDING_FORBIDDEN_PALACE
@@ -752,7 +763,7 @@ buildings:
   - name: Pentagon
     asset_name: BUILDING_PENTAGON
     cost: 800
-    required_tech: Radar
+    required_tech: Combined Arms
     is_wonder: true
     not_yet:
       - Cheaper unit upgrades

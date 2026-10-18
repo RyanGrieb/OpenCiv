@@ -538,11 +538,14 @@ technologies:
     description: Engines that burn fuel inside the cylinder power the next generation of vehicles.
   - name: Penicillin
     asset_name: BUILDING_MEDICAL_LAB
-    cost: 1690
-    prerequisites: [Refrigeration]
+    cost: 3315
+    prerequisites: [Refrigeration, Plastics]
     row: 12
     slot: 1
     description: Antibiotics cure infections that once killed millions.
+    # Not enforced: trade routes have no cap yet.
+    notes:
+      - Allows an additional trade route
   - name: Plastics
     asset_name: BUILDING_HYDRO_PLANT
     cost: 1690
@@ -577,35 +580,39 @@ technologies:
   - name: Ecology
     asset_name: BUILDING_SOLAR_PLANT
     cost: 1950
-    prerequisites: [Penicillin, Plastics]
+    prerequisites: [Penicillin, Atomic Theory]
     row: 13
     slot: 1
     description: Studies how living things and their surroundings depend on each other.
   - name: Atomic Theory
     asset_name: BUILDING_MANHATTAN_PROJECT
-    cost: 1690
-    prerequisites: [Electronics]
+    cost: 3315
+    prerequisites: [Electronics, Plastics]
     row: 12
     slot: 3
     description: Shows that matter is built of atoms with enormous energy inside.
+    # Not enforced: the map has no Uranium or Academies.
+    notes:
+      - Reveals Uranium
+      - +2 Science from Academies
   - name: Radar
     asset_name: BUILDING_PENTAGON
-    cost: 1690
-    prerequisites: [Radio, Flight]
+    cost: 3315
+    prerequisites: [Ballistics, Electronics]
     row: 12
     slot: 5
     description: Bounces radio waves off distant objects to see them in the dark.
   - name: Nuclear Fission
     asset_name: BUILDING_NUCLEAR_PLANT
     cost: 1950
-    prerequisites: [Atomic Theory]
+    prerequisites: [Atomic Theory, Radar]
     row: 13
     slot: 3
     description: Splits the atom, releasing power for plants and weapons alike.
   - name: Computers
     asset_name: UNIT_NUCLEAR_SUBMARINE
     cost: 1950
-    prerequisites: [Combined Arms]
+    prerequisites: [Radar, Combined Arms]
     row: 13
     slot: 7
     description: Machines that calculate faster than any person.
@@ -689,8 +696,8 @@ technologies:
     description: Studies the flight of projectiles, improving the aim of guns and shells.
   - name: Combined Arms
     asset_name: ICON_UNKNOWN
-    cost: 2015
-    prerequisites: [Combustion]
+    cost: 3315
+    prerequisites: [Combustion, Ballistics]
     row: 12
     slot: 7
     description: Tanks, infantry and aircraft fight as a single force.
