@@ -131,6 +131,7 @@ technologies:
     description: The first metal-working technology, providing sturdy tools and early bronze weapons.
     notes:
       - Can remove Jungles
+      - Reveals Iron
   - name: Optics
     asset_name: BUILDING_LIGHTHOUSE
     cost: 105
@@ -200,8 +201,6 @@ technologies:
     row: 3
     slot: 9
     description: The discovery of iron, a metal stronger than bronze, lays the groundwork for advanced metallurgy.
-    notes:
-      - Reveals Iron
   - name: Theology
     asset_name: ICON_FAITH
     cost: 175

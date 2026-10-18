@@ -9,7 +9,7 @@ import { TestUtils } from "../TestUtils";
 // Starts on the tech_effects map preset (server/config/map_presets.yml) with fog of war on and every
 // tech costing 1 science, so each one is researched the turn after it's chosen. Checks what
 // researching a tech does to the map, as in Civ 5 Brave New World: Horses stay hidden until Animal
-// Husbandry and Iron until Iron Working, and Civil Service adds 1 Food to the Farm beside the lake
+// Husbandry and Iron until Bronze Working, and Civil Service adds 1 Food to the Farm beside the lake
 // but not to the dry one. Ends zoomed in on the preset to look over by eye.
 export function setupTechEffectsTest(game: Game) {
   const runner = new TestRunner("TechEffects");
@@ -94,8 +94,8 @@ export function setupTechEffectsTest(game: Game) {
   });
 
   runner.addStep({
-    name: "Iron Working reveals the Iron, worth 1 Production",
-    action: async () => researchInOrder(["Mining", "Bronze Working", "Iron Working"]),
+    name: "Bronze Working reveals the Iron, worth 1 Production",
+    action: async () => researchInOrder(["Mining", "Bronze Working"]),
     verification: () => has(ironTile(), "iron") && yieldOf(ironTile(), "production") === 3
   });
 

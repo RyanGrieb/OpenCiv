@@ -14,6 +14,7 @@ export const SPRITE_MANIFEST: SpriteManifestEntry[] = [
   { name: "BUILDING_APOLLO_PROGRAM", url: new URL("../../assets/sprites/buildings/BUILDING_APOLLO_PROGRAM.png", import.meta.url).href },
   { name: "BUILDING_AQUEDUCT", url: new URL("../../assets/sprites/buildings/BUILDING_AQUEDUCT.png", import.meta.url).href },
   { name: "BUILDING_BANK", url: new URL("../../assets/sprites/buildings/BUILDING_BANK.png", import.meta.url).href },
+  { name: "BUILDING_BARRACKS", url: new URL("../../assets/sprites/buildings/BUILDING_BARRACKS.png", import.meta.url).href },
   { name: "BUILDING_BAZAAR", url: new URL("../../assets/sprites/buildings/BUILDING_BAZAAR.png", import.meta.url).href },
   { name: "BUILDING_BIG_BEN", url: new URL("../../assets/sprites/buildings/BUILDING_BIG_BEN.png", import.meta.url).href },
   { name: "BUILDING_BOROBUDUR", url: new URL("../../assets/sprites/buildings/BUILDING_BOROBUDUR.png", import.meta.url).href },

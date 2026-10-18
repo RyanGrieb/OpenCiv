@@ -26,7 +26,7 @@ describe('TechEffects', () => {
   describe('revealing strategic resources', () => {
     it.each([
       ['horses', 'Animal Husbandry'],
-      ['iron', 'Iron Working']
+      ['iron', 'Bronze Working']
     ])('hides %s until %s', (resource, tech) => {
       expect(TechEffects.isResourceHidden(resource, player())).toBe(true);
       expect(TechEffects.isResourceHidden(resource, player(tech))).toBe(false);
@@ -41,7 +41,7 @@ describe('TechEffects', () => {
       const tile = tileOf('plains_hill', 'iron');
 
       expect(yieldsOf(tile, player())).toEqual({ production: 2 });
-      expect(yieldsOf(tile, player('Iron Working'))).toEqual({ production: 3 });
+      expect(yieldsOf(tile, player('Bronze Working'))).toEqual({ production: 3 });
     });
 
     it('leaves a hidden resource out of the tile sent to that player', () => {
@@ -91,8 +91,8 @@ describe('TechEffects', () => {
     it('marks the tiles a tech changes, so they get resent', () => {
       expect(TechEffects.changesTile('Civil Service', riverFarm())).toBe(true);
       expect(TechEffects.changesTile('Civil Service', tileOf('grass', 'farm'))).toBe(false);
-      expect(TechEffects.changesTile('Iron Working', tileOf('grass', 'iron'))).toBe(true);
-      expect(TechEffects.changesTile('Iron Working', tileOf('grass', 'horses'))).toBe(false);
+      expect(TechEffects.changesTile('Bronze Working', tileOf('grass', 'iron'))).toBe(true);
+      expect(TechEffects.changesTile('Bronze Working', tileOf('grass', 'horses'))).toBe(false);
     });
   });
 

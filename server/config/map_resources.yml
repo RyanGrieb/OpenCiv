@@ -101,7 +101,7 @@ strategic_resources:
     min_temp: 0
     max_temp: 90
   - name: iron
-    reveal_tech: Iron Working
+    reveal_tech: Bronze Working
     spawn_tiles:
       - grass
       - grass_hill

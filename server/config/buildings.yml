@@ -28,6 +28,14 @@ buildings:
     maintenance: 1
     stats:
       - culture: 2
+  - name: Barracks
+    asset_name: BUILDING_BARRACKS
+    cost: 75
+    maintenance: 1
+    required_tech: Bronze Working
+    not_yet:
+      - +15 XP for land units built here
+    stats: []
   - name: Amphitheater
     asset_name: BUILDING_AMPHITHEATER
     cost: 100

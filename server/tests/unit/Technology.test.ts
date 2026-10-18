@@ -105,7 +105,7 @@ describe('Technology', () => {
   it.each([
     ['Archery', ['Archer'], ['Temple of Artemis']],
     ['Masonry', [], ['Great Pyramids', 'Mausoleum of Halicarnassus', 'Walls']],
-    ['Bronze Working', ['Spearman'], ['Colossus', 'Statue of Zeus']],
+    ['Bronze Working', ['Spearman'], ['Barracks', 'Colossus', 'Statue of Zeus']],
     ['Optics', [], ['Great Lighthouse', 'Lighthouse']],
     ['Philosophy', [], ['National College', 'Oracle', 'Temple']],
     ['Drama and Poetry', [], ['Amphitheater', 'National Epic', 'Parthenon']],
