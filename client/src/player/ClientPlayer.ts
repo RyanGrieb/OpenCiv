@@ -130,6 +130,7 @@ export class ClientPlayer extends AbstractPlayer {
       // On release, so holding B down doesn't flicker aiming on and off with key repeat.
       .on("keyup", (options) => {
         if (options.key === "b" || options.key === "B") this.toggleRangedAttack();
+        if (options.key === " ") this.skipSelectedUnitTurn();
       });
 
     Game.getInstance()
@@ -353,6 +354,39 @@ export class ClientPlayer extends AbstractPlayer {
 
   public hasResearchedTech(techName: string): boolean {
     return this.researchedTechs.has(techName);
+  }
+
+  /**
+   * What the selected unit's Skip Turn button and the spacebar do: leave it where it is this turn,
+   * then select the next unit the server still says needs orders, like Civ 5. With none left, nothing
+   * stays selected.
+   */
+  public skipSelectedUnitTurn() {
+    const unit = this.selectedUnit;
+    if (!unit || Game.getInstance().getCurrentScene().getCamera().isLocked()) return;
+
+    const action = unit.getActions().find((candidate) => candidate.getName() === "skip_turn");
+    if (!action?.requirementsMet(unit)) return;
+
+    // The server's next notifications no longer list the skipped unit, so they say which one is next.
+    const notifications = Game.getInstance().getCurrentSceneAs<InGameScene>().getNotifications();
+    const selectNextIdleUnit = () => {
+      notifications.removeChangeListener(selectNextIdleUnit);
+      if (this.selectedUnit !== unit) return;
+
+      const unitOrders = notifications.getAll().find((notification) => notification.type === "unitOrders");
+      if (unitOrders) notifications.act(unitOrders);
+      else this.unselectUnit();
+    };
+    notifications.onChange(selectNextIdleUnit);
+
+    WebsocketClient.sendMessage({
+      event: "unitAction",
+      unitX: unit.getTile().getGridX(),
+      unitY: unit.getTile().getGridY(),
+      id: unit.getID(),
+      actionName: action.getName()
+    });
   }
 
   public unselectUnit(): Unit {

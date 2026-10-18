@@ -273,6 +273,12 @@ export class UnitDisplayInfo extends ActorGroup {
             return;
           }
 
+          // Skip Turn moves the selection on to the next unit needing orders, which the client tracks.
+          if (action.getName() === "skip_turn") {
+            Game.getInstance().getCurrentSceneAs<InGameScene>().getClientPlayer().skipSelectedUnitTurn();
+            return;
+          }
+
           // Send action event to server
           WebsocketClient.sendMessage({
             event: "unitAction",

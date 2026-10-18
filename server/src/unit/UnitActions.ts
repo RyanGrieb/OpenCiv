@@ -15,7 +15,7 @@ export class UnitActions {
       name: "skip_turn",
       icon: "ICON_SKIP_TURN",
       requirements: ["movement"],
-      desc: "Skip Turn",
+      desc: "Skip Turn (Space)",
       onAction: (unit: Unit) => unit.skipTurn()
     };
   }

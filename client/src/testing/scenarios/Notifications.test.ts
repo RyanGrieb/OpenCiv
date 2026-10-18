@@ -60,6 +60,26 @@ export function setupNotificationsTest(game: Game) {
     });
 
     runner.addStep({
+        name: "Move Unit selects an idle unit; Space skips it and selects the next, until none are left",
+        action: async () => {
+            const selectedId = () => utils.getClientPlayer().getUnits().find((unit) => unit.isSelected())?.getID();
+
+            utils.getClientPlayer().unselectUnit();
+            utils.getInGameScene().getNextTurnButton().call("clicked");
+            while (find("unitOrders")) {
+                const skipped = selectedId();
+                if (skipped === undefined || !find("unitOrders").unitIds.includes(skipped)) throw new Error("No idle unit is selected");
+
+                document.body.dispatchEvent(new KeyboardEvent("keyup", { key: " " }));
+                await utils.waitUntil(() => selectedId() !== skipped, 3000, "Space to select the next unit");
+                utils.log(`Skipped ${skipped}, now selected: ${selectedId()}`, "yellow");
+            }
+            if (selectedId() !== undefined) throw new Error("A unit is still selected with none left needing orders");
+        },
+        verification: () => nextTurnText() === "Next Turn"
+    });
+
+    runner.addStep({
         name: "Left-clicking with a unit selected shows the right-click tip; moving drops it",
         action: async () => {
             WebsocketClient.sendMessage({ event: "requestMoveUnitTip" });
@@ -150,15 +170,8 @@ export function setupNotificationsTest(game: Game) {
     });
 
     runner.addStep({
-        name: "Move Unit selects an idle unit; skipping its turn brings back Next Turn",
+        name: "Skipping every idle unit's turn brings back Next Turn",
         action: async () => {
-            if (!find("unitOrders")) return;
-
-            utils.getClientPlayer().unselectUnit();
-            utils.getInGameScene().getNextTurnButton().call("clicked");
-            const selected = utils.getClientPlayer().getUnits().find((unit) => unit.isSelected());
-            if (!selected || !find("unitOrders").unitIds.includes(selected.getID())) throw new Error("Move Unit didn't select an idle unit");
-
             await utils.skipIdleUnits();
         },
         verification: () => nextTurnText() === "Next Turn"
