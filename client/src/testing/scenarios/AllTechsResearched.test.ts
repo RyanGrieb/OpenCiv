@@ -4,7 +4,7 @@ import { NetworkEvents, WebsocketClient } from "../../network/Client";
 import { NotificationData } from "../../notification/Notifications";
 import { TestUtils } from "../TestUtils";
 
-// With every tech already researched (the startWithAllTechs game option), settling a city must not
+// With every tech already researched (the startWithAllTechs game option) and the map revealed, settling a city must not
 // ask for research, and Next Turn must end the turn instead of showing "Choose Research".
 export function setupAllTechsResearchedTest(game: Game) {
     const runner = new TestRunner("AllTechsResearched");
@@ -18,7 +18,7 @@ export function setupAllTechsResearchedTest(game: Game) {
     runner.addStep({
         name: "Start a game with every tech researched",
         action: async () => {
-            await utils.ensureInGame({ allowBarbarians: false, startWithAllTechs: true });
+            await utils.ensureInGame({ allowBarbarians: false, startWithAllTechs: true, revealMap: true });
         },
         verification: () => game.getCurrentScene().getName() === "in_game"
     });
