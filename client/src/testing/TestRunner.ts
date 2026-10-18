@@ -100,16 +100,18 @@ export class TestRunner {
         }
 
         RealMouseGuard.releaseOnNextClick();
+        const logBody = document.getElementById("test-results-log");
+        if (logBody) logBody.style.pointerEvents = "auto";
     }
 
-    // Where the log lines go. Sandbox scenarios turn off pointer events on the whole window so clicks
-    // reach the map under it; the log turns them back on for itself so its scrollbar still works.
+    // Where the log lines go. While the scenario runs, clicks pass through it to the map (it still
+    // follows the newest line on its own); once the scenario is done, its scrollbar can be used.
     private createLogBody(): HTMLDivElement {
         const logBody = document.createElement("div");
         logBody.id = "test-results-log";
         logBody.style.maxHeight = TestRunner.LOG_MAX_HEIGHT;
         logBody.style.overflowY = "auto";
-        logBody.style.pointerEvents = "auto";
+        logBody.style.pointerEvents = "none";
         return logBody;
     }
 
