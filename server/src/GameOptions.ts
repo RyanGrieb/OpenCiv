@@ -118,6 +118,8 @@ interface BaseGameOptionDefinition {
   label: string;
   // Only listed in the client's Game Options UI once the player opens its advanced options.
   hidden?: boolean;
+  // Heading the advanced options list this option under, as a section the player can open and close.
+  category?: string;
 }
 
 interface BooleanGameOptionDefinition extends BaseGameOptionDefinition {
@@ -171,6 +173,7 @@ export const GameOptionDefinitions: GameOptionDefinition[] = [
     max: 504,
     step: GLOBE_WIDTH_STEP,
     hidden: true,
+    category: "Map",
     onChange: (options) => MapSizes.syncPreset(options)
   },
   {
@@ -181,13 +184,32 @@ export const GameOptionDefinitions: GameOptionDefinition[] = [
     max: 512,
     step: MAP_CHUNK_SIZE,
     hidden: true,
+    category: "Map",
     onChange: (options) => MapSizes.syncPreset(options)
   },
-  { key: "revealMap", label: "Reveal Entire Map", type: "boolean", hidden: true },
-  { key: "spawnPlayersTogether", label: "Spawn Players Together", type: "boolean", hidden: true },
-  { key: "startWithAllTechs", label: "Start With All Techs", type: "boolean", hidden: true },
-  { key: "startWithBuilder", label: "Start With a Builder", type: "boolean", hidden: true },
-  { key: "startWithArcher", label: "Start With an Archer", type: "boolean", hidden: true },
+  { key: "revealMap", label: "Reveal Entire Map", type: "boolean", hidden: true, category: "Map" },
+  { key: "spawnPlayersTogether", label: "Spawn Players Together", type: "boolean", hidden: true, category: "Map" },
+  {
+    key: "startWithAllTechs",
+    label: "Start With All Techs",
+    type: "boolean",
+    hidden: true,
+    category: "Starting Bonuses"
+  },
+  {
+    key: "startWithBuilder",
+    label: "Start With a Builder",
+    type: "boolean",
+    hidden: true,
+    category: "Starting Bonuses"
+  },
+  {
+    key: "startWithArcher",
+    label: "Start With an Archer",
+    type: "boolean",
+    hidden: true,
+    category: "Starting Bonuses"
+  },
   {
     key: "cityStartingHealth",
     label: "City Starting Health",
@@ -195,9 +217,19 @@ export const GameOptionDefinitions: GameOptionDefinition[] = [
     min: 1,
     max: 200,
     step: 1,
-    hidden: true
+    hidden: true,
+    category: "Rules"
   },
-  { key: "startingGold", label: "Starting Gold", type: "number", min: 0, max: 10000, step: 10, hidden: true },
+  {
+    key: "startingGold",
+    label: "Starting Gold",
+    type: "number",
+    min: 0,
+    max: 10000,
+    step: 10,
+    hidden: true,
+    category: "Starting Bonuses"
+  },
   {
     key: "startingExperience",
     label: "Starting Experience",
@@ -205,9 +237,19 @@ export const GameOptionDefinitions: GameOptionDefinition[] = [
     min: 0,
     max: 1000,
     step: 5,
-    hidden: true
+    hidden: true,
+    category: "Starting Bonuses"
   },
-  { key: "techCostPercent", label: "Tech Cost %", type: "number", min: 1, max: 300, step: 1, hidden: true },
+  {
+    key: "techCostPercent",
+    label: "Tech Cost %",
+    type: "number",
+    min: 1,
+    max: 300,
+    step: 1,
+    hidden: true,
+    category: "Rules"
+  },
   {
     key: "productionCostPercent",
     label: "Production Cost %",
@@ -215,7 +257,17 @@ export const GameOptionDefinitions: GameOptionDefinition[] = [
     min: 1,
     max: 300,
     step: 1,
-    hidden: true
+    hidden: true,
+    category: "Rules"
   },
-  { key: "baseHappiness", label: "Base Happiness", type: "number", min: -50, max: 50, step: 1, hidden: true }
+  {
+    key: "baseHappiness",
+    label: "Base Happiness",
+    type: "number",
+    min: -50,
+    max: 50,
+    step: 1,
+    hidden: true,
+    category: "Rules"
+  }
 ];
