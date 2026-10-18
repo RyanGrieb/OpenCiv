@@ -35,8 +35,12 @@ export function setupCityWallsTest(game: Game) {
       5000,
       `${name} to be queued`
     );
-    WebsocketClient.sendMessage({ event: "nextTurnRequest", value: true });
-    await utils.waitUntil(() => hasBuilding(name), 5000, `${name} to be built`);
+    // Even at 1% costs a city with little production can need a few turns for the dearer buildings.
+    for (let turn = 0; turn < 5 && !hasBuilding(name); turn++) {
+      WebsocketClient.sendMessage({ event: "nextTurnRequest", value: true });
+      await utils.waitUntil(() => hasBuilding(name), 3000).catch(() => {});
+    }
+    await utils.waitUntil(() => hasBuilding(name), 1000, `${name} to be built`);
     // The new look arrives right behind the building.
     await utils.delay(1000);
     utils.log(`The city is drawn as ${drawnAs().join(", ")}`, "yellow");
