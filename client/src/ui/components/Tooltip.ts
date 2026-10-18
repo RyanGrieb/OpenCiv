@@ -44,7 +44,9 @@ export class Tooltip extends ActorGroup {
     science: SpriteRegion.ICON_SCIENCE,
     culture: SpriteRegion.ICON_CULTURE,
     faith: SpriteRegion.ICON_FAITH,
-    happiness: SpriteRegion.ICON_MORALE
+    happiness: SpriteRegion.ICON_MORALE,
+    defense: SpriteRegion.ICON_DEFENSE,
+    city_health: SpriteRegion.ICON_HEALTH
   };
 
   protected constructor(x: number, y: number, z = 10) {
@@ -90,10 +92,7 @@ export class Tooltip extends ActorGroup {
     const yieldsWidthOf = (index: number) =>
       yieldLabels[index].reduce(
         (total, label, yieldIndex) =>
-          total +
-          (yieldIndex === 0 ? Tooltip.TEXT_YIELD_GAP : Tooltip.YIELD_GAP) +
-          label.getWidth() +
-          Tooltip.YIELD_ICON_SIZE,
+          total + Tooltip.gapBefore(yieldIndex, labels[index]) + label.getWidth() + Tooltip.YIELD_ICON_SIZE,
         0
       );
     const lineGap = lines.some((line) => (line.yields ?? []).length > 0) ? Tooltip.YIELD_LINE_GAP : Tooltip.LINE_GAP;
@@ -101,7 +100,7 @@ export class Tooltip extends ActorGroup {
       0,
       ...labels.map((label, index) => indentOf(index) + label.getWidth() + yieldsWidthOf(index))
     );
-    const textHeight = labels.reduce((total, label) => total + label.getHeight() + lineGap, -lineGap);
+    const textHeight = labels.reduce((total, label) => total + Tooltip.heightOf(label) + lineGap, -lineGap);
     this.width = textWidth + padding * 2;
     this.height = textHeight + padding * 2;
     if (corner === "bottomRight") {
@@ -116,7 +115,7 @@ export class Tooltip extends ActorGroup {
     labels.forEach((label, index) => {
       label.setPosition(this.x + padding + indentOf(index), lineY);
       icons.push(...this.placeYields(lines[index].yields ?? [], yieldLabels[index], label));
-      lineY += label.getHeight() + lineGap;
+      lineY += Tooltip.heightOf(label) + lineGap;
     });
 
     this.addActor(
@@ -134,6 +133,17 @@ export class Tooltip extends ActorGroup {
     [...labels, ...yieldLabels.flat(), ...icons].forEach((actor) => this.addActor(actor));
   }
 
+  // More space after a line's text than between its yields, and none on a line that's only yields.
+  private static gapBefore(yieldIndex: number, lineLabel: Label): number {
+    if (yieldIndex > 0) return Tooltip.YIELD_GAP;
+    return lineLabel.getText() ? Tooltip.TEXT_YIELD_GAP : 0;
+  }
+
+  // A line that's only yields has no text to measure, so it's as tall as one line of text.
+  private static heightOf(label: Label): number {
+    return label.getText() ? label.getHeight() : UITheme.FONT_SIZE;
+  }
+
   // Lines up each yield's number and icon after the line's text, returning the icons.
   private placeYields(yields: TooltipYield[], valueLabels: Label[], lineLabel: Label): Actor[] {
     let x = lineLabel.getX() + lineLabel.getWidth();
@@ -142,7 +152,7 @@ export class Tooltip extends ActorGroup {
     const iconY = lineLabel.getY() - UITheme.centerTextY(Tooltip.YIELD_ICON_SIZE);
 
     return yields.map((entry, index) => {
-      x += index === 0 ? Tooltip.TEXT_YIELD_GAP : Tooltip.YIELD_GAP;
+      x += Tooltip.gapBefore(index, lineLabel);
       valueLabels[index].setPosition(x, lineLabel.getY());
       x += valueLabels[index].getWidth();
 

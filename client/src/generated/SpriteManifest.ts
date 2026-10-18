@@ -144,6 +144,7 @@ export const SPRITE_MANIFEST: SpriteManifestEntry[] = [
   { name: "ICON_GOLD", url: new URL("../../assets/sprites/icons/ICON_GOLD.png", import.meta.url).href },
   { name: "ICON_GOTO_LEFT", url: new URL("../../assets/sprites/icons/ICON_GOTO_LEFT.png", import.meta.url).href },
   { name: "ICON_HAMMER", url: new URL("../../assets/sprites/icons/ICON_HAMMER.png", import.meta.url).href },
+  { name: "ICON_HEALTH", url: new URL("../../assets/sprites/icons/ICON_HEALTH.png", import.meta.url).href },
   { name: "ICON_MAMLUKS", url: new URL("../../assets/sprites/icons/ICON_MAMLUKS.png", import.meta.url).href },
   { name: "ICON_MINE", url: new URL("../../assets/sprites/icons/ICON_MINE.png", import.meta.url).href },
   { name: "ICON_MONGOLIA", url: new URL("../../assets/sprites/icons/ICON_MONGOLIA.png", import.meta.url).href },

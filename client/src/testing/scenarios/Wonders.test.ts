@@ -123,13 +123,13 @@ export function setupWondersTest(game: Game) {
     });
 
     runner.addStep({
-        name: "Hovering a building shows what it gives and its upkeep",
+        name: "Hovering a building shows what it gives (Defense and Health with icons) and its maintenance",
         action: async () => {
             await hoverListRow("Walls");
             utils.log(JSON.stringify(tooltipLines()), "yellow");
         },
         verification: () =>
-            JSON.stringify(tooltipLines()) === JSON.stringify(["Walls", "+5 Defense", "+50 City Health", "-1 Gold per turn upkeep"])
+            JSON.stringify(tooltipLines()) === JSON.stringify(["Walls", "", "Maintenance", "+5", "+50", "-1"])
     });
 
     runner.addStep({
@@ -140,7 +140,7 @@ export function setupWondersTest(game: Game) {
         },
         verification: () =>
             JSON.stringify(tooltipLines()) ===
-            JSON.stringify(["Temple of Artemis", "Great Wonder: only one in the world", "+1 Culture", "+10% Food in all cities"])
+            JSON.stringify(["Temple of Artemis", "Great Wonder: only one in the world", "", "+10% Food in all cities", "+1"])
     });
 
     runner.addStep({
@@ -212,7 +212,7 @@ export function setupWondersTest(game: Game) {
     runner.addStep({
         name: "Leave Notre Dame's tooltip showing, to look at",
         action: async () => hoverListRow("Notre Dame"),
-        verification: () => tooltipLines().includes("+10 Happiness")
+        verification: () => tooltipLines().includes("+10")
     });
 
     return runner;
