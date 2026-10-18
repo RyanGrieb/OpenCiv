@@ -64,13 +64,7 @@ export class Tooltip extends ActorGroup {
       0,
       ...labels.map((label, index) => indentOf(index) + label.getWidth() + yieldsWidthOf(index))
     );
-    // A line with yields is as tall as their icons, so icons on neighbouring lines don't overlap.
-    const heightOf = (index: number) =>
-      Math.max(labels[index].getHeight(), yieldLabels[index].length > 0 ? Tooltip.YIELD_ICON_SIZE : 0);
-    const textHeight = labels.reduce(
-      (total, _, index) => total + heightOf(index) + Tooltip.LINE_GAP,
-      -Tooltip.LINE_GAP
-    );
+    const textHeight = labels.reduce((total, label) => total + label.getHeight() + Tooltip.LINE_GAP, -Tooltip.LINE_GAP);
     this.width = textWidth + padding * 2;
     this.height = textHeight + padding * 2;
     if (corner === "bottomRight") {
@@ -83,9 +77,9 @@ export class Tooltip extends ActorGroup {
     const icons: Actor[] = [];
     let lineY = this.y + padding;
     labels.forEach((label, index) => {
-      label.setPosition(this.x + padding + indentOf(index), lineY + (heightOf(index) - label.getHeight()) / 2);
+      label.setPosition(this.x + padding + indentOf(index), lineY);
       icons.push(...this.placeYields(lines[index].yields ?? [], yieldLabels[index], label));
-      lineY += heightOf(index) + Tooltip.LINE_GAP;
+      lineY += label.getHeight() + Tooltip.LINE_GAP;
     });
 
     this.addActor(
@@ -106,7 +100,9 @@ export class Tooltip extends ActorGroup {
   // Lines up each yield's number and icon after the line's text, returning the icons.
   private placeYields(yields: TooltipYield[], valueLabels: Label[], lineLabel: Label): Actor[] {
     let x = lineLabel.getX() + lineLabel.getWidth();
-    const iconY = lineLabel.getY() + (lineLabel.getHeight() - Tooltip.YIELD_ICON_SIZE) / 2;
+    // Placed against the text the way the status bar does it. The icon's sprite is mostly empty
+    // around the edges, so it can reach into the lines above and below without covering them.
+    const iconY = lineLabel.getY() - UITheme.centerTextY(Tooltip.YIELD_ICON_SIZE);
 
     return yields.map((entry, index) => {
       x += Tooltip.YIELD_GAP;
