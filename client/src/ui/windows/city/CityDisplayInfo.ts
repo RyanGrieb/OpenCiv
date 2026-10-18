@@ -45,9 +45,19 @@ export class CityDisplayInfo extends ActorGroup {
       parentObject: this,
       callback: (data: any) => {
         if (data["cityName"] !== this.city.getName()) return;
-        this.showStatsWindow();
+        // An open list sits in the stats window's place, so leave the stats window hidden.
+        if (!this.listMode) this.showStatsWindow();
         this.tileOverlays.refresh();
         this.showProductionQueueWindow();
+      }
+    });
+
+    // The list's turn counts and prices go stale on a new turn, so close it.
+    NetworkEvents.on({
+      eventName: "newTurn",
+      parentObject: this,
+      callback: () => {
+        if (this.listMode) this.closeList();
       }
     });
 
