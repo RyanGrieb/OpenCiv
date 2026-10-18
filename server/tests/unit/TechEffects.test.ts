@@ -119,6 +119,24 @@ describe('TechEffects', () => {
     });
   });
 
+  it("adds Fertilizer's food to pastures and plantations, wet or dry", () => {
+    for (const type of ['improved_cattle', 'citrus_plantation']) {
+      const tile = tileOf('grass', type);
+      const without = yieldsOf(tile, player()).food ?? 0;
+
+      expect(yieldsOf(tile, player('Fertilizer')).food).toBe(without + 1);
+    }
+  });
+
+  it("adds Chemistry's production to mines and quarries", () => {
+    for (const type of ['mine', 'iron_mine', 'stone_quarry']) {
+      const tile = tileOf('plains_hill', type);
+      const without = yieldsOf(tile, player()).production ?? 0;
+
+      expect(yieldsOf(tile, player('Chemistry')).production).toBe(without + 1);
+    }
+  });
+
   it("adds Scientific Theory's production to lumber mills", () => {
     const mill = tileOf('grass', 'forest', 'lumber_mill');
     const without = yieldsOf(mill, player()).production ?? 0;

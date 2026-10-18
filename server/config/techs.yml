@@ -288,27 +288,32 @@ technologies:
   # Renaissance Era onward, from Brave New World's tech tree. Prerequisites are kept in lower rows than their tech.
   - name: Astronomy
     asset_name: UNIT_CARAVEL
-    cost: 420
+    cost: 505
     prerequisites: [Education, Compass]
     row: 6
     slot: 1
     description: Charts the heavens, leading to ships that can cross the open ocean.
+    # Not enforced: land units can't embark yet.
     notes:
-      - Allows embarked units to enter deep ocean
+      - Faster embarked movement
+      - Allows embarking across oceans
   - name: Acoustics
     asset_name: BUILDING_OPERA_HOUSE
-    cost: 420
+    cost: 505
     prerequisites: [Education]
     row: 6
     slot: 3
     description: The science of sound, enabling great halls for music and worship.
   - name: Banking
     asset_name: BUILDING_BANK
-    cost: 420
+    cost: 505
     prerequisites: [Education, Chivalry]
     row: 6
-    slot: 4
+    slot: 5
     description: Organizes lending and deposits, putting a city's wealth to work.
+    # Not enforced: trade routes have no cap yet.
+    notes:
+      - Allows an additional trade route
   - name: Printing Press
     asset_name: BUILDING_THEATER
     cost: 420
@@ -328,7 +333,7 @@ technologies:
     cost: 585
     prerequisites: [Astronomy]
     row: 7
-    slot: 0
+    slot: 1
     description: Advances sailing and shipbuilding for long voyages.
   - name: Architecture
     asset_name: BUILDING_LEANING_TOWER_OF_PISA
@@ -346,26 +351,46 @@ technologies:
     description: The groundwork for the modern money system.
   - name: Chemistry
     asset_name: UNIT_CANNON
-    cost: 585
+    cost: 750
     prerequisites: [Gunpowder]
     row: 7
-    slot: 8
+    slot: 9
     description: The study of matter and how it changes, from powders to acids.
+    notes:
+      - +1 Production from Mines and Quarries
+    tile_bonuses:
+      - tile_type: mine
+        stats:
+          - production: 1
+      - tile_type: copper_mine
+        stats:
+          - production: 1
+      - tile_type: iron_mine
+        stats:
+          - production: 1
+      - tile_type: gold_mine
+        stats:
+          - production: 1
+      - tile_type: stone_quarry
+        stats:
+          - production: 1
   - name: Metallurgy
     asset_name: UNIT_LANCER
     cost: 585
     prerequisites: [Gunpowder, Printing Press]
     row: 7
-    slot: 9
+    slot: 8
     description: Improves the metals behind Renaissance weaponry and armor.
   - name: Scientific Theory
     asset_name: BUILDING_PUBLIC_SCHOOL
-    cost: 845
-    prerequisites: [Astronomy, Economics]
+    cost: 1040
+    prerequisites: [Economics, Architecture]
     row: 8
-    slot: 1
+    slot: 3
     description: Tests ideas against evidence, the base of modern science.
+    # Not enforced: there are no Academies yet.
     notes:
+      - +2 Science from Academies
       - +1 Production from Lumber Mills
     tile_bonuses:
       - tile_type: lumber_mill
@@ -376,7 +401,7 @@ technologies:
     cost: 845
     prerequisites: [Architecture, Navigation]
     row: 8
-    slot: 3
+    slot: 1
     description: Digs up the past and puts it on display.
   - name: Industrialization
     asset_name: BUILDING_FACTORY
@@ -390,27 +415,46 @@ technologies:
     cost: 845
     prerequisites: [Economics, Chemistry]
     row: 8
-    slot: 7
+    slot: 8
     description: Turns warfare into an organized discipline.
   - name: Rifling
     asset_name: UNIT_RIFLEMAN
     cost: 925
     prerequisites: [Metallurgy]
     row: 8
-    slot: 9
+    slot: 6
     description: Grooved barrels make guns accurate at long range.
   - name: Fertilizer
     asset_name: TILE_FARM
     cost: 845
-    prerequisites: [Scientific Theory]
-    row: 9
-    slot: 0
+    prerequisites: [Chemistry]
+    row: 8
+    slot: 9
     description: Feeds the soil so farms yield more where water is scarce.
     notes:
-      - +1 Food from Farms not next to fresh water
+      - +1 Food from Farms without fresh water
+      - +1 Food from Plantations and Pastures
     tile_bonuses:
       - tile_type: farm
         fresh_water: false
+        stats:
+          - food: 1
+      - tile_type: citrus_plantation
+        stats:
+          - food: 1
+      - tile_type: cotton_plantation
+        stats:
+          - food: 1
+      - tile_type: olive_plantation
+        stats:
+          - food: 1
+      - tile_type: improved_horses
+        stats:
+          - food: 1
+      - tile_type: improved_cattle
+        stats:
+          - food: 1
+      - tile_type: improved_sheep
         stats:
           - food: 1
   - name: Biology
@@ -437,7 +481,7 @@ technologies:
   - name: Dynamite
     asset_name: UNIT_ARTILLERY
     cost: 1235
-    prerequisites: [Rifling, Military Science]
+    prerequisites: [Fertilizer, Rifling]
     row: 9
     slot: 8
     description: A stable explosive for mining, demolition and war.
