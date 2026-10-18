@@ -27,24 +27,24 @@ export class BuildingTooltip extends Tooltip {
     if (kind) lines.push({ text: kind, color: BuildingTooltip.WONDER_COLOR });
 
     const yields = Tooltip.getYields([...building.stats, { city_health: building.city_health ?? 0 }]);
-    if (yields.length > 0) lines.push({ text: "", color: "white", indent: true, yields });
+    if (yields.length > 0) lines.push({ text: "", color: "white", yields });
 
     const bonuses = [...BuildingTooltip.getBonuses(building), ...(building.effect_lines ?? [])];
-    if (bonuses.length === 0 && yields.length === 0) lines.push({ text: "No bonuses", color: "gray", indent: true });
-    bonuses.forEach((text) => lines.push({ text, color: BuildingTooltip.BONUS_COLOR, indent: true }));
+    if (bonuses.length === 0 && yields.length === 0) lines.push({ text: "No bonuses", color: "gray" });
+    bonuses.forEach((text) => lines.push({ text, color: BuildingTooltip.BONUS_COLOR }));
 
     if (building.maintenance) {
       lines.push({
         text: "Maintenance",
         color: BuildingTooltip.UPKEEP_COLOR,
-        indent: true,
+
         yields: Tooltip.getYields([{ gold: -building.maintenance }])
       });
     }
 
     const notYet = building.not_yet ?? [];
     if (notYet.length > 0) lines.push({ text: "Not in the game yet:", color: BuildingTooltip.NOT_YET_COLOR });
-    notYet.forEach((text) => lines.push({ text, color: BuildingTooltip.NOT_YET_COLOR, indent: true }));
+    notYet.forEach((text) => lines.push({ text, color: BuildingTooltip.NOT_YET_COLOR }));
 
     return lines;
   }
