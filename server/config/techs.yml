@@ -579,7 +579,7 @@ technologies:
     description: Powered flight, the end of distance as a barrier.
   - name: Ecology
     asset_name: BUILDING_SOLAR_PLANT
-    cost: 1950
+    cost: 4160
     prerequisites: [Penicillin, Atomic Theory]
     row: 13
     slot: 1
@@ -604,14 +604,14 @@ technologies:
     description: Bounces radio waves off distant objects to see them in the dark.
   - name: Nuclear Fission
     asset_name: BUILDING_NUCLEAR_PLANT
-    cost: 1950
+    cost: 4160
     prerequisites: [Atomic Theory, Radar]
     row: 13
     slot: 3
     description: Splits the atom, releasing power for plants and weapons alike.
   - name: Computers
     asset_name: UNIT_NUCLEAR_SUBMARINE
-    cost: 1950
+    cost: 4160
     prerequisites: [Radar, Combined Arms]
     row: 13
     slot: 7
@@ -619,13 +619,13 @@ technologies:
   - name: Lasers
     asset_name: UNIT_MODERN_ARMOR
     cost: 1950
-    prerequisites: [Atomic Theory, Radar]
+    prerequisites: [Computers]
     row: 14
     slot: 7
     description: Focused light for cutting, measuring and aiming.
   - name: Rocketry
     asset_name: BUILDING_APOLLO_PROGRAM
-    cost: 1950
+    cost: 4160
     prerequisites: [Radar]
     row: 13
     slot: 5
@@ -640,7 +640,7 @@ technologies:
   - name: Robotics
     asset_name: UNIT_MISSILE_CRUISER
     cost: 2175
-    prerequisites: [Computers]
+    prerequisites: [Rocketry, Computers]
     row: 14
     slot: 6
     description: Programmable machines that do work too dull or dangerous for people.
@@ -654,7 +654,7 @@ technologies:
   - name: Satellites
     asset_name: BUILDING_APOLLO_PROGRAM
     cost: 2175
-    prerequisites: [Rocketry, Computers]
+    prerequisites: [Rocketry]
     row: 14
     slot: 5
     description: Machines in orbit that watch, listen and relay from above.
@@ -704,14 +704,14 @@ technologies:
   - name: Telecommunications
     asset_name: ICON_UNKNOWN
     cost: 2175
-    prerequisites: [Computers]
+    prerequisites: [Ecology]
     row: 14
     slot: 1
     description: Carries voice, video and data across the whole world.
   - name: Mobile Tactics
     asset_name: ICON_UNKNOWN
     cost: 2175
-    prerequisites: [Combined Arms]
+    prerequisites: [Ecology, Nuclear Fission]
     row: 14
     slot: 2
     description: Fast, flexible forces that strike where the enemy is weakest.

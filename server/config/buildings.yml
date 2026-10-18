@@ -791,7 +791,7 @@ buildings:
   - name: Sydney Opera House
     asset_name: BUILDING_SYDNEY_OPERA_HOUSE
     cost: 1000
-    required_tech: Globalization
+    required_tech: Ecology
     is_wonder: true
     not_yet:
       - A free Social Policy
@@ -818,3 +818,13 @@ buildings:
     stats:
       - culture: 3
       - happiness: 4
+  - name: Great Firewall
+    asset_name: BUILDING_GREAT_FIREWALL
+    cost: 1000
+    required_tech: Computers
+    is_wonder: true
+    not_yet:
+      - Its Civ 5 effect
+    stats:
+      - culture: 3
+      - science: 5

@@ -147,11 +147,13 @@ describe('Technology', () => {
     ['Electronics', ['Battleship', 'Mechanized Infantry'], ['Cristo Redentor']],
     ['Radio', [], ['Broadcast Tower', 'Eiffel Tower']],
     ['Atomic Theory', [], ['Manhattan Project']],
-    ['Computers', ['Nuclear Submarine'], []],
+    ['Computers', [], ['Great Firewall']],
     ['Lasers', ['Modern Armor'], []],
     ['Rocketry', ['Rocket Artillery'], ['Apollo Program']],
-    ['Robotics', ['Missile Cruiser'], []],
-    ['Globalization', [], ['Sydney Opera House', 'United Nations']]
+    ['Robotics', ['Missile Cruiser', 'Nuclear Submarine'], []],
+    ['Globalization', [], ['United Nations']],
+    ['Ecology', [], ['Sydney Opera House']],
+    ['Nuclear Fission', ['Bazooka'], []]
   ])('unlocks what %s unlocks in Brave New World', (tech, units, buildings) => {
     const unlocks = Technology.getUnlocks(tech);
     const names = (list: { name: string }[]) => list.map((entry) => entry.name).sort();
