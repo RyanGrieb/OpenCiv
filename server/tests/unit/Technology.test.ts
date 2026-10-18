@@ -22,7 +22,7 @@ describe('Technology', () => {
   it('loads every technology, including tech-gated ones with prerequisites', () => {
     const technologies = Technology.getAllTechnologies();
 
-    expect(technologies).toHaveLength(76);
+    expect(technologies).toHaveLength(75);
 
     // Matches Civ5's actual root set - everything else requires "Agriculture"
     // (a free starting tech this config doesn't model), so these four are the
@@ -137,11 +137,12 @@ describe('Technology', () => {
     ['Electricity', [], ['Stock Exchange']],
     ['Steam Power', ['Ironclad'], []],
     ['Dynamite', ['Artillery'], []],
-    ['Refrigeration', ['Submarine'], []],
-    ['Telegraph', ['Battleship'], ['Cristo Redentor']],
-    ['Replaceable Parts', ['Anti-Tank Gun', 'Infantry'], ['Statue of Liberty']],
+    ['Refrigeration', ['Submarine'], ['Stadium']],
+    ['Replaceable Parts', ['Great War Infantry'], ['Statue of Liberty']],
+    ['Plastics', ['Anti-Tank Gun', 'Infantry'], []],
+    ['Flight', [], ['Prora']],
     ['Combustion', ['Destroyer', 'Tank'], []],
-    ['Electronics', ['Mechanized Infantry'], ['Stadium']],
+    ['Electronics', ['Battleship', 'Mechanized Infantry'], ['Cristo Redentor']],
     ['Radio', [], ['Broadcast Tower', 'Eiffel Tower']],
     ['Radar', [], ['Pentagon']],
     ['Atomic Theory', [], ['Manhattan Project']],

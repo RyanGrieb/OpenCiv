@@ -507,18 +507,11 @@ technologies:
       - Obsoletes the Great Wall
   - name: Refrigeration
     asset_name: BUILDING_SUPERMARKET
-    cost: 1430
-    prerequisites: [Electricity, Biology]
+    cost: 2015
+    prerequisites: [Biology, Electricity]
     row: 10
-    slot: 1
+    slot: 0
     description: Keeps food fresh for weeks, letting cities grow larger.
-  - name: Telegraph
-    asset_name: BUILDING_CRISTO_REDENTOR
-    cost: 1430
-    prerequisites: [Electricity]
-    row: 10
-    slot: 3
-    description: Sends messages along wires faster than any rider.
   - name: Railroad
     asset_name: BUILDING_ARSENAL
     cost: 1235
@@ -528,10 +521,10 @@ technologies:
     description: Steam locomotives move goods and armies across continents.
   - name: Replaceable Parts
     asset_name: UNIT_INFANTRY
-    cost: 1235
+    cost: 2015
     prerequisites: [Electricity, Steam Power]
     row: 10
-    slot: 7
+    slot: 3
     description: Interchangeable parts make weapons easy to mass produce and repair.
   - name: Combustion
     asset_name: UNIT_TANK
@@ -557,23 +550,26 @@ technologies:
   - name: Electronics
     asset_name: BUILDING_STADIUM
     cost: 1690
-    prerequisites: [Telegraph]
+    prerequisites: [Replaceable Parts, Flight]
     row: 11
     slot: 3
     description: Controls electric current with tubes and circuits.
   - name: Radio
     asset_name: BUILDING_BROADCAST_TOWER
-    cost: 1430
-    prerequisites: [Telegraph]
-    row: 11
-    slot: 4
+    cost: 2015
+    prerequisites: [Electricity]
+    row: 10
+    slot: 1
     description: Carries voices and music through the air.
+    # Not enforced: there is no World Congress yet.
+    notes:
+      - Enables the International Games World Congress proposal
   - name: Flight
     asset_name: UNIT_FIGHTER
-    cost: 1430
-    prerequisites: [Replaceable Parts, Combustion]
-    row: 11
-    slot: 8
+    cost: 2015
+    prerequisites: [Steam Power]
+    row: 10
+    slot: 4
     description: Powered flight, the end of distance as a barrier.
   - name: Ecology
     asset_name: BUILDING_SOLAR_PLANT

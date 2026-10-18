@@ -637,7 +637,7 @@ buildings:
     asset_name: BUILDING_STADIUM
     cost: 300
     maintenance: 3
-    required_tech: Electronics
+    required_tech: Refrigeration
     requires_building: Colosseum
     stats:
       - happiness: 4
@@ -722,7 +722,7 @@ buildings:
   - name: Cristo Redentor
     asset_name: BUILDING_CRISTO_REDENTOR
     cost: 600
-    required_tech: Telegraph
+    required_tech: Electronics
     is_wonder: true
     not_yet:
       - Culture needed for new policies is reduced
@@ -797,3 +797,13 @@ buildings:
     stats:
       - gold: 6
       - culture: 3
+  - name: Prora
+    asset_name: BUILDING_PRORA
+    cost: 600
+    required_tech: Flight
+    is_wonder: true
+    not_yet:
+      - Its Civ 5 effect
+    stats:
+      - culture: 3
+      - happiness: 4

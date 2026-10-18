@@ -254,17 +254,23 @@ units:
     default_move_distance: 6
     required_tech: Combustion
     obsolete_tech: Robotics
+  - name: Great War Infantry
+    combat_strength: 36
+    attack_type: melee
+    cost: 250
+    required_tech: Replaceable Parts
+    obsolete_tech: Plastics
   - name: Infantry
     combat_strength: 50
     attack_type: melee
     cost: 300
-    required_tech: Replaceable Parts
+    required_tech: Plastics
     obsolete_tech: Electronics
   - name: Anti-Tank Gun
     combat_strength: 32
     attack_type: melee
     cost: 250
-    required_tech: Replaceable Parts
+    required_tech: Plastics
   - name: Submarine
     combat_strength: 40
     ranged_strength: 65
@@ -283,7 +289,7 @@ units:
     domain: sea
     cost: 520
     default_move_distance: 5
-    required_tech: Telegraph
+    required_tech: Electronics
   - name: Tank
     combat_strength: 60
     attack_type: melee
