@@ -220,6 +220,16 @@ export class Tile extends Actor {
   }
 
   /**
+   * Whether a tile type is one of the layers a city is drawn in (see getCityTypes()). Each is drawn
+   * on its own: the globe tells a city's buildings, and its walls' pieces, apart by their opacities
+   * (see StandingPieces), which each layer marks for itself, and which drawing one over another would
+   * run together.
+   */
+  public static isCityLayer(tileType: string): boolean {
+    return tileType.startsWith("city_");
+  }
+
+  /**
    * The tile type whose sprite draws a city of the given era (an era id from the server, like
    * "classical") at (gridX, gridY): one of that era's looks, picked from a hash of the coordinates
    * so a city keeps its look until its owner enters a new era.
