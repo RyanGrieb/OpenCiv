@@ -18,7 +18,7 @@ export interface EraData {
 export interface TileBonusData {
   // The tile type that gets the bonus, e.g. "farm".
   tile_type: string;
-  // Only tiles on a river or next to a lake.
+  // true: only tiles on a river or next to a lake. false: only tiles that aren't.
   fresh_water?: boolean;
   stats: StatEntry[];
 }

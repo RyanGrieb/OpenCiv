@@ -11,6 +11,21 @@ eras:
   - name: Medieval Era
     id: medieval
     rows: [4, 5]
+  - name: Renaissance Era
+    id: renaissance
+    rows: [6, 7]
+  - name: Industrial Era
+    id: industrial
+    rows: [8, 9]
+  - name: Modern Era
+    id: modern
+    rows: [10, 11]
+  - name: Atomic Era
+    id: atomic
+    rows: [12, 13]
+  - name: Information Era
+    id: information
+    rows: [14, 15]
 technologies:
   # slot is the tech's horizontal column (0-9) within its row - a fixed 10-slot
   # grid, matching Civ5's tech-web layout, where unused slots stay visually
@@ -24,7 +39,7 @@ technologies:
   # buildings.yml and improvements.yml each name their own required_tech, and
   # map_resources.yml names the tech that reveals a resource (reveal_tech).
   # tile_bonuses are yields a tech adds to its owner's tiles of a type
-  # (fresh_water: only on a river or beside a lake). The few notes nothing
+  # (fresh_water: true only on a river or beside a lake, false only away from both). The few notes nothing
   # enforces yet say so in the tech's own comment.
   - name: Pottery
     asset_name: BUILDING_GRANARY
@@ -270,3 +285,341 @@ technologies:
     row: 5
     slot: 9
     description: A stronger, more refined form of iron, enabling more resilient weapons and armor.
+  # Renaissance Era onward, from Brave New World's tech tree. Prerequisites are kept in lower rows than their tech.
+  - name: Astronomy
+    asset_name: UNIT_CARAVEL
+    cost: 420
+    prerequisites: [Education, Compass]
+    row: 6
+    slot: 1
+    description: Charts the heavens, leading to ships that can cross the open ocean.
+    notes:
+      - Allows embarked units to enter deep ocean
+  - name: Acoustics
+    asset_name: BUILDING_OPERA_HOUSE
+    cost: 420
+    prerequisites: [Education]
+    row: 6
+    slot: 3
+    description: The science of sound, enabling great halls for music and worship.
+  - name: Banking
+    asset_name: BUILDING_BANK
+    cost: 420
+    prerequisites: [Education, Chivalry]
+    row: 6
+    slot: 4
+    description: Organizes lending and deposits, putting a city's wealth to work.
+  - name: Printing Press
+    asset_name: BUILDING_THEATER
+    cost: 420
+    prerequisites: [Machinery, Physics]
+    row: 6
+    slot: 7
+    description: Spreads books and ideas far faster than hand copying ever could.
+  - name: Gunpowder
+    asset_name: UNIT_MUSKETMAN
+    cost: 440
+    prerequisites: [Physics, Steel]
+    row: 6
+    slot: 9
+    description: A black powder that changes the battlefield for good.
+  - name: Navigation
+    asset_name: UNIT_FRIGATE
+    cost: 585
+    prerequisites: [Astronomy]
+    row: 7
+    slot: 0
+    description: Advances sailing and shipbuilding for long voyages.
+  - name: Architecture
+    asset_name: BUILDING_LEANING_TOWER_OF_PISA
+    cost: 420
+    prerequisites: [Acoustics, Banking]
+    row: 7
+    slot: 3
+    description: Designs grand structures that outlast their builders.
+  - name: Economics
+    asset_name: BUILDING_WINDMILL
+    cost: 585
+    prerequisites: [Banking, Printing Press]
+    row: 7
+    slot: 5
+    description: The groundwork for the modern money system.
+  - name: Chemistry
+    asset_name: UNIT_CANNON
+    cost: 585
+    prerequisites: [Gunpowder]
+    row: 7
+    slot: 8
+    description: The study of matter and how it changes, from powders to acids.
+  - name: Metallurgy
+    asset_name: UNIT_LANCER
+    cost: 585
+    prerequisites: [Gunpowder, Printing Press]
+    row: 7
+    slot: 9
+    description: Improves the metals behind Renaissance weaponry and armor.
+  - name: Scientific Theory
+    asset_name: BUILDING_PUBLIC_SCHOOL
+    cost: 845
+    prerequisites: [Astronomy, Economics]
+    row: 8
+    slot: 1
+    description: Tests ideas against evidence, the base of modern science.
+    notes:
+      - +1 Production from Lumber Mills
+    tile_bonuses:
+      - tile_type: lumber_mill
+        stats:
+          - production: 1
+  - name: Archaeology
+    asset_name: BUILDING_MUSEUM
+    cost: 845
+    prerequisites: [Architecture, Navigation]
+    row: 8
+    slot: 3
+    description: Digs up the past and puts it on display.
+  - name: Industrialization
+    asset_name: BUILDING_FACTORY
+    cost: 925
+    prerequisites: [Economics, Navigation]
+    row: 8
+    slot: 5
+    description: Machines and factories replace the workshop.
+  - name: Military Science
+    asset_name: UNIT_CAVALRY
+    cost: 845
+    prerequisites: [Economics, Chemistry]
+    row: 8
+    slot: 7
+    description: Turns warfare into an organized discipline.
+  - name: Rifling
+    asset_name: UNIT_RIFLEMAN
+    cost: 925
+    prerequisites: [Metallurgy]
+    row: 8
+    slot: 9
+    description: Grooved barrels make guns accurate at long range.
+  - name: Fertilizer
+    asset_name: TILE_FARM
+    cost: 845
+    prerequisites: [Scientific Theory]
+    row: 9
+    slot: 0
+    description: Feeds the soil so farms yield more where water is scarce.
+    notes:
+      - +1 Food from Farms not next to fresh water
+    tile_bonuses:
+      - tile_type: farm
+        fresh_water: false
+        stats:
+          - food: 1
+  - name: Biology
+    asset_name: BUILDING_HOSPITAL
+    cost: 1090
+    prerequisites: [Archaeology, Scientific Theory]
+    row: 9
+    slot: 2
+    description: The study of living things, the root of modern medicine.
+  - name: Electricity
+    asset_name: BUILDING_STOCK_EXCHANGE
+    cost: 1235
+    prerequisites: [Scientific Theory, Metallurgy]
+    row: 9
+    slot: 4
+    description: Harnesses electric current for light, power and trade.
+  - name: Steam Power
+    asset_name: UNIT_IRONCLAD
+    cost: 1090
+    prerequisites: [Industrialization, Scientific Theory]
+    row: 9
+    slot: 5
+    description: Steam engines drive ships and machines without wind or muscle.
+  - name: Dynamite
+    asset_name: UNIT_ARTILLERY
+    cost: 1235
+    prerequisites: [Rifling, Military Science]
+    row: 9
+    slot: 8
+    description: A stable explosive for mining, demolition and war.
+  - name: Refrigeration
+    asset_name: BUILDING_SUPERMARKET
+    cost: 1430
+    prerequisites: [Electricity, Biology]
+    row: 10
+    slot: 1
+    description: Keeps food fresh for weeks, letting cities grow larger.
+  - name: Telegraph
+    asset_name: BUILDING_CRISTO_REDENTOR
+    cost: 1430
+    prerequisites: [Electricity]
+    row: 10
+    slot: 3
+    description: Sends messages along wires faster than any rider.
+  - name: Railroad
+    asset_name: BUILDING_ARSENAL
+    cost: 1235
+    prerequisites: [Steam Power]
+    row: 10
+    slot: 5
+    description: Steam locomotives move goods and armies across continents.
+  - name: Replaceable Parts
+    asset_name: UNIT_INFANTRY
+    cost: 1235
+    prerequisites: [Dynamite, Industrialization]
+    row: 10
+    slot: 7
+    description: Interchangeable parts make weapons easy to mass produce and repair.
+  - name: Combustion
+    asset_name: UNIT_TANK
+    cost: 1430
+    prerequisites: [Dynamite, Steam Power]
+    row: 10
+    slot: 9
+    description: Engines that burn fuel inside the cylinder power the next generation of vehicles.
+  - name: Penicillin
+    asset_name: BUILDING_MEDICAL_LAB
+    cost: 1690
+    prerequisites: [Refrigeration, Biology]
+    row: 11
+    slot: 0
+    description: Antibiotics cure infections that once killed millions.
+  - name: Plastics
+    asset_name: BUILDING_HYDRO_PLANT
+    cost: 1690
+    prerequisites: [Refrigeration]
+    row: 11
+    slot: 1
+    description: Cheap, moldable materials made from oil.
+  - name: Electronics
+    asset_name: BUILDING_STADIUM
+    cost: 1690
+    prerequisites: [Telegraph]
+    row: 11
+    slot: 3
+    description: Controls electric current with tubes and circuits.
+  - name: Radio
+    asset_name: BUILDING_BROADCAST_TOWER
+    cost: 1430
+    prerequisites: [Telegraph]
+    row: 11
+    slot: 4
+    description: Carries voices and music through the air.
+  - name: Flight
+    asset_name: UNIT_FIGHTER
+    cost: 1430
+    prerequisites: [Replaceable Parts, Combustion]
+    row: 11
+    slot: 8
+    description: Powered flight, the end of distance as a barrier.
+  - name: Ecology
+    asset_name: BUILDING_SOLAR_PLANT
+    cost: 1950
+    prerequisites: [Penicillin, Plastics]
+    row: 12
+    slot: 0
+    description: Studies how living things and their surroundings depend on each other.
+  - name: Atomic Theory
+    asset_name: BUILDING_MANHATTAN_PROJECT
+    cost: 1690
+    prerequisites: [Electronics]
+    row: 12
+    slot: 2
+    description: Shows that matter is built of atoms with enormous energy inside.
+  - name: Mass Media
+    asset_name: BUILDING_BROADCAST_TOWER
+    cost: 1690
+    prerequisites: [Radio]
+    row: 12
+    slot: 4
+    description: Newspapers, film and broadcasts reach whole nations at once.
+  - name: Radar
+    asset_name: BUILDING_PENTAGON
+    cost: 1690
+    prerequisites: [Radio, Flight]
+    row: 12
+    slot: 7
+    description: Bounces radio waves off distant objects to see them in the dark.
+  - name: Nuclear Fission
+    asset_name: BUILDING_NUCLEAR_PLANT
+    cost: 1950
+    prerequisites: [Atomic Theory]
+    row: 13
+    slot: 2
+    description: Splits the atom, releasing power for plants and weapons alike.
+  - name: Computers
+    asset_name: UNIT_NUCLEAR_SUBMARINE
+    cost: 1950
+    prerequisites: [Mass Media, Electronics]
+    row: 13
+    slot: 4
+    description: Machines that calculate faster than any person.
+  - name: Lasers
+    asset_name: UNIT_MODERN_ARMOR
+    cost: 1950
+    prerequisites: [Atomic Theory, Radar]
+    row: 13
+    slot: 6
+    description: Focused light for cutting, measuring and aiming.
+  - name: Rocketry
+    asset_name: BUILDING_APOLLO_PROGRAM
+    cost: 1950
+    prerequisites: [Radar]
+    row: 13
+    slot: 8
+    description: Liquid-fueled rockets that reach beyond the atmosphere.
+  - name: Globalization
+    asset_name: BUILDING_UNITED_NATIONS
+    cost: 2175
+    prerequisites: [Computers]
+    row: 14
+    slot: 1
+    description: Trade, travel and communication knit the world into one market.
+  - name: Robotics
+    asset_name: UNIT_MISSILE_CRUISER
+    cost: 2175
+    prerequisites: [Computers]
+    row: 14
+    slot: 3
+    description: Programmable machines that do work too dull or dangerous for people.
+  - name: Particle Physics
+    asset_name: BUILDING_SPACESHIP_FACTORY
+    cost: 2175
+    prerequisites: [Lasers, Computers]
+    row: 14
+    slot: 5
+    description: Probes the smallest pieces of matter with giant machines.
+  - name: Satellites
+    asset_name: BUILDING_APOLLO_PROGRAM
+    cost: 2175
+    prerequisites: [Rocketry, Computers]
+    row: 14
+    slot: 7
+    description: Machines in orbit that watch, listen and relay from above.
+  - name: Stealth
+    asset_name: UNIT_STEALTH_BOMBER
+    cost: 2175
+    prerequisites: [Lasers]
+    row: 14
+    slot: 9
+    description: Shapes and coats aircraft so radar can barely see them.
+  - name: Advanced Ballistics
+    asset_name: UNIT_NUCLEAR_MISSILE
+    cost: 2175
+    prerequisites: [Rocketry, Nuclear Fission]
+    row: 15
+    slot: 0
+    description: Guides rockets over thousands of miles to a chosen target.
+  - name: Nanotechnology
+    asset_name: ICON_UNKNOWN
+    cost: 2145
+    prerequisites: [Robotics, Particle Physics]
+    row: 15
+    slot: 3
+    description: Builds machines and materials one atom at a time.
+  - name: Nuclear Fusion
+    asset_name: UNIT_GIANT_DEATH_ROBOT
+    cost: 2340
+    prerequisites: [Particle Physics]
+    row: 15
+    slot: 6
+    description: Joins atoms together to release the energy that powers the stars.

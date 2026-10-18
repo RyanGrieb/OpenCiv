@@ -39,6 +39,6 @@ export class TechEffects {
   private static bonusApplies(bonus: TileBonusData, tile: Tile): boolean {
     if (!tile.containsTileType(bonus.tile_type)) return false;
 
-    return !bonus.fresh_water || tile.hasFreshWater();
+    return bonus.fresh_water === undefined || tile.hasFreshWater() === bonus.fresh_water;
   }
 }
