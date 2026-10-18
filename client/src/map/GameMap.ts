@@ -19,6 +19,7 @@ import { TerrainBlend } from "./TerrainBlend";
 import { MountainPeaks } from "./MountainPeaks";
 import { HillMounds } from "./HillMounds";
 import { SceneObject } from "../scene/SceneObject";
+import { FlatMapPicture } from "./FlatMapPicture";
 
 /**
  * A tile's art that stands up off the ground on the globe (trees, mountain peaks, hills' mounds,
@@ -168,6 +169,8 @@ export class GameMap {
 
   // The soft-edged fog over the whole map - created once the map's size is known.
   private fogOfWar: FogOfWarLayer;
+  // The chunks as the flat map draws them, a few big canvases at a time.
+  private flatPicture: FlatMapPicture;
 
   // Every chunk-visual rebuild goes through this queue rather than running concurrently, so a chunk's
   // rebuilds land in the order they were asked for - fog reveals can trigger many of these in quick
@@ -568,6 +571,9 @@ export class GameMap {
         scene.removeActor(this.fogOfWar);
         this.fogOfWar = new FogOfWarLayer(this.mapWidth, this.mapHeight, MapWrap.isWrapped());
         scene.addActor(this.fogOfWar);
+        scene.removeActor(this.flatPicture);
+        this.flatPicture = new FlatMapPicture();
+        scene.addActor(this.flatPicture);
 
         this.tiles = [];
         for (let x = 0; x < this.mapWidth; x++) {
@@ -1017,6 +1023,7 @@ export class GameMap {
     const scene = Game.getInstance().getCurrentScene();
     const previous = layer.get(chunkKey);
     if (previous) scene.removeActor(previous);
+    this.flatPicture?.removeChunk(previous);
     layer.delete(chunkKey);
     if (actors.length === 0) return;
 
@@ -1030,6 +1037,7 @@ export class GameMap {
     // Explicit so the fog layer (z 1) reliably sorts above the map: an undefined z doesn't compare.
     merged.setZValue(z);
     scene.addActor(merged);
+    this.flatPicture?.addChunk(merged);
     layer.set(chunkKey, merged);
     this.chunkLayers.set(merged, layer === this.standingLayerChunks ? "standing" : "terrain");
   }

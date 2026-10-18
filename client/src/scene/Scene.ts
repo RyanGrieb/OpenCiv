@@ -6,6 +6,7 @@ import { Line } from "./Line";
 import { SceneObject } from "./SceneObject";
 import { ActorGroup } from "./ActorGroup";
 import { MapWrap } from "../map/MapWrap";
+import { FlatMapPicture } from "../map/FlatMapPicture";
 
 export abstract class Scene {
   protected static ExitReceipt = new (class {})();
@@ -86,7 +87,8 @@ export abstract class Scene {
         return;
       }
 
-      if (this.worldHidden || worldOffscreen) return;
+      // Drawn as part of a picture of them all - see FlatMapPicture.
+      if (this.worldHidden || worldOffscreen || FlatMapPicture.covers(object)) return;
 
       for (const offsetX of offsets) {
         game.setWorldDrawOffsetX(offsetX);
