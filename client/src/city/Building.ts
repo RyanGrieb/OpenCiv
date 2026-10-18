@@ -29,7 +29,7 @@ export class Buidling {
   constructor(buildingData: BuildingData) {
     this.name = buildingData.name;
     this.effectLines = buildingData.effect_lines ?? [];
-    this.spriteRegion = resolveSpriteRegion(buildingData.asset_name);
+    this.spriteRegion = resolveSpriteRegion(buildingData.asset_name) ?? SpriteRegion.ICON_UNKNOWN;
     this.category = Buidling.categoryOf(buildingData);
     this.statLine = {};
 

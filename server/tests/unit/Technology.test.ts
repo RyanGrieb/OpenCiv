@@ -22,7 +22,7 @@ describe('Technology', () => {
   it('loads every technology, including tech-gated ones with prerequisites', () => {
     const technologies = Technology.getAllTechnologies();
 
-    expect(technologies).toHaveLength(30);
+    expect(technologies).toHaveLength(76);
 
     // Matches Civ5's actual root set - everything else requires "Agriculture"
     // (a free starting tech this config doesn't model), so these four are the
@@ -117,7 +117,39 @@ describe('Technology', () => {
     ['Chivalry', ['Knight'], ['Alhambra', 'Castle', 'Himeji Castle']],
     ['Machinery', ['Crossbowman'], ['Ironworks']],
     ['Physics', ['Trebuchet'], ['Notre Dame']],
-    ['Steel', ['Longswordsman'], []]
+    ['Steel', ['Longswordsman'], []],
+    ['Astronomy', ['Caravel'], ['Observatory']],
+    ['Acoustics', [], ['Opera House', 'Sistine Chapel']],
+    ['Banking', [], ['Bank', 'Forbidden Palace']],
+    ['Printing Press', [], ['Taj Mahal']],
+    ['Gunpowder', ['Musketman'], []],
+    ['Navigation', ['Frigate', 'Privateer'], ['Seaport']],
+    ['Architecture', [], ['Leaning Tower of Pisa']],
+    ['Economics', [], ['Big Ben', 'Windmill']],
+    ['Chemistry', ['Cannon'], []],
+    ['Metallurgy', ['Lancer'], []],
+    ['Scientific Theory', [], ['Public School']],
+    ['Archaeology', [], ['Hermitage', 'Louvre', 'Museum']],
+    ['Industrialization', [], ['Factory']],
+    ['Military Science', ['Cavalry'], ['Brandenburg Gate']],
+    ['Rifling', ['Rifleman'], []],
+    ['Biology', [], ['Hospital']],
+    ['Electricity', ['Destroyer'], ['Stock Exchange']],
+    ['Steam Power', ['Ironclad'], []],
+    ['Dynamite', ['Artillery'], []],
+    ['Refrigeration', ['Submarine'], []],
+    ['Telegraph', ['Battleship'], ['Cristo Redentor']],
+    ['Replaceable Parts', ['Anti-Tank Gun', 'Infantry'], ['Statue of Liberty']],
+    ['Combustion', ['Tank'], []],
+    ['Electronics', ['Mechanized Infantry'], ['Stadium']],
+    ['Radio', [], ['Broadcast Tower', 'Eiffel Tower']],
+    ['Radar', [], ['Pentagon']],
+    ['Atomic Theory', [], ['Manhattan Project']],
+    ['Computers', ['Nuclear Submarine'], []],
+    ['Lasers', ['Modern Armor'], []],
+    ['Rocketry', ['Rocket Artillery'], ['Apollo Program']],
+    ['Robotics', ['Missile Cruiser'], []],
+    ['Globalization', [], ['Sydney Opera House', 'United Nations']]
   ])('unlocks what %s unlocks in Brave New World', (tech, units, buildings) => {
     const unlocks = Technology.getUnlocks(tech);
     const names = (list: { name: string }[]) => list.map((entry) => entry.name).sort();
@@ -132,7 +164,16 @@ describe('Technology', () => {
     ['Chariot Archer', 'Chivalry'],
     ['Catapult', 'Physics'],
     ['Swordsman', 'Steel'],
-    ['Legion', 'Steel']
+    ['Legion', 'Steel'],
+    ['Pikeman', 'Gunpowder'],
+    ['Longswordsman', 'Gunpowder'],
+    ['Knight', 'Metallurgy'],
+    ['Trebuchet', 'Chemistry'],
+    ['Galleass', 'Navigation'],
+    ['Musketman', 'Rifling'],
+    ['Cannon', 'Dynamite'],
+    ['Rifleman', 'Replaceable Parts'],
+    ['Tank', 'Lasers']
   ])('makes the %s obsolete with %s, the tech of its upgrade', (unit, tech) => {
     expect(Unit.getAllUnitData().find((data) => data.name === unit)?.obsolete_tech).toBe(tech);
   });
@@ -222,7 +263,23 @@ describe('Technology', () => {
     });
 
     it('gives every era an id', () => {
-      expect(Technology.getAllEras().map((era) => era.id)).toEqual(['ancient', 'classical', 'medieval']);
+      expect(Technology.getAllEras().map((era) => era.id)).toEqual([
+        'ancient', 'classical', 'medieval', 'renaissance', 'industrial', 'modern', 'atomic', 'information'
+      ]);
+    });
+
+    it('reaches each later era with the first tech of its rows', () => {
+      expect(Technology.getEraOf(['Pottery', 'Gunpowder']).id).toBe('renaissance');
+      expect(Technology.getEraOf(['Pottery', 'Steam Power']).id).toBe('industrial');
+      expect(Technology.getEraOf(['Pottery', 'Flight']).id).toBe('modern');
+      expect(Technology.getEraOf(['Pottery', 'Computers']).id).toBe('atomic');
+      expect(Technology.getEraOf(['Pottery', 'Robotics']).id).toBe('information');
+    });
+
+    it('puts every tech in some era', () => {
+      const rows = new Set(Technology.getAllEras().flatMap((era) => era.rows));
+
+      for (const tech of Technology.getAllTechnologies()) expect(rows).toContain(tech.getRow());
     });
   });
 });

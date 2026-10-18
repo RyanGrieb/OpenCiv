@@ -98,6 +98,8 @@ export class Tile extends Actor {
   private static readonly HILL_HASH_OFFSET = 15485;
   // How many looks a city has in each era: TILE_CITY_<ERA>_1 to _3.
   private static readonly CITY_VARIANT_COUNT = 3;
+  // The era later ones are drawn as until they get their own city sprites.
+  private static readonly LAST_DRAWN_CITY_ERA = "medieval";
   // Offsets the coordinates a tile's mirroring is hashed from, so it doesn't follow its look.
   private static readonly MIRROR_HASH_OFFSET = 104729;
 
@@ -235,7 +237,8 @@ export class Tile extends Actor {
    * so a city keeps its look until its owner enters a new era.
    */
   public static getCityType(era: string, gridX: number, gridY: number): string {
-    return `city_${era}_${(Tile.hashCoordinates(gridX, gridY) % Tile.CITY_VARIANT_COUNT) + 1}`;
+    const drawnEra = resolveSpriteRegion(`TILE_CITY_${era.toUpperCase()}_1`) ? era : Tile.LAST_DRAWN_CITY_ERA;
+    return `city_${drawnEra}_${(Tile.hashCoordinates(gridX, gridY) % Tile.CITY_VARIANT_COUNT) + 1}`;
   }
 
   /**

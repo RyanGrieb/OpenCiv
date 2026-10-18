@@ -263,7 +263,8 @@ export class Unit extends ActorGroup {
 
     this.unitActor = new Actor({
       image: Game.getInstance().getImage(GameImage.SPRITESHEET),
-      spriteRegion: resolveSpriteRegion(`UNIT_${Strings.toConstantCase(this.name)}`),
+      // Units without art yet (the later eras') show the unknown icon.
+      spriteRegion: resolveSpriteRegion(`UNIT_${Strings.toConstantCase(this.name)}`) ?? SpriteRegion.ICON_UNKNOWN,
       x: tile.getCenterPosition().x - 28 / 2,
       y: tile.getCenterPosition().y - 28 / 2,
       z: 2,

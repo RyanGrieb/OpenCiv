@@ -96,6 +96,36 @@ describe('TechEffects', () => {
     });
   });
 
+  describe("Fertilizer's dry farms", () => {
+    const riverFarm = () => {
+      const tile = tileOf('grass', 'farm');
+      jest.spyOn(tile, 'hasRiver').mockReturnValue(true);
+      return tile;
+    };
+
+    it('adds 1 food to a farm away from fresh water', () => {
+      expect(yieldsOf(tileOf('grass', 'farm'), player())).toEqual({ food: 3 });
+      expect(yieldsOf(tileOf('grass', 'farm'), player('Fertilizer'))).toEqual({ food: 4 });
+    });
+
+    it('leaves a river farm to Civil Service', () => {
+      expect(yieldsOf(riverFarm(), player('Fertilizer'))).toEqual({ food: 3 });
+      expect(yieldsOf(riverFarm(), player('Fertilizer', 'Civil Service'))).toEqual({ food: 4 });
+    });
+
+    it('marks dry farms as changed by it', () => {
+      expect(TechEffects.changesTile('Fertilizer', tileOf('grass', 'farm'))).toBe(true);
+      expect(TechEffects.changesTile('Fertilizer', riverFarm())).toBe(false);
+    });
+  });
+
+  it("adds Scientific Theory's production to lumber mills", () => {
+    const mill = tileOf('grass', 'forest', 'lumber_mill');
+    const without = yieldsOf(mill, player()).production ?? 0;
+
+    expect(yieldsOf(mill, player('Scientific Theory')).production).toBe(without + 1);
+  });
+
   describe('roads across rivers', () => {
     const riverRoad = () => {
       const from = tileOf('grass', 'road');
@@ -125,7 +155,16 @@ describe('TechEffects', () => {
     const techsWithEffects = new Set(Technology.getAllTileBonuses().map((entry) => entry.techName));
     techsWithEffects.add(Tile.BRIDGE_TECH);
 
+    // These unlock only what the game has no systems for yet: air units, nuclear weapons, spaceship parts, power
+    // plants, railroads, and Future Tech's repeating research.
+    const waitingOnSystems = [
+      'Railroad', 'Plastics', 'Penicillin', 'Mass Media', 'Ecology', 'Nuclear Fission', 'Particle Physics',
+      'Satellites', 'Stealth', 'Advanced Ballistics', 'Nanotechnology', 'Nuclear Fusion', 'Flight', 'Radar'
+    ];
+
     for (const tech of Technology.getAllTechnologies()) {
+      if (waitingOnSystems.includes(tech.getName())) continue;
+
       const unlocks = Technology.getUnlocks(tech.getName());
       const unlockCount = Object.values(unlocks).reduce((total, list) => total + list.length, 0);
 
