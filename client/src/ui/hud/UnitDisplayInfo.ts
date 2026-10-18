@@ -10,6 +10,9 @@ import { Button, ButtonSize } from "../components/Button";
 import { Label } from "../components/Label";
 import { UITheme } from "../UITheme";
 import { InGameScene } from "../../scene/type/InGameScene";
+import { resolveSpriteRegion } from "../../Assets";
+import { PromotionTooltip } from "./PromotionTooltip";
+import { PromotionWindow } from "./PromotionWindow";
 
 const WINDOW_WIDTH = 300;
 // Offsets from the window's top. Action buttons take 44-108, wrapping into more rows of 4 when a
@@ -21,6 +24,10 @@ const MOVEMENT_Y = 114;
 const STRENGTH_Y = 142;
 const HEALTH_BAR_Y = 176;
 const XP_BAR_Y = 208;
+// The row of icons for the promotions the unit has, under the XP bar.
+const PROMOTIONS_Y = 242;
+const PROMOTION_ICON_SIZE = 24;
+const PROMOTION_ICON_GAP = 4;
 const TEXT_X = 16;
 const BAR_MARGIN = 14;
 const BAR_HEIGHT = 26;
@@ -31,7 +38,7 @@ const STRENGTH_SPACING = 10;
 
 export class UnitDisplayInfo extends ActorGroup {
   // CombatPreviewWindow stacks on top of this window.
-  public static readonly HEIGHT = 246;
+  public static readonly HEIGHT = 278;
 
   private unit: Unit;
   // Shows the hovered action's description in place of the movement line.
@@ -44,6 +51,8 @@ export class UnitDisplayInfo extends ActorGroup {
   // Strength, health bar and XP bar - rebuilt whenever strength or health changes.
   private combatActors: Actor[] = [];
   private actionButtons: Button[];
+  // Open while the player picks a promotion (see the Promote action).
+  private promotionWindow: PromotionWindow | undefined;
 
   constructor(unit: Unit) {
     super({
@@ -122,7 +131,14 @@ export class UnitDisplayInfo extends ActorGroup {
       }
     });
 
-    for (const eventName of ["unitCombat", "unitHealth", "unitFortified", "unitActions", "unitBuildStatus"]) {
+    for (const eventName of [
+      "unitCombat",
+      "unitHealth",
+      "unitFortified",
+      "unitActions",
+      "unitBuildStatus",
+      "unitPromotions"
+    ]) {
       NetworkEvents.on({
         eventName,
         parentObject: this,
@@ -140,6 +156,36 @@ export class UnitDisplayInfo extends ActorGroup {
   public onDestroyed() {
     super.onDestroyed();
     NetworkEvents.removeCallbacksByParentObject(this);
+    this.closePromotionWindow();
+    PromotionTooltip.hide();
+  }
+
+  // Whether (x, y) is over this window, or the promotion list standing on it.
+  public isOver(x: number, y: number): boolean {
+    return this.insideActor(x, y) || (this.promotionWindow?.insideActor(x, y) ?? false);
+  }
+
+  public getPromotionWindow(): PromotionWindow | undefined {
+    return this.promotionWindow;
+  }
+
+  // The Promote action: opens the list of promotions on offer, or closes it if it's open.
+  public togglePromotionWindow() {
+    if (this.promotionWindow) {
+      this.closePromotionWindow();
+      return;
+    }
+    if (this.unit.getPromotionData().promotionChoices.length < 1) return;
+
+    this.promotionWindow = new PromotionWindow(this.unit, this.y - 8, () => this.closePromotionWindow());
+    Game.getInstance().getCurrentScene().addActor(this.promotionWindow);
+  }
+
+  private closePromotionWindow() {
+    if (!this.promotionWindow) return;
+
+    Game.getInstance().getCurrentScene().removeActor(this.promotionWindow);
+    this.promotionWindow = undefined;
   }
 
   private updateMovementLabel() {
@@ -168,8 +214,8 @@ export class UnitDisplayInfo extends ActorGroup {
   }
 
   // "Strength: 8" with the crossed swords after it (and for a ranged unit, "Ranged: 7" with a target),
-  // then old_java's health bar (red under green) across the window with e.g. "HP 63/100" on it, and an
-  // XP bar under that. XP isn't tracked yet, so it's empty.
+  // then old_java's health bar (red under green) across the window with e.g. "HP 63/100" on it, an
+  // XP bar under that toward the next promotion, and the icons of the promotions the unit has.
   private updateCombatRows() {
     const strengths: { label: Label; icon: SpriteRegion }[] = [
       { label: this.createLabel(`Strength: ${this.unit.getCombatStrength()}`), icon: SpriteRegion.ICON_COMBAT }
@@ -181,7 +227,8 @@ export class UnitDisplayInfo extends ActorGroup {
       });
     }
     const healthLabel = this.createLabel(`HP ${this.unit.getHealth()}/${Unit.MAX_HEALTH}`);
-    const xpLabel = this.createLabel("XP 0/10");
+    const { experience, experienceNeeded } = this.unit.getPromotionData();
+    const xpLabel = this.createLabel(`XP ${experience}/${experienceNeeded}`);
 
     const labels = [...strengths.map(({ label }) => label), healthLabel, xpLabel];
     Promise.all(labels.map((label) => label.conformSize())).then(() => {
@@ -190,7 +237,8 @@ export class UnitDisplayInfo extends ActorGroup {
       const actors: Actor[] = [
         ...this.createStrengthRow(strengths),
         ...this.createBar(HEALTH_BAR_Y, "red", "limegreen", healthFraction, healthLabel),
-        ...this.createBar(XP_BAR_Y, "rgb(50, 40, 70)", "mediumpurple", 0, xpLabel)
+        ...this.createBar(XP_BAR_Y, "rgb(50, 40, 70)", "mediumpurple", Math.min(1, experience / experienceNeeded), xpLabel),
+        ...this.createPromotionIcons()
       ];
 
       for (const actor of this.combatActors) this.removeActor(actor);
@@ -223,6 +271,31 @@ export class UnitDisplayInfo extends ActorGroup {
     }
 
     return actors;
+  }
+
+  // One icon per promotion the unit has, left to right; hovering one says what it does. Icons shrink to
+  // keep a long list on one row.
+  private createPromotionIcons(): Actor[] {
+    const promotions = this.unit.getPromotionData().promotions;
+    const rowWidth = this.width - TEXT_X * 2;
+    const step = Math.min(PROMOTION_ICON_SIZE + PROMOTION_ICON_GAP, rowWidth / Math.max(1, promotions.length));
+    const size = Math.min(PROMOTION_ICON_SIZE, step - 2);
+    const y = this.y + PROMOTIONS_Y + this.getExtraActionRowsHeight();
+
+    return promotions.map((promotion, index) => {
+      const icon = new Actor({
+        image: Game.getInstance().getImage(GameImage.SPRITESHEET),
+        spriteRegion: resolveSpriteRegion(promotion.icon) ?? SpriteRegion.ICON_UNKNOWN,
+        x: this.x + TEXT_X + index * step,
+        y,
+        width: size,
+        height: size,
+        cameraApplies: false
+      });
+      icon.on("mouse_enter", () => PromotionTooltip.show(icon.getX() + size, y - 4, promotion));
+      icon.on("mouse_exit", () => PromotionTooltip.hide());
+      return icon;
+    });
   }
 
   private createLabel(text: string) {
@@ -273,6 +346,12 @@ export class UnitDisplayInfo extends ActorGroup {
             return;
           }
 
+          // Promote opens the list of promotions to pick from, which the client shows itself.
+          if (action.getName() === "promote") {
+            this.togglePromotionWindow();
+            return;
+          }
+
           // Skip Turn moves the selection on to the next unit needing orders, which the client tracks.
           if (action.getName() === "skip_turn") {
             Game.getInstance().getCurrentSceneAs<InGameScene>().getClientPlayer().skipSelectedUnitTurn();
@@ -310,6 +389,8 @@ export class UnitDisplayInfo extends ActorGroup {
   }
 
   private refreshDisplayInfo() {
+    // A pick was made, or the unit can't promote any more.
+    if (this.unit.getPromotionData().promotionChoices.length < 1) this.closePromotionWindow();
     this.updateMovementLabel();
     if (this.unit.canFight()) this.updateCombatRows();
     this.updateBuildLabel();

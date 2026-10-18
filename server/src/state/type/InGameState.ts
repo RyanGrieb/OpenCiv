@@ -98,14 +98,17 @@ export class InGameState extends State {
     );
   }
 
-  // The startWithAllTechs / startWithBuilder / startWithArcher / startingGold game options, for trying
-  // out Builder improvements, ranged combat and buying production.
+  // The startWithAllTechs / startWithBuilder / startWithArcher / startingGold / startingExperience game
+  // options, for trying out Builder improvements, ranged combat, buying production and promotions.
   private static applyDebugStart(player: Player, spawnTile: Tile) {
     const options = Game.getInstance().getGameOptions();
     if (options.startWithAllTechs) player.researchAllTechs();
     if (options.startWithBuilder) InGameState.addUnitBeside(spawnTile, "Builder", player, true);
     if (options.startWithArcher) InGameState.addUnitBeside(spawnTile, "Archer", player, false);
     if (options.startingGold > 0) player.addToAccumulatedStat("gold", options.startingGold);
+    if (options.startingExperience > 0) {
+      player.getUnits().forEach((unit) => unit.gainExperience(options.startingExperience));
+    }
   }
 
   // Any land beside the Settler will do - a civilian can share a tile with the Warrior, a military unit can't.

@@ -26,8 +26,11 @@ export class Tooltip extends ActorGroup {
     this.setTransparency(ClientSettings.get("HUD_TRANSPARENCY"));
   }
 
-  /** Labels measure themselves, hence async. Nudges the box up or left if it would run off screen. */
-  protected async layout(lines: TooltipLine[]) {
+  /**
+   * Labels measure themselves, hence async. Nudges the box up or left if it would run off screen.
+   * `corner` is which corner of the box sits at the (x, y) it was made with.
+   */
+  protected async layout(lines: TooltipLine[], corner: "topLeft" | "bottomRight" = "topLeft") {
     const padding = Tooltip.PADDING;
     const labels = lines.map(
       (line) => new Label({ text: line.text, font: UITheme.FONT, fontColor: line.color, cameraApplies: false })
@@ -39,6 +42,10 @@ export class Tooltip extends ActorGroup {
     const textHeight = labels.reduce((total, label) => total + label.getHeight() + Tooltip.LINE_GAP, -Tooltip.LINE_GAP);
     this.width = textWidth + padding * 2;
     this.height = textHeight + padding * 2;
+    if (corner === "bottomRight") {
+      this.x -= this.width;
+      this.y -= this.height;
+    }
     this.x = Math.max(0, Math.min(this.x, Game.getInstance().getWidth() - this.width));
     this.y = Math.max(0, Math.min(this.y, Game.getInstance().getHeight() - this.height));
 

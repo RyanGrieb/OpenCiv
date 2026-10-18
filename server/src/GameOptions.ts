@@ -33,6 +33,9 @@ export interface GameOptions {
   startAtWar: boolean;
   // Gold every player starts with, for trying out buying production (see the GoldSpending scenario).
   startingGold: number;
+  // Experience every player's starting military units begin with, for trying out promotions (see the
+  // Promotions scenario).
+  startingExperience: number;
   // Every tech's cost as a percentage of its techs.yml cost, like Civ 5's game speeds (Quick is 67).
   // Scenarios set it to 1 so a tech is researched the turn after it's chosen (see TechEffects).
   techCostPercent: number;
@@ -104,6 +107,7 @@ export const DefaultGameOptions: GameOptions = {
   mapPreset: "",
   startAtWar: false,
   startingGold: 0,
+  startingExperience: 0,
   techCostPercent: 100,
   productionCostPercent: 100,
   baseHappiness: 9
@@ -194,6 +198,15 @@ export const GameOptionDefinitions: GameOptionDefinition[] = [
     hidden: true
   },
   { key: "startingGold", label: "Starting Gold", type: "number", min: 0, max: 10000, step: 10, hidden: true },
+  {
+    key: "startingExperience",
+    label: "Starting Experience",
+    type: "number",
+    min: 0,
+    max: 1000,
+    step: 5,
+    hidden: true
+  },
   { key: "techCostPercent", label: "Tech Cost %", type: "number", min: 1, max: 300, step: 1, hidden: true },
   {
     key: "productionCostPercent",

@@ -134,7 +134,7 @@ export class TestUtils {
         WebsocketClient.sendMessage({ event: "setGameOption", option: "allowBarbarians", value: false });
         // Options stick on the server between games, so an earlier scenario's Archer and damaged cities are undone.
         // The two civilizations start at war, so combat scenarios can fight straight away (Diplomacy turns it off).
-        const gameOptions = { startWithArcher: false, cityStartingHealth: 200, startAtWar: true, startingGold: 0, ...options.gameOptions };
+        const gameOptions = { startWithArcher: false, cityStartingHealth: 200, startAtWar: true, startingGold: 0, startingExperience: 0, ...options.gameOptions };
         for (const [option, value] of Object.entries(gameOptions)) {
             WebsocketClient.sendMessage({ event: "setGameOption", option, value });
         }

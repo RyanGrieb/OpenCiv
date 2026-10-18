@@ -132,6 +132,28 @@ export interface UnitBuildStatus {
   turnsLeft?: number;
 }
 
+// A promotion as the server describes it (see server UnitPromotions.toJSON()).
+export interface PromotionInfo {
+  name: string;
+  displayName: string;
+  icon: string;
+  description: string;
+  // What it does that the game doesn't have the systems for yet.
+  notYet: string[];
+}
+
+// A unit's experience and promotions. promotionChoices is only filled in for the owner's own units.
+export interface UnitPromotionData {
+  experience: number;
+  level: number;
+  // Total experience at which the next promotion becomes available.
+  experienceNeeded: number;
+  promotions: PromotionInfo[];
+  promotionChoices: PromotionInfo[];
+  // Woodsman: forest and jungle cost half the movement.
+  woodsman: boolean;
+}
+
 // Payload for constructing a Unit (server "createUnit"-style data, also embedded
 // per-tile in a "mapChunk" event's units list).
 export interface UnitCreationData {
@@ -155,6 +177,12 @@ export interface UnitCreationData {
   player: string;
   queuedTiles: { x: number; y: number }[];
   actions: UnitActionData[];
+  experience?: number;
+  level?: number;
+  experienceNeeded?: number;
+  promotions?: PromotionInfo[];
+  promotionChoices?: PromotionInfo[];
+  woodsman?: boolean;
   // Only on the owner's own units (see server Unit.asJSON).
   building?: string;
   buildingStatus?: string;
@@ -250,6 +278,7 @@ export class Unit extends ActorGroup {
   private buildStatus: UnitBuildStatus;
   // The improvement being built, shown beside the health bubble like fortifyIcon.
   private buildIcon: Actor | undefined;
+  private promotionData: UnitPromotionData;
 
   constructor(tile: Tile, unitJSON: UnitCreationData) {
     super({
@@ -291,6 +320,14 @@ export class Unit extends ActorGroup {
     this.coastOnly = unitJSON.coastOnly ?? false;
     this.availableMovement = unitJSON.remainingMovement;
     this.defaultMoveDistance = unitJSON.defaultMoveDistance;
+    this.promotionData = {
+      experience: unitJSON.experience ?? 0,
+      level: unitJSON.level ?? 1,
+      experienceNeeded: unitJSON.experienceNeeded ?? 10,
+      promotions: unitJSON.promotions ?? [],
+      promotionChoices: unitJSON.promotionChoices ?? [],
+      woodsman: unitJSON.woodsman ?? false
+    };
     this.player = AbstractPlayer.getPlayerByName(unitJSON.player);
     if (this.player) {
       this.player.addUnit(this);
@@ -448,6 +485,20 @@ export class Unit extends ActorGroup {
       }
     });
 
+    // Experience gained or a promotion picked (only the owner hears).
+    NetworkEvents.on<UnitPromotionData & { id: number; range: number; remainingMovement: number }>({
+      eventName: "unitPromotions",
+      parentObject: this,
+      callback: (data) => {
+        if (this.id !== data.id) return;
+
+        const { experience, level, experienceNeeded, promotions, promotionChoices, woodsman } = data;
+        this.promotionData = { experience, level, experienceNeeded, promotions, promotionChoices, woodsman };
+        this.range = data.range;
+        this.availableMovement = data.remainingMovement;
+      }
+    });
+
     NetworkEvents.on<UnitHealthEvent>({
       eventName: "unitHealth",
       parentObject: this,
@@ -544,7 +595,11 @@ export class Unit extends ActorGroup {
     // Mirrors the server: open water costs a move a tile.
     if (this.domain === "sea") return 1;
 
-    return Tile.getWeight(current, neighbor, this);
+    return this.getTerrainWeight(current, neighbor);
+  }
+
+  public getPromotionData(): UnitPromotionData {
+    return this.promotionData;
   }
 
   public reduceMovement(amount: number) {
@@ -598,7 +653,7 @@ export class Unit extends ActorGroup {
 
   // Whether a click at (x, y) landed on this unit's info window, shown while it's selected.
   public isOverDisplayInfo(x: number, y: number): boolean {
-    return this.selected && (this.unitDisplayInfo?.insideActor(x, y) ?? false);
+    return this.selected && (this.unitDisplayInfo?.isOver(x, y) ?? false);
   }
 
   public getQueuedMovementTiles() {
@@ -747,6 +802,15 @@ export class Unit extends ActorGroup {
     this.civIcon?.draw(canvasContext);
     if (this.fortified) this.fortifyIcon.draw(canvasContext);
     this.buildIcon?.draw(canvasContext);
+  }
+
+  // Mirrors the server's Unit.getTerrainWeight(): Woodsman halves what forest and jungle cost.
+  private getTerrainWeight(current: Tile, neighbor: Tile): number {
+    const weight = Tile.getWeight(current, neighbor, this);
+    if (weight <= 1 || weight >= 9999 || !this.promotionData.woodsman) return weight;
+
+    const woods = neighbor.getTileTypes().some((type) => type.includes("forest") || type.includes("jungle"));
+    return woods ? Math.ceil(weight / 2) : weight;
   }
 
   private setBuildStatus(status: UnitBuildStatus) {
