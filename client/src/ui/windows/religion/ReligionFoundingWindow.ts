@@ -1,7 +1,7 @@
 import { GameImage, SpriteRegion } from "../../../Assets";
 import { Game } from "../../../Game";
 import { NetworkEvents, WebsocketClient } from "../../../network/Client";
-import { BeliefData, ReligionsEvent } from "../../../religion/Religions";
+import { BeliefData, Religions, ReligionsEvent } from "../../../religion/Religions";
 import { Actor } from "../../../scene/Actor";
 import { ActorGroup } from "../../../scene/ActorGroup";
 import { Button, ButtonSize } from "../../components/Button";
@@ -64,6 +64,7 @@ export class ReligionFoundingWindow extends ActorGroup {
   private static readonly TITLE_HEIGHT = 48;
   private static readonly FOOTER_HEIGHT = 120;
   private static readonly NAME_ROW_HEIGHT = 44;
+  private static readonly NAME_ICON_SIZE = 32;
   private static readonly BELIEF_ROW_HEIGHT = 84;
   private static readonly ROW_GAP = 4;
   private static readonly LINE_GAP = 8;
@@ -239,11 +240,20 @@ export class ReligionFoundingWindow extends ActorGroup {
           onClicked: () => this.choose("religion", name),
           onHover: () => {}
         }),
+        new Actor({
+          image: Game.getInstance().getImage(GameImage.SPRITESHEET),
+          spriteRegion: Religions.getIcon(name),
+          x: x + ReligionFoundingWindow.PADDING,
+          y: y + (height - ReligionFoundingWindow.NAME_ICON_SIZE) / 2,
+          width: ReligionFoundingWindow.NAME_ICON_SIZE,
+          height: ReligionFoundingWindow.NAME_ICON_SIZE,
+          cameraApplies: false
+        }),
         new Label({
           text: name,
           font: UITheme.FONT,
           fontColor: "white",
-          x: x + ReligionFoundingWindow.PADDING,
+          x: x + ReligionFoundingWindow.PADDING * 2 + ReligionFoundingWindow.NAME_ICON_SIZE,
           y: y + UITheme.centerTextY(height)
         })
       ]
