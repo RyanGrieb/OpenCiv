@@ -1,0 +1,219 @@
+# Civ 5 (Brave New World) pantheons. A player founds one once their faith reaches the cost in
+# Pantheons.getCost(), and each pantheon can only be founded by one civilization.
+#
+#   yields      - the bonus drawn as stat icons in the pantheon list ("+1 [faith]"), for display.
+#   text        - the words after those icons ("from Tundra without Forest"), or the whole bonus
+#                 when there are no yields to draw. Short, to fit on one line of the list.
+#   description - the whole bonus in words, for the pantheon's tooltip.
+#   effects     - what the server applies (see PantheonEffectsData in server/src/religion/Pantheons.ts):
+#     tile_yields     - extra yields on tiles of the owner's cities: by terrain (any of the tile types),
+#                       resources (improved or not), improvement, or natural_wonder. except rules a
+#                       tile out.
+#     building_yields - extra yields from a building in each of the owner's cities.
+#     city_yields     - extra yields for each of the owner's cities with min_population, or on a river.
+#                       Happiness counts toward the empire's total.
+#     growth_percent, border_growth_percent - cities grow, and claim tiles, this much faster.
+#     city_ranged_percent - added to the strength the owner's cities shoot with.
+#     wonder_production   - percent added to production of great wonders from these eras.
+#     heal_near_city      - extra HP a healing unit of the owner's regains in or next to its own city.
+#     faith_from_kills    - faith equal to a defeated unit's strength, for battles won within range
+#                           tiles of one of the owner's cities.
+#   not_yet     - the parts the game doesn't have the systems or map resources for yet.
+pantheons:
+  - name: Ancestor Worship
+    yields: { culture: 1 }
+    text: "from Shrines"
+    description: "+1 Culture from Shrines"
+    effects:
+      building_yields:
+        - building: Shrine
+          stats: { culture: 1 }
+  - name: Dance of the Aurora
+    yields: { faith: 1 }
+    text: "from Tundra without Forest"
+    description: "+1 Faith from Tundra tiles without Forest"
+    effects:
+      tile_yields:
+        - terrain: [tundra, tundra_hill]
+          except: [forest]
+          stats: { faith: 1 }
+  - name: Desert Folklore
+    yields: { faith: 1 }
+    text: "from Desert and Flood Plains"
+    description: "+1 Faith from Desert tiles (including Flood Plains and Oasis)"
+    effects:
+      tile_yields:
+        - terrain: [desert, desert_hill, floodplains]
+          stats: { faith: 1 }
+    not_yet: [Oasis isn't on the map yet]
+  - name: Earth Mother
+    yields: { faith: 1 }
+    text: "from Copper, Iron and Salt"
+    description: "+1 Faith for each Copper, Iron, and Salt resource"
+    effects:
+      tile_yields:
+        - resources: [copper, iron, salt]
+          stats: { faith: 1 }
+    not_yet: [Salt isn't on the map yet]
+  - name: Faith Healers
+    text: "+30 HP healing next to your cities"
+    description: "+30 HP healed per turn if adjacent to a friendly city"
+    effects:
+      heal_near_city: 30
+  - name: Fertility Rites
+    text: "10% faster city growth"
+    description: "10% faster Food Growth rates"
+    effects:
+      growth_percent: 10
+  - name: God of Craftsmen
+    yields: { production: 1 }
+    text: "in cities of 3+ Population"
+    description: "+1 Production in cities with Population of 3+"
+    effects:
+      city_yields:
+        - min_population: 3
+          stats: { production: 1 }
+  - name: God of the Open Sky
+    yields: { culture: 1 }
+    text: "from Pastures"
+    description: "+1 Culture from Pastures"
+    effects:
+      tile_yields:
+        - improvement: Pasture
+          stats: { culture: 1 }
+  - name: God of the Sea
+    yields: { production: 1 }
+    text: "from Fishing Boats"
+    description: "+1 Production from Fishing Boats"
+    effects:
+      tile_yields:
+        - improvement: Fishing Boats
+          stats: { production: 1 }
+  - name: God of War
+    text: "Faith for battles won near your cities"
+    description: "Gain Faith equal to the defeated unit's strength if you win a battle within 4 tiles of your city"
+    effects:
+      faith_from_kills:
+        range: 4
+  - name: Goddess of Festivals
+    yields: { culture: 1, faith: 1 }
+    text: "from Wine and Incense"
+    description: "+1 Culture and +1 Faith for each Wine and Incense"
+    effects:
+      tile_yields:
+        - resources: [wine, incense]
+          stats: { culture: 1, faith: 1 }
+    not_yet: [Wine and Incense aren't on the map yet]
+  - name: Goddess of Love
+    yields: { happiness: 1 }
+    text: "from cities of 6+ Population"
+    description: "+1 Happiness from cities with Population of 6+"
+    effects:
+      city_yields:
+        - min_population: 6
+          stats: { happiness: 1 }
+  - name: Goddess of Protection
+    text: "+30% city Ranged Strength"
+    description: "+30% increase in city Ranged Combat Strength"
+    effects:
+      city_ranged_percent: 30
+  - name: Goddess of the Hunt
+    yields: { food: 1 }
+    text: "from Camps"
+    description: "+1 Food from Camps"
+    effects:
+      tile_yields:
+        - improvement: Camp
+          stats: { food: 1 }
+  - name: God-King
+    yields: { production: 1, gold: 1, science: 1, culture: 1, faith: 1 }
+    text: "from the Palace"
+    description: "Palace provides +1 Culture, Faith, Gold, Production, and Science"
+    effects:
+      building_yields:
+        - building: Palace
+          stats: { production: 1, gold: 1, science: 1, culture: 1, faith: 1 }
+  - name: Messenger of the Gods
+    yields: { science: 2 }
+    text: "in cities with a City Connection"
+    description: "+2 Science in cities with a City Connection"
+    not_yet: [City connections aren't in the game yet, so this gives nothing]
+  - name: Monument to the Gods
+    text: "+15% Production for early Wonders"
+    description: "+15% Production for Ancient and Classical Era Wonders"
+    effects:
+      wonder_production:
+        percent: 15
+        eras: [ancient, classical]
+  - name: One with Nature
+    yields: { faith: 4 }
+    text: "from Natural Wonders"
+    description: "+4 Faith from Natural Wonders"
+    effects:
+      tile_yields:
+        - natural_wonder: true
+          stats: { faith: 4 }
+  - name: Oral Tradition
+    yields: { culture: 1 }
+    text: "from Plantations"
+    description: "+1 Culture from Plantations"
+    effects:
+      tile_yields:
+        - improvement: Plantation
+          stats: { culture: 1 }
+  - name: Religious Idols
+    yields: { culture: 1, faith: 1 }
+    text: "from Gold and Silver"
+    description: "+1 Culture and +1 Faith for each Gold and Silver"
+    effects:
+      tile_yields:
+        - resources: [gold, silver]
+          stats: { culture: 1, faith: 1 }
+    not_yet: [Silver isn't on the map yet]
+  - name: Religious Settlements
+    text: "15% faster border growth"
+    description: "15% faster border growth"
+    effects:
+      border_growth_percent: 15
+  - name: Sacred Path
+    yields: { culture: 1 }
+    text: "from Jungle tiles"
+    description: "+1 Culture from Jungle tiles (resource tiles in a Jungle also qualify)"
+    effects:
+      tile_yields:
+        - terrain: [jungle]
+          stats: { culture: 1 }
+  - name: Sacred Waters
+    yields: { happiness: 1 }
+    text: "from cities on rivers"
+    description: "+1 Happiness from cities on rivers"
+    effects:
+      city_yields:
+        - river: true
+          stats: { happiness: 1 }
+  - name: Stone Circles
+    yields: { faith: 2 }
+    text: "from Quarries"
+    description: "+2 Faith from Quarries"
+    effects:
+      tile_yields:
+        - improvement: Quarry
+          stats: { faith: 2 }
+  - name: Sun God
+    yields: { food: 1 }
+    text: "from Bananas, Citrus and Wheat"
+    description: "+1 Food for each Bananas, Citrus, and Wheat resource"
+    effects:
+      tile_yields:
+        - resources: [bananas, citrus, wheat]
+          stats: { food: 1 }
+    not_yet: [Bananas aren't on the map yet]
+  - name: Tears of the Gods
+    yields: { faith: 2 }
+    text: "from Gems and Pearls"
+    description: "+2 Faith for each Gems and Pearls resource"
+    effects:
+      tile_yields:
+        - resources: [gems, pearls]
+          stats: { faith: 2 }
+    not_yet: [Gems aren't on the map yet]

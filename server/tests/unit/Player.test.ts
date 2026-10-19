@@ -55,7 +55,7 @@ describe('Player', () => {
     } as unknown as jest.Mocked<WebSocket>;
 
     onSpy = jest.spyOn(ServerEvents, 'on').mockImplementation(() => { });
-    jest.spyOn(Game, 'getInstance').mockReturnValue({ getGameOptions: () => DefaultGameOptions } as unknown as Game);
+    jest.spyOn(Game, 'getInstance').mockReturnValue({ getGameOptions: () => DefaultGameOptions, getPlayers: () => new Map() } as unknown as Game);
 
     player = new Player('TestPlayer', mockWebsocket);
   });
@@ -114,6 +114,7 @@ describe('Player', () => {
       accumulatedStats: {},
       goldBreakdown: { income: [{ source: 'TestCity', amount: 2 }], expenses: [], net: 2 },
       happinessBreakdown: { sources: [{ source: 'Base', amount: 9 }], unhappiness: [{ source: '1 city', amount: 3 }], net: 6, status: 'content', effects: [] },
+      faithBreakdown: { pantheon: null, pantheonCost: 10, pantheonsLeft: 26 },
     }));
   });
 
@@ -121,18 +122,27 @@ describe('Player', () => {
     player['cities'].push(makeMockCity({ gold: 5 }));
 
     triggerServerEvent('nextTurn');
-    expect(player.getAccumulatedStats()).toEqual({ gold: 5 });
+    expect(player.getAccumulatedStats()).toEqual({ gold: 5, faith: 0 });
 
     triggerServerEvent('nextTurn');
-    expect(player.getAccumulatedStats()).toEqual({ gold: 10 });
+    expect(player.getAccumulatedStats()).toEqual({ gold: 10, faith: 0 });
+  });
+
+  it('banks faith like gold', () => {
+    player['cities'].push(makeMockCity({ faith: 3 }));
+
+    triggerServerEvent('nextTurn');
+    triggerServerEvent('nextTurn');
+
+    expect(player.getAccumulatedStats()).toEqual({ gold: 0, faith: 6 });
   });
 
   it('does not bank stats that are not marked as accumulating', () => {
-    player['cities'].push(makeMockCity({ science: 5, faith: 5, culture: 5, production: 5 }));
+    player['cities'].push(makeMockCity({ science: 5, culture: 5, production: 5 }));
 
     triggerServerEvent('nextTurn');
 
-    expect(player.getAccumulatedStats()).toEqual({ gold: 0 });
+    expect(player.getAccumulatedStats()).toEqual({ gold: 0, faith: 0 });
   });
 
   it('sends an updated totals packet after banking stats for the turn', () => {
@@ -143,9 +153,10 @@ describe('Player', () => {
     expect(mockWebsocket.send).toHaveBeenCalledWith(JSON.stringify({
       event: 'updateTotalStats',
       stats: { science: 0, gold: 5, production: 0, faith: 0, culture: 0 },
-      accumulatedStats: { gold: 5 },
+      accumulatedStats: { gold: 5, faith: 0 },
       goldBreakdown: { income: [{ source: 'TestCity', amount: 5 }], expenses: [], net: 5 },
       happinessBreakdown: { sources: [{ source: 'Base', amount: 9 }], unhappiness: [{ source: '1 city', amount: 3 }], net: 6, status: 'content', effects: [] },
+      faithBreakdown: { pantheon: null, pantheonCost: 10, pantheonsLeft: 26 },
     }));
   });
 
