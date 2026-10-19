@@ -242,6 +242,10 @@ ScenarioRegistry.register("Happiness", ScenarioCategory.ECONOMY, async () => {
   return module.setupHappinessTest;
 });
 
+ScenarioRegistry.register("PantheonPicker", ScenarioCategory.RELIGION, async () => {
+  const module = await import("./scenarios/PantheonPicker.test");
+  return module.setupPantheonPickerTest;
+});
 ScenarioRegistry.register("Pantheons", ScenarioCategory.RELIGION, async () => {
   const module = await import("./scenarios/Pantheons.test");
   return module.setupPantheonsTest;
