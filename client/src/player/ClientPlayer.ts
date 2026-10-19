@@ -45,7 +45,14 @@ export class ClientPlayer extends AbstractPlayer {
   private totalStats: Map<string, number> = new Map();
   private accumulatedStats: Map<string, number> = new Map();
   private goldBreakdown: GoldBreakdown = { income: [], expenses: [], net: 0 };
-  private faithBreakdown: FaithBreakdown = { pantheon: null, pantheonCost: 0, pantheonsLeft: 0 };
+  private faithBreakdown: FaithBreakdown = {
+    pantheon: null,
+    pantheonCost: 0,
+    pantheonsLeft: 0,
+    religion: null,
+    religionCost: 0,
+    religionsLeft: 0
+  };
   private happinessBreakdown: HappinessBreakdown = {
     sources: [],
     unhappiness: [],

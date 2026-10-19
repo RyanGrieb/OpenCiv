@@ -21,6 +21,7 @@ import { ResearchDisplayInfo } from "../../ui/hud/ResearchDisplayInfo";
 import { ResearchTreeWindow } from "../../ui/windows/ResearchTreeWindow";
 import { DiplomacyWindow } from "../../ui/windows/DiplomacyWindow";
 import { PantheonList } from "../../ui/windows/religion/PantheonList";
+import { ReligionFoundingWindow } from "../../ui/windows/religion/ReligionFoundingWindow";
 import { ReligionWindow } from "../../ui/windows/religion/ReligionWindow";
 import { DeclareWarWindow } from "../../ui/windows/DeclareWarWindow";
 import { StatusBar } from "../../ui/hud/StatusBar";
@@ -52,6 +53,7 @@ export class InGameScene extends Scene {
   private diplomacyButton: Button;
   private diplomacyWindow: DiplomacyWindow;
   private pantheonList: PantheonList;
+  private religionFoundingWindow: ReligionFoundingWindow;
   private religionWindow: ReligionWindow;
   private religionButton: Button;
   private declareWarWindow: DeclareWarWindow;
@@ -582,20 +584,53 @@ export class InGameScene extends Scene {
       onChosen: () => this.closePantheonUI(),
       onClose: () => this.closePantheonUI()
     });
-    this.addActor(this.pantheonList);
-    this.setUIState(true);
-    this.openUIElement = { close: () => this.closePantheonUI() };
+    this.openSidePanel(this.pantheonList, () => this.closePantheonUI());
+  }
 
-    // The list reaches down past them, and clicks aren't occluded by z-order.
+  private closePantheonUI() {
+    this.closeSidePanel(this.pantheonList);
+    this.pantheonList = undefined;
+  }
+
+  public getReligionFoundingWindow(): ReligionFoundingWindow | undefined {
+    return this.religionFoundingWindow;
+  }
+
+  // Opened from the Found Religion button or its notification. Founding one closes it.
+  public toggleReligionFoundingUI() {
+    if (this.religionFoundingWindow) {
+      this.closeReligionFoundingUI();
+      return;
+    }
+    if (this.openUIElement) return;
+
+    this.religionFoundingWindow = new ReligionFoundingWindow({
+      onChosen: () => this.closeReligionFoundingUI(),
+      onClose: () => this.closeReligionFoundingUI()
+    });
+    this.openSidePanel(this.religionFoundingWindow, () => this.closeReligionFoundingUI());
+  }
+
+  private closeReligionFoundingUI() {
+    this.closeSidePanel(this.religionFoundingWindow);
+    this.religionFoundingWindow = undefined;
+  }
+
+  // A panel down the left of the screen, like the pantheon list. It reaches down past the bottom-left
+  // buttons and the turn button, and clicks aren't occluded by z-order, so they go while it's open.
+  private openSidePanel(panel: Actor, close: () => void) {
+    this.addActor(panel);
+    this.setUIState(true);
+    this.openUIElement = { close };
+
     this.removeActor(this.nextTurnButton);
     this.removeActor(this.diplomacyButton);
     this.removeActor(this.religionButton);
     this.removeActor(this.tileInformationLabel);
   }
 
-  private closePantheonUI() {
-    this.removeActor(this.pantheonList);
-    this.pantheonList = undefined;
+  private closeSidePanel(panel: Actor) {
+    this.removeActor(panel);
     this.setUIState(false);
     this.openUIElement = undefined;
 

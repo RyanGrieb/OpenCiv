@@ -13,7 +13,7 @@ import { Combat, CombatModifier } from "./Combat";
 import { UnitActions } from "./UnitActions";
 import { UnitPromotions } from "./UnitPromotions";
 import { UnitUpgrades } from "./UnitUpgrades";
-import { Pantheons } from "../religion/Pantheons";
+import { Beliefs } from "../religion/Beliefs";
 
 export interface UnitAction {
   name: string;
@@ -567,7 +567,7 @@ export class Unit {
     if (this.tile.getCity()?.getPlayer() === this.player) amount = Combat.HEAL_IN_OWN_CITY;
     else if (this.tile.getCityTerritoryOf()?.getPlayer() === this.player) amount = Combat.HEAL_IN_FRIENDLY_TERRITORY;
 
-    this.setHealthAndAnnounce(this.health + amount + this.getMedicBonus() + Pantheons.getHealBonus(this));
+    this.setHealthAndAnnounce(this.health + amount + this.getMedicBonus() + Beliefs.getHealBonus(this));
   }
 
   // The best Medic among the owner's units here and next door, this one included. Medics don't add up.
@@ -738,7 +738,7 @@ export class Unit {
       defender.gainExperience(UnitPromotions.MELEE_DEFENSE_XP, this.player);
 
       if (this.health <= 0) {
-        Pantheons.onBattleWon(defender.player, this, targetTile);
+        Beliefs.onBattleWon(defender.player, this, targetTile);
         this.delete();
         return true;
       }
@@ -746,7 +746,7 @@ export class Unit {
       // The defender held - both stay where they are.
       if (defender.health > 0) return true;
 
-      Pantheons.onBattleWon(this.player, defender, targetTile);
+      Beliefs.onBattleWon(this.player, defender, targetTile);
       defender.delete();
     } else {
       // Nothing here could fight back - the civilians are captured or destroyed below.
@@ -829,7 +829,7 @@ export class Unit {
     this.gainExperience(UnitPromotions.RANGED_ATTACK_XP, defender.player);
     defender.gainExperience(UnitPromotions.RANGED_DEFENSE_XP, this.player);
     if (defender.health <= 0) {
-      Pantheons.onBattleWon(this.player, defender, targetTile);
+      Beliefs.onBattleWon(this.player, defender, targetTile);
       defender.delete();
     }
 

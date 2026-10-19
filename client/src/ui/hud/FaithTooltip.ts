@@ -5,11 +5,14 @@ export interface FaithBreakdown {
   pantheon: { name: string; description: string } | null;
   pantheonCost: number;
   pantheonsLeft: number;
+  religion: string | null;
+  religionCost: number;
+  religionsLeft: number;
 }
 
 /**
- * The box that drops down from the status bar's faith while the mouse is over it: the pantheon the
- * player founded, or the faith the next one costs.
+ * The box that drops down from the status bar's faith while the mouse is over it: the pantheon and
+ * religion the player founded, or the faith the next one costs.
  */
 export class FaithTooltip extends Tooltip {
   private static readonly BONUS_COLOR = "#8ee07a";
@@ -25,7 +28,8 @@ export class FaithTooltip extends Tooltip {
     if (breakdown.pantheon) {
       return [
         { text: `Pantheon: ${breakdown.pantheon.name}`, color: "white" },
-        { text: breakdown.pantheon.description, color: FaithTooltip.BONUS_COLOR }
+        { text: breakdown.pantheon.description, color: FaithTooltip.BONUS_COLOR },
+        FaithTooltip.getReligionLine(faith, breakdown)
       ];
     }
     if (breakdown.pantheonsLeft < 1) return [{ text: "Every pantheon has been founded", color: "gray" }];
@@ -34,5 +38,12 @@ export class FaithTooltip extends Tooltip {
       { text: "No pantheon yet", color: "white" },
       { text: `Found one at ${breakdown.pantheonCost} Faith (you have ${faith})`, color: "white" }
     ];
+  }
+
+  private static getReligionLine(faith: number, breakdown: FaithBreakdown): TooltipLine {
+    if (breakdown.religion) return { text: `Religion: ${breakdown.religion}`, color: "white" };
+    if (breakdown.religionsLeft < 1) return { text: "Every religion has been founded", color: "gray" };
+
+    return { text: `Found a religion at ${breakdown.religionCost} Faith (you have ${faith})`, color: "white" };
   }
 }

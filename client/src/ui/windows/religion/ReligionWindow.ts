@@ -1,7 +1,7 @@
 import { GameImage, SpriteRegion } from "../../../Assets";
 import { Game } from "../../../Game";
 import { NetworkEvents, WebsocketClient } from "../../../network/Client";
-import { ReligionOverview } from "../../../religion/Pantheons";
+import { BeliefSummary, ReligionOverview } from "../../../religion/Religions";
 import { Actor } from "../../../scene/Actor";
 import { ActorGroup } from "../../../scene/ActorGroup";
 import { Button, ButtonSize } from "../../components/Button";
@@ -29,9 +29,8 @@ interface WindowLine {
 }
 
 /**
- * The faith button's window: the player's pantheon and its bonus, the founder and follower beliefs
- * (religions aren't in the game yet), which cities follow it and what each gets from it, and what it
- * all adds up to. The server works it all out and sends it as "religionOverview"; this only shows it.
+ * The faith button's window: the player's pantheon and its bonus, their religion with its founder and
+ * follower beliefs, which cities follow them and what each gets from them, and what it all adds up to. The server works it all out and sends it as "religionOverview"; this only shows it.
  */
 export class ReligionWindow extends ActorGroup {
   private onClose: () => void;
@@ -60,27 +59,46 @@ export class ReligionWindow extends ActorGroup {
   }
 
   private static getPantheonLines(overview: ReligionOverview): WindowLine[] {
-    const pantheon = overview.pantheon;
-    if (!pantheon) {
-      const cost = `Found one at ${overview.pantheonCost} Faith (you have ${overview.faith}).`;
-      return [
-        { text: "Pantheon: none yet", color: "white", font: TITLE_FONT },
-        { text: overview.canFoundPantheon ? "You can found one now: Choose Pantheon." : cost, color: "lightgray" }
-      ];
-    }
+    if (overview.pantheon) return ReligionWindow.describe("Pantheon", overview.pantheon);
 
+    const cost = `Found one at ${overview.pantheonCost} Faith (you have ${overview.faith}).`;
     return [
-      { text: `Pantheon: ${pantheon.name}`, color: "white", font: TITLE_FONT },
-      { text: pantheon.description, color: BONUS_COLOR },
-      ...pantheon.not_yet.map((text) => ({ text: `Not in the game yet: ${text}`, color: NOT_YET_COLOR }))
+      { text: "Pantheon: none yet", color: "white", font: TITLE_FONT },
+      { text: overview.canFoundPantheon ? "You can found one now: Choose Pantheon." : cost, color: "lightgray" }
     ];
   }
 
   private static getBeliefLines(overview: ReligionOverview): WindowLine[] {
+    if (overview.religion) {
+      return [
+        {
+          text: `Religion: ${overview.religion.name} (holy city ${overview.religion.holyCity})`,
+          color: "white",
+          font: TITLE_FONT,
+          rule: true
+        },
+        ...ReligionWindow.describe("Founder Belief", overview.founderBelief),
+        ...ReligionWindow.describe("Follower Belief", overview.followerBelief)
+      ];
+    }
+
+    const cost = overview.pantheon
+      ? `Found one at ${overview.religionCost} Faith (you have ${overview.faith}).`
+      : `Found a pantheon first, then a religion at ${overview.religionCost} Faith.`;
     return [
-      { text: `Founder Belief: ${overview.founderBelief ?? "none"}`, color: "white", font: TITLE_FONT, rule: true },
-      { text: `Follower Belief: ${overview.followerBelief ?? "none"}`, color: "white", font: TITLE_FONT },
-      { text: "Founding a religion isn't in the game yet.", color: NOT_YET_COLOR }
+      { text: "Religion: none yet", color: "white", font: TITLE_FONT, rule: true },
+      { text: overview.canFoundReligion ? "You can found one now: Found Religion." : cost, color: "lightgray" }
+    ];
+  }
+
+  // "Pantheon: Desert Folklore", its bonus, and whatever of it isn't in the game yet.
+  private static describe(heading: string, belief: BeliefSummary | null): WindowLine[] {
+    if (!belief) return [];
+
+    return [
+      { text: `${heading}: ${belief.name}`, color: "white", font: TITLE_FONT },
+      { text: belief.description, color: BONUS_COLOR },
+      ...belief.not_yet.map((text) => ({ text: `Not in the game yet: ${text}`, color: NOT_YET_COLOR }))
     ];
   }
 
@@ -97,7 +115,10 @@ export class ReligionWindow extends ActorGroup {
       { text: "Total each turn:", color: "white", font: TITLE_FONT, rule: true, stats: overview.totals },
       ...(hasTotals ? [] : [{ text: "No yields from it right now", color: NOT_YET_COLOR }]),
       { text: "Cities following it", color: "white", font: TITLE_FONT, rule: true },
-      ...overview.cities.map((city) => ({ text: city.name, color: "white", stats: city.bonuses }))
+      ...overview.cities.map((city) => ({ text: city.name, color: "white", stats: city.bonuses })),
+      ...(Object.keys(overview.empire).length > 0
+        ? [{ text: "Empire-wide", color: "white", stats: overview.empire }]
+        : [])
     ];
   }
 

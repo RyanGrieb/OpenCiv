@@ -91,6 +91,10 @@ export class PlayerDiplomacy {
     return this.met.has(other);
   }
 
+  public isAtWar(): boolean {
+    return this.wars.size > 0;
+  }
+
   public isAtWarWith(other: Player): boolean {
     return this.wars.has(other);
   }

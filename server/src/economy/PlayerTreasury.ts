@@ -1,4 +1,5 @@
 import { Player } from "../Player";
+import { Beliefs } from "../religion/Beliefs";
 import { Unit } from "../unit/Unit";
 
 // One line of the gold breakdown the status bar's tooltip shows, e.g. { source: "Rome", amount: 4 }.
@@ -52,6 +53,12 @@ export class PlayerTreasury {
     const income = this.player
       .getCities()
       .map((city) => ({ source: city.getName(), amount: city.getStatline({ asArray: false }).gold }))
+      .concat(
+        Beliefs.getEmpireYieldSources(this.player).map((source) => ({
+          source: source.source,
+          amount: source.stats[0].gold
+        }))
+      )
       .filter((entry) => entry.amount !== 0);
 
     const expenses = [
