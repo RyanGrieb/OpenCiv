@@ -16,6 +16,7 @@ import { Barbarians } from "../../barbarian/Barbarians";
 import { Player } from "../../Player";
 import { PlayerNotifications } from "../../notification/PlayerNotifications";
 import { PlayerDiplomacy } from "../../diplomacy/PlayerDiplomacy";
+import { DevConsole } from "../../dev/DevConsole";
 
 export class InGameState extends State {
   private turnTimeJob: Job;
@@ -75,7 +76,7 @@ export class InGameState extends State {
     console.log(`Stamped map preset "${preset.name}" around ${spawnTile.getX()},${spawnTile.getY()}`);
 
     for (const { tile, cell } of stamped) {
-      if (cell.unit) tile.addUnit(Unit.createFromName(cell.unit, tile, player));
+      if (cell.unit) Unit.spawn(cell.unit, tile, player);
     }
 
     return spawnTile;
@@ -127,7 +128,7 @@ export class InGameState extends State {
           candidate.getMovementCost() < 9999 &&
           candidate.canPlaceUnit(player, isUtility)
       );
-    tile?.addUnit(Unit.createFromName(unitName, tile, player));
+    if (tile) Unit.spawn(unitName, tile, player);
   }
 
   public onInitialize() {
@@ -135,6 +136,8 @@ export class InGameState extends State {
     this.currentTurn = 0;
     this.turnTime = 0;
     this.destroyed = false;
+
+    DevConsole.listen(this);
 
     // Set loading screen for players
     Game.getInstance()
@@ -285,11 +288,11 @@ export class InGameState extends State {
         firstSpawnTile ??= spawnTile;
 
         // From units.yml, so starting units match built ones (combat strength, the Settler's action).
-        spawnTile.addUnit(Unit.createFromName("Settler", spawnTile, player));
+        Unit.spawn("Settler", spawnTile, player);
 
         //TODO: Re-choose spawn location if warrior can't spawn
         const warriorTile = spawnTile.getAdjacentTiles().find(InGameState.isOpenSpawnTile);
-        warriorTile?.addUnit(Unit.createFromName("Warrior", warriorTile, player));
+        if (warriorTile) Unit.spawn("Warrior", warriorTile, player);
 
         InGameState.applyDebugStart(player, spawnTile);
 

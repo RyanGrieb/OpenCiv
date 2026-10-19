@@ -57,6 +57,10 @@ export class Game {
   private nineSliceImageIds = new WeakMap<object, number>();
   private nextNineSliceImageId = 1;
   private resizeTimer: number;
+  // While set, every key press goes to it alone (and key releases nowhere), as when typing into the dev console.
+  private keyCapture: ((event: KeyboardEvent) => void) | undefined;
+  // Keys pressed into the capture, whose release goes nowhere either.
+  private readonly capturedKeys = new Set<string>();
   private oldWidth: number;
   private oldHeight: number;
   private dpr: number;
@@ -228,6 +232,11 @@ export class Game {
       );
 
       document.body.addEventListener("keydown", (event) => {
+        if (this.keyCapture) {
+          this.capturedKeys.add(event.key);
+          this.keyCapture(event);
+          return;
+        }
         this.actors.forEach((actor) => {
           actor.call("keydown", { key: event.key });
         });
@@ -242,6 +251,8 @@ export class Game {
       });
 
       document.body.addEventListener("keyup", (event) => {
+        // Even once the capture's over, as with the Escape that closed the dev console.
+        if (this.capturedKeys.delete(event.key) || this.keyCapture) return;
         this.actors.forEach((actor) => {
           actor.call("keyup", { key: event.key });
         });
@@ -696,6 +707,11 @@ export class Game {
     canvasContext.globalAlpha = 1;
 
     canvasContext.restore();
+  }
+
+  /** Hands every key press to `capture` until it's set back to undefined. */
+  public setKeyCapture(capture: ((event: KeyboardEvent) => void) | undefined) {
+    this.keyCapture = capture;
   }
 
   public measureText(text: string, font: string): { width: number; height: number } {

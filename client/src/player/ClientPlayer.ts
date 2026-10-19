@@ -485,6 +485,8 @@ export class ClientPlayer extends AbstractPlayer {
   }
 
   private onLeftClickTile(clickedTile: Tile | undefined, x: number, y: number) {
+    // A dev console command waiting on a tile (like spawn) takes the click.
+    if (Game.getInstance().getCurrentSceneAs<InGameScene>().getDevConsole()?.useTileClick(clickedTile)) return;
     // The click was meant for a notification, not the map beneath it.
     if (Game.getInstance().getCurrentSceneAs<InGameScene>().isOverNotifications(x, y)) return;
     // Nor was a click on the unit info's buttons (Ranged Attack could otherwise fire at a tile under it).

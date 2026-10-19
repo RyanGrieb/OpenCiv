@@ -20,6 +20,7 @@ import { NotificationPanel } from "../../ui/hud/NotificationPanel";
 import { ResearchDisplayInfo } from "../../ui/hud/ResearchDisplayInfo";
 import { ResearchTreeWindow } from "../../ui/windows/ResearchTreeWindow";
 import { DiplomacyWindow } from "../../ui/windows/DiplomacyWindow";
+import { DevConsole } from "../../ui/hud/DevConsole";
 import { PantheonList } from "../../ui/windows/religion/PantheonList";
 import { ReligionFoundingWindow } from "../../ui/windows/religion/ReligionFoundingWindow";
 import { ReligionWindow } from "../../ui/windows/religion/ReligionWindow";
@@ -63,6 +64,7 @@ export class InGameScene extends Scene {
   private escMenu: ActorGroup;
   private settingsGroup: ClientSettingsGroup;
   private openUIElement: GameplayUIElement;
+  private devConsole: DevConsole;
   // Covers the map until every tile from the initial sync is drawn - undefined once it has been.
   private loadingScreen: LoadingScreen;
   // The flat map's camera, and the globe's once the map has been shown as one (see setGlobeView()).
@@ -96,6 +98,13 @@ export class InGameScene extends Scene {
     this.setWorldHidden(true);
     this.on<MapLoadProgressEvent>("mapLoadProgress", (options) => {
       this.loadingScreen?.setStatus(options.text, options.progress);
+    });
+
+    // Typing goes to the console while it's open, so it's opened on the press (see Game.setKeyCapture()).
+    this.on("keydown", (options) => {
+      if (this.loadingScreen || options.key !== DevConsole.TOGGLE_KEY) return;
+      this.devConsole ??= new DevConsole();
+      this.devConsole.toggle();
     });
 
     this.on("keyup", (options) => {
@@ -273,6 +282,9 @@ export class InGameScene extends Scene {
   }
 
   public onDestroyed() {
+    // Gives the keyboard back to whatever scene comes next.
+    if (this.devConsole?.isOpen()) this.devConsole.toggle();
+    this.devConsole = undefined;
     // The scene keeps its camera for when it's next shown (see restoreCamera()), which is the flat one.
     if (this.isGlobeView()) this.setCamera(this.flatCamera);
     this.globeCamera?.dispose();
@@ -500,6 +512,11 @@ export class InGameScene extends Scene {
 
   public getNotifications(): Notifications {
     return this.notifications;
+  }
+
+  /** The developer console, once ` has opened it. */
+  public getDevConsole(): DevConsole | undefined {
+    return this.devConsole;
   }
 
   public isOverNotifications(x: number, y: number): boolean {
