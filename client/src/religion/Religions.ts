@@ -1,3 +1,6 @@
+import { SpriteRegion } from "../Assets";
+import { Strings } from "../util/Strings";
+
 // Mirrors the parts of server/src/religion/Beliefs.ts's BeliefData the client shows - keep both in sync.
 // A pantheon, or a religion's founder or follower belief.
 export interface BeliefData {
@@ -51,4 +54,11 @@ export interface ReligionOverview {
   // What the empire gets besides (Church Property's gold, Ceremonial Burial's happiness).
   empire: Record<string, number>;
   totals: Record<string, number>;
+}
+
+export class Religions {
+  // ICON_RELIGION_<NAME>, e.g. ICON_RELIGION_EASTERN_ORTHODOXY.
+  public static getIcon(name: string): SpriteRegion {
+    return SpriteRegion[`ICON_RELIGION_${Strings.toConstantCase(name)}` as keyof typeof SpriteRegion];
+  }
 }
