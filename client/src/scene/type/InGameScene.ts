@@ -443,18 +443,11 @@ export class InGameScene extends Scene {
   }
 
   /**
-   * Shift+Enter: ends the turn past production, research and idle units, which can wait. The pantheon
-   * can't, so it still opens instead.
+   * Shift+Enter: ends the turn past every choice still waiting. Each one is worked out from the
+   * player's state, so it comes back next turn.
    */
   private forceNextTurn() {
     if (this.clientPlayer.hasRequestedNextTurn()) return;
-
-    const pantheon = this.notifications.getAll().find((notification) => notification.type === "pantheon");
-    if (pantheon) {
-      this.notifications.act(pantheon);
-      return;
-    }
-
     this.setRequestedNextTurn(true);
   }
 
