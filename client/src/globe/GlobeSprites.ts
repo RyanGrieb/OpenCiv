@@ -656,7 +656,9 @@ export class GlobeSprites {
 
   /**
    * The point a unit standing under a point on screen (CSS pixels) means - its tile - for the
-   * nearest such unit, or undefined if there's none there.
+   * nearest such unit, or undefined if there's none there. Only its picture counts, not the clear
+   * space around it: standing up, a unit's rectangle reaches over the ground behind its tile, which is
+   * where the mouse points there.
    */
   public pick(screenX: number, screenY: number, camera: THREE.Camera): [number, number] | undefined {
     let nearest: { point: [number, number]; distance: number } | undefined;
@@ -665,6 +667,7 @@ export class GlobeSprites {
 
       const local = this.toBillboard(billboard, screenX, screenY, camera);
       if (!local || local[0] < 0 || local[0] > 1 || local[1] < 0 || local[1] > 1) continue;
+      if (!this.showsAt(billboard, local)) continue;
 
       const distance = camera.position.distanceTo(this.footInWorld(billboard));
       if (!nearest || distance < nearest.distance) nearest = { point: options.pickPoint(), distance };
@@ -1069,6 +1072,15 @@ export class GlobeSprites {
     const dx = screenX - x0;
     const dy = screenY - y0;
     return [(dx * (y2 - y0) - dy * (x2 - x0)) / determinant, ((x1 - x0) * dy - (y1 - y0) * dx) / determinant];
+  }
+
+  // Whether a billboard drawn from the label atlas shows anything at a point on it (0 to 1 across and
+  // down), rather than being clear there.
+  private showsAt(billboard: Billboard, [across, down]: [number, number]) {
+    const x = Math.min(billboard.atlasWidth - 1, Math.floor(across * billboard.atlasWidth));
+    const y = Math.min(billboard.atlasHeight - 1, Math.floor(down * billboard.atlasHeight));
+    const alpha = this.labels.context.getImageData(billboard.atlasX + x, billboard.atlasY + y, 1, 1).data[3];
+    return alpha > 0;
   }
 
   // A billboard's top left, top right and bottom left corners on screen (CSS pixels) this frame,
