@@ -22,8 +22,9 @@ import { WorktreeProcesses } from "./WorktreeProcesses";
 // moved since or master can't fast-forward to it. To deny, don't approve - reply in the thread.
 //
 // Worktrees live in ../OpenCiv-branches/ and are reused, so a second try of the same branch just
-// moves it to the latest push and skips npm install unless a lockfile changed. Any other arguments
-// go to the server as game options, like with start:ports.
+// moves it to the latest push and skips npm install unless a lockfile changed. A new worktree hard-links
+// node_modules from your checkout or another worktree, and installs only when none has the same lockfile.
+// Any other arguments go to the server as game options, like with start:ports.
 //
 // A branch's server and client are stopped when you press Ctrl+C or close the terminal, and before the same branch
 // is tried again. Anything that still escapes is found by its worktree path, which --stop and --clean look for.
@@ -49,18 +50,99 @@ class TryBranch {
     return refs ? refs.split("\n") : [];
   }
 
+  // dir is a project folder (server/ or client/) inside a worktree. A new worktree borrows node_modules from your
+  // own checkout or another worktree, hard-linked so it costs neither disk nor much time, and only runs npm install
+  // when no copy matches its lockfile. Even then it starts from the closest copy, so npm only fetches what changed.
   public static installIfChanged(dir: string): void {
-    const lockfile = path.join(dir, "package-lock.json");
-    const hash = crypto.createHash("sha1").update(fs.readFileSync(lockfile)).digest("hex");
-    const stamp = path.join(dir, "node_modules", INSTALL_STAMP);
+    const hash = this.lockfileHash(dir);
+    const nodeModules = path.join(dir, "node_modules");
+    const stamp = path.join(nodeModules, INSTALL_STAMP);
     if (fs.existsSync(stamp) && fs.readFileSync(stamp, "utf8") === hash) return;
 
+    if (!fs.existsSync(nodeModules)) {
+      const seed = this.findSeed(dir, hash);
+      if (seed) {
+        console.log(`Linking ${path.basename(dir)} dependencies from ${seed.dir}...`);
+        this.linkTree(path.join(seed.dir, "node_modules"), nodeModules, seed.root, path.dirname(dir));
+        if (seed.matches) {
+          fs.writeFileSync(stamp, hash);
+          return;
+        }
+      }
+    }
+
     console.log(`Installing ${path.basename(dir)} dependencies...`);
-    execSync("npm install --no-audit --no-fund", { cwd: dir, stdio: "inherit" });
+    execSync("npm install --no-audit --no-fund --prefer-offline", { cwd: dir, stdio: "inherit" });
     fs.writeFileSync(stamp, hash);
     // A different npm version can rewrite the lockfile while installing, and a changed lockfile stops the
     // next try from checking out a newer push here.
     TryBranch.git(["checkout", "--quiet", "--", "package-lock.json"], dir);
+  }
+
+  public static lockfileHash(dir: string): string {
+    const lockfile = path.join(dir, "package-lock.json");
+    return crypto.createHash("sha1").update(fs.readFileSync(lockfile)).digest("hex");
+  }
+
+  // The same project folder in your own checkout or another worktree that already has node_modules, preferring one
+  // installed from the same lockfile. Your checkout's node_modules carries no stamp, so its lockfile stands in.
+  public static findSeed(dir: string, hash: string): { dir: string; root: string; matches: boolean } | undefined {
+    const project = path.basename(dir);
+    const roots = [
+      ROOT,
+      ...(fs.existsSync(WORKTREES) ? fs.readdirSync(WORKTREES).map((name) => path.join(WORKTREES, name)) : [])
+    ];
+    const seeds = roots
+      .map((root) => ({ root, dir: path.join(root, project) }))
+      .filter((seed) => this.normalizePath(seed.dir) !== this.normalizePath(dir))
+      .filter((seed) => fs.existsSync(path.join(seed.dir, "node_modules")))
+      .map((seed) => {
+        const stamp = path.join(seed.dir, "node_modules", INSTALL_STAMP);
+        const seedHash = fs.existsSync(stamp) ? fs.readFileSync(stamp, "utf8") : this.lockfileHash(seed.dir);
+        return { ...seed, matches: seedHash === hash };
+      });
+    return seeds.find((seed) => seed.matches) ?? seeds[0];
+  }
+
+  // Recreates the folder tree from under to, hard-linking each file. npm and Vite replace files rather than write
+  // into them, so the copies can't change each other. Vite's own cache is left out. A symlink (or a Windows
+  // junction, like the file:.. dependency) pointing inside fromRoot is rebuilt to point at the same place in toRoot.
+  public static linkTree(from: string, to: string, fromRoot: string, toRoot: string): void {
+    fs.mkdirSync(to, { recursive: true });
+    for (const entry of fs.readdirSync(from, { withFileTypes: true })) {
+      if (entry.name === ".vite" || entry.name === INSTALL_STAMP) continue;
+      const source = path.join(from, entry.name);
+      const target = path.join(to, entry.name);
+      if (entry.isSymbolicLink()) {
+        this.relink(source, target, fromRoot, toRoot);
+      } else if (entry.isDirectory()) {
+        this.linkTree(source, target, fromRoot, toRoot);
+      } else {
+        try {
+          fs.linkSync(source, target);
+        } catch {
+          fs.copyFileSync(source, target);
+        }
+      }
+    }
+  }
+
+  public static relink(source: string, target: string, fromRoot: string, toRoot: string): void {
+    const pointsAt = path.resolve(path.dirname(source), fs.readlinkSync(source));
+    const inside = path.relative(fromRoot, pointsAt);
+    if (inside.startsWith("..") || path.isAbsolute(inside)) return;
+
+    const destination = path.join(toRoot, inside);
+    try {
+      if (process.platform === "win32") {
+        // Junctions need no admin rights but only work for folders, and take an absolute path.
+        fs.symlinkSync(destination, target, "junction");
+      } else {
+        fs.symlinkSync(path.relative(path.dirname(target), destination), target);
+      }
+    } catch {
+      // A link to a file on Windows needs Developer Mode. Leaving it out is safe: npm makes .cmd files for bins there.
+    }
   }
 
   public static async confirm(question: string): Promise<boolean> {
