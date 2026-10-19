@@ -175,8 +175,7 @@ export class Camera {
           return;
         }
 
-        this.lastMouseX = options.x - scene.getCamera().getX();
-        this.lastMouseY = options.y - scene.getCamera().getY();
+        this.anchorDrag(options.x, options.y);
         this.mouseHeld = true;
       });
 
@@ -187,8 +186,7 @@ export class Camera {
       });
 
       this.onSceneInput("mouseup", (options) => {
-        this.lastMouseX = options.x - scene.getCamera().getX();
-        this.lastMouseY = options.y - scene.getCamera().getY();
+        this.anchorDrag(options.x, options.y);
         this.mouseHeld = false;
       });
 
@@ -204,13 +202,11 @@ export class Camera {
           scene.getCamera().zoom(options.x, options.y, 1.2);
         }
 
-        this.lastMouseX = options.x - scene.getCamera().getX();
-        this.lastMouseY = options.y - scene.getCamera().getY();
+        this.anchorDrag(options.x, options.y);
       });
 
       this.onSceneInput("mouseleave", (options) => {
-        this.lastMouseX = options.x - scene.getCamera().getX();
-        this.lastMouseY = options.y - scene.getCamera().getY();
+        this.anchorDrag(options.x, options.y);
         this.mouseHeld = false;
       });
     }
@@ -315,6 +311,14 @@ export class Camera {
     this.x += copies * worldWidth * this.zoomAmount;
     this.targetX += targetDelta;
     this.lastMouseX -= targetDelta; // Feeds targetX on the next drag frame.
+  }
+
+  // A drag moves the target position with the mouse, so it's anchored to the target, not to where
+  // the camera has glided so far: anchoring to the latter mid-zoom undid the zoom's pan on the next
+  // mouse move, swinging the view toward the map's top left.
+  private anchorDrag(mouseX: number, mouseY: number) {
+    this.lastMouseX = mouseX - this.targetX;
+    this.lastMouseY = mouseY - this.targetY;
   }
 
   /**
