@@ -15,7 +15,15 @@ export enum NotificationPriority {
 // needing production, select a unit needing orders, or dismiss a one-off message.
 // A "cityStrike" click starts aiming a city that has an enemy in range, and a "diplomacy" click
 // opens the diplomacy window.
-export type NotificationType = "research" | "production" | "unitOrders" | "cityStrike" | "diplomacy" | "message";
+// A "pantheon" click opens the pantheon picker.
+export type NotificationType =
+  | "research"
+  | "production"
+  | "unitOrders"
+  | "cityStrike"
+  | "diplomacy"
+  | "pantheon"
+  | "message";
 
 export interface NotificationData {
   id: string;
@@ -178,13 +186,18 @@ export class PlayerNotifications {
   /** Every active notification, highest priority first. */
   public getNotifications(): NotificationData[] {
     const derived = [
+      // Ahead of research, so the turn button asks for the pantheon first.
+      this.getPantheonNotification(),
       this.getResearchNotification(),
       this.getProductionNotification(),
       this.getCityStrikeNotification(),
       this.getPeaceOfferNotification(),
       this.getUnitOrdersNotification()
     ];
-    const notifications = [...derived.filter((notification) => notification), ...this.messages.map((message) => message.data)];
+    const notifications = [
+      ...derived.filter((notification) => notification),
+      ...this.messages.map((message) => message.data)
+    ];
 
     // Stable sort: equal priorities keep the order they were added in.
     return notifications.sort((a, b) => b.priority - a.priority);
@@ -202,6 +215,20 @@ export class PlayerNotifications {
       text: "You can research a new technology.",
       priority: NotificationPriority.HIGH,
       turnBlockingLabel: "Choose Research"
+    };
+  }
+
+  // Civ 5's "you can found a pantheon", once the player has the faith for one.
+  private getPantheonNotification(): NotificationData | undefined {
+    if (!this.player.getReligion().canFoundPantheon()) return undefined;
+
+    return {
+      id: "pantheon",
+      type: "pantheon",
+      icon: "ICON_FAITH",
+      text: "You have enough Faith to found a pantheon.",
+      priority: NotificationPriority.HIGH,
+      turnBlockingLabel: "Choose Pantheon"
     };
   }
 

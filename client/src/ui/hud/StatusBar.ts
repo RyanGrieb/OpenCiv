@@ -8,6 +8,7 @@ import { Strings } from "../../util/Strings";
 import { Label } from "../components/Label";
 import { Tooltip } from "../components/Tooltip";
 import { UITheme } from "../UITheme";
+import { FaithTooltip } from "./FaithTooltip";
 import { GoldTooltip } from "./GoldTooltip";
 import { HappinessStatus, HappinessTooltip } from "./HappinessTooltip";
 
@@ -17,7 +18,7 @@ interface TurnTimeEvent {
 }
 
 // The stats that drop down a breakdown while the mouse is over them.
-type HoverStat = "gold" | "happiness";
+type HoverStat = "gold" | "happiness" | "faith";
 
 export class StatusBar extends ActorGroup {
   private static readonly HAPPINESS_COLORS: Record<HappinessStatus, string> = {
@@ -115,6 +116,7 @@ export class StatusBar extends ActorGroup {
       x >= descLabel.getX() && x <= valueLabel.getX() + valueLabel.getWidth();
     if (isOver(this.goldDescLabel, this.goldLabel)) return "gold";
     if (isOver(this.happinessDescLabel, this.happinessLabel)) return "happiness";
+    if (isOver(this.faithDescLabel, this.faithLabel)) return "faith";
     return undefined;
   }
 
@@ -143,6 +145,10 @@ export class StatusBar extends ActorGroup {
     const y = this.y + this.height;
 
     if (stat === "gold") return GoldTooltip.create(this.goldDescLabel.getX(), y, clientPlayer.getGoldBreakdown());
+    if (stat === "faith") {
+      const faith = clientPlayer.getAccumulatedStat("faith");
+      return FaithTooltip.create(this.faithDescLabel.getX(), y, faith, clientPlayer.getFaithBreakdown());
+    }
     return HappinessTooltip.create(this.happinessDescLabel.getX(), y, clientPlayer.getHappinessBreakdown());
   }
 
@@ -420,7 +426,9 @@ export class StatusBar extends ActorGroup {
 
     this.faithDescLabel.setPosition(this.happinessLabel.getX() + this.happinessLabel.getWidth() + 10, 8);
     this.faithIcon.setPosition(this.faithDescLabel.getX() + this.faithDescLabel.getWidth(), this.faithIcon.getY());
-    this.faithLabel.setText(Strings.convertToStatUnit(clientPlayer.getTotalStat("faith")));
+    const faithTotal = clientPlayer.getAccumulatedStat("faith");
+    const faithRate = Strings.convertToStatUnit(clientPlayer.getTotalStat("faith"));
+    this.faithLabel.setText(`${faithTotal} (${faithRate})`);
     await this.faithLabel.conformSize();
     this.faithLabel.setPosition(this.faithIcon.getX() + this.faithIcon.getWidth() - 8, 8);
 

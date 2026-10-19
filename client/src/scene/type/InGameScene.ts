@@ -20,6 +20,7 @@ import { NotificationPanel } from "../../ui/hud/NotificationPanel";
 import { ResearchDisplayInfo } from "../../ui/hud/ResearchDisplayInfo";
 import { ResearchTreeWindow } from "../../ui/windows/ResearchTreeWindow";
 import { DiplomacyWindow } from "../../ui/windows/DiplomacyWindow";
+import { PantheonList } from "../../ui/windows/religion/PantheonList";
 import { DeclareWarWindow } from "../../ui/windows/DeclareWarWindow";
 import { StatusBar } from "../../ui/hud/StatusBar";
 import { TileInspector } from "../../ui/hud/TileInspector";
@@ -49,6 +50,7 @@ export class InGameScene extends Scene {
   private researchTreeWindow: ResearchTreeWindow;
   private diplomacyButton: Button;
   private diplomacyWindow: DiplomacyWindow;
+  private pantheonList: PantheonList;
   private declareWarWindow: DeclareWarWindow;
   private cityDisplayInfo: CityDisplayInfo;
   private nextTurnButton: Button;
@@ -518,6 +520,40 @@ export class InGameScene extends Scene {
     this.addActor(this.diplomacyWindow);
     this.setUIState(true);
     this.openUIElement = { close: () => this.closeDiplomacyUI() };
+  }
+
+  public getPantheonList(): PantheonList | undefined {
+    return this.pantheonList;
+  }
+
+  // Opened from the Choose Pantheon button or its notification. Choosing one closes it.
+  public togglePantheonUI() {
+    if (this.pantheonList) {
+      this.closePantheonUI();
+      return;
+    }
+    if (this.openUIElement) return;
+
+    this.pantheonList = new PantheonList({ onChosen: () => this.closePantheonUI() });
+    this.addActor(this.pantheonList);
+    this.setUIState(true);
+    this.openUIElement = { close: () => this.closePantheonUI() };
+
+    // The list reaches down past them, and clicks aren't occluded by z-order.
+    this.removeActor(this.nextTurnButton);
+    this.removeActor(this.diplomacyButton);
+    this.removeActor(this.tileInformationLabel);
+  }
+
+  private closePantheonUI() {
+    this.removeActor(this.pantheonList);
+    this.pantheonList = undefined;
+    this.setUIState(false);
+    this.openUIElement = undefined;
+
+    this.addActor(this.nextTurnButton);
+    this.addActor(this.diplomacyButton);
+    this.addActor(this.tileInformationLabel);
   }
 
   /**

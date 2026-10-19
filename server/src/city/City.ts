@@ -6,6 +6,7 @@ import { StatEntry, StatValues, Tile } from "../map/Tile";
 import { Combat, CombatModifier } from "../unit/Combat";
 import { Unit, UnitYMLTypeData } from "../unit/Unit";
 import { UnitPromotions } from "../unit/UnitPromotions";
+import { Pantheons } from "../religion/Pantheons";
 import { BorderGrowth } from "./BorderGrowth";
 import { Building, BuildingData } from "./Building";
 import { BuildingEffects } from "./BuildingEffects";
@@ -618,6 +619,15 @@ export class City {
     return this.getBaseStrength() * (1 + modifierTotal);
   }
 
+  /** What the city shoots with: its combat strength, raised by Goddess of Protection. */
+  public getStrikeStrength(): number {
+    const modifierTotal = Pantheons.getCityRangedModifiers(this.player).reduce(
+      (total, modifier) => total + modifier.value,
+      0
+    );
+    return this.getCombatStrength() * (1 + modifierTotal);
+  }
+
   // The owner's military unit standing in the city, if any.
   public getGarrison(): Unit | undefined {
     return this.tile.getUnits().find((unit) => unit.getPlayer() === this.player && unit.canFight());
@@ -655,7 +665,7 @@ export class City {
     this.strikeSpent = true;
 
     const result = Combat.resolveRanged({
-      attackerStrength: this.getCombatStrength(),
+      attackerStrength: this.getStrikeStrength(),
       attackerHealth: Combat.MAX_HEALTH,
       defenderStrength: Combat.getDefenseStrength(
         defender.getCombatStrength(),
@@ -683,7 +693,10 @@ export class City {
         player.sendNetworkEvent(combatPacket);
       });
 
-    if (defender.getHealth() <= 0) defender.delete();
+    if (defender.getHealth() <= 0) {
+      Pantheons.onBattleWon(this.player, defender, targetTile);
+      defender.delete();
+    }
     return true;
   }
 
@@ -703,7 +716,7 @@ export class City {
       attackerMaxHealth: this.getMaxHealth(),
       defenderHealth: defender.getHealth(),
       ...Combat.predictRanged({
-        attackerRangedStrength: this.getCombatStrength(),
+        attackerRangedStrength: this.getStrikeStrength(),
         attackerHealth: Combat.MAX_HEALTH,
         defenderBaseStrength: defender.getCombatStrength(),
         defenderHealth: defender.getHealth(),
@@ -784,12 +797,17 @@ export class City {
     this.sendStatUpdate(this.player);
   }
 
+  // Fertility Rites makes it less.
   public getFoodRequiredToGrow(): number {
-    return City.GROWTH_FOOD_BASE + City.GROWTH_FOOD_PER_POP * this.population;
+    return Pantheons.getFoodRequiredToGrow(
+      City.GROWTH_FOOD_BASE + City.GROWTH_FOOD_PER_POP * this.population,
+      this.player
+    );
   }
 
   public getCultureRequiredToExpand(): number {
-    return BuildingEffects.getBorderCost(BorderGrowth.getCultureCost(this.tilesAcquired), this.player);
+    const cost = BuildingEffects.getBorderCost(BorderGrowth.getCultureCost(this.tilesAcquired), this.player);
+    return Pantheons.getBorderCost(cost, this.player);
   }
 
   public getTile(): Tile {
@@ -905,7 +923,7 @@ export class City {
     };
   }
 
-  // What the city yields each turn: its buildings and worked tiles, then its buildings' effects, then
+  // What the city yields each turn: its buildings, worked tiles and pantheon, then its buildings' effects, then
   // what unhappiness and training a Settler take out of its food.
   private computeStats(): CityStats {
     const cityStats: CityStats = {
@@ -928,7 +946,8 @@ export class City {
       ...this.buildings.flatMap((building) =>
         Object.entries(building.getStatLine()).map(([stat, value]) => ({ [stat]: value }) as StatEntry)
       ),
-      ...this.workedTiles.flatMap((tile) => tile.getStats())
+      ...this.workedTiles.flatMap((tile) => tile.getStats()),
+      ...Pantheons.getCityYields(this)
     ];
     for (const stat of statLines) {
       const statType = Object.keys(stat)[0] as keyof CityStats;
@@ -1260,13 +1279,24 @@ export class City {
     return true;
   }
 
-  // The city's production put toward `item` each turn: some buildings speed up some units (Stables, Forge).
+  // The city's production put toward `item` each turn: some buildings speed up some units (Stables, Forge),
+  // and Monument to the Gods early wonders.
   private getProductionToward(item: ProductionOption): number {
     const production = this.getStatline({ asArray: false }).production;
-    if (item.type !== "unit" || production <= 0) return production;
+    if (production <= 0) return production;
+    if (item.type === "building") return this.getProductionTowardBuilding(item.name, production);
+    if (item.type !== "unit") return production;
 
     const unit = Unit.getAllUnitData().find((data) => data.name === item.name);
     const percent = BuildingEffects.getUnitProductionPercent(this, unit);
+    return Math.floor((production * (100 + percent)) / 100);
+  }
+
+  private getProductionTowardBuilding(buildingName: string, production: number): number {
+    const building = Building.createFromName(buildingName);
+    if (!building?.isWonderBuilding()) return production;
+
+    const percent = Pantheons.getWonderProductionPercent(this.player, building.getRequiredTech());
     return Math.floor((production * (100 + percent)) / 100);
   }
 

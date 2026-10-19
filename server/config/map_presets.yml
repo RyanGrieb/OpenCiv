@@ -250,3 +250,20 @@ presets:
       - "g C S P g T R ~ O"
       - " g K g g g U ~ O O"
       - "g g g g g ~ ~ O O"
+
+  pantheons:
+    description: Desert, Flood Plains and Tundra around the Settler, to found Desert Folklore or Dance of the Aurora and watch tiles gain Faith.
+    legend:
+      "g": [grass]
+      "p": [plains]
+      "d": [desert]
+      "F": [floodplains]
+      "t": [tundra]
+      "T": [tundra, forest]
+      "S": [grass]
+    rows:
+      - "g g p t t g g"
+      - " g g d T t g g"
+      - "g g d S F g g"
+      - " g g d d F g g"
+      - "g p g p g g g"

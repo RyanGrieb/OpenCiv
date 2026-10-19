@@ -33,6 +33,8 @@ export interface GameOptions {
   startAtWar: boolean;
   // Gold every player starts with, for trying out buying production (see the GoldSpending scenario).
   startingGold: number;
+  // Faith every player starts with, for trying out pantheons (see the Pantheons scenario).
+  startingFaith: number;
   // Experience every player's starting military units begin with, for trying out promotions (see the
   // Promotions scenario).
   startingExperience: number;
@@ -107,6 +109,7 @@ export const DefaultGameOptions: GameOptions = {
   mapPreset: "",
   startAtWar: false,
   startingGold: 0,
+  startingFaith: 0,
   startingExperience: 0,
   techCostPercent: 100,
   productionCostPercent: 100,
@@ -236,6 +239,16 @@ export const GameOptionDefinitions: GameOptionDefinition[] = [
     min: 0,
     max: 10000,
     step: 10,
+    hidden: true,
+    category: "Starting Bonuses"
+  },
+  {
+    key: "startingFaith",
+    label: "Starting Faith",
+    type: "number",
+    min: 0,
+    max: 1000,
+    step: 5,
     hidden: true,
     category: "Starting Bonuses"
   },

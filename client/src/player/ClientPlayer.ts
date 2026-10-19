@@ -16,6 +16,7 @@ import { City } from "../city/City";
 import { CityStrikeAiming } from "../city/CityStrikeAiming";
 import { Diplomacy, Relation } from "./Diplomacy";
 import { GoldBreakdown } from "../ui/hud/GoldTooltip";
+import { FaithBreakdown } from "../ui/hud/FaithTooltip";
 import { HappinessBreakdown } from "../ui/hud/HappinessTooltip";
 
 export interface CurrentResearch {
@@ -44,6 +45,7 @@ export class ClientPlayer extends AbstractPlayer {
   private totalStats: Map<string, number> = new Map();
   private accumulatedStats: Map<string, number> = new Map();
   private goldBreakdown: GoldBreakdown = { income: [], expenses: [], net: 0 };
+  private faithBreakdown: FaithBreakdown = { pantheon: null, pantheonCost: 0, pantheonsLeft: 0 };
   private happinessBreakdown: HappinessBreakdown = {
     sources: [],
     unhappiness: [],
@@ -301,6 +303,7 @@ export class ClientPlayer extends AbstractPlayer {
 
         this.goldBreakdown = data["goldBreakdown"] ?? this.goldBreakdown;
         this.happinessBreakdown = data["happinessBreakdown"] ?? this.happinessBreakdown;
+        this.faithBreakdown = data["faithBreakdown"] ?? this.faithBreakdown;
       }
     });
 
@@ -357,6 +360,10 @@ export class ClientPlayer extends AbstractPlayer {
   }
 
   /** The empire's happiness, where it comes from, and what unhappiness is costing, as the server last reported it. */
+  public getFaithBreakdown(): FaithBreakdown {
+    return this.faithBreakdown;
+  }
+
   public getHappinessBreakdown(): HappinessBreakdown {
     return this.happinessBreakdown;
   }

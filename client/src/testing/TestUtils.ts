@@ -18,6 +18,7 @@ export class TestUtils {
         cityStartingHealth: 200,
         startAtWar: false,
         startingGold: 0,
+        startingFaith: 0,
         startingExperience: 0,
         techCostPercent: 100,
         productionCostPercent: 100,

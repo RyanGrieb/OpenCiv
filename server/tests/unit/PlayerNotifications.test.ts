@@ -15,6 +15,7 @@ describe('PlayerNotifications', () => {
   let currentResearch: any;
   let techsLeft: boolean;
   let relations: any[];
+  let canFoundPantheon: boolean;
 
   const makeUnit = (id: number, options: { movement?: number; queued?: boolean; fortified?: boolean; skipping?: boolean; building?: string } = {}) => ({
     getId: () => id,
@@ -45,6 +46,7 @@ describe('PlayerNotifications', () => {
     currentResearch = null;
     techsLeft = true;
     relations = [];
+    canFoundPantheon = false;
     mockWebsocket = {} as WebSocket;
 
     onSpy = jest.spyOn(ServerEvents, 'on').mockImplementation(() => { });
@@ -57,6 +59,7 @@ describe('PlayerNotifications', () => {
       getWebsocket: jest.fn(() => mockWebsocket),
       sendNetworkEvent: jest.fn(),
       getDiplomacy: jest.fn(() => ({ toJSON: () => relations })),
+      getReligion: jest.fn(() => ({ canFoundPantheon: () => canFoundPantheon })),
     } as unknown as jest.Mocked<Player>;
 
     notifications = new PlayerNotifications(mockPlayer);
@@ -64,6 +67,14 @@ describe('PlayerNotifications', () => {
 
   it('has nothing to say before the player has a city or a unit', () => {
     expect(notifications.getNotifications()).toEqual([]);
+  });
+
+  it('blocks the turn with Choose Pantheon once the player can found a pantheon', () => {
+    canFoundPantheon = true;
+
+    expect(notifications.getNotifications()).toEqual([
+      expect.objectContaining({ id: 'pantheon', type: 'pantheon', turnBlockingLabel: 'Choose Pantheon' }),
+    ]);
   });
 
   it('asks for research once a city exists and nothing is being researched', () => {

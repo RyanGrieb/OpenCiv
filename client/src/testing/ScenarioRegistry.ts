@@ -10,6 +10,7 @@ export enum ScenarioCategory {
   CITIES = "Cities",
   UNITS = "Units",
   ECONOMY = "Economy",
+  RELIGION = "Religion",
   COMBAT = "Combat",
   DIPLOMACY = "Diplomacy",
   NAVAL = "Naval",
@@ -241,6 +242,10 @@ ScenarioRegistry.register("Happiness", ScenarioCategory.ECONOMY, async () => {
   return module.setupHappinessTest;
 });
 
+ScenarioRegistry.register("Pantheons", ScenarioCategory.RELIGION, async () => {
+  const module = await import("./scenarios/Pantheons.test");
+  return module.setupPantheonsTest;
+});
 ScenarioRegistry.register("Trapping", ScenarioCategory.ECONOMY, async () => {
   const module = await import("./scenarios/Trapping.test");
   return module.setupTrappingTest;

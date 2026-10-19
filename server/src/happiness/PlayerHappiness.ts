@@ -4,6 +4,7 @@ import { Player } from "../Player";
 import { Improvement } from "../map/Improvement";
 import { MapResources } from "../map/MapResources";
 import { Tile } from "../map/Tile";
+import { Pantheons } from "../religion/Pantheons";
 import { CombatModifier } from "../unit/Combat";
 
 // One line of the happiness breakdown the status bar's tooltip shows, e.g. { source: "Citrus", amount: 4 }.
@@ -113,7 +114,8 @@ export class PlayerHappiness {
       })),
       ...this.player
         .getCities()
-        .map((city) => ({ source: `Buildings in ${city.getName()}`, amount: city.getBuildingHappiness() }))
+        .map((city) => ({ source: `Buildings in ${city.getName()}`, amount: city.getBuildingHappiness() })),
+      ...Pantheons.getHappiness(this.player)
     ].filter((entry) => entry.amount !== 0);
 
     const cities = this.player.getCities();

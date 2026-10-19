@@ -8,6 +8,7 @@ import { PlayerHappiness } from "./happiness/PlayerHappiness";
 import { GameMap } from "./map/GameMap";
 import { PlayerVisibility } from "./map/PlayerVisibility";
 import { PlayerNotifications } from "./notification/PlayerNotifications";
+import { PlayerReligion } from "./religion/PlayerReligion";
 import { TechEffects } from "./research/TechEffects";
 import { EraData, Technology } from "./research/Technology";
 import { Unit } from "./unit/Unit";
@@ -23,9 +24,9 @@ export interface TotalStats {
 }
 
 // Stats whose per-turn rate above gets banked into a running total each turn,
-// rather than just reflecting the current rate. Add a key here (e.g. "faith") to
-// make another stat accumulate - no other changes needed, client included.
-const ACCUMULATING_STATS: (keyof TotalStats)[] = ["gold"];
+// rather than just reflecting the current rate. Add a key here to make another
+// stat accumulate - no other changes needed, client included.
+const ACCUMULATING_STATS: (keyof TotalStats)[] = ["gold", "faith"];
 
 export interface CurrentResearch {
   techName: string;
@@ -60,6 +61,7 @@ export class Player {
   private diplomacy: PlayerDiplomacy;
   private treasury: PlayerTreasury;
   private happiness: PlayerHappiness;
+  private religion: PlayerReligion;
   // Free techs (from a wonder) banked while nothing was being researched: the next tech chosen is free.
   private freeTechs: number;
 
@@ -83,6 +85,7 @@ export class Player {
     this.diplomacy = new PlayerDiplomacy(this);
     this.treasury = new PlayerTreasury(this);
     this.happiness = new PlayerHappiness(this);
+    this.religion = new PlayerReligion(this);
     this.freeTechs = 0;
 
     // Add event listener for when the player disconnects
@@ -403,7 +406,8 @@ export class Player {
       stats: this.getTotalStats(),
       accumulatedStats: this.getAccumulatedStats(),
       goldBreakdown: this.treasury.getBreakdown(),
-      happinessBreakdown: this.happiness.getBreakdown()
+      happinessBreakdown: this.happiness.getBreakdown(),
+      faithBreakdown: this.religion.getFaithBreakdown()
     });
 
     // Every city's growth depends on the status, so each one's food needs resending.
@@ -535,6 +539,11 @@ export class Player {
   /** The empire-wide happiness, and what unhappiness costs this player. */
   public getHappiness() {
     return this.happiness;
+  }
+
+  /** This player's faith-bought beliefs: their pantheon. */
+  public getReligion() {
+    return this.religion;
   }
 
   /** Who this player has met, and who they're at war with. */
