@@ -175,18 +175,18 @@ export class Camera {
           return;
         }
 
-        this.anchorDrag(options.x, options.y);
+        // clientX/Y are CSS pixels, the camera's units (like the wheel's x/y); x/y are device pixels.
+        this.anchorDrag(options.clientX, options.clientY);
         this.mouseHeld = true;
       });
 
       this.onSceneInput("mousemove", (options) => {
         if (this.mouseHeld) {
-          scene.getCamera().setTargetPosition(options.x - this.lastMouseX, options.y - this.lastMouseY);
+          scene.getCamera().setTargetPosition(options.clientX - this.lastMouseX, options.clientY - this.lastMouseY);
         }
       });
 
-      this.onSceneInput("mouseup", (options) => {
-        this.anchorDrag(options.x, options.y);
+      this.onSceneInput("mouseup", () => {
         this.mouseHeld = false;
       });
 
@@ -205,8 +205,7 @@ export class Camera {
         this.anchorDrag(options.x, options.y);
       });
 
-      this.onSceneInput("mouseleave", (options) => {
-        this.anchorDrag(options.x, options.y);
+      this.onSceneInput("mouseleave", () => {
         this.mouseHeld = false;
       });
     }
@@ -315,7 +314,8 @@ export class Camera {
 
   // A drag moves the target position with the mouse, so it's anchored to the target, not to where
   // the camera has glided so far: anchoring to the latter mid-zoom undid the zoom's pan on the next
-  // mouse move, swinging the view toward the map's top left.
+  // mouse move. Takes CSS pixels: mixing in the device pixels of a mouse event's x/y jumped the view
+  // toward the map's top left on a high-DPI screen.
   private anchorDrag(mouseX: number, mouseY: number) {
     this.lastMouseX = mouseX - this.targetX;
     this.lastMouseY = mouseY - this.targetY;
