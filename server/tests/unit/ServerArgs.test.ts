@@ -99,4 +99,14 @@ describe("ServerArgs", () => {
       expect(usage).toContain(`--${key}=`);
     }
   });
+
+  it("turns developer mode on with --dev or DEV_MODE, and never as a game option", () => {
+    expect(ServerArgs.parseDevMode([], {})).toBe(false);
+    expect(ServerArgs.parseDevMode(["--dev"], {})).toBe(true);
+    expect(ServerArgs.parseDevMode([], { DEV_MODE: "true" })).toBe(true);
+    expect(ServerArgs.parseDevMode([], { DEV_MODE: "false" })).toBe(false);
+    expect(ServerArgs.parseDevMode([], { GAME_OPTIONS: "numCityStates=0,dev" })).toBe(true);
+    expect(ServerArgs.parseGameOptions([], { GAME_OPTIONS: "dev" })).toEqual({});
+    expect(ServerArgs.parseGameOptions(["--dev"], {})).toEqual({});
+  });
 });

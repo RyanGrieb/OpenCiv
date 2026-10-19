@@ -27,10 +27,19 @@ describe("DevConsole", () => {
     jest.spyOn(Game, "getInstance").mockReturnValue({ getPlayers: () => new Map() } as unknown as Game);
     jest.spyOn(ServerEvents, "on").mockImplementation(() => {});
     jest.spyOn(console, "log").mockImplementation(() => {});
+    DevConsole.setEnabled(true);
   });
 
   afterEach(() => {
     jest.restoreAllMocks();
+  });
+
+  it("refuses every command outside developer mode", () => {
+    DevConsole.setEnabled(false);
+    const result = DevConsole.run(player, "spawn Archer", [0, 0]);
+
+    expect(result.lines[0]).toContain("developer mode");
+    expect(grass.getUnits()).toEqual([]);
   });
 
   it("asks for a tile, then spawns the unit there", () => {

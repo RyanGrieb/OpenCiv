@@ -26,6 +26,11 @@ export class ServerArgs {
   private static readonly PORT_ENV_VAR = "SERVER_PORT";
   private static readonly PORT_ARG = "port";
 
+  // Developer mode lets players run the dev console's commands (see DevConsole). It's only ever set
+  // where the server is launched - never a game option, which any player could change in the lobby.
+  private static readonly DEV_ENV_VAR = "DEV_MODE";
+  private static readonly DEV_ARG = "dev";
+
   public static helpRequested(argv: string[] = process.argv.slice(2)): boolean {
     return argv.some((arg) => arg === "--help" || arg === "-h");
   }
@@ -41,6 +46,8 @@ export class ServerArgs {
     const overrides: Partial<GameOptions> = {};
 
     for (const [key, value] of this.envPairs(env).concat(this.argvPairs(argv))) {
+      // Read by parseDevMode instead.
+      if (key === this.DEV_ARG) continue;
       this.applyOverride(overrides, key, value);
     }
 
@@ -73,12 +80,25 @@ export class ServerArgs {
     return port;
   }
 
+  /**
+   * Whether to run in developer mode: --dev, the DEV_MODE env var set to true, or dev in GAME_OPTIONS
+   * (where `npm run try` and start:ports put the arguments they pass on, so `npm run try -- <branch> --dev`
+   * works).
+   */
+  public static parseDevMode(argv: string[] = process.argv.slice(2), env: NodeJS.ProcessEnv = process.env): boolean {
+    const flags = this.envPairs(env).concat(this.argvPairs(argv));
+    if (flags.some(([key, value]) => key === this.DEV_ARG && value === undefined)) return true;
+    return this.TRUE_VALUES.includes((env[this.DEV_ENV_VAR] ?? "").trim().toLowerCase());
+  }
+
   public static usage(): string {
     const lines = [
       "Usage: npm start -- [options]",
       "",
       "Server options:",
-      `  --${this.PORT_ARG}=<number>`.padEnd(38) + `default: ${this.DEFAULT_PORT} (or the ${this.PORT_ENV_VAR} env var)`,
+      `  --${this.PORT_ARG}=<number>`.padEnd(38) +
+        `default: ${this.DEFAULT_PORT} (or the ${this.PORT_ENV_VAR} env var)`,
+      `  --${this.DEV_ARG}`.padEnd(38) + `developer mode, for the dev console (or ${this.DEV_ENV_VAR}=true)`,
       "",
       "Game options:"
     ];

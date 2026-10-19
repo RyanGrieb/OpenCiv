@@ -8,6 +8,7 @@ import { LobbyState } from "./state/type/LobbyState";
 import { City } from "./city/City";
 import { UnitUpgrades } from "./unit/UnitUpgrades";
 import { PlayerNotifications } from "./notification/PlayerNotifications";
+import { DevConsole } from "./dev/DevConsole";
 
 export class Server {
   private static serverInstance: Server;
@@ -150,4 +151,5 @@ if (ServerArgs.helpRequested()) {
 Server.getInstance().setPort(ServerArgs.parsePort());
 Server.getInstance().setAllowDuplicateIPs(true);
 Server.getInstance().setGameOptionOverrides(ServerArgs.parseGameOptions());
+DevConsole.setEnabled(ServerArgs.parseDevMode());
 Server.getInstance().start();

@@ -11,9 +11,10 @@ export interface DevCommandResult {
 }
 
 /**
- * The developer console's commands (the client opens it with `), for trying things out mid-game. The
- * client sends what was typed as a devCommand event, with the tile it picked when a command asked for
- * one (pickTile), and shows the lines it gets back in a devCommandResult event.
+ * The developer console's commands (the client opens it with `), for trying things out mid-game, on a
+ * server launched in developer mode (--dev, or DEV_MODE=true). The client sends what was typed as a
+ * devCommand event, with the tile it picked when a command asked for one (pickTile), and shows the lines
+ * it gets back in a devCommandResult event.
  */
 export class DevConsole {
   private static readonly HELP = [
@@ -21,6 +22,14 @@ export class DevConsole {
     "units - lists the units that can be spawned",
     "spawn <unit> - spawns a unit of yours on the next tile you left click"
   ];
+
+  // Developer mode, set at launch (see ServerArgs.parseDevMode()): off, every command is refused.
+  private static enabled = false;
+
+  public static setEnabled(enabled: boolean) {
+    DevConsole.enabled = enabled;
+    if (enabled) console.log("Developer mode: the dev console's commands are on");
+  }
 
   /** Answers the devCommand event while a game is on. */
   public static listen(parentObject: object) {
@@ -40,6 +49,10 @@ export class DevConsole {
 
   /** Runs a command for a player, on a tile (grid x and y) when it has picked one. */
   public static run(player: Player, text: string, tile?: [number, number]): DevCommandResult {
+    if (!DevConsole.enabled) {
+      return { lines: ["This server isn't in developer mode, so the console's commands are off."] };
+    }
+
     const [command, ...words] = text.trim().split(/\s+/);
     const argument = words.join(" ");
 

@@ -5,7 +5,8 @@ import { Unit } from "../../Unit";
 import { TestUtils } from "../TestUtils";
 
 // The developer console: ` opens it, "spawn archer" waits for a tile, and the next left click on the
-// map puts an Archer there. Ends with the console open, for trying other commands (type help).
+// map puts an Archer there. Ends with the console open, for trying other commands (type help). Needs
+// a server in developer mode: npm run try -- <branch> --dev.
 export function setupDevConsoleTest(game: Game) {
   const runner = new TestRunner("DevConsole");
   const utils = new TestUtils(game);

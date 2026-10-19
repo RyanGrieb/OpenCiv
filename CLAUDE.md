@@ -106,6 +106,8 @@ At startup, `client/src/SpriteAtlas.ts` packs every sprite in the manifest into 
 
 `server/src/GameOptions.ts` owns the game's tunable options (defaults in `DefaultGameOptions`, plus `GameOptionDefinitions` describing which ones the client's UI renders). `server/src/ServerArgs.ts` parses overrides from argv and the `GAME_OPTIONS` env var and `Server.ts` hands them to `Game.init()`, which applies them over the defaults — the client can still change them afterwards in the lobby.
 
+**Developer mode** (`--dev`, `DEV_MODE=true`, or `dev` in `GAME_OPTIONS`, so `npm run try -- <branch> --dev` works) turns on the dev console's commands (`server/src/dev/DevConsole.ts`; the client opens it with `` ` ``). It's deliberately not a game option, since any player can change those in the lobby. `npm run test:scenarios` turns it on.
+
 The parser derives its key list and each value's type from `DefaultGameOptions`, so **a new field on `GameOptions` is settable from the command line with no change to `ServerArgs`**. Options missing from `GameOptionDefinitions` (not exposed in the UI) are still settable this way; numbers get clamped to a definition's `min`/`max` when one exists.
 
 ### Config-driven game data
