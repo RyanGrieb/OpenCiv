@@ -21,6 +21,7 @@ import { ResearchDisplayInfo } from "../../ui/hud/ResearchDisplayInfo";
 import { ResearchTreeWindow } from "../../ui/windows/ResearchTreeWindow";
 import { DiplomacyWindow } from "../../ui/windows/DiplomacyWindow";
 import { PantheonList } from "../../ui/windows/religion/PantheonList";
+import { ReligionWindow } from "../../ui/windows/religion/ReligionWindow";
 import { DeclareWarWindow } from "../../ui/windows/DeclareWarWindow";
 import { StatusBar } from "../../ui/hud/StatusBar";
 import { TileInspector } from "../../ui/hud/TileInspector";
@@ -51,6 +52,8 @@ export class InGameScene extends Scene {
   private diplomacyButton: Button;
   private diplomacyWindow: DiplomacyWindow;
   private pantheonList: PantheonList;
+  private religionWindow: ReligionWindow;
+  private religionButton: Button;
   private declareWarWindow: DeclareWarWindow;
   private cityDisplayInfo: CityDisplayInfo;
   private nextTurnButton: Button;
@@ -305,6 +308,7 @@ export class InGameScene extends Scene {
     this.removeActor(this.statusBar);
     this.removeActor(this.researchDisplayInfo);
     this.removeActor(this.diplomacyButton);
+    this.removeActor(this.religionButton);
     this.removeActor(this.notificationPanel);
     this.removeActor(this.nextTurnButton);
     this.removeActor(this.closeCityDisplayButton);
@@ -359,6 +363,22 @@ export class InGameScene extends Scene {
     });
     this.diplomacyButton.setTransparency(ClientSettings.get("HUD_TRANSPARENCY"));
     this.addActor(this.diplomacyButton);
+
+    // Beside it, where old_java kept its religion button.
+    this.religionButton = new Button({
+      buttonImage: GameImage.ICON_BUTTON,
+      buttonHoveredImage: GameImage.ICON_BUTTON_HOVERED,
+      icon: SpriteRegion.ICON_FAITH,
+      iconWidth: UITheme.ICON_SIZE,
+      iconHeight: UITheme.ICON_SIZE,
+      size: ButtonSize.ICON_LARGE,
+      x: this.diplomacyButton.getX() + ButtonSize.ICON_LARGE.width + 8,
+      y: this.diplomacyButton.getY(),
+      z: 5,
+      onClicked: () => this.toggleReligionUI()
+    });
+    this.religionButton.setTransparency(ClientSettings.get("HUD_TRANSPARENCY"));
+    this.addActor(this.religionButton);
 
     this.notificationPanel = new NotificationPanel(this.notifications);
     this.addActor(this.notificationPanel);
@@ -522,6 +542,30 @@ export class InGameScene extends Scene {
     this.openUIElement = { close: () => this.closeDiplomacyUI() };
   }
 
+  public getReligionWindow(): ReligionWindow | undefined {
+    return this.religionWindow;
+  }
+
+  public toggleReligionUI() {
+    if (this.religionWindow) {
+      this.closeReligionUI();
+      return;
+    }
+    if (this.openUIElement) return;
+
+    this.religionWindow = new ReligionWindow({ onClose: () => this.closeReligionUI() });
+    this.addActor(this.religionWindow);
+    this.setUIState(true);
+    this.openUIElement = { close: () => this.closeReligionUI() };
+  }
+
+  private closeReligionUI() {
+    this.removeActor(this.religionWindow);
+    this.religionWindow = undefined;
+    this.setUIState(false);
+    this.openUIElement = undefined;
+  }
+
   public getPantheonList(): PantheonList | undefined {
     return this.pantheonList;
   }
@@ -534,7 +578,10 @@ export class InGameScene extends Scene {
     }
     if (this.openUIElement) return;
 
-    this.pantheonList = new PantheonList({ onChosen: () => this.closePantheonUI() });
+    this.pantheonList = new PantheonList({
+      onChosen: () => this.closePantheonUI(),
+      onClose: () => this.closePantheonUI()
+    });
     this.addActor(this.pantheonList);
     this.setUIState(true);
     this.openUIElement = { close: () => this.closePantheonUI() };
@@ -542,6 +589,7 @@ export class InGameScene extends Scene {
     // The list reaches down past them, and clicks aren't occluded by z-order.
     this.removeActor(this.nextTurnButton);
     this.removeActor(this.diplomacyButton);
+    this.removeActor(this.religionButton);
     this.removeActor(this.tileInformationLabel);
   }
 
@@ -553,6 +601,7 @@ export class InGameScene extends Scene {
 
     this.addActor(this.nextTurnButton);
     this.addActor(this.diplomacyButton);
+    this.addActor(this.religionButton);
     this.addActor(this.tileInformationLabel);
   }
 
@@ -640,6 +689,7 @@ export class InGameScene extends Scene {
     this.removeActor(this.tileInformationLabel);
     this.removeActor(this.researchDisplayInfo);
     this.removeActor(this.diplomacyButton);
+    this.removeActor(this.religionButton);
     this.removeActor(this.notificationPanel);
 
     this.addActor(this.closeCityDisplayButton);
@@ -655,6 +705,7 @@ export class InGameScene extends Scene {
     this.addActor(this.tileInformationLabel);
     this.addActor(this.researchDisplayInfo);
     this.addActor(this.diplomacyButton);
+    this.addActor(this.religionButton);
     this.addActor(this.notificationPanel);
 
     this.removeActor(this.closeCityDisplayButton);
@@ -673,6 +724,7 @@ export class InGameScene extends Scene {
     this.removeActor(this.tileInformationLabel);
     this.removeActor(this.researchDisplayInfo);
     this.removeActor(this.diplomacyButton);
+    this.removeActor(this.religionButton);
     this.removeActor(this.notificationPanel);
   }
 
@@ -687,6 +739,7 @@ export class InGameScene extends Scene {
     this.addActor(this.tileInformationLabel);
     this.addActor(this.researchDisplayInfo);
     this.addActor(this.diplomacyButton);
+    this.addActor(this.religionButton);
     this.addActor(this.notificationPanel);
   }
 

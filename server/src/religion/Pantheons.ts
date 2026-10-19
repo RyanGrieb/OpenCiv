@@ -132,11 +132,36 @@ export class Pantheons {
     const pantheon = Pantheons.getEffectsOf(player);
     if (!pantheon) return [];
 
-    const amount = player
-      .getCities()
-      .flatMap((city) => (pantheon.effects.city_yields ?? []).filter((effect) => Pantheons.cityMatches(effect, city)))
-      .reduce((total, effect) => total + (effect.stats.happiness ?? 0), 0);
+    const amount = player.getCities().reduce((total, city) => total + Pantheons.getCityHappiness(city), 0);
     return amount === 0 ? [] : [{ source: pantheon.name, amount }];
+  }
+
+  // The happiness the pantheon gets from this city (Goddess of Love, Sacred Waters).
+  public static getCityHappiness(city: City): number {
+    const effects = Pantheons.getEffectsOf(city.getPlayer())?.effects;
+
+    return (effects?.city_yields ?? [])
+      .filter((effect) => Pantheons.cityMatches(effect, city))
+      .reduce((total, effect) => total + (effect.stats.happiness ?? 0), 0);
+  }
+
+  /**
+   * Everything the pantheon adds to the city each turn, totalled by stat: its worked tiles' bonuses,
+   * its own yields and happiness. Before the city's buildings scale them, so a Temple of Artemis can
+   * make the city's real total a little more.
+   */
+  public static getCityBonuses(city: City): Record<string, number> {
+    const stats = [
+      ...city.getWorkedTiles().flatMap((tile) => Pantheons.getTileBonusSources(tile).flatMap((source) => source.stats)),
+      ...Pantheons.getCityYields(city),
+      { happiness: Pantheons.getCityHappiness(city) }
+    ];
+    const totals: Record<string, number> = {};
+    stats
+      .flatMap((stat) => Object.entries(stat))
+      .filter(([, value]) => value !== 0)
+      .forEach(([stat, value]) => (totals[stat] = (totals[stat] ?? 0) + value));
+    return totals;
   }
 
   // Food a city needs to grow, once Fertility Rites has made growth faster.

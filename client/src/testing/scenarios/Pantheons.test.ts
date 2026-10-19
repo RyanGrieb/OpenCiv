@@ -14,7 +14,7 @@ const CHOSEN = "Desert Folklore";
 // Desert, Flood Plains and Tundra around the Settler, starting with the 10 Faith the world's first
 // pantheon costs (the startingFaith game option). The turn button reads Choose Pantheon and opens the
 // pantheon list; Desert Folklore is founded from it, and the city's desert tiles gain +1 Faith, which
-// the middle-click tile tooltip lists under the pantheon's name. Leaves that tooltip open.
+// the middle-click tile tooltip lists under the pantheon's name. Ends on the faith button's religion window.
 export function setupPantheonsTest(game: Game) {
     const runner = new TestRunner("Pantheons");
     const utils = new TestUtils(game);
@@ -107,6 +107,19 @@ export function setupPantheonsTest(game: Game) {
             await utils.waitUntil(() => sourceNames().includes(CHOSEN), 5000, "The tile tooltip to list the pantheon");
         },
         verification: () => desert.getTileYield()?.faith === 1 && sourceNames().includes(CHOSEN)
+    });
+
+    runner.addStep({
+        name: `Click the faith button: the religion window shows ${CHOSEN}, the city following it, and what it adds up to`,
+        action: async () => {
+            inspector().close();
+            scene().toggleReligionUI();
+            await utils.waitUntil(() => !!scene().getReligionWindow()?.getOverview(), 5000, "The religion window to fill");
+        },
+        verification: () => {
+            const overview = scene().getReligionWindow().getOverview();
+            return overview.pantheon?.name === CHOSEN && overview.cities.length === 1 && overview.cities[0].name === city.getName();
+        }
     });
 
     return runner;
