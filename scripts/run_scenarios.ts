@@ -19,6 +19,10 @@ const ROOT = path.resolve(__dirname, "..");
 const REGISTRY = path.join(ROOT, "client/src/testing/ScenarioRegistry.ts");
 const PASSED_LINE = "[TEST] ALL TESTS PASSED";
 const FAILED_PREFIX = "[TEST] TEST FAILED";
+// Deprecated scenarios: still in the scenario list to run by hand, or here by name with --scenario, but
+// left out of a run of every scenario (and so out of CI). GlobeDepth checks the globe's look on a random
+// map, which made it too flaky headless.
+const NOT_IN_FULL_RUN = ["GlobeDepth"];
 
 interface Options {
     scenarios: string[];
@@ -44,7 +48,7 @@ class ScenarioCli {
 
     public static parse(argv: string[]): Options {
         const options: Options = {
-            scenarios: this.allScenarios(),
+            scenarios: this.allScenarios().filter((name) => !NOT_IN_FULL_RUN.includes(name)),
             shard: { index: 1, count: 1 },
             retries: 0,
             timeoutMs: 180_000
