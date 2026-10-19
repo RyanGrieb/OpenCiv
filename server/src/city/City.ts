@@ -575,10 +575,19 @@ export class City {
       cityStats: cityStats,
       workedTiles: this.workedTiles.map((tile) => ({ x: tile.getX(), y: tile.getY() })),
       productionQueue: this.productionQueue.map((item) => this.toClientOption(item)),
+      turnsToGrow: this.getTurnsToGrow(),
       nextBorderTile: nextBorderTile ? { x: nextBorderTile.getX(), y: nextBorderTile.getY() } : null
     });
 
     player.sendTotalStatsUpdate();
+  }
+
+  // Turns until the city's next citizen at its current food surplus, or null while it isn't growing.
+  public getTurnsToGrow(): number | null {
+    const food = this.getStatline({ asArray: false }).food;
+    if (food <= 0) return null;
+
+    return Math.max(1, Math.ceil((this.getFoodRequiredToGrow() - this.foodSurplus) / food));
   }
 
   public getStatline(options: { asArray: true }): CityStatEntry[];
@@ -928,6 +937,8 @@ export class City {
     return {
       cityName: this.name,
       player: this.player.getName(),
+      // Shown on the city's banner to everyone who can see it.
+      population: this.population,
       tileX: this.tile.getX(),
       tileY: this.tile.getY(),
       territory: territoryCoords,
@@ -1149,6 +1160,7 @@ export class City {
         this.population--;
         console.log(`[City ${this.name}] Starved down to population ${this.population}`);
         this.updateWorkedTiles({ sendStatUpdate: false });
+        this.announcePopulation();
       }
 
       this.foodSurplus = 0;
@@ -1162,7 +1174,17 @@ export class City {
       this.population++;
       console.log(`[City ${this.name}] Grew to population ${this.population}`);
       this.updateWorkedTiles({ sendStatUpdate: false });
+      this.announcePopulation();
     }
+  }
+
+  // Every civilization's banner for the city shows its size.
+  private announcePopulation() {
+    Game.getInstance()
+      .getPlayers()
+      .forEach((player) =>
+        player.sendNetworkEvent({ event: "cityPopulation", cityName: this.name, population: this.population })
+      );
   }
 
   // Banks this turn's culture, and claims a new tile once the bank covers the next one's cost. As in

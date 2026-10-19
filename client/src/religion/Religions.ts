@@ -50,8 +50,15 @@ export interface ReligionOverview {
   // The faith the next Great Prophet is born at, and whether one is waiting to found the religion.
   prophetCost: number;
   hasProphet: boolean;
-  // Each city following the pantheon or religion, with what it gets from it each turn.
-  cities: { name: string; bonuses: Record<string, number> }[];
+  // The player's cities, with what each gets from the pantheon or religion each turn, then other
+  // civilizations' cities following the religion (civilization set, no bonuses).
+  cities: {
+    name: string;
+    civilization: string | null;
+    followers: number;
+    population: number;
+    bonuses: Record<string, number>;
+  }[];
   // What the empire gets besides (Church Property's gold, Ceremonial Burial's happiness).
   empire: Record<string, number>;
   totals: Record<string, number>;

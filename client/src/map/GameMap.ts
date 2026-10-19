@@ -97,6 +97,7 @@ interface CityData {
   walls: string | null;
   // Who follows what in the city.
   religion?: CityReligionInfo;
+  population?: number;
 }
 
 // Server "cityAppearanceChanged": the city's owner entered a new era, or it built walls.
@@ -751,6 +752,7 @@ export class GameMap {
     if (existingCity) {
       existingCity.setAppearance(cityJSON.era, cityJSON.walls);
       existingCity.setReligion(cityJSON.religion);
+      existingCity.setPopulation(cityJSON.population);
       existingCity.setTerritory(territory);
       existingCity.setCenterTile(centerTile);
       return;
@@ -1233,7 +1235,7 @@ export class GameMap {
         y1: tile.getVectors()[i].y,
         x2: tile.getVectors()[iNext].x,
         y2: tile.getVectors()[iNext].y,
-        z: options.cityOutline ? GameMap.CITY_OUTLINE_Z : options.z ?? 2,
+        z: options.cityOutline ? GameMap.CITY_OUTLINE_Z : (options.z ?? 2),
         cityOutline: options.cityOutline
       });
 
@@ -1276,7 +1278,6 @@ export class GameMap {
     for (const outline of tileOutlines) {
       Game.getInstance().getCurrentScene().addLine(outline.line);
     }
-
 
     // Update our tileOutlines map
     if (this.tileOutlines.has(tile)) {
@@ -1344,7 +1345,8 @@ export class GameMap {
       strength: data.strength,
       era: data.era,
       walls: data.walls,
-      religion: data.religion
+      religion: data.religion,
+      population: data.population
     });
   }
 }

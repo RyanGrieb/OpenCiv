@@ -19,8 +19,8 @@ const PILGRIMAGE_FAITH = 2;
 // tiles apart; the second player joins over a bare websocket. We found a pantheon, end the turn for a
 // Great Prophet, and found Islam with Pilgrimage in our city, its holy city, whose name gets Islam's
 // icon. Over the next turns the holy city's pressure converts the neighbour's citizen, so its city
-// follows Islam too: its name gets the icon, hovering it lists the followers, and Pilgrimage pays us
-// 2 Faith for the foreign city following.
+// follows Islam too: its name gets the icon, hovering it lists the followers, Pilgrimage pays us
+// 2 Faith for the foreign city following, and the religion window lists it.
 export function setupReligionSpreadTest(game: Game) {
     const runner = new TestRunner("ReligionSpread");
     const utils = new TestUtils(game);
@@ -143,6 +143,24 @@ export function setupReligionSpreadTest(game: Game) {
             await utils.waitUntil(() => pilgrimage() === PILGRIMAGE_FAITH, 5000, "Pilgrimage's faith to show");
         },
         verification: () => pilgrimage() === PILGRIMAGE_FAITH
+    });
+
+    runner.addStep({
+        name: `Open the religion window: it shows ${RELIGION}'s icon and lists their city among those following it`,
+        action: async () => {
+            scene().toggleReligionUI();
+            await utils.waitUntil(
+                () => !!scene().getReligionWindow()?.getOverview()?.cities.some((city) => city.name === enemyCity.getName()),
+                5000,
+                "The religion window to list their city"
+            );
+            await utils.delay(1500);
+        },
+        verification: () =>
+            scene()
+                .getReligionWindow()
+                .getTexts()
+                .some((text) => text.startsWith(enemyCity.getName()))
     });
 
     return runner;

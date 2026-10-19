@@ -1,7 +1,7 @@
 import { GameImage, SpriteRegion } from "../../../Assets";
 import { Game } from "../../../Game";
 import { NetworkEvents, WebsocketClient } from "../../../network/Client";
-import { BeliefSummary, ReligionOverview } from "../../../religion/Religions";
+import { BeliefSummary, ReligionOverview, Religions } from "../../../religion/Religions";
 import { Actor } from "../../../scene/Actor";
 import { ActorGroup } from "../../../scene/ActorGroup";
 import { Button, ButtonSize } from "../../components/Button";
@@ -17,6 +17,7 @@ const TITLE_FONT = `bold ${UITheme.FONT_SIZE}px serif`;
 const RULE_COLOR = "rgba(255, 255, 255, 0.3)";
 const BONUS_COLOR = "#8ee07a";
 const NOT_YET_COLOR = "gray";
+const ICON_SIZE = UITheme.FONT_SIZE + 8;
 
 // One line of the window: words, or yields with words after them.
 interface WindowLine {
@@ -26,6 +27,8 @@ interface WindowLine {
   stats?: Record<string, number>;
   // A rule above the line, starting a new section.
   rule?: boolean;
+  // Drawn before the words.
+  icon?: SpriteRegion;
 }
 
 /**
@@ -73,6 +76,7 @@ export class ReligionWindow extends ActorGroup {
       return [
         {
           text: `Religion: ${overview.religion.name} (holy city ${overview.religion.holyCity})`,
+          icon: Religions.getIcon(overview.religion.name),
           color: "white",
           font: TITLE_FONT,
           rule: true
@@ -118,11 +122,23 @@ export class ReligionWindow extends ActorGroup {
       { text: "Total each turn:", color: "white", font: TITLE_FONT, rule: true, stats: overview.totals },
       ...(hasTotals ? [] : [{ text: "No yields from it right now", color: NOT_YET_COLOR }]),
       { text: "Cities following it", color: "white", font: TITLE_FONT, rule: true },
-      ...overview.cities.map((city) => ({ text: city.name, color: "white", stats: city.bonuses })),
+      ...overview.cities.map((city) => ({
+        text: ReligionWindow.describeCity(overview, city),
+        color: city.civilization ? "lightgray" : "white",
+        stats: city.bonuses
+      })),
       ...(Object.keys(overview.empire).length > 0
         ? [{ text: "Empire-wide", color: "white", stats: overview.empire }]
         : [])
     ];
+  }
+
+  // "Rome (2 of 3 citizens follow)", or for another civilization's city "Washington, America (...)".
+  private static describeCity(overview: ReligionOverview, city: ReligionOverview["cities"][number]): string {
+    const name = city.civilization ? `${city.name}, ${city.civilization}` : city.name;
+    if (!overview.religion) return name;
+
+    return `${name} (${city.followers} of ${city.population} follow)`;
   }
 
   private static createRule(x: number, y: number): Actor {
@@ -136,14 +152,29 @@ export class ReligionWindow extends ActorGroup {
     });
   }
 
-  // The words, then any yields after them: "Rome +2 [faith]".
+  // Any icon, the words, then any yields after them: "Rome +2 [faith]".
   private static createLine(line: WindowLine, x: number, y: number): Actor[] {
-    const label = new Label({ text: line.text, x, y, font: line.font ?? UITheme.FONT, fontColor: line.color });
-    if (!line.stats) return [label];
+    const icon = line.icon ? [ReligionWindow.createIcon(line.icon, x, y)] : [];
+    const textX = line.icon ? x + ICON_SIZE + 6 : x;
+    const label = new Label({ text: line.text, x: textX, y, font: line.font ?? UITheme.FONT, fontColor: line.color });
+    if (!line.stats) return [...icon, label];
 
     const textWidth = Game.getInstance().measureText(line.text, line.font ?? UITheme.FONT).width;
-    const yields = YieldLine.create({ stats: line.stats, x: x + textWidth + 12, y, color: BONUS_COLOR });
-    return [label, ...yields.actors];
+    const yields = YieldLine.create({ stats: line.stats, x: textX + textWidth + 12, y, color: BONUS_COLOR });
+    return [...icon, label, ...yields.actors];
+  }
+
+  // Centred on the line's text.
+  private static createIcon(spriteRegion: SpriteRegion, x: number, y: number): Actor {
+    return new Actor({
+      image: Game.getInstance().getImage(GameImage.SPRITESHEET),
+      spriteRegion,
+      x,
+      y: y + UITheme.FONT_SIZE / 2 - ICON_SIZE / 2 + 2,
+      width: ICON_SIZE,
+      height: ICON_SIZE,
+      cameraApplies: false
+    });
   }
   public getOverview(): ReligionOverview | undefined {
     return this.overview;

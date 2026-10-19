@@ -6,14 +6,13 @@ import { NetworkEvents } from "../network/Client";
 import { AbstractPlayer } from "../player/AbstractPlayer";
 import { Actor } from "../scene/Actor";
 import { ActorGroup } from "../scene/ActorGroup";
-import { CityReligionInfo, CityReligionsEvent, Religions } from "../religion/Religions";
+import { CityReligionInfo, CityReligionsEvent } from "../religion/Religions";
 import { Marking } from "../scene/Marking";
 import { Standing } from "../scene/Standing";
 import { InGameScene } from "../scene/type/InGameScene";
 import { FloatingText } from "../ui/components/FloatingText";
-import { CityReligionTooltip } from "../ui/hud/CityReligionTooltip";
-import { Label } from "../ui/components/Label";
 import { Buidling, BuildingData } from "./Building";
+import { CityBanner } from "./CityBanner";
 
 export interface CityOptions {
   player: AbstractPlayer;
@@ -32,6 +31,7 @@ export interface CityOptions {
   walls: string | null;
   // Who follows what here.
   religion?: CityReligionInfo;
+  population?: number;
 }
 
 // Server "cityCombatStatus" payload, from server City.refreshCombatStatus().
@@ -96,14 +96,14 @@ export class City extends ActorGroup {
   // The tile the server will grow this city's borders into next, if any is left to claim.
   private nextBorderTile: Tile | undefined;
   private name: string;
-  private civIcon: Actor;
-  private nameLabel: Label;
+  // Over the city: population, growth, name, religion and production, like Civ 5's.
+  private banner: CityBanner;
   // Right of the name, shown on the owner's city while it can strike. Clicking it starts aiming.
   private strikeIcon: Actor;
-  // Right of the name, the icon of the religion the city follows, if it follows one. Hovering it shows
-  // who follows what.
-  private religionIcon: Actor | undefined;
   private religion: CityReligionInfo;
+  private population: number;
+  // Only the owner hears it: turns until the next citizen, or null while the city isn't growing.
+  private turnsToGrow: number | null = null;
   // Its own scene object, standing over the city on the globe - see CityHealthBar.
   private healthBar: CityHealthBar;
   private health: number;
@@ -136,6 +136,7 @@ export class City extends ActorGroup {
     this.era = options.era ?? City.DEFAULT_ERA;
     this.walls = options.walls ?? null;
     this.religion = options.religion ?? { followers: {}, nonFollowers: 0, majority: null };
+    this.population = options.population ?? 1;
 
     this.innerBorderColor = this.player.getCivilizationData()["inside_border_color"];
     this.outsideBorderColor = this.player.getCivilizationData()["outside_border_color"];
@@ -153,6 +154,14 @@ export class City extends ActorGroup {
     if (options.tile) {
       this.setCenterTile(options.tile);
     }
+
+    NetworkEvents.on<{ cityName: string; population: number }>({
+      eventName: "cityPopulation",
+      parentObject: this,
+      callback: (data) => {
+        if (data.cityName === this.name) this.setPopulation(data.population);
+      }
+    });
 
     NetworkEvents.on<CityReligionsEvent>({
       eventName: "cityReligions",
@@ -203,7 +212,10 @@ export class City extends ActorGroup {
         this.nextBorderTile = nextBorderTile
           ? GameMap.getInstance().getTiles()[nextBorderTile.x]?.[nextBorderTile.y]
           : undefined;
+        this.turnsToGrow = data["turnsToGrow"] ?? null;
         this.statsPresent = true;
+        this.population = this.stats.get("population") ?? this.population;
+        this.refreshBanner();
       }
     });
 
@@ -264,7 +276,7 @@ export class City extends ActorGroup {
       overlay: true
     });
     Game.getInstance().getCurrentScene().addActor(this.healthBar);
-    this.createNameLabel();
+    this.createBanner();
   }
 
   /**
@@ -325,7 +337,7 @@ export class City extends ActorGroup {
     this.player.removeCity(this);
     super.onDestroyed();
     const scene = Game.getInstance().getCurrentScene();
-    [this.nameLabel, this.civIcon, this.strikeIcon, this.religionIcon, this.healthBar]
+    [this.banner, this.strikeIcon, this.healthBar]
       .filter((actor) => actor)
       .forEach((actor) => scene.removeActor(actor));
     this.removeTerritoryOverlays();
@@ -349,17 +361,35 @@ export class City extends ActorGroup {
     return this.religion;
   }
 
+  public getPopulation(): number {
+    return this.population;
+  }
+
+  public setPopulation(population: number) {
+    if (population === undefined || population === this.population) return;
+
+    this.population = population;
+    this.refreshBanner();
+  }
+
+  public getTurnsToGrow(): number | null {
+    return this.turnsToGrow;
+  }
+
+  public isOwnedByClient(): boolean {
+    return this.player === Game.getInstance().getCurrentSceneAs<InGameScene>().getClientPlayer();
+  }
+
   public hasReligionIcon(): boolean {
-    return !!this.religionIcon;
+    return !!this.banner && !!this.religion.majority;
   }
 
   /** Shows the religion the city now follows by its name, and keeps who follows what for the tooltip. */
   public setReligion(religion: CityReligionInfo) {
     if (!religion) return;
 
-    const majorityChanged = religion.majority !== this.religion.majority;
     this.religion = religion;
-    if (majorityChanged && this.nameLabel) this.createReligionIcon();
+    this.refreshBanner();
   }
 
   /** Redraws the city when its owner enters a new era or it builds walls. */
@@ -436,112 +466,35 @@ export class City extends ActorGroup {
     this.territoryOverlays = [];
   }
 
-  // The city's name and civ icon, positioned off its center tile - so this only runs once that
-  // tile has been discovered (see setCenterTile).
-  private createNameLabel() {
-    this.nameLabel = new Label({
-      text: this.name,
-      cameraApplies: true,
-      x: this.tile.getX(),
-      y: this.tile.getY(),
-      font: "12px serif",
-      fontColor: "white",
-      transparency: 1,
-      shadowBlur: 1,
-      shadowColor: "black",
-      lineWidth: 1,
-      z: 4
+  // The city's banner, positioned off its center tile - so this only runs once that tile has been
+  // discovered (see setCenterTile).
+  private createBanner() {
+    this.banner = new CityBanner(this, 4);
+    this.banner.refresh();
+    // On the globe the banner stands over the city, always in front of the map.
+    Standing.set(this.banner, {
+      anchor: () => this.getStandingPoint(),
+      tileMiddle: () => this.getTileMiddle(),
+      overlay: true
     });
-
-    if (this.player == Game.getInstance().getCurrentSceneAs<InGameScene>().getClientPlayer()) {
-      this.nameLabel.setOnClick(() => {
-        Game.getInstance().getCurrentSceneAs<InGameScene>().toggleCityUI(this);
-      });
-    }
-
-    this.nameLabel.conformSize().then(() => {
-      this.nameLabel.setPosition(
-        this.tile.getX() - this.nameLabel.getWidth() / 2 + this.tile.getWidth() / 2 + 7,
-        this.tile.getY() - this.nameLabel.getHeight()
-      );
-      // On the globe the banner stands over the city, always in front of the map.
-      Standing.set(this.nameLabel, {
-        anchor: () => this.getStandingPoint(),
-        tileMiddle: () => this.getTileMiddle(),
-        overlay: true
-      });
-      Game.getInstance().getCurrentScene().addActor(this.nameLabel);
-
-      this.civIcon = new Actor({
-        image: Game.getInstance().getImage(GameImage.SPRITESHEET),
-        spriteRegion: resolveSpriteRegion(this.player.getCivilizationData().icon_name),
-        x: this.nameLabel.getX() - 14,
-        y: this.nameLabel.getY(),
-        z: 4,
-        width: 12,
-        height: 12
-      });
-      //this.addActor(this.civIcon);
-      Standing.set(this.civIcon, {
-        anchor: () => this.getStandingPoint(),
-        tileMiddle: () => this.getTileMiddle(),
-        overlay: true
-      });
-
-      Game.getInstance().getCurrentScene().addActor(this.civIcon);
-      this.createStrikeIcon();
-      this.createReligionIcon();
-    });
+    Game.getInstance().getCurrentScene().addActor(this.banner);
+    this.createStrikeIcon();
   }
 
-  // Replaces the religion icon with the one the city follows now, or none.
-  private createReligionIcon() {
-    const scene = Game.getInstance().getCurrentScene();
-    if (this.religionIcon) {
-      scene.removeActor(this.religionIcon);
-      CityReligionTooltip.hide();
-    }
-    this.religionIcon = undefined;
+  // Lays the banner out again for what it shows now, and the strike icon beside it.
+  private refreshBanner() {
+    if (!this.banner) return;
 
-    if (this.religion.majority) {
-      this.religionIcon = new Actor({
-        image: Game.getInstance().getImage(GameImage.SPRITESHEET),
-        spriteRegion: Religions.getIcon(this.religion.majority),
-        x: this.nameLabel.getX() + this.nameLabel.getWidth() + 2,
-        y: this.nameLabel.getY(),
-        z: 4,
-        width: City.BANNER_ICON_SIZE,
-        height: City.BANNER_ICON_SIZE,
-        cameraApplies: true
-      });
-      Standing.set(this.religionIcon, {
-        anchor: () => this.getStandingPoint(),
-        tileMiddle: () => this.getTileMiddle(),
-        overlay: true
-      });
-      this.religionIcon.on("mouse_enter", () => CityReligionTooltip.show(this.name, this.religion));
-      this.religionIcon.on("mouse_exit", () => CityReligionTooltip.hide());
-      scene.addActor(this.religionIcon);
-    }
-    this.placeStrikeIcon();
-  }
-
-  // The strike icon goes right of the name, after the religion icon if there is one.
-  private placeStrikeIcon() {
-    if (!this.strikeIcon) return;
-
-    const left = this.religionIcon
-      ? this.religionIcon.getX() + City.BANNER_ICON_SIZE
-      : this.nameLabel.getX() + this.nameLabel.getWidth();
-    this.strikeIcon.setPosition(left + 2, this.nameLabel.getY());
+    this.banner.refresh();
+    this.strikeIcon?.setPosition(this.banner.getRight() + 2, this.banner.getY());
   }
 
   private createStrikeIcon() {
     this.strikeIcon = new Actor({
       image: Game.getInstance().getImage(GameImage.SPRITESHEET),
       spriteRegion: SpriteRegion.ICON_TARGET,
-      x: this.nameLabel.getX() + this.nameLabel.getWidth() + 2,
-      y: this.nameLabel.getY(),
+      x: this.banner.getRight() + 2,
+      y: this.banner.getY(),
       z: 4,
       width: City.BANNER_ICON_SIZE,
       height: City.BANNER_ICON_SIZE,

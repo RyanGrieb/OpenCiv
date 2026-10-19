@@ -280,14 +280,19 @@ export class PlayerReligion {
 
   /**
    * What the client's religion window shows: the pantheon, the religion and its beliefs, each city
-   * following them with what it gets from them, what the empire gets besides, and all of it added up.
+   * following them (the player's own with what it gets from them, and other civilizations' following
+   * the religion), what the empire gets besides, and all of it added up.
    */
   public sendOverview() {
     const pantheon = this.getPantheon();
     const following = this.getBeliefs().length > 0;
-    const cities = following
-      ? this.player.getCities().map((city) => ({ name: city.getName(), bonuses: Beliefs.getCityBonuses(city) }))
+    const ownCities = following ? this.player.getCities().map((city) => this.describeCity(city)) : [];
+    const foreignCities = this.religion
+      ? Religions.getCitiesFollowing(this.religion.name)
+          .filter((city) => city.getPlayer() !== this.player)
+          .map((city) => this.describeCity(city))
       : [];
+    const cities = [...ownCities, ...foreignCities];
     const empire = following ? Beliefs.getEmpireBonuses(this.player) : {};
     const totals: Record<string, number> = {};
     [...cities.map((city) => city.bonuses), empire]
@@ -311,6 +316,18 @@ export class PlayerReligion {
       empire,
       totals
     });
+  }
+
+  // A row of the religion window's city list. Only the player's own cities' bonuses are theirs.
+  private describeCity(city: City) {
+    const own = city.getPlayer() === this.player;
+    return {
+      name: city.getName(),
+      civilization: own ? null : (city.getPlayer().getCivilizationName() ?? city.getPlayer().getName()),
+      followers: this.religion ? city.getReligion().getFollowersOf(this.religion.name) : 0,
+      population: city.getPopulation(),
+      bonuses: own ? Beliefs.getCityBonuses(city) : {}
+    };
   }
 
   private getProphets(): Unit[] {
