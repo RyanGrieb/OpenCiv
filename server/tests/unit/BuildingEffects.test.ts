@@ -106,6 +106,13 @@ describe("BuildingEffects", () => {
       expect(bonusesOn(ownedTile(city, "plains", "improved_wheat"))).toEqual({ food: 1 });
     });
 
+    it("gives a Granary +1 Food on Deer, with or without a Camp", () => {
+      const city = cityOf(playerWith(), ["Granary"]);
+
+      expect(bonusesOn(ownedTile(city, "tundra", "deer", "forest"))).toEqual({ food: 1 });
+      expect(bonusesOn(ownedTile(city, "tundra", "deer_camp", "forest"))).toEqual({ food: 1 });
+    });
+
     it("gives a University +2 Science on jungle", () => {
       const city = cityOf(playerWith(), ["Library", "University"]);
 

@@ -146,7 +146,7 @@ buildings:
     required_tech: Pottery
     effects:
       tile_yields:
-        - resources: [wheat, bananas]
+        - resources: [wheat, bananas, deer]
           stats: { food: 1 }
     stats:
       - food: 2
