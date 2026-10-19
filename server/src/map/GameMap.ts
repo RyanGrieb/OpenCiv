@@ -279,6 +279,7 @@ export class GameMap {
       { text: "Placing resources", weight: 2, run: () => this.generateResources() },
       { text: "Carving rivers", weight: 2, run: () => this.generateRivers() },
       { text: "Flooding desert rivers", weight: 1, run: () => this.generateFloodplains() },
+      { text: "Watering oases", weight: 1, run: () => this.generateOases() },
       { text: "Placing natural wonders", weight: 2, run: () => this.placeNaturalWonders() }
     ];
   }
@@ -1045,6 +1046,18 @@ export class GameMap {
 
     // == Apply floodplains for desert tiles w/ river tiles
     console.log("Done generating floodplains!");
+  }
+
+  // A few lone oases on bare desert, after the rivers so none becomes floodplains, and after the
+  // resources so none sits on one.
+  private generateOases() {
+    const numberOfOases = Math.ceil(this.mapArea * 0.002);
+    for (let i = 0; i < numberOfOases; i++) {
+      const tile = this.getRandomTileWith({ tileTypes: ["desert"], avoidResourceTiles: true });
+      if (!tile || tile.hasRiver()) continue;
+
+      tile.addTileType("oasis");
+    }
   }
 
   private placeNaturalWonders() {

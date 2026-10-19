@@ -936,7 +936,7 @@ export class GameMap {
           .flatMap((type) =>
             type === "city"
               ? Tile.getCityTypes(city?.getEra() ?? City.DEFAULT_ERA, city?.getWalls() ?? null, gridX, gridY)
-              : [Tile.getVariantFeatureType(type, tileTypes[0], gridX, gridY)]
+              : Tile.getDrawnTypes(type, tileTypes[0], gridX, gridY)
           );
         const underRoad = overlayTypes.filter((type) => Tile.UNDER_ROAD_TILE_TYPES.includes(type));
         const flat = overlayTypes.filter((type) => Tile.FLAT_TILE_TYPES.includes(type));

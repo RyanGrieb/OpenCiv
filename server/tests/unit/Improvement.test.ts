@@ -93,6 +93,30 @@ describe('Improvement', () => {
     expect(buildable(tile)).toContain('Farm');
   });
 
+  it('builds a Mine on Salt, Silver and Gems, and a Plantation on Wine, Incense and Bananas', () => {
+    const cases: [string[], string, string][] = [
+      [['desert', 'salt'], 'Mine', 'salt_mine'],
+      [['tundra', 'silver'], 'Mine', 'silver_mine'],
+      [['plains', 'gems'], 'Mine', 'gems_mine'],
+      [['grass', 'wine'], 'Plantation', 'wine_plantation'],
+      [['desert', 'incense'], 'Plantation', 'incense_plantation'],
+      [['grass', 'bananas', 'jungle'], 'Plantation', 'banana_plantation']
+    ];
+    for (const [types, name, improved] of cases) {
+      const tile = tileOf(...types);
+      expect(buildable(tile)).toContain(name);
+      expect(buildable(tile)).not.toContain(name === 'Mine' ? 'Plantation' : 'Mine');
+
+      Improvement.complete(improvement(name), tile);
+      expect(tile.getTileTypes()).toEqual(types.map((type) => (type === types[1] ? improved : type)));
+      expect(Improvement.getImprovedResource(tile)).toBe(types[1]);
+    }
+  });
+
+  it('builds nothing but a road on an oasis', () => {
+    expect(buildable(tileOf('desert', 'oasis'))).toEqual(['Road']);
+  });
+
   it('builds a Camp on Deer, Bison, Ivory, Furs and Truffles once Trapping is in, keeping the trees', () => {
     expect(buildable(tileOf('grass', 'deer', 'forest'))).toEqual(['Camp', 'Road', 'Remove Forest']);
     expect(buildable(tileOf('grass', 'truffles', 'jungle'))).toEqual(['Camp', 'Road', 'Remove Jungle']);

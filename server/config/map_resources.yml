@@ -82,6 +82,17 @@ bonus_resources:
     set_chance: 0.05
     min_temp: 30
     max_temp: 80
+  # Civ 5 bananas grow only in jungle, so they're drawn over its trees.
+  - name: bananas
+    spawn_tiles:
+      - jungle
+    path_length: 1
+    min_tiles_set: 1
+    max_tiles_set: 2
+    set_chance: 0.05
+    min_temp: 60
+    max_temp: 100
+    spawn_on_additional_tile_types: true
 # reveal_tech hides a resource from a player until they research it, as Civ 5 does with its strategic
 # resources: the tile looks and yields like plain terrain to them, and nothing can be built on it.
 strategic_resources:
@@ -261,5 +272,67 @@ luxury_resources:
     max_tiles_set: 2
     set_chance: 0.05
     min_temp: 30
+    max_temp: 100
+    spawn_on_additional_tile_types: true
+  - name: salt
+    spawn_tiles:
+      - desert
+      - plains
+      - tundra
+    path_length: 1
+    min_tiles_set: 1
+    max_tiles_set: 2
+    set_chance: 0.1
+    min_temp: 0
+    max_temp: 100
+  - name: wine
+    spawn_tiles:
+      - grass
+      - plains
+    path_length: 1
+    min_tiles_set: 1
+    max_tiles_set: 2
+    set_chance: 0.1
+    min_temp: 40
+    max_temp: 90
+  - name: incense
+    spawn_tiles:
+      - desert
+      - plains
+    path_length: 1
+    min_tiles_set: 1
+    max_tiles_set: 2
+    set_chance: 0.1
+    min_temp: 60
+    max_temp: 100
+  - name: silver
+    spawn_tiles:
+      - desert
+      - desert_hill
+      - tundra
+      - tundra_hill
+    path_length: 1
+    min_tiles_set: 1
+    max_tiles_set: 2
+    set_chance: 0.1
+    min_temp: 0
+    max_temp: 100
+  # Gems also turn up in jungle, behind its trees like ores in a forest.
+  - name: gems
+    spawn_tiles:
+      - grass
+      - grass_hill
+      - plains
+      - plains_hill
+      - desert
+      - desert_hill
+      - tundra
+      - tundra_hill
+      - jungle
+    path_length: 1
+    min_tiles_set: 1
+    max_tiles_set: 2
+    set_chance: 0.05
+    min_temp: 0
     max_temp: 100
     spawn_on_additional_tile_types: true

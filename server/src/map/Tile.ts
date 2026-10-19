@@ -36,8 +36,8 @@ export class Tile {
   public static readonly ELEVATION_FLAT = 0;
   public static readonly ELEVATION_HILL = 1;
   public static readonly ELEVATION_MOUNTAIN = 2;
-  // Trees, undergrowth and marsh that grow on a tile's terrain and replace its yields (see getStats()).
-  public static readonly FEATURES = ["forest", "jungle", "marsh"];
+  // Trees, undergrowth, marsh and oases that grow on a tile's terrain and replace its yields (see getStats()).
+  public static readonly FEATURES = ["forest", "jungle", "marsh", "oasis"];
   // The land a feature can grow on, whose own yields the feature replaces.
   public static readonly BASE_TERRAIN = [
     "grass",
@@ -844,11 +844,11 @@ export class Tile {
     return this.containsTileTypes(["ocean", "shallow_ocean", "freshwater"]);
   }
 
-  // Civ 5's fresh water: a river along the tile, or a lake beside it.
+  // Civ 5's fresh water: a river along the tile, or a lake or oasis beside it (or an oasis on it).
   public hasFreshWater(): boolean {
-    if (this.hasRiver()) return true;
+    if (this.hasRiver() || this.containsTileType("oasis")) return true;
 
-    return this.adjacentTiles.some((tile) => tile?.containsTileType("freshwater"));
+    return this.adjacentTiles.some((tile) => tile?.containsTileTypes(["freshwater", "oasis"]));
   }
 
   // Land beside the sea, where a city can build ships and let them in. A lake doesn't count, since

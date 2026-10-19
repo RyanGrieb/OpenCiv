@@ -73,6 +73,12 @@ tiles:
     name: Marsh
     stats:
       - food: 1
+  # Civ 5's desert oasis. Fresh water for the tiles around it, and nothing can be built on it.
+  OASIS:
+    name: Oasis
+    stats:
+      - food: 3
+      - gold: 1
   HORSES:
     name: Horses
     stats:
@@ -256,6 +262,59 @@ tiles:
     stats:
       - gold: 2
       - production: 1
+  SALT:
+    name: Salt
+    stats:
+      - food: 1
+      - gold: 1
+  SALT_MINE:
+    name: Salt Mine
+    stats:
+      - food: 1
+      - gold: 1
+      - production: 1
+  SILVER:
+    name: Silver
+    stats:
+      - gold: 2
+  SILVER_MINE:
+    name: Silver Mine
+    stats:
+      - gold: 2
+      - production: 1
+  GEMS:
+    name: Gems
+    stats:
+      - gold: 3
+  GEMS_MINE:
+    name: Gems Mine
+    stats:
+      - gold: 3
+      - production: 1
+  WINE:
+    name: Wine
+    stats:
+      - gold: 2
+  WINE_PLANTATION:
+    name: Wine Plantation
+    stats:
+      - gold: 3
+  INCENSE:
+    name: Incense
+    stats:
+      - gold: 2
+  INCENSE_PLANTATION:
+    name: Incense Plantation
+    stats:
+      - gold: 3
+  BANANAS:
+    name: Bananas
+    stats:
+      - food: 1
+  BANANA_PLANTATION:
+    name: Banana Plantation
+    stats:
+      - food: 2
   # Improvements built on tiles without a resource - these add to the tile's own yields.
   FARM:
     name: Farm

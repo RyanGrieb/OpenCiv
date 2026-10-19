@@ -193,4 +193,17 @@ describe('GameMap', () => {
       }
     }
   });
+
+  it('puts oases only on bare desert, never on a resource', () => {
+    const tiles = gameMap.getTiles().flat();
+    tiles.forEach((tile) => tile.replaceTileType(tile.getTileTypes()[0], 'desert'));
+    tiles[0].addTileType('salt');
+
+    for (let i = 0; i < 20; i++) gameMap['generateOases']();
+
+    const oases = tiles.filter((tile) => tile.containsTileType('oasis'));
+    expect(oases.length).toBeGreaterThan(0);
+    oases.forEach((tile) => expect(tile.getTileTypes()).toEqual(['desert', 'oasis']));
+    expect(tiles[0].getTileTypes()).toEqual(['desert', 'salt']);
+  });
 });

@@ -385,6 +385,15 @@ technologies:
       - tile_type: gold_mine
         stats:
           - production: 1
+      - tile_type: salt_mine
+        stats:
+          - production: 1
+      - tile_type: silver_mine
+        stats:
+          - production: 1
+      - tile_type: gems_mine
+        stats:
+          - production: 1
       - tile_type: stone_quarry
         stats:
           - production: 1
@@ -467,6 +476,15 @@ technologies:
         stats:
           - food: 1
       - tile_type: olive_plantation
+        stats:
+          - food: 1
+      - tile_type: wine_plantation
+        stats:
+          - food: 1
+      - tile_type: incense_plantation
+        stats:
+          - food: 1
+      - tile_type: banana_plantation
         stats:
           - food: 1
       - tile_type: improved_horses

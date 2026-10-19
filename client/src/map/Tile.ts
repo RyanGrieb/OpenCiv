@@ -45,34 +45,48 @@ export class Tile extends Actor {
   public static readonly GROUND_FEATURES = ["marsh"];
   // Resources and improvements drawn as seen from above, lying on the ground over a road, which on
   // the globe lie flat on it rather than stand up off it like trees (see GameMap.getStandingSprites()):
-  // ores, the mines and quarry dug into them, and a crater.
+  // ores and salt, the mines and quarry dug into them, an oasis's pool, and a crater.
   public static readonly FLAT_TILE_TYPES = [
     "iron",
     "copper",
     "gold",
+    "silver",
+    "gems",
+    "salt",
     "stone",
     "mine",
     "iron_mine",
     "copper_mine",
     "gold_mine",
+    "silver_mine",
+    "gems_mine",
+    "salt_mine",
     "stone_quarry",
+    "oasis",
     "barringer_crater"
   ];
-  // Camp animals (and truffles) and their camps. They can be found in a forest, jungle or marsh, so they're
-  // drawn after its trees rather than hidden under them, each on its own so that on the globe they
-  // stand up from their own feet, not as part of a tree.
+  // Camp animals (and truffles) and bananas, and their camps and plantation. They can be found in a
+  // forest, jungle or marsh, so they're drawn after its trees rather than hidden under them, each on
+  // its own so that on the globe they stand up from their own feet, not as part of a tree.
   public static readonly OVER_FEATURE_TILE_TYPES = [
     "deer",
     "bison",
     "ivory",
     "furs",
     "truffles",
+    "bananas",
     "deer_camp",
     "bison_camp",
     "ivory_camp",
     "furs_camp",
-    "truffles_camp"
+    "truffles_camp",
+    "banana_plantation"
   ];
+  // Tile types drawn as more than one sprite, each laid on the ground or stood up on its own (see
+  // getDrawnTypes()): an oasis's pool lies flat while its palms stand.
+  private static readonly DRAWN_PARTS: Record<string, string[]> = {
+    oasis: ["oasis", "oasis_palms"]
+  };
   // Standing sprites with separately marked pieces that stay positioned relative to their tile on
   // the globe, rather than each piece standing on its own foot at the planet's outline.
   public static readonly SHARED_FOOT_STANDING_TILE_TYPES = [
@@ -242,6 +256,12 @@ export class Tile extends Actor {
       return Tile.AUTUMN_FOREST_TYPES[hash % Tile.AUTUMN_FOREST_TYPES.length];
     }
     return Tile.pickVariant(featureType, hash);
+  }
+
+  // The tile types whose sprites draw an overlay: its parts if it's drawn in more than one (see
+  // DRAWN_PARTS), else its look at (gridX, gridY) (see getVariantFeatureType()).
+  public static getDrawnTypes(type: string, terrainType: string, gridX: number, gridY: number): string[] {
+    return Tile.DRAWN_PARTS[type] ?? [Tile.getVariantFeatureType(type, terrainType, gridX, gridY)];
   }
 
   /**

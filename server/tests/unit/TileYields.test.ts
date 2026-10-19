@@ -52,6 +52,19 @@ describe("Tile yields", () => {
     expect(marsh.getMovementCost()).toBe(2);
   });
 
+  it("an oasis turns desert into 3 food and 1 gold, and is fresh water for itself and its neighbors", () => {
+    expect(yieldsOf("desert", "oasis")).toEqual({ food: 3, gold: 1 });
+
+    const oasis = new Tile("desert", 0, 0);
+    oasis.addTileType("oasis");
+    const neighbor = new Tile("desert", 1, 0);
+    neighbor.setAdjacentTile(3, oasis);
+    expect(oasis.getMovementCost()).toBe(1);
+    expect(oasis.hasFreshWater()).toBe(true);
+    expect(neighbor.hasFreshWater()).toBe(true);
+    expect(new Tile("desert", 2, 0).hasFreshWater()).toBe(false);
+  });
+
   it("adds a resource on top of the feature that replaced the terrain", () => {
     expect(yieldsOf("grass", "forest", "iron")).toEqual({ food: 1, production: 2 });
   });
@@ -89,6 +102,18 @@ describe("Tile yields", () => {
     [["tundra", "forest", "furs_camp"], { food: 1, production: 1, gold: 3 }],
     [["grass", "jungle", "truffles"], { food: 2, gold: 2 }],
     [["grass", "jungle", "truffles_camp"], { food: 2, gold: 3 }],
+    [["desert", "salt"], { food: 1, gold: 1 }],
+    [["desert", "salt_mine"], { food: 1, production: 1, gold: 1 }],
+    [["desert_hill", "silver"], { production: 2, gold: 2 }],
+    [["tundra", "silver_mine"], { food: 1, production: 1, gold: 2 }],
+    [["grass", "jungle", "gems"], { food: 2, gold: 3 }],
+    [["plains", "gems_mine"], { food: 1, production: 2, gold: 3 }],
+    [["grass", "wine"], { food: 2, gold: 2 }],
+    [["plains", "wine_plantation"], { food: 1, production: 1, gold: 3 }],
+    [["desert", "incense"], { gold: 2 }],
+    [["plains", "incense_plantation"], { food: 1, production: 1, gold: 3 }],
+    [["grass", "jungle", "bananas"], { food: 3 }],
+    [["grass", "jungle", "banana_plantation"], { food: 4 }],
     [["grass", "farm"], { food: 3 }],
     [["grass_hill", "mine"], { production: 3 }]
   ])("%o yields %o", (tileTypes, expected) => {

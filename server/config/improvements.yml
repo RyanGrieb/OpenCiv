@@ -50,6 +50,9 @@ improvements:
       copper: copper_mine
       iron: iron_mine
       gold: gold_mine
+      salt: salt_mine
+      silver: silver_mine
+      gems: gems_mine
   - name: Fishing Boats
     asset_name: TILE_IMPROVED_FISH
     icon: TILE_IMPROVED_FISH
@@ -72,6 +75,9 @@ improvements:
       citrus: citrus_plantation
       cotton: cotton_plantation
       olives: olive_plantation
+      wine: wine_plantation
+      incense: incense_plantation
+      bananas: banana_plantation
   - name: Camp
     asset_name: TILE_FURS_CAMP
     icon: TILE_FURS_CAMP
@@ -105,7 +111,7 @@ improvements:
     required_tech: The Wheel
     build_turns: 3
     tile_type: road
-    features: [forest, jungle, marsh]
+    features: [forest, jungle, marsh, oasis]
     route: true
     outside_borders: true
   - name: Lumber Mill

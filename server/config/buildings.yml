@@ -145,7 +145,7 @@ buildings:
     required_tech: Pottery
     effects:
       tile_yields:
-        - resources: [wheat]
+        - resources: [wheat, bananas]
           stats: { food: 1 }
     stats:
       - food: 2
@@ -242,7 +242,7 @@ buildings:
     required_tech: Currency
     effects:
       tile_yields:
-        - resources: [gold]
+        - resources: [gold, silver]
           stats: { gold: 2 }
     stats: []
   - name: National College
