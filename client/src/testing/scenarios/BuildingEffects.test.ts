@@ -218,10 +218,10 @@ export function setupBuildingEffectsTest(game: Game) {
   });
 
   runner.addStep({
-    name: `The Great Library gives a free tech: ${FREE_TECH} is researched the moment it's chosen`,
+    name: `The Great Library gives a free tech: ${FREE_TECH} is researched the moment it's picked`,
     action: async () => {
       await buildNow("Great Library");
-      WebsocketClient.sendMessage({ event: "chooseResearch", techName: FREE_TECH });
+      WebsocketClient.sendMessage({ event: "chooseFreeTech", techName: FREE_TECH });
       await utils.waitUntil(() => me().hasResearchedTech(FREE_TECH), 3000, `${FREE_TECH} to be researched`);
     },
     verification: () => me().hasResearchedTech(FREE_TECH)

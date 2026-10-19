@@ -48,12 +48,16 @@ export interface TechDetailData {
 // like the Civ5 wiki's tech sidebar - cost, Requires, Leads to, Enables (units,
 // buildings, wonders, improvements) and Notes - above old_java PickResearchWindow's
 // turns/status line and Research/Cancel action. Requires/Leads to entries are
-// links that open that tech's own window in place of this one.
+// links that open that tech's own window in place of this one. Opened from the free tech list instead
+// (onPickFree set), its action takes the tech as the free one.
 export class TechDetailWindow extends ActorGroup {
   private tech: TechDetailData;
   private allTechs: TechDetailData[];
   private onClose: () => void;
   private onOpenTech: (techName: string) => void;
+  private onPickFree?: () => void;
+  // Where the window's left edge goes; centered on the screen without one.
+  private left?: number;
 
   private statusLabel: Label;
   private actionButton: Button;
@@ -66,6 +70,8 @@ export class TechDetailWindow extends ActorGroup {
     allTechs: TechDetailData[];
     onClose: () => void;
     onOpenTech: (techName: string) => void;
+    onPickFree?: () => void;
+    left?: number;
   }) {
     super({ x: 0, y: 0, z: 7, width: WINDOW_WIDTH, height: 0, cameraApplies: false });
 
@@ -73,6 +79,8 @@ export class TechDetailWindow extends ActorGroup {
     this.allTechs = options.allTechs;
     this.onClose = options.onClose;
     this.onOpenTech = options.onOpenTech;
+    this.onPickFree = options.onPickFree;
+    this.left = options.left;
 
     this.build();
   }
@@ -228,11 +236,11 @@ export class TechDetailWindow extends ActorGroup {
     );
     this.statusY = y + 10;
     this.actionY = this.statusY + UITheme.FONT_SIZE + 12;
-    const height = this.actionY + ButtonSize.MEDIUM.height + PADDING;
+    const height = this.actionY + this.getActionButtonSize().height + PADDING;
 
     this.setSize(WINDOW_WIDTH, height);
     this.setPosition(
-      Game.getInstance().getWidth() / 2 - this.width / 2,
+      this.left ?? Game.getInstance().getWidth() / 2 - this.width / 2,
       Math.max(UITheme.STATUS_BAR_HEIGHT, Game.getInstance().getHeight() / 2 - height / 2)
     );
 
@@ -295,6 +303,15 @@ export class TechDetailWindow extends ActorGroup {
     });
   }
 
+  public getActionButton(): Button | undefined {
+    return this.actionButton;
+  }
+
+  // "Pick Free Tech" doesn't fit a medium button.
+  private getActionButtonSize() {
+    return this.onPickFree ? ButtonSize.LARGE : ButtonSize.MEDIUM;
+  }
+
   // Re-evaluated on every updateResearch push, so a tech completing (or another
   // tech being picked, replacing this one) while the window is open never leaves
   // a stale Research/Cancel action showing.
@@ -309,6 +326,8 @@ export class TechDetailWindow extends ActorGroup {
     let statusText: string;
     if (isResearched) {
       statusText = "Researched";
+    } else if (this.onPickFree && missingPrerequisites.length < 1) {
+      statusText = "Free";
     } else if (missingPrerequisites.length > 0) {
       statusText = "Research the required techs first";
     } else if (rate <= 0) {
@@ -332,24 +351,37 @@ export class TechDetailWindow extends ActorGroup {
 
     if (isResearched || missingPrerequisites.length > 0) return;
 
-    this.actionButton = new Button({
-      text: isCurrent ? "Cancel" : "Research",
-      x: this.x + this.width / 2 - ButtonSize.MEDIUM.width / 2,
-      y: this.y + this.actionY,
-      size: ButtonSize.MEDIUM,
-      fontColor: "white",
-      onClicked: () => {
-        if (isCurrent) {
-          WebsocketClient.sendMessage({ event: "cancelResearch" });
-        } else {
-          WebsocketClient.sendMessage({ event: "chooseResearch", techName: this.tech.name });
-        }
-        this.onClose();
+    if (this.onPickFree) {
+      this.addActionButton("Pick Free Tech", () => {
+        WebsocketClient.sendMessage({ event: "chooseFreeTech", techName: this.tech.name });
+        this.onPickFree();
+      });
+      return;
+    }
 
-        if (!isCurrent) {
-          Game.getInstance().getCurrentSceneAs<InGameScene>().toggleResearchUI();
-        }
+    this.addActionButton(isCurrent ? "Cancel" : "Research", () => {
+      if (isCurrent) {
+        WebsocketClient.sendMessage({ event: "cancelResearch" });
+      } else {
+        WebsocketClient.sendMessage({ event: "chooseResearch", techName: this.tech.name });
       }
+      this.onClose();
+
+      if (!isCurrent) {
+        Game.getInstance().getCurrentSceneAs<InGameScene>().toggleResearchUI();
+      }
+    });
+  }
+
+  private addActionButton(text: string, onClicked: () => void) {
+    const size = this.getActionButtonSize();
+    this.actionButton = new Button({
+      text,
+      x: this.x + this.width / 2 - size.width / 2,
+      y: this.y + this.actionY,
+      size,
+      fontColor: "white",
+      onClicked
     });
     this.addActor(this.actionButton);
   }

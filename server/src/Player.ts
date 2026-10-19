@@ -187,6 +187,28 @@ export class Player {
     });
 
     ServerEvents.on({
+      eventName: "requestFreeTechs",
+      parentObject: this,
+      callback: (data, websocket) => {
+        if (this.wsConnection != websocket) return;
+
+        this.sendFreeTechs();
+      },
+      globalEvent: true
+    });
+
+    ServerEvents.on({
+      eventName: "chooseFreeTech",
+      parentObject: this,
+      callback: (data, websocket) => {
+        if (this.wsConnection != websocket) return;
+
+        this.chooseFreeTech(data["techName"]);
+      },
+      globalEvent: true
+    });
+
+    ServerEvents.on({
       eventName: "cancelResearch",
       parentObject: this,
       callback: (data, websocket) => {
@@ -433,43 +455,60 @@ export class Player {
   }
 
   /**
-   * A free tech, e.g. from the Great Library. Civ 5 lets the player pick it: here it finishes whatever
-   * is being researched, or, with nothing chosen, the next tech the player chooses.
+   * A free tech, e.g. from the Great Library. As in Civ 5 the player picks it, from the techs they could
+   * research now: the turn button reads Pick Free Tech until they do (see PlayerNotifications).
    */
   public grantFreeTech(source: string) {
-    if (this.currentResearch) {
-      this.notifications.addMessage("ICON_SCIENCE", `${source} gives you ${this.currentResearch.techName} for free.`);
-      this.completeResearch();
-      return;
-    }
-
     if (!this.hasTechsLeftToResearch()) return;
 
     this.freeTechs++;
-    this.notifications.addMessage("ICON_SCIENCE", `${source} gives you a free tech: the next one you choose is free.`);
+    this.notifications.addMessage("ICON_SCIENCE", `${source} gives you a free tech.`);
   }
 
   public getFreeTechs(): number {
     return this.freeTechs;
   }
 
+  /** The techs a free tech can be spent on: every one not researched yet whose prerequisites are. */
+  public getFreeTechChoices(): Technology[] {
+    if (this.freeTechs < 1) return [];
+
+    return Technology.getAllTechnologies().filter((tech) => this.canResearch(tech));
+  }
+
+  /** The free techs left and what they can go on. The whole tree comes too, for the tech's detail window. */
+  public sendFreeTechs() {
+    this.sendNetworkEvent({
+      event: "freeTechs",
+      count: this.freeTechs,
+      choices: this.getFreeTechChoices().map((tech) => tech.getName()),
+      technologies: Technology.getAllTechnologies().map((tech) => tech.toJSON(this.getCivilizationName()))
+    });
+  }
+
+  private chooseFreeTech(techName: string) {
+    const tech = this.getFreeTechChoices().find((choice) => choice.getName() === techName);
+    if (!tech) return;
+
+    this.freeTechs--;
+    if (this.currentResearch?.techName === tech.getName()) this.currentResearch = null;
+    this.completeTech(tech.getName(), tech.getAssetName());
+    this.sendFreeTechs();
+  }
+
+  private canResearch(tech: Technology): boolean {
+    if (this.researchedTechs.has(tech.getName())) return false;
+
+    return tech.getPrerequisites().every((prereq) => this.researchedTechs.has(prereq));
+  }
+
   private chooseResearch(techName: string) {
     const tech = Technology.createFromName(techName);
-    if (!tech || this.researchedTechs.has(tech.getName())) return;
-
-    const missingPrerequisite = tech.getPrerequisites().some((prereq) => !this.researchedTechs.has(prereq));
-    if (missingPrerequisite) return;
+    if (!tech || !this.canResearch(tech)) return;
 
     const costPercent = Game.getInstance().getGameOptions().techCostPercent;
     const cost = Math.max(1, Math.round((tech.getCost() * costPercent) / 100));
     this.currentResearch = { techName: tech.getName(), assetName: tech.getAssetName(), progress: 0, cost };
-
-    if (this.freeTechs > 0) {
-      this.freeTechs--;
-      this.completeResearch();
-      return;
-    }
-
     this.sendResearchUpdate();
   }
 
@@ -488,12 +527,17 @@ export class Player {
     this.sendResearchUpdate();
   }
 
-  // Finishes the tech being researched, whether the science is in or it came free.
+  // Finishes the tech being researched, once the science is in.
   private completeResearch() {
     const { techName, assetName } = this.currentResearch;
+    this.currentResearch = null;
+    this.completeTech(techName, assetName);
+  }
+
+  // Adds a tech to the researched ones, whether the science is in or it came free.
+  private completeTech(techName: string, assetName: string) {
     const previousEra = this.getEra();
     this.researchedTechs.add(techName);
-    this.currentResearch = null;
     this.notifications.addMessage(assetName, `You have discovered ${techName}.`);
     // A new tech can unlock improvements for this player's Builders.
     this.units.forEach((unit) => unit.sendActionsToOwner());

@@ -22,6 +22,7 @@ import { ResearchTreeWindow } from "../../ui/windows/ResearchTreeWindow";
 import { DiplomacyWindow } from "../../ui/windows/DiplomacyWindow";
 import { DevConsole } from "../../ui/hud/DevConsole";
 import { PantheonList } from "../../ui/windows/religion/PantheonList";
+import { FreeTechList } from "../../ui/windows/FreeTechList";
 import { ReligionFoundingWindow } from "../../ui/windows/religion/ReligionFoundingWindow";
 import { ReligionWindow } from "../../ui/windows/religion/ReligionWindow";
 import { DeclareWarWindow } from "../../ui/windows/DeclareWarWindow";
@@ -54,6 +55,7 @@ export class InGameScene extends Scene {
   private diplomacyButton: Button;
   private diplomacyWindow: DiplomacyWindow;
   private pantheonList: PantheonList;
+  private freeTechList: FreeTechList;
   private religionFoundingWindow: ReligionFoundingWindow;
   private religionWindow: ReligionWindow;
   private religionButton: Button;
@@ -619,6 +621,30 @@ export class InGameScene extends Scene {
   private closePantheonUI() {
     this.closeSidePanel(this.pantheonList);
     this.pantheonList = undefined;
+  }
+
+  public getFreeTechList(): FreeTechList | undefined {
+    return this.freeTechList;
+  }
+
+  // Opened from the Pick Free Tech button or its notification. Picking one closes it.
+  public toggleFreeTechUI() {
+    if (this.freeTechList) {
+      this.closeFreeTechUI();
+      return;
+    }
+    if (this.openUIElement) return;
+
+    this.freeTechList = new FreeTechList({
+      onChosen: () => this.closeFreeTechUI(),
+      onClose: () => this.closeFreeTechUI()
+    });
+    this.openSidePanel(this.freeTechList, () => this.closeFreeTechUI());
+  }
+
+  private closeFreeTechUI() {
+    this.closeSidePanel(this.freeTechList);
+    this.freeTechList = undefined;
   }
 
   public getReligionFoundingWindow(): ReligionFoundingWindow | undefined {

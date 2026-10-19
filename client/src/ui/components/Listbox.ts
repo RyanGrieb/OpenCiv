@@ -1,9 +1,10 @@
-import { GameImage } from "../../Assets";
+import { GameImage, SpriteRegion } from "../../Assets";
 import { Game } from "../../Game";
 import { Actor } from "../../scene/Actor";
 import { ActorGroup } from "../../scene/ActorGroup";
 import { Numbers } from "../../util/Numbers";
 import { Vector } from "../../util/Vector";
+import { ButtonSize } from "./Button";
 import { Label } from "./Label";
 import { RectangleOptions } from "./Rectangle";
 
@@ -303,6 +304,39 @@ export class ListBox extends ActorGroup {
 
     this.rows.push(row);
     this.addActor(row);
+  }
+
+  /**
+   * A title row with a close icon at its right end, for a picker down the side of the screen (the
+   * pantheon list, the free tech list). The icon sits in the title's row, so it scrolls with the title
+   * and never sits over a row a click would choose. A plain icon rather than a Button: rows scroll by
+   * moving each actor in them, and a Button's own icon wouldn't move with it.
+   */
+  public addClosableTitle(name: string, height: number, onClose: () => void) {
+    this.addCategory(name, height);
+
+    const titleRow = this.rows[this.rows.length - 1];
+    const size = ButtonSize.ICON_SMALL;
+    const padding = 8;
+    const close = new Actor({
+      image: Game.getInstance().getImage(GameImage.SPRITESHEET),
+      spriteRegion: SpriteRegion.ICON_CANCEL,
+      x: titleRow.getX() + titleRow.getWidth() - padding - size.width,
+      y: titleRow.getY() + (height - size.height) / 2,
+      width: size.width,
+      height: size.height,
+      cameraApplies: false
+    });
+    // A row's children never hear the click itself (ActorGroup only relays "clicked" one level down),
+    // but they do track the mouse, so the title row asks whether it was over the icon.
+    titleRow.on("clicked", () => {
+      if (close.isMouseInside()) onClose();
+    });
+    close.on("mousemove", () => {
+      if (close.isMouseInside()) Game.getInstance().setCursor("pointer");
+    });
+    close.on("mouse_exit", () => Game.getInstance().setCursor("default"));
+    titleRow.addActor(close);
   }
 
   public addRow(options: {

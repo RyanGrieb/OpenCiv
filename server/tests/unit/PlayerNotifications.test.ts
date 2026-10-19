@@ -56,6 +56,7 @@ describe('PlayerNotifications', () => {
       getUnits: jest.fn(() => units),
       getCurrentResearch: jest.fn(() => currentResearch),
       hasTechsLeftToResearch: jest.fn(() => techsLeft),
+      getFreeTechChoices: jest.fn((): unknown[] => []),
       getWebsocket: jest.fn(() => mockWebsocket),
       sendNetworkEvent: jest.fn(),
       getDiplomacy: jest.fn(() => ({ toJSON: () => relations })),

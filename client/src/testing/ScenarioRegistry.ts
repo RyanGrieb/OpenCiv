@@ -152,6 +152,11 @@ ScenarioRegistry.register("ObsoleteUnits", ScenarioCategory.RESEARCH, async () =
   return module.setupObsoleteUnitsTest;
 });
 
+ScenarioRegistry.register("FreeTechPicker", ScenarioCategory.RESEARCH, async () => {
+  const module = await import("./scenarios/FreeTechPicker.test");
+  return module.setupFreeTechPickerTest;
+});
+
 ScenarioRegistry.register("TechEffects", ScenarioCategory.RESEARCH, async () => {
   const module = await import("./scenarios/TechEffects.test");
   return module.setupTechEffectsTest;

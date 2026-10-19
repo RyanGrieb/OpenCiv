@@ -3,7 +3,6 @@ import { Game } from "../../../Game";
 import { NetworkEvents, WebsocketClient } from "../../../network/Client";
 import { PantheonData, PantheonsEvent } from "../../../religion/Pantheons";
 import { Actor } from "../../../scene/Actor";
-import { ButtonSize } from "../../components/Button";
 import { ListBox } from "../../components/Listbox";
 import { YieldLine } from "../../components/YieldLine";
 import { UITheme } from "../../UITheme";
@@ -108,36 +107,8 @@ export class PantheonList extends ListBox {
     this.canFound = data.canFound;
 
     const title = data.canFound ? `Choose a Pantheon (${data.cost} Faith)` : `Pantheons (${data.cost} Faith)`;
-    this.addCategory(title, PantheonList.TITLE_HEIGHT);
-    this.addCloseButton();
+    this.addClosableTitle(title, PantheonList.TITLE_HEIGHT, this.onClose);
     data.available.forEach((pantheon) => this.addPantheonRow(pantheon));
-  }
-
-  // In the title's row, so it scrolls with the title and never sits over a pantheon a click would found.
-  // A plain icon rather than a Button: rows scroll by moving each actor in them, and a Button's own icon
-  // wouldn't move with it.
-  private addCloseButton() {
-    const titleRow = this.getRows()[0];
-    const size = ButtonSize.ICON_SMALL;
-    const close = new Actor({
-      image: Game.getInstance().getImage(GameImage.SPRITESHEET),
-      spriteRegion: SpriteRegion.ICON_CANCEL,
-      x: titleRow.getX() + titleRow.getWidth() - PantheonList.PADDING - size.width,
-      y: titleRow.getY() + (PantheonList.TITLE_HEIGHT - size.height) / 2,
-      width: size.width,
-      height: size.height,
-      cameraApplies: false
-    });
-    // A row's children never hear the click itself (ActorGroup only relays "clicked" one level down),
-    // but they do track the mouse, so the title row asks whether it was over the icon.
-    titleRow.on("clicked", () => {
-      if (close.isMouseInside()) this.onClose();
-    });
-    close.on("mousemove", () => {
-      if (close.isMouseInside()) Game.getInstance().setCursor("pointer");
-    });
-    close.on("mouse_exit", () => Game.getInstance().setCursor("default"));
-    titleRow.addActor(close);
   }
 
   private addPantheonRow(pantheon: PantheonData) {

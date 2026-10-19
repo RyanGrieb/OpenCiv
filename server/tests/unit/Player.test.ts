@@ -169,29 +169,62 @@ describe('Player', () => {
       jest.spyOn(GameMap, 'getInstance').mockReturnValue({ getTiles: (): Tile[][] => [] } as unknown as GameMap);
     });
 
-    it('finishes the tech being researched right away', () => {
+    const chooseFree = (techName: string) => triggerServerEvent('chooseFreeTech', { techName }, mockWebsocket);
+
+    it('leaves the tech being researched alone and lets the player pick one', () => {
       choose('Pottery');
 
       player.grantFreeTech('Great Library');
 
-      expect(player.hasResearchedTech('Pottery')).toBe(true);
-      expect(player.getCurrentResearch()).toBeNull();
-      expect(player.getFreeTechs()).toBe(0);
+      expect(player.hasResearchedTech('Pottery')).toBe(false);
+      expect(player.getCurrentResearch().techName).toBe('Pottery');
+      expect(player.getFreeTechs()).toBe(1);
+      expect(player.getFreeTechChoices().map((tech) => tech.getName())).toContain('Mining');
     });
 
-    it('with nothing being researched, makes the next tech chosen free', () => {
+    it('offers only techs whose prerequisites are researched', () => {
       player.grantFreeTech('Great Library');
+
+      const choices = player.getFreeTechChoices().map((tech) => tech.getName());
+      expect(choices).toContain('Pottery');
+      expect(choices).not.toContain('Writing');
+
+      chooseFree('Writing');
+      expect(player.hasResearchedTech('Writing')).toBe(false);
       expect(player.getFreeTechs()).toBe(1);
+    });
+
+    it('researches the picked tech, and choosing research afterwards costs science again', () => {
+      player.grantFreeTech('Great Library');
+
+      chooseFree('Mining');
+
+      expect(player.hasResearchedTech('Mining')).toBe(true);
+      expect(player.getFreeTechs()).toBe(0);
+      expect(player.getFreeTechChoices()).toEqual([]);
 
       choose('Pottery');
+      expect(player.hasResearchedTech('Pottery')).toBe(false);
+      expect(player.getCurrentResearch().techName).toBe('Pottery');
+    });
+
+    it('picking the tech being researched finishes it', () => {
+      choose('Pottery');
+      player.grantFreeTech('Great Library');
+
+      chooseFree('Pottery');
 
       expect(player.hasResearchedTech('Pottery')).toBe(true);
       expect(player.getCurrentResearch()).toBeNull();
-      expect(player.getFreeTechs()).toBe(0);
+    });
 
-      choose('Mining');
-      expect(player.hasResearchedTech('Mining')).toBe(false);
-      expect(player.getCurrentResearch().techName).toBe('Mining');
+    it('turns the turn button into Pick Free Tech until one is picked', () => {
+      const freeTech = () => player.getNotifications().getNotifications().find((n) => n.type === 'freeTech');
+      player.grantFreeTech('Great Library');
+      expect(freeTech()?.turnBlockingLabel).toBe('Pick Free Tech');
+
+      chooseFree('Mining');
+      expect(freeTech()).toBeUndefined();
     });
   });
 

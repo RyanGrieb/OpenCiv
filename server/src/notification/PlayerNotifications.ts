@@ -15,7 +15,7 @@ export enum NotificationPriority {
 // needing production, select a unit needing orders, or dismiss a one-off message.
 // A "cityStrike" click starts aiming a city that has an enemy in range, and a "diplomacy" click
 // opens the diplomacy window.
-// A "pantheon" click opens the pantheon picker.
+// A "pantheon" click opens the pantheon picker, and a "freeTech" click the free tech picker.
 export type NotificationType =
   | "research"
   | "production"
@@ -23,6 +23,7 @@ export type NotificationType =
   | "cityStrike"
   | "diplomacy"
   | "pantheon"
+  | "freeTech"
   | "message";
 
 export interface NotificationData {
@@ -186,7 +187,8 @@ export class PlayerNotifications {
   /** Every active notification, highest priority first. */
   public getNotifications(): NotificationData[] {
     const derived = [
-      // Ahead of research, so the turn button asks for the pantheon first.
+      // Ahead of research, so the turn button asks for the free tech and the pantheon first.
+      this.getFreeTechNotification(),
       this.getPantheonNotification(),
       this.getResearchNotification(),
       this.getProductionNotification(),
@@ -215,6 +217,20 @@ export class PlayerNotifications {
       text: "You can research a new technology.",
       priority: NotificationPriority.HIGH,
       turnBlockingLabel: "Choose Research"
+    };
+  }
+
+  // Civ 5's "choose a free technology", e.g. after the Great Library, until the player picks one.
+  private getFreeTechNotification(): NotificationData | undefined {
+    if (this.player.getFreeTechChoices().length < 1) return undefined;
+
+    return {
+      id: "freeTech",
+      type: "freeTech",
+      icon: "ICON_SCIENCE",
+      text: "You can pick a free technology.",
+      priority: NotificationPriority.HIGH,
+      turnBlockingLabel: "Pick Free Tech"
     };
   }
 
