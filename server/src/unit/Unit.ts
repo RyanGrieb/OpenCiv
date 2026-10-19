@@ -341,6 +341,26 @@ export class Unit {
     });
   }
 
+  /** createFromName(), with the new unit put on its tile - undefined if no unit has that name. */
+  public static spawn(
+    name: string,
+    tile: Tile,
+    player: Player,
+    options?: { availableMovement?: number; health?: number; promotions?: UnitPromotions }
+  ): Unit | undefined {
+    const unit = Unit.createFromName(name, tile, player, options);
+    if (unit) tile.addUnit(unit);
+
+    return unit;
+  }
+
+  // Ground a unit of this type could stand on: land for land units, water for ships.
+  public static canStandOn(name: string, tile: Tile): boolean {
+    const data = Unit.getUnitYMLTypeDataByName(name);
+    if (data?.domain === "sea") return Unit.canSailOnto(tile, data.coast_only ?? false);
+    return !tile.isWater() && tile.getMovementCost() < 9999;
+  }
+
   // Every unit type the config knows about, including ones with no `cost` -
   // callers building a production catalog must filter those out themselves.
   public static getAllUnitData(): UnitYMLTypeData[] {
@@ -366,16 +386,16 @@ export class Unit {
     return tile.isWater() && !(coastOnly && tile.containsTileType("ocean"));
   }
 
+  public static getUnitYMLTypeDataByName(name: string): UnitYMLTypeData | undefined {
+    return Unit.loadUnitData().find((unit) => unit.name.toLocaleLowerCase() === name.toLocaleLowerCase());
+  }
+
   // An approach that attacks this turn beats one that doesn't; then more movement left, then a shorter walk.
   private static isBetterApproach(a: MeleeApproach, b: MeleeApproach): boolean {
     if (a.attacksThisTurn !== b.attacksThisTurn) return a.attacksThisTurn;
     if (a.attacksThisTurn && a.remainingMovement !== b.remainingMovement)
       return a.remainingMovement > b.remainingMovement;
     return a.pathLength < b.pathLength;
-  }
-
-  private static getUnitYMLTypeDataByName(name: string): UnitYMLTypeData | undefined {
-    return Unit.loadUnitData().find((unit) => unit.name.toLocaleLowerCase() === name.toLocaleLowerCase());
   }
 
   private static loadUnitData(): UnitYMLTypeData[] {
@@ -1577,7 +1597,7 @@ export class Unit {
     });
 
     for (const capturedAs of capturedTypes) {
-      targetTile.addUnit(Unit.createFromName(capturedAs, targetTile, this.player, { availableMovement: 0 }));
+      Unit.spawn(capturedAs, targetTile, this.player, { availableMovement: 0 });
     }
   }
 

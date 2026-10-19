@@ -293,10 +293,7 @@ export class Barbarians {
   }
 
   private createUnit(tile: Tile): Unit | undefined {
-    const unit = Unit.createFromName(this.getSpawnUnitName(), tile, this.player);
-    if (unit) tile.addUnit(unit);
-
-    return unit;
+    return Unit.spawn(this.getSpawnUnitName(), tile, this.player);
   }
 
   // Closes in on the nearest civilization's unit or city within aggro range, stopping next to it -

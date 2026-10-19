@@ -87,6 +87,21 @@ describe('City', () => {
       civName === 'Rome' ? unit.name !== 'Swordsman' : unit.name !== 'Legion'
     );
 
+    // The real lookups and spawn, over the mocked unit data and createFromName below.
+    (Unit.getUnitYMLTypeDataByName as jest.Mock).mockImplementation((name: string) =>
+      Unit.getAllUnitData().find((data) => data.name.toLowerCase() === name.toLowerCase())
+    );
+    (Unit.canStandOn as jest.Mock).mockImplementation((name: string, tile: Tile) => {
+      const data = Unit.getUnitYMLTypeDataByName(name);
+      if (data?.domain === 'sea') return Unit.canSailOnto(tile, data.coast_only ?? false);
+      return !tile.isWater() && tile.getMovementCost() < 9999;
+    });
+    (Unit.spawn as jest.Mock).mockImplementation((name: string, tile: Tile, player: Player, options: unknown) => {
+      const unit = Unit.createFromName(name, tile, player, options);
+      if (unit) tile.addUnit(unit);
+      return unit;
+    });
+
     (Unit.getAllUnitData as jest.Mock).mockReturnValue([
       { name: 'Warrior', attack_type: 'melee', cost: 30, obsolete_tech: 'Iron Working' },
       { name: 'Scout', attack_type: 'melee', cost: 20 },

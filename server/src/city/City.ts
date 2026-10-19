@@ -1394,10 +1394,9 @@ export class City {
   }
 
   private spawnUnit(unitName: string, tile: Tile, options?: { availableMovement?: number }) {
-    const unit = Unit.createFromName(unitName, tile, this.player, options);
+    const unit = Unit.spawn(unitName, tile, this.player, options);
     if (!unit) return;
 
-    tile.addUnit(unit);
     // Experience and promotions from the Barracks, Alhambra and the like.
     BuildingEffects.applyToTrainedUnit(this, unit);
   }
@@ -1409,15 +1408,12 @@ export class City {
   // The city's own tile if the new unit can stack there, else the first free tile within `range` it
   // could move onto, nearest first: land for land units, water for ships.
   private getUnitSpawnTile(unitName: string, range = 1): Tile | undefined {
-    const unitData = Unit.getAllUnitData().find((data) => data.name.toLowerCase() === unitName.toLowerCase());
-    const isUtility = unitData?.is_utility ?? false;
-
-    const canStandOn = (tile: Tile) => {
-      if (unitData?.domain === "sea") return Unit.canSailOnto(tile, unitData.coast_only ?? false);
-      return !tile.isWater() && tile.getMovementCost() < 9999;
-    };
+    const isUtility = Unit.getUnitYMLTypeDataByName(unitName)?.is_utility ?? false;
     const nearby = range > 1 ? this.getTilesNearestFirst(range) : this.tile.getAdjacentTiles();
-    const candidates = [this.tile, ...nearby.filter((tile) => tile && tile !== this.tile && canStandOn(tile))];
+    const candidates = [
+      this.tile,
+      ...nearby.filter((tile) => tile && tile !== this.tile && Unit.canStandOn(unitName, tile))
+    ];
 
     return candidates.find((tile) => tile.canPlaceUnit(this.player, isUtility));
   }
