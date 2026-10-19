@@ -82,12 +82,15 @@ export class ReligionWindow extends ActorGroup {
       ];
     }
 
-    const cost = overview.pantheon
-      ? `Found one at ${overview.religionCost} Faith (you have ${overview.faith}).`
-      : `Found a pantheon first, then a religion at ${overview.religionCost} Faith.`;
+    const prophet = overview.pantheon
+      ? `A Great Prophet is born at ${overview.prophetCost} Faith (you have ${overview.faith}).`
+      : `Found a pantheon first. A Great Prophet is then born at ${overview.prophetCost} Faith.`;
     return [
       { text: "Religion: none yet", color: "white", font: TITLE_FONT, rule: true },
-      { text: overview.canFoundReligion ? "You can found one now: Found Religion." : cost, color: "lightgray" }
+      {
+        text: overview.hasProphet ? "Your Great Prophet can found one in any of your cities." : prophet,
+        color: "lightgray"
+      }
     ];
   }
 

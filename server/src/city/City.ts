@@ -1294,6 +1294,15 @@ export class City {
     return Math.floor((production * (100 + percent)) / 100);
   }
 
+  /** A unit given rather than built, such as a Great Prophet: on the city or a free tile near it. */
+  public spawnFreeUnit(unitName: string): boolean {
+    const tile = this.getUnitSpawnTile(unitName, 2);
+    if (!tile) return false;
+
+    this.spawnUnit(unitName, tile);
+    return true;
+  }
+
   private getProductionTowardBuilding(buildingName: string, production: number): number {
     const building = Building.createFromName(buildingName);
     if (!building?.isWonderBuilding()) return production;

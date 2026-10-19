@@ -3,6 +3,7 @@ import { Game } from "../Game";
 import { GameMap } from "../map/GameMap";
 import type { City } from "../city/City";
 import type { Player } from "../Player";
+import type { Unit } from "../unit/Unit";
 import { BeliefData, Beliefs } from "./Beliefs";
 import { PantheonData, Pantheons } from "./Pantheons";
 import { Religions } from "./Religions";
@@ -17,14 +18,21 @@ export interface FoundedReligion {
 
 /**
  * A player's faith-bought beliefs. Once their faith reaches Pantheons.getCost() they may found a
- * pantheon no other civilization has; with a pantheon, once it reaches Religions.getCost(), a religion
- * with a founder and a follower belief. Either spends the faith. Every one of the player's own cities
- * follows their religion; religions don't spread to other civilizations yet.
+ * pantheon no other civilization has. With a pantheon, once it reaches getProphetCost(), a Great
+ * Prophet is born, and in one of the player's cities the prophet founds a religion with a founder and
+ * a follower belief. Every one of the player's own cities follows their religion; religions don't
+ * spread to other civilizations yet.
  */
 export class PlayerReligion {
+  public static readonly PROPHET = "Great Prophet";
+  // Brave New World's standard-speed Great Prophet costs: 200 Faith for a player's first, 100 more for each after.
+  public static readonly FIRST_PROPHET_COST = 200;
+  public static readonly COST_PER_PROPHET = 100;
+
   private player: Player;
   private pantheonName: string | undefined;
   private religion: FoundedReligion | undefined;
+  private prophetsEarned = 0;
   // Cities that have come to follow the religion, each paid Initiation Rites' gold once.
   private convertedCities = new Set<City>();
 
@@ -59,7 +67,7 @@ export class PlayerReligion {
       callback: (data, websocket) => {
         if (this.player.getWebsocket() != websocket) return;
 
-        this.sendReligions();
+        this.sendReligions(data["unitId"]);
       },
       globalEvent: true
     });
@@ -70,7 +78,7 @@ export class PlayerReligion {
       callback: (data, websocket) => {
         if (this.player.getWebsocket() != websocket) return;
 
-        this.foundReligion(data["name"], data["founderBelief"], data["followerBelief"]);
+        this.foundReligion(data["name"], data["founderBelief"], data["followerBelief"], data["unitId"]);
       },
       globalEvent: true
     });
@@ -108,17 +116,17 @@ export class PlayerReligion {
     ].filter((belief) => belief);
   }
 
-  // What the status bar's faith tooltip shows: the pantheon and religion founded, or what the next costs.
+  // What the status bar's faith tooltip shows: where the player's faith comes from each turn.
   public getFaithBreakdown() {
-    const pantheon = this.getPantheon();
-    return {
-      pantheon: pantheon ? { name: pantheon.name, description: pantheon.description } : null,
-      pantheonCost: Pantheons.getCost(),
-      pantheonsLeft: Pantheons.getAvailable().length,
-      religion: this.religion?.name ?? null,
-      religionCost: Religions.getCost(),
-      religionsLeft: Religions.getAvailable().religions.length
-    };
+    const income = this.player
+      .getCities()
+      .map((city) => ({ source: city.getName(), amount: city.getStatline({ asArray: false }).faith }))
+      .filter((entry) => entry.amount !== 0);
+    return { income, net: income.reduce((total, entry) => total + entry.amount, 0) };
+  }
+
+  public getProphetCost(): number {
+    return PlayerReligion.FIRST_PROPHET_COST + PlayerReligion.COST_PER_PROPHET * this.prophetsEarned;
   }
 
   // Enough faith, no pantheon yet, and one left to found. The barbarians never found one.
@@ -143,32 +151,57 @@ export class PlayerReligion {
     return true;
   }
 
-  // A pantheon, enough faith, no religion yet, a city to be its holy city, and a name and beliefs left.
-  public canFoundReligion(): boolean {
-    if (this.religion || !this.pantheonName || this.player.isBarbarian() || !this.player.hasClient()) return false;
-    if (this.player.getCities().length < 1) return false;
-    if ((this.player.getAccumulatedStats()["faith"] ?? 0) < Religions.getCost()) return false;
+  /**
+   * A Great Prophet is born once the player has a pantheon, no religion and no prophet yet, and the
+   * faith for one, while a religion is left to found. Called each turn once faith is banked.
+   */
+  public checkForProphet() {
+    if (!this.canEarnProphet()) return;
 
-    const available = Religions.getAvailable();
-    return (
-      available.religions.length > 0 && available.founderBeliefs.length > 0 && available.followerBeliefs.length > 0
-    );
+    const cities = this.player.getCities();
+    const city = cities.find((candidate) => candidate.hasBuilding("Palace")) ?? cities[0];
+    if (!city.spawnFreeUnit(PlayerReligion.PROPHET)) return;
+
+    this.player.addToAccumulatedStat("faith", -this.getProphetCost());
+    this.prophetsEarned++;
+    this.player
+      .getNotifications()
+      .addMessage("ICON_FAITH", `A Great Prophet has been born in ${city.getName()}. In a city, it can found a religion.`);
+    this.player.sendTotalStatsUpdate();
+  }
+
+  public canEarnProphet(): boolean {
+    if (this.religion || !this.pantheonName || this.player.isBarbarian() || !this.player.hasClient()) return false;
+    if (this.getProphets().length > 0 || this.player.getCities().length < 1) return false;
+    if ((this.player.getAccumulatedStats()["faith"] ?? 0) < this.getProphetCost()) return false;
+
+    return Religions.hasRoomForAnother();
+  }
+
+  // The player's Great Prophet can found their religion, standing in one of their cities.
+  public canFoundReligionWith(prophet: Unit | undefined): boolean {
+    if (this.religion || !prophet || prophet.getPlayer() !== this.player) return false;
+    if (prophet.getName() !== PlayerReligion.PROPHET) return false;
+    if (prophet.getTile().getCity()?.getPlayer() !== this.player) return false;
+
+    return Religions.hasRoomForAnother();
   }
 
   /**
-   * Founds the religion with the two beliefs, spending the faith it costs. Its holy city is the capital.
-   * False if the player can't found it, or another religion has the name or either belief.
+   * The Great Prophet founds the religion with the two beliefs, and is used up. The city it stands in
+   * becomes the holy city. False if it can't, or another religion has the name or either belief.
    */
-  public foundReligion(name: string, founderBeliefName: string, followerBeliefName: string): boolean {
+  public foundReligion(name: string, founderBeliefName: string, followerBeliefName: string, prophetId: number): boolean {
     const available = Religions.getAvailable();
     const founderBelief = available.founderBeliefs.find((belief) => belief.name === founderBeliefName);
     const followerBelief = available.followerBeliefs.find((belief) => belief.name === followerBeliefName);
     if (!available.religions.includes(name) || !founderBelief || !followerBelief) return false;
-    if (!this.canFoundReligion()) return false;
 
-    this.player.addToAccumulatedStat("faith", -Religions.getCost());
-    const cities = this.player.getCities();
-    const holyCity = cities.find((city) => city.hasBuilding("Palace")) ?? cities[0];
+    const prophet = this.getProphet(prophetId);
+    if (!this.canFoundReligionWith(prophet)) return false;
+
+    const holyCity = prophet.getTile().getCity();
+    prophet.delete();
     this.religion = {
       name,
       founderBelief: founderBelief.name,
@@ -183,7 +216,7 @@ export class PlayerReligion {
         `You have founded ${name} in ${holyCity.getName()}, with ${founderBelief.name} and ${followerBelief.name}.`
       );
     this.announceReligionToOthers();
-    cities.forEach((city) => this.convert(city));
+    this.player.getCities().forEach((city) => this.convert(city));
     this.applyFounded();
     return true;
   }
@@ -196,15 +229,15 @@ export class PlayerReligion {
     this.player.sendTotalStatsUpdate();
   }
 
-  // What the client's religion founding window shows: names and beliefs left, and what founding costs.
-  public sendReligions() {
+  // What the client's religion founding window shows: the names and beliefs left, and whether the
+  // Great Prophet it was opened from can found a religion where it stands.
+  public sendReligions(prophetId?: number) {
     const available = Religions.getAvailable();
     this.player.sendNetworkEvent({
       event: "religions",
-      cost: Religions.getCost(),
       faith: this.player.getAccumulatedStats()["faith"] ?? 0,
       religion: this.religion ?? null,
-      canFound: this.canFoundReligion(),
+      canFound: this.canFoundReligionWith(this.getProphet(prophetId)),
       hasPantheon: !!this.pantheonName,
       religions: available.religions,
       founderBeliefs: available.founderBeliefs,
@@ -244,8 +277,8 @@ export class PlayerReligion {
       event: "religionOverview",
       pantheon: PlayerReligion.describe(pantheon),
       religion: this.religion ? { name: this.religion.name, holyCity: this.religion.holyCity } : null,
-      religionCost: Religions.getCost(),
-      canFoundReligion: this.canFoundReligion(),
+      prophetCost: this.getProphetCost(),
+      hasProphet: this.getProphets().length > 0,
       faith: this.player.getAccumulatedStats()["faith"] ?? 0,
       pantheonCost: Pantheons.getCost(),
       canFoundPantheon: this.canFoundPantheon(),
@@ -257,6 +290,14 @@ export class PlayerReligion {
       empire,
       totals
     });
+  }
+
+  private getProphets(): Unit[] {
+    return this.player.getUnits().filter((unit) => unit.getName() === PlayerReligion.PROPHET);
+  }
+
+  private getProphet(id: number | undefined): Unit | undefined {
+    return this.getProphets().find((unit) => unit.getId() === id);
   }
 
   // Initiation Rites pays out the first time each city follows the religion.

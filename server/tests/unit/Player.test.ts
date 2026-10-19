@@ -114,7 +114,7 @@ describe('Player', () => {
       accumulatedStats: {},
       goldBreakdown: { income: [{ source: 'TestCity', amount: 2 }], expenses: [], net: 2 },
       happinessBreakdown: { sources: [{ source: 'Base', amount: 9 }], unhappiness: [{ source: '1 city', amount: 3 }], net: 6, status: 'content', effects: [] },
-      faithBreakdown: { pantheon: null, pantheonCost: 10, pantheonsLeft: 26, religion: null, religionCost: 200, religionsLeft: 13 },
+      faithBreakdown: { income: [], net: 0 },
     }));
   });
 
@@ -156,7 +156,7 @@ describe('Player', () => {
       accumulatedStats: { gold: 5, faith: 0 },
       goldBreakdown: { income: [{ source: 'TestCity', amount: 5 }], expenses: [], net: 5 },
       happinessBreakdown: { sources: [{ source: 'Base', amount: 9 }], unhappiness: [{ source: '1 city', amount: 3 }], net: 6, status: 'content', effects: [] },
-      faithBreakdown: { pantheon: null, pantheonCost: 10, pantheonsLeft: 26, religion: null, religionCost: 200, religionsLeft: 13 },
+      faithBreakdown: { income: [], net: 0 },
     }));
   });
 

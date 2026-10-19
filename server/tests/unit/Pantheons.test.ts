@@ -21,6 +21,7 @@ describe("Pantheons", () => {
       getName: () => `player${players.size}`,
       getCivilizationName: () => `Civ${players.size}`,
       getCities: () => player.ownCities,
+      getUnits: (): unknown[] => [],
       hasResearchedTech: (tech: string) => (options.techs ?? []).includes(tech),
       isBarbarian: () => false,
       hasClient: () => true,

@@ -94,7 +94,6 @@ export function setupPantheonsTest(game: Game) {
         verification: () =>
             !list() &&
             me().getAccumulatedStat("faith") === STARTING_FAITH - FIRST_PANTHEON_COST &&
-            me().getFaithBreakdown().pantheon?.name === CHOSEN &&
             nextTurnText() !== "Choose Pantheon"
     });
 

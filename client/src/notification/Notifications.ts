@@ -7,7 +7,7 @@ import { InGameScene } from "../scene/type/InGameScene";
 // Mirrors server/src/notification/PlayerNotifications.ts's NotificationData - keep both in sync.
 export interface NotificationData {
   id: string;
-  type: "research" | "production" | "unitOrders" | "cityStrike" | "diplomacy" | "pantheon" | "religion" | "message";
+  type: "research" | "production" | "unitOrders" | "cityStrike" | "diplomacy" | "pantheon" | "message";
   icon: string;
   text: string;
   priority: number;
@@ -90,9 +90,6 @@ export class Notifications {
         return;
       case "pantheon":
         if (!scene.getPantheonList()) scene.togglePantheonUI();
-        return;
-      case "religion":
-        if (!scene.getReligionFoundingWindow()) scene.toggleReligionFoundingUI();
         return;
       case "message":
         WebsocketClient.sendMessage({ event: "dismissNotification", id: notification.id });

@@ -15,7 +15,7 @@ export enum NotificationPriority {
 // needing production, select a unit needing orders, or dismiss a one-off message.
 // A "cityStrike" click starts aiming a city that has an enemy in range, and a "diplomacy" click
 // opens the diplomacy window.
-// A "pantheon" click opens the pantheon picker, a "religion" click the religion founding window.
+// A "pantheon" click opens the pantheon picker.
 export type NotificationType =
   | "research"
   | "production"
@@ -23,7 +23,6 @@ export type NotificationType =
   | "cityStrike"
   | "diplomacy"
   | "pantheon"
-  | "religion"
   | "message";
 
 export interface NotificationData {
@@ -187,9 +186,8 @@ export class PlayerNotifications {
   /** Every active notification, highest priority first. */
   public getNotifications(): NotificationData[] {
     const derived = [
-      // Ahead of research, so the turn button asks for the pantheon or religion first.
+      // Ahead of research, so the turn button asks for the pantheon first.
       this.getPantheonNotification(),
-      this.getReligionNotification(),
       this.getResearchNotification(),
       this.getProductionNotification(),
       this.getCityStrikeNotification(),
@@ -231,20 +229,6 @@ export class PlayerNotifications {
       text: "You have enough Faith to found a pantheon.",
       priority: NotificationPriority.HIGH,
       turnBlockingLabel: "Choose Pantheon"
-    };
-  }
-
-  // Civ 5's "you can found a religion", once the player has a pantheon and the faith for one.
-  private getReligionNotification(): NotificationData | undefined {
-    if (!this.player.getReligion().canFoundReligion()) return undefined;
-
-    return {
-      id: "religion",
-      type: "religion",
-      icon: "ICON_FAITH",
-      text: "You have enough Faith to found a religion.",
-      priority: NotificationPriority.HIGH,
-      turnBlockingLabel: "Found Religion"
     };
   }
 

@@ -596,8 +596,8 @@ export class InGameScene extends Scene {
     return this.religionFoundingWindow;
   }
 
-  // Opened from the Found Religion button or its notification. Founding one closes it.
-  public toggleReligionFoundingUI() {
+  // Opened from a Great Prophet's Found Religion action. Founding one closes it.
+  public toggleReligionFoundingUI(prophetId: number) {
     if (this.religionFoundingWindow) {
       this.closeReligionFoundingUI();
       return;
@@ -605,6 +605,7 @@ export class InGameScene extends Scene {
     if (this.openUIElement) return;
 
     this.religionFoundingWindow = new ReligionFoundingWindow({
+      prophetId,
       onChosen: () => this.closeReligionFoundingUI(),
       onClose: () => this.closeReligionFoundingUI()
     });

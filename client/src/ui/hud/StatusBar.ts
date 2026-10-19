@@ -145,10 +145,7 @@ export class StatusBar extends ActorGroup {
     const y = this.y + this.height;
 
     if (stat === "gold") return GoldTooltip.create(this.goldDescLabel.getX(), y, clientPlayer.getGoldBreakdown());
-    if (stat === "faith") {
-      const faith = clientPlayer.getAccumulatedStat("faith");
-      return FaithTooltip.create(this.faithDescLabel.getX(), y, faith, clientPlayer.getFaithBreakdown());
-    }
+    if (stat === "faith") return FaithTooltip.create(this.faithDescLabel.getX(), y, clientPlayer.getFaithBreakdown());
     return HappinessTooltip.create(this.happinessDescLabel.getX(), y, clientPlayer.getHappinessBreakdown());
   }
 

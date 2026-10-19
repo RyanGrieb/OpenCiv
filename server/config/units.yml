@@ -39,6 +39,10 @@ units:
     is_utility: true
     cost: 106
     captured_as: Builder
+  # Not built: born from faith (see PlayerReligion), and founds a religion.
+  - name: Great Prophet
+    is_utility: true
+    default_move_distance: 2
   - name: Archer
     combat_strength: 5
     ranged_strength: 7

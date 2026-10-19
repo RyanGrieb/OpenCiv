@@ -135,6 +135,7 @@ export class Player {
       parentObject: this,
       callback: () => {
         this.accumulateTurnStats();
+        this.religion.checkForProphet();
         this.accumulateResearch();
         this.diplomacy.passTurn();
       },

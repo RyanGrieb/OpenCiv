@@ -52,7 +52,8 @@ class ChoiceRow extends Actor {
 }
 
 /**
- * Civ 5's religion founding screen, down the left of the screen like the pantheon list: a religion no
+ * Civ 5's religion founding screen, opened from a Great Prophet's Found Religion action and down the
+ * left of the screen like the pantheon list: a religion no
  * one has founded yet, a founder belief and a follower belief, each in its own section, then a Found
  * Religion button once all three are chosen. Each belief shows its bonus below its name the way the
  * pantheon list does, and its tooltip on hover. The server decides what's offered and whether founding
@@ -72,6 +73,8 @@ export class ReligionFoundingWindow extends ActorGroup {
   private static readonly BONUS_COLOR = "#8ee07a";
   private static readonly NOT_YET_COLOR = "gray";
 
+  // The Great Prophet founding the religion, which the server uses up.
+  private prophetId: number;
   private onChosen: () => void;
   private onClose: () => void;
   private data: ReligionsEvent | undefined;
@@ -88,11 +91,12 @@ export class ReligionFoundingWindow extends ActorGroup {
   private tooltip: BeliefTooltip | undefined;
   private tooltipBuild = 0;
 
-  constructor(options: { onChosen: () => void; onClose: () => void }) {
+  constructor(options: { prophetId: number; onChosen: () => void; onClose: () => void }) {
     const y = UITheme.STATUS_BAR_HEIGHT;
     const height = Game.getInstance().getHeight() - y;
     super({ x: 0, y, z: 7, width: ReligionFoundingWindow.WIDTH, height, cameraApplies: false });
 
+    this.prophetId = options.prophetId;
     this.onChosen = options.onChosen;
     this.onClose = options.onClose;
 
@@ -136,7 +140,7 @@ export class ReligionFoundingWindow extends ActorGroup {
       callback: (data) => this.build(data)
     });
 
-    WebsocketClient.sendMessage({ event: "requestReligions" });
+    WebsocketClient.sendMessage({ event: "requestReligions", unitId: this.prophetId });
   }
 
   // Whatever is under the yields' number: the bonus in words, gray when the game can't do any of it yet.
@@ -172,7 +176,13 @@ export class ReligionFoundingWindow extends ActorGroup {
     const { religion, founderBelief, followerBelief } = this.chosen;
     if (!this.data?.canFound || !religion || !founderBelief || !followerBelief) return false;
 
-    WebsocketClient.sendMessage({ event: "foundReligion", name: religion, founderBelief, followerBelief });
+    WebsocketClient.sendMessage({
+      event: "foundReligion",
+      unitId: this.prophetId,
+      name: religion,
+      founderBelief,
+      followerBelief
+    });
     this.onChosen();
     return true;
   }
@@ -307,7 +317,7 @@ export class ReligionFoundingWindow extends ActorGroup {
     const padding = ReligionFoundingWindow.PADDING;
     const data = this.data;
     const { religion, founderBelief, followerBelief } = this.chosen;
-    const title = data.canFound ? `Found a Religion (${data.cost} Faith)` : `Religions (${data.cost} Faith)`;
+    const title = data.canFound ? "Found a Religion" : "Religions";
     const footerY = this.y + this.height - ReligionFoundingWindow.FOOTER_HEIGHT + padding;
     const ready = data.canFound && !!religion && !!founderBelief && !!followerBelief;
 

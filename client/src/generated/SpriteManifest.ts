@@ -454,6 +454,7 @@ export const SPRITE_MANIFEST: SpriteManifestEntry[] = [
   { name: "UNIT_GALLEASS", url: new URL("../../assets/sprites/units/UNIT_GALLEASS.png", import.meta.url).href },
   { name: "UNIT_GATLING_GUN", url: new URL("../../assets/sprites/units/UNIT_GATLING_GUN.png", import.meta.url).href },
   { name: "UNIT_GIANT_DEATH_ROBOT", url: new URL("../../assets/sprites/units/UNIT_GIANT_DEATH_ROBOT.png", import.meta.url).href },
+  { name: "UNIT_GREAT_PROPHET", url: new URL("../../assets/sprites/units/UNIT_GREAT_PROPHET.png", import.meta.url).href },
   { name: "UNIT_GREAT_WAR_INFANTRY", url: new URL("../../assets/sprites/units/UNIT_GREAT_WAR_INFANTRY.png", import.meta.url).href },
   { name: "UNIT_HORSEMAN", url: new URL("../../assets/sprites/units/UNIT_HORSEMAN.png", import.meta.url).href },
   { name: "UNIT_INFANTRY", url: new URL("../../assets/sprites/units/UNIT_INFANTRY.png", import.meta.url).href },

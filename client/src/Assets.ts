@@ -24,6 +24,7 @@ export enum SpriteRegion {
   //Units
   UNIT_WARRIOR = 1,
   UNIT_SCOUT,
+  UNIT_GREAT_PROPHET,
   UNIT_ARCHER,
   UNIT_BUILDER,
   UNIT_CAMEL_ARCHER,

@@ -65,6 +65,19 @@ export class UnitActions {
     };
   }
 
+  // The Great Prophet's: in one of its owner's cities, the owner's client opens the religion founding
+  // window, and sends the choice back as "foundReligion" (see PlayerReligion.foundReligion()).
+  public static foundReligion(): UnitAction {
+    return {
+      name: "found_religion",
+      icon: "ICON_FAITH",
+      requirements: [],
+      desc: "Found Religion",
+      isAvailable: (unit: Unit) => unit.getPlayer().getReligion().canFoundReligionWith(unit),
+      onAction: () => {}
+    };
+  }
+
   public static settleCity(): UnitAction {
     return {
       name: "settle",
@@ -121,6 +134,7 @@ export class UnitActions {
   // What this kind of unit can do besides skipping a turn.
   private static typeActions(data: UnitYMLTypeData): UnitAction[] {
     if (data.name === "Settler") return [UnitActions.settleCity()];
+    if (data.name === "Great Prophet") return [UnitActions.foundReligion()];
     if (data.name === "Builder")
       return Improvement.getBuildableImprovementData("land").map(UnitActions.buildImprovement);
     if (data.name === "Work Boat")

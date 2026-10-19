@@ -10,16 +10,11 @@ interface ReligionsConfig {
 }
 
 /**
- * Civ 5's religions and the beliefs a founder chooses for one, from config/religions.yml, and what
- * founding one costs. No two religions share a name or a belief. PlayerReligion founds them, and
- * Beliefs applies a founded religion's beliefs.
+ * Civ 5's religions and the beliefs a founder chooses for one, from config/religions.yml. No two
+ * religions share a name or a belief. PlayerReligion founds them, and Beliefs applies a founded
+ * religion's beliefs.
  */
 export class Religions {
-  // Brave New World's standard-speed Great Prophet costs, paid in faith here since there are no Great
-  // Prophets yet: 200 Faith for the world's first religion, 100 more for each after.
-  public static readonly FIRST_RELIGION_COST = 200;
-  public static readonly COST_PER_FOUNDED = 100;
-
   public static getNames(): string[] {
     return Religions.getConfig().religions;
   }
@@ -45,9 +40,12 @@ export class Religions {
     return Array.from(Game.getInstance().getPlayers().values()).filter((player) => !!player.getReligion().getFounded());
   }
 
-  // The faith the next religion founded anywhere in the world costs.
-  public static getCost(): number {
-    return Religions.FIRST_RELIGION_COST + Religions.COST_PER_FOUNDED * Religions.getFounders().length;
+  // Whether a religion can still be founded: a name, a founder belief and a follower belief are left.
+  public static hasRoomForAnother(): boolean {
+    const available = Religions.getAvailable();
+    return (
+      available.religions.length > 0 && available.founderBeliefs.length > 0 && available.followerBeliefs.length > 0
+    );
   }
 
   // What's still free to found: religion names, and founder and follower beliefs no religion has taken.

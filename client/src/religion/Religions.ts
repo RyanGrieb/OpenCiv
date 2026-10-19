@@ -19,9 +19,9 @@ export interface FoundedReligion {
   holyCity: string;
 }
 
-// The server's "religions" event: what's left to found a religion with, and what it costs.
+// The server's "religions" event: what's left to found a religion with, and whether the Great Prophet
+// the window was opened from can found one where it stands.
 export interface ReligionsEvent {
-  cost: number;
   faith: number;
   religion: FoundedReligion | null;
   canFound: boolean;
@@ -47,8 +47,9 @@ export interface ReligionOverview {
   faith: number;
   pantheonCost: number;
   canFoundPantheon: boolean;
-  religionCost: number;
-  canFoundReligion: boolean;
+  // The faith the next Great Prophet is born at, and whether one is waiting to found the religion.
+  prophetCost: number;
+  hasProphet: boolean;
   // Each city following the pantheon or religion, with what it gets from it each turn.
   cities: { name: string; bonuses: Record<string, number> }[];
   // What the empire gets besides (Church Property's gold, Ceremonial Burial's happiness).

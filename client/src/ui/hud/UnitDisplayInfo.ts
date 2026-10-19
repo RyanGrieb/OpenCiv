@@ -379,6 +379,12 @@ export class UnitDisplayInfo extends ActorGroup {
             return;
           }
 
+          // Found Religion opens the religion founding window, which sends the choice itself.
+          if (action.getName() === "found_religion") {
+            Game.getInstance().getCurrentSceneAs<InGameScene>().toggleReligionFoundingUI(this.unit.getID());
+            return;
+          }
+
           // Skip Turn moves the selection on to the next unit needing orders, which the client tracks.
           if (action.getName() === "skip_turn") {
             Game.getInstance().getCurrentSceneAs<InGameScene>().getClientPlayer().skipSelectedUnitTurn();

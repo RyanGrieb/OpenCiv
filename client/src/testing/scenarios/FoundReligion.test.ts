@@ -4,17 +4,17 @@ import { WebsocketClient } from "../../network/Client";
 import { TestUtils } from "../TestUtils";
 
 const PANTHEON_COST = 10;
-const RELIGION_COST = 200;
+const PROPHET_COST = 200;
 const RELIGION = "Islam";
 const FOUNDER_BELIEF = "Initiation Rites";
 const FOLLOWER_BELIEF = "Feed the World";
 const INITIATION_RITES_GOLD = 100;
 
 // Founds a religion against a live server: settles a city on the pantheons map preset with the 210
-// Faith a pantheon and then the world's first religion cost (the startingFaith game option), and
-// founds the Sacred Path pantheon. The turn button then reads Found Religion and opens the religion
-// founding window, where Islam is founded with Initiation Rites, whose 100 Gold arrives for the one
-// city, and Feed the World. Ends on the faith button's religion window showing the religion.
+// Faith a pantheon and then a Great Prophet cost (the startingFaith game option), and founds the Sacred
+// Path pantheon. Ending the turn, a Great Prophet is born in the city; its Found Religion action opens
+// the religion founding window, where Islam is founded with Initiation Rites, whose 100 Gold arrives
+// for the one city, and Feed the World. Ends on the faith button's religion window showing the religion.
 export function setupFoundReligionTest(game: Game) {
     const runner = new TestRunner("FoundReligion");
     const utils = new TestUtils(game);
@@ -22,18 +22,18 @@ export function setupFoundReligionTest(game: Game) {
 
     const me = () => utils.getClientPlayer();
     const scene = () => utils.getInGameScene();
-    const nextTurnText = () => scene().getNextTurnButton().getText();
-    const religionNotification = () => scene().getNotifications().getAll().find((notification) => notification.type === "religion");
+    const prophet = () => me().getUnits().find((unit) => unit.getName() === "Great Prophet");
     const founding = () => scene().getReligionFoundingWindow();
+    const canFound = () => prophet()?.getActions().some((action) => action.getName() === "found_religion" && action.requirementsMet(prophet()));
 
     runner.addStep({
-        name: `Start with ${PANTHEON_COST + RELIGION_COST} Faith, settle a city and found a pantheon`,
+        name: `Start with ${PANTHEON_COST + PROPHET_COST} Faith, settle a city and found a pantheon`,
         action: async () => {
             await utils.ensureInGame({
                 allowBarbarians: false,
                 revealMap: true,
                 mapPreset: "pantheons",
-                startingFaith: PANTHEON_COST + RELIGION_COST
+                startingFaith: PANTHEON_COST + PROPHET_COST
             });
             const settler = await utils.findUnitWithAction("settle");
             WebsocketClient.sendMessage({
@@ -46,24 +46,25 @@ export function setupFoundReligionTest(game: Game) {
             await utils.waitUntil(() => me().getCities().length > 0, 5000, "City to be founded");
             scene().focusOnTile(me().getCities()[0].getTile(), 3);
             WebsocketClient.sendMessage({ event: "foundPantheon", name: "Sacred Path" });
-            await utils.waitUntil(() => me().getFaithBreakdown().pantheon?.name === "Sacred Path", 5000, "The pantheon to be founded");
+            await utils.waitUntil(() => me().getAccumulatedStat("faith") === PROPHET_COST, 5000, "The pantheon to be founded");
         },
-        verification: () => me().getAccumulatedStat("faith") === RELIGION_COST
+        verification: () => !prophet() && scene().getNextTurnButton().getText() !== "Found Religion"
     });
 
     runner.addStep({
-        name: "The faith is enough for a religion: a notification says so, and the turn button reads Found Religion",
+        name: "End the turn: a Great Prophet is born in the city, spending the Faith, and can found a religion there",
         action: async () => {
-            await utils.skipIdleUnits();
-            await utils.waitUntil(() => nextTurnText() === "Found Religion", 5000, "The turn button to read Found Religion");
+            WebsocketClient.sendMessage({ event: "nextTurnRequest", value: true });
+            await utils.waitUntil(() => !!prophet() && canFound(), 8000, "A Great Prophet to be born");
+            scene().focusOnTile(prophet().getTile(), 3);
         },
-        verification: () => !!religionNotification() && nextTurnText() === "Found Religion"
+        verification: () => canFound() && me().getAccumulatedStat("faith") < PROPHET_COST
     });
 
     runner.addStep({
-        name: "Click Found Religion: the window lists 13 religions, 9 founder beliefs and 16 follower beliefs",
+        name: "Found Religion with the prophet: the window lists 13 religions, 9 founder beliefs and 16 follower beliefs",
         action: async () => {
-            scene().getNextTurnButton().call("clicked");
+            scene().toggleReligionFoundingUI(prophet().getID());
             await utils.waitUntil(() => founding()?.getChoices().religion.length === 13, 5000, "The religion founding window to fill");
         },
         verification: () =>
@@ -87,18 +88,14 @@ export function setupFoundReligionTest(game: Game) {
     });
 
     runner.addStep({
-        name: `Found Religion: the window closes, the Faith is spent, and ${FOUNDER_BELIEF} pays ${INITIATION_RITES_GOLD} Gold for the city`,
+        name: `Found Religion: the window closes, the prophet is used up, and ${FOUNDER_BELIEF} pays ${INITIATION_RITES_GOLD} Gold for the city`,
         action: async () => {
             goldBefore = me().getAccumulatedStat("gold");
             founding().found();
-            await utils.waitUntil(() => me().getFaithBreakdown().religion === RELIGION, 5000, "The religion to be founded");
+            await utils.waitUntil(() => !prophet(), 5000, "The prophet to be used up");
+            await utils.waitUntil(() => me().getAccumulatedStat("gold") === goldBefore + INITIATION_RITES_GOLD, 5000, "The gold to arrive");
         },
-        verification: () =>
-            !founding() &&
-            me().getAccumulatedStat("faith") === 0 &&
-            me().getAccumulatedStat("gold") === goldBefore + INITIATION_RITES_GOLD &&
-            !religionNotification() &&
-            nextTurnText() !== "Found Religion"
+        verification: () => !founding() && !prophet() && me().getAccumulatedStat("gold") === goldBefore + INITIATION_RITES_GOLD
     });
 
     runner.addStep({

@@ -1,49 +1,36 @@
+import { Strings } from "../../util/Strings";
 import { Tooltip, TooltipLine } from "../components/Tooltip";
+import { GoldEntry } from "./GoldTooltip";
 
 // Sent by the server with every updateTotalStats (see server PlayerReligion.getFaithBreakdown()).
 export interface FaithBreakdown {
-  pantheon: { name: string; description: string } | null;
-  pantheonCost: number;
-  pantheonsLeft: number;
-  religion: string | null;
-  religionCost: number;
-  religionsLeft: number;
+  income: GoldEntry[];
+  net: number;
 }
 
 /**
- * The box that drops down from the status bar's faith while the mouse is over it: the pantheon and
- * religion the player founded, or the faith the next one costs.
+ * The box that drops down from the status bar's faith while the mouse is over it: where the faith
+ * comes from each turn, laid out like the gold tooltip. The religion itself is in the faith button's window.
  */
 export class FaithTooltip extends Tooltip {
-  private static readonly BONUS_COLOR = "#8ee07a";
+  private static readonly INCOME_COLOR = "#8ee07a";
 
   /** Builds the tooltip with its top-left corner at (x, y). */
-  public static async create(x: number, y: number, faith: number, breakdown: FaithBreakdown): Promise<FaithTooltip> {
+  public static async create(x: number, y: number, breakdown: FaithBreakdown): Promise<FaithTooltip> {
     const tooltip = new FaithTooltip(x, y);
-    await tooltip.layout(FaithTooltip.getLines(faith, breakdown));
+    await tooltip.layout(FaithTooltip.getLines(breakdown));
     return tooltip;
   }
 
-  private static getLines(faith: number, breakdown: FaithBreakdown): TooltipLine[] {
-    if (breakdown.pantheon) {
-      return [
-        { text: `Pantheon: ${breakdown.pantheon.name}`, color: "white" },
-        { text: breakdown.pantheon.description, color: FaithTooltip.BONUS_COLOR },
-        FaithTooltip.getReligionLine(faith, breakdown)
-      ];
-    }
-    if (breakdown.pantheonsLeft < 1) return [{ text: "Every pantheon has been founded", color: "gray" }];
+  private static getLines(breakdown: FaithBreakdown): TooltipLine[] {
+    const lines: TooltipLine[] = [{ text: "Income", color: "white" }];
 
-    return [
-      { text: "No pantheon yet", color: "white" },
-      { text: `Found one at ${breakdown.pantheonCost} Faith (you have ${faith})`, color: "white" }
-    ];
-  }
+    if (breakdown.income.length === 0) lines.push({ text: "None", color: "gray", indent: true });
+    breakdown.income.forEach((entry) =>
+      lines.push({ text: `+${entry.amount} from ${entry.source}`, color: FaithTooltip.INCOME_COLOR, indent: true })
+    );
 
-  private static getReligionLine(faith: number, breakdown: FaithBreakdown): TooltipLine {
-    if (breakdown.religion) return { text: `Religion: ${breakdown.religion}`, color: "white" };
-    if (breakdown.religionsLeft < 1) return { text: "Every religion has been founded", color: "gray" };
-
-    return { text: `Found a religion at ${breakdown.religionCost} Faith (you have ${faith})`, color: "white" };
+    lines.push({ text: `${Strings.convertToStatUnit(breakdown.net)} faith per turn`, color: "white" });
+    return lines;
   }
 }
