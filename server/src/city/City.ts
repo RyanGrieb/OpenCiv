@@ -13,6 +13,7 @@ import { BuildingEffects } from "./BuildingEffects";
 import { BuildingCategory, Wonders } from "./Wonders";
 import { CityCombat } from "./CityCombat";
 import { PlayerDiplomacy } from "../diplomacy/PlayerDiplomacy";
+import { FaithPurchase } from "../economy/FaithPurchase";
 import { GoldPurchase } from "../economy/GoldPurchase";
 
 export interface CityStats extends StatValues {
@@ -49,6 +50,8 @@ export interface ProductionOption {
   // On the copies sent to the client (see toClientOption): what buying it outright costs, absent when it
   // can't be bought, and how many turns the city's production would take to finish it.
   goldCost?: number;
+  // On the faith purchase list's copies: what buying it with faith costs.
+  faithCost?: number;
   turns?: number;
   // On the copies in the production and purchase lists: the building's stats, for the client's tooltip.
   building?: BuildingData;
@@ -270,7 +273,9 @@ export class City {
         const player = Game.getInstance().getPlayerFromWebsocket(websocket);
         if (this.name !== data["cityName"] || this.player !== player) return;
 
-        player.sendNetworkEvent({ event: "updatePurchaseOptions", cityName: this.name, ...this.getPurchaseOptions() });
+        const currency = data["currency"] === "faith" ? "faith" : "gold";
+        const options = currency === "faith" ? this.getFaithPurchaseOptions() : this.getPurchaseOptions();
+        player.sendNetworkEvent({ event: "updatePurchaseOptions", cityName: this.name, currency, ...options });
       }
     });
 
@@ -282,6 +287,11 @@ export class City {
       callback: (data, websocket) => {
         const player = Game.getInstance().getPlayerFromWebsocket(websocket);
         if (this.name !== data["cityName"] || this.player !== player) return;
+
+        if (data["currency"] === "faith") {
+          if (this.purchaseWithFaith(data["type"], data["name"])) this.sendStatUpdate(player);
+          return;
+        }
 
         // Looked up server-side, like addToProductionQueue, so it's something the city can build.
         const option = City.allOptions(this.getProductionOptions({ includeQueuedBuildings: true })).find(
@@ -1224,6 +1234,45 @@ export class City {
     const buyable = (option: ProductionOption) => option.goldCost !== undefined;
 
     return { units: units.map(priced).filter(buyable), buildings: buildings.map(priced).filter(buyable) };
+  }
+
+  /**
+   * What faith can buy here: the buildings the city's religion unlocks (Cathedrals and the like) that it
+   * doesn't have yet, and with Holy Warriors the pre-Industrial land military units it could train.
+   */
+  private getFaithPurchaseOptions(): { units: ProductionOption[]; buildings: ProductionOption[] } {
+    const buildings = Beliefs.getFaithBuildings(this)
+      .filter(({ building }) => !this.hasBuilding(building))
+      .map(({ building, faith_cost }) => ({
+        type: "building" as const,
+        name: building,
+        cost: 0,
+        faithCost: faith_cost,
+        building: Building.createFromName(building)?.toJSON()
+      }));
+    const unitData = (name: string) => Unit.getAllUnitData().find((data) => data.name === name);
+    const units = this.getProductionOptions()
+      .units.filter((option) => Beliefs.canBuyUnitWithFaith(this, unitData(option.name)))
+      .map((option) => ({ ...option, faithCost: FaithPurchase.getUnitCost(option.cost) }));
+
+    return { units, buildings };
+  }
+
+  // Buys it with the owner's faith and finishes it now. False if faith can't buy it here or there isn't
+  // enough. A bought unit can't move until next turn.
+  private purchaseWithFaith(type: string, name: string): boolean {
+    const { units, buildings } = this.getFaithPurchaseOptions();
+    const item = [...units, ...buildings].find((option) => option.type === type && option.name === name);
+    if (!item || (this.player.getAccumulatedStats()["faith"] ?? 0) < item.faithCost) return false;
+
+    const spawnTile = item.type === "unit" ? this.getUnitSpawnTile(item.name) : undefined;
+    if (item.type === "unit" && !spawnTile) return false;
+
+    this.player.addToAccumulatedStat("faith", -item.faithCost);
+    if (item.type === "building") this.addBuilding(item.name);
+    if (spawnTile) this.spawnUnit(item.name, spawnTile, { availableMovement: 0 });
+    this.player.sendTotalStatsUpdate();
+    return true;
   }
 
   // The queued entry for this item that's furthest along, if it's queued at all.

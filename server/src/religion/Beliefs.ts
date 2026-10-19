@@ -8,7 +8,7 @@ import type { Player } from "../Player";
 import { TechEffects } from "../research/TechEffects";
 import { Technology } from "../research/Technology";
 import type { CombatModifier } from "../unit/Combat";
-import type { Unit } from "../unit/Unit";
+import type { Unit, UnitYMLTypeData } from "../unit/Unit";
 
 // Extra yields a belief gives some tiles of its owner's cities. Every field given has to match.
 export interface BeliefTileYield {
@@ -55,6 +55,8 @@ export interface BeliefEffectsData {
   happiness_per_cities?: { per: number };
   gold_per_followers?: { per: number };
   gold_on_conversion?: number;
+  faith_buildings?: { building: string; faith_cost: number }[];
+  faith_units?: { before_era: string };
 }
 
 // A pantheon, or a religion's founder or follower belief.
@@ -211,6 +213,23 @@ export class Beliefs {
       (tile) => tile?.getCity()?.getPlayer() === unit.getPlayer()
     );
     return nearOwnCity ? bonus : 0;
+  }
+
+  // The buildings the city's beliefs let it buy with faith (Cathedrals, Pagodas and the like), with prices.
+  public static getFaithBuildings(city: City): { building: string; faith_cost: number }[] {
+    return Beliefs.getBeliefsOf(city.getPlayer()).flatMap((belief) => belief.effects.faith_buildings ?? []);
+  }
+
+  // Holy Warriors: whether the city's beliefs let it buy this unit with faith - a land military unit from
+  // before the belief's era.
+  public static canBuyUnitWithFaith(city: City, unit: UnitYMLTypeData): boolean {
+    if (unit.is_utility || (unit.domain ?? "land") !== "land" || !unit.combat_strength) return false;
+
+    const eras = Technology.getAllEras().map((era) => era.id);
+    const unitEra = eras.indexOf(Technology.getEraOf(unit.required_tech ? [unit.required_tech] : []).id);
+    return Beliefs.getBeliefsOf(city.getPlayer())
+      .map((belief) => belief.effects.faith_units)
+      .some((effect) => effect && unitEra < eras.indexOf(effect.before_era));
   }
 
   // Initiation Rites: the gold for a city that has just come to follow the player's religion.

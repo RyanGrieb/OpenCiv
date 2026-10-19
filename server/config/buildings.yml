@@ -882,3 +882,32 @@ buildings:
     stats:
       - culture: 3
       - happiness: 4
+  # Religious buildings, never built: a city whose religion has the follower belief that unlocks one buys it
+  # with faith (see `faith_buildings` in config/religions.yml). Brave New World's yields as best remembered.
+  - name: Cathedral
+    asset_name: BUILDING_CATHEDRAL
+    maintenance: 3
+    not_yet:
+      - A slot for a Great Work of Art
+    stats:
+      - faith: 3
+      - happiness: 1
+  - name: Monastery
+    asset_name: BUILDING_MONASTERY
+    not_yet:
+      - +1 Faith and +1 Culture from each worked Incense and Wine
+    stats:
+      - faith: 2
+      - culture: 2
+  - name: Mosque
+    asset_name: BUILDING_MOSQUE
+    stats:
+      - faith: 3
+      - culture: 2
+      - happiness: 1
+  - name: Pagoda
+    asset_name: BUILDING_PAGODA
+    stats:
+      - faith: 2
+      - culture: 2
+      - happiness: 2

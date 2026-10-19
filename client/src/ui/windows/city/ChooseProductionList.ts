@@ -11,8 +11,8 @@ import { BuildingTooltip } from "./BuildingTooltip";
 import { CityScreen } from "./CityScreen";
 
 // "produce" lists what the city can queue, with the turns each would take; "purchase" lists what gold
-// can buy, with each price.
-export type ProductionListMode = "produce" | "purchase";
+// can buy, and "faith" what faith can buy, with each price.
+export type ProductionListMode = "produce" | "purchase" | "faith";
 
 // Takes the stats window's place while the player picks something to produce or buy. Clicking a row
 // queues it or, in the purchase list, buys it.
@@ -99,8 +99,8 @@ export class ChooseProductionList extends ListBox {
     const rowY = this.getNextRowPosition().y;
     const rowHeight = CityScreen.PRODUCTION_ROW_HEIGHT;
     const textX = rowX + 8 + UITheme.ICON_SIZE + 8;
-    const purchasing = this.mode === "purchase";
-    const affordable = !purchasing || this.getGold() >= option.goldCost;
+    const purchasing = this.mode !== "produce";
+    const affordable = !purchasing || this.getMoney() >= this.getPrice(option);
 
     const row = this.addRow({
       text: purchasing ? option.name : ChooseProductionList.getProduceText(option),
@@ -128,6 +128,7 @@ export class ChooseProductionList extends ListBox {
 
       WebsocketClient.sendMessage({
         event: purchasing ? "purchaseProductionOption" : "addToProductionQueue",
+        currency: this.mode === "faith" ? "faith" : "gold",
         cityName: this.city.getName(),
         type: option.type,
         name: option.name
@@ -174,11 +175,11 @@ export class ChooseProductionList extends ListBox {
     this.tooltip = undefined;
   }
 
-  // The price and a gold icon at the row's right edge, the price greyed out while it's unaffordable.
+  // The price and a gold or faith icon at the row's right edge, the price greyed out while it's unaffordable.
   private createPrice(option: ProductionQueueItem, rowX: number, rowY: number, affordable: boolean): Actor[] {
     const rowCenterY = rowY + CityScreen.PRODUCTION_ROW_HEIGHT / 2;
     const iconX = rowX + ChooseProductionList.WIDTH - UITheme.ICON_SIZE - 8;
-    const text = `${option.goldCost}`;
+    const text = `${this.getPrice(option)}`;
     const { width: textWidth, height: textHeight } = Game.getInstance().measureText(text, UITheme.FONT);
 
     return [
@@ -191,7 +192,7 @@ export class ChooseProductionList extends ListBox {
       }),
       new Actor({
         image: Game.getInstance().getImage(GameImage.SPRITESHEET),
-        spriteRegion: SpriteRegion.ICON_GOLD,
+        spriteRegion: this.mode === "faith" ? SpriteRegion.ICON_FAITH : SpriteRegion.ICON_GOLD,
         x: iconX,
         y: rowCenterY - UITheme.ICON_SIZE / 2,
         z: CityScreen.Z,
@@ -202,7 +203,13 @@ export class ChooseProductionList extends ListBox {
     ];
   }
 
-  private getGold(): number {
-    return Game.getInstance().getCurrentSceneAs<InGameScene>().getClientPlayer().getAccumulatedStat("gold");
+  private getPrice(option: ProductionQueueItem): number {
+    return this.mode === "faith" ? option.faithCost : option.goldCost;
+  }
+
+  // The gold or faith the player has to buy with.
+  private getMoney(): number {
+    const stat = this.mode === "faith" ? "faith" : "gold";
+    return Game.getInstance().getCurrentSceneAs<InGameScene>().getClientPlayer().getAccumulatedStat(stat);
   }
 }

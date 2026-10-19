@@ -74,7 +74,8 @@ export class CityDisplayInfo extends ActorGroup {
       eventName: "updatePurchaseOptions",
       parentObject: this,
       callback: (data: any) => {
-        if (data["cityName"] !== this.city.getName() || this.listMode !== "purchase") return;
+        const mode = data["currency"] === "faith" ? "faith" : "purchase";
+        if (data["cityName"] !== this.city.getName() || this.listMode !== mode) return;
         this.showChooseProductionList(data);
       }
     });
@@ -128,7 +129,7 @@ export class CityDisplayInfo extends ActorGroup {
     this.showProductionQueueWindow();
 
     const event = mode === "produce" ? "requestProductionOptions" : "requestPurchaseOptions";
-    WebsocketClient.sendMessage({ event, cityName: this.city.getName() });
+    WebsocketClient.sendMessage({ event, cityName: this.city.getName(), currency: mode === "faith" ? "faith" : "gold" });
   }
 
   private closeList() {

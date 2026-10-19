@@ -14,6 +14,9 @@
 #   happiness_per_cities            - 1 happiness for every `per` cities following it.
 #   gold_per_followers              - 1 gold each turn for every `per` followers.
 #   gold_on_conversion              - gold once for each city that comes to follow it.
+#   faith_buildings                 - [{ building, faith_cost }]: a following city may buy these with faith.
+#   faith_units                     - { before_era }: a following city may buy land military units from
+#                                     eras before this one with faith (see FaithPurchase).
 religions:
   - Buddhism
   - Christianity
@@ -91,7 +94,9 @@ follower_beliefs:
   - name: Cathedrals
     text: "Use Faith to buy Cathedrals"
     description: "Use Faith to purchase Cathedrals"
-    not_yet: [Buying with Faith and the Cathedral aren't in the game yet, so this gives nothing]
+    effects:
+      faith_buildings:
+        - { building: Cathedral, faith_cost: 200 }
   - name: Choral Music
     yields: { culture: 2 }
     text: "from Temples in cities with 5 followers"
@@ -125,7 +130,8 @@ follower_beliefs:
   - name: Holy Warriors
     text: "Use Faith to buy pre-Industrial land units"
     description: "Use Faith to purchase pre-Industrial land units"
-    not_yet: [Buying with Faith isn't in the game yet, so this gives nothing]
+    effects:
+      faith_units: { before_era: industrial }
   - name: Liturgical Drama
     yields: { faith: 1 }
     text: "from Amphitheaters with 3 followers"
@@ -138,15 +144,21 @@ follower_beliefs:
   - name: Monasteries
     text: "Use Faith to buy Monasteries"
     description: "Use Faith to purchase Monasteries"
-    not_yet: [Buying with Faith and the Monastery aren't in the game yet, so this gives nothing]
+    effects:
+      faith_buildings:
+        - { building: Monastery, faith_cost: 200 }
   - name: Mosques
     text: "Use Faith to buy Mosques"
     description: "Use Faith to purchase Mosques"
-    not_yet: [Buying with Faith and the Mosque aren't in the game yet, so this gives nothing]
+    effects:
+      faith_buildings:
+        - { building: Mosque, faith_cost: 200 }
   - name: Pagodas
     text: "Use Faith to buy Pagodas"
     description: "Use Faith to purchase Pagodas"
-    not_yet: [Buying with Faith and the Pagoda aren't in the game yet, so this gives nothing]
+    effects:
+      faith_buildings:
+        - { building: Pagoda, faith_cost: 200 }
   - name: Peace Gardens
     yields: { happiness: 2 }
     text: "from Gardens"

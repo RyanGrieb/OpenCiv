@@ -178,8 +178,7 @@ export class CityProductionQueueWindow extends ActorGroup {
   }
 
   // "Produce" (or "Add to Queue") across the top, with a gold "Buy" and a faith "Buy" side by side below it.
-  // Produce and the Buy buttons carry their icon on the left; Add to Queue and Cancel have none. Buying with
-  // faith doesn't exist yet, so the faith Buy does nothing.
+  // Produce and the Buy buttons carry their icon on the left; Add to Queue and Cancel have none.
   private addBottomButtons(listMode: ProductionListMode | undefined, onToggleList: (mode: ProductionListMode) => void) {
     const gap = CityProductionQueueWindow.BUTTON_GAP;
     const fullWidth = CityProductionQueueWindow.WIDTH - gap * 2;
@@ -210,7 +209,14 @@ export class CityProductionQueueWindow extends ActorGroup {
       )
     );
     this.addActor(
-      this.createBottomButton("Buy", SpriteRegion.ICON_FAITH, leftX + halfWidth + gap, buyY, halfWidth, () => {})
+      this.createBottomButton(
+        listMode === "faith" ? "Cancel" : "Buy",
+        listMode === "faith" ? undefined : SpriteRegion.ICON_FAITH,
+        leftX + halfWidth + gap,
+        buyY,
+        halfWidth,
+        () => onToggleList("faith")
+      )
     );
   }
 

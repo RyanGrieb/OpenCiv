@@ -279,4 +279,30 @@ describe("Religions", () => {
       expect(Beliefs.getFoodRequiredToGrow(115, player)).toBe(115);
     });
   });
+
+  describe("faith purchasing", () => {
+    const unit = (name: string) => Unit.getAllUnitData().find((data) => data.name === name);
+
+    it("unlocks a faith building with each of Cathedrals, Monasteries, Mosques and Pagodas", () => {
+      const player = founder();
+      const city = player.ownCities[0];
+      found(player, "Islam", "Tithe", "Mosques");
+
+      expect(Beliefs.getFaithBuildings(city)).toEqual([{ building: "Mosque", faith_cost: 200 }]);
+    });
+
+    it("lets Holy Warriors buy pre-Industrial land military units, and nothing else", () => {
+      const player = founder();
+      const city = player.ownCities[0];
+      expect(Beliefs.canBuyUnitWithFaith(city, unit("Swordsman"))).toBe(false);
+
+      found(player, "Islam", "Tithe", "Holy Warriors");
+
+      expect(Beliefs.canBuyUnitWithFaith(city, unit("Warrior"))).toBe(true);
+      expect(Beliefs.canBuyUnitWithFaith(city, unit("Swordsman"))).toBe(true);
+      expect(Beliefs.canBuyUnitWithFaith(city, unit("Rifleman"))).toBe(false);
+      expect(Beliefs.canBuyUnitWithFaith(city, unit("Settler"))).toBe(false);
+      expect(Beliefs.canBuyUnitWithFaith(city, unit("Trireme"))).toBe(false);
+    });
+  });
 });
