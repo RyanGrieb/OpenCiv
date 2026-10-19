@@ -4,18 +4,17 @@ import { SceneObject } from "../scene/SceneObject";
 
 // One of the picture's canvases, over a square of the world, and whether a chunk on it changed since it was drawn.
 interface Page {
-  context: CanvasRenderingContext2D;
+  ground: CanvasRenderingContext2D;
+  standing: CanvasRenderingContext2D;
   dirty: boolean;
 }
 
 /**
  * The map's chunks as the flat map shows them - terrain, what lies on the ground, what stands on it -
  * painted together onto a few big canvases (pages), each over a square of the world, so that a frame
- * draws one picture per page in view rather than every chunk of every layer: a few draws instead of
- * hundreds, more so zoomed out. Pixel for pixel what drawing the chunks would show, as nothing else
- * is drawn between them (they lie under the fog of war, z 1, and all else). A page is painted again
- * from its chunks, in their order, only once one of them comes, goes or changes, and only once it's
- * in view. The chunks stay in the scene, for the globe, which draws them itself.
+ * draws a few pictures instead of hundreds of chunks, more so zoomed out. A page is painted again from
+ * its chunks, in z order, only once one changes and only once it's in view. The chunks stay in the scene
+ * for the globe, which draws them itself.
  */
 export class FlatMapPicture extends Actor {
   // A page's side, in world pixels.
@@ -25,7 +24,7 @@ export class FlatMapPicture extends Actor {
   private static readonly OVERLAP = 1;
   private static readonly covered = new WeakSet<SceneObject>();
 
-  private readonly chunks = new Set<Actor>();
+  private readonly chunks = new Map<Actor, boolean>();
   private readonly pages = new Map<string, Page>();
   private sorted: Actor[] | undefined;
 
@@ -43,8 +42,8 @@ export class FlatMapPicture extends Actor {
   }
 
   /** Paints a chunk into the picture, in its z order with the others. */
-  public addChunk(chunk: Actor) {
-    this.chunks.add(chunk);
+  public addChunk(chunk: Actor, standing = false) {
+    this.chunks.set(chunk, standing);
     FlatMapPicture.covered.add(chunk);
     this.sorted = undefined;
     this.markUnder(chunk);
@@ -76,18 +75,25 @@ export class FlatMapPicture extends Actor {
     const bottom = top + canvasContext.canvas.height / scale;
 
     const page = FlatMapPicture.PAGE;
-    canvasContext.save();
-    game.applyCameraTransform(canvasContext);
+    const visiblePages: { page: Page; x: number; y: number }[] = [];
     for (let row = Math.max(0, Math.floor(top / page)); row * page < bottom; row++) {
       for (let column = Math.max(0, Math.floor(left / page)); column * page < right; column++) {
         const drawn = this.pages.get(FlatMapPicture.keyOf(column, row));
         if (!drawn) continue;
 
         if (drawn.dirty) this.paint(drawn, column, row);
-        const overlap = FlatMapPicture.OVERLAP;
-        canvasContext.drawImage(drawn.context.canvas, column * page - overlap, row * page - overlap);
+        visiblePages.push({
+          page: drawn,
+          x: column * page - FlatMapPicture.OVERLAP,
+          y: row * page - FlatMapPicture.OVERLAP
+        });
       }
     }
+
+    canvasContext.save();
+    game.applyCameraTransform(canvasContext);
+    for (const visible of visiblePages) canvasContext.drawImage(visible.page.ground.canvas, visible.x, visible.y);
+    for (const visible of visiblePages) canvasContext.drawImage(visible.page.standing.canvas, visible.x, visible.y);
     canvasContext.restore();
   }
 
@@ -109,30 +115,42 @@ export class FlatMapPicture extends Actor {
         const canvas = document.createElement("canvas");
         canvas.width = page + overlap * 2;
         canvas.height = page + overlap * 2;
-        this.pages.set(key, { context: canvas.getContext("2d"), dirty: true });
+        const standingCanvas = document.createElement("canvas");
+        standingCanvas.width = page + overlap * 2;
+        standingCanvas.height = page + overlap * 2;
+        this.pages.set(key, {
+          ground: canvas.getContext("2d"),
+          standing: standingCanvas.getContext("2d"),
+          dirty: true
+        });
       }
     }
   }
 
-  // Paints a page from scratch: every chunk over it, in the order the scene would draw them.
+  // Paints a page's ground and standing chunks separately, leaving city borders sharp between them.
   private paint(page: Page, column: number, row: number) {
-    this.sorted ??= [...this.chunks].sort((a, b) => a.getZIndex() - b.getZIndex());
+    this.sorted ??= [...this.chunks.keys()].sort((a, b) => a.getZIndex() - b.getZIndex());
     const overlap = FlatMapPicture.OVERLAP;
     const side = FlatMapPicture.PAGE + overlap * 2;
     const [pageX, pageY] = [column * FlatMapPicture.PAGE - overlap, row * FlatMapPicture.PAGE - overlap];
-    const context = page.context;
-    context.setTransform(1, 0, 0, 1, 0, 0);
-    context.clearRect(0, 0, side, side);
-    context.imageSmoothingEnabled = false;
-    context.setTransform(1, 0, 0, 1, -pageX, -pageY);
-    for (const chunk of this.sorted) {
-      const [x, y, width, height] = [chunk.getX(), chunk.getY(), chunk.getWidth(), chunk.getHeight()];
-      if (x >= pageX + side || y >= pageY + side || x + width <= pageX || y + height <= pageY) continue;
+    for (const [context, standing] of [
+      [page.ground, false],
+      [page.standing, true]
+    ] as const) {
+      context.setTransform(1, 0, 0, 1, 0, 0);
+      context.clearRect(0, 0, side, side);
+      context.imageSmoothingEnabled = false;
+      context.setTransform(1, 0, 0, 1, -pageX, -pageY);
+      for (const chunk of this.sorted) {
+        if (this.chunks.get(chunk) !== standing) continue;
+        const [x, y, width, height] = [chunk.getX(), chunk.getY(), chunk.getWidth(), chunk.getHeight()];
+        if (x >= pageX + side || y >= pageY + side || x + width <= pageX || y + height <= pageY) continue;
 
-      context.globalAlpha = chunk.getTransparency();
-      context.drawImage(chunk.getImage(), x, y, width, height);
+        context.globalAlpha = chunk.getTransparency();
+        context.drawImage(chunk.getImage(), x, y, width, height);
+      }
+      context.globalAlpha = 1;
     }
-    context.globalAlpha = 1;
     page.dirty = false;
   }
 }

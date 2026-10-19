@@ -28,10 +28,11 @@ export class GlobeLines {
   private drawn: number | undefined;
 
   /** `renderOrder` places the strips among what else is drawn over the ground - see OverStanding. */
-  constructor(projection: GlobeProjection, renderOrder: number) {
+  constructor(projection: GlobeProjection, renderOrder: number, depthTest = false) {
     this.projection = projection;
     const material = new THREE.MeshLambertMaterial({ vertexColors: true });
     OverStanding.setUp(material);
+    material.depthTest = depthTest;
     // Each strip's pixels fade out over the last pixel to its edges (where `across` reaches 1 either
     // side), half covered right at them, as a canvas smooths a line's edges; one narrower than a
     // pixel fades as much as it's narrower.

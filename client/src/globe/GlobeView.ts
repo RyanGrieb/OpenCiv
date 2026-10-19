@@ -98,6 +98,7 @@ export class GlobeView {
   private readonly lines: GlobeLines;
   // Lines the flat map draws under its units (by their z), drawn under units here too.
   private readonly linesUnderUnits: GlobeLines;
+  private readonly cityLines: GlobeLines;
   private readonly decals: GlobeDecals;
   private readonly sprites: GlobeSprites;
   private readonly bandUniforms = {
@@ -170,7 +171,8 @@ export class GlobeView {
     // Over the hovered tile (see GlobeDecals), as their z puts them on the flat map.
     this.lines = new GlobeLines(this.projection, OverStanding.RENDER_ORDER + 1);
     this.linesUnderUnits = new GlobeLines(this.projection, OverStanding.UNDER_UNITS_RENDER_ORDER);
-    this.planet.add(this.lines.mesh, this.linesUnderUnits.mesh);
+    this.cityLines = new GlobeLines(this.projection, OverStanding.CITY_BORDER_RENDER_ORDER, true);
+    this.planet.add(this.lines.mesh, this.linesUnderUnits.mesh, this.cityLines.mesh);
     this.decals = new GlobeDecals(this.projection);
     this.planet.add(this.decals.group);
     this.sprites = new GlobeSprites(this.projection, this.planet, maxTextureSize);
@@ -252,8 +254,9 @@ export class GlobeView {
       useView
     );
     const lines = objects.filter((object): object is Line => object instanceof Line);
-    this.lines.update(lines.filter((line) => line.getZIndex() >= Unit.MAP_Z));
-    this.linesUnderUnits.update(lines.filter((line) => line.getZIndex() < Unit.MAP_Z));
+    this.lines.update(lines.filter((line) => !line.isCityOutline() && line.getZIndex() >= Unit.MAP_Z));
+    this.linesUnderUnits.update(lines.filter((line) => !line.isCityOutline() && line.getZIndex() < Unit.MAP_Z));
+    this.cityLines.update(lines.filter((line) => line.isCityOutline()));
     this.sprites.update(objects, zoom * this.renderer.getPixelRatio(), this.camera, useView);
     this.worldView = this.ground.view;
   }
@@ -311,6 +314,7 @@ export class GlobeView {
     this.ground.dispose();
     this.lines.dispose();
     this.linesUnderUnits.dispose();
+    this.cityLines.dispose();
     this.decals.dispose();
     this.sprites.dispose();
     this.renderer.dispose();

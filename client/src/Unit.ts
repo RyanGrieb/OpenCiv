@@ -230,8 +230,8 @@ export class Unit extends ActorGroup {
   // Local child z-order (independent of the group's scene-level z): the sprite must
   // always draw above the selection-tile graphic, never the reverse.
   private static readonly UNIT_SPRITE_Z = 1;
-  // Where units sit among the map's scene objects: over the selected unit's outline, under the hovered
-  // tile's and the map's other lines.
+  // Where units sit among the map's scene objects: over the selected unit's outline, hovered tile and
+  // city borders, under movement paths and other map lines.
   public static readonly MAP_Z = 2;
   private static readonly SELECTION_TILE_Z = 0;
   // The health bubble, civ icon and status icons sit above everything else on the map (city borders,

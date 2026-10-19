@@ -11,7 +11,7 @@ export class HoveredTile extends Tile {
     super({
       x: x,
       y: y,
-      z: 2,
+      z: 1.6,
       gridX: 0, //Grid values don't matter.
       gridY: 0,
       tileTypes: ["hovered"],

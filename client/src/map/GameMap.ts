@@ -127,6 +127,8 @@ export class GameMap {
   // farms, roads, ores), then what stands up off it (trees, resources, improvements) - see rebuildChunkVisuals().
   private static readonly GROUND_LAYER_Z = 0.5;
   private static readonly STANDING_LAYER_Z = 0.625;
+  // City borders render over territory fills (1.5) but under units (2).
+  private static readonly CITY_OUTLINE_Z = 1.75;
   // Each later chunk row of a layer sorts above the one before, within this much z.
   private static readonly LAYER_ROWS_Z = 0.125;
   // The terrain whose sprite is peaks painted on rock, which stand up on the globe - see MountainPeaks.
@@ -1052,7 +1054,7 @@ export class GameMap {
     // Explicit so the fog layer (z 1) reliably sorts above the map: an undefined z doesn't compare.
     merged.setZValue(z);
     scene.addActor(merged);
-    this.flatPicture?.addChunk(merged);
+    this.flatPicture?.addChunk(merged, layer === this.standingLayerChunks);
     layer.set(chunkKey, merged);
     this.chunkLayers.set(merged, layer === this.standingLayerChunks ? "standing" : "terrain");
   }
@@ -1126,7 +1128,7 @@ export class GameMap {
     return [chunkGridX, chunkGridY];
   }
 
-  public drawBorder(tiles: Tile[], color: string, z?: number) {
+  public drawBorder(tiles: Tile[], color: string) {
     // Create outline from the outer border tiles.
 
     //1. Get outter tiles
@@ -1157,7 +1159,7 @@ export class GameMap {
         thickness: 1,
         color: color,
         cityOutline: true,
-        z: z
+        z: GameMap.CITY_OUTLINE_Z
       });
     }
   }
@@ -1177,9 +1179,9 @@ export class GameMap {
       outlines.splice(outlines.indexOf(outline), 1); // Remove outline from list (NO CITY OUTLINES EVER!!! UNLESS SPECIFIED)
 
       // Reset any outlines effected by this outline
-      for (const [_, effectedOutlines] of outline.getEffectedOutlines().entries()) {
+      for (const effectedOutlines of outline.getEffectedOutlines().values()) {
         for (const effectedOutline of effectedOutlines) {
-          effectedOutline.line.setZValue(2);
+          effectedOutline.line.setZValue(GameMap.CITY_OUTLINE_Z);
           effectedOutline.line.setToOriginalPositions();
         }
       }
@@ -1227,7 +1229,8 @@ export class GameMap {
         y1: tile.getVectors()[i].y,
         x2: tile.getVectors()[iNext].x,
         y2: tile.getVectors()[iNext].y,
-        z: options.z ?? 2
+        z: options.cityOutline ? GameMap.CITY_OUTLINE_Z : options.z ?? 2,
+        cityOutline: options.cityOutline
       });
 
       // Draw non-city outlines closer to the tile
@@ -1255,7 +1258,7 @@ export class GameMap {
             for (const adjTileOutline of this.tileOutlines.get(adjTile)) {
               if (adjTileOutline.edge === oppositeAdjEdge) {
                 const adjLine = adjTileOutline.line;
-                adjLine.setZValue(outline.line.getZIndex() + 1);
+                adjLine.setZValue(outline.line.getZIndex() + 0.002);
                 this.setLinePositionCloserToTile(adjLine, adjTile, 0.5);
                 adjLine.increaseDistance(0.75); //Increase length of line since the adjLine has more distance to cover
                 outline.addEffectedOutlines(adjTile, adjTileOutline);
@@ -1269,6 +1272,7 @@ export class GameMap {
     for (const outline of tileOutlines) {
       Game.getInstance().getCurrentScene().addLine(outline.line);
     }
+
 
     // Update our tileOutlines map
     if (this.tileOutlines.has(tile)) {

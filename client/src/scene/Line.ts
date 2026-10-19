@@ -11,6 +11,7 @@ export interface LineOptions {
   y2: number;
   z?: number;
   transparency?: number;
+  cityOutline?: boolean;
 }
 
 export class Line implements SceneObject {
@@ -22,6 +23,7 @@ export class Line implements SceneObject {
   private y2: number;
   private z: number;
   private transparency: number;
+  private cityOutline: boolean;
   private originalPositions: Vector[];
 
   constructor(options: LineOptions) {
@@ -33,6 +35,7 @@ export class Line implements SceneObject {
     this.y2 = options.y2;
     this.z = options.z ?? 0;
     this.transparency = options.transparency ?? 1;
+    this.cityOutline = options.cityOutline ?? false;
 
     this.originalPositions = [];
     this.originalPositions.push(new Vector(this.x1, this.y1), new Vector(this.x2, this.y2));
@@ -83,6 +86,10 @@ export class Line implements SceneObject {
 
   public getTransparency() {
     return this.transparency;
+  }
+
+  public isCityOutline(): boolean {
+    return this.cityOutline;
   }
 
   public getZIndex(): number {

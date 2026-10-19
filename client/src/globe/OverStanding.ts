@@ -14,6 +14,8 @@ export class OverStanding {
   // after the map's sprites, but before units, which are drawn after them (see GlobeSprites) so as to
   // stand on them.
   public static readonly MARKING_UNDER_UNITS_RENDER_ORDER = 3;
+  // Over ground markings, including the hovered tile, but depth-tested against standing map sprites.
+  public static readonly CITY_BORDER_RENDER_ORDER = OverStanding.RENDER_ORDER + 0.5;
   public static readonly UNDER_UNITS_RENDER_ORDER = 4;
   public static readonly UNITS_RENDER_ORDER = 5;
 

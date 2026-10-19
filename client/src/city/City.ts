@@ -286,7 +286,7 @@ export class City extends ActorGroup {
       this.territoryOverlays.push(territoryOverlay);
     }
 
-    GameMap.getInstance().drawBorder(this.territory, this.outsideBorderColor, 3);
+    GameMap.getInstance().drawBorder(this.territory, this.outsideBorderColor);
   }
 
   public hasStats(): boolean {
