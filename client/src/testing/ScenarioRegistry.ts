@@ -262,6 +262,10 @@ ScenarioRegistry.register("FaithPurchase", ScenarioCategory.RELIGION, async () =
   const module = await import("./scenarios/FaithPurchase.test");
   return module.setupFaithPurchaseTest;
 });
+ScenarioRegistry.register("ReligionSpread", ScenarioCategory.RELIGION, async () => {
+  const module = await import("./scenarios/ReligionSpread.test");
+  return module.setupReligionSpreadTest;
+});
 ScenarioRegistry.register("Trapping", ScenarioCategory.ECONOMY, async () => {
   const module = await import("./scenarios/Trapping.test");
   return module.setupTrappingTest;

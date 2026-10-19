@@ -10,6 +10,7 @@ import { Line } from "../scene/Line";
 import PriorityQueue from "ts-priority-queue";
 import { AbstractPlayer } from "../player/AbstractPlayer";
 import { City } from "../city/City";
+import { CityReligionInfo } from "../religion/Religions";
 import { TileOutline } from "./TileOutline";
 import { Vector } from "../util/Vector";
 import { MapWrap } from "./MapWrap";
@@ -94,6 +95,8 @@ interface CityData {
   era: string;
   // The strongest walls the city has built ("walls", "castle"), or null.
   walls: string | null;
+  // Who follows what in the city.
+  religion?: CityReligionInfo;
 }
 
 // Server "cityAppearanceChanged": the city's owner entered a new era, or it built walls.
@@ -747,6 +750,7 @@ export class GameMap {
     const existingCity = this.knownCities.get(key);
     if (existingCity) {
       existingCity.setAppearance(cityJSON.era, cityJSON.walls);
+      existingCity.setReligion(cityJSON.religion);
       existingCity.setTerritory(territory);
       existingCity.setCenterTile(centerTile);
       return;
@@ -1339,7 +1343,8 @@ export class GameMap {
       maxHealth: data.maxHealth,
       strength: data.strength,
       era: data.era,
-      walls: data.walls
+      walls: data.walls,
+      religion: data.religion
     });
   }
 }

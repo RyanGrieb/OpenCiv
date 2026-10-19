@@ -1,7 +1,8 @@
 # Civ 5 (Brave New World) religions and beliefs. A player with a pantheon founds a religion once their
-# faith reaches Religions.getCost(), choosing a religion no one else has, one founder belief and one
-# follower belief (none taken by another religion). For now every one of the founder's own cities
-# follows it, with all its citizens as followers; religions don't spread to other civilizations yet.
+# Great Prophet founds it, choosing a religion no one else has, one founder belief and one follower
+# belief (none taken by another religion). Its holy city follows it at once, and it spreads from city
+# to city by pressure (see server/src/religion/CityReligion.ts and Religions.spreadPressure()). A city
+# whose majority follows it gets its follower belief; the founder belief pays its founder.
 #
 # Beliefs are written like config/pantheons.yml's pantheons (yields, text, description, effects,
 # not_yet), with these effects besides the pantheon ones (see BeliefEffectsData in
@@ -14,6 +15,9 @@
 #   happiness_per_cities            - 1 happiness for every `per` cities following it.
 #   gold_per_followers              - 1 gold each turn for every `per` followers.
 #   gold_on_conversion              - gold once for each city that comes to follow it.
+#   happiness_per_foreign_followers - 1 happiness for every `per` followers in non-enemy foreign cities.
+#   faith_per_foreign_city          - faith each turn for each foreign city following it.
+#   culture_per_foreign_followers   - 1 culture each turn for every `per` followers in foreign cities.
 #   faith_buildings                 - [{ building, faith_cost }]: a following city may buy these with faith.
 #   faith_units                     - { before_era }: a following city may buy land military units from
 #                                     eras before this one with faith (see FaithPurchase).
@@ -63,12 +67,14 @@ founder_beliefs:
     yields: { happiness: 1 }
     text: "per 8 followers in friendly foreign cities"
     description: "+1 Happiness for every 8 followers of this religion in non-enemy foreign cities"
-    not_yet: [Religions don't spread to other civilizations yet, so this gives nothing]
+    effects:
+      happiness_per_foreign_followers: { per: 8 }
   - name: Pilgrimage
     yields: { faith: 2 }
     text: "for each foreign city following"
     description: "+2 Faith for each foreign City following this religion"
-    not_yet: [Religions don't spread to other civilizations yet, so this gives nothing]
+    effects:
+      faith_per_foreign_city: 2
   - name: Tithe
     yields: { gold: 1 }
     text: "for every 4 followers"
@@ -79,7 +85,8 @@ founder_beliefs:
     yields: { culture: 1 }
     text: "per 5 followers in other civilizations"
     description: "+1 Culture for every 5 followers of this religion in other civilizations"
-    not_yet: [Religions don't spread to other civilizations yet, so this gives nothing]
+    effects:
+      culture_per_foreign_followers: { per: 5 }
 
 follower_beliefs:
   - name: Asceticism

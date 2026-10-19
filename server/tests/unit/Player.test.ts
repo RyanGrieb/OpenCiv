@@ -35,6 +35,7 @@ describe('Player', () => {
       getTerritory: jest.fn().mockReturnValue([]),
       getPopulation: jest.fn().mockReturnValue(stats.population ?? 0),
       getBuildingHappiness: jest.fn().mockReturnValue(0),
+      getPlayer: () => player,
     } as unknown as jest.Mocked<City>;
   };
 

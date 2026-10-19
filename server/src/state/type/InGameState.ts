@@ -11,6 +11,7 @@ import { Tile } from "../../map/Tile";
 import { MapPresets } from "../../map/MapPresets";
 import { AncientRuins } from "../../map/AncientRuins";
 import { NaturalWonders } from "../../map/NaturalWonders";
+import { Religions } from "../../religion/Religions";
 import { Barbarians } from "../../barbarian/Barbarians";
 import { Player } from "../../Player";
 import { PlayerNotifications } from "../../notification/PlayerNotifications";
@@ -370,6 +371,9 @@ export class InGameState extends State {
 
     // Once every unit's movement is back to full from the event above.
     Barbarians.getInstance()?.playTurn();
+
+    // After cities have grown in the event above, so new citizens count toward who follows what.
+    Religions.spreadPressure();
 
     // Queued movement resolves inside the event above, so this catches up any sight change it
     // caused, and converges anything else that shifted sight without announcing it.

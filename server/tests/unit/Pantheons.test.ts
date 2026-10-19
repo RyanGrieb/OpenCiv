@@ -5,6 +5,7 @@ import { GameMap } from "../../src/map/GameMap";
 import { Tile } from "../../src/map/Tile";
 import { Player } from "../../src/Player";
 import { Beliefs } from "../../src/religion/Beliefs";
+import { CityReligion } from "../../src/religion/CityReligion";
 import { Pantheons } from "../../src/religion/Pantheons";
 import { PlayerReligion } from "../../src/religion/PlayerReligion";
 
@@ -55,6 +56,8 @@ describe("Pantheons", () => {
       getWorkedTiles: () => workedTiles,
       updateWorkedTiles: jest.fn()
     } as unknown as City;
+    const religion = new CityReligion(city, options.population ?? 1);
+    (city as unknown as Record<string, unknown>).getReligion = () => religion;
     player.ownCities.push(city);
     return city;
   };
@@ -220,17 +223,17 @@ describe("Pantheons", () => {
     });
 
     it("makes growth 10% faster with Fertility Rites, and borders 15% faster with Religious Settlements", () => {
-      expect(Beliefs.getFoodRequiredToGrow(22, playerWith({ pantheon: "Fertility Rites" }))).toBe(20);
-      expect(Beliefs.getFoodRequiredToGrow(22, playerWith())).toBe(22);
-      expect(Beliefs.getBorderCost(23, playerWith({ pantheon: "Religious Settlements" }))).toBe(20);
+      expect(Beliefs.getFoodRequiredToGrow(22, cityOf(playerWith({ pantheon: "Fertility Rites" })))).toBe(20);
+      expect(Beliefs.getFoodRequiredToGrow(22, cityOf(playerWith()))).toBe(22);
+      expect(Beliefs.getBorderCost(23, cityOf(playerWith({ pantheon: "Religious Settlements" })))).toBe(20);
     });
 
     it("speeds up only Ancient and Classical wonders with Monument to the Gods", () => {
-      const player = playerWith({ pantheon: "Monument to the Gods" });
+      const city = cityOf(playerWith({ pantheon: "Monument to the Gods" }));
 
-      expect(Beliefs.getWonderProductionPercent(player, "Pottery")).toBe(15);
-      expect(Beliefs.getWonderProductionPercent(player, "Philosophy")).toBe(15);
-      expect(Beliefs.getWonderProductionPercent(player, "Theology")).toBe(0);
+      expect(Beliefs.getWonderProductionPercent(city, "Pottery")).toBe(15);
+      expect(Beliefs.getWonderProductionPercent(city, "Philosophy")).toBe(15);
+      expect(Beliefs.getWonderProductionPercent(city, "Theology")).toBe(0);
     });
 
     it("adds up what the pantheon gives a city: its worked tiles' bonuses, its own yields and happiness", () => {
@@ -246,7 +249,7 @@ describe("Pantheons", () => {
     });
 
     it("raises city strike strength by 30% with Goddess of Protection", () => {
-      expect(Beliefs.getCityRangedModifiers(playerWith({ pantheon: "Goddess of Protection" }))).toEqual([
+      expect(Beliefs.getCityRangedModifiers(cityOf(playerWith({ pantheon: "Goddess of Protection" })))).toEqual([
         { label: "Goddess of Protection", value: 0.3 }
       ]);
     });

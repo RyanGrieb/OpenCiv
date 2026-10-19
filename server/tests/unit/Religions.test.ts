@@ -2,8 +2,10 @@ import { City } from "../../src/city/City";
 import { ServerEvents } from "../../src/Events";
 import { Game } from "../../src/Game";
 import { GameMap } from "../../src/map/GameMap";
+import { Tile } from "../../src/map/Tile";
 import { Player } from "../../src/Player";
 import { Beliefs } from "../../src/religion/Beliefs";
+import { CityReligion } from "../../src/religion/CityReligion";
 import { PlayerReligion } from "../../src/religion/PlayerReligion";
 import { Religions } from "../../src/religion/Religions";
 import { Unit } from "../../src/unit/Unit";
@@ -39,7 +41,7 @@ describe("Religions", () => {
       getAccumulatedStats: () => accumulated,
       addToAccumulatedStat: (stat: string, amount: number) => (accumulated[stat] = (accumulated[stat] ?? 0) + amount),
       getNotifications: () => ({ addMessage: (icon: string, text: string) => player.messages.push(text) }),
-      getDiplomacy: () => ({ isAtWar: () => player.atWar }),
+      getDiplomacy: () => ({ isAtWar: () => player.atWar, isAtWarWith: () => player.atWar }),
       sendTotalStatsUpdate: jest.fn(),
       sendNetworkEvent: jest.fn(),
       getWebsocket: (): undefined => undefined
@@ -51,12 +53,22 @@ describe("Religions", () => {
     return player;
   };
 
-  const cityOf = (player: TestPlayer, options: { name?: string; buildings?: string[]; population?: number } = {}) => {
+  // A city of the player's at (x, 0), 3 tiles east of the last one unless placed.
+  const cityOf = (
+    player: TestPlayer,
+    options: { name?: string; buildings?: string[]; population?: number; x?: number } = {}
+  ) => {
     const buildings = options.buildings ?? [];
+    const tile = new Tile("grass", options.x ?? Religions.getAllCities().length * 3, 0);
+    const name = options.name ?? `city${Religions.getAllCities().length}`;
+    let population = options.population ?? 1;
     const city = {
-      getName: () => options.name ?? `city${player.ownCities.length}`,
+      setPopulation: (count: number) => (population = count),
+      getName: () => name,
       getPlayer: () => player,
-      getPopulation: () => options.population ?? 1,
+      getTile: () => tile,
+      getPopulation: () => population,
+      refreshBeliefs: jest.fn(),
       hasBuilding: (name: string) => buildings.includes(name),
       getBuildings: () =>
         buildings.map((name) => ({ getName: () => name, isWonderBuilding: () => name === "Pyramids" })),
@@ -67,9 +79,20 @@ describe("Religions", () => {
         prophetOf(player, city);
         return true;
       })
-    } as unknown as City;
+    } as unknown as City & { setPopulation: (count: number) => void };
+    const religion = new CityReligion(city, population);
+    (city as unknown as Record<string, unknown>).getReligion = () => religion;
     player.ownCities.push(city);
     return city;
+  };
+
+  // Every citizen of the player's cities follows the religion.
+  const followAll = (player: TestPlayer, religion: string) =>
+    player.ownCities.forEach((city) => city.getReligion().convertAll(religion));
+
+  const foundAndFollow = (player: TestPlayer, name: string, founderBelief: string, followerBelief: string) => {
+    found(player, name, founderBelief, followerBelief);
+    followAll(player, name);
   };
 
   // A Great Prophet of the player's, standing on the city's tile (or nowhere near a city). Always id 1.
@@ -197,39 +220,134 @@ describe("Religions", () => {
     });
   });
 
+  describe("spreading", () => {
+    it("converts the holy city at founding, and only it", () => {
+      const player = founder();
+      const other = cityOf(player, { population: 3 });
+      found(player, "Islam", "Tithe", "Feed the World");
+
+      expect(player.ownCities[0].getReligion().getMajority()).toBe("Islam");
+      expect(other.getReligion().getMajority()).toBeUndefined();
+    });
+
+    it("converts one citizen for every 60 pressure, within 10 tiles of a following city", () => {
+      const player = founder();
+      found(player, "Islam", "Tithe", "Feed the World");
+      const near = cityOf(playerWith(), { population: 4, x: 10 });
+      const far = cityOf(playerWith(), { population: 4, x: 11 });
+
+      for (let turn = 0; turn < 5; turn++) Religions.spreadPressure();
+
+      // The holy city presses 12 a turn: 60 after 5 turns, one citizen.
+      expect(near.getReligion().getFollowers()).toEqual({ Islam: 1 });
+      expect(near.getReligion().getNonFollowers()).toBe(3);
+      expect(near.getReligion().getMajority()).toBeUndefined();
+      expect(far.getReligion().getFollowers()).toEqual({});
+    });
+
+    it("follows the religion with the most followers, if they're at least as many as those following none", () => {
+      const city = cityOf(playerWith(), { population: 5 });
+      const religion = city.getReligion();
+
+      religion.addPressure("Islam", 120);
+      expect(religion.getMajority()).toBeUndefined();
+      religion.addPressure("Judaism", 120);
+      expect(religion.getMajority()).toBeUndefined();
+      religion.addPressure("Islam", 60);
+      expect(religion.getFollowers()).toEqual({ Islam: 3, Judaism: 2 });
+      expect(religion.getMajority()).toBe("Islam");
+    });
+
+    it("converts the biggest other religion's followers once no one is left following none", () => {
+      const city = cityOf(playerWith(), { population: 3 });
+      city.getReligion().convertAll("Islam");
+
+      city.getReligion().addPressure("Judaism", 120);
+
+      expect(city.getReligion().getFollowers()).toEqual({ Islam: 1, Judaism: 2 });
+      expect(city.getReligion().getMajority()).toBe("Judaism");
+    });
+
+    it("adds new citizens to the majority, and takes lost ones from those following none first", () => {
+      const city = cityOf(playerWith(), { population: 3 });
+      city.getReligion().addPressure("Islam", 120);
+
+      city.setPopulation(5);
+      expect(city.getReligion().getFollowers()).toEqual({ Islam: 4 });
+
+      city.getReligion().addPressure("Judaism", 60);
+      city.setPopulation(3);
+      expect(city.getReligion().getFollowers()).toEqual({ Islam: 3 });
+      expect(city.getReligion().getNonFollowers()).toBe(0);
+    });
+
+    it("gives a city following another civilization's religion that religion's follower belief", () => {
+      const player = founder();
+      found(player, "Islam", "Tithe", "Feed the World");
+      const foreign = cityOf(playerWith(), { buildings: ["Shrine"] });
+
+      expect(Beliefs.getCityBonuses(foreign)).toEqual({});
+      foreign.getReligion().convertAll("Islam");
+      expect(Beliefs.getCityBonuses(foreign)).toEqual({ food: 1 });
+    });
+  });
+
   describe("founder beliefs", () => {
     it("gives Church Property 2 Gold for each city, and Tithe 1 for every 4 followers", () => {
       const church = founder();
       cityOf(church, { population: 3 });
-      found(church, "Islam", "Church Property", "Feed the World");
-      expect(Beliefs.getEmpireGold(church)).toBe(4);
+      foundAndFollow(church, "Islam", "Church Property", "Feed the World");
+      expect(Beliefs.getEmpireYields(church)).toEqual({ gold: 4 });
 
       const tithe = founder();
       cityOf(tithe, { population: 7 });
-      found(tithe, "Judaism", "Tithe", "Asceticism");
-      expect(Beliefs.getEmpireGold(tithe)).toBe(2);
+      foundAndFollow(tithe, "Judaism", "Tithe", "Asceticism");
+      expect(Beliefs.getEmpireYields(tithe)).toEqual({ gold: 2 });
     });
 
     it("gives Ceremonial Burial 1 Happiness for every 2 cities", () => {
       const player = founder();
       cityOf(player);
       cityOf(player);
-      found(player, "Islam", "Ceremonial Burial", "Feed the World");
+      foundAndFollow(player, "Islam", "Ceremonial Burial", "Feed the World");
 
       expect(Beliefs.getHappiness(player)).toContainEqual({ source: "Ceremonial Burial", amount: 1 });
       expect(Beliefs.getEmpireBonuses(player)).toEqual({ happiness: 1 });
     });
 
-    it("pays Initiation Rites' 100 Gold once for each city at founding, and for each city joined later", () => {
+    it("pays Initiation Rites' 100 Gold for the holy city, then once for each city converted", () => {
       const player = founder();
-      cityOf(player);
+      const other = cityOf(player);
       found(player, "Islam", "Initiation Rites", "Feed the World");
-      expect(player.accumulated.gold).toBe(200);
+      expect(player.accumulated.gold).toBe(100);
 
-      const settled = cityOf(player);
-      player.getReligion().onCityJoined(settled);
-      player.getReligion().onCityJoined(settled);
-      expect(player.accumulated.gold).toBe(300);
+      // Rome's 12 pressure a turn converts the 1-citizen city in 5 turns; it stays converted after.
+      for (let turn = 0; turn < 8; turn++) Religions.spreadPressure();
+      expect(other.getReligion().getMajority()).toBe("Islam");
+      expect(player.accumulated.gold).toBe(200);
+    });
+
+    it("gives Pilgrimage 2 Faith per foreign city following, World Church 1 Culture per 5 foreign followers", () => {
+      const player = founder();
+      found(player, "Islam", "Pilgrimage", "Feed the World");
+      const foreign = cityOf(playerWith(), { population: 5 });
+      foreign.getReligion().convertAll("Islam");
+      expect(Beliefs.getEmpireYields(player)).toEqual({ faith: 2 });
+
+      const church = founder();
+      found(church, "Judaism", "World Church", "Asceticism");
+      cityOf(playerWith(), { population: 10 }).getReligion().convertAll("Judaism");
+      expect(Beliefs.getEmpireYields(church)).toEqual({ culture: 2 });
+    });
+
+    it("gives Peace Loving 1 Happiness per 8 followers in foreign cities not at war with the founder", () => {
+      const player = founder();
+      found(player, "Islam", "Peace Loving", "Feed the World");
+      cityOf(playerWith(), { population: 8 }).getReligion().convertAll("Islam");
+      expect(Beliefs.getEmpireBonuses(player)).toEqual({ happiness: 1 });
+
+      player.atWar = true;
+      expect(Beliefs.getEmpireBonuses(player)).toEqual({});
     });
   });
 
@@ -238,7 +356,7 @@ describe("Religions", () => {
       const player = founder();
       const small = cityOf(player, { buildings: ["Shrine", "Temple"], population: 2 });
       const large = cityOf(player, { buildings: ["Shrine", "Temple"], population: 5 });
-      found(player, "Islam", "Tithe", "Asceticism");
+      foundAndFollow(player, "Islam", "Tithe", "Asceticism");
 
       expect(Beliefs.getCityHappiness(small)).toBe(0);
       expect(Beliefs.getCityHappiness(large)).toBe(1);
@@ -247,7 +365,7 @@ describe("Religions", () => {
     it("gives Feed the World +1 Food from each Shrine and Temple", () => {
       const player = founder();
       const city = cityOf(player, { buildings: ["Shrine", "Temple"] });
-      found(player, "Islam", "Tithe", "Feed the World");
+      foundAndFollow(player, "Islam", "Tithe", "Feed the World");
 
       expect(Beliefs.getCityBonuses(city)).toEqual({ food: 2 });
     });
@@ -255,7 +373,7 @@ describe("Religions", () => {
     it("gives Divine Inspiration +2 Faith for each World Wonder", () => {
       const player = founder();
       const city = cityOf(player, { buildings: ["Pyramids", "Shrine"] });
-      found(player, "Islam", "Tithe", "Divine Inspiration");
+      foundAndFollow(player, "Islam", "Tithe", "Divine Inspiration");
 
       expect(Beliefs.getCityBonuses(city)).toEqual({ faith: 2 });
     });
@@ -263,7 +381,7 @@ describe("Religions", () => {
     it("adds Religious Community's 1% Production per follower, up to 15%", () => {
       const player = founder();
       const city = cityOf(player, { population: 20 });
-      found(player, "Islam", "Tithe", "Religious Community");
+      foundAndFollow(player, "Islam", "Tithe", "Religious Community");
 
       const stats = { production: 100 } as Parameters<typeof Beliefs.applyToCityStats>[1];
       Beliefs.applyToCityStats(city, stats);
@@ -273,10 +391,11 @@ describe("Religions", () => {
     it("speeds growth 15% with Swords into Plowshares only while at peace", () => {
       const player = founder();
       found(player, "Islam", "Tithe", "Swords into Plowshares");
+      const holyCity = player.ownCities[0];
 
-      expect(Beliefs.getFoodRequiredToGrow(115, player)).toBe(100);
+      expect(Beliefs.getFoodRequiredToGrow(115, holyCity)).toBe(100);
       player.atWar = true;
-      expect(Beliefs.getFoodRequiredToGrow(115, player)).toBe(115);
+      expect(Beliefs.getFoodRequiredToGrow(115, holyCity)).toBe(115);
     });
   });
 

@@ -1265,7 +1265,7 @@ describe('City', () => {
       (enemyPlayer as any).getUnits = jest.fn().mockReturnValue([]);
       (enemyPlayer as any).getNotifications = jest.fn().mockReturnValue({ addMessage: jest.fn() });
       (enemyPlayer as any).sendTotalStatsUpdate = jest.fn();
-      (enemyPlayer as any).getReligion = jest.fn().mockReturnValue({ onCityJoined: jest.fn(), getBeliefs: (): unknown[] => [] });
+      (enemyPlayer as any).getReligion = jest.fn().mockReturnValue({ getPantheon: (): undefined => undefined, getFounded: (): undefined => undefined });
       (mockPlayer as any).getUnits = jest.fn().mockReturnValue([]);
       (visibility as any).hasDiscovered = jest.fn().mockReturnValue(true);
       city.addBuilding('Palace');

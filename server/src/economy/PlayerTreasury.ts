@@ -56,7 +56,7 @@ export class PlayerTreasury {
       .concat(
         Beliefs.getEmpireYieldSources(this.player).map((source) => ({
           source: source.source,
-          amount: source.stats[0].gold
+          amount: source.stats.reduce((total, stat) => total + (stat.gold ?? 0), 0)
         }))
       )
       .filter((entry) => entry.amount !== 0);

@@ -5,6 +5,7 @@ import { Improvement } from "../map/Improvement";
 import { NaturalWonders } from "../map/NaturalWonders";
 import type { StatEntry, Tile, YieldSource } from "../map/Tile";
 import type { Player } from "../Player";
+import { Religions } from "./Religions";
 import { TechEffects } from "../research/TechEffects";
 import { Technology } from "../research/Technology";
 import type { CombatModifier } from "../unit/Combat";
@@ -55,6 +56,9 @@ export interface BeliefEffectsData {
   happiness_per_cities?: { per: number };
   gold_per_followers?: { per: number };
   gold_on_conversion?: number;
+  happiness_per_foreign_followers?: { per: number };
+  faith_per_foreign_city?: number;
+  culture_per_foreign_followers?: { per: number };
   faith_buildings?: { building: string; faith_cost: number }[];
   faith_units?: { before_era: string };
 }
@@ -71,19 +75,42 @@ export interface BeliefData {
   not_yet?: string[];
 }
 
+type ActiveBelief = BeliefData & { effects: BeliefEffectsData };
+
 /**
- * Applies the effects of a player's pantheon and religion beliefs wherever in the game each matters.
- * Every effect only helps the player who holds the belief. For now all of that player's cities follow
- * their religion, every citizen a follower, and the religion follows no one else.
+ * Applies the effects of pantheons and religions' beliefs wherever in the game each matters, as Civ 5
+ * does. A city following a religion (see CityReligion.getMajority()) gets that religion's follower
+ * belief and its founder's pantheon; a city following none gets its owner's pantheon. A religion's
+ * founder belief rewards whoever founded it, for its followers wherever they are.
  */
 export class Beliefs {
-  // The beliefs' bonuses to the tile, from the player whose city's territory it is.
-  public static getTileBonusSources(tile: Tile): YieldSource[] {
-    const owner = tile.getOwner();
+  // The pantheon and follower belief the city follows (see the class comment).
+  public static getCityBeliefs(city: City): ActiveBelief[] {
+    const majority = city.getReligion?.().getMajority();
+    const founder = majority ? Religions.getFounderOf(majority) : undefined;
+    const beliefs = founder
+      ? [
+          founder.getReligion().getPantheon(),
+          Religions.getFollowerBelief(founder.getReligion().getFounded().followerBelief)
+        ]
+      : [city.getPlayer().getReligion?.().getPantheon()];
+    return Beliefs.withEffects(beliefs);
+  }
 
-    return Beliefs.getBeliefsOf(owner).flatMap((belief) =>
+  // The founder belief of the religion the player founded, if they founded one.
+  public static getFounderBeliefs(player: Player): ActiveBelief[] {
+    const religion = player.getReligion?.().getFounded();
+    return Beliefs.withEffects([religion ? Religions.getFounderBelief(religion.founderBelief) : undefined]);
+  }
+
+  // The beliefs' bonuses to the tile, from the city whose territory it is.
+  public static getTileBonusSources(tile: Tile): YieldSource[] {
+    const city = tile.getCityTerritoryOf();
+    if (!city) return [];
+
+    return Beliefs.getCityBeliefs(city).flatMap((belief) =>
       (belief.effects.tile_yields ?? [])
-        .filter((effect) => Beliefs.tileMatches(effect, tile, owner))
+        .filter((effect) => Beliefs.tileMatches(effect, tile, city.getPlayer()))
         .map((effect) => ({ source: belief.name, stats: Beliefs.toStatEntries(effect.stats) }))
     );
   }
@@ -98,58 +125,77 @@ export class Beliefs {
     return Beliefs.getCityStats(city).reduce((total, stat) => total + (stat.happiness ?? 0), 0);
   }
 
-  // Happiness from the beliefs, counted toward the empire's total like a building's, one line each.
+  /**
+   * Happiness from beliefs, counted toward the empire's total like a building's, one line each: what
+   * the player's cities get from the beliefs they follow, and what the player's founder belief gets
+   * from the religion's followers (Ceremonial Burial, Peace Loving).
+   */
   public static getHappiness(player: Player): HappinessEntry[] {
-    const cities = player.getCities();
+    const totals = new Map<string, number>();
+    const add = (source: string, amount: number) => totals.set(source, (totals.get(source) ?? 0) + amount);
 
-    return Beliefs.getBeliefsOf(player)
-      .map((belief) => {
-        const fromCities = cities.reduce(
-          (total, city) => total + Beliefs.sumStat(Beliefs.getCityStatsFrom(belief, city), "happiness"),
-          0
-        );
-        return { source: belief.name, amount: fromCities + Beliefs.getPerCitiesHappiness(belief, cities.length) };
-      })
-      .filter((entry) => entry.amount !== 0);
-  }
+    player
+      .getCities()
+      .forEach((city) =>
+        Beliefs.getCityBeliefs(city).forEach((belief) =>
+          add(belief.name, Beliefs.sumStat(Beliefs.getCityStatsFrom(belief, city), "happiness"))
+        )
+      );
+    Beliefs.getFounderBeliefs(player).forEach((belief) =>
+      add(belief.name, Beliefs.getFounderHappiness(player, belief))
+    );
 
-  // Yields the beliefs give the empire rather than a city (Church Property, Tithe), one entry each.
-  public static getEmpireYieldSources(player: Player): YieldSource[] {
-    const cities = player.getCities();
-    const followers = cities.reduce((total, city) => total + city.getPopulation(), 0);
-
-    return Beliefs.getBeliefsOf(player)
-      .map((belief) => {
-        const perCity = (belief.effects.gold_per_city ?? 0) * cities.length;
-        const per = belief.effects.gold_per_followers?.per;
-        const perFollowers = per ? Math.floor(followers / per) : 0;
-        return { source: belief.name, stats: [{ gold: perCity + perFollowers }] };
-      })
-      .filter((source) => source.stats[0].gold !== 0);
+    return [...totals].map(([source, amount]) => ({ source, amount })).filter((entry) => entry.amount !== 0);
   }
 
   /**
-   * What the beliefs add to the empire as a whole rather than to any one city, totalled by stat:
-   * Church Property's and Tithe's gold, Ceremonial Burial's happiness.
+   * Yields the player's founder belief earns the empire rather than a city, one entry each: Church
+   * Property's and Tithe's gold, Pilgrimage's faith and World Church's culture.
+   */
+  public static getEmpireYieldSources(player: Player): YieldSource[] {
+    const religion = player.getReligion?.().getFounded()?.name;
+    if (!religion) return [];
+
+    const cities = Religions.getCitiesFollowing(religion);
+    const foreignCities = cities.filter((city) => city.getPlayer() !== player);
+    const followers = Religions.countFollowers(religion, Religions.getAllCities());
+    const foreignFollowers = Religions.countFollowers(
+      religion,
+      Religions.getAllCities().filter((city) => city.getPlayer() !== player)
+    );
+    const per = (count: number, effect: { per: number } | undefined) => (effect ? Math.floor(count / effect.per) : 0);
+
+    return Beliefs.getFounderBeliefs(player)
+      .map((belief) => {
+        const effects = belief.effects;
+        const gold = (effects.gold_per_city ?? 0) * cities.length + per(followers, effects.gold_per_followers);
+        const faith = (effects.faith_per_foreign_city ?? 0) * foreignCities.length;
+        const culture = per(foreignFollowers, effects.culture_per_foreign_followers);
+        const stats = Beliefs.toStatEntries({ gold, faith, culture }).filter((stat) => Object.values(stat)[0] !== 0);
+        return { source: belief.name, stats };
+      })
+      .filter((source) => source.stats.length > 0);
+  }
+
+  // The founder belief's empire yields, totalled by stat.
+  public static getEmpireYields(player: Player): Record<string, number> {
+    return Beliefs.totalOf(Beliefs.getEmpireYieldSources(player).flatMap((source) => source.stats));
+  }
+
+  /**
+   * What the founder belief adds to the empire as a whole rather than to any one city, totalled by stat:
+   * its empire yields and its happiness.
    */
   public static getEmpireBonuses(player: Player): Record<string, number> {
-    const cityCount = player.getCities().length;
-    const happiness = Beliefs.getBeliefsOf(player).reduce(
-      (total, belief) => total + Beliefs.getPerCitiesHappiness(belief, cityCount),
+    const happiness = Beliefs.getFounderBeliefs(player).reduce(
+      (total, belief) => total + Beliefs.getFounderHappiness(player, belief),
       0
     );
-    return Beliefs.totalOf([{ gold: Beliefs.getEmpireGold(player) }, { happiness }]);
-  }
-
-  public static getEmpireGold(player: Player): number {
-    return Beliefs.getEmpireYieldSources(player).reduce(
-      (total, source) => total + Beliefs.sumStat(source.stats, "gold"),
-      0
-    );
+    return Beliefs.totalOf([...Beliefs.getEmpireYieldSources(player).flatMap((source) => source.stats), { happiness }]);
   }
 
   /**
-   * Everything the beliefs add to the city each turn, totalled by stat: its worked tiles' bonuses,
+   * Everything the city's beliefs add to it each turn, totalled by stat: its worked tiles' bonuses,
    * its own yields and happiness. Before the city's buildings scale them, so a Temple of Artemis can
    * make the city's real total a little more.
    */
@@ -163,61 +209,59 @@ export class Beliefs {
 
   // Religious Community's percent on the city's production, once its other yields are in.
   public static applyToCityStats(city: City, stats: CityStats) {
-    const percent = Beliefs.getBeliefsOf(city.getPlayer())
+    const followers = Beliefs.getMajorityFollowers(city);
+    const percent = Beliefs.getCityBeliefs(city)
       .map((belief) => belief.effects.production_percent_per_follower)
       .filter((effect) => effect)
-      .reduce((total, effect) => total + Math.min(effect.max, effect.percent * city.getPopulation()), 0);
+      .reduce((total, effect) => total + Math.min(effect.max, effect.percent * followers), 0);
     if (percent === 0 || stats.production <= 0) return;
 
     stats.production = Math.floor((stats.production * (100 + percent)) / 100);
   }
 
-  // Food a city needs to grow, once Fertility Rites (and Swords into Plowshares, at peace) speed it up.
-  public static getFoodRequiredToGrow(baseFood: number, player: Player): number {
-    const beliefs = Beliefs.getBeliefsOf(player);
+  // Food the city needs to grow, once Fertility Rites (and Swords into Plowshares, at peace) speed it up.
+  public static getFoodRequiredToGrow(baseFood: number, city: City): number {
+    const beliefs = Beliefs.getCityBeliefs(city);
     const always = beliefs.reduce((total, belief) => total + (belief.effects.growth_percent ?? 0), 0);
     const atPeace = beliefs.reduce((total, belief) => total + (belief.effects.growth_percent_at_peace ?? 0), 0);
-    const peaceBonus = atPeace > 0 && !player.getDiplomacy().isAtWar() ? atPeace : 0;
+    const peaceBonus = atPeace > 0 && !city.getPlayer().getDiplomacy().isAtWar() ? atPeace : 0;
     return Beliefs.speedUp(baseFood, always + peaceBonus);
   }
 
-  // Culture the next border tile costs, once Religious Settlements has made border growth faster.
-  public static getBorderCost(baseCost: number, player: Player): number {
-    return Beliefs.speedUp(baseCost, Beliefs.sumEffect(player, "border_growth_percent"));
+  // Culture the city's next border tile costs, once Religious Settlements has made border growth faster.
+  public static getBorderCost(baseCost: number, city: City): number {
+    return Beliefs.speedUp(baseCost, Beliefs.sumEffect(city, "border_growth_percent"));
   }
 
-  // Goddess of Protection's bonus to what the player's cities shoot with.
-  public static getCityRangedModifiers(player: Player): CombatModifier[] {
-    return Beliefs.getBeliefsOf(player)
+  // Goddess of Protection's bonus to what the city shoots with.
+  public static getCityRangedModifiers(city: City): CombatModifier[] {
+    return Beliefs.getCityBeliefs(city)
       .filter((belief) => belief.effects.city_ranged_percent)
       .map((belief) => ({ label: belief.name, value: belief.effects.city_ranged_percent / 100 }));
   }
 
-  // Monument to the Gods: percent added to the player's production of the great wonder.
-  public static getWonderProductionPercent(player: Player, requiredTech: string | undefined): number {
+  // Monument to the Gods: percent added to the city's production of the great wonder.
+  public static getWonderProductionPercent(city: City, requiredTech: string | undefined): number {
     if (!requiredTech) return 0;
 
     const era = Technology.getEraOf([requiredTech]);
-    return Beliefs.getBeliefsOf(player)
+    return Beliefs.getCityBeliefs(city)
       .map((belief) => belief.effects.wonder_production)
       .filter((effect) => effect?.eras.includes(era.id))
       .reduce((total, effect) => total + effect.percent, 0);
   }
 
-  // Faith Healers: extra HP for a unit healing in or next to one of its owner's cities.
+  // Faith Healers: extra HP for a unit healing in or next to one of its owner's cities that follows it.
   public static getHealBonus(unit: Unit): number {
-    const bonus = Beliefs.sumEffect(unit.getPlayer(), "heal_near_city");
-    if (!bonus) return 0;
-
-    const nearOwnCity = [unit.getTile(), ...unit.getTile().getAdjacentTiles()].some(
-      (tile) => tile?.getCity()?.getPlayer() === unit.getPlayer()
-    );
-    return nearOwnCity ? bonus : 0;
+    const cities = [unit.getTile(), ...unit.getTile().getAdjacentTiles()]
+      .map((tile) => tile?.getCity())
+      .filter((city) => city?.getPlayer() === unit.getPlayer());
+    return Math.max(0, ...cities.map((city) => Beliefs.sumEffect(city, "heal_near_city")));
   }
 
   // The buildings the city's beliefs let it buy with faith (Cathedrals, Pagodas and the like), with prices.
   public static getFaithBuildings(city: City): { building: string; faith_cost: number }[] {
-    return Beliefs.getBeliefsOf(city.getPlayer()).flatMap((belief) => belief.effects.faith_buildings ?? []);
+    return Beliefs.getCityBeliefs(city).flatMap((belief) => belief.effects.faith_buildings ?? []);
   }
 
   // Holy Warriors: whether the city's beliefs let it buy this unit with faith - a land military unit from
@@ -227,61 +271,80 @@ export class Beliefs {
 
     const eras = Technology.getAllEras().map((era) => era.id);
     const unitEra = eras.indexOf(Technology.getEraOf(unit.required_tech ? [unit.required_tech] : []).id);
-    return Beliefs.getBeliefsOf(city.getPlayer())
+    return Beliefs.getCityBeliefs(city)
       .map((belief) => belief.effects.faith_units)
       .some((effect) => effect && unitEra < eras.indexOf(effect.before_era));
   }
 
-  // Initiation Rites: the gold for a city that has just come to follow the player's religion.
-  public static getGoldOnConversion(player: Player): { source: string; gold: number }[] {
-    return Beliefs.getBeliefsOf(player)
+  // Initiation Rites: the gold the founder gets for a city that has just come to follow their religion.
+  public static getGoldOnConversion(founder: Player): { source: string; gold: number }[] {
+    return Beliefs.getFounderBeliefs(founder)
       .filter((belief) => belief.effects.gold_on_conversion)
       .map((belief) => ({ source: belief.name, gold: belief.effects.gold_on_conversion }));
   }
 
   /**
    * God of War: `winner` defeated `loser` on `tile`. Faith equal to the loser's strength, if the battle
-   * was close enough to one of the winner's cities.
+   * was close enough to one of the winner's cities that follows it.
    */
   public static onBattleWon(winner: Player, loser: Unit, tile: Tile) {
-    for (const belief of Beliefs.getBeliefsOf(winner)) {
-      const range = belief.effects.faith_from_kills?.range;
-      if (range === undefined) continue;
+    const faith = Math.round(loser.getCombatStrength());
+    if (faith <= 0) return;
 
-      const nearCity = winner
-        .getCities()
-        .some((city) => BorderGrowth.getRingDistances(city.getTile(), range).has(tile));
-      const faith = Math.round(loser.getCombatStrength());
-      if (!nearCity || faith <= 0) continue;
+    const rewarded = new Set<string>();
+    for (const city of winner.getCities?.() ?? []) {
+      for (const belief of Beliefs.getCityBeliefs(city)) {
+        const range = belief.effects.faith_from_kills?.range;
+        if (range === undefined || rewarded.has(belief.name)) continue;
+        if (!BorderGrowth.getRingDistances(city.getTile(), range).has(tile)) continue;
 
-      winner.addToAccumulatedStat("faith", faith);
-      winner
-        .getNotifications()
-        .addMessage("ICON_FAITH", `${belief.name}: +${faith} Faith for defeating a ${loser.getName()}.`);
+        rewarded.add(belief.name);
+        winner.addToAccumulatedStat("faith", faith);
+        winner
+          .getNotifications()
+          .addMessage("ICON_FAITH", `${belief.name}: +${faith} Faith for defeating a ${loser.getName()}.`);
+      }
     }
   }
 
-  // The player's pantheon and religion beliefs, each with effects to read even if it lists none.
-  private static getBeliefsOf(player: Player | undefined): (BeliefData & { effects: BeliefEffectsData })[] {
-    const beliefs = player?.getReligion?.().getBeliefs() ?? [];
-    return beliefs.map((belief) => ({ ...belief, effects: belief.effects ?? {} }));
+  // How many of the city's citizens follow its religion.
+  private static getMajorityFollowers(city: City): number {
+    const religion = city.getReligion?.();
+    const majority = religion?.getMajority();
+    return majority ? religion.getFollowersOf(majority) : 0;
   }
 
-  // Ceremonial Burial: 1 happiness for every `per` cities following.
-  private static getPerCitiesHappiness(belief: BeliefData & { effects: BeliefEffectsData }, cityCount: number): number {
-    const per = belief.effects.happiness_per_cities?.per;
-    return per ? Math.floor(cityCount / per) : 0;
+  private static withEffects(beliefs: (BeliefData | undefined)[]): ActiveBelief[] {
+    return beliefs.filter((belief) => belief).map((belief) => ({ ...belief, effects: belief.effects ?? {} }));
+  }
+
+  // Ceremonial Burial's happiness for every so many cities following, Peace Loving's for every so many
+  // followers in friendly foreign cities.
+  private static getFounderHappiness(player: Player, belief: ActiveBelief): number {
+    const religion = player.getReligion().getFounded()?.name;
+    if (!religion) return 0;
+
+    const perCities = belief.effects.happiness_per_cities?.per;
+    const fromCities = perCities ? Math.floor(Religions.getCitiesFollowing(religion).length / perCities) : 0;
+    const perFollowers = belief.effects.happiness_per_foreign_followers?.per;
+    if (!perFollowers) return fromCities;
+
+    const friendly = Religions.getAllCities().filter(
+      (city) => city.getPlayer() !== player && !player.getDiplomacy().isAtWarWith(city.getPlayer())
+    );
+    return fromCities + Math.floor(Religions.countFollowers(religion, friendly) / perFollowers);
   }
 
   private static getCityStats(city: City): StatEntry[] {
-    return Beliefs.getBeliefsOf(city.getPlayer()).flatMap((belief) => Beliefs.getCityStatsFrom(belief, city));
+    return Beliefs.getCityBeliefs(city).flatMap((belief) => Beliefs.getCityStatsFrom(belief, city));
   }
 
-  private static getCityStatsFrom(belief: BeliefData & { effects: BeliefEffectsData }, city: City): StatEntry[] {
+  private static getCityStatsFrom(belief: ActiveBelief, city: City): StatEntry[] {
     const effects = belief.effects;
+    const followers = Beliefs.getMajorityFollowers(city);
     const buildingYields = (effects.building_yields ?? [])
       .filter((effect) => city.hasBuilding(effect.building))
-      .filter((effect) => city.getPopulation() >= (effect.min_followers ?? 0))
+      .filter((effect) => followers >= (effect.min_followers ?? 0))
       .flatMap((effect) => Beliefs.toStatEntries(effect.stats));
     const cityYields = (effects.city_yields ?? [])
       .filter((effect) => Beliefs.cityMatches(effect, city))
@@ -294,8 +357,8 @@ export class Beliefs {
     return [...buildingYields, ...cityYields, ...wonderYields];
   }
 
-  private static sumEffect(player: Player, effect: "border_growth_percent" | "heal_near_city"): number {
-    return Beliefs.getBeliefsOf(player).reduce((total, belief) => total + (belief.effects[effect] ?? 0), 0);
+  private static sumEffect(city: City, effect: "border_growth_percent" | "heal_near_city"): number {
+    return Beliefs.getCityBeliefs(city).reduce((total, belief) => total + (belief.effects[effect] ?? 0), 0);
   }
 
   private static tileMatches(effect: BeliefTileYield, tile: Tile, owner: Player): boolean {

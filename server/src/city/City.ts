@@ -7,6 +7,7 @@ import { Combat, CombatModifier } from "../unit/Combat";
 import { Unit, UnitYMLTypeData } from "../unit/Unit";
 import { UnitPromotions } from "../unit/UnitPromotions";
 import { Beliefs } from "../religion/Beliefs";
+import { CityReligion } from "../religion/CityReligion";
 import { BorderGrowth } from "./BorderGrowth";
 import { Building, BuildingData } from "./Building";
 import { BuildingEffects } from "./BuildingEffects";
@@ -119,6 +120,8 @@ export class City {
   private strikeSpent: boolean;
   // What each player was last told about this city's health, strength and strike (see refreshCombatStatus()).
   private sentCombatStatus: Map<Player, string>;
+  // Which religions the citizens follow.
+  private religion: CityReligion;
 
   /**
    * Creates a new City instance.
@@ -140,6 +143,7 @@ export class City {
     this.health = Math.min(CityCombat.BASE_MAX_HEALTH, Game.getInstance().getGameOptions().cityStartingHealth);
     this.strikeSpent = false;
     this.sentCombatStatus = new Map();
+    this.religion = new CityReligion(this, this.population);
 
     // A new city claims the ring around it, except tiles another city already owns.
     this.territory = [this.tile];
@@ -631,10 +635,7 @@ export class City {
 
   /** What the city shoots with: its combat strength, raised by Goddess of Protection. */
   public getStrikeStrength(): number {
-    const modifierTotal = Beliefs.getCityRangedModifiers(this.player).reduce(
-      (total, modifier) => total + modifier.value,
-      0
-    );
+    const modifierTotal = Beliefs.getCityRangedModifiers(this).reduce((total, modifier) => total + modifier.value, 0);
     return this.getCombatStrength() * (1 + modifierTotal);
   }
 
@@ -770,7 +771,8 @@ export class City {
     this.updateWorkedTiles({ sendStatUpdate: false });
 
     City.relocatePalace(previousOwner);
-    newOwner.getReligion().onCityJoined(this);
+    // The new owner's beliefs may differ, so their pantheon may now apply here.
+    newOwner.sendTotalStatsUpdate();
 
     previousOwner.getVisibility().update();
     newOwner.getVisibility().update();
@@ -810,15 +812,12 @@ export class City {
 
   // Fertility Rites makes it less.
   public getFoodRequiredToGrow(): number {
-    return Beliefs.getFoodRequiredToGrow(
-      City.GROWTH_FOOD_BASE + City.GROWTH_FOOD_PER_POP * this.population,
-      this.player
-    );
+    return Beliefs.getFoodRequiredToGrow(City.GROWTH_FOOD_BASE + City.GROWTH_FOOD_PER_POP * this.population, this);
   }
 
   public getCultureRequiredToExpand(): number {
     const cost = BuildingEffects.getBorderCost(BorderGrowth.getCultureCost(this.tilesAcquired), this.player);
-    return Beliefs.getBorderCost(cost, this.player);
+    return Beliefs.getBorderCost(cost, this);
   }
 
   public getTile(): Tile {
@@ -839,6 +838,16 @@ export class City {
 
   public isCoastal(): boolean {
     return this.tile.isCoastal();
+  }
+
+  public getReligion(): CityReligion {
+    return this.religion;
+  }
+
+  // The city follows other beliefs now: its tiles' yields and its own stats change.
+  public refreshBeliefs() {
+    GameMap.getInstance().sendTilesToPlayer(this.player, this.territory);
+    this.updateWorkedTiles({ sendStatUpdate: true });
   }
 
   public getPlayer(): Player {
@@ -929,6 +938,8 @@ export class City {
       era: this.player.getEra().id,
       // Drawn round the city once it builds them.
       walls: this.getWalls(),
+      // Shown by the city's name: what it follows, and who follows what.
+      religion: this.religion.toJSON(),
       // Which tiles a city works is its owner's business.
       workedTiles: ownCity ? this.workedTiles.map((tile) => ({ x: tile.getX(), y: tile.getY() })) : []
     };
@@ -1356,7 +1367,7 @@ export class City {
     const building = Building.createFromName(buildingName);
     if (!building?.isWonderBuilding()) return production;
 
-    const percent = Beliefs.getWonderProductionPercent(this.player, building.getRequiredTech());
+    const percent = Beliefs.getWonderProductionPercent(this, building.getRequiredTech());
     return Math.floor((production * (100 + percent)) / 100);
   }
 

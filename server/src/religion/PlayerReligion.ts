@@ -20,8 +20,8 @@ export interface FoundedReligion {
  * A player's faith-bought beliefs. Once their faith reaches Pantheons.getCost() they may found a
  * pantheon no other civilization has. With a pantheon, once it reaches getProphetCost(), a Great
  * Prophet is born, and in one of the player's cities the prophet founds a religion with a founder and
- * a follower belief. Every one of the player's own cities follows their religion; religions don't
- * spread to other civilizations yet.
+ * a follower belief. That holy city follows it at once; from there it spreads to the cities around it,
+ * the player's or anyone's (see Religions.spreadPressure()).
  */
 export class PlayerReligion {
   public static readonly PROPHET = "Great Prophet";
@@ -32,6 +32,7 @@ export class PlayerReligion {
   private player: Player;
   private pantheonName: string | undefined;
   private religion: FoundedReligion | undefined;
+  private holyCity: City | undefined;
   private prophetsEarned = 0;
   // Cities that have come to follow the religion, each paid Initiation Rites' gold once.
   private convertedCities = new Set<City>();
@@ -107,6 +108,11 @@ export class PlayerReligion {
     return this.religion;
   }
 
+  // Where the religion was founded, whoever owns it now.
+  public getHolyCity(): City | undefined {
+    return this.holyCity;
+  }
+
   // The pantheon, then the religion's founder and follower beliefs: whatever of them the player has.
   public getBeliefs(): BeliefData[] {
     return [
@@ -121,6 +127,12 @@ export class PlayerReligion {
     const income = this.player
       .getCities()
       .map((city) => ({ source: city.getName(), amount: city.getStatline({ asArray: false }).faith }))
+      .concat(
+        Beliefs.getEmpireYieldSources(this.player).map((source) => ({
+          source: source.source,
+          amount: source.stats.reduce((total, stat) => total + (stat.faith ?? 0), 0)
+        }))
+      )
       .filter((entry) => entry.amount !== 0);
     return { income, net: income.reduce((total, entry) => total + entry.amount, 0) };
   }
@@ -208,6 +220,7 @@ export class PlayerReligion {
       followerBelief: followerBelief.name,
       holyCity: holyCity.getName()
     };
+    this.holyCity = holyCity;
 
     this.player
       .getNotifications()
@@ -216,16 +229,24 @@ export class PlayerReligion {
         `You have founded ${name} in ${holyCity.getName()}, with ${founderBelief.name} and ${followerBelief.name}.`
       );
     this.announceReligionToOthers();
-    this.player.getCities().forEach((city) => this.convert(city));
+    holyCity.getReligion().convertAll(name);
+    Religions.onMajorityChanged(holyCity);
+    Religions.sendCityReligions([holyCity]);
     this.applyFounded();
     return true;
   }
 
-  // A city the player settled or captured comes to follow their religion.
-  public onCityJoined(city: City) {
-    if (!this.religion) return;
+  // Initiation Rites pays out the first time each city comes to follow the player's religion.
+  public onCityConverted(city: City) {
+    if (this.convertedCities.has(city)) return;
 
-    this.convert(city);
+    this.convertedCities.add(city);
+    Beliefs.getGoldOnConversion(this.player).forEach(({ source, gold }) => {
+      this.player.addToAccumulatedStat("gold", gold);
+      this.player
+        .getNotifications()
+        .addMessage("ICON_GOLD", `${source}: +${gold} Gold as ${city.getName()} follows ${this.religion.name}.`);
+    });
     this.player.sendTotalStatsUpdate();
   }
 
@@ -298,19 +319,6 @@ export class PlayerReligion {
 
   private getProphet(id: number | undefined): Unit | undefined {
     return this.getProphets().find((unit) => unit.getId() === id);
-  }
-
-  // Initiation Rites pays out the first time each city follows the religion.
-  private convert(city: City) {
-    if (this.convertedCities.has(city)) return;
-
-    this.convertedCities.add(city);
-    Beliefs.getGoldOnConversion(this.player).forEach(({ source, gold }) => {
-      this.player.addToAccumulatedStat("gold", gold);
-      this.player
-        .getNotifications()
-        .addMessage("ICON_GOLD", `${source}: +${gold} Gold as ${city.getName()} follows ${this.religion.name}.`);
-    });
   }
 
   private announceReligionToOthers() {

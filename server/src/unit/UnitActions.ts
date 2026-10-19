@@ -94,7 +94,6 @@ export class UnitActions {
 
         const city = new City({ player: player, tile: tile });
         player.getCities().push(city);
-        player.getReligion().onCityJoined(city);
 
         city.announceCreated();
         // The new borders change what Builders can build, and where every civilization's Settlers can settle.

@@ -19,7 +19,8 @@ describe('PlayerHappiness', () => {
       getName: () => options.name ?? 'Rome',
       getPopulation: () => options.population ?? 1,
       getTerritory: () => options.territory ?? [],
-      getBuildingHappiness: () => options.buildingHappiness ?? 0
+      getBuildingHappiness: () => options.buildingHappiness ?? 0,
+      getPlayer: () => player
     }) as unknown as City;
 
   const tileWith = (...types: string[]) => {

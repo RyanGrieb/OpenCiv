@@ -355,7 +355,10 @@ export class Player {
       totals.culture += cityStats.culture;
     }
 
-    totals.gold += Beliefs.getEmpireGold(this);
+    const empire = Beliefs.getEmpireYields(this);
+    totals.gold += empire.gold ?? 0;
+    totals.faith += empire.faith ?? 0;
+    totals.culture += empire.culture ?? 0;
     totals.gold -= this.treasury.getUpkeep();
 
     return totals;

@@ -57,6 +57,19 @@ export interface ReligionOverview {
   totals: Record<string, number>;
 }
 
+// Who follows what in a city (see server CityReligion.toJSON()), in city JSON and "cityReligions".
+export interface CityReligionInfo {
+  followers: Record<string, number>;
+  nonFollowers: number;
+  // The religion the city follows, or null when no religion has enough followers.
+  majority: string | null;
+}
+
+// The server's "cityReligions" event, sent each turn once religions have spread.
+export interface CityReligionsEvent {
+  cities: (CityReligionInfo & { cityName: string })[];
+}
+
 export class Religions {
   // ICON_RELIGION_<NAME>, e.g. ICON_RELIGION_EASTERN_ORTHODOXY.
   public static getIcon(name: string): SpriteRegion {
