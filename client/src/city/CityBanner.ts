@@ -1,4 +1,4 @@
-import { GameImage, SpriteRegion } from "../Assets";
+import { GameImage, SpriteRegion, resolveSpriteRegion } from "../Assets";
 import { Game } from "../Game";
 import { MapWrap } from "../map/MapWrap";
 import { Religions } from "../religion/Religions";
@@ -18,25 +18,29 @@ interface Box {
 }
 
 /**
- * The bar over a city, like Civ 5's: a pill with the population, the growth bar and turns until the next citizen, the name, the religion it follows, and the production
- * turns, bar and item. Only the owner sees growth and production. Drawn in world coordinates, so it
- * scales with the map; clicking the owner's opens the city, hovering the religion icon lists followers.
+ * The bar over a city, like Civ 5's: a pill with the population, the growth bar and turns until the
+ * next citizen, the name, the religion it follows, and the production turns, bar and item, with a
+ * defense tab on top. Only the owner sees growth and production; another civilization's city shows its
+ * civilization's icon where the production item would be. Drawn in world coordinates, so it scales
+ * with the map; clicking the owner's opens the city, hovering the religion icon lists followers.
  */
 export class CityBanner extends Actor {
-  private static readonly HEIGHT = 8;
-  // Above the city's health bar, which sits along the top of its tile.
-  private static readonly ABOVE_TILE = 2;
-  private static readonly RELIGION_ICON_SIZE = 5.5;
-  private static readonly PRODUCTION_ICON_SIZE = 6.5;
-  private static readonly BAR_WIDTH = 1.5;
+  private static readonly HEIGHT = 7;
+  // The pill's top, down from the top of the city's tile: it lies over the top of the city.
+  private static readonly BELOW_TILE_TOP = 2;
+  private static readonly RELIGION_ICON_SIZE = 5;
+  private static readonly RIGHT_ICON_SIZE = 5.5;
+  private static readonly BAR_WIDTH = 1.25;
   // The defense tab centered on top of the pill, like Civ 5's: a shield and the city's strength.
-  private static readonly DEFENSE_HEIGHT = 6;
-  private static readonly DEFENSE_ICON_SIZE = 5.5;
-  private static readonly DEFENSE_FONT = "bold 5px sans-serif";
-  private static readonly GAP = 1.5;
-  private static readonly NAME_FONT = "bold 6px serif";
-  private static readonly POPULATION_FONT = "bold 5.5px sans-serif";
-  private static readonly TURNS_FONT = "4.5px sans-serif";
+  private static readonly DEFENSE_HEIGHT = 5;
+  private static readonly DEFENSE_ICON_SIZE = 4.5;
+  private static readonly DEFENSE_FONT = "bold 4px sans-serif";
+  // Between the defense tab and the pill, so the tab doesn't touch the pill's outline.
+  private static readonly DEFENSE_GAP = 0.75;
+  private static readonly GAP = 1.25;
+  private static readonly NAME_FONT = "bold 5px serif";
+  private static readonly POPULATION_FONT = "bold 5px sans-serif";
+  private static readonly TURNS_FONT = "4px sans-serif";
   private static readonly PILL_COLOR = "rgba(22, 32, 58, 0.88)";
   private static readonly BOX_COLOR = "rgba(8, 12, 26, 0.9)";
   private static readonly GROWTH_COLOR = "#7cd65a";
@@ -56,7 +60,8 @@ export class CityBanner extends Actor {
   private defenseText: Box;
   private productionTurns: Box | undefined;
   private productionBar: Box | undefined;
-  private productionIcon: Box | undefined;
+  // The production item for the owner, the civilization's icon for anyone else.
+  private rightIcon: Box | undefined;
   private tooltipShown = false;
 
   constructor(city: City, z: number) {
@@ -77,8 +82,12 @@ export class CityBanner extends Actor {
     context.font = font;
     context.fillStyle = "white";
     context.textAlign = "center";
-    context.textBaseline = "middle";
-    context.fillText(text, box.x + box.width / 2, box.y + box.height / 2 + 0.5);
+    // Centered on the glyphs themselves, not the font's em box, so it lines up with the icons and bars.
+    context.textBaseline = "alphabetic";
+    const metrics = context.measureText(text);
+    const glyphHeight = metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent;
+    const baseline = box.y + box.height / 2 + glyphHeight / 2 - metrics.actualBoundingBoxDescent;
+    context.fillText(text, box.x + box.width / 2, baseline);
   }
 
   // A vertical bar filling from the bottom.
@@ -131,13 +140,14 @@ export class CityBanner extends Actor {
       own ? gap + CityBanner.BAR_WIDTH + gap + growthTurnsWidth : 0,
       gap + nameWidth,
       religion ? gap + CityBanner.RELIGION_ICON_SIZE : 0,
-      production ? gap + productionTurnsWidth + gap + CityBanner.BAR_WIDTH + gap + CityBanner.PRODUCTION_ICON_SIZE : 0,
+      production ? gap + productionTurnsWidth + gap + CityBanner.BAR_WIDTH : 0,
+      production || !own ? gap + CityBanner.RIGHT_ICON_SIZE : 0,
       height / 2
     ];
     const pillWidth = widths.reduce((total, width) => total + width, 0);
     const totalWidth = pillWidth;
     const left = tile.getX() + tile.getWidth() / 2 - totalWidth / 2;
-    const top = tile.getY() - height - CityBanner.ABOVE_TILE;
+    const top = tile.getY() + CityBanner.BELOW_TILE_TOP;
     const middle = (size: number) => top + (height - size) / 2;
 
     this.pill = { x: left, y: top, width: pillWidth, height };
@@ -150,7 +160,7 @@ export class CityBanner extends Actor {
     this.growthBar = undefined;
     this.growthTurns = undefined;
     if (own) {
-      this.growthBar = { x: x + gap, y: top + 1.5, width: CityBanner.BAR_WIDTH, height: height - 3 };
+      this.growthBar = { x: x + gap, y: top + 1.25, width: CityBanner.BAR_WIDTH, height: height - 2.5 };
       x += gap + CityBanner.BAR_WIDTH + gap;
       this.growthTurns = { x, y: top, width: growthTurnsWidth, height };
       x += growthTurnsWidth;
@@ -168,20 +178,22 @@ export class CityBanner extends Actor {
 
     this.productionTurns = undefined;
     this.productionBar = undefined;
-    this.productionIcon = undefined;
+    this.rightIcon = undefined;
     if (production) {
       this.productionTurns = { x: x + gap, y: top, width: productionTurnsWidth, height };
       x += gap + productionTurnsWidth;
-      this.productionBar = { x: x + gap, y: top + 1.5, width: CityBanner.BAR_WIDTH, height: height - 3 };
+      this.productionBar = { x: x + gap, y: top + 1.25, width: CityBanner.BAR_WIDTH, height: height - 2.5 };
       x += gap + CityBanner.BAR_WIDTH;
-      const size = CityBanner.PRODUCTION_ICON_SIZE;
-      this.productionIcon = { x: x + gap, y: middle(size), width: size, height: size };
+    }
+    if (production || !own) {
+      const size = CityBanner.RIGHT_ICON_SIZE;
+      this.rightIcon = { x: x + gap, y: middle(size), width: size, height: size };
     }
 
     const defenseTextWidth = CityBanner.measure(this.getDefenseText(), CityBanner.DEFENSE_FONT);
     const iconSize = CityBanner.DEFENSE_ICON_SIZE;
     const tabWidth = 2 + iconSize + 0.5 + defenseTextWidth + 2;
-    const tabTop = top - CityBanner.DEFENSE_HEIGHT + 1;
+    const tabTop = top - CityBanner.DEFENSE_GAP - CityBanner.DEFENSE_HEIGHT;
     this.defenseTab = {
       x: this.pill.x + pillWidth / 2 - tabWidth / 2,
       y: tabTop,
@@ -208,6 +220,11 @@ export class CityBanner extends Actor {
   /** Where the banner's pill ends on the right, for whatever sits beside it (the city's strike icon). */
   public getRight(): number {
     return this.getX() + this.getWidth();
+  }
+
+  /** The bottom of the banner's pill, where the city's health bar hangs. */
+  public getPillBottom(): number {
+    return this.pill ? this.pill.y + this.pill.height : this.getY() + this.getHeight();
   }
 
   /** The top of the banner's pill, below its defense tab. */
@@ -244,7 +261,10 @@ export class CityBanner extends Actor {
         (production.progress ?? 0) / production.cost,
         CityBanner.PRODUCTION_COLOR
       );
-      this.drawProductionIcon(canvasContext, CityScreen.resolveProductionIcon(production));
+      this.drawRightIcon(canvasContext, CityScreen.resolveProductionIcon(production));
+    }
+    if (this.rightIcon && !this.city.isOwnedByClient()) {
+      this.drawRightIcon(canvasContext, resolveSpriteRegion(this.city.getPlayer().getCivilizationData().icon_name));
     }
 
     canvasContext.restore();
@@ -292,9 +312,9 @@ export class CityBanner extends Actor {
     context.stroke();
   }
 
-  // The item in a dark circle, like Civ 5's.
-  private drawProductionIcon(context: CanvasRenderingContext2D, region: SpriteRegion) {
-    const box = this.productionIcon;
+  // The production item or civilization icon in a dark circle, like Civ 5's.
+  private drawRightIcon(context: CanvasRenderingContext2D, region: SpriteRegion) {
+    const box = this.rightIcon;
     context.beginPath();
     context.arc(box.x + box.width / 2, box.y + box.height / 2, box.width / 2 + 0.5, 0, Math.PI * 2);
     context.fillStyle = CityBanner.BOX_COLOR;

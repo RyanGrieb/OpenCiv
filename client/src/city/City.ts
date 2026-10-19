@@ -84,7 +84,7 @@ export class City extends ActorGroup {
   public static readonly DEFAULT_ERA = "ancient";
   private static readonly HEALTH_BAR_WIDTH = 28;
   private static readonly HEALTH_BAR_HEIGHT = 3;
-  private static readonly BANNER_ICON_SIZE = 8;
+  private static readonly BANNER_ICON_SIZE = 7;
   // The bottom of the city's tile, from its center: where a unit there stands (see Unit.getStandingPoint()).
   private static readonly STANDING_BELOW_CENTER = 14;
 
@@ -250,7 +250,7 @@ export class City extends ActorGroup {
     if (!this.tile || this.health >= this.maxHealth) return;
 
     const x = this.tile.getX() + (this.tile.getWidth() - City.HEALTH_BAR_WIDTH) / 2;
-    const y = this.tile.getY() - 1;
+    const y = this.getHealthBarY();
     const healthWidth = (Math.max(0, this.health) / this.maxHealth) * City.HEALTH_BAR_WIDTH;
     const bar = { y, height: City.HEALTH_BAR_HEIGHT, canvasContext, fill: true, cameraApplies: true };
 
@@ -271,7 +271,7 @@ export class City extends ActorGroup {
     this.tile.setCity(this);
     this.healthBar = new CityHealthBar(this, this.getZIndex());
     Standing.set(this.healthBar, {
-      anchor: () => this.getStandingPoint(),
+      anchor: () => this.getTileMiddle(),
       tileMiddle: () => this.getTileMiddle(),
       bounds: () => this.getHealthBarBounds(),
       overlay: true
@@ -472,9 +472,10 @@ export class City extends ActorGroup {
   private createBanner() {
     this.banner = new CityBanner(this, 4);
     this.banner.refresh();
-    // On the globe the banner stands over the city, always in front of the map.
+    // On the globe the banner stands over the city, always in front of the map. It stands on the tile's
+    // middle rather than its bottom like a unit, so it isn't lifted high off the ground.
     Standing.set(this.banner, {
-      anchor: () => this.getStandingPoint(),
+      anchor: () => this.getTileMiddle(),
       tileMiddle: () => this.getTileMiddle(),
       overlay: true
     });
@@ -502,7 +503,7 @@ export class City extends ActorGroup {
       cameraApplies: true
     });
     Standing.set(this.strikeIcon, {
-      anchor: () => this.getStandingPoint(),
+      anchor: () => this.getTileMiddle(),
       tileMiddle: () => this.getTileMiddle(),
       overlay: true
     });
@@ -525,22 +526,27 @@ export class City extends ActorGroup {
     else scene.removeActor(this.strikeIcon);
   }
 
-  // Where the city's banner, health bar and damage stand on the globe: the bottom of its tile, like a unit there.
+  // Where the city's damage stands on the globe: the bottom of its tile, like a unit there.
   private getStandingPoint(): [number, number] {
     const center = this.tile.getCenterPosition();
     return [center.x, center.y + City.STANDING_BELOW_CENTER];
   }
 
-  // The middle of its tile: what its banner and the like stand off on the globe (see
-  // StandingOptions.tileMiddle).
+  // The middle of its tile: where its banner, strike icon and health bar stand on the globe, and what
+  // its damage stands off (see StandingOptions.tileMiddle).
   private getTileMiddle(): [number, number] {
     const center = this.tile.getCenterPosition();
     return [center.x, center.y];
   }
 
+  // Just under the banner, as in Civ 5.
+  private getHealthBarY(): number {
+    return this.banner ? this.banner.getPillBottom() + 0.5 : this.tile.getY() + 10;
+  }
+
   private getHealthBarBounds(): [number, number, number, number] {
     const x = this.tile.getX() + (this.tile.getWidth() - City.HEALTH_BAR_WIDTH) / 2;
-    const y = this.tile.getY() - 1;
+    const y = this.getHealthBarY();
     return [x - 1, y - 1, x + City.HEALTH_BAR_WIDTH + 1, y + City.HEALTH_BAR_HEIGHT + 1];
   }
 
