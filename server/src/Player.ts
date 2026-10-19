@@ -8,6 +8,7 @@ import { PlayerHappiness } from "./happiness/PlayerHappiness";
 import { GameMap } from "./map/GameMap";
 import { PlayerVisibility } from "./map/PlayerVisibility";
 import { PlayerNotifications } from "./notification/PlayerNotifications";
+import { Beliefs } from "./religion/Beliefs";
 import { PlayerReligion } from "./religion/PlayerReligion";
 import { TechEffects } from "./research/TechEffects";
 import { EraData, Technology } from "./research/Technology";
@@ -353,6 +354,7 @@ export class Player {
       totals.culture += cityStats.culture;
     }
 
+    totals.gold += Beliefs.getEmpireGold(this);
     totals.gold -= this.treasury.getUpkeep();
 
     return totals;

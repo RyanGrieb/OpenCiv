@@ -6,7 +6,7 @@ import { StatEntry, StatValues, Tile } from "../map/Tile";
 import { Combat, CombatModifier } from "../unit/Combat";
 import { Unit, UnitYMLTypeData } from "../unit/Unit";
 import { UnitPromotions } from "../unit/UnitPromotions";
-import { Pantheons } from "../religion/Pantheons";
+import { Beliefs } from "../religion/Beliefs";
 import { BorderGrowth } from "./BorderGrowth";
 import { Building, BuildingData } from "./Building";
 import { BuildingEffects } from "./BuildingEffects";
@@ -621,7 +621,7 @@ export class City {
 
   /** What the city shoots with: its combat strength, raised by Goddess of Protection. */
   public getStrikeStrength(): number {
-    const modifierTotal = Pantheons.getCityRangedModifiers(this.player).reduce(
+    const modifierTotal = Beliefs.getCityRangedModifiers(this.player).reduce(
       (total, modifier) => total + modifier.value,
       0
     );
@@ -694,7 +694,7 @@ export class City {
       });
 
     if (defender.getHealth() <= 0) {
-      Pantheons.onBattleWon(this.player, defender, targetTile);
+      Beliefs.onBattleWon(this.player, defender, targetTile);
       defender.delete();
     }
     return true;
@@ -760,6 +760,7 @@ export class City {
     this.updateWorkedTiles({ sendStatUpdate: false });
 
     City.relocatePalace(previousOwner);
+    newOwner.getReligion().onCityJoined(this);
 
     previousOwner.getVisibility().update();
     newOwner.getVisibility().update();
@@ -799,7 +800,7 @@ export class City {
 
   // Fertility Rites makes it less.
   public getFoodRequiredToGrow(): number {
-    return Pantheons.getFoodRequiredToGrow(
+    return Beliefs.getFoodRequiredToGrow(
       City.GROWTH_FOOD_BASE + City.GROWTH_FOOD_PER_POP * this.population,
       this.player
     );
@@ -807,7 +808,7 @@ export class City {
 
   public getCultureRequiredToExpand(): number {
     const cost = BuildingEffects.getBorderCost(BorderGrowth.getCultureCost(this.tilesAcquired), this.player);
-    return Pantheons.getBorderCost(cost, this.player);
+    return Beliefs.getBorderCost(cost, this.player);
   }
 
   public getTile(): Tile {
@@ -947,7 +948,7 @@ export class City {
         Object.entries(building.getStatLine()).map(([stat, value]) => ({ [stat]: value }) as StatEntry)
       ),
       ...this.workedTiles.flatMap((tile) => tile.getStats()),
-      ...Pantheons.getCityYields(this)
+      ...Beliefs.getCityYields(this)
     ];
     for (const stat of statLines) {
       const statType = Object.keys(stat)[0] as keyof CityStats;
@@ -955,6 +956,7 @@ export class City {
     }
 
     BuildingEffects.applyToCityStats(this, cityStats);
+    Beliefs.applyToCityStats(this, cityStats);
 
     // Unhappiness slows growth. Applied to the stat itself, so the city screen shows the food that's
     // really banked each turn.
@@ -1296,7 +1298,7 @@ export class City {
     const building = Building.createFromName(buildingName);
     if (!building?.isWonderBuilding()) return production;
 
-    const percent = Pantheons.getWonderProductionPercent(this.player, building.getRequiredTech());
+    const percent = Beliefs.getWonderProductionPercent(this.player, building.getRequiredTech());
     return Math.floor((production * (100 + percent)) / 100);
   }
 

@@ -7,7 +7,7 @@ import { ButtonSize } from "../../components/Button";
 import { ListBox } from "../../components/Listbox";
 import { YieldLine } from "../../components/YieldLine";
 import { UITheme } from "../../UITheme";
-import { PantheonTooltip } from "./PantheonTooltip";
+import { BeliefTooltip } from "./BeliefTooltip";
 
 /**
  * Civ 5's pantheon picker, down the left of the screen like a city's production list: every pantheon
@@ -31,7 +31,7 @@ export class PantheonList extends ListBox {
   // The pantheon under the mouse, and its tooltip once built. tooltipBuild drops a tooltip that finishes
   // building after the mouse has already moved on.
   private hoveredPantheon: PantheonData | undefined;
-  private tooltip: PantheonTooltip | undefined;
+  private tooltip: BeliefTooltip | undefined;
   private tooltipBuild = 0;
   private rowsByName = new Map<string, { getY(): number }>();
 
@@ -90,7 +90,7 @@ export class PantheonList extends ListBox {
     return true;
   }
 
-  public getTooltip(): PantheonTooltip | undefined {
+  public getTooltip(): BeliefTooltip | undefined {
     return this.tooltip;
   }
 
@@ -189,7 +189,7 @@ export class PantheonList extends ListBox {
   private async showTooltip(pantheon: PantheonData, rowY: number) {
     this.hoveredPantheon = pantheon;
     const build = ++this.tooltipBuild;
-    const tooltip = await PantheonTooltip.create(this.x + this.width + 8, rowY, pantheon);
+    const tooltip = await BeliefTooltip.create(this.x + this.width + 8, rowY, pantheon);
     if (build !== this.tooltipBuild) return;
 
     this.removeTooltip();

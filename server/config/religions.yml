@@ -1,0 +1,185 @@
+# Civ 5 (Brave New World) religions and beliefs. A player with a pantheon founds a religion once their
+# faith reaches Religions.getCost(), choosing a religion no one else has, one founder belief and one
+# follower belief (none taken by another religion). For now every one of the founder's own cities
+# follows it, with all its citizens as followers; religions don't spread to other civilizations yet.
+#
+# Beliefs are written like config/pantheons.yml's pantheons (yields, text, description, effects,
+# not_yet), with these effects besides the pantheon ones (see BeliefEffectsData in
+# server/src/religion/Beliefs.ts):
+#   building_yields.min_followers   - only in cities with at least this many followers.
+#   wonder_yields                   - extra yields for each great wonder in a following city.
+#   production_percent_per_follower - { percent, max }: added to a following city's production.
+#   growth_percent_at_peace         - faster growth while the owner is at war with no civilization.
+#   gold_per_city                   - gold each turn for each city following the religion.
+#   happiness_per_cities            - 1 happiness for every `per` cities following it.
+#   gold_per_followers              - 1 gold each turn for every `per` followers.
+#   gold_on_conversion              - gold once for each city that comes to follow it.
+religions:
+  - Buddhism
+  - Christianity
+  - Confucianism
+  - Eastern Orthodoxy
+  - Hinduism
+  - Islam
+  - Judaism
+  - Protestantism
+  - Shinto
+  - Sikhism
+  - Taoism
+  - Tengriism
+  - Zoroastrianism
+
+founder_beliefs:
+  - name: Ceremonial Burial
+    yields: { happiness: 1 }
+    text: "for every 2 cities following"
+    description: "+1 Happiness for every 2 Cities following this religion"
+    effects:
+      happiness_per_cities: { per: 2 }
+  - name: Church Property
+    yields: { gold: 2 }
+    text: "for each city following"
+    description: "+2 Gold for each City following this religion"
+    effects:
+      gold_per_city: 2
+  - name: Initiation Rites
+    yields: { gold: 100 }
+    text: "when each city first converts"
+    description: "+100 Gold when each City first converts to this religion"
+    effects:
+      gold_on_conversion: 100
+  - name: Interfaith Dialogue
+    text: "Science when Missionaries spread it"
+    description: "Gain Science when a Missionary spreads this religion to cities of other religions"
+    not_yet: [Missionaries aren't in the game yet, so this gives nothing]
+  - name: Papal Primacy
+    text: "+15 resting Influence with City-States"
+    description: "+15 to Influence resting point with City-States following this religion"
+    not_yet: [City-States aren't in the game yet, so this gives nothing]
+  - name: Peace Loving
+    yields: { happiness: 1 }
+    text: "per 8 followers in friendly foreign cities"
+    description: "+1 Happiness for every 8 followers of this religion in non-enemy foreign cities"
+    not_yet: [Religions don't spread to other civilizations yet, so this gives nothing]
+  - name: Pilgrimage
+    yields: { faith: 2 }
+    text: "for each foreign city following"
+    description: "+2 Faith for each foreign City following this religion"
+    not_yet: [Religions don't spread to other civilizations yet, so this gives nothing]
+  - name: Tithe
+    yields: { gold: 1 }
+    text: "for every 4 followers"
+    description: "+1 Gold for every 4 followers of this religion"
+    effects:
+      gold_per_followers: { per: 4 }
+  - name: World Church
+    yields: { culture: 1 }
+    text: "per 5 followers in other civilizations"
+    description: "+1 Culture for every 5 followers of this religion in other civilizations"
+    not_yet: [Religions don't spread to other civilizations yet, so this gives nothing]
+
+follower_beliefs:
+  - name: Asceticism
+    yields: { happiness: 1 }
+    text: "from Shrines in cities with 3 followers"
+    description: "Shrines provide +1 Happiness in cities with 3 followers"
+    effects:
+      building_yields:
+        - building: Shrine
+          min_followers: 3
+          stats: { happiness: 1 }
+  - name: Cathedrals
+    text: "Use Faith to buy Cathedrals"
+    description: "Use Faith to purchase Cathedrals"
+    not_yet: [Buying with Faith and the Cathedral aren't in the game yet, so this gives nothing]
+  - name: Choral Music
+    yields: { culture: 2 }
+    text: "from Temples in cities with 5 followers"
+    description: "Temples provide +2 Culture in cities with 5 followers"
+    effects:
+      building_yields:
+        - building: Temple
+          min_followers: 5
+          stats: { culture: 2 }
+  - name: Divine Inspiration
+    yields: { faith: 2 }
+    text: "from each World Wonder"
+    description: "Each World Wonder provides +2 Faith in city"
+    effects:
+      wonder_yields: { faith: 2 }
+  - name: Feed the World
+    yields: { food: 1 }
+    text: "from each Shrine and Temple"
+    description: "Shrines and Temples provide +1 Food each in city"
+    effects:
+      building_yields:
+        - building: Shrine
+          stats: { food: 1 }
+        - building: Temple
+          stats: { food: 1 }
+  - name: Guruship
+    yields: { production: 2 }
+    text: "if the city has a Specialist"
+    description: "+2 Production if city has a Specialist"
+    not_yet: [Specialists aren't in the game yet, so this gives nothing]
+  - name: Holy Warriors
+    text: "Use Faith to buy pre-Industrial land units"
+    description: "Use Faith to purchase pre-Industrial land units"
+    not_yet: [Buying with Faith isn't in the game yet, so this gives nothing]
+  - name: Liturgical Drama
+    yields: { faith: 1 }
+    text: "from Amphitheaters with 3 followers"
+    description: "Amphitheaters provide +1 Faith in cities with 3 followers"
+    effects:
+      building_yields:
+        - building: Amphitheater
+          min_followers: 3
+          stats: { faith: 1 }
+  - name: Monasteries
+    text: "Use Faith to buy Monasteries"
+    description: "Use Faith to purchase Monasteries"
+    not_yet: [Buying with Faith and the Monastery aren't in the game yet, so this gives nothing]
+  - name: Mosques
+    text: "Use Faith to buy Mosques"
+    description: "Use Faith to purchase Mosques"
+    not_yet: [Buying with Faith and the Mosque aren't in the game yet, so this gives nothing]
+  - name: Pagodas
+    text: "Use Faith to buy Pagodas"
+    description: "Use Faith to purchase Pagodas"
+    not_yet: [Buying with Faith and the Pagoda aren't in the game yet, so this gives nothing]
+  - name: Peace Gardens
+    yields: { happiness: 2 }
+    text: "from Gardens"
+    description: "Gardens provide +2 Happiness in city"
+    effects:
+      building_yields:
+        - building: Garden
+          stats: { happiness: 2 }
+  - name: Religious Art
+    yields: { culture: 5 }
+    text: "from the Hermitage"
+    description: "Hermitage provides +5 Culture and +5 Tourism"
+    effects:
+      building_yields:
+        - building: Hermitage
+          stats: { culture: 5 }
+    not_yet: [Tourism isn't in the game yet]
+  - name: Religious Center
+    yields: { happiness: 2 }
+    text: "from Temples in cities with 5 followers"
+    description: "Temples provide +2 Happiness in cities with 5 followers"
+    effects:
+      building_yields:
+        - building: Temple
+          min_followers: 5
+          stats: { happiness: 2 }
+  - name: Religious Community
+    text: "+1% Production per follower (max +15%)"
+    description: "+1% Production for each follower (Max +15%)"
+    effects:
+      production_percent_per_follower: { percent: 1, max: 15 }
+  - name: Swords into Plowshares
+    text: "15% faster growth while at peace"
+    description: "15% faster Food Growth rate for city if not at war"
+    effects:
+      growth_percent_at_peace: 15

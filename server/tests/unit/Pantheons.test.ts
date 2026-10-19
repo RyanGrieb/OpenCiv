@@ -4,6 +4,7 @@ import { Game } from "../../src/Game";
 import { GameMap } from "../../src/map/GameMap";
 import { Tile } from "../../src/map/Tile";
 import { Player } from "../../src/Player";
+import { Beliefs } from "../../src/religion/Beliefs";
 import { Pantheons } from "../../src/religion/Pantheons";
 import { PlayerReligion } from "../../src/religion/PlayerReligion";
 
@@ -65,7 +66,7 @@ describe("Pantheons", () => {
   };
 
   const bonusesOn = (tile: Tile) =>
-    Object.assign({}, ...Pantheons.getTileBonusSources(tile).flatMap((source) => source.stats));
+    Object.assign({}, ...Beliefs.getTileBonusSources(tile).flatMap((source) => source.stats));
 
   beforeEach(() => {
     players = new Map();
@@ -190,21 +191,21 @@ describe("Pantheons", () => {
       const capital = cityOf(player, { buildings: ["Palace"] });
       const other = cityOf(player);
 
-      expect(Object.assign({}, ...Pantheons.getCityYields(capital))).toEqual({
+      expect(Object.assign({}, ...Beliefs.getCityYields(capital))).toEqual({
         production: 1,
         gold: 1,
         science: 1,
         culture: 1,
         faith: 1
       });
-      expect(Pantheons.getCityYields(other)).toEqual([]);
+      expect(Beliefs.getCityYields(other)).toEqual([]);
     });
 
     it("gives God of Craftsmen +1 Production in cities of 3 or more", () => {
       const player = playerWith({ pantheon: "God of Craftsmen" });
 
-      expect(Pantheons.getCityYields(cityOf(player, { population: 2 }))).toEqual([]);
-      expect(Pantheons.getCityYields(cityOf(player, { population: 3 }))).toEqual([{ production: 1 }]);
+      expect(Beliefs.getCityYields(cityOf(player, { population: 2 }))).toEqual([]);
+      expect(Beliefs.getCityYields(cityOf(player, { population: 3 }))).toEqual([{ production: 1 }]);
     });
 
     it("counts Goddess of Love's happiness for the empire, not in the city's yields", () => {
@@ -213,38 +214,38 @@ describe("Pantheons", () => {
       cityOf(player, { population: 6 });
       cityOf(player, { population: 5 });
 
-      expect(Pantheons.getCityYields(bigCity)).toEqual([]);
-      expect(Pantheons.getHappiness(player)).toEqual([{ source: "Goddess of Love", amount: 2 }]);
+      expect(Beliefs.getCityYields(bigCity)).toEqual([]);
+      expect(Beliefs.getHappiness(player)).toEqual([{ source: "Goddess of Love", amount: 2 }]);
     });
 
     it("makes growth 10% faster with Fertility Rites, and borders 15% faster with Religious Settlements", () => {
-      expect(Pantheons.getFoodRequiredToGrow(22, playerWith({ pantheon: "Fertility Rites" }))).toBe(20);
-      expect(Pantheons.getFoodRequiredToGrow(22, playerWith())).toBe(22);
-      expect(Pantheons.getBorderCost(23, playerWith({ pantheon: "Religious Settlements" }))).toBe(20);
+      expect(Beliefs.getFoodRequiredToGrow(22, playerWith({ pantheon: "Fertility Rites" }))).toBe(20);
+      expect(Beliefs.getFoodRequiredToGrow(22, playerWith())).toBe(22);
+      expect(Beliefs.getBorderCost(23, playerWith({ pantheon: "Religious Settlements" }))).toBe(20);
     });
 
     it("speeds up only Ancient and Classical wonders with Monument to the Gods", () => {
       const player = playerWith({ pantheon: "Monument to the Gods" });
 
-      expect(Pantheons.getWonderProductionPercent(player, "Pottery")).toBe(15);
-      expect(Pantheons.getWonderProductionPercent(player, "Philosophy")).toBe(15);
-      expect(Pantheons.getWonderProductionPercent(player, "Theology")).toBe(0);
+      expect(Beliefs.getWonderProductionPercent(player, "Pottery")).toBe(15);
+      expect(Beliefs.getWonderProductionPercent(player, "Philosophy")).toBe(15);
+      expect(Beliefs.getWonderProductionPercent(player, "Theology")).toBe(0);
     });
 
     it("adds up what the pantheon gives a city: its worked tiles' bonuses, its own yields and happiness", () => {
       const player = playerWith({ pantheon: "Sacred Waters" });
       const city = cityOf(player);
       city.getTile().setRiverSide(0, true, false);
-      expect(Pantheons.getCityBonuses(city)).toEqual({ happiness: 1 });
+      expect(Beliefs.getCityBonuses(city)).toEqual({ happiness: 1 });
 
       const desertPlayer = playerWith({ pantheon: "Desert Folklore" });
       const desertCity = cityOf(desertPlayer);
       desertCity.getWorkedTiles().push(ownedTile(desertCity, "desert"), ownedTile(desertCity, "floodplains"));
-      expect(Pantheons.getCityBonuses(desertCity)).toEqual({ faith: 2 });
+      expect(Beliefs.getCityBonuses(desertCity)).toEqual({ faith: 2 });
     });
 
     it("raises city strike strength by 30% with Goddess of Protection", () => {
-      expect(Pantheons.getCityRangedModifiers(playerWith({ pantheon: "Goddess of Protection" }))).toEqual([
+      expect(Beliefs.getCityRangedModifiers(playerWith({ pantheon: "Goddess of Protection" }))).toEqual([
         { label: "Goddess of Protection", value: 0.3 }
       ]);
     });

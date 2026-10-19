@@ -10,7 +10,7 @@ import { MapResources } from "./MapResources";
 import { NaturalWonders } from "./NaturalWonders";
 import { TechEffects } from "../research/TechEffects";
 import { BuildingEffects } from "../city/BuildingEffects";
-import { Pantheons } from "../religion/Pantheons";
+import { Beliefs } from "../religion/Beliefs";
 
 // A tile/building stat-line is represented as an array of single-key partial objects
 // (e.g. [{ science: 0 }, { gold: 0 }, ...]) rather than one flat dictionary.
@@ -978,7 +978,7 @@ export class Tile {
     });
     sources.push(...TechEffects.getTileBonusSources(this, player));
     sources.push(...BuildingEffects.getTileBonusSources(this));
-    sources.push(...Pantheons.getTileBonusSources(this));
+    sources.push(...Beliefs.getTileBonusSources(this));
 
     // As in Civ 5, a city center always makes at least 2 Food.
     const food = sources.flatMap((source) => source.stats).reduce((total, stat) => total + (stat.food ?? 0), 0);

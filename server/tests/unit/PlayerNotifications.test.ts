@@ -59,7 +59,7 @@ describe('PlayerNotifications', () => {
       getWebsocket: jest.fn(() => mockWebsocket),
       sendNetworkEvent: jest.fn(),
       getDiplomacy: jest.fn(() => ({ toJSON: () => relations })),
-      getReligion: jest.fn(() => ({ canFoundPantheon: () => canFoundPantheon })),
+      getReligion: jest.fn(() => ({ canFoundPantheon: () => canFoundPantheon, canFoundReligion: () => false })),
     } as unknown as jest.Mocked<Player>;
 
     notifications = new PlayerNotifications(mockPlayer);

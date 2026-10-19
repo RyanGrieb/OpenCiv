@@ -250,6 +250,14 @@ ScenarioRegistry.register("Pantheons", ScenarioCategory.RELIGION, async () => {
   const module = await import("./scenarios/Pantheons.test");
   return module.setupPantheonsTest;
 });
+ScenarioRegistry.register("ReligionPicker", ScenarioCategory.RELIGION, async () => {
+  const module = await import("./scenarios/ReligionPicker.test");
+  return module.setupReligionPickerTest;
+});
+ScenarioRegistry.register("FoundReligion", ScenarioCategory.RELIGION, async () => {
+  const module = await import("./scenarios/FoundReligion.test");
+  return module.setupFoundReligionTest;
+});
 ScenarioRegistry.register("Trapping", ScenarioCategory.ECONOMY, async () => {
   const module = await import("./scenarios/Trapping.test");
   return module.setupTrappingTest;
