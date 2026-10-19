@@ -31,7 +31,7 @@ export function setupGlobeDepthTest(game: Game) {
   const hoveredTile = (): Tile | undefined => clientPlayer()["hoveredTile"]?.getRepresentedTile();
   const mouse = (type: string, [clientX, clientY]: number[], options: MouseEventInit = {}) =>
     game.getCanvas().dispatchEvent(new MouseEvent(type, { clientX, clientY, bubbles: true, ...options }));
-  const nameLabel = () => (cityTile?.getCity() as unknown as Record<string, any>)?.["nameLabel"];
+  const cityBanner = () => (cityTile?.getCity() as unknown as Record<string, any>)?.["banner"];
   // How often each of the globe's pictures has been handed to the GPU.
   const uploads = () => [
     globe()["ground"].patchesCopied,
@@ -155,7 +155,7 @@ export function setupGlobeDepthTest(game: Game) {
       object: unknown;
       billboard: Record<string, number>;
     }[]) {
-      const tile = object === warrior ? warrior.getTile() : object === nameLabel() ? cityTile : undefined;
+      const tile = object === warrior ? warrior.getTile() : object === cityBanner() ? cityTile : undefined;
       if (tile) onTiles.push({ billboard, tile: `${tile.getGridX()},${tile.getGridY()}` });
     }
 
@@ -227,9 +227,9 @@ export function setupGlobeDepthTest(game: Game) {
         id: settler.getID(),
         actionName: "settle"
       });
-      await utils.waitUntil(() => !!nameLabel(), 10000, "The city and its banner");
+      await utils.waitUntil(() => !!cityBanner(), 10000, "The city and its banner");
     },
-    verification: () => !!nameLabel()
+    verification: () => !!cityBanner()
   });
 
   runner.addStep({
@@ -239,7 +239,7 @@ export function setupGlobeDepthTest(game: Game) {
       await lookAt(cityTile);
       utils.log(`${sprites()["mapBillboards"].length} pieces of the map's sprites stand on the globe`, "yellow");
     },
-    verification: () => sprites()["mapBillboards"].length > 0 && standing(nameLabel()) && standing(warrior)
+    verification: () => sprites()["mapBillboards"].length > 0 && standing(cityBanner()) && standing(warrior)
   });
 
   runner.addStep({
@@ -352,7 +352,7 @@ export function setupGlobeDepthTest(game: Game) {
     name: "Clicking the city's banner, where it stands over the city, opens the city",
     action: async () => {
       utils.getClientPlayer().unselectUnit();
-      const banner = globe().screenPointOf(nameLabel(), 0.5, 0.5);
+      const banner = globe().screenPointOf(cityBanner(), 0.5, 0.5);
       if (!banner) return;
 
       mouse("mousemove", banner);

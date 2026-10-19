@@ -82,8 +82,6 @@ export interface ProductionOptions {
 export class City extends ActorGroup {
   // What a city looks like until the server says otherwise.
   public static readonly DEFAULT_ERA = "ancient";
-  private static readonly HEALTH_BAR_WIDTH = 28;
-  private static readonly HEALTH_BAR_HEIGHT = 3;
   private static readonly BANNER_ICON_SIZE = 7;
   // The bottom of the city's tile, from its center: where a unit there stands (see Unit.getStandingPoint()).
   private static readonly STANDING_BELOW_CENTER = 14;
@@ -105,7 +103,6 @@ export class City extends ActorGroup {
   // Only the owner hears it: turns until the next citizen, or null while the city isn't growing.
   private turnsToGrow: number | null = null;
   // Its own scene object, standing over the city on the globe - see CityHealthBar.
-  private healthBar: CityHealthBar;
   private health: number;
   private maxHealth: number;
   private strength: number;
@@ -241,21 +238,9 @@ export class City extends ActorGroup {
 
         this.showDamage(this.health - data.defenderCityHealth);
         this.health = data.defenderCityHealth;
+        this.refreshBanner();
       }
     });
-  }
-
-  // Only once damaged, as in Civ 5: green for health left, red for what's lost, between banner and city.
-  public drawHealthBar(canvasContext: CanvasRenderingContext2D) {
-    if (!this.tile || this.health >= this.maxHealth) return;
-
-    const x = this.tile.getX() + (this.tile.getWidth() - City.HEALTH_BAR_WIDTH) / 2;
-    const y = this.getHealthBarY();
-    const healthWidth = (Math.max(0, this.health) / this.maxHealth) * City.HEALTH_BAR_WIDTH;
-    const bar = { y, height: City.HEALTH_BAR_HEIGHT, canvasContext, fill: true, cameraApplies: true };
-
-    Game.getInstance().drawRect({ ...bar, x, width: City.HEALTH_BAR_WIDTH, color: "red" });
-    Game.getInstance().drawRect({ ...bar, x, width: healthWidth, color: "lime" });
   }
 
   /**
@@ -269,14 +254,6 @@ export class City extends ActorGroup {
 
     this.tile = tile;
     this.tile.setCity(this);
-    this.healthBar = new CityHealthBar(this, this.getZIndex());
-    Standing.set(this.healthBar, {
-      anchor: () => this.getTileMiddle(),
-      tileMiddle: () => this.getTileMiddle(),
-      bounds: () => this.getHealthBarBounds(),
-      overlay: true
-    });
-    Game.getInstance().getCurrentScene().addActor(this.healthBar);
     this.createBanner();
   }
 
@@ -338,9 +315,7 @@ export class City extends ActorGroup {
     this.player.removeCity(this);
     super.onDestroyed();
     const scene = Game.getInstance().getCurrentScene();
-    [this.banner, this.strikeIcon, this.healthBar]
-      .filter((actor) => actor)
-      .forEach((actor) => scene.removeActor(actor));
+    [this.banner, this.strikeIcon].filter((actor) => actor).forEach((actor) => scene.removeActor(actor));
     this.removeTerritoryOverlays();
   }
 
@@ -539,17 +514,6 @@ export class City extends ActorGroup {
     return [center.x, center.y];
   }
 
-  // Just under the banner, as in Civ 5.
-  private getHealthBarY(): number {
-    return this.banner ? this.banner.getPillBottom() + 0.5 : this.tile.getY() + 10;
-  }
-
-  private getHealthBarBounds(): [number, number, number, number] {
-    const x = this.tile.getX() + (this.tile.getWidth() - City.HEALTH_BAR_WIDTH) / 2;
-    const y = this.getHealthBarY();
-    return [x - 1, y - 1, x + City.HEALTH_BAR_WIDTH + 1, y + City.HEALTH_BAR_HEIGHT + 1];
-  }
-
   // "-24" rising from the city, like the damage over a unit.
   private showDamage(damage: number) {
     if (!this.tile || damage <= 0) return;
@@ -564,25 +528,5 @@ export class City extends ActorGroup {
       fromY: this.tile.getY() + 4,
       toY: this.tile.getY() - 16
     }).show();
-  }
-}
-
-// The scene object a City's health bar is drawn through: the city's territory lies on the ground, and
-// the bar stands up over it on the globe.
-class CityHealthBar extends Actor {
-  private city: City;
-
-  constructor(city: City, z: number) {
-    // Zero-sized so it never catches the mouse.
-    super({ x: 0, y: 0, z, width: 0, height: 0 });
-    this.city = city;
-  }
-
-  public draw(canvasContext: CanvasRenderingContext2D) {
-    this.city.drawHealthBar(canvasContext);
-  }
-
-  public getDrawState() {
-    return `${this.city.getHealth()}/${this.city.getMaxHealth()}`;
   }
 }

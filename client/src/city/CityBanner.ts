@@ -25,7 +25,11 @@ interface Box {
  * with the map; clicking the owner's opens the city, hovering the religion icon lists followers.
  */
 export class CityBanner extends Actor {
-  private static readonly HEIGHT = 7;
+  private static readonly HEIGHT = 8;
+  // A damaged city's health, as a thin bar along the top of the pill over the name.
+  private static readonly HEALTH_BAR_HEIGHT = 1.25;
+  private static readonly HEALTH_COLOR = "#4fe04f";
+  private static readonly LOST_HEALTH_COLOR = "#d83a2e";
   // The pill's top, down from the top of the city's tile: it lies over the top of the city.
   private static readonly BELOW_TILE_TOP = 2;
   private static readonly RELIGION_ICON_SIZE = 5;
@@ -55,6 +59,7 @@ export class CityBanner extends Actor {
   private growthTurns: Box | undefined;
   private name: Box;
   private religionIcon: Box | undefined;
+  private healthBar: Box | undefined;
   private defenseTab: Box;
   private defenseIcon: Box;
   private defenseText: Box;
@@ -166,7 +171,15 @@ export class CityBanner extends Actor {
       x += growthTurnsWidth;
     }
 
+    // A damaged city's name moves down to make room for its health bar above it.
+    this.healthBar = undefined;
     this.name = { x: x + gap, y: top, width: nameWidth, height };
+    if (this.isDamaged()) {
+      const barTop = top + 1;
+      this.healthBar = { x: x + gap, y: barTop, width: nameWidth, height: CityBanner.HEALTH_BAR_HEIGHT };
+      const nameTop = barTop + CityBanner.HEALTH_BAR_HEIGHT;
+      this.name = { x: x + gap, y: nameTop, width: nameWidth, height: top + height - 0.5 - nameTop };
+    }
     x += gap + nameWidth;
 
     this.religionIcon = undefined;
@@ -247,6 +260,7 @@ export class CityBanner extends Actor {
       CityBanner.drawText(canvasContext, this.getGrowthTurnsText(), this.growthTurns, CityBanner.TURNS_FONT);
     }
     CityBanner.drawText(canvasContext, this.city.getName(), this.name, CityBanner.NAME_FONT);
+    if (this.healthBar) this.drawHealthBar(canvasContext);
 
     const religion = this.city.getReligion().majority;
     if (this.religionIcon && religion)
@@ -282,6 +296,7 @@ export class CityBanner extends Actor {
       this.getGrowthFraction(),
       this.city.getReligion().majority ?? "",
       this.getDefenseText(),
+      `${this.city.getHealth()}/${this.city.getMaxHealth()}`,
       production ? `${production.name}:${production.progress ?? 0}/${production.cost}:${production.turns}` : ""
     ].join("|");
   }
@@ -289,6 +304,21 @@ export class CityBanner extends Actor {
   public onDestroyed() {
     this.hideTooltip();
     super.onDestroyed();
+  }
+
+  // Green for health left, red for what's lost.
+  private drawHealthBar(context: CanvasRenderingContext2D) {
+    const { x, y, width, height } = this.healthBar;
+    const left = Math.max(0, this.city.getHealth()) / this.city.getMaxHealth();
+    context.fillStyle = CityBanner.LOST_HEALTH_COLOR;
+    context.fillRect(x, y, width, height);
+    context.fillStyle = CityBanner.HEALTH_COLOR;
+    context.fillRect(x, y, width * left, height);
+  }
+
+  // Only once damaged, as in Civ 5.
+  private isDamaged(): boolean {
+    return this.city.getHealth() < this.city.getMaxHealth();
   }
 
   private drawDefense(context: CanvasRenderingContext2D) {

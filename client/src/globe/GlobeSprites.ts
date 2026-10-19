@@ -328,8 +328,8 @@ export class GlobeSprites {
   // Fog of war more opaque than this over a sprite's foot means clouds, which hide it.
   private static readonly CLOUD_HIDES = 0.75;
   // Labels and badges are drawn into their atlas at the screen's resolution, up to this many atlas
-  // pixels to a world pixel, so text stays sharp close up.
-  private static readonly MAX_DETAIL = 4;
+  // pixels to a world pixel, so text and small icons (a city's banner) stay sharp close up.
+  private static readonly MAX_DETAIL = 8;
   // Pixels added around each label or badge's rectangle, for text outlines and shadows.
   private static readonly MARGIN = 2;
   // A billboard stands straight out of the ground, rather than upright, where the middle of its tile
@@ -900,7 +900,9 @@ export class GlobeSprites {
     camera: THREE.Camera,
     useView: (view: WorldView) => void
   ) {
-    const scale = Math.max(1, Math.min(GlobeSprites.MAX_DETAIL, Math.ceil(detail)));
+    // A step past the screen's resolution, as what stands nearer the camera than the view's middle (a
+    // tilted view) is drawn larger than `detail` says.
+    const scale = Math.max(1, Math.min(GlobeSprites.MAX_DETAIL, Math.ceil(detail) + 1));
     const print = new Fingerprint().add(scale);
     const found: {
       object: SceneObject;
