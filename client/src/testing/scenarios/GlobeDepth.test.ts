@@ -64,10 +64,13 @@ export function setupGlobeDepthTest(game: Game) {
     );
     const pointLatitude = Math.asin(point[1]);
     const [x, y] = globe().projection.toWorld(Math.atan2(point[0], point[2]), pointLatitude);
-    // As far out wherever it looks from as the flat map's zoom of 0.9 is at the equator.
+    // As far out wherever it looks from as the flat map's zoom of 0.9 is at the equator in a window 720
+    // pixels tall. The camera's distance follows the zoom and the window's height, so this keeps it, and
+    // where the planet's outline falls, the same in any window: closer in, a short window would put the
+    // warrior on the outline where these views mean it to stand on the planet's face.
     scene()
       .getCamera()
-      .jumpToLocation(x, y, 0.9 * Math.cos(pointLatitude));
+      .jumpToLocation(x, y, ((0.9 * window.innerHeight) / 720) * Math.cos(pointLatitude));
     await utils.delay(1500);
   };
   // Where the planet's middle is on screen: what stands straight out of the ground points away from it,
@@ -303,14 +306,15 @@ export function setupGlobeDepthTest(game: Game) {
     name: "However the ground turns or tilts away on screen, the warrior's feet stay on its tile, below its middle",
     action: async () => {
       // Close up and tilted toward the horizon; below the planet's middle; toward its east edge; down to
-      // its right.
+      // its right. Each well inside the outline (a radian down to the right sat right at it, on the
+      // narrowest maps), where the warrior stands upright rather than straight out of the ground.
       await lookAt(warrior.getTile());
       feetOnTile = [warriorFeet()];
       await lookFromThe("north", 0.7);
       feetOnTile.push(warriorFeet());
       await lookFromThe("west", 0.8);
       feetOnTile.push(warriorFeet());
-      await lookFromThe("northwest", 1);
+      await lookFromThe("northwest", 0.9);
       feetOnTile.push(warriorFeet());
       const percents = (key: "inside" | "aside") =>
         feetOnTile.map((feet) => `${Math.round(feet[key] * 100)}%`).join(", ");
