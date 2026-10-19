@@ -24,6 +24,8 @@ export function setupAquaticSandboxTest(game: Game) {
         WebsocketClient.sendMessage({ event: "setGameOption", option, value: true });
       }
       WebsocketClient.sendMessage({ event: "setGameOption", option: "allowBarbarians", value: false });
+      // The preset's extra ships cost upkeep from turn one; an empty treasury would disband one.
+      WebsocketClient.sendMessage({ event: "setGameOption", option: "startingGold", value: 100 });
       WebsocketClient.sendMessage({ event: "setState", state: "in_game" });
       await utils.waitUntil(() => game.getCurrentScene().getName() === "in_game", 15000, "Scene to become in_game");
     },
