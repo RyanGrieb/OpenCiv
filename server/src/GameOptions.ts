@@ -253,7 +253,8 @@ export const GameOptionDefinitions: GameOptionDefinition[] = [
     key: "techCostPercent",
     label: "Tech Cost %",
     type: "number",
-    min: 1,
+    // 0 makes every tech cost 1 science, which scenarios use to research deep into the tree.
+    min: 0,
     max: 300,
     step: 1,
     hidden: true,

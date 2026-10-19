@@ -9,9 +9,9 @@ import { InGameScene } from "../../scene/type/InGameScene";
 import { TestUtils } from "../TestUtils";
 
 // A city is drawn in its owner's era, as the server reports it, in one of three looks per era picked
-// from its coordinates. With every tech costing 1 science, settles a city and researches into the
-// Classical and then the Medieval Era, checking the city is redrawn each time. Stays zoomed in on the
-// city so each change can be seen by eye.
+// from its coordinates. With every tech costing 1 science, settles a city and researches one era after
+// another up to the Information Era, by the shortest path into each, checking the city is redrawn each
+// time. Stays zoomed in on the city so each change can be seen by eye.
 export function setupCityErasTest(game: Game) {
   const runner = new TestRunner("CityEras");
   const utils = new TestUtils(game);
@@ -36,7 +36,7 @@ export function setupCityErasTest(game: Game) {
   runner.addStep({
     name: "Start a game with 1-science techs and settle a city",
     action: async () => {
-      await utils.ensureInGame({ allowBarbarians: false, startWithAllTechs: false, techCostPercent: 1 });
+      await utils.ensureInGame({ allowBarbarians: false, startWithAllTechs: false, techCostPercent: 0 });
       const settler = await utils.findUnitWithAction("settle");
       const tile = settler.getTile();
       WebsocketClient.sendMessage({
@@ -64,17 +64,67 @@ export function setupCityErasTest(game: Game) {
       )
   });
 
-  runner.addStep({
-    name: "Mathematics brings the Classical Era, and the city is rebuilt in its style",
-    action: async () => researchInOrder(["Animal Husbandry", "Archery", "The Wheel", "Mathematics"]),
-    verification: () => city.getEra() === "classical" && drawnAs().startsWith("city_classical_")
-  });
+  // Each era's techs, in research order: the fewest techs, on top of the earlier eras', that reach it.
+  const eraPaths: [string, string, string[]][] = [
+    ["classical", "Mathematics", ["Animal Husbandry", "Archery", "The Wheel", "Mathematics"]],
+    ["medieval", "Guilds", ["Currency", "Guilds"]],
+    [
+      "renaissance",
+      "Printing Press",
+      [
+        "Mining",
+        "Masonry",
+        "Construction",
+        "Engineering",
+        "Machinery",
+        "Bronze Working",
+        "Iron Working",
+        "Metal Casting",
+        "Physics",
+        "Printing Press"
+      ]
+    ],
+    ["industrial", "Rifling", ["Steel", "Gunpowder", "Metallurgy", "Rifling"]],
+    [
+      "modern",
+      "Radio",
+      [
+        "Pottery",
+        "Writing",
+        "Drama and Poetry",
+        "Calendar",
+        "Philosophy",
+        "Theology",
+        "Trapping",
+        "Horseback Riding",
+        "Civil Service",
+        "Education",
+        "Chivalry",
+        "Banking",
+        "Economics",
+        "Acoustics",
+        "Architecture",
+        "Scientific Theory",
+        "Electricity",
+        "Radio"
+      ]
+    ],
+    [
+      "atomic",
+      "Atomic Theory",
+      ["Industrialization", "Steam Power", "Replaceable Parts", "Flight", "Electronics", "Plastics", "Atomic Theory"]
+    ],
+    ["information", "Satellites", ["Ballistics", "Radar", "Rocketry", "Satellites"]]
+  ];
 
-  runner.addStep({
-    name: "Guilds brings the Medieval Era, and the city is rebuilt again",
-    action: async () => researchInOrder(["Currency", "Guilds"]),
-    verification: () => city.getEra() === "medieval" && drawnAs().startsWith("city_medieval_")
-  });
+  for (const [era, firstTech, path] of eraPaths) {
+    const eraName = era.charAt(0).toUpperCase() + era.slice(1);
+    runner.addStep({
+      name: `${firstTech} brings the ${eraName} Era, and the city is rebuilt in its style`,
+      action: async () => researchInOrder(path),
+      verification: () => city.getEra() === era && drawnAs().startsWith(`city_${era}_`)
+    });
+  }
 
   return runner;
 }
