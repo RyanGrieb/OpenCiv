@@ -75,7 +75,14 @@ export class Tile extends Actor {
   ];
   // Standing sprites with separately marked pieces that stay positioned relative to their tile on
   // the globe, rather than each piece standing on its own foot at the planet's outline.
-  public static readonly SHARED_FOOT_STANDING_TILE_TYPES = ["barbarian_camp"];
+  public static readonly SHARED_FOOT_STANDING_TILE_TYPES = [
+    "barbarian_camp",
+    "deer_camp",
+    "bison_camp",
+    "ivory_camp",
+    "furs_camp",
+    "truffles_camp"
+  ];
   // Tile types drawn some other way than their own sprite - roads connect to their neighbors (see
   // Road.createActors).
   private static readonly UNSPRITED_TILE_TYPES = ["road"];
