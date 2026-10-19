@@ -401,4 +401,17 @@ describe('PlayerVisibility', () => {
     expect(visibility.isVisible(farTile)).toBe(true);
     expect(visibility.hasDiscovered(farTile)).toBe(true);
   });
+
+  it('reveals the whole map for one player, sending it all once, and never fogs it again', () => {
+    (GameMap.getInstance() as unknown as { getTiles: () => Tile[][] }).getTiles = () => [[homeTile, farTile]];
+
+    visibility.revealAll();
+    visibility.revealAll();
+    visibility.update();
+
+    expect(visibility.isVisible(farTile)).toBe(true);
+    expect(sendTilesToPlayer).toHaveBeenCalledTimes(1);
+    expect(sendTilesToPlayer).toHaveBeenCalledWith(mockPlayer, [homeTile, farTile]);
+    expect(mockPlayer.sendNetworkEvent).not.toHaveBeenCalled();
+  });
 });

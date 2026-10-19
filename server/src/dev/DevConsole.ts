@@ -20,7 +20,8 @@ export class DevConsole {
   private static readonly HELP = [
     "help - lists these commands",
     "units - lists the units that can be spawned",
-    "spawn <unit> - spawns a unit of yours on the next tile you left click"
+    "spawn <unit> - spawns a unit of yours on the next tile you left click",
+    "reveal - lifts the fog of war for you, for the rest of the game"
   ];
 
   // Developer mode, set at launch (see ServerArgs.parseDevMode()): off, every command is refused.
@@ -71,6 +72,9 @@ export class DevConsole {
         };
       case "spawn":
         return DevConsole.spawn(player, argument, tile);
+      case "reveal":
+        player.getVisibility().revealAll();
+        return { lines: ["The whole map is revealed."] };
       default:
         return { lines: [`Unknown command "${command}". Type help for the list.`] };
     }

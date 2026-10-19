@@ -4,7 +4,6 @@ import { Game } from "../Game";
 import { Player } from "../Player";
 import { AncientRuins } from "../map/AncientRuins";
 import { GameMap } from "../map/GameMap";
-import { PlayerVisibility } from "../map/PlayerVisibility";
 import { Tile } from "../map/Tile";
 import { Unit } from "../unit/Unit";
 import { ConfigLoader } from "../util/ConfigLoader";
@@ -192,10 +191,10 @@ export class Barbarians {
       }
     }
 
-    if (!PlayerVisibility.mapRevealed()) {
-      for (const player of Game.getInstance().getPlayers().values()) {
-        if (player.getVisibility().isVisible(tile)) return false;
-      }
+    // A player who sees the whole map would rule out every tile, so only those with fog count.
+    for (const player of Game.getInstance().getPlayers().values()) {
+      const visibility = player.getVisibility();
+      if (!visibility.isRevealed() && visibility.isVisible(tile)) return false;
     }
 
     return true;

@@ -5,8 +5,8 @@ import { Unit } from "../../Unit";
 import { TestUtils } from "../TestUtils";
 
 // The developer console: ` opens it, "spawn archer" waits for a tile, and the next left click on the
-// map puts an Archer there. Ends with the console open, for trying other commands (type help). Needs
-// a server in developer mode: npm run try -- <branch> --dev.
+// map puts an Archer there, then reveal lifts the fog. Ends with the console open, for trying other
+// commands (type help). Needs a server in developer mode: npm run try -- <branch> --dev.
 export function setupDevConsoleTest(game: Game) {
   const runner = new TestRunner("DevConsole");
   const utils = new TestUtils(game);
@@ -86,6 +86,16 @@ export function setupDevConsoleTest(game: Game) {
       await utils.delay(100);
     },
     verification: () => devConsole().isOpen() && output().some((line) => line.startsWith("Spawned the Archer"))
+  });
+
+  runner.addStep({
+    name: "reveal lifts the fog of war",
+    action: async () => {
+      type("reveal");
+      press("Enter");
+      await utils.waitUntil(() => output().some((line) => line.includes("revealed")), 5000, "The server to answer");
+    },
+    verification: () => output().some((line) => line.includes("revealed"))
   });
 
   return runner;

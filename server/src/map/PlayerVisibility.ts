@@ -24,6 +24,8 @@ export class PlayerVisibility {
   private player: Player;
   private discovered: Set<Tile>;
   private visible: Set<Tile>;
+  // Sees the whole map, as with revealMap, but for this player alone (the dev console's reveal).
+  private revealed = false;
 
   constructor(player: Player) {
     this.player = player;
@@ -38,11 +40,24 @@ export class PlayerVisibility {
   }
 
   public isVisible(tile: Tile): boolean {
-    return PlayerVisibility.mapRevealed() || this.visible.has(tile);
+    return this.isRevealed() || this.visible.has(tile);
   }
 
   public hasDiscovered(tile: Tile): boolean {
-    return PlayerVisibility.mapRevealed() || this.discovered.has(tile);
+    return this.isRevealed() || this.discovered.has(tile);
+  }
+
+  /** Whether this player sees the whole map: the game's revealMap option, or revealAll(). */
+  public isRevealed(): boolean {
+    return PlayerVisibility.mapRevealed() || this.revealed;
+  }
+
+  /** Lifts the fog for this player for the rest of the game, sending them the whole map as it is now. */
+  public revealAll() {
+    if (this.isRevealed()) return;
+
+    this.revealed = true;
+    GameMap.getInstance().sendTilesToPlayer(this.player, GameMap.getInstance().getTiles().flat().filter(Boolean));
   }
 
   public getDiscoveredTiles(): Set<Tile> {
@@ -65,8 +80,8 @@ export class PlayerVisibility {
     const inSight = this.computeVisibleTiles();
     this.player.getDiplomacy().meetPlayersOn(inSight);
 
-    // Everything was already sent with the initial map, and nothing ever fogs.
-    if (PlayerVisibility.mapRevealed()) return;
+    // Everything was already sent (with the initial map, or by revealAll()), and nothing ever fogs.
+    if (this.isRevealed()) return;
 
     const previouslyVisible = this.visible;
     this.visible = inSight;
