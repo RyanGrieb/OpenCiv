@@ -78,8 +78,14 @@ export class CityBanner extends Actor {
 
       Game.getInstance().getCurrentSceneAs<InGameScene>().toggleCityUI(this.city);
     });
-    this.on("mousemove", (options) => this.hoverReligion(options.clientX, options.clientY));
-    this.on("mouse_exit", () => this.hideTooltip());
+    this.on("mousemove", (options) => {
+      this.updateCursor();
+      this.hoverReligion(options.clientX, options.clientY);
+    });
+    this.on("mouse_exit", () => {
+      if (this.city.isOwnedByClient()) Game.getInstance().setCursor("default");
+      this.hideTooltip();
+    });
   }
 
   // "3" turns with a bar a third full: the text drawn over the box, centered.
@@ -370,6 +376,14 @@ export class CityBanner extends Actor {
   private getGrowthFraction(): number {
     const required = this.city.getStat("foodRequiredToGrow");
     return required ? (this.city.getStat("foodSurplus") ?? 0) / required : 0;
+  }
+
+  // A pointer over the owner's banner, which opens the city when clicked - but not under the system menu.
+  private updateCursor() {
+    if (!this.isMouseInside() || !this.city.isOwnedByClient()) return;
+
+    const menuOpen = Game.getInstance().getCurrentScene().hasSystemMenuOpen();
+    Game.getInstance().setCursor(menuOpen ? "default" : "pointer");
   }
 
   private hoverReligion(screenX: number, screenY: number) {
