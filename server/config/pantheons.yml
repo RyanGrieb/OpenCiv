@@ -43,9 +43,8 @@ pantheons:
     description: "+1 Faith from Desert tiles (including Flood Plains and Oasis)"
     effects:
       tile_yields:
-        - terrain: [desert, desert_hill, floodplains]
+        - terrain: [desert, desert_hill, floodplains, oasis]
           stats: { faith: 1 }
-    not_yet: [Oasis isn't on the map yet]
   - name: Earth Mother
     yields: { faith: 1 }
     text: "from Copper, Iron and Salt"
@@ -54,7 +53,6 @@ pantheons:
       tile_yields:
         - resources: [copper, iron, salt]
           stats: { faith: 1 }
-    not_yet: [Salt isn't on the map yet]
   - name: Faith Healers
     text: "+30 HP healing next to your cities"
     description: "+30 HP healed per turn if adjacent to a friendly city"
@@ -103,7 +101,6 @@ pantheons:
       tile_yields:
         - resources: [wine, incense]
           stats: { culture: 1, faith: 1 }
-    not_yet: [Wine and Incense aren't on the map yet]
   - name: Goddess of Love
     yields: { happiness: 1 }
     text: "from cities of 6+ Population"
@@ -169,7 +166,6 @@ pantheons:
       tile_yields:
         - resources: [gold, silver]
           stats: { culture: 1, faith: 1 }
-    not_yet: [Silver isn't on the map yet]
   - name: Religious Settlements
     text: "15% faster border growth"
     description: "15% faster border growth"
@@ -207,7 +203,6 @@ pantheons:
       tile_yields:
         - resources: [bananas, citrus, wheat]
           stats: { food: 1 }
-    not_yet: [Bananas aren't on the map yet]
   - name: Tears of the Gods
     yields: { faith: 2 }
     text: "from Gems and Pearls"
@@ -216,4 +211,3 @@ pantheons:
       tile_yields:
         - resources: [gems, pearls]
           stats: { faith: 2 }
-    not_yet: [Gems aren't on the map yet]

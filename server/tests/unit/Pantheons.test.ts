@@ -153,6 +153,21 @@ describe("Pantheons", () => {
       expect(bonusesOn(ownedTile(city, "grass_hill", "iron"))).toEqual({});
     });
 
+    it("counts the newer resources and Oasis", () => {
+      const festivals = cityOf(playerWith({ pantheon: "Goddess of Festivals" }));
+      expect(bonusesOn(ownedTile(festivals, "plains", "wine"))).toEqual({ culture: 1, faith: 1 });
+      expect(bonusesOn(ownedTile(festivals, "desert", "incense_plantation"))).toEqual({ culture: 1, faith: 1 });
+
+      const tears = cityOf(playerWith({ pantheon: "Tears of the Gods" }));
+      expect(bonusesOn(ownedTile(tears, "grass", "gems"))).toEqual({ faith: 2 });
+
+      const sunGod = cityOf(playerWith({ pantheon: "Sun God" }));
+      expect(bonusesOn(ownedTile(sunGod, "grass", "jungle", "bananas"))).toEqual({ food: 1 });
+
+      const desert = cityOf(playerWith({ pantheon: "Desert Folklore" }));
+      expect(bonusesOn(ownedTile(desert, "desert", "oasis"))).toEqual({ faith: 1 });
+    });
+
     it("lists the bonus under the pantheon's name in the tile's yields", () => {
       const city = cityOf(playerWith({ pantheon: "Sacred Path" }));
       const tile = ownedTile(city, "grass", "jungle");

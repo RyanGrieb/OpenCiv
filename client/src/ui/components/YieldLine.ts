@@ -11,8 +11,10 @@ import { Tooltip } from "./Tooltip";
  * own rows rather than using a Tooltip.
  */
 export class YieldLine {
-  // Between a yield's number and the line's text, then between yields - as in Tooltip.
-  private static readonly TEXT_GAP = 12;
+  // From the last icon to the words after it. Negative: the icon's sprite is mostly empty around the
+  // edges, so the words tuck in the way the status bar's numbers do (8px into the icon there).
+  private static readonly TEXT_GAP = -6;
+  // Between yields, as in Tooltip.
   private static readonly YIELD_GAP = 2;
 
   /** The line's actors, with the top of its text at (x, y), and how wide it came out. */
