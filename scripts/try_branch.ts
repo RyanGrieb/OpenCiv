@@ -31,6 +31,7 @@ import { WorktreeProcesses } from "./WorktreeProcesses";
 const ROOT = path.resolve(__dirname, "..");
 const WORKTREES = path.resolve(ROOT, "..", "OpenCiv-branches");
 const INSTALL_STAMP = ".try-install-hash";
+const LOCKFILES = ["package-lock.json", "client/package-lock.json", "server/package-lock.json"];
 
 class TryBranch {
   // Runs git directly rather than through a shell, so a branch name or path is always one argument and never shell.
@@ -57,6 +58,9 @@ class TryBranch {
     console.log(`Installing ${path.basename(dir)} dependencies...`);
     execSync("npm install --no-audit --no-fund", { cwd: dir, stdio: "inherit" });
     fs.writeFileSync(stamp, hash);
+    // A different npm version can rewrite the lockfile while installing, and a changed lockfile stops the
+    // next try from checking out a newer push here.
+    TryBranch.git(["checkout", "--quiet", "--", "package-lock.json"], dir);
   }
 
   public static async confirm(question: string): Promise<boolean> {
@@ -239,6 +243,8 @@ class TryBranch {
 
   if (fs.existsSync(worktree)) {
     TryBranch.stop(worktree);
+    // Lockfiles an earlier install rewrote (see installIfChanged) would block the checkout.
+    TryBranch.git(["checkout", "--quiet", "--", ...LOCKFILES], worktree);
     TryBranch.git(["checkout", "--quiet", "--detach", commit], worktree);
   } else {
     fs.mkdirSync(WORKTREES, { recursive: true });
