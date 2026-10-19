@@ -106,7 +106,7 @@ At startup, `client/src/SpriteAtlas.ts` packs every sprite in the manifest into 
 
 `server/src/GameOptions.ts` owns the game's tunable options (defaults in `DefaultGameOptions`, plus `GameOptionDefinitions` describing which ones the client's UI renders). `server/src/ServerArgs.ts` parses overrides from argv and the `GAME_OPTIONS` env var and `Server.ts` hands them to `Game.init()`, which applies them over the defaults — the client can still change them afterwards in the lobby.
 
-**Developer mode** (`--dev`, `DEV_MODE=true`, or `dev` in `GAME_OPTIONS`, so `npm run try -- <branch> --dev` works) turns on the dev console's commands (`server/src/dev/DevConsole.ts`; the client opens it with `` ` ``). It's deliberately not a game option, since any player can change those in the lobby. `npm run test:scenarios` turns it on.
+**Developer mode** (`--dev`, `DEV_MODE=true`, or `dev` in `GAME_OPTIONS`, so `npm run try -- <branch> --dev` works) turns on the dev console's commands (`server/src/dev/DevConsole.ts`; the client opens it with `` ` ``). It's deliberately not a game option, since any player can change those in the lobby.
 
 The parser derives its key list and each value's type from `DefaultGameOptions`, so **a new field on `GameOptions` is settable from the command line with no change to `ServerArgs`**. Options missing from `GameOptionDefinitions` (not exposed in the UI) are still settable this way; numbers get clamped to a definition's `min`/`max` when one exists.
 
@@ -121,6 +121,8 @@ Server-side static game data lives in `server/config/*.yml` (`civilizations.yml`
 3. **Root `test:e2e`**: orchestration only — boots both dev servers in test mode and hands you the URL for #2. It's a human-in-the-loop workflow, not an automated test command.
 
 The **Tests** workflow (`.github/workflows/tests.yml`) runs the server Jest suite and every scenario, in 8 shards, on each push. **Don't wait for it or check its result** before handing a branch over or fast-forwarding it into master: the user watches it on GitHub and will say if a scenario broke. Test your own change the usual way (typecheck, the server tests and scenarios it touches) and move on.
+
+**Only write a scenario for a serious implementation**: a substantial gameplay system or UI feature whose behavior can't be checked any other way (combat, city growth, the globe's picking). Every scenario adds to the Tests workflow's load on GitHub Actions. Content additions (a resource, a unique unit or building), small visual tweaks, dev tooling (the dev console) and anything the server's Jest tests already cover get server tests only, or no new test.
 
 Scenarios run one after another against the same server, and game options stick on it between games, so `TestUtils.OPTION_RESETS` puts every scenario-only option back to its default before a game starts. Add a new scenario-only `GameOptions` field there too.
 

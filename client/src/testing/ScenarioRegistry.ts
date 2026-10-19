@@ -281,11 +281,6 @@ ScenarioRegistry.register("SettlerProduction", ScenarioCategory.CITIES, async ()
   return module.setupSettlerProductionTest;
 });
 
-ScenarioRegistry.register("DevConsole", ScenarioCategory.INTERFACE, async () => {
-  const module = await import("./scenarios/DevConsole.test");
-  return module.setupDevConsoleTest;
-});
-
 ScenarioRegistry.register("GlobeMap", ScenarioCategory.MAP, async () => {
   const module = await import("./scenarios/GlobeMap.test");
   return module.setupGlobeMapTest;

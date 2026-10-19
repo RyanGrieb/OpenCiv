@@ -78,8 +78,7 @@ class ScenarioServers {
     private processes: ChildProcess[] = [];
 
     public start(ports: { server: number; client: number }) {
-        // Developer mode, for the DevConsole scenario.
-        const env = { ...process.env, ...DevPorts.env(ports), TEST_MODE: "true", DEV_MODE: "true" };
+        const env = { ...process.env, ...DevPorts.env(ports), TEST_MODE: "true" };
         const server = spawn("npx", ["ts-node", "--transpile-only", "src/Server.ts"], {
             cwd: path.join(ROOT, "server"),
             env,
