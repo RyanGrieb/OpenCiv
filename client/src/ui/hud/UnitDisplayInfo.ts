@@ -37,8 +37,9 @@ const COMBAT_ICON_GAP = 4;
 const STRENGTH_SPACING = 10;
 
 export class UnitDisplayInfo extends ActorGroup {
-  // CombatPreviewWindow stacks on top of this window.
+  // CombatPreviewWindow sits to the left of this window.
   public static readonly HEIGHT = 278;
+  public static readonly WIDTH = WINDOW_WIDTH;
 
   private unit: Unit;
   // Shows the hovered action's description in place of the movement line, wrapped within the window.

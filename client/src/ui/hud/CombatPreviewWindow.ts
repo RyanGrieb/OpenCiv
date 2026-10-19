@@ -32,6 +32,17 @@ export interface CombatPreviewEvent {
   defenderDamage: { min: number; expected: number; max: number };
   // "Decisive Victory", "Minor Defeat", "Stalemate", ... from the average roll.
   outcome: string;
+  // Each side's strength with every bonus and penalty applied, and those bonuses and penalties.
+  attackerStrength: number;
+  defenderStrength: number;
+  attackerModifiers: CombatModifier[];
+  defenderModifiers: CombatModifier[];
+}
+
+// Mirrors server/src/unit/Combat.ts's CombatModifier. `value` is a fraction: 0.25 is +25%.
+export interface CombatModifier {
+  label: string;
+  value: number;
 }
 
 // One side of the fight, as the window draws it.
@@ -49,10 +60,15 @@ interface HealthRing {
   damage: { min: number; max: number };
 }
 
-// Matches UnitDisplayInfo's WINDOW_WIDTH.
-const WINDOW_WIDTH = 300;
-const WINDOW_HEIGHT = 152;
+// Wide enough for a bonus like "+25% Great Wall" on each side.
+const WINDOW_WIDTH = 520;
+// Title, both sides' units and rings, and the outcome between them.
+const TOP_HEIGHT = 148;
+const STAT_LINE_HEIGHT = 28;
+const STRENGTH_ICON_SIZE = 24;
 const PADDING = 10;
+// From the right edge of the unit info window.
+const GAP = 8;
 // Each side's unit, ring and labels are centered in a column this wide, leaving the middle to the outcome.
 const SIDE_COLUMN_WIDTH = 90;
 const UNIT_SIZE = 44;
@@ -63,18 +79,20 @@ const OUTCOME_ICON_SIZE = 36;
 /**
  * Attacker on the left, defender on the right, the likely outcome between them. Each side's civ icon
  * sits in a health ring like the one over units on the map: green is health it keeps whatever the roll,
- * yellow is what the roll decides, red is what it loses either way.
+ * yellow is what the roll decides, red is what it loses either way. Under each side, its strength and
+ * the bonuses and penalties that went into it. Sits to the left of the unit info window.
  */
 export class CombatPreviewWindow extends ActorGroup {
   private rings: HealthRing[] = [];
   private civIcons: Actor[] = [];
 
   constructor(attacker: CombatSide, defender: CombatSide, preview: CombatPreviewEvent) {
+    const height = CombatPreviewWindow.getHeight(preview);
     super({
-      x: Game.getInstance().getWidth() - WINDOW_WIDTH,
-      y: Game.getInstance().getHeight() - UnitDisplayInfo.HEIGHT - WINDOW_HEIGHT - 8,
+      x: Game.getInstance().getWidth() - UnitDisplayInfo.WIDTH - GAP - WINDOW_WIDTH,
+      y: Game.getInstance().getHeight() - height,
       width: WINDOW_WIDTH,
-      height: WINDOW_HEIGHT,
+      height,
       cameraApplies: false,
       z: 5
     });
@@ -111,6 +129,16 @@ export class CombatPreviewWindow extends ActorGroup {
     this.addSideLabels(rightCenterX, rowCenterY, preview.defenderHealth, preview.defenderDamage);
 
     this.addOutcome(preview.outcome, this.x + this.width / 2, rowCenterY);
+
+    const statsY = this.y + TOP_HEIGHT;
+    this.addSideStats(this.x + PADDING, "left", statsY, preview.attackerStrength, preview.attackerModifiers);
+    this.addSideStats(
+      this.x + this.width - PADDING,
+      "right",
+      statsY,
+      preview.defenderStrength,
+      preview.defenderModifiers
+    );
   }
 
   public static unitSide(unit: Unit): CombatSide {
@@ -123,6 +151,17 @@ export class CombatPreviewWindow extends ActorGroup {
 
   public static citySide(city: City): CombatSide {
     return { spriteRegion: city.getSpriteRegion(), player: city.getPlayer(), maxHealth: city.getMaxHealth() };
+  }
+
+  // "+25% Hill", or "-20% Across river".
+  public static formatModifier(modifier: CombatModifier): string {
+    const percent = Math.round(modifier.value * 100);
+    return `${percent >= 0 ? "+" : ""}${percent}% ${modifier.label}`;
+  }
+
+  private static getHeight(preview: CombatPreviewEvent): number {
+    const lines = 1 + Math.max(preview.attackerModifiers?.length ?? 0, preview.defenderModifiers?.length ?? 0);
+    return TOP_HEIGHT + lines * STAT_LINE_HEIGHT + PADDING;
   }
 
   private static getTitle(preview: CombatPreviewEvent): string {
@@ -193,6 +232,57 @@ export class CombatPreviewWindow extends ActorGroup {
     const range = worst === best ? `${best}` : `${worst}-${best}`;
 
     this.addCenteredLabel(range, centerX, rowCenterY + 30, UITheme.FONT);
+  }
+
+  // "Strength: 12.5" with the crossed swords, then a line per bonus (green) or penalty (red). The
+  // defender's column is mirrored, lined up on the window's right edge.
+  private addSideStats(
+    edgeX: number,
+    align: "left" | "right",
+    y: number,
+    strength: number,
+    modifiers: CombatModifier[]
+  ) {
+    const strengthLabel = new Label({
+      text: `Strength: ${Math.round(strength * 10) / 10}`,
+      font: UITheme.FONT,
+      fontColor: "white"
+    });
+    strengthLabel.conformSize().then(() => {
+      const width = strengthLabel.getWidth() + 4 + STRENGTH_ICON_SIZE;
+      const startX = align === "left" ? edgeX : edgeX - width;
+      strengthLabel.setPosition(startX, y);
+      this.addActor(strengthLabel);
+      this.addActor(
+        new Actor({
+          image: Game.getInstance().getImage(GameImage.SPRITESHEET),
+          spriteRegion: SpriteRegion.ICON_COMBAT,
+          x: startX + strengthLabel.getWidth() + 4,
+          y: y + (UITheme.FONT_SIZE - STRENGTH_ICON_SIZE) / 2,
+          width: STRENGTH_ICON_SIZE,
+          height: STRENGTH_ICON_SIZE
+        })
+      );
+    });
+
+    (modifiers ?? []).forEach((modifier, index) => {
+      const color = modifier.value >= 0 ? "lime" : "#ff6060";
+      this.addAlignedLabel(
+        CombatPreviewWindow.formatModifier(modifier),
+        edgeX,
+        align,
+        y + (index + 1) * STAT_LINE_HEIGHT,
+        color
+      );
+    });
+  }
+
+  private addAlignedLabel(text: string, edgeX: number, align: "left" | "right", y: number, fontColor: string) {
+    const label = new Label({ text, font: UITheme.FONT, fontColor });
+    label.conformSize().then(() => {
+      label.setPosition(align === "left" ? edgeX : edgeX - label.getWidth(), y);
+      this.addActor(label);
+    });
   }
 
   private addOutcome(outcome: string, centerX: number, rowCenterY: number) {
