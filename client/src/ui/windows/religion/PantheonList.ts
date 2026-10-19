@@ -3,9 +3,9 @@ import { Game } from "../../../Game";
 import { NetworkEvents, WebsocketClient } from "../../../network/Client";
 import { PantheonData, PantheonsEvent } from "../../../religion/Pantheons";
 import { Actor } from "../../../scene/Actor";
-import { Label } from "../../components/Label";
+import { ButtonSize } from "../../components/Button";
 import { ListBox } from "../../components/Listbox";
-import { Tooltip, TooltipYield } from "../../components/Tooltip";
+import { YieldLine } from "../../components/YieldLine";
 import { UITheme } from "../../UITheme";
 import { PantheonTooltip } from "./PantheonTooltip";
 
@@ -21,13 +21,11 @@ export class PantheonList extends ListBox {
   private static readonly TITLE_HEIGHT = 44;
   private static readonly PADDING = 8;
   private static readonly LINE_GAP = 8;
-  // Between a yield's number and the line's text, then between yields - as in Tooltip.
-  private static readonly TEXT_GAP = 12;
-  private static readonly YIELD_GAP = 2;
   private static readonly BONUS_COLOR = "#8ee07a";
   private static readonly NOT_YET_COLOR = "gray";
 
   private onChosen: () => void;
+  private onClose: () => void;
   private pantheons: PantheonData[];
   private canFound: boolean;
   // The pantheon under the mouse, and its tooltip once built. tooltipBuild drops a tooltip that finishes
@@ -37,7 +35,7 @@ export class PantheonList extends ListBox {
   private tooltipBuild = 0;
   private rowsByName = new Map<string, { getY(): number }>();
 
-  constructor(options: { onChosen: () => void }) {
+  constructor(options: { onChosen: () => void; onClose: () => void }) {
     super({
       x: 0,
       y: UITheme.STATUS_BAR_HEIGHT,
@@ -49,6 +47,7 @@ export class PantheonList extends ListBox {
     });
 
     this.onChosen = options.onChosen;
+    this.onClose = options.onClose;
     this.pantheons = [];
     this.canFound = false;
 
@@ -65,41 +64,6 @@ export class PantheonList extends ListBox {
   private static getTextColor(pantheon: PantheonData): string {
     const doesNothing = (pantheon.not_yet ?? []).some((text) => text.includes("gives nothing"));
     return doesNothing ? PantheonList.NOT_YET_COLOR : PantheonList.BONUS_COLOR;
-  }
-
-  // "+1 [faith] from Shrines": the yields as icons the size the status bar draws them, then the words.
-  private static createBonusLine(pantheon: PantheonData, x: number, y: number): Actor[] {
-    const color = PantheonList.getTextColor(pantheon);
-    const yields: TooltipYield[] = Tooltip.getYields([pantheon.yields ?? {}]);
-    const iconY = y - UITheme.centerTextY(UITheme.ICON_SIZE);
-    const actors: Actor[] = [];
-    let lineX = x;
-
-    yields.forEach((entry, index) => {
-      if (index > 0) lineX += PantheonList.YIELD_GAP;
-      actors.push(PantheonList.createText(entry.text, lineX, y, color));
-      lineX += Game.getInstance().measureText(entry.text, UITheme.FONT).width;
-      actors.push(
-        new Actor({
-          image: Game.getInstance().getImage(GameImage.SPRITESHEET),
-          spriteRegion: entry.icon,
-          x: lineX,
-          y: iconY,
-          width: UITheme.ICON_SIZE,
-          height: UITheme.ICON_SIZE,
-          cameraApplies: false
-        })
-      );
-      lineX += UITheme.ICON_SIZE;
-    });
-
-    if (yields.length > 0) lineX += PantheonList.TEXT_GAP - PantheonList.YIELD_GAP;
-    actors.push(PantheonList.createText(pantheon.text, lineX, y, color));
-    return actors;
-  }
-
-  private static createText(text: string, x: number, y: number, color: string): Label {
-    return new Label({ text, x, y, font: UITheme.FONT, fontColor: color, cameraApplies: false });
   }
 
   public getPantheonNames(): string[] {
@@ -145,7 +109,35 @@ export class PantheonList extends ListBox {
 
     const title = data.canFound ? `Choose a Pantheon (${data.cost} Faith)` : `Pantheons (${data.cost} Faith)`;
     this.addCategory(title, PantheonList.TITLE_HEIGHT);
+    this.addCloseButton();
     data.available.forEach((pantheon) => this.addPantheonRow(pantheon));
+  }
+
+  // In the title's row, so it scrolls with the title and never sits over a pantheon a click would found.
+  // A plain icon rather than a Button: rows scroll by moving each actor in them, and a Button's own icon
+  // wouldn't move with it.
+  private addCloseButton() {
+    const titleRow = this.getRows()[0];
+    const size = ButtonSize.ICON_SMALL;
+    const close = new Actor({
+      image: Game.getInstance().getImage(GameImage.SPRITESHEET),
+      spriteRegion: SpriteRegion.ICON_CANCEL,
+      x: titleRow.getX() + titleRow.getWidth() - PantheonList.PADDING - size.width,
+      y: titleRow.getY() + (PantheonList.TITLE_HEIGHT - size.height) / 2,
+      width: size.width,
+      height: size.height,
+      cameraApplies: false
+    });
+    // A row's children never hear the click itself (ActorGroup only relays "clicked" one level down),
+    // but they do track the mouse, so the title row asks whether it was over the icon.
+    titleRow.on("clicked", () => {
+      if (close.isMouseInside()) this.onClose();
+    });
+    close.on("mousemove", () => {
+      if (close.isMouseInside()) Game.getInstance().setCursor("pointer");
+    });
+    close.on("mouse_exit", () => Game.getInstance().setCursor("default"));
+    titleRow.addActor(close);
   }
 
   private addPantheonRow(pantheon: PantheonData) {
@@ -169,7 +161,13 @@ export class PantheonList extends ListBox {
           height: UITheme.ICON_SIZE,
           cameraApplies: false
         }),
-        ...PantheonList.createBonusLine(pantheon, textX, bonusY)
+        ...YieldLine.create({
+          stats: pantheon.yields ?? {},
+          x: textX,
+          y: bonusY,
+          color: PantheonList.getTextColor(pantheon),
+          text: pantheon.text
+        }).actors
       ]
     });
     this.rowsByName.set(pantheon.name, row);

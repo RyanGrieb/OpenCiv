@@ -27,6 +27,17 @@ export class PlayerReligion {
     });
 
     ServerEvents.on({
+      eventName: "requestReligionOverview",
+      parentObject: this,
+      callback: (data, websocket) => {
+        if (this.player.getWebsocket() != websocket) return;
+
+        this.sendOverview();
+      },
+      globalEvent: true
+    });
+
+    ServerEvents.on({
       eventName: "foundPantheon",
       parentObject: this,
       callback: (data, websocket) => {
@@ -87,6 +98,35 @@ export class PlayerReligion {
       pantheon: this.pantheonName ?? null,
       canFound: this.canFoundPantheon(),
       available: Pantheons.getAvailable()
+    });
+  }
+
+  /**
+   * What the client's religion window shows: the pantheon, the beliefs (none until religions are in the
+   * game), each city following it with what it gets from it, and those bonuses added up.
+   */
+  public sendOverview() {
+    const pantheon = this.getPantheon();
+    const cities = pantheon
+      ? this.player.getCities().map((city) => ({ name: city.getName(), bonuses: Pantheons.getCityBonuses(city) }))
+      : [];
+    const totals: Record<string, number> = {};
+    cities
+      .flatMap((city) => Object.entries(city.bonuses))
+      .forEach(([stat, value]) => (totals[stat] = (totals[stat] ?? 0) + value));
+
+    this.player.sendNetworkEvent({
+      event: "religionOverview",
+      pantheon: pantheon
+        ? { name: pantheon.name, description: pantheon.description, not_yet: pantheon.not_yet ?? [] }
+        : null,
+      faith: this.player.getAccumulatedStats()["faith"] ?? 0,
+      pantheonCost: Pantheons.getCost(),
+      canFoundPantheon: this.canFoundPantheon(),
+      founderBelief: null,
+      followerBelief: null,
+      cities,
+      totals
     });
   }
 

@@ -42,6 +42,7 @@ describe("Pantheons", () => {
     options: { buildings?: string[]; population?: number } = {}
   ) => {
     const cityTile = new Tile("grass", 5, 5);
+    const workedTiles: Tile[] = [];
     const city = {
       getPlayer: () => player,
       getPopulation: () => options.population ?? 1,
@@ -49,6 +50,7 @@ describe("Pantheons", () => {
       getBuildings: (): unknown[] => [],
       getTile: () => cityTile,
       getTerritory: (): Tile[] => [],
+      getWorkedTiles: () => workedTiles,
       updateWorkedTiles: jest.fn()
     } as unknown as City;
     player.ownCities.push(city);
@@ -212,6 +214,18 @@ describe("Pantheons", () => {
       expect(Pantheons.getWonderProductionPercent(player, "Pottery")).toBe(15);
       expect(Pantheons.getWonderProductionPercent(player, "Philosophy")).toBe(15);
       expect(Pantheons.getWonderProductionPercent(player, "Theology")).toBe(0);
+    });
+
+    it("adds up what the pantheon gives a city: its worked tiles' bonuses, its own yields and happiness", () => {
+      const player = playerWith({ pantheon: "Sacred Waters" });
+      const city = cityOf(player);
+      city.getTile().setRiverSide(0, true, false);
+      expect(Pantheons.getCityBonuses(city)).toEqual({ happiness: 1 });
+
+      const desertPlayer = playerWith({ pantheon: "Desert Folklore" });
+      const desertCity = cityOf(desertPlayer);
+      desertCity.getWorkedTiles().push(ownedTile(desertCity, "desert"), ownedTile(desertCity, "floodplains"));
+      expect(Pantheons.getCityBonuses(desertCity)).toEqual({ faith: 2 });
     });
 
     it("raises city strike strength by 30% with Goddess of Protection", () => {
