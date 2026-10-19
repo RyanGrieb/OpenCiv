@@ -251,6 +251,22 @@ presets:
       - " g K g g g U ~ O O"
       - "g g g g g ~ ~ O O"
 
+  melee_combat:
+    description: Open grassland around the Settler, so the MeleeCombat scenario can always find room to walk up to an enemy across a gap.
+    legend:
+      "g": [grass]
+      "S": [grass]
+    rows:
+      - "g g g g g g g g g"
+      - " g g g g g g g g g"
+      - "g g g g g g g g g"
+      - " g g g g g g g g g"
+      - "g g g g S g g g g"
+      - " g g g g g g g g g"
+      - "g g g g g g g g g"
+      - " g g g g g g g g g"
+      - "g g g g g g g g g"
+
   pantheons:
     description: Desert, Flood Plains and Tundra around the Settler, to found Desert Folklore or Dance of the Aurora and watch tiles gain Faith.
     legend:

@@ -518,23 +518,53 @@ export class Unit extends ActorGroup {
 
   // Mirrors server/src/unit/Unit.ts's spendMovement() - keep both in sync. Roads cost a third of a
   // move, so movement is kept in exact thirds rather than drifting with floating point.
+  // An approach that attacks this turn beats one that doesn't; then more movement left, then a shorter walk.
+  private static isBetterApproach(
+    a: { path: Tile[]; attacksThisTurn: boolean; movementLeft: number },
+    b: { path: Tile[]; attacksThisTurn: boolean; movementLeft: number }
+  ): boolean {
+    if (a.attacksThisTurn !== b.attacksThisTurn) return a.attacksThisTurn;
+    if (a.attacksThisTurn && a.movementLeft !== b.movementLeft) return a.movementLeft > b.movementLeft;
+    return a.path.length < b.path.length;
+  }
+
   public static spendMovement(movement: number, cost: number): number {
     return Math.max(0, Math.round((movement - cost) * 3) / 3);
   }
 
-  // Mirrors server/src/unit/Unit.ts's canMeleeAttack() - keep both in sync. Only civilizations at
-  // war are enemies (see Diplomacy). `ignoreDiplomacy` asks whether the attack would be possible if
-  // they were, for the Declare War prompt.
+  // Mirrors server/src/unit/Unit.ts's canMeleeAttack() - keep both in sync. An attack from where the
+  // unit stands; see getMeleeApproach() for enemies further away. `ignoreDiplomacy` asks whether the
+  // attack would be possible if they were at war, for the Declare War prompt.
   public canMeleeAttack(targetTile: Tile, options?: { ignoreDiplomacy: boolean }): boolean {
-    if (this.attackType !== "melee" || !this.canFight() || this.availableMovement <= 0) return false;
-    if (this.tile.isWater() || targetTile.isWater()) return false;
-    if (!this.tile.getAdjacentTiles().includes(targetTile)) return false;
+    if (this.availableMovement <= 0 || !this.isMeleeTarget(targetTile, options)) return false;
+    return this.tile.getAdjacentTiles().includes(targetTile);
+  }
 
-    const isTarget = (player: AbstractPlayer) =>
-      options?.ignoreDiplomacy ? player !== this.player : Diplomacy.areAtWar(this.player, player);
-    const city = targetTile.getCity();
-    if (city && isTarget(city.getPlayer())) return true;
-    return targetTile.getUnits().some((unit) => isTarget(unit.getPlayer()));
+  /**
+   * Mirrors server/src/unit/Unit.ts's getMeleeApproach() - keep both in sync. Civ 5 move-and-attack:
+   * the path to a tile next to an enemy further than a step away, which the server walks before
+   * attacking. It's the one leaving the most movement to attack with this turn, or if none can, the
+   * shortest, which only closes in.
+   */
+  public getMeleeApproach(
+    targetTile: Tile,
+    options?: { ignoreDiplomacy: boolean }
+  ): { path: Tile[]; attacksThisTurn: boolean } | undefined {
+    if (this.availableMovement <= 0 || !this.isMeleeTarget(targetTile, options)) return undefined;
+    if (this.tile.getAdjacentTiles().includes(targetTile)) return undefined;
+
+    let best: { path: Tile[]; attacksThisTurn: boolean; movementLeft: number } | undefined;
+    for (const tile of targetTile.getAdjacentTiles()) {
+      if (!tile || tile.isWater()) continue;
+
+      const path = GameMap.getInstance().constructShortestPath(this, this.tile, tile);
+      if (path.length < 2) continue;
+
+      const movementLeft = this.getMovementLeftAfter(path);
+      const candidate = { path, attacksThisTurn: movementLeft > 0, movementLeft };
+      if (!best || Unit.isBetterApproach(candidate, best)) best = candidate;
+    }
+    return best && { path: best.path, attacksThisTurn: best.attacksThisTurn };
   }
 
   public isRanged(): boolean {
@@ -900,6 +930,28 @@ export class Unit extends ActorGroup {
 
   public getPlayer() {
     return this.player;
+  }
+
+  // Whether this unit could melee whatever is on targetTile, wherever the two of them stand.
+  private isMeleeTarget(targetTile: Tile, options?: { ignoreDiplomacy: boolean }): boolean {
+    if (this.attackType !== "melee" || !this.canFight()) return false;
+    if (this.tile.isWater() || targetTile.isWater()) return false;
+
+    const isTarget = (player: AbstractPlayer) =>
+      options?.ignoreDiplomacy ? player !== this.player : Diplomacy.areAtWar(this.player, player);
+    const city = targetTile.getCity();
+    if (city && isTarget(city.getPlayer())) return true;
+    return targetTile.getUnits().some((unit) => isTarget(unit.getPlayer()));
+  }
+
+  // The movement left on reaching the end of `path` this turn, or 0 if it can't be reached this turn.
+  private getMovementLeftAfter(path: Tile[]): number {
+    let movement = this.availableMovement;
+    for (let i = 0; i < path.length - 1; i++) {
+      if (movement <= 0) return 0;
+      movement = Unit.spendMovement(movement, this.getTileWeight(path[i], path[i + 1]));
+    }
+    return movement;
   }
 }
 

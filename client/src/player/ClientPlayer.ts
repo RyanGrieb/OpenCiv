@@ -598,12 +598,13 @@ export class ClientPlayer extends AbstractPlayer {
     this.outlinedTile = undefined;
   }
 
-  // Melee units hit adjacent enemies; ranged units, anything the server listed in range and sight.
+  // Melee units hit enemies they can stand next to with movement to spare; ranged units, anything the
+  // server listed in range and sight.
   private canAttack(tile: Tile | undefined): boolean {
     if (!this.selectedUnit || !tile) return false;
     if (this.selectedUnit.isRanged()) return this.rangedAiming.canShoot(tile);
 
-    return this.selectedUnit.canMeleeAttack(tile);
+    return this.selectedUnit.canMeleeAttack(tile) || !!this.selectedUnit.getMeleeApproach(tile)?.attacksThisTurn;
   }
 
   // The owner of what's on `tile`, if the selected unit could attack it but for being at peace with them.
@@ -614,7 +615,8 @@ export class ClientPlayer extends AbstractPlayer {
 
     const inReach = unit.isRanged()
       ? this.rangedAiming.canShoot(tile, { ignoreDiplomacy: true })
-      : unit.canMeleeAttack(tile, { ignoreDiplomacy: true });
+      : unit.canMeleeAttack(tile, { ignoreDiplomacy: true }) ||
+        !!unit.getMeleeApproach(tile, { ignoreDiplomacy: true })?.attacksThisTurn;
     return inReach ? owner : undefined;
   }
 
@@ -630,7 +632,8 @@ export class ClientPlayer extends AbstractPlayer {
   }
 
   // Right-dragging onto an enemy the selected unit can hit shows a red line and target instead of a
-  // path, and asks the server what the fight would look like (see the "combatPreview" listener).
+  // path, and asks the server what the fight would look like (see the "combatPreview" listener). A
+  // melee unit that has to walk up first shows that walk, with the red line from where it ends.
   private previewAttack(tile: Tile): boolean {
     if (!this.canAttack(tile)) return false;
 
@@ -638,7 +641,10 @@ export class ClientPlayer extends AbstractPlayer {
     GameMap.getInstance().drawUnitSelectionOutline(tile, "red");
     this.outlinedTile = tile;
 
-    const start = this.selectedUnit.getTile().getCenterPosition();
+    const approachPath = this.selectedUnit.isRanged() ? undefined : this.selectedUnit.getMeleeApproach(tile)?.path;
+    if (approachPath) this.drawMovementPathFromTiles(approachPath);
+
+    const start = (approachPath?.[approachPath.length - 1] ?? this.selectedUnit.getTile()).getCenterPosition();
     const end = tile.getCenterPosition();
     const line = new Line({
       color: "red",
@@ -697,6 +703,13 @@ export class ClientPlayer extends AbstractPlayer {
     }
 
     if (this.promptWarOver(targetTile)) return;
+
+    // An enemy out of reach this turn: the server closes in on it instead.
+    if (this.selectedUnit.getMeleeApproach(targetTile)) {
+      this.attackWithSelectedUnit(targetTile);
+      this.unselectUnit();
+      return;
+    }
 
     const pathTiles = GameMap.getInstance().constructShortestPath(
       this.selectedUnit,
@@ -872,7 +885,10 @@ export class ClientPlayer extends AbstractPlayer {
     //);
 
     //console.time("constructShortestPath()");
-    const pathTiles = GameMap.getInstance().constructShortestPath(this.selectedUnit, startTile, goalTile);
+    // Towards an enemy, the path ends next to it (see Unit.getMeleeApproach()).
+    const pathTiles =
+      this.selectedUnit.getMeleeApproach(goalTile)?.path ??
+      GameMap.getInstance().constructShortestPath(this.selectedUnit, startTile, goalTile);
 
     return this.drawMovementPathFromTiles(pathTiles);
   }

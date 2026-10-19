@@ -15,6 +15,7 @@ export class TestUtils {
         startWithAllTechs: false,
         startWithBuilder: false,
         startWithArcher: false,
+        startWithHorseman: false,
         cityStartingHealth: 200,
         startAtWar: false,
         startingGold: 0,
@@ -134,7 +135,7 @@ export class TestUtils {
     public async startGameWithSecondPlayer(options: {
         autoEndTurns: boolean;
         // Extra game options on top of the ones below, e.g. { startWithArcher: true }.
-        gameOptions?: Record<string, boolean | number>;
+        gameOptions?: Record<string, boolean | number | string>;
     }): Promise<WebSocket> {
         WebsocketClient.init("localhost");
         await this.waitUntil(() => this.game.getCurrentScene().getName() === "lobby", 5000, "Scene to become lobby");

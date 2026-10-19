@@ -10,12 +10,16 @@ import { TestUtils } from "../TestUtils";
 // Plays melee combat out against a live server. A second player joins from this same page over a bare
 // websocket and does nothing but end turns and, near the end, strike back - so everything happens in
 // front of whoever is watching, from Player1's side. The map is revealed and both players start a couple
-// of tiles apart, so the fight starts right away.
+// of tiles apart on open grassland (the melee_combat map preset), each with a Warrior and a Horseman, so the
+// fight starts right away. Our Warrior opens by walking up to the enemy Settler
+// across a one-tile gap and capturing it in the same move, and at the end our Horseman charges an enemy
+// two tiles away.
 export function setupMeleeCombatTest(game: Game) {
     const runner = new TestRunner("MeleeCombat");
     const utils = new TestUtils(game);
     let enemySocket: WebSocket | undefined;
     let warrior: Unit | undefined;
+    let horseman: Unit | undefined;
     let enemyWarrior: Unit | undefined;
     let enemySettler: Unit | undefined;
     let enemyWarriorTile: Tile | undefined;
@@ -33,6 +37,23 @@ export function setupMeleeCombatTest(game: Game) {
     };
     const isAlive = (unit: Unit) => allUnits().includes(unit);
     const isAdjacent = (a: Tile, b: Tile) => a.getAdjacentTiles().includes(b);
+    // Open land with nothing on it but `unit`, if given.
+    const isOpen = (tile: Tile, unit?: Unit) =>
+        !!tile && !tile.isWater() && tile.getMovementCost() < 9999 && !tile.getCity() && tile.getUnits().every((other) => other === unit);
+    const pathCost = (unit: Unit, path: Tile[]) => path.slice(1).reduce((cost, tile, i) => cost + unit.getTileWeight(path[i], tile), 0);
+
+    // Open tiles `gap` + 1 steps from the target, from which `unit` could walk next to it and still have a move to attack with.
+    const chargeTiles = (unit: Unit, target: Tile, gap: number) =>
+        utils.tilesAround(target, gap + 1, gap + 1).filter(
+            (start) =>
+                isOpen(start, unit) &&
+                target.getAdjacentTiles().some((next) => {
+                    if (!isOpen(next)) return false;
+                    const path = GameMap.getInstance().constructShortestPath(unit, start, next);
+                    return path.length > 1 && pathCost(unit, path) < unit.getDefaultMoveDistance();
+                })
+        );
+    const hasPathLine = () => clientPlayer()["movementLines"].some((line: { getColor(): string }) => line.getColor() !== "red");
     const watch = (unit: Unit) => scene().focusOnTile(unit.getTile(), 3);
 
     // Both players have to ask for the next turn before it comes.
@@ -76,22 +97,23 @@ export function setupMeleeCombatTest(game: Game) {
     runner.addStep({
         name: "Start a revealed-map game against a second player",
         action: async () => {
-            enemySocket = await utils.startGameWithSecondPlayer({ autoEndTurns: false });
+            enemySocket = await utils.startGameWithSecondPlayer({ autoEndTurns: false, gameOptions: { startWithHorseman: true, mapPreset: "melee_combat", startingGold: 100 } });
         },
         verification: () => game.getCurrentScene().getName() === "in_game"
     });
 
     runner.addStep({
-        name: "Find our Warrior and the enemy's Warrior and Settler",
+        name: "Find our Warrior and Horseman, and the enemy's Warrior and Settler",
         action: async () => {
             await utils.waitUntil(
                 () => {
                     const me = utils.getClientPlayer();
-                    warrior = me.getUnits().find((unit) => unit.canFight());
+                    warrior = me.getUnits().find((unit) => unit.getName() === "Warrior");
+                    horseman = me.getUnits().find((unit) => unit.getName() === "Horseman");
                     const enemies = allUnits().filter((unit) => unit.getPlayer() !== me);
-                    enemyWarrior = enemies.find((unit) => unit.canFight());
+                    enemyWarrior = enemies.find((unit) => unit.getName() === "Warrior");
                     enemySettler = enemies.find((unit) => unit.isUtility());
-                    return !!(warrior && enemyWarrior && enemySettler);
+                    return !!(warrior && horseman && enemyWarrior && enemySettler);
                 },
                 10000,
                 "Both players' starting units to appear"
@@ -103,47 +125,33 @@ export function setupMeleeCombatTest(game: Game) {
     });
 
     runner.addStep({
-        name: "March next to the enemy Settler",
+        name: "March to two tiles from the enemy Settler, with one open tile between them",
         action: async () => {
-            for (let turn = 0; turn < 40 && !isAdjacent(warrior.getTile(), enemySettler.getTile()); turn++) {
-                let best: Tile[] | undefined;
-                for (const tile of enemySettler.getTile().getAdjacentTiles()) {
-                    if (!tile || tile.isWater() || tile.getUnits().length > 0) continue;
-                    const path = GameMap.getInstance().constructShortestPath(warrior, warrior.getTile(), tile);
-                    if (path.length > 1 && (!best || path.length < best.length)) best = path;
-                }
-                if (!best) throw new Error("No open tile next to the enemy Settler can be reached");
-
-                const target = best[best.length - 1];
-                WebsocketClient.sendMessage({
-                    event: "moveUnit",
-                    unitX: warrior.getTile().getGridX(),
-                    unitY: warrior.getTile().getGridY(),
-                    id: warrior.getID(),
-                    targetX: target.getGridX(),
-                    targetY: target.getGridY()
-                });
-                await utils.delay(300);
-                watch(warrior);
-                await endTurn();
-            }
+            await utils.walkTo(
+                warrior,
+                () => chargeTiles(warrior, enemySettler.getTile(), 1),
+                (data) => WebsocketClient.sendMessage(data),
+                endTurn
+            );
             // Start the attack with a full turn's movement.
             await endTurn();
+            watch(warrior);
         },
-        verification: () => isAdjacent(warrior.getTile(), enemySettler.getTile())
+        verification: () =>
+            !isAdjacent(warrior.getTile(), enemySettler.getTile()) && !!warrior.getMeleeApproach(enemySettler.getTile())?.attacksThisTurn
     });
 
     runner.addStep({
-        name: "Aiming at the Settler draws a red line, with no preview since it can't fight back",
+        name: "Aiming at the Settler across the gap draws the walk up to it, then a red line, with no preview since it can't fight back",
         action: async () => {
             aimAt(warrior, enemySettler.getTile());
             await utils.delay(1500);
         },
-        verification: () => hasRedLine() && previewWindow() === undefined
+        verification: () => hasRedLine() && hasPathLine() && previewWindow() === undefined
     });
 
     runner.addStep({
-        name: "Attacking a lone Settler captures it as a Builder and moves in, spending all movement",
+        name: "Attacking across the gap walks up and captures the lone Settler as a Builder, spending all movement",
         action: async () => {
             overrunTile = enemySettler.getTile();
             attackThroughUI(warrior, overrunTile);
@@ -272,6 +280,48 @@ export function setupMeleeCombatTest(game: Game) {
         // Attacking wakes a fortified unit.
         verification: () =>
             !!expected && isAlive(expected.survivor) && expected.survivor.getTile() === expected.tile && !expected.survivor.isFortified()
+    });
+
+    let charge: { target: Unit; health: number } | undefined;
+
+    runner.addStep({
+        name: "Our Horseman rides to three tiles from an enemy, with two tiles between them",
+        action: async () => {
+            const target = allUnits().find((unit) => unit.getPlayer() !== utils.getClientPlayer() && unit.canFight());
+            if (!target) throw new Error("No enemy left to charge");
+            charge = { target, health: target.getHealth() };
+
+            await utils.walkTo(horseman, () => chargeTiles(horseman, target.getTile(), 2), (data) => WebsocketClient.sendMessage(data), endTurn);
+            await endTurn();
+            watch(horseman);
+        },
+        verification: () => utils.tilesAround(charge.target.getTile(), 3, 3).includes(horseman.getTile()) && !isAdjacent(horseman.getTile(), charge.target.getTile())
+    });
+
+    runner.addStep({
+        name: "Aiming at it from there previews the fight, with the ride up to it drawn",
+        action: async () => {
+            aimAt(horseman, charge.target.getTile());
+            await utils.waitUntil(() => !!previewWindow(), 5000, "Combat preview to appear");
+            await utils.delay(1500);
+        },
+        verification: () => hasRedLine() && hasPathLine() && previewWindow() !== undefined
+    });
+
+    runner.addStep({
+        name: "Attacking rides up next to the enemy and strikes in the same move",
+        action: async () => {
+            const targetTile = charge.target.getTile();
+            attackThroughUI(horseman, targetTile);
+            await utils.waitUntil(
+                () => !isAlive(charge.target) || charge.target.getHealth() < charge.health,
+                5000,
+                "The Horseman's charge to land"
+            );
+            await utils.delay(500);
+            watch(horseman);
+        },
+        verification: () => !isAlive(charge.target) || isAdjacent(horseman.getTile(), charge.target.getTile())
     });
 
     return runner;

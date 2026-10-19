@@ -100,13 +100,15 @@ export class InGameState extends State {
     );
   }
 
-  // The startWithAllTechs / startWithBuilder / startWithArcher / startingGold / startingFaith / startingExperience game
-  // options, for trying out Builder improvements, ranged combat, buying production, pantheons and promotions.
+  // The startWithAllTechs / startWithBuilder / startWithArcher / startWithHorseman / startingGold / startingFaith /
+  // startingExperience game options, for trying out Builder improvements, ranged combat, moving in to attack,
+  // buying production, pantheons and promotions.
   private static applyDebugStart(player: Player, spawnTile: Tile) {
     const options = Game.getInstance().getGameOptions();
     if (options.startWithAllTechs) player.researchAllTechs();
     if (options.startWithBuilder) InGameState.addUnitBeside(spawnTile, "Builder", player, true);
     if (options.startWithArcher) InGameState.addUnitBeside(spawnTile, "Archer", player, false);
+    if (options.startWithHorseman) InGameState.addUnitBeside(spawnTile, "Horseman", player, false);
     if (options.startingGold > 0) player.addToAccumulatedStat("gold", options.startingGold);
     if (options.startingFaith > 0) player.addToAccumulatedStat("faith", options.startingFaith);
     if (options.startingExperience > 0) {

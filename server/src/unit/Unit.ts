@@ -91,6 +91,15 @@ export interface UnitYMLTypeData {
   free_promotions?: string[];
 }
 
+// A move towards a tile next to an enemy, ahead of attacking it (see Unit.getMeleeApproach()).
+interface MeleeApproach {
+  tile: Tile; // Where this turn's movement gets to
+  remainingTiles: Tile[]; // Queued for later turns
+  remainingMovement: number;
+  attacksThisTurn: boolean; // Arrives next to the enemy with movement left to attack
+  pathLength: number;
+}
+
 export class Unit {
   private static nextId = 0;
 
@@ -206,7 +215,7 @@ export class Unit {
         if (!targetTile) return;
 
         if (this.isRanged()) this.rangedAttack(targetTile);
-        else this.meleeAttack(targetTile);
+        else this.moveAndMeleeAttack(targetTile);
       }
     });
 
@@ -355,6 +364,14 @@ export class Unit {
   // Open water a ship can move onto. Coast-only ships (see coast_only in units.yml) keep off deep ocean.
   public static canSailOnto(tile: Tile, coastOnly: boolean): boolean {
     return tile.isWater() && !(coastOnly && tile.containsTileType("ocean"));
+  }
+
+  // An approach that attacks this turn beats one that doesn't; then more movement left, then a shorter walk.
+  private static isBetterApproach(a: MeleeApproach, b: MeleeApproach): boolean {
+    if (a.attacksThisTurn !== b.attacksThisTurn) return a.attacksThisTurn;
+    if (a.attacksThisTurn && a.remainingMovement !== b.remainingMovement)
+      return a.remainingMovement > b.remainingMovement;
+    return a.pathLength < b.pathLength;
   }
 
   private static getUnitYMLTypeDataByName(name: string): UnitYMLTypeData | undefined {
@@ -760,11 +777,34 @@ export class Unit {
     return true;
   }
 
+  /**
+   * Civ 5 move-and-attack: an enemy further than a step away is walked up to first, then attacked
+   * if the unit has movement left once it's there. Without any left it just stops next to the enemy,
+   * and one beyond this turn's reach is closed in on, like any other move order.
+   * @returns Whether an attack actually happened.
+   */
+  public moveAndMeleeAttack(targetTile: Tile): boolean {
+    if (this.canMeleeAttack(targetTile)) return this.meleeAttack(targetTile);
+    if (this.availableMovement <= 0 || !this.isMeleeTarget(targetTile)) return false;
+
+    const approach = this.getMeleeApproach(targetTile);
+    if (!approach) return false;
+
+    this.moveToTile({
+      previousTile: this.tile,
+      targetTile: approach.tile,
+      remainingTiles: approach.remainingTiles,
+      remainingMovement: approach.remainingMovement
+    });
+    return this.meleeAttack(targetTile);
+  }
+
   public getMeleePreview(targetTile: Tile) {
-    if (!this.canMeleeAttack(targetTile)) return undefined;
+    const fromTile = this.getMeleeAttackTile(targetTile);
+    if (!fromTile) return undefined;
 
     const city = this.getEnemyCity(targetTile);
-    if (city) return this.getMeleeCityPreview(city);
+    if (city) return this.getMeleeCityPreview(city, fromTile);
 
     // Like old_java's UnitCombatWindow, there's nothing to preview when nothing can fight back.
     const defender = targetTile.getUnits().find((unit) => this.isEnemy(unit.getPlayer()) && unit.canFight());
@@ -783,7 +823,7 @@ export class Unit {
         attackerHealth: this.health,
         defenderBaseStrength: defender.combatStrength,
         defenderHealth: defender.health,
-        fromTile: this.tile,
+        fromTile,
         targetTile,
         attacker: this.getMeleeAttacker(targetTile, defender),
         defenderExtraModifiers: defender.getDefensePromotionModifiers({ ranged: false, attacker: this })
@@ -910,15 +950,10 @@ export class Unit {
     });
   }
 
+  // An attack from where the unit stands. moveAndMeleeAttack() also reaches enemies further away.
   public canMeleeAttack(targetTile: Tile): boolean {
-    if (this.attackType !== "melee" || !this.canFight() || this.availableMovement <= 0) return false;
-
-    // Land melee only - water units can't move yet, let alone fight.
-    if (this.tile.isWater() || targetTile.isWater()) return false;
-    if (!this.tile.getAdjacentTiles().includes(targetTile)) return false;
-
-    if (this.getEnemyCity(targetTile)) return true;
-    return targetTile.getUnits().some((unit) => this.isEnemy(unit.getPlayer()));
+    if (this.availableMovement <= 0 || !this.isMeleeTarget(targetTile)) return false;
+    return this.tile.getAdjacentTiles().includes(targetTile);
   }
 
   public isRanged() {
@@ -1360,6 +1395,58 @@ export class Unit {
     this.clearMovementQueue();
   }
 
+  // Whether this unit could melee whatever is on targetTile, wherever the two of them stand.
+  private isMeleeTarget(targetTile: Tile): boolean {
+    if (this.attackType !== "melee" || !this.canFight()) return false;
+
+    // Land melee only - water units can't move yet, let alone fight.
+    if (this.tile.isWater() || targetTile.isWater()) return false;
+
+    if (this.getEnemyCity(targetTile)) return true;
+    return targetTile.getUnits().some((unit) => this.isEnemy(unit.getPlayer()));
+  }
+
+  // Where this unit would strike targetTile from this turn: here, or a tile next to it that it can walk
+  // to with movement to spare.
+  private getMeleeAttackTile(targetTile: Tile): Tile | undefined {
+    if (this.canMeleeAttack(targetTile)) return this.tile;
+    if (this.availableMovement <= 0 || !this.isMeleeTarget(targetTile)) return undefined;
+
+    const approach = this.getMeleeApproach(targetTile);
+    return approach?.attacksThisTurn ? approach.tile : undefined;
+  }
+
+  /**
+   * The move towards a tile next to targetTile that an attack on it would start with: the one leaving
+   * the most movement to attack with this turn, or if none can be reached this turn, the soonest reached.
+   * Mirrored by the client's Unit.getMeleeApproach() - keep both in sync.
+   */
+  private getMeleeApproach(targetTile: Tile): MeleeApproach | undefined {
+    if (this.tile.getAdjacentTiles().includes(targetTile)) return undefined;
+
+    let best: MeleeApproach | undefined;
+    for (const tile of targetTile.getAdjacentTiles()) {
+      if (!tile || tile.isWater()) continue;
+
+      const path = GameMap.getInstance().constructShortestPath(this, this.tile, tile);
+      if (path.length < 2) continue;
+
+      const [arrivedTile, remainingTiles, remainingMovement] = this.getMovementTowardsTargetTile(tile, path);
+      if (!arrivedTile || arrivedTile === this.tile) continue;
+
+      const attacksThisTurn = arrivedTile === tile && remainingMovement > 0;
+      const candidate = {
+        tile: arrivedTile,
+        remainingTiles,
+        remainingMovement,
+        attacksThisTurn,
+        pathLength: path.length
+      };
+      if (!best || Unit.isBetterApproach(candidate, best)) best = candidate;
+    }
+    return best;
+  }
+
   private getEnemyCity(tile: Tile): City | undefined {
     const city = tile.getCity();
     return city && this.isEnemy(city.getPlayer()) ? city : undefined;
@@ -1424,7 +1511,7 @@ export class Unit {
     this.gainExperience(UnitPromotions.RANGED_ATTACK_XP, city.getPlayer());
   }
 
-  private getMeleeCityPreview(city: City) {
+  private getMeleeCityPreview(city: City, fromTile: Tile) {
     return {
       attackerId: this.id,
       targetX: city.getTile().getX(),
@@ -1438,7 +1525,7 @@ export class Unit {
         attackerHealth: this.health,
         defenderBaseStrength: city.getBaseStrength(),
         defenderHealth: city.getHealth(),
-        fromTile: this.tile,
+        fromTile,
         targetTile: city.getTile(),
         attacker: this.getMeleeAttacker(city.getTile()),
         defenderModifiers: city.getDefenseModifiers(),

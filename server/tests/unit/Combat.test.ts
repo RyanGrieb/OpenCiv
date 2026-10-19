@@ -386,6 +386,81 @@ describe("Unit.meleeAttack", () => {
     expect(Unit.createFromName("Warrior", originTile, attackerPlayer).getCombatStrength()).toBe(8);
     expect(Unit.createFromName("Settler", originTile, attackerPlayer).canFight()).toBe(false);
   });
+
+  describe("moving in to attack", () => {
+    // A row of open grass, attacker at the left end: row[0] - row[1] - row[2] - ...
+    let row: Tile[];
+
+    const makeMover = (moves: number) => {
+      const unit = new Unit({
+        name: "Mover",
+        tile: row[0],
+        player: attackerPlayer,
+        attackType: "melee",
+        combatStrength: 8,
+        defaultMoveDistance: moves,
+        actions: []
+      });
+      row[0].addUnit(unit);
+      return unit;
+    };
+
+    beforeEach(() => {
+      row = [0, 1, 2, 3, 4].map((x) => new Tile("grass", x, 0));
+      row.slice(1).forEach((tile, i) => {
+        row[i].setAdjacentTile(0, tile);
+        tile.setAdjacentTile(3, row[i]);
+      });
+      jest.spyOn(GameMap, "getInstance").mockReturnValue({
+        getTilesInRange: (tile: Tile) => [tile],
+        constructShortestPath: (_unit: Unit, start: Tile, goal: Tile) =>
+          goal.getX() > start.getX() ? row.slice(start.getX(), goal.getX() + 1) : []
+      } as any);
+      jest.spyOn(Combat, "resolveMelee").mockReturnValue({ attackerHealth: 70, defenderHealth: 60 });
+    });
+
+    it("walks up to an enemy one tile away and attacks with the move it has left", () => {
+      const warrior = makeMover(2);
+      const defender = makeUnit(row[2], defenderPlayer);
+
+      expect(warrior.canMeleeAttack(row[2])).toBe(false);
+      expect(warrior.getMeleePreview(row[2])).toBeDefined();
+      expect(warrior.moveAndMeleeAttack(row[2])).toBe(true);
+
+      expect(warrior.getTile()).toBe(row[1]);
+      expect(defender.getHealth()).toBe(60);
+      expect(warrior["availableMovement"]).toBe(0);
+    });
+
+    it("reaches further with more movement", () => {
+      const horseman = makeMover(4);
+      const defender = makeUnit(row[4], defenderPlayer);
+
+      expect(horseman.moveAndMeleeAttack(row[4])).toBe(true);
+
+      expect(horseman.getTile()).toBe(row[3]);
+      expect(defender.getHealth()).toBe(60);
+    });
+
+    it("only moves next to the enemy when that takes all its movement", () => {
+      const warrior = makeMover(2);
+      const defender = makeUnit(row[3], defenderPlayer);
+
+      expect(warrior.getMeleePreview(row[3])).toBeUndefined();
+      expect(warrior.moveAndMeleeAttack(row[3])).toBe(false);
+
+      expect(warrior.getTile()).toBe(row[2]);
+      expect(defender.getHealth()).toBe(100);
+    });
+
+    it("leaves friendly units alone", () => {
+      const warrior = makeMover(2);
+      makeUnit(row[2], attackerPlayer);
+
+      expect(warrior.moveAndMeleeAttack(row[2])).toBe(false);
+      expect(warrior.getTile()).toBe(row[0]);
+    });
+  });
 });
 
 describe("Unit.rangedAttack", () => {

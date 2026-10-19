@@ -22,6 +22,8 @@ export interface GameOptions {
   startWithBuilder: boolean;
   // An Archer beside every player's Settler, for trying out ranged combat (see the RangedCombat scenario).
   startWithArcher: boolean;
+  // A Horseman beside every player's Settler, for a melee unit that moves further (see MeleeCombat).
+  startWithHorseman: boolean;
   // The health every city is founded with, out of its 200. Lower it to try capturing a city without
   // first spending turns wearing it down (see the CityCombat scenario).
   cityStartingHealth: number;
@@ -105,6 +107,7 @@ export const DefaultGameOptions: GameOptions = {
   startWithAllTechs: false,
   startWithBuilder: false,
   startWithArcher: false,
+  startWithHorseman: false,
   cityStartingHealth: 200,
   mapPreset: "",
   startAtWar: false,
@@ -218,6 +221,13 @@ export const GameOptionDefinitions: GameOptionDefinition[] = [
   {
     key: "startWithArcher",
     label: "Start With an Archer",
+    type: "boolean",
+    hidden: true,
+    category: "Starting Bonuses"
+  },
+  {
+    key: "startWithHorseman",
+    label: "Start With a Horseman",
     type: "boolean",
     hidden: true,
     category: "Starting Bonuses"
