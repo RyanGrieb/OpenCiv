@@ -84,7 +84,7 @@ export class City extends ActorGroup {
   public static readonly DEFAULT_ERA = "ancient";
   private static readonly HEALTH_BAR_WIDTH = 28;
   private static readonly HEALTH_BAR_HEIGHT = 3;
-  private static readonly BANNER_ICON_SIZE = 12;
+  private static readonly BANNER_ICON_SIZE = 8;
   // The bottom of the city's tile, from its center: where a unit there stands (see Unit.getStandingPoint()).
   private static readonly STANDING_BELOW_CENTER = 14;
 
@@ -229,6 +229,7 @@ export class City extends ActorGroup {
         this.maxHealth = data.maxHealth;
         this.strength = data.strength;
         this.setStrikeReady(data.canStrike);
+        this.refreshBanner();
       }
     });
 
@@ -486,7 +487,7 @@ export class City extends ActorGroup {
     if (!this.banner) return;
 
     this.banner.refresh();
-    this.strikeIcon?.setPosition(this.banner.getRight() + 2, this.banner.getY());
+    this.strikeIcon?.setPosition(this.banner.getRight() + 2, this.banner.getPillTop());
   }
 
   private createStrikeIcon() {
@@ -494,7 +495,7 @@ export class City extends ActorGroup {
       image: Game.getInstance().getImage(GameImage.SPRITESHEET),
       spriteRegion: SpriteRegion.ICON_TARGET,
       x: this.banner.getRight() + 2,
-      y: this.banner.getY(),
+      y: this.banner.getPillTop(),
       z: 4,
       width: City.BANNER_ICON_SIZE,
       height: City.BANNER_ICON_SIZE,
