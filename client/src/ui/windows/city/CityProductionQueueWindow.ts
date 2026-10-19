@@ -76,7 +76,7 @@ export class CityProductionQueueWindow extends ActorGroup {
       x: CityProductionQueueWindow.X,
       y: this.windowY,
       width: CityProductionQueueWindow.WIDTH,
-      height: CityProductionQueueWindow.HEIGHT - 68,
+      height: CityProductionQueueWindow.HEIGHT - 132,
       rowHeight: CityProductionQueueWindow.ROW_HEIGHT,
       textFont: UITheme.FONT,
       fontColor: "white"
@@ -177,34 +177,40 @@ export class CityProductionQueueWindow extends ActorGroup {
     });
   }
 
-  // "Produce" (or "Add to Queue") with "Purchase" to its right. Produce and Purchase carry their icon on
-  // the left; Add to Queue and Cancel have none.
+  // "Produce" (or "Add to Queue") across the top, with a gold "Buy" and a faith "Buy" side by side below it.
+  // Produce and the Buy buttons carry their icon on the left; Add to Queue and Cancel have none. Buying with
+  // faith doesn't exist yet, so the faith Buy does nothing.
   private addBottomButtons(listMode: ProductionListMode | undefined, onToggleList: (mode: ProductionListMode) => void) {
     const gap = CityProductionQueueWindow.BUTTON_GAP;
-    const buttonWidth = (CityProductionQueueWindow.WIDTH - gap * 3) / 2;
-    const chooseX = CityProductionQueueWindow.X + gap;
-    const y = this.windowY + CityProductionQueueWindow.HEIGHT - ButtonSize.LARGE.height - 4;
+    const fullWidth = CityProductionQueueWindow.WIDTH - gap * 2;
+    const halfWidth = (CityProductionQueueWindow.WIDTH - gap * 3) / 2;
+    const leftX = CityProductionQueueWindow.X + gap;
+    const buyY = this.windowY + CityProductionQueueWindow.HEIGHT - ButtonSize.LARGE.height - 4;
+    const chooseY = buyY - ButtonSize.LARGE.height - 4;
     const chooseText = this.getChooseProductionText(listMode);
 
     this.addActor(
       this.createBottomButton(
         chooseText,
         chooseText === "Produce" ? SpriteRegion.ICON_PRODUCTION : undefined,
-        chooseX,
-        y,
-        buttonWidth,
+        leftX,
+        chooseY,
+        fullWidth,
         () => onToggleList("produce")
       )
     );
     this.addActor(
       this.createBottomButton(
-        listMode === "purchase" ? "Cancel" : "Purchase",
+        listMode === "purchase" ? "Cancel" : "Buy",
         listMode === "purchase" ? undefined : SpriteRegion.ICON_GOLD,
-        chooseX + buttonWidth + gap,
-        y,
-        buttonWidth,
+        leftX,
+        buyY,
+        halfWidth,
         () => onToggleList("purchase")
       )
+    );
+    this.addActor(
+      this.createBottomButton("Buy", SpriteRegion.ICON_FAITH, leftX + halfWidth + gap, buyY, halfWidth, () => {})
     );
   }
 
