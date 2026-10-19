@@ -15,6 +15,7 @@ export class CityDisplayInfo extends ActorGroup {
 
   private tileOverlays: CityTileOverlays;
   private statsWindow: CityStatsWindow;
+  private buildingsWindow: CityBuildingsWindow;
   private productionQueueWindow: CityProductionQueueWindow;
   private chooseProductionList: ChooseProductionList;
   // Which list is open in the stats window's place, if any.
@@ -33,7 +34,7 @@ export class CityDisplayInfo extends ActorGroup {
     this.city = city;
 
     this.showStatsWindow();
-    this.addActor(new CityBuildingsWindow(city));
+    this.showBuildingsWindow();
     this.tileOverlays = new CityTileOverlays(city);
     this.showProductionQueueWindow();
 
@@ -45,8 +46,10 @@ export class CityDisplayInfo extends ActorGroup {
       parentObject: this,
       callback: (data: any) => {
         if (data["cityName"] !== this.city.getName()) return;
-        // An open list sits in the stats window's place, so leave the stats window hidden.
+        // An open list sits in the stats window's place, so leave the stats window hidden. Its options
+        // may have changed (something was just bought), so ask for them again.
         if (!this.listMode) this.showStatsWindow();
+        else this.requestListOptions(this.listMode);
         this.tileOverlays.refresh();
         this.showProductionQueueWindow();
       }
@@ -58,6 +61,15 @@ export class CityDisplayInfo extends ActorGroup {
       parentObject: this,
       callback: () => {
         if (this.listMode) this.closeList();
+      }
+    });
+
+    // Bought or finished: the city's own listener has already added it to getBuildings().
+    NetworkEvents.on({
+      eventName: "addBuilding",
+      parentObject: this,
+      callback: (data: any) => {
+        if (data["cityName"] === this.city.getName()) this.showBuildingsWindow();
       }
     });
 
@@ -95,6 +107,12 @@ export class CityDisplayInfo extends ActorGroup {
     this.addActor(this.statsWindow);
   }
 
+  private showBuildingsWindow() {
+    this.removeActor(this.buildingsWindow);
+    this.buildingsWindow = new CityBuildingsWindow(this.city);
+    this.addActor(this.buildingsWindow);
+  }
+
   private hideStatsWindow() {
     this.removeActor(this.statsWindow);
     this.statsWindow = undefined;
@@ -128,8 +146,16 @@ export class CityDisplayInfo extends ActorGroup {
     // Rebuild just for the buttons' new "Cancel" label - the queue itself hasn't changed.
     this.showProductionQueueWindow();
 
+    this.requestListOptions(mode);
+  }
+
+  private requestListOptions(mode: ProductionListMode) {
     const event = mode === "produce" ? "requestProductionOptions" : "requestPurchaseOptions";
-    WebsocketClient.sendMessage({ event, cityName: this.city.getName(), currency: mode === "faith" ? "faith" : "gold" });
+    WebsocketClient.sendMessage({
+      event,
+      cityName: this.city.getName(),
+      currency: mode === "faith" ? "faith" : "gold"
+    });
   }
 
   private closeList() {

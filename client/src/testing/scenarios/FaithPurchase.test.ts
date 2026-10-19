@@ -11,7 +11,8 @@ const MOSQUE_COST = 200;
 // Buys a Mosque with faith against a live server: on the pantheons map preset with Faith for a pantheon,
 // a Great Prophet and a Mosque (the startingFaith game option), founds a pantheon, waits a turn for the
 // prophet, and founds Islam with the Mosques follower belief. The city screen's faith Buy then lists the
-// Mosque at 200 Faith, and buying it spends the faith and adds it to the city.
+// Mosque at 200 Faith, and buying it spends the faith, drops it from the still-open list, and adds it
+// to the city's buildings list.
 export function setupFaithPurchaseTest(game: Game) {
     const runner = new TestRunner("FaithPurchase");
     const utils = new TestUtils(game);
@@ -24,6 +25,11 @@ export function setupFaithPurchaseTest(game: Game) {
     const scene = () => utils.getInGameScene() as unknown as Record<string, any>;
     const cityScreen = () => scene()["cityDisplayInfo"] as Record<string, any>;
     const openList = (): ChooseProductionList | undefined => cityScreen()?.["chooseProductionList"];
+    // The rows of the city screen's own buildings list.
+    const buildingRows = (): string[] =>
+        ((cityScreen()?.["buildingsWindow"] as Record<string, any>)?.["rows"] ?? []).map(
+            (row: any) => row.getLabel().getText() as string
+        );
     const listRows = (mode: ProductionListMode): string[] => {
         const list = openList();
         if (list?.getMode() !== mode) return [];
@@ -80,7 +86,7 @@ export function setupFaithPurchaseTest(game: Game) {
     });
 
     runner.addStep({
-        name: `Buy the Mosque: ${MOSQUE_COST} Faith is spent and the city has it`,
+        name: `Buy the Mosque: ${MOSQUE_COST} Faith is spent, it leaves the open faith list and shows in the city's buildings`,
         action: async () => {
             faithBefore = faith();
             WebsocketClient.sendMessage({
@@ -92,8 +98,11 @@ export function setupFaithPurchaseTest(game: Game) {
             });
             await utils.waitUntil(() => faith() === faithBefore - MOSQUE_COST, 5000, "The faith to be spent");
             await utils.waitUntil(() => city().getBuildings().some((building) => building.getName() === "Mosque"), 5000, "The Mosque to be built");
+            await utils.waitUntil(() => !listRows("faith").includes("Mosque"), 5000, "The faith list to drop the Mosque");
+            await utils.delay(1500);
         },
-        verification: () => faith() === faithBefore - MOSQUE_COST
+        verification: () =>
+            faith() === faithBefore - MOSQUE_COST && !listRows("faith").includes("Mosque") && buildingRows().includes("Mosque")
     });
 
     return runner;
