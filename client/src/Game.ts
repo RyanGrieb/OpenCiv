@@ -254,11 +254,11 @@ export class Game {
         // Even once the capture's over, as with the Escape that closed the dev console.
         if (this.capturedKeys.delete(event.key) || this.keyCapture) return;
         this.actors.forEach((actor) => {
-          actor.call("keyup", { key: event.key });
+          actor.call("keyup", { key: event.key, shiftKey: event.shiftKey });
         });
 
         if (this.currentScene) {
-          this.currentScene.call("keyup", { key: event.key });
+          this.currentScene.call("keyup", { key: event.key, shiftKey: event.shiftKey });
         }
       });
       document.addEventListener("contextmenu", (event) => event.preventDefault());

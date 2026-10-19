@@ -119,6 +119,9 @@ export class InGameScene extends Scene {
       if ((options.key === "g" || options.key === "G") && !this.getCamera().isLocked()) {
         this.setGlobeView(!this.isGlobeView());
       }
+      if (options.key === "Enter" && options.shiftKey) {
+        this.forceNextTurn();
+      }
     });
 
     // Initialize all existing players
@@ -433,6 +436,22 @@ export class InGameScene extends Scene {
     const turnBlocker = this.notifications.getTurnBlocker();
     if (turnBlocker) {
       this.notifications.act(turnBlocker);
+      return;
+    }
+
+    this.setRequestedNextTurn(true);
+  }
+
+  /**
+   * Shift+Enter: ends the turn past production, research and idle units, which can wait. The pantheon
+   * can't, so it still opens instead.
+   */
+  private forceNextTurn() {
+    if (this.clientPlayer.hasRequestedNextTurn()) return;
+
+    const pantheon = this.notifications.getAll().find((notification) => notification.type === "pantheon");
+    if (pantheon) {
+      this.notifications.act(pantheon);
       return;
     }
 
