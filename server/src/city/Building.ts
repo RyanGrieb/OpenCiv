@@ -27,6 +27,8 @@ export interface BuildingData {
   requires_building?: string;
   // The city must sit on a river (Water Mill).
   requires_river?: boolean;
+  // The city must sit next to a mountain (Observatory).
+  requires_mountain?: boolean;
   // Civ 5's effects beyond flat yields (see BuildingEffects).
   effects?: BuildingEffectsData;
   // Real effects that need systems the game doesn't have yet. Shown in the tooltip, nothing applies them.
@@ -50,6 +52,7 @@ export class Building {
   private coastal: boolean;
   private requiredBuilding?: string;
   private requiresRiver: boolean;
+  private requiresMountain: boolean;
   private effects: BuildingEffectsData;
   private notYet: string[];
 
@@ -67,6 +70,7 @@ export class Building {
     this.coastal = data.coastal ?? false;
     this.requiredBuilding = data.requires_building;
     this.requiresRiver = data.requires_river ?? false;
+    this.requiresMountain = data.requires_mountain ?? false;
     this.effects = data.effects ?? {};
     this.notYet = data.not_yet ?? [];
 
@@ -150,6 +154,10 @@ export class Building {
 
   public needsRiver(): boolean {
     return this.requiresRiver;
+  }
+
+  public needsMountain(): boolean {
+    return this.requiresMountain;
   }
 
   public getEffects(): BuildingEffectsData {

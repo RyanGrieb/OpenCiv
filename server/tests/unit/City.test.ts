@@ -52,6 +52,7 @@ describe('City', () => {
       getUnits: jest.fn().mockReturnValue([]),
       isCoastal: jest.fn().mockReturnValue(false),
       hasRiver: jest.fn().mockReturnValue(false),
+      isNextToMountain: jest.fn().mockReturnValue(false),
     } as unknown as jest.Mocked<Tile>;
 
     // With population 1, City.updateWorkedTiles works one tile beyond the city's
@@ -1508,6 +1509,21 @@ describe('City', () => {
 
       (mockTile as any).hasRiver.mockReturnValue(true);
       expect(offersWaterMill()).toBe(true);
+    });
+
+    it('offers an Observatory only in a city next to a mountain', () => {
+      mockPlayer.hasResearchedTech.mockReturnValue(true);
+      const offersObservatory = () => {
+        mockPlayer.sendNetworkEvent.mockClear();
+        triggerServerEvent('requestProductionOptions', { cityName: 'TestCity' }, mockWebsocket);
+        const { buildings } = (mockPlayer.sendNetworkEvent as jest.Mock).mock.calls[0][0];
+        return buildings.some((option: { name: string }) => option.name === 'Observatory');
+      };
+
+      expect(offersObservatory()).toBe(false);
+
+      (mockTile as any).isNextToMountain.mockReturnValue(true);
+      expect(offersObservatory()).toBe(true);
     });
 
     it('sends what the effects do with each building in the production list', () => {

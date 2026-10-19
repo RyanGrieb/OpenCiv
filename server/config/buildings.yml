@@ -12,7 +12,8 @@
 # BuildingEffectsData says what each key does). not_yet lists real effects that need systems the game
 # doesn't have yet (great people, great works, policies, religion, trade routes); those buildings keep a
 # flat stand-in in stats, and their tooltip lists the real effect as not in the game yet.
-# requires_river: the city must sit on a river (Water Mill).
+# requires_river: the city must sit on a river (Water Mill). requires_mountain: the city must sit next to
+# a mountain (Observatory).
 buildings:
   - name: Palace
     asset_name: BUILDING_PALACE
@@ -575,8 +576,7 @@ buildings:
     cost: 120
     maintenance: 2
     required_tech: Astronomy
-    not_yet:
-      - Must be built in a city next to a Mountain
+    requires_mountain: true
     effects:
       yield_percent: { science: 50 }
     stats: []

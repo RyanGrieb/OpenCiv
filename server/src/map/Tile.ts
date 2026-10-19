@@ -852,6 +852,11 @@ export class Tile {
     return this.adjacentTiles.some((tile) => tile?.containsTileTypes(["freshwater", "oasis"]));
   }
 
+  // A mountain on one of the six tiles around this one, as Civ 5's Observatory needs.
+  public isNextToMountain(): boolean {
+    return this.adjacentTiles.some((tile) => tile?.getTileTypes().some((type) => type.includes("mountain")));
+  }
+
   // Land beside the sea, where a city can build ships and let them in. A lake doesn't count, since
   // nothing built there could sail anywhere. Mirrored by the client's Tile.isCoastal().
   public isCoastal(): boolean {

@@ -1091,10 +1091,11 @@ export class City {
       )
       .map((unit) => ({ type: "unit", name: unit.name, cost: this.scaleCost(unit.cost) }));
 
-    // A building can need a coast, a river, or another building in the city first.
+    // A building can need a coast, a river, a mountain beside the city, or another building in the city first.
     const siteAllows = (building: Building) =>
       (!building.isCoastal() || this.isCoastal()) &&
       (!building.needsRiver() || this.tile.hasRiver()) &&
+      (!building.needsMountain() || this.tile.isNextToMountain()) &&
       (!building.getRequiredBuilding() || this.hasBuilding(building.getRequiredBuilding()));
 
     const available = Building.getAllBuildings().filter(
