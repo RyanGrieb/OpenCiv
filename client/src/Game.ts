@@ -792,6 +792,8 @@ export class Game {
     const yPos = textOptions.y;
 
     if (textOptions.lineWidth > 0) {
+      // Round joins: the default miter join spikes the outline out past sharp corners, like an M's.
+      canvasContext.lineJoin = "round";
       if (text.includes("\n")) {
         for (const [index, line] of text.split("\n").entries()) {
           canvasContext.strokeText(line, xPos, yPos + textOptions.height * index);
@@ -799,6 +801,7 @@ export class Game {
       } else {
         canvasContext.strokeText(text, xPos, yPos);
       }
+      canvasContext.lineJoin = "miter";
     }
 
     if (text.includes("\n")) {
