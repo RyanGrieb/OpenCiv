@@ -174,6 +174,8 @@ export interface UnitCreationData {
   coastOnly: boolean;
   // Missionaries, Inquisitors and Great Prophets may cross any civilization's borders.
   entersForeignLands?: boolean;
+  // Missionaries' and Great Prophets' strength in percent, worn down in foreign lands.
+  preachingStrength?: number;
   remainingMovement: number;
   defaultMoveDistance: number;
   player: string;
@@ -246,6 +248,9 @@ export class Unit extends ActorGroup {
   // the health the unit has left and red for what it's lost, like old_java's UnitHealthBubble.
   private static readonly CIV_ICON_SIZE = 8;
   private static readonly HEALTH_BUBBLE_RADIUS = 5;
+  // A Missionary's or Great Prophet's preaching strength, as a thin gold bar under the health bubble.
+  private static readonly PREACHING_BAR_WIDTH = 12;
+  private static readonly PREACHING_BAR_HEIGHT = 2;
 
   private name: string;
   private id: number;
@@ -261,6 +266,7 @@ export class Unit extends ActorGroup {
   private domain: "land" | "sea";
   private coastOnly: boolean;
   private foreignLandsAllowed: boolean;
+  private preachingStrength: number | undefined;
   private unitActor: Actor;
   // Draws the health bubble and the icons around it at BADGE_Z, as its own scene object, since the
   // unit itself sits at a z-level the map's overlays draw over.
@@ -322,6 +328,7 @@ export class Unit extends ActorGroup {
     this.domain = unitJSON.domain ?? "land";
     this.coastOnly = unitJSON.coastOnly ?? false;
     this.foreignLandsAllowed = unitJSON.entersForeignLands ?? false;
+    this.preachingStrength = unitJSON.preachingStrength ?? undefined;
     this.availableMovement = unitJSON.remainingMovement;
     this.defaultMoveDistance = unitJSON.defaultMoveDistance;
     this.promotionData = {
@@ -508,6 +515,14 @@ export class Unit extends ActorGroup {
       parentObject: this,
       callback: (data) => {
         if (this.id === data.id) this.health = data.health;
+      }
+    });
+
+    NetworkEvents.on<{ id: number; preachingStrength: number }>({
+      eventName: "unitPreachingStrength",
+      parentObject: this,
+      callback: (data) => {
+        if (this.id === data.id) this.preachingStrength = data.preachingStrength;
       }
     });
 
@@ -833,11 +848,22 @@ export class Unit extends ActorGroup {
 
   // What the badges show, besides where - see UnitBadges.getDrawState().
   public getBadgeState() {
-    return [this.health, this.fortified, this.civIcon?.getSpriteRegion(), this.buildIcon?.getSpriteRegion()].join("|");
+    return [
+      this.health,
+      this.preachingStrength,
+      this.fortified,
+      this.civIcon?.getSpriteRegion(),
+      this.buildIcon?.getSpriteRegion()
+    ].join("|");
+  }
+
+  public getPreachingStrength(): number | undefined {
+    return this.preachingStrength;
   }
 
   public drawBadges(canvasContext: CanvasRenderingContext2D) {
     this.drawHealthBubble(canvasContext);
+    this.drawPreachingBar(canvasContext);
     this.civIcon?.draw(canvasContext);
     if (this.fortified) this.fortifyIcon.draw(canvasContext);
     this.buildIcon?.draw(canvasContext);
@@ -886,6 +912,30 @@ export class Unit extends ActorGroup {
     }
   }
 
+  private drawPreachingBar(canvasContext: CanvasRenderingContext2D) {
+    if (this.preachingStrength === undefined) return;
+
+    const { x, y, width, height } = this.getPreachingBarRect();
+    const filled = Math.round((width * Math.max(0, this.preachingStrength)) / 100);
+    canvasContext.fillStyle = "black";
+    canvasContext.fillRect(x - 1, y - 1, width + 2, height + 2);
+    canvasContext.fillStyle = "#5a4a1a";
+    canvasContext.fillRect(x, y, width, height);
+    canvasContext.fillStyle = "gold";
+    canvasContext.fillRect(x, y, filled, height);
+  }
+
+  // Centered just under the health bubble.
+  private getPreachingBarRect() {
+    const { x, y } = this.getCivIconPosition();
+    return {
+      x: x + (Unit.CIV_ICON_SIZE - Unit.PREACHING_BAR_WIDTH) / 2,
+      y: y + Unit.CIV_ICON_SIZE / 2 + Unit.HEALTH_BUBBLE_RADIUS + 2,
+      width: Unit.PREACHING_BAR_WIDTH,
+      height: Unit.PREACHING_BAR_HEIGHT
+    };
+  }
+
   // "-12" rising from just under the civ icon to above it, then fading, as in Civ 5.
   private showDamage(damage: number) {
     if (damage <= 0) return;
@@ -920,7 +970,9 @@ export class Unit extends ActorGroup {
     const centerY = y + Unit.CIV_ICON_SIZE / 2;
     const reach = Unit.HEALTH_BUBBLE_RADIUS + 1;
     const right = this.getFortifyIconPosition().x + Unit.CIV_ICON_SIZE + 1;
-    return [centerX - reach, centerY - reach, right, centerY + reach];
+    const bar = this.getPreachingBarRect();
+    const bottom = this.preachingStrength === undefined ? centerY + reach : bar.y + bar.height + 2;
+    return [Math.min(centerX - reach, bar.x - 2), centerY - reach, right, bottom];
   }
 
   // Just right of the health bubble.

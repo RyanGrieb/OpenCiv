@@ -299,12 +299,12 @@ export function setupReligionSpreadTest(game: Game) {
     });
 
     runner.addStep({
-        name: "End the turn: our Missionary loses strength in their lands",
+        name: "End the turn: our Missionary loses strength in their lands, and its preaching strength bar shows it",
         action: async () => {
             await endTurn();
             await utils.waitUntil(() => spreadDesc()?.includes("% strength"), 5000, "The Missionary to lose strength");
         },
-        verification: () => spreadDesc()?.includes("% strength")
+        verification: () => spreadDesc()?.includes("% strength") && ownUnit("Missionary").getPreachingStrength() < 100
     });
 
     return runner;

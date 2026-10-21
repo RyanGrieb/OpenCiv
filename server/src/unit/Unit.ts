@@ -1125,6 +1125,11 @@ export class Unit {
     return this.spreadsLeft < (Unit.getUnitYMLTypeDataByName(this.name)?.spread_charges ?? 0);
   }
 
+  // Missionaries and Great Prophets, which Spread Religion.
+  public canSpread(): boolean {
+    return (Unit.getUnitYMLTypeDataByName(this.name)?.spread_charges ?? 0) > 0;
+  }
+
   public getReligiousStrength(): number {
     return this.religiousStrength;
   }
@@ -1132,6 +1137,11 @@ export class Unit {
   public weakenReligiousStrength(percent: number) {
     this.religiousStrength = Math.max(0, this.religiousStrength - percent);
     this.sendActionsToOwner();
+    this.sendToObservers(this.tile, () => ({
+      event: "unitPreachingStrength",
+      id: this.id,
+      preachingStrength: this.religiousStrength
+    }));
   }
 
   // Missionaries, Inquisitors and Great Prophets may cross any civilization's borders.
@@ -1319,6 +1329,8 @@ export class Unit {
       domain: this.domain,
       coastOnly: this.coastOnly,
       entersForeignLands: this.foreignLandsAllowed,
+      // Missionaries' and Great Prophets' strength, for the bar under their health bubble.
+      preachingStrength: this.canSpread() ? this.religiousStrength : undefined,
       id: this.id,
       actions: ownUnit ? this.getUnitActionsJSON() : [],
       queuedTiles: queuedTilesJSON,
