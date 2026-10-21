@@ -95,17 +95,19 @@ export class ReligiousUnits {
     return true;
   }
 
-  // At each turn's start: the player's Missionaries in another civilization's lands lose strength, and
-  // one with none left is lost.
+  // At each turn's start: the player's Missionaries and Great Prophets in another civilization's lands
+  // lose strength, and one with none left is lost.
   public static applyAttrition(player: Player) {
     player
       .getUnits()
-      .filter((unit) => unit.getName() === ReligiousUnits.MISSIONARY && ReligiousUnits.isAbroad(unit))
+      .filter((unit) => unit.canSpread() && ReligiousUnits.isAbroad(unit))
       .forEach((unit) => {
         unit.weakenReligiousStrength(ReligiousUnits.ATTRITION_PERCENT);
         if (unit.getReligiousStrength() > 0) return;
 
-        player.getNotifications().addMessage("ICON_FAITH", "Your Missionary has lost its strength in foreign lands.");
+        player
+          .getNotifications()
+          .addMessage("ICON_FAITH", `Your ${unit.getName()} has lost its strength in foreign lands.`);
         unit.delete();
       });
   }

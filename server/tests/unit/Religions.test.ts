@@ -470,6 +470,7 @@ describe("Religions", () => {
         setReligion: (name: string) => (religion = name),
         getSpreadsLeft: () => unit.spreads,
         hasSpread: () => name === "Great Prophet" && unit.spreads < 4,
+        canSpread: () => name === "Missionary" || name === "Great Prophet",
         getAvailableMovement: () => 2,
         getReligiousStrength: () => unit.strength,
         weakenReligiousStrength: (percent: number) => (unit.strength -= percent),
@@ -579,10 +580,12 @@ describe("Religions", () => {
       ]);
     });
 
-    it("wears a Missionary down by a quarter each turn in foreign lands, losing it at none", () => {
+    it("wears Missionaries and Great Prophets down by a quarter each turn in foreign lands, losing them at none", () => {
       const { rome, paris } = islamAndParis();
       const abroad = religiousUnit(rome, "Missionary", { lands: paris, religion: "Islam" });
       const home = religiousUnit(rome, "Missionary", { lands: rome.ownCities[0], religion: "Islam" });
+      const prophet = religiousUnit(rome, "Great Prophet", { lands: paris });
+      const inquisitor = religiousUnit(rome, "Inquisitor", { lands: paris, religion: "Islam" });
 
       ReligiousUnits.applyAttrition(rome);
       expect(abroad.strength).toBe(75);
@@ -592,6 +595,8 @@ describe("Religions", () => {
       for (let turn = 0; turn < 3; turn++) ReligiousUnits.applyAttrition(rome);
       expect(abroad.deleted).toBe(true);
       expect(home.deleted).toBe(false);
+      expect(prophet.deleted).toBe(true);
+      expect(inquisitor.strength).toBe(100);
     });
 
     it("stops a Great Prophet that has spread from enhancing", () => {

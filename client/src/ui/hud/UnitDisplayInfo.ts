@@ -52,6 +52,8 @@ export class UnitDisplayInfo extends ActorGroup {
   private buildLabel: Label;
   // Strength, health bar and XP bar - rebuilt whenever strength or health changes.
   private combatActors: Actor[] = [];
+  // A Missionary's or Great Prophet's preaching strength bar, where a fighting unit's health bar goes.
+  private preachingActors: Actor[] = [];
   // The part of combatActors on the strength row, right under the movement line.
   private strengthActors: Actor[] = [];
   private actionButtons: Button[];
@@ -113,6 +115,7 @@ export class UnitDisplayInfo extends ActorGroup {
     this.addActor(this.buildLabel);
 
     if (unit.canFight()) this.updateCombatRows();
+    this.updatePreachingBar();
     this.updateBuildLabel();
 
     this.updateActionButtons();
@@ -142,7 +145,8 @@ export class UnitDisplayInfo extends ActorGroup {
       "unitFortified",
       "unitActions",
       "unitBuildStatus",
-      "unitPromotions"
+      "unitPromotions",
+      "unitPreachingStrength"
     ]) {
       NetworkEvents.on({
         eventName,
@@ -263,6 +267,21 @@ export class UnitDisplayInfo extends ActorGroup {
       }
       this.combatActors = actors;
       this.strengthActors = strengthActors;
+    });
+  }
+
+  // A gold bar like the health bar, e.g. "Preaching Strength 75%", worn down in foreign lands.
+  private updatePreachingBar() {
+    const strength = this.unit.getPreachingStrength();
+    if (strength === undefined) return;
+
+    const label = this.createLabel(`Preaching Strength ${strength}%`);
+    label.conformSize().then(() => {
+      const fraction = Math.max(0, Math.min(100, strength)) / 100;
+      const actors = this.createBar(HEALTH_BAR_Y, "rgb(90, 74, 26)", "goldenrod", fraction, label);
+      for (const actor of this.preachingActors) this.removeActor(actor);
+      for (const actor of actors) this.addActor(actor);
+      this.preachingActors = actors;
     });
   }
 
@@ -411,6 +430,7 @@ export class UnitDisplayInfo extends ActorGroup {
     if (this.unit.getPromotionData().promotionChoices.length < 1) this.closePromotionWindow();
     this.updateMovementLabel();
     if (this.unit.canFight()) this.updateCombatRows();
+    this.updatePreachingBar();
     this.updateBuildLabel();
     this.updateActionButtons();
   }
