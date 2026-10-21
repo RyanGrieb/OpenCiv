@@ -7,7 +7,7 @@ import { ActorGroup } from "../../../scene/ActorGroup";
 import { Button, ButtonSize } from "../../components/Button";
 import { Label } from "../../components/Label";
 import { SectionList, SectionListRow } from "../../components/SectionList";
-import { YieldLine } from "../../components/YieldLine";
+import { YieldText } from "../../components/YieldText";
 import { UITheme } from "../../UITheme";
 import { BeliefTooltip } from "./BeliefTooltip";
 
@@ -298,13 +298,13 @@ export class ReligionFoundingWindow extends ActorGroup {
             cameraApplies: false
           }),
           new Label({ text: belief.name, font: UITheme.FONT, fontColor: "white", x: textX, y: nameY }),
-          ...YieldLine.create({
-            stats: belief.yields ?? {},
+          new Label({
+            text: YieldText.withText(belief.yields ?? {}, belief.text),
             x: textX,
             y: nameY + UITheme.FONT_SIZE + ReligionFoundingWindow.LINE_GAP,
-            color: ReligionFoundingWindow.getTextColor(belief),
-            text: belief.text
-          }).actors
+            font: UITheme.FONT,
+            fontColor: ReligionFoundingWindow.getTextColor(belief)
+          })
         ];
       }
     };

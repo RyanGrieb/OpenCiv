@@ -1,5 +1,4 @@
 import { TestRunner } from "../TestRunner";
-import { SpriteRegion } from "../../Assets";
 import { Game } from "../../Game";
 import { WebsocketClient } from "../../network/Client";
 import { Unit } from "../../Unit";
@@ -30,8 +29,8 @@ export function setupHappinessTest(game: Game) {
     const happiness = () => me().getHappinessBreakdown();
     const source = (name: string) => happiness().sources.filter((entry) => entry.source === name);
     const statusBar = () => (utils.getInGameScene() as unknown as Record<string, any>)["statusBar"] as Record<string, any>;
-    const statusBarShows = (text: string, icon: SpriteRegion) =>
-        statusBar()["happinessLabel"].getText() === text && statusBar()["happinessIcon"]["spriteRegion"] === icon;
+    const statusBarShows = (text: string, icon: string) =>
+        statusBar()["happinessLabel"].getText() === `Happiness: !{${icon}} ${text}`;
     const builders = () => (me()?.getUnits() ?? []).filter((unit) => unit.getName() === "Builder");
     // What the tooltip's lines add up to: every source, less every cost.
     const addsUp = () =>
@@ -73,7 +72,7 @@ export function setupHappinessTest(game: Game) {
             await utils.waitUntil(() => builders().length === 3, 90000, "The Builders to appear");
             await utils.waitUntil(() => happiness().net === BASE_HAPPINESS && !!statusBar()?.["happinessLabel"], 90000, "Happiness to arrive");
         },
-        verification: () => happiness().status === "unhappy" && statusBarShows(`${BASE_HAPPINESS}`, SpriteRegion.ICON_UNHAPPY)
+        verification: () => happiness().status === "unhappy" && statusBarShows(`${BASE_HAPPINESS}`, "unhappy")
     });
 
     runner.addStep({
@@ -96,7 +95,7 @@ export function setupHappinessTest(game: Game) {
             happiness().net === BASE_HAPPINESS - CITY_UNHAPPINESS - CITIZEN_UNHAPPINESS &&
             happiness().effects.includes("Cities stop growing") &&
             city.getStat("food") <= 0 &&
-            statusBarShows(`${happiness().net}`, SpriteRegion.ICON_UNHAPPY) &&
+            statusBarShows(`${happiness().net}`, "unhappy") &&
             addsUp()
     });
 
@@ -138,7 +137,7 @@ export function setupHappinessTest(game: Game) {
                 BASE_HAPPINESS - CITY_UNHAPPINESS - CITIZEN_UNHAPPINESS + COLOSSEUM_HAPPINESS + 2 * LUXURY_HAPPINESS &&
             happiness().status === "content" &&
             happiness().effects.length === 0 &&
-            statusBarShows(`+${happiness().net}`, SpriteRegion.ICON_MORALE) &&
+            statusBarShows(`+${happiness().net}`, "happiness") &&
             addsUp()
     });
 

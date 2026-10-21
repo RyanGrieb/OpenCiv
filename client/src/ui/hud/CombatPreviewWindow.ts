@@ -65,7 +65,6 @@ const WINDOW_WIDTH = 520;
 // Title, both sides' units and rings, and the outcome between them.
 const TOP_HEIGHT = 148;
 const STAT_LINE_HEIGHT = 28;
-const STRENGTH_ICON_SIZE = 24;
 const PADDING = 10;
 // From the right edge of the unit info window.
 const GAP = 8;
@@ -243,27 +242,7 @@ export class CombatPreviewWindow extends ActorGroup {
     strength: number,
     modifiers: CombatModifier[]
   ) {
-    const strengthLabel = new Label({
-      text: `Strength: ${Math.round(strength * 10) / 10}`,
-      font: UITheme.FONT,
-      fontColor: "white"
-    });
-    strengthLabel.conformSize().then(() => {
-      const width = strengthLabel.getWidth() + 4 + STRENGTH_ICON_SIZE;
-      const startX = align === "left" ? edgeX : edgeX - width;
-      strengthLabel.setPosition(startX, y);
-      this.addActor(strengthLabel);
-      this.addActor(
-        new Actor({
-          image: Game.getInstance().getImage(GameImage.SPRITESHEET),
-          spriteRegion: SpriteRegion.ICON_COMBAT,
-          x: startX + strengthLabel.getWidth() + 4,
-          y: y + (UITheme.FONT_SIZE - STRENGTH_ICON_SIZE) / 2,
-          width: STRENGTH_ICON_SIZE,
-          height: STRENGTH_ICON_SIZE
-        })
-      );
-    });
+    this.addAlignedLabel(`Strength: ${Math.round(strength * 10) / 10} !{combat}`, edgeX, align, y, "white");
 
     (modifiers ?? []).forEach((modifier, index) => {
       const color = modifier.value >= 0 ? "lime" : "#ff6060";

@@ -1,5 +1,6 @@
 import { Tile } from "../../map/Tile";
 import { Tooltip, TooltipLine } from "../components/Tooltip";
+import { YieldText } from "../components/YieldText";
 
 // One thing adding to a tile's yields, e.g. { source: "Wheat", stats: [{ food: 1 }] }.
 export interface TileYieldSource {
@@ -43,14 +44,10 @@ export class TileTooltip extends Tooltip {
 
     if (info.sources.length === 0) lines.push({ text: "No yields", color: "gray" });
     info.sources.forEach((source) =>
-      lines.push({
-        text: source.source,
-        color: TileTooltip.SOURCE_COLOR,
-        yields: Tooltip.getYields(source.stats)
-      })
+      lines.push({ text: `${source.source} ${YieldText.of(source.stats)}`, color: TileTooltip.SOURCE_COLOR })
     );
 
-    if (info.sources.length > 0) lines.push({ text: "Total", color: "white", yields: Tooltip.getYields(info.yields) });
+    if (info.sources.length > 0) lines.push({ text: `Total ${YieldText.of(info.yields)}`, color: "white" });
     return lines;
   }
 }

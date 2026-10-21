@@ -1,5 +1,6 @@
 import { BeliefData } from "../../../religion/Religions";
 import { Tooltip, TooltipLine } from "../../components/Tooltip";
+import { YieldText } from "../../components/YieldText";
 
 /**
  * Shown beside a pantheon or belief in its list while the mouse is over it, laid out like a building's
@@ -19,8 +20,8 @@ export class BeliefTooltip extends Tooltip {
   private static getLines(belief: BeliefData): TooltipLine[] {
     const lines: TooltipLine[] = [{ text: belief.name, color: "white" }];
 
-    const yields = Tooltip.getYields([belief.yields ?? {}]);
-    if (yields.length > 0) lines.push({ text: "", color: "white", yields });
+    const yields = YieldText.of([belief.yields ?? {}]);
+    if (yields) lines.push({ text: yields, color: "white" });
 
     lines.push({ text: belief.description, color: BeliefTooltip.BONUS_COLOR });
 

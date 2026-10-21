@@ -31,8 +31,6 @@ const PROMOTION_ICON_GAP = 4;
 const TEXT_X = 16;
 const BAR_MARGIN = 14;
 const BAR_HEIGHT = 26;
-const COMBAT_ICON_SIZE = 24;
-const COMBAT_ICON_GAP = 4;
 // Between one strength's icon and the next strength's label.
 const STRENGTH_SPACING = 10;
 
@@ -235,20 +233,13 @@ export class UnitDisplayInfo extends ActorGroup {
   // then old_java's health bar (red under green) across the window with e.g. "HP 63/100" on it, an
   // XP bar under that toward the next promotion, and the icons of the promotions the unit has.
   private updateCombatRows() {
-    const strengths: { label: Label; icon: SpriteRegion }[] = [
-      { label: this.createLabel(`Strength: ${this.unit.getCombatStrength()}`), icon: SpriteRegion.ICON_COMBAT }
-    ];
-    if (this.unit.isRanged()) {
-      strengths.push({
-        label: this.createLabel(`Ranged: ${this.unit.getRangedStrength()}`),
-        icon: SpriteRegion.ICON_TARGET
-      });
-    }
+    const strengths = [this.createLabel(`Strength: ${this.unit.getCombatStrength()} !{combat}`)];
+    if (this.unit.isRanged()) strengths.push(this.createLabel(`Ranged: ${this.unit.getRangedStrength()} !{target}`));
     const healthLabel = this.createLabel(`HP ${this.unit.getHealth()}/${Unit.MAX_HEALTH}`);
     const { experience, experienceNeeded } = this.unit.getPromotionData();
     const xpLabel = this.createLabel(`XP ${experience}/${experienceNeeded}`);
 
-    const labels = [...strengths.map(({ label }) => label), healthLabel, xpLabel];
+    const labels = [...strengths, healthLabel, xpLabel];
     Promise.all(labels.map((label) => label.conformSize())).then(() => {
       const healthFraction = Math.max(0, Math.min(Unit.MAX_HEALTH, this.unit.getHealth())) / Unit.MAX_HEALTH;
 
@@ -275,30 +266,17 @@ export class UnitDisplayInfo extends ActorGroup {
     });
   }
 
-  // Each strength's label followed by its icon, left to right along the strength row.
-  private createStrengthRow(strengths: { label: Label; icon: SpriteRegion }[]) {
+  // Each strength's label, icon included, left to right along the strength row.
+  private createStrengthRow(strengths: Label[]): Actor[] {
     const y = this.y + STRENGTH_Y + this.getExtraActionRowsHeight();
-    const actors: Actor[] = [];
     let x = this.x + TEXT_X;
 
-    for (const { label, icon } of strengths) {
+    for (const label of strengths) {
       label.setPosition(x, y);
-      x += label.getWidth() + COMBAT_ICON_GAP;
-      actors.push(
-        label,
-        new Actor({
-          image: Game.getInstance().getImage(GameImage.SPRITESHEET),
-          spriteRegion: icon,
-          x,
-          y: y + (label.getHeight() - COMBAT_ICON_SIZE) / 2,
-          width: COMBAT_ICON_SIZE,
-          height: COMBAT_ICON_SIZE
-        })
-      );
-      x += COMBAT_ICON_SIZE + STRENGTH_SPACING;
+      x += label.getWidth() + STRENGTH_SPACING;
     }
 
-    return actors;
+    return strengths;
   }
 
   // One icon per promotion the unit has, left to right; hovering one says what it does. Icons shrink to

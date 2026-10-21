@@ -128,7 +128,7 @@ export function setupRangedCombatTest(game: Game) {
                 archer.getCombatStrength() === 5 &&
                 archer.getRangedStrength() === 7 &&
                 archer.getRange() === 2 &&
-                labels.includes("Ranged: 7") &&
+                labels.includes("Ranged: 7 !{target}") &&
                 archer.getActions().some((action) => action.getName() === "ranged_attack" && action.requirementsMet(archer))
             );
         }

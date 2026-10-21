@@ -6,7 +6,7 @@ import { Actor } from "../../../scene/Actor";
 import { ActorGroup } from "../../../scene/ActorGroup";
 import { Button, ButtonSize } from "../../components/Button";
 import { Label } from "../../components/Label";
-import { YieldLine } from "../../components/YieldLine";
+import { YieldText } from "../../components/YieldText";
 import { UITheme } from "../../UITheme";
 
 const WINDOW_WIDTH = 760;
@@ -160,8 +160,14 @@ export class ReligionWindow extends ActorGroup {
     if (!line.stats) return [...icon, label];
 
     const textWidth = Game.getInstance().measureText(line.text, line.font ?? UITheme.FONT).width;
-    const yields = YieldLine.create({ stats: line.stats, x: textX + textWidth + 12, y, color: BONUS_COLOR });
-    return [...icon, label, ...yields.actors];
+    const yields = new Label({
+      text: YieldText.of([line.stats]),
+      x: textX + textWidth + 12,
+      y,
+      font: UITheme.FONT,
+      fontColor: BONUS_COLOR
+    });
+    return [...icon, label, yields];
   }
 
   // Centred on the line's text.

@@ -1,34 +1,22 @@
-import { GameImage, SpriteRegion } from "../../../Assets";
+import { GameImage } from "../../../Assets";
 import { Game } from "../../../Game";
 import { City } from "../../../city/City";
 import { BuildingCategory, Buidling } from "../../../city/Building";
 import { Actor } from "../../../scene/Actor";
-import { Strings } from "../../../util/Strings";
 import { ButtonSize } from "../../components/Button";
 import { Label } from "../../components/Label";
 import { ListBox } from "../../components/Listbox";
 import { RadioButton } from "../../components/RadioButton";
+import { YieldText } from "../../components/YieldText";
 import { UITheme } from "../../UITheme";
 import { CityScreen } from "./CityScreen";
 
-const BUILDING_STAT_ICONS: Record<string, SpriteRegion> = {
-  science: SpriteRegion.ICON_SCIENCE,
-  gold: SpriteRegion.ICON_GOLD,
-  production: SpriteRegion.ICON_PRODUCTION,
-  faith: SpriteRegion.ICON_FAITH,
-  culture: SpriteRegion.ICON_CULTURE,
-  food: SpriteRegion.ICON_FOOD,
-  population: SpriteRegion.ICON_POPULATION,
-  happiness: SpriteRegion.ICON_MORALE,
-  defense: SpriteRegion.ICON_DEFENSE
-};
-
 const CITIZEN_FOCUSES = [
-  { name: "Food Focus", icon: SpriteRegion.ICON_FOOD },
-  { name: "Production Focus", icon: SpriteRegion.ICON_PRODUCTION },
-  { name: "Gold Focus", icon: SpriteRegion.ICON_GOLD },
-  { name: "Science Focus", icon: SpriteRegion.ICON_SCIENCE },
-  { name: "Culture Focus", icon: SpriteRegion.ICON_CULTURE }
+  "!{food} Food Focus",
+  "!{production} Production Focus",
+  "!{gold} Gold Focus",
+  "!{science} Science Focus",
+  "!{culture} Culture Focus"
 ];
 
 const FOCUS_ROW_HEIGHT = 64; // Tall enough for the ICON_LARGE radio button
@@ -92,28 +80,13 @@ export class CityBuildingsWindow extends ListBox {
     });
 
     for (const focus of CITIZEN_FOCUSES) {
-      const rowX = this.getNextRowPosition().x;
-      const rowY = this.getNextRowPosition().y;
-
       this.addRow({
         category: "Citizen Management",
-        text: focus.name,
-        textX: rowX + 120,
+        text: focus,
+        textX: this.getNextRowPosition().x + 72,
         centerTextY: true,
         rowHeight: FOCUS_ROW_HEIGHT,
-        actorIcons: [
-          this.createFocusRadioButton(false),
-          new Actor({
-            image: Game.getInstance().getImage(GameImage.SPRITESHEET),
-            spriteRegion: focus.icon,
-            x: rowX + 72,
-            y: rowY + FOCUS_ROW_HEIGHT / 2 - UITheme.ICON_SIZE / 2,
-            z: CityScreen.Z,
-            width: UITheme.ICON_SIZE,
-            height: UITheme.ICON_SIZE,
-            cameraApplies: false
-          })
-        ]
+        actorIcons: [this.createFocusRadioButton(false)]
       });
     }
   }
@@ -195,62 +168,26 @@ export class CityBuildingsWindow extends ListBox {
     return { actors, bottomY: startY + wrapped.length * EFFECT_LINE_HEIGHT };
   }
 
-  // Builds icon+value actors for a building's stats, wrapping lines by measured width, and where they
-  // end. Must return actors synchronously - ones added to a row after addRow() don't render.
+  // The building's yields as one label, wrapped to `maxWidth`, and where it ends. Must return actors
+  // synchronously - ones added to a row after addRow() don't render.
   private buildStatIconActors(
     statLine: Record<string, number>,
     startX: number,
     startY: number,
     maxWidth: number
   ): { actors: Actor[]; bottomY: number } {
-    const actors: Actor[] = [];
-    const iconSize = UITheme.ICON_SIZE;
-    const font = UITheme.FONT;
-    const gapAfterItem = 8;
-    const lineHeight = iconSize;
+    const text = YieldText.of([statLine]);
+    if (!text) return { actors: [], bottomY: startY };
 
-    let x = startX;
-    let y = startY;
-
-    for (const [stat, value] of Object.entries(statLine)) {
-      if (value === 0) continue;
-
-      const icon = BUILDING_STAT_ICONS[stat] ?? SpriteRegion.ICON_UNKNOWN;
-      const text = Strings.convertToStatUnit(value);
-      const textWidth = Game.getInstance().measureText(text, font).width;
-      const itemWidth = iconSize + textWidth;
-
-      // Wrap if it won't fit, unless the line's still empty
-      if (x !== startX && x + itemWidth > startX + maxWidth) {
-        x = startX;
-        y += lineHeight;
-      }
-
-      actors.push(
-        new Actor({
-          image: Game.getInstance().getImage(GameImage.SPRITESHEET),
-          spriteRegion: icon,
-          x: x,
-          y: y,
-          z: CityScreen.Z,
-          width: iconSize,
-          height: iconSize,
-          cameraApplies: false
-        })
-      );
-      actors.push(
-        new Label({
-          text: text,
-          font: font,
-          fontColor: "white",
-          x: x + iconSize,
-          y: y + UITheme.centerTextY(iconSize)
-        })
-      );
-
-      x += itemWidth + gapAfterItem;
-    }
-
-    return { actors, bottomY: actors.length > 0 ? y + lineHeight : startY };
+    const { lines } = Label.measure(text, UITheme.FONT, maxWidth);
+    const label = new Label({
+      text,
+      font: UITheme.FONT,
+      fontColor: "white",
+      x: startX,
+      y: startY + UITheme.centerTextY(UITheme.ICON_SIZE),
+      maxWidth
+    });
+    return { actors: [label], bottomY: startY + UITheme.ICON_SIZE + (lines - 1) * Label.iconLineHeight() };
   }
 }

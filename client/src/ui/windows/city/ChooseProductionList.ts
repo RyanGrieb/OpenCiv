@@ -1,4 +1,4 @@
-import { GameImage, SpriteRegion } from "../../../Assets";
+import { GameImage } from "../../../Assets";
 import { Game } from "../../../Game";
 import { City, ProductionOptions, ProductionQueueItem } from "../../../city/City";
 import { WebsocketClient } from "../../../network/Client";
@@ -177,28 +177,14 @@ export class ChooseProductionList extends ListBox {
 
   // The price and a gold or faith icon at the row's right edge, the price greyed out while it's unaffordable.
   private createPrice(option: ProductionQueueItem, rowX: number, rowY: number, affordable: boolean): Actor[] {
-    const rowCenterY = rowY + CityScreen.PRODUCTION_ROW_HEIGHT / 2;
-    const iconX = rowX + ChooseProductionList.WIDTH - UITheme.ICON_SIZE - 8;
-    const text = `${this.getPrice(option)}`;
-    const { width: textWidth, height: textHeight } = Game.getInstance().measureText(text, UITheme.FONT);
-
+    const text = `${this.getPrice(option)} !{${this.mode === "faith" ? "faith" : "gold"}}`;
     return [
       new Label({
         text,
-        x: iconX - textWidth,
-        y: rowCenterY - textHeight / 2,
+        x: rowX + ChooseProductionList.WIDTH - 8 - Label.measure(text).width,
+        y: rowY + UITheme.centerTextY(CityScreen.PRODUCTION_ROW_HEIGHT),
         font: UITheme.FONT,
         fontColor: affordable ? "white" : "gray"
-      }),
-      new Actor({
-        image: Game.getInstance().getImage(GameImage.SPRITESHEET),
-        spriteRegion: this.mode === "faith" ? SpriteRegion.ICON_FAITH : SpriteRegion.ICON_GOLD,
-        x: iconX,
-        y: rowCenterY - UITheme.ICON_SIZE / 2,
-        z: CityScreen.Z,
-        width: UITheme.ICON_SIZE,
-        height: UITheme.ICON_SIZE,
-        cameraApplies: false
       })
     ];
   }

@@ -45,7 +45,6 @@ export class InGameScene extends Scene {
   private players: AbstractPlayer[];
   private clientPlayer: ClientPlayer;
   private tileInformationLabel: Label;
-  private tileYieldActors: Actor[] = [];
   private statusBar: StatusBar;
   private researchDisplayInfo: ResearchDisplayInfo;
   private notifications: Notifications;
@@ -74,6 +73,15 @@ export class InGameScene extends Scene {
   private globeCamera: GlobeCamera;
 
   // Loaded as ?test=true&scenario=<name> (see Index.ts).
+  // "!{food} 2 !{production} 1": each of the hovered tile's yields above zero.
+  private static getHoverYieldText(tile: Tile): string {
+    const yields = tile.getTileYield() ?? {};
+    return ["food", "production", "gold", "faith", "happiness", "science", "culture"]
+      .filter((stat) => (yields[stat] ?? 0) > 0)
+      .map((stat) => `!{${stat}} ${yields[stat]}`)
+      .join(" ");
+  }
+
   private static isScenarioRun() {
     return new URLSearchParams(window.location.search).get("test") === "true";
   }
@@ -177,83 +185,14 @@ export class InGameScene extends Scene {
       this.tileInspector = new TileInspector(this);
 
       this.on("tileHovered", (options) => {
-        // Remove previous yield icons
-        for (const actor of this.tileYieldActors) {
-          this.removeActor(actor);
-        }
+        if (!options.tile || this.openUIElement) return;
 
-        this.tileYieldActors = [];
-
-        if (options.tile && !this.openUIElement) {
-          const tileTypes = options.tile
-            .getTileTypes()
-            .map((tileType: string) => Tile.getTileTypeName(tileType))
-            .join(", ");
-
-          // Get tile yields
-          const yields = options.tile.getTileYield();
-
-          // Map stat keys to SpriteRegion
-          const statSpriteRegions: Record<string, SpriteRegion> = {
-            food: SpriteRegion.ICON_FOOD,
-            production: SpriteRegion.ICON_PRODUCTION,
-            gold: SpriteRegion.ICON_GOLD,
-            faith: SpriteRegion.ICON_FAITH,
-            happiness: SpriteRegion.ICON_MORALE,
-            science: SpriteRegion.ICON_SCIENCE,
-            culture: SpriteRegion.ICON_CULTURE
-          };
-
-          // Set the label text (without yields)
-          this.tileInformationLabel.setText(
-            `[${options.tile.getGridX()},${options.tile.getGridY()}] ` +
-              tileTypes +
-              (options.tile.hasRiver() ? ", River" : "")
-          );
-
-          this.tileInformationLabel.conformSize().then(() => {
-            // Positioning for icons (right after the label)
-            let iconX = this.tileInformationLabel.getX() + this.tileInformationLabel.getWidth();
-            const iconY = this.tileInformationLabel.getY() - UITheme.centerTextY(UITheme.ICON_SIZE);
-
-            if (yields) {
-              for (const [key, value] of Object.entries(yields)) {
-                if (typeof value === "number" && value > 0 && statSpriteRegions[key]) {
-                  // Create icon actor
-                  const iconActor = new Actor({
-                    image: Game.getInstance().getImage(GameImage.SPRITESHEET),
-                    spriteRegion: statSpriteRegions[key],
-                    x: iconX,
-                    y: iconY,
-                    width: UITheme.ICON_SIZE,
-                    height: UITheme.ICON_SIZE,
-                    z: 10,
-                    cameraApplies: false
-                  });
-                  this.addActor(iconActor);
-                  this.tileYieldActors.push(iconActor);
-
-                  // Create value label
-                  const valueLabel = new Label({
-                    text: value.toString(),
-                    font: UITheme.FONT,
-                    fontColor: "white",
-                    shadowColor: "black",
-                    lineWidth: 4,
-                    x: iconX + iconActor.getWidth() - 8,
-                    y: this.tileInformationLabel.getY(),
-                    z: 10
-                  });
-                  this.addActor(valueLabel);
-                  this.tileYieldActors.push(valueLabel);
-
-                  // Move X for next icon
-                  iconX += UITheme.ICON_SIZE + 12;
-                }
-              }
-            }
-          });
-        }
+        const tile: Tile = options.tile;
+        const names = tile.getTileTypes().map((tileType: string) => Tile.getTileTypeName(tileType));
+        if (tile.hasRiver()) names.push("River");
+        this.tileInformationLabel.setText(
+          `[${tile.getGridX()},${tile.getGridY()}] ${names.join(", ")} ${InGameScene.getHoverYieldText(tile)}`
+        );
       });
       //DEBUG top layer chunks -
       /* GameMap.getInstance()
@@ -740,10 +679,6 @@ export class InGameScene extends Scene {
 
     if (isOpen) {
       this.tileInformationLabel.setText("");
-      this.tileYieldActors.forEach((actor) => {
-        this.removeActor(actor);
-      });
-      this.tileYieldActors = [];
     } else {
       this.systemMenuOpen = false;
     }

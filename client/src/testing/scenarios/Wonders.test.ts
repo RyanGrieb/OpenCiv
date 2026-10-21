@@ -129,7 +129,7 @@ export function setupWondersTest(game: Game) {
             utils.log(JSON.stringify(tooltipLines()), "yellow");
         },
         verification: () =>
-            JSON.stringify(tooltipLines()) === JSON.stringify(["Walls", "", "Maintenance", "+5", "+50", "-1"])
+            JSON.stringify(tooltipLines()) === JSON.stringify(["Walls", "+5 !{defense}+50 !{city_health}", "Maintenance -1 !{gold}"])
     });
 
     runner.addStep({
@@ -140,7 +140,7 @@ export function setupWondersTest(game: Game) {
         },
         verification: () =>
             JSON.stringify(tooltipLines()) ===
-            JSON.stringify(["Temple of Artemis", "Great Wonder: only one in the world", "", "+10% Food in all cities", "+1"])
+            JSON.stringify(["Temple of Artemis", "Great Wonder: only one in the world", "+1 !{culture}", "+10% Food in all cities"])
     });
 
     runner.addStep({
@@ -212,7 +212,7 @@ export function setupWondersTest(game: Game) {
     runner.addStep({
         name: "Leave Notre Dame's tooltip showing, to look at",
         action: async () => hoverListRow("Notre Dame"),
-        verification: () => tooltipLines().includes("+10")
+        verification: () => tooltipLines().some((line) => line.includes("+10 !{happiness}"))
     });
 
     return runner;

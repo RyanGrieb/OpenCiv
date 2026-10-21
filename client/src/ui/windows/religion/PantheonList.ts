@@ -3,8 +3,9 @@ import { Game } from "../../../Game";
 import { NetworkEvents, WebsocketClient } from "../../../network/Client";
 import { PantheonData, PantheonsEvent } from "../../../religion/Pantheons";
 import { Actor } from "../../../scene/Actor";
+import { Label } from "../../components/Label";
 import { ListBox } from "../../components/Listbox";
-import { YieldLine } from "../../components/YieldLine";
+import { YieldText } from "../../components/YieldText";
 import { UITheme } from "../../UITheme";
 import { BeliefTooltip } from "./BeliefTooltip";
 
@@ -132,13 +133,13 @@ export class PantheonList extends ListBox {
           height: UITheme.ICON_SIZE,
           cameraApplies: false
         }),
-        ...YieldLine.create({
-          stats: pantheon.yields ?? {},
+        new Label({
+          text: YieldText.withText(pantheon.yields ?? {}, pantheon.text),
           x: textX,
           y: bonusY,
-          color: PantheonList.getTextColor(pantheon),
-          text: pantheon.text
-        }).actors
+          font: UITheme.FONT,
+          fontColor: PantheonList.getTextColor(pantheon)
+        })
       ]
     });
     this.rowsByName.set(pantheon.name, row);

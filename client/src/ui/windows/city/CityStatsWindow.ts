@@ -1,4 +1,4 @@
-import { GameImage, SpriteRegion } from "../../../Assets";
+import { GameImage } from "../../../Assets";
 import { Game } from "../../../Game";
 import { City } from "../../../city/City";
 import { Actor } from "../../../scene/Actor";
@@ -12,7 +12,7 @@ import { CityScreen } from "./CityScreen";
 // `absolute` stats are plain counts, the rest are per-turn rates.
 interface StatRow {
   key: string;
-  icon: SpriteRegion;
+  // Starts with the stat's icon.
   text: string;
   color: string;
   absolute?: boolean;
@@ -26,15 +26,15 @@ interface ProgressReadout {
 }
 
 const STAT_ROWS: StatRow[] = [
-  { key: "population", icon: SpriteRegion.ICON_POPULATION, text: "Population:", color: "white", absolute: true },
-  { key: "happiness", icon: SpriteRegion.ICON_MORALE, text: "Happiness:", color: "orange", absolute: true },
-  { key: "food", icon: SpriteRegion.ICON_FOOD, text: "Food:", color: "lime" },
-  { key: "production", icon: SpriteRegion.ICON_PRODUCTION, text: "Production:", color: "rgb(220,162,29)" },
-  { key: "gold", icon: SpriteRegion.ICON_GOLD, text: "Gold:", color: "gold" },
-  { key: "science", icon: SpriteRegion.ICON_SCIENCE, text: "Science:", color: "aqua" },
-  { key: "culture", icon: SpriteRegion.ICON_CULTURE, text: "Culture:", color: "rgb(207, 159, 255)" },
-  { key: "faith", icon: SpriteRegion.ICON_FAITH, text: "Faith:", color: "rgb(255, 255, 255)" },
-  { key: "defense", icon: SpriteRegion.ICON_DEFENSE, text: "Defense:", color: "rgb(255, 0, 0)" }
+  { key: "population", text: "!{population} Population:", color: "white", absolute: true },
+  { key: "happiness", text: "!{happiness} Happiness:", color: "orange", absolute: true },
+  { key: "food", text: "!{food} Food:", color: "lime" },
+  { key: "production", text: "!{production} Production:", color: "rgb(220,162,29)" },
+  { key: "gold", text: "!{gold} Gold:", color: "gold" },
+  { key: "science", text: "!{science} Science:", color: "aqua" },
+  { key: "culture", text: "!{culture} Culture:", color: "rgb(207, 159, 255)" },
+  { key: "faith", text: "!{faith} Faith:", color: "rgb(255, 255, 255)" },
+  { key: "defense", text: "!{defense} Defense:", color: "rgb(255, 0, 0)" }
 ];
 
 // Top-left window: the city's name, its stat rows, and the growth and border-expansion progress bars.
@@ -99,22 +99,11 @@ export class CityStatsWindow extends ActorGroup {
     const textY = iconY + UITheme.centerTextY(UITheme.ICON_SIZE);
 
     this.addActor(
-      new Actor({
-        image: Game.getInstance().getImage(GameImage.SPRITESHEET),
-        spriteRegion: stat.icon,
-        x: x + 10,
-        y: iconY,
-        width: UITheme.ICON_SIZE,
-        height: UITheme.ICON_SIZE
-      })
-    );
-
-    this.addActor(
       new Label({
         text: stat.text,
         font: UITheme.FONT,
         fontColor: stat.color,
-        x: x + 10 + UITheme.ICON_SIZE,
+        x: x + 10,
         y: textY
       })
     );

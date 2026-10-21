@@ -1,6 +1,7 @@
 import { BuildingData } from "../../../city/Building";
 import { Strings } from "../../../util/Strings";
 import { Tooltip, TooltipLine } from "../../components/Tooltip";
+import { YieldText } from "../../components/YieldText";
 
 /**
  * Shown beside a building or wonder in the production and purchase lists while the mouse is over it:
@@ -26,19 +27,17 @@ export class BuildingTooltip extends Tooltip {
     const kind = BuildingTooltip.getWonderText(building);
     if (kind) lines.push({ text: kind, color: BuildingTooltip.WONDER_COLOR });
 
-    const yields = Tooltip.getYields([...building.stats, { city_health: building.city_health ?? 0 }]);
-    if (yields.length > 0) lines.push({ text: "", color: "white", yields });
+    const yields = YieldText.of([...building.stats, { city_health: building.city_health ?? 0 }]);
+    if (yields) lines.push({ text: yields, color: "white" });
 
     const bonuses = [...BuildingTooltip.getBonuses(building), ...(building.effect_lines ?? [])];
-    if (bonuses.length === 0 && yields.length === 0) lines.push({ text: "No bonuses", color: "gray" });
+    if (bonuses.length === 0 && !yields) lines.push({ text: "No bonuses", color: "gray" });
     bonuses.forEach((text) => lines.push({ text, color: BuildingTooltip.BONUS_COLOR }));
 
     if (building.maintenance) {
       lines.push({
-        text: "Maintenance",
-        color: BuildingTooltip.UPKEEP_COLOR,
-
-        yields: Tooltip.getYields([{ gold: -building.maintenance }])
+        text: `Maintenance ${YieldText.of([{ gold: -building.maintenance }])}`,
+        color: BuildingTooltip.UPKEEP_COLOR
       });
     }
 
@@ -59,7 +58,7 @@ export class BuildingTooltip extends Tooltip {
   private static getBonuses(building: BuildingData): string[] {
     return building.stats
       .flatMap((stat) => Object.entries(stat))
-      .filter(([stat, value]) => value !== 0 && !Tooltip.isYieldStat(stat))
+      .filter(([stat, value]) => value !== 0 && !YieldText.isYieldStat(stat))
       .map(([stat, value]) => `${Strings.convertToStatUnit(value)} ${Strings.capitalizeWords(stat)}`);
   }
 }

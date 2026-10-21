@@ -32,28 +32,12 @@ export class StatusBar extends ActorGroup {
   private currentTurnText: string; //when currentTurnLabel may not be initalized yet
   private currentTurnLabel: Label;
 
-  private scienceDescLabel: Label;
-  private scienceIcon: Actor;
+  // "Science: [icon] +5", each stat one label, left to right.
   private scienceLabel: Label;
-
-  private cultureDescLabel: Label;
-  private cultureIcon: Actor;
   private cultureLabel: Label;
-
-  private goldDescLabel: Label;
-  private goldIcon: Actor;
   private goldLabel: Label;
-
-  private happinessDescLabel: Label;
-  private happinessIcon: Actor;
   private happinessLabel: Label;
-
-  private faithDescLabel: Label;
-  private faithIcon: Actor;
   private faithLabel: Label;
-
-  private tradeDescLabel: Label;
-  private tradeIcon: Actor;
   private tradeLabel: Label;
 
   private hoveredStat: HoverStat | undefined;
@@ -112,11 +96,10 @@ export class StatusBar extends ActorGroup {
   private getStatAt(x: number, y: number): HoverStat | undefined {
     if (!this.happinessLabel || y < this.y || y > this.y + this.height) return undefined;
 
-    const isOver = (descLabel: Label, valueLabel: Label) =>
-      x >= descLabel.getX() && x <= valueLabel.getX() + valueLabel.getWidth();
-    if (isOver(this.goldDescLabel, this.goldLabel)) return "gold";
-    if (isOver(this.happinessDescLabel, this.happinessLabel)) return "happiness";
-    if (isOver(this.faithDescLabel, this.faithLabel)) return "faith";
+    const isOver = (label: Label) => x >= label.getX() && x <= label.getX() + label.getWidth();
+    if (isOver(this.goldLabel)) return "gold";
+    if (isOver(this.happinessLabel)) return "happiness";
+    if (isOver(this.faithLabel)) return "faith";
     return undefined;
   }
 
@@ -144,9 +127,9 @@ export class StatusBar extends ActorGroup {
     const clientPlayer = Game.getInstance().getCurrentSceneAs<InGameScene>().getClientPlayer();
     const y = this.y + this.height;
 
-    if (stat === "gold") return GoldTooltip.create(this.goldDescLabel.getX(), y, clientPlayer.getGoldBreakdown());
-    if (stat === "faith") return FaithTooltip.create(this.faithDescLabel.getX(), y, clientPlayer.getFaithBreakdown());
-    return HappinessTooltip.create(this.happinessDescLabel.getX(), y, clientPlayer.getHappinessBreakdown());
+    if (stat === "gold") return GoldTooltip.create(this.goldLabel.getX(), y, clientPlayer.getGoldBreakdown());
+    if (stat === "faith") return FaithTooltip.create(this.faithLabel.getX(), y, clientPlayer.getFaithBreakdown());
+    return HappinessTooltip.create(this.happinessLabel.getX(), y, clientPlayer.getHappinessBreakdown());
   }
 
   private hideTooltip() {
@@ -185,186 +168,13 @@ export class StatusBar extends ActorGroup {
     });
     this.addActor(this.statusBarActor);
 
-    //Science Information
-    this.scienceDescLabel = new Label({
-      text: "Science:",
-      font: UITheme.FONT,
-      fontColor: "white"
-    });
-    await this.scienceDescLabel.conformSize();
-    this.scienceDescLabel.setPosition(this.x + 1, 8);
-    this.addActor(this.scienceDescLabel);
-
-    this.scienceIcon = new Actor({
-      image: Game.getInstance().getImage(GameImage.SPRITESHEET),
-      spriteRegion: SpriteRegion.ICON_SCIENCE,
-      x: this.scienceDescLabel.getX() + this.scienceDescLabel.getWidth(),
-      y: 0,
-      width: UITheme.ICON_SIZE,
-      height: UITheme.ICON_SIZE
-    });
-
-    this.addActor(this.scienceIcon);
-
-    this.scienceLabel = new Label({
-      text: "+0",
-      font: UITheme.FONT,
-      fontColor: "white"
-    });
-    await this.scienceLabel.conformSize();
-    this.scienceLabel.setPosition(this.scienceIcon.getX() + this.scienceIcon.getWidth() - 8, 8);
-    this.addActor(this.scienceLabel);
-
-    // Culture information
-    this.cultureDescLabel = new Label({
-      text: "Culture:",
-      font: UITheme.FONT,
-      fontColor: "white"
-    });
-    await this.cultureDescLabel.conformSize();
-    this.cultureDescLabel.setPosition(this.scienceLabel.getX() + this.scienceLabel.getWidth() + 10, 8);
-    this.addActor(this.cultureDescLabel);
-
-    this.cultureIcon = new Actor({
-      image: Game.getInstance().getImage(GameImage.SPRITESHEET),
-      spriteRegion: SpriteRegion.ICON_CULTURE,
-      x: this.cultureDescLabel.getX() + this.cultureDescLabel.getWidth(),
-      y: 0,
-      width: UITheme.ICON_SIZE,
-      height: UITheme.ICON_SIZE
-    });
-
-    this.addActor(this.cultureIcon);
-
-    this.cultureLabel = new Label({
-      text: "+0",
-      font: UITheme.FONT,
-      fontColor: "white"
-    });
-    await this.cultureLabel.conformSize();
-    this.cultureLabel.setPosition(this.cultureIcon.getX() + this.cultureIcon.getWidth() - 8, 8);
-    this.addActor(this.cultureLabel);
-
-    //Gold information
-    this.goldDescLabel = new Label({
-      text: "Gold:",
-      font: UITheme.FONT,
-      fontColor: "white"
-    });
-    await this.goldDescLabel.conformSize();
-    this.goldDescLabel.setPosition(this.cultureLabel.getX() + this.cultureLabel.getWidth() + 10, 8);
-    this.addActor(this.goldDescLabel);
-
-    this.goldIcon = new Actor({
-      image: Game.getInstance().getImage(GameImage.SPRITESHEET),
-      spriteRegion: SpriteRegion.ICON_GOLD,
-      x: this.goldDescLabel.getX() + this.goldDescLabel.getWidth(),
-      y: 0,
-      width: UITheme.ICON_SIZE,
-      height: UITheme.ICON_SIZE
-    });
-
-    this.addActor(this.goldIcon);
-
-    this.goldLabel = new Label({
-      text: "+0",
-      font: UITheme.FONT,
-      fontColor: "white"
-    });
-    await this.goldLabel.conformSize();
-    this.goldLabel.setPosition(this.goldIcon.getX() + this.goldIcon.getWidth() - 8, 8);
-    this.addActor(this.goldLabel);
-
-    // Happiness information
-    this.happinessDescLabel = new Label({
-      text: "Happiness:",
-      font: UITheme.FONT,
-      fontColor: "white"
-    });
-    await this.happinessDescLabel.conformSize();
-    this.happinessDescLabel.setPosition(this.goldLabel.getX() + this.goldLabel.getWidth() + 10, 8);
-    this.addActor(this.happinessDescLabel);
-
-    this.happinessIcon = new Actor({
-      image: Game.getInstance().getImage(GameImage.SPRITESHEET),
-      spriteRegion: SpriteRegion.ICON_MORALE,
-      x: this.happinessDescLabel.getX() + this.happinessDescLabel.getWidth(),
-      y: 0,
-      width: UITheme.ICON_SIZE,
-      height: UITheme.ICON_SIZE
-    });
-
-    this.addActor(this.happinessIcon);
-
-    this.happinessLabel = new Label({
-      text: "+0",
-      font: UITheme.FONT,
-      fontColor: "white"
-    });
-    await this.happinessLabel.conformSize();
-    this.happinessLabel.setPosition(this.happinessIcon.getX() + this.happinessIcon.getWidth() - 8, 8);
-    this.addActor(this.happinessLabel);
-
-    //Faith information
-
-    this.faithDescLabel = new Label({
-      text: "Faith:",
-      font: UITheme.FONT,
-      fontColor: "white"
-    });
-    await this.faithDescLabel.conformSize();
-    this.faithDescLabel.setPosition(this.happinessLabel.getX() + this.happinessLabel.getWidth() + 10, 8);
-    this.addActor(this.faithDescLabel);
-
-    this.faithIcon = new Actor({
-      image: Game.getInstance().getImage(GameImage.SPRITESHEET),
-      spriteRegion: SpriteRegion.ICON_FAITH,
-      x: this.faithDescLabel.getX() + this.faithDescLabel.getWidth(),
-      y: 0,
-      width: UITheme.ICON_SIZE,
-      height: UITheme.ICON_SIZE
-    });
-
-    this.addActor(this.faithIcon);
-
-    this.faithLabel = new Label({
-      text: "+0",
-      font: UITheme.FONT,
-      fontColor: "white"
-    });
-    await this.faithLabel.conformSize();
-    this.faithLabel.setPosition(this.faithIcon.getX() + this.faithIcon.getWidth() - 8, 8);
-    this.addActor(this.faithLabel);
-
-    //Trade information
-    this.tradeDescLabel = new Label({
-      text: "Trade:",
-      font: UITheme.FONT,
-      fontColor: "white"
-    });
-    await this.tradeDescLabel.conformSize();
-    this.tradeDescLabel.setPosition(this.faithLabel.getX() + this.faithLabel.getWidth() + 10, 8);
-    this.addActor(this.tradeDescLabel);
-
-    this.tradeIcon = new Actor({
-      image: Game.getInstance().getImage(GameImage.SPRITESHEET),
-      spriteRegion: SpriteRegion.ICON_TRADE,
-      x: this.tradeDescLabel.getX() + this.tradeDescLabel.getWidth(),
-      y: 0,
-      width: UITheme.ICON_SIZE,
-      height: UITheme.ICON_SIZE
-    });
-
-    this.addActor(this.tradeIcon);
-
-    this.tradeLabel = new Label({
-      text: "0/0",
-      font: UITheme.FONT,
-      fontColor: "white"
-    });
-    await this.tradeLabel.conformSize();
-    this.tradeLabel.setPosition(this.tradeIcon.getX() + this.tradeIcon.getWidth() - 8, 8);
-    this.addActor(this.tradeLabel);
+    this.scienceLabel = StatusBar.createStatLabel();
+    this.cultureLabel = StatusBar.createStatLabel();
+    this.goldLabel = StatusBar.createStatLabel();
+    this.happinessLabel = StatusBar.createStatLabel();
+    this.faithLabel = StatusBar.createStatLabel();
+    this.tradeLabel = StatusBar.createStatLabel();
+    this.getStatLabels().forEach((label) => this.addActor(label));
 
     // Current turn information
     this.currentTurnLabel = new Label({
@@ -381,56 +191,44 @@ export class StatusBar extends ActorGroup {
     this.updateStatLabels();
   }
 
+  private static createStatLabel(): Label {
+    return new Label({ text: "", font: UITheme.FONT, fontColor: "white" });
+  }
+
+  private getStatLabels(): Label[] {
+    return [
+      this.scienceLabel,
+      this.cultureLabel,
+      this.goldLabel,
+      this.happinessLabel,
+      this.faithLabel,
+      this.tradeLabel
+    ];
+  }
+
   // Re-flows every label after the changed one, since a wider/narrower number
   // shifts everything to its right in this left-to-right layout.
   private async updateStatLabels() {
     if (!this.scienceLabel) return;
 
     const clientPlayer = Game.getInstance().getCurrentSceneAs<InGameScene>().getClientPlayer();
-
-    this.scienceLabel.setText(Strings.convertToStatUnit(clientPlayer.getTotalStat("science")));
-    await this.scienceLabel.conformSize();
-    this.scienceLabel.setPosition(this.scienceIcon.getX() + this.scienceIcon.getWidth() - 8, 8);
-
-    this.cultureDescLabel.setPosition(this.scienceLabel.getX() + this.scienceLabel.getWidth() + 10, 8);
-    this.cultureIcon.setPosition(
-      this.cultureDescLabel.getX() + this.cultureDescLabel.getWidth(),
-      this.cultureIcon.getY()
-    );
-    this.cultureLabel.setText(Strings.convertToStatUnit(clientPlayer.getTotalStat("culture")));
-    await this.cultureLabel.conformSize();
-    this.cultureLabel.setPosition(this.cultureIcon.getX() + this.cultureIcon.getWidth() - 8, 8);
-
-    this.goldDescLabel.setPosition(this.cultureLabel.getX() + this.cultureLabel.getWidth() + 10, 8);
-    this.goldIcon.setPosition(this.goldDescLabel.getX() + this.goldDescLabel.getWidth(), this.goldIcon.getY());
-    const goldTotal = clientPlayer.getAccumulatedStat("gold");
-    const goldRate = Strings.convertToStatUnit(clientPlayer.getTotalStat("gold"));
-    this.goldLabel.setText(`${goldTotal} (${goldRate})`);
-    await this.goldLabel.conformSize();
-    this.goldLabel.setPosition(this.goldIcon.getX() + this.goldIcon.getWidth() - 8, 8);
-
-    this.happinessDescLabel.setPosition(this.goldLabel.getX() + this.goldLabel.getWidth() + 10, 8);
-    this.happinessIcon.setPosition(
-      this.happinessDescLabel.getX() + this.happinessDescLabel.getWidth(),
-      this.happinessIcon.getY()
-    );
+    const rate = (stat: string) => Strings.convertToStatUnit(clientPlayer.getTotalStat(stat));
     const happiness = clientPlayer.getHappinessBreakdown();
-    this.happinessIcon.setSpriteRegion(happiness.net < 0 ? SpriteRegion.ICON_UNHAPPY : SpriteRegion.ICON_MORALE);
+    const happinessIcon = happiness.net < 0 ? "unhappy" : "happiness";
+
+    this.scienceLabel.setText(`Science: !{science} ${rate("science")}`);
+    this.cultureLabel.setText(`Culture: !{culture} ${rate("culture")}`);
+    this.goldLabel.setText(`Gold: !{gold} ${clientPlayer.getAccumulatedStat("gold")} (${rate("gold")})`);
+    this.happinessLabel.setText(`Happiness: !{${happinessIcon}} ${Strings.convertToStatUnit(happiness.net)}`);
     this.happinessLabel.setFontColor(StatusBar.HAPPINESS_COLORS[happiness.status]);
-    this.happinessLabel.setText(Strings.convertToStatUnit(happiness.net));
-    await this.happinessLabel.conformSize();
-    this.happinessLabel.setPosition(this.happinessIcon.getX() + this.happinessIcon.getWidth() - 8, 8);
+    this.faithLabel.setText(`Faith: !{faith} ${clientPlayer.getAccumulatedStat("faith")} (${rate("faith")})`);
+    this.tradeLabel.setText("Trade: !{trade} 0/0");
 
-    this.faithDescLabel.setPosition(this.happinessLabel.getX() + this.happinessLabel.getWidth() + 10, 8);
-    this.faithIcon.setPosition(this.faithDescLabel.getX() + this.faithDescLabel.getWidth(), this.faithIcon.getY());
-    const faithTotal = clientPlayer.getAccumulatedStat("faith");
-    const faithRate = Strings.convertToStatUnit(clientPlayer.getTotalStat("faith"));
-    this.faithLabel.setText(`${faithTotal} (${faithRate})`);
-    await this.faithLabel.conformSize();
-    this.faithLabel.setPosition(this.faithIcon.getX() + this.faithIcon.getWidth() - 8, 8);
-
-    this.tradeDescLabel.setPosition(this.faithLabel.getX() + this.faithLabel.getWidth() + 10, 8);
-    this.tradeIcon.setPosition(this.tradeDescLabel.getX() + this.tradeDescLabel.getWidth(), this.tradeIcon.getY());
-    this.tradeLabel.setPosition(this.tradeIcon.getX() + this.tradeIcon.getWidth() - 8, 8);
+    let x = this.x + 1;
+    for (const label of this.getStatLabels()) {
+      await label.conformSize();
+      label.setPosition(x, 8);
+      x += label.getWidth() + 10;
+    }
   }
 }
