@@ -61,6 +61,7 @@ export interface BeliefEffectsData {
   culture_per_foreign_followers?: { per: number };
   faith_buildings?: { building: string; faith_cost: number }[];
   faith_units?: { before_era: string };
+  science_per_other_follower?: number;
   spread_range_percent?: number;
   spread_pressure_percent?: { percent: number; with_tech?: { tech: string; percent: number } };
   prophet_cost_percent?: number;
@@ -334,6 +335,25 @@ export class Beliefs {
     return Beliefs.getCityBeliefs(city)
       .map((belief) => belief.effects.faith_units)
       .some((effect) => effect && unitEra < eras.indexOf(effect.before_era));
+  }
+
+  /**
+   * Interfaith Dialogue: a Missionary has spread the religion to a city where `otherFollowers` citizens
+   * followed other religions. Science to the religion's founder, toward what they're researching.
+   */
+  public static onMissionarySpread(religion: string, city: City, otherFollowers: number) {
+    const founder = Religions.getFounderOf(religion);
+    if (!founder || otherFollowers <= 0) return;
+
+    Beliefs.getFounderBeliefs(founder)
+      .filter((belief) => belief.effects.science_per_other_follower)
+      .forEach((belief) => {
+        const science = belief.effects.science_per_other_follower * otherFollowers;
+        founder.addScience(science);
+        founder
+          .getNotifications()
+          .addMessage("ICON_SCIENCE", `${belief.name}: +${science} Science as ${religion} reaches ${city.getName()}.`);
+      });
   }
 
   // Initiation Rites: the gold the founder gets for a city that has just come to follow their religion.

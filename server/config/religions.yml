@@ -21,6 +21,8 @@
 #   faith_buildings                 - [{ building, faith_cost }]: a following city may buy these with faith.
 #   faith_units                     - { before_era }: a following city may buy land military units from
 #                                     eras before this one with faith (see FaithPurchase).
+#   science_per_other_follower      - science for each follower of another religion in a city a Missionary
+#                                     spreads it to.
 #
 # A religion is enhanced by a later Great Prophet in one of its founder's cities, choosing a second
 # follower belief and an enhancer belief. Enhancer beliefs help the founder spread the religion:
@@ -70,9 +72,11 @@ founder_beliefs:
     effects:
       gold_on_conversion: 100
   - name: Interfaith Dialogue
-    text: "Science when Missionaries spread it"
+    yields: { science: 2 }
+    text: "per other religion's follower a Missionary reaches"
     description: "Gain Science when a Missionary spreads this religion to cities of other religions"
-    not_yet: [Missionaries aren't in the game yet, so this gives nothing]
+    effects:
+      science_per_other_follower: 2
   - name: Papal Primacy
     text: "+15 resting Influence with City-States"
     description: "+15 to Influence resting point with City-States following this religion"

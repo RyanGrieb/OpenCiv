@@ -412,6 +412,19 @@ export class Player {
     return Technology.getAllTechnologies().some((tech) => !this.researchedTechs.has(tech.getName()));
   }
 
+  // Science from elsewhere than the turn's yields (Interfaith Dialogue), toward the current research.
+  public addScience(amount: number) {
+    if (!this.currentResearch || amount <= 0) return;
+
+    this.currentResearch.progress += amount;
+    if (this.currentResearch.progress >= this.currentResearch.cost) {
+      this.completeResearch();
+      return;
+    }
+
+    this.sendResearchUpdate();
+  }
+
   // For the startWithAllTechs game option. Sent to the client once it asks for its research.
   public researchAllTechs() {
     Technology.getAllTechnologies().forEach((tech) => this.researchedTechs.add(tech.getName()));

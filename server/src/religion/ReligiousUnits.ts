@@ -63,10 +63,13 @@ export class ReligiousUnits {
 
     const religion = ReligiousUnits.getReligionOf(unit);
     const prophet = unit.getName() === PlayerReligion.PROPHET;
+    const followers = city.getPopulation() - city.getReligion().getNonFollowers();
+    const otherReligionFollowers = followers - city.getReligion().getFollowersOf(religion);
     if (prophet) city.getReligion().removeOthers(religion);
     const strength = ReligiousUnits.getStrength(unit);
     city.getReligion().addPressure(religion, strength);
     ReligiousUnits.onCityReligionChanged(city);
+    if (!prophet) Beliefs.onMissionarySpread(religion, city, otherReligionFollowers);
     // Everyone's client floats "Islam: +180" up from the city.
     Array.from(Game.getInstance().getPlayers().values()).forEach((player) =>
       player.sendNetworkEvent({ event: "religionSpread", cityName: city.getName(), religion, strength })

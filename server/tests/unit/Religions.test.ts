@@ -508,6 +508,20 @@ describe("Religions", () => {
       expect(ReligiousUnits.canSpread(missionary)).toBe(false);
     });
 
+    it("gives Interfaith Dialogue 2 Science per other religion's follower a Missionary reaches", () => {
+      const rome = founder();
+      found(rome, "Islam", "Interfaith Dialogue", "Feed the World");
+      const science = jest.fn();
+      (rome as unknown as Record<string, unknown>).addScience = science;
+      const paris = cityOf(playerWith(), { name: "Paris", population: 4, x: 30 });
+      paris.getReligion().addPressure("Judaism", 180);
+
+      ReligiousUnits.spread(religiousUnit(rome, "Missionary", { city: paris, religion: "Islam" }));
+      expect(science).toHaveBeenCalledWith(6);
+      ReligiousUnits.spread(religiousUnit(rome, "Great Prophet", { city: paris }));
+      expect(science).toHaveBeenCalledTimes(1);
+    });
+
     it("lets a Great Prophet clear out other religions as it spreads its owner's, harder with Messiah", () => {
       const { rome, paris } = islamAndParis();
       paris.getReligion().convertAll("Judaism");
