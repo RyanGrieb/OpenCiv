@@ -95,8 +95,15 @@ export class ReligiousUnits {
     const city = ReligiousUnits.getHeresyTarget(unit);
     if (!city) return false;
 
+    const removed = Object.fromEntries(
+      Object.entries(city.getReligion().getFollowers()).filter(([religion]) => religion !== unit.getReligion())
+    );
     city.getReligion().removeOthers(unit.getReligion());
     ReligiousUnits.onCityReligionChanged(city);
+    // Everyone's client floats "-2 Heretics" up from the city, one line per religion removed.
+    Array.from(Game.getInstance().getPlayers().values()).forEach((player) =>
+      player.sendNetworkEvent({ event: "heresyRemoved", cityName: city.getName(), removed })
+    );
     unit
       .getPlayer()
       .getNotifications()

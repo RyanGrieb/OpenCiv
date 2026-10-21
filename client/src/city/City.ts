@@ -85,6 +85,8 @@ export class City extends ActorGroup {
   private static readonly BANNER_ICON_SIZE = 7;
   // The bottom of the city's tile, from its center: where a unit there stands (see Unit.getStandingPoint()).
   private static readonly STANDING_BELOW_CENTER = 14;
+  // Between stacked floating texts, e.g. several religions an Inquisitor removed at once.
+  private static readonly FLOATING_LINE_GAP = 10;
 
   private player: AbstractPlayer;
   private tile: Tile;
@@ -174,6 +176,14 @@ export class City extends ActorGroup {
       parentObject: this,
       callback: (data) => {
         if (data.cityName === this.name) this.showSpread(data.religion, data.converted);
+      }
+    });
+
+    NetworkEvents.on<{ cityName: string; removed: Record<string, number> }>({
+      eventName: "heresyRemoved",
+      parentObject: this,
+      callback: (data) => {
+        if (data.cityName === this.name) this.showHeresyRemoved(data.removed);
       }
     });
 
@@ -536,7 +546,20 @@ export class City extends ActorGroup {
     this.showFloatingText(`!{${icon}} +${converted} ${converted === 1 ? "Follower" : "Followers"}`, "white");
   }
 
-  private showFloatingText(text: string, color: string) {
+  // A religion's icon and "-2 Heretics" rising in red from the city for each religion an Inquisitor
+  // removed there, one line above the next.
+  private showHeresyRemoved(removed: Record<string, number>) {
+    Object.entries(removed)
+      .filter(([, count]) => count > 0)
+      .forEach(([religion, count], index) => {
+        const icon = SpriteRegion[Religions.getIcon(religion)];
+        const heretics = count === 1 ? "Heretic" : "Heretics";
+        this.showFloatingText(`!{${icon}} -${count} ${heretics}`, "red", index * City.FLOATING_LINE_GAP);
+      });
+  }
+
+  // `raise` lifts the text that much higher, for several lines at once.
+  private showFloatingText(text: string, color: string, raise = 0) {
     if (!this.tile) return;
 
     new FloatingText({
@@ -545,8 +568,8 @@ export class City extends ActorGroup {
       standsOn: () => this.getStandingPoint(),
       tileMiddle: () => this.getTileMiddle(),
       centerX: this.tile.getX() + this.tile.getWidth() / 2,
-      fromY: this.tile.getY() + 4,
-      toY: this.tile.getY() - 16
+      fromY: this.tile.getY() + 4 - raise,
+      toY: this.tile.getY() - 16 - raise
     }).show();
   }
 }
