@@ -494,10 +494,11 @@ export class Tile extends Actor {
   // Mirrors server/src/map/Tile.ts's isImpassableFor() - keep both in sync.
   // Whether a unit can't even pass through here on the way somewhere else: another civilization's
   // units or city are in the way (getting past them means attacking, see Unit.canMeleeAttack), or the
-  // tile is inside the borders of a civilization the unit's owner is at peace with.
+  // tile is inside the borders of a civilization the unit's owner is at peace with (religious units
+  // may cross those).
   public isImpassableFor(movingUnit: Unit): boolean {
     if (this.city && this.city.getPlayer() !== movingUnit.getPlayer()) return true;
-    if (this.isClosedBorderFor(movingUnit.getPlayer())) return true;
+    if (this.isClosedBorderFor(movingUnit.getPlayer()) && !movingUnit.entersForeignLands()) return true;
 
     return this.units.some((unit) => unit !== movingUnit && unit.getPlayer() !== movingUnit.getPlayer());
   }

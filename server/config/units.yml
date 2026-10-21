@@ -43,6 +43,20 @@ units:
   - name: Great Prophet
     is_utility: true
     default_move_distance: 2
+    spread_charges: 4
+    enters_foreign_lands: true
+  # Bought with faith in a city following a religion, and spread that religion (see ReligiousUnits).
+  - name: Missionary
+    is_utility: true
+    default_move_distance: 4
+    faith_cost: 200
+    spread_charges: 2
+    enters_foreign_lands: true
+  - name: Inquisitor
+    is_utility: true
+    default_move_distance: 3
+    faith_cost: 200
+    enters_foreign_lands: true
   - name: Archer
     combat_strength: 5
     ranged_strength: 7

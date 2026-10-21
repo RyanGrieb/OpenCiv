@@ -7,6 +7,7 @@ import { Combat, CombatModifier } from "../unit/Combat";
 import { Unit, UnitYMLTypeData } from "../unit/Unit";
 import { UnitPromotions } from "../unit/UnitPromotions";
 import { Beliefs } from "../religion/Beliefs";
+import { ReligiousUnits } from "../religion/ReligiousUnits";
 import { CityReligion } from "../religion/CityReligion";
 import { BorderGrowth } from "./BorderGrowth";
 import { Building, BuildingData } from "./Building";
@@ -1272,7 +1273,8 @@ export class City {
 
   /**
    * What faith can buy here: the buildings the city's religion unlocks (Cathedrals and the like) that it
-   * doesn't have yet, and with Holy Warriors the pre-Industrial land military units it could train.
+   * doesn't have yet, Missionaries and Inquisitors of its religion, and with Holy Warriors the
+   * pre-Industrial land military units it could train.
    */
   private getFaithPurchaseOptions(): { units: ProductionOption[]; buildings: ProductionOption[] } {
     const buildings = Beliefs.getFaithBuildings(this)
@@ -1288,8 +1290,14 @@ export class City {
     const units = this.getProductionOptions()
       .units.filter((option) => Beliefs.canBuyUnitWithFaith(this, unitData(option.name)))
       .map((option) => ({ ...option, faithCost: FaithPurchase.getUnitCost(option.cost) }));
+    const religiousUnits = ReligiousUnits.getFaithOptions(this).map(({ name, faithCost }) => ({
+      type: "unit" as const,
+      name,
+      cost: 0,
+      faithCost
+    }));
 
-    return { units, buildings };
+    return { units: [...religiousUnits, ...units], buildings };
   }
 
   // Buys it with the owner's faith and finishes it now. False if faith can't buy it here or there isn't
@@ -1398,6 +1406,7 @@ export class City {
     const unit = Unit.spawn(unitName, tile, this.player, options);
     if (!unit) return;
 
+    if (ReligiousUnits.carriesReligion(unitName)) unit.setReligion(this.religion.getMajority());
     // Experience and promotions from the Barracks, Alhambra and the like.
     BuildingEffects.applyToTrainedUnit(this, unit);
   }

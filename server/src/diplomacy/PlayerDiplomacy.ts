@@ -254,7 +254,7 @@ export class PlayerDiplomacy {
   public static expelTrespassers(tiles: Tile[]) {
     for (const tile of tiles) {
       for (const unit of [...tile.getUnits()]) {
-        if (!tile.isClosedBorderFor(unit.getPlayer())) continue;
+        if (!tile.isClosedBorderFor(unit.getPlayer()) || unit.entersForeignLands()) continue;
 
         const destination = PlayerDiplomacy.findTileOutsideBorders(unit);
         if (!destination) continue;

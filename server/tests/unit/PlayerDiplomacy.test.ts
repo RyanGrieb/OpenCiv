@@ -193,7 +193,7 @@ describe("PlayerDiplomacy", () => {
 
     it("turn back a unit that tries to walk in", () => {
       rome.getDiplomacy().meet(mongolia);
-      const mongolWarrior = { getPlayer: () => mongolia } as unknown as Unit;
+      const mongolWarrior = { getPlayer: () => mongolia, entersForeignLands: () => false } as unknown as Unit;
 
       expect(territoryTile(rome).isImpassableFor(mongolWarrior)).toBe(true);
       expect(new Tile("grassland", 1, 0).isImpassableFor(mongolWarrior)).toBe(false);

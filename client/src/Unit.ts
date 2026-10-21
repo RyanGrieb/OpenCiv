@@ -172,6 +172,8 @@ export interface UnitCreationData {
   ignoresTerrainCost: boolean;
   domain: "land" | "sea";
   coastOnly: boolean;
+  // Missionaries, Inquisitors and Great Prophets may cross any civilization's borders.
+  entersForeignLands?: boolean;
   remainingMovement: number;
   defaultMoveDistance: number;
   player: string;
@@ -258,6 +260,7 @@ export class Unit extends ActorGroup {
   private terrainCostIgnored: boolean;
   private domain: "land" | "sea";
   private coastOnly: boolean;
+  private foreignLandsAllowed: boolean;
   private unitActor: Actor;
   // Draws the health bubble and the icons around it at BADGE_Z, as its own scene object, since the
   // unit itself sits at a z-level the map's overlays draw over.
@@ -318,6 +321,7 @@ export class Unit extends ActorGroup {
     this.terrainCostIgnored = unitJSON.ignoresTerrainCost;
     this.domain = unitJSON.domain ?? "land";
     this.coastOnly = unitJSON.coastOnly ?? false;
+    this.foreignLandsAllowed = unitJSON.entersForeignLands ?? false;
     this.availableMovement = unitJSON.remainingMovement;
     this.defaultMoveDistance = unitJSON.defaultMoveDistance;
     this.promotionData = {
@@ -710,6 +714,11 @@ export class Unit extends ActorGroup {
 
   public getAttackType(): string {
     return this.attackType;
+  }
+
+  // Mirrors server Unit.entersForeignLands().
+  public entersForeignLands(): boolean {
+    return this.foreignLandsAllowed;
   }
 
   public isUtility(): boolean {

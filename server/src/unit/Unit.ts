@@ -51,6 +51,8 @@ export interface UnitOptions {
   health?: number;
   promotions?: UnitPromotions;
   actions: UnitAction[];
+  spreadCharges?: number;
+  entersForeignLands?: boolean;
 }
 
 // Where a unit can go: land units walk, sea units sail.
@@ -89,6 +91,11 @@ export interface UnitYMLTypeData {
   // Civ 5's unit combat class, and promotions every unit of the type starts with (see units.yml).
   unit_class?: string;
   free_promotions?: string[];
+  // Religious units: what one costs bought with faith, how many times it can Spread Religion, and that
+  // it may enter any civilization's lands (see ReligiousUnits).
+  faith_cost?: number;
+  spread_charges?: number;
+  enters_foreign_lands?: boolean;
 }
 
 // A move towards a tile next to an enemy, ahead of attacking it (see Unit.getMeleeApproach()).
@@ -140,6 +147,12 @@ export class Unit {
 
   private id: number; // Increment this every time a unit object is created
   private actions: UnitAction[];
+  // A religious unit's religion (none for a Great Prophet, which spreads its owner's), the Spread
+  // Religion uses it has left, and its strength in percent, worn down in foreign lands (see ReligiousUnits).
+  private religion: string | undefined;
+  private spreadsLeft: number;
+  private religiousStrength = 100;
+  private foreignLandsAllowed: boolean;
 
   constructor(options: UnitOptions) {
     this.name = options.name;
@@ -169,6 +182,8 @@ export class Unit {
     this.availableMovement = options.availableMovement ?? this.getMaxMovement();
     this.actions = options.actions || [];
     this.queuedMovementTiles = [];
+    this.spreadsLeft = options.spreadCharges ?? 0;
+    this.foreignLandsAllowed = options.entersForeignLands ?? false;
 
     this.player.addUnit(this);
 
@@ -337,7 +352,9 @@ export class Unit {
       availableMovement: options?.availableMovement,
       health: options?.health,
       promotions: options?.promotions,
-      actions: UnitActions.forUnitType(data)
+      actions: UnitActions.forUnitType(data),
+      spreadCharges: data.spread_charges,
+      entersForeignLands: data.enters_foreign_lands
     });
   }
 
@@ -1091,6 +1108,47 @@ export class Unit {
     this.health = Math.max(0, Math.min(Combat.MAX_HEALTH, health));
   }
 
+  public getReligion(): string | undefined {
+    return this.religion;
+  }
+
+  public setReligion(religion: string | undefined) {
+    this.religion = religion;
+  }
+
+  public getSpreadsLeft(): number {
+    return this.spreadsLeft;
+  }
+
+  // Whether it has spread its religion yet: a Great Prophet that has can't enhance one.
+  public hasSpread(): boolean {
+    return this.spreadsLeft < (Unit.getUnitYMLTypeDataByName(this.name)?.spread_charges ?? 0);
+  }
+
+  public getReligiousStrength(): number {
+    return this.religiousStrength;
+  }
+
+  public weakenReligiousStrength(percent: number) {
+    this.religiousStrength = Math.max(0, this.religiousStrength - percent);
+    this.sendActionsToOwner();
+  }
+
+  // Missionaries, Inquisitors and Great Prophets may cross any civilization's borders.
+  public entersForeignLands(): boolean {
+    return this.foreignLandsAllowed;
+  }
+
+  // One Spread Religion or Remove Heresy, which ends the unit's turn.
+  public useReligiousAction() {
+    this.spreadsLeft = Math.max(0, this.spreadsLeft - 1);
+    this.clearMovementQueue();
+    this.availableMovement = 0;
+    this.actedThisTurn = true;
+    this.sendBuildStatus({ remainingMovement: 0 });
+    this.sendActionsToOwner();
+  }
+
   public getName() {
     return this.name;
   }
@@ -1260,6 +1318,7 @@ export class Unit {
       ignoresTerrainCost: this.terrainCostIgnored,
       domain: this.domain,
       coastOnly: this.coastOnly,
+      entersForeignLands: this.foreignLandsAllowed,
       id: this.id,
       actions: ownUnit ? this.getUnitActionsJSON() : [],
       queuedTiles: queuedTilesJSON,

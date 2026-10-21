@@ -69,6 +69,14 @@ export class CityReligion {
     this.followers.set(religion, this.population);
   }
 
+  // Every follower of another religion follows none instead, and the pressure toward the others is
+  // gone, as a Great Prophet's spread or an Inquisitor's Remove Heresy leaves a city.
+  public removeOthers(religion: string | undefined) {
+    this.matchPopulation();
+    [...this.followers.keys()].filter((name) => name !== religion).forEach((name) => this.followers.delete(name));
+    [...this.pressure.keys()].filter((name) => name !== religion).forEach((name) => this.pressure.delete(name));
+  }
+
   // For the client: who follows what here, and what the city follows.
   public toJSON() {
     return {

@@ -1,6 +1,7 @@
 import { City } from "../city/City";
 import { Game } from "../Game";
 import { Improvement, ImprovementData } from "../map/Improvement";
+import { ReligiousUnits } from "../religion/ReligiousUnits";
 import { Unit, UnitAction, UnitYMLTypeData } from "./Unit";
 import { UnitUpgrades } from "./UnitUpgrades";
 
@@ -92,6 +93,31 @@ export class UnitActions {
     };
   }
 
+  // Missionaries' and Great Prophets': spreads their religion to the city they stand in or next to.
+  public static spreadReligion(): UnitAction {
+    return {
+      name: "spread_religion",
+      icon: "ICON_FAITH",
+      requirements: ["movement"],
+      desc: "Spread Religion",
+      getDesc: (unit: Unit) => ReligiousUnits.describeSpread(unit),
+      isAvailable: (unit: Unit) => ReligiousUnits.canSpread(unit),
+      onAction: (unit: Unit) => ReligiousUnits.spread(unit)
+    };
+  }
+
+  // The Inquisitor's: clears other religions out of its owner's city it stands in or next to.
+  public static removeHeresy(): UnitAction {
+    return {
+      name: "remove_heresy",
+      icon: "ICON_FAITH",
+      requirements: ["movement"],
+      desc: "Remove Heresy",
+      isAvailable: (unit: Unit) => ReligiousUnits.canRemoveHeresy(unit),
+      onAction: (unit: Unit) => ReligiousUnits.removeHeresy(unit)
+    };
+  }
+
   public static settleCity(): UnitAction {
     return {
       name: "settle",
@@ -147,7 +173,10 @@ export class UnitActions {
   // What this kind of unit can do besides skipping a turn.
   private static typeActions(data: UnitYMLTypeData): UnitAction[] {
     if (data.name === "Settler") return [UnitActions.settleCity()];
-    if (data.name === "Great Prophet") return [UnitActions.foundReligion(), UnitActions.enhanceReligion()];
+    if (data.name === "Great Prophet")
+      return [UnitActions.foundReligion(), UnitActions.enhanceReligion(), UnitActions.spreadReligion()];
+    if (data.name === ReligiousUnits.MISSIONARY) return [UnitActions.spreadReligion()];
+    if (data.name === ReligiousUnits.INQUISITOR) return [UnitActions.removeHeresy()];
     if (data.name === "Builder")
       return Improvement.getBuildableImprovementData("land").map(UnitActions.buildImprovement);
     if (data.name === "Work Boat")

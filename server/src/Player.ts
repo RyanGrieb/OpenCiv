@@ -10,6 +10,7 @@ import { PlayerVisibility } from "./map/PlayerVisibility";
 import { PlayerNotifications } from "./notification/PlayerNotifications";
 import { Beliefs } from "./religion/Beliefs";
 import { PlayerReligion } from "./religion/PlayerReligion";
+import { ReligiousUnits } from "./religion/ReligiousUnits";
 import { TechEffects } from "./research/TechEffects";
 import { EraData, Technology } from "./research/Technology";
 import { Unit } from "./unit/Unit";
@@ -136,6 +137,7 @@ export class Player {
       callback: () => {
         this.accumulateTurnStats();
         this.religion.checkForProphet();
+        ReligiousUnits.applyAttrition(this);
         this.accumulateResearch();
         this.diplomacy.passTurn();
       },

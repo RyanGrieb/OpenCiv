@@ -8,6 +8,7 @@ import { Beliefs } from "../../src/religion/Beliefs";
 import { CityReligion } from "../../src/religion/CityReligion";
 import { PlayerReligion } from "../../src/religion/PlayerReligion";
 import { Religions } from "../../src/religion/Religions";
+import { ReligiousUnits } from "../../src/religion/ReligiousUnits";
 import { Unit } from "../../src/unit/Unit";
 
 const PROPHET_ID = 1;
@@ -106,6 +107,7 @@ describe("Religions", () => {
     const prophet = {
       getId: () => PROPHET_ID,
       getName: () => "Great Prophet",
+      hasSpread: () => false,
       getPlayer: () => player,
       getTile: () => ({ getCity: () => city }),
       delete: jest.fn(() => (player.ownUnits = player.ownUnits.filter((unit) => unit !== prophet)))
@@ -439,6 +441,165 @@ describe("Religions", () => {
       expect(Beliefs.getCityBonuses(foreign)).toEqual({});
       foreign.getReligion().convertAll("Islam");
       expect(Beliefs.getCityBonuses(foreign)).toEqual({ food: 1 });
+    });
+  });
+
+  describe("religious units", () => {
+    type TestUnit = Unit & { deleted: boolean; spreads: number; strength: number };
+
+    // A Missionary, Inquisitor or Great Prophet of the player's, standing in the city (or in `lands`).
+    const religiousUnit = (
+      player: TestPlayer,
+      name: string,
+      options: { city?: City; religion?: string; lands?: City } = {}
+    ) => {
+      let religion = options.religion;
+      const unit = {
+        deleted: false,
+        spreads: name === "Missionary" ? 2 : name === "Great Prophet" ? 4 : 0,
+        strength: 100,
+        getName: () => name,
+        getPlayer: () => player,
+        getId: () => PROPHET_ID,
+        getTile: () => ({
+          getCity: () => options.city,
+          getAdjacentTiles: (): unknown[] => [],
+          getCityTerritoryOf: () => options.lands ?? options.city
+        }),
+        getReligion: () => religion,
+        setReligion: (name: string) => (religion = name),
+        getSpreadsLeft: () => unit.spreads,
+        hasSpread: () => name === "Great Prophet" && unit.spreads < 4,
+        getAvailableMovement: () => 2,
+        getReligiousStrength: () => unit.strength,
+        weakenReligiousStrength: (percent: number) => (unit.strength -= percent),
+        useReligiousAction: () => unit.spreads--,
+        delete: () => {
+          unit.deleted = true;
+          player.ownUnits = player.ownUnits.filter((other) => other !== (unit as unknown));
+        }
+      } as unknown as TestUnit;
+      player.ownUnits.push(unit);
+      return unit;
+    };
+
+    // Rome founded Islam; Paris, size 4, is another civilization's city following nothing.
+    const islamAndParis = () => {
+      const rome = founder();
+      found(rome, "Islam", "Tithe", "Feed the World");
+      const france = playerWith();
+      const paris = cityOf(france, { name: "Paris", population: 4, x: 30 });
+      return { rome, france, paris };
+    };
+
+    it("lets a Missionary spread its religion twice, about 3 citizens each time, then uses it up", () => {
+      const { rome, paris } = islamAndParis();
+      const missionary = religiousUnit(rome, "Missionary", { city: paris, religion: "Islam" });
+
+      expect(ReligiousUnits.spread(missionary)).toBe(true);
+      expect(paris.getReligion().getFollowersOf("Islam")).toBe(3);
+      expect(paris.getReligion().getMajority()).toBe("Islam");
+      expect(missionary.deleted).toBe(false);
+
+      expect(ReligiousUnits.spread(missionary)).toBe(true);
+      expect(paris.getReligion().getFollowersOf("Islam")).toBe(4);
+      expect(missionary.deleted).toBe(true);
+      expect(ReligiousUnits.canSpread(missionary)).toBe(false);
+    });
+
+    it("lets a Great Prophet clear out other religions as it spreads its owner's, harder with Messiah", () => {
+      const { rome, paris } = islamAndParis();
+      paris.getReligion().convertAll("Judaism");
+      paris.setPopulation(8);
+      const prophet = religiousUnit(rome, "Great Prophet", { city: paris });
+
+      ReligiousUnits.spread(prophet);
+      expect(paris.getReligion().getFollowers()).toEqual({ Islam: 4 });
+
+      prophetOf(rome, rome.ownCities[0]);
+      rome.getReligion().enhanceReligion("Asceticism", "Messiah", PROPHET_ID);
+      const strong = religiousUnit(rome, "Great Prophet", { city: paris });
+      ReligiousUnits.spread(strong);
+      expect(paris.getReligion().getFollowersOf("Islam")).toBe(8);
+    });
+
+    it("pays Reliquary's 50 Faith when a Great Prophet's last spread uses it up", () => {
+      const { rome, paris } = islamAndParis();
+      prophetOf(rome, rome.ownCities[0]);
+      rome.getReligion().enhanceReligion("Asceticism", "Reliquary", PROPHET_ID);
+      const prophet = religiousUnit(rome, "Great Prophet", { city: paris });
+      prophet.spreads = 1;
+      rome.accumulated.faith = 0;
+
+      ReligiousUnits.spread(prophet);
+
+      expect(prophet.deleted).toBe(true);
+      expect(rome.accumulated.faith).toBe(50);
+    });
+
+    it("keeps other religions out of a city its owner's Inquisitor guards, and removes heresy there", () => {
+      const { rome, france, paris } = islamAndParis();
+      paris.getReligion().addPressure("Judaism", 60);
+      const inquisitor = religiousUnit(france, "Inquisitor", { city: paris, religion: "Judaism" });
+      paris.getTile().addUnit(inquisitor);
+      const missionary = religiousUnit(rome, "Missionary", { city: paris, religion: "Islam" });
+      expect(ReligiousUnits.canSpread(missionary)).toBe(false);
+      expect(ReligiousUnits.canSpread(religiousUnit(france, "Missionary", { city: paris, religion: "Judaism" }))).toBe(
+        true
+      );
+
+      paris.getTile().removeUnit(inquisitor);
+      ReligiousUnits.spread(missionary);
+      expect(paris.getReligion().getFollowers()).toEqual({ Islam: 3, Judaism: 1 });
+      expect(
+        ReligiousUnits.canRemoveHeresy(religiousUnit(rome, "Inquisitor", { city: paris, religion: "Islam" }))
+      ).toBe(false);
+
+      expect(ReligiousUnits.removeHeresy(inquisitor)).toBe(true);
+      expect(paris.getReligion().getFollowers()).toEqual({ Judaism: 1 });
+      expect(inquisitor.deleted).toBe(true);
+    });
+
+    it("sells Missionaries in a following city, Inquisitors once enhanced, 30% off with Holy Order", () => {
+      const { rome, paris } = islamAndParis();
+      const holyCity = rome.ownCities[0];
+      expect(ReligiousUnits.getFaithOptions(paris)).toEqual([]);
+      expect(ReligiousUnits.getFaithOptions(holyCity)).toEqual([{ name: "Missionary", faithCost: 200 }]);
+
+      prophetOf(rome, holyCity);
+      rome.getReligion().enhanceReligion("Asceticism", "Holy Order", PROPHET_ID);
+      expect(ReligiousUnits.getFaithOptions(holyCity)).toEqual([
+        { name: "Missionary", faithCost: 140 },
+        { name: "Inquisitor", faithCost: 140 }
+      ]);
+      paris.getReligion().convertAll("Islam");
+      expect(ReligiousUnits.getFaithOptions(paris)).toEqual([
+        { name: "Missionary", faithCost: 200 },
+        { name: "Inquisitor", faithCost: 200 }
+      ]);
+    });
+
+    it("wears a Missionary down by a quarter each turn in foreign lands, losing it at none", () => {
+      const { rome, paris } = islamAndParis();
+      const abroad = religiousUnit(rome, "Missionary", { lands: paris, religion: "Islam" });
+      const home = religiousUnit(rome, "Missionary", { lands: rome.ownCities[0], religion: "Islam" });
+
+      ReligiousUnits.applyAttrition(rome);
+      expect(abroad.strength).toBe(75);
+      expect(home.strength).toBe(100);
+      expect(ReligiousUnits.describeSpread(abroad)).toBe("Spread Islam (2 left, 75% strength)");
+
+      for (let turn = 0; turn < 3; turn++) ReligiousUnits.applyAttrition(rome);
+      expect(abroad.deleted).toBe(true);
+      expect(home.deleted).toBe(false);
+    });
+
+    it("stops a Great Prophet that has spread from enhancing", () => {
+      const { rome } = islamAndParis();
+      const prophet = religiousUnit(rome, "Great Prophet", { city: rome.ownCities[0] });
+      expect(rome.getReligion().canEnhanceWith(prophet)).toBe(true);
+      prophet.spreads = 3;
+      expect(rome.getReligion().canEnhanceWith(prophet)).toBe(false);
     });
   });
 

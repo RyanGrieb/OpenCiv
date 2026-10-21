@@ -286,7 +286,7 @@ export class PlayerReligion {
   // The player's Great Prophet can enhance their religion, standing in one of their cities.
   public canEnhanceWith(prophet: Unit | undefined): boolean {
     if (!this.religion || this.isEnhanced() || !prophet || prophet.getPlayer() !== this.player) return false;
-    if (prophet.getName() !== PlayerReligion.PROPHET) return false;
+    if (prophet.getName() !== PlayerReligion.PROPHET || prophet.hasSpread()) return false;
     if (prophet.getTile().getCity()?.getPlayer() !== this.player) return false;
 
     const available = Religions.getAvailable();
@@ -318,6 +318,17 @@ export class PlayerReligion {
     Religions.getCitiesFollowing(this.religion.name).forEach((city) => city.refreshBeliefs());
     this.applyFounded();
     return true;
+  }
+
+  // Reliquary pays faith each time the player uses up a Great Person.
+  public onGreatPersonExpended() {
+    const faith = Beliefs.getOwnEnhancerEffects(this.player).faith_on_great_person;
+    if (!faith) return;
+
+    this.player.addToAccumulatedStat("faith", faith);
+    this.player
+      .getNotifications()
+      .addMessage("ICON_FAITH", `${this.religion.enhancerBelief}: +${faith} Faith for expending a Great Person.`);
   }
 
   // Initiation Rites pays out the first time each city comes to follow the player's religion.
