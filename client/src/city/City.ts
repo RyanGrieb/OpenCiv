@@ -169,6 +169,14 @@ export class City extends ActorGroup {
       }
     });
 
+    NetworkEvents.on<{ cityName: string; religion: string; strength: number }>({
+      eventName: "religionSpread",
+      parentObject: this,
+      callback: (data) => {
+        if (data.cityName === this.name) this.showSpread(data.religion, data.strength);
+      }
+    });
+
     NetworkEvents.on({
       eventName: "addBuilding",
       parentObject: this,
@@ -516,15 +524,23 @@ export class City extends ActorGroup {
 
   // "-24" rising from the city, like the damage over a unit.
   private showDamage(damage: number) {
-    if (!this.tile || damage <= 0) return;
+    if (damage > 0) this.showFloatingText(`-${damage}`, "red");
+  }
 
-    const centerX = this.tile.getX() + this.tile.getWidth() / 2;
+  // "Islam: +180" rising from the city when a Missionary or Great Prophet spreads a religion to it.
+  private showSpread(religion: string, strength: number) {
+    this.showFloatingText(`${religion}: +${strength}`, "gold");
+  }
+
+  private showFloatingText(text: string, color: string) {
+    if (!this.tile) return;
+
     new FloatingText({
-      text: `-${damage}`,
-      color: "red",
+      text,
+      color,
       standsOn: () => this.getStandingPoint(),
       tileMiddle: () => this.getTileMiddle(),
-      centerX,
+      centerX: this.tile.getX() + this.tile.getWidth() / 2,
       fromY: this.tile.getY() + 4,
       toY: this.tile.getY() - 16
     }).show();
