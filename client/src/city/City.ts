@@ -6,7 +6,7 @@ import { NetworkEvents } from "../network/Client";
 import { AbstractPlayer } from "../player/AbstractPlayer";
 import { Actor } from "../scene/Actor";
 import { ActorGroup } from "../scene/ActorGroup";
-import { CityReligionInfo, CityReligionsEvent } from "../religion/Religions";
+import { CityReligionInfo, CityReligionsEvent, Religions } from "../religion/Religions";
 import { Marking } from "../scene/Marking";
 import { Standing } from "../scene/Standing";
 import { InGameScene } from "../scene/type/InGameScene";
@@ -169,11 +169,11 @@ export class City extends ActorGroup {
       }
     });
 
-    NetworkEvents.on<{ cityName: string; religion: string; strength: number }>({
+    NetworkEvents.on<{ cityName: string; religion: string; converted: number }>({
       eventName: "religionSpread",
       parentObject: this,
       callback: (data) => {
-        if (data.cityName === this.name) this.showSpread(data.religion, data.strength);
+        if (data.cityName === this.name) this.showSpread(data.religion, data.converted);
       }
     });
 
@@ -527,9 +527,13 @@ export class City extends ActorGroup {
     if (damage > 0) this.showFloatingText(`-${damage}`, "red");
   }
 
-  // "Islam: +180" rising from the city when a Missionary or Great Prophet spreads a religion to it.
-  private showSpread(religion: string, strength: number) {
-    this.showFloatingText(`${religion}: +${strength}`, "gold");
+  // The religion's icon and "+2 Followers" rising from the city when a Missionary or Great Prophet
+  // converts its citizens. Nothing when the spread only built up pressure.
+  private showSpread(religion: string, converted: number) {
+    if (converted <= 0) return;
+
+    const icon = SpriteRegion[Religions.getIcon(religion)];
+    this.showFloatingText(`!{${icon}} +${converted} ${converted === 1 ? "Follower" : "Followers"}`, "white");
   }
 
   private showFloatingText(text: string, color: string) {
