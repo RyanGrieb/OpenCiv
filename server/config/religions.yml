@@ -21,6 +21,20 @@
 #   faith_buildings                 - [{ building, faith_cost }]: a following city may buy these with faith.
 #   faith_units                     - { before_era }: a following city may buy land military units from
 #                                     eras before this one with faith (see FaithPurchase).
+#
+# A religion is enhanced by a later Great Prophet in one of its founder's cities, choosing a second
+# follower belief and an enhancer belief. Enhancer beliefs help the founder spread the religion:
+#   spread_range_percent            - the religion presses on cities this much further away.
+#   spread_pressure_percent         - { percent, with_tech }: this much more pressure, more once the
+#                                     founder knows with_tech.tech.
+#   prophet_cost_percent            - the founder's Great Prophets cost this much more (negative: less).
+#   prophet_strength_percent        - the founder's Great Prophets spread it this much harder.
+#   missionary_cost_percent         - Missionaries and Inquisitors cost this much more faith (negative: less).
+#   missionary_strength_percent     - the founder's Missionaries spread it this much harder.
+#   combat_near_friendly_percent    - the founder's units fight this much harder in the lands of their own
+#                                     or a non-enemy's city following the religion.
+#   combat_near_enemy_percent       - and in the lands of an enemy's city following it.
+#   faith_on_great_person           - faith each time the founder expends a Great Person.
 religions:
   - Buddhism
   - Christianity
@@ -202,3 +216,51 @@ follower_beliefs:
     description: "15% faster Food Growth rate for city if not at war"
     effects:
       growth_percent_at_peace: 15
+
+enhancer_beliefs:
+  - name: Defender of the Faith
+    text: "+20% Combat Strength near friendly cities following"
+    description: "+20% Combat Strength for your units in the lands of friendly cities following this religion"
+    effects:
+      combat_near_friendly_percent: 20
+  - name: Holy Order
+    text: "Missionaries and Inquisitors cost 30% less"
+    description: "Missionaries and Inquisitors cost 30% less Faith"
+    effects:
+      missionary_cost_percent: -30
+  - name: Itinerant Preachers
+    text: "Spreads to cities 30% further away"
+    description: "Religion spreads to cities 30% further away"
+    effects:
+      spread_range_percent: 30
+  - name: Just War
+    text: "+20% Combat Strength near enemy cities following"
+    description: "+20% Combat Strength for your units in the lands of enemy cities following this religion"
+    effects:
+      combat_near_enemy_percent: 20
+  - name: Messiah
+    text: "Prophets 25% stronger and 25% cheaper"
+    description: "Prophets 25% stronger and earned with 25% less Faith"
+    effects:
+      prophet_cost_percent: -25
+      prophet_strength_percent: 25
+  - name: Missionary Zeal
+    text: "Missionaries spread it 25% harder"
+    description: "Missionary conversion strength +25%"
+    effects:
+      missionary_strength_percent: 25
+  - name: Religious Texts
+    text: "Spreads 25% faster (50% with Printing Press)"
+    description: "Religion spreads 25% faster (50% faster after discovery of Printing Press)"
+    effects:
+      spread_pressure_percent: { percent: 25, with_tech: { tech: Printing Press, percent: 50 } }
+  - name: Religious Unity
+    text: "Spreads to friendly City-States twice as fast"
+    description: "Religion spreads to friendly City-States at double rate"
+    not_yet: [City-States aren't in the game yet, so this gives nothing]
+  - name: Reliquary
+    yields: { faith: 50 }
+    text: "each time a Great Person is expended"
+    description: "Gain 50 Faith each time a Great Person is expended"
+    effects:
+      faith_on_great_person: 50

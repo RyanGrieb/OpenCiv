@@ -11,7 +11,9 @@ import { YieldText } from "../../components/YieldText";
 import { UITheme } from "../../UITheme";
 import { BeliefTooltip } from "./BeliefTooltip";
 
-export type ReligionChoice = "religion" | "founderBelief" | "followerBelief";
+export type ReligionChoice = "religion" | "founderBelief" | "followerBelief" | "enhancerBelief";
+// Founding a religion, or enhancing the one founded.
+export type ReligionWindowMode = "found" | "enhance";
 
 // A clickable row of the list: highlighted while chosen, lighter while the mouse is over it.
 class ChoiceRow extends Actor {
@@ -57,7 +59,8 @@ class ChoiceRow extends Actor {
  * one has founded yet, a founder belief and a follower belief, each in its own section, then a Found
  * Religion button once all three are chosen. Each belief shows its bonus below its name the way the
  * pantheon list does, and its tooltip on hover. The server decides what's offered and whether founding
- * goes through (see server PlayerReligion).
+ * goes through (see server PlayerReligion). A later Great Prophet's Enhance Religion action opens it to
+ * choose a second follower belief and an enhancer belief instead.
  */
 export class ReligionFoundingWindow extends ActorGroup {
   private static readonly WIDTH = 560;
@@ -75,13 +78,15 @@ export class ReligionFoundingWindow extends ActorGroup {
 
   // The Great Prophet founding the religion, which the server uses up.
   private prophetId: number;
+  private mode: ReligionWindowMode;
   private onChosen: () => void;
   private onClose: () => void;
   private data: ReligionsEvent | undefined;
   private chosen: Record<ReligionChoice, string | undefined> = {
     religion: undefined,
     founderBelief: undefined,
-    followerBelief: undefined
+    followerBelief: undefined,
+    enhancerBelief: undefined
   };
   private list: SectionList;
   private footerActors: Actor[] = [];
@@ -91,12 +96,13 @@ export class ReligionFoundingWindow extends ActorGroup {
   private tooltip: BeliefTooltip | undefined;
   private tooltipBuild = 0;
 
-  constructor(options: { prophetId: number; onChosen: () => void; onClose: () => void }) {
+  constructor(options: { prophetId: number; mode: ReligionWindowMode; onChosen: () => void; onClose: () => void }) {
     const y = UITheme.STATUS_BAR_HEIGHT;
     const height = Game.getInstance().getHeight() - y;
     super({ x: 0, y, z: 7, width: ReligionFoundingWindow.WIDTH, height, cameraApplies: false });
 
     this.prophetId = options.prophetId;
+    this.mode = options.mode;
     this.onChosen = options.onChosen;
     this.onClose = options.onClose;
 
@@ -149,13 +155,18 @@ export class ReligionFoundingWindow extends ActorGroup {
     return doesNothing ? ReligionFoundingWindow.NOT_YET_COLOR : ReligionFoundingWindow.BONUS_COLOR;
   }
 
-  /** The religions, founder beliefs and follower beliefs on offer, by name. For scenarios. */
+  /** The religions and beliefs on offer, by name. For scenarios. */
   public getChoices(): Record<ReligionChoice, string[]> {
     return {
       religion: this.data?.religions ?? [],
       founderBelief: (this.data?.founderBeliefs ?? []).map((belief) => belief.name),
-      followerBelief: (this.data?.followerBeliefs ?? []).map((belief) => belief.name)
+      followerBelief: (this.data?.followerBeliefs ?? []).map((belief) => belief.name),
+      enhancerBelief: (this.data?.enhancerBeliefs ?? []).map((belief) => belief.name)
     };
+  }
+
+  public getMode(): ReligionWindowMode {
+    return this.mode;
   }
 
   public getChosen(): Record<ReligionChoice, string | undefined> {
@@ -171,10 +182,20 @@ export class ReligionFoundingWindow extends ActorGroup {
     return true;
   }
 
+  /** Enhances the religion with the chosen beliefs, as the Enhance Religion button would. */
+  public enhance(): boolean {
+    const { followerBelief, enhancerBelief } = this.chosen;
+    if (this.mode !== "enhance" || !this.data?.canEnhance || !followerBelief || !enhancerBelief) return false;
+
+    WebsocketClient.sendMessage({ event: "enhanceReligion", unitId: this.prophetId, followerBelief, enhancerBelief });
+    this.onChosen();
+    return true;
+  }
+
   /** Founds the chosen religion, as the Found Religion button would. False until all three are chosen. */
   public found(): boolean {
     const { religion, founderBelief, followerBelief } = this.chosen;
-    if (!this.data?.canFound || !religion || !founderBelief || !followerBelief) return false;
+    if (this.mode !== "found" || !this.data?.canFound || !religion || !founderBelief || !followerBelief) return false;
 
     WebsocketClient.sendMessage({
       event: "foundReligion",
@@ -189,9 +210,11 @@ export class ReligionFoundingWindow extends ActorGroup {
 
   /** Opens the belief's tooltip, as hovering its row would. For scenarios. */
   public showTooltipFor(name: string): boolean {
-    const belief = [...(this.data?.founderBeliefs ?? []), ...(this.data?.followerBeliefs ?? [])].find(
-      (entry) => entry.name === name
-    );
+    const belief = [
+      ...(this.data?.founderBeliefs ?? []),
+      ...(this.data?.followerBeliefs ?? []),
+      ...(this.data?.enhancerBeliefs ?? [])
+    ].find((entry) => entry.name === name);
     if (!belief) return false;
 
     this.showTooltip(belief, this.list.getY());
@@ -222,18 +245,56 @@ export class ReligionFoundingWindow extends ActorGroup {
     if (!this.data) return;
 
     this.hideTooltip();
-    this.list.setSections([
-      { title: "Religion", rows: this.data.religions.map((name) => this.createNameRow(name)) },
-      {
-        title: "Founder Belief",
-        rows: this.data.founderBeliefs.map((belief) => this.createBeliefRow("founderBelief", belief))
-      },
-      {
-        title: "Follower Belief",
-        rows: this.data.followerBeliefs.map((belief) => this.createBeliefRow("followerBelief", belief))
-      }
-    ]);
+    const followerSection = {
+      title: this.mode === "enhance" ? "Second Follower Belief" : "Follower Belief",
+      rows: this.data.followerBeliefs.map((belief) => this.createBeliefRow("followerBelief", belief))
+    };
+    if (this.mode === "enhance") {
+      this.list.setSections([
+        followerSection,
+        {
+          title: "Enhancer Belief",
+          rows: this.data.enhancerBeliefs.map((belief) => this.createBeliefRow("enhancerBelief", belief))
+        }
+      ]);
+    } else {
+      this.list.setSections([
+        { title: "Religion", rows: this.data.religions.map((name) => this.createNameRow(name)) },
+        {
+          title: "Founder Belief",
+          rows: this.data.founderBeliefs.map((belief) => this.createBeliefRow("founderBelief", belief))
+        },
+        followerSection
+      ]);
+    }
     this.buildHeaderAndFooter();
+  }
+
+  // The title, what's chosen so far, whether it can go through, and the button that sends it.
+  private getFooter() {
+    const { religion, founderBelief, followerBelief, enhancerBelief } = this.chosen;
+    if (this.mode === "enhance") {
+      const name = this.data.religion?.name ?? "Your religion";
+      return {
+        title: this.data.canEnhance ? `Enhance ${name}` : name,
+        summary: [followerBelief ?? "no follower belief", enhancerBelief ?? "no enhancer belief"].join(", "),
+        ready: this.data.canEnhance && !!followerBelief && !!enhancerBelief,
+        button: "Enhance Religion",
+        onClicked: () => this.enhance()
+      };
+    }
+
+    return {
+      title: this.data.canFound ? "Found a Religion" : "Religions",
+      summary: [
+        religion ?? "No religion",
+        founderBelief ?? "no founder belief",
+        followerBelief ?? "no follower belief"
+      ].join(", "),
+      ready: this.data.canFound && !!religion && !!founderBelief && !!followerBelief,
+      button: "Found Religion",
+      onClicked: () => this.found()
+    };
   }
 
   private createNameRow(name: string): SectionListRow {
@@ -315,11 +376,8 @@ export class ReligionFoundingWindow extends ActorGroup {
     this.footerActors.forEach((actor) => this.removeActor(actor));
 
     const padding = ReligionFoundingWindow.PADDING;
-    const data = this.data;
-    const { religion, founderBelief, followerBelief } = this.chosen;
-    const title = data.canFound ? "Found a Religion" : "Religions";
+    const { title, summary, ready, button, onClicked } = this.getFooter();
     const footerY = this.y + this.height - ReligionFoundingWindow.FOOTER_HEIGHT + padding;
-    const ready = data.canFound && !!religion && !!founderBelief && !!followerBelief;
 
     this.footerActors = [
       new Label({
@@ -330,11 +388,7 @@ export class ReligionFoundingWindow extends ActorGroup {
         y: this.y + UITheme.centerTextY(ReligionFoundingWindow.TITLE_HEIGHT)
       }),
       new Label({
-        text: [
-          religion ?? "No religion",
-          founderBelief ?? "no founder belief",
-          followerBelief ?? "no follower belief"
-        ].join(", "),
+        text: summary,
         font: UITheme.FONT,
         fontColor: ready ? "white" : "lightgray",
         x: this.x + padding,
@@ -345,13 +399,13 @@ export class ReligionFoundingWindow extends ActorGroup {
     if (ready) {
       this.footerActors.push(
         new Button({
-          text: "Found Religion",
+          text: button,
           icon: SpriteRegion.ICON_FAITH,
           size: ButtonSize.LARGE,
           fontColor: "white",
           x: this.x + this.width / 2 - ButtonSize.LARGE.width / 2,
           y: footerY + UITheme.FONT_SIZE + 20,
-          onClicked: () => this.found()
+          onClicked
         })
       );
     }

@@ -3,12 +3,13 @@ import { Game } from "../Game";
 import { Tile } from "../map/Tile";
 import type { Player } from "../Player";
 import { ConfigLoader } from "../util/ConfigLoader";
-import type { BeliefData } from "./Beliefs";
+import { BeliefData, Beliefs } from "./Beliefs";
 
 interface ReligionsConfig {
   religions: string[];
   founder_beliefs: BeliefData[];
   follower_beliefs: BeliefData[];
+  enhancer_beliefs: BeliefData[];
 }
 
 /**
@@ -88,6 +89,14 @@ export class Religions {
     return Religions.getConfig().follower_beliefs;
   }
 
+  public static getEnhancerBeliefs(): BeliefData[] {
+    return Religions.getConfig().enhancer_beliefs;
+  }
+
+  public static getEnhancerBelief(name: string): BeliefData | undefined {
+    return Religions.getEnhancerBeliefs().find((belief) => belief.name === name);
+  }
+
   public static getFounderBelief(name: string): BeliefData | undefined {
     return Religions.getFounderBeliefs().find((belief) => belief.name === name);
   }
@@ -109,17 +118,24 @@ export class Religions {
     );
   }
 
-  // What's still free to found: religion names, and founder and follower beliefs no religion has taken.
+  // What's still free: religion names, and founder, follower and enhancer beliefs no religion has taken.
   public static getAvailable() {
     const founded = Religions.getFounders().map((player) => player.getReligion().getFounded());
     const taken = new Set(
-      founded.flatMap((religion) => [religion.name, religion.founderBelief, religion.followerBelief])
+      founded.flatMap((religion) => [
+        religion.name,
+        religion.founderBelief,
+        religion.followerBelief,
+        religion.followerBelief2,
+        religion.enhancerBelief
+      ])
     );
 
     return {
       religions: Religions.getNames().filter((name) => !taken.has(name)),
       founderBeliefs: Religions.getFounderBeliefs().filter((belief) => !taken.has(belief.name)),
-      followerBeliefs: Religions.getFollowerBeliefs().filter((belief) => !taken.has(belief.name))
+      followerBeliefs: Religions.getFollowerBeliefs().filter((belief) => !taken.has(belief.name)),
+      enhancerBeliefs: Religions.getEnhancerBeliefs().filter((belief) => !taken.has(belief.name))
     };
   }
 
@@ -128,10 +144,14 @@ export class Religions {
     if (!religion) return [];
 
     const holyCity = Religions.getFounderOf(religion)?.getReligion().getHolyCity();
-    const amount = holyCity === source ? Religions.HOLY_CITY_PRESSURE : Religions.PRESSURE;
+    const amount = Beliefs.getSpreadPressure(
+      religion,
+      holyCity === source ? Religions.HOLY_CITY_PRESSURE : Religions.PRESSURE
+    );
+    const range = Beliefs.getSpreadRange(religion, Religions.PRESSURE_RANGE);
     return cities
       .filter((target) => target !== source)
-      .filter((target) => Tile.gridDistance(source.getTile(), target.getTile()) <= Religions.PRESSURE_RANGE)
+      .filter((target) => Tile.gridDistance(source.getTile(), target.getTile()) <= range)
       .map((target) => ({ target, religion, amount }));
   }
 

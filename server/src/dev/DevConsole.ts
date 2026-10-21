@@ -21,7 +21,8 @@ export class DevConsole {
     "help - lists these commands",
     "units - lists the units that can be spawned",
     "spawn <unit> - spawns a unit of yours on the next tile you left click",
-    "reveal - lifts the fog of war for you, for the rest of the game"
+    "reveal - lifts the fog of war for you, for the rest of the game",
+    "faith <amount> - adds that much faith to yours"
   ];
 
   // Developer mode, set at launch (see ServerArgs.parseDevMode()): off, every command is refused.
@@ -75,6 +76,8 @@ export class DevConsole {
       case "reveal":
         player.getVisibility().revealAll();
         return { lines: ["The whole map is revealed."] };
+      case "faith":
+        return DevConsole.addFaith(player, argument);
       default:
         return { lines: [`Unknown command "${command}". Type help for the list.`] };
     }
@@ -98,5 +101,13 @@ export class DevConsole {
 
     Unit.spawn(data.name, tile, player);
     return { lines: [`Spawned the ${data.name} at ${tile.getX()},${tile.getY()}.`] };
+  }
+
+  private static addFaith(player: Player, amount: string): DevCommandResult {
+    const faith = Number(amount);
+    if (!Number.isInteger(faith)) return { lines: ["Usage: faith <amount>, a whole number."] };
+
+    player.addToAccumulatedStat("faith", faith);
+    return { lines: [`+${faith} Faith (you have ${player.getAccumulatedStats()["faith"]}).`] };
   }
 }

@@ -364,6 +364,12 @@ export class UnitDisplayInfo extends ActorGroup {
             return;
           }
 
+          // Enhance Religion opens the same window, choosing a second follower belief and an enhancer belief.
+          if (action.getName() === "enhance_religion") {
+            Game.getInstance().getCurrentSceneAs<InGameScene>().toggleReligionFoundingUI(this.unit.getID(), "enhance");
+            return;
+          }
+
           // Skip Turn moves the selection on to the next unit needing orders, which the client tracks.
           if (action.getName() === "skip_turn") {
             Game.getInstance().getCurrentSceneAs<InGameScene>().getClientPlayer().skipSelectedUnitTurn();

@@ -7,13 +7,17 @@ import type { Unit } from "../unit/Unit";
 import { BeliefData, Beliefs } from "./Beliefs";
 import { PantheonData, Pantheons } from "./Pantheons";
 import { Religions } from "./Religions";
+import { Technology } from "../research/Technology";
 
-// A religion a player founded, by name, with the founder and follower belief chosen for it.
+// A religion a player founded, by name, with the founder and follower belief chosen for it, and once
+// a later Great Prophet enhances it, a second follower belief and an enhancer belief.
 export interface FoundedReligion {
   name: string;
   founderBelief: string;
   followerBelief: string;
   holyCity: string;
+  followerBelief2?: string;
+  enhancerBelief?: string;
 }
 
 /**
@@ -21,13 +25,19 @@ export interface FoundedReligion {
  * pantheon no other civilization has. With a pantheon, once it reaches getProphetCost(), a Great
  * Prophet is born, and in one of the player's cities the prophet founds a religion with a founder and
  * a follower belief. That holy city follows it at once; from there it spreads to the cities around it,
- * the player's or anyone's (see Religions.spreadPressure()).
+ * the player's or anyone's (see Religions.spreadPressure()). A later Great Prophet, in one of the
+ * player's cities, enhances it with a second follower belief and an enhancer belief.
  */
 export class PlayerReligion {
   public static readonly PROPHET = "Great Prophet";
   // Brave New World's standard-speed Great Prophet costs: 200 Faith for a player's first, 100 more for each after.
   public static readonly FIRST_PROPHET_COST = 200;
   public static readonly COST_PER_PROPHET = 100;
+  // Civ 5's chance of a Great Prophet each turn, once faith reaches its cost: 5%, and 1% more for
+  // each point of faith past the cost.
+  public static readonly BASE_PROPHET_CHANCE = 5;
+  // Until this era a Great Prophet takes all the faith banked, not just its cost.
+  public static readonly PROPHET_TAKES_ALL_UNTIL = "industrial";
 
   private player: Player;
   private pantheonName: string | undefined;
@@ -85,6 +95,17 @@ export class PlayerReligion {
     });
 
     ServerEvents.on({
+      eventName: "enhanceReligion",
+      parentObject: this,
+      callback: (data, websocket) => {
+        if (this.player.getWebsocket() != websocket) return;
+
+        this.enhanceReligion(data["followerBelief"], data["enhancerBelief"], data["unitId"]);
+      },
+      globalEvent: true
+    });
+
+    ServerEvents.on({
       eventName: "foundPantheon",
       parentObject: this,
       callback: (data, websocket) => {
@@ -113,13 +134,20 @@ export class PlayerReligion {
     return this.holyCity;
   }
 
-  // The pantheon, then the religion's founder and follower beliefs: whatever of them the player has.
+  // The pantheon, then the religion's beliefs: whatever of them the player has.
   public getBeliefs(): BeliefData[] {
+    const religion = this.religion;
     return [
       this.getPantheon(),
-      this.religion ? Religions.getFounderBelief(this.religion.founderBelief) : undefined,
-      this.religion ? Religions.getFollowerBelief(this.religion.followerBelief) : undefined
+      religion ? Religions.getFounderBelief(religion.founderBelief) : undefined,
+      religion ? Religions.getFollowerBelief(religion.followerBelief) : undefined,
+      religion?.followerBelief2 ? Religions.getFollowerBelief(religion.followerBelief2) : undefined,
+      religion?.enhancerBelief ? Religions.getEnhancerBelief(religion.enhancerBelief) : undefined
     ].filter((belief) => belief);
+  }
+
+  public isEnhanced(): boolean {
+    return !!this.religion?.enhancerBelief;
   }
 
   // What the status bar's faith tooltip shows: where the player's faith comes from each turn.
@@ -137,8 +165,20 @@ export class PlayerReligion {
     return { income, net: income.reduce((total, entry) => total + entry.amount, 0) };
   }
 
+  // 200 Faith for the first, 100 more for each after, a quarter less with Messiah.
   public getProphetCost(): number {
-    return PlayerReligion.FIRST_PROPHET_COST + PlayerReligion.COST_PER_PROPHET * this.prophetsEarned;
+    const cost = PlayerReligion.FIRST_PROPHET_COST + PlayerReligion.COST_PER_PROPHET * this.prophetsEarned;
+    return Beliefs.getProphetCost(this.player, cost);
+  }
+
+  // The percent chance of a Great Prophet being born this turn: none short of its cost, then 5% and 1%
+  // more for each point of faith past it.
+  public getProphetChance(): number {
+    const faith = this.player.getAccumulatedStats()["faith"] ?? 0;
+    const cost = this.getProphetCost();
+    if (faith < cost) return 0;
+
+    return Math.min(100, PlayerReligion.BASE_PROPHET_CHANCE + faith - cost);
   }
 
   // Enough faith, no pantheon yet, and one left to found. The barbarians never found one.
@@ -164,30 +204,32 @@ export class PlayerReligion {
   }
 
   /**
-   * A Great Prophet is born once the player has a pantheon, no religion and no prophet yet, and the
-   * faith for one, while a religion is left to found. Called each turn once faith is banked.
+   * Called each turn once faith is banked: whether a Great Prophet is born, by the chance
+   * getProphetChance() gives. Before the Industrial Era it takes all the faith banked, after it only
+   * its cost. It's born in the holy city while the player holds it, else in their capital.
    */
-  public checkForProphet() {
-    if (!this.canEarnProphet()) return;
+  public checkForProphet(roll: () => number = Math.random) {
+    if (!this.canEarnProphet() || roll() * 100 >= this.getProphetChance()) return;
 
-    const cities = this.player.getCities();
-    const city = cities.find((candidate) => candidate.hasBuilding("Palace")) ?? cities[0];
+    const city = this.getProphetBirthCity();
     if (!city.spawnFreeUnit(PlayerReligion.PROPHET)) return;
 
-    this.player.addToAccumulatedStat("faith", -this.getProphetCost());
+    const faith = this.player.getAccumulatedStats()["faith"] ?? 0;
+    this.player.addToAccumulatedStat("faith", -(this.takesAllFaith() ? faith : this.getProphetCost()));
     this.prophetsEarned++;
+    const can = this.religion ? "enhance your religion or spread it" : "found a religion";
     this.player
       .getNotifications()
-      .addMessage("ICON_FAITH", `A Great Prophet has been born in ${city.getName()}. In a city, it can found a religion.`);
+      .addMessage("ICON_FAITH", `A Great Prophet has been born in ${city.getName()}. In a city, it can ${can}.`);
     this.player.sendTotalStatsUpdate();
   }
 
+  // A pantheon, a city and the faith, and unless the player has founded a religion, one left to found.
   public canEarnProphet(): boolean {
-    if (this.religion || !this.pantheonName || this.player.isBarbarian() || !this.player.hasClient()) return false;
-    if (this.getProphets().length > 0 || this.player.getCities().length < 1) return false;
-    if ((this.player.getAccumulatedStats()["faith"] ?? 0) < this.getProphetCost()) return false;
+    if (!this.pantheonName || this.player.isBarbarian() || !this.player.hasClient()) return false;
+    if (this.player.getCities().length < 1 || this.getProphetChance() <= 0) return false;
 
-    return Religions.hasRoomForAnother();
+    return !!this.religion || Religions.hasRoomForAnother();
   }
 
   // The player's Great Prophet can found their religion, standing in one of their cities.
@@ -203,7 +245,12 @@ export class PlayerReligion {
    * The Great Prophet founds the religion with the two beliefs, and is used up. The city it stands in
    * becomes the holy city. False if it can't, or another religion has the name or either belief.
    */
-  public foundReligion(name: string, founderBeliefName: string, followerBeliefName: string, prophetId: number): boolean {
+  public foundReligion(
+    name: string,
+    founderBeliefName: string,
+    followerBeliefName: string,
+    prophetId: number
+  ): boolean {
     const available = Religions.getAvailable();
     const founderBelief = available.founderBeliefs.find((belief) => belief.name === founderBeliefName);
     const followerBelief = available.followerBeliefs.find((belief) => belief.name === followerBeliefName);
@@ -236,6 +283,43 @@ export class PlayerReligion {
     return true;
   }
 
+  // The player's Great Prophet can enhance their religion, standing in one of their cities.
+  public canEnhanceWith(prophet: Unit | undefined): boolean {
+    if (!this.religion || this.isEnhanced() || !prophet || prophet.getPlayer() !== this.player) return false;
+    if (prophet.getName() !== PlayerReligion.PROPHET) return false;
+    if (prophet.getTile().getCity()?.getPlayer() !== this.player) return false;
+
+    const available = Religions.getAvailable();
+    return available.followerBeliefs.length > 0 && available.enhancerBeliefs.length > 0;
+  }
+
+  /**
+   * The Great Prophet enhances the religion with a second follower belief and an enhancer belief, and
+   * is used up. False if it can't, or another religion has either belief.
+   */
+  public enhanceReligion(followerBeliefName: string, enhancerBeliefName: string, prophetId: number): boolean {
+    const available = Religions.getAvailable();
+    const followerBelief = available.followerBeliefs.find((belief) => belief.name === followerBeliefName);
+    const enhancerBelief = available.enhancerBeliefs.find((belief) => belief.name === enhancerBeliefName);
+    const prophet = this.getProphet(prophetId);
+    if (!followerBelief || !enhancerBelief || !this.canEnhanceWith(prophet)) return false;
+
+    prophet.delete();
+    this.religion.followerBelief2 = followerBelief.name;
+    this.religion.enhancerBelief = enhancerBelief.name;
+
+    this.player
+      .getNotifications()
+      .addMessage(
+        "ICON_FAITH",
+        `You have enhanced ${this.religion.name} with ${followerBelief.name} and ${enhancerBelief.name}.`
+      );
+    this.announceEnhancedToOthers();
+    Religions.getCitiesFollowing(this.religion.name).forEach((city) => city.refreshBeliefs());
+    this.applyFounded();
+    return true;
+  }
+
   // Initiation Rites pays out the first time each city comes to follow the player's religion.
   public onCityConverted(city: City) {
     if (this.convertedCities.has(city)) return;
@@ -251,7 +335,7 @@ export class PlayerReligion {
   }
 
   // What the client's religion founding window shows: the names and beliefs left, and whether the
-  // Great Prophet it was opened from can found a religion where it stands.
+  // Great Prophet it was opened from can found or enhance a religion where it stands.
   public sendReligions(prophetId?: number) {
     const available = Religions.getAvailable();
     this.player.sendNetworkEvent({
@@ -259,10 +343,12 @@ export class PlayerReligion {
       faith: this.player.getAccumulatedStats()["faith"] ?? 0,
       religion: this.religion ?? null,
       canFound: this.canFoundReligionWith(this.getProphet(prophetId)),
+      canEnhance: this.canEnhanceWith(this.getProphet(prophetId)),
       hasPantheon: !!this.pantheonName,
       religions: available.religions,
       founderBeliefs: available.founderBeliefs,
-      followerBeliefs: available.followerBeliefs
+      followerBeliefs: available.followerBeliefs,
+      enhancerBeliefs: available.enhancerBeliefs
     });
   }
 
@@ -312,6 +398,13 @@ export class PlayerReligion {
       followerBelief: PlayerReligion.describe(
         this.religion && Religions.getFollowerBelief(this.religion.followerBelief)
       ),
+      followerBelief2: PlayerReligion.describe(
+        this.religion?.followerBelief2 && Religions.getFollowerBelief(this.religion.followerBelief2)
+      ),
+      enhancerBelief: PlayerReligion.describe(
+        this.religion?.enhancerBelief && Religions.getEnhancerBelief(this.religion.enhancerBelief)
+      ),
+      prophetChance: this.getProphetChance(),
       cities,
       empire,
       totals
@@ -328,6 +421,19 @@ export class PlayerReligion {
       population: city.getPopulation(),
       bonuses: own ? Beliefs.getCityBonuses(city) : {}
     };
+  }
+
+  // The holy city while the player holds it, else the capital.
+  private getProphetBirthCity(): City {
+    const cities = this.player.getCities();
+    if (this.holyCity && cities.includes(this.holyCity)) return this.holyCity;
+
+    return cities.find((candidate) => candidate.hasBuilding("Palace")) ?? cities[0];
+  }
+
+  private takesAllFaith(): boolean {
+    const eras = Technology.getAllEras().map((era) => era.id);
+    return eras.indexOf(this.player.getEra().id) < eras.indexOf(PlayerReligion.PROPHET_TAKES_ALL_UNTIL);
   }
 
   private getProphets(): Unit[] {
@@ -347,6 +453,19 @@ export class PlayerReligion {
         if (other === this.player) return;
 
         other.getNotifications().addMessage("ICON_FAITH", `${civName} has founded ${this.religion.name}.`);
+        other.getReligion().sendReligions();
+      });
+  }
+
+  private announceEnhancedToOthers() {
+    const civName = this.player.getCivilizationName() ?? this.player.getName();
+
+    Game.getInstance()
+      .getPlayers()
+      .forEach((other) => {
+        if (other === this.player) return;
+
+        other.getNotifications().addMessage("ICON_FAITH", `${civName} has enhanced ${this.religion.name}.`);
         other.getReligion().sendReligions();
       });
   }

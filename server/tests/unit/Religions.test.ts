@@ -22,6 +22,8 @@ describe("Religions", () => {
     messages: string[];
     atWar: boolean;
     ownUnits: Unit[];
+    era: string;
+    techs: string[];
   };
 
   const playerWith = (options: { pantheon?: string; faith?: number } = {}) => {
@@ -32,6 +34,10 @@ describe("Religions", () => {
       messages: [] as string[],
       atWar: false,
       ownUnits: [] as Unit[],
+      era: "ancient",
+      techs: [] as string[],
+      getEra: () => ({ id: player.era }),
+      hasResearchedTech: (tech: string) => player.techs.includes(tech),
       getUnits: () => player.ownUnits,
       getName: () => `player${players.size}`,
       getCivilizationName: () => `Civ${players.size}`,
@@ -134,19 +140,49 @@ describe("Religions", () => {
   });
 
   describe("Great Prophets", () => {
-    it("are born at 200 Faith in the capital, the next costing 300", () => {
-      const player = playerWith({ pantheon: "Sacred Path", faith: 210 });
+    const always = () => 0;
+    const never = () => 0.999;
+
+    it("have a 5% chance at their cost, 1% more for each Faith past it, up to 100%", () => {
+      const player = playerWith({ pantheon: "Sacred Path", faith: 199 });
+      cityOf(player);
+      const chanceAt = (faith: number) => {
+        player.accumulated.faith = faith;
+        return player.getReligion().getProphetChance();
+      };
+
+      expect(chanceAt(199)).toBe(0);
+      expect(chanceAt(200)).toBe(5);
+      expect(chanceAt(250)).toBe(55);
+      expect(chanceAt(295)).toBe(100);
+      expect(chanceAt(400)).toBe(100);
+    });
+
+    it("are born on a roll under the chance, in the capital, taking all the Faith before the Industrial Era", () => {
+      const player = playerWith({ pantheon: "Sacred Path", faith: 250 });
       const rome = cityOf(player, { name: "Rome", buildings: ["Palace"] });
 
-      player.getReligion().checkForProphet();
+      player.getReligion().checkForProphet(() => 0.56);
+      expect(rome.spawnFreeUnit).not.toHaveBeenCalled();
+      player.getReligion().checkForProphet(() => 0.54);
 
       expect(rome.spawnFreeUnit).toHaveBeenCalledWith("Great Prophet");
-      expect(player.accumulated.faith).toBe(10);
+      expect(player.accumulated.faith).toBe(0);
       expect(player.getReligion().getProphetCost()).toBe(300);
       expect(player.messages.some((text) => text.includes("Great Prophet has been born in Rome"))).toBe(true);
     });
 
-    it("need a pantheon, a city, the faith, and no prophet already waiting", () => {
+    it("take only their cost from the Industrial Era on", () => {
+      const player = playerWith({ pantheon: "Sacred Path", faith: 250 });
+      player.era = "industrial";
+      cityOf(player, { buildings: ["Palace"] });
+
+      player.getReligion().checkForProphet(always);
+
+      expect(player.accumulated.faith).toBe(50);
+    });
+
+    it("need a pantheon, a city, the faith, and a religion left to found or one founded", () => {
       const withPantheon = () => playerWith({ pantheon: "Sacred Path", faith: 200 });
       const ready = withPantheon();
       cityOf(ready);
@@ -159,7 +195,121 @@ describe("Religions", () => {
       const poor = playerWith({ pantheon: "Sacred Path", faith: 199 });
       cityOf(poor);
       expect(poor.getReligion().canEarnProphet()).toBe(false);
-      expect(founder(500).getReligion().canEarnProphet()).toBe(false);
+      expect(founder(500).getReligion().canEarnProphet()).toBe(true);
+
+      const founded = founder(200);
+      found(founded, "Islam", "Tithe", "Feed the World");
+      const late = founder(500);
+      jest.spyOn(Religions, "hasRoomForAnother").mockReturnValue(false);
+      expect(late.getReligion().canEarnProphet()).toBe(false);
+      expect(founded.getReligion().canEarnProphet()).toBe(true);
+    });
+
+    it("are born in the holy city once there is one, and never on a roll over the chance", () => {
+      const player = founder(210);
+      const capital = cityOf(player, { name: "Paris", buildings: ["Palace"] });
+      player.ownCities.reverse();
+      found(player, "Islam", "Tithe", "Feed the World");
+      const rome = player.ownCities.find((city) => city.getName() === "Rome");
+
+      player.getReligion().checkForProphet(never);
+      expect(rome.spawnFreeUnit).not.toHaveBeenCalled();
+      player.getReligion().checkForProphet(always);
+
+      expect(rome.spawnFreeUnit).toHaveBeenCalledWith("Great Prophet");
+      expect(capital.spawnFreeUnit).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("enhancing", () => {
+    const enhance = (player: TestPlayer, followerBelief: string, enhancerBelief: string) =>
+      player.getReligion().enhanceReligion(followerBelief, enhancerBelief, PROPHET_ID);
+
+    // A player who founded Islam, with a second Great Prophet in the holy city.
+    const founderWithProphet = () => {
+      const player = founder();
+      found(player, "Islam", "Tithe", "Feed the World");
+      prophetOf(player, player.ownCities[0]);
+      return player;
+    };
+
+    it("lists 9 enhancer beliefs", () => {
+      expect(Religions.getEnhancerBeliefs()).toHaveLength(9);
+    });
+
+    it("adds a second follower belief and an enhancer belief, using up the prophet", () => {
+      const player = founderWithProphet();
+      const prophet = player.ownUnits[0];
+      expect(player.getReligion().canEnhanceWith(prophet)).toBe(true);
+
+      expect(enhance(player, "Asceticism", "Messiah")).toBe(true);
+
+      expect(prophet.delete).toHaveBeenCalled();
+      expect(player.getReligion().isEnhanced()).toBe(true);
+      expect(player.getReligion().getFounded()).toMatchObject({
+        followerBelief2: "Asceticism",
+        enhancerBelief: "Messiah"
+      });
+      expect(Beliefs.getCityBeliefs(player.ownCities[0]).map((belief) => belief.name)).toEqual([
+        "Sacred Path",
+        "Feed the World",
+        "Asceticism"
+      ]);
+      prophetOf(player, player.ownCities[0]);
+      expect(player.getReligion().canEnhanceWith(player.ownUnits[0])).toBe(false);
+    });
+
+    it("needs a founded religion, the prophet in an own city, and beliefs no one has", () => {
+      const unfounded = founder();
+      expect(unfounded.getReligion().canEnhanceWith(unfounded.ownUnits[0])).toBe(false);
+
+      const player = founderWithProphet();
+      expect(enhance(player, "Feed the World", "Messiah")).toBe(false);
+      expect(enhance(player, "Asceticism", "Tithe")).toBe(false);
+    });
+
+    it("gives Messiah's prophets a quarter off", () => {
+      const player = founderWithProphet();
+      enhance(player, "Asceticism", "Messiah");
+
+      expect(player.getReligion().getProphetCost()).toBe(150);
+    });
+
+    it("presses 30% further with Itinerant Preachers, 25% harder with Religious Texts and 50% with Printing Press", () => {
+      const player = founderWithProphet();
+      enhance(player, "Asceticism", "Itinerant Preachers");
+      expect(Beliefs.getSpreadRange("Islam", 10)).toBe(13);
+      expect(Beliefs.getSpreadPressure("Islam", 6)).toBe(6);
+
+      const texts = founder();
+      found(texts, "Judaism", "Church Property", "Peace Gardens");
+      prophetOf(texts, texts.ownCities[0]);
+      enhance(texts, "Pagodas", "Religious Texts");
+      expect(Beliefs.getSpreadPressure("Judaism", 12)).toBe(15);
+      texts.techs.push("Printing Press");
+      expect(Beliefs.getSpreadPressure("Judaism", 12)).toBe(18);
+    });
+
+    it("gives Defender of the Faith +20% in friendly following lands and Just War +20% in enemy ones", () => {
+      const player = founderWithProphet();
+      enhance(player, "Asceticism", "Defender of the Faith");
+      const enemy = playerWith();
+      const enemyCity = cityOf(enemy);
+      const tileOf = (city: City) => ({ getCityTerritoryOf: () => city }) as unknown as Tile;
+
+      expect(Beliefs.getCombatModifiers(player, tileOf(player.ownCities[0]))).toEqual([
+        { label: "Defender of the Faith", value: 0.2 }
+      ]);
+      expect(Beliefs.getCombatModifiers(player, tileOf(enemyCity))).toEqual([]);
+
+      const crusader = founder();
+      found(crusader, "Judaism", "Church Property", "Peace Gardens");
+      prophetOf(crusader, crusader.ownCities[0]);
+      enhance(crusader, "Pagodas", "Just War");
+      crusader.atWar = true;
+      enemyCity.getReligion().convertAll("Judaism");
+      expect(Beliefs.getCombatModifiers(crusader, tileOf(enemyCity))).toEqual([{ label: "Just War", value: 0.2 }]);
+      expect(Beliefs.getCombatModifiers(crusader, tileOf(crusader.ownCities[0]))).toEqual([]);
     });
   });
 

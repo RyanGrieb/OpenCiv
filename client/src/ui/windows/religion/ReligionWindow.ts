@@ -82,12 +82,15 @@ export class ReligionWindow extends ActorGroup {
           rule: true
         },
         ...ReligionWindow.describe("Founder Belief", overview.founderBelief),
-        ...ReligionWindow.describe("Follower Belief", overview.followerBelief)
+        ...ReligionWindow.describe("Follower Belief", overview.followerBelief),
+        ...ReligionWindow.describe("Follower Belief", overview.followerBelief2),
+        ...ReligionWindow.describe("Enhancer Belief", overview.enhancerBelief),
+        { text: ReligionWindow.describeProphetChance(overview), color: "lightgray" }
       ];
     }
 
     const prophet = overview.pantheon
-      ? `A Great Prophet is born at ${overview.prophetCost} Faith (you have ${overview.faith}).`
+      ? ReligionWindow.describeProphetChance(overview)
       : `Found a pantheon first. A Great Prophet is then born at ${overview.prophetCost} Faith.`;
     return [
       { text: "Religion: none yet", color: "white", font: TITLE_FONT, rule: true },
@@ -96,6 +99,12 @@ export class ReligionWindow extends ActorGroup {
         color: "lightgray"
       }
     ];
+  }
+
+  // From the Great Prophet's cost on, a 5% chance each turn and 1% more for each Faith past it.
+  private static describeProphetChance(overview: ReligionOverview): string {
+    const cost = `Next Great Prophet from ${overview.prophetCost} Faith (you have ${overview.faith})`;
+    return overview.prophetChance > 0 ? `${cost}: ${overview.prophetChance}% chance each turn.` : `${cost}.`;
   }
 
   // "Pantheon: Desert Folklore", its bonus, and whatever of it isn't in the game yet.

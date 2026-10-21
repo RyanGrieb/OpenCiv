@@ -1,6 +1,7 @@
 import random from "random";
 import { Tile } from "../map/Tile";
 import { BuildingEffects } from "../city/BuildingEffects";
+import { Beliefs } from "../religion/Beliefs";
 
 export interface CombatResult {
   attackerHealth: number;
@@ -344,7 +345,8 @@ export class Combat {
   }
 
   // What the owner of the unit fighting from this tile brings to the fight: a very unhappy empire's
-  // units fight worse (see PlayerHappiness), and Himeji Castle's fight better in their own borders.
+  // units fight worse (see PlayerHappiness), Himeji Castle's fight better in their own borders, and
+  // Defender of the Faith's and Just War's in the lands of cities following their religion.
   private static getOwnerModifiers(tile: Tile): CombatModifier[] {
     const fighter = tile.getUnits().find((unit) => unit.canFight());
     if (!fighter) return [];
@@ -352,7 +354,8 @@ export class Combat {
     const player = fighter.getPlayer();
     return [
       ...player.getHappiness().getCombatModifiers(),
-      ...BuildingEffects.getTerritoryCombatModifiers(player, tile)
+      ...BuildingEffects.getTerritoryCombatModifiers(player, tile),
+      ...Beliefs.getCombatModifiers(player, tile)
     ];
   }
 

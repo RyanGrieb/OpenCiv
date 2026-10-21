@@ -9,6 +9,8 @@ import { TestUtils } from "../TestUtils";
 
 const PANTHEON_COST = 10;
 const PROPHET_COST = 200;
+// A Great Prophet is sure to be born at its cost plus 95 Faith (a 5% chance, and 1% more per Faith past it).
+const SURE_PROPHET = PROPHET_COST + 95;
 const RELIGION = "Islam";
 // Pressure from the holy city (12 a turn) converts a citizen for every 60: the neighbour's one citizen
 // in 5 turns.
@@ -65,11 +67,11 @@ export function setupReligionSpreadTest(game: Game) {
         });
 
     runner.addStep({
-        name: `Start a revealed-map game at peace with a second player, with ${PANTHEON_COST + PROPHET_COST} Faith each`,
+        name: `Start a revealed-map game at peace with a second player, with ${PANTHEON_COST + SURE_PROPHET} Faith each`,
         action: async () => {
             enemySocket = await utils.startGameWithSecondPlayer({
                 autoEndTurns: false,
-                gameOptions: { startAtWar: false, startingFaith: PANTHEON_COST + PROPHET_COST }
+                gameOptions: { startAtWar: false, startingFaith: PANTHEON_COST + SURE_PROPHET }
             });
             await utils.waitUntil(() => settlers().length === 2, 10000, "Both Settlers to appear");
         },
@@ -96,7 +98,7 @@ export function setupReligionSpreadTest(game: Game) {
         name: `Found a pantheon, end the turn for a Great Prophet, and found ${RELIGION} with Pilgrimage: our city's name gets its icon`,
         action: async () => {
             sendAsUs({ event: "foundPantheon", name: "Sacred Path" });
-            await utils.waitUntil(() => me().getAccumulatedStat("faith") <= PROPHET_COST, 5000, "The pantheon to be founded");
+            await utils.waitUntil(() => me().getAccumulatedStat("faith") <= SURE_PROPHET, 5000, "The pantheon to be founded");
             await endTurn();
             await utils.waitUntil(() => !!prophet(), 8000, "A Great Prophet to be born");
             sendAsUs({

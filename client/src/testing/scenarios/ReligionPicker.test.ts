@@ -17,9 +17,9 @@ export function setupReligionPickerTest(game: Game) {
     const founding = () => scene().getReligionFoundingWindow();
 
     runner.addStep({
-        name: "Start with 210 Faith, settle a city, found a pantheon and end the turn for a Great Prophet",
+        name: "Start with 305 Faith (a sure Great Prophet), settle a city, found a pantheon and end the turn for a Great Prophet",
         action: async () => {
-            await utils.ensureInGame({ allowBarbarians: false, revealMap: true, mapPreset: "pantheons", startingFaith: 210 });
+            await utils.ensureInGame({ allowBarbarians: false, revealMap: true, mapPreset: "pantheons", startingFaith: 305 });
             const settler = await utils.findUnitWithAction("settle");
             WebsocketClient.sendMessage({
                 event: "unitAction",
@@ -31,7 +31,7 @@ export function setupReligionPickerTest(game: Game) {
             await utils.waitUntil(() => me().getCities().length > 0, 5000, "City to be founded");
             scene().focusOnTile(me().getCities()[0].getTile(), 3);
             WebsocketClient.sendMessage({ event: "foundPantheon", name: "Sacred Path" });
-            await utils.waitUntil(() => me().getAccumulatedStat("faith") === 200, 5000, "The pantheon to be founded");
+            await utils.waitUntil(() => me().getAccumulatedStat("faith") === 295, 5000, "The pantheon to be founded");
             WebsocketClient.sendMessage({ event: "nextTurnRequest", value: true });
             await utils.waitUntil(() => !!prophet(), 8000, "A Great Prophet to be born");
         },

@@ -78,6 +78,20 @@ export class UnitActions {
     };
   }
 
+  // The Great Prophet's, once its owner has founded a religion: in one of their cities, the client opens
+  // the same window to choose a second follower belief and an enhancer belief, sent back as
+  // "enhanceReligion" (see PlayerReligion.enhanceReligion()).
+  public static enhanceReligion(): UnitAction {
+    return {
+      name: "enhance_religion",
+      icon: "ICON_FAITH",
+      requirements: [],
+      desc: "Enhance Religion",
+      isAvailable: (unit: Unit) => unit.getPlayer().getReligion().canEnhanceWith(unit),
+      onAction: () => {}
+    };
+  }
+
   public static settleCity(): UnitAction {
     return {
       name: "settle",
@@ -133,7 +147,7 @@ export class UnitActions {
   // What this kind of unit can do besides skipping a turn.
   private static typeActions(data: UnitYMLTypeData): UnitAction[] {
     if (data.name === "Settler") return [UnitActions.settleCity()];
-    if (data.name === "Great Prophet") return [UnitActions.foundReligion()];
+    if (data.name === "Great Prophet") return [UnitActions.foundReligion(), UnitActions.enhanceReligion()];
     if (data.name === "Builder")
       return Improvement.getBuildableImprovementData("land").map(UnitActions.buildImprovement);
     if (data.name === "Work Boat")

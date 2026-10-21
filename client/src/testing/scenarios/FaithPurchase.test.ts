@@ -6,11 +6,14 @@ import { TestUtils } from "../TestUtils";
 
 const PANTHEON_COST = 10;
 const PROPHET_COST = 200;
+// A Great Prophet is sure to be born at its cost plus 95 Faith (a 5% chance, and 1% more per Faith past it).
+const SURE_PROPHET = PROPHET_COST + 95;
 const MOSQUE_COST = 200;
 
 // Buys a Mosque with faith against a live server: on the pantheons map preset with Faith for a pantheon,
-// a Great Prophet and a Mosque (the startingFaith game option), founds a pantheon, waits a turn for the
-// prophet, and founds Islam with the Mosques follower belief. The city screen's faith Buy then lists the
+// a sure Great Prophet and a Mosque (the startingFaith game option), and every tech so the prophet takes
+// only its cost as it does from the Industrial Era on, rather than all the Faith. Founds a pantheon,
+// waits a turn for the prophet, and founds Islam with the Mosques follower belief. The city screen's faith Buy then lists the
 // Mosque at 200 Faith, and buying it spends the faith, drops it from the still-open list, and adds it
 // to the city's buildings list.
 export function setupFaithPurchaseTest(game: Game) {
@@ -45,7 +48,8 @@ export function setupFaithPurchaseTest(game: Game) {
                 allowBarbarians: false,
                 revealMap: true,
                 mapPreset: "pantheons",
-                startingFaith: PANTHEON_COST + PROPHET_COST + MOSQUE_COST
+                startWithAllTechs: true,
+                startingFaith: PANTHEON_COST + SURE_PROPHET + MOSQUE_COST
             });
             const settler = await utils.findUnitWithAction("settle");
             WebsocketClient.sendMessage({
@@ -58,7 +62,7 @@ export function setupFaithPurchaseTest(game: Game) {
             await utils.waitUntil(() => me().getCities().length > 0, 5000, "City to be founded");
             utils.getInGameScene().focusOnTile(city().getTile(), 3);
             WebsocketClient.sendMessage({ event: "foundPantheon", name: "Sacred Path" });
-            await utils.waitUntil(() => faith() === PROPHET_COST + MOSQUE_COST, 5000, "The pantheon to be founded");
+            await utils.waitUntil(() => faith() === SURE_PROPHET + MOSQUE_COST, 5000, "The pantheon to be founded");
             WebsocketClient.sendMessage({ event: "nextTurnRequest", value: true });
             await utils.waitUntil(() => !!prophet(), 8000, "A Great Prophet to be born");
             WebsocketClient.sendMessage({

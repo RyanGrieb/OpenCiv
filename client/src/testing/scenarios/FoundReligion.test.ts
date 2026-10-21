@@ -5,14 +5,17 @@ import { TestUtils } from "../TestUtils";
 
 const PANTHEON_COST = 10;
 const PROPHET_COST = 200;
+// A Great Prophet is sure to be born at its cost plus 95 Faith (a 5% chance, and 1% more per Faith past it).
+const SURE_PROPHET = PROPHET_COST + 95;
 const RELIGION = "Islam";
 const FOUNDER_BELIEF = "Initiation Rites";
 const FOLLOWER_BELIEF = "Feed the World";
 const INITIATION_RITES_GOLD = 100;
 
-// Founds a religion against a live server: settles a city on the pantheons map preset with the 210
-// Faith a pantheon and then a Great Prophet cost (the startingFaith game option), and founds the Sacred
-// Path pantheon. Ending the turn, a Great Prophet is born in the city; its Found Religion action opens
+// Founds a religion against a live server: settles a city on the pantheons map preset with the Faith a
+// pantheon costs and enough past a Great Prophet's cost for a sure one (the startingFaith game option),
+// and founds the Sacred Path pantheon. Ending the turn, a Great Prophet is born in the city, taking all
+// the Faith; its Found Religion action opens
 // the religion founding window, where Islam is founded with Initiation Rites, whose 100 Gold arrives
 // for the one city, and Feed the World. Ends on the faith button's religion window showing the religion.
 export function setupFoundReligionTest(game: Game) {
@@ -27,13 +30,13 @@ export function setupFoundReligionTest(game: Game) {
     const canFound = () => prophet()?.getActions().some((action) => action.getName() === "found_religion" && action.requirementsMet(prophet()));
 
     runner.addStep({
-        name: `Start with ${PANTHEON_COST + PROPHET_COST} Faith, settle a city and found a pantheon`,
+        name: `Start with ${PANTHEON_COST + SURE_PROPHET} Faith, settle a city and found a pantheon`,
         action: async () => {
             await utils.ensureInGame({
                 allowBarbarians: false,
                 revealMap: true,
                 mapPreset: "pantheons",
-                startingFaith: PANTHEON_COST + PROPHET_COST
+                startingFaith: PANTHEON_COST + SURE_PROPHET
             });
             const settler = await utils.findUnitWithAction("settle");
             WebsocketClient.sendMessage({
@@ -46,13 +49,13 @@ export function setupFoundReligionTest(game: Game) {
             await utils.waitUntil(() => me().getCities().length > 0, 5000, "City to be founded");
             scene().focusOnTile(me().getCities()[0].getTile(), 3);
             WebsocketClient.sendMessage({ event: "foundPantheon", name: "Sacred Path" });
-            await utils.waitUntil(() => me().getAccumulatedStat("faith") === PROPHET_COST, 5000, "The pantheon to be founded");
+            await utils.waitUntil(() => me().getAccumulatedStat("faith") === SURE_PROPHET, 5000, "The pantheon to be founded");
         },
         verification: () => !prophet() && scene().getNextTurnButton().getText() !== "Found Religion"
     });
 
     runner.addStep({
-        name: "End the turn: a Great Prophet is born in the city, spending the Faith, and can found a religion there",
+        name: "End the turn: a Great Prophet is born in the city, taking all the Faith, and can found a religion there",
         action: async () => {
             WebsocketClient.sendMessage({ event: "nextTurnRequest", value: true });
             await utils.waitUntil(() => !!prophet() && canFound(), 8000, "A Great Prophet to be born");

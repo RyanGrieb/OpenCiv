@@ -61,6 +61,15 @@ export interface BeliefEffectsData {
   culture_per_foreign_followers?: { per: number };
   faith_buildings?: { building: string; faith_cost: number }[];
   faith_units?: { before_era: string };
+  spread_range_percent?: number;
+  spread_pressure_percent?: { percent: number; with_tech?: { tech: string; percent: number } };
+  prophet_cost_percent?: number;
+  prophet_strength_percent?: number;
+  missionary_cost_percent?: number;
+  missionary_strength_percent?: number;
+  combat_near_friendly_percent?: number;
+  combat_near_enemy_percent?: number;
+  faith_on_great_person?: number;
 }
 
 // A pantheon, or a religion's founder or follower belief.
@@ -88,13 +97,64 @@ export class Beliefs {
   public static getCityBeliefs(city: City): ActiveBelief[] {
     const majority = city.getReligion?.().getMajority();
     const founder = majority ? Religions.getFounderOf(majority) : undefined;
-    const beliefs = founder
+    const founded = founder?.getReligion().getFounded();
+    const beliefs = founded
       ? [
           founder.getReligion().getPantheon(),
-          Religions.getFollowerBelief(founder.getReligion().getFounded().followerBelief)
+          Religions.getFollowerBelief(founded.followerBelief),
+          founded.followerBelief2 ? Religions.getFollowerBelief(founded.followerBelief2) : undefined
         ]
       : [city.getPlayer().getReligion?.().getPantheon()];
     return Beliefs.withEffects(beliefs);
+  }
+
+  // The enhancer belief of the religion, once its founder has enhanced it. Its effects are the founder's.
+  public static getEnhancerBelief(religion: string | undefined): ActiveBelief | undefined {
+    const enhancer = religion ? Religions.getFounderOf(religion)?.getReligion().getFounded().enhancerBelief : undefined;
+    return Beliefs.withEffects([enhancer ? Religions.getEnhancerBelief(enhancer) : undefined])[0];
+  }
+
+  // The enhancer belief of the religion the player founded, if they founded and enhanced one.
+  public static getOwnEnhancerEffects(player: Player): BeliefEffectsData {
+    return Beliefs.getEnhancerBelief(player.getReligion?.().getFounded()?.name)?.effects ?? {};
+  }
+
+  // How far the religion presses on other cities, once Itinerant Preachers has carried it further.
+  public static getSpreadRange(religion: string, baseRange: number): number {
+    const percent = Beliefs.getEnhancerBelief(religion)?.effects.spread_range_percent ?? 0;
+    return Math.round((baseRange * (100 + percent)) / 100);
+  }
+
+  // How hard a city following the religion presses it, once Religious Texts has made it spread faster.
+  public static getSpreadPressure(religion: string, basePressure: number): number {
+    const effect = Beliefs.getEnhancerBelief(religion)?.effects.spread_pressure_percent;
+    if (!effect) return basePressure;
+
+    const founder = Religions.getFounderOf(religion);
+    const withTech = effect.with_tech && founder.hasResearchedTech(effect.with_tech.tech);
+    const percent = withTech ? effect.with_tech.percent : effect.percent;
+    return Math.round((basePressure * (100 + percent)) / 100);
+  }
+
+  // The faith the player's next Great Prophet costs, once Messiah has made it cheaper.
+  public static getProphetCost(player: Player, baseCost: number): number {
+    const percent = Beliefs.getOwnEnhancerEffects(player).prophet_cost_percent ?? 0;
+    return Math.round((baseCost * (100 + percent)) / 100);
+  }
+
+  /**
+   * Defender of the Faith and Just War: what the fighter's owner gets for fighting on the tile, in the
+   * lands of a city following the religion they founded - their own or a non-enemy's city for the one,
+   * an enemy's for the other.
+   */
+  public static getCombatModifiers(player: Player, tile: Tile): CombatModifier[] {
+    const enhancer = Beliefs.getEnhancerBelief(player.getReligion?.().getFounded()?.name);
+    const city = tile.getCityTerritoryOf();
+    if (!enhancer || !city || city.getReligion().getMajority() !== player.getReligion().getFounded().name) return [];
+
+    const enemy = city.getPlayer() !== player && player.getDiplomacy().isAtWarWith(city.getPlayer());
+    const percent = enemy ? enhancer.effects.combat_near_enemy_percent : enhancer.effects.combat_near_friendly_percent;
+    return percent ? [{ label: enhancer.name, value: percent / 100 }] : [];
   }
 
   // The founder belief of the religion the player founded, if they founded one.

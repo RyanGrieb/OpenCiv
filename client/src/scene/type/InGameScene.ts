@@ -23,7 +23,7 @@ import { DiplomacyWindow } from "../../ui/windows/DiplomacyWindow";
 import { DevConsole } from "../../ui/hud/DevConsole";
 import { PantheonList } from "../../ui/windows/religion/PantheonList";
 import { FreeTechList } from "../../ui/windows/FreeTechList";
-import { ReligionFoundingWindow } from "../../ui/windows/religion/ReligionFoundingWindow";
+import { ReligionFoundingWindow, ReligionWindowMode } from "../../ui/windows/religion/ReligionFoundingWindow";
 import { ReligionWindow } from "../../ui/windows/religion/ReligionWindow";
 import { DeclareWarWindow } from "../../ui/windows/DeclareWarWindow";
 import { StatusBar } from "../../ui/hud/StatusBar";
@@ -590,8 +590,8 @@ export class InGameScene extends Scene {
     return this.religionFoundingWindow;
   }
 
-  // Opened from a Great Prophet's Found Religion action. Founding one closes it.
-  public toggleReligionFoundingUI(prophetId: number) {
+  // Opened from a Great Prophet's Found Religion or Enhance Religion action. Choosing closes it.
+  public toggleReligionFoundingUI(prophetId: number, mode: ReligionWindowMode = "found") {
     if (this.religionFoundingWindow) {
       this.closeReligionFoundingUI();
       return;
@@ -600,6 +600,7 @@ export class InGameScene extends Scene {
 
     this.religionFoundingWindow = new ReligionFoundingWindow({
       prophetId,
+      mode,
       onChosen: () => this.closeReligionFoundingUI(),
       onClose: () => this.closeReligionFoundingUI()
     });
