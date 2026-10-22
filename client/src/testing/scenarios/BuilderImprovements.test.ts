@@ -136,11 +136,16 @@ export function setupBuilderImprovementsTest(game: Game) {
             select(builder);
             foodBefore = farmTile.getTileYield()?.food ?? 0;
         },
-        // The window lays its buttons out a full button apart, so none overlap.
+        // The window lays its buttons out a full button apart, so none overlap. A hill also offers a
+        // Mine, and with Skip Turn that's 5 buttons, which wrap onto a second row.
         verification: () => {
             const shown = shownActions().map((action) => action.getName());
-            const xs = actionButtons().map((button) => button.getX());
-            const apart = xs.every((x, index) => index === 0 || x - xs[index - 1] >= 64);
+            const buttons = actionButtons();
+            const apart = buttons.every((button, index) =>
+                buttons
+                    .slice(0, index)
+                    .every((other) => Math.abs(button.getX() - other.getX()) >= 64 || Math.abs(button.getY() - other.getY()) >= 64)
+            );
             return shown.includes("build_farm") && shown.includes("build_road") && apart;
         }
     });
