@@ -16,6 +16,7 @@ export enum NotificationPriority {
 // A "cityStrike" click starts aiming a city that has an enemy in range, and a "diplomacy" click
 // opens the diplomacy window.
 // A "pantheon" click opens the pantheon picker, and a "freeTech" click the free tech picker.
+// A "tradeRoute" click selects a Caravan or Cargo Ship that can start a route and opens its routes.
 export type NotificationType =
   | "research"
   | "production"
@@ -24,6 +25,7 @@ export type NotificationType =
   | "diplomacy"
   | "pantheon"
   | "freeTech"
+  | "tradeRoute"
   | "message";
 
 export interface NotificationData {
@@ -36,7 +38,7 @@ export interface NotificationData {
   // Set when the player must deal with this before ending the turn. The client's Next Turn button
   // shows this label and acts on the notification instead.
   turnBlockingLabel?: string;
-  // What a click cycles through, for "production", "cityStrike" and "unitOrders".
+  // What a click cycles through, for "production", "cityStrike", "unitOrders" and "tradeRoute".
   cityNames?: string[];
   unitIds?: number[];
 }
@@ -195,6 +197,7 @@ export class PlayerNotifications {
       this.getProductionNotification(),
       this.getCityStrikeNotification(),
       this.getPeaceOfferNotification(),
+      this.getTradeRouteNotification(),
       this.getUnitOrdersNotification()
     ];
     const notifications = [
@@ -293,6 +296,25 @@ export class PlayerNotifications {
       icon: "ICON_DIPLOMACY",
       text: `${offers.map((relation) => relation.civName).join(", ")} ${offers.length > 1 ? "offer" : "offers"} you peace.`,
       priority: NotificationPriority.HIGH
+    };
+  }
+
+  // A Caravan or Cargo Ship waiting for orders in a city it could start a trade route from - a new one,
+  // or one just back from a route that ended. Ahead of Move Unit, so the turn button asks for the route.
+  private getTradeRouteNotification(): NotificationData | undefined {
+    const traders = this.player
+      .getUnits()
+      .filter((unit) => PlayerNotifications.needsOrders(unit) && this.player.getTradeRoutes().canEstablishWith(unit));
+    if (traders.length < 1) return undefined;
+
+    return {
+      id: "tradeRoute",
+      type: "tradeRoute",
+      icon: "ICON_TRADE",
+      text: "You can establish a trade route.",
+      priority: NotificationPriority.MEDIUM,
+      turnBlockingLabel: "Establish Trade",
+      unitIds: traders.map((unit) => unit.getId())
     };
   }
 

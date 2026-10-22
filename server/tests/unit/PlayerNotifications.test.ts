@@ -38,6 +38,9 @@ describe('PlayerNotifications', () => {
     registration[0].callback(data, mockWebsocket);
   };
 
+  // Units that could start a trade route where they stand.
+  let traderIds: number[] = [];
+
   const ids = () => notifications.getNotifications().map((notification) => notification.id);
 
   beforeEach(() => {
@@ -48,6 +51,7 @@ describe('PlayerNotifications', () => {
     techsLeft = true;
     relations = [];
     canFoundPantheon = false;
+    traderIds = [];
     mockWebsocket = {} as WebSocket;
 
     onSpy = jest.spyOn(ServerEvents, 'on').mockImplementation(() => { });
@@ -62,6 +66,7 @@ describe('PlayerNotifications', () => {
       sendNetworkEvent: jest.fn(),
       getDiplomacy: jest.fn(() => ({ toJSON: () => relations })),
       getReligion: jest.fn(() => ({ canFoundPantheon: () => canFoundPantheon, canFoundReligion: () => false })),
+      getTradeRoutes: jest.fn(() => ({ canEstablishWith: (unit: { getId(): number }) => traderIds.includes(unit.getId()) })),
     } as unknown as jest.Mocked<Player>;
 
     notifications = new PlayerNotifications(mockPlayer);
@@ -125,6 +130,15 @@ describe('PlayerNotifications', () => {
     const [unitOrders] = notifications.getNotifications();
     expect(unitOrders.unitIds).toEqual([1, 5]);
     expect(unitOrders.turnBlockingLabel).toBe('Move Unit');
+  });
+
+  it('blocks the turn with Establish Trade for an idle Caravan that can start a route, ahead of Move Unit', () => {
+    traderIds = [2, 3];
+    units.push(makeUnit(1), makeUnit(2), makeUnit(3, { skipping: true }));
+
+    const [trade, unitOrders] = notifications.getNotifications();
+    expect(trade).toMatchObject({ type: 'tradeRoute', turnBlockingLabel: 'Establish Trade', unitIds: [2] });
+    expect(unitOrders.unitIds).toEqual([1, 2]);
   });
 
   it('orders notifications by priority, research first', () => {

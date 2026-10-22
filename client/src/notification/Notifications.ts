@@ -7,7 +7,16 @@ import { InGameScene } from "../scene/type/InGameScene";
 // Mirrors server/src/notification/PlayerNotifications.ts's NotificationData - keep both in sync.
 export interface NotificationData {
   id: string;
-  type: "research" | "production" | "unitOrders" | "cityStrike" | "diplomacy" | "pantheon" | "freeTech" | "message";
+  type:
+    | "research"
+    | "production"
+    | "unitOrders"
+    | "cityStrike"
+    | "diplomacy"
+    | "pantheon"
+    | "freeTech"
+    | "tradeRoute"
+    | "message";
   icon: string;
   text: string;
   priority: number;
@@ -94,6 +103,9 @@ export class Notifications {
       case "freeTech":
         if (!scene.getFreeTechList()) scene.toggleFreeTechUI();
         return;
+      case "tradeRoute":
+        this.openNextTradeRoute(notification, scene);
+        return;
       case "message":
         WebsocketClient.sendMessage({ event: "dismissNotification", id: notification.id });
         return;
@@ -124,6 +136,17 @@ export class Notifications {
 
     scene.focusOnTile(unit.getTile(), scene.getCamera().getZoomAmount());
     this.player.selectUnit(unit);
+  }
+
+  // Selects the next Caravan or Cargo Ship that can start a route, and opens the routes it could take.
+  private openNextTradeRoute(notification: NotificationData, scene: InGameScene) {
+    const unitId = this.nextTarget(notification, notification.unitIds);
+    const unit = this.player.getUnits().find((unit) => unit.getID() === unitId);
+    if (!unit) return;
+
+    scene.focusOnTile(unit.getTile(), scene.getCamera().getZoomAmount());
+    this.player.selectUnit(unit);
+    if (!scene.getTradeRouteList()) scene.toggleTradeRouteUI(unit.getID());
   }
 
   private nextTarget<T>(notification: NotificationData, targets: T[] | undefined): T | undefined {

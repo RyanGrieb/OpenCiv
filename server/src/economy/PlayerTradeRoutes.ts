@@ -3,6 +3,7 @@ import type { City } from "../city/City";
 import { PlayerDiplomacy } from "../diplomacy/PlayerDiplomacy";
 import { ServerEvents } from "../Events";
 import { Improvement } from "../map/Improvement";
+import { NotificationPriority } from "../notification/PlayerNotifications";
 import { StatEntry, Tile } from "../map/Tile";
 import type { Player } from "../Player";
 import { TechEffects } from "../research/TechEffects";
@@ -242,7 +243,8 @@ export class PlayerTradeRoutes {
       }
 
       this.close(route, `Your trade route from ${names} has ended. The ${route.unit.getName()} is back home.`);
-      PlayerTradeRoutes.stepTo(route.unit, route.origin.getTile(), 0);
+      // Home with its moves, ready for a new route this turn.
+      PlayerTradeRoutes.stepTo(route.unit, route.origin.getTile(), route.unit.getMaxMovement());
     }
   }
 
@@ -414,7 +416,8 @@ export class PlayerTradeRoutes {
     PlayerTradeRoutes.allRoutes = PlayerTradeRoutes.allRoutes.filter((entry) => entry !== route);
     route.unit.setTrading(false);
     this.refreshCities(route);
-    this.player.getNotifications().addMessage("ICON_TRADE", message);
+    this.player.sendTotalStatsUpdate();
+    this.player.getNotifications().addMessage("ICON_TRADE", message, { priority: NotificationPriority.MEDIUM });
   }
 
   // Both ends' yields just changed.
