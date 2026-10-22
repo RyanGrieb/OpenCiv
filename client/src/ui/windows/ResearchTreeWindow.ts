@@ -647,6 +647,8 @@ export class ResearchTreeWindow extends ActorGroup {
     const centerX = left + radius - 2 * this.zoomLevel;
     const centerY = bottom - radius + 2 * this.zoomLevel;
 
+    // Saved and restored so the centered text alignment doesn't carry over to the labels drawn after it.
+    context.save();
     context.beginPath();
     context.arc(centerX, centerY, radius, 0, Math.PI * 2);
     context.fillStyle = "black";
@@ -660,6 +662,7 @@ export class ResearchTreeWindow extends ActorGroup {
     context.textAlign = "center";
     context.textBaseline = "middle";
     context.fillText(String(queueNumber), centerX, centerY + 1);
+    context.restore();
   }
 
   private drawSprite(context: CanvasRenderingContext2D, assetName: string, x: number, y: number, size: number) {
