@@ -27,15 +27,29 @@ export class Road {
 
   // The road actors for a tile drawn at (x, y). Roads run toward every adjacent road or city: one
   // neighbor gets a straight road through the tile toward it (as on old_java), several get a sprite
-  // per consecutive pair, and a road with no neighbors lies horizontally.
+  // per consecutive pair, and a road with no neighbors lies horizontally. A railroad tile lays rails
+  // the same way toward neighboring railroads and cities, over road where a plain road meets it.
   public static createActors(tile: Tile, x: number, y: number): Actor[] {
     if (!tile.getTileTypes().includes("road")) return [];
 
-    return Road.getSidePairs(tile).map(
+    const roadSides = Road.getSides(tile, (neighbor) => neighbor.hasRoad());
+    if (!tile.getTileTypes().includes("railroad")) return Road.createSprites(Road.toPairs(roadSides), "ROAD", x, y);
+
+    // Rails with no railroad to meet still follow the road.
+    const railSides = Road.getSides(tile, (neighbor) => neighbor.hasRailroad());
+    const roadOnly = roadSides.filter((side) => !railSides.includes(side));
+    return [
+      ...(roadOnly.length > 0 ? Road.createSprites(Road.toPairs(roadSides), "ROAD", x, y) : []),
+      ...Road.createSprites(Road.toPairs(railSides.length > 0 ? railSides : roadSides), "RAILROAD", x, y)
+    ];
+  }
+
+  private static createSprites(pairs: [number, number][], prefix: "ROAD" | "RAILROAD", x: number, y: number): Actor[] {
+    return pairs.map(
       ([from, to]) =>
         new Actor({
           image: Game.getInstance().getImage(GameImage.SPRITESHEET),
-          spriteRegion: Road.SPRITES_BY_SIDES[`${from},${to}`],
+          spriteRegion: Road.getSprite(Road.SPRITES_BY_SIDES[`${from},${to}`], prefix),
           x,
           y,
           width: Tile.WIDTH,
@@ -44,12 +58,22 @@ export class Road {
     );
   }
 
-  private static getSidePairs(tile: Tile): [number, number][] {
+  // The railroad sprites are named like the road ones (RAILROAD_HORIZONTAL for ROAD_HORIZONTAL).
+  private static getSprite(road: SpriteRegion, prefix: "ROAD" | "RAILROAD"): SpriteRegion {
+    if (prefix === "ROAD") return road;
+    return SpriteRegion[`RAIL${SpriteRegion[road]}` as keyof typeof SpriteRegion];
+  }
+
+  // The sides facing a neighbor that passes the check.
+  private static getSides(tile: Tile, connects: (neighbor: Tile) => boolean): number[] {
     const sides: number[] = [];
     tile.getAdjacentTiles().forEach((neighbor, side) => {
-      if (neighbor?.hasRoad()) sides.push(side);
+      if (neighbor && connects(neighbor)) sides.push(side);
     });
+    return sides;
+  }
 
+  private static toPairs(sides: number[]): [number, number][] {
     if (sides.length === 0) return [[2, 5]];
     if (sides.length === 1) return [Road.sortedPair(sides[0], (sides[0] + 3) % 6)];
 

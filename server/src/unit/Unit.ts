@@ -397,10 +397,10 @@ export class Unit {
     return !Unit.loadUnitData().some((other) => other.unique_to === civName && other.replaces === unit.name);
   }
 
-  // Roads cost a third of a move, so movement is kept in exact thirds - otherwise floating point
-  // leaves a sliver after three road steps and the unit could keep going.
+  // Roads cost a third of a move and railroads a tenth, so movement is kept in exact thirtieths -
+  // otherwise floating point leaves a sliver after three road steps and the unit could keep going.
   public static spendMovement(movement: number, cost: number): number {
-    return Math.max(0, Math.round((movement - cost) * 3) / 3);
+    return Math.max(0, Math.round((movement - cost) * 30) / 30);
   }
 
   // Open water a ship can move onto. Coast-only ships (see coast_only in units.yml) keep off deep ocean.

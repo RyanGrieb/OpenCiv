@@ -532,8 +532,6 @@ export class Unit extends ActorGroup {
     });
   }
 
-  // Mirrors server/src/unit/Unit.ts's spendMovement() - keep both in sync. Roads cost a third of a
-  // move, so movement is kept in exact thirds rather than drifting with floating point.
   // An approach that attacks this turn beats one that doesn't; then more movement left, then a shorter walk.
   private static isBetterApproach(
     a: { path: Tile[]; attacksThisTurn: boolean; movementLeft: number },
@@ -544,8 +542,11 @@ export class Unit extends ActorGroup {
     return a.path.length < b.path.length;
   }
 
+  // Mirrors server/src/unit/Unit.ts's spendMovement() - keep both in sync. Roads cost a third of a
+  // move and railroads a tenth, so movement is kept in exact thirtieths rather than drifting with
+  // floating point.
   public static spendMovement(movement: number, cost: number): number {
-    return Math.max(0, Math.round((movement - cost) * 3) / 3);
+    return Math.max(0, Math.round((movement - cost) * 30) / 30);
   }
 
   // Mirrors server/src/unit/Unit.ts's canMeleeAttack() - keep both in sync. An attack from where the

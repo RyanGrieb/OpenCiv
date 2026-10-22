@@ -55,6 +55,8 @@ export class Tile {
   ];
   // Civ 5: moving along a road from one road tile to the next costs a third of a move.
   public static readonly ROAD_MOVEMENT_COST = 1 / 3;
+  // And along a railroad, a tenth.
+  public static readonly RAILROAD_MOVEMENT_COST = 1 / 10;
   // As in Civ 5, roads only bridge rivers once their owner has Engineering.
   public static readonly BRIDGE_TECH = "Engineering";
 
@@ -145,6 +147,11 @@ export class Tile {
   // A city counts as a road, as in Civ 5.
   public hasRoad(): boolean {
     return this.containsTileType("road") || !!this.city;
+  }
+
+  // And as a railroad. Mirrored by the client's Tile.hasRailroad().
+  public hasRailroad(): boolean {
+    return this.containsTileType("railroad") || !!this.city;
   }
 
   // The unimproved resource on this tile, if any (e.g. "cattle", but not "improved_cattle").
@@ -942,8 +949,12 @@ export class Tile {
     return player?.hasResearchedTech(Tile.BRIDGE_TECH) ?? false;
   }
 
+  // Mirrored by the client's Tile.getWeight() - keep both in sync.
   public static getWeight(tile1: Tile, tile2: Tile, unit?: Unit): number {
-    if (Tile.roadCarriesAcross(tile1, tile2, unit?.getPlayer())) return Tile.ROAD_MOVEMENT_COST;
+    if (Tile.roadCarriesAcross(tile1, tile2, unit?.getPlayer())) {
+      const railroad = tile1.hasRailroad() && tile2.hasRailroad();
+      return railroad ? Tile.RAILROAD_MOVEMENT_COST : Tile.ROAD_MOVEMENT_COST;
+    }
 
     if (unit?.ignoresTerrainCost()) {
       // Still respect impassable terrain (e.g. mountains) - only flatten the

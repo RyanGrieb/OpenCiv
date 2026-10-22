@@ -6,10 +6,11 @@ import type { Player } from "../Player";
 
 /**
  * Civ 5's city connections (vanilla's trade routes): a city joined to its owner's capital by a chain of
- * roads, or by sea between two cities with a Harbor, earns gold every turn. The chain can mix the two -
+ * roads (or railroads, which are roads too), or by sea between two cities with a Harbor, earns gold every turn. The chain can mix the two -
  * a road out to a harbor city, by sea to another, by road on again - but has to end at the capital.
  *
- * Every road tile costs its owner ROAD_MAINTENANCE gold a turn: whoever's territory it lies in, or the
+ * Every road tile costs its owner ROAD_MAINTENANCE gold a turn (a railroad RAILROAD_MAINTENANCE instead):
+ * whoever's territory it lies in, or the
  * civilization whose Builder made it when it's out on unowned land.
  *
  * Which cities are connected is worked out again whenever the map changes (a road finished, a city
@@ -19,6 +20,7 @@ import type { Player } from "../Player";
  */
 export class CityConnections {
   public static readonly ROAD_MAINTENANCE = 1;
+  public static readonly RAILROAD_MAINTENANCE = 2;
   public static readonly CITY_POPULATION_GOLD = 1.1;
   public static readonly CAPITAL_POPULATION_GOLD = 0.15;
   public static readonly HARBOR = "Harbor";
@@ -28,13 +30,13 @@ export class CityConnections {
 
   private player: Player;
   private connected: Set<City>;
-  private roadCount: number;
+  private roadTiles: Tile[];
   private computedAt: number;
 
   constructor(player: Player) {
     this.player = player;
     this.connected = new Set();
-    this.roadCount = 0;
+    this.roadTiles = [];
     this.computedAt = -1;
   }
 
@@ -83,14 +85,20 @@ export class CityConnections {
     return Math.floor((gold * (100 + BuildingEffects.getConnectionGoldPercent(this.player))) / 100);
   }
 
-  // Road tiles this player pays maintenance on.
+  // Road and railroad tiles this player pays maintenance on.
   public getRoadCount(): number {
     this.refresh();
-    return this.roadCount;
+    return this.roadTiles.length;
   }
 
   public getRoadMaintenance(): number {
-    return this.getRoadCount() * CityConnections.ROAD_MAINTENANCE;
+    this.refresh();
+    return this.roadTiles.reduce(
+      (total, tile) =>
+        total +
+        (tile.containsTileType("railroad") ? CityConnections.RAILROAD_MAINTENANCE : CityConnections.ROAD_MAINTENANCE),
+      0
+    );
   }
 
   private refresh() {
@@ -98,10 +106,10 @@ export class CityConnections {
 
     this.computedAt = CityConnections.version;
     this.connected = this.findConnected();
-    this.roadCount = GameMap.getInstance()
+    this.roadTiles = GameMap.getInstance()
       .getTiles()
       .flat()
-      .filter((tile) => tile.containsTileType("road") && CityConnections.getRoadPayer(tile) === this.player).length;
+      .filter((tile) => tile.containsTileType("road") && CityConnections.getRoadPayer(tile) === this.player);
   }
 
   // Spreads out from the capital along roads, crossing the sea from one harbor city to the next.

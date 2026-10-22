@@ -246,4 +246,36 @@ describe('Improvement', () => {
       expect(movement).toBe(0);
     });
   });
+
+  describe('railroads', () => {
+    const railroadTech = player(['The Wheel', 'Railroad']);
+
+    it('are offered once Railroad is researched, and lay a road along with the rails', () => {
+      const tile = tileOf('grass');
+      expect(buildable(tile, railroadTech)).toContain('Railroad');
+      expect(buildable(tile)).not.toContain('Railroad');
+
+      Improvement.complete(improvement('Railroad'), tile, railroadTech);
+
+      expect(tile.containsTileType('railroad')).toBe(true);
+      expect(tile.hasRoad()).toBe(true);
+      expect(buildable(tile, railroadTech)).not.toContain('Road');
+      expect(buildable(tile, railroadTech)).not.toContain('Railroad');
+    });
+
+    it('cost a tenth of a move between two railroad tiles, a third onto a plain road', () => {
+      const from = tileOf('grass', 'road', 'railroad');
+
+      expect(Tile.getWeight(from, tileOf('grass_hill', 'road', 'railroad'))).toBeCloseTo(1 / 10);
+      expect(Tile.getWeight(from, tileOf('grass', 'road'))).toBeCloseTo(1 / 3);
+    });
+
+    it('let a unit take exactly ten railroad steps per move', () => {
+      let movement = 1;
+      for (let step = 0; step < 9; step++) movement = Unit.spendMovement(movement, Tile.RAILROAD_MOVEMENT_COST);
+      expect(movement).toBeGreaterThan(0);
+
+      expect(Unit.spendMovement(movement, Tile.RAILROAD_MOVEMENT_COST)).toBe(0);
+    });
+  });
 });

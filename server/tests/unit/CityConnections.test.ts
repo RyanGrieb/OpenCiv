@@ -135,4 +135,15 @@ describe('CityConnections', () => {
     CityConnections.invalidate();
     expect(connections.getRoadCount()).toBe(2);
   });
+
+  it('charges more for a railroad', () => {
+    const line = row('grass', 'grass');
+    join(line);
+    const capital = cityOn(line[0], { buildings: ['Palace'] });
+    line[1].addTileType('road');
+    line[1].addTileType('railroad');
+    line[1].setCityTerritoryOf(capital);
+
+    expect(connections.getRoadMaintenance()).toBe(CityConnections.RAILROAD_MAINTENANCE);
+  });
 });

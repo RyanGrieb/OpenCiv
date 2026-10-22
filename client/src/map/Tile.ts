@@ -36,6 +36,8 @@ export class Tile extends Actor {
   public static HEIGHT = 32;
   // Mirrors server/src/map/Tile.ts's ROAD_MOVEMENT_COST.
   public static readonly ROAD_MOVEMENT_COST = 1 / 3;
+  // Mirrors server/src/map/Tile.ts's RAILROAD_MOVEMENT_COST.
+  public static readonly RAILROAD_MOVEMENT_COST = 1 / 10;
   // As in Civ 5, roads only bridge rivers once their owner has Engineering.
   public static readonly BRIDGE_TECH = "Engineering";
   // Improvements that cover the ground, so a road through the tile is drawn on top of them.
@@ -99,7 +101,7 @@ export class Tile extends Actor {
   ];
   // Tile types drawn some other way than their own sprite - roads connect to their neighbors (see
   // Road.createActors).
-  private static readonly UNSPRITED_TILE_TYPES = ["road"];
+  private static readonly UNSPRITED_TILE_TYPES = ["road", "railroad"];
   // How many look-only variant sprites (TILE_<TYPE>_2, _3, ...) each base terrain has on top of its
   // plain one - see getVariantTileType().
   private static readonly TILE_VARIANT_COUNTS: Record<string, number> = {
@@ -344,8 +346,12 @@ export class Tile extends Actor {
     return player?.hasResearchedTech(Tile.BRIDGE_TECH) ?? false;
   }
 
+  // Mirrors the server's Tile.getWeight() - keep both in sync.
   public static getWeight(tile1: Tile, tile2: Tile, unit?: Unit): number {
-    if (Tile.roadCarriesAcross(tile1, tile2, unit?.getPlayer())) return Tile.ROAD_MOVEMENT_COST;
+    if (Tile.roadCarriesAcross(tile1, tile2, unit?.getPlayer())) {
+      const railroad = tile1.hasRailroad() && tile2.hasRailroad();
+      return railroad ? Tile.RAILROAD_MOVEMENT_COST : Tile.ROAD_MOVEMENT_COST;
+    }
 
     if (unit?.ignoresTerrainCost()) {
       // Still respect impassable terrain (e.g. mountains) - only flatten the
@@ -460,6 +466,11 @@ export class Tile extends Actor {
   // A city counts as a road, as in Civ 5.
   public hasRoad(): boolean {
     return this.tileTypes.includes("road") || this.tileTypes.includes("city");
+  }
+
+  // And as a railroad. Mirrors the server's Tile.hasRailroad().
+  public hasRailroad(): boolean {
+    return this.tileTypes.includes("railroad") || this.tileTypes.includes("city");
   }
 
   public samePosition(tile: Tile) {

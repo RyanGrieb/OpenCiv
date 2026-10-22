@@ -11,6 +11,7 @@
 #                   feature has to be cleared first.
 #   requires_feature - the feature the tile must have (a Lumber Mill needs forest).
 #   route         - roads stack with the tile's improvement rather than being it.
+#   includes_route - another route laid along with this one: a railroad is a road too.
 #   removes_feature - a clearing job: takes the feature off the tile instead of building anything.
 #   domain        - sea for improvements a Work Boat builds on water resources. Absent means a
 #                   Builder's, on land.
@@ -111,6 +112,16 @@ improvements:
     required_tech: The Wheel
     build_turns: 3
     tile_type: road
+    features: [forest, jungle, marsh, oasis]
+    route: true
+    outside_borders: true
+  - name: Railroad
+    asset_name: RAILROAD_VERTICAL_RIGHT
+    icon: RAILROAD_VERTICAL_RIGHT
+    required_tech: Railroad
+    build_turns: 3
+    tile_type: railroad
+    includes_route: road
     features: [forest, jungle, marsh, oasis]
     route: true
     outside_borders: true

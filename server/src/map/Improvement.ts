@@ -21,6 +21,7 @@ export interface ImprovementData {
   features?: string[];
   requires_feature?: string;
   route?: boolean;
+  includes_route?: string;
   removes_feature?: string;
   outside_borders?: boolean;
   // "sea" for a Work Boat's improvements, built on water. Absent means a Builder's, on land.
@@ -94,6 +95,8 @@ export class Improvement {
 
     if (improvement.route) {
       tile.addTileType(improvement.tile_type);
+      if (improvement.includes_route && !tile.containsTileType(improvement.includes_route))
+        tile.addTileType(improvement.includes_route);
       tile.setRouteBuilder(builder);
       return;
     }
