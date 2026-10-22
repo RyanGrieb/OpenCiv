@@ -64,8 +64,9 @@ export class PlayerTreasury {
           amount: source.stats.reduce((total, stat) => total + (stat.gold ?? 0), 0)
         }))
       )
-      .concat([{ source: this.getConnectionsText(), amount: this.getEmpireIncome() }])
-      .filter((entry) => entry.amount !== 0);
+      .filter((entry) => entry.amount !== 0)
+      // Listed while any city is connected, even before small cities earn a whole gold from it.
+      .concat(this.player.getConnections().getConnectedCities().length > 0 ? [this.getConnectionsEntry()] : []);
 
     const expenses = [
       { source: "Building maintenance", amount: this.getBuildingUpkeep() },
@@ -116,10 +117,10 @@ export class PlayerTreasury {
     return [...units].reverse().find((unit) => unit.canFight()) ?? units[units.length - 1];
   }
 
-  // e.g. "City connections (2 cities)"
-  private getConnectionsText(): string {
+  // e.g. { source: "City connections (2 cities)", amount: 5 }
+  private getConnectionsEntry(): GoldEntry {
     const count = this.player.getConnections().getConnectedCities().length;
-    return `City connections (${count} ${count === 1 ? "city" : "cities"})`;
+    return { source: `City connections (${count} ${count === 1 ? "city" : "cities"})`, amount: this.getEmpireIncome() };
   }
 
   // e.g. "4 roads"

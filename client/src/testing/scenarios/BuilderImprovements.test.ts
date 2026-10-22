@@ -161,7 +161,7 @@ export function setupBuilderImprovementsTest(game: Game) {
 
     runner.addStep({
         // At least +1: with every tech, Fertilizer (and Civil Service beside fresh water) add more food to farms.
-        name: "After 7 turns the tile is a Farm with more food, and only a Road is left to build",
+        name: "After 7 turns the tile is a Farm with more food, and only a Road or Railroad is left to build",
         action: async () => {
             await endTurnsUntil(() => farmTile.getTileTypes().includes("farm"), 9, "Farm to finish");
             select(builder);
@@ -171,7 +171,7 @@ export function setupBuilderImprovementsTest(game: Game) {
             !builder.getBuildingImprovement() &&
             farmTile.getTileYield()?.food > foodBefore &&
             JSON.stringify(shownActions().map((action) => action.getName()).filter((name) => name.startsWith("build_"))) ===
-                JSON.stringify(["build_road"])
+                JSON.stringify(["build_road", "build_railroad"])
     });
 
     runner.addStep({

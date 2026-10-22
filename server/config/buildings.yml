@@ -112,8 +112,7 @@ buildings:
       tile_yields:
         - terrain: sea
           stats: { gold: 1 }
-    not_yet:
-      - An extra trade route
+      trade_routes: 1
     stats:
       - culture: 1
   - name: Forge
@@ -422,8 +421,7 @@ buildings:
         - terrain: desert
           except: [floodplains]
           stats: { food: 1, production: 1 }
-    not_yet:
-      - An extra trade route
+      trade_routes: 1
     stats: []
   - name: Great Wall
     asset_name: BUILDING_GREAT_WALL

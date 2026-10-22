@@ -56,12 +56,10 @@ technologies:
     row: 0
     slot: 4
     description: Unlocks pastures and an additional trade route.
-    # The extra trade route isn't enforced: trade routes have no cap yet.
+    trade_routes: 1
     notes:
       - text: Reveals Horses
         icon: TILE_HORSES
-      - text: Allows an additional trade route
-        icon: ICON_TRADE
   - name: Archery
     asset_name: UNIT_ARCHER
     cost: 35
@@ -86,6 +84,7 @@ technologies:
     row: 1
     slot: 0
     description: Develops the means to traverse the seas, one of civilization's great early achievements.
+    trade_routes: 1
   - name: Calendar
     asset_name: BUILDING_STONEHENGE
     cost: 55
@@ -263,6 +262,7 @@ technologies:
     row: 5
     slot: 0
     description: Enables more reliable navigation, extending a ship's vision range at sea.
+    trade_routes: 1
   - name: Education
     asset_name: BUILDING_UNIVERSITY
     cost: 275
@@ -332,10 +332,7 @@ technologies:
     row: 6
     slot: 5
     description: Organizes lending and deposits, putting a city's wealth to work.
-    # Not enforced: trade routes have no cap yet.
-    notes:
-      - text: Allows an additional trade route
-        icon: ICON_TRADE
+    trade_routes: 1
   - name: Printing Press
     asset_name: BUILDING_THEATER
     cost: 420
@@ -529,12 +526,11 @@ technologies:
     row: 9
     slot: 1
     description: The study of living things, the root of modern medicine.
-    # Not enforced: the map has no Oil, and trade routes have no cap yet.
+    # Not enforced: the map has no Oil.
+    trade_routes: 1
     notes:
       - text: Reveals Oil
         icon: TILE_OIL
-      - text: Allows an additional trade route
-        icon: ICON_TRADE
   - name: Electricity
     asset_name: BUILDING_STOCK_EXCHANGE
     cost: 1530
@@ -603,10 +599,7 @@ technologies:
     row: 12
     slot: 1
     description: Antibiotics cure infections that once killed millions.
-    # Not enforced: trade routes have no cap yet.
-    notes:
-      - text: Allows an additional trade route
-        icon: ICON_TRADE
+    trade_routes: 1
   - name: Plastics
     asset_name: BUILDING_HYDRO_PLANT
     cost: 1690

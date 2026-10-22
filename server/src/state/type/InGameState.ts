@@ -13,6 +13,7 @@ import { AncientRuins } from "../../map/AncientRuins";
 import { NaturalWonders } from "../../map/NaturalWonders";
 import { Religions } from "../../religion/Religions";
 import { Barbarians } from "../../barbarian/Barbarians";
+import { PlayerTradeRoutes } from "../../economy/PlayerTradeRoutes";
 import { Player } from "../../Player";
 import { PlayerNotifications } from "../../notification/PlayerNotifications";
 import { PlayerDiplomacy } from "../../diplomacy/PlayerDiplomacy";
@@ -398,6 +399,7 @@ export class InGameState extends State {
       gracefulShutdown();
     }
     Barbarians.destroyInstance();
+    PlayerTradeRoutes.clearAll();
     AncientRuins.destroyInstance();
     GameMap.destroyInstance();
     return super.onDestroyed();

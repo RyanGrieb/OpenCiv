@@ -4,6 +4,7 @@ import { Game } from "./Game";
 import { City } from "./city/City";
 import { PlayerDiplomacy } from "./diplomacy/PlayerDiplomacy";
 import { CityConnections } from "./economy/CityConnections";
+import { PlayerTradeRoutes } from "./economy/PlayerTradeRoutes";
 import { PlayerTreasury } from "./economy/PlayerTreasury";
 import { PlayerHappiness } from "./happiness/PlayerHappiness";
 import { GameMap } from "./map/GameMap";
@@ -71,6 +72,7 @@ export class Player {
   private diplomacy: PlayerDiplomacy;
   private treasury: PlayerTreasury;
   private connections: CityConnections;
+  private tradeRoutes: PlayerTradeRoutes;
   private happiness: PlayerHappiness;
   private religion: PlayerReligion;
   // Free techs (from a wonder) banked while nothing was being researched: the next tech chosen is free.
@@ -99,6 +101,7 @@ export class Player {
     this.diplomacy = new PlayerDiplomacy(this);
     this.treasury = new PlayerTreasury(this);
     this.connections = new CityConnections(this);
+    this.tradeRoutes = new PlayerTradeRoutes(this);
     this.happiness = new PlayerHappiness(this);
     this.religion = new PlayerReligion(this);
     this.freeTechs = 0;
@@ -149,6 +152,7 @@ export class Player {
       parentObject: this,
       callback: () => {
         this.accumulateTurnStats();
+        this.tradeRoutes.passTurn();
         this.religion.checkForProphet();
         ReligiousUnits.applyAttrition(this);
         this.accumulateResearch();
@@ -687,6 +691,11 @@ export class Player {
   /** Which of this player's cities are connected to their capital, and what their roads cost. */
   public getConnections() {
     return this.connections;
+  }
+
+  /** The trade routes this player's Caravans and Cargo Ships run. */
+  public getTradeRoutes() {
+    return this.tradeRoutes;
   }
 
   /** The empire-wide happiness, and what unhappiness costs this player. */

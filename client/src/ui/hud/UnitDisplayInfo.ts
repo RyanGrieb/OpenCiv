@@ -389,6 +389,12 @@ export class UnitDisplayInfo extends ActorGroup {
             return;
           }
 
+          // Establish Trade Route opens the list of routes on offer, which sends the choice itself.
+          if (action.getName() === "establish_trade_route") {
+            Game.getInstance().getCurrentSceneAs<InGameScene>().toggleTradeRouteUI(this.unit.getID());
+            return;
+          }
+
           // Skip Turn moves the selection on to the next unit needing orders, which the client tracks.
           if (action.getName() === "skip_turn") {
             Game.getInstance().getCurrentSceneAs<InGameScene>().getClientPlayer().skipSelectedUnitTurn();

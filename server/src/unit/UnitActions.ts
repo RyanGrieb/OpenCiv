@@ -1,5 +1,6 @@
 import { City } from "../city/City";
 import { Game } from "../Game";
+import { PlayerTradeRoutes } from "../economy/PlayerTradeRoutes";
 import { Improvement, ImprovementData } from "../map/Improvement";
 import { ReligiousUnits } from "../religion/ReligiousUnits";
 import { Unit, UnitAction, UnitYMLTypeData } from "./Unit";
@@ -118,6 +119,19 @@ export class UnitActions {
     };
   }
 
+  // Caravans' and Cargo Ships': in one of its owner's cities, the owner's client opens the list of
+  // routes on offer from there, and sends the pick back as "establishTradeRoute" (see PlayerTradeRoutes).
+  public static establishTradeRoute(): UnitAction {
+    return {
+      name: "establish_trade_route",
+      icon: "ICON_TRADE",
+      requirements: ["movement"],
+      desc: "Establish Trade Route",
+      isAvailable: (unit: Unit) => unit.getPlayer().getTradeRoutes().canEstablishWith(unit),
+      onAction: () => {}
+    };
+  }
+
   public static settleCity(): UnitAction {
     return {
       name: "settle",
@@ -177,6 +191,7 @@ export class UnitActions {
       return [UnitActions.foundReligion(), UnitActions.enhanceReligion(), UnitActions.spreadReligion()];
     if (data.name === ReligiousUnits.MISSIONARY) return [UnitActions.spreadReligion()];
     if (data.name === ReligiousUnits.INQUISITOR) return [UnitActions.removeHeresy()];
+    if (PlayerTradeRoutes.isTradeUnit(data.name)) return [UnitActions.establishTradeRoute()];
     if (data.name === "Builder")
       return Improvement.getBuildableImprovementData("land").map(UnitActions.buildImprovement);
     if (data.name === "Work Boat")

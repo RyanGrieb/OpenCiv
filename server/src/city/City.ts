@@ -16,6 +16,7 @@ import { BuildingCategory, Wonders } from "./Wonders";
 import { CityCombat } from "./CityCombat";
 import { PlayerDiplomacy } from "../diplomacy/PlayerDiplomacy";
 import { CityConnections } from "../economy/CityConnections";
+import { PlayerTradeRoutes } from "../economy/PlayerTradeRoutes";
 import { FaithPurchase } from "../economy/FaithPurchase";
 import { GoldPurchase } from "../economy/GoldPurchase";
 
@@ -963,7 +964,7 @@ export class City {
     };
   }
 
-  // What the city yields each turn: its buildings, worked tiles and pantheon, then its buildings' effects, then
+  // What the city yields each turn: its buildings, worked tiles, pantheon and trade routes, then its buildings' effects, then
   // what unhappiness and training a Settler take out of its food.
   private computeStats(): CityStats {
     const cityStats: CityStats = {
@@ -987,7 +988,8 @@ export class City {
         Object.entries(building.getStatLine()).map(([stat, value]) => ({ [stat]: value }) as StatEntry)
       ),
       ...this.workedTiles.flatMap((tile) => tile.getStats()),
-      ...Beliefs.getCityYields(this)
+      ...Beliefs.getCityYields(this),
+      ...PlayerTradeRoutes.getCityYields(this)
     ];
     for (const stat of statLines) {
       const statType = Object.keys(stat)[0] as keyof CityStats;

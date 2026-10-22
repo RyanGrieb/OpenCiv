@@ -24,6 +24,7 @@ import { DevConsole } from "../../ui/hud/DevConsole";
 import { PantheonList } from "../../ui/windows/religion/PantheonList";
 import { FreeTechList } from "../../ui/windows/FreeTechList";
 import { ReligionFoundingWindow, ReligionWindowMode } from "../../ui/windows/religion/ReligionFoundingWindow";
+import { TradeRouteList } from "../../ui/windows/TradeRouteList";
 import { ReligionWindow } from "../../ui/windows/religion/ReligionWindow";
 import { DeclareWarWindow } from "../../ui/windows/DeclareWarWindow";
 import { StatusBar } from "../../ui/hud/StatusBar";
@@ -56,6 +57,7 @@ export class InGameScene extends Scene {
   private pantheonList: PantheonList;
   private freeTechList: FreeTechList;
   private religionFoundingWindow: ReligionFoundingWindow;
+  private tradeRouteList: TradeRouteList;
   private religionWindow: ReligionWindow;
   private religionButton: Button;
   private declareWarWindow: DeclareWarWindow;
@@ -610,6 +612,31 @@ export class InGameScene extends Scene {
   private closeReligionFoundingUI() {
     this.closeSidePanel(this.religionFoundingWindow);
     this.religionFoundingWindow = undefined;
+  }
+
+  public getTradeRouteList(): TradeRouteList | undefined {
+    return this.tradeRouteList;
+  }
+
+  // Opened from a Caravan's or Cargo Ship's Establish Trade Route action. Choosing a route closes it.
+  public toggleTradeRouteUI(unitId: number) {
+    if (this.tradeRouteList) {
+      this.closeTradeRouteUI();
+      return;
+    }
+    if (this.openUIElement) return;
+
+    this.tradeRouteList = new TradeRouteList({
+      unitId,
+      onChosen: () => this.closeTradeRouteUI(),
+      onClose: () => this.closeTradeRouteUI()
+    });
+    this.openSidePanel(this.tradeRouteList, () => this.closeTradeRouteUI());
+  }
+
+  private closeTradeRouteUI() {
+    this.closeSidePanel(this.tradeRouteList);
+    this.tradeRouteList = undefined;
   }
 
   // A panel down the left of the screen, like the pantheon list. It reaches down past the bottom-left

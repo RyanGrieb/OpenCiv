@@ -44,6 +44,8 @@ export class BuildingEffectText {
     if (effects.connection_gold_percent) {
       lines.push(`+${effects.connection_gold_percent}% Gold from city connections and trade routes`);
     }
+    if (effects.trade_routes)
+      lines.push(`+${effects.trade_routes} Trade Route${effects.trade_routes === 1 ? "" : "s"}`);
     if (effects.trained_unit_experience) {
       const units = effects.trained_unit_experience.land_only ? "land units" : "units";
       lines.push(`+${effects.trained_unit_experience.amount} XP for ${units} trained here`);

@@ -283,3 +283,21 @@ presets:
       - "g g d S F g g"
       - " g g d d F g g"
       - "g p g p g g g"
+
+  trade_routes:
+    description: Two Settlers four tiles apart with a road between them, and a Caravan on the road next to the first, to found two connected cities and send food from one to the other.
+    legend:
+      "g": [grass]
+      "r": [grass, road]
+      "S": [grass]
+      "T": [grass]
+      "C": [grass, road]
+    units:
+      "T": Settler
+      "C": Caravan
+    rows:
+      - "g g g g g g g g"
+      - " g g g g g g g g"
+      - "g S C r r T g g"
+      - " g g g g g g g g"
+      - "g g g g g g g g"

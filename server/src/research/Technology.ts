@@ -33,6 +33,8 @@ export interface TechnologyData {
   // The Civ5 wiki's "Notes" bullets, shown in the tech detail window.
   notes?: TechNoteData[];
   tile_bonuses?: TileBonusData[];
+  // Trade route slots the tech adds (Brave New World's), listed among its notes.
+  trade_routes?: number;
   // Horizontal position (0-9) within its row in the research tree, matching
   // Civ5's tech-web layout - a fixed 10-slot grid per row, some slots deliberately
   // left empty, rather than techs packed tightly together.
@@ -72,6 +74,7 @@ export class Technology {
   private prerequisites: string[];
   private description: string;
   private notes: TechNoteData[];
+  private tradeRoutes: number;
   private slot: number;
   private row: number;
 
@@ -81,7 +84,8 @@ export class Technology {
     this.cost = data.cost;
     this.prerequisites = data.prerequisites ?? [];
     this.description = data.description;
-    this.notes = data.notes ?? [];
+    this.notes = [...(data.notes ?? []), ...Technology.getTradeRouteNotes(data)];
+    this.tradeRoutes = data.trade_routes ?? 0;
     this.slot = data.slot;
     this.row = data.row;
   }
@@ -145,6 +149,14 @@ export class Technology {
     };
   }
 
+  // The note for each trade route slot the tech adds.
+  private static getTradeRouteNotes(data: TechnologyData): TechNoteData[] {
+    return Array.from({ length: data.trade_routes ?? 0 }, () => ({
+      text: "Allows an additional trade route",
+      icon: "ICON_TRADE"
+    }));
+  }
+
   private static loadTechnologyData(): TechnologyData[] {
     return ConfigLoader.load<{ technologies: TechnologyData[] }>("./config/techs.yml").technologies;
   }
@@ -179,6 +191,10 @@ export class Technology {
 
   public getNoteData(): TechNoteData[] {
     return this.notes;
+  }
+
+  public getTradeRoutes(): number {
+    return this.tradeRoutes;
   }
 
   public getSlot() {
