@@ -306,7 +306,11 @@ describe('City', () => {
       loseWonderToAnotherCity: jest.fn(),
     });
     const addPlayer = (name: string, cities: object[]) => {
-      const player = { getCities: () => cities, getNotifications: () => ({ addMessage: jest.fn() }) };
+      const player = {
+        getCities: () => cities,
+        getNotifications: () => ({ addMessage: jest.fn() }),
+        getDiplomacy: () => ({ hasMet: (_other: unknown) => false }),
+      };
       Game.getInstance().getPlayers().set(name, player as unknown as Player);
       return player;
     };
@@ -388,7 +392,21 @@ describe('City', () => {
 
       expect(city.hasBuilding('Oracle')).toBe(true);
       expect(rivalCity.loseWonderToAnotherCity).toHaveBeenCalledWith('Oracle', city);
-      expect(romeMessages.addMessage).toHaveBeenCalledWith('ICON_CULTURE', 'Oracle has been completed by Germany.');
+      expect(romeMessages.addMessage).toHaveBeenCalledWith('BUILDING_ORACLE', 'Oracle has been completed in a far away land.');
+    });
+
+    it('names the builder of a great wonder to the civilizations that have met it', () => {
+      const rome = addPlayer('Rome', []);
+      const romeMessages = { addMessage: jest.fn() };
+      rome.getNotifications = () => romeMessages;
+      rome.getDiplomacy = () => ({ hasMet: (other: unknown) => other === mockPlayer });
+      (mockPlayer as any).getCivilizationName = () => 'Germany';
+      mockTile.getStats.mockReturnValue([{ production: 500 }]);
+
+      triggerServerEvent('addToProductionQueue', { cityName: 'TestCity', type: 'building', name: 'Oracle' }, {} as WebSocket);
+      triggerServerEvent('nextTurn', { turn: 2 });
+
+      expect(romeMessages.addMessage).toHaveBeenCalledWith('BUILDING_ORACLE', 'Oracle has been completed by Germany.');
     });
 
     it('refunds the production put into a wonder another city finished first, as gold', () => {

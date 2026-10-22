@@ -233,7 +233,7 @@ export class PlayerDiplomacy {
   }
 
   // Every player in a game has a civ by the time they can meet anyone; the name is a fallback.
-  private static civName(player: Player): string {
+  public static civName(player: Player): string {
     return player.getCivilizationName() ?? player.getName();
   }
 

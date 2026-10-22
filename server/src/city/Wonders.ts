@@ -1,4 +1,5 @@
 import { Game } from "../Game";
+import { PlayerDiplomacy } from "../diplomacy/PlayerDiplomacy";
 import { Player } from "../Player";
 import { Building } from "./Building";
 import { City } from "./City";
@@ -41,7 +42,8 @@ export class Wonders {
 
   /**
    * Called once `builder` finishes a great wonder. Every other city building it loses it from its queue
-   * and gets the production it had put in back as gold, and every civilization hears who built it.
+   * and gets the production it had put in back as gold. Every civilization hears of it, with the wonder's
+   * picture: who built it if they have met the builder, else only that it rose in a far away land.
    */
   public static onGreatWonderBuilt(name: string, builder: City) {
     for (const city of Wonders.getAllCities()) {
@@ -49,11 +51,13 @@ export class Wonders {
       city.loseWonderToAnotherCity(name, builder);
     }
 
+    const owner = builder.getPlayer();
+    const icon = Building.createFromName(name)?.getAssetName() ?? "ICON_CULTURE";
     for (const player of Wonders.getPlayers()) {
-      if (player === builder.getPlayer()) continue;
-      player
-        .getNotifications()
-        .addMessage("ICON_CULTURE", `${name} has been completed by ${builder.getPlayer().getName()}.`);
+      if (player === owner) continue;
+
+      const where = player.getDiplomacy().hasMet(owner) ? `by ${PlayerDiplomacy.civName(owner)}` : "in a far away land";
+      player.getNotifications().addMessage(icon, `${name} has been completed ${where}.`);
     }
   }
 
