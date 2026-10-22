@@ -35,7 +35,8 @@ technologies:
   # "placeholder" below have no real Civ5 layout reference yet.
   #
   # notes are the Civ5 wiki's "Notes" bullets (Brave New World), shown in the
-  # tech detail window. What a tech unlocks is not listed here: units.yml,
+  # tech detail window. Each note's icon sits among the tech's bonus icons on its
+  # research tree button. What a tech unlocks is not listed here: units.yml,
   # buildings.yml and improvements.yml each name their own required_tech, and
   # map_resources.yml names the tech that reveals a resource (reveal_tech).
   # tile_bonuses are yields a tech adds to its owner's tiles of a type
@@ -57,8 +58,10 @@ technologies:
     description: Unlocks pastures and an additional trade route.
     # The extra trade route isn't enforced: trade routes have no cap yet.
     notes:
-      - Reveals Horses
-      - Allows an additional trade route
+      - text: Reveals Horses
+        icon: TILE_HORSES
+      - text: Allows an additional trade route
+        icon: ICON_TRADE
   - name: Archery
     asset_name: UNIT_ARCHER
     cost: 35
@@ -74,7 +77,8 @@ technologies:
     slot: 8
     description: Allows mining mineral resources and clearing forests.
     notes:
-      - Can remove Forests
+      - text: Can remove Forests
+        icon: ICON_CHOP
   - name: Sailing
     asset_name: UNIT_WORK_BOAT
     cost: 55
@@ -98,7 +102,8 @@ technologies:
     description: Enables recording information on durable materials, preserving knowledge across generations.
     # Not enforced: there are no embassies yet.
     notes:
-      - Allows exchanging embassies
+      - text: Allows exchanging embassies
+        icon: ICON_DIPLOMACY
   - name: Trapping
     asset_name: BUILDING_CIRCUS
     cost: 55
@@ -121,7 +126,8 @@ technologies:
     slot: 8
     description: The art of building with stone, enabling massive stone structures and fortifications.
     notes:
-      - Can remove Marshes
+      - text: Can remove Marshes
+        icon: ICON_CHOP
   - name: Bronze Working
     asset_name: UNIT_SPEARMAN
     cost: 55
@@ -130,8 +136,10 @@ technologies:
     slot: 9
     description: The first metal-working technology, providing sturdy tools and early bronze weapons.
     notes:
-      - Can remove Jungles
-      - Reveals Iron
+      - text: Can remove Jungles
+        icon: ICON_CHOP
+      - text: Reveals Iron
+        icon: TILE_IRON
   - name: Optics
     asset_name: BUILDING_LIGHTHOUSE
     cost: 105
@@ -141,7 +149,8 @@ technologies:
     description: Develops tools for seeing farther, enabling key advances in seafaring.
     # Not enforced: land units can't embark yet.
     notes:
-      - Allows land units to embark
+      - text: Allows land units to embark
+        icon: ICON_EMBARK
   - name: Horseback Riding
     asset_name: UNIT_HORSEMAN
     cost: 105
@@ -193,7 +202,8 @@ technologies:
     description: Builds on mathematics to design complex structures and machines before actually building them.
     # Enforced by Tile.BRIDGE_TECH.
     notes:
-      - Roads cross rivers
+      - text: Roads cross rivers
+        icon: ICON_BRIDGE
   - name: Iron Working
     asset_name: UNIT_SWORDSMAN
     cost: 105
@@ -216,7 +226,8 @@ technologies:
     slot: 4
     description: Creates the first true state organization, improving food production.
     notes:
-      - +1 Food from Farms next to fresh water
+      - text: +1 Food from Farms next to fresh water
+        icon: TILE_FARM
     tile_bonuses:
       - tile_type: farm
         fresh_water: true
@@ -234,7 +245,8 @@ technologies:
     description: The first worker unions, letting tradespeople organize and better control their trades.
     # Not enforced: there is no production-to-gold conversion yet.
     notes:
-      - Allows cities to convert Production into Gold
+      - text: Allows cities to convert Production into Gold
+        icon: ICON_GOLD
   - name: Metal Casting
     asset_name: BUILDING_FORGE
     cost: 175
@@ -260,8 +272,10 @@ technologies:
     description: Establishes formal schooling, greatly increasing the pursuit of knowledge.
     # Not enforced: there is no production-to-science conversion or research agreements yet.
     notes:
-      - Allows cities to convert Production into Science
-      - Allows Research agreements
+      - text: Allows cities to convert Production into Science
+        icon: ICON_SCIENCE
+      - text: Allows Research agreements
+        icon: ICON_DIPLOMACY
   - name: Chivalry
     asset_name: UNIT_KNIGHT
     cost: 275
@@ -300,8 +314,10 @@ technologies:
     description: Charts the heavens, leading to ships that can cross the open ocean.
     # Not enforced: land units can't embark yet.
     notes:
-      - Faster embarked movement
-      - Allows embarking across oceans
+      - text: Faster embarked movement
+        icon: ICON_EMBARK
+      - text: Allows embarking across oceans
+        icon: ICON_EMBARK
   - name: Acoustics
     asset_name: BUILDING_OPERA_HOUSE
     cost: 505
@@ -318,7 +334,8 @@ technologies:
     description: Organizes lending and deposits, putting a city's wealth to work.
     # Not enforced: trade routes have no cap yet.
     notes:
-      - Allows an additional trade route
+      - text: Allows an additional trade route
+        icon: ICON_TRADE
   - name: Printing Press
     asset_name: BUILDING_THEATER
     cost: 420
@@ -355,7 +372,8 @@ technologies:
     slot: 5
     description: The groundwork for the modern money system.
     notes:
-      - +1 Gold from Camps on Ivory and Furs
+      - text: +1 Gold from Camps on Ivory and Furs
+        icon: TILE_IVORY_CAMP
     tile_bonuses:
       - tile_type: ivory_camp
         stats:
@@ -371,7 +389,8 @@ technologies:
     slot: 9
     description: The study of matter and how it changes, from powders to acids.
     notes:
-      - +1 Production from Mines and Quarries
+      - text: +1 Production from Mines and Quarries
+        icon: TILE_MINE
     tile_bonuses:
       - tile_type: mine
         stats:
@@ -413,8 +432,10 @@ technologies:
     description: Tests ideas against evidence, the base of modern science.
     # Not enforced: there are no Academies yet.
     notes:
-      - +2 Science from Academies
-      - +1 Production from Lumber Mills
+      - text: +2 Science from Academies
+        icon: ICON_SCIENCE
+      - text: +1 Production from Lumber Mills
+        icon: TILE_LUMBER_MILL
     tile_bonuses:
       - tile_type: lumber_mill
         stats:
@@ -428,8 +449,10 @@ technologies:
     description: Digs up the past and puts it on display.
     # Not enforced: there are no archaeological sites yet.
     notes:
-      - Reveals archaeological sites
-      - Allows constructing archaeological digs
+      - text: Reveals archaeological sites
+        icon: ICON_ARCHAEOLOGY
+      - text: Allows constructing archaeological digs
+        icon: ICON_ARCHAEOLOGY
   - name: Industrialization
     asset_name: BUILDING_FACTORY
     cost: 1040
@@ -439,7 +462,8 @@ technologies:
     description: Machines and factories replace the workshop.
     # Not enforced: the map has no Coal.
     notes:
-      - Reveals Coal
+      - text: Reveals Coal
+        icon: TILE_COAL
   - name: Military Science
     asset_name: UNIT_CAVALRY
     cost: 1040
@@ -462,8 +486,10 @@ technologies:
     slot: 9
     description: Feeds the soil so farms yield more where water is scarce.
     notes:
-      - +1 Food from Farms without fresh water
-      - +1 Food from Plantations and Pastures
+      - text: +1 Food from Farms without fresh water
+        icon: TILE_FARM
+      - text: +1 Food from Plantations and Pastures
+        icon: TILE_COTTON_PLANTATION
     tile_bonuses:
       - tile_type: farm
         fresh_water: false
@@ -505,8 +531,10 @@ technologies:
     description: The study of living things, the root of modern medicine.
     # Not enforced: the map has no Oil, and trade routes have no cap yet.
     notes:
-      - Reveals Oil
-      - Allows an additional trade route
+      - text: Reveals Oil
+        icon: TILE_OIL
+      - text: Allows an additional trade route
+        icon: ICON_TRADE
   - name: Electricity
     asset_name: BUILDING_STOCK_EXCHANGE
     cost: 1530
@@ -516,7 +544,8 @@ technologies:
     description: Harnesses electric current for light, power and trade.
     # Not enforced: the map has no Aluminum.
     notes:
-      - Reveals Aluminum
+      - text: Reveals Aluminum
+        icon: TILE_ALUMINUM
   - name: Steam Power
     asset_name: UNIT_IRONCLAD
     cost: 1530
@@ -526,7 +555,8 @@ technologies:
     description: Steam engines drive ships and machines without wind or muscle.
     # Not enforced: land units can't embark yet.
     notes:
-      - Faster embarked movement
+      - text: Faster embarked movement
+        icon: ICON_EMBARK
   - name: Dynamite
     asset_name: UNIT_ARTILLERY
     cost: 1530
@@ -536,7 +566,8 @@ technologies:
     description: A stable explosive for mining, demolition and war.
     # Not enforced: wonders don't go obsolete yet.
     notes:
-      - Obsoletes the Great Wall
+      - text: Obsoletes the Great Wall
+        icon: BUILDING_GREAT_WALL
   - name: Refrigeration
     asset_name: BUILDING_SUPERMARKET
     cost: 2015
@@ -574,7 +605,8 @@ technologies:
     description: Antibiotics cure infections that once killed millions.
     # Not enforced: trade routes have no cap yet.
     notes:
-      - Allows an additional trade route
+      - text: Allows an additional trade route
+        icon: ICON_TRADE
   - name: Plastics
     asset_name: BUILDING_HYDRO_PLANT
     cost: 1690
@@ -598,7 +630,8 @@ technologies:
     description: Carries voices and music through the air.
     # Not enforced: there is no World Congress yet.
     notes:
-      - Enables the International Games World Congress proposal
+      - text: Enables the International Games World Congress proposal
+        icon: ICON_DIPLOMACY
   - name: Flight
     asset_name: UNIT_FIGHTER
     cost: 2015
@@ -622,8 +655,10 @@ technologies:
     description: Shows that matter is built of atoms with enormous energy inside.
     # Not enforced: the map has no Uranium or Academies.
     notes:
-      - Reveals Uranium
-      - +2 Science from Academies
+      - text: Reveals Uranium
+        icon: TILE_URANIUM
+      - text: +2 Science from Academies
+        icon: ICON_SCIENCE
   - name: Radar
     asset_name: BUILDING_PENTAGON
     cost: 3315
@@ -668,7 +703,8 @@ technologies:
     description: Trade, travel and communication knit the world into one market.
     # Not enforced: there is no World Congress yet.
     notes:
-      - Gives an additional World Congress delegate for each Diplomat in a foreign capital
+      - text: Gives an additional World Congress delegate for each Diplomat in a foreign capital
+        icon: ICON_DIPLOMACY
   - name: Robotics
     asset_name: UNIT_MISSILE_CRUISER
     cost: 5005
@@ -692,7 +728,8 @@ technologies:
     description: Machines in orbit that watch, listen and relay from above.
     # Not enforced: researching it doesn't explore the map yet.
     notes:
-      - Automatically explores the entire map
+      - text: Automatically explores the entire map
+        icon: ICON_MAP
   - name: Stealth
     asset_name: UNIT_STEALTH_BOMBER
     cost: 5720
@@ -759,7 +796,8 @@ technologies:
     description: Links computers around the world into one network.
     # Not enforced: there is no tourism yet.
     notes:
-      - Doubles the Tourism of all your cities
+      - text: Doubles the Tourism of all your cities
+        icon: ICON_CULTURE
   - name: Future Tech
     asset_name: ICON_UNKNOWN
     cost: 6175
@@ -769,4 +807,5 @@ technologies:
     description: Research beyond today's science.
     # Not enforced: research can't repeat and there is no score yet.
     notes:
-      - Increases score each time it is researched
+      - text: Increases score each time it is researched
+        icon: ICON_STAR

@@ -378,6 +378,11 @@ export class Unit {
     return !tile.isWater() && tile.getMovementCost() < 9999;
   }
 
+  // A unit type's sprite, e.g. "Work Boat" -> UNIT_WORK_BOAT.
+  public static getAssetName(unitName: string): string {
+    return `UNIT_${unitName.toUpperCase().replace(/ /g, "_")}`;
+  }
+
   // Every unit type the config knows about, including ones with no `cost` -
   // callers building a production catalog must filter those out themselves.
   public static getAllUnitData(): UnitYMLTypeData[] {

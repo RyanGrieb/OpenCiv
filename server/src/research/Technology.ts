@@ -3,6 +3,7 @@ import { Improvement } from "../map/Improvement";
 import type { StatEntry } from "../map/Tile";
 import { Unit } from "../unit/Unit";
 import { ConfigLoader } from "../util/ConfigLoader";
+import { TechBonuses } from "./TechBonuses";
 
 // A row range labeled for the research tree's visual section dividers/labels
 // (e.g. "Ancient Era" spanning rows 0-1) - hand-placed in techs.yml, same as
@@ -30,7 +31,7 @@ export interface TechnologyData {
   prerequisites: string[];
   description: string;
   // The Civ5 wiki's "Notes" bullets, shown in the tech detail window.
-  notes?: string[];
+  notes?: TechNoteData[];
   tile_bonuses?: TileBonusData[];
   // Horizontal position (0-9) within its row in the research tree, matching
   // Civ5's tech-web layout - a fixed 10-slot grid per row, some slots deliberately
@@ -41,6 +42,12 @@ export interface TechnologyData {
   // the shallowest row its prerequisites allow, so two techs can be equally deep
   // in the prerequisite graph and still sit in different rows.
   row: number;
+}
+
+// A note's icon stands for it among the tech's bonus icons in the research tree (see TechBonuses).
+export interface TechNoteData {
+  text: string;
+  icon: string;
 }
 
 export interface UnlockData {
@@ -64,7 +71,7 @@ export class Technology {
   private cost: number;
   private prerequisites: string[];
   private description: string;
-  private notes: string[];
+  private notes: TechNoteData[];
   private slot: number;
   private row: number;
 
@@ -129,7 +136,7 @@ export class Technology {
     return {
       units: Unit.getAllUnitData()
         .filter((unit) => unit.required_tech === techName && Unit.isAvailableToCiv(unit, civName))
-        .map((unit) => ({ name: unit.name, asset_name: `UNIT_${unit.name.toUpperCase().replace(/ /g, "_")}` })),
+        .map((unit) => ({ name: unit.name, asset_name: Unit.getAssetName(unit.name) })),
       buildings: buildings.filter((building) => !building.isWonderBuilding()).map(toUnlock),
       wonders: buildings.filter((building) => building.isWonderBuilding()).map(toUnlock),
       improvements: Improvement.getAllImprovementData()
@@ -166,7 +173,11 @@ export class Technology {
     return this.description;
   }
 
-  public getNotes() {
+  public getNotes(): string[] {
+    return this.notes.map((note) => note.text);
+  }
+
+  public getNoteData(): TechNoteData[] {
     return this.notes;
   }
 
@@ -185,8 +196,9 @@ export class Technology {
       cost: this.cost,
       prerequisites: this.prerequisites,
       description: this.description,
-      notes: this.notes,
+      notes: this.getNotes(),
       unlocks: Technology.getUnlocks(this.name, civName),
+      bonuses: TechBonuses.of(this, civName),
       slot: this.slot,
       row: this.row
     };

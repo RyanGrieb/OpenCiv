@@ -1,25 +1,26 @@
-import { Building } from '../../src/city/Building';
-import { Improvement } from '../../src/map/Improvement';
-import { Technology } from '../../src/research/Technology';
-import { Unit } from '../../src/unit/Unit';
-import { ConfigLoader } from '../../src/util/ConfigLoader';
+import { Building } from "../../src/city/Building";
+import { Improvement } from "../../src/map/Improvement";
+import { TechBonuses } from "../../src/research/TechBonuses";
+import { Technology } from "../../src/research/Technology";
+import { Unit } from "../../src/unit/Unit";
+import { ConfigLoader } from "../../src/util/ConfigLoader";
 
 // Deliberately not mocking fs/yaml - exercises the real config/techs.yml,
 // same approach as Building.test.ts.
-describe('Technology', () => {
-  it('creates a Technology from a known name, case-insensitively', () => {
-    const technology = Technology.createFromName('pottery');
+describe("Technology", () => {
+  it("creates a Technology from a known name, case-insensitively", () => {
+    const technology = Technology.createFromName("pottery");
 
     expect(technology).toBeDefined();
-    expect(technology.getName()).toBe('Pottery');
+    expect(technology.getName()).toBe("Pottery");
     expect(technology.getCost()).toBe(35);
   });
 
-  it('returns undefined for an unrecognized technology name', () => {
-    expect(Technology.createFromName('Nonexistent')).toBeUndefined();
+  it("returns undefined for an unrecognized technology name", () => {
+    expect(Technology.createFromName("Nonexistent")).toBeUndefined();
   });
 
-  it('loads every technology, including tech-gated ones with prerequisites', () => {
+  it("loads every technology, including tech-gated ones with prerequisites", () => {
     const technologies = Technology.getAllTechnologies();
 
     expect(technologies).toHaveLength(80);
@@ -28,12 +29,15 @@ describe('Technology', () => {
     // (a free starting tech this config doesn't model), so these four are the
     // only ones with no modeled prerequisites at all.
     const rootTechs = technologies.filter((tech) => tech.getPrerequisites().length === 0);
-    expect(rootTechs.map((tech) => tech.getName()).sort()).toEqual(
-      ['Animal Husbandry', 'Archery', 'Mining', 'Pottery']
-    );
+    expect(rootTechs.map((tech) => tech.getName()).sort()).toEqual([
+      "Animal Husbandry",
+      "Archery",
+      "Mining",
+      "Pottery"
+    ]);
   });
 
-  it('has every prerequisite reference a technology that actually exists in the config', () => {
+  it("has every prerequisite reference a technology that actually exists in the config", () => {
     const technologies = Technology.getAllTechnologies();
     const names = new Set(technologies.map((tech) => tech.getName()));
 
@@ -44,122 +48,152 @@ describe('Technology', () => {
     }
   });
 
-  it('round-trips through toJSON back to the wire shape', () => {
-    const technology = Technology.createFromName('Pottery');
+  it("round-trips through toJSON back to the wire shape", () => {
+    const technology = Technology.createFromName("Pottery");
 
     expect(technology.toJSON()).toEqual({
-      name: 'Pottery',
-      asset_name: 'BUILDING_GRANARY',
+      name: "Pottery",
+      asset_name: "BUILDING_GRANARY",
       cost: 35,
       prerequisites: [],
-      description: 'Enables long-term storage of food and materials.',
+      description: "Enables long-term storage of food and materials.",
       notes: [],
       unlocks: {
         units: [],
         buildings: [
-          { name: 'Granary', asset_name: 'BUILDING_GRANARY' },
-          { name: 'Shrine', asset_name: 'BUILDING_SHRINE' },
+          { name: "Granary", asset_name: "BUILDING_GRANARY" },
+          { name: "Shrine", asset_name: "BUILDING_SHRINE" }
         ],
         wonders: [],
-        improvements: [],
+        improvements: []
       },
+      bonuses: [
+        expect.objectContaining({ name: "Granary", kind: "building" }),
+        expect.objectContaining({ name: "Shrine", kind: "building" })
+      ],
       slot: 1,
-      row: 0,
+      row: 0
     });
   });
 
-  it('lists what a tech unlocks from the unit, building and improvement configs', () => {
-    expect(Technology.getUnlocks('Animal Husbandry')).toEqual({
-      units: [{ name: 'Caravan', asset_name: 'UNIT_CARAVAN' }],
+  it("lists a tech's unlocks and then its notes as button bonuses", () => {
+    const bonuses = TechBonuses.of(Technology.createFromName("Animal Husbandry"));
+
+    expect(bonuses.map((bonus) => [bonus.name, bonus.kind, bonus.asset_name])).toEqual([
+      ["Caravan", "unit", "UNIT_CARAVAN"],
+      ["Pasture", "improvement", "ICON_EMPTY_PASTURE"],
+      ["Reveals Horses", "note", "TILE_HORSES"],
+      ["Allows an additional trade route", "note", "ICON_TRADE"]
+    ]);
+    expect(bonuses[1].lines).toContain("Improves Horses, Cattle, Sheep");
+  });
+
+  it("describes a unit bonus by its strength, movement and cost", () => {
+    const spearman = TechBonuses.of(Technology.createFromName("Bronze Working")).find(
+      (bonus) => bonus.name === "Spearman"
+    );
+
+    expect(spearman.lines).toEqual(expect.arrayContaining(["Strength: 11 !{combat}", "Movement: 2 !{move}"]));
+  });
+
+  it("gives a building bonus its tooltip data", () => {
+    const granary = TechBonuses.of(Technology.createFromName("Pottery")).find((bonus) => bonus.name === "Granary");
+
+    expect(granary.building?.name).toBe("Granary");
+  });
+
+  it("lists what a tech unlocks from the unit, building and improvement configs", () => {
+    expect(Technology.getUnlocks("Animal Husbandry")).toEqual({
+      units: [{ name: "Caravan", asset_name: "UNIT_CARAVAN" }],
       buildings: [],
       wonders: [],
-      improvements: [{ name: 'Pasture', asset_name: 'ICON_EMPTY_PASTURE' }],
+      improvements: [{ name: "Pasture", asset_name: "ICON_EMPTY_PASTURE" }]
     });
 
-    const construction = Technology.getUnlocks('Construction');
-    expect(construction.units.map((unit) => unit.name)).toEqual(['Composite Bowman']);
-    expect(construction.buildings.map((building) => building.name)).toEqual(['Colosseum']);
-    expect(construction.wonders.map((wonder) => wonder.name)).toEqual(['Terracotta Army']);
-    expect(construction.improvements.map((improvement) => improvement.name)).toEqual(['Lumber Mill']);
+    const construction = Technology.getUnlocks("Construction");
+    expect(construction.units.map((unit) => unit.name)).toEqual(["Composite Bowman"]);
+    expect(construction.buildings.map((building) => building.name)).toEqual(["Colosseum"]);
+    expect(construction.wonders.map((wonder) => wonder.name)).toEqual(["Terracotta Army"]);
+    expect(construction.improvements.map((improvement) => improvement.name)).toEqual(["Lumber Mill"]);
   });
 
-  it('lists a unique unit only for its own civ, in place of the unit it replaces', () => {
+  it("lists a unique unit only for its own civ, in place of the unit it replaces", () => {
     const ironWorkingUnits = (civName?: string) =>
-      Technology.getUnlocks('Iron Working', civName).units.map((unit) => unit.name);
+      Technology.getUnlocks("Iron Working", civName).units.map((unit) => unit.name);
 
-    expect(ironWorkingUnits('Rome')).toEqual(['Legion']);
-    expect(ironWorkingUnits('Germany')).toEqual(['Swordsman']);
-    expect(ironWorkingUnits()).toEqual(['Swordsman']);
+    expect(ironWorkingUnits("Rome")).toEqual(["Legion"]);
+    expect(ironWorkingUnits("Germany")).toEqual(["Swordsman"]);
+    expect(ironWorkingUnits()).toEqual(["Swordsman"]);
   });
 
   it("leaves the Bazaar (Arabia's unique Market) out of Currency, since nobody plays Arabia", () => {
     const currencyBuildings = (civName?: string) =>
-      Technology.getUnlocks('Currency', civName).buildings.map((building) => building.name);
+      Technology.getUnlocks("Currency", civName).buildings.map((building) => building.name);
 
-    expect(currencyBuildings()).toContain('Market');
-    expect(currencyBuildings('Rome')).not.toContain('Bazaar');
-    expect(currencyBuildings('Arabia')).toContain('Bazaar');
-    expect(currencyBuildings('Arabia')).not.toContain('Market');
+    expect(currencyBuildings()).toContain("Market");
+    expect(currencyBuildings("Rome")).not.toContain("Bazaar");
+    expect(currencyBuildings("Arabia")).toContain("Bazaar");
+    expect(currencyBuildings("Arabia")).not.toContain("Market");
   });
 
   it.each([
-    ['Archery', ['Archer'], ['Temple of Artemis']],
-    ['Masonry', [], ['Great Pyramids', 'Mausoleum of Halicarnassus', 'Walls']],
-    ['Bronze Working', ['Spearman'], ['Barracks', 'Colossus', 'Statue of Zeus']],
-    ['Optics', [], ['Great Lighthouse', 'Lighthouse']],
-    ['Philosophy', [], ['National College', 'Oracle', 'Temple']],
-    ['Drama and Poetry', [], ['Amphitheater', 'National Epic', 'Parthenon']],
-    ['Currency', [], ['Market', 'Mint', 'Petra']],
-    ['Theology', [], ['Borobudur', 'Garden', 'Grand Temple', 'Great Mosque of Djenne', 'Hagia Sophia']],
-    ['Civil Service', ['Pikeman'], ['Chichen Itza']],
-    ['Compass', ['Galleass'], ['Harbor']],
-    ['Education', [], ['Angkor Wat', 'Oxford University', 'University']],
-    ['Chivalry', ['Knight'], ['Alhambra', 'Castle', 'Himeji Castle']],
-    ['Machinery', ['Crossbowman'], ['Ironworks']],
-    ['Physics', ['Trebuchet'], ['Notre Dame']],
-    ['Steel', ['Longswordsman'], []],
-    ['Astronomy', ['Caravel'], ['Observatory']],
-    ['Acoustics', [], ['Opera House', 'Sistine Chapel']],
-    ['Banking', [], ['Bank', 'Forbidden Palace']],
-    ['Printing Press', [], ['Taj Mahal']],
-    ['Gunpowder', ['Musketman'], []],
-    ['Navigation', ['Frigate', 'Privateer'], ['Seaport']],
-    ['Architecture', [], ['Leaning Tower of Pisa']],
-    ['Economics', [], ['Windmill']],
-    ['Chemistry', ['Cannon'], []],
-    ['Metallurgy', ['Lancer'], []],
-    ['Scientific Theory', [], ['Public School']],
-    ['Archaeology', [], ['Hermitage', 'Louvre', 'Museum']],
-    ['Industrialization', ['Gatling Gun'], ['Big Ben', 'Factory']],
-    ['Military Science', ['Cavalry'], ['Brandenburg Gate']],
-    ['Rifling', ['Rifleman'], []],
-    ['Biology', [], ['Hospital']],
-    ['Railroad', [], ['Arsenal']],
-    ['Electricity', [], ['Stock Exchange']],
-    ['Steam Power', ['Ironclad'], []],
-    ['Dynamite', ['Artillery'], []],
-    ['Refrigeration', ['Submarine'], ['Stadium']],
-    ['Replaceable Parts', ['Great War Infantry'], ['Statue of Liberty']],
-    ['Plastics', ['Infantry'], []],
-    ['Penicillin', ['Marine'], ['Medical Lab']],
-    ['Combined Arms', ['Anti-Tank Gun', 'Tank'], ['Pentagon']],
-    ['Flight', [], ['Prora']],
-    ['Combustion', ['Destroyer'], []],
-    ['Electronics', ['Battleship'], ['Cristo Redentor', 'Military Base']],
-    ['Telecommunications', ['Nuclear Submarine'], ['CN Tower']],
-    ['Mobile Tactics', ['Mechanized Infantry'], []],
-    ['Radio', [], ['Broadcast Tower', 'Eiffel Tower']],
-    ['Atomic Theory', [], ['Manhattan Project']],
-    ['Computers', [], ['Great Firewall']],
-    ['Lasers', ['Modern Armor'], []],
-    ['Rocketry', ['Rocket Artillery'], ['Apollo Program']],
-    ['Robotics', ['Missile Cruiser'], []],
-    ['Globalization', [], ['United Nations']],
-    ['Ecology', [], ['Sydney Opera House']],
-    ['Nuclear Fission', ['Bazooka'], []],
-    ['Nuclear Fusion', ['Giant Death Robot'], []],
-    ['Nanotechnology', ['XCOM Squad'], []]
-  ])('unlocks what %s unlocks in Brave New World', (tech, units, buildings) => {
+    ["Archery", ["Archer"], ["Temple of Artemis"]],
+    ["Masonry", [], ["Great Pyramids", "Mausoleum of Halicarnassus", "Walls"]],
+    ["Bronze Working", ["Spearman"], ["Barracks", "Colossus", "Statue of Zeus"]],
+    ["Optics", [], ["Great Lighthouse", "Lighthouse"]],
+    ["Philosophy", [], ["National College", "Oracle", "Temple"]],
+    ["Drama and Poetry", [], ["Amphitheater", "National Epic", "Parthenon"]],
+    ["Currency", [], ["Market", "Mint", "Petra"]],
+    ["Theology", [], ["Borobudur", "Garden", "Grand Temple", "Great Mosque of Djenne", "Hagia Sophia"]],
+    ["Civil Service", ["Pikeman"], ["Chichen Itza"]],
+    ["Compass", ["Galleass"], ["Harbor"]],
+    ["Education", [], ["Angkor Wat", "Oxford University", "University"]],
+    ["Chivalry", ["Knight"], ["Alhambra", "Castle", "Himeji Castle"]],
+    ["Machinery", ["Crossbowman"], ["Ironworks"]],
+    ["Physics", ["Trebuchet"], ["Notre Dame"]],
+    ["Steel", ["Longswordsman"], []],
+    ["Astronomy", ["Caravel"], ["Observatory"]],
+    ["Acoustics", [], ["Opera House", "Sistine Chapel"]],
+    ["Banking", [], ["Bank", "Forbidden Palace"]],
+    ["Printing Press", [], ["Taj Mahal"]],
+    ["Gunpowder", ["Musketman"], []],
+    ["Navigation", ["Frigate", "Privateer"], ["Seaport"]],
+    ["Architecture", [], ["Leaning Tower of Pisa"]],
+    ["Economics", [], ["Windmill"]],
+    ["Chemistry", ["Cannon"], []],
+    ["Metallurgy", ["Lancer"], []],
+    ["Scientific Theory", [], ["Public School"]],
+    ["Archaeology", [], ["Hermitage", "Louvre", "Museum"]],
+    ["Industrialization", ["Gatling Gun"], ["Big Ben", "Factory"]],
+    ["Military Science", ["Cavalry"], ["Brandenburg Gate"]],
+    ["Rifling", ["Rifleman"], []],
+    ["Biology", [], ["Hospital"]],
+    ["Railroad", [], ["Arsenal"]],
+    ["Electricity", [], ["Stock Exchange"]],
+    ["Steam Power", ["Ironclad"], []],
+    ["Dynamite", ["Artillery"], []],
+    ["Refrigeration", ["Submarine"], ["Stadium"]],
+    ["Replaceable Parts", ["Great War Infantry"], ["Statue of Liberty"]],
+    ["Plastics", ["Infantry"], []],
+    ["Penicillin", ["Marine"], ["Medical Lab"]],
+    ["Combined Arms", ["Anti-Tank Gun", "Tank"], ["Pentagon"]],
+    ["Flight", [], ["Prora"]],
+    ["Combustion", ["Destroyer"], []],
+    ["Electronics", ["Battleship"], ["Cristo Redentor", "Military Base"]],
+    ["Telecommunications", ["Nuclear Submarine"], ["CN Tower"]],
+    ["Mobile Tactics", ["Mechanized Infantry"], []],
+    ["Radio", [], ["Broadcast Tower", "Eiffel Tower"]],
+    ["Atomic Theory", [], ["Manhattan Project"]],
+    ["Computers", [], ["Great Firewall"]],
+    ["Lasers", ["Modern Armor"], []],
+    ["Rocketry", ["Rocket Artillery"], ["Apollo Program"]],
+    ["Robotics", ["Missile Cruiser"], []],
+    ["Globalization", [], ["United Nations"]],
+    ["Ecology", [], ["Sydney Opera House"]],
+    ["Nuclear Fission", ["Bazooka"], []],
+    ["Nuclear Fusion", ["Giant Death Robot"], []],
+    ["Nanotechnology", ["XCOM Squad"], []]
+  ])("unlocks what %s unlocks in Brave New World", (tech, units, buildings) => {
     const unlocks = Technology.getUnlocks(tech);
     const names = (list: { name: string }[]) => list.map((entry) => entry.name).sort();
 
@@ -168,31 +202,31 @@ describe('Technology', () => {
   });
 
   it.each([
-    ['Trireme', 'Compass'],
-    ['Horseman', 'Chivalry'],
-    ['Chariot Archer', 'Chivalry'],
-    ['Catapult', 'Physics'],
-    ['Swordsman', 'Steel'],
-    ['Legion', 'Steel'],
-    ['Pikeman', 'Gunpowder'],
-    ['Crossbowman', 'Industrialization'],
-    ['Longswordsman', 'Gunpowder'],
-    ['Knight', 'Metallurgy'],
-    ['Trebuchet', 'Chemistry'],
-    ['Galleass', 'Navigation'],
-    ['Musketman', 'Rifling'],
-    ['Cannon', 'Dynamite'],
-    ['Rifleman', 'Replaceable Parts'],
-    ['Tank', 'Lasers']
-  ])('makes the %s obsolete with %s, the tech of its upgrade', (unit, tech) => {
+    ["Trireme", "Compass"],
+    ["Horseman", "Chivalry"],
+    ["Chariot Archer", "Chivalry"],
+    ["Catapult", "Physics"],
+    ["Swordsman", "Steel"],
+    ["Legion", "Steel"],
+    ["Pikeman", "Gunpowder"],
+    ["Crossbowman", "Industrialization"],
+    ["Longswordsman", "Gunpowder"],
+    ["Knight", "Metallurgy"],
+    ["Trebuchet", "Chemistry"],
+    ["Galleass", "Navigation"],
+    ["Musketman", "Rifling"],
+    ["Cannon", "Dynamite"],
+    ["Rifleman", "Replaceable Parts"],
+    ["Tank", "Lasers"]
+  ])("makes the %s obsolete with %s, the tech of its upgrade", (unit, tech) => {
     expect(Unit.getAllUnitData().find((data) => data.name === unit)?.obsolete_tech).toBe(tech);
   });
 
-  it('points every obsolete_tech, unique_to and replaces at a tech, civ and unit that exist', () => {
+  it("points every obsolete_tech, unique_to and replaces at a tech, civ and unit that exist", () => {
     const techNames = new Set(Technology.getAllTechnologies().map((tech) => tech.getName()));
     const unitNames = new Set(Unit.getAllUnitData().map((unit) => unit.name));
     const civNames = new Set(
-      ConfigLoader.load<{ civilizations: { name: string }[] }>('./config/civilizations.yml').civilizations.map(
+      ConfigLoader.load<{ civilizations: { name: string }[] }>("./config/civilizations.yml").civilizations.map(
         (civ) => civ.name
       )
     );
@@ -204,7 +238,7 @@ describe('Technology', () => {
     }
   });
 
-  it('only gates units, buildings and improvements behind technologies that exist', () => {
+  it("only gates units, buildings and improvements behind technologies that exist", () => {
     const unlocked = Technology.getAllTechnologies().flatMap((tech) => {
       const unlocks = Technology.getUnlocks(tech.getName());
       return [...unlocks.units, ...unlocks.buildings, ...unlocks.wonders, ...unlocks.improvements];
@@ -222,13 +256,13 @@ describe('Technology', () => {
       // Clearing forest or jungle isn't an improvement, so the window leaves those out.
       ...Improvement.getAllImprovementData()
         .filter((improvement) => !improvement.removes_feature)
-        .map((improvement) => improvement.required_tech),
+        .map((improvement) => improvement.required_tech)
     ];
     const gatedCount = requiredTechs.filter((tech) => tech).length;
     expect(unlocked).toHaveLength(gatedCount);
   });
 
-  it('gives every technology a slot within the 10-column grid, unique within its own row', () => {
+  it("gives every technology a slot within the 10-column grid, unique within its own row", () => {
     const technologies = Technology.getAllTechnologies();
     const slotsByRow = new Map<number, number[]>();
 
@@ -246,7 +280,7 @@ describe('Technology', () => {
     }
   });
 
-  it('places every technology in a row strictly after all of its prerequisites', () => {
+  it("places every technology in a row strictly after all of its prerequisites", () => {
     const technologies = Technology.getAllTechnologies();
     const techByName = new Map(technologies.map((tech) => [tech.getName(), tech]));
 
@@ -258,36 +292,43 @@ describe('Technology', () => {
     }
   });
 
-  describe('getEraOf', () => {
-    it('is the first era before anything is researched', () => {
-      expect(Technology.getEraOf([]).id).toBe('ancient');
+  describe("getEraOf", () => {
+    it("is the first era before anything is researched", () => {
+      expect(Technology.getEraOf([]).id).toBe("ancient");
     });
 
-    it('is the latest era any researched tech belongs to', () => {
+    it("is the latest era any researched tech belongs to", () => {
       const firstClassical = Technology.getAllTechnologies().find((tech) => tech.getRow() === 2);
       const firstMedieval = Technology.getAllTechnologies().find((tech) => tech.getRow() === 4);
 
-      expect(Technology.getEraOf(['Pottery']).id).toBe('ancient');
-      expect(Technology.getEraOf(['Pottery', firstClassical.getName()]).id).toBe('classical');
-      expect(Technology.getEraOf([firstMedieval.getName(), 'Pottery']).id).toBe('medieval');
+      expect(Technology.getEraOf(["Pottery"]).id).toBe("ancient");
+      expect(Technology.getEraOf(["Pottery", firstClassical.getName()]).id).toBe("classical");
+      expect(Technology.getEraOf([firstMedieval.getName(), "Pottery"]).id).toBe("medieval");
     });
 
-    it('gives every era an id', () => {
+    it("gives every era an id", () => {
       expect(Technology.getAllEras().map((era) => era.id)).toEqual([
-        'ancient', 'classical', 'medieval', 'renaissance', 'industrial', 'modern', 'atomic', 'information'
+        "ancient",
+        "classical",
+        "medieval",
+        "renaissance",
+        "industrial",
+        "modern",
+        "atomic",
+        "information"
       ]);
     });
 
-    it('reaches each later era with the first tech of its rows', () => {
-      expect(Technology.getEraOf(['Pottery', 'Gunpowder']).id).toBe('renaissance');
-      expect(Technology.getEraOf(['Pottery', 'Steam Power']).id).toBe('industrial');
-      expect(Technology.getEraOf(['Pottery', 'Flight']).id).toBe('modern');
-      expect(Technology.getEraOf(['Pottery', 'Computers']).id).toBe('atomic');
-      expect(Technology.getEraOf(['Pottery', 'Robotics']).id).toBe('information');
-      expect(Technology.getEraOf(['Pottery', 'Future Tech']).id).toBe('information');
+    it("reaches each later era with the first tech of its rows", () => {
+      expect(Technology.getEraOf(["Pottery", "Gunpowder"]).id).toBe("renaissance");
+      expect(Technology.getEraOf(["Pottery", "Steam Power"]).id).toBe("industrial");
+      expect(Technology.getEraOf(["Pottery", "Flight"]).id).toBe("modern");
+      expect(Technology.getEraOf(["Pottery", "Computers"]).id).toBe("atomic");
+      expect(Technology.getEraOf(["Pottery", "Robotics"]).id).toBe("information");
+      expect(Technology.getEraOf(["Pottery", "Future Tech"]).id).toBe("information");
     });
 
-    it('puts every tech in some era', () => {
+    it("puts every tech in some era", () => {
       const rows = new Set(Technology.getAllEras().flatMap((era) => era.rows));
 
       for (const tech of Technology.getAllTechnologies()) expect(rows).toContain(tech.getRow());

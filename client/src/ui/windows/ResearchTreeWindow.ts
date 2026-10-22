@@ -8,14 +8,25 @@ import { InGameScene } from "../../scene/type/InGameScene";
 import { Numbers } from "../../util/Numbers";
 import { Button, ButtonSize } from "../components/Button";
 import { Label } from "../components/Label";
+import { TechBonusTooltip } from "./TechBonusTooltip";
 import { TechDetailData, TechDetailWindow } from "./TechDetailWindow";
+import { Tooltip } from "../components/Tooltip";
 import { UITheme } from "../UITheme";
 
 const WINDOW_PADDING = 16;
 // Base (100% zoom) tile geometry - actual layout scales these by zoomLevel.
 const BASE_TILE_PADDING = 8;
-const BASE_TILE_ICON_SIZE = 32; // Matches old_java's TechnologyLeaf icon size.
-const BASE_TILE_WIDTH = 220;
+const BASE_TILE_ICON_SIZE = 56; // The tech's own icon, centered on the tile's left side as in Civ5.
+const BASE_TILE_ICON_GAP = 10; // Between the tech's icon and its name and bonus row.
+const BASE_BONUS_ICON_SIZE = 32;
+const BASE_BONUS_ICON_GAP = 4;
+const BONUS_ROW_FITS = 6; // The most bonus icons a tech has (Bronze Working), sized into the tile's width.
+const BASE_TILE_WIDTH =
+  BASE_TILE_PADDING * 3 +
+  BASE_TILE_ICON_SIZE +
+  BASE_TILE_ICON_GAP +
+  BONUS_ROW_FITS * (BASE_BONUS_ICON_SIZE + BASE_BONUS_ICON_GAP);
+const BASE_NAME_GAP = 4; // Between the name and the bonus row under it.
 const BASE_SLOT_GAP = 12; // Vertical gap between tiles in the same column.
 const BASE_COLUMN_GAP = 48; // Horizontal gap between columns, where the connector lines bend.
 const BASE_ERA_LABEL_MARGIN = 8; // Space above and below the era labels over the columns.
@@ -28,6 +39,9 @@ const PAN_EDGE_MARGIN = 60; // Content can't be dragged past this far off either
 const CONNECTOR_MET_COLOR = "lime";
 const CONNECTOR_UNMET_COLOR = "#666";
 const CONNECTOR_WIDTH = 2;
+const ICON_BACKDROP_COLOR = "rgba(0, 0, 0, 0.35)";
+const ICON_RING_COLOR = "rgba(255, 255, 255, 0.25)";
+const TOOLTIP_OFFSET = 4; // Between a hovered bonus icon and the tooltip under it.
 
 interface TechData extends TechDetailData {
   slot: number;
@@ -42,7 +56,13 @@ interface EraData {
 interface TechTile {
   tech: TechData;
   background: Actor; // Hit-testing/position only - never drawn; its transparency doubles as the tile's locked-state alpha.
-  bitmap?: HTMLCanvasElement; // The tile's background, icon and name pre-rendered once per build; undefined until its label is measured.
+  bitmap?: HTMLCanvasElement; // The tile's background, icons and name pre-rendered once per build; undefined until its label is measured.
+}
+
+// Which bonus icon the mouse is over, so its tooltip is only rebuilt when that changes.
+interface HoveredBonus {
+  tile: TechTile;
+  index: number;
 }
 
 // Every size that scales with zoomLevel, computed once per (re)build and threaded
@@ -52,6 +72,10 @@ interface TreeLayout {
   columnGap: number;
   slotGap: number;
   iconSize: number;
+  bonusIconSize: number;
+  bonusIconGap: number;
+  textX: number; // Where the name and the bonus row start, from the tile's left edge.
+  tileHeight: number;
   tilePadding: number;
   eraLabelMargin: number;
   font: string;
@@ -63,8 +87,10 @@ interface TreeLayout {
 // techs.yml, matching Civ5's hand-placed tech-web layout rather than a position
 // derived from prerequisite depth - two techs can be equally deep in the
 // prerequisite graph and still sit in different columns, and a column can have
-// deliberately empty slots. Each tile mirrors old_java's compact TechnologyLeaf
-// (icon + name only); clicking one opens a TechDetailWindow with the full
+// deliberately empty slots. Each tile is a Civ5 tech button: the tech's large icon
+// on the left, its name along the top, and a row of icons for what it gives
+// (units, buildings, wonders, improvements, its notes) along the bottom, each with
+// a tooltip on hover. Clicking one opens a TechDetailWindow with the full
 // description and Research/Cancel action.
 //
 // The tree can be wider/taller than the window (80 techs, 17 columns wide),
@@ -81,6 +107,9 @@ export class ResearchTreeWindow extends ActorGroup {
   private tiles: TechTile[] = [];
   private tilesByName: Map<string, TechTile> = new Map();
   private eraLabels: Label[] = [];
+  private layout: TreeLayout | undefined;
+  private hoveredBonus: HoveredBonus | undefined;
+  private bonusTooltip: Tooltip | undefined;
 
   private isMouseDown = false;
   private isDragging = false;
@@ -153,7 +182,11 @@ export class ResearchTreeWindow extends ActorGroup {
       this.hoverX = options.x;
       this.hoverY = options.y;
 
-      if (!this.isMouseDown) return;
+      if (!this.isMouseDown) {
+        this.updateBonusTooltip();
+        return;
+      }
+      this.hideBonusTooltip();
 
       const { dx, dy } = this.clampPanDelta(options.x - this.lastMouseX, options.y - this.lastMouseY);
       this.lastMouseX = options.x;
@@ -179,6 +212,7 @@ export class ResearchTreeWindow extends ActorGroup {
 
     this.on("mouseleave", () => {
       this.isMouseDown = false;
+      this.hideBonusTooltip();
     });
 
     // Rebuilds the whole tree at the new scale rather than transforming the canvas
@@ -259,6 +293,10 @@ export class ResearchTreeWindow extends ActorGroup {
     }
 
     this.closeButton.draw(canvasContext);
+
+    if (this.bonusTooltip) {
+      this.bonusTooltip.draw(canvasContext);
+    }
 
     if (this.detailWindow) {
       this.detailWindow.draw(canvasContext);
@@ -344,6 +382,7 @@ export class ResearchTreeWindow extends ActorGroup {
   }
 
   private clearTree() {
+    this.hideBonusTooltip();
     for (const tile of this.tiles) {
       this.removeActor(tile.background);
     }
@@ -360,16 +399,13 @@ export class ResearchTreeWindow extends ActorGroup {
     if (this.lastTechnologies.length === 0) return;
 
     const requestId = ++this.buildRequestId;
-    const layout: TreeLayout = {
-      tileWidth: BASE_TILE_WIDTH * this.zoomLevel,
-      columnGap: BASE_COLUMN_GAP * this.zoomLevel,
-      slotGap: BASE_SLOT_GAP * this.zoomLevel,
-      iconSize: BASE_TILE_ICON_SIZE * this.zoomLevel,
-      tilePadding: BASE_TILE_PADDING * this.zoomLevel,
-      eraLabelMargin: BASE_ERA_LABEL_MARGIN * this.zoomLevel,
-      font: `${Math.round(UITheme.FONT_SIZE * this.zoomLevel)}px serif`
-    };
-    const textMaxWidth = layout.tileWidth - layout.tilePadding * 2 - layout.iconSize - 8 * this.zoomLevel;
+    const zoom = this.zoomLevel;
+    const tileWidth = BASE_TILE_WIDTH * zoom;
+    const tilePadding = BASE_TILE_PADDING * zoom;
+    const iconSize = BASE_TILE_ICON_SIZE * zoom;
+    const textX = tilePadding + iconSize + BASE_TILE_ICON_GAP * zoom;
+    const font = `${Math.round(UITheme.FONT_SIZE * zoom)}px serif`;
+    const textMaxWidth = tileWidth - textX - tilePadding;
 
     // Every tile shares one height (the tallest wrapped name across all techs),
     // so tiles line up in a clean grid instead of each being sized to its own content.
@@ -381,8 +417,24 @@ export class ResearchTreeWindow extends ActorGroup {
     // top of (or instead of) whatever that newer build already produced.
     if (requestId !== this.buildRequestId) return;
 
+    // The name along the top, the bonus row along the bottom.
     const nameSlotHeight = Math.max(...nameWraps.map(([, height]) => height));
-    const tileHeight = layout.tilePadding * 2 + Math.max(layout.iconSize, nameSlotHeight);
+    const bonusIconSize = BASE_BONUS_ICON_SIZE * zoom;
+    const tileHeight = tilePadding * 2 + Math.max(iconSize, nameSlotHeight + BASE_NAME_GAP * zoom + bonusIconSize);
+    const layout: TreeLayout = {
+      tileWidth,
+      columnGap: BASE_COLUMN_GAP * zoom,
+      slotGap: BASE_SLOT_GAP * zoom,
+      iconSize,
+      bonusIconSize,
+      bonusIconGap: BASE_BONUS_ICON_GAP * zoom,
+      textX,
+      tileHeight,
+      tilePadding,
+      eraLabelMargin: BASE_ERA_LABEL_MARGIN * zoom,
+      font
+    };
+    this.layout = layout;
 
     // panX/panY (drag accumulation, adjusted on each zoom to keep the point under
     // the cursor fixed - see the wheel handler) folded in here, once, so every
@@ -402,7 +454,7 @@ export class ResearchTreeWindow extends ActorGroup {
     for (const tech of this.lastTechnologies) {
       const tileX = columnX(tech.row);
       const tileY = gridTopY + tech.slot * (tileHeight + layout.slotGap);
-      this.tiles.push(this.createTechTile(tech, tileX, tileY, tileHeight, textMaxWidth, layout, requestId));
+      this.tiles.push(this.createTechTile(tech, tileX, tileY, textMaxWidth, layout, requestId));
     }
 
     this.buildEraMarkers(this.lastEras, columnX, originY, layout, requestId);
@@ -441,18 +493,15 @@ export class ResearchTreeWindow extends ActorGroup {
     tech: TechData,
     tileX: number,
     tileY: number,
-    tileHeight: number,
     textMaxWidth: number,
     layout: TreeLayout,
     requestId: number
   ): TechTile {
-    const iconRegion = resolveSpriteRegion(tech.asset_name) ?? SpriteRegion.ICON_UNKNOWN;
-
     const background = new Actor({
       x: tileX,
       y: tileY,
       width: layout.tileWidth,
-      height: tileHeight,
+      height: layout.tileHeight,
       cameraApplies: false
     });
     background.on("mouse_enter", () => {
@@ -469,53 +518,138 @@ export class ResearchTreeWindow extends ActorGroup {
     const tile: TechTile = { tech, background };
     this.tilesByName.set(tech.name, tile);
 
-    // Laid out at the bitmap's own origin rather than the tile's on-screen position.
-    const bitmapWidth = Math.ceil(layout.tileWidth);
-    const bitmapHeight = Math.ceil(tileHeight);
-    const iconX = layout.tilePadding;
-
     const nameLabel = new Label({
       text: tech.name,
       font: layout.font,
       fontColor: "white",
       maxWidth: textMaxWidth,
-      x: iconX + layout.iconSize + 8 * this.zoomLevel,
+      x: layout.textX,
       y: layout.tilePadding
     });
     nameLabel.conformSize().then(() => {
       if (requestId !== this.buildRequestId) return; // Superseded mid-measurement - see buildTree.
-
-      const bitmap = document.createElement("canvas");
-      bitmap.width = bitmapWidth;
-      bitmap.height = bitmapHeight;
-      const bitmapContext = bitmap.getContext("2d");
-
-      new Actor({
-        image: Game.getInstance().getImage(GameImage.POPUP_BOX),
-        x: 0,
-        y: 0,
-        width: bitmapWidth,
-        height: bitmapHeight,
-        nineSlice: true,
-        cornerSize: 10,
-        cameraApplies: false
-      }).draw(bitmapContext);
-
-      new Actor({
-        image: Game.getInstance().getImage(GameImage.SPRITESHEET),
-        spriteRegion: iconRegion,
-        x: iconX,
-        y: bitmapHeight / 2 - layout.iconSize / 2,
-        width: layout.iconSize,
-        height: layout.iconSize,
-        cameraApplies: false
-      }).draw(bitmapContext);
-
-      nameLabel.draw(bitmapContext);
-      tile.bitmap = bitmap;
+      tile.bitmap = this.drawTileBitmap(tech, nameLabel, layout);
     });
 
     return tile;
+  }
+
+  // The tile's background, the tech's icon in a dark ring, its name and its bonus row, laid out at the
+  // bitmap's own origin rather than the tile's on-screen position.
+  private drawTileBitmap(tech: TechData, nameLabel: Label, layout: TreeLayout): HTMLCanvasElement {
+    const bitmap = document.createElement("canvas");
+    bitmap.width = Math.ceil(layout.tileWidth);
+    bitmap.height = Math.ceil(layout.tileHeight);
+    const context = bitmap.getContext("2d");
+
+    new Actor({
+      image: Game.getInstance().getImage(GameImage.POPUP_BOX),
+      x: 0,
+      y: 0,
+      width: bitmap.width,
+      height: bitmap.height,
+      nineSlice: true,
+      cornerSize: 10,
+      cameraApplies: false
+    }).draw(context);
+
+    const iconX = layout.tilePadding;
+    const iconY = layout.tileHeight / 2 - layout.iconSize / 2;
+    const ringRadius = layout.iconSize / 2 + 2 * this.zoomLevel;
+    context.beginPath();
+    context.arc(iconX + layout.iconSize / 2, iconY + layout.iconSize / 2, ringRadius, 0, Math.PI * 2);
+    context.fillStyle = ICON_BACKDROP_COLOR;
+    context.fill();
+    context.lineWidth = 2 * this.zoomLevel;
+    context.strokeStyle = ICON_RING_COLOR;
+    context.stroke();
+    this.drawSprite(context, tech.asset_name, iconX, iconY, layout.iconSize);
+
+    nameLabel.draw(context);
+
+    // A dark strip under the bonus icons, like Civ5's, running from the name's left edge to the tile's right.
+    const rowY = this.bonusRowY(layout);
+    const stripInset = 2 * this.zoomLevel;
+    context.beginPath();
+    context.roundRect(
+      layout.textX - stripInset,
+      rowY - stripInset,
+      layout.tileWidth - layout.tilePadding - layout.textX + stripInset * 2,
+      layout.bonusIconSize + stripInset * 2,
+      4 * this.zoomLevel
+    );
+    context.fillStyle = ICON_BACKDROP_COLOR;
+    context.fill();
+
+    (tech.bonuses ?? []).forEach((bonus, index) => {
+      this.drawSprite(context, bonus.asset_name, this.bonusIconX(layout, index), rowY, layout.bonusIconSize);
+    });
+
+    return bitmap;
+  }
+
+  private drawSprite(context: CanvasRenderingContext2D, assetName: string, x: number, y: number, size: number) {
+    new Actor({
+      image: Game.getInstance().getImage(GameImage.SPRITESHEET),
+      spriteRegion: resolveSpriteRegion(assetName) ?? SpriteRegion.ICON_UNKNOWN,
+      x,
+      y,
+      width: size,
+      height: size,
+      cameraApplies: false
+    }).draw(context);
+  }
+
+  // Where the bonus row sits in a tile, from the tile's top-left corner.
+  private bonusRowY(layout: TreeLayout): number {
+    return layout.tileHeight - layout.tilePadding - layout.bonusIconSize;
+  }
+
+  private bonusIconX(layout: TreeLayout, index: number): number {
+    return layout.textX + index * (layout.bonusIconSize + layout.bonusIconGap);
+  }
+
+  // The bonus icon under the mouse, if any.
+  private findHoveredBonus(): HoveredBonus | undefined {
+    const layout = this.layout;
+    if (!layout || this.detailWindow) return undefined;
+
+    for (const tile of this.tiles) {
+      const localX = this.hoverX - tile.background.getX();
+      const localY = this.hoverY - tile.background.getY();
+      const rowY = this.bonusRowY(layout);
+      if (localY < rowY || localY > rowY + layout.bonusIconSize) continue;
+
+      const index = Math.floor((localX - layout.textX) / (layout.bonusIconSize + layout.bonusIconGap));
+      if (index < 0 || index >= (tile.tech.bonuses ?? []).length) continue;
+      if (localX > this.bonusIconX(layout, index) + layout.bonusIconSize) continue; // In the gap between two icons.
+
+      return { tile, index };
+    }
+    return undefined;
+  }
+
+  // Shows the hovered bonus icon's tooltip under it, or hides it once the mouse leaves the icon.
+  private async updateBonusTooltip() {
+    const hovered = this.findHoveredBonus();
+    if (hovered?.tile === this.hoveredBonus?.tile && hovered?.index === this.hoveredBonus?.index) return;
+
+    this.hideBonusTooltip();
+    if (!hovered) return;
+    this.hoveredBonus = hovered;
+
+    const layout = this.layout;
+    const x = hovered.tile.background.getX() + this.bonusIconX(layout, hovered.index);
+    const y = hovered.tile.background.getY() + this.bonusRowY(layout) + layout.bonusIconSize + TOOLTIP_OFFSET;
+    const tooltip = await TechBonusTooltip.create(x, y, hovered.tile.tech.bonuses[hovered.index]);
+    // The mouse moved on to another icon (or off) while this one was being measured.
+    if (this.hoveredBonus !== hovered) return;
+    this.bonusTooltip = tooltip;
+  }
+
+  private hideBonusTooltip() {
+    this.hoveredBonus = undefined;
+    this.bonusTooltip = undefined;
   }
 
   // Dims any tile whose prerequisites aren't all researched yet, rather than
@@ -581,6 +715,7 @@ export class ResearchTreeWindow extends ActorGroup {
       this.detailWindow = undefined;
     }
 
+    this.hideBonusTooltip();
     this.detailWindow = new TechDetailWindow({
       tech,
       allTechs: this.lastTechnologies,

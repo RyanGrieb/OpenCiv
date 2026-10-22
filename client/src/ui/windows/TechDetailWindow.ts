@@ -7,6 +7,7 @@ import { InGameScene } from "../../scene/type/InGameScene";
 import { Button, ButtonSize } from "../components/Button";
 import { Label } from "../components/Label";
 import { UITheme } from "../UITheme";
+import { TechBonusData } from "./TechBonusTooltip";
 
 const WINDOW_WIDTH = 440;
 const PADDING = 16;
@@ -42,6 +43,8 @@ export interface TechDetailData {
     wonders: UnlockData[];
     improvements: UnlockData[];
   };
+  // The icons on the tech's research tree button: its unlocks, then its notes.
+  bonuses: TechBonusData[];
 }
 
 // Detail popup opened by clicking a tech tile in ResearchTreeWindow. Laid out
