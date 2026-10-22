@@ -410,7 +410,7 @@ export class ResearchTreeWindow extends ActorGroup {
     // Every tile shares one height (the tallest wrapped name across all techs),
     // so tiles line up in a clean grid instead of each being sized to its own content.
     const nameWraps = await Promise.all(
-      this.lastTechnologies.map((tech) => Game.getInstance().getWrappedText(tech.name, layout.font, textMaxWidth))
+      this.lastTechnologies.map((tech) => Game.getInstance().getWrappedText(tech.name, font, textMaxWidth))
     );
     // A newer rebuild (another zoom tick, or fresh data) started while this one was
     // awaiting text measurement - drop these results rather than adding tiles on

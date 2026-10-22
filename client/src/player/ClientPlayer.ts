@@ -77,10 +77,12 @@ export class ClientPlayer extends AbstractPlayer {
     Game.getInstance()
       .getCurrentScene()
       .on("mousemove", (options) => {
+        // The hovered-tile outline only exists once the map has loaded.
+        if (!this.hoveredTile) return;
         const mouseX = options.clientX;
         const mouseY = options.clientY;
 
-        let oldHoveredTile = this.hoveredTile ? this.hoveredTile.getRepresentedTile() : undefined;
+        let oldHoveredTile = this.hoveredTile.getRepresentedTile();
 
         this.updateHoveredTile(mouseX, mouseY);
 
