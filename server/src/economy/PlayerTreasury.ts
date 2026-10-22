@@ -46,7 +46,12 @@ export class PlayerTreasury {
   }
 
   public getUpkeep(): number {
-    return this.getBuildingUpkeep() + this.getUnitUpkeep();
+    return this.getBuildingUpkeep() + this.getUnitUpkeep() + this.player.getConnections().getRoadMaintenance();
+  }
+
+  // Gold earned outside any one city's yields: city connections to the capital.
+  public getEmpireIncome(): number {
+    return this.player.getConnections().getGold();
   }
 
   public getBreakdown(): GoldBreakdown {
@@ -59,11 +64,13 @@ export class PlayerTreasury {
           amount: source.stats.reduce((total, stat) => total + (stat.gold ?? 0), 0)
         }))
       )
+      .concat([{ source: this.getConnectionsText(), amount: this.getEmpireIncome() }])
       .filter((entry) => entry.amount !== 0);
 
     const expenses = [
       { source: "Building maintenance", amount: this.getBuildingUpkeep() },
-      { source: `Unit maintenance (${this.getPaidUnitsText()})`, amount: this.getUnitUpkeep() }
+      { source: `Unit maintenance (${this.getPaidUnitsText()})`, amount: this.getUnitUpkeep() },
+      { source: `Road maintenance (${this.getRoadsText()})`, amount: this.player.getConnections().getRoadMaintenance() }
     ].filter((entry) => entry.amount !== 0);
 
     const net =
@@ -107,6 +114,18 @@ export class PlayerTreasury {
   private pickUnitToDisband(): Unit | undefined {
     const units = this.player.getUnits();
     return [...units].reverse().find((unit) => unit.canFight()) ?? units[units.length - 1];
+  }
+
+  // e.g. "City connections (2 cities)"
+  private getConnectionsText(): string {
+    const count = this.player.getConnections().getConnectedCities().length;
+    return `City connections (${count} ${count === 1 ? "city" : "cities"})`;
+  }
+
+  // e.g. "4 roads"
+  private getRoadsText(): string {
+    const count = this.player.getConnections().getRoadCount();
+    return `${count} road${count === 1 ? "" : "s"}`;
   }
 
   // e.g. "5 units, 3 free"

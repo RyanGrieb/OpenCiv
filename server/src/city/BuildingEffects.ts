@@ -73,6 +73,8 @@ export interface BuildingEffectsData {
   border_cost_percent?: number;
   // Extra movement an enemy land unit spends on each tile of the owner's territory.
   enemy_movement_cost?: number;
+  // Percent added to the gold the owner's city connections and trade routes bring in (Machu Picchu).
+  connection_gold_percent?: number;
   // Experience units trained in the city start with (Barracks).
   trained_unit_experience?: TrainedUnitEffect & { amount: number };
   // Promotions units trained in the city start with (Alhambra's Drill I).
@@ -86,7 +88,8 @@ type NumberEffect =
   | "friendly_territory_combat_percent"
   | "city_attack_percent"
   | "border_cost_percent"
-  | "enemy_movement_cost";
+  | "enemy_movement_cost"
+  | "connection_gold_percent";
 
 /** Applies buildings.yml's `effects` (see BuildingEffectsData) wherever in the game each one matters. */
 export class BuildingEffects {
@@ -159,6 +162,10 @@ export class BuildingEffects {
   public static getBuildTurns(baseTurns: number, player: Player): number {
     const percent = BuildingEffects.sumEmpire(player, "builder_speed_percent");
     return Math.max(1, Math.ceil((baseTurns * 100) / (100 + percent)));
+  }
+
+  public static getConnectionGoldPercent(player: Player): number {
+    return BuildingEffects.sumEmpire(player, "connection_gold_percent");
   }
 
   public static getNavalMovementBonus(player: Player): number {

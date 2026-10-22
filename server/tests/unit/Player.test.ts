@@ -38,6 +38,8 @@ describe("Player", () => {
       getTerritory: jest.fn().mockReturnValue([]),
       getPopulation: jest.fn().mockReturnValue(stats.population ?? 0),
       getBuildingHappiness: jest.fn().mockReturnValue(0),
+      hasBuilding: jest.fn().mockReturnValue(false),
+      getBuildings: jest.fn().mockReturnValue([]),
       getPlayer: () => player
     } as unknown as jest.Mocked<City>;
   };
@@ -62,6 +64,7 @@ describe("Player", () => {
     jest
       .spyOn(Game, "getInstance")
       .mockReturnValue({ getGameOptions: () => DefaultGameOptions, getPlayers: () => new Map() } as unknown as Game);
+    jest.spyOn(GameMap, "getInstance").mockReturnValue({ getTiles: (): Tile[][] => [] } as unknown as GameMap);
 
     player = new Player("TestPlayer", mockWebsocket);
   });

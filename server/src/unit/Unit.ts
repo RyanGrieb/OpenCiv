@@ -606,6 +606,8 @@ export class Unit {
     GameMap.getInstance().broadcastTileUpdate(this.tile);
     // A worked tile's yields just changed - let its city re-pick which tiles to work.
     this.tile.getCityTerritoryOf()?.updateWorkedTiles({ sendStatUpdate: true });
+    // A road can join a city to the capital, and costs upkeep, wherever it is.
+    if (improvement.route) this.player.sendTotalStatsUpdate();
   }
 
   // The owner's Great Pyramids speed their Builders up.

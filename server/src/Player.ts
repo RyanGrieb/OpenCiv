@@ -3,6 +3,7 @@ import { ServerEvents } from "./Events";
 import { Game } from "./Game";
 import { City } from "./city/City";
 import { PlayerDiplomacy } from "./diplomacy/PlayerDiplomacy";
+import { CityConnections } from "./economy/CityConnections";
 import { PlayerTreasury } from "./economy/PlayerTreasury";
 import { PlayerHappiness } from "./happiness/PlayerHappiness";
 import { GameMap } from "./map/GameMap";
@@ -69,6 +70,7 @@ export class Player {
   private notifications: PlayerNotifications;
   private diplomacy: PlayerDiplomacy;
   private treasury: PlayerTreasury;
+  private connections: CityConnections;
   private happiness: PlayerHappiness;
   private religion: PlayerReligion;
   // Free techs (from a wonder) banked while nothing was being researched: the next tech chosen is free.
@@ -96,6 +98,7 @@ export class Player {
     this.notifications = new PlayerNotifications(this);
     this.diplomacy = new PlayerDiplomacy(this);
     this.treasury = new PlayerTreasury(this);
+    this.connections = new CityConnections(this);
     this.happiness = new PlayerHappiness(this);
     this.religion = new PlayerReligion(this);
     this.freeTechs = 0;
@@ -394,6 +397,7 @@ export class Player {
     totals.gold += empire.gold ?? 0;
     totals.faith += empire.faith ?? 0;
     totals.culture += empire.culture ?? 0;
+    totals.gold += this.treasury.getEmpireIncome();
     totals.gold -= this.treasury.getUpkeep();
 
     return totals;
@@ -678,6 +682,11 @@ export class Player {
   /** Where this player's gold comes from and goes, and what it can afford. */
   public getTreasury() {
     return this.treasury;
+  }
+
+  /** Which of this player's cities are connected to their capital, and what their roads cost. */
+  public getConnections() {
+    return this.connections;
   }
 
   /** The empire-wide happiness, and what unhappiness costs this player. */

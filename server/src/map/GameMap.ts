@@ -9,6 +9,7 @@ import { Unit } from "../unit/Unit";
 import PriorityQueue from "ts-priority-queue";
 import { Numbers } from "../util/Numbers";
 import { GLOBE_WIDTH_STEP, MAP_CHUNK_SIZE, MIN_MAP_DIMENSION } from "../GameOptions";
+import { CityConnections } from "../economy/CityConnections";
 
 export class GameMap {
   private static instance: GameMap;
@@ -378,6 +379,9 @@ export class GameMap {
   // Players who have discovered the tile but can't see it right now are deliberately skipped: their
   // client keeps whatever it last saw, and catches up when the tile comes back into sight.
   public broadcastTileUpdate(tile: Tile) {
+    // Whatever changed on the tile may have joined or cut cities off from their capital.
+    CityConnections.invalidate();
+
     Game.getInstance()
       .getPlayers()
       .forEach((player) => {

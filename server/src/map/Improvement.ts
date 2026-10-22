@@ -94,6 +94,7 @@ export class Improvement {
 
     if (improvement.route) {
       tile.addTileType(improvement.tile_type);
+      tile.setRouteBuilder(builder);
       return;
     }
 

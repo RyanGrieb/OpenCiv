@@ -15,6 +15,7 @@ import { BuildingEffects } from "./BuildingEffects";
 import { BuildingCategory, Wonders } from "./Wonders";
 import { CityCombat } from "./CityCombat";
 import { PlayerDiplomacy } from "../diplomacy/PlayerDiplomacy";
+import { CityConnections } from "../economy/CityConnections";
 import { FaithPurchase } from "../economy/FaithPurchase";
 import { GoldPurchase } from "../economy/GoldPurchase";
 
@@ -471,6 +472,8 @@ export class City {
     if (!building) return;
 
     this.buildings.push(building);
+    // A Harbor opens a sea connection, and a Palace moves the capital.
+    CityConnections.invalidate();
 
     // Send new-building packet to player
     this.player.sendNetworkEvent({
@@ -501,6 +504,9 @@ export class City {
    * getJSON() filters for them.
    */
   public sendTerritoryUpdate() {
+    // Whose territory a road lies in decides who pays for it.
+    CityConnections.invalidate();
+
     Game.getInstance()
       .getPlayers()
       .forEach((player) => {

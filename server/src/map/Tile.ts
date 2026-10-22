@@ -83,6 +83,8 @@ export class Tile {
   // Turns Builders have put into each improvement on this tile so far. Kept when a Builder walks
   // off, so another one can pick the work up where it was left, as in Civ 5.
   private buildProgress: Map<string, number>;
+  // Whose Builder made the road here: they pay its maintenance while it's on land nobody owns.
+  private routeBuilder: Player | undefined;
 
   constructor(tileType: string, x: number, y: number) {
     this.generationHeight = 0;
@@ -130,6 +132,14 @@ export class Tile {
 
   public clearBuildProgress(improvement: string) {
     this.buildProgress.delete(improvement);
+  }
+
+  public getRouteBuilder(): Player | undefined {
+    return this.routeBuilder;
+  }
+
+  public setRouteBuilder(player: Player | undefined) {
+    this.routeBuilder = player;
   }
 
   // A city counts as a road, as in Civ 5.

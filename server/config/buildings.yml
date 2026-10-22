@@ -215,8 +215,8 @@ buildings:
     cost: 300
     required_tech: Guilds
     is_wonder: true
-    not_yet:
-      - +25% Gold from city connections and trade routes
+    effects:
+      connection_gold_percent: 25
     stats:
       - culture: 1
       - gold: 5
