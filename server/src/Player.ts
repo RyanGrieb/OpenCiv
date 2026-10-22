@@ -63,6 +63,8 @@ export class Player {
   private researchQueue: string[];
   // Science put into techs that were started and then switched away from, kept for when they're picked again.
   private techProgress: Map<string, number>;
+  // The science rate the research tree's turn counts were last sent at, so a new rate resends them.
+  private researchSentAtScience: number;
   private visibility: PlayerVisibility;
   private notifications: PlayerNotifications;
   private diplomacy: PlayerDiplomacy;
@@ -89,6 +91,7 @@ export class Player {
     this.researchedTechs = new Set();
     this.researchQueue = [];
     this.techProgress = new Map();
+    this.researchSentAtScience = 0;
     this.visibility = new PlayerVisibility(this);
     this.notifications = new PlayerNotifications(this);
     this.diplomacy = new PlayerDiplomacy(this);
@@ -451,6 +454,8 @@ export class Player {
 
   public sendTotalStatsUpdate() {
     const statusChanged = this.happiness.announceStatusChange();
+    // The tech tree's turn counts go stale when the science rate changes.
+    if (this.getTotalStats().science !== this.researchSentAtScience) this.sendResearchUpdate();
 
     this.sendNetworkEvent({
       event: "updateTotalStats",
@@ -470,6 +475,7 @@ export class Player {
   }
 
   public sendResearchUpdate() {
+    this.researchSentAtScience = this.getTotalStats().science;
     this.sendNetworkEvent({
       event: "updateResearch",
       currentResearch: this.currentResearch,

@@ -314,6 +314,16 @@ describe("Player", () => {
       expect(turns["Writing"]).toBe(6);
     });
 
+    it("resends the turn counts once science starts coming in", () => {
+      player["cities"].push(makeMockCity({ science: 4 }));
+      mockWebsocket.send.mockClear();
+
+      player.sendTotalStatsUpdate();
+
+      const sent = mockWebsocket.send.mock.calls.map(([json]) => JSON.parse(json as string));
+      expect(sent.find((event) => event.event === "updateResearch")?.turns["Pottery"]).toBe(9);
+    });
+
     it("has no turn count with no science coming in", () => {
       expect(player.getTurnsToResearch()["Pottery"]).toBeNull();
     });
