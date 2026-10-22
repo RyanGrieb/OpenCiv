@@ -21,6 +21,7 @@ describe('PlayerTradeRoutes', () => {
       getUnits: () => units,
       getWebsocket: (): undefined => undefined,
       getNotifications: () => ({ addMessage }),
+      sendTotalStatsUpdate: jest.fn(),
       getVisibility: () => ({ hasDiscovered: () => true }),
       getDiplomacy: () => ({ isAtWarWith: () => false })
     }) as unknown as Player;
@@ -33,8 +34,7 @@ describe('PlayerTradeRoutes', () => {
       getTerritory: () => options.territory ?? [],
       getTile: () => options.tile,
       getBuildings: (): string[] => [],
-      sendStatUpdate: jest.fn(),
-      grantFreeUnit: jest.fn()
+      sendStatUpdate: jest.fn()
     } as unknown as City;
     options.tile?.setCity(city);
     return city;
@@ -45,7 +45,10 @@ describe('PlayerTradeRoutes', () => {
     origin,
     destination,
     kind,
-    unitName: sea ? 'Cargo Ship' : 'Caravan',
+    unit: {} as Unit,
+    path: [],
+    position: 0,
+    heading: 1,
     sea,
     turnsLeft: PlayerTradeRoutes.ROUTE_TURNS
   });
@@ -133,12 +136,19 @@ describe('PlayerTradeRoutes', () => {
       tiles = landRow(14);
       origin = makeCity('Rome', () => player, { tile: tiles[0] });
       cities.push(origin);
+      let caravanTile = tiles[0];
+      let trading = false;
       caravan = {
         getId: () => 7,
         getName: () => 'Caravan',
         getDomain: () => 'land',
-        getTile: () => tiles[0],
-        delete: jest.fn()
+        getTile: () => caravanTile,
+        getMaxMovement: () => 2,
+        getPlayer: () => player,
+        ignoresTerrainCost: () => false,
+        isTrading: () => trading,
+        setTrading: jest.fn((value: boolean) => (trading = value)),
+        moveToTile: jest.fn((options: { targetTile: Tile }) => (caravanTile = options.targetTile))
       } as unknown as Unit;
       units.push(caravan);
     });
@@ -154,20 +164,29 @@ describe('PlayerTradeRoutes', () => {
       ]);
     });
 
-    it('is used up setting a route up, and comes home when it ends', () => {
+    it('walks the route back and forth, and is home and free again when it ends', () => {
       const antium = makeCity('Antium', () => player, { tile: tiles[3], population: 2 });
       cities.push(antium);
 
       expect(routes.establish(7, 'Antium', 'food')).toBe(true);
-      expect(caravan.delete).toHaveBeenCalled();
+      expect(caravan.isTrading()).toBe(true);
       expect(PlayerTradeRoutes.getCityYields(antium)).toEqual([{ food: 3 }]);
-      // The only slot is taken.
+      // The only slot is taken, and a trading unit can't start another.
       expect(routes.hasFreeSlot()).toBe(false);
 
-      for (let turn = 0; turn < PlayerTradeRoutes.ROUTE_TURNS; turn++) routes.passTurn();
+      // Two tiles a turn, turning round at each city.
+      routes.passTurn();
+      expect(caravan.getTile()).toBe(tiles[2]);
+      routes.passTurn();
+      expect(caravan.getTile()).toBe(tiles[3]);
+      routes.passTurn();
+      expect(caravan.getTile()).toBe(tiles[1]);
+
+      for (let turn = 3; turn < PlayerTradeRoutes.ROUTE_TURNS; turn++) routes.passTurn();
 
       expect(routes.getRoutes()).toEqual([]);
-      expect(origin.grantFreeUnit).toHaveBeenCalledWith('Caravan');
+      expect(caravan.getTile()).toBe(tiles[0]);
+      expect(caravan.isTrading()).toBe(false);
       expect(PlayerTradeRoutes.getCityYields(antium)).toEqual([]);
     });
 

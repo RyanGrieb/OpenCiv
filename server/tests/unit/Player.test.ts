@@ -140,7 +140,9 @@ describe("Player", () => {
           status: "content",
           effects: []
         },
-        faithBreakdown: { income: [], net: 0 }
+        faithBreakdown: { income: [], net: 0 },
+        tradeRoutes: { slots: 0, routes: [] },
+        connectedCities: []
       })
     );
   });
@@ -190,7 +192,9 @@ describe("Player", () => {
           status: "content",
           effects: []
         },
-        faithBreakdown: { income: [], net: 0 }
+        faithBreakdown: { income: [], net: 0 },
+        tradeRoutes: { slots: 0, routes: [] },
+        connectedCities: []
       })
     );
   });

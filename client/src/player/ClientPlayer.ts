@@ -17,6 +17,7 @@ import { CityStrikeAiming } from "../city/CityStrikeAiming";
 import { Diplomacy, Relation } from "./Diplomacy";
 import { GoldBreakdown } from "../ui/hud/GoldTooltip";
 import { FaithBreakdown } from "../ui/hud/FaithTooltip";
+import { TradeSummary } from "../ui/hud/TradeTooltip";
 import { HappinessBreakdown } from "../ui/hud/HappinessTooltip";
 
 export interface CurrentResearch {
@@ -46,6 +47,9 @@ export class ClientPlayer extends AbstractPlayer {
   private accumulatedStats: Map<string, number> = new Map();
   private goldBreakdown: GoldBreakdown = { income: [], expenses: [], net: 0 };
   private faithBreakdown: FaithBreakdown = { income: [], net: 0 };
+  private tradeSummary: TradeSummary = { slots: 0, routes: [] };
+  // The player's cities connected to their capital, by name.
+  private connectedCities: string[] = [];
   private happinessBreakdown: HappinessBreakdown = {
     sources: [],
     unhappiness: [],
@@ -309,6 +313,14 @@ export class ClientPlayer extends AbstractPlayer {
         this.goldBreakdown = data["goldBreakdown"] ?? this.goldBreakdown;
         this.happinessBreakdown = data["happinessBreakdown"] ?? this.happinessBreakdown;
         this.faithBreakdown = data["faithBreakdown"] ?? this.faithBreakdown;
+        this.tradeSummary = data["tradeRoutes"] ?? this.tradeSummary;
+
+        // The connection icon under each city's banner.
+        const connected: string[] = data["connectedCities"] ?? [];
+        if (connected.join() !== this.connectedCities.join()) {
+          this.connectedCities = connected;
+          this.getCities().forEach((city) => city.refreshConnection());
+        }
       }
     });
 
@@ -369,6 +381,15 @@ export class ClientPlayer extends AbstractPlayer {
   /** The empire's happiness, where it comes from, and what unhappiness is costing, as the server last reported it. */
   public getFaithBreakdown(): FaithBreakdown {
     return this.faithBreakdown;
+  }
+
+  public isConnected(cityName: string): boolean {
+    return this.connectedCities.includes(cityName);
+  }
+
+  /** The trade routes running and the room for more, as the server last reported them. */
+  public getTradeSummary(): TradeSummary {
+    return this.tradeSummary;
   }
 
   public getHappinessBreakdown(): HappinessBreakdown {

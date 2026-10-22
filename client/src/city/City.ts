@@ -370,6 +370,18 @@ export class City extends ActorGroup {
     return this.turnsToGrow;
   }
 
+  // Whether the city has a connection to its owner's capital (by road or harbor), for the icon under its
+  // banner. The server only tells the owner.
+  public isConnected(): boolean {
+    if (!this.isOwnedByClient()) return false;
+    return Game.getInstance().getCurrentSceneAs<InGameScene>().getClientPlayer().isConnected(this.name);
+  }
+
+  // Called when the owner's connections may have changed.
+  public refreshConnection() {
+    this.refreshBanner();
+  }
+
   public isOwnedByClient(): boolean {
     return this.player === Game.getInstance().getCurrentSceneAs<InGameScene>().getClientPlayer();
   }

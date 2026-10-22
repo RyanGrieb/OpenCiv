@@ -134,9 +134,10 @@ export class PlayerNotifications {
       .forEach((player) => player.getNotifications().queueRefresh());
   }
 
-  // A unit heading somewhere, fortified, skipping its turn, or working an improvement already has its orders.
+  // A unit heading somewhere, fortified, skipping its turn, working an improvement or walking a trade
+  // route already has its orders.
   private static needsOrders(unit: Unit): boolean {
-    if (unit.getAvailableMovement() <= 0) return false;
+    if (unit.getAvailableMovement() <= 0 || unit.isTrading()) return false;
 
     return !unit.hasMovementQueue() && !unit.isFortified() && !unit.isSkippingTurn() && !unit.getBuildingImprovement();
   }

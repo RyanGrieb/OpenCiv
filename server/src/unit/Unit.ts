@@ -126,6 +126,8 @@ export class Unit {
   private fortifiedForATurn: boolean;
   // Set by the "Skip Turn" action: the unit stays put, so it no longer needs orders until the next turn or it moves.
   private skippingTurn: boolean;
+  // Walking a trade route (see PlayerTradeRoutes): it moves on its own and takes no orders.
+  private trading = false;
   private defaultMoveDistance: number;
   private availableMovement: number;
   private sightRange: number;
@@ -197,7 +199,7 @@ export class Unit {
         const targetTile = GameMap.getInstance().getTiles()[data["targetX"]][data["targetY"]];
         const player = Game.getInstance().getPlayerFromWebsocket(websocket);
 
-        if (this.id !== data["id"] || this.tile === targetTile || this.player != player) return;
+        if (this.id !== data["id"] || this.tile === targetTile || this.player != player || this.trading) return;
 
         // Move the furthest we can possibly go, and queue the rest of tiles for next turn.
 
@@ -281,7 +283,7 @@ export class Unit {
         const unitTile = GameMap.getInstance().getTiles()[data["unitX"]][data["unitY"]];
         const player = Game.getInstance().getPlayerFromWebsocket(websocket);
 
-        if (this.tile !== unitTile || this.id !== data["id"] || this.player !== player) return;
+        if (this.tile !== unitTile || this.id !== data["id"] || this.player !== player || this.trading) return;
 
         const action = this.getActionByName(data["actionName"]);
         if (!action || action.isAvailable?.(this) === false) return;
@@ -1086,6 +1088,17 @@ export class Unit {
     return this.id;
   }
 
+  public isTrading() {
+    return this.trading;
+  }
+
+  // Sets the unit walking a trade route, or frees it again. A trading unit has no actions to show.
+  public setTrading(trading: boolean) {
+    this.trading = trading;
+    this.queuedMovementTiles = [];
+    this.sendActionsToOwner();
+  }
+
   public getAvailableMovement() {
     return this.availableMovement;
   }
@@ -1357,6 +1370,7 @@ export class Unit {
   }
 
   public getUnitActionsJSON() {
+    if (this.trading) return [];
     return this.actions.map(({ name, icon, requirements, desc, getDesc, isAvailable }) => ({
       name,
       icon,

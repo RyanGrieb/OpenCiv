@@ -456,6 +456,7 @@ export class Player {
       const current = this.accumulatedStats.get(stat) ?? 0;
       this.accumulatedStats.set(stat, current + rates[stat]);
     }
+    this.connections.bankTurn();
 
     this.sendTotalStatsUpdate();
   }
@@ -471,7 +472,9 @@ export class Player {
       accumulatedStats: this.getAccumulatedStats(),
       goldBreakdown: this.treasury.getBreakdown(),
       happinessBreakdown: this.happiness.getBreakdown(),
-      faithBreakdown: this.religion.getFaithBreakdown()
+      faithBreakdown: this.religion.getFaithBreakdown(),
+      tradeRoutes: this.tradeRoutes.getSummary(),
+      connectedCities: this.connections.getConnectedCities().map((city) => city.getName())
     });
 
     // Every city's growth depends on the status, so each one's food needs resending.

@@ -33,6 +33,9 @@ export class CityBanner extends Actor {
   // The pill's top, down from the top of the city's tile: it lies over the top of the city.
   private static readonly BELOW_TILE_TOP = 2;
   private static readonly RELIGION_ICON_SIZE = 5;
+  // Civ 5's city connection mark, in a dark circle centered under the pill.
+  private static readonly CONNECTION_ICON_SIZE = 4.5;
+  private static readonly CONNECTION_GAP = 0.75;
   private static readonly RIGHT_ICON_SIZE = 5.5;
   private static readonly BAR_WIDTH = 1.25;
   // The defense tab centered on top of the pill, like Civ 5's: a shield and the city's strength.
@@ -67,6 +70,7 @@ export class CityBanner extends Actor {
   private productionBar: Box | undefined;
   // The production item for the owner, the civilization's icon for anyone else.
   private rightIcon: Box | undefined;
+  private connectionIcon: Box | undefined;
   private tooltipShown = false;
 
   constructor(city: City, z: number) {
@@ -232,8 +236,17 @@ export class CityBanner extends Actor {
       height: CityBanner.DEFENSE_HEIGHT
     };
 
+    this.connectionIcon = undefined;
+    let bottom = top + height;
+    if (own && this.city.isConnected()) {
+      const size = CityBanner.CONNECTION_ICON_SIZE;
+      const iconTop = bottom + CityBanner.CONNECTION_GAP;
+      this.connectionIcon = { x: this.pill.x + pillWidth / 2 - size / 2, y: iconTop, width: size, height: size };
+      bottom = iconTop + size;
+    }
+
     this.setPosition(left, tabTop);
-    this.setSize(totalWidth, top + height - tabTop);
+    this.setSize(totalWidth, bottom - tabTop);
   }
 
   /** Where the banner's pill ends on the right, for whatever sits beside it (the city's strike icon). */
@@ -283,6 +296,7 @@ export class CityBanner extends Actor {
       );
       this.drawRightIcon(canvasContext, CityScreen.resolveProductionIcon(production));
     }
+    if (this.connectionIcon) this.drawConnectionIcon(canvasContext);
     if (this.rightIcon && !this.city.isOwnedByClient()) {
       this.drawRightIcon(canvasContext, resolveSpriteRegion(this.city.getPlayer().getCivilizationData().icon_name));
     }
@@ -303,6 +317,7 @@ export class CityBanner extends Actor {
       this.city.getReligion().majority ?? "",
       this.getDefenseText(),
       `${this.city.getHealth()}/${this.city.getMaxHealth()}`,
+      this.connectionIcon ? "connected" : "",
       production ? `${production.name}:${production.progress ?? 0}/${production.cost}:${production.turns}` : ""
     ].join("|");
   }
@@ -356,6 +371,15 @@ export class CityBanner extends Actor {
     context.fillStyle = CityBanner.BOX_COLOR;
     context.fill();
     CityBanner.drawSprite(context, region, box);
+  }
+
+  private drawConnectionIcon(context: CanvasRenderingContext2D) {
+    const box = this.connectionIcon;
+    context.beginPath();
+    context.arc(box.x + box.width / 2, box.y + box.height / 2, box.width / 2 + 0.5, 0, Math.PI * 2);
+    context.fillStyle = CityBanner.BOX_COLOR;
+    context.fill();
+    CityBanner.drawSprite(context, SpriteRegion.ICON_CONNECTION, box);
   }
 
   // Civ 5 shows the city's strength as a whole number.

@@ -11,6 +11,7 @@ import { UITheme } from "../UITheme";
 import { FaithTooltip } from "./FaithTooltip";
 import { GoldTooltip } from "./GoldTooltip";
 import { HappinessStatus, HappinessTooltip } from "./HappinessTooltip";
+import { TradeTooltip } from "./TradeTooltip";
 
 interface TurnTimeEvent {
   turn: number;
@@ -18,7 +19,7 @@ interface TurnTimeEvent {
 }
 
 // The stats that drop down a breakdown while the mouse is over them.
-type HoverStat = "gold" | "happiness" | "faith";
+type HoverStat = "gold" | "happiness" | "faith" | "trade";
 
 export class StatusBar extends ActorGroup {
   private static readonly HAPPINESS_COLORS: Record<HappinessStatus, string> = {
@@ -100,6 +101,7 @@ export class StatusBar extends ActorGroup {
     if (isOver(this.goldLabel)) return "gold";
     if (isOver(this.happinessLabel)) return "happiness";
     if (isOver(this.faithLabel)) return "faith";
+    if (isOver(this.tradeLabel)) return "trade";
     return undefined;
   }
 
@@ -129,6 +131,7 @@ export class StatusBar extends ActorGroup {
 
     if (stat === "gold") return GoldTooltip.create(this.goldLabel.getX(), y, clientPlayer.getGoldBreakdown());
     if (stat === "faith") return FaithTooltip.create(this.faithLabel.getX(), y, clientPlayer.getFaithBreakdown());
+    if (stat === "trade") return TradeTooltip.create(this.tradeLabel.getX(), y, clientPlayer.getTradeSummary());
     return HappinessTooltip.create(this.happinessLabel.getX(), y, clientPlayer.getHappinessBreakdown());
   }
 
@@ -222,7 +225,8 @@ export class StatusBar extends ActorGroup {
     this.happinessLabel.setText(`Happiness: !{${happinessIcon}} ${Strings.convertToStatUnit(happiness.net)}`);
     this.happinessLabel.setFontColor(StatusBar.HAPPINESS_COLORS[happiness.status]);
     this.faithLabel.setText(`Faith: !{faith} ${clientPlayer.getAccumulatedStat("faith")} (${rate("faith")})`);
-    this.tradeLabel.setText("Trade: !{trade} 0/0");
+    const trade = clientPlayer.getTradeSummary();
+    this.tradeLabel.setText(`Trade: !{trade} ${trade.routes.length}/${trade.slots}`);
 
     let x = this.x + 1;
     for (const label of this.getStatLabels()) {

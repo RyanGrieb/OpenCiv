@@ -20,6 +20,7 @@ describe('PlayerNotifications', () => {
   const makeUnit = (id: number, options: { movement?: number; queued?: boolean; fortified?: boolean; skipping?: boolean; building?: string } = {}) => ({
     getId: () => id,
     getAvailableMovement: () => options.movement ?? 2,
+    isTrading: () => false,
     hasMovementQueue: () => options.queued ?? false,
     isFortified: () => options.fortified ?? false,
     isSkippingTurn: () => options.skipping ?? false,

@@ -75,6 +75,23 @@ describe('CityConnections', () => {
     expect(connections.getGold()).toBe(4);
   });
 
+  it("banks a small city's fractions of gold once they add up to a whole gold", () => {
+    const line = row('grass', 'grass', 'grass');
+    join(line);
+    cityOn(line[0], { buildings: ['Palace'] });
+    cityOn(line[2]);
+    line[1].addTileType('road');
+    CityConnections.invalidate();
+
+    // 1.1 + 0.15 - 1 = 0.25 a turn: a gold every fourth turn.
+    const banked = [];
+    for (let turn = 0; turn < 8; turn++) {
+      banked.push(connections.getGold());
+      connections.bankTurn();
+    }
+    expect(banked).toEqual([0, 0, 0, 1, 0, 0, 0, 1]);
+  });
+
   it('is cut off by a gap in the road', () => {
     const line = row('grass', 'grass', 'grass', 'grass');
     join(line);

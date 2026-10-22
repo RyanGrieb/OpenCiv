@@ -24,6 +24,8 @@ export class CityConnections {
   public static readonly CITY_POPULATION_GOLD = 1.1;
   public static readonly CAPITAL_POPULATION_GOLD = 0.15;
   public static readonly HARBOR = "Harbor";
+  // Floating point slack, so 4 x 0.25 banks the whole gold.
+  private static readonly EPSILON = 1e-9;
 
   // Bumped by invalidate(), so every player knows to work their connections out again.
   private static version = 0;
@@ -31,12 +33,15 @@ export class CityConnections {
   private player: Player;
   private connected: Set<City>;
   private roadTiles: Tile[];
+  // Connection gold earned but not yet a whole gold.
+  private leftoverGold: number;
   private computedAt: number;
 
   constructor(player: Player) {
     this.player = player;
     this.connected = new Set();
     this.roadTiles = [];
+    this.leftoverGold = 0;
     this.computedAt = -1;
   }
 
@@ -73,8 +78,8 @@ export class CityConnections {
     return this.getConnectedCities().includes(city);
   }
 
-  // The gold all connections bring in this turn, rounded down, with Machu Picchu's bonus.
-  public getGold(): number {
+  // The gold all connections bring in a turn, fractions included, with Machu Picchu's bonus.
+  public getExactGold(): number {
     const capital = this.getCapital();
     if (!capital) return 0;
 
@@ -82,7 +87,18 @@ export class CityConnections {
       (total, city) => total + CityConnections.getConnectionGold(city, capital),
       0
     );
-    return Math.floor((gold * (100 + BuildingEffects.getConnectionGoldPercent(this.player))) / 100);
+    return (gold * (100 + BuildingEffects.getConnectionGoldPercent(this.player))) / 100;
+  }
+
+  // The whole gold banked this turn: the fractions left over from earlier turns add up, as Civ 5
+  // keeps hundredths of gold, so a pop-1 city's 0.25 still pays 1 gold every 4 turns.
+  public getGold(): number {
+    return Math.floor(this.getExactGold() + this.leftoverGold + CityConnections.EPSILON);
+  }
+
+  // Called once this turn's gold is banked: keeps what didn't make a whole gold for next turn.
+  public bankTurn() {
+    this.leftoverGold = Math.max(0, this.getExactGold() + this.leftoverGold - this.getGold());
   }
 
   // Road and railroad tiles this player pays maintenance on.

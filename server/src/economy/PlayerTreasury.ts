@@ -117,10 +117,16 @@ export class PlayerTreasury {
     return [...units].reverse().find((unit) => unit.canFight()) ?? units[units.length - 1];
   }
 
-  // e.g. { source: "City connections (2 cities)", amount: 5 }
+  // e.g. { source: "City connections (2 cities, 5.35 a turn)", amount: 5 }. The amount is this turn's whole
+  // gold; the fractions build up from turn to turn.
   private getConnectionsEntry(): GoldEntry {
-    const count = this.player.getConnections().getConnectedCities().length;
-    return { source: `City connections (${count} ${count === 1 ? "city" : "cities"})`, amount: this.getEmpireIncome() };
+    const connections = this.player.getConnections();
+    const count = connections.getConnectedCities().length;
+    const exact = Math.round(connections.getExactGold() * 100) / 100;
+    return {
+      source: `City connections (${count} ${count === 1 ? "city" : "cities"}, ${exact} a turn)`,
+      amount: this.getEmpireIncome()
+    };
   }
 
   // e.g. "4 roads"
