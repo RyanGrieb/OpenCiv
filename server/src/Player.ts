@@ -484,22 +484,20 @@ export class Player {
   }
 
   /**
-   * Turns until each unresearched tech is in at this player's science rate, counting every tech still
-   * needed on the way to it, as Civ 5's tech tree does. null with no science coming in.
+   * Turns each unresearched tech takes on its own at this player's science rate, as Civ 5's tech tree
+   * shows them: the science still to put into it, not the techs needed before it. null with no science
+   * coming in.
    */
   public getTurnsToResearch(): Record<string, number | null> {
     const science = this.getTotalStats().science;
-    const isResearched = (techName: string) => this.researchedTechs.has(techName);
     const turns: Record<string, number | null> = {};
 
     for (const tech of Technology.getAllTechnologies()) {
-      if (isResearched(tech.getName())) continue;
+      const techName = tech.getName();
+      if (this.researchedTechs.has(techName)) continue;
 
-      const remaining = ResearchPath.to(tech.getName(), isResearched).reduce(
-        (total, techName) => total + this.getResearchCost(techName) - this.getResearchProgress(techName),
-        0
-      );
-      turns[tech.getName()] = science > 0 ? Math.max(1, Math.ceil(remaining / science)) : null;
+      const remaining = this.getResearchCost(techName) - this.getResearchProgress(techName);
+      turns[techName] = science > 0 ? Math.max(1, Math.ceil(remaining / science)) : null;
     }
     return turns;
   }

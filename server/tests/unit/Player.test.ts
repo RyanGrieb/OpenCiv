@@ -304,14 +304,14 @@ describe("Player", () => {
       expect(player.getCurrentResearch().progress).toBe(10);
     });
 
-    it("counts the turns to a tech with every tech still needed on the way", () => {
+    it("counts the turns each tech takes on its own", () => {
       player["cities"].push(makeMockCity({ science: 10 }));
 
       const turns = player.getTurnsToResearch();
 
-      // Pottery and Writing cost 35 + 55 at 10 science a turn.
+      // Pottery costs 35 and Writing 55, at 10 science a turn - Writing's count leaves out Pottery's.
       expect(turns["Pottery"]).toBe(4);
-      expect(turns["Writing"]).toBe(9);
+      expect(turns["Writing"]).toBe(6);
     });
 
     it("has no turn count with no science coming in", () => {

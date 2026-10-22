@@ -384,7 +384,7 @@ export class ClientPlayer extends AbstractPlayer {
     return this.researchQueue;
   }
 
-  /** Turns until the tech is in, counting the techs still needed before it. undefined when unknown. */
+  /** Turns the tech takes on its own at the current science rate. undefined when unknown. */
   public getTurnsToResearch(techName: string): number | undefined {
     return this.turnsToResearch[techName] ?? undefined;
   }
