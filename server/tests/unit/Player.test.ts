@@ -1,24 +1,27 @@
-import { Player } from '../../src/Player';
-import { City, CityStats } from '../../src/city/City';
-import { ServerEvents } from '../../src/Events';
-import { WebSocket } from 'ws';
-import { PlayerTreasury } from '../../src/economy/PlayerTreasury';
-import { Game } from '../../src/Game';
-import { DefaultGameOptions } from '../../src/GameOptions';
-import { GameMap } from '../../src/map/GameMap';
-import { Tile } from '../../src/map/Tile';
+import { Player } from "../../src/Player";
+import { City, CityStats } from "../../src/city/City";
+import { ServerEvents } from "../../src/Events";
+import { WebSocket } from "ws";
+import { PlayerTreasury } from "../../src/economy/PlayerTreasury";
+import { Game } from "../../src/Game";
+import { DefaultGameOptions } from "../../src/GameOptions";
+import { GameMap } from "../../src/map/GameMap";
+import { Tile } from "../../src/map/Tile";
 
-jest.mock('../../src/city/City');
-jest.mock('../../src/Events');
+jest.mock("../../src/city/City");
+jest.mock("../../src/Events");
 
-describe('Player', () => {
+describe("Player", () => {
   let player: Player;
   let mockWebsocket: jest.Mocked<WebSocket>;
   let onSpy: jest.SpyInstance;
 
-  const makeMockCity = (stats: Partial<CityStats>, options: { name?: string; maintenance?: number } = {}): jest.Mocked<City> => {
+  const makeMockCity = (
+    stats: Partial<CityStats>,
+    options: { name?: string; maintenance?: number } = {}
+  ): jest.Mocked<City> => {
     return {
-      getName: jest.fn().mockReturnValue(options.name ?? 'TestCity'),
+      getName: jest.fn().mockReturnValue(options.name ?? "TestCity"),
       getStatline: jest.fn().mockReturnValue({
         population: 0,
         science: 0,
@@ -29,13 +32,13 @@ describe('Player', () => {
         food: 0,
         happiness: 0,
         foodSurplus: 0,
-        ...stats,
+        ...stats
       }),
       getBuildingMaintenance: jest.fn().mockReturnValue(options.maintenance ?? 0),
       getTerritory: jest.fn().mockReturnValue([]),
       getPopulation: jest.fn().mockReturnValue(stats.population ?? 0),
       getBuildingHappiness: jest.fn().mockReturnValue(0),
-      getPlayer: () => player,
+      getPlayer: () => player
     } as unknown as jest.Mocked<City>;
   };
 
@@ -52,17 +55,19 @@ describe('Player', () => {
 
     mockWebsocket = {
       on: jest.fn(),
-      send: jest.fn(),
+      send: jest.fn()
     } as unknown as jest.Mocked<WebSocket>;
 
-    onSpy = jest.spyOn(ServerEvents, 'on').mockImplementation(() => { });
-    jest.spyOn(Game, 'getInstance').mockReturnValue({ getGameOptions: () => DefaultGameOptions, getPlayers: () => new Map() } as unknown as Game);
+    onSpy = jest.spyOn(ServerEvents, "on").mockImplementation(() => {});
+    jest
+      .spyOn(Game, "getInstance")
+      .mockReturnValue({ getGameOptions: () => DefaultGameOptions, getPlayers: () => new Map() } as unknown as Game);
 
-    player = new Player('TestPlayer', mockWebsocket);
+    player = new Player("TestPlayer", mockWebsocket);
   });
 
-  it('sums stats that pool across the empire from every city', () => {
-    player['cities'].push(
+  it("sums stats that pool across the empire from every city", () => {
+    player["cities"].push(
       makeMockCity({ science: 2, gold: 3, production: 1, faith: 0, culture: 4 }),
       makeMockCity({ science: 5, gold: 1, production: 2, faith: 6, culture: 0 })
     );
@@ -72,13 +77,23 @@ describe('Player', () => {
       gold: 4,
       production: 3,
       faith: 6,
-      culture: 4,
+      culture: 4
     });
   });
 
-  it('ignores city-specific stats that should not pool empire-wide', () => {
-    player['cities'].push(
-      makeMockCity({ science: 1, gold: 1, production: 1, faith: 1, culture: 1, population: 10, happiness: 5, food: 8, foodSurplus: 2 })
+  it("ignores city-specific stats that should not pool empire-wide", () => {
+    player["cities"].push(
+      makeMockCity({
+        science: 1,
+        gold: 1,
+        production: 1,
+        faith: 1,
+        culture: 1,
+        population: 10,
+        happiness: 5,
+        food: 8,
+        foodSurplus: 2
+      })
     );
 
     expect(player.getTotalStats()).toEqual({
@@ -86,224 +101,306 @@ describe('Player', () => {
       gold: 1,
       production: 1,
       faith: 1,
-      culture: 1,
+      culture: 1
     });
   });
 
-  it('returns all-zero totals with no cities', () => {
+  it("returns all-zero totals with no cities", () => {
     expect(player.getTotalStats()).toEqual({
       science: 0,
       gold: 0,
       production: 0,
       faith: 0,
-      culture: 0,
+      culture: 0
     });
   });
 
-  it('starts with no accumulated stats banked', () => {
+  it("starts with no accumulated stats banked", () => {
     expect(player.getAccumulatedStats()).toEqual({});
   });
 
-  it('sends the computed totals to the player over the network', () => {
-    player['cities'].push(makeMockCity({ science: 9, gold: 2, production: 0, faith: 0, culture: 3 }));
+  it("sends the computed totals to the player over the network", () => {
+    player["cities"].push(makeMockCity({ science: 9, gold: 2, production: 0, faith: 0, culture: 3 }));
 
     player.sendTotalStatsUpdate();
 
-    expect(mockWebsocket.send).toHaveBeenCalledWith(JSON.stringify({
-      event: 'updateTotalStats',
-      stats: { science: 9, gold: 2, production: 0, faith: 0, culture: 3 },
-      accumulatedStats: {},
-      goldBreakdown: { income: [{ source: 'TestCity', amount: 2 }], expenses: [], net: 2 },
-      happinessBreakdown: { sources: [{ source: 'Base', amount: 9 }], unhappiness: [{ source: '1 city', amount: 3 }], net: 6, status: 'content', effects: [] },
-      faithBreakdown: { income: [], net: 0 },
-    }));
+    expect(mockWebsocket.send).toHaveBeenCalledWith(
+      JSON.stringify({
+        event: "updateTotalStats",
+        stats: { science: 9, gold: 2, production: 0, faith: 0, culture: 3 },
+        accumulatedStats: {},
+        goldBreakdown: { income: [{ source: "TestCity", amount: 2 }], expenses: [], net: 2 },
+        happinessBreakdown: {
+          sources: [{ source: "Base", amount: 9 }],
+          unhappiness: [{ source: "1 city", amount: 3 }],
+          net: 6,
+          status: "content",
+          effects: []
+        },
+        faithBreakdown: { income: [], net: 0 }
+      })
+    );
   });
 
-  it('banks the current per-turn rate of every accumulating stat on each turn', () => {
-    player['cities'].push(makeMockCity({ gold: 5 }));
+  it("banks the current per-turn rate of every accumulating stat on each turn", () => {
+    player["cities"].push(makeMockCity({ gold: 5 }));
 
-    triggerServerEvent('nextTurn');
+    triggerServerEvent("nextTurn");
     expect(player.getAccumulatedStats()).toEqual({ gold: 5, faith: 0 });
 
-    triggerServerEvent('nextTurn');
+    triggerServerEvent("nextTurn");
     expect(player.getAccumulatedStats()).toEqual({ gold: 10, faith: 0 });
   });
 
-  it('banks faith like gold', () => {
-    player['cities'].push(makeMockCity({ faith: 3 }));
+  it("banks faith like gold", () => {
+    player["cities"].push(makeMockCity({ faith: 3 }));
 
-    triggerServerEvent('nextTurn');
-    triggerServerEvent('nextTurn');
+    triggerServerEvent("nextTurn");
+    triggerServerEvent("nextTurn");
 
     expect(player.getAccumulatedStats()).toEqual({ gold: 0, faith: 6 });
   });
 
-  it('does not bank stats that are not marked as accumulating', () => {
-    player['cities'].push(makeMockCity({ science: 5, culture: 5, production: 5 }));
+  it("does not bank stats that are not marked as accumulating", () => {
+    player["cities"].push(makeMockCity({ science: 5, culture: 5, production: 5 }));
 
-    triggerServerEvent('nextTurn');
+    triggerServerEvent("nextTurn");
 
     expect(player.getAccumulatedStats()).toEqual({ gold: 0, faith: 0 });
   });
 
-  it('sends an updated totals packet after banking stats for the turn', () => {
-    player['cities'].push(makeMockCity({ gold: 5 }));
+  it("sends an updated totals packet after banking stats for the turn", () => {
+    player["cities"].push(makeMockCity({ gold: 5 }));
 
-    triggerServerEvent('nextTurn');
+    triggerServerEvent("nextTurn");
 
-    expect(mockWebsocket.send).toHaveBeenCalledWith(JSON.stringify({
-      event: 'updateTotalStats',
-      stats: { science: 0, gold: 5, production: 0, faith: 0, culture: 0 },
-      accumulatedStats: { gold: 5, faith: 0 },
-      goldBreakdown: { income: [{ source: 'TestCity', amount: 5 }], expenses: [], net: 5 },
-      happinessBreakdown: { sources: [{ source: 'Base', amount: 9 }], unhappiness: [{ source: '1 city', amount: 3 }], net: 6, status: 'content', effects: [] },
-      faithBreakdown: { income: [], net: 0 },
-    }));
+    expect(mockWebsocket.send).toHaveBeenCalledWith(
+      JSON.stringify({
+        event: "updateTotalStats",
+        stats: { science: 0, gold: 5, production: 0, faith: 0, culture: 0 },
+        accumulatedStats: { gold: 5, faith: 0 },
+        goldBreakdown: { income: [{ source: "TestCity", amount: 5 }], expenses: [], net: 5 },
+        happinessBreakdown: {
+          sources: [{ source: "Base", amount: 9 }],
+          unhappiness: [{ source: "1 city", amount: 3 }],
+          net: 6,
+          status: "content",
+          effects: []
+        },
+        faithBreakdown: { income: [], net: 0 }
+      })
+    );
   });
 
-  describe('free techs', () => {
-    const choose = (techName: string) => triggerServerEvent('chooseResearch', { techName }, mockWebsocket);
+  describe("free techs", () => {
+    const choose = (techName: string) => triggerServerEvent("chooseResearch", { techName }, mockWebsocket);
 
     // Finishing a tech resends the tiles it changes; an empty map has none.
     beforeEach(() => {
-      jest.spyOn(GameMap, 'getInstance').mockReturnValue({ getTiles: (): Tile[][] => [] } as unknown as GameMap);
+      jest.spyOn(GameMap, "getInstance").mockReturnValue({ getTiles: (): Tile[][] => [] } as unknown as GameMap);
     });
 
-    const chooseFree = (techName: string) => triggerServerEvent('chooseFreeTech', { techName }, mockWebsocket);
+    const chooseFree = (techName: string) => triggerServerEvent("chooseFreeTech", { techName }, mockWebsocket);
 
-    it('leaves the tech being researched alone and lets the player pick one', () => {
-      choose('Pottery');
+    it("leaves the tech being researched alone and lets the player pick one", () => {
+      choose("Pottery");
 
-      player.grantFreeTech('Great Library');
+      player.grantFreeTech("Great Library");
 
-      expect(player.hasResearchedTech('Pottery')).toBe(false);
-      expect(player.getCurrentResearch().techName).toBe('Pottery');
+      expect(player.hasResearchedTech("Pottery")).toBe(false);
+      expect(player.getCurrentResearch().techName).toBe("Pottery");
       expect(player.getFreeTechs()).toBe(1);
-      expect(player.getFreeTechChoices().map((tech) => tech.getName())).toContain('Mining');
+      expect(player.getFreeTechChoices().map((tech) => tech.getName())).toContain("Mining");
     });
 
-    it('offers only techs whose prerequisites are researched', () => {
-      player.grantFreeTech('Great Library');
+    it("offers only techs whose prerequisites are researched", () => {
+      player.grantFreeTech("Great Library");
 
       const choices = player.getFreeTechChoices().map((tech) => tech.getName());
-      expect(choices).toContain('Pottery');
-      expect(choices).not.toContain('Writing');
+      expect(choices).toContain("Pottery");
+      expect(choices).not.toContain("Writing");
 
-      chooseFree('Writing');
-      expect(player.hasResearchedTech('Writing')).toBe(false);
+      chooseFree("Writing");
+      expect(player.hasResearchedTech("Writing")).toBe(false);
       expect(player.getFreeTechs()).toBe(1);
     });
 
-    it('researches the picked tech, and choosing research afterwards costs science again', () => {
-      player.grantFreeTech('Great Library');
+    it("researches the picked tech, and choosing research afterwards costs science again", () => {
+      player.grantFreeTech("Great Library");
 
-      chooseFree('Mining');
+      chooseFree("Mining");
 
-      expect(player.hasResearchedTech('Mining')).toBe(true);
+      expect(player.hasResearchedTech("Mining")).toBe(true);
       expect(player.getFreeTechs()).toBe(0);
       expect(player.getFreeTechChoices()).toEqual([]);
 
-      choose('Pottery');
-      expect(player.hasResearchedTech('Pottery')).toBe(false);
-      expect(player.getCurrentResearch().techName).toBe('Pottery');
+      choose("Pottery");
+      expect(player.hasResearchedTech("Pottery")).toBe(false);
+      expect(player.getCurrentResearch().techName).toBe("Pottery");
     });
 
-    it('picking the tech being researched finishes it', () => {
-      choose('Pottery');
-      player.grantFreeTech('Great Library');
+    it("picking the tech being researched finishes it", () => {
+      choose("Pottery");
+      player.grantFreeTech("Great Library");
 
-      chooseFree('Pottery');
+      chooseFree("Pottery");
 
-      expect(player.hasResearchedTech('Pottery')).toBe(true);
+      expect(player.hasResearchedTech("Pottery")).toBe(true);
       expect(player.getCurrentResearch()).toBeNull();
     });
 
-    it('turns the turn button into Pick Free Tech until one is picked', () => {
-      const freeTech = () => player.getNotifications().getNotifications().find((n) => n.type === 'freeTech');
-      player.grantFreeTech('Great Library');
-      expect(freeTech()?.turnBlockingLabel).toBe('Pick Free Tech');
+    it("turns the turn button into Pick Free Tech until one is picked", () => {
+      const freeTech = () =>
+        player
+          .getNotifications()
+          .getNotifications()
+          .find((n) => n.type === "freeTech");
+      player.grantFreeTech("Great Library");
+      expect(freeTech()?.turnBlockingLabel).toBe("Pick Free Tech");
 
-      chooseFree('Mining');
+      chooseFree("Mining");
       expect(freeTech()).toBeUndefined();
     });
   });
 
-  describe('era', () => {
-    it('starts in the Ancient Era and moves on with its techs', () => {
-      expect(player.getEra().id).toBe('ancient');
+  describe("research queue", () => {
+    const choose = (techName: string) => triggerServerEvent("chooseResearch", { techName }, mockWebsocket);
 
-      player.researchAllTechs();
-
-      expect(player.getEra().id).toBe('information');
+    beforeEach(() => {
+      jest.spyOn(GameMap, "getInstance").mockReturnValue({ getTiles: (): Tile[][] => [] } as unknown as GameMap);
     });
 
-    it('announces a new era and has every city redrawn in its style', () => {
-      const city = { ...makeMockCity({}), sendAppearanceUpdate: jest.fn() };
-      player['cities'].push(city as unknown as City);
-      player.researchAllTechs();
-      const addMessage = jest.spyOn(player.getNotifications(), 'addMessage');
+    it("researches an available tech straight away, with nothing queued", () => {
+      choose("Pottery");
 
-      player['onEnteredEra']();
+      expect(player.getCurrentResearch().techName).toBe("Pottery");
+      expect(player.getResearchQueue()).toEqual([]);
+    });
 
-      expect(city.sendAppearanceUpdate).toHaveBeenCalled();
-      expect(addMessage).toHaveBeenCalledWith('TILE_CITY_INFORMATION_1', 'You have entered the Information Era.');
+    it("queues every prerequisite of a tech that is not available yet, first ones first", () => {
+      choose("Writing");
+
+      expect(player.getCurrentResearch().techName).toBe("Pottery");
+      expect(player.getResearchQueue()).toEqual(["Writing"]);
+    });
+
+    it("starts the next queued tech once the current one is in", () => {
+      choose("Writing");
+
+      player.addScience(1000);
+
+      expect(player.hasResearchedTech("Pottery")).toBe(true);
+      expect(player.getCurrentResearch().techName).toBe("Writing");
+      expect(player.getResearchQueue()).toEqual([]);
+    });
+
+    it("keeps the science put into a tech when switching away from it", () => {
+      choose("Pottery");
+      player.addScience(10);
+
+      choose("Mining");
+      choose("Pottery");
+
+      expect(player.getCurrentResearch().progress).toBe(10);
+    });
+
+    it("counts the turns to a tech with every tech still needed on the way", () => {
+      player["cities"].push(makeMockCity({ science: 10 }));
+
+      const turns = player.getTurnsToResearch();
+
+      // Pottery and Writing cost 35 + 55 at 10 science a turn.
+      expect(turns["Pottery"]).toBe(4);
+      expect(turns["Writing"]).toBe(9);
+    });
+
+    it("has no turn count with no science coming in", () => {
+      expect(player.getTurnsToResearch()["Pottery"]).toBeNull();
     });
   });
 
-  describe('gold upkeep', () => {
+  describe("era", () => {
+    it("starts in the Ancient Era and moves on with its techs", () => {
+      expect(player.getEra().id).toBe("ancient");
+
+      player.researchAllTechs();
+
+      expect(player.getEra().id).toBe("information");
+    });
+
+    it("announces a new era and has every city redrawn in its style", () => {
+      const city = { ...makeMockCity({}), sendAppearanceUpdate: jest.fn() };
+      player["cities"].push(city as unknown as City);
+      player.researchAllTechs();
+      const addMessage = jest.spyOn(player.getNotifications(), "addMessage");
+
+      player["onEnteredEra"]();
+
+      expect(city.sendAppearanceUpdate).toHaveBeenCalled();
+      expect(addMessage).toHaveBeenCalledWith("TILE_CITY_INFORMATION_1", "You have entered the Information Era.");
+    });
+  });
+
+  describe("gold upkeep", () => {
     const addUnits = (count: number, options: { canFight?: boolean } = {}) => {
       const units = Array.from({ length: count }, (_, index) => ({
         getName: jest.fn().mockReturnValue(`Unit${index}`),
         canFight: jest.fn().mockReturnValue(options.canFight ?? true),
-        delete: jest.fn(),
+        delete: jest.fn()
       }));
       units.forEach((unit) => player.addUnit(unit as any));
       return units;
     };
 
     beforeEach(() => {
-      player.setCivilizationData({ name: 'Rome', cities: [] });
-      player['notifications'] = { addMessage: jest.fn() } as any;
+      player.setCivilizationData({ name: "Rome", cities: [] });
+      player["notifications"] = { addMessage: jest.fn() } as any;
     });
 
-    it('takes building maintenance out of the per-turn gold rate', () => {
-      player['cities'].push(makeMockCity({ gold: 5 }, { maintenance: 3 }));
+    it("takes building maintenance out of the per-turn gold rate", () => {
+      player["cities"].push(makeMockCity({ gold: 5 }, { maintenance: 3 }));
 
       expect(player.getTotalStats().gold).toBe(2);
     });
 
-    it('charges each unit past the free ones', () => {
-      player['cities'].push(makeMockCity({ gold: 5 }));
+    it("charges each unit past the free ones", () => {
+      player["cities"].push(makeMockCity({ gold: 5 }));
       addUnits(PlayerTreasury.FREE_UNITS + 2);
 
       expect(player.getTotalStats().gold).toBe(5 - 2 * PlayerTreasury.GOLD_PER_UNIT);
     });
 
-    it('charges nothing for units within the free allowance', () => {
-      player['cities'].push(makeMockCity({ gold: 5 }));
+    it("charges nothing for units within the free allowance", () => {
+      player["cities"].push(makeMockCity({ gold: 5 }));
       addUnits(PlayerTreasury.FREE_UNITS);
 
       expect(player.getTotalStats().gold).toBe(5);
     });
 
-    it('lists income per city and each kind of upkeep in the breakdown', () => {
-      player['cities'].push(makeMockCity({ gold: 4 }, { name: 'Rome', maintenance: 1 }), makeMockCity({ gold: 0 }, { name: 'Antium', maintenance: 2 }));
+    it("lists income per city and each kind of upkeep in the breakdown", () => {
+      player["cities"].push(
+        makeMockCity({ gold: 4 }, { name: "Rome", maintenance: 1 }),
+        makeMockCity({ gold: 0 }, { name: "Antium", maintenance: 2 })
+      );
       addUnits(PlayerTreasury.FREE_UNITS + 1);
 
       expect(player.getTreasury().getBreakdown()).toEqual({
-        income: [{ source: 'Rome', amount: 4 }],
+        income: [{ source: "Rome", amount: 4 }],
         expenses: [
-          { source: 'Building maintenance', amount: 3 },
-          { source: `Unit maintenance (${PlayerTreasury.FREE_UNITS + 1} units, ${PlayerTreasury.FREE_UNITS} free)`, amount: 1 },
+          { source: "Building maintenance", amount: 3 },
+          {
+            source: `Unit maintenance (${PlayerTreasury.FREE_UNITS + 1} units, ${PlayerTreasury.FREE_UNITS} free)`,
+            amount: 1
+          }
         ],
-        net: 0,
+        net: 0
       });
     });
 
-    it('empties a treasury in debt and disbands a military unit', () => {
+    it("empties a treasury in debt and disbands a military unit", () => {
       const [civilian] = addUnits(1, { canFight: false });
       const [soldier] = addUnits(1);
-      player.addToAccumulatedStat('gold', -4);
+      player.addToAccumulatedStat("gold", -4);
 
       player.getTreasury().settleDebt();
 
@@ -312,9 +409,9 @@ describe('Player', () => {
       expect(civilian.delete).not.toHaveBeenCalled();
     });
 
-    it('leaves a treasury that is not in debt alone', () => {
+    it("leaves a treasury that is not in debt alone", () => {
       const [soldier] = addUnits(1);
-      player.addToAccumulatedStat('gold', 0);
+      player.addToAccumulatedStat("gold", 0);
 
       player.getTreasury().settleDebt();
 

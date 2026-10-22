@@ -9,23 +9,26 @@ import { Numbers } from "../../util/Numbers";
 import { Button, ButtonSize } from "../components/Button";
 import { Label } from "../components/Label";
 import { TechBonusTooltip } from "./TechBonusTooltip";
-import { TechDetailData, TechDetailWindow } from "./TechDetailWindow";
+import { TechDetailData } from "./TechDetailWindow";
 import { Tooltip } from "../components/Tooltip";
 import { UITheme } from "../UITheme";
 
 const WINDOW_PADDING = 16;
 // Base (100% zoom) tile geometry - actual layout scales these by zoomLevel.
 const BASE_TILE_PADDING = 8;
-const BASE_TILE_ICON_SIZE = 56; // The tech's own icon, centered on the tile's left side as in Civ5.
+const BASE_TILE_ICON_SIZE = 64; // The tech's own icon at twice its sprite's size, centered on the tile's left side as in Civ5.
 const BASE_TILE_ICON_GAP = 10; // Between the tech's icon and its name and bonus row.
 const BASE_BONUS_ICON_SIZE = 32;
 const BASE_BONUS_ICON_GAP = 4;
-const BONUS_ROW_FITS = 6; // The most bonus icons a tech has (Bronze Working), sized into the tile's width.
+const BONUS_ROW_FITS = 6; // The most bonus icons a tech has (Bronze Working).
+const BASE_TURNS_WIDTH = 100; // Kept free at the top right of the name for "x Turns".
+const BASE_NAME_WIDTH = 190; // Room for the longest names (Advanced Ballistics) on one line.
 const BASE_TILE_WIDTH =
-  BASE_TILE_PADDING * 3 +
+  BASE_TILE_PADDING * 2 +
   BASE_TILE_ICON_SIZE +
   BASE_TILE_ICON_GAP +
-  BONUS_ROW_FITS * (BASE_BONUS_ICON_SIZE + BASE_BONUS_ICON_GAP);
+  Math.max(BONUS_ROW_FITS * (BASE_BONUS_ICON_SIZE + BASE_BONUS_ICON_GAP), BASE_NAME_WIDTH + BASE_TURNS_WIDTH);
+const BASE_QUEUE_BADGE_RADIUS = 12;
 const BASE_NAME_GAP = 4; // Between the name and the bonus row under it.
 const BASE_SLOT_GAP = 12; // Vertical gap between tiles in the same column.
 const BASE_COLUMN_GAP = 48; // Horizontal gap between columns, where the connector lines bend.
@@ -40,6 +43,13 @@ const CONNECTOR_MET_COLOR = "lime";
 const CONNECTOR_UNMET_COLOR = "#666";
 const CONNECTOR_WIDTH = 2;
 const ICON_BACKDROP_COLOR = "rgba(0, 0, 0, 0.35)";
+const QUEUE_BADGE_RING_COLOR = "#f0c850";
+// Tints laid over a tile's background by its research state; available and locked tiles keep the plain one.
+const STATE_TINTS: Partial<Record<TechState, string>> = {
+  researched: "rgba(50, 100, 190, 0.6)",
+  researching: "rgba(60, 170, 60, 0.6)",
+  queued: "rgba(30, 120, 110, 0.6)"
+};
 const ICON_RING_COLOR = "rgba(255, 255, 255, 0.25)";
 const TOOLTIP_OFFSET = 4; // Between a hovered bonus icon and the tooltip under it.
 
@@ -53,10 +63,13 @@ interface EraData {
   rows: number[];
 }
 
+type TechState = "researched" | "researching" | "queued" | "available" | "locked";
+
 interface TechTile {
   tech: TechData;
+  nameLabel?: Label; // Undefined until measured.
   background: Actor; // Hit-testing/position only - never drawn; its transparency doubles as the tile's locked-state alpha.
-  bitmap?: HTMLCanvasElement; // The tile's background, icons and name pre-rendered once per build; undefined until its label is measured.
+  bitmap?: HTMLCanvasElement; // The tile's background, icons and text pre-rendered on each build and research change; undefined until its label is measured.
 }
 
 // Which bonus icon the mouse is over, so its tooltip is only rebuilt when that changes.
@@ -90,8 +103,9 @@ interface TreeLayout {
 // deliberately empty slots. Each tile is a Civ5 tech button: the tech's large icon
 // on the left, its name along the top, and a row of icons for what it gives
 // (units, buildings, wonders, improvements, its notes) along the bottom, each with
-// a tooltip on hover. Clicking one opens a TechDetailWindow with the full
-// description and Research/Cancel action.
+// a tooltip on hover, plus "x Turns" at the top right. Clicking one researches it, or,
+// as in Civ5, queues every tech on the way to it; the tile's color shows whether it's
+// researched, being researched or queued, and a badge shows its place in the queue.
 //
 // The tree can be wider/taller than the window (80 techs, 17 columns wide),
 // so content is drag-panned and clipped to the window bounds rather than shrunk
@@ -103,7 +117,6 @@ interface TreeLayout {
 export class ResearchTreeWindow extends ActorGroup {
   private windowBackground: Actor;
   private closeButton: Button;
-  private detailWindow: TechDetailWindow;
   private tiles: TechTile[] = [];
   private tilesByName: Map<string, TechTile> = new Map();
   private eraLabels: Label[] = [];
@@ -255,7 +268,7 @@ export class ResearchTreeWindow extends ActorGroup {
       eventName: "updateResearch",
       parentObject: this,
       callback: () => {
-        this.refreshLockState();
+        this.refreshTiles();
       }
     });
 
@@ -296,10 +309,6 @@ export class ResearchTreeWindow extends ActorGroup {
 
     if (this.bonusTooltip) {
       this.bonusTooltip.draw(canvasContext);
-    }
-
-    if (this.detailWindow) {
-      this.detailWindow.draw(canvasContext);
     }
 
     canvasContext.restore();
@@ -405,7 +414,7 @@ export class ResearchTreeWindow extends ActorGroup {
     const iconSize = BASE_TILE_ICON_SIZE * zoom;
     const textX = tilePadding + iconSize + BASE_TILE_ICON_GAP * zoom;
     const font = `${Math.round(UITheme.FONT_SIZE * zoom)}px serif`;
-    const textMaxWidth = tileWidth - textX - tilePadding;
+    const textMaxWidth = tileWidth - textX - tilePadding - BASE_TURNS_WIDTH * zoom;
 
     // Every tile shares one height (the tallest wrapped name across all techs),
     // so tiles line up in a clean grid instead of each being sized to its own content.
@@ -458,7 +467,7 @@ export class ResearchTreeWindow extends ActorGroup {
     }
 
     this.buildEraMarkers(this.lastEras, columnX, originY, layout, requestId);
-    this.refreshLockState();
+    this.refreshTiles();
   }
 
   // A label for each era above the tree, centered over that era's columns as in Civ5,
@@ -504,14 +513,11 @@ export class ResearchTreeWindow extends ActorGroup {
       height: layout.tileHeight,
       cameraApplies: false
     });
-    background.on("mouse_enter", () => {
-      if (this.detailWindow) return; // Tiles aren't clickable while the detail popup is open - see the "clicked" guard below.
-      Game.getInstance().setCursor("pointer");
-    });
+    background.on("mouse_enter", () => Game.getInstance().setCursor("pointer"));
     background.on("mouse_exit", () => Game.getInstance().setCursor("default"));
     background.on("clicked", () => {
-      if (this.isDragging || this.detailWindow) return; // A drag ending over a tile shouldn't also open it, and a tile behind the open detail popup shouldn't be clickable through it.
-      this.openTechDetail(tech);
+      if (this.isDragging) return; // A drag ending over a tile shouldn't also pick it.
+      this.chooseTech(tech.name);
     });
     this.addActor(background);
 
@@ -528,19 +534,52 @@ export class ResearchTreeWindow extends ActorGroup {
     });
     nameLabel.conformSize().then(() => {
       if (requestId !== this.buildRequestId) return; // Superseded mid-measurement - see buildTree.
-      tile.bitmap = this.drawTileBitmap(tech, nameLabel, layout);
+      tile.nameLabel = nameLabel;
+      this.renderTile(tile, layout, requestId);
     });
 
     return tile;
   }
 
-  // The tile's background, the tech's icon in a dark ring, its name and its bonus row, laid out at the
-  // bitmap's own origin rather than the tile's on-screen position.
-  private drawTileBitmap(tech: TechData, nameLabel: Label, layout: TreeLayout): HTMLCanvasElement {
+  // Measures the tile's turn count, then redraws its bitmap in its current research state.
+  private async renderTile(tile: TechTile, layout: TreeLayout, requestId: number) {
+    const clientPlayer = Game.getInstance().getCurrentSceneAs<InGameScene>().getClientPlayer();
+    const state = this.getTechState(tile.tech, clientPlayer);
+    const turns = state === "researched" ? undefined : clientPlayer.getTurnsToResearch(tile.tech.name);
+
+    let turnsLabel: Label | undefined;
+    if (turns !== undefined) {
+      turnsLabel = new Label({
+        text: `${turns} ${turns === 1 ? "Turn" : "Turns"}`,
+        font: layout.font,
+        fontColor: "white"
+      });
+      await turnsLabel.conformSize();
+      if (requestId !== this.buildRequestId) return; // Superseded mid-measurement - see buildTree.
+      turnsLabel.setPosition(layout.tileWidth - layout.tilePadding - turnsLabel.getWidth(), layout.tilePadding);
+    }
+
+    tile.background.setTransparency(state === "locked" ? LOCKED_TRANSPARENCY : 1);
+    tile.bitmap = this.drawTileBitmap(tile, state, turnsLabel, this.getQueueNumber(tile.tech, clientPlayer), layout);
+  }
+
+  // The tile's background tinted by its state, the tech's icon in a dark ring with its queue badge, its
+  // name and turns and its bonus row, laid out at the bitmap's own origin rather than the tile's on-screen
+  // position.
+  private drawTileBitmap(
+    tile: TechTile,
+    state: TechState,
+    turnsLabel: Label | undefined,
+    queueNumber: number | undefined,
+    layout: TreeLayout
+  ): HTMLCanvasElement {
+    const tech = tile.tech;
     const bitmap = document.createElement("canvas");
     bitmap.width = Math.ceil(layout.tileWidth);
     bitmap.height = Math.ceil(layout.tileHeight);
     const context = bitmap.getContext("2d");
+    // Sprites are pixel art: scaled up without smoothing they stay sharp instead of blurring.
+    context.imageSmoothingEnabled = false;
 
     new Actor({
       image: Game.getInstance().getImage(GameImage.POPUP_BOX),
@@ -552,6 +591,7 @@ export class ResearchTreeWindow extends ActorGroup {
       cornerSize: 10,
       cameraApplies: false
     }).draw(context);
+    this.tint(context, STATE_TINTS[state]);
 
     const iconX = layout.tilePadding;
     const iconY = layout.tileHeight / 2 - layout.iconSize / 2;
@@ -564,8 +604,10 @@ export class ResearchTreeWindow extends ActorGroup {
     context.strokeStyle = ICON_RING_COLOR;
     context.stroke();
     this.drawSprite(context, tech.asset_name, iconX, iconY, layout.iconSize);
+    if (queueNumber !== undefined) this.drawQueueBadge(context, queueNumber, iconX, iconY + layout.iconSize);
 
-    nameLabel.draw(context);
+    tile.nameLabel.draw(context);
+    turnsLabel?.draw(context);
 
     // A dark strip under the bonus icons, like Civ5's, running from the name's left edge to the tile's right.
     const rowY = this.bonusRowY(layout);
@@ -586,6 +628,38 @@ export class ResearchTreeWindow extends ActorGroup {
     });
 
     return bitmap;
+  }
+
+  // Colors only the background's own pixels, so its rounded corners stay clear.
+  private tint(context: CanvasRenderingContext2D, color: string | undefined) {
+    if (!color) return;
+
+    context.save();
+    context.globalCompositeOperation = "source-atop";
+    context.fillStyle = color;
+    context.fillRect(0, 0, context.canvas.width, context.canvas.height);
+    context.restore();
+  }
+
+  // The tech's place in the research queue, in a ring over the bottom left of its icon, as in Civ5.
+  private drawQueueBadge(context: CanvasRenderingContext2D, queueNumber: number, left: number, bottom: number) {
+    const radius = BASE_QUEUE_BADGE_RADIUS * this.zoomLevel;
+    const centerX = left + radius - 2 * this.zoomLevel;
+    const centerY = bottom - radius + 2 * this.zoomLevel;
+
+    context.beginPath();
+    context.arc(centerX, centerY, radius, 0, Math.PI * 2);
+    context.fillStyle = "black";
+    context.fill();
+    context.lineWidth = 2 * this.zoomLevel;
+    context.strokeStyle = QUEUE_BADGE_RING_COLOR;
+    context.stroke();
+
+    context.font = `bold ${Math.round(16 * this.zoomLevel)}px serif`;
+    context.fillStyle = "white";
+    context.textAlign = "center";
+    context.textBaseline = "middle";
+    context.fillText(String(queueNumber), centerX, centerY + 1);
   }
 
   private drawSprite(context: CanvasRenderingContext2D, assetName: string, x: number, y: number, size: number) {
@@ -612,7 +686,7 @@ export class ResearchTreeWindow extends ActorGroup {
   // The bonus icon under the mouse, if any.
   private findHoveredBonus(): HoveredBonus | undefined {
     const layout = this.layout;
-    if (!layout || this.detailWindow) return undefined;
+    if (!layout) return undefined;
 
     for (const tile of this.tiles) {
       const localX = this.hoverX - tile.background.getX();
@@ -652,16 +726,31 @@ export class ResearchTreeWindow extends ActorGroup {
     this.bonusTooltip = undefined;
   }
 
-  // Dims any tile whose prerequisites aren't all researched yet, rather than
-  // hiding it - lets the whole tree stay visible so techs further out can be
-  // previewed ahead of time. Re-run whenever research state changes.
-  private refreshLockState() {
-    const clientPlayer: ClientPlayer = Game.getInstance().getCurrentSceneAs<InGameScene>().getClientPlayer();
+  // Redraws every measured tile in its research state - re-run whenever that changes. Tiles whose
+  // prerequisites aren't all researched are dimmed rather than hidden, so techs further out can be
+  // previewed ahead of time.
+  private refreshTiles() {
+    if (!this.layout) return;
 
     for (const tile of this.tiles) {
-      const locked = tile.tech.prerequisites.some((prereq) => !clientPlayer.hasResearchedTech(prereq));
-      tile.background.setTransparency(locked ? LOCKED_TRANSPARENCY : 1);
+      if (tile.nameLabel) this.renderTile(tile, this.layout, this.buildRequestId);
     }
+  }
+
+  private getTechState(tech: TechData, clientPlayer: ClientPlayer): TechState {
+    if (clientPlayer.hasResearchedTech(tech.name)) return "researched";
+    if (clientPlayer.getCurrentResearch()?.techName === tech.name) return "researching";
+    if (clientPlayer.getResearchQueue().includes(tech.name)) return "queued";
+    if (tech.prerequisites.some((prereq) => !clientPlayer.hasResearchedTech(prereq))) return "locked";
+    return "available";
+  }
+
+  // 1 for the tech being researched, then the queued ones in order. Undefined for any other tech.
+  private getQueueNumber(tech: TechData, clientPlayer: ClientPlayer): number | undefined {
+    const current = clientPlayer.getCurrentResearch()?.techName;
+    const order = [...(current ? [current] : []), ...clientPlayer.getResearchQueue()];
+    const index = order.indexOf(tech.name);
+    return index < 0 ? undefined : index + 1;
   }
 
   private clampPanDelta(dx: number, dy: number): { dx: number; dy: number } {
@@ -699,32 +788,19 @@ export class ResearchTreeWindow extends ActorGroup {
     return Math.min(Math.max(delta, min), max);
   }
 
-  public getDetailWindow(): TechDetailWindow | undefined {
-    return this.detailWindow;
+  /**
+   * Researches the tech, or queues every tech on the way to it when it isn't available yet - the server
+   * works out the order. Researched techs do nothing. What a click on its tile does.
+   */
+  public chooseTech(techName: string) {
+    const clientPlayer = Game.getInstance().getCurrentSceneAs<InGameScene>().getClientPlayer();
+    if (clientPlayer.hasResearchedTech(techName)) return;
+
+    WebsocketClient.sendMessage({ event: "chooseResearch", techName });
   }
 
-  public openTechDetailByName(techName: string): boolean {
-    const tech = this.lastTechnologies.find((candidate) => candidate.name === techName);
-    if (tech) this.openTechDetail(tech);
-    return tech !== undefined;
-  }
-
-  private openTechDetail(tech: TechData) {
-    if (this.detailWindow) {
-      this.removeActor(this.detailWindow);
-      this.detailWindow = undefined;
-    }
-
-    this.hideBonusTooltip();
-    this.detailWindow = new TechDetailWindow({
-      tech,
-      allTechs: this.lastTechnologies,
-      onClose: () => {
-        this.removeActor(this.detailWindow);
-        this.detailWindow = undefined;
-      },
-      onOpenTech: (techName) => this.openTechDetailByName(techName)
-    });
-    this.addActor(this.detailWindow);
+  /** Whether the tree has been built from the server's techs. */
+  public hasTech(techName: string): boolean {
+    return this.tilesByName.has(techName);
   }
 }

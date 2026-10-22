@@ -55,6 +55,9 @@ export class ClientPlayer extends AbstractPlayer {
   };
   private currentResearch: CurrentResearch | null = null;
   private researchedTechs: Set<string> = new Set();
+  // Techs to research after the current one, in order, and the server's turn count to each tech.
+  private researchQueue: string[] = [];
+  private turnsToResearch: Record<string, number | null> = {};
   // Every civilization this player has met, by player name.
   private relations: Map<string, Relation> = new Map();
 
@@ -315,6 +318,8 @@ export class ClientPlayer extends AbstractPlayer {
       callback: (data) => {
         this.currentResearch = data["currentResearch"];
         this.researchedTechs = new Set(data["researchedTechs"]);
+        this.researchQueue = data["queue"] ?? [];
+        this.turnsToResearch = data["turns"] ?? {};
       }
     });
 
@@ -372,6 +377,16 @@ export class ClientPlayer extends AbstractPlayer {
 
   public getCurrentResearch(): CurrentResearch | null {
     return this.currentResearch;
+  }
+
+  /** Techs queued after the current research, in the order they'll be researched. */
+  public getResearchQueue(): string[] {
+    return this.researchQueue;
+  }
+
+  /** Turns until the tech is in, counting the techs still needed before it. undefined when unknown. */
+  public getTurnsToResearch(techName: string): number | undefined {
+    return this.turnsToResearch[techName] ?? undefined;
   }
 
   public hasResearchedTech(techName: string): boolean {

@@ -11,6 +11,7 @@ import { PlayerNotifications } from "./notification/PlayerNotifications";
 import { Beliefs } from "./religion/Beliefs";
 import { PlayerReligion } from "./religion/PlayerReligion";
 import { ReligiousUnits } from "./religion/ReligiousUnits";
+import { ResearchPath } from "./research/ResearchPath";
 import { TechEffects } from "./research/TechEffects";
 import { EraData, Technology } from "./research/Technology";
 import { Unit } from "./unit/Unit";
@@ -58,6 +59,10 @@ export class Player {
   private accumulatedStats: Map<string, number>;
   private currentResearch: CurrentResearch | null;
   private researchedTechs: Set<string>;
+  // Techs to research after the current one, in order (Civ 5's research queue).
+  private researchQueue: string[];
+  // Science put into techs that were started and then switched away from, kept for when they're picked again.
+  private techProgress: Map<string, number>;
   private visibility: PlayerVisibility;
   private notifications: PlayerNotifications;
   private diplomacy: PlayerDiplomacy;
@@ -82,6 +87,8 @@ export class Player {
     this.accumulatedStats = new Map();
     this.currentResearch = null;
     this.researchedTechs = new Set();
+    this.researchQueue = [];
+    this.techProgress = new Map();
     this.visibility = new PlayerVisibility(this);
     this.notifications = new PlayerNotifications(this);
     this.diplomacy = new PlayerDiplomacy(this);
@@ -216,7 +223,8 @@ export class Player {
       callback: (data, websocket) => {
         if (this.wsConnection != websocket) return;
 
-        this.currentResearch = null;
+        this.setCurrentResearch(null);
+        this.researchQueue = [];
         this.sendResearchUpdate();
       },
       globalEvent: true
@@ -465,8 +473,35 @@ export class Player {
     this.sendNetworkEvent({
       event: "updateResearch",
       currentResearch: this.currentResearch,
-      researchedTechs: Array.from(this.researchedTechs)
+      researchedTechs: Array.from(this.researchedTechs),
+      queue: this.researchQueue,
+      turns: this.getTurnsToResearch()
     });
+  }
+
+  public getResearchQueue(): string[] {
+    return this.researchQueue;
+  }
+
+  /**
+   * Turns until each unresearched tech is in at this player's science rate, counting every tech still
+   * needed on the way to it, as Civ 5's tech tree does. null with no science coming in.
+   */
+  public getTurnsToResearch(): Record<string, number | null> {
+    const science = this.getTotalStats().science;
+    const isResearched = (techName: string) => this.researchedTechs.has(techName);
+    const turns: Record<string, number | null> = {};
+
+    for (const tech of Technology.getAllTechnologies()) {
+      if (isResearched(tech.getName())) continue;
+
+      const remaining = ResearchPath.to(tech.getName(), isResearched).reduce(
+        (total, techName) => total + this.getResearchCost(techName) - this.getResearchProgress(techName),
+        0
+      );
+      turns[tech.getName()] = science > 0 ? Math.max(1, Math.ceil(remaining / science)) : null;
+    }
+    return turns;
   }
 
   /**
@@ -517,14 +552,52 @@ export class Player {
     return tech.getPrerequisites().every((prereq) => this.researchedTechs.has(prereq));
   }
 
+  // A tech that isn't available yet queues every tech on the way to it, as in Civ 5.
   private chooseResearch(techName: string) {
-    const tech = Technology.createFromName(techName);
-    if (!tech || !this.canResearch(tech)) return;
+    const path = ResearchPath.to(techName, (name) => this.researchedTechs.has(name));
+    if (path.length < 1) return;
 
-    const costPercent = Game.getInstance().getGameOptions().techCostPercent;
-    const cost = Math.max(1, Math.round((tech.getCost() * costPercent) / 100));
-    this.currentResearch = { techName: tech.getName(), assetName: tech.getAssetName(), progress: 0, cost };
+    this.setCurrentResearch(path[0]);
+    this.researchQueue = path.slice(1);
     this.sendResearchUpdate();
+  }
+
+  // Switching away keeps the science already put into the old tech for later.
+  private setCurrentResearch(techName: string | null) {
+    if (this.currentResearch) this.techProgress.set(this.currentResearch.techName, this.currentResearch.progress);
+
+    const tech = techName ? Technology.createFromName(techName) : undefined;
+    if (!tech || !this.canResearch(tech)) {
+      this.currentResearch = null;
+      return;
+    }
+
+    this.currentResearch = {
+      techName: tech.getName(),
+      assetName: tech.getAssetName(),
+      progress: this.getResearchProgress(tech.getName()),
+      cost: this.getResearchCost(tech.getName())
+    };
+  }
+
+  // Starts the next queued tech once nothing is being researched, skipping any that came in some other way.
+  private advanceResearchQueue() {
+    this.researchQueue = this.researchQueue.filter((techName) => !this.researchedTechs.has(techName));
+    if (this.currentResearch || this.researchQueue.length < 1) return;
+
+    this.setCurrentResearch(this.researchQueue.shift());
+  }
+
+  private getResearchProgress(techName: string): number {
+    if (this.currentResearch?.techName === techName) return this.currentResearch.progress;
+    return this.techProgress.get(techName) ?? 0;
+  }
+
+  // A tech's science cost, scaled by the techCostPercent game option.
+  private getResearchCost(techName: string): number {
+    const tech = Technology.createFromName(techName);
+    const costPercent = Game.getInstance().getGameOptions().techCostPercent;
+    return Math.max(1, Math.round(((tech?.getCost() ?? 0) * costPercent) / 100));
   }
 
   // Mirrors accumulateTurnStats: banks this turn's science against whatever is
@@ -553,6 +626,8 @@ export class Player {
   private completeTech(techName: string, assetName: string) {
     const previousEra = this.getEra();
     this.researchedTechs.add(techName);
+    this.techProgress.delete(techName);
+    this.advanceResearchQueue();
     this.notifications.addMessage(assetName, `You have discovered ${techName}.`);
     // A new tech can unlock improvements for this player's Builders.
     this.units.forEach((unit) => unit.sendActionsToOwner());

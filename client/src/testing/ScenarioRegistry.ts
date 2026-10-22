@@ -117,9 +117,9 @@ ScenarioRegistry.register("AncientRuins", ScenarioCategory.MAP, async () => {
   return module.setupAncientRuinsTest;
 });
 
-ScenarioRegistry.register("TechDetailWindow", ScenarioCategory.RESEARCH, async () => {
-  const module = await import("./scenarios/TechDetailWindow.test");
-  return module.setupTechDetailWindowTest;
+ScenarioRegistry.register("ResearchTree", ScenarioCategory.RESEARCH, async () => {
+  const module = await import("./scenarios/ResearchTree.test");
+  return module.setupResearchTreeTest;
 });
 
 ScenarioRegistry.register("BarbarianCamps", ScenarioCategory.COMBAT, async () => {
