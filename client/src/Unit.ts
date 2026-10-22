@@ -237,6 +237,8 @@ export class Unit extends ActorGroup {
   // Where units sit among the map's scene objects: over the selected unit's outline, hovered tile and
   // city borders, under movement paths and other map lines.
   public static readonly MAP_Z = 2;
+  // Mirrors the server's PlayerTradeRoutes.LAND_UNIT and SEA_UNIT.
+  private static readonly TRADE_UNITS = ["Caravan", "Cargo Ship"];
   private static readonly SELECTION_TILE_Z = 0;
   // The health bubble, civ icon and status icons sit above everything else on the map (city borders,
   // the hovered tile, movement path lines at z 3), but below city banners (z 4) and the HUD.
@@ -736,6 +738,12 @@ export class Unit extends ActorGroup {
 
   public isUtility(): boolean {
     return this.utility;
+  }
+
+  // Caravans and Cargo Ships, which stack with any of their owner's units. Mirrors the server's
+  // PlayerTradeRoutes.isTradeUnit().
+  public isTradeUnit(): boolean {
+    return Unit.TRADE_UNITS.includes(this.name);
   }
 
   public ignoresTerrainCost(): boolean {

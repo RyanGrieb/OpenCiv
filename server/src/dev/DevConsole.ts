@@ -1,3 +1,4 @@
+import { PlayerTradeRoutes } from "../economy/PlayerTradeRoutes";
 import { ServerEvents } from "../Events";
 import { Game } from "../Game";
 import { Player } from "../Player";
@@ -95,7 +96,7 @@ export class DevConsole {
     if (!Unit.canStandOn(data.name, tile)) {
       return { lines: [`The ${data.name} can't stand there. Pick another tile.`], pickTile: `spawn ${data.name}` };
     }
-    if (!tile.canPlaceUnit(player, data.is_utility ?? false)) {
+    if (!tile.canPlaceUnit(player, data.is_utility ?? false, PlayerTradeRoutes.isTradeUnit(data.name))) {
       return { lines: [`The ${data.name} can't share that tile. Pick another.`], pickTile: `spawn ${data.name}` };
     }
 

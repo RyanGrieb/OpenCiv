@@ -1433,7 +1433,8 @@ export class City {
       ...nearby.filter((tile) => tile && tile !== this.tile && Unit.canStandOn(unitName, tile))
     ];
 
-    return candidates.find((tile) => tile.canPlaceUnit(this.player, isUtility));
+    const isTradeUnit = PlayerTradeRoutes.isTradeUnit(unitName);
+    return candidates.find((tile) => tile.canPlaceUnit(this.player, isUtility, isTradeUnit));
   }
 
   // Every tile within `range` of the city, ring by ring outward (the order getRingDistances finds them in).

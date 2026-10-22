@@ -716,7 +716,7 @@ describe('City', () => {
 
         triggerServerEvent('nextTurn', { turn: 2 });
 
-        expect(mockTile.canPlaceUnit).toHaveBeenCalledWith(mockPlayer, false);
+        expect(mockTile.canPlaceUnit).toHaveBeenCalledWith(mockPlayer, false, false);
         expect(Unit.createFromName).toHaveBeenCalledWith('Warrior', free, mockPlayer, undefined);
         expect(free.addUnit).toHaveBeenCalled();
         expect(mockTile.addUnit).not.toHaveBeenCalled();

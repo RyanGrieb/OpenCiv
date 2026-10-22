@@ -498,8 +498,11 @@ export class Tile extends Actor {
       return true;
     }
 
+    // Trade units stack with anything of their owner's, and nothing is blocked by them.
+    if (movingUnit.isTradeUnit()) return false;
+
     // Same-type ally units can't stack (utility+utility, or non-utility+non-utility); mixed types can.
-    return otherUnits.some((unit) => unit.isUtility() === movingUnit.isUtility());
+    return otherUnits.some((unit) => !unit.isTradeUnit() && unit.isUtility() === movingUnit.isUtility());
   }
 
   // Mirrors server/src/map/Tile.ts's isImpassableFor() - keep both in sync.

@@ -191,11 +191,13 @@ export class Tile {
   }
 
   // Whether a unit can't end its move here. A tile holds at most one military and one utility (civilian)
-  // unit, so a same-type ally blocks - but can still be passed through, see isImpassableFor().
+  // unit, so a same-type ally blocks - but can still be passed through, see isImpassableFor(). Caravans
+  // and Cargo Ships don't count: any number of them share a tile with their owner's other units.
+  // Mirrored by the client's Tile.isBlockedFor() - keep both in sync.
   public isBlockedFor(movingUnit: Unit): boolean {
     return (
       this.isImpassableFor(movingUnit) ||
-      this.hasStackingConflict(movingUnit.getPlayer(), movingUnit.isUtility(), movingUnit)
+      this.hasStackingConflict(movingUnit.getPlayer(), movingUnit.isUtility(), movingUnit.isTradeUnit(), movingUnit)
     );
   }
 
@@ -219,8 +221,8 @@ export class Tile {
   }
 
   // Whether a new unit of this type could be placed here, e.g. one just finished by production.
-  public canPlaceUnit(player: Player, isUtility: boolean): boolean {
-    return !this.hasStackingConflict(player, isUtility);
+  public canPlaceUnit(player: Player, isUtility: boolean, isTradeUnit = false): boolean {
+    return !this.hasStackingConflict(player, isUtility, isTradeUnit);
   }
 
   public getRiverSides() {
@@ -1053,7 +1055,7 @@ export class Tile {
     return this.tileTypes.filter((type) => !Tile.BASE_TERRAIN.includes(type));
   }
 
-  private hasStackingConflict(player: Player, isUtility: boolean, ignoredUnit?: Unit): boolean {
+  private hasStackingConflict(player: Player, isUtility: boolean, isTradeUnit: boolean, ignoredUnit?: Unit): boolean {
     const otherUnits = this.units.filter((unit) => unit !== ignoredUnit);
 
     // A unit from another civilization always blocks.
@@ -1061,7 +1063,10 @@ export class Tile {
       return true;
     }
 
+    // Trade units stack with anything of their owner's, and nothing is blocked by them.
+    if (isTradeUnit) return false;
+
     // Same-type ally units can't stack (utility+utility, or non-utility+non-utility); mixed types can.
-    return otherUnits.some((unit) => unit.isUtility() === isUtility);
+    return otherUnits.some((unit) => !unit.isTradeUnit() && unit.isUtility() === isUtility);
   }
 }

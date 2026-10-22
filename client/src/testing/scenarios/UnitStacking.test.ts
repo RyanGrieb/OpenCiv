@@ -47,8 +47,8 @@ export function setupUnitStackingTest(game: Game) {
         name: "Same-type ally units cannot share a tile",
         action: () => { },
         verification: () => {
-            const fakeAllyWarrior = { isUtility: () => false, getPlayer: () => warrior.getPlayer() } as unknown as Unit;
-            const fakeAllySettler = { isUtility: () => true, getPlayer: () => settler.getPlayer() } as unknown as Unit;
+            const fakeAllyWarrior = { isUtility: () => false, isTradeUnit: () => false, getPlayer: () => warrior.getPlayer() } as unknown as Unit;
+            const fakeAllySettler = { isUtility: () => true, isTradeUnit: () => false, getPlayer: () => settler.getPlayer() } as unknown as Unit;
 
             return warrior.getTile().isBlockedFor(fakeAllyWarrior) && settler.getTile().isBlockedFor(fakeAllySettler);
         }
@@ -58,7 +58,7 @@ export function setupUnitStackingTest(game: Game) {
         name: "Enemy units always block, regardless of type",
         action: () => { },
         verification: () => {
-            const fakeEnemyUnit = { isUtility: () => true, getPlayer: () => ({} as any) } as unknown as Unit;
+            const fakeEnemyUnit = { isUtility: () => true, isTradeUnit: () => false, getPlayer: () => ({} as any) } as unknown as Unit;
             return settler.getTile().isBlockedFor(fakeEnemyUnit);
         }
     });
@@ -67,8 +67,8 @@ export function setupUnitStackingTest(game: Game) {
         name: "Same-type allies can be passed through, enemies cannot",
         action: () => { },
         verification: () => {
-            const fakeAllyWarrior = { isUtility: () => false, getPlayer: () => warrior.getPlayer() } as unknown as Unit;
-            const fakeEnemyUnit = { isUtility: () => true, getPlayer: () => ({} as any) } as unknown as Unit;
+            const fakeAllyWarrior = { isUtility: () => false, isTradeUnit: () => false, getPlayer: () => warrior.getPlayer() } as unknown as Unit;
+            const fakeEnemyUnit = { isUtility: () => true, isTradeUnit: () => false, getPlayer: () => ({} as any) } as unknown as Unit;
 
             return !warrior.getTile().isImpassableFor(fakeAllyWarrior) && settler.getTile().isImpassableFor(fakeEnemyUnit);
         }

@@ -13,9 +13,10 @@ describe('Tile', () => {
     playerB = {} as Player;
   });
 
-  const fakeUnit = (isUtility: boolean, player: Player, ignoresTerrainCost = false) =>
+  const fakeUnit = (isUtility: boolean, player: Player, ignoresTerrainCost = false, isTradeUnit = false) =>
     ({
       isUtility: () => isUtility,
+      isTradeUnit: () => isTradeUnit,
       getPlayer: () => player,
       ignoresTerrainCost: () => ignoresTerrainCost,
     } as unknown as Unit);
@@ -31,6 +32,26 @@ describe('Tile', () => {
     tile.addUnit(mover);
 
     expect(tile.isBlockedFor(mover)).toBe(false);
+  });
+
+  it('lets a trade unit share a tile with any of its owner\'s units, and they with it', () => {
+    const caravan = () => fakeUnit(true, playerA, false, true);
+    tile.addUnit(fakeUnit(false, playerA));
+    tile.addUnit(fakeUnit(true, playerA));
+    tile.addUnit(caravan());
+
+    expect(tile.isBlockedFor(caravan())).toBe(false);
+    expect(tile.canPlaceUnit(playerA, true, true)).toBe(true);
+    // The Builder and Warrior still block another of their kind.
+    expect(tile.isBlockedFor(fakeUnit(true, playerA))).toBe(true);
+    // Another civilization's trade unit is still kept out.
+    expect(tile.isBlockedFor(fakeUnit(true, playerB, false, true))).toBe(true);
+  });
+
+  it('lets a Builder join a tile holding only a Caravan', () => {
+    tile.addUnit(fakeUnit(true, playerA, false, true));
+
+    expect(tile.isBlockedFor(fakeUnit(true, playerA))).toBe(false);
   });
 
   it('blocks a same-type ally unit (two non-utility units)', () => {

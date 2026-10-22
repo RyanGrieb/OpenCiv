@@ -1,3 +1,4 @@
+import { PlayerTradeRoutes } from "../economy/PlayerTradeRoutes";
 import { City } from "../city/City";
 import { BuildingEffects } from "../city/BuildingEffects";
 import { ServerEvents } from "../Events";
@@ -1275,6 +1276,11 @@ export class Unit {
 
   public isUtility() {
     return this.utility;
+  }
+
+  // Caravans and Cargo Ships, which stack with any of their owner's units (see Tile.isBlockedFor()).
+  public isTradeUnit(): boolean {
+    return PlayerTradeRoutes.isTradeUnit(this.name);
   }
 
   // The owner's Great Lighthouse lets ships see further, and promotions (Scouting, Sentry) let anything.
