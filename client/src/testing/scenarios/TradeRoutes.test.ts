@@ -65,7 +65,7 @@ export function setupTradeRoutesTest(game: Game) {
             scene().focusOnTile(caravan().getTile(), 3);
             await utils.waitUntil(() => connected() && roadUpkeep() > 0 && otherCity().isConnected(), 5000, "City connection gold and road upkeep");
         },
-        verification: () => connected() && roadUpkeep() > 0 && otherCity().isConnected() && capital().isConnected()
+        verification: () => connected() && roadUpkeep() > 0 && otherCity().isConnected() && !capital().isConnected()
     });
 
     runner.addStep({

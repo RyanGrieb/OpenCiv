@@ -74,13 +74,6 @@ export class CityConnections {
     return this.player.getCities().filter((city) => this.connected.has(city));
   }
 
-  // The capital and every city connected to it, once there's at least one: the cities whose banners
-  // show the connection icon. The capital earns nothing itself, but it's one end of every connection.
-  public getNetworkCities(): City[] {
-    const connected = this.getConnectedCities();
-    return connected.length > 0 ? [this.getCapital(), ...connected] : [];
-  }
-
   public isConnected(city: City): boolean {
     return this.getConnectedCities().includes(city);
   }

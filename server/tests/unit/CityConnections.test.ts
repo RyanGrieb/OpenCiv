@@ -71,8 +71,6 @@ describe('CityConnections', () => {
 
     expect(connections.getConnectedCities()).toEqual([antium]);
     expect(connections.isConnected(capital)).toBe(false);
-    // Both ends show the connection.
-    expect(connections.getNetworkCities()).toEqual([capital, antium]);
     // 4.3 rounded down.
     expect(connections.getGold()).toBe(4);
   });

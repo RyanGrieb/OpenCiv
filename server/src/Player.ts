@@ -474,7 +474,7 @@ export class Player {
       happinessBreakdown: this.happiness.getBreakdown(),
       faithBreakdown: this.religion.getFaithBreakdown(),
       tradeRoutes: this.tradeRoutes.getSummary(),
-      connectedCities: this.connections.getNetworkCities().map((city) => city.getName())
+      connectedCities: this.connections.getConnectedCities().map((city) => city.getName())
     });
 
     // Every city's growth depends on the status, so each one's food needs resending.
