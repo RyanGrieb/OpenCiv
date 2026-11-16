@@ -40,7 +40,7 @@ export class CityBanner extends Actor {
   private static readonly DEFENSE_ICON_SIZE = 4.5;
   private static readonly DEFENSE_FONT = "bold 4px sans-serif";
   // Between the defense tab and the pill, so the tab doesn't touch the pill's outline.
-  private static readonly DEFENSE_GAP = 0.75;
+  private static readonly DEFENSE_GAP = 0.5;
   private static readonly GAP = 1.25;
   private static readonly NAME_FONT = "bold 5px serif";
   private static readonly POPULATION_FONT = "bold 5px sans-serif";
@@ -50,6 +50,7 @@ export class CityBanner extends Actor {
   private static readonly GROWTH_COLOR = "#7cd65a";
   private static readonly PRODUCTION_COLOR = "#e8a23c";
   private static readonly BAR_BACK_COLOR = "rgba(255, 255, 255, 0.2)";
+  private static readonly BAR_BACK_COLOR_ON_LIGHT_FILL = "rgba(0, 0, 0, 0.2)";
 
   private city: City;
   // Where each piece goes, worked out by refresh().
@@ -89,9 +90,15 @@ export class CityBanner extends Actor {
   }
 
   // "3" turns with a bar a third full: the text drawn over the box, centered.
-  private static drawText(context: CanvasRenderingContext2D, text: string, box: Box, font: string) {
+  private static drawText(
+    context: CanvasRenderingContext2D,
+    text: string,
+    box: Box,
+    font: string,
+    color = "white"
+  ) {
     context.font = font;
-    context.fillStyle = "white";
+    context.fillStyle = color;
     context.textAlign = "center";
     // Centered on the glyphs themselves, not the font's em box, so it lines up with the icons and bars.
     context.textBaseline = "alphabetic";
@@ -101,13 +108,49 @@ export class CityBanner extends Actor {
     context.fillText(text, box.x + box.width / 2, baseline);
   }
 
+  // Choose black text on bright fill colors and white text on dark ones for legibility.
+  private static getTextColorForFillType(context: CanvasRenderingContext2D, fillType: string): string {
+    context.save();
+    context.fillStyle = fillType;
+    const normalizedFillType = context.fillStyle;
+    context.restore();
+
+    const rgb = normalizedFillType.match(
+      /^#([\da-f]{2})([\da-f]{2})([\da-f]{2})$|^rgba?\(\s*(\d+(?:\.\d+)?),\s*(\d+(?:\.\d+)?),\s*(\d+(?:\.\d+)?)(?:\s*[,/]\s*[\d.]+%?)?\s*\)$/i
+    );
+    if (!rgb) return "white";
+
+    const channels = rgb[1]
+      ? [parseInt(rgb[1], 16), parseInt(rgb[2], 16), parseInt(rgb[3], 16)]
+      : [Number(rgb[4]), Number(rgb[5]), Number(rgb[6])];
+    const linearChannels = channels.map((channel) => {
+      const normalized = channel / 255;
+      return normalized <= 0.04045 ? normalized / 12.92 : ((normalized + 0.055) / 1.055) ** 2.4;
+    });
+    const luminance = 0.2126 * linearChannels[0] + 0.7152 * linearChannels[1] + 0.0722 * linearChannels[2];
+
+    return luminance >= 0.8 ? "black" : "white";
+  }
+
   // A vertical bar filling from the bottom.
-  private static drawBar(context: CanvasRenderingContext2D, box: Box, fraction: number, color: string) {
-    context.fillStyle = CityBanner.BAR_BACK_COLOR;
+  private static drawBar(
+    context: CanvasRenderingContext2D,
+    box: Box,
+    fraction: number,
+    color: string,
+    backgroundColor: string,
+    outlineColor: string
+  ) {
+    context.fillStyle = backgroundColor;
     context.fillRect(box.x, box.y, box.width, box.height);
     const filled = Math.max(0, Math.min(1, fraction)) * box.height;
     context.fillStyle = color;
     context.fillRect(box.x, box.y + box.height - filled, box.width, filled);
+    context.save();
+    context.strokeStyle = outlineColor;
+    context.lineWidth = 0.5;
+    context.strokeRect(box.x, box.y, box.width, box.height);
+    context.restore();
   }
 
   private static drawSprite(context: CanvasRenderingContext2D, region: SpriteRegion, box: Box) {
@@ -255,17 +298,41 @@ export class CityBanner extends Actor {
     if (!this.pill) return;
 
     const game = Game.getInstance();
+    const civilizationData = this.city.getPlayer().getCivilizationData();
+    const labelColor = CityBanner.getTextColorForFillType(
+      canvasContext,
+      civilizationData.outside_border_color
+    );
     canvasContext.save();
     if (game.isWorldContext(canvasContext)) game.applyCameraTransform(canvasContext);
 
-    this.drawDefense(canvasContext);
+    this.drawDefense(canvasContext, labelColor);
     this.drawPill(canvasContext);
-    CityBanner.drawText(canvasContext, this.getPopulationText(), this.populationBox, CityBanner.POPULATION_FONT);
+    CityBanner.drawText(
+      canvasContext,
+      this.getPopulationText(),
+      this.populationBox,
+      CityBanner.POPULATION_FONT,
+      labelColor
+    );
     if (this.growthBar) {
-      CityBanner.drawBar(canvasContext, this.growthBar, this.getGrowthFraction(), CityBanner.GROWTH_COLOR);
-      CityBanner.drawText(canvasContext, this.getGrowthTurnsText(), this.growthTurns, CityBanner.TURNS_FONT);
+      CityBanner.drawBar(
+        canvasContext,
+        this.growthBar,
+        this.getGrowthFraction(),
+        CityBanner.GROWTH_COLOR,
+        labelColor === "black" ? CityBanner.BAR_BACK_COLOR_ON_LIGHT_FILL : CityBanner.BAR_BACK_COLOR,
+        civilizationData.inside_border_color
+      );
+      CityBanner.drawText(
+        canvasContext,
+        this.getGrowthTurnsText(),
+        this.growthTurns,
+        CityBanner.TURNS_FONT,
+        labelColor
+      );
     }
-    CityBanner.drawText(canvasContext, this.city.getName(), this.name, CityBanner.NAME_FONT);
+    CityBanner.drawText(canvasContext, this.city.getName(), this.name, CityBanner.NAME_FONT, labelColor);
     if (this.healthBar) this.drawHealthBar(canvasContext);
 
     const religion = this.city.getReligion().majority;
@@ -274,12 +341,20 @@ export class CityBanner extends Actor {
 
     const production = this.city.getProductionQueue()[0];
     if (this.productionBar && production) {
-      CityBanner.drawText(canvasContext, String(production.turns ?? "-"), this.productionTurns, CityBanner.TURNS_FONT);
+      CityBanner.drawText(
+        canvasContext,
+        String(production.turns ?? "-"),
+        this.productionTurns,
+        CityBanner.TURNS_FONT,
+        labelColor
+      );
       CityBanner.drawBar(
         canvasContext,
         this.productionBar,
         (production.progress ?? 0) / production.cost,
-        CityBanner.PRODUCTION_COLOR
+        CityBanner.PRODUCTION_COLOR,
+        labelColor === "black" ? CityBanner.BAR_BACK_COLOR_ON_LIGHT_FILL : CityBanner.BAR_BACK_COLOR,
+        civilizationData.inside_border_color
       );
       this.drawRightIcon(canvasContext, CityScreen.resolveProductionIcon(production));
     }
@@ -327,25 +402,29 @@ export class CityBanner extends Actor {
     return this.city.getHealth() < this.city.getMaxHealth();
   }
 
-  private drawDefense(context: CanvasRenderingContext2D) {
+  private drawDefense(context: CanvasRenderingContext2D, labelColor: string) {
     const { x, y, width, height } = this.defenseTab;
     context.beginPath();
     context.roundRect(x, y, width, height, 1.5);
-    context.fillStyle = CityBanner.PILL_COLOR;
+    context.save();
+    context.globalAlpha = 0.75;
+    context.fillStyle = this.city.getPlayer().getCivilizationData()["outside_border_color"];
     context.fill();
+    context.restore();
     CityBanner.drawSprite(context, SpriteRegion.ICON_DEFENSE, this.defenseIcon);
-    CityBanner.drawText(context, this.getDefenseText(), this.defenseText, CityBanner.DEFENSE_FONT);
+    CityBanner.drawText(context, this.getDefenseText(), this.defenseText, CityBanner.DEFENSE_FONT, labelColor);
   }
 
   private drawPill(context: CanvasRenderingContext2D) {
     const { x, y, width, height } = this.pill;
     context.beginPath();
     context.roundRect(x, y, width, height, height / 2);
-    context.fillStyle = CityBanner.PILL_COLOR;
+    context.save();
+    context.globalAlpha = 0.75;
+    context.fillStyle = this.city.getPlayer().getCivilizationData()["outside_border_color"];
     context.fill();
-    context.lineWidth = 0.75;
-    context.strokeStyle = this.city.getPlayer().getCivilizationData()["outside_border_color"] ?? "white";
-    context.stroke();
+    context.restore();
+
   }
 
   // The production item or civilization icon in a dark circle, like Civ 5's.
